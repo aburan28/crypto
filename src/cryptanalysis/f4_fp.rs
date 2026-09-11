@@ -270,7 +270,10 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         eprintln!(
             "f4: {} polys in {n_vars} vars over F_{p}, degrees {:?}",
             input.len(),
-            input.iter().map(|f| f.iter().map(|(e, _)| total_degree(e)).max().unwrap_or(0)).collect::<Vec<_>>()
+            input
+                .iter()
+                .map(|f| f.iter().map(|(e, _)| total_degree(e)).max().unwrap_or(0))
+                .collect::<Vec<_>>()
         );
     }
     let ord = opts.order;
@@ -626,6 +629,46 @@ pub fn interreduce(basis: &[Poly], p: u64, ord: Ordering) -> Vec<Poly> {
     out
 }
 
+/// Autoreduce a *generating set* (not a Gröbner basis): reduce every
+/// element by the others until nothing changes, dropping the ones that
+/// reduce to zero.  Two generators with the same leading monomial are
+/// not redundant — their difference is a new generator with a smaller
+/// one — which is what distinguishes this from [`interreduce`].
+pub fn autoreduce(polys: &[Poly], p: u64, ord: Ordering) -> Vec<Poly> {
+    let mut set: Vec<Poly> = polys
+        .iter()
+        .map(|f| normalise(f, p, ord))
+        .filter(|f| !f.is_empty())
+        .collect();
+    loop {
+        let mut changed = false;
+        let mut i = 0;
+        while i < set.len() {
+            let others: Vec<Poly> = set
+                .iter()
+                .enumerate()
+                .filter(|(j, _)| *j != i)
+                .map(|(_, g)| g.clone())
+                .collect();
+            let r = normalise(&reduce(&set[i], &others, p, ord), p, ord);
+            if r != set[i] {
+                changed = true;
+                if r.is_empty() {
+                    set.remove(i);
+                    continue;
+                }
+                set[i] = r;
+            }
+            i += 1;
+        }
+        if !changed {
+            break;
+        }
+    }
+    set.sort_by(|a, b| cmp_monomial(&b[0].0, &a[0].0, ord));
+    set
+}
+
 // ── Solving ────────────────────────────────────────────────────────
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -875,6 +918,23 @@ mod tests {
         };
         sols.sort();
         assert_eq!(sols, vec![vec![2, 2], vec![5, 5]]);
+    }
+
+    #[test]
+    fn autoreduce_keeps_generators_with_equal_leading_monomials() {
+        // x² + y and x² + 2y generate (x², y): interreduce would wrongly
+        // drop one of them, autoreduce must keep two generators
+        let p = 31;
+        let f = poly(&[(&[2, 0], 1), (&[0, 1], 1)]);
+        let g = poly(&[(&[2, 0], 1), (&[0, 1], 2)]);
+        let a = autoreduce(&[f.clone(), g.clone()], p, Ordering::Grevlex);
+        assert_eq!(a.len(), 2, "{a:?}");
+        assert!(a.iter().any(|h| h == &poly(&[(&[2, 0], 1)])), "{a:?}");
+        assert!(a.iter().any(|h| h == &poly(&[(&[0, 1], 1)])), "{a:?}");
+        // multiples of a generator are dropped
+        let m = poly(&[(&[3, 1], 1), (&[1, 2], 1)]); // x·y·(x² + y)
+        let a = autoreduce(&[f.clone(), m], p, Ordering::Grevlex);
+        assert_eq!(a.len(), 1, "{a:?}");
     }
 
     #[test]

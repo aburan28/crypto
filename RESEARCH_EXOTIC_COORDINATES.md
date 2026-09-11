@@ -1256,3 +1256,165 @@ Buchberger that finishes neither.  The 167 descended equations of the
 `v`-system are the 3 digits of the relation plus the identities among
 `v_i³` and `Πv` up to the box's degree — an F4 with a degree bound
 would take most of them as redundant; Buchberger does not.
+
+---
+
+## 14. A degree-bounded F4 over `F_p`, and the `m = 3` rows it settles
+
+**Code:** `src/cryptanalysis/f4_fp.rs`; `coordinate_descent::compare_arms`
+(`GB_ENGINE`, `F4_MAX_DEGREE`); `examples/klein_descent.rs`,
+`examples/three_torsion.rs --descent-only`.
+
+§12.4 and §13.5 closed on systems the repo's Buchberger could not
+finish.  The solver is now there: Faugère's F4 with the normal
+selection strategy, a degree bound on the critical pairs (the basis is
+the degree-`D` truncation — enough to decide consistency and solve when
+the solving degree is at most `D`), symbolic preprocessing, dense row
+reduction mod `p` with rows in parallel, the product criterion, a
+cooperative deadline, and solving by root finding on a univariate basis
+element and substitution.  Every reported solution is checked against
+the system; the unit tests compare with brute force on random
+zero-dimensional systems.  What it reports besides the time is the
+**solving degree** — the degree of the last step that produced a new
+basis element or the constant `1` — and the largest matrix, which are
+the numbers that transfer between sizes.
+
+### 14.1 `m = 2`: agreement, and the solving degrees
+
+On every arm and target of §12.3 and §13.4 the F4 verdict equals
+Buchberger's (found / refuted), and at this size both are milliseconds
+(F4's setup is the larger constant).  The solving degrees: Gaudry's
+`S₃` 3–5, the one-involution system 2, the `v`-base 3-torsion system 2
+against 4 for the plain `y`-line system on the same base.
+
+### 14.2 `m = 3`: the Klein descent, timed at last
+
+`GB_ENGINE=f4`, bound 24, 300 s budget, two decomposable and two
+random targets per curve.
+
+| curve | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 35 800 | 14 | 2250 × 2594 |
+| | one `T`, `w = u²`, `Πu` | 4 / 8 | 4 | 35 | 790 | 7 | 740 × 822 |
+| | Klein | 9 / – | 2 | 8 | not `F_p`-valued | | |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 3 / 3 | 12 | 125 | 22 800 | 14 | 2173 × 2515 |
+| | one `T` | 4 / 8 | 4 | 35 | 540 | 7 | 714 × 796 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 3 / 3 | 12 | 125 | 21 900 | 14 | 2164 × 2513 |
+| | one `T` | 4 / 8 | 4 | 35 | 680 | 7 | 740 × 822 |
+| control `y² = x³ − x / F₂₉³` (over `F_p`), random target | `x` (Gaudry) | 3 / 3 | 12 | 125 | 48 400, refuted | 14 | 2157 × 2493 |
+| | one `T` | 4 / 8 | 4 | 35 | 760, refuted | 7 | 707 × 789 |
+| | Klein (`F_p`-valued here, base a subgroup) | 9 / 32 | 2 | 8 | 300 | 2 | 271 × 190 |
+
+Same verdict on every target.  The one-involution system solves
+**30–60× faster** than Gaudry's at `m = 3`, at **half the solving degree
+(7 against 14)** and a matrix a ninth of the size.  At `m = 2` the ratio
+was 3–7× on Buchberger with degree 2 against 4; the gap widens with
+`m`, as the halving of the relation's degree per point (§3, §10) would
+predict for an F4 whose cost is governed by the solving degree.  This is
+the first timed row of the whole thread where the coordinate change is
+worth more than a constant, and it is the ordinary one — one rational
+2-torsion point, the sign frame, the product invariant — not any of the
+larger groups.
+
+### 14.3 The 3-torsion frame at `m = 3`
+
+`y² = x³ + b` over `F₃₁³` (§13.4's curve), `GB_ENGINE=f4`, bound 24,
+300 s budget, two decomposable targets per base.
+
+| base | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix | verdict |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 19 000–35 000 | 14 | 2166 × 2512 | found (6) |
+| `{v ∈ F_p}` | `v_i³`, `Πv` under `⟨τ₃⟩` | 4 / 167 (autoreduced before the solve) | 9 | 118 | 152 000 | 12 | 5953 × 6598 | found (162) |
+
+The first attempt handed F4 the 167 descended equations as they came
+— every identity up to the relation's degree, multiples included —
+and went undetermined at 300 s on a 6065 × 6710 matrix; autoreducing
+the generating set first (`f4_fp::autoreduce`; not `interreduce`, which
+is sound only on a Gröbner-like set and silently dropped the digit
+equations sharing a leading monomial — caught by the solution count)
+brought it inside the budget but barely changed the matrix: the size
+is the system's, not the redundancy's.
+
+So at `m = 3` the 3-torsion frame **does not pay**: a lower solving
+degree (12 against 14) on a matrix two and a half times larger, and
+five to eight times the time, where the 2-torsion frame (§14.2) halves
+the degree and divides the time by thirty.  The two frames differ in
+what the tuple unknown carries — `Πu` of degree 3 in the `u_i` for the
+2-torsion frame, `Πv` of degree 8 in the relation for the 3-torsion one
+(§13.5) — and F4 pays for that degree in columns.  The `m = 2`
+advantage of the `v`-base system (§13.4) is a small-`m` result, like
+its multilinearity.
+
+### 14.4 What this changes
+
+The thread's standing summary — "a real reduction of the relation
+degree per point at every `m`, no free relations once the projection is
+accounted for, and a solve smaller by a constant the solver cannot
+rank" — loses its last clause for the 2-torsion frame: its solve is
+smaller by a factor that grows with `m`, and at `m = 3` it is measured.
+The 3-torsion frame keeps only the first clause.  The gain is still per
+solve, not per relation (§11.4), and still needs a rational 2-torsion
+point and, in Gaudry's setting, a base on which the invariants stay in
+`F_p` (§12.2).
+
+---
+
+## 15. Charts beyond the `x`-line: four point representations, classified
+
+**Code:** `coordinate_quotients::{Line, Chart, descended_map,
+linearised_chart}`, `examples/exotic_charts.rs`, `examples/three_torsion.rs`.
+
+§3's lemma — a degree-2 coordinate is a Möbius frame on the `x`-line,
+and only 2-torsion translations act on that line — bounds what the
+`x`-line can carry.  The way past it is to change the line: a quotient
+of `E` by a finite group of point maps that *contains* the translation
+one wants, so that the translation descends to a Möbius map there.
+Four such lines were built, the induced Möbius map fitted on three
+points and verified on every point of the curve, linearised when its
+fixed points are rational, and run through the quotient engine
+(`p = 1009`, `m = 2`, exact collapse).
+
+| # | curve | line (degree on `E`) | map that descends | as Möbius map | frame | invariant per point | relation (degrees) | terms | collapse = `|Γ|` |
+|---|---|---|---|---|---|---|---|---:|---:|
+| 1 | `y² = x³ + b`, `q ≡ 1 mod 3` | `y` (3): quotient by `ω` | 3-torsion `τ_T` | `y ↦ √b(y − 3√b)/(y + √b)`, order 3 | `v = (y − s)/(y + s)`: `v ↦ ωv` | `V = v³ + v⁻³` | `(V₁−2)(V₂−2)(V₃−2) = (P−2)³`, `[1, 1, 1, 3]` | 10 | 54 |
+| 2 | `y² = x³ + ax`, `p ≡ 1 mod 4` | `x²` (4): quotient by `i` | 2-torsion `τ_T` (`x ↦ a/x`) | `x² ↦ a²/x²`, fixed points `±a` | sign frame on `x²`, **rational for every `a`** (on `x` only for `a` a square) | `W = ((x² − a)/(x² + a))²` | `[4, 4, 1, 4]` with `Πu` | 30 | 16 (with `i`) |
+| 3 | Tate normal form, rational `T₄` | `x′ = x(P) + x(P + T₂)` (2): `E/⟨T₂⟩` | 4-torsion `τ_{T₄}` (not Möbius on `x`) | involution `x′ ↦ c/x′` | sign frame on `x′` | `W = u′²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 32 (= 8 × 4) |
+| 4 | `y² = x³ + 1`, rational `T₆` | `x″ = x + x(P+T₃) + x(P−T₃)` (3): `E/⟨T₃⟩` (Vélu) | 2-torsion `τ_{T₂}` (with `τ_{T₃}` trivial, `ω` a scaling) | involution, and `ω: x″ ↦ ωx″` | sign frame on `x″` | `W = u″²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 72 (with `T₃`); with `ω` too `|G| = 72`, `|Γ| = 864`, collapse 892 ≈ 864, and the minimal-degree relation degenerates to a linear one among the orbit sums, as on the `x`-line in §13.2 |
+
+Two of the four are new lines in the strict sense and two are the old
+line on another curve, and the engine says which is which.
+
+- **#1 and #2 are quotients by automorphisms** (`ω` of order 3, `i` of
+  order 4), which exist only at `j = 0` and `j = 1728`.  On them a
+  translation that is invisible on `x` (3-torsion) or a frame that is
+  irrational on `x` (2-torsion with `a` a non-square) becomes a
+  rational linear map.  #1 gives a lower relation degree than the
+  `x`-line (§13.2); #2 does not — its relation has degree 4 per point
+  where Semaev's has 2 — so #2 is a representation that exists where
+  the sign frame does not, not a better one.
+- **#3 and #4 are isogeny lines**: the `x`-line of `E/⟨T⟩` pulled back
+  to `E`.  A translation by a point `Q` with `[k]Q ∈ ⟨T⟩` descends
+  because its image on `E/⟨T⟩` is torsion of lower order, and the
+  representation is exactly the 2-torsion sign frame *of the isogenous
+  curve*: #4's relation is the 9-term one of §10.1 to the coefficient,
+  with the collapse multiplied by the kernel order (72 = 8 × 9).  This is
+  the §3 lemma "translation-invariant coordinates factor through
+  isogenies" seen from the other side: the engine finds the coordinate
+  the isogeny already had.  By the §11 accounting the extra collapse is
+  the cofactor's, not a new relation, so #3 and #4 are changes of curve —
+  legitimate, sometimes convenient (a curve with rational 4- or
+  6-torsion has a 2-isogenous neighbour where the same sign frame
+  applies and may be cheaper), but not new gains.
+
+At `m = 3` the two isogeny lines give the `x`-line's own `m = 3`
+relation again — 93 terms, degrees `[4, 4, 4, 1, 3, 0, 1]` in
+`(W₁..W₄, Πu, e₂[Σu], e₄[Σu])`, total degree 6, exactly the control of
+§13.2 — with `|Γ| = 128 = 16 × 8` and `432 = 54 × 8`.  The
+classification holds at every `m` measured.
+
+What the four have in common is the recipe: pick a point map `g` that
+does not act on the `x`-line, find a quotient line on which it does
+(`descended_map` fits and verifies the Möbius map; `linearised_chart`
+frames it), and let the quotient engine measure the invariants.  Every
+line in the table was found this way, and the fits fail loudly (τ_{T₃}
+on `x`, τ_{T₄} on `x`) where the lemma says they must.

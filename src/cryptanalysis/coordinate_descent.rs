@@ -88,7 +88,7 @@ impl FixedTargetSystem {
     fn seed_value(&self, curve: &Curve, seed: &Seed, summands: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = self.chart.apply(f, p);
+            let v = self.chart.apply_on(curve, p);
             (v != INF).then_some(v)
         };
         match seed {
@@ -597,6 +597,10 @@ pub fn f4_max_degree() -> u32 {
 pub fn f4_time(p: u64, sys: &DescendedSystem) -> (f64, u32, F4Verdict, usize, (usize, usize)) {
     let mut eqs: Vec<f4_fp::Poly> = sys.equations.clone();
     eqs.extend(sys.identities.iter().cloned());
+    // The descended identities are every identity up to the relation's
+    // degree, multiples of lower ones included; interreducing them first
+    // keeps the first F4 matrix from being built out of redundant rows.
+    let eqs = f4_fp::autoreduce(&eqs, p, Ordering::Grevlex);
     let opts = F4Options::new(Ordering::Grevlex, f4_max_degree()).with_budget(groebner_budget());
     let r = f4_fp::solve(&eqs, sys.fp_unknowns, p, &opts);
     let (verdict, n) = match &r.verdict {
@@ -705,7 +709,7 @@ pub fn compare_arms(
         .iter()
         .copied()
         .filter(|&p| {
-            let u = base_chart.apply(f, p);
+            let u = base_chart.apply_on(curve, p);
             u != INF && f.in_subfield(u, 1)
         })
         .collect();
@@ -907,7 +911,9 @@ mod tests {
         // systems and finds the decomposition (checked against the system)
         for a in &arms[..2] {
             assert_eq!(a.f4_verdict, F4Verdict::Found, "{text}");
-            assert!(a.f4_solutions >= 1, "{text}");
+            // a decomposition, not a positive-dimensional variety: the
+            // fibre of a decomposable target is a handful of tuples
+            assert!((1..=16).contains(&a.f4_solutions), "{text}");
             assert!(a.f4_ms.is_finite() && a.f4_ms < 30_000.0, "{text}");
         }
         // a random target off the base is refuted by both engines the
