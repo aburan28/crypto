@@ -1045,11 +1045,10 @@ in `k`.
   addition on that field (`≈ 63`), so `S = total/√n` is comparable
   across the whole note.
 
-What is *not* built is Gaudry's `O(1)` solve of the three-unknown `S₄`
-system (symmetrised variables and a Gröbner basis or resultant
-cascade), which would remove the remaining factor `2|F|` from the
-per-residual cost.  The report separates that factor so the effect of
-adding it can be read off.
+Gaudry's `O(1)` solve of the three-unknown `S₄` system, which removes
+the remaining factor `2|F|` from the per-residual cost, was built
+afterwards and is measured in §11.4; §11.2–11.3 are the
+meet-in-the-middle numbers it is compared against.
 
 ### 11.2 Measured
 
@@ -1111,9 +1110,9 @@ So the subspace base does what the prime-field base could not — it
 makes the count sub-birthday — and at these sizes it does so at three
 orders of magnitude more work than rho, with a scaling exponent that
 only improves once the last loop over the base is replaced by an
-algebraic solve.  That solve is the next thing to build; its constant
-`C₃` is the number that decides whether the method beats rho at any
-size that fits in this module.
+algebraic solve.  Its constant `C₃` is the number that decides whether
+the method beats rho at any size that fits in this module; §11.4
+builds the solve and measures it.
 
 ## References
 
@@ -1136,3 +1135,12 @@ size that fits in this module.
   A. Messeng, *Algebraic approaches for the elliptic curve discrete
   logarithm problem over prime fields*, PKC 2016.  The algebraic
   decomposition oracles this note contrasts with.
+- P. Gaudry, *Index calculus for abelian varieties of small dimension
+  and the elliptic curve discrete logarithm problem*, J. Symbolic
+  Comput. 44 (2009).  The subspace factor base on `E(F_{q^k})`, the
+  symmetrised `S_{k+1}` system and its Gröbner solve; §11.
+- J.-C. Faugère, *A new efficient algorithm for computing Gröbner
+  bases (F₄)*, J. Pure Appl. Algebra 139 (1999); B. Mourrain,
+  *Computing the isolated roots by matrix methods*, J. Symbolic
+  Comput. 26 (1998).  The Macaulay-matrix and multiplication-matrix
+  solve used in §11.4.
