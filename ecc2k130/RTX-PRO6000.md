@@ -32,6 +32,9 @@ CUDA 13.0 requires a compatible driver; the tested driver is 580.95.05.
 NVIDIA lists 580.65.06 for the Linux CUDA 13.0 GA toolkit in its
 [release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#cuda-driver).
 
+The measured hardware ceilings that bound this preset are in
+[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
+
 ## Direct-order reduction comparison
 
 The [paired reducer comparison](benchmarks/direct-reduction/comparison.json)

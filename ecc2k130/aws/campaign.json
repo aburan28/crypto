@@ -1,0 +1,22 @@
+{
+  "_comment": "Single source of truth for every worker. Geometry (batch, blockThreads, minBlocks, workers) must match the binary named by binaryKey and must never change while checkpoints exist: a checkpoint is only loadable into the same worker/batch shape. dpWeight must be identical campaign-wide or cross-worker collisions can be missed. build.sh fills in binaryKey/hostBinaryKey/sourceSha256.",
+  "curve": 131,
+  "packed": true,
+  "dpWeight": 34,
+  "batch": 32,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": 192512,
+  "steps": 1024,
+  "checkpointEvery": 600,
+  "uploadEvery": 600,
+  "maxIters": 1073741824,
+  "verify": 0,
+  "loadMax": 2000000,
+  "dpCap": 65536,
+  "restartHours": 48,
+  "extraArgs": [],
+  "binaryKey": "",
+  "hostBinaryKey": "",
+  "sourceSha256": ""
+}
