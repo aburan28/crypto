@@ -839,6 +839,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
                     }
                     return;
                 }
+                KoblitzIcEvent::RelationAttemptFinished { .. } => return,
                 KoblitzIcEvent::RelationCollectionFinished { collected, trials } => (
                     "relation_collection",
                     "stopped",
@@ -853,6 +854,17 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
                 KoblitzIcEvent::LinearAlgebraIncomplete => {
                     ("linear_algebra", "incomplete", json!({}))
                 }
+                KoblitzIcEvent::MatrixRank {
+                    rows,
+                    columns,
+                    rank,
+                    candidate_produced,
+                } => (
+                    "linear_algebra",
+                    "rank",
+                    json!({"rows":rows,"columns":columns,"rank":rank,
+                        "candidate_produced":candidate_produced}),
+                ),
                 KoblitzIcEvent::LinearAlgebraSkipped => ("linear_algebra", "skipped", json!({})),
                 KoblitzIcEvent::VerificationStarted => ("verification", "started", json!({})),
                 KoblitzIcEvent::VerificationFinished { verified } => (

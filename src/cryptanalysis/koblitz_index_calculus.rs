@@ -136,15 +136,15 @@ use serde::{Deserialize, Serialize};
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
-use crate::cryptanalysis::koblitz_sparse_la::{
-    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
-};
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
     SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+use crate::cryptanalysis::koblitz_sparse_la::{
+    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+};
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
@@ -533,11 +533,7 @@ impl KoblitzCurve {
         // `2^n` sweep is impossible, so sample deterministically from
         // a fixed LCG (reproducible across hosts).
         let mut generator = BinaryPoint::Infinity;
-        let mask = if n >= 64 {
-            u64::MAX
-        } else {
-            (1u64 << n) - 1
-        };
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
         let exhaustive = n <= 24;
         let budget = if exhaustive {
             1u64 << n
@@ -552,9 +548,7 @@ impl KoblitzCurve {
             let raw = if exhaustive {
                 i
             } else {
-                state = state
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1);
+                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
                 state & mask
             };
             let x = F2mElement::from_biguint(&BigUint::from(raw), n);
@@ -946,7 +940,10 @@ impl FrobeniusFactorBase {
 
 /// One representative per orbit of a point set under Frobenius and
 /// negation (the set is assumed closed under both).
-fn signed_frobenius_orbit_representatives(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Vec<BinaryPoint> {
+fn signed_frobenius_orbit_representatives(
+    kc: &KoblitzCurve,
+    points: &[BinaryPoint],
+) -> Vec<BinaryPoint> {
     let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
     let mut reps = Vec::new();
     for p in points {
@@ -2727,6 +2724,65 @@ pub struct KoblitzIcReport {
     pub pair_table_entries: usize,
     /// Time spent building that table.
     pub pair_table_ns: u128,
+    /// One exact record for every generated relation candidate, including
+    /// refutations, capped Unknown outcomes, invalid models, and skipped direct
+    /// relations. This is public synthetic replay material, not a log label.
+    pub attempt_records: Vec<KoblitzRelationAttemptRecord>,
+    /// Every admitted relation row in collection order. The rows are learned
+    /// from point decompositions; no factor-base discrete logarithm is supplied.
+    pub relation_matrix: Vec<KoblitzRelation>,
+    /// Final matrix dimensions, including the target-log column.
+    pub matrix_rows: usize,
+    pub matrix_columns: usize,
+    /// Rank of the final matrix over the prime subgroup order.
+    pub terminal_matrix_rank: usize,
+    /// Number of modular elimination attempts.
+    pub rank_checks: usize,
+    /// Rank and verification result for each modular elimination attempt.
+    pub rank_history: Vec<KoblitzRankRecord>,
+}
+
+/// Terminal classification for one relation candidate.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum KoblitzRelationAttemptDisposition {
+    RelationFound,
+    Refuted,
+    Unknown,
+    InvalidModel,
+    DirectSkipped,
+    DirectSolved,
+}
+
+/// Exact public replay record for one relation candidate `[a]G + [b]Q`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KoblitzRelationAttemptRecord {
+    pub trial: usize,
+    pub coefficient_a: BigUint,
+    pub coefficient_b: BigUint,
+    pub target: BinaryPoint,
+    pub disposition: KoblitzRelationAttemptDisposition,
+    pub decomposition_indices: Option<Vec<usize>>,
+    pub solver_calls: usize,
+    pub models: usize,
+    pub conflicts: u64,
+    pub implied_rows: usize,
+}
+
+/// One modular relation-matrix rank/solve attempt.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct KoblitzRankRecord {
+    pub rows: usize,
+    pub columns: usize,
+    pub rank: usize,
+    pub candidate_produced: bool,
+    pub candidate_verified: bool,
+}
+
+struct RelationSolveResult {
+    candidate: Option<BigUint>,
+    rows: usize,
+    columns: usize,
+    rank: usize,
 }
 
 fn solve_relation_system(
@@ -2734,7 +2790,7 @@ fn solve_relation_system(
     relation_unknowns: usize,
     cofactor: &BigUint,
     modulus: &BigUint,
-) -> Option<BigUint> {
+) -> RelationSolveResult {
     let h = cofactor % modulus;
     let mut matrix = Vec::with_capacity(relations.len());
     let mut rhs = Vec::with_capacity(relations.len());
@@ -2744,8 +2800,17 @@ fn solve_relation_system(
         matrix.push(row);
         rhs.push((&h * &relation.coef_a) % modulus);
     }
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus)?;
-    solution.get(relation_unknowns).cloned()
+    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus);
+    let rank = matrix
+        .iter()
+        .filter(|row| row.iter().any(|value| !value.is_zero()))
+        .count();
+    RelationSolveResult {
+        candidate: solution.and_then(|values| values.get(relation_unknowns).cloned()),
+        rows: relations.len(),
+        columns: relation_unknowns + 1,
+        rank,
+    }
 }
 
 enum RelationAttemptOutcome {
@@ -2775,6 +2840,13 @@ pub enum KoblitzIcEvent {
         wanted: usize,
         trials: usize,
     },
+    /// Exact completion record for one generated relation candidate.
+    RelationAttemptFinished {
+        trial: usize,
+        disposition: KoblitzRelationAttemptDisposition,
+        conflicts: u64,
+        collected: usize,
+    },
     RelationCollectionFinished {
         collected: usize,
         trials: usize,
@@ -2786,6 +2858,12 @@ pub enum KoblitzIcEvent {
     LinearAlgebraFinished,
     /// The current relation matrix did not yield a candidate.
     LinearAlgebraIncomplete,
+    MatrixRank {
+        rows: usize,
+        columns: usize,
+        rank: usize,
+        candidate_produced: bool,
+    },
     LinearAlgebraSkipped,
     VerificationStarted,
     VerificationFinished {
@@ -2834,9 +2912,10 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {})
 }
 
-/// Run index calculus with a caller-supplied factor base, reporting
-/// progress.  Emits [`KoblitzIcEvent::FactorBaseReady`] but not
-/// `FactorBaseStarted`, since the base was built by the caller.
+/// Run index calculus on an arbitrary public subgroup target with a
+/// caller-supplied algebraic factor base and exact synchronous progress.
+/// Emits [`KoblitzIcEvent::FactorBaseReady`] but not `FactorBaseStarted`,
+/// since the base was built by the caller.
 pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -2914,8 +2993,47 @@ fn koblitz_index_calculus_dlp_observed(
         cofactor_admission_ns,
         pair_table_entries: 0,
         pair_table_ns: 0,
+        attempt_records: Vec::new(),
+        relation_matrix: Vec::new(),
+        matrix_rows: 0,
+        matrix_columns: relation_unknowns + 1,
+        terminal_matrix_rank: 0,
+        rank_checks: 0,
+        rank_history: Vec::new(),
     };
+    let wanted = relation_unknowns + opts.extra_relations.max(1);
     if fb.points.is_empty() || !m_cofactor_admissible {
+        progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
+        progress(KoblitzIcEvent::RelationCollectionFinished {
+            collected: 0,
+            trials: 0,
+        });
+        progress(KoblitzIcEvent::LinearAlgebraStarted {
+            rows: 0,
+            columns: relation_unknowns + 1,
+        });
+        report.linear_solve_attempts = 1;
+        report.rank_checks = 1;
+        let linear_start = std::time::Instant::now();
+        let solved = solve_relation_system(&[], relation_unknowns, &kc.cofactor, r);
+        report.linear_algebra_ns = linear_start.elapsed().as_nanos();
+        report.matrix_rows = solved.rows;
+        report.matrix_columns = solved.columns;
+        report.terminal_matrix_rank = solved.rank;
+        report.rank_history.push(KoblitzRankRecord {
+            rows: solved.rows,
+            columns: solved.columns,
+            rank: solved.rank,
+            candidate_produced: solved.candidate.is_some(),
+            candidate_verified: false,
+        });
+        progress(KoblitzIcEvent::MatrixRank {
+            rows: solved.rows,
+            columns: solved.columns,
+            rank: solved.rank,
+            candidate_produced: solved.candidate.is_some(),
+        });
+        progress(KoblitzIcEvent::LinearAlgebraIncomplete);
         return Some(report);
     }
 
@@ -2934,7 +3052,6 @@ fn koblitz_index_calculus_dlp_observed(
     };
 
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let wanted = relation_unknowns + opts.extra_relations.max(1);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
     // Incremental reduced echelon form over Z/rZ; the dense big-integer
     // solver is the fallback for a modulus wider than 64 bits.
@@ -2943,19 +3060,54 @@ fn koblitz_index_calculus_dlp_observed(
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
     let relation_start = std::time::Instant::now();
 
-    // Extract, announce and verify a candidate scalar from the echelon
-    // form.  `Some(true)` means solved; `Some(false)` means a pinned
-    // scalar failed verification, which only a wrong relation can cause.
+    // Record the exact incremental rank and, when allowed and pinned,
+    // announce and verify the target scalar. `Some(true)` means solved;
+    // `Some(false)` means a pinned scalar failed verification, which only
+    // a wrong relation can cause. `None` is an honest incomplete rank check.
     let finish_incremental = |echelon: &IncrementalRelationSolver,
-                                  report: &mut KoblitzIcReport,
-                                  progress: &mut dyn FnMut(KoblitzIcEvent)|
+                              report: &mut KoblitzIcReport,
+                              progress: &mut dyn FnMut(KoblitzIcEvent),
+                              allow_verification: bool|
      -> Option<bool> {
-        let d = echelon.target_biguint()?;
-        progress(KoblitzIcEvent::LinearAlgebraStarted {
-            rows: echelon.rank(),
-            columns: relation_unknowns + 1,
-        });
+        let rows = echelon.rows_seen();
+        let columns = relation_unknowns + 1;
+        let rank = echelon.rank();
+        let candidate = echelon.target_biguint();
+        let candidate_produced = candidate.is_some();
+        progress(KoblitzIcEvent::LinearAlgebraStarted { rows, columns });
         report.linear_solve_attempts += 1;
+        report.rank_checks += 1;
+        report.matrix_rows = rows;
+        report.matrix_columns = columns;
+        report.terminal_matrix_rank = rank;
+        progress(KoblitzIcEvent::MatrixRank {
+            rows,
+            columns,
+            rank,
+            candidate_produced,
+        });
+        if !allow_verification {
+            report.rank_history.push(KoblitzRankRecord {
+                rows,
+                columns,
+                rank,
+                candidate_produced,
+                candidate_verified: false,
+            });
+            progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+            return None;
+        }
+        let Some(d) = candidate else {
+            report.rank_history.push(KoblitzRankRecord {
+                rows,
+                columns,
+                rank,
+                candidate_produced: false,
+                candidate_verified: false,
+            });
+            progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+            return None;
+        };
         progress(KoblitzIcEvent::LinearAlgebraFinished);
         progress(KoblitzIcEvent::VerificationStarted);
         let verified = kc.mul(&g, &d) == *q;
@@ -2965,6 +3117,13 @@ fn koblitz_index_calculus_dlp_observed(
         } else {
             report.verification_failures += 1;
         }
+        report.rank_history.push(KoblitzRankRecord {
+            rows,
+            columns,
+            rank,
+            candidate_produced: true,
+            candidate_verified: verified,
+        });
         Some(verified)
     };
 
@@ -3033,68 +3192,115 @@ fn koblitz_index_calculus_dlp_observed(
             attempts.iter().map(evaluate).collect()
         };
 
-        for outcome in &outcomes {
-            match outcome {
-                RelationAttemptOutcome::Groebner(_, stats) => {
+        let mut inconsistent = false;
+        for ((a, b, target), outcome) in attempts.into_iter().zip(outcomes) {
+            let trial = report.attempt_records.len() + 1;
+            let mut solver_calls = 0usize;
+            let mut models = 0usize;
+            let mut conflicts = 0u64;
+            let mut implied_rows = 0usize;
+            let (found, disposition) = match outcome {
+                RelationAttemptOutcome::Direct => {
+                    if !opts.allow_direct_relation {
+                        report.direct_relations_skipped += 1;
+                        (None, KoblitzRelationAttemptDisposition::DirectSkipped)
+                    } else {
+                        let d = solve_for_d(&a, &b, r)?;
+                        progress(KoblitzIcEvent::RelationCollectionFinished {
+                            collected: relations.len(),
+                            trials: report.trials,
+                        });
+                        progress(KoblitzIcEvent::LinearAlgebraSkipped);
+                        progress(KoblitzIcEvent::VerificationStarted);
+                        let verified = kc.mul(&g, &d) == *q;
+                        progress(KoblitzIcEvent::VerificationFinished { verified });
+                        report.attempt_records.push(KoblitzRelationAttemptRecord {
+                            trial,
+                            coefficient_a: a,
+                            coefficient_b: b,
+                            target,
+                            disposition: KoblitzRelationAttemptDisposition::DirectSolved,
+                            decomposition_indices: None,
+                            solver_calls,
+                            models,
+                            conflicts,
+                            implied_rows,
+                        });
+                        progress(KoblitzIcEvent::RelationAttemptFinished {
+                            trial,
+                            disposition: KoblitzRelationAttemptDisposition::DirectSolved,
+                            conflicts,
+                            collected: relations.len(),
+                        });
+                        if verified {
+                            report.log = Some(d);
+                            report.direct_relation = true;
+                            report.relations = relations.len();
+                            report.independent_relations =
+                                echelon.as_ref().map_or(0, IncrementalRelationSolver::rank);
+                            report.relation_matrix = relations.clone();
+                            report.matrix_rows = relations.len();
+                            report.terminal_matrix_rank = report.independent_relations;
+                            report.relation_collection_ns = relation_start
+                                .elapsed()
+                                .as_nanos()
+                                .saturating_sub(report.linear_algebra_ns);
+                            return Some(report);
+                        }
+                        progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
+                        continue;
+                    }
+                }
+                RelationAttemptOutcome::Enumerated(idxs) => {
+                    let disposition = if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    };
+                    (idxs, disposition)
+                }
+                RelationAttemptOutcome::Groebner(idxs, stats) => {
                     report.reductions += stats.reductions;
                     report.infeasible_branches += stats.infeasible_branches;
+                    let disposition = if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.exhausted {
+                        KoblitzRelationAttemptDisposition::Unknown
+                    } else {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    };
+                    (idxs, disposition)
                 }
-                RelationAttemptOutcome::Sat(_, stats) => {
+                RelationAttemptOutcome::Sat(idxs, stats) => {
+                    solver_calls = stats.solver_calls;
+                    models = stats.models;
+                    conflicts = stats.conflicts;
+                    implied_rows = stats.implied_rows;
                     report.sat_calls += stats.solver_calls;
                     report.sat_refutations += usize::from(stats.refuted);
                     report.sat_unknowns += usize::from(stats.exhausted);
                     report.sat_invalid_models += stats.spurious;
                     report.sat_models += stats.models;
                     report.sat_conflicts += stats.conflicts;
+                    let disposition = if stats.spurious != 0 {
+                        KoblitzRelationAttemptDisposition::InvalidModel
+                    } else if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.refuted {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    } else {
+                        KoblitzRelationAttemptDisposition::Unknown
+                    };
+                    let admitted =
+                        if disposition == KoblitzRelationAttemptDisposition::RelationFound {
+                            idxs
+                        } else {
+                            None
+                        };
+                    (admitted, disposition)
                 }
-                RelationAttemptOutcome::Direct | RelationAttemptOutcome::Enumerated(_) => {}
-            }
-        }
-        if report.sat_invalid_models != 0 {
-            report.relations = relations.len();
-            report.relation_collection_ns = relation_start
-                .elapsed()
-                .as_nanos()
-                .saturating_sub(report.linear_algebra_ns);
-            return Some(report);
-        }
-
-        let mut inconsistent = false;
-        for ((a, b, _target), outcome) in attempts.into_iter().zip(outcomes) {
-            let found = match outcome {
-                RelationAttemptOutcome::Direct => {
-                    if !opts.allow_direct_relation {
-                        report.direct_relations_skipped += 1;
-                        continue;
-                    }
-                    let d = solve_for_d(&a, &b, r)?;
-                    progress(KoblitzIcEvent::RelationCollectionFinished {
-                        collected: relations.len(),
-                        trials: report.trials,
-                    });
-                    progress(KoblitzIcEvent::LinearAlgebraSkipped);
-                    progress(KoblitzIcEvent::VerificationStarted);
-                    if kc.mul(&g, &d) == *q {
-                        report.log = Some(d);
-                        report.direct_relation = true;
-                        report.relations = relations.len();
-                        report.independent_relations =
-                            echelon.as_ref().map_or(0, IncrementalRelationSolver::rank);
-                        report.relation_collection_ns = relation_start
-                            .elapsed()
-                            .as_nanos()
-                            .saturating_sub(report.linear_algebra_ns);
-                        progress(KoblitzIcEvent::VerificationFinished { verified: true });
-                        return Some(report);
-                    }
-                    progress(KoblitzIcEvent::VerificationFinished { verified: false });
-                    progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
-                    None
-                }
-                RelationAttemptOutcome::Enumerated(idxs)
-                | RelationAttemptOutcome::Groebner(idxs, _)
-                | RelationAttemptOutcome::Sat(idxs, _) => idxs,
             };
+            let decomposition_indices = found.clone();
             if let Some(idxs) = found {
                 let relation = relation_from_decomposition_with_mode(
                     kc,
@@ -3120,6 +3326,27 @@ fn koblitz_index_calculus_dlp_observed(
                 }
                 relations.push(relation);
             }
+            report.attempt_records.push(KoblitzRelationAttemptRecord {
+                trial,
+                coefficient_a: a,
+                coefficient_b: b,
+                target,
+                disposition,
+                decomposition_indices,
+                solver_calls,
+                models,
+                conflicts,
+                implied_rows,
+            });
+            progress(KoblitzIcEvent::RelationAttemptFinished {
+                trial,
+                disposition,
+                conflicts,
+                collected: relations.len(),
+            });
+        }
+        if report.sat_invalid_models != 0 {
+            break;
         }
 
         progress(KoblitzIcEvent::RelationProgress {
@@ -3134,50 +3361,86 @@ fn koblitz_index_calculus_dlp_observed(
         }
         if opts.stop_on_verified_rank {
             if let Some(echelon) = echelon.as_ref() {
-                let linear_start = std::time::Instant::now();
-                let outcome = finish_incremental(echelon, &mut report, progress);
-                report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-                match outcome {
-                    Some(true) => {
-                        report.relations = relations.len();
-                        report.relation_collection_ns = relation_start
-                            .elapsed()
-                            .as_nanos()
-                            .saturating_sub(report.linear_algebra_ns);
-                        return Some(report);
+                if echelon.target_biguint().is_some() {
+                    progress(KoblitzIcEvent::RelationCollectionFinished {
+                        collected: relations.len(),
+                        trials: report.trials,
+                    });
+                    let linear_start = std::time::Instant::now();
+                    let outcome = finish_incremental(echelon, &mut report, progress, true);
+                    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+                    match outcome {
+                        Some(true) => {
+                            report.relations = relations.len();
+                            report.relation_matrix = relations.clone();
+                            report.relation_collection_ns = relation_start
+                                .elapsed()
+                                .as_nanos()
+                                .saturating_sub(report.linear_algebra_ns);
+                            return Some(report);
+                        }
+                        // Pinned but wrong: a wrong relation slipped in.
+                        Some(false) => break,
+                        None => {}
                     }
-                    // Pinned but wrong: a wrong relation slipped in.
-                    Some(false) => break,
-                    None => {}
                 }
             } else if relations.len() >= relation_unknowns + 1 {
+                progress(KoblitzIcEvent::RelationCollectionFinished {
+                    collected: relations.len(),
+                    trials: report.trials,
+                });
                 progress(KoblitzIcEvent::LinearAlgebraStarted {
                     rows: relations.len(),
                     columns: relation_unknowns + 1,
                 });
                 report.linear_solve_attempts += 1;
+                report.rank_checks += 1;
                 let linear_start = std::time::Instant::now();
-                let candidate =
-                    solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+                let solved = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
                 report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-                if candidate.is_none() {
-                    progress(KoblitzIcEvent::LinearAlgebraIncomplete);
-                }
-                let candidate = candidate.filter(|d| {
+                report.matrix_rows = solved.rows;
+                report.matrix_columns = solved.columns;
+                report.terminal_matrix_rank = solved.rank;
+                let candidate_produced = solved.candidate.is_some();
+                progress(KoblitzIcEvent::MatrixRank {
+                    rows: solved.rows,
+                    columns: solved.columns,
+                    rank: solved.rank,
+                    candidate_produced,
+                });
+                let mut candidate_verified = false;
+                let candidate = if let Some(d) = solved.candidate {
                     progress(KoblitzIcEvent::LinearAlgebraFinished);
                     progress(KoblitzIcEvent::VerificationStarted);
-                    let verified = kc.mul(&g, d) == *q;
-                    progress(KoblitzIcEvent::VerificationFinished { verified });
-                    verified
+                    candidate_verified = kc.mul(&g, &d) == *q;
+                    progress(KoblitzIcEvent::VerificationFinished {
+                        verified: candidate_verified,
+                    });
+                    candidate_verified.then_some(d)
+                } else {
+                    progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+                    None
+                };
+                report.rank_history.push(KoblitzRankRecord {
+                    rows: solved.rows,
+                    columns: solved.columns,
+                    rank: solved.rank,
+                    candidate_produced,
+                    candidate_verified,
                 });
                 if let Some(d) = candidate {
                     report.log = Some(d);
                     report.relations = relations.len();
+                    report.relation_matrix = relations.clone();
                     report.relation_collection_ns = relation_start
                         .elapsed()
                         .as_nanos()
                         .saturating_sub(report.linear_algebra_ns);
                     return Some(report);
+                }
+                if candidate_produced {
+                    report.verification_failures += 1;
+                    break;
                 }
                 progress(KoblitzIcEvent::RelationCollectionStarted { wanted });
             }
@@ -3188,33 +3451,24 @@ fn koblitz_index_calculus_dlp_observed(
         .as_nanos()
         .saturating_sub(report.linear_algebra_ns);
     report.relations = relations.len();
+    report.relation_matrix = relations.clone();
+    report.matrix_rows = relations.len();
     progress(KoblitzIcEvent::RelationCollectionFinished {
         collected: relations.len(),
         trials: report.trials,
     });
-    if report.inconsistent_relations > 0 || report.verification_failures > 0 {
+    if report.verification_failures > 0 {
         return Some(report);
     }
 
     // Unknowns: x_1 … x_s (orbit logs) and d, in the last column.
     //   Σ_o c_o x_o  −  (h·b)·d  ≡  h·a   (mod r)
     if let Some(echelon) = echelon.as_ref() {
-        if relations.is_empty() {
-            return Some(report);
-        }
+        let allow_verification =
+            report.sat_invalid_models == 0 && report.inconsistent_relations == 0;
         let linear_start = std::time::Instant::now();
-        let outcome = finish_incremental(echelon, &mut report, progress);
+        finish_incremental(echelon, &mut report, progress, allow_verification);
         report.linear_algebra_ns += linear_start.elapsed().as_nanos();
-        if outcome.is_none() {
-            progress(KoblitzIcEvent::LinearAlgebraStarted {
-                rows: echelon.rank(),
-                columns: relation_unknowns + 1,
-            });
-            progress(KoblitzIcEvent::LinearAlgebraIncomplete);
-        }
-        return Some(report);
-    }
-    if relations.len() < relation_unknowns + 1 {
         return Some(report);
     }
     progress(KoblitzIcEvent::LinearAlgebraStarted {
@@ -3222,19 +3476,57 @@ fn koblitz_index_calculus_dlp_observed(
         columns: relation_unknowns + 1,
     });
     report.linear_solve_attempts += 1;
+    report.rank_checks += 1;
     let linear_start = std::time::Instant::now();
-    let Some(d) = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r) else {
-        report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+    let solved = solve_relation_system(&relations, relation_unknowns, &kc.cofactor, r);
+    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
+    report.matrix_rows = solved.rows;
+    report.matrix_columns = solved.columns;
+    report.terminal_matrix_rank = solved.rank;
+    let candidate_produced = solved.candidate.is_some();
+    progress(KoblitzIcEvent::MatrixRank {
+        rows: solved.rows,
+        columns: solved.columns,
+        rank: solved.rank,
+        candidate_produced,
+    });
+    if report.sat_invalid_models != 0 || report.inconsistent_relations != 0 {
+        report.rank_history.push(KoblitzRankRecord {
+            rows: solved.rows,
+            columns: solved.columns,
+            rank: solved.rank,
+            candidate_produced,
+            candidate_verified: false,
+        });
+        progress(KoblitzIcEvent::LinearAlgebraIncomplete);
+        return Some(report);
+    }
+    let Some(d) = solved.candidate else {
+        report.rank_history.push(KoblitzRankRecord {
+            rows: solved.rows,
+            columns: solved.columns,
+            rank: solved.rank,
+            candidate_produced: false,
+            candidate_verified: false,
+        });
         progress(KoblitzIcEvent::LinearAlgebraIncomplete);
         return Some(report);
     };
-    report.linear_algebra_ns += linear_start.elapsed().as_nanos();
     progress(KoblitzIcEvent::LinearAlgebraFinished);
     progress(KoblitzIcEvent::VerificationStarted);
     let verified = kc.mul(&g, &d) == *q;
     if verified {
         report.log = Some(d);
+    } else {
+        report.verification_failures += 1;
     }
+    report.rank_history.push(KoblitzRankRecord {
+        rows: solved.rows,
+        columns: solved.columns,
+        rank: solved.rank,
+        candidate_produced: true,
+        candidate_verified: verified,
+    });
     progress(KoblitzIcEvent::VerificationFinished { verified });
     Some(report)
 }
@@ -3243,6 +3535,291 @@ fn koblitz_index_calculus_dlp_observed(
 fn solve_for_d(a: &BigUint, b: &BigUint, r: &BigUint) -> Option<BigUint> {
     let b_inv = mod_inverse(&(b % r), r)?;
     Some(((r - (a % r)) * b_inv) % r)
+}
+
+/// Controls for the same-target signed-Frobenius/negation quotient rho walk.
+#[derive(Clone, Debug)]
+pub struct KoblitzSignedRhoOptions {
+    pub seed: u64,
+    pub jump_count: usize,
+    pub max_restarts: u32,
+    pub max_iterations_per_restart: u64,
+    pub progress_interval: u64,
+}
+
+impl Default for KoblitzSignedRhoOptions {
+    fn default() -> Self {
+        Self {
+            seed: 0x52_48_4f_2d_41_55_54_4f,
+            jump_count: 16,
+            max_restarts: 64,
+            max_iterations_per_restart: 1 << 28,
+            progress_interval: 256,
+        }
+    }
+}
+
+/// Exact operation ledger for one signed-Frobenius rho run.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct KoblitzSignedRhoCharges {
+    pub coefficient_draws: u64,
+    pub setup_scalar_multiplications: u64,
+    pub setup_group_additions: u64,
+    pub walk_group_additions: u64,
+    pub candidate_verification_scalar_multiplications: u64,
+    pub canonicalizations: u64,
+    pub frobenius_maps: u64,
+    pub negations_examined: u64,
+    pub partition_hashes: u64,
+    pub collisions: u64,
+    pub failed_collisions: u64,
+}
+
+/// Terminal report for an arbitrary public target. A missing log is an honest
+/// incomplete result and is never an UNSAT or security conclusion.
+#[derive(Clone, Debug)]
+pub struct KoblitzSignedRhoReport {
+    pub recovered_log: Option<BigUint>,
+    pub verified: bool,
+    pub exhausted: bool,
+    pub iterations: u64,
+    pub restarts_attempted: u32,
+    pub jump_table_rebuilds: u32,
+    pub setup_ns: u128,
+    pub walk_ns: u128,
+    pub verification_ns: u128,
+    pub charges: KoblitzSignedRhoCharges,
+}
+
+/// Live signed-rho milestones. Counters are cumulative and exact.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum KoblitzSignedRhoEvent {
+    RestartStarted { restart: u32 },
+    JumpTableReady { restart: u32, jumps: usize },
+    WalkProgress { restart: u32, iterations: u64 },
+    Collision { restart: u32, verified: bool },
+    Finished { verified: bool, exhausted: bool },
+}
+
+#[derive(Clone)]
+struct KoblitzSignedRhoState {
+    point: BinaryPoint,
+    coefficient_a: BigUint,
+    coefficient_b: BigUint,
+}
+
+fn canonicalize_signed_rho(
+    curve: &KoblitzCurve,
+    state: KoblitzSignedRhoState,
+    charges: &mut KoblitzSignedRhoCharges,
+) -> KoblitzSignedRhoState {
+    charges.canonicalizations += 1;
+    if state.point == BinaryPoint::Infinity {
+        return state;
+    }
+    let modulus = &curve.subgroup_order;
+    let mut current = state.point.clone();
+    let mut lambda_k = BigUint::one();
+    let mut best: Option<(Option<(BigUint, BigUint)>, BinaryPoint, BigUint)> = None;
+    for _ in 0..curve.n {
+        let negated = point_neg(&current);
+        charges.negations_examined += 1;
+        for (is_negated, candidate) in [(false, current.clone()), (true, negated)] {
+            let key = match &candidate {
+                BinaryPoint::Infinity => None,
+                BinaryPoint::Affine { x, y } => Some((x.to_biguint(), y.to_biguint())),
+            };
+            let factor = if is_negated && !lambda_k.is_zero() {
+                modulus - &lambda_k
+            } else {
+                lambda_k.clone()
+            };
+            if best.as_ref().is_none_or(|(old, _, _)| key < *old) {
+                best = Some((key, candidate, factor));
+            }
+        }
+        current = curve.frobenius(&current);
+        charges.frobenius_maps += 1;
+        lambda_k = (&lambda_k * &curve.lambda) % modulus;
+    }
+    let (_, point, factor) = best.expect("nonempty signed Frobenius orbit");
+    KoblitzSignedRhoState {
+        point,
+        coefficient_a: (&state.coefficient_a * &factor) % modulus,
+        coefficient_b: (&state.coefficient_b * &factor) % modulus,
+    }
+}
+
+fn rho_sub_mod(left: &BigUint, right: &BigUint, modulus: &BigUint) -> BigUint {
+    if left >= right {
+        (left - right) % modulus
+    } else {
+        let difference = (right - left) % modulus;
+        if difference.is_zero() {
+            BigUint::zero()
+        } else {
+            modulus - difference
+        }
+    }
+}
+
+fn signed_rho_step(
+    curve: &KoblitzCurve,
+    jumps: &[(BinaryPoint, BigUint, BigUint)],
+    state: KoblitzSignedRhoState,
+    charges: &mut KoblitzSignedRhoCharges,
+) -> KoblitzSignedRhoState {
+    let bucket = match &state.point {
+        BinaryPoint::Infinity => 0,
+        BinaryPoint::Affine { x, y } => {
+            let x0 = x.to_biguint().iter_u64_digits().next().unwrap_or(0);
+            let y0 = y.to_biguint().iter_u64_digits().next().unwrap_or(0);
+            (x0 ^ y0.rotate_left(17)) as usize % jumps.len()
+        }
+    };
+    charges.partition_hashes += 1;
+    charges.walk_group_additions += 1;
+    let jump = &jumps[bucket];
+    canonicalize_signed_rho(
+        curve,
+        KoblitzSignedRhoState {
+            point: curve.add(&state.point, &jump.0),
+            coefficient_a: (&state.coefficient_a + &jump.1) % &curve.subgroup_order,
+            coefficient_b: (&state.coefficient_b + &jump.2) % &curve.subgroup_order,
+        },
+        charges,
+    )
+}
+
+/// Recover the discrete logarithm of an arbitrary public subgroup target with
+/// a signed-Frobenius/negation quotient rho walk. The target scalar is neither
+/// an input nor used for verification; success is checked only by `[d]G == Q`.
+pub fn koblitz_signed_frobenius_rho_with_progress(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    options: &KoblitzSignedRhoOptions,
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> KoblitzSignedRhoReport {
+    assert!(options.jump_count > 0, "rho needs at least one jump");
+    let modulus = &curve.subgroup_order;
+    let modulus_u64 = modulus.to_u64_digits().first().copied().unwrap_or(0);
+    assert!(modulus_u64 > 2, "rho subgroup order must fit u64");
+    let mut rng = StdRng::seed_from_u64(options.seed);
+    let mut report = KoblitzSignedRhoReport {
+        recovered_log: None,
+        verified: false,
+        exhausted: true,
+        iterations: 0,
+        restarts_attempted: 0,
+        jump_table_rebuilds: 0,
+        setup_ns: 0,
+        walk_ns: 0,
+        verification_ns: 0,
+        charges: KoblitzSignedRhoCharges::default(),
+    };
+
+    'restarts: for restart in 0..options.max_restarts {
+        report.restarts_attempted += 1;
+        progress(KoblitzSignedRhoEvent::RestartStarted { restart });
+        let setup_started = std::time::Instant::now();
+        let jumps = (0..options.jump_count)
+            .map(|_| {
+                let a = BigUint::from(rng.gen_range(1..modulus_u64));
+                let b = BigUint::from(rng.gen_range(1..modulus_u64));
+                report.charges.coefficient_draws += 2;
+                report.charges.setup_scalar_multiplications += 2;
+                report.charges.setup_group_additions += 1;
+                let point = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b));
+                (point, a, b)
+            })
+            .collect::<Vec<_>>();
+        report.jump_table_rebuilds += 1;
+        progress(KoblitzSignedRhoEvent::JumpTableReady {
+            restart,
+            jumps: jumps.len(),
+        });
+        let a = BigUint::from(rng.gen_range(1..modulus_u64));
+        let b = BigUint::from(rng.gen_range(1..modulus_u64));
+        report.charges.coefficient_draws += 2;
+        report.charges.setup_scalar_multiplications += 2;
+        report.charges.setup_group_additions += 1;
+        let initial = canonicalize_signed_rho(
+            curve,
+            KoblitzSignedRhoState {
+                point: curve.add(&curve.mul(curve.generator(), &a), &curve.mul(target, &b)),
+                coefficient_a: a,
+                coefficient_b: b,
+            },
+            &mut report.charges,
+        );
+        report.setup_ns += setup_started.elapsed().as_nanos();
+
+        let walk_started = std::time::Instant::now();
+        if options.max_iterations_per_restart == 0 {
+            report.walk_ns += walk_started.elapsed().as_nanos();
+            continue;
+        }
+        let mut tortoise = signed_rho_step(curve, &jumps, initial.clone(), &mut report.charges);
+        let hare_once = signed_rho_step(curve, &jumps, initial, &mut report.charges);
+        let mut hare = signed_rho_step(curve, &jumps, hare_once, &mut report.charges);
+        for local_iteration in 0..options.max_iterations_per_restart {
+            report.iterations += 1;
+            if options.progress_interval != 0
+                && (local_iteration + 1) % options.progress_interval == 0
+            {
+                progress(KoblitzSignedRhoEvent::WalkProgress {
+                    restart,
+                    iterations: report.iterations,
+                });
+            }
+            if tortoise.point == hare.point {
+                report.charges.collisions += 1;
+                let numerator = rho_sub_mod(&tortoise.coefficient_a, &hare.coefficient_a, modulus);
+                let denominator =
+                    rho_sub_mod(&hare.coefficient_b, &tortoise.coefficient_b, modulus);
+                let candidate = mod_inverse(&denominator, modulus)
+                    .map(|inverse| (&numerator * inverse) % modulus);
+                // Close the walk segment before collision processing. Candidate
+                // verification is a separately charged stage and must never be
+                // counted in `walk_ns` as well.
+                report.walk_ns += walk_started.elapsed().as_nanos();
+                let verification_started = std::time::Instant::now();
+                let verified = candidate.as_ref().is_some_and(|value| {
+                    report.charges.candidate_verification_scalar_multiplications += 1;
+                    curve.mul(curve.generator(), value) == *target
+                });
+                report.verification_ns += verification_started.elapsed().as_nanos();
+                progress(KoblitzSignedRhoEvent::Collision { restart, verified });
+                if verified {
+                    report.recovered_log = candidate;
+                    report.verified = true;
+                    report.exhausted = false;
+                    progress(KoblitzSignedRhoEvent::Finished {
+                        verified: true,
+                        exhausted: false,
+                    });
+                    return report;
+                }
+                report.charges.failed_collisions += 1;
+                continue 'restarts;
+            }
+            // The three states below are consumed by the next comparison.
+            // Do not charge an unused advance after the final permitted
+            // comparison of an exhausted restart.
+            if local_iteration + 1 == options.max_iterations_per_restart {
+                break;
+            }
+            tortoise = signed_rho_step(curve, &jumps, tortoise, &mut report.charges);
+            let hare_once = signed_rho_step(curve, &jumps, hare, &mut report.charges);
+            hare = signed_rho_step(curve, &jumps, hare_once, &mut report.charges);
+        }
+        report.walk_ns += walk_started.elapsed().as_nanos();
+    }
+    progress(KoblitzSignedRhoEvent::Finished {
+        verified: false,
+        exhausted: true,
+    });
+    report
 }
 
 // ── Cost model ─────────────────────────────────────────────────────
@@ -3349,9 +3926,7 @@ impl FactorBaseLogTable {
     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
         let g = kc.generator();
         self.columns.iter().all(|(point, log)| {
-            *point != BinaryPoint::Infinity
-                && log < &kc.subgroup_order
-                && &kc.mul(g, log) == point
+            *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
         })
     }
 
@@ -3408,12 +3983,19 @@ fn decompose_once(
 ) -> Option<Vec<usize>> {
     match opts.strategy {
         DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
-        DecompositionStrategy::PairTable => {
-            pair.expect("pair table required").decompose(kc, fb, target, opts.m)
-        }
+        DecompositionStrategy::PairTable => pair
+            .expect("pair table required")
+            .decompose(kc, fb, target, opts.m),
         DecompositionStrategy::Groebner => {
             groebner_decompose(
-                kc, fb, index_of, field, target, opts.m, opts.engine, opts.node_budget,
+                kc,
+                fb,
+                index_of,
+                field,
+                target,
+                opts.m,
+                opts.engine,
+                opts.node_budget,
             )
             .0
         }
@@ -3477,9 +4059,8 @@ pub struct CollectionReport {
 /// from a generator keyed by the pair, so trials are independent of one
 /// another and of the order in which they are visited.
 pub fn probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
-    let key = seed
-        ^ 0x5052_4f42_4553_4551
-        ^ trial.wrapping_mul(0x9e37_79b9_7f4a_7c15).rotate_left(17);
+    let key =
+        seed ^ 0x5052_4f42_4553_4551 ^ trial.wrapping_mul(0x9e37_79b9_7f4a_7c15).rotate_left(17);
     StdRng::seed_from_u64(key).gen_range(1..r_u64.max(2))
 }
 
@@ -3509,7 +4090,11 @@ pub const PRECOMPUTE_BATCH_TRIALS: usize = 64;
 impl<'a> RelationCollector<'a> {
     /// `None` when the base cannot decompose with `opts.m` summands or
     /// the field is too wide for the pair table.
-    pub fn new(kc: &'a KoblitzCurve, fb: &'a FrobeniusFactorBase, opts: &'a KoblitzIcOptions) -> Option<Self> {
+    pub fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+    ) -> Option<Self> {
         let pair = if opts.strategy == DecompositionStrategy::PairTable {
             PairSource::Owned(PairSumTable::build(kc, fb)?)
         } else {
@@ -3544,7 +4129,13 @@ impl<'a> RelationCollector<'a> {
         if !fb.m_can_decompose(kc, opts.m) {
             return None;
         }
-        let r_u64 = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        let r_u64 = kc
+            .subgroup_order
+            .to_u64_digits()
+            .first()
+            .copied()
+            .unwrap_or(1)
+            .max(2);
         Some(Self {
             kc,
             fb,
@@ -3591,10 +4182,16 @@ impl<'a> RelationCollector<'a> {
                 self.opts,
                 &target,
             )?;
-            Some(CollectedRelation { trial: t, a, points })
+            Some(CollectedRelation {
+                trial: t,
+                a,
+                points,
+            })
         };
-        let mut relations: Vec<CollectedRelation> =
-            (unit.start..end).into_par_iter().filter_map(probe).collect();
+        let mut relations: Vec<CollectedRelation> = (unit.start..end)
+            .into_par_iter()
+            .filter_map(probe)
+            .collect();
         relations.sort_by_key(|r| r.trial);
         let report = CollectionReport {
             trials: (end - unit.start) as usize,
@@ -3613,7 +4210,12 @@ pub fn verify_collected_relation(
     m: usize,
     rel: &CollectedRelation,
 ) -> bool {
-    let r_u64 = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(0);
+    let r_u64 = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(0);
     if rel.points.len() != m || rel.a == 0 || rel.a >= r_u64 {
         return false;
     }
@@ -3645,7 +4247,11 @@ struct LogSystem<'a> {
 
 impl<'a> LogSystem<'a> {
     /// `None` when the base has no projected columns.
-    fn new(kc: &'a KoblitzCurve, fb: &'a FrobeniusFactorBase, opts: &'a KoblitzIcOptions) -> Option<Self> {
+    fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+    ) -> Option<Self> {
         let r = &kc.subgroup_order;
         let projected = projected_signed_orbit_map(kc, fb);
         let n_cols = projected.representatives.len();
@@ -3694,7 +4300,8 @@ impl<'a> LogSystem<'a> {
         );
         let rhs = (&self.h * &a) % r;
         if self.sparse_opts.is_some() {
-            self.sparse_rows.push(SparseRow::from_dense(&relation.row, &rhs, self.r_u64));
+            self.sparse_rows
+                .push(SparseRow::from_dense(&relation.row, &rhs, self.r_u64));
         } else {
             self.dense_matrix.push(relation.row);
             self.dense_rhs.push(rhs);
@@ -3716,7 +4323,9 @@ impl<'a> LogSystem<'a> {
                 );
                 report.sparse_report = Some(sreport);
                 match outcome {
-                    SparseSolveOutcome::Solved(x) => Some(x.into_iter().map(BigUint::from).collect()),
+                    SparseSolveOutcome::Solved(x) => {
+                        Some(x.into_iter().map(BigUint::from).collect())
+                    }
                     SparseSolveOutcome::Undetermined | SparseSolveOutcome::Inconsistent => None,
                 }
             }
@@ -3815,7 +4424,10 @@ pub fn solve_factor_base_logs(
         }
     }
     // Best effort with whatever was collected; unverified.
-    let columns = system.attempt(&mut report).map(|t| t.columns).unwrap_or_default();
+    let columns = system
+        .attempt(&mut report)
+        .map(|t| t.columns)
+        .unwrap_or_default();
     Some((FactorBaseLogTable { columns }, report))
 }
 
@@ -3866,7 +4478,12 @@ pub fn solve_factor_base_logs_from_relations(
             return Some((table, report));
         }
     }
-    Some((FactorBaseLogTable { columns: Vec::new() }, report))
+    Some((
+        FactorBaseLogTable {
+            columns: Vec::new(),
+        },
+        report,
+    ))
 }
 
 /// What an individual-logarithm descent did.
@@ -3965,7 +4582,13 @@ pub fn individual_log_with_pair_table(
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
-            kc, fb, &idxs, &a, &b, opts.collapse_negation, Some(&projected),
+            kc,
+            fb,
+            &idxs,
+            &a,
+            &b,
+            opts.collapse_negation,
+            Some(&projected),
         );
         // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
         let mut sum = BigUint::zero();
@@ -4648,7 +5271,11 @@ mod tests {
         for n in 3..=24u32 {
             let full = find_irreducible(n).expect("exhaustive search finds one");
             let sparse = find_irreducible_sparse(n).expect("sparse search finds one");
-            assert_eq!((full.degree, full.low_terms), (sparse.degree, sparse.low_terms), "n = {n}");
+            assert_eq!(
+                (full.degree, full.low_terms),
+                (sparse.degree, sparse.low_terms),
+                "n = {n}"
+            );
         }
     }
 
@@ -4728,7 +5355,10 @@ mod tests {
         assert_eq!(fb.subspace_basis, parent.subspace_basis);
         assert!(!fb.uses_ambient_basis());
         let parent_keys: HashSet<_> = parent.points.iter().map(point_key).collect();
-        assert!(fb.points.iter().all(|p| parent_keys.contains(&point_key(p))));
+        assert!(fb
+            .points
+            .iter()
+            .all(|p| parent_keys.contains(&point_key(p))));
         let index = fb.index_map();
         let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let table = PairSumTable::build(&kc, &fb).unwrap();
@@ -4777,7 +5407,11 @@ mod tests {
                     SolverEngine::default(),
                     20_000,
                 );
-                assert_eq!(groebner.is_some(), reference.is_some(), "F4 m = {m}, k = {k}");
+                assert_eq!(
+                    groebner.is_some(),
+                    reference.is_some(),
+                    "F4 m = {m}, k = {k}"
+                );
             }
         }
         assert!(found > 0, "the pruned base must still decompose something");
@@ -4803,12 +5437,22 @@ mod tests {
                 assert!(models.insert((a, b)));
                 solver.reset_search();
                 let clause = (0..2 * width)
-                    .map(|i| if model[i] { -((i + 1) as i32) } else { (i + 1) as i32 })
+                    .map(|i| {
+                        if model[i] {
+                            -((i + 1) as i32)
+                        } else {
+                            (i + 1) as i32
+                        }
+                    })
                     .collect();
                 solver.add_clause(clause);
             }
             let total = 1u32 << width;
-            assert_eq!(models.len() as u32, total * (total + 1) / 2, "width {width}");
+            assert_eq!(
+                models.len() as u32,
+                total * (total + 1) / 2,
+                "width {width}"
+            );
         }
     }
 
@@ -4912,7 +5556,8 @@ mod tests {
                 assert_eq!(kc.mul(&g, &recovered), q);
             }
             // O has logarithm 0 without any probing.
-            let (zero, _) = individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
+            let (zero, _) =
+                individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
             assert!(zero.is_zero());
         }
     }
@@ -4968,10 +5613,16 @@ mod tests {
             };
             let (dt, dr) = solve_factor_base_logs(&kc, &fb, &dense).unwrap();
             let (st, sr) = solve_factor_base_logs(&kc, &fb, &sparse).unwrap();
-            assert!(dr.verified && !dr.sparse && dr.sparse_report.is_none(), "K_{a}/2^{n} dense");
+            assert!(
+                dr.verified && !dr.sparse && dr.sparse_report.is_none(),
+                "K_{a}/2^{n} dense"
+            );
             assert!(sr.verified && sr.sparse, "K_{a}/2^{n} sparse: {sr:?}");
             assert!(dt.verify(&kc) && st.verify(&kc));
-            assert_eq!(dt.columns, st.columns, "K_{a}/2^{n}: the two paths disagree");
+            assert_eq!(
+                dt.columns, st.columns,
+                "K_{a}/2^{n}: the two paths disagree"
+            );
             let srep = sr.sparse_report.as_ref().expect("sparse statistics");
             assert_eq!(srep.filter.columns_in, st.len());
             assert_eq!(srep.core_dimension + srep.reconstructed_columns, st.len());
@@ -4981,7 +5632,12 @@ mod tests {
             // is covered, so it needs at least as many relations as
             // columns and no more attempts than the dense path.
             assert!(sr.relations >= st.len());
-            assert!(sr.solve_attempts <= dr.solve_attempts, "K_{a}/2^{n}: {} > {}", sr.solve_attempts, dr.solve_attempts);
+            assert!(
+                sr.solve_attempts <= dr.solve_attempts,
+                "K_{a}/2^{n}: {} > {}",
+                sr.solve_attempts,
+                dr.solve_attempts
+            );
         }
     }
 
@@ -5004,14 +5660,26 @@ mod tests {
         let opts = collector_options();
         let r = kc.subgroup_order.to_u64_digits()[0];
         let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
-        let (whole, report) = collector.collect(RelationWorkUnit { seed: 7, start: 0, count: 600 });
+        let (whole, report) = collector.collect(RelationWorkUnit {
+            seed: 7,
+            start: 0,
+            count: 600,
+        });
         assert_eq!(report.trials, 600);
         assert_eq!(report.relations, whole.len());
         assert!(whole.len() > 10, "{} relations", whole.len());
         // Any partition of the range, in any order, gives the same relations.
         let mut parts = Vec::new();
         for (start, count) in [(350u64, 250u64), (0, 100), (100, 250)] {
-            parts.extend(collector.collect(RelationWorkUnit { seed: 7, start, count }).0);
+            parts.extend(
+                collector
+                    .collect(RelationWorkUnit {
+                        seed: 7,
+                        start,
+                        count,
+                    })
+                    .0,
+            );
         }
         parts.sort_by_key(|rel| rel.trial);
         assert_eq!(whole, parts);
@@ -5022,7 +5690,11 @@ mod tests {
             assert!((0..600).contains(&rel.trial));
         }
         // Another seed is another sequence.
-        let (other, _) = collector.collect(RelationWorkUnit { seed: 8, start: 0, count: 600 });
+        let (other, _) = collector.collect(RelationWorkUnit {
+            seed: 8,
+            start: 0,
+            count: 600,
+        });
         assert_ne!(whole, other);
         // Forgeries are rejected: wrong scalar, wrong point, wrong count, bad index.
         let good = whole[0].clone();
@@ -5063,9 +5735,16 @@ mod tests {
             // out of order with a duplicate and a forgery mixed in.
             let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
             let total = report.trials as u64;
-            let (first, _) = collector.collect(RelationWorkUnit { seed: opts.seed, start: 0, count: total / 2 });
-            let (second, _) =
-                collector.collect(RelationWorkUnit { seed: opts.seed, start: total / 2, count: total - total / 2 });
+            let (first, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: 0,
+                count: total / 2,
+            });
+            let (second, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: total / 2,
+                count: total - total / 2,
+            });
             let mut all = second.clone();
             all.extend(first.iter().cloned());
             all.push(first[0].clone());
@@ -5079,12 +5758,17 @@ mod tests {
             // subgroup repeats scalars); the merge drops them, plus the
             // one duplicate added above.
             assert!(rep2.duplicate_relations >= 1);
-            assert_eq!(rep2.relations + rep2.duplicate_relations, report.relations + 1, "K_{a}/2^{n}");
+            assert_eq!(
+                rep2.relations + rep2.duplicate_relations,
+                report.relations + 1,
+                "K_{a}/2^{n}"
+            );
             assert_eq!(rep2.sparse, report.sparse);
             assert_eq!(t2.columns, table.columns, "K_{a}/2^{n}: tables differ");
             assert!(t2.verify(&kc));
             // Too few relations: unverified, never a wrong table.
-            let (t3, rep3) = solve_factor_base_logs_from_relations(&kc, &fb, &opts, &first[..1]).unwrap();
+            let (t3, rep3) =
+                solve_factor_base_logs_from_relations(&kc, &fb, &opts, &first[..1]).unwrap();
             assert!(!rep3.verified && t3.is_empty());
         }
     }
@@ -5111,11 +5795,9 @@ mod tests {
                 );
             }
             // And on a nonlinear union, which has more cofactor classes.
-            let union = build_frobenius_union_factor_base(
-                &kc,
-                &[F2mElement::one(n), F2mElement::z(n)],
-            )
-            .unwrap();
+            let union =
+                build_frobenius_union_factor_base(&kc, &[F2mElement::one(n), F2mElement::z(n)])
+                    .unwrap();
             for m in 1..=4 {
                 assert_eq!(
                     union.m_can_decompose(&kc, m),
@@ -5522,6 +6204,107 @@ mod tests {
         assert_eq!(report.log, Some(d));
         assert!(!report.direct_relation);
         assert_eq!(report.sat_invalid_models, 0);
+    }
+
+    #[test]
+    fn incomplete_ic_retains_a_terminal_matrix_rank() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(53u32));
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let report = koblitz_index_calculus_dlp_with_factor_base(
+            &kc,
+            &q,
+            &fb,
+            &KoblitzIcOptions {
+                strategy: DecompositionStrategy::Sat,
+                max_trials: 0,
+                allow_direct_relation: false,
+                ..KoblitzIcOptions::default()
+            },
+        )
+        .unwrap();
+        assert!(report.log.is_none());
+        assert_eq!(report.trials, 0);
+        assert_eq!(report.relations, 0);
+        assert_eq!(report.matrix_rows, 0);
+        assert_eq!(report.matrix_columns, report.orbit_count + 1);
+        assert_eq!(report.terminal_matrix_rank, 0);
+        assert_eq!(report.rank_checks, 1);
+        assert_eq!(report.linear_solve_attempts, 1);
+        assert_eq!(report.rank_history.len(), 1);
+        assert_eq!(report.rank_history[0].rank, 0);
+        assert!(!report.rank_history[0].candidate_produced);
+        assert!(!report.rank_history[0].candidate_verified);
+    }
+
+    #[test]
+    fn rho_walk_timing_stops_before_collision_verification_progress() {
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(17u32));
+        let started = std::time::Instant::now();
+        let mut delayed_collision = false;
+        let report = koblitz_signed_frobenius_rho_with_progress(
+            &kc,
+            &q,
+            &KoblitzSignedRhoOptions {
+                seed: 8_981_096_000_249_929_860,
+                jump_count: 16,
+                max_restarts: 16,
+                max_iterations_per_restart: 1 << 20,
+                progress_interval: 256,
+            },
+            &mut |event| {
+                if matches!(event, KoblitzSignedRhoEvent::Collision { .. }) && !delayed_collision {
+                    delayed_collision = true;
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+            },
+        );
+        let elapsed_ns = started.elapsed().as_nanos();
+        assert!(report.verified);
+        assert!(delayed_collision);
+        let charged_ns = report.setup_ns + report.walk_ns + report.verification_ns;
+        assert!(
+            elapsed_ns.saturating_sub(charged_ns)
+                >= std::time::Duration::from_millis(40).as_nanos(),
+            "collision callback leaked into a timed algorithm stage: elapsed={elapsed_ns}, charged={charged_ns}"
+        );
+    }
+
+    #[test]
+    fn exhausted_rho_does_not_charge_an_unused_final_advance() {
+        let kc = KoblitzCurve::new(1, 7).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(17u32));
+        let (report, events) = (0..1024)
+            .find_map(|seed| {
+                let mut events = Vec::new();
+                let report = koblitz_signed_frobenius_rho_with_progress(
+                    &kc,
+                    &q,
+                    &KoblitzSignedRhoOptions {
+                        seed,
+                        jump_count: 16,
+                        max_restarts: 1,
+                        max_iterations_per_restart: 1,
+                        progress_interval: 0,
+                    },
+                    &mut |event| events.push(event),
+                );
+                (report.exhausted && report.charges.collisions == 0).then_some((report, events))
+            })
+            .expect("a one-comparison restart should exhaust without a collision");
+        assert!(!report.verified);
+        assert!(report.exhausted);
+        assert_eq!(report.restarts_attempted, 1);
+        assert_eq!(report.iterations, 1);
+        assert_eq!(report.charges.walk_group_additions, 3 * report.iterations);
+        assert!(matches!(
+            events.last(),
+            Some(KoblitzSignedRhoEvent::Finished {
+                verified: false,
+                exhausted: true,
+            })
+        ));
     }
 
     #[test]
