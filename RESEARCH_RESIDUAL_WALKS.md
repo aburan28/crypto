@@ -1056,11 +1056,64 @@ adding it can be read off.
 `cargo run --release --example gaudry_cubic_bench -- --protocol`, two
 seeds per size, `p ≡ 1 (mod 3)`:
 
-GAUDRY_TABLE
+| `p` | `n` | base | residuals | decomposition rate | pair tests / residual | `F_p` mults / pair test | ops / residual | total ops | `S` | rho steps | rho `S` | `S` / rho `S` | wall |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | 132 | 815 | 0.152 | 265 | 1,512 | 6,694 | 5.5·10⁶ | 1,224 | 2,952 | 1.16 | 1,057× | 6 s |
+| 523 | 2^27.1 | 248 | 1,534 | 0.152 | 496 | 1,557 | 12,835 | 19.6·10⁶ | 1,640 | 11,681 | 1.18 | 1,385× | 20 s |
+| 1039 | 2^30.1 | 520 | 2,928 | 0.166 | 1,039 | 1,811 | 30,989 | 90.7·10⁶ | 2,707 | 43,086 | 1.37 | 1,978× | 91 s |
+| 2083 | 2^33.1 | 1,068 | 5,555 | 0.180 | 2,136 | 1,856 | 65,170 | 361.7·10⁶ | 3,805 | 158,426 | 1.70 | 2,240× | 361 s |
+
+Every run recovered the planted `d`, for both methods.  Least-squares
+exponents over the four sizes: total operations `∝ n^{0.69}`
+(prediction `n^{2/3}`), operations per residual `∝ n^{0.38}`
+(`2|F| ∝ n^{1/3}` times the slow growth of the pair test, `1,512 →
+1,856` `F_p` multiplications as `log p` grows), residuals `∝ n^{0.31}`
+(`≈ |F|/rate`).
 
 ### 11.3 Reading it
 
-GAUDRY_NARRATIVE
+The pieces of Gaudry's argument are all visible, and so is what is
+missing:
+
+- **The subspace makes the pair test cheap.**  `≈ 1,500–1,900` `F_p`
+  multiplications, about `25–30` affine additions, to decide
+  `Y ∈ ±F ± F` for a base of `130–1,070` points — the prime-field
+  `S₃` oracle paid one square root *per base element* for the same
+  decision (§10.4).  That is the `O(1)`-versus-`O(|F|)` gap the Weil
+  restriction buys, measured.
+- **The decomposition rate is what the count predicts.**
+  `(2|F|)³/6n ≈ 0.15–0.18` of residuals are signed distinct-index
+  triples, so `≈ 6` residuals per relation and `≈ 6|F|` residuals in
+  all: `815 → 5,555` as `|F|` goes `132 → 1,068`.  The relation count
+  is `∝ n^{1/3}`, not `∝ √n` — the count factor `κ` is finally
+  *sub-birthday*: `815/√n = 0.20` at 24 bits and `5,555/√n = 0.06` at
+  33 bits, falling as `n^{-1/6}`.
+- **The cost is still `Θ(n^{2/3})`, because the triple test is still
+  a loop over the base.**  Each residual runs `2|F|` pair tests, so
+  operations per residual grow like `n^{1/3}` and the total like
+  `n^{2/3}`; measured `n^{0.69}`.  Against rho's `n^{1/2}` the ratio
+  widens with `n`: `1,057×` at 24 bits, `2,240×` at 33 bits.
+- **What Gaudry's `O(1)` solve would change.**  Replacing the
+  `2|F|` pair tests by one solve of the three-unknown system costs
+  some constant `C₃` per residual instead of `2|F| · 1,800` `F_p`
+  multiplications (`4.8·10⁵` at `p = 271`, `4.0·10⁶` at `p = 2083`);
+  the total becomes `≈ 6|F| · C₃ ∝ n^{1/3}`, and the crossover with
+  rho sits where `6|F| C₃ < 1.25 √n · 63`, i.e. `C₃ < 13 · n^{1/6}`
+  `F_p` multiplications — `C₃ < 600` at 33 bits, `C₃ < 5,000` at 50
+  bits, `C₃ < 10⁶` at 100 bits.  A resultant cascade on the symmetrised
+  system is in the `10⁵–10⁶` range by the degree count of §10; a tuned
+  Gröbner solve is what the literature uses.  The linear algebra
+  (`|F| ∝ n^{1/3}` unknowns, `n^{2/3}` dense, `n^{1/3+ε}` sparse with
+  double large primes) then decides the exponent, which is how
+  Gaudry's `Õ(q^{2−2/k})` arises.
+
+So the subspace base does what the prime-field base could not — it
+makes the count sub-birthday — and at these sizes it does so at three
+orders of magnitude more work than rho, with a scaling exponent that
+only improves once the last loop over the base is replaced by an
+algebraic solve.  That solve is the next thing to build; its constant
+`C₃` is the number that decides whether the method beats rho at any
+size that fits in this module.
 
 ## References
 
