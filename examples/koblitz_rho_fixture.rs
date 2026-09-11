@@ -18,6 +18,8 @@ use std::time::Instant;
 const TASK_ID: &str = "TASK-KIC-SAT-RHO-CROSSOVER-20260909";
 const JUMPS: usize = 32;
 const MAX_RESTARTS: u64 = 128;
+/// Fruitless-collision restart budget for larger fields (n≥41).
+const MAX_RESTARTS_LARGE: u64 = 100_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Quotient {
@@ -546,12 +548,20 @@ fn solve_fixture(
                 Quotient::SignedFrobenius => signed_size as f64,
             }))
         .sqrt();
-    let max_steps = (ideal_steps.ceil() as u64).saturating_mul(200).max(10_000);
+    // Toy rungs finish with 200×√(πr/2A); n≥41 needs more headroom —
+    // distinguished-point density and restart waste grow with the field.
+    let safety = if curve.n >= 41 { 2_000 } else { 200 };
+    let max_steps = (ideal_steps.ceil() as u64).saturating_mul(safety).max(10_000);
     let mut steps = 0u64;
     let mut restarts = 0u64;
     let mut recovered = None;
+    let restart_cap = if curve.n >= 41 {
+        MAX_RESTARTS_LARGE
+    } else {
+        MAX_RESTARTS
+    };
 
-    'restart: while restarts <= MAX_RESTARTS && steps < max_steps {
+    'restart: while restarts <= restart_cap && steps < max_steps {
         let initial = random_state(curve, &q, &mut rng, modulus, &mut charges);
         let mut state = canonicalize(
             curve,
@@ -694,12 +704,20 @@ fn solve_fixture_packed(
                 Quotient::SignedFrobenius => signed_size as f64,
             }))
         .sqrt();
-    let max_steps = (ideal_steps.ceil() as u64).saturating_mul(200).max(10_000);
+    // Toy rungs finish with 200×√(πr/2A); n≥41 needs more headroom —
+    // distinguished-point density and restart waste grow with the field.
+    let safety = if curve.n >= 41 { 2_000 } else { 200 };
+    let max_steps = (ideal_steps.ceil() as u64).saturating_mul(safety).max(10_000);
     let mut steps = 0u64;
     let mut restarts = 0u64;
     let mut recovered = None;
+    let restart_cap = if curve.n >= 41 {
+        MAX_RESTARTS_LARGE
+    } else {
+        MAX_RESTARTS
+    };
 
-    'restart: while restarts <= MAX_RESTARTS && steps < max_steps {
+    'restart: while restarts <= restart_cap && steps < max_steps {
         let initial = raw_random_state(curve, generator, q, &mut rng, modulus, &mut charges);
         let mut state = raw_canonicalize(curve, initial, mode, modulus, lambda, &mut charges);
         loop {
@@ -823,7 +841,7 @@ fn main() {
     let backend = args.get(5).map(String::as_str).unwrap_or("reference");
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
     assert!(matches!(backend, "reference" | "packed"));
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41));
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     for fixture_index in 0..fixtures {

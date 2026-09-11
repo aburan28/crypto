@@ -7076,3 +7076,225 @@ fibre.  It now reports the median.
 ### Commits made
 
 (see PR — coordinate search module, example, research doc)
+
+---
+
+## 2026-09-10 (autolab run, second session)
+
+### Task picked
+
+Own next step #1 from the first session: wire the symmetrised `S₃`/`S₄`
+into the Koblitz decomposition oracles and run H1–H3, so "the system is
+smaller" is tested against "the solve is faster".  The 2026-09-08
+sessions made the point that those are different claims.
+
+### Work done
+
+- `src/cryptanalysis/koblitz_symmetrised.rs`: factor base in the
+  Artin–Schreier frame (`u = 1/(x + 1)`, `V ∋ 1`, divisor of `xⁿ − 1`
+  containing `x − 1`); the symmetrised polynomials Weil-restricted with
+  `m(ℓ − 1) + 1` unknowns (`w_i` and `s` linear in the bits, one parity
+  bit); root lifting including relations through `R + T`; matrix-F4 and
+  CDCL oracles; a direct unchained `S₄`-in-`x` control arm; a paired
+  benchmark with enumeration gates on every verdict and re-summation of
+  every relation.  Seven tests, including that the hardcoded polynomials
+  equal `coordinate_search`'s interpolation and that F4 and SAT agree
+  with enumeration at `m = 2, 3`.
+- `examples/symmetrised_oracle_bench.rs`: the ladder.  Learned on the
+  way that `n = 21` is unusable — composite, so no prime-order subgroup
+  exceeds its cofactor — and retargeted to `n = 17, 23`.
+
+### Findings
+
+**H1 confirmed by two to three orders of magnitude at `m = 3`.**
+`K₁/F₂¹⁵`: F4 refutes the symmetrised system in 26 ms against 10.2 s for
+the production chained system, found targets 8 ms against 5.7 s.  `K₀`
+the same.  At `m = 2` the gain is ×2 (F4) to ×5 (SAT).  Zero gate
+failures anywhere.
+
+**Decomposed by control arm:** dropping the chained intermediates is
+×12 (direct `S₄` in `x`, 541 ms); the symmetry is a further ×75.
+
+**H2 falsified as stated:** the symmetrised systems have a *higher*
+first fall degree (4 vs 3) and solve faster.  The chained system's early
+syzygies are its own redundancy.  First fall degree is the wrong
+predictor for this comparison; splits and conflicts are the right ones
+(788 → 236, 51 445 → 3 424 at `K₀/F₂¹⁵`).
+
+**SAT is back in the game.**  The production SAT arm's 227 s refutation
+at `K₁/F₂¹⁵`, `m = 3` becomes 101 ms; the F4/SAT gap is ×4, not ×340.
+What CDCL could not handle was the free intermediate field element.
+
+**Not uniformly better, and the exception is the engine.**  At
+`K₁/F₂¹⁷`, `m = 3` (dimension 9 is the only invariant subspace with
+`1`; every target decomposes) the symmetrised system has 25 unknowns of
+Boolean degree 4, above `matrix_f4_f2`'s column limit for a degree-5
+matrix, so F4 is reduced to splitting: 6.2 s and 3 219 splits against
+4.0 s and 49 for the chained system.  On SAT it still wins (3/4 found
+against 0/4).  At `K₁/F₂²³`, `m = 3`, 59 unknowns against 34, the
+production system answers nothing within budget on either engine and
+the symmetrised system finds 2/3 on F4 in 5.8 s.  The wall moved.
+
+**`m = 2` is a constant factor.**  ×2 on F4 refutations from `n = 15`
+to `n = 23`, ×4–9 on SAT; found targets within noise.  H3's
+"sub-second at the wall" is falsified: 1.6 s at `n = 23`, and the first
+fall degree there equals the `x`-system's.
+
+`n = 21` is composite — the group order carries the subfield curves'
+orders and no prime-order subgroup exceeds its cofactor — so the
+constructor refuses it; the earlier `n = 21` numbers were curve-free
+system profiles.  The ladder uses primes.
+
+### Next step proposal
+
+1. Chain the symmetrised `S₃` for `m ≥ 4`; compare against unchained
+   symmetrised `S₄`.
+2. Add the symmetrised oracle as a strategy in `koblitz_index_calculus`
+   and re-run the scaling target's ladder end to end.
+3. Tuple-level coordinates for the `Z/4` of `K₀`, unchanged.
+
+### Commits made
+
+(see PR — oracle module, paired bench, research doc §8)
+
+---
+
+## 2026-09-10 (autolab run, third session on exotic coordinates)
+
+### Task picked
+
+"Test out new exotic coordinates."  The first session proved per-point
+coordinates see nothing beyond the rational 2-torsion, so new
+coordinates have to come from the two spaces it left open: the joint
+invariants of the whole group `E[2] ≅ (Z/2)²`, and coordinates on tuples
+of points where `K₀`'s 4-torsion can act.  Both need invariants of a
+group that is not a single involution, and deriving those by hand per
+group is the kind of thing the algorithm should do.
+
+### Work done
+
+- `src/cryptanalysis/coordinate_quotients.rs`: close point maps into a
+  group; find the relation-preserving subgroup `Γ ⊆ G^{m+1}` by
+  experiment; invariants as elementary symmetric functions of orbit
+  *sets* of seed functions (sets, not multisets — even multiplicities
+  kill every `e_k` over `F₂`); minimal-total-degree relation with the
+  identities among invariants quotiented out (the first thing found
+  otherwise is `s² + s = Σw`, which holds everywhere); exact collapse by
+  enumerating every relation tuple, memoised per point.
+- The identity basis pivots on monomials heaviest in the tuple seeds, so
+  reducing a relation against it strips exactly the identity's part; the
+  5-term symmetrised `S₃` of the first session comes back as itself.
+  Before that fix the representative had 8 terms.
+- Weighted degree in `u` is reported only when every projected map is
+  affine on the `u`-line; `T₄` is not, and the column says "algebraic".
+- `examples/coordinate_quotients.rs`: `K₁` control, `K₀` with `T₂` and
+  with `T₄` (points only, `+Σu`, `+Πu`, `+ pair sums/differences`),
+  `y² = x³ − x / F₁₀₀₉` with one `T`, all of `E[2]`, and `E[2] + Aut`;
+  a one-torsion prime curve.  Three tests.
+
+### Findings
+
+**The orbit-set invariants separate `Γ`-orbits exactly, every time.**
+Collapse equals `|Γ|` to the decimal in every run: 8 for `⟨T₂, −⟩`, 32
+for `⟨T₄, −⟩` on `K₀`, 32 for `E[2]` on the prime curve.
+
+**`K₀`'s 4-torsion quadruples the collapse, and it is the endomorphism
+`π − 1`.**  The per-point invariant is a coordinate on `E/⟨T₄, −1⟩`, and
+on `K₀` the quotient by `E(F₂)` is `π − 1`, so this is the same curve with
+the instance transported: four targets `R + kT₄` per solve, orbits of
+size up to `8n`, and it composes with the `T₂` symmetrisation of the
+previous sessions rather than replacing it.  The relation being linear in
+the invariants is the transport in disguise, not a lower-degree
+polynomial — `e₂[Σu]` is algebraic in the `u_i`.
+
+**The Klein group on `y² = x³ − x`**: `|Γ| = 32` at `m = 2`, separated
+exactly; §6.4's "complete `E[2]`" done.  Prime-field and `F_{p^k}` only.
+
+**Pair seeds add nothing.**  With `u(P_i ± P_j)` included on `K₀` every
+pair invariant is redundant and the same 5-term relation is found.
+
+A method lesson worth keeping: total degree in a set of invariants is
+not a cost.  Adding `Πu` to the seeds lowered the relation's total
+degree from 3 to 2 while raising its degree in the `u_i` from 6 to 9.
+The tool now prints both and refuses the second when it is undefined.
+
+### Next step proposal
+
+1. Wire the `π − 1` transport into `koblitz_symmetrised` for `K₀`: the
+   symmetrised system unchanged, targets transported, four relations
+   per solve, `8n`-orbits — and measure relations per second end to end.
+2. `F_{p^k}` in `Gf`, so the Klein invariants meet a subspace factor
+   base (Gaudry's setting) where they can be descended.
+3. Seeds of higher order: translations by rational 3-torsion on
+   `j = 0` curves and the `Z/3` automorphism, through the same engine.
+
+### Commits made
+
+(see PR — quotient module, example, research note §10)
+
+---
+
+## 2026-09-10 (autolab run, fourth session on exotic coordinates)
+
+### Task picked
+
+§10.5 item 1: the `π − 1` transport on `K₀`.  Solve the symmetrised
+system for `φ(R)`, lift through `φ⁻¹`, and measure what it is worth end
+to end.
+
+### Work done
+
+- `koblitz_symmetrised`: `phi_table` (preimages and kernel of `φ` over
+  the toy curve), `transported_symmetrised_decompose` (solve for `φ(R)`,
+  keep searching roots until one has every summand in `im φ`, lift to
+  `R + K` with `K ∈ E(F₂)`), `projected_column` (the driver's notion of
+  an unknown: the signed Frobenius orbit of `[h]P`), `decomposes_over`
+  (enumeration over any point list), `transport_bench`,
+  `examples/transport_bench.rs`.  The solve and the lifter gained an
+  acceptance predicate applied over *every* lift of a root, because a
+  root is an orbit of decompositions and the first one to sum correctly
+  is not always the one a side condition wants.
+- Read the driver before writing any of it: rows are
+  `Σ c_o x_o − (h·b)·d ≡ h·a`, multiplied by the cofactor, with
+  `collapse_projected_orbits` merging points of equal `[h]P`.
+
+### Findings
+
+**An accounting error in three earlier sessions, now corrected.**  The
+cofactor kills `E(F₂)`, so `R`, `R + T₂`, `R + kT₄` are one projected
+target and `P`, `P + K` one unknown.  "One solve covers `R` and `R + T`"
+(§4.3, §8) and "four targets per solve" (§10) were bookkeeping.  The
+`T₂` gain that stands is the smaller system (§8's numbers) and the
+halved column count of a `T₂`-closed base.  `targets_per_solve` removed
+from the descent model; the sections amended in place.
+
+**The transport is a second question, not the first in disguise — and
+a worse one.**  The transported verdict is "`R` decomposes over
+`φ⁻¹(F_u)`", a different base; the first draft of the section claimed
+the verdicts must agree and the bench falsified it within a minute.
+Since `im φ` has index 4, only about a quarter of `F_u` has preimages
+and the second question succeeds about `4^{1−m}` as often as the
+direct one, at the same cost.
+
+**Its unknowns are foldable, not folded.**  `[h]φ(P) = [λ − 1][h]P`
+holds on every point (verified), so a transported column is a known
+multiple of an existing one — but the driver's columns are orbits of
+points, and `[λ − 1]⁻¹[h]Q ≠ [h]Q`, so it would need to be taught to
+fold by `(λ − 1)` as it folds Frobenius by `λ^k`.  With that, the union
+`F_u ∪ φ⁻¹(F_u)` doubles the points at constant columns; the mixed
+decompositions that then become usable are the ceiling for a mixed
+oracle, which would need the degree-4 correspondence between `x(P)` and
+`x(φ(P))` — the chained cost §8 removed.
+
+**Composite `n` is degenerate for this whole thread.**  At `n = 15` the
+dimension-7 subspace containing `1` is `F₈ + F₃₂`; `F_u` is subfield
+points inside `E[h]` and occupies one projected column.  The `n = 15`
+oracle timings of §8 are real but their relations are unusable.  `K₀`'s
+only sound instance in range is `n = 23`.
+
+### Next step proposal
+
+Numbers pending in this session's bench (§11.3).  After that, the
+thread's open items are unchanged from §10.5 minus item 1, with one
+addition: any future oracle claim should be checked against
+`projected_column` counts before timing anything.

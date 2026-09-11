@@ -1295,7 +1295,29 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     let mut accepted: Vec<Vec<RawPoint>> = Vec::new();
     let mut seen_orbits = HashSet::new();
     let mut scanned_x = 0u64;
-    for x in 0..(1u64 << curve.n) {
+    let mask = if curve.n >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << curve.n) - 1
+    };
+    // Exhaustive affine order is fine on small fields; past ~32 bits a
+    // full `2^n` walk is impossible, so draw abscissae from a fixed LCG.
+    let exhaustive = curve.n <= 32;
+    let budget = if exhaustive {
+        1u64 << curve.n
+    } else {
+        1u64 << 24
+    };
+    let mut state = 0xD1B54A32D192ED03u64 ^ (curve.n as u64) ^ ((wanted as u64) << 17);
+    for i in 0..budget {
+        let x = if exhaustive {
+            i
+        } else {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            state & mask
+        };
         scanned_x += 1;
         for point in raw_points_with_x(curve, x) {
             let subgroup_point = if cofactor_two {
@@ -1324,7 +1346,12 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
             break;
         }
     }
-    assert_eq!(accepted.len(), wanted);
+    assert_eq!(
+        accepted.len(),
+        wanted,
+        "failed to collect {wanted} orbits at n={} after {scanned_x} abscissae",
+        curve.n
+    );
     accepted.sort_by_key(|orbit| raw_compact_key(orbit[0]));
     let mut points = Vec::new();
     let mut point_labels = Vec::new();
@@ -1630,7 +1657,7 @@ fn main() {
         .unwrap_or(0);
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41));
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
 
@@ -2245,6 +2272,14 @@ fn main() {
         } else if rank_before == columns + 1 {
             dimension_bound_rank_crosschecks += 1;
             columns + 1
+        } else if columns > 64
+            || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1")
+        {
+            // Full dense GE after every accepted row is O(#rows · K³) and
+            // dominates past ~64 columns (n=53 balanced bases). Trust the
+            // incremental echelon; optional end-of-run dense check remains
+            // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
+            rank_after
         } else {
             dense_rank_recomputations += 1;
             dense_rank(&rows, columns + 1, modulus)

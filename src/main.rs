@@ -306,6 +306,138 @@ enum CryptanalysisOp {
         #[arg(long, default_value = "all")]
         target: String,
     },
+    /// **Collaborative (peer-to-peer) Pollard rho** — divide one
+    /// ECDLP among many machines with self-verifying distinguished-
+    /// point check-ins.  See `docs/POLLARD_COLLAB_DESIGN.md`.
+    RhoCollab {
+        #[command(subcommand)]
+        op: RhoCollabOp,
+    },
+}
+
+#[derive(Subcommand)]
+enum RhoCollabOp {
+    /// Write a job document that every participant shares.
+    Init {
+        /// Built-in curve: `demo-small`, `demo-mid`, `demo-32`,
+        /// `demo-40`, `secp256k1`.
+        #[arg(long, default_value = "demo-32")]
+        curve: String,
+        /// Plant a secret (hex): the target becomes `secret·P`.
+        #[arg(long)]
+        secret: Option<String>,
+        /// Target point as `x:y` (hex).  Required unless `--secret`.
+        #[arg(long)]
+        target: Option<String>,
+        /// Job label (part of the job id).
+        #[arg(long, default_value = "collab")]
+        name: String,
+        /// Distinguished-point bits; default ≈ ¼·log₂ n.
+        #[arg(long)]
+        dp_bits: Option<u8>,
+        /// Number of r-adding branches.
+        #[arg(long, default_value_t = 32)]
+        branches: u32,
+        /// Use the negation map (x-only DP keys, ≈√2 faster).
+        #[arg(long)]
+        negation: bool,
+        /// Walkers per work unit.
+        #[arg(long, default_value_t = 256)]
+        unit_size: u64,
+        /// Seed mixed into every derivation (re-run with a new one).
+        #[arg(long, default_value_t = 0)]
+        seed: u64,
+        /// Where to write the job document.
+        #[arg(long, default_value = "job.json")]
+        out: std::path::PathBuf,
+        /// Also write it as `<mailbox>/job.json`.
+        #[arg(long)]
+        mailbox: Option<std::path::PathBuf>,
+    },
+    /// Walk units, check in, and exchange check-ins with peers.
+    Work {
+        /// Job document (default: `<mailbox>/job.json`).
+        #[arg(long)]
+        job: Option<std::path::PathBuf>,
+        /// This node's name; lanes are `<node>.<n>`.
+        #[arg(long, default_value = "node")]
+        node: String,
+        /// Worker lanes (threads).
+        #[arg(long, default_value_t = 1)]
+        threads: usize,
+        /// Shared directory transport.
+        #[arg(long)]
+        mailbox: Option<std::path::PathBuf>,
+        /// TCP address to listen on, e.g. `0.0.0.0:7000`.
+        #[arg(long)]
+        listen: Option<String>,
+        /// TCP peers to gossip with (repeatable).
+        #[arg(long = "peer")]
+        peers: Vec<String>,
+        /// Walkers per check-in.
+        #[arg(long, default_value_t = 64)]
+        checkin_every: u64,
+        /// Seconds a silent claim stays live before others take it over.
+        #[arg(long, default_value_t = 120)]
+        lease_secs: u64,
+        /// Seconds between mailbox/peer syncs and status lines.
+        #[arg(long, default_value_t = 5)]
+        sync_secs: u64,
+        /// Stop after this many seconds (0 = until solved).
+        #[arg(long, default_value_t = 0)]
+        max_seconds: u64,
+        /// Stop each lane after this many walkers (0 = until solved).
+        #[arg(long, default_value_t = 0)]
+        max_walkers: u64,
+        /// A cairn node (`http://host:port`, running `cairn serve
+        /// --queue`).  Every distinguished point is committed and revealed
+        /// as a claim on `--objective`, and the objective's log is merged
+        /// back as the shared DP table.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        /// The cairn piecework objective id the points are claims on.
+        #[arg(long)]
+        objective: Option<String>,
+        /// Nickname to submit under (default: the node name).  Ignored
+        /// when `--identity` is given.
+        #[arg(long)]
+        submitter: Option<String>,
+        /// A cairn identity file (`cairn identity --out FILE`): submit
+        /// under its Ed25519 key and sign every record.
+        #[arg(long)]
+        identity: Option<std::path::PathBuf>,
+        /// The cairn objective that pays for `k` itself.  Once the search
+        /// solves, `{"k": …}` is committed there and revealed next epoch.
+        #[arg(long)]
+        answer_objective: Option<String>,
+        /// The cairn node's epoch length in seconds (its
+        /// `CAIRN_EPOCH_SECONDS`; 600 unless the operator changed it).
+        #[arg(long, default_value_t = 600)]
+        cairn_epoch_secs: u64,
+        /// Where pending commitments are kept between runs (default:
+        /// `<node>.cairn.json` next to the job).
+        #[arg(long)]
+        cairn_state: Option<std::path::PathBuf>,
+    },
+    /// Show merged progress from a mailbox, peers, and/or a cairn log.
+    Status {
+        #[arg(long)]
+        job: Option<std::path::PathBuf>,
+        #[arg(long)]
+        mailbox: Option<std::path::PathBuf>,
+        #[arg(long = "peer")]
+        peers: Vec<String>,
+        /// Read the objective's accepted points from this cairn node.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        #[arg(long)]
+        objective: Option<String>,
+        /// Emit JSON instead of text.
+        #[arg(long)]
+        json: bool,
+        #[arg(long, default_value_t = 120)]
+        lease_secs: u64,
+    },
 }
 
 #[derive(Subcommand)]
@@ -401,6 +533,451 @@ fn cmd_cryptopals(arg: &str) {
     }
     if any_fail {
         std::process::exit(1);
+    }
+}
+
+// ── Collaborative rho ────────────────────────────────────────────────────────
+
+fn cmd_rho_collab(op: RhoCollabOp) {
+    use crypto_lib::cryptanalysis::pollard_collab::cairn::{
+        wall_clock, CairnConfig, CairnTransport, Submitter,
+    };
+    use crypto_lib::cryptanalysis::pollard_collab::{
+        demo_curve, run_lane, sync_with_peer, JobSpec, LaneOptions, Mailbox, PeerServer,
+        SharedState, DEMO_CURVES,
+    };
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::{Arc, Mutex};
+    use std::time::{Duration, Instant};
+
+    fn die(msg: impl std::fmt::Display) -> ! {
+        eprintln!("error: {msg}");
+        std::process::exit(1);
+    }
+    fn parse_hex(s: &str) -> BigUint {
+        BigUint::parse_bytes(s.trim().trim_start_matches("0x").as_bytes(), 16)
+            .unwrap_or_else(|| die(format!("bad hex `{s}`")))
+    }
+    fn load_spec(job: &Option<std::path::PathBuf>, mailbox: &Option<std::path::PathBuf>) -> JobSpec {
+        match (job, mailbox) {
+            (Some(p), _) => {
+                let s = std::fs::read_to_string(p).unwrap_or_else(|e| die(format!("{}: {e}", p.display())));
+                JobSpec::from_json(&s).unwrap_or_else(|e| die(e))
+            }
+            (None, Some(d)) => Mailbox::read_job(d).unwrap_or_else(|e| die(e)),
+            (None, None) => die("pass --job <file> or --mailbox <dir>"),
+        }
+    }
+
+    /// Open the cairn transport the flags describe, if `--cairn` was given.
+    #[allow(clippy::too_many_arguments)]
+    fn open_cairn(
+        url: &Option<String>,
+        objective: &Option<String>,
+        submitter: &Option<String>,
+        identity: &Option<std::path::PathBuf>,
+        answer_objective: &Option<String>,
+        epoch_secs: u64,
+        state_path: Option<std::path::PathBuf>,
+        default_name: &str,
+    ) -> Option<CairnTransport> {
+        let url = url.as_ref()?;
+        let objective_id = objective
+            .clone()
+            .unwrap_or_else(|| die("--cairn needs --objective <id>"));
+        let who = match identity {
+            Some(path) => Submitter::from_identity_file(path).unwrap_or_else(|e| die(e)),
+            None => Submitter::Nickname(submitter.clone().unwrap_or_else(|| default_name.to_string())),
+        };
+        let transport = CairnTransport::open(CairnConfig {
+            url: url.trim_end_matches('/').to_string(),
+            objective_id: objective_id.clone(),
+            submitter: who,
+            answer_objective: answer_objective.clone(),
+            epoch_secs,
+            state_path,
+            clock: wall_clock(),
+        })
+        .unwrap_or_else(|e| die(e));
+        let short = if objective_id.len() > 23 { format!("{}…", &objective_id[..23]) } else { objective_id };
+        eprintln!(
+            "[cairn] {url} · objective {short} · submitting as {}{}",
+            transport.submitter(),
+            if transport.pending() > 0 {
+                format!(" · {} commitment(s) pending from a previous run", transport.pending())
+            } else {
+                String::new()
+            }
+        );
+        Some(transport)
+    }
+
+    match op {
+        RhoCollabOp::Init {
+            curve,
+            secret,
+            target,
+            name,
+            dp_bits,
+            branches,
+            negation,
+            unit_size,
+            seed,
+            out,
+            mailbox,
+        } => {
+            let params = demo_curve(&curve)
+                .unwrap_or_else(|| die(format!("unknown curve `{curve}`; try {}", DEMO_CURVES.join(", "))));
+            let q = match (&secret, &target) {
+                (Some(s), _) => {
+                    let x = parse_hex(s) % &params.n;
+                    params.generator().scalar_mul(&x, &params.a_fe())
+                }
+                (None, Some(t)) => {
+                    let (xs, ys) = t
+                        .split_once(':')
+                        .unwrap_or_else(|| die("--target must be `x:y` hex"));
+                    Point::Affine {
+                        x: params.fe(parse_hex(xs)),
+                        y: params.fe(parse_hex(ys)),
+                    }
+                }
+                (None, None) => die("pass --secret <hex> (planted demo) or --target x:y"),
+            };
+            let mut spec = JobSpec::new(&params, &q, &name, seed).unwrap_or_else(|e| die(e));
+            if let Some(b) = dp_bits {
+                spec.dp_bits = b;
+            }
+            spec.num_branches = branches;
+            spec.negation_map = negation;
+            spec.unit_size = unit_size;
+            let ctx = spec.build().unwrap_or_else(|e| die(e));
+            std::fs::write(&out, spec.to_json()).unwrap_or_else(|e| die(format!("{}: {e}", out.display())));
+            if let Some(d) = &mailbox {
+                let mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
+                mb.write_job(&spec).unwrap_or_else(|e| die(e));
+            }
+            println!("job id:          {}", ctx.job_id);
+            println!("curve:           {} ({} bits)", params.name, params.n.bits());
+            println!("dp_bits:         {}  (mean trail 2^{})", spec.dp_bits, spec.dp_bits);
+            println!("unit size:       {} walkers", spec.unit_size);
+            println!("expected steps:  {:.3e}", ctx.expected_steps());
+            println!("expected DPs:    {:.3e}", ctx.expected_dps());
+            println!("written:         {}", out.display());
+            if let Some(d) = mailbox {
+                println!("mailbox:         {}", d.join("job.json").display());
+            }
+        }
+
+        RhoCollabOp::Work {
+            job,
+            node,
+            threads,
+            mailbox,
+            listen,
+            peers,
+            checkin_every,
+            lease_secs,
+            sync_secs,
+            max_seconds,
+            max_walkers,
+            cairn,
+            objective,
+            submitter,
+            identity,
+            answer_objective,
+            cairn_epoch_secs,
+            cairn_state,
+        } => {
+            let spec = load_spec(&job, &mailbox);
+            let ctx = Arc::new(spec.build().unwrap_or_else(|e| die(e)));
+            let state = Arc::new(Mutex::new(SharedState::new(&ctx)));
+            let cairn_state = cairn_state.or_else(|| {
+                cairn.as_ref().map(|_| {
+                    let dir = job
+                        .as_ref()
+                        .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+                        .or_else(|| mailbox.clone())
+                        .unwrap_or_else(|| std::path::PathBuf::from("."));
+                    dir.join(format!("{node}.cairn.json"))
+                })
+            });
+            let cairn = open_cairn(
+                &cairn,
+                &objective,
+                &submitter,
+                &identity,
+                &answer_objective,
+                cairn_epoch_secs,
+                cairn_state,
+                &node,
+            )
+            .map(|t| Arc::new(Mutex::new(t)));
+            if let Some(c) = &cairn {
+                let mut st = state.lock().unwrap();
+                match c.lock().unwrap().sync(&ctx, &mut st) {
+                    Ok(r) => eprintln!(
+                        "[cairn] log read: {} points merged, {} rejected, {} revealed",
+                        r.accepted_dps, r.rejected_dps, r.revealed
+                    ),
+                    Err(e) => eprintln!("[cairn] first sync failed: {e}"),
+                }
+            }
+            let mbox = mailbox.as_ref().map(|d| {
+                let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
+                let (n, _) = mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
+                eprintln!("[collab] mailbox {}: merged {n} check-ins", d.display());
+                Arc::new(Mutex::new(mb))
+            });
+            let _server = listen.as_ref().map(|addr| {
+                let s = PeerServer::start(addr, Arc::clone(&ctx), Arc::clone(&state))
+                    .unwrap_or_else(|e| die(format!("listen {addr}: {e}")));
+                eprintln!("[collab] listening on {}", s.local_addr());
+                s
+            });
+            let do_sync = |verbose: bool| {
+                for p in &peers {
+                    match sync_with_peer(p.as_str(), &ctx, &state) {
+                        Ok(r) => {
+                            if verbose && (r.received > 0 || r.sent > 0) {
+                                eprintln!(
+                                    "[collab] {p}: received {} sent {} rejected {}/{}",
+                                    r.received, r.sent, r.rejected_here, r.rejected_there
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            if verbose {
+                                eprintln!("[collab] {p}: sync failed: {e}");
+                            }
+                        }
+                    }
+                }
+                if let Some(mb) = &mbox {
+                    let mut mb = mb.lock().unwrap();
+                    let mut st = state.lock().unwrap();
+                    if let Ok((n, rej)) = mb.sync(&ctx, &mut st) {
+                        if verbose && (n > 0 || rej > 0) {
+                            eprintln!("[collab] mailbox: +{n} check-ins, {rej} DPs rejected");
+                        }
+                    }
+                    // Bridge: anything learned over TCP goes into the
+                    // directory too.
+                    if let Err(e) = mb.publish_missing(&st) {
+                        eprintln!("[collab] mailbox relay failed: {e}");
+                    }
+                }
+                if let Some(c) = &cairn {
+                    let mut st = state.lock().unwrap();
+                    let mut c = c.lock().unwrap();
+                    match c.sync(&ctx, &mut st) {
+                        Ok(r) => {
+                            if verbose && (r.accepted_dps > 0 || r.revealed > 0 || r.refused > 0) {
+                                eprintln!(
+                                    "[cairn] +{} points from the log ({} rejected), {} revealed, {} refused",
+                                    r.accepted_dps, r.rejected_dps, r.revealed, r.refused
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            if verbose {
+                                eprintln!("[cairn] sync failed: {e}");
+                            }
+                        }
+                    }
+                }
+            };
+            do_sync(true);
+
+            eprintln!(
+                "[collab] job {} · node {node} · {threads} lane(s) · expected {:.3e} steps",
+                &ctx.job_id[..16],
+                ctx.expected_steps()
+            );
+            let stop = Arc::new(AtomicBool::new(false));
+            let start = Instant::now();
+            let handles: Vec<_> = (0..threads.max(1))
+                .map(|lane| {
+                    let ctx = Arc::clone(&ctx);
+                    let state = Arc::clone(&state);
+                    let stop = Arc::clone(&stop);
+                    let mbox = mbox.clone();
+                    let cairn = cairn.clone();
+                    let opts = LaneOptions {
+                        checkin_every,
+                        lease_secs,
+                        max_walkers,
+                        ..LaneOptions::new(&format!("{node}.{lane}"))
+                    };
+                    std::thread::spawn(move || {
+                        run_lane(
+                            &ctx,
+                            &state,
+                            &opts,
+                            &mut |ci| {
+                                if let Some(mb) = &mbox {
+                                    if let Err(e) = mb.lock().unwrap().publish(ci) {
+                                        eprintln!("[collab] publish failed: {e}");
+                                    }
+                                }
+                                if let Some(c) = &cairn {
+                                    match c.lock().unwrap().publish(&ctx, ci) {
+                                        Ok(r) if r.committed > 0 => eprintln!(
+                                            "[cairn] committed {} point(s); reveal follows next epoch",
+                                            r.committed
+                                        ),
+                                        Ok(_) => {}
+                                        Err(e) => eprintln!("[cairn] commit failed: {e}"),
+                                    }
+                                }
+                            },
+                            &|| stop.load(Ordering::Relaxed),
+                        )
+                    })
+                })
+                .collect();
+
+            let tick = Duration::from_secs(sync_secs.max(1));
+            let mut last_sync = Instant::now();
+            loop {
+                std::thread::sleep(Duration::from_millis(250));
+                let lanes_done = handles.iter().all(|h| h.is_finished());
+                let solved = state.lock().unwrap().solution.is_some();
+                let timed_out = max_seconds > 0 && start.elapsed().as_secs() >= max_seconds;
+                let due = last_sync.elapsed() >= tick;
+                if due || solved || lanes_done || timed_out {
+                    last_sync = Instant::now();
+                    do_sync(true);
+                    let st = state.lock().unwrap();
+                    let p = st.progress(&ctx, crypto_lib::cryptanalysis::pollard_collab::state::now_secs(), lease_secs);
+                    eprintln!(
+                        "[collab] {:>6.1}s  steps {:>10}  ({:>5.1}% of expected)  DPs {:>7}  units done {} active {}  peers {}  rejected {}",
+                        start.elapsed().as_secs_f64(),
+                        p.steps,
+                        100.0 * p.fraction,
+                        p.dps_stored,
+                        p.units_completed,
+                        p.units_active,
+                        p.peers,
+                        p.rejected_dps,
+                    );
+                    if let Some(c) = &cairn {
+                        let c = c.lock().unwrap();
+                        let s = c.stats();
+                        eprintln!(
+                            "[cairn]  committed {}  revealed {}  pending {}  refused {}  paid {} unit(s) = {}  rejected {}  log points {}",
+                            s.committed, s.revealed, c.pending(), s.refused, s.paid_units, s.paid_total, s.rejected, s.log_dps,
+                        );
+                    }
+                }
+                if solved || lanes_done || timed_out {
+                    break;
+                }
+            }
+            stop.store(true, Ordering::Relaxed);
+            for h in handles {
+                let _ = h.join();
+            }
+            // Final exchange so peers learn the outcome.
+            do_sync(false);
+            let st = state.lock().unwrap();
+            if let Some(c) = &cairn {
+                let c = c.lock().unwrap();
+                if c.pending() > 0 {
+                    eprintln!(
+                        "[cairn] {} commitment(s) still wait for the epoch to turn; run `work` again \
+                         (same node name and state file) to reveal them",
+                        c.pending()
+                    );
+                }
+            }
+            match &st.solution {
+                Some(x) => {
+                    println!("solution: {}", x.to_str_radix(16));
+                    println!("verified: {}", ctx.g.scalar_mul(x, &ctx.a) == ctx.q);
+                }
+                None => {
+                    println!("solution: not found (stopped after {:.1}s)", start.elapsed().as_secs_f64());
+                    std::process::exit(2);
+                }
+            }
+        }
+
+        RhoCollabOp::Status {
+            job,
+            mailbox,
+            peers,
+            cairn,
+            objective,
+            json,
+            lease_secs,
+        } => {
+            let spec = load_spec(&job, &mailbox);
+            let ctx = spec.build().unwrap_or_else(|e| die(e));
+            let state = Mutex::new(SharedState::new(&ctx));
+            if let Some(d) = &mailbox {
+                let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
+                mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
+            }
+            if let Some(mut c) = open_cairn(&cairn, &objective, &None, &None, &None, 600, None, "status") {
+                match c.sync(&ctx, &mut state.lock().unwrap()) {
+                    Ok(r) => eprintln!(
+                        "[cairn] {} accepted point(s) in the log, {} rejected here",
+                        r.accepted_dps, r.rejected_dps
+                    ),
+                    Err(e) => eprintln!("[cairn] {e}"),
+                }
+            }
+            for p in &peers {
+                if let Err(e) = sync_with_peer(p.as_str(), &ctx, &state) {
+                    eprintln!("[collab] {p}: {e}");
+                }
+            }
+            let st = state.lock().unwrap();
+            let now = crypto_lib::cryptanalysis::pollard_collab::state::now_secs();
+            let p = st.progress(&ctx, now, lease_secs);
+            if json {
+                println!("{}", serde_json::to_string_pretty(&p).unwrap());
+                return;
+            }
+            println!("job id:        {}", ctx.job_id);
+            println!("peers seen:    {}   check-ins: {}", p.peers, p.checkins);
+            println!(
+                "steps:         {}   ({:.1}% of expected {:.3e})",
+                p.steps,
+                100.0 * p.fraction,
+                p.expected_steps
+            );
+            println!("DPs stored:    {}   (expected ≈ {:.3e}; {} rejected)", p.dps_stored, p.expected_dps, p.rejected_dps);
+            println!("units:         {} completed, {} active", p.units_completed, p.units_active);
+            match &p.solution {
+                Some(x) => println!("solution:      {x}"),
+                None => println!("solution:      not yet"),
+            }
+            let units = st.units(now, lease_secs);
+            if !units.is_empty() {
+                println!();
+                println!("{:>8} {:>10} {:>10} {:>6} {:>5}  owner", "unit", "walkers", "steps", "dps", "dead");
+                for u in units.iter().take(40) {
+                    println!(
+                        "{:>8} {:>10} {:>10} {:>6} {:>5}  {}",
+                        u.unit,
+                        format!("{}/{}", u.walkers_done, ctx.spec.unit_size),
+                        u.steps,
+                        u.dps,
+                        u.dead_trails,
+                        if u.completed {
+                            "done".to_string()
+                        } else {
+                            u.owner.clone().unwrap_or_else(|| "(lease expired)".into())
+                        }
+                    );
+                }
+                if units.len() > 40 {
+                    println!("… {} more units", units.len() - 40);
+                }
+            }
+        }
     }
 }
 
@@ -784,6 +1361,7 @@ fn cmd_cryptanalysis(op: CryptanalysisOp) {
             let report = run_full_bench(1);
             println!("{}", report);
         }
+        CryptanalysisOp::RhoCollab { op } => cmd_rho_collab(op),
         CryptanalysisOp::HashAuto { hash } => {
             use crypto_lib::cryptanalysis::hash_attacks::auto_hash_attack;
             match auto_hash_attack(&hash) {

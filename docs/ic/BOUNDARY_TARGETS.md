@@ -117,13 +117,13 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 oracles (enumerate / Groebner / SAT) + exact-support collectors
 (`koblitz_index_calculus`, `koblitz_rank_fixture`, SAT factor-base review).
 
-Code guard: `MAX_N = 41` in `koblitz_index_calculus`.
+Code guard: `MAX_N = 63` in `koblitz_index_calculus` (u64 field packing).
 
 Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Exact / optimized bases at `n = 19`; minimum base **feasible** at `n = 41` (`N41_MINIMUM_BASE_FEASIBLE`); Frobenius+negation orbits; construction RSS/bytes expected in evidence | Balanced base at `n = 53` (materialized **or** implicit + storage lower bound) under crossover-task resource gate | Orbit closure verified; construction RSS + retained bytes logged | `research/sat_factor_base_review_20260908/` n19 + n41 |
+| `factor_base` | Exact / optimized bases at `n = 19`; curve+generator **construction at `n = 53`** (past prior `MAX_N=41`); minimum base feasible at `n = 41`; Frobenius+negation orbits | Balanced base at `n = 53` under crossover-task resource gate with RSS + retained bytes; then vs_rho costs at that base | Orbit closure verified; construction RSS + retained bytes logged | `constructs_past_prior_ceiling_n53`; n53 autolab probe |
 | `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `RESEARCH_KOBLITZ_SCALING_TARGET.md`; `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` |
 | `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
 | `rank` | Full rank on `n = 37` fixtures (1024-target amortized series); `n = 41` fixture reaches rank; relation-matrix LA (not GB FFD) | Single-process rank to `K+1` at `n = 41` without summary-only elision; report dims, surplus, LA charged/wall | Independent matrix replay **or** preserved row transcript | n37 / n41 autolab artifacts |

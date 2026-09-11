@@ -517,6 +517,7 @@ def draft_vs_rho_claim(
     timing_class = beat["timing_class_goal"]
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
+    producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
     ic_cost = (
         float(direct_obs["whole_process_wall_ms"])
         if timing_class == "whole_process_wall"
@@ -540,7 +541,11 @@ def draft_vs_rho_claim(
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
         "all_stages_charged_same_series": True,
-        "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION",
+        "verdict": (
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
         "claim_boundary": (
             "Public synthetic Koblitz fixture comparison only. Not key recovery, "
             "not asymptotic sub-rho, not an imported-point attack, and not a "
@@ -643,7 +648,11 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         write_json(run / "state.json", state)
 
         env = os.environ.copy()
+        # Default to incremental crosscheck for small rungs; beats may override
+        # (n=53 dense recompute-after-every-relation is hour-class).
         env.setdefault("KIC_INCREMENTAL_RANK_CROSSCHECK", "1")
+        for key, value in (beat.get("env") or {}).items():
+            env[str(key)] = str(value)
         direct_seed = seed_for(beat_id, "direct", 0)
         rho_seed = seed_for(beat_id, "rho", 0)
         direct_cmd = [

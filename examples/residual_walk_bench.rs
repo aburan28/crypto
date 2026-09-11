@@ -16,7 +16,19 @@
 //! cargo run --release --example residual_walk_bench -- --bits 24 --fb 256 --trials 3
 //! cargo run --release --example residual_walk_bench -- --panel --json experiments/20_residual_walk_panel.json
 //! cargo run --release --example residual_walk_bench -- --panel --quick
+//! cargo run --release --example residual_walk_bench -- --baseline --json experiments/20_residual_walk_baseline.json
 //! ```
+//!
+//! `--seeded` and `--structure` are the round-3 protocols aimed at the
+//! count factor κ (signed-pair seeding; `j = 0` automorphism folding);
+//! `--j0`, `--aut` and `--seed-pairs` expose the same knobs for single
+//! runs.  `--baseline --tuned` runs the same protocol with the generic levers on
+//! (negation map, difference table, 512-step segments, no restart after
+//! a collision on the mutation walk) for the exhaustive-storage rows.  `--baseline` is the fixed optimisation protocol (`n ≈ 2^24` and
+//! `2^28`, `B = 256`, `k = 3`, seeds 1–3, every strategy, plus `C1` and
+//! `R` with 8 distinguished-point bits; about a minute).  Score it, or
+//! compare it against the frozen baseline, with
+//! `scripts/residual_walk_scoreboard.py`.
 //!
 //! Every run verifies each relation by scalar multiplication and scores
 //! the recovered logarithm against the planted one.
@@ -25,8 +37,8 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::residual_walk::{
-    generate_instance, mitm_four_decomposition, run_strategy, FactorBase, Instance, MitmReport,
-    Strategy, StrategyReport, WalkOptions,
+    generate_instance, generate_j0_instance, mitm_four_decomposition, run_strategy, FactorBase,
+    Instance, MitmReport, Strategy, StrategyReport, WalkOptions,
 };
 use serde::Serialize;
 
@@ -102,6 +114,81 @@ fn setup(bits: u32, fb: usize, seed: u64) -> (Instance, FactorBase) {
     let inst = generate_instance(bits, seed);
     let fb = FactorBase::build(&inst.curve, fb);
     (inst, fb)
+}
+
+fn setup_j0(bits: u32, fb: usize, seed: u64) -> (Instance, FactorBase) {
+    let inst = generate_j0_instance(bits, seed);
+    let fb = FactorBase::build_orbit_reps(&inst, fb);
+    (inst, fb)
+}
+
+/// Round-3 protocols aimed at the count factor κ.
+///
+/// `seeded`: the baseline instances with every generic lever plus the
+/// signed-pair seed table, mutation walk only.
+/// `structure`: `j = 0` instances with an orbit-representative factor
+/// base of 256 unknowns; B, C1 and R with every generic lever, once with
+/// negation folding only (control) and once with the 6-fold automorphism
+/// folding.
+fn kappa_protocol(structure: bool) -> Vec<StrategyReport> {
+    let mut out = Vec::new();
+    header();
+    for bits in [24u32, 28] {
+        for seed in 1..=3u64 {
+            let tuned = WalkOptions {
+                k: 3,
+                max_ops: 1 << 34,
+                seed,
+                negation_map: true,
+                diff_table: true,
+                segment_len: 512,
+                continue_after_collision: true,
+                ..WalkOptions::default()
+            };
+            if structure {
+                let (inst, fb) = setup_j0(bits, 256, seed);
+                println!(
+                    "-- j=0: n = {} (2^{:.1}), B = {} orbits, seed {}",
+                    inst.curve.n,
+                    (inst.curve.n as f64).log2(),
+                    fb.len(),
+                    seed
+                );
+                let trio = [
+                    Strategy::LocalMutationWalk,
+                    Strategy::RAddingResidualWalk,
+                    Strategy::PlainRho,
+                ];
+                run_all(&inst, &fb, &trio, &tuned, &mut out);
+                let folded = WalkOptions {
+                    use_automorphism: true,
+                    ..tuned.clone()
+                };
+                run_all(&inst, &fb, &trio, &folded, &mut out);
+            } else {
+                let (inst, fb) = setup(bits, 256, seed);
+                println!(
+                    "-- n = {} (2^{:.1}), B = {}, seed {}",
+                    inst.curve.n,
+                    (inst.curve.n as f64).log2(),
+                    fb.len(),
+                    seed
+                );
+                let seeded = WalkOptions {
+                    seed_pairs: true,
+                    ..tuned.clone()
+                };
+                run_all(
+                    &inst,
+                    &fb,
+                    &[Strategy::LocalMutationWalk],
+                    &seeded,
+                    &mut out,
+                );
+            }
+        }
+    }
+    out
 }
 
 fn run_all(
@@ -263,6 +350,53 @@ fn panel(quick: bool) -> Panel {
     p
 }
 
+/// The fixed optimisation protocol: two sizes, one factor base, three
+/// seeds, every strategy, plus the distinguished-point variants of the
+/// two one-op-per-step walks.  Deterministic for a given build.
+fn baseline(tuned: bool) -> Vec<StrategyReport> {
+    let mut out = Vec::new();
+    header();
+    for bits in [24u32, 28] {
+        for seed in 1..=3u64 {
+            let (inst, fb) = setup(bits, 256, seed);
+            println!(
+                "-- n = {} (2^{:.1}), B = {}, seed {}",
+                inst.curve.n,
+                (inst.curve.n as f64).log2(),
+                fb.len(),
+                seed
+            );
+            let opts = WalkOptions {
+                k: 3,
+                max_ops: 1 << 34,
+                seed,
+                negation_map: tuned,
+                diff_table: tuned,
+                segment_len: if tuned { 512 } else { 0 },
+                continue_after_collision: tuned,
+                ..WalkOptions::default()
+            };
+            run_all(&inst, &fb, &Strategy::ALL, &opts, &mut out);
+            // Distinguished points need the walk itself to propagate a
+            // collision, so the negation map (table-only) is off here.
+            let dp = WalkOptions {
+                dp_bits: 8,
+                negation_map: false,
+                segment_len: 0,
+                ..opts.clone()
+            };
+            run_all(
+                &inst,
+                &fb,
+                &[Strategy::RAddingResidualWalk, Strategy::PlainRho],
+                &dp,
+                &mut out,
+            );
+        }
+    }
+    out
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut bits = 24u32;
@@ -275,6 +409,17 @@ fn main() {
     let mut strategies: Vec<Strategy> = Strategy::ALL.to_vec();
     let mut json: Option<String> = None;
     let mut do_panel = false;
+    let mut do_baseline = false;
+    let mut tuned = false;
+    let mut do_seeded = false;
+    let mut do_structure = false;
+    let mut j0 = false;
+    let mut aut = false;
+    let mut seed_pairs = false;
+    let mut negation = false;
+    let mut diff_table = false;
+    let mut segment = 0u64;
+    let mut continue_walk = false;
     let mut quick = false;
     let mut i = 0;
     let value = |i: &mut usize, args: &[String]| -> String {
@@ -306,11 +451,24 @@ fn main() {
             }
             "--json" => json = Some(value(&mut i, &args)),
             "--panel" => do_panel = true,
+            "--baseline" => do_baseline = true,
+            "--tuned" => tuned = true,
+            "--negation" => negation = true,
+            "--diff-table" => diff_table = true,
+            "--segment" => segment = value(&mut i, &args).parse().expect("--segment"),
+            "--continue" => continue_walk = true,
+            "--j0" => j0 = true,
+            "--aut" => aut = true,
+            "--seed-pairs" => seed_pairs = true,
+            "--seeded" => do_seeded = true,
+            "--structure" => do_structure = true,
             "--quick" => quick = true,
             "--help" | "-h" => {
                 println!(
                     "usage: residual_walk_bench [--bits N] [--fb B] [--k K] [--trials T] [--seed S] \
-                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--json FILE] [--panel [--quick]]"
+                     [--dp BITS] [--budget OPS] [--strategies A,B,C1,C2,R] [--negation] [--diff-table] [--segment N] [--continue] [--j0] [--aut] [--seed-pairs] [--json FILE] \
+                     [--seeded] [--structure] \
+                     [--panel [--quick]] [--baseline [--tuned]]"
                 );
                 return;
             }
@@ -320,6 +478,24 @@ fn main() {
             }
         }
         i += 1;
+    }
+
+    if do_seeded || do_structure {
+        let reports = kappa_protocol(do_structure);
+        if let Some(path) = json {
+            fs::write(&path, serde_json::to_string_pretty(&reports).unwrap()).expect("write json");
+            println!("\nwrote {path}");
+        }
+        return;
+    }
+
+    if do_baseline {
+        let reports = baseline(tuned);
+        if let Some(path) = json {
+            fs::write(&path, serde_json::to_string_pretty(&reports).unwrap()).expect("write json");
+            println!("\nwrote {path}");
+        }
+        return;
     }
 
     if do_panel {
@@ -334,7 +510,11 @@ fn main() {
     let mut reports = Vec::new();
     header();
     for t in 0..trials {
-        let (inst, fb) = setup(bits, fbsize, seed + t);
+        let (inst, fb) = if j0 {
+            setup_j0(bits, fbsize, seed + t)
+        } else {
+            setup(bits, fbsize, seed + t)
+        };
         println!(
             "-- p = {}, n = {} (2^{:.1}), B = {}, d = {}",
             inst.curve.p,
@@ -348,6 +528,12 @@ fn main() {
             max_ops: budget,
             dp_bits: dp,
             seed: seed + t,
+            negation_map: negation,
+            diff_table,
+            segment_len: segment,
+            continue_after_collision: continue_walk,
+            use_automorphism: aut,
+            seed_pairs,
             ..WalkOptions::default()
         };
         for &s in &strategies {

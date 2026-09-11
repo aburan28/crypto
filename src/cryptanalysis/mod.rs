@@ -106,9 +106,11 @@ pub mod boolean;
 pub mod boomerang;
 pub mod canonical_lift;
 pub mod cga_hnc;
+pub mod cheon_attack;
 pub mod cipher_registry;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
+pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod descent_algebraic;
 pub mod descent_expansion;
@@ -121,9 +123,9 @@ pub mod ec_trapdoor;
 pub mod ecdlp_variants;
 pub mod ecdsa_audit;
 pub mod ecm;
-pub mod eds_residue;
 pub mod eds_mov;
 pub mod eds_net;
+pub mod eds_residue;
 pub mod eds_tate;
 pub mod ffd_harness;
 pub mod fght_snfs;
@@ -133,11 +135,15 @@ pub mod groebner_f4;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
+pub mod invalid_curve_attack;
 pub mod j0_twists;
 pub mod koblitz_bench;
+pub mod koblitz_factor_base_search;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
+pub mod koblitz_relation_solver;
+pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod mazur_tate_sigma;
@@ -146,10 +152,8 @@ pub mod md5_differential;
 pub mod md5_hashclash_ffi;
 pub mod ml_rho_walks;
 pub mod modular_polynomial;
-pub mod multi_key_hnp;
-pub mod cheon_attack;
-pub mod invalid_curve_attack;
 pub mod mov_attack;
+pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
 pub mod p256_attacks;
@@ -160,16 +164,17 @@ pub mod pc_degree_harness;
 pub mod petit_quisquater;
 pub mod pkm_criterion;
 pub mod pohlig_hellman;
+pub mod pollard_collab;
+pub mod pollard_rho;
 pub mod pq_descent;
 pub mod pq_groebner_f2;
 pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
-pub mod pollard_rho;
 pub mod preprocessing_rho;
-pub mod residual_walk;
 pub mod quantum_estimator;
 pub mod research_bench;
+pub mod residual_walk;
 pub mod sat;
 pub mod sbox;
 pub mod semaev_corpus;
@@ -178,10 +183,10 @@ pub mod semaev_higher;
 pub mod semaev_sat;
 pub mod sha1_differential;
 pub mod shor;
+pub mod signal_ratchet;
 pub mod signature_corpus;
 pub mod solinas_correlations;
 pub mod statistical;
-pub mod signal_ratchet;
 pub mod symmetrized_semaev;
 pub mod tls12_kdf;
 pub mod tls13_kdf;
@@ -214,33 +219,11 @@ pub use ec_index_calculus::{
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,
 };
-pub use koblitz_bench::{
-    bench_instance, ffd_summary, format_ffd_table, format_oracle_table, format_system_table,
-    max_m_within_budget, n_vars_for, profile_system, subspace_ladder, sweep_ffd, sweep_systems,
-    FfdSummary, InstanceBench, OracleRun, SystemProfile,
-};
-pub use koblitz_groebner::{
-    build_decomposition_system, first_fall_degree, macaulay_profile, matrix_f4_f2,
-    solve_boolean_system, solve_boolean_system_filtered, sym_semaev_s3, DecompositionSystem,
-    FieldStructure, MacaulayProfile, SolveOptions, SolveStats, SolverEngine, SymElement,
-};
-pub use koblitz_index_calculus::{
-    build_frobenius_factor_base, factor_x_n_minus_1, find_irreducible, frobenius_eigenvalue,
-    all_factors_of_x_n_minus_1, available_subspace_dimensions,
-    build_explicit_frobenius_orbit_factor_base, build_frobenius_factor_base_from_divisor,
-    build_frobenius_union_factor_base, cyclotomic_cosets, enumerate_decompose,
-    find_irreducible_sparse, groebner_decompose, invariant_subspace_basis,
-    is_irreducible_f2, sat_decompose, koblitz_index_calculus_dlp,
-    koblitz_index_calculus_dlp_with_factor_base,
-    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
-    koblitz_signed_frobenius_rho_with_progress, koblitz_speedup_model, linearised_kernel,
-    linearised_kernel_basis, order_of_2_mod_n,
-    point_key, points_with_x, saturate_factor_base_two_torsion, span_f2,
-    subspace_basis_for_divisor, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
-    KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, KoblitzIcReport, KoblitzRankRecord,
-    KoblitzRelation, KoblitzRelationAttemptDisposition, KoblitzRelationAttemptRecord,
-    KoblitzSignedRhoCharges, KoblitzSignedRhoEvent, KoblitzSignedRhoOptions,
-    KoblitzSignedRhoReport, KoblitzSpeedup, SatDecompositionOptions, SatDecompositionStats,
+pub use ecdlp_variants::{
+    bsgs_average_case, bsgs_interleaving, bsgs_interleaving_block, bsgs_interleaving_negation,
+    bsgs_negation, bsgs_textbook, demo_group_mid, demo_group_small, gaudry_schost,
+    gaudry_schost_montgomery, gaudry_schost_negation, grumpy_giants, grumpy_giants_block,
+    grumpy_giants_negation, DlpSolution, EcGroup, GaudrySchostOptions,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,
@@ -252,18 +235,40 @@ pub use j0_twists::{
     enumerate_twists, factorise_small, format_twist_table, max_prime_factor, naive_point_count,
     primitive_root, twist_coefficients, TwistInfo,
 };
+pub use koblitz_bench::{
+    bench_instance, ffd_summary, format_ffd_table, format_oracle_table, format_system_table,
+    max_m_within_budget, n_vars_for, profile_system, subspace_ladder, sweep_ffd, sweep_systems,
+    FfdSummary, InstanceBench, OracleRun, SystemProfile,
+};
+pub use koblitz_groebner::{
+    build_decomposition_system, first_fall_degree, macaulay_profile, matrix_f4_f2,
+    solve_boolean_system, solve_boolean_system_filtered, sym_semaev_s3, DecompositionSystem,
+    FieldStructure, MacaulayProfile, SolveOptions, SolveStats, SolverEngine, SymElement,
+};
+pub use koblitz_index_calculus::{
+    all_factors_of_x_n_minus_1, available_subspace_dimensions,
+    build_explicit_frobenius_orbit_factor_base, build_frobenius_factor_base,
+    build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
+    enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
+    frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
+    is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_factor_base,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    koblitz_signed_frobenius_rho_with_progress, koblitz_speedup_model, linearised_kernel,
+    linearised_kernel_basis, order_of_2_mod_n, pack_point, point_key, points_with_x,
+    restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
+    solve_factor_base_logs, span_f2, subspace_basis_for_divisor, DecompositionStrategy,
+    FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase, IndividualLogReport, KoblitzCurve,
+    KoblitzIcEvent, KoblitzIcOptions, KoblitzIcReport, KoblitzRankRecord, KoblitzRelation,
+    KoblitzRelationAttemptDisposition, KoblitzRelationAttemptRecord, KoblitzSignedRhoCharges,
+    KoblitzSignedRhoEvent, KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup,
+    LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+};
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{
     bounded_bsgs_binary, bounded_bsgs_prime, legacy_curve_attack_report,
     run_legacy_curve_attack_demos, BoundedDlpSolution, LegacyCurveAttackDemo,
 };
 pub use multi_key_hnp::{build_transcript, multi_key_hnp_recover_master, ChildKeySignature};
-pub use ecdlp_variants::{
-    bsgs_average_case, bsgs_interleaving, bsgs_interleaving_block, bsgs_interleaving_negation,
-    bsgs_negation, bsgs_textbook, demo_group_mid, demo_group_small, gaudry_schost,
-    gaudry_schost_montgomery, gaudry_schost_negation, grumpy_giants, grumpy_giants_block,
-    grumpy_giants_negation, DlpSolution, EcGroup, GaudrySchostOptions,
-};
 pub use pollard_rho::{
     pollard_rho_dlp, pollard_rho_dlp_zp, pollard_rho_dlp_zp_multi, pollard_rho_dp_dlp_zp,
     pollard_rho_dp_dlp_zp_multi, DpRhoOptions, RhoOptions, RhoSolution,
