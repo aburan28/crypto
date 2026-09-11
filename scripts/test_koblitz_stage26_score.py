@@ -22,6 +22,14 @@ CELLS = {
 
 
 class Stage26ScoreTests(unittest.TestCase):
+    def test_completion_gate_audit_preserves_open_gates(self) -> None:
+        value = score.completion_gate_audit()
+        self.assertEqual(value["2_same_instance_backend_matrix"]["status"], "partial")
+        self.assertIn("licensed Magma F4 execution on all 160 inputs", value["2_same_instance_backend_matrix"]["missing"])
+        self.assertEqual(value["5_unknown_scalar"]["status"], "finite_degree23_complete")
+        self.assertEqual(value["7_external_review"]["status"], "missing")
+        self.assertIn("not a Koblitz index-calculus SOTA", value["overall"])
+
     def test_matched_direct_mitm_binding(self) -> None:
         value = score.matched_direct_mitm()
         self.assertEqual(value["instances"], 160)

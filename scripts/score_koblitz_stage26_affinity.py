@@ -281,6 +281,55 @@ def natural_relation_yield_control() -> dict[str, Any]:
     }
 
 
+def completion_gate_audit() -> dict[str, Any]:
+    return {
+        "1_full_cost_accounting": {
+            "status": "partial",
+            "proved": [
+                "Stage-21 algebraic factor-base and exact pair-oracle process resources",
+                "Stage-25 factor-base discovery, relation collection, linear solve, IC, rho, and one-CPU outer envelope",
+                "Stage-26 and Stage-27 matched PDP cell, build, acquisition, conflict, operation, wall, and memory records",
+            ],
+            "missing": [
+                "one same-instance end-to-end index-calculus experiment through relation collection and linear algebra at n=31, n=41, and the larger PDP regime",
+                "hosted package-installation CPU and memory",
+                "simultaneous aggregate memory for parallel compiler processes",
+            ],
+        },
+        "2_same_instance_backend_matrix": {
+            "status": "partial",
+            "proved": ["native XOR SAT, WDSat, CryptoMiniSat, and direct MITM on the same 160 inputs", "standard and GGMP factor-base cells at n=31"],
+            "missing": ["licensed Magma F4 execution on all 160 inputs"],
+        },
+        "3_resource_fields": {
+            "status": "partial",
+            "proved": ["one-CPU elapsed, total core-seconds, solver conflicts where exposed, process RSS, sampled process-tree RSS, process wall, and workflow wall"],
+            "missing": ["Magma process resources", "CPU and memory for hosted package installation and adjacent checkout commands"],
+        },
+        "4_scaling": {
+            "status": "finite_pdp_complete_not_end_to_end_ic",
+            "proved": ["balanced PDP cells at n=31, n=41, and n=59"],
+            "missing": ["end-to-end index-calculus scaling at those degrees"],
+        },
+        "5_unknown_scalar": {
+            "status": "finite_degree23_complete",
+            "proved": ["five public unknown-scalar targets completed without constructed target scalars or factor-base log labels"],
+            "missing": ["larger unknown-scalar end-to-end regimes"],
+        },
+        "6_pollard_rho": {
+            "status": "finite_degree23_complete_full_scope_partial",
+            "proved": ["same-target signed-Frobenius/negation rho controls for all five unknown-scalar targets"],
+            "missing": ["one fully unified cost comparison at the n=31, n=41, and larger end-to-end regimes"],
+        },
+        "7_external_review": {
+            "status": "missing",
+            "proved": ["fresh hosted execution of project-authored workflows"],
+            "missing": ["unaffiliated reproduction", "source-pinned novelty verdict"],
+        },
+        "overall": "strong internal engineering and public toy-research improvement; not a Koblitz index-calculus SOTA",
+    }
+
+
 def validate_task_source(task_root: Path, packet: Path, packet_record: dict[str, Any]) -> None:
     expected = {Path(row["path"]).name: row for row in packet_record["files"]}
     instance = task_root / "instance"
@@ -448,6 +497,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
             "hosted package installation lacks CPU and memory receipts",
             "unaffiliated reproduction and novelty review remain absent",
         ],
+        "completion_gate_audit": completion_gate_audit(),
     }
     args.output.mkdir(parents=False)
     phase_b.write_json_new(args.output / "score.json", result)
