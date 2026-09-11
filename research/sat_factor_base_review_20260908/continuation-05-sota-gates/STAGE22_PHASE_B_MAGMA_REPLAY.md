@@ -135,3 +135,12 @@ The predecessor packet and successor-01 remain retained. They are superseded:
 the hardened verifier rejects the predecessor preflight, and successor-01 is
 bound to the older non-relocatable terminal-evidence bundle. No Magma task has
 run on any packet.
+
+The class-blind successor-02 packet is distributed with this branch as
+`stage-22-phase-b-magma-replay-packet-successor-02-20260910.tar.gz`. Its archive
+SHA-256 is
+`97c87bce7da810674ead478f5a04ef6739c5da7e269287c42b21c91f1887fe54`.
+CI checks the archive digest, rejects absolute paths, parent traversal, links,
+and special files, extracts it into a fresh directory, and reruns
+`verify-packet`. The archive contains no oracle, target class, known witness,
+or previous solver output.
