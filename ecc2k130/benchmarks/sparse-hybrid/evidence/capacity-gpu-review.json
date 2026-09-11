@@ -1,0 +1,221 @@
+{
+  "valid": true,
+  "status": "Terminal source-bound raw-MMA capacity audit passed",
+  "auditorSha256": "a713482798a1b9d1dcce06a6572ea878ce21c2da8fc95d0ee59161eca47ed7fb",
+  "inputHashes": {
+    "gpu-result.json": "aab7f14ae5330af42b98fae86fca5ca2e3614333d83c672aa7b49bc2216eb8f1",
+    "compile-result.json": "dacde7faf98c4ae3e96dca33e74584fb8bb9e8f0fb602796800d713bb86f8dbe",
+    "code-review.json": "6511cd82a5b70b54399c2c93e47b0ba90b553b9dcd4b5aff81139456586bc664",
+    "run.py": "40f27abb6bcee88bef0317a0a70b02a86f3d85a8ae244ad775dcbdeb82881639",
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba"
+  },
+  "gpuReturnSha256": "ad12bac5e2b224c4ec2f2b2e6f3d67a4ff418be9692e7a4ba6b49dc3fac12490",
+  "predispatchSha256": "1128d04d658af23bb0b5168e140c9482f23d48d804250255971c2b3e2a91bfcb",
+  "binarySha256": "675bd67a206cd817aa31e1e1762a577bf6c8be7bf6f863788cb32f46ef59c9be",
+  "binaryVolumeArtifact": "/data/sparse-hybrid-capacity-compile/1789149713960886039/probe",
+  "sourceHashes": {
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba"
+  },
+  "nativeCodeReviewSha256": "6511cd82a5b70b54399c2c93e47b0ba90b553b9dcd4b5aff81139456586bc664",
+  "toolchain": {
+    "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+    "nvcc": "13.3.73",
+    "ptxas": "13.3.73",
+    "arch": "sm_120"
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "device": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-2b2b38e8-ba6b-2774-55d6-f36b2a579e1b",
+    "driver": "580.95.05",
+    "SMs": 188
+  },
+  "allCommandsExitZero": true,
+  "allTimeoutFlagsFalse": true,
+  "remotePrePostSourceBinaryHashesChecked": true,
+  "initialFullCorrectness": {
+    "valid": true,
+    "basisPairs": 16384,
+    "edgePairs": 64,
+    "densePairs": 64,
+    "cases": 16512,
+    "coefficientComparisons": 4227072,
+    "rawProductComparisons": 33024,
+    "timed": false
+  },
+  "resources": [
+    {
+      "kind": "resources",
+      "mode": "dense4",
+      "registers": 40,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "occupancyApiBlocksPerSm": 12
+    },
+    {
+      "kind": "resources",
+      "mode": "hybrid4",
+      "registers": 38,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "occupancyApiBlocksPerSm": 12
+    },
+    {
+      "kind": "resources",
+      "mode": "dense8",
+      "registers": 56,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "occupancyApiBlocksPerSm": 9
+    },
+    {
+      "kind": "resources",
+      "mode": "hybrid8",
+      "registers": 52,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "occupancyApiBlocksPerSm": 9
+    }
+  ],
+  "warmupsExcluded": 8,
+  "measurements": 20,
+  "exact28SampleSequenceChecked": true,
+  "allCountsAndStoredRatesRecomputed": true,
+  "totalAccumulatorOutputComparisons": 129368064,
+  "measuredAccumulatorOutputComparisons": 92405760,
+  "overflowBound": 1124139008,
+  "observedMaximumByChains": {
+    "4": 1090585056,
+    "8": 1090585536
+  },
+  "rawCoreRateSummaries": {
+    "dense4": {
+      "median": 35859550980.66396,
+      "minimum": 35640470033.55277,
+      "maximum": 36005424486.932915,
+      "eventMilliseconds": [
+        0.691392004,
+        0.688672006,
+        0.684383988,
+        0.687168002,
+        0.684992015
+      ],
+      "relativeFullRangePercent": 1.017732914661791
+    },
+    "hybrid4": {
+      "median": 52982522598.24973,
+      "minimum": 52746626142.54427,
+      "maximum": 53516436515.19675,
+      "eventMilliseconds": [
+        0.467168003,
+        0.460447997,
+        0.465312004,
+        0.460768014,
+        0.46508801
+      ],
+      "relativeFullRangePercent": 1.452951529865254
+    },
+    "dense8": {
+      "median": 36205182606.18764,
+      "minimum": 36101639479.7623,
+      "maximum": 36282799085.633865,
+      "eventMilliseconds": [
+        1.364127994,
+        1.365120053,
+        1.360319972,
+        1.361215949,
+        1.358304024
+      ],
+      "relativeFullRangePercent": 0.5003692643732329
+    },
+    "hybrid8": {
+      "median": 53819401792.06934,
+      "minimum": 53688070777.46105,
+      "maximum": 54316709565.70602,
+      "eventMilliseconds": [
+        0.915871978,
+        0.917952001,
+        0.911872029,
+        0.915711999,
+        0.90732801
+      ],
+      "relativeFullRangePercent": 1.1680523515919101
+    }
+  },
+  "matrixInstructionMedianRates": {
+    "dense4": {
+      "denseMatrixInstructionsPerSecond": 107578652941.9919,
+      "sparseMatrixInstructionsPerSecond": 0.0
+    },
+    "hybrid4": {
+      "denseMatrixInstructionsPerSecond": 52982522598.24973,
+      "sparseMatrixInstructionsPerSecond": 52982522598.24973
+    },
+    "dense8": {
+      "denseMatrixInstructionsPerSecond": 108615547818.56293,
+      "sparseMatrixInstructionsPerSecond": 0.0
+    },
+    "hybrid8": {
+      "denseMatrixInstructionsPerSecond": 53819401792.06934,
+      "sparseMatrixInstructionsPerSecond": 53819401792.06934
+    }
+  },
+  "pairedRatios": {
+    "4": {
+      "individualHybridOverDense": [
+        1.4799643801803783,
+        1.4956564269732286,
+        1.4708066461143778,
+        1.491353525247089,
+        1.4728223481830889
+      ],
+      "medianPairedRatio": 1.4799643801803783,
+      "minimumPairedRatio": 1.4708066461143778,
+      "maximumPairedRatio": 1.4956564269732286,
+      "ratioOfSeparateModeMedians": 1.4775010045948078,
+      "aggregateRatioDefinition": "Producer hybridToDenseRatios is the ratio of the two mode medians, not the median of the five paired ratios."
+    },
+    "8": {
+      "individualHybridOverDense": [
+        1.4894308667231653,
+        1.4871366384221214,
+        1.4917882430189118,
+        1.486510988702246,
+        1.4970374649846863
+      ],
+      "medianPairedRatio": 1.4894308667231653,
+      "minimumPairedRatio": 1.486510988702246,
+      "maximumPairedRatio": 1.4970374649846863,
+      "ratioOfSeparateModeMedians": 1.486510988702246,
+      "aggregateRatioDefinition": "Producer hybridToDenseRatios is the ratio of the two mode medians, not the median of the five paired ratios."
+    }
+  },
+  "sourceDemandComparison": {
+    "currentRawCoresPerScalarUpdate": 5.15625,
+    "targetScalarUpdatesPerSecond": 15000000000,
+    "requiredRawCoreEquivalentsPerSecond": 77343750000.0,
+    "observedBestMedianRawCoreEquivalentsPerSecond": 53819401792.06934,
+    "observedMedianAsFractionOfDemand": 0.6958468110489774,
+    "demandOverObservedMedian": 1.4370979131060713,
+    "additionalRawCoreRateRequired": 23524348207.930656,
+    "interpretation": "The tested hybrid8 launch cadence delivered less raw-core-equivalent throughput than the current 165/32 source schedule would require at 15B scalar updates/s. This is a comparison to an observed implementation, not a universal hardware bound or proof that 15B is impossible."
+  },
+  "findings": [],
+  "limits": [
+    "No GPU, compiler, benchmark, or numerical correctness test was rerun during this retained-artifact audit.",
+    "Event intervals include device fragment loads, C seed initialization, round loops and final stores. They exclude host packing, D2H readback and CPU verification, raw-product parity reconstruction, high-three-bit field terms, reduction, inversion and complete walk work.",
+    "Every launch is followed by full CPU output verification. These are per-launch rates under that cadence, not uninterrupted sustained capacity.",
+    "Each chain repeatedly adds the same per-warp integer-convolution matrix. Raw-core equivalents count this validated operation sequence; they are not independently emitted field products or complete scalar updates.",
+    "The producer aggregate ratios are ratios of separate medians. This review additionally computes each paired ratio and its median.",
+    "Four- and eight-chain panels run at different times. Hardware clocks, temperature, power and actual occupancy were not recorded; the occupancy fields are API capacity predictions.",
+    "The source-demand comparison assumes one raw128 core per current field product and retains the current 165/32 arithmetic schedule. It does not prove a minimum number of cores for all possible representations or algorithms.",
+    "Code identity relies on retained remote pre/post binary hashes and disabled PTX JIT, tied to the reviewed compiler artifact. This review does not independently download the volume binary or hash all dynamically loaded host libraries."
+  ],
+  "app": "ap-lTAjCRdCMaUEZ63lId9aEt"
+}
