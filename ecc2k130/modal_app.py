@@ -89,6 +89,9 @@ if PACKED_GENERATED_PRODUCT not in ("0", "1"):
     raise ValueError("ECC_PACKED_GENERATED_PRODUCT must be 0 or 1")
 if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
     raise ValueError("ECC_PACKED_GENERATED_PRODUCT=1 requires ECC_PACKED_DIRECT_REDUCE=1")
+PACKED_CLMAD = os.environ.get("ECC_PACKED_CLMAD", "0")
+if PACKED_CLMAD not in ("0", "1"):
+    raise ValueError("ECC_PACKED_CLMAD must be 0 or 1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
@@ -137,6 +140,7 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "packedPolynomialState": PACKED_POLY_STATE == "1",
          "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
          "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
+         "packedClmad": PACKED_CLMAD == "1",
          "packedStateTile": int(PACKED_STATE_TILE)}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
@@ -165,6 +169,7 @@ image = (
           "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
           "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
           "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
+          "ECC_PACKED_CLMAD": PACKED_CLMAD,
           "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
     .apt_install("build-essential")
     .add_local_dir(
@@ -188,7 +193,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_STATE_TILE={PACKED_STATE_TILE}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_STATE_TILE={PACKED_STATE_TILE}',
     )
 )
 
@@ -282,6 +287,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "packedPolynomialState": PACKED_POLY_STATE == "1",
             "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
             "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
+            "packedClmad": PACKED_CLMAD == "1",
             "packedStateTile": int(PACKED_STATE_TILE)}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
@@ -308,7 +314,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_STATE_TILE={PACKED_STATE_TILE}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_STATE_TILE={PACKED_STATE_TILE}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -344,6 +350,7 @@ def benchmarkIdentity(packed=False):
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                packedClmad=(PACKED_CLMAD == '1') if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
@@ -353,6 +360,7 @@ def checkPackedReduction(sample):
     for marker, field, expectedField, expected in (
         ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
         ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
+        ('native carryless multiply', 'packedClmad', 'expectedPackedClmad', PACKED_CLMAD),
     ):
         modes = re.findall(r'^packed ' + marker + r': (.*)$', sample.get('raw', ''), re.MULTILINE)
         actual = modes[0] if len(modes) == 1 else None
@@ -489,11 +497,13 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                packedClmad=(PACKED_CLMAD == '1') if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
+                packedClmad=PACKED_CLMAD == '1',
                 packedStateTile=int(PACKED_STATE_TILE))
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
@@ -580,6 +590,7 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                    packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                   packedClmad=(PACKED_CLMAD == '1') if packed else None,
                    packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
@@ -1094,6 +1105,7 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
+                packedClmad=PACKED_CLMAD == '1',
                 packedStateTile=int(PACKED_STATE_TILE),
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
 

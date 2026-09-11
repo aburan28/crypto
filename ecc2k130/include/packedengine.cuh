@@ -146,6 +146,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
+        printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
