@@ -88,7 +88,7 @@ impl FixedTargetSystem {
     fn seed_value(&self, curve: &Curve, seed: &Seed, summands: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = self.chart.apply(f, p);
+            let v = self.chart.apply_on(curve, p);
             (v != INF).then_some(v)
         };
         match seed {
@@ -705,7 +705,7 @@ pub fn compare_arms(
         .iter()
         .copied()
         .filter(|&p| {
-            let u = base_chart.apply(f, p);
+            let u = base_chart.apply_on(curve, p);
             u != INF && f.in_subfield(u, 1)
         })
         .collect();

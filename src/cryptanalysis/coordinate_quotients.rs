@@ -48,7 +48,7 @@ use std::collections::{HashMap, HashSet};
 
 use super::coordinate_search::{
     detect_symmetries, kernel, linearising_frame, relation_tuple, Auto, Curve, FrameKind, Gf,
-    Mobius, Pt, Rng64, Scope, SymmetryKind, INF,
+    Mobius, MobiusKind, Pt, Rng64, Scope, SymmetryKind, INF,
 };
 
 /// Exponent vectors over `nv` variables with total degree exactly `d`.
@@ -96,6 +96,18 @@ pub const MAX_INVARIANTS: usize = 14;
 pub enum Line {
     X,
     Y,
+    /// `x²`: the quotient of the `x`-line by the order-4 automorphism
+    /// `(x, y) ↦ (−x, iy)` of `y² = x³ + ax` (`i ∈ F_q`).
+    X2,
+    /// `x(P) + x(P + T)` for a 2-torsion point `T`: the `x`-line of the
+    /// 2-isogenous curve `E/⟨T⟩` (Vélu, up to an affine change), where a
+    /// 4-torsion point `Q` with `2Q = T` becomes 2-torsion and its
+    /// translation a Möbius involution.
+    Iso2(Pt),
+    /// `x(P) + x(P + T) + x(P − T)` for a 3-torsion point `T`: the
+    /// `x`-line of `E/⟨T⟩`, where a 2-torsion translation stays a Möbius
+    /// involution and the two together give the 6-torsion.
+    Iso3(Pt),
 }
 
 /// A coordinate on the curve: a Möbius frame applied to `x(P)` or `y(P)`.
@@ -112,11 +124,63 @@ impl Chart {
     pub fn y(mob: Mobius) -> Self {
         Chart { line: Line::Y, mob }
     }
+    pub fn on(line: Line, mob: Mobius) -> Self {
+        Chart { line, mob }
+    }
+    /// The underlying coordinate before the frame, `INF` at a pole.
+    pub fn base_value(line: Line, curve: &Curve, p: Pt) -> u64 {
+        let f = &curve.f;
+        match line {
+            Line::X => p.x(),
+            Line::Y => p.y(),
+            Line::X2 => {
+                let x = p.x();
+                if x == INF {
+                    INF
+                } else {
+                    f.mul(x, x)
+                }
+            }
+            Line::Iso2(t) => {
+                let (a, b) = (p.x(), curve.add(p, t).x());
+                if a == INF || b == INF {
+                    INF
+                } else {
+                    f.add(a, b)
+                }
+            }
+            Line::Iso3(t) => {
+                let (a, b, c) = (p.x(), curve.add(p, t).x(), curve.sub(p, t).x());
+                if a == INF || b == INF || c == INF {
+                    INF
+                } else {
+                    f.add(f.add(a, b), c)
+                }
+            }
+        }
+    }
     /// The chart value at `P`, `INF` at a pole.
+    pub fn apply_on(&self, curve: &Curve, p: Pt) -> u64 {
+        self.mob
+            .apply(&curve.f, Chart::base_value(self.line, curve, p))
+    }
+    /// The chart value at `P` for the `x`- and `y`-lines (the lines that
+    /// need no curve arithmetic); use [`Chart::apply_on`] in general.
     pub fn apply(&self, f: &Gf, p: Pt) -> u64 {
         let t = match self.line {
             Line::X => p.x(),
             Line::Y => p.y(),
+            Line::X2 => {
+                let x = p.x();
+                if x == INF {
+                    INF
+                } else {
+                    f.mul(x, x)
+                }
+            }
+            Line::Iso2(_) | Line::Iso3(_) => {
+                panic!("Chart::apply on an isogeny line needs the curve: use apply_on")
+            }
         };
         self.mob.apply(f, t)
     }
@@ -125,8 +189,51 @@ impl Chart {
         match self.line {
             Line::X => inner.replace('t', "x"),
             Line::Y => inner.replace('t', "y"),
+            Line::X2 => inner.replace('t', "x²"),
+            Line::Iso2(_) => inner.replace('t', "x′"),
+            Line::Iso3(_) => inner.replace('t', "x″"),
         }
     }
+}
+
+/// The Möbius map a point map induces on a line, if it induces one:
+/// fitted on three points, verified on all.
+pub fn descended_map(curve: &Curve, pts: &[Pt], line: Line, g: &PointMap) -> Option<Mobius> {
+    let f = &curve.f;
+    let val = |p: Pt| Chart::base_value(line, curve, p);
+    let mut pairs: Vec<(u64, u64)> = Vec::new();
+    let mut seen = HashSet::new();
+    for &p in pts {
+        let (t, s) = (val(p), val(g.apply(curve, p)));
+        if t != INF && s != INF && seen.insert(t) {
+            pairs.push((t, s));
+        }
+        if pairs.len() == 3 {
+            break;
+        }
+    }
+    let m = Mobius::fit(f, &pairs)?;
+    let ok = pts.iter().all(|&p| {
+        let (t, s) = (val(p), val(g.apply(curve, p)));
+        // poles of the base coordinate carry no information
+        t == INF || s == INF || m.apply(f, t) == s
+    });
+    ok.then_some(m)
+}
+
+/// A chart on `line` in which `g` (an involution on that line) is
+/// linearised — `t ↦ −t` in odd characteristic, `t ↦ t + 1` in
+/// characteristic 2 — when its fixed points are rational; otherwise the
+/// plain line.  `None` if `g` is not a Möbius map on the line at all.
+pub fn linearised_chart(
+    curve: &Curve,
+    pts: &[Pt],
+    line: Line,
+    g: &PointMap,
+) -> Option<(Chart, FrameKind, Mobius)> {
+    let m = descended_map(curve, pts, line, g)?;
+    let fr = linearising_frame(&curve.f, &m);
+    Some((Chart::on(line, fr.mob), fr.kind, m))
 }
 
 impl From<Mobius> for Chart {
@@ -336,7 +443,7 @@ impl Seed {
     pub fn eval(&self, curve: &Curve, chart: &Chart, tuple: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = chart.apply(f, p);
+            let v = chart.apply_on(curve, p);
             (v != INF).then_some(v)
         };
         match self {
@@ -485,7 +592,7 @@ impl QuotientSystem {
                             let proj = self.projection(i);
                             let mut vals: Vec<u64> = Vec::new();
                             for g in &proj {
-                                let v = self.chart.apply(f, g.apply(curve, tuple[i]));
+                                let v = self.chart.apply_on(curve, g.apply(curve, tuple[i]));
                                 if v == INF {
                                     return None;
                                 }
@@ -606,8 +713,8 @@ fn map_is_affine_on_u(curve: &Curve, pts: &[Pt], chart: &Chart, g: &PointMap) ->
     let pairs: Vec<(u64, u64)> = pts
         .iter()
         .filter_map(|&p| {
-            let a = chart.apply(f, p);
-            let b = chart.apply(f, g.apply(curve, p));
+            let a = chart.apply_on(curve, p);
+            let b = chart.apply_on(curve, g.apply(curve, p));
             (a != INF && b != INF).then_some((a, b))
         })
         .collect();
@@ -1334,5 +1441,69 @@ mod tests {
             let u = chart.apply(&f, *p);
             assert_eq!(*v, f.pow(u, 3));
         }
+    }
+
+    #[test]
+    fn torsion_translations_become_mobius_maps_on_the_new_lines() {
+        let f = Gf::prime(1009);
+        // (a) j = 1728, a a non-square: τ_T is Möbius on x (x ↦ a/x) with
+        // irrational fixed points, and Möbius on x² with rational ones.
+        let a = (2..f.p).find(|&a| f.sqrt(a).is_none()).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), a, 0, "j=1728");
+        let pts = c.affine_points();
+        let tau = PointMap::translate(Pt::Aff(0, 0));
+        let on_x = descended_map(&c, &pts, Line::X, &tau).unwrap();
+        assert_eq!(on_x.kind(&f), MobiusKind::Inversion(a));
+        let (_, kind_x, _) = linearised_chart(&c, &pts, Line::X, &tau).unwrap();
+        assert_eq!(kind_x, FrameKind::Trace, "±√a irrational");
+        let (chart, kind, m) = linearised_chart(&c, &pts, Line::X2, &tau).unwrap();
+        assert_eq!(m.kind(&f), MobiusKind::Inversion(f.mul(a, a)));
+        assert_eq!(kind, FrameKind::Sign);
+        for &p in pts.iter().take(200) {
+            let v = chart.apply_on(&c, p);
+            let vt = chart.apply_on(&c, c.add(p, Pt::Aff(0, 0)));
+            if v != INF && vt != INF {
+                assert_eq!(vt, f.neg(v));
+            }
+        }
+        // (b) rational 4-torsion: τ_{T₄} is not Möbius on x but is on the
+        // 2-isogeny line, as an involution
+        let b = 2u64;
+        let c4 = Curve {
+            a1: 1,
+            a2: f.neg(b),
+            a3: f.neg(b),
+            a4: 0,
+            a6: 0,
+            label: "4-torsion".into(),
+            f: f.clone(),
+        };
+        let pts = c4.affine_points();
+        let t4 = Pt::Aff(0, 0);
+        assert_eq!(c4.mul(t4, 4), Pt::Inf);
+        let t2 = c4.mul(t4, 2);
+        let tau4 = PointMap::translate(t4);
+        assert!(descended_map(&c4, &pts, Line::X, &tau4).is_none());
+        let m = descended_map(&c4, &pts, Line::Iso2(t2), &tau4).unwrap();
+        assert_eq!(m.order(&f, 8), Some(2));
+        // (c) 6-torsion on y² = x³ + 1: τ_{T₂} and ω are Möbius on the
+        // 3-isogeny line, τ_{T₃} acts trivially there
+        let cb = Curve::short_weierstrass(f.clone(), 0, 1, "j=0");
+        let pts = cb.affine_points();
+        let t3 = Pt::Aff(0, 1);
+        let t2 = torsion_points(&cb, &pts, 2)[0];
+        let line = Line::Iso3(t3);
+        assert!(descended_map(&cb, &pts, Line::X, &PointMap::translate(t3)).is_none());
+        let m2 = descended_map(&cb, &pts, line, &PointMap::translate(t2)).unwrap();
+        assert_eq!(m2.order(&f, 8), Some(2));
+        let m3 = descended_map(&cb, &pts, line, &PointMap::translate(t3)).unwrap();
+        assert!(m3.is_identity(&f));
+        let omega = (2..f.p).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        let om = PointMap {
+            auto: Auto::Scale(omega),
+            t: Pt::Inf,
+        };
+        let mo = descended_map(&cb, &pts, line, &om).unwrap();
+        assert!(matches!(mo.kind(&f), MobiusKind::Scaling(_)));
     }
 }

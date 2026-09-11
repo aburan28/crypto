@@ -1256,3 +1256,77 @@ Buchberger that finishes neither.  The 167 descended equations of the
 `v`-system are the 3 digits of the relation plus the identities among
 `v_i³` and `Πv` up to the box's degree — an F4 with a degree bound
 would take most of them as redundant; Buchberger does not.
+
+---
+
+## 14. A degree-bounded F4 over `F_p`, and the `m = 3` rows it settles
+
+**Code:** `src/cryptanalysis/f4_fp.rs`; `coordinate_descent::compare_arms`
+(`GB_ENGINE`, `F4_MAX_DEGREE`); `examples/klein_descent.rs`,
+`examples/three_torsion.rs --descent-only`.
+
+§12.4 and §13.5 closed on systems the repo's Buchberger could not
+finish.  The solver is now there: Faugère's F4 with the normal
+selection strategy, a degree bound on the critical pairs (the basis is
+the degree-`D` truncation — enough to decide consistency and solve when
+the solving degree is at most `D`), symbolic preprocessing, dense row
+reduction mod `p` with rows in parallel, the product criterion, a
+cooperative deadline, and solving by root finding on a univariate basis
+element and substitution.  Every reported solution is checked against
+the system; the unit tests compare with brute force on random
+zero-dimensional systems.  What it reports besides the time is the
+**solving degree** — the degree of the last step that produced a new
+basis element or the constant `1` — and the largest matrix, which are
+the numbers that transfer between sizes.
+
+### 14.1 `m = 2`: agreement, and the solving degrees
+
+On every arm and target of §12.3 and §13.4 the F4 verdict equals
+Buchberger's (found / refuted), and at this size both are milliseconds
+(F4's setup is the larger constant).  The solving degrees: Gaudry's
+`S₃` 3–5, the one-involution system 2, the `v`-base 3-torsion system 2
+against 4 for the plain `y`-line system on the same base.
+
+### 14.2 `m = 3`: the Klein descent, timed at last
+
+`GB_ENGINE=f4`, bound 24, 300 s budget, two decomposable and two
+random targets per curve.
+
+| curve | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 35 800 | 14 | 2250 × 2594 |
+| | one `T`, `w = u²`, `Πu` | 4 / 8 | 4 | 35 | 790 | 7 | 740 × 822 |
+| | Klein | 9 / – | 2 | 8 | not `F_p`-valued | | |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 3 / 3 | 12 | 125 | 22 800 | 14 | 2173 × 2515 |
+| | one `T` | 4 / 8 | 4 | 35 | 540 | 7 | 714 × 796 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 3 / 3 | 12 | 125 | 21 900 | 14 | 2164 × 2513 |
+| | one `T` | 4 / 8 | 4 | 35 | 680 | 7 | 740 × 822 |
+| control `y² = x³ − x / F₂₉³` (over `F_p`), random target | `x` (Gaudry) | 3 / 3 | 12 | 125 | 48 400, refuted | 14 | 2157 × 2493 |
+| | one `T` | 4 / 8 | 4 | 35 | 760, refuted | 7 | 707 × 789 |
+| | Klein (`F_p`-valued here, base a subgroup) | 9 / 32 | 2 | 8 | 300 | 2 | 271 × 190 |
+
+Same verdict on every target.  The one-involution system solves
+**30–60× faster** than Gaudry's at `m = 3`, at **half the solving degree
+(7 against 14)** and a matrix a ninth of the size.  At `m = 2` the ratio
+was 3–7× on Buchberger with degree 2 against 4; the gap widens with
+`m`, as the halving of the relation's degree per point (§3, §10) would
+predict for an F4 whose cost is governed by the solving degree.  This is
+the first timed row of the whole thread where the coordinate change is
+worth more than a constant, and it is the ordinary one — one rational
+2-torsion point, the sign frame, the product invariant — not any of the
+larger groups.
+
+### 14.3 The 3-torsion frame at `m = 3`
+
+TBD-F4-T3
+
+### 14.4 What this changes
+
+The thread's standing summary — "a real reduction of the relation
+degree per point at every `m`, no free relations once the projection is
+accounted for, and a solve smaller by a constant the solver cannot
+rank" — loses its last clause: the solve is smaller by a factor that
+grows with `m`, and at `m = 3` it is measured.  The gain is still per
+solve, not per relation (§11.4), and still needs a rational 2-torsion
+point (or a 3-torsion point on a `j = 0` curve) and, in Gaudry's
+setting, a base on which the invariants stay in `F_p` (§12.2, §13.4).
