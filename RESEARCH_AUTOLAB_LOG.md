@@ -7530,9 +7530,11 @@ plain and the symmetrised systems at `n = 23`, `m = 3` (where the wall
 moved, §8.3) would say whether the 2-torsion frame's gain there is the
 same halving as over `F_p`.  On the representation side the list is
 complete for the groups the structural lemmas allow at `j = 0`,
-`j = 1728` and for rational torsion up to 6; a `j = 0` curve over
-`F_{p²}` with the full `E[3]` rational (the 3-torsion analogue of the
-Klein group) is the one untried case.
+`j = 1728` and for rational torsion up to 6; the full-`E[3]` analogue
+of the Klein group is ruled out by §16's lemma (a translation descends
+to `E/⟨α⟩` iff its point lies in `E[1 − α]`, of order `N(1 − α)` = 4, 3,
+2, 1 for `α = −1, ω, i, −ω`), checked on `F₁₀₀₉` with the full `E[3]`
+rational.
 
 ### Commits made
 

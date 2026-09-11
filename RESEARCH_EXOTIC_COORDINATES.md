@@ -1418,3 +1418,45 @@ does not act on the `x`-line, find a quotient line on which it does
 frames it), and let the quotient engine measure the invariants.  Every
 line in the table was found this way, and the fits fail loudly (τ_{T₃}
 on `x`, τ_{T₄} on `x`) where the lemma says they must.
+
+---
+
+## 16. Which translations a line can carry: the closing lemma
+
+**Code:** the unit test
+`a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed`
+in `coordinate_quotients.rs`.
+
+§15 raised the one untried representation: a `j = 0` curve with the
+full `E[3]` rational, the 3-torsion analogue of the Klein group.  It
+does not exist, and the reason classifies every line of §15 at once.
+
+**Lemma.**  Let `α` be an automorphism of `E` whose quotient `E/⟨α⟩` is
+a line (`α = −1, ω, i, −ω`).  The translation `τ_Q` descends to a
+Möbius map on that line iff `τ_Q` normalises `⟨α⟩`, i.e. iff
+`α(Q) = Q`, i.e. iff `Q ∈ E[1 − α]`.  The order of `E[1 − α]` is the
+norm of `1 − α` in the endomorphism ring:
+
+| `α` | line | `N(1 − α)` | `E[1 − α]` | translations that descend |
+|---|---|---:|---|---|
+| `−1` | `x` | 4 | `E[2]` | the Klein group (§6.4, §10.3) |
+| `ω` (`j = 0`) | `y` | 3 | `{O, ±T₃}`, `T₃ = (0, √b)` | one 3-torsion subgroup (§13) |
+| `i` (`j = 1728`) | `x²` | 2 | `{O, (0, 0)}` | one 2-torsion point (§15 #2) |
+| `−ω` (`j = 0`, order 6) | `x³` | 1 | `{O}` | none |
+
+Checked on `F₁₀₀₉`: on `y² = x³ + b` with all eight 3-torsion points
+rational (`−4b` a cube, `−3b` a square), `descended_map` on the
+`y`-line succeeds for exactly the two points fixed by `ω`; on
+`y² = x³ + ax` with full 2-torsion it succeeds on `x²` for exactly
+`(0, 0)`, while on `x` it succeeds for all three.
+
+So an automorphism quotient carries at most `N(1 − α)` torsion points,
+and the table is complete: the Klein group on `x` is the largest such
+representation, the `y`-line 3-torsion and the `x²`-line 2-torsion are
+the other two, and the order-6 quotient carries nothing.  Every other
+torsion translation reaches a line only through an isogeny (§15 #3,
+#4), which is a change of curve.  With §3's lemma on degree-2
+coordinates, §10.5's list of groups, and this, the representation
+search of this note is closed on the structural side: what remains
+open is the solver side (§14) and the Koblitz comparison the seventh
+log entry proposes.
