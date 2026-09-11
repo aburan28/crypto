@@ -59,6 +59,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
                   packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1",
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
+                  expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
         if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0:
@@ -90,6 +91,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
              f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}",
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
+             f"PACKED_CLMAD={client.PACKED_CLMAD}",
              f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
@@ -106,6 +108,14 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
             packedGeneratedProduct=result["packedGeneratedProduct"])
         if generatedModes != [client.PACKED_GENERATED_PRODUCT]:
             raise RuntimeError("packed GPU arithmetic generated product identity disagrees with the requested build")
+        clmadModes = re.findall(r"^packed arithmetic native carryless multiply: (.*)$",
+                                result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualClmad = clmadModes[0] if len(clmadModes) == 1 else None
+        result["packedClmad"] = (actualClmad == "1") if actualClmad in ("0", "1") else None
+        result["deviceArithmetic"].update(expectedPackedClmad=client.PACKED_CLMAD == "1",
+                                          packedClmad=result["packedClmad"])
+        if clmadModes != [client.PACKED_CLMAD]:
+            raise RuntimeError("packed GPU arithmetic CLMAD identity disagrees with the requested build")
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:

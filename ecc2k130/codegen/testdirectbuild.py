@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,15 +47,16 @@ def environment(mode='0', generated='0', tile='0'):
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
+            f'packed native carryless multiply: {clmad}\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -321,16 +322,18 @@ class GeneratedProductBuildTests(unittest.TestCase):
             tune = function('runAutotune', env)(configs='0:32:128:2', packed=True)
             self.assertEqual(tune['results'][0]['packedGeneratedProduct'], mode == '1')
 
-    def audit_fixture(self, mode, arithmetic=None, failed_phase=None, failed_marker=None):
+    def audit_fixture(self, mode, arithmetic=None, failed_phase=None, failed_marker=None,
+                      clmad='0', clmad_arithmetic=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode)
+            env = environment('1', mode, clmad=clmad)
             workers = 192512
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
                 text = (f'packed direct reduction: 1\n'
                         f'packed generated product: {marker}\n'
                         'packed state tile: 0\n'
+                        f'packed native carryless multiply: {clmad}\n'
                         f'backend cuda-packed131: {workers} threads x 32 slots x 1 lanes = {workers * 32} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
@@ -348,6 +351,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                 commands.append(command)
                 if command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
+                             + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
                             + (f'packed arithmetic generated product: {mode}\n' if arithmetic is None else arithmetic))
                 elif command[0] == 'python3':
                     text = 'integration passed\n'
@@ -478,6 +482,102 @@ class StateTileBuildTests(unittest.TestCase):
                 self.assertFalse(check(sample))
                 self.assertEqual(sample['rate'], 0)
                 self.assertFalse(summarizeSamples([good, sample])['valid'])
+
+
+class ClmadBuildTests(unittest.TestCase):
+    def test_environment_defaults_and_rejects_invalid_values(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_CLMAD' for t in node.targets))
+        for value in (None, '0', '1', '', '2', '-1', 'true'):
+            env = dict(os=SimpleNamespace(environ={} if value is None else {'ECC_PACKED_CLMAD': value}))
+            with self.subTest(value=value):
+                if value in (None, '0', '1'):
+                    execute(body[index:index + 2], env)
+                    self.assertEqual(env['PACKED_CLMAD'], value or '0')
+                else:
+                    with self.assertRaises(ValueError):
+                        execute(body[index:index + 2], env)
+
+    def test_image_and_cache_preserve_native_mode(self):
+        class Image:
+            def __init__(self): self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for mode in ('0', '1'):
+            env = environment('1', '1', clmad=mode)
+            image = Image()
+            env.update(CUDA_VERSION='13.3.1', GENCODE='fixture', LOCAL=ROOT,
+                       modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)))
+            assignment('image', env)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_CLMAD'], mode)
+            builds = [c for c in image.calls['run_commands'] if 'make gpu ' in c]
+            self.assertEqual(len(builds), 1)
+            self.assertIn('PACKED_CLMAD=' + mode, builds[0])
+            self.assertEqual(env['BAKED']['packedClmad'], mode == '1')
+        env = environment('1', '1')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda c, **k: (commands.append(c) or 0, 'built'))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        env['PACKED_CLMAD'] = '1'
+        with self.assertRaisesRegex(ValueError, 'matching baked binary'):
+            function('runBench', env)(rebuild=False, packed=True)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertIn('PACKED_CLMAD=1', commands[-1])
+        env['PACKED_CLMAD'] = '0'
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertIn('PACKED_CLMAD=0', commands[-1])
+
+    def test_missing_wrong_or_duplicate_identity_cannot_rank(self):
+        for mode in ('0', '1'):
+            check = function('checkPackedReduction', environment('1', '1', clmad=mode))
+            text = raw('1', '1', clmad=mode)
+            good = benchResult('fixture', 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedClmad'], mode == '1')
+            marker = f'packed native carryless multiply: {mode}\n'
+            for bad in (text.replace(marker, ''), text + marker,
+                        raw('1', '1', clmad=str(1 - int(mode))), raw('1', '1', clmad='2')):
+                sample = benchResult('fixture', 0, bad)
+                self.assertFalse(check(sample))
+                self.assertEqual(sample['rate'], 0)
+                self.assertFalse(summarizeSamples([good, sample])['valid'])
+
+    def test_benchmark_and_autotune_record_native_mode(self):
+        for mode in ('0', '1'):
+            env = environment('1', '1', clmad=mode)
+            env.update(buildFor=lambda *a, **k: (True, 'built'),
+                       benchmarkIdentity=lambda *a, **k: {},
+                       measureBench=lambda *a, **k: dict(valid=True, rate=6000.0),
+                       os=SimpleNamespace(makedirs=lambda *a, **k: None),
+                       open=lambda *a, **k: io.StringIO(), volume=SimpleNamespace(commit=lambda: None))
+            self.assertEqual(function('runBench', env)(rebuild=False, packed=True)['packedClmad'], mode == '1')
+            function('autotuneConfigs', env)
+            tune = function('runAutotune', env)(configs='0:32:128:2', packed=True)
+            self.assertEqual(tune['results'][0]['packedClmad'], mode == '1')
+
+    def test_audit_binds_arithmetic_and_timed_modes(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            result, commands = fixture.audit_fixture('1', clmad=mode)
+            self.assertTrue(result['valid'], result.get('error'))
+            self.assertIn('PACKED_CLMAD=' + mode, commands[0])
+            for row in [result, result['deviceArithmetic'], *result['benchmark']['samples'], *result['collection']]:
+                self.assertEqual(row['expectedPackedClmad'], mode == '1')
+                self.assertEqual(row['packedClmad'], mode == '1')
+            for marker in ('', f'packed arithmetic native carryless multiply: {1 - int(mode)}\n',
+                           f'packed arithmetic native carryless multiply: {mode}\n' * 2):
+                failed, commands = fixture.audit_fixture('1', clmad=mode, clmad_arithmetic=marker)
+                self.assertFalse(failed['valid'])
+                self.assertIn('CLMAD identity', failed['error'])
+                self.assertEqual(len(commands), 1)
+                self.assertNotIn('integration', failed)
 
 
 if __name__ == '__main__':
