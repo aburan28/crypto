@@ -90,7 +90,7 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_koblitz_stage23_terminal_evidence.py \
             "$RUNNER_TEMP/stage25-portable-stage23"
       - name: Upload Stage-25 evidence
-        if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
+        if: ${{ always() && hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: koblitz-stage25-single-core-${{ github.run_id }}
