@@ -22,7 +22,7 @@ their original worker and batch counts; benchmark and audit presets do not
 resume user checkpoints. It enables the single
 polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
-The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md)
+The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md),
 [direct-order polynomial reduction](DIRECT-REDUCTION.md), and the
 [generated polynomial-product schedule](GENERATED-PRODUCT.md).
 These settings retain the existing iteration, DP report and packed-checkpoint
@@ -60,6 +60,24 @@ This measures the combined source/compiler/linked-runtime change; it does
 not isolate a generator-only gain. General generated-product defaults remain
 off. [GENERATED-PRODUCT.md](GENERATED-PRODUCT.md) gives the implementation,
 reproduction commands, ranges and validation scope.
+
+The [published-command audit](benchmarks/generated-product/native-audit.json)
+ran `make audit-rtx-pro6000` from the public implementation on a separate
+allocation and measured:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **6.960528** | 6.937184–6.963077 |
+| DP34 collection | **6.809915** | 6.807981–6.817479 |
+
+Every repetition completed the same 201,863,462,912 scalar updates with the
+requested generated-product mode. Each collection recorded 5,149 points,
+164,768 bytes and zero drops. GPU arithmetic and full client integration
+checks passed. This audit retains corpus counts and sizes; matching content
+hashes are supplied by the paired comparison. The separate native result
+validates the published command and does not measure another percentage gain.
+Source, linked-binary and public-device-code bindings are documented in
+[GENERATED-PRODUCT.md](GENERATED-PRODUCT.md).
 
 ## Historical direct-order reduction comparison
 

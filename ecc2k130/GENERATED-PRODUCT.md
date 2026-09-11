@@ -77,6 +77,46 @@ Raw artifact SHA256:
 Independent review SHA256:
 `33f239ce5aa0c1fcf91d8893741239a8f64024d10749a6b82169dd4fb8309ea1`.
 
+## Published-command audit and code binding
+
+The [native preset audit](benchmarks/generated-product/native-audit.json)
+ran `make audit-rtx-pro6000` from the public implementation at commit
+`25db47d7ce6c0bc30ce21f60bb5186f9d2f9bf38` on a separate GPU allocation.
+The [source manifest](benchmarks/generated-product/native-source-manifest.json)
+retains all 109 input file hashes. Subsequent publication changes add only
+documentation and evidence; the measured implementation remains unchanged.
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **6.960528** | 6.937184–6.963077 |
+| DP34 collection | **6.809915** | 6.807981–6.817479 |
+
+Every repetition completed 201,863,462,912 scalar updates with generated
+product mode 1. Each collection recorded 5,149 points, 164,768 bytes and zero
+drops. The GPU arithmetic suite and full client replay, restart, guard and
+resume checks passed before timing. This audit retains collection counts
+and sizes, but not collection content hashes; the paired comparison above
+provides the matching-multiset evidence. The native audit verifies the
+published command and is not an additional paired estimate of the gain.
+
+The native source digest is
+`d18667225ba454e86179756a6b036b0bfbb721107b2fe313bc4a6a1b1af49be4`;
+the linked client binary hash is
+`e1c2f918b0b0b4a28278346b3de91435e0bbbd6e34405383175eb03ae5aad76c`.
+Raw native audit SHA256:
+`c9686d2eaa20282acedbeef45ea0dbc1548ff2365fa7e7cbb11428b5ac221f72`.
+
+A separate CPU compiler check compiled the public packed kernels with the
+same CUDA 13.3.73 wrapper used for the tested G1 prototype. The complete cubin
+and PTX are byte-identical, including all walk/init instructions and
+encodings, helper placement and resource declarations. The public cubin hash
+is `5b4d9ba9cdef7543563dada4aea2df4d2758ae21673a420aa85b2a369dfb88ac`.
+The [raw compiler record](benchmarks/generated-product/public-code-resources.json)
+and [independent review](benchmarks/generated-product/public-code-review.json)
+retain commands, hashes and complete disassembly. This binds the public
+device implementation to the measured prototype; it does not assert equality
+of the complete linked host binaries or provide another throughput result.
+
 ## Compiler and correctness scope
 
 Under CUDA 13.3.73, the same-source comparison reports 4,284.875 common-path
