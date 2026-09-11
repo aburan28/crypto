@@ -797,6 +797,16 @@ solves the same database from two out-of-order units with a duplicate
 and a forgery mixed in and compares it column for column with the
 single-process table.
 
+Measured on `K_0/2^31` over the search-selected 35-column base
+(`m = 3`, `unit_trials = 64`): two workers run concurrently on the same
+four cores collected units 0 and 1 in 23 s each (each builds its own
+`|F|²` pair table, which is the whole cost; the 64 probes are
+milliseconds), then the driver merged 78 relations from the two units,
+re-verified them, filtered the 78 × 35 system to a 13-column core, ran
+block Wiedemann and certified all 35 logarithms in 0.7 s for the logs
+stage, and descended three targets in two relations each — 13.8 s
+wall for the driver, again dominated by its pair table.
+
 This is the stage that makes the pipeline's collection cost scale with
 machines rather than cores: every unit is independent, the merge is one
 scalar multiplication per relation, and the linear algebra of the
