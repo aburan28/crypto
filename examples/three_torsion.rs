@@ -104,6 +104,18 @@ fn run(
     max_tuples: usize,
     rng: &mut Rng64,
 ) {
+    // `--only SUBSTR` (repeatable) restricts the runs to matching labels
+    let only: Vec<String> = {
+        let a: Vec<String> = std::env::args().collect();
+        a.iter()
+            .enumerate()
+            .filter(|(_, x)| x.as_str() == "--only")
+            .filter_map(|(i, _)| a.get(i + 1).cloned())
+            .collect()
+    };
+    if !only.is_empty() && !only.iter().any(|o| label.contains(o.as_str())) {
+        return;
+    }
     let t0 = Instant::now();
     match run_quotient_boxed(
         curve, pts, label, gens, chart, seeds, m, max_deg, caps, max_tuples, rng,
@@ -240,6 +252,14 @@ fn main() {
     } else {
         (16, Some((4, 8)))
     };
+    // On the v-line the point invariants have degree 3 (measured under
+    // ⟨τ₃⟩ alone), so a tighter point cap leaves room for the tuple
+    // unknown's degree within the monomial cap.
+    let (vdeg, vcaps) = if m == 2 {
+        (9, None)
+    } else {
+        (20, Some((3, 8)))
+    };
     let mut rng = Rng64::new(0x3333);
     println!("=== 3-torsion seeds on j = 0 curves, m = {m} ===");
     println!();
@@ -318,19 +338,22 @@ fn main() {
             &mut rng,
         );
     }
-    run(
-        &ca,
-        &pts,
-        "y, ⟨−⟩: y-Semaev",
-        &[neg],
-        yid,
-        &points_sum_product(m),
-        m,
-        deg,
-        caps,
-        max_tuples,
-        &mut rng,
-    );
+    // y-Semaev at m = 3 has degree 9 per point: over the monomial cap.
+    if m == 2 {
+        run(
+            &ca,
+            &pts,
+            "y, ⟨−⟩: y-Semaev",
+            &[neg],
+            yid,
+            &points_sum_product(m),
+            m,
+            deg,
+            caps,
+            max_tuples,
+            &mut rng,
+        );
+    }
     run(
         &ca,
         &pts,
@@ -339,8 +362,8 @@ fn main() {
         vchart,
         &points_product(m),
         m,
-        deg,
-        caps,
+        vdeg,
+        vcaps,
         max_tuples,
         &mut rng,
     );
@@ -352,8 +375,8 @@ fn main() {
         vchart,
         &points_product(m),
         m,
-        deg,
-        caps,
+        vdeg,
+        vcaps,
         max_tuples,
         &mut rng,
     );
@@ -365,8 +388,8 @@ fn main() {
         vchart,
         &points_product(m),
         m,
-        deg,
-        caps,
+        vdeg,
+        vcaps,
         max_tuples,
         &mut rng,
     );
@@ -378,8 +401,8 @@ fn main() {
         vchart,
         &points_sum_product(m),
         m,
-        deg,
-        caps,
+        vdeg,
+        vcaps,
         max_tuples,
         &mut rng,
     );
@@ -414,19 +437,22 @@ fn main() {
         max_tuples,
         &mut rng,
     );
-    run(
-        &cb,
-        &pts,
-        "u, ⟨τ₂, τ₃, −⟩ = ⟨τ₆, −⟩: points+Σ+Π",
-        &[tau2, taub, neg],
-        Chart::x(fr2),
-        &points_sum_product(m),
-        m,
-        deg,
-        caps,
-        max_tuples,
-        &mut rng,
-    );
+    // 14 invariants at m = 3: over the monomial cap at total degree 4.
+    if m == 2 {
+        run(
+            &cb,
+            &pts,
+            "u, ⟨τ₂, τ₃, −⟩ = ⟨τ₆, −⟩: points+Σ+Π",
+            &[tau2, taub, neg],
+            Chart::x(fr2),
+            &points_sum_product(m),
+            m,
+            deg,
+            caps,
+            max_tuples,
+            &mut rng,
+        );
+    }
     let vb = three_torsion_chart(&cb, t3b);
     run(
         &cb,
@@ -436,8 +462,8 @@ fn main() {
         vb,
         &points_product(m),
         m,
-        deg,
-        caps,
+        vdeg,
+        vcaps,
         max_tuples,
         &mut rng,
     );

@@ -532,13 +532,13 @@ pub fn compare_descents(
 /// The interpolation degree box for `m` summands: total degree and
 /// `(point, tuple)` caps.  Semaev's relation has degree `2^{m−1}` in each
 /// point; the quotient invariants have at most that, the tuple invariants
-/// at most twice it.
+/// at most twice it, and the total degree is bounded by their sum.
 pub fn degree_box(m: usize) -> (u32, Option<(u32, u32)>) {
     if m <= 2 {
         (6, None)
     } else {
         let d = 1u32 << (m - 1);
-        (d * m as u32 + 2, Some((d, 2 * d)))
+        (d * m as u32 + 2 * d, Some((d, 2 * d)))
     }
 }
 
