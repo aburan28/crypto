@@ -1489,8 +1489,8 @@ whose matrix exceeded the caps falls back to the largest that fits.
 
 | instance | arm | vars | deg | F4 degree 3: ms / splits | degree 4: ms / splits | degree 5: ms / splits |
 |---|---|---:|---:|---|---|---|
-| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | TBD-KD-A05X |
-| | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | TBD-KD-A05S |
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 (degree-5 matrix over the caps: fell back to 4) |
+| | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | 75 / 15 |
 | `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | – |
 | | symmetrised | 13 | 4 | 6 (found), 26 (refuted) / 29 | 9, 29 / 8 | – |
 | `K₁/F₂¹⁷` (found) | `x`-chained | 44 | 3 | 3 963 / 49 | TBD-KD-B |
