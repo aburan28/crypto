@@ -58,6 +58,13 @@ Arithmetic, integration, normalized-state and bidirectional checkpoint
 resume checks passed. [TILED-STATE.md](TILED-STATE.md) gives ranges, source
 bindings and the distinction between logical checkpoints and padded storage.
 
+The separate [public preset audit](benchmarks/tiled-state/native-audit.json)
+ran `make audit-rtx-pro6000` and measured **7.088708 B/s** benchmark median
+(7.071418–7.132367) and **6.962796 B/s** collection median
+(6.962669–6.963781). All six runs completed the exact scalar budget with tile
+256; every collection recorded 5,149 points with zero drops. This validates
+the published command and does not estimate an additional percentage gain.
+
 ## Historical generated-product preset comparison
 
 The [controlled comparison](benchmarks/generated-product/comparison.json)

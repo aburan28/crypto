@@ -92,6 +92,43 @@ generated-product comparison to estimate another gain.
 These measurements do not establish the 15 B/s target or performance on
 other GPUs/configurations.
 
+## Public preset audit
+
+The [native audit](benchmarks/tiled-state/native-audit.json) ran the normal
+`make audit-rtx-pro6000` command from public commit
+`ddeaa5484a3285f1d981cab1072d2dd4e610e8f5` on a separate RTX PRO 6000
+allocation. It measured:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **7.088708** | 7.071418–7.132367 |
+| DP34 collection | **6.962796** | 6.962669–6.963781 |
+
+All six repetitions completed 201,863,462,912 scalar updates with generated
+products enabled and tile mode 256. Each collection recorded 5,149 points,
+164,768 bytes and zero drops. GPU arithmetic and full client integration
+passed before timing. The baked 256-thread image was reused successfully.
+Runtime resources were 128 registers, zero local bytes and zero shared bytes.
+
+The [review](benchmarks/tiled-state/native-audit-review.json) verifies those
+counters and mode markers and recomputes the remote source digest over 65
+code/build files. The [committed source manifest](benchmarks/tiled-state/native-source-manifest.json)
+retains all 139 local input files, including the audit entry point. Subsequent
+publication changes add only documentation and evidence.
+
+This native audit validates the public command; it is not another paired
+gain. It retains corpus counts and sizes, while the controlled comparison
+supplies content-hash equality. Source/binary identity is recorded before
+the checks, without post-run hashes or full linked-client disassembly in
+this native artifact.
+
+Native raw SHA256:
+`499287b3dff4a7315a0ae9343d254aaa157ace5fffd810d85e49838f51b29758`.
+Source digest:
+`e4fc12d1774c9698c892c78d1fe19ed8e10387741b6a70c17fd28f46da1edb10`.
+Linked binary SHA256:
+`dd7e9840f13e664f2ac373c94f9c744dfd1095aafe27981adf349f39824c3294`.
+
 ## Compiler and validation evidence
 
 On the frozen generated-product source, the untiled control reproduces the
