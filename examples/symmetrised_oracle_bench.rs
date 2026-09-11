@@ -46,6 +46,9 @@ fn main() {
     if flag("--no-direct") {
         opts.direct_x = false;
     }
+    if flag("--no-x") {
+        opts.chained_x = false;
+    }
     if flag("--whole-group") {
         opts.targets_in_subgroup = false;
     }
