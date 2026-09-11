@@ -62,7 +62,7 @@ independently pinned verifier. The trusted verifier treats every bundled source
 and verifier file as inert data.
 
 The first independently reviewed publication of this trusted verifier is
-commit `f977ab014a5ba00aa6084542e2b09cc766a20092`. Its wrapper SHA-256 is
+commit `dd6b2057542df939b016a74d0488ecd553208347`. Its wrapper SHA-256 is
 `c3a2431c7d6c99d0e9efcf13b441d00e86937220bd9a883faa42c47f12026da9`,
 and its core SHA-256 is
 `307c4933fc18fdbd2385224a6eab78e6283509c765dece45fde6a07ca91310bb`.

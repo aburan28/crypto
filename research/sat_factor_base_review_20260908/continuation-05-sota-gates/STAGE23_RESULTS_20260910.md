@@ -144,7 +144,7 @@ rows, resources, ratios, and claim flags without executing bundled code.
 - Bundle manifest SHA-256:
   `0dc95216c59a5cd8f9aea6346c4336711f0fd4ef7b1c75481da9944118e5af48`.
 - Trusted verifier implementation commit:
-  `f977ab014a5ba00aa6084542e2b09cc766a20092`.
+  `dd6b2057542df939b016a74d0488ecd553208347`.
 - Trusted verifier wrapper SHA-256:
   `c3a2431c7d6c99d0e9efcf13b441d00e86937220bd9a883faa42c47f12026da9`.
 - Trusted verifier core SHA-256:
