@@ -302,6 +302,18 @@ fn display(report: &Value) {
                 if let Some(la) = st.get("linear_algebra").filter(|v| !v.is_null()) {
                     println!("         linear algebra: {}", linear_algebra_summary(la));
                 }
+                if let Some(v) = st.get("vs_rho").filter(|v| !v.is_null()) {
+                    println!(
+                        "         vs rho: descent {:.4}s/target, amortised {:.4}s/target, rho {:.4}s/target ({} of {} rho-verified); charged ratio {:.1}x, amortised {:.2}x; charged crossover {}",
+                        v["ic"]["descent_seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["ic"]["amortised_seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["rho"]["seconds_per_target"].as_f64().unwrap_or(0.0),
+                        v["rho"]["verified"], v["targets"],
+                        v["ratio"]["charged"].as_f64().unwrap_or(0.0),
+                        v["ratio"]["amortised"].as_f64().unwrap_or(0.0),
+                        v["verdict"]["charged_crossover"]
+                    );
+                }
             }
             if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
                 println!("Solutions: {} verified of {}", sol["verified"], sol["count"]);

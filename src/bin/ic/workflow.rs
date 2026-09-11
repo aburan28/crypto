@@ -50,8 +50,9 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    individual_log_with_pair_table, solve_factor_base_logs_from_relations, CollectedRelation,
-    DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, PairSumTable,
+    individual_log_with_pair_table, koblitz_signed_frobenius_rho_with_progress,
+    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
     RelationCollector, RelationWorkUnit,
 };
 use num_bigint::BigUint;
@@ -92,6 +93,10 @@ fn is_one_u32(v: &u32) -> bool {
 }
 fn is_one_u64(v: &u64) -> bool {
     *v == 1
+}
+fn baseline_is_default(b: &BaselineParams) -> bool {
+    let d = BaselineParams::default();
+    !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
 }
 /// Whether a document's curve fields name `c`.
 fn same_curve(degree: u32, curve_a: u8, subfield: u32, curve_b: u64, c: &KoblitzCurve) -> bool {
@@ -208,6 +213,29 @@ impl Default for CollectionParams {
     }
 }
 
+/// An in-process Pollard ρ baseline on the same targets, for the
+/// `vs_rho` comparison: the signed-Frobenius ρ already carries the
+/// Koblitz automorphism discount (`A = 2n` classes), so its wall time
+/// is the discounted generic cost.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct BaselineParams {
+    /// Run the ρ baseline after the descent.
+    pub rho: bool,
+    pub rho_seed: u64,
+    /// Walk iterations per restart before ρ gives up on a target.
+    pub rho_max_iterations: u64,
+}
+impl Default for BaselineParams {
+    fn default() -> Self {
+        Self {
+            rho: false,
+            rho_seed: 0x52_48_4f_2d_41_55_54_4f,
+            rho_max_iterations: 1 << 28,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WorkflowParams {
@@ -227,6 +255,8 @@ pub struct WorkflowParams {
     pub linear_algebra: LinearAlgebraParams,
     #[serde(default)]
     pub collection: CollectionParams,
+    #[serde(default, skip_serializing_if = "baseline_is_default")]
+    pub baseline: BaselineParams,
     pub factor_base: FactorBaseSource,
     #[serde(default)]
     pub targets: Vec<TargetSpec>,
@@ -407,6 +437,7 @@ const FACTOR_BASE_FILE: &str = "factor_base.json";
 const LOGS_FILE: &str = "logs.json";
 const SOLUTIONS_FILE: &str = "solutions.json";
 const RELATIONS_DIR: &str = "relations";
+const BASELINE_FILE: &str = "baseline.json";
 
 fn unit_path(dir: &Path, unit: usize) -> PathBuf {
     dir.join(RELATIONS_DIR).join(format!("unit-{unit:05}.json"))
@@ -953,8 +984,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         pending.len()
     ));
     // The pair table is shared with collection; built once per process.
-    if ic.strategy == DecompositionStrategy::PairTable && !pending.is_empty() && pair.is_none() {
+    let mut pair_table_seconds = 0.0f64;
+    if ic.strategy == DecompositionStrategy::PairTable && (!pending.is_empty() || p.baseline.rho) && pair.is_none() {
+        let tp = Instant::now();
         pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+        pair_table_seconds = tp.elapsed().as_secs_f64();
     }
     let mut solved_now = 0usize;
     let mut failed_now = 0usize;
@@ -1005,7 +1039,76 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     write_atomic(&state_path, &state)?;
     stage_reports.push(json!({"stage":"solve","status":if all_verified{"complete"}else{"failed"},"ran":true,
         "targets":p.targets.len(),"already_solved":already.len(),"solved_now":solved_now,"failed_now":failed_now,
+        "pair_table_seconds":pair_table_seconds,
         "elapsed_seconds":t2.elapsed().as_secs_f64()}));
+
+    // ── Baseline: signed-Frobenius ρ on the same targets, same process ──
+    if p.baseline.rho {
+        let t3 = Instant::now();
+        say(&format!("[ρ]   baseline: signed-Frobenius rho on {} targets …", p.targets.len()));
+        let mut rows = Vec::with_capacity(p.targets.len());
+        let (mut rho_seconds, mut rho_iterations, mut rho_verified) = (0.0f64, 0u64, 0usize);
+        for i in 0..p.targets.len() {
+            let k = known_scalar(&c, &p.targets[i])?;
+            let q = c.mul(c.generator(), &k);
+            let options = KoblitzSignedRhoOptions {
+                seed: p.baseline.rho_seed ^ (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15),
+                max_iterations_per_restart: p.baseline.rho_max_iterations,
+                progress_interval: 1 << 20,
+                ..KoblitzSignedRhoOptions::default()
+            };
+            let t = Instant::now();
+            let report = koblitz_signed_frobenius_rho_with_progress(&c, &q, &options, &mut |_| {});
+            let secs = t.elapsed().as_secs_f64();
+            let verified = report.verified && report.recovered_log.as_ref() == Some(&k);
+            rho_seconds += secs;
+            rho_iterations += report.iterations;
+            rho_verified += usize::from(verified);
+            rows.push(json!({"index":i,"verified":verified,"iterations":report.iterations,
+                "restarts":report.restarts_attempted,"seconds":secs,
+                "walk_group_additions":report.charges.walk_group_additions}));
+            say(&format!(
+                "      target {i}: rho {} after {} iterations ({:.3}s)",
+                if verified { "verified" } else { "FAILED" },
+                report.iterations,
+                secs
+            ));
+        }
+        let targets = p.targets.len().max(1) as f64;
+        let descent_total: f64 = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.elapsed_seconds).sum();
+        let descent_trials: usize = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.descent_trials).sum();
+        let precompute = state.select.elapsed_seconds + state.collect.elapsed_seconds + state.logs.elapsed_seconds;
+        let ic_charged = descent_total / targets;
+        let ic_amortised = (precompute + pair_table_seconds + descent_total) / targets;
+        let rho_per_target = rho_seconds / targets;
+        let ratio = |ic: f64| if ic > 0.0 { rho_per_target / ic } else { f64::INFINITY };
+        let vs_rho = json!({
+            "n":c.n,"subgroup_order":c.subgroup_order.to_string(),"targets":p.targets.len(),
+            "claim_boundary":"synthetic_known_answer",
+            "automorphism_discount":{"family":"signed Frobenius classes, A = 2n","n":c.n,"sqrt_2n":(2.0*c.n as f64).sqrt()},
+            "timing_class":{"charged":"algorithmic_charged: per-target descent wall (one decomposition and a lookup) against the ρ walk on the same target in the same process",
+                            "amortised":"select + collect + logs + pair-table wall divided over the targets, plus descent",
+                            "whole_process":"the same precompute counted once against the ρ total"},
+            "ic":{"descent_seconds_total":descent_total,"descent_seconds_per_target":ic_charged,"descent_trials_total":descent_trials,
+                  "precompute_seconds":precompute,"pair_table_seconds":pair_table_seconds,
+                  "amortised_seconds_per_target":ic_amortised,"verified":state.solved_targets},
+            "rho":{"seconds_total":rho_seconds,"seconds_per_target":rho_per_target,"iterations_total":rho_iterations,"verified":rho_verified,
+                   "seed":p.baseline.rho_seed,"max_iterations_per_restart":p.baseline.rho_max_iterations},
+            "ratio":{"charged":ratio(ic_charged),"amortised":ratio(ic_amortised)},
+            "verdict":{
+                "charged_crossover":all_verified && rho_verified == p.targets.len() && ic_charged < rho_per_target,
+                "charged_margin":if rho_per_target > 0.0 {1.0 - ic_charged / rho_per_target} else {0.0},
+                "amortised_crossover":all_verified && rho_verified == p.targets.len() && ic_amortised < rho_per_target,
+                "whole_process_crossover":all_verified && rho_verified == p.targets.len() && precompute + pair_table_seconds + descent_total < rho_seconds},
+            "targets_detail":rows,
+            "elapsed_seconds":t3.elapsed().as_secs_f64()});
+        write_atomic(&args.dir.join(BASELINE_FILE), &vs_rho)?;
+        stage_reports.push(json!({"stage":"baseline","status":"complete","ran":true,"vs_rho":vs_rho}));
+        say(&format!(
+            "[ρ]   baseline: rho {:.4}s/target ({} verified) vs descent {:.4}s/target, amortised {:.4}s/target — charged ratio {:.1}×, amortised {:.2}×",
+            rho_per_target, rho_verified, ic_charged, ic_amortised, ratio(ic_charged), ratio(ic_amortised)
+        ));
+    }
     let status = if all_verified { "complete" } else { "failed" };
     Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, Some(&solutions), overall_failed, begin, status))
 }
@@ -1034,7 +1137,7 @@ fn finish(
             "verified":s.solutions.iter().filter(|x| x.verified).count(),
             "items":s.solutions})),
         "failure":failure,
-        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"relations":RELATIONS_DIR,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE},
+        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"relations":RELATIONS_DIR,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE,"baseline":BASELINE_FILE},
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":experiment::resources(),
         "scope":"resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]})

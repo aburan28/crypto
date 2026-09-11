@@ -528,6 +528,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
             "summands":2,"solver":"pair_table","seed":1,
             "linear_algebra":{"mode":"sparse","sparse":{"wiedemann":{"block_m":2,"block_n":2}}},
             "collection":{"unit_trials":128,"units":2,"max_units":8},
+            "baseline":{"rho":true,"rho_max_iterations":100000},
             "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
             "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"}]
         }))
@@ -610,6 +611,16 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(stages[2]["ran"], false, "logs must be reused");
     assert_eq!(stages[3]["stage"], "solve");
     assert_eq!(stages[3]["solved_now"], 3);
+    // The rho baseline ran on the same three targets in this process.
+    assert_eq!(stages[4]["stage"], "baseline");
+    let vs = &stages[4]["vs_rho"];
+    assert_eq!(vs["targets"], 3);
+    assert_eq!(vs["rho"]["verified"], 3);
+    assert_eq!(vs["ic"]["verified"], 3);
+    assert!(vs["rho"]["seconds_per_target"].as_f64().unwrap() > 0.0);
+    assert!(vs["ratio"]["charged"].as_f64().unwrap() > 0.0);
+    assert!(vs["verdict"]["charged_crossover"].is_boolean());
+    assert!(dir.join("baseline.json").exists());
     for item in v["solutions"]["items"].as_array().unwrap() {
         assert_eq!(item["verified"], true);
         assert_eq!(item["expected"], item["recovered"]);

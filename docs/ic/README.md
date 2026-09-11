@@ -361,6 +361,30 @@ stage with its units, the logs stage with its verification counts and
 linear-algebra statistics — and every solution with its expected and
 recovered scalar.
 
+### The ρ baseline (`vs_rho`)
+
+    "baseline":{"rho":true,"rho_seed":5931241263826122831,"rho_max_iterations":268435456}
+
+With `baseline.rho` the driver runs the signed-Frobenius Pollard ρ
+(`koblitz_signed_frobenius_rho_with_progress`, which already carries the
+Koblitz automorphism discount: it walks the `A = 2n` classes) on the
+same known-answer targets, in the same process, after the descent, and
+writes `baseline.json` plus a `vs_rho` block in the report with the
+three timing classes the boundary ledger distinguishes:
+
+- **charged** — per-target descent wall (one decomposition and a lookup
+  against the reused database) against the ρ walk on the same target;
+- **amortised** — select + collect + logs + pair-table wall divided over
+  the targets, plus the descent;
+- **whole process** — the precompute counted once against the ρ total.
+
+Each comes with the ratio `ρ / IC` and a boolean verdict; a verdict is
+`true` only when every target was solved *and* ρ-verified. The ledger's
+`vs_rho` row asks for exactly these fields (`timing_class`,
+`automorphism_discount`, both costs, `claim_boundary`); the report
+carries them, but promoting a row still goes through the ledger's own
+autolab and independent-replay process.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json
