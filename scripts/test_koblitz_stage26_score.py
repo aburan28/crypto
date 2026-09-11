@@ -22,6 +22,30 @@ CELLS = {
 
 
 class Stage26ScoreTests(unittest.TestCase):
+    def test_artifact_accounting_requires_exact_five(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "artifacts.json"
+            names = [f"koblitz-stage26-{cell}-{score.EXPECTED_RUN}" for cell in sorted(CELLS)]
+            names.append(f"koblitz-stage26-tools-{score.EXPECTED_RUN}")
+            rows = [
+                {
+                    "id": index + 1,
+                    "name": name,
+                    "size_in_bytes": 100,
+                    "digest": "sha256:" + f"{index + 1:064x}",
+                    "expires_at": "2026-12-10T00:00:00Z",
+                    "expired": False,
+                    "workflow_run": {"id": score.EXPECTED_RUN, "head_sha": score.EXPECTED_COMMIT},
+                }
+                for index, name in enumerate(names)
+            ]
+            path.write_text(json.dumps({"total_count": 5, "artifacts": rows}))
+            self.assertEqual(set(score.artifact_accounting(path, CELLS)), set(names))
+            rows[0]["expired"] = True
+            path.write_text(json.dumps({"total_count": 5, "artifacts": rows}))
+            with self.assertRaises(score.Stage26ScoreError):
+                score.artifact_accounting(path, CELLS)
+
     def test_completion_gate_audit_preserves_open_gates(self) -> None:
         value = score.completion_gate_audit()
         self.assertEqual(value["2_same_instance_backend_matrix"]["status"], "partial")

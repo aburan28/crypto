@@ -170,6 +170,26 @@ def workflow_accounting(path: Path, expected_cells: set[str]) -> dict[str, Any]:
     }
 
 
+def artifact_accounting(path: Path, expected_cells: set[str]) -> dict[str, Any]:
+    value = read_json(path, "Stage-26 artifact metadata")
+    rows = value.get("artifacts")
+    require(value.get("total_count") == 5 and isinstance(rows, list) and len(rows) == 5, "Stage-26 artifact count changed")
+    expected = {f"koblitz-stage26-{cell}-{EXPECTED_RUN}" for cell in expected_cells}
+    expected.add(f"koblitz-stage26-tools-{EXPECTED_RUN}")
+    require({row.get("name") for row in rows} == expected, "Stage-26 artifact names changed")
+    records = {}
+    for row in rows:
+        name = row["name"]
+        require(row.get("expired") is False and isinstance(row.get("id"), int) and row["id"] > 0, f"Stage-26 artifact state changed: {name}")
+        require(isinstance(row.get("size_in_bytes"), int) and row["size_in_bytes"] > 0, f"Stage-26 artifact size changed: {name}")
+        digest = row.get("digest", "")
+        phase_b.require_hex64(digest.removeprefix("sha256:"), f"Stage-26 artifact digest {name}")
+        source = row.get("workflow_run", {})
+        require(source.get("id") == EXPECTED_RUN and source.get("head_sha") == EXPECTED_COMMIT, f"Stage-26 artifact source changed: {name}")
+        records[name] = {key: row[key] for key in ("id", "name", "size_in_bytes", "digest", "expires_at")}
+    return records
+
+
 def matched_direct_mitm() -> dict[str, Any]:
     verification = stage27_verifier.verify()
     score = read_json(DIRECT_MITM_SCORE, "matched direct-MITM score")
@@ -487,6 +507,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         })
     tool_accounting = tool_costs(args.tools_root)
     workflow = workflow_accounting(args.workflow_metadata, set(cell_roots))
+    artifacts = artifact_accounting(args.artifact_metadata, set(cell_roots))
     direct_mitm = matched_direct_mitm()
     unknown_scalar = unknown_scalar_control()
     relation_yield = natural_relation_yield_control()
@@ -500,6 +521,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         "phase_a_seal_sha256": phase_b.sha256_file(args.phase_a_seal, "Phase-A seal"),
         "phase_a_oracle_sha256": raw_seal["oracle_ledger_sha256"],
         "workflow": workflow,
+        "artifacts": artifacts,
         "cells": cells,
         "instances": 160,
         "backend_rows": 480,
@@ -561,6 +583,7 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--cell-root", type=Path, action="append", required=True)
     value.add_argument("--tools-root", type=Path, required=True)
     value.add_argument("--workflow-metadata", type=Path, required=True)
+    value.add_argument("--artifact-metadata", type=Path, required=True)
     value.add_argument("--phase-a-seal", type=Path, required=True)
     value.add_argument("--oracle-ledger", type=Path, required=True)
     value.add_argument("--protocol", type=Path, default=DEFAULT_PROTOCOL)
@@ -570,7 +593,7 @@ def parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = parser().parse_args()
-    for name in ("packet", "tools_root", "workflow_metadata", "phase_a_seal", "oracle_ledger", "protocol"):
+    for name in ("packet", "tools_root", "workflow_metadata", "artifact_metadata", "phase_a_seal", "oracle_ledger", "protocol"):
         setattr(args, name, getattr(args, name).resolve())
     args.cell_root = [root.resolve() for root in args.cell_root]
     args.output = args.output.resolve()
