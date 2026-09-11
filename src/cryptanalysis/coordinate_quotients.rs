@@ -795,7 +795,16 @@ pub fn interpolate_quotient_boxed(
     let mut cache = EvalCache::default();
     let mut identities_seen = Vec::new();
     let mut last_len = 0usize;
-    for d in 1..=max_total_degree {
+    // Experiment overrides: `QUOTIENT_START_DEGREE` skips the lower total
+    // degrees (one kernel computation on the full box instead of one per
+    // degree; the relation found is then the sparsest in the box, not of
+    // minimal total degree), `QUOTIENT_MAX_MONOMIALS` raises the cap.
+    let env_u32 = |k: &str| std::env::var(k).ok().and_then(|v| v.parse::<u32>().ok());
+    let start = env_u32("QUOTIENT_START_DEGREE").unwrap_or(1).max(1);
+    let max_monomials = env_u32("QUOTIENT_MAX_MONOMIALS")
+        .map(|m| m as usize)
+        .unwrap_or(max_monomials);
+    for d in start..=max_total_degree {
         let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d)
             .into_iter()
             .filter(|e| e.iter().zip(&var_caps).all(|(k, c)| k <= c))
