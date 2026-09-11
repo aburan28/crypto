@@ -252,6 +252,10 @@ class Stage21ControlPlaneTests(unittest.TestCase):
             identity = bridge.tool_identity(shim, "shim fixture")
             self.assertEqual(identity["path"], str(shim.absolute()))
             self.assertEqual(identity["sha256"], bridge.sha256_bytes(Path(sys.executable).resolve().read_bytes()))
+            environment = bridge.safe_child_environment(
+                cargo_home=Path(directory), rustc=shim
+            )
+            self.assertEqual(environment["RUSTC"], str(shim.absolute()))
 
     def test_blake3_vectors_and_derivable_payload_tampering(self) -> None:
         self.assertEqual(
