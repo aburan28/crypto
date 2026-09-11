@@ -1,0 +1,724 @@
+{
+  "schema": "koblitz_pdp_phase_b_result_summary.v1",
+  "recorded_at": "2026-09-10",
+  "status": "post_run_truth_scoring_complete",
+  "evidence_class": "finite_public_synthetic_balanced_pdp_measurement",
+  "terminal_artifact_times_utc": {
+    "run_sealed_at": "2026-09-11T01:17:28.833548Z",
+    "score_created_at": "2026-09-11T01:20:57.030960Z"
+  },
+  "source_revisions": {
+    "phase_a_preparer": {
+      "commit": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88",
+      "dirty": false
+    },
+    "phase_b_runner_and_scorer": {
+      "commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
+      "dirty": false
+    },
+    "cryptominisat": "7ae1b4a74259cdce223a584281fb8f090bbd3eed",
+    "wdsat": "55d55b2620d768d9f7c78dcd8990a0689533c1d0"
+  },
+  "panel": {
+    "selected_instances": 160,
+    "source_system_clusters": 160,
+    "largest_source_system_cluster": 1,
+    "backend_outcomes": 480,
+    "process_receipts_in_terminal_run": 899,
+    "cells": 4,
+    "instances_per_cell": 40,
+    "class_allocation_per_cell": {
+      "decomposable": 20,
+      "nondecomposable": 20
+    },
+    "backend_order": [
+      "native-xor",
+      "wdsat",
+      "cryptominisat"
+    ],
+    "full_panel_scored": true
+  },
+  "outcome_totals": {
+    "correct": 261,
+    "true_positive": 141,
+    "true_negative": 120,
+    "false_positive": 0,
+    "false_negative": 0,
+    "inconclusive": 219,
+    "all_rows_correct_or_inconclusive": true
+  },
+  "per_backend": [
+    {
+      "backend": "cryptominisat",
+      "outcomes": 160,
+      "correct": 97,
+      "true_positive": 57,
+      "true_negative": 40,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 63,
+      "status_counts": {
+        "sat": 57,
+        "unsat": 40,
+        "timeout_inconclusive": 63
+      },
+      "total_core_seconds": 7390.357624000003,
+      "summed_process_wall_seconds": 8177.817223744234,
+      "peak_rss_bytes": 377995264,
+      "conflicts_reported": 97,
+      "conflict_coverage_denominator": 160,
+      "conflicts_sum": 21721752,
+      "conflicts_median_reported_rows": 51280,
+      "conflicts_min": 0,
+      "conflicts_max": 2870087,
+      "conflict_values_sha256": "a09e7fc0656353d17cb715df842a6a53675fe5a87c1d94fa7000f1f801abceae"
+    },
+    {
+      "backend": "native-xor",
+      "outcomes": 160,
+      "correct": 82,
+      "true_positive": 42,
+      "true_negative": 40,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 78,
+      "status_counts": {
+        "sat": 42,
+        "unsat": 40,
+        "unknown_inconclusive": 78
+      },
+      "total_core_seconds": 546.035259,
+      "summed_process_wall_seconds": 621.183327006525,
+      "peak_rss_bytes": 171311104,
+      "conflicts_reported": 160,
+      "conflict_coverage_denominator": 160,
+      "conflicts_sum": 9233732,
+      "conflicts_median_reported_rows": 29265.5,
+      "conflicts_min": 496,
+      "conflicts_max": 100000,
+      "conflict_values_sha256": "9d643c769bdbadaffb47dd762e69acd8c7f1806e096e872086c89851ef98e6c3"
+    },
+    {
+      "backend": "wdsat",
+      "outcomes": 160,
+      "correct": 82,
+      "true_positive": 42,
+      "true_negative": 40,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 78,
+      "status_counts": {
+        "sat": 42,
+        "unsat": 40,
+        "timeout_inconclusive": 78
+      },
+      "total_core_seconds": 8499.206871000002,
+      "summed_process_wall_seconds": 9497.848570470465,
+      "peak_rss_bytes": 14581760,
+      "conflicts_reported": 82,
+      "conflict_coverage_denominator": 160,
+      "conflicts_sum": 10907041,
+      "conflicts_median_reported_rows": 30712,
+      "conflicts_min": 7,
+      "conflicts_max": 6121750,
+      "conflict_values_sha256": "f535ca4912ce19c2265b06193c8af225d13bcf4ed6c5aad48156e8d66280f2a3"
+    }
+  ],
+  "per_cell_backend": [
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "backend": "cryptominisat",
+      "outcomes": 40,
+      "correct": 17,
+      "true_positive": 17,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 23,
+      "total_core_seconds": 2967.7976289999997,
+      "summed_process_wall_seconds": 3304.7471811665455,
+      "peak_rss_bytes": 299646976,
+      "conflicts_reported": 17,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 16996950,
+      "conflicts_median_reported_rows": 839886
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "backend": "native-xor",
+      "outcomes": 40,
+      "correct": 2,
+      "true_positive": 2,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 38,
+      "total_core_seconds": 81.05744500000002,
+      "summed_process_wall_seconds": 89.96877828985453,
+      "peak_rss_bytes": 54329344,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 3814284,
+      "conflicts_median_reported_rows": 100000
+    },
+    {
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "backend": "wdsat",
+      "outcomes": 40,
+      "correct": 1,
+      "true_positive": 1,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 39,
+      "total_core_seconds": 4246.896465,
+      "summed_process_wall_seconds": 4701.108792331419,
+      "peak_rss_bytes": 12288000,
+      "conflicts_reported": 1,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 6121750,
+      "conflicts_median_reported_rows": 6121750
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "backend": "cryptominisat",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 48.107356999999986,
+      "summed_process_wall_seconds": 52.77818187291268,
+      "peak_rss_bytes": 14237696,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 3460100,
+      "conflicts_median_reported_rows": 104966.5
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "backend": "native-xor",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 18.782657999999998,
+      "summed_process_wall_seconds": 20.050318790599704,
+      "peak_rss_bytes": 15417344,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 696384,
+      "conflicts_median_reported_rows": 21541.5
+    },
+    {
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "backend": "wdsat",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 6.937482,
+      "summed_process_wall_seconds": 8.070512962643988,
+      "peak_rss_bytes": 10682368,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 791042,
+      "conflicts_median_reported_rows": 26683
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "backend": "cryptominisat",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 16.399480999999998,
+      "summed_process_wall_seconds": 19.706110456492752,
+      "peak_rss_bytes": 11354112,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 1264702,
+      "conflicts_median_reported_rows": 36696.5
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "backend": "native-xor",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 20.508181999999994,
+      "summed_process_wall_seconds": 23.843649837072007,
+      "peak_rss_bytes": 14663680,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 723064,
+      "conflicts_median_reported_rows": 23457
+    },
+    {
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "backend": "wdsat",
+      "outcomes": 40,
+      "correct": 40,
+      "true_positive": 20,
+      "true_negative": 20,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 0,
+      "total_core_seconds": 7.407406,
+      "summed_process_wall_seconds": 8.88866646331735,
+      "peak_rss_bytes": 10747904,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 686457,
+      "conflicts_median_reported_rows": 23672
+    },
+    {
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "backend": "cryptominisat",
+      "outcomes": 40,
+      "correct": 0,
+      "true_positive": 0,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 40,
+      "total_core_seconds": 4358.053157000001,
+      "summed_process_wall_seconds": 4800.585750248283,
+      "peak_rss_bytes": 377995264,
+      "conflicts_reported": 0,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 0,
+      "conflicts_median_reported_rows": null
+    },
+    {
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "backend": "native-xor",
+      "outcomes": 40,
+      "correct": 0,
+      "true_positive": 0,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 40,
+      "total_core_seconds": 425.686974,
+      "summed_process_wall_seconds": 487.3205800889991,
+      "peak_rss_bytes": 171311104,
+      "conflicts_reported": 40,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 4000000,
+      "conflicts_median_reported_rows": 100000
+    },
+    {
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "backend": "wdsat",
+      "outcomes": 40,
+      "correct": 1,
+      "true_positive": 1,
+      "true_negative": 0,
+      "false_positive": 0,
+      "false_negative": 0,
+      "inconclusive": 39,
+      "total_core_seconds": 4237.965518,
+      "summed_process_wall_seconds": 4779.780598713085,
+      "peak_rss_bytes": 14581760,
+      "conflicts_reported": 1,
+      "conflict_coverage_denominator": 40,
+      "conflicts_sum": 3307792,
+      "conflicts_median_reported_rows": 3307792
+    }
+  ],
+  "resource_semantics": {
+    "per_cell_backend_scope": "solver process plus conditional external point-witness validator for WDSat and CryptoMiniSat; native-XOR process includes regeneration, solving, source-model validation, and exact lifted point-witness validation",
+    "summed_process_wall_seconds": "sum of fresh child-process wall times; not a whole-driver elapsed interval",
+    "peak_rss_bytes": "maximum fresh-process high-water mark; not summed RSS and not simultaneous aggregate parallel memory",
+    "single_core_elapsed_seconds": null,
+    "single_core_seconds": "legacy alias of total_core_seconds, equal to user plus system CPU; not measured single-core elapsed time",
+    "conflict_median": "median over rows that reported a numeric conflict count; missing timeout conflict counts are not imputed"
+  },
+  "run_accounting": {
+    "backend_child_processes": {
+      "total_core_seconds": 16435.599754,
+      "summed_process_wall_seconds": 18296.849121221225
+    },
+    "all_charged_child_processes": {
+      "total_core_seconds": 16443.830358,
+      "summed_process_wall_seconds": 18306.751722359215,
+      "peak_rss_bytes": 377995264
+    },
+    "non_backend_child_processes": {
+      "total_core_seconds": 8.230604,
+      "summed_process_wall_seconds": 9.90260113799
+    },
+    "whole_driver_outer_receipt": {
+      "total_core_seconds": 16494.118381,
+      "wall_seconds": 18373.393590125022,
+      "peak_rss_bytes": 377995264
+    },
+    "outer_minus_charged_children": {
+      "total_core_seconds": 50.288023,
+      "wall_seconds": 66.641867765808
+    },
+    "double_count_rule": "The inclusive whole-driver receipt encloses the child processes and must not be added to the child sums. Campaign totals use the outer receipt once."
+  },
+  "tool_builds": {
+    "rust": {
+      "source_commit": "62be8cf6dfdaf1aec54e0a8f290ed55b822229a0",
+      "receipt_sha256": "de34841bbf582143a41ae01d50b6fc5e029626e7c09cd254b895a5c1d652cb9a",
+      "receipt_resources": {
+        "total_core_seconds": 144.840462,
+        "summed_process_wall_seconds": 96.601535040885,
+        "largest_child_peak_rss_bytes": 937918464,
+        "aggregate_process_tree_peak_rss_bytes": null
+      },
+      "outer_resources": {
+        "total_core_seconds": 145.970568,
+        "wall_seconds": 98.08739075006451,
+        "peak_rss_bytes": 937918464
+      }
+    },
+    "cryptominisat": {
+      "source_commit": "7ae1b4a74259cdce223a584281fb8f090bbd3eed",
+      "receipt_sha256": "c2a9be07fb510e378b935433c8c091dd4f515e2f05e24154f8ef00e83fc191f4",
+      "receipt_resources": {
+        "total_core_seconds": 147.907117,
+        "summed_process_wall_seconds": 95.479146290105,
+        "largest_child_peak_rss_bytes": 1053556736,
+        "aggregate_process_tree_peak_rss_bytes": null
+      },
+      "outer_resources": {
+        "total_core_seconds": 149.271767,
+        "wall_seconds": 97.29112316598184,
+        "peak_rss_bytes": 1053556736
+      }
+    },
+    "wdsat": {
+      "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+      "receipt_sha256": "7239950c441ca46554bbabdbd3c9e4768adfa6b2c784bd1b6696446b22054fa7",
+      "receipt_resources": {
+        "total_core_seconds": 1.077924,
+        "summed_process_wall_seconds": 1.451572334045,
+        "largest_child_peak_rss_bytes": 57933824,
+        "aggregate_process_tree_peak_rss_bytes": null
+      },
+      "outer_resources": {
+        "total_core_seconds": 1.809385,
+        "wall_seconds": 2.250140583026223,
+        "peak_rss_bytes": 57933824
+      }
+    },
+    "double_count_rule": "Campaign totals use each final outer builder receipt once and do not add the nested receipt process sums."
+  },
+  "campaign_accounting": {
+    "successful_terminal_path": {
+      "component_labels": [
+        "phase_a_preparer",
+        "phase_b_stage",
+        "rust_build_final",
+        "cryptominisat_build_final",
+        "wdsat_build_final",
+        "phase_b_run_final",
+        "phase_b_score"
+      ],
+      "components": 7,
+      "total_core_seconds": 17864.202394,
+      "summed_receipt_wall_seconds": 19682.45256249921,
+      "maximum_individual_peak_rss_bytes": 2182103040
+    },
+    "all_listed_receipts": {
+      "components": 21,
+      "successful_returncodes": 15,
+      "failed_returncodes": 6,
+      "total_core_seconds": 18546.173826000002,
+      "summed_receipt_wall_seconds": 20239.841542497976,
+      "maximum_individual_peak_rss_bytes": 2182103040
+    },
+    "total_semantics": "Arithmetic sums of the listed non-nested top-level receipts. Summed receipt wall is not elapsed calendar time. Peak RSS is the maximum individual high-water mark, not a sum or simultaneous aggregate."
+  },
+  "receipt_catalog": [
+    {
+      "label": "phase_a_preparer",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-a-20260910/preparer.metrics.json",
+      "sha256": "f88ddd495335e981ca1df201d51fcb8af3a78670e0e357afcf6733b35099df91",
+      "returncode": 0,
+      "total_core_seconds": 1072.186495,
+      "wall_seconds": 1109.6102739589987,
+      "peak_rss_bytes": 2182103040
+    },
+    {
+      "label": "phase_b_stage",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-stage-meter-20260910/stage.metrics.json",
+      "sha256": "b7e7adffabb8c4a356b9beb2d2141c863d8c63a5c32c04726a9a21f127b829b9",
+      "returncode": 0,
+      "total_core_seconds": 0.150859,
+      "wall_seconds": 0.5376370410667732,
+      "peak_rss_bytes": 25296896
+    },
+    {
+      "label": "rust_build_final",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-03-outer-20260910/builder.metrics.json",
+      "sha256": "a229508c5bf3fede9e96b4bf6b517e6020a863cb7f19661747049b97414a5d60",
+      "returncode": 0,
+      "total_core_seconds": 145.970568,
+      "wall_seconds": 98.08739075006451,
+      "peak_rss_bytes": 937918464
+    },
+    {
+      "label": "cryptominisat_build_final",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-outer-20260910/builder.metrics.json",
+      "sha256": "d713de21482077368087d98780f6aa4aee372c0cb4e0562b32dea032ebf21f0a",
+      "returncode": 0,
+      "total_core_seconds": 149.271767,
+      "wall_seconds": 97.29112316598184,
+      "peak_rss_bytes": 1053556736
+    },
+    {
+      "label": "wdsat_build_final",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-outer-20260910/builder.metrics.json",
+      "sha256": "71a4a2df3060a0f246dcf083f4163a6cd460d22a594074640e4cabf70895fd57",
+      "returncode": 0,
+      "total_core_seconds": 1.809385,
+      "wall_seconds": 2.250140583026223,
+      "peak_rss_bytes": 57933824
+    },
+    {
+      "label": "phase_b_run_final",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-outer-successor-01-20260910/driver.metrics.json",
+      "sha256": "b8a7ca762135112209c4981e666286fd2b59f0a9576df12d34a9376b86f34b22",
+      "returncode": 0,
+      "total_core_seconds": 16494.118381,
+      "wall_seconds": 18373.393590125022,
+      "peak_rss_bytes": 377995264
+    },
+    {
+      "label": "phase_b_score",
+      "disposition": "terminal_success_path",
+      "included_in_successful_terminal_path": true,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-score-outer-successor-01-20260910/scorer.metrics.json",
+      "sha256": "0e71b1de01d81b2ae30c5f9f0cf8f3b381a8857225593b3de7a5b2af42031800",
+      "returncode": 0,
+      "total_core_seconds": 0.694939,
+      "wall_seconds": 1.282406875048764,
+      "peak_rss_bytes": 49135616
+    },
+    {
+      "label": "plan_preflight_initial",
+      "disposition": "failed_retained_aggregate_resource_validation",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-plan-preflight-20260910/plan.metrics.json",
+      "sha256": "98686d0b2e2cfc723f4bf8eba393a68c79e6e127eb14e51868bb7789e8c178d8",
+      "returncode": 1,
+      "total_core_seconds": 0.303718,
+      "wall_seconds": 0.49683683295734227,
+      "peak_rss_bytes": 38567936
+    },
+    {
+      "label": "plan_preflight_successor_01",
+      "disposition": "superseded_preflight",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-plan-preflight-successor-01-20260910/plan.metrics.json",
+      "sha256": "eecdba2f0d5ee2151e1b69d8a5e41fedb3ca5cf36d68d19fba08b4133514c31b",
+      "returncode": 0,
+      "total_core_seconds": 0.350476,
+      "wall_seconds": 0.5950535419397056,
+      "peak_rss_bytes": 36651008
+    },
+    {
+      "label": "plan_preflight_successor_02",
+      "disposition": "selected_supporting_preflight",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-plan-preflight-successor-02-20260910/plan.metrics.json",
+      "sha256": "f2abcd527e0599ef064ec71156ab5684cf9ab95f995805d60994fd09e9deae8a",
+      "returncode": 0,
+      "total_core_seconds": 0.343995,
+      "wall_seconds": 0.45254879200365394,
+      "peak_rss_bytes": 36339712
+    },
+    {
+      "label": "rust_build_initial",
+      "disposition": "failed_retained_vendor_step",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-outer-20260910/builder.metrics.json",
+      "sha256": "b5572df483fb33fe5f8b9f77d7c39339778cd06359503dddd58d34269c2fd4c1",
+      "returncode": 2,
+      "total_core_seconds": 1.112891,
+      "wall_seconds": 2.357244790997356,
+      "peak_rss_bytes": 63307776
+    },
+    {
+      "label": "rust_build_successor_01",
+      "disposition": "superseded_clean_outer_build",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-01-outer-20260910/builder.metrics.json",
+      "sha256": "2b29d6043a796bd577d2ef31ea2103beb30068b985ee0418e4d13bd2c198a7ee",
+      "returncode": 0,
+      "total_core_seconds": 199.908939,
+      "wall_seconds": 201.41312145791017,
+      "peak_rss_bytes": 808189952
+    },
+    {
+      "label": "rust_build_successor_02",
+      "disposition": "superseded_clean_outer_build",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-build-successor-02-outer-20260910/builder.metrics.json",
+      "sha256": "4e8f472aba896e1f7c83c8c12a5ec33d99d1970ba8cc533c5214272abf4e109a",
+      "returncode": 0,
+      "total_core_seconds": 141.788862,
+      "wall_seconds": 96.28134099999443,
+      "peak_rss_bytes": 980320256
+    },
+    {
+      "label": "rust_dependency_fetch_initial",
+      "disposition": "failed_retained_permission_error",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-dependency-fetch-20260910/fetch.metrics.json",
+      "sha256": "53da0618023be05e7c9866b223916e1069f0b7cae8c55f780b5485b8fa4dc33a",
+      "returncode": 101,
+      "total_core_seconds": 0.11011,
+      "wall_seconds": 0.5346283329417929,
+      "peak_rss_bytes": 40714240
+    },
+    {
+      "label": "rust_dependency_fetch_successor_01",
+      "disposition": "supporting_prerequisite_success",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-rust-dependency-fetch-successor-01-20260910/fetch.metrics.json",
+      "sha256": "7ca8962b35010950c41b2fca398de1d3908c3823ede0ddd6c04e1ed174649ef0",
+      "returncode": 0,
+      "total_core_seconds": 0.14898,
+      "wall_seconds": 0.37695183302275836,
+      "peak_rss_bytes": 42090496
+    },
+    {
+      "label": "cryptominisat_build_initial",
+      "disposition": "failed_retained_binary_copy_step",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-outer-20260910/builder.metrics.json",
+      "sha256": "200e0e5923adb1216feb9acb3a99ad7ea3e88cfc75475521b1bf4a48f23b1b25",
+      "returncode": 2,
+      "total_core_seconds": 149.689779,
+      "wall_seconds": 107.51225762499962,
+      "peak_rss_bytes": 268091392
+    },
+    {
+      "label": "cryptominisat_build_successor_01",
+      "disposition": "superseded_clean_outer_build",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-01-outer-20260910/builder.metrics.json",
+      "sha256": "970b93d771d12ea40497d3c701e1fe658a23df302b9894d54cc6c5921520255b",
+      "returncode": 0,
+      "total_core_seconds": 154.34093,
+      "wall_seconds": 104.28869829198811,
+      "peak_rss_bytes": 956973056
+    },
+    {
+      "label": "wdsat_build_initial",
+      "disposition": "failed_retained_builder_validation_runtime",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-build-outer-20260910/builder.metrics.json",
+      "sha256": "b4c0aac03c2f6b024e76d503db8528515c3580132370058e9baebe2a40995f04",
+      "returncode": 1,
+      "total_core_seconds": 2.408927,
+      "wall_seconds": 3.174999332986772,
+      "peak_rss_bytes": 58032128
+    },
+    {
+      "label": "wdsat_build_successor_01",
+      "disposition": "superseded_clean_outer_build",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-build-successor-01-outer-20260910/builder.metrics.json",
+      "sha256": "35d1784308b3ff62f3bdb886ce1cb7bee20ad9d9fc71d1df2f0eafeb6e0e1583",
+      "returncode": 0,
+      "total_core_seconds": 1.845063,
+      "wall_seconds": 2.431116957915947,
+      "peak_rss_bytes": 57376768
+    },
+    {
+      "label": "wdsat_build_successor_02",
+      "disposition": "superseded_by_capacity_successor",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-build-successor-02-outer-20260910/builder.metrics.json",
+      "sha256": "d13688db3b96f5b17225846e4833ffcd09dd003d6651f02bb7b750664fcade07",
+      "returncode": 0,
+      "total_core_seconds": 1.603593,
+      "wall_seconds": 2.3450874170521274,
+      "peak_rss_bytes": 57851904
+    },
+    {
+      "label": "phase_b_run_initial",
+      "disposition": "failed_retained_wdsat_capacity_gate_no_solver_started",
+      "included_in_successful_terminal_path": false,
+      "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-outer-20260910/driver.metrics.json",
+      "sha256": "0b69e594bb3014dc84e436af9a8849b1ada49aca771e56450e6db9369c6bdede",
+      "returncode": 2,
+      "total_core_seconds": 28.015169,
+      "wall_seconds": 35.129093792056665,
+      "peak_rss_bytes": 39223296
+    }
+  ],
+  "custody_hashes": {
+    "phase_a_protocol_sha256": "69544ee3a0b0250dd720e1b498e8f03cdf7d4427ab11bfb551325cf29b86fd53",
+    "phase_a_seal_sha256": "01b7fbab8bccbb45c7e3e6a46640ff5997cefee303416afd9671da7cc2e13632",
+    "phase_a_blind_bundle_sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77",
+    "phase_a_oracle_sha256": "0e4ac5d9dd92b11e6b896342eeef076e985c12ad931c1acc97e0d9c2e626890a",
+    "phase_b_protocol_sha256": "5de2d43527286054ad348b182145d07a988b1236a141377d01b0e7f6f5a38ddb",
+    "run_inventory_sha256": "bb4377054700edf3049a7590b9b9fdd8fe6a0c57b6a216a7928dd211dc74a12c",
+    "run_seal_file_sha256": "e528f9bbaa6b7554224379cb32f7b1ed5be0a3cb8bde15e56dee7d1a5f75b538",
+    "run_summary_sha256": "198a3ec9a4569f1a73a51ea92fa3d525475af038223408a3b1ca2de780459003",
+    "score_sha256": "cc6a999e4438a01b44c187039f1fa7ff684d2c8f38192d7c4032159d62bf806e",
+    "score_seal_file_sha256": "675f951516ecd9a81ac11f669dc8bf56a321d5da0a59b60cb04b784a7f0e7cab",
+    "sizing_failure_result_sha256": "29d58c84395a00e6685862051b21c021f97a0153eab34ca6580fe16db8427dde",
+    "sizing_failure_partial_run_inventory_sha256": "f2c5a9125bd8cb59901d6d365484715d1bbfff243fb94a0d99ce3234ca87fffb",
+    "sizing_failure_seal_payload_sha256": "2d4e46527c5b6fb36c55f5a2106d8b23913b9ca93517df3991fdcf34afb2ef0d"
+  },
+  "tool_identities": {
+    "exporter_sha256": "48c63078f2da6e594fef0038c6ecc13c34beb569f35660b6c39532123a2358e2",
+    "backend_sha256": "14ec9a3d976371b6b100fa32a4ab916f50ddc88aad18fb6c6df8e81de925f96d",
+    "cryptominisat_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+    "wdsat_sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185",
+    "wdsat_config_sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352",
+    "process_meter_sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+  },
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "full_cost_blockers_from_score": [
+    "measured single-core elapsed time is unavailable; legacy single_core_seconds aliases total CPU",
+    "outer build-driver overhead and simultaneous aggregate build memory require separate measurement",
+    "Phase-B costs exclude Phase-A preparation and the remaining end-to-end index-calculus stages"
+  ],
+  "additive_accounting_note": "This summary separately includes the Phase-A preparer and final outer build-driver receipts, but does not mutate the frozen score or close simultaneous aggregate build-memory, prior source/toolchain/system-dependency, or end-to-end index-calculus cost gaps.",
+  "scientific_blockers": [
+    "The 50/50 balanced panel measures conditional solver behavior and does not estimate natural target prevalence or relation yield.",
+    "The panel contains no relation collection, rank accumulation, modular linear algebra, unknown-scalar recovery, or same-target automorphism-optimized Pollard-rho comparison.",
+    "Magma F4 was not executed in Phase B; no matched process-scoped Magma CPU, RSS, conflict, or point-witness evidence exists.",
+    "A complete full-cost comparison still lacks measured single-core elapsed time and simultaneous aggregate memory for parallel builds.",
+    "No unaffiliated external reproduction or completed source-pinned novelty review exists."
+  ],
+  "claim_boundary": "Balanced public toy PDP scoring only. Every terminal backend result was correct and all other outcomes remained inconclusive. This is not natural relation-yield evidence, an end-to-end index-calculus result, a Pollard-rho crossover, a novelty finding, an external reproduction, a key-recovery result, or a Koblitz index-calculus SOTA claim."
+}

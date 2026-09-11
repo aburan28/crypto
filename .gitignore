@@ -1,5 +1,8 @@
 /target
 Cargo.lock
+# Stage 20 deliberately freezes a separate lockfile for its metered,
+# source-archived Rust build while the library root lock remains ignored.
+!research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock
 
 # macOS resource-fork sidecar files (created on filesystems mounted via
 # Finder / SMB / etc.). Empty payload, just filesystem cruft.

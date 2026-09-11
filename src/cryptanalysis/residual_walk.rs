@@ -435,6 +435,15 @@ impl Curve {
 
 // ── Instance generation ────────────────────────────────────────────────
 
+/// The order-3 automorphism `ζ(x, y) = (ωx, y)` of a `j = 0` curve
+/// `y² = x³ + b` over `p ≡ 1 (mod 3)`, acting on the prime-order
+/// subgroup as multiplication by `λ` (`λ² + λ + 1 ≡ 0 mod n`).
+#[derive(Clone, Copy, Debug, Serialize)]
+pub struct Automorphism {
+    pub omega: u64,
+    pub lambda: u64,
+}
+
 /// A known-answer ECDLP instance: `q = d · curve.g`.
 #[derive(Clone, Debug, Serialize)]
 pub struct Instance {
@@ -442,6 +451,20 @@ pub struct Instance {
     pub q: Pt,
     /// The planted answer, used only to score the recovered value.
     pub d: u64,
+    /// Present on `j = 0` instances: the extra structure the 6-fold
+    /// residual folding exploits.
+    pub aut: Option<Automorphism>,
+}
+
+impl Instance {
+    /// `ζ(pt) = (ωx, y)`; the identity when the instance has no
+    /// automorphism.
+    pub fn zeta(&self, pt: &Pt) -> Pt {
+        match (&self.aut, pt.inf) {
+            (Some(aut), false) => Pt::affine(mul_mod(aut.omega, pt.x, self.curve.p), pt.y),
+            _ => *pt,
+        }
+    }
 }
 
 fn random_prime(bits: u32, rng: &mut StdRng) -> u64 {
@@ -529,7 +552,70 @@ pub fn generate_instance(bits: u32, seed: u64) -> Instance {
         let d = rng.gen_range(1..order);
         let q = curve.mul(&g, d);
         curve.reset_ops();
-        return Instance { curve, q, d };
+        return Instance {
+            curve,
+            q,
+            d,
+            aut: None,
+        };
+    }
+}
+
+/// Generate a random `j = 0` curve `y² = x³ + b` over a prime
+/// `p ≡ 1 (mod 3)` of about `bits` bits with prime group order, its
+/// order-3 automorphism, and a random known-answer target.
+pub fn generate_j0_instance(bits: u32, seed: u64) -> Instance {
+    assert!(
+        (12..=MAX_BITS).contains(&bits),
+        "bits must lie in 12..={MAX_BITS}"
+    );
+    let mut rng = StdRng::seed_from_u64(seed ^ 0x1_0000_5EED);
+    loop {
+        let p = random_prime(bits, &mut rng);
+        if p % 3 != 1 {
+            continue;
+        }
+        // A primitive cube root of unity mod p.
+        let omega = loop {
+            let g = rng.gen_range(2..p);
+            let w = pow_mod(g, (p - 1) / 3, p);
+            if w != 1 {
+                break w;
+            }
+        };
+        let b = rng.gen_range(1..p);
+        let curve = Curve::new(p, 0, b, 0, Pt::INFINITY);
+        let g = loop {
+            let x = rng.gen_range(1..p);
+            if let Some(pt) = curve.lift_x(x) {
+                break pt;
+            }
+        };
+        let Some(order) = unique_hasse_multiple(&curve, &g) else {
+            continue;
+        };
+        if !is_prime_u64(order) || order % 3 != 1 {
+            continue;
+        }
+        let curve = Curve::new(p, 0, b, order, g);
+        // λ = (−1 ± √−3) / 2 mod n; pick the root that matches ζ.
+        let root = sqrt_mod(order - 3, order).expect("−3 is a square mod n when n ≡ 1 mod 3");
+        let half = inv_mod(2, order);
+        let zeta_g = Pt::affine(mul_mod(omega, g.x, p), g.y);
+        let lambda = [root, order - root]
+            .into_iter()
+            .map(|r| mul_mod(sub_mod(r, 1, order), half, order))
+            .find(|&l| curve.mul(&g, l) == zeta_g)
+            .expect("one root of λ² + λ + 1 matches ζ");
+        let d = rng.gen_range(1..order);
+        let q = curve.mul(&g, d);
+        curve.reset_ops();
+        return Instance {
+            curve,
+            q,
+            d,
+            aut: Some(Automorphism { omega, lambda }),
+        };
     }
 }
 
@@ -551,6 +637,30 @@ impl FactorBase {
         while points.len() < size && x < curve.p {
             if let Some(pt) = curve.lift_x(x) {
                 if pt.y != 0 {
+                    by_x.insert(x, points.len());
+                    points.push(pt);
+                }
+            }
+            x += 1;
+        }
+        FactorBase { points, by_x }
+    }
+
+    /// Factor base of the `size` smallest-`x` points that are canonical
+    /// under the instance's automorphism folding (one representative per
+    /// `⟨±1, ζ⟩`-orbit).  Without an automorphism this is [`Self::build`].
+    pub fn build_orbit_reps(inst: &Instance, size: usize) -> FactorBase {
+        if inst.aut.is_none() {
+            return FactorBase::build(&inst.curve, size);
+        }
+        let curve = &inst.curve;
+        let mut points = Vec::with_capacity(size);
+        let mut by_x = HashMap::with_capacity(size);
+        let mut x = 1u64;
+        while points.len() < size && x < curve.p {
+            if let Some(pt) = curve.lift_x(x) {
+                let (canon, _) = fold(inst, Fold::Automorphism, &pt);
+                if pt.y != 0 && canon == pt {
                     by_x.insert(x, points.len());
                     points.push(pt);
                 }
@@ -588,6 +698,22 @@ pub struct Relation {
     pub db: u64,
     /// Sparse signed coefficients `(factor_base_index, multiplicity)`.
     pub coeffs: Vec<(usize, i64)>,
+    /// Factored form `f1·R1 − f2·R2` with small-coefficient residuals
+    /// `R_j = a_j G + b_j Q − Σ c_j P`, kept for relations whose scaled
+    /// coefficients are full-size scalars (automorphism folding) so that
+    /// verification costs two large scalar multiplications instead of
+    /// one per coefficient.
+    #[serde(skip)]
+    pub factored: Option<Box<FactoredRelation>>,
+}
+
+/// See [`Relation::factored`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FactoredRelation {
+    pub f1: u64,
+    pub r1: (u64, u64, Vec<(usize, i64)>),
+    pub f2: u64,
+    pub r2: (u64, u64, Vec<(usize, i64)>),
 }
 
 /// What a residual collision turned out to be.
@@ -618,11 +744,66 @@ impl Relation {
     /// Check `da·G + db·Q − Σ c_i P_i = O` with actual group arithmetic.
     pub fn verify(&self, inst: &Instance, fb: &FactorBase) -> bool {
         let curve = &inst.curve;
-        let mut acc = curve.combine(&inst.q, self.da, self.db);
-        for &(i, c) in &self.coeffs {
-            acc = curve.sub(&acc, &curve.mul_signed(&fb.points[i], c));
+        let eval = |a: u64, b: u64, coeffs: &[(usize, i64)]| {
+            let mut acc = curve.combine(&inst.q, a, b);
+            for &(i, c) in coeffs {
+                acc = curve.sub(&acc, &curve.mul_signed(&fb.points[i], c));
+            }
+            acc
+        };
+        match &self.factored {
+            Some(fr) => {
+                let x1 = eval(fr.r1.0, fr.r1.1, &fr.r1.2);
+                let x2 = eval(fr.r2.0, fr.r2.1, &fr.r2.2);
+                curve.mul(&x1, fr.f1) == curve.mul(&x2, fr.f2)
+            }
+            None => eval(self.da, self.db, &self.coeffs).inf,
         }
-        acc.inf
+    }
+
+    /// `f1·(a1 G + b1 Q − Σ c1 P) − f2·(a2 G + b2 Q − Σ c2 P) = O` as a
+    /// relation; the factored form is retained when either factor is
+    /// not `±1`.
+    pub fn scaled(
+        n: u64,
+        f1: u64,
+        r1: (u64, u64, Vec<(usize, i64)>),
+        f2: u64,
+        r2: (u64, u64, Vec<(usize, i64)>),
+    ) -> Relation {
+        let (f1, f2) = (f1 % n, f2 % n);
+        let mut acc: HashMap<usize, u64> = HashMap::new();
+        for (f, coeffs, negate) in [(f1, &r1.2, false), (f2, &r2.2, true)] {
+            for &(i, c) in coeffs {
+                let mag = mul_mod(f, c.unsigned_abs() % n, n);
+                let v = if (c < 0) ^ negate { (n - mag) % n } else { mag };
+                let e = acc.entry(i).or_insert(0);
+                *e = add_mod(*e, v, n);
+            }
+        }
+        let mut coeffs: Vec<(usize, i64)> = acc
+            .into_iter()
+            .filter(|&(_, v)| v != 0)
+            .map(|(i, v)| (i, centred(v, n)))
+            .collect();
+        coeffs.sort_unstable();
+        let small = |f: u64| f == 1 || f == n - 1;
+        let factored = if small(f1) && small(f2) {
+            None
+        } else {
+            Some(Box::new(FactoredRelation {
+                f1,
+                r1: r1.clone(),
+                f2,
+                r2: r2.clone(),
+            }))
+        };
+        Relation {
+            da: sub_mod(mul_mod(f1, r1.0 % n, n), mul_mod(f2, r2.0 % n, n), n),
+            db: sub_mod(mul_mod(f1, r1.1 % n, n), mul_mod(f2, r2.1 % n, n), n),
+            coeffs,
+            factored,
+        }
     }
 
     /// Dense row over `ℤ/nℤ` in the unknowns `(ℓ_0, …, ℓ_{B−1}, d)` plus
@@ -638,20 +819,76 @@ impl Relation {
     }
 }
 
-/// Representative of the class `{pt, −pt}` (the point with the smaller
-/// `y`) and the sign relating `pt` to it: `pt = sign · canonical`.
-fn negation_class(curve: &Curve, pt: &Pt) -> (Pt, i64) {
-    if !pt.inf && pt.y * 2 > curve.p {
-        (curve.neg(pt), -1)
-    } else {
-        (*pt, 1)
+/// How residuals are folded before they are keyed in the table.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum Fold {
+    /// Exact points.
+    Identity,
+    /// Classes `{P, −P}`.
+    Negation,
+    /// Classes `{±ζ^k P}` on a `j = 0` instance (six points).
+    Automorphism,
+}
+
+impl Fold {
+    pub fn order(self) -> u32 {
+        match self {
+            Fold::Identity => 1,
+            Fold::Negation => 2,
+            Fold::Automorphism => 6,
+        }
     }
 }
 
-fn multiset_sum(t1: &[u32], t2: &[u32]) -> Vec<(usize, i64)> {
-    let mut all: Vec<u32> = t1.to_vec();
-    all.extend_from_slice(t2);
-    multiset_diff(&all, &[])
+/// Canonical representative `C` of the fold class of `pt` and the scalar
+/// `f` with `pt = f · C`.  The representative has the smallest `x` among
+/// `{x, ωx, ω²x}` (automorphism only) and the smaller `y`.  Costs field
+/// multiplications only, never a group operation.
+fn fold(inst: &Instance, mode: Fold, pt: &Pt) -> (Pt, u64) {
+    let curve = &inst.curve;
+    let n = curve.n;
+    if pt.inf || mode == Fold::Identity {
+        return (*pt, 1);
+    }
+    let (x, k) = match (mode, &inst.aut) {
+        (Fold::Automorphism, Some(aut)) => {
+            let x1 = mul_mod(aut.omega, pt.x, curve.p);
+            let x2 = mul_mod(aut.omega, x1, curve.p);
+            let (mut x, mut k) = (pt.x, 0u32);
+            if x1 < x {
+                x = x1;
+                k = 1;
+            }
+            if x2 < x {
+                x = x2;
+                k = 2;
+            }
+            (x, k)
+        }
+        _ => (pt.x, 0),
+    };
+    // ζ^k(pt) = (x, y) = λ^k · pt, so pt = λ^{−k} · (x, y) = λ^{3−k} · (x, y).
+    let mut f = match (&inst.aut, k) {
+        (Some(aut), 1) => mul_mod(aut.lambda, aut.lambda, n),
+        (Some(aut), 2) => aut.lambda,
+        _ => 1,
+    };
+    let y = if pt.y * 2 > curve.p {
+        f = (n - f) % n;
+        curve.p - pt.y
+    } else {
+        pt.y
+    };
+    (Pt::affine(x, y), f)
+}
+
+/// Centre a residue mod `n` into `(−n/2, n/2]` as a signed coefficient.
+fn centred(v: u64, n: u64) -> i64 {
+    if v > n / 2 {
+        v as i64 - n as i64
+    } else {
+        v as i64
+    }
 }
 
 fn multiset_diff(t1: &[u32], t2: &[u32]) -> Vec<(usize, i64)> {
@@ -854,6 +1091,14 @@ pub struct WalkOptions {
     /// collision-preserving walks must restart: after a merge every
     /// further step would re-collide.)
     pub continue_after_collision: bool,
+    /// Fold residuals by the instance's order-3 automorphism as well as
+    /// by negation (six points per table class; `j = 0` instances only,
+    /// exhaustive storage only).  Implies `negation_map`.
+    pub use_automorphism: bool,
+    /// Explicit-state strategies only: seed the residual table with every
+    /// signed pair `±P_i ± P_j` before walking.  Each seed is a residual
+    /// with a known decomposition and is counted in `seeded_points`.
+    pub seed_pairs: bool,
 }
 
 impl Default for WalkOptions {
@@ -871,6 +1116,8 @@ impl Default for WalkOptions {
             diff_table: false,
             segment_len: 0,
             continue_after_collision: false,
+            use_automorphism: false,
+            seed_pairs: false,
         }
     }
 }
@@ -892,6 +1139,13 @@ pub struct StrategyReport {
     pub diff_table: bool,
     pub segment_len: u64,
     pub continue_after_collision: bool,
+    /// Size of the fold classes the table is keyed on: 1, 2 or 6.
+    pub fold_order: u32,
+    /// Whether the instance is a `j = 0` curve with its automorphism.
+    pub j_zero: bool,
+    /// Residuals with known decomposition inserted before walking
+    /// (signed pair sums); they count towards the total point count.
+    pub seeded_points: u64,
     /// Residuals evaluated (independent samples or walk steps).
     pub samples: u64,
     /// Residuals that passed the filter / distinguished-point test and
@@ -947,6 +1201,9 @@ impl StrategyReport {
             diff_table: opts.diff_table,
             segment_len: opts.segment_len,
             continue_after_collision: opts.continue_after_collision,
+            fold_order: fold_mode(inst, opts).order(),
+            j_zero: inst.aut.is_some(),
+            seeded_points: 0,
             samples: 0,
             accepted: 0,
             table_entries: 0,
@@ -1076,17 +1333,21 @@ impl<'a> Collector<'a> {
 
 // ── Explicit partial-decomposition states (A, B, C2) ───────────────────
 
-/// `(a, b, sorted multiset of factor-base indices)`.
+/// `(a, b, sorted multisets of factor-base indices)`: the residual is
+/// `aG + bQ − Σ P_tuple + Σ P_minus`.  Walked states have an empty
+/// `minus`; seeded pair states (`±P_i ± P_j`) use it.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DecompState {
     pub a: u64,
     pub b: u64,
     pub tuple: Vec<u32>,
+    pub minus: Vec<u32>,
 }
 
 impl DecompState {
     fn canonical(mut self) -> Self {
         self.tuple.sort_unstable();
+        self.minus.sort_unstable();
         self
     }
 
@@ -1095,6 +1356,7 @@ impl DecompState {
             a: rng.gen_range(0..n),
             b: rng.gen_range(1..n),
             tuple: (0..k).map(|_| rng.gen_range(0..fb_size as u32)).collect(),
+            minus: Vec::new(),
         }
         .canonical()
     }
@@ -1111,56 +1373,64 @@ impl DecompState {
         let a = next() % n;
         let b = 1 + next() % (n - 1);
         let tuple = (0..k).map(|_| (next() % fb_size as u64) as u32).collect();
-        DecompState { a, b, tuple }.canonical()
+        DecompState {
+            a,
+            b,
+            tuple,
+            minus: Vec::new(),
+        }
+        .canonical()
     }
 
-    /// `aG + bQ − Σ P_{tuple}`.
+    /// `aG + bQ − Σ P_{tuple} + Σ P_{minus}`.
     pub fn residual(&self, inst: &Instance, fb: &FactorBase) -> Pt {
         let curve = &inst.curve;
         let mut l = curve.combine(&inst.q, self.a, self.b);
         for &i in &self.tuple {
             l = curve.sub(&l, &fb.points[i as usize]);
         }
+        for &i in &self.minus {
+            l = curve.add(&l, &fb.points[i as usize]);
+        }
         l
     }
 
     /// Relation implied by `L(self) = L(other)`.
     pub fn relation_to(&self, other: &DecompState, n: u64) -> Relation {
-        Relation {
-            da: sub_mod(self.a % n, other.a % n, n),
-            db: sub_mod(self.b % n, other.b % n, n),
-            coeffs: multiset_diff(&self.tuple, &other.tuple),
-        }
+        self.relation_scaled(1, other, 1, n)
     }
 
-    /// Relation implied by `sign · L(self) = other_sign · L(other)`: the
-    /// plain difference when the signs agree, and
-    /// `(a+a')G + (b+b')Q = ΣT + ΣT'` when they differ.
-    pub fn relation_to_signed(
-        &self,
-        sign: i64,
-        other: &DecompState,
-        other_sign: i64,
-        n: u64,
-    ) -> Relation {
-        if sign == other_sign {
-            return self.relation_to(other, n);
-        }
-        Relation {
-            da: add_mod(self.a % n, other.a % n, n),
-            db: add_mod(self.b % n, other.b % n, n),
-            coeffs: multiset_sum(&self.tuple, &other.tuple),
-        }
+    /// Relation implied by `L(self) = f · C` and `L(other) = f' · C` for
+    /// the same fold representative `C`, i.e. `f' · L(self) = f · L(other)`:
+    /// `(f'a − fa')G + (f'b − fb')Q = f'·ΣT − f·ΣT'`.  With `f, f' ∈ {±1}`
+    /// this is the negation-map relation; with `λ` powers it is the
+    /// automorphism-folded one.
+    pub fn relation_scaled(&self, f: u64, other: &DecompState, f_other: u64, n: u64) -> Relation {
+        Relation::scaled(
+            n,
+            f_other,
+            (
+                self.a % n,
+                self.b % n,
+                multiset_diff(&self.tuple, &self.minus),
+            ),
+            f,
+            (
+                other.a % n,
+                other.b % n,
+                multiset_diff(&other.tuple, &other.minus),
+            ),
+        )
     }
 
-    /// Relation implied by `L(self) = sign·P_i` (or `O` when `hit` is
-    /// `None`).
+    /// Relation implied by `L(self) = c·P_i` (or `O` when `hit` is
+    /// `None`), with `c` a centred signed coefficient.
     pub fn full_relation(&self, hit: Option<(usize, i64)>) -> Relation {
-        let mut coeffs = multiset_diff(&self.tuple, &[]);
-        if let Some((i, sign)) = hit {
+        let mut coeffs = multiset_diff(&self.tuple, &self.minus);
+        if let Some((i, c)) = hit {
             match coeffs.iter_mut().find(|(j, _)| *j == i) {
-                Some(entry) => entry.1 += sign,
-                None => coeffs.push((i, sign)),
+                Some(entry) => entry.1 += c,
+                None => coeffs.push((i, c)),
             }
             coeffs.retain(|&(_, c)| c != 0);
             coeffs.sort_unstable();
@@ -1169,8 +1439,33 @@ impl DecompState {
             da: self.a,
             db: self.b,
             coeffs,
+            factored: None,
         }
     }
+}
+
+/// The fold the options ask for on this instance.
+fn fold_mode(inst: &Instance, opts: &WalkOptions) -> Fold {
+    if opts.use_automorphism && inst.aut.is_some() {
+        Fold::Automorphism
+    } else if opts.negation_map || opts.use_automorphism {
+        Fold::Negation
+    } else {
+        Fold::Identity
+    }
+}
+
+/// Complete-decomposition test under a fold: `pt = c · P_i` for a
+/// factor-base point, with `c` centred.
+fn fold_lookup(inst: &Instance, fb: &FactorBase, mode: Fold, pt: &Pt) -> Option<(usize, i64)> {
+    let (canon, f) = fold(inst, mode, pt);
+    let (i, sign) = fb.lookup(&canon)?;
+    let c = if sign == 1 {
+        f
+    } else {
+        (inst.curve.n - f) % inst.curve.n
+    };
+    Some((i, centred(c, inst.curve.n)))
 }
 
 const DP_SALT: u64 = 0xD15_71C7;
@@ -1197,7 +1492,55 @@ fn run_explicit(
     curve.reset_ops();
     let start = Instant::now();
     let mut col = Collector::new(inst, fb, strategy, opts);
-    let mut table: HashMap<Pt, (DecompState, i64)> = HashMap::new();
+    let mode = fold_mode(inst, opts);
+    let mut table: HashMap<Pt, (DecompState, u64)> = HashMap::new();
+
+    // Optional seeding with every signed pair sum.  A seed is a residual
+    // of the state `(0, 0, tuple, minus)` whose decomposition is known;
+    // it collides with walked residuals exactly like a stored one and
+    // is counted in `seeded_points`.
+    if opts.seed_pairs {
+        let seed_state = |tuple: Vec<u32>, minus: Vec<u32>| {
+            DecompState {
+                a: 0,
+                b: 0,
+                tuple,
+                minus,
+            }
+            .canonical()
+        };
+        for i in 0..bsize {
+            for j in (i + 1)..bsize {
+                let (pi, pj) = (fb.points[i], fb.points[j]);
+                let (iu, ju) = (i as u32, j as u32);
+                let sum = curve.add(&pi, &pj);
+                let dif = curve.sub(&pi, &pj);
+                let mut seeds = vec![
+                    (sum, seed_state(vec![], vec![iu, ju])),
+                    (dif, seed_state(vec![ju], vec![iu])),
+                ];
+                if mode == Fold::Identity {
+                    seeds.push((curve.neg(&sum), seed_state(vec![iu, ju], vec![])));
+                    seeds.push((curve.neg(&dif), seed_state(vec![iu], vec![ju])));
+                }
+                for (pt, state) in seeds {
+                    if let Some(hit) = fold_lookup(inst, fb, mode, &pt) {
+                        col.push_full(state.full_relation(Some(hit)));
+                    }
+                    let (key, f) = fold(inst, mode, &pt);
+                    match table.get(&key) {
+                        Some((prev, prev_f)) => {
+                            col.push_collision(state.relation_scaled(f, prev, *prev_f, n));
+                        }
+                        None => {
+                            table.insert(key, (state, f));
+                            col.report.seeded_points += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Optional `P_i − P_j` table for the local-mutation walk.
     let diff: Vec<Pt> = if strategy == Strategy::LocalMutationWalk && opts.diff_table {
@@ -1230,29 +1573,25 @@ fn run_explicit(
         if passes_filter {
             if l.inf {
                 col.push_full(state.full_relation(None));
-            } else if let Some(hit) = fb.lookup(&l) {
+            } else if let Some(hit) = fold_lookup(inst, fb, mode, &l) {
                 col.push_full(state.full_relation(Some(hit)));
             }
             col.report.accepted += 1;
-            let (key, sign) = if opts.negation_map {
-                negation_class(curve, &l)
-            } else {
-                (l, 1)
-            };
+            let (key, f) = fold(inst, mode, &l);
             match table.get(&key) {
-                Some((prev, prev_sign)) => {
+                Some((prev, prev_f)) => {
                     if *prev == state {
-                        // Same state: a revisit (same sign) or `L = −L`,
-                        // i.e. `L = O`, already reported as a complete
-                        // decomposition.  Neither is progress.
+                        // Same state: a revisit, or `f·L = f'·L` with
+                        // `f ≠ f'`, i.e. `L = O`, already reported as a
+                        // complete decomposition.  Neither is progress.
                         col.count_collision(CollisionKind::Trivial);
                     } else {
-                        col.push_collision(state.relation_to_signed(sign, prev, *prev_sign, n));
+                        col.push_collision(state.relation_scaled(f, prev, *prev_f, n));
                     }
                     restart = true;
                 }
                 None => {
-                    table.insert(key, (state.clone(), sign));
+                    table.insert(key, (state.clone(), f));
                 }
             }
         }
@@ -1334,8 +1673,8 @@ fn run_explicit(
 fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> StrategyReport {
     let strategy = Strategy::FreshHashWalk;
     assert!(
-        !opts.negation_map,
-        "the negation map is implemented for exhaustive storage (dp_bits = 0) only"
+        !opts.negation_map && !opts.use_automorphism && !opts.seed_pairs,
+        "folding and seeding are implemented for exhaustive storage (dp_bits = 0) only"
     );
     let curve = &inst.curve;
     let n = curve.n;
@@ -1507,37 +1846,39 @@ impl<'a> RAddingWalk<'a> {
             da: sub_mod(here.a, there.a, n),
             db: sub_mod(here.b, there.b, n),
             coeffs,
+            factored: None,
         }
     }
 
-    /// Relation implied by `sign·L(here) = there_sign·L(there)`.
-    fn relation_signed(
-        &self,
-        here: &WalkPosition,
-        sign: i64,
-        there: &WalkPosition,
-        there_sign: i64,
-    ) -> Relation {
-        if sign == there_sign {
-            return self.relation(here, there);
-        }
-        let n = self.inst.curve.n;
+    /// Small-coefficient view of a walk position over the factor base.
+    fn small_form(&self, pos: &WalkPosition) -> (u64, u64, Vec<(usize, i64)>) {
         let mut by_fb: HashMap<usize, i64> = HashMap::new();
         for (j, m) in self.mults.iter().enumerate() {
-            let total = here.counts[j] as i64 + there.counts[j] as i64;
-            if total != 0 {
+            if pos.counts[j] != 0 {
                 if let Some(i) = m.fb_index {
-                    *by_fb.entry(i).or_insert(0) += total;
+                    *by_fb.entry(i).or_insert(0) += pos.counts[j] as i64;
                 }
             }
         }
-        let mut coeffs: Vec<(usize, i64)> = by_fb.into_iter().filter(|&(_, c)| c != 0).collect();
+        let mut coeffs: Vec<(usize, i64)> = by_fb.into_iter().collect();
         coeffs.sort_unstable();
-        Relation {
-            da: add_mod(here.a, there.a, n),
-            db: add_mod(here.b, there.b, n),
-            coeffs,
+        (pos.a, pos.b, coeffs)
+    }
+
+    /// Relation implied by `L(here) = f·C`, `L(there) = f'·C`, i.e.
+    /// `f'·L(here) = f·L(there)`.
+    fn relation_scaled(
+        &self,
+        here: &WalkPosition,
+        f: u64,
+        there: &WalkPosition,
+        f_there: u64,
+    ) -> Relation {
+        if f == 1 && f_there == 1 {
+            return self.relation(here, there);
         }
+        let n = self.inst.curve.n;
+        Relation::scaled(n, f_there, self.small_form(here), f, self.small_form(there))
     }
 
     /// Relation from `L = sign·P_i` (or `O`).
@@ -1578,9 +1919,10 @@ fn run_radding(
     };
     assert!(r >= 2, "need at least two multipliers");
     assert!(
-        !(opts.negation_map && opts.dp_bits > 0),
-        "the negation map is implemented for exhaustive storage (dp_bits = 0) only"
+        !((opts.negation_map || opts.use_automorphism) && opts.dp_bits > 0),
+        "folding is implemented for exhaustive storage (dp_bits = 0) only"
     );
+    let mode = fold_mode(inst, opts);
     let mut rng = StdRng::seed_from_u64(opts.seed ^ mix64(strategy.tag().len() as u64 + 29));
     curve.reset_ops();
     let start = Instant::now();
@@ -1619,7 +1961,7 @@ fn run_radding(
     } else {
         (64u64 << opts.dp_bits).max(8 * sqrt_n)
     };
-    let mut table: HashMap<Pt, (u32, u32, i8)> = HashMap::new();
+    let mut table: HashMap<Pt, (u32, u32, u64)> = HashMap::new();
 
     'outer: loop {
         let w = walk.starts.len();
@@ -1634,7 +1976,7 @@ fn run_radding(
             let full_hit = if l.inf {
                 Some(None)
             } else {
-                fb.lookup(&l).map(Some)
+                fold_lookup(inst, fb, mode, &l).map(Some)
             };
             if let Some(hit) = full_hit {
                 let before = curve.ops();
@@ -1646,29 +1988,24 @@ fn run_radding(
             }
             if is_distinguished(&l, opts.dp_bits) {
                 col.report.accepted += 1;
-                let (key, sign) = if opts.negation_map {
-                    negation_class(curve, &l)
-                } else {
-                    (l, 1)
-                };
+                let (key, f) = fold(inst, mode, &l);
                 match table.get(&key) {
-                    Some(&(w2, s2, sign2)) => {
-                        let sign2 = sign2 as i64;
+                    Some(&(w2, s2, f2)) => {
                         let before = curve.ops();
                         let here = walk.replay(w, step);
                         let there = walk.replay(w2 as usize, s2 as u64);
                         col.report.replay_ops += curve.ops() - before;
-                        let there_expected = if sign == sign2 { l } else { curve.neg(&l) };
-                        if here.residual != l || there.residual != there_expected {
+                        let there_fold = fold(inst, mode, &there.residual);
+                        if here.residual != l || there_fold != (key, f2) {
                             // Never expected: the walk is deterministic.
                             col.report.relations_failed_verification += 1;
                         } else {
-                            col.push_collision(walk.relation_signed(&here, sign, &there, sign2));
+                            col.push_collision(walk.relation_scaled(&here, f, &there, f2));
                         }
                         break;
                     }
                     None => {
-                        table.insert(key, (w as u32, step as u32, sign as i8));
+                        table.insert(key, (w as u32, step as u32, f));
                     }
                 }
             }
@@ -1775,6 +2112,7 @@ pub fn mitm_four_decomposition(
                         da: 0,
                         db: 0,
                         coeffs: multiset_diff(&[i as u32, j as u32], &[k, l]),
+                        factored: None,
                     };
                     if rel.kind() != CollisionKind::Trivial {
                         let before = curve.ops();
@@ -1814,6 +2152,7 @@ pub fn mitm_four_decomposition(
                         da: a,
                         db: b,
                         coeffs,
+                        factored: None,
                     };
                     let before = curve.ops();
                     let ok = rel.verify(inst, fb);
@@ -2142,12 +2481,14 @@ mod tests {
             a: 5,
             b: 7,
             tuple: vec![2, 9, 4],
+            minus: vec![],
         }
         .canonical();
         let s2 = DecompState {
             a: 5,
             b: 7,
             tuple: vec![9, 4, 2],
+            minus: vec![],
         }
         .canonical();
         assert_eq!(s1, s2);
@@ -2156,6 +2497,7 @@ mod tests {
             a: 6,
             b: 7,
             tuple: vec![9, 4, 2],
+            minus: vec![],
         }
         .canonical();
         assert_eq!(s1.relation_to(&s3, 101).kind(), CollisionKind::Direct);
@@ -2163,6 +2505,7 @@ mod tests {
             a: 5,
             b: 7,
             tuple: vec![9, 4, 3],
+            minus: vec![],
         }
         .canonical();
         assert_eq!(
@@ -2297,37 +2640,125 @@ mod tests {
         let inst = generate_instance(16, 2);
         let c = &inst.curve;
         let pt = c.mul(&c.g, 12345);
-        let (k1, s1) = negation_class(c, &pt);
-        let (k2, s2) = negation_class(c, &c.neg(&pt));
+        let (k1, f1) = fold(&inst, Fold::Negation, &pt);
+        let (k2, f2) = fold(&inst, Fold::Negation, &c.neg(&pt));
         assert_eq!(k1, k2);
-        assert_eq!(s1, -s2);
-        assert_eq!(c.mul_signed(&k1, s1), pt);
+        assert_eq!(add_mod(f1, f2, c.n), 0);
+        assert_eq!(c.mul(&k1, f1), pt);
         // Signed relations from mirrored states verify by arithmetic.
         let fb = FactorBase::build(c, 8);
         let s = DecompState {
             a: 5,
             b: 9,
             tuple: vec![1, 3, 3],
+            minus: vec![6],
         };
         let t = DecompState {
             a: 11,
             b: 2,
             tuple: vec![0, 4, 7],
+            minus: vec![],
         };
-        // Force the sign-mismatch branch and check its algebra on a
-        // synthetic equality: build u with L(u) = −L(t) via u = (−a, −b, …)
-        // is impossible with non-negative multiplicities, so check the
-        // identity (a+a')G + (b+b')Q − ΣT − ΣT' = L(s) + L(t) instead.
-        let rel = s.relation_to_signed(1, &t, -1, c.n);
-        let lhs = {
+        // The scaled relation f'·L(s) − f·L(t) must evaluate, by group
+        // arithmetic, to f'·L(s) − f·L(t) for arbitrary factors.
+        let combo = |rel: &Relation| {
             let mut acc = c.combine(&inst.q, rel.da, rel.db);
             for &(i, coef) in &rel.coeffs {
                 acc = c.sub(&acc, &c.mul_signed(&fb.points[i], coef));
             }
             acc
         };
-        let rhs = c.add(&s.residual(&inst, &fb), &t.residual(&inst, &fb));
-        assert_eq!(lhs, rhs);
+        let (ls, lt) = (s.residual(&inst, &fb), t.residual(&inst, &fb));
+        let rel = s.relation_scaled(1, &t, c.n - 1, c.n);
+        assert_eq!(combo(&rel), c.sub(&c.mul(&ls, c.n - 1), &lt));
+        let (f, ft) = (777u64, 12_345u64);
+        let rel = s.relation_scaled(f, &t, ft, c.n);
+        assert_eq!(combo(&rel), c.sub(&c.mul(&ls, ft), &c.mul(&lt, f)));
+    }
+
+    #[test]
+    fn j0_instance_has_a_matching_automorphism() {
+        let inst = generate_j0_instance(18, 4);
+        let c = &inst.curve;
+        let aut = inst.aut.unwrap();
+        assert_eq!(c.a, 0);
+        assert_eq!(c.p % 3, 1);
+        assert_eq!(c.n % 3, 1);
+        assert!(is_prime_u64(c.n));
+        assert_eq!(pow_mod(aut.omega, 3, c.p), 1);
+        assert_ne!(aut.omega, 1);
+        let l2 = mul_mod(aut.lambda, aut.lambda, c.n);
+        assert_eq!(add_mod(add_mod(l2, aut.lambda, c.n), 1, c.n), 0);
+        for k in [1u64, 2, 999, 123_456] {
+            let pt = c.mul(&c.g, k);
+            assert_eq!(c.mul(&pt, aut.lambda), inst.zeta(&pt));
+            // Every point of the orbit folds to the same representative
+            // with a factor that reproduces the point.
+            let (canon, _) = fold(&inst, Fold::Automorphism, &pt);
+            let mut img = pt;
+            for _ in 0..3 {
+                for q in [img, c.neg(&img)] {
+                    let (cq, fq) = fold(&inst, Fold::Automorphism, &q);
+                    assert_eq!(cq, canon);
+                    assert_eq!(c.mul(&cq, fq), q);
+                }
+                img = inst.zeta(&img);
+            }
+        }
+        let fb = FactorBase::build_orbit_reps(&inst, 12);
+        assert_eq!(fb.len(), 12);
+        for pt in &fb.points {
+            assert_eq!(fold(&inst, Fold::Automorphism, pt).0, *pt);
+        }
+    }
+
+    #[test]
+    fn automorphism_folding_recovers_the_planted_logarithm() {
+        let inst = generate_j0_instance(18, 9);
+        let fb = FactorBase::build_orbit_reps(&inst, 24);
+        for strategy in Strategy::ALL {
+            let opts = WalkOptions {
+                k: 3,
+                max_ops: 1 << 26,
+                seed: 3,
+                use_automorphism: true,
+                diff_table: true,
+                segment_len: 300,
+                continue_after_collision: true,
+                ..WalkOptions::default()
+            };
+            let rep = run_strategy(&inst, &fb, strategy, &opts);
+            assert_eq!(
+                rep.correct,
+                Some(true),
+                "{} folded failed: {rep:?}",
+                rep.strategy
+            );
+            assert_eq!(rep.relations_failed_verification, 0, "{}", rep.strategy);
+            assert_eq!(rep.fold_order, 6);
+            assert!(rep.j_zero);
+        }
+    }
+
+    #[test]
+    fn seeded_pairs_count_and_solve() {
+        let (inst, fb) = small_setup(18, 24, 12);
+        let opts = WalkOptions {
+            k: 3,
+            max_ops: 1 << 26,
+            seed: 5,
+            negation_map: true,
+            seed_pairs: true,
+            ..WalkOptions::default()
+        };
+        let rep = run_strategy(&inst, &fb, Strategy::LocalMutationWalk, &opts);
+        assert_eq!(rep.correct, Some(true), "{rep:?}");
+        assert_eq!(rep.relations_failed_verification, 0);
+        // 24·23/2 pairs, two classes each under the negation map (minus
+        // any coincidences already present).
+        assert!(rep.seeded_points as usize <= 24 * 23);
+        assert!(rep.seeded_points as usize > 24 * 23 - 24);
+        assert_eq!(rep.setup_ops as usize, 24 * 23);
     }
 
     #[test]

@@ -1,0 +1,393 @@
+{
+  "binary_identity": {
+    "bytes": 114608,
+    "path": "wdsat_solver",
+    "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+  },
+  "binary_sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185",
+  "build_context": {
+    "frozen_config_path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-capacity-successor-01-20260910/wdsat-config.h",
+    "original_capsule_root": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910",
+    "source_checkout": "/Volumes/SSD990/wdsat-binary-sat-review-20260909"
+  },
+  "build_driver_identity": {
+    "bytes": 40107,
+    "path": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/build_koblitz_phase_b_wdsat.py",
+    "resolved_path": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/build_koblitz_phase_b_wdsat.py",
+    "sha256": "51f5e63be49b1c97489aae535418737490d6606804f81322be76c318a2aa81f5"
+  },
+  "build_processes": [
+    {
+      "command": [
+        "/bin/cp",
+        "-R",
+        "/Volumes/SSD990/wdsat-binary-sat-review-20260909/src",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src"
+      ],
+      "inputs": [],
+      "intent_path": "source-copy.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1753088,
+        "single_core_seconds": 0.014729999999999998,
+        "system_seconds": 0.013111999999999999,
+        "total_core_seconds": 0.014729999999999998,
+        "user_seconds": 0.0016179999999999999,
+        "wall_seconds": 0.033623042050749063
+      },
+      "metrics_path": "source-copy.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "source-copy",
+      "stderr_bytes": 0,
+      "stderr_path": "source-copy.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "source-copy.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    {
+      "command": [
+        "/bin/cp",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-capacity-successor-01-20260910/wdsat-config.h",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/config.h"
+      ],
+      "inputs": [],
+      "intent_path": "config-install.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1277952,
+        "single_core_seconds": 0.002593,
+        "system_seconds": 0.0019039999999999999,
+        "total_core_seconds": 0.002593,
+        "user_seconds": 0.0006889999999999999,
+        "wall_seconds": 0.0046692920150235295
+      },
+      "metrics_path": "config-install.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "config-install",
+      "stderr_bytes": 0,
+      "stderr_path": "config-install.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "config-install.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    {
+      "command": [
+        "/usr/bin/make",
+        "-C",
+        "src",
+        "clean"
+      ],
+      "inputs": [
+        {
+          "bytes": 237,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/config.h",
+          "sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352"
+        }
+      ],
+      "intent_path": "clean.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1687552,
+        "single_core_seconds": 0.01676,
+        "system_seconds": 0.011046,
+        "total_core_seconds": 0.01676,
+        "user_seconds": 0.0057139999999999995,
+        "wall_seconds": 0.04763341601938009
+      },
+      "metrics_path": "clean.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "clean",
+      "stderr_bytes": 0,
+      "stderr_path": "clean.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 17,
+      "stdout_path": "clean.stdout",
+      "stdout_sha256": "a3515c316ebd9e7c90a2a42b194022151e5a247df963425832fe5923d04eedbd",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    {
+      "command": [
+        "/usr/bin/make",
+        "-C",
+        "src"
+      ],
+      "inputs": [
+        {
+          "bytes": 16778,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/cnf.c",
+          "sha256": "ec86f8f08d9272579b20d6dfb9513ca69bdfca3c490e4b11e75878f13745a9ee"
+        },
+        {
+          "bytes": 1866,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/cnf.h",
+          "sha256": "f1c5479b60c4a49192c84569a74a9838b855c44411e35c066817076c90879a62"
+        },
+        {
+          "bytes": 237,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/config.h",
+          "sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352"
+        },
+        {
+          "bytes": 38752,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/dimacs.c",
+          "sha256": "d165dea3b5c2919c8d29a05a037e0b98ed7aac4ff9f7c8c073a7a9c2151d9ffb"
+        },
+        {
+          "bytes": 2213,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/dimacs.h",
+          "sha256": "f40ede80353b747851463b0fd376c3b9f7e394367b21df115ab8f5f797b30cfd"
+        },
+        {
+          "bytes": 8112,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/fp.c",
+          "sha256": "c51eca3b78beb801810ab82a9ae5d97af688338d567ec4c645873ec4adf1fd06"
+        },
+        {
+          "bytes": 1096,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/fp.h",
+          "sha256": "cff83916044c1370c0c07f271fa8eea6446ff1e29032618821cdda3c75b68e97"
+        },
+        {
+          "bytes": 4248,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/main.c",
+          "sha256": "0ab5b48557aa3a5a6229124bda3dea36a1a771d2a8f92721e6d44a4291b0973d"
+        },
+        {
+          "bytes": 602,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/makefile",
+          "sha256": "3cbeb6537587d54d28c37937e17d841b551d774f7a9946aeee91264e9413b48d"
+        },
+        {
+          "bytes": 13723,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/wdsat.c",
+          "sha256": "1f17ba03459bbdda89539e542bbda75d8860037082a25d7c073dc0d90095a732"
+        },
+        {
+          "bytes": 746,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/wdsat.h",
+          "sha256": "476b9ae9fcf66b140625e6b8f44179a121bcc08cb425f63dd7b6caf02c1d6e8a"
+        },
+        {
+          "bytes": 1205,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/wdsat_utils.c",
+          "sha256": "430b2d23de167854782cfd46dd0e08987abcd1d69cfde69d82482dd81899740e"
+        },
+        {
+          "bytes": 6860,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/wdsat_utils.h",
+          "sha256": "15cd7a3921902d157e7c83bc333c516ec8ba685e91170c897e06c5fe3654479b"
+        },
+        {
+          "bytes": 30129,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/xorgauss.c",
+          "sha256": "e9c62dda272a3801999b03da2ada8282539796caf98befd6768ce79027e526ec"
+        },
+        {
+          "bytes": 4841,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/xorgauss.h",
+          "sha256": "02014f27602a0e02553467acde33d14c69c7aa0f8a5fc01f16deece57b438445"
+        },
+        {
+          "bytes": 11794,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/xorset.c",
+          "sha256": "584ef01e43561df607a7e65d340dcd30736121834c4b66f81f9f208b6d924c0d"
+        },
+        {
+          "bytes": 3039,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/src/xorset.h",
+          "sha256": "0cb90df166194472d21bcb7740d5ab2c1887db89eea9e2522a4d06e977099db9"
+        }
+      ],
+      "intent_path": "build.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 57933824,
+        "single_core_seconds": 1.0410309999999998,
+        "system_seconds": 0.481189,
+        "total_core_seconds": 1.0410309999999998,
+        "user_seconds": 0.559842,
+        "wall_seconds": 1.3605604169424623
+      },
+      "metrics_path": "build.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "build",
+      "stderr_bytes": 0,
+      "stderr_path": "build.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 555,
+      "stdout_path": "build.stdout",
+      "stdout_sha256": "bda1279faf30fa7521c844135222ed499cb4abbf1d1c7b63138ded4af17ecfa6",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    {
+      "command": [
+        "/bin/cp",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/wdsat_solver",
+        "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/wdsat_solver"
+      ],
+      "inputs": [
+        {
+          "bytes": 114608,
+          "path": "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-wdsat-capacity-successor-01-20260910/build/wdsat_solver",
+          "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+        }
+      ],
+      "intent_path": "binary-copy.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1392640,
+        "single_core_seconds": 0.0028099999999999996,
+        "system_seconds": 0.0020659999999999997,
+        "total_core_seconds": 0.0028099999999999996,
+        "user_seconds": 0.000744,
+        "wall_seconds": 0.005086167016997933
+      },
+      "metrics_path": "binary-copy.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "binary-copy",
+      "stderr_bytes": 0,
+      "stderr_path": "binary-copy.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stdout_path": "binary-copy.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    }
+  ],
+  "child_environment": {
+    "CC": "/usr/bin/cc",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "RAYON_NUM_THREADS": "1",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "claim_boundary": "Clean source-copy, config-install, clean, build, and binary-copy costs only; exact blind-target export sizing is charged and checked separately before solving",
+  "config": "#define __XG_ENHANCED__\n#define __MAX_ANF_ID__ 79\n#define __MAX_DEGREE__ 4\n#define __MAX_ID__ 2000\n#define __MAX_BUFFER_SIZE__ 32804\n#define __MAX_EQ__ 6511\n#define __MAX_EQ_SIZE__ 5\n#define __MAX_XEQ__ 112\n#define __MAX_XEQ_SIZE__ 2001\n",
+  "config_sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352",
+  "configured_source_inventory_path": "configured-source-inventory.json",
+  "frozen_recipe": {
+    "one_process_at_a_time": true,
+    "schema": "koblitz_pdp_phase_b_wdsat_build_recipe.v1",
+    "stages": [
+      {
+        "arguments": [
+          "-R",
+          "source/src",
+          "capsule/build/src"
+        ],
+        "cwd": "capsule",
+        "role": "source-copy",
+        "tool": "cp"
+      },
+      {
+        "arguments": [
+          "frozen-config",
+          "capsule/build/src/config.h"
+        ],
+        "cwd": "capsule",
+        "role": "config-install",
+        "tool": "cp"
+      },
+      {
+        "arguments": [
+          "-C",
+          "src",
+          "clean"
+        ],
+        "cwd": "capsule/build",
+        "role": "clean",
+        "tool": "make"
+      },
+      {
+        "arguments": [
+          "-C",
+          "src"
+        ],
+        "cwd": "capsule/build",
+        "role": "build",
+        "tool": "make"
+      },
+      {
+        "arguments": [
+          "capsule/build/wdsat_solver",
+          "capsule/wdsat_solver"
+        ],
+        "cwd": "capsule",
+        "role": "binary-copy",
+        "tool": "cp"
+      }
+    ]
+  },
+  "limits": {
+    "max_anf_id": 79,
+    "max_buffer_size": 32804,
+    "max_degree": 4,
+    "max_eq": 6511,
+    "max_eq_size": 5,
+    "max_id": 2000,
+    "max_xeq": 112,
+    "max_xeq_size": 2001
+  },
+  "process_meter_identity": {
+    "bytes": 3471,
+    "path": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/process_meter.py",
+    "resolved_path": "/Volumes/SSD990/crypto-koblitz-balanced-pdp-phase-b-20260910/scripts/process_meter.py",
+    "sha256": "8705343c10c129941ff3a1068be8211c0a495d2ea9a5200bc26b64ad26e3065f"
+  },
+  "protocol_payload_sha256": "d1b408fd9ae810c14f8ea9d11123fd8f7beaea203d406d43c9ec3087a87f1a60",
+  "receipt_payload_sha256": "570175b5d70112378ec144ca9054905c2167294faab323ea23604fce01bb674d",
+  "resources": {
+    "aggregate_process_tree_peak_rss_bytes": null,
+    "largest_child_peak_rss_bytes": 57933824,
+    "single_core_elapsed_seconds": null,
+    "single_core_seconds": 1.077924,
+    "single_core_seconds_alias_of": "total_core_seconds",
+    "summed_process_wall_seconds": 1.451572334045,
+    "total_core_seconds": 1.077924
+  },
+  "schema": "koblitz_pdp_phase_b_wdsat_build_receipt.v2",
+  "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+  "source_dirty": false,
+  "status": "completed",
+  "toolchain": {
+    "cc": {
+      "bytes": 118640,
+      "path": "/usr/bin/cc",
+      "resolved_path": "/usr/bin/cc",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    },
+    "cp": {
+      "bytes": 152976,
+      "path": "/bin/cp",
+      "resolved_path": "/bin/cp",
+      "sha256": "48f8e2964a1866e3e734f5dbdd0949ee2f30a881540f8925d480407d1be0f3cc"
+    },
+    "make": {
+      "bytes": 118640,
+      "path": "/usr/bin/make",
+      "resolved_path": "/usr/bin/make",
+      "sha256": "44a68ddc1983d6cff3fd35ba3f9ba5f82004216f1dcde69892b3d1b06e408698"
+    }
+  }
+}

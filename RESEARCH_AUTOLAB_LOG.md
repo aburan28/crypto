@@ -7231,3 +7231,70 @@ The tool now prints both and refuses the second when it is undefined.
 ### Commits made
 
 (see PR — quotient module, example, research note §10)
+
+---
+
+## 2026-09-10 (autolab run, fourth session on exotic coordinates)
+
+### Task picked
+
+§10.5 item 1: the `π − 1` transport on `K₀`.  Solve the symmetrised
+system for `φ(R)`, lift through `φ⁻¹`, and measure what it is worth end
+to end.
+
+### Work done
+
+- `koblitz_symmetrised`: `phi_table` (preimages and kernel of `φ` over
+  the toy curve), `transported_symmetrised_decompose` (solve for `φ(R)`,
+  keep searching roots until one has every summand in `im φ`, lift to
+  `R + K` with `K ∈ E(F₂)`), `projected_column` (the driver's notion of
+  an unknown: the signed Frobenius orbit of `[h]P`), `decomposes_over`
+  (enumeration over any point list), `transport_bench`,
+  `examples/transport_bench.rs`.  The solve and the lifter gained an
+  acceptance predicate applied over *every* lift of a root, because a
+  root is an orbit of decompositions and the first one to sum correctly
+  is not always the one a side condition wants.
+- Read the driver before writing any of it: rows are
+  `Σ c_o x_o − (h·b)·d ≡ h·a`, multiplied by the cofactor, with
+  `collapse_projected_orbits` merging points of equal `[h]P`.
+
+### Findings
+
+**An accounting error in three earlier sessions, now corrected.**  The
+cofactor kills `E(F₂)`, so `R`, `R + T₂`, `R + kT₄` are one projected
+target and `P`, `P + K` one unknown.  "One solve covers `R` and `R + T`"
+(§4.3, §8) and "four targets per solve" (§10) were bookkeeping.  The
+`T₂` gain that stands is the smaller system (§8's numbers) and the
+halved column count of a `T₂`-closed base.  `targets_per_solve` removed
+from the descent model; the sections amended in place.
+
+**The transport is a second question, not the first in disguise — and
+a worse one.**  The transported verdict is "`R` decomposes over
+`φ⁻¹(F_u)`", a different base; the first draft of the section claimed
+the verdicts must agree and the bench falsified it within a minute.
+Since `im φ` has index 4, only about a quarter of `F_u` has preimages
+and the second question succeeds about `4^{1−m}` as often as the
+direct one, at the same cost.
+
+**Its unknowns are foldable, not folded.**  `[h]φ(P) = [λ − 1][h]P`
+holds on every point (verified), so a transported column is a known
+multiple of an existing one — but the driver's columns are orbits of
+points, and `[λ − 1]⁻¹[h]Q ≠ [h]Q`, so it would need to be taught to
+fold by `(λ − 1)` as it folds Frobenius by `λ^k`.  With that, the union
+`F_u ∪ φ⁻¹(F_u)` doubles the points at constant columns; the mixed
+decompositions that then become usable are the ceiling for a mixed
+oracle, which would need the degree-4 correspondence between `x(P)` and
+`x(φ(P))` — the chained cost §8 removed.
+
+**Composite `n` is degenerate for this whole thread.**  At `n = 15` the
+dimension-7 subspace containing `1` is `F₈ + F₃₂`; `F_u` is subfield
+points inside `E[h]` and occupies one projected column.  The `n = 15`
+oracle timings of §8 are real but their relations are unusable.  `K₀`'s
+only sound instance in range is `n = 23`.
+
+### Next step proposal
+
+Numbers pending in this session's bench (§11.3).  After that, the
+thread's open items are unchanged from §10.5 minus item 1, with one
+addition: any future oracle claim should be checked against
+`projected_column` counts before timing anything.

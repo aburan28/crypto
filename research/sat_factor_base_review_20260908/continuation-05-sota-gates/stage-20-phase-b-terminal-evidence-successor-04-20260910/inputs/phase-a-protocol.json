@@ -1,0 +1,139 @@
+{
+  "schema": "koblitz_balanced_pdp_phase_a_protocol.v1",
+  "recorded_at": "2026-09-10",
+  "status": "frozen_before_preparation",
+  "implementation_scope": "Phase-A target preparation only; no SAT backend, long n59 census, relation collection, discrete-log recovery, or key material",
+  "claim_boundary": "This protocol can create a balanced, class-stratified public toy PDP panel. It cannot establish natural class prevalence from the 50/50 sample, an end-to-end index-calculus result, cryptanalytic key recovery, or a SOTA claim.",
+  "stage13_binding": {
+    "source_revision": "67cf7f559cf6cf4c70fc16f22eb5dd68e4883d31",
+    "panel_summary_sha256": "a1ef9a35b9ae80c972c3d9dbf45d1336c49944e20a10e6839f9c3debce483040",
+    "custody_schema": "koblitz_stage13_panel_custody.v1"
+  },
+  "master_seed_derivation": {
+    "algorithm": "SHA-256",
+    "input_encoding": "ASCII KOBLITZ-BALANCED-PDP-v1 followed by one zero byte followed by the raw 32-byte Stage13 panel-summary SHA-256",
+    "manual_per_cell_seeds_forbidden": true
+  },
+  "master_seed_anchor_hex": "a1ef9a35b9ae80c972c3d9dbf45d1336c49944e20a10e6839f9c3debce483040",
+  "master_seed_hex": "baaa64e7c331b4f852554f51137d906129022c8cccdb6a36dab548034f281f70",
+  "quotas_per_cell": {
+    "decomposable": 20,
+    "nondecomposable": 20
+  },
+  "max_unconditional_draws_per_cell": 100000,
+  "factor_space_dimension_ceiling": 16,
+  "target_population": {
+    "definition": "All affine points E(F_(2^n)) excluding infinity",
+    "sampler": "BLAKE3 keyed domain-separated draws of n uniform x bits and one selector bit; reject nonlifting x; for x != 0 select the canonically y-sorted lift; for x = 0 accept the unique lift only for selector zero",
+    "duplicate_policy": "retain first accepted occurrence only",
+    "receipt": "record draw cap, draws examined, accepted affine draws, decode/decomposable/duplicate rejection counts, selected count, and SHA-256 of the accepted LE64(x)||LE64(y) stream",
+    "discrete_log_scalar_generated": false
+  },
+  "classification": {
+    "oracle": "complete exact m=3 factor-base sumset census",
+    "tuple_policy": "canonical indices i <= j <= k with repetition allowed",
+    "infinity_policy": "retain infinity during pair arithmetic and exclude it only from the affine target sumset",
+    "operation_identity": "group additions must equal B(B+1)/2 + B(B+1)(B+2)/6 before exhaustive is true",
+    "digest_encoding": "sort point keys in numeric lexicographic (x,y) order, then hash concatenated LE64(x)||LE64(y) records with SHA-256",
+    "independent_replay": "a second flat-vector materialization sharing neither the primary pair cache nor its hash table must reproduce the exact distinct count and digest",
+    "selected_witness_validation": "re-sum every selected decomposable witness and require exact affine target equality",
+    "decomposable_selection": "bottom-20 target-level keyed priorities after sumset deduplication",
+    "nondecomposable_selection": "first 20 distinct unconditional affine draws absent from the complete sumset",
+    "sat_backends_may_classify": false,
+    "large_census_guard": "preparation requires an explicit --max-canonical-triples ceiling checked before the output directory is created"
+  },
+  "blinding": {
+    "blind_bundle_schema": "koblitz_pdp_blind_bundle.v1",
+    "blind_instance_schema": "koblitz_pdp_blind_instance.v1",
+    "oracle_ledger_schema": "koblitz_pdp_sealed_oracle_ledger.v1",
+    "seal_schema": "koblitz_pdp_phase_a_seal.v1",
+    "blind_forbidden_fields": [
+      "target_class",
+      "witness_indices",
+      "unconditional_draw_index",
+      "selection_priority_hex",
+      "planted_points"
+    ],
+    "presentation_order": "independent target-derived BLAKE3 priority across all selected cells",
+    "source_nonce": "Each blind instance contains a target-derived class-blind u64 used in the legacy exporter seed position and bound with the opaque id and target mode by the explicit-target v2 source identity",
+    "negation_orbit_policy": "P and -P remain distinct uniformly sampled affine targets, but the blind source_system_id binds their common x-only source system and is the mandatory bootstrap cluster key",
+    "solver_access_boundary": "Only blind/ may be supplied to solver processes; sealed-oracle/ remains withheld until solver artifacts are frozen"
+  },
+  "cells": [
+    {
+      "id": "n31-l5-m3-standard-a1-f0",
+      "n": 31,
+      "ell": 5,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "expected_factor_points": 31,
+      "expected_affine_targets": "2147392941"
+    },
+    {
+      "id": "n31-l5-m3-ggmp-a0-f0",
+      "n": 31,
+      "ell": 5,
+      "m": 3,
+      "basis": "ggmp",
+      "curve_a": 0,
+      "factor_index": 0,
+      "expected_factor_points": 63,
+      "expected_affine_targets": "2147574355"
+    },
+    {
+      "id": "n41-l5-m3-standard-a1-f0",
+      "n": 41,
+      "ell": 5,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "expected_factor_points": 25,
+      "expected_affine_targets": "2199020947333"
+    },
+    {
+      "id": "n59-l9-m3-standard-a1-f0",
+      "n": 59,
+      "ell": 9,
+      "m": 3,
+      "basis": "standard",
+      "curve_a": 1,
+      "factor_index": 0,
+      "expected_factor_points": 483,
+      "expected_affine_targets": "576460753246971901"
+    }
+  ],
+  "future_solver_phase": {
+    "selected_instances": 160,
+    "required_backend_runs": 480,
+    "backends": [
+      "native-xor",
+      "wdsat",
+      "cryptominisat"
+    ],
+    "single_thread": true,
+    "per_process_watchdog_seconds": 120,
+    "timeout_or_unknown_is_unsat": false,
+    "execution_status": "not_run"
+  },
+  "acceptance": {
+    "phase_a": [
+      "Every cell reproduces its frozen factor-point and affine-population counts",
+      "Every sumset receipt reports exhaustive canonical pair and triple counts",
+      "Every decomposable target has a validated exact factor-point witness",
+      "Every nondecomposable target is absent from the complete affine sumset",
+      "Each cell has exactly 20 entries of each class in the sealed oracle",
+      "The blind bundle contains 160 unique opaque ids and none of the forbidden fields",
+      "The blind and oracle files are independently hashed by the seal"
+    ],
+    "stop_conditions": [
+      "A selected cell exceeds the explicit canonical-triple ceiling",
+      "A frozen geometry or population count differs",
+      "Either class contains fewer than 20 distinct targets",
+      "Any output path already exists",
+      "Any oracle field appears in the blind bundle"
+    ]
+  }
+}
