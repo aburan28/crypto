@@ -321,13 +321,17 @@ def require_hex(value: Any, context: str, pattern: re.Pattern[str] = HEX64) -> s
 
 
 def tool_identity(path: Path, context: str) -> dict[str, Any]:
-    resolved = path.resolve(strict=True)
+    invocation = path.absolute()
+    resolved = invocation.resolve(strict=True)
     metadata = resolved.stat()
     if not stat.S_ISREG(metadata.st_mode) or not os.access(resolved, os.X_OK):
         raise Stage21Error(f"{context} must be a regular executable: {resolved}")
     data = resolved.read_bytes()
     return {
-        "path": str(resolved),
+        # Preserve the invocation basename. Rustup and similar multicall
+        # shims dispatch from argv[0]; resolving `cargo` to `rustup` before
+        # launch changes the requested tool even though the bytes are equal.
+        "path": str(invocation),
         "bytes": len(data),
         "sha256": sha256_bytes(data),
     }
