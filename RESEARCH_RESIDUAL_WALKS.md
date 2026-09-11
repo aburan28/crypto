@@ -1001,6 +1001,67 @@ Three statements now stand on measurement rather than argument:
    per-residual work that grows with the base, and the best of them
    scales as `n^{2/3}`.
 
+## 11. Gaudry's setting: a subspace factor base on `E(F_{p³})`
+
+§10.4–10.5 measured the summation-polynomial oracles where they are
+weakest.  On a prime field there is no proper additive subspace, so the
+factor base `{x < B}` has no algebraic structure and `S₃` can only be
+used one base element at a time.  Gaudry's index calculus (2009) is the
+setting where the polynomials earn their keep: `E` over `F_{q^k}`, the
+base `F = {P : x(P) ∈ F_q}` — an `F_q`-subspace of abscissae — and the
+Weil restriction of `S_{m+1}(x_1, …, x_m, x_R) = 0`, with the `x_i`
+unknown in `F_q`, a system of `k` polynomial equations over `F_q` in
+`m` unknowns whose solving cost does not depend on `|F|`.  For fixed
+`k ≥ 3` this beats rho asymptotically, with constants that grow fast
+in `k`.
+
+### 11.1 What was built
+
+`cryptanalysis::gaudry_cubic`, `k = m = 3`:
+
+- `F_{p³} = F_p[t]/(t³ − c)` with an `F_p`-multiplication counter;
+  random curves `y² = x³ + ax + b`, `a, b ∈ F_{p³}`, of prime order
+  `n ≈ p³` (BSGS over the Hasse interval); the subspace base of the
+  `≈ p/2` points with `x ∈ F_p`.
+- The **Weil-restricted `S₃` pair test**: `S₃(x_Y, X₁, X₂) = 0` with
+  `X₁, X₂ ∈ F_p` unknown is three quadratics over `F_p`; `X₂` is
+  eliminated by the explicit `4×4` Sylvester resultant of the first
+  two, leaving a degree-`≤ 8` polynomial in `X₁` whose `F_p`-roots are
+  found by Cantor–Zassenhaus, completed to `X₂` by the quadratic
+  formula, checked against the third component and the base, and
+  signed by group arithmetic.  Checked against brute force over every
+  signed pair.  Cost `O(log p)` field multiplications, independent of
+  the base size — where the prime-field `S₃` oracle needed one square
+  root per base element.
+- The **triple oracle** in meet-in-the-middle form: for every `P_k`
+  in the base, `Y = R ∓ P_k` (one group operation) and the pair test on
+  `Y`; distinct-index triples reported once.  Checked on constructed
+  triples and verified by arithmetic on every decomposition.
+- Relation collection by full decomposition of random `R = aG + bQ`
+  until `d` is determined (the same `RelationSystem`), and **rho on the
+  same group** for the reference.  Accounting: group operations are
+  affine additions in `E(F_{p³})`; oracle work is counted in `F_p`
+  multiplications and converted at the measured cost of one affine
+  addition on that field (`≈ 63`), so `S = total/√n` is comparable
+  across the whole note.
+
+What is *not* built is Gaudry's `O(1)` solve of the three-unknown `S₄`
+system (symmetrised variables and a Gröbner basis or resultant
+cascade), which would remove the remaining factor `2|F|` from the
+per-residual cost.  The report separates that factor so the effect of
+adding it can be read off.
+
+### 11.2 Measured
+
+`cargo run --release --example gaudry_cubic_bench -- --protocol`, two
+seeds per size, `p ≡ 1 (mod 3)`:
+
+GAUDRY_TABLE
+
+### 11.3 Reading it
+
+GAUDRY_NARRATIVE
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

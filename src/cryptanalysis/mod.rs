@@ -173,6 +173,7 @@ pub mod pollard_collab;
 pub mod pollard_rho;
 pub mod preprocessing_rho;
 pub mod residual_walk;
+pub mod gaudry_cubic;
 pub mod quantum_estimator;
 pub mod research_bench;
 pub mod sat;
