@@ -228,6 +228,41 @@ impl FastCurve {
         }
     }
 
+    /// `P_i + Q_i` for every `i`, appended to `out`, with **one** field
+    /// inversion for the whole slice.  This is what lets many
+    /// independent walks share the cost of the one inversion a point
+    /// addition needs: with `w` walks stepping together the inversion
+    /// costs `3 + 1/w` multiplications each instead of the `2n` a
+    /// Fermat inversion takes.
+    pub fn add_pairwise(
+        &self,
+        ps: &[FastPoint],
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        assert_eq!(ps.len(), qs.len(), "pairwise addition needs equal slices");
+        let f = &self.field;
+        scratch.dens.clear();
+        scratch.dens.extend(ps.iter().zip(qs).map(|(p, q)| {
+            if p.infinity || q.infinity || p.x == q.x {
+                0
+            } else {
+                p.x ^ q.x
+            }
+        }));
+        f.batch_inv(&mut scratch.dens, &mut scratch.acc);
+        out.reserve(ps.len());
+        for ((p, q), &inv) in ps.iter().zip(qs).zip(&scratch.dens) {
+            if inv == 0 {
+                out.push(self.add(*p, *q));
+                continue;
+            }
+            let lambda = f.mul(p.y ^ q.y, inv);
+            out.push(self.add_with_lambda(*p, *q, lambda));
+        }
+    }
+
     /// `[k]P` by double-and-add.
     pub fn mul_u64(&self, p: FastPoint, k: u64) -> FastPoint {
         if k == 0 || p.infinity {
@@ -358,6 +393,36 @@ mod tests {
             for (q, sum) in qs.iter().zip(&out) {
                 assert_eq!(*sum, fc.add(p, *q));
             }
+        }
+    }
+
+    #[test]
+    fn pairwise_additions_equal_individual_ones() {
+        let kc = KoblitzCurve::new(1, 19).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let points: Vec<FastPoint> = random_points(&kc, 24, 11)
+            .iter()
+            .map(|p| fc.lift(p))
+            .collect();
+        // Degenerate pairs too: P + P, P + (−P), P + O.
+        let mut ps: Vec<FastPoint> = Vec::new();
+        let mut qs: Vec<FastPoint> = Vec::new();
+        for (i, &p) in points.iter().enumerate() {
+            ps.push(p);
+            qs.push(points[(i * 7 + 3) % points.len()]);
+            ps.push(p);
+            qs.push(p);
+            ps.push(p);
+            qs.push(fc.neg(p));
+            ps.push(p);
+            qs.push(FastPoint::INFINITY);
+        }
+        let mut out = Vec::new();
+        let mut scratch = BatchScratch::default();
+        fc.add_pairwise(&ps, &qs, &mut out, &mut scratch);
+        assert_eq!(out.len(), ps.len());
+        for ((p, q), sum) in ps.iter().zip(&qs).zip(&out) {
+            assert_eq!(*sum, fc.add(*p, *q));
         }
     }
 
