@@ -903,7 +903,60 @@ than the residual table at unit cost — which is what a summation
 polynomial does *not* do: it trades memory for square roots, one per
 factor-base element.
 
-### 10.5 Where this leaves κ
+### 10.5 Candidate 4 — triple decompositions (`S₄`, and its meet-in-the-middle form)
+
+Three summands reach a far larger set: signed triples with distinct
+indices number `8·C(B,3) ≈ 22·10⁶` at `B = 256`, about a tenth of `n`
+at 28 bits, so roughly one residual in ten decomposes outright and no
+collision is needed for it.  Two oracles decide membership:
+
+- **Algebraic `S₄`** (`s4_oracle`): `S₄ = Res(S₃, S₃)`, evaluated as
+  `S₃` applied twice — for each `i` the roots `Y = x(L ∓ P_i)`, then for
+  each `j > i` the roots `X` of `S₃(Y, x_j, X)`, looked up in the base.
+  `B²` quadratics per residual, no table at all.  Checked against brute
+  force over every signed distinct-index triple.
+- **Meet in the middle** (`mitm_neighbours` with `seed_pairs`): the
+  `2B` neighbours `L ∓ P_k` are computed (one group operation each) and
+  looked up in the table that already holds every `±P_i ± P_j`; a hit
+  on a seed is a triple, a neighbour in `±F` is a pair, a hit on a
+  walked residual is an ordinary collision with one extra term.  `2B`
+  operations per residual plus the `B²` seed table.
+
+Measured on the tuned mutation walk (`--oracle s4`, `--oracle mitm3`;
+`n ≈ 2^24, 2^28`, `B = 256`, three seeds each):
+
+| oracle | bits | κ walked | decompositions found | oracle share | S | S tuned | S ratio |
+|:--|---:|---:|---:|---:|---:|---:|---:|
+| meet in the middle | 24 | 0.02 | ≈ 420 | 40.5% (+59.4% seed table) | 48.2 | 29.8 | 1.6× worse |
+| meet in the middle | 28 | 0.15 | ≈ 705 | 92.1% | 90.1 | 19.7 | 4.6× worse |
+| algebraic `S₄` | 24 | S4_24_KAPPA | S4_24_HITS | S4_24_SHARE | S4_24_S | 29.8 | S4_24_RATIO |
+| algebraic `S₄` | 28 | S4_28_KAPPA | S4_28_HITS | S4_28_SHARE | S4_28_S | 19.7 | S4_28_RATIO |
+
+The meet-in-the-middle oracle is the strongest count reduction in this
+note by a wide margin — at 28 bits a run walks `≈ 2,000` residuals,
+`0.15·√n`, and about one in three of them decomposes through a
+neighbour (`≈ 700` triples for `253` independent relations; the rest
+are dependent, as expected once the rank nears `B + 1`) — and it is
+still `4.6×` the cost of the plain walk, `60×` rho's.  The reason is
+the same ledger as before: `512` neighbour operations per residual
+against one.  Per operation it checks `2B² ≈ 131,000` virtual
+coincidences (each neighbour against the whole seed table), which is
+close to the `T ≈ 230,000` a walked table lookup checks at these sizes
+— so the two are within a small factor of each other, and the walk
+wins because its checks come with a stored point that keeps paying.
+As `n` grows, `T ∝ √n` outpaces `2B²` unless `B` grows like `n^{1/3}`,
+at which point the seed table's `B²` cost is itself `n^{2/3}`: the
+whole route is `Θ(n^{2/3})`, the textbook figure for index calculus
+with 3-decompositions and a linear-algebra-sized base, and the
+measured `S` of `48 → 90` from 24 to 28 bits (`1.9×` for `16×` in `n`,
+i.e. `n^{0.23}`) is on its way there.
+
+The algebraic `S₄` is the same test with the seed table replaced by a
+square root per pair `(i, j)`: `B²` operation-equivalents per residual
+instead of `2B`, i.e. `128×` dearer per residual at `B = 256`, with the
+only advantage that nothing is stored.  S4_NARRATIVE
+
+### 10.6 Where this leaves κ
 
 | what was tried | κ (walked) | κ_total | κ_total / floor | verdict |
 |:--|---:|---:|---:|:--|
@@ -912,6 +965,8 @@ factor-base element.
 | `j = 0` control (negation only) | 17.09 | 17.09 | 1.07 | reference on the structured curve |
 | `j = 0` with 6-fold | 9.47 | 9.47 | 1.02 | κ ÷ 1.8, floor ÷ 1.73; rho ÷ 1.8 as well |
 | `S₃` pair oracle | 12.37 | (virtual) | — | walked count relabelled as `B` square roots per residual; `S` 162× worse |
+| triple oracle, meet in the middle | 0.15 | (virtual) | — | one residual in three decomposes; `2B` operations each; `S` 4.6× worse, `Θ(n^{2/3})` |
+| triple oracle, algebraic `S₄` | S4_28_KAPPA | (virtual) | — | `B²` square roots per residual; `S` S4_28_RATIO |
 
 Three statements now stand on measurement rather than argument:
 
@@ -933,9 +988,12 @@ Three statements now stand on measurement rather than argument:
    fold-aware floor — has to make two *distinct* formal combinations
    coincide with probability above `γ/n`, which is to say it has to
    compute something about the coordinates that the group law does
-   not.  The summation-polynomial oracle is the only candidate of that
-   kind on prime fields; §10.4 measures `S₃` at `B` square roots per
-   residual and finds it two orders of magnitude behind the walk.
+   not.  The summation-polynomial oracles are the only candidates of
+   that kind on prime fields; §10.4 and §10.5 measure `S₃`, `S₄` and the
+   meet-in-the-middle triple oracle and find every one of them behind
+   the walk in operations — the count they save is bought with
+   per-residual work that grows with the base, and the best of them
+   scales as `n^{2/3}`.
 
 ## References
 
