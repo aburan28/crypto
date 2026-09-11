@@ -18,6 +18,7 @@ import run_koblitz_stage26_affinity_cell as cell_tool
 import run_koblitz_stage25_single_core as stage25_tool
 import score_koblitz_blind_pdp_phase_b as phase_b_score
 import verify_koblitz_stage27_result as stage27_verifier
+import verify_koblitz_stage28_relation_yield_replay as stage28_verifier
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -264,10 +265,12 @@ def natural_relation_yield_control() -> dict[str, Any]:
     require(natural.get("targets") == 256 and natural.get("hits") == 163 and natural.get("misses") == 93, "Stage-21 natural-yield totals changed")
     admission = summary.get("verification_and_admission", {})
     require(admission.get("measurement_admission_status") == "pending_independent_payload_replay" and admission.get("scientific_measurement_admitted") is False, "Stage-21 admission boundary changed")
+    replay = stage28_verifier.verify()
     return {
         "summary": {"path": str(summary_path.relative_to(REPO)), "bytes": summary_path.stat().st_size, "sha256": phase_b.sha256_file(summary_path, "Stage-21 summary")},
         "seal": {"path": str(seal_path.relative_to(REPO)), "bytes": seal_path.stat().st_size, "sha256": phase_b.sha256_file(seal_path, "Stage-21 seal")},
-        "status": summary["status"],
+        "historical_status": summary["status"],
+        "status": "finite_public_synthetic_internal_payload_replay_complete",
         "factor_base": factor_base,
         "natural": natural,
         "planted_sat": summary["measurement"]["planted_sat"],
@@ -276,6 +279,12 @@ def natural_relation_yield_control() -> dict[str, Any]:
         "operation_counts": summary["operation_counts"],
         "resource_totals": summary["resource_totals"],
         "verification_and_admission": admission,
+        "independent_internal_payload_replay": replay,
+        "factor_base_materialization_replayed": True,
+        "canonical_pair_oracle_replayed": True,
+        "witness_curve_readdition_replayed": True,
+        "current_measurement_admission_status": "finite_public_synthetic_internal_replay_complete",
+        "independent_external_reproduction_satisfied": False,
         "full_cost_gate_passed": False,
         "koblitz_index_calculus_sota": False,
     }
@@ -286,7 +295,7 @@ def completion_gate_audit() -> dict[str, Any]:
         "1_full_cost_accounting": {
             "status": "partial",
             "proved": [
-                "Stage-21 algebraic factor-base and exact pair-oracle process resources",
+                "Stage-21 algebraic factor-base and exact pair-oracle process resources plus Stage-28 independent internal replay of all 9,165,621 pairs and 227 witnesses",
                 "Stage-25 factor-base discovery, relation collection, linear solve, IC, rho, and one-CPU outer envelope",
                 "Stage-26 and Stage-27 matched PDP cell, build, acquisition, conflict, operation, wall, and memory records",
             ],

@@ -50,6 +50,10 @@ class Stage26ScoreTests(unittest.TestCase):
         self.assertEqual(value["natural"]["hits"], 163)
         self.assertFalse(value["factor_base"]["factor_base_discrete_log_labels_constructed"])
         self.assertEqual(value["verification_and_admission"]["measurement_admission_status"], "pending_independent_payload_replay")
+        self.assertEqual(value["current_measurement_admission_status"], "finite_public_synthetic_internal_replay_complete")
+        self.assertTrue(value["factor_base_materialization_replayed"])
+        self.assertEqual(value["independent_internal_payload_replay"]["canonical_pairs"], 9165621)
+        self.assertFalse(value["independent_external_reproduction_satisfied"])
 
     def test_elapsed_time(self) -> None:
         self.assertEqual(score.elapsed_time("1:02.50"), 62.5)
