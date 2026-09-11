@@ -1,4 +1,4 @@
-//! Resumable, parameter-file-driven pipeline: select → logs → solve.
+//! Resumable, parameter-file-driven pipeline: select → collect → logs → solve.
 //!
 //! The number-field-sieve tools run as a sequence of stages with their
 //! outputs on disk, so a run can be stopped, inspected and resumed
@@ -9,9 +9,22 @@
 //!    parameter file, or the best-by-census candidate of the
 //!    factor-base search; materialised and written as
 //!    `factor_base.json`.
-//! 2. **logs** — precompute the factor-base logarithm database over
-//!    that base (`logs.json`), every column certified by `[x]G == R`.
-//! 3. **solve** — descend each target with one relation reusing the
+//! 2. **collect** — draw and decompose probes in **work units**, each a
+//!    slice of the seed's probe sequence, written as
+//!    `relations/unit-NNNNN.json`.  Units are independent: any machine
+//!    with the parameter file (and `factor_base.json` for a searched
+//!    base) can run `--collect-units 3-7` and drop its files into the
+//!    run directory, the way sieving clients feed a number-field-sieve
+//!    server.  Every relation carries only the probe scalar and the
+//!    factor-base point indices; the driver re-verifies each one in
+//!    the group before it is used, so a bad worker cannot poison the
+//!    database.
+//! 3. **logs** — merge the units, verify and deduplicate the relations,
+//!    and precompute the factor-base logarithm database (`logs.json`),
+//!    every column certified by `[x]G == R`.  When the relations do not
+//!    yet determine every column the driver collects further units up
+//!    to `collection.max_units`.
+//! 4. **solve** — descend each target with one relation reusing the
 //!    database, appending to `solutions.json` after every target so an
 //!    interrupted run resumes at the first unsolved one.
 //!
@@ -37,14 +50,16 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    individual_log_with_pair_table, solve_factor_base_logs, DecompositionStrategy,
-    FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    individual_log_with_pair_table, solve_factor_base_logs_from_relations, CollectedRelation,
+    DecompositionStrategy, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, PairSumTable,
+    RelationCollector, RelationWorkUnit,
 };
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
+    collections::BTreeMap,
     fs::{self, File},
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -149,6 +164,28 @@ pub struct LinearAlgebraParams {
     pub sparse: SparseSolveOptions,
 }
 
+/// Relation collection in work units.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct CollectionParams {
+    /// Probes per work unit.
+    pub unit_trials: u64,
+    /// Units the driver collects before the first solve attempt.
+    pub units: usize,
+    /// Units the driver may collect in total when the relations do not
+    /// yet determine every column.
+    pub max_units: usize,
+}
+impl Default for CollectionParams {
+    fn default() -> Self {
+        Self {
+            unit_trials: 4096,
+            units: 4,
+            max_units: 64,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WorkflowParams {
@@ -166,6 +203,8 @@ pub struct WorkflowParams {
     pub max_trials: u32,
     #[serde(default)]
     pub linear_algebra: LinearAlgebraParams,
+    #[serde(default)]
+    pub collection: CollectionParams,
     pub factor_base: FactorBaseSource,
     #[serde(default)]
     pub targets: Vec<TargetSpec>,
@@ -208,6 +247,13 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if p.curve.curve_a > 1 {
         return Err("curve_a must be 0 or 1".into());
     }
+    let col = &p.collection;
+    if col.unit_trials == 0 || col.unit_trials > 100_000_000 {
+        return Err("collection.unit_trials must be 1..=100000000".into());
+    }
+    if col.units == 0 || col.max_units < col.units || col.max_units > 100_000 {
+        return Err("collection.units must be at least 1 and at most collection.max_units (≤ 100000)".into());
+    }
     for (i, t) in p.targets.iter().enumerate() {
         if t.known_log.is_some() == t.random_seed.is_some() {
             return Err(format!(
@@ -231,6 +277,7 @@ fn params_digest(p: &WorkflowParams) -> String {
 #[serde(rename_all = "snake_case")]
 pub enum Stage {
     Select,
+    Collect,
     Logs,
     Solve,
 }
@@ -266,6 +313,8 @@ pub struct WorkflowState {
     #[serde(default)]
     pub select: StageState,
     #[serde(default)]
+    pub collect: StageState,
+    #[serde(default)]
     pub logs: StageState,
     #[serde(default)]
     pub solve: StageState,
@@ -275,6 +324,31 @@ pub struct WorkflowState {
     pub total_targets: usize,
     #[serde(default)]
     pub runs: u32,
+    /// Valid work-unit files present at the last run.
+    #[serde(default)]
+    pub units_collected: usize,
+    /// Relations in those units (before verification and deduplication).
+    #[serde(default)]
+    pub relations_collected: usize,
+}
+
+/// One work unit's relations, bound to the run and the factor base so a
+/// file from another experiment is ignored rather than merged.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RelationUnitDocument {
+    pub schema_version: u32,
+    pub params_digest: String,
+    pub degree: u32,
+    pub curve_a: u8,
+    pub spec: FactorBaseSpec,
+    pub summands: u8,
+    pub unit: usize,
+    pub seed: u64,
+    pub start: u64,
+    pub count: u64,
+    pub relations: Vec<CollectedRelation>,
+    pub elapsed_seconds: f64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -302,6 +376,40 @@ const STATE_FILE: &str = "state.json";
 const FACTOR_BASE_FILE: &str = "factor_base.json";
 const LOGS_FILE: &str = "logs.json";
 const SOLUTIONS_FILE: &str = "solutions.json";
+const RELATIONS_DIR: &str = "relations";
+
+fn unit_path(dir: &Path, unit: usize) -> PathBuf {
+    dir.join(RELATIONS_DIR).join(format!("unit-{unit:05}.json"))
+}
+
+/// A worker's list of work units, as given on the command line.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct UnitList(pub Vec<usize>);
+
+/// Parse a worker's unit list: `3`, `0-3`, `0-3,7,9-10`.
+pub fn parse_units(text: &str) -> Result<UnitList, String> {
+    let mut out = Vec::new();
+    for part in text.split(',').map(str::trim).filter(|p| !p.is_empty()) {
+        let (lo, hi) = match part.split_once('-') {
+            Some((a, b)) => (a.trim().parse::<usize>(), b.trim().parse::<usize>()),
+            None => (part.parse::<usize>(), part.parse::<usize>()),
+        };
+        let (lo, hi) = (lo.map_err(|e| format!("{part:?}: {e}"))?, hi.map_err(|e| format!("{part:?}: {e}"))?);
+        if lo > hi {
+            return Err(format!("{part:?}: empty range"));
+        }
+        if hi - lo > 100_000 {
+            return Err(format!("{part:?}: range too wide"));
+        }
+        out.extend(lo..=hi);
+    }
+    out.sort_unstable();
+    out.dedup();
+    if out.is_empty() {
+        return Err("no work units given".into());
+    }
+    Ok(UnitList(out))
+}
 
 /// Write a JSON document atomically: temp file in the same directory,
 /// then rename over the destination.
@@ -343,6 +451,10 @@ pub struct WorkflowArgs {
     /// Stop after this stage (useful for staged or interrupted runs).
     #[arg(long, value_enum)]
     pub stop_after: Option<Stage>,
+    /// Act as a collection worker: run only these work units (`3`,
+    /// `0-3`, `0-3,7`), write their relation files, and stop.
+    #[arg(long, value_parser = parse_units)]
+    pub collect_units: Option<UnitList>,
 }
 
 fn known_scalar(c: &KoblitzCurve, t: &TargetSpec) -> Result<BigUint, String> {
@@ -462,11 +574,14 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             params_digest: digest.clone(),
             name: p.name.clone(),
             select: StageState::default(),
+            collect: StageState::default(),
             logs: StageState::default(),
             solve: StageState::default(),
             solved_targets: 0,
             total_targets: p.targets.len(),
             runs: 0,
+            units_collected: 0,
+            relations_collected: 0,
         }
     };
     state.runs += 1;
@@ -503,7 +618,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 return Err("factor_base.json does not belong to this curve".into());
             }
             let fb = experiment::materialize(&c, &doc.spec)?;
-            say(&format!("[1/3] select: reused {}", FACTOR_BASE_FILE));
+            say(&format!("[1/4] select: reused {}", FACTOR_BASE_FILE));
             (doc.spec, fb)
         } else {
             select_ran = true;
@@ -511,7 +626,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 FactorBaseSource::Spec { spec } => (spec.clone(), None),
                 src @ FactorBaseSource::Search { .. } => {
                     let opts = search_options(src, &p)?;
-                    say("[1/3] select: running factor-base search …");
+                    say("[1/4] select: running factor-base search …");
                     let report = search(&c, &opts);
                     let best = report.best().ok_or(
                         "factor-base search found no candidate that decomposes any target",
@@ -541,7 +656,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 stage_reports.push(json!({"stage":"select","status":"complete","ran":true,"search":sr}));
             }
             say(&format!(
-                "[1/3] select: complete — {} ({} points, {} signed orbits)",
+                "[1/4] select: complete — {} ({} points, {} signed orbits)",
                 serde_json::to_string(&spec).unwrap_or_default(),
                 fb.points.len(),
                 fb.unknowns()
@@ -559,59 +674,199 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
     }
 
-    // ── Stage 2: logs ──────────────────────────────────────────────
+    // ── Stage 2: collect (work units) ──────────────────────────────
     let t1 = Instant::now();
     let ic = experiment::with_linear_algebra(
         experiment::ic_options(p.solver, p.summands, p.max_trials, p.seed),
         p.linear_algebra.mode,
         p.linear_algebra.sparse,
     );
-    let table = if state.logs.status == StageStatus::Complete && logs_path.exists() {
+    let rel_dir = args.dir.join(RELATIONS_DIR);
+    fs::create_dir_all(&rel_dir).map_err(|e| format!("{}: {e}", rel_dir.display()))?;
+    // The pair table is built at most once per process and shared by
+    // collection and descent.
+    let mut pair: Option<PairSumTable> = None;
+    let (mut units, ignored) = load_units(&rel_dir, &digest, &c, &spec, p.summands)?;
+    let worker_mode = args.collect_units.is_some();
+    let logs_done = state.logs.status == StageStatus::Complete && logs_path.exists();
+    let wanted: Vec<usize> = match args.collect_units.as_ref().map(|u| &u.0) {
+        Some(list) => {
+            if let Some(&u) = list.iter().find(|&&u| u >= p.collection.max_units) {
+                return Err(format!(
+                    "work unit {u} is beyond collection.max_units = {}",
+                    p.collection.max_units
+                ));
+            }
+            list.iter().copied().filter(|u| !units.contains_key(u)).collect()
+        }
+        None if logs_done => Vec::new(),
+        None => (0..p.collection.units).filter(|u| !units.contains_key(u)).collect(),
+    };
+    if ignored > 0 {
+        say(&format!(
+            "[2/4] collect: ignored {ignored} relation file(s) from another run or factor base"
+        ));
+    }
+    let mut units_ran = 0usize;
+    let mut relations_now = 0usize;
+    let mut trials_now = 0u64;
+    if !wanted.is_empty() {
+        say(&format!(
+            "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
+            wanted.len(),
+            p.collection.unit_trials,
+            units.len()
+        ));
+    }
+    for &u in &wanted {
+        let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, u)?;
+        say(&format!(
+            "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+            doc.relations.len(),
+            doc.count,
+            doc.elapsed_seconds
+        ));
+        units_ran += 1;
+        relations_now += doc.relations.len();
+        trials_now += doc.count;
+        units.insert(u, doc);
+        state.units_collected = units.len();
+        state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+        write_atomic(&state_path, &state)?;
+    }
+    state.units_collected = units.len();
+    state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+    let requested_present = (0..p.collection.units).all(|u| units.contains_key(&u));
+    state.collect = StageState {
+        status: if requested_present || logs_done { StageStatus::Complete } else { StageStatus::Pending },
+        artifact: Some(RELATIONS_DIR.into()),
+        elapsed_seconds: state.collect.elapsed_seconds + t1.elapsed().as_secs_f64(),
+        reason: None,
+    };
+    write_atomic(&state_path, &state)?;
+    let trials_total: u64 = units.values().map(|d| d.count).sum();
+    stage_reports.push(json!({"stage":"collect",
+        "status":if state.collect.status == StageStatus::Complete {"complete"} else {"partial"},
+        "ran":units_ran > 0,"worker":worker_mode,
+        "units":{"present":units.len(),"ran_now":units_ran,"requested":p.collection.units,
+                 "max":p.collection.max_units,"ignored":ignored,"trials_per_unit":p.collection.unit_trials,
+                 "indices":units.keys().copied().collect::<Vec<_>>()},
+        "trials_now":trials_now,"relations_now":relations_now,
+        "trials_total":trials_total,"relations_total":state.relations_collected,
+        "elapsed_seconds":t1.elapsed().as_secs_f64()}));
+    if units_ran == 0 {
+        say(&format!(
+            "[2/4] collect: reused {} unit(s), {} relations from {} probes",
+            units.len(),
+            state.relations_collected,
+            trials_total
+        ));
+    } else {
+        say(&format!(
+            "[2/4] collect: {} unit(s) present, {} relations from {} probes ({:.1}s this run)",
+            units.len(),
+            state.relations_collected,
+            trials_total,
+            t1.elapsed().as_secs_f64()
+        ));
+    }
+    if worker_mode || args.stop_after == Some(Stage::Collect) {
+        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+    }
+
+    // ── Stage 3: logs (merge, verify, solve) ───────────────────────
+    let t2 = Instant::now();
+    let table = if logs_done {
         let doc: LogTableDocument = read_json(&logs_path)?;
         let table = log_table_from_doc(&c, &doc)?;
         if doc.spec != spec {
             return Err("logs.json was built over a different factor base".into());
         }
-        say(&format!("[2/3] logs: reused {} ({} columns, re-verified)", LOGS_FILE, table.len()));
+        say(&format!("[3/4] logs: reused {} ({} columns, re-verified)", LOGS_FILE, table.len()));
         stage_reports.push(json!({"stage":"logs","status":"complete","ran":false,"columns":table.len()}));
         Some(table)
     } else {
-        say("[2/3] logs: precomputing the factor-base logarithm database …");
-        match solve_factor_base_logs(&c, &fb, &ic) {
+        say(&format!(
+            "[3/4] logs: verifying {} relations from {} unit(s) and solving …",
+            state.relations_collected,
+            units.len()
+        ));
+        let mut merged: Vec<CollectedRelation> =
+            units.values().flat_map(|d| d.relations.iter().cloned()).collect();
+        let mut outcome = solve_factor_base_logs_from_relations(&c, &fb, &ic, &merged);
+        let mut extended = 0usize;
+        // Undetermined: collect further units up to the budget, solving
+        // again after each.
+        while let Some((_, report)) = &outcome {
+            if report.verified {
+                break;
+            }
+            let next = units.keys().max().map_or(0, |m| m + 1);
+            if next >= p.collection.max_units {
+                break;
+            }
+            say(&format!(
+                "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
+                report.relations, report.rejected_relations, report.duplicate_relations, report.columns
+            ));
+            let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, next)?;
+            say(&format!(
+                "      unit {next:05}: {} relations from {} probes ({:.2}s)",
+                doc.relations.len(),
+                doc.count,
+                doc.elapsed_seconds
+            ));
+            merged.extend(doc.relations.iter().cloned());
+            units.insert(next, doc);
+            extended += 1;
+            state.units_collected = units.len();
+            state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+            write_atomic(&state_path, &state)?;
+            outcome = solve_factor_base_logs_from_relations(&c, &fb, &ic, &merged);
+        }
+        let trials_total: u64 = units.values().map(|d| d.count).sum();
+        match outcome {
             Some((table, report)) if report.verified => {
                 let doc = log_table_to_doc(&c, &spec, p.summands, p.solver, &table);
                 write_atomic(&logs_path, &doc)?;
                 state.logs = StageState {
                     status: StageStatus::Complete,
                     artifact: Some(LOGS_FILE.into()),
-                    elapsed_seconds: t1.elapsed().as_secs_f64(),
+                    elapsed_seconds: t2.elapsed().as_secs_f64(),
                     reason: None,
                 };
                 write_atomic(&state_path, &state)?;
                 stage_reports.push(json!({"stage":"logs","status":"complete","ran":true,
-                    "columns":report.columns,"trials":report.trials,"relations":report.relations,
+                    "columns":report.columns,"trials":trials_total,"relations":report.relations,
+                    "relations_loaded":merged.len(),"rejected":report.rejected_relations,
+                    "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
+                    "verification_seconds":report.collection_seconds,
                     "linear_algebra":experiment::linear_algebra_json(&report),
-                    "elapsed_seconds":t1.elapsed().as_secs_f64()}));
+                    "elapsed_seconds":t2.elapsed().as_secs_f64()}));
                 say(&format!(
-                    "[2/3] logs: complete — {} columns certified from {} relations in {} trials ({:.1}s); {}",
-                    report.columns, report.relations, report.trials, t1.elapsed().as_secs_f64(),
+                    "[3/4] logs: complete — {} columns certified from {} relations ({} rejected, {} duplicates) out of {} units / {} probes ({:.1}s); {}",
+                    report.columns, report.relations, report.rejected_relations, report.duplicate_relations,
+                    units.len(), trials_total, t2.elapsed().as_secs_f64(),
                     super::linear_algebra_summary(&experiment::linear_algebra_json(&report))
                 ));
                 Some(table)
             }
             Some((_, report)) => {
                 let reason = format!(
-                    "relations did not determine every column logarithm within {} trials ({} relations, {} columns)",
-                    report.trials, report.relations, report.columns
+                    "relations from {} units ({} probes; {} accepted, {} rejected, {} duplicates) did not determine every one of {} columns; raise collection.max_units or collection.unit_trials",
+                    units.len(), trials_total, report.relations, report.rejected_relations,
+                    report.duplicate_relations, report.columns
                 );
                 state.logs = StageState {
                     status: StageStatus::Failed,
                     artifact: None,
-                    elapsed_seconds: t1.elapsed().as_secs_f64(),
+                    elapsed_seconds: t2.elapsed().as_secs_f64(),
                     reason: Some(reason.clone()),
                 };
                 write_atomic(&state_path, &state)?;
                 stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason,
+                    "relations_loaded":merged.len(),"rejected":report.rejected_relations,
+                    "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
                     "linear_algebra":experiment::linear_algebra_json(&report)}));
                 overall_failed = Some(reason);
                 None
@@ -621,7 +876,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 state.logs = StageState {
                     status: StageStatus::Failed,
                     artifact: None,
-                    elapsed_seconds: t1.elapsed().as_secs_f64(),
+                    elapsed_seconds: t2.elapsed().as_secs_f64(),
                     reason: Some(reason.clone()),
                 };
                 write_atomic(&state_path, &state)?;
@@ -659,17 +914,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         solutions.solutions.iter().filter(|s| s.verified).map(|s| s.index).collect();
     let pending: Vec<usize> = (0..p.targets.len()).filter(|i| !already.contains(i)).collect();
     say(&format!(
-        "[3/3] solve: {} targets, {} already solved, {} pending",
+        "[4/4] solve: {} targets, {} already solved, {} pending",
         p.targets.len(),
         already.len(),
         pending.len()
     ));
-    // Build the pair table once for the whole batch.
-    let pair = if ic.strategy == DecompositionStrategy::PairTable && !pending.is_empty() {
-        Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?)
-    } else {
-        None
-    };
+    // The pair table is shared with collection; built once per process.
+    if ic.strategy == DecompositionStrategy::PairTable && !pending.is_empty() && pair.is_none() {
+        pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+    }
     let mut solved_now = 0usize;
     let mut failed_now = 0usize;
     for i in pending {
@@ -748,8 +1001,95 @@ fn finish(
             "verified":s.solutions.iter().filter(|x| x.verified).count(),
             "items":s.solutions})),
         "failure":failure,
-        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE},
+        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"relations":RELATIONS_DIR,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE},
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":experiment::resources(),
-        "scope":"resumable staged pipeline: select → logs → solve; completed stages and solved targets are reused on rerun after re-verification against the reconstructed curve",
+        "scope":"resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]})
+}
+
+/// Read every valid work-unit file of this run; files belonging to
+/// another parameter set, curve or factor base — or unreadable ones —
+/// are counted and ignored.
+fn load_units(
+    rel_dir: &Path,
+    digest: &str,
+    c: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+    summands: u8,
+) -> Result<(BTreeMap<usize, RelationUnitDocument>, usize), String> {
+    let mut units = BTreeMap::new();
+    let mut ignored = 0usize;
+    let entries = match fs::read_dir(rel_dir) {
+        Ok(e) => e,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok((units, 0)),
+        Err(e) => return Err(format!("{}: {e}", rel_dir.display())),
+    };
+    for entry in entries {
+        let path = entry.map_err(|e| e.to_string())?.path();
+        let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        if !(name.starts_with("unit-") && name.ends_with(".json")) {
+            continue;
+        }
+        let Ok(doc) = read_json::<RelationUnitDocument>(&path) else {
+            ignored += 1;
+            continue;
+        };
+        let belongs = doc.schema_version == 1
+            && doc.params_digest == digest
+            && doc.degree == c.n
+            && doc.curve_a == c.a
+            && doc.spec == *spec
+            && doc.summands == summands
+            && name == format!("unit-{:05}.json", doc.unit);
+        if !belongs || units.contains_key(&doc.unit) {
+            ignored += 1;
+            continue;
+        }
+        units.insert(doc.unit, doc);
+    }
+    Ok((units, ignored))
+}
+
+/// Collect one work unit and write its file atomically.
+#[allow(clippy::too_many_arguments)]
+fn collect_unit(
+    c: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    ic: &KoblitzIcOptions,
+    pair: &mut Option<PairSumTable>,
+    p: &WorkflowParams,
+    digest: &str,
+    spec: &FactorBaseSpec,
+    rel_dir: &Path,
+    unit: usize,
+) -> Result<RelationUnitDocument, String> {
+    if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+        *pair = Some(PairSumTable::build(c, fb).ok_or("field too wide for the pair table")?);
+    }
+    let collector = RelationCollector::with_pair_table(c, fb, ic, pair.as_ref())
+        .ok_or("factor base cannot decompose with this summand count")?;
+    let work = RelationWorkUnit {
+        seed: p.seed,
+        start: (unit as u64)
+            .checked_mul(p.collection.unit_trials)
+            .ok_or("work unit range overflows")?,
+        count: p.collection.unit_trials,
+    };
+    let (relations, report) = collector.collect(work);
+    let doc = RelationUnitDocument {
+        schema_version: 1,
+        params_digest: digest.to_string(),
+        degree: c.n,
+        curve_a: c.a,
+        spec: spec.clone(),
+        summands: p.summands,
+        unit,
+        seed: work.seed,
+        start: work.start,
+        count: work.count,
+        relations,
+        elapsed_seconds: report.elapsed_seconds,
+    };
+    write_atomic(&unit_path(rel_dir.parent().unwrap_or(rel_dir), unit), &doc)?;
+    Ok(doc)
 }

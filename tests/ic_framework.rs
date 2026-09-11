@@ -527,6 +527,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
             "schema_version":1,"name":"k0n9","curve":{"degree":9,"curve_a":0},
             "summands":2,"solver":"pair_table","seed":1,
             "linear_algebra":{"mode":"sparse","sparse":{"wiedemann":{"block_m":2,"block_n":2}}},
+            "collection":{"unit_trials":128,"units":2,"max_units":8},
             "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
             "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"}]
         }))
@@ -543,6 +544,38 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(v["run_number"], 1);
     assert!(dir.join("factor_base.json").exists());
     assert!(!dir.join("logs.json").exists());
+    assert!(!dir.join("relations").join("unit-00000.json").exists());
+
+    // A collection worker (another process, possibly another machine)
+    // runs one work unit and stops; running it again does nothing.
+    let unit1 = dir.join("relations").join("unit-00001.json");
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "1"]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "stopped");
+    assert_eq!(v["stages"][1]["stage"], "collect");
+    assert_eq!(v["stages"][1]["worker"], true);
+    assert_eq!(v["stages"][1]["units"]["ran_now"], 1);
+    assert_eq!(v["stages"][1]["units"]["present"], 1);
+    assert_eq!(v["stages"][1]["status"], "partial", "unit 0 is still missing");
+    assert!(unit1.exists() && !dir.join("logs.json").exists());
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "1"]);
+    assert!(ok, "{v}");
+    assert_eq!(v["stages"][1]["units"]["ran_now"], 0);
+    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "99"]);
+    assert!(!ok, "a unit beyond max_units is refused: {v}");
+
+    // Forge one relation in the worker's file and drop in a file from
+    // another run: the forgery is rejected, the foreign file ignored.
+    let mut unit: Value = serde_json::from_slice(&std::fs::read(&unit1).unwrap()).unwrap();
+    let relations_in_unit1 = unit["relations"].as_array().unwrap().len();
+    assert!(relations_in_unit1 > 0);
+    let a: u64 = unit["relations"][0]["a"].as_u64().unwrap();
+    unit["relations"][0]["a"] = json!(if a == 1 { 2 } else { a - 1 });
+    std::fs::write(&unit1, serde_json::to_vec(&unit).unwrap()).unwrap();
+    let mut foreign = unit.clone();
+    foreign["params_digest"] = json!("0".repeat(64));
+    foreign["unit"] = json!(7);
+    std::fs::write(dir.join("relations").join("unit-00007.json"), serde_json::to_vec(&foreign).unwrap()).unwrap();
 
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--stop-after", "logs"]);
     assert!(ok, "{v}");
@@ -550,14 +583,22 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let stages = v["stages"].as_array().unwrap();
     assert_eq!(stages[0]["stage"], "select");
     assert_eq!(stages[0]["ran"], false, "select must be reused");
-    assert_eq!(stages[1]["stage"], "logs");
-    assert_eq!(stages[1]["ran"], true);
-    assert_eq!(stages[1]["linear_algebra"]["mode"], "sparse");
-    // Three columns: the filter eliminates them all and no Wiedemann run
-    // is needed, but the filtering statistics are reported.
-    assert_eq!(stages[1]["linear_algebra"]["sparse"]["filter"]["columns_in"], 3);
-    assert_eq!(stages[1]["linear_algebra"]["sparse"]["core_dimension"], 0);
+    assert_eq!(stages[1]["stage"], "collect");
+    assert_eq!(stages[1]["units"]["ran_now"], 1, "only unit 0 was missing");
+    assert_eq!(stages[1]["units"]["present"], 2);
+    assert_eq!(stages[1]["units"]["ignored"], 1);
+    assert_eq!(stages[1]["status"], "complete");
+    assert_eq!(stages[2]["stage"], "logs");
+    assert_eq!(stages[2]["ran"], true);
+    assert_eq!(stages[2]["rejected"], 1, "the forged relation");
+    assert_eq!(stages[2]["units_used"], 2);
+    assert_eq!(stages[2]["linear_algebra"]["mode"], "sparse");
+    // Three columns; the filtering statistics are reported and whatever
+    // the merge leaves (at most the three) goes to block Wiedemann.
+    assert_eq!(stages[2]["linear_algebra"]["sparse"]["filter"]["columns_in"], 3);
+    assert!(stages[2]["linear_algebra"]["sparse"]["core_dimension"].as_u64().unwrap() <= 3);
     assert!(dir.join("logs.json").exists());
+    assert!(dir.join("relations").join("unit-00000.json").exists());
 
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
@@ -565,9 +606,10 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(v["solutions"]["verified"], 3);
     assert_eq!(v["solutions"]["count"], 3);
     let stages = v["stages"].as_array().unwrap();
-    assert_eq!(stages[1]["ran"], false, "logs must be reused");
-    assert_eq!(stages[2]["stage"], "solve");
-    assert_eq!(stages[2]["solved_now"], 3);
+    assert_eq!(stages[1]["ran"], false, "collection must be reused");
+    assert_eq!(stages[2]["ran"], false, "logs must be reused");
+    assert_eq!(stages[3]["stage"], "solve");
+    assert_eq!(stages[3]["solved_now"], 3);
     for item in v["solutions"]["items"].as_array().unwrap() {
         assert_eq!(item["verified"], true);
         assert_eq!(item["expected"], item["recovered"]);
@@ -577,9 +619,10 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "complete");
-    assert_eq!(v["run_number"], 4);
-    assert_eq!(v["stages"][2]["solved_now"], 0);
-    assert_eq!(v["stages"][2]["already_solved"], 3);
+    assert_eq!(v["run_number"], 6, "the refused worker run persisted nothing");
+    assert_eq!(v["stages"][3]["solved_now"], 0);
+    assert_eq!(v["stages"][3]["already_solved"], 3);
+    assert_eq!(v["state"]["units_collected"], 2);
 
     // A different parameter set is refused in the same directory.
     let other = path();

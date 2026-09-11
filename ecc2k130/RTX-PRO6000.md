@@ -35,6 +35,10 @@ newer, subject to its feature and native-code conditions. The comparison
 disabled PTX JIT and validated the actual device paths before timing. See
 [NVIDIA’s compatibility guidance](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html).
 
+Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
+with the associated performance model, are in
+[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
+
 ## Generated-product preset comparison
 
 The [controlled comparison](benchmarks/generated-product/comparison.json)

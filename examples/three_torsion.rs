@@ -17,7 +17,9 @@
 //! cargo run --release --example three_torsion -- 3       # m = 3
 //! ```
 
-use crypto_lib::cryptanalysis::coordinate_descent::{compare_arms, format_arms, Arm, DescentArm};
+use crypto_lib::cryptanalysis::coordinate_descent::{
+    compare_arms, format_arms, Arm, DescentArm, F4Verdict,
+};
 use crypto_lib::cryptanalysis::coordinate_quotients::{
     format_quotient, run_quotient_boxed, torsion_points, two_torsion_frame, Chart, PointMap, Seed,
 };
@@ -216,15 +218,34 @@ fn descent(m: usize, targets: usize, rng: &mut Rng64) {
         }
         if let Some(first) = rows.first() {
             print!("{}", format_arms(first));
-            println!("   median GB ms over {} decomposable targets:", rows.len());
+            println!(
+                "   medians over {} decomposable targets (Buchberger | F4):",
+                rows.len()
+            );
             for ai in 0..first.len() {
                 let ms: Vec<f64> = rows.iter().map(|r| r[ai].groebner_ms).collect();
                 let refuted = rows.iter().filter(|r| r[ai].inconsistent).count();
+                let f4_ms: Vec<f64> = rows.iter().map(|r| r[ai].f4_ms).collect();
+                let f4_deg: Vec<f64> = rows
+                    .iter()
+                    .filter(|r| r[ai].f4_verdict != F4Verdict::NotRun)
+                    .map(|r| r[ai].f4_degree as f64)
+                    .collect();
+                let f4_refuted = rows
+                    .iter()
+                    .filter(|r| r[ai].f4_verdict == F4Verdict::Refuted)
+                    .count();
+                let f4_undet = rows
+                    .iter()
+                    .filter(|r| r[ai].f4_verdict == F4Verdict::Undetermined)
+                    .count();
                 println!(
-                    "      {:<22} {:>8.1} ms   (refuted {refuted}/{})",
+                    "      {:<22} GB {:>8.1} ms (refuted {refuted}/{}) | F4 {:>8.1} ms, solving degree {:>4.1}, refuted {f4_refuted}, undetermined {f4_undet}",
                     first[ai].label,
+                    rows.len(),
                     median(ms),
-                    rows.len()
+                    median(f4_ms),
+                    median(f4_deg)
                 );
             }
         }
@@ -260,6 +281,16 @@ fn main() {
     } else {
         (20, Some((3, 8)))
     };
+    // `THREE_TORSION_VCAPS=point,tuple` overrides the v-line box at m = 3;
+    // the total degree then covers the whole box.
+    let vcaps = std::env::var("THREE_TORSION_VCAPS")
+        .ok()
+        .and_then(|v| {
+            let mut it = v.split(',').filter_map(|x| x.trim().parse::<u32>().ok());
+            Some((it.next()?, it.next()?))
+        })
+        .or(vcaps);
+    let vdeg = vcaps.map_or(vdeg, |(pc, tc)| vdeg.max((m as u32 + 1) * pc + tc));
     let mut rng = Rng64::new(0x3333);
     println!("=== 3-torsion seeds on j = 0 curves, m = {m} ===");
     println!();

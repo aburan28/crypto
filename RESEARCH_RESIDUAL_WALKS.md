@@ -1045,11 +1045,10 @@ in `k`.
   addition on that field (`≈ 63`), so `S = total/√n` is comparable
   across the whole note.
 
-What is *not* built is Gaudry's `O(1)` solve of the three-unknown `S₄`
-system (symmetrised variables and a Gröbner basis or resultant
-cascade), which would remove the remaining factor `2|F|` from the
-per-residual cost.  The report separates that factor so the effect of
-adding it can be read off.
+Gaudry's `O(1)` solve of the three-unknown `S₄` system, which removes
+the remaining factor `2|F|` from the per-residual cost, was built
+afterwards and is measured in §11.4; §11.2–11.3 are the
+meet-in-the-middle numbers it is compared against.
 
 ### 11.2 Measured
 
@@ -1111,9 +1110,143 @@ So the subspace base does what the prime-field base could not — it
 makes the count sub-birthday — and at these sizes it does so at three
 orders of magnitude more work than rho, with a scaling exponent that
 only improves once the last loop over the base is replaced by an
-algebraic solve.  That solve is the next thing to build; its constant
-`C₃` is the number that decides whether the method beats rho at any
-size that fits in this module.
+algebraic solve.  Its constant `C₃` is the number that decides whether
+the method beats rho at any size that fits in this module; §11.4
+builds the solve and measures it.
+
+### 11.4 Gaudry's `O(1)` solve: the three-unknown `S₄` system
+
+The last loop over the base is removed by solving, per residual, the
+symmetrised system directly.  `Solver::Groebner` in
+`cryptanalysis::gaudry_cubic` does it in five stages, all in `F_p`
+arithmetic with the same multiplication counter:
+
+- **Once per curve** (`SymmetrisedS4::precompute`, `41,360` `F_p`
+  multiplications): `S₄(x₁, x₂, x₃, x₄) = Res_X(S₃(x₁, x₂, X),
+  S₃(x₃, x₄, X))` is expanded symbolically over `F_{p³}` (the `4×4`
+  Sylvester determinant of two quadratics in `X`), then
+  rewritten in the elementary symmetric polynomials `e₁, e₂, e₃` of
+  `x₁, x₂, x₃` by lex-leading-term reduction.  The result
+  `H(e₁, e₂, e₃, x₄)` has at most `175` terms, total degree `≤ 4` in
+  the `e`s and `≤ 4` in `x₄`.
+- **Weil restriction** (`15` multiplications per term): with `x₄ = x_R
+  ∈ F_{p³}` substituted and `e₁, e₂, e₃ ∈ F_p` unknown, the three
+  `F_p`-components of `H` are three polynomials of degree `≤ 4` in three
+  unknowns over `F_p`.  Their common zeros are the `F_p`-points
+  `(e₁, e₂, e₃)`; by Bézout at most `64`.
+- **Macaulay matrix** at degree `10` (`252 × 286`: every equation
+  times every monomial of degree `≤ 6`), reduced to row echelon form
+  over `F_p`; the non-pivot columns of degree `< 10` are the standard
+  monomials of the quotient.  When the quotient does not close at
+  degree `10` — a normal form of `e₁ · b` is unavailable, or `1, e₁,
+  e₂, e₃` is not standard — the degree is raised to `11`, `12`, `13`
+  (`Θ(d⁶)` in the reduction).
+- **Eigenvalues.**  The multiplication matrix `M_{e₁}` on the
+  quotient (`≤ 64 × 64`), its characteristic polynomial by Hessenberg
+  reduction, its `F_p`-roots by Cantor–Zassenhaus; for each root `λ` a
+  left eigenvector is an evaluation functional, normalised at `1` it
+  reads off `(e₂, e₃)`, and the candidate `(λ, e₂, e₃)` is checked
+  against all three equations.
+- **Splitting.**  `T³ − e₁T² + e₂T − e₃` is factored over `F_p`; a
+  triple of roots (with multiplicity) is a triple of abscissae in the
+  base; the signs are settled by group arithmetic as in the
+  meet-in-the-middle oracle.
+
+Two failure modes are handled rather than hidden.  A residual whose
+affine Macaulay matrix never closes by degree `13` (solutions at
+infinity in the affine coordinates `e₁, e₂, e₃` — about one residual
+in a thousand) is sent to the meet-in-the-middle oracle and its cost
+is counted on the same ledger (`fallback_fp_muls`).  A residual with a
+repeated eigenvalue is reported (`degenerate_eigenspaces`), and the
+eigenvector test still recovers every solution whose functional is a
+kernel basis vector.  The solver is checked against the
+meet-in-the-middle oracle on every residual of a `p = 271` run
+(`--cross-check`: `0` mismatches in `728`), by end-to-end recovery of
+the planted logarithm, and by a unit test that compares the two
+oracles on random residuals.
+
+`cargo run --release --example gaudry_cubic_bench -- --protocol
+--groebner`, the same sizes and seeds as §11.2; `C₃` is the measured
+`F_p` cost per residual (`oracle_fp_muls / residuals`), the Macaulay
+share is the fraction of `C₃` spent in the row reduction, `retries`
+counts residuals redone at degree `11`, `fallback` counts residuals
+sent to the meet-in-the-middle oracle:
+
+| `p` | `n` | base | residuals | decomposition rate | `C₃` (`F_p` mults / residual) | Macaulay share | retries | fallback | total ops | `S` | MITM `S` (§11.2) | rho `S` | `S` / rho `S` | wall |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | 129 | 965 | 0.127 | 4.79·10⁶ | 92 % | 1 | 1 | 73·10⁶ | 16,456 | 1,224 | 0.81 | 20,321× | 38 s |
+| 271 | 2^24.2 | 136 | 789 | 0.166 | 4.72·10⁶ | 92 % | 0 | 0 | 59·10⁶ | 13,276 | 1,224 | 1.51 | 8,810× | 31 s |
+| 523 | 2^27.1 | 256 | 1,479 | 0.165 | 4.84·10⁶ | 92 % | 2 | 2 | 114·10⁶ | 9,500 | 1,640 | 1.38 | 6,866× | 59 s |
+| 523 | 2^27.1 | 240 | 1,880 | 0.122 | 4.81·10⁶ | 92 % | 2 | 2 | 144·10⁶ | 12,016 | 1,640 | 0.98 | 12,212× | 75 s |
+| 1039 | 2^30.1 | 507 | 3,045 | 0.151 | 4.85·10⁶ | 92 % | 4 | 4 | 235·10⁶ | 7,006 | 2,707 | 1.29 | 5,446× | 122 s |
+| 1039 | 2^30.1 | 532 | 2,648 | 0.184 | 4.92·10⁶ | 92 % | 6 | 6 | 207·10⁶ | 6,187 | 2,707 | 1.45 | 4,264× | 108 s |
+| 2083 | 2^33.1 | 1,088 | 5,555 | 0.181 | 4.81·10⁶ | 91 % | 3 | 3 | 425·10⁶ | 4,466 | 3,805 | 1.62 | 2,759× | 222 s |
+| 2083 | 2^33.1 | 1,048 | 5,970 | 0.163 | 4.79·10⁶ | 92 % | 2 | 2 | 454·10⁶ | 4,779 | 3,805 | 1.78 | 2,687× | 239 s |
+
+Every run recovered the planted `d`, for both methods.  Reading it:
+
+- **`C₃` is a constant, as promised.**  `≈ 4.7–4.9 · 10⁶` `F_p`
+  multiplications per residual at every size, `≈ 76,000` affine
+  additions, of which the Macaulay reduction is `≈ 92 %` and the rest
+  is the characteristic polynomial and the eigenvectors.  The
+  per-residual cost no longer grows with the base — the
+  meet-in-the-middle oracle paid `2|F| · 1,800`, i.e. `4.8·10⁵` at
+  `p = 271` rising to `4.0·10⁶` at `p = 2083`.
+- **Total work is `∝ n^{0.31}`** (prediction `n^{1/3}`, the
+  count of residuals `≈ 6|F|`, measured `∝ n^{0.30}`), against
+  `n^{0.69}` for the meet-in-the-middle oracle and `n^{1/2}` for rho.
+  The exponent Gaudry's argument needs for the relation phase is now
+  measured.
+- **The constant is where the crossover was predicted to be
+  decided, and it decides against.**  §11.3 gives the condition for
+  beating rho as `C₃ < 13 · n^{1/6}`.  With `C₃ = 4.8·10⁶` that is
+  `n^{1/6} > 3.7·10⁵`, i.e. `n > 2^{111}`: at the sizes this module
+  runs the solve is `≈ 10⁴×` rho, and the ratio to rho falls only as
+  `n^{-1/6}` — `≈ 12,800×` at 24 bits, `≈ 2,700×` at 33 bits (per-size means; the per-seed ratios in the table carry rho's own variance).
+  Against the meet-in-the-middle oracle the solve breaks even at
+  `2|F| · 1,850 ≈ 4.8·10⁶`, `|F| ≈ 1,300`, `p ≈ 2,600`, `n ≈ 2^{34}`
+  — just past the largest size measured, where the two oracles cost
+  the same (`S` `4,620` vs `3,805`) and the solve's flatter
+  exponent takes over from there.
+- **What the constant is made of.**  The Macaulay matrix at degree
+  `10` has `252` rows and `286` columns because the three Weil
+  components are dense quartics; the reduction is `≈ 4.4·10⁶`
+  multiplications, `≈ rows · cols · rank`.  A structured solver — an
+  `F₄`/`F₅`-style reduction that exploits the sparsity of the shifted
+  rows, or the resultant of two of the three quartics in `e₃` first —
+  would cut it by a constant factor, not change the picture: the
+  crossover needs `C₃` below `600` at 33 bits, below `5,000` at 50
+  bits, and the smallest conceivable dense reduction of a `64`-solution
+  zero-dimensional system in three unknowns is already `≈ 64³`.
+  This is the concrete reason the fixed-`k` Gaudry attack is a
+  large-`n` statement: its relation-phase constant is on the order of
+  `10⁶` where rho's is `1`.
+- **The failures are structural, not a regularity-degree problem.**
+  `20` of the `22,331` residuals did not close at degree `10`, and
+  none of them closed at `11`, `12` or `13` either: every retry ended
+  in the fallback.  Those are residuals whose affine system has
+  solutions at infinity (or a positive-dimensional component), which
+  no affine Macaulay degree resolves; a homogeneous or saturated
+  formulation would, and the fallback cost they incur is `0.04 %` of
+  the total, so they are noted rather than chased.  The quotient
+  otherwise has Bézout's full `64` dimensions at every residual, and
+  each residual yields `≈ 1` `F_p`-rational `(e₁, e₂, e₃)` on
+  average, of which about one in six has a cubic that splits — the
+  decomposition rate `≈ 0.16` of §11.2 again.
+- **The linear algebra is not the bottleneck here, and will be
+  later.**  Dense elimination on `|F| + 1 ≈ 1,090` unknowns took
+  `0.4 s` of the `222 s` at `p = 2083`, but with `|F| ∝ n^{1/3}` it is
+  `∝ n` dense and `∝ n^{2/3}` sparse, both worse than rho; Gaudry's
+  `Õ(n^{4/9})` for `k = 3` comes from a double-large-prime variation
+  that shrinks the matrix to `∝ n^{1/3+ε}` before elimination, which
+  this module does not build.
+
+So the three-unknown solve is built, correct, and base-independent —
+the count is sub-birthday (`κ ∝ n^{-1/6}`) and the cost per relation
+is a constant — and the constant, measured honestly in the same units
+as everything else in this note, places the crossover with rho near
+`2^{111}`.  That is the number to improve on: any change to the solver
+is scored by `C₃`, and the target is `13 · n^{1/6}`.
 
 ## References
 
@@ -1136,3 +1269,12 @@ size that fits in this module.
   A. Messeng, *Algebraic approaches for the elliptic curve discrete
   logarithm problem over prime fields*, PKC 2016.  The algebraic
   decomposition oracles this note contrasts with.
+- P. Gaudry, *Index calculus for abelian varieties of small dimension
+  and the elliptic curve discrete logarithm problem*, J. Symbolic
+  Comput. 44 (2009).  The subspace factor base on `E(F_{q^k})`, the
+  symmetrised `S_{k+1}` system and its Gröbner solve; §11.
+- J.-C. Faugère, *A new efficient algorithm for computing Gröbner
+  bases (F₄)*, J. Pure Appl. Algebra 139 (1999); B. Mourrain,
+  *Computing the isolated roots by matrix methods*, J. Symbolic
+  Comput. 26 (1998).  The Macaulay-matrix and multiplication-matrix
+  solve used in §11.4.

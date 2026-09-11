@@ -1007,6 +1007,705 @@ pub fn subspace_triple_oracle(
     (found, muls)
 }
 
+// ── Gaudry's O(1) solve: symmetrised S₄, Macaulay matrix, eigenvalues ────
+
+/// Sparse polynomial over `F_{p³}` in four variables, exponents ≤ 255.
+#[derive(Clone, Debug)]
+struct KPoly {
+    terms: HashMap<[u8; 4], E3>,
+}
+
+impl KPoly {
+    fn zero() -> KPoly {
+        KPoly {
+            terms: HashMap::new(),
+        }
+    }
+    fn constant(c: E3) -> KPoly {
+        let mut t = HashMap::new();
+        if c != Fp3::ZERO {
+            t.insert([0, 0, 0, 0], c);
+        }
+        KPoly { terms: t }
+    }
+    fn var(i: usize) -> KPoly {
+        let mut e = [0u8; 4];
+        e[i] = 1;
+        let mut t = HashMap::new();
+        t.insert(e, Fp3::ONE);
+        KPoly { terms: t }
+    }
+    fn add_term(&mut self, f: &Fp3, e: [u8; 4], c: E3) {
+        let entry = self.terms.entry(e).or_insert(Fp3::ZERO);
+        *entry = f.add(entry, &c);
+        if *entry == Fp3::ZERO {
+            self.terms.remove(&e);
+        }
+    }
+    fn add(&self, f: &Fp3, o: &KPoly) -> KPoly {
+        let mut out = self.clone();
+        for (&e, &c) in &o.terms {
+            out.add_term(f, e, c);
+        }
+        out
+    }
+    fn sub(&self, f: &Fp3, o: &KPoly) -> KPoly {
+        let mut out = self.clone();
+        for (&e, &c) in &o.terms {
+            out.add_term(f, e, f.neg(&c));
+        }
+        out
+    }
+    fn mul(&self, f: &Fp3, o: &KPoly) -> KPoly {
+        let mut out = KPoly::zero();
+        for (&e1, &c1) in &self.terms {
+            for (&e2, &c2) in &o.terms {
+                let e = [e1[0] + e2[0], e1[1] + e2[1], e1[2] + e2[2], e1[3] + e2[3]];
+                out.add_term(f, e, f.mul(&c1, &c2));
+            }
+        }
+        out
+    }
+    fn scale(&self, f: &Fp3, k: &E3) -> KPoly {
+        let mut out = KPoly::zero();
+        for (&e, &c) in &self.terms {
+            out.add_term(f, e, f.mul(&c, k));
+        }
+        out
+    }
+    /// Evaluate at a point of `F_{p³}⁴`.
+    fn eval(&self, f: &Fp3, x: &[E3; 4]) -> E3 {
+        let mut acc = Fp3::ZERO;
+        for (&e, &c) in &self.terms {
+            let mut term = c;
+            for i in 0..4 {
+                for _ in 0..e[i] {
+                    term = f.mul(&term, &x[i]);
+                }
+            }
+            acc = f.add(&acc, &term);
+        }
+        acc
+    }
+}
+
+/// `S₃(u, v, w)` for the curve as a symbolic polynomial with the three
+/// arguments mapped to variable slots `su, sv, sw`.
+fn s3_symbolic(curve: &Curve3, su: usize, sv: usize, sw: usize) -> KPoly {
+    let f = &curve.field;
+    let (u, v, w) = (KPoly::var(su), KPoly::var(sv), KPoly::var(sw));
+    let a = KPoly::constant(curve.a);
+    let b = KPoly::constant(curve.b);
+    let two = f.from_base(2);
+    let four = f.from_base(4);
+    // (u − v)² w²
+    let d = u.sub(f, &v);
+    let t1 = d.mul(f, &d).mul(f, &w).mul(f, &w);
+    // −2[(u + v)(uv + a) + 2b] w
+    let inner = u
+        .add(f, &v)
+        .mul(f, &u.mul(f, &v).add(f, &a))
+        .add(f, &b.scale(f, &two));
+    let t2 = inner.mul(f, &w).scale(f, &f.neg(&two));
+    // (uv − a)² − 4b(u + v)
+    let uv_a = u.mul(f, &v).sub(f, &a);
+    let t3 = uv_a
+        .mul(f, &uv_a)
+        .sub(f, &b.scale(f, &four).mul(f, &u.add(f, &v)));
+    t1.add(f, &t2).add(f, &t3)
+}
+
+/// Coefficients of `X^0, X^1, X^2` of a polynomial of degree ≤ 2 in
+/// variable slot `slot`, as polynomials in the other variables.
+fn coeffs_in(poly: &KPoly, slot: usize) -> [KPoly; 3] {
+    let mut out = [KPoly::zero(), KPoly::zero(), KPoly::zero()];
+    for (&e, &c) in &poly.terms {
+        let k = e[slot] as usize;
+        assert!(k <= 2);
+        let mut e2 = e;
+        e2[slot] = 0;
+        out[k].terms.insert(e2, c);
+    }
+    out
+}
+
+/// `S₄(x₁, x₂, x₃, x₄) = Res_X(S₃(x₁, x₂, X), S₃(x₃, x₄, X))` as a
+/// symbolic polynomial in slots `0..4` (degree ≤ 4 in each).
+fn s4_symbolic(curve: &Curve3) -> KPoly {
+    let f = &curve.field;
+    // A(X) = S₃(x₁, x₂, X): the resultant variable X borrows slot 3,
+    // which x₄ does not use in A.
+    let a_poly = s3_symbolic(curve, 0, 1, 3);
+    let al = coeffs_in(&a_poly, 3);
+    // B(X) = S₃(x₃, x₄, X): X borrows slot 0, which x₁ does not use in B.
+    let b_poly = s3_symbolic(curve, 2, 3, 0);
+    let be = coeffs_in(&b_poly, 0);
+    // Res = (a₂b₀ − a₀b₂)² − (a₂b₁ − a₁b₂)(a₁b₀ − a₀b₁)
+    let t1 = al[2].mul(f, &be[0]).sub(f, &al[0].mul(f, &be[2]));
+    let t2 = al[2].mul(f, &be[1]).sub(f, &al[1].mul(f, &be[2]));
+    let t3 = al[1].mul(f, &be[0]).sub(f, &al[0].mul(f, &be[1]));
+    t1.mul(f, &t1).sub(f, &t2.mul(f, &t3))
+}
+
+/// `S₄` symmetrised in `(x₁, x₂, x₃)`: a polynomial in
+/// `(e₁, e₂, e₃, x₄)` with `e₁ = x₁+x₂+x₃`, `e₂ = x₁x₂+x₁x₃+x₂x₃`,
+/// `e₃ = x₁x₂x₃`, total degree ≤ 4 in the `e`s, degree ≤ 4 in `x₄`.
+#[derive(Clone, Debug)]
+pub struct SymmetrisedS4 {
+    /// exponent `(a, b, c, d)` = `e₁^a e₂^b e₃^c x₄^d` → coefficient.
+    terms: HashMap<[u8; 4], E3>,
+}
+
+impl SymmetrisedS4 {
+    /// Once per curve.  Reduces the lex-leading term of the symmetric
+    /// polynomial by the matching product of elementary symmetric
+    /// polynomials until nothing is left.
+    pub fn precompute(curve: &Curve3) -> SymmetrisedS4 {
+        let f = &curve.field;
+        let mut g = s4_symbolic(curve);
+        let e1 = KPoly::var(0).add(f, &KPoly::var(1)).add(f, &KPoly::var(2));
+        let e2 = KPoly::var(0)
+            .mul(f, &KPoly::var(1))
+            .add(f, &KPoly::var(0).mul(f, &KPoly::var(2)))
+            .add(f, &KPoly::var(1).mul(f, &KPoly::var(2)));
+        let e3 = KPoly::var(0).mul(f, &KPoly::var(1)).mul(f, &KPoly::var(2));
+        let mut cache: HashMap<[u8; 3], KPoly> = HashMap::new();
+        let mut terms = HashMap::new();
+        loop {
+            // Lex-largest monomial (x₁ first).
+            let Some((&lead, &coef)) = g.terms.iter().max_by_key(|(e, _)| **e) else {
+                break;
+            };
+            let (a, b, c, d) = (lead[0], lead[1], lead[2], lead[3]);
+            assert!(
+                a >= b && b >= c,
+                "not symmetric in x₁, x₂, x₃: lead {lead:?}"
+            );
+            let key = [a - b, b - c, c];
+            let expansion = cache
+                .entry(key)
+                .or_insert_with(|| {
+                    let mut acc = KPoly::constant(Fp3::ONE);
+                    for _ in 0..key[0] {
+                        acc = acc.mul(f, &e1);
+                    }
+                    for _ in 0..key[1] {
+                        acc = acc.mul(f, &e2);
+                    }
+                    for _ in 0..key[2] {
+                        acc = acc.mul(f, &e3);
+                    }
+                    acc
+                })
+                .clone();
+            let entry = terms
+                .entry([key[0], key[1], key[2], d])
+                .or_insert(Fp3::ZERO);
+            *entry = f.add(entry, &coef);
+            // Subtract coef · expansion · x₄^d.
+            for (&e, &c) in &expansion.terms {
+                g.add_term(f, [e[0], e[1], e[2], d], f.neg(&f.mul(&c, &coef)));
+            }
+        }
+        terms.retain(|_, c| *c != Fp3::ZERO);
+        SymmetrisedS4 { terms }
+    }
+
+    /// The three `F_p`-components of `H(e₁, e₂, e₃, x_R)` as sparse
+    /// coefficient maps over the monomials of total degree ≤ 4.
+    fn weil_restrict(&self, f: &Fp3, x_r: &E3) -> [HashMap<[u8; 3], u64>; 3] {
+        let mut out = [HashMap::new(), HashMap::new(), HashMap::new()];
+        let mut pow = [Fp3::ONE; 5];
+        for i in 1..5 {
+            pow[i] = f.mul(&pow[i - 1], x_r);
+        }
+        for (&e, &c) in &self.terms {
+            let v = f.mul(&c, &pow[e[3] as usize]);
+            for k in 0..3 {
+                let entry = out[k].entry([e[0], e[1], e[2]]).or_insert(0);
+                *entry = am(*entry, v.0[k], f.p);
+            }
+        }
+        for o in out.iter_mut() {
+            o.retain(|_, v| *v != 0);
+        }
+        out
+    }
+}
+
+/// Monomials of total degree ≤ `d` in three variables, grevlex
+/// descending (largest first).
+fn monomials_grevlex_desc(d: u8) -> Vec<[u8; 3]> {
+    let mut v = Vec::new();
+    for a in 0..=d {
+        for b in 0..=(d - a) {
+            for c in 0..=(d - a - b) {
+                v.push([a, b, c]);
+            }
+        }
+    }
+    v.sort_by(|x, y| grevlex_cmp(y, x));
+    v
+}
+
+fn grevlex_cmp(a: &[u8; 3], b: &[u8; 3]) -> std::cmp::Ordering {
+    let da = a[0] as u16 + a[1] as u16 + a[2] as u16;
+    let db = b[0] as u16 + b[1] as u16 + b[2] as u16;
+    if da != db {
+        return da.cmp(&db);
+    }
+    // Same degree: the one with the smaller last differing exponent
+    // (from the right) is larger.
+    for i in (0..3).rev() {
+        if a[i] != b[i] {
+            return b[i].cmp(&a[i]);
+        }
+    }
+    std::cmp::Ordering::Equal
+}
+
+/// Row-reduce `m` (rows × cols) over `F_p` to reduced row echelon form;
+/// returns the pivot column of each non-zero row, in order.  Counts
+/// multiplications.
+fn rref_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
+    let rows = m.len();
+    let cols = if rows > 0 { m[0].len() } else { 0 };
+    let mut pivots = Vec::new();
+    let mut r = 0;
+    for c in 0..cols {
+        if r >= rows {
+            break;
+        }
+        let Some(pr) = (r..rows).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        m.swap(r, pr);
+        let inv = inv_mod(m[r][c], p);
+        for j in c..cols {
+            m[r][j] = mm(m[r][j], inv, p);
+        }
+        *muls += (cols - c) as u64;
+        let pivot_row = m[r].clone();
+        for i in 0..rows {
+            if i != r && m[i][c] != 0 {
+                let fct = m[i][c];
+                for j in c..cols {
+                    if pivot_row[j] != 0 {
+                        m[i][j] = sm(m[i][j], mm(fct, pivot_row[j], p), p);
+                    }
+                }
+                *muls += (cols - c) as u64;
+            }
+        }
+        pivots.push(c);
+        r += 1;
+    }
+    pivots
+}
+
+/// Characteristic polynomial of a square matrix over `F_p` (Hessenberg
+/// reduction, then the standard recurrence).  Coefficients low to high,
+/// monic.
+fn charpoly_mod_p(a: &[Vec<u64>], p: u64, muls: &mut u64) -> UPoly {
+    let n = a.len();
+    let mut h: Vec<Vec<u64>> = a.to_vec();
+    // Reduce to upper Hessenberg form by similarity transforms.
+    for j in 0..n.saturating_sub(2) {
+        let Some(piv) = ((j + 1)..n).find(|&i| h[i][j] != 0) else {
+            continue;
+        };
+        if piv != j + 1 {
+            h.swap(piv, j + 1);
+            for row in h.iter_mut() {
+                row.swap(piv, j + 1);
+            }
+        }
+        let inv = inv_mod(h[j + 1][j], p);
+        for i in (j + 2)..n {
+            if h[i][j] == 0 {
+                continue;
+            }
+            let fct = mm(h[i][j], inv, p);
+            // row_i -= fct · row_{j+1}
+            for k in 0..n {
+                let v = mm(fct, h[j + 1][k], p);
+                h[i][k] = sm(h[i][k], v, p);
+            }
+            // col_{j+1} += fct · col_i
+            for k in 0..n {
+                let v = mm(fct, h[k][i], p);
+                h[k][j + 1] = am(h[k][j + 1], v, p);
+            }
+            *muls += 2 * n as u64;
+        }
+    }
+    // p_0 = 1; p_k(x) = (x − h[k-1][k-1]) p_{k-1}
+    //                   − Σ_{i=1}^{k-1} h[i-1][k-1] (Π_{m=i}^{k-1} h[m][m-1]) p_{i-1}
+    let mut polys: Vec<UPoly> = vec![UPoly(vec![1])];
+    let ring = PolyRing::new(p);
+    for k in 1..=n {
+        let hk = h[k - 1][k - 1];
+        let mut pk = ring.mul(&polys[k - 1], &UPoly(vec![(p - hk) % p, 1]));
+        let mut prod = 1u64;
+        for i in (1..k).rev() {
+            prod = mm(prod, h[i][i - 1], p);
+            let coef = mm(h[i - 1][k - 1], prod, p);
+            if coef != 0 {
+                pk = ring.sub(&pk, &ring.scale(&polys[i - 1], coef));
+            }
+        }
+        polys.push(pk);
+    }
+    *muls += ring.muls.get();
+    polys.pop().unwrap()
+}
+
+/// Kernel basis of `(m − λI)` for a square matrix `m` over `F_p`.
+fn eigenvectors_mod_p(m: &[Vec<u64>], lambda: u64, p: u64, muls: &mut u64) -> Vec<Vec<u64>> {
+    let n = m.len();
+    let mut a: Vec<Vec<u64>> = m.to_vec();
+    for i in 0..n {
+        a[i][i] = sm(a[i][i], lambda, p);
+    }
+    let pivots = rref_mod_p(&mut a, p, muls);
+    let free: Vec<usize> = (0..n).filter(|c| !pivots.contains(c)).collect();
+    let mut basis = Vec::new();
+    for &fc in &free {
+        let mut v = vec![0u64; n];
+        v[fc] = 1;
+        for (r, &pc) in pivots.iter().enumerate() {
+            v[pc] = (p - a[r][fc]) % p;
+        }
+        basis.push(v);
+    }
+    basis
+}
+
+/// Statistics of the `O(1)` solve, accumulated across calls.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct SolveStats {
+    pub solves: u64,
+    pub fp_muls: u64,
+    pub macaulay_muls: u64,
+    pub quotient_dim_total: u64,
+    pub e_solutions: u64,
+    pub split_cubics: u64,
+    pub degenerate_eigenspaces: u64,
+    /// Residuals whose degree-10 Macaulay matrix did not close the
+    /// quotient (normal forms incomplete) and were redone at 11–13.
+    pub retried_at_degree_11: u64,
+    pub retried_at_degree_12: u64,
+    pub retried_at_degree_13: u64,
+    /// Residuals given up on after degree 13 (affine Macaulay matrix
+    /// never closed the quotient); these are routed to the MITM oracle.
+    pub unsolved: u64,
+    /// F_p multiplications spent in the MITM fallback for unsolved
+    /// residuals (also included in `fp_muls`).
+    pub fallback_fp_muls: u64,
+}
+
+/// Solve `S₄(x₁, x₂, x₃, x_R) = 0` for `x_i ∈ F_p` with cost
+/// independent of the base: Weil-restrict the symmetrised polynomial,
+/// build the Macaulay matrix at the regularity degree, read the
+/// quotient and the multiplication matrix of `e₁`, take its
+/// eigenvalues in `F_p`, recover `(e₂, e₃)` from eigenvectors, and split
+/// the cubic.  Returns sorted triples `[x₁, x₂, x₃]` of `F_p` abscissae
+/// (each a solution of the symmetric system whose cubic splits over
+/// `F_p`).  Returns `None` when no Macaulay degree in 10–13 closes the
+/// quotient, so the caller can fall back to a base-dependent oracle.
+pub fn solve_s4_subspace(
+    inst: &Instance3,
+    pre: &SymmetrisedS4,
+    x_r: &E3,
+    rng: &mut StdRng,
+    stats: &mut SolveStats,
+) -> Option<Vec<[u64; 3]>> {
+    let f = &inst.curve.field;
+    let p = f.p;
+    let mut muls = 0u64;
+    stats.solves += 1;
+    let comps = pre.weil_restrict(f, x_r);
+    muls += pre.terms.len() as u64 * 15;
+
+    let mut result: Vec<[u64; 3]> = Vec::new();
+    let mut solved_at_some_degree = false;
+    for degree in [10u8, 11, 12, 13] {
+        let escalate = |stats: &mut SolveStats, degree: u8| match degree {
+            10 => stats.retried_at_degree_11 += 1,
+            11 => stats.retried_at_degree_12 += 1,
+            12 => stats.retried_at_degree_13 += 1,
+            _ => stats.unsolved += 1,
+        };
+        // Macaulay matrix at `degree`.
+        let cols = monomials_grevlex_desc(degree);
+        let col_index: HashMap<[u8; 3], usize> =
+            cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+        let shifts = monomials_grevlex_desc(degree - 4);
+        let mut mat: Vec<Vec<u64>> = Vec::with_capacity(3 * shifts.len());
+        for comp in &comps {
+            for sh in &shifts {
+                let mut row = vec![0u64; cols.len()];
+                for (&e, &c) in comp {
+                    let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2]];
+                    let ci = col_index[&m];
+                    row[ci] = am(row[ci], c, p);
+                }
+                mat.push(row);
+            }
+        }
+        let before = muls;
+        let pivots = rref_mod_p(&mut mat, p, &mut muls);
+        stats.macaulay_muls += muls - before;
+        let pivot_set: std::collections::HashSet<usize> = pivots.iter().copied().collect();
+        // Standard monomials: non-pivot columns of degree ≤ degree − 1.
+        let standard: Vec<usize> = (0..cols.len())
+            .filter(|&c| !pivot_set.contains(&c))
+            .filter(|&c| (cols[c][0] + cols[c][1] + cols[c][2]) < degree)
+            .collect();
+        let dim = standard.len();
+        if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+            eprintln!(
+                "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}",
+                mat.len(),
+                cols.len(),
+                pivots.len()
+            );
+        }
+        if dim == 0 || dim > 64 {
+            escalate(stats, degree);
+            continue;
+        }
+        stats.quotient_dim_total += dim as u64;
+        let std_index: HashMap<usize, usize> =
+            standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
+        let pivot_row: HashMap<usize, usize> =
+            pivots.iter().enumerate().map(|(r, &c)| (c, r)).collect();
+        // Normal form of a monomial column over the standard basis.
+        let normal_form = |c: usize| -> Option<Vec<u64>> {
+            let mut v = vec![0u64; dim];
+            if let Some(&i) = std_index.get(&c) {
+                v[i] = 1;
+                return Some(v);
+            }
+            let &r = pivot_row.get(&c)?;
+            for j in (c + 1)..cols.len() {
+                let val = mat[r][j];
+                if val != 0 {
+                    let &i = std_index.get(&j)?; // must be standard in RREF
+                    v[i] = (p - val) % p;
+                }
+            }
+            Some(v)
+        };
+        // Multiplication matrix of e₁: column b ↦ NF(e₁ · b).
+        let mut m_e1 = vec![vec![0u64; dim]; dim];
+        let mut ok = true;
+        for (bi, &bc) in standard.iter().enumerate() {
+            let m = cols[bc];
+            let shifted = [m[0] + 1, m[1], m[2]];
+            let Some(&sc) = col_index.get(&shifted) else {
+                ok = false;
+                break;
+            };
+            let Some(nf) = normal_form(sc) else {
+                ok = false;
+                break;
+            };
+            for (ri, val) in nf.into_iter().enumerate() {
+                m_e1[ri][bi] = val;
+            }
+        }
+        if !ok {
+            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+                eprintln!("  degree {degree}: normal form of e1·b unavailable");
+            }
+            escalate(stats, degree);
+            continue;
+        }
+        // Eigenvalues in F_p from the characteristic polynomial.
+        let cp = charpoly_mod_p(&m_e1, p, &mut muls);
+        let ring = PolyRing::new(p);
+        let lambdas = ring.roots(&cp, rng);
+        // Transpose for left eigenvectors (evaluation functionals).
+        let mut mt = vec![vec![0u64; dim]; dim];
+        for i in 0..dim {
+            for j in 0..dim {
+                mt[j][i] = m_e1[i][j];
+            }
+        }
+        let idx_of = |mono: [u8; 3]| -> Option<usize> {
+            col_index.get(&mono).and_then(|c| std_index.get(c)).copied()
+        };
+        let (Some(i1), Some(i2), Some(i3), Some(i0)) = (
+            idx_of([1, 0, 0]),
+            idx_of([0, 1, 0]),
+            idx_of([0, 0, 1]),
+            idx_of([0, 0, 0]),
+        ) else {
+            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+                let low: Vec<[u8; 3]> = pivots
+                    .iter()
+                    .map(|&c| cols[c])
+                    .filter(|m| (m[0] + m[1] + m[2]) <= 3)
+                    .collect();
+                eprintln!(
+                    "  degree {degree}: 1, e1, e2 or e3 is not standard; low-degree pivots {low:?}"
+                );
+            }
+            escalate(stats, degree);
+            continue;
+        };
+        let eval_comp = |comp: &HashMap<[u8; 3], u64>, e: [u64; 3]| -> u64 {
+            let mut acc = 0u64;
+            for (&m, &c) in comp {
+                let mut t = c;
+                for (k, &v) in e.iter().enumerate() {
+                    for _ in 0..m[k] {
+                        t = mm(t, v, p);
+                    }
+                }
+                acc = am(acc, t, p);
+            }
+            acc
+        };
+        let mut candidates: Vec<[u64; 3]> = Vec::new();
+        if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+            eprintln!("  charpoly degree {} roots {:?}", cp.0.len() - 1, lambdas);
+        }
+        for lam in lambdas {
+            let ker = eigenvectors_mod_p(&mt, lam, p, &mut muls);
+            if ker.len() != 1 {
+                stats.degenerate_eigenspaces += 1;
+            }
+            if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+                eprintln!("  λ = {lam}: kernel dim {}", ker.len());
+            }
+            for w in &ker {
+                if w[i0] == 0 {
+                    continue;
+                }
+                let inv = inv_mod(w[i0], p);
+                let e = [mm(w[i1], inv, p), mm(w[i2], inv, p), mm(w[i3], inv, p)];
+                if e[0] != lam {
+                    continue;
+                }
+                if comps.iter().all(|comp| eval_comp(comp, e) == 0) {
+                    candidates.push(e);
+                }
+            }
+        }
+        candidates.sort_unstable();
+        candidates.dedup();
+        stats.e_solutions += candidates.len() as u64;
+        // Split each cubic T³ − e₁T² + e₂T − e₃ over F_p.
+        for e in candidates {
+            let cubic = UPoly(vec![(p - e[2]) % p, e[1], (p - e[0]) % p, 1]);
+            let roots = ring.roots(&cubic, rng);
+            // Three roots counted with multiplicity: the cubic must equal
+            // Π (T − r) for some multiset drawn from its distinct roots.
+            let mut triple: Option<[u64; 3]> = None;
+            'outer: for &r1 in &roots {
+                for &r2 in &roots {
+                    for &r3 in &roots {
+                        if r1 <= r2 && r2 <= r3 {
+                            let s1 = am(am(r1, r2, p), r3, p);
+                            let s2 = am(am(mm(r1, r2, p), mm(r1, r3, p), p), mm(r2, r3, p), p);
+                            let s3 = mm(mm(r1, r2, p), r3, p);
+                            if s1 == e[0] && s2 == e[1] && s3 == e[2] {
+                                triple = Some([r1, r2, r3]);
+                                break 'outer;
+                            }
+                        }
+                    }
+                }
+            }
+            if let Some(t) = triple {
+                stats.split_cubics += 1;
+                result.push(t);
+            }
+        }
+        muls += ring.muls.get();
+        solved_at_some_degree = true;
+        break;
+    }
+    if !solved_at_some_degree && std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+        eprintln!("  gave up after degree 13");
+    }
+    stats.fp_muls += muls;
+    if !solved_at_some_degree {
+        return None;
+    }
+    result.sort_unstable();
+    result.dedup();
+    Some(result)
+}
+
+/// Triple oracle built on [`solve_s4_subspace`]: decompositions of `R`
+/// as `±P_i ± P_j ± P_k` (distinct or repeated indices), signs settled
+/// by group arithmetic, plus `R = ±P_i`.
+pub fn subspace_triple_oracle_groebner(
+    inst: &Instance3,
+    base: &SubspaceBase,
+    pre: &SymmetrisedS4,
+    r: &Pt3,
+    rng: &mut StdRng,
+    stats: &mut SolveStats,
+) -> Vec<Vec<(usize, i64)>> {
+    let curve = &inst.curve;
+    let mut found = Vec::new();
+    if r.inf {
+        return found;
+    }
+    if let Some((i, s)) = base.lookup(&curve.field, r) {
+        found.push(vec![(i, s)]);
+    }
+    let Some(triples) = solve_s4_subspace(inst, pre, &r.x, rng, stats) else {
+        // Affine Macaulay failure (components at infinity): counted
+        // fallback to the base-dependent MITM oracle.
+        let (decs, muls) = subspace_triple_oracle(inst, base, r, rng);
+        stats.fallback_fp_muls += muls;
+        stats.fp_muls += muls;
+        return decs;
+    };
+    for [x1, x2, x3] in triples {
+        let idx: Option<Vec<usize>> = [x1, x2, x3]
+            .iter()
+            .map(|x| base.by_x.get(x).copied())
+            .collect();
+        let Some(idx) = idx else {
+            continue;
+        };
+        // R = s₁P₁ + s₂P₂ + s₃P₃ for some signs.
+        for s1 in [1i64, -1] {
+            let a1 = curve.sub(r, &curve.mul_signed(&base.points[idx[0]], s1));
+            for s2 in [1i64, -1] {
+                let a2 = curve.sub(&a1, &curve.mul_signed(&base.points[idx[1]], s2));
+                let p3 = base.points[idx[2]];
+                let s3 = if a2 == p3 {
+                    1
+                } else if a2 == curve.neg(&p3) {
+                    -1
+                } else {
+                    continue;
+                };
+                let mut acc: HashMap<usize, i64> = HashMap::new();
+                for (i, s) in [(idx[0], s1), (idx[1], s2), (idx[2], s3)] {
+                    *acc.entry(i).or_insert(0) += s;
+                }
+                let mut terms: Vec<(usize, i64)> =
+                    acc.into_iter().filter(|&(_, c)| c != 0).collect();
+                terms.sort_unstable();
+                if !terms.is_empty() {
+                    found.push(terms);
+                }
+            }
+        }
+    }
+    found.sort();
+    found.dedup();
+    found
+}
+
 // ── Relation collection and the rho reference ────────────────────────────
 
 /// Report of one Gaudry-style run.
@@ -1037,15 +1736,51 @@ pub struct GaudryReport {
     pub decomposition_rate: f64,
     pub wall_ms: f64,
     pub linear_algebra_ms: f64,
+    pub solver: Solver,
+    /// `F_p` multiplications of the once-per-curve symmetrised-`S₄`
+    /// precomputation (included in `total_ops`).
+    pub precompute_fp_muls: u64,
+    pub solve_stats: SolveStats,
+    pub cross_checked: u64,
+    pub cross_check_mismatches: u64,
+}
+
+/// Which triple oracle a run uses.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum Solver {
+    /// `2|F|` Weil-restricted `S₃` pair tests per residual.
+    MeetInTheMiddle,
+    /// Gaudry's `O(1)` symmetrised-`S₄` solve per residual.
+    Groebner,
 }
 
 /// Collect relations by full decomposition of random `R = aG + bQ` until
-/// `d` is determined.
+/// `d` is determined, with the meet-in-the-middle oracle.
 pub fn run_gaudry(
     inst: &Instance3,
     base: &SubspaceBase,
     seed: u64,
     max_residuals: u64,
+) -> GaudryReport {
+    run_gaudry_with(
+        inst,
+        base,
+        seed,
+        max_residuals,
+        Solver::MeetInTheMiddle,
+        false,
+    )
+}
+
+/// As [`run_gaudry`] with a choice of oracle; `cross_check` also runs
+/// the other oracle on every residual and counts disagreements.
+pub fn run_gaudry_with(
+    inst: &Instance3,
+    base: &SubspaceBase,
+    seed: u64,
+    max_residuals: u64,
+    solver: Solver,
+    cross_check: bool,
 ) -> GaudryReport {
     let curve = &inst.curve;
     let n = curve.n;
@@ -1064,6 +1799,14 @@ pub fn run_gaudry(
         curve.reset();
         m
     };
+    let pre = if solver == Solver::Groebner || cross_check {
+        Some(SymmetrisedS4::precompute(curve))
+    } else {
+        None
+    };
+    let precompute_muls = curve.field.muls();
+    curve.reset();
+    let mut stats = SolveStats::default();
     let mut system = RelationSystem::new(n, base.len() + 1);
     let mut rep = GaudryReport {
         p: curve.field.p,
@@ -1087,6 +1830,11 @@ pub fn run_gaudry(
         decomposition_rate: 0.0,
         wall_ms: 0.0,
         linear_algebra_ms: 0.0,
+        solver,
+        precompute_fp_muls: 0,
+        solve_stats: SolveStats::default(),
+        cross_checked: 0,
+        cross_check_mismatches: 0,
     };
     let mut la = std::time::Duration::ZERO;
     while rep.residuals < max_residuals {
@@ -1094,9 +1842,58 @@ pub fn run_gaudry(
         let a = rng.gen_range(0..n);
         let b = rng.gen_range(1..n);
         let r = curve.add(&curve.mul(&curve.g, a), &curve.mul(&inst.q, b));
-        let (decs, muls) = subspace_triple_oracle(inst, base, &r, &mut rng);
-        rep.oracle_fp_muls += muls;
-        rep.pair_tests += 2 * base.len() as u64;
+        let decs = match solver {
+            Solver::MeetInTheMiddle => {
+                let (decs, muls) = subspace_triple_oracle(inst, base, &r, &mut rng);
+                rep.oracle_fp_muls += muls;
+                rep.pair_tests += 2 * base.len() as u64;
+                decs
+            }
+            Solver::Groebner => {
+                let before = stats.fp_muls;
+                let decs = subspace_triple_oracle_groebner(
+                    inst,
+                    base,
+                    pre.as_ref().unwrap(),
+                    &r,
+                    &mut rng,
+                    &mut stats,
+                );
+                rep.oracle_fp_muls += stats.fp_muls - before;
+                decs
+            }
+        };
+        if cross_check {
+            let other = match solver {
+                Solver::MeetInTheMiddle => {
+                    let mut st = SolveStats::default();
+                    subspace_triple_oracle_groebner(
+                        inst,
+                        base,
+                        pre.as_ref().unwrap(),
+                        &r,
+                        &mut rng,
+                        &mut st,
+                    )
+                }
+                Solver::Groebner => subspace_triple_oracle(inst, base, &r, &mut rng).0,
+            };
+            // Compare distinct-index triples and singles only (the pair
+            // channel differs between the two oracles).
+            let filt = |v: &Vec<Vec<(usize, i64)>>| -> Vec<Vec<(usize, i64)>> {
+                v.iter().filter(|t| t.len() != 2).cloned().collect()
+            };
+            if filt(&decs) != filt(&other) {
+                rep.cross_check_mismatches += 1;
+                if std::env::var_os("GAUDRY_DEBUG").is_some() {
+                    eprintln!(
+                        "cross-check mismatch at residual {} (a={a}, b={b}): {:?} produced {:?}, other produced {:?}; stats {:?}",
+                        rep.residuals, solver, filt(&decs), filt(&other), stats
+                    );
+                }
+            }
+            rep.cross_checked += 1;
+        }
         for terms in decs {
             rep.decompositions += 1;
             // Verify aG + bQ = Σ c_i P_i.
@@ -1130,7 +1927,11 @@ pub fn run_gaudry(
     }
     rep.rank = system.rank();
     rep.group_ops = curve.ops();
-    rep.total_ops = rep.group_ops as f64 + rep.oracle_fp_muls as f64 / fp_per_add;
+    rep.solver = solver;
+    rep.precompute_fp_muls = precompute_muls;
+    rep.solve_stats = stats;
+    rep.total_ops =
+        rep.group_ops as f64 + (rep.oracle_fp_muls + precompute_muls) as f64 / fp_per_add;
     rep.s = rep.total_ops / (n as f64).sqrt();
     rep.fp_muls_per_pair_test = rep.oracle_fp_muls as f64 / rep.pair_tests.max(1) as f64;
     rep.decomposition_rate = rep.decompositions as f64 / rep.residuals as f64;
@@ -1337,6 +2138,99 @@ mod tests {
     }
 
     #[test]
+    fn symbolic_s4_vanishes_on_sums_and_symmetrisation_is_exact() {
+        let inst = generate_instance3(67, 6);
+        let c = &inst.curve;
+        let f = &c.field;
+        let mut rng = StdRng::seed_from_u64(3);
+        let g = s4_symbolic(c);
+        // S₄(x₁, x₂, x₃, x(P₁+P₂+P₃)) = 0 for random points.
+        for k in 1..6u64 {
+            let p1 = c.mul(&c.g, 11 * k + 1);
+            let p2 = c.mul(&c.g, 23 * k + 5);
+            let p3 = c.mul(&c.g, 37 * k + 7);
+            let s = c.add(&c.add(&p1, &p2), &p3);
+            assert_eq!(g.eval(f, &[p1.x, p2.x, p3.x, s.x]), Fp3::ZERO);
+            let s2 = c.add(&c.sub(&p1, &p2), &p3);
+            assert_eq!(g.eval(f, &[p1.x, p2.x, p3.x, s2.x]), Fp3::ZERO);
+        }
+        // H(e(x), x₄) = G(x) at random points.
+        let pre = SymmetrisedS4::precompute(c);
+        for _ in 0..20 {
+            let x: [E3; 4] = std::array::from_fn(|_| {
+                E3([
+                    rng.gen_range(0..f.p),
+                    rng.gen_range(0..f.p),
+                    rng.gen_range(0..f.p),
+                ])
+            });
+            let e1 = f.add(&f.add(&x[0], &x[1]), &x[2]);
+            let e2 = f.add(
+                &f.add(&f.mul(&x[0], &x[1]), &f.mul(&x[0], &x[2])),
+                &f.mul(&x[1], &x[2]),
+            );
+            let e3 = f.mul(&f.mul(&x[0], &x[1]), &x[2]);
+            let mut h = Fp3::ZERO;
+            for (&e, &coef) in &pre.terms {
+                let mut t = coef;
+                for _ in 0..e[0] {
+                    t = f.mul(&t, &e1);
+                }
+                for _ in 0..e[1] {
+                    t = f.mul(&t, &e2);
+                }
+                for _ in 0..e[2] {
+                    t = f.mul(&t, &e3);
+                }
+                for _ in 0..e[3] {
+                    t = f.mul(&t, &x[3]);
+                }
+                h = f.add(&h, &t);
+            }
+            assert_eq!(h, g.eval(f, &x));
+        }
+        assert!(pre.terms.len() <= 175, "{}", pre.terms.len());
+    }
+
+    #[test]
+    fn groebner_solve_agrees_with_the_meet_in_the_middle_oracle() {
+        let inst = generate_instance3(67, 8);
+        let c = &inst.curve;
+        let mut rng = StdRng::seed_from_u64(4);
+        let base = SubspaceBase::build(&inst, &mut rng);
+        let pre = SymmetrisedS4::precompute(c);
+        let mut stats = SolveStats::default();
+        // Constructed triple.
+        let r = c.add(
+            &c.add(&base.points[2], &base.points[9]),
+            &c.neg(&base.points[14]),
+        );
+        let decs = subspace_triple_oracle_groebner(&inst, &base, &pre, &r, &mut rng, &mut stats);
+        assert!(decs.contains(&vec![(2, 1), (9, 1), (14, -1)]), "{decs:?}");
+        // Random residuals: the same distinct-index triples as the MITM oracle.
+        let filt = |v: &Vec<Vec<(usize, i64)>>| -> Vec<Vec<(usize, i64)>> {
+            v.iter().filter(|t| t.len() != 2).cloned().collect()
+        };
+        let mut agree = 0;
+        for k in 1..40u64 {
+            let r = c.mul(&c.g, k * 104_729 + 3);
+            let a = subspace_triple_oracle_groebner(&inst, &base, &pre, &r, &mut rng, &mut stats);
+            let (b, _) = subspace_triple_oracle(&inst, &base, &r, &mut rng);
+            assert_eq!(
+                filt(&a),
+                filt(&b),
+                "residual {k}: groebner {a:?} vs mitm {b:?}"
+            );
+            agree += filt(&a).len();
+        }
+        assert!(agree > 0, "no triples found on random residuals");
+        // The regularity degree 10 suffices for almost every residual; a
+        // few need the degree-11 matrix.
+        assert!(stats.retried_at_degree_11 * 10 <= stats.solves, "{stats:?}");
+        assert!(stats.quotient_dim_total >= 40 * 60, "{stats:?}");
+    }
+
+    #[test]
     fn gaudry_and_rho_recover_the_planted_logarithm() {
         let inst = generate_instance3(67, 11);
         let mut rng = StdRng::seed_from_u64(2);
@@ -1344,6 +2238,10 @@ mod tests {
         let rep = run_gaudry(&inst, &base, 1, 20_000);
         assert_eq!(rep.correct, Some(true), "{rep:?}");
         assert!(rep.decomposition_rate > 0.02);
+        let grob = run_gaudry_with(&inst, &base, 1, 20_000, Solver::Groebner, true);
+        assert_eq!(grob.correct, Some(true), "{grob:?}");
+        assert_eq!(grob.cross_check_mismatches, 0, "{grob:?}");
+        assert!(grob.solve_stats.solves == grob.residuals);
         let rho = run_rho3(&inst, 1);
         assert_eq!(rho.correct, Some(true), "{rho:?}");
     }

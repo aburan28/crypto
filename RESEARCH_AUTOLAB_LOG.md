@@ -7419,11 +7419,41 @@ equations, total degree 2, 6 terms).  `{v ∈ F_p}` is non-empty in the
 useful sense only when `−b` is a cube (`E[2]` rational) — the first
 draft got a two-point base.
 
-TBD-LOG-M3
+**`m = 3` is a different story, and the note says so.**  Two tools were
+needed to see it at all: a per-variable degree box for the
+interpolation (`S₄` has total degree 12 but degree 4 per point) and a
+wall-clock budget per Buchberger run.  With them: (i) the one-involution
+system at `m = 3` is a third of the degree and a quarter of the size of
+Gaudry's descended `S₄`, the Klein group is still not `F_p`-valued, and
+the repo's Buchberger finishes neither system in 180 s on any target —
+shape settled, timing not (§12.4); (ii) on the `v`-line, the 3-torsion
+translations alone give degree 3 per point against Semaev's 4 (one
+step down, not a halving), and folding the sign in — the source of the
+`m = 2` multilinearity — gives no relation in any box tried, up to
+5625 monomials in a single kernel computation.  The `m = 2`
+multilinearity was a small-`m` accident, not a pattern (§13.5).  For
+the decomposition problem the fixed target breaks the sign anyway, so
+the `v_i³, Πv` system is the one that matters.
+
+**A process lesson**, recorded because it cost an hour: a timed-out
+Buchberger left running on its own thread keeps its core; eight of
+them put the machine at load 16 on four cores and starved every other
+run.  Budgets need a kill, not a detach — or one run at a time.
 
 ### Next step proposal
 
-TBD-LOG-NEXT
+The coordinate thread is at a natural stop: every group the structural
+lemmas allow (2-torsion, Klein, 4-torsion transport, 3-torsion on the
+`y`-line, automorphisms) has been run through the engine at `m = 2`
+and `m = 3`, and the pattern is uniform — a real reduction of the
+relation degree per point at every `m`, no free relations once the
+projection is accounted for, and a solve that is smaller by a constant
+factor which the repo's Buchberger cannot even rank at `m = 3`.  The
+next step is therefore not another coordinate but a solver: an F4/F5
+over `F_p` with a degree bound (the module named `groebner_f4` is a
+Buchberger), against which §12.4's and §13.5's systems can be timed.
+Until then the `m = 2` rankings (§12.3, §13.4) are the only timed
+results, and they favour the quotient systems 3–7×.
 
 ### Commits made
 

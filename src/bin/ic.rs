@@ -57,7 +57,7 @@ enum Action {
     Logs(experiment::LogsArgs),
     /// Recover a target's logarithm by descent, reusing a saved database.
     Solve(experiment::SolveArgs),
-    /// Run or resume a staged select → logs → solve pipeline from a parameter file.
+    /// Run or resume a staged select → collect → logs → solve pipeline from a parameter file (or act as a collection worker).
     Workflow(workflow::WorkflowArgs),
 }
 #[derive(Args)]
@@ -293,6 +293,12 @@ fn display(report: &Value) {
                     st["status"].as_str().unwrap_or("?"),
                     if st["ran"] == true { "ran" } else { "reused" }
                 );
+                if let Some(u) = st.get("units").filter(|v| !v.is_null()) {
+                    println!(
+                        "         units: {} present ({} ran now, {} ignored); {} relations from {} probes",
+                        u["present"], u["ran_now"], u["ignored"], st["relations_total"], st["trials_total"]
+                    );
+                }
                 if let Some(la) = st.get("linear_algebra").filter(|v| !v.is_null()) {
                     println!("         linear algebra: {}", linear_algebra_summary(la));
                 }
