@@ -14,6 +14,10 @@ measured 6.905 B scalar walk iterations/s. A separate paired comparison
 measured a 1.17% benchmark gain and 1.14% collection gain from direct reduction. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
+[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records measured
+instruction-pipe and memory ceilings for this GPU and shows why one card
+cannot reach 15–20 B iterations/s with any known arithmetic.
+
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
 That guide supersedes the earlier bandwidth estimates and tuning prescriptions

@@ -11,7 +11,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_index_calculus_dlp_with_factor_base_and_progress,
     koblitz_signed_frobenius_rho_with_progress, DecompositionStrategy, KoblitzCurve,
     KoblitzIcEvent, KoblitzIcOptions, KoblitzRelation, KoblitzRelationAttemptDisposition,
-    KoblitzRelationAttemptRecord, KoblitzSignedRhoEvent, KoblitzSignedRhoOptions,
+    KoblitzRelationAttemptRecord, KoblitzSignedRhoEvent, KoblitzSignedRhoOptions, LinearAlgebra,
     SatDecompositionOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_pdp_phase_a::decode_uniform_affine_draw;
@@ -534,6 +534,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         relation_batch_size: 1,
         allow_direct_relation: false,
         collapse_projected_orbits: true,
+        linear_algebra: LinearAlgebra::Dense,
     };
     let solve_started = Instant::now();
     let report = koblitz_index_calculus_dlp_with_factor_base_and_progress(

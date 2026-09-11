@@ -8,8 +8,10 @@ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, MAX_N,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
+    LogTableReport, MAX_N,
 };
+use crypto_lib::cryptanalysis::koblitz_sparse_la::{BlockWiedemannOptions, SparseSolveOptions};
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
@@ -65,6 +67,58 @@ impl Solver {
             Self::PairTable => DecompositionStrategy::PairTable,
         }
     }
+}
+/// How the factor-base logarithm precompute solves its relation matrix.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LinearAlgebraMode {
+    /// Dense big-integer Gaussian elimination after every new relation.
+    Dense,
+    /// Relation filtering (duplicates, singletons, excess, merge), then
+    /// block Wiedemann on the reduced core.
+    #[default]
+    Sparse,
+}
+impl LinearAlgebraMode {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Dense => "dense",
+            Self::Sparse => "sparse",
+        }
+    }
+}
+/// Select the linear-algebra path of `solve_factor_base_logs`.
+pub(crate) fn with_linear_algebra(
+    mut opts: KoblitzIcOptions,
+    mode: LinearAlgebraMode,
+    sparse: SparseSolveOptions,
+) -> KoblitzIcOptions {
+    opts.linear_algebra = match mode {
+        LinearAlgebraMode::Dense => LinearAlgebra::Dense,
+        LinearAlgebraMode::Sparse => LinearAlgebra::Sparse(sparse),
+    };
+    opts
+}
+/// Sparse-solve options with one block size for both sides of the
+/// Krylov sequence; everything else at its default.
+pub(crate) fn sparse_options(block_size: usize) -> SparseSolveOptions {
+    SparseSolveOptions {
+        wiedemann: BlockWiedemannOptions {
+            block_m: block_size,
+            block_n: block_size,
+            ..BlockWiedemannOptions::default()
+        },
+        ..SparseSolveOptions::default()
+    }
+}
+/// The linear-algebra part of a precompute report.
+pub(crate) fn linear_algebra_json(report: &LogTableReport) -> Value {
+    json!({
+        "mode": if report.sparse { "sparse" } else { "dense" },
+        "attempts": report.solve_attempts,
+        "seconds": report.linear_algebra_seconds,
+        "sparse": report.sparse_report.as_ref().map(|r| serde_json::to_value(r).unwrap_or(Value::Null)),
+    })
 }
 /// A factor-base recipe saved by `ic search`, bound to the curve it was
 /// found on so it cannot be replayed on a different one by accident.
@@ -276,6 +330,13 @@ pub struct LogsArgs {
     pub solver: Solver,
     #[arg(long, default_value_t = 0x4b_6f_62_6c_69_74_7a_00u64)]
     pub seed: u64,
+    /// How the relation matrix is solved: filtering + block Wiedemann
+    /// (sparse) or dense big-integer elimination.
+    #[arg(long, value_enum, default_value_t = LinearAlgebraMode::Sparse)]
+    pub linear_algebra: LinearAlgebraMode,
+    /// Block size (both sides) of the block Wiedemann Krylov sequence.
+    #[arg(long,default_value_t=4,value_parser=clap::value_parser!(u8).range(1..=64))]
+    pub block_size: u8,
     /// Write the logarithm database here; an existing path is never overwritten.
     #[arg(long = "database")]
     pub database: PathBuf,
@@ -345,7 +406,7 @@ pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
     }
     Ok(doc)
 }
-fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
+pub(crate) fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
     KoblitzIcOptions {
         m: summands as usize,
         strategy: strategy.strategy(),
@@ -356,6 +417,60 @@ fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> Kob
         seed,
         ..KoblitzIcOptions::default()
     }
+}
+/// Serialise a solved logarithm table, bound to its curve and factor base.
+pub(crate) fn log_table_to_doc(
+    c: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+    summands: u8,
+    solver: Solver,
+    table: &FactorBaseLogTable,
+) -> LogTableDocument {
+    let columns: Vec<LogColumn> = table
+        .columns
+        .iter()
+        .map(|(point, log)| match point {
+            BinaryPoint::Affine { x, y } => LogColumn {
+                x: params::hex(&x.to_biguint()),
+                y: params::hex(&y.to_biguint()),
+                log: log.to_string(),
+            },
+            BinaryPoint::Infinity => unreachable!("projected columns are affine"),
+        })
+        .collect();
+    LogTableDocument {
+        schema_version: 1,
+        degree: c.n,
+        curve_a: c.a,
+        spec: spec.clone(),
+        subgroup_order: c.subgroup_order.to_string(),
+        cofactor: c.cofactor.to_string(),
+        summands,
+        solver,
+        columns,
+    }
+}
+/// Rebuild a logarithm table from its document and re-verify every column
+/// against the reconstructed curve; a tampered or mismatched table is an error.
+pub(crate) fn log_table_from_doc(
+    c: &KoblitzCurve,
+    doc: &LogTableDocument,
+) -> Result<FactorBaseLogTable, String> {
+    if doc.degree != c.n || doc.curve_a != c.a || doc.subgroup_order != c.subgroup_order.to_string() {
+        return Err("logarithm database does not belong to this curve".into());
+    }
+    let mut columns = Vec::with_capacity(doc.columns.len());
+    for col in &doc.columns {
+        let x = F2mElement::from_biguint(&params::number(&col.x)?, c.n);
+        let y = F2mElement::from_biguint(&params::number(&col.y)?, c.n);
+        let log = params::number(&col.log)?;
+        columns.push((BinaryPoint::Affine { x, y }, log));
+    }
+    let table = FactorBaseLogTable { columns };
+    if !table.verify(c) {
+        return Err("logarithm database failed re-verification: a column log does not satisfy [x]G == point".into());
+    }
+    Ok(table)
 }
 pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
@@ -384,13 +499,18 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let fb = materialize(&c, &spec)?;
     if !quiet {
         println!(
-            "ic — factor-base logarithm precomputation on K_{} / GF(2^{}); r = {}\nFactor base: {}; {} summands; engine {}",
+            "ic — factor-base logarithm precomputation on K_{} / GF(2^{}); r = {}\nFactor base: {}; {} summands; engine {}; linear algebra {}",
             c.a, c.n, c.subgroup_order,
-            serde_json::to_string(&spec).unwrap_or_default(), args.summands, args.solver.name()
+            serde_json::to_string(&spec).unwrap_or_default(), args.summands, args.solver.name(),
+            args.linear_algebra.name()
         );
         let _ = std::io::stdout().flush();
     }
-    let opts = ic_options(args.solver, args.summands, args.max_trials, args.seed);
+    let opts = with_linear_algebra(
+        ic_options(args.solver, args.summands, args.max_trials, args.seed),
+        args.linear_algebra,
+        sparse_options(usize::from(args.block_size)),
+    );
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
         .ok_or("factor base has no usable projected columns for this summand count")?;
     if !report.verified {
@@ -399,37 +519,17 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             "reason":"relations did not determine every column logarithm within the trial budget",
             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
             "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+            "linear_algebra":linear_algebra_json(&report),
             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
     }
-    let columns: Vec<LogColumn> = table
-        .columns
-        .iter()
-        .map(|(point, log)| match point {
-            BinaryPoint::Affine { x, y } => LogColumn {
-                x: params::hex(&x.to_biguint()),
-                y: params::hex(&y.to_biguint()),
-                log: log.to_string(),
-            },
-            BinaryPoint::Infinity => unreachable!("projected columns are affine"),
-        })
-        .collect();
-    let doc = LogTableDocument {
-        schema_version: 1,
-        degree: c.n,
-        curve_a: c.a,
-        spec: spec.clone(),
-        subgroup_order: c.subgroup_order.to_string(),
-        cofactor: c.cofactor.to_string(),
-        summands: args.summands,
-        solver: args.solver,
-        columns,
-    };
+    let doc = log_table_to_doc(&c, &spec, args.summands, args.solver, &table);
     write_new(&args.database, &serde_json::to_value(&doc).map_err(|e| e.to_string())?)?;
     Ok(json!({"schema_version":1,"operation":"logs","status":"complete",
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
         "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
         "factor_base":factor_base_json(&spec,&fb,report.columns),
         "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+        "linear_algebra":linear_algebra_json(&report),
         "verified":true,"out":args.database.display().to_string(),
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
         "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",
@@ -450,17 +550,7 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     }
     let fb = materialize(&c, &doc.spec)?;
     // Reconstruct the table and re-verify every column against the curve.
-    let mut columns = Vec::with_capacity(doc.columns.len());
-    for col in &doc.columns {
-        let x = F2mElement::from_biguint(&params::number(&col.x)?, c.n);
-        let y = F2mElement::from_biguint(&params::number(&col.y)?, c.n);
-        let log = params::number(&col.log)?;
-        columns.push((BinaryPoint::Affine { x, y }, log));
-    }
-    let table = FactorBaseLogTable { columns };
-    if !table.verify(&c) {
-        return Err("logarithm database failed re-verification: a column log does not satisfy [x]G == point".into());
-    }
+    let table = log_table_from_doc(&c, &doc)?;
     // Build the synthetic known-answer target.
     let k = if args.random_target {
         let mut rng = StdRng::seed_from_u64(args.seed ^ 0x534f_4c56_4552_5447);
@@ -501,7 +591,7 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
         "scope":"per-target individual logarithm: one relation over a reused, re-verified factor-base logarithm database",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]}))
 }
-fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
+pub(crate) fn curve(n: u32, a: u8) -> Result<KoblitzCurve, String> {
     // Keep this guard even for internal callers, independently of Clap.
     if n < 3 || n > MAX_N || n % 2 == 0 || a > 1 {
         return Err("unsupported synthetic curve parameters".into());
@@ -525,7 +615,7 @@ fn known(curve: &KoblitzCurve, args: &RunArgs) -> Result<BigUint, String> {
     }
     Ok(n)
 }
-fn validate_factor_size(n: u32) -> Result<u32, String> {
+pub(crate) fn validate_factor_size(n: u32) -> Result<u32, String> {
     let dim = order_of_2_mod_n(n).ok_or("no supported factor-base family for this degree")?;
     if dim > MAX_FACTOR_DIMENSION {
         return Err(format!("factor-base dimension {dim} exceeds the materialization limit {MAX_FACTOR_DIMENSION}; use ic search and --factor-base, or inspection and fixture generation"));
@@ -554,7 +644,7 @@ fn factor_base_spec(args: &RunArgs) -> Result<FactorBaseSpec, String> {
         }
     }
 }
-fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
+pub(crate) fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
     let fb = spec.materialize(kc)?;
     if fb.subspace.len() > MAX_ABSCISSAE {
         return Err(format!(
@@ -564,7 +654,7 @@ fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFact
     }
     Ok(fb)
 }
-fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
+pub(crate) fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
     json!({"spec":spec,"family":spec.family(),
         "domain":crypto_lib::cryptanalysis::koblitz_factor_base_search::domain_label(&fb.domain),
         "dimension":fb.ell,"abscissae":fb.subspace.len(),"points":fb.points.len(),

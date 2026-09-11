@@ -110,6 +110,7 @@ pub mod cheon_attack;
 pub mod cipher_registry;
 pub mod cm_canonical_lift;
 pub mod coleman_integration;
+pub mod coordinate_descent;
 pub mod coordinate_quotients;
 pub mod coordinate_search;
 pub mod descent_algebraic;
@@ -127,8 +128,10 @@ pub mod eds_mov;
 pub mod eds_net;
 pub mod eds_residue;
 pub mod eds_tate;
+pub mod f4_fp;
 pub mod ffd_harness;
 pub mod fght_snfs;
+pub mod gaudry_cubic;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
 pub mod groebner_f4;
@@ -143,6 +146,7 @@ pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
+pub mod koblitz_sparse_la;
 pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
@@ -250,18 +254,27 @@ pub use koblitz_index_calculus::{
     build_explicit_frobenius_orbit_factor_base, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
     enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
-    frobenius_eigenvalue, groebner_decompose, individual_log, invariant_subspace_basis,
-    is_irreducible_f2, koblitz_index_calculus_dlp, koblitz_index_calculus_dlp_with_factor_base,
+    frobenius_eigenvalue, groebner_decompose, individual_log, individual_log_with_pair_table,
+    invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
+    koblitz_index_calculus_dlp_with_factor_base,
     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
     koblitz_signed_frobenius_rho_with_progress, koblitz_speedup_model, linearised_kernel,
-    linearised_kernel_basis, order_of_2_mod_n, pack_point, point_key, points_with_x,
+    linearised_kernel_basis, order_of_2_mod_n, pack_point, point_key, points_with_x, probe_scalar,
     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
-    solve_factor_base_logs, span_f2, subspace_basis_for_divisor, DecompositionStrategy,
-    FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase, IndividualLogReport, KoblitzCurve,
-    KoblitzIcEvent, KoblitzIcOptions, KoblitzIcReport, KoblitzRankRecord, KoblitzRelation,
-    KoblitzRelationAttemptDisposition, KoblitzRelationAttemptRecord, KoblitzSignedRhoCharges,
-    KoblitzSignedRhoEvent, KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup,
-    LogTableReport, PairSumTable, SatDecompositionOptions, SatDecompositionStats,
+    solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2,
+    subspace_basis_for_divisor, verify_collected_relation, CollectedRelation, CollectionReport,
+    DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
+    IndividualLogReport, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, KoblitzIcReport,
+    KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
+    KoblitzRelationAttemptRecord, KoblitzSignedRhoCharges, KoblitzSignedRhoEvent,
+    KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup, LinearAlgebra, LogTableReport,
+    PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
+    SatDecompositionStats, PRECOMPUTE_BATCH_TRIALS,
+};
+pub use koblitz_sparse_la::{
+    block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,
+    BlockWiedemannReport, CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseRow,
+    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

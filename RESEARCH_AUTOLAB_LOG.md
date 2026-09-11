@@ -7298,3 +7298,164 @@ Numbers pending in this session's bench (§11.3).  After that, the
 thread's open items are unchanged from §10.5 minus item 1, with one
 addition: any future oracle claim should be checked against
 `projected_column` counts before timing anything.
+
+---
+
+## 2026-09-11 (autolab run, fifth session on exotic coordinates)
+
+### Task picked
+
+§10.5 item 2: `F_{p^k}` support, so the Klein invariants meet a
+subspace factor base and "bits, not degrees" can be answered by
+descent.
+
+### Work done
+
+- `Gf::extension(p, k)`: odd-characteristic extension fields with
+  digit-vector elements, log tables, first-irreducible-by-trial-division;
+  the search and quotient engines run on them unchanged (the interpolated
+  `S₃` over `F_{13²}` matches the closed form).
+- `coordinate_descent`: fixed-target quotient systems (`Γ₀ = Γ ∩
+  (G^m × {id})`, summand-only seeds, relation interpolated for the given
+  `R` with identities quotiented out and kept as equations), descent by
+  coefficient digits to `k` equations over `F_p`, `F_p`-valuedness
+  check on the base before anything is timed, and a three-arm
+  comparison — Gaudry's `x`, one involution, the Klein group — on the
+  repo's Buchberger.
+- Two false starts caught by the tool's own checks: every curve in the
+  first example was over `F_p`, where the base `x ∈ F_p` is `E(F_p)`
+  and decomposable targets are `F_p`-rational (one descended equation
+  where there should be `k`); and the sign arm refuted decomposable
+  targets built from base points at the frame's pole.  The family
+  `y² = x(x² − αx + 1)`, `α ∉ F_p`, gives Gaudry's setting with an
+  `F_p`-rational sign frame; targets are now built from the base every
+  arm shares.
+
+### Findings
+
+**The Klein group does not descend, and cannot.**  On every curve in
+Gaudry's setting its invariants leave `F_p` on the base (`F_p?` column
+NO); on the over-`F_p` control they stay in `F_p` but the base is a
+subgroup.  Structurally: the base is an `F_p`-line, stability under all
+three involutions puts every 2-torsion abscissa in `F_p`, and that is
+the degenerate case.  §6.4 / §10.3 close on a measured negative.
+
+**One involution descends and is the cheaper system at `m = 2`.**
+Three `F_p`-unknowns and four equations of total degree 2 against
+Gaudry's two unknowns, three equations of total degree 4; Buchberger
+0.1 ms against 0.3 (found) and 0.6 ms (refuted); identical verdicts on
+every target.  `m = 3` in this session's run (§12.4).
+
+### Next step proposal
+
+The thread's remaining open item is §10.5's higher-order seeds
+(3-torsion on `j = 0` curves), and the standing rule from the fourth
+session — projected column counts before timings — now has a
+companion: `F_p`-valuedness on the base before descent.
+
+### Commits made
+
+(see PR — `Gf::extension`, `coordinate_descent`, `klein_descent`
+example, research note §12)
+
+---
+
+## 2026-09-11 (autolab run, sixth session on exotic coordinates)
+
+### Task picked
+
+§10.5's last open item: higher-order seeds — rational 3-torsion on
+`j = 0` curves — plus the `m = 3` rows §12.4 still owed.
+
+### Work done
+
+- `Chart`: a Möbius frame on the `x`- or the `y`-line, threaded through
+  the quotient and descent engines (`Mobius` still converts to an
+  `x`-chart, so nothing upstream changed).  Needed because a 3-torsion
+  translation is not Möbius on `x` but is on `y` when it commutes with
+  the order-3 automorphism (`j = 0`, `q ≡ 1 mod 3`).
+- Boxed interpolation (`interpolate_quotient_boxed`,
+  `interpolate_and_descend_boxed`): per-variable degree caps for point
+  and tuple invariants on top of the total degree, so that `m = 3`
+  relations (Semaev's `S₄`: total degree 12, degree 4 per point) fit
+  under the 3000-monomial cap.  `S₄` is now recovered at `m = 3` with
+  191 terms, as it should be.
+- `compare_arms` / `standard_arms`: arbitrary arms on a chosen base
+  chart; the Klein example runs its arms one at a time with progress.
+- `examples/three_torsion.rs`: curves A (`b = 2`) and B (`b = 1`) over
+  `F₁₀₀₉`, eleven quotient runs on both lines at `m = 2`, the `v`-line
+  runs at `m = 3`, and the descent over `F₃₁³` on two bases.
+- Unit test: the `x`-line quotient by `⟨τ₃, −1⟩` is Vélu's coordinate
+  `x + 4b/x²`; the chart `v = (y − s)/(y + s)`, `s = √b√−3`, has
+  `τ₃ : v ↦ ω^{±1}v` and `−1 : v ↦ 1/v` on every point.
+
+### Findings
+
+**The 3-torsion frame exists, on the `y`-line, and does what the
+2-torsion frame did one degree up.**  Summation relations have degree 2
+per variable in `x`, 3 in `y`, and 1 in `V = v³ + v⁻³`:
+
+    (V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³,   P = Πv + 1/Πv,
+
+equivalently `Π(v_i³ − 1) = (Πv_i − 1)³` — multilinear in the point
+invariants, all the remaining degree in one tuple unknown.  Collapse
+`|Γ| = 54` exactly at `m = 2` (18 tuples of translations summing to zero
+× 6 automorphisms), diagnosed as such by the engine when `ω` is left
+out of `G` (collapse 3× above `|Γ|`).
+
+**On the `x`-line the 3-torsion group is Vélu's isogeny and nothing
+else** — the §3 lemma, now measured: `e₂`, `e₃` of the orbit are
+constant, `e₁ = (x³ + 4b)/x²`.
+
+**The accounting of §11 holds unchanged**: `V` identifies a point up to
+`⟨T, ω, −1⟩`, all of which the projection kills or turns into a known
+scalar, so one solve is one row.  The gain is in the solve.
+
+**In Gaudry's setting the frame does not descend on Gaudry's base, and
+defines a base of its own.**  On `{x ∈ F_p}` only Semaev is
+`F_p`-valued; on `{v ∈ F_p}` only the `v`-line systems are, and there
+the 3-torsion system is the smallest one in this note (3 unknowns, 3
+equations, total degree 2, 6 terms).  `{v ∈ F_p}` is non-empty in the
+useful sense only when `−b` is a cube (`E[2]` rational) — the first
+draft got a two-point base.
+
+**`m = 3` is a different story, and the note says so.**  Two tools were
+needed to see it at all: a per-variable degree box for the
+interpolation (`S₄` has total degree 12 but degree 4 per point) and a
+wall-clock budget per Buchberger run.  With them: (i) the one-involution
+system at `m = 3` is a third of the degree and a quarter of the size of
+Gaudry's descended `S₄`, the Klein group is still not `F_p`-valued, and
+the repo's Buchberger finishes neither system in 180 s on any target —
+shape settled, timing not (§12.4); (ii) on the `v`-line, the 3-torsion
+translations alone give degree 3 per point against Semaev's 4 (one
+step down, not a halving), and folding the sign in — the source of the
+`m = 2` multilinearity — gives no relation in any box tried, up to
+5625 monomials in a single kernel computation.  The `m = 2`
+multilinearity was a small-`m` accident, not a pattern (§13.5).  For
+the decomposition problem the fixed target breaks the sign anyway, so
+the `v_i³, Πv` system is the one that matters.
+
+**A process lesson**, recorded because it cost an hour: a timed-out
+Buchberger left running on its own thread keeps its core; eight of
+them put the machine at load 16 on four cores and starved every other
+run.  Budgets need a kill, not a detach — or one run at a time.
+
+### Next step proposal
+
+The coordinate thread is at a natural stop: every group the structural
+lemmas allow (2-torsion, Klein, 4-torsion transport, 3-torsion on the
+`y`-line, automorphisms) has been run through the engine at `m = 2`
+and `m = 3`, and the pattern is uniform — a real reduction of the
+relation degree per point at every `m`, no free relations once the
+projection is accounted for, and a solve that is smaller by a constant
+factor which the repo's Buchberger cannot even rank at `m = 3`.  The
+next step is therefore not another coordinate but a solver: an F4/F5
+over `F_p` with a degree bound (the module named `groebner_f4` is a
+Buchberger), against which §12.4's and §13.5's systems can be timed.
+Until then the `m = 2` rankings (§12.3, §13.4) are the only timed
+results, and they favour the quotient systems 3–7×.
+
+### Commits made
+
+(see PR — `Chart`, boxed interpolation, `compare_arms`,
+`three_torsion` example, research note §13)

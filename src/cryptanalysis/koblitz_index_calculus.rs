@@ -131,6 +131,7 @@ use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
@@ -141,6 +142,9 @@ use crate::cryptanalysis::koblitz_groebner::{
     SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+use crate::cryptanalysis::koblitz_sparse_la::{
+    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+};
 use crate::cryptanalysis::sat::SolveResult;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
@@ -2602,6 +2606,23 @@ pub struct KoblitzIcOptions {
     /// signed Frobenius. This removes public algebraic dependencies without
     /// computing any factor-base logarithm.
     pub collapse_projected_orbits: bool,
+    /// How [`solve_factor_base_logs`] solves the relation matrix.
+    pub linear_algebra: LinearAlgebra,
+}
+
+/// The linear-algebra stage of the factor-base logarithm precompute.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LinearAlgebra {
+    /// Dense big-integer Gaussian elimination
+    /// ([`crate::cryptanalysis::ec_index_calculus::gaussian_eliminate_mod_n`]),
+    /// attempted after every new relation once there are as many rows
+    /// as columns.  The reference path.
+    Dense,
+    /// Relation filtering followed by block Wiedemann on the reduced
+    /// core ([`crate::cryptanalysis::koblitz_sparse_la`]); falls back to
+    /// [`Self::Dense`] when the subgroup order does not fit the `u64`
+    /// arithmetic.
+    Sparse(SparseSolveOptions),
 }
 
 impl Default for KoblitzIcOptions {
@@ -2623,6 +2644,7 @@ impl Default for KoblitzIcOptions {
             relation_batch_size: 1,
             allow_direct_relation: true,
             collapse_projected_orbits: false,
+            linear_algebra: LinearAlgebra::Dense,
         }
     }
 }
@@ -3928,6 +3950,22 @@ pub struct LogTableReport {
     pub relations: usize,
     /// Whether every column logarithm verified as `[x_o]G == R_o`.
     pub verified: bool,
+    /// Linear solves attempted (each on the relations collected so far).
+    pub solve_attempts: usize,
+    /// Wall time spent in those solves.
+    pub linear_algebra_seconds: f64,
+    /// Whether the sparse path (filtering + block Wiedemann) was used.
+    pub sparse: bool,
+    /// Filtering and block Wiedemann statistics of the last sparse
+    /// attempt, when the sparse path was used.
+    pub sparse_report: Option<SparseSolveReport>,
+    /// Wall time spent drawing and decomposing probes (or, for a solve
+    /// from collected relations, re-verifying them).
+    pub collection_seconds: f64,
+    /// Collected relations that failed re-verification in the group.
+    pub rejected_relations: usize,
+    /// Collected relations identical to an earlier one.
+    pub duplicate_relations: usize,
 }
 
 /// Dispatch one decomposition question `target = Σ_{i} P_{i}` (`m`
@@ -3978,6 +4016,354 @@ fn decompose_once(
     }
 }
 
+// ── Relation collection in work units ──────────────────────────────
+
+/// One relation `[a]G = Σ_i P_{points[i]}` as a collector reports it:
+/// the trial number, the probe scalar and the factor-base point indices,
+/// nothing else.  A consumer rebuilds the row and re-checks the equation
+/// in the group ([`verify_collected_relation`]) before using it, so a
+/// corrupt or forged relation from a remote worker cannot enter the
+/// linear algebra.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CollectedRelation {
+    /// Trial index within the seed's probe sequence.
+    pub trial: u64,
+    /// The probe scalar, `R = [a]G`.
+    pub a: u64,
+    /// Indices into the factor base, `R = Σ points[i]` (with repetition).
+    pub points: Vec<usize>,
+}
+
+/// A slice `[start, start + count)` of a seed's probe sequence.  Probe
+/// `t` depends only on `(seed, t)` ([`probe_scalar`]), so any partition
+/// of the trial range into units yields the same relations, in any
+/// order, on any number of machines.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RelationWorkUnit {
+    pub seed: u64,
+    pub start: u64,
+    pub count: u64,
+}
+
+/// What collecting one work unit did.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct CollectionReport {
+    /// Probes drawn.
+    pub trials: usize,
+    /// Probes that decomposed.
+    pub relations: usize,
+    pub elapsed_seconds: f64,
+}
+
+/// The probe scalar of trial `t` under `seed`: uniform in `1..r`, drawn
+/// from a generator keyed by the pair, so trials are independent of one
+/// another and of the order in which they are visited.
+pub fn probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
+    let key =
+        seed ^ 0x5052_4f42_4553_4551 ^ trial.wrapping_mul(0x9e37_79b9_7f4a_7c15).rotate_left(17);
+    StdRng::seed_from_u64(key).gen_range(1..r_u64.max(2))
+}
+
+enum PairSource<'a> {
+    None,
+    Owned(PairSumTable),
+    Borrowed(&'a PairSumTable),
+}
+
+/// Decomposition state shared by every trial of a collector: the point
+/// index map, the field structure and, for the pair-table oracle, the
+/// table.  Built once per process and reused across work units.
+pub struct RelationCollector<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    opts: &'a KoblitzIcOptions,
+    index_of: HashMap<(BigUint, BigUint), usize>,
+    field: FieldStructure,
+    pair: PairSource<'a>,
+    r_u64: u64,
+}
+
+/// Trials collected per batch by [`solve_factor_base_logs`] between
+/// solve attempts; every batch runs in parallel.
+pub const PRECOMPUTE_BATCH_TRIALS: usize = 64;
+
+impl<'a> RelationCollector<'a> {
+    /// `None` when the base cannot decompose with `opts.m` summands or
+    /// the field is too wide for the pair table.
+    pub fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+    ) -> Option<Self> {
+        let pair = if opts.strategy == DecompositionStrategy::PairTable {
+            PairSource::Owned(PairSumTable::build(kc, fb)?)
+        } else {
+            PairSource::None
+        };
+        Self::with_pair(kc, fb, opts, pair)
+    }
+
+    /// Like [`Self::new`] but reusing a pair table the caller already
+    /// built (required when the strategy is
+    /// [`DecompositionStrategy::PairTable`]).
+    pub fn with_pair_table(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        pair: Option<&'a PairSumTable>,
+    ) -> Option<Self> {
+        let pair = match (opts.strategy, pair) {
+            (DecompositionStrategy::PairTable, Some(p)) => PairSource::Borrowed(p),
+            (DecompositionStrategy::PairTable, None) => return None,
+            _ => PairSource::None,
+        };
+        Self::with_pair(kc, fb, opts, pair)
+    }
+
+    fn with_pair(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        pair: PairSource<'a>,
+    ) -> Option<Self> {
+        if !fb.m_can_decompose(kc, opts.m) {
+            return None;
+        }
+        let r_u64 = kc
+            .subgroup_order
+            .to_u64_digits()
+            .first()
+            .copied()
+            .unwrap_or(1)
+            .max(2);
+        Some(Self {
+            kc,
+            fb,
+            opts,
+            index_of: fb.index_map(),
+            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
+            pair,
+            r_u64,
+        })
+    }
+
+    /// The pair table, when the oracle uses one.
+    pub fn pair_table(&self) -> Option<&PairSumTable> {
+        match &self.pair {
+            PairSource::None => None,
+            PairSource::Owned(p) => Some(p),
+            PairSource::Borrowed(p) => Some(p),
+        }
+    }
+
+    /// The largest probe scalar drawn, `r − 1` (or 1 for a degenerate order).
+    pub fn scalar_bound(&self) -> u64 {
+        self.r_u64
+    }
+
+    /// Collect the relations of one work unit, trials in parallel,
+    /// returned in trial order.
+    pub fn collect(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
+        let begin = std::time::Instant::now();
+        let g = self.kc.generator();
+        let end = unit.start.saturating_add(unit.count);
+        let probe = |t: u64| -> Option<CollectedRelation> {
+            let a = probe_scalar(unit.seed, t, self.r_u64);
+            let target = self.kc.mul(g, &BigUint::from(a));
+            if target == BinaryPoint::Infinity {
+                return None;
+            }
+            let points = decompose_once(
+                self.kc,
+                self.fb,
+                &self.index_of,
+                &self.field,
+                self.pair_table(),
+                self.opts,
+                &target,
+            )?;
+            Some(CollectedRelation {
+                trial: t,
+                a,
+                points,
+            })
+        };
+        let mut relations: Vec<CollectedRelation> = (unit.start..end)
+            .into_par_iter()
+            .filter_map(probe)
+            .collect();
+        relations.sort_by_key(|r| r.trial);
+        let report = CollectionReport {
+            trials: (end - unit.start) as usize,
+            relations: relations.len(),
+            elapsed_seconds: begin.elapsed().as_secs_f64(),
+        };
+        (relations, report)
+    }
+}
+
+/// Re-check a reported relation in the group: exactly `m` indices, all
+/// in range, `0 < a < r`, and `[a]G == Σ P_i`.
+pub fn verify_collected_relation(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    m: usize,
+    rel: &CollectedRelation,
+) -> bool {
+    let r_u64 = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(0);
+    if rel.points.len() != m || rel.a == 0 || rel.a >= r_u64 {
+        return false;
+    }
+    if rel.points.iter().any(|&i| i >= fb.points.len()) {
+        return false;
+    }
+    let mut sum = BinaryPoint::Infinity;
+    for &i in &rel.points {
+        sum = kc.add(&sum, &fb.points[i]);
+    }
+    sum != BinaryPoint::Infinity && sum == kc.mul(kc.generator(), &BigUint::from(rel.a))
+}
+
+/// The relation rows of a logarithm precompute, dense or sparse per the
+/// options, and the solve attempt shared by every entry point.
+struct LogSystem<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    opts: &'a KoblitzIcOptions,
+    projected: ProjectedSignedOrbitMap,
+    n_cols: usize,
+    r_u64: u64,
+    h: BigUint,
+    sparse_opts: Option<SparseSolveOptions>,
+    dense_matrix: Vec<Vec<BigUint>>,
+    dense_rhs: Vec<BigUint>,
+    sparse_rows: Vec<SparseRow>,
+}
+
+impl<'a> LogSystem<'a> {
+    /// `None` when the base has no projected columns.
+    fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+    ) -> Option<Self> {
+        let r = &kc.subgroup_order;
+        let projected = projected_signed_orbit_map(kc, fb);
+        let n_cols = projected.representatives.len();
+        if n_cols == 0 {
+            return None;
+        }
+        let sparse_opts = match opts.linear_algebra {
+            LinearAlgebra::Sparse(s) if koblitz_sparse_la::modulus_supported(r) => Some(s),
+            _ => None,
+        };
+        Some(Self {
+            kc,
+            fb,
+            opts,
+            projected,
+            n_cols,
+            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+            h: &kc.cofactor % r,
+            sparse_opts,
+            dense_matrix: Vec::new(),
+            dense_rhs: Vec::new(),
+            sparse_rows: Vec::new(),
+        })
+    }
+
+    fn rows(&self) -> usize {
+        if self.sparse_opts.is_some() {
+            self.sparse_rows.len()
+        } else {
+            self.dense_matrix.len()
+        }
+    }
+
+    /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
+    fn push(&mut self, rel: &CollectedRelation) {
+        let r = &self.kc.subgroup_order;
+        let a = BigUint::from(rel.a);
+        let relation = relation_from_decomposition_with_mode(
+            self.kc,
+            self.fb,
+            &rel.points,
+            &a,
+            &BigUint::zero(),
+            self.opts.collapse_negation,
+            Some(&self.projected),
+        );
+        let rhs = (&self.h * &a) % r;
+        if self.sparse_opts.is_some() {
+            self.sparse_rows
+                .push(SparseRow::from_dense(&relation.row, &rhs, self.r_u64));
+        } else {
+            self.dense_matrix.push(relation.row);
+            self.dense_rhs.push(rhs);
+        }
+    }
+
+    /// Solve with the rows so far; `Some` only for a table certified in
+    /// the group.  Attempts, timing and sparse statistics go to `report`.
+    fn attempt(&self, report: &mut LogTableReport) -> Option<FactorBaseLogTable> {
+        report.solve_attempts += 1;
+        let begin = std::time::Instant::now();
+        let solution = match self.sparse_opts {
+            Some(sopts) => {
+                let (outcome, sreport) = koblitz_sparse_la::solve_sparse_system(
+                    &self.sparse_rows,
+                    self.n_cols,
+                    self.r_u64,
+                    &sopts,
+                );
+                report.sparse_report = Some(sreport);
+                match outcome {
+                    SparseSolveOutcome::Solved(x) => {
+                        Some(x.into_iter().map(BigUint::from).collect())
+                    }
+                    SparseSolveOutcome::Undetermined | SparseSolveOutcome::Inconsistent => None,
+                }
+            }
+            None => {
+                let mut m = self.dense_matrix.clone();
+                let mut b = self.dense_rhs.clone();
+                gaussian_eliminate_mod_n(&mut m, &mut b, &self.kc.subgroup_order)
+            }
+        };
+        report.linear_algebra_seconds += begin.elapsed().as_secs_f64();
+        let table = self.table_from(solution?);
+        table.verify(self.kc).then_some(table)
+    }
+
+    fn table_from(&self, solution: Vec<BigUint>) -> FactorBaseLogTable {
+        let columns = self
+            .projected
+            .representatives
+            .iter()
+            .zip(solution)
+            .map(|(point, log)| (point.clone(), log))
+            .collect();
+        FactorBaseLogTable { columns }
+    }
+
+    /// Whether an attempt is due: enough rows, and enough new ones since
+    /// the last attempt (a failed block Wiedemann run costs a whole Krylov
+    /// sequence, so the sparse path waits for a batch of new rows; the
+    /// dense path attempts after every batch).
+    fn attempt_interval(&self) -> usize {
+        if self.sparse_opts.is_some() {
+            (self.n_cols / 32).max(1)
+        } else {
+            1
+        }
+    }
+}
+
 /// **Precompute the factor-base logarithm database.**
 ///
 /// Draws `R = [a]G` probes (`b = 0`, so the target plays no part),
@@ -3990,95 +4376,114 @@ fn decompose_once(
 /// Returns `None` only for a degenerate factor base (no projected
 /// columns, or the field too wide for the pair table); an exhausted
 /// trial budget yields a report with `verified = false`.
+///
+/// Probes are drawn in parallel batches of [`PRECOMPUTE_BATCH_TRIALS`]
+/// from the seed's probe sequence ([`probe_scalar`]), the same sequence
+/// a set of [`RelationCollector`] work units would draw, so a
+/// single-process run and a distributed one see identical relations.
+/// The linear algebra is chosen by [`KoblitzIcOptions::linear_algebra`].
+/// The sparse path keeps only the nonzero entries of each row (at most
+/// `m` per relation), skips the solve until every column occurs in some
+/// row, and then filters the matrix and runs block Wiedemann on the
+/// core; the dense path re-eliminates the full big-integer matrix.
 pub fn solve_factor_base_logs(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
-    let r = &kc.subgroup_order;
-    let g = kc.generator().clone();
-    let projected = projected_signed_orbit_map(kc, fb);
-    let n_cols = projected.representatives.len();
-    let mut report = LogTableReport::default();
-    if n_cols == 0 || !fb.m_can_decompose(kc, opts.m) {
-        return None;
-    }
-    let index_of = fb.index_map();
-    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let pair = if opts.strategy == DecompositionStrategy::PairTable {
-        Some(PairSumTable::build(kc, fb)?)
-    } else {
-        None
+    let mut system = LogSystem::new(kc, fb, opts)?;
+    let collector = RelationCollector::new(kc, fb, opts)?;
+    let mut report = LogTableReport {
+        sparse: system.sparse_opts.is_some(),
+        columns: system.n_cols,
+        ..LogTableReport::default()
     };
-    let h = &kc.cofactor % r;
-
-    let mut rng = StdRng::seed_from_u64(opts.seed ^ 0x4c_4f_47_53_00_00_00_00);
-    let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
-    let mut matrix: Vec<Vec<BigUint>> = Vec::new();
-    let mut rhs: Vec<BigUint> = Vec::new();
+    let interval = system.attempt_interval();
+    let batch = opts.relation_batch_size.max(PRECOMPUTE_BATCH_TRIALS);
     let mut last_attempt = 0usize;
-
     while report.trials < opts.max_trials {
-        report.trials += 1;
-        let a = BigUint::from(rng.gen_range(1..r_u64));
-        let target = kc.mul(&g, &a);
-        if target == BinaryPoint::Infinity {
-            continue;
-        }
-        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
-        else {
-            continue;
+        let count = batch.min(opts.max_trials - report.trials);
+        let unit = RelationWorkUnit {
+            seed: opts.seed,
+            start: report.trials as u64,
+            count: count as u64,
         };
-        let relation = relation_from_decomposition_with_mode(
-            kc,
-            fb,
-            &idxs,
-            &a,
-            &BigUint::zero(),
-            opts.collapse_negation,
-            Some(&projected),
-        );
-        matrix.push(relation.row);
-        rhs.push((&h * &a) % r);
-        report.relations += 1;
-
-        // Attempt a solve once there are at least as many relations as
-        // columns and at least one new row since the last attempt.
-        if matrix.len() >= n_cols && matrix.len() > last_attempt {
-            last_attempt = matrix.len();
-            let mut m = matrix.clone();
-            let mut b = rhs.clone();
-            if let Some(solution) = gaussian_eliminate_mod_n(&mut m, &mut b, r) {
-                let columns: Vec<(BinaryPoint, BigUint)> = projected
-                    .representatives
-                    .iter()
-                    .zip(solution.iter())
-                    .map(|(point, log)| (point.clone(), log.clone()))
-                    .collect();
-                let table = FactorBaseLogTable { columns };
-                if table.verify(kc) {
-                    report.columns = n_cols;
-                    report.verified = true;
-                    return Some((table, report));
-                }
+        let (relations, creport) = collector.collect(unit);
+        report.trials += creport.trials;
+        report.collection_seconds += creport.elapsed_seconds;
+        for rel in &relations {
+            system.push(rel);
+        }
+        report.relations = system.rows();
+        if report.relations >= system.n_cols && report.relations - last_attempt >= interval {
+            last_attempt = report.relations;
+            if let Some(table) = system.attempt(&mut report) {
+                report.verified = true;
+                return Some((table, report));
             }
         }
     }
-    report.columns = n_cols;
-    // Best-effort table from whatever was collected; unverified.
-    let mut m = matrix.clone();
-    let mut b = rhs.clone();
-    let columns = gaussian_eliminate_mod_n(&mut m, &mut b, r)
-        .map(|solution| {
-            projected
-                .representatives
-                .iter()
-                .zip(solution)
-                .map(|(point, log)| (point.clone(), log))
-                .collect()
-        })
+    // Best effort with whatever was collected; unverified.
+    let columns = system
+        .attempt(&mut report)
+        .map(|t| t.columns)
         .unwrap_or_default();
     Some((FactorBaseLogTable { columns }, report))
+}
+
+/// **Solve the logarithm database from relations collected elsewhere.**
+///
+/// Every relation is re-verified in the group first and rejected if it
+/// fails (`report.rejected_relations`); exact duplicates are dropped
+/// (`report.duplicate_relations`).  The accepted rows go through the same
+/// linear algebra and certification as [`solve_factor_base_logs`].
+/// `None` for a base with no projected columns; a set of relations that
+/// does not determine every column yields `verified = false`.
+pub fn solve_factor_base_logs_from_relations(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    relations: &[CollectedRelation],
+) -> Option<(FactorBaseLogTable, LogTableReport)> {
+    let mut system = LogSystem::new(kc, fb, opts)?;
+    let mut report = LogTableReport {
+        sparse: system.sparse_opts.is_some(),
+        columns: system.n_cols,
+        ..LogTableReport::default()
+    };
+    let begin = std::time::Instant::now();
+    let verdicts: Vec<bool> = relations
+        .par_iter()
+        .map(|rel| verify_collected_relation(kc, fb, opts.m, rel))
+        .collect();
+    let mut seen: HashSet<(u64, Vec<usize>)> = HashSet::new();
+    for (rel, ok) in relations.iter().zip(verdicts) {
+        if !ok {
+            report.rejected_relations += 1;
+            continue;
+        }
+        let mut key = rel.points.clone();
+        key.sort_unstable();
+        if !seen.insert((rel.a, key)) {
+            report.duplicate_relations += 1;
+            continue;
+        }
+        system.push(rel);
+    }
+    report.collection_seconds = begin.elapsed().as_secs_f64();
+    report.relations = system.rows();
+    if report.relations >= system.n_cols {
+        if let Some(table) = system.attempt(&mut report) {
+            report.verified = true;
+            return Some((table, report));
+        }
+    }
+    Some((
+        FactorBaseLogTable {
+            columns: Vec::new(),
+        },
+        report,
+    ))
 }
 
 /// What an individual-logarithm descent did.
@@ -4110,6 +4515,26 @@ pub fn individual_log(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
 ) -> Option<(BigUint, IndividualLogReport)> {
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    individual_log_with_pair_table(kc, fb, table, q, opts, pair.as_ref())
+}
+
+/// [`individual_log`] with a caller-supplied pair table, so a batch of
+/// targets over one factor base builds the `|F|²` table once instead
+/// of once per target.  `pair` is required when the strategy is
+/// [`DecompositionStrategy::PairTable`] and ignored otherwise.
+pub fn individual_log_with_pair_table(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    pair: Option<&PairSumTable>,
+) -> Option<(BigUint, IndividualLogReport)> {
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
     let projected = projected_signed_orbit_map(kc, fb);
@@ -4122,13 +4547,11 @@ pub fn individual_log(
         report.log = Some(BigUint::zero());
         return Some((BigUint::zero(), report));
     }
+    if opts.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+        return None;
+    }
     let index_of = fb.index_map();
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let pair = if opts.strategy == DecompositionStrategy::PairTable {
-        Some(PairSumTable::build(kc, fb)?)
-    } else {
-        None
-    };
     let log_of = table.log_of();
     // Column logs in the rebuilt column order (matched by point identity).
     let column_log: Vec<BigUint> = projected
@@ -4155,8 +4578,7 @@ pub fn individual_log(
             }
             continue;
         }
-        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair.as_ref(), opts, &target)
-        else {
+        let Some(idxs) = decompose_once(kc, fb, &index_of, &field, pair, opts, &target) else {
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
@@ -5154,6 +5576,201 @@ mod tests {
         // Corrupt one logarithm; verification must catch it.
         table.columns[0].1 = (&table.columns[0].1 + BigUint::one()) % &kc.subgroup_order;
         assert!(!table.verify(&kc));
+    }
+
+    #[test]
+    fn sparse_and_dense_linear_algebra_certify_the_same_log_table() {
+        // Same curve, base, oracle and seed: the two linear-algebra paths
+        // see the same relations and must certify the same logarithms.
+        // (The bases whose two-summand coverage determines every column:
+        // K_0/2^9 with 3 columns, K_1/2^11 with 45.)
+        for (a, n) in [(0u8, 9u32), (1, 11)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let base = KoblitzIcOptions {
+                m: 2,
+                strategy: DecompositionStrategy::PairTable,
+                collapse_negation: true,
+                collapse_projected_orbits: true,
+                allow_direct_relation: false,
+                max_trials: 40_000,
+                ..KoblitzIcOptions::default()
+            };
+            let dense = KoblitzIcOptions {
+                linear_algebra: LinearAlgebra::Dense,
+                ..base.clone()
+            };
+            let sparse = KoblitzIcOptions {
+                linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions {
+                    wiedemann: koblitz_sparse_la::BlockWiedemannOptions {
+                        block_m: 2,
+                        block_n: 3,
+                        margin: 8,
+                    },
+                    ..SparseSolveOptions::default()
+                }),
+                ..base.clone()
+            };
+            let (dt, dr) = solve_factor_base_logs(&kc, &fb, &dense).unwrap();
+            let (st, sr) = solve_factor_base_logs(&kc, &fb, &sparse).unwrap();
+            assert!(
+                dr.verified && !dr.sparse && dr.sparse_report.is_none(),
+                "K_{a}/2^{n} dense"
+            );
+            assert!(sr.verified && sr.sparse, "K_{a}/2^{n} sparse: {sr:?}");
+            assert!(dt.verify(&kc) && st.verify(&kc));
+            assert_eq!(
+                dt.columns, st.columns,
+                "K_{a}/2^{n}: the two paths disagree"
+            );
+            let srep = sr.sparse_report.as_ref().expect("sparse statistics");
+            assert_eq!(srep.filter.columns_in, st.len());
+            assert_eq!(srep.core_dimension + srep.reconstructed_columns, st.len());
+            assert!(sr.solve_attempts >= 1 && dr.solve_attempts >= 1);
+            assert!(sr.linear_algebra_seconds >= 0.0);
+            // The sparse path never attempts a solve before every column
+            // is covered, so it needs at least as many relations as
+            // columns and no more attempts than the dense path.
+            assert!(sr.relations >= st.len());
+            assert!(
+                sr.solve_attempts <= dr.solve_attempts,
+                "K_{a}/2^{n}: {} > {}",
+                sr.solve_attempts,
+                dr.solve_attempts
+            );
+        }
+    }
+
+    fn collector_options() -> KoblitzIcOptions {
+        KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::PairTable,
+            collapse_negation: true,
+            collapse_projected_orbits: true,
+            allow_direct_relation: false,
+            max_trials: 40_000,
+            ..KoblitzIcOptions::default()
+        }
+    }
+
+    #[test]
+    fn work_units_partition_the_probe_sequence_exactly() {
+        let kc = KoblitzCurve::new(1, 11).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = collector_options();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+        let (whole, report) = collector.collect(RelationWorkUnit {
+            seed: 7,
+            start: 0,
+            count: 600,
+        });
+        assert_eq!(report.trials, 600);
+        assert_eq!(report.relations, whole.len());
+        assert!(whole.len() > 10, "{} relations", whole.len());
+        // Any partition of the range, in any order, gives the same relations.
+        let mut parts = Vec::new();
+        for (start, count) in [(350u64, 250u64), (0, 100), (100, 250)] {
+            parts.extend(
+                collector
+                    .collect(RelationWorkUnit {
+                        seed: 7,
+                        start,
+                        count,
+                    })
+                    .0,
+            );
+        }
+        parts.sort_by_key(|rel| rel.trial);
+        assert_eq!(whole, parts);
+        for rel in &whole {
+            assert!(verify_collected_relation(&kc, &fb, 2, rel));
+            assert_eq!(rel.a, probe_scalar(7, rel.trial, r));
+            assert_eq!(rel.points.len(), 2);
+            assert!((0..600).contains(&rel.trial));
+        }
+        // Another seed is another sequence.
+        let (other, _) = collector.collect(RelationWorkUnit {
+            seed: 8,
+            start: 0,
+            count: 600,
+        });
+        assert_ne!(whole, other);
+        // Forgeries are rejected: wrong scalar, wrong point, wrong count, bad index.
+        let good = whole[0].clone();
+        let mut bad = good.clone();
+        bad.a = if bad.a == 1 { 2 } else { bad.a - 1 };
+        assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
+        let mut bad = good.clone();
+        bad.points[0] = (bad.points[0] + 1) % fb.points.len();
+        assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
+        let mut bad = good.clone();
+        bad.points.push(0);
+        assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
+        let mut bad = good.clone();
+        bad.points[0] = usize::MAX;
+        assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
+        let mut bad = good.clone();
+        bad.a = 0;
+        assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
+        assert!(!verify_collected_relation(&kc, &fb, 3, &good));
+    }
+
+    #[test]
+    fn logs_from_collected_relations_match_the_single_process_precompute() {
+        for (a, n, la) in [
+            (0u8, 9u32, LinearAlgebra::Dense),
+            (1, 11, LinearAlgebra::Sparse(SparseSolveOptions::default())),
+        ] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let opts = KoblitzIcOptions {
+                linear_algebra: la,
+                ..collector_options()
+            };
+            let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+            assert!(report.verified, "K_{a}/2^{n}: {report:?}");
+            assert!(report.collection_seconds > 0.0);
+            // The same probe range collected as two work units, delivered
+            // out of order with a duplicate and a forgery mixed in.
+            let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+            let total = report.trials as u64;
+            let (first, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: 0,
+                count: total / 2,
+            });
+            let (second, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: total / 2,
+                count: total - total / 2,
+            });
+            let mut all = second.clone();
+            all.extend(first.iter().cloned());
+            all.push(first[0].clone());
+            let mut forged = first[0].clone();
+            forged.a = if forged.a == 1 { 2 } else { forged.a - 1 };
+            all.push(forged);
+            let (t2, rep2) = solve_factor_base_logs_from_relations(&kc, &fb, &opts, &all).unwrap();
+            assert!(rep2.verified, "K_{a}/2^{n}: {rep2:?}");
+            assert_eq!(rep2.rejected_relations, 1);
+            // The single-process run keeps repeated probes (a tiny
+            // subgroup repeats scalars); the merge drops them, plus the
+            // one duplicate added above.
+            assert!(rep2.duplicate_relations >= 1);
+            assert_eq!(
+                rep2.relations + rep2.duplicate_relations,
+                report.relations + 1,
+                "K_{a}/2^{n}"
+            );
+            assert_eq!(rep2.sparse, report.sparse);
+            assert_eq!(t2.columns, table.columns, "K_{a}/2^{n}: tables differ");
+            assert!(t2.verify(&kc));
+            // Too few relations: unverified, never a wrong table.
+            let (t3, rep3) =
+                solve_factor_base_logs_from_relations(&kc, &fb, &opts, &first[..1]).unwrap();
+            assert!(!rep3.verified && t3.is_empty());
+        }
     }
 
     #[test]

@@ -188,6 +188,138 @@ target then needs one or two relations. The `logs` trial budget
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
 
+### Linear algebra: relation filtering and block Wiedemann
+
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
+
+Each relation has at most `m` nonzero entries, so the relation matrix is
+sparse in exactly the way a number-field-sieve matrix is. By default
+(`--linear-algebra sparse`) `ic logs` solves it the way CADO-NFS does:
+
+1. **Filtering** — duplicate rows are dropped; a column occurring in only
+   one row (a *singleton*) is removed with that row and recovered later
+   by back-substitution; surplus rows beyond a small excess are removed,
+   choosing rows whose removal cascades through the weight-2 columns
+   (the clique rule); light columns are merged away by structured
+   Gaussian elimination under a fill-in bound. Every elimination is
+   recorded, so the eliminated logarithms are reconstructed exactly from
+   the core solution (back-substitution, then propagation through the
+   original rows, then a small dense residual if anything is left).
+2. **Block Wiedemann** — the reduced core is made square by folding its
+   excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
+   and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
+   `block_size × block_size` blocks through a matrix Berlekamp–Massey
+   step (a shifted minimal approximant basis). Only sparse
+   matrix-times-block products touch the matrix, in parallel over rows.
+
+The sparse path never attempts a solve before every column occurs in
+some row, and the solution is checked against every relation before
+the group certification `[x_o]G == R_o` runs. `--linear-algebra dense`
+keeps the reference behaviour: full big-integer elimination after every
+new relation. Both paths certify the same database (the `ic` tests
+compare them); the report's `linear_algebra` object records the mode,
+the attempts, the time, and for the sparse path the filtering counts
+and the Wiedemann run (`core_dimension`, `sequence_length`, products).
+
+## Running the pipeline as a resumable workflow
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --stop-after logs
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31          # resumes
+
+Like a number-field-sieve run, `ic workflow` executes the pipeline as
+stages whose outputs live on disk, so a run can be stopped, inspected
+and resumed without redoing finished work:
+
+1. **select** — the factor base, either an explicit recipe or the
+   best-by-census candidate of the factor-base search; written as
+   `factor_base.json`.
+2. **collect** — relations, in work units (see below); each unit is
+   written as `relations/unit-NNNNN.json`.
+3. **logs** — the units are merged, every relation re-verified in the
+   group and deduplicated, and the factor-base logarithm database solved
+   (`logs.json`), every column certified by `[x]G == R`. If the
+   relations do not yet determine every column, further units are
+   collected up to `collection.max_units`.
+4. **solve** — each target descended with one relation reusing the
+   database; `solutions.json` is rewritten after every target, so an
+   interrupted run resumes at the first unsolved one. The pair table is
+   built once per process and shared by collection and descent.
+
+`state.json` records a BLAKE3 digest of the parameter file and each
+stage's status. A rerun in the same directory reloads existing
+artifacts, re-verifies them against the reconstructed curve (a stale or
+tampered artifact is an error, never trusted), and continues from the
+first incomplete stage; a parameter file whose digest differs is refused
+so one directory never mixes two experiments. Artifacts are written
+atomically. `--stop-after select|collect|logs|solve` ends the run early.
+
+### Distributed relation collection
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 0-3    # worker A
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 4-7    # worker B
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31                        # merge, solve, descend
+
+Relation collection is embarrassingly parallel, and the workflow splits
+it the way a sieve is split into `q`-ranges. The probe scalar of trial
+`t` depends only on the parameter seed and `t`, so the probe sequence
+is one fixed, reproducible sequence; a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it. Any process with the
+parameter file (and `factor_base.json`, when the base came from the
+search) can run a set of units with `--collect-units` — it writes
+`relations/unit-NNNNN.json` for each and stops — and the files from
+several workers or machines are simply placed in the run directory. The
+driver without `--collect-units` collects whatever units of the first
+`collection.units` are still missing itself, then merges everything
+present. Inside a unit the trials run in parallel over the cores.
+
+A relation file carries only the probe scalar and the factor-base point
+indices of each relation, bound to the parameter digest, curve, factor
+base and summand count. On merge every relation is re-verified in the
+group (`[a]G == Σ P_i`, exactly `m` indices, all in range) and exact
+duplicates are dropped, so a corrupt or forged file cannot poison the
+database — a rejected relation is counted, never used — and a file from
+another run or base is ignored, not merged. Partition invariance is
+tested: the union of any set of units equals the relations of a
+single-process run over the same range, and `ic logs` itself now draws
+its probes from the same sequence in parallel batches.
+
+Parameters (`collection`, all optional):
+
+    "collection":{"unit_trials":4096,"units":4,"max_units":64}
+
+`unit_trials` probes per unit; `units` the number the driver collects
+before the first solve; `max_units` the most it may collect when the
+relations do not yet determine every column. The report's collect stage
+lists the units present, run and ignored; the logs stage reports the
+relations loaded, rejected and deduplicated and which units were used.
+
+A parameter file (schema_version 1):
+
+    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+     "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
+     "linear_algebra":{"mode":"sparse",
+                       "sparse":{"wiedemann":{"block_m":4,"block_n":4},
+                                 "filter":{"target_excess":32,"merge_max_weight":8}}},
+     "collection":{"unit_trials":4096,"units":4,"max_units":64},
+     "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
+                    "max_dimension":11,"targets":256,"saturate":false},
+     "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
+
+`factor_base.mode` is `spec` (with a recipe as written by `ic search`)
+or `search` (the census search's knobs; the best candidate is taken
+without child validation). Each target is a synthetic known-answer
+instance: `known_log` names the scalar, `random_seed` draws one
+reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
+or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
+filtering + block Wiedemann, with every knob of the sparse solver under
+`sparse`) or `dense`. `collection` sizes the work units (above). The
+report lists every stage with whether it ran or was reused — the collect
+stage with its units, the logs stage with its verification counts and
+linear-algebra statistics — and every solution with its expected and
+recovered scalar.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json
