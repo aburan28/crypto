@@ -24,7 +24,9 @@ polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
 The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md),
 [direct-order polynomial reduction](DIRECT-REDUCTION.md), and the
-[generated polynomial-product schedule](GENERATED-PRODUCT.md).
+[generated polynomial-product schedule](GENERATED-PRODUCT.md). It groups
+packed state into [256-worker tiles](TILED-STATE.md), preserving coalesced
+warp accesses while simplifying field addressing.
 These settings retain the existing iteration, DP report and packed-checkpoint
 semantics. The linked comparison validates normal-to-polynomial resume and
 the reverse direction, and measures both modes on one GPU.
@@ -39,7 +41,24 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Generated-product preset comparison
+## Tiled-state preset comparison
+
+The [controlled tiled-state comparison](benchmarks/tiled-state/comparison.json)
+keeps generated-product arithmetic, CUDA 13.3.73, B32/T256/minBlocks2 and
+192,512 workers fixed on one GPU. Three paired confirmations measured:
+
+| Workload | Untiled median B/s | Tiled median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 6.852888 | **6.994745** | **2.07%** |
+| DP34 collection | 6.766691 | **6.894434** | **1.89%** |
+
+Every sample completed 201,863,462,912 scalar updates. Every pair favored
+tiling; all six collection hashes matched, with 5,149 records and zero drops.
+Arithmetic, integration, normalized-state and bidirectional checkpoint
+resume checks passed. [TILED-STATE.md](TILED-STATE.md) gives ranges, source
+bindings and the distinction between logical checkpoints and padded storage.
+
+## Historical generated-product preset comparison
 
 The [controlled comparison](benchmarks/generated-product/comparison.json)
 compares the previous CUDA 13.0 native preset with generated products on

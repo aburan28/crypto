@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0'):
+def environment(mode='0', generated='0', tile='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,14 +47,15 @@ def environment(mode='0', generated='0'):
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0'):
+def raw(mode='0', generated='0', tile='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
+            f'packed state tile: {tile}\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -329,6 +330,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                 marker = mode if failed_phase != phase else failed_marker
                 text = (f'packed direct reduction: 1\n'
                         f'packed generated product: {marker}\n'
+                        'packed state tile: 0\n'
                         f'backend cuda-packed131: {workers} threads x 32 slots x 1 lanes = {workers * 32} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
@@ -393,6 +395,89 @@ class GeneratedProductBuildTests(unittest.TestCase):
                         row = (result['benchmark']['samples'] if phase == 'benchmark' else result['collection'])[0]
                         self.assertFalse(row['valid'])
                         self.assertEqual(row['rate'], 0)
+
+
+class StateTileBuildTests(unittest.TestCase):
+    def test_environment_and_dependencies(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_STATE_TILE' for t in node.targets))
+        for value in (None, '0', '256', '', '1', '128', '0256', 'true'):
+            for missing in (None, 'POLY_STATE', 'CACHE_DENOM', 'POLY_CHAIN'):
+                values = {} if value is None else {'ECC_PACKED_STATE_TILE': value}
+                env = dict(os=SimpleNamespace(environ=values), PACKED_POLY_STATE='1',
+                           PACKED_CACHE_DENOM='1', PACKED_POLY_CHAIN='1')
+                if missing:
+                    env['PACKED_' + missing] = '0'
+                valid = value in (None, '0') or (value == '256' and missing is None)
+                with self.subTest(value=value, missing=missing):
+                    if valid:
+                        execute(body[index:index + 3], env)
+                        self.assertEqual(env['PACKED_STATE_TILE'], value or '0')
+                    else:
+                        with self.assertRaises(ValueError):
+                            execute(body[index:index + 3], env)
+
+    def test_baked_image_geometry_matches_layout(self):
+        class Image:
+            def __init__(self):
+                self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for tile, threads in (('0', 128), ('256', 256)):
+            env = environment('1', '1', tile)
+            image = Image()
+            env.update(modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)),
+                       GENCODE='fixture', LOCAL=ROOT)
+            assignment('image', env)
+            builds = [s for s in image.calls['run_commands'] if 'make gpu ' in s]
+            self.assertEqual(len(builds), 1)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_STATE_TILE'], tile)
+            self.assertIn('THREADS=' + str(threads), builds[0])
+            self.assertIn('PACKED_STATE_TILE=' + tile, builds[0])
+            self.assertEqual(env['BAKED']['threads'], threads)
+            self.assertEqual(env['BAKED']['packedStateTile'], int(tile))
+
+    def test_rebuild_cannot_reuse_another_layout(self):
+        env = environment('1', '1', '0')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda command, **kwargs: (commands.append(command) or 0, ''))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 128, 0, arch='120')[0])
+        self.assertEqual(commands, [])
+        env['PACKED_STATE_TILE'] = '256'
+        self.assertTrue(build(32, 256, 0, arch='120')[0])
+        self.assertIn('PACKED_STATE_TILE=256', commands[-1])
+        self.assertFalse(env['bakedIntact'][0])
+
+    def test_incompatible_block_size_stops_before_build(self):
+        env = environment('1', '1', '256')
+        env['sh'] = env['shStream'] = lambda *a, **k: self.fail('invalid layout must not invoke compiler')
+        ok, error = function('buildFor', env)(32, 128, 0, arch='120')
+        self.assertFalse(ok)
+        self.assertIn('256 threads per block', error)
+
+    def test_missing_wrong_and_duplicate_tile_cannot_rank(self):
+        for tile in ('0', '256'):
+            env = environment('1', '1', tile)
+            check = function('checkPackedReduction', env)
+            text = raw('1', '1', tile)
+            good = benchResult(['fixture'], 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedStateTile'], int(tile))
+            for bad in (text.replace(f'packed state tile: {tile}\n', ''),
+                        raw('1', '1', '256' if tile == '0' else '0'),
+                        text + f'packed state tile: {tile}\n',
+                        text + 'packed state tile: true\n',
+                        text.replace(f'packed state tile: {tile}', 'packed state tile: 1')):
+                sample = benchResult(['fixture'], 0, bad)
+                self.assertFalse(check(sample))
+                self.assertEqual(sample['rate'], 0)
+                self.assertFalse(summarizeSamples([good, sample])['valid'])
 
 
 if __name__ == '__main__':

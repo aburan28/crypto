@@ -58,7 +58,8 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
                   batch=32, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
                   packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1",
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
-                  packedGeneratedProduct=None)
+                  packedGeneratedProduct=None,
+                  expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
         if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0:
             raise ValueError("min-blocks, repeats and block-threads must be positive")
@@ -88,7 +89,8 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
              f"PACKED_UNROLL_INV={client.PACKED_UNROLL_INV}", f"PACKED_PAIR_PRODUCTS={client.PACKED_PAIR_PRODUCTS}",
              f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}",
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
-             f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}"], 120)
+             f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
+             f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
         arithmeticModes = re.findall(r"^packed arithmetic direct reduction: (.*)$",
@@ -118,6 +120,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
             result["benchmark"].update(valid=False, rate=0.0, error="benchmark did not complete every requested repetition")
         if not result["benchmark"]["valid"]:
             raise RuntimeError("throughput benchmark failed or completed scalar counts disagree")
+        result["packedStateTile"] = benchmarkSamples[0]["packedStateTile"]
 
         # Time real collection with CPU trail replay disabled only after the
         # integration test has independently replayed reports. Each sample

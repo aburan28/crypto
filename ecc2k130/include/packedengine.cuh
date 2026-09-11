@@ -14,6 +14,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaFree(denominators);
     }
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
+#if ECC_PACKED_STATE_TILE
+    size_t physicalFieldCount() const override {
+        return eccPacked131::physicalStateThreads(size_t(P.threads)) * BATCH * 5;
+    }
+#endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
     unsigned checkpointVersion() const override { return 2u; }
     int checkpointLanes() const override { return 1; }
@@ -37,10 +42,32 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         }
     }
     void exportCheckpointField(std::vector<unsigned> &words) const override {
+#if ECC_PACKED_STATE_TILE
+        // The transfer contains every physical tile, including padding. Disk
+        // coordinates remain logical SoA and use normal basis in version 2.
+        std::vector<unsigned> logical(fieldCount());
+        for (int slot = 0; slot < BATCH; ++slot)
+            for (int word = 0; word < 5; ++word)
+                for (int tid = 0; tid < P.threads; ++tid)
+                    logical[(size_t(slot) * 5 + word) * P.threads + tid] =
+                        words[eccPacked131::stateWordIndex(slot, word, tid)];
+        words.swap(logical);
+#endif
         convertCheckpointField(words, false);
     }
     void importCheckpointField(std::vector<unsigned> &words) const override {
         convertCheckpointField(words, true);
+#if ECC_PACKED_STATE_TILE
+        // Start with zero padding. Keep device metadata indexed by logical
+        // slot*P.threads+tid; only the coordinate field is tiled here.
+        std::vector<unsigned> physical(physicalFieldCount(), 0u);
+        for (int slot = 0; slot < BATCH; ++slot)
+            for (int word = 0; word < 5; ++word)
+                for (int tid = 0; tid < P.threads; ++tid)
+                    physical[eccPacked131::stateWordIndex(slot, word, tid)] =
+                        words[(size_t(slot) * 5 + word) * P.threads + tid];
+        words.swap(physical);
+#endif
     }
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
@@ -80,7 +107,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             CUDA_CHECK(cudaFuncSetCacheConfig(eccPacked131::walk, cudaFuncCachePreferL1));
         P.threads = o.threads; P.steps = o.steps; P.dpWeight = o.dpWeight;
         P.runId = o.runId; P.maxIters = o.maxIters; P.iterBase = 0; P.dpCap = o.dpCap;
-        const size_t bytes = fieldCount() * sizeof(unsigned);
+        const size_t bytes = physicalFieldCount() * sizeof(unsigned);
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
 #if ECC_PACKED_CACHE_DENOM
@@ -119,6 +146,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
+        printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());

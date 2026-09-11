@@ -89,6 +89,11 @@ if PACKED_GENERATED_PRODUCT not in ("0", "1"):
     raise ValueError("ECC_PACKED_GENERATED_PRODUCT must be 0 or 1")
 if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
     raise ValueError("ECC_PACKED_GENERATED_PRODUCT=1 requires ECC_PACKED_DIRECT_REDUCE=1")
+PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
+if PACKED_STATE_TILE not in ("0", "256"):
+    raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
+if PACKED_STATE_TILE == "256" and (PACKED_POLY_STATE != "1" or PACKED_CACHE_DENOM != "1" or PACKED_POLY_CHAIN != "1"):
+    raise ValueError("ECC_PACKED_STATE_TILE=256 requires polynomial state, denominator cache and polynomial chains")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -128,10 +133,11 @@ LOCAL = pathlib.Path(__file__).parent
 # What the image already contains.  A request for exactly this on a matching
 # architecture needs no rebuild, and the default ::bench is exactly this -- it
 # was spending minutes recompiling a binary it already had, in silence.
-BAKED = {"batch": 32, "threads": 128, "leaf": 0, "minBlocks": 2,
+BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "leaf": 0, "minBlocks": 2,
          "packedPolynomialState": PACKED_POLY_STATE == "1",
          "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
-         "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1"}
+         "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
+         "packedStateTile": int(PACKED_STATE_TILE)}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
 # ./ecc2k130 in place, so once anything has rebuilt, the image's baked binary is
@@ -158,7 +164,8 @@ image = (
           "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
           "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
           "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
-          "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT})
+          "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
+          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -181,7 +188,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_STATE_TILE={PACKED_STATE_TILE}',
     )
 )
 
@@ -257,6 +264,8 @@ def gpuName():
 def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
              streamKarat=False, smemSpill=False, globalCg=False):
     """Rebuild the client for one architecture and one set of knobs."""
+    if PACKED_STATE_TILE == "256" and threads != 256:
+        return False, "ECC_PACKED_STATE_TILE=256 requires 256 threads per block"
     arch = arch or computeCapability()
     # leaf 0 means "let the generator choose by register budget", which is what
     # gen.py does with no --leaf: the largest halving-chain size whose
@@ -272,7 +281,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
     want = {"batch": batch, "threads": threads, "leaf": leaf, "minBlocks": minBlocks,
             "packedPolynomialState": PACKED_POLY_STATE == "1",
             "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
-            "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1"}
+            "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
+            "packedStateTile": int(PACKED_STATE_TILE)}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
     experimental = streamKarat or smemSpill or globalCg
@@ -298,7 +308,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_STATE_TILE={PACKED_STATE_TILE}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -334,11 +344,12 @@ def benchmarkIdentity(packed=False):
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
 
 def checkPackedReduction(sample):
-    """Reject rates whose packed reducer or generated-product mode disagrees."""
+    """Reject rates whose reducer, generated-product or physical-layout mode disagrees."""
     for marker, field, expectedField, expected in (
         ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
         ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
@@ -350,6 +361,13 @@ def checkPackedReduction(sample):
         sample['valid'] = bool(sample.get('valid') and actual == expected)
         if actual != expected:
             sample.setdefault('error', 'packed ' + marker + ' identity is missing, duplicated or different from the requested build')
+    tiles = re.findall(r'^packed state tile: (.*)$', sample.get('raw', ''), re.MULTILINE)
+    actualTile = tiles[0] if len(tiles) == 1 else None
+    sample['expectedPackedStateTile'] = int(PACKED_STATE_TILE)
+    sample['packedStateTile'] = int(actualTile) if actualTile in ('0', '256') else None
+    if actualTile != PACKED_STATE_TILE:
+        sample['valid'] = False
+        sample.setdefault('error', 'packed state tile identity is missing, duplicated or different from the requested build')
     if not sample['valid']:
         sample['rate'] = 0.0
     return sample['valid']
@@ -470,11 +488,13 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 smemSpill=smemSpill, globalCg=globalCg, preferL1=preferL1, packed=packed,
                 packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
-                packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None)
+                packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                packedStateTile=int(PACKED_STATE_TILE) if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
-                packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1')
+                packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
+                packedStateTile=int(PACKED_STATE_TILE))
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
         raise ValueError('rebuild=False requires the untouched matching baked binary')
@@ -560,6 +580,7 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedPolynomialState=(PACKED_POLY_STATE == '1') if packed else None,
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                    packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
+                   packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
             results.append(dict(cfg, valid=False, rate=0.0, error=log))
@@ -1073,6 +1094,7 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
+                packedStateTile=int(PACKED_STATE_TILE),
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
 
 
