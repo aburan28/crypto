@@ -55,6 +55,14 @@ current reach." Maintained as a table here and machine-checked by
 | P6 | Over-determined `ρ ≫ 1` collapses `D*` to 2 (Nullstellensatz) | `supported` | n=10 sweep: ρ≥2.5 ⇒ mean D* ≤ 2.03 (`15b5b1c`, re-confirmed iteration 1) |
 | **P3-alg** | `D*` is predicted by an **algebraic** invariant: the **early Macaulay rank defect** `δ(D)=r_gen(D)−r(D)` (excess low-degree syzygies). More early defect ⇒ lower `D*`. | **`supported`** | EXP-F iter 5: at n=8,n'=4 early-defect↔D* Spearman **ρ_s = −1.000**. EXP-G iter 6: 40-cell curve, pooled ρ_s −0.754, critical slope −7.2. **EXP-G iter 7 extended reach to `2n'=14`** (single-pass rank+refute + d_cap censoring): **50 cells**, pooled **ρ_s = −0.793**; *critical* regime (30 cells incl. 2n'=12,14) **ρ_s = −0.778, slope −7.6**. Seed-robust at extended reach: critical ρ_s ∈ [−0.70,−0.81], slope ∈ [−7.6,−8.5] over 3 seeds — adding the big points *strengthened* the law. The new critical points (12,6),(14,7) show perfect inverse ordering. Censoring (228 high-D* targets dropped) is conservative — it biases random D* down toward subfield, yet ρ_s rose. The predictor that **works where both graph invariants failed**: it reads the coefficient algebra (multiplicative closure → low-degree relations) that γ and treewidth are blind to. |
 
+**Offensive sibling.** The predictions above ask whether `D*` is *forced*
+to be large. The mirror question — whether an attacker can *present* the
+system so that `D*` is small — is tracked separately in
+`RESEARCH_DEGREE_REDUCTION.md` (ledger R1–R5, module
+`src/cryptanalysis/degree_reduction.rs`). It shares this file's loop, gates
+and instrument stack; results flow back here when they bear on P3-alg or
+P6.
+
 New predictions are appended as experiments suggest them; killed ones stay
 in the table with their kill evidence (negative results are the point).
 The graph-invariant predictors P2/P2″ are dead; the algebraic predictor
