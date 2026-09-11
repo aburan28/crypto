@@ -1460,3 +1460,42 @@ coordinates, §10.5's list of groups, and this, the representation
 search of this note is closed on the structural side: what remains
 open is the solver side (§14) and the Koblitz comparison the seventh
 log entry proposes.
+
+---
+
+## 17. The Koblitz comparison at equal Macaulay degree
+
+**Code:** `PairedOptions::f4_max_degree` (`--f4-degree`),
+`F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS`, `SolveStats::{max_degree_built,
+oversize}`; `examples/symmetrised_oracle_bench.rs`.
+
+§8 compared the `x`-chained and the symmetrised systems under the
+repo's Boolean solver as it ships: matrix-F4 up to Macaulay degree 3,
+then splitting.  Reading the engine again for this section showed
+that this was not an equal comparison.  The symmetrised `m = 3`
+systems have degree 4, and the engine builds Macaulay matrices only
+from the equations' own degree up to its cap, so at cap 3 it built the
+degree-4 matrix of the bare equations — no multiples — and did the
+rest by splitting and propagation.  The `x`-chained systems (degree 3)
+got one round of multiplication.  §8's "effort" column therefore
+compared a system with algebra against a system without, and the
+symmetrised system still won at `n = 15` and `n = 23` while losing at
+`n = 17`.
+
+This section reruns both arms at Macaulay degree 3, 4 and 5 with the
+size caps raised (60 000 rows, 300 000 columns), four decomposable or
+refuted targets per instance, no SAT.  "Effort" is splits; a degree
+whose matrix exceeded the caps falls back to the largest that fits.
+
+| instance | arm | vars | deg | F4 degree 3: ms / splits | degree 4: ms / splits | degree 5: ms / splits |
+|---|---|---:|---:|---|---|---|
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | TBD-KD-A05X |
+| | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | TBD-KD-A05S |
+| `K₁/F₂¹⁵` (found) | `x`-chained | 30 | 3 | TBD-KD-C |
+| | symmetrised | 13 | 4 | TBD-KD-C |
+| `K₁/F₂¹⁷` (found) | `x`-chained | 44 | 3 | 3 963 / 49 | TBD-KD-B |
+| | symmetrised | 25 | 4 | 5 537 / 3 219 | TBD-KD-B |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | budget (§8) | TBD-KD-D |
+| | symmetrised | 34 | 4 | 5 795 / 135 (§8) | TBD-KD-D |
+
+TBD-KD-READING
