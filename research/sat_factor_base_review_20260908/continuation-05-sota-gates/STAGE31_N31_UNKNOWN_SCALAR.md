@@ -1,6 +1,6 @@
 # Stage 31: n=31 public unknown-scalar workflow
 
-Stage 31 is gated on a successful Stage 30 factor-base artifact. It accepts only a schema-v1 degree-31 `K_0` divisor-kernel recipe. It does not select or modify the factor base and cannot fall back to a default recipe.
+Stage 31 is gated on a successful Stage 30 factor-base artifact. It accepts only a schema-v1 degree-31 `K_0` divisor-kernel recipe or its explicit two-torsion saturation with the divisor retained as its parent. It does not select or modify the factor base and cannot fall back to a default recipe.
 
 The run precomputes factor-base logarithms from public probes and collected relations. Sparse linear algebra must determine every projected column, and every computed log is certified by its group identity before descent begins. Thus factor-base logs are learned by the algorithm and are not known by construction.
 

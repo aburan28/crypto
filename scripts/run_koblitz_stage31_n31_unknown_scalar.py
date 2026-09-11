@@ -41,8 +41,9 @@ def self_test() -> dict[str, Any]:
     require(len(PUBLIC_TARGET_SEEDS) == 5, "target count changed")
     require(len(set(PUBLIC_TARGET_SEEDS)) == 5, "target seeds are not distinct")
     require(all(type(seed) is int and seed > 0 for seed in PUBLIC_TARGET_SEEDS), "target seed is invalid")
-    generated = params({"spec": {"kind": "divisor", "indices": [0, 2]}})
-    require(generated["factor_base"] == {"mode": "spec", "spec": {"kind": "divisor", "indices": [0, 2]}}, "factor-base handoff changed")
+    saturated = {"kind": "two_torsion_saturated", "parent": {"kind": "divisor", "indices": [0, 1, 5]}}
+    generated = params({"spec": saturated})
+    require(generated["factor_base"] == {"mode": "spec", "spec": saturated}, "factor-base handoff changed")
     require(generated["targets"] == [{"public_hash_seed": seed} for seed in PUBLIC_TARGET_SEEDS], "public targets changed")
     require(all("known_log" not in target and "random_seed" not in target for target in generated["targets"]), "Stage-31 parameters construct target scalars")
     require(generated["baseline"]["rho"] is True and generated["linear_algebra"]["mode"] == "sparse", "rho or sparse linear algebra was disabled")
@@ -60,8 +61,14 @@ def validate_factor_base(path: Path) -> dict[str, Any]:
         "Stage-30 factor-base recipe names the wrong curve",
     )
     spec = value.get("spec")
-    require(isinstance(spec, dict) and spec.get("kind") == "divisor", "Stage-30 factor base is not a divisor-kernel recipe")
-    indices = spec.get("indices")
+    require(isinstance(spec, dict), "Stage-30 factor-base specification is invalid")
+    if spec.get("kind") == "divisor":
+        divisor = spec
+    else:
+        require(spec.get("kind") == "two_torsion_saturated", "Stage-30 factor base is not a divisor or its two-torsion saturation")
+        divisor = spec.get("parent")
+        require(isinstance(divisor, dict) and divisor.get("kind") == "divisor", "Stage-30 saturated factor base has no divisor parent")
+    indices = divisor.get("indices")
     require(isinstance(indices, list) and indices and all(type(index) is int and index >= 0 for index in indices), "Stage-30 divisor indices are invalid")
     return value
 
