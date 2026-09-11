@@ -1471,9 +1471,23 @@ fn solve_at_degree(
     let col_index: HashMap<[u8; 3], usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
     let shifts = monomials_grevlex_desc(degree - 4);
+    // Macaulay's row selection: make the three leading monomials
+    // distinct by eliminating among the components, then leave out
+    // the shift `m · f_i` whenever `m` is divisible by the leading
+    // monomial of an earlier component — those rows are Koszul
+    // combinations of the rows kept, so the row space is unchanged.
+    let (comps, leads) = triangularise_leads(comps, p, muls);
+    let divides = |lm: &[u8; 3], m: &[u8; 3]| lm[0] <= m[0] && lm[1] <= m[1] && lm[2] <= m[2];
     let mut mat: Vec<Vec<u64>> = Vec::with_capacity(3 * shifts.len());
-    for comp in comps {
+    for (i, comp) in comps.iter().enumerate() {
         for sh in &shifts {
+            if leads
+                .iter()
+                .take(i)
+                .any(|lm| lm.is_some_and(|lm| divides(&lm, sh)))
+            {
+                continue;
+            }
             let mut row = vec![0u64; cols.len()];
             for (&e, &c) in comp {
                 let m = [e[0] + sh[0], e[1] + sh[1], e[2] + sh[2]];
@@ -1760,6 +1774,58 @@ impl<'a> NormalForms<'a> {
         self.memo[c] = Some(v.clone());
         Some(v)
     }
+}
+
+/// Grevlex-leading monomial of a sparse polynomial, if any.
+fn leading_monomial(f: &HashMap<[u8; 3], u64>) -> Option<[u8; 3]> {
+    f.iter()
+        .filter(|(_, &c)| c != 0)
+        .map(|(m, _)| *m)
+        .max_by(grevlex_cmp)
+}
+
+/// Eliminate among the three components so that their leading
+/// monomials are distinct (and of degree 4, generically); returns the
+/// new components in decreasing order of leading monomial and those
+/// leading monomials (`None` for a component that vanished).
+fn triangularise_leads(
+    comps: &[HashMap<[u8; 3], u64>; 3],
+    p: u64,
+    muls: &mut u64,
+) -> (Vec<HashMap<[u8; 3], u64>>, Vec<Option<[u8; 3]>>) {
+    let mut fs: Vec<HashMap<[u8; 3], u64>> = comps.to_vec();
+    for _round in 0..8 {
+        fs.sort_by(|a, b| match (leading_monomial(a), leading_monomial(b)) {
+            (Some(x), Some(y)) => grevlex_cmp(&y, &x),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => std::cmp::Ordering::Equal,
+        });
+        let mut changed = false;
+        for i in 1..fs.len() {
+            let (Some(li), Some(lj)) = (leading_monomial(&fs[i]), leading_monomial(&fs[i - 1]))
+            else {
+                continue;
+            };
+            if li == lj {
+                // f_i ← f_i − (lc_i / lc_{i−1}) f_{i−1}.
+                let f = mm(fs[i][&li], inv_mod(fs[i - 1][&lj], p), p);
+                let prev = fs[i - 1].clone();
+                for (&m, &c) in &prev {
+                    let e = fs[i].entry(m).or_insert(0);
+                    *e = sm(*e, mm(f, c, p), p);
+                    *muls += 1;
+                }
+                fs[i].retain(|_, c| *c != 0);
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    let leads = fs.iter().map(leading_monomial).collect();
+    (fs, leads)
 }
 
 /// Multiplication matrix of the variable `var` on the quotient:
