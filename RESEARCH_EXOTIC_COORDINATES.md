@@ -983,10 +983,25 @@ measured negative.
 
 | curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | GB ms found / refuted |
 |---|---|---:|---:|---:|---:|---:|---|
-| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.3 / 0.6 |
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.6 |
 | | one `T`, `w = u²`, `Πu` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
-| | Klein | 4 | 5 | – | – | – | not `F_p`-valued |
-TBD-K2
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.2 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₁₃⁴`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 4 | 4 | 9 | 0.3 / 0.8 |
+| | one `T` | 2 | 3 | 5 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| control `y² = x³ − x / F₂₉³` (over `F_p`) | all three | | | | | | no decomposable target off `E(F_p)` exists; Klein `F_p`-valued |
+
+At `m = 2` the one-involution system is the smaller one on every count
+the Gröbner engine sees — total degree 2 against 4, five terms against
+nine — at the price of one more unknown (`Πu`) and one more equation
+(the identity `(Πu)² = w₁w₂`), and it is three to seven times faster on
+Buchberger, with identical verdicts on every target.  These are
+sub-millisecond systems; the ranking, not the ratio, is the result.
 
 ### 12.4 `m = 3`
 
