@@ -1239,4 +1239,20 @@ the translations alone, and the `m = 3` system on the `v`-base is the
 descent, against Gaudry's three unknowns, total degree 12, 125 terms.
 Measured over `F₃₁³`:
 
-TBD-T3D3
+| base | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger (180 s budget) |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` (20 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > budget, both targets |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box (`y` has degree 9 per point) | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | – | 9 | 118 | **no** | – |
+| `{v ∈ F_p}` (86 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | – | 12 | 125 | **no** | – |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | 167 | 9 | 118 | yes | > budget, both targets |
+
+The same picture as §12.4: bases and `F_p`-valuedness exactly as at
+`m = 2`, a smaller-degree system on the `v`-base (9 against 12), and a
+Buchberger that finishes neither.  The 167 descended equations of the
+`v`-system are the 3 digits of the relation plus the identities among
+`v_i³` and `Πv` up to the box's degree — an F4 with a degree bound
+would take most of them as redundant; Buchberger does not.
