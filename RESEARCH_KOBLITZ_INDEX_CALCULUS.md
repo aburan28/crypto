@@ -752,3 +752,52 @@ In `koblitz_groebner`:
   (F4)*, J. Pure Appl. Algebra 139 (1999).
 - G. Bard, *Algebraic Cryptanalysis*, Springer 2009, ch. 13 — the
   Boolean-ring representation.
+
+## Distributed relation collection — 2026-09-11
+
+**Modules:** `koblitz_index_calculus::{RelationCollector, RelationWorkUnit,
+CollectedRelation, probe_scalar, verify_collected_relation,
+solve_factor_base_logs_from_relations}`.
+**Tool:** `ic workflow --collect-units …` (worker), `ic workflow` (driver).
+**Docs:** `docs/ic/README.md`.
+
+Relation collection is the embarrassingly parallel half of the pipeline,
+and a number-field-sieve run splits it into work units that clients
+sieve independently and a server merges.  The workflow now has the same
+shape.  The probe scalar of trial `t` is a function of the parameter
+seed and `t` alone (a generator keyed by the pair), so the probe
+sequence is one fixed sequence and a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it.  `RelationCollector`
+builds the decomposition state once per process (index map, field
+structure, the `|F|²` pair table) and runs the trials of a unit in
+parallel over the cores, returning the relations in trial order; the
+single-process precompute `solve_factor_base_logs` draws its probes from
+the same sequence in parallel batches of 64, so a local run and a
+distributed one see identical relations (pinned by
+`work_units_partition_the_probe_sequence_exactly`: the union of any
+partition of a range, in any order, equals the whole range).
+
+A worker (`ic workflow --params … --dir … --collect-units 4-7`) writes
+`relations/unit-NNNNN.json` per unit and stops.  A relation file carries
+only the probe scalar and the factor-base point indices of each
+relation, bound to the parameter digest, curve, base recipe and summand
+count.  The driver merges every valid unit present, **re-verifies each
+relation in the group** (`[a]G == Σ P_i`, exactly `m` indices in range)
+and drops exact duplicates before the linear algebra, so a corrupt or
+forged file costs a rejected relation and nothing else, and a file from
+another run or base is ignored rather than merged.  If the accepted
+relations do not determine every column, the driver collects further
+units itself up to `collection.max_units`, solving again after each,
+and otherwise fails closed with the counts.  The workflow test runs a
+worker for one unit, forges a relation in its file, drops in a file
+from another digest, lets the driver fill the missing unit, and checks
+that the forgery is the one rejected relation, the foreign file the one
+ignored unit, and the three targets still descend; the library test
+solves the same database from two out-of-order units with a duplicate
+and a forgery mixed in and compares it column for column with the
+single-process table.
+
+This is the stage that makes the pipeline's collection cost scale with
+machines rather than cores: every unit is independent, the merge is one
+scalar multiplication per relation, and the linear algebra of the
+previous entry is what turns the merged relations into the database.
