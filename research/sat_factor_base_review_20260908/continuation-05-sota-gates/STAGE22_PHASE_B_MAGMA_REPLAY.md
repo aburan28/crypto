@@ -29,10 +29,10 @@ Prepare and verify the packet on the source host:
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py prepare \
   --run-root /Volumes/SSD990/koblitz-balanced-pdp-phase-b-run-successor-01-20260910 \
-  --output /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-01-20260910
+  --output /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py verify-packet \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-01-20260910
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910
 ```
 
 Only that sealed packet and a clean checkout containing the runner, process
@@ -55,14 +55,14 @@ The production point validator must match the charged Phase-B backend exactly:
 
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py preflight \
-  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-01-20260910 \
+  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
   --magma /licensed/path/magma \
   --minisat /path/to/minisat \
   --backend /path/to/koblitz_pdp_backend \
   --license-access-statement-file /path/to/license-access.txt
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py run \
-  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-01-20260910 \
+  --packet /path/to/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
   --magma /licensed/path/magma \
   --minisat /path/to/minisat \
   --backend /path/to/koblitz_pdp_backend \
@@ -104,11 +104,11 @@ the score:
 
 ```sh
 python3 scripts/run_koblitz_phase_b_magma_replay.py verify-return \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-01-20260910 \
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
   --return-root /path/to/returned-magma-results
 
 python3 scripts/run_koblitz_phase_b_magma_replay.py score \
-  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-01-20260910 \
+  --packet /Volumes/SSD990/koblitz-phase-b-magma-replay-packet-successor-02-20260910 \
   --return-root /path/to/returned-magma-results \
   --output /Volumes/SSD990/koblitz-phase-b-magma-replay-score-20260910
 ```
@@ -119,3 +119,19 @@ original score seal, and classify the blind Magma outcomes. A local synthetic
 run or a self-attested licensed-host return does not by itself establish an
 unaffiliated reproduction. Novelty review, the remaining full-cost stages and
 the Koblitz SOTA claim all stay false.
+
+## Prepared successor packet
+
+The hardened successor packet prepared after rebasing to the relocatable
+Phase-B evidence bundle contains exactly 160 Magma inputs, 160 matching
+manifests, the protocol, and the packet manifest. Its terminal identities are:
+
+- packet-seal SHA-256: `1548c85abaecd61a4079235bb75705eaf6d085d5fb11660a575e04b620bb4342`;
+- inventory SHA-256: `3a160c4bbfbcbcc9be36e20d739923e81212beb3ad3e2ad9cad22b94d3d4c856`;
+- manifest SHA-256: `dcd2a602e6e9e2073483d6a9a1efd84bf5c5d983256b41ff20ce1f1d10e2d886`;
+- protocol SHA-256: `3afd6baa75be22639b451a9fb4d021976baaf56e6c6d2edd5b35113656f1c6cd`.
+
+The predecessor packet and successor-01 remain retained. They are superseded:
+the hardened verifier rejects the predecessor preflight, and successor-01 is
+bound to the older non-relocatable terminal-evidence bundle. No Magma task has
+run on any packet.
