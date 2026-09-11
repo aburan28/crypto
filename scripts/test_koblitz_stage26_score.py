@@ -22,6 +22,13 @@ CELLS = {
 
 
 class Stage26ScoreTests(unittest.TestCase):
+    def test_matched_direct_mitm_binding(self) -> None:
+        value = score.matched_direct_mitm()
+        self.assertEqual(value["instances"], 160)
+        self.assertEqual(value["outcomes"], 160)
+        self.assertEqual(value["classification_counts"], {"true_negative": 80, "true_positive": 80})
+        self.assertIsNone(value["conflicts"])
+
     def test_elapsed_time(self) -> None:
         self.assertEqual(score.elapsed_time("1:02.50"), 62.5)
         self.assertEqual(score.elapsed_time("1:02:03"), 3723.0)

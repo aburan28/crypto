@@ -16,6 +16,7 @@ import koblitz_stage26_affinity_inputs as packet_tool
 import run_koblitz_blind_pdp_phase_b as phase_b
 import run_koblitz_stage26_affinity_cell as cell_tool
 import score_koblitz_blind_pdp_phase_b as phase_b_score
+import verify_koblitz_stage27_result as stage27_verifier
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -24,6 +25,7 @@ SCHEMA = "koblitz_stage26_affinity_score.v1"
 SEAL_SCHEMA = "koblitz_stage26_affinity_score_seal.v1"
 EXPECTED_RUN = 34632018379
 EXPECTED_COMMIT = "03968a5da2a511abb723652529de34dc60e10942"
+DIRECT_MITM_SCORE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-27-direct-mitm-result-20260911/score.json"
 
 
 class Stage26ScoreError(RuntimeError):
@@ -164,6 +166,31 @@ def workflow_accounting(path: Path, expected_cells: set[str]) -> dict[str, Any]:
     }
 
 
+def matched_direct_mitm() -> dict[str, Any]:
+    verification = stage27_verifier.verify()
+    score = read_json(DIRECT_MITM_SCORE, "matched direct-MITM score")
+    require(score.get("status") == "complete_verified_truth_scored_direct_mitm_panel", "matched direct-MITM score is incomplete")
+    require(score.get("instances") == 160 and score.get("outcomes") == 160, "matched direct-MITM counts changed")
+    require(score.get("classification_counts") == {"true_negative": 80, "true_positive": 80}, "matched direct-MITM classifications changed")
+    require(score.get("full_cost_gate_passed") is False and score.get("koblitz_index_calculus_sota") is False, "matched direct-MITM score widened its claim")
+    return {
+        "verification": verification,
+        "score": {
+            "path": str(DIRECT_MITM_SCORE.relative_to(REPO)),
+            "bytes": DIRECT_MITM_SCORE.stat().st_size,
+            "sha256": phase_b.sha256_file(DIRECT_MITM_SCORE, "matched direct-MITM score"),
+        },
+        "workflow": score["workflow"],
+        "instances": score["instances"],
+        "outcomes": score["outcomes"],
+        "classification_counts": score["classification_counts"],
+        "resources": score["resources"],
+        "operations": score["operations"],
+        "conflicts": score["conflicts"],
+        "conflict_semantics": score["conflict_semantics"],
+    }
+
+
 def validate_task_source(task_root: Path, packet: Path, packet_record: dict[str, Any]) -> None:
     expected = {Path(row["path"]).name: row for row in packet_record["files"]}
     instance = task_root / "instance"
@@ -283,6 +310,7 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
         })
     tool_accounting = tool_costs(args.tools_root)
     workflow = workflow_accounting(args.workflow_metadata, set(cell_roots))
+    direct_mitm = matched_direct_mitm()
     outer_core = math.fsum(row["outer_resources"]["total_core_seconds"] for row in cells.values())
     outer_elapsed = math.fsum(row["outer_resources"]["single_core_elapsed_seconds"] for row in cells.values())
     result = {
@@ -308,8 +336,9 @@ def score(args: argparse.Namespace) -> dict[str, Any]:
             "parallel_cell_job_span_seconds": workflow["parallel_cell_job_span_seconds"],
         },
         "tool_accounting": tool_accounting,
-        "charged_total_core_seconds_available": outer_core + tool_accounting["acquisition_total_core_seconds"] + tool_accounting["build_total_core_seconds"],
-        "charged_scope": "tool source acquisition, exact tool builds, four packet verifications, cell setup, source verification, and 480 solver outcomes",
+        "matched_direct_mitm": direct_mitm,
+        "charged_total_core_seconds_available": outer_core + direct_mitm["resources"]["summed_outer_total_core_seconds"] + tool_accounting["acquisition_total_core_seconds"] + tool_accounting["build_total_core_seconds"],
+        "charged_scope": "tool source acquisition, exact tool builds, eight one-CPU packet/cell envelopes, 480 SAT-backend outcomes, and 160 matched direct-MITM outcomes",
         "rows": rows,
         "factor_base_algebraic_without_target_subgroup_enumeration": True,
         "factor_base_logs_known_by_construction": False,
