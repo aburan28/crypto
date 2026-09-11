@@ -160,12 +160,12 @@ unavailable.
 
 ## Additive retained-mathematics replay
 
-Stage 24 adds two separately written, project-internal mathematical replays.
-They do not execute the producer, retained binaries, bundled verifier, or
-producer verification Booleans. The committed replay uses an independently
-locked official `blake3` 1.8.7 helper and a separate implementation of the
-binary field, Koblitz group law, algebraic factor base, signed-Frobenius
-projection, relation construction, modular elimination, and point checks.
+Stage 24 adds one committed project-internal mathematical replay. It does not
+execute the producer, retained binaries, bundled verifier, or producer
+verification Booleans. The replay uses a separately locked official `blake3`
+1.8.7 helper and an independent implementation of the binary field, Koblitz
+group law, algebraic factor base, signed-Frobenius projection, relation
+construction, modular elimination, and point checks.
 
 Across 1,251 stable check units it independently reproduced the field and
 curve, both public discovery panels, all five target streams and identities,
