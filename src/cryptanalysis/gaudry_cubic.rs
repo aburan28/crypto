@@ -1407,6 +1407,12 @@ pub struct SolveStats {
     /// Split of `macaulay_muls`: forward elimination vs the normal
     /// forms read off by back-substitution.
     pub echelon_muls: u64,
+    /// Split of the rest of the solve: characteristic polynomial,
+    /// eigenvectors (including eigenspace splitting), root finding
+    /// (eigenvalues and cubics).
+    pub charpoly_muls: u64,
+    pub eigenvector_muls: u64,
+    pub roots_muls: u64,
 }
 
 /// Solve `S₄(x₁, x₂, x₃, x_R) = 0` for `x_i ∈ F_p` with cost
@@ -1534,9 +1540,12 @@ fn solve_at_degree(
         return None;
     };
     // Eigenvalues in F_p from the characteristic polynomial.
+    let before_cp = *muls;
     let cp = charpoly_mod_p(&m_e1, p, muls);
+    stats.charpoly_muls += *muls - before_cp;
     let ring = PolyRing::new(p);
     let lambdas = ring.roots(&cp, rng);
+    stats.roots_muls += ring.muls.get();
     // Transpose for left eigenvectors (evaluation functionals).
     let mut mt = vec![vec![0u64; dim]; dim];
     for i in 0..dim {
@@ -1585,7 +1594,9 @@ fn solve_at_degree(
     }
     let mut m_other: [Option<Vec<Vec<u64>>>; 2] = [None, None];
     for lam in lambdas {
+        let before_ev = *muls;
         let mut ker = eigenvectors_mod_p(&mt, lam, p, muls);
+        stats.eigenvector_muls += *muls - before_ev;
         if debug {
             eprintln!("  λ = {lam}: kernel dim {}", ker.len());
         }
