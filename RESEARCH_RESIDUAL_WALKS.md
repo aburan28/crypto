@@ -929,8 +929,8 @@ Measured on the tuned mutation walk (`--oracle s4`, `--oracle mitm3`;
 |:--|---:|---:|---:|---:|---:|---:|---:|
 | meet in the middle | 24 | 0.02 | ≈ 420 | 40.5% (+59.4% seed table) | 48.2 | 29.8 | 1.6× worse |
 | meet in the middle | 28 | 0.15 | ≈ 705 | 92.1% | 90.1 | 19.7 | 4.6× worse |
-| algebraic `S₄` | 24 | S4_24_KAPPA | S4_24_HITS | S4_24_SHARE | S4_24_S | 29.8 | S4_24_RATIO |
-| algebraic `S₄` | 28 | S4_28_KAPPA | S4_28_HITS | S4_28_SHARE | S4_28_S | 19.7 | S4_28_RATIO |
+| algebraic `S₄` | 24 | 0.04 | ≈ 251 | 99.4% | 2,504.8 | 29.8 | 84× worse |
+| algebraic `S₄` | 28 | 0.17 | ≈ 262 | 100.0% | 11,153.4 | 19.7 | 566× worse |
 
 The meet-in-the-middle oracle is the strongest count reduction in this
 note by a wide margin — at 28 bits a run walks `≈ 2,000` residuals,
@@ -954,7 +954,13 @@ i.e. `n^{0.23}`) is on its way there.
 The algebraic `S₄` is the same test with the seed table replaced by a
 square root per pair `(i, j)`: `B²` operation-equivalents per residual
 instead of `2B`, i.e. `128×` dearer per residual at `B = 256`, with the
-only advantage that nothing is stored.  S4_NARRATIVE
+only advantage that nothing is stored.  Measured, it is the lowest walked count in this note — `κ = 0.17` at
+28 bits, `≈ 2,400` residuals of which `262` decomposed, one in nine as
+predicted — and the highest cost: `S = 11,153`, `566×` the tuned walk
+and `9,000×` rho, with the oracle at `100.0%` of the budget.  The two
+triple oracles decide the same membership at `2B` versus `B²`
+operations per residual, and their `S` differ by that ratio (`90`
+against `11,153` is `124×`, against `B/2 = 128`).
 
 ### 10.6 Where this leaves κ
 
@@ -966,7 +972,7 @@ only advantage that nothing is stored.  S4_NARRATIVE
 | `j = 0` with 6-fold | 9.47 | 9.47 | 1.02 | κ ÷ 1.8, floor ÷ 1.73; rho ÷ 1.8 as well |
 | `S₃` pair oracle | 12.37 | (virtual) | — | walked count relabelled as `B` square roots per residual; `S` 162× worse |
 | triple oracle, meet in the middle | 0.15 | (virtual) | — | one residual in three decomposes; `2B` operations each; `S` 4.6× worse, `Θ(n^{2/3})` |
-| triple oracle, algebraic `S₄` | S4_28_KAPPA | (virtual) | — | `B²` square roots per residual; `S` S4_28_RATIO |
+| triple oracle, algebraic `S₄` | 0.17 | (virtual) | — | `B²` square roots per residual; `S` 566× worse |
 
 Three statements now stand on measurement rather than argument:
 
