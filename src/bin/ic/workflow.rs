@@ -28,8 +28,10 @@
 //! parameter file; imported points are never solved.
 
 use super::experiment::{
-    self, log_table_from_doc, log_table_to_doc, FactorBaseDocument, LogTableDocument, Solver,
+    self, log_table_from_doc, log_table_to_doc, FactorBaseDocument, LinearAlgebraMode,
+    LogTableDocument, Solver,
 };
+use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use clap::{Args, ValueEnum};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
@@ -138,6 +140,15 @@ pub struct TargetSpec {
     pub random_seed: Option<u64>,
 }
 
+/// The linear algebra of the logs stage: `dense` elimination or
+/// `sparse` filtering + block Wiedemann with its knobs.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct LinearAlgebraParams {
+    pub mode: LinearAlgebraMode,
+    pub sparse: SparseSolveOptions,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WorkflowParams {
@@ -153,6 +164,8 @@ pub struct WorkflowParams {
     pub seed: u64,
     #[serde(default = "default_max_trials")]
     pub max_trials: u32,
+    #[serde(default)]
+    pub linear_algebra: LinearAlgebraParams,
     pub factor_base: FactorBaseSource,
     #[serde(default)]
     pub targets: Vec<TargetSpec>,
@@ -548,7 +561,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
 
     // ── Stage 2: logs ──────────────────────────────────────────────
     let t1 = Instant::now();
-    let ic = experiment::ic_options(p.solver, p.summands, p.max_trials, p.seed);
+    let ic = experiment::with_linear_algebra(
+        experiment::ic_options(p.solver, p.summands, p.max_trials, p.seed),
+        p.linear_algebra.mode,
+        p.linear_algebra.sparse,
+    );
     let table = if state.logs.status == StageStatus::Complete && logs_path.exists() {
         let doc: LogTableDocument = read_json(&logs_path)?;
         let table = log_table_from_doc(&c, &doc)?;
@@ -573,10 +590,12 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 write_atomic(&state_path, &state)?;
                 stage_reports.push(json!({"stage":"logs","status":"complete","ran":true,
                     "columns":report.columns,"trials":report.trials,"relations":report.relations,
+                    "linear_algebra":experiment::linear_algebra_json(&report),
                     "elapsed_seconds":t1.elapsed().as_secs_f64()}));
                 say(&format!(
-                    "[2/3] logs: complete — {} columns certified from {} relations in {} trials ({:.1}s)",
-                    report.columns, report.relations, report.trials, t1.elapsed().as_secs_f64()
+                    "[2/3] logs: complete — {} columns certified from {} relations in {} trials ({:.1}s); {}",
+                    report.columns, report.relations, report.trials, t1.elapsed().as_secs_f64(),
+                    super::linear_algebra_summary(&experiment::linear_algebra_json(&report))
                 ));
                 Some(table)
             }
@@ -592,7 +611,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     reason: Some(reason.clone()),
                 };
                 write_atomic(&state_path, &state)?;
-                stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason}));
+                stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason,
+                    "linear_algebra":experiment::linear_algebra_json(&report)}));
                 overall_failed = Some(reason);
                 None
             }

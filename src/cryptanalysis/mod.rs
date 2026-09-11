@@ -141,6 +141,7 @@ pub mod koblitz_factor_base_search;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
+pub mod koblitz_sparse_la;
 pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;
@@ -245,7 +246,12 @@ pub use koblitz_index_calculus::{
     point_key, points_with_x, saturate_factor_base_two_torsion, span_f2,
     subspace_basis_for_divisor, DecompositionStrategy, FactorBaseDomain, FrobeniusFactorBase,
     KoblitzCurve, KoblitzIcOptions, KoblitzIcReport, KoblitzRelation, KoblitzSpeedup,
-    SatDecompositionOptions, SatDecompositionStats,
+    LinearAlgebra, SatDecompositionOptions, SatDecompositionStats,
+};
+pub use koblitz_sparse_la::{
+    block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,
+    BlockWiedemannReport, CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseRow,
+    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 pub use ecdsa_audit::{
     audit_ecdsa_transcript, quick_bias_score, AuditOptions, AuditResult, EcdsaSample,

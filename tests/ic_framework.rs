@@ -436,6 +436,31 @@ fn factor_base_logarithm_database_precomputes_then_descends() {
     assert_eq!(logs["status"], "complete");
     assert_eq!(logs["verified"], true);
     assert_eq!(logs["counts"]["columns"], 3);
+    assert_eq!(logs["linear_algebra"]["mode"], "sparse");
+    assert!(logs["linear_algebra"]["attempts"].as_u64().unwrap() >= 1);
+
+    // The dense path certifies the very same database.
+    let dense_db = path();
+    let (ok, dense) = command(&[
+        "logs",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--solver",
+        "pair-table",
+        "--linear-algebra",
+        "dense",
+        "--database",
+        dense_db.to_str().unwrap(),
+    ]);
+    assert!(ok, "{dense}");
+    assert_eq!(dense["linear_algebra"]["mode"], "dense");
+    assert!(dense["linear_algebra"]["sparse"].is_null());
+    let a: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
+    let b: Value = serde_json::from_slice(&std::fs::read(&dense_db).unwrap()).unwrap();
+    assert_eq!(a["columns"], b["columns"], "sparse and dense databases differ");
+    std::fs::remove_file(dense_db).unwrap();
 
     for k in ["1", "53", "126"] {
         let (ok, solve) = command(&[
@@ -501,6 +526,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
         serde_json::to_vec(&json!({
             "schema_version":1,"name":"k0n9","curve":{"degree":9,"curve_a":0},
             "summands":2,"solver":"pair_table","seed":1,
+            "linear_algebra":{"mode":"sparse","sparse":{"wiedemann":{"block_m":2,"block_n":2}}},
             "factor_base":{"mode":"spec","spec":{"kind":"factor","index":0}},
             "targets":[{"known_log":"53"},{"random_seed":7},{"known_log":"126"}]
         }))
@@ -526,6 +552,11 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(stages[0]["ran"], false, "select must be reused");
     assert_eq!(stages[1]["stage"], "logs");
     assert_eq!(stages[1]["ran"], true);
+    assert_eq!(stages[1]["linear_algebra"]["mode"], "sparse");
+    // Three columns: the filter eliminates them all and no Wiedemann run
+    // is needed, but the filtering statistics are reported.
+    assert_eq!(stages[1]["linear_algebra"]["sparse"]["filter"]["columns_in"], 3);
+    assert_eq!(stages[1]["linear_algebra"]["sparse"]["core_dimension"], 0);
     assert!(dir.join("logs.json").exists());
 
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);

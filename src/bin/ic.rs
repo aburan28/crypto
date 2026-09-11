@@ -129,6 +129,31 @@ fn binary_hash() -> Option<String> {
     }
     Some(hasher.finalize().to_hex().to_string())
 }
+/// One line for the `linear_algebra` object of a logs report.
+fn linear_algebra_summary(la: &Value) -> String {
+    let mut line = format!(
+        "{} ({} attempts, {:.3}s)",
+        la["mode"].as_str().unwrap_or("?"),
+        la["attempts"],
+        la["seconds"].as_f64().unwrap_or(0.0)
+    );
+    if let Some(s) = la.get("sparse").filter(|v| !v.is_null()) {
+        let f = &s["filter"];
+        line.push_str(&format!(
+            "; filtered {} rows × {} columns to a core of {} ({} singletons, {} excess rows, {} merged)",
+            f["rows_in"], f["columns_in"], s["core_dimension"], f["singletons_removed"],
+            f["excess_rows_removed"], f["merged_columns"]
+        ));
+        if let Some(w) = s.get("wiedemann").filter(|v| !v.is_null()) {
+            line.push_str(&format!(
+                "; block Wiedemann {}×{}, {} Krylov terms, {} products",
+                w["block_m"], w["block_n"], w["sequence_length"], w["products"]
+            ));
+        }
+    }
+    line
+}
+
 fn display(report: &Value) {
     match report["operation"].as_str() {
         Some("inspect") => {
@@ -230,6 +255,9 @@ fn display(report: &Value) {
                 report["counts"]["trials"],
                 report["counts"]["relations"]
             );
+            if let Some(la) = report.get("linear_algebra").filter(|v| !v.is_null()) {
+                println!("Linear algebra: {}", linear_algebra_summary(la));
+            }
             if let Some(path) = report["out"].as_str() {
                 println!("Database saved: {path}");
             } else if let Some(reason) = report["reason"].as_str() {
@@ -265,6 +293,9 @@ fn display(report: &Value) {
                     st["status"].as_str().unwrap_or("?"),
                     if st["ran"] == true { "ran" } else { "reused" }
                 );
+                if let Some(la) = st.get("linear_algebra").filter(|v| !v.is_null()) {
+                    println!("         linear algebra: {}", linear_algebra_summary(la));
+                }
             }
             if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
                 println!("Solutions: {} verified of {}", sol["verified"], sol["count"]);

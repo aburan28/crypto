@@ -8,8 +8,10 @@ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, MAX_N,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
+    LogTableReport, MAX_N,
 };
+use crypto_lib::cryptanalysis::koblitz_sparse_la::{BlockWiedemannOptions, SparseSolveOptions};
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
@@ -65,6 +67,58 @@ impl Solver {
             Self::PairTable => DecompositionStrategy::PairTable,
         }
     }
+}
+/// How the factor-base logarithm precompute solves its relation matrix.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LinearAlgebraMode {
+    /// Dense big-integer Gaussian elimination after every new relation.
+    Dense,
+    /// Relation filtering (duplicates, singletons, excess, merge), then
+    /// block Wiedemann on the reduced core.
+    #[default]
+    Sparse,
+}
+impl LinearAlgebraMode {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Dense => "dense",
+            Self::Sparse => "sparse",
+        }
+    }
+}
+/// Select the linear-algebra path of `solve_factor_base_logs`.
+pub(crate) fn with_linear_algebra(
+    mut opts: KoblitzIcOptions,
+    mode: LinearAlgebraMode,
+    sparse: SparseSolveOptions,
+) -> KoblitzIcOptions {
+    opts.linear_algebra = match mode {
+        LinearAlgebraMode::Dense => LinearAlgebra::Dense,
+        LinearAlgebraMode::Sparse => LinearAlgebra::Sparse(sparse),
+    };
+    opts
+}
+/// Sparse-solve options with one block size for both sides of the
+/// Krylov sequence; everything else at its default.
+pub(crate) fn sparse_options(block_size: usize) -> SparseSolveOptions {
+    SparseSolveOptions {
+        wiedemann: BlockWiedemannOptions {
+            block_m: block_size,
+            block_n: block_size,
+            ..BlockWiedemannOptions::default()
+        },
+        ..SparseSolveOptions::default()
+    }
+}
+/// The linear-algebra part of a precompute report.
+pub(crate) fn linear_algebra_json(report: &LogTableReport) -> Value {
+    json!({
+        "mode": if report.sparse { "sparse" } else { "dense" },
+        "attempts": report.solve_attempts,
+        "seconds": report.linear_algebra_seconds,
+        "sparse": report.sparse_report.as_ref().map(|r| serde_json::to_value(r).unwrap_or(Value::Null)),
+    })
 }
 /// A factor-base recipe saved by `ic search`, bound to the curve it was
 /// found on so it cannot be replayed on a different one by accident.
@@ -276,6 +330,13 @@ pub struct LogsArgs {
     pub solver: Solver,
     #[arg(long, default_value_t = 0x4b_6f_62_6c_69_74_7a_00u64)]
     pub seed: u64,
+    /// How the relation matrix is solved: filtering + block Wiedemann
+    /// (sparse) or dense big-integer elimination.
+    #[arg(long, value_enum, default_value_t = LinearAlgebraMode::Sparse)]
+    pub linear_algebra: LinearAlgebraMode,
+    /// Block size (both sides) of the block Wiedemann Krylov sequence.
+    #[arg(long,default_value_t=4,value_parser=clap::value_parser!(u8).range(1..=64))]
+    pub block_size: u8,
     /// Write the logarithm database here; an existing path is never overwritten.
     #[arg(long = "database")]
     pub database: PathBuf,
@@ -438,13 +499,18 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let fb = materialize(&c, &spec)?;
     if !quiet {
         println!(
-            "ic — factor-base logarithm precomputation on K_{} / GF(2^{}); r = {}\nFactor base: {}; {} summands; engine {}",
+            "ic — factor-base logarithm precomputation on K_{} / GF(2^{}); r = {}\nFactor base: {}; {} summands; engine {}; linear algebra {}",
             c.a, c.n, c.subgroup_order,
-            serde_json::to_string(&spec).unwrap_or_default(), args.summands, args.solver.name()
+            serde_json::to_string(&spec).unwrap_or_default(), args.summands, args.solver.name(),
+            args.linear_algebra.name()
         );
         let _ = std::io::stdout().flush();
     }
-    let opts = ic_options(args.solver, args.summands, args.max_trials, args.seed);
+    let opts = with_linear_algebra(
+        ic_options(args.solver, args.summands, args.max_trials, args.seed),
+        args.linear_algebra,
+        sparse_options(usize::from(args.block_size)),
+    );
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
         .ok_or("factor base has no usable projected columns for this summand count")?;
     if !report.verified {
@@ -453,6 +519,7 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             "reason":"relations did not determine every column logarithm within the trial budget",
             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
             "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+            "linear_algebra":linear_algebra_json(&report),
             "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
     }
     let doc = log_table_to_doc(&c, &spec, args.summands, args.solver, &table);
@@ -462,6 +529,7 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
         "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
         "factor_base":factor_base_json(&spec,&fb,report.columns),
         "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
+        "linear_algebra":linear_algebra_json(&report),
         "verified":true,"out":args.database.display().to_string(),
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
         "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",
