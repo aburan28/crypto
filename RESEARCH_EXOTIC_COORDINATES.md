@@ -1205,4 +1205,38 @@ relation *yield* per base is not compared here.
 
 ### 13.5 `m = 3`
 
-TBD-T3M3
+Curve A, `p = 1009`, the same boxes as §12.4 (a per-variable cap on
+the point invariants and on the tuple invariant on top of the total
+degree; without it `S₄` itself is out of reach).
+
+| line, group `G` | `|Γ|` | invariants | box (point, tuple) | relation | terms |
+|---|---:|---|---|---|---:|
+| `x`, `⟨−1⟩` (Semaev) | 2 | `x_i` | (4, –), total ≤ 16 | `S₄`, `[4, 4, 4, 4]`, total degree 12 | 191 |
+| `x`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | Vélu `e₁[x_i]`, orbit sums of `Πx, Σx` | (4, 8) | none under the monomial cap (12 invariants) / none up to total degree 11 | – |
+| `y`, `⟨−1⟩` | 2 | `y_i²`, `(Πy)²`, `(Σy)²` | (4, 8) | none up to total degree 8 (`y` has degree 9 per point) | – |
+| `v`, `⟨τ₃⟩` | 27 | `v_i³`, `Πv` | (3, 8), total ≤ 20 | `[3, 3, 3, 3, 8]`, total degree 10 | 310 |
+| `v`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | `V_i = v_i³ + v_i⁻³`, `P = Πv + 1/Πv` | (3, 8), total ≤ 20 | none | – |
+| same | | same | (4, 8), 5625 monomials, one kernel at total degree 24 | none | – |
+| same | | same | (3, 12), 3328 monomials, one kernel at total degree 24 | none | – |
+| same, `+ Σv` seed | 162 | `V_i`, `P`, `e₃, e₄[Σv]` | (3, 8) | none under the monomial cap | – |
+
+So at `m = 3` the 3-torsion frame behaves like the 2-torsion one **only
+on the translation side**: in `v_i³` the relation has degree 3 in each
+point where Semaev's has 4 (one degree down, as `w = u²` takes `S₄` from
+4 to 2 — a smaller step here), with the tuple unknown `Πv` carrying
+degree 8.  Folding the sign in as well, which at `m = 2` gave the
+multilinear `(V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³`, gives **nothing** in
+any box tried: there is no relation among `V_i = v_i³ + v_i⁻³` and
+`P = Πv + 1/Πv` of degree ≤ 4 in each `V_i` and ≤ 8 in `P`, nor of
+degree ≤ 3 and ≤ 12.  The `m = 2` multilinearity was a small-`m`
+accident of the sign symmetrisation, not a pattern.  This is the same
+place §10.4 found the Klein group's advantage thinning at `m = 3`.
+
+For the decomposition problem itself the sign is irrelevant anyway: a
+fixed target breaks the global sign, so the fixed-target group `Γ₀` is
+the translations alone, and the `m = 3` system on the `v`-base is the
+`v_i³, Πv` one — four `F_p`-unknowns, total degree 9, 118 terms before
+descent, against Gaudry's three unknowns, total degree 12, 125 terms.
+Measured over `F₃₁³`:
+
+TBD-T3D3
