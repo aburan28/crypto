@@ -50,7 +50,7 @@ use num_bigint::BigUint;
 
 use super::coordinate_quotients::{
     group_closure, monomials_up_to_total_degree, relation_subgroup, torsion_points,
-    two_torsion_frame, PointMap, Seed,
+    two_torsion_frame, Chart, PointMap, Seed,
 };
 use super::coordinate_search::{kernel, Curve, Gf, Mobius, Pt, Rng64, INF};
 use super::groebner_f4::{buchberger, reduce_basis, Ordering};
@@ -62,7 +62,7 @@ use crate::ecc::field::FieldElement;
 #[derive(Clone, Debug)]
 pub struct FixedTargetSystem {
     pub gamma0: Vec<Vec<PointMap>>,
-    pub frame: Mobius,
+    pub chart: Chart,
     pub seeds: Vec<Seed>,
     /// `(seed index, orbit size, k)` for each invariant `e_k` of the seed's
     /// orbit set.
@@ -87,7 +87,7 @@ impl FixedTargetSystem {
     fn seed_value(&self, curve: &Curve, seed: &Seed, summands: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = self.frame.apply(f, p.x());
+            let v = self.chart.apply(f, p);
             (v != INF).then_some(v)
         };
         match seed {
@@ -172,7 +172,7 @@ pub fn build_fixed_target_system(
     curve: &Curve,
     pts: &[Pt],
     generators: &[PointMap],
-    frame: Mobius,
+    chart: impl Into<Chart>,
     seeds: &[Seed],
     m: usize,
     target: Pt,
@@ -191,7 +191,7 @@ pub fn build_fixed_target_system(
     }
     let mut sys = FixedTargetSystem {
         gamma0,
-        frame,
+        chart: chart.into(),
         seeds: seeds.to_vec(),
         invariants: Vec::new(),
         m,
@@ -479,7 +479,12 @@ pub struct DescentArm {
     pub error: Option<String>,
 }
 
-/// Run the three arms on one curve and target.
+/// One candidate coordinate system for [`compare_arms`]: label, group
+/// generators, chart, summand seeds.
+pub type Arm = (String, Vec<PointMap>, Chart, Vec<Seed>);
+
+/// Run the three standard arms (Gaudry's `x`, one 2-torsion involution,
+/// the full 2-torsion group) on one curve and target.
 pub fn compare_descents(
     curve: &Curve,
     pts: &[Pt],
@@ -487,34 +492,25 @@ pub fn compare_descents(
     m: usize,
     rng: &mut Rng64,
 ) -> Vec<DescentArm> {
-    let f = &curve.f;
     let t2 = torsion_points(curve, pts, 2);
     let frame = two_torsion_frame(curve, pts, rng);
-    let factor_base: Vec<Pt> = pts
-        .iter()
-        .copied()
-        .filter(|&p| {
-            let u = frame.apply(f, p.x());
-            u != INF && f.in_subfield(u, 1)
-        })
-        .collect();
     let point_seeds: Vec<Seed> = (0..m).map(Seed::Point).collect();
     let mut with_product = point_seeds.clone();
     with_product.push(Seed::Product);
     let mut with_extras = with_product.clone();
     with_extras.push(Seed::Sum);
-    let mut arms: Vec<(String, Vec<PointMap>, Mobius, Vec<Seed>)> = Vec::new();
+    let mut arms: Vec<Arm> = Vec::new();
     arms.push((
         "x (Gaudry)".into(),
         vec![PointMap::negate()],
-        Mobius::identity(),
+        Chart::x(Mobius::identity()),
         point_seeds.clone(),
     ));
     if let Some(&t) = t2.first() {
         arms.push((
             "one T, sign frame: w, Πu".into(),
             vec![PointMap::translate(t), PointMap::negate()],
-            frame,
+            Chart::x(frame),
             with_product,
         ));
     }
@@ -524,10 +520,35 @@ pub fn compare_descents(
         arms.push((
             "E[2] (Klein): orbit invariants".into(),
             gens,
-            frame,
+            Chart::x(frame),
             with_extras,
         ));
     }
+    compare_arms(curve, pts, target, m, Chart::x(frame), arms, rng)
+}
+
+/// Run arbitrary arms on one curve and target.  The factor base is the
+/// set of points whose `base_chart` coordinate is finite and lies in
+/// `F_p`; every arm is interpolated on that same base so the arms are
+/// comparable.
+pub fn compare_arms(
+    curve: &Curve,
+    pts: &[Pt],
+    target: Pt,
+    m: usize,
+    base_chart: Chart,
+    arms: Vec<Arm>,
+    rng: &mut Rng64,
+) -> Vec<DescentArm> {
+    let f = &curve.f;
+    let factor_base: Vec<Pt> = pts
+        .iter()
+        .copied()
+        .filter(|&p| {
+            let u = base_chart.apply(f, p);
+            u != INF && f.in_subfield(u, 1)
+        })
+        .collect();
     let mut out = Vec::new();
     for (label, gens, fr, seeds) in arms {
         let Some(sys) = build_fixed_target_system(curve, pts, &gens, fr, &seeds, m, target, rng)

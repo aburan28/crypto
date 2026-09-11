@@ -554,7 +554,10 @@ mod tests {
         let kp = ntru_keygen();
         let zero = NtruPoly::zero();
 
-        assert_eq!(ntru_decapsulate(&zero, &kp.sk), rejection_key(&kp.sk, &zero));
+        assert_eq!(
+            ntru_decapsulate(&zero, &kp.sk),
+            rejection_key(&kp.sk, &zero)
+        );
     }
 
     #[test]

@@ -136,7 +136,9 @@ mod tests {
     use super::*;
     use crate::binary_ecc::F2mElement;
     use crate::cryptanalysis::descent_expansion::enumerate_irreducibles;
-    use crate::cryptanalysis::descent_lowgamma::{descend_on_subspace, BasisFamily, FactorSubspace};
+    use crate::cryptanalysis::descent_lowgamma::{
+        descend_on_subspace, BasisFamily, FactorSubspace,
+    };
 
     /// The defect is non-negative and the profile spans the requested
     /// degrees.
@@ -164,9 +166,30 @@ mod tests {
     #[test]
     fn defect_aggregation() {
         let prof = vec![
-            RankRow { degree: 2, rows: 6, cols: 20, rank: 6, generic_rank: 6, defect: 0 },
-            RankRow { degree: 3, rows: 60, cols: 56, rank: 50, generic_rank: 55, defect: 5 },
-            RankRow { degree: 4, rows: 200, cols: 120, rank: 118, generic_rank: 120, defect: 2 },
+            RankRow {
+                degree: 2,
+                rows: 6,
+                cols: 20,
+                rank: 6,
+                generic_rank: 6,
+                defect: 0,
+            },
+            RankRow {
+                degree: 3,
+                rows: 60,
+                cols: 56,
+                rank: 50,
+                generic_rank: 55,
+                defect: 5,
+            },
+            RankRow {
+                degree: 4,
+                rows: 200,
+                cols: 120,
+                rank: 118,
+                generic_rank: 120,
+                defect: 2,
+            },
         ];
         assert_eq!(total_defect(&prof), 7);
         // early_defect(cutoff=3) = (0+5)/cols_at_deg_3 = 5/56.
@@ -194,17 +217,23 @@ mod tests {
             let mut cnt = 0.0;
             for t in 0..6u64 {
                 let v = match fam {
-                    BasisFamily::Random => FactorSubspace::build(fam, n, n_sub, &irr, 0x500 + seed_off + t),
+                    BasisFamily::Random => {
+                        FactorSubspace::build(fam, n, n_sub, &irr, 0x500 + seed_off + t)
+                    }
                     _ => FactorSubspace::build(fam, n, n_sub, &irr, 0),
                 }
                 .unwrap();
                 // Deterministic-ish (b, x3) from t.
                 let b = F2mElement::from_bit_positions(
-                    &(0..n).filter(|k| ((t.wrapping_mul(2654435761) >> k) & 1) == 1).collect::<Vec<_>>(),
+                    &(0..n)
+                        .filter(|k| ((t.wrapping_mul(2654435761) >> k) & 1) == 1)
+                        .collect::<Vec<_>>(),
                     n,
                 );
                 let x3 = F2mElement::from_bit_positions(
-                    &(0..n).filter(|k| (((t.wrapping_mul(40503) + 7) >> k) & 1) == 1).collect::<Vec<_>>(),
+                    &(0..n)
+                        .filter(|k| (((t.wrapping_mul(40503) + 7) >> k) & 1) == 1)
+                        .collect::<Vec<_>>(),
                     n,
                 );
                 if b.is_zero() || x3.is_zero() {
@@ -215,7 +244,11 @@ mod tests {
                 acc += early_defect(&prof, cutoff);
                 cnt += 1.0;
             }
-            if cnt > 0.0 { acc / cnt } else { 0.0 }
+            if cnt > 0.0 {
+                acc / cnt
+            } else {
+                0.0
+            }
         };
 
         let sub = mean_early(BasisFamily::Subfield, 0);

@@ -208,10 +208,7 @@ where
                             let rhs_red = &rhs / &gcd;
                             if let Some(rhs_inv) = mod_inverse(&rhs_red, &m) {
                                 let x_base = (&lhs_red * &rhs_inv) % &m;
-                                let g_u: u64 = gcd
-                                    .iter_u64_digits()
-                                    .next()
-                                    .unwrap_or(0);
+                                let g_u: u64 = gcd.iter_u64_digits().next().unwrap_or(0);
                                 let mut x_cand = x_base;
                                 for _ in 0..g_u {
                                     let test = pow(g, &x_cand);

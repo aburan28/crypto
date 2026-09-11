@@ -55,9 +55,8 @@ use crate::binary_ecc::{BinaryPoint, F2mElement};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
-    projected_signed_orbit_count, restrict_factor_base_to_orbits,
-    saturate_factor_base_two_torsion, span_f2, FactorBaseDomain, FrobeniusFactorBase,
-    KoblitzCurve, PairSumTable,
+    projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
+    span_f2, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -114,8 +113,12 @@ impl FactorBaseSpec {
     /// Build the base this spec names on `kc`, or explain why not.
     pub fn materialize(&self, kc: &KoblitzCurve) -> Result<FrobeniusFactorBase, String> {
         match self {
-            Self::Factor { index } => build_frobenius_factor_base(kc, *index)
-                .ok_or_else(|| format!("no degree-ord_n(2) factor with index {index} at n = {}", kc.n)),
+            Self::Factor { index } => build_frobenius_factor_base(kc, *index).ok_or_else(|| {
+                format!(
+                    "no degree-ord_n(2) factor with index {index} at n = {}",
+                    kc.n
+                )
+            }),
             Self::Divisor { indices } => {
                 let factors = all_factors_of_x_n_minus_1(kc.n);
                 let mut sorted = indices.clone();
@@ -166,9 +169,11 @@ impl FactorBaseSpec {
                     .collect();
                 let mut keep = Vec::with_capacity(retained_abscissa_orbits.len());
                 for x in retained_abscissa_orbits {
-                    let o = by_rep
-                        .get(x)
-                        .ok_or_else(|| format!("abscissa {x} is not a signed-orbit representative of the parent base"))?;
+                    let o = by_rep.get(x).ok_or_else(|| {
+                        format!(
+                            "abscissa {x} is not a signed-orbit representative of the parent base"
+                        )
+                    })?;
                     keep.push(*o);
                 }
                 keep.sort_unstable();
@@ -452,7 +457,9 @@ pub fn greedy_prune(
         covered = c;
         score = s;
     }
-    let keep: Vec<usize> = (0..fb.signed_orbits.len()).filter(|&o| retained[o]).collect();
+    let keep: Vec<usize> = (0..fb.signed_orbits.len())
+        .filter(|&o| retained[o])
+        .collect();
     (keep, steps)
 }
 
@@ -646,7 +653,8 @@ pub fn evaluate_spec(
         )];
     }
     let mut out = Vec::new();
-    let (candidate, witnesses) = score_base(kc, spec.clone(), &fb, targets, opts, build_ms, Vec::new());
+    let (candidate, witnesses) =
+        score_base(kc, spec.clone(), &fb, targets, opts, build_ms, Vec::new());
     let base_score = candidate.expected_trials();
     out.push(candidate);
     if prune && base_score.is_finite() {
@@ -743,7 +751,11 @@ fn score_base(
 pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBaseSpec> {
     let mut specs: Vec<FactorBaseSpec> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
-    fn push_unique(specs: &mut Vec<FactorBaseSpec>, seen: &mut HashSet<String>, spec: FactorBaseSpec) {
+    fn push_unique(
+        specs: &mut Vec<FactorBaseSpec>,
+        seen: &mut HashSet<String>,
+        spec: FactorBaseSpec,
+    ) {
         let key = serde_json::to_string(&spec).unwrap_or_default();
         if seen.insert(key) {
             specs.push(spec);
@@ -789,8 +801,10 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
                     .iter()
                     .map(|&m| F2mElement::from_biguint(&BigUint::from(m), kc.n))
                     .collect();
-                let unique: HashSet<BigUint> =
-                    span_f2(&basis, kc.n).iter().map(|x| x.to_biguint()).collect();
+                let unique: HashSet<BigUint> = span_f2(&basis, kc.n)
+                    .iter()
+                    .map(|x| x.to_biguint())
+                    .collect();
                 if unique.len() == 1usize << dim {
                     seeds.push(masks);
                 }
@@ -879,7 +893,12 @@ mod tests {
     use crate::cryptanalysis::koblitz_index_calculus::{enumerate_decompose, point_key};
     use num_traits::One;
 
-    fn brute_coverage(kc: &KoblitzCurve, fb: &FrobeniusFactorBase, targets: &TargetSet, m: usize) -> usize {
+    fn brute_coverage(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        targets: &TargetSet,
+        m: usize,
+    ) -> usize {
         let index = fb.index_map();
         targets
             .points
@@ -894,7 +913,9 @@ mod tests {
         let targets = TargetSet::new(&kc, 64, 4096, 7);
         assert!(targets.exhaustive, "r = 211 must be enumerated");
         for spec in [
-            FactorBaseSpec::Divisor { indices: vec![0, 2] },
+            FactorBaseSpec::Divisor {
+                indices: vec![0, 2],
+            },
             FactorBaseSpec::Divisor { indices: vec![2] },
             FactorBaseSpec::FrobeniusUnion {
                 seed_masks: vec![3468, 4413],
@@ -904,14 +925,31 @@ mod tests {
             let table = PairSumTable::build(&kc, &fb).unwrap();
             for m in [2usize, 3] {
                 let witnesses = witness_list(&kc, &fb, &table, &targets, m);
-                let census = census_from_witnesses(&witnesses, &targets, m, fb.signed_orbits.len(), fb.unknowns(), 2, 0.0);
-                assert_eq!(census.covered, brute_coverage(&kc, &fb, &targets, m), "{spec:?} m={m}");
+                let census = census_from_witnesses(
+                    &witnesses,
+                    &targets,
+                    m,
+                    fb.signed_orbits.len(),
+                    fb.unknowns(),
+                    2,
+                    0.0,
+                );
+                assert_eq!(
+                    census.covered,
+                    brute_coverage(&kc, &fb, &targets, m),
+                    "{spec:?} m={m}"
+                );
                 // Every witness really sums to its target.
                 let mut check = 0;
                 table.witnesses(&kc, &fb, &targets.points[0], m, &mut |idxs| {
-                    let sum = idxs.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
                     assert_eq!(sum, targets.points[0]);
-                    assert!(idxs.windows(2).all(|w| w[0] <= w[1]), "witnesses are sorted");
+                    assert!(
+                        idxs.windows(2).all(|w| w[0] <= w[1]),
+                        "witnesses are sorted"
+                    );
                     check += 1;
                     true
                 });
@@ -933,7 +971,9 @@ mod tests {
         };
         let divisor = evaluate_spec(
             &kc,
-            &FactorBaseSpec::Divisor { indices: vec![0, 2] },
+            &FactorBaseSpec::Divisor {
+                indices: vec![0, 2],
+            },
             &targets,
             &opts,
             false,
@@ -962,7 +1002,9 @@ mod tests {
             projected_columns: false,
             ..SearchOptions::default()
         };
-        let spec = FactorBaseSpec::Divisor { indices: vec![1, 2] };
+        let spec = FactorBaseSpec::Divisor {
+            indices: vec![1, 2],
+        };
         let candidates = evaluate_spec(&kc, &spec, &targets, &opts, true);
         assert!(!candidates.is_empty());
         let parent = &candidates[0];
@@ -991,9 +1033,11 @@ mod tests {
     fn greedy_prune_scores_are_exact_recounts() {
         let kc = KoblitzCurve::new(1, 15).unwrap();
         let targets = TargetSet::new(&kc, 64, 4096, 5);
-        let fb = FactorBaseSpec::Divisor { indices: vec![0, 1, 2] }
-            .materialize(&kc)
-            .unwrap();
+        let fb = FactorBaseSpec::Divisor {
+            indices: vec![0, 1, 2],
+        }
+        .materialize(&kc)
+        .unwrap();
         let table = PairSumTable::build(&kc, &fb).unwrap();
         let witnesses = witness_list(&kc, &fb, &table, &targets, 3);
         let (keep, steps) = greedy_prune(&fb, &witnesses, targets.len(), 2, 1);
@@ -1003,7 +1047,15 @@ mod tests {
             let pruned = restrict_factor_base_to_orbits(&kc, &fb, &keep).unwrap();
             let table = PairSumTable::build(&kc, &pruned).unwrap();
             let w = witness_list(&kc, &pruned, &table, &targets, 3);
-            let census = census_from_witnesses(&w, &targets, 3, pruned.signed_orbits.len(), pruned.signed_orbits.len(), 2, 0.0);
+            let census = census_from_witnesses(
+                &w,
+                &targets,
+                3,
+                pruned.signed_orbits.len(),
+                pruned.signed_orbits.len(),
+                2,
+                0.0,
+            );
             assert_eq!(census.covered, last.covered_after);
             assert_eq!(pruned.signed_orbits.len(), last.unknowns_after);
         }
@@ -1031,7 +1083,11 @@ mod tests {
         assert!(best.expected_trials().is_finite());
         assert!(best.census.as_ref().unwrap().covered > 0);
         // Ranking is monotone in expected trials.
-        let scores: Vec<f64> = report.candidates.iter().map(Candidate::expected_trials).collect();
+        let scores: Vec<f64> = report
+            .candidates
+            .iter()
+            .map(Candidate::expected_trials)
+            .collect();
         assert!(scores.windows(2).all(|w| w[0] <= w[1]));
         // The best candidate must actually solve a DLP end to end.
         use crate::cryptanalysis::koblitz_index_calculus::{

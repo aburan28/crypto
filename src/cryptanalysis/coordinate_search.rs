@@ -649,6 +649,13 @@ impl Pt {
             Pt::Aff(x, _) => *x,
         }
     }
+    /// `y(P)`, with `y(O) = ∞`.
+    pub fn y(&self) -> u64 {
+        match self {
+            Pt::Inf => INF,
+            Pt::Aff(_, y) => *y,
+        }
+    }
 }
 
 /// An automorphism of `E` fixing `O`, in the shapes that occur over the

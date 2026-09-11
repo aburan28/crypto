@@ -316,7 +316,10 @@ fn expand_s3_in_xs(a: &FieldElement, b: &FieldElement) -> MPoly {
     let sum12 = x1.add(&x2);
     let prod12 = x1.mul(&x2);
     let inner = sum12.mul(&prod12.add(&a_m)).add(&two.mul(&b_m));
-    let term2 = two.mul(&inner).scale(&FieldElement::one(p.clone()).neg()).mul(&x3);
+    let term2 = two
+        .mul(&inner)
+        .scale(&FieldElement::one(p.clone()).neg())
+        .mul(&x3);
 
     // term3 = (X_1 X_2 - a)² - 4 b (X_1 + X_2)
     let part = prod12.sub(&a_m);
@@ -490,9 +493,7 @@ mod tests {
         // Add e_1² coefficient term.
         let mut e_sq = vec![0u32; 3];
         e_sq[0] = 2;
-        expected
-            .terms
-            .insert(e_sq, FieldElement::one(p.clone()));
+        expected.terms.insert(e_sq, FieldElement::one(p.clone()));
         // Subtract 2 e_2.
         let mut e2_term = vec![0u32; 3];
         e2_term[1] = 1;

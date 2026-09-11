@@ -352,8 +352,7 @@ pub fn ems_collision_probe(n_reps: usize) -> (f64, f64) {
         let (ms_no, _) = tls12_key_schedule(&pms, &cr, &sr, 40, None);
         *no_ems.entry(ms_no).or_insert(0) += 1;
         // EMS path: master secret depends on transcript hash.
-        let (ms_yes, _) =
-            tls12_key_schedule(&pms, &cr, &sr, 40, Some(&transcript));
+        let (ms_yes, _) = tls12_key_schedule(&pms, &cr, &sr, 40, Some(&transcript));
         *ems.entry(ms_yes).or_insert(0) += 1;
     }
     // Collision rate = fraction of handshakes that share their
@@ -396,8 +395,7 @@ fn pearson_corr_bytes(a: &[u8], b: &[u8]) -> f64 {
 
 fn chi_p_value(chi2: f64, df: usize) -> f64 {
     let df = df as f64;
-    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df)))
-        / ((2.0 / (9.0 * df)).sqrt());
+    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df))) / ((2.0 / (9.0 * df)).sqrt());
     0.5 * (1.0 - erf(t / std::f64::consts::SQRT_2))
 }
 
@@ -411,8 +409,7 @@ fn erf(x: f64) -> f64 {
     let a5 = 1.061405429;
     let p = 0.3275911;
     let t = 1.0 / (1.0 + p * x);
-    let y = 1.0
-        - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * (-x * x).exp();
+    let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * (-x * x).exp();
     sign * y
 }
 
@@ -506,7 +503,10 @@ pub fn format_anomaly_report(r: &AnomalyReport) -> String {
         paint("?", FG_BRIGHT_YELLOW)
     };
     let ems_status = if r.ems_collision_rate < 0.01 {
-        paint("✓ EMS mitigates: transcript hash breaks collision", FG_BRIGHT_GREEN)
+        paint(
+            "✓ EMS mitigates: transcript hash breaks collision",
+            FG_BRIGHT_GREEN,
+        )
     } else {
         paint("⚠ unexpected EMS collision rate", FG_BRIGHT_RED)
     };
@@ -653,14 +653,27 @@ mod tests {
     #[test]
     fn anomaly_audit_passes() {
         let r = run_anomaly_audit(4096, 40, 42);
-        assert!(r.chi_squared_p_value > 1e-9, "chi² p too small: {}", r.chi_squared_p_value);
-        assert!(r.monobit_p_value > 1e-9, "monobit p too small: {}", r.monobit_p_value);
-        assert!(r.first_byte_chi_p_value > 1e-9, "first-byte p too small: {}", r.first_byte_chi_p_value);
+        assert!(
+            r.chi_squared_p_value > 1e-9,
+            "chi² p too small: {}",
+            r.chi_squared_p_value
+        );
+        assert!(
+            r.monobit_p_value > 1e-9,
+            "monobit p too small: {}",
+            r.monobit_p_value
+        );
+        assert!(
+            r.first_byte_chi_p_value > 1e-9,
+            "first-byte p too small: {}",
+            r.first_byte_chi_p_value
+        );
         let ideal = (r.key_block_length as f64) * 8.0 / 2.0;
         assert!(
             (r.mean_avalanche_bits - ideal).abs() < ideal * 0.2,
             "avalanche off: got {}, ideal {}",
-            r.mean_avalanche_bits, ideal
+            r.mean_avalanche_bits,
+            ideal
         );
         // Under H₀ on a 40-byte key block, max |r| over 256 pairs ≈
         // √(2·ln 256)/√40 ≈ 0.53 — generous threshold at 0.7.  (Real
@@ -728,12 +741,31 @@ mod tests {
         println!("```");
         println!("  Test                          TLS 1.2 (P_SHA256)    TLS 1.3 (HKDF)");
         println!("  ──────────────────────────    ──────────────────    ──────────────");
-        println!("  chi²_p (byte uniformity)      {:.4}                {:.4}", r12.chi_squared_p_value, r13.chi_squared_p_value);
-        println!("  monobit_p (bit balance)       {:.4}                {:.4}", r12.monobit_p_value, r13.monobit_p_value);
-        println!("  first-byte chi²_p             {:.4}                {:.4}", r12.first_byte_chi_p_value, r13.first_byte_chi_p_value);
-        println!("  avalanche bits (ideal=128)    {:.2}                {:.2}", r12.mean_avalanche_bits, r13.mean_avalanche_bits);
-        println!("  cross-handshake max |r|       {:.4}                {:.4}", r12.cross_handshake_max_pearson.abs(), r13.cross_handshake_max_pearson.abs());
-        println!("  small-subgroup max |z|        {:.2}σ                  {:.2}σ", r12.small_subgroup_bias_max, r13.small_subgroup_bias_max);
+        println!(
+            "  chi²_p (byte uniformity)      {:.4}                {:.4}",
+            r12.chi_squared_p_value, r13.chi_squared_p_value
+        );
+        println!(
+            "  monobit_p (bit balance)       {:.4}                {:.4}",
+            r12.monobit_p_value, r13.monobit_p_value
+        );
+        println!(
+            "  first-byte chi²_p             {:.4}                {:.4}",
+            r12.first_byte_chi_p_value, r13.first_byte_chi_p_value
+        );
+        println!(
+            "  avalanche bits (ideal=128)    {:.2}                {:.2}",
+            r12.mean_avalanche_bits, r13.mean_avalanche_bits
+        );
+        println!(
+            "  cross-handshake max |r|       {:.4}                {:.4}",
+            r12.cross_handshake_max_pearson.abs(),
+            r13.cross_handshake_max_pearson.abs()
+        );
+        println!(
+            "  small-subgroup max |z|        {:.2}σ                  {:.2}σ",
+            r12.small_subgroup_bias_max, r13.small_subgroup_bias_max
+        );
         println!("```");
         println!();
         println!("**Verdict**: both PRF families produce statistically-equivalent output.");
@@ -744,7 +776,13 @@ mod tests {
         println!("The MEANINGFUL difference between TLS 1.2 and TLS 1.3 is the");
         println!("**Extended Master Secret** (RFC 7627) — without EMS, TLS 1.2 is");
         println!("vulnerable to the triple-handshake attack:");
-        println!("  - no-EMS collision rate: {:.4}  (= 1.0: vulnerable)", r12.no_ems_collision_rate);
-        println!("  - EMS collision rate:    {:.4}  (= 0.0: mitigated)", r12.ems_collision_rate);
+        println!(
+            "  - no-EMS collision rate: {:.4}  (= 1.0: vulnerable)",
+            r12.no_ems_collision_rate
+        );
+        println!(
+            "  - EMS collision rate:    {:.4}  (= 0.0: mitigated)",
+            r12.ems_collision_rate
+        );
     }
 }

@@ -234,10 +234,7 @@ fn hash_to_field_fq2(msg: &[u8], dst: &[u8], count: usize) -> Vec<Fq2> {
 // Z (non-square in F_{p²}, chosen as -(2 + I)).
 
 fn fq2_from_u32_pair(c0: u32, c1: u32) -> Fq2 {
-    Fq2::new(
-        Fq::new(BigUint::from(c0)),
-        Fq::new(BigUint::from(c1)),
-    )
+    Fq2::new(Fq::new(BigUint::from(c0)), Fq::new(BigUint::from(c1)))
 }
 
 fn iso_a() -> Fq2 {
@@ -252,8 +249,12 @@ fn sswu_z() -> Fq2 {
     // Z = -(2 + I) = (p-2) + (p-1)·I
     let p = modulus();
     Fq2::new(
-        Fq { value: &p - BigUint::from(2u32) },
-        Fq { value: &p - BigUint::from(1u32) },
+        Fq {
+            value: &p - BigUint::from(2u32),
+        },
+        Fq {
+            value: &p - BigUint::from(1u32),
+        },
     )
 }
 
@@ -363,7 +364,7 @@ fn sswu_map_to_iso_curve(u: &Fq2) -> (Fq2, Fq2) {
     let zu2 = z.mul(&u2);
     let zu2_sq = zu2.square();
     let zu2_plus_zu2_sq = zu2.add(&zu2_sq); // Z·u² + Z²·u⁴
-    // x1_num = B · (Z·u² + Z²·u⁴ + 1)
+                                            // x1_num = B · (Z·u² + Z²·u⁴ + 1)
     let x1_num = b.mul(&zu2_plus_zu2_sq.add(&one));
     // x1_den = -A · (Z·u² + Z²·u⁴); fall back to Z·A if zero.
     let neg_a = a.neg();

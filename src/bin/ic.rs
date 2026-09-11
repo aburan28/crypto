@@ -203,7 +203,11 @@ fn display(report: &Value) {
                         .map_or("∞".to_string(), |v| format!("{v:.1}"))
                 );
             }
-            for v in report["validation"]["runs"].as_array().into_iter().flatten() {
+            for v in report["validation"]["runs"]
+                .as_array()
+                .into_iter()
+                .flatten()
+            {
                 println!(
                     "  validated #{}: eligible {}; median process seconds {}",
                     v["rank"], v["eligible"], v["median_process_seconds"]
@@ -234,13 +238,14 @@ fn display(report: &Value) {
         Some("solve") => {
             println!(
                 "Solve: {}; database columns {} (re-verified)",
-                report["status"],
-                report["database"]["columns"]
+                report["status"], report["database"]["columns"]
             );
             if let Some(result) = report.get("result") {
                 println!(
                     "Expected: {}; recovered: {}; verified: {}; descent trials: {}",
-                    result["expected"], result["recovered"], result["verified"],
+                    result["expected"],
+                    result["recovered"],
+                    result["verified"],
                     report["counts"]["descent_trials"]
                 );
             }

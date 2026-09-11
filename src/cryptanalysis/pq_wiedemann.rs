@@ -319,9 +319,7 @@ mod tests {
         let n = BigUint::from(13u32);
         let mut s = vec![BigUint::from(1u32), BigUint::from(1u32)];
         for i in 2..20 {
-            let v = (&BigUint::from(2u32) * &s[i - 1]
-                + &BigUint::from(3u32) * &s[i - 2])
-                % &n;
+            let v = (&BigUint::from(2u32) * &s[i - 1] + &BigUint::from(3u32) * &s[i - 2]) % &n;
             s.push(v);
         }
         let c = berlekamp_massey(&s, &n).expect("BM should succeed");
@@ -407,8 +405,7 @@ mod tests {
         // Dense reference.
         let mut dense_m_clone = dense_m.clone();
         let mut b_clone = b.clone();
-        let dense_x =
-            gaussian_eliminate_mod_n(&mut dense_m_clone, &mut b_clone, &n).unwrap();
+        let dense_x = gaussian_eliminate_mod_n(&mut dense_m_clone, &mut b_clone, &n).unwrap();
         // Try multiple seeds for Wiedemann.
         let mut wied_x = None;
         for seed in 0u64..20 {
@@ -497,8 +494,7 @@ mod tests {
         }
         let mut dense_m_clone = dense_m.clone();
         let mut b_clone = b.clone();
-        let dense_x =
-            gaussian_eliminate_mod_n(&mut dense_m_clone, &mut b_clone, &n).unwrap();
+        let dense_x = gaussian_eliminate_mod_n(&mut dense_m_clone, &mut b_clone, &n).unwrap();
         let mut wied_x = None;
         for seed in 0u64..30 {
             if let Some(x) = wiedemann_solve(&sparse_m, &b, 6, &n, seed) {

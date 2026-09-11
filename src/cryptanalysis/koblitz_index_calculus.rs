@@ -909,7 +909,10 @@ impl FrobeniusFactorBase {
 
 /// One representative per orbit of a point set under Frobenius and
 /// negation (the set is assumed closed under both).
-fn signed_frobenius_orbit_representatives(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Vec<BinaryPoint> {
+fn signed_frobenius_orbit_representatives(
+    kc: &KoblitzCurve,
+    points: &[BinaryPoint],
+) -> Vec<BinaryPoint> {
     let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
     let mut reps = Vec::new();
     for p in points {
@@ -2892,8 +2895,8 @@ fn koblitz_index_calculus_dlp_observed(
     // form.  `Some(true)` means solved; `Some(false)` means a pinned
     // scalar failed verification, which only a wrong relation can cause.
     let finish_incremental = |echelon: &IncrementalRelationSolver,
-                                  report: &mut KoblitzIcReport,
-                                  progress: &mut dyn FnMut(KoblitzIcEvent)|
+                              report: &mut KoblitzIcReport,
+                              progress: &mut dyn FnMut(KoblitzIcEvent)|
      -> Option<bool> {
         let d = echelon.target_biguint()?;
         progress(KoblitzIcEvent::LinearAlgebraStarted {
@@ -3294,9 +3297,7 @@ impl FactorBaseLogTable {
     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
         let g = kc.generator();
         self.columns.iter().all(|(point, log)| {
-            *point != BinaryPoint::Infinity
-                && log < &kc.subgroup_order
-                && &kc.mul(g, log) == point
+            *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
         })
     }
 
@@ -3337,12 +3338,19 @@ fn decompose_once(
 ) -> Option<Vec<usize>> {
     match opts.strategy {
         DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
-        DecompositionStrategy::PairTable => {
-            pair.expect("pair table required").decompose(kc, fb, target, opts.m)
-        }
+        DecompositionStrategy::PairTable => pair
+            .expect("pair table required")
+            .decompose(kc, fb, target, opts.m),
         DecompositionStrategy::Groebner => {
             groebner_decompose(
-                kc, fb, index_of, field, target, opts.m, opts.engine, opts.node_budget,
+                kc,
+                fb,
+                index_of,
+                field,
+                target,
+                opts.m,
+                opts.engine,
+                opts.node_budget,
             )
             .0
         }
@@ -3415,7 +3423,13 @@ pub fn solve_factor_base_logs(
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
-            kc, fb, &idxs, &a, &BigUint::zero(), opts.collapse_negation, Some(&projected),
+            kc,
+            fb,
+            &idxs,
+            &a,
+            &BigUint::zero(),
+            opts.collapse_negation,
+            Some(&projected),
         );
         matrix.push(relation.row);
         rhs.push((&h * &a) % r);
@@ -3539,7 +3553,13 @@ pub fn individual_log(
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
-            kc, fb, &idxs, &a, &b, opts.collapse_negation, Some(&projected),
+            kc,
+            fb,
+            &idxs,
+            &a,
+            &b,
+            opts.collapse_negation,
+            Some(&projected),
         );
         // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
         let mut sum = BigUint::zero();
@@ -4210,7 +4230,11 @@ mod tests {
         for n in 3..=24u32 {
             let full = find_irreducible(n).expect("exhaustive search finds one");
             let sparse = find_irreducible_sparse(n).expect("sparse search finds one");
-            assert_eq!((full.degree, full.low_terms), (sparse.degree, sparse.low_terms), "n = {n}");
+            assert_eq!(
+                (full.degree, full.low_terms),
+                (sparse.degree, sparse.low_terms),
+                "n = {n}"
+            );
         }
     }
 
@@ -4290,7 +4314,10 @@ mod tests {
         assert_eq!(fb.subspace_basis, parent.subspace_basis);
         assert!(!fb.uses_ambient_basis());
         let parent_keys: HashSet<_> = parent.points.iter().map(point_key).collect();
-        assert!(fb.points.iter().all(|p| parent_keys.contains(&point_key(p))));
+        assert!(fb
+            .points
+            .iter()
+            .all(|p| parent_keys.contains(&point_key(p))));
         let index = fb.index_map();
         let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let table = PairSumTable::build(&kc, &fb).unwrap();
@@ -4339,7 +4366,11 @@ mod tests {
                     SolverEngine::default(),
                     20_000,
                 );
-                assert_eq!(groebner.is_some(), reference.is_some(), "F4 m = {m}, k = {k}");
+                assert_eq!(
+                    groebner.is_some(),
+                    reference.is_some(),
+                    "F4 m = {m}, k = {k}"
+                );
             }
         }
         assert!(found > 0, "the pruned base must still decompose something");
@@ -4365,12 +4396,22 @@ mod tests {
                 assert!(models.insert((a, b)));
                 solver.reset_search();
                 let clause = (0..2 * width)
-                    .map(|i| if model[i] { -((i + 1) as i32) } else { (i + 1) as i32 })
+                    .map(|i| {
+                        if model[i] {
+                            -((i + 1) as i32)
+                        } else {
+                            (i + 1) as i32
+                        }
+                    })
                     .collect();
                 solver.add_clause(clause);
             }
             let total = 1u32 << width;
-            assert_eq!(models.len() as u32, total * (total + 1) / 2, "width {width}");
+            assert_eq!(
+                models.len() as u32,
+                total * (total + 1) / 2,
+                "width {width}"
+            );
         }
     }
 
@@ -4474,7 +4515,8 @@ mod tests {
                 assert_eq!(kc.mul(&g, &recovered), q);
             }
             // O has logarithm 0 without any probing.
-            let (zero, _) = individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
+            let (zero, _) =
+                individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
             assert!(zero.is_zero());
         }
     }
@@ -4517,11 +4559,9 @@ mod tests {
                 );
             }
             // And on a nonlinear union, which has more cofactor classes.
-            let union = build_frobenius_union_factor_base(
-                &kc,
-                &[F2mElement::one(n), F2mElement::z(n)],
-            )
-            .unwrap();
+            let union =
+                build_frobenius_union_factor_base(&kc, &[F2mElement::one(n), F2mElement::z(n)])
+                    .unwrap();
             for m in 1..=4 {
                 assert_eq!(
                     union.m_can_decompose(&kc, m),

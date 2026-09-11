@@ -28,7 +28,9 @@
 
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::descent_expansion::enumerate_irreducibles;
-use crypto_lib::cryptanalysis::descent_lowgamma::{descend_on_subspace, BasisFamily, FactorSubspace};
+use crypto_lib::cryptanalysis::descent_lowgamma::{
+    descend_on_subspace, BasisFamily, FactorSubspace,
+};
 use crypto_lib::cryptanalysis::ffd_harness::{
     monomial_index, num_monomials_upto_degree, quad_monomial_index, F2BoolPoly,
 };
@@ -79,8 +81,8 @@ fn mult_column(monos: &[Vec<u32>], k: Option<u32>, num_vars: u32, words: usize) 
         let mut nm = m.clone();
         if let Some(kk) = k {
             match nm.binary_search(&kk) {
-                Ok(_) => {}                       // x_k² = x_k, no change
-                Err(pos) => nm.insert(pos, kk),   // append, stay sorted
+                Ok(_) => {}                     // x_k² = x_k, no change
+                Err(pos) => nm.insert(pos, kk), // append, stay sorted
             }
         }
         if nm.len() as u32 > 3 {
@@ -148,7 +150,11 @@ fn null_space(columns: &[Vec<u64>], words: usize) -> Vec<Vec<u32>> {
                 merged.extend_from_slice(&p.combo[b..]);
                 combo = merged;
             } else {
-                pivots.push(Pivot { vec: vec.clone(), lead: l, combo: combo.clone() });
+                pivots.push(Pivot {
+                    vec: vec.clone(),
+                    lead: l,
+                    combo: combo.clone(),
+                });
                 break;
             }
         }
@@ -240,9 +246,14 @@ fn analyse(
     let all_equal = forms.windows(2).all(|w| w[0] == w[1]);
     let common = forms.first().cloned().unwrap_or_default();
     // X₁ coord set vs X₂ coord set
-    let mut x1: Vec<u32> = common.iter().filter_map(|t| t.filter(|v| *v < n_sub)).collect();
-    let mut x2: Vec<u32> =
-        common.iter().filter_map(|t| t.and_then(|v| (v >= n_sub).then_some(v - n_sub))).collect();
+    let mut x1: Vec<u32> = common
+        .iter()
+        .filter_map(|t| t.filter(|v| *v < n_sub))
+        .collect();
+    let mut x2: Vec<u32> = common
+        .iter()
+        .filter_map(|t| t.and_then(|v| (v >= n_sub).then_some(v - n_sub)))
+        .collect();
     x1.sort_unstable();
     x2.sort_unstable();
     let symmetric = x1 == x2;
@@ -251,12 +262,7 @@ fn analyse(
 }
 
 /// Independently verify ℓ · (Σ_{i∈S} f_i) ≡ 0  (mod x_k²=x_k, degree ≤ 3).
-fn verify_identity(
-    eqs: &[F2BoolPoly],
-    common: &[Option<u32>],
-    s: &[u32],
-    num_vars: u32,
-) -> bool {
+fn verify_identity(eqs: &[F2BoolPoly], common: &[Option<u32>], s: &[u32], num_vars: u32) -> bool {
     // F_S = Σ_{i∈S} f_i (XOR of coefficient vectors).
     let mut fs = F2BoolPoly::zero(num_vars);
     for &i in s {
@@ -302,7 +308,10 @@ fn within_half_quads(eqs: &[F2BoolPoly], num_vars: u32, n_sub: u32) -> u64 {
 }
 
 fn main() {
-    let seed = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(7u64);
+    let seed = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(7u64);
     println!("════════════════════════════════════════════════════════════════");
     println!("EXP-J — degree-3 syzygy extraction & identification, seed={seed}");
     println!("  Claim under test: the unique syzygy is ℓ·(Σ_{{i∈S}} f_i) ≡ 0 with a");
@@ -321,7 +330,8 @@ fn main() {
         let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 8));
         // Several random instances per N.
         for inst in 0..3u64 {
-            let v = FactorSubspace::build(BasisFamily::Random, n, n_sub, &irr, 0x900 + inst).unwrap();
+            let v =
+                FactorSubspace::build(BasisFamily::Random, n, n_sub, &irr, 0x900 + inst).unwrap();
             let b = rand_nz(&mut rng, n);
             let x3 = rand_nz(&mut rng, n);
             let eqs = descend_on_subspace(n, &v, &irr, &b, &x3);
@@ -340,8 +350,10 @@ fn main() {
             all_verified &= ok;
             all_bipartite &= within == 0;
             if inst == 0 {
-                let nx: Vec<u32> =
-                    common.iter().filter_map(|t| t.filter(|v| *v < n_sub)).collect();
+                let nx: Vec<u32> = common
+                    .iter()
+                    .filter_map(|t| t.filter(|v| *v < n_sub))
+                    .collect();
                 println!(
                     "  2n'={n_vars} inst{inst}: dim={dim}  |S|={}  ℓ same∀i:{eq_all}  ℓ-sym:{sym}  ℓ·F_S≡0:{ok}  within-half-quads:{within}  (ℓ X₁-coords={:?})",
                     s.len(),

@@ -205,15 +205,10 @@ pub fn run_anomaly_audit(n_handshakes: usize, key_length: usize, seed: u64) -> A
         let bit = (rng.next_u32() as usize) % (32 * 8);
         dhe[bit / 8] ^= 1 << (bit % 8);
         let (_, _, k1, _) = tls13_key_schedule(&dhe, &transcript_hash, key_length);
-        let hd: u32 = k0
-            .iter()
-            .zip(&k1)
-            .map(|(a, b)| (a ^ b).count_ones())
-            .sum();
+        let hd: u32 = k0.iter().zip(&k1).map(|(a, b)| (a ^ b).count_ones()).sum();
         total_flipped_bits += hd as u64;
     }
-    let mean_avalanche_bits =
-        total_flipped_bits as f64 / avalanche_samples.max(1) as f64;
+    let mean_avalanche_bits = total_flipped_bits as f64 / avalanche_samples.max(1) as f64;
 
     // ── 3. Cross-handshake correlation ──────────────────────────────
     // For each pair, derive a long (256-byte) blob via
@@ -296,7 +291,11 @@ fn short_key_collision_count(
 /// tiny set.  In a real implementation this can happen if the peer
 /// chose a small-subgroup point.  Measures max per-byte bias of the
 /// derived key averaged across the confined input set.
-fn small_subgroup_bias_probe(set_size: usize, transcript_hash: &[u8; 32], key_length: usize) -> f64 {
+fn small_subgroup_bias_probe(
+    set_size: usize,
+    transcript_hash: &[u8; 32],
+    key_length: usize,
+) -> f64 {
     // Synthesize `set_size` deliberately structured DHE inputs (each
     // a 32-byte buffer of `(i, i, …, i)` — minimal entropy).  Derive
     // keys; measure how much the output bytes deviate from uniform.
@@ -359,8 +358,7 @@ fn pearson_corr_bytes(a: &[u8], b: &[u8]) -> f64 {
 /// of freedom.  Wilson-Hilferty transform.
 fn chi_p_value(chi2: f64, df: usize) -> f64 {
     let df = df as f64;
-    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df)))
-        / ((2.0 / (9.0 * df)).sqrt());
+    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df))) / ((2.0 / (9.0 * df)).sqrt());
     // Convert one-sided z to upper-tail probability.
     0.5 * (1.0 - erf(t / std::f64::consts::SQRT_2))
 }
@@ -376,8 +374,7 @@ fn erf(x: f64) -> f64 {
     let a5 = 1.061405429;
     let p = 0.3275911;
     let t = 1.0 / (1.0 + p * x);
-    let y = 1.0
-        - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * (-x * x).exp();
+    let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * (-x * x).exp();
     sign * y
 }
 
@@ -421,16 +418,16 @@ pub fn format_anomaly_report(r: &AnomalyReport) -> String {
         "  mean flipped output bits: {:.2}  (ideal ≈ {:.1})  {}\n",
         r.mean_avalanche_bits, ideal, avalanche_status
     ));
-    s.push_str(&format!(
-        "  samples: {}\n\n",
-        r.avalanche_samples
-    ));
+    s.push_str(&format!("  samples: {}\n\n", r.avalanche_samples));
     s.push_str("## Test 4 — Cross-handshake correlation\n\n");
     // Under H₀ (independent 256-byte derivatives), max |r| over 256
     // pairs is approximately √(2·ln 256)/√256 ≈ 0.21.  Threshold of
     // 0.30 leaves room for the natural noise floor.
     let corr_status = if r.cross_handshake_max_pearson.abs() < 0.30 {
-        paint("✓ uncorrelated (within H₀ noise floor ≈ 0.21)", FG_BRIGHT_GREEN)
+        paint(
+            "✓ uncorrelated (within H₀ noise floor ≈ 0.21)",
+            FG_BRIGHT_GREEN,
+        )
     } else {
         paint("⚠ check", FG_BRIGHT_YELLOW)
     };
@@ -563,8 +560,16 @@ mod tests {
     fn anomaly_audit_passes() {
         let r = run_anomaly_audit(4096, 32, 42);
         // Uniformity p-values should not be ridiculously small.
-        assert!(r.chi_squared_p_value > 1e-9, "chi² p too small: {}", r.chi_squared_p_value);
-        assert!(r.monobit_p_value > 1e-9, "monobit p too small: {}", r.monobit_p_value);
+        assert!(
+            r.chi_squared_p_value > 1e-9,
+            "chi² p too small: {}",
+            r.chi_squared_p_value
+        );
+        assert!(
+            r.monobit_p_value > 1e-9,
+            "monobit p too small: {}",
+            r.monobit_p_value
+        );
         // First-byte chi² p > tiny threshold.
         assert!(
             r.first_byte_chi_p_value > 1e-9,
@@ -576,7 +581,8 @@ mod tests {
         assert!(
             (r.mean_avalanche_bits - ideal).abs() < ideal * 0.2,
             "avalanche off: got {}, ideal {}",
-            r.mean_avalanche_bits, ideal
+            r.mean_avalanche_bits,
+            ideal
         );
         // No cross-handshake correlation.
         assert!(
@@ -615,12 +621,8 @@ mod tests {
         println!("Each row is one independent audit run.  An anomaly is *real* iff");
         println!("the same column shows p ≪ 0.05 across most/all rows.\n");
         println!("```");
-        println!(
-            "  seed       chi²_p    monobit_p   1st-byte_p    max|r|    max|z|"
-        );
-        println!(
-            "  ────────   ───────   ─────────   ──────────   ───────   ──────"
-        );
+        println!("  seed       chi²_p    monobit_p   1st-byte_p    max|r|    max|z|");
+        println!("  ────────   ───────   ─────────   ──────────   ───────   ──────");
         for seed in [1u64, 42, 1337, 2025, 99_999] {
             let r = run_anomaly_audit(8192, 32, seed);
             println!(
@@ -634,12 +636,8 @@ mod tests {
             );
         }
         println!("```\n");
-        println!(
-            "Under the null hypothesis (HKDF is a PRF), each p-value column should be"
-        );
-        println!(
-            "approximately uniform on [0, 1]; flags below p < 0.05 should occur ~1 in 20"
-        );
+        println!("Under the null hypothesis (HKDF is a PRF), each p-value column should be");
+        println!("approximately uniform on [0, 1]; flags below p < 0.05 should occur ~1 in 20");
         println!("rows by chance, not in every row.");
     }
 }

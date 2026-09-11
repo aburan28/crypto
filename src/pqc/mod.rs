@@ -27,19 +27,19 @@ pub mod hawk;
 pub mod hqc;
 pub mod kyber;
 pub mod mayo;
-pub mod mpcith;
-pub mod mqom;
 pub mod mceliece;
 pub mod ml_dsa;
 pub mod ml_kem;
+pub mod mpcith;
+pub mod mqom;
 pub mod ntru;
 pub mod ntru_prime;
 pub mod qr_uov;
-pub mod slh_dsa;
-pub mod uov;
 pub mod sdith;
+pub mod slh_dsa;
 pub mod snova;
 pub mod sqisign;
+pub mod uov;
 pub mod x_wing;
 
 pub use kyber::{
@@ -52,7 +52,9 @@ pub use ml_kem::{
     MlKemDecapsKey, MlKemEncapsKey, MlKemParams, ML_KEM_1024, ML_KEM_512, ML_KEM_768,
 };
 
-pub use ml_dsa::{ml_dsa_65_keygen, ml_dsa_65_sign, ml_dsa_65_verify, MlDsaPublicKey, MlDsaSecretKey};
+pub use ml_dsa::{
+    ml_dsa_65_keygen, ml_dsa_65_sign, ml_dsa_65_verify, MlDsaPublicKey, MlDsaSecretKey,
+};
 
 pub use sqisign::{
     sqisign_keygen, sqisign_sign, sqisign_verify, SqiSignPublicKey, SqiSignSecretKey, SqiSignature,

@@ -545,7 +545,7 @@ fn solve_fixture(
                 Quotient::Negation => 2.0,
                 Quotient::SignedFrobenius => signed_size as f64,
             }))
-        .sqrt();
+    .sqrt();
     let max_steps = (ideal_steps.ceil() as u64).saturating_mul(200).max(10_000);
     let mut steps = 0u64;
     let mut restarts = 0u64;
@@ -553,14 +553,7 @@ fn solve_fixture(
 
     'restart: while restarts <= MAX_RESTARTS && steps < max_steps {
         let initial = random_state(curve, &q, &mut rng, modulus, &mut charges);
-        let mut state = canonicalize(
-            curve,
-            initial,
-            mode,
-            modulus,
-            lambda,
-            &mut charges,
-        );
+        let mut state = canonicalize(curve, initial, mode, modulus, lambda, &mut charges);
         loop {
             let key = point_key(&state.point);
             charges.table_queries += 1;
@@ -593,14 +586,7 @@ fn solve_fixture(
                 b: (state.b + jump.b) % modulus,
             };
             charges.group_additions += 1;
-            state = canonicalize(
-                curve,
-                state,
-                mode,
-                modulus,
-                lambda,
-                &mut charges,
-            );
+            state = canonicalize(curve, state, mode, modulus, lambda, &mut charges);
             steps += 1;
             if steps >= max_steps {
                 break 'restart;
@@ -693,7 +679,7 @@ fn solve_fixture_packed(
                 Quotient::Negation => 2.0,
                 Quotient::SignedFrobenius => signed_size as f64,
             }))
-        .sqrt();
+    .sqrt();
     let max_steps = (ideal_steps.ceil() as u64).saturating_mul(200).max(10_000);
     let mut steps = 0u64;
     let mut restarts = 0u64;
@@ -746,7 +732,10 @@ fn solve_fixture_packed(
     assert_eq!(recovered, d0);
     let reference_q = curve.mul(curve.generator(), &BigUint::from(d0));
     assert_eq!(raw_point(&reference_q), q);
-    assert_eq!(curve.mul(curve.generator(), &BigUint::from(recovered)), reference_q);
+    assert_eq!(
+        curve.mul(curve.generator(), &BigUint::from(recovered)),
+        reference_q
+    );
     let validation_ms = validation_started.elapsed().as_secs_f64() * 1000.0;
     let table_entries = table.len();
     let generator_point_key = raw_key(generator);
@@ -833,10 +822,7 @@ fn main() {
                 mode.name()
             )
         } else {
-            format!(
-                "{TASK_ID}|rho|{n}|{a}|{}|{fixture_index}",
-                mode.name()
-            )
+            format!("{TASK_ID}|rho|{n}|{a}|{}|{fixture_index}", mode.name())
         };
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());

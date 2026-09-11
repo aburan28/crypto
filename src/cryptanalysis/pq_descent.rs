@@ -147,7 +147,10 @@ pub fn weil_descend_s3(
 ) -> DescentSystem {
     let m = curve.m;
     let m_prime = v_basis.len() as u32;
-    assert!(m_prime <= 8, "weil descent capped at m' ≤ 8 (2^{{2m'}} table size)");
+    assert!(
+        m_prime <= 8,
+        "weil descent capped at m' ≤ 8 (2^{{2m'}} table size)"
+    );
     assert!(
         v_basis.iter().all(|e| e.m_value() == m),
         "all basis elements must live in F_{{2^m}}"
@@ -218,7 +221,11 @@ impl DescentSystemN3 {
     pub fn lift_solution(&self, v: u64) -> (F2mElement, F2mElement, F2mElement) {
         let m = self.m;
         let mp = self.m_prime as usize;
-        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        let mut x = [
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+        ];
         for (idx, xi) in x.iter_mut().enumerate() {
             for k in 0..mp {
                 if (v >> (idx * mp + k)) & 1 == 1 {
@@ -250,7 +257,10 @@ pub fn weil_descend_s4(
     use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
     let m = curve.m;
     let m_prime = v_basis.len() as u32;
-    assert!(m_prime <= 5, "n=3 weil descent capped at m' ≤ 5 (2^{{3m'}} table size)");
+    assert!(
+        m_prime <= 5,
+        "n=3 weil descent capped at m' ≤ 5 (2^{{3m'}} table size)"
+    );
     assert!(
         v_basis.iter().all(|e| e.m_value() == m),
         "all basis elements must live in F_{{2^m}}"
@@ -264,7 +274,11 @@ pub fn weil_descend_s4(
 
     for input in 0..n_inputs {
         // Decode v_{i, k} for i ∈ {0, 1, 2}.
-        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        let mut x = [
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+        ];
         for (idx, xi) in x.iter_mut().enumerate() {
             for k in 0..mp {
                 if (input >> (idx * mp + k)) & 1 == 1 {
@@ -318,10 +332,8 @@ pub fn solve_decomposition_via_descent_n3(
     v_basis: &[F2mElement],
 ) -> Vec<(F2mElement, F2mElement, F2mElement)> {
     let sys = weil_descend_s4(curve, x_r, v_basis);
-    let gb = crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2(
-        sys.equations.clone(),
-        sys.n_vars,
-    );
+    let gb =
+        crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2(sys.equations.clone(), sys.n_vars);
     let sols = crate::cryptanalysis::pq_groebner_f2::solve_system_f2(&gb, sys.n_vars);
     sols.into_iter().map(|v| sys.lift_solution(v)).collect()
 }
@@ -350,10 +362,7 @@ pub fn solve_decomposition_via_descent_n3_xl(
     v_basis: &[F2mElement],
 ) -> Vec<(F2mElement, F2mElement, F2mElement)> {
     let sys = weil_descend_s4(curve, x_r, v_basis);
-    let sols = crate::cryptanalysis::pq_xl::boolean_xl_solve(
-        sys.equations.clone(),
-        sys.n_vars,
-    );
+    let sols = crate::cryptanalysis::pq_xl::boolean_xl_solve(sys.equations.clone(), sys.n_vars);
     sols.into_iter().map(|v| sys.lift_solution(v)).collect()
 }
 
@@ -384,7 +393,11 @@ pub fn solve_decomposition_n3_direct(
     let m = curve.m;
     let mut out = Vec::new();
     for input in 0..n_inputs {
-        let mut x = [F2mElement::zero(m), F2mElement::zero(m), F2mElement::zero(m)];
+        let mut x = [
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+            F2mElement::zero(m),
+        ];
         for (idx, xi) in x.iter_mut().enumerate() {
             for k in 0..mp {
                 if (input >> (idx * mp + k)) & 1 == 1 {
@@ -420,10 +433,8 @@ pub fn solve_decomposition_via_descent(
     v_basis: &[F2mElement],
 ) -> Vec<(F2mElement, F2mElement)> {
     let sys = weil_descend_s3(curve, x_r, v_basis);
-    let gb = crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2(
-        sys.equations.clone(),
-        sys.n_vars,
-    );
+    let gb =
+        crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2(sys.equations.clone(), sys.n_vars);
     let sols = crate::cryptanalysis::pq_groebner_f2::solve_system_f2(&gb, sys.n_vars);
     sols.into_iter().map(|v| sys.lift_solution(v)).collect()
 }
@@ -455,7 +466,7 @@ mod tests {
         mobius_transform(&mut tt, 2);
         // ANF: monomials are v_0, v_1, v_0 v_1 → coefficients on masks 1, 2, 3.
         assert_eq!(tt, vec![false, true, true, true]); // (mask 0=0, mask 1=1, mask 2=1, mask 3=1)
-        // Inverse Möbius is the same operation (over F_2).
+                                                       // Inverse Möbius is the same operation (over F_2).
         mobius_transform(&mut tt, 2);
         assert_eq!(tt, original);
     }
@@ -525,8 +536,7 @@ mod tests {
             let direct = binary_semaev_s3(&x1, &x2, &x_r, &curve.b, &irr);
             let direct_bits = direct.to_biguint();
             for j in 0..(m as usize) {
-                let expected = ((&direct_bits >> j) & BigUint::from(1u32))
-                    == BigUint::from(1u32);
+                let expected = ((&direct_bits >> j) & BigUint::from(1u32)) == BigUint::from(1u32);
                 let got = sys.equations[j].eval(v) == 1;
                 assert_eq!(
                     got, expected,
@@ -545,9 +555,7 @@ mod tests {
     #[test]
     fn descent_pipeline_recovers_constructed_pair() {
         use crate::binary_ecc::curve::{point_add, point_neg};
-        use crate::cryptanalysis::petit_quisquater::{
-            build_pq_factor_base, PqSubspace,
-        };
+        use crate::cryptanalysis::petit_quisquater::{build_pq_factor_base, PqSubspace};
         let m = 8;
         let irr = IrreduciblePoly::deg_8();
         let curve = BinaryCurve {
@@ -560,8 +568,8 @@ mod tests {
             cofactor: BigUint::from(1u32),
         };
         let v_basis = standard_basis(m, 4); // V = F_2-span{1, z, z², z³}
-        // Use the existing PQ factor-base builder to pick two on-curve
-        // points whose x-coords lie in V.
+                                            // Use the existing PQ factor-base builder to pick two on-curve
+                                            // points whose x-coords lie in V.
         let pq_v = PqSubspace::span_low(m, 4);
         let fb = build_pq_factor_base(&curve, &pq_v);
         assert!(fb.len() >= 2, "need ≥ 2 FB points");
@@ -631,8 +639,7 @@ mod tests {
             let direct = binary_semaev_s4(&x1, &x2, &x3, &x_r, &curve.b, &irr);
             let direct_bits = direct.to_biguint();
             for j in 0..(m as usize) {
-                let expected =
-                    ((&direct_bits >> j) & BigUint::from(1u32)) == BigUint::from(1u32);
+                let expected = ((&direct_bits >> j) & BigUint::from(1u32)) == BigUint::from(1u32);
                 let got = sys.equations[j].eval(v) == 1;
                 assert_eq!(
                     got, expected,
@@ -651,9 +658,7 @@ mod tests {
     fn descent_n3_pipeline_recovers_constructed_triple() {
         use crate::binary_ecc::curve::{point_add, point_neg};
         use crate::cryptanalysis::binary_semaev::binary_semaev_s4;
-        use crate::cryptanalysis::petit_quisquater::{
-            build_pq_factor_base, PqSubspace,
-        };
+        use crate::cryptanalysis::petit_quisquater::{build_pq_factor_base, PqSubspace};
         let m = 8;
         let irr = IrreduciblePoly::deg_8();
         let curve = BinaryCurve {
@@ -671,7 +676,11 @@ mod tests {
         // the test triple.
         let pq_v = PqSubspace::span_low(m, 3);
         let fb = build_pq_factor_base(&curve, &pq_v);
-        assert!(fb.len() >= 3, "need ≥ 3 FB points in V_3 (got {})", fb.len());
+        assert!(
+            fb.len() >= 3,
+            "need ≥ 3 FB points in V_3 (got {})",
+            fb.len()
+        );
         let p1 = &fb[0].point;
         let p2 = &fb[1].point;
         let p3 = &fb[2].point;
@@ -728,9 +737,7 @@ mod tests {
     /// as direct `S_4 = 0` enumeration over `V × V × V`.
     #[test]
     fn descent_n3_xl_matches_direct() {
-        use crate::cryptanalysis::petit_quisquater::{
-            build_pq_factor_base, PqSubspace,
-        };
+        use crate::cryptanalysis::petit_quisquater::{build_pq_factor_base, PqSubspace};
         let m = 8;
         let irr = IrreduciblePoly::deg_8();
         let curve = BinaryCurve {

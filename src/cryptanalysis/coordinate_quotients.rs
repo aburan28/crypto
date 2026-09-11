@@ -86,6 +86,55 @@ pub fn monomials_up_to_total_degree(nv: usize, d: u32) -> Vec<Vec<u32>> {
 pub const MAX_E_PER_SEED: usize = 4;
 pub const MAX_INVARIANTS: usize = 14;
 
+// ── Charts: a Möbius frame on the `x`- or the `y`-line ─────────────
+
+/// Which coordinate line a frame lives on.  Every point map that commutes
+/// with the order-3 automorphism of a `j = 0` curve descends to the
+/// `y`-line (the quotient by that automorphism), which is where rational
+/// 3-torsion translations become Möbius maps.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Line {
+    X,
+    Y,
+}
+
+/// A coordinate on the curve: a Möbius frame applied to `x(P)` or `y(P)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Chart {
+    pub line: Line,
+    pub mob: Mobius,
+}
+
+impl Chart {
+    pub fn x(mob: Mobius) -> Self {
+        Chart { line: Line::X, mob }
+    }
+    pub fn y(mob: Mobius) -> Self {
+        Chart { line: Line::Y, mob }
+    }
+    /// The chart value at `P`, `INF` at a pole.
+    pub fn apply(&self, f: &Gf, p: Pt) -> u64 {
+        let t = match self.line {
+            Line::X => p.x(),
+            Line::Y => p.y(),
+        };
+        self.mob.apply(f, t)
+    }
+    pub fn describe(&self, f: &Gf) -> String {
+        let inner = self.mob.describe(f);
+        match self.line {
+            Line::X => inner.replace('t', "x"),
+            Line::Y => inner.replace('t', "y"),
+        }
+    }
+}
+
+impl From<Mobius> for Chart {
+    fn from(mob: Mobius) -> Self {
+        Chart::x(mob)
+    }
+}
+
 // ── Point maps and their group ─────────────────────────────────────
 
 /// `P ↦ auto(P) + t`.
@@ -284,10 +333,10 @@ impl Seed {
         }
     }
     /// Value on a tuple, `None` at a pole.
-    pub fn eval(&self, curve: &Curve, frame: &Mobius, tuple: &[Pt]) -> Option<u64> {
+    pub fn eval(&self, curve: &Curve, chart: &Chart, tuple: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = frame.apply(f, p.x());
+            let v = chart.apply(f, p);
             (v != INF).then_some(v)
         };
         match self {
@@ -344,7 +393,7 @@ fn elementary_symmetric(f: &Gf, xs: &[u64]) -> Vec<u64> {
 /// `None` if any is a pole.
 fn orbit_set(
     curve: &Curve,
-    frame: &Mobius,
+    chart: &Chart,
     gamma: &[Vec<PointMap>],
     seed: &Seed,
     tuple: &[Pt],
@@ -356,7 +405,7 @@ fn orbit_set(
             .zip(g)
             .map(|(&p, gm)| gm.apply(curve, p))
             .collect();
-        vals.push(seed.eval(curve, frame, &moved)?);
+        vals.push(seed.eval(curve, chart, &moved)?);
     }
     vals.sort_unstable();
     vals.dedup();
@@ -369,7 +418,7 @@ fn orbit_set(
 pub struct QuotientSystem {
     pub group: Vec<PointMap>,
     pub gamma: Vec<Vec<PointMap>>,
-    pub frame: Mobius,
+    pub chart: Chart,
     pub seeds: Vec<Seed>,
     pub invariants: Vec<Invariant>,
     pub m: usize,
@@ -436,7 +485,7 @@ impl QuotientSystem {
                             let proj = self.projection(i);
                             let mut vals: Vec<u64> = Vec::new();
                             for g in &proj {
-                                let v = self.frame.apply(f, g.apply(curve, tuple[i]).x());
+                                let v = self.chart.apply(f, g.apply(curve, tuple[i]));
                                 if v == INF {
                                     return None;
                                 }
@@ -460,7 +509,7 @@ impl QuotientSystem {
                         e[..e.len() - 1].to_vec()
                     }
                     _ => {
-                        let set = orbit_set(curve, &self.frame, &self.gamma, &inv.seed, tuple)?;
+                        let set = orbit_set(curve, &self.chart, &self.gamma, &inv.seed, tuple)?;
                         if set.len() != inv.orbit_size {
                             return None;
                         }
@@ -481,11 +530,12 @@ pub fn build_quotient_system(
     curve: &Curve,
     pts: &[Pt],
     generators: &[PointMap],
-    frame: Mobius,
+    chart: impl Into<Chart>,
     seeds: &[Seed],
     m: usize,
     rng: &mut Rng64,
 ) -> Option<QuotientSystem> {
+    let chart: Chart = chart.into();
     let group = group_closure(curve, generators, 512)?;
     let gamma = relation_subgroup(curve, pts, &group, m, 12, rng);
     if gamma.is_empty() {
@@ -501,7 +551,7 @@ pub fn build_quotient_system(
     for seed in seeds {
         let sets: Vec<Vec<u64>> = probes
             .iter()
-            .filter_map(|t| orbit_set(curve, &frame, &gamma, seed, t))
+            .filter_map(|t| orbit_set(curve, &chart, &gamma, seed, t))
             .collect();
         if sets.len() < 8 {
             continue;
@@ -538,11 +588,11 @@ pub fn build_quotient_system(
     }
     let affine_on_u = group
         .iter()
-        .all(|g| map_is_affine_on_u(curve, pts, &frame, g));
+        .all(|g| map_is_affine_on_u(curve, pts, &chart, g));
     Some(QuotientSystem {
         group,
         gamma,
-        frame,
+        chart,
         seeds: seeds.to_vec(),
         invariants,
         m,
@@ -551,13 +601,13 @@ pub fn build_quotient_system(
 }
 
 /// Does `u(γP) = a·u(P) + b` for constants `a, b`, on every point?
-fn map_is_affine_on_u(curve: &Curve, pts: &[Pt], frame: &Mobius, g: &PointMap) -> bool {
+fn map_is_affine_on_u(curve: &Curve, pts: &[Pt], chart: &Chart, g: &PointMap) -> bool {
     let f = &curve.f;
     let pairs: Vec<(u64, u64)> = pts
         .iter()
         .filter_map(|&p| {
-            let a = frame.apply(f, p.x());
-            let b = frame.apply(f, g.apply(curve, p).x());
+            let a = chart.apply(f, p);
+            let b = chart.apply(f, g.apply(curve, p));
             (a != INF && b != INF).then_some((a, b))
         })
         .collect();
@@ -918,14 +968,14 @@ pub fn run_quotient(
     pts: &[Pt],
     label: &str,
     generators: &[PointMap],
-    frame: Mobius,
+    chart: impl Into<Chart>,
     seeds: &[Seed],
     m: usize,
     max_total_degree: u32,
     max_tuples: usize,
     rng: &mut Rng64,
 ) -> Option<QuotientReport> {
-    let qs = build_quotient_system(curve, pts, generators, frame, seeds, m, rng)?;
+    let qs = build_quotient_system(curve, pts, generators, chart.into(), seeds, m, rng)?;
     let relation = interpolate_quotient(curve, pts, &qs, max_total_degree, 3000, rng);
     let weighted_degree = relation.as_ref().ok().and_then(|r| qs.weighted_degree(r));
     let collapse = exact_collapse(curve, pts, &qs, max_tuples);
@@ -1112,5 +1162,99 @@ mod tests {
         assert!(rel.verified_on >= 100);
         let (_, _, col) = r.collapse.unwrap();
         assert!((col - 32.0).abs() < 0.5, "collapse {col}");
+    }
+
+    #[test]
+    fn three_torsion_is_velu_on_the_x_line_and_mobius_on_the_y_line() {
+        // y² = x³ + 2 over F_1009 (p ≡ 1 mod 3): T = (0, √2) has order 3.
+        let f = Gf::prime(1009);
+        let b = 2;
+        let t = f.sqrt(b).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), 0, b, "j=0");
+        let t3 = Pt::Aff(0, t);
+        assert_eq!(c.mul(t3, 3), Pt::Inf);
+        let pts = c.affine_points();
+        let mut rng = Rng64::new(5);
+        let gens = vec![PointMap::translate(t3), PointMap::negate()];
+        // x-line: the only non-constant orbit invariant of x is Vélu's
+        // e₁ = x + 4b/x², the x-coordinate on E/⟨T⟩.
+        let qs = build_quotient_system(
+            &c,
+            &pts,
+            &gens,
+            Mobius::identity(),
+            &[Seed::Point(0), Seed::Point(1), Seed::Point(2)],
+            2,
+            &mut rng,
+        )
+        .unwrap();
+        assert_eq!(qs.group.len(), 6);
+        assert_eq!(qs.gamma.len(), 18);
+        assert_eq!(
+            qs.invariants.len(),
+            3,
+            "e₂ and e₃ of the orbit are constant"
+        );
+        assert!(
+            !qs.affine_on_u,
+            "a 3-torsion translation is not Möbius on x"
+        );
+        let four_b = f.mul(f.add(f.add(1, 1), f.add(1, 1)), b);
+        let mut cache = EvalCache::default();
+        for _ in 0..20 {
+            let tuple = relation_tuple(&c, &pts, 2, &mut rng);
+            if tuple.iter().any(|p| p.x() == 0) {
+                continue;
+            }
+            let vals = qs.evaluate(&c, &tuple, &mut cache).unwrap();
+            for (v, p) in vals.iter().zip(&tuple) {
+                let x = p.x();
+                let velu = f.add(x, f.div(four_b, f.mul(x, x)));
+                assert_eq!(*v, velu);
+            }
+        }
+        // y-line: v = (y − s)/(y + s), s = √b·√−3, has τ_T as v ↦ ω^{±1} v
+        // and −1 as v ↦ 1/v, so the quotient engine sees an affine map
+        // and the invariant v³.
+        let three = f.add(f.add(1, 1), 1);
+        let s = f.mul(t, f.sqrt(f.neg(three)).unwrap());
+        let chart = Chart::y(Mobius {
+            a: 1,
+            b: f.neg(s),
+            c: 1,
+            d: s,
+        });
+        let omega = (2..f.q).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        for &p in &pts {
+            let v = chart.apply(&f, p);
+            let vt = chart.apply(&f, c.add(p, t3));
+            if v == INF || vt == INF || v == 0 {
+                continue;
+            }
+            assert!(vt == f.mul(omega, v) || vt == f.mul(f.mul(omega, omega), v));
+            assert_eq!(chart.apply(&f, c.neg(p)), f.inv(v));
+        }
+        let qs = build_quotient_system(
+            &c,
+            &pts,
+            &[PointMap::translate(t3)],
+            chart,
+            &[Seed::Point(0), Seed::Point(1), Seed::Point(2)],
+            2,
+            &mut rng,
+        )
+        .unwrap();
+        assert!(qs.affine_on_u);
+        assert_eq!(qs.gamma.len(), 9);
+        assert_eq!(
+            qs.invariants.iter().map(|i| i.name()).collect::<Vec<_>>(),
+            ["e3[u1]", "e3[u2]", "e3[u3]"]
+        );
+        let tuple = relation_tuple(&c, &pts, 2, &mut rng);
+        let vals = qs.evaluate(&c, &tuple, &mut EvalCache::default()).unwrap();
+        for (v, p) in vals.iter().zip(&tuple) {
+            let u = chart.apply(&f, *p);
+            assert_eq!(*v, f.pow(u, 3));
+        }
     }
 }

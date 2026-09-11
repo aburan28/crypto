@@ -217,10 +217,7 @@ mod tests {
     #[test]
     fn pmac_aes128_partial_tail() {
         let key = AesKey::new(&h("000102030405060708090A0B0C0D0E0F")).unwrap();
-        let tag = pmac(
-            &key,
-            &h("000102030405060708090A0B0C0D0E0F10111213"),
-        );
+        let tag = pmac(&key, &h("000102030405060708090A0B0C0D0E0F10111213"));
         assert_eq!(&tag[..], &h("0412CA150BBF79058D8C75A58C993F55")[..]);
     }
 
