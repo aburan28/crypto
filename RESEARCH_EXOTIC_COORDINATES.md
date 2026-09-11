@@ -1528,8 +1528,79 @@ costs hours on the larger fields and its trend is already fixed by the
 | `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | 232 031 / 24 |
 | | symmetrised | 13 | 4 | 6 found, 26 refuted / 29 | 9, 29 / 8 | 35, 63 / 6 |
 | `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
-| | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | TBD-KD-F5 |
+| | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | 994 608 / 405 |
 | `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | 0/3, budget / 907 | – | – |
 | | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | TBD-KD-G5 |
 
-TBD-KD-READING
+### Reading
+
+**The cap buys splits and pays in time, and the exchange rate is set by
+the number of unknowns.**  Every arm at every instance loses split count
+as the cap rises and gains wall time.  What differs is the rate.  On the
+30-variable `x`-chained system at `K₀/F₂¹⁵`, cap 3 → 4 divides the
+splits by 25 and multiplies the time by 38.  On the 13-variable
+symmetrised system at the same instance it divides the splits by 15 and
+multiplies the time by 1.15.  At `n = 17`, where the symmetrised system
+has 25 variables, cap 4 → 5 divides its splits by 8 and multiplies its
+time by 49 — the symmetrised system at 25 variables behaves like the
+`x`-chained system at 30, not like itself at 13.  **The variable count,
+not the coordinate frame, is what decides whether extra Macaulay degree
+is affordable.**
+
+**Equal caps favour the `x`-chained arm, and comparing along the
+diagonal is the fair reading.**  Because the cap is absolute, the
+comparable pairs are (`x`-chained at cap `d`, symmetrised at cap
+`d + 1`): each arm then gets the same number of rounds above its own
+equations.  Along that diagonal:
+
+| instance | `x` at cap 3 vs sym at cap 4 | `x` at cap 4 vs sym at cap 5 |
+|---|---|---|
+| `K₀/F₂¹⁵` | 9 071 vs 30 ms — **×300** | 348 459 vs 75 ms — **×4 600** |
+| `K₁/F₂¹⁵` | 5 795 vs 9 ms — **×640** | 217 128 vs 35 ms — **×6 200** |
+| `K₁/F₂¹⁷` | 3 963 vs 20 269 ms — **×0.2** | not run vs 994 608 ms |
+
+**§8's `n = 17` verdict survives the correction; its explanation does
+not.**  §8 attributed the loss there to the symmetrised system being
+the one that outgrew the engine — "the better F4 instance only while
+its degree-4 Macaulay matrix fits".  The `built` column says the
+opposite happens at the raised caps: on `K₀/F₂¹⁵` at cap 5 it is the
+30-variable `x`-chained system whose matrix is refused (`built = 4`
+with a refusal flag) while the 13-variable symmetrised one builds
+degree 5.  The symmetrised system is the *smaller* Macaulay problem at
+equal degree, as its variable count implies.  What sinks it at
+`n = 17` is not matrix size but split count: 3 219 against 49 at cap 3,
+and still 405 against 49 after a cap rise that costs it a factor of 180
+in time.  The dimension-9 subspace there gives every target on the
+order of a hundred decompositions, and the symmetrised system pays for
+each of them in search; the `x`-chained system's extra 19 unknowns buy
+it a shape the splitter closes in fifty decisions.
+
+**At `n = 23` the symmetrised system is the only arm that answers.**
+Under a 3 000-split budget the 59-variable `x`-chained system is
+inconclusive on all three targets at cap 3, having spent 907 splits;
+the symmetrised system finds two of three in 5.7 s.  Raising its cap to
+4 cuts its splits from 135 to 15 and costs it a factor of 8 in time,
+and it still answers two of three.  Nothing about the equal-degree
+rerun changes the `n = 23` row, which is the row that matters for the
+scaling target.
+
+**What this says about the coordinate change.**  The 2-torsion frame's
+gain on the Koblitz side is a gain in *system size* — 34 unknowns
+against 59 at `n = 23`, 13 against 30 at `n = 15` — and size is what
+makes algebra affordable: the symmetrised system can be given another
+Macaulay degree for a factor of 1.15 where the `x`-chained system pays
+38.  It is not a gain in search behaviour, and where search dominates
+(`n = 17`, every target decomposable many times over) the larger system
+wins.  That is the same conclusion §14 reached over `F_p` by a
+different route — the frame halves the relation's degree per point, and
+what that buys is a solve whose matrices stay small — with the Koblitz
+caveat that a small system is not automatically a small search.
+
+### What this section does not settle
+
+The split heuristic is the repo's own (lowest free variable), and the
+`n = 17` result is a statement about that heuristic as much as about
+the systems.  A solver that chose its splitting variable by the
+symmetrised system's structure — the orbit an unknown belongs to —
+might not spend 3 219 decisions where the `x`-chained system spends 49.
+That is the next thing worth building on this side.
