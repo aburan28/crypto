@@ -7298,3 +7298,62 @@ Numbers pending in this session's bench (§11.3).  After that, the
 thread's open items are unchanged from §10.5 minus item 1, with one
 addition: any future oracle claim should be checked against
 `projected_column` counts before timing anything.
+
+---
+
+## 2026-09-11 (autolab run, fifth session on exotic coordinates)
+
+### Task picked
+
+§10.5 item 2: `F_{p^k}` support, so the Klein invariants meet a
+subspace factor base and "bits, not degrees" can be answered by
+descent.
+
+### Work done
+
+- `Gf::extension(p, k)`: odd-characteristic extension fields with
+  digit-vector elements, log tables, first-irreducible-by-trial-division;
+  the search and quotient engines run on them unchanged (the interpolated
+  `S₃` over `F_{13²}` matches the closed form).
+- `coordinate_descent`: fixed-target quotient systems (`Γ₀ = Γ ∩
+  (G^m × {id})`, summand-only seeds, relation interpolated for the given
+  `R` with identities quotiented out and kept as equations), descent by
+  coefficient digits to `k` equations over `F_p`, `F_p`-valuedness
+  check on the base before anything is timed, and a three-arm
+  comparison — Gaudry's `x`, one involution, the Klein group — on the
+  repo's Buchberger.
+- Two false starts caught by the tool's own checks: every curve in the
+  first example was over `F_p`, where the base `x ∈ F_p` is `E(F_p)`
+  and decomposable targets are `F_p`-rational (one descended equation
+  where there should be `k`); and the sign arm refuted decomposable
+  targets built from base points at the frame's pole.  The family
+  `y² = x(x² − αx + 1)`, `α ∉ F_p`, gives Gaudry's setting with an
+  `F_p`-rational sign frame; targets are now built from the base every
+  arm shares.
+
+### Findings
+
+**The Klein group does not descend, and cannot.**  On every curve in
+Gaudry's setting its invariants leave `F_p` on the base (`F_p?` column
+NO); on the over-`F_p` control they stay in `F_p` but the base is a
+subgroup.  Structurally: the base is an `F_p`-line, stability under all
+three involutions puts every 2-torsion abscissa in `F_p`, and that is
+the degenerate case.  §6.4 / §10.3 close on a measured negative.
+
+**One involution descends and is the cheaper system at `m = 2`.**
+Three `F_p`-unknowns and four equations of total degree 2 against
+Gaudry's two unknowns, three equations of total degree 4; Buchberger
+0.1 ms against 0.3 (found) and 0.6 ms (refuted); identical verdicts on
+every target.  `m = 3` in this session's run (§12.4).
+
+### Next step proposal
+
+The thread's remaining open item is §10.5's higher-order seeds
+(3-torsion on `j = 0` curves), and the standing rule from the fourth
+session — projected column counts before timings — now has a
+companion: `F_p`-valuedness on the base before descent.
+
+### Commits made
+
+(see PR — `Gf::extension`, `coordinate_descent`, `klein_descent`
+example, research note §12)

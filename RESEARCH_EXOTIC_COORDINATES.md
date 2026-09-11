@@ -922,3 +922,72 @@ held on every point of every `φ⁻¹(F_u)`.
 - §10.5 item 1: done, negative.  The remaining items stand, and the
   union-base ceiling measured here is the number a mixed oracle would
   have to justify itself against.
+
+## 12. `F_{p^k}`: the Klein invariants meet a subspace factor base
+
+**Code:** `coordinate_search::Gf::extension`,
+`src/cryptanalysis/coordinate_descent.rs`, `examples/klein_descent.rs`.
+
+§10.3 left the Klein group's worth as "a question about bits, not
+degrees", unanswerable on a prime field because there is no subspace
+factor base there.  Gaudry's setting has one: `E/F_{p^k}` with the base
+`{P : x(P) ∈ F_p}`, and if the coordinate change is `F_p`-rational every
+invariant of a factor-base point is in `F_p`, so a relation over
+`F_{p^k}` in `F_p`-unknowns is `k` relations over `F_p` — the digits of
+its coefficients — and the repo's `F_p` Buchberger can solve it.
+
+### 12.1 What had to be built
+
+- `Gf::extension(p, k)`: `F_{p^k} = F_p[t]/(f)` with elements as base-`p`
+  digit vectors, so the digits *are* the coordinates a descent reads
+  off; log tables for multiplication; the search and quotient engines
+  run on it unchanged (the interpolated `S₃` over `F_{13²}` matches the
+  closed form; the Frobenius is detected as a global symmetry).
+- **Fixed-target quotients.**  The decomposition problem fixes `R`, so
+  the symmetry group is `Γ₀ = Γ ∩ (G^m × {id})`, the seeds are functions
+  of the summands only, and the relation is interpolated from summand
+  tuples with `Σ P_i = R` for that `R`, with identities among the
+  invariants quotiented out and *kept* — they are equations of the
+  descended system.  Every invariant is checked to be `F_p`-valued on
+  the base before anything is descended or timed.
+- **The setting itself.**  A curve *over* `F_p` makes the base
+  `E(F_p)`, a subgroup, and every target that decomposes is `F_p`-rational
+  — the first version of the example measured exactly that degenerate
+  case.  The family `y² = x(x² − αx + 1)`, `α ∉ F_p`, has `T = (0, 0)`
+  with `x(P + T) = 1/x`, fixed points `±1`, hence an `F_p`-rational sign
+  frame `u = (x − 1)/(x + 1)` and the base `{u ∈ F_p} = {x ∈ F_p}` minus
+  the frame's pole, while the curve is not over `F_p`; the other two
+  2-torsion points are rational iff `α² − 4` is a square.
+
+### 12.2 The Klein group does not descend, and why
+
+On every curve in Gaudry's setting the invariants of the full `E[2]`
+are **not** `F_p`-valued on the base (the `F_p?` column); the single
+involution's are.  The reason is structural: the base is an `F_p`-line
+in `P¹` (the sign frame's `F_p ∪ {∞}`), and for the Klein
+symmetrisation to apply, that line must be stable under all three
+involutions `x ↦ e_T + c_T/(x − e_T)`.  That forces every `e_T` and
+`c_T` into `F_p`, i.e. all three 2-torsion abscissae into `F_p`, i.e. the
+curve over `F_p` — the degenerate case.  On the over-`F_p` control the
+Klein invariants are indeed `F_p`-valued, and the base is `E(F_p)`.
+
+So §6.4's "complete `E[2]`" and §10.3's fourfold collapse are real on
+the curve but unusable with a subspace factor base on any curve for
+which that base is worth having.  The Klein direction closes here, on a
+measured negative.
+
+### 12.3 One involution against Gaudry, descended
+
+`m = 2`, `k = 3`, targets: four sums of two base points with
+`x(R) ∉ F_p`, four random points.  Both arms agree on every verdict.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | GB ms found / refuted |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.3 / 0.6 |
+| | one `T`, `w = u²`, `Πu` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | not `F_p`-valued |
+TBD-K2
+
+### 12.4 `m = 3`
+
+TBD-K3
