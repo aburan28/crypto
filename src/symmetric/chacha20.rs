@@ -162,7 +162,12 @@ fn chacha_block_with(
     out
 }
 
-fn chacha_xor_with(data: &[u8], key: &[u8; 32], nonce: &[u8; 12], double_rounds: usize) -> Vec<u8> {
+fn chacha_xor_with(
+    data: &[u8],
+    key: &[u8; 32],
+    nonce: &[u8; 12],
+    double_rounds: usize,
+) -> Vec<u8> {
     let mut out = data.to_vec();
     let mut counter = 1u32;
     for chunk in out.chunks_mut(64) {
@@ -544,10 +549,7 @@ mod tests {
     fn chacha_param_matches_chacha20() {
         let key = [0x42u8; 32];
         let nonce = [0x11u8; 12];
-        assert_eq!(
-            chacha_block_with(&key, &nonce, 7, 10),
-            chacha20_block(&key, &nonce, 7)
-        );
+        assert_eq!(chacha_block_with(&key, &nonce, 7, 10), chacha20_block(&key, &nonce, 7));
     }
 
     /// ChaCha8 and ChaCha12 XOR round-trips.

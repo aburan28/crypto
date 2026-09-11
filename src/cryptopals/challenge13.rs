@@ -38,7 +38,10 @@ fn ecb_dec(ct: &[u8], key: &AesKey) -> Vec<u8> {
 }
 
 fn profile_for(email: &str) -> String {
-    let sanitised: String = email.chars().filter(|c| *c != '&' && *c != '=').collect();
+    let sanitised: String = email
+        .chars()
+        .filter(|c| *c != '&' && *c != '=')
+        .collect();
     format!("email={}&uid=10&role=user", sanitised)
 }
 

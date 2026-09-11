@@ -103,11 +103,7 @@ fn mat_mul(a: &Matrix, b: &Matrix) -> Matrix {
 
 fn mat_vec(a: &Matrix, x: &[u8]) -> Vec<u8> {
     a.iter()
-        .map(|row| {
-            row.iter()
-                .zip(x)
-                .fold(0u8, |acc, (&aij, &xj)| acc ^ gf_mul(aij, xj))
-        })
+        .map(|row| row.iter().zip(x).fold(0u8, |acc, (&aij, &xj)| acc ^ gf_mul(aij, xj)))
         .collect()
 }
 
@@ -164,9 +160,7 @@ fn solve_underdetermined(a: &Matrix, b: &[u8]) -> Option<Vec<u8>> {
         if row == rows {
             break;
         }
-        let Some(p) = (row..rows).find(|&r| m[r][col] != 0) else {
-            continue;
-        };
+        let Some(p) = (row..rows).find(|&r| m[r][col] != 0) else { continue };
         m.swap(row, p);
         rhs.swap(row, p);
         let inv = gf_inv(m[row][col]);
@@ -286,10 +280,7 @@ pub fn mayo_keygen() -> (MayoPublicKey, MayoSecretKey) {
         }
     };
     let t_t = transpose(&t);
-    let forms = central
-        .iter()
-        .map(|q| mat_mul(&t_t, &mat_mul(q, &t)))
-        .collect();
+    let forms = central.iter().map(|q| mat_mul(&t_t, &mat_mul(q, &t))).collect();
     (MayoPublicKey { forms }, MayoSecretKey { central, t_inv })
 }
 
@@ -339,10 +330,8 @@ fn eval_whipped(forms: &[Matrix], inputs: &[Vec<u8>]) -> Vec<u8> {
     }
     for i in 0..K {
         for j in (i + 1)..K {
-            let p: Vec<u8> = forms
-                .iter()
-                .map(|q| eval_polar(q, &inputs[i], &inputs[j]))
-                .collect();
+            let p: Vec<u8> =
+                forms.iter().map(|q| eval_polar(q, &inputs[i], &inputs[j])).collect();
             let ep = mat_vec(&e[pair_index(i, j)], &p);
             for (a, v) in acc.iter_mut().zip(ep) {
                 *a ^= v;
@@ -407,11 +396,8 @@ pub fn mayo_sign(sk: &MayoSecretKey, msg: &[u8]) -> MayoSignature {
             for j in (i + 1)..K {
                 let xi0 = with_oils(&vins[i], &zero_oil);
                 let xj0 = with_oils(&vins[j], &zero_oil);
-                let c: Vec<u8> = sk
-                    .central
-                    .iter()
-                    .map(|q| eval_polar(q, &xi0, &xj0))
-                    .collect();
+                let c: Vec<u8> =
+                    sk.central.iter().map(|q| eval_polar(q, &xi0, &xj0)).collect();
                 let ec = mat_vec(&e[pair_index(i, j)], &c);
                 for (bk, v) in b.iter_mut().zip(ec) {
                     *bk ^= v;
@@ -447,9 +433,7 @@ pub fn mayo_sign(sk: &MayoSecretKey, msg: &[u8]) -> MayoSignature {
             }
         }
 
-        let Some(oils) = solve_underdetermined(&a, &b) else {
-            continue;
-        };
+        let Some(oils) = solve_underdetermined(&a, &b) else { continue };
 
         // Assemble central-coordinate inputs and map through T⁻¹.
         let inputs: Vec<Vec<u8>> = (0..K)
@@ -504,10 +488,8 @@ mod tests {
         let via_public = eval_whipped(&pk.forms, &inputs);
         // Central inputs: w_i = T x_i, i.e. x_i = T⁻¹ w_i ⇒ w_i = T x_i.
         // We only have T⁻¹ in the secret key, so check the inverse way:
-        let central_inputs: Vec<Vec<u8>> = inputs
-            .iter()
-            .map(|x| mat_vec(&invert(&sk.t_inv).unwrap(), x))
-            .collect();
+        let central_inputs: Vec<Vec<u8>> =
+            inputs.iter().map(|x| mat_vec(&invert(&sk.t_inv).unwrap(), x)).collect();
         let via_central = eval_whipped(&sk.central, &central_inputs);
         assert_eq!(via_public, via_central);
     }

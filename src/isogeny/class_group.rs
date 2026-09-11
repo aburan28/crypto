@@ -562,7 +562,12 @@ mod tests {
         // The famous nine fundamental class-number-1 discriminants
         // for ℂ-CM curves with End_Q(E) maximal.
         for d_val in [-3, -4, -7, -8, -11, -19, -43, -67, -163] {
-            assert_eq!(class_number(&d(d_val)), 1, "expected h({}) = 1", d_val);
+            assert_eq!(
+                class_number(&d(d_val)),
+                1,
+                "expected h({}) = 1",
+                d_val
+            );
         }
     }
 
@@ -572,15 +577,12 @@ mod tests {
         // The three reduced forms are (1,1,6), (2,1,3), (2,-1,3).
         let forms = enumerate_reduced_forms(&d(-23));
         assert_eq!(forms.len(), 3);
-        let mut printed: Vec<String> = forms.iter().map(|f| f.to_string()).collect();
+        let mut printed: Vec<String> =
+            forms.iter().map(|f| f.to_string()).collect();
         printed.sort();
         assert_eq!(
             printed,
-            vec![
-                "[1, 1, 6]".to_string(),
-                "[2, -1, 3]".to_string(),
-                "[2, 1, 3]".to_string()
-            ],
+            vec!["[1, 1, 6]".to_string(), "[2, -1, 3]".to_string(), "[2, 1, 3]".to_string()],
         );
     }
 

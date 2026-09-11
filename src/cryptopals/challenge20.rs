@@ -29,10 +29,7 @@ pub fn run() -> Report {
         .map(|(b, k)| (b ^ k) as char)
         .collect();
     r.line(format!("Line 1 head: {:?}", recovered_first));
-    assert!(
-        recovered_first.to_ascii_lowercase().contains("i'm rated")
-            || recovered_first.chars().filter(|c| c.is_ascii()).count() > n * 9 / 10
-    );
+    assert!(recovered_first.to_ascii_lowercase().contains("i'm rated") || recovered_first.chars().filter(|c| c.is_ascii()).count() > n * 9 / 10);
     r.succeed()
 }
 

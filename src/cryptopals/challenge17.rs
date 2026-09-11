@@ -13,8 +13,8 @@ use crate::cryptopals::challenge10::cbc_encrypt_no_iv_prefix;
 use crate::cryptopals::low_util::{b64_decode, pkcs7_unpad};
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{decrypt_block, AesKey};
-use rand::rngs::StdRng;
 use rand::{seq::SliceRandom, SeedableRng};
+use rand::rngs::StdRng;
 
 const STRINGS: &[&str] = &[
     "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
@@ -58,7 +58,11 @@ pub fn padding_oracle(ct: &[u8], iv: &[u8; 16], key: &AesKey) -> bool {
 
 /// Decrypt one ciphertext block `cn` whose predecessor was `c_prev`,
 /// using a padding oracle.  Returns the plaintext block.
-pub fn decrypt_block_via_oracle(c_prev: &[u8; 16], cn: &[u8; 16], key: &AesKey) -> [u8; 16] {
+pub fn decrypt_block_via_oracle(
+    c_prev: &[u8; 16],
+    cn: &[u8; 16],
+    key: &AesKey,
+) -> [u8; 16] {
     let mut intermediate = [0u8; 16]; // I = AES_K^-1(cn)
     for k in (0..16).rev() {
         let pad = (16 - k) as u8;

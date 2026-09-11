@@ -3,7 +3,7 @@
   "title": "Index-calculus boundary ledger",
   "updated": "2026-09-10",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
-  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
+  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
     "factor_base",
     "decomposition",
@@ -66,7 +66,11 @@
         "trials_per_relation",
         "target_mix"
       ],
-      "target_mix_fields": ["natural", "planted_sat", "proven_unsat"]
+      "target_mix_fields": [
+        "natural",
+        "planted_sat",
+        "proven_unsat"
+      ]
     },
     "rank": {
       "required": [
@@ -117,41 +121,47 @@
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",
     "vs_rho and end_to_end_dlp past prior size require independent recomputation.",
-    "Incomplete measurement_schema fields fail closed — no row promotion."
+    "Incomplete measurement_schema fields fail closed \u2014 no row promotion."
   ],
   "agent_priorities": [
     {
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "whole-process wall-clock crossover at n=37, or charged crossover at n=41 with same gates and >=20% margin"
+      "beat": "Push past prior ceiling: construct+measure n=53 vs_rho probe; then wall at n=37 or charged at n=41 with >=20% margin"
     },
     {
       "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base",
+      "beat": "Balanced base at n=53 under resource gate (materialized or implicit+storage lower bound)"
+    },
+    {
+      "rank": 3,
       "regime": "koblitz",
       "stage": "decomposition",
       "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged"
     },
     {
-      "rank": 3,
+      "rank": 4,
       "regime": "binary",
       "stage": "decomposition",
       "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged"
     },
     {
-      "rank": 4,
+      "rank": 5,
       "regime": "prime",
       "stage": "end_to_end_dlp",
       "beat": "j=0 known-answer IC at 16 bits agreeing with rho"
     },
     {
-      "rank": 5,
+      "rank": 6,
       "regime": "binary_and_prime",
       "stage": "relation_yield",
       "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs"
     },
     {
-      "rank": 6,
+      "rank": 7,
       "regime": "all",
       "stage": "decomposition",
       "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts"
@@ -159,7 +169,7 @@
   ],
   "regimes": {
     "binary": {
-      "label": "Binary fields (Weil–Semaev / non-Koblitz)",
+      "label": "Binary fields (Weil\u2013Semaev / non-Koblitz)",
       "best_stack": [
         "semaev_decomp",
         "semaev_sat",
@@ -194,7 +204,10 @@
               "construction_wall_ms logged"
             ]
           },
-          "evidence": ["docs/ic/README.md", "RESEARCH_SEMAEV_DECOMPOSITION.md"],
+          "evidence": [
+            "docs/ic/README.md",
+            "RESEARCH_SEMAEV_DECOMPOSITION.md"
+          ],
           "history": []
         },
         "decomposition": {
@@ -207,11 +220,18 @@
               "pairs_n": 21,
               "pairs_l": 7,
               "usable_l_approx": 12,
-              "oracle_classes": ["sat", "pairs_and_solve", "enumerate"],
+              "oracle_classes": [
+                "sat",
+                "pairs_and_solve",
+                "enumerate"
+              ],
               "ffd": {
                 "full_field_weil_s3": {
                   "value": 3,
-                  "n_range": [3, 7],
+                  "n_range": [
+                    3,
+                    7
+                  ],
                   "source": "RESEARCH_FFD_MEASUREMENT.md"
                 },
                 "subspace_sat_pairs_ladder": {
@@ -294,7 +314,9 @@
               "stage_timers present"
             ]
           },
-          "evidence": ["docs/ic/README.md"],
+          "evidence": [
+            "docs/ic/README.md"
+          ],
           "history": []
         },
         "vs_rho": {
@@ -329,7 +351,7 @@
         "koblitz_rank_fixture"
       ],
       "implementation_caps": {
-        "MAX_N": 41
+        "MAX_N": 63
       },
       "unknowns_formula": "m*l + (m-2)*n",
       "automorphism_discount_default": "sqrt(2n) with A=2*n",
@@ -337,19 +359,20 @@
         "factor_base": {
           "status": "record",
           "current": {
-            "summary": "Exact/optimized bases at n=19; minimum base feasible at n=41",
+            "summary": "Exact/optimized bases at n=19; curve+generator construction verified at n=53 (past prior MAX_N=41); minimum base feasible at n=41",
             "metrics": {
               "exact_n": 19,
               "feasible_n": 41,
+              "construction_n_max": 53,
               "construction_method": "frobenius_invariant_linearized_or_point_defined",
               "materialized": true,
               "construction_wall_ms": null,
               "retained_bytes": null
             },
-            "verdict": "N41_MINIMUM_BASE_FEASIBLE"
+            "verdict": "N53_CURVE_CONSTRUCTION_OK"
           },
           "next_target": {
-            "summary": "Balanced base at n=53 under crossover-task resource gate (materialized or implicit+storage lower bound)",
+            "summary": "Balanced base at n=53 under crossover-task resource gate (materialized or implicit+storage lower bound); publish construction RSS + retained bytes",
             "acceptance_gates": [
               "Frobenius+negation closure verified",
               "construction RSS and retained bytes logged"
@@ -375,13 +398,44 @@
                 "draws_per_row": 16,
                 "headline": "No measured system falls later than D=3; chained m>=3 falls at FFD=3; m=2 often FFD 2-3 and overdetermined",
                 "examples": [
-                  {"n": 31, "l": 5, "m": 3, "vars": 46, "eqs": 62, "deg": 3, "ffd_min": 3, "ffd_max": 3},
-                  {"n": 31, "l": 5, "m": 2, "vars": 10, "eqs": 31, "deg": 2, "ffd_min": 2, "ffd_max": 2},
-                  {"n": 21, "l": 6, "m": 3, "vars": 39, "eqs": 42, "deg": 3, "ffd_min": 3, "ffd_max": 3}
+                  {
+                    "n": 31,
+                    "l": 5,
+                    "m": 3,
+                    "vars": 46,
+                    "eqs": 62,
+                    "deg": 3,
+                    "ffd_min": 3,
+                    "ffd_max": 3
+                  },
+                  {
+                    "n": 31,
+                    "l": 5,
+                    "m": 2,
+                    "vars": 10,
+                    "eqs": 31,
+                    "deg": 2,
+                    "ffd_min": 2,
+                    "ffd_max": 2
+                  },
+                  {
+                    "n": 21,
+                    "l": 6,
+                    "m": 3,
+                    "vars": 39,
+                    "eqs": 42,
+                    "deg": 3,
+                    "ffd_min": 3,
+                    "ffd_max": 3
+                  }
                 ]
               },
-              "f4_splits": "flat across 39→46 unknowns (scaling note)",
-              "oracle_classes": ["enumerate", "groebner", "sat"]
+              "f4_splits": "flat across 39\u219246 unknowns (scaling note)",
+              "oracle_classes": [
+                "enumerate",
+                "groebner",
+                "sat"
+              ]
             }
           },
           "next_target": {
@@ -459,7 +513,7 @@
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps",
+            "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps",
             "metrics": {
               "demo_n_max": 13,
               "ic_degree_doc_max": 23,
@@ -469,11 +523,14 @@
           "next_target": {
             "summary": "Known-answer full IC at n=23 with stage timers",
             "acceptance_gates": [
-              "progress events FB→relations→LA→verify",
+              "progress events FB\u2192relations\u2192LA\u2192verify",
               "[d]G = Q"
             ]
           },
-          "evidence": ["docs/ic/README.md", "tests/ic_progress.rs"],
+          "evidence": [
+            "docs/ic/README.md",
+            "tests/ic_progress.rs"
+          ],
           "history": []
         },
         "vs_rho": {
@@ -492,13 +549,14 @@
             "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
           },
           "next_target": {
-            "summary": "whole-process wall-clock at n=37 OR charged crossover at n=41 with >=20% margin",
+            "summary": "After n=53 construction+probe: win whole-process wall at n=37 OR charged at n=41 (>=20% margin); then charged/wall at n=53 with balanced eta",
             "acceptance_gates": [
               "all stages charged",
               "independent validation",
               "explicit verdict field for wall or next-rung",
               "timing_class and automorphism_discount explicit"
-            ]
+            ],
+            "n53_probe_note": "IC producer RANK_PLUS_32 and rho recover at n=53 (draft vs_rho costs); not a ledger promotion"
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json"
@@ -525,7 +583,11 @@
           "current": {
             "summary": "Small-x and zeta-orbit bases on toy primes; Eisenstein-smooth FB implemented",
             "metrics": {
-              "construction_methods": ["small_x", "zeta_orbit", "eisenstein_smooth"],
+              "construction_methods": [
+                "small_x",
+                "zeta_orbit",
+                "eisenstein_smooth"
+              ],
               "materialized": true,
               "construction_wall_ms": null,
               "retained_bytes": null
@@ -539,13 +601,16 @@
               "construction_wall_ms and retained_bytes logged"
             ]
           },
-          "evidence": ["docs/RESEARCH_BENCH_LOG.md", "src/cryptanalysis/ec_index_calculus_j0.rs"],
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md",
+            "src/cryptanalysis/ec_index_calculus_j0.rs"
+          ],
           "history": []
         },
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "S3 2-decomp through bench sizes; S4/Gröbner not a scaling win; FFD not published on 2-decomp frontier",
+            "summary": "S3 2-decomp through bench sizes; S4/Gr\u00f6bner not a scaling win; FFD not published on 2-decomp frontier",
             "metrics": {
               "summation": "S3",
               "summands": 2,
@@ -554,7 +619,9 @@
                 "status": "unmeasured",
                 "reason": "Current bench frontier records wall scaling / alpha fits, not FFD/DoR"
               },
-              "oracle_classes": ["semaev_s3_2decomp"]
+              "oracle_classes": [
+                "semaev_s3_2decomp"
+              ]
             }
           },
           "next_target": {
@@ -565,7 +632,9 @@
               "unknowns, system_degree, eq_var_ratio, median_ms_per_target logged"
             ]
           },
-          "evidence": ["src/cryptanalysis/ec_index_calculus.rs"],
+          "evidence": [
+            "src/cryptanalysis/ec_index_calculus.rs"
+          ],
           "history": []
         },
         "relation_yield": {
@@ -579,10 +648,15 @@
             }
           },
           "next_target": {
-            "summary": "Trials-per-relation vs bitlength for 10–16 bits on frozen ladder",
-            "acceptance_gates": ["at least 3 bitlengths", "R^2 reported"]
+            "summary": "Trials-per-relation vs bitlength for 10\u201316 bits on frozen ladder",
+            "acceptance_gates": [
+              "at least 3 bitlengths",
+              "R^2 reported"
+            ]
           },
-          "evidence": ["docs/RESEARCH_BENCH_LOG.md"],
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md"
+          ],
           "history": []
         },
         "rank": {
@@ -624,7 +698,9 @@
               "stage_timers present"
             ]
           },
-          "evidence": ["docs/RESEARCH_BENCH_LOG.md"],
+          "evidence": [
+            "docs/RESEARCH_BENCH_LOG.md"
+          ],
           "history": []
         },
         "vs_rho": {
@@ -647,7 +723,9 @@
               "timing_class explicit"
             ]
           },
-          "evidence": ["research/ecdlp_autolab/paper.md"],
+          "evidence": [
+            "research/ecdlp_autolab/paper.md"
+          ],
           "history": []
         }
       }

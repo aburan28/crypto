@@ -255,9 +255,7 @@ impl EcGroup {
             }
         }
 
-        out.into_iter()
-            .map(|o| o.expect("every slot filled"))
-            .collect()
+        out.into_iter().map(|o| o.expect("every slot filled")).collect()
     }
 }
 
@@ -404,12 +402,8 @@ mod tests {
     fn batch_add_matches_sequential() {
         let grp = demo_group_small();
         // Build five independent (P_i, Q_i) generic pairs.
-        let base: Vec<Point> = (1u32..=5)
-            .map(|k| grp.mul_setup(&BigUint::from(k)))
-            .collect();
-        let off: Vec<Point> = (7u32..=11)
-            .map(|k| grp.mul_setup(&BigUint::from(k)))
-            .collect();
+        let base: Vec<Point> = (1u32..=5).map(|k| grp.mul_setup(&BigUint::from(k))).collect();
+        let off: Vec<Point> = (7u32..=11).map(|k| grp.mul_setup(&BigUint::from(k))).collect();
         let pairs: Vec<(Point, Point)> = base.iter().cloned().zip(off.iter().cloned()).collect();
         let batched = grp.batch_add(&pairs);
         for (i, (pp, qq)) in pairs.iter().enumerate() {

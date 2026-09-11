@@ -145,10 +145,12 @@ mod tests {
         let iv: [u8; 10] = h("00000000000000000000").try_into().unwrap();
         let mut tr = Trivium::new(&key, &iv);
         let ks = tr.keystream(64);
-        let expected = h("38EB86FF730D7A9CAF8DF13A4420540D\
+        let expected = h(
+            "38EB86FF730D7A9CAF8DF13A4420540D\
              BB7B651464C87501552041C249F29A64\
              D2FBF515610921EBE06C8F92CECF7F80\
-             98FF20CCCC6A62B97BE8EF7454FC80F9");
+             98FF20CCCC6A62B97BE8EF7454FC80F9",
+        );
         assert_eq!(ks, expected);
     }
 

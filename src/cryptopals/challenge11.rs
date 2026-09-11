@@ -12,8 +12,8 @@
 use crate::cryptopals::challenge10::cbc_encrypt_no_iv_prefix;
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{encrypt_block, AesKey};
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {

@@ -183,8 +183,10 @@ mod tests {
     fn cshake128_sample_1() {
         let data = h("00010203");
         let s = b"Email Signature";
-        let expected = h("c1c36925b6409a04f1b504fcbca9d82b\
-             4017277cb5ed2b2065fc1d3814d5aaf5");
+        let expected = h(
+            "c1c36925b6409a04f1b504fcbca9d82b\
+             4017277cb5ed2b2065fc1d3814d5aaf5",
+        );
         assert_eq!(cshake128(&data, b"", s, 32), expected);
     }
 
@@ -193,8 +195,10 @@ mod tests {
     fn cshake128_sample_2() {
         let data: Vec<u8> = (0u8..=199).collect();
         let s = b"Email Signature";
-        let expected = h("c5221d50e4f822d96a2e8881a961420f\
-             294b7b24fe3d2094baed2c6524cc166b");
+        let expected = h(
+            "c5221d50e4f822d96a2e8881a961420f\
+             294b7b24fe3d2094baed2c6524cc166b",
+        );
         assert_eq!(cshake128(&data, b"", s, 32), expected);
     }
 
@@ -205,10 +209,12 @@ mod tests {
     fn cshake256_sample_3() {
         let data = h("00010203");
         let s = b"Email Signature";
-        let expected = h("d008828e2b80ac9d2218ffee1d070c48\
+        let expected = h(
+            "d008828e2b80ac9d2218ffee1d070c48\
              b8e4c87bff32c9699d5b6896eee0edd1\
              64020e2be0560858d9c00c037e34a969\
-             37c561a74c412bb4c746469527281c8c");
+             37c561a74c412bb4c746469527281c8c",
+        );
         assert_eq!(cshake256(&data, b"", s, 64), expected);
     }
 
@@ -217,13 +223,17 @@ mod tests {
     fn cshake256_sample_4() {
         let data: Vec<u8> = (0u8..=199).collect();
         let s = b"Email Signature";
-        let expected = h("07dc27b11e51fbac75bc7b3c1d983e8b\
+        let expected = h(
+            "07dc27b11e51fbac75bc7b3c1d983e8b\
              4b85fb1defaf218912ac86430273091727f42b17ed1df63e\
-             8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb");
+             8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb",
+        );
         // Above hex is wrapped; recompute clean.
-        let expected_clean = h("07dc27b11e51fbac75bc7b3c1d983e8b\
+        let expected_clean = h(
+            "07dc27b11e51fbac75bc7b3c1d983e8b\
              4b85fb1defaf218912ac86430273091727f42b17ed1df63e\
-             8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb");
+             8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb",
+        );
         assert_eq!(expected, expected_clean);
         assert_eq!(cshake256(&data, b"", s, 64), expected);
     }

@@ -16,9 +16,9 @@
 //! Toy parameters here: `M = 2·3·5·7·11·13 = 30030`, primes ~32 bits
 //! so the dlog and Coppersmith both run in milliseconds.
 
+use crate::cryptopals::Report;
 use crate::cryptopals::challenge67::coppersmith;
 use crate::cryptopals::set8_util::crt_combine;
-use crate::cryptopals::Report;
 use num_bigint::{BigInt, BigUint, ToBigInt};
 use num_integer::Integer;
 use num_traits::{One, Zero};
@@ -73,7 +73,11 @@ pub fn order_mod(g: &BigUint, n: &BigUint) -> BigUint {
 /// Generate a ROCA-shaped prime: `p = k · M + 65537^a mod M`.
 ///
 /// Returns `(p, k, a)`.
-pub fn roca_prime(m: &BigUint, target_bits: u64, seed: u64) -> (BigUint, BigUint, BigUint) {
+pub fn roca_prime(
+    m: &BigUint,
+    target_bits: u64,
+    seed: u64,
+) -> (BigUint, BigUint, BigUint) {
     use crate::asymmetric::rsa::is_prime;
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
@@ -136,9 +140,7 @@ pub fn dlog_bsgs(g: &BigUint, target: &BigUint, m: &BigUint) -> Option<BigUint> 
     if g_inv.gcd != BigInt::one() {
         return None;
     }
-    let g_inv = (((g_inv.x % &m_int) + &m_int) % &m_int)
-        .to_biguint()
-        .unwrap();
+    let g_inv = (((g_inv.x % &m_int) + &m_int) % &m_int).to_biguint().unwrap();
     let factor = g_inv.modpow(&step, m);
     let mut gamma = target.clone() % m;
     for i in 0..step_u {

@@ -60,10 +60,5 @@ fn main() {
 
     println!();
     println!("Theoretical degree progression: 2, 4, 8, 16, 32, ...");
-    println!(
-        "Observed: 2 (S_3), {} (S_4), {} (S_5), {} (S_6).",
-        s4.degree().unwrap(),
-        s5.degree().unwrap(),
-        s6.degree().unwrap()
-    );
+    println!("Observed: 2 (S_3), {} (S_4), {} (S_5), {} (S_6).", s4.degree().unwrap(), s5.degree().unwrap(), s6.degree().unwrap());
 }

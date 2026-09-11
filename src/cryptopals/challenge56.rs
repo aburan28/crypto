@@ -96,14 +96,15 @@ fn argmax(counts: &[u64]) -> u8 {
 /// byte lands at keystream position 15.  Gather `n_samples`
 /// ciphertexts, find the most-common ciphertext byte at position 15,
 /// XOR with the most-likely keystream byte at that position.
-pub fn recover_byte(cookie: &[u8], cookie_index: usize, most_likely_z16: u8, n_samples: u64) -> u8 {
+pub fn recover_byte(
+    cookie: &[u8],
+    cookie_index: usize,
+    most_likely_z16: u8,
+    n_samples: u64,
+) -> u8 {
     // We want cookie[cookie_index] at ciphertext position 15.
     // Path length = 15 - cookie_index (0 if cookie_index = 15).
-    let path_len = if cookie_index <= 15 {
-        15 - cookie_index
-    } else {
-        0
-    };
+    let path_len = if cookie_index <= 15 { 15 - cookie_index } else { 0 };
     let path = vec![b'/'; path_len];
     let mut counts = [0u64; 256];
     for _ in 0..n_samples {

@@ -16,10 +16,7 @@ pub fn run() -> Report {
     let (p, q, _g_real) = dsa_params();
     let g_zero = BigUint::zero();
     let r_sig = g_zero.modpow(&BigUint::from(7u32), &p) % &q;
-    r.line(format!(
-        "g = 0 → r component = {} (always 0 → invalid sig matches anything)",
-        r_sig
-    ));
+    r.line(format!("g = 0 → r component = {} (always 0 → invalid sig matches anything)", r_sig));
     assert!(r_sig.is_zero());
 
     let g_one = &p + BigUint::from(1u32);

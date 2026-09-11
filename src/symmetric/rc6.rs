@@ -134,9 +134,7 @@ impl Rc6 {
                 .wrapping_mul(d.wrapping_mul(2).wrapping_add(1))
                 .rotate_left(LG_W);
             a = (a ^ t).rotate_left(u & (W - 1)).wrapping_add(self.s[2 * i]);
-            c = (c ^ u)
-                .rotate_left(t & (W - 1))
-                .wrapping_add(self.s[2 * i + 1]);
+            c = (c ^ u).rotate_left(t & (W - 1)).wrapping_add(self.s[2 * i + 1]);
             // (A, B, C, D) ← (B, C, D, A)
             let na = b;
             let nb = c;
@@ -267,7 +265,9 @@ mod tests {
     /// CT  = c8241816f0d7e48920ad16a1674e5d48
     #[test]
     fn rc6_paper_vector_256() {
-        let key = h("0123456789abcdef0112233445566778 899aabbccddeeff01032547698badcfe");
+        let key = h(
+            "0123456789abcdef0112233445566778 899aabbccddeeff01032547698badcfe",
+        );
         let mut block = hex16("02132435465768798a9bacbdcedfe0f1");
         let pt = block;
         let cipher = Rc6::new(&key).unwrap();

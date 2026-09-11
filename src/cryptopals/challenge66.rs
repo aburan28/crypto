@@ -39,14 +39,14 @@
 //! means rarer faults but easier filtering.  Walk the key one bit
 //! at a time.
 
-use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use crate::cryptopals::challenge59::{Curve, Pt};
-use crate::cryptopals::set8_util::parse_big;
 use crate::cryptopals::Report;
+use crate::cryptopals::set8_util::parse_big;
+use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 /// Fault predicate.  Returns `true` when the add would corrupt.
 /// `mask` controls the fault rate: smaller mask → more faults.
@@ -75,10 +75,7 @@ pub fn faulty_scalar_mul(curve: &Curve, q: &Pt, k: &BigUint, mask: u128) -> Opti
     if k.is_zero() {
         return Some(Pt::Inf);
     }
-    let bits: Vec<bool> = (0..k.bits())
-        .rev()
-        .map(|i| ((k >> i as usize) & BigUint::one()).is_one())
-        .collect();
+    let bits: Vec<bool> = (0..k.bits()).rev().map(|i| ((k >> i as usize) & BigUint::one()).is_one()).collect();
     let mut r = q.clone();
     for &b in &bits[1..] {
         r = faulty_add(curve, &r, &r, mask)?;
@@ -185,8 +182,7 @@ pub fn run() -> Report {
     // 10-bit secret so the demo runs quickly; full recovery scales.
     let secret_bits: u32 = 10;
     let mut rng = StdRng::seed_from_u64(0xBEEF);
-    let secret =
-        BigUint::from(rng.gen::<u32>() & ((1u32 << secret_bits) - 1) | (1u32 << (secret_bits - 1)));
+    let secret = BigUint::from(rng.gen::<u32>() & ((1u32 << secret_bits) - 1) | (1u32 << (secret_bits - 1)));
     r.line(format!("Secret d (binary): {:b}", secret));
     r.line(format!("Fault probability per add ≈ 1/{}", 1u128 << 10));
     let mask = 1u128 << 10;

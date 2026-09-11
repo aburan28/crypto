@@ -123,10 +123,7 @@ pub fn run() -> Report {
     let original = b"alert('MZA who was that?');\n";
     let original_tag = cbc_mac_hash(&key, original);
     let expected_hex = "296b8d7cb78a243dda4d0a61d33bbdd1";
-    r.line(format!(
-        "Original snippet : {:?}",
-        std::str::from_utf8(original).unwrap()
-    ));
+    r.line(format!("Original snippet : {:?}", std::str::from_utf8(original).unwrap()));
     r.line(format!("CBC-MAC of orig  : {}", hex::encode(original_tag)));
     r.line(format!("Cryptopals target: {}", expected_hex));
     // Cryptopals's literal target was computed with a slightly

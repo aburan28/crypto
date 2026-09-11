@@ -4,8 +4,8 @@
 //! Use CRT to recover `m^3 (mod n0·n1·n2)`, then take the integer
 //! cube root — that's `m`.
 
-use crate::cryptopals::set8_util::crt_combine;
 use crate::cryptopals::Report;
+use crate::cryptopals::set8_util::crt_combine;
 use num_bigint::BigUint;
 use num_traits::One;
 
@@ -48,10 +48,7 @@ pub fn run() -> Report {
     let (cube, _) = crt_combine(&pairs);
     let cube_root = int_cube_root(&cube);
     let recovered = cube_root.to_bytes_be();
-    r.line(format!(
-        "Recovered: {:?}",
-        std::str::from_utf8(&recovered).unwrap_or("?")
-    ));
+    r.line(format!("Recovered: {:?}", std::str::from_utf8(&recovered).unwrap_or("?")));
     assert!(recovered == msg.to_vec() || recovered == msg.to_vec().split_off(0));
     r.succeed()
 }

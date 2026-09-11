@@ -82,9 +82,7 @@ pub(crate) fn gf_inv(a: u8) -> u8 {
 }
 
 pub(crate) fn dot(a: &[u8], b: &[u8]) -> u8 {
-    a.iter()
-        .zip(b)
-        .fold(0u8, |acc, (&x, &y)| acc ^ gf_mul(x, y))
+    a.iter().zip(b).fold(0u8, |acc, (&x, &y)| acc ^ gf_mul(x, y))
 }
 
 fn xor_into(acc: &mut [u8], src: &[u8]) {
@@ -186,30 +184,15 @@ fn setup_parties(rel: &impl MpcRelation, witness: &[u8], rep: usize) -> (Vec<Par
     for i in 0..N_PARTIES {
         let mut seed = vec![0u8; SEED_BYTES];
         random_bytes(&mut seed);
-        let wshare = if i < N_PARTIES - 1 {
-            prg(&seed, b"w", wlen)
-        } else {
-            vec![0u8; wlen]
-        };
+        let wshare = if i < N_PARTIES - 1 { prg(&seed, b"w", wlen) } else { vec![0u8; wlen] };
         let a = prg(&seed, b"a", dlen);
         let b = prg(&seed, b"b", dlen);
-        let c = if i < N_PARTIES - 1 {
-            prg(&seed, b"c", 1)[0]
-        } else {
-            0
-        };
+        let c = if i < N_PARTIES - 1 { prg(&seed, b"c", 1)[0] } else { 0 };
         xor_into(&mut w_acc, &wshare);
         xor_into(&mut a_sum, &a);
         xor_into(&mut b_sum, &b);
         c_acc ^= c;
-        parties.push(Party {
-            seed,
-            wshare,
-            a,
-            b,
-            c,
-            com: [0u8; 32],
-        });
+        parties.push(Party { seed, wshare, a, b, c, com: [0u8; 32] });
     }
     // Corrections for the last party.
     let mut aux_w = witness.to_vec();
@@ -219,16 +202,7 @@ fn setup_parties(rel: &impl MpcRelation, witness: &[u8], rep: usize) -> (Vec<Par
     parties[N_PARTIES - 1].c = aux_c;
     // Commitments.
     for (i, p) in parties.iter_mut().enumerate() {
-        p.com = commit_party(
-            rep,
-            i,
-            &p.seed,
-            if i == N_PARTIES - 1 {
-                Some((&aux_w, aux_c))
-            } else {
-                None
-            },
-        );
+        p.com = commit_party(rep, i, &p.seed, if i == N_PARTIES - 1 { Some((&aux_w, aux_c)) } else { None });
     }
     (parties, aux_w, aux_c)
 }
@@ -244,7 +218,11 @@ fn commit_party(rep: usize, index: usize, seed: &[u8], aux: Option<(&[u8], u8)>)
 }
 
 /// Recompute a revealed party's derived state from its seed.
-fn expand_party(rel: &impl MpcRelation, seed: &[u8], aux: Option<(&[u8], u8)>) -> Party {
+fn expand_party(
+    rel: &impl MpcRelation,
+    seed: &[u8],
+    aux: Option<(&[u8], u8)>,
+) -> Party {
     let wlen = rel.witness_len();
     let dlen = rel.dot_len();
     let (wshare, c) = match aux {
@@ -284,11 +262,8 @@ pub(crate) fn mpcith_prove(rel: &impl MpcRelation, witness: &[u8], msg: &[u8]) -
     let mut broadcasts: Vec<Vec<(Vec<u8>, Vec<u8>, u8, Vec<u8>)>> = Vec::with_capacity(TAU);
     for (rep, parties) in all.iter().enumerate() {
         let eps = prg(&h1, &[b'e', rep as u8], rel.eps_len());
-        let views: Vec<PartyView> = parties
-            .iter()
-            .enumerate()
-            .map(|(i, p)| rel.party_compute(&p.wshare, i == 0, &eps))
-            .collect();
+        let views: Vec<PartyView> =
+            parties.iter().enumerate().map(|(i, p)| rel.party_compute(&p.wshare, i == 0, &eps)).collect();
         // Open α = u + a and β = v + b.
         let dlen = rel.dot_len();
         let mut alpha = vec![0u8; dlen];
@@ -333,16 +308,9 @@ pub(crate) fn mpcith_prove(rel: &impl MpcRelation, witness: &[u8], msg: &[u8]) -
         let (aux_w, aux_c) = &auxes[rep];
         let (ha, hb, hv, hl) = broadcasts[rep][hidden].clone();
         reps.push(RepProof {
-            seeds: (0..N_PARTIES)
-                .filter(|&i| i != hidden)
-                .map(|i| parties[i].seed.clone())
-                .collect(),
+            seeds: (0..N_PARTIES).filter(|&i| i != hidden).map(|i| parties[i].seed.clone()).collect(),
             hidden_com: parties[hidden].com,
-            aux_w: if hidden != N_PARTIES - 1 {
-                aux_w.clone()
-            } else {
-                Vec::new()
-            },
+            aux_w: if hidden != N_PARTIES - 1 { aux_w.clone() } else { Vec::new() },
             aux_c: if hidden != N_PARTIES - 1 { *aux_c } else { 0 },
             hidden_alpha: ha,
             hidden_beta: hb,
@@ -443,9 +411,7 @@ pub(crate) fn mpcith_verify(rel: &impl MpcRelation, msg: &[u8], proof: &MpcithPr
             // Filled for every non-hidden party in the loop above; a
             // missing slot would mean the hidden index was inconsistent,
             // so reject rather than panic on adversarial input.
-            let Some((p, view, ai, bi)) = slot.take() else {
-                return false;
-            };
+            let Some((p, view, ai, bi)) = slot.take() else { return false };
             let mut v = view.t ^ p.c ^ dot(&alpha, &p.b) ^ dot(&beta, &p.a);
             if i == 0 {
                 v ^= dot(&alpha, &beta);

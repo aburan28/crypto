@@ -34,8 +34,8 @@ use crate::ecc::keys::EccKeyPair;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::Zero;
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Bias the nonce by zeroing the low `l_bits` bits.
 fn biased_nonce(rng: &mut StdRng, n: &BigUint, l_bits: u32) -> BigUint {
@@ -87,7 +87,12 @@ pub fn sign_biased(
         if s.is_zero() {
             continue;
         }
-        return BiasedSignature { r, s, z, k_bits };
+        return BiasedSignature {
+            r,
+            s,
+            z,
+            k_bits,
+        };
     }
 }
 
@@ -123,7 +128,10 @@ pub fn run() -> Report {
     match hnp_recover_key_with_reduction(&curve, &pub_key, &sigs, HnpReduction::Lll) {
         Ok(recovered) => {
             r.line(format!("Recovered d   : {}", recovered));
-            r.line(format!("Match d       : {}", recovered == d));
+            r.line(format!(
+                "Match d       : {}",
+                recovered == d
+            ));
             if recovered == d {
                 return r.succeed();
             }

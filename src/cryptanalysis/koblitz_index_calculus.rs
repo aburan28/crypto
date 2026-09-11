@@ -104,7 +104,7 @@
 //!   remains inconclusive.  The exact factor-base coverage results do not
 //!   establish a SAT speedup or a solving-complexity bound.
 //! - **Toy / research rungs only.**  Curve construction via
-//!   [`KoblitzCurve::new`] is guarded by [`MAX_N`] (currently 41) so the
+//!   [`KoblitzCurve::new`] is guarded by [`MAX_N`] (currently 63) so the
 //!   factor base can be materialised and the group order factored.  This
 //!   does not threaten sect163k1 or any other deployed Koblitz curve —
 //!   as the paper's own conclusion puts it, index calculus remains
@@ -148,12 +148,16 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.  Curve construction costs trial division to
-/// `√#E ≈ 2^{n/2}` and a sparse irreducible search; both are cheap to
-/// the boundary-ledger rungs at `n = 37` / `n = 41`.  What actually
-/// bounds a run is the `2^dim` factor base and, for the
-/// meet-in-the-middle oracle, its `|F|²` pair table.
-pub const MAX_N: u32 = 41;
+/// the mathematics.  Field elements are packed in a `u64`, so the
+/// absolute limit is `n < 64`.  Past `n ≈ 24` the generator is found
+/// by deterministic sampling rather than a full abscissa sweep; point
+/// counting still uses the closed Koblitz recurrence (no `2^n` scan).
+/// Curve construction costs trial division to `√#E ≈ 2^{n/2}` and a
+/// sparse irreducible search; both are still cheap at the
+/// boundary-ledger rungs through `n = 53`.  What actually bounds a run
+/// is the `2^dim` factor base and, for the meet-in-the-middle oracle,
+/// its `|F|²` pair table.
+pub const MAX_N: u32 = 63;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -520,18 +524,47 @@ impl KoblitzCurve {
         }
 
         // A generator of the order-r subgroup: kill the cofactor on
-        // successive curve points until the result is non-trivial.
+        // curve points until the result is non-trivial.  Exhaustive
+        // abscissa search is fine through ~24 bits; past that a full
+        // `2^n` sweep is impossible, so sample deterministically from
+        // a fixed LCG (reproducible across hosts).
         let mut generator = BinaryPoint::Infinity;
-        for raw in 0..(1u64 << n) {
+        let mask = if n >= 64 {
+            u64::MAX
+        } else {
+            (1u64 << n) - 1
+        };
+        let exhaustive = n <= 24;
+        let budget = if exhaustive {
+            1u64 << n
+        } else {
+            // ~1M trials is plenty: a random x hits the curve ~1/2 of
+            // the time and survives the cofactor map with probability
+            // ≈ 1 − 1/r ≫ 2^{-20} on admitted rungs.
+            1u64 << 20
+        };
+        let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
+        for i in 0..budget {
+            let raw = if exhaustive {
+                i
+            } else {
+                state = state
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1);
+                state & mask
+            };
             let x = F2mElement::from_biguint(&BigUint::from(raw), n);
             let pts = points_with_x(&curve, &x);
             let mut found = false;
             for p in pts {
                 let cand = scalar_mul(&curve, &p, &cofactor);
                 if cand != BinaryPoint::Infinity {
-                    generator = cand;
-                    found = true;
-                    break;
+                    // Confirm order divides r (reject accidental torsion).
+                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
+                        generator = cand;
+                        found = true;
+                        break;
+                    }
                 }
             }
             if found {
@@ -909,10 +942,7 @@ impl FrobeniusFactorBase {
 
 /// One representative per orbit of a point set under Frobenius and
 /// negation (the set is assumed closed under both).
-fn signed_frobenius_orbit_representatives(
-    kc: &KoblitzCurve,
-    points: &[BinaryPoint],
-) -> Vec<BinaryPoint> {
+fn signed_frobenius_orbit_representatives(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Vec<BinaryPoint> {
     let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
     let mut reps = Vec::new();
     for p in points {
@@ -2895,8 +2925,8 @@ fn koblitz_index_calculus_dlp_observed(
     // form.  `Some(true)` means solved; `Some(false)` means a pinned
     // scalar failed verification, which only a wrong relation can cause.
     let finish_incremental = |echelon: &IncrementalRelationSolver,
-                              report: &mut KoblitzIcReport,
-                              progress: &mut dyn FnMut(KoblitzIcEvent)|
+                                  report: &mut KoblitzIcReport,
+                                  progress: &mut dyn FnMut(KoblitzIcEvent)|
      -> Option<bool> {
         let d = echelon.target_biguint()?;
         progress(KoblitzIcEvent::LinearAlgebraStarted {
@@ -3297,7 +3327,9 @@ impl FactorBaseLogTable {
     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
         let g = kc.generator();
         self.columns.iter().all(|(point, log)| {
-            *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
+            *point != BinaryPoint::Infinity
+                && log < &kc.subgroup_order
+                && &kc.mul(g, log) == point
         })
     }
 
@@ -3338,19 +3370,12 @@ fn decompose_once(
 ) -> Option<Vec<usize>> {
     match opts.strategy {
         DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
-        DecompositionStrategy::PairTable => pair
-            .expect("pair table required")
-            .decompose(kc, fb, target, opts.m),
+        DecompositionStrategy::PairTable => {
+            pair.expect("pair table required").decompose(kc, fb, target, opts.m)
+        }
         DecompositionStrategy::Groebner => {
             groebner_decompose(
-                kc,
-                fb,
-                index_of,
-                field,
-                target,
-                opts.m,
-                opts.engine,
-                opts.node_budget,
+                kc, fb, index_of, field, target, opts.m, opts.engine, opts.node_budget,
             )
             .0
         }
@@ -3423,13 +3448,7 @@ pub fn solve_factor_base_logs(
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
-            kc,
-            fb,
-            &idxs,
-            &a,
-            &BigUint::zero(),
-            opts.collapse_negation,
-            Some(&projected),
+            kc, fb, &idxs, &a, &BigUint::zero(), opts.collapse_negation, Some(&projected),
         );
         matrix.push(relation.row);
         rhs.push((&h * &a) % r);
@@ -3553,13 +3572,7 @@ pub fn individual_log(
             continue;
         };
         let relation = relation_from_decomposition_with_mode(
-            kc,
-            fb,
-            &idxs,
-            &a,
-            &b,
-            opts.collapse_negation,
-            Some(&projected),
+            kc, fb, &idxs, &a, &b, opts.collapse_negation, Some(&projected),
         );
         // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
         let mut sum = BigUint::zero();
@@ -3612,6 +3625,18 @@ mod tests {
             }
             assert!(is_irreducible_f2(mask), "n = {n}");
         }
+    }
+
+    #[test]
+    fn constructs_past_prior_ceiling_n53() {
+        // Ledger next factor-base / vs_rho rung past MAX_N=41.
+        let curve = KoblitzCurve::new(0, 53).expect("K_0/F_2^53 must construct");
+        assert_eq!(curve.n, 53);
+        assert!(curve.subgroup_order.bits() >= 40);
+        assert_eq!(
+            scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
+            BinaryPoint::Infinity
+        );
     }
 
     #[test]
@@ -4230,11 +4255,7 @@ mod tests {
         for n in 3..=24u32 {
             let full = find_irreducible(n).expect("exhaustive search finds one");
             let sparse = find_irreducible_sparse(n).expect("sparse search finds one");
-            assert_eq!(
-                (full.degree, full.low_terms),
-                (sparse.degree, sparse.low_terms),
-                "n = {n}"
-            );
+            assert_eq!((full.degree, full.low_terms), (sparse.degree, sparse.low_terms), "n = {n}");
         }
     }
 
@@ -4314,10 +4335,7 @@ mod tests {
         assert_eq!(fb.subspace_basis, parent.subspace_basis);
         assert!(!fb.uses_ambient_basis());
         let parent_keys: HashSet<_> = parent.points.iter().map(point_key).collect();
-        assert!(fb
-            .points
-            .iter()
-            .all(|p| parent_keys.contains(&point_key(p))));
+        assert!(fb.points.iter().all(|p| parent_keys.contains(&point_key(p))));
         let index = fb.index_map();
         let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let table = PairSumTable::build(&kc, &fb).unwrap();
@@ -4366,11 +4384,7 @@ mod tests {
                     SolverEngine::default(),
                     20_000,
                 );
-                assert_eq!(
-                    groebner.is_some(),
-                    reference.is_some(),
-                    "F4 m = {m}, k = {k}"
-                );
+                assert_eq!(groebner.is_some(), reference.is_some(), "F4 m = {m}, k = {k}");
             }
         }
         assert!(found > 0, "the pruned base must still decompose something");
@@ -4396,22 +4410,12 @@ mod tests {
                 assert!(models.insert((a, b)));
                 solver.reset_search();
                 let clause = (0..2 * width)
-                    .map(|i| {
-                        if model[i] {
-                            -((i + 1) as i32)
-                        } else {
-                            (i + 1) as i32
-                        }
-                    })
+                    .map(|i| if model[i] { -((i + 1) as i32) } else { (i + 1) as i32 })
                     .collect();
                 solver.add_clause(clause);
             }
             let total = 1u32 << width;
-            assert_eq!(
-                models.len() as u32,
-                total * (total + 1) / 2,
-                "width {width}"
-            );
+            assert_eq!(models.len() as u32, total * (total + 1) / 2, "width {width}");
         }
     }
 
@@ -4515,8 +4519,7 @@ mod tests {
                 assert_eq!(kc.mul(&g, &recovered), q);
             }
             // O has logarithm 0 without any probing.
-            let (zero, _) =
-                individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
+            let (zero, _) = individual_log(&kc, &fb, &table, &BinaryPoint::Infinity, &opts).unwrap();
             assert!(zero.is_zero());
         }
     }
@@ -4559,9 +4562,11 @@ mod tests {
                 );
             }
             // And on a nonlinear union, which has more cofactor classes.
-            let union =
-                build_frobenius_union_factor_base(&kc, &[F2mElement::one(n), F2mElement::z(n)])
-                    .unwrap();
+            let union = build_frobenius_union_factor_base(
+                &kc,
+                &[F2mElement::one(n), F2mElement::z(n)],
+            )
+            .unwrap();
             for m in 1..=4 {
                 assert_eq!(
                     union.m_can_decompose(&kc, m),

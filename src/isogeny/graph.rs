@@ -151,7 +151,11 @@ impl IsogenyGraph {
                 *by_ell.entry(deg).or_default() += 1;
             }
             for (ell, count) in by_ell {
-                *counts.entry(ell).or_default().entry(count).or_default() += 1;
+                *counts
+                    .entry(ell)
+                    .or_default()
+                    .entry(count)
+                    .or_default() += 1;
             }
         }
         counts

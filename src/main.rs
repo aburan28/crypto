@@ -389,8 +389,37 @@ enum RhoCollabOp {
         /// Stop each lane after this many walkers (0 = until solved).
         #[arg(long, default_value_t = 0)]
         max_walkers: u64,
+        /// A cairn node (`http://host:port`, running `cairn serve
+        /// --queue`).  Every distinguished point is committed and revealed
+        /// as a claim on `--objective`, and the objective's log is merged
+        /// back as the shared DP table.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        /// The cairn piecework objective id the points are claims on.
+        #[arg(long)]
+        objective: Option<String>,
+        /// Nickname to submit under (default: the node name).  Ignored
+        /// when `--identity` is given.
+        #[arg(long)]
+        submitter: Option<String>,
+        /// A cairn identity file (`cairn identity --out FILE`): submit
+        /// under its Ed25519 key and sign every record.
+        #[arg(long)]
+        identity: Option<std::path::PathBuf>,
+        /// The cairn objective that pays for `k` itself.  Once the search
+        /// solves, `{"k": …}` is committed there and revealed next epoch.
+        #[arg(long)]
+        answer_objective: Option<String>,
+        /// The cairn node's epoch length in seconds (its
+        /// `CAIRN_EPOCH_SECONDS`; 600 unless the operator changed it).
+        #[arg(long, default_value_t = 600)]
+        cairn_epoch_secs: u64,
+        /// Where pending commitments are kept between runs (default:
+        /// `<node>.cairn.json` next to the job).
+        #[arg(long)]
+        cairn_state: Option<std::path::PathBuf>,
     },
-    /// Show merged progress from a mailbox and/or peers.
+    /// Show merged progress from a mailbox, peers, and/or a cairn log.
     Status {
         #[arg(long)]
         job: Option<std::path::PathBuf>,
@@ -398,6 +427,11 @@ enum RhoCollabOp {
         mailbox: Option<std::path::PathBuf>,
         #[arg(long = "peer")]
         peers: Vec<String>,
+        /// Read the objective's accepted points from this cairn node.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        #[arg(long)]
+        objective: Option<String>,
         /// Emit JSON instead of text.
         #[arg(long)]
         json: bool,
@@ -505,6 +539,9 @@ fn cmd_cryptopals(arg: &str) {
 // ── Collaborative rho ────────────────────────────────────────────────────────
 
 fn cmd_rho_collab(op: RhoCollabOp) {
+    use crypto_lib::cryptanalysis::pollard_collab::cairn::{
+        wall_clock, CairnConfig, CairnTransport, Submitter,
+    };
     use crypto_lib::cryptanalysis::pollard_collab::{
         demo_curve, run_lane, sync_with_peer, JobSpec, LaneOptions, Mailbox, PeerServer,
         SharedState, DEMO_CURVES,
@@ -521,19 +558,58 @@ fn cmd_rho_collab(op: RhoCollabOp) {
         BigUint::parse_bytes(s.trim().trim_start_matches("0x").as_bytes(), 16)
             .unwrap_or_else(|| die(format!("bad hex `{s}`")))
     }
-    fn load_spec(
-        job: &Option<std::path::PathBuf>,
-        mailbox: &Option<std::path::PathBuf>,
-    ) -> JobSpec {
+    fn load_spec(job: &Option<std::path::PathBuf>, mailbox: &Option<std::path::PathBuf>) -> JobSpec {
         match (job, mailbox) {
             (Some(p), _) => {
-                let s = std::fs::read_to_string(p)
-                    .unwrap_or_else(|e| die(format!("{}: {e}", p.display())));
+                let s = std::fs::read_to_string(p).unwrap_or_else(|e| die(format!("{}: {e}", p.display())));
                 JobSpec::from_json(&s).unwrap_or_else(|e| die(e))
             }
             (None, Some(d)) => Mailbox::read_job(d).unwrap_or_else(|e| die(e)),
             (None, None) => die("pass --job <file> or --mailbox <dir>"),
         }
+    }
+
+    /// Open the cairn transport the flags describe, if `--cairn` was given.
+    #[allow(clippy::too_many_arguments)]
+    fn open_cairn(
+        url: &Option<String>,
+        objective: &Option<String>,
+        submitter: &Option<String>,
+        identity: &Option<std::path::PathBuf>,
+        answer_objective: &Option<String>,
+        epoch_secs: u64,
+        state_path: Option<std::path::PathBuf>,
+        default_name: &str,
+    ) -> Option<CairnTransport> {
+        let url = url.as_ref()?;
+        let objective_id = objective
+            .clone()
+            .unwrap_or_else(|| die("--cairn needs --objective <id>"));
+        let who = match identity {
+            Some(path) => Submitter::from_identity_file(path).unwrap_or_else(|e| die(e)),
+            None => Submitter::Nickname(submitter.clone().unwrap_or_else(|| default_name.to_string())),
+        };
+        let transport = CairnTransport::open(CairnConfig {
+            url: url.trim_end_matches('/').to_string(),
+            objective_id: objective_id.clone(),
+            submitter: who,
+            answer_objective: answer_objective.clone(),
+            epoch_secs,
+            state_path,
+            clock: wall_clock(),
+        })
+        .unwrap_or_else(|e| die(e));
+        let short = if objective_id.len() > 23 { format!("{}…", &objective_id[..23]) } else { objective_id };
+        eprintln!(
+            "[cairn] {url} · objective {short} · submitting as {}{}",
+            transport.submitter(),
+            if transport.pending() > 0 {
+                format!(" · {} commitment(s) pending from a previous run", transport.pending())
+            } else {
+                String::new()
+            }
+        );
+        Some(transport)
     }
 
     match op {
@@ -550,12 +626,8 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             out,
             mailbox,
         } => {
-            let params = demo_curve(&curve).unwrap_or_else(|| {
-                die(format!(
-                    "unknown curve `{curve}`; try {}",
-                    DEMO_CURVES.join(", ")
-                ))
-            });
+            let params = demo_curve(&curve)
+                .unwrap_or_else(|| die(format!("unknown curve `{curve}`; try {}", DEMO_CURVES.join(", "))));
             let q = match (&secret, &target) {
                 (Some(s), _) => {
                     let x = parse_hex(s) % &params.n;
@@ -580,22 +652,14 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             spec.negation_map = negation;
             spec.unit_size = unit_size;
             let ctx = spec.build().unwrap_or_else(|e| die(e));
-            std::fs::write(&out, spec.to_json())
-                .unwrap_or_else(|e| die(format!("{}: {e}", out.display())));
+            std::fs::write(&out, spec.to_json()).unwrap_or_else(|e| die(format!("{}: {e}", out.display())));
             if let Some(d) = &mailbox {
                 let mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
                 mb.write_job(&spec).unwrap_or_else(|e| die(e));
             }
             println!("job id:          {}", ctx.job_id);
-            println!(
-                "curve:           {} ({} bits)",
-                params.name,
-                params.n.bits()
-            );
-            println!(
-                "dp_bits:         {}  (mean trail 2^{})",
-                spec.dp_bits, spec.dp_bits
-            );
+            println!("curve:           {} ({} bits)", params.name, params.n.bits());
+            println!("dp_bits:         {}  (mean trail 2^{})", spec.dp_bits, spec.dp_bits);
             println!("unit size:       {} walkers", spec.unit_size);
             println!("expected steps:  {:.3e}", ctx.expected_steps());
             println!("expected DPs:    {:.3e}", ctx.expected_dps());
@@ -617,15 +681,51 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             sync_secs,
             max_seconds,
             max_walkers,
+            cairn,
+            objective,
+            submitter,
+            identity,
+            answer_objective,
+            cairn_epoch_secs,
+            cairn_state,
         } => {
             let spec = load_spec(&job, &mailbox);
             let ctx = Arc::new(spec.build().unwrap_or_else(|e| die(e)));
             let state = Arc::new(Mutex::new(SharedState::new(&ctx)));
+            let cairn_state = cairn_state.or_else(|| {
+                cairn.as_ref().map(|_| {
+                    let dir = job
+                        .as_ref()
+                        .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+                        .or_else(|| mailbox.clone())
+                        .unwrap_or_else(|| std::path::PathBuf::from("."));
+                    dir.join(format!("{node}.cairn.json"))
+                })
+            });
+            let cairn = open_cairn(
+                &cairn,
+                &objective,
+                &submitter,
+                &identity,
+                &answer_objective,
+                cairn_epoch_secs,
+                cairn_state,
+                &node,
+            )
+            .map(|t| Arc::new(Mutex::new(t)));
+            if let Some(c) = &cairn {
+                let mut st = state.lock().unwrap();
+                match c.lock().unwrap().sync(&ctx, &mut st) {
+                    Ok(r) => eprintln!(
+                        "[cairn] log read: {} points merged, {} rejected, {} revealed",
+                        r.accepted_dps, r.rejected_dps, r.revealed
+                    ),
+                    Err(e) => eprintln!("[cairn] first sync failed: {e}"),
+                }
+            }
             let mbox = mailbox.as_ref().map(|d| {
                 let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
-                let (n, _) = mb
-                    .sync(&ctx, &mut state.lock().unwrap())
-                    .unwrap_or_else(|e| die(e));
+                let (n, _) = mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
                 eprintln!("[collab] mailbox {}: merged {n} check-ins", d.display());
                 Arc::new(Mutex::new(mb))
             });
@@ -667,6 +767,25 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         eprintln!("[collab] mailbox relay failed: {e}");
                     }
                 }
+                if let Some(c) = &cairn {
+                    let mut st = state.lock().unwrap();
+                    let mut c = c.lock().unwrap();
+                    match c.sync(&ctx, &mut st) {
+                        Ok(r) => {
+                            if verbose && (r.accepted_dps > 0 || r.revealed > 0 || r.refused > 0) {
+                                eprintln!(
+                                    "[cairn] +{} points from the log ({} rejected), {} revealed, {} refused",
+                                    r.accepted_dps, r.rejected_dps, r.revealed, r.refused
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            if verbose {
+                                eprintln!("[cairn] sync failed: {e}");
+                            }
+                        }
+                    }
+                }
             };
             do_sync(true);
 
@@ -683,6 +802,7 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                     let state = Arc::clone(&state);
                     let stop = Arc::clone(&stop);
                     let mbox = mbox.clone();
+                    let cairn = cairn.clone();
                     let opts = LaneOptions {
                         checkin_every,
                         lease_secs,
@@ -698,6 +818,16 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                                 if let Some(mb) = &mbox {
                                     if let Err(e) = mb.lock().unwrap().publish(ci) {
                                         eprintln!("[collab] publish failed: {e}");
+                                    }
+                                }
+                                if let Some(c) = &cairn {
+                                    match c.lock().unwrap().publish(&ctx, ci) {
+                                        Ok(r) if r.committed > 0 => eprintln!(
+                                            "[cairn] committed {} point(s); reveal follows next epoch",
+                                            r.committed
+                                        ),
+                                        Ok(_) => {}
+                                        Err(e) => eprintln!("[cairn] commit failed: {e}"),
                                     }
                                 }
                             },
@@ -719,11 +849,7 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                     last_sync = Instant::now();
                     do_sync(true);
                     let st = state.lock().unwrap();
-                    let p = st.progress(
-                        &ctx,
-                        crypto_lib::cryptanalysis::pollard_collab::state::now_secs(),
-                        lease_secs,
-                    );
+                    let p = st.progress(&ctx, crypto_lib::cryptanalysis::pollard_collab::state::now_secs(), lease_secs);
                     eprintln!(
                         "[collab] {:>6.1}s  steps {:>10}  ({:>5.1}% of expected)  DPs {:>7}  units done {} active {}  peers {}  rejected {}",
                         start.elapsed().as_secs_f64(),
@@ -735,6 +861,14 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         p.peers,
                         p.rejected_dps,
                     );
+                    if let Some(c) = &cairn {
+                        let c = c.lock().unwrap();
+                        let s = c.stats();
+                        eprintln!(
+                            "[cairn]  committed {}  revealed {}  pending {}  refused {}  paid {} unit(s) = {}  rejected {}  log points {}",
+                            s.committed, s.revealed, c.pending(), s.refused, s.paid_units, s.paid_total, s.rejected, s.log_dps,
+                        );
+                    }
                 }
                 if solved || lanes_done || timed_out {
                     break;
@@ -747,16 +881,23 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             // Final exchange so peers learn the outcome.
             do_sync(false);
             let st = state.lock().unwrap();
+            if let Some(c) = &cairn {
+                let c = c.lock().unwrap();
+                if c.pending() > 0 {
+                    eprintln!(
+                        "[cairn] {} commitment(s) still wait for the epoch to turn; run `work` again \
+                         (same node name and state file) to reveal them",
+                        c.pending()
+                    );
+                }
+            }
             match &st.solution {
                 Some(x) => {
                     println!("solution: {}", x.to_str_radix(16));
                     println!("verified: {}", ctx.g.scalar_mul(x, &ctx.a) == ctx.q);
                 }
                 None => {
-                    println!(
-                        "solution: not found (stopped after {:.1}s)",
-                        start.elapsed().as_secs_f64()
-                    );
+                    println!("solution: not found (stopped after {:.1}s)", start.elapsed().as_secs_f64());
                     std::process::exit(2);
                 }
             }
@@ -766,6 +907,8 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             job,
             mailbox,
             peers,
+            cairn,
+            objective,
             json,
             lease_secs,
         } => {
@@ -774,8 +917,16 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             let state = Mutex::new(SharedState::new(&ctx));
             if let Some(d) = &mailbox {
                 let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
-                mb.sync(&ctx, &mut state.lock().unwrap())
-                    .unwrap_or_else(|e| die(e));
+                mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
+            }
+            if let Some(mut c) = open_cairn(&cairn, &objective, &None, &None, &None, 600, None, "status") {
+                match c.sync(&ctx, &mut state.lock().unwrap()) {
+                    Ok(r) => eprintln!(
+                        "[cairn] {} accepted point(s) in the log, {} rejected here",
+                        r.accepted_dps, r.rejected_dps
+                    ),
+                    Err(e) => eprintln!("[cairn] {e}"),
+                }
             }
             for p in &peers {
                 if let Err(e) = sync_with_peer(p.as_str(), &ctx, &state) {
@@ -797,14 +948,8 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                 100.0 * p.fraction,
                 p.expected_steps
             );
-            println!(
-                "DPs stored:    {}   (expected ≈ {:.3e}; {} rejected)",
-                p.dps_stored, p.expected_dps, p.rejected_dps
-            );
-            println!(
-                "units:         {} completed, {} active",
-                p.units_completed, p.units_active
-            );
+            println!("DPs stored:    {}   (expected ≈ {:.3e}; {} rejected)", p.dps_stored, p.expected_dps, p.rejected_dps);
+            println!("units:         {} completed, {} active", p.units_completed, p.units_active);
             match &p.solution {
                 Some(x) => println!("solution:      {x}"),
                 None => println!("solution:      not yet"),
@@ -812,10 +957,7 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             let units = st.units(now, lease_secs);
             if !units.is_empty() {
                 println!();
-                println!(
-                    "{:>8} {:>10} {:>10} {:>6} {:>5}  owner",
-                    "unit", "walkers", "steps", "dps", "dead"
-                );
+                println!("{:>8} {:>10} {:>10} {:>6} {:>5}  owner", "unit", "walkers", "steps", "dps", "dead");
                 for u in units.iter().take(40) {
                     println!(
                         "{:>8} {:>10} {:>10} {:>6} {:>5}  {}",
@@ -848,7 +990,10 @@ fn parse_isogeny_curve(name: &str) -> crypto_lib::isogeny::SmallCurve {
         "toy-b" | "toy-101" => toy_curve_b(),
         "toy-j0" | "toy-j0-103" => toy_curve_j0(),
         _ => {
-            eprintln!("unknown curve `{}`; try one of: toy-a, toy-b, toy-j0", name);
+            eprintln!(
+                "unknown curve `{}`; try one of: toy-a, toy-b, toy-j0",
+                name
+            );
             std::process::exit(1);
         }
     }
@@ -888,10 +1033,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             let pos = position(&c, ell);
             println!("# ℓ-isogeny volcano for `{}` at ℓ = {}", curve, ell);
             println!();
-            println!(
-                "Curve:           y² = x³ + {}x + {}  over  F_{}",
-                c.a, c.b, c.p
-            );
+            println!("Curve:           y² = x³ + {}x + {}  over  F_{}", c.a, c.b, c.p);
             println!("j-invariant:     {}", j_invariant(&c));
             println!("Frobenius trace: {}", m.start_cm.trace);
             println!("#E(F_p):         {}", m.start_cm.order);
@@ -906,10 +1048,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             println!();
             for level in &m.levels {
                 let n = level.j_invariants.len();
-                println!(
-                    "Level {:>2}: {:>3} vertices  j = {:?}",
-                    level.level, n, level.j_invariants
-                );
+                println!("Level {:>2}: {:>3} vertices  j = {:?}", level.level, n, level.j_invariants);
             }
         }
         IsogenyOp::Graph {
@@ -920,15 +1059,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             let c = parse_isogeny_curve(&curve);
             let primes = parse_ell_list(&ell_list);
             let g = build_graph(&c, &primes, max_nodes);
-            println!(
-                "# {}-isogeny graph for `{}`",
-                primes
-                    .iter()
-                    .map(|p| p.to_string())
-                    .collect::<Vec<_>>()
-                    .join(","),
-                curve
-            );
+            println!("# {}-isogeny graph for `{}`", primes.iter().map(|p| p.to_string()).collect::<Vec<_>>().join(","), curve);
             println!();
             println!("Vertices: {}", g.order());
             println!("Edges:    {}", g.size());
@@ -1632,22 +1763,11 @@ fn cmd_hkdf() {
 fn cmd_pqc() {
     println!("=== ML-KEM-768 (NIST FIPS 203) ===");
     let (ek, dk) = ml_kem_keygen(&ML_KEM_768);
-    println!(
-        "Key pair generated: ek = {} bytes, dk = {} bytes.",
-        ek.0.len(),
-        dk.0.len()
-    );
+    println!("Key pair generated: ek = {} bytes, dk = {} bytes.", ek.0.len(), dk.0.len());
     let (ct, ss_enc) = ml_kem_encaps(&ML_KEM_768, &ek).expect("fresh key is valid");
-    println!(
-        "Encapsulated ({} bytes). Shared secret (encaps): {}",
-        ct.len(),
-        to_hex(&ss_enc)
-    );
+    println!("Encapsulated ({} bytes). Shared secret (encaps): {}", ct.len(), to_hex(&ss_enc));
     let ss_dec = ml_kem_decaps(&ML_KEM_768, &dk, &ct).expect("well-formed ciphertext");
-    println!(
-        "Decapsulated.             Shared secret (decaps): {}",
-        to_hex(&ss_dec)
-    );
+    println!("Decapsulated.             Shared secret (decaps): {}", to_hex(&ss_dec));
     println!("Secrets match: {}", ss_enc == ss_dec);
 
     println!("\n=== ML-DSA-65 (NIST FIPS 204) ===");
@@ -1656,19 +1776,12 @@ fn cmd_pqc() {
     let (pk, sk) = ml_dsa_65_keygen(&seed);
     let msg = b"post-quantum signatures";
     let sig = ml_dsa_65_sign(&sk, msg, &[0u8; 32]);
-    println!(
-        "Signed {} bytes -> {} byte signature.",
-        msg.len(),
-        sig.len()
-    );
+    println!("Signed {} bytes -> {} byte signature.", msg.len(), sig.len());
     println!("Verify: {}", ml_dsa_65_verify(&pk, msg, &sig));
 
     println!("\n=== SQIsign (toy p = 431 educational demo) ===");
     let (spk, ssk) = sqisign_keygen();
-    println!(
-        "Public key: j(E_A) = {:?} on the supersingular 2-isogeny graph.",
-        spk.j
-    );
+    println!("Public key: j(E_A) = {:?} on the supersingular 2-isogeny graph.", spk.j);
     let ssig = sqisign_sign(&spk, &ssk, msg);
     println!(
         "Signature: commitment j(E_1) = {:?}, response path of {} steps.",
@@ -1710,59 +1823,23 @@ fn cmd_pqc_onramp(msg: &[u8]) {
     }
 
     let (pk, sk) = uov_keygen();
-    demo!(
-        "UOV",
-        "multivariate",
-        uov_verify(&pk, msg, &uov_sign(&sk, msg))
-    );
+    demo!("UOV", "multivariate", uov_verify(&pk, msg, &uov_sign(&sk, msg)));
     let (pk, sk) = mayo_keygen();
-    demo!(
-        "MAYO",
-        "multivariate",
-        mayo_verify(&pk, msg, &mayo_sign(&sk, msg))
-    );
+    demo!("MAYO", "multivariate", mayo_verify(&pk, msg, &mayo_sign(&sk, msg)));
     let (pk, sk) = qr_uov_keygen();
-    demo!(
-        "QR-UOV",
-        "multivariate",
-        qr_uov_verify(&pk, msg, &qr_uov_sign(&sk, msg))
-    );
+    demo!("QR-UOV", "multivariate", qr_uov_verify(&pk, msg, &qr_uov_sign(&sk, msg)));
     let (pk, sk) = snova_keygen();
-    demo!(
-        "SNOVA",
-        "multivariate",
-        snova_verify(&pk, msg, &snova_sign(&sk, msg))
-    );
+    demo!("SNOVA", "multivariate", snova_verify(&pk, msg, &snova_sign(&sk, msg)));
     let (pk, sk) = hawk_keygen();
-    demo!(
-        "HAWK",
-        "lattice (LIP)",
-        hawk_verify(&pk, msg, &hawk_sign(&sk, msg))
-    );
+    demo!("HAWK", "lattice (LIP)", hawk_verify(&pk, msg, &hawk_sign(&sk, msg)));
     let (pk, sk) = fn_dsa_keygen();
-    demo!(
-        "FN-DSA",
-        "lattice (NTRU)",
-        fn_dsa_verify(&pk, msg, &fn_dsa_sign(&sk, msg))
-    );
+    demo!("FN-DSA", "lattice (NTRU)", fn_dsa_verify(&pk, msg, &fn_dsa_sign(&sk, msg)));
     let (pk, sk) = sdith_keygen();
-    demo!(
-        "SDitH",
-        "MPC-in-the-head",
-        sdith_verify(&pk, msg, &sdith_sign(&pk, &sk, msg))
-    );
+    demo!("SDitH", "MPC-in-the-head", sdith_verify(&pk, msg, &sdith_sign(&pk, &sk, msg)));
     let (pk, sk) = mqom_keygen();
-    demo!(
-        "MQOM",
-        "MPC-in-the-head",
-        mqom_verify(&pk, msg, &mqom_sign(&pk, &sk, msg))
-    );
+    demo!("MQOM", "MPC-in-the-head", mqom_verify(&pk, msg, &mqom_sign(&pk, &sk, msg)));
     let (pk, sk) = faest_keygen();
-    demo!(
-        "FAEST",
-        "MPC-in-the-head",
-        faest_verify(&pk, msg, &faest_sign(&pk, &sk, msg))
-    );
+    demo!("FAEST", "MPC-in-the-head", faest_verify(&pk, msg, &faest_sign(&pk, &sk, msg)));
 }
 
 fn cmd_demo() {

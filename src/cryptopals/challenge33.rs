@@ -5,8 +5,8 @@
 use crate::cryptopals::set8_util::parse_big;
 use crate::cryptopals::Report;
 use num_bigint::{BigUint, RandBigInt};
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 pub fn nist_p_g() -> (BigUint, BigUint) {
     let p = BigUint::parse_bytes(

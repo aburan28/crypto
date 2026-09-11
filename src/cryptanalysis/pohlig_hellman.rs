@@ -337,7 +337,13 @@ mod tests {
         let g = curve.generator();
         let a_fe = curve.a_fe();
         let q = g.scalar_mul(&BigUint::from(99u32), &a_fe);
-        let result = recover_in_prime_power_subgroup(&curve, &g, &q, &BigUint::from(199u32), 1);
+        let result = recover_in_prime_power_subgroup(
+            &curve,
+            &g,
+            &q,
+            &BigUint::from(199u32),
+            1,
+        );
         let (d, steps) = result.expect("should recover");
         assert_eq!(d, BigUint::from(99u32));
         assert!(steps <= 199);

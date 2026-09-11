@@ -73,7 +73,8 @@ fn write_key(state: &mut [u32; 16], key: &[u8; 32]) {
         state[1 + i] = u32::from_le_bytes(key[i * 4..i * 4 + 4].try_into().unwrap());
     }
     for i in 0..4 {
-        state[11 + i] = u32::from_le_bytes(key[16 + i * 4..16 + i * 4 + 4].try_into().unwrap());
+        state[11 + i] =
+            u32::from_le_bytes(key[16 + i * 4..16 + i * 4 + 4].try_into().unwrap());
     }
 }
 

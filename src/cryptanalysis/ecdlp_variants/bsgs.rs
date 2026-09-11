@@ -647,11 +647,7 @@ mod tests {
             let want = BigUint::from(x);
             assert_eq!(bsgs_textbook(&g, &q).unwrap().x, want, "textbook x={x}");
             assert_eq!(bsgs_average_case(&g, &q).unwrap().x, want, "avg x={x}");
-            assert_eq!(
-                bsgs_interleaving(&g, &q).unwrap().x,
-                want,
-                "interleave x={x}"
-            );
+            assert_eq!(bsgs_interleaving(&g, &q).unwrap().x, want, "interleave x={x}");
             assert_eq!(grumpy_giants(&g, &q).unwrap().x, want, "grumpy x={x}");
             assert_eq!(bsgs_negation(&g, &q).unwrap().x, want, "neg x={x}");
             assert_eq!(

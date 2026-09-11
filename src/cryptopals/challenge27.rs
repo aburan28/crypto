@@ -34,7 +34,7 @@ pub fn run() -> Report {
     let pt = b"ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 48
     let ct = cbc_encrypt_no_iv_prefix(pt, &key, &iv);
     assert_eq!(ct.len(), 48 + 16); // 48 bytes pt + one block PKCS7 pad
-                                   // Take only the first 48 bytes (3 blocks).
+    // Take only the first 48 bytes (3 blocks).
     let mut malformed = vec![0u8; 48];
     malformed[..16].copy_from_slice(&ct[..16]);
     // block 1 = all zeros

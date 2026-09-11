@@ -10,8 +10,8 @@ use crate::cryptopals::Report;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::Zero;
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 pub fn run() -> Report {
     let mut r = Report::new(37, "Break SRP with A = 0 / N");

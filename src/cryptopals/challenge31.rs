@@ -8,8 +8,8 @@
 //! "sleep" that's proportional to the number of correct leading
 //! bytes — slow enough to be measurable but not actually sleeping.
 
-use crate::cryptopals::set8_util::hmac_sha256;
 use crate::cryptopals::Report;
+use crate::cryptopals::set8_util::hmac_sha256;
 
 const KEY: &[u8] = b"network-key-31";
 
@@ -33,10 +33,7 @@ pub fn timing_oracle(msg: &[u8], candidate: &[u8]) -> (bool, u32) {
         }
     }
     let elapsed = matched * 50; // 50 µs per matching byte
-    (
-        matched as usize == mac.len() && candidate.len() == mac.len(),
-        elapsed,
-    )
+    (matched as usize == mac.len() && candidate.len() == mac.len(), elapsed)
 }
 
 pub fn recover_via_timing(msg: &[u8]) -> [u8; 32] {

@@ -176,7 +176,8 @@ impl TlsClient {
                     let transcript_before_finished =
                         self.transcript[..self.transcript.len() - full.len()].to_vec();
                     let th = sha256(&transcript_before_finished);
-                    let expected = hmac_sha256(&server_finished_key, &th);
+                    let expected =
+                        hmac_sha256(&server_finished_key, &th);
                     if hs.body != expected {
                         self.state = State::Failed;
                         return None;

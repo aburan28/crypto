@@ -32,13 +32,17 @@
 //!
 //! Total work: pre-commit `2^(k + b/2 + 1)`-ish, forgery `2^(b-k)`.
 
-use crate::cryptopals::challenge52::{compress, weak_hash};
 use crate::cryptopals::Report;
+use crate::cryptopals::challenge52::{compress, weak_hash};
 use std::collections::HashMap;
 
 /// Find a single block from each of `a` and `b` whose outputs
 /// collide.  Returns `(block_a, block_b, common_next)`.
-pub fn merge_states(a: &[u8], b: &[u8], b_bytes: usize) -> ([u8; 16], [u8; 16], Vec<u8>) {
+pub fn merge_states(
+    a: &[u8],
+    b: &[u8],
+    b_bytes: usize,
+) -> ([u8; 16], [u8; 16], Vec<u8>) {
     let mut from_a: HashMap<Vec<u8>, [u8; 16]> = HashMap::new();
     let mut counter: u64 = 0;
     loop {
@@ -115,7 +119,8 @@ pub fn build_diamond(k: usize, iv: &[u8], b_bytes: usize) -> Diamond {
         let pairs: Vec<(usize, usize)> =
             (0..current.len()).step_by(2).map(|i| (i, i + 1)).collect();
         for (i, j) in &pairs {
-            let (blk_i, blk_j, parent) = merge_states(&current[*i], &current[*j], b_bytes);
+            let (blk_i, blk_j, parent) =
+                merge_states(&current[*i], &current[*j], b_bytes);
             // Backfill the block for both children.
             current_layer[*i].block = blk_i;
             current_layer[*j].block = blk_j;
@@ -193,7 +198,12 @@ pub fn find_glue(
 
 /// Forge a full message that starts with `prediction`, has the
 /// expected diamond-derived tail, and hashes to the commitment.
-pub fn forge(diamond: &Diamond, prediction: &[u8], iv: &[u8], b_bytes: usize) -> Vec<u8> {
+pub fn forge(
+    diamond: &Diamond,
+    prediction: &[u8],
+    iv: &[u8],
+    b_bytes: usize,
+) -> Vec<u8> {
     // Hash the prediction up to its final state.  The prediction
     // should already be 16-byte aligned (caller's responsibility).
     assert!(prediction.len() % 16 == 0);
@@ -220,14 +230,10 @@ pub fn run() -> Report {
     let diamond = build_diamond(k, &iv, b_bytes);
     let commit = commitment(&diamond, b_bytes);
     r.line(format!("Public commitment: {}", hex::encode(&commit)));
-    r.line(format!(
-        "Root state       : {}",
-        hex::encode(&diamond.root_state)
-    ));
+    r.line(format!("Root state       : {}", hex::encode(&diamond.root_state)));
 
     // After the event has happened, write whatever "prediction" we like.
-    let prediction =
-        b"The Wu-Tang Clan will rule the AFC East in week 17\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    let prediction = b"The Wu-Tang Clan will rule the AFC East in week 17\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     // Align to 16 bytes — trim/pad as needed.
     let mut padded = prediction.to_vec();
     while padded.len() % 16 != 0 {
@@ -243,7 +249,10 @@ pub fn run() -> Report {
     ));
     r.line(format!("  total length      = {} bytes", forged.len()));
     r.line(format!("  forged hash       = {}", hex::encode(&h)));
-    r.line(format!("  matches commit    = {}", h == commit));
+    r.line(format!(
+        "  matches commit    = {}",
+        h == commit
+    ));
     assert_eq!(h, commit);
     r.succeed()
 }

@@ -22,14 +22,14 @@ fn main() {
     println!();
 
     let fb = build_factor_base(&curve);
-    println!(
-        "Factor base FB = {{ P : x(P) ∈ F_5 }} :  {} points",
-        fb.len()
-    );
+    println!("Factor base FB = {{ P : x(P) ∈ F_5 }} :  {} points", fb.len());
     for (i, p) in fb.iter().enumerate() {
         let x = p.x.as_ref().unwrap();
         let y = p.y.as_ref().unwrap();
-        println!("  FB[{}]  =  ( {:?},  {:?} )", i, x.coeffs, y.coeffs);
+        println!(
+            "  FB[{}]  =  ( {:?},  {:?} )",
+            i, x.coeffs, y.coeffs
+        );
     }
 
     if fb.len() < 2 {

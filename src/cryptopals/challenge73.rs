@@ -25,8 +25,8 @@ use crate::ecc::keys::EccKeyPair;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::Zero;
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Sign with a HIGH-bit-biased nonce: `k` is uniform in `[1, 2^k_bits)`.
 /// This is the bias direction the HNP recovery engine expects.
@@ -71,7 +71,12 @@ fn sign_biased(
         if s.is_zero() {
             continue;
         }
-        return BiasedSignature { r, s, z, k_bits };
+        return BiasedSignature {
+            r,
+            s,
+            z,
+            k_bits,
+        };
     }
 }
 
@@ -94,27 +99,16 @@ pub fn run() -> Report {
     let m = 8;
     let mut rng = StdRng::seed_from_u64(0xBBBA);
     let sigs: Vec<BiasedSignature> = (0..m)
-        .map(|i| {
-            sign_biased(
-                &curve,
-                &d,
-                format!("msg-{i}").as_bytes(),
-                bias_bits,
-                &mut rng,
-            )
-        })
+        .map(|i| sign_biased(&curve, &d, format!("msg-{i}").as_bytes(), bias_bits, &mut rng))
         .collect();
 
     r.line(format!("curve         : P-256 ({}-bit n)", curve.n.bits()));
-    r.line(format!(
-        "bias depth    : top {} bits forced zero (k < 2^{})",
-        bias_bits,
-        256 - bias_bits
-    ));
+    r.line(format!("bias depth    : top {} bits forced zero (k < 2^{})", bias_bits, 256 - bias_bits));
     r.line(format!("signatures    : m = {}", m));
 
     // Try LLL first.
-    let lll_result = hnp_recover_key_with_reduction(&curve, &pub_key, &sigs, HnpReduction::Lll);
+    let lll_result =
+        hnp_recover_key_with_reduction(&curve, &pub_key, &sigs, HnpReduction::Lll);
     r.line(format!(
         "LLL alone      : {}",
         match &lll_result {
@@ -124,7 +118,8 @@ pub fn run() -> Report {
         }
     ));
     // BKZ-12 should succeed where LLL doesn't.
-    let bkz_result = hnp_recover_key_with_reduction(&curve, &pub_key, &sigs, HnpReduction::Bkz(12));
+    let bkz_result =
+        hnp_recover_key_with_reduction(&curve, &pub_key, &sigs, HnpReduction::Bkz(12));
     let bkz_ok = matches!(&bkz_result, Ok(x) if x == &d);
     r.line(format!(
         "BKZ-12         : {}",

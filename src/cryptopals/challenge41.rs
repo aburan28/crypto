@@ -35,10 +35,7 @@ pub fn run() -> Report {
     // Recover m = p_prime / s mod n
     let m_recovered = (&p_prime * mod_inv(&s, &n)) % &n;
     let bytes = m_recovered.to_bytes_be();
-    r.line(format!(
-        "Recovered: {:?}",
-        std::str::from_utf8(&bytes).unwrap_or("?")
-    ));
+    r.line(format!("Recovered: {:?}", std::str::from_utf8(&bytes).unwrap_or("?")));
     assert_eq!(bytes, secret);
     r.succeed()
 }

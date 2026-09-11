@@ -63,11 +63,7 @@ fn w_add(a: &W, b: &W) -> W {
 }
 
 fn w_sub(a: &W, b: &W) -> W {
-    [
-        (a[0] + Q - b[0]) % Q,
-        (a[1] + Q - b[1]) % Q,
-        (a[2] + Q - b[2]) % Q,
-    ]
+    [(a[0] + Q - b[0]) % Q, (a[1] + Q - b[1]) % Q, (a[2] + Q - b[2]) % Q]
 }
 
 /// Multiply mod f(x) = x³ − x − 1, i.e. x³ ≡ x + 1.
@@ -79,11 +75,7 @@ fn w_mul(a: &W, b: &W) -> W {
         }
     }
     // x⁴ ≡ x² + x, x³ ≡ x + 1.
-    [
-        (t[0] + t[3]) % Q,
-        (t[1] + t[3] + t[4]) % Q,
-        (t[2] + t[4]) % Q,
-    ]
+    [(t[0] + t[3]) % Q, (t[1] + t[3] + t[4]) % Q, (t[2] + t[4]) % Q]
 }
 
 fn w_is_zero(a: &W) -> bool {
@@ -206,9 +198,7 @@ fn solve(a: &Matrix, b: &[W]) -> Option<Vec<W>> {
     Some(
         inv.iter()
             .map(|row| {
-                row.iter()
-                    .zip(b)
-                    .fold(ZERO, |acc, (aij, bj)| w_add(&acc, &w_mul(aij, bj)))
+                row.iter().zip(b).fold(ZERO, |acc, (aij, bj)| w_add(&acc, &w_mul(aij, bj)))
             })
             .collect(),
     )
@@ -286,10 +276,7 @@ pub fn qr_uov_keygen() -> (QrUovPublicKey, QrUovSecretKey) {
         }
     };
     let t_t = transpose(&t);
-    let forms = central
-        .iter()
-        .map(|q| mat_mul(&t_t, &mat_mul(q, &t)))
-        .collect();
+    let forms = central.iter().map(|q| mat_mul(&t_t, &mat_mul(q, &t))).collect();
     (QrUovPublicKey { forms }, QrUovSecretKey { central, t_inv })
 }
 
@@ -337,10 +324,7 @@ pub fn qr_uov_verify(pk: &QrUovPublicKey, msg: &[u8], sig: &[W]) -> bool {
         return false;
     }
     let target = hash_to_target(msg);
-    pk.forms
-        .iter()
-        .zip(&target)
-        .all(|(q, t)| eval_form(q, sig) == *t)
+    pk.forms.iter().zip(&target).all(|(q, t)| eval_form(q, sig) == *t)
 }
 
 #[cfg(test)]

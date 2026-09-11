@@ -210,7 +210,12 @@ fn finalize(s: &mut [u64; 5], k0: u64, k1: u64) -> [u8; 16] {
 }
 
 /// Encrypt under Ascon-128. Returns `ciphertext || 16-byte tag`.
-pub fn ascon128_encrypt(key: &[u8; 16], nonce: &[u8; 16], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
+pub fn ascon128_encrypt(
+    key: &[u8; 16],
+    nonce: &[u8; 16],
+    aad: &[u8],
+    plaintext: &[u8],
+) -> Vec<u8> {
     let (mut s, k0, k1) = init_state(key, nonce);
     absorb_aad(&mut s, aad);
 
@@ -442,10 +447,7 @@ mod tests {
         let aad = h("0001020304050607");
         let pt = h("00010203040506070809");
         let ct = ascon128_encrypt(&key, &nonce, &aad, &pt);
-        assert_eq!(
-            ct,
-            h("69FFEE6F5505A4897E2EC93B4AF37A996A1CDCDD047F83D55553")
-        );
+        assert_eq!(ct, h("69FFEE6F5505A4897E2EC93B4AF37A996A1CDCDD047F83D55553"));
     }
 
     /// **Vector 3**: no AD, exact-multiple PT (24 bytes = 3 full rate blocks).
@@ -513,9 +515,7 @@ mod tests {
         let nonce = [0x07u8; 16];
         for len in [0usize, 1, 7, 8, 9, 15, 16, 17, 23, 24, 25, 63, 64, 65, 200] {
             let pt: Vec<u8> = (0..len).map(|i| (i as u8).wrapping_mul(31)).collect();
-            let aad: Vec<u8> = (0..(len % 17))
-                .map(|i| (i as u8).wrapping_mul(17))
-                .collect();
+            let aad: Vec<u8> = (0..(len % 17)).map(|i| (i as u8).wrapping_mul(17)).collect();
             let ct = ascon128_encrypt(&key, &nonce, &aad, &pt);
             assert_eq!(ct.len(), pt.len() + 16);
             let dec = ascon128_decrypt(&key, &nonce, &aad, &ct).expect("roundtrip tag verified");
@@ -587,9 +587,7 @@ mod tests {
         let (key, nonce) = key_nonce_seq();
         let out = ascon128a_encrypt(&key, &nonce, b"AD!", b"");
         assert_eq!(&out[..], &h("6c909bd0013cd15c94b5ee62ed727897")[..]);
-        assert!(ascon128a_decrypt(&key, &nonce, b"AD!", &out)
-            .unwrap()
-            .is_empty());
+        assert!(ascon128a_decrypt(&key, &nonce, b"AD!", &out).unwrap().is_empty());
     }
 
     /// Empty AAD, 7-byte plaintext (partial rate block).

@@ -82,7 +82,11 @@ fn compress_lz77(data: &[u8]) -> Vec<u8> {
         // — O(N²) — but fine for the modest demo strings we pass.
         for d in start..i {
             let mut l = 0;
-            while i + l < n && d + l < i && data[d + l] == data[i + l] && l < 258 {
+            while i + l < n
+                && d + l < i
+                && data[d + l] == data[i + l]
+                && l < 258
+            {
                 l += 1;
             }
             if l > best_len {
@@ -208,7 +212,10 @@ fn build_trial(prefix: &str, known: &[u8], candidate: u8, pad_len: usize) -> Str
 /// Stream-mode recovery: the oracle's output length tracks the
 /// compressed length byte-for-byte, so picking the candidate that
 /// minimises `oracle(prefix || known || c)` is sufficient.
-fn crime_recover_stream<F: Fn(&str) -> usize>(oracle: &F, expected_len: usize) -> Vec<u8> {
+fn crime_recover_stream<F: Fn(&str) -> usize>(
+    oracle: &F,
+    expected_len: usize,
+) -> Vec<u8> {
     let alph = alphabet();
     let mut known: Vec<u8> = Vec::new();
     let base_prefix = "\r\nCookie: sessionid=";
@@ -235,7 +242,10 @@ fn crime_recover_stream<F: Fn(&str) -> usize>(oracle: &F, expected_len: usize) -
 /// The classical fix is to *vary the pad length*: at some specific
 /// pad length, the wrong-guess size lands on exactly a multiple of
 /// 16, so the correct guess is one full block (16 bytes) shorter.
-fn crime_recover_cbc<F: Fn(&str) -> usize>(oracle: &F, expected_len: usize) -> Vec<u8> {
+fn crime_recover_cbc<F: Fn(&str) -> usize>(
+    oracle: &F,
+    expected_len: usize,
+) -> Vec<u8> {
     let alph = alphabet();
     let mut known: Vec<u8> = Vec::new();
     let base_prefix = "\r\nCookie: sessionid=";
@@ -298,7 +308,8 @@ pub fn run() -> Report {
 
     // ── Stream oracle (clean LZ77) ──────────────────────────────
     r.line("Stream oracle (AES-CTR over LZ77 — length = compressed length):");
-    let recovered_stream = crime_recover(&oracle_stream_lz77, SESSION_COOKIE.len(), false);
+    let recovered_stream =
+        crime_recover(&oracle_stream_lz77, SESSION_COOKIE.len(), false);
     let recovered_stream_s = String::from_utf8_lossy(&recovered_stream).to_string();
     r.line(format!("  recovered = {:?}", recovered_stream_s));
     r.line(format!(
@@ -310,13 +321,11 @@ pub fn run() -> Report {
     // ── CBC oracle (clean LZ77) ─────────────────────────────────
     r.line("");
     r.line("CBC oracle (AES-CBC — length quantised to 16 bytes):");
-    let recovered_cbc = crime_recover(&oracle_cbc_lz77, SESSION_COOKIE.len(), true);
+    let recovered_cbc =
+        crime_recover(&oracle_cbc_lz77, SESSION_COOKIE.len(), true);
     let recovered_cbc_s = String::from_utf8_lossy(&recovered_cbc).to_string();
     r.line(format!("  recovered = {:?}", recovered_cbc_s));
-    r.line(format!(
-        "  match     = {}",
-        recovered_cbc_s == SESSION_COOKIE
-    ));
+    r.line(format!("  match     = {}", recovered_cbc_s == SESSION_COOKIE));
     let cbc_ok = recovered_cbc_s == SESSION_COOKIE;
 
     // ── Real zlib spot-check ────────────────────────────────────

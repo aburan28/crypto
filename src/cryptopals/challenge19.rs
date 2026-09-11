@@ -27,16 +27,17 @@ pub fn run() -> Report {
     let max_len = cts.iter().map(|c| c.len()).max().unwrap();
     let mut keystream = vec![0u8; max_len];
     for pos in 0..max_len {
-        let column: Vec<u8> = cts.iter().filter_map(|c| c.get(pos).copied()).collect();
+        let column: Vec<u8> = cts
+            .iter()
+            .filter_map(|c| c.get(pos).copied())
+            .collect();
         let (k, _, _) = break_single_xor(&column);
         keystream[pos] = k;
     }
     let mut total_correct = 0;
     for c in &cts {
         let recovered: Vec<u8> = c.iter().zip(&keystream).map(|(b, k)| b ^ k).collect();
-        if !recovered.is_empty()
-            && recovered.iter().filter(|b| b.is_ascii()).count() > recovered.len() / 2
-        {
+        if !recovered.is_empty() && recovered.iter().filter(|b| b.is_ascii()).count() > recovered.len() / 2 {
             total_correct += 1;
         }
     }

@@ -877,8 +877,7 @@ impl Solver {
                     continue;
                 }
                 let free = m & !self.assigned_w[w];
-                if free.count_ones() > 1
-                    || (free != 0 && free.trailing_zeros() + (w * 64) as u32 != p)
+                if free.count_ones() > 1 || (free != 0 && free.trailing_zeros() + (w * 64) as u32 != p)
                 {
                     lone = false;
                     break;
@@ -889,11 +888,7 @@ impl Solver {
                 continue 'rows;
             }
 
-            let lit = if parity {
-                (p + 1) as Lit
-            } else {
-                -((p + 1) as Lit)
-            };
+            let lit = if parity { (p + 1) as Lit } else { -((p + 1) as Lit) };
             let mut buf = std::mem::take(&mut self.xor_reason[p as usize]);
             let mask = std::mem::take(&mut self.matrix[i].mask);
             self.write_xor_reason(&mask, Some(lit), &mut buf);
@@ -1104,7 +1099,12 @@ impl Solver {
     /// Marks made on a successful walk are kept — those variables are
     /// now known to be implied by the clause — and rolled back on
     /// failure, which is what `top` records.
-    fn lit_redundant(&mut self, p: Lit, abstract_levels: u32, stack: &mut Vec<Lit>) -> bool {
+    fn lit_redundant(
+        &mut self,
+        p: Lit,
+        abstract_levels: u32,
+        stack: &mut Vec<Lit>,
+    ) -> bool {
         let top = self.seen_stack.len();
         stack.clear();
         stack.push(p);
@@ -1165,11 +1165,7 @@ impl Solver {
             // buffer was a memcpy of up to a hundred literals at every
             // resolution step, and conflict analysis is the hottest
             // phase of the solve.
-            let xor_var = if p == 0 {
-                usize::MAX
-            } else {
-                var_of(p) as usize
-            };
+            let xor_var = if p == 0 { usize::MAX } else { var_of(p) as usize };
             let len = match src {
                 Conflict::Clause(idx) => self.clauses[idx].len(),
                 Conflict::Xor if xor_var == usize::MAX => self.xor_conflict.len(),
@@ -1204,8 +1200,7 @@ impl Solver {
                         }
                         self.activity_inc *= 1e-100;
                     }
-                    self.order
-                        .bumped(v as u32, &self.activity, &self.branch_priority);
+                    self.order.bumped(v as u32, &self.activity, &self.branch_priority);
                     if self.level[v] >= current_level {
                         counter += 1;
                     } else {
@@ -1236,6 +1231,7 @@ impl Solver {
                 Reason::Decision => break,
             }
         }
+
 
         // **Local clause minimization** (MiniSat's `analyze` follow-up).
         // A literal whose own reason is built entirely from literals
@@ -1321,8 +1317,7 @@ impl Solver {
             self.assignment[v] = None;
             self.assigned_w[v / 64] &= !(1u64 << (v % 64));
             self.level[v] = -1;
-            self.order
-                .insert(v as u32, &self.activity, &self.branch_priority);
+            self.order.insert(v as u32, &self.activity, &self.branch_priority);
         }
         self.trail_lim.truncate(level);
         self.qhead = target;
@@ -1994,19 +1989,11 @@ mod tests {
             let res = s.solve();
 
             if brute_sat {
-                assert_eq!(
-                    res,
-                    SolveResult::Sat,
-                    "trial {trial}: solver missed a model"
-                );
+                assert_eq!(res, SolveResult::Sat, "trial {trial}: solver missed a model");
                 let m = s.model();
                 assert!(s.check_xors(&m), "trial {trial}: model violates a row");
             } else {
-                assert_eq!(
-                    res,
-                    SolveResult::Unsat,
-                    "trial {trial}: solver invented a model"
-                );
+                assert_eq!(res, SolveResult::Unsat, "trial {trial}: solver invented a model");
                 let _ = trivially_unsat;
             }
         }

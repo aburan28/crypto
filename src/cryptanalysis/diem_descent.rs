@@ -293,14 +293,9 @@ impl ECurveFpk {
             // Doubling.
             let two = Fpk::from_base(2, self.p, self.k);
             let three = Fpk::from_base(3, self.p, self.k);
-            let num = three
-                .mul(&x1.mul(x1, self.irr_const), self.irr_const)
-                .add(&self.a);
+            let num = three.mul(&x1.mul(x1, self.irr_const), self.irr_const).add(&self.a);
             let den = two.mul(y1, self.irr_const);
-            let lam = num.mul(
-                &fpk_inv(&den, self.irr_const).expect("non-zero den"),
-                self.irr_const,
-            );
+            let lam = num.mul(&fpk_inv(&den, self.irr_const).expect("non-zero den"), self.irr_const);
             let lam_sq = lam.mul(&lam, self.irr_const);
             let x3 = lam_sq.sub(&two.mul(x1, self.irr_const));
             let y3 = lam.mul(&x1.sub(&x3), self.irr_const).sub(y1);
@@ -311,10 +306,7 @@ impl ECurveFpk {
         }
         let num = y2.sub(y1);
         let den = x2.sub(x1);
-        let lam = num.mul(
-            &fpk_inv(&den, self.irr_const).expect("non-zero den"),
-            self.irr_const,
-        );
+        let lam = num.mul(&fpk_inv(&den, self.irr_const).expect("non-zero den"), self.irr_const);
         let lam_sq = lam.mul(&lam, self.irr_const);
         let x3 = lam_sq.sub(x1).sub(x2);
         let y3 = lam.mul(&x1.sub(&x3), self.irr_const).sub(y1);
@@ -422,7 +414,13 @@ pub fn find_2_decomposition(curve: &ECurveFpk, fb: &[Pt], r: &Pt) -> Option<Deco
 }
 
 /// Convenience: random R = a G + b Q, returns (a, b, R).
-pub fn random_relation_target(curve: &ECurveFpk, g: &Pt, q: &Pt, a: &BigUint, b: &BigUint) -> Pt {
+pub fn random_relation_target(
+    curve: &ECurveFpk,
+    g: &Pt,
+    q: &Pt,
+    a: &BigUint,
+    b: &BigUint,
+) -> Pt {
     let ag = curve.scalar_mul(a, g);
     let bq = curve.scalar_mul(b, q);
     curve.add(&ag, &bq)

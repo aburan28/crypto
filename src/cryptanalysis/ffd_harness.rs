@@ -226,9 +226,7 @@ impl F2BoolPoly {
         let s_const = self.coeffs[0];
         let s_lin: Vec<bool> = (0..num_vars).map(|i| self.coeffs[1 + i as usize]).collect();
         let o_const = other.coeffs[0];
-        let o_lin: Vec<bool> = (0..num_vars)
-            .map(|i| other.coeffs[1 + i as usize])
-            .collect();
+        let o_lin: Vec<bool> = (0..num_vars).map(|i| other.coeffs[1 + i as usize]).collect();
 
         // const × const
         if s_const && o_const {
@@ -1121,11 +1119,7 @@ mod tests {
             acc
         };
 
-        for (v1, v2) in [
-            (0b00000u32, 0b00000u32),
-            (0b10110, 0b01101),
-            (0b11111, 0b00001),
-        ] {
+        for (v1, v2) in [(0b00000u32, 0b00000u32), (0b10110, 0b01101), (0b11111, 0b00001)] {
             let bits = |v: u32| -> Vec<u32> { (0..l).filter(|k| (v >> k) & 1 == 1).collect() };
             let x1 = F2mElement::from_bit_positions(&bits(v1), n);
             let x2 = F2mElement::from_bit_positions(&bits(v2), n);

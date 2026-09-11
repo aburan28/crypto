@@ -186,7 +186,8 @@ fn rho_via_pohlig_gls(
         .iter()
         .map(|d| g.scalar_mul(&BigUint::from(*d), a_fe))
         .collect();
-    let (sol, total_iters) = pohlig_multi_target_rho(g, &targets, n_big, a_fe, max_iters, seed);
+    let (sol, total_iters) =
+        pohlig_multi_target_rho(g, &targets, n_big, a_fe, max_iters, seed);
     let per_target = total_iters / M.max(1);
     match sol {
         Some(s) => (
@@ -225,11 +226,11 @@ fn r_adding_rho_on_curve(
     seed: u64,
 ) -> (Option<RhoSolution>, u64) {
     use crate::utils::mod_inverse;
-    use num_bigint::RandBigInt;
     use num_integer::Integer;
     use num_traits::One;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
+    use num_bigint::RandBigInt;
     let _ = One::one as fn() -> BigUint;
 
     const R: usize = 20;
@@ -246,9 +247,7 @@ fn r_adding_rho_on_curve(
     for _ in 0..R {
         let a_i = (&mut rng).gen_biguint_below(n);
         let b_i = (&mut rng).gen_biguint_below(n);
-        let pt = g
-            .scalar_mul(&a_i, a_fe)
-            .add(&h.scalar_mul(&b_i, a_fe), a_fe);
+        let pt = g.scalar_mul(&a_i, a_fe).add(&h.scalar_mul(&b_i, a_fe), a_fe);
         m_pts.push(pt);
         m_a.push(a_i);
         m_b.push(b_i);
@@ -295,10 +294,7 @@ fn r_adding_rho_on_curve(
         let (a0, b0) = if restart == 0 {
             (BigUint::from(1u32), BigUint::zero())
         } else {
-            (
-                (&mut rng).gen_biguint_below(n),
-                (&mut rng).gen_biguint_below(n),
-            )
+            ((&mut rng).gen_biguint_below(n), (&mut rng).gen_biguint_below(n))
         };
         let start = g.scalar_mul(&a0, a_fe).add(&h.scalar_mul(&b0, a_fe), a_fe);
 
@@ -342,13 +338,7 @@ fn r_adding_rho_on_curve(
                         .ok_or("rho: rhs has no inverse mod n")
                         .unwrap();
                     let x = (&lhs * &inv) % n;
-                    return (
-                        Some(RhoSolution {
-                            x,
-                            iterations: iters,
-                        }),
-                        iters,
-                    );
+                    return (Some(RhoSolution { x, iterations: iters }), iters);
                 }
                 // gcd-recovery branch (round-2 fix): solve mod n/g and
                 // brute-force the remaining g candidates.
@@ -364,10 +354,7 @@ fn r_adding_rho_on_curve(
                             let test = g.scalar_mul(&x_cand, a_fe);
                             if test == *h {
                                 return (
-                                    Some(RhoSolution {
-                                        x: x_cand,
-                                        iterations: iters,
-                                    }),
+                                    Some(RhoSolution { x: x_cand, iterations: iters }),
                                     iters,
                                 );
                             }
@@ -504,11 +491,7 @@ fn dp_parallel_rho_on_curve(
                     (a - b) % m
                 } else {
                     let diff = (b - a) % m;
-                    if diff.is_zero() {
-                        BigUint::zero()
-                    } else {
-                        m - diff
-                    }
+                    if diff.is_zero() { BigUint::zero() } else { m - diff }
                 }
             };
 
@@ -603,13 +586,7 @@ fn dp_parallel_rho_on_curve(
     let total = total_iters.load(Ordering::Relaxed);
     let final_x = result.lock().unwrap().take();
     match final_x {
-        Some(x) => (
-            Some(RhoSolution {
-                x,
-                iterations: total,
-            }),
-            total,
-        ),
+        Some(x) => (Some(RhoSolution { x, iterations: total }), total),
         None => (None, max_iters),
     }
 }
@@ -672,7 +649,8 @@ pub fn multi_target_dp_rho(
     let dp_mask = (1u64 << dp_bits) - 1;
 
     // Shared state.  DP table maps point-key → (a, b_0, …, b_{m-1}).
-    let dp_table: Arc<Mutex<HashMap<u64, Vec<BigUint>>>> = Arc::new(Mutex::new(HashMap::new()));
+    let dp_table: Arc<Mutex<HashMap<u64, Vec<BigUint>>>> =
+        Arc::new(Mutex::new(HashMap::new()));
     // Incremental Gaussian elimination state.  `pivots[col] =
     // Some(row)` if we have a pivot for column `col`.  Rows are
     // stored in `rows`, each as (coeffs[0..m], rhs).
@@ -729,17 +707,15 @@ pub fn multi_target_dp_rho(
                     (a - b) % m
                 } else {
                     let diff = (b - a) % m;
-                    if diff.is_zero() {
-                        BigUint::zero()
-                    } else {
-                        m - diff
-                    }
+                    if diff.is_zero() { BigUint::zero() } else { m - diff }
                 }
             };
 
             // Random initial state.
             let a0 = (&mut wrng).gen_biguint_below(n);
-            let bs0: Vec<BigUint> = (0..m).map(|_| (&mut wrng).gen_biguint_below(n)).collect();
+            let bs0: Vec<BigUint> = (0..m)
+                .map(|_| (&mut wrng).gen_biguint_below(n))
+                .collect();
             let mut pt = g_pt.scalar_mul(&a0, a_fe);
             for i in 0..m {
                 pt = pt.add(&targets[i].scalar_mul(&bs0[i], a_fe), a_fe);
@@ -914,13 +890,12 @@ pub fn pohlig_multi_target_rho(
 
     // For each (q, e): lift base/targets to order-q^e subgroup
     // by scalar-multiplying by n / q^e, then run GLS rho there.
-    let mut residues_per_target: Vec<Vec<(BigUint, BigUint)>> = vec![Vec::new(); m];
+    let mut residues_per_target: Vec<Vec<(BigUint, BigUint)>> =
+        vec![Vec::new(); m];
     let mut total_iters: u64 = 0;
     for (q, e) in &all_factors {
         let mut qe: u64 = 1;
-        for _ in 0..*e {
-            qe *= q;
-        }
+        for _ in 0..*e { qe *= q; }
         let qe_big = BigUint::from(qe);
         let cofactor = BigUint::from(n_u64 / qe);
         let g_sub = g.scalar_mul(&cofactor, a_fe);
@@ -1029,7 +1004,12 @@ impl RrefState {
     /// Reduce `(coeffs, rhs)` against existing pivots; if a non-zero
     /// row remains, pivot it into the matrix.  Returns true iff the
     /// matrix now has rank `m` (i.e. the system is solvable).
-    fn add_equation(&mut self, coeffs_in: &[BigUint], rhs_in: &BigUint, n: &BigUint) -> bool {
+    fn add_equation(
+        &mut self,
+        coeffs_in: &[BigUint],
+        rhs_in: &BigUint,
+        n: &BigUint,
+    ) -> bool {
         use crate::utils::mod_inverse;
         if self.rank == self.m {
             return true;
@@ -1039,11 +1019,7 @@ impl RrefState {
                 (a - b) % m
             } else {
                 let diff = (b - a) % m;
-                if diff.is_zero() {
-                    BigUint::zero()
-                } else {
-                    m - diff
-                }
+                if diff.is_zero() { BigUint::zero() } else { m - diff }
             }
         };
 
@@ -1113,10 +1089,7 @@ impl RrefState {
         self.rows[col] = Some((coeffs, rhs));
         self.rank += 1;
         #[cfg(feature = "rho_debug")]
-        eprintln!(
-            "rref: pivot at col {}, rank now {}/{}",
-            col, self.rank, self.m
-        );
+        eprintln!("rref: pivot at col {}, rank now {}/{}", col, self.rank, self.m);
         self.rank == self.m
     }
 
@@ -1165,11 +1138,7 @@ fn solve_mod_n(
             (a - b) % m
         } else {
             let diff = (b - a) % m;
-            if diff.is_zero() {
-                BigUint::zero()
-            } else {
-                m - diff
-            }
+            if diff.is_zero() { BigUint::zero() } else { m - diff }
         }
     };
 
@@ -1288,30 +1257,10 @@ mod tests {
         ];
         // Random row coefficients
         let rows: Vec<Vec<BigUint>> = vec![
-            vec![
-                BigUint::from(7u64),
-                BigUint::from(3u64),
-                BigUint::from(11u64),
-                BigUint::from(2u64),
-            ],
-            vec![
-                BigUint::from(13u64),
-                BigUint::from(17u64),
-                BigUint::from(5u64),
-                BigUint::from(23u64),
-            ],
-            vec![
-                BigUint::from(29u64),
-                BigUint::from(31u64),
-                BigUint::from(37u64),
-                BigUint::from(41u64),
-            ],
-            vec![
-                BigUint::from(43u64),
-                BigUint::from(47u64),
-                BigUint::from(53u64),
-                BigUint::from(59u64),
-            ],
+            vec![BigUint::from(7u64), BigUint::from(3u64), BigUint::from(11u64), BigUint::from(2u64)],
+            vec![BigUint::from(13u64), BigUint::from(17u64), BigUint::from(5u64), BigUint::from(23u64)],
+            vec![BigUint::from(29u64), BigUint::from(31u64), BigUint::from(37u64), BigUint::from(41u64)],
+            vec![BigUint::from(43u64), BigUint::from(47u64), BigUint::from(53u64), BigUint::from(59u64)],
         ];
         let mut state = RrefState::new(m);
         for row in &rows {
@@ -1321,19 +1270,12 @@ mod tests {
                 rhs = (rhs + &row[i] * &secrets[i]) % &n;
             }
             let solved = state.add_equation(row, &rhs, &n);
-            eprintln!(
-                "after add: rank={}/{} solved={}",
-                state.rank, state.m, solved
-            );
+            eprintln!("after add: rank={}/{} solved={}", state.rank, state.m, solved);
         }
         assert_eq!(state.rank, m, "didn't reach full rank");
         let sol = state.read_solution();
         for i in 0..m {
-            assert_eq!(
-                sol[i], secrets[i],
-                "secret {} mismatch: got {} want {}",
-                i, sol[i], secrets[i]
-            );
+            assert_eq!(sol[i], secrets[i], "secret {} mismatch: got {} want {}", i, sol[i], secrets[i]);
         }
     }
 
@@ -1346,12 +1288,7 @@ mod tests {
         use crate::isogeny::SmallCurve;
         use num_bigint::BigUint;
 
-        let curve = SmallCurve {
-            name: "16b",
-            p: 65537,
-            a: 2,
-            b: 3,
-        };
+        let curve = SmallCurve { name: "16b", p: 65537, a: 2, b: 3 };
         let cp = curve.to_curve_params();
         let a_fe = cp.a_fe();
         let cm = crate::isogeny::cm::cm_discriminant(&curve);
@@ -1389,15 +1326,15 @@ mod tests {
         // solve all of them.
         for seed in [42u64, 100, 1, 12345, 7, 555] {
             let cap = 1u64 << 18;
-            let (sol, _iters) = pohlig_multi_target_rho(&g, &targets, &n_big, &a_fe, cap, seed);
+            let (sol, _iters) = pohlig_multi_target_rho(
+                &g, &targets, &n_big, &a_fe, cap, seed,
+            );
             let sol = sol.unwrap_or_else(|| panic!("seed {} failed", seed));
             for (i, want) in secrets.iter().enumerate() {
                 let want_mod = BigUint::from(*want) % &n_big;
-                assert_eq!(
-                    sol[i], want_mod,
+                assert_eq!(sol[i], want_mod,
                     "seed {} secret {} mismatch: got {} want {}",
-                    seed, i, sol[i], want_mod
-                );
+                    seed, i, sol[i], want_mod);
             }
         }
     }
@@ -1415,12 +1352,7 @@ mod tests {
         use crate::isogeny::SmallCurve;
         use num_bigint::BigUint;
 
-        let curve = SmallCurve {
-            name: "16b",
-            p: 65537,
-            a: 2,
-            b: 3,
-        };
+        let curve = SmallCurve { name: "16b", p: 65537, a: 2, b: 3 };
         let cp = curve.to_curve_params();
         let a_fe = cp.a_fe();
         let cm = crate::isogeny::cm::cm_discriminant(&curve);

@@ -4,8 +4,8 @@
 //!
 //! In the cryptopals scenario `k` is in `[0, 2^16)`, so we brute-force.
 
-use crate::cryptopals::challenge28::sha1;
 use crate::cryptopals::Report;
+use crate::cryptopals::challenge28::sha1;
 use num_bigint::{BigInt, BigUint, ToBigInt};
 use num_integer::Integer;
 use num_traits::One;
@@ -31,7 +31,13 @@ pub fn dsa_params() -> (BigUint, BigUint, BigUint) {
     (p, q, g)
 }
 
-pub fn dsa_x_from_known_k(m: &[u8], k: &BigUint, r: &BigUint, s: &BigUint, q: &BigUint) -> BigUint {
+pub fn dsa_x_from_known_k(
+    m: &[u8],
+    k: &BigUint,
+    r: &BigUint,
+    s: &BigUint,
+    q: &BigUint,
+) -> BigUint {
     let h = BigUint::from_bytes_be(&sha1(m));
     let h = &h % q;
     let r_inv = mod_inv(r, q);
@@ -45,10 +51,8 @@ pub fn run() -> Report {
     let mut r = Report::new(43, "DSA: recover key from known/leaked nonce");
     let (_p, q, _g) = dsa_params();
     let msg: &[u8] = b"For those that envy a MC it can be hazardous to your health\nSo be friendly, a matter of life and death, just like a etch-a-sketch\n";
-    let r_known =
-        BigUint::parse_bytes(b"548099063082341131477253921760299949438196259240", 10).unwrap();
-    let s_known =
-        BigUint::parse_bytes(b"857042759984254168557880549501802188789837994940", 10).unwrap();
+    let r_known = BigUint::parse_bytes(b"548099063082341131477253921760299949438196259240", 10).unwrap();
+    let s_known = BigUint::parse_bytes(b"857042759984254168557880549501802188789837994940", 10).unwrap();
     let target_fingerprint = "0954edd5e0afe5542a4adf012611a91912a3ec16";
     let mut recovered: Option<BigUint> = None;
     for k in 1u32..=(1 << 16) {
@@ -75,7 +79,7 @@ pub fn run() -> Report {
     let h_l = BigUint::from(0x77u32);
     let _ = x_check; // shadow the earlier 0x12345 with an in-range value
     let x_check = BigUint::from(0x1234u32); // < q
-                                            // s = (h + x·r)·k⁻¹  →  s·k − h = x·r → x = (s·k − h)·r⁻¹.
+    // s = (h + x·r)·k⁻¹  →  s·k − h = x·r → x = (s·k − h)·r⁻¹.
     let s_l = ((&h_l + &x_check * &r_l) * mod_inv(&k_l, &q_local)) % &q_local;
     let x_recovered = {
         let r_inv = mod_inv(&r_l, &q_local);

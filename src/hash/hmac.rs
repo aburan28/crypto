@@ -65,7 +65,13 @@ where
 /// Generic over the inner hash via the same `(block_size, hash)` interface
 /// as [`hmac_with`].  Always prefer this over `hmac_with(...) == tag` when
 /// the tag is supplied by an untrusted party.
-pub fn hmac_verify_ct<F>(block_size: usize, hash: F, key: &[u8], data: &[u8], tag: &[u8]) -> bool
+pub fn hmac_verify_ct<F>(
+    block_size: usize,
+    hash: F,
+    key: &[u8],
+    data: &[u8],
+    tag: &[u8],
+) -> bool
 where
     F: Fn(&[u8]) -> Vec<u8>,
 {
@@ -158,10 +164,7 @@ mod tests {
     #[test]
     fn hmac_sha1_long_key() {
         // RFC 2202 TC6: key=0xaa * 80 — longer than block_size, gets hashed
-        let mac = hmac_sha1(
-            &[0xaa; 80],
-            b"Test Using Larger Than Block-Size Key - Hash Key First",
-        );
+        let mac = hmac_sha1(&[0xaa; 80], b"Test Using Larger Than Block-Size Key - Hash Key First");
         assert_eq!(
             &mac,
             h("aa4ae5e15272d00e95705637ce8a3b55ed402112").as_slice(),
@@ -208,11 +211,8 @@ mod tests {
         let mac = hmac_sha384(&[0x0b; 20], b"Hi There");
         assert_eq!(
             &mac,
-            h(
-                "afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59c\
-               faea9ea9076ede7f4af152e8b2fa9cb6"
-            )
-            .as_slice(),
+            h("afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59c\
+               faea9ea9076ede7f4af152e8b2fa9cb6").as_slice(),
         );
     }
 
@@ -221,11 +221,8 @@ mod tests {
         let mac = hmac_sha384(b"Jefe", b"what do ya want for nothing?");
         assert_eq!(
             &mac,
-            h(
-                "af45d2e376484031617f78d2b58a6b1b9c7ef464f5a01b47e42ec3736322445e\
-               8e2240ca5e69e2c78b3239ecfab21649"
-            )
-            .as_slice(),
+            h("af45d2e376484031617f78d2b58a6b1b9c7ef464f5a01b47e42ec3736322445e\
+               8e2240ca5e69e2c78b3239ecfab21649").as_slice(),
         );
     }
 
@@ -236,11 +233,8 @@ mod tests {
         let mac = hmac_sha512(&[0x0b; 20], b"Hi There");
         assert_eq!(
             &mac,
-            h(
-                "87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cde\
-               daa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854"
-            )
-            .as_slice(),
+            h("87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cde\
+               daa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854").as_slice(),
         );
     }
 
@@ -249,11 +243,8 @@ mod tests {
         let mac = hmac_sha512(b"Jefe", b"what do ya want for nothing?");
         assert_eq!(
             &mac,
-            h(
-                "164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea250554\
-               9758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737"
-            )
-            .as_slice(),
+            h("164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea250554\
+               9758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737").as_slice(),
         );
     }
 
@@ -281,12 +272,6 @@ mod tests {
         let key = b"secret";
         let data = b"message";
         let tag = hmac_sha256(key, data);
-        assert!(!hmac_verify_ct(
-            64,
-            |b| sha256(b).to_vec(),
-            key,
-            data,
-            &tag[..16]
-        ));
+        assert!(!hmac_verify_ct(64, |b| sha256(b).to_vec(), key, data, &tag[..16]));
     }
 }

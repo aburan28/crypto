@@ -111,8 +111,8 @@ pub use aes_cbc::{
     pkcs7_unpad as cbc_pkcs7_unpad,
 };
 pub use chacha20::{
-    chacha12_xor, chacha20_block, chacha20_poly1305_decrypt, chacha20_poly1305_encrypt,
-    chacha20_xor, chacha8_xor, hchacha20, poly1305, xchacha20_xor,
+    chacha20_block, chacha20_poly1305_decrypt, chacha20_poly1305_encrypt, chacha20_xor,
+    chacha8_xor, chacha12_xor, hchacha20, poly1305, xchacha20_xor,
 };
 pub use cmac::{aes_cmac, CmacTag};
 pub use des::Des;
@@ -126,7 +126,9 @@ pub use modes::{
 };
 pub use rc4::{rc4, Rc4};
 pub use rc5::Rc5;
-pub use salsa20::{hsalsa20, salsa20_block, salsa20_xor, secretbox, secretbox_open, xsalsa20_xor};
+pub use salsa20::{
+    hsalsa20, salsa20_block, salsa20_xor, secretbox, secretbox_open, xsalsa20_xor,
+};
 pub use simon::{Simon128_128, Simon128_256, Simon64_128};
 pub use sm4::Sm4;
 // pub use speck::{Speck128_128, Speck128_256, Speck64_128};

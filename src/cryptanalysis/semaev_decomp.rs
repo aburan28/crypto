@@ -479,10 +479,11 @@ pub fn subspace_poly(l: u32, gf: &Gf2) -> Vec<u64> {
     let mut a = vec![1u64];
     for i in 0..l {
         let b = 1u64 << i; // basis vector z^i
-                           // L_i(b)
-        let lb = a.iter().enumerate().fold(0u64, |acc, (j, &aj)| {
-            acc ^ gf.mul(aj, gf.sqr_k(b, j as u32))
-        });
+        // L_i(b)
+        let lb = a
+            .iter()
+            .enumerate()
+            .fold(0u64, |acc, (j, &aj)| acc ^ gf.mul(aj, gf.sqr_k(b, j as u32)));
         let mut next = vec![0u64; a.len() + 1];
         for (j, &aj) in a.iter().enumerate() {
             next[j + 1] ^= gf.sqr(aj); // from L_i(t)²
@@ -756,10 +757,7 @@ mod tests {
             }
         }
         // Both verdicts must actually occur, or the test proves nothing.
-        assert!(
-            sat > 0 && unsat > 0,
-            "degenerate corpus: {sat} sat, {unsat} unsat"
-        );
+        assert!(sat > 0 && unsat > 0, "degenerate corpus: {sat} sat, {unsat} unsat");
     }
 
     /// The quartic-in-`X₃` rearrangement must agree with the twelve-term
@@ -779,7 +777,8 @@ mod tests {
                             &gf.to_element(x3),
                             &irr,
                         );
-                        let want = symmetrised_s4_eval(&e1, &e2, &e3, &inst.x_r(), &irr);
+                        let want =
+                            symmetrised_s4_eval(&e1, &e2, &e3, &inst.x_r(), &irr);
                         let got = eval_f3(x1, x2, x3, xr, &gf);
                         assert_eq!(
                             got,
@@ -814,9 +813,9 @@ mod tests {
             assert_eq!(lv.len() as u32, l + 1);
             assert_eq!(*lv.last().unwrap(), 1, "n={n}: must be monic");
             let eval = |t: u64| {
-                lv.iter().enumerate().fold(0u64, |acc, (i, &ai)| {
-                    acc ^ gf.mul(ai, gf.sqr_k(t, i as u32))
-                })
+                lv.iter()
+                    .enumerate()
+                    .fold(0u64, |acc, (i, &ai)| acc ^ gf.mul(ai, gf.sqr_k(t, i as u32)))
             };
 
             for t in 0..(1u64 << l) {

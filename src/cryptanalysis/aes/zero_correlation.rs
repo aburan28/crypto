@@ -189,7 +189,9 @@ pub fn format_zc_report(pairs: &[(u8, u8, f64)], top_k: usize) -> String {
         ));
     }
     s.push('\n');
-    s.push_str(&paint("✓ ", FG_BRIGHT_GREEN));
+    s.push_str(&paint(
+        "✓ ", FG_BRIGHT_GREEN,
+    ));
     s.push_str(
         "Each row above is an algebraic identity that holds with probability EXACTLY 1/2 on the AES S-box.  \
          A reduced-round AES key-recovery attack would use one such (α, β) to filter wrong-key candidates: \

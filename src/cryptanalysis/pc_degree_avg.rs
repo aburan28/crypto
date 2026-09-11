@@ -460,10 +460,7 @@ mod tests {
         assert!(row.n_targets >= 1, "no non-decomposable target found");
         // Non-decomposable ⇒ a refutation exists, so within a generous
         // degree budget there should be no `none`s.
-        assert_eq!(
-            row.refutation.n_none, 0,
-            "non-decomposable target failed to refute"
-        );
+        assert_eq!(row.refutation.n_none, 0, "non-decomposable target failed to refute");
     }
 
     /// The averaged sweep runs end-to-end and produces one row per `n`.

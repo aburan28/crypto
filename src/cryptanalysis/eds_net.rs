@@ -168,11 +168,7 @@ pub fn build_net_pq(
                 w[b][a + 1] = None;
                 continue;
             }
-            match (
-                w[b][a],
-                w[b][a - 1],
-                x_of(a as i64, b as i64, pt, qq, ca, p),
-            ) {
+            match (w[b][a], w[b][a - 1], x_of(a as i64, b as i64, pt, qq, ca, p)) {
                 (Some(wa), Some(wam1), Some(xm)) => {
                     let val = mulm(subm(xp, xm, p), mulm(mulm(wa, wa, p), invm(wam1, p), p), p);
                     w[b][a + 1] = if val == 0 { None } else { Some(val) };
@@ -211,7 +207,8 @@ pub fn check_net_relation(
     let pmr = sub(pv, rv)?;
     let qr = add(qv, rv);
     let qmr = sub(qv, rv)?;
-    let (wpq, wpmq, wpr, wpmr, wqr, wqmr) = (g(pq)?, g(pmq)?, g(pr)?, g(pmr)?, g(qr)?, g(qmr)?);
+    let (wpq, wpmq, wpr, wpmr, wqr, wqmr) =
+        (g(pq)?, g(pmq)?, g(pr)?, g(pmr)?, g(qr)?, g(qmr)?);
     let (wp, wq, wr) = (g(pv)?, g(qv)?, g(rv)?);
     // W(p+q)W(p−q)W(r)² = W(p+r)W(p−r)W(q)² − W(q+r)W(q−r)W(p)²
     let lhs = mulm(mulm(wpq, wpmq, p), mulm(wr, wr, p), p);
@@ -382,38 +379,20 @@ mod tests {
         let mut checked = 0;
         for (pv, qv, rv) in triples {
             if let Some(ok) = check_net_relation(&net, pv, qv, rv) {
-                assert!(
-                    ok,
-                    "NET failed (independent P,Q) at {:?},{:?},{:?}",
-                    pv, qv, rv
-                );
+                assert!(ok, "NET failed (independent P,Q) at {:?},{:?},{:?}", pv, qv, rv);
                 checked += 1;
             }
         }
-        assert!(
-            checked >= 3,
-            "expected several checkable triples, got {}",
-            checked
-        );
+        assert!(checked >= 3, "expected several checkable triples, got {}", checked);
 
         // genuinely rank-2 zero-lattice: aP+bQ=O ⟺ a≡b≡0 (mod 7).
         let pt = Some(pp);
         for a in 0..14usize {
             for b in 0..14usize {
-                let is_o = ec_add(
-                    ec_mul(a as u64, pt, ca, p),
-                    ec_mul(b as u64, Some(q), ca, p),
-                    ca,
-                    p,
-                )
-                .is_none();
-                assert_eq!(
-                    is_o,
-                    a % 7 == 0 && b % 7 == 0,
-                    "zero-lattice at ({},{})",
-                    a,
-                    b
-                );
+                let is_o =
+                    ec_add(ec_mul(a as u64, pt, ca, p), ec_mul(b as u64, Some(q), ca, p), ca, p)
+                        .is_none();
+                assert_eq!(is_o, a % 7 == 0 && b % 7 == 0, "zero-lattice at ({},{})", a, b);
             }
         }
     }
@@ -448,10 +427,7 @@ mod tests {
         assert_ne!(tau_miller, 1, "expected a nondegenerate pairing value");
         assert_eq!(powm(tau_miller, r, p), 1, "pairing must lie in μ_r");
         // the headline: Stange's net formula reproduces the Miller pairing.
-        assert_eq!(
-            tau_net, tau_miller,
-            "Tate-via-net must equal Miller pairing"
-        );
+        assert_eq!(tau_net, tau_miller, "Tate-via-net must equal Miller pairing");
     }
 
     fn gcd(mut a: u64, mut b: u64) -> u64 {
@@ -495,11 +471,7 @@ mod tests {
                 checked += 1;
             }
         }
-        assert!(
-            checked >= 3,
-            "expected several checkable NET triples, got {}",
-            checked
-        );
+        assert!(checked >= 3, "expected several checkable NET triples, got {}", checked);
     }
 
     #[test]
@@ -516,13 +488,8 @@ mod tests {
         let mut zeros_seen = 0;
         for b in 0..=bmax {
             for a in 0..=amax {
-                let is_o = ec_add(
-                    ec_mul(a as u64, pt, ca, p),
-                    ec_mul(b as u64, qq, ca, p),
-                    ca,
-                    p,
-                )
-                .is_none();
+                let is_o = ec_add(ec_mul(a as u64, pt, ca, p), ec_mul(b as u64, qq, ca, p), ca, p)
+                    .is_none();
                 if is_o {
                     assert!(net.get(a, b).is_none(), "missing zero at ({},{})", a, b);
                     zeros_seen += 1;

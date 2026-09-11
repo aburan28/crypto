@@ -24,7 +24,8 @@ impl Mt19937 {
 
     fn twist(&mut self) {
         for i in 0..624 {
-            let y = (self.state[i] & 0x8000_0000) | (self.state[(i + 1) % 624] & 0x7fff_ffff);
+            let y = (self.state[i] & 0x8000_0000)
+                | (self.state[(i + 1) % 624] & 0x7fff_ffff);
             let mut next = self.state[(i + 397) % 624] ^ (y >> 1);
             if y & 1 != 0 {
                 next ^= 0x9908_b0df;

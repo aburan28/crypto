@@ -30,8 +30,8 @@
 //!    `j - 1` blocks, then `B`, then `M[j..]`.  Total length = `M`'s
 //!    length, so padding matches, so the full hash matches.
 
-use crate::cryptopals::challenge52::{compress, weak_hash};
 use crate::cryptopals::Report;
+use crate::cryptopals::challenge52::{compress, weak_hash};
 use std::collections::HashMap;
 
 /// One level of the expandable-message construction.  Given a
@@ -114,7 +114,10 @@ pub fn build_expandable(
 /// message.  Greedily picks each level: if remaining target length
 /// minus remaining short-only cost is at least the long length,
 /// choose long; otherwise short.
-pub fn assemble_expandable(levels: &[([u8; 16], Vec<[u8; 16]>)], target_blocks: usize) -> Vec<u8> {
+pub fn assemble_expandable(
+    levels: &[([u8; 16], Vec<[u8; 16]>)],
+    target_blocks: usize,
+) -> Vec<u8> {
     let k = levels.len();
     assert!(target_blocks >= k);
     let max_extra = (1usize << k) - 1;
@@ -191,7 +194,11 @@ pub fn find_bridge(
 /// End-to-end second-pre-image: given a long target message,
 /// produce a different message of the same block length whose
 /// hash matches.
-pub fn second_preimage(target: &[u8], iv: &[u8], b_bytes: usize) -> Vec<u8> {
+pub fn second_preimage(
+    target: &[u8],
+    iv: &[u8],
+    b_bytes: usize,
+) -> Vec<u8> {
     let n_blocks = target.len() / 16;
     // Pick the smallest k with 2^k >= n_blocks.
     let k = (n_blocks as f64).log2().ceil() as usize;

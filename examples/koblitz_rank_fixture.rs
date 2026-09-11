@@ -8,7 +8,9 @@
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
-use crypto_lib::cryptanalysis::koblitz_index_calculus::{point_key, points_with_x, KoblitzCurve};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+    point_key, points_with_x, KoblitzCurve,
+};
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::rngs::StdRng;
@@ -246,11 +248,7 @@ impl CompactPairTable {
         };
         Self {
             keys_x: vec![u64::MAX; capacity],
-            keys_y: if x_only {
-                Vec::new()
-            } else {
-                vec![0; capacity]
-            },
+            keys_y: if x_only { Vec::new() } else { vec![0; capacity] },
             values: vec![QuotientPairWitness::default(); capacity],
             x_filter: if filter_bits != 0 {
                 vec![0; filter_bits.div_ceil(u64::BITS as usize)]
@@ -323,15 +321,20 @@ impl CompactPairTable {
             return true;
         }
         let (first, second) = self.x_filter_indices(x);
-        self.x_filter[first / u64::BITS as usize] & (1u64 << (first % u64::BITS as usize)) != 0
-            && self.x_filter[second / u64::BITS as usize] & (1u64 << (second % u64::BITS as usize))
+        self.x_filter[first / u64::BITS as usize]
+            & (1u64 << (first % u64::BITS as usize))
+            != 0
+            && self.x_filter[second / u64::BITS as usize]
+                & (1u64 << (second % u64::BITS as usize))
                 != 0
     }
 
     fn insert_x_filter(&mut self, x: u64) {
         let (first, second) = self.x_filter_indices(x);
-        self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
-        self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
+        self.x_filter[first / u64::BITS as usize] |=
+            1u64 << (first % u64::BITS as usize);
+        self.x_filter[second / u64::BITS as usize] |=
+            1u64 << (second % u64::BITS as usize);
     }
 
     fn x_filter_indices(&self, x: u64) -> (usize, usize) {
@@ -390,14 +393,7 @@ impl CompactPairTable {
             if negative {
                 y ^= x;
                 labels = labels.map(|(column, coefficient)| {
-                    (
-                        column,
-                        if coefficient == 0 {
-                            0
-                        } else {
-                            modulus - coefficient
-                        },
-                    )
+                    (column, if coefficient == 0 { 0 } else { modulus - coefficient })
                 });
             }
             Some((x, y))
@@ -670,9 +666,7 @@ fn signed_point_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPo
     let mut by_key = BTreeMap::new();
     let mut current = point.clone();
     for _ in 0..curve.n {
-        by_key
-            .entry(point_key(&current))
-            .or_insert_with(|| current.clone());
+        by_key.entry(point_key(&current)).or_insert_with(|| current.clone());
         let negative = point_neg(&current);
         by_key.entry(point_key(&negative)).or_insert(negative);
         current = curve.frobenius(&current);
@@ -723,9 +717,7 @@ fn batch_target_minus_base(
         product = product.mul(&denominator, irr);
         denominators.push(Some(denominator));
     }
-    let mut inverse_product = product
-        .flt_inverse(irr)
-        .expect("nonempty nonzero batch product");
+    let mut inverse_product = product.flt_inverse(irr).expect("nonempty nonzero batch product");
     let mut inverses: Vec<Option<F2mElement>> = vec![None; points.len()];
     for index in (0..points.len()).rev() {
         let (Some(denominator), Some(prefix)) = (&denominators[index], &prefixes[index]) else {
@@ -752,7 +744,10 @@ fn batch_target_minus_base(
                 .add(target_x)
                 .add(x)
                 .add(&curve.curve.a);
-            let y3 = lambda.mul(&target_x.add(&x3), irr).add(&x3).add(target_y);
+            let y3 = lambda
+                .mul(&target_x.add(&x3), irr)
+                .add(&x3)
+                .add(target_y);
             BinaryPoint::Affine { x: x3, y: y3 }
         })
         .collect()
@@ -806,7 +801,11 @@ fn batch_target_minus_keys(
             }
             let negative_y = y ^ x;
             let lambda = mul_raw(curve, target_y ^ negative_y, inverses[index]);
-            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ (curve.a as u64);
+            let x3 = square_raw(curve, lambda)
+                ^ lambda
+                ^ target_x
+                ^ x
+                ^ (curve.a as u64);
             let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
             (x3 + 1, y3)
         })
@@ -855,7 +854,11 @@ fn batch_raw_target_minus_keys(
                 return raw_compact_key(raw_add_point(curve, target, raw_neg_point(*point)));
             }
             let lambda = mul_raw(curve, target_y ^ y ^ x, inverses[index]);
-            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let x3 = square_raw(curve, lambda)
+                ^ lambda
+                ^ target_x
+                ^ x
+                ^ curve.a as u64;
             let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
             (x3 + 1, y3)
         })
@@ -928,7 +931,10 @@ fn batch_raw_target_minus_points_x_filtered(
     points.len()
 }
 
-fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> Vec<(u64, u64)> {
+fn batch_raw_add_keys(
+    curve: &KoblitzCurve,
+    pairs: &[(RawPoint, RawPoint)],
+) -> Vec<(u64, u64)> {
     let mut denominators = vec![0u64; pairs.len()];
     let mut prefixes = vec![0u64; pairs.len()];
     let mut product = 1u64;
@@ -1035,7 +1041,11 @@ fn batch_raw_target_minus_fibers(
                 ))
             } else {
                 let lambda = mul_raw(curve, target_y ^ y ^ fiber.x, inverses[fiber_index]);
-                let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ fiber.x ^ curve.a as u64;
+                let x3 = square_raw(curve, lambda)
+                    ^ lambda
+                    ^ target_x
+                    ^ fiber.x
+                    ^ curve.a as u64;
                 let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
                 (x3 + 1, y3)
             };
@@ -1102,7 +1112,11 @@ fn batch_raw_target_minus_fibers_x_filtered(
                 continue;
             }
             let lambda = mul_raw(curve, target_y ^ y ^ fiber.x, inverses[fiber_index]);
-            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ fiber.x ^ curve.a as u64;
+            let x3 = square_raw(curve, lambda)
+                ^ lambda
+                ^ target_x
+                ^ fiber.x
+                ^ curve.a as u64;
             let key_x = x3 + 1;
             if !table.might_contain_x(key_x) {
                 continue;
@@ -1154,14 +1168,7 @@ fn lookup_signed_expanded_pair(
             let raw_x = rest_key.0.saturating_sub(1);
             assert_eq!(rest_key.1, image_y ^ raw_x);
             stored.map(|(column, coefficient)| {
-                (
-                    column,
-                    if coefficient == 0 {
-                        0
-                    } else {
-                        modulus - coefficient
-                    },
-                )
+                (column, if coefficient == 0 { 0 } else { modulus - coefficient })
             })
         };
         let indices = labels.map(|label| label_to_index[&label]);
@@ -1210,14 +1217,17 @@ fn lookup_pair_witness(
             (witness, maps)
         }
         PairMode::SignedExpanded => {
-            let witness =
-                lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index).map(
-                    |(pair_indices, pair_labels)| {
-                        let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
-                        let indices = [pair_indices[0], pair_indices[1], right];
-                        (indices, labels)
-                    },
-                );
+            let witness = lookup_signed_expanded_pair(
+                rest_key,
+                modulus,
+                quotient_pairs,
+                label_to_index,
+            )
+            .map(|(pair_indices, pair_labels)| {
+                let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
+                let indices = [pair_indices[0], pair_indices[1], right];
+                (indices, labels)
+            });
             (witness, 0)
         }
     }
@@ -1285,7 +1295,29 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     let mut accepted: Vec<Vec<RawPoint>> = Vec::new();
     let mut seen_orbits = HashSet::new();
     let mut scanned_x = 0u64;
-    for x in 0..(1u64 << curve.n) {
+    let mask = if curve.n >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << curve.n) - 1
+    };
+    // Exhaustive affine order is fine on small fields; past ~32 bits a
+    // full `2^n` walk is impossible, so draw abscissae from a fixed LCG.
+    let exhaustive = curve.n <= 32;
+    let budget = if exhaustive {
+        1u64 << curve.n
+    } else {
+        1u64 << 24
+    };
+    let mut state = 0xD1B54A32D192ED03u64 ^ (curve.n as u64) ^ ((wanted as u64) << 17);
+    for i in 0..budget {
+        let x = if exhaustive {
+            i
+        } else {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            state & mask
+        };
         scanned_x += 1;
         for point in raw_points_with_x(curve, x) {
             let subgroup_point = if cofactor_two {
@@ -1314,7 +1346,12 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
             break;
         }
     }
-    assert_eq!(accepted.len(), wanted);
+    assert_eq!(
+        accepted.len(),
+        wanted,
+        "failed to collect {wanted} orbits at n={} after {scanned_x} abscissae",
+        curve.n
+    );
     accepted.sort_by_key(|orbit| raw_compact_key(orbit[0]));
     let mut points = Vec::new();
     let mut point_labels = Vec::new();
@@ -1326,9 +1363,7 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
         let mut current = representative;
         let mut coefficient = 1u64;
         for _ in 0..curve.n {
-            labels
-                .entry(raw_compact_key(current))
-                .or_insert(coefficient);
+            labels.entry(raw_compact_key(current)).or_insert(coefficient);
             labels
                 .entry(raw_compact_key(raw_neg_point(current)))
                 .or_insert(modulus - coefficient);
@@ -1398,11 +1433,7 @@ fn reference_point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
             break;
         }
     }
-    assert_eq!(
-        accepted.len(),
-        wanted,
-        "field scan did not find enough subgroup orbits"
-    );
+    assert_eq!(accepted.len(), wanted, "field scan did not find enough subgroup orbits");
 
     accepted.sort_by_key(|orbit| point_key(&orbit[0]));
     let mut points = Vec::new();
@@ -1460,8 +1491,8 @@ impl Echelon {
             if let Some(pivot) = &self.pivots[column] {
                 let factor = row[column];
                 for index in column..row.len() {
-                    let product =
-                        ((factor as u128 * pivot[index] as u128) % modulus as u128) as u64;
+                    let product = ((factor as u128 * pivot[index] as u128)
+                        % modulus as u128) as u64;
                     row[index] = if row[index] >= product {
                         row[index] - product
                     } else {
@@ -1498,8 +1529,8 @@ impl ReverseEchelon {
             if let Some(pivot) = &self.pivots[column] {
                 let factor = row[column];
                 for index in 0..=column {
-                    let product =
-                        ((factor as u128 * pivot[index] as u128) % modulus as u128) as u64;
+                    let product = ((factor as u128 * pivot[index] as u128)
+                        % modulus as u128) as u64;
                     row[index] = if row[index] >= product {
                         row[index] - product
                     } else {
@@ -1530,8 +1561,8 @@ fn dense_rank(input: &[Vec<u64>], columns: usize, modulus: u64) -> usize {
         matrix.swap(rank, pivot);
         let inverse = modpow(matrix[rank][column], modulus - 2, modulus);
         for index in column..columns {
-            matrix[rank][index] =
-                ((matrix[rank][index] as u128 * inverse as u128) % modulus as u128) as u64;
+            matrix[rank][index] = ((matrix[rank][index] as u128 * inverse as u128)
+                % modulus as u128) as u64;
         }
         for row in 0..matrix.len() {
             if row == rank || matrix[row][column] == 0 {
@@ -1539,8 +1570,8 @@ fn dense_rank(input: &[Vec<u64>], columns: usize, modulus: u64) -> usize {
             }
             let factor = matrix[row][column];
             for index in column..columns {
-                let product =
-                    ((factor as u128 * matrix[rank][index] as u128) % modulus as u128) as u64;
+                let product = ((factor as u128 * matrix[rank][index] as u128)
+                    % modulus as u128) as u64;
                 matrix[row][index] = if matrix[row][index] >= product {
                     matrix[row][index] - product
                 } else {
@@ -1587,8 +1618,8 @@ fn solve_full_column_rank_system(
             }
             let factor = matrix[row][column];
             for index in column..=columns {
-                let product =
-                    ((factor as u128 * matrix[pivot_row][index] as u128) % modulus as u128) as u64;
+                let product = ((factor as u128 * matrix[pivot_row][index] as u128)
+                    % modulus as u128) as u64;
                 matrix[row][index] = if matrix[row][index] >= product {
                     matrix[row][index] - product
                 } else {
@@ -1613,19 +1644,11 @@ fn main() {
     let eta_denominator: u32 = arguments[4].parse().unwrap();
     let seed: u64 = arguments[5].parse().unwrap();
     let pair_mode = PairMode::parse(arguments.get(6).map(String::as_str).unwrap_or("full"));
-    let target_mode = TargetMode::parse(
-        arguments
-            .get(7)
-            .map(String::as_str)
-            .unwrap_or("independent"),
-    );
-    let query_mode = QueryMode::parse(arguments.get(8).map(String::as_str).unwrap_or("pointwise"));
-    let batch_fixtures: u64 = arguments
-        .get(9)
-        .map(String::as_str)
-        .unwrap_or("1")
-        .parse()
-        .unwrap();
+    let target_mode =
+        TargetMode::parse(arguments.get(7).map(String::as_str).unwrap_or("independent"));
+    let query_mode =
+        QueryMode::parse(arguments.get(8).map(String::as_str).unwrap_or("pointwise"));
+    let batch_fixtures: u64 = arguments.get(9).map(String::as_str).unwrap_or("1").parse().unwrap();
     let summary_only = std::env::var("KIC_SUMMARY_ONLY").as_deref() == Ok("1");
     let batch_corpus = std::env::var("KIC_BATCH_CORPUS").ok();
     let relation_cap_extra: usize = std::env::var("KIC_RELATION_CAP_EXTRA")
@@ -1634,7 +1657,7 @@ fn main() {
         .unwrap_or(0);
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41));
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
 
@@ -1723,7 +1746,9 @@ fn main() {
             }
             let sum_keys = batch_raw_add_keys(&curve, &operands);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
-            for ((left_column, right_column, relative), key) in jobs.into_iter().zip(sum_keys) {
+            for ((left_column, right_column, relative), key) in
+                jobs.into_iter().zip(sum_keys)
+            {
                 if pair_mode == PairMode::SignedQuotient {
                     let (canonical, multiplier, maps) =
                         canonical_signed_key(&curve, key, modulus, lambda);
@@ -1764,8 +1789,8 @@ fn main() {
                             let x = square_raw(&curve, image_key.0 - 1);
                             let y = square_raw(&curve, image_key.1);
                             image_key = (x + 1, y);
-                            multiplier =
-                                ((multiplier as u128 * lambda as u128) % modulus as u128) as u64;
+                            multiplier = ((multiplier as u128 * lambda as u128)
+                                % modulus as u128) as u64;
                             pair_canonicalization_maps += 1;
                         }
                     }
@@ -1781,10 +1806,9 @@ fn main() {
     let pair_ms = pair_started.elapsed().as_secs_f64() * 1000.0;
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
     let base_validation_started = Instant::now();
-    assert!(base
-        .representatives
-        .iter()
-        .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+    assert!(base.representatives.iter().all(|point| {
+        curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity
+    }));
     let base_validation_ms = base_validation_started.elapsed().as_secs_f64() * 1000.0;
     let representative_keys: Vec<_> = base
         .representatives
@@ -1862,323 +1886,268 @@ fn main() {
     let mut batch_support_queries = 0usize;
     let mut batch_rank_plus_32 = 0u64;
     for fixture_index in 0..batch_fixtures {
-        let fixture_material = if batch_fixtures == 1 {
-            format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
-        } else if let Some(corpus) = &batch_corpus {
-            format!("TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}")
-        } else {
-            format!(
+    let fixture_material = if batch_fixtures == 1 {
+        format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
+    } else if let Some(corpus) = &batch_corpus {
+        format!(
+            "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{corpus}|{seed}|{fixture_index}"
+        )
+    } else {
+        format!(
             "TASK-KIC-DIRECT-BATCH-20260910|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}|{fixture_index}"
         )
-        };
-        let digest = blake3::hash(fixture_material.as_bytes());
-        let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
-        let mut rng = StdRng::seed_from_u64(fixture_seed);
-        let fixture_generation_started = Instant::now();
-        let d0 = rng.gen_range(1..modulus);
-        let q = curve.mul(curve.generator(), &BigUint::from(d0));
-        let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
-        let generator_raw = to_raw_point(curve.generator());
-        let q_raw = to_raw_point(&q);
-        let fixture_setup_started = Instant::now();
-        let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
-            match target_mode {
-                TargetMode::CoefficientWalk => {
-                    let walk_a = rng.gen_range(0..modulus);
-                    let walk_b = rng.gen_range(1..modulus);
-                    let delta_a = rng.gen_range(1..modulus);
-                    let delta_b = rng.gen_range(1..modulus);
-                    let walk_target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, walk_a),
-                        raw_scalar_point(&curve, q_raw, walk_b),
-                    );
-                    let walk_jump = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, delta_a),
-                        raw_scalar_point(&curve, q_raw, delta_b),
-                    );
-                    (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
-                }
-                TargetMode::PartitionWalk => {
-                    let walk_a = rng.gen_range(0..modulus);
-                    let walk_b = rng.gen_range(1..modulus);
-                    let walk_target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, walk_a),
-                        raw_scalar_point(&curve, q_raw, walk_b),
-                    );
-                    (walk_a, walk_b, 0, 0, walk_target, None)
-                }
-                TargetMode::Independent => (0, 0, 0, 0, None, None),
-            };
-        let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
-        let mut echelon = Echelon::new(columns + 1);
-        let mut reverse_echelon = ReverseEchelon::new(columns + 1);
-        let mut rows = Vec::new();
-        let mut right_hand_sides = Vec::new();
-        let mut exact_rows = HashSet::new();
-        let mut projective_rows = HashSet::new();
-        let mut duplicate_rows = 0usize;
-        let mut scalar_multiple_rows = 0usize;
-        let mut accepted = 0usize;
-        let mut trials = 0usize;
-        let mut rank_full_at = None;
-        let mut decomposition_queries = 0usize;
-        let mut query_additions = 0usize;
-        let mut query_canonicalization_maps = 0usize;
-        let mut query_x_filter_rejections = 0usize;
-        let mut query_exact_table_misses = 0usize;
-        let mut target_walk_additions = 0usize;
-        let mut query_batch_inversions = 0usize;
-        let mut reference_validation_records = Vec::new();
-        let mut walk_seen = HashSet::new();
-        let mut target_walk_restarts = 0usize;
-        let mut target_scalar_multiplications = match target_mode {
-            TargetMode::Independent => 0,
-            TargetMode::CoefficientWalk => 4,
-            TargetMode::PartitionWalk => 2,
-        };
-        let mut fiber_rest_scratch = Vec::with_capacity(128);
-        let mut pair_point_scratch = Vec::with_capacity(64);
-        let mut pair_label_scratch = Vec::with_capacity(64);
-        let mut pair_rest_scratch = Vec::with_capacity(64);
-        let mut dense_rank_recomputations = 0usize;
-        let mut dimension_bound_rank_crosschecks = 0usize;
-        let mut reverse_incremental_rank_crosschecks = 0usize;
-        let mut terminal_dense_rank_crosschecks = 0usize;
-        let mut target_generation_ns = 0u128;
-        let mut query_total_ns = 0u128;
-        let mut packed_verification_ns = 0u128;
-        let mut rank_diagnostics_ns = 0u128;
-        let mut receipt_construction_ns = 0u128;
-        let collection_started = Instant::now();
-        let relation_cap = 2 * columns + 64 + relation_cap_extra;
-        let target_cap = 100_000usize;
+    };
+    let digest = blake3::hash(fixture_material.as_bytes());
+    let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+    let mut rng = StdRng::seed_from_u64(fixture_seed);
+    let fixture_generation_started = Instant::now();
+    let d0 = rng.gen_range(1..modulus);
+    let q = curve.mul(curve.generator(), &BigUint::from(d0));
+    let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
+    let generator_raw = to_raw_point(curve.generator());
+    let q_raw = to_raw_point(&q);
+    let fixture_setup_started = Instant::now();
+    let (mut walk_a, mut walk_b, delta_a, delta_b, mut walk_target, walk_jump) =
+        match target_mode {
+        TargetMode::CoefficientWalk => {
+            let walk_a = rng.gen_range(0..modulus);
+            let walk_b = rng.gen_range(1..modulus);
+            let delta_a = rng.gen_range(1..modulus);
+            let delta_b = rng.gen_range(1..modulus);
+            let walk_target = raw_add_point(
+                &curve,
+                raw_scalar_point(&curve, generator_raw, walk_a),
+                raw_scalar_point(&curve, q_raw, walk_b),
+            );
+            let walk_jump = raw_add_point(
+                &curve,
+                raw_scalar_point(&curve, generator_raw, delta_a),
+                raw_scalar_point(&curve, q_raw, delta_b),
+            );
+            (walk_a, walk_b, delta_a, delta_b, walk_target, walk_jump)
+        }
+        TargetMode::PartitionWalk => {
+            let walk_a = rng.gen_range(0..modulus);
+            let walk_b = rng.gen_range(1..modulus);
+            let walk_target = raw_add_point(
+                &curve,
+                raw_scalar_point(&curve, generator_raw, walk_a),
+                raw_scalar_point(&curve, q_raw, walk_b),
+            );
+            (walk_a, walk_b, 0, 0, walk_target, None)
+        }
+        TargetMode::Independent => {
+            (0, 0, 0, 0, None, None)
+        }
+    };
+    let fixture_setup_ms = fixture_setup_started.elapsed().as_secs_f64() * 1000.0;
+    let mut echelon = Echelon::new(columns + 1);
+    let mut reverse_echelon = ReverseEchelon::new(columns + 1);
+    let mut rows = Vec::new();
+    let mut right_hand_sides = Vec::new();
+    let mut exact_rows = HashSet::new();
+    let mut projective_rows = HashSet::new();
+    let mut duplicate_rows = 0usize;
+    let mut scalar_multiple_rows = 0usize;
+    let mut accepted = 0usize;
+    let mut trials = 0usize;
+    let mut rank_full_at = None;
+    let mut decomposition_queries = 0usize;
+    let mut query_additions = 0usize;
+    let mut query_canonicalization_maps = 0usize;
+    let mut query_x_filter_rejections = 0usize;
+    let mut query_exact_table_misses = 0usize;
+    let mut target_walk_additions = 0usize;
+    let mut query_batch_inversions = 0usize;
+    let mut reference_validation_records = Vec::new();
+    let mut walk_seen = HashSet::new();
+    let mut target_walk_restarts = 0usize;
+    let mut target_scalar_multiplications = match target_mode {
+        TargetMode::Independent => 0,
+        TargetMode::CoefficientWalk => 4,
+        TargetMode::PartitionWalk => 2,
+    };
+    let mut fiber_rest_scratch = Vec::with_capacity(128);
+    let mut pair_point_scratch = Vec::with_capacity(64);
+    let mut pair_label_scratch = Vec::with_capacity(64);
+    let mut pair_rest_scratch = Vec::with_capacity(64);
+    let mut dense_rank_recomputations = 0usize;
+    let mut dimension_bound_rank_crosschecks = 0usize;
+    let mut reverse_incremental_rank_crosschecks = 0usize;
+    let mut terminal_dense_rank_crosschecks = 0usize;
+    let mut target_generation_ns = 0u128;
+    let mut query_total_ns = 0u128;
+    let mut packed_verification_ns = 0u128;
+    let mut rank_diagnostics_ns = 0u128;
+    let mut receipt_construction_ns = 0u128;
+    let collection_started = Instant::now();
+    let relation_cap = 2 * columns + 64 + relation_cap_extra;
+    let target_cap = 100_000usize;
 
-        while trials < target_cap {
-            if let Some(full_at) = rank_full_at {
-                if accepted >= full_at + 32 {
-                    break;
-                }
-            } else if accepted >= relation_cap {
+    while trials < target_cap {
+        if let Some(full_at) = rank_full_at {
+            if accepted >= full_at + 32 {
                 break;
             }
-            trials += 1;
-            let target_generation_started = Instant::now();
-            if target_mode != TargetMode::Independent
-                && !walk_seen.insert(raw_compact_key(walk_target))
-            {
-                loop {
-                    walk_a = rng.gen_range(0..modulus);
-                    walk_b = rng.gen_range(1..modulus);
-                    walk_target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, walk_a),
-                        raw_scalar_point(&curve, q_raw, walk_b),
-                    );
-                    target_scalar_multiplications += 2;
-                    if walk_seen.insert(raw_compact_key(walk_target)) {
-                        break;
-                    }
+        } else if accepted >= relation_cap {
+            break;
+        }
+        trials += 1;
+        let target_generation_started = Instant::now();
+        if target_mode != TargetMode::Independent
+            && !walk_seen.insert(raw_compact_key(walk_target))
+        {
+            loop {
+                walk_a = rng.gen_range(0..modulus);
+                walk_b = rng.gen_range(1..modulus);
+                walk_target = raw_add_point(
+                    &curve,
+                    raw_scalar_point(&curve, generator_raw, walk_a),
+                    raw_scalar_point(&curve, q_raw, walk_b),
+                );
+                target_scalar_multiplications += 2;
+                if walk_seen.insert(raw_compact_key(walk_target)) {
+                    break;
                 }
-                target_walk_restarts += 1;
             }
-            let (coefficient_a, coefficient_b, target) = match target_mode {
-                TargetMode::Independent => {
-                    let coefficient_a = rng.gen_range(0..modulus);
-                    let coefficient_b = rng.gen_range(1..modulus);
-                    let target = raw_add_point(
-                        &curve,
-                        raw_scalar_point(&curve, generator_raw, coefficient_a),
-                        raw_scalar_point(&curve, q_raw, coefficient_b),
-                    );
-                    target_scalar_multiplications += 2;
-                    (coefficient_a, coefficient_b, target)
-                }
-                TargetMode::CoefficientWalk => {
-                    let result = (walk_a, walk_b, walk_target.clone());
-                    walk_a = (walk_a + delta_a) % modulus;
-                    walk_b = (walk_b + delta_b) % modulus;
-                    walk_target = raw_add_point(&curve, walk_target, walk_jump);
-                    target_walk_additions += 1;
-                    result
-                }
-                TargetMode::PartitionWalk => {
-                    let result = (walk_a, walk_b, walk_target);
-                    match target_partition(walk_target) {
-                        0 => {
-                            walk_a = (walk_a + 1) % modulus;
-                            walk_target = raw_add_point(&curve, walk_target, generator_raw);
-                        }
-                        1 => {
-                            walk_b = (walk_b + 1) % modulus;
-                            walk_target = raw_add_point(&curve, walk_target, q_raw);
-                        }
-                        _ => {
-                            walk_a = (2 * walk_a) % modulus;
-                            walk_b = (2 * walk_b) % modulus;
-                            walk_target = raw_double_point(&curve, walk_target);
-                        }
+            target_walk_restarts += 1;
+        }
+        let (coefficient_a, coefficient_b, target) = match target_mode {
+            TargetMode::Independent => {
+                let coefficient_a = rng.gen_range(0..modulus);
+                let coefficient_b = rng.gen_range(1..modulus);
+                let target = raw_add_point(
+                    &curve,
+                    raw_scalar_point(&curve, generator_raw, coefficient_a),
+                    raw_scalar_point(&curve, q_raw, coefficient_b),
+                );
+                target_scalar_multiplications += 2;
+                (coefficient_a, coefficient_b, target)
+            }
+            TargetMode::CoefficientWalk => {
+                let result = (walk_a, walk_b, walk_target.clone());
+                walk_a = (walk_a + delta_a) % modulus;
+                walk_b = (walk_b + delta_b) % modulus;
+                walk_target = raw_add_point(&curve, walk_target, walk_jump);
+                target_walk_additions += 1;
+                result
+            }
+            TargetMode::PartitionWalk => {
+                let result = (walk_a, walk_b, walk_target);
+                match target_partition(walk_target) {
+                    0 => {
+                        walk_a = (walk_a + 1) % modulus;
+                        walk_target = raw_add_point(&curve, walk_target, generator_raw);
                     }
-                    target_walk_additions += 1;
-                    result
-                }
-            };
-            target_generation_ns += target_generation_started.elapsed().as_nanos();
-            let query_started = Instant::now();
-            let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
-            if let Some(width) = query_mode.pair_pair_width() {
-                assert!(pair_mode == PairMode::SignedExpanded);
-                let slots = quotient_pairs.slots();
-                let start_slot =
-                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
-                let mut cursor = 0usize;
-                while cursor < 2 * slots && witness.is_none() {
-                    pair_point_scratch.clear();
-                    pair_label_scratch.clear();
-                    while cursor < 2 * slots && pair_point_scratch.len() < width {
-                        let slot = (start_slot + cursor / 2) & (slots - 1);
-                        let negative = cursor & 1 == 1;
-                        cursor += 1;
-                        if let Some((point, labels)) =
-                            quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
-                        {
-                            pair_point_scratch.push(point);
-                            pair_label_scratch.push(labels);
-                        }
+                    1 => {
+                        walk_b = (walk_b + 1) % modulus;
+                        walk_target = raw_add_point(&curve, walk_target, q_raw);
                     }
-                    if pair_point_scratch.is_empty() {
+                    _ => {
+                        walk_a = (2 * walk_a) % modulus;
+                        walk_b = (2 * walk_b) % modulus;
+                        walk_target = raw_double_point(&curve, walk_target);
+                    }
+                }
+                target_walk_additions += 1;
+                result
+            }
+        };
+        target_generation_ns += target_generation_started.elapsed().as_nanos();
+        let query_started = Instant::now();
+        let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
+        if let Some(width) = query_mode.pair_pair_width() {
+            assert!(pair_mode == PairMode::SignedExpanded);
+            let slots = quotient_pairs.slots();
+            let start_slot = CompactPairTable::hash(raw_compact_key(target)) as usize
+                & (slots - 1);
+            let mut cursor = 0usize;
+            while cursor < 2 * slots && witness.is_none() {
+                pair_point_scratch.clear();
+                pair_label_scratch.clear();
+                while cursor < 2 * slots && pair_point_scratch.len() < width {
+                    let slot = (start_slot + cursor / 2) & (slots - 1);
+                    let negative = cursor & 1 == 1;
+                    cursor += 1;
+                    if let Some((point, labels)) =
+                        quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
+                    {
+                        pair_point_scratch.push(point);
+                        pair_label_scratch.push(labels);
+                    }
+                }
+                if pair_point_scratch.is_empty() {
+                    continue;
+                }
+                let attempted = batch_raw_target_minus_points_x_filtered(
+                    &curve,
+                    target,
+                    &pair_point_scratch,
+                    &quotient_pairs,
+                    &mut pair_rest_scratch,
+                );
+                query_additions += attempted;
+                decomposition_queries += attempted;
+                query_x_filter_rejections += attempted - pair_rest_scratch.len();
+                query_batch_inversions += usize::from(target.is_some());
+                for &(position, rest_key) in &pair_rest_scratch {
+                    let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                        rest_key,
+                        modulus,
+                        &quotient_pairs,
+                        &label_to_index,
+                    ) else {
+                        query_exact_table_misses += 1;
                         continue;
-                    }
-                    let attempted = batch_raw_target_minus_points_x_filtered(
+                    };
+                    let left_labels = pair_label_scratch[position];
+                    let left_indices = left_labels.map(|label| label_to_index[&label]);
+                    witness = Some((
+                        vec![
+                            left_indices[0],
+                            left_indices[1],
+                            right_indices[0],
+                            right_indices[1],
+                        ],
+                        vec![
+                            left_labels[0],
+                            left_labels[1],
+                            right_labels[0],
+                            right_labels[1],
+                        ],
+                    ));
+                    break;
+                }
+            }
+        } else if let Some(width) = query_mode.fiber_width() {
+            for start in (0..base_fibers.len()).step_by(width) {
+                let end = (start + width).min(base_fibers.len());
+                let attempted = if pair_mode == PairMode::SignedExpanded {
+                    batch_raw_target_minus_fibers_x_filtered(
                         &curve,
                         target,
-                        &pair_point_scratch,
+                        &base_fibers[start..end],
                         &quotient_pairs,
-                        &mut pair_rest_scratch,
+                        &mut fiber_rest_scratch,
+                    )
+                } else {
+                    batch_raw_target_minus_fibers(
+                        &curve,
+                        target,
+                        &base_fibers[start..end],
+                        &mut fiber_rest_scratch,
                     );
-                    query_additions += attempted;
-                    decomposition_queries += attempted;
-                    query_x_filter_rejections += attempted - pair_rest_scratch.len();
-                    query_batch_inversions += usize::from(target.is_some());
-                    for &(position, rest_key) in &pair_rest_scratch {
-                        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
-                            rest_key,
-                            modulus,
-                            &quotient_pairs,
-                            &label_to_index,
-                        ) else {
-                            query_exact_table_misses += 1;
-                            continue;
-                        };
-                        let left_labels = pair_label_scratch[position];
-                        let left_indices = left_labels.map(|label| label_to_index[&label]);
-                        witness = Some((
-                            vec![
-                                left_indices[0],
-                                left_indices[1],
-                                right_indices[0],
-                                right_indices[1],
-                            ],
-                            vec![
-                                left_labels[0],
-                                left_labels[1],
-                                right_labels[0],
-                                right_labels[1],
-                            ],
-                        ));
-                        break;
-                    }
-                }
-            } else if let Some(width) = query_mode.fiber_width() {
-                for start in (0..base_fibers.len()).step_by(width) {
-                    let end = (start + width).min(base_fibers.len());
-                    let attempted = if pair_mode == PairMode::SignedExpanded {
-                        batch_raw_target_minus_fibers_x_filtered(
-                            &curve,
-                            target,
-                            &base_fibers[start..end],
-                            &quotient_pairs,
-                            &mut fiber_rest_scratch,
-                        )
-                    } else {
-                        batch_raw_target_minus_fibers(
-                            &curve,
-                            target,
-                            &base_fibers[start..end],
-                            &mut fiber_rest_scratch,
-                        );
-                        fiber_rest_scratch.len()
-                    };
-                    query_additions += attempted;
-                    decomposition_queries += attempted;
-                    query_x_filter_rejections += attempted - fiber_rest_scratch.len();
-                    query_batch_inversions += usize::from(target.is_some());
-                    for &(right, rest_key) in &fiber_rest_scratch {
-                        let (candidate, maps) = lookup_pair_witness(
-                            pair_mode,
-                            &curve,
-                            rest_key,
-                            right,
-                            modulus,
-                            lambda,
-                            &base,
-                            &full_pairs,
-                            &quotient_pairs,
-                            &label_to_index,
-                        );
-                        query_canonicalization_maps += maps;
-                        if let Some((indices, labels)) = candidate {
-                            witness = Some((indices.to_vec(), labels.to_vec()));
-                            break;
-                        }
-                    }
-                    if witness.is_some() {
-                        break;
-                    }
-                }
-            } else if let Some(width) = query_mode.width(base.points.len()) {
-                for start in (0..base.points.len()).step_by(width) {
-                    let end = (start + width).min(base.points.len());
-                    let rests =
-                        batch_raw_target_minus_keys(&curve, target, &raw_base_points[start..end]);
-                    query_additions += rests.len();
-                    query_batch_inversions += usize::from(target.is_some());
-                    for (offset, &rest_key) in rests.iter().enumerate() {
-                        let right = start + offset;
-                        decomposition_queries += 1;
-                        let (candidate, maps) = lookup_pair_witness(
-                            pair_mode,
-                            &curve,
-                            rest_key,
-                            right,
-                            modulus,
-                            lambda,
-                            &base,
-                            &full_pairs,
-                            &quotient_pairs,
-                            &label_to_index,
-                        );
-                        query_canonicalization_maps += maps;
-                        if let Some((indices, labels)) = candidate {
-                            witness = Some((indices.to_vec(), labels.to_vec()));
-                            break;
-                        }
-                    }
-                    if witness.is_some() {
-                        break;
-                    }
-                }
-            } else {
-                for (right, &point) in raw_base_points.iter().enumerate() {
-                    let rest = raw_add_point(&curve, target, raw_neg_point(point));
-                    query_additions += 1;
-                    decomposition_queries += 1;
+                    fiber_rest_scratch.len()
+                };
+                query_additions += attempted;
+                decomposition_queries += attempted;
+                query_x_filter_rejections += attempted - fiber_rest_scratch.len();
+                query_batch_inversions += usize::from(target.is_some());
+                for &(right, rest_key) in &fiber_rest_scratch {
                     let (candidate, maps) = lookup_pair_witness(
                         pair_mode,
                         &curve,
-                        raw_compact_key(rest),
+                        rest_key,
                         right,
                         modulus,
                         lambda,
@@ -2193,286 +2162,349 @@ fn main() {
                         break;
                     }
                 }
+                if witness.is_some() {
+                    break;
+                }
             }
-            let query_elapsed = query_started.elapsed();
-            let query_ms = query_elapsed.as_secs_f64() * 1000.0;
-            query_total_ns += query_elapsed.as_nanos();
-            let Some((indices, witness_labels)) = witness else {
-                continue;
-            };
-            let packed_verification_started = Instant::now();
-            let sum = indices.iter().fold(None, |accumulator, &index| {
-                raw_add_point(&curve, accumulator, raw_base_points[index])
-            });
-            assert_eq!(
-                sum, target,
-                "support-index relation must verify in the group"
-            );
-            reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
-            packed_verification_ns += packed_verification_started.elapsed().as_nanos();
+        } else if let Some(width) = query_mode.width(base.points.len()) {
+            for start in (0..base.points.len()).step_by(width) {
+                let end = (start + width).min(base.points.len());
+                let rests =
+                    batch_raw_target_minus_keys(&curve, target, &raw_base_points[start..end]);
+                query_additions += rests.len();
+                query_batch_inversions += usize::from(target.is_some());
+                for (offset, &rest_key) in rests.iter().enumerate() {
+                    let right = start + offset;
+                    decomposition_queries += 1;
+                    let (candidate, maps) = lookup_pair_witness(
+                        pair_mode,
+                        &curve,
+                        rest_key,
+                        right,
+                        modulus,
+                        lambda,
+                        &base,
+                        &full_pairs,
+                        &quotient_pairs,
+                        &label_to_index,
+                    );
+                    query_canonicalization_maps += maps;
+                    if let Some((indices, labels)) = candidate {
+                        witness = Some((indices.to_vec(), labels.to_vec()));
+                        break;
+                    }
+                }
+                if witness.is_some() {
+                    break;
+                }
+            }
+        } else {
+            for (right, &point) in raw_base_points.iter().enumerate() {
+                let rest = raw_add_point(&curve, target, raw_neg_point(point));
+                query_additions += 1;
+                decomposition_queries += 1;
+                let (candidate, maps) = lookup_pair_witness(
+                    pair_mode,
+                    &curve,
+                    raw_compact_key(rest),
+                    right,
+                    modulus,
+                    lambda,
+                    &base,
+                    &full_pairs,
+                    &quotient_pairs,
+                    &label_to_index,
+                );
+                query_canonicalization_maps += maps;
+                if let Some((indices, labels)) = candidate {
+                    witness = Some((indices.to_vec(), labels.to_vec()));
+                    break;
+                }
+            }
+        }
+        let query_elapsed = query_started.elapsed();
+        let query_ms = query_elapsed.as_secs_f64() * 1000.0;
+        query_total_ns += query_elapsed.as_nanos();
+        let Some((indices, witness_labels)) = witness else {
+            continue;
+        };
+        let packed_verification_started = Instant::now();
+        let sum = indices.iter().fold(None, |accumulator, &index| {
+            raw_add_point(&curve, accumulator, raw_base_points[index])
+        });
+        assert_eq!(sum, target, "support-index relation must verify in the group");
+        reference_validation_records.push((indices.clone(), coefficient_a, coefficient_b));
+        packed_verification_ns += packed_verification_started.elapsed().as_nanos();
 
-            let rank_started = Instant::now();
-            let mut row = vec![0u64; columns + 1];
-            for &(column, coefficient) in &witness_labels {
-                row[column] = (row[column] + coefficient) % modulus;
-            }
-            row[columns] = (modulus - coefficient_b) % modulus;
-            let exact_duplicate = !exact_rows.insert(row.clone());
-            duplicate_rows += usize::from(exact_duplicate);
-            let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
-            let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
-            let normalized_row: Vec<_> = row
+        let rank_started = Instant::now();
+        let mut row = vec![0u64; columns + 1];
+        for &(column, coefficient) in &witness_labels {
+            row[column] = (row[column] + coefficient) % modulus;
+        }
+        row[columns] = (modulus - coefficient_b) % modulus;
+        let exact_duplicate = !exact_rows.insert(row.clone());
+        duplicate_rows += usize::from(exact_duplicate);
+        let first_nonzero = row.iter().copied().find(|&value| value != 0).unwrap();
+        let normalization_inverse = modpow(first_nonzero, modulus - 2, modulus);
+        let normalized_row: Vec<_> = row
+            .iter()
+            .map(|value| {
+                ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
+            })
+            .collect();
+        let scalar_multiple = !projective_rows.insert(normalized_row);
+        scalar_multiple_rows += usize::from(scalar_multiple);
+        let rank_before = echelon.rank;
+        let incremented = echelon.insert(row.clone(), modulus);
+        let rank_after = echelon.rank;
+        assert_eq!(rank_after, rank_before + usize::from(incremented));
+        rows.push(row.clone());
+        right_hand_sides.push(coefficient_a);
+        let independently_crosschecked_rank = if incremental_rank_crosscheck {
+            let reverse_before = reverse_echelon.rank;
+            let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
+            assert_eq!(
+                reverse_echelon.rank,
+                reverse_before + usize::from(reverse_incremented)
+            );
+            reverse_incremental_rank_crosschecks += 1;
+            reverse_echelon.rank
+        } else if rank_before == columns + 1 {
+            dimension_bound_rank_crosschecks += 1;
+            columns + 1
+        } else if columns > 64
+            || std::env::var("KIC_SKIP_DENSE_RANK").as_deref() == Ok("1")
+        {
+            // Full dense GE after every accepted row is O(#rows · K³) and
+            // dominates past ~64 columns (n=53 balanced bases). Trust the
+            // incremental echelon; optional end-of-run dense check remains
+            // available via KIC_INCREMENTAL_RANK_CROSSCHECK.
+            rank_after
+        } else {
+            dense_rank_recomputations += 1;
+            dense_rank(&rows, columns + 1, modulus)
+        };
+        assert_eq!(independently_crosschecked_rank, rank_after);
+        accepted += 1;
+        if rank_after == columns + 1 && rank_full_at.is_none() {
+            rank_full_at = Some(accepted);
+        }
+        rank_diagnostics_ns += rank_started.elapsed().as_nanos();
+        let receipt_started = Instant::now();
+        let point_indices: Vec<_> = indices.into_iter().collect();
+        assert_eq!(
+            point_indices
                 .iter()
-                .map(|value| {
-                    ((*value as u128 * normalization_inverse as u128) % modulus as u128) as u64
+                .map(|&index| base.point_labels[index])
+                .collect::<Vec<_>>(),
+            witness_labels
+        );
+        if !summary_only {
+            let labels: Vec<_> = point_indices
+                .iter()
+                .map(|&index| {
+                    let (column, coefficient) = base.point_labels[index];
+                    json!({"column":column,"coefficient":coefficient})
                 })
                 .collect();
-            let scalar_multiple = !projective_rows.insert(normalized_row);
-            scalar_multiple_rows += usize::from(scalar_multiple);
-            let rank_before = echelon.rank;
-            let incremented = echelon.insert(row.clone(), modulus);
-            let rank_after = echelon.rank;
-            assert_eq!(rank_after, rank_before + usize::from(incremented));
-            rows.push(row.clone());
-            right_hand_sides.push(coefficient_a);
-            let independently_crosschecked_rank = if incremental_rank_crosscheck {
-                let reverse_before = reverse_echelon.rank;
-                let reverse_incremented = reverse_echelon.insert(row.clone(), modulus);
-                assert_eq!(
-                    reverse_echelon.rank,
-                    reverse_before + usize::from(reverse_incremented)
-                );
-                reverse_incremental_rank_crosschecks += 1;
-                reverse_echelon.rank
-            } else if rank_before == columns + 1 {
-                dimension_bound_rank_crosschecks += 1;
-                columns + 1
-            } else {
-                dense_rank_recomputations += 1;
-                dense_rank(&rows, columns + 1, modulus)
-            };
-            assert_eq!(independently_crosschecked_rank, rank_after);
-            accepted += 1;
-            if rank_after == columns + 1 && rank_full_at.is_none() {
-                rank_full_at = Some(accepted);
-            }
-            rank_diagnostics_ns += rank_started.elapsed().as_nanos();
-            let receipt_started = Instant::now();
-            let point_indices: Vec<_> = indices.into_iter().collect();
-            assert_eq!(
-                point_indices
-                    .iter()
-                    .map(|&index| base.point_labels[index])
-                    .collect::<Vec<_>>(),
-                witness_labels
-            );
-            if !summary_only {
-                let labels: Vec<_> = point_indices
-                    .iter()
-                    .map(|&index| {
-                        let (column, coefficient) = base.point_labels[index];
-                        json!({"column":column,"coefficient":coefficient})
-                    })
-                    .collect();
-                let (target_x, target_y) = raw_compact_key(target);
-                let relation_material = serde_json::to_vec(&json!({
-                    "n":n,
-                    "a":a,
-                    "base_hash":&base_hash,
-                    "trial":trials,
-                    "coefficient_a":coefficient_a,
-                    "coefficient_b":coefficient_b,
-                    "target":[target_x,target_y],
-                    "indices":&point_indices,
-                    "row":&row
-                }))
-                .unwrap();
-                let relation_hash = blake3::hash(&relation_material).to_hex().to_string();
-                println!(
-                    "{}",
-                    json!({
-                        "schema_version":"1.0",
-                        "task_id":TASK_ID,
-                        "kind":"relation_rank_receipt",
-                        "evidence_class":"measured_exact_support_relation",
-                        "n":n,
-                        "a":a,
-                        "fixture_seed":fixture_seed,
-                        "base_hash":&base_hash,
-                        "relation_hash":relation_hash,
-                        "published_fixture_scalar":d0,
-                        "trial":trials,
-                        "accepted_relation":accepted,
-                        "coefficient_a":coefficient_a,
-                        "coefficient_b":coefficient_b,
-                        "target_point_key":[target_x,target_y],
-                        "factor_point_indices":&point_indices,
-                        "orbit_labels":labels,
-                        "sparse_row":&row,
-                        "rank_before":rank_before,
-                        "rank_after":rank_after,
-                        "rank_incremented":incremented,
-                        "duplicate_row":exact_duplicate,
-                        "scalar_multiple_row":scalar_multiple,
-                        "dense_crosscheck_rank":rank_after,
-                        "query_ms":query_ms,
-                        "verified_group_identity":true,
-                        "group_identity_backend":"packed_u64_polynomial_basis",
-                        "fixture_scalar_used_by_collector":false
-                    })
-                );
-            }
-            receipt_construction_ns += receipt_started.elapsed().as_nanos();
-        }
-        if incremental_rank_crosscheck {
-            let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
-            assert_eq!(terminal_dense_rank, echelon.rank);
-            assert_eq!(terminal_dense_rank, reverse_echelon.rank);
-            terminal_dense_rank_crosschecks += 1;
-        }
-        let linear_solve_started = Instant::now();
-        let solution = (echelon.rank == columns + 1).then(|| {
-            solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus).unwrap()
-        });
-        let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
-        let solution_validation_started = Instant::now();
-        if let Some(solution) = &solution {
-            assert_eq!(solution[columns], d0);
-            for (column, representative) in base.representatives.iter().enumerate() {
-                assert_eq!(
-                    curve.mul(curve.generator(), &BigUint::from(solution[column])),
-                    *representative
-                );
-            }
-            for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
-                let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
-                    (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
-                });
-                assert_eq!(value, rhs);
-            }
-        }
-        let solution_validation_ms = solution_validation_started.elapsed().as_secs_f64() * 1000.0;
-        let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
-        let reference_validation_started = Instant::now();
-        for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
-            let target = curve.add(
-                &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
-                &curve.mul(&q, &BigUint::from(*coefficient_b)),
-            );
-            let sum = indices
-                .iter()
-                .fold(BinaryPoint::Infinity, |accumulator, &index| {
-                    curve.add(&accumulator, &base.points[index])
-                });
-            assert_eq!(sum, target, "independent reference relation validation");
-        }
-        let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
-        let q_key = point_key(&q);
-        let generator_key = point_key(curve.generator());
-        let status = if rank_full_at
-            .map(|full_at| accepted >= full_at + 32)
-            .unwrap_or(false)
-        {
-            "RANK_PLUS_32"
-        } else if accepted >= relation_cap {
-            "RANK_DEFICIENT"
-        } else {
-            "TARGET_CAP"
-        };
-        batch_online_charged_ms += fixture_setup_ms + collection_ms;
-        batch_fixture_generation_ms += fixture_generation_ms;
-        batch_reference_validation_ms += reference_validation_ms;
-        batch_target_trials += trials;
-        batch_admitted_relations += accepted;
-        batch_support_queries += decomposition_queries;
-        batch_rank_plus_32 += u64::from(status == "RANK_PLUS_32");
-        println!(
-            "{}",
-            json!({
-                "schema_version":"1.0",
-                "task_id":TASK_ID,
-                "kind":"relation_rank_summary",
-                "evidence_class":"measured_exact_support_relation",
-                "fixture_index":fixture_index,
-                "fixture_seed":fixture_seed,
-                "published_fixture_scalar":d0,
-                "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
-                "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
-                "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
-                "recovered_fixture_scalar":solution.as_ref().map(|values| values[columns]),
-                "factor_base_log_solution":solution.as_ref().map(|values| &values[..columns]),
-                "linear_solution_verified":solution.is_some(),
+            let (target_x, target_y) = raw_compact_key(target);
+            let relation_material = serde_json::to_vec(&json!({
                 "n":n,
                 "a":a,
-                "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
-                "status":status,
-                "orbit_columns":columns,
-                "matrix_columns":columns+1,
-                "factor_base_points":base.points.len(),
                 "base_hash":&base_hash,
-                "target_trials":trials,
-                "admitted_relations":accepted,
-                "terminal_rank":echelon.rank,
-                "duplicate_rows":duplicate_rows,
-                "scalar_multiple_rows":scalar_multiple_rows,
-                "full_rank_at_relation":rank_full_at,
-                "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
-                "relation_cap_without_rank":relation_cap,
-                "relation_cap_extra":relation_cap_extra,
-                "collection_ms":collection_ms,
-                "linear_solve_ms":linear_solve_ms,
-                "solution_validation_ms":solution_validation_ms,
-                "setup_ms":setup_ms,
-                "curve_setup_ms":curve_setup_ms,
-                "fixture_setup_ms":fixture_setup_ms,
-                "fixture_generation_ms":fixture_generation_ms,
-                "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms,
-                "pair_group_additions":pair_additions,
-                "pair_index_mode":pair_mode.name(),
-                "pair_canonicalization_maps":pair_canonicalization_maps,
-                "pair_batch_inversions":pair_batch_inversions,
-                "query_group_additions":query_additions,
-                "query_canonicalization_maps":query_canonicalization_maps,
-                "query_x_filter_rejections":query_x_filter_rejections,
-                "query_exact_table_misses":query_exact_table_misses,
-                "query_mode":query_mode.name(),
-                "decomposition_arity":if query_mode.pair_pair_width().is_some() {4} else {3},
-                "query_batch_inversions":query_batch_inversions,
-                "target_mode":target_mode.name(),
-                "target_walk_additions":target_walk_additions,
-                "target_walk_restarts":target_walk_restarts,
-                "target_scalar_multiplications":target_scalar_multiplications,
-                "support_queries":decomposition_queries,
-                "all_relations_group_verified":true,
-                "reference_validation_ms":reference_validation_ms,
-                "reference_relations_validated":reference_validation_records.len(),
-                "rank_crosschecked_after_every_relation":true,
-                "dense_rank_recomputations":dense_rank_recomputations,
-                "dimension_bound_rank_crosschecks":dimension_bound_rank_crosschecks,
-                "post_full_rank_crosscheck":if incremental_rank_crosscheck {
-                    "reverse-pivot incremental rank with terminal dense check"
-                } else {
-                    "ambient dimension bound"
-                },
-                "rank_crosscheck_mode":if incremental_rank_crosscheck {
-                    "forward_and_reverse_incremental_plus_terminal_dense"
-                } else {
-                    "dense_until_full_then_ambient_dimension"
-                },
-                "reverse_incremental_rank_crosschecks":reverse_incremental_rank_crosschecks,
-                "terminal_dense_rank_crosschecks":terminal_dense_rank_crosschecks,
-                "variant":match pair_mode { PairMode::Full=>"V2_full_pair_support_index", PairMode::SignedQuotient=>"V2_signed_quotient_pair_support_index", PairMode::SignedExpanded=>"V2_signed_expanded_pair_support_index" },
-                "summary_only_timing":summary_only,
-                "timing_breakdown_ms":{
-                    "target_generation":target_generation_ns as f64/1_000_000.0,
-                    "query":query_total_ns as f64/1_000_000.0,
-                    "packed_verification":packed_verification_ns as f64/1_000_000.0,
-                    "rank_and_diagnostics":rank_diagnostics_ns as f64/1_000_000.0,
-                    "receipt_construction":receipt_construction_ns as f64/1_000_000.0
-                },
-                "claim_boundary":"public synthetic relation/rank control; fixture scalar retained only for validation"
-            })
+                "trial":trials,
+                "coefficient_a":coefficient_a,
+                "coefficient_b":coefficient_b,
+                "target":[target_x,target_y],
+                "indices":&point_indices,
+                "row":&row
+            }))
+            .unwrap();
+            let relation_hash = blake3::hash(&relation_material).to_hex().to_string();
+            println!(
+                "{}",
+                json!({
+                    "schema_version":"1.0",
+                    "task_id":TASK_ID,
+                    "kind":"relation_rank_receipt",
+                    "evidence_class":"measured_exact_support_relation",
+                    "n":n,
+                    "a":a,
+                    "fixture_seed":fixture_seed,
+                    "base_hash":&base_hash,
+                    "relation_hash":relation_hash,
+                    "published_fixture_scalar":d0,
+                    "trial":trials,
+                    "accepted_relation":accepted,
+                    "coefficient_a":coefficient_a,
+                    "coefficient_b":coefficient_b,
+                    "target_point_key":[target_x,target_y],
+                    "factor_point_indices":&point_indices,
+                    "orbit_labels":labels,
+                    "sparse_row":&row,
+                    "rank_before":rank_before,
+                    "rank_after":rank_after,
+                    "rank_incremented":incremented,
+                    "duplicate_row":exact_duplicate,
+                    "scalar_multiple_row":scalar_multiple,
+                    "dense_crosscheck_rank":rank_after,
+                    "query_ms":query_ms,
+                    "verified_group_identity":true,
+                    "group_identity_backend":"packed_u64_polynomial_basis",
+                    "fixture_scalar_used_by_collector":false
+                })
+            );
+        }
+        receipt_construction_ns += receipt_started.elapsed().as_nanos();
+    }
+    if incremental_rank_crosscheck {
+        let terminal_dense_rank = dense_rank(&rows, columns + 1, modulus);
+        assert_eq!(terminal_dense_rank, echelon.rank);
+        assert_eq!(terminal_dense_rank, reverse_echelon.rank);
+        terminal_dense_rank_crosschecks += 1;
+    }
+    let linear_solve_started = Instant::now();
+    let solution = (echelon.rank == columns + 1).then(|| {
+        solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus).unwrap()
+    });
+    let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
+    let solution_validation_started = Instant::now();
+    if let Some(solution) = &solution {
+        assert_eq!(solution[columns], d0);
+        for (column, representative) in base.representatives.iter().enumerate() {
+            assert_eq!(
+                curve.mul(curve.generator(), &BigUint::from(solution[column])),
+                *representative
+            );
+        }
+        for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
+            let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
+                (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
+            });
+            assert_eq!(value, rhs);
+        }
+    }
+    let solution_validation_ms =
+        solution_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
+    let reference_validation_started = Instant::now();
+    for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
+        let target = curve.add(
+            &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
+            &curve.mul(&q, &BigUint::from(*coefficient_b)),
         );
+        let sum = indices.iter().fold(BinaryPoint::Infinity, |accumulator, &index| {
+            curve.add(&accumulator, &base.points[index])
+        });
+        assert_eq!(sum, target, "independent reference relation validation");
+    }
+    let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
+    let q_key = point_key(&q);
+    let generator_key = point_key(curve.generator());
+    let status = if rank_full_at
+        .map(|full_at| accepted >= full_at + 32)
+        .unwrap_or(false)
+    {
+        "RANK_PLUS_32"
+    } else if accepted >= relation_cap {
+        "RANK_DEFICIENT"
+    } else {
+        "TARGET_CAP"
+    };
+    batch_online_charged_ms += fixture_setup_ms + collection_ms;
+    batch_fixture_generation_ms += fixture_generation_ms;
+    batch_reference_validation_ms += reference_validation_ms;
+    batch_target_trials += trials;
+    batch_admitted_relations += accepted;
+    batch_support_queries += decomposition_queries;
+    batch_rank_plus_32 += u64::from(status == "RANK_PLUS_32");
+    println!(
+        "{}",
+        json!({
+            "schema_version":"1.0",
+            "task_id":TASK_ID,
+            "kind":"relation_rank_summary",
+            "evidence_class":"measured_exact_support_relation",
+            "fixture_index":fixture_index,
+            "fixture_seed":fixture_seed,
+            "published_fixture_scalar":d0,
+            "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
+            "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
+            "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
+            "recovered_fixture_scalar":solution.as_ref().map(|values| values[columns]),
+            "factor_base_log_solution":solution.as_ref().map(|values| &values[..columns]),
+            "linear_solution_verified":solution.is_some(),
+            "n":n,
+            "a":a,
+            "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
+            "status":status,
+            "orbit_columns":columns,
+            "matrix_columns":columns+1,
+            "factor_base_points":base.points.len(),
+            "base_hash":&base_hash,
+            "target_trials":trials,
+            "admitted_relations":accepted,
+            "terminal_rank":echelon.rank,
+            "duplicate_rows":duplicate_rows,
+            "scalar_multiple_rows":scalar_multiple_rows,
+            "full_rank_at_relation":rank_full_at,
+            "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
+            "relation_cap_without_rank":relation_cap,
+            "relation_cap_extra":relation_cap_extra,
+            "collection_ms":collection_ms,
+            "linear_solve_ms":linear_solve_ms,
+            "solution_validation_ms":solution_validation_ms,
+            "setup_ms":setup_ms,
+            "curve_setup_ms":curve_setup_ms,
+            "fixture_setup_ms":fixture_setup_ms,
+            "fixture_generation_ms":fixture_generation_ms,
+            "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms,
+            "pair_group_additions":pair_additions,
+            "pair_index_mode":pair_mode.name(),
+            "pair_canonicalization_maps":pair_canonicalization_maps,
+            "pair_batch_inversions":pair_batch_inversions,
+            "query_group_additions":query_additions,
+            "query_canonicalization_maps":query_canonicalization_maps,
+            "query_x_filter_rejections":query_x_filter_rejections,
+            "query_exact_table_misses":query_exact_table_misses,
+            "query_mode":query_mode.name(),
+            "decomposition_arity":if query_mode.pair_pair_width().is_some() {4} else {3},
+            "query_batch_inversions":query_batch_inversions,
+            "target_mode":target_mode.name(),
+            "target_walk_additions":target_walk_additions,
+            "target_walk_restarts":target_walk_restarts,
+            "target_scalar_multiplications":target_scalar_multiplications,
+            "support_queries":decomposition_queries,
+            "all_relations_group_verified":true,
+            "reference_validation_ms":reference_validation_ms,
+            "reference_relations_validated":reference_validation_records.len(),
+            "rank_crosschecked_after_every_relation":true,
+            "dense_rank_recomputations":dense_rank_recomputations,
+            "dimension_bound_rank_crosschecks":dimension_bound_rank_crosschecks,
+            "post_full_rank_crosscheck":if incremental_rank_crosscheck {
+                "reverse-pivot incremental rank with terminal dense check"
+            } else {
+                "ambient dimension bound"
+            },
+            "rank_crosscheck_mode":if incremental_rank_crosscheck {
+                "forward_and_reverse_incremental_plus_terminal_dense"
+            } else {
+                "dense_until_full_then_ambient_dimension"
+            },
+            "reverse_incremental_rank_crosschecks":reverse_incremental_rank_crosschecks,
+            "terminal_dense_rank_crosschecks":terminal_dense_rank_crosschecks,
+            "variant":match pair_mode { PairMode::Full=>"V2_full_pair_support_index", PairMode::SignedQuotient=>"V2_signed_quotient_pair_support_index", PairMode::SignedExpanded=>"V2_signed_expanded_pair_support_index" },
+            "summary_only_timing":summary_only,
+            "timing_breakdown_ms":{
+                "target_generation":target_generation_ns as f64/1_000_000.0,
+                "query":query_total_ns as f64/1_000_000.0,
+                "packed_verification":packed_verification_ns as f64/1_000_000.0,
+                "rank_and_diagnostics":rank_diagnostics_ns as f64/1_000_000.0,
+                "receipt_construction":receipt_construction_ns as f64/1_000_000.0
+            },
+            "claim_boundary":"public synthetic relation/rank control; fixture scalar retained only for validation"
+        })
+    );
     }
     if batch_fixtures > 1 {
         let observed_batch_section_ms = batch_started.elapsed().as_secs_f64() * 1000.0;
@@ -2599,7 +2631,8 @@ mod packed_tests {
                 .iter()
                 .map(to_raw_point)
                 .collect();
-                let packed_points: HashSet<_> = raw_points_with_x(&curve, x).into_iter().collect();
+                let packed_points: HashSet<_> =
+                    raw_points_with_x(&curve, x).into_iter().collect();
                 assert_eq!(packed_points, reference_points, "n={n}, x={x}");
             }
             if curve.cofactor == BigUint::from(2u8) {
@@ -2627,7 +2660,9 @@ mod packed_tests {
     fn x_filter_and_lazy_y_recovery_match_full_fiber_batch() {
         let curve = KoblitzCurve::new(1, 23).unwrap();
         let raw_points: Vec<_> = (1..=48u64)
-            .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
+            .map(|scalar| {
+                to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+            })
             .collect();
         let fibers = raw_fibers(&raw_points);
         assert!(fibers.len() <= 64);
@@ -2737,10 +2772,9 @@ mod packed_tests {
         let base = point_defined_base(&curve, 1);
         assert_eq!(base.representatives.len(), 1);
         assert_eq!(base.points.len(), 74);
-        assert!(base
-            .points
-            .iter()
-            .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+        assert!(base.points.iter().all(|point| {
+            curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity
+        }));
     }
 
     #[test]
@@ -2798,10 +2832,9 @@ mod packed_tests {
         let base = point_defined_base(&curve, 1);
         assert_eq!(base.representatives.len(), 1);
         assert_eq!(base.points.len(), 82);
-        assert!(base
-            .points
-            .iter()
-            .all(|point| { curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity }));
+        assert!(base.points.iter().all(|point| {
+            curve.mul(point, &curve.subgroup_order) == BinaryPoint::Infinity
+        }));
     }
 
     #[test]
@@ -2842,11 +2875,10 @@ mod packed_tests {
         let right_hand_sides = rows
             .iter()
             .map(|row| {
-                row.iter()
-                    .zip(&solution)
-                    .fold(0u64, |sum, (&left, &right)| {
-                        (sum + ((left as u128 * right as u128) % modulus as u128) as u64) % modulus
-                    })
+                row.iter().zip(&solution).fold(0u64, |sum, (&left, &right)| {
+                    (sum + ((left as u128 * right as u128) % modulus as u128) as u64)
+                        % modulus
+                })
             })
             .collect::<Vec<_>>();
         assert_eq!(

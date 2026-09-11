@@ -143,11 +143,7 @@ fn fq_solve(a: &FqMatrix, b: &[u8]) -> Option<Vec<u8>> {
     let inv = fq_invert(a)?;
     Some(
         inv.iter()
-            .map(|row| {
-                row.iter()
-                    .zip(b)
-                    .fold(0u8, |acc, (&x, &y)| acc ^ gf_mul(x, y))
-            })
+            .map(|row| row.iter().zip(b).fold(0u8, |acc, (&x, &y)| acc ^ gf_mul(x, y)))
             .collect(),
     )
 }
@@ -159,12 +155,7 @@ fn fq_solve(a: &FqMatrix, b: &[u8]) -> Option<Vec<u8>> {
 // decomposes back into N×N ring blocks.
 
 fn t_block(t: &FqMatrix, i: usize, j: usize) -> R {
-    [
-        t[2 * i][2 * j],
-        t[2 * i][2 * j + 1],
-        t[2 * i + 1][2 * j],
-        t[2 * i + 1][2 * j + 1],
-    ]
+    [t[2 * i][2 * j], t[2 * i][2 * j + 1], t[2 * i + 1][2 * j], t[2 * i + 1][2 * j + 1]]
 }
 
 /// Apply an R-blocked matrix to a vector of ring elements.
@@ -214,12 +205,7 @@ fn hash_to_target(msg: &[u8]) -> Vec<R> {
     let h = shake256(&input, M * 4);
     (0..M)
         .map(|k| {
-            [
-                h[4 * k] & 0x0f,
-                h[4 * k + 1] & 0x0f,
-                h[4 * k + 2] & 0x0f,
-                h[4 * k + 3] & 0x0f,
-            ]
+            [h[4 * k] & 0x0f, h[4 * k + 1] & 0x0f, h[4 * k + 2] & 0x0f, h[4 * k + 3] & 0x0f]
         })
         .collect()
 }
@@ -265,7 +251,8 @@ pub fn snova_keygen() -> (SnovaPublicKey, SnovaSecretKey) {
                     let tia_t = r_transpose(&t_block(&t, i, a));
                     for j in 0..N {
                         if q[i][j] != R_ZERO {
-                            let term = r_mul(&tia_t, &r_mul(&q[i][j], &t_block(&t, j, b)));
+                            let term =
+                                r_mul(&tia_t, &r_mul(&q[i][j], &t_block(&t, j, b)));
                             acc = r_add(&acc, &term);
                         }
                     }
@@ -310,9 +297,7 @@ pub fn snova_sign(sk: &SnovaSecretKey, msg: &[u8]) -> Vec<R> {
                 }
             }
         }
-        let Some(sol) = fq_solve(&a, &b) else {
-            continue;
-        };
+        let Some(sol) = fq_solve(&a, &b) else { continue };
         for oil in 0..O {
             for entry in 0..4 {
                 x[V + oil][entry] = sol[oil * 4 + entry];
@@ -327,10 +312,7 @@ pub fn snova_verify(pk: &SnovaPublicKey, msg: &[u8], sig: &[R]) -> bool {
         return false;
     }
     let target = hash_to_target(msg);
-    pk.forms
-        .iter()
-        .zip(&target)
-        .all(|(p, t)| eval_ring_form(p, sig) == *t)
+    pk.forms.iter().zip(&target).all(|(p, t)| eval_ring_form(p, sig) == *t)
 }
 
 #[cfg(test)]

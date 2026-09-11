@@ -10,7 +10,9 @@
 //! to show the F_p χ-period is a *different*, arithmetic quantity (r or 2r,
 //! set by the multiplier characters), not a reduction of the real sign.
 
-use crypto_lib::cryptanalysis::eds_residue::{eds_integer, reduce_and_analyze, sign_period, signs};
+use crypto_lib::cryptanalysis::eds_residue::{
+    eds_integer, reduce_and_analyze, sign_period, signs,
+};
 
 fn main() {
     println!("\n=== EDS-Residue F_p ↔ Z bridge (curve 37a, P=(0,0)) ===\n");
@@ -19,16 +21,7 @@ fn main() {
     let s = signs(&w);
     print!("integer EDS (A006769) signs, n=1..40:  ");
     for &sgn in s.iter().take(41).skip(1) {
-        print!(
-            "{}",
-            if sgn > 0 {
-                '+'
-            } else if sgn < 0 {
-                '-'
-            } else {
-                '0'
-            }
-        );
+        print!("{}", if sgn > 0 { '+' } else if sgn < 0 { '-' } else { '0' });
     }
     println!();
     match sign_period(&s, 1, 80) {

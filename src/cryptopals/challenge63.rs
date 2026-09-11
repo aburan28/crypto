@@ -35,8 +35,8 @@
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{aes_ctr, encrypt_block, AesKey};
 use num_bigint::BigUint;
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 // ── GF(2^128) element ─────────────────────────────────────────────
 
@@ -184,14 +184,10 @@ impl Poly {
     }
 
     pub fn zero() -> Self {
-        Poly {
-            coeffs: vec![Gf128::zero()],
-        }
+        Poly { coeffs: vec![Gf128::zero()] }
     }
     pub fn one() -> Self {
-        Poly {
-            coeffs: vec![Gf128::one()],
-        }
+        Poly { coeffs: vec![Gf128::one()] }
     }
 
     pub fn deg(&self) -> i32 {
@@ -426,7 +422,12 @@ fn random_poly(deg: usize, rng: &mut StdRng) -> Poly {
 ///
 /// With both ciphertexts the *same length* the length-block delta
 /// is zero, so the linear term drops out.
-pub fn build_nonce_reuse_poly(ct1: &[u8], tag1: &[u8; 16], ct2: &[u8], tag2: &[u8; 16]) -> Poly {
+pub fn build_nonce_reuse_poly(
+    ct1: &[u8],
+    tag1: &[u8; 16],
+    ct2: &[u8],
+    tag2: &[u8; 16],
+) -> Poly {
     assert_eq!(ct1.len(), ct2.len(), "messages must be same length");
     let n_blocks = (ct1.len() + 15) / 16;
     let mut coeffs = vec![Gf128::zero(); n_blocks + 2];

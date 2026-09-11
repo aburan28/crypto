@@ -14,8 +14,8 @@
 use crate::cryptopals::low_util::b64_decode;
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{encrypt_block, AesKey};
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 const TARGET_B64: &str = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
 
@@ -108,10 +108,7 @@ pub fn run() -> Report {
             break;
         }
     }
-    r.line(format!(
-        "Recovered head: {:?}",
-        &String::from_utf8_lossy(&recovered)[..40]
-    ));
+    r.line(format!("Recovered head: {:?}", &String::from_utf8_lossy(&recovered)[..40]));
     assert!(recovered.starts_with(b"Rollin' in my 5.0"));
     r.succeed()
 }

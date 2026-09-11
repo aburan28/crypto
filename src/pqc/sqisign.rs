@@ -106,24 +106,15 @@ impl Fp2 {
         Fp2::new(a, 0)
     }
     pub fn add(&self, o: &Fp2) -> Fp2 {
-        Fp2 {
-            a: (self.a + o.a) % P,
-            b: (self.b + o.b) % P,
-        }
+        Fp2 { a: (self.a + o.a) % P, b: (self.b + o.b) % P }
     }
     pub fn sub(&self, o: &Fp2) -> Fp2 {
-        Fp2 {
-            a: (self.a + P - o.a) % P,
-            b: (self.b + P - o.b) % P,
-        }
+        Fp2 { a: (self.a + P - o.a) % P, b: (self.b + P - o.b) % P }
     }
     pub fn mul(&self, o: &Fp2) -> Fp2 {
         // (a + bi)(c + di) = (ac − bd) + (ad + bc)i.
         let (a, b, c, d) = (self.a, self.b, o.a, o.b);
-        Fp2 {
-            a: (a * c + (P - 1) * (b * d % P)) % P,
-            b: (a * d + b * c) % P,
-        }
+        Fp2 { a: (a * c + (P - 1) * (b * d % P)) % P, b: (a * d + b * c) % P }
     }
     pub fn is_zero(&self) -> bool {
         self.a == 0 && self.b == 0
@@ -283,12 +274,8 @@ pub fn graph() -> &'static IsogenyGraph {
 /// graph vertex); callers must treat that as the end of the walk rather
 /// than index into it.
 fn step_choices(g: &IsogenyGraph, cur: &Fp2, prev: Option<Fp2>) -> Vec<Fp2> {
-    let forward: Vec<Fp2> = g
-        .neighbors(cur)
-        .iter()
-        .copied()
-        .filter(|n| Some(*n) != prev)
-        .collect();
+    let forward: Vec<Fp2> =
+        g.neighbors(cur).iter().copied().filter(|n| Some(*n) != prev).collect();
     if forward.is_empty() {
         g.neighbors(cur).to_vec()
     } else {
@@ -307,11 +294,7 @@ fn random_walk(start: Fp2, len: usize) -> Vec<Fp2> {
     let mut path = vec![start];
     for _ in 0..len {
         let cur = *path.last().unwrap();
-        let prev = if path.len() >= 2 {
-            Some(path[path.len() - 2])
-        } else {
-            None
-        };
+        let prev = if path.len() >= 2 { Some(path[path.len() - 2]) } else { None };
         let choices = step_choices(g, &cur, prev);
         if choices.is_empty() {
             break;
@@ -338,11 +321,7 @@ fn challenge_walk(pk: &Fp2, commitment: &Fp2, msg: &[u8]) -> Vec<Fp2> {
     let mut path = vec![*commitment];
     for &byte in stream.iter() {
         let cur = *path.last().unwrap();
-        let prev = if path.len() >= 2 {
-            Some(path[path.len() - 2])
-        } else {
-            None
-        };
+        let prev = if path.len() >= 2 { Some(path[path.len() - 2]) } else { None };
         let choices = step_choices(g, &cur, prev);
         if choices.is_empty() {
             break;
@@ -378,9 +357,7 @@ pub struct SqiSignature {
 /// KeyGen: secret walk `φ_sk: E₀ → E_A`, public key `j(E_A)`.
 pub fn sqisign_keygen() -> (SqiSignPublicKey, SqiSignSecretKey) {
     let path = random_walk(j0(), SK_WALK_LEN);
-    let pk = SqiSignPublicKey {
-        j: *path.last().unwrap(),
-    };
+    let pk = SqiSignPublicKey { j: *path.last().unwrap() };
     (pk, SqiSignSecretKey { path })
 }
 
@@ -405,7 +382,11 @@ pub fn sqisign_keygen() -> (SqiSignPublicKey, SqiSignSecretKey) {
 /// parameters but trivial (a BFS) here.  Do not read secret-key
 /// dependence into this signer.  See `sqisign_keygen` and the module
 /// docs.
-pub fn sqisign_sign(pk: &SqiSignPublicKey, _sk: &SqiSignSecretKey, msg: &[u8]) -> SqiSignature {
+pub fn sqisign_sign(
+    pk: &SqiSignPublicKey,
+    _sk: &SqiSignSecretKey,
+    msg: &[u8],
+) -> SqiSignature {
     let com_path = random_walk(j0(), COM_WALK_LEN);
     let commitment = *com_path.last().unwrap();
     let chl_path = challenge_walk(&pk.j, &commitment, msg);
@@ -417,10 +398,7 @@ pub fn sqisign_sign(pk: &SqiSignPublicKey, _sk: &SqiSignSecretKey, msg: &[u8]) -
     let response = graph()
         .shortest_path(&pk.j, &j2)
         .expect("supersingular 2-isogeny graph is connected");
-    SqiSignature {
-        commitment,
-        response,
-    }
+    SqiSignature { commitment, response }
 }
 
 /// Verify: recompute the challenge walk from `(pk, commitment, msg)`,
@@ -552,9 +530,7 @@ mod tests {
                 break 'outer;
             }
         }
-        let pk = SqiSignPublicKey {
-            j: ordinary.unwrap(),
-        };
+        let pk = SqiSignPublicKey { j: ordinary.unwrap() };
         let (pk_real, sk) = sqisign_keygen();
         let sig = sqisign_sign(&pk_real, &sk, b"m");
         assert!(!sqisign_verify(&pk, b"m", &sig));

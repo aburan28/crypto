@@ -51,9 +51,7 @@
 //! - **B. Möller, A. Vanstone**, *Invalid-curve attacks on ECC* (informal).
 
 use crate::cryptanalysis::j0_twists::{enumerate_twists, TwistInfo};
-use crate::cryptanalysis::pohlig_hellman::{
-    crt_combine, pohlig_hellman_curve, PohligHellmanReport,
-};
+use crate::cryptanalysis::pohlig_hellman::{crt_combine, pohlig_hellman_curve, PohligHellmanReport};
 use crate::ecc::curve::CurveParams;
 use crate::ecc::point::Point;
 use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
@@ -141,17 +139,18 @@ pub fn mount_invalid_curve_attack(
             // twists give residues at the same prime, keep the
             // higher-power version (the larger one is at least as
             // informative).
-            let pp_factors = crate::cryptanalysis::j0_twists::factorise_small(&smooth_part);
+            let pp_factors =
+                crate::cryptanalysis::j0_twists::factorise_small(&smooth_part);
             for (p, e) in pp_factors {
                 let pe = p.pow(e);
                 let d_mod_pe = d_mod_smooth % &pe;
                 // Check whether this prime is already in `residues`;
                 // if so, only keep the higher prime-power.
-                let existing_idx = residues.iter().position(|(m, _)| {
-                    crate::cryptanalysis::j0_twists::factorise_small(m)
+                let existing_idx = residues
+                    .iter()
+                    .position(|(m, _)| crate::cryptanalysis::j0_twists::factorise_small(m)
                         .iter()
-                        .any(|(q, _)| q == &p)
-                });
+                        .any(|(q, _)| q == &p));
                 if let Some(i) = existing_idx {
                     if pe > residues[i].0 {
                         residues[i] = (pe.clone(), d_mod_pe);
@@ -185,9 +184,7 @@ pub fn mount_invalid_curve_attack(
             // Brute-force completion if cheap.
             let remaining_bits = base_curve.n.bits() as f64 - (total_mod.bits() as f64);
             if remaining_bits <= 24.0 {
-                Some(complete_via_brute_force(
-                    base_curve, partial, &total_mod, d_truth,
-                ))
+                Some(complete_via_brute_force(base_curve, partial, &total_mod, d_truth))
             } else {
                 None
             }
@@ -233,7 +230,9 @@ fn construct_twist_curve(base: &CurveParams, twist: &TwistInfo) -> CurveParams {
     while gx < base.p {
         let x = base.fe(gx.clone());
         let rhs = x.mul(&x).mul(&x).add(&base.fe(twist.b_prime.clone())).value;
-        if let Some(y) = crate::cryptanalysis::ec_index_calculus::sqrt_mod_p(&rhs, &base.p) {
+        if let Some(y) =
+            crate::cryptanalysis::ec_index_calculus::sqrt_mod_p(&rhs, &base.p)
+        {
             gy = y;
             break;
         }
@@ -305,7 +304,12 @@ pub fn format_visualization(report: &InvalidCurveAttackReport) -> String {
                 .as_ref()
                 .map(|d| d.to_str_radix(10))
                 .unwrap_or_else(|| "—".into());
-            s.push_str(&format!("| {} | {} | {} |\n", idx, order_used, recovered,));
+            s.push_str(&format!(
+                "| {} | {} | {} |\n",
+                idx,
+                order_used,
+                recovered,
+            ));
         }
         s.push('\n');
     }

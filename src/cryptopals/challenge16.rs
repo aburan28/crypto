@@ -33,11 +33,8 @@ pub fn oracle_encrypt(user_data: &[u8], key: &AesKey, iv: &[u8; 16]) -> Vec<u8> 
 pub fn oracle_check_admin(ct: &[u8], key: &AesKey, iv: &[u8; 16]) -> bool {
     match cbc_decrypt_no_iv_prefix(ct, key, iv) {
         None => false,
-        Some(pt) => {
-            pt.windows(13)
-                .any(|w| w == b";admin=true;a="[..12].as_ref())
-                || pt.windows(12).any(|w| w == b";admin=true;")
-        }
+        Some(pt) => pt.windows(13).any(|w| w == b";admin=true;a="[..12].as_ref())
+            || pt.windows(12).any(|w| w == b";admin=true;"),
     }
 }
 

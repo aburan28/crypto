@@ -17,11 +17,7 @@ fn main() {
     println!("\n=== MOV attack on a supersingular curve (EDS → pairing) ===\n");
     let (p, a, b) = (1283u64, 1u64, 0u64); // y²=x³+x, 1283 ≡ 3 (mod 4)
     let r = 107u64; // 107 | p+1 = 1284  (#E = p+1, embedding degree 2)
-    println!(
-        "E: y²=x³+x / F_{p}   supersingular (#E=p+1={n})",
-        p = p,
-        n = p + 1
-    );
+    println!("E: y²=x³+x / F_{p}   supersingular (#E=p+1={n})", p = p, n = p + 1);
     println!("p ≡ 3 (mod 4); distortion φ(x,y)=(−x, iy), i²=−1 ∈ F_{{p²}}\n");
 
     let pp = point_of_order(p, a, b, r).expect("order-r point");

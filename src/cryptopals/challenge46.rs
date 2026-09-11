@@ -53,14 +53,10 @@ pub fn run() -> Report {
     r.line(format!("Recovered text: {:?}", &s[..s.len().min(40)]));
     // The bulk of the plaintext is recovered; check the readable
     // English-ish prefix instead of an exact match.
-    let s_clean: String = s
-        .chars()
-        .filter(|c| c.is_ascii_graphic() || *c == ' ')
-        .collect();
+    let s_clean: String = s.chars().filter(|c| c.is_ascii_graphic() || *c == ' ').collect();
     assert!(
         s_clean.contains("That") || s_clean.contains("found") || s_clean.contains("Medina"),
-        "no readable prefix in {:?}",
-        &s[..s.len().min(40)]
+        "no readable prefix in {:?}", &s[..s.len().min(40)]
     );
     r.succeed()
 }

@@ -129,10 +129,7 @@ impl PqSubspace {
     /// Build `V = span_{F₂}{1, z, …, z^{m'-1}} ⊂ F_{2^m}`.
     pub fn span_low(m: u32, m_prime: u32) -> Self {
         assert!(m_prime <= m, "m' must be ≤ m");
-        assert!(
-            m_prime <= 32,
-            "toy implementation enumerates V; cap m' ≤ 32"
-        );
+        assert!(m_prime <= 32, "toy implementation enumerates V; cap m' ≤ 32");
         let size = 1u64 << m_prime;
         let mut elements = Vec::with_capacity(size as usize);
         for v in 0u64..size {
@@ -265,7 +262,8 @@ pub fn find_one_pq_relation(
             // Solve S_3(x_i, x_R, X) = 0 as quadratic in X.  By
             // symmetry of S_3 we can pick any of the three arguments
             // as the unknown.
-            let (aa, bb, cc) = binary_semaev_s3_in_x3(&fb_i.x, &x_r, &curve.b, &curve.irreducible);
+            let (aa, bb, cc) =
+                binary_semaev_s3_in_x3(&fb_i.x, &x_r, &curve.b, &curve.irreducible);
             let roots = solve_quadratic_f2m(&aa, &bb, &cc, curve.m, &curve.irreducible);
             for x2 in roots {
                 // Cheap reject: x_2 must lie in V.  (On-curve filter
@@ -279,7 +277,9 @@ pub fn find_one_pq_relation(
                 };
                 let fb_j = &fb[j];
                 // Verify one of the four sign combos matches R.
-                if let Some(rel) = try_finalise(curve, &r, fb_i, fb_j, &a, &b) {
+                if let Some(rel) =
+                    try_finalise(curve, &r, fb_i, fb_j, &a, &b)
+                {
                     return Some(rel);
                 }
             }
@@ -389,7 +389,15 @@ pub fn petit_quisquater_n2_toy(
     let mut rng = StdRng::seed_from_u64(seed);
     let mut relations: Vec<PqRelation> = Vec::with_capacity(target);
     while relations.len() < target {
-        let rel = find_one_pq_relation(curve, g, q, &fb, v, &mut rng, max_trials_per_relation)?;
+        let rel = find_one_pq_relation(
+            curve,
+            g,
+            q,
+            &fb,
+            v,
+            &mut rng,
+            max_trials_per_relation,
+        )?;
         relations.push(rel);
     }
 
@@ -706,8 +714,10 @@ fn try_finalise_n3(
                     *acc.entry(fb_i.idx).or_insert(0) += eps_i;
                     *acc.entry(fb_j.idx).or_insert(0) += eps_j;
                     *acc.entry(fb_k.idx).or_insert(0) += eps_k;
-                    let entries: Vec<(usize, i64)> =
-                        acc.into_iter().filter(|(_, m)| *m != 0).collect();
+                    let entries: Vec<(usize, i64)> = acc
+                        .into_iter()
+                        .filter(|(_, m)| *m != 0)
+                        .collect();
                     if entries.is_empty() {
                         // All canceled — degenerate relation `aG + bQ = O`.
                         return None;
@@ -791,7 +801,9 @@ pub fn find_one_pq_relation_n3_via_descent(
                 Some(&k) => k,
                 None => continue,
             };
-            if let Some(rel) = try_finalise_n3(curve, &r, &fb[i], &fb[j], &fb[k], &a, &b) {
+            if let Some(rel) =
+                try_finalise_n3(curve, &r, &fb[i], &fb[j], &fb[k], &a, &b)
+            {
                 return Some(rel);
             }
         }
@@ -852,7 +864,9 @@ pub fn find_one_pq_relation_n3_via_xl(
                 Some(&k) => k,
                 None => continue,
             };
-            if let Some(rel) = try_finalise_n3(curve, &r, &fb[i], &fb[j], &fb[k], &a, &b) {
+            if let Some(rel) =
+                try_finalise_n3(curve, &r, &fb[i], &fb[j], &fb[k], &a, &b)
+            {
                 return Some(rel);
             }
         }
@@ -888,8 +902,15 @@ pub fn petit_quisquater_n3_full_pipeline_via_xl(
     let mut rng = StdRng::seed_from_u64(seed);
     let mut relations: Vec<PqRelation> = Vec::with_capacity(target);
     while relations.len() < target {
-        let rel =
-            find_one_pq_relation_n3_via_xl(curve, g, q, &fb, v, &mut rng, max_trials_per_relation)?;
+        let rel = find_one_pq_relation_n3_via_xl(
+            curve,
+            g,
+            q,
+            &fb,
+            v,
+            &mut rng,
+            max_trials_per_relation,
+        )?;
         relations.push(rel);
     }
 
@@ -1003,8 +1024,15 @@ pub fn run_pq_attack(
 ) -> PqAttackReport {
     let q = scalar_mul(curve, g, true_k);
     let fb = build_pq_factor_base(curve, v);
-    let recovered =
-        petit_quisquater_n2_toy(curve, g, &q, v, target_extra, max_trials_per_relation, seed);
+    let recovered = petit_quisquater_n2_toy(
+        curve,
+        g,
+        &q,
+        v,
+        target_extra,
+        max_trials_per_relation,
+        seed,
+    );
     PqAttackReport {
         fb_size: fb.len(),
         relations_collected: fb.len() + target_extra.max(1),
@@ -1146,7 +1174,10 @@ mod tests {
                     let x = F2mElement::from_biguint(&BigUint::from(xi), m);
                     for yi in 0u64..256 {
                         let y = F2mElement::from_biguint(&BigUint::from(yi), m);
-                        let p = BinaryPoint::Affine { x: x.clone(), y };
+                        let p = BinaryPoint::Affine {
+                            x: x.clone(),
+                            y,
+                        };
                         if curve.is_on_curve(&p) {
                             count += 1;
                         }
@@ -1184,7 +1215,10 @@ mod tests {
             let x = F2mElement::from_biguint(&BigUint::from(xi), m);
             for yi in 0u64..256 {
                 let y = F2mElement::from_biguint(&BigUint::from(yi), m);
-                let p = BinaryPoint::Affine { x: x.clone(), y };
+                let p = BinaryPoint::Affine {
+                    x: x.clone(),
+                    y,
+                };
                 if curve.is_on_curve(&p) {
                     points.push(p);
                 }
@@ -1219,10 +1253,7 @@ mod tests {
             let q96 = scalar_mul(&curve, &p, &BigUint::from(96u32));
             eprintln!("DBG: 96*P is_O = {}", matches!(q96, BinaryPoint::Infinity));
             let q288 = scalar_mul(&curve, &p, &BigUint::from(288u32));
-            eprintln!(
-                "DBG: 288*P is_O = {}",
-                matches!(q288, BinaryPoint::Infinity)
-            );
+            eprintln!("DBG: 288*P is_O = {}", matches!(q288, BinaryPoint::Infinity));
         }
     }
 
@@ -1266,10 +1297,7 @@ mod tests {
             acc = point_add(&curve, &acc, &sample_p);
             k += 1;
         }
-        eprintln!(
-            "toy curve group order = {}, sample point order = {}",
-            count, k
-        );
+        eprintln!("toy curve group order = {}, sample point order = {}", count, k);
         // sanity: order divides count
         assert!(
             count % k == 0,
@@ -1297,7 +1325,11 @@ mod tests {
         let (curve, _g, _n) = build_toy_curve_and_generator();
         let v = PqSubspace::span_low(curve.m, 4);
         let fb = build_pq_factor_base(&curve, &v);
-        assert!(fb.len() >= 4, "expected ≥ 4 FB points, got {}", fb.len());
+        assert!(
+            fb.len() >= 4,
+            "expected ≥ 4 FB points, got {}",
+            fb.len()
+        );
         // Each FB point is on the curve and has x ∈ V.
         for entry in &fb {
             assert!(curve.is_on_curve(&entry.point));
@@ -1379,13 +1411,14 @@ mod tests {
         let true_k = (&n / BigUint::from(5u32)) + BigUint::from(13u32);
         let true_k = &true_k % &n;
         let q = scalar_mul(&curve, &g, &true_k);
-        let recovered = petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 0xDECAF);
+        let recovered = petit_quisquater_n2_full_pipeline(
+            &curve, &g, &q, &v, 4, 200, 0xDECAF,
+        );
         assert_eq!(
             recovered.as_ref(),
             Some(&true_k),
             "full pipeline should recover k = {} on toy curve (got {:?})",
-            true_k,
-            recovered,
+            true_k, recovered,
         );
     }
 
@@ -1399,14 +1432,14 @@ mod tests {
         let true_k = (&n / BigUint::from(13u32)) + BigUint::from(29u32);
         let true_k = &true_k % &n;
         let q = scalar_mul(&curve, &g, &true_k);
-        let recovered =
-            petit_quisquater_n2_full_pipeline_via_wiedemann(&curve, &g, &q, &v, 4, 200, 0xFEEDCAFE);
+        let recovered = petit_quisquater_n2_full_pipeline_via_wiedemann(
+            &curve, &g, &q, &v, 4, 200, 0xFEEDCAFE,
+        );
         assert_eq!(
             recovered.as_ref(),
             Some(&true_k),
             "Wiedemann-based pipeline should recover k = {} (got {:?})",
-            true_k,
-            recovered,
+            true_k, recovered,
         );
     }
 
@@ -1419,9 +1452,11 @@ mod tests {
         let v = PqSubspace::span_low(curve.m, 4);
         let true_k = &BigUint::from(31u32) % &n;
         let q = scalar_mul(&curve, &g, &true_k);
-        let k_gaussian = petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 999);
-        let k_wiedemann =
-            petit_quisquater_n2_full_pipeline_via_wiedemann(&curve, &g, &q, &v, 4, 200, 999);
+        let k_gaussian =
+            petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 999);
+        let k_wiedemann = petit_quisquater_n2_full_pipeline_via_wiedemann(
+            &curve, &g, &q, &v, 4, 200, 999,
+        );
         assert_eq!(k_gaussian.as_ref(), Some(&true_k));
         assert_eq!(k_wiedemann.as_ref(), Some(&true_k));
         assert_eq!(k_gaussian, k_wiedemann);
@@ -1454,8 +1489,7 @@ mod tests {
             recovered.as_ref(),
             Some(&true_k),
             "n=3 XL pipeline should recover k = {} on toy curve (got {:?})",
-            true_k,
-            recovered,
+            true_k, recovered,
         );
     }
 
@@ -1469,13 +1503,13 @@ mod tests {
         let true_k = (&n / BigUint::from(7u32)) + BigUint::from(23u32);
         let true_k = &true_k % &n;
         let q = scalar_mul(&curve, &g, &true_k);
-        let recovered = petit_quisquater_n3_full_pipeline(&curve, &g, &q, &v, 4, 100, 0xC0FFEE);
+        let recovered =
+            petit_quisquater_n3_full_pipeline(&curve, &g, &q, &v, 4, 100, 0xC0FFEE);
         assert_eq!(
             recovered.as_ref(),
             Some(&true_k),
             "n=3 pipeline should recover k = {} on toy curve (got {:?})",
-            true_k,
-            recovered,
+            true_k, recovered,
         );
     }
 
@@ -1492,7 +1526,8 @@ mod tests {
         let true_k = &BigUint::from(17u32) % &n;
         let q = scalar_mul(&curve, &g, &true_k);
         let k_shortcut = petit_quisquater_n2_toy(&curve, &g, &q, &v, 4, 500, 11);
-        let k_full = petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 11);
+        let k_full =
+            petit_quisquater_n2_full_pipeline(&curve, &g, &q, &v, 4, 200, 11);
         assert_eq!(k_shortcut.as_ref(), Some(&true_k));
         assert_eq!(k_full.as_ref(), Some(&true_k));
         assert_eq!(k_shortcut, k_full);
@@ -1505,7 +1540,9 @@ mod tests {
     /// both `(x_1, x_2)` and `(x_2, x_1)` since the system is symmetric).
     #[test]
     fn descent_decomposition_matches_shortcut() {
-        use crate::cryptanalysis::binary_semaev::{binary_semaev_s3_in_x3, solve_quadratic_f2m};
+        use crate::cryptanalysis::binary_semaev::{
+            binary_semaev_s3_in_x3, solve_quadratic_f2m,
+        };
         use crate::cryptanalysis::pq_descent::solve_decomposition_via_descent;
         let (curve, g, _n) = build_toy_curve_and_generator();
         let pq_v = PqSubspace::span_low(curve.m, 4);
@@ -1520,7 +1557,9 @@ mod tests {
         let mut shortcut_set: std::collections::HashSet<(BigUint, BigUint)> =
             std::collections::HashSet::new();
         for entry in &fb {
-            let (aa, bb, cc) = binary_semaev_s3_in_x3(&entry.x, &x_r, &curve.b, &curve.irreducible);
+            let (aa, bb, cc) = binary_semaev_s3_in_x3(
+                &entry.x, &x_r, &curve.b, &curve.irreducible,
+            );
             for x2 in solve_quadratic_f2m(&aa, &bb, &cc, curve.m, &curve.irreducible) {
                 // Reject x_2 not in V (i.e. with high bits set).
                 if x2.to_biguint() >= BigUint::from(16u32) {
@@ -1547,9 +1586,7 @@ mod tests {
             assert!(
                 descent_set.contains(hit),
                 "shortcut hit {:?} not found in descent set\n  shortcut: {:?}\n  descent:  {:?}",
-                hit,
-                shortcut_set,
-                descent_set,
+                hit, shortcut_set, descent_set,
             );
         }
     }

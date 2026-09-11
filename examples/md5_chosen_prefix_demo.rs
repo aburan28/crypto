@@ -15,14 +15,13 @@
 //!   cargo run --release --example md5_chosen_prefix_demo
 
 use crypto_lib::cryptanalysis::md5_chosen_prefix::{
-    apply_delta_m, compose_near_collision_chain, find_near_collision_block, ihv_after_prefix,
-    parse_conditions_table, rho_chosen_prefix_birthday, trace_block, WalkSide, WANG_BLOCK1_ROUND1,
-    WANG_DELTA_M0, WANG_DELTA_M1, WANG_M, WANG_M_PRIME,
+    apply_delta_m, compose_near_collision_chain, find_near_collision_block,
+    ihv_after_prefix, parse_conditions_table, rho_chosen_prefix_birthday,
+    trace_block, WANG_DELTA_M0, WANG_DELTA_M1, WANG_M, WANG_M_PRIME,
+    WANG_BLOCK1_ROUND1, WalkSide,
 };
 use crypto_lib::cryptanalysis::md5_differential::{md5, MD5_IV};
-use crypto_lib::cryptanalysis::md5_hashclash_ffi::{
-    ChosenPrefixCollision, FfiError, HASHCLASH_LINKED,
-};
+use crypto_lib::cryptanalysis::md5_hashclash_ffi::{ChosenPrefixCollision, FfiError, HASHCLASH_LINKED};
 use std::time::Instant;
 
 fn hex(b: &[u8]) -> String {
@@ -47,21 +46,18 @@ fn main() {
     println!("  MD5(M') = {}", hex(&h2));
     assert_eq!(h1, h2, "Wang pair must collide");
     assert_ne!(WANG_M, WANG_M_PRIME, "M and M' must differ");
-    let diff_bits: u32 = WANG_M
-        .iter()
-        .zip(WANG_M_PRIME.iter())
+    let diff_bits: u32 = WANG_M.iter().zip(WANG_M_PRIME.iter())
         .map(|(a, b)| (a ^ b).count_ones())
         .sum();
     println!("  M ≠ M' in {} bits across 1024", diff_bits);
     println!("  → Confirmed: published Wang 2004 collision verified.");
 
     // Demonstrate apply_delta_m round-trip.
-    let mut m0 = [0u8; 64];
-    m0.copy_from_slice(&WANG_M[..64]);
+    let mut m0 = [0u8; 64]; m0.copy_from_slice(&WANG_M[..64]);
     let m0_p = apply_delta_m(&m0, &WANG_DELTA_M0);
     assert_eq!(&m0_p[..], &WANG_M_PRIME[..64]);
     println!("  → apply_delta_m(WANG_M_0, ΔM_0) reproduces WANG_M'_0.");
-    let _ = WANG_DELTA_M1; // exported for completeness
+    let _ = WANG_DELTA_M1;  // exported for completeness
 
     // ── Phase 1: IHV computation for chosen prefixes ──────────────────
     banner("PHASE 1 — IHV computation for two chosen prefixes");
@@ -75,16 +71,8 @@ fn main() {
     let (iv_q, tail_q) = ihv_after_prefix(prefix_q);
     println!("  prefix_P = {:?}", std::str::from_utf8(prefix_p).unwrap());
     println!("  prefix_Q = {:?}", std::str::from_utf8(prefix_q).unwrap());
-    println!(
-        "  IHV_P = {:08x?}  (residual tail {} bytes)",
-        iv_p,
-        tail_p.len()
-    );
-    println!(
-        "  IHV_Q = {:08x?}  (residual tail {} bytes)",
-        iv_q,
-        tail_q.len()
-    );
+    println!("  IHV_P = {:08x?}  (residual tail {} bytes)", iv_p, tail_p.len());
+    println!("  IHV_Q = {:08x?}  (residual tail {} bytes)", iv_q, tail_q.len());
     let initial_delta = [
         iv_q[0].wrapping_sub(iv_p[0]),
         iv_q[1].wrapping_sub(iv_p[1]),
@@ -92,10 +80,8 @@ fn main() {
         iv_q[3].wrapping_sub(iv_p[3]),
     ];
     println!("  ΔIHV_initial = {:08x?}", initial_delta);
-    println!(
-        "  popcount(ΔIHV) = {}",
-        initial_delta.iter().map(|d| d.count_ones()).sum::<u32>()
-    );
+    println!("  popcount(ΔIHV) = {}",
+        initial_delta.iter().map(|d| d.count_ones()).sum::<u32>());
 
     // ── Phase 2: Birthday-phase IHV alignment ────────────────────────
     banner("PHASE 2 — Pollard-rho birthday: project IHVs to a common 16-bit slice");
@@ -105,8 +91,10 @@ fn main() {
     println!("  Cross-side detection via WalkSide tag");
     let t0 = Instant::now();
     let r = rho_chosen_prefix_birthday(
-        &iv_p, &iv_q, /* proj_bits */ 16, /* dp_bits */ 4, /* max_walks */ 2000,
-        /* max_walk_len */ 1024, /* seed */ 0xDEADBEEF,
+        &iv_p, &iv_q,
+        /* proj_bits */ 16, /* dp_bits */ 4,
+        /* max_walks */ 2000, /* max_walk_len */ 1024,
+        /* seed */ 0xDEADBEEF,
     );
     let elapsed = t0.elapsed();
     match r {
@@ -138,16 +126,10 @@ fn main() {
     let elapsed = t0.elapsed();
     match res {
         Some(step) => {
-            println!(
-                "  ✓ Wang-like near-collision block found in {:.2?}",
-                elapsed
-            );
+            println!("  ✓ Wang-like near-collision block found in {:.2?}", elapsed);
             println!("    ΔIHV_in  = {:08x?}", step.delta_in);
-            println!(
-                "    ΔIHV_out = {:08x?} (popcnt {})",
-                step.delta_out,
-                step.delta_out.iter().map(|d| d.count_ones()).sum::<u32>()
-            );
+            println!("    ΔIHV_out = {:08x?} (popcnt {})", step.delta_out,
+                step.delta_out.iter().map(|d| d.count_ones()).sum::<u32>());
         }
         None => {
             println!("  · No near-collision in 1000 trials ({:.2?}).", elapsed);
@@ -184,21 +166,13 @@ Q15 bit31 Z
                 println!("    Q[{:2}] bit{:2} {:?}", c.step, c.bit, c.cond);
             }
             // Apply to Wang's block and report satisfaction.
-            let mut b = [0u8; 64];
-            b.copy_from_slice(&WANG_M[..64]);
+            let mut b = [0u8; 64]; b.copy_from_slice(&WANG_M[..64]);
             let trace = trace_block(&MD5_IV, &b);
-            let sat = cs
-                .iter()
-                .filter(|c| {
-                    use crypto_lib::cryptanalysis::md5_chosen_prefix::check_condition;
-                    check_condition(&trace, c)
-                })
-                .count();
-            println!(
-                "  Wang's published block satisfies {}/{} of these.",
-                sat,
-                cs.len()
-            );
+            let sat = cs.iter().filter(|c| {
+                use crypto_lib::cryptanalysis::md5_chosen_prefix::check_condition;
+                check_condition(&trace, c)
+            }).count();
+            println!("  Wang's published block satisfies {}/{} of these.", sat, cs.len());
         }
         Err(e) => println!("  parse error: {}", e),
     }
@@ -207,10 +181,7 @@ Q15 bit31 Z
 
     // ── Phase 5: hashclash FFI status ────────────────────────────────
     banner("PHASE 5 — hashclash FFI (Marc Stevens' reference implementation)");
-    println!(
-        "  Compile-time link status: HASHCLASH_LINKED = {}",
-        HASHCLASH_LINKED
-    );
+    println!("  Compile-time link status: HASHCLASH_LINKED = {}", HASHCLASH_LINKED);
     let cpc = ChosenPrefixCollision::new(prefix_p, prefix_q);
     match cpc.find() {
         Ok((m, mp)) => {

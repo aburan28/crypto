@@ -740,11 +740,7 @@ mod tests {
         for fam in ["n15l5", "n17l6", "n19l6"] {
             let fam_rows: Vec<_> = CORPUS.iter().filter(|c| c.name.starts_with(fam)).collect();
             assert_eq!(fam_rows.len(), 20, "{fam}");
-            assert_eq!(
-                fam_rows.iter().filter(|c| c.labelled_sat).count(),
-                10,
-                "{fam}"
-            );
+            assert_eq!(fam_rows.iter().filter(|c| c.labelled_sat).count(), 10, "{fam}");
         }
         assert!(CORPUS.iter().all(|c| c.planted.is_some() == c.labelled_sat));
     }
@@ -755,9 +751,7 @@ mod tests {
     #[test]
     fn corpus_planted_solutions_are_decompositions() {
         for inst in CORPUS.iter().filter(|c| c.labelled_sat) {
-            let xs = inst
-                .planted_elements()
-                .expect("an -S instance has a planted solution");
+            let xs = inst.planted_elements().expect("an -S instance has a planted solution");
             assert!(
                 inst.is_decomposition(&xs),
                 "{}: upstream's planted solution does not satisfy our S₄",

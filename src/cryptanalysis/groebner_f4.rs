@@ -194,7 +194,9 @@ pub fn reduce(f: &MPoly, basis: &[MPoly], ord: Ordering) -> MPoly {
         }
         if !reduced {
             // Move the leading term to remainder.
-            remainder.terms.insert(lm_r.clone(), lc_r.clone());
+            remainder
+                .terms
+                .insert(lm_r.clone(), lc_r.clone());
             r.terms.remove(&lm_r);
         }
     }
@@ -394,14 +396,8 @@ mod tests {
         let x2 = vec![2u32, 0];
         let xy = vec![1u32, 1];
         let y2 = vec![0u32, 2];
-        assert_eq!(
-            cmp_monomial(&x2, &xy, Ordering::Grevlex),
-            std::cmp::Ordering::Greater
-        );
-        assert_eq!(
-            cmp_monomial(&xy, &y2, Ordering::Grevlex),
-            std::cmp::Ordering::Greater
-        );
+        assert_eq!(cmp_monomial(&x2, &xy, Ordering::Grevlex), std::cmp::Ordering::Greater);
+        assert_eq!(cmp_monomial(&xy, &y2, Ordering::Grevlex), std::cmp::Ordering::Greater);
     }
 
     /// **Reduction sanity**: reduce `x² + y` by `{x}` gives `y`.
@@ -461,10 +457,7 @@ mod tests {
                     val = val.add(&v.mul(&fe(0, &p))); // y = 0
                 }
             }
-            assert!(
-                val.is_zero(),
-                "reduced basis poly does not vanish at (1, 0)"
-            );
+            assert!(val.is_zero(), "reduced basis poly does not vanish at (1, 0)");
         }
     }
 

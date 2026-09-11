@@ -19,8 +19,8 @@
 //! every modern smartcard ships masking + shuffling countermeasures.
 
 use crate::cryptopals::Report;
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 const AES_SBOX: [u8; 256] = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -104,7 +104,11 @@ fn pearson(x: &[f64], y: &[f64]) -> f64 {
 
 /// Recover one AES key byte at position `byte_idx` from
 /// `(plaintexts, traces)` via Pearson CPA.
-pub fn recover_key_byte(pts: &[[u8; 16]], traces: &[[f64; 16]], byte_idx: usize) -> (u8, f64) {
+pub fn recover_key_byte(
+    pts: &[[u8; 16]],
+    traces: &[[f64; 16]],
+    byte_idx: usize,
+) -> (u8, f64) {
     let n = traces.len();
     let leakage: Vec<f64> = (0..n).map(|t| traces[t][byte_idx]).collect();
     let mut best = (0u8, 0.0f64);

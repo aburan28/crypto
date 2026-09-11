@@ -30,9 +30,7 @@
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::descent_algebraic::rank_profile;
 use crypto_lib::cryptanalysis::descent_expansion::enumerate_irreducibles;
-use crypto_lib::cryptanalysis::descent_lowgamma::{
-    descend_on_subspace, BasisFamily, FactorSubspace,
-};
+use crypto_lib::cryptanalysis::descent_lowgamma::{descend_on_subspace, BasisFamily, FactorSubspace};
 use crypto_lib::cryptanalysis::ffd_harness::{num_monomials_upto_degree, F2BoolPoly};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -74,22 +72,9 @@ fn measure<F: FnMut(&mut StdRng) -> (Vec<F2BoolPoly>, u32)>(
             continue;
         }
         let prof = rank_profile(&eqs, n_vars, m, 3);
-        let raw2 = prof
-            .iter()
-            .find(|r| r.degree == 2)
-            .map(|r| r.defect)
-            .unwrap_or(0);
-        let raw3 = prof
-            .iter()
-            .find(|r| r.degree == 3)
-            .map(|r| r.defect)
-            .unwrap_or(0);
-        let cols3 = prof
-            .iter()
-            .find(|r| r.degree == 3)
-            .map(|r| r.cols)
-            .unwrap_or(1)
-            .max(1);
+        let raw2 = prof.iter().find(|r| r.degree == 2).map(|r| r.defect).unwrap_or(0);
+        let raw3 = prof.iter().find(|r| r.degree == 3).map(|r| r.defect).unwrap_or(0);
+        let cols3 = prof.iter().find(|r| r.degree == 3).map(|r| r.cols).unwrap_or(1).max(1);
         d2 += raw2 as f64;
         d3 += raw3 as f64;
         norm += (raw2 + raw3) as f64 / cols3 as f64;
@@ -117,16 +102,7 @@ fn main() {
         .and_then(|s| s.parse::<u64>().ok())
         .unwrap_or(7);
     let trials = 12u64;
-    let points: &[(u32, u32)] = &[
-        (6, 3),
-        (8, 4),
-        (10, 5),
-        (12, 6),
-        (14, 7),
-        (16, 8),
-        (18, 9),
-        (20, 10),
-    ];
+    let points: &[(u32, u32)] = &[(6, 3), (8, 4), (10, 5), (12, 6), (14, 7), (16, 8), (18, 9), (20, 10)];
 
     let mut rows = Vec::new();
     for &(n, n_sub) in points {
@@ -163,7 +139,8 @@ fn main() {
 
         let (ctl_d2, ctl_d3, _ctl_norm) = measure(
             |rng| {
-                let eqs: Vec<F2BoolPoly> = (0..m_eqs).map(|_| random_quad(n_vars, rng)).collect();
+                let eqs: Vec<F2BoolPoly> =
+                    (0..m_eqs).map(|_| random_quad(n_vars, rng)).collect();
                 (eqs, m_eqs)
             },
             n_vars,
@@ -202,10 +179,7 @@ fn main() {
     }
     // Is the RAW Semaev defect bounded as N grows (vs cols growing)?
     let big: Vec<&Row> = rows.iter().filter(|r| r.two_nsub >= 12).collect();
-    let raw_min = big
-        .iter()
-        .map(|r| r.sem_d2 + r.sem_d3)
-        .fold(f64::INFINITY, f64::min);
+    let raw_min = big.iter().map(|r| r.sem_d2 + r.sem_d3).fold(f64::INFINITY, f64::min);
     let raw_max = big.iter().map(|r| r.sem_d2 + r.sem_d3).fold(0.0, f64::max);
     let ctl_max = rows.iter().map(|r| r.ctl_raw).fold(0.0, f64::max);
     println!("\n  Control (random quadratics): raw Σδ ≤ {ctl_max:.2} — random systems are");
@@ -217,10 +191,7 @@ fn main() {
     println!("    syzygies, so Δ_low = Σδ/cols → 0 for a structural (not genericity) reason.");
 
     // Snapshot.
-    let ts = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+    let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
     let cell = |r: &Row| {
         format!(
             "{{\"two_nsub\":{},\"m_eqs\":{},\"sem_d2\":{:.4},\"sem_d3\":{:.4},\"sem_raw\":{:.4},\"control_raw\":{:.4},\"sem_norm\":{:.6}}}",
@@ -238,3 +209,4 @@ fn main() {
     }
     println!("════════════════════════════════════════════════════════════════");
 }
+

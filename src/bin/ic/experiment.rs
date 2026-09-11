@@ -1,10 +1,10 @@
 //! Bounded experiments on internally generated, known-answer toy instances.
 use super::params::{self, Field, Fixture, Parameters};
 use clap::{Args, ValueEnum};
-use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
     order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
@@ -338,8 +338,8 @@ pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
     if data.len() > 16_777_216 {
         return Err("logarithm database exceeds 16 MiB".into());
     }
-    let doc: LogTableDocument = serde_json::from_slice(&data)
-        .map_err(|e| format!("invalid logarithm database JSON: {e}"))?;
+    let doc: LogTableDocument =
+        serde_json::from_slice(&data).map_err(|e| format!("invalid logarithm database JSON: {e}"))?;
     if doc.schema_version != 1 {
         return Err("unsupported logarithm database schema version".into());
     }
@@ -360,10 +360,7 @@ fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> Kob
 pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
     if std::fs::symlink_metadata(&args.database).is_ok() {
-        return Err(format!(
-            "logarithm database already exists: {}",
-            args.database.display()
-        ));
+        return Err(format!("logarithm database already exists: {}", args.database.display()));
     }
     let spec = match &args.factor_base {
         Some(path) => {
@@ -397,14 +394,12 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
         .ok_or("factor base has no usable projected columns for this summand count")?;
     if !report.verified {
-        return Ok(
-            json!({"schema_version":1,"operation":"logs","status":"incomplete",
+        return Ok(json!({"schema_version":1,"operation":"logs","status":"incomplete",
             "evidence_scope":"synthetic_known_answer",
             "reason":"relations did not determine every column logarithm within the trial budget",
             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
             "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
-            "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}),
-        );
+            "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
     }
     let columns: Vec<LogColumn> = table
         .columns
@@ -429,12 +424,8 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
         solver: args.solver,
         columns,
     };
-    write_new(
-        &args.database,
-        &serde_json::to_value(&doc).map_err(|e| e.to_string())?,
-    )?;
-    Ok(
-        json!({"schema_version":1,"operation":"logs","status":"complete",
+    write_new(&args.database, &serde_json::to_value(&doc).map_err(|e| e.to_string())?)?;
+    Ok(json!({"schema_version":1,"operation":"logs","status":"complete",
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
         "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
         "factor_base":factor_base_json(&spec,&fb,report.columns),
@@ -442,8 +433,7 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
         "verified":true,"out":args.database.display().to_string(),
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
         "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",
-        "limitations":["No imported target was used.","This precomputation does not establish scaling or challenge readiness."]}),
-    )
+        "limitations":["No imported target was used.","This precomputation does not establish scaling or challenge readiness."]}))
 }
 pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
@@ -456,9 +446,7 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     }
     let c = curve(args.degree, args.curve_a)?;
     if doc.subgroup_order != c.subgroup_order.to_string() {
-        return Err(
-            "logarithm database subgroup order does not match the reconstructed curve".into(),
-        );
+        return Err("logarithm database subgroup order does not match the reconstructed curve".into());
     }
     let fb = materialize(&c, &doc.spec)?;
     // Reconstruct the table and re-verify every column against the curve.
@@ -498,15 +486,10 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     let outcome = individual_log(&c, &fb, &table, &target, &opts);
     let (recovered, report) = match outcome {
         Some((d, r)) => (Some(d), r),
-        None => (
-            None,
-            crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogReport::default(),
-        ),
+        None => (None, crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogReport::default()),
     };
     let verified = recovered.as_ref() == Some(&k)
-        && recovered
-            .as_ref()
-            .is_some_and(|d| c.mul(c.generator(), d) == target);
+        && recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == target);
     Ok(json!({"schema_version":1,"operation":"solve",
         "status":if verified{"complete"}else{"incomplete"},
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
@@ -689,10 +672,10 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
     let mut stages = Vec::new();
     let mut stage_start = Instant::now();
     let record = |stages: &mut Vec<Value>,
-                  stage: &str,
-                  state: &str,
-                  details: Value,
-                  stage_start: &mut Instant| {
+                      stage: &str,
+                      state: &str,
+                      details: Value,
+                      stage_start: &mut Instant| {
         if state == "started" {
             *stage_start = Instant::now();
         }
@@ -1051,10 +1034,7 @@ impl TempSpec {
             doc.degree
         ));
         let _ = std::fs::remove_file(&path);
-        write_new(
-            &path,
-            &serde_json::to_value(doc).map_err(|e| e.to_string())?,
-        )?;
+        write_new(&path, &serde_json::to_value(doc).map_err(|e| e.to_string())?)?;
         Ok(Self(path))
     }
 }
@@ -1195,10 +1175,8 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
                 winner = Some((rank, cost));
             }
         }
-        validations.push(
-            json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
-            "median_process_seconds":med,"holdout":runs}),
-        );
+        validations.push(json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+            "median_process_seconds":med,"holdout":runs}));
     }
     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
     let selected_doc = selected.map(|c| FactorBaseDocument {
@@ -1217,8 +1195,7 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     } else {
         "inconclusive"
     };
-    Ok(
-        json!({"schema_version":1,"operation":"search","status":status,
+    Ok(json!({"schema_version":1,"operation":"search","status":status,
         "evidence_scope":"exact_yield_census_with_synthetic_validation",
         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
@@ -1234,6 +1211,5 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         "limitations":["Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.",
             "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the chosen oracle.",
             "Selected means fastest validated on these holdout fixtures, not a global optimum.",
-            "No imported target was used."]}),
-    )
+            "No imported target was used."]}))
 }

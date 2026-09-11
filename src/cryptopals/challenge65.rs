@@ -23,8 +23,8 @@
 
 use crate::cryptopals::challenge64::{m_c, m_s, BitMatrix, Mat};
 use crate::cryptopals::Report;
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 /// Find any solution `d` of `T·d = t`, or `None` if inconsistent.
 /// `t` is a `rows`-bit vector (bit `i` = bit `i` of `t`).

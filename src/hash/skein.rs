@@ -372,7 +372,9 @@ mod tests {
     #[test]
     fn kat_skein256_empty() {
         let h = skein256(b"", 32);
-        let expect = hex_to_vec("c8877087da56e072870daa843f176e9453115929094c3a40c463a196c29bf7ba");
+        let expect = hex_to_vec(
+            "c8877087da56e072870daa843f176e9453115929094c3a40c463a196c29bf7ba",
+        );
         assert_eq!(h, expect);
     }
 

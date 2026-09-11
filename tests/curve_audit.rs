@@ -151,15 +151,25 @@ fn parse_audit_output(stdout: &str) -> AuditReport {
                 "EMBEDDING_DEGREE_BITS" => {
                     report.embedding_degree_bits = value.parse().unwrap_or(0)
                 }
-                "STRUCTURAL_COMPLETENESS" => report.structural_completeness = value.to_string(),
+                "STRUCTURAL_COMPLETENESS" => {
+                    report.structural_completeness = value.to_string()
+                }
                 "ECDLP_COST_BITS" => report.ecdlp_cost_bits = value.parse().unwrap_or(0),
-                "B5_GENUS_2_COST_BITS" => report.b5_genus_2_cost_bits = value.parse().unwrap_or(0),
-                "B5_GENUS_3_COST_BITS" => report.b5_genus_3_cost_bits = value.parse().unwrap_or(0),
-                "B5_GENUS_4_COST_BITS" => report.b5_genus_4_cost_bits = value.parse().unwrap_or(0),
+                "B5_GENUS_2_COST_BITS" => {
+                    report.b5_genus_2_cost_bits = value.parse().unwrap_or(0)
+                }
+                "B5_GENUS_3_COST_BITS" => {
+                    report.b5_genus_3_cost_bits = value.parse().unwrap_or(0)
+                }
+                "B5_GENUS_4_COST_BITS" => {
+                    report.b5_genus_4_cost_bits = value.parse().unwrap_or(0)
+                }
                 "B5_PASS" => report.b5_pass = value == "1",
                 "B6_PASS" => report.b6_pass = value == "1",
                 "B7_PASS" => report.b7_pass = value == "1",
-                "ALL_BLOCKS_B1_TO_B7_PASS" => report.all_blocks_pass = value == "1",
+                "ALL_BLOCKS_B1_TO_B7_PASS" => {
+                    report.all_blocks_pass = value == "1"
+                }
                 "ERROR" => report.error = Some(value.to_string()),
                 _ => {}
             }
@@ -229,11 +239,17 @@ fn all_curves_pass_structural_audit() {
                 all_passed = false;
             }
             if !report.b7_pass {
-                eprintln!("FAIL ({}): B7 failed (curve is supersingular)", curve.name);
+                eprintln!(
+                    "FAIL ({}): B7 failed (curve is supersingular)",
+                    curve.name
+                );
                 all_passed = false;
             }
             if !report.all_blocks_pass {
-                eprintln!("FAIL ({}): ALL_BLOCKS_B1_TO_B7_PASS = false", curve.name);
+                eprintln!(
+                    "FAIL ({}): ALL_BLOCKS_B1_TO_B7_PASS = false",
+                    curve.name
+                );
                 all_passed = false;
             }
         }
@@ -284,10 +300,7 @@ fn audit_template_exists() {
 
 /// Generate a fresh CM curve with the given discriminant and prime
 /// bit-length via PARI, then return parsed (p, a, b, n).
-fn generate_fresh_cm_curve(
-    disc: i64,
-    bit_target: u32,
-) -> Option<(String, String, String, String, i64, u32)> {
+fn generate_fresh_cm_curve(disc: i64, bit_target: u32) -> Option<(String, String, String, String, i64, u32)> {
     if !pari_available() {
         return None;
     }
@@ -342,7 +355,8 @@ fn generate_fresh_cm_curve(
 
 /// Run the PARI audit on a curve specified by raw hex parameters.
 fn run_audit_on_hex_params(name: &str, p: &str, a: &str, b: &str, n: &str) -> String {
-    let template = std::fs::read_to_string(template_path()).expect("audit template not found");
+    let template = std::fs::read_to_string(template_path())
+        .expect("audit template not found");
     let prelude = format!(
         "p = 0x{};\nn = 0x{};\na = 0x{};\nb = 0x{};\ncurve_name = \"{}\";\n",
         p, n, a, b, name
@@ -534,7 +548,9 @@ fn hnp_recovers_p256_key_via_lll_phase15() {
         }
 
         // LLL converges on P-256 lattices for k_bits = 192, m = 8.
-        match hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::Lll) {
+        match hnp_recover_key_with_reduction(
+            &curve, &kp.public, &sigs, HnpReduction::Lll,
+        ) {
             Ok(recovered) => {
                 assert_eq!(
                     recovered, d,

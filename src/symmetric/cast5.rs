@@ -391,196 +391,84 @@ fn key_schedule(key: &[u8; 16]) -> ([u32; 16], [u32; 16]) {
         let base = outer * 16;
 
         // ── Phase A: derive z from x ─────────────────────────────
-        z[0] = x[0]
-            ^ S5[byte(&x, 13) as usize]
-            ^ S6[byte(&x, 15) as usize]
-            ^ S7[byte(&x, 12) as usize]
-            ^ S8[byte(&x, 14) as usize]
-            ^ S7[byte(&x, 8) as usize];
-        z[1] = x[2]
-            ^ S5[byte(&z, 0) as usize]
-            ^ S6[byte(&z, 2) as usize]
-            ^ S7[byte(&z, 1) as usize]
-            ^ S8[byte(&z, 3) as usize]
-            ^ S8[byte(&x, 10) as usize];
-        z[2] = x[3]
-            ^ S5[byte(&z, 7) as usize]
-            ^ S6[byte(&z, 6) as usize]
-            ^ S7[byte(&z, 5) as usize]
-            ^ S8[byte(&z, 4) as usize]
-            ^ S5[byte(&x, 9) as usize];
-        z[3] = x[1]
-            ^ S5[byte(&z, 10) as usize]
-            ^ S6[byte(&z, 9) as usize]
-            ^ S7[byte(&z, 11) as usize]
-            ^ S8[byte(&z, 8) as usize]
-            ^ S6[byte(&x, 11) as usize];
+        z[0] = x[0] ^ S5[byte(&x, 13) as usize] ^ S6[byte(&x, 15) as usize]
+            ^ S7[byte(&x, 12) as usize] ^ S8[byte(&x, 14) as usize] ^ S7[byte(&x, 8) as usize];
+        z[1] = x[2] ^ S5[byte(&z, 0) as usize] ^ S6[byte(&z, 2) as usize]
+            ^ S7[byte(&z, 1) as usize] ^ S8[byte(&z, 3) as usize] ^ S8[byte(&x, 10) as usize];
+        z[2] = x[3] ^ S5[byte(&z, 7) as usize] ^ S6[byte(&z, 6) as usize]
+            ^ S7[byte(&z, 5) as usize] ^ S8[byte(&z, 4) as usize] ^ S5[byte(&x, 9) as usize];
+        z[3] = x[1] ^ S5[byte(&z, 10) as usize] ^ S6[byte(&z, 9) as usize]
+            ^ S7[byte(&z, 11) as usize] ^ S8[byte(&z, 8) as usize] ^ S6[byte(&x, 11) as usize];
 
         // K1..K4 (outer iteration 0) or K17..K20 (outer iteration 1).
-        all[base + 0] = S5[byte(&z, 8) as usize]
-            ^ S6[byte(&z, 9) as usize]
-            ^ S7[byte(&z, 7) as usize]
-            ^ S8[byte(&z, 6) as usize]
-            ^ S5[byte(&z, 2) as usize];
-        all[base + 1] = S5[byte(&z, 10) as usize]
-            ^ S6[byte(&z, 11) as usize]
-            ^ S7[byte(&z, 5) as usize]
-            ^ S8[byte(&z, 4) as usize]
-            ^ S6[byte(&z, 6) as usize];
-        all[base + 2] = S5[byte(&z, 12) as usize]
-            ^ S6[byte(&z, 13) as usize]
-            ^ S7[byte(&z, 3) as usize]
-            ^ S8[byte(&z, 2) as usize]
-            ^ S7[byte(&z, 9) as usize];
-        all[base + 3] = S5[byte(&z, 14) as usize]
-            ^ S6[byte(&z, 15) as usize]
-            ^ S7[byte(&z, 1) as usize]
-            ^ S8[byte(&z, 0) as usize]
-            ^ S8[byte(&z, 12) as usize];
+        all[base + 0] = S5[byte(&z, 8) as usize] ^ S6[byte(&z, 9) as usize]
+            ^ S7[byte(&z, 7) as usize] ^ S8[byte(&z, 6) as usize] ^ S5[byte(&z, 2) as usize];
+        all[base + 1] = S5[byte(&z, 10) as usize] ^ S6[byte(&z, 11) as usize]
+            ^ S7[byte(&z, 5) as usize] ^ S8[byte(&z, 4) as usize] ^ S6[byte(&z, 6) as usize];
+        all[base + 2] = S5[byte(&z, 12) as usize] ^ S6[byte(&z, 13) as usize]
+            ^ S7[byte(&z, 3) as usize] ^ S8[byte(&z, 2) as usize] ^ S7[byte(&z, 9) as usize];
+        all[base + 3] = S5[byte(&z, 14) as usize] ^ S6[byte(&z, 15) as usize]
+            ^ S7[byte(&z, 1) as usize] ^ S8[byte(&z, 0) as usize] ^ S8[byte(&z, 12) as usize];
 
         // ── Phase B: derive x from z ─────────────────────────────
-        x[0] = z[2]
-            ^ S5[byte(&z, 5) as usize]
-            ^ S6[byte(&z, 7) as usize]
-            ^ S7[byte(&z, 4) as usize]
-            ^ S8[byte(&z, 6) as usize]
-            ^ S7[byte(&z, 0) as usize];
-        x[1] = z[0]
-            ^ S5[byte(&x, 0) as usize]
-            ^ S6[byte(&x, 2) as usize]
-            ^ S7[byte(&x, 1) as usize]
-            ^ S8[byte(&x, 3) as usize]
-            ^ S8[byte(&z, 2) as usize];
-        x[2] = z[1]
-            ^ S5[byte(&x, 7) as usize]
-            ^ S6[byte(&x, 6) as usize]
-            ^ S7[byte(&x, 5) as usize]
-            ^ S8[byte(&x, 4) as usize]
-            ^ S5[byte(&z, 1) as usize];
-        x[3] = z[3]
-            ^ S5[byte(&x, 10) as usize]
-            ^ S6[byte(&x, 9) as usize]
-            ^ S7[byte(&x, 11) as usize]
-            ^ S8[byte(&x, 8) as usize]
-            ^ S6[byte(&z, 3) as usize];
+        x[0] = z[2] ^ S5[byte(&z, 5) as usize] ^ S6[byte(&z, 7) as usize]
+            ^ S7[byte(&z, 4) as usize] ^ S8[byte(&z, 6) as usize] ^ S7[byte(&z, 0) as usize];
+        x[1] = z[0] ^ S5[byte(&x, 0) as usize] ^ S6[byte(&x, 2) as usize]
+            ^ S7[byte(&x, 1) as usize] ^ S8[byte(&x, 3) as usize] ^ S8[byte(&z, 2) as usize];
+        x[2] = z[1] ^ S5[byte(&x, 7) as usize] ^ S6[byte(&x, 6) as usize]
+            ^ S7[byte(&x, 5) as usize] ^ S8[byte(&x, 4) as usize] ^ S5[byte(&z, 1) as usize];
+        x[3] = z[3] ^ S5[byte(&x, 10) as usize] ^ S6[byte(&x, 9) as usize]
+            ^ S7[byte(&x, 11) as usize] ^ S8[byte(&x, 8) as usize] ^ S6[byte(&z, 3) as usize];
 
         // K5..K8 (or K21..K24).
-        all[base + 4] = S5[byte(&x, 3) as usize]
-            ^ S6[byte(&x, 2) as usize]
-            ^ S7[byte(&x, 12) as usize]
-            ^ S8[byte(&x, 13) as usize]
-            ^ S5[byte(&x, 8) as usize];
-        all[base + 5] = S5[byte(&x, 1) as usize]
-            ^ S6[byte(&x, 0) as usize]
-            ^ S7[byte(&x, 14) as usize]
-            ^ S8[byte(&x, 15) as usize]
-            ^ S6[byte(&x, 13) as usize];
-        all[base + 6] = S5[byte(&x, 7) as usize]
-            ^ S6[byte(&x, 6) as usize]
-            ^ S7[byte(&x, 8) as usize]
-            ^ S8[byte(&x, 9) as usize]
-            ^ S7[byte(&x, 3) as usize];
-        all[base + 7] = S5[byte(&x, 5) as usize]
-            ^ S6[byte(&x, 4) as usize]
-            ^ S7[byte(&x, 10) as usize]
-            ^ S8[byte(&x, 11) as usize]
-            ^ S8[byte(&x, 7) as usize];
+        all[base + 4] = S5[byte(&x, 3) as usize] ^ S6[byte(&x, 2) as usize]
+            ^ S7[byte(&x, 12) as usize] ^ S8[byte(&x, 13) as usize] ^ S5[byte(&x, 8) as usize];
+        all[base + 5] = S5[byte(&x, 1) as usize] ^ S6[byte(&x, 0) as usize]
+            ^ S7[byte(&x, 14) as usize] ^ S8[byte(&x, 15) as usize] ^ S6[byte(&x, 13) as usize];
+        all[base + 6] = S5[byte(&x, 7) as usize] ^ S6[byte(&x, 6) as usize]
+            ^ S7[byte(&x, 8) as usize] ^ S8[byte(&x, 9) as usize] ^ S7[byte(&x, 3) as usize];
+        all[base + 7] = S5[byte(&x, 5) as usize] ^ S6[byte(&x, 4) as usize]
+            ^ S7[byte(&x, 10) as usize] ^ S8[byte(&x, 11) as usize] ^ S8[byte(&x, 7) as usize];
 
         // ── Phase A' (same equations as Phase A, repeated) ───────
-        z[0] = x[0]
-            ^ S5[byte(&x, 13) as usize]
-            ^ S6[byte(&x, 15) as usize]
-            ^ S7[byte(&x, 12) as usize]
-            ^ S8[byte(&x, 14) as usize]
-            ^ S7[byte(&x, 8) as usize];
-        z[1] = x[2]
-            ^ S5[byte(&z, 0) as usize]
-            ^ S6[byte(&z, 2) as usize]
-            ^ S7[byte(&z, 1) as usize]
-            ^ S8[byte(&z, 3) as usize]
-            ^ S8[byte(&x, 10) as usize];
-        z[2] = x[3]
-            ^ S5[byte(&z, 7) as usize]
-            ^ S6[byte(&z, 6) as usize]
-            ^ S7[byte(&z, 5) as usize]
-            ^ S8[byte(&z, 4) as usize]
-            ^ S5[byte(&x, 9) as usize];
-        z[3] = x[1]
-            ^ S5[byte(&z, 10) as usize]
-            ^ S6[byte(&z, 9) as usize]
-            ^ S7[byte(&z, 11) as usize]
-            ^ S8[byte(&z, 8) as usize]
-            ^ S6[byte(&x, 11) as usize];
+        z[0] = x[0] ^ S5[byte(&x, 13) as usize] ^ S6[byte(&x, 15) as usize]
+            ^ S7[byte(&x, 12) as usize] ^ S8[byte(&x, 14) as usize] ^ S7[byte(&x, 8) as usize];
+        z[1] = x[2] ^ S5[byte(&z, 0) as usize] ^ S6[byte(&z, 2) as usize]
+            ^ S7[byte(&z, 1) as usize] ^ S8[byte(&z, 3) as usize] ^ S8[byte(&x, 10) as usize];
+        z[2] = x[3] ^ S5[byte(&z, 7) as usize] ^ S6[byte(&z, 6) as usize]
+            ^ S7[byte(&z, 5) as usize] ^ S8[byte(&z, 4) as usize] ^ S5[byte(&x, 9) as usize];
+        z[3] = x[1] ^ S5[byte(&z, 10) as usize] ^ S6[byte(&z, 9) as usize]
+            ^ S7[byte(&z, 11) as usize] ^ S8[byte(&z, 8) as usize] ^ S6[byte(&x, 11) as usize];
 
         // K9..K12 (or K25..K28): different byte taps from K1..K4.
-        all[base + 8] = S5[byte(&z, 3) as usize]
-            ^ S6[byte(&z, 2) as usize]
-            ^ S7[byte(&z, 12) as usize]
-            ^ S8[byte(&z, 13) as usize]
-            ^ S5[byte(&z, 9) as usize];
-        all[base + 9] = S5[byte(&z, 1) as usize]
-            ^ S6[byte(&z, 0) as usize]
-            ^ S7[byte(&z, 14) as usize]
-            ^ S8[byte(&z, 15) as usize]
-            ^ S6[byte(&z, 12) as usize];
-        all[base + 10] = S5[byte(&z, 7) as usize]
-            ^ S6[byte(&z, 6) as usize]
-            ^ S7[byte(&z, 8) as usize]
-            ^ S8[byte(&z, 9) as usize]
-            ^ S7[byte(&z, 2) as usize];
-        all[base + 11] = S5[byte(&z, 5) as usize]
-            ^ S6[byte(&z, 4) as usize]
-            ^ S7[byte(&z, 10) as usize]
-            ^ S8[byte(&z, 11) as usize]
-            ^ S8[byte(&z, 6) as usize];
+        all[base + 8] = S5[byte(&z, 3) as usize] ^ S6[byte(&z, 2) as usize]
+            ^ S7[byte(&z, 12) as usize] ^ S8[byte(&z, 13) as usize] ^ S5[byte(&z, 9) as usize];
+        all[base + 9] = S5[byte(&z, 1) as usize] ^ S6[byte(&z, 0) as usize]
+            ^ S7[byte(&z, 14) as usize] ^ S8[byte(&z, 15) as usize] ^ S6[byte(&z, 12) as usize];
+        all[base + 10] = S5[byte(&z, 7) as usize] ^ S6[byte(&z, 6) as usize]
+            ^ S7[byte(&z, 8) as usize] ^ S8[byte(&z, 9) as usize] ^ S7[byte(&z, 2) as usize];
+        all[base + 11] = S5[byte(&z, 5) as usize] ^ S6[byte(&z, 4) as usize]
+            ^ S7[byte(&z, 10) as usize] ^ S8[byte(&z, 11) as usize] ^ S8[byte(&z, 6) as usize];
 
         // ── Phase B' ────────────────────────────────────────────
-        x[0] = z[2]
-            ^ S5[byte(&z, 5) as usize]
-            ^ S6[byte(&z, 7) as usize]
-            ^ S7[byte(&z, 4) as usize]
-            ^ S8[byte(&z, 6) as usize]
-            ^ S7[byte(&z, 0) as usize];
-        x[1] = z[0]
-            ^ S5[byte(&x, 0) as usize]
-            ^ S6[byte(&x, 2) as usize]
-            ^ S7[byte(&x, 1) as usize]
-            ^ S8[byte(&x, 3) as usize]
-            ^ S8[byte(&z, 2) as usize];
-        x[2] = z[1]
-            ^ S5[byte(&x, 7) as usize]
-            ^ S6[byte(&x, 6) as usize]
-            ^ S7[byte(&x, 5) as usize]
-            ^ S8[byte(&x, 4) as usize]
-            ^ S5[byte(&z, 1) as usize];
-        x[3] = z[3]
-            ^ S5[byte(&x, 10) as usize]
-            ^ S6[byte(&x, 9) as usize]
-            ^ S7[byte(&x, 11) as usize]
-            ^ S8[byte(&x, 8) as usize]
-            ^ S6[byte(&z, 3) as usize];
+        x[0] = z[2] ^ S5[byte(&z, 5) as usize] ^ S6[byte(&z, 7) as usize]
+            ^ S7[byte(&z, 4) as usize] ^ S8[byte(&z, 6) as usize] ^ S7[byte(&z, 0) as usize];
+        x[1] = z[0] ^ S5[byte(&x, 0) as usize] ^ S6[byte(&x, 2) as usize]
+            ^ S7[byte(&x, 1) as usize] ^ S8[byte(&x, 3) as usize] ^ S8[byte(&z, 2) as usize];
+        x[2] = z[1] ^ S5[byte(&x, 7) as usize] ^ S6[byte(&x, 6) as usize]
+            ^ S7[byte(&x, 5) as usize] ^ S8[byte(&x, 4) as usize] ^ S5[byte(&z, 1) as usize];
+        x[3] = z[3] ^ S5[byte(&x, 10) as usize] ^ S6[byte(&x, 9) as usize]
+            ^ S7[byte(&x, 11) as usize] ^ S8[byte(&x, 8) as usize] ^ S6[byte(&z, 3) as usize];
 
         // K13..K16 (or K29..K32): different byte taps from K5..K8.
-        all[base + 12] = S5[byte(&x, 8) as usize]
-            ^ S6[byte(&x, 9) as usize]
-            ^ S7[byte(&x, 7) as usize]
-            ^ S8[byte(&x, 6) as usize]
-            ^ S5[byte(&x, 3) as usize];
-        all[base + 13] = S5[byte(&x, 10) as usize]
-            ^ S6[byte(&x, 11) as usize]
-            ^ S7[byte(&x, 5) as usize]
-            ^ S8[byte(&x, 4) as usize]
-            ^ S6[byte(&x, 7) as usize];
-        all[base + 14] = S5[byte(&x, 12) as usize]
-            ^ S6[byte(&x, 13) as usize]
-            ^ S7[byte(&x, 3) as usize]
-            ^ S8[byte(&x, 2) as usize]
-            ^ S7[byte(&x, 8) as usize];
-        all[base + 15] = S5[byte(&x, 14) as usize]
-            ^ S6[byte(&x, 15) as usize]
-            ^ S7[byte(&x, 1) as usize]
-            ^ S8[byte(&x, 0) as usize]
-            ^ S8[byte(&x, 13) as usize];
+        all[base + 12] = S5[byte(&x, 8) as usize] ^ S6[byte(&x, 9) as usize]
+            ^ S7[byte(&x, 7) as usize] ^ S8[byte(&x, 6) as usize] ^ S5[byte(&x, 3) as usize];
+        all[base + 13] = S5[byte(&x, 10) as usize] ^ S6[byte(&x, 11) as usize]
+            ^ S7[byte(&x, 5) as usize] ^ S8[byte(&x, 4) as usize] ^ S6[byte(&x, 7) as usize];
+        all[base + 14] = S5[byte(&x, 12) as usize] ^ S6[byte(&x, 13) as usize]
+            ^ S7[byte(&x, 3) as usize] ^ S8[byte(&x, 2) as usize] ^ S7[byte(&x, 8) as usize];
+        all[base + 15] = S5[byte(&x, 14) as usize] ^ S6[byte(&x, 15) as usize]
+            ^ S7[byte(&x, 1) as usize] ^ S8[byte(&x, 0) as usize] ^ S8[byte(&x, 13) as usize];
     }
 
     let mut km = [0u32; 16];

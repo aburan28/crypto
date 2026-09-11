@@ -6,15 +6,15 @@
 //! Alice and Bob compute `K = p^priv mod p = 0`, and Mallory knows
 //! the key in advance: `K = SHA-256(0)`.
 
-use crate::cryptopals::challenge10::cbc_decrypt_no_iv_prefix;
 use crate::cryptopals::challenge33::nist_p_g;
+use crate::cryptopals::challenge10::cbc_decrypt_no_iv_prefix;
 use crate::cryptopals::Report;
 use crate::hash::sha256::sha256;
 use crate::symmetric::aes::AesKey;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::Zero;
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 pub fn run() -> Report {
     let mut r = Report::new(34, "MITM key-fixing on DH");
@@ -43,10 +43,7 @@ pub fn run() -> Report {
     );
     let mallory_key = AesKey::new(&sha256(b"\x00")[..16]).unwrap();
     let pt = cbc_decrypt_no_iv_prefix(&ct, &mallory_key, &iv).unwrap();
-    r.line(format!(
-        "Mallory decrypts: {:?}",
-        std::str::from_utf8(&pt).unwrap()
-    ));
+    r.line(format!("Mallory decrypts: {:?}", std::str::from_utf8(&pt).unwrap()));
     assert_eq!(pt, msg);
     r.succeed()
 }

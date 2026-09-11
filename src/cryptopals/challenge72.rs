@@ -69,7 +69,11 @@ pub fn bellcore_factor(
     n: &BigUint,
 ) -> Option<BigUint> {
     let lhs = s_faulty.modpow(e, n);
-    let diff: BigUint = if lhs >= *m { lhs - m } else { m + n - lhs };
+    let diff: BigUint = if lhs >= *m {
+        lhs - m
+    } else {
+        m + n - lhs
+    };
     let g = diff.gcd(n);
     if g > BigUint::one() && g < *n {
         Some(g)

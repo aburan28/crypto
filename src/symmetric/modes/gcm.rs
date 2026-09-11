@@ -94,7 +94,12 @@ fn ghash(h: &[u8; 16], aad: &[u8], ciphertext: &[u8]) -> [u8; 16] {
 }
 
 /// Generic CTR over a 16-byte block cipher, starting at the given counter.
-fn ctr_from<C: BlockCipher128>(cipher: &C, nonce: &[u8; 12], start: u32, data: &[u8]) -> Vec<u8> {
+fn ctr_from<C: BlockCipher128>(
+    cipher: &C,
+    nonce: &[u8; 12],
+    start: u32,
+    data: &[u8],
+) -> Vec<u8> {
     let mut out = data.to_vec();
     let mut ctr = start;
     for chunk in out.chunks_mut(16) {

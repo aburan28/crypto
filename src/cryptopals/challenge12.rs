@@ -66,14 +66,16 @@ pub fn run() -> Report {
         let pad_len = block_size - 1 - (recovered.len() % block_size);
         let prefix = vec![b'A'; pad_len];
         let target_ct = oracle(&prefix);
-        let target_block = &target_ct[block_idx * block_size..(block_idx + 1) * block_size];
+        let target_block =
+            &target_ct[block_idx * block_size..(block_idx + 1) * block_size];
         let mut found = false;
         for b in 0..=255u8 {
             let mut candidate = prefix.clone();
             candidate.extend_from_slice(&recovered);
             candidate.push(b);
             let cand_ct = oracle(&candidate);
-            let cand_block = &cand_ct[block_idx * block_size..(block_idx + 1) * block_size];
+            let cand_block =
+                &cand_ct[block_idx * block_size..(block_idx + 1) * block_size];
             if cand_block == target_block {
                 recovered.push(b);
                 found = true;
@@ -85,10 +87,7 @@ pub fn run() -> Report {
             break;
         }
     }
-    r.line(format!(
-        "Recovered head: {:?}",
-        &String::from_utf8_lossy(&recovered)[..40]
-    ));
+    r.line(format!("Recovered head: {:?}", &String::from_utf8_lossy(&recovered)[..40]));
     assert!(recovered.starts_with(b"Rollin' in my 5.0"));
     r.succeed()
 }

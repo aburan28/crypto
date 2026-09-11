@@ -135,7 +135,8 @@ fn decomposes(x_r: &F2mElement, l: u32, n: u32, irr: &IrreduciblePoly) -> bool {
     for a in 0..span as usize {
         for b in a..span as usize {
             for c in b..span as usize {
-                let (e1, e2, e3) = elementary_symmetric_3(&base[a], &base[b], &base[c], irr);
+                let (e1, e2, e3) =
+                    elementary_symmetric_3(&base[a], &base[b], &base[c], irr);
                 if symmetrised_s4_eval(&e1, &e2, &e3, x_r, irr).is_zero() {
                     return true;
                 }
@@ -155,15 +156,7 @@ fn main() {
     for &(n, _, low) in LADDER {
         let f = irr_bits(low, n);
         let ok = is_irreducible(f, n);
-        println!(
-            "    n = {n:<3} {:<24} {}",
-            format!("{low:?}"),
-            if ok {
-                "irreducible"
-            } else {
-                "REDUCIBLE — unusable"
-            }
-        );
+        println!("    n = {n:<3} {:<24} {}", format!("{low:?}"), if ok { "irreducible" } else { "REDUCIBLE — unusable" });
         assert!(ok, "modulus for n = {n} is not irreducible");
     }
 

@@ -269,7 +269,9 @@ pub fn restrict_to_subspace(eqs: &[F2BoolPoly], n: u32, n_sub: u32) -> Vec<F2Boo
                 for j in (i + 1)..old_vars {
                     let idx = quad_monomial_index(i, j, old_vars);
                     if idx < eq.coeffs.len() && eq.coeffs[idx] {
-                        if let (Some(mi), Some(mj)) = (map_var(i, n, n_sub), map_var(j, n, n_sub)) {
+                        if let (Some(mi), Some(mj)) =
+                            (map_var(i, n, n_sub), map_var(j, n, n_sub))
+                        {
                             // mi != mj because the var map is injective.
                             let (a, c) = if mi < mj { (mi, mj) } else { (mj, mi) };
                             let nidx = quad_monomial_index(a, c, new_vars);
@@ -552,12 +554,7 @@ mod tests {
         let mut checked_refute = false;
         let mut checked_nonrefute = false;
         // A handful of targets to hit both refuting and non-refuting cases.
-        for (bm, xm) in [
-            (0b011u32, 0b101u32),
-            (0b110, 0b011),
-            (0b101, 0b010),
-            (0b111, 0b100),
-        ] {
+        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
             let b = F2mElement::from_bit_positions(
                 &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
                 n,
@@ -607,12 +604,7 @@ mod tests {
         let irr = irr(n);
         let mut hit_refute = false;
         let mut hit_nonrefute = false;
-        for (bm, xm) in [
-            (0b011u32, 0b101u32),
-            (0b110, 0b011),
-            (0b101, 0b010),
-            (0b111, 0b100),
-        ] {
+        for (bm, xm) in [(0b011u32, 0b101u32), (0b110, 0b011), (0b101, 0b010), (0b111, 0b100)] {
             let b = F2mElement::from_bit_positions(
                 &(0..n).filter(|k| (bm >> k) & 1 == 1).collect::<Vec<_>>(),
                 n,

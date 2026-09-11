@@ -139,7 +139,7 @@ never collide.
 
 ## 7. Transports
 
-The state and the messages are transport-agnostic. Two transports ship:
+The state and the messages are transport-agnostic. Three transports ship:
 
 **Mailbox** (`mailbox.rs`). A directory:
 
@@ -170,6 +170,59 @@ in a few rounds. The topology is the operator's choice: everyone syncing with
 one well-known node is the simplest; a ring or a mesh removes the single
 point of failure. A node that listens is *not* a coordinator — it holds no
 state the others lack, and losing it loses nothing that was gossiped.
+
+**cairn** (`cairn.rs`). A paid network rather than a peer: a
+[cairn](https://github.com/aburan28/cairn) node serving a *piecework*
+objective whose checker verifies one distinguished point and pays
+`unit_price` for each novel accepted one
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md),
+[Stage A](https://github.com/aburan28/cairn/pull/144)). Each DP a lane finds
+goes out as cairn's commit–reveal pair over plain HTTP, and the objective's
+log comes back as the DP table:
+
+```
+POST /submit?kind=commitment   {type, objective_id, submitter, hash, created_at}
+        … the epoch turns …
+POST /submit?kind=claim        {type, objective_id, submitter, artifact, nonce, created_at, cites: []}
+GET  /log                      every accepted claim → a check-in from peer "cairn:<submitter>"
+```
+
+The artifact is exactly `{x, y, a, b}` with `2y ≤ p`, so one point has one
+spelling whichever walk reached it; a walker index or step count in the
+artifact would let a copier re-mint a public point by relabelling it. The
+commitment hash and the canonical encoding are cairn's consensus rules,
+reproduced here and pinned against its frozen conformance vectors. A record
+under a key-shaped submitter is signed with this crate's Ed25519 from the
+identity file `cairn identity` writes; a nickname needs no signature.
+
+What is different from the other two transports:
+
+- **Novelty is the artifact, not the point.** A second coefficient pair for
+  a point already in the log is a *new* artifact to cairn — it is paid, and
+  it is the collision. So the transport deduplicates on the whole artifact
+  and never on `x` alone.
+- **A reveal waits for the epoch.** A commitment is remembered (and written
+  to `<node>.cairn.json`) until the node's epoch turns, then revealed; a
+  restart picks the pending ones up. The client has to know the epoch length
+  (`--cairn-epoch-secs`, 600 unless the operator set `CAIRN_EPOCH_SECONDS`).
+- **Leases are not needed.** cairn pays for the point, not for finishing a
+  unit, so an unfinished unit costs nothing and `work_assignment` on the
+  cairn side hands out disjoint unit ranges without anyone holding a lease.
+  The mailbox/TCP lease machinery still runs locally and is harmless.
+- **The negated twin is merged.** Under a walk without the negation map the
+  DP table keys on `x:y`; a canonical point from the log and a local
+  `(x, −y)` would otherwise never meet, so the transport merges both
+  spellings and `solve_collision` handles the opposite-`y` case as before.
+- **The answer is claimed too.** With `--answer-objective`, the moment the
+  local state solves — from its own points or from the log — `{"k": <64 hex>}`
+  is committed to the objective that pays for the discrete log itself, and
+  revealed next epoch.
+
+The fake node in `cairn.rs`'s tests validates shape and signatures at the
+boundary and refuses a reveal without its commitment, the way `serve.rs` and
+`drain` do; the transport was also run against a real `cairn serve --queue`
+node on the 50-bit rho objective, with both a signed and a nickname
+contributor, and every claim was accepted and paid.
 
 ## 8. Failure handling
 

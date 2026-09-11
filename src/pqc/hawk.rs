@@ -136,9 +136,7 @@ fn hash_to_parities(salt: &[u8], msg: &[u8]) -> Vector {
     input.extend_from_slice(salt);
     input.extend_from_slice(msg);
     let h = shake256(&input, DIM / 8);
-    (0..DIM)
-        .map(|i| ((h[i / 8] >> (i % 8)) & 1) as i64)
-        .collect()
+    (0..DIM).map(|i| ((h[i / 8] >> (i % 8)) & 1) as i64).collect()
 }
 
 pub fn hawk_keygen() -> (HawkPublicKey, HawkSecretKey) {
@@ -165,23 +163,14 @@ pub fn hawk_sign(sk: &HawkSecretKey, msg: &[u8]) -> HawkSignature {
         // Bh mod 2 tells which coordinates of the short vector e = Bu must
         // be odd; pick e ∈ {0, ±1}^DIM in that coset (sign random — real
         // HAWK samples e from a discrete Gaussian on the coset instead).
-        let bh: Vector = (0..DIM)
-            .map(|i| (0..DIM).map(|j| sk.b[i][j] * h[j]).sum::<i64>())
-            .collect();
+        let bh: Vector =
+            (0..DIM).map(|i| (0..DIM).map(|j| sk.b[i][j] * h[j]).sum::<i64>()).collect();
         let mut signs = vec![0u8; DIM];
         random_bytes(&mut signs);
         let e: Vector = bh
             .iter()
             .zip(&signs)
-            .map(|(&p, &r)| {
-                if p.rem_euclid(2) == 0 {
-                    0
-                } else if r & 1 == 0 {
-                    1
-                } else {
-                    -1
-                }
-            })
+            .map(|(&p, &r)| if p.rem_euclid(2) == 0 { 0 } else if r & 1 == 0 { 1 } else { -1 })
             .collect();
 
         // If every Bh coordinate is even then e = 0, giving u = 0 and a
@@ -194,9 +183,8 @@ pub fn hawk_sign(sk: &HawkSecretKey, msg: &[u8]) -> HawkSignature {
         }
 
         // u = B⁻¹e satisfies u ≡ h (mod 2); publish s = (h − u)/2.
-        let u: Vector = (0..DIM)
-            .map(|i| (0..DIM).map(|j| sk.b_inv[i][j] * e[j]).sum::<i64>())
-            .collect();
+        let u: Vector =
+            (0..DIM).map(|i| (0..DIM).map(|j| sk.b_inv[i][j] * e[j]).sum::<i64>()).collect();
         let s: Vector = h.iter().zip(&u).map(|(&hi, &ui)| (hi - ui) / 2).collect();
         return HawkSignature { salt, s };
     }
@@ -212,11 +200,7 @@ pub fn hawk_verify(pk: &HawkPublicKey, msg: &[u8], sig: &HawkSignature) -> bool 
     // untrusted, so compute u in i128 — `hi - 2*si` on a raw i64 `si`
     // could overflow (debug panic / release wraparound before the check
     // even runs).
-    let u: Vec<i128> = h
-        .iter()
-        .zip(&sig.s)
-        .map(|(&hi, &si)| hi as i128 - 2 * si as i128)
-        .collect();
+    let u: Vec<i128> = h.iter().zip(&sig.s).map(|(&hi, &si)| hi as i128 - 2 * si as i128).collect();
     if u.iter().all(|&x| x == 0) {
         return false;
     }
@@ -284,15 +268,9 @@ mod tests {
         // in the `h − 2s` / quadratic-form computation.  Extreme i64
         // coordinates must simply be rejected.
         let (pk, _) = hawk_keygen();
-        let sig = HawkSignature {
-            salt: vec![0u8; SALT_BYTES],
-            s: vec![i64::MAX; DIM],
-        };
+        let sig = HawkSignature { salt: vec![0u8; SALT_BYTES], s: vec![i64::MAX; DIM] };
         assert!(!hawk_verify(&pk, b"m", &sig));
-        let sig2 = HawkSignature {
-            salt: vec![0u8; SALT_BYTES],
-            s: vec![i64::MIN; DIM],
-        };
+        let sig2 = HawkSignature { salt: vec![0u8; SALT_BYTES], s: vec![i64::MIN; DIM] };
         assert!(!hawk_verify(&pk, b"m", &sig2));
     }
 
@@ -321,10 +299,7 @@ mod tests {
         // *Euclidean* metric but long in the Q-metric.
         let (pk, _) = hawk_keygen();
         let msg = b"forgery";
-        let sig = HawkSignature {
-            salt: vec![0u8; SALT_BYTES],
-            s: vec![0; DIM],
-        };
+        let sig = HawkSignature { salt: vec![0u8; SALT_BYTES], s: vec![0; DIM] };
         assert!(!hawk_verify(&pk, msg, &sig));
     }
 

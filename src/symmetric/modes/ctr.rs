@@ -59,7 +59,11 @@ pub fn ctr_apply<C: BlockCipher128>(
 /// RFC 3686-style CTR: 12-byte nonce || 4-byte big-endian counter.
 /// Counter starts at 1 (per RFC 3686 §4).  This is the layout used by
 /// AES-CTR throughout the project.
-pub fn ctr_rfc3686<C: BlockCipher128>(cipher: &C, nonce: &[u8; 12], data: &[u8]) -> Vec<u8> {
+pub fn ctr_rfc3686<C: BlockCipher128>(
+    cipher: &C,
+    nonce: &[u8; 12],
+    data: &[u8],
+) -> Vec<u8> {
     let mut init = [0u8; 16];
     init[..12].copy_from_slice(nonce);
     init[12..].copy_from_slice(&1u32.to_be_bytes());

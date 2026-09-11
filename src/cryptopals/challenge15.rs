@@ -16,10 +16,7 @@ pub fn run() -> Report {
     let pad_good = pkcs7_unpad(good, 16);
     let pad_bad1 = pkcs7_unpad(bad1, 16);
     let pad_bad2 = pkcs7_unpad(bad2, 16);
-    r.line(format!(
-        "good        : {:?}",
-        pad_good.as_ref().map(|v| std::str::from_utf8(v).unwrap())
-    ));
+    r.line(format!("good        : {:?}", pad_good.as_ref().map(|v| std::str::from_utf8(v).unwrap())));
     r.line(format!("bad #1      : {:?}", pad_bad1.is_none()));
     r.line(format!("bad #2      : {:?}", pad_bad2.is_none()));
     assert_eq!(pad_good.unwrap(), b"ICE ICE BABY");

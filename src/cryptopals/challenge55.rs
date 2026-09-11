@@ -49,24 +49,15 @@
 use crate::cryptopals::Report;
 use crate::hash::md4::md4_compress;
 
-#[inline]
-fn f(x: u32, y: u32, z: u32) -> u32 {
-    (x & y) | (!x & z)
-}
+#[inline] fn f(x: u32, y: u32, z: u32) -> u32 { (x & y) | (!x & z) }
 
 const IV: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
 const SHIFTS_R1: [u32; 16] = [3, 7, 11, 19, 3, 7, 11, 19, 3, 7, 11, 19, 3, 7, 11, 19];
 
 /// Set bit `b` of `x` to 0.
-#[inline]
-fn clr(x: u32, b: u32) -> u32 {
-    x & !(1 << b)
-}
+#[inline] fn clr(x: u32, b: u32) -> u32 { x & !(1 << b) }
 /// Set bit `b` of `x` to 1.
-#[inline]
-fn set(x: u32, b: u32) -> u32 {
-    x | (1 << b)
-}
+#[inline] fn set(x: u32, b: u32) -> u32 { x | (1 << b) }
 /// Copy bit `b` from `src` into `x`.
 #[inline]
 fn copy_bit(x: u32, src: u32, b: u32) -> u32 {
@@ -266,7 +257,11 @@ fn apply_conditions(step: usize, q: u32, a: u32, b: u32, c: u32, d: u32) -> u32 
 /// Run one MD4 step (round 1) and return `(q_new, m_used)`.
 /// Always solves for the message word that makes `q_new` satisfy
 /// the conditions.
-fn forward_step(step: usize, a: u32, b: u32, c: u32, d: u32, m: u32) -> (u32, u32) {
+fn forward_step(
+    step: usize,
+    a: u32, b: u32, c: u32, d: u32,
+    m: u32,
+) -> (u32, u32) {
     // First, compute what the natural next register would be.
     let s = SHIFTS_R1[step];
     let raw = a.wrapping_add(f(b, c, d)).wrapping_add(m).rotate_left(s);
@@ -334,8 +329,8 @@ fn compress_words(m: &[u32; 16]) -> [u32; 4] {
 pub fn find_collision(max_tries: u64) -> Option<([u32; 16], [u32; 16])> {
     // Use the same RNG as the rest of the repo to avoid pulling new
     // crates.
-    use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
+    use rand::rngs::StdRng;
     let mut rng = StdRng::from_entropy();
 
     for _ in 0..max_tries {

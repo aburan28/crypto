@@ -61,12 +61,12 @@ struct ChallengeParams {
     n: &'static str,
 }
 const ECCP79_PARAMS: Option<ChallengeParams> = Some(ChallengeParams {
-    p: "62CE5177412ACA899CF5",
-    a: "39C95E6DDDB1BC45733C",
-    b: "1F16D880E89D5A1C0ED1",
+    p:  "62CE5177412ACA899CF5",
+    a:  "39C95E6DDDB1BC45733C",
+    b:  "1F16D880E89D5A1C0ED1",
     gx: "315D4B201C208475057D",
     gy: "035F3DF5AB370252450A",
-    n: "62CE5177407B7258DC31",
+    n:  "62CE5177407B7258DC31",
     qx: "0679834CEFB7215DC365",
     qy: "4084BC50388C4E6FDFAB",
 });
@@ -148,8 +148,7 @@ fn random_demo_curve(bits: usize, rng: &mut StdRng) -> (CurveParams, Point) {
     loop {
         // Random prime p of the requested bit length.
         let p = loop {
-            let cand =
-                rng.gen_biguint(bits as u64) | (BigUint::one() << (bits - 1)) | BigUint::one();
+            let cand = rng.gen_biguint(bits as u64) | (BigUint::one() << (bits - 1)) | BigUint::one();
             if is_probable_prime(&cand, 20) {
                 break cand;
             }
@@ -166,7 +165,8 @@ fn random_demo_curve(bits: usize, rng: &mut StdRng) -> (CurveParams, Point) {
         // Pick a generator: random x, solve for y.
         let (gx, gy) = loop {
             let x = rng.gen_biguint_below(&p);
-            let rhs = (x.modpow(&BigUint::from(3u32), &p) + &a * &x + &b) % &p;
+            let rhs =
+                (x.modpow(&BigUint::from(3u32), &p) + &a * &x + &b) % &p;
             if let Some(y) = sqrt_mod(&rhs, &p) {
                 break (x, y);
             }
@@ -275,7 +275,8 @@ fn point_order_bsgs(g: &Point, a: &FieldElement, p: &BigUint, _bits: usize) -> O
         if let Some(&i) = table.get(&serialize_point(&q_pos)) {
             // i·g = -T - j·w·g  ⇒  (p+1 + j·w + i)·g = ∞
             let m = j * w + i;
-            let order = (BigInt::from_biguint(Sign::Plus, p + BigUint::one()) + BigInt::from(m))
+            let order = (BigInt::from_biguint(Sign::Plus, p + BigUint::one())
+                + BigInt::from(m))
                 .to_biguint()?;
             return Some(order);
         }
@@ -284,8 +285,8 @@ fn point_order_bsgs(g: &Point, a: &FieldElement, p: &BigUint, _bits: usize) -> O
             if let Some(&i) = table.get(&serialize_point(&q_neg)) {
                 // i·g = -T + j·w·g  ⇒  (p+1 - j·w + i)·g = ∞
                 let m_signed = -(j * w) + i;
-                let order_int =
-                    BigInt::from_biguint(Sign::Plus, p + BigUint::one()) + BigInt::from(m_signed);
+                let order_int = BigInt::from_biguint(Sign::Plus, p + BigUint::one())
+                    + BigInt::from(m_signed);
                 if let Some(order) = order_int.to_biguint() {
                     return Some(order);
                 }
@@ -381,22 +382,10 @@ impl Walk {
 
 /// Solve a + b·k ≡ a' + b'·k (mod n) → k = (a - a') / (b' - b) mod n.
 fn solve_collision(
-    a: &BigUint,
-    b: &BigUint,
-    a2: &BigUint,
-    b2: &BigUint,
-    n: &BigUint,
+    a: &BigUint, b: &BigUint, a2: &BigUint, b2: &BigUint, n: &BigUint,
 ) -> Option<BigUint> {
-    let num = if a >= a2 {
-        (a - a2) % n
-    } else {
-        (n - ((a2 - a) % n)) % n
-    };
-    let den = if b2 >= b {
-        (b2 - b) % n
-    } else {
-        (n - ((b - b2) % n)) % n
-    };
+    let num = if a >= a2 { (a - a2) % n } else { (n - ((a2 - a) % n)) % n };
+    let den = if b2 >= b { (b2 - b) % n } else { (n - ((b - b2) % n)) % n };
     if den.is_zero() {
         return None;
     }
@@ -408,10 +397,8 @@ fn modinv(a: &BigUint, n: &BigUint) -> Option<BigUint> {
     // Extended Euclidean.
     use num_bigint::BigInt;
     use num_bigint::Sign;
-    let (mut old_r, mut r) = (
-        BigInt::from_biguint(Sign::Plus, n.clone()),
-        BigInt::from_biguint(Sign::Plus, a.clone()),
-    );
+    let (mut old_r, mut r) = (BigInt::from_biguint(Sign::Plus, n.clone()),
+                              BigInt::from_biguint(Sign::Plus, a.clone()));
     let (mut old_s, mut s) = (BigInt::zero(), BigInt::one());
     while !r.is_zero() {
         let q = &old_r / &r;
@@ -583,9 +570,10 @@ fn verify_challenge(curve: &CurveParams, g: &Point, q: &Point) {
     let on_curve = |pt: &Point, name: &str| {
         if let Point::Affine { x, y } = pt {
             let lhs = y.value.modpow(&BigUint::from(2u32), &curve.p);
-            let rhs =
-                (x.value.modpow(&BigUint::from(3u32), &curve.p) + &curve.a * &x.value + &curve.b)
-                    % &curve.p;
+            let rhs = (x.value.modpow(&BigUint::from(3u32), &curve.p)
+                + &curve.a * &x.value
+                + &curve.b)
+                % &curve.p;
             assert_eq!(lhs, rhs, "{} is not on the curve", name);
         } else {
             panic!("{} is the point at infinity", name);
@@ -678,14 +666,11 @@ fn main() {
     println!("threads:      {}", threads);
     println!();
 
-    let recovered =
-        rho_attack_parallel(&curve, &g, &q, 0xDEADBEEF, threads).expect("rho returned None");
+    let recovered = rho_attack_parallel(&curve, &g, &q, 0xDEADBEEF, threads)
+        .expect("rho returned None");
     println!("recovered k:  {:x}", recovered);
     if let Some(k) = planted {
-        assert_eq!(
-            recovered, k,
-            "recovered scalar does not match planted secret"
-        );
+        assert_eq!(recovered, k, "recovered scalar does not match planted secret");
         println!("✓ matches planted secret");
     }
 }

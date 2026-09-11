@@ -20,17 +20,17 @@
 //! ```
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::descent_algebraic::{early_defect, rank_profile};
 use crypto_lib::cryptanalysis::descent_expansion::{
     enumerate_irreducibles, spearman, system_expansion_report,
 };
 use crypto_lib::cryptanalysis::descent_lowgamma::{
-    descend_on_subspace, measure_on_subspace, run_lowgamma_cell, BasisFamily, FactorSubspace,
+    descend_on_subspace, run_lowgamma_cell, measure_on_subspace, BasisFamily, FactorSubspace,
     LowGammaCell,
 };
+use crypto_lib::cryptanalysis::descent_algebraic::{early_defect, rank_profile};
 use crypto_lib::cryptanalysis::pc_degree_avg::{
-    mean_dstar_spread, measure_avg, run_pc_curve_independence_sweep, run_pc_operating_point_sweep,
-    run_pc_regime_sweep, AvgRow,
+    measure_avg, mean_dstar_spread, run_pc_curve_independence_sweep,
+    run_pc_operating_point_sweep, run_pc_regime_sweep, AvgRow,
 };
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -59,7 +59,9 @@ fn main() {
     let exp_a = run_pc_curve_independence_sweep(n_a, nsub_a, n_curves, 12, targets, seed);
     let spread = mean_dstar_spread(&exp_a);
     let p5 = judge_p5(spread);
-    println!("\n[EXP-A] curve-independence  n={n_a} n'={nsub_a}  ({n_curves} curves)");
+    println!(
+        "\n[EXP-A] curve-independence  n={n_a} n'={nsub_a}  ({n_curves} curves)"
+    );
     for (i, r) in exp_a.iter().enumerate() {
         println!(
             "   curve #{i}: mean D*={}  hist {}",
@@ -69,9 +71,7 @@ fn main() {
     }
     println!(
         "   → spread(mean D*) = {}   GATE G-P5: {}",
-        spread
-            .map(|s| format!("{s:.3}"))
-            .unwrap_or_else(|| "—".into()),
+        spread.map(|s| format!("{s:.3}")).unwrap_or_else(|| "—".into()),
         p5
     );
 
@@ -99,9 +99,7 @@ fn main() {
     println!("\n[EXP-C] G-P2: system-γ vs mean D* across {p2_n} bases (n=8,n'=3)");
     println!(
         "   γ spread={p2_gspread:.3}  D* spread={p2_dspread:.3}  Spearman ρ_s={}",
-        p2_rho
-            .map(|r| format!("{r:+.3}"))
-            .unwrap_or_else(|| "—".into()),
+        p2_rho.map(|r| format!("{r:+.3}")).unwrap_or_else(|| "—".into()),
     );
     println!("   GATE G-P2 (γ ↔ D* positive monotone): {p2}");
 
@@ -118,9 +116,7 @@ fn main() {
             "    {:<11} {:>8.3} {:>9} {:>9.0}%",
             format!("{:?}", c.family),
             c.gamma_mean,
-            c.dstar_mean
-                .map(|d| format!("{d:.2}"))
-                .unwrap_or_else(|| "—".into()),
+            c.dstar_mean.map(|d| format!("{d:.2}")).unwrap_or_else(|| "—".into()),
             c.decomp_rate * 100.0,
         );
     }
@@ -132,26 +128,19 @@ fn main() {
     // Hilbert-function defect — read from the coefficients — predicts D*.
     let ef = run_exp_f(8, 4, 24, 3, seed.wrapping_add(5));
     println!("\n[EXP-F] algebraic discriminator: early rank defect vs D* (n=8, n'=4):");
-    println!(
-        "    {:<11} {:>13} {:>9}",
-        "family", "early-defect", "D* mean"
-    );
+    println!("    {:<11} {:>13} {:>9}", "family", "early-defect", "D* mean");
     for c in &ef {
         println!(
             "    {:<11} {:>13.4} {:>9}",
             format!("{:?}", c.family),
             c.early_defect,
-            c.dstar_mean
-                .map(|d| format!("{d:.2}"))
-                .unwrap_or_else(|| "—".into()),
+            c.dstar_mean.map(|d| format!("{d:.2}")).unwrap_or_else(|| "—".into()),
         );
     }
     let (p3alg, p3_rho) = judge_p3_algebraic(&ef);
     println!(
         "   GATE G-P3-alg (defect ↑ ⇒ D* ↓, Spearman ρ_s={}): {p3alg}",
-        p3_rho
-            .map(|r| format!("{r:+.3}"))
-            .unwrap_or_else(|| "—".into()),
+        p3_rho.map(|r| format!("{r:+.3}")).unwrap_or_else(|| "—".into()),
     );
 
     // ── Snapshot to experiments/ ────────────────────────────────────
@@ -164,8 +153,8 @@ fn main() {
         .unwrap_or(0);
     let path = "experiments/ffd_loop_latest.json".to_string();
     let json = build_json(
-        seed, targets, ts, &exp_a, spread, &p5, &opp, &p1_odd, &p1_even, &regime, &p6, &p2, p2_rho,
-        p2_gspread, p2_dspread, &ee, &p2e, &ef, &p3alg, p3_rho,
+        seed, targets, ts, &exp_a, spread, &p5, &opp, &p1_odd, &p1_even, &regime, &p6, &p2,
+        p2_rho, p2_gspread, p2_dspread, &ee, &p2e, &ef, &p3alg, p3_rho,
     );
     match std::fs::write(&path, &json) {
         Ok(_) => println!("\n[snapshot] wrote {path}"),
@@ -229,14 +218,10 @@ fn run_exp_e(n: u32, n_sub: u32, trials: u32, seed: u64) -> Vec<LowGammaCell> {
         .next()
         .expect("a degree-n irreducible exists");
     let d_max = 2 * n_sub + 2;
-    [
-        BasisFamily::Subfield,
-        BasisFamily::Coordinate,
-        BasisFamily::Random,
-    ]
-    .into_iter()
-    .filter_map(|fam| run_lowgamma_cell(fam, n, n_sub, &irr, d_max, trials, seed))
-    .collect()
+    [BasisFamily::Subfield, BasisFamily::Coordinate, BasisFamily::Random]
+        .into_iter()
+        .filter_map(|fam| run_lowgamma_cell(fam, n, n_sub, &irr, d_max, trials, seed))
+        .collect()
 }
 
 /// One EXP-F cell: a factor-base family's mean early rank defect and mean D*.
@@ -259,18 +244,12 @@ fn run_exp_f(n: u32, n_sub: u32, trials: u32, cutoff: u32, seed: u64) -> Vec<Alg
     let d_max = 2 * n_sub;
     let mut rng = StdRng::seed_from_u64(seed);
     let mut out = Vec::new();
-    for fam in [
-        BasisFamily::Subfield,
-        BasisFamily::Coordinate,
-        BasisFamily::Random,
-    ] {
+    for fam in [BasisFamily::Subfield, BasisFamily::Coordinate, BasisFamily::Random] {
         let mut de = Vec::new();
         let mut ds = Vec::new();
         for t in 0..trials as u64 {
             let v = match fam {
-                BasisFamily::Random => {
-                    FactorSubspace::build(fam, n, n_sub, &irr, seed ^ (0x900 + t))
-                }
+                BasisFamily::Random => FactorSubspace::build(fam, n, n_sub, &irr, seed ^ (0x900 + t)),
                 _ => FactorSubspace::build(fam, n, n_sub, &irr, 0),
             };
             let Some(v) = v else { continue };
@@ -507,10 +486,7 @@ fn judge_p2(rho: Option<f64>, gamma_spread: f64) -> Verdict {
 
 /// G-P6: rows with ρ ≥ 2 should have mean D* ≈ 2.
 fn judge_p6(rows: &[AvgRow]) -> Verdict {
-    let overdet: Vec<&AvgRow> = rows
-        .iter()
-        .filter(|r| r.ratio() >= G_P6_OVERDET_RATIO)
-        .collect();
+    let overdet: Vec<&AvgRow> = rows.iter().filter(|r| r.ratio() >= G_P6_OVERDET_RATIO).collect();
     if overdet.is_empty() {
         return Verdict {
             status: "blocked",
@@ -523,10 +499,7 @@ fn judge_p6(rows: &[AvgRow]) -> Verdict {
     if all_collapsed {
         Verdict {
             status: "supported",
-            detail: format!(
-                "all {} over-determined cells have mean D* ≤ {G_P6_COLLAPSE_MEAN}",
-                overdet.len()
-            ),
+            detail: format!("all {} over-determined cells have mean D* ≤ {G_P6_COLLAPSE_MEAN}", overdet.len()),
         }
     } else {
         Verdict {
@@ -599,10 +572,7 @@ fn fmt_mean(r: &AvgRow) -> String {
 }
 
 fn print_table(rows: &[AvgRow]) {
-    println!(
-        "    {:>3} {:>3} {:>5} {:>5} {:>9} {:>12}",
-        "n", "n'", "ρ", "N", "mean D*", "hist"
-    );
+    println!("    {:>3} {:>3} {:>5} {:>5} {:>9} {:>12}", "n", "n'", "ρ", "N", "mean D*", "hist");
     for r in rows {
         println!(
             "    {:>3} {:>3} {:>5.2} {:>5} {:>9} {:>12}",
@@ -657,14 +627,10 @@ fn build_json(
             r.refutation.histogram_str(),
         )
     };
-    let arr = |rows: &[AvgRow]| rows.iter().map(row_json).collect::<Vec<_>>().join(",");
-    let verdict = |v: &Verdict| {
-        format!(
-            "{{\"status\":\"{}\",\"detail\":\"{}\"}}",
-            v.status,
-            v.detail.replace('"', "'")
-        )
+    let arr = |rows: &[AvgRow]| {
+        rows.iter().map(row_json).collect::<Vec<_>>().join(",")
     };
+    let verdict = |v: &Verdict| format!("{{\"status\":\"{}\",\"detail\":\"{}\"}}", v.status, v.detail.replace('"', "'"));
     let cell_json = |c: &LowGammaCell| {
         format!(
             "{{\"family\":\"{:?}\",\"n\":{},\"n_sub\":{},\"trials\":{},\"decomp_rate\":{:.4},\"gamma_mean\":{:.4},\"dstar_mean\":{},\"nondecomp\":{}}}",
@@ -684,9 +650,7 @@ fn build_json(
             "{{\"family\":\"{:?}\",\"early_defect\":{:.5},\"dstar_mean\":{}}}",
             c.family,
             c.early_defect,
-            c.dstar_mean
-                .map(|d| format!("{d:.4}"))
-                .unwrap_or_else(|| "null".into()),
+            c.dstar_mean.map(|d| format!("{d:.4}")).unwrap_or_else(|| "null".into()),
         )
     };
     let ef_arr = ef.iter().map(alg_json).collect::<Vec<_>>().join(",");

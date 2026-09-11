@@ -155,11 +155,7 @@ pub fn scrypt(
         return Err("scrypt: n too large for given r");
     }
     // r * p < 2^30
-    if (r as u64)
-        .checked_mul(p as u64)
-        .ok_or("scrypt: r*p overflow")?
-        >= 1 << 30
-    {
+    if (r as u64).checked_mul(p as u64).ok_or("scrypt: r*p overflow")? >= 1 << 30 {
         return Err("scrypt: r * p must be < 2^30");
     }
     // dk_len <= (2^32 - 1) * 32

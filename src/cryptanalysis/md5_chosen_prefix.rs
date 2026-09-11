@@ -55,44 +55,20 @@ use crate::cryptanalysis::md5_differential::{md5_compress, MD5_IV};
 /// MD4, MD5, HAVAL-128 and RIPEMD*, Crypto 2004 rump session;
 /// published in Eurocrypt 2005.
 pub const WANG_DELTA_M0: [i64; 16] = [
-    0,
-    0,
-    0,
-    0,
-    1 << 31,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1 << 15,
-    0,
-    0,
-    1 << 31,
-    0,
+    0, 0, 0, 0,
+    1 << 31, 0, 0, 0,
+    0, 0, 0, 1 << 15,
+    0, 0, 1 << 31, 0,
 ];
 
 /// Wang 2005 message difference for **block 1**.  Identical to
 /// `WANG_DELTA_M0` except word 11 subtracts `2¹⁵` (the negation is
 /// what makes the two blocks' IHV deltas cancel).
 pub const WANG_DELTA_M1: [i64; 16] = [
-    0,
-    0,
-    0,
-    0,
-    1 << 31,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    -(1 << 15),
-    0,
-    0,
-    1 << 31,
-    0,
+    0, 0, 0, 0,
+    1 << 31, 0, 0, 0,
+    0, 0, 0, -(1 << 15),
+    0, 0, 1 << 31, 0,
 ];
 
 /// Target intermediate-hash-value difference after processing
@@ -157,9 +133,10 @@ const T: [u32; 64] = [
 ];
 
 const S: [u32; 64] = [
-    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9,
-    14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15,
-    21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+    5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+    4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+    6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
 ];
 
 fn round_fn(round: usize, b: u32, c: u32, d: u32) -> u32 {
@@ -204,10 +181,8 @@ pub fn trace_block(iv: &[u32; 4], block: &[u8; 64]) -> ChainTrace {
     let mut m = [0u32; 16];
     for j in 0..16 {
         m[j] = u32::from_le_bytes([
-            block[4 * j],
-            block[4 * j + 1],
-            block[4 * j + 2],
-            block[4 * j + 3],
+            block[4 * j], block[4 * j + 1],
+            block[4 * j + 2], block[4 * j + 3],
         ]);
     }
     let mut q = [0u32; 68];
@@ -226,10 +201,7 @@ pub fn trace_block(iv: &[u32; 4], block: &[u8; 64]) -> ChainTrace {
                 .rotate_left(S[r]),
         );
         q[4 + r] = new_a;
-        a = d;
-        d = c;
-        c = b;
-        b = new_a;
+        a = d; d = c; c = b; b = new_a;
     }
     ChainTrace { q, m }
 }
@@ -254,10 +226,8 @@ pub fn apply_delta_m(block: &[u8; 64], delta: &[i64; 16]) -> [u8; 64] {
     let mut m = [0u32; 16];
     for j in 0..16 {
         m[j] = u32::from_le_bytes([
-            block[4 * j],
-            block[4 * j + 1],
-            block[4 * j + 2],
-            block[4 * j + 3],
+            block[4 * j], block[4 * j + 1],
+            block[4 * j + 2], block[4 * j + 3],
         ]);
     }
     for j in 0..16 {
@@ -293,8 +263,8 @@ pub enum BitCondition {
 /// A bit condition tagged with the step `i` (1..=64) and bit (0..=31).
 #[derive(Copy, Clone, Debug)]
 pub struct Condition {
-    pub step: usize, // 1..=64
-    pub bit: u8,     // 0..=31
+    pub step: usize,  // 1..=64
+    pub bit: u8,      // 0..=31
     pub cond: BitCondition,
 }
 
@@ -302,11 +272,7 @@ pub struct Condition {
 /// `prev` is `trace.q[4 + step - 2]` (or `trace.q[3]` if `step == 1`).
 pub fn check_condition(trace: &ChainTrace, c: &Condition) -> bool {
     let q_i = trace.q[4 + c.step - 1];
-    let q_prev = if c.step == 1 {
-        trace.q[3]
-    } else {
-        trace.q[4 + c.step - 2]
-    };
+    let q_prev = if c.step == 1 { trace.q[3] } else { trace.q[4 + c.step - 2] };
     let bi = (q_i >> c.bit) & 1;
     let bp = (q_prev >> c.bit) & 1;
     match c.cond {
@@ -322,10 +288,7 @@ pub fn check_condition(trace: &ChainTrace, c: &Condition) -> bool {
 /// helper to make table entry less error-prone.  Not used directly
 /// in the search loop — provided for documentation/testing.
 pub fn count_satisfied(trace: &ChainTrace, conditions: &[Condition]) -> usize {
-    conditions
-        .iter()
-        .filter(|c| check_condition(trace, c))
-        .count()
+    conditions.iter().filter(|c| check_condition(trace, c)).count()
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -350,62 +313,26 @@ pub const WANG_BLOCK1_ROUND1: &[Condition] = &[
     // Step 1 (Q[1]): a₁'s bit 6 must equal 0 (the "carry source" for
     // the bit-31 perturbation from m[0]'s rotation).  In Wang's table:
     //   Q[1] bit 6 = 0, bit 12 = 0, bit 23 = 0.
-    Condition {
-        step: 1,
-        bit: 6,
-        cond: BitCondition::Zero,
-    },
-    Condition {
-        step: 1,
-        bit: 12,
-        cond: BitCondition::Zero,
-    },
-    Condition {
-        step: 1,
-        bit: 23,
-        cond: BitCondition::Zero,
-    },
+    Condition { step: 1, bit: 6,  cond: BitCondition::Zero },
+    Condition { step: 1, bit: 12, cond: BitCondition::Zero },
+    Condition { step: 1, bit: 23, cond: BitCondition::Zero },
+
     // Step 2 (Q[2]): inherits constraints from Q[1].
-    Condition {
-        step: 2,
-        bit: 6,
-        cond: BitCondition::EqPrev,
-    },
-    Condition {
-        step: 2,
-        bit: 12,
-        cond: BitCondition::One,
-    },
-    Condition {
-        step: 2,
-        bit: 23,
-        cond: BitCondition::One,
-    },
+    Condition { step: 2, bit: 6,  cond: BitCondition::EqPrev },
+    Condition { step: 2, bit: 12, cond: BitCondition::One },
+    Condition { step: 2, bit: 23, cond: BitCondition::One },
+
     // Step 4 (Q[4]): bit 23 must equal Q[3] bit 23.
-    Condition {
-        step: 4,
-        bit: 23,
-        cond: BitCondition::EqPrev,
-    },
+    Condition { step: 4, bit: 23, cond: BitCondition::EqPrev },
+
     // Step 5 — message word m[4] enters; this is where Δm[4]=2³¹
     // first perturbs.  Q[5] bit 31 must be 0 (so the diff propagates
     // additively rather than via carry).
-    Condition {
-        step: 5,
-        bit: 31,
-        cond: BitCondition::Zero,
-    },
+    Condition { step: 5, bit: 31, cond: BitCondition::Zero },
+
     // Steps 12, 15 — where m[11] and m[14] enter.
-    Condition {
-        step: 12,
-        bit: 15,
-        cond: BitCondition::Zero,
-    },
-    Condition {
-        step: 15,
-        bit: 31,
-        cond: BitCondition::Zero,
-    },
+    Condition { step: 12, bit: 15, cond: BitCondition::Zero },
+    Condition { step: 15, bit: 31, cond: BitCondition::Zero },
 ];
 
 /// Round-2..4 probe conditions for block 1 — used by rejection
@@ -414,26 +341,10 @@ pub const WANG_BLOCK1_ROUND1: &[Condition] = &[
 /// certainly wrong, but satisfying them all does not guarantee a
 /// collision (that requires the full SNKO table).
 pub const WANG_BLOCK1_TAIL: &[Condition] = &[
-    Condition {
-        step: 17,
-        bit: 31,
-        cond: BitCondition::Zero,
-    },
-    Condition {
-        step: 20,
-        bit: 31,
-        cond: BitCondition::Zero,
-    },
-    Condition {
-        step: 32,
-        bit: 31,
-        cond: BitCondition::EqPrev,
-    },
-    Condition {
-        step: 48,
-        bit: 31,
-        cond: BitCondition::EqPrev,
-    },
+    Condition { step: 17, bit: 31, cond: BitCondition::Zero },
+    Condition { step: 20, bit: 31, cond: BitCondition::Zero },
+    Condition { step: 32, bit: 31, cond: BitCondition::EqPrev },
+    Condition { step: 48, bit: 31, cond: BitCondition::EqPrev },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
@@ -468,27 +379,15 @@ pub fn modify_round1_step(
     let mut q_new = rng_word;
     for c in conditions.iter().filter(|c| c.step == step) {
         let mask = 1u32 << c.bit;
-        let q_pre = if step == 1 {
-            trace.q[3]
-        } else {
-            trace.q[4 + step - 2]
-        };
+        let q_pre = if step == 1 { trace.q[3] } else { trace.q[4 + step - 2] };
         match c.cond {
             BitCondition::Zero => q_new &= !mask,
             BitCondition::One => q_new |= mask,
             BitCondition::EqPrev => {
-                if q_pre & mask != 0 {
-                    q_new |= mask
-                } else {
-                    q_new &= !mask
-                }
+                if q_pre & mask != 0 { q_new |= mask } else { q_new &= !mask }
             }
             BitCondition::NeqPrev => {
-                if q_pre & mask != 0 {
-                    q_new &= !mask
-                } else {
-                    q_new |= mask
-                }
+                if q_pre & mask != 0 { q_new &= !mask } else { q_new |= mask }
             }
         }
     }
@@ -496,21 +395,9 @@ pub fn modify_round1_step(
     // Q[step] = Q[step-1] + ROL(Q[step-4] + F(...) + T[r] + m[r], S[r])
     // ⇒ m[r] = ROR(Q[step] - Q[step-1], S[r]) - Q[step-4] - F(...) - T[r]
     let q_m1 = q_prev;
-    let q_m2 = if step >= 2 {
-        trace.q[4 + step - 2 - 1]
-    } else {
-        trace.q[2]
-    };
-    let q_m3 = if step >= 3 {
-        trace.q[4 + step - 3 - 1]
-    } else {
-        trace.q[1]
-    };
-    let q_m4 = if step >= 4 {
-        trace.q[4 + step - 4 - 1]
-    } else {
-        trace.q[0]
-    };
+    let q_m2 = if step >= 2 { trace.q[4 + step - 2 - 1] } else { trace.q[2] };
+    let q_m3 = if step >= 3 { trace.q[4 + step - 3 - 1] } else { trace.q[1] };
+    let q_m4 = if step >= 4 { trace.q[4 + step - 4 - 1] } else { trace.q[0] };
     // F is round-1 selection function over (b, c, d) = (Q[i-1], Q[i-2], Q[i-3])
     let f_val = (q_m1 & q_m2) | (!q_m1 & q_m3);
     let diff = q_new.wrapping_sub(q_m1);
@@ -567,11 +454,14 @@ pub fn try_wang_block1(iv: &[u32; 4], rng_seed: u64) -> Option<([u8; 64], [u8; 6
         return None;
     }
     // Run both blocks and check the IHV difference.
-    let mut s = *iv;
-    md5_compress(&mut s, &block, 64);
-    let mut sp = *iv;
-    md5_compress(&mut sp, &block_p, 64);
-    let diff = [s[0] ^ sp[0], s[1] ^ sp[1], s[2] ^ sp[2], s[3] ^ sp[3]];
+    let mut s = *iv; md5_compress(&mut s, &block, 64);
+    let mut sp = *iv; md5_compress(&mut sp, &block_p, 64);
+    let diff = [
+        s[0] ^ sp[0],
+        s[1] ^ sp[1],
+        s[2] ^ sp[2],
+        s[3] ^ sp[3],
+    ];
     // Wang target Δ`IHV₁` in XOR form (we keep it loose: any nonzero
     // diff in the right Hamming bucket is a candidate to push forward).
     if diff[0].count_ones() <= 2
@@ -641,7 +531,10 @@ pub fn apply_q9_tunnel(block: &[u8; 64], iv: &[u32; 4], bit_mask: u32) -> Option
     let f_val = (q8 & q7) | (!q8 & q6);
     let diff = q9_new.wrapping_sub(q8);
     let rot = diff.rotate_right(S[8]);
-    let m8_new = rot.wrapping_sub(q5).wrapping_sub(f_val).wrapping_sub(T[8]);
+    let m8_new = rot
+        .wrapping_sub(q5)
+        .wrapping_sub(f_val)
+        .wrapping_sub(T[8]);
     out[32..36].copy_from_slice(&m8_new.to_le_bytes());
     // Verify downstream Q[10..16] still satisfy round-1 conditions
     // (rough check — caller should re-run the full condition test).
@@ -703,9 +596,9 @@ pub fn birthday_align(
     max_trials: u64,
     seed: u64,
 ) -> Option<(Vec<u8>, Vec<u8>, [u32; 4], [u32; 4])> {
+    use std::collections::HashMap;
     use rand::rngs::StdRng;
     use rand::{RngCore, SeedableRng};
-    use std::collections::HashMap;
     let mut rng = StdRng::seed_from_u64(seed);
     let mut seen_p: HashMap<[u32; 4], Vec<u8>> = HashMap::new();
 
@@ -801,7 +694,11 @@ fn is_distinguished(s: &[u32; 4], w: u32) -> bool {
 /// Returns `(dp_state, trail_length, walk_trail)` if a DP is reached;
 /// the trail is recorded so post-collision back-walking can find the
 /// exact collision step.
-fn walk_to_dp(start: &[u32; 4], w: u32, max_steps: u64) -> Option<([u32; 4], u64)> {
+fn walk_to_dp(
+    start: &[u32; 4],
+    w: u32,
+    max_steps: u64,
+) -> Option<([u32; 4], u64)> {
     let mut s = *start;
     for i in 1..=max_steps {
         s = rho_step(&s);
@@ -814,19 +711,12 @@ fn walk_to_dp(start: &[u32; 4], w: u32, max_steps: u64) -> Option<([u32; 4], u64
 
 /// Side tag for chosen-prefix birthday walks.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum WalkSide {
-    P,
-    Q,
-}
+pub enum WalkSide { P, Q }
 
 /// Project `s` to `proj_bits` low bits of each word; used as the
 /// equivalence relation for "collision" in the birthday phase.
 fn project(s: &[u32; 4], proj_bits: u32) -> [u32; 4] {
-    let mask = if proj_bits >= 32 {
-        !0u32
-    } else {
-        (1u32 << proj_bits).wrapping_sub(1)
-    };
+    let mask = if proj_bits >= 32 { !0u32 } else { (1u32 << proj_bits).wrapping_sub(1) };
     [s[0] & mask, s[1] & mask, s[2] & mask, s[3] & mask]
 }
 
@@ -852,36 +742,25 @@ pub fn rho_chosen_prefix_birthday(
     max_walk_len: u64,
     seed: u64,
 ) -> Option<(WalkSide, u64, [u32; 4], WalkSide, u64, [u32; 4])> {
+    use std::collections::HashMap;
     use rand::rngs::StdRng;
     use rand::{RngCore, SeedableRng};
-    use std::collections::HashMap;
     let mut rng = StdRng::seed_from_u64(seed);
     let mut table: HashMap<[u32; 4], (WalkSide, u64, [u32; 4])> = HashMap::new();
 
     for walk_id in 0..max_walks {
-        let side = if walk_id % 2 == 0 {
-            WalkSide::P
-        } else {
-            WalkSide::Q
-        };
+        let side = if walk_id % 2 == 0 { WalkSide::P } else { WalkSide::Q };
         let iv = if side == WalkSide::P { iv_p } else { iv_q };
-        let nonce = [
-            rng.next_u32(),
-            rng.next_u32(),
-            rng.next_u32(),
-            rng.next_u32(),
-        ];
-        let start = [
-            iv[0] ^ nonce[0],
-            iv[1] ^ nonce[1],
-            iv[2] ^ nonce[2],
-            iv[3] ^ nonce[3],
-        ];
+        let nonce = [rng.next_u32(), rng.next_u32(), rng.next_u32(), rng.next_u32()];
+        let start = [iv[0] ^ nonce[0], iv[1] ^ nonce[1], iv[2] ^ nonce[2], iv[3] ^ nonce[3]];
         if let Some((dp, _len)) = walk_to_dp(&start, dp_bits, max_walk_len) {
             let key = project(&dp, proj_bits);
             if let Some((other_side, other_id, other_start)) = table.get(&key) {
                 if *other_side != side {
-                    return Some((*other_side, *other_id, *other_start, side, walk_id, start));
+                    return Some((
+                        *other_side, *other_id, *other_start,
+                        side, walk_id, start,
+                    ));
                 }
             } else {
                 table.insert(key, (side, walk_id, start));
@@ -951,18 +830,10 @@ pub fn modify_q17_bit(
                 BitCondition::Zero => q_target &= !mask,
                 BitCondition::One => q_target |= mask,
                 BitCondition::EqPrev => {
-                    if q_pre & mask != 0 {
-                        q_target |= mask
-                    } else {
-                        q_target &= !mask
-                    }
+                    if q_pre & mask != 0 { q_target |= mask } else { q_target &= !mask }
                 }
                 BitCondition::NeqPrev => {
-                    if q_pre & mask != 0 {
-                        q_target &= !mask
-                    } else {
-                        q_target |= mask
-                    }
+                    if q_pre & mask != 0 { q_target &= !mask } else { q_target |= mask }
                 }
             }
         }
@@ -971,11 +842,7 @@ pub fn modify_q17_bit(
         let q_m1 = trace.q[4 + step - 2];
         let q_m2 = trace.q[4 + step - 3];
         let q_m3 = trace.q[4 + step - 4];
-        let q_m4 = if step >= 4 {
-            trace.q[4 + step - 5]
-        } else {
-            trace.q[0]
-        };
+        let q_m4 = if step >= 4 { trace.q[4 + step - 5] } else { trace.q[0] };
         let f_val = (q_m1 & q_m2) | (!q_m1 & q_m3);
         let diff = q_target.wrapping_sub(q_m1);
         let rot = diff.rotate_right(S[r]);
@@ -1048,10 +915,8 @@ pub fn apply_generic_tunnel(
     // m[word_index(r)] clobbers an earlier round-1 word and the
     // tunnel needs the auxiliary multi-step modification machinery
     // (see `modify_q17_bit` for the pattern).
-    assert!(
-        (1..=16).contains(&step),
-        "generic tunnel only handles round 1 (steps 1..=16); use multi-step modifier for round 2+"
-    );
+    assert!((1..=16).contains(&step),
+        "generic tunnel only handles round 1 (steps 1..=16); use multi-step modifier for round 2+");
     let mut out = *block;
     let trace = trace_block(iv, block);
     let q_old = trace.q[4 + step - 1];
@@ -1063,18 +928,11 @@ pub fn apply_generic_tunnel(
     let q_m1 = trace.q[4 + step - 2];
     let q_m2 = trace.q[4 + step - 3];
     let q_m3 = trace.q[4 + step - 4];
-    let q_m4 = if step >= 4 {
-        trace.q[4 + step - 5]
-    } else {
-        trace.q[step - 1]
-    };
+    let q_m4 = if step >= 4 { trace.q[4 + step - 5] } else { trace.q[step - 1] };
     let f_val = (q_m1 & q_m2) | (!q_m1 & q_m3);
     let diff = q_new.wrapping_sub(q_m1);
     let rot = diff.rotate_right(S[r]);
-    let m_new = rot
-        .wrapping_sub(q_m4)
-        .wrapping_sub(f_val)
-        .wrapping_sub(T[r]);
+    let m_new = rot.wrapping_sub(q_m4).wrapping_sub(f_val).wrapping_sub(T[r]);
     out[4 * r..4 * r + 4].copy_from_slice(&m_new.to_le_bytes());
     let new_trace = trace_block(iv, &out);
     let sat = count_satisfied(&new_trace, conditions_r1);
@@ -1122,13 +980,8 @@ pub fn find_near_collision_block(
 ) -> Option<NearCollisionStep> {
     // Sanity: `iv_prime - iv = delta_in`.
     for j in 0..4 {
-        assert_eq!(
-            iv_prime[j].wrapping_sub(iv[j]),
-            delta_in[j],
-            "iv_prime[{}] inconsistent with delta_in[{}]",
-            j,
-            j
-        );
+        assert_eq!(iv_prime[j].wrapping_sub(iv[j]), delta_in[j],
+            "iv_prime[{}] inconsistent with delta_in[{}]", j, j);
     }
     if delta_in.iter().all(|&x| x == 0) {
         // Identical-prefix: use Wang's path directly.
@@ -1181,13 +1034,8 @@ pub fn compose_near_collision_chain(
         if delta.iter().all(|&x| x == 0) {
             break;
         }
-        match find_near_collision_block(
-            &cur_iv,
-            &cur_ivp,
-            &delta,
-            trials_per_block,
-            seed.wrapping_add(k as u64),
-        ) {
+        match find_near_collision_block(&cur_iv, &cur_ivp, &delta, trials_per_block,
+                                         seed.wrapping_add(k as u64)) {
             Some(step) => {
                 let mut s = cur_iv;
                 let mut sp = cur_ivp;
@@ -1230,50 +1078,28 @@ pub fn parse_conditions_table(s: &str) -> Result<Vec<Condition>, String> {
         }
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() != 3 {
-            return Err(format!(
-                "line {}: expected 3 tokens, got {}",
-                lineno + 1,
-                parts.len()
-            ));
+            return Err(format!("line {}: expected 3 tokens, got {}", lineno + 1, parts.len()));
         }
-        let step_s = parts[0]
-            .strip_prefix('Q')
+        let step_s = parts[0].strip_prefix('Q')
             .ok_or_else(|| format!("line {}: token 1 missing 'Q' prefix", lineno + 1))?;
-        let step: usize = step_s
-            .parse()
+        let step: usize = step_s.parse()
             .map_err(|_| format!("line {}: invalid step '{}'", lineno + 1, step_s))?;
         if !(1..=64).contains(&step) {
-            return Err(format!(
-                "line {}: step {} out of range [1,64]",
-                lineno + 1,
-                step
-            ));
+            return Err(format!("line {}: step {} out of range [1,64]", lineno + 1, step));
         }
-        let bit_s = parts[1]
-            .strip_prefix("bit")
+        let bit_s = parts[1].strip_prefix("bit")
             .ok_or_else(|| format!("line {}: token 2 missing 'bit' prefix", lineno + 1))?;
-        let bit: u8 = bit_s
-            .parse()
+        let bit: u8 = bit_s.parse()
             .map_err(|_| format!("line {}: invalid bit '{}'", lineno + 1, bit_s))?;
         if bit >= 32 {
-            return Err(format!(
-                "line {}: bit {} out of range [0,31]",
-                lineno + 1,
-                bit
-            ));
+            return Err(format!("line {}: bit {} out of range [0,31]", lineno + 1, bit));
         }
         let cond = match parts[2] {
             "Z" => BitCondition::Zero,
             "O" => BitCondition::One,
             "E" => BitCondition::EqPrev,
             "N" => BitCondition::NeqPrev,
-            other => {
-                return Err(format!(
-                    "line {}: unknown condition '{}'",
-                    lineno + 1,
-                    other
-                ))
-            }
+            other => return Err(format!("line {}: unknown condition '{}'", lineno + 1, other)),
         };
         out.push(Condition { step, bit, cond });
     }
@@ -1282,7 +1108,8 @@ pub fn parse_conditions_table(s: &str) -> Result<Vec<Condition>, String> {
 
 /// Load a conditions table from a file path.
 pub fn load_conditions_table(path: &std::path::Path) -> Result<Vec<Condition>, String> {
-    let s = std::fs::read_to_string(path).map_err(|e| format!("read {:?}: {}", path, e))?;
+    let s = std::fs::read_to_string(path)
+        .map_err(|e| format!("read {:?}: {}", path, e))?;
     parse_conditions_table(&s)
 }
 
@@ -1304,11 +1131,9 @@ mod tests {
     fn wang_published_pair_collides() {
         let h1 = md5(&WANG_M, 64);
         let h2 = md5(&WANG_M_PRIME, 64);
-        assert_eq!(
-            h1, h2,
+        assert_eq!(h1, h2,
             "Wang 2004 colliding pair failed to collide under our MD5 — \
-             implementation is wrong or test vector mistyped."
-        );
+             implementation is wrong or test vector mistyped.");
         assert_ne!(WANG_M, WANG_M_PRIME, "M and M' must differ");
     }
 
@@ -1323,29 +1148,16 @@ mod tests {
         let mut m1p = [0u32; 16];
         for j in 0..16 {
             m0[j] = u32::from_le_bytes([
-                WANG_M[4 * j],
-                WANG_M[4 * j + 1],
-                WANG_M[4 * j + 2],
-                WANG_M[4 * j + 3],
-            ]);
+                WANG_M[4*j], WANG_M[4*j+1], WANG_M[4*j+2], WANG_M[4*j+3]]);
             m0p[j] = u32::from_le_bytes([
-                WANG_M_PRIME[4 * j],
-                WANG_M_PRIME[4 * j + 1],
-                WANG_M_PRIME[4 * j + 2],
-                WANG_M_PRIME[4 * j + 3],
-            ]);
+                WANG_M_PRIME[4*j], WANG_M_PRIME[4*j+1],
+                WANG_M_PRIME[4*j+2], WANG_M_PRIME[4*j+3]]);
             m1[j] = u32::from_le_bytes([
-                WANG_M[64 + 4 * j],
-                WANG_M[64 + 4 * j + 1],
-                WANG_M[64 + 4 * j + 2],
-                WANG_M[64 + 4 * j + 3],
-            ]);
+                WANG_M[64+4*j], WANG_M[64+4*j+1],
+                WANG_M[64+4*j+2], WANG_M[64+4*j+3]]);
             m1p[j] = u32::from_le_bytes([
-                WANG_M_PRIME[64 + 4 * j],
-                WANG_M_PRIME[64 + 4 * j + 1],
-                WANG_M_PRIME[64 + 4 * j + 2],
-                WANG_M_PRIME[64 + 4 * j + 3],
-            ]);
+                WANG_M_PRIME[64+4*j], WANG_M_PRIME[64+4*j+1],
+                WANG_M_PRIME[64+4*j+2], WANG_M_PRIME[64+4*j+3]]);
         }
         // Compare as u32 (mod 2^32) — for bit-31 flips, the signed
         // delta can be either +2^31 or -2^31, but both map to the
@@ -1354,16 +1166,10 @@ mod tests {
         for j in 0..16 {
             let d0 = m0p[j].wrapping_sub(m0[j]);
             let d1 = m1p[j].wrapping_sub(m1[j]);
-            assert_eq!(
-                d0, WANG_DELTA_M0[j] as u32,
-                "block-0 word {} delta mismatch: got {:08x}",
-                j, d0
-            );
-            assert_eq!(
-                d1, WANG_DELTA_M1[j] as u32,
-                "block-1 word {} delta mismatch: got {:08x}",
-                j, d1
-            );
+            assert_eq!(d0, WANG_DELTA_M0[j] as u32,
+                "block-0 word {} delta mismatch: got {:08x}", j, d0);
+            assert_eq!(d1, WANG_DELTA_M1[j] as u32,
+                "block-1 word {} delta mismatch: got {:08x}", j, d1);
         }
     }
 
@@ -1377,11 +1183,12 @@ mod tests {
         let mut block0p = [0u8; 64];
         block0.copy_from_slice(&WANG_M[..64]);
         block0p.copy_from_slice(&WANG_M_PRIME[..64]);
-        let mut s = MD5_IV;
-        md5_compress(&mut s, &block0, 64);
-        let mut sp = MD5_IV;
-        md5_compress(&mut sp, &block0p, 64);
-        let diff = [s[0] ^ sp[0], s[1] ^ sp[1], s[2] ^ sp[2], s[3] ^ sp[3]];
+        let mut s = MD5_IV;  md5_compress(&mut s, &block0, 64);
+        let mut sp = MD5_IV; md5_compress(&mut sp, &block0p, 64);
+        let diff = [
+            s[0] ^ sp[0], s[1] ^ sp[1],
+            s[2] ^ sp[2], s[3] ^ sp[3],
+        ];
         println!("\n=== Wang block-0 IHV XOR difference ===");
         for (j, d) in diff.iter().enumerate() {
             println!("  word {}: {:08x}  (popcnt {})", j, d, d.count_ones());
@@ -1406,20 +1213,15 @@ mod tests {
         block0.copy_from_slice(&WANG_M[..64]);
         let trace = trace_block(&MD5_IV, &block0);
         let n_sat = count_satisfied(&trace, WANG_BLOCK1_ROUND1);
-        println!(
-            "\n=== Wang published block-0: conditions satisfied: {} / {} ===",
-            n_sat,
-            WANG_BLOCK1_ROUND1.len()
-        );
+        println!("\n=== Wang published block-0: conditions satisfied: {} / {} ===",
+                 n_sat, WANG_BLOCK1_ROUND1.len());
         // Wang's pair was found with the *original* Wang conditions;
         // our minimal subset is illustrative, so we allow some slack.
         // What matters cryptanalytically is that the collision holds
         // (asserted by test #1), not that our toy condition subset
         // is perfectly self-consistent.
-        assert!(
-            n_sat >= WANG_BLOCK1_ROUND1.len() / 2,
-            "fewer than half of encoded conditions hold — encoding is broken"
-        );
+        assert!(n_sat >= WANG_BLOCK1_ROUND1.len() / 2,
+            "fewer than half of encoded conditions hold — encoding is broken");
     }
 
     /// **Test #5**: `apply_delta_m` correctly transforms Wang's M
@@ -1447,10 +1249,7 @@ mod tests {
         if let Some(tuned) = apply_q9_tunnel(&block0, &MD5_IV, 0b101) {
             let trace1 = trace_block(&MD5_IV, &tuned);
             let sat1 = count_satisfied(&trace1, WANG_BLOCK1_ROUND1);
-            println!(
-                "\n=== Q9 tunnel: round-1 conditions {} → {} ===",
-                sat0, sat1
-            );
+            println!("\n=== Q9 tunnel: round-1 conditions {} → {} ===", sat0, sat1);
             assert!(tuned != block0, "Q9 tunnel produced no change");
         }
     }
@@ -1470,11 +1269,7 @@ mod tests {
         match result {
             Some((sp, sq, hp, hq)) => {
                 println!("\n=== Birthday align: 8-bit projection hit ===");
-                println!(
-                    "  suffix_P [{} bytes], suffix_Q [{} bytes]",
-                    sp.len(),
-                    sq.len()
-                );
+                println!("  suffix_P [{} bytes], suffix_Q [{} bytes]", sp.len(), sq.len());
                 println!("  IHV_P after suffix: {:08x?}", hp);
                 println!("  IHV_Q after suffix: {:08x?}", hq);
                 assert_eq!(hp[0] & 0xFF, hq[0] & 0xFF, "projection collision invalid");
@@ -1522,10 +1317,8 @@ mod tests {
                 println!("\n=== rho chosen-prefix birthday: cross-side hit ===");
             }
             None => {
-                println!(
-                    "\n=== rho chosen-prefix birthday: no cross-side hit \
-                          in 8000 walks (probabilistic — expected occasionally) ==="
-                );
+                println!("\n=== rho chosen-prefix birthday: no cross-side hit \
+                          in 8000 walks (probabilistic — expected occasionally) ===");
             }
         }
     }
@@ -1539,19 +1332,13 @@ mod tests {
         let base = trace_block(&MD5_IV, &block);
         let sat_before = count_satisfied(&base, WANG_BLOCK1_ROUND1);
         let r = modify_q17_bit(&block, &MD5_IV, 5, WANG_BLOCK1_ROUND1);
-        println!(
-            "\n=== Q17 multi-step: r1 {} → {} ===",
-            sat_before, r.satisfied_round1
-        );
+        println!("\n=== Q17 multi-step: r1 {} → {} ===", sat_before, r.satisfied_round1);
         // The Q17 modifier re-applies round-1 modification on steps
         // 2..=16 (step 1 is untouched).  It must not *regress* the
         // round-1 condition count.
-        assert!(
-            r.satisfied_round1 >= sat_before,
+        assert!(r.satisfied_round1 >= sat_before,
             "multi-step modification regressed round-1 conditions: {} → {}",
-            sat_before,
-            r.satisfied_round1
-        );
+            sat_before, r.satisfied_round1);
     }
 
     /// **Stage 6 test**: each Klíma tunnel produces a block that
@@ -1574,14 +1361,10 @@ mod tests {
             // tolerance 8: minimal-conditions table — any tunnel may
             // disturb 1–2 conditions on Wang's published block since
             // our condition set is illustrative.
-            let r = apply_generic_tunnel(&block, &MD5_IV, *step, mask, WANG_BLOCK1_ROUND1, 8);
-            println!(
-                "=== tunnel {} (step={}, mask=0x{:08x}): {:?} ===",
-                name,
-                step,
-                mask,
-                r.is_some()
-            );
+            let r = apply_generic_tunnel(&block, &MD5_IV, *step, mask,
+                                          WANG_BLOCK1_ROUND1, 8);
+            println!("=== tunnel {} (step={}, mask=0x{:08x}): {:?} ===",
+                     name, step, mask, r.is_some());
         }
     }
 
@@ -1619,18 +1402,9 @@ Q16 bit15 N
     /// useful error message.
     #[test]
     fn conditions_table_parse_errors() {
-        assert!(
-            parse_conditions_table("Q99 bit0 Z").is_err(),
-            "step out of range"
-        );
-        assert!(
-            parse_conditions_table("Q1 bit99 Z").is_err(),
-            "bit out of range"
-        );
+        assert!(parse_conditions_table("Q99 bit0 Z").is_err(), "step out of range");
+        assert!(parse_conditions_table("Q1 bit99 Z").is_err(), "bit out of range");
         assert!(parse_conditions_table("Q1 bit0 X").is_err(), "unknown cond");
-        assert!(
-            parse_conditions_table("bit0 Z Q1").is_err(),
-            "missing Q prefix"
-        );
+        assert!(parse_conditions_table("bit0 Z Q1").is_err(), "missing Q prefix");
     }
 }

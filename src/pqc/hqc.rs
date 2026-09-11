@@ -372,9 +372,7 @@ mod tests {
     fn hqc_decapsulate_rejects_truncated_u_storage_without_panicking() {
         let kp = hqc_keygen();
         let ct = HqcCiphertext {
-            u: F2Poly {
-                bits: vec![0u8; BYTES - 1],
-            },
+            u: F2Poly { bits: vec![0u8; BYTES - 1] },
             v: F2Poly::zero(),
         };
 

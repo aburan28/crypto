@@ -243,10 +243,7 @@ pub fn uov_keygen() -> (UovPublicKey, UovSecretKey) {
     let (t, t_inv) = random_invertible(N);
     // Public forms: P_k(y) = F_k(T·y), i.e. Q'_k = Tᵀ Q_k T.
     let t_t = transpose(&t);
-    let forms = central
-        .iter()
-        .map(|q| mat_mul(&t_t, &mat_mul(q, &t)))
-        .collect();
+    let forms = central.iter().map(|q| mat_mul(&t_t, &mat_mul(q, &t))).collect();
     (UovPublicKey { forms }, UovSecretKey { central, t_inv })
 }
 
@@ -307,10 +304,7 @@ pub fn uov_verify(pk: &UovPublicKey, msg: &[u8], sig: &[u8]) -> bool {
         return false;
     }
     let target = hash_to_target(msg);
-    pk.forms
-        .iter()
-        .zip(target.iter())
-        .all(|(q, &t)| eval_form(q, sig) == t)
+    pk.forms.iter().zip(target.iter()).all(|(q, &t)| eval_form(q, sig) == t)
 }
 
 #[cfg(test)]
@@ -344,10 +338,7 @@ mod tests {
         // After composing with T, the oil×oil block is (overwhelmingly)
         // nonzero — the public map looks like random MQ.
         let (pk, _) = uov_keygen();
-        let nonzero = pk
-            .forms
-            .iter()
-            .any(|q| (V..N).any(|i| (V..N).any(|j| q[i][j] != 0)));
+        let nonzero = pk.forms.iter().any(|q| (V..N).any(|i| (V..N).any(|j| q[i][j] != 0)));
         assert!(nonzero);
     }
 

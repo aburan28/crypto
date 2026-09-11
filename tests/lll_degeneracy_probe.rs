@@ -140,7 +140,8 @@ fn probe_once(
     let sigs = generate_biased_sigs(curve, &d, k_bits, m, k_seed);
 
     let t0 = Instant::now();
-    let result = hnp_recover_key_with_reduction(curve, &kp.public, &sigs, HnpReduction::Lll);
+    let result =
+        hnp_recover_key_with_reduction(curve, &kp.public, &sigs, HnpReduction::Lll);
     let elapsed = t0.elapsed().as_millis();
 
     let outcome = match result {
@@ -185,16 +186,8 @@ fn probe_lll_degeneracy_head_to_head() {
 
     eprintln!();
     eprintln!("=== Summary ===");
-    eprintln!(
-        "P-256:     {}/{} probes recovered key",
-        p256_pass,
-        seeds.len()
-    );
-    eprintln!(
-        "secp256k1: {}/{} probes recovered key",
-        secp_pass,
-        seeds.len()
-    );
+    eprintln!("P-256:     {}/{} probes recovered key", p256_pass, seeds.len());
+    eprintln!("secp256k1: {}/{} probes recovered key", secp_pass, seeds.len());
 
     assert!(
         p256_pass + secp_pass > 0,
@@ -241,16 +234,8 @@ fn probe_384bit_lll_multiseed() {
 
     eprintln!();
     eprintln!("=== Summary ===");
-    eprintln!(
-        "P-384:           {}/{} seeds recovered key",
-        p384_pass,
-        seeds.len()
-    );
-    eprintln!(
-        "brainpoolP384r1: {}/{} seeds recovered key",
-        bp384_pass,
-        seeds.len()
-    );
+    eprintln!("P-384:           {}/{} seeds recovered key", p384_pass, seeds.len());
+    eprintln!("brainpoolP384r1: {}/{} seeds recovered key", bp384_pass, seeds.len());
 
     assert_eq!(
         p384_pass,
@@ -395,7 +380,8 @@ fn probe_koblitz_lll_degeneracy_hypothesis() {
         let mut passes = 0usize;
         let mut total_elapsed: u128 = 0;
         for (d_seed, k_seed) in &seeds {
-            let (outcome, elapsed) = probe_once(curve, name, *k_bits, 8, *d_seed, *k_seed);
+            let (outcome, elapsed) =
+                probe_once(curve, name, *k_bits, 8, *d_seed, *k_seed);
             total_elapsed += elapsed;
             if outcome.starts_with("✓") {
                 passes += 1;
@@ -409,14 +395,7 @@ fn probe_koblitz_lll_degeneracy_hypothesis() {
             passes,
             seeds.len()
         );
-        results.push((
-            name.to_string(),
-            *n_bits,
-            form,
-            passes,
-            seeds.len(),
-            total_elapsed,
-        ));
+        results.push((name.to_string(), *n_bits, form, passes, seeds.len(), total_elapsed));
     }
 
     eprintln!();
@@ -500,8 +479,12 @@ fn probe_p521_reduction_sweep() {
             HnpReduction::LllHp => "LLL-HP".to_string(),
             HnpReduction::Bkz(b) => format!("BKZ-{}", b),
         };
-        let (outcome, elapsed) = probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, red);
-        eprintln!("{:<8} {:<10} {:<55} {:>12}", m, red_label, outcome, elapsed);
+        let (outcome, elapsed) =
+            probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, red);
+        eprintln!(
+            "{:<8} {:<10} {:<55} {:>12}",
+            m, red_label, outcome, elapsed
+        );
         if outcome.starts_with("✓") {
             any_recovered = true;
         }
@@ -544,15 +527,8 @@ fn probe_p521_lll_hp() {
 
     for (d_seed, k_seed, m) in seeds {
         // f64 LLL (expected: fail due to catastrophic cancellation)
-        let (out_f64, t_f64) = probe_once_ext(
-            &p521,
-            "P-521[f64]",
-            k_bits,
-            m,
-            d_seed,
-            k_seed,
-            HnpReduction::Lll,
-        );
+        let (out_f64, t_f64) =
+            probe_once_ext(&p521, "P-521[f64]", k_bits, m, d_seed, k_seed, HnpReduction::Lll);
         if out_f64.starts_with("✓") {
             f64_pass += 1;
         }
@@ -620,15 +596,7 @@ fn probe_p521_hp_timing() {
     eprintln!("=== P-521 HP LLL single-seed timing (incremental GS swap) ===");
     eprintln!("  baseline (full-recompute, 2026-05-22): ~79s");
 
-    let (outcome, elapsed_ms) = probe_once_ext(
-        &p521,
-        "P-521",
-        k_bits,
-        m,
-        d_seed,
-        k_seed,
-        HnpReduction::LllHp,
-    );
+    let (outcome, elapsed_ms) = probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
 
     eprintln!("  result: {} in {} ms", outcome, elapsed_ms);
     eprintln!();
@@ -674,15 +642,8 @@ fn probe_p521_hp_m16() {
     let mut total_ms = 0u128;
 
     for (d_seed, k_seed) in seeds {
-        let (outcome, elapsed_ms) = probe_once_ext(
-            &p521,
-            "P-521",
-            k_bits,
-            m,
-            d_seed,
-            k_seed,
-            HnpReduction::LllHp,
-        );
+        let (outcome, elapsed_ms) =
+            probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
         if outcome.starts_with("✓") {
             pass += 1;
         }
@@ -732,15 +693,8 @@ fn probe_p521_hp_m32_timing() {
     eprintln!("  baseline (m=8 incremental, 2026-05-28): ~14s");
     eprintln!("  O((m+2)²) estimate for m=32: ~162s");
 
-    let (outcome, elapsed_ms) = probe_once_ext(
-        &p521,
-        "P-521",
-        k_bits,
-        m,
-        d_seed,
-        k_seed,
-        HnpReduction::LllHp,
-    );
+    let (outcome, elapsed_ms) =
+        probe_once_ext(&p521, "P-521", k_bits, m, d_seed, k_seed, HnpReduction::LllHp);
 
     eprintln!();
     eprintln!("  m=32 result: {} in {} ms", outcome, elapsed_ms);

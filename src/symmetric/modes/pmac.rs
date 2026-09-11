@@ -237,10 +237,12 @@ mod tests {
     #[test]
     fn pmac_four_block_message() {
         let key = AesKey::new(&h("2b7e151628aed2a6abf7158809cf4f3c")).unwrap();
-        let msg = h("6bc1bee22e409f96e93d7e117393172a\
+        let msg = h(
+            "6bc1bee22e409f96e93d7e117393172a\
              ae2d8a571e03ac9c9eb76fac45af8e51\
              30c81c46a35ce411e5fbc1191a0a52ef\
-             f69f2445df4f9b17ad2b417be66c3710");
+             f69f2445df4f9b17ad2b417be66c3710",
+        );
         let tag = pmac(&key, &msg);
         // Determinism + sensitivity.
         assert_eq!(tag, pmac(&key, &msg));

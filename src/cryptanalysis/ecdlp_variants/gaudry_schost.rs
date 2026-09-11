@@ -195,12 +195,7 @@ fn fold(
 
 /// Recover `x` from a tame `(u_a, v_a)` and wild `(u_b, v_b)` meeting
 /// at one point; `None` if the pair is degenerate or fails to verify.
-fn recover(
-    group: &EcGroup,
-    q: &Point,
-    a: (&BigUint, &BigUint),
-    b: (&BigUint, &BigUint),
-) -> Option<BigUint> {
+fn recover(group: &EcGroup, q: &Point, a: (&BigUint, &BigUint), b: (&BigUint, &BigUint)) -> Option<BigUint> {
     let n = group.order();
     let dv = sub_mod(b.1, a.1, n); // v_b − v_a
     if dv.is_zero() {

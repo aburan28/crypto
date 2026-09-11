@@ -110,7 +110,7 @@ pub fn sparse_solve_mod_n(
     n: &BigUint,
 ) -> Option<BigUint> {
     let _ = n_cols; // present in API for documentation; the algorithm is row-driven and detects empty columns automatically.
-                    // Drop trivial all-zero rows.
+    // Drop trivial all-zero rows.
     rows.retain(|r| !r.entries.is_empty() || !r.rhs.is_zero());
 
     // Track the sequence of pivots so we can back-substitute.
@@ -244,7 +244,10 @@ mod tests {
     #[test]
     fn solve_trivial_one_var() {
         let n = BigUint::from(11u32);
-        let row = SparseRow::from_entries(vec![(0, BigUint::from(3u32))], BigUint::from(7u32));
+        let row = SparseRow::from_entries(
+            vec![(0, BigUint::from(3u32))],
+            BigUint::from(7u32),
+        );
         let x = sparse_solve_mod_n(vec![row], 1, 0, &n);
         assert_eq!(x, Some(BigUint::from(6u32)));
     }
@@ -340,9 +343,7 @@ mod tests {
         let r2 = SparseRow::from_entries(vec![(0, BigUint::one())], BigUint::from(5u32));
         // x = 3 AND x = 5 mod 7 is inconsistent.
         let sol = sparse_solve_mod_n(vec![r1, r2], 1, 0, &n);
-        assert!(
-            sol.is_none() || sol == Some(BigUint::from(3u32)) || sol == Some(BigUint::from(5u32))
-        );
+        assert!(sol.is_none() || sol == Some(BigUint::from(3u32)) || sol == Some(BigUint::from(5u32)));
         // We accept either None or one of the rows' values; we just
         // shouldn't get something wildly wrong.  (Our pivot-elim
         // detects the inconsistency in the no-active-cols branch.)

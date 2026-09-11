@@ -109,7 +109,11 @@ pub struct AnomalyReport {
     pub mean_avalanche_bits: f64,
 }
 
-pub fn run_anomaly_audit(n_chains: usize, messages_per_chain: usize, seed: u64) -> AnomalyReport {
+pub fn run_anomaly_audit(
+    n_chains: usize,
+    messages_per_chain: usize,
+    seed: u64,
+) -> AnomalyReport {
     use rand::rngs::StdRng;
     use rand::{RngCore, SeedableRng};
     let mut rng = StdRng::seed_from_u64(seed);
@@ -309,7 +313,8 @@ fn pearson_corr_bytes(a: &[u8], b: &[u8]) -> f64 {
 
 fn chi_p_value(chi2: f64, df: usize) -> f64 {
     let df = df as f64;
-    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df))) / ((2.0 / (9.0 * df)).sqrt());
+    let t = ((chi2 / df).powf(1.0 / 3.0) - (1.0 - 2.0 / (9.0 * df)))
+        / ((2.0 / (9.0 * df)).sqrt());
     0.5 * (1.0 - erf(t / std::f64::consts::SQRT_2))
 }
 
@@ -390,10 +395,7 @@ pub fn format_anomaly_report(r: &AnomalyReport) -> String {
          max |r| ≈ √(2·ln 512)/√32 ≈ 0.62.\n\n",
     );
     let pcs_status = if r.pcs_max_correlation < 0.70 {
-        paint(
-            "✓ DH ratchet restores secrecy (within H₀ noise floor ≈ 0.62)",
-            FG_BRIGHT_GREEN,
-        )
+        paint("✓ DH ratchet restores secrecy (within H₀ noise floor ≈ 0.62)", FG_BRIGHT_GREEN)
     } else {
         paint("⚠ above H₀ noise floor", FG_BRIGHT_RED)
     };
@@ -435,8 +437,8 @@ pub fn format_anomaly_report(r: &AnomalyReport) -> String {
         r.first_byte_chi_p_value < 0.001,
         r.mean_lag1_autocorr.abs() > 0.10,
         r.max_cross_chain_corr > 0.30,
-        r.pcs_max_correlation > 0.70, // H₀ max-of-512 |r| ≈ 0.62
-        r.small_subgroup_max_z > 6.0, // H₀ max-of-16384 |z| ≈ 4.4
+        r.pcs_max_correlation > 0.70,   // H₀ max-of-512 |r| ≈ 0.62
+        r.small_subgroup_max_z > 6.0,    // H₀ max-of-16384 |z| ≈ 4.4
         (r.mean_avalanche_bits - ideal).abs() > ideal * 0.25,
     ];
     let count = strict.iter().filter(|&&x| x).count();
@@ -536,17 +538,9 @@ mod tests {
     #[test]
     fn anomaly_audit_passes() {
         let r = run_anomaly_audit(256, 64, 42);
-        assert!(
-            r.chi_squared_p_value > 1e-9,
-            "chi²: {}",
-            r.chi_squared_p_value
-        );
+        assert!(r.chi_squared_p_value > 1e-9, "chi²: {}", r.chi_squared_p_value);
         assert!(r.monobit_p_value > 1e-9, "monobit: {}", r.monobit_p_value);
-        assert!(
-            r.first_byte_chi_p_value > 1e-9,
-            "first-byte: {}",
-            r.first_byte_chi_p_value
-        );
+        assert!(r.first_byte_chi_p_value > 1e-9, "first-byte: {}", r.first_byte_chi_p_value);
         assert!(
             r.mean_lag1_autocorr.abs() < 0.10,
             "lag-1 autocorr: {}",
@@ -588,8 +582,12 @@ mod tests {
     fn demo_multi_seed_stability_check() {
         println!("\n# Multi-seed stability of Signal Double Ratchet audit\n");
         println!("```");
-        println!("  seed       chi²_p    monobit_p   1st-byte_p    lag1_r    pcs_r    sub_z");
-        println!("  ────────   ───────   ─────────   ──────────    ──────    ─────    ─────");
+        println!(
+            "  seed       chi²_p    monobit_p   1st-byte_p    lag1_r    pcs_r    sub_z"
+        );
+        println!(
+            "  ────────   ───────   ─────────   ──────────    ──────    ─────    ─────"
+        );
         for seed in [1u64, 42, 1337, 2025, 99_999] {
             let r = run_anomaly_audit(256, 64, seed);
             println!(

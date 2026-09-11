@@ -455,27 +455,25 @@ impl Mars {
 
     /// Encrypt one 16-byte block in place.
     pub fn encrypt_block(&self, block: &mut [u8; 16]) {
-        let mut a = u32::from_le_bytes(block[0..4].try_into().unwrap()).wrapping_add(self.l_key[0]);
-        let mut b = u32::from_le_bytes(block[4..8].try_into().unwrap()).wrapping_add(self.l_key[1]);
-        let mut c =
-            u32::from_le_bytes(block[8..12].try_into().unwrap()).wrapping_add(self.l_key[2]);
-        let mut d =
-            u32::from_le_bytes(block[12..16].try_into().unwrap()).wrapping_add(self.l_key[3]);
+        let mut a = u32::from_le_bytes(block[0..4].try_into().unwrap())
+            .wrapping_add(self.l_key[0]);
+        let mut b = u32::from_le_bytes(block[4..8].try_into().unwrap())
+            .wrapping_add(self.l_key[1]);
+        let mut c = u32::from_le_bytes(block[8..12].try_into().unwrap())
+            .wrapping_add(self.l_key[2]);
+        let mut d = u32::from_le_bytes(block[12..16].try_into().unwrap())
+            .wrapping_add(self.l_key[3]);
 
         // ── Forward mixing (8 rounds) ───────────────────────────────
         // The 2 ↑ `a += d` / `b += c` "feedback" steps appear in
         // rounds 0,1,4,5 only — they prevent a low-difference attack
         // on the otherwise pure mixing layer.
-        f_mix(&mut a, &mut b, &mut c, &mut d);
-        a = a.wrapping_add(d);
-        f_mix(&mut b, &mut c, &mut d, &mut a);
-        b = b.wrapping_add(c);
+        f_mix(&mut a, &mut b, &mut c, &mut d); a = a.wrapping_add(d);
+        f_mix(&mut b, &mut c, &mut d, &mut a); b = b.wrapping_add(c);
         f_mix(&mut c, &mut d, &mut a, &mut b);
         f_mix(&mut d, &mut a, &mut b, &mut c);
-        f_mix(&mut a, &mut b, &mut c, &mut d);
-        a = a.wrapping_add(d);
-        f_mix(&mut b, &mut c, &mut d, &mut a);
-        b = b.wrapping_add(c);
+        f_mix(&mut a, &mut b, &mut c, &mut d); a = a.wrapping_add(d);
+        f_mix(&mut b, &mut c, &mut d, &mut a); b = b.wrapping_add(c);
         f_mix(&mut c, &mut d, &mut a, &mut b);
         f_mix(&mut d, &mut a, &mut b, &mut c);
 
@@ -484,9 +482,9 @@ impl Mars {
         // Next 8 rounds: "backward" — swap c ↔ d in the call signature
         // so the E-function outputs land in mirrored positions.
         let k = &self.l_key;
-        f_ktr(&mut a, &mut b, &mut c, &mut d, k, 4);
-        f_ktr(&mut b, &mut c, &mut d, &mut a, k, 6);
-        f_ktr(&mut c, &mut d, &mut a, &mut b, k, 8);
+        f_ktr(&mut a, &mut b, &mut c, &mut d, k,  4);
+        f_ktr(&mut b, &mut c, &mut d, &mut a, k,  6);
+        f_ktr(&mut c, &mut d, &mut a, &mut b, k,  8);
         f_ktr(&mut d, &mut a, &mut b, &mut c, k, 10);
         f_ktr(&mut a, &mut b, &mut c, &mut d, k, 12);
         f_ktr(&mut b, &mut c, &mut d, &mut a, k, 14);
@@ -504,16 +502,12 @@ impl Mars {
 
         // ── Backwards mixing (8 rounds) ─────────────────────────────
         b_mix(&mut a, &mut b, &mut c, &mut d);
-        b_mix(&mut b, &mut c, &mut d, &mut a);
-        c = c.wrapping_sub(b);
-        b_mix(&mut c, &mut d, &mut a, &mut b);
-        d = d.wrapping_sub(a);
+        b_mix(&mut b, &mut c, &mut d, &mut a); c = c.wrapping_sub(b);
+        b_mix(&mut c, &mut d, &mut a, &mut b); d = d.wrapping_sub(a);
         b_mix(&mut d, &mut a, &mut b, &mut c);
         b_mix(&mut a, &mut b, &mut c, &mut d);
-        b_mix(&mut b, &mut c, &mut d, &mut a);
-        c = c.wrapping_sub(b);
-        b_mix(&mut c, &mut d, &mut a, &mut b);
-        d = d.wrapping_sub(a);
+        b_mix(&mut b, &mut c, &mut d, &mut a); c = c.wrapping_sub(b);
+        b_mix(&mut c, &mut d, &mut a, &mut b); d = d.wrapping_sub(a);
         b_mix(&mut d, &mut a, &mut b, &mut c);
 
         block[0..4].copy_from_slice(&a.wrapping_sub(self.l_key[36]).to_le_bytes());
@@ -528,28 +522,24 @@ impl Mars {
         // ct[8..12] → b, ct[12..16] → a.  This reflects the cipher's
         // not-fully-symmetric structure: encryption uses K[0..4] then
         // K[36..40]; decryption swaps them and reverses both halves.
-        let mut d =
-            u32::from_le_bytes(block[0..4].try_into().unwrap()).wrapping_add(self.l_key[36]);
-        let mut c =
-            u32::from_le_bytes(block[4..8].try_into().unwrap()).wrapping_add(self.l_key[37]);
-        let mut b =
-            u32::from_le_bytes(block[8..12].try_into().unwrap()).wrapping_add(self.l_key[38]);
-        let mut a =
-            u32::from_le_bytes(block[12..16].try_into().unwrap()).wrapping_add(self.l_key[39]);
+        let mut d = u32::from_le_bytes(block[0..4].try_into().unwrap())
+            .wrapping_add(self.l_key[36]);
+        let mut c = u32::from_le_bytes(block[4..8].try_into().unwrap())
+            .wrapping_add(self.l_key[37]);
+        let mut b = u32::from_le_bytes(block[8..12].try_into().unwrap())
+            .wrapping_add(self.l_key[38]);
+        let mut a = u32::from_le_bytes(block[12..16].try_into().unwrap())
+            .wrapping_add(self.l_key[39]);
 
         // Forward mixing on the loaded values (yes, the *encrypt*
         // forward mixing — MARS uses the same primitive in both
         // directions; only the keyed core uses a true inverse).
-        f_mix(&mut a, &mut b, &mut c, &mut d);
-        a = a.wrapping_add(d);
-        f_mix(&mut b, &mut c, &mut d, &mut a);
-        b = b.wrapping_add(c);
+        f_mix(&mut a, &mut b, &mut c, &mut d); a = a.wrapping_add(d);
+        f_mix(&mut b, &mut c, &mut d, &mut a); b = b.wrapping_add(c);
         f_mix(&mut c, &mut d, &mut a, &mut b);
         f_mix(&mut d, &mut a, &mut b, &mut c);
-        f_mix(&mut a, &mut b, &mut c, &mut d);
-        a = a.wrapping_add(d);
-        f_mix(&mut b, &mut c, &mut d, &mut a);
-        b = b.wrapping_add(c);
+        f_mix(&mut a, &mut b, &mut c, &mut d); a = a.wrapping_add(d);
+        f_mix(&mut b, &mut c, &mut d, &mut a); b = b.wrapping_add(c);
         f_mix(&mut c, &mut d, &mut a, &mut b);
         f_mix(&mut d, &mut a, &mut b, &mut c);
 
@@ -571,21 +561,17 @@ impl Mars {
         r_ktr(&mut c, &mut b, &mut a, &mut d, k, 14);
         r_ktr(&mut d, &mut c, &mut b, &mut a, k, 12);
         r_ktr(&mut a, &mut d, &mut c, &mut b, k, 10);
-        r_ktr(&mut b, &mut a, &mut d, &mut c, k, 8);
-        r_ktr(&mut c, &mut b, &mut a, &mut d, k, 6);
-        r_ktr(&mut d, &mut c, &mut b, &mut a, k, 4);
+        r_ktr(&mut b, &mut a, &mut d, &mut c, k,  8);
+        r_ktr(&mut c, &mut b, &mut a, &mut d, k,  6);
+        r_ktr(&mut d, &mut c, &mut b, &mut a, k,  4);
 
         b_mix(&mut a, &mut b, &mut c, &mut d);
-        b_mix(&mut b, &mut c, &mut d, &mut a);
-        c = c.wrapping_sub(b);
-        b_mix(&mut c, &mut d, &mut a, &mut b);
-        d = d.wrapping_sub(a);
+        b_mix(&mut b, &mut c, &mut d, &mut a); c = c.wrapping_sub(b);
+        b_mix(&mut c, &mut d, &mut a, &mut b); d = d.wrapping_sub(a);
         b_mix(&mut d, &mut a, &mut b, &mut c);
         b_mix(&mut a, &mut b, &mut c, &mut d);
-        b_mix(&mut b, &mut c, &mut d, &mut a);
-        c = c.wrapping_sub(b);
-        b_mix(&mut c, &mut d, &mut a, &mut b);
-        d = d.wrapping_sub(a);
+        b_mix(&mut b, &mut c, &mut d, &mut a); c = c.wrapping_sub(b);
+        b_mix(&mut c, &mut d, &mut a, &mut b); d = d.wrapping_sub(a);
         b_mix(&mut d, &mut a, &mut b, &mut c);
 
         block[0..4].copy_from_slice(&d.wrapping_sub(self.l_key[0]).to_le_bytes());
@@ -662,13 +648,9 @@ mod tests {
     #[test]
     fn mars_structured_128() {
         let mut key = [0u8; 16];
-        for (i, b) in key.iter_mut().enumerate() {
-            *b = i as u8;
-        }
+        for (i, b) in key.iter_mut().enumerate() { *b = i as u8; }
         let mut pt = [0u8; 16];
-        for (i, b) in pt.iter_mut().enumerate() {
-            *b = 0x10 + i as u8;
-        }
+        for (i, b) in pt.iter_mut().enumerate() { *b = 0x10 + i as u8; }
         let cipher = Mars::new(&key).unwrap();
         let mut block = pt;
         cipher.encrypt_block(&mut block);
@@ -682,13 +664,9 @@ mod tests {
     #[test]
     fn mars_structured_192() {
         let mut key = [0u8; 24];
-        for (i, b) in key.iter_mut().enumerate() {
-            *b = i as u8;
-        }
+        for (i, b) in key.iter_mut().enumerate() { *b = i as u8; }
         let mut pt = [0u8; 16];
-        for (i, b) in pt.iter_mut().enumerate() {
-            *b = 0xa0 + i as u8;
-        }
+        for (i, b) in pt.iter_mut().enumerate() { *b = 0xa0 + i as u8; }
         let cipher = Mars::new(&key).unwrap();
         let mut block = pt;
         cipher.encrypt_block(&mut block);
@@ -702,13 +680,9 @@ mod tests {
     #[test]
     fn mars_structured_256() {
         let mut key = [0u8; 32];
-        for (i, b) in key.iter_mut().enumerate() {
-            *b = 0x80 + i as u8;
-        }
+        for (i, b) in key.iter_mut().enumerate() { *b = 0x80 + i as u8; }
         let mut pt = [0u8; 16];
-        for (i, b) in pt.iter_mut().enumerate() {
-            *b = 0xf0 - i as u8;
-        }
+        for (i, b) in pt.iter_mut().enumerate() { *b = 0xf0 - i as u8; }
         let cipher = Mars::new(&key).unwrap();
         let mut block = pt;
         cipher.encrypt_block(&mut block);

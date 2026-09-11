@@ -299,7 +299,14 @@ pub fn self_tate_raw(
 
 /// Reduced Tate pairing `⟨P,Q⟩_r ∈ μ_r ⊂ F_p^*` for an **arbitrary** second
 /// argument `Q` (not necessarily in `⟨P⟩`), embedding degree 1 (`r | p−1`).
-pub fn tate_pairing(pp: (u64, u64), qq: (u64, u64), r: u64, a: u64, b: u64, p: u64) -> Option<u64> {
+pub fn tate_pairing(
+    pp: (u64, u64),
+    qq: (u64, u64),
+    r: u64,
+    a: u64,
+    b: u64,
+    p: u64,
+) -> Option<u64> {
     assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
     let exp = (p - 1) / r;
     for xs in 1..p {
@@ -352,19 +359,11 @@ pub fn eds_u64(a: u64, b: u64, x: u64, y: u64, p: u64, count: usize) -> Vec<u64>
     let a2 = mulm(a, a, p);
     let w2 = mulm(2, y, p);
     let w3 = {
-        let t = addm(
-            addm(mulm(3, x4, p), mulm(mulm(6, a, p), x2, p), p),
-            mulm(mulm(12, b, p), x, p),
-            p,
-        );
+        let t = addm(addm(mulm(3, x4, p), mulm(mulm(6, a, p), x2, p), p), mulm(mulm(12, b, p), x, p), p);
         subm(t, a2, p)
     };
     let w4 = {
-        let pos = addm(
-            addm(x6, mulm(mulm(5, a, p), x4, p), p),
-            mulm(mulm(20, b, p), x3, p),
-            p,
-        );
+        let pos = addm(addm(x6, mulm(mulm(5, a, p), x4, p), p), mulm(mulm(20, b, p), x3, p), p);
         let mut inner = subm(pos, mulm(mulm(5, a2, p), x2, p), p);
         inner = subm(inner, mulm(mulm(mulm(4, a, p), b, p), x, p), p);
         inner = subm(inner, mulm(8, mulm(b, b, p), p), p);
@@ -413,11 +412,7 @@ pub fn eds_multiplier_b(a: u64, b: u64, x: u64, y: u64, r: u64, p: u64) -> Optio
 pub fn find_embedding1_instance(p: u64, min_r: u64) -> Option<(u64, u64, (u64, u64), u64)> {
     for a in 0..30u64 {
         for b in 0..30u64 {
-            let disc = addm(
-                mulm(4, mulm(mulm(a, a, p), a, p), p),
-                mulm(27, mulm(b, b, p), p),
-                p,
-            );
+            let disc = addm(mulm(4, mulm(mulm(a, a, p), a, p), p), mulm(27, mulm(b, b, p), p), p);
             if disc == 0 {
                 continue;
             }
@@ -441,7 +436,7 @@ pub fn find_embedding1_instance(p: u64, min_r: u64) -> Option<(u64, u64, (u64, u
                 None => continue,
             };
             let gg = (n).gcd(&(p - 1)); // largest r dividing both n and p−1 is a divisor of this
-                                        // pick the largest even divisor of `gg` that is ≥ min_r
+            // pick the largest even divisor of `gg` that is ≥ min_r
             let mut r = 0u64;
             let mut d = 1u64;
             while d * d <= gg {
@@ -478,11 +473,7 @@ pub fn enumerate_embedding1(
     let mut out = Vec::new();
     for a in 0..40u64 {
         for b in 0..40u64 {
-            let disc = addm(
-                mulm(4, mulm(mulm(a, a, p), a, p), p),
-                mulm(27, mulm(b, b, p), p),
-                p,
-            );
+            let disc = addm(mulm(4, mulm(mulm(a, a, p), a, p), p), mulm(27, mulm(b, b, p), p), p);
             if disc == 0 {
                 continue;
             }
@@ -655,10 +646,7 @@ mod tests {
             }
         }
         assert!(total >= 12, "need supersingular instances, got {}", total);
-        assert_eq!(
-            agree, total,
-            "χ(B)=χ(f_{{r,P}}) on supersingular (embedding degree 2)"
-        );
+        assert_eq!(agree, total, "χ(B)=χ(f_{{r,P}}) on supersingular (embedding degree 2)");
         assert_eq!(sindep, total, "χ(f) must be S-independent on supersingular");
     }
 
@@ -674,12 +662,7 @@ mod tests {
                     Some(s) => s,
                     None => continue,
                 };
-                assert!(
-                    s.in_mu_r && s.bilinear,
-                    "pairing must be valid (p={},r={})",
-                    p,
-                    r
-                );
+                assert!(s.in_mu_r && s.bilinear, "pairing must be valid (p={},r={})", p, r);
                 if v2(r) == v2(p - 1) {
                     nd_total += 1;
                     if s.chi_tate == s.chi_b {
@@ -694,10 +677,7 @@ mod tests {
             }
         }
         assert!(nd_total >= 10, "need a populated nondegenerate regime");
-        assert_eq!(
-            nd_agree, nd_total,
-            "χ(B)=χ(⟨P,P⟩) must hold in nondeg regime"
-        );
+        assert_eq!(nd_agree, nd_total, "χ(B)=χ(⟨P,P⟩) must hold in nondeg regime");
         assert_eq!(forced_pos, forced_total, "forced regime ⇒ χ(⟨P,P⟩)=+1");
     }
 
@@ -711,7 +691,8 @@ mod tests {
         for p in [1009u64, 1013, 2003, 4099, 10007, 1019] {
             for a in 0..25u64 {
                 for b in 0..25u64 {
-                    let disc = (4 * mulm(mulm(a, a, p), a, p) + 27 * mulm(b, b, p)) % p;
+                    let disc =
+                        (4 * mulm(mulm(a, a, p), a, p) + 27 * mulm(b, b, p)) % p;
                     if disc == 0 {
                         continue;
                     }
@@ -764,16 +745,9 @@ mod tests {
                 }
             }
         }
-        assert!(
-            hi_emb >= 20,
-            "need embedding-degree>1 instances, got {}",
-            hi_emb
-        );
+        assert!(hi_emb >= 20, "need embedding-degree>1 instances, got {}", hi_emb);
         assert_eq!(sindep, total, "χ(f) must be S-independent for even r");
-        assert_eq!(
-            agree, total,
-            "χ(B)=χ(f_{{r,P}}) should lift to any embedding degree"
-        );
+        assert_eq!(agree, total, "χ(B)=χ(f_{{r,P}}) should lift to any embedding degree");
     }
 
     #[test]
@@ -808,22 +782,13 @@ mod tests {
                 // forced regime: reduced character is structurally trivial.
                 if v2(r) < v2(p - 1) {
                     forced += 1;
-                    assert_eq!(
-                        legendre(t1, p),
-                        1,
-                        "forced ⇒ χ(reduced)=+1 (p={},r={})",
-                        p,
-                        r
-                    );
+                    assert_eq!(legendre(t1, p), 1, "forced ⇒ χ(reduced)=+1 (p={},r={})", p, r);
                 }
             }
         }
         assert!(total >= 20, "need many even-r instances, got {}", total);
         assert!(forced >= 5, "need forced-regime instances, got {}", forced);
-        assert_eq!(
-            agree, total,
-            "χ(B)=χ(unreduced self-pairing) for all even r"
-        );
+        assert_eq!(agree, total, "χ(B)=χ(unreduced self-pairing) for all even r");
         assert_eq!(sindep, total, "χ(unreduced) must be S-independent (r even)");
     }
 

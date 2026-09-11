@@ -30,13 +30,15 @@
 //! 5. Repeat with more `r` values.  CRT-combine until the product
 //!    exceeds the order of Alice's curve — and you have `d`.
 
-use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
-use crate::cryptopals::set8_util::{biguint_to_bytes_be, crt_combine, hmac_sha256, parse_big};
+use crate::cryptopals::set8_util::{
+    biguint_to_bytes_be, crt_combine, hmac_sha256, parse_big,
+};
 use crate::cryptopals::Report;
+use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use num_bigint::{BigInt, BigUint, ToBigInt};
 use num_traits::{One, Zero};
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 
 /// Convert BigUint mod p (operates on signed BigInt internally to
 /// keep negatives sane).
@@ -190,7 +192,12 @@ fn rhs(curve: &Curve, x: &BigUint) -> BigUint {
 /// `curve_order`).  We pick random `x`, compute `y` via
 /// Tonelli-Shanks, then multiply by `curve_order / r`.  Restart if
 /// the result is the identity.
-pub fn random_point_of_order(curve: &Curve, curve_order: &BigUint, r: &BigUint, seed: u64) -> Pt {
+pub fn random_point_of_order(
+    curve: &Curve,
+    curve_order: &BigUint,
+    r: &BigUint,
+    seed: u64,
+) -> Pt {
     let mut rng = StdRng::seed_from_u64(seed);
     let cofactor = curve_order / r;
     let p = &curve.p;

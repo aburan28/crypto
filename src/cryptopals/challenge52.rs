@@ -70,7 +70,10 @@ pub fn weak_hash(message: &[u8], iv: &[u8], b_bytes: usize) -> Vec<u8> {
 /// Find a single-block collision under `compress(state, ·, b_bytes)`.
 /// Returns `(blockA, blockB, next_state)`.  Uses a hash-map birthday
 /// search; expected ~`2^(b_bytes·4)` queries.
-pub fn find_block_collision(state: &[u8], b_bytes: usize) -> ([u8; 16], [u8; 16], Vec<u8>) {
+pub fn find_block_collision(
+    state: &[u8],
+    b_bytes: usize,
+) -> ([u8; 16], [u8; 16], Vec<u8>) {
     let mut seen: HashMap<Vec<u8>, [u8; 16]> = HashMap::new();
     let mut block = [0u8; 16];
     let mut counter: u64 = 0;
@@ -135,7 +138,10 @@ pub fn expand_multicollision(pairs: &[([u8; 16], [u8; 16])]) -> Vec<Vec<u8>> {
 /// 1. Generate a `2^(b_g · 4)` multicollision in the `f`-hash.
 /// 2. Probe each multicollision member under `g`; expect a
 ///    collision after ~`2^(b_g · 4)` probes (birthday in `g`).
-pub fn cascade_collision(f_bytes: usize, g_bytes: usize) -> Option<(Vec<u8>, Vec<u8>)> {
+pub fn cascade_collision(
+    f_bytes: usize,
+    g_bytes: usize,
+) -> Option<(Vec<u8>, Vec<u8>)> {
     // Joux multicollision of size 2^n where n = b_g · 8 / 2.
     let n = g_bytes * 4;
     let iv_f = vec![0u8; f_bytes];
@@ -175,11 +181,7 @@ pub fn run() -> Report {
     r.line(format!("Final state    : {}", hex::encode(&final_state)));
     let h0 = weak_hash(&messages[0], &iv, b_bytes);
     let all_same = messages.iter().all(|m| weak_hash(m, &iv, b_bytes) == h0);
-    r.line(format!(
-        "All messages share hash {}: {}",
-        hex::encode(&h0),
-        all_same
-    ));
+    r.line(format!("All messages share hash {}: {}", hex::encode(&h0), all_same));
     assert!(all_same);
 
     // ── Part 2: cascade attack.  f = 16-bit, g = 24-bit. ──
