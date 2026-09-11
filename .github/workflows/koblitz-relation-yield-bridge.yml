@@ -37,6 +37,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/stage21-outer"
           python3 scripts/run_koblitz_relation_yield_bridge.py plan \
             --smoke \
+            --allow-dirty \
             --output "$RUNNER_TEMP/stage21-run" \
             --outer-stdout "$RUNNER_TEMP/stage21-outer/driver.stdout" \
             --outer-stderr "$RUNNER_TEMP/stage21-outer/driver.stderr" \
@@ -51,6 +52,14 @@ jobs:
           root = Path(os.environ["RUNNER_TEMP"])
           plan = json.loads((root / "stage21-plan.json").read_text())
           subprocess.run(plan["required_outer_meter_command"], check=True)
+          metrics = json.loads((root / "stage21-outer/driver.metrics.json").read_text())
+          if metrics["returncode"] != 0 or metrics["timed_out"] or metrics["orphan_group_terminated"]:
+              print((root / "stage21-outer/driver.stderr").read_text())
+              raise SystemExit(
+                  "metered Stage-21 smoke failed: "
+                  f"returncode={metrics['returncode']} timed_out={metrics['timed_out']} "
+                  f"orphan_group_terminated={metrics['orphan_group_terminated']}"
+              )
           PY
           python3 scripts/run_koblitz_relation_yield_bridge.py verify \
             --run-root "$RUNNER_TEMP/stage21-run" \
