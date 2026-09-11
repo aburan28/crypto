@@ -76,6 +76,7 @@ jobs:
             --outer-metrics "$RUNNER_TEMP/stage21-outer/driver.metrics.json" \
             --output "$RUNNER_TEMP/stage21-verification"
           python3 - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
