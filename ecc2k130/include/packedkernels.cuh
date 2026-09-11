@@ -34,17 +34,46 @@ namespace eccPacked131 {
 #if ECC_PACKED_POLY_STATE && (!ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_POLY_STATE requires the denominator cache and polynomial chains"
 #endif
+#ifndef ECC_PACKED_STATE_TILE
+#define ECC_PACKED_STATE_TILE 0
+#endif
+#if ECC_PACKED_STATE_TILE != 0 && ECC_PACKED_STATE_TILE != 256
+#error "ECC_PACKED_STATE_TILE must be 0 or 256"
+#endif
+#if ECC_PACKED_STATE_TILE && (!ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
+#error "ECC_PACKED_STATE_TILE requires polynomial state, denominator cache and polynomial chains"
+#endif
+#if ECC_PACKED_STATE_TILE && ECC_THREADS != 256
+#error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256"
+#endif
+#if ECC_PACKED_STATE_TILE
+ECC_HD size_t physicalStateThreads(size_t threads) {
+    return ((threads + 255) / 256) * 256;
+}
+ECC_HD size_t stateWordIndex(int slot, int word, int tid) {
+    return ((size_t(tid) / 256 * ECC_BATCH * 5 + size_t(slot) * 5 + word) * 256)
+           + size_t(tid) % 256;
+}
+#endif
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
     P131 a;
 #pragma unroll
+#if ECC_PACKED_STATE_TILE
+    for (int i = 0; i < 5; ++i) a.v[i] = p[stateWordIndex(slot, i, tid)];
+#else
     for (int i = 0; i < 5; ++i) a.v[i] = p[(size_t(slot) * 5 + i) * threads + tid];
+#endif
     return a;
 }
 __device__ __forceinline__ void store(unsigned *p, int slot, int tid, int threads, P131 a) {
 #pragma unroll
+#if ECC_PACKED_STATE_TILE
+    for (int i = 0; i < 5; ++i) p[stateWordIndex(slot, i, tid)] = a.v[i];
+#else
     for (int i = 0; i < 5; ++i) p[(size_t(slot) * 5 + i) * threads + tid] = a.v[i];
+#endif
 }
 __device__ __forceinline__ void toLimbs(P131 a, unsigned long long *out) {
     out[0] = a.v[0] | (static_cast<unsigned long long>(a.v[1]) << 32);

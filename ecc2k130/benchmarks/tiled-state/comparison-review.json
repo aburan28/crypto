@@ -1,0 +1,244 @@
+{
+  "valid": true,
+  "scope": "Independent retained-result audit. No compiler, GPU, client or host-suite calls.",
+  "rawSha256": "87e60bd3da41f80066bfed5057b2830e16c24743c40572c5172a3ca473d12b31",
+  "driverSha256": "dc738766d5a47846f12bcfdcdbb894c88498ca76af306d83b604c2ba0aa09f34",
+  "bindingsSha256": "94219930f2cb83b84a038a5752c02b2e69e57807cb50b0eb9dfe6c9d9d91f843",
+  "sourceManifestSha256": "91c4f7b1455dd7a0179542164a0691a4c4ebd89c5984703b8125da0031316f30",
+  "gpuIdentity": [
+    "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "GPU-4f844343-cb0d-f475-87e9-6482327eb1c8",
+    "580.95.05"
+  ],
+  "cpuCodeAndResourcesMatch": true,
+  "fullArithmeticAndIntegrationPassed": true,
+  "layoutSlots": [
+    64,
+    16384
+  ],
+  "crossCheckpointWorkers": [
+    8,
+    257
+  ],
+  "crossCheckpointCommands": 12,
+  "timedRows": [
+    {
+      "name": "control",
+      "phase": "warmup",
+      "repeat": 0,
+      "rate": 6948.007,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "warmup",
+      "repeat": 0,
+      "rate": 7006.875,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "screen",
+      "repeat": 0,
+      "rate": 6850.383,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "screen",
+      "repeat": 1,
+      "rate": 6994.776,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "screen",
+      "repeat": 2,
+      "rate": 6853.97,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "confirmation",
+      "repeat": 0,
+      "rate": 6847.417,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "confirmation",
+      "repeat": 1,
+      "rate": 6852.888,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "confirmation",
+      "repeat": 2,
+      "rate": 6855.23,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "confirmation",
+      "repeat": 0,
+      "rate": 6991.535,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "confirmation",
+      "repeat": 1,
+      "rate": 6994.745,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "confirmation",
+      "repeat": 2,
+      "rate": 6995.327,
+      "iterations": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "collection",
+      "repeat": 0,
+      "rate": 6769.657,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "collection",
+      "repeat": 1,
+      "rate": 6766.691,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "control",
+      "phase": "collection",
+      "repeat": 2,
+      "rate": 6764.705,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "collection",
+      "repeat": 0,
+      "rate": 6897.658,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "collection",
+      "repeat": 1,
+      "rate": 6894.273,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    },
+    {
+      "name": "candidate",
+      "phase": "collection",
+      "repeat": 2,
+      "rate": 6894.434,
+      "iterations": 201863462912,
+      "reports": 5149,
+      "verified": 0,
+      "dropped": 0
+    }
+  ],
+  "allTimedCounts": 201863462912,
+  "screenRatesM": [
+    6850.383,
+    6994.776,
+    6853.97
+  ],
+  "qualificationThresholdM": 6888.23985,
+  "qualified": true,
+  "summaries": {
+    "confirmation": {
+      "control": {
+        "median": 6852.888,
+        "minimum": 6847.417,
+        "maximum": 6855.23
+      },
+      "candidate": {
+        "median": 6994.745,
+        "minimum": 6991.535,
+        "maximum": 6995.327
+      },
+      "candidateGainPercent": 2.0700323717533387
+    },
+    "collection": {
+      "control": {
+        "median": 6766.691,
+        "minimum": 6764.705,
+        "maximum": 6769.657
+      },
+      "candidate": {
+        "median": 6894.434,
+        "minimum": 6894.273,
+        "maximum": 6897.658
+      },
+      "candidateGainPercent": 1.8878207974917238
+    }
+  },
+  "corpusIdentity": {
+    "sha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b",
+    "bytes": 164768,
+    "records": 5149
+  },
+  "limits": [
+    "No compiler, GPU, client or prior host tests rerun.",
+    "Checkpoint/corpus equality is audited from source-bound producer receipts and matching recorded hashes; temporary raw files are not present for independent redecoding.",
+    "No claim about page size, TLB/cache cause or hardware ceiling.",
+    "Comparison keeps public generated-product arithmetic enabled in both modes and changes STATE_TILE0/256 under CUDA13.3."
+  ],
+  "reviewScriptSha256": "e73214a496b9620b7d8168b3c4abb2f4f13bdc8b7cd7489beb63d55daf77ec65"
+}

@@ -409,6 +409,9 @@ struct CudaEngine {
 
     virtual ~CudaEngine() = default;
     virtual size_t fieldCount() const { return (size_t)P.threads * BATCH * M; }
+    // Device field allocations may include physical-layout padding. Checkpoint
+    // headers and payload sizes continue to use the logical fieldCount().
+    virtual size_t physicalFieldCount() const { return fieldCount(); }
     size_t slotCount() const { return (size_t)P.threads * BATCH; }
     virtual size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
     virtual unsigned checkpointVersion() const { return 1u; }
@@ -434,13 +437,17 @@ struct CudaEngine {
         h.runId = runId;
         h.iterBase = iterBase;
         bool ok = fwrite(&h, sizeof h, 1, f) == 1;
-        std::vector<W> fbuf(fieldCount());
+        std::vector<W> fbuf;
         std::vector<W> sbuf(slotCount());
         std::vector<u64> lbuf(laneCount());
         const W *fields[2] = {P.x, P.y};
         for (int i = 0; i < 2 && ok; ++i) {
+            // Export may resize staging to the logical checkpoint field size.
+            // Restore the physical transfer length independently for X and Y.
+            fbuf.resize(physicalFieldCount());
             CUDA_CHECK(cudaMemcpy(fbuf.data(), fields[i], fbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
             exportCheckpointField(fbuf);
+            if (fbuf.size() != fieldCount()) { ok = false; break; }
             ok = fwrite(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
         }
         if (ok) {
@@ -473,9 +480,12 @@ struct CudaEngine {
         std::vector<u64> lbuf(laneCount());
         W *fields[2] = {P.x, P.y};
         for (int i = 0; i < 2 && ok; ++i) {
+            // Import may expand staging into a padded physical field.
+            fbuf.resize(fieldCount());
             ok = fread(fbuf.data(), sizeof(W), fbuf.size(), f) == fbuf.size();
             if (ok) {
                 importCheckpointField(fbuf);
+                if (fbuf.size() != physicalFieldCount()) { ok = false; break; }
                 CUDA_CHECK(cudaMemcpy(fields[i], fbuf.data(), fbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
             }
         }

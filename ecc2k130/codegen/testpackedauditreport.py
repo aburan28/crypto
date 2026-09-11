@@ -17,7 +17,7 @@ class PackedAuditCountTests(unittest.TestCase):
         modePath = path.with_name('modal_app.py')
         modeHelper = next(node for node in ast.parse(modePath.read_text()).body
                           if isinstance(node, ast.FunctionDef) and node.name == 'checkPackedReduction')
-        modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0')
+        modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0', PACKED_STATE_TILE='0')
         exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
         namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
                          checkPackedReduction=modeNamespace['checkPackedReduction']))
@@ -31,6 +31,7 @@ class PackedAuditCountTests(unittest.TestCase):
                 f'dp weight {weight}, 1024 steps per launch\n'
                 'packed direct reduction: 0\n'
                 'packed generated product: 0\n'
+                'packed state tile: 0\n'
                 f'1.0 s 6000.000 M it/s {expected // 2} iterations 0 dp 0 stored 0 dropped\n'
                 f'2.0 s 6000.000 M it/s {expected} iterations 0 dp 0 stored 0 dropped\n'
                 'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
@@ -64,6 +65,9 @@ class PackedAuditCountTests(unittest.TestCase):
             'missing generated product': raw.replace('packed generated product: 0\n', ''),
             'wrong generated product': raw.replace('packed generated product: 0', 'packed generated product: 1'),
             'duplicate generated product': raw + 'packed generated product: 0\n',
+            'missing tile': raw.replace('packed state tile: 0\n', ''),
+            'wrong tile': raw.replace('packed state tile: 0', 'packed state tile: 256'),
+            'duplicate malformed tile': raw + 'packed state tile: 1\n',
             'drops': raw.replace('0 dropped', '1 dropped'),
             'nonfinite': raw.replace('finished: 6000.000', 'finished: nan'),
         }
