@@ -235,12 +235,17 @@ and resumed without redoing finished work:
 1. **select** — the factor base, either an explicit recipe or the
    best-by-census candidate of the factor-base search; written as
    `factor_base.json`.
-2. **logs** — the factor-base logarithm database over that base
-   (`logs.json`), every column certified by `[x]G == R`.
-3. **solve** — each target descended with one relation reusing the
+2. **collect** — relations, in work units (see below); each unit is
+   written as `relations/unit-NNNNN.json`.
+3. **logs** — the units are merged, every relation re-verified in the
+   group and deduplicated, and the factor-base logarithm database solved
+   (`logs.json`), every column certified by `[x]G == R`. If the
+   relations do not yet determine every column, further units are
+   collected up to `collection.max_units`.
+4. **solve** — each target descended with one relation reusing the
    database; `solutions.json` is rewritten after every target, so an
    interrupted run resumes at the first unsolved one. The pair table is
-   built once for the whole batch.
+   built once per process and shared by collection and descent.
 
 `state.json` records a BLAKE3 digest of the parameter file and each
 stage's status. A rerun in the same directory reloads existing
@@ -248,7 +253,47 @@ artifacts, re-verifies them against the reconstructed curve (a stale or
 tampered artifact is an error, never trusted), and continues from the
 first incomplete stage; a parameter file whose digest differs is refused
 so one directory never mixes two experiments. Artifacts are written
-atomically. `--stop-after select|logs|solve` ends the run early.
+atomically. `--stop-after select|collect|logs|solve` ends the run early.
+
+### Distributed relation collection
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 0-3    # worker A
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 4-7    # worker B
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31                        # merge, solve, descend
+
+Relation collection is embarrassingly parallel, and the workflow splits
+it the way a sieve is split into `q`-ranges. The probe scalar of trial
+`t` depends only on the parameter seed and `t`, so the probe sequence
+is one fixed, reproducible sequence; a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it. Any process with the
+parameter file (and `factor_base.json`, when the base came from the
+search) can run a set of units with `--collect-units` — it writes
+`relations/unit-NNNNN.json` for each and stops — and the files from
+several workers or machines are simply placed in the run directory. The
+driver without `--collect-units` collects whatever units of the first
+`collection.units` are still missing itself, then merges everything
+present. Inside a unit the trials run in parallel over the cores.
+
+A relation file carries only the probe scalar and the factor-base point
+indices of each relation, bound to the parameter digest, curve, factor
+base and summand count. On merge every relation is re-verified in the
+group (`[a]G == Σ P_i`, exactly `m` indices, all in range) and exact
+duplicates are dropped, so a corrupt or forged file cannot poison the
+database — a rejected relation is counted, never used — and a file from
+another run or base is ignored, not merged. Partition invariance is
+tested: the union of any set of units equals the relations of a
+single-process run over the same range, and `ic logs` itself now draws
+its probes from the same sequence in parallel batches.
+
+Parameters (`collection`, all optional):
+
+    "collection":{"unit_trials":4096,"units":4,"max_units":64}
+
+`unit_trials` probes per unit; `units` the number the driver collects
+before the first solve; `max_units` the most it may collect when the
+relations do not yet determine every column. The report's collect stage
+lists the units present, run and ignored; the logs stage reports the
+relations loaded, rejected and deduplicated and which units were used.
 
 A parameter file (schema_version 1):
 
@@ -257,6 +302,7 @@ A parameter file (schema_version 1):
      "linear_algebra":{"mode":"sparse",
                        "sparse":{"wiedemann":{"block_m":4,"block_n":4},
                                  "filter":{"target_excess":32,"merge_max_weight":8}}},
+     "collection":{"unit_trials":4096,"units":4,"max_units":64},
      "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
                     "max_dimension":11,"targets":256,"saturate":false},
      "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
@@ -268,9 +314,11 @@ instance: `known_log` names the scalar, `random_seed` draws one
 reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
 or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
 filtering + block Wiedemann, with every knob of the sparse solver under
-`sparse`) or `dense`. The report lists every stage with whether it ran
-or was reused — the logs stage with its linear-algebra statistics — and
-every solution with its expected and recovered scalar.
+`sparse`) or `dense`. `collection` sizes the work units (above). The
+report lists every stage with whether it ran or was reused — the collect
+stage with its units, the logs stage with its verification counts and
+linear-algebra statistics — and every solution with its expected and
+recovered scalar.
 
 ## Random fixtures and custom parameters
 
