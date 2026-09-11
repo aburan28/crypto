@@ -239,6 +239,25 @@ python3 and no FPGA toolchain.
 | `ecc_mul131.v` | 16,494 | 12 | 10,765 | 12 clk | 1 |
 | `ecc_hamming131.v` | 268 | 3 | 40 | 3 clk | 1 |
 | `ecc_sigma131.v` | **0** | — | — | combinational | — |
+| `ecc_pre131.v` | 2,887 | 3 | 1,612 | 3 clk | 1 |
+| `ecc_post131.v` | 33,641 | 24 | 29,765 | 24 clk | 1 |
+| `ecc_inv131.v` | 8 × `ecc_mul131` | — | — | 96 clk | 1 |
+
+`ecc_pre131` and `ecc_post131` are the walk's two passes, split exactly as
+`include/walk.h` splits them. The asymmetry is the whole point: **pass 1 costs
+no multiplication at all** — weight tree, three conditional squarings, and the
+XORs that form `d = x + sigma^j(x)` and `e = y + sigma^j(y)` — while pass 2 is
+two multiplications, `lam = e·d^-1` and `lam·(x + x3)`. 2,887 gates against
+33,641.
+
+`ecc_inv131` is Itoh-Tsujii, derived from the same addition chain
+`FieldBs::inv` uses: 8 multiplications for m − 1 = 130, which is optimal, with
+every intermediate squaring a permutation. It is emitted structurally, as 8
+instances of the verified multiplier plus the wiring, so it inherits the
+multiplier's verification. One inverter is ~44,500 LUT6, about 5% of a VU47P,
+and Montgomery's trick means a device needs very few — which is why unrolling
+it is affordable here and was not on the published Spartan-6 designs, where 8
+multipliers would have been most of the chip.
 
 The multiplier is the leaf-9 conversion multiplier, so its 16,494 gates are the
 same 16,494 that §2 maps to 5,563 LUT6: the RTL and the area analysis describe
@@ -262,7 +281,29 @@ as synchronous circuits and compares against `field.Onb`:
 ecc_mul131.v: PASS -- 8 multiplications, II=1, latency 12 clk, checked against field.Onb
 ecc_hamming131.v: PASS -- 8 weights, II=1, latency 3 clk
 ecc_sigma131.v: PASS -- sigma^(3+sel) for all 8 selects, 4 elements, 0 gates
+ecc_pre131.v: PASS -- 8 steps, II=1, latency 3 clk, weight and sigma^j addends match field.Onb
+ecc_post131.v: PASS -- 8 additions, II=1, latency 24 clk, points match curves.Curve
+walk step: PASS -- 4 iterations of sigma^j(R)+R through ecc_pre and ecc_post, every
+                   result on the curve and equal to curves.Curve
 ```
+
+A real simulator now checks the same modules independently: `make -C
+hdl/ecc2k130` runs the generated testbenches and the sequencer's under Icarus
+Verilog.
+
+```
+PASS: 16 multiplications, II=1, latency 12 clk
+PASS: 16 inversions, II=1, latency 96 clk
+PASS: 124 walks x 3 steps retired, II=1, ring latency 124 clk, 517 distinguished
+      points, all trajectories match curves.Curve
+```
+
+Both paths agreeing matters, because they fail differently. The Python checker
+found nothing a simulator would not, but it runs with no toolchain at all. The
+simulator immediately found what the Python checker structurally could not: the
+valid pipeline had no initialiser, so it powered up as X and claimed valid
+before the pipeline had filled. Data was never wrong — every product matched —
+but a downstream consumer would have latched garbage on the first 12 clocks.
 
 It recovers the latency and the initiation interval from the simulated
 waveform rather than trusting the module header, so the two properties an
@@ -281,15 +322,57 @@ cores that is 1.55 M flip-flops of 2.61 M, or 59%. The design stays LUT-bound,
 so §4's conclusion holds, but the flip-flop margin is thinner than estimated
 and a 2-levels-per-stage variant is now clearly out of reach.
 
-**What is not built.** The datapath only — which is the part with the
-engineering, on the same split [`hdl/ecc/README.md`](../hdl/ecc/README.md)
-makes. Missing: the rho sequencer (walk state, distinguished-point FIFO, host
-IO), the Itoh-Tsujii inverter and the dual-buffer Montgomery batching that
-shares it across cores, and the point-addition schedule around the multiplier.
-Those are bookkeeping in the sense that the CUDA client already defines their
-semantics, not in the sense that they are free.
+## 7. The sequencer
 
-## 7. What would settle it, in order
+[`hdl/ecc2k130/ecc_rho_core.v`](../hdl/ecc2k130/ecc_rho_core.v) is one complete
+rho core. It is hand written, because it is control rather than arithmetic, and
+it turned out to need **no state machine at all**: every generated block has
+II = 1 and no back pressure, so the ring the published designs describe is
+literally a ring.
+
+```
+load ->|                                                        |
+       +--> ecc_pre --> ecc_inv --> [state RAM] --> ecc_post ----+
+              3 clk       96 clk        1 clk         24 clk
+```
+
+A walk re-enters `ecc_pre` 124 clocks after it left, so 124 walks are resident
+and each advances one step per 124 clocks — while the core retires **one step
+per clock**, which is the number that matters. Two details are load-bearing:
+
+* **The in-flight state is a RAM, not a delay line.** `ecc_post` needs x, y, d
+  and e at the moment `d^-1` arrives, 96 clocks later. Registers would cost
+  4 × 131 × 96 = 50,304 flip-flops per core, and §4 shows flip-flops are the
+  second-scarcest resource; a RAM indexed by the walk's tag costs 2 block RAMs.
+* **The tag is the whole mechanism.** Each block carries an opaque tag beside
+  the operands and never inspects it, so results route back to the right walk
+  with no matching logic — the arrangement
+  [`hdl/ecc/ec_add_pipe.vhd`](../hdl/ecc/ec_add_pipe.vhd) already uses.
+
+Distinguished points leave through a report port and the host supplies
+replacement start points, as in the published designs: building a start point is
+128 point additions and has no business inside the ring.
+
+`tb_ecc_rho_core.v` loads one start point per slot from `curves.Curve`, lets the
+ring free-run, and checks every retired step against that walk's reference
+trajectory, that a step retires on every clock once full, and that nothing is
+reported distinguished unless its weight really is within the cutoff. 372 steps,
+all matching.
+
+**One honest gap.** This core inverts every denominator directly, so it costs
+2 + 8 = **10 multiplications per step**, not the 5.125 that §3's area numbers
+assume. Montgomery's trick is what closes that: batching B denominators costs
+3 + 8/B each, and §3's 5.33 multipliers per core depends on it. So the core is
+correct but currently buys its correctness at about **half** the throughput per
+LUT that §4 and §5 project. The batching engine is the next piece, and this
+core is the reference it has to stay bit-exact against.
+
+**What else is not built.** Host IO (the report FIFO's PCIe or HBM side), the
+start-point generator, and multi-core instantiation with a shared inverter. And
+**nothing has been synthesised**, so every area and clock number here is still
+derived rather than measured.
+
+## 8. What would settle it, in order
 
 1. ~~**A Verilog backend for `ir.Prog`.**~~ Done — §6. The datapath is now
    generated from the same IR the CUDA client is built from and checked against
@@ -313,7 +396,7 @@ with measurements, do not. The GPU client exists, works, and is audited; an
 FPGA client is still a quarter of engineering for a number that may not beat
 it.
 
-## 8. Reproducing
+## 9. Reproducing
 
 ```bash
 cd ecc2k130/benchmarks/fpga-lut && python3 lutmap.py --json result.json

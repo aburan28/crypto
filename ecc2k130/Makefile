@@ -17,6 +17,8 @@
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
+IVERILOG ?= iverilog
+VVP     ?= vvp
 NVCC    ?= nvcc
 CXX     ?= g++
 CLANG   ?= clang
@@ -99,6 +101,13 @@ verilog:
 # emission (stage crossings, register chains, output wiring), not the IR.
 check-verilog:
 	cd codegen && python3 testverilog.py --rtl ../generated/rtl
+
+# Run the same RTL under a real simulator, plus the rho sequencer's testbench.
+# Needs Icarus Verilog; check-verilog needs nothing but python3.
+sim: verilog
+	cd generated/rtl && $(IVERILOG) -g2012 -o tb_mul.vvp ecc_mul131.v tb_ecc_mul131.v && $(VVP) tb_mul.vvp
+	cd generated/rtl && $(IVERILOG) -g2012 -o tb_inv.vvp ecc_mul131.v ecc_delay.v ecc_inv131.v tb_ecc_inv131.v && $(VVP) tb_inv.vvp
+	$(MAKE) -C ../hdl/ecc2k130
 
 cpu: ecc2k130-cpu
 

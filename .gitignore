@@ -34,6 +34,9 @@ gpu/ecc/bench
 hdl/**/*.o
 hdl/**/*.cf
 hdl/**/e~*
+
+# Icarus Verilog compiled testbenches (make sim / make -C hdl/ecc2k130)
+*.vvp
 gpu/ecc2k/curve_*.h
 gpu/ecc2k/vec_*.h
 gpu/ecc2k/test_ecc2k95

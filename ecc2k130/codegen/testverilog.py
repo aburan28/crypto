@@ -9,11 +9,23 @@
 # output tied to the wrong wire.  None of those show up in the IR.
 #
 # So this reads the .v files as text, parses them with a small evaluator that
-# knows nothing about the generator, and runs them as a synchronous circuit:
-# drive one operand pair per clock, advance the registers, and compare the
-# output stream against field.Onb.  It also recovers the latency and the
-# initiation interval from the simulated waveform rather than trusting the
-# module header, which is the pair of claims an FPGA design lives on.
+# knows nothing about the generator, and runs them as synchronous circuits:
+# drive one input set per clock, advance the registers, and compare the output
+# stream against field.Onb.  It also recovers the latency and the initiation
+# interval from the simulated waveform rather than trusting the module header,
+# which is the pair of claims an interleaved datapath lives on.
+#
+# The last check is the one that matters most: ecc_pre and ecc_post are driven
+# back to back on a real curve point, with the inversion done in Python where
+# the batch inverter would do it in hardware, and the result compared against
+# sigma^j(R) + R computed by curves.Curve.  That is one whole walk step of the
+# datapath, checked against the model the CPU and CUDA clients are checked
+# against.
+#
+# Field elements have a redundant coordinate representation (the all-ones vector
+# is zero), so element comparisons go through fromCoords/toCoords rather than
+# comparing raw words.  Weights do not: HW is taken of the stored coordinates,
+# exactly as the client does, so those are compared as integers.
 #
 # This is not a substitute for a real simulator -- it covers the subset of
 # Verilog the generator emits and nothing else.  tb_ecc_mul131.v is there for
@@ -26,6 +38,7 @@ import os
 import random
 import re
 
+import curves
 import field
 
 WIRE = re.compile(r'^\s*wire\s+(w\d+)\s*=\s*(.+);\s*$')
@@ -37,11 +50,7 @@ MUX = re.compile(r"^\s*wire\s+\[\d+:0\]\s+(\w+)\s*=\s*sel\[(\d)\]\s*\?\s*(\w+)\s
 
 
 def parseModule(path):
-    """Parse the subset of Verilog genverilog.py emits.
-
-    Returns the combinational assignments in emission (topological) order, the
-    register transfers, the output bit map and the latency the header claims.
-    """
+    """Parse the subset of Verilog genverilog.py emits."""
     assigns = []
     regs = []
     outputs = {}
@@ -137,10 +146,11 @@ def lookup(name, vals):
     return vals[name]
 
 
-def simulate(assigns, regs, outputs, outName, width, drive, cycles):
-    """Run the circuit for `cycles` clocks.  drive(t) sets the input bits.
+def simulate(assigns, regs, outputs, wants, drive, cycles):
+    """Run the circuit for `cycles` clocks.
 
-    Returns the output word sampled at the end of every cycle.
+    `drive(t)` returns the input bits for clock t; `wants` is [(port, width)].
+    Returns one dict of port -> word per clock.
     """
     vals = {}
     for name, _ in regs:
@@ -150,12 +160,15 @@ def simulate(assigns, regs, outputs, outName, width, drive, cycles):
         vals.update(drive(t))
         for name, tok in assigns:
             vals[name] = evalExpr(tok, vals)
-        word = 0
-        for k in range(width):
-            src = outputs[outName].get(k)
-            if src is not None and lookup(src, vals):
-                word |= 1 << k
-        trace.append(word)
+        sample = {}
+        for port, width in wants:
+            word = 0
+            for k in range(width):
+                src = outputs[port].get(k)
+                if src is not None and lookup(src, vals):
+                    word |= 1 << k
+            sample[port] = word
+        trace.append(sample)
         nxt = {}
         for dst, src in regs:
             nxt[dst] = lookup(src, vals)
@@ -169,42 +182,50 @@ def findLatency(trace, expected):
     for d in range(len(trace) - n + 1):
         ok = True
         for i in range(n):
-            if trace[d + i] != expected[i]:
-                ok = False
+            for port in expected[i]:
+                if trace[d + i][port] != expected[i][port]:
+                    ok = False
+                    break
+            if not ok:
                 break
         if ok:
             return d
     return None
 
 
-def driveWords(names, widths, words):
+def driveWords(pairs):
+    """pairs is [(portName, width, word)] -> the flat bit dict the sim wants."""
     bits = {}
-    for k in range(len(names)):
-        for i in range(widths[k]):
-            bits['%s[%d]' % (names[k], i)] = (words[k] >> i) & 1
+    for port, width, word in pairs:
+        for i in range(width):
+            bits['%s[%d]' % (port, i)] = (word >> i) & 1
     return bits
+
+
+def sameElement(onb, word, element):
+    """Compare a coordinate word against a field element, up to representation."""
+    return onb.toCoords(onb.fromCoords(word)) == onb.toCoords(element)
 
 
 def checkMul(rtl, m, onb, rng, count):
     path = os.path.join(rtl, 'ecc_mul%d.v' % m)
     assigns, regs, outputs, claimed = parseModule(path)
     vectors = []
-    for k in range(count):
+    for _ in range(count):
         u = onb.randomElement(rng)
         v = onb.randomElement(rng)
         vectors.append((onb.toCoords(u), onb.toCoords(v),
                         onb.toCoords(onb.mul(u, v))))
-    idle = (0, 0, 0)
 
     def drive(t):
-        row = vectors[t] if t < len(vectors) else idle
-        return driveWords(['a', 'b'], [m, m], [row[0], row[1]])
+        row = vectors[t] if t < len(vectors) else (0, 0, 0)
+        return driveWords([('a', m, row[0]), ('b', m, row[1])])
 
-    cycles = count + claimed + 4
-    trace = simulate(assigns, regs, outputs, 'p', m, drive, cycles)
+    trace = simulate(assigns, regs, outputs, [('p', m)], drive,
+                     count + claimed + 4)
     expected = []
     for row in vectors:
-        expected.append(row[2])
+        expected.append({'p': row[2]})
     got = findLatency(trace, expected)
     if got is None:
         raise RuntimeError('ecc_mul%d: product stream never matched field.Onb' % m)
@@ -213,7 +234,6 @@ def checkMul(rtl, m, onb, rng, count):
                            % (m, got, claimed))
     print('ecc_mul%d.v: PASS -- %d multiplications, II=1, latency %d clk, '
           'checked against field.Onb' % (m, count, got))
-    return got
 
 
 def checkHamming(rtl, m, nBits, rng, count):
@@ -225,18 +245,177 @@ def checkHamming(rtl, m, nBits, rng, count):
 
     def drive(t):
         word = vectors[t] if t < len(vectors) else 0
-        return driveWords(['x'], [m], [word])
+        return driveWords([('x', m, word)])
 
-    trace = simulate(assigns, regs, outputs, 'hw', nBits, drive,
+    trace = simulate(assigns, regs, outputs, [('hw', nBits)], drive,
                      count + claimed + 4)
     expected = []
     for v in vectors:
-        expected.append(bin(v).count('1'))
+        expected.append({'hw': bin(v).count('1')})
     got = findLatency(trace, expected)
     if got is None:
         raise RuntimeError('ecc_hamming%d: weights never matched popcount' % m)
     print('ecc_hamming%d.v: PASS -- %d weights, II=1, latency %d clk'
           % (m, count, got))
+
+
+def preReference(onb, m, nBits, xWord, yWord):
+    """What ecc_pre must produce: weight, then d and e for sigma^j."""
+    weight = bin(xWord).count('1')
+    j = 3 + ((weight // 2) % 8)
+    xu = onb.fromCoords(xWord)
+    yu = onb.fromCoords(yWord)
+    d = onb.add(xu, onb.frob(xu, j))
+    e = onb.add(yu, onb.frob(yu, j))
+    return weight, j, d, e
+
+
+def checkPre(rtl, m, nBits, onb, rng, count):
+    path = os.path.join(rtl, 'ecc_pre%d.v' % m)
+    assigns, regs, outputs, claimed = parseModule(path)
+    vectors = []
+    for _ in range(count):
+        xw = onb.toCoords(onb.randomElement(rng))
+        yw = onb.toCoords(onb.randomElement(rng))
+        vectors.append((xw, yw))
+
+    def drive(t):
+        row = vectors[t] if t < len(vectors) else (0, 0)
+        return driveWords([('x', m, row[0]), ('y', m, row[1])])
+
+    wants = [('d', m), ('e', m), ('hw', nBits)]
+    trace = simulate(assigns, regs, outputs, wants, drive, count + claimed + 4)
+    # the weight decides sigma^j, so check it first and the addends through it
+    expected = []
+    for xw, yw in vectors:
+        weight, _, d, e = preReference(onb, m, nBits, xw, yw)
+        expected.append({'hw': weight})
+    got = findLatency(trace, expected)
+    if got is None:
+        raise RuntimeError('ecc_pre%d: weights never matched popcount' % m)
+    for i in range(count):
+        xw, yw = vectors[i]
+        weight, j, d, e = preReference(onb, m, nBits, xw, yw)
+        sample = trace[got + i]
+        if not sameElement(onb, sample['d'], d):
+            raise RuntimeError('ecc_pre%d: vector %d denominator wrong (j=%d)'
+                               % (m, i, j))
+        if not sameElement(onb, sample['e'], e):
+            raise RuntimeError('ecc_pre%d: vector %d numerator wrong (j=%d)'
+                               % (m, i, j))
+    print('ecc_pre%d.v: PASS -- %d steps, II=1, latency %d clk, weight and '
+          'sigma^j addends match field.Onb, 0 multiplications'
+          % (m, count, got))
+
+
+def checkPost(rtl, m, onb, curve, rng, count):
+    """Drive ecc_post on real curve points and check sigma^j(R) + R."""
+    path = os.path.join(rtl, 'ecc_post%d.v' % m)
+    assigns, regs, outputs, claimed = parseModule(path)
+    vectors = []
+    while len(vectors) < count:
+        point = curve.pointFromX(onb.randomElement(rng))
+        if point is None:
+            continue
+        xu, yu = point
+        xw = onb.toCoords(xu)
+        weight = bin(xw).count('1')
+        j = 3 + ((weight // 2) % 8)
+        other = curve.frob(point, j)
+        d = onb.add(xu, other[0])
+        if onb.toCoords(d) == 0:
+            continue
+        e = onb.add(yu, other[1])
+        want = curve.add(point, other)
+        if want is None:
+            continue
+        vectors.append((xw, onb.toCoords(yu), onb.toCoords(d), onb.toCoords(e),
+                        onb.toCoords(onb.inv(d)), want))
+
+    def drive(t):
+        row = vectors[t] if t < len(vectors) else (0, 0, 0, 0, 0, None)
+        return driveWords([('x', m, row[0]), ('y', m, row[1]),
+                           ('d', m, row[2]), ('e', m, row[3]),
+                           ('di', m, row[4])])
+
+    wants = [('x3', m), ('y3', m)]
+    trace = simulate(assigns, regs, outputs, wants, drive, count + claimed + 4)
+    expected = []
+    for row in vectors:
+        expected.append({'x3': onb.toCoords(row[5][0])})
+    got = findLatency(trace, expected)
+    if got is None:
+        raise RuntimeError('ecc_post%d: x3 never matched curves.Curve' % m)
+    for i in range(count):
+        want = vectors[i][5]
+        sample = trace[got + i]
+        if not sameElement(onb, sample['x3'], want[0]):
+            raise RuntimeError('ecc_post%d: vector %d x3 wrong' % (m, i))
+        if not sameElement(onb, sample['y3'], want[1]):
+            raise RuntimeError('ecc_post%d: vector %d y3 wrong' % (m, i))
+    print('ecc_post%d.v: PASS -- %d additions, II=1, latency %d clk, points '
+          'match curves.Curve, 2 multiplications' % (m, count, got))
+    return got
+
+
+def checkStep(rtl, m, nBits, onb, curve, rng, count):
+    """One whole walk step through both blocks: R -> sigma^j(R) + R."""
+    preA, preR, preO, preLat = parseModule(os.path.join(rtl, 'ecc_pre%d.v' % m))
+    postA, postR, postO, postLat = parseModule(os.path.join(rtl, 'ecc_post%d.v' % m))
+    points = []
+    while len(points) < count:
+        point = curve.pointFromX(onb.randomElement(rng))
+        if point is None:
+            continue
+        weight = bin(onb.toCoords(point[0])).count('1')
+        j = 3 + ((weight // 2) % 8)
+        other = curve.frob(point, j)
+        if onb.toCoords(onb.add(point[0], other[0])) == 0:
+            continue
+        want = curve.add(point, other)
+        if want is None:
+            continue
+        points.append((point, want))
+
+    def drivePre(t):
+        row = points[t][0] if t < len(points) else (onb.zero(), onb.zero())
+        return driveWords([('x', m, onb.toCoords(row[0])),
+                           ('y', m, onb.toCoords(row[1]))])
+
+    preTrace = simulate(preA, preR, preO, [('d', m), ('e', m), ('hw', nBits)],
+                        drivePre, count + preLat + 4)
+    # the inversion is the one part the batch inverter would do in hardware
+    stream = []
+    for i in range(count):
+        sample = preTrace[preLat + i]
+        d = onb.fromCoords(sample['d'])
+        stream.append((points[i][0], sample['d'], sample['e'],
+                       onb.toCoords(onb.inv(d))))
+
+    def drivePost(t):
+        if t < len(stream):
+            point, dw, ew, diw = stream[t]
+            return driveWords([('x', m, onb.toCoords(point[0])),
+                               ('y', m, onb.toCoords(point[1])),
+                               ('d', m, dw), ('e', m, ew), ('di', m, diw)])
+        return driveWords([('x', m, 0), ('y', m, 0), ('d', m, 0), ('e', m, 0),
+                           ('di', m, 0)])
+
+    postTrace = simulate(postA, postR, postO, [('x3', m), ('y3', m)], drivePost,
+                         count + postLat + 4)
+    for i in range(count):
+        sample = postTrace[postLat + i]
+        want = points[i][1]
+        if not sameElement(onb, sample['x3'], want[0]):
+            raise RuntimeError('walk step %d: x wrong' % i)
+        if not sameElement(onb, sample['y3'], want[1]):
+            raise RuntimeError('walk step %d: y wrong' % i)
+        if not curve.onCurve((onb.fromCoords(sample['x3']),
+                              onb.fromCoords(sample['y3']))):
+            raise RuntimeError('walk step %d: result is not on the curve' % i)
+    print('walk step: PASS -- %d iterations of sigma^j(R)+R through ecc_pre and '
+          'ecc_post, every result on the curve and equal to curves.Curve'
+          % count)
 
 
 def checkSigma(rtl, m, onb, rng, trials):
@@ -309,6 +488,7 @@ def main():
     m = args.m
     rng = random.Random(0xF00D0000 + m)
     onb = field.Onb(m)
+    curve = curves.Curve(onb)
     nBits = 1
     while (1 << nBits) <= m:
         nBits += 1
@@ -316,7 +496,10 @@ def main():
     checkMul(args.rtl, m, onb, rng, args.vectors)
     checkHamming(args.rtl, m, nBits, rng, args.vectors)
     checkSigma(args.rtl, m, onb, rng, 4)
-    print('all emitted modules agree with field.Onb')
+    checkPre(args.rtl, m, nBits, onb, rng, args.vectors)
+    checkPost(args.rtl, m, onb, curve, rng, args.vectors)
+    checkStep(args.rtl, m, nBits, onb, curve, rng, 4)
+    print('all emitted modules agree with field.Onb and curves.Curve')
 
 
 if __name__ == '__main__':

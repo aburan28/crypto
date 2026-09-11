@@ -480,7 +480,7 @@ module ecc_hamming131 #(parameter [7:0] cutoff = 34) (
 
     // tag and valid ride alongside the operands
     reg [7:0] tagPipe [0:2];
-    reg [2:0] validPipe;
+    reg [2:0] validPipe = 3'b0;
     integer s;
     always @(posedge clk) begin
         tagPipe[0] <= tagIn;

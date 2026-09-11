@@ -27730,7 +27730,7 @@ module ecc_mul131 (
 
     // tag and valid ride alongside the operands
     reg [7:0] tagPipe [0:11];
-    reg [11:0] validPipe;
+    reg [11:0] validPipe = 12'b0;
     integer s;
     always @(posedge clk) begin
         tagPipe[0] <= tagIn;

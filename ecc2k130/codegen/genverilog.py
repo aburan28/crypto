@@ -38,6 +38,7 @@ import os
 import random
 
 import build
+import curves
 import field
 import ir
 
@@ -107,9 +108,16 @@ def registerPlan(prog, roots, order, stage, nStages):
     return lastNeed, ffs
 
 
-def emitModule(name, prog, roots, inputs, outName, outLen, gatesPerStage,
-               tagWidth):
-    """Return (lines, stats) for a pipelined module computing roots."""
+def emitModule(name, prog, outs, inputs, gatesPerStage, tagWidth):
+    """Return (lines, stats) for a pipelined module.
+
+    `outs` is a list of (portName, roots); every output leaves the pipeline at
+    the same stage, so a module with several results stays a single datapath
+    with one latency and one valid.
+    """
+    roots = []
+    for _, rs in outs:
+        roots.extend(rs)
     order = liveOrder(prog, roots)
     depth, stage, nStages = stageAssignment(prog, roots, order, gatesPerStage)
     lastNeed, ffs = registerPlan(prog, roots, order, stage, nStages)
@@ -137,7 +145,8 @@ def emitModule(name, prog, roots, inputs, outName, outLen, gatesPerStage,
         ports.append('input  wire [%d:0] %s' % (inputWidth(prog, nm) - 1, nm))
     ports.append('input  wire [%d:0] tagIn' % (tagWidth - 1))
     ports.append('input  wire validIn')
-    ports.append('output wire [%d:0] %s' % (outLen - 1, outName))
+    for nm, rs in outs:
+        ports.append('output wire [%d:0] %s' % (len(rs) - 1, nm))
     ports.append('output wire [%d:0] tagOut' % (tagWidth - 1))
     ports.append('output wire validOut')
     lines.append('module %s (' % name)
@@ -194,16 +203,20 @@ def emitModule(name, prog, roots, inputs, outName, outLen, gatesPerStage,
         lines.append('')
 
     lines.append('    // ---- outputs ----')
-    for k in range(outLen):
-        r = roots[k] if k < len(roots) else None
-        if r is None:
-            lines.append('    assign %s[%d] = 1\'b0;' % (outName, k))
-        else:
-            lines.append('    assign %s[%d] = %s;' % (outName, k, ref(r, nStages)))
+    for nm, rs in outs:
+        for k in range(len(rs)):
+            if rs[k] is None:
+                lines.append('    assign %s[%d] = 1\'b0;' % (nm, k))
+            else:
+                lines.append('    assign %s[%d] = %s;' % (nm, k, ref(rs[k], nStages)))
     lines.append('')
     lines.append('    // tag and valid ride alongside the operands')
     lines.append('    reg [%d:0] tagPipe [0:%d];' % (tagWidth - 1, nStages - 1))
-    lines.append('    reg [%d:0] validPipe;' % (nStages - 1))
+    # validPipe must start at zero, not X: nothing may claim valid before the
+    # pipeline has filled, and a declaration initialiser is honoured both by
+    # simulation and by FPGA bitstream initialisation.  The data path needs no
+    # reset, because valid gates every consumer.
+    lines.append('    reg [%d:0] validPipe = %d\'b0;' % (nStages - 1, nStages))
     lines.append('    integer s;')
     lines.append('    always @(posedge clk) begin')
     lines.append('        tagPipe[0] <= tagIn;')
@@ -231,6 +244,110 @@ def inputWidth(prog, name):
         if src is not None and src[0] == name and src[1] > top:
             top = src[1]
     return top + 1
+
+
+def sigmaList(m, u, k):
+    """sigma^k on a list of nets: a permutation of the list, so it is free.
+
+    Mirrors FieldBs::sigma in include/fieldbs.h -- the coefficient of
+    gamma_{i+1} moves to gamma_{fold(2^k (i+1))}.
+    """
+    n = 2 * m + 1
+    e = pow(2, k, n)
+    out = [None] * m
+    for i in range(m):
+        t = ((i + 1) * e) % n
+        d = (t if t <= m else n - t) - 1
+        out[d] = u[i]
+    return out
+
+
+def selList(p, mask, aList, bList):
+    """ECC_SEL: mask ? a : b, as b ^ ((a ^ b) & mask)."""
+    out = []
+    for i in range(len(aList)):
+        out.append(p.xor(bList[i], p.andOp(p.xor(aList[i], bList[i]), mask)))
+    return out
+
+
+def mulIr(p, m, leaf, u, v):
+    """One GF(2^m) multiplication inside a larger program."""
+    pu = build.multPrepIr(p, u, m)
+    pv = build.multPrepIr(p, v, m)
+    return build.toOnbIr(p, build.polyMulIr(p, pu, pv, leaf), m)
+
+
+def buildPre(m, nBits):
+    """Pass 1 of the walk: weight, sigma^j selection and the two addends.
+
+    R' = sigma^j(R) + R with j = 3 + ((HW(x)/2) mod 8), so this block computes
+    HW(x), selects sigma^j through three conditional squarings, and emits the
+    addition's denominator d = x + sigma^j(x) and numerator e = y + sigma^j(y).
+
+    It contains **no multiplication**: squaring is a permutation and addition is
+    XOR, so pass 1 is the weight tree plus muxes.  Unlike the CUDA client, which
+    recomputes sigma^j in pass 2 to save memory traffic, the hardware just lets
+    d and e ride the pipeline.
+    """
+    p = ir.Prog()
+    x = []
+    y = []
+    for i in range(m):
+        x.append(p.addInput('x', i))
+    for i in range(m):
+        y.append(p.addInput('y', i))
+    hb = build.hammingIr(p, x, nBits)
+    sx = sigmaList(m, x, 3)
+    sy = sigmaList(m, y, 3)
+    for idx, step in ((1, 1), (2, 2), (3, 4)):
+        sx = selList(p, hb[idx], sigmaList(m, sx, step), sx)
+        sy = selList(p, hb[idx], sigmaList(m, sy, step), sy)
+    d = []
+    e = []
+    for i in range(m):
+        d.append(p.xor(x[i], sx[i]))
+        e.append(p.xor(y[i], sy[i]))
+    return p, d, e, hb
+
+
+def buildPost(m, leaf):
+    """Pass 2 of the walk: the affine addition, given the inverted denominator.
+
+    lam = e * dinv;  x3 = lam^2 + lam + d;  y3 = lam*(x + x3) + x3 + y.
+    Two multiplications, matching Walk::pointAdd in include/walk.h.  The inverse
+    arrives from outside because one inverter is shared across a whole batch by
+    Montgomery's trick -- the same reason hdl/ecc/ec_add_pipe.vhd takes it as a
+    port.
+    """
+    p = ir.Prog()
+    x = []
+    y = []
+    d = []
+    e = []
+    di = []
+    for i in range(m):
+        x.append(p.addInput('x', i))
+    for i in range(m):
+        y.append(p.addInput('y', i))
+    for i in range(m):
+        d.append(p.addInput('d', i))
+    for i in range(m):
+        e.append(p.addInput('e', i))
+    for i in range(m):
+        di.append(p.addInput('di', i))
+    lam = mulIr(p, m, leaf, e, di)
+    lamSq = sigmaList(m, lam, 1)
+    x3 = []
+    for i in range(m):
+        x3.append(p.xor(p.xor(lamSq[i], lam[i]), d[i]))
+    t = []
+    for i in range(m):
+        t.append(p.xor(x[i], x3[i]))
+    prod = mulIr(p, m, leaf, lam, t)
+    y3 = []
+    for i in range(m):
+        y3.append(p.xor(p.xor(prod[i], x3[i]), y[i]))
+    return p, x3, y3
 
 
 def buildMul(m, leaf):
@@ -321,6 +438,278 @@ def emitSigma(m, name):
     return lines
 
 
+def invChain(m):
+    """The Itoh-Tsujii schedule, mirroring FieldBs::inv in include/fieldbs.h.
+
+    a^-1 = a^(2^m - 2) = (a^(2^(m-1) - 1))^2, built with an addition chain for
+    m-1.  Returns [(sigmaExponent, operand)] with operand 'acc' or 'a', and the
+    exponent of the final squaring.  For m = 131 this is 8 multiplications,
+    which is the known optimum for an addition chain to 130.
+    """
+    e = m - 1
+    hb = 0
+    while (1 << (hb + 1)) <= e:
+        hb += 1
+    steps = []
+    k = 1
+    for bit in range(hb - 1, -1, -1):
+        steps.append((k, 'acc'))
+        k <<= 1
+        if (e >> bit) & 1:
+            steps.append((1, 'a'))
+            k += 1
+    if k != e:
+        raise RuntimeError('addition chain ended at %d, not %d' % (k, e))
+    return steps, 1
+
+
+def emitDelay(name):
+    """A plain shift register, for operands that must wait for the pipeline."""
+    lines = []
+    lines.append('// Generated by codegen/genverilog.py -- do not edit.')
+    lines.append('`default_nettype none')
+    lines.append('')
+    lines.append('module %s #(parameter WIDTH = 131, parameter DEPTH = 1) (' % name)
+    lines.append('    input  wire             clk,')
+    lines.append('    input  wire [WIDTH-1:0] d,')
+    lines.append('    output wire [WIDTH-1:0] q')
+    lines.append(');')
+    lines.append('    reg [WIDTH-1:0] pipe [0:DEPTH-1];')
+    lines.append('    integer i;')
+    lines.append('    always @(posedge clk) begin')
+    lines.append('        pipe[0] <= d;')
+    lines.append('        for (i = 1; i < DEPTH; i = i + 1) pipe[i] <= pipe[i-1];')
+    lines.append('    end')
+    lines.append('    assign q = pipe[DEPTH-1];')
+    lines.append('endmodule')
+    lines.append('`default_nettype wire')
+    return lines
+
+
+def sigmaWires(m, dstNet, srcNet, k):
+    """assign dstNet[...] = srcNet[...] implementing sigma^k: pure wiring."""
+    perm = sigmaPermutation(m, k)
+    out = []
+    for i in range(m):
+        out.append('    assign %s[%d] = %s[%d];' % (dstNet, i, srcNet, perm[i]))
+    return out
+
+
+def emitInv(m, name, mulName, delayName, mulLatency, tagWidth):
+    """Itoh-Tsujii inversion as a chain of multiplier instances.
+
+    Every squaring between multiplications is a permutation, so the only logic
+    here is the multipliers themselves: 8 of them, fully pipelined, II = 1,
+    latency 8 x mulLatency.  One inverter serves every core on the device
+    through Montgomery's trick, so unrolling it costs about 5% of a VU47P --
+    the published Spartan-6 designs used a one-multiplier sequencer instead
+    because there 8 multipliers would have been most of the chip.
+    """
+    steps, finalSigma = invChain(m)
+    latency = len(steps) * mulLatency
+    lines = []
+    lines.append('// Generated by codegen/genverilog.py -- do not edit.')
+    lines.append('// Itoh-Tsujii inversion in GF(2^%d): %d multiplications, II = 1,'
+                 % (m, len(steps)))
+    lines.append('// latency %d clocks.  Squarings are permutations, hence free.'
+                 % latency)
+    lines.append('`default_nettype none')
+    lines.append('')
+    lines.append('module %s (' % name)
+    lines.append('    input  wire clk,')
+    lines.append('    input  wire [%d:0] a,' % (m - 1))
+    lines.append('    input  wire [%d:0] tagIn,' % (tagWidth - 1))
+    lines.append('    input  wire validIn,')
+    lines.append('    output wire [%d:0] r,' % (m - 1))
+    lines.append('    output wire [%d:0] tagOut,' % (tagWidth - 1))
+    lines.append('    output wire validOut')
+    lines.append(');')
+    lines.append('')
+    lines.append('    wire [%d:0] acc0 = a;' % (m - 1))
+    lines.append('    wire [%d:0] tag0 = tagIn;' % (tagWidth - 1))
+    lines.append('    wire        v0 = validIn;')
+    lines.append('')
+    needDelay = {}
+    for i in range(len(steps)):
+        if steps[i][1] == 'a' and i > 0:
+            needDelay[i] = i * mulLatency
+    for i in sorted(needDelay):
+        lines.append('    // the original operand must wait for %d stages of pipeline'
+                     % i)
+        lines.append('    wire [%d:0] aDel%d;' % (m - 1, i))
+        lines.append('    %s #(.WIDTH(%d), .DEPTH(%d)) uDel%d ('
+                     % (delayName, m, needDelay[i], i))
+        lines.append('        .clk(clk), .d(a), .q(aDel%d));' % i)
+        lines.append('')
+    for i in range(len(steps)):
+        k, operand = steps[i]
+        lines.append('    // step %d: sigma^%d(acc) * %s' % (i + 1, k, operand))
+        lines.append('    wire [%d:0] s%d;' % (m - 1, i))
+        lines.extend(sigmaWires(m, 's%d' % i, 'acc%d' % i, k))
+        if operand == 'acc':
+            other = 'acc%d' % i
+        elif i == 0:
+            other = 'a'
+        else:
+            other = 'aDel%d' % i
+        lines.append('    wire [%d:0] acc%d;' % (m - 1, i + 1))
+        lines.append('    wire [%d:0] tag%d;' % (tagWidth - 1, i + 1))
+        lines.append('    wire        v%d;' % (i + 1))
+        lines.append('    %s u%d (.clk(clk), .a(s%d), .b(%s), .tagIn(tag%d),'
+                     % (mulName, i, i, other, i))
+        lines.append('        .validIn(v%d), .p(acc%d), .tagOut(tag%d), .validOut(v%d));'
+                     % (i, i + 1, i + 1, i + 1))
+        lines.append('')
+    last = len(steps)
+    lines.append('    // final squaring, again just wiring')
+    lines.extend(sigmaWires(m, 'r', 'acc%d' % last, finalSigma))
+    lines.append('    assign tagOut = tag%d;' % last)
+    lines.append('    assign validOut = v%d;' % last)
+    lines.append('')
+    lines.append('endmodule')
+    lines.append('`default_nettype wire')
+    return lines, latency, len(steps)
+
+
+def emitOneInputTestbench(name, module, m, latency, vectorFile, count, what):
+    """Self-checking testbench for a one-operand module (a -> r)."""
+    lines = []
+    lines.append('// Generated by codegen/genverilog.py -- do not edit.')
+    lines.append('// Drives %d operands back to back and checks %s, the latency and'
+                 % (count, what))
+    lines.append('// that the tag follows its operand.  Vectors come from field.Onb.')
+    lines.append('`timescale 1ns/1ps')
+    lines.append('`default_nettype none')
+    lines.append('')
+    lines.append('module %s;' % name)
+    lines.append('    localparam M = %d;' % m)
+    lines.append('    localparam LAT = %d;' % latency)
+    lines.append('    localparam N = %d;' % count)
+    lines.append('')
+    lines.append('    reg clk = 1\'b0;')
+    lines.append('    always #5 clk = ~clk;')
+    lines.append('')
+    lines.append('    reg  [M-1:0] a = {M{1\'b0}};')
+    lines.append('    reg  [7:0]   tagIn = 8\'d0;')
+    lines.append('    reg          validIn = 1\'b0;')
+    lines.append('    wire [M-1:0] r;')
+    lines.append('    wire [7:0]   tagOut;')
+    lines.append('    wire         validOut;')
+    lines.append('')
+    lines.append('    %s dut (.clk(clk), .a(a), .tagIn(tagIn), .validIn(validIn),'
+                 % module)
+    lines.append('        .r(r), .tagOut(tagOut), .validOut(validOut));')
+    lines.append('')
+    lines.append('    reg [2*M-1:0] row [0:N-1];')
+    lines.append('    reg [M-1:0] av [0:N-1];')
+    lines.append('    reg [M-1:0] rv [0:N-1];')
+    lines.append('')
+    lines.append('    integer i, issued, checked;')
+    lines.append('    integer errors = 0;')
+    lines.append('    initial begin')
+    lines.append('        $readmemh("%s", row);' % vectorFile)
+    lines.append('        for (i = 0; i < N; i = i + 1) begin')
+    lines.append('            av[i] = row[i][2*M-1:M];')
+    lines.append('            rv[i] = row[i][M-1:0];')
+    lines.append('        end')
+    lines.append('        @(negedge clk);')
+    lines.append('        for (issued = 0; issued < N; issued = issued + 1) begin')
+    lines.append('            a <= av[issued];')
+    lines.append('            tagIn <= issued[7:0];')
+    lines.append('            validIn <= 1\'b1;')
+    lines.append('            @(negedge clk);')
+    lines.append('        end')
+    lines.append('        validIn <= 1\'b0;')
+    lines.append('    end')
+    lines.append('')
+    lines.append('    initial begin')
+    lines.append('        checked = 0;')
+    lines.append('        @(negedge clk);')
+    lines.append('        for (i = 0; i < LAT; i = i + 1) begin')
+    lines.append('            if (validOut !== 1\'b0) begin')
+    lines.append('                $display("FAIL: valid after %0d clocks, latency is %0d",')
+    lines.append('                    i, LAT);')
+    lines.append('                errors = errors + 1;')
+    lines.append('            end')
+    lines.append('            @(negedge clk);')
+    lines.append('        end')
+    lines.append('        while (checked < N) begin')
+    lines.append('            if (validOut !== 1\'b1) begin')
+    lines.append('                $display("FAIL: gap in the output stream at %0d", checked);')
+    lines.append('                errors = errors + 1;')
+    lines.append('            end')
+    lines.append('            if (r !== rv[checked]) begin')
+    lines.append('                $display("FAIL: vector %0d mismatch", checked);')
+    lines.append('                $display("  got  %h", r);')
+    lines.append('                $display("  want %h", rv[checked]);')
+    lines.append('                errors = errors + 1;')
+    lines.append('            end')
+    lines.append('            if (tagOut !== checked[7:0]) begin')
+    lines.append('                $display("FAIL: vector %0d tag %0d out of order",')
+    lines.append('                    checked, tagOut);')
+    lines.append('                errors = errors + 1;')
+    lines.append('            end')
+    lines.append('            checked = checked + 1;')
+    lines.append('            @(negedge clk);')
+    lines.append('        end')
+    lines.append('        if (errors == 0)')
+    lines.append('            $display("%s: %0d %s, II=1, latency %0d clk",')
+    lines.append('                "PASS", N, "%s", LAT);' % what)
+    lines.append('        else')
+    lines.append('            $display("FAIL: %0d errors", errors);')
+    lines.append('        $finish;')
+    lines.append('    end')
+    lines.append('')
+    lines.append('endmodule')
+    lines.append('`default_nettype wire')
+    return lines
+
+
+def walkStep(onb, curve, point):
+    """One iteration of the reference walk: sigma^j(R) + R."""
+    weight = bin(onb.toCoords(point[0])).count('1')
+    j = 3 + ((weight // 2) % 8)
+    other = curve.frob(point, j)
+    if onb.toCoords(onb.add(point[0], other[0])) == 0:
+        return None
+    return curve.add(point, other)
+
+
+def walkVectorRows(m, onb, curve, rng, slots, steps):
+    """For each slot, a start point and the trajectory it must follow.
+
+    Row (s, t) is the point after t steps of walk s, so the hardware's retired
+    steps can be compared against the reference one for one.
+    """
+    rows = []
+    while len(rows) < slots:
+        point = curve.pointFromX(onb.randomElement(rng))
+        if point is None:
+            continue
+        traj = [point]
+        ok = True
+        for _ in range(steps):
+            nxt = walkStep(onb, curve, traj[-1])
+            if nxt is None:
+                ok = False
+                break
+            traj.append(nxt)
+        if ok:
+            rows.append(traj)
+    return rows
+
+
+def invVectorRows(m, onb, rng, count):
+    """(a, a^-1) pairs, a nonzero."""
+    rows = []
+    while len(rows) < count:
+        u = onb.randomElement(rng)
+        if onb.toCoords(u) == 0:
+            continue
+        rows.append((onb.toCoords(u), onb.toCoords(onb.inv(u))))
+    return rows
+
+
 def emitTestbench(name, module, m, stages, vectorFile, count):
     lines = []
     lines.append('// Generated by codegen/genverilog.py -- do not edit.')
@@ -355,9 +744,12 @@ def emitTestbench(name, module, m, stages, vectorFile, count):
     lines.append('    reg [M-1:0] pv [0:N-1];')
     lines.append('    reg [3*M-1:0] row [0:N-1];')
     lines.append('')
-    lines.append('    integer i, issued, checked, errors;')
+    lines.append('    integer i, issued, checked;')
+    # errors is initialised at declaration, not inside one of the two initial
+    # blocks: both start at time zero, so zeroing it in one races with an
+    # increment in the other and silently loses a failure.
+    lines.append('    integer errors = 0;')
     lines.append('    initial begin')
-    lines.append('        errors = 0;')
     lines.append('        $readmemh("%s", row);' % vectorFile)
     lines.append('        for (i = 0; i < N; i = i + 1) begin')
     lines.append('            av[i] = row[i][3*M-1:2*M];')
@@ -451,6 +843,10 @@ def main():
     ap.add_argument('--leaf', type=int, default=9)
     ap.add_argument('--gates-per-stage', type=int, default=8, dest='gatesPerStage')
     ap.add_argument('--vectors', type=int, default=16)
+    # one start point per ring slot: pre + inverter + RAM + post, see
+    # hdl/ecc2k130/ecc_rho_core.v
+    ap.add_argument('--slots', type=int, default=124)
+    ap.add_argument('--steps', type=int, default=3)
     args = ap.parse_args()
 
     m = args.m
@@ -459,18 +855,19 @@ def main():
     rng = random.Random(0x5EED0000 + m)
     onb = field.Onb(m)
     onb.selfTest(rng)
+    curve = curves.Curve(onb)
 
     prog, roots = buildMul(m, args.leaf)
-    lines, mulStats = emitModule('ecc_mul%d' % m, prog, roots, ['a', 'b'], 'p', m,
-                                 args.gatesPerStage, 8)
+    lines, mulStats = emitModule('ecc_mul%d' % m, prog, [('p', roots)],
+                                 ['a', 'b'], args.gatesPerStage, 8)
     writeLines(os.path.join(args.out, 'ecc_mul%d.v' % m), lines)
 
     nBits = 1
     while (1 << nBits) <= m:
         nBits += 1
     hProg, hRoots = buildHamming(m, nBits)
-    hLines, hamStats = emitModule('ecc_hamming%d' % m, hProg, hRoots, ['x'], 'hw',
-                                  nBits, args.gatesPerStage, 8)
+    hLines, hamStats = emitModule('ecc_hamming%d' % m, hProg, [('hw', hRoots)],
+                                  ['x'], args.gatesPerStage, 8)
     # the distinguished-point test is an nBits comparator, not worth a gate DAG
     tail = hLines.index('endmodule')
     hLines[tail:tail] = [
@@ -489,6 +886,48 @@ def main():
 
     writeLines(os.path.join(args.out, 'ecc_sigma%d.v' % m),
                emitSigma(m, 'ecc_sigma%d' % m))
+
+    preProg, preD, preE, preHb = buildPre(m, nBits)
+    preLines, preStats = emitModule(
+        'ecc_pre%d' % m, preProg,
+        [('d', preD), ('e', preE), ('hw', preHb)], ['x', 'y'],
+        args.gatesPerStage, 8)
+    writeLines(os.path.join(args.out, 'ecc_pre%d.v' % m), preLines)
+
+    postProg, postX3, postY3 = buildPost(m, args.leaf)
+    postLines, postStats = emitModule(
+        'ecc_post%d' % m, postProg, [('x3', postX3), ('y3', postY3)],
+        ['x', 'y', 'd', 'e', 'di'], args.gatesPerStage, 8)
+    writeLines(os.path.join(args.out, 'ecc_post%d.v' % m), postLines)
+
+    writeLines(os.path.join(args.out, 'ecc_delay.v'), emitDelay('ecc_delay'))
+
+    invLines, invLat, invMults = emitInv(m, 'ecc_inv%d' % m, 'ecc_mul%d' % m,
+                                         'ecc_delay', mulStats['stages'], 8)
+    writeLines(os.path.join(args.out, 'ecc_inv%d.v' % m), invLines)
+
+    invRows = invVectorRows(m, onb, rng, args.vectors)
+    iWidth = (2 * m + 3) // 4
+    iLines = ['// a | a^-1 in ONB coordinates, %d bits each, from field.Onb' % m]
+    for ca, ci in invRows:
+        iLines.append('%0*x' % (iWidth, (ca << m) | ci))
+    writeLines(os.path.join(args.out, 'vectors_inv%d.txt' % m), iLines)
+    writeLines(os.path.join(args.out, 'tb_ecc_inv%d.v' % m),
+               emitOneInputTestbench('tb_ecc_inv%d' % m, 'ecc_inv%d' % m, m,
+                                     invLat, 'vectors_inv%d.txt' % m,
+                                     args.vectors, 'inversions'))
+
+    # Reference trajectories for the rho core: one start point per ring slot,
+    # then the exact sequence of points the hardware must reproduce.
+    traj = walkVectorRows(m, onb, curve, rng, args.slots, args.steps)
+    tWidth = (2 * m + 3) // 4
+    tLines = ['// x | y after t steps, slot-major, %d slots x %d points, '
+              'from curves.Curve' % (args.slots, args.steps + 1)]
+    for walk in traj:
+        for point in walk:
+            tLines.append('%0*x' % (tWidth, (onb.toCoords(point[0]) << m)
+                                    | onb.toCoords(point[1])))
+    writeLines(os.path.join(args.out, 'vectors_walk%d.txt' % m), tLines)
 
     rows = vectorRows(m, onb, rng, args.vectors)
     width = (3 * m + 3) // 4
@@ -509,7 +948,16 @@ def main():
     print('  ecc_hamming%d.v   %d gates, %d stages, %d pipeline registers'
           % (m, hamStats['gates'], hamStats['stages'], hamStats['registers']))
     print('  ecc_sigma%d.v     0 gates (coordinate permutation and 3 muxes)' % m)
-    print('  tb_ecc_mul%d.v    %d vectors' % (m, args.vectors))
+    print('  ecc_pre%d.v       %d gates, %d stages, %d pipeline registers '
+          '(no multiplication)'
+          % (m, preStats['gates'], preStats['stages'], preStats['registers']))
+    print('  ecc_post%d.v      %d gates, %d stages, %d pipeline registers '
+          '(2 multiplications)'
+          % (m, postStats['gates'], postStats['stages'], postStats['registers']))
+    print('  ecc_inv%d.v       %d multiplier instances, II=1, latency %d clk'
+          % (m, invMults, invLat))
+    print('  tb_ecc_mul%d.v, tb_ecc_inv%d.v    %d vectors each'
+          % (m, m, args.vectors))
 
 
 if __name__ == '__main__':
