@@ -1,0 +1,113 @@
+name: Koblitz Stage 25 single-CPU control
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage25_single_core.py"
+      - "scripts/test_koblitz_stage25_single_core.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-affinity.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE25_SINGLE_CORE_RESULTS.md"
+      - ".github/workflows/koblitz-stage25-single-core.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  single-cpu-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frozen dependency lock
+        run: cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+      - name: Test Stage-25 control plane
+        run: |
+          python3 scripts/test_koblitz_stage25_single_core.py -v
+          python3 scripts/run_koblitz_stage25_single_core.py self-test
+      - name: Validate committed Stage-25 result
+        if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') != '' }}
+        run: |
+          python3 - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+
+          script = Path("scripts/run_koblitz_stage25_single_core.py")
+          spec = importlib.util.spec_from_file_location("stage25", script)
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          stage = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates")
+          result = module.validate_result(json.loads((stage / "stage-25-single-core-result.json").read_text()))
+          affinity = module.validate_affinity(json.loads((stage / "stage-25-single-core-affinity.json").read_text()))
+          assert result["affinity"] == affinity
+          assert result["status"] == "complete_single_cpu_affinity_control"
+          assert result["profile"] == "production"
+          assert result["measurements"]["single_core_elapsed_seconds"] > 0
+          assert result["accounting_boundary"]["covers_stage20_n31_n41_n59_backend_matrix"] is False
+          assert result["full_cost_gate_passed"] is False
+          assert result["koblitz_index_calculus_sota"] is False
+          PY
+      - name: Run full one-CPU Stage-23 production control
+        if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
+        run: |
+          python3 scripts/run_koblitz_stage25_single_core.py run \
+            --profile production \
+            --output "$RUNNER_TEMP/stage25-single-core"
+          python3 scripts/run_koblitz_stage25_single_core.py verify \
+            --output "$RUNNER_TEMP/stage25-single-core" \
+            > "$RUNNER_TEMP/stage25-verification.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"]) / "stage25-single-core"
+          result = json.loads((root / "result.json").read_text())
+          assert result["status"] == "complete_single_cpu_affinity_control"
+          assert result["profile"] == "production"
+          assert result["affinity"]["parent_effective_before"] == [result["affinity"]["selected_cpu"]]
+          assert result["affinity"]["child_effective_before"] == [result["affinity"]["selected_cpu"]]
+          assert result["affinity"]["parent_effective_after"] == [result["affinity"]["selected_cpu"]]
+          assert result["affinity"]["child_effective_after"] == [result["affinity"]["selected_cpu"]]
+          assert result["measurements"]["single_core_elapsed_seconds"] > 0
+          assert result["accounting_boundary"]["covers_stage20_n31_n41_n59_backend_matrix"] is False
+          assert result["full_cost_gate_passed"] is False
+          assert result["koblitz_index_calculus_sota"] is False
+          PY
+      - name: Package portable Stage-23 evidence from the affined run
+        if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
+        run: |
+          python3 scripts/package_koblitz_stage23_terminal_evidence.py \
+            --run-root "$RUNNER_TEMP/stage25-single-core/stage23-run" \
+            --outer-root "$RUNNER_TEMP/stage25-single-core/stage23-run-outer" \
+            --outer-metrics "$RUNNER_TEMP/stage25-single-core/stage23-run-outer/driver.metrics.json" \
+            --project-verification-root "$RUNNER_TEMP/stage25-single-core/stage23-verification" \
+            --output "$RUNNER_TEMP/stage25-portable-stage23"
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_koblitz_stage23_terminal_evidence.py \
+            "$RUNNER_TEMP/stage25-portable-stage23"
+      - name: Upload Stage-25 evidence
+        if: ${{ hashFiles('research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-25-single-core-result.json') == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: koblitz-stage25-single-core-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/stage25-single-core/affinity.json
+            ${{ runner.temp }}/stage25-single-core/result.json
+            ${{ runner.temp }}/stage25-single-core/result-seal.json
+            ${{ runner.temp }}/stage25-single-core/source.json
+            ${{ runner.temp }}/stage25-single-core/protocol.json
+            ${{ runner.temp }}/stage25-single-core/stage23-plan.json
+            ${{ runner.temp }}/stage25-single-core/stage23-run/run-summary.json
+            ${{ runner.temp }}/stage25-single-core/stage23-run/run-seal.json
+            ${{ runner.temp }}/stage25-single-core/stage23-run/inputs
+            ${{ runner.temp }}/stage25-single-core/stage23-run/tasks
+            ${{ runner.temp }}/stage25-single-core/stage23-run-outer
+            ${{ runner.temp }}/stage25-single-core/stage23-verification
+            ${{ runner.temp }}/stage25-portable-stage23
+            ${{ runner.temp }}/stage25-verification.json
