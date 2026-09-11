@@ -1,4 +1,8 @@
 """Bind a fresh compile only when its source, native code and resources match the reviewed fixture."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 from pathlib import Path
 import hashlib,json,re
 

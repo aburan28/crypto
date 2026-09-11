@@ -1,4 +1,8 @@
 """Bounded paired raw-MMA capacity measurement, not a field/walk benchmark."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 from pathlib import Path
 import csv,hashlib,json,math,os,signal,statistics,subprocess,time
 import modal

@@ -89,7 +89,7 @@ run; the portable drivers write fresh results under ignored `build/`.
 To reproduce the reviewed capacity panel:
 
 ```sh
-python3 -m unittest test_capacity_gate.py
+python3 -m unittest test_capacity_gate.py test_assertion_mode.py
 modal run compile_capacity.py
 modal run run_capacity.py
 ```
@@ -102,6 +102,11 @@ binary-bound review under `build/`. A mismatch stops before GPU timing.
 checks every output and records exact counts and event intervals. Fresh
 results are written to `build/capacity-gpu-result.json`; historical evidence
 remains unchanged.
+
+The Python fixtures use assertions for verification. Every entry point and
+reference/admission module rejects `-O`, `-OO` and `PYTHONOPTIMIZE` before
+importing dependencies or setting up remote work, so disabling assertions
+cannot silently produce an accepted result.
 
 ## Mapping
 

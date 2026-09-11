@@ -1,4 +1,8 @@
 """Integer convolution and independent carryless reference; raw128 only."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 MASK=(1<<128)-1
 
 def encode(a):

@@ -1,4 +1,8 @@
 """Execute the already compiled raw128 correctness fixture on one RTX GPU."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 from pathlib import Path
 import csv,hashlib,json,os,signal,subprocess,time
 import modal

@@ -1,4 +1,8 @@
 """Exact structural 2:4 sparse mapping of the prior radix128 raw128 product."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 from pathlib import Path
 import hashlib,importlib.util,json,random
 

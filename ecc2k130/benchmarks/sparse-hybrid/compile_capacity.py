@@ -1,4 +1,8 @@
 """One bounded CPU-only CUDA compile; no executable or GPU run."""
+
+if not __debug__:
+    raise RuntimeError("This benchmark requires Python assertions; remove -O, -OO and PYTHONOPTIMIZE.")
+
 from pathlib import Path
 import hashlib,json,os,signal,subprocess,time
 import modal
