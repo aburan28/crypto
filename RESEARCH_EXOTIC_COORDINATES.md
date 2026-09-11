@@ -1352,7 +1352,7 @@ fixed points are rational, and run through the quotient engine
 |---|---|---|---|---|---|---|---|---:|---:|
 | 1 | `y² = x³ + b`, `q ≡ 1 mod 3` | `y` (3): quotient by `ω` | 3-torsion `τ_T` | `y ↦ √b(y − 3√b)/(y + √b)`, order 3 | `v = (y − s)/(y + s)`: `v ↦ ωv` | `V = v³ + v⁻³` | `(V₁−2)(V₂−2)(V₃−2) = (P−2)³`, `[1, 1, 1, 3]` | 10 | 54 |
 | 2 | `y² = x³ + ax`, `p ≡ 1 mod 4` | `x²` (4): quotient by `i` | 2-torsion `τ_T` (`x ↦ a/x`) | `x² ↦ a²/x²`, fixed points `±a` | sign frame on `x²`, **rational for every `a`** (on `x` only for `a` a square) | `W = ((x² − a)/(x² + a))²` | `[4, 4, 1, 4]` with `Πu` | 30 | 16 (with `i`) |
-| 3 | Tate normal form, rational `T₄` | `x′ = x(P) + x(P + T₂)` (2): `E/⟨T₂⟩` | 4-torsion `τ_{T₄}` (not Möbius on `x`) | involution `x′ ↦ c/x′` | sign frame on `x′` | `W = u′²` | TBD-EX-B | | |
+| 3 | Tate normal form, rational `T₄` | `x′ = x(P) + x(P + T₂)` (2): `E/⟨T₂⟩` | 4-torsion `τ_{T₄}` (not Möbius on `x`) | involution `x′ ↦ c/x′` | sign frame on `x′` | `W = u′²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 32 (= 8 × 4) |
 | 4 | `y² = x³ + 1`, rational `T₆` | `x″ = x + x(P+T₃) + x(P−T₃)` (3): `E/⟨T₃⟩` (Vélu) | 2-torsion `τ_{T₂}` (with `τ_{T₃}` trivial, `ω` a scaling) | involution, and `ω: x″ ↦ ωx″` | sign frame on `x″` | `W = u″²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 72 (with `T₃`) TBD-EX-C |
 
 Two of the four are new lines in the strict sense and two are the old
