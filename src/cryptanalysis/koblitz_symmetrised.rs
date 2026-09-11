@@ -1018,6 +1018,11 @@ pub struct PairedOptions {
     /// Draw targets from the prime-order subgroup (as index calculus
     /// does) rather than from the whole group.
     pub targets_in_subgroup: bool,
+    /// Highest Macaulay degree the F4 engine builds before splitting.
+    /// The symmetrised systems have degree 4 (`m = 3`), so at the
+    /// default 3 they get no algebraic reduction at all before the
+    /// first split; 4 or 5 is what a fair comparison needs.
+    pub f4_max_degree: u32,
 }
 
 impl Default for PairedOptions {
@@ -1032,6 +1037,7 @@ impl Default for PairedOptions {
             direct_x: true,
             ffd_max_degree: 4,
             targets_in_subgroup: true,
+            f4_max_degree: 3,
         }
     }
 }
@@ -1177,7 +1183,9 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
     let mut sym = Acc::new("sym F4");
     let mut x_chain_sat = Acc::new("x-chained SAT");
     let mut sym_sat = Acc::new("sym SAT");
-    let engine = SolverEngine::default();
+    let engine = SolverEngine::MatrixF4 {
+        max_degree: opts.f4_max_degree,
+    };
 
     for (ti, target) in targets.iter().enumerate() {
         // Truth on each base.
@@ -1515,6 +1523,7 @@ mod tests {
             direct_x: true,
             ffd_max_degree: 0,
             targets_in_subgroup: false,
+            f4_max_degree: 3,
         };
         let b = paired_bench(a, n, m, &opts).unwrap();
         for arm in &b.arms {

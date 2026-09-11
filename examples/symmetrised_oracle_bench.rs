@@ -53,6 +53,9 @@ fn main() {
     if let Some(b) = value("--node-budget") {
         opts.node_budget = b;
     }
+    if let Some(d) = value("--f4-degree") {
+        opts.f4_max_degree = d as u32;
+    }
     if let Some(c) = value("--conflict-budget") {
         opts.conflict_budget = c as u64;
     }

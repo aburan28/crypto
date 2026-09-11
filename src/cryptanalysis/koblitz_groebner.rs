@@ -480,6 +480,21 @@ fn monomials_up_to(n_vars: usize, deg: u32) -> Vec<u64> {
 const MAX_F4_ROWS: usize = 20_000;
 const MAX_F4_COLS: usize = 40_000;
 
+/// Macaulay size caps, overridable for experiments through the
+/// `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS` environment variables.
+fn max_f4_rows() -> usize {
+    std::env::var("F4_F2_MAX_ROWS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(MAX_F4_ROWS)
+}
+fn max_f4_cols() -> usize {
+    std::env::var("F4_F2_MAX_COLS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(MAX_F4_COLS)
+}
+
 /// **Matrix-F4 step over `F_2`**: multiply every input polynomial by
 /// every monomial that keeps the degree `≤ degree`, row-reduce the
 /// resulting Macaulay matrix, and return the reduced rows as
@@ -561,7 +576,7 @@ fn build_macaulay(
             if !row.is_empty() {
                 rows_monos.push(row);
             }
-            if rows_monos.len() > MAX_F4_ROWS {
+            if rows_monos.len() > max_f4_rows() {
                 return None;
             }
         }
@@ -573,7 +588,7 @@ fn build_macaulay(
     let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
     cols.sort_unstable();
     cols.dedup();
-    if cols.len() > MAX_F4_COLS {
+    if cols.len() > max_f4_cols() {
         return None;
     }
     cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
@@ -795,6 +810,11 @@ pub struct SolveStats {
     pub splits: usize,
     /// True if the node budget ran out, so results may be incomplete.
     pub exhausted: bool,
+    /// Highest Macaulay degree whose matrix was actually built.
+    pub max_degree_built: u32,
+    /// Reductions at which the next Macaulay matrix exceeded the size
+    /// caps (the engine then split on what it had).
+    pub oversize: usize,
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a
@@ -821,6 +841,7 @@ fn reduce_system(
             for d in base..=max_degree.max(base) {
                 match matrix_f4_f2(system, n_vars, d) {
                     Some(rows) => {
+                        stats.max_degree_built = stats.max_degree_built.max(d);
                         let decisive = rows.iter().any(|p| is_constant_one(p))
                             || rows.iter().any(|p| forced_assignment(p).is_some());
                         best = Some(rows);
@@ -828,7 +849,11 @@ fn reduce_system(
                             break;
                         }
                     }
-                    None => break, // matrix too large: use what we have
+                    None => {
+                        // matrix too large: use what we have
+                        stats.oversize += 1;
+                        break;
+                    }
                 }
             }
             best
