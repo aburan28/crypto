@@ -351,7 +351,10 @@ def safe_child_environment(*, cargo_home: Path | None = None, rustc: Path | None
         environment["CARGO_HOME"] = str(cargo_home.resolve())
         environment["CARGO_INCREMENTAL"] = "0"
     if rustc is not None:
-        environment["RUSTC"] = str(rustc.resolve(strict=True))
+        # Preserve a rustup multicall shim's `rustc` basename. Resolving the
+        # path to the underlying `rustup` executable changes its dispatch.
+        rustc.resolve(strict=True)
+        environment["RUSTC"] = str(rustc.absolute())
     return environment
 
 
