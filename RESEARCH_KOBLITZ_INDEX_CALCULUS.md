@@ -572,6 +572,107 @@ logarithm / descent stage a full pipeline needs.  Tested by
 against brute-forced logs) and `ic`'s
 `factor_base_logarithm_database_precomputes_then_descends`.
 
+## The resumable workflow driver — 2026-09-11
+
+**Tool:** `ic workflow --params wf.json --dir runs/…` (`src/bin/ic/workflow.rs`).
+**Docs:** `docs/ic/README.md`.
+
+The stages above now run as a number-field-sieve-style workflow: a
+parameter file names the curve, the factor-base source (an explicit
+recipe or the census search), the oracle and the targets; the driver
+executes **select → logs → solve** with every output on disk in a run
+directory and a `state.json` manifest carrying the parameter digest and
+each stage's status.  A rerun reloads existing artifacts, re-verifies
+them against the reconstructed curve — a stale or tampered
+`logs.json` is an error, never trusted — and continues from the first
+incomplete stage; the solve stage rewrites `solutions.json` after each
+target, so an interrupted batch resumes at the first unsolved one.  A
+parameter file whose digest differs is refused, so one directory never
+mixes two experiments.  `individual_log_with_pair_table` lets the batch
+build the `|F|²` pair table once instead of once per target.
+
+Exercised end to end on `K_0/2^9` (stop after select, resume through
+logs, finish solve, full reuse, tamper rejection, digest refusal) and on
+`K_1/2^15` with `mode: search`, where the census picked the same
+30-point one-column pruned union as the interactive search and all five
+targets descended in one relation each; the interactive `ic` tests cover
+the stage-by-stage resume.
+
+## Relation filtering and block Wiedemann — 2026-09-11
+
+**Module:** `koblitz_sparse_la` (`filter_relations`,
+`block_wiedemann_kernel`, `solve_sparse_system`).
+**Wiring:** `KoblitzIcOptions::linear_algebra`, `ic logs
+--linear-algebra sparse|dense --block-size`, the workflow's
+`linear_algebra` block.  **Docs:** `docs/ic/README.md`.
+
+The precompute solved its relation matrix by dense big-integer
+elimination, re-run on the whole matrix after every new relation.  Each
+relation has at most `m` nonzero entries, so the matrix is as sparse as
+a sieve matrix, and the stages a number-field-sieve driver puts between
+relation collection and the logarithm solve now exist for the ECDLP
+pipeline:
+
+- **Filtering** (`filter_relations`), in CADO's order: duplicate rows
+  out; singleton columns eliminated with their row and recovered by
+  back-substitution; excess rows removed down to a target excess by the
+  clique rule (rows are joined by weight-2 columns with union–find, the
+  heaviest row of the largest component goes first, and each removal
+  cascades through the singletons it creates); light columns merged by
+  structured Gaussian elimination under a fill-in bound.  Every
+  elimination is kept as `(pivot row, column)`; reconstruction runs the
+  stack backwards, then propagates through the *original* rows while
+  some row has one unknown, then solves whatever is left densely — so
+  the sparse path determines exactly the columns the original system
+  determines (`filtering_preserves_the_solution_and_reconstructs_every_column`
+  checks determinacy against an independent rank computation on random
+  systems).
+- **Block Wiedemann** (`block_wiedemann_kernel`).  The core is made
+  square by folding its excess rows into random earlier rows with random
+  coefficients, homogenised to `M (x, 1)ᵀ = 0` (never materialised: the
+  operator applies `A` and subtracts `t·b`), and a kernel vector is
+  found from the `m × n` Krylov blocks `X Mⁱ Y`.  The matrix
+  Berlekamp–Massey step is the iterative shifted minimal approximant
+  basis of `[a(λ) | I_m]` with shift `(0ⁿ, 1ᵐ)`: every basis column
+  `[f; g]` has `a·f + g ≡ 0 (mod λ^L)` with `deg g ≤ δ − 1`, which is
+  exactly the block recurrence `Σ_k S_{s−k} f_k = 0` for `δ ≤ s < L`.
+  Two details that the tests forced:  (i) Horner runs from the top
+  power (`f_0` multiplies `M^e`), and (ii) `Y = M·Z` for random `Z`
+  (Coppersmith) — with random `Y` the vector identities
+  `Σ_k M^{δ−k} Y f_k = 0` are exact in the block case and yield
+  nothing, while evaluating the same generator on `Z` gives a vector
+  `M` kills within `δ − e + 1` steps.  Sparse matrix-times-block
+  products run in parallel over rows; `u64` arithmetic throughout
+  (`r < 2^63`).
+- **Safety.**  The solve is skipped until every column occurs in some
+  row (a cheap test the dense path never made — it eliminated the full
+  matrix to discover the deficiency), a failed Wiedemann run is retried
+  with a fresh fold, the solution is checked against every relation,
+  and the table is still certified in the group.  The two paths certify
+  identical databases (`sparse_and_dense_linear_algebra_certify_the_same_log_table`
+  on `K_0/2^9` and `K_1/2^11`; `ic`'s
+  `factor_base_logarithm_database_precomputes_then_descends` compares
+  the written files).
+
+Measured:
+
+| system | filter | core | block Wiedemann | solve |
+|:-------|:-------|:-----|:----------------|------:|
+| `K_0/2^31`, 35 columns, 74 relations (`ic logs`, sparse) | 4 singletons, 7 excess rows, 20 merged | 11 × 11, 158 nonzeros | 4×4, 14 Krylov terms, 17 products | 0.4 ms for all 40 attempts (dense: 22 ms) |
+| synthetic, 3 000 columns, 18 000 rows of weight 3 (unit test) | 1 411 singletons, 14 968 excess rows, 1 273 merged | 316 × 316, 4 644 nonzeros | 4×4, 168 terms, 248 products | 48 ms |
+
+At 35 columns the linear algebra was never the cost (the run is the
+`|F|²` pair table, 16 s either way), so the point of the measurement is
+that the sparse path is exact and no slower; the second row is the
+regime it is for.  The dense reference is `O(rows · cols²)` big-integer
+operations per attempt and keeps the full `rows × cols` `BigUint`
+matrix in memory, which is what stopped the precompute from being run
+on bases with thousands of columns; the sparse path keeps `≤ m`
+entries per relation and costs one Krylov sequence.  The matrix
+Berlekamp–Massey step is the quadratic iterative one (`O(L² m² (n+m))`),
+fine to `10^4`–`10^5` columns; Thomé's subquadratic variant is the next
+step if the base sizes get there.
+
 ## Open problems from the talk (unimplemented)
 
 - Couveignes–Lercier invariant factor bases via isogenies between
