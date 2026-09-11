@@ -57,6 +57,11 @@ jobs:
           git -C "$RUNNER_TEMP/cms/build/_deps/cadiback-src" checkout acc8bb55b98e35afe0dc228662bf41d8341b8a9b
           git -C "$RUNNER_TEMP/wdsat" status --porcelain=v1
           git -C "$RUNNER_TEMP/cms" status --porcelain=v1
+          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          /usr/bin/time -v -o "$RUNNER_TEMP/acquisition/rust-crates.time" cargo fetch --locked
+          rm Cargo.lock
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
       - name: Build and meter exact tools
         run: |
           python3 scripts/build_koblitz_phase_b_wdsat.py \
