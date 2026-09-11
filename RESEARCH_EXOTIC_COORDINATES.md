@@ -1491,8 +1491,8 @@ whose matrix exceeded the caps falls back to the largest that fits.
 |---|---|---:|---:|---|---|---|
 | `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | TBD-KD-A05X |
 | | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | TBD-KD-A05S |
-| `K₁/F₂¹⁵` (found) | `x`-chained | 30 | 3 | TBD-KD-C |
-| | symmetrised | 13 | 4 | TBD-KD-C |
+| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | – |
+| | symmetrised | 13 | 4 | 6 (found), 26 (refuted) / 29 | 9, 29 / 8 | – |
 | `K₁/F₂¹⁷` (found) | `x`-chained | 44 | 3 | 3 963 / 49 | TBD-KD-B |
 | | symmetrised | 25 | 4 | 5 537 / 3 219 | TBD-KD-B |
 | `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | budget (§8) | TBD-KD-D |
