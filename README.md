@@ -392,7 +392,7 @@ that makes adding new attacks cheap.
 | Module                                       | Attack                                                  |
 |----------------------------------------------|---------------------------------------------------------|
 | `cryptanalysis::pollard_rho`                 | Pollard ρ for DLP / ECDLP, multi-shard, distinguished-points |
-| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
+| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip + [cairn](https://github.com/aburan28/cairn) piecework transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
 | `cryptanalysis::preprocessing_rho`           | Bernstein-Lange precomputation rho                       |
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
@@ -685,9 +685,23 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
-Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
-[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
-verified artifact, is [aburan28/cairn#143](https://github.com/aburan28/cairn/pull/143).
+Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node can
+post the same search as a `piecework` objective, where each distinguished
+point is a verified artifact paid from a pool
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md),
+built in [aburan28/cairn#144](https://github.com/aburan28/cairn/pull/144)).
+`--cairn` commits and reveals every point as a claim and reads the objective's
+log back as the shared DP table, so a collision with anyone else's point is
+seen here and, with `--answer-objective`, `k` is claimed too:
+
+```bash
+crypto cryptanalysis rho-collab work --job nums-50-rho.json --node carol \
+    --cairn http://127.0.0.1:8080 --objective sha256:… --answer-objective sha256:… \
+    --identity carol.json          # or --submitter carol for an unsigned nickname
+crypto cryptanalysis rho-collab status --job nums-50-rho.json --cairn http://127.0.0.1:8080 --objective sha256:…
+```
+
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).
 
 ### Index calculus (ECDLP, prime fields)
 

@@ -389,8 +389,37 @@ enum RhoCollabOp {
         /// Stop each lane after this many walkers (0 = until solved).
         #[arg(long, default_value_t = 0)]
         max_walkers: u64,
+        /// A cairn node (`http://host:port`, running `cairn serve
+        /// --queue`).  Every distinguished point is committed and revealed
+        /// as a claim on `--objective`, and the objective's log is merged
+        /// back as the shared DP table.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        /// The cairn piecework objective id the points are claims on.
+        #[arg(long)]
+        objective: Option<String>,
+        /// Nickname to submit under (default: the node name).  Ignored
+        /// when `--identity` is given.
+        #[arg(long)]
+        submitter: Option<String>,
+        /// A cairn identity file (`cairn identity --out FILE`): submit
+        /// under its Ed25519 key and sign every record.
+        #[arg(long)]
+        identity: Option<std::path::PathBuf>,
+        /// The cairn objective that pays for `k` itself.  Once the search
+        /// solves, `{"k": …}` is committed there and revealed next epoch.
+        #[arg(long)]
+        answer_objective: Option<String>,
+        /// The cairn node's epoch length in seconds (its
+        /// `CAIRN_EPOCH_SECONDS`; 600 unless the operator changed it).
+        #[arg(long, default_value_t = 600)]
+        cairn_epoch_secs: u64,
+        /// Where pending commitments are kept between runs (default:
+        /// `<node>.cairn.json` next to the job).
+        #[arg(long)]
+        cairn_state: Option<std::path::PathBuf>,
     },
-    /// Show merged progress from a mailbox and/or peers.
+    /// Show merged progress from a mailbox, peers, and/or a cairn log.
     Status {
         #[arg(long)]
         job: Option<std::path::PathBuf>,
@@ -398,6 +427,11 @@ enum RhoCollabOp {
         mailbox: Option<std::path::PathBuf>,
         #[arg(long = "peer")]
         peers: Vec<String>,
+        /// Read the objective's accepted points from this cairn node.
+        #[arg(long, requires = "objective")]
+        cairn: Option<String>,
+        #[arg(long)]
+        objective: Option<String>,
         /// Emit JSON instead of text.
         #[arg(long)]
         json: bool,
@@ -505,6 +539,9 @@ fn cmd_cryptopals(arg: &str) {
 // ── Collaborative rho ────────────────────────────────────────────────────────
 
 fn cmd_rho_collab(op: RhoCollabOp) {
+    use crypto_lib::cryptanalysis::pollard_collab::cairn::{
+        wall_clock, CairnConfig, CairnTransport, Submitter,
+    };
     use crypto_lib::cryptanalysis::pollard_collab::{
         demo_curve, run_lane, sync_with_peer, JobSpec, LaneOptions, Mailbox, PeerServer,
         SharedState, DEMO_CURVES,
@@ -530,6 +567,49 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             (None, Some(d)) => Mailbox::read_job(d).unwrap_or_else(|e| die(e)),
             (None, None) => die("pass --job <file> or --mailbox <dir>"),
         }
+    }
+
+    /// Open the cairn transport the flags describe, if `--cairn` was given.
+    #[allow(clippy::too_many_arguments)]
+    fn open_cairn(
+        url: &Option<String>,
+        objective: &Option<String>,
+        submitter: &Option<String>,
+        identity: &Option<std::path::PathBuf>,
+        answer_objective: &Option<String>,
+        epoch_secs: u64,
+        state_path: Option<std::path::PathBuf>,
+        default_name: &str,
+    ) -> Option<CairnTransport> {
+        let url = url.as_ref()?;
+        let objective_id = objective
+            .clone()
+            .unwrap_or_else(|| die("--cairn needs --objective <id>"));
+        let who = match identity {
+            Some(path) => Submitter::from_identity_file(path).unwrap_or_else(|e| die(e)),
+            None => Submitter::Nickname(submitter.clone().unwrap_or_else(|| default_name.to_string())),
+        };
+        let transport = CairnTransport::open(CairnConfig {
+            url: url.trim_end_matches('/').to_string(),
+            objective_id: objective_id.clone(),
+            submitter: who,
+            answer_objective: answer_objective.clone(),
+            epoch_secs,
+            state_path,
+            clock: wall_clock(),
+        })
+        .unwrap_or_else(|e| die(e));
+        let short = if objective_id.len() > 23 { format!("{}…", &objective_id[..23]) } else { objective_id };
+        eprintln!(
+            "[cairn] {url} · objective {short} · submitting as {}{}",
+            transport.submitter(),
+            if transport.pending() > 0 {
+                format!(" · {} commitment(s) pending from a previous run", transport.pending())
+            } else {
+                String::new()
+            }
+        );
+        Some(transport)
     }
 
     match op {
@@ -601,10 +681,48 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             sync_secs,
             max_seconds,
             max_walkers,
+            cairn,
+            objective,
+            submitter,
+            identity,
+            answer_objective,
+            cairn_epoch_secs,
+            cairn_state,
         } => {
             let spec = load_spec(&job, &mailbox);
             let ctx = Arc::new(spec.build().unwrap_or_else(|e| die(e)));
             let state = Arc::new(Mutex::new(SharedState::new(&ctx)));
+            let cairn_state = cairn_state.or_else(|| {
+                cairn.as_ref().map(|_| {
+                    let dir = job
+                        .as_ref()
+                        .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+                        .or_else(|| mailbox.clone())
+                        .unwrap_or_else(|| std::path::PathBuf::from("."));
+                    dir.join(format!("{node}.cairn.json"))
+                })
+            });
+            let cairn = open_cairn(
+                &cairn,
+                &objective,
+                &submitter,
+                &identity,
+                &answer_objective,
+                cairn_epoch_secs,
+                cairn_state,
+                &node,
+            )
+            .map(|t| Arc::new(Mutex::new(t)));
+            if let Some(c) = &cairn {
+                let mut st = state.lock().unwrap();
+                match c.lock().unwrap().sync(&ctx, &mut st) {
+                    Ok(r) => eprintln!(
+                        "[cairn] log read: {} points merged, {} rejected, {} revealed",
+                        r.accepted_dps, r.rejected_dps, r.revealed
+                    ),
+                    Err(e) => eprintln!("[cairn] first sync failed: {e}"),
+                }
+            }
             let mbox = mailbox.as_ref().map(|d| {
                 let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
                 let (n, _) = mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
@@ -649,6 +767,25 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         eprintln!("[collab] mailbox relay failed: {e}");
                     }
                 }
+                if let Some(c) = &cairn {
+                    let mut st = state.lock().unwrap();
+                    let mut c = c.lock().unwrap();
+                    match c.sync(&ctx, &mut st) {
+                        Ok(r) => {
+                            if verbose && (r.accepted_dps > 0 || r.revealed > 0 || r.refused > 0) {
+                                eprintln!(
+                                    "[cairn] +{} points from the log ({} rejected), {} revealed, {} refused",
+                                    r.accepted_dps, r.rejected_dps, r.revealed, r.refused
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            if verbose {
+                                eprintln!("[cairn] sync failed: {e}");
+                            }
+                        }
+                    }
+                }
             };
             do_sync(true);
 
@@ -665,6 +802,7 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                     let state = Arc::clone(&state);
                     let stop = Arc::clone(&stop);
                     let mbox = mbox.clone();
+                    let cairn = cairn.clone();
                     let opts = LaneOptions {
                         checkin_every,
                         lease_secs,
@@ -680,6 +818,16 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                                 if let Some(mb) = &mbox {
                                     if let Err(e) = mb.lock().unwrap().publish(ci) {
                                         eprintln!("[collab] publish failed: {e}");
+                                    }
+                                }
+                                if let Some(c) = &cairn {
+                                    match c.lock().unwrap().publish(&ctx, ci) {
+                                        Ok(r) if r.committed > 0 => eprintln!(
+                                            "[cairn] committed {} point(s); reveal follows next epoch",
+                                            r.committed
+                                        ),
+                                        Ok(_) => {}
+                                        Err(e) => eprintln!("[cairn] commit failed: {e}"),
                                     }
                                 }
                             },
@@ -713,6 +861,14 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         p.peers,
                         p.rejected_dps,
                     );
+                    if let Some(c) = &cairn {
+                        let c = c.lock().unwrap();
+                        let s = c.stats();
+                        eprintln!(
+                            "[cairn]  committed {}  revealed {}  pending {}  refused {}  paid {} unit(s) = {}  rejected {}  log points {}",
+                            s.committed, s.revealed, c.pending(), s.refused, s.paid_units, s.paid_total, s.rejected, s.log_dps,
+                        );
+                    }
                 }
                 if solved || lanes_done || timed_out {
                     break;
@@ -725,6 +881,16 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             // Final exchange so peers learn the outcome.
             do_sync(false);
             let st = state.lock().unwrap();
+            if let Some(c) = &cairn {
+                let c = c.lock().unwrap();
+                if c.pending() > 0 {
+                    eprintln!(
+                        "[cairn] {} commitment(s) still wait for the epoch to turn; run `work` again \
+                         (same node name and state file) to reveal them",
+                        c.pending()
+                    );
+                }
+            }
             match &st.solution {
                 Some(x) => {
                     println!("solution: {}", x.to_str_radix(16));
@@ -741,6 +907,8 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             job,
             mailbox,
             peers,
+            cairn,
+            objective,
             json,
             lease_secs,
         } => {
@@ -750,6 +918,15 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             if let Some(d) = &mailbox {
                 let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
                 mb.sync(&ctx, &mut state.lock().unwrap()).unwrap_or_else(|e| die(e));
+            }
+            if let Some(mut c) = open_cairn(&cairn, &objective, &None, &None, &None, 600, None, "status") {
+                match c.sync(&ctx, &mut state.lock().unwrap()) {
+                    Ok(r) => eprintln!(
+                        "[cairn] {} accepted point(s) in the log, {} rejected here",
+                        r.accepted_dps, r.rejected_dps
+                    ),
+                    Err(e) => eprintln!("[cairn] {e}"),
+                }
             }
             for p in &peers {
                 if let Err(e) = sync_with_peer(p.as_str(), &ctx, &state) {
