@@ -80,6 +80,16 @@ jump tables. Rho walk timing stops before collision-candidate verification, so
 setup, walk, and verification timing intervals do not overlap. Any other row is
 incomplete and inconclusive.
 
+The relation matrix has one column for each projected signed-Frobenius orbit
+logarithm and a final column for the target scalar `d`. Completion does not
+require every factor-base logarithm to be unique. The verifier independently
+row-reduces the retained matrix modulo the prime subgroup order and requires
+the affine solution space to have one invariant target coordinate: equivalently,
+every homogeneous nullspace vector has zero in the final coordinate. It then
+requires that coordinate to equal the reported scalar and retains the exact
+`[d]G = Q` point check. A deficient total rank is therefore admissible only
+when its free directions affect factor-base logs but cannot change `d`.
+
 The project verifier reconstructs the exact permitted task prefix from the
 archived protocol and target panel. For every task it reopens the intent, raw
 meter output, receipt, stdout, stderr, inputs, and parsed result; checks the

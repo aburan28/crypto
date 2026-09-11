@@ -683,6 +683,125 @@ def validate_targets(result: dict[str, Any], profile: str, expected: int) -> lis
     return targets
 
 
+def canonical_residue(value: Any, modulus: int, context: str) -> int:
+    if not isinstance(value, str):
+        raise Stage23Error(f"{context} must be a canonical decimal string")
+    try:
+        parsed = int(value)
+    except ValueError as error:
+        raise Stage23Error(f"{context} is not a decimal integer") from error
+    if value != str(parsed) or not 0 <= parsed < modulus:
+        raise Stage23Error(f"{context} is not a canonical residue")
+    return parsed
+
+
+def relation_arithmetic(profile: str) -> tuple[int, int]:
+    if profile == "production":
+        curve = protocol(profile)["curve"]
+        return int(curve["subgroup_order"]), int(curve["cofactor"])
+    if profile == "smoke":
+        # K_1 / F_(2^7) has order 142 and the frozen prime-order
+        # subgroup used by the smoke producer has r=71 and h=2.
+        return 71, 2
+    raise Stage23Error("IC profile has no frozen relation arithmetic")
+
+
+def target_column_certificate(result: dict[str, Any], profile: str) -> dict[str, Any]:
+    """Reconstruct the relation system and prove whether only d is identifiable."""
+    report = result.get("report", {})
+    relations = result.get("relation_matrix", [])
+    columns = report.get("matrix_columns")
+    if type(columns) is not int or columns < 1 or not isinstance(relations, list):
+        raise Stage23Error("IC relation matrix has invalid dimensions")
+    modulus, cofactor = relation_arithmetic(profile)
+    orbit_columns = columns - 1
+    augmented: list[list[int]] = []
+    for index, relation in enumerate(relations):
+        if not isinstance(relation, dict):
+            raise Stage23Error(f"IC relation {index} is not an object")
+        row = relation.get("row")
+        if not isinstance(row, list) or len(row) != orbit_columns:
+            raise Stage23Error(f"IC relation {index} has the wrong orbit-column count")
+        coefficients = [
+            canonical_residue(value, modulus, f"IC relation {index} column {column}")
+            for column, value in enumerate(row)
+        ]
+        coefficient_a = canonical_residue(
+            relation.get("coefficient_a"), modulus, f"IC relation {index} coefficient_a"
+        )
+        coefficient_b = canonical_residue(
+            relation.get("coefficient_b"), modulus, f"IC relation {index} coefficient_b"
+        )
+        # Σ c_o x_o - (h*b)d = h*a (mod r).
+        coefficients.append((-cofactor * coefficient_b) % modulus)
+        augmented.append(coefficients + [(cofactor * coefficient_a) % modulus])
+
+    pivot_columns: list[int] = []
+    pivot_row = 0
+    for column in range(columns):
+        selected = next(
+            (
+                row
+                for row in range(pivot_row, len(augmented))
+                if augmented[row][column] % modulus != 0
+            ),
+            None,
+        )
+        if selected is None:
+            continue
+        augmented[pivot_row], augmented[selected] = (
+            augmented[selected],
+            augmented[pivot_row],
+        )
+        try:
+            inverse = pow(augmented[pivot_row][column], -1, modulus)
+        except ValueError as error:
+            raise Stage23Error("IC relation pivot is not invertible modulo the subgroup order") from error
+        augmented[pivot_row] = [
+            value * inverse % modulus for value in augmented[pivot_row]
+        ]
+        for row in range(len(augmented)):
+            if row == pivot_row or augmented[row][column] == 0:
+                continue
+            factor = augmented[row][column]
+            augmented[row] = [
+                (augmented[row][entry] - factor * augmented[pivot_row][entry]) % modulus
+                for entry in range(columns + 1)
+            ]
+        pivot_columns.append(column)
+        pivot_row += 1
+        if pivot_row == len(augmented):
+            break
+
+    consistent = not any(
+        all(value == 0 for value in row[:columns]) and row[columns] != 0
+        for row in augmented
+    )
+    rank = len(pivot_columns)
+    target_column = columns - 1
+    target_pivot = target_column in pivot_columns
+    free_columns = [column for column in range(columns) if column not in pivot_columns]
+    target_row = pivot_columns.index(target_column) if target_pivot else None
+    target_invariant = bool(
+        consistent
+        and target_row is not None
+        and all(augmented[target_row][column] == 0 for column in free_columns)
+    )
+    target_scalar = augmented[target_row][columns] if target_invariant else None
+    return {
+        "rows": len(relations),
+        "columns": columns,
+        "rank": rank,
+        "nullity": columns - rank,
+        "consistent": consistent,
+        "target_column": target_column,
+        "target_pivot": target_pivot,
+        "free_columns": free_columns,
+        "target_invariant": target_invariant,
+        "target_scalar": str(target_scalar) if target_scalar is not None else None,
+    }
+
+
 def validate_ic(
     result: dict[str, Any], target: dict[str, Any], profile: str | None = None
 ) -> bool:
@@ -690,7 +809,10 @@ def validate_ic(
         raise Stage23Error("wrong IC result schema")
     if result.get("status") not in {"complete_verified", "incomplete"}:
         raise Stage23Error("unknown IC terminal status")
-    if profile is not None and result.get("profile") != profile:
+    actual_profile = result.get("profile")
+    if actual_profile not in {"production", "smoke"}:
+        raise Stage23Error("IC profile is unknown")
+    if profile is not None and actual_profile != profile:
         raise Stage23Error("IC profile mismatch")
     if result.get("target_id") != target["target_id"] or result.get("target") != target["point"]:
         raise Stage23Error("IC target mismatch")
@@ -746,6 +868,8 @@ def validate_ic(
         or len(rank_events) != len(rank_history)
         or report.get("matrix_rows") != len(matrix)
         or type(report.get("matrix_columns")) is not int
+        or type(report.get("orbit_count")) is not int
+        or report.get("matrix_columns") != report.get("orbit_count") + 1
         or type(report.get("terminal_matrix_rank")) is not int
         or not 0
         <= report["terminal_matrix_rank"]
@@ -758,6 +882,13 @@ def validate_ic(
         report_field = "terminal_matrix_rank" if field == "rank" else f"matrix_{field}"
         if terminal.get(field) != report.get(report_field) or terminal_event.get(field) != report.get(report_field):
             raise Stage23Error("IC terminal rank evidence is inconsistent")
+    certificate = target_column_certificate(result, actual_profile)
+    if (
+        certificate["rows"] != report.get("matrix_rows")
+        or certificate["columns"] != report.get("matrix_columns")
+        or certificate["rank"] != report.get("terminal_matrix_rank")
+    ):
+        raise Stage23Error("IC retained matrix does not reproduce its rank evidence")
     if result.get("status") == "complete_verified":
         if not report.get("recovered_scalar_point_verified") or report.get("recovered_scalar") is None:
             raise Stage23Error("completed IC row lacks point verification")
@@ -765,11 +896,24 @@ def validate_ic(
             raise Stage23Error("completed IC row bypassed the matrix or admitted an invalid model")
         if (
             report.get("matrix_rows") != len(matrix)
-            or report.get("terminal_matrix_rank") != report.get("matrix_columns")
             or not report.get("rank_history")
+            or report["rank_history"][-1].get("candidate_produced") is not True
             or report["rank_history"][-1].get("candidate_verified") is not True
         ):
             raise Stage23Error("completed IC row lacks matrix/rank evidence")
+        recovered = canonical_residue(
+            report["recovered_scalar"],
+            relation_arithmetic(actual_profile)[0],
+            "IC recovered scalar",
+        )
+        if (
+            certificate["consistent"] is not True
+            or certificate["target_invariant"] is not True
+            or certificate["target_scalar"] != str(recovered)
+        ):
+            raise Stage23Error(
+                "completed IC row does not identify the reported target scalar"
+            )
         return True
     if report.get("recovered_scalar_point_verified") or report.get("recovered_scalar") is not None:
         raise Stage23Error("incomplete IC row retained a completed scalar claim")
