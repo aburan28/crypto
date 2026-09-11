@@ -242,8 +242,8 @@ fn descent(m: usize, targets: usize, rng: &mut Rng64) {
                 println!(
                     "      {:<22} GB {:>8.1} ms (refuted {refuted}/{}) | F4 {:>8.1} ms, solving degree {:>4.1}, refuted {f4_refuted}, undetermined {f4_undet}",
                     first[ai].label,
-                    rows.len(),
                     median(ms),
+                    rows.len(),
                     median(f4_ms),
                     median(f4_deg)
                 );
