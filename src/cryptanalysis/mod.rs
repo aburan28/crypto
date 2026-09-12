@@ -274,7 +274,8 @@ pub use koblitz_index_calculus::{
     PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
     SatDecompositionStats, PRECOMPUTE_BATCH_TRIALS, invariant_factors, top_factor_indices,
     subspace_basis_for_factors, q_linearised_kernel_basis, subfield_group_order,
-    frobenius_eigenvalue_q, MAX_SUBFIELD_DEGREE,
+    frobenius_eigenvalue_q, MAX_SUBFIELD_DEGREE, build_subgroup_orbit_factor_base,
+    FactorBaseLogSolver,
 };
 pub use koblitz_sparse_la::{
     block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,

@@ -1693,6 +1693,84 @@ pub fn build_explicit_frobenius_orbit_factor_base(
     )
 }
 
+/// **Build a factor base from the prime-order subgroup**: Frobenius
+/// orbits of abscissae drawn pseudo-randomly from `seed`, keeping only
+/// those whose points satisfy `[r]P = O`.
+///
+/// Sampling stops once the base holds at least `points` points, so the
+/// result is reproducible from `(curve, seed, points)` alone and a
+/// recipe naming those three is a complete description of the base.
+///
+/// Why the subgroup: a relation and a descent both ask for a target of
+/// `⟨G⟩` to be a sum of `m` base points.  Points outside `⟨G⟩` can only
+/// sum into it when their cofactor components happen to cancel, so a
+/// base drawn from the whole curve wastes most of its sums on the wrong
+/// coset.  Restricting to the subgroup removes that loss, and the test
+/// `[r]P = O` needs no logarithm.
+///
+/// `None` when the field is too wide to sample abscissae as `u64`, or
+/// when sampling cannot reach `points` (a degenerate curve).
+pub fn build_subgroup_orbit_factor_base(
+    kc: &KoblitzCurve,
+    seed: u64,
+    points: usize,
+) -> Result<FrobeniusFactorBase, String> {
+    if kc.n >= 64 {
+        return Err("subgroup orbit sampling needs n < 64".into());
+    }
+    if points == 0 {
+        return Err("a factor base needs at least one point".into());
+    }
+    let curve = FastCurve::new(&kc.curve).ok_or("field too wide for single-word arithmetic")?;
+    let cofactor = &kc.cofactor;
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut representatives: Vec<F2mElement> = Vec::new();
+    let mut seen: HashSet<u64> = HashSet::new();
+    let mut base: Option<FrobeniusFactorBase> = None;
+    // Each round adds a batch of orbits and rebuilds, so the loop stops at
+    // the first base that reaches `points` rather than overshooting by a
+    // whole batch's worth of Frobenius closure.
+    let batch = 8usize;
+    let cap = 1u64 << kc.n;
+    let mut drawn = 0u64;
+    let budget = 1024u64 * points as u64;
+    while base.as_ref().is_none_or(|b| b.points.len() < points) {
+        let mut added = 0usize;
+        while added < batch {
+            drawn += 1;
+            if drawn > budget {
+                return Err(format!(
+                    "drew {drawn} abscissae without reaching {points} subgroup points on {}",
+                    kc.label()
+                ));
+            }
+            let x = F2mElement::from_biguint(&BigUint::from(rng.gen_range(1..cap)), kc.n);
+            let Some(point) = points_with_x(&kc.curve, &x).into_iter().next() else {
+                continue;
+            };
+            // Multiply by the cofactor rather than rejecting: [h]P has
+            // order dividing r for *every* P, so no sample is wasted, and
+            // where the cofactor is large that is the difference between
+            // one draw per base point and h of them.  Knowing P says
+            // nothing about the logarithm of [h]P.
+            let projected = curve.mul(curve.lift(&point), cofactor);
+            if projected.infinity {
+                continue;
+            }
+            if !seen.insert(projected.x) {
+                continue;
+            }
+            let BinaryPoint::Affine { x, .. } = curve.lower(projected) else {
+                continue;
+            };
+            representatives.push(x);
+            added += 1;
+        }
+        base = build_explicit_frobenius_orbit_factor_base(kc, &representatives);
+    }
+    base.ok_or_else(|| "subgroup orbit sampling produced no base".into())
+}
+
 /// **Keep only the listed signed orbits** of a factor base.
 ///
 /// The retained set is still closed under Frobenius and negation, so
@@ -5567,50 +5645,116 @@ pub fn solve_factor_base_logs(
 /// linear algebra and certification as [`solve_factor_base_logs`].
 /// `None` for a base with no projected columns; a set of relations that
 /// does not determine every column yields `verified = false`.
+/// **The logarithm system of one factor base, fed relations over time.**
+///
+/// The setup a solve needs — the signed-orbit map of the base, the
+/// column order, the modular workspace — costs `Θ(|F|·n)` to build, and
+/// a relation costs a group re-verification.  A driver that collects
+/// more relations when the columns are not yet determined would pay
+/// both again on every round: this pays each exactly once.
+pub struct FactorBaseLogSolver<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    opts: &'a KoblitzIcOptions,
+    system: LogSystem<'a>,
+    seen: HashSet<(u64, Vec<usize>)>,
+    report: LogTableReport,
+}
+
+impl<'a> FactorBaseLogSolver<'a> {
+    /// `None` when the base has no projected columns.
+    pub fn new(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+    ) -> Option<Self> {
+        let system = LogSystem::new(kc, fb, opts)?;
+        let report = LogTableReport {
+            sparse: system.sparse_opts.is_some(),
+            columns: system.n_cols,
+            ..LogTableReport::default()
+        };
+        Some(Self {
+            kc,
+            fb,
+            opts,
+            system,
+            seen: HashSet::new(),
+            report,
+        })
+    }
+
+    /// Verify these relations in the group and keep the ones that are
+    /// new.  A forged or duplicate relation is counted and dropped, so a
+    /// remote worker cannot enter anything into the linear algebra.
+    pub fn push(&mut self, relations: &[CollectedRelation]) {
+        let begin = std::time::Instant::now();
+        let verdicts: Vec<bool> = relations
+            .par_iter()
+            .map(|rel| verify_collected_relation(self.kc, self.fb, self.opts.m, rel))
+            .collect();
+        for (rel, ok) in relations.iter().zip(verdicts) {
+            if !ok {
+                self.report.rejected_relations += 1;
+                continue;
+            }
+            let mut key = rel.points.clone();
+            key.sort_unstable();
+            if !self.seen.insert((rel.a, key)) {
+                self.report.duplicate_relations += 1;
+                continue;
+            }
+            self.system.push(rel);
+        }
+        self.report.collection_seconds += begin.elapsed().as_secs_f64();
+        self.report.relations = self.system.rows();
+    }
+
+    /// Relations accepted so far.
+    pub fn relations(&self) -> usize {
+        self.system.rows()
+    }
+
+    /// Columns the relations must determine.
+    pub fn columns(&self) -> usize {
+        self.system.n_cols
+    }
+
+    /// Try to solve with what has been pushed.  `None` means more
+    /// relations are needed; the solver stays usable either way.
+    pub fn try_solve(&mut self) -> Option<(FactorBaseLogTable, LogTableReport)> {
+        if self.system.rows() < self.system.n_cols {
+            return None;
+        }
+        let mut report = self.report.clone();
+        let table = self.system.attempt(&mut report)?;
+        report.verified = true;
+        self.report.solve_attempts = report.solve_attempts;
+        Some((table, report))
+    }
+
+    /// The report as it stands, for a solve that has not succeeded.
+    pub fn report(&self) -> LogTableReport {
+        self.report.clone()
+    }
+}
+
 pub fn solve_factor_base_logs_from_relations(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
     relations: &[CollectedRelation],
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
-    let mut system = LogSystem::new(kc, fb, opts)?;
-    let mut report = LogTableReport {
-        sparse: system.sparse_opts.is_some(),
-        columns: system.n_cols,
-        ..LogTableReport::default()
-    };
-    let begin = std::time::Instant::now();
-    let verdicts: Vec<bool> = relations
-        .par_iter()
-        .map(|rel| verify_collected_relation(kc, fb, opts.m, rel))
-        .collect();
-    let mut seen: HashSet<(u64, Vec<usize>)> = HashSet::new();
-    for (rel, ok) in relations.iter().zip(verdicts) {
-        if !ok {
-            report.rejected_relations += 1;
-            continue;
-        }
-        let mut key = rel.points.clone();
-        key.sort_unstable();
-        if !seen.insert((rel.a, key)) {
-            report.duplicate_relations += 1;
-            continue;
-        }
-        system.push(rel);
-    }
-    report.collection_seconds = begin.elapsed().as_secs_f64();
-    report.relations = system.rows();
-    if report.relations >= system.n_cols {
-        if let Some(table) = system.attempt(&mut report) {
-            report.verified = true;
-            return Some((table, report));
-        }
+    let mut solver = FactorBaseLogSolver::new(kc, fb, opts)?;
+    solver.push(relations);
+    if let Some(solved) = solver.try_solve() {
+        return Some(solved);
     }
     Some((
         FactorBaseLogTable {
             columns: Vec::new(),
         },
-        report,
+        solver.report(),
     ))
 }
 
@@ -5857,6 +6001,89 @@ enum Probe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn subgroup_orbit_bases_are_reproducible_and_inside_the_subgroup() {
+        for (a, n) in [(0u8, 19u32), (1, 19), (0, 23)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 7, 200).unwrap();
+            assert!(fb.points.len() >= 200);
+            // Every point is in the prime-order subgroup, and the base is
+            // still closed under Frobenius and negation.
+            for p in &fb.points {
+                assert_eq!(kc.mul(p, &kc.subgroup_order), BinaryPoint::Infinity);
+                assert!(fb.points.contains(&kc.frobenius(p)));
+                assert!(fb.points.contains(&point_neg(p)));
+            }
+            // The recipe is the whole description: same seed, same base.
+            let again = build_subgroup_orbit_factor_base(&kc, 7, 200).unwrap();
+            assert_eq!(fb.points, again.points);
+            let other = build_subgroup_orbit_factor_base(&kc, 8, 200).unwrap();
+            assert_ne!(fb.points, other.points);
+        }
+    }
+
+    #[test]
+    fn subgroup_orbit_bases_decompose_far_more_often_than_a_subspace_union() {
+        // The measurement this family exists for: how often a random
+        // subgroup point is a sum of three base points.
+        let kc = KoblitzCurve::new(0, 37).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let g = fc.lift(kc.generator());
+        let rate = |fb: &FrobeniusFactorBase| -> f64 {
+            let table = PairSumTable::build(&kc, fb).unwrap();
+            let mut rng = StdRng::seed_from_u64(4);
+            let trials = 600;
+            let hits = (0..trials)
+                .filter(|_| {
+                    let target = fc.mul_u64(g, rng.gen_range(1..r));
+                    table.decompose_fast(target, 3).is_some()
+                })
+                .count();
+            hits as f64 / trials as f64
+        };
+        let seeds: Vec<F2mElement> = (0..3)
+            .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+            .collect();
+        let union = build_frobenius_union_factor_base(&kc, &seeds).unwrap();
+        let subgroup = build_subgroup_orbit_factor_base(&kc, 11, union.points.len()).unwrap();
+        let (union_rate, subgroup_rate) = (rate(&union), rate(&subgroup));
+        // Same size, same column order of magnitude, far better yield.
+        assert!(subgroup.points.len() >= union.points.len());
+        // Both bases must be in the scarce regime, or the comparison is
+        // vacuous.
+        assert!(union_rate < 0.5, "union base saturates: {union_rate}");
+        assert!(
+            subgroup_rate > 2.0 * union_rate,
+            "union {union_rate:.4} from {} points, subgroup {subgroup_rate:.4} from {} points",
+            union.points.len(),
+            subgroup.points.len()
+        );
+    }
+
+    #[test]
+    fn subgroup_orbit_base_precomputes_logs_and_descends() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::PairTable,
+            max_trials: 200_000,
+            ..KoblitzIcOptions::default()
+        };
+        let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).expect("log database");
+        assert!(report.relations >= table.columns.len());
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        for d in [1u64, 5, 9_999 % r, r - 2] {
+            let d = BigUint::from(d);
+            let q = kc.mul(kc.generator(), &d);
+            let (found, _) = solver.solve(&q).expect("descends");
+            assert_eq!(found, d);
+        }
+    }
 
     #[test]
     fn rho_charge_ledgers_close() {

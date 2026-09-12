@@ -53,7 +53,8 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x,
+    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, FactorBaseLogSolver,
+    FactorBaseLogTable,
     solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
     IndividualLogSolver,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
@@ -973,16 +974,21 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             state.relations_collected,
             units.len()
         ));
-        let mut merged: Vec<CollectedRelation> =
+        let merged: Vec<CollectedRelation> =
             units.values().flat_map(|d| d.relations.iter().cloned()).collect();
-        let mut outcome = solve_factor_base_logs_from_relations(&c, &fb, &ic, &merged);
+        // One solver for the whole stage: the orbit map of the base and
+        // the verification of a relation are each paid once, however many
+        // rounds of collection it takes to determine the columns.
+        let mut solver = FactorBaseLogSolver::new(&c, &fb, &ic)
+            .ok_or("factor base has no projected columns")?;
+        solver.push(&merged);
+        let mut loaded = merged.len();
+        let mut outcome = solver.try_solve();
         let mut extended = 0usize;
         // Undetermined: collect further units up to the budget, solving
         // again after each.
-        while let Some((_, report)) = &outcome {
-            if report.verified {
-                break;
-            }
+        while outcome.is_none() {
+            let report = solver.report();
             let next = units.keys().max().map_or(0, |m| m + 1);
             if next >= p.collection.max_units {
                 break;
@@ -998,15 +1004,23 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 doc.count,
                 doc.elapsed_seconds
             ));
-            merged.extend(doc.relations.iter().cloned());
+            solver.push(&doc.relations);
+            loaded += doc.relations.len();
             units.insert(next, doc);
             extended += 1;
             state.units_collected = units.len();
             state.relations_collected = units.values().map(|d| d.relations.len()).sum();
             write_atomic(&state_path, &state)?;
-            outcome = solve_factor_base_logs_from_relations(&c, &fb, &ic, &merged);
+            outcome = solver.try_solve();
         }
         let trials_total: u64 = units.values().map(|d| d.count).sum();
+        let outcome = outcome.or_else(|| {
+            Some((
+                FactorBaseLogTable { columns: Vec::new() },
+                solver.report(),
+            ))
+        });
+        let merged = loaded;
         match outcome {
             Some((table, report)) if report.verified => {
                 let doc = log_table_to_doc(&c, &spec, p.summands, p.solver, &table);
@@ -1020,7 +1034,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 write_atomic(&state_path, &state)?;
                 stage_reports.push(json!({"stage":"logs","status":"complete","ran":true,
                     "columns":report.columns,"trials":trials_total,"relations":report.relations,
-                    "relations_loaded":merged.len(),"rejected":report.rejected_relations,
+                    "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
                     "verification_seconds":report.collection_seconds,
                     "linear_algebra":experiment::linear_algebra_json(&report),
@@ -1047,7 +1061,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 };
                 write_atomic(&state_path, &state)?;
                 stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason,
-                    "relations_loaded":merged.len(),"rejected":report.rejected_relations,
+                    "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
                     "linear_algebra":experiment::linear_algebra_json(&report)}));
                 overall_failed = Some(reason);
