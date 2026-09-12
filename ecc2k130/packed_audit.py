@@ -69,6 +69,8 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
             raise ValueError("min-blocks, repeats, block-threads and batch must be positive")
         if workers < 0:
             raise ValueError("workers must be nonnegative (0 selects automatic workers)")
+        if client.PACKED_STATE_TILE == "256" and batch > 64:
+            raise ValueError("tiled storage validation supports batch sizes 1 through 64")
         ok, build = client.buildFor(batch, blockThreads, 0, minBlocks=minBlocks)
         result["build"] = build
         if not ok:

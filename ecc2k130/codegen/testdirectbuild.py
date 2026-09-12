@@ -328,7 +328,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                       clmad='0', clmad_arithmetic=None, batch=32,
                       weighted='0', weighted_arithmetic=None, paired_sigma=None,
                       tile='0', compact='0', storage_output=None, storage_returncode=0,
-                      failed_compact_phase=None, failed_compact_marker=None):
+                      failed_compact_phase=None, failed_compact_marker=None, build_calls=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
             env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact)
@@ -352,7 +352,11 @@ class GeneratedProductBuildTests(unittest.TestCase):
             function('measureBench', env)
             client = SimpleNamespace(**env)
             client.REMOTE = directory
-            client.buildFor = lambda requested, *a, **k: (requested == batch, 'built')
+            def build(requested, *args, **kwargs):
+                if build_calls is not None:
+                    build_calls.append(requested)
+                return requested == batch, 'built'
+            client.buildFor = build
             client.benchmarkIdentity = lambda **k: {'packedGeneratedProduct': mode == '1'}
             client.volume = SimpleNamespace(commit=lambda: None)
             def run(command, **kwargs):
@@ -761,9 +765,18 @@ class CompactStateBuildTests(unittest.TestCase):
         build = function('buildFor', env)
         self.assertTrue(build(32, 256, 0)[0])
         self.assertEqual(commands, [])
+        measured = []
+        env.update(benchmarkIdentity=lambda *a, **k: {},
+                   measureBench=lambda *a, **k: (measured.append(a) or dict(valid=True, rate=6000.0)))
+        bench = function('runBench', env)
+        matching = bench(rebuild=False, packed=True, threads=256)
+        self.assertTrue(matching['valid'])
+        self.assertFalse(matching['packedCompactState'])
+        self.assertEqual(len(measured), 1)
         env['PACKED_COMPACT_STATE'] = '1'
         with self.assertRaisesRegex(ValueError, 'matching baked binary'):
-            function('runBench', env)(rebuild=False, packed=True)
+            bench(rebuild=False, packed=True, threads=256)
+        self.assertEqual(len(measured), 1)
         self.assertTrue(build(32, 256, 0)[0])
         self.assertIn('PACKED_COMPACT_STATE=1', commands[-1])
         env['PACKED_COMPACT_STATE'] = '0'
@@ -833,6 +846,29 @@ class CompactStateBuildTests(unittest.TestCase):
                                                      failed_compact_phase=phase, failed_compact_marker=marker)
                     self.assertFalse(result['valid'])
                     self.assertIn('deviceStorage', result)
+
+    def test_tiled_storage_batch_limit_is_checked_before_any_build(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for batch in (65, 128):
+                builds = []
+                result, commands = fixture.audit_fixture('1', tile='256', compact=mode,
+                                                        batch=batch, build_calls=builds)
+                self.assertFalse(result['valid'])
+                self.assertIn('batch sizes 1 through 64', result['error'])
+                self.assertEqual(builds, [])
+                self.assertEqual(commands, [])
+                self.assertNotIn('build', result)
+                self.assertNotIn('identity', result)
+            for batch in (1, 64):
+                result, _ = fixture.audit_fixture('1', tile='256', compact=mode, batch=batch)
+                self.assertTrue(result['valid'], result.get('error'))
+                self.assertEqual(result['deviceStorage']['records'], 18584 * batch)
+        builds = []
+        result, _ = fixture.audit_fixture('1', tile='0', compact='0', batch=128, build_calls=builds)
+        self.assertTrue(result['valid'], result.get('error'))
+        self.assertEqual(builds, [128])
+        self.assertNotIn('deviceStorage', result)
 
 
 if __name__ == '__main__':
