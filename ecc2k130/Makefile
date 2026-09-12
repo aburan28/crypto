@@ -50,9 +50,26 @@ ifeq ($(GLOBAL_CG),1)
 GPUFLAGS += -Xptxas --def-load-cache=cg
 endif
 # The CPU build picks the widest word the target supports (AVX-512 -> 512 lanes,
-# AVX2 -> 256, otherwise 64).  Use a portable baseline when the build machine
-# and the run machine may differ.
+# AVX2 -> 256, NEON -> 128, otherwise 64).  Use a portable baseline when the
+# build machine and the run machine may differ.
 MARCH   ?= native
+
+# On aarch64 the wide word is NEON, and EOR3 (FEAT_SHA3) is most of what makes
+# it faster than the 64-bit fallback rather than merely wider.  -march=native
+# does not always imply +sha3 -- GCC on Darwin reports no SHA3 for native on
+# cores that have it -- so ask the compiler which spelling actually defines the
+# feature macro and take the first that does.  Falling through to plain MARCH
+# still gets NEON and BSL, just not the three-input XOR.
+HOSTARCH := $(shell uname -m)
+ifneq (,$(filter arm64 aarch64,$(HOSTARCH)))
+sha3flag = $(shell $(CXX) $(1) -dM -E -x c++ /dev/null 2>/dev/null | grep -c __ARM_FEATURE_SHA3)
+ARCHFLAGS := $(firstword \
+    $(foreach f,-march=$(MARCH) -march=$(MARCH)+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3, \
+        $(if $(filter-out 0,$(call sha3flag,$(f))),$(f))) \
+    -march=$(MARCH))
+else
+ARCHFLAGS := -march=$(MARCH)
+endif
 ARCH    ?= -gencode arch=compute_80,code=sm_80 \
            -gencode arch=compute_86,code=sm_86 \
            -gencode arch=compute_89,code=sm_89 \
@@ -113,7 +130,7 @@ check-verilog:
 cpu: ecc2k130-cpu
 
 ecc2k130-cpu: src/main.cu $(HDRS) $(GEN)
-	$(CXX) -O3 -std=c++17 -march=$(MARCH) -fopenmp $(DEFS) -DECC_NO_CUDA \
+	$(CXX) -O3 -std=c++17 $(ARCHFLAGS) -fopenmp $(DEFS) -DECC_NO_CUDA \
 	    -Wall -Wno-unused-function -Wno-unknown-pragmas -x c++ src/main.cu -o $@
 
 gpu: ecc2k130
