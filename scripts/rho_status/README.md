@@ -17,23 +17,36 @@ already on that host.
 
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
-## One-time GitHub setup
+## One-time GitHub + IAM setup
 
-1. **Secrets** (repo or environment `github-pages`):
+The publish job authenticates to AWS with GitHub OIDC. It assumes
+`arn:aws:iam::590183823895:role/ecc2k130-status-gha` and never uses
+static access keys.
+
+1. **Create the role** (administrator profile; `adam` cannot create IAM):
+
+   ```bash
+   AWS_PROFILE=admin ./scripts/rho_status/gha_iam_role.sh
+   ```
+
+   That installs the GitHub OIDC provider if missing and a role that can
+   only `ec2:DescribeInstances` / `ec2:DescribeTags`. Trust is limited to
+   `repo:aburan28/crypto:environment:github-pages` and `ref:refs/heads/main`.
+
+2. **Secrets** (repo or environment `github-pages`):
    - `RHO_WALKER_SSH_KEY` — private key for `ubuntu` on the walker
      (the `meow34` key the instance was launched with).
-   - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — IAM user that can
-     `ec2:DescribeInstances` in `us-west-2`, so the job can find the
-     current spot public IP after a replacement.
    - Optional: `RHO_WALKER_HOST` if you want to pin a host and skip the
      lookup.
-2. **Pages**: Settings → Pages → Source = **GitHub Actions**.
-3. Keep SSH ingress on the walker SG limited to operators. The Action
+
+3. **Pages**: Settings → Pages → Source = **GitHub Actions**.
+
+4. Keep SSH ingress on the walker SG limited to operators. The Action
    uses the same key; if you later rotate the spot box, retag the new
    instance `Name=rho-ecc2k-walker` and allow the operator IP again.
 
-The workflow does **not** need `DATABASE_URL` in GitHub. The walker
-already has it.
+The workflow does **not** need `DATABASE_URL` or `AWS_ACCESS_KEY_ID`.
+The walker already has the database URL; AWS uses the OIDC role.
 
 ## Local commands
 

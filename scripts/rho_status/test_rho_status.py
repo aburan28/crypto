@@ -13,6 +13,7 @@ from snapshot import CLAIM_BOUNDARY, FORBIDDEN_PUBLIC_KEYS, assert_public, campa
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 
 
 class SnapshotTests(unittest.TestCase):
@@ -55,6 +56,17 @@ class SnapshotTests(unittest.TestCase):
             assert_public({"point_key": "00"})
         for key in FORBIDDEN_PUBLIC_KEYS:
             self.assertTrue(key)
+
+
+class WorkflowTests(unittest.TestCase):
+    def test_publish_job_uses_oidc_role(self):
+        path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("role-to-assume: arn:aws:iam::590183823895:role/ecc2k130-status-gha", text)
+        self.assertIn("id-token: write", text)
+        self.assertNotIn("aws-access-key-id", text)
+        self.assertNotIn("AWS_SECRET_ACCESS_KEY", text)
 
 
 class HistoryTests(unittest.TestCase):
