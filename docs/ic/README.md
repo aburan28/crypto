@@ -439,6 +439,19 @@ uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
 Use it with the pair-table solver. `groebner` and `sat` need a linear
 domain and will refuse.
 
+**How big?** With a subgroup base the work per target falls as
+`r/|F|²` — four times cheaper per doubling — while the pair table grows
+as `|F|²`, so the answer depends on how many targets share the database.
+At degree 41: 5248 points costs 3.0 s of precompute and 16.2 ms a
+target, 10496 points costs 9.0 s and 7.2 ms, and the two cross at about
+665 targets. `docs/ic/runs/koblitz-base-size-20260912.json` has the
+sweep and both end-to-end runs. Past about 10500 points at that degree
+the decomposition rate saturates and further growth only makes each
+trial dearer.
+
+`PairSumTable::build` refuses a base whose table would exceed 4 GiB, so
+an over-large base fails with a number instead of an allocation.
+
 ### Ledger rungs, ready to run
 
 `docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the

@@ -25,9 +25,16 @@ use std::{
 };
 
 /// Largest subspace dimension the legacy single-factor family may
-/// materialise (`2^12` abscissae).  Spec-based bases are held to the
+/// materialise (`2^13` abscissae).  Spec-based bases are held to the
 /// same abscissa count.
-pub const MAX_FACTOR_DIMENSION: u32 = 12;
+///
+/// What the cap is really protecting is the pair table, which holds
+/// `|F|(|F|+1)/2` entries of 16 bytes for `|F| ≈ 2·abscissae`: at 8192
+/// abscissae that is about 2 GB, and every further doubling multiplies
+/// it by four.  [`PairSumTable::build`] refuses past its own byte
+/// budget, so a base that is too large for the machine fails with a
+/// number rather than an allocation.
+pub const MAX_FACTOR_DIMENSION: u32 = 13;
 pub const MAX_ABSCISSAE: usize = 1 << MAX_FACTOR_DIMENSION;
 pub fn degree(value: &str) -> Result<u32, String> {
     let n = value
