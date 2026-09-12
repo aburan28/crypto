@@ -61,6 +61,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
+                  expectedPackedClmadFused=int(client.PACKED_CLMAD_FUSED), packedClmadFused=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
         if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0 or batch <= 0:
@@ -93,6 +94,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
              f"PACKED_CLMAD={client.PACKED_CLMAD}",
+             f"PACKED_CLMAD_FUSED={client.PACKED_CLMAD_FUSED}",
              f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
@@ -117,6 +119,15 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                                           packedClmad=result["packedClmad"])
         if clmadModes != [client.PACKED_CLMAD]:
             raise RuntimeError("packed GPU arithmetic CLMAD identity disagrees with the requested build")
+        fusionModes = re.findall(r"^packed arithmetic carryless addends: (.*)$",
+                                 result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualFusion = fusionModes[0] if len(fusionModes) == 1 else None
+        result["packedClmadFused"] = int(actualFusion) if actualFusion in ("0", "1", "2") else None
+        result["deviceArithmetic"].update(
+            expectedPackedClmadFused=int(client.PACKED_CLMAD_FUSED),
+            packedClmadFused=result["packedClmadFused"])
+        if fusionModes != [client.PACKED_CLMAD_FUSED]:
+            raise RuntimeError("packed GPU arithmetic carryless addend identity disagrees with the requested build")
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:

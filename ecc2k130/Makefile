@@ -40,6 +40,7 @@ PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 PACKED_CLMAD ?= 0
+PACKED_CLMAD_FUSED ?= 0
 PACKED_STATE_TILE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
@@ -75,6 +76,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
+       -DECC_PACKED_CLMAD_FUSED=$(PACKED_CLMAD_FUSED) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
 
 all: cpu
@@ -202,7 +204,7 @@ test-generated-product:
 test-clmad:
 	python3 -m unittest discover -s codegen -p testclmad.py
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_CLMAD_FUSED=$(PACKED_CLMAD_FUSED) -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
 	./build/test-packed-clmad-host
 
 test-packed-cuda:
