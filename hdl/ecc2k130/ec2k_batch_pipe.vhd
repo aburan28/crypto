@@ -416,12 +416,17 @@ begin
   end process;
 
   -- ---------------------------------------------------------------- --
-  -- input handshake
+  -- input handshake.  A stage takes a walk only when it is empty, so each
+  -- stage's data enable is its own valid bit and nothing else: one walk
+  -- per two clocks through here, against the one per 5.3 the step unit
+  -- consumes.  Letting a stage take and pass on the same clock chained
+  -- the fill's state through three stages into 300 clock enables, the
+  -- worst path of the routed 64-engine image (fill_pend -> p0_x, 0.03 ns).
   -- ---------------------------------------------------------------- --
   fill_ok    <= fb_valid and not fill_pend;
   p1_take    <= p1_valid and fill_ok;
-  p0_adv     <= p0_valid and (not p1_valid or p1_take);
-  in_rdy     <= '1' when rst = '0' and (p0_valid = '0' or p0_adv = '1') else '0';
+  p0_adv     <= p0_valid and not p1_valid;
+  in_rdy     <= not p0_valid and not rst;
   in_ready   <= in_rdy;
   dummy_fill <= flushing and fill_ok and not p1_valid;
 
@@ -458,20 +463,24 @@ begin
       if p1_take = '1' then
         p1_valid <= '0';
       end if;
-      if p0_adv = '1' then
-        p1_valid <= '1';
+      if p1_valid = '0' then
         p1_x     <= p0_x;
         p1_y     <= p0_y;
         p1_tag   <= p0_tag;
         p1_hw    <= hw_sum(p0_parts);
+      end if;
+      if p0_adv = '1' then
+        p1_valid <= '1';
         p0_valid <= '0';
       end if;
-      if in_valid = '1' and in_rdy = '1' then
-        p0_valid <= '1';
+      if p0_valid = '0' then
         p0_x     <= in_x;
         p0_y     <= in_y;
         p0_tag   <= in_tag;
         p0_parts <= gf_weight_parts(in_x);
+        if in_valid = '1' and rst = '0' then
+          p0_valid <= '1';
+        end if;
       end if;
 
       -- ============ fill ============
