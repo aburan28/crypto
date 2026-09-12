@@ -22,8 +22,8 @@ REPO = Path(__file__).resolve().parents[1]
 STAGE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
 PARAMS = STAGE / "stage-39-n41-fixed-algebraic-holdout-params.json"
 PREDECESSOR = STAGE / "stage-38-algebraic-collection-result-20260912/verification.json"
-TARGET_SEEDS = [41201, 41202, 41203, 41204, 41205]
-RELATION_SEED = 41231
+TARGET_SEEDS = [41301, 41302, 41303, 41304, 41305]
+RELATION_SEED = 41331
 WINDOW = 149
 ALGEBRAIC_SPEC = {
     "kind": "two_torsion_saturated",
@@ -45,6 +45,13 @@ def require(condition: bool, message: str) -> None:
 def load(path: Path, context: str) -> dict[str, Any]:
     value = json.loads(path.read_text())
     require(isinstance(value, dict), f"{context} must be a JSON object")
+    return value
+
+
+def predecessor_identity() -> dict[str, Any]:
+    """Content identity with a checkout-independent repository path."""
+    value = custody.executable_identity(PREDECESSOR, "Stage-38 hosted result", executable=False)
+    value["path"] = str(PREDECESSOR.relative_to(REPO))
     return value
 
 
@@ -79,10 +86,11 @@ def self_test() -> dict[str, Any]:
     )
     require(current["collection"] == {"unit_trials": 8192, "units": 4, "max_units": 64}, "Stage-39 collection boundary changed")
     require(current["factor_base"].keys() == {"mode", "spec"}, "Stage-39 factor-base rule contains hidden search inputs")
+    require(not Path(predecessor_identity()["path"]).is_absolute(), "Stage-39 predecessor path is checkout-dependent")
     return {
         "schema": "koblitz_stage39_self_test.v1",
         "status": "PASS",
-        "checks": 16,
+        "checks": 17,
         "factor_base_family": "fixed_two_torsion_saturated_frobenius_union",
         "factor_base_recipe": ALGEBRAIC_SPEC,
         "factor_base_discovery_target_samples": 0,
@@ -251,7 +259,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         },
         "workflow_result": workflow,
         "predecessor_stage38": {
-            "identity": custody.executable_identity(PREDECESSOR, "Stage-38 hosted result", executable=False),
+            "identity": predecessor_identity(),
             "source_commit": predecessor["source_commit"],
             "workflow_run_id": predecessor["workflow"]["run_id"],
             "winner": predecessor["selection"]["winner"],
@@ -320,7 +328,7 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
     )
     predecessor = load(PREDECESSOR, "Stage-38 hosted result")
     expected_predecessor = {
-        "identity": custody.executable_identity(PREDECESSOR, "Stage-38 hosted result", executable=False),
+        "identity": predecessor_identity(),
         "source_commit": predecessor["source_commit"],
         "workflow_run_id": predecessor["workflow"]["run_id"],
         "winner": predecessor["selection"]["winner"],
