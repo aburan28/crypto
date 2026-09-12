@@ -63,8 +63,10 @@ synth_design -mode out_of_context \
              -keep_equivalent_registers
 
 # The numbers the capacity estimate in ../../../README.md waits for.
-report_utilization -hierarchical -hierarchical_depth 2 \
-    -file ${reports_dir}/${CL}.${TAG}.synth_utilization.rpt
+report_utilization -file ${reports_dir}/${CL}.${TAG}.synth_utilization.rpt
+# Depth 4 reaches inside one engine: walker, step unit, multiplier.
+report_utilization -hierarchical -hierarchical_depth 4 \
+    -file ${reports_dir}/${CL}.${TAG}.synth_utilization_hier.rpt
 report_timing_summary -max_paths 20 \
     -file ${reports_dir}/${CL}.${TAG}.synth_timing.rpt
 
