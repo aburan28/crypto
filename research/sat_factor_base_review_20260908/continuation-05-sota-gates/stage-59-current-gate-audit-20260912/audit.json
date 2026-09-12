@@ -7,7 +7,7 @@
     },
     "ledger": {
       "path": "docs/ic/boundary_targets.json",
-      "sha256": "d347221308a10210d3006f5e1bb6e68285e889656cf9af5bcdf37c86ecd9a33f"
+      "sha256": "1071b127def7a3a9f84294f6e76ea881cbe79e6f3dc159c2cf9f130debddf6a3"
     },
     "scoreboard": {
       "path": "docs/ic/BOUNDARY_TARGETS.md",
@@ -51,12 +51,12 @@
       "parallel_1024_wall_seconds_stage52": 28.35286647299999,
       "parallel_4096_wall_seconds_stage48": 26.767457699000005,
       "parallel_4096_wall_seconds_stage52": 26.408146775999995,
-      "parallel_direct_core_seconds_ratio": 0.9563189074461959,
-      "parallel_direct_core_seconds_ratio_baseline": "pair_pair_parallel_1024 same-run",
+      "parallel_direct_core_seconds_ratio": 0.6143520974888967,
+      "parallel_direct_core_seconds_ratio_baseline": "portable_sparse_carryless same-binary Stage 56",
       "parallel_direct_over_rho_wall_ratio": 3.688473082311116,
       "parallel_direct_wall_seconds": 18.872020093999993,
-      "parallel_direct_wall_speedup": 1.0736409000410199,
-      "parallel_direct_wall_speedup_baseline": "pair_pair_parallel_1024 same-run",
+      "parallel_direct_wall_speedup": 1.4186949503361426,
+      "parallel_direct_wall_speedup_baseline": "portable_sparse_carryless same-binary Stage 56",
       "pclmul_collection_speedup": 1.7786595858644723,
       "pclmul_core_seconds_ratio": 0.6143520974888967,
       "pclmul_wall_seconds_stage56": 18.872020093999993,
