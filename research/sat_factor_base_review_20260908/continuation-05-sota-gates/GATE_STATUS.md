@@ -1,7 +1,7 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 43, 2026-09-12. The machine-readable audit is
-`stage-43-current-gate-audit-20260912/audit.json`.
+Current through Stage 45, 2026-09-12. The machine-readable audit is
+`stage-45-current-gate-audit-20260912/audit.json`.
 
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
@@ -17,7 +17,7 @@ does not establish a new state of the art.
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. Stage 42 adds metered `n=53` direct/rho RSS, CPU, wall, support/query counts, and watchdogs. | Supply the same fields for licensed Magma F4. The original local `n=53` pointwise autolab recorded a 16 GiB cap without enforcing or measuring it; Stage 42 supersedes that resource receipt. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and PDP-only `n=59`. Unknown-scalar end-to-end controls cover `n=31` and `n=41`. Stage 42 constructs, ranks, solves, and verifies an exact same-target known-answer `n=53` instance. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` arm remains PDP-only. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, and 41; n=53 known-answer only** | Stage 39 defines the `n=41` factor base from a fixed algebraic rule with zero discovery target samples or scalar labels, derives every factor-base log from relations, and solves five hash-derived targets whose scalars were not constructed. | Stage 42 uses one explicit public `n=53` scalar retained only for validation. An unknown-scalar `n=53` run and unaffiliated replay remain open. |
-| 6. Full cost against automorphism-optimized Pollard rho | **Finite online crossover; amortized/full-cost crossover false** | Stage 39's `n=41` online descent is 3.502068 times faster than rho, while amortized IC is 5.025825 times slower and fresh build plus science is 110.791382 times rho. Stage 40 reduces four-core amortized wall to 3.605523 times rho while spending 1.286948 times the one-core process CPU. Stage 42 uses the exact same `n=53` target in both arms: direct is 12.131346 times slower and fresh build plus direct is 37.698325 times rho. | The `n=41` crossover assumes the factor-base log database exists. No amortized or whole-process cell crosses. All improvements are finite constants, not exponent changes. |
+| 6. Full cost against automorphism-optimized Pollard rho | **Finite online crossover; amortized/full-cost crossover false** | Stage 39's `n=41` online descent is 3.502068 times faster than rho, while amortized IC is 5.025825 times slower and fresh build plus science is 110.791382 times rho. Stage 40 reduces four-core amortized wall to 3.605523 times rho while spending 1.286948 times the one-core CPU. Stage 44 runs sequential direct, deterministic four-thread direct, and rho on the exact same `n=53` target: parallel direct is 5.974650 times slower than rho, 1.578535 times faster in wall and 1.482930 times costlier in CPU than sequential direct; fresh build plus parallel direct is 25.281709 times rho. | The `n=41` crossover assumes the factor-base log database exists. No amortized or whole-process cell crosses. Parallel latency reductions spend additional CPU. All improvements are finite constants, not exponent changes. |
 | 7. Independent external reproduction and novelty review | **Missing** | Issue [#97](https://github.com/aburan28/crypto/issues/97) contains current source pins, the Stage-22 Magma packet, Phase-B and Stage-35 artifacts, exact verifier commands, primary-source links, and the `CONCUR` / `QUALIFIED` / `BREAKS` format. Outreach is also open at [mtrimoska/EC-Index-Calculus-Benchmarks#1](https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks/issues/1). | An unaffiliated reviewer must return a sealed reproduction and source-pinned novelty/correctness assessment. Project-authored CI and replays do not satisfy independence. |
 
 ## Current Phase-B matrix
@@ -60,8 +60,11 @@ Stage 42 uses a point-defined `n=53` base with 9,964 points and 94 orbit
 columns, selected without scalar labels. Direct and rho receive the same public
 point `Q=(2565091273463387,5885236316843894)` and both recover validation scalar
 `476811900269`. Direct retains 189 verified four-summand relations and takes
-39.780605 seconds wall; packed signed-Frobenius rho takes 3.279158 seconds. The
-same-target whole-process ratio is therefore a 12.131346-times direct loss.
+48.358874 seconds wall sequentially; deterministic four-thread query waves
+reduce it to 30.635297 seconds while preserving all 189 relation hashes. Packed
+signed-Frobenius rho in the same Stage 44 series takes 5.127547 seconds. The
+parallel same-target whole-process ratio is therefore a 5.974650-times direct
+loss, and parallel process CPU is 1.482930 times the sequential direct CPU.
 
 The narrow supported conclusion is unchanged: this is strong internal
 engineering and finite public toy-research evidence. The known SAT-based
