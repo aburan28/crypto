@@ -2474,9 +2474,13 @@ impl PairSumTable {
     }
 
     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
+    ///
+    /// Compact tables do not store those triples, so this returns an
+    /// empty slice for them.  [`Self::pairs_for`] answers either
+    /// representation.
     #[inline]
     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
-        if !self.admitted(key) {
+        if self.is_compact() || !self.admitted(key) {
             return &[];
         }
         self.lookup_admitted(key)
@@ -2538,6 +2542,9 @@ impl PairSumTable {
     }
 
     fn lookup_admitted(&self, key: u64) -> &[(u64, u32, u32)] {
+        if self.entries.is_empty() {
+            return &[];
+        }
         let bucket = (key >> self.bucket_shift) as usize;
         let Some(&lo) = self.bucket_start.get(bucket) else {
             return &[];
@@ -8372,6 +8379,11 @@ mod tests {
 
         let fc = FastCurve::new(&kc.curve).unwrap();
         let g = fc.lift(kc.generator());
+        // An admitted key used to slice the empty `entries` vector.
+        // lookup must return empty, not panic.
+        let stored = fc.add(fc.lift(&fb.points[0]), fc.lift(&fb.points[0]));
+        let _ = compact.lookup(stored.pack());
+        let _ = compact.lookup(1_000_001);
         // Every stored sum, and a stream of points that mostly are not.
         let mut checked_hits = 0usize;
         let mut checked_misses = 0usize;
