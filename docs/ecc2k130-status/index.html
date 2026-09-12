@@ -635,8 +635,9 @@
     loadedAt = new Date();
 
     // history.json is optional: the dashboard is still useful without it, so
-    // a failure here must not take the page down with it.
-    var history = { points: [] };
+    // a failure here must not take the page down with it, and must not wipe
+    // a chart or table that already loaded.
+    var history = null;
     var historyError = "";
     try {
       history = await fetchJSON("./history.json");
@@ -669,10 +670,17 @@
       : "none recorded";
 
     drawHourly(denseHours(status.hourly || [], generated));
-    drawTotals((history && history.points) || []);
+    if (history) {
+      drawTotals(history.points || []);
+      drawHistory(history.points || []);
+    } else {
+      var historyBody = el("history-body");
+      if (historyBody && !historyBody.children.length) {
+        emptyRow(historyBody, 6, "Could not read history.json (" + historyError + ").");
+      }
+    }
     drawWorkers(status.per_worker || [], generated);
     drawCampaign(status);
-    drawHistory((history && history.points) || []);
 
     if (historyError) {
       el("total-note").textContent = "Could not read history.json (" + historyError + ").";
