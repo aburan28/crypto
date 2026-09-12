@@ -1,0 +1,68 @@
+{
+  "schema": "isogeny_class_search/v1",
+  "experiment": "EXP-R6",
+  "lever": "L5 curve-side (isogeny)",
+  "seed": 7,
+  "generated_unix": 1789213502,
+  "omega": 2.807,
+  "verdict": "KILLED",
+  "class": {
+    "n": 131,
+    "trace": "-22283658519494248867",
+    "order": "2722258935367507707729280517973639940516",
+    "conductor": "38531015900842053623",
+    "fully_factored": true,
+    "conductor_factors": [{"ell": "263", "valuation": 1}, {"ell": "146505763881528721", "valuation": 1}],
+    "crater_size": 1,
+    "class_size": "38531015900842054149",
+    "log2_class_size": 65.0627,
+    "log2_rho_reference": 60.3090,
+    "log2_class_over_rho": 4.7536
+  },
+  "reach": [
+    {"degree_budget": "100", "reachable": "1", "log2_reachable": 0.0000, "log2_fraction_of_class": -65.0627, "exhaustive": false},
+    {"degree_budget": "263", "reachable": "263", "log2_reachable": 8.0389, "log2_fraction_of_class": -57.0237, "exhaustive": false},
+    {"degree_budget": "1000000", "reachable": "263", "log2_reachable": 8.0389, "log2_fraction_of_class": -57.0237, "exhaustive": false},
+    {"degree_budget": "146505763881528721", "reachable": "38531015900842054149", "log2_reachable": 65.0627, "log2_fraction_of_class": 0.0000, "exhaustive": true}
+  ],
+  "modular_polynomial_crosscheck": [
+    {"ell": 2, "phi_degree": 3, "roots": 1, "only_self": true},
+    {"ell": 3, "phi_degree": 4, "roots": 0, "only_self": true}
+  ],
+  "leading_form_witness": [
+    {"n": 8, "l": 4, "vars": 8, "eqs": 8, "curves_compared": 63, "degrees_touched_by_a6": [0], "top_degree": 2, "degree_ge1_identical": true},
+    {"n": 10, "l": 5, "vars": 10, "eqs": 10, "curves_compared": 63, "degrees_touched_by_a6": [0], "top_degree": 2, "degree_ge1_identical": true},
+    {"n": 12, "l": 6, "vars": 12, "eqs": 12, "curves_compared": 63, "degrees_touched_by_a6": [0], "top_degree": 2, "degree_ge1_identical": true}
+  ],
+  "mechanism": [
+    {"n": 8, "target": 17, "dim_S": 1, "escaped_perp": 128, "refuted_at_2": 128, "mismatches": 0, "constant_is_a6": true, "escape_density": 0.501961},
+    {"n": 8, "target": 21, "dim_S": 1, "escaped_perp": 128, "refuted_at_2": 128, "mismatches": 0, "constant_is_a6": true, "escape_density": 0.501961},
+    {"n": 10, "target": 33, "dim_S": 1, "escaped_perp": 512, "refuted_at_2": 512, "mismatches": 0, "constant_is_a6": true, "escape_density": 0.500489},
+    {"n": 10, "target": 37, "dim_S": 1, "escaped_perp": 512, "refuted_at_2": 512, "mismatches": 0, "constant_is_a6": true, "escape_density": 0.500489}
+  ],
+  "curve_effect": [
+    {"n": 6, "l": 3, "curves": 63, "targets_select": 12, "targets_holdout": 12, "pooled_mean": 2.298805, "pooled_var": 0.400756, "between_curve_var": 0.071641, "no_effect_var": 0.053249, "variance_ratio": 1.345387, "best_a6": 3, "best_select_mean": 2.000000, "best_holdout_mean": 2.000000, "koblitz_select_mean": 2.272727, "koblitz_holdout_mean": 2.666667, "margin_select": 0.272727, "margin_holdout": 0.666667, "curves_at_floor_select": 24, "curves_at_floor_holdout": 23, "curves_at_floor_both": 15},
+    {"n": 8, "l": 4, "curves": 255, "targets_select": 12, "targets_holdout": 12, "pooled_mean": 2.466891, "pooled_var": 0.656773, "between_curve_var": 0.117844, "no_effect_var": 0.085277, "variance_ratio": 1.381898, "best_a6": 7, "best_select_mean": 2.000000, "best_holdout_mean": 2.454545, "koblitz_select_mean": 2.375000, "koblitz_holdout_mean": 2.857143, "margin_select": 0.375000, "margin_holdout": 0.402597, "curves_at_floor_select": 44, "curves_at_floor_holdout": 46, "curves_at_floor_both": 2},
+    {"n": 10, "l": 5, "curves": 1023, "targets_select": 12, "targets_holdout": 12, "pooled_mean": 2.537879, "pooled_var": 0.778868, "between_curve_var": 0.139064, "no_effect_var": 0.098687, "variance_ratio": 1.409142, "best_a6": 5, "best_select_mean": 2.000000, "best_holdout_mean": 3.454545, "koblitz_select_mean": 2.600000, "koblitz_holdout_mean": 2.666667, "margin_select": 0.600000, "margin_holdout": -0.787879, "curves_at_floor_select": 129, "curves_at_floor_holdout": 139, "curves_at_floor_both": 29}
+  ],
+  "uniform_floor_survivors": [
+    {"n": 8, "l": 4, "targets": 8, "survivors": 68, "curves": 255, "fraction": 0.26666667, "koblitz_mean": 2.500000},
+    {"n": 8, "l": 4, "targets": 16, "survivors": 34, "curves": 255, "fraction": 0.13333333, "koblitz_mean": 2.500000},
+    {"n": 8, "l": 4, "targets": 32, "survivors": 0, "curves": 255, "fraction": 0.00000000, "koblitz_mean": 2.473684},
+    {"n": 8, "l": 4, "targets": 48, "survivors": 0, "curves": 255, "fraction": 0.00000000, "koblitz_mean": 2.433333},
+    {"n": 8, "l": 4, "targets": 64, "survivors": 0, "curves": 255, "fraction": 0.00000000, "koblitz_mean": 2.475000},
+    {"n": 10, "l": 5, "targets": 8, "survivors": 230, "curves": 1023, "fraction": 0.22482893, "koblitz_mean": 2.333333},
+    {"n": 10, "l": 5, "targets": 16, "survivors": 73, "curves": 1023, "fraction": 0.07135875, "koblitz_mean": 2.727273},
+    {"n": 10, "l": 5, "targets": 32, "survivors": 14, "curves": 1023, "fraction": 0.01368524, "koblitz_mean": 2.454545},
+    {"n": 10, "l": 5, "targets": 48, "survivors": 7, "curves": 1023, "fraction": 0.00684262, "koblitz_mean": 2.588235},
+    {"n": 10, "l": 5, "targets": 64, "survivors": 1, "curves": 1023, "fraction": 0.00097752, "koblitz_mean": 2.550000}
+  ],
+  "table_floor_log2": 13.8158,
+  "table": [
+    {"variant": "floor — every cell at the D* = 2 Nullstellensatz floor", "log2_ops": 13.8158, "log2_ratio_to_floor": 0.0000, "class": "floor"},
+    {"variant": "Koblitz curve a₆ = 1 (the baseline L5 moves away from)", "log2_ops": 23.0725, "log2_ratio_to_floor": 9.2566, "class": "reference"},
+    {"variant": "best curve selected on target set A, scored on A", "log2_ops": 13.8158, "log2_ratio_to_floor": 0.0000, "class": "selection (biased)"},
+    {"variant": "the same curve, scored on the disjoint holdout B", "log2_ops": 24.1967, "log2_ratio_to_floor": 10.3809, "class": "accounting"},
+    {"variant": "2^N enumeration of V × V", "log2_ops": 13.3219, "log2_ratio_to_floor": -0.4939, "class": "reference"}
+  ]
+}

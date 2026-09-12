@@ -50,8 +50,9 @@ So no iteration of this thread can end in limbo. That is the point.
 
 ## 2. The lever taxonomy
 
-`D*` depends on the pair (ideal, presentation). Four levers, ordered by
-how much they are allowed to change:
+`D*` depends on the pair (ideal, presentation). Five levers, ordered by
+how much they are allowed to change — L1–L4 re-present one fixed curve, L5
+changes the curve itself:
 
 | # | Lever | What it changes | What it costs | Status |
 |---|---|---|---|---|
@@ -59,10 +60,14 @@ how much they are allowed to change:
 | **L2** | **Symmetrisation** — solve over the elementary symmetric variables instead of the `Xᵢ` (Faugère–Gaudry–Huot–Renault) | the *variables*: `3ℓ` at degree 6 → `9ℓ−3` at degree 3 | 3× the variables for ½ the degree | **blocked on reach, iteration 5 — but bounded.** The exact Macaulay-width crossover is `ℓ = 6`; below it symmetrisation is the *wider* presentation, and `ℓ ≤ 3` is all a dense Macaulay scan reaches |
 | **L3** | **Hybrid slicing** — guess `k` variables, solve `2^k` slices, raising `ρ = #eqs/#vars` | the *determination ratio* | `2^k` multiplicative | **killed, iteration 1** (degenerate optimum) — but one-sided guessing is the cheapest route to the `D*=2` floor, and iteration 3 found it *dominates* the mutant route once guessing is allowed |
 | **L4** | **Degree falls (mutants)** — add the *nonzero* low-degree remainders of top-degree cancellations to the generator set, so `x_k · g` rows become available a degree early | the *generating set*; ideal and variables unchanged | the extraction's own climb to degree 3 | **supported on degrees, regime-dependent on cost — iteration 2.** `D*` drops 4.00 → 2.00 on the generic family; net of extraction cost it pays only where the base degree is high |
+| **L5** | **The curve** — move along the isogeny class, solving on an isogenous `E'` and transporting the answer back (Galbraith–Hess–Smart) | the *curve*, hence the ideal's inhomogeneous part | computing the isogeny, and finding the target | **killed, iteration 6** — `a₆` enters the descended system strictly *below* the leading form, so `d_reg` is constant on the class; and only 263 of ECC2K-130's `2^65.06` vertices are reachable. `RESEARCH_ISOGENY_CLASS_SEARCH.md` |
 
 L1 is the known part of the map and is not this thread's subject. L2, L3
 and L4 are presentation changes that apply to *any* curve, which is what
-makes them worth measuring.
+makes them worth measuring. L5 is the odd one out — it is the only lever an
+attacker gets for free, since nothing requires the curve you attack to be
+the curve you were given — and the only one whose verdict is settled by a
+derivation rather than a sweep.
 
 ### 2.0 Syzygies are not degree falls (the iteration-1 error, corrected)
 
@@ -191,6 +196,9 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R4″** | The strong pooled defect↔`D*` correlation is a **size proxy**, not structure | **`supported`** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. |
 | **R5** | **Levers compose**: one-sided guessing plus the mutant route beats guessing alone | **`killed`** | EXP-R5, iteration 3. The pre-registered gate (collapse fraction `c < 1/2`) is **degenerate** — the composed route hits `c = 0` in every cell, because mutants reach the floor with no guessing at all. Scored on total work instead (G-R5′): composed loses to raw guessing by a **flat −2.87 bits** at every `N` and seed, and neither route beats `2^N`. |
 | **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
+| **R6** | **Some curve in the ECC2K-130 isogeny class has a materially lower solving degree** than the Koblitz curve (lever L5) | **`killed`** | Boundaries C and D of `RESEARCH_ISOGENY_CLASS_SEARCH.md`, both exact and needing no search: `a₆ = 1/j` is the whole curve-dependence of the descended Semaev system and it enters *below* the leading form (a constant at `m = 2`; Boolean degree `≤ 5` of `6` at `m = 3`), so `d_reg` is constant on the class; and L1's subfield mechanism needs a proper subfield of `F_{2^131}`, which does not exist and which no isogeny creates. |
+| **R6′** | The residual variation in the **affine** `D*` across curves is a *curve* effect an attacker can move to | **`killed`** | EXP-R6, iteration 6. The exact criterion `D* = 2 ⟺ a₆ ∉ S^⊥` with `S^⊥` fixed *by the target* holds with **0** disagreements over every curve at four targets; the best curve selected on one target set is `2^{+1.13}` worse than the unmodified baseline on a disjoint one. |
+| **R6″** | An exhaustive search of the isogeny class is *feasible* | **`killed`** | The class has `2^65.06` vertices against ρ's `2^60.31` operations, so enumeration is `2^4.75×` a full ρ run; and only `263` vertices are reachable without a degree-`146505763881528721` isogeny (kernel polynomial degree `2^56`). |
 
 ### Pre-registered gates
 
@@ -250,12 +258,76 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   ≥ 0.25 bits per size step (a materiality threshold, added because the
   first version of the test called a 0.01-bit wobble "closing").
 
+- **G-R6** *(registered iteration 6)*. L5 is *supported* if some curve keeps
+  a mean-`D*` margin `≥ 0.5` degrees over the unmodified curve on a
+  **disjoint holdout** target set, at every measured `n`, **and** the
+  between-curve variance of mean `D*` exceeds twice the no-effect prediction
+  (pooled variance over the effective per-curve sample size). *Killed* if the
+  holdout margin is `≤ 0` while the selection margin is positive — a winner's
+  curse. *Blocked* if the margin is positive but shrinking in the target
+  count. The holdout half is not optional: `D*` takes 3 values here, so
+  selecting the minimum over a dozen targets manufactures a margin from
+  nothing.
+
 ---
 
 ## 5. Iteration log
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-12 — iteration 6 (EXP-R6 — L5, the curve-side lever: empty, and derivably so)
+
+**Task.** Score the one lever the taxonomy was missing: change the *curve*.
+The ECDLP transports along an isogeny of degree coprime to the subgroup
+order, so an attacker may solve on any curve in ECC2K-130's isogeny class —
+the move Galbraith–Hess–Smart turned into an attack on Weil descent.
+
+**Experiment.** `RESEARCH_ISOGENY_CLASS_SEARCH.md`, module
+`cryptanalysis::isogeny_class_search`, driver
+`examples/isogeny_class_search.rs`, snapshot
+`experiments/isogeny_class_search.json`.
+
+**Result.** Three of the four boundaries are derived, and they leave the
+lever no room.
+
+- **The curve enters below the leading form.** `S₃` depends on the curve only
+  through `a₆ = 1/j`, and only as an *additive constant*, so after Weil
+  descent `a₆` moves nothing but the constant term of each equation —
+  verified coefficient-by-coefficient at `n ∈ {8,10,12}`. At `m = 3` the
+  `a₆`-expansion of `S₄` puts `a₆` in Boolean degree `≤ 5` of `6` (identity
+  verified on 300 combinations). So `d_reg` — a Hilbert invariant of the
+  leading forms — is **constant on the whole isogeny class**, and a curve
+  change can only *lose* a degree fall, never create one lower.
+- **The class is bigger than ρ.** `Σ_{f|c} h(O_f) = 2^65.06` vertices
+  (`c = 263 · 146505763881528721`, `h(−7) = 1`) against ρ's `2^60.31`.
+- **263 vertices are reachable.** `h(−7) = 1` makes every crater a single
+  vertex, so horizontal isogenies return to `E` and descending ones need
+  `ℓ | c`: every prime below 263 has a *single-vertex* graph, cross-checked
+  against `Φ₂(X,1)` and `Φ₃(X,1)` over the real `F_{2^131}`.
+- **The affine `D*` does vary** — `{2,3,4}` over all 255 curves at `n = 8` —
+  and the mechanism is exact: `D* = 2 ⟺ a₆ ∉ S^⊥` where
+  `S = {λ : Σ λ_i h_i = 0}` is the left null space of the *curve-independent*
+  leading parts. `S^⊥` is fixed by the **target**, so goodness is a
+  `(curve, target)` property. Zero disagreements with the solver.
+- **Holdout.** selection margin `+0.273/+0.375/+0.600` at `n = 6/8/10`;
+  holdout margin `+0.667/+0.403/−0.788`; variance ratio `1.345/1.382/1.409`
+  against 1 (no effect) and 12 (deterministic).
+
+**Gate verdict.** **G-R6 killed** — the holdout margin is negative at the
+largest size and no size clears `≥ 0.5` at a variance ratio `≥ 2`.
+
+**Ledger delta.** R6 `killed`, R6′ `killed`, R6″ `killed`.
+
+**Class of the change.** **Accounting.** The numbers that moved are the
+boundaries; the attacker's algorithm is unchanged. The selection-set row of
+the table is a textbook **relabelling** — exactly on the floor where it was
+chosen, `2^{+1.13}` above baseline where it was not.
+
+**Next.** The one thing that would reopen L5 is a counterexample to Boundary
+C at `m ≥ 4`: if `a₆` reaches the leading form of `S₅`, `d_reg` becomes
+curve-dependent at the first `m` where index calculus is asymptotically
+interesting. That is a symbolic computation, not a search.
 
 ### 2026-09-12 — iteration 5 (EXP-R2 — L2 is bounded, and out of this instrument's reach)
 
@@ -570,7 +642,7 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 ## 6. Where the thread stands, and the queue
 
-**All four levers have now been tested.** That was the thread's charter, so
+**All five levers have now been tested.** That was the thread's charter, so
 this is a natural reporting point rather than a pause.
 
 | # | Lever | Outcome |
@@ -579,6 +651,7 @@ this is a natural reporting point rather than a pause.
 | **L2** | symmetrisation | **blocked structurally** — cannot pay below `ℓ = 6`, and a dense Macaulay scan reaches `ℓ ≤ 3` |
 | **L3** | hybrid slicing | **killed** — the cost optimum is exhaustive search |
 | **L4** | degree falls (mutants) | **supported on degrees**; net of its own extraction cost it pays only where the base degree is high |
+| **L5** | the curve (isogeny class) | **killed** — `d_reg` is constant on the class, and 263 of `2^65.06` vertices are reachable |
 | — | L3 ∘ L4 | **killed** — the levers are substitutes, not complements |
 
 Nothing found here reduces the solving degree at a price worth paying in the

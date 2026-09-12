@@ -58,10 +58,25 @@ current reach." Maintained as a table here and machine-checked by
 **Offensive sibling.** The predictions above ask whether `D*` is *forced*
 to be large. The mirror question — whether an attacker can *present* the
 system so that `D*` is small — is tracked separately in
-`RESEARCH_DEGREE_REDUCTION.md` (ledger R1–R5, module
+`RESEARCH_DEGREE_REDUCTION.md` (ledger R1–R6, module
 `src/cryptanalysis/degree_reduction.rs`). It shares this file's loop, gates
 and instrument stack; results flow back here when they bear on P3-alg or
 P6.
+
+One result flows back already. Lever L5 there — change the *curve*, by
+walking the isogeny class — is settled by an exact argument rather than a
+sweep: the curve coefficient `a₆ = 1/j` is the whole curve-dependence of the
+descended Semaev system, and it enters strictly *below* the leading form (an
+additive constant at `m = 2`; Boolean degree `≤ 5` of `6` at `m = 3`).  So
+the degree of regularity, a Hilbert invariant of the leading forms, is
+**constant on an entire isogeny class**, and every `D*` this program measures
+that varies with the curve varies through the *inhomogeneous* part only.  The
+mechanism is exact: `D* = 2 ⟺ a₆ ∉ S^⊥`, where `S` is the left null space of
+the curve-independent leading parts and `S^⊥` is fixed by the **target**.
+That is a genuine strengthening of the defensive side — it says the solving
+degree is a property of the field and the factor base, not of the curve, so
+no curve-selection criterion can make a field safer or more dangerous here.
+See `RESEARCH_ISOGENY_CLASS_SEARCH.md`.
 
 New predictions are appended as experiments suggest them; killed ones stay
 in the table with their kill evidence (negative results are the point).
