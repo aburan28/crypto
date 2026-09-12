@@ -64,6 +64,7 @@ enum QueryMode {
     PairPair128,
     PairPair256,
     PairPairParallel512,
+    PairPairParallel1024,
 }
 
 impl QueryMode {
@@ -87,6 +88,7 @@ impl QueryMode {
             "pair_pair_128" => Self::PairPair128,
             "pair_pair_256" => Self::PairPair256,
             "pair_pair_parallel_512" => Self::PairPairParallel512,
+            "pair_pair_parallel_1024" => Self::PairPairParallel1024,
             _ => panic!("unknown query mode {value}"),
         }
     }
@@ -111,6 +113,7 @@ impl QueryMode {
             Self::PairPair128 => "pair_pair_128",
             Self::PairPair256 => "pair_pair_256",
             Self::PairPairParallel512 => "pair_pair_parallel_512",
+            Self::PairPairParallel1024 => "pair_pair_parallel_1024",
         }
     }
 
@@ -133,7 +136,8 @@ impl QueryMode {
             | Self::PairPair64
             | Self::PairPair128
             | Self::PairPair256
-            | Self::PairPairParallel512 => None,
+            | Self::PairPairParallel512
+            | Self::PairPairParallel1024 => None,
         }
     }
 
@@ -154,12 +158,13 @@ impl QueryMode {
             Self::PairPair128 => Some(128),
             Self::PairPair256 => Some(256),
             Self::PairPairParallel512 => Some(512),
+            Self::PairPairParallel1024 => Some(1024),
             _ => None,
         }
     }
 
     fn pair_pair_parallel(self) -> bool {
-        matches!(self, Self::PairPairParallel512)
+        matches!(self, Self::PairPairParallel512 | Self::PairPairParallel1024)
     }
 }
 
