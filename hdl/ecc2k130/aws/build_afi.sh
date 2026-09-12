@@ -87,8 +87,11 @@ launch)
     # token of the calling user in its user data instead.  That is the
     # caller's own permissions on the caller's own instance for the length
     # of one build, and it is what a role would have given it, scoped wider;
-    # the role is preferred whenever it can be made.
+    # the role is preferred when it already exists or can be made.
     ensureRole() {
+        # An existing profile is enough: SSO/assumed-role callers can attach
+        # it but usually cannot put-role-policy / attach-role-policy.
+        aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1 && return 0
         aws iam get-role --role-name "$ROLE" >/dev/null 2>&1 \
         || aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
              "Version": "2012-10-17",
@@ -103,16 +106,14 @@ launch)
           ]
         }" || return 1
         aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore || return 1
-        if ! aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
-            aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
-            aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
-            echo "created instance profile $PROFILE; waiting for IAM to propagate"
-            sleep 15
-        fi
+        aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
+        aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
+        echo "created instance profile $PROFILE; waiting for IAM to propagate"
+        sleep 15
     }
     profileOpt=()
     credLine=""
-    if [ "${NO_ROLE:-0}" != 1 ] && ensureRole 2>/dev/null; then
+    if [ "${NO_ROLE:-0}" != 1 ] && ensureRole; then
         profileOpt=(--iam-instance-profile "Name=$PROFILE")
         echo "instance profile $PROFILE"
     else
