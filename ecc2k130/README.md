@@ -67,7 +67,7 @@ code that would run on a GPU is what the test suite exercises.
 |---|---|
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
-| CPU client | measured, 12.6 M iterations/s per core |
+| CPU client | measured, 12.6 M iterations/s per AVX-512 core, 15.7 M per M4 Pro core |
 | CUDA client | public-command median of 14.637530 B/s for complete packed walks on one RTX PRO 6000 |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
@@ -118,8 +118,15 @@ at a scale of a few GPU-hours rather than a few GPU-centuries.
 One word operation advances `W` walks at once. The device uses 32-bit words,
 and the host picks the widest it has: AVX-512 gives 512 lanes and, through
 `vpternlogd`, the same single-instruction three-input logic that `LOP3.LUT`
-gives on the GPU. The arithmetic source is identical for all three widths;
-only `bitslice.h` changes.
+gives on the GPU; AVX2 gives 256; aarch64 NEON gives 128. The arithmetic
+source is identical for every width; only `bitslice.h` changes.
+
+aarch64 has no general three-input logic unit, but it has the two cases this
+code spends its instructions on. `BSL` is `ECC_SEL` exactly, and `EOR3`
+(`FEAT_SHA3`, present on Neoverse V1/V2 and every Apple core) is `ECC_XOR3`
+exactly, so the NEON word is an instruction-count win and not only a width
+win. `-march=native` does not imply `+sha3` on every toolchain, so the
+Makefile probes for a spelling that defines `__ARM_FEATURE_SHA3`.
 
 ### Two field backends
 
@@ -283,8 +290,35 @@ Four threads reach 40 M iterations/s. For comparison, the 2009 hand-written
 qhasm implementation reached 533 cycles/iteration on a Core 2 with 128-bit
 vectors.
 
-On Apple Silicon (M4 Pro, 10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained,
-`--steps 8192 --launches 8`):
+On aarch64, one core, `GF(2^131)`, `--bench --steps 32 --launches 8
+--threads 1`, median of five. The 64-lane column is what this code did before
+it had a NEON word, and is the paired control:
+
+| host | compiler | 64 lanes | NEON 128 | speedup |
+|---|---|---|---|---|
+| M4 Pro | g++ 16.1 | 5.185 M | 11.342 M | 2.19x |
+| M4 Pro | Apple clang 17 | — | 15.673 M | 3.02x over g++/64 |
+
+Splitting the M4 Pro gcc gain: the NEON word alone, with `BSL` but without
+`EOR3`, gives 9.149 M (1.76x), and turning on `FEAT_SHA3` takes it to 11.342 M
+(a further 1.24x). Compiler choice is worth more than either on this code --
+gcc emits 9372 instructions for the `GF(2^131)` multiply leaf, 59% of them
+loads and stores against spilled temporaries, where clang emits 1902 plus
+five outlined calls.
+
+On Graviton3 (`c7g.xlarge`, Neoverse V1), measured on one core while the other
+four ran a production walk, so the absolute rates are roughly half of an idle
+core and only the ratios are meaningful. Median of seven, interleaved, spread
+under 0.5%:
+
+| compiler | 64 lanes | NEON 128 | speedup |
+|---|---|---|---|
+| g++ 13.3 | 2.606 M | 5.286 M | 2.03x |
+| clang 18.1 | 3.725 M | 6.215 M | 2.38x over g++/64 |
+
+Older Apple Silicon measurements, before the NEON word existed (M4 Pro,
+10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained, `--steps 8192
+--launches 8`):
 
 | threads | BATCH=32 | BATCH=64 | BATCH=96 |
 |---|---|---|---|
@@ -292,8 +326,9 @@ On Apple Silicon (M4 Pro, 10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained,
 | 8  |  ~19 M  |  ~19 M  |  ~19 M  |
 | 14 |  ~33 M  |  ~34 M  |  ~34 M  |
 
-The 64-bit lane path autovectorizes into NEON 64-bit pairs under `-O3`, which
-is worth about 25% on this hardware. Throughput peaks near the DRAM ceiling
+Those numbers predate the NEON word: the 64-bit lane path autovectorized into
+NEON 64-bit pairs under `-O3`, worth about 25% on this hardware, which the
+explicit 128-lane word now supersedes. Throughput peaks near the DRAM ceiling
 (roughly 270 GB/s on M4 Pro, 8 MB/iteration at 14 threads x BATCH=64). The
 default `BATCH=32` is near-optimal; `OMP_PROC_BIND=close OMP_PLACES=cores`
 recovers another ~5% on the host OpenMP runtime.
@@ -696,11 +731,18 @@ and `--leaf` to the generator (Karatsuba leaf size).
 ### Building on macOS
 
 `make cpu` defaults to `CXX=g++`, but on macOS that resolves to Apple's
-clang, which has no `-fopenmp`. Use the Homebrew toolchain:
+clang, whose `-fopenmp` needs the runtime named separately. Either toolchain
+works:
 
 ```
 make cpu CXX="/opt/homebrew/bin/g++-16 -isysroot $(xcrun --show-sdk-path)"
+
+make cpu CXX="clang++ -I/opt/homebrew/opt/libomp/include -L/opt/homebrew/opt/libomp/lib" \
+         OMPFLAGS="-Xpreprocessor -fopenmp -lomp"
 ```
+
+Prefer clang on aarch64 if you are measuring: it is worth about 1.4x on the
+walk, all of it in how the generated multiply leaf is register-allocated.
 
 The CUDA targets (`make gpu`, `make ptx`, `make check-cuda`) need a CUDA
 toolchain, which is no longer published for macOS — see the Modal section

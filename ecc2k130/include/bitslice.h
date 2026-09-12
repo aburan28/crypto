@@ -255,12 +255,17 @@ struct alignas(16) Bits128 {
         return (vgetq_lane_u64(d, 0) | vgetq_lane_u64(d, 1)) == 0ull;
     }
     bool operator!=(const Bits128 &o) const { return !(*this == o); }
+    // uint64_t is unsigned long on LP64 and unsigned long long on Darwin, and
+    // the NEON intrinsics insist on their own spelling, so go through it.
     unsigned long long limb(int i) const {
-        unsigned long long tmp[2];
+        uint64_t tmp[2];
         vst1q_u64(tmp, v);
-        return tmp[i];
+        return (unsigned long long)tmp[i];
     }
-    static Bits128 fromLimbs(const unsigned long long *p) { return Bits128(vld1q_u64(p)); }
+    static Bits128 fromLimbs(const unsigned long long *p) {
+        const uint64_t tmp[2] = {(uint64_t)p[0], (uint64_t)p[1]};
+        return Bits128(vld1q_u64(tmp));
+    }
 };
 
 // BSL selects bit by bit from two sources under a mask, which is ECC_SEL
