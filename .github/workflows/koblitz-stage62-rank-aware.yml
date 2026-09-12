@@ -1,0 +1,65 @@
+name: Koblitz Stage 62 n53 rank-aware scan
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage62_rank_aware.py"
+      - ".github/workflows/koblitz-stage62-rank-aware.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate rank-aware controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage62_rank_aware.py
+          python3 scripts/run_koblitz_stage62_rank_aware.py self-test
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-rank-aware:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage62_rank_aware.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage62-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare ordinary full rank, rank-aware scan, and rho
+        run: |
+          python3 scripts/run_koblitz_stage62_rank_aware.py run \
+            --build "$RUNNER_TEMP/stage62-build" \
+            --output "$RUNNER_TEMP/stage62-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage62_rank_aware.py verify \
+            --build "$RUNNER_TEMP/stage62-build" \
+            --output "$RUNNER_TEMP/stage62-run" \
+            > "$RUNNER_TEMP/stage62-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage62-rank-aware-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage62-build
+            ${{ runner.temp }}/stage62-run
+            ${{ runner.temp }}/stage62-verification.json

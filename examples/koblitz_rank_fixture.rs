@@ -439,6 +439,29 @@ impl CompactPairTable {
             + self.x_filter.len() * std::mem::size_of::<u64>()
     }
 
+    fn slots_for_column(
+        &self,
+        point_labels: &[(usize, u64)],
+        column: usize,
+        column_count: usize,
+    ) -> Vec<u32> {
+        assert!(self.x_only);
+        assert!(self.keys_x.len() <= u32::MAX as usize);
+        let mut result = Vec::with_capacity(self.len * 2 / column_count + 1);
+        for slot in 0..self.keys_x.len() {
+            if self.keys_x[slot] == u64::MAX {
+                continue;
+            }
+            let indices = self.columns[slot].map(usize::from);
+            let left = point_labels[indices[0]].0;
+            let right = point_labels[indices[1]].0;
+            if left == column || right == column {
+                result.push(slot as u32);
+            }
+        }
+        result
+    }
+
     fn x_filter_kind(&self) -> &'static str {
         if !self.x_only {
             "disabled"
@@ -1403,6 +1426,7 @@ fn pair_pair_cursor_chunk(
     point_labels: &[(usize, u64)],
     label_to_index: &HashMap<(usize, u64), usize>,
     modulus: u64,
+    slot_order: Option<&[u32]>,
     start_slot: usize,
     cursor_start: usize,
     cursor_end: usize,
@@ -1414,7 +1438,16 @@ fn pair_pair_cursor_chunk(
     scratch.points.reserve(cursor_end - cursor_start);
     scratch.signed_slots.reserve(cursor_end - cursor_start);
     for cursor in cursor_start..cursor_end {
-        let slot = (start_slot + cursor / 2) & (slots - 1);
+        let slot = if let Some(order) = slot_order {
+            let ordered = start_slot + cursor / 2;
+            order[if ordered >= order.len() {
+                ordered - order.len()
+            } else {
+                ordered
+            }] as usize
+        } else {
+            (start_slot + cursor / 2) & (slots - 1)
+        };
         let negative = cursor & 1 == 1;
         if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative) {
             scratch.points.push(point);
@@ -1973,11 +2006,13 @@ fn main() {
         .ok()
         .map(|value| value.parse().unwrap())
         .unwrap_or(32);
+    let rank_aware_pair_scan = std::env::var("KIC_RANK_AWARE_PAIR_SCAN").as_deref() == Ok("1");
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
+    assert!(!rank_aware_pair_scan || query_mode.pair_pair_parallel());
 
     let curve_setup_started = Instant::now();
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
@@ -2326,6 +2361,11 @@ fn main() {
         let mut query_batch_inversions = 0usize;
         let mut query_parallel_waves = 0usize;
         let mut query_parallel_chunks = 0usize;
+        let mut rank_targeted_trials = 0usize;
+        let mut rank_targeted_nonincrements = 0usize;
+        let mut rank_target_slot_index_builds = 0usize;
+        let mut rank_target_slot_column = None;
+        let mut rank_target_slots = Vec::new();
         let mut reference_validation_records = Vec::new();
         let mut walk_seen = HashSet::new();
         let mut target_walk_restarts = 0usize;
@@ -2432,13 +2472,33 @@ fn main() {
             target_generation_ns += target_generation_started.elapsed().as_nanos();
             let query_started = Instant::now();
             let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
+            let targeted_column = if rank_aware_pair_scan && echelon.rank >= columns {
+                echelon.pivots[..columns].iter().position(Option::is_none)
+            } else {
+                None
+            };
+            rank_targeted_trials += usize::from(targeted_column.is_some());
+            if let Some(column) = targeted_column {
+                if rank_target_slot_column != Some(column) {
+                    rank_target_slots =
+                        quotient_pairs.slots_for_column(&base.point_labels, column, columns);
+                    assert!(!rank_target_slots.is_empty());
+                    rank_target_slot_column = Some(column);
+                    rank_target_slot_index_builds += 1;
+                }
+            }
             if let Some(width) = query_mode.pair_pair_width() {
                 assert!(pair_mode == PairMode::SignedExpanded);
                 let slots = quotient_pairs.slots();
-                let start_slot =
-                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
+                let slot_order = targeted_column.map(|_| rank_target_slots.as_slice());
+                let scan_slots = slot_order.map_or(slots, <[u32]>::len);
+                let start_slot = if slot_order.is_some() {
+                    CompactPairTable::hash(raw_compact_key(target)) as usize % scan_slots
+                } else {
+                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1)
+                };
                 if query_mode.pair_pair_parallel() {
-                    let cursors = 2 * slots;
+                    let cursors = 2 * scan_slots;
                     let chunks = cursors.div_ceil(width);
                     let lanes = pair_parallel_scratch.len();
                     let mut wave_start = 0usize;
@@ -2457,6 +2517,7 @@ fn main() {
                                     &base.point_labels,
                                     &label_to_index,
                                     modulus,
+                                    slot_order,
                                     start_slot,
                                     cursor_start,
                                     (cursor_start + width).min(cursors),
@@ -2689,6 +2750,7 @@ fn main() {
             let incremented = echelon.insert(row.clone(), modulus);
             let rank_after = echelon.rank;
             assert_eq!(rank_after, rank_before + usize::from(incremented));
+            rank_targeted_nonincrements += usize::from(targeted_column.is_some() && !incremented);
             rows.push(row.clone());
             right_hand_sides.push(coefficient_a);
             let independently_crosschecked_rank = if incremental_rank_crosscheck {
@@ -2901,6 +2963,12 @@ fn main() {
                 "full_rank_at_relation":rank_full_at,
                 "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
                 "required_surplus_relations":required_rank_surplus,
+                "rank_aware_pair_scan":rank_aware_pair_scan,
+                "rank_targeted_trials":rank_targeted_trials,
+                "rank_targeted_nonincrements":rank_targeted_nonincrements,
+                "rank_target_slot_index_builds":rank_target_slot_index_builds,
+                "rank_target_slot_index_entries":rank_target_slots.len(),
+                "rank_target_slot_index_allocated_bytes":rank_target_slots.capacity()*std::mem::size_of::<u32>(),
                 "relation_cap_without_rank":relation_cap,
                 "relation_cap_extra":relation_cap_extra,
                 "collection_ms":collection_ms,
