@@ -331,14 +331,33 @@ behavioural model of the register block, which is what `host/test.sh`
 runs the whole `worker.py` contract against, down to feeding the resulting
 `dp.bin` to `merge.py`.
 
-## Capacity and what it would mean — estimated
+## Capacity — synthesised
 
-Per VU47P (2.85M LUTs), at ~10k LUTs per batched step unit — a 5–6k LUT
-multiplier, 640 × 131 bits of distributed RAM with two read ports on the
-leaf and tree arrays (~2k), the `sigma^j` selection muxes on the operand
-path (~1.5k), and control — **200–250 step units**, LUT-bound, no DSPs or
-BRAM binding. At 5.3 clocks per step and 300–400 MHz that is 56–75 M
-steps/s per unit and **11–19 G steps/s per FPGA**.
+Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, one `ec2k_walker`
+(256 walks, W = 16, 8 batches in flight):
+
+| | LUTs | of which LUTRAM | FFs |
+|---|---|---|---|
+| `ec2k_walker` (whole engine) | **13 681** | 4 644 | 5 624 |
+| ├ walker body (ready FIFO, counters) | 2 159 | 1 568 | 371 |
+| └ `ec2k_batch_pipe` | 11 522 | 3 076 | 5 253 |
+| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stage) | 5 975 | 3 076 | 2 361 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 5 547 | 0 | 2 892 |
+
+Worst slack at a 4.0 ns clock is +1.98 ns (engine alone), so the fabric
+is not what limits the clock; the shell's `clk_main_a0` recipe is. The
+multiplier is 40% of an engine and its leaf products
+(`gf2_kmul`'s `leaf.r`, 5.0k LUTs) are the single largest item; the
+memories are the next (3.1k LUTRAM in the step unit, 1.6k in the walker).
+No DSPs or block RAM are used.
+
+The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
+logic cells), so an engine is 1.05% of the device: **48 engines is half
+the device**, 64 is two thirds, and ~70% is where routing of a design this
+regular typically starts to fail timing. At 5.3 clocks per step and the
+250 MHz shell clock that is 47 M steps/s per engine and **2.3 G steps/s
+at 48 engines, 3.0 G at 64**; a 400 MHz clock recipe, which the slack
+above supports if implementation agrees, would give 1.6x that.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
@@ -349,13 +368,19 @@ field secp256k1 (`docs/ecc_fpga_cost_model.md`) does not: there the FPGA
 advantage was "roughly 2x, fragile"; here the multiplier costs no DSPs, the
 inversion costs eight multiplies, and a step costs 5.3.
 
-None of this is measured. `aws/` synthesises the four modules on an AWS
-build instance and brings back LUT, FF and Fmax; the estimates above are
-what those numbers replace. If the clock lands low the place to look is the
-multiplier's leaf stage (33 AND terms per bit, three to four LUT levels;
-`MUL_KARATSUBA = 3` halves it) and the operand-forming stage of the step
-unit (`sigma^j` is three 2:1 mux levels after a fixed permutation, then one
-XOR).
+Two things the first synthesis taught, both fixed:
+
+- **One writer per array, really.** The walker's step counters were
+  written from the load path and from the retire path; Vivado built them
+  from 8 192 flip-flops behind a 256:1 read mux, 25k LUTs per engine, and
+  the hierarchical report blamed the step unit. Loads now wait for a clock
+  with no retiring step so one `if/elsif` chain writes every array.
+- **One address per read port.** Each distinct `array(expr)` in the
+  operand stage became its own LUTRAM copy: the tree had eight, `x` five.
+  Stage A now forms one address per port and the phase selects which
+  port feeds an operand; `d = x + sigma^j(x)` is formed once at fill
+  instead of at each of its three uses. Step unit LUTRAM went from 6 748
+  to 3 076 and three of five `sigma^j` instances disappeared.
 
 ## What is not here
 
@@ -367,11 +392,10 @@ XOR).
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **A built image.** The custom logic, host program and build scripts are
-  in `aws/` and `host/`, but nothing has run Vivado or an F2 instance: the
-  Fmax, LUT count per engine and therefore `NENG` are all still the
-  estimates above. `aws/README.md` says what the first build should look
-  at.
+- **A routed image.** The custom logic has been synthesised in the F2
+  CL flow (the numbers above) but no build has yet completed place and
+  route or run on an F2 instance; post-route Fmax and the `NENG` that
+  closes timing are what `aws/build_afi.sh` is for.
 - **Reading a walk back.** The engine's walk state is write-only from the
   host, so walks in flight are lost when a worker restarts; each of them
   is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for

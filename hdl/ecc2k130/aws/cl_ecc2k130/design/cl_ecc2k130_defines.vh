@@ -11,9 +11,9 @@
 `ifndef CL_ECC2K130_DEFINES
 `define CL_ECC2K130_DEFINES
 
-// walker engines; ~10k LUTs each, the VU47P has 2.85M
+// walker engines; 13.7k LUTs each as synthesised, the VU47P has 1.30M
 `ifndef ECC_NENG
-`define ECC_NENG 32
+`define ECC_NENG 48
 `endif
 
 // walks per engine = 2**ECC_ID_W; must comfortably cover 2**(LOG_W+LOG_NB)
