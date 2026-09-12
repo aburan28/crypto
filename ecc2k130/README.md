@@ -126,7 +126,12 @@ code spends its instructions on. `BSL` is `ECC_SEL` exactly, and `EOR3`
 (`FEAT_SHA3`, present on Neoverse V1/V2 and every Apple core) is `ECC_XOR3`
 exactly, so the NEON word is an instruction-count win and not only a width
 win. `-march=native` does not imply `+sha3` on every toolchain, so the
-Makefile probes for a spelling that defines `__ARM_FEATURE_SHA3`.
+Makefile probes for a spelling that defines `__ARM_FEATURE_SHA3`. It only
+probes when the CPU reports `sha3` and `MARCH` is left at `native`, since
+every toolchain accepts `-march=armv8.2-a+sha3` whether or not the core can
+run it, and a binary built that way would `SIGILL` on Neoverse N1 or a
+Cortex-A72. Such a core still gets NEON and `BSL`, just two `EOR`s for
+`ECC_XOR3`; `make test-logic` prints which of the two is in effect.
 
 ### Two field backends
 

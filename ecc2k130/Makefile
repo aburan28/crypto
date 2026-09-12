@@ -55,7 +55,10 @@ GPUFLAGS += -Xptxas --def-load-cache=cg
 endif
 # The CPU build picks the widest word the target supports (AVX-512 -> 512 lanes,
 # AVX2 -> 256, NEON -> 128, otherwise 64).  Use a portable baseline when the
-# build machine and the run machine may differ.
+# build machine and the run machine may differ.  That lever does not work on
+# Apple clang, whose driver keeps the host CPU's features regardless of -march:
+# MARCH=armv8-a leaves __ARM_FEATURE_SHA3 undefined yet the backend still folds
+# XOR trees into EOR3.  Build portable binaries on the target OS.
 MARCH   ?= native
 
 # On aarch64 the wide word is NEON, and EOR3 (FEAT_SHA3) is most of what makes
@@ -65,17 +68,27 @@ MARCH   ?= native
 # feature macro and take the first that does.  A compiler-accepted +sha3
 # spelling is not proof the host can execute EOR3 (armv8.2-a+sha3 is accepted
 # on any recent toolchain), so those candidates are used only when the CPU
-# reports FEAT_SHA3.  Falling through to plain MARCH still gets NEON and BSL,
+# reports FEAT_SHA3.  They also rewrite the requested -march, so only search
+# when MARCH is native: an explicit MARCH names a target this host is not
+# evidence about.  Falling through to plain MARCH still gets NEON and BSL,
 # just not the three-input XOR.
 HOSTARCH := $(shell uname -m)
+HOSTOS   := $(shell uname -s)
 ifneq (,$(filter arm64 aarch64,$(HOSTARCH)))
 # Linux lists sha3 in cpuinfo Features when FEAT_SHA3 is present.  Darwin has
-# no /proc; every Apple Silicon core has SHA3, and sysctl names it
-# hw.optional.arm.FEAT_SHA3 when the key exists.
-HOSTSHA3 := $(shell if [ -r /proc/cpuinfo ]; then grep -m1 '^Features' /proc/cpuinfo | grep -c -w sha3; else sysctl -n hw.optional.arm.FEAT_SHA3 2>/dev/null || echo 1; fi)
+# no /proc, and every Apple Silicon core has SHA3, so a missing
+# hw.optional.arm.FEAT_SHA3 key means present there and absent anywhere else.
+ifeq ($(HOSTOS),Darwin)
+HOSTSHA3 := $(shell sysctl -n hw.optional.arm.FEAT_SHA3 2>/dev/null || echo 1)
+else
+HOSTSHA3 := $(shell grep -m1 '^Features' /proc/cpuinfo 2>/dev/null | grep -c -w sha3)
+endif
 sha3flag = $(shell $(CXX) $(1) -dM -E -x c++ /dev/null 2>/dev/null | grep -c __ARM_FEATURE_SHA3)
+SHA3TRY := $(if $(filter native,$(MARCH)), \
+    $(if $(filter-out 0,$(HOSTSHA3)), \
+        -march=native+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3))
 ARCHFLAGS := $(firstword \
-    $(foreach f,-march=$(MARCH) $(if $(filter-out 0,$(HOSTSHA3)),-march=$(MARCH)+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3), \
+    $(foreach f,-march=$(MARCH) $(SHA3TRY), \
         $(if $(filter-out 0,$(call sha3flag,$(f))),$(f))) \
     -march=$(MARCH))
 else
