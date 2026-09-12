@@ -6,6 +6,8 @@ A full three-summand pair-table scan finds a triple once with each summand in th
 
 The integration retains Stage 35's explicit `descent_summands` report and adds the effective `collection_window`. It also carries `summands_scanned` in every relation-unit document and reports initial and final totals. Older units deserialize the new counter as zero; new measurement admission requires the exact nonzero charge `trials × window`, or `trials × |F|` for the full-scan control.
 
+The projected signed-Frobenius orbit map now uses single-word group arithmetic when the field fits in a word. A point-for-point equivalence test compares it with the general big-integer map on several subgroup bases and the exact n=41 algebraic recipe. The first orbit-map construction previously fell between the select and collect timers; fresh workflows now charge it to selection.
+
 The hosted sweep runs six cells on one inherited Linux CPU from one clean binary:
 
 - full scan;

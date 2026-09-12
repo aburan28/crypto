@@ -3212,6 +3212,9 @@ fn projected_signed_orbit_map(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
 ) -> ProjectedSignedOrbitMap {
+    if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
+        return map;
+    }
     let projected: Vec<_> = fb
         .points
         .iter()
@@ -3273,6 +3276,89 @@ fn projected_signed_orbit_map(
         orbit_of,
         representatives,
     }
+}
+
+/// [`projected_signed_orbit_map`] in single-word arithmetic, or `None`
+/// when the field is too wide for it.
+///
+/// Same answer, point for point.  The ordering the general map
+/// canonicalises and sorts by is [`point_key`], `(x + 1, y)`
+/// lexicographically; [`FastPoint::pack`] is `((x + 1) << 1 | sign)`
+/// with `sign` marking which of `y` and `x ^ y` is the larger, so within
+/// one abscissa it separates `P` from `−P` in the same order `y` does.
+/// The two orders agree, and so do the representatives they pick.
+///
+/// This is worth doing because the map is not a small cost: it projects
+/// every base point by the cofactor and then walks each one's whole
+/// signed Frobenius orbit, which at degree 53 on a 15264-point base is
+/// about 1.6 million point operations — 8.2 seconds in big-integer
+/// arithmetic, and a large share of a precompute that no longer spends
+/// most of its time collecting.
+fn projected_signed_orbit_map_fast(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> Option<ProjectedSignedOrbitMap> {
+    let fc = FastCurve::new(&kc.curve)?;
+    let projected: Vec<FastPoint> = fb
+        .points
+        .par_iter()
+        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
+        .collect();
+    let mut representatives: Vec<FastPoint> = Vec::new();
+    let mut seen: HashSet<u64> = HashSet::new();
+    for &point in &projected {
+        if point.infinity || seen.contains(&point.pack()) {
+            continue;
+        }
+        let mut current = point;
+        let mut canonical = point;
+        let mut canonical_key = point.pack();
+        for _ in 0..kc.n {
+            for candidate in [current, fc.neg(current)] {
+                let key = candidate.pack();
+                seen.insert(key);
+                if key < canonical_key {
+                    canonical = candidate;
+                    canonical_key = key;
+                }
+            }
+            current = fc.frobenius_k(current, kc.k);
+        }
+        representatives.push(canonical);
+    }
+    representatives.sort_unstable_by_key(|p| p.pack());
+
+    let mut location_by_key: HashMap<u64, (usize, u32, bool)> = HashMap::new();
+    for (orbit, &representative) in representatives.iter().enumerate() {
+        let mut current = representative;
+        for k in 0..kc.n {
+            location_by_key
+                .entry(current.pack())
+                .or_insert((orbit, k, false));
+            location_by_key
+                .entry(fc.neg(current).pack())
+                .or_insert((orbit, k, true));
+            current = fc.frobenius_k(current, kc.k);
+        }
+    }
+    let orbit_of = projected
+        .iter()
+        .map(|point| {
+            if point.infinity {
+                return None;
+            }
+            Some(
+                *location_by_key
+                    .get(&point.pack())
+                    .expect("cofactor projection was not found in its canonical orbit"),
+            )
+        })
+        .collect();
+
+    Some(ProjectedSignedOrbitMap {
+        orbit_of,
+        representatives: representatives.into_iter().map(|p| fc.lower(p)).collect(),
+    })
 }
 
 /// Number of nonzero signed-Frobenius columns remaining after every
@@ -7914,6 +8000,112 @@ mod tests {
             max_trials: 200_000,
             ..KoblitzIcOptions::default()
         }
+    }
+
+    /// The general orbit map, with the single-word path removed, so the
+    /// fast one can be checked against it rather than against itself.
+    fn projected_signed_orbit_map_general(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+    ) -> (Vec<Option<(usize, u32, bool)>>, Vec<BinaryPoint>) {
+        let projected: Vec<_> = fb
+            .points
+            .iter()
+            .map(|point| kc.mul(point, &kc.cofactor))
+            .collect();
+        let mut representatives: Vec<BinaryPoint> = Vec::new();
+        let mut seen = HashSet::new();
+        for point in &projected {
+            if *point == BinaryPoint::Infinity || seen.contains(&point_key(point)) {
+                continue;
+            }
+            let mut current = point.clone();
+            let mut canonical = point.clone();
+            let mut canonical_key = point_key(point);
+            for _ in 0..kc.n {
+                for candidate in [current.clone(), point_neg(&current)] {
+                    let key = point_key(&candidate);
+                    seen.insert(key.clone());
+                    if key < canonical_key {
+                        canonical = candidate;
+                        canonical_key = key;
+                    }
+                }
+                current = kc.frobenius(&current);
+            }
+            representatives.push(canonical);
+        }
+        representatives.sort_by_key(point_key);
+        let mut location_by_key = HashMap::new();
+        for (orbit, representative) in representatives.iter().enumerate() {
+            let mut current = representative.clone();
+            for k in 0..kc.n {
+                location_by_key
+                    .entry(point_key(&current))
+                    .or_insert((orbit, k, false));
+                location_by_key
+                    .entry(point_key(&point_neg(&current)))
+                    .or_insert((orbit, k, true));
+                current = kc.frobenius(&current);
+            }
+        }
+        let orbit_of = projected
+            .iter()
+            .map(|point| {
+                (*point != BinaryPoint::Infinity).then(|| {
+                    *location_by_key
+                        .get(&point_key(point))
+                        .expect("in its orbit")
+                })
+            })
+            .collect();
+        (orbit_of, representatives)
+    }
+
+    #[test]
+    fn the_single_word_orbit_map_agrees_with_the_general_one() {
+        // Both the subspace bases the algebraic oracles want and the
+        // subgroup bases the pair table wants, at several degrees.
+        let mut checked = 0;
+        for (degree, points) in [(15u32, 300usize), (19, 400), (31, 600), (37, 800)] {
+            let Some(kc) = KoblitzCurve::new(0, degree) else {
+                continue;
+            };
+            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 3, points) else {
+                continue;
+            };
+            checked += 1;
+            let fast =
+                projected_signed_orbit_map_fast(&kc, &fb).expect("these fields fit in a word");
+            let (orbit_of, representatives) = projected_signed_orbit_map_general(&kc, &fb);
+            assert_eq!(
+                fast.representatives, representatives,
+                "degree {degree}: the two maps chose different orbit representatives"
+            );
+            assert_eq!(
+                fast.orbit_of, orbit_of,
+                "degree {degree}: the two maps placed a point differently"
+            );
+        }
+        // The exact algebraic recipe used by the n=41 public-target run.
+        let kc = KoblitzCurve::new(0, 41).expect("degree 41 curve");
+        let basis: Vec<F2mElement> = (0..6)
+            .map(|i| F2mElement::from_biguint(&BigUint::from(1u64 << i), 41))
+            .collect();
+        let union = build_frobenius_union_factor_base(&kc, &basis).expect("Frobenius union");
+        let fb = saturate_factor_base_two_torsion(&kc, &union).expect("two-torsion closure");
+        let fast = projected_signed_orbit_map_fast(&kc, &fb).expect("degree 41 fits in a word");
+        let (orbit_of, representatives) = projected_signed_orbit_map_general(&kc, &fb);
+        assert_eq!(
+            fast.representatives, representatives,
+            "algebraic representatives"
+        );
+        assert_eq!(fast.orbit_of, orbit_of, "algebraic orbit placements");
+        checked += 1;
+        assert_eq!(
+            checked, 5,
+            "a degree this test relies on stopped being available"
+        );
     }
 
     #[test]
