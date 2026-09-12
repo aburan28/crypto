@@ -872,12 +872,19 @@ fn batch_raw_target_minus_keys(
         .collect()
 }
 
+#[derive(Default)]
+struct RawBatchScratch {
+    denominators: Vec<u64>,
+    prefixes_and_inverses: Vec<u64>,
+}
+
 fn batch_raw_target_minus_points_x_filtered(
     curve: &KoblitzCurve,
     target: RawPoint,
     points: &[RawPoint],
     table: &CompactPairTable,
     output: &mut Vec<(usize, (u64, u64))>,
+    scratch: &mut RawBatchScratch,
 ) -> usize {
     assert!(table.x_only);
     output.clear();
@@ -890,26 +897,26 @@ fn batch_raw_target_minus_points_x_filtered(
         }
         return points.len();
     };
-    let mut denominators = vec![0u64; points.len()];
-    let mut prefixes = vec![0u64; points.len()];
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes_and_inverses.resize(points.len(), 0);
     let mut product = 1u64;
     for (index, point) in points.iter().enumerate() {
         let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
-        denominators[index] = denominator;
+        scratch.denominators[index] = denominator;
         if denominator != 0 {
-            prefixes[index] = product;
+            scratch.prefixes_and_inverses[index] = product;
             product = mul_raw(curve, product, denominator);
         }
     }
     let mut inverse_product = inverse_raw(curve, product);
-    let mut inverses = vec![0u64; points.len()];
     for index in (0..points.len()).rev() {
-        let denominator = denominators[index];
+        let denominator = scratch.denominators[index];
         if denominator == 0 {
             continue;
         }
-        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        let inverse = mul_raw(curve, inverse_product, scratch.prefixes_and_inverses[index]);
         inverse_product = mul_raw(curve, inverse_product, denominator);
+        scratch.prefixes_and_inverses[index] = inverse;
     }
     for (index, &point) in points.iter().enumerate() {
         let Some((x, y)) = point else {
@@ -919,14 +926,18 @@ fn batch_raw_target_minus_points_x_filtered(
             }
             continue;
         };
-        if denominators[index] == 0 {
+        if scratch.denominators[index] == 0 {
             let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(point)));
             if table.might_contain_x(key.0) {
                 output.push((index, key));
             }
             continue;
         }
-        let lambda = mul_raw(curve, target_y ^ y ^ x, inverses[index]);
+        let lambda = mul_raw(
+            curve,
+            target_y ^ y ^ x,
+            scratch.prefixes_and_inverses[index],
+        );
         let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
         let key_x = x3 + 1;
         if !table.might_contain_x(key_x) {
@@ -1180,6 +1191,14 @@ fn lookup_signed_expanded_pair(
 }
 
 #[derive(Default)]
+struct PairPairChunkScratch {
+    points: Vec<RawPoint>,
+    labels: Vec<[(usize, u64); 2]>,
+    rests: Vec<(usize, (u64, u64))>,
+    batch: RawBatchScratch,
+}
+
+#[derive(Default)]
 struct PairPairChunkResult {
     witness: Option<([usize; 4], [(usize, u64); 4])>,
     additions: usize,
@@ -1200,45 +1219,48 @@ fn pair_pair_cursor_chunk(
     start_slot: usize,
     cursor_start: usize,
     cursor_end: usize,
+    scratch: &mut PairPairChunkScratch,
 ) -> PairPairChunkResult {
     let slots = quotient_pairs.slots();
-    let mut points = Vec::with_capacity(cursor_end - cursor_start);
-    let mut labels = Vec::with_capacity(cursor_end - cursor_start);
+    scratch.points.clear();
+    scratch.labels.clear();
+    scratch.points.reserve(cursor_end - cursor_start);
+    scratch.labels.reserve(cursor_end - cursor_start);
     for cursor in cursor_start..cursor_end {
         let slot = (start_slot + cursor / 2) & (slots - 1);
         let negative = cursor & 1 == 1;
         if let Some((point, pair_labels)) =
             quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
         {
-            points.push(point);
-            labels.push(pair_labels);
+            scratch.points.push(point);
+            scratch.labels.push(pair_labels);
         }
     }
-    if points.is_empty() {
+    if scratch.points.is_empty() {
         return PairPairChunkResult::default();
     }
-    let mut rests = Vec::with_capacity(points.len());
     let attempted = batch_raw_target_minus_points_x_filtered(
         curve,
         target,
-        &points,
+        &scratch.points,
         quotient_pairs,
-        &mut rests,
+        &mut scratch.rests,
+        &mut scratch.batch,
     );
     let mut result = PairPairChunkResult {
         additions: attempted,
-        x_filter_rejections: attempted - rests.len(),
+        x_filter_rejections: attempted - scratch.rests.len(),
         batch_inversions: usize::from(target.is_some()),
         ..PairPairChunkResult::default()
     };
-    for &(position, rest_key) in &rests {
+    for &(position, rest_key) in &scratch.rests {
         let Some((right_indices, right_labels)) =
             lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index)
         else {
             result.exact_table_misses += 1;
             continue;
         };
-        let left_labels = labels[position];
+        let left_labels = scratch.labels[position];
         let left_indices = left_labels.map(|label| label_to_index[&label]);
         result.witness = Some((
             [
@@ -2080,6 +2102,15 @@ fn main() {
         let mut pair_point_scratch = Vec::with_capacity(64);
         let mut pair_label_scratch = Vec::with_capacity(64);
         let mut pair_rest_scratch = Vec::with_capacity(64);
+        let mut pair_batch_scratch = RawBatchScratch::default();
+        let parallel_lanes = if query_mode.pair_pair_parallel() {
+            rayon::current_num_threads().max(1)
+        } else {
+            0
+        };
+        let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
+            (0..parallel_lanes).map(|_| Default::default()).collect();
+        let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
         let mut dense_rank_recomputations = 0usize;
         let mut dimension_bound_rank_crosschecks = 0usize;
         let mut reverse_incremental_rank_crosschecks = 0usize;
@@ -2173,13 +2204,15 @@ fn main() {
                 if query_mode.pair_pair_parallel() {
                     let cursors = 2 * slots;
                     let chunks = cursors.div_ceil(width);
-                    let lanes = rayon::current_num_threads().max(1);
+                    let lanes = pair_parallel_scratch.len();
                     let mut wave_start = 0usize;
                     while wave_start < chunks && witness.is_none() {
                         let wave_end = (wave_start + lanes).min(chunks);
-                        let results: Vec<PairPairChunkResult> = (wave_start..wave_end)
-                            .into_par_iter()
-                            .map(|chunk| {
+                        pair_parallel_scratch[..wave_end - wave_start]
+                            .par_iter_mut()
+                            .enumerate()
+                            .map(|(lane, scratch)| {
+                                let chunk = wave_start + lane;
                                 let cursor_start = chunk * width;
                                 pair_pair_cursor_chunk(
                                     &curve,
@@ -2190,12 +2223,13 @@ fn main() {
                                     start_slot,
                                     cursor_start,
                                     (cursor_start + width).min(cursors),
+                                    scratch,
                                 )
                             })
-                            .collect();
+                            .collect_into_vec(&mut pair_parallel_results);
                         query_parallel_waves += 1;
-                        query_parallel_chunks += results.len();
-                        for result in results {
+                        query_parallel_chunks += pair_parallel_results.len();
+                        for result in pair_parallel_results.drain(..) {
                             query_additions += result.additions;
                             decomposition_queries += result.additions;
                             query_x_filter_rejections += result.x_filter_rejections;
@@ -2234,6 +2268,7 @@ fn main() {
                             &pair_point_scratch,
                             &quotient_pairs,
                             &mut pair_rest_scratch,
+                            &mut pair_batch_scratch,
                         );
                         query_additions += attempted;
                         decomposition_queries += attempted;
@@ -2854,12 +2889,14 @@ mod packed_tests {
                 .filter(|(_, key)| table.might_contain_x(key.0))
                 .collect();
             let mut pointwise_filtered = Vec::new();
+            let mut pointwise_scratch = RawBatchScratch::default();
             let pointwise_attempted = batch_raw_target_minus_points_x_filtered(
                 &curve,
                 target,
                 &raw_points,
                 &table,
                 &mut pointwise_filtered,
+                &mut pointwise_scratch,
             );
             assert_eq!(pointwise_attempted, raw_points.len());
             assert_eq!(pointwise_filtered, pointwise_expected);
