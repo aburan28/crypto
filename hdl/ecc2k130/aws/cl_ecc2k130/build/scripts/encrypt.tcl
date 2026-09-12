@@ -35,6 +35,7 @@ set rtl_files {
   ec2k_batch_pipe.vhd
   ec2k_walker.vhd
   ec2k_axil.vhd
+  ec2k_axil_cdc.vhd
 }
 foreach f $rtl_files {
   if {![file exists ${rtl_dir}/$f]} {
