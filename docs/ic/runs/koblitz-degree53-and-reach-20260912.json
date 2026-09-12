@@ -1,0 +1,129 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_degree_53_rung_and_reach",
+ "date": "2026-09-12",
+ "what_this_is": "The largest Koblitz subgroup this repository's family offers, measured end to end, and the projection that follows for where the advantage runs out. K_0/F_2^53 has a 44-bit subgroup, 38 times the degree-41 rung.",
+ "measured": {
+  "curve": "K_0 / F_2^53",
+  "subgroup_order": "21044858204113",
+  "subgroup_bits": 45,
+  "targets": 32,
+  "factor_base": {
+   "family": "subgroup_orbits",
+   "points": 15264,
+   "abscissae": 7632,
+   "projected_columns": 144
+  },
+  "collection_summands": 3,
+  "descent_summands": 2,
+  "relations": 458,
+  "stage_seconds": {
+   "select": 0.0,
+   "collect": 17.673,
+   "logs": 9.229
+  },
+  "ic": {
+   "precompute_seconds": 35.93584696,
+   "descent_seconds_per_target": 0.0492171235,
+   "descent_trials_total": 7803621,
+   "verified": 32
+  },
+  "rho": {
+   "seconds_per_target": 1.2155113030312499,
+   "iterations_total": 31891777,
+   "verified": 32
+  },
+  "ratio": {
+   "amortised": 1.0369378145211405,
+   "charged": 24.696918807765144
+  },
+  "verdict": {
+   "amortised_crossover": true,
+   "charged_crossover": true,
+   "charged_margin": 0.9595091190207264,
+   "whole_process_crossover": true
+  },
+  "probe_microseconds": 0.202,
+  "rho_step_microseconds": 1.22
+ },
+ "the_laws": "At a fixed memory budget the factor base is fixed, and then: the descent costs 2r/|F|^2 probes, so it grows linearly in r; relation collection costs about 9r/(n|F|) lookups, also linear in r; and rho costs sqrt(pi r/2)/sqrt(2n) steps, which grows as the square root. Linear loses to a square root, so rho overtakes \u2014 the question is only where.",
+ "projection": {
+  "basis": "the constants this run measured: 0.20 us a probe, 1.22 us a rho step, a 15264-point base",
+  "rows": [
+   {
+    "subgroup_bits": 40,
+    "descent_seconds_per_target": 0.0019,
+    "rho_seconds_per_target": 0.1557,
+    "charged_ratio": 81.73,
+    "precompute_seconds": 2.0,
+    "break_even_targets": 16
+   },
+   {
+    "subgroup_bits": 45,
+    "descent_seconds_per_target": 0.061,
+    "rho_seconds_per_target": 0.8807,
+    "charged_ratio": 14.45,
+    "precompute_seconds": 79.0,
+    "break_even_targets": 96
+   },
+   {
+    "subgroup_bits": 48,
+    "descent_seconds_per_target": 0.4876,
+    "rho_seconds_per_target": 2.4909,
+    "charged_ratio": 5.11,
+    "precompute_seconds": 632.0,
+    "break_even_targets": 315
+   },
+   {
+    "subgroup_bits": 50,
+    "descent_seconds_per_target": 1.9506,
+    "rho_seconds_per_target": 4.9818,
+    "charged_ratio": 2.55,
+    "precompute_seconds": 2528.0,
+    "break_even_targets": 834
+   },
+   {
+    "subgroup_bits": 52,
+    "descent_seconds_per_target": 7.8023,
+    "rho_seconds_per_target": 9.9636,
+    "charged_ratio": 1.28,
+    "precompute_seconds": 10112.0,
+    "break_even_targets": 4679
+   },
+   {
+    "subgroup_bits": 53,
+    "descent_seconds_per_target": 15.6046,
+    "rho_seconds_per_target": 14.0907,
+    "charged_ratio": 0.9,
+    "precompute_seconds": 20224.0,
+    "break_even_targets": null
+   },
+   {
+    "subgroup_bits": 56,
+    "descent_seconds_per_target": 124.837,
+    "rho_seconds_per_target": 39.8545,
+    "charged_ratio": 0.32,
+    "precompute_seconds": 161789.0,
+    "break_even_targets": null
+   }
+  ]
+ },
+ "reading": "The charged advantage survives to about a 52-bit subgroup and is gone by 53. The whole-process advantage dies sooner in practice: it needs a batch of targets that grows with r \u2014 16 at 40 bits, 96 at 45, 315 at 48, 834 at 50 \u2014 because the precompute grows linearly while rho grows as a square root. What stops this is relation collection, not the descent.",
+ "what_this_is_not": [
+  "Not a single-instance claim at any size. Even where the batch verdict holds, one target alone costs the whole precompute and rho wins.",
+  "Not a statement about the exponent: everything here is a constant at a fixed memory budget. A larger budget moves the boundary by half a bit per doubling of |F| and no more.",
+  "Not independent: one build, one host, one series.",
+  "The projection is arithmetic on two measured constants, not a series of runs. Where it is checked against this degree-53 run it under-predicts the win by about 1.7x."
+ ],
+ "claim_boundary": "synthetic_known_answer",
+ "software": {
+  "commit": "46fa2f002db92cec081f16e49c7cbbbcb9d4a98a",
+  "profile": "release"
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ }
+}

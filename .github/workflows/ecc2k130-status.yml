@@ -1,3 +1,6 @@
+# Publishes the whole GitHub Pages site (landing page, index-calculus
+# scoreboard, ECC2K-130 dashboard) via scripts/site/build.py. The workflow
+# name is kept for the check names other configuration refers to.
 name: ECC2K-130 status pages
 
 on:
@@ -8,13 +11,19 @@ on:
     paths:
       - ".github/workflows/ecc2k130-status.yml"
       - "scripts/rho_status/**"
+      - "scripts/site/**"
       - "docs/ecc2k130-status/**"
+      - "docs/site/**"
+      - "docs/index-calculus-scoreboard.html"
   push:
     branches: [main]
     paths:
       - ".github/workflows/ecc2k130-status.yml"
       - "scripts/rho_status/**"
+      - "scripts/site/**"
       - "docs/ecc2k130-status/**"
+      - "docs/site/**"
+      - "docs/index-calculus-scoreboard.html"
 
 permissions:
   contents: read
@@ -33,6 +42,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
+      - name: Site build tests
+        run: python3 scripts/site/test_build.py
 
   publish:
     needs: test
@@ -91,8 +102,10 @@ jobs:
             --history-out docs/ecc2k130-status/history.json
 
       - uses: actions/configure-pages@v5
+      - name: Assemble site
+        run: python3 scripts/site/build.py --out _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/ecc2k130-status
+          path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
