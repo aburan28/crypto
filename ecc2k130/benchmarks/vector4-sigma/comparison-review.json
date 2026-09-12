@@ -1,0 +1,186 @@
+{
+  "valid": true,
+  "status": "terminal_fixed_vector4_comparison_independently_validated",
+  "ownerSession": 15541,
+  "app": "ap-8wtaL9FddF0MIdQZJffxYc",
+  "rawSha256": "ab570300f07c31577132c545ecd47b1181b1254122526e12c14947f3dc5a62df",
+  "rawBytes": 4481399,
+  "sourceCanonicalSha256": "5b629d80a63f176807f05e8fc202aee0968291ec7691923a233752b9e9705c21",
+  "driverFreezeSha256": "7bd95d57a210c336a37c0053d66c5c8cddd6f9417b5966bab2457172d3ce81a0",
+  "prebuildSha256": "740f1b2300d1070d9f44d50ef33d874d4f8d1c47d1d9b91d06a28c301a99ce76",
+  "predispatchReviewSha256": "3608fa937bb73648754042eb2a2ca294e4358a69c6fce17154127a21cfa849c1",
+  "qualified": false,
+  "screenRatesM": [
+    14640.971,
+    14682.74,
+    14573.526
+  ],
+  "screenThresholdM": 14714.175854999998,
+  "controlDriftPercent": -0.460659337416891,
+  "timedRows": 5,
+  "samples": [
+    {
+      "name": "control",
+      "phase": "warmup",
+      "repeat": 0,
+      "rate": 14839.438,
+      "updates": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "stored": 0,
+      "workers": 385024,
+      "steps": 1024,
+      "launches": 32,
+      "weight": 0,
+      "progressRows": 7
+    },
+    {
+      "name": "vector1",
+      "phase": "warmup",
+      "repeat": 0,
+      "rate": 14811.917,
+      "updates": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "stored": 0,
+      "workers": 385024,
+      "steps": 1024,
+      "launches": 32,
+      "weight": 0,
+      "progressRows": 7
+    },
+    {
+      "name": "control",
+      "phase": "screen",
+      "repeat": 0,
+      "rate": 14640.971,
+      "updates": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "stored": 0,
+      "workers": 385024,
+      "steps": 1024,
+      "launches": 32,
+      "weight": 0,
+      "progressRows": 7
+    },
+    {
+      "name": "vector1",
+      "phase": "screen",
+      "repeat": 1,
+      "rate": 14682.74,
+      "updates": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "stored": 0,
+      "workers": 385024,
+      "steps": 1024,
+      "launches": 32,
+      "weight": 0,
+      "progressRows": 7
+    },
+    {
+      "name": "control",
+      "phase": "screen",
+      "repeat": 2,
+      "rate": 14573.526,
+      "updates": 201863462912,
+      "reports": 0,
+      "verified": 0,
+      "stored": 0,
+      "workers": 385024,
+      "steps": 1024,
+      "launches": 32,
+      "weight": 0,
+      "progressRows": 7
+    }
+  ],
+  "metrics": {},
+  "runtimeResources": {
+    "control": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": 1792
+    },
+    "vector1": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": 1792
+    }
+  },
+  "calibrationSha256": "dc19151e2f51adeeac89a6b959bd6bd87210682c7205322c89daa9bdb7e8dc2a",
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-6dfb4b54-b9c7-5b39-ee6d-4b32e324e0c4",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-6dfb4b54-b9c7-5b39-ee6d-4b32e324e0c4",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "30"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-6dfb4b54-b9c7-5b39-ee6d-4b32e324e0c4",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-6dfb4b54-b9c7-5b39-ee6d-4b32e324e0c4",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2385 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "62"
+    }
+  },
+  "validation": {
+    "arithmeticModes": 2,
+    "arithmeticSuitesEach": 6,
+    "storageCasesEach": 128,
+    "storageRecordsEach": 297344,
+    "sharedProbeEach": {
+      "scenarios": 21,
+      "inputPairs": 21036,
+      "snapshots": 114,
+      "words": 51072
+    },
+    "integrationModes": 2,
+    "normalizedSlots": [
+      64,
+      16384
+    ],
+    "nestedLayoutClients": 10,
+    "checkpointChildren": 28,
+    "checkpointSuccesses": 26,
+    "expectedRejections": 2,
+    "checkpointComparisons": 12,
+    "allBeforeTiming": true
+  },
+  "corpora": {
+    "timedCollections": 0,
+    "sizes": [],
+    "sortedHashes": [],
+    "allMatch": false
+  },
+  "goal": {
+    "targetB": 26,
+    "confirmedVectorBenchmarkMedianAtLeastTarget": false,
+    "confirmedVectorCollectionMedianAtLeastTarget": false
+  },
+  "findings": [],
+  "limits": [
+    "One fixed configuration on one GPU allocation; no population-level performance claim.",
+    "Compiler selected-path reductions are not runtime speed claims; only the complete scalar samples are timed.",
+    "Runtime shared attributes are calibrated separately from2816-byte compiler extents.",
+    "GPU clock/temperature data are before/after snapshots; no counter/profile attribution is established.",
+    "Returned corpus hashes/counts are validated against the frozen producer gates; temporary corpus/checkpoint payloads are not independently retained here.",
+    "No knobs, source edits, GPU retries or alternate designs were run."
+  ],
+  "independentAuditorSha256": "d14c750dc2613a297815691533cb4832683f2f3c300c0b0b508c0cd1d8584ff4"
+}

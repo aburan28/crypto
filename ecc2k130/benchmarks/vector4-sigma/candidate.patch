@@ -1,0 +1,713 @@
+--- a/ecc2k130/Makefile
++++ b/ecc2k130/Makefile
+@@ -43,6 +43,7 @@
+ PACKED_WEIGHTED_PREFIX ?= 0
+ PACKED_COMPACT_STATE ?= 0
+ PACKED_SHARED_SIGMA ?= 0
++PACKED_VECTOR_SIGMA ?= 0
+ PACKED_STATE_TILE ?= 0
+ # Keep experimental tuning independent: one change per comparison initially.
+ GPUFLAGS = -Xptxas -v
+@@ -81,6 +82,7 @@
+        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
+        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
+        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
++       -DECC_PACKED_VECTOR_SIGMA=$(PACKED_VECTOR_SIGMA) \
+        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
+ 
+ all: cpu
+--- a/ecc2k130/codegen/gensigma.py
++++ b/ecc2k130/codegen/gensigma.py
+@@ -182,6 +182,92 @@
+     return lines + shared + ['#endif']
+ 
+ 
++
++def emitVectorSharedWalkPair(nets):
++    # Consecutive unique row IDs form one four-component vector. The original
++    # scalar/global/inverse table and helpers are not changed.
++    exponents = list(range(3,11))
++    chosen = [nets[k] for k in exponents]
++    ops = []
++    for stage in range(len(chosen[0])):
++        d = chosen[0][stage][0]
++        for word in range(8):
++            masks = tuple((net[stage][1] >> (32*word)) & 0xffffffff for net in chosen)
++            if any(masks):
++                ops.append((d,word,masks))
++    unique = list(dict.fromkeys(row for _,_,row in ops))
++    if len(unique) != 56:
++        raise ValueError('vector mask grouping requires the reviewed56 rows')
++    lines = ['#if ECC_PACKED_SHARED_SIGMA',
++             '#ifdef __CUDACC__',
++             'using SigmaWalkVector131 = uint4;',
++             'static __shared__ __align__(16) uint4 sigmaWalkSharedVector131Masks[14][8];',
++             '#else',
++             'struct alignas(16) SigmaWalkVector131 { uint32_t x,y,z,w; };',
++             '#endif',
++             'static_assert(sizeof(SigmaWalkVector131)==16, "four mask words without padding");',
++             'static ECC_HD void initSigmaWalkShared131() {',
++             '#ifdef __CUDA_ARCH__',
++             '    for (unsigned i=threadIdx.x; i<448u; i+=blockDim.x) {',
++             '        const uint32_t value=__ldg(&sigmaWalkNetwork131Masks[i/8][i%8]);',
++             '        uint4 &destination=sigmaWalkSharedVector131Masks[i/32][i%8];',
++             '        // Separate scalar members have distinct writers. Do not',
++             '        // use a read-modify-write vector store for one component.',
++             '        switch ((i/8)%4) {',
++             '        case 0: destination.x=value; break;',
++             '        case 1: destination.y=value; break;',
++             '        case 2: destination.z=value; break;',
++             '        default: destination.w=value; break;',
++             '        }',
++             '    }',
++             '    __syncthreads();',
++             '#endif',
++             '}',
++             'static ECC_BIG SigmaWalkPair131 sigmaWalkNetworkPairShared131(P131 a,P131 b,int index) {',
++             '#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)',
++             '    const int exponents[] = {3,4,5,6,7,8,9,10};',
++             '    for (int i=0;i<exponents[index];i++) { a=sqr131(a); b=sqr131(b); }',
++             '    return SigmaWalkPair131{a,b};',
++             '#else',
++             '    uint32_t a0=a.v[0], a1=a.v[1], a2=a.v[2], a3=a.v[3], a4=a.v[4];',
++             '    uint32_t b0=b.v[0], b1=b.v[1], b2=b.v[2], b3=b.v[3], b4=b.v[4];',
++             '    uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;']
++    loaded = set()
++    fields = ('x','y','z','w')
++    for d,word,row in ops:
++        idx = unique.index(row)
++        group,component = divmod(idx,4)
++        if group not in loaded:
++            loaded.add(group)
++            lines += ['#ifdef __CUDA_ARCH__',
++                      '    const uint4 group%d=sigmaWalkSharedVector131Masks[%d][index];' % (group,group),
++                      '#else',
++                      '    const SigmaWalkVector131 group%d{%s};' %
++                      (group,','.join('sigmaWalkNetwork131Masks[%d][index]' % (4*group+c) for c in range(4))),
++                      '#endif']
++        lines += ['    mask=group%d.%s;' % (group,fields[component])]
++        for value in ('a','b'):
++            if d < 32:
++                lines += ['    t=((%s%d >> %d)^%s%d)&mask;' % (value,word,d,value,word),
++                          '    %s%d^=t^(t << %d);' % (value,word,d)]
++            else:
++                other = word+d//32
++                if other >= 8:
++                    raise ValueError('unexpected word pair')
++                lines += ['    t=(%s%d^%s%d)&mask;' % (value,word,value,other),
++                          '    %s%d^=t; %s%d^=t;' % (value,word,value,other)]
++    if loaded != set(range(14)):
++        raise ValueError('all14 groups must be consumed')
++    lines += ['    return SigmaWalkPair131{P131{{a0,a1,a2,a3,a4&7u}},P131{{b0,b1,b2,b3,b4&7u}}};',
++              '#endif','}','#endif']
++    return lines
++
++
++def emitSelectedSharedWalkPair(nets):
++    return (['#if ECC_PACKED_VECTOR_SIGMA'] + emitVectorSharedWalkPair(nets) +
++            ['#else'] + emitSharedWalkPair(nets) + ['#endif'])
++
++
+ def generate():
+     nets = networks()
+     lines = ['// Generated by codegen/gensigma.py; included inside eccPacked131.',
+@@ -192,7 +278,7 @@
+              '#define ECC_SIGMA_INV_STORAGE alignas(32) static const', '#endif']
+     walk, nw = emitGroup(nets, 'sigmaWalkNetwork131', list(range(3,11)), 8)
+     inv, ni = emitGroup(nets, 'sigmaInvNetwork131', [16,32,65], 4)
+-    lines += walk + inv + emitWalkPair(nets) + emitSharedWalkPair(nets) + ['#undef ECC_SIGMA_WALK_STORAGE', '#undef ECC_SIGMA_INV_STORAGE']
++    lines += walk + inv + emitWalkPair(nets) + emitSelectedSharedWalkPair(nets) + ['#undef ECC_SIGMA_WALK_STORAGE', '#undef ECC_SIGMA_INV_STORAGE']
+     return '\n'.join(lines)+'\n', (nw,ni)
+ 
+ 
+--- a/ecc2k130/include/packed131.h
++++ b/ecc2k130/include/packed131.h
+@@ -16,6 +16,15 @@
+ #endif
+ #if ECC_PACKED_SHARED_SIGMA && ECC_PACKED_WEIGHTED_PREFIX != 2
+ #error "ECC_PACKED_SHARED_SIGMA requires weighted-prefix mode 2"
++#endif
++#ifndef ECC_PACKED_VECTOR_SIGMA
++#define ECC_PACKED_VECTOR_SIGMA 0
++#endif
++#if ECC_PACKED_VECTOR_SIGMA != 0 && ECC_PACKED_VECTOR_SIGMA != 1
++#error "ECC_PACKED_VECTOR_SIGMA must be 0 or 1"
++#endif
++#if ECC_PACKED_VECTOR_SIGMA && (!ECC_PACKED_SHARED_SIGMA || ECC_PACKED_WEIGHTED_PREFIX != 2)
++#error "ECC_PACKED_VECTOR_SIGMA requires shared sigma and weighted-prefix mode 2"
+ #endif
+ #ifndef ECC_PACKED_CLMAD
+ #define ECC_PACKED_CLMAD 0
+@@ -270,6 +279,9 @@
+ #endif
+ #if ECC_PACKED_SHARED_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
+ #error "ECC_PACKED_SHARED_SIGMA requires the walk permutation network"
++#endif
++#if ECC_PACKED_VECTOR_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
++#error "ECC_PACKED_VECTOR_SIGMA requires the walk permutation network"
+ #endif
+ #if ECC_PACKED_PERM_SIGMA
+ #include "packedsigma131.h"
+--- a/ecc2k130/include/packedengine.cuh
++++ b/ecc2k130/include/packedengine.cuh
+@@ -189,6 +189,7 @@
+         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
+         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
+         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
++        printf("packed vector sigma: %d\n", ECC_PACKED_VECTOR_SIGMA);
+         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
+         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
+--- a/ecc2k130/include/packedsigma131.h
++++ b/ecc2k130/include/packedsigma131.h
+@@ -1632,6 +1632,436 @@
+ #endif
+ }
+ #endif
++#if ECC_PACKED_VECTOR_SIGMA
++#if ECC_PACKED_SHARED_SIGMA
++#ifdef __CUDACC__
++using SigmaWalkVector131 = uint4;
++static __shared__ __align__(16) uint4 sigmaWalkSharedVector131Masks[14][8];
++#else
++struct alignas(16) SigmaWalkVector131 { uint32_t x,y,z,w; };
++#endif
++static_assert(sizeof(SigmaWalkVector131)==16, "four mask words without padding");
++static ECC_HD void initSigmaWalkShared131() {
++#ifdef __CUDA_ARCH__
++    for (unsigned i=threadIdx.x; i<448u; i+=blockDim.x) {
++        const uint32_t value=__ldg(&sigmaWalkNetwork131Masks[i/8][i%8]);
++        uint4 &destination=sigmaWalkSharedVector131Masks[i/32][i%8];
++        // Separate scalar members have distinct writers. Do not
++        // use a read-modify-write vector store for one component.
++        switch ((i/8)%4) {
++        case 0: destination.x=value; break;
++        case 1: destination.y=value; break;
++        case 2: destination.z=value; break;
++        default: destination.w=value; break;
++        }
++    }
++    __syncthreads();
++#endif
++}
++static ECC_BIG SigmaWalkPair131 sigmaWalkNetworkPairShared131(P131 a,P131 b,int index) {
++#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
++    const int exponents[] = {3,4,5,6,7,8,9,10};
++    for (int i=0;i<exponents[index];i++) { a=sqr131(a); b=sqr131(b); }
++    return SigmaWalkPair131{a,b};
++#else
++    uint32_t a0=a.v[0], a1=a.v[1], a2=a.v[2], a3=a.v[3], a4=a.v[4];
++    uint32_t b0=b.v[0], b1=b.v[1], b2=b.v[2], b3=b.v[3], b4=b.v[4];
++    uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
++#ifdef __CUDA_ARCH__
++    const uint4 group0=sigmaWalkSharedVector131Masks[0][index];
++#else
++    const SigmaWalkVector131 group0{sigmaWalkNetwork131Masks[0][index],sigmaWalkNetwork131Masks[1][index],sigmaWalkNetwork131Masks[2][index],sigmaWalkNetwork131Masks[3][index]};
++#endif
++    mask=group0.x;
++    t=((a0 >> 1)^a0)&mask;
++    a0^=t^(t << 1);
++    t=((b0 >> 1)^b0)&mask;
++    b0^=t^(t << 1);
++    mask=group0.y;
++    t=((a1 >> 1)^a1)&mask;
++    a1^=t^(t << 1);
++    t=((b1 >> 1)^b1)&mask;
++    b1^=t^(t << 1);
++    mask=group0.z;
++    t=((a2 >> 1)^a2)&mask;
++    a2^=t^(t << 1);
++    t=((b2 >> 1)^b2)&mask;
++    b2^=t^(t << 1);
++    mask=group0.w;
++    t=((a3 >> 1)^a3)&mask;
++    a3^=t^(t << 1);
++    t=((b3 >> 1)^b3)&mask;
++    b3^=t^(t << 1);
++#ifdef __CUDA_ARCH__
++    const uint4 group1=sigmaWalkSharedVector131Masks[1][index];
++#else
++    const SigmaWalkVector131 group1{sigmaWalkNetwork131Masks[4][index],sigmaWalkNetwork131Masks[5][index],sigmaWalkNetwork131Masks[6][index],sigmaWalkNetwork131Masks[7][index]};
++#endif
++    mask=group1.x;
++    t=((a4 >> 1)^a4)&mask;
++    a4^=t^(t << 1);
++    t=((b4 >> 1)^b4)&mask;
++    b4^=t^(t << 1);
++    mask=group1.y;
++    t=((a0 >> 2)^a0)&mask;
++    a0^=t^(t << 2);
++    t=((b0 >> 2)^b0)&mask;
++    b0^=t^(t << 2);
++    mask=group1.z;
++    t=((a1 >> 2)^a1)&mask;
++    a1^=t^(t << 2);
++    t=((b1 >> 2)^b1)&mask;
++    b1^=t^(t << 2);
++    mask=group1.w;
++    t=((a2 >> 2)^a2)&mask;
++    a2^=t^(t << 2);
++    t=((b2 >> 2)^b2)&mask;
++    b2^=t^(t << 2);
++#ifdef __CUDA_ARCH__
++    const uint4 group2=sigmaWalkSharedVector131Masks[2][index];
++#else
++    const SigmaWalkVector131 group2{sigmaWalkNetwork131Masks[8][index],sigmaWalkNetwork131Masks[9][index],sigmaWalkNetwork131Masks[10][index],sigmaWalkNetwork131Masks[11][index]};
++#endif
++    mask=group2.x;
++    t=((a3 >> 2)^a3)&mask;
++    a3^=t^(t << 2);
++    t=((b3 >> 2)^b3)&mask;
++    b3^=t^(t << 2);
++    mask=group2.y;
++    t=((a4 >> 2)^a4)&mask;
++    a4^=t^(t << 2);
++    t=((b4 >> 2)^b4)&mask;
++    b4^=t^(t << 2);
++    mask=group2.z;
++    t=((a0 >> 4)^a0)&mask;
++    a0^=t^(t << 4);
++    t=((b0 >> 4)^b0)&mask;
++    b0^=t^(t << 4);
++    mask=group2.w;
++    t=((a1 >> 4)^a1)&mask;
++    a1^=t^(t << 4);
++    t=((b1 >> 4)^b1)&mask;
++    b1^=t^(t << 4);
++#ifdef __CUDA_ARCH__
++    const uint4 group3=sigmaWalkSharedVector131Masks[3][index];
++#else
++    const SigmaWalkVector131 group3{sigmaWalkNetwork131Masks[12][index],sigmaWalkNetwork131Masks[13][index],sigmaWalkNetwork131Masks[14][index],sigmaWalkNetwork131Masks[15][index]};
++#endif
++    mask=group3.x;
++    t=((a2 >> 4)^a2)&mask;
++    a2^=t^(t << 4);
++    t=((b2 >> 4)^b2)&mask;
++    b2^=t^(t << 4);
++    mask=group3.y;
++    t=((a3 >> 4)^a3)&mask;
++    a3^=t^(t << 4);
++    t=((b3 >> 4)^b3)&mask;
++    b3^=t^(t << 4);
++    mask=group3.z;
++    t=((a4 >> 4)^a4)&mask;
++    a4^=t^(t << 4);
++    t=((b4 >> 4)^b4)&mask;
++    b4^=t^(t << 4);
++    mask=group3.w;
++    t=((a0 >> 8)^a0)&mask;
++    a0^=t^(t << 8);
++    t=((b0 >> 8)^b0)&mask;
++    b0^=t^(t << 8);
++#ifdef __CUDA_ARCH__
++    const uint4 group4=sigmaWalkSharedVector131Masks[4][index];
++#else
++    const SigmaWalkVector131 group4{sigmaWalkNetwork131Masks[16][index],sigmaWalkNetwork131Masks[17][index],sigmaWalkNetwork131Masks[18][index],sigmaWalkNetwork131Masks[19][index]};
++#endif
++    mask=group4.x;
++    t=((a1 >> 8)^a1)&mask;
++    a1^=t^(t << 8);
++    t=((b1 >> 8)^b1)&mask;
++    b1^=t^(t << 8);
++    mask=group4.y;
++    t=((a2 >> 8)^a2)&mask;
++    a2^=t^(t << 8);
++    t=((b2 >> 8)^b2)&mask;
++    b2^=t^(t << 8);
++    mask=group4.z;
++    t=((a3 >> 8)^a3)&mask;
++    a3^=t^(t << 8);
++    t=((b3 >> 8)^b3)&mask;
++    b3^=t^(t << 8);
++    mask=group4.w;
++    t=((a4 >> 8)^a4)&mask;
++    a4^=t^(t << 8);
++    t=((b4 >> 8)^b4)&mask;
++    b4^=t^(t << 8);
++#ifdef __CUDA_ARCH__
++    const uint4 group5=sigmaWalkSharedVector131Masks[5][index];
++#else
++    const SigmaWalkVector131 group5{sigmaWalkNetwork131Masks[20][index],sigmaWalkNetwork131Masks[21][index],sigmaWalkNetwork131Masks[22][index],sigmaWalkNetwork131Masks[23][index]};
++#endif
++    mask=group5.x;
++    t=((a1 >> 16)^a1)&mask;
++    a1^=t^(t << 16);
++    t=((b1 >> 16)^b1)&mask;
++    b1^=t^(t << 16);
++    mask=group5.y;
++    t=((a2 >> 16)^a2)&mask;
++    a2^=t^(t << 16);
++    t=((b2 >> 16)^b2)&mask;
++    b2^=t^(t << 16);
++    mask=group5.z;
++    t=((a3 >> 16)^a3)&mask;
++    a3^=t^(t << 16);
++    t=((b3 >> 16)^b3)&mask;
++    b3^=t^(t << 16);
++    mask=group5.w;
++    t=((a4 >> 16)^a4)&mask;
++    a4^=t^(t << 16);
++    t=((b4 >> 16)^b4)&mask;
++    b4^=t^(t << 16);
++#ifdef __CUDA_ARCH__
++    const uint4 group6=sigmaWalkSharedVector131Masks[6][index];
++#else
++    const SigmaWalkVector131 group6{sigmaWalkNetwork131Masks[24][index],sigmaWalkNetwork131Masks[25][index],sigmaWalkNetwork131Masks[26][index],sigmaWalkNetwork131Masks[27][index]};
++#endif
++    mask=group6.x;
++    t=(a2^a3)&mask;
++    a2^=t; a3^=t;
++    t=(b2^b3)&mask;
++    b2^=t; b3^=t;
++    mask=group6.y;
++    t=(a4^a5)&mask;
++    a4^=t; a5^=t;
++    t=(b4^b5)&mask;
++    b4^=t; b5^=t;
++    mask=group6.z;
++    t=(a4^a6)&mask;
++    a4^=t; a6^=t;
++    t=(b4^b6)&mask;
++    b4^=t; b6^=t;
++    mask=group6.w;
++    t=(a5^a7)&mask;
++    a5^=t; a7^=t;
++    t=(b5^b7)&mask;
++    b5^=t; b7^=t;
++#ifdef __CUDA_ARCH__
++    const uint4 group7=sigmaWalkSharedVector131Masks[7][index];
++#else
++    const SigmaWalkVector131 group7{sigmaWalkNetwork131Masks[28][index],sigmaWalkNetwork131Masks[29][index],sigmaWalkNetwork131Masks[30][index],sigmaWalkNetwork131Masks[31][index]};
++#endif
++    mask=group7.x;
++    t=(a0^a4)&mask;
++    a0^=t; a4^=t;
++    t=(b0^b4)&mask;
++    b0^=t; b4^=t;
++    mask=group7.y;
++    t=(a1^a5)&mask;
++    a1^=t; a5^=t;
++    t=(b1^b5)&mask;
++    b1^=t; b5^=t;
++    mask=group6.z;
++    t=(a2^a6)&mask;
++    a2^=t; a6^=t;
++    t=(b2^b6)&mask;
++    b2^=t; b6^=t;
++    mask=group6.w;
++    t=(a3^a7)&mask;
++    a3^=t; a7^=t;
++    t=(b3^b7)&mask;
++    b3^=t; b7^=t;
++    mask=group7.z;
++    t=(a0^a2)&mask;
++    a0^=t; a2^=t;
++    t=(b0^b2)&mask;
++    b0^=t; b2^=t;
++    mask=group7.w;
++    t=(a1^a3)&mask;
++    a1^=t; a3^=t;
++    t=(b1^b3)&mask;
++    b1^=t; b3^=t;
++    mask=group6.z;
++    t=(a4^a6)&mask;
++    a4^=t; a6^=t;
++    t=(b4^b6)&mask;
++    b4^=t; b6^=t;
++    mask=group6.w;
++    t=(a5^a7)&mask;
++    a5^=t; a7^=t;
++    t=(b5^b7)&mask;
++    b5^=t; b7^=t;
++#ifdef __CUDA_ARCH__
++    const uint4 group8=sigmaWalkSharedVector131Masks[8][index];
++#else
++    const SigmaWalkVector131 group8{sigmaWalkNetwork131Masks[32][index],sigmaWalkNetwork131Masks[33][index],sigmaWalkNetwork131Masks[34][index],sigmaWalkNetwork131Masks[35][index]};
++#endif
++    mask=group8.x;
++    t=(a0^a1)&mask;
++    a0^=t; a1^=t;
++    t=(b0^b1)&mask;
++    b0^=t; b1^=t;
++    mask=group8.y;
++    t=(a2^a3)&mask;
++    a2^=t; a3^=t;
++    t=(b2^b3)&mask;
++    b2^=t; b3^=t;
++    mask=group6.y;
++    t=(a4^a5)&mask;
++    a4^=t; a5^=t;
++    t=(b4^b5)&mask;
++    b4^=t; b5^=t;
++    mask=group8.z;
++    t=((a0 >> 16)^a0)&mask;
++    a0^=t^(t << 16);
++    t=((b0 >> 16)^b0)&mask;
++    b0^=t^(t << 16);
++    mask=group8.w;
++    t=((a1 >> 16)^a1)&mask;
++    a1^=t^(t << 16);
++    t=((b1 >> 16)^b1)&mask;
++    b1^=t^(t << 16);
++#ifdef __CUDA_ARCH__
++    const uint4 group9=sigmaWalkSharedVector131Masks[9][index];
++#else
++    const SigmaWalkVector131 group9{sigmaWalkNetwork131Masks[36][index],sigmaWalkNetwork131Masks[37][index],sigmaWalkNetwork131Masks[38][index],sigmaWalkNetwork131Masks[39][index]};
++#endif
++    mask=group9.x;
++    t=((a2 >> 16)^a2)&mask;
++    a2^=t^(t << 16);
++    t=((b2 >> 16)^b2)&mask;
++    b2^=t^(t << 16);
++    mask=group9.y;
++    t=((a3 >> 16)^a3)&mask;
++    a3^=t^(t << 16);
++    t=((b3 >> 16)^b3)&mask;
++    b3^=t^(t << 16);
++    mask=group5.w;
++    t=((a4 >> 16)^a4)&mask;
++    a4^=t^(t << 16);
++    t=((b4 >> 16)^b4)&mask;
++    b4^=t^(t << 16);
++    mask=group9.z;
++    t=((a0 >> 8)^a0)&mask;
++    a0^=t^(t << 8);
++    t=((b0 >> 8)^b0)&mask;
++    b0^=t^(t << 8);
++    mask=group9.w;
++    t=((a1 >> 8)^a1)&mask;
++    a1^=t^(t << 8);
++    t=((b1 >> 8)^b1)&mask;
++    b1^=t^(t << 8);
++#ifdef __CUDA_ARCH__
++    const uint4 group10=sigmaWalkSharedVector131Masks[10][index];
++#else
++    const SigmaWalkVector131 group10{sigmaWalkNetwork131Masks[40][index],sigmaWalkNetwork131Masks[41][index],sigmaWalkNetwork131Masks[42][index],sigmaWalkNetwork131Masks[43][index]};
++#endif
++    mask=group10.x;
++    t=((a2 >> 8)^a2)&mask;
++    a2^=t^(t << 8);
++    t=((b2 >> 8)^b2)&mask;
++    b2^=t^(t << 8);
++    mask=group10.y;
++    t=((a3 >> 8)^a3)&mask;
++    a3^=t^(t << 8);
++    t=((b3 >> 8)^b3)&mask;
++    b3^=t^(t << 8);
++    mask=group4.w;
++    t=((a4 >> 8)^a4)&mask;
++    a4^=t^(t << 8);
++    t=((b4 >> 8)^b4)&mask;
++    b4^=t^(t << 8);
++    mask=group10.z;
++    t=((a0 >> 4)^a0)&mask;
++    a0^=t^(t << 4);
++    t=((b0 >> 4)^b0)&mask;
++    b0^=t^(t << 4);
++    mask=group10.w;
++    t=((a1 >> 4)^a1)&mask;
++    a1^=t^(t << 4);
++    t=((b1 >> 4)^b1)&mask;
++    b1^=t^(t << 4);
++#ifdef __CUDA_ARCH__
++    const uint4 group11=sigmaWalkSharedVector131Masks[11][index];
++#else
++    const SigmaWalkVector131 group11{sigmaWalkNetwork131Masks[44][index],sigmaWalkNetwork131Masks[45][index],sigmaWalkNetwork131Masks[46][index],sigmaWalkNetwork131Masks[47][index]};
++#endif
++    mask=group11.x;
++    t=((a2 >> 4)^a2)&mask;
++    a2^=t^(t << 4);
++    t=((b2 >> 4)^b2)&mask;
++    b2^=t^(t << 4);
++    mask=group11.y;
++    t=((a3 >> 4)^a3)&mask;
++    a3^=t^(t << 4);
++    t=((b3 >> 4)^b3)&mask;
++    b3^=t^(t << 4);
++    mask=group3.z;
++    t=((a4 >> 4)^a4)&mask;
++    a4^=t^(t << 4);
++    t=((b4 >> 4)^b4)&mask;
++    b4^=t^(t << 4);
++    mask=group11.z;
++    t=((a0 >> 2)^a0)&mask;
++    a0^=t^(t << 2);
++    t=((b0 >> 2)^b0)&mask;
++    b0^=t^(t << 2);
++    mask=group11.w;
++    t=((a1 >> 2)^a1)&mask;
++    a1^=t^(t << 2);
++    t=((b1 >> 2)^b1)&mask;
++    b1^=t^(t << 2);
++#ifdef __CUDA_ARCH__
++    const uint4 group12=sigmaWalkSharedVector131Masks[12][index];
++#else
++    const SigmaWalkVector131 group12{sigmaWalkNetwork131Masks[48][index],sigmaWalkNetwork131Masks[49][index],sigmaWalkNetwork131Masks[50][index],sigmaWalkNetwork131Masks[51][index]};
++#endif
++    mask=group12.x;
++    t=((a2 >> 2)^a2)&mask;
++    a2^=t^(t << 2);
++    t=((b2 >> 2)^b2)&mask;
++    b2^=t^(t << 2);
++    mask=group12.y;
++    t=((a3 >> 2)^a3)&mask;
++    a3^=t^(t << 2);
++    t=((b3 >> 2)^b3)&mask;
++    b3^=t^(t << 2);
++    mask=group12.z;
++    t=((a4 >> 2)^a4)&mask;
++    a4^=t^(t << 2);
++    t=((b4 >> 2)^b4)&mask;
++    b4^=t^(t << 2);
++    mask=group12.w;
++    t=((a0 >> 1)^a0)&mask;
++    a0^=t^(t << 1);
++    t=((b0 >> 1)^b0)&mask;
++    b0^=t^(t << 1);
++#ifdef __CUDA_ARCH__
++    const uint4 group13=sigmaWalkSharedVector131Masks[13][index];
++#else
++    const SigmaWalkVector131 group13{sigmaWalkNetwork131Masks[52][index],sigmaWalkNetwork131Masks[53][index],sigmaWalkNetwork131Masks[54][index],sigmaWalkNetwork131Masks[55][index]};
++#endif
++    mask=group13.x;
++    t=((a1 >> 1)^a1)&mask;
++    a1^=t^(t << 1);
++    t=((b1 >> 1)^b1)&mask;
++    b1^=t^(t << 1);
++    mask=group13.y;
++    t=((a2 >> 1)^a2)&mask;
++    a2^=t^(t << 1);
++    t=((b2 >> 1)^b2)&mask;
++    b2^=t^(t << 1);
++    mask=group13.z;
++    t=((a3 >> 1)^a3)&mask;
++    a3^=t^(t << 1);
++    t=((b3 >> 1)^b3)&mask;
++    b3^=t^(t << 1);
++    mask=group13.w;
++    t=((a4 >> 1)^a4)&mask;
++    a4^=t^(t << 1);
++    t=((b4 >> 1)^b4)&mask;
++    b4^=t^(t << 1);
++    return SigmaWalkPair131{P131{{a0,a1,a2,a3,a4&7u}},P131{{b0,b1,b2,b3,b4&7u}}};
++#endif
++}
++#endif
++#else
+ #if ECC_PACKED_SHARED_SIGMA
+ #ifdef __CUDACC__
+ static __shared__ uint32_t sigmaWalkShared131Masks[56][8];
+@@ -2234,5 +2664,6 @@
+ #endif
+ }
+ #endif
++#endif
+ #undef ECC_SIGMA_WALK_STORAGE
+ #undef ECC_SIGMA_INV_STORAGE
+--- a/ecc2k130/src/testpackedcuda.cu
++++ b/ecc2k130/src/testpackedcuda.cu
+@@ -293,6 +293,7 @@
+     printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
+     printf("packed arithmetic native carryless multiply: %d\n",ECC_PACKED_CLMAD);
+     printf("packed arithmetic weighted prefix: %d\n",ECC_PACKED_WEIGHTED_PREFIX);
++    printf("packed arithmetic vector sigma: %d\n",ECC_PACKED_VECTOR_SIGMA);
+     const int selected[] = {0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
+     std::vector<P131> input;
+     std::vector<int> powers;
+--- a/ecc2k130/src/testsharedsigmacuda.cu
++++ b/ecc2k130/src/testsharedsigmacuda.cu
+@@ -39,21 +39,54 @@
+     return !std::memcmp(a.v, b.v, sizeof a.v) && (a.v[4] & ~7u) == 0;
+ }
+ 
++#if ECC_PACKED_SHARED_SIGMA
++// Read and poison the actual physical table order. The host expectation
++// below is built independently from logical row/index pairs.
++static __device__ uint32_t probeSharedWord(unsigned word) {
++#if ECC_PACKED_VECTOR_SIGMA
++    const uint4 value=eccPacked131::sigmaWalkSharedVector131Masks[word/32][(word/4)%8];
++    switch(word%4) {case 0:return value.x;case 1:return value.y;case 2:return value.z;default:return value.w;}
++#else
++    return eccPacked131::sigmaWalkShared131Masks[word/8][word%8];
++#endif
++}
++static __device__ void poisonSharedWord(unsigned word,uint32_t value) {
++#if ECC_PACKED_VECTOR_SIGMA
++    uint4 &destination=eccPacked131::sigmaWalkSharedVector131Masks[word/32][(word/4)%8];
++    switch(word%4) {
++    case 0:destination.x=value;break;
++    case 1:destination.y=value;break;
++    case 2:destination.z=value;break;
++    default:destination.w=value;break;
++    }
++#else
++    eccPacked131::sigmaWalkShared131Masks[word/8][word%8]=value;
++#endif
++}
++
++#endif
++
+ __global__ void sigmaStorageProbe(const P131 *a, const P131 *b, const int *powers,
+                                   Outputs *out, unsigned *tables, int n) {
+     using namespace eccPacked131;
+ #if ECC_PACKED_SHARED_SIGMA
+     // A prior shared allocation must not accidentally satisfy the copy test.
+-    for (unsigned word = threadIdx.x; word < 448; word += blockDim.x)
+-        sigmaWalkShared131Masks[word / 8][word % 8] =
+-            ~__ldg(&sigmaWalkNetwork131Masks[word / 8][word % 8]);
++    for (unsigned word = threadIdx.x; word < 448; word += blockDim.x) {
++#if ECC_PACKED_VECTOR_SIGMA
++        const unsigned logicalRow=(word/32)*4+word%4;
++        const unsigned logicalIndex=(word/4)%8;
++#else
++        const unsigned logicalRow=word/8, logicalIndex=word%8;
++#endif
++        poisonSharedWord(word,~__ldg(&sigmaWalkNetwork131Masks[logicalRow][logicalIndex]));
++    }
+     __syncthreads();
+     initSigmaWalkShared131();
+ #endif
+     // Include entirely inactive blocks: table setup precedes every return.
+     for (unsigned word = threadIdx.x; word < 448; word += blockDim.x) {
+ #if ECC_PACKED_SHARED_SIGMA
+-        const unsigned value = sigmaWalkShared131Masks[word / 8][word % 8];
++        const unsigned value = probeSharedWord(word);
+ #else
+         const unsigned value = __ldg(&sigmaWalkNetwork131Masks[word / 8][word % 8]);
+ #endif
+@@ -115,6 +148,18 @@
+     unsigned expectedTable[56][8];
+     static_assert(sizeof(eccPacked131::sigmaWalkNetwork131Masks) == sizeof(expectedTable), "56x8 mask table required");
+     checked(cudaMemcpyFromSymbol(expectedTable, eccPacked131::sigmaWalkNetwork131Masks, sizeof(expectedTable)));
++    unsigned expectedPhysical[448];
++    bool assigned[448]{};
++    for (unsigned row=0;row<56;++row) for (unsigned index=0;index<8;++index) {
++#if ECC_PACKED_VECTOR_SIGMA
++        const unsigned destination=32*(row/4)+4*index+row%4;
++#else
++        const unsigned destination=8*row+index;
++#endif
++        need(destination<448 && !assigned[destination],"independent physical table bijection");
++        assigned[destination]=true; expectedPhysical[destination]=expectedTable[row][index];
++    }
++    need(std::all_of(assigned,assigned+448,[](bool x){return x;}),"all448 physical cells expected");
+     unsigned scenarios = 0, pairs = 0, blocksChecked = 0;
+     const int sizes[] = {0, 1, 3, 255, 256, 257, 6240};
+     for (int n : sizes) {
+@@ -139,7 +184,7 @@
+             checked(cudaMemcpy(hostTables.data(), deviceTables, tableWords * sizeof(unsigned), cudaMemcpyDeviceToHost));
+             need(hostTables.front() == 0xa5a5a5a5u && hostTables.back() == 0xa5a5a5a5u, "table output guards");
+             for (int block = 0; block < blocks; ++block)
+-                need(!std::memcmp(hostTables.data() + 1 + size_t(block) * 448, expectedTable, sizeof expectedTable), "every block's complete mask snapshot");
++                need(!std::memcmp(hostTables.data() + 1 + size_t(block) * 448, expectedPhysical, sizeof expectedPhysical), "every block's complete physical mask snapshot");
+             for (int i = 0; i < n; ++i) {
+                 const auto &v = hostOut[i + 1];
+                 const size_t source = mixed ? (size_t(i) % 8) * 780 + size_t(i) / 8 : size_t(i);
+@@ -157,6 +202,7 @@
+     checked(cudaFree(da)); checked(cudaFree(db)); checked(cudaFree(dp));
+     need(scenarios == 21 && pairs == 21036 && blocksChecked == 114, "scenario/pair/block counters");
+     std::printf("packed shared sigma probe: %d\n", ECC_PACKED_SHARED_SIGMA);
++    std::printf("packed vector sigma probe: %d\n", ECC_PACKED_VECTOR_SIGMA);
+     std::printf("PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing\n");
+     std::printf("PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks\n");
+     return 0;

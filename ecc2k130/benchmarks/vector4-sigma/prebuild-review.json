@@ -1,0 +1,154 @@
+{
+  "valid": true,
+  "status": "Eight CPU-only deployment builds and complete native/source gates passed; no runtime calibration or GPU execution occurred",
+  "prebuildSha256": "740f1b2300d1070d9f44d50ef33d874d4f8d1c47d1d9b91d06a28c301a99ce76",
+  "prebuildBytes": 3889712,
+  "returnReceiptSha256": "c11074baf55eb6e0263810ca2974442143ef0a38ef031d82b411c204722fdcfe",
+  "driverFreezeSha256": "7bd95d57a210c336a37c0053d66c5c8cddd6f9417b5966bab2457172d3ce81a0",
+  "driverSha256": "e79952054f2dd5c7b2b372ec6bc1a806564c1d125fe53a8d44c56ecf2b19d840",
+  "sourceFiles": 160,
+  "sourceHashes": {
+    "control": "5b629d80a63f176807f05e8fc202aee0968291ec7691923a233752b9e9705c21",
+    "vector1": "5b629d80a63f176807f05e8fc202aee0968291ec7691923a233752b9e9705c21"
+  },
+  "runtimeTestDelta": [
+    "src/testpackedcuda.cu",
+    "src/testsharedsigmacuda.cu"
+  ],
+  "buildCount": 8,
+  "compilerVersion": "13.3.73",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "binaries": {
+    "control": "6d34c5b89d55c5dd6929ef1ea5c1491b8166d87fc4e131edf3556defdbb74b86",
+    "vector1": "cb811b960216068a7c5759a6011157aebae41acf0312986b1e449d3e2938e607"
+  },
+  "arithmeticBinaries": {
+    "control": "58018c37760387d85ff4bbcaa978909e2ee5cd95c0064eb7473cae06db8416c4",
+    "vector1": "adb9181adef77d9497297201f255b0b347d86c3d27e66c7d83448398713d8b4b"
+  },
+  "storageBinaries": {
+    "control": "71c39283f8f34096c64b64ea0fa7974d37b380253422a438059970c1f57c05da",
+    "vector1": "5d9ed14dfb41b5fb5a5904fe8c4e68a33c157bcafe414bb6b47390d84856965a"
+  },
+  "sharedProbeBinaries": {
+    "control": "cd08ae35b53e85ac017c7162493998c3f27858c841c1e8b83eae071bc24ac2a7",
+    "vector1": "15aa741d05796503862416f6867d6d1efc2c66de6e5ff70c44dee0144e92cf2f"
+  },
+  "fullNativeCode": {
+    "control": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4528,
+          "encodingSha256": "54a0d24cd6f8d1d9fe625c4f2e583b002af42dde15cb5b7b3375be84f666a837",
+          "instructionTextSha256": "027000298030fc60ac1a18acde77dc1c91097090670630bde843cdc984d311ce"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "7a8b014039f649ccb16639be7c02fb4a537570f346f4b30449462ec38c60a71a",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    },
+    "vector1": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4408,
+          "encodingSha256": "c8e8635da4e4ed859ba094c45a5b1e4878c76bbe76bd67283bcbb77bc860674c",
+          "instructionTextSha256": "053533f35ebd2fa63c7b927ab5934768fc6f90f126b08d86bd39354256c0ebcc"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "7a8b014039f649ccb16639be7c02fb4a537570f346f4b30449462ec38c60a71a",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    }
+  },
+  "compilerWarnings": [],
+  "runtimeResources": {
+    "control": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": null
+    },
+    "vector1": {
+      "registers": 104,
+      "localBytes": 0,
+      "sharedBytes": null
+    }
+  },
+  "calibrationPending": true,
+  "compiledSharedBytes": {
+    "control": 2816,
+    "vector1": 2816
+  },
+  "storageGate": {
+    "cases": 128,
+    "records": 297344
+  },
+  "sharedProbeGate": {
+    "scenarios": 21,
+    "inputPairs": 21036,
+    "blockSnapshots": 114,
+    "maskWords": 51072
+  },
+  "checkpointGate": {
+    "children": 28,
+    "successes": 26,
+    "rejections": 2,
+    "comparisons": 12,
+    "threads": [
+      8,
+      256,
+      257
+    ]
+  },
+  "scalarWalks": 6160384,
+  "workers": 385024,
+  "updatesPerTimedRow": 201863462912,
+  "normalizedStates": [
+    64,
+    16384
+  ],
+  "goalBillionScalarUpdatesPerSecond": 26,
+  "scope": "This receipt author also prepared the driver; root provides the separate independent predispatch review.",
+  "limits": [
+    "CPU native/resource evidence does not establish device correctness, runtime shared-memory API values, bank conflicts, occupancy or speed.",
+    "The first untimed calibrations, all arithmetic/storage/shared-probe/integration/state/checkpoint gates and benchmark phases are prepared but have not executed.",
+    "No GPU request was made by this phase."
+  ]
+}
