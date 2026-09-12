@@ -61,6 +61,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
+                  expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1", packedCompactState=None,
                   expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX), packedWeightedPrefix=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
@@ -94,6 +95,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
              f"PACKED_CLMAD={client.PACKED_CLMAD}",
+             f"PACKED_COMPACT_STATE={client.PACKED_COMPACT_STATE}",
              f"PACKED_WEIGHTED_PREFIX={client.PACKED_WEIGHTED_PREFIX}",
              f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
@@ -131,6 +133,25 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
         pairedSigmaPass = "PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing"
         if result["deviceArithmetic"]["output"].splitlines().count(pairedSigmaPass) != 1:
             raise RuntimeError("packed GPU paired Frobenius validation did not complete exactly once")
+        if client.PACKED_STATE_TILE == "256":
+            # This exercises actual load/store accessors for either tiled layout.
+            # It runs before client integration and every timed sample.
+            storageCommand = list(result["deviceArithmetic"]["command"])
+            storageCommand[1] = "test-packed-storage-cuda"
+            storage = result["deviceStorage"] = run(storageCommand, 300)
+            if storage["returncode"]:
+                raise RuntimeError("packed GPU storage validation failed")
+            storageModes = re.findall(r"^packed storage compact state: (.*)$", storage["output"], re.MULTILINE)
+            storageBatches = re.findall(r"^packed storage batch: (.*)$", storage["output"], re.MULTILINE)
+            actualCompact = storageModes[0] if len(storageModes) == 1 else None
+            storage.update(expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1",
+                           packedCompactState=(actualCompact == "1") if actualCompact in ("0", "1") else None)
+            storagePass = (f"PASS: 128 GPU storage cases, {18584 * batch} records, "
+                           "independent physical images and logical reads with canaries")
+            if (storageModes != [client.PACKED_COMPACT_STATE] or storageBatches != [str(batch)]
+                    or [line for line in storage["output"].splitlines() if line.startswith("PASS:")] != [storagePass]):
+                raise RuntimeError("packed GPU storage identity or complete validation counts disagree")
+            storage.update(cases=128, records=18584 * batch)
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:
@@ -146,6 +167,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
         if not result["benchmark"]["valid"]:
             raise RuntimeError("throughput benchmark failed or completed scalar counts disagree")
         result["packedStateTile"] = benchmarkSamples[0]["packedStateTile"]
+        result["packedCompactState"] = benchmarkSamples[0]["packedCompactState"]
 
         # Time real collection with CPU trail replay disabled only after the
         # integration test has independently replayed reports. Each sample
