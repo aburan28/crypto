@@ -1222,6 +1222,98 @@ fn batch_raw_target_minus_points_x_filtered(
     points.len()
 }
 
+/// Compute both `target - point` and `target - (-point)` while sharing the
+/// denominator product and inverse for the two signs of every affine point.
+/// Results retain positive-then-negative order for each input point. Infinity
+/// has only one sign, matching `CompactPairTable::signed_point_at_slot`.
+fn batch_raw_target_minus_signed_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[RawPoint],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, bool, (u64, u64))>,
+    scratch: &mut RawBatchScratch,
+) -> usize {
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        let mut attempted = 0usize;
+        for (index, &point) in points.iter().enumerate() {
+            let positive_key = raw_compact_key(raw_neg_point(point));
+            attempted += 1;
+            if table.might_contain_x(positive_key.0) {
+                output.push((index, false, positive_key));
+            }
+            if point.is_some() {
+                let negative_key = raw_compact_key(point);
+                attempted += 1;
+                if table.might_contain_x(negative_key.0) {
+                    output.push((index, true, negative_key));
+                }
+            }
+        }
+        return attempted;
+    };
+
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes_and_inverses.resize(points.len(), 0);
+    let mut product = 1u64;
+    for (index, point) in points.iter().enumerate() {
+        let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
+        scratch.denominators[index] = denominator;
+        if denominator != 0 {
+            scratch.prefixes_and_inverses[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    for index in (0..points.len()).rev() {
+        let denominator = scratch.denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        let inverse = mul_raw(curve, inverse_product, scratch.prefixes_and_inverses[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+        scratch.prefixes_and_inverses[index] = inverse;
+    }
+
+    let mut attempted = 0usize;
+    for (index, &point) in points.iter().enumerate() {
+        let Some((x, y)) = point else {
+            let key = raw_compact_key(target);
+            attempted += 1;
+            if table.might_contain_x(key.0) {
+                output.push((index, false, key));
+            }
+            continue;
+        };
+        if scratch.denominators[index] == 0 {
+            for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
+                let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
+                attempted += 1;
+                if table.might_contain_x(key.0) {
+                    output.push((index, negative, key));
+                }
+            }
+            continue;
+        }
+
+        let inverse = scratch.prefixes_and_inverses[index];
+        for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
+            let lambda = mul_raw(curve, numerator, inverse);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let key_x = x3 + 1;
+            attempted += 1;
+            if !table.might_contain_x(key_x) {
+                continue;
+            }
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            output.push((index, negative, (key_x, y3)));
+        }
+    }
+    attempted
+}
+
 fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> Vec<(u64, u64)> {
     let mut denominators = vec![0u64; pairs.len()];
     let mut prefixes = vec![0u64; pairs.len()];
@@ -1469,7 +1561,8 @@ fn lookup_signed_expanded_pair(
 struct PairPairChunkScratch {
     points: Vec<RawPoint>,
     signed_slots: Vec<usize>,
-    rests: Vec<(usize, (u64, u64))>,
+    separate_rests: Vec<(usize, (u64, u64))>,
+    dual_rests: Vec<(usize, bool, (u64, u64))>,
     batch: RawBatchScratch,
 }
 
@@ -1480,6 +1573,7 @@ struct PairPairChunkResult {
     x_filter_rejections: usize,
     exact_table_misses: usize,
     batch_inversions: usize,
+    shared_denominator_inputs: usize,
 }
 
 /// Evaluate one fixed cursor interval of the signed-expanded pair table.
@@ -1496,14 +1590,22 @@ fn pair_pair_cursor_chunk(
     start_slot: usize,
     cursor_start: usize,
     cursor_end: usize,
+    dual_sign: bool,
     scratch: &mut PairPairChunkScratch,
 ) -> PairPairChunkResult {
     let slots = quotient_pairs.slots();
     scratch.points.clear();
     scratch.signed_slots.clear();
-    scratch.points.reserve(cursor_end - cursor_start);
-    scratch.signed_slots.reserve(cursor_end - cursor_start);
-    for cursor in cursor_start..cursor_end {
+    let step = if dual_sign { 2 } else { 1 };
+    if dual_sign {
+        assert_eq!(cursor_start & 1, 0);
+        assert_eq!(cursor_end & 1, 0);
+    }
+    scratch.points.reserve((cursor_end - cursor_start) / step);
+    scratch
+        .signed_slots
+        .reserve((cursor_end - cursor_start) / step);
+    for cursor in (cursor_start..cursor_end).step_by(step) {
         let slot = if let Some(order) = slot_order {
             let ordered = start_slot + cursor / 2;
             order[if ordered >= order.len() {
@@ -1514,7 +1616,7 @@ fn pair_pair_cursor_chunk(
         } else {
             (start_slot + cursor / 2) & (slots - 1)
         };
-        let negative = cursor & 1 == 1;
+        let negative = !dual_sign && cursor & 1 == 1;
         if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative) {
             scratch.points.push(point);
             scratch.signed_slots.push(slot << 1 | usize::from(negative));
@@ -1523,21 +1625,38 @@ fn pair_pair_cursor_chunk(
     if scratch.points.is_empty() {
         return PairPairChunkResult::default();
     }
-    let attempted = batch_raw_target_minus_points_x_filtered(
-        curve,
-        target,
-        &scratch.points,
-        quotient_pairs,
-        &mut scratch.rests,
-        &mut scratch.batch,
-    );
+    let attempted = if dual_sign {
+        batch_raw_target_minus_signed_points_x_filtered(
+            curve,
+            target,
+            &scratch.points,
+            quotient_pairs,
+            &mut scratch.dual_rests,
+            &mut scratch.batch,
+        )
+    } else {
+        batch_raw_target_minus_points_x_filtered(
+            curve,
+            target,
+            &scratch.points,
+            quotient_pairs,
+            &mut scratch.separate_rests,
+            &mut scratch.batch,
+        )
+    };
+    let filtered_hits = if dual_sign {
+        scratch.dual_rests.len()
+    } else {
+        scratch.separate_rests.len()
+    };
     let mut result = PairPairChunkResult {
         additions: attempted,
-        x_filter_rejections: attempted - scratch.rests.len(),
+        x_filter_rejections: attempted - filtered_hits,
         batch_inversions: usize::from(target.is_some()),
+        shared_denominator_inputs: if dual_sign { scratch.points.len() } else { 0 },
         ..PairPairChunkResult::default()
     };
-    for &(position, rest_key) in &scratch.rests {
+    let mut consume = |position: usize, negative: bool, rest_key: (u64, u64)| {
         let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
             rest_key,
             modulus,
@@ -1546,12 +1665,13 @@ fn pair_pair_cursor_chunk(
             label_to_index,
         ) else {
             result.exact_table_misses += 1;
-            continue;
+            return false;
         };
         let signed_slot = scratch.signed_slots[position];
+        let negative = negative ^ (signed_slot & 1 == 1);
         let (left_indices, left_labels) = quotient_pairs.signed_labels_at_slot(
             signed_slot >> 1,
-            signed_slot & 1 == 1,
+            negative,
             modulus,
             point_labels,
             label_to_index,
@@ -1570,7 +1690,20 @@ fn pair_pair_cursor_chunk(
                 right_labels[1],
             ],
         ));
-        break;
+        true
+    };
+    if dual_sign {
+        for &(position, negative, rest_key) in &scratch.dual_rests {
+            if consume(position, negative, rest_key) {
+                break;
+            }
+        }
+    } else {
+        for &(position, rest_key) in &scratch.separate_rests {
+            if consume(position, false, rest_key) {
+                break;
+            }
+        }
     }
     result
 }
@@ -2111,6 +2244,8 @@ fn main() {
         .ok()
         .map(|value| value.parse().unwrap())
         .unwrap_or(1);
+    let dual_sign_pair_scan =
+        std::env::var("KIC_DISABLE_DUAL_SIGN_PAIR_SCAN").as_deref() != Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -2540,6 +2675,7 @@ fn main() {
         let mut query_batch_inversions = 0usize;
         let mut query_parallel_waves = 0usize;
         let mut query_parallel_chunks = 0usize;
+        let mut query_shared_sign_denominator_inputs = 0usize;
         let mut rank_targeted_trials = 0usize;
         let mut rank_targeted_nonincrements = 0usize;
         let mut rank_target_slot_index_builds = 0usize;
@@ -2701,6 +2837,7 @@ fn main() {
                                     start_slot,
                                     cursor_start,
                                     (cursor_start + width).min(cursors),
+                                    dual_sign_pair_scan,
                                     scratch,
                                 )
                             })
@@ -2713,6 +2850,8 @@ fn main() {
                             query_x_filter_rejections += result.x_filter_rejections;
                             query_exact_table_misses += result.exact_table_misses;
                             query_batch_inversions += result.batch_inversions;
+                            query_shared_sign_denominator_inputs +=
+                                result.shared_denominator_inputs;
                             if witness.is_none() {
                                 if let Some((indices, labels)) = result.witness {
                                     witness = Some((indices.to_vec(), labels.to_vec()));
@@ -3178,6 +3317,8 @@ fn main() {
                 "query_parallel_threads":if query_mode.pair_pair_parallel() {rayon::current_num_threads()} else {1},
                 "query_parallel_waves":query_parallel_waves,
                 "query_parallel_chunks":query_parallel_chunks,
+                "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
+                "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "target_mode":target_mode.name(),
                 "target_walk_additions":target_walk_additions,
                 "target_walk_restarts":target_walk_restarts,
@@ -3426,6 +3567,63 @@ mod packed_tests {
                 assert!(table.get(*key).is_some());
             }
         }
+    }
+
+    #[test]
+    fn dual_sign_batch_matches_separate_signed_inputs() {
+        let curve = KoblitzCurve::new(1, 23).unwrap();
+        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(71u64)));
+        let points: Vec<_> = (1..=48u64)
+            .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
+            .collect();
+        let mut signed_points = Vec::with_capacity(points.len() * 2);
+        let mut signed_positions = Vec::with_capacity(points.len() * 2);
+        for (position, &point) in points.iter().enumerate() {
+            signed_points.push(point);
+            signed_positions.push((position, false));
+            if point.is_some() {
+                signed_points.push(raw_neg_point(point));
+                signed_positions.push((position, true));
+            }
+        }
+
+        let keys = batch_raw_target_minus_keys(&curve, target, &signed_points);
+        let mut table = CompactPairTable::with_capacity(keys.len() * 2, true, (1 << 23) + 1);
+        for &key in &keys {
+            table.insert(key, QuotientPairWitness::default());
+        }
+
+        let mut separate = Vec::new();
+        let mut separate_scratch = RawBatchScratch::default();
+        let separate_attempted = batch_raw_target_minus_points_x_filtered(
+            &curve,
+            target,
+            &signed_points,
+            &table,
+            &mut separate,
+            &mut separate_scratch,
+        );
+        let separate_normalized: Vec<_> = separate
+            .into_iter()
+            .map(|(position, key)| {
+                let (point_position, negative) = signed_positions[position];
+                (point_position, negative, key)
+            })
+            .collect();
+
+        let mut dual = Vec::new();
+        let mut dual_scratch = RawBatchScratch::default();
+        let dual_attempted = batch_raw_target_minus_signed_points_x_filtered(
+            &curve,
+            target,
+            &points,
+            &table,
+            &mut dual,
+            &mut dual_scratch,
+        );
+        assert_eq!(dual_attempted, separate_attempted);
+        assert_eq!(dual, separate_normalized);
+        assert_eq!(dual_scratch.denominators.len() * 2, signed_points.len());
     }
 
     #[test]
