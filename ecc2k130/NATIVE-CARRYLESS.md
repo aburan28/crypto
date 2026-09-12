@@ -2,8 +2,9 @@
 
 `PACKED_CLMAD=1` selects native carryless multiplication for the packed CUDA
 backend. Its general default is zero. The RTX PRO 6000 preset enables it
-with CUDA 13.3.1, batch 32, 256 threads per block, minimum two blocks and
-256-worker state tiles.
+with CUDA 13.3.1, batch 16, 256 threads per block, minimum two blocks and
+256-worker state tiles. [BATCH-TUNING.md](BATCH-TUNING.md) records the later
+13.206088 B/s batch comparison. The arithmetic comparison below used batch 32.
 
 The device implementation uses `clmad.lo.u64` and `clmad.hi.u64` with zero
 addends. Both halves of each raw 64-bit product feed the existing three-leaf

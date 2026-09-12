@@ -1,4 +1,10 @@
-# Why one RTX PRO 6000 cannot reach 20 B iterations/s
+# Historical software-arithmetic throughput model
+
+This document retains the CUDA 13.0 software-arithmetic probes and model.
+The later [native carryless implementation](NATIVE-CARRYLESS.md) changes the
+instruction mix, and [batch tuning](BATCH-TUNING.md) measured 13.206088 B
+complete scalar updates/s. The conclusions below describe the earlier path
+and do not establish a universal limit for the current implementation.
 
 Measured on 2026-09-10 with [benchmarks/hardware-limits/probe.cu](benchmarks/hardware-limits/probe.cu)
 on one RTX PRO 6000 Blackwell Server Edition (driver 580.95.05, CUDA 13.0.48,

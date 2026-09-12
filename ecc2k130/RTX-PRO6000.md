@@ -13,9 +13,9 @@ collection runs; it writes `build/rtx-pro6000-audit.json`. Both allocate one
 RTX PRO 6000 Blackwell Server Edition through Modal. Set `MODAL=/path/to/modal`
 when using a specific client environment.
 
-The preset selects CUDA 13.3.1, the packed backend, batch 32, 256 threads per
-block, minBlocks 2, 192,512 worker threads, 1,024 steps per launch and 32 launches.
-The selected worker count is twice the automatic count on the tested 188-SM
+The preset selects CUDA 13.3.1, the packed backend, batch 16, 256 threads per
+block, minBlocks 2, 385,024 worker threads, 1,024 steps per launch and 32 launches.
+The selected worker count is four times the automatic count on the tested 188-SM
 server GPU. Set `RTX_PRO6000_WORKERS=0` to use automatic workers, or provide
 an explicit count to either Make target. Existing checkpoints still require
 their original worker and batch counts; benchmark and audit presets do not
@@ -43,7 +43,31 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Native carryless preset comparison
+## Batch-16 preset comparison
+
+The [controlled batch comparison](benchmarks/batch-tuning/comparison.json)
+keeps native carryless arithmetic, the compiler, tile size and logical work
+fixed on one GPU. Three alternating paired repetitions measured:
+
+| Workload | Previous batch-32 median B/s | Batch-16 median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 8.673447 | **13.206088** | **52.2588%** |
+| DP34 collection | 8.508196 | **12.936060** | **52.0423%** |
+
+Every timed sample completed 201,863,462,912 scalar updates. All six
+collection multisets matched, with 5,149 records and zero drops. The five
+screened configurations passed arithmetic, full client, normalized-state,
+checkpoint and runtime geometry checks. [BATCH-TUNING.md](BATCH-TUNING.md)
+records ranges, screening results and the batch-specific checkpoint boundary.
+The separate [public Make-command audit](benchmarks/batch-tuning/native-audit.json)
+measured **13.283756 B/s** benchmark median (13.151469–13.434216) and
+**12.813626 B/s** collection median (12.800253–12.815682). All six samples
+completed the same scalar budget with batch 16 and 385,024 workers; each
+collection recorded 5,149 points with zero drops. This validates the updated
+command on a separate allocation. The paired comparison above estimates
+the preset's gain.
+
+## Historical native carryless preset comparison
 
 The [controlled native comparison](benchmarks/clmad/comparison.json) measured
 **8.703518 B complete scalar updates/s**, versus **7.110440 B/s** for the

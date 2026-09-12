@@ -323,18 +323,18 @@ class GeneratedProductBuildTests(unittest.TestCase):
             self.assertEqual(tune['results'][0]['packedGeneratedProduct'], mode == '1')
 
     def audit_fixture(self, mode, arithmetic=None, failed_phase=None, failed_marker=None,
-                      clmad='0', clmad_arithmetic=None):
+                      clmad='0', clmad_arithmetic=None, batch=32):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
             env = environment('1', mode, clmad=clmad)
-            workers = 192512
+            workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
                 text = (f'packed direct reduction: 1\n'
                         f'packed generated product: {marker}\n'
                         'packed state tile: 0\n'
                         f'packed native carryless multiply: {clmad}\n'
-                        f'backend cuda-packed131: {workers} threads x 32 slots x 1 lanes = {workers * 32} walks, '
+                        f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {workers * batch} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
                         'finished: 6000.000 M it/s, 1 distinguished points (0 verified against the reference, 0 dropped)\n')
@@ -344,7 +344,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
             function('measureBench', env)
             client = SimpleNamespace(**env)
             client.REMOTE = directory
-            client.buildFor = lambda *a, **k: (True, 'built')
+            client.buildFor = lambda requested, *a, **k: (requested == batch, 'built')
             client.benchmarkIdentity = lambda **k: {'packedGeneratedProduct': mode == '1'}
             client.volume = SimpleNamespace(commit=lambda: None)
             def run(command, **kwargs):
@@ -364,7 +364,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
             audit_env = dict(client=client, re=re, json=json, time=time, tempfile=tempfile,
                              print=lambda *a, **k: None, subprocess=SimpleNamespace(run=run), Path=path)
             function('checkScalarCounts', audit_env, 'packed_audit.py')
-            result = function('runAudit', audit_env, 'packed_audit.py')(repeats=1, workers=workers)
+            result = function('runAudit', audit_env, 'packed_audit.py')(repeats=1, workers=workers, batch=batch)
             return result, commands
 
     def test_native_audit_forwards_flag_and_records_expected_and_actual_modes(self):
@@ -377,6 +377,17 @@ class GeneratedProductBuildTests(unittest.TestCase):
                 self.assertEqual(row['packedGeneratedProduct'], mode == '1')
             self.assertEqual(result['collection'][0]['corpusBytes'], 32)
             self.assertEqual(result['benchmark']['samples'][0]['reportedIterations'], 201863462912)
+
+    def test_native_audit_forwards_nondefault_batch(self):
+        for batch in (8, 16):
+            result, commands = self.audit_fixture('1', clmad='1', batch=batch)
+            self.assertTrue(result['valid'], result.get('error'))
+            self.assertEqual(result['batch'], batch)
+            self.assertIn('BATCH=' + str(batch), commands[0])
+            for sample in [*result['benchmark']['samples'], *result['collection']]:
+                self.assertEqual(sample['actualBatch'], batch)
+                self.assertEqual(sample['requestedBatch'], batch)
+                self.assertEqual(sample['reportedIterations'], 201863462912)
 
     def test_arithmetic_identity_failure_stops_before_integration_or_timing(self):
         for mode in ('0', '1'):
