@@ -2169,10 +2169,14 @@ pub struct PairSumTable {
     /// ([`Self::recover_pair`]).  Hits are rare by construction, so that
     /// scan is paid about once per relation rather than once per probe.
     ///
-    /// This is exact, not a filter: the bucket index covers the top bits
-    /// of the key and a rest covers all the others, so a rest that
-    /// matches in the right bucket is the key.  There are no false
-    /// positives to spend recovery scans on.
+    /// A rest is the key's hash narrowed to a word, so two keys in one
+    /// bucket collide with probability `2⁻³²` and a bucket holds about
+    /// sixteen: a lookup is wrong about one time in `2²⁸`.  Wrong in the
+    /// harmless direction — never a false *negative*, so nothing is
+    /// missed, and a false positive only spends a recovery scan that
+    /// comes back empty.  Recovery checks the group itself
+    /// (`target − P_i` is a base point or it is not), so what the table
+    /// returns is right whatever the rest said.
     rests: Vec<u32>,
     /// `pack()` of each base point to its index, for recovering the
     /// summands of a compact hit.  `|F|` entries, not `|F|²`.
@@ -2233,15 +2237,13 @@ impl PairSumTable {
         pairs * 4 + buckets * 4 + pairs / 2
     }
 
-    /// Bucket bits for the compact table.  At least `key_bits − 32`, so
-    /// the rest a bucket leaves over always fits a `u32` and the
-    /// representation stays exact; otherwise about one bucket per
-    /// sixteen pairs, which keeps a bucket's run inside a cache line.
+    /// Bucket bits for the compact table: about one bucket per sixteen
+    /// pairs, which keeps a bucket's run inside a cache line, capped so
+    /// the index itself stays small.
     fn compact_bucket_bits(pairs: u128, degree: u32) -> u32 {
         let key_bits = degree + 2;
-        let by_width = key_bits.saturating_sub(32);
         let by_run = (128 - (pairs.max(1) >> 4).leading_zeros()).max(1);
-        by_width.max(by_run).min(key_bits).min(30)
+        by_run.min(key_bits).min(26)
     }
 
     /// [`Self::build`] with an explicit ceiling on the entries.
@@ -2358,7 +2360,6 @@ impl PairSumTable {
         // scan.  The pair sums are recomputed rather than held between
         // the passes — holding them would cost the eight bytes a pair
         // that this representation exists to avoid.
-        let mask = (1u64 << bucket_shift) - 1;
         let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
         let each_row = |i: usize, f: &mut dyn FnMut(u64)| {
             let mut sums = Vec::with_capacity(n_points - i);
@@ -2397,7 +2398,7 @@ impl PairSumTable {
                 // once by the bucket's cursor and inside the run the
                 // counting pass measured for that bucket.
                 unsafe {
-                    *(slots as *mut u32).add(slot) = (key & mask) as u32;
+                    *(slots as *mut u32).add(slot) = Self::compact_rest(key);
                 }
                 let h = (pair_filter_hash(key) & present_mask) as usize;
                 present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
@@ -2424,6 +2425,15 @@ impl PairSumTable {
             present,
             present_mask,
         })
+    }
+
+    /// The word a key is stored as.  A hash rather than the key's low
+    /// bits, so the representation does not depend on the bucket width
+    /// and works at any degree the single-word arithmetic reaches — at
+    /// `n = 61` a packed sum is 63 bits and no affordable bucket index
+    /// leaves 32 of them over.
+    fn compact_rest(key: u64) -> u32 {
+        pair_filter_hash(key) as u32
     }
 
     /// Whether this table keeps the summands of each pair.
@@ -2474,15 +2484,16 @@ impl PairSumTable {
 
     /// [`Self::lookup`] for a key the filter has already admitted.
     #[inline]
-    /// Whether the compact table holds this key.  Exact: the bucket
-    /// pins the key's top bits and the rest pins every other one.
+    /// Whether the compact table may hold this key: never a false
+    /// negative, and a false positive about one time in `2²⁸`, which
+    /// costs a recovery scan that comes back empty.
     fn compact_contains(&self, key: u64) -> bool {
         let bucket = (key >> self.bucket_shift) as usize;
         let Some(&lo) = self.bucket_start.get(bucket) else {
             return false;
         };
         let hi = self.bucket_start[bucket + 1];
-        let rest = (key & ((1u64 << self.bucket_shift) - 1)) as u32;
+        let rest = Self::compact_rest(key);
         // A run holds about sixteen rests, which is one cache line: a
         // scan beats a search and spares the build any ordering.
         self.rests[lo as usize..hi as usize].contains(&rest)
@@ -8335,8 +8346,18 @@ mod tests {
 
     #[test]
     fn the_compact_table_answers_exactly_as_the_full_one() {
-        let kc = KoblitzCurve::new(0, 19).unwrap();
-        let fb = build_subgroup_orbit_factor_base(&kc, 3, 300).unwrap();
+        // Degree 61 is the one that matters for the rest's width: a
+        // packed sum there is 63 bits, more than a bucket index can
+        // leave over, so the rest has to be a hash rather than the key's
+        // own low bits and the two tables must still agree.
+        for (degree, points) in [(19u32, 300usize), (31, 400), (61, 400)] {
+            the_compact_table_agrees_at(degree, points);
+        }
+    }
+
+    fn the_compact_table_agrees_at(degree: u32, points: usize) {
+        let kc = KoblitzCurve::new(0, degree).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
         let full = PairSumTable::build(&kc, &fb).unwrap();
         // A budget below the full table's width but above the compact
         // one's forces the compact representation of the same base.
@@ -8389,7 +8410,10 @@ mod tests {
                 checked_hits += 1;
             }
         }
-        assert!(checked_hits > 0 && checked_misses > 0, "the test checked only one side");
+        assert!(
+            checked_hits > 0 && checked_misses > 0,
+            "degree {degree}: the test checked only one side"
+        );
     }
 
     #[test]

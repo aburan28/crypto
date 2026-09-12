@@ -1536,18 +1536,19 @@ so the descent's `2r/|F|²` is directly proportional to the width of a
 stored pair. **Halving the bytes halves the descent.**
 
 Sixteen bytes is `(packed sum, i, j)`. The sum is what a lookup asks
-about; `i` and `j` are what it answers with. But a bucket index already
-pins the top bits of a sum, and the bits it leaves over fit a `u32` for
-every degree this pipeline reaches — so four bytes hold the whole key
-**exactly**, with no filter and no false positives. What that gives up is
-the answer: a hit knows a decomposition exists but not of what.
+about; `i` and `j` are what it answers with. Four bytes hold a bucketed
+hash of the sum — never a false negative, and a false positive about one
+time in `2²⁸`. What that gives up is the answer: a hit knows a
+decomposition may exist but not of what.
 
-The answer is recoverable. `target − P_i` is a base point exactly when
-`i` is a summand, so one `|F|`-long scan finds the pair. Hits are rare by
-construction — that is what a decomposition oracle *is* — so the scan is
-paid about once per relation rather than once per probe. Storage falls
-from sixteen bytes to about four and a half, counting the bucket index
-and the presence filter.
+The answer is recoverable, and recovering it is what makes the
+approximation safe. `target − P_i` is a base point exactly when `i` is a
+summand, so one `|F|`-long scan finds the pair — and the scan asks the
+group, not the table, so a false positive costs a scan that comes back
+empty and never a wrong answer. Hits are rare by construction — that is
+what a decomposition oracle *is* — so the scan is paid about once per
+relation rather than once per probe. Storage falls from sixteen bytes to
+about four and a half, counting the bucket index and the presence filter.
 
 At four gibibytes that is a base of 42302 points instead of 23169, and
 3.33 times fewer descent probes.
@@ -1591,3 +1592,57 @@ eight bytes a pair the representation exists to avoid.
 It costs 66.3 s for 664.8 million pairs against 6.7 s for 116.5 million —
 100 ns a pair against 57. That factor is the second pass, and it is now
 the largest single item in a wide precompute.
+
+## Degree 61: a 48-bit subgroup, and the boundary moves
+
+`K_0/F_{2^61}` has a 48-bit prime-order subgroup,
+`r = 162 888 033 982 417` — 7.7 times the degree-53 rung and the largest
+this family offers inside single-word arithmetic. On a 36112-point
+compact-table base, 32 targets:
+
+| | |
+|---|---|
+| factor base | 36112 points / 296 columns |
+| precompute | 79.0 s |
+| descent | 53.1 ms/target, 213 108 probes |
+| signed-Frobenius ρ | 3.248 s/target, 2 263 934 steps |
+| charged ρ/IC | **61.2** |
+| amortised ρ/IC | **1.29** |
+
+32 of 32 solved, 32 of 32 confirmed by the ρ walk, and **all three
+verdicts true** — charged, amortised and whole-process — at 32 targets.
+
+That last point is worth dwelling on, because the earlier projection said
+otherwise. The reach table two sections up put the charged ratio at 5.1
+at 48 bits and said the whole-process class would need about 315 targets
+there. Measured: **61.2, and 32 targets sufficed.** The projection
+under-predicted by a factor of twelve.
+
+It was not wrong when it was written. It used the constants of a
+15264-point base with a full scan, and since then every one of those
+constants has moved: collection reached its `2r/|F|²` floor, two setup
+costs left the precompute, and the compact table more than doubled the
+base. A projection is only as good as the implementation it was measured
+on, and this one was overtaken three times in an afternoon.
+
+### Where the boundary is now
+
+The charged ratio falls as `√r`, so from 61.2 at 48 bits the charged
+advantage runs out around
+
+```text
+    48 + 2·log₂(61.2) ≈ 60 bits
+```
+
+against the 52 the earlier table gave. That is an extrapolation from one
+point along a theoretical slope, and it should be read as one — the two
+wide-base rungs actually measured (75.2 at 45 bits, 61.2 at 48) fall more
+slowly than `√r` predicts, which would put the boundary further out
+still. The slope is used because it is the one the cost laws predict, not
+because two points confirmed it.
+
+None of this touches the exponent. The descent still costs `2r/|F|²`
+probes and ρ still costs `√(πr/2)/√(2n)` steps; linear still loses to a
+square root, and the boundary is still a boundary. What moved is where it
+sits, and it moved because a constant that looked fixed turned out not to
+be — four times in a row.

@@ -470,12 +470,13 @@ trial dearer.
 
 `PairSumTable::build` keeps a base inside 4 GiB, and past that budget it
 changes representation rather than refusing. The full table stores each
-pair as `(packed sum, i, j)`, sixteen bytes; the **compact** one stores
-only the part of the sum its bucket does not already pin, which fits a
-`u32` exactly — no filter, no false positives — and recovers the summands
-of a hit by one `|F|`-long scan, since `target − P_i` is a base point
-exactly when `i` is a summand. Hits are rare, so that scan is paid about
-once per relation rather than once per probe.
+pair as `(packed sum, i, j)`, sixteen bytes; the **compact** one stores a
+bucketed hash of the sum in a `u32` — never a false negative, a false
+positive about one time in `2²⁸` — and recovers the summands of a hit by
+one `|F|`-long scan, since `target − P_i` is a base point exactly when
+`i` is a summand. That scan asks the group rather than the table, so a
+false positive costs an empty scan and never a wrong answer. Hits are
+rare, so it is paid about once per relation rather than once per probe.
 
 At a fixed budget `B` the base is `|F| = √(2B / bytes per pair)`, and the
 descent needs `2r/|F|²` probes, so the width of a stored pair is
@@ -484,6 +485,16 @@ sixteen is a base of 42302 points instead of 23169 at 4 GiB, and 3.3
 times fewer probes. Below the budget nothing changes: a base that fits
 with its summands keeps them. Below even the compact size the build
 still refuses with a number instead of an allocation.
+
+`docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
+offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
+a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
+against ρ's 3.248 s — charged 61.2, amortised 1.29, and all three
+verdicts true at 32 targets.
+`docs/ic/runs/koblitz-degree61-20260912.json` records it, and says what
+it does to the earlier reach projection: that projection put the charged
+ratio at 5.1 at 48 bits and wanted 315 targets, because it was measured
+on constants that have since moved three times.
 
 `docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
 36464-point compact base: the descent falls from 50.4 ms a target to

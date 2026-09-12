@@ -90,7 +90,8 @@
   "build": "A counting sort in two parallel passes, no comparison sort: the bucket of a key is known before any key is compared. Measured 66.3 s for 664.8 million pairs at 36464 points, against 6.7 s for 116.5 million at 15264 -- 100 ns a pair against 57, the cost of making two passes over the pairs instead of one.",
   "compact_bytes_per_pair_asymptotic": 4.5,
   "full_bytes_per_pair": 16,
-  "why_exact": "The bucket index covers the top bits of a packed sum and the rest covers every other one, so a rest found in the right bucket is the key. There are no false positives; what is given up is the summands, recovered on a hit by one |F|-long scan. Hits are rare by construction, so that scan is paid about once per relation rather than once per probe.",
+  "why_a_hash_and_not_the_key": "The key's own low bits would be exact where a bucket index leaves 32 of them over, which holds to degree 59 but not 61: a packed sum there is 63 bits and no affordable bucket index leaves enough. Hashing costs a collision rate of 2^-32 an entry and works at every degree the single-word arithmetic reaches.",
+  "why_exact": "A rest is the key's hash narrowed to a word, so a lookup is wrong about one time in 2^28 -- never a false negative, and a false positive only spends a recovery scan that comes back empty. Recovery asks the group, not the table: target - P_i is a base point exactly when i is a summand, so what the table returns is right whatever the rest said. What is given up is the summands, and hits are rare by construction, so that scan is paid about once per relation rather than once per probe.",
   "widest_base_at_4_gibibytes": {
    "compact": 42302,
    "full": 23169,
