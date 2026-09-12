@@ -52,6 +52,36 @@ class ClmadGuardTests(unittest.TestCase):
         self.assertIn('clmad.lo.u64', result.stdout)
         self.assertIn('clmad.hi.u64', result.stdout)
 
+    def test_addend_fusion_defaults_to_the_existing_product(self):
+        default = self.preprocess('-DECC_PACKED_CLMAD=1')
+        disabled = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_FUSED=0')
+        self.assertEqual(default.returncode, 0, default.stderr)
+        self.assertEqual(disabled.returncode, 0, disabled.stderr)
+        self.assertEqual(default.stdout, disabled.stdout)
+
+    def test_addend_fusion_rejects_invalid_or_disabled_native_modes(self):
+        for value in ('-1', '3'):
+            result = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_FUSED=' + value)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('ECC_PACKED_CLMAD_FUSED must be 0, 1 or 2', result.stderr)
+        for value in ('1', '2'):
+            result = self.preprocess('-DECC_PACKED_CLMAD=0', '-DECC_PACKED_CLMAD_FUSED=' + value)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('ECC_PACKED_CLMAD_FUSED requires ECC_PACKED_CLMAD', result.stderr)
+
+    def test_addend_fusion_host_simulation_and_device_selection(self):
+        for value in ('1', '2'):
+            flags = ['-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_FUSED=' + value]
+            host = self.preprocess(*flags)
+            self.assertEqual(host.returncode, 0, host.stderr)
+            self.assertIn('clmadLo64', host.stdout)
+            self.assertNotIn('clmad.lo.u64', host.stdout)
+            device = self.preprocess(*flags, '-D__CUDACC__', '-D__CUDACC_VER_MAJOR__=13',
+                                     '-D__CUDACC_VER_MINOR__=3', '-D__CUDA_ARCH__=800')
+            self.assertEqual(device.returncode, 0, device.stderr)
+            self.assertIn('clmad.lo.u64 %0, %1, %2, %3;', device.stdout)
+            self.assertIn('clmad.hi.u64 %0, %1, %2, %3;', device.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()

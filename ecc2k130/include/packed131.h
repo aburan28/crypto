@@ -14,6 +14,15 @@
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
 #error "ECC_PACKED_CLMAD requires sm_80 or newer"
 #endif
+#ifndef ECC_PACKED_CLMAD_FUSED
+#define ECC_PACKED_CLMAD_FUSED 0
+#endif
+#if ECC_PACKED_CLMAD_FUSED < 0 || ECC_PACKED_CLMAD_FUSED > 2
+#error "ECC_PACKED_CLMAD_FUSED must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_CLMAD_FUSED && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_CLMAD_FUSED requires ECC_PACKED_CLMAD"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
@@ -64,8 +73,49 @@ ECC_HD void clmul64(uint32_t r[4], const uint32_t a[2], const uint32_t b[2]) {
 #endif
 }
 
+#if ECC_PACKED_CLMAD_FUSED
+ECC_HD uint64_t clmadLo64(uint64_t a, uint64_t b, uint64_t c) {
+#if defined(__CUDA_ARCH__)
+    uint64_t r;
+    asm("clmad.lo.u64 %0, %1, %2, %3;" : "=l"(r) : "l"(a), "l"(b), "l"(c));
+    return r;
+#else
+    uint32_t aa[2]={uint32_t(a),uint32_t(a>>32)};
+    uint32_t bb[2]={uint32_t(b),uint32_t(b>>32)}, r[4];
+    clmul64(r,aa,bb);
+    return (uint64_t(r[0]) | (uint64_t(r[1])<<32)) ^ c;
+#endif
+}
+ECC_HD uint64_t clmadHi64(uint64_t a, uint64_t b, uint64_t c) {
+#if defined(__CUDA_ARCH__)
+    uint64_t r;
+    asm("clmad.hi.u64 %0, %1, %2, %3;" : "=l"(r) : "l"(a), "l"(b), "l"(c));
+    return r;
+#else
+    uint32_t aa[2]={uint32_t(a),uint32_t(a>>32)};
+    uint32_t bb[2]={uint32_t(b),uint32_t(b>>32)}, r[4];
+    clmul64(r,aa,bb);
+    return (uint64_t(r[2]) | (uint64_t(r[3])<<32)) ^ c;
+#endif
+}
+#endif
+
 /* 4 x 4 words -> 8 words, Karatsuba again: 3 clmul64 = 9 clmul32. */
 ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
+#if ECC_PACKED_CLMAD_FUSED
+    const uint64_t a0=uint64_t(a[0])|(uint64_t(a[1])<<32);
+    const uint64_t a1=uint64_t(a[2])|(uint64_t(a[3])<<32);
+    const uint64_t b0=uint64_t(b[0])|(uint64_t(b[1])<<32);
+    const uint64_t b1=uint64_t(b[2])|(uint64_t(b[3])<<32);
+    const uint64_t p0=clmadLo64(a0,b0,0), p1=clmadHi64(a0,b0,0);
+    const uint64_t p2=clmadLo64(a1,b1,0), p3=clmadHi64(a1,b1,0);
+    const uint64_t r1=clmadLo64(a0^a1,b0^b1,p0^p1^p2);
+    const uint64_t r2=clmadHi64(a0^a1,b0^b1,p1^p2^p3);
+    r[0]=uint32_t(p0); r[1]=uint32_t(p0>>32);
+    r[2]=uint32_t(r1); r[3]=uint32_t(r1>>32);
+    r[4]=uint32_t(r2); r[5]=uint32_t(r2>>32);
+    r[6]=uint32_t(p3); r[7]=uint32_t(p3>>32);
+#else
     uint32_t lo[4], hi[4], mid[4], as[2], bs[2];
     clmul64(lo, a, b);
     clmul64(hi, a + 2, b + 2);
@@ -81,6 +131,7 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
     r[5] = hi[1] ^ mid[3];
     r[6] = hi[2];
     r[7] = hi[3];
+#endif
 }
 
 struct P131 { uint32_t v[5]; };
@@ -102,6 +153,22 @@ ECC_HD P131 reverse131(const P131 &a) {
     return r;
 }
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
+#if ECC_PACKED_CLMAD_FUSED == 2
+    clmul128(c,a.v,b.v);
+    const uint64_t a0=uint64_t(a.v[0])|(uint64_t(a.v[1])<<32);
+    const uint64_t a1=uint64_t(a.v[2])|(uint64_t(a.v[3])<<32);
+    const uint64_t b0=uint64_t(b.v[0])|(uint64_t(b.v[1])<<32);
+    const uint64_t b1=uint64_t(b.v[2])|(uint64_t(b.v[3])<<32);
+    const uint64_t at=a.v[4]&7u, bt=b.v[4]&7u;
+    uint64_t c2=uint64_t(c[4])|(uint64_t(c[5])<<32);
+    uint64_t c3=uint64_t(c[6])|(uint64_t(c[7])<<32);
+    c2=clmadLo64(a0,bt,clmadLo64(b0,at,c2));
+    c3=clmadLo64(a1,bt,clmadLo64(b1,at,clmadHi64(a0,bt,clmadHi64(b0,at,c3))));
+    const uint64_t c4=clmadLo64(at,bt,clmadHi64(a1,bt,clmadHi64(b1,at,0)));
+    c[4]=uint32_t(c2); c[5]=uint32_t(c2>>32);
+    c[6]=uint32_t(c3); c[7]=uint32_t(c3>>32);
+    c[8]=uint32_t(c4);
+#else
     clmul128(c,a.v,b.v); c[8]=0;
 #pragma unroll
     for(int k=0;k<3;k++) {
@@ -114,6 +181,7 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         }
         c[8]^=(b.v[4]&ma)<<k;
     }
+#endif
 }
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;
