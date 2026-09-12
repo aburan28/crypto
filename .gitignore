@@ -46,3 +46,9 @@ gpu/btcpuzzle/tune_kangaroo
 
 # Local convenience link to the index-calculus executable.
 /ic
+
+# gpu/macaulay generated headers, test binary and CUDA bench binary
+gpu/macaulay/params.h
+gpu/macaulay/vectors.h
+gpu/macaulay/test_cpu_main
+gpu/macaulay/bench
