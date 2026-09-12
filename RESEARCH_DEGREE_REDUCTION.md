@@ -186,9 +186,11 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R2′** | Symmetrisation's Macaulay width crosses below elimination's only at **`ℓ = 6`** | **`supported`** (exact, no solver) | EXP-R2: `cols(9ℓ−3, 3)` vs `cols(3ℓ, 6)` — 576 vs 64 at `ℓ=2`, 12384 vs 9949 at `ℓ=5`, 22152 vs 31180 at `ℓ=6`, and the gap widens to 7× by `ℓ=10`. Below `ℓ=6` symmetrisation trades 3× the variables for ½ the degree and **loses**. |
 | **R3** | **Adding degree falls (L4) as explicit generators lowers `D*`** at matched targets | **`supported`** | EXP-R3, iteration 2. All three families, 3 operating points each, 8 matched targets per cell: `D*` strictly lower wherever there was headroom. Generic (Random) family **4.00 → 2.00** on 8/8 targets at `N = 12, 14`. `worsened = 0` everywhere, as the ideal-membership invariant requires. |
 | **R3′** | The `D*` drop **survives its own cost** — extraction must climb to degree 3, so the net saving must still be positive | **regime-dependent** | EXP-R3: net `+1.44` bits mean on Random (positive at every `N`, seeds 7/11/23 give +1.44/+1.45/+1.49); `−0.60` on Coordinate (sign varies); `−6.36` on Subfield (**killed** — the system already solved at `D* ≈ 2.1`, so the climb to 3 is pure overhead). L4 pays where the system is hard and costs where it is easy. |
-| **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed`** | Follows from R4″: a pooled correlation over mixed sizes is a size proxy here, so "pooled `ρ_s`" cannot establish the claim however the defect is scaled. Scoring a lever needs matched shape and total work, not a defect correlation. |
+| **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed` as stated** | A pooled *instance-level* `ρ_s` over mixed sizes cannot establish this (R4″), so the gate as written measures nothing. This is a kill of the **statistic**, not of the defect: EXP-R4b shows the family-level version of the same correlation is strong and size-robust (R4c). Scoring a lever still needs matched shape and total work — but "score the lever *family*, not the instance" is now an open question, not a closed one. |
 | **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | **`killed`** | EXP-R4′, iteration 4. Five normalisations × three designed groups × four seeds. Nothing clears `ρ_s ≤ −0.6` on all three; the un-normalised variants fail cross-shape as expected (the control that shows the test has power), and the normalised ones pass *pooled* only. |
-| **R4″** | The strong pooled defect↔`D*` correlation is a **size proxy**, not structure | **`supported`** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. |
+| **R4″** | The strong pooled **instance-level** defect↔`D*` correlation — one point per target — is a **size proxy**, not structure | **`supported`, scope corrected iteration 6** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. EXP-R4b reproduces it on the same snapshot (instance level, size-controlled: **−0.12…−0.35**). **As originally written this row said "the strong pooled defect↔`D*` correlation", with no unit qualifier, and iteration 4 read that as reaching the FFD program's published figure. It does not — see R4b.** |
+| **R4b** | The FFD program's own published `Δ_low ↔ D*` law (EXP-G, `ρ_s = −0.79`) shares R4″'s defect and is **also a size proxy** | **`killed`** | EXP-R4b, iteration 6. On EXP-G's own 50 cells the law survives every size control: mean per-block **−0.6998**, blocked rank **−0.6983**, fixed-effects **−0.7499** against pooled −0.7929. In the ECDLP-relevant critical regime (`2n' = n`) size control makes it *stronger*, not weaker: **−0.9124** controlled vs −0.7781 pooled. This thread raised the flag; this thread withdraws it. |
+| **R4c** | `Δ_low` is a **family-level** discriminator (it ranks factor-base constructions) but not an **instance-level** one (it does not rank targets within a construction) | **`supported`** | EXP-R4b Panel B, on iteration 4's *own* 2016-cell snapshot, size-controlled both ways: instance level **−0.35** (mean per-block) / **−0.12** (blocked rank); family level **−0.85** (blocked rank), with the three families ordered correctly in **4 of the 4** size blocks where `D*` varies at all (the other two are floored at `D* = 2`). Same cells, same defect, same `D*` — only the unit of analysis differs. |
 | **R5** | **Levers compose**: one-sided guessing plus the mutant route beats guessing alone | **`killed`** | EXP-R5, iteration 3. The pre-registered gate (collapse fraction `c < 1/2`) is **degenerate** — the composed route hits `c = 0` in every cell, because mutants reach the floor with no guessing at all. Scored on total work instead (G-R5′): composed loses to raw guessing by a **flat −2.87 bits** at every `N` and seed, and neither route beats `2^N`. |
 | **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
 
@@ -235,7 +237,19 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   the mean of the per-`vars` Spearman — is what decides whether a pooled
   correlation is structure. A variant's pooled figure counts as real only if
   its size-controlled figure also clears −0.6; otherwise the pooled figure is
-  recorded as a size proxy.
+  recorded as a size proxy. **Amended iteration 6**: the gate must also name
+  its **unit of analysis**, because a size-controlled statistic on targets
+  and one on family means answer different questions and can disagree by
+  0.7 (R4c). A verdict that does not say which unit it used is not a verdict.
+- **G-R4b** *(registered iteration 6)*. Applied to a *published* correlation,
+  with three size-controlled statistics rather than one, because any single
+  one has a failure mode the others do not: mean per-block (equal weight per
+  stratum, blind to strata too small to correlate), blocked rank (all cells
+  at once, needs strata rank-comparable), fixed-effects (raw magnitudes, not
+  ranks). The law is **vindicated** if all three reach ≤ −0.6; recorded as a
+  **size proxy** if pooled clears −0.6 while they do not; **inconclusive** if
+  pooled does not itself clear the bar on re-analysis, since then there is
+  nothing to control for.
 - **G-R5.** *Supported* if `c(composed) < c(one-side)` at ≥ 2 operating
   points, seed-robust. **(Retired as degenerate, iteration 3: the composed
   route reaches the floor at `k = 0`, so the gate passes by construction
@@ -256,6 +270,100 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-12 — iteration 6 (EXP-R4b — the thread withdraws its own flag)
+
+- **Task picked.** The queue head: the upstream caveat iteration 4 attached
+  to the FFD program's headline `ρ_s = −0.79`. It was the only open item
+  where a cheap experiment could overturn something the repo treats as
+  settled — and, because this thread raised it, the only one where *not*
+  running the experiment leaves a wrong claim standing in someone else's
+  document on this thread's authority.
+- **Built** (`src/cryptanalysis/degree_reduction.rs`, +5 tests):
+  `size_control`, which reports a pooled correlation next to **three**
+  size-controlled counterparts — mean per-block Spearman, blocked rank, and
+  fixed-effects. Three rather than one because each has a failure mode the
+  others do not (small strata, rank-incomparability, magnitude-blindness);
+  agreement between them is the evidence, and disagreement localises which
+  part of the pooled figure was the nuisance variable. The tests pin both
+  directions: a construction with *exactly zero* within-stratum correlation
+  and a strong stratum trend must read pooled `+0.895` and controlled `0` on
+  all three; a relation identical inside every stratum must survive all
+  three at `< −0.99`. Degenerate strata report `None` and are skipped, never
+  averaged in as `0`.
+- **Result, panel A — EXP-G's own 50 cells.** The law is **not** a size
+  proxy:
+
+  | statistic | all cells | critical (`2n' = n`) | over-determined |
+  |---|---:|---:|---:|
+  | pooled `ρ_s` | −0.7929 | −0.7781 | −0.7334 |
+  | mean per-block `ρ_s` | **−0.6998** | **−0.9124** | −0.3809 |
+  | blocked rank `r` | **−0.6983** | **−0.9023** | −0.3979 |
+  | fixed-effects `r` | **−0.7499** | **−0.8186** | −0.5752 |
+
+  The pooled column reproduces the published −0.79324/−0.77805. In the
+  ECDLP-relevant critical regime, holding size fixed makes the law
+  **stronger** than pooling it. The over-determined column is weak exactly
+  as **P6** predicts — `ρ ≫ 1` floors `D*` at 2, leaving no variance for any
+  predictor to explain; the three weakest single blocks are `n'=2` at every
+  `n`, so the weakness tracks the determination ratio, not the size.
+- **Result, panel B — iteration 4's own 2016 cells, two units of analysis.**
+  This is the part that settles *why*, without appeal to EXP-G's data:
+
+  | statistic | instance level (per target) | family level (per `(vars, family)` mean) |
+  |---|---:|---:|
+  | pooled `ρ_s` | −0.5164 | −0.8734 |
+  | mean per-block `ρ_s` | −0.3494 | −1.0000 |
+  | blocked rank `r` | **−0.1189** | **−0.8528** |
+  | fixed-effects `r` | −0.3248 | −0.8337 |
+
+  Same snapshot, same defect, same `D*`, same size control. Only the unit of
+  analysis differs, and it is worth 0.73 in blocked rank. The three families
+  are ordered correctly in **4 of the 4** size blocks where `D*` varies at
+  all; the other two (`vars = 4, 6`) are floored at `D* = 2`.
+- **Diagnosis.** EXP-G's within-block contrast is across three structurally
+  different factor-base **families** whose defects span ~27× at fixed size.
+  Iteration 4 correlated individual **targets** pooled across families,
+  where target-to-target noise swamps the family signal — and then reasoned
+  from the *shape* of EXP-G's aggregation ("pooled the same way") to the
+  conclusion that it shared the artifact. The aggregations are not the same,
+  and the analogy was false.
+- **What survives and what does not.** R4′'s kill **stands**: no
+  renormalisation makes `Δ_low` compare individual instances across shapes,
+  and five variants × four seeds is good evidence for that. What does not
+  survive is the inference from it — that the published law is therefore a
+  size proxy. Those are different claims about different units, and only the
+  first was ever tested. The `Δ_low` screen is a **family-level
+  discriminator**, which is the use the FFD proposal put it to: ranking
+  curve and factor-base choices, not ranking targets within one.
+- **Gate verdicts.** G-R4b (registered this iteration): the law is
+  **vindicated**. G-R4″: **amended** — a size-control verdict must now name
+  its unit of analysis, since two honest ones can disagree by 0.7.
+- **Ledger delta.** R4b registered→**killed** (the prediction was that the
+  upstream law *is* a proxy). R4c registered→**supported**. R4″'s scope
+  narrowed to the instance level, with the original wording and the reason
+  it misled recorded in the row. R4's kill re-justified: it kills the
+  *statistic*, not the defect. §2.1 corrected; iteration 4's upstream caveat
+  marked withdrawn **in place** rather than deleted — a ledger that removes
+  its wrong calls stops being a record.
+- **Class (AGENTS.md §3): `accounting`.** Numbers changed, algorithm did
+  not, and no ratio to the `2^N` boundary moved — this iteration produced
+  no attack progress and must not be read as any. What it produced is a
+  correction to a claim, which AGENTS.md says is worth committing and not
+  worth calling a result. Stated plainly: **the thread is still at zero
+  against its boundary**, exactly where iteration 5 left it.
+- **Method note, against this thread's own recurring error.** Iterations 1,
+  3, 4 and 5 each caught a metric that counted one resource and ignored
+  another. This one is the same class with a different resource: a statistic
+  that fixed the nuisance variable it had thought of (size) while leaving
+  the unit of analysis unstated. The fix is the same shape as the others —
+  name the thing being held constant, and report the comparison that would
+  falsify you next to the one that supports you.
+- **Next.** EXP-R3b (reach for the L4 trend at `N = 16–18`) is now the queue
+  head. The newly-open question from R4 is worth a line in the queue too:
+  the defect is dead as an instance-level lever score, but **family-level
+  lever scoring was never tested** and is not excluded by anything measured
+  so far.
 
 ### 2026-09-12 — iteration 5 (EXP-R2 — L2 is bounded, and out of this instrument's reach)
 
@@ -343,8 +451,15 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   Every variant that clears the bar *pooled* fails it once `vars` is held
   fixed. `D*` and a size-normalised defect both trend with `N`, and pooling
   across sizes reads that shared trend as correlation. **The pooled figure
-  is a size proxy** (→ R4″). No denominator repairs that, because the
-  problem is not the denominator.
+  is a size proxy at the instance level** (→ R4″). No denominator repairs
+  that, because the problem is not the denominator.
+
+  **Correction, iteration 6.** The qualifier "at the instance level" was not
+  in the original text, and its absence was not cosmetic — it is what let
+  iteration 4 carry the conclusion upstream to a figure it had not measured.
+  Aggregate these same cells to `(vars, family)` means and the correlation
+  returns at **−0.85** (blocked rank, size-controlled). The defect ranks
+  *constructions*, not *targets*. See R4b/R4c and EXP-R4b.
 - **Controls that show the test has power.** The un-normalised variants
   (raw, per-equation) score −0.10…−0.21 on `rho-varies` while the
   normalised ones score −0.85…−0.94 — exactly the expected failure of an
@@ -371,11 +486,23 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   If it does hold there, the `Δ_low` screen — the FFD proposal's headline
   deliverable — is weaker than advertised, and that matters to the defensive
   side of the program as much as this one.
+
+  > **Withdrawn, iteration 6 (EXP-R4b).** It was checked, and it does not
+  > hold there. EXP-G's law survives every size control (−0.70/−0.70/−0.75
+  > against pooled −0.79), and in the critical regime size control makes it
+  > *stronger* (−0.91). The flag was raised on an analogy — "pooled the same
+  > way, so possibly the same artifact" — and the analogy was false, because
+  > EXP-G pools family cell means where iteration 4 pooled individual
+  > targets. Flagging it was right; what was wrong was reasoning from the
+  > shape of someone else's aggregation without re-running it. The caveat is
+  > left standing above rather than deleted, because a ledger that quietly
+  > removes its wrong calls stops being a record. See R4b, R4c, G-R4b.
 - **Gate verdicts.** G-R4′: **killed**. G-R4″ (registered this iteration):
   **supported**. G-R4: **retired** — a pooled `ρ_s` over mixed sizes cannot
   establish it.
 - **Ledger delta.** R4′ open→killed; R4 open→killed; R4″ registered→
-  supported. §2.1's iteration-1 diagnosis corrected.
+  supported. §2.1's iteration-1 diagnosis corrected. *(R4″'s scope narrowed
+  to the instance level in iteration 6; R4's kill re-justified there.)*
 - **Next.** R4′'s kill *unblocks* R2 rather than blocking it: the
   prescription is simply not to use `Δ_low` for scoring. L2 is measured the
   way iterations 2 and 3 measured their levers — matched `(vars, eqs, ρ)`,
@@ -573,13 +700,24 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 **All four levers have now been tested.** That was the thread's charter, so
 this is a natural reporting point rather than a pause.
 
-| # | Lever | Outcome |
-|---|---|---|
-| **L1** | factor-base structure | the FFD program's own result; not this thread's subject |
-| **L2** | symmetrisation | **blocked structurally** — cannot pay below `ℓ = 6`, and a dense Macaulay scan reaches `ℓ ≤ 3` |
-| **L3** | hybrid slicing | **killed** — the cost optimum is exhaustive search |
-| **L4** | degree falls (mutants) | **supported on degrees**; net of its own extraction cost it pays only where the base degree is high |
-| — | L3 ∘ L4 | **killed** — the levers are substitutes, not complements |
+| # | Lever | Outcome | Class (AGENTS.md §3) |
+|---|---|---|---|
+| **L1** | factor-base structure | the FFD program's own result; not this thread's subject | — |
+| **L2** | symmetrisation | **blocked structurally** — cannot pay below `ℓ = 6`, and a dense Macaulay scan reaches `ℓ ≤ 3` | none (untested at the size where it could pay) |
+| **L3** | hybrid slicing | **killed** — the cost optimum is exhaustive search | `accounting` — the apparent +8.83 bits was a boundary artifact |
+| **L4** | degree falls (mutants) | **supported on degrees**; net of its own extraction cost it pays only where the base degree is high | `accounting` — charging extraction cut +8…+11 bits to +1.44 |
+| — | L3 ∘ L4 | **killed** — the levers are substitutes, not complements | none |
+
+**Ratio to the boundary: unmoved.** Per AGENTS.md §3 the only class that
+counts as a result is `advance` — a fall in the ratio to the stated floor.
+This thread's boundary is `2^N` enumeration (§3), and **no lever tested
+beats it at any operating point measured**. L4's `+1.44` bits on the Random
+family is a gain *against the unaugmented Gröbner solve*, not against the
+boundary, and the thread has been explicit about that since iteration 2.
+Three of the five rows above are `accounting`: in each case a metric
+counted one resource and ignored what another cost, and correcting it
+removed the apparent gain. That is the thread's main empirical finding
+about its own method, and it is why every row carries a boundary column.
 
 Nothing found here reduces the solving degree at a price worth paying in the
 regime the instrument can see. The two positive results are narrow and
@@ -587,23 +725,35 @@ specific: mutants buy exactly one degree on the generic family (`+1.44` bits,
 iteration 2), and one-sided guessing reaches the `D*=2` floor at `c = 1/2`
 (iteration 1). The two most useful results are negative and structural:
 levers aimed at the same floor do not compose (iteration 3), and the `Δ_low`
-screen is a size proxy rather than a predictor (iteration 4).
+screen does not rank individual instances across shapes, however it is
+normalised (iteration 4) — though it does rank **families**, which is what
+the FFD program uses it for (iteration 6).
+
+**The thread's third useful output is a correction to itself.** Iteration 4
+carried its instance-level kill upstream and flagged the FFD program's
+headline law as a probable size proxy. Iteration 6 tested that flag and
+withdrew it: the law survives every size control, and strengthens under it
+in the critical regime. The flag stood for two iterations and was cited in a
+merged PR. The lesson is not "don't flag things" — flagging it is what got it
+tested — but that an inference from the *shape* of someone else's
+aggregation is a hypothesis, and this thread's own ledger discipline exists
+to stop hypotheses being filed as findings.
 
 **Queue, if the thread continues:**
 
-1. **EXP-R2b — reach for L2.** The only way to answer the lever that is
+1. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
+   `+0.94 → +1.75 → +1.62` over `N = 10,12,14`. Degree-3 extraction is cheap
+   enough to run at `N = 16–18`. Cheapest remaining item with a positive
+   result at stake.
+2. **EXP-R4c — family-level lever scoring.** R4 killed `Δ_low` as an
+   instance-level lever score, and iteration 6 showed the family-level
+   statistic is strong (−0.85 blocked rank). Whether it ranks *lever-generated
+   presentations* the way it ranks factor-base families was never tested, and
+   nothing measured so far excludes it. Cheap: the cells already exist.
+3. **EXP-R2b — reach for L2.** The only way to answer the lever that is
    bounded rather than killed. Needs a sparse F4/F5 reaching ~51 variables at
    degree 3 (`ℓ = 6`). This is an engineering project, not an experiment, and
    should not be started without deciding that L2 is worth that much.
-2. **EXP-R4b — is the upstream law also a size proxy?** Iteration 4 flagged
-   that the FFD program's `ρ_s = −0.79` was pooled across `2n' ∈ {4,…,14}`,
-   the same way this thread's pooled figures were. Re-running EXP-G with a
-   size-controlled statistic is cheap and settles it. This matters to the
-   *defensive* program more than to this one, since `Δ_low` is its headline
-   screening deliverable.
-3. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
-   `+0.94 → +1.75 → +1.62` over `N = 10,12,14`. Degree-3 extraction is cheap
-   enough to run at `N = 16–18`.
 
 ## 7. Honest limitations
 
