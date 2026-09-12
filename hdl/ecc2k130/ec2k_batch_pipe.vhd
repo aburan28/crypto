@@ -116,7 +116,11 @@ architecture rtl of ec2k_batch_pipe is
   constant IDX_W  : natural := maxn(LOG_W + 1, 3);
   constant LVL_W  : natural := maxn(LOG_W, 3);
   constant KIND_W : natural := 3;
-  constant MTAG_W : natural := LOG_NB + KIND_W + IDX_W + 1;
+  -- batch, phase, level, index, last: the level rides along so the
+  -- retire side computes the batch's next state from the tag alone and
+  -- never reads the level array it writes (a 16:1 mux into a decrement
+  -- and a write decode, one of the engine's longest paths)
+  constant MTAG_W : natural := LOG_NB + KIND_W + LVL_W + IDX_W + 1;
 
   constant PH_FWD : natural := 0;
   constant PH_INV : natural := 1;
@@ -358,7 +362,7 @@ begin
 
   -- retire-side read address, from the product that retires RD_LAT clocks
   -- from now
-  ahd_b <= unsigned(ahd_tag(MTAG_W - 1 downto KIND_W + IDX_W + 1));
+  ahd_b <= unsigned(ahd_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
   ahd_i <= unsigned(ahd_tag(IDX_W downto 1));
   ra_lr <= leaf_addr(ahd_b, ahd_i);
 
@@ -433,6 +437,7 @@ begin
     variable x3, y3  : gf_t;
     variable rb      : bid_t;
     variable rkind   : ph_t;
+    variable rlvl    : lvl_t;
     variable ridx    : idx_t;
     variable rlast   : std_logic;
     variable rn      : node_t;
@@ -523,8 +528,9 @@ begin
         -- ============ retire ============
         o1_valid <= '0';
         if res_valid = '1' then
-          rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + IDX_W + 1));
-          rkind := unsigned(res_tag(KIND_W + IDX_W downto IDX_W + 1));
+          rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
+          rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
+          rlvl  := unsigned(res_tag(LVL_W + IDX_W downto IDX_W + 1));
           ridx  := unsigned(res_tag(IDX_W downto 1));
           rlast := res_tag(0);
           rn    := ridx(LOG_W downto 0);
@@ -534,11 +540,11 @@ begin
               m_ta(tree_addr(rb, rn)) <= res_r;
               m_tb(tree_addr(rb, rn)) <= res_r;
               if rlast = '1' then
-                if b_lvl(to_integer(rb)) = 0 then
+                if rlvl = 0 then
                   b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
                   b_lvl(to_integer(rb)) <= (others => '0');
                 else
-                  b_lvl(to_integer(rb)) <= b_lvl(to_integer(rb)) - 1;
+                  b_lvl(to_integer(rb)) <= rlvl - 1;
                 end if;
               end if;
             when PH_INV =>
@@ -564,10 +570,10 @@ begin
               m_ta(tree_addr(rb, rn)) <= res_r;
               m_tb(tree_addr(rb, rn)) <= res_r;
               if rlast = '1' then
-                if b_lvl(to_integer(rb)) = LOG_W - 1 then
+                if rlvl = LOG_W - 1 then
                   b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
                 else
-                  b_lvl(to_integer(rb)) <= b_lvl(to_integer(rb)) + 1;
+                  b_lvl(to_integer(rb)) <= rlvl + 1;
                 end if;
               end if;
             when PH_LAM =>
@@ -650,19 +656,23 @@ begin
             when PH_FWD =>
               n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
               a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(lvl)
                           & std_logic_vector(resize(n, IDX_W)) & last;
             when PH_INV =>
               a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(lvl)
                           & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
             when PH_BWD =>
               n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
               c := n(LOG_W - 1 downto 0) & idx(0);
               a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(lvl)
                           & std_logic_vector(resize(c, IDX_W)) & last;
             when others =>
               -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
               -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
               a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(lvl)
                           & std_logic_vector(resize(i, IDX_W)) & last;
           end case;
           a_zaddr(0) <= leaf_addr(b, i);

@@ -433,20 +433,24 @@ spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
 an engine are the walker's four-word prefetch buffer.
 
 Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe and
-**+1.25 ns** inside an engine, and none of the sixteen worst paths touches
-a memory: the register block's read mux from its address register (1.64
-ns, ten bits fanning out to five hundred LUTs), then the output weight's
-second-stage sum (1.58 ns) and the retire side's batch-level update, a
-16:1 mux of the level array into a decrement and back (1.56 ns). Earlier
-worst paths and what removed them: the operand stage's level/index
-arithmetic into a LUTRAM read (+0.83 ns; an address stage); the walker's
-step-counter read-modify-write (1.6 ns; the count now rides in the tag);
-the 22-group weight sum in one clock (1.74 ns; sums of four, then of
-six); the queue's pointer subtraction into the credit compare (1.70 ns;
-occupancy is a counter); the bridge's address into the read mux and the
-queue's LUTRAM read into it (1.67 ns; the address is registered in the
-block, the queue head is read into registers a clock ahead, and a write
-no longer overlaps its own response). The multiplier is now 58% of an engine
+**+1.25 ns** inside an engine, and none of the eighty worst paths touches
+a memory's data: the register block's read mux from its address register
+(1.64 ns, ten bits fanning out to five hundred LUTs), then the output
+weight's second-stage sum (1.58 ns), a free-list pointer into the flush
+counter's reset (1.38 ns) and the burst level into a tree address (1.15
+ns plus the block RAM's setup). Earlier worst paths and what removed
+them: the operand stage's level/index arithmetic into a LUTRAM read
+(+0.83 ns; an address stage); the walker's step-counter read-modify-write
+(1.6 ns; the count now rides in the tag); the 22-group weight sum in one
+clock (1.74 ns; sums of four, then of six); the queue's pointer
+subtraction into the credit compare (1.70 ns; occupancy is a counter); the
+bridge's address into the read mux and the queue's LUTRAM read into it
+(1.67 ns; the address is registered in the block, the queue head is read
+into registers a clock ahead, and a write no longer overlaps its own
+response); the retire side's batch-level update, a 16:1 mux of the level
+array into a decrement and back (1.56 ns; the level rides in the
+multiplier tag too, so retire writes the array and never reads it). The
+multiplier is now 58% of an engine
 and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) the single
 largest item. The one distributed RAM left is the register block's
 64-deep report queue (356 LUTRAM, one copy on the die). No DSPs or URAM
