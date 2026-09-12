@@ -65,7 +65,7 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, 13.7k LUTs as synthesised (`../README.md`, "Capacity");
+its walk memory, 13.1k LUTs as synthesised (`../README.md`, "Capacity");
 the VU47P has 1.30M. The default 48 is half the device; read
 `synth_utilization` and the post-route timing from the reports, then go to
 what fits. Utilisation above ~70% of the LUTs (~64 engines) is where
@@ -143,23 +143,26 @@ Read [`../../ecc/aws/README.md`](../../ecc/aws/README.md) first: it
 explains the cost, the termination trap, and why this is synthesis rather
 than an FPGA image.
 
-### What to compare against
+### What came back
 
-The estimates in [`../README.md`](../README.md) that the results replace:
+The estimates in [`../README.md`](../README.md) against what Vivado 2025.2
+synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 
-| Quantity | Estimate | Basis |
+| Quantity | Estimate | Synthesised |
 |---|---|---|
-| LUT per multiplier | 5–6k | 9801 AND folded three per LUT6 with their XORs, plus the remaining ~9k XOR2 at five per LUT6 |
-| FF per multiplier | ~3k | eight stages of 131–600 bits |
-| DSP per multiplier | 0 | binary-field arithmetic has no carries |
-| LUT per batched step unit | ~10k | multiplier, 640 × 131 bits of distributed RAM with two read ports on two of the arrays, `sigma^j` muxes on the operand path, two split popcounts |
-| BRAM | 0 | every array is small enough for LUTRAM and has one write port |
-| Clock | 300–400 MHz | leaf stage of the multiplier (33 AND terms per bit) and the operand-forming stage of the step unit are the deepest, three to four LUT levels |
+| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
+| FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
+| DSP per multiplier | 0 | 0 |
+| LUT per engine (step unit + walker) | ~10k | **13 146**, of which 4 812 LUTRAM; 7 388 FF |
+| Register block (`ec2k_axil`, 4 engines) | — | 1 449 LUTs, 1 773 FF in total |
+| BRAM | 0 | 0 |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns for the engine alone; the shell fixes `clk_main_a0` at 250 MHz |
 
-If the clock lands low, sweep `MUL_KARATSUBA` in `gf131_pkg.vhd`: three
-levels give a 17-bit leaf, halving the deepest stage, for two more clocks
-of latency, which the scheduler absorbs by holding more batches in flight.
-If the LUT count lands high, the same sweep in the other direction tells
-whether Karatsuba's extra XORs are paying for themselves on this fabric.
-The step unit's retire path is a RAM write and one XOR; it should not be
-the limit.
+The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
+two-writer counter array in the walker had become 8k flip-flops behind a
+256:1 mux, and every distinct `array(expr)` in the step unit's operand
+stage had become its own LUTRAM copy. Both are fixed
+([`../README.md`](../README.md), "Capacity"); the per-module probe that
+found them is a plain out-of-context `synth_design` of one entity with a
+LUT histogram by driven signal, which is the tool to reach for if a future
+build's numbers do not add up.
