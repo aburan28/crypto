@@ -1,106 +1,726 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ECC2K-130 distinguished-point status</title>
-  <link rel="stylesheet" href="./style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECC2K-130 campaign status · aburan28/crypto</title>
+<meta name="description" content="Hourly aggregates from the Certicom ECC2K-130 distinguished-point collection: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1020">
+<link rel="canonical" href="https://aburan28.github.io/crypto/status/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ECC2K-130 campaign status">
+<meta property="og:description" content="Hourly distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign. Counts only: no walk coefficients, no point keys.">
+<meta property="og:url" content="https://aburan28.github.io/crypto/status/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <main>
-    <p class="kicker">Certicom ECC2K-130 · Pollard ρ · distinguished points</p>
-    <h1>Campaign status</h1>
-    <p class="sub">
-      Hourly read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-      DP table. The page publishes counts only. Walk coefficients and point keys
-      stay in the private store.
+<a class="skip" href="#main">Skip to status</a>
+
+<header class="topbar">
+  <nav aria-label="Site">
+    <a href="../">Overview</a>
+    <a href="../scoreboard/">Scoreboard</a>
+    <a href="./" aria-current="page">Campaign status</a>
+    <a href="https://github.com/aburan28/crypto">Repository</a>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
+  <h1>Campaign status</h1>
+  <p class="sub">
+    Hourly read-only snapshot of the shared <span class="mono">ecc2k-130</span>
+    distinguished-point table. The page publishes counts only &mdash; walk
+    coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
+    the private store and never reach this page.
+  </p>
+
+  <noscript>
+    <p class="banner UNREACHABLE">
+      This dashboard renders two JSON files in the browser, so it needs
+      JavaScript. Without it, read the data directly:
+      <a href="./status.json">status.json</a> and
+      <a href="./history.json">history.json</a>.
     </p>
-    <div id="banner" class="banner UNREACHABLE">Loading snapshot…</div>
-    <div class="row">
-      <div class="card"><div class="label">Distinguished points</div><div class="value mono" id="dps">—</div></div>
-      <div class="card"><div class="label">Collisions</div><div class="value mono" id="collisions">—</div></div>
-      <div class="card"><div class="label">DPs last hour</div><div class="value mono" id="dps_last_hour">—</div></div>
-      <div class="card"><div class="label">Active worker ids</div><div class="value mono" id="workers">—</div></div>
+  </noscript>
+
+  <div id="banner" class="banner UNREACHABLE" role="status">Loading snapshot&hellip;</div>
+
+  <div class="freshness">
+    <span id="freshness-text">&mdash;</span>
+    <button type="button" id="refresh">Refresh now</button>
+  </div>
+
+  <h2 class="sr-only">Headline counts</h2>
+  <div class="row">
+    <div class="card">
+      <div class="label">Distinguished points</div>
+      <div class="value mono" id="dps">&mdash;</div>
+      <div class="foot" id="dps-foot">&nbsp;</div>
     </div>
-    <div class="row">
-      <div class="card"><div class="label">First DP</div><div class="value" id="first_dp_at" style="font-size:18px">—</div></div>
-      <div class="card"><div class="label">Latest DP</div><div class="value" id="last_dp_at" style="font-size:18px">—</div></div>
-      <div class="card"><div class="label">Snapshot</div><div class="value" id="generated_at" style="font-size:18px">—</div></div>
+    <div class="card">
+      <div class="label">Last hour</div>
+      <div class="value mono" id="dps_last_hour">&mdash;</div>
+      <div class="foot" id="rate-foot">&nbsp;</div>
     </div>
-    <section>
-      <h2>DPs by hour (7-day table)</h2>
-      <div class="bars" id="bars"></div>
-      <p class="note" id="hourly-note"></p>
-    </section>
-    <section>
-      <h2>Workers</h2>
+    <div class="card">
+      <div class="label">Last 24 hours</div>
+      <div class="value mono" id="dps_last_day">&mdash;</div>
+      <div class="foot">&nbsp;</div>
+    </div>
+    <div class="card">
+      <div class="label">Workers</div>
+      <div class="value mono" id="workers">&mdash;</div>
+      <div class="foot" id="workers-foot">&nbsp;</div>
+    </div>
+    <div class="card" id="collision-card">
+      <div class="label">Collisions</div>
+      <div class="value mono" id="collisions">&mdash;</div>
+      <div class="foot" id="collisions-foot">&nbsp;</div>
+    </div>
+  </div>
+
+  <section aria-labelledby="h-rate">
+    <h2 id="h-rate">Distinguished points per hour</h2>
+    <p class="note">
+      One bar per UTC hour over the window the snapshot covers. Hours in which
+      no point was recorded are drawn as gaps at zero rather than omitted, so
+      the spacing is real time and an outage looks like an outage.
+    </p>
+    <div id="hourly-chart" class="chart"></div>
+    <p class="note" id="hourly-note"></p>
+    <details class="alt">
+      <summary>Hourly buckets as a table</summary>
+      <div class="scroll" tabindex="0">
+        <table>
+          <caption class="sr-only">Distinguished points recorded in each UTC hour</caption>
+          <thead><tr><th scope="col">Hour (UTC)</th><th scope="col" class="num">DPs</th></tr></thead>
+          <tbody id="hourly-body"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section aria-labelledby="h-total">
+    <h2 id="h-total">Cumulative distinguished points</h2>
+    <p class="note">
+      Total table size at each published snapshot, from
+      <span class="mono">history.json</span>. The series starts when this page
+      began publishing, so it is a record of the public feed and not of the
+      campaign before it.
+    </p>
+    <div id="total-chart" class="chart"></div>
+    <p class="note" id="total-note"></p>
+  </section>
+
+  <section aria-labelledby="h-workers">
+    <h2 id="h-workers">Workers</h2>
+    <p class="note">
+      Per-worker point counts. A worker is marked active when its most recent
+      point is inside the last hour of the snapshot.
+    </p>
+    <div class="scroll" tabindex="0">
       <table>
-        <thead><tr><th>worker_id</th><th>DPs</th><th>first</th><th>last</th></tr></thead>
+        <caption class="sr-only">Distinguished points contributed per worker</caption>
+        <thead>
+          <tr>
+            <th scope="col">worker_id</th>
+            <th scope="col" class="num">DPs</th>
+            <th scope="col" class="num">share</th>
+            <th scope="col">first point</th>
+            <th scope="col">last point</th>
+          </tr>
+        </thead>
         <tbody id="workers-body"></tbody>
       </table>
-    </section>
-    <section>
-      <h2>Hourly job history</h2>
-      <p class="note">Last 168 published snapshots from the GitHub Action.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-campaign">
+    <h2 id="h-campaign">Campaign</h2>
+    <div class="scroll" tabindex="0">
       <table>
-        <thead><tr><th>generated_at</th><th>state</th><th>DPs</th><th>last hour</th><th>collisions</th></tr></thead>
-        <tbody id="history-body"></tbody>
+        <caption class="sr-only">Campaign identifiers and timestamps</caption>
+        <tbody id="campaign-body"></tbody>
       </table>
-    </section>
-    <footer id="claim"></footer>
-  </main>
-  <script>
-    const fmt = (n) => n == null ? "—" : Number(n).toLocaleString("en-US");
-    const when = (s) => s ? s.replace("T", " ").replace("Z", " UTC") : "—";
-    async function load() {
-      const status = await (await fetch("./status.json", { cache: "no-store" })).json();
-      const history = await (await fetch("./history.json", { cache: "no-store" })).json().catch(() => ({ points: [] }));
-      const banner = document.getElementById("banner");
-      banner.className = "banner " + (status.state || "UNREACHABLE");
-      banner.textContent = status.state === "COLLISION_RECORDED"
-        ? "Collision recorded in the DP table — not independently verified here."
-        : status.state === "COLLECTING"
-          ? "Collecting. New distinguished points arrived in the last hour."
-          : status.state === "IDLE_OR_STALE"
-            ? "Store has points, but none in the last hour."
-            : status.state === "EMPTY"
-              ? "Campaign row exists; no distinguished points yet."
-              : "Snapshot missing or unreachable.";
-      for (const id of ["dps", "collisions", "dps_last_hour", "workers"]) {
-        document.getElementById(id).textContent = fmt(status[id]);
-      }
-      document.getElementById("first_dp_at").textContent = when(status.first_dp_at);
-      document.getElementById("last_dp_at").textContent = when(status.last_dp_at);
-      document.getElementById("generated_at").textContent = when(status.generated_at);
-      const hourly = status.hourly || [];
-      const max = Math.max(1, ...hourly.map((h) => h.dps || 0));
-      const bars = document.getElementById("bars");
-      bars.innerHTML = "";
-      hourly.forEach((h) => {
-        const d = document.createElement("div");
-        d.className = "bar";
-        d.style.height = Math.max(2, (100 * (h.dps || 0) / max)) + "%";
-        d.title = when(h.hour) + " · " + fmt(h.dps);
-        bars.appendChild(d);
-      });
-      document.getElementById("hourly-note").textContent = hourly.length
-        ? hourly.length + " hour buckets · peak " + fmt(max)
-        : "No hourly buckets yet.";
-      document.getElementById("workers-body").innerHTML = (status.per_worker || []).map((w) =>
-        "<tr><td class=\"mono\">" + (w.worker_id || "") + "</td><td>" + fmt(w.dps) +
-        "</td><td>" + when(w.first_dp_at) + "</td><td>" + when(w.last_dp_at) + "</td></tr>"
-      ).join("") || "<tr><td colspan=4>None</td></tr>";
-      const points = (history.points || []).slice().reverse();
-      document.getElementById("history-body").innerHTML = points.map((p) =>
-        "<tr><td>" + when(p.generated_at) + "</td><td>" + (p.state || "") +
-        "</td><td>" + fmt(p.dps) + "</td><td>" + fmt(p.dps_last_hour) +
-        "</td><td>" + fmt(p.collisions) + "</td></tr>"
-      ).join("") || "<tr><td colspan=5>No published history yet.</td></tr>";
-      document.getElementById("claim").textContent = status.claim_boundary || "";
+    </div>
+  </section>
+
+  <section aria-labelledby="h-history">
+    <h2 id="h-history">Snapshot history</h2>
+    <p class="note">
+      The last 168 snapshots published by the hourly GitHub Action, newest
+      first.
+    </p>
+    <details class="alt">
+      <summary id="history-summary">Snapshot table</summary>
+      <div class="scroll" tabindex="0">
+        <table>
+          <caption class="sr-only">Published snapshots, newest first</caption>
+          <thead>
+            <tr>
+              <th scope="col">generated_at</th>
+              <th scope="col">state</th>
+              <th scope="col" class="num">DPs</th>
+              <th scope="col" class="num">last hour</th>
+              <th scope="col" class="num">workers</th>
+              <th scope="col" class="num">collisions</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <h2>What this page does and does not claim</h2>
+    <p id="claim"></p>
+    <p>
+      Raw data: <a href="./status.json">status.json</a> ·
+      <a href="./history.json">history.json</a>. How the snapshot is taken,
+      and what is deliberately withheld:
+      <a href="https://github.com/aburan28/crypto/blob/main/scripts/rho_status/README.md">scripts/rho_status/README.md</a>.
+    </p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var HOUR_MS = 3600 * 1000;
+  var REFRESH_MS = 60 * 1000;
+  // The publishing Action runs hourly; two missed runs is a real problem.
+  var STALE_AFTER_MS = 2 * HOUR_MS;
+  var HISTORY_LIMIT = 168;
+
+  var STATE_TEXT = {
+    COLLECTING: "Collecting. New distinguished points arrived in the last hour.",
+    IDLE_OR_STALE: "Store has points, but none in the last hour.",
+    EMPTY: "Campaign row exists; no distinguished points yet.",
+    COLLISION_RECORDED: "Collision recorded in the DP table — not independently verified here.",
+    UNREACHABLE: "Snapshot missing or unreachable."
+  };
+
+  var el = function (id) { return document.getElementById(id); };
+  var loadedAt = null;
+  var timer = null;
+
+  function num(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    var n = Number(value);
+    return isFinite(n) ? n.toLocaleString("en-US") : "—";
+  }
+
+  function parseTime(value) {
+    if (!value) return null;
+    var date = new Date(String(value));
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function utc(date, withSeconds) {
+    if (!date) return "—";
+    var text = date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate()) +
+      " " + pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes());
+    if (withSeconds) text += ":" + pad(date.getUTCSeconds());
+    return text + " UTC";
+  }
+
+  function ago(date, reference) {
+    if (!date) return "";
+    var ms = (reference || new Date()).getTime() - date.getTime();
+    if (ms < 0) return "in the future";
+    var mins = Math.floor(ms / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + (mins === 1 ? " min ago" : " min ago");
+    var hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + (hours === 1 ? " hour ago" : " hours ago");
+    var days = Math.floor(hours / 24);
+    return days + (days === 1 ? " day ago" : " days ago");
+  }
+
+  // Timestamps carry microseconds and a "+00:00" offset straight from
+  // Postgres. Render them, keep the raw value in datetime= for machines.
+  function timeCell(value, withSeconds) {
+    var node = document.createElement("time");
+    var date = parseTime(value);
+    if (!date) {
+      node.textContent = "—";
+      return node;
     }
-    load().catch((err) => {
-      document.getElementById("banner").textContent = "Failed to load status.json: " + err;
-    });
-  </script>
+    node.setAttribute("datetime", date.toISOString());
+    node.textContent = utc(date, withSeconds);
+    node.title = String(value);
+    return node;
+  }
+
+  function cell(row, content, className) {
+    var td = document.createElement("td");
+    if (className) td.className = className;
+    if (content instanceof Node) td.appendChild(content);
+    else td.textContent = content;
+    row.appendChild(td);
+    return td;
+  }
+
+  function emptyRow(body, span, text) {
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.colSpan = span;
+    td.className = "empty";
+    td.textContent = text;
+    tr.appendChild(td);
+    body.appendChild(tr);
+  }
+
+  // Only fills tables that are still empty, so a failed refresh never wipes
+  // rows that loaded successfully a minute ago.
+  function placeholderTables(text) {
+    var targets = [["workers-body", 5], ["hourly-body", 2], ["history-body", 6]];
+    for (var i = 0; i < targets.length; i++) {
+      var body = el(targets[i][0]);
+      if (body && !body.children.length) emptyRow(body, targets[i][1], text);
+    }
+  }
+
+  function svg(width, height, label) {
+    var node = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    node.setAttribute("viewBox", "0 0 " + width + " " + height);
+    node.setAttribute("role", "img");
+    node.setAttribute("aria-label", label);
+    return node;
+  }
+
+  function shape(name, attrs) {
+    var node = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (var key in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, key)) node.setAttribute(key, attrs[key]);
+    }
+    return node;
+  }
+
+  function label(x, y, text, anchor, cls) {
+    var node = shape("text", { x: x, y: y, "text-anchor": anchor || "start" });
+    if (cls) node.setAttribute("class", cls);
+    node.textContent = text;
+    return node;
+  }
+
+  // status.hourly is sparse: hours with no points are absent entirely, so
+  // drawing the buckets as given makes a 14-hour outage look like one hour.
+  // Expand to a contiguous series and let the zeros show.
+  function denseHours(hourly, endReference) {
+    var rows = [];
+    var i;
+    for (i = 0; i < hourly.length; i++) {
+      var at = parseTime(hourly[i].hour);
+      if (at) rows.push({ at: at, dps: Number(hourly[i].dps) || 0 });
+    }
+    if (!rows.length) return [];
+    rows.sort(function (a, b) { return a.at - b.at; });
+
+    var floorHour = function (date) { return Math.floor(date.getTime() / HOUR_MS) * HOUR_MS; };
+    var byHour = {};
+    for (i = 0; i < rows.length; i++) byHour[floorHour(rows[i].at)] = rows[i].dps;
+
+    var start = floorHour(rows[0].at);
+    var end = floorHour(rows[rows.length - 1].at);
+    if (endReference) end = Math.max(end, floorHour(endReference));
+    var count = Math.min(Math.round((end - start) / HOUR_MS) + 1, HISTORY_LIMIT);
+    var first = end - (count - 1) * HOUR_MS;
+
+    var series = [];
+    for (i = 0; i < count; i++) {
+      var stamp = first + i * HOUR_MS;
+      series.push({ at: new Date(stamp), dps: byHour[stamp] || 0 });
+    }
+    return series;
+  }
+
+  function drawHourly(series) {
+    var host = el("hourly-chart");
+    host.textContent = "";
+    if (!series.length) {
+      host.appendChild(document.createTextNode(""));
+      el("hourly-note").textContent = "No hourly buckets yet.";
+      return;
+    }
+
+    var W = 960, H = 200, PAD_L = 54, PAD_R = 8, PAD_T = 12, PAD_B = 26;
+    var plotW = W - PAD_L - PAD_R;
+    var plotH = H - PAD_T - PAD_B;
+    var peak = 0;
+    var total = 0;
+    var i;
+    for (i = 0; i < series.length; i++) {
+      peak = Math.max(peak, series[i].dps);
+      total += series[i].dps;
+    }
+    var scale = peak > 0 ? plotH / peak : 0;
+    var slot = plotW / series.length;
+    var barW = Math.max(1, Math.min(slot - 1, slot * 0.82));
+
+    var chart = svg(W, H,
+      series.length + " hourly buckets from " + utc(series[0].at) + " to " +
+      utc(series[series.length - 1].at) + ", peak " + num(peak) +
+      " distinguished points in one hour, " + num(total) + " in the window");
+
+    chart.appendChild(shape("line", { x1: PAD_L, y1: PAD_T + plotH, x2: W - PAD_R, y2: PAD_T + plotH, "class": "axis" }));
+    if (peak > 0) {
+      chart.appendChild(shape("line", { x1: PAD_L, y1: PAD_T, x2: W - PAD_R, y2: PAD_T, "class": "grid" }));
+      chart.appendChild(label(PAD_L - 8, PAD_T + 4, num(peak), "end", "tick"));
+    }
+    chart.appendChild(label(PAD_L - 8, PAD_T + plotH + 4, "0", "end", "tick"));
+
+    for (i = 0; i < series.length; i++) {
+      var point = series[i];
+      var x = PAD_L + i * slot + (slot - barW) / 2;
+      var height = point.dps > 0 ? Math.max(1.5, point.dps * scale) : 0;
+      if (height > 0) {
+        var bar = shape("rect", {
+          x: x, y: PAD_T + plotH - height, width: barW, height: height, rx: Math.min(2, barW / 2), "class": "bar"
+        });
+        var tip = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        tip.textContent = utc(point.at) + " · " + num(point.dps) + " DPs";
+        bar.appendChild(tip);
+        chart.appendChild(bar);
+      }
+      // A tick at each midnight, plus the first bucket, keeps the axis honest
+      // about how much wall-clock time the bars span.
+      var isMidnight = point.at.getUTCHours() === 0;
+      if (isMidnight || i === 0) {
+        var text = isMidnight
+          ? point.at.getUTCFullYear() + "-" + pad(point.at.getUTCMonth() + 1) + "-" + pad(point.at.getUTCDate())
+          : pad(point.at.getUTCHours()) + ":00";
+        chart.appendChild(label(PAD_L + i * slot, H - 8, text, i === 0 ? "start" : "middle", "tick"));
+        chart.appendChild(shape("line", {
+          x1: PAD_L + i * slot, y1: PAD_T, x2: PAD_L + i * slot, y2: PAD_T + plotH, "class": "grid"
+        }));
+      }
+    }
+
+    host.appendChild(chart);
+    var span = Math.round((series[series.length - 1].at - series[0].at) / HOUR_MS) + 1;
+    var quiet = 0;
+    for (i = 0; i < series.length; i++) if (series[i].dps === 0) quiet++;
+    el("hourly-note").textContent =
+      span + (span === 1 ? " hour" : " hours") + " covered · peak " + num(peak) +
+      " in one hour · " + num(total) + " in the window · " +
+      (quiet ? num(quiet) + " empty " + (quiet === 1 ? "hour" : "hours") : "no empty hours");
+
+    var body = el("hourly-body");
+    body.textContent = "";
+    var nonEmpty = series.filter(function (row) { return row.dps > 0; });
+    if (!nonEmpty.length) {
+      emptyRow(body, 2, "No points recorded in this window.");
+      return;
+    }
+    for (i = nonEmpty.length - 1; i >= 0; i--) {
+      var tr = document.createElement("tr");
+      cell(tr, timeCell(nonEmpty[i].at.toISOString()));
+      cell(tr, num(nonEmpty[i].dps), "num mono");
+      body.appendChild(tr);
+    }
+  }
+
+  function drawTotals(points) {
+    var host = el("total-chart");
+    host.textContent = "";
+    var series = [];
+    var i;
+    for (i = 0; i < points.length; i++) {
+      var at = parseTime(points[i].generated_at);
+      if (at) series.push({ at: at, dps: Number(points[i].dps) || 0 });
+    }
+    series.sort(function (a, b) { return a.at - b.at; });
+
+    if (series.length < 2) {
+      el("total-note").textContent = series.length
+        ? "One snapshot published so far; a curve needs two."
+        : "No published history yet.";
+      return;
+    }
+
+    var W = 960, H = 200, PAD_L = 62, PAD_R = 10, PAD_T = 12, PAD_B = 26;
+    var plotW = W - PAD_L - PAD_R;
+    var plotH = H - PAD_T - PAD_B;
+    var first = series[0].at.getTime();
+    var last = series[series.length - 1].at.getTime();
+    var spanMs = Math.max(1, last - first);
+    var peak = 0;
+    for (i = 0; i < series.length; i++) peak = Math.max(peak, series[i].dps);
+    var top = peak > 0 ? peak : 1;
+
+    var x = function (date) { return PAD_L + ((date.getTime() - first) / spanMs) * plotW; };
+    var y = function (value) { return PAD_T + plotH - (value / top) * plotH; };
+
+    var chart = svg(W, H,
+      "Cumulative distinguished points across " + series.length + " snapshots, from " +
+      num(series[0].dps) + " on " + utc(series[0].at) + " to " + num(series[series.length - 1].dps) +
+      " on " + utc(series[series.length - 1].at));
+
+    chart.appendChild(shape("line", { x1: PAD_L, y1: PAD_T + plotH, x2: W - PAD_R, y2: PAD_T + plotH, "class": "axis" }));
+    chart.appendChild(shape("line", { x1: PAD_L, y1: PAD_T, x2: W - PAD_R, y2: PAD_T, "class": "grid" }));
+    chart.appendChild(label(PAD_L - 8, PAD_T + 4, num(top), "end", "tick"));
+    chart.appendChild(label(PAD_L - 8, PAD_T + plotH + 4, "0", "end", "tick"));
+    chart.appendChild(label(PAD_L, H - 8, utc(series[0].at), "start", "tick"));
+    chart.appendChild(label(W - PAD_R, H - 8, utc(series[series.length - 1].at), "end", "tick"));
+
+    var line = [];
+    for (i = 0; i < series.length; i++) {
+      line.push((i === 0 ? "M" : "L") + x(series[i].at).toFixed(1) + " " + y(series[i].dps).toFixed(1));
+    }
+    var area = line.concat([
+      "L" + x(series[series.length - 1].at).toFixed(1) + " " + (PAD_T + plotH),
+      "L" + x(series[0].at).toFixed(1) + " " + (PAD_T + plotH),
+      "Z"
+    ]);
+    chart.appendChild(shape("path", { d: area.join(" "), "class": "area" }));
+    chart.appendChild(shape("path", { d: line.join(" "), "class": "line" }));
+    chart.appendChild(shape("circle", {
+      cx: x(series[series.length - 1].at).toFixed(1), cy: y(series[series.length - 1].dps).toFixed(1),
+      r: 3.5, "class": "dot"
+    }));
+
+    host.appendChild(chart);
+
+    var gained = series[series.length - 1].dps - series[0].dps;
+    var hours = (last - first) / HOUR_MS;
+    var perHour = hours > 0 ? Math.round(gained / hours) : 0;
+    el("total-note").textContent =
+      series.length + " snapshots · " + num(gained) + " points added over " +
+      (hours >= 1 ? Math.round(hours) + (Math.round(hours) === 1 ? " hour" : " hours") : "under an hour") +
+      (perHour > 0 ? " · mean " + num(perHour) + " per hour across the feed" : "");
+  }
+
+  function drawWorkers(workers, snapshotAt) {
+    var body = el("workers-body");
+    body.textContent = "";
+    if (!workers.length) {
+      emptyRow(body, 5, "No workers have reported points.");
+      el("workers-foot").textContent = " ";
+      return;
+    }
+    var totalDps = 0;
+    var i;
+    for (i = 0; i < workers.length; i++) totalDps += Number(workers[i].dps) || 0;
+
+    var sorted = workers.slice().sort(function (a, b) { return (Number(b.dps) || 0) - (Number(a.dps) || 0); });
+    var active = 0;
+    for (i = 0; i < sorted.length; i++) {
+      var worker = sorted[i];
+      var dps = Number(worker.dps) || 0;
+      var lastAt = parseTime(worker.last_dp_at);
+      var isActive = Boolean(lastAt && snapshotAt && (snapshotAt.getTime() - lastAt.getTime()) <= HOUR_MS);
+      if (isActive) active++;
+
+      var tr = document.createElement("tr");
+      var idCell = document.createElement("td");
+      idCell.className = "mono";
+      // worker_id is self-reported by the walkers, so it goes in as text.
+      idCell.appendChild(document.createTextNode(worker.worker_id || "unknown"));
+      if (isActive) {
+        var chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = "active";
+        idCell.appendChild(document.createTextNode(" "));
+        idCell.appendChild(chip);
+      }
+      tr.appendChild(idCell);
+      cell(tr, num(dps), "num mono");
+      cell(tr, totalDps > 0 ? (100 * dps / totalDps).toFixed(1) + "%" : "—", "num mono");
+      cell(tr, timeCell(worker.first_dp_at));
+      cell(tr, timeCell(worker.last_dp_at));
+      body.appendChild(tr);
+    }
+    el("workers-foot").textContent = active
+      ? num(active) + " active in the last hour"
+      : "none active in the last hour";
+  }
+
+  function drawCampaign(status) {
+    var body = el("campaign-body");
+    body.textContent = "";
+    var rows = [
+      ["Campaign", status.campaign_id || "—", true],
+      ["Curve", status.curve_id || "—", true],
+      ["DP mask bits", status.dp_mask_bits === null || status.dp_mask_bits === undefined ? "not published" : String(status.dp_mask_bits), true],
+      ["Campaign opened", timeCell(status.campaign_created_at, true), false],
+      ["First point", timeCell(status.first_dp_at, true), false],
+      ["Latest point", timeCell(status.last_dp_at, true), false],
+      ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
+      ["Snapshot generated", timeCell(status.generated_at, true), false],
+      ["Snapshot source", status.source || "—", true],
+      ["Schema version", status.schema_version === undefined ? "—" : String(status.schema_version), true]
+    ];
+    for (var i = 0; i < rows.length; i++) {
+      var tr = document.createElement("tr");
+      var th = document.createElement("th");
+      th.scope = "row";
+      th.textContent = rows[i][0];
+      tr.appendChild(th);
+      cell(tr, rows[i][1], rows[i][2] ? "mono" : "");
+      body.appendChild(tr);
+    }
+  }
+
+  function drawHistory(points) {
+    var body = el("history-body");
+    body.textContent = "";
+    if (!points.length) {
+      emptyRow(body, 6, "No published history yet.");
+      el("history-summary").textContent = "Snapshot table";
+      return;
+    }
+    el("history-summary").textContent = "Snapshot table (" + points.length + ")";
+    for (var i = points.length - 1; i >= 0; i--) {
+      var point = points[i];
+      var tr = document.createElement("tr");
+      cell(tr, timeCell(point.generated_at, true));
+      cell(tr, point.state || "—", "mono");
+      cell(tr, num(point.dps), "num mono");
+      cell(tr, num(point.dps_last_hour), "num mono");
+      cell(tr, num(point.workers), "num mono");
+      cell(tr, num(point.collisions), "num mono");
+      body.appendChild(tr);
+    }
+  }
+
+  function setBanner(state, extra) {
+    var banner = el("banner");
+    var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
+    banner.className = "banner " + known;
+    banner.textContent = STATE_TEXT[known] + (extra ? " " + extra : "");
+  }
+
+  function tickFreshness(status, failure) {
+    var text = el("freshness-text");
+    if (failure) {
+      text.textContent = failure;
+      return;
+    }
+    var generated = parseTime(status && status.generated_at);
+    var parts = [];
+    if (generated) parts.push("Snapshot " + utc(generated, true) + " (" + ago(generated) + ")");
+    else parts.push("Snapshot time not published");
+    if (loadedAt) parts.push("fetched " + ago(loadedAt));
+    text.textContent = parts.join(" · ");
+  }
+
+  async function fetchJSON(path) {
+    var response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) throw new Error(path + ": HTTP " + response.status);
+    return response.json();
+  }
+
+  var lastStatus = null;
+  var historyLoaded = false;
+
+  async function load() {
+    var status;
+    try {
+      status = await fetchJSON("./status.json");
+    } catch (err) {
+      setBanner("UNREACHABLE", "Could not read status.json (" + err.message + ").");
+      tickFreshness(lastStatus, "status.json unavailable · last try " + utc(new Date(), true));
+      placeholderTables("No data \u2014 the snapshot could not be read.");
+      return;
+    }
+    lastStatus = status;
+    loadedAt = new Date();
+
+    // history.json is optional: the dashboard is still useful without it, so
+    // a failure here must not take the page down with it, and must not wipe
+    // a chart or table that already loaded.
+    var history = null;
+    var historyError = "";
+    try {
+      history = await fetchJSON("./history.json");
+    } catch (err) {
+      historyError = err.message;
+    }
+
+    var generated = parseTime(status.generated_at);
+    var snapshotAge = generated ? Date.now() - generated.getTime() : null;
+    var stale = snapshotAge !== null && snapshotAge > STALE_AFTER_MS;
+    setBanner(status.state, stale
+      ? "The publishing job last ran " + ago(generated) + ", so these counts are not current."
+      : "");
+
+    el("dps").textContent = num(status.dps);
+    el("dps_last_hour").textContent = num(status.dps_last_hour);
+    el("dps_last_day").textContent = num(status.dps_last_day);
+    el("workers").textContent = num(status.workers);
+    el("collisions").textContent = num(status.collisions);
+
+    var firstAt = parseTime(status.first_dp_at);
+    el("dps-foot").textContent = firstAt ? "since " + utc(firstAt) : " ";
+    var lastAt = parseTime(status.last_dp_at);
+    el("rate-foot").textContent = lastAt ? "latest point " + ago(lastAt) : " ";
+
+    var collisions = Number(status.collisions) || 0;
+    el("collision-card").className = "card" + (collisions > 0 ? " alert" : "");
+    el("collisions-foot").textContent = collisions > 0
+      ? "unverified — needs an independent [k]P = Q check"
+      : "none recorded";
+
+    drawHourly(denseHours(status.hourly || [], generated));
+    if (history) {
+      drawTotals(history.points || []);
+      drawHistory(history.points || []);
+      // Only a history with rows in it is worth protecting from a later
+      // failure message: an empty one leaves the same "nothing here" row a
+      // failure would, and would otherwise keep saying there is no history
+      // when the truth is that the file could not be read.
+      historyLoaded = (history.points || []).length > 0;
+    } else if (!historyLoaded) {
+      var historyBody = el("history-body");
+      if (historyBody) {
+        historyBody.textContent = "";
+        emptyRow(historyBody, 6, "Could not read history.json (" + historyError + ").");
+      }
+    }
+    drawWorkers(status.per_worker || [], generated);
+    drawCampaign(status);
+
+    if (historyError) {
+      el("total-note").textContent = "Could not read history.json (" + historyError + ").";
+    }
+    el("claim").textContent = status.claim_boundary ||
+      "No claim boundary published in this snapshot.";
+    tickFreshness(status, "");
+  }
+
+  function schedule() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(function () {
+      // Nothing to refresh for a hidden tab; the visibility handler catches up.
+      if (document.hidden) {
+        tickFreshness(lastStatus, "");
+        return;
+      }
+      load();
+    }, REFRESH_MS);
+  }
+
+  el("refresh").addEventListener("click", function () {
+    el("refresh").disabled = true;
+    load().finally(function () { el("refresh").disabled = false; });
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) load();
+  });
+
+  load();
+  schedule();
+})();
+</script>
 </body>
 </html>

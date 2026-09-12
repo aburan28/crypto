@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aburan28/crypto · cryptography and the cost of breaking it</title>
+<meta name="description" content="A from-scratch cryptography library in Rust and the cryptanalysis suite that measures where attack crossovers actually are: the index-calculus cost ledger, a live ECC2K-130 Pollard rho campaign, and the research notes behind both.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1020">
+<link rel="canonical" href="https://aburan28.github.io/crypto/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="aburan28/crypto — cryptography and the cost of breaking it">
+<meta property="og:description" content="The index-calculus cost ledger, a live ECC2K-130 Pollard rho campaign, and the research notes behind both.">
+<meta property="og:url" content="https://aburan28.github.io/crypto/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <nav aria-label="Site">
+    <a href="./" aria-current="page">Overview</a>
+    <a href="./scoreboard/">Scoreboard</a>
+    <a href="./status/">Campaign status</a>
+    <a href="https://github.com/aburan28/crypto">Repository</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <p class="kicker">aburan28/crypto</p>
+    <h1>Cryptography, and the cost of breaking it</h1>
+    <p class="lede">
+      A from-scratch implementation of the major cryptographic algorithm
+      families in Rust, and a cryptanalysis suite built to answer one
+      question about each attack it implements: <em>where is the crossover,
+      actually?</em> Published here are the cost ledger that answer lives in,
+      a live distinguished-point campaign, and the notes behind both.
+    </p>
+  </section>
+
+  <aside class="warn" role="note">
+    <h2>Not for production use</h2>
+    <p>
+      The library is an educational reimplementation. It is not
+      constant-time &mdash; the big-integer arithmetic branches on secret
+      values, so every RSA, ECDSA, ECDH and ECC operation leaks through
+      timing, and the AES S-box is a lookup table open to cache-timing
+      attacks. It has had no third-party audit, and some parameter sets in it
+      are deliberately far below any security level.
+      <a href="https://github.com/aburan28/crypto/blob/main/SECURITY.md">SECURITY.md</a>
+      lists the structural limitations in full, with the audited
+      alternatives to use instead.
+    </p>
+  </aside>
+
+  <h2 class="section-head">What is published here</h2>
+  <div class="cards">
+
+    <a class="card" href="./scoreboard/">
+      <p class="card-kicker">Cost ledger</p>
+      <h3>Index Calculus Scoreboard</h3>
+      <p>
+        Every index-calculus variant built in this repository for the
+        elliptic-curve discrete logarithm, scored in one unit against two
+        boundaries: a generic-group floor that no amount of engineering can
+        cross, and Pollard rho measured on the same curves with the same
+        operation accounting.
+      </p>
+      <p class="card-more">Open the scoreboard</p>
+    </a>
+
+    <a class="card" href="./status/">
+      <p class="card-kicker">Live campaign</p>
+      <h3>ECC2K-130 status</h3>
+      <p>
+        Hourly aggregates from the Certicom ECC2K-130 distinguished-point
+        collection: counts, per-worker yield and collisions. Counts only
+        &mdash; walk coefficients, point keys and seeds stay in the private
+        store.
+      </p>
+      <dl class="live" id="live">
+        <div><dt>Points</dt><dd class="mono" id="live-dps">&mdash;</dd></div>
+        <div><dt>Workers</dt><dd class="mono" id="live-workers">&mdash;</dd></div>
+        <div><dt>State</dt><dd class="mono state" id="live-state">&mdash;</dd></div>
+      </dl>
+      <p class="card-more">Open the dashboard</p>
+    </a>
+
+    <a class="card" href="https://github.com/aburan28/crypto/blob/main/docs/ECDLP_ATTACK_MATRIX.md">
+      <p class="card-kicker">Taxonomy</p>
+      <h3>ECDLP attack matrix</h3>
+      <p>
+        A map of every known attack on elliptic-curve cryptography,
+        cross-referenced with where each one is implemented here, and
+        calibrated to what an attacker can actually do to a curve rather
+        than to speculative weaknesses.
+      </p>
+      <p class="card-more">Read the matrix</p>
+    </a>
+
+  </div>
+
+  <section class="rule-section" aria-labelledby="h-rule">
+    <h2 id="h-rule" class="section-head">How a result is reported here</h2>
+    <p class="lede narrow">
+      A cryptanalysis thread can run for weeks, improve its own headline
+      number by two orders of magnitude and have established nothing. The
+      convention that prevents it is the one worth knowing before reading
+      anything else on this site: progress is a <strong>ratio to a
+      boundary</strong>, reported in a <strong>single table</strong> whose
+      rows are variants and whose columns are one unit.
+    </p>
+
+    <dl class="facts">
+      <div class="fact">
+        <dt>The unit</dt>
+        <dd class="mono">S = ops / &radic;n</dd>
+        <p>
+          Group operations per square root of the group order. Every cost the
+          method incurs is inside it: precomputation, table setup, relation
+          verification, linear algebra, and any work an oracle does per call.
+          Picking the unit this way makes rho flat at every size, so &ldquo;is
+          this better than rho&rdquo; becomes reading one column.
+        </p>
+      </div>
+      <div class="fact">
+        <dt>A floor</dt>
+        <dd class="mono">&kappa; &ge; &radic;(2(B+1)/&gamma;)</dd>
+        <p>
+          A lower bound from a counting argument rather than a measurement:
+          generic relation yield from <span class="mono">P</span> residuals is
+          at most <span class="mono">&gamma;P&sup2;/2n</span>. It moves only
+          with the factor-base size and the automorphism order, so it cannot
+          be tuned away.
+        </p>
+      </div>
+      <div class="fact">
+        <dt>A reference</dt>
+        <dd class="mono">rho, S &asymp; 1.3</dd>
+        <p>
+          The cost of the best algorithm that already solves the same problem,
+          measured in the same unit on the same instances: 1.2 to 1.8 across
+          four group sizes. A boundary chosen after the fact is not a
+          boundary, so both are written down before any optimising starts.
+        </p>
+      </div>
+    </dl>
+
+    <p class="lede narrow">
+      Every change then gets classified, and only the first of the four is
+      worth calling a result:
+    </p>
+
+    <div class="scroll" tabindex="0">
+      <table class="classes">
+        <caption class="sr-only">The four classes a measured change can fall into</caption>
+        <thead>
+          <tr><th scope="col">Class</th><th scope="col">What moved</th><th scope="col">What it means</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><span class="chip advance">advance</span></th>
+            <td>ratio to the floor fell</td>
+            <td>the method does something a generic algorithm cannot</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="chip engineering">engineering</span></th>
+            <td><span class="mono">S</span> fell, ratio to the floor flat</td>
+            <td>legitimate, bounded, and not a finding</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="chip relabelling">relabelling</span></th>
+            <td>headline count fell, <span class="mono">S</span> rose</td>
+            <td>work moved somewhere the headline does not look</td>
+          </tr>
+          <tr>
+            <th scope="row"><span class="chip accounting">accounting</span></th>
+            <td>numbers changed, algorithm did not</td>
+            <td>a correction; say so and do not claim the gain</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      The unit, the floor and the reference figures above are quoted from the
+      <a href="./scoreboard/">scoreboard</a>; the reporting rule itself is in
+      <a href="https://github.com/aburan28/crypto/blob/main/AGENTS.md">AGENTS.md</a>.
+    </p>
+  </section>
+
+  <section aria-labelledby="h-notes">
+    <h2 id="h-notes" class="section-head">Research notes</h2>
+    <p class="lede narrow">
+      Each note carries its own boundary, table and falsification target. The
+      bottom lines here are mostly negative results stated in numbers, which
+      is what a finished thread looks like when the answer is no.
+    </p>
+
+    <ul class="notes">
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_RESIDUAL_WALKS.md">Residual walks over partial decompositions</a>
+        <p>
+          The reference implementation of the reporting rule, end to end.
+          Result in one line: every residual-collision hybrid tested recovers
+          the planted logarithm correctly, and every one of them needs
+          <span class="mono">&asymp; &radic;(2n(B+1))</span> residuals to do
+          it &mdash; a factor <span class="mono">&radic;(2(B+1))</span>
+          <em>more</em> than plain Pollard rho needs steps. The walk changes
+          how cheaply a residual is constructed, not how many a collision
+          needs.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_KOBLITZ_INDEX_CALCULUS.md">Index calculus on Koblitz curves</a>
+        <p>
+          Frobenius-invariant factor bases, Semaev summation polynomials and
+          Gr&ouml;bner solving, with a scoped scaling target and
+          pre-registered hypotheses in a companion note.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_DEGREE_REDUCTION.md">Reducing the solving degree</a>
+        <p>
+          The offensive side of the first-fall-degree program: whether the
+          Gr&ouml;bner solving degree is a property of the system or of the
+          presentation chosen for it.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_FFD_PROOF_COMPLEXITY.md">A proof-complexity bridge for the first-fall-degree assumption</a>
+        <p>
+          Reads the disputed first-fall-degree heuristic as, up to constants,
+          a statement about Polynomial Calculus refutation size.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_EXOTIC_COORDINATES.md">Exotic coordinates for point decomposition</a>
+        <p>
+          An algorithmic search for point representations beyond affine,
+          projective and Jacobian that give better relations between points,
+          rather than a trawl through formula databases.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_SECP256K1_CM.md">secp256k1's j = 0 / disc = &minus;3 CM structure</a>
+        <p>
+          Whether the unusual endomorphism ring of secp256k1 leaks anything
+          ECDLP-relevant, with a PARI/GP artefact that reproduces every
+          invariant in the note.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/README.md">ECC2K-130 and ECC2K-95 walk engines</a>
+        <p>
+          The CPU, GPU and HDL walk implementations behind the
+          <a href="./status/">live campaign</a>, and the measured throughput
+          ceiling of each.
+        </p>
+      </li>
+      <li>
+        <a href="https://github.com/aburan28/crypto/blob/main/PRIMER_ELLIPTIC_CURVES.md">A visual primer: CM, Jacobian, twist, isogeny, rank, embedding degree</a>
+        <p>
+          No prerequisites. The six terms that show up everywhere above,
+          each as what it is, a picture, and what it looks like in
+          secp256k1 &mdash; read this first if the notes read as jargon.
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <footer>
+    <h2>What this site does not claim</h2>
+    <p>
+      Nothing published here breaks a deployed curve. The scoreboard's
+      variants are measured against Pollard rho and a generic-group floor
+      precisely so that a cost improvement cannot be mistaken for a break,
+      and the campaign page reports distinguished-point counts for a
+      published challenge curve: a recorded collision there is not a
+      discrete-log recovery until an independent solver has checked
+      <span class="mono">[k]P = Q</span>.
+    </p>
+    <p>
+      Source for every page here, and for the figures on them:
+      <a href="https://github.com/aburan28/crypto">github.com/aburan28/crypto</a>.
+    </p>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+  // Progressive enhancement: the card reads fine without these three numbers.
+  var set = function (id, text) {
+    var node = document.getElementById(id);
+    if (node) node.textContent = text;
+  };
+  fetch("./status.json", { cache: "no-store" })
+    .then(function (response) {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    })
+    .then(function (status) {
+      var dps = Number(status.dps);
+      var workers = Number(status.workers);
+      set("live-dps", isFinite(dps) ? dps.toLocaleString("en-US") : "—");
+      set("live-workers", isFinite(workers) ? workers.toLocaleString("en-US") : "—");
+      set("live-state", String(status.state || "—").toLowerCase().replace(/_/g, " "));
+    })
+    .catch(function () {
+      var live = document.getElementById("live");
+      if (live) live.hidden = true;
+    });
+})();
+</script>
+</body>
+</html>
