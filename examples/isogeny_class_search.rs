@@ -12,7 +12,7 @@
 //!
 //! | # | Boundary | Kind | Value |
 //! |---|---|---|---|
-//! | **A** | the isogeny class has more vertices than ρ has group operations | floor (counting) | `2^65.06` vertices vs `2^60.31` ρ operations |
+//! | **A** | the isogeny class has more vertices than ρ has group operations | floor (counting) | `2^65.06` vertices vs `2^60.81` ρ operations (`2^64.83` for ρ without automorphisms) |
 //! | **B** | vertices reachable by a computable isogeny | floor (reachability) | `263` of `2^65.06`, i.e. `2^-56.9` of the class |
 //! | **C** | the curve enters the descended system **below** the leading form | exact, algebraic | `d_reg` and fall-availability are constant on the class |
 //! | **D** | the only measured `D*`-lowering mechanism (L1 subfield) needs a subfield | exact | `131` is prime; isogenies do not change the field |
@@ -58,12 +58,23 @@ use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const OMEGA: f64 = 2.807;
-/// ρ on the 130-bit prime subgroup, with the `√(2·131)` negation +
-/// Frobenius speedup the ECC2K-130 effort actually uses.
-fn log2_rho_reference() -> f64 {
-    let r = 680564733841876926932320129493409985129f64;
-    (std::f64::consts::PI * r / 4.0).sqrt().log2() - (2.0f64 * 131.0).sqrt().log2()
+/// The 130-bit prime subgroup order of ECC2K-130.
+const SUBGROUP_ORDER: f64 = 680564733841876926932320129493409985129f64;
+
+/// Expected ρ iterations on a group of order `r` whose automorphism group has
+/// order `m` and acts freely: the walk is on `r/m` classes, so the birthday
+/// bound is `√(π(r/m)/2) = √(πr/2m)`.
+///
+/// Writing it once, parameterised by `m`, is deliberate.  `√(πr/4)` is *already*
+/// `m = 2` (negation), so dividing that by `√(2·131)` applies negation twice and
+/// understates ρ by half a bit — the error this function replaces.
+fn log2_rho(m: f64) -> f64 {
+    (std::f64::consts::PI * SUBGROUP_ORDER / (2.0 * m)).sqrt().log2()
 }
+
+/// ECC2K-130's automorphism group: negation together with the 131 Frobenius
+/// powers, so `m = 2 · 131 = 262`.
+const RHO_AUT_ORDER: f64 = 262.0;
 
 fn main() {
     let seed = std::env::args()
@@ -102,12 +113,23 @@ fn main() {
         class.class_size,
         class.log2_class_size()
     );
-    let log2_rho = log2_rho_reference();
+    let log2_rho_aut = log2_rho(RHO_AUT_ORDER);
+    let log2_rho_plain = log2_rho(1.0);
     println!(
-        "   ρ reference  = 2^{:.2} group operations  ⇒ enumerating the class costs 2^{:.2}× ρ",
-        log2_rho,
-        class.log2_class_size() - log2_rho
+        "   ρ reference  = 2^{:.2} iterations, √(πr/2m) with m = 262 (negation × 131 Frobenius)",
+        log2_rho_aut
     );
+    println!(
+        "                  2^{:.2} for plain ρ with no automorphisms (m = 1)",
+        log2_rho_plain
+    );
+    println!(
+        "   ⇒ enumerating the class costs 2^{:.2}× the automorphism-assisted ρ, and 2^{:.2}× plain ρ.",
+        class.log2_class_size() - log2_rho_aut,
+        class.log2_class_size() - log2_rho_plain
+    );
+    println!("     The sign is what Boundary A rests on, and it holds either way; the margin");
+    println!("     against plain ρ is thin, so the boundary is reported with both.");
 
     println!("\n   per-prime volcano structure:");
     println!(
@@ -462,7 +484,8 @@ fn main() {
         &table_rows,
         floor,
         verdict,
-        log2_rho,
+        log2_rho_aut,
+        log2_rho_plain,
     );
 }
 
@@ -492,6 +515,7 @@ fn write_json(
     floor: f64,
     verdict: &str,
     log2_rho: f64,
+    log2_rho_plain: f64,
 ) {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -517,12 +541,14 @@ fn write_json(
     }
     s.push_str("],\n");
     s.push_str(&format!(
-        "    \"crater_size\": {},\n    \"class_size\": \"{}\",\n    \"log2_class_size\": {:.4},\n    \"log2_rho_reference\": {:.4},\n    \"log2_class_over_rho\": {:.4}\n  }},\n",
+        "    \"crater_size\": {},\n    \"class_size\": \"{}\",\n    \"log2_class_size\": {:.4},\n    \"log2_rho_reference\": {:.4},\n    \"rho_automorphism_order\": 262,\n    \"log2_rho_plain\": {:.4},\n    \"log2_class_over_rho\": {:.4},\n    \"log2_class_over_rho_plain\": {:.4}\n  }},\n",
         class.crater_size,
         class.class_size,
         class.log2_class_size(),
         log2_rho,
-        class.log2_class_size() - log2_rho
+        log2_rho_plain,
+        class.log2_class_size() - log2_rho,
+        class.log2_class_size() - log2_rho_plain
     ));
     s.push_str("  \"reach\": [\n");
     for (i, (b, r)) in reach.iter().enumerate() {

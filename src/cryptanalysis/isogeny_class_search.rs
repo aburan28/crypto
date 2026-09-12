@@ -35,13 +35,26 @@
 //!   h(O_f) = f · Π_{ℓ | f} (1 − (d_K/ℓ)/ℓ)                (h_K = 1, unit index 1).
 //! ```
 //!
-//! Pollard ρ on the 130-bit prime subgroup costs `2^64.33` group
-//! operations, or `2^60.31` with the `√(2·131)` negation-plus-Frobenius
-//! speedup the ECC2K-130 effort actually uses.  **Enumerating the isogeny
-//! class costs more than solving the DLP by ρ**, at one operation per
-//! vertex, before any per-vertex Gröbner work is charged.  So an
-//! *exhaustive* search of the class is ruled out by counting alone, and
-//! only a search touching `≤ 2^{-4.75}` of it could ever pay.
+//! Pollard ρ on a group of order `r` whose automorphism group has order `m`
+//! and acts freely walks on `r/m` classes, so the birthday bound is
+//! `√(π(r/m)/2) = √(πr/2m)`.  For ECC2K-130 the automorphism group is
+//! negation together with the 131 Frobenius powers, `m = 2 · 131 = 262`:
+//!
+//! ```text
+//!   plain ρ, m = 1      √(πr/2)    = 2^64.83
+//!   negation, m = 2     √(πr/4)    = 2^64.33
+//!   full, m = 262       √(πr/524)  = 2^60.81   ← the ECC2K-130 effort's target
+//! ```
+//!
+//! **Enumerating the isogeny class costs more than solving the DLP by ρ**, at
+//! one operation per vertex, before any per-vertex Gröbner work is charged —
+//! `2^4.25×` against the automorphism-assisted ρ.  The margin is much thinner
+//! against plain ρ, only `2^0.24×`, so Boundary A is reported against both:
+//! the *sign* is what it rests on, and that holds either way.
+//!
+//! (An earlier revision of this module divided `√(πr/4)` by `√(2·131)`.  That
+//! applies negation twice — `√(πr/4)` is already `m = 2` — and understated ρ
+//! by half a bit.  Caught in review on PR #203.)
 //!
 //! ## Boundary B — 263 of those `2^65` vertices are reachable, and that is all
 //!
@@ -1512,20 +1525,41 @@ mod tests {
         assert_eq!(class.primes[1].kronecker, -1);
     }
 
-    /// Boundary A: the class has more vertices than ρ has group operations.
+    /// Boundary A: the class has more vertices than ρ has group operations —
+    /// against ρ *with* its automorphism speedup and against plain ρ, because
+    /// the margin differs by four bits between them and only the sign is
+    /// load-bearing.
     #[test]
     fn class_is_larger_than_the_rho_reference() {
         let class = koblitz_isogeny_class(131, 5_000_000);
         let log2_class = class.log2_class_size();
-        // ρ with the √(2·131) Frobenius/negation speedup.
-        let r = 680564733841876926932320129493409985129f64;
-        let log2_rho =
-            (std::f64::consts::PI * r / 4.0).sqrt().log2() - (2.0f64 * 131.0).sqrt().log2();
-        assert!(
-            log2_class > log2_rho,
-            "class 2^{log2_class:.2} must exceed rho 2^{log2_rho:.2}"
-        );
         assert!((log2_class - 65.06).abs() < 0.02, "got 2^{log2_class}");
+
+        // √(πr/2m): the walk is on r/m classes, so m enters once and once only.
+        let r = 680564733841876926932320129493409985129f64;
+        let log2_rho = |m: f64| (std::f64::consts::PI * r / (2.0 * m)).sqrt().log2();
+
+        let aut = log2_rho(262.0); // negation × 131 Frobenius powers
+        let plain = log2_rho(1.0);
+        assert!((aut - 60.81).abs() < 0.02, "aut rho 2^{aut}");
+        assert!((plain - 64.83).abs() < 0.02, "plain rho 2^{plain}");
+        // Pin the specific error this replaced: taking the m = 2 form and
+        // dividing it by √262 double-counts negation and lands exactly half a
+        // bit low.  If someone reintroduces that expression, this fires.
+        let double_counted = log2_rho(2.0) - 0.5 * 262f64.log2();
+        assert!(
+            (aut - double_counted - 0.5).abs() < 0.01,
+            "the double-counted form should sit exactly 0.5 bits below the \
+             correct one; got {:.4} vs {:.4}",
+            double_counted,
+            aut
+        );
+
+        assert!(log2_class > aut, "class 2^{log2_class:.2} vs aut rho 2^{aut:.2}");
+        assert!(
+            log2_class > plain,
+            "class 2^{log2_class:.2} vs plain rho 2^{plain:.2}"
+        );
     }
 
     /// Boundary B: only 263 vertices are reachable with a feasible isogeny
