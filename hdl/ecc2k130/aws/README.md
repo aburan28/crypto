@@ -65,12 +65,12 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, about 8.4k LUTs, 20 RAMB36 and 2 RAMB18 as synthesised
+its walk memory, about 8.6k LUTs, 16 RAMB36 and 2 RAMB18 as synthesised
 (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs and 2 016 RAMB36.
-The default 48 is a third of the device; 64 is 41% of the LUTs and 67% of
-the block RAM, and the RAM is what runs out first, around 80. Read
-`synth_utilization` and the post-route timing from the reports, then go to
-what fits.
+The default 48 is a third of the device; 64 is 42% of the LUTs and 54% of
+the block RAM, 80 is 53% and 67%, 96 is 63% and 81%; the RAM is what runs
+out first. Read `synth_utilization` and the post-route timing from the
+reports, then go to what fits.
 
 `ID_W` sets walks per engine, `2^ID_W`. Each walk is 304 bits of block
 RAM, and the step unit holds `W · 2^LOG_NB` = 256 walks at once; 512 (the
@@ -118,8 +118,9 @@ the same structure.
 for the management tools and the `fpga_mgmt` library, fetches
 `campaign.json`, `fpga/afi.json`, `fpga/source.tar.gz` and `aws/worker.py`
 from the bucket, builds `ecc2k130-fpga` with `make pci`, and runs its
-`--selftest`. Then per slot: `fpga-load-local-image -S slot -I agfi -R`,
-wait for `loaded`, and probe the slot with `ecc2k130-fpga --launches 1`,
+`--selftest`. Then per slot: `fpga-load-local-image -S slot -I agfi` (F2's
+tools rescan PCI by default and reject F1's `-R`), wait for `loaded`, and
+probe the slot with `ecc2k130-fpga --launches 1`,
 which checks `MAGIC` and `GEOM`. Only a slot that answers as this image
 gets a worker.
 
@@ -176,10 +177,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 100 – 8 420** with them in block RAM, 180 LUTRAM left; 7 420 FF |
-| Register block (`ec2k_axil`) | — | 902 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
-| BRAM | 0 | **20 RAMB36 + 2 RAMB18 per engine** since the memories moved out of LUTRAM (below) |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.18 ns at 3.0 ns (synthesis, two engines with register block and bridge; +1.25 inside an engine); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 260 – 8 570** with them in block RAM, 180 LUTRAM and 586 SRL left; 7 660 FF |
+| Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
+| BRAM | 0 | **16 RAMB36 + 2 RAMB18 per engine** since the memories moved out of LUTRAM (below); 20 + 2 before the retire side stopped reading memories |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.13 ns at 3.0 ns (synthesis, two engines with register block and bridge; +1.23 inside an engine); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
@@ -210,20 +211,32 @@ replicate because the loads are memory primitives. 4 800 LUTRAM per
 engine, 48 times, spread across every SLICEM of a region is a design
 that cannot place tightly. Every wide memory is now block RAM
 ([`../README.md`](../README.md), "Capacity"), with the read latency of
-two hidden by a look-ahead tag on the retire side and a prefetch buffer
-in the walker; the engine lost 4 700 LUTs and gained 21 block RAMs,
-and the free depth of a block RAM made 512 walks and 16 batches in flight
-the default, 5.29 clocks per step against 5.54.
+two hidden by a prefetch buffer in the walker and, on the retire side, by
+not reading at all (the final multiply carries what its retire needs);
+the engine lost 4 700 LUTs and gained 17 block RAM tiles, and the free
+depth of a block RAM made 512 walks and 16 batches in flight the
+default, 5.29 clocks per step against 5.54.
 
 **The 48-engine build of that revision met timing at 333 MHz**
-(`20260912-181902-n48-c333`, AFI `agfi-0977ae08fec2f9ced`): placed at
-+0.418 ns with no failing endpoint and no congestion worse than 8×8,
-routed at **WNS +0.022 ns, TNS 0, WHS +0.009**; 403 891 LUTs (31%),
-397 918 FFs (15%), 960 RAMB36 + 96 RAMB18 (50% of the block RAM), no
-DSP or URAM. Its ten worst paths were all one net, a spine stage's reset
-register into the clock enables of the 1 300 data flip-flops it held
-during reset, 2.3 ns of route for one LUT across an SLR boundary — so
-data registers no longer see the reset anywhere in the design (the batch
-pipe, walker and multiplier had the same shape inside every engine). The
-first revision's 48-engine build, for the record, routed at −1.65 ns on
-the 4 ns clock with −221 µs of total negative slack.
+(`20260912-181902-n48-c333`): placed at +0.418 ns with no failing
+endpoint and no congestion worse than 8×8, routed at **WNS +0.022 ns,
+TNS 0, WHS +0.009**; 403 891 LUTs (31%), 397 918 FFs (15%), 960 RAMB36 +
+96 RAMB18 (50% of the block RAM), no DSP or URAM. Its ten worst paths
+were all one net, a spine stage's reset register into the clock enables
+of the 1 300 data flip-flops it held during reset, 2.3 ns of route for
+one LUT across an SLR boundary — so data registers no longer see the
+reset anywhere in the design (the batch pipe, walker and multiplier had
+the same shape inside every engine). The first revision's 48-engine
+build, for the record, routed at −1.65 ns on the 4 ns clock with −221 µs
+of total negative slack.
+
+Its AFI `agfi-0977ae08fec2f9ced` cannot be loaded: `fpga-load-local-image`
+answers `cl-id-mismatch`, because the HDK's `aws_build_dcp_from_cl.py`
+copies the PCIe ids from `cl_id_defines.vh` into the manifest with
+`str.lstrip("32'h")`, which also strips a leading `2` or `3` of the id
+itself — subsystem id `2C13` went in as `C13`. The same DCP tarball with
+the manifest corrected by hand was resubmitted as
+**`agfi-08bd9e69a78e4dc79`** (build directory
+`20260912-181902-n48-c333-idfix`); `build_afi_instance.sh` now checks the
+manifest against the defines and rewrites it inside the tarball, and the
+subsystem id is `EC13`.
