@@ -41,6 +41,7 @@ set targets [list \
     ec2k_batch_pipe [concat $mul ec2k_batch_pipe.vhd] \
     ec2k_step_pipe  [concat $mul ec2k_step_pipe.vhd] \
     ec2k_walker     [concat $mul ec2k_batch_pipe.vhd ec2k_walker.vhd] \
+    ec2k_axil       [concat $mul ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd] \
 ]
 
 set summary {}

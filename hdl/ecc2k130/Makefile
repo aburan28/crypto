@@ -16,9 +16,9 @@ GHDL  ?= ghdl
 STD   ?= --std=08
 PY    ?= python3
 
-SRC := gf131_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_step_pipe.vhd ec2k_walker.vhd
+SRC := gf131_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_step_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd
 TBP := gf131_tb_pkg.vhd
-TBS := gf131_mul_tb ec2k_batch_tb ec2k_step_tb ec2k_walker_tb
+TBS := gf131_mul_tb ec2k_batch_tb ec2k_step_tb ec2k_walker_tb ec2k_axil_tb
 VEC := vectors_ecc2k130.txt
 
 .PHONY: all test check vectors cost rate clean
