@@ -296,6 +296,33 @@ over `F_{2^176}`, which is why GHS breaks `c2pnb176w1` and cannot touch
 this.)  That is a statement about all `2^131` curves, derived in one
 line, covering what no walk can enumerate.
 
+#### The same divisor set closes the quasi-subfield route
+
+`RESEARCH_QUASI_SUBFIELD.md` (landed on `main` while this thread ran)
+attacks the same target from the other side: it builds a factor base
+from the roots of a **quasi-subfield polynomial** (Huang–Kosters–Petit–
+Yeo–Yun), which is the other known route to a lower first fall degree on
+a binary curve.  Its §3 establishes that such polynomials exist exactly
+where a Frobenius-stable `F_2`-subspace does — i.e. exactly at the
+divisor degrees of `t^n − 1`.
+
+That is the *same set* `achievable_magic_numbers` computes here, so one
+calculation settles both questions at `n = 131`:
+
+```
+    attainable dimensions over F_{2^131}  =  {0, 1, 130, 131}
+      → GHS window 2..=6            empty
+      → n0 = 1    the subfield F_2, a factor base of 2 elements
+      → n0 = 130  the trace hyperplane, a factor base of half the field
+```
+
+Neither surviving dimension is a usable factor base.  So **both** known
+routes to a lower solving degree on a binary curve are closed over
+`F_{2^131}` by one line of divisor arithmetic — and closed for every
+curve over the field, not just for ECC2K-130's isogeny class.  Pinned by
+`no_usable_quasi_subfield_dimension_over_f2_131`, which also cross-checks
+the coset computation against the sibling module's.
+
 ### 4.4 The walk cannot even take its first step at small `ℓ`
 
 Two findings, both surprises worth recording:
@@ -546,6 +573,10 @@ Stated so a later reader does not re-open this on a hunch:
 - **A cheaper-than-free screen, which cannot exist.**  The floor charges
   one operation per curve.  No screen beats that, so no refinement of the
   search strategy can move the ratio in §2.3.
+- **Not: a quasi-subfield factor base.**  Asked and answered in §4.3 —
+  it needs a Frobenius-stable subspace, and `t^131 − 1` offers only
+  `F_2` and the trace hyperplane.  `RESEARCH_QUASI_SUBFIELD.md` reaches
+  the same negative conclusion independently, and by the same lemma.
 
 ---
 

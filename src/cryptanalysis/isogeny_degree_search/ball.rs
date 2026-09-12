@@ -40,6 +40,29 @@
 //! That is a statement about all `2^131` curves over the field, derived
 //! rather than sampled, so it covers the part of the isogeny class no
 //! walk of any radius can enumerate.
+//!
+//! ## The same divisor set closes the quasi-subfield route
+//!
+//! [`crate::cryptanalysis::quasi_subfield`] (see
+//! `RESEARCH_QUASI_SUBFIELD.md`) reaches the ECDLP from the other
+//! direction: it builds a factor base from the roots of a
+//! quasi-subfield polynomial, which exist exactly where a
+//! Frobenius-stable `F_2`-subspace does — i.e. exactly at the divisor
+//! degrees of `t^n − 1`.  That is the **same** set
+//! [`achievable_magic_numbers`] computes, so one calculation settles
+//! both questions at `n = 131`:
+//!
+//! ```text
+//!     attainable dimensions over F_{2^131}  =  {0, 1, 130, 131}
+//!       → GHS window 2..=6            empty
+//!       → n0 = 1    the subfield F_2, a factor base of 2 elements
+//!       → n0 = 130  the trace hyperplane, a factor base of half the field
+//! ```
+//!
+//! Neither surviving dimension is a usable factor base, so the two
+//! known routes to a lower first fall degree on a binary curve are
+//! closed over this field by one line of divisor arithmetic — and
+//! closed for every curve, not just for ECC2K-130's isogeny class.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_isogeny::{j_invariant, l_isogenous_neighbours};
@@ -489,6 +512,33 @@ mod tests {
         // The contrast: a composite degree has plenty of room, which is
         // why GHS breaks c2pnb176w1 and cannot touch ECC2K-130.
         assert!(!ghs_window_is_empty(176, 2, 6));
+    }
+
+    /// The same divisor set closes the quasi-subfield route.  A
+    /// quasi-subfield factor base needs a Frobenius-stable subspace, so
+    /// its dimension must be one of these; over `F_{2^131}` that leaves
+    /// only `F_2` (two elements) and the trace hyperplane (half the
+    /// field), neither of which is a usable factor base.
+    #[test]
+    fn no_usable_quasi_subfield_dimension_over_f2_131() {
+        let dims = achievable_magic_numbers(131);
+        let usable: Vec<u32> = dims
+            .iter()
+            .copied()
+            .filter(|d| *d > 1 && *d < 131 && *d * 2 < 131)
+            .collect();
+        assert!(
+            usable.is_empty(),
+            "a factor base needs 1 < n0 < n/2; attainable dimensions were {dims:?}"
+        );
+        // Cross-check the criterion the sibling thread states: the
+        // attainable dimensions are the divisor degrees of t^n − 1, and
+        // `quasi_subfield` agrees on a size it can evaluate.
+        let cosets =
+            crate::cryptanalysis::quasi_subfield::cyclotomic_cosets(131).expect("131 is odd");
+        let mut sizes: Vec<u32> = cosets.iter().map(|c| c.len() as u32).collect();
+        sizes.sort_unstable();
+        assert_eq!(sizes, cyclotomic_coset_sizes(131));
     }
 
     /// ECC2K-130 itself screens as the subfield curve (`j = 1 ∈ F_2`)
