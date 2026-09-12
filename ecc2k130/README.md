@@ -27,6 +27,12 @@ A GPU-oriented client for the Certicom binary-curve challenges: Pollard rho with
 a Frobenius-based iteration function, bitsliced, with the field arithmetic
 emitted by a code generator.
 
+The same iteration function exists in VHDL in [`hdl/ecc2k130/`](../hdl/ecc2k130/):
+a GF(2^131) multiplier in this normal basis, a step unit that does the whole
+`R + sigma^j(R)` in ten multiplies (inversion is eight, since squaring is
+wiring), and a walker that reports distinguished points. Its testbenches are
+checked against the field model in `codegen/`.
+
 Two targets are configured:
 
 * **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations. Uses the
