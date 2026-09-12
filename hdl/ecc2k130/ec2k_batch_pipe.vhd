@@ -262,6 +262,11 @@ architecture rtl of ec2k_batch_pipe is
   signal idle_cnt  : unsigned(15 downto 0) := (others => '0');
   signal flushing  : std_logic := '0';
   signal fill_ok, dummy_fill : std_logic;
+  -- the registered leaf write (address once per table)
+  signal w_en      : std_logic := '0';
+  signal w_la_a, w_da_a, w_db_a : laddr_t := 0;
+  signal w_la_word : la_word_t := (others => '0');
+  signal w_d       : gf_t := (others => '0');
 
   -- ready queue and free list of batch ids
   signal rq : q_t := (others => (others => '0'));
@@ -470,6 +475,16 @@ begin
       end if;
 
       -- ============ fill ============
+      -- The leaf writes go through one register stage: the write address
+      -- of each table is its own copy, so the placer can put it beside the
+      -- table's block RAMs (in the routed 64-engine image the fill's batch
+      -- id into a leaf table's write address was the worst path, 3.0 ns).
+      w_en <= '0';
+      if w_en = '1' then
+        m_la(w_la_a) <= w_la_word;
+        m_da(w_da_a) <= w_d;
+        m_db(w_db_a) <= w_d;
+      end if;
       if fb_valid = '0' then
         if not fl_empty then
           fb       <= fl(to_integer(fl_rd(LOG_NB - 1 downto 0)));
@@ -481,15 +496,15 @@ begin
         end if;
       elsif p1_take = '1' or dummy_fill = '1' then
         la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
+        w_en   <= '1';
+        w_la_a <= la;  w_da_a <= la;  w_db_a <= la;
         if p1_take = '1' then
-          j        := std_logic_vector(p1_hw(3 downto 1));
-          m_la(la) <= p1_x & p1_y & j & p1_tag & '1';
-          m_da(la) <= p1_x xor gf_sigma_j(p1_x, j);
-          m_db(la) <= p1_x xor gf_sigma_j(p1_x, j);
+          j         := std_logic_vector(p1_hw(3 downto 1));
+          w_la_word <= p1_x & p1_y & j & p1_tag & '1';
+          w_d       <= p1_x xor gf_sigma_j(p1_x, j);
         else
-          m_la(la) <= DUMMY_X & GF_ZERO & "000" & tag_t'(others => '0') & '0';
-          m_da(la) <= DUMMY_D;
-          m_db(la) <= DUMMY_D;
+          w_la_word <= DUMMY_X & GF_ZERO & "000" & tag_t'(others => '0') & '0';
+          w_d       <= DUMMY_D;
         end if;
         idle_cnt <= (others => '0');
         if fill_cnt = W - 1 then
@@ -761,7 +776,7 @@ begin
 
       if rst = '1' then
         p0_valid <= '0'; p1_valid <= '0';
-        fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0';
+        fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0'; w_en <= '0';
         idle_cnt <= (others => '0'); flushing <= '0';
         rq_wr <= (others => '0'); rq_rd <= (others => '0');
         fl <= q_identity;
