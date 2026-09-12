@@ -286,7 +286,7 @@ def emitVectors(rng, out):
         out.write('STEP %s %s %d %s %s %d\n'
                   % (hexs(x), hexs(y), weight(x), hexs(x3), hexs(y3), weight(x3)))
 
-    for _ in range(24):
+    for _ in range(40):
         x, y = randomSubgroupPoint(rng)
         x0, y0 = x, y
         k = 0
@@ -300,15 +300,22 @@ def emitVectors(rng, out):
 
 
 def cost():
-    prepOnes = sum(bin(DICKSON[i] >> 1).count('1') for i in range(1, M + 1))
-    toOnbOnes = sum(bin(r).count('1') for r in TOONB)
-    prepMaxIn = max(sum((DICKSON[i] >> k) & 1 for i in range(1, M + 1)) for k in range(1, M + 1))
-    toOnbMaxIn = max(sum((r >> k) & 1 for r in TOONB) for k in range(M))
-    print('prep  (gamma -> c-powers): %5d XOR inputs, widest output %d' % (prepOnes, prepMaxIn))
-    print('toOnb (c-powers -> gamma): %5d XOR inputs, widest output %d' % (toOnbOnes, toOnbMaxIn))
-    print('schoolbook product       : %5d AND, %5d XOR' % (M * M, (M - 1) * (M - 1)))
-    print('per multiply, two-input gates: %d'
-          % (2 * prepOnes - 2 * M + M * M + (M - 1) * (M - 1) + toOnbOnes - M))
+    """Two-input gate counts of the multiplier, read off the constant
+    matrices.  A k-input XOR is k-1 XOR2 gates."""
+    prepIn = [sum((DICKSON[i] >> k) & 1 for i in range(1, M + 1)) for k in range(1, M + 1)]
+    toOnbIn = [sum((r >> k) & 1 for r in TOONB) for k in range(M)]
+    prepXor = sum(k - 1 for k in prepIn if k)
+    toOnbXor = sum(k - 1 for k in toOnbIn if k)
+    prodAnd = M * M
+    prodXor = M * M - (2 * M - 1)
+    print('prep  (gamma -> c-powers): %5d XOR2, widest output %d inputs, x2 operands'
+          % (prepXor, max(prepIn)))
+    print('product 131 x 131 over GF(2): %5d AND, %5d XOR2, in %d rows of %d bits'
+          % (prodAnd, prodXor, (M + 16) // 17, 17))
+    print('toOnb (c-powers -> gamma): %5d XOR2, widest output %d inputs'
+          % (toOnbXor, max(toOnbIn)))
+    print('per multiply: %d AND, %d XOR2, no reduction, no DSP'
+          % (prodAnd, 2 * prepXor + prodXor + toOnbXor))
 
 
 def main():
