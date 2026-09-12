@@ -507,10 +507,11 @@ Two things the first synthesis taught, both fixed:
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **A routed image.** The custom logic has been synthesised in the F2
-  CL flow (the numbers above) but no build has yet completed place and
-  route or run on an F2 instance; post-route Fmax and the `NENG` that
-  closes timing are what `aws/build_afi.sh` is for.
+- **A run on an F2 instance.** The 48-engine image at 333 MHz has been
+  placed and routed and **meets timing** (`aws/README.md`, "What came
+  back"; AFI `agfi-0977ae08fec2f9ced`), but no worker has loaded it yet;
+  the measured steps per second against the 3.0 G the clock and the rate
+  promise is the next number.
 - **Reading a walk back.** The engine's walk state is write-only from the
   host, so walks in flight are lost when a worker restarts; each of them
   is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for
