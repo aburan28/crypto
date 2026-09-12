@@ -75,9 +75,18 @@ mask words in both build modes. Existing arithmetic, storage, client and
 checkpoint checks also passed. The [independent review](benchmarks/shared-sigma/comparison-review.json)
 records exact source, native-code and runtime bindings.
 
-The Make/Modal integration is awaiting its first public-command GPU audit.
-The separate compact audit below remains the previous public absolute-rate
-measurement. The active 26 B/s target remains unachieved.
+The separate [public Make-command audit](benchmarks/shared-sigma/native-audit.json)
+measured a **14.637530 B/s** benchmark median (14.537769–14.781098) and
+**14.106673 B/s** collection median (14.073041–14.159239). Arithmetic,
+storage, shared-mask and full client checks passed before timing. All six
+samples completed 201,863,462,912 scalar updates, with the selected shared
+mode and zero drops; each collection retained 5,149 records (164,768 bytes).
+The [audit review](benchmarks/shared-sigma/native-audit-review.json) binds the
+committed source, actual flags, resources and complete counts. The public
+artifact retains corpus counts/sizes; content equality is established by
+the separate matched comparison. This run reproduces the published command
+on another allocation and does not estimate an additional code-change gain.
+The active 26 B/s target remains unachieved.
 
 ## Historical compact-state preset comparison
 

@@ -4,8 +4,9 @@
 is 0, and it requires weighted-prefix mode 2 and the walk permutation network.
 The RTX PRO 6000 preset selects it after a finite matched comparison measured
 gains of 0.801% in the complete scalar benchmark and 0.954% with DP34 collection.
-`RTX_PRO6000_SHARED_SIGMA=0` retains the global-memory control. The new public
-Make/Modal integration still requires its first public-command GPU audit.
+`RTX_PRO6000_SHARED_SIGMA=0` retains the global-memory control. The public
+Make/Modal preset also passed a separate GPU audit at 14.637530 B/s benchmark
+median and 14.106673 B/s with collection.
 
 The paired Frobenius helper uses a 56-by-8 table of 32-bit masks. The candidate
 copies all 448 words, or 1,792 bytes, into a separate shared-memory table once
@@ -126,10 +127,34 @@ make audit-rtx-pro6000
 make audit-rtx-pro6000 RTX_PRO6000_SHARED_SIGMA=0
 ```
 
-These public commands have not yet supplied a GPU audit of this integration.
 Missing, duplicated or different shared-mode markers invalidate packed benchmark
 and collection rows; applicable audits stop before integration/timing if the
-shared-table probe fails. The previously validated public benchmark median is
-14.472716 B/s. This paired gain does not establish a new public absolute-rate
-record. The objective remains 26 B complete scalar iterations/s on one GPU,
-approximately 1.804 times the candidate's measured benchmark median.
+shared-table probe fails.
+
+The default public command completed on one RTX PRO 6000 from commit
+`6a48e3ec6dbd51a54e22cace4c24b27e0022b3d0`. Its
+[retained artifact](benchmarks/shared-sigma/native-audit.json) measured:
+
+| Workload | Three complete samples, B/s | Median B/s |
+|---|---|---:|
+| Benchmark | 14.781098, 14.637530, 14.537769 | **14.637530** |
+| DP34 collection | 14.159239, 14.106673, 14.073041 | **14.106673** |
+
+Each sample completed 201,863,462,912 updates. All three collections retained
+5,149 records (164,768 bytes), with zero drops. The device arithmetic, storage,
+shared-mask and full client checks passed before timing. Runtime output
+confirmed the selected shared mode, 104 registers, zero local bytes, 1,792
+function shared bytes and the separate 1,024-byte device reservation.
+
+The [offline review](benchmarks/shared-sigma/native-audit-review.json) verifies
+the 251-file committed snapshot, the wrapper's 71-file source aggregate and
+42 source-file matches with the controlled runtime, including five RTL/test
+fixtures outside the CUDA compilation. Its parser passed 106 synthetic cases
+before measurement. The public artifact reports a pre-validation executable
+hash; it has no post-run executable hashes or full native-code dump. It keeps
+corpus counts/sizes rather than content hashes. Those stronger code and
+corpus bindings belong to the separate controlled comparison above.
+
+This is a public-command reproduction on a separate GPU allocation, so its
+absolute rates do not estimate an additional paired gain. The objective
+remains 26 B complete scalar iterations/s on one GPU and is unachieved.
