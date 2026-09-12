@@ -11,10 +11,11 @@
 # and flip-flops -- binary-field arithmetic uses no DSP48 at all -- and LUT
 # counts move little between synthesis and routing.
 #
-# Each module is synthesised separately so the cost of one multiplier, one
-# step unit and the whole walker can be read off on their own.  The
-# multiplier's LUT count is the number the per-part capacity estimate in
-# ../README.md depends on.
+# Each module is synthesised separately so the cost of one multiplier, the
+# batched step unit, the simple step unit and the whole walker can be read
+# off on their own.  The multiplier's LUT count is the number the per-part
+# capacity estimate in ../README.md depends on; the multiplier is also the
+# place to sweep MUL_KARATSUBA (gf131_pkg.vhd) for the LUT optimum.
 #
 # ../../ecc/aws/run_aws_synthesis.sh launches a build instance and runs this
 # file; point it here with HDLDIR=$(pwd)/.. -- see README.md alongside.
@@ -34,11 +35,13 @@ puts "== period    $period ns ([format %.1f [expr {1000.0/$period}]] MHz)"
 puts "== rtl from  $rtldir"
 
 # Each entry: top-level entity, and the sources it needs.
-set targets {
-    gf131_mul      {gf131_pkg.vhd gf131_mul.vhd}
-    ec2k_step_pipe {gf131_pkg.vhd gf131_mul.vhd ec2k_step_pipe.vhd}
-    ec2k_walker    {gf131_pkg.vhd gf131_mul.vhd ec2k_step_pipe.vhd ec2k_walker.vhd}
-}
+set mul {gf131_pkg.vhd gf2_kmul.vhd gf131_mul.vhd}
+set targets [list \
+    gf131_mul       $mul \
+    ec2k_batch_pipe [concat $mul ec2k_batch_pipe.vhd] \
+    ec2k_step_pipe  [concat $mul ec2k_step_pipe.vhd] \
+    ec2k_walker     [concat $mul ec2k_batch_pipe.vhd ec2k_walker.vhd] \
+]
 
 set summary {}
 
