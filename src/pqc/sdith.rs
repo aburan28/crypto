@@ -78,14 +78,22 @@ impl MpcRelation for SdRelation {
     }
     fn party_compute(&self, wshare: &[u8], leader: bool, eps: &[u8]) -> PartyView {
         // Dot check ⟨ε∘e, e⟩ = Σ εⱼeⱼ  (batched binarity).
-        let u: Vec<u8> = wshare.iter().zip(eps).map(|(&e, &x)| gf_mul(e, x)).collect();
+        let u: Vec<u8> = wshare
+            .iter()
+            .zip(eps)
+            .map(|(&e, &x)| gf_mul(e, x))
+            .collect();
         let v = wshare.to_vec();
         let t = u.iter().fold(0u8, |acc, &x| acc ^ x); // Σ εⱼeⱼ share (u already ε∘e)
-        // Linear check: shares of H·e − y.
+                                                       // Linear check: shares of H·e − y.
         let mut lin: Vec<u8> = self
             .h
             .iter()
-            .map(|row| row.iter().zip(wshare).fold(0u8, |acc, (&hij, &ej)| acc ^ gf_mul(hij, ej)))
+            .map(|row| {
+                row.iter()
+                    .zip(wshare)
+                    .fold(0u8, |acc, (&hij, &ej)| acc ^ gf_mul(hij, ej))
+            })
             .collect();
         if leader {
             for (l, &yi) in lin.iter_mut().zip(&self.y) {
@@ -116,7 +124,11 @@ pub fn sdith_keygen() -> (SdithPublicKey, SdithSecretKey) {
     }
     let y: Vec<u8> = h
         .iter()
-        .map(|row| row.iter().zip(&e).fold(0u8, |acc, (&hij, &ej)| acc ^ gf_mul(hij, ej)))
+        .map(|row| {
+            row.iter()
+                .zip(&e)
+                .fold(0u8, |acc, (&hij, &ej)| acc ^ gf_mul(hij, ej))
+        })
         .collect();
     (SdithPublicKey { h, y }, SdithSecretKey { e })
 }
@@ -133,12 +145,18 @@ fn statement(pk: &SdithPublicKey, msg: &[u8]) -> Vec<u8> {
 }
 
 pub fn sdith_sign(pk: &SdithPublicKey, sk: &SdithSecretKey, msg: &[u8]) -> SdithSignature {
-    let rel = SdRelation { h: pk.h.clone(), y: pk.y.clone() };
+    let rel = SdRelation {
+        h: pk.h.clone(),
+        y: pk.y.clone(),
+    };
     mpcith_prove(&rel, &sk.e, &statement(pk, msg))
 }
 
 pub fn sdith_verify(pk: &SdithPublicKey, msg: &[u8], sig: &SdithSignature) -> bool {
-    let rel = SdRelation { h: pk.h.clone(), y: pk.y.clone() };
+    let rel = SdRelation {
+        h: pk.h.clone(),
+        y: pk.y.clone(),
+    };
     mpcith_verify(&rel, &statement(pk, msg), sig)
 }
 
@@ -152,7 +170,10 @@ mod tests {
         assert_eq!(sk.e.iter().filter(|&&x| x == 1).count(), W);
         assert!(sk.e.iter().all(|&x| x <= 1));
         for (row, &yi) in pk.h.iter().zip(&pk.y) {
-            let s = row.iter().zip(&sk.e).fold(0u8, |acc, (&h, &e)| acc ^ gf_mul(h, e));
+            let s = row
+                .iter()
+                .zip(&sk.e)
+                .fold(0u8, |acc, (&h, &e)| acc ^ gf_mul(h, e));
             assert_eq!(s, yi);
         }
     }
@@ -189,7 +210,10 @@ mod tests {
         // variant: sign with a corrupted witness directly.
         let mut bad = sk.e.clone();
         bad[0] ^= 0x17; // non-binary now
-        let rel = SdRelation { h: pk.h.clone(), y: pk.y.clone() };
+        let rel = SdRelation {
+            h: pk.h.clone(),
+            y: pk.y.clone(),
+        };
         let msg = statement(&pk, b"msg");
         let sig = mpcith_prove(&rel, &bad, &msg);
         assert!(!mpcith_verify(&rel, &msg, &sig));

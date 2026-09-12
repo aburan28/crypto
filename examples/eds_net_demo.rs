@@ -60,19 +60,29 @@ fn main() {
     let k = (7..m)
         .find(|&k| gcd(k, m) == 1 && (k * bmax as u64 + amax as u64) < m)
         .unwrap();
-    println!("E: y²=x³+{}x+{} /F_{}   P=({},{}) ord={}   Q=[{}]P\n", ca, cb, p, pp.0, pp.1, m, k);
+    println!(
+        "E: y²=x³+{}x+{} /F_{}   P=({},{}) ord={}   Q=[{}]P\n",
+        ca, cb, p, pp.0, pp.1, m, k
+    );
 
     let net = build_net(ca, cb, p, pp, k, amax, bmax);
 
     // validate NET on a few triples
-    let triples = [((5, 4), (3, 1), (1, 1)), ((7, 5), (3, 2), (2, 1)), ((9, 6), (4, 2), (2, 1))];
+    let triples = [
+        ((5, 4), (3, 1), (1, 1)),
+        ((7, 5), (3, 2), (2, 1)),
+        ((9, 6), (4, 2), (2, 1)),
+    ];
     let mut ok_all = true;
     for (pv, qv, rv) in triples {
         if let Some(ok) = check_net_relation(&net, pv, qv, rv) {
             ok_all &= ok;
         }
     }
-    println!("net recurrence (NET): {}", if ok_all { "holds ✓" } else { "FAILS ✗" });
+    println!(
+        "net recurrence (NET): {}",
+        if ok_all { "holds ✓" } else { "FAILS ✗" }
+    );
 
     // χ-pattern of the net
     println!("\nχ(W(a,b)) pattern  (· = zero / O):");
@@ -98,7 +108,12 @@ fn main() {
     let mut reparam_ok = true;
     for b in 0..=bmax {
         for a in 0..=amax {
-            let lhs = ec_add(ec_mul(a as u64, pt, ca, p), ec_mul(b as u64, qq, ca, p), ca, p);
+            let lhs = ec_add(
+                ec_mul(a as u64, pt, ca, p),
+                ec_mul(b as u64, qq, ca, p),
+                ca,
+                p,
+            );
             let rhs = ec_mul((a as u64 + b as u64 * k) % m, pt, ca, p);
             if lhs != rhs {
                 reparam_ok = false;
@@ -107,7 +122,11 @@ fn main() {
     }
     println!(
         "\naP+bQ = [(a+bk) mod m]P for all (a,b): {}",
-        if reparam_ok { "yes ✓ — net is built from rank-1 data x(jP) only" } else { "no" }
+        if reparam_ok {
+            "yes ✓ — net is built from rank-1 data x(jP) only"
+        } else {
+            "no"
+        }
     );
     println!(
         "⇒ for Q∈⟨P⟩ (the ECDLP case) the rank-2 net is a reparametrisation of\n  \

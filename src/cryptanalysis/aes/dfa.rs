@@ -167,7 +167,11 @@ pub fn inject_fault_round_8(
 /// differ between `correct` and `faulted`.  For a fault at round
 /// 8, every byte differs (with overwhelming probability).
 pub fn count_active_ct_bytes(correct: &[u8; 16], faulted: &[u8; 16]) -> usize {
-    correct.iter().zip(faulted.iter()).filter(|(a, b)| a != b).count()
+    correct
+        .iter()
+        .zip(faulted.iter())
+        .filter(|(a, b)| a != b)
+        .count()
 }
 
 fn bytes_to_state(block: &[u8; 16]) -> [[u8; 4]; 4] {

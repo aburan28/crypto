@@ -8,8 +8,8 @@ use crate::cryptopals::set8_util::{biguint_to_bytes_be, hmac_sha256};
 use crate::cryptopals::Report;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
-use rand::SeedableRng;
 use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 fn h_concat(parts: &[&BigUint]) -> BigUint {
     let mut buf = Vec::new();

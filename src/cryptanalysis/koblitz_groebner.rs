@@ -346,6 +346,70 @@ pub fn sym_semaev_s3(
     acc.coords
 }
 
+/// **The symmetrised fourth summation polynomial**, Weil-restricted.
+///
+/// Returns the `n` Boolean coordinates of
+///
+/// ```text
+///   f₃ = x_R⁴ + e₁⁴ + e₃⁴ + e₂⁴x_R⁴ + e₃³x_R + e₃e₂²x_R³ + e₃e₁²x_R
+///        + e₃x_R³ + e₁²e₃²x_R² + e₃²x_R⁴ + e₃² + e₂²x_R²
+/// ```
+///
+/// where `e₁, e₂, e₃` are the elementary symmetric functions of `x₁,
+/// x₂, x₃`.  It vanishes exactly when some choice of signs makes
+/// `±P₁ ± P₂ ± P₃ ± R = O`, so unlike the chained `S₃` of
+/// [`build_decomposition_system`] it needs **no intermediate unknowns**
+/// — which is the whole reason it is here.  Fixing `x₁` to a constant
+/// leaves a system in the `2ℓ` unknowns of `x₂` and `x₃` alone, and
+/// that is the object
+/// [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
+/// names as the one route to a sub-`2^{2ℓ}` decomposition oracle.
+///
+/// Any of `x₁, x₂, x₃` may be a [`SymElement::constant`]; the degree of
+/// the result in the Boolean unknowns drops accordingly.
+///
+/// Specialised to `b = 1` (the Koblitz curve `y² + xy = x³ + x² + 1`),
+/// which is what the twelve constants above are folded for.
+pub fn sym_semaev_s4(
+    x1: &SymElement,
+    x2: &SymElement,
+    x3: &SymElement,
+    x_r: &F2mElement,
+    st: &FieldStructure,
+) -> Vec<F2BoolPoly> {
+    let n_vars = x1.coords[0].n_vars;
+    let n = st.n;
+
+    let e1 = x1.add(x2).add(x3);
+    let p12 = x1.mul(x2, st);
+    let e2 = p12.add(&x1.mul(x3, st)).add(&x2.mul(x3, st));
+    let e3 = p12.mul(x3, st);
+
+    let e1_sq = e1.square(st);
+    let e2_sq = e2.square(st);
+    let e3_sq = e3.square(st);
+
+    // Powers of the known target, as constants.
+    let xr1 = SymElement::constant(x_r, n, n_vars);
+    let xr2 = xr1.square(st);
+    let xr3 = xr2.mul(&xr1, st);
+    let xr4 = xr2.square(st);
+
+    let mut acc = xr4.clone();
+    acc = acc.add(&e1_sq.square(st)); // e₁⁴
+    acc = acc.add(&e3_sq.square(st)); // e₃⁴
+    acc = acc.add(&e2_sq.square(st).mul(&xr4, st)); // e₂⁴x_R⁴
+    acc = acc.add(&e3_sq.mul(&e3, st).mul(&xr1, st)); // e₃³x_R
+    acc = acc.add(&e3.mul(&e2_sq, st).mul(&xr3, st)); // e₃e₂²x_R³
+    acc = acc.add(&e3.mul(&e1_sq, st).mul(&xr1, st)); // e₃e₁²x_R
+    acc = acc.add(&e3.mul(&xr3, st)); // e₃x_R³
+    acc = acc.add(&e1_sq.mul(&e3_sq, st).mul(&xr2, st)); // e₁²e₃²x_R²
+    acc = acc.add(&e3_sq.mul(&xr4, st)); // e₃²x_R⁴
+    acc = acc.add(&e3_sq); // e₃²
+    acc = acc.add(&e2_sq.mul(&xr2, st)); // e₂²x_R²
+    acc.coords
+}
+
 /// The Boolean system whose roots are the `m`-point decompositions of a
 /// target with abscissa `x_r` over the subspace spanned by `basis`.
 #[derive(Clone, Debug)]
@@ -451,6 +515,183 @@ pub fn build_decomposition_system(
     })
 }
 
+// ── Block structure ────────────────────────────────────────────────
+
+impl DecompositionSystem {
+    /// The **block partition** the variables fall into: one block of
+    /// `ℓ` per summand, then one block of `n` per intermediate point of
+    /// the chain, in the layout order
+    /// [`build_decomposition_system`] uses.
+    ///
+    /// The system is *multilinear* with respect to this partition —
+    /// degree at most one in each block — which is a much stronger
+    /// statement than its total degree.  For `m = 2` the single `S₃`
+    /// link is `(x₁+x₂)²x_R² + x₁x₂x_R + (x₁x₂)² + b`: every term is
+    /// bilinear in the two summand blocks, because squaring is
+    /// `F_2`-linear and `x₁x₂` is bilinear.  For `m ≥ 3` the chained
+    /// links keep the property with the intermediate blocks joining in,
+    /// so the system is total-degree 3 but multidegree `(1,1,…,1)`.
+    ///
+    /// That is what [`matrix_f4_f2_blocked`] exploits.
+    pub fn blocks(&self, n: u32) -> Vec<usize> {
+        let mut v = vec![self.ell; self.m];
+        v.extend(std::iter::repeat_n(n as usize, self.m.saturating_sub(2)));
+        v
+    }
+}
+
+/// Per-block degree of a Boolean monomial under a block partition.
+///
+/// `blocks` gives block sizes in variable-index order, so block `i`
+/// owns a contiguous range of variables.
+pub fn block_degrees(mask: u64, blocks: &[usize]) -> Vec<u32> {
+    let mut out = Vec::with_capacity(blocks.len());
+    let mut lo = 0usize;
+    for &w in blocks {
+        let hi = (lo + w).min(64);
+        let window = if lo >= 64 {
+            0
+        } else if hi - lo >= 64 {
+            u64::MAX
+        } else {
+            ((1u64 << (hi - lo)) - 1) << lo
+        };
+        out.push((mask & window).count_ones());
+        lo = hi;
+    }
+    out
+}
+
+/// Largest per-block degree over the terms of a polynomial.
+pub fn poly_block_degrees(p: &F2BoolPoly, blocks: &[usize]) -> Vec<u32> {
+    let mut out = vec![0u32; blocks.len()];
+    for t in &p.terms {
+        for (o, d) in out.iter_mut().zip(block_degrees(t.mask, blocks)) {
+            *o = (*o).max(d);
+        }
+    }
+    out
+}
+
+/// **Matrix-F4 with a multidegree bound** instead of a total-degree one.
+///
+/// The ordinary [`matrix_f4_f2`] shifts every input polynomial by every
+/// monomial that keeps the *total* degree within `degree`.  On a system
+/// that is multilinear with respect to a block partition that is
+/// wasteful: it spends most of its columns on monomials with a high
+/// degree inside one block, and those are precisely the monomials the
+/// structure says cannot help.
+///
+/// This bounds the degree **per block** instead.  A shift is kept only
+/// when every term of the product stays inside the bounds, so every row
+/// is still an honest multiple of an input polynomial and a returned
+/// constant `1` is still a genuine certificate of infeasibility — the
+/// row space is a subspace of the total-degree one, never larger.
+///
+/// The column count goes from `C(v, ≤D)` to `Π_i C(v_i, ≤d_i)`, which
+/// on the decomposition systems is where the saving is.
+///
+/// Returns the reduced rows and the 64-bit word XORs the elimination
+/// performed, or `None` if the matrix would exceed the size limits.
+pub fn matrix_f4_f2_blocked(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    blocks: &[usize],
+    bounds: &[u32],
+) -> Option<(Vec<F2BoolPoly>, u64)> {
+    if polys.is_empty() || blocks.len() != bounds.len() {
+        return Some((Vec::new(), 0));
+    }
+    let within = |mask: u64| -> bool {
+        block_degrees(mask, blocks)
+            .iter()
+            .zip(bounds)
+            .all(|(d, b)| d <= b)
+    };
+
+    // Candidate shifts: monomials already inside the bounds.  A shift
+    // that breaks a bound on its own can only break it further after
+    // multiplication.
+    let total_bound: u32 = bounds.iter().sum();
+    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+    for p in polys {
+        for mult in monomials_up_to(n_vars, total_bound) {
+            if !within(mult) {
+                continue;
+            }
+            let row = {
+                let mut all: Vec<u64> = p.terms.iter().map(|t| t.mask | mult).collect();
+                all.sort_unstable();
+                let mut row: Vec<u64> = Vec::with_capacity(all.len());
+                let mut i = 0;
+                while i < all.len() {
+                    let mut j = i;
+                    while j < all.len() && all[j] == all[i] {
+                        j += 1;
+                    }
+                    if (j - i) % 2 == 1 {
+                        row.push(all[i]);
+                    }
+                    i = j;
+                }
+                row
+            };
+            // Every term must stay inside the bounds, or the row would
+            // need a column the bound excludes and truncating it would
+            // leave the ideal.
+            if row.is_empty() || !row.iter().all(|&m| within(m)) {
+                continue;
+            }
+            rows_monos.push(row);
+            if rows_monos.len() > max_f4_rows() {
+                return None;
+            }
+        }
+    }
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), 0));
+    }
+
+    let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
+    cols.sort_unstable();
+    cols.dedup();
+    if cols.len() > max_f4_cols() {
+        return None;
+    }
+    cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+    let index: std::collections::HashMap<u64, usize> =
+        cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+
+    let words = cols.len().div_ceil(64);
+    let mut matrix: Vec<Vec<u64>> = rows_monos
+        .iter()
+        .map(|monos| {
+            let mut row = vec![0u64; words];
+            for m in monos {
+                let c = index[m];
+                row[c / 64] |= 1 << (c % 64);
+            }
+            row
+        })
+        .collect();
+
+    let mut word_ops = 0u64;
+    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+
+    let n_vars_out = polys[0].n_vars;
+    let mut out = Vec::with_capacity(rank);
+    for row in matrix.iter().take(rank) {
+        let monos: Vec<F2BoolMono> = (0..cols.len())
+            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
+            .map(|c| F2BoolMono::from_mask(cols[c]))
+            .collect();
+        if !monos.is_empty() {
+            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+        }
+    }
+    Some((out, word_ops))
+}
+
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
 
 /// All monomials of degree `≤ deg` over `n_vars` Boolean variables, as
@@ -509,14 +750,33 @@ fn max_f4_cols() -> usize {
 ///
 /// Returns `None` if the matrix would exceed the size limits.
 pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    matrix_f4_f2_counted(polys, n_vars, degree).map(|(rows, _)| rows)
+}
+
+/// As [`matrix_f4_f2`], but also returns the number of 64-bit word XORs
+/// the row reduction performed.
+///
+/// The count exists so an F4 reduction can be priced in the same unit as
+/// the other engines that solve these systems — notably
+/// [`crate::cryptanalysis::crossbred`], whose preprocessing is the same
+/// kind of elimination on the same kind of matrix.  It measures the
+/// elimination only: building the matrix and reading the rows back out
+/// are not counted, because they are linear in the matrix size and the
+/// elimination is not.
+pub fn matrix_f4_f2_counted(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<F2BoolPoly>, u64)> {
     if polys.is_empty() {
-        return Some(Vec::new());
+        return Some((Vec::new(), 0));
     }
     let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
     if matrix.is_empty() {
-        return Some(Vec::new());
+        return Some((Vec::new(), 0));
     }
-    let rank = rref_f2(&mut matrix, cols.len());
+    let mut word_ops = 0u64;
+    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
 
     let n_vars_out = polys[0].n_vars;
     let words = cols.len().div_ceil(64);
@@ -531,7 +791,7 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
-    Some(out)
+    Some((out, word_ops))
 }
 
 /// Build the Macaulay matrix: every product `p · m` with
@@ -613,6 +873,13 @@ fn build_macaulay(
 /// Reduced row echelon form over `F_2`; returns the rank, with the
 /// pivot rows moved to the front of `matrix`.
 fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let mut ignored = 0u64;
+    rref_f2_counted(matrix, n_cols, &mut ignored)
+}
+
+/// [`rref_f2`], accumulating the 64-bit word XORs it performs into
+/// `word_ops`.
+fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
     for c in 0..n_cols {
@@ -628,6 +895,7 @@ fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
                 for k in 0..words {
                     matrix[r][k] ^= matrix[pivot_row][k];
                 }
+                *word_ops += words as u64;
             }
         }
         pivot_row += 1;
@@ -1181,6 +1449,195 @@ mod tests {
                 }
             }
             assert_eq!(F2mElement::from_bit_positions(&got, n), scalar);
+        }
+    }
+
+    /// The symbolic `S₄` must agree with the scalar symmetrised `S₄`
+    /// that `semaev_decomp` evaluates, on every point of the subspace.
+    ///
+    /// This is the gate on the twelve folded constants: they are
+    /// transcribed here from the same derivation `binary_semaev_s4`
+    /// uses, and a transcription error would produce a system that is
+    /// wrong in a way no downstream test would catch — the roots would
+    /// simply be different, and every one of them would fail the group
+    /// re-check and silently cost relations.
+    #[test]
+    fn symbolic_s4_matches_the_scalar_symmetrised_s4() {
+        use crate::cryptanalysis::semaev_decomp::{eval_f3, Gf2};
+
+        let mut compared = 0u64;
+        for (n, l) in [(6u32, 2u32), (9, 3), (12, 4)] {
+            let irr = find_irreducible(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let gf = Gf2::new(&irr);
+            let basis: Vec<F2mElement> = (0..l)
+                .map(|k| F2mElement::from_bit_positions(&[k], n))
+                .collect();
+            let n_vars = 3 * l as usize;
+            let x1 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+            let x2 = SymElement::from_subspace_vars(&basis, l as usize, n, n_vars);
+            let x3 = SymElement::from_subspace_vars(&basis, 2 * l as usize, n, n_vars);
+
+            for xr_raw in [1u64, 5, 37, 100] {
+                let x_r = fe(xr_raw % (1 << n), n);
+                let eqs = sym_semaev_s4(&x1, &x2, &x3, &x_r, &st);
+                assert_eq!(eqs.len(), n as usize);
+                for point in 0..(1u64 << n_vars) {
+                    let v1 = gf.from_element(&x1.eval(point, n));
+                    let v2 = gf.from_element(&x2.eval(point, n));
+                    let v3 = gf.from_element(&x3.eval(point, n));
+                    let scalar = eval_f3(v1, v2, v3, gf.from_element(&x_r), &gf);
+                    let mut got = Vec::new();
+                    for (k, e) in eqs.iter().enumerate() {
+                        if e.eval(point) == 1 {
+                            got.push(k as u32);
+                        }
+                    }
+                    assert_eq!(
+                        F2mElement::from_bit_positions(&got, n),
+                        gf.to_element(scalar),
+                        "n={n} l={l} x_r={xr_raw} point={point}"
+                    );
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared > 10_000, "only {compared} points compared");
+    }
+
+    /// Fixing `x₁` really does leave a system in `2ℓ` unknowns, and it
+    /// really is lower degree than the three-unknown one — that is the
+    /// premise of the fixed-`x₁` route.
+    #[test]
+    fn fixing_x1_leaves_a_system_in_two_summands() {
+        let (n, l) = (12u32, 4u32);
+        let irr = find_irreducible(n).unwrap();
+        let st = FieldStructure::new(n, &irr);
+        let basis: Vec<F2mElement> = (0..l)
+            .map(|k| F2mElement::from_bit_positions(&[k], n))
+            .collect();
+        let x_r = fe(37, n);
+
+        let deg = |eqs: &[F2BoolPoly]| -> u32 {
+            eqs.iter()
+                .flat_map(|e| e.terms.iter())
+                .map(|t| t.mask.count_ones())
+                .max()
+                .unwrap_or(0)
+        };
+
+        // All three unknown: 3ℓ variables.
+        let free = 3 * l as usize;
+        let full = sym_semaev_s4(
+            &SymElement::from_subspace_vars(&basis, 0, n, free),
+            &SymElement::from_subspace_vars(&basis, l as usize, n, free),
+            &SymElement::from_subspace_vars(&basis, 2 * l as usize, n, free),
+            &x_r,
+            &st,
+        );
+
+        // `x₁` fixed: 2ℓ variables, and a lower-degree system.
+        let two = 2 * l as usize;
+        let fixed = sym_semaev_s4(
+            &SymElement::constant(&basis[0], n, two),
+            &SymElement::from_subspace_vars(&basis, 0, n, two),
+            &SymElement::from_subspace_vars(&basis, l as usize, n, two),
+            &x_r,
+            &st,
+        );
+
+        assert!(
+            deg(&fixed) < deg(&full),
+            "fixing x1 should drop the degree: {} vs {}",
+            deg(&fixed),
+            deg(&full)
+        );
+        // Nothing in the fixed system may touch a variable above 2ℓ.
+        let top: u64 = fixed
+            .iter()
+            .flat_map(|e| e.terms.iter())
+            .map(|t| t.mask)
+            .fold(0, |a, b| a | b);
+        assert_eq!(top >> two, 0, "fixed system used a variable beyond 2ℓ");
+    }
+
+    /// The decomposition systems really are multilinear with respect to
+    /// the block partition — degree at most one per block — at every
+    /// `m`.  That is the premise of [`matrix_f4_f2_blocked`], and it is
+    /// a stronger statement than the total degree, which is 2 for
+    /// `m = 2` and 3 once the chain appears.
+    #[test]
+    fn the_decomposition_systems_are_multilinear_in_their_blocks() {
+        use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base;
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let x_r = match kc.add(&fb.points[0], &fb.points[3]) {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("P1 + P2 = O"),
+        };
+
+        for m in [2usize, 3] {
+            let Some(sys) =
+                build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, &st)
+            else {
+                continue;
+            };
+            let blocks = sys.blocks(kc.n);
+            assert_eq!(blocks.iter().sum::<usize>(), sys.n_vars, "m={m}");
+
+            let total = sys
+                .equations
+                .iter()
+                .flat_map(|e| e.terms.iter())
+                .map(|t| t.mask.count_ones())
+                .max()
+                .unwrap_or(0);
+            assert_eq!(total, if m == 2 { 2 } else { 3 }, "m={m} total degree");
+
+            for (k, e) in sys.equations.iter().enumerate() {
+                let d = poly_block_degrees(e, &blocks);
+                assert!(
+                    d.iter().all(|&x| x <= 1),
+                    "m={m} equation {k} has block degrees {d:?}, not multilinear"
+                );
+            }
+        }
+    }
+
+    /// The blocked Macaulay matrix must produce only genuine ideal
+    /// members: whatever it returns has to vanish on every root of the
+    /// original system.  It is allowed to be weaker than the
+    /// total-degree matrix — its row space is a subspace — but never
+    /// wrong.
+    #[test]
+    fn the_blocked_macaulay_returns_only_ideal_members() {
+        use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base;
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let x_r = match kc.add(&fb.points[0], &fb.points[3]) {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("P1 + P2 = O"),
+        };
+        let sys =
+            build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, 2, &st).unwrap();
+        let blocks = sys.blocks(kc.n);
+
+        let roots: Vec<u64> = (0..(1u64 << sys.n_vars))
+            .filter(|&p| sys.equations.iter().all(|q| q.eval(p) == 0))
+            .collect();
+        assert!(!roots.is_empty());
+
+        for bound in [1u32, 2, 3] {
+            let bounds = vec![bound; blocks.len()];
+            let (rows, _) =
+                matrix_f4_f2_blocked(&sys.equations, sys.n_vars, &blocks, &bounds).unwrap();
+            for r in &rows {
+                for &pt in &roots {
+                    assert_eq!(r.eval(pt), 0, "bound {bound}: blocked row misses a root");
+                }
+            }
         }
     }
 

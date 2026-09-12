@@ -47,5 +47,20 @@ gpu/btcpuzzle/tune_kangaroo
 # Local convenience link to the index-calculus executable.
 /ic
 
+# gpu/macaulay generated headers, test binary and CUDA bench binary
+gpu/macaulay/params.h
+gpu/macaulay/vectors.h
+gpu/macaulay/test_cpu_main
+gpu/macaulay/bench
+
+# gpu/semaev generated headers, test binary and CUDA bench binary
+gpu/semaev/params.h
+gpu/semaev/vectors.h
+gpu/semaev/test_cpu_main
+gpu/semaev/bench2
+gpu/ecc2k/test_pt_ecc2k95
+gpu/ecc2k/test_pt_k23
+gpu/ecc2k/test_pt_k41
+
 # Assembled GitHub Pages site (scripts/site/build.py output).
 /_site

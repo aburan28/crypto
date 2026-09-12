@@ -103,7 +103,10 @@ fn h_prime(input: &[u8], out_len: usize) -> Vec<u8> {
 /// of plain `a = a + b`.
 #[inline]
 fn gb(v: &mut [u64], a: usize, b: usize, c: usize, d: usize) {
-    let mul = |x: u64, y: u64| 2u64.wrapping_mul(x & 0xFFFF_FFFF).wrapping_mul(y & 0xFFFF_FFFF);
+    let mul = |x: u64, y: u64| {
+        2u64.wrapping_mul(x & 0xFFFF_FFFF)
+            .wrapping_mul(y & 0xFFFF_FFFF)
+    };
     v[a] = v[a].wrapping_add(v[b]).wrapping_add(mul(v[a], v[b]));
     v[d] = (v[d] ^ v[a]).rotate_right(32);
     v[c] = v[c].wrapping_add(v[d]).wrapping_add(mul(v[c], v[d]));
@@ -203,11 +206,7 @@ fn ref_position(
     let j1 = (pseudo_rand & 0xFFFF_FFFF) as u32;
     let j2 = (pseudo_rand >> 32) as u32;
 
-    let ref_lane = if same_lane {
-        lane
-    } else {
-        j2 % p_lanes
-    };
+    let ref_lane = if same_lane { lane } else { j2 % p_lanes };
 
     // Size of the reference set W (RFC §3.4): all finished segments of
     // ref_lane, plus the already-filled part of the current segment if
@@ -314,7 +313,8 @@ pub fn argon2(
     let total_blocks = m_prime;
 
     // ── H₀: BLAKE2b-512 of the parameter pre-image ──
-    let mut pre = Vec::with_capacity(40 + password.len() + salt.len() + key.len() + associated.len());
+    let mut pre =
+        Vec::with_capacity(40 + password.len() + salt.len() + key.len() + associated.len());
     pre.extend_from_slice(&p_lanes.to_le_bytes());
     pre.extend_from_slice(&out_len.to_le_bytes());
     pre.extend_from_slice(&m_kib.to_le_bytes());
@@ -499,7 +499,17 @@ pub fn argon2id(
     p: u32,
     out_len: u32,
 ) -> Result<Vec<u8>, &'static str> {
-    argon2(Argon2Variant::Id, password, salt, &[], &[], m_kib, t, p, out_len)
+    argon2(
+        Argon2Variant::Id,
+        password,
+        salt,
+        &[],
+        &[],
+        m_kib,
+        t,
+        p,
+        out_len,
+    )
 }
 
 #[cfg(test)]
@@ -555,8 +565,24 @@ mod tests {
     fn argon2id_no_key_no_ad() {
         // Smoke test the convenience wrapper: just verify it runs and
         // returns the requested length, deterministically.
-        let a = argon2id(b"correct horse battery staple", b"some salt 1234567", 32, 2, 1, 32).unwrap();
-        let b = argon2id(b"correct horse battery staple", b"some salt 1234567", 32, 2, 1, 32).unwrap();
+        let a = argon2id(
+            b"correct horse battery staple",
+            b"some salt 1234567",
+            32,
+            2,
+            1,
+            32,
+        )
+        .unwrap();
+        let b = argon2id(
+            b"correct horse battery staple",
+            b"some salt 1234567",
+            32,
+            2,
+            1,
+            32,
+        )
+        .unwrap();
         assert_eq!(a, b);
         assert_eq!(a.len(), 32);
     }

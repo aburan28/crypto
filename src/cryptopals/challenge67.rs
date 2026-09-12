@@ -143,10 +143,7 @@ pub fn coppersmith(
     let x_i = x_bound.to_bigint().unwrap();
     let dim = (h + 1) * d;
 
-    let f_int: Vec<BigInt> = f_mod_n
-        .iter()
-        .map(|c| c.to_bigint().unwrap())
-        .collect();
+    let f_int: Vec<BigInt> = f_mod_n.iter().map(|c| c.to_bigint().unwrap()).collect();
     // Powers of f.
     let mut f_powers: Vec<Vec<BigInt>> = vec![vec![BigInt::one()]];
     for _ in 1..=h {
@@ -300,11 +297,7 @@ pub fn coppersmith_debug(
 }
 
 /// Legacy `h=1` wrapper for use as a building block.
-pub fn coppersmith_h1(
-    f_mod_n: &[BigUint],
-    n: &BigUint,
-    x_bound: &BigUint,
-) -> Option<BigInt> {
+pub fn coppersmith_h1(f_mod_n: &[BigUint], n: &BigUint, x_bound: &BigUint) -> Option<BigInt> {
     coppersmith(f_mod_n, n, x_bound, 1)
 }
 
@@ -337,7 +330,8 @@ pub fn run() -> Report {
     let b = BigUint::parse_bytes(
         b"deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbe",
         16,
-    ).unwrap();
+    )
+    .unwrap();
     let x_true = BigUint::from(0xCAFEu32);
     let m: BigUint = (&b << shift as usize) + &x_true;
     let c = m.modpow(&e, n);
@@ -354,7 +348,11 @@ pub fn run() -> Report {
 
     r.line(format!("N has {} bits, e = 3", n.bits()));
     r.line(format!("known prefix b·2^{} = (256 bits)", shift));
-    r.line(format!("true unknown x = {}  ({} bits)", x_true, x_bound.bits() - 1));
+    r.line(format!(
+        "true unknown x = {}  ({} bits)",
+        x_true,
+        x_bound.bits() - 1
+    ));
 
     match coppersmith(&f, n, &x_bound, 1) {
         Some(root) => {
@@ -384,7 +382,8 @@ mod tests {
         let b = BigUint::parse_bytes(
             b"deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbe",
             16,
-        ).unwrap();
+        )
+        .unwrap();
         let x_true = BigUint::from(0xCAFEu32);
         let m: BigUint = (&b << shift as usize) + &x_true;
         let c = m.modpow(&e, n);
@@ -407,7 +406,11 @@ mod tests {
         // weak to recover this x.
         let evals = coppersmith_debug(&f, n, &x_bound, 1, &xt_i);
         let zero_count = evals.iter().filter(|e| e.is_zero()).count();
-        eprintln!("Coppersmith debug: {} rows evaluate to 0 at x_true (out of {})", zero_count, evals.len());
+        eprintln!(
+            "Coppersmith debug: {} rows evaluate to 0 at x_true (out of {})",
+            zero_count,
+            evals.len()
+        );
         for (i, e) in evals.iter().enumerate().take(5) {
             eprintln!("  row {} eval = {} bits", i, e.bits());
         }
@@ -419,9 +422,14 @@ mod tests {
     fn univariate_finds_small_root() {
         // Toy: N small, f(x) = x³ + x² + x + 7 with known root.
         let n = BigUint::from(1_000_003u32); // prime, just to have a modulus
-        // Pick root = 5; build f(x) such that f(5) = 0 mod N.
+                                             // Pick root = 5; build f(x) such that f(5) = 0 mod N.
         let root = BigInt::from(5);
-        let coeffs_int = vec![BigInt::from(-100), BigInt::from(3), BigInt::from(-1), BigInt::from(1)];
+        let coeffs_int = vec![
+            BigInt::from(-100),
+            BigInt::from(3),
+            BigInt::from(-1),
+            BigInt::from(1),
+        ];
         // 5^3 - 5^2 + 3·5 - 100 = 125 - 25 + 15 - 100 = 15.  We need = 0 mod N.
         // Adjust constant.
         let val: BigInt = eval_poly(&coeffs_int, &root);
@@ -430,7 +438,8 @@ mod tests {
         let mut adj = coeffs_int.clone();
         adj[0] = new_a0;
         // Now f(5) = 0 over Z (so trivially mod N too).
-        let f_mod_n: Vec<BigUint> = adj.iter()
+        let f_mod_n: Vec<BigUint> = adj
+            .iter()
             .map(|c| ((c % &n_i) + &n_i).to_biguint().unwrap() % &n)
             .collect();
         let x_bound = BigUint::from(20u32);

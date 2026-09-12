@@ -238,7 +238,9 @@ pub fn audit(curve: &CurveParams) -> PkmAuditReport {
 /// secp256k1 (`2²⁵⁶ − 2³² − 977`) it returns ~10.
 pub fn solinas_signed_weight(p: &BigUint) -> u32 {
     // Build the binary digits, then convert to NAF.
-    let bits: Vec<u8> = (0..p.bits()).map(|i| if p.bit(i) { 1 } else { 0 }).collect();
+    let bits: Vec<u8> = (0..p.bits())
+        .map(|i| if p.bit(i) { 1 } else { 0 })
+        .collect();
     if bits.is_empty() {
         return 0;
     }

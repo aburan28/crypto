@@ -5,8 +5,8 @@
 
 use crate::cryptopals::challenge31::timing_oracle;
 use crate::cryptopals::Report;
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 pub fn noisy_oracle(msg: &[u8], candidate: &[u8], rng: &mut StdRng) -> (bool, i64) {
     let (ok, t) = timing_oracle(msg, candidate);
@@ -42,7 +42,11 @@ pub fn run() -> Report {
     let recovered = recover_via_noisy_timing(msg, 8);
     r.line(format!("Recovered MAC: {}", hex::encode(recovered)));
     r.line(format!("True      MAC: {}", hex::encode(true_mac)));
-    let matching = recovered.iter().zip(&true_mac).filter(|(a, b)| a == b).count();
+    let matching = recovered
+        .iter()
+        .zip(&true_mac)
+        .filter(|(a, b)| a == b)
+        .count();
     r.line(format!("matching bytes: {}/32", matching));
     assert!(matching >= 28); // accept some noise-induced misses
     r.succeed()
