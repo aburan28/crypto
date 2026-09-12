@@ -73,7 +73,7 @@ infra)
     # works, this is just the one AWS tests F2 on.
     if [ -z "${AMI:-}" ]; then
         AMI=$(aws ec2 describe-images --owners aws-marketplace \
-              --filters "Name=name,Values=*FPGA Developer AMI*" "Name=state,Values=available" \
+              --filters "Name=name,Values=FPGA Developer AMI (Ubuntu)*" "Name=state,Values=available" \
                         "Name=architecture,Values=x86_64" \
               --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)
         if [ -z "$AMI" ] || [ "$AMI" = None ]; then
@@ -81,7 +81,7 @@ infra)
             exit 1
         fi
     fi
-    read -r AMINAME ROOTDEV <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[Name,RootDeviceName]' --output text)"
+    read -r ROOTDEV AMINAME <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[RootDeviceName,Name]' --output text)"
     echo "AMI $AMI ($AMINAME, root $ROOTDEV)"
 
     sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" -e "s/__REGION__/$AWS_DEFAULT_REGION/g" \
