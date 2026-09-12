@@ -27,20 +27,23 @@ derived, or estimated.
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
 | `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
-| `gf131_mul_tb.vhd`, `ec2k_batch_tb.vhd`, `ec2k_step_tb.vhd`, `ec2k_walker_tb.vhd` | Self-checking testbenches |
+| `ec2k_axil.vhd` | **The host interface.** AXI4-Lite register block around `NENG` walkers: load registers, a distinguished-point queue, step/point/drop counters, geometry readback |
+| `gf131_mul_tb.vhd`, `ec2k_batch_tb.vhd`, `ec2k_step_tb.vhd`, `ec2k_walker_tb.vhd`, `ec2k_axil_tb.vhd` | Self-checking testbenches |
 | `gf131_tb_pkg.vhd` | Hex helpers shared by the testbenches |
 | `ecc2k_ref.py` | Reference model of every hardware algorithm, proved against `ecc2k130/codegen/field.py`; generates the vectors; gate counts |
 | `vectors_ecc2k130.txt` | Generated: 256 products, 200 steps, 64 walks to a distinguished point |
-| `aws/` | Out-of-context synthesis script for the VU47P |
+| `host/` | `ecc2k130-fpga`, the host program: drives the register block over PCIe (or a behavioural model with `--sim`), speaks `worker.py`'s client contract, writes the campaign's dp records and checkpoints |
+| `aws/` | Out-of-context synthesis script; the F2 custom logic `cl_ecc2k130` around `ec2k_axil`; the AWS CLI that builds the image and runs an F2 fleet — see [`aws/README.md`](aws/README.md) |
 
 ## Run
 
 ```bash
-make            # analyse, elaborate and run the four testbenches
+make            # analyse, elaborate and run the five testbenches
 make rate       # steady-state clocks per step of the batched unit, 6144 steps
 make check      # prove the hardware algorithms against the client's field model
 make vectors    # regenerate the vector file
 make cost       # gate counts of the multiplier from its constant matrices
+make -C host test   # build the host program and run it against its own model
 ```
 
 Needs GHDL and Python 3 (the generator imports `ecc2k130/codegen`). Current
@@ -58,6 +61,9 @@ ec2k_step_tb: PASS
 === ec2k_walker_tb ===
 ec2k_walker_tb: 64 distinguished points from 797 steps in 15102 clk (32 walks, batches of 8, 4 in flight)
 ec2k_walker_tb: PASS
+=== ec2k_axil_tb ===
+ec2k_axil_tb: 64 distinguished points, 797 steps through 2 engine(s) of 16 walks, 6096 status polls
+ec2k_axil_tb: PASS
 
 $ make rate
 ec2k_batch_tb: 6144 steps in 33160 clk = 539/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
@@ -278,6 +284,53 @@ is not a throughput measurement: the walk population dwindles as records
 run out and the tail is spent in partial batches waiting for the flush;
 `make rate` is the one that measures the saturated rate.
 
+## The host interface
+
+`ec2k_axil` is what a host sees: an AXI4-Lite slave in front of `NENG`
+walkers, each with `2^ID_W` walks, addressed as one flat space of
+`gid = engine · 2^ID_W + id`. It does three things and nothing else.
+
+- **Load.** The host writes `LD_ID`, the five 32-bit words of `x` and `y`
+  (word `k` is bits `32k+31..32k`, word 4 the top three bits — the same
+  limb order as the client's `Elem`), then `LD_GO`; `STATUS.LD_BUSY` clears
+  when the engine has taken it. Loading an id that is still walking
+  duplicates the walk, since the walker has no kill; the host only reloads
+  an id after that id has reported.
+- **Report.** Every engine's `dp_*` port lands in a holding register; a
+  rotating pointer drains them into a `2^DP_FIFO_W`-deep queue the host
+  reads through `DP_ID`, `DP_STEPS`, `DP_X*`, `DP_Y*` and pops with
+  `DP_POP`. A holding register overwritten before it was drained counts in
+  `DROPPED` and sets the sticky `STATUS.DP_OVERFLOW`; that only happens if
+  the host stops polling for a long time, since reports arrive at
+  `NENG · rate / 2^DP_WEIGHT` and the drain runs at one per clock.
+- **Count.** `STEPS` (64-bit, high word latched on the low read) is the
+  total steps of every engine; `DPS` the reports queued. `GEOM` reads back
+  `ID_W`, `LOG_W`, `LOG_NB`, `DP_WEIGHT` and `NENG`, so the host can refuse
+  an image built for a different campaign; `MAGIC` is `0x2C130001`.
+
+`CTRL.RUN` holds the engines in reset while clear, `CTRL.CLEAR` zeroes the
+counters and the queue. The register map with byte offsets is at the top of
+`ec2k_axil.vhd`. `ec2k_axil_tb` replays the walker testbench's 64 walks
+through the registers alone, spread over two engines, and checks the same
+per-id bookkeeping.
+
+The step tests weight *after* each step, never the point the host loaded,
+so a distinguished start point would walk on forever; the host tests start
+points itself and reports them with zero iterations, exactly as the GPU
+client does.
+
+`host/ecc2k130_fpga.cpp` is that host. It is a drop-in for the CUDA client
+under `ecc2k130/aws/worker.py`: same flags, same progress line, same
+32-byte `(seed, canonical x)` dp records, a checkpoint the supervisor
+resumes from the same way, verification of every report by rewalking it
+from its seed with the packed CPU arithmetic, and collision resolution on
+`--load` through the same `Solver`. Its seeds are `(runId, epoch, gid,
+counter)`, so a resumed worker never repeats a seed and every seed
+rewalks to its point without the FPGA. `--sim` swaps the PCIe bus for a
+behavioural model of the register block, which is what `host/test.sh`
+runs the whole `worker.py` contract against, down to feeding the resulting
+`dp.bin` to `merge.py`.
+
 ## Capacity and what it would mean — estimated
 
 Per VU47P (2.85M LUTs), at ~10k LUTs per batched step unit — a 5–6k LUT
@@ -314,10 +367,18 @@ XOR).
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **The AWS shell.** Like `hdl/ecc/`, this is a bare datapath with a clock,
-  a load port and a report port. A loadable FPGA image needs the `aws-fpga`
-  custom-logic wrapper, AXI interfaces and a host program; see
-  `hdl/ecc/aws/README.md` for what that involves.
+- **A built image.** The custom logic, host program and build scripts are
+  in `aws/` and `host/`, but nothing has run Vivado or an F2 instance: the
+  Fmax, LUT count per engine and therefore `NENG` are all still the
+  estimates above. `aws/README.md` says what the first build should look
+  at.
+- **Reading a walk back.** The engine's walk state is write-only from the
+  host, so walks in flight are lost when a worker restarts; each of them
+  is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for
+  it. It also means no per-walk `--max-iters`: a walk that never reaches a
+  distinguished point (a cycle before the first one — at a cutoff of
+  `2^34` on a walk whose expected cycle length is near `2^65`, that is
+  astronomically rare) is only cleared by dropping `CTRL.RUN`.
 - **Restart on the FPGA.** Building a fresh start point costs 128 point
   additions with `sigma^i(P)`, once per report — roughly one in `2^25`
   steps at the real cutoff. The client keeps that off the hot path too.
