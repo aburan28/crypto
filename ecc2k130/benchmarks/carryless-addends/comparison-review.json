@@ -1,0 +1,113 @@
+{
+  "valid": true,
+  "status": "Completed canonical-input CLMAD addend full-walk receipt passed retained-artifact audit",
+  "rawSha256": "e3246bd2289580c753a67991a4d64fcba1bcedc08fb89d440c8b05be18ff647c",
+  "auditorSha256": "449053fb70930a2d557c0e1b1b71d226b7be52cfd0a47526306c95ee63c07528",
+  "fusionModes": {
+    "control": 0,
+    "addend2": 2
+  },
+  "canonicalInputsOnly": true,
+  "rootPredispatchReviewSha256": "9ffe9acf9785e84d23eb05c1b9f4c9cc3fe0c063deab5acc85ccc7c047b9a2e8",
+  "predispatchReviewSha256": "1921674e17734ae83ec733e0f90fbc27a4264c51685ed18cd34a7a31dce159a9",
+  "driverFreezeSha256": "0d2ffa65db39ad662220083c42f6fef17d4a084f5c6a80ff52699f0071d2d89f",
+  "prebuildSha256": "15e85a6a09d2c78ea370551981788ac8b01f4fdb513a79c3266c96c85cd2fe27",
+  "sourceManifestHashes": {
+    "control": "d01af7fe41b4353727cfe25d3f7bfb1d3a162a8ff4f322a54c028b370dbf13ba",
+    "addend2": "d01af7fe41b4353727cfe25d3f7bfb1d3a162a8ff4f322a54c028b370dbf13ba"
+  },
+  "sourceFilesPerMode": 157,
+  "binaries": {
+    "control": "cb97e5ea4ee33611521c6e257f792d2eb934271a017bc2621ebaccacc936c118",
+    "addend2": "6682a9c9c238182f5dc394e0dcee628a60fbb353037c04847b9db81b4abd4740"
+  },
+  "arithmeticBinaries": {
+    "control": "4667c52a6aa4bcb4e0a257ac90aeaa0fa1d1c4c81fe73809ac5a88876be6104a",
+    "addend2": "46e58e6e85064c0e52ec6168056341c679f5fff3386ea557c060d9dda1613f77"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-89114d1b-db22-213d-3a47-db59e7254092",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-89114d1b-db22-213d-3a47-db59e7254092",
+      "driver_version": "580.95.05",
+      "pstate": "P8",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "31"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-89114d1b-db22-213d-3a47-db59e7254092",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-89114d1b-db22-213d-3a47-db59e7254092",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2422 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "62"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRequiredCommandsCompletedWithExpectedStatus": true,
+  "checkpointChildren": 20,
+  "expectedCheckpointRejections": 2,
+  "warmupsExcluded": 2,
+  "timedRows": 5,
+  "scalarUpdatesEveryTimedRow": 201863462912,
+  "scalarWalks": 6160384,
+  "stepsPerWalk": 32768,
+  "batches": {
+    "control": 16,
+    "addend2": 16
+  },
+  "workers": {
+    "control": 385024,
+    "addend2": 385024
+  },
+  "screenQualified": false,
+  "screenWinner": null,
+  "screenRatesM": [
+    {
+      "mode": "control",
+      "rate": 13363.256
+    },
+    {
+      "mode": "addend2",
+      "rate": 10280.322
+    },
+    {
+      "mode": "control",
+      "rate": 13280.746
+    }
+  ],
+  "controlDriftPercent": -0.6174393426272795,
+  "qualificationThresholdM": 13430.072279999998,
+  "statistics": {},
+  "pairedComparisons": {},
+  "corpusIdentity": null,
+  "goalEvaluation": null,
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Complete scalar rates apply to this fixed oneGPU public walk workload. Warmups/screen peaks are excluded from repeated goal evaluation; benchmark and DP34 medians remain separate.",
+    "Fusion mode is the varied configuration. B16, minBlocks2, T256, TILE256 and CLMAD1 are fixed. Field products per scalar are5+5/B; equal scalar work does not mean equal arithmetic or perCTA footprint.",
+    "Fusion equivalence is limited to canonical131-bit field inputs and cleared denominator tags. FUSED2 masks top limbs; arbitrary noncanonical raw inputs are outside this proof.",
+    "Checkpoint v2 intentionally rejects different batch/worker headers even at equal payload length; same-geometry and same-batch cross-mode resume are checked separately.",
+    "Temporary checkpoint and DP payload bytes are not retained; this audit verifies their recorded hashes, sizes, counts and bound executable helpers rather than independently rehashing those transient payloads.",
+    "API occupancy predictions and endpoint GPU telemetry do not prove achieved occupancy, cache hits, continuous clocks or a universal hardware ceiling."
+  ]
+}

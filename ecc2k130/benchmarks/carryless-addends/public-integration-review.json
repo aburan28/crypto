@@ -1,0 +1,69 @@
+{
+  "valid": true,
+  "kind": "Independent exact-head public carryless-addend integration review",
+  "repository": "/private/tmp/ecc2k-addend-implementation-pr-20260912",
+  "branch": "codex/ecc2k130-native-addends",
+  "head": "a69a992042d63e58abefd2ae96eb5c4ebd90bb84",
+  "base": "85b9c0b325c5423d64332f886e07d4366645d29c",
+  "changedFiles": {
+    "ecc2k130/CARRYLESS-ADDENDS.md": "4588af0a83ca1488290b3533e53b0e8d0a64058f0c2ede0cd9614d4d09ce6f5f",
+    "ecc2k130/Makefile": "b6e0b934439ce5ed581740fa3c61f9bf43d328d6f81837bba3792be08848f4c5",
+    "ecc2k130/codegen/testclmad.py": "75f937b9b3cf4960f36c6033920f4136f11ae43c3c09659a6b975e28b9de43aa",
+    "ecc2k130/codegen/testdirectbuild.py": "0869119b49aa20b915e825e3285fcba7cd481214adcda9992baf70fd8f1614e4",
+    "ecc2k130/codegen/testpackedauditreport.py": "f25bcaf4cb62ac28106a61e0aab38be4479e2c6b7b92b60049547182a390fb85",
+    "ecc2k130/include/packed131.h": "1146933ef2ee4af1f5249bb1fd8a6bce9e2b84950b93060c6b000080c281dc7a",
+    "ecc2k130/include/packedengine.cuh": "3cc5a81f940fe7908b17dc117e0aa7b2b6666689123dada4fa2442c9fc61b44a",
+    "ecc2k130/modal_app.py": "14e57c8fd943a6dc70f99d412a79fdcbffb905440903754025a124d7480e6658",
+    "ecc2k130/packed_audit.py": "d3e976a465658a35415431d45ea007f9f12813c5a38e3f8ff4f85674f3e0b5d9",
+    "ecc2k130/src/testpackedcuda.cu": "828fac22d6a68cbe36d8049b2d1a10cd7877e8b2f83fce4197e6c75a403b9c4a"
+  },
+  "cleanBeforeAndAfter": true,
+  "headerByteIdenticalToReviewedPrototype": true,
+  "algebraSourceReviewSha256": "cdf75478b2987a528bba1301b87495f154e1dcf24b292e9c1203b45e2fc3496b",
+  "hostTests": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "codegen/testdirectbuild.py"
+      ],
+      "exitCode": 0,
+      "tests": 33,
+      "logPath": "/private/tmp/ecc2k-addend-public-review-20260912/testdirectbuild.log",
+      "logSha256": "5bc61ba2de9e263d8766cb22d6cb1071a9b3281f735d6d791030537514a1f1ef"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "codegen/testpackedauditreport.py"
+      ],
+      "exitCode": 0,
+      "tests": 5,
+      "logPath": "/private/tmp/ecc2k-addend-public-review-20260912/testpackedauditreport.log",
+      "logSha256": "533131dad8973c589ae697ab1dd346cc55caa134cd1e536cedf26f1b057c0f1f"
+    }
+  ],
+  "hostTestsRun": 38,
+  "preprocessorTestMethodsReviewedButNotRerun": 7,
+  "checks": [
+    "The C++ mode defaults to0, admits only0/1/2, and nonzero modes require native CLMAD. Existing CUDA13.3/sm80 guards and host software simulation remain in force.",
+    "Public Make passes the enum define once through DEFS and forwards it into the dedicated host arithmetic target. The RTX preset does not enable a nonzero mode.",
+    "Public runtime and arithmetic markers are respectively packed carryless addends and packed arithmetic carryless addends; their values are the exact enum mode.",
+    "Modal validates environment values and the native-CLMAD prerequisite before image creation; the image environment and baked build retain the mode.",
+    "The baked identity, buildFor requested identity, real rebuild command and runBench no-rebuild guard include the integer mode, so stale binaries cannot be reused after a mode change.",
+    "Benchmark identity, benchmark/autotune rows and compile-check records preserve the selected integer mode, while nonpacked records remain None.",
+    "checkPackedReduction rejects missing, wrong, malformed or duplicate markers without restoring a previously invalid sample; invalid rates become zero.",
+    "packed_audit forwards the same mode into its arithmetic build, records expected/actual values, and rejects arithmetic identity failure before integration or timing. Every timed sample reaches the shared marker/count gate.",
+    "The fixture correction supplies the new default variable and its new output marker. It does not relax a production predicate; additional mutation tests exercise the new rejection cases.",
+    "Documentation distinguishes canonical inputs, host simulation, compiler evidence and pending device validation/timing."
+  ],
+  "findings": [],
+  "limits": [
+    "Only relevant Python wrapper/count tests were executed by this review; no C++/CUDA compile, numerical field suite, GPU job or job-status poll was performed.",
+    "The seven preprocessor tests were inspected and their owner-reported pass was not rerun. The unchanged report tests outside this scope are not counted among the38 tests run here.",
+    "The arithmetic header is covered by the prior canonical-input algebra/header/CPU review. FUSED2 masks top limbs, so arbitrary noncanonical raw input equivalence is not claimed.",
+    "Public GPU correctness and throughput remain pending at this review boundary. The private GPU run uses different marker labels and does not by itself validate public wrapper execution.",
+    "Source-level and static compiler instruction counts are not a speedup measurement; nonzero modes remain opt-in."
+  ]
+}

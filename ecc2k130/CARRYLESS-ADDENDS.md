@@ -46,7 +46,27 @@ helpers from 171 / 325 / 353 to 109 / 210 / 294 non-NOP instructions. It
 also increased the number of native carryless instructions. These are
 compiler observations, not throughput measurements.
 
-A separately frozen control-versus-mode-2 GPU comparison is pending. It
-requires device arithmetic, full client replay, common-state, checkpoint
-and exact-count checks before timing. The RTX preset continues to use mode
-0 until a complete matched comparison supports a change.
+## Mode-2 GPU screening result
+
+The [controlled GPU screen](benchmarks/carryless-addends/comparison.json)
+passed device arithmetic, full client replay, common-state, checkpoint and
+exact-count checks on one RTX PRO 6000 Blackwell Server Edition. Every
+timed row completed 201,863,462,912 complete scalar updates.
+
+| Screening order | Mode | Complete scalar rate B/s |
+|---:|---:|---:|
+| 1 | 0, control | 13.363256 |
+| 2 | 2, native top terms | 10.280322 |
+| 3 | 0, control | 13.280746 |
+
+Mode 2 failed the predefined qualification threshold. No repeated
+confirmation or timed DP34 collection was triggered. Two warmups are
+excluded from this table. The [retained-result audit](benchmarks/carryless-addends/comparison-review.json)
+passed all five timed rows and 20 checkpoint children, including two
+expected worker-geometry rejections.
+
+The shorter native code did not improve this workload's throughput. This
+screen supplies no hardware-pipe ceiling measurement. Mode 2 is not selected
+by the RTX preset, and the implementation PR remains a draft while a hybrid
+with fewer native top-term multiplies is evaluated. The 15 B/s target remains
+unachieved.
