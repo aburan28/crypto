@@ -468,8 +468,29 @@ sweep and both end-to-end runs. Past about 10500 points at that degree
 the decomposition rate saturates and further growth only makes each
 trial dearer.
 
-`PairSumTable::build` refuses a base whose table would exceed 4 GiB, so
-an over-large base fails with a number instead of an allocation.
+`PairSumTable::build` keeps a base inside 4 GiB, and past that budget it
+changes representation rather than refusing. The full table stores each
+pair as `(packed sum, i, j)`, sixteen bytes; the **compact** one stores
+only the part of the sum its bucket does not already pin, which fits a
+`u32` exactly — no filter, no false positives — and recovers the summands
+of a hit by one `|F|`-long scan, since `target − P_i` is a base point
+exactly when `i` is a summand. Hits are rare, so that scan is paid about
+once per relation rather than once per probe.
+
+At a fixed budget `B` the base is `|F| = √(2B / bytes per pair)`, and the
+descent needs `2r/|F|²` probes, so the width of a stored pair is
+proportional to the descent's cost. Four and a half bytes instead of
+sixteen is a base of 42302 points instead of 23169 at 4 GiB, and 3.3
+times fewer probes. Below the budget nothing changes: a base that fits
+with its summands keeps them. Below even the compact size the build
+still refuses with a number instead of an allocation.
+
+`docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
+36464-point compact base: the descent falls from 50.4 ms a target to
+16.3 ms and the charged ρ/IC ratio rises from 25.0 to 75.2, while the
+precompute rises from 16.5 s to 87.8 s. That is a trade, and
+`docs/ic/runs/koblitz-compact-pair-table-20260912.json` prices it — about
+2200 targets before the wider base is the cheaper one.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.

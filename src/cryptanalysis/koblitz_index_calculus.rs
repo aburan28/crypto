@@ -125,6 +125,7 @@
 //!   (2000) — the `√n` rho speed-up we compare against.
 
 use std::collections::{HashMap, HashSet};
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -2152,7 +2153,30 @@ fn pair_filter_hash(key: u64) -> u64 {
 #[derive(Clone, Debug)]
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
+    /// Empty in the compact representation, which keeps `rests` instead.
     entries: Vec<(u64, u32, u32)>,
+    /// The compact representation of the same set: the part of each
+    /// packed sum that its bucket does not already determine, sorted
+    /// within the bucket, and nothing else.
+    ///
+    /// A stored pair costs sixteen bytes as a `(key, i, j)` triple and
+    /// four as a rest, and at a fixed memory budget the base is
+    /// `|F| = √(2·budget/bytes per pair)`, so the descent's `2r/|F|²`
+    /// probes scale directly with that width: a quarter of the bytes is
+    /// four times the reach at the same memory.  What it gives up is the
+    /// summands — a hit knows a decomposition exists but not of what —
+    /// and those are recovered by one `|F|`-long scan
+    /// ([`Self::recover_pair`]).  Hits are rare by construction, so that
+    /// scan is paid about once per relation rather than once per probe.
+    ///
+    /// This is exact, not a filter: the bucket index covers the top bits
+    /// of the key and a rest covers all the others, so a rest that
+    /// matches in the right bucket is the key.  There are no false
+    /// positives to spend recovery scans on.
+    rests: Vec<u32>,
+    /// `pack()` of each base point to its index, for recovering the
+    /// summands of a compact hit.  `|F|` entries, not `|F|²`.
+    index_of_point: HashMap<u64, u32>,
     /// Single-word arithmetic on the curve, for the table build and the
     /// `|F|` subtractions of a three-summand search.
     curve: FastCurve,
@@ -2191,8 +2215,33 @@ impl PairSumTable {
 
     /// Bytes the entries of a table for this base would occupy.
     pub fn byte_size(points: usize) -> u128 {
-        let pairs = points as u128 * (points as u128 + 1) / 2;
-        pairs * std::mem::size_of::<(u64, u32, u32)>() as u128
+        Self::pair_count(points) * std::mem::size_of::<(u64, u32, u32)>() as u128
+    }
+
+    /// Stored pairs for a base of this size.
+    fn pair_count(points: usize) -> u128 {
+        points as u128 * (points as u128 + 1) / 2
+    }
+
+    /// [`Self::byte_size`] for the compact representation: four bytes a
+    /// pair for the rest, plus the bucket index and the presence filter.
+    /// A quarter of the full table's width, which at a fixed budget is
+    /// twice the base and four times the `|F|²` the descent divides by.
+    pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
+        let pairs = Self::pair_count(points);
+        let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
+        pairs * 4 + buckets * 4 + pairs / 2
+    }
+
+    /// Bucket bits for the compact table.  At least `key_bits − 32`, so
+    /// the rest a bucket leaves over always fits a `u32` and the
+    /// representation stays exact; otherwise about one bucket per
+    /// sixteen pairs, which keeps a bucket's run inside a cache line.
+    fn compact_bucket_bits(pairs: u128, degree: u32) -> u32 {
+        let key_bits = degree + 2;
+        let by_width = key_bits.saturating_sub(32);
+        let by_run = (128 - (pairs.max(1) >> 4).leading_zeros()).max(1);
+        by_width.max(by_run).min(key_bits).min(30)
     }
 
     /// [`Self::build`] with an explicit ceiling on the entries.
@@ -2210,7 +2259,10 @@ impl PairSumTable {
             return None;
         }
         if Self::byte_size(fb.points.len()) > byte_budget {
-            return None;
+            // Too wide to store the summands; the compact table may
+            // still fit, and a base that fits only compactly is exactly
+            // the base worth having.
+            return Self::build_compact_within(kc, fb, byte_budget);
         }
         let curve = FastCurve::new(&kc.curve)?;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
@@ -2255,6 +2307,8 @@ impl PairSumTable {
         }
         Some(Self {
             entries,
+            rests: Vec::new(),
+            index_of_point: HashMap::new(),
             curve,
             points,
             negated,
@@ -2265,14 +2319,129 @@ impl PairSumTable {
         })
     }
 
+    /// The compact table: every pair sum's bucket and rest, and no
+    /// summands.
+    ///
+    /// Built without a comparison sort — the bucket of a key is known
+    /// before any key is compared, so counting the buckets and
+    /// scattering into them puts every rest in place in two linear
+    /// passes.  A run of rests is sorted afterwards, which is a handful
+    /// of elements per bucket.
+    fn build_compact_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        let n_points = fb.points.len();
+        if n_points > u32::MAX as usize {
+            return None;
+        }
+        if Self::compact_byte_size(n_points, kc.n) > byte_budget {
+            return None;
+        }
+        let pairs = Self::pair_count(n_points);
+        if pairs > u32::MAX as u128 {
+            return None;
+        }
+        let curve = FastCurve::new(&kc.curve)?;
+        let key_bits = curve.n + 2;
+        let bucket_bits = Self::compact_bucket_bits(pairs, curve.n);
+        let bucket_shift = key_bits - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+
+        // A counting sort in two passes over the pairs, both parallel.
+        // The bucket of a key is known before any key is compared, so
+        // nothing is sorted: counting the buckets and scattering into
+        // them puts every rest in its run, and a run is short enough to
+        // scan.  The pair sums are recomputed rather than held between
+        // the passes — holding them would cost the eight bytes a pair
+        // that this representation exists to avoid.
+        let mask = (1u64 << bucket_shift) - 1;
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        let each_row = |i: usize, f: &mut dyn FnMut(u64)| {
+            let mut sums = Vec::with_capacity(n_points - i);
+            let mut scratch = BatchScratch::default();
+            curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+            for sum in &sums {
+                f(sum.pack());
+            }
+        };
+        (0..n_points).into_par_iter().for_each(|i| {
+            each_row(i, &mut |key| {
+                counts[(key >> bucket_shift) as usize + 1].fetch_add(1, Ordering::Relaxed);
+            });
+        });
+        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        let total = bucket_start[buckets] as usize;
+        let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+        let mut rests = vec![0u32; total];
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let words = (1usize << filter_bits) / 64;
+        let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+        // Each pair claims its slot with one atomic increment, and no
+        // two pairs claim the same one, so the writes never overlap.
+        // The presence filter is set in the same pass: both want only
+        // the key, and a pass costs `|F|²/2` point additions.
+        let slots = rests.as_mut_ptr() as usize;
+        (0..n_points).into_par_iter().for_each(|i| {
+            each_row(i, &mut |key| {
+                let bucket = (key >> bucket_shift) as usize;
+                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+                // SAFETY: `slot` is this pair's own index, handed out
+                // once by the bucket's cursor and inside the run the
+                // counting pass measured for that bucket.
+                unsafe {
+                    *(slots as *mut u32).add(slot) = (key & mask) as u32;
+                }
+                let h = (pair_filter_hash(key) & present_mask) as usize;
+                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+            });
+        });
+        let present: Vec<u64> = present_atomic
+            .iter()
+            .map(|w| w.load(Ordering::Relaxed))
+            .collect();
+        let index_of_point = points
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (p.pack(), i as u32))
+            .collect();
+        Some(Self {
+            entries: Vec::new(),
+            rests,
+            index_of_point,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+        })
+    }
+
+    /// Whether this table keeps the summands of each pair.
+    pub fn is_compact(&self) -> bool {
+        self.entries.is_empty() && !self.rests.is_empty()
+    }
+
     /// Number of stored pair sums (with multiplicity).
     pub fn len(&self) -> usize {
+        if self.is_compact() {
+            return self.rests.len();
+        }
         self.entries.len()
     }
 
     /// Whether the table is empty.
     pub fn is_empty(&self) -> bool {
-        self.entries.is_empty()
+        self.len() == 0
     }
 
     /// The single-word curve the table was built on.
@@ -2305,6 +2474,58 @@ impl PairSumTable {
 
     /// [`Self::lookup`] for a key the filter has already admitted.
     #[inline]
+    /// Whether the compact table holds this key.  Exact: the bucket
+    /// pins the key's top bits and the rest pins every other one.
+    fn compact_contains(&self, key: u64) -> bool {
+        let bucket = (key >> self.bucket_shift) as usize;
+        let Some(&lo) = self.bucket_start.get(bucket) else {
+            return false;
+        };
+        let hi = self.bucket_start[bucket + 1];
+        let rest = (key & ((1u64 << self.bucket_shift) - 1)) as u32;
+        // A run holds about sixteen rests, which is one cache line: a
+        // scan beats a search and spares the build any ordering.
+        self.rests[lo as usize..hi as usize].contains(&rest)
+    }
+
+    /// The summands of a pair the compact table holds, recovered by one
+    /// pass over the base: `target − P_i` is a base point exactly when
+    /// `i` is a summand.  Paid on a hit, which is rare — that is the
+    /// trade the compact table makes.
+    fn recover_pair(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+        let mut rests = Vec::with_capacity(self.points.len());
+        let mut scratch = BatchScratch::default();
+        self.curve
+            .add_many(target, &self.negated, &mut rests, &mut scratch);
+        for (i, rest) in rests.iter().enumerate() {
+            if rest.infinity {
+                continue;
+            }
+            if let Some(&j) = self.index_of_point.get(&rest.pack()) {
+                if i as u32 <= j {
+                    out.push((i as u32, j));
+                }
+            }
+        }
+    }
+
+    /// The summand pairs of `target`, however the table stores them.
+    /// `out` is cleared first.
+    pub fn pairs_for(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+        out.clear();
+        let key = target.pack();
+        if !self.admitted(key) {
+            return;
+        }
+        if self.is_compact() {
+            if self.compact_contains(key) {
+                self.recover_pair(target, out);
+            }
+            return;
+        }
+        out.extend(self.lookup_admitted(key).iter().map(|&(_, i, j)| (i, j)));
+    }
+
     fn lookup_admitted(&self, key: u64) -> &[(u64, u32, u32)] {
         let bucket = (key >> self.bucket_shift) as usize;
         let Some(&lo) = self.bucket_start.get(bucket) else {
@@ -2428,12 +2649,12 @@ impl PairSumTable {
         for rest in rests.iter().take(LOOKAHEAD) {
             prefetch(&self.present[self.filter_word(rest.pack())]);
         }
+        let mut pairs = Vec::new();
         for (offset, rest) in rests.iter().enumerate() {
             if let Some(ahead) = rests.get(offset + LOOKAHEAD) {
                 prefetch(&self.present[self.filter_word(ahead.pack())]);
             }
-            let key = rest.pack();
-            if !self.admitted(key) {
+            if !self.admitted(rest.pack()) {
                 continue;
             }
             let k = if offset < tail {
@@ -2441,7 +2662,8 @@ impl PairSumTable {
             } else {
                 offset - tail
             };
-            for &(_, i, j) in self.lookup_admitted(key) {
+            self.pairs_for(*rest, &mut pairs);
+            for &(i, j) in &pairs {
                 if !sink(&[i as usize, j as usize, k]) {
                     return;
                 }
@@ -2472,7 +2694,9 @@ impl PairSumTable {
     ) {
         match m {
             2 => {
-                for &(_, i, j) in self.lookup(target.pack()) {
+                let mut pairs = Vec::new();
+                self.pairs_for(target, &mut pairs);
+                for (i, j) in pairs {
                     if !sink(&[i as usize, j as usize]) {
                         return;
                     }
@@ -2491,15 +2715,16 @@ impl PairSumTable {
                 for rest in rests.iter().take(LOOKAHEAD) {
                     prefetch(&self.present[self.filter_word(rest.pack())]);
                 }
+                let mut pairs = Vec::new();
                 for (k, rest) in rests.iter().enumerate() {
                     if let Some(ahead) = rests.get(k + LOOKAHEAD) {
                         prefetch(&self.present[self.filter_word(ahead.pack())]);
                     }
-                    let key = rest.pack();
-                    if !self.admitted(key) {
+                    if !self.admitted(rest.pack()) {
                         continue;
                     }
-                    for &(_, i, j) in self.lookup_admitted(key) {
+                    self.pairs_for(*rest, &mut pairs);
+                    for &(i, j) in &pairs {
                         if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
                             return;
                         }
@@ -2508,6 +2733,8 @@ impl PairSumTable {
             }
             4 => {
                 // Walk the table as the second half: R − (P_k + P_l).
+                // Only the full representation can be walked; the
+                // compact one holds no summands to walk.
                 let mut last_key: Option<u64> = None;
                 let mut rest = FastPoint::INFINITY;
                 for &(key, k, l) in &self.entries {
@@ -2518,7 +2745,9 @@ impl PairSumTable {
                         rest = self.curve.add(target, self.curve.neg(pair));
                         last_key = Some(key);
                     }
-                    for &(_, i, j) in self.lookup(rest.pack()) {
+                    let mut pairs = Vec::new();
+                    self.pairs_for(rest, &mut pairs);
+                    for &(i, j) in &pairs {
                         if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
                             return;
                         }
@@ -6649,11 +6878,22 @@ mod tests {
     fn pair_table_refuses_a_base_beyond_its_byte_budget() {
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
-        let needed = PairSumTable::byte_size(fb.points.len());
-        assert!(PairSumTable::build_within(&kc, &fb, needed).is_some());
-        assert!(PairSumTable::build_within(&kc, &fb, needed - 1).is_none());
+        let full = PairSumTable::byte_size(fb.points.len());
+        let compact = PairSumTable::compact_byte_size(fb.points.len(), kc.n);
+        assert!(compact < full, "the compact table is the narrower one");
+        // A budget that fits the summands keeps them.
+        let wide = PairSumTable::build_within(&kc, &fb, full).expect("fits with summands");
+        assert!(!wide.is_compact());
+        // One that does not falls back to the compact table rather than
+        // refusing: a base that fits only compactly is worth having.
+        let narrow = PairSumTable::build_within(&kc, &fb, full - 1).expect("fits compactly");
+        assert!(narrow.is_compact());
+        assert_eq!(wide.len(), narrow.len());
+        // Below even that, it refuses with a number rather than an
+        // allocation the machine cannot meet.
+        assert!(PairSumTable::build_within(&kc, &fb, compact - 1).is_none());
         // The default budget is far above a base this size.
-        assert!(needed < PairSumTable::DEFAULT_BYTE_BUDGET);
+        assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
         assert!(PairSumTable::build(&kc, &fb).is_some());
     }
 
@@ -8091,6 +8331,65 @@ mod tests {
             })
             .collect();
         (orbit_of, representatives)
+    }
+
+    #[test]
+    fn the_compact_table_answers_exactly_as_the_full_one() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 300).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        // A budget below the full table's width but above the compact
+        // one's forces the compact representation of the same base.
+        let compact = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::compact_byte_size(fb.points.len(), kc.n),
+        )
+        .expect("the compact table fits its own budget");
+        assert!(!full.is_compact() && compact.is_compact());
+        assert_eq!(full.len(), compact.len(), "the two hold the same pairs");
+
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        // Every stored sum, and a stream of points that mostly are not.
+        let mut checked_hits = 0usize;
+        let mut checked_misses = 0usize;
+        for t in 1u64..900 {
+            let target = fc.mul_u64(g, t);
+            if target.infinity {
+                continue;
+            }
+            let mut a = Vec::new();
+            let mut b = Vec::new();
+            full.pairs_for(target, &mut a);
+            compact.pairs_for(target, &mut b);
+            a.sort_unstable();
+            b.sort_unstable();
+            assert_eq!(a, b, "the two disagreed on [{t}]G");
+            if a.is_empty() {
+                checked_misses += 1;
+            } else {
+                checked_hits += 1;
+            }
+        }
+        for i in 0..fb.points.len().min(64) {
+            for j in i..fb.points.len().min(64) {
+                let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
+                if sum.infinity {
+                    continue;
+                }
+                let mut a = Vec::new();
+                let mut b = Vec::new();
+                full.pairs_for(sum, &mut a);
+                compact.pairs_for(sum, &mut b);
+                a.sort_unstable();
+                b.sort_unstable();
+                assert!(a.contains(&(i as u32, j as u32)), "full lost a stored pair");
+                assert_eq!(a, b, "the two disagreed on a stored pair sum");
+                checked_hits += 1;
+            }
+        }
+        assert!(checked_hits > 0 && checked_misses > 0, "the test checked only one side");
     }
 
     #[test]

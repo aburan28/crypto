@@ -1516,3 +1516,78 @@ cheap enough that eight seconds of setup became the thing to look at;
 before that, they were noise inside a larger number. Profiling only finds
 what is currently largest, which means a real speedup is usually followed
 by another one.
+
+## The memory wall, and what a pair costs to store
+
+Every section above moved a constant inside a cost law. This one moves
+the quantity the laws divide by.
+
+The descent needs `2r/|F|²` probes and collection `2r/(n|F|)` lookups, so
+`|F|` is what the reach is made of — and `|F|` is capped by the pair
+table, which holds `|F|²/2` sums. At sixteen bytes a sum, four gibibytes
+buys a base of about 23000 points and not one more. The relation is
+worth writing down: at a fixed budget `B`,
+
+```text
+    |F| = √(2B / bytes per pair)
+```
+
+so the descent's `2r/|F|²` is directly proportional to the width of a
+stored pair. **Halving the bytes halves the descent.**
+
+Sixteen bytes is `(packed sum, i, j)`. The sum is what a lookup asks
+about; `i` and `j` are what it answers with. But a bucket index already
+pins the top bits of a sum, and the bits it leaves over fit a `u32` for
+every degree this pipeline reaches — so four bytes hold the whole key
+**exactly**, with no filter and no false positives. What that gives up is
+the answer: a hit knows a decomposition exists but not of what.
+
+The answer is recoverable. `target − P_i` is a base point exactly when
+`i` is a summand, so one `|F|`-long scan finds the pair. Hits are rare by
+construction — that is what a decomposition oracle *is* — so the scan is
+paid about once per relation rather than once per probe. Storage falls
+from sixteen bytes to about four and a half, counting the bucket index
+and the presence filter.
+
+At four gibibytes that is a base of 42302 points instead of 23169, and
+3.33 times fewer descent probes.
+
+### What it costs, measured
+
+`K_0/F_{2^53}`, 32 targets, the same four-gibibyte budget:
+
+| | narrow (15264 points) | wide (36464 points) |
+|---|---|---|
+| pair table | full, 16 B/pair | compact, 4.9 B/pair |
+| precompute | 16.5 s | 87.8 s |
+| descent probes/target | 243 863 | **32 877** |
+| descent | 50.4 ms | **16.3 ms** |
+| charged ρ/IC | 25.0 | **75.2** |
+| amortised ρ/IC | 2.17 | 0.44 |
+
+Both solved 32 of 32 and had all 32 confirmed by ρ. The charged ratio
+triples, which is about three and a half bits of reach since the ratio
+falls as `√r`. The precompute quintuples, because the table is quadratic
+in a base that grew and the base has 344 columns to determine instead of
+144.
+
+So this is a trade, not a free win, and the crossing point is the target
+count: 71 extra seconds of precompute against 32 ms saved per target is
+**about 2200 targets** before the wider base is the cheaper one. For a
+single logarithm the narrow base is better; for a campaign against a
+whole curve the wide one is, and it is the only one of the two whose
+charged advantage survives past 53 bits.
+
+### Building it
+
+The compact table is built by a counting sort in two parallel passes and
+no comparison sort at all — the bucket of a key is known before any key
+is compared, so counting the buckets and scattering into them puts every
+rest in its run, and a run is sixteen entries, one cache line, scanned
+rather than searched. The pair sums are recomputed in the second pass
+rather than held between the two, because holding them would cost the
+eight bytes a pair the representation exists to avoid.
+
+It costs 66.3 s for 664.8 million pairs against 6.7 s for 116.5 million —
+100 ns a pair against 57. That factor is the second pass, and it is now
+the largest single item in a wide precompute.

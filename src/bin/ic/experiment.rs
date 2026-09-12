@@ -35,7 +35,20 @@ use std::{
 /// budget, so a base that is too large for the machine fails with a
 /// number rather than an allocation.
 pub const MAX_FACTOR_DIMENSION: u32 = 13;
-pub const MAX_ABSCISSAE: usize = 1 << MAX_FACTOR_DIMENSION;
+/// Abscissae a base may materialise to.
+///
+/// This was `1 << MAX_FACTOR_DIMENSION`, which is the right bound for a
+/// subspace base — its abscissae are a dimension's worth and nothing
+/// else chooses them.  A subgroup-orbit base has no such dimension, and
+/// what actually bounds it is the pair table: while a stored pair cost
+/// sixteen bytes the table refused anything past about 23000 points at
+/// four gibibytes, which is under this cap anyway.  The compact table
+/// stores four and a half bytes a pair and reaches about 42000 points at
+/// the same budget, so this cap became the binding one.  It is raised to
+/// sit above the memory bound rather than below it, and
+/// [`PairSumTable::build`] still refuses past its own byte budget with a
+/// number rather than an allocation.
+pub const MAX_ABSCISSAE: usize = 1 << 16;
 pub fn degree(value: &str) -> Result<u32, String> {
     let n = value
         .parse::<u32>()

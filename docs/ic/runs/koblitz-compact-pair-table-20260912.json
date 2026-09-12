@@ -1,0 +1,107 @@
+{
+ "claim_boundary": "synthetic_known_answer",
+ "date": "2026-09-12",
+ "degree_53": {
+  "curve": "K_0 / F_2^53",
+  "narrow": {
+   "base_points": 15264,
+   "columns": 144,
+   "descent_probes_per_target": 243863,
+   "descent_seconds_per_target": 0.04878924706250001,
+   "pair_table": "full, 16 bytes a pair",
+   "parameters": "docs/ic/params/k0n53-subgroup.json",
+   "precompute_seconds": 16.515170663,
+   "ratio": {
+    "amortised": 2.160907447547633,
+    "charged": 25.019271118773272
+   },
+   "rho_seconds_per_target": 1.2206713999375003,
+   "rho_verified": 32,
+   "stage_seconds": {
+    "collect": 14.67,
+    "logs": 0.86,
+    "select": 0.99,
+    "solve": 1.75
+   },
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.9600308100402795,
+    "whole_process_crossover": true
+   },
+   "verified": 32
+  },
+  "subgroup_bits": 45,
+  "targets": 32,
+  "the_trade": {
+   "base_ratio": 2.39,
+   "break_even_targets": 2196,
+   "charged_ratio_narrow": 25.02,
+   "charged_ratio_wide": 75.15,
+   "descent_probe_ratio": 7.42,
+   "descent_second_ratio": 2.99,
+   "descent_seconds_saved_per_target": 0.03247,
+   "precompute_seconds_extra": 71.29,
+   "reading": "The wide base buys charged reach and costs a larger precompute. The charged ratio rises 3.0 times, which is about three and a half bits since the ratio falls as the square root of r; the precompute rises five times, so the whole-process advantage needs about 2000 targets before the wider base is the cheaper one."
+  },
+  "wide": {
+   "base_points": 36464,
+   "columns": 344,
+   "descent_probes_per_target": 32877,
+   "descent_seconds_per_target": 0.016318435937500004,
+   "pair_table": "compact, 4.9 bytes a pair at this size",
+   "parameters": "docs/ic/params/k0n53-subgroup-wide.json",
+   "peak_rss_megabytes": 4222,
+   "precompute_seconds": 87.81003277700002,
+   "ratio": {
+    "amortised": 0.4442682694998542,
+    "charged": 75.15120452241561
+   },
+   "rho_seconds_per_target": 1.2263501166249997,
+   "rho_verified": 32,
+   "stage_seconds": {
+    "collect": 81.63,
+    "logs": 3.78,
+    "select": 2.41,
+    "solve": 0.78
+   },
+   "verdict": {
+    "amortised_crossover": false,
+    "charged_crossover": true,
+    "charged_margin": 0.9866934933863671,
+    "whole_process_crossover": false
+   },
+   "verified": 32
+  }
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "operation": "koblitz_compact_pair_table",
+ "schema_version": 1,
+ "software": {
+  "commit": "aa5f4f9d8395b72fd3871085912871c91215fb00",
+  "profile": "release"
+ },
+ "the_representation": {
+  "build": "A counting sort in two parallel passes, no comparison sort: the bucket of a key is known before any key is compared. Measured 66.3 s for 664.8 million pairs at 36464 points, against 6.7 s for 116.5 million at 15264 -- 100 ns a pair against 57, the cost of making two passes over the pairs instead of one.",
+  "compact_bytes_per_pair_asymptotic": 4.5,
+  "full_bytes_per_pair": 16,
+  "why_exact": "The bucket index covers the top bits of a packed sum and the rest covers every other one, so a rest found in the right bucket is the key. There are no false positives; what is given up is the summands, recovered on a hit by one |F|-long scan. Hits are rare by construction, so that scan is paid about once per relation rather than once per probe.",
+  "widest_base_at_4_gibibytes": {
+   "compact": 42302,
+   "full": 23169,
+   "probe_ratio": 3.33
+  }
+ },
+ "what_this_is": "The pair table is what caps the factor base, and the base is what the descent divides by. Storing each pair as an exact rest instead of a (key, i, j) triple quarters the width, which at a fixed memory budget doubles the base and quarters the descent's probes. This measures the trade end to end against the narrow base on the same budget.",
+ "what_this_is_not": [
+  "Not an asymptotic result: the descent still costs 2r/|F|^2 probes, and |F| grew by a constant.",
+  "Not a free win: the amortised and whole-process verdicts are false at the wide base for 32 targets, and true at the narrow one.",
+  "Not a claim about any curve in use: K_0 over F_2^53 has a 45-bit subgroup.",
+  "Not a measurement of the compact table below its own memory bound: a base that fits with its summands keeps them."
+ ]
+}

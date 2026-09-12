@@ -32,6 +32,12 @@ fn main() {
             "base_points": fb.points.len(),
             "columns": columns,
             "pair_entries": pair.len(),
+            "pair_table_compact": pair.is_compact(),
+            "pair_table_bytes": if pair.is_compact() {
+                PairSumTable::compact_byte_size(fb.points.len(), kc.n)
+            } else {
+                PairSumTable::byte_size(fb.points.len())
+            },
             "curve_seconds": curve_seconds,
             "factor_base_seconds": base_seconds,
             "orbit_map_seconds": orbit_map_seconds,
