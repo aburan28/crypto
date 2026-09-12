@@ -1510,13 +1510,16 @@ pub fn is_probable_prime(n: &BigInt) -> bool {
     ] {
         let a = BigInt::from(a);
         // A witness that is a multiple of `n` gives `x = 0`, which never
-        // reaches `n - 1`, and would report a prime as composite.  This is
-        // reachable only for `n` in {41, 43, 47, 53}: trial division above
-        // covers every prime up to 37, and 38, 39, 40 are divisible by 2 or
-        // 3, so 41 is the smallest `n` that gets here.  At those sizes the
-        // retained bases 2..37 are the first twelve primes, deterministic
-        // for every `n` below 3.317e24, so skipping is sound rather than
-        // merely convenient.
+        // reaches `n - 1`, and would report a prime as composite.  The
+        // trial-division prefix above now covers every base in this list, so
+        // this guard is unreachable as the two lists stand; it is kept
+        // because that is precisely the coupling that broke once — bases ran
+        // to 53 while trial division stopped at 37, so 41, 43, 47 and 53
+        // were reported composite — and extending one list without the other
+        // must not be able to reintroduce it.  Skipping is sound rather than
+        // merely convenient: it can only ever trigger at `n <= 53`, where
+        // the retained bases 2..37 are the first twelve primes and
+        // deterministic for every `n` below 3.317e24.
         if &a >= n {
             continue;
         }
