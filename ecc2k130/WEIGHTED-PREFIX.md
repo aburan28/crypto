@@ -105,5 +105,42 @@ identities, exact counters and paired statistics. It verifies recorded
 corpus hashes; transient corpus payloads were not retained. The raw result
 SHA-256 is `1ad29dc750ce1b1a634e3f850d34e5a9bb1a67e40db8a0aea619e6fb6c08b8c2`.
 
-This is a modest measured improvement; the 15 B/s target remains
-unachieved. A separate audit of the updated public Make command is pending.
+## Public-command audit
+
+The updated `make audit-rtx-pro6000` completed on a separate single-GPU
+allocation from committed source `bf10b66025a04aadf1db84fe0554c3e0092fbd39`.
+The [native audit](benchmarks/weighted-prefix/native-audit.json) measured:
+
+| Workload | Median B/s | Range across three repetitions |
+|---|---:|---:|
+| Complete scalar benchmark | **13.761732** | 13.669981–13.868451 |
+| DP34 collection | **13.284582** | 13.269334–13.327483 |
+
+All six runs completed 201,863,462,912 scalar updates with mode 2, batch 16
+and 385,024 workers. Each collection recorded 5,149 points, 164,768 bytes
+and zero drops. The six GPU arithmetic suites, including the direct
+6,240-pair Frobenius check, and full client replay/restart/checkpoint tests
+passed before timing. The kernel reported 100 registers per thread and
+zero local or shared bytes.
+
+The [artifact review](benchmarks/weighted-prefix/native-audit-review.json)
+verifies the raw results, exact counts, medians, geometry and source identity
+against the retained 197-file manifest. This public audit records corpus
+counts and sizes; content hashes and post-run binary/native-code bindings
+come from the controlled comparison. The public artifact's raw SHA-256 is
+`1f1d35da5bf6eaf9b546c3c6c6b3f88159316794109c26143b588b07560d3235`.
+Public and controlled complete binaries have different hashes. Identical
+device-source files and selected settings establish their source binding;
+the public artifact does not include a full native-code comparison.
+An [independent readback](benchmarks/weighted-prefix/native-audit-independent-review.json)
+verified the six samples, committed manifest and identical device sources
+and settings, with these same limitations.
+
+The first upload failed before GPU execution because its live log was
+inside the uploaded directory. The preserved failure receipt records that
+infrastructure failure. The successful retry used the same frozen source
+with logging outside that directory.
+
+These absolute rates validate the published command on another allocation;
+the matched comparison above estimates the code change's gain. The 15 B/s
+target remains unachieved.

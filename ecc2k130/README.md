@@ -1,11 +1,13 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed CUDA backend](PACKED.md) has measured **13.323276 billion
-complete scalar walk iterations/s** on RTX PRO 6000 Blackwell using
+The optional [packed CUDA backend](PACKED.md) has measured a **13.761732 billion
+complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
 [native carryless multiplication](NATIVE-CARRYLESS.md) and the
 [16-slot batch preset](BATCH-TUNING.md) with
 [weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md).
-Collection measured **13.054029 B/s**.
+The public Make-command audit measured **13.284582 B/s** with DP34 collection.
+Its separate matched comparison measured 13.323276 B/s benchmark and
+13.054029 B/s collection; that comparison establishes the change's gain.
 The
 [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
@@ -60,16 +62,14 @@ code that would run on a GPU is what the test suite exercises.
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per core |
-| CUDA client | complete packed walks measured at 13.323276 B/s on one RTX PRO 6000 |
+| CUDA client | public-command median of 13.761732 B/s for complete packed walks on one RTX PRO 6000 |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
 
-No GPU was available while this was written, so the CUDA path is verified by
-compiling it — host and device halves, plus `ptxas` register allocation — and
-by running the identical arithmetic on the CPU. `modal_app.py` exists to close
-that gap: it builds the client on a Modal GPU, runs the same validation there,
-recovers discrete logarithms on the device, and autotunes the build knobs
-against real hardware.
+Initial development used host execution and CUDA compilation checks. The
+packed backend now also has device arithmetic, complete client and checkpoint
+validation on the RTX PRO 6000. The public Modal audit runs these checks before
+timing complete walks; retained results and their limits are linked above.
 
 ## The problems
 

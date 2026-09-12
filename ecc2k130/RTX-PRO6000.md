@@ -60,8 +60,16 @@ GPU. Three paired repetitions per workload measured:
 Every pair favored the candidate. Each sample completed 201,863,462,912
 scalar updates. All six collection multisets matched, with 5,149 records
 and zero drops. Arithmetic, direct paired-permutation, full client,
-normalized-state and checkpoint checks passed. A separate audit of the
-updated public Make command is pending.
+normalized-state and checkpoint checks passed.
+
+The separate [public Make-command audit](benchmarks/weighted-prefix/native-audit.json)
+measured **13.761732 B/s** benchmark median (13.669981–13.868451) and
+**13.284582 B/s** collection median (13.269334–13.327483). All six samples
+completed the same scalar budget with mode 2, batch 16 and 385,024 workers;
+each collection recorded 5,149 points and zero drops. GPU arithmetic and
+client replay/restart/checkpoint tests passed before timing. This result
+validates the published command on a separate allocation; the paired
+comparison above estimates the gain. The 15 B/s target remains unachieved.
 
 ## Historical batch-16 preset comparison
 
