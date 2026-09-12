@@ -197,10 +197,13 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R3d** | L4 **narrows the gap to the `2^N` enumeration boundary** (§3, baseline 2) | **`killed`** | EXP-R3b. **0 of 54 cells beat `2^N`** (3 seeds × 3 families × 6 sizes). On Random — the one family where L4 pays — the augmented margin runs `−10.20, −9.96, −10.12, −9.51, −12.69, −12.09` over `N = 10…20`: 9.5–12.7 bits *behind* brute force, losing **3.18 bits across the `N = 16 → 18` break** alone and `−0.378` bits per size step overall. The pre-registered G-R3b passes on this same data because it scores the saving against the *raw Gröbner solve*: a race between two routes that both lose. **Scope:** the widening is Random-specific. Subfield's augmented margin *narrows* monotonically (`−10.49 → −7.53`) and Coordinate's is non-monotone, so R3d is killed by "no cell beats the boundary", not by a universal widening — see R3e for what the Subfield trend actually is. |
 | **R3e** | *(observation, not a pre-registered prediction)* On the **Subfield** family the **raw, unaugmented** solve is converging on the `2^N` boundary: margin `−4.99 → −1.19` bits over `N = 10…20` | **`observed`; explained, and not an advance** | EXP-R3b. At `N = 20` the plain Gröbner solve on a Subfield factor base is only `1.19` bits behind enumeration, and the trend would cross near `N ≈ 22–24`. This is **arithmetic, not cryptanalysis**: Subfield's `D*` is pinned at `2.12–2.25`, i.e. at the Nullstellensatz floor, so its solve is `poly(N)` while enumeration is `2^N` — a crossover is guaranteed and measures the family's *degeneracy*, which is the FFD program's own L1 result (§2), not a lever of this thread. Recorded because a bare "Gröbner overtakes brute force at `N ≈ 23`" would read as a breakthrough and is not one. Note also that **L4 makes this family dramatically worse** (augmented margin `−10.49` vs raw `−4.99` at `N = 10`): on the only family approaching the boundary, this thread's lever actively hurts. |
 | **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed` as stated** | A pooled *instance-level* `ρ_s` over mixed sizes cannot establish this (R4″), so the gate as written measures nothing. This is a kill of the **statistic**, not of the defect: EXP-R4b shows the family-level version of the same correlation is strong and size-robust (R4c). Scoring a lever still needs matched shape and total work — but "score the lever *family*, not the instance" is now an open question, not a closed one. |
-| **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | **`killed`** | EXP-R4′, iteration 4. Five normalisations × three designed groups × four seeds. Nothing clears `ρ_s ≤ −0.6` on all three; the un-normalised variants fail cross-shape as expected (the control that shows the test has power), and the normalised ones pass *pooled* only. |
+| **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | **`killed`** | EXP-R4′, iteration 4. Five normalisations × three designed groups × four seeds. Nothing clears `ρ_s ≤ −0.6` on all three; the un-normalised variants fail cross-shape as expected (the control that shows the test has power), and the normalised ones pass *pooled* only. **Sharpened iteration 8 (R4e):** within a family at fixed size the defect is not merely weak, it is *positively* correlated with `D*`. Picking the easiest instance in a group by lowest `Δ_low` would systematically pick the hardest. No renormalisation can fix a sign. |
 | **R4″** | The strong pooled **instance-level** defect↔`D*` correlation — one point per target — is a **size proxy**, not structure | **`supported`, scope corrected iteration 6** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. EXP-R4b reproduces it on the same snapshot (instance level, size-controlled: **−0.32…−0.35**; first published as −0.12…−0.35, see the iteration-7 correction). **As originally written this row said "the strong pooled defect↔`D*` correlation", with no unit qualifier, and iteration 4 read that as reaching the FFD program's published figure. It does not — see R4b.** |
 | **R4b** | The FFD program's own published `Δ_low ↔ D*` law (EXP-G, `ρ_s = −0.79`) shares R4″'s defect and is **also a size proxy** | **`killed`** | EXP-R4b, iteration 6. On EXP-G's own 50 cells the law survives every size control: mean per-block **−0.6998**, blocked rank **−0.6983**, fixed-effects **−0.7499** against pooled −0.7929. In the ECDLP-relevant critical regime (`2n' = n`) size control makes it *stronger*, not weaker: **−0.9124** controlled vs −0.7781 pooled. This thread raised the flag; this thread withdraws it. |
 | **R4c** | `Δ_low` is a **family-level** discriminator (it ranks factor-base constructions) but not an **instance-level** one (it does not rank targets within a construction) | **`supported`** | EXP-R4b Panel B, on iteration 4's *own* 2016-cell snapshot, size-controlled both ways: instance level **−0.35** (mean per-block) / **−0.33** (blocked rank, corrected iteration 7 — first published as −0.12); family level **−0.85** (blocked rank), with the three families ordered correctly in **4 of the 4** size blocks where `D*` varies at all (the other two are floored at `D* = 2`). Same cells, same defect, same `D*` — only the unit of analysis differs. |
+| **R4d** | Lever **L4 acts *through* `Δ_low`** — the defect mediates the lever's effect, at either the paired or the presentation-family level | **`killed`, with the sign inverted** | EXP-R4d, iteration 8. Three presentations of the *same system at the same variable count on the same target* (raw / one saturation round / saturated), so nothing is cross-shape and R4′'s objection cannot apply. Both statistics come out **strongly positive** where the gate required `≤ −0.6`: paired blocked rank **+0.8385**, presentation-family blocked rank **+0.8704**. This is a harder kill than the gate anticipated — not "no relation" but "the relation runs the other way". |
+| **R4e** | *(discovered, not predicted)* `Δ_low` **changes sign with the grouping**: negative between factor-base families, **positive within a family at fixed size** | **`supported`, mechanism identified** | EXP-R4d. Within-cell `ρ_s(Δ_low, D*)` is positive in **10 of 10** decidable cells (`+0.62…+1.00`), while the between-family law at the same sizes is strongly negative (R4c, `−0.85`). Textbook Simpson's paradox, with a cause: `Δ_low` sums degrees `≤ 3`, so a system can only show a degree-3 defect if its tower *reaches* degree 3 deficiently. A target refuting at `D* = 2` never exercises degree 3, so its cutoff-3 defect is ~0 **by construction** — e.g. Coordinate `N = 14`, `D* = 2` targets average `Δ = 0.00213` against `0.03511` for `D* = 4`. Inside a homogeneous group the statistic is partly a proxy for "did this instance need degree 3", which *is* `D*`, positively. |
+| **R4f** | *(discovered, not predicted)* `Δ_low` **cannot score a lever's output at all**, independent of any correlation | **`supported` (mechanical, asserted in a test)** | EXP-R4d: **0 of 192** saturated targets retain any cutoff-3 defect — saturation drives `Δ_low` to *exactly* zero, every time. It must: the cutoff-3 defect **is** the space of degree-3 falls, and saturation adds precisely those as generators. So the lever's action is to *consume* the quantity a screen would measure, and "the defect of the post-lever system" is identically 0 however much or little good the lever did. Pinned by `saturation_consumes_the_early_defect`. |
 | **R5** | **Levers compose**: one-sided guessing plus the mutant route beats guessing alone | **`killed`** | EXP-R5, iteration 3. The pre-registered gate (collapse fraction `c < 1/2`) is **degenerate** — the composed route hits `c = 0` in every cell, because mutants reach the floor with no guessing at all. Scored on total work instead (G-R5′): composed loses to raw guessing by a **flat −2.87 bits** at every `N` and seed, and neither route beats `2^N`. |
 | **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
 
@@ -252,6 +255,34 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   is now *reported per cell*, next to the saving. Every lever verdict from
   iteration 7 on must carry it, because G-R3b demonstrated that a gate can
   pass while the ratio to the boundary is going backwards (→ R3d).
+- **G-R4d** *(registered iteration 8, before any measurement code was
+  written; note the ledger already uses `R4c` for a different row, so the
+  experiment queued as "EXP-R4c" is named **EXP-R4d**)*. R4 asked whether
+  levers act *through* `Δ_low` and was killed as a pooled instance-level
+  statistic; iteration 6 showed the defect works at the **family** level
+  for factor-base families. This asks whether it also works for
+  **lever-generated presentations**, using three presentations of the
+  *same system at the same variable count* — `raw`, one saturation round
+  (`one-round`), and fully saturated (`saturated`) — so that nothing in
+  the comparison is cross-shape. Two statistics, both size-controlled:
+  1. **Paired lever effect.** Per target, `dΔ = Δ_low(sat) − Δ_low(raw)`
+     against `dD* = D*(sat) − D*(raw)`, blocked on `(family, N)`. If the
+     lever acts through the defect, the targets whose defect rose most are
+     the targets whose `D*` fell most — a *negative* correlation.
+  2. **Presentation-family level.** Aggregate to
+     `(operating point, presentation)` means and run the same three
+     size-controlled statistics, exactly as EXP-R4b's panel B did for
+     factor-base families.
+  *Supported* if **both** reach `≤ −0.6`; *killed* if neither does;
+  *partial* if exactly one does.
+  **Degeneracy clause, stated in advance because it is the likely
+  outcome:** EXP-R3 and EXP-R3b both show the augmented system pinned at
+  `D* = 2` over wide ranges, so `dD*` may have *no variance* at some
+  cells. Where the response is constant no correlation is defined, and the
+  cell must be reported as **degenerate** — not scored, and not silently
+  averaged in as 0. A gate that passes only because the degenerate cells
+  were dropped is not a pass, so the count of degenerate cells is reported
+  next to the verdict.
 - **G-R4.** *Supported* at pooled `ρ_s ≤ −0.6` over ≥ 30 lever-generated
   cells. *Killed* at `|ρ_s| < 0.2` or a sign flip. **(Retired, iteration 4:
   a pooled `ρ_s` over mixed sizes is not evidence here — see G-R4″.)**
@@ -296,6 +327,82 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-12 — iteration 8 (EXP-R4d — the defect changes sign with the grouping)
+
+- **Task picked.** The last cheap item: R4 asked whether levers act
+  *through* `Δ_low`, and iteration 4 killed it as a *statistic* rather than
+  as a claim. Iteration 6 then found the defect strong at the family level.
+  So the question was open, not closed. *(Named EXP-R4d, not the queued
+  "EXP-R4c" — the ledger already uses R4c for a different row.)*
+- **Design that removes the objection which killed R4.** Three
+  presentations of the **same system, same variable count, same target**:
+  raw, one saturation round, fully saturated. They differ only in how many
+  degree-3 falls have been folded in — a *dose* axis for L4 with nothing
+  cross-shape in it, so R4′'s objection cannot apply. Gate **G-R4d** was
+  registered in the charter before any measurement code was written,
+  including a degeneracy clause anticipating that `dD*` might be constant.
+- **The gate is killed, and the sign is inverted.** Paired blocked rank
+  **+0.8385**; presentation-family blocked rank **+0.8704**. The gate asked
+  for `≤ −0.6`. This is a harder kill than "no relation": the relation runs
+  *the other way*.
+- **My own design flaw, which the degeneracy clause did not catch.** The
+  paired statistic turned out to be *mathematically identical* to the raw
+  within-cell correlation. Saturation sends `Δ_low → 0` and `D* → 2`, so
+  `dΔ = −Δ_raw` and `dD* = 2 − D*_raw`, and the two sign flips cancel. The
+  clause I registered covered the case where `dD*` is constant (it caught
+  1 of 12 cells); it did not cover the subtler case where the *difference*
+  is an affine image of the raw measurement and therefore carries no new
+  information. Statistic 1 was not a second reading, it was the first one
+  wearing a disguise.
+- **What the data actually says (statistic 3, added after seeing the
+  sign).** Stratify each cell's targets by their `D*` and the cause is
+  plain:
+
+  | family | `N` | `D* = 2` targets | higher-`D*` targets | within `ρ_s` |
+  |---|---:|---:|---:|---:|
+  | Coordinate | 14 | `Δ = 0.00213` (10) | `Δ = 0.03511` (6, `D*=4`) | **+0.871** |
+  | Coordinate | 16 | `Δ = 0.00215` (8) | `Δ = 0.02672` (8, `D*=4`) | **+0.909** |
+  | Random | 14 | `Δ = 0.00000` (1) | `Δ = 0.00213` (15, `D*=4`) | **+1.000** |
+  | Subfield | 14 | `Δ = 0.07234` (12) | `Δ = 0.07872` (4, `D*=3`) | **+1.000** |
+
+  **Positive in 10 of 10 decidable cells.** Meanwhile the between-family
+  law at the same sizes is `−0.85` (R4c). Same statistic, same data,
+  opposite signs at the two groupings — Simpson's paradox, with a
+  mechanism rather than a shrug.
+- **The mechanism.** `Δ_low` sums degrees `≤ 3`, so a system can only
+  exhibit a degree-3 defect if its Macaulay tower **reaches** degree 3 in a
+  deficient state. A target that refutes at `D* = 2` never exercises degree
+  3, so its cutoff-3 defect is ~0 *by construction*. Inside a homogeneous
+  group the statistic is therefore partly a proxy for "did this instance
+  need degree 3" — which is `D*` itself, positively. Between families the
+  structural differences dominate and the sign flips back. **Both are
+  real.** The defect does not carry a single sign, and which one you get
+  depends on what you hold fixed.
+- **And a second, purely mechanical limit (R4f).** **0 of 192** saturated
+  targets retain any cutoff-3 defect: saturation drives `Δ_low` to exactly
+  zero, every time. It must — the cutoff-3 defect *is* the space of
+  degree-3 falls, and saturation adds precisely those as generators. So
+  `Δ_low` cannot score a lever's **output** at all, correlation or no
+  correlation: the lever's action is to consume the quantity. Pinned in
+  `saturation_consumes_the_early_defect` rather than left as prose.
+- **What this does and does not touch.** It does **not** touch the FFD
+  program's law: that is a between-family statement, it is what the screen
+  is used for, and iteration 6 confirmed it size-controlled at `−0.90` in
+  the critical regime. What it adds is the **scope boundary** — the screen
+  ranks constructions and must never rank instances inside one, not merely
+  because it is weak there (R4′) but because it points the wrong way.
+  Choosing the easiest target in a family by lowest `Δ_low` would
+  systematically choose the hardest.
+- **Gate verdicts.** G-R4d: **killed** (sign inverted). R4 is now closed
+  rather than "killed as stated": the defect does not mediate L4 on any
+  reading tested, and R4f says it cannot in principle score a lever output.
+- **Ledger delta.** R4d registered→killed; R4e registered→supported
+  (discovered, not predicted — labelled as such); R4f registered→supported
+  (mechanical, test-pinned). R4′ sharpened from "weak" to "wrong-signed".
+- **Class (AGENTS.md §3): `accounting`.** Numbers changed, no algorithm
+  did, and no ratio to the `2^N` boundary moved — this iteration measures a
+  predictor, not an attack. The thread is where iteration 7 left it.
 
 ### 2026-09-12 — iteration 7 (EXP-R3b — the gate passes and the boundary says no)
 
@@ -914,19 +1021,24 @@ to stop hypotheses being filed as findings.
 **Queue, if the thread continues.** It should be said plainly that the
 queue is thin and that none of it is likely to change the boundary verdict:
 
-1. **EXP-R4c — family-level lever scoring.** R4 killed `Δ_low` as an
-   instance-level lever score, and iteration 6 showed the family-level
-   statistic is strong (−0.85 blocked rank). Whether it ranks *lever-generated
-   presentations* the way it ranks factor-base families was never tested, and
-   nothing measured so far excludes it. Cheap: the cells already exist.
-2. **EXP-R2b — reach for L2.** The only lever that is bounded rather than
+1. **EXP-R2b — reach for L2.** The only lever that is bounded rather than
    killed. Needs a sparse F4/F5 reaching ~51 variables at degree 3
    (`ℓ = 6`). This is an engineering project, not an experiment, and should
    not be started without deciding that L2 is worth that much — a decision
    that should weigh §6's boundary verdict, not just L2's open status.
 
-*(EXP-R3b, formerly item 1, was run in iteration 7. It found the L4 trend
-continuing on its own metric and reversing against the boundary.)*
+*(EXP-R3b was run in iteration 7: the L4 trend continues on its own metric
+and reverses against the boundary. EXP-R4d — queued as "EXP-R4c" — was run
+in iteration 8: the defect does not mediate L4 on any reading, and changes
+sign with the grouping. Both queue items that could be answered cheaply have
+now been answered, and neither moved the boundary.)*
+
+**So the queue has one item left, and it is not cheap.** Every lever in the
+taxonomy has been measured; the only unmeasured claim is L2 above the
+`ℓ = 6` crossover, which needs a solver this repo does not have. A thread
+that has tested its whole taxonomy and found nothing that beats its boundary
+should say that plainly rather than generate further variations of the
+measurements it has already made.
 
 ## 7. Honest limitations
 

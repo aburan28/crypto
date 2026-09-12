@@ -1648,6 +1648,129 @@ pub fn collect_rho_matched_cells(
     out
 }
 
+// ── Presentation dose-response (EXP-R4d) ────────────────────────────
+
+/// One target measured under three presentations of the **same system at
+/// the same variable count**: the raw descended system, the system after a
+/// single saturation round, and the fully saturated system.
+///
+/// The three differ only in how many degree-3 falls have been folded into
+/// the generating set, so this is a *dose* axis for lever L4 with nothing
+/// cross-shape in it. That matters because R4′ established that `Δ_low`
+/// cannot compare instances across shapes; holding `vars` and the target
+/// fixed removes that objection entirely, leaving only the question R4
+/// actually asked — does the lever act *through* the defect?
+#[derive(Clone, Debug)]
+pub struct PresentationRow {
+    pub full_vars: u32,
+    /// Generator counts under the three presentations.
+    pub eqs: [u32; 3],
+    /// `Δ_low` under raw / one-round / saturated.
+    pub defect: [f64; 3],
+    /// `D*` under raw / one-round / saturated.
+    pub dstar: [u32; 3],
+}
+
+/// Labels for the three presentations, in the order they appear in
+/// [`PresentationRow`]'s arrays.
+pub const PRESENTATIONS: [&str; 3] = ["raw", "one-round", "saturated"];
+
+/// Measure `targets` non-decomposable targets under all three
+/// presentations at one `(family, n, n')` cell.
+///
+/// Returns one row per target for which every presentation refuted within
+/// `d_max`; a target that censors under any presentation is dropped
+/// entirely rather than contributing a partial row, so the three columns
+/// are always the same set of targets.
+#[allow(clippy::too_many_arguments)]
+pub fn run_presentation_cell(
+    family: BasisFamily,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    targets: u32,
+    d_max: u32,
+    rounds: u32,
+    seed: u64,
+) -> Vec<PresentationRow> {
+    let full_vars = 2 * n_sub;
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    let mut out = Vec::new();
+    let mut attempts = 0u32;
+    while (out.len() as u32) < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                match FactorSubspace::build(
+                    family,
+                    n,
+                    n_sub,
+                    irr,
+                    seed ^ (0x9E37 + attempts as u64),
+                ) {
+                    Some(v) => v,
+                    None => return out,
+                }
+            }
+            _ => match FactorSubspace::build(family, n, n_sub, irr, 0) {
+                Some(v) => v,
+                None => return out,
+            },
+        };
+        let b = rand_nz(n, &mut next);
+        let x3 = rand_nz(n, &mut next);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+        let raw = descend_on_subspace(n, &v, irr, &b, &x3);
+        // One round, then saturation. `saturate_with_falls` with
+        // `rounds = 1` is exactly the first round of the full run, so the
+        // dose axis is nested by construction.
+        let (one, _) = saturate_with_falls(&raw, full_vars, 1);
+        let (sat, _) = saturate_with_falls(&raw, full_vars, rounds);
+
+        let mut dstar = [0u32; 3];
+        let mut defect = [0.0f64; 3];
+        let mut eqs = [0u32; 3];
+        let mut ok = true;
+        for (i, sys) in [&raw, &one, &sat].into_iter().enumerate() {
+            let ne = sys.len() as u32;
+            let Some(d) = refutation_scan(sys, full_vars, d_max).1 else {
+                ok = false;
+                break;
+            };
+            let profile = rank_profile(sys, full_vars, ne, 3.min(d_max));
+            eqs[i] = ne;
+            dstar[i] = d;
+            defect[i] = early_defect(&profile, 3);
+        }
+        if !ok {
+            continue;
+        }
+        out.push(PresentationRow {
+            full_vars,
+            eqs,
+            defect,
+            dstar,
+        });
+    }
+    out
+}
+
 // ── Size-controlled correlation (EXP-R4b) ───────────────────────────
 
 /// One `(block, x, y)` observation for a blocked correlation.
@@ -2550,6 +2673,65 @@ mod tests {
             last <= first + 1e-9,
             "mean D* rose under slicing: {first} → {last}"
         );
+    }
+
+    // ── Presentation dose-response (EXP-R4d) ────────────────────────
+
+    /// The mechanical fact EXP-R4d turns on, and the reason `Δ_low` cannot
+    /// score a lever's *output*: the cutoff-3 defect **is** the space of
+    /// degree-3 falls, and saturation adds precisely those as generators.
+    /// So a saturated system has no degree-3 defect left — the lever's
+    /// action is to consume the quantity a screen would measure.
+    ///
+    /// Asserted on a real descended system rather than a constructed one,
+    /// because the claim is about what `saturate_with_falls` does to
+    /// `early_defect`, not about arithmetic.
+    #[test]
+    fn saturation_consumes_the_early_defect() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Coordinate, 10, 5, &irr, 4, 6, 6, 7);
+        assert!(!rows.is_empty(), "need at least one measurable target");
+        for r in &rows {
+            assert_eq!(
+                r.defect[2], 0.0,
+                "saturated presentation must have zero cutoff-3 defect, got {}",
+                r.defect[2]
+            );
+            assert!(
+                r.eqs[0] < r.eqs[2],
+                "saturation must add generators: {} -> {}",
+                r.eqs[0],
+                r.eqs[2]
+            );
+        }
+        // At least one target must have had something to consume, or the
+        // test is vacuous.
+        assert!(
+            rows.iter().any(|r| r.defect[0] > 0.0),
+            "no target had a raw defect — the assertion above proves nothing"
+        );
+    }
+
+    /// The dose axis is nested: one round is a prefix of full saturation,
+    /// so generator counts must be monotone and `D*` must never rise
+    /// (adding ideal elements cannot make a system harder).
+    #[test]
+    fn presentation_dose_axis_is_monotone() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Random, 10, 5, &irr, 4, 6, 6, 11);
+        assert!(!rows.is_empty());
+        for r in &rows {
+            assert!(
+                r.eqs[0] <= r.eqs[1] && r.eqs[1] <= r.eqs[2],
+                "generator counts must be nested: {:?}",
+                r.eqs
+            );
+            assert!(
+                r.dstar[0] >= r.dstar[1] && r.dstar[1] >= r.dstar[2],
+                "D* must not rise along the dose axis: {:?}",
+                r.dstar
+            );
+        }
     }
 
     // ── Size-controlled correlation (EXP-R4b) ───────────────────────
