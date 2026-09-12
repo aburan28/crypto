@@ -1,24 +1,24 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 53, 2026-09-12. The machine-readable current audit is
-`stage-53-current-gate-audit-20260912/audit.json`; its latest hosted evidence is
-sealed in `stage-52-n53-lazy-result-20260912/verification.json`.
+Current through Stage 59, 2026-09-12. The machine-readable current audit is
+`stage-59-current-gate-audit-20260912/audit.json`; its latest hosted evidence is
+sealed in the Stage 56 PCLMUL and Stage 58 unknown-scalar results.
 
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
-runs at degrees 23, 31, and 41; and a same-target known-answer construction,
-rank, solve, and rho comparison at `n=53`. It has not passed all seven gates and
+runs at degrees 23, 31, 41, and 53; and same-target known-answer and
+scalar-blind construction, rank, solve, and rho comparisons at `n=53`. It has not passed all seven gates and
 does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. Stage 39 charges fixed algebraic construction, relations, LA, five unknown-scalar descents, rho, clean build, wall/core, and tree RSS. Stage 40 charges every one/four/four/one cell. Stage 52 verifies the latest clean build, 1,024/4,096 direct arms, and exact same-target rho: 455.588094 core-seconds, 149.479894 sequential wall-seconds, and 1,718,161,408 bytes maximum sampled tree RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. Stage 39 charges fixed algebraic construction, relations, LA, five unknown-scalar descents, rho, clean build, wall/core, and tree RSS. Stage 40 charges every one/four/four/one cell. Stage 56 charges clean build plus portable/PCLMUL/rho at 428.232650 core-seconds, 140.410989 sequential wall-seconds, and 1,709,281,280 bytes tree RSS. Stage 58 charges clean build plus unknown-scalar direct/rho at 368.127516 core-seconds, 117.138948 sequential wall-seconds, and 1,708,228,608 bytes tree RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
-| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. Stages 46–52 add metered `n=53` direct/rho RSS, CPU, wall, support/query counts, inversion/wave counts, and watchdogs. | Supply the same fields for licensed Magma F4. The original local `n=53` pointwise autolab recorded a 16 GiB cap without enforcing or measuring it; Stage 42 supersedes that resource receipt. |
+| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. Stages 46–58 add metered `n=53` direct/rho RSS, CPU, wall, support/query counts, inversion/wave counts, target derivation, and watchdogs. | Supply the same fields for licensed Magma F4. The original local `n=53` pointwise autolab recorded a 16 GiB cap without enforcing or measuring it; Stage 42 supersedes that resource receipt. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and PDP-only `n=59`. Unknown-scalar end-to-end controls cover `n=31` and `n=41`. Stage 42 constructs, ranks, solves, and verifies an exact same-target known-answer `n=53` instance. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` arm remains PDP-only. |
-| 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, and 41; n=53 known-answer only** | Stage 39 defines the `n=41` factor base from a fixed algebraic rule with zero discovery target samples or scalar labels, derives every factor-base log from relations, and solves five hash-derived targets whose scalars were not constructed. | Stage 42 uses one explicit public `n=53` scalar retained only for validation. An unknown-scalar `n=53` run and unaffiliated replay remain open. |
-| 6. Full cost against automorphism-optimized Pollard rho | **Finite online crossover; amortized/full-cost crossover false** | Stage 39's `n=41` online descent is 3.502068 times faster than rho, while amortized IC is 5.025825 times slower and fresh build plus science is 110.791382 times rho. Stage 40 reduces four-core amortized wall to 3.605523 times rho while spending 1.286948 times the one-core CPU. Stage 52 verifies the preferred 4,096-cursor direct on the exact same `n=53` target: it is 5.166323 times slower than rho, 1.073641 times faster in wall and uses 0.956319 times the CPU of 1,024 cursors in the same hosted run; fresh build plus preferred direct is 22.668683 times rho. | The `n=41` crossover assumes the factor-base log database exists. No amortized or whole-process cell crosses. Parallel latency reductions spend additional CPU. All improvements are finite constants, not exponent changes. |
+| 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, and 53** | Stage 58 derives `n=53` target `Q` from public hash seed 53001 without constructing or supplying its scalar, derives all 94 factor-base logs from 165 relations, and has direct IC and rho independently recover the same `d` with `[d]G=Q`. | Repeat on independent n=53 public seeds and obtain unaffiliated replay; these are strengthening steps rather than prerequisites for the finite gate-5 execution. |
+| 6. Full cost against automorphism-optimized Pollard rho | **Finite online crossover; amortized/full-cost crossover false** | Stage 39's `n=41` online descent is 3.502068 times faster than rho, while amortized IC is 5.025825 times slower and fresh build plus science is 110.791382 times rho. Stage 40 reduces four-core amortized wall to 3.605523 times rho while spending 1.286948 times the one-core CPU. Stage 56 verifies PCLMUL on the same binary and target: it is 1.418695 times faster in wall, uses 0.614352 times portable CPU, remains 3.688473 times slower than rho, and remains 21.182086 times rho with fresh build. Stage 58 unknown-scalar direct remains 4.428199 times rho and 25.722944 times with fresh build. | The `n=41` crossover assumes the factor-base log database exists. No amortized or whole-process cell crosses. Parallel latency reductions spend additional CPU. All improvements are finite constants, not exponent changes. |
 | 7. Independent external reproduction and novelty review | **Missing** | Issue [#97](https://github.com/aburan28/crypto/issues/97) contains current source pins, the Stage-22 Magma packet, Phase-B and Stage-35 artifacts, exact verifier commands, primary-source links, and the `CONCUR` / `QUALIFIED` / `BREAKS` format. Outreach is also open at [mtrimoska/EC-Index-Calculus-Benchmarks#1](https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks/issues/1). | An unaffiliated reviewer must return a sealed reproduction and source-pinned novelty/correctness assessment. Project-authored CI and replays do not satisfy independence. |
 
 ## Current Phase-B matrix
@@ -60,15 +60,16 @@ process CPU by 28.7 percent.
 Stage 42 uses a point-defined `n=53` base with 9,964 points and 94 orbit
 columns, selected without scalar labels. Direct and rho receive the same public
 point `Q=(2565091273463387,5885236316843894)` and both recover validation scalar
-`476811900269`. Stages 46–52 retain the same 189 verified four-summand relation hashes while
-reusing query scratch, increasing the parallel batch width, and loading pair
-labels only after exact hits. In the latest same-run comparison, 4,096 cursors
-reduce wall from 28.352866 to 26.408147 seconds and CPU from 63.847327 to
-61.058406 core-seconds versus 1,024 cursors. Packed signed-Frobenius rho takes
-5.111594 seconds, so preferred direct remains 5.166323 times slower; fresh build
-plus direct remains 22.668683 times slower. Peak direct RSS falls to
-1,392,087,040 bytes and the retained support allocation falls by 134,217,728
-bytes.
+`476811900269`. Stages 46–56 retain the same 189 known-answer relation hashes while reusing
+query scratch, widening batches, loading pair labels only after exact hits, and
+using x86 carry-less multiplication. In the same-binary Stage 56 comparison,
+PCLMUL reduces wall from 26.773640 to 18.872020 seconds and CPU from 61.623592
+to 37.858583 core-seconds. It remains 3.688473 times slower than rho and
+21.182086 times slower with fresh build. Stage 58 then derives an unrelated
+public hash target without constructing its scalar, derives all factor-base
+logs from 165 relations, and has direct IC and rho independently recover
+`7892094459170` with `[d]G=Q`. Unknown-scalar direct remains 4.428199 times rho
+and 25.722944 times rho with fresh build.
 
 The narrow supported conclusion is unchanged: this is strong internal
 engineering and finite public toy-research evidence. The known SAT-based

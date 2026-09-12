@@ -608,7 +608,7 @@
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=41 fixed-algebraic online charged crossover with full-cost loss; n=53 preferred 4,096-cursor four-thread same-target direct remains a whole-process loss",
+            "summary": "n=41 fixed-algebraic online charged crossover with full-cost loss; n=53 PCLMUL and public unknown-scalar completions remain whole-process losses",
             "metrics": {
               "n41_timing_class": "algorithmic_charged_online",
               "n41_ic_over_rho_online_wall_ratio": 0.28554556054870023,
@@ -617,15 +617,15 @@
               "n41_four_core_amortised_ic_over_rho_wall_ratio": 3.605523155126031,
               "n53_timing_class": "whole_process_wall",
               "n53_sequential_direct_over_rho_wall_ratio": 9.431191019720737,
-              "n53_parallel_direct_over_rho_wall_ratio": 5.16632272222771,
+              "n53_parallel_direct_over_rho_wall_ratio": 3.688473082311116,
               "n53_parallel_direct_wall_speedup": 1.0736409000410199,
               "n53_parallel_direct_core_seconds_ratio": 0.9563189074461959,
-              "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 22.668682825815015,
+              "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 21.18208585582923,
               "automorphism_discount": "signed Frobenius, sqrt(2n), A=2*n family",
               "same_target_n53": true,
               "whole_process_wall_crossover": false,
               "n53_preferred_query_mode": "pair_pair_parallel_4096",
-              "n53_preferred_direct_wall_seconds": 26.408146775999995,
+              "n53_preferred_direct_wall_seconds": 18.872020093999993,
               "n53_parallel_direct_wall_speedup_baseline": "pair_pair_parallel_1024 same-run",
               "n53_parallel_direct_core_seconds_ratio_baseline": "pair_pair_parallel_1024 same-run",
               "n53_parallel_4096_support_queries": 85699806,
@@ -634,10 +634,19 @@
               "n53_stage44_parallel_vs_sequential_wall_speedup": 1.5785345203205414,
               "n53_stage44_parallel_vs_sequential_core_seconds_ratio": 1.4829302318645805,
               "n53_parallel_4096_support_table_allocated_bytes": 1275068416,
-              "n53_parallel_4096_peak_rss_bytes": 1392087040
+              "n53_parallel_4096_peak_rss_bytes": 1392087040,
+              "n53_field_mul_backend": "x86_64_pclmulqdq",
+              "n53_pclmul_vs_portable_wall_speedup": 1.4186949503361426,
+              "n53_pclmul_vs_portable_collection_speedup": 1.7786595858644723,
+              "n53_pclmul_vs_portable_core_seconds_ratio": 0.6143520974888967,
+              "n53_unknown_scalar_completed": true,
+              "n53_unknown_scalar_direct_over_rho_wall_ratio": 4.428199126138434,
+              "n53_unknown_scalar_fresh_build_plus_direct_over_rho_wall_ratio": 25.722944297568233,
+              "n53_unknown_scalar_relations": 165,
+              "n53_unknown_scalar_support_queries": 89210247
             },
             "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_PARALLEL_WALL_LOSS",
-            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation; preferred four-thread n=53 remains 5.166x slower on the exact same target. The 4,096 mode is 1.074x faster in wall and uses 0.956x CPU versus 1,024 in the latest same-run control. Not asymptotic sub-rho, key recovery, or SOTA."
+            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation. PCLMUL n=53 direct remains 3.688x slower than same-target rho; the n=53 public unknown-scalar direct run remains 4.428x slower. Fresh-build costs do not cross. Not asymptotic sub-rho, key recovery, or SOTA."
           },
           "next_target": {
             "summary": "Achieve whole-process same-target wall crossover at n=41 or n=53 while retaining build, setup, relation, LA, memory, parallel CPU, and rho charges",
@@ -648,7 +657,7 @@
               "timing class and automorphism discount explicit",
               "whole-process direct/rho ratio < 1"
             ],
-            "n53_probe_note": "Preferred deterministic four-thread 4,096-cursor n=53 direct/rho wall ratio is 5.166; support setup and pair-pair query remain the measured bottlenecks."
+            "n53_probe_note": "PCLMUL n=53 direct/rho wall ratio is 3.688; public unknown-scalar n=53 direct/rho is 4.428. Support setup, relation collection, and full build cost remain the measured bottlenecks."
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
@@ -657,7 +666,9 @@
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-44-n53-parallel-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-49-n53-width-results-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-52-n53-lazy-result-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-52-n53-lazy-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-56-n53-pclmul-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-58-n53-unknown-result-20260912/verification.json"
           ],
           "history": [
             {
