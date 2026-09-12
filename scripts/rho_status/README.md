@@ -74,7 +74,13 @@ python3 scripts/rho_status/render.py \
   --history-out docs/ecc2k130-status/history.json
 ```
 
-Open `docs/ecc2k130-status/index.html` next to the JSON files.
+Open `docs/ecc2k130-status/index.html` next to the JSON files, or assemble
+the whole site the way the Action publishes it:
+
+```bash
+python3 scripts/site/build.py --out _site
+python3 -m http.server --directory _site 8000   # dashboard at /status/
+```
 
 ## Published fields
 
