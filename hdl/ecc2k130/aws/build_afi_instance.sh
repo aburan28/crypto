@@ -100,6 +100,42 @@ python3 aws_build_dcp_from_cl.py --cl cl_ecc2k130 --tag "$TAG" || fail "aws_buil
 
 TARBALL="$CL_DIR/build/checkpoints/$TAG.Developer_CL.tar"
 [ -f "$TARBALL" ] || { tail -60 "$TAG.vivado.log" 2>/dev/null; fail "no DCP tarball; see the vivado log"; }
+
+# The HDK's aws_build_dcp_from_cl.py (2.3.4) takes the PCIe ids for the
+# manifest out of cl_id_defines.vh with str.lstrip("32'h"), which also eats
+# a leading 2 or 3 of the id itself (0x2C13 became 0xC13; the loaded image
+# then fails with cl-id-mismatch and cannot be used).  Re-derive the four
+# ids properly and rewrite the manifest inside the tarball when they differ.
+fixdir=$(mktemp -d)
+tar -C "$fixdir" -xf "$TARBALL"
+if python3 - "$CL_DIR/design/cl_id_defines.vh" "$fixdir/to_aws/$TAG.manifest.txt" <<'EOF'
+import re, sys
+defs, mf = sys.argv[1:]
+ids = {}
+for line in open(defs):
+    m = re.match(r"\s*`define\s+CL_SH_ID([01])\s+32'h([0-9A-Fa-f]{4})_([0-9A-Fa-f]{4})", line)
+    if m:
+        hi, lo = m.group(2).upper(), m.group(3).upper()
+        if m.group(1) == "0":
+            ids["pci_device_id"], ids["pci_vendor_id"] = "0x" + hi, "0x" + lo
+        else:
+            ids["pci_subsystem_id"], ids["pci_subsystem_vendor_id"] = "0x" + hi, "0x" + lo
+text = open(mf).read()
+changed = False
+for k, v in ids.items():
+    new, n = re.subn(r"^%s=.*$" % k, "%s=%s" % (k, v), text, flags=re.M)
+    if n and new != text:
+        print("manifest %s corrected to %s" % (k, v)); text, changed = new, True
+if changed:
+    open(mf, "w").write(text)
+sys.exit(0 if changed else 1)
+EOF
+then
+    tar -C "$fixdir" -cf "$TARBALL" ./to_aws
+fi
+rm -rf "$fixdir"
+tar -xOf "$TARBALL" "./to_aws/$TAG.manifest.txt" | grep pci_
+
 if ls "$CL_DIR/build/checkpoints/"*VIOLATED* >/dev/null 2>&1; then
     echo "WARNING: timing was not met; the image will be flagged timingViolated in afi.json"
     TIMING=violated
