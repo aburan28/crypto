@@ -7633,3 +7633,75 @@ under the engine, which is the number the scaling target needs.
 ### Commits made
 
 (see PR — `built` column and `--no-x`, research note §17, §8 pointer)
+
+## 2026-09-12 (autolab run, ninth session on exotic coordinates)
+
+### Task picked
+
+The eighth session's next step, and the one §17 named: the splitting
+heuristic.  §17 established that what sinks the symmetrised system at
+`n = 17` is split count rather than matrix size, and the solver had
+always branched on the lowest free variable.
+
+### Work done
+
+- `SplitRule` in `koblitz_groebner`: `LowestFree` (the historical rule,
+  still the default), `MostFrequent` (the free variable in the most
+  monomials of the current system), `MinTermWeight` (occurrences
+  weighted by `2^{1−d}`, the MOM rule).  `SolveOptions::split_rule`
+  carries it; `split_rule_default()` reads `SOLVER_SPLIT_RULE` for the
+  decomposition entry points, matching how the Macaulay size caps are
+  already overridden, so no signature on the production path changed.
+- Test `every_split_rule_finds_exactly_the_solutions`: twelve random
+  Boolean systems, all three rules, each asserted to return exactly the
+  solution set exhaustive enumeration gives.  A rule may change how
+  fast a branch closes, never what the search finds.
+- Twenty bench runs across `K₀/F₂¹⁵`, `K₁/F₂¹⁵`, `K₁/F₂¹⁷`, `K₁/F₂²³`;
+  research note §18.
+
+### Findings
+
+**§17's one loss belongs to the splitter, not to the systems (§18).**
+At `n = 17` under the default rule the symmetrised system takes 4 860 ms
+against the `x`-chained system's 2 746 — the ×1.6 loss standing since
+§8.  Under `MostFrequent`, applied to both arms as a shipped solver
+would, it takes 1 266 ms against 8 601, a ×6.8 win.  Neither system
+changed.  The exception that survived §17's correction does not survive
+a change of branch variable.
+
+**The win is in the cost of a split, not in the number of them.**  The
+symmetrised system still splits more at `n = 17` under the same rule,
+756 against 221; each split is cheaper at 25 unknowns against 44.  That
+is §17's size advantage reaching the wall clock through a second
+channel, once the splitter stops wasting search.
+
+**No rule dominates and the spread is large.**  `MinTermWeight` is the
+best cell measured anywhere — `K₀/F₂¹⁵`'s `x`-chained refutation in 52
+splits against 787, a factor of 15 — and the worst for the symmetrised
+system at every instance.  Which rule suits an instance is not
+predictable from its coordinate frame.
+
+**`n = 15` and `n = 23` are unchanged** under all three rules, including
+which arm answers at `n = 23`.  Only `n = 17` moves.
+
+### Process notes
+
+- Splits reproduce to the unit between runs; milliseconds do not, and
+  the first sweep ran two scripts concurrently.  The `n = 17` headline
+  was re-measured on an idle machine before being written down —
+  identical splits, times within 5%.  Report the deterministic column
+  as the measurement and the timing as its consequence.
+
+### Next step proposal
+
+The orbit-aware rule §17 actually proposed is still untried: branch by
+the Frobenius orbit an unknown belongs to, rather than by a frequency
+score that happens to work at `n = 17`.  Two questions for it — does it
+beat `MostFrequent` there, and does it explain why `MostFrequent`
+helps?  Second, the cap and the rule have only been measured
+separately; §17 showed the cap is worth orders of magnitude by itself,
+and their interaction is unmeasured.
+
+### Commits made
+
+(see PR — `SplitRule` and its test, research note §18)
