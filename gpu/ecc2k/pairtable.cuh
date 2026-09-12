@@ -34,19 +34,30 @@
  *
  * ## Scratch
  *
- * A row of `k` needs `k` field elements of scratch for the prefix
- * products.  At `|F|` in the thousands that is far too much for shared
+ * A row of `k` needs **two** buffers of `k` field elements: the
+ * denominators, and the prefix products `pt_batch_inv` builds beside
+ * them.  At `|F|` in the thousands that is far too much for shared
  * memory per thread, so the caller passes a global scratch buffer of
- * `rows_in_flight * |F|` elements.  Sizing it is the host's job; see
- * `pt_scratch_elems`.
+ * `rows_in_flight * pt_scratch_elems(|F|)` elements.  Size it with that
+ * helper rather than by hand -- an earlier revision of this file had
+ * the helper returning one buffer's worth while the kernel indexed two,
+ * which would have overrun for every thread past the first.
  */
 #ifndef GPU_ECC2K_PAIRTABLE_CUH
 #define GPU_ECC2K_PAIRTABLE_CUH
 
 #include "koblitz.cuh"
 
-/* Field elements of scratch one thread needs for a base of `n_points`. */
-G2_HD size_t pt_scratch_elems(size_t n_points) { return n_points; }
+/* Field elements of scratch **one thread** needs for a base of
+ * `n_points`.
+ *
+ * Two buffers of `n_points`, not one: a row needs the denominators and
+ * the prefix products at the same time, and `pt_batch_inv` reads the
+ * originals while writing the inverses.  `pairtable_kernel` indexes
+ * `scratch` at `tid * pt_scratch_elems(n)` accordingly, so a host that
+ * sizes its allocation from this helper gets exactly what the kernel
+ * writes. */
+G2_HD size_t pt_scratch_elems(size_t n_points) { return 2 * n_points; }
 
 /* Batch inversion (Montgomery's trick).
  *
@@ -156,8 +167,9 @@ __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_off
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
     for (int i = tid; i < n; i += stride) {
-        f2e *den = scratch + (size_t)tid * 2 * scratch_stride;
-        f2e *scr = den + scratch_stride;
+        /* `scratch_stride` is `pt_scratch_elems(n)`: both buffers. */
+        f2e *den = scratch + (size_t)tid * scratch_stride;
+        f2e *scr = den + n;
         const int k = n - i;
         /* Reuse `den` for the sums as they are produced: a sum is
          * consumed into the key immediately, so no second buffer of

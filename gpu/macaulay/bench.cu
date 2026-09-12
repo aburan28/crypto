@@ -179,14 +179,26 @@ static void throughput() {
         }
         CUDA_OK(cudaMalloc(&d_piv, (size_t)rows * batch * sizeof(int)));
         CUDA_OK(cudaMalloc(&d_rank, (size_t)batch * sizeof(int)));
-        CUDA_OK(cudaMemcpy(d_a, host.data(), sz * batch * sizeof(uint32_t),
-                           cudaMemcpyHostToDevice));
-
         cudaEvent_t t0, t1;
         CUDA_OK(cudaEventCreate(&t0));
         CUDA_OK(cudaEventCreate(&t1));
-        /* One warm-up launch, then the timed one. */
+        /* One warm-up launch, then the timed one.
+         *
+         * The re-upload inside the loop is not optional.  Both kernels
+         * work **in place**: after the warm-up, `d_a` holds the reduced
+         * form in Montgomery representation, so a second pass would
+         * Montgomery-convert an already-converted matrix and then
+         * eliminate a matrix that is already in echelon form -- far
+         * less work than the real reduction, and the timing would be
+         * of that instead.  Restoring the input each rep is what makes
+         * the timed launch measure the same thing the warm-up did.
+         *
+         * The copy is outside the event window, so only the kernels
+         * are timed. */
         for (int rep = 0; rep < 2; rep++) {
+            CUDA_OK(cudaMemcpy(d_a, host.data(), sz * batch * sizeof(uint32_t),
+                               cudaMemcpyHostToDevice));
+            CUDA_OK(cudaDeviceSynchronize());
             if (rep == 1) CUDA_OK(cudaEventRecord(t0));
             to_mont_kernel<<<256, 256>>>(d_a, sz * batch);
             rref_batch_kernel<<<batch, MAC_THREADS, shared_bytes()>>>(

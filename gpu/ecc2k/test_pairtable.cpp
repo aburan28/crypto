@@ -97,11 +97,19 @@ static void test_rows() {
     for (int i = 0; i < half; i++) pts.push_back(Koblitz::neg(pts[i]));
     const int n = (int)pts.size();
     std::vector<pt2k> out(n);
-    std::vector<f2e> den(n), scratch(n);
+    /* Size the scratch exactly the way a host must size the kernel's,
+     * and split it exactly the way the kernel splits it.  That is what
+     * makes this a check on `pt_scratch_elems` and not just on the
+     * arithmetic: if the helper under-reports, this overruns. */
+    const size_t need = pt_scratch_elems((size_t)n);
+    CHECK(need >= 2 * (size_t)n, "pt_scratch_elems reports %zu for n=%d", need, n);
+    std::vector<f2e> scratch(need);
+    f2e *den = scratch.data();
+    f2e *scr = den + n;
     long compared = 0, doublings = 0, infinities = 0;
 
     for (int i = 0; i < n; i++) {
-        pt_row(pts.data(), n, i, out.data(), den.data(), scratch.data());
+        pt_row(pts.data(), n, i, out.data(), den, scr);
         for (int t = 0; t < n - i; t++) {
             pt2k want = Koblitz::add(pts[i], pts[i + t]);
             CHECK(pt_eq(out[t], want), "row %d, j=%d: batched sum differs", i, i + t);

@@ -233,13 +233,20 @@ static void throughput() {
     const uint64_t npairs = span * (span + 1) / 2;
     for (int which = 0; which < 2; which++) {
         SweepResult init{0u, {0, 0, 0}};
-        CUDA_OK(cudaMemcpy(d_out, &init, sizeof(init), cudaMemcpyHostToDevice));
         int grid = (int)((span + SEM_THREADS - 1) / SEM_THREADS);
         if (grid < 1) grid = 1;
         cudaEvent_t t0, t1;
         CUDA_OK(cudaEventCreate(&t0));
         CUDA_OK(cudaEventCreate(&t1));
         for (int rep = 0; rep < 2; rep++) {
+            /* Reset the result slot each rep.  Both kernels early-exit
+             * once `found` is set, so a warm-up that answered would
+             * leave the timed rep measuring an immediate return.  The
+             * target above is chosen not to decompose, which already
+             * prevents that, but the reset means the measurement does
+             * not silently depend on that choice. */
+            CUDA_OK(cudaMemcpy(d_out, &init, sizeof(init), cudaMemcpyHostToDevice));
+            CUDA_OK(cudaDeviceSynchronize());
             if (rep == 1) CUDA_OK(cudaEventRecord(t0));
             if (which == 0)
                 sweep_kernel<<<grid, SEM_THREADS>>>(xr, SEM_L, SEM_IRR, SEM_N,
