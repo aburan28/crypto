@@ -2007,12 +2007,15 @@ fn main() {
         .map(|value| value.parse().unwrap())
         .unwrap_or(32);
     let rank_aware_pair_scan = std::env::var("KIC_RANK_AWARE_PAIR_SCAN").as_deref() == Ok("1");
+    let parallel_support_expansion =
+        std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
     assert!(!rank_aware_pair_scan || query_mode.pair_pair_parallel());
+    assert!(!parallel_support_expansion || pair_mode == PairMode::SignedExpanded);
 
     let curve_setup_started = Instant::now();
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
@@ -2123,45 +2126,89 @@ fn main() {
             }
             let sum_keys = batch_raw_add_keys(&curve, &operands);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
-            for ((left_column, right_column, relative, left, right), key) in
-                jobs.into_iter().zip(sum_keys)
-            {
-                if pair_mode == PairMode::SignedQuotient {
-                    let (canonical, multiplier, maps) =
-                        canonical_signed_key(&curve, key, modulus, lambda);
-                    pair_canonicalization_maps += maps;
-                    quotient_pairs.insert(
-                        canonical,
-                        QuotientPairWitness::new(
-                            [
-                                (left_column, multiplier),
-                                (
-                                    right_column,
-                                    ((relative as u128 * multiplier as u128) % modulus as u128)
-                                        as u64,
-                                ),
-                            ],
-                            canonical.1,
-                        ),
-                    );
-                } else {
-                    let mut image_key = key;
-                    let mut image_indices = [left, right];
-                    for exponent in 0..curve.n {
-                        quotient_pairs.insert(
-                            image_key,
-                            QuotientPairWitness::from_point_indices(image_indices, image_key.1),
-                        );
-                        if exponent + 1 < curve.n && image_key.0 != 0 {
-                            let x = square_raw(&curve, image_key.0 - 1);
-                            let y = square_raw(&curve, image_key.1);
-                            image_key = (x + 1, y);
-                            image_indices = image_indices.map(|index| frobenius_next_index[index]);
-                            pair_canonicalization_maps += 1;
+            if parallel_support_expansion {
+                const JOB_BATCH: usize = 65_536;
+                const JOB_CHUNK: usize = 1_024;
+                pair_additions += jobs.len();
+                for batch_start in (0..jobs.len()).step_by(JOB_BATCH) {
+                    let batch_end = (batch_start + JOB_BATCH).min(jobs.len());
+                    let expanded: Vec<_> = jobs[batch_start..batch_end]
+                        .par_chunks(JOB_CHUNK)
+                        .zip(sum_keys[batch_start..batch_end].par_chunks(JOB_CHUNK))
+                        .map(|(job_chunk, key_chunk)| {
+                            let mut entries =
+                                Vec::with_capacity(job_chunk.len() * curve.n as usize);
+                            let mut maps = 0usize;
+                            for (&(_, _, _, left, right), &key) in job_chunk.iter().zip(key_chunk) {
+                                let mut image_key = key;
+                                let mut image_indices = [left, right];
+                                for exponent in 0..curve.n {
+                                    entries.push((image_key, image_indices));
+                                    if exponent + 1 < curve.n && image_key.0 != 0 {
+                                        let x = square_raw(&curve, image_key.0 - 1);
+                                        let y = square_raw(&curve, image_key.1);
+                                        image_key = (x + 1, y);
+                                        image_indices =
+                                            image_indices.map(|index| frobenius_next_index[index]);
+                                        maps += 1;
+                                    }
+                                }
+                            }
+                            (entries, maps)
+                        })
+                        .collect();
+                    for (entries, maps) in expanded {
+                        pair_canonicalization_maps += maps;
+                        for (image_key, image_indices) in entries {
+                            quotient_pairs.insert(
+                                image_key,
+                                QuotientPairWitness::from_point_indices(image_indices, image_key.1),
+                            );
                         }
                     }
                 }
-                pair_additions += 1;
+            } else {
+                for ((left_column, right_column, relative, left, right), key) in
+                    jobs.into_iter().zip(sum_keys)
+                {
+                    if pair_mode == PairMode::SignedQuotient {
+                        let (canonical, multiplier, maps) =
+                            canonical_signed_key(&curve, key, modulus, lambda);
+                        pair_canonicalization_maps += maps;
+                        quotient_pairs.insert(
+                            canonical,
+                            QuotientPairWitness::new(
+                                [
+                                    (left_column, multiplier),
+                                    (
+                                        right_column,
+                                        ((relative as u128 * multiplier as u128) % modulus as u128)
+                                            as u64,
+                                    ),
+                                ],
+                                canonical.1,
+                            ),
+                        );
+                    } else {
+                        let mut image_key = key;
+                        let mut image_indices = [left, right];
+                        for exponent in 0..curve.n {
+                            quotient_pairs.insert(
+                                image_key,
+                                QuotientPairWitness::from_point_indices(image_indices, image_key.1),
+                            );
+                            if exponent + 1 < curve.n && image_key.0 != 0 {
+                                let x = square_raw(&curve, image_key.0 - 1);
+                                let y = square_raw(&curve, image_key.1);
+                                image_key = (x + 1, y);
+                                image_indices =
+                                    image_indices.map(|index| frobenius_next_index[index]);
+                                pair_canonicalization_maps += 1;
+                            }
+                        }
+                    }
+                    pair_additions += 1;
+                }
             }
         }
     }
@@ -2227,6 +2274,9 @@ fn main() {
             "field_x_values_scanned":base.scanned_x,
             "base_construction_ms":base_ms,
             "support_index_ms":pair_ms,
+            "parallel_support_expansion":parallel_support_expansion,
+            "parallel_support_expansion_job_batch":if parallel_support_expansion {65536} else {0},
+            "parallel_support_expansion_job_chunk":if parallel_support_expansion {1024} else {0},
             "pair_index_mode":pair_mode.name(),
             "total_setup_ms":setup_ms,
             "curve_setup_ms":curve_setup_ms,
