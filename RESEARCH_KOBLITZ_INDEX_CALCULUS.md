@@ -1099,3 +1099,56 @@ base and re-verified *every* relation each time, quadratically.
 incrementally, verifying each exactly once. At `n = 39` the logs stage
 went from 16.6 s to 3.6 s over four extension rounds, at `n = 31` from
 8.0 s to 1.1 s over nine.
+
+### How large should the base be? — 2026-09-12
+
+With a subgroup base the decomposition rate is the one a random base
+gives, so the cost model is finally clean and can be used to *choose* a
+base rather than to explain one. A target decomposes with probability
+`|F|³/(3!·r)`, and an `m = 3` trial costs `|F|` table lookups, so the
+work per target is
+
+```text
+    (3!·r / |F|³) · Θ(|F|)  =  Θ(r / |F|²)
+```
+
+— four times cheaper for every doubling of the base, until the rate
+saturates at one witness per trial and growth only makes each trial
+dearer. The pair table is quadratic in `|F|`, so the precompute rises
+four times per doubling at the same moment.
+
+Measured at `n = 41` (`docs/ic/runs/koblitz-base-size-20260912.json`):
+
+| points | abscissae | table | build | trials/target | ms/target |
+|--------|-----------|-------|-------|---------------|-----------|
+| 1312 | 656 | 14 MB | 0.1 s | 400 | 47.8 |
+| 2624 | 1312 | 55 MB | 0.4 s | 133 | 29.2 |
+| 5248 | 2624 | 220 MB | 1.7 s | 29 | 13.7 |
+| 10496 | 5248 | 881 MB | 6.6 s | 3 | 3.5 |
+| 20992 | 10496 | 3.5 GB | 32.3 s | 1 | 2.3 |
+
+The `1/|F|²` law holds exactly to 10496 points, where the rate saturates
+and the last doubling buys 1.5× for four times the memory.
+
+**So the base is a function of the target count, not of the curve.**
+Total cost is `precompute(|F|) + T·descent(|F|)`, and end to end over
+256 targets at `n = 41`:
+
+| base | precompute | descent/target | total | ρ total |
+|------|-----------|----------------|-------|---------|
+| 5248 points | 3.0 s | 16.2 ms | **7.2 s** | 31.5 s |
+| 10496 points | 9.0 s | 7.2 ms | 10.9 s | 31.1 s |
+
+256 of 256 solved, 256 of 256 ρ walks recovered and verified, both runs.
+The two lines cross at about **665 targets**: below that the smaller base
+wins on total cost, above it the larger. Against ρ's 121 ms per target
+they cross at roughly 29 and 85 targets respectively — which is the
+honest way to state a whole-process win, as a *number of targets* rather
+than a verdict.
+
+The abscissa cap was `2^12`, which put the measured optimum out of
+reach; it is now `2^13`. What the cap was really protecting is the pair
+table, so `PairSumTable::build` now refuses past a stated byte budget
+(4 GiB by default, about 16000 points) instead of attempting an
+allocation the machine cannot meet — a base one doubling too large now
+fails with a number rather than an OOM.

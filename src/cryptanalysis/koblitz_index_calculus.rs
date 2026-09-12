@@ -2140,12 +2140,39 @@ pub struct PairSumTable {
 }
 
 impl PairSumTable {
+    /// Entries a table may occupy before [`Self::build`] refuses: 4 GiB,
+    /// which is a base of about 16000 points.
+    pub const DEFAULT_BYTE_BUDGET: u128 = 4 << 30;
+
     /// Build the table with `|F|(|F|+1)/2` point additions — one field
     /// inversion per row by Montgomery's trick, rows in parallel; 16
     /// bytes per entry.  Returns `None` when the field is too wide to
     /// pack a point into a `u64`.
     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        Self::build_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
+    }
+
+    /// Bytes the entries of a table for this base would occupy.
+    pub fn byte_size(points: usize) -> u128 {
+        let pairs = points as u128 * (points as u128 + 1) / 2;
+        pairs * std::mem::size_of::<(u64, u32, u32)>() as u128
+    }
+
+    /// [`Self::build`] with an explicit ceiling on the entries.
+    ///
+    /// The table is quadratic in the base, so the difference between a
+    /// base that fits and one that does not is a single doubling.
+    /// Refusing by a stated budget turns that into a `None` the caller
+    /// can report, instead of an allocation the machine cannot meet.
+    pub fn build_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
         if fb.points.len() > u32::MAX as usize {
+            return None;
+        }
+        if Self::byte_size(fb.points.len()) > byte_budget {
             return None;
         }
         let curve = FastCurve::new(&kc.curve)?;
@@ -6017,6 +6044,58 @@ enum Probe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pair_table_refuses_a_base_beyond_its_byte_budget() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let needed = PairSumTable::byte_size(fb.points.len());
+        assert!(PairSumTable::build_within(&kc, &fb, needed).is_some());
+        assert!(PairSumTable::build_within(&kc, &fb, needed - 1).is_none());
+        // The default budget is far above a base this size.
+        assert!(needed < PairSumTable::DEFAULT_BYTE_BUDGET);
+        assert!(PairSumTable::build(&kc, &fb).is_some());
+    }
+
+    #[test]
+    #[ignore]
+    fn subgroup_base_size_sweep() {
+        // Work per target should fall as 1/|F|^2: the witness rate rises
+        // as |F|^3 and a trial costs |F| lookups.  Where does that stop
+        // paying?
+        let n: u32 = std::env::var("SWEEP_N").map(|v| v.parse().unwrap()).unwrap_or(41);
+        let kc = KoblitzCurve::new(0, n).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let g = fc.lift(kc.generator());
+        eprintln!("{:>7} {:>7} {:>9} {:>10} {:>9} {:>10} {:>11} {:>9}",
+            "points", "absc", "entries", "table MB", "build s", "1/rate", "ms/trial", "ms/target");
+        let mut size = 1300usize;
+        while size <= 24_000 {
+            let t = std::time::Instant::now();
+            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 5, size) else { break };
+            let select = t.elapsed().as_secs_f64();
+            let t = std::time::Instant::now();
+            let Some(table) = PairSumTable::build(&kc, &fb) else { break };
+            let build = t.elapsed().as_secs_f64();
+            let mut rng = StdRng::seed_from_u64(77);
+            let trials = 400;
+            let t = std::time::Instant::now();
+            let hits = (0..trials)
+                .filter(|_| {
+                    let target = fc.mul_u64(g, rng.gen_range(1..r));
+                    table.decompose_fast(target, 3).is_some()
+                })
+                .count();
+            let per_trial = t.elapsed().as_secs_f64() * 1000.0 / trials as f64;
+            let rate = hits.max(1) as f64 / trials as f64;
+            eprintln!("{:>7} {:>7} {:>9} {:>10.0} {:>9.1} {:>10.0} {:>11.3} {:>9.1}",
+                fb.points.len(), fb.subspace.len(), table.len(),
+                table.len() as f64 * 16.0 / 1e6, select + build, 1.0 / rate,
+                per_trial, per_trial / rate);
+            size *= 2;
+        }
+    }
 
     #[test]
     fn subgroup_orbit_bases_are_reproducible_and_inside_the_subgroup() {
