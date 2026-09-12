@@ -12,7 +12,12 @@
 -- Walks interleave arbitrarily inside the engine; the per-id bookkeeping is
 -- what makes the check independent of that order.
 --
---   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf131_mul.vhd ec2k_step_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
+-- The clock count here is not a throughput figure: the population of live
+-- walks dwindles as records run out, and the tail is spent in partial
+-- batches waiting for the flush.  ec2k_batch_tb measures the saturated
+-- rate.
+--
+--   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
 --   ghdl -e --std=08 ec2k_walker_tb
 --   ghdl -r --std=08 ec2k_walker_tb
 
@@ -27,8 +32,9 @@ use work.gf131_tb_pkg.all;
 entity ec2k_walker_tb is
   generic (
     VECTORS : string := "vectors_ecc2k130.txt";
-    ID_W    : natural := 4;
-    SLOT_W  : natural := 4
+    ID_W    : natural := 5;
+    LOG_W   : natural := 3;
+    LOG_NB  : natural := 2
   );
 end entity;
 
@@ -66,7 +72,8 @@ begin
   clk <= not clk after 5 ns when running else '0';
 
   dut : entity work.ec2k_walker
-    generic map (ID_W => ID_W, SLOT_W => SLOT_W, CNT_W => CNT_W, DP_WEIGHT => 56)
+    generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB, FLUSH_CLK => 16,
+                 CNT_W => CNT_W, DP_WEIGHT => 56)
     port map (
       clk => clk, rst => rst,
       ld_valid => ld_valid, ld_ready => ld_ready,
@@ -194,7 +201,8 @@ begin
     if errors = 0 then
       report "ec2k_walker_tb: " & integer'image(reports) & " distinguished points from "
              & integer'image(steps) & " steps in " & integer'image(cycles) & " clk ("
-             & integer'image(NWALK) & " walks, " & integer'image(2 ** SLOT_W) & " slots)";
+             & integer'image(NWALK) & " walks, batches of " & integer'image(2 ** LOG_W)
+             & ", " & integer'image(2 ** LOG_NB) & " in flight)";
       report "ec2k_walker_tb: PASS";
     else
       report "ec2k_walker_tb: FAIL -- " & integer'image(errors) & " errors" severity failure;

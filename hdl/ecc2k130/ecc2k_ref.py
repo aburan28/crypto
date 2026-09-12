@@ -280,13 +280,14 @@ def emitVectors(rng, out):
     for a, b in pairs:
         out.write('MUL %s %s %s\n' % (hexs(a), hexs(b), hexs(refMul(a, b))))
 
-    for _ in range(64):
+    # 200 = 12 full batches of 16 plus a partial one, to exercise the flush
+    for _ in range(200):
         x, y = randomSubgroupPoint(rng)
         x3, y3 = refStep(x, y)
         out.write('STEP %s %s %d %s %s %d\n'
                   % (hexs(x), hexs(y), weight(x), hexs(x3), hexs(y3), weight(x3)))
 
-    for _ in range(40):
+    for _ in range(64):
         x, y = randomSubgroupPoint(rng)
         x0, y0 = x, y
         k = 0
@@ -306,16 +307,35 @@ def cost():
     toOnbIn = [sum((r >> k) & 1 for r in TOONB) for k in range(M)]
     prepXor = sum(k - 1 for k in prepIn if k)
     toOnbXor = sum(k - 1 for k in toOnbIn if k)
-    prodAnd = M * M
-    prodXor = M * M - (2 * M - 1)
     print('prep  (gamma -> c-powers): %5d XOR2, widest output %d inputs, x2 operands'
           % (prepXor, max(prepIn)))
-    print('product 131 x 131 over GF(2): %5d AND, %5d XOR2, in %d rows of %d bits'
-          % (prodAnd, prodXor, (M + 16) // 17, 17))
     print('toOnb (c-powers -> gamma): %5d XOR2, widest output %d inputs'
           % (toOnbXor, max(toOnbIn)))
-    print('per multiply: %d AND, %d XOR2, no reduction, no DSP'
-          % (prodAnd, 2 * prepXor + prodXor + toOnbXor))
+    print('Karatsuba levels (gf2_kmul), n x n product over GF(2):')
+    for levels in range(4):
+        a, x, leaf = kmulCost(M, levels)
+        print('  %d level(s): leaf %3d bits, %5d AND, %5d XOR2; per multiply %5d AND, %5d XOR2,'
+              ' latency %d clk' % (levels, leaf, a, x, a, 2 * prepXor + x + toOnbXor,
+                                   2 * levels + 4))
+
+
+def kmulCost(n, levels):
+    """(AND, XOR2, leaf width) of gf2_kmul: schoolbook leaf, unequal halves
+    zero-extended, post-combine counted bit by bit."""
+    if levels == 0:
+        return n * n, (n - 1) * (n - 1), n
+    h = (n + 1) // 2
+    a, x, leaf = kmulCost(h, levels - 1)
+    pre = 2 * h                                  # a0 + a1, b0 + b1
+    mid = 2 * (2 * h - 1)                        # p0 + p1 + p2
+    # overlaps of p0, mid << h, p2 << 2h within the 2n-1 output bits
+    terms = [0] * (2 * n - 1)
+    for i in range(2 * h - 1):
+        for lo in (0, h, 2 * h):
+            if i + lo < 2 * n - 1:
+                terms[i + lo] += 1
+    post = sum(t - 1 for t in terms if t)
+    return 3 * a, 3 * x + pre + mid + post, leaf
 
 
 def main():
