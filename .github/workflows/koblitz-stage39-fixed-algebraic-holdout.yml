@@ -6,6 +6,7 @@ on:
       - "scripts/run_koblitz_stage39_fixed_algebraic_holdout.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-39-n41-fixed-algebraic-holdout-params.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE39_FIXED_ALGEBRAIC_HOLDOUT.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-38-algebraic-collection-result-20260912/verification.json"
       - ".github/workflows/koblitz-stage39-fixed-algebraic-holdout.yml"
   workflow_dispatch:
 

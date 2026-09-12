@@ -21,6 +21,7 @@ import run_koblitz_stage33_n41_unknown_scalar as stage33
 REPO = Path(__file__).resolve().parents[1]
 STAGE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
 PARAMS = STAGE / "stage-39-n41-fixed-algebraic-holdout-params.json"
+PREDECESSOR = STAGE / "stage-38-algebraic-collection-result-20260912/verification.json"
 TARGET_SEEDS = [41201, 41202, 41203, 41204, 41205]
 RELATION_SEED = 41231
 WINDOW = 149
@@ -69,12 +70,19 @@ def validate_params(path: Path = PARAMS) -> dict[str, Any]:
 
 def self_test() -> dict[str, Any]:
     current = validate_params()
+    predecessor = load(PREDECESSOR, "Stage-38 hosted result")
+    require(
+        predecessor.get("status") == "hosted_six_window_algebraic_sweep_verified"
+        and predecessor.get("selection", {}).get("winner", {}).get("collection_window") == WINDOW
+        and predecessor.get("source_commit") == "647481caed3c703d270800922d1e262a5b683834",
+        "Stage-39 is not bound to the verified Stage-38 winner",
+    )
     require(current["collection"] == {"unit_trials": 8192, "units": 4, "max_units": 64}, "Stage-39 collection boundary changed")
     require(current["factor_base"].keys() == {"mode", "spec"}, "Stage-39 factor-base rule contains hidden search inputs")
     return {
         "schema": "koblitz_stage39_self_test.v1",
         "status": "PASS",
-        "checks": 14,
+        "checks": 16,
         "factor_base_family": "fixed_two_torsion_saturated_frobenius_union",
         "factor_base_recipe": ALGEBRAIC_SPEC,
         "factor_base_discovery_target_samples": 0,
@@ -88,6 +96,8 @@ def self_test() -> dict[str, Any]:
         "collection_window": WINDOW,
         "relation_seed_is_holdout": True,
         "public_target_seeds_are_holdout": True,
+        "predecessor_stage38_source_commit": predecessor["source_commit"],
+        "predecessor_stage38_run_id": predecessor["workflow"]["run_id"],
     }
 
 
@@ -218,6 +228,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     complete = stage33.process_complete(process) and workflow is not None and baseline is not None
     build_outer = build_result["outer_resources"]
     rho_wall = baseline["rho"]["seconds_total"] if baseline else None
+    predecessor = load(PREDECESSOR, "Stage-38 hosted result")
     result = {
         "schema": RUN_SCHEMA,
         "status": "complete_n41_fixed_algebraic_holdout" if complete else "incomplete_n41_fixed_algebraic_holdout",
@@ -239,6 +250,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "one_cpu_utilization_percent": 100.0 * outer["total_core_seconds"] / outer["wall_seconds"],
         },
         "workflow_result": workflow,
+        "predecessor_stage38": {
+            "identity": custody.executable_identity(PREDECESSOR, "Stage-38 hosted result", executable=False),
+            "source_commit": predecessor["source_commit"],
+            "workflow_run_id": predecessor["workflow"]["run_id"],
+            "winner": predecessor["selection"]["winner"],
+            "comparison": predecessor["comparison"],
+        },
         "factor_base_discovery": {
             "method": "fixed_algebraic_rule",
             "public_parameters": {"n": 41, "ell": 6, "collection_m": 3},
@@ -300,7 +318,20 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         and discovery.get("construction_elapsed_seconds") == workflow["state"]["select"]["elapsed_seconds"],
         "Stage-39 algebraic discovery accounting changed",
     )
+    predecessor = load(PREDECESSOR, "Stage-38 hosted result")
+    expected_predecessor = {
+        "identity": custody.executable_identity(PREDECESSOR, "Stage-38 hosted result", executable=False),
+        "source_commit": predecessor["source_commit"],
+        "workflow_run_id": predecessor["workflow"]["run_id"],
+        "winner": predecessor["selection"]["winner"],
+        "comparison": predecessor["comparison"],
+    }
+    require(result.get("predecessor_stage38") == expected_predecessor, "Stage-39 predecessor binding changed")
     ratio = baseline["ratio"]
+    old_amortised = predecessor["comparison"]["stage38_ic_over_rho_amortised_wall_ratio"]
+    new_amortised = 1.0 / ratio["amortised"]
+    old_precompute = predecessor["selection"]["winner"]["precompute_seconds"]
+    new_precompute = baseline["ic"]["precompute_seconds"]
     return {
         "schema": "koblitz_stage39_verification.v1",
         "status": "n41_fixed_algebraic_holdout_build_and_run_verified",
@@ -316,7 +347,12 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         "rho_over_ic_online_wall_ratio": ratio["charged"],
         "rho_over_ic_amortised_wall_ratio": ratio["amortised"],
         "ic_over_rho_online_wall_ratio": 1.0 / ratio["charged"],
-        "ic_over_rho_amortised_wall_ratio": 1.0 / ratio["amortised"],
+        "ic_over_rho_amortised_wall_ratio": new_amortised,
+        "stage38_ic_over_rho_amortised_wall_ratio": old_amortised,
+        "amortised_ratio_improvement_factor": old_amortised / new_amortised,
+        "precompute_seconds": new_precompute,
+        "stage38_precompute_seconds": old_precompute,
+        "precompute_speedup_over_stage38": old_precompute / new_precompute,
         "single_core_elapsed_seconds": result["outer_resources"]["single_core_elapsed_seconds"],
         "scientific_outer_core_seconds": result["outer_resources"]["total_core_seconds"],
         "charged_total_core_seconds_available": result["charged_total_core_seconds_available"],
