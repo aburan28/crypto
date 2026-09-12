@@ -177,33 +177,81 @@ equations.  Measured, not assumed: at `n ∈ {8, 10, 12}`, 64 curves compared
 coefficient-by-coefficient, `a₆` touches Boolean degree `{0}` of `≤ 2`, and
 the degree-`≥ 1` part is identical for every curve.
 
-At `m = 3` the same holds with room to spare.  Expanding
-`S₄ = Res_X(S₃(X₁,X₂,X), S₃(X₃,x_R,X))` in `a₆`, with
-`A₁ = (X₁+X₂)², B₁ = X₁X₂, A₂ = (X₃+x_R)², B₂ = X₃x_R`:
+**Beyond `m = 2`, computed rather than estimated (EXP-R6b).** For `m ≥ 3` the
+curve no longer enters as a pure constant, so the question is where exactly it
+lands.  Two things make this worth computing:
+
+*Boolean degree is a sum of Hamming weights, not a total degree.* After descent
+each `Xᵢ` is a vector of `F_2`-linear forms in its bits, and `Xᵢ^{2^k}` is
+**also** `F_2`-linear (Frobenius is linear, and `b² = b` on Boolean
+coefficients).  So `Xᵢ^e` is a product of `wt(e)` linear forms and
 
 ```
-  S₄ = [A₁(X₃x_R)² + A₂(X₁X₂)²]²                 a₆-free, Boolean degree 3
-     + (A₁B₂ + A₂B₁)(B₁(X₃x_R)² + B₂(X₁X₂)²)     a₆-free, Boolean degree 6
-     + a₆  · (A₁B₂ + A₂B₁)(B₁ + B₂)              Boolean degree ≤ 5
-     + a₆² · (A₁ + A₂)²                          Boolean degree 1
+  bdeg(Π Xᵢ^{eᵢ}) = Σᵢ wt(eᵢ).
 ```
 
-Boolean degrees are counted with squaring free, since Frobenius is
-`F_2`-linear and `x² = x` on Boolean coefficients — this is why the `m = 3`
-system is degree 6 in `3ℓ` variables rather than 12.  With `x_R` constant that
-makes `A₁, A₂, B₂` degree 1 and `B₁` degree 2, from which the four
-annotations above follow.  The top degree is 6 and `a₆` reaches at most 5.
-The identity itself is verified over 300 `(x₁,x₂,x₃,x_R,a₆)` combinations in
-`s4_a6_expansion_is_quadratic_with_subleading_coefficients`.
+Multiplying factor degrees therefore *overestimates*: in `S₄` the product
+`(A₂B₁)(B₁C₂)` looks like `3 × 3 = 6`, but `X₁X₂ · X₁X₂ = X₁²X₂²` collapses to
+Boolean degree 2.  **The first version of this note quoted `a₆` reaching degree
+5 at `m = 3` from exactly that product bound; the exact value is 4.**
+
+Building `S_{m+1}` by Semaev's recursion
+`S_{i+j−2} = Res_Y(S_i(…,Y), S_j(…,Y))` and profiling every monomial by its
+`a₆`-power gives:
+
+| `m` | symbolic vars | top Boolean degree | max bdeg of `a₆`-carrying terms | gap |
+|---:|---:|---:|---:|---:|
+| 2 | 2 | 2 | 0 | **2** |
+| 3 | 3 | 6 | 4 | **2** |
+| 4 | 4 | 12 | 10 | **2** |
+| 5 | 5 | 20 | 18 | **2** |
+
+The top Boolean degree is `m(m−1)`, it is **always `a₆`-free**, and every
+`a₆`-carrying term sits **exactly two degrees below it**.  Two independent
+corroborations of the top figure: at `m = 2` it is 2, which is why the
+descended `S₃` system is quadratic (`ffd_harness::F2BoolPoly` encodes exactly
+degree `≤ 2`); at `m = 3` it is 6, which is the degree
+`binary_semaev_s4`'s own module doc records for the eliminated `3ℓ`-variable
+presentation.
+
+**And `m(m−1)` is not a coincidence — the upper bound holds for every `m`.**
+Semaev's construction gives `deg_{Xᵢ} S_{m+1} = 2^{m−1}`, and over the
+exponents `e ≤ 2^{m−1}` the Hamming weight is maximised at
+`e = 2^{m−1} − 1 = 0b11…1`, where `wt(e) = m−1`.  Since the Boolean degree of a
+monomial is `Σᵢ wt(eᵢ)` over the `m` symbolic variables,
+
+```
+  bdeg(S_{m+1}) ≤ m · max{ wt(e) : e ≤ 2^{m−1} } = m(m−1)     for every m.
+```
+
+So the *ceiling* is proved in general; what the computation adds is that the
+ceiling is **attained**, that the monomials attaining it are `a₆`-free, and
+that `a₆` stops two short of it.  Those three facts are established at
+`m ∈ {2,3,4,5}` and are what Boundary C rests on; they are not proved for all
+`m`, and §7 says so.
+
+The gap being **constant rather than shrinking** is the load-bearing part.  A
+narrowing gap would predict the boundary failing at some larger `m`; a flat one
+says it does not erode.
+
+*Verification.* Each `S_{m+1}` is checked three ways before its profile is
+believed: symmetry in all `m+1` arguments (on adjacent transpositions, which
+generate the symmetric group), degree `2^{m−1}` in each argument as Semaev's
+construction requires, and — for `S₄` — agreement with the repository's own
+`binary_semaev_s4` at 60 random field points, which validates the resultant
+machinery against trusted code.  `S₅` was additionally checked semantically:
+over four curves on `F_{2^5}` it vanished on **all 1146** genuine 5-point
+decompositions and on no tuple lacking one.
 
 > **Boundary C.** The leading-form ideal of the descended Semaev system is
-> independent of the curve, for `m ∈ {2, 3}`.  Therefore the degree of
-> regularity in the Bardet–Faugère–Salvy sense — a Hilbert-series invariant
-> of the leading forms — is **constant on the entire isogeny class**, and so
-> is the degree at which any top-degree cancellation first becomes
-> *available*.  Changing the curve can make a fall's remainder vanish, i.e.
-> **lose** a fall; it cannot create one at a lower degree.  The lever's only
-> possible effect on `d_reg` is adverse.
+> independent of the curve, for every `m ∈ {2, 3, 4, 5}` — `a₆` stays exactly
+> two Boolean degrees below the leading form at each.  Therefore the degree of
+> regularity in the Bardet–Faugère–Salvy sense — a Hilbert-series invariant of
+> the leading forms — is **constant on the entire isogeny class**, and so is
+> the degree at which any top-degree cancellation first becomes *available*.
+> Changing the curve can make a fall's remainder vanish, i.e. **lose** a fall;
+> it cannot create one at a lower degree.  The lever's only possible effect on
+> `d_reg` is adverse.
 
 This is the answer to the question as literally posed — "curves where the
 degree of regularity is easier" — and it is negative by a two-line argument
@@ -289,6 +337,7 @@ Four numbers come out, and the last one decides.
 | **R6″** | The exhaustive search over the class is *feasible* | **`killed`** | Boundary A (`2^65.06` vertices vs `2^60.81` ρ, or `2^64.83` plain ρ) and B (263 reachable). The search that does terminate covers `2^{−57}` of the class. |
 | **R6‴** | `D* = 2` density over curves is `1 − 2^{−dim S}` per target | **`supported`** (exact) | `dim S = 1` at `n ∈ {8, 10}`, escape count `128/255` and `512/1023`, matching `(2^n − 2^{n−1})/(2^n − 1)`; mismatches `0`. |
 | **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** | EXP-R6. Survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10` over `T = 8/16/32/48/64`. Monotone and reaching zero. |
+| **R6b** | `a₆` reaches the **leading form** at some `m ≥ 4`, making `d_reg` curve-dependent where index calculus is asymptotically interesting | **`killed`** | EXP-R6b, iteration 2. Computed symbolically for `m ∈ {2,3,4,5}`: the top Boolean degree is `m(m−1)`, always `a₆`-free, with `a₆` exactly **2** degrees below at every `m`. Constant gap, not a narrowing one. `S₄` validated against the repo's own implementation; `S₅` against 1146 genuine decompositions. |
 
 ### Pre-registered gates
 
@@ -323,6 +372,7 @@ Four numbers come out, and the last one decides.
 | `…::curve_effect_test` | variance decomposition plus the disjoint-holdout winner's-curse control |
 | `…::uniform_floor_survivors` | the decisive statistic: curves on the `D* = 2` floor for *every* target, swept over the whole curve space |
 | `…::all_traces` | exact point counting, for the class-size cross-validation |
+| `cryptanalysis::semaev_leading_form` | symbolic `S_{m+1}` over `F_2[a₆]` by the resultant recursion, and the Boolean-degree profile that decides Boundary C at each `m` (4 tests) |
 | `examples/isogeny_class_search.rs` | EXP-R6 driver → `experiments/isogeny_class_search.json` |
 
 `D*` is measured by the thread's existing `pc_degree_harness::refutation_scan`,
@@ -334,6 +384,66 @@ Run: `cargo run --release --example isogeny_class_search`.
 ---
 
 ## 5. Iteration log
+
+### 2026-09-12 — iteration 2 (EXP-R6b — Boundary C holds to `m = 5`, and the ceiling is explained)
+
+**Task.** The queue head from iteration 1, and the one thing that could
+reopen L5: does `a₆` reach the leading form at `m ≥ 4`, where index calculus
+is asymptotically interesting?  Iteration 1 proved Boundary C only for
+`m ∈ {2,3}` by hand expansion.
+
+**Experiment.** Build `S_{m+1}` symbolically over `F_2[a₆]` by Semaev's
+resultant recursion and profile every monomial by its `a₆`-power, for
+`m ∈ {2,3,4,5}`.  New module `cryptanalysis::semaev_leading_form` (5 tests):
+multivariate `F_2` polynomials, the characteristic-2 quadratic resultant, and
+a memoised Sylvester determinant for the quadratic×quartic (`S₅`) and
+quartic×quartic (`S₆`) steps.
+
+**Result.**
+
+| `m` | symbolic vars | monomials | top bdeg | `a₆` max | gap |
+|---:|---:|---:|---:|---:|---:|
+| 2 | 2 | 5 | 2 | 0 | **2** |
+| 3 | 3 | 24 | 6 | 4 | **2** |
+| 4 | 4 | 729 | 12 | 10 | **2** |
+| 5 | 5 | 190252 | 20 | 18 | **2** |
+
+- **Boundary C holds at every `m` reached**, with a **constant** gap of 2 —
+  not a narrowing one, which is what would have predicted failure further out.
+- **The `m(m−1)` ceiling is proved for all `m`**, not merely observed:
+  `deg_{Xᵢ} S_{m+1} = 2^{m−1}` and `max{wt(e) : e ≤ 2^{m−1}} = m−1`, so
+  `bdeg ≤ m(m−1)` always.  The computation supplies the three facts the bound
+  does not: attainment, `a₆`-freeness of the attaining monomials, and the
+  two-degree shortfall of `a₆`.
+- **A correction to iteration 1.** It quoted `a₆` reaching Boolean degree
+  **5** at `m = 3`.  The exact value is **4**.  The 5 came from multiplying
+  factor degrees (`3 × 3 = 6`, minus one), which overestimates: Boolean degree
+  is `Σ wt(eᵢ)`, and `X₁X₂ · X₁X₂ = X₁²X₂²` collapses to degree 2 under
+  Frobenius rather than doubling to 4.  The direction of the claim is
+  unaffected — `a₆` was and is strictly below the leading form — but the
+  number was loose and is now exact.
+
+**Verification.** Each `S_{m+1}` is checked three ways before its profile is
+used: symmetry in all `m+1` arguments (on adjacent transpositions, which
+generate the symmetric group), degree `2^{m−1}` per argument as Semaev
+requires, and for `S₄` agreement with the repository's own
+`binary_semaev_s4` at 60 random field points — which validates the resultant
+machinery against trusted code rather than against itself.  `S₅` was checked
+semantically as well: over four curves on `F_{2^5}` it vanished on **all 1146**
+genuine 5-point decompositions and on no tuple lacking one.
+
+**Gate verdict.** **R6b killed** — no counterexample at `m = 4` or `m = 5`.
+
+**Ledger delta.** R6b `killed`. Boundary C strengthened from `m ∈ {2,3}` to
+`m ∈ {2,3,4,5}` plus a general ceiling; limitation 2 narrowed accordingly.
+
+**Class of the change.** **Accounting** again — a boundary got firmer and one
+of its numbers got corrected; no attack moved.
+
+**Next.** The induction: prove the gap is 2 for all `m`, or find a
+counterexample at `m ≥ 6`.  `S₇ = Res(S₄, S₅)` is the next computable step.
+
+---
 
 ### 2026-09-12 — iteration 1 (EXP-R6 — the lever is empty, and every reason is derived)
 
@@ -447,13 +557,17 @@ earlier lessons:
 1. **`D*` is measured at `m = 2`, `n ≤ 10`.** The `m = 3` system is degree 6
    in `3ℓ` variables, where the dense Macaulay tower has essentially no
    multiplier budget — the same structural reach limit that left L2
-   `blocked` in iteration 5 of the degree-reduction thread.  `m = 3` is
-   covered here by Boundary C (exact, and verified as an identity) rather
-   than by a `D*` measurement, and that is a genuinely weaker kind of
-   evidence for the affine quantity.
-2. **Boundary C is proved for `m ∈ {2, 3}` by direct expansion**, not for
-   all `m`.  The resultant recursion makes it plausible that `a₆` stays
-   sub-leading at every `m`, but that is a conjecture here, not a theorem.
+   `blocked` in iteration 5 of the degree-reduction thread.  `m ≥ 3` is
+   covered here by Boundary C (exact, and verified) rather than by a `D*`
+   measurement, and that is a genuinely weaker kind of evidence for the
+   affine quantity.
+2. **Boundary C is now computed for `m ∈ {2,3,4,5}`, still not proved for all
+   `m`.**  The gap is exactly 2 at each, and `m = 4, 5` are the sizes that
+   matter (index calculus is only asymptotically interesting from `m = 3`), so
+   this is much stronger than the `m ≤ 3` the first version rested on.  But it
+   remains a computation at four values of `m`, not an induction: the pattern
+   `top = m(m−1)`, `a₆ ≤ m(m−1) − 2` is unproved, and `S₇` and beyond were not
+   reached (`S₆` already has 190252 monomials).
 3. **The 262 curves on the 263-floor are never written down.** Boundary C
    makes their `a₆` values irrelevant to the question (their `d_reg` is
    `E`'s), and the containment argument of §3 covers their `D*` distribution
@@ -479,11 +593,14 @@ earlier lessons:
 
 ## 8. What would change the verdict
 
-- **A counterexample to Boundary C at `m ≥ 4`.** If `a₆` reaches the
-  leading form of `S₅`, `d_reg` becomes curve-dependent and the lever
-  reopens — at the one `m` where index calculus is asymptotically
-  interesting.  This is the single highest-value follow-up, and it is a
-  symbolic computation, not a search.
+- ~~**A counterexample to Boundary C at `m ≥ 4`.**~~ **Done — EXP-R6b,
+  iteration 2, and it did not find one.**  `S₅` and `S₆` were built and
+  profiled: `a₆` stays exactly two Boolean degrees below the leading form at
+  `m = 4` and `m = 5`, the same gap as at `m = 2, 3`.  What is left of this
+  item is the induction: a proof that the gap is 2 for *all* `m`, or a
+  counterexample at `m ≥ 6`.  `S₇` needs a resultant of two `S₄`-sized
+  quartics one level up, so the next step is `S₇ = Res(S₄, S₅)` — tractable,
+  since `S₆` took seconds.
 - **A target-independent good curve.** The criterion of §3.1 says the good
   set is target-dependent.  A curve whose `a₆` escapes `S^⊥(x_R)` for a
   constant fraction of *all* targets, uniformly in `n`, would contradict it

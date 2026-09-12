@@ -187,6 +187,7 @@ pub mod sat;
 pub mod sbox;
 pub mod semaev_corpus;
 pub mod semaev_decomp;
+pub mod semaev_leading_form;
 pub mod semaev_higher;
 pub mod semaev_sat;
 pub mod sha1_differential;
