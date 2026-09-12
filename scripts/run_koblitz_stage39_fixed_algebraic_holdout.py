@@ -109,7 +109,9 @@ def self_test() -> dict[str, Any]:
     }
 
 
-def validate_workflow(value: dict[str, Any], workflow_dir: Path) -> dict[str, Any]:
+def validate_workflow(
+    value: dict[str, Any], workflow_dir: Path, target_seeds: list[int] = TARGET_SEEDS
+) -> dict[str, Any]:
     require(value.get("operation") == "workflow" and value.get("status") == "complete", "Stage-39 workflow is incomplete")
     require(value.get("evidence_scope") == "public_hash_unknown_scalar", "Stage-39 evidence label changed")
     require(value.get("degree") == 41 and value.get("summands") == 3 and value.get("descent_summands") == 2, "Stage-39 workflow summands changed")
@@ -166,7 +168,7 @@ def validate_workflow(value: dict[str, Any], workflow_dir: Path) -> dict[str, An
             and 0 < item["descent_trials"] <= 100_000_000
             and target.get("kind") == "public_hash_to_curve_cofactor"
             and target.get("target_scalar_constructed") is False
-            and target.get("public_hash_seed") == TARGET_SEEDS[index],
+            and target.get("public_hash_seed") == target_seeds[index],
             f"Stage-39 target {index} changed or failed",
         )
         trials += item["descent_trials"]
