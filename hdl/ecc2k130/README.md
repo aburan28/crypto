@@ -13,9 +13,11 @@ the client's own field model in `ecc2k130/codegen/`.
 Reference part is the AMD Virtex UltraScale+ VU47P (AWS `f2.6xlarge`), the
 same one `hdl/ecc/` and `hdl/sha1/` target, but there are no vendor
 primitives: plain `ieee.std_logic_1164` and `numeric_std`, simulates under
-GHDL, reads into any synthesis flow. Nothing here has been synthesised or
-run on an FPGA; every number below is labelled measured (in simulation),
-derived, or estimated.
+GHDL, reads into any synthesis flow. Every number below is labelled
+measured (in simulation or on the device), derived, or estimated. **The
+48-engine image runs on an `f2.6xlarge` at 3.01 G steps/s** (`aws/README.md`,
+"What came back"): 48 × 333 MHz / 5.31 clocks per step, with 64 of its
+distinguished points checked against the client's reference walk.
 
 ## Files
 
@@ -514,12 +516,11 @@ Two things the first synthesis taught, both fixed:
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **A run on an F2 instance.** The 48-engine image at 333 MHz has been
-  placed and routed and **meets timing** (`aws/README.md`, "What came
-  back"); its first AFI would not load (a manifest id the HDK script
-  clipped) and the corrected one, `agfi-08bd9e69a78e4dc79`, is what an
-  f2.6xlarge loads next; the measured steps per second against the 3.0 G
-  the clock and the rate promise is the next number.
+- **A campaign on F2 instances.** The 48-engine image runs on an
+  `f2.6xlarge` at the predicted rate (3.01 G steps/s, `aws/README.md`,
+  "What came back") and the 64-engine image has met timing; what has not
+  happened yet is a fleet of workers feeding the shared corpus for hours,
+  which is `f2.sh up` once the account has the worker instance profile.
 - **Reading a walk back.** The engine's walk state is write-only from the
   host, so walks in flight are lost when a worker restarts; each of them
   is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for
