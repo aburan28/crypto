@@ -87,8 +87,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     serial_environment["KIC_RANK_SURPLUS"] = "0"
     serial_environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
     serial_environment["RAYON_NUM_THREADS"] = "4"
+    if args.pipeline:
+        serial_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
     parallel_environment = dict(serial_environment)
     parallel_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
+    if args.pipeline:
+        parallel_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     rho_environment = custody.safe_child_environment()
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
@@ -114,9 +118,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     parallel_summary = parallel["summary"]
     require(serial["base"]["base_hash"] == parallel["base"]["base_hash"], "factor base changed")
     require(serial["base"]["support_index_entries"] == parallel["base"]["support_index_entries"], "support entries changed")
-    require(serial["base"].get("parallel_support_expansion") is False, "serial control changed")
+    require(serial["base"].get("parallel_support_expansion") is args.pipeline, "baseline expansion mode changed")
     require(parallel["base"].get("parallel_support_expansion") is True, "parallel expansion was not enabled")
-    require(parallel["base"].get("parallel_support_expansion_job_batch") == 65_536, "parallel batch changed")
+    require(parallel["base"].get("pipelined_support_expansion") is args.pipeline, "pipeline mode changed")
+    expected_batch = 32_768 if args.pipeline else 65_536
+    require(parallel["base"].get("parallel_support_expansion_job_batch") == expected_batch, "parallel batch changed")
     require(parallel["base"].get("parallel_support_expansion_job_chunk") == 1_024, "parallel chunk changed")
     require(serial["relation_hashes"] == parallel["relation_hashes"], "relation transcript changed")
     require(serial_summary["factor_base_log_solution"] == parallel_summary["factor_base_log_solution"], "full-rank solution changed")
@@ -159,6 +165,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "parallel": parallel,
         "rho": rho_rows[0],
         "comparison": comparison,
+        "pipelined_support_expansion": args.pipeline,
         "charged_total_core_seconds_available": build["outer_resources"]["total_core_seconds"] + outer["total_core_seconds"],
         "charged_sequential_wall_seconds_available": build["outer_resources"]["wall_seconds"] + outer["wall_seconds"],
         "maximum_sampled_process_tree_rss_bytes": max(build["outer_resources"]["sampled_peak_process_tree_rss_bytes"], outer["sampled_peak_process_tree_rss_bytes"]),
@@ -219,6 +226,7 @@ def main() -> None:
     run_parser.add_argument("--build", type=Path, required=True)
     run_parser.add_argument("--output", type=Path, required=True)
     run_parser.add_argument("--timeout", type=int, default=1800)
+    run_parser.add_argument("--pipeline", action="store_true")
     verify_parser = sub.add_parser("verify")
     verify_parser.add_argument("--build", type=Path, required=True)
     verify_parser.add_argument("--output", type=Path, required=True)

@@ -1996,6 +1996,40 @@ fn solve_full_column_rank_system(
     Some((0..columns).map(|row| matrix[row][columns]).collect())
 }
 
+type PairExpansionJob = (usize, usize, u64, usize, usize);
+type ExpandedSupportEntry = ((u64, u64), [usize; 2]);
+
+fn expand_support_batch(
+    curve: &KoblitzCurve,
+    jobs: &[PairExpansionJob],
+    sum_keys: &[(u64, u64)],
+    frobenius_next_index: &[usize],
+    job_chunk: usize,
+) -> Vec<(Vec<ExpandedSupportEntry>, usize)> {
+    jobs.par_chunks(job_chunk)
+        .zip(sum_keys.par_chunks(job_chunk))
+        .map(|(job_chunk, key_chunk)| {
+            let mut entries = Vec::with_capacity(job_chunk.len() * curve.n as usize);
+            let mut maps = 0usize;
+            for (&(_, _, _, left, right), &key) in job_chunk.iter().zip(key_chunk) {
+                let mut image_key = key;
+                let mut image_indices = [left, right];
+                for exponent in 0..curve.n {
+                    entries.push((image_key, image_indices));
+                    if exponent + 1 < curve.n && image_key.0 != 0 {
+                        let x = square_raw(curve, image_key.0 - 1);
+                        let y = square_raw(curve, image_key.1);
+                        image_key = (x + 1, y);
+                        image_indices = image_indices.map(|index| frobenius_next_index[index]);
+                        maps += 1;
+                    }
+                }
+            }
+            (entries, maps)
+        })
+        .collect()
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
@@ -2035,6 +2069,8 @@ fn main() {
     let rank_aware_pair_scan = std::env::var("KIC_RANK_AWARE_PAIR_SCAN").as_deref() == Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
+    let pipelined_support_expansion =
+        std::env::var("KIC_PIPELINED_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
@@ -2042,6 +2078,7 @@ fn main() {
     assert!(batch_fixtures > 0);
     assert!(!rank_aware_pair_scan || query_mode.pair_pair_parallel());
     assert!(!parallel_support_expansion || pair_mode == PairMode::SignedExpanded);
+    assert!(!pipelined_support_expansion || parallel_support_expansion);
 
     let curve_setup_started = Instant::now();
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
@@ -2130,7 +2167,7 @@ fn main() {
                 .copied()
                 .filter(|&value| value <= modpow(value, modulus - 2, modulus))
                 .collect();
-            let mut jobs = Vec::new();
+            let mut jobs: Vec<PairExpansionJob> = Vec::new();
             let mut operands = Vec::new();
             for left_column in 0..columns {
                 let left = label_to_index[&(left_column, 1)];
@@ -2153,36 +2190,14 @@ fn main() {
             let sum_keys = batch_raw_add_keys(&curve, &operands);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
             if parallel_support_expansion {
-                const JOB_BATCH: usize = 65_536;
                 const JOB_CHUNK: usize = 1_024;
+                let job_batch = if pipelined_support_expansion {
+                    32_768
+                } else {
+                    65_536
+                };
                 pair_additions += jobs.len();
-                for batch_start in (0..jobs.len()).step_by(JOB_BATCH) {
-                    let batch_end = (batch_start + JOB_BATCH).min(jobs.len());
-                    let expanded: Vec<_> = jobs[batch_start..batch_end]
-                        .par_chunks(JOB_CHUNK)
-                        .zip(sum_keys[batch_start..batch_end].par_chunks(JOB_CHUNK))
-                        .map(|(job_chunk, key_chunk)| {
-                            let mut entries =
-                                Vec::with_capacity(job_chunk.len() * curve.n as usize);
-                            let mut maps = 0usize;
-                            for (&(_, _, _, left, right), &key) in job_chunk.iter().zip(key_chunk) {
-                                let mut image_key = key;
-                                let mut image_indices = [left, right];
-                                for exponent in 0..curve.n {
-                                    entries.push((image_key, image_indices));
-                                    if exponent + 1 < curve.n && image_key.0 != 0 {
-                                        let x = square_raw(&curve, image_key.0 - 1);
-                                        let y = square_raw(&curve, image_key.1);
-                                        image_key = (x + 1, y);
-                                        image_indices =
-                                            image_indices.map(|index| frobenius_next_index[index]);
-                                        maps += 1;
-                                    }
-                                }
-                            }
-                            (entries, maps)
-                        })
-                        .collect();
+                let mut consume = |expanded: Vec<(Vec<ExpandedSupportEntry>, usize)>| {
                     for (entries, maps) in expanded {
                         pair_canonicalization_maps += maps;
                         for (image_key, image_indices) in entries {
@@ -2191,6 +2206,45 @@ fn main() {
                                 QuotientPairWitness::from_point_indices(image_indices, image_key.1),
                             );
                         }
+                    }
+                };
+                if pipelined_support_expansion {
+                    let batches = jobs.len().div_ceil(job_batch);
+                    let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+                    std::thread::scope(|scope| {
+                        scope.spawn(|| {
+                            let pool = rayon::ThreadPoolBuilder::new()
+                                .num_threads(3)
+                                .build()
+                                .expect("three-thread support expansion pool");
+                            for batch_start in (0..jobs.len()).step_by(job_batch) {
+                                let batch_end = (batch_start + job_batch).min(jobs.len());
+                                let expanded = pool.install(|| {
+                                    expand_support_batch(
+                                        &curve,
+                                        &jobs[batch_start..batch_end],
+                                        &sum_keys[batch_start..batch_end],
+                                        &frobenius_next_index,
+                                        JOB_CHUNK,
+                                    )
+                                });
+                                sender.send(expanded).expect("support expansion consumer");
+                            }
+                        });
+                        for _ in 0..batches {
+                            consume(receiver.recv().expect("support expansion producer"));
+                        }
+                    });
+                } else {
+                    for batch_start in (0..jobs.len()).step_by(job_batch) {
+                        let batch_end = (batch_start + job_batch).min(jobs.len());
+                        consume(expand_support_batch(
+                            &curve,
+                            &jobs[batch_start..batch_end],
+                            &sum_keys[batch_start..batch_end],
+                            &frobenius_next_index,
+                            JOB_CHUNK,
+                        ));
                     }
                 }
             } else {
@@ -2302,7 +2356,9 @@ fn main() {
             "base_construction_ms":base_ms,
             "support_index_ms":pair_ms,
             "parallel_support_expansion":parallel_support_expansion,
-            "parallel_support_expansion_job_batch":if parallel_support_expansion {65536} else {0},
+            "pipelined_support_expansion":pipelined_support_expansion,
+            "parallel_support_expansion_threads":if pipelined_support_expansion {3} else if parallel_support_expansion {rayon::current_num_threads()} else {0},
+            "parallel_support_expansion_job_batch":if pipelined_support_expansion {32768} else if parallel_support_expansion {65536} else {0},
             "parallel_support_expansion_job_chunk":if parallel_support_expansion {1024} else {0},
             "pair_index_mode":pair_mode.name(),
             "total_setup_ms":setup_ms,
