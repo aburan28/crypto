@@ -448,6 +448,321 @@ begin
     variable la      : laddr_t;
   begin
     if rising_edge(clk) then
+      -- The body runs every clock; the reset, applied last, overrides the
+      -- control registers only.  Data registers never see it, so no reset
+      -- net reaches thousands of clock enables (see ec2k_axil's stage).
+      rq_pushed := false;
+
+      -- ============ input pipeline ============
+      if p1_take = '1' then
+        p1_valid <= '0';
+      end if;
+      if p0_adv = '1' then
+        p1_valid <= '1';
+        p1_x     <= p0_x;
+        p1_y     <= p0_y;
+        p1_tag   <= p0_tag;
+        p1_hw    <= hw_sum(p0_parts);
+        p0_valid <= '0';
+      end if;
+      if in_valid = '1' and in_rdy = '1' then
+        p0_valid <= '1';
+        p0_x     <= in_x;
+        p0_y     <= in_y;
+        p0_tag   <= in_tag;
+        p0_parts <= gf_weight_parts(in_x);
+      end if;
+
+      -- ============ fill ============
+      if fb_valid = '0' then
+        if not fl_empty then
+          fb       <= fl(to_integer(fl_rd(LOG_NB - 1 downto 0)));
+          fl_rd    <= fl_rd + 1;
+          fb_valid <= '1';
+          fill_cnt <= (others => '0');
+          idle_cnt <= (others => '0');
+          flushing <= '0';
+        end if;
+      elsif p1_take = '1' or dummy_fill = '1' then
+        la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
+        if p1_take = '1' then
+          j        := std_logic_vector(p1_hw(3 downto 1));
+          m_la(la) <= p1_x & p1_y & j;
+          m_lb(la) <= p1_y & p1_tag & '1';
+          m_da(la) <= p1_x xor gf_sigma_j(p1_x, j);
+          m_db(la) <= p1_x xor gf_sigma_j(p1_x, j);
+        else
+          m_la(la) <= DUMMY_X & GF_ZERO & "000";
+          m_lb(la) <= GF_ZERO & tag_t'(others => '0') & '0';
+          m_da(la) <= DUMMY_D;
+          m_db(la) <= DUMMY_D;
+        end if;
+        idle_cnt <= (others => '0');
+        if fill_cnt = W - 1 then
+          -- batch complete: first forward level is the parents of the leaves
+          b_ph(to_integer(fb))  <= to_unsigned(PH_FWD, KIND_W);
+          b_lvl(to_integer(fb)) <= to_unsigned(LOG_W - 1, LVL_W);
+          fill_pend <= '1';
+          pend_b    <= fb;
+          fb_valid  <= '0';
+          flushing  <= '0';
+        else
+          fill_cnt <= fill_cnt + 1;
+        end if;
+      elsif fill_cnt /= 0 and fill_pend = '0' then
+        if idle_cnt = FLUSH_CLK then
+          flushing <= '1';
+        else
+          idle_cnt <= idle_cnt + 1;
+        end if;
+      end if;
+
+      -- ============ retire ============
+      o1_valid <= '0';
+      if res_valid = '1' then
+        rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
+        rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
+        rlvl  := unsigned(res_tag(LVL_W + IDX_W downto IDX_W + 1));
+        ridx  := unsigned(res_tag(IDX_W downto 1));
+        rlast := res_tag(0);
+        rn    := ridx(LOG_W downto 0);
+        ri    := ridx(LOG_W - 1 downto 0);
+        case to_integer(rkind) is
+          when PH_FWD =>
+            m_ta(tree_addr(rb, rn)) <= res_r;
+            m_tb(tree_addr(rb, rn)) <= res_r;
+            if rlast = '1' then
+              if rlvl = 0 then
+                b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
+                b_lvl(to_integer(rb)) <= (others => '0');
+              else
+                b_lvl(to_integer(rb)) <= rlvl - 1;
+              end if;
+            end if;
+          when PH_INV =>
+            -- t(1) holds the root, then beta_2, then 1/root; t(0) the accumulator
+            case to_integer(ridx(2 downto 0)) is
+              when 0 =>
+                m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
+                m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
+              when 7 =>
+                m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
+                m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
+              when others =>
+                m_ta(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
+                m_tb(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
+            end case;
+            if ridx(2 downto 0) = 7 then
+              b_ph(to_integer(rb))  <= to_unsigned(PH_BWD, KIND_W);
+              b_lvl(to_integer(rb)) <= (others => '0');
+            else
+              b_lvl(to_integer(rb)) <= resize(ridx(2 downto 0) + 1, LVL_W);
+            end if;
+          when PH_BWD =>
+            m_ta(tree_addr(rb, rn)) <= res_r;
+            m_tb(tree_addr(rb, rn)) <= res_r;
+            if rlast = '1' then
+              if rlvl = LOG_W - 1 then
+                b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
+              else
+                b_lvl(to_integer(rb)) <= rlvl + 1;
+              end if;
+            end if;
+          when PH_LAM =>
+            m_ta(tree_addr(rb, ('1' & ri))) <= res_r;             -- leaf W+i := lam
+            m_tb(tree_addr(rb, ('1' & ri))) <= res_r;
+            if rlast = '1' then
+              b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
+            end if;
+          when others =>
+            -- rr_lb / rr_z were read for this leaf through the look-ahead tag
+            y3 := res_r xor rr_z xor rr_lb(LB_W - 1 downto TAG_W + 1);
+            o1_valid <= rr_lb(0);
+            o1_x     <= rr_z;
+            o1_y     <= y3;
+            o1_tag   <= rr_lb(TAG_W downto 1);
+            if rlast = '1' then
+              fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
+              fl_wr <= fl_wr + 1;
+            end if;
+        end case;
+        if rlast = '1' and to_integer(rkind) /= PH_FIN then
+          rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= rb;
+          rq_wr <= rq_wr + 1;
+          rq_pushed := true;
+        end if;
+      end if;
+
+      -- a completed fill enters the queue on a clock no retire is using it
+      if fill_pend = '1' and not rq_pushed then
+        rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= pend_b;
+        rq_wr <= rq_wr + 1;
+        fill_pend <= '0';
+      end if;
+
+      -- ============ burst engine ============
+      nxt_consumed := false;
+      if cur_valid = '1' then
+        if cur_idx = cur_end then
+          if nxt_valid = '1' then
+            cur_b   <= nxt_b;  cur_ph <= nxt_ph;  cur_lvl <= nxt_lvl;
+            cur_idx <= (others => '0');
+            cur_end <= burst_end(nxt_ph, nxt_lvl);
+            nxt_consumed := true;
+          else
+            cur_valid <= '0';
+          end if;
+        else
+          cur_idx <= cur_idx + 1;
+        end if;
+      elsif nxt_valid = '1' then
+        cur_valid <= '1';
+        cur_b   <= nxt_b;  cur_ph <= nxt_ph;  cur_lvl <= nxt_lvl;
+        cur_idx <= (others => '0');
+        cur_end <= burst_end(nxt_ph, nxt_lvl);
+        nxt_consumed := true;
+      end if;
+
+      if (nxt_valid = '0' or nxt_consumed) then
+        if not rq_empty then
+          b := rq(to_integer(rq_rd(LOG_NB - 1 downto 0)));
+          rq_rd     <= rq_rd + 1;
+          nxt_valid <= '1';
+          nxt_b     <= b;
+          nxt_ph    <= b_ph(to_integer(b));
+          nxt_lvl   <= b_lvl(to_integer(b));
+        else
+          nxt_valid <= '0';
+        end if;
+      end if;
+
+      -- ============ stage A0: tag, beside the memory address ============
+      a_valid(0) <= cur_valid;
+      if cur_valid = '1' then
+        b   := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
+        last := '0';
+        if idx = cur_end then last := '1'; end if;
+        a_k(0) <= lvl(2 downto 0);
+        i := resize(idx, LOG_W);
+        case to_integer(ph) is
+          when PH_FWD =>
+            n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
+            a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                        & std_logic_vector(lvl)
+                        & std_logic_vector(resize(n, IDX_W)) & last;
+          when PH_INV =>
+            a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                        & std_logic_vector(lvl)
+                        & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
+          when PH_BWD =>
+            n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
+            c := n(LOG_W - 1 downto 0) & idx(0);
+            a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                        & std_logic_vector(lvl)
+                        & std_logic_vector(resize(c, IDX_W)) & last;
+          when others =>
+            -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
+            -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
+            a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                        & std_logic_vector(lvl)
+                        & std_logic_vector(resize(i, IDX_W)) & last;
+        end case;
+        a_zaddr(0) <= leaf_addr(b, i);
+        a_ph(0)    <= ph;
+        if to_integer(lvl) = LOG_W - 1 then a_leafy(0) <= '1'; else a_leafy(0) <= '0'; end if;
+      end if;
+
+      -- ============ stage A1: the memories' output register ============
+      for s in 1 to RD_LAT - 1 loop
+        a_valid(s) <= a_valid(s - 1);
+        a_ph(s)    <= a_ph(s - 1);
+        a_k(s)     <= a_k(s - 1);
+        a_tag(s)   <= a_tag(s - 1);
+        a_zaddr(s) <= a_zaddr(s - 1);
+        a_leafy(s) <= a_leafy(s - 1);
+      end loop;
+
+      -- ============ stage A2: operands off the memories ============
+      ra_valid <= a_valid(RD_LAT - 1);
+      if a_valid(RD_LAT - 1) = '1' then
+        ra_ja    <= rr_la(2 downto 0);
+        ra_zaddr <= a_zaddr(RD_LAT - 1);
+        ra_c     <= rr_da;
+        ra_k     <= a_k(RD_LAT - 1);
+        ra_tag   <= a_tag(RD_LAT - 1);
+        case to_integer(a_ph(RD_LAT - 1)) is
+          when PH_FWD =>
+            if a_leafy(RD_LAT - 1) = '1' then ra_a <= rr_da; else ra_a <= rr_ta; end if;
+            if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
+          when PH_INV =>
+            ra_a <= rr_ta;
+            ra_b <= rr_tb;
+          when PH_BWD =>
+            ra_a <= rr_ta;
+            if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
+          when PH_LAM =>
+            ra_a <= rr_la(M + 2 downto 3);                        -- y
+            ra_b <= rr_tb;
+          when others =>
+            ra_a <= rr_ta;
+            ra_b <= rr_la(LA_W - 1 downto M + 3);                 -- x
+        end case;
+        ra_ph <= a_ph(RD_LAT - 1);
+      end if;
+
+      -- ============ stage B: form operands ============
+      mul_valid <= ra_valid;
+      mul_tag   <= ra_tag;
+      if ra_valid = '1' then
+        oa := ra_a;
+        ob := ra_b;
+        case to_integer(ra_ph) is
+          when PH_INV =>
+            ob := inv_frob(ra_b, ra_k);
+          when PH_LAM =>
+            oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
+          when PH_FIN =>
+            -- ra_a = lam, ra_b = x, ra_c = d
+            x3 := gf_frob(ra_a, 1) xor ra_a xor ra_c;
+            ob := ra_b xor x3;
+            m_z(ra_zaddr) <= x3;
+          when others =>
+            null;
+        end case;
+        mul_a <= oa;
+        mul_b <= ob;
+      end if;
+
+      -- ============ output: weight and DP test over four clocks ============
+      o2_valid <= o1_valid;
+      o2_x     <= o1_x;
+      o2_y     <= o1_y;
+      o2_tag   <= o1_tag;
+      o2_parts <= gf_weight_parts(o1_x);
+
+      o3_valid <= o2_valid;
+      o3_x     <= o2_x;
+      o3_y     <= o2_y;
+      o3_tag   <= o2_tag;
+      o3_quads <= hw_quads(o2_parts);
+
+      o4_valid <= o3_valid;
+      o4_x     <= o3_x;
+      o4_y     <= o3_y;
+      o4_tag   <= o3_tag;
+      o4_hw    <= hw_sum(o3_quads);
+
+      out_valid <= o4_valid;
+      out_x     <= o4_x;
+      out_y     <= o4_y;
+      out_tag   <= o4_tag;
+      out_hw    <= o4_hw;
+      if to_integer(o4_hw) <= DP_WEIGHT then
+        out_dp <= '1';
+      else
+        out_dp <= '0';
+      end if;
+
       if rst = '1' then
         p0_valid <= '0'; p1_valid <= '0';
         fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0';
@@ -458,318 +773,6 @@ begin
         cur_valid <= '0'; nxt_valid <= '0';
         a_valid <= (others => '0'); ra_valid <= '0'; mul_valid <= '0';
         o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; o4_valid <= '0'; out_valid <= '0';
-      else
-        rq_pushed := false;
-
-        -- ============ input pipeline ============
-        if p1_take = '1' then
-          p1_valid <= '0';
-        end if;
-        if p0_adv = '1' then
-          p1_valid <= '1';
-          p1_x     <= p0_x;
-          p1_y     <= p0_y;
-          p1_tag   <= p0_tag;
-          p1_hw    <= hw_sum(p0_parts);
-          p0_valid <= '0';
-        end if;
-        if in_valid = '1' and in_rdy = '1' then
-          p0_valid <= '1';
-          p0_x     <= in_x;
-          p0_y     <= in_y;
-          p0_tag   <= in_tag;
-          p0_parts <= gf_weight_parts(in_x);
-        end if;
-
-        -- ============ fill ============
-        if fb_valid = '0' then
-          if not fl_empty then
-            fb       <= fl(to_integer(fl_rd(LOG_NB - 1 downto 0)));
-            fl_rd    <= fl_rd + 1;
-            fb_valid <= '1';
-            fill_cnt <= (others => '0');
-            idle_cnt <= (others => '0');
-            flushing <= '0';
-          end if;
-        elsif p1_take = '1' or dummy_fill = '1' then
-          la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
-          if p1_take = '1' then
-            j        := std_logic_vector(p1_hw(3 downto 1));
-            m_la(la) <= p1_x & p1_y & j;
-            m_lb(la) <= p1_y & p1_tag & '1';
-            m_da(la) <= p1_x xor gf_sigma_j(p1_x, j);
-            m_db(la) <= p1_x xor gf_sigma_j(p1_x, j);
-          else
-            m_la(la) <= DUMMY_X & GF_ZERO & "000";
-            m_lb(la) <= GF_ZERO & tag_t'(others => '0') & '0';
-            m_da(la) <= DUMMY_D;
-            m_db(la) <= DUMMY_D;
-          end if;
-          idle_cnt <= (others => '0');
-          if fill_cnt = W - 1 then
-            -- batch complete: first forward level is the parents of the leaves
-            b_ph(to_integer(fb))  <= to_unsigned(PH_FWD, KIND_W);
-            b_lvl(to_integer(fb)) <= to_unsigned(LOG_W - 1, LVL_W);
-            fill_pend <= '1';
-            pend_b    <= fb;
-            fb_valid  <= '0';
-            flushing  <= '0';
-          else
-            fill_cnt <= fill_cnt + 1;
-          end if;
-        elsif fill_cnt /= 0 and fill_pend = '0' then
-          if idle_cnt = FLUSH_CLK then
-            flushing <= '1';
-          else
-            idle_cnt <= idle_cnt + 1;
-          end if;
-        end if;
-
-        -- ============ retire ============
-        o1_valid <= '0';
-        if res_valid = '1' then
-          rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
-          rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
-          rlvl  := unsigned(res_tag(LVL_W + IDX_W downto IDX_W + 1));
-          ridx  := unsigned(res_tag(IDX_W downto 1));
-          rlast := res_tag(0);
-          rn    := ridx(LOG_W downto 0);
-          ri    := ridx(LOG_W - 1 downto 0);
-          case to_integer(rkind) is
-            when PH_FWD =>
-              m_ta(tree_addr(rb, rn)) <= res_r;
-              m_tb(tree_addr(rb, rn)) <= res_r;
-              if rlast = '1' then
-                if rlvl = 0 then
-                  b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
-                  b_lvl(to_integer(rb)) <= (others => '0');
-                else
-                  b_lvl(to_integer(rb)) <= rlvl - 1;
-                end if;
-              end if;
-            when PH_INV =>
-              -- t(1) holds the root, then beta_2, then 1/root; t(0) the accumulator
-              case to_integer(ridx(2 downto 0)) is
-                when 0 =>
-                  m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
-                  m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
-                when 7 =>
-                  m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
-                  m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
-                when others =>
-                  m_ta(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
-                  m_tb(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
-              end case;
-              if ridx(2 downto 0) = 7 then
-                b_ph(to_integer(rb))  <= to_unsigned(PH_BWD, KIND_W);
-                b_lvl(to_integer(rb)) <= (others => '0');
-              else
-                b_lvl(to_integer(rb)) <= resize(ridx(2 downto 0) + 1, LVL_W);
-              end if;
-            when PH_BWD =>
-              m_ta(tree_addr(rb, rn)) <= res_r;
-              m_tb(tree_addr(rb, rn)) <= res_r;
-              if rlast = '1' then
-                if rlvl = LOG_W - 1 then
-                  b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
-                else
-                  b_lvl(to_integer(rb)) <= rlvl + 1;
-                end if;
-              end if;
-            when PH_LAM =>
-              m_ta(tree_addr(rb, ('1' & ri))) <= res_r;             -- leaf W+i := lam
-              m_tb(tree_addr(rb, ('1' & ri))) <= res_r;
-              if rlast = '1' then
-                b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
-              end if;
-            when others =>
-              -- rr_lb / rr_z were read for this leaf through the look-ahead tag
-              y3 := res_r xor rr_z xor rr_lb(LB_W - 1 downto TAG_W + 1);
-              o1_valid <= rr_lb(0);
-              o1_x     <= rr_z;
-              o1_y     <= y3;
-              o1_tag   <= rr_lb(TAG_W downto 1);
-              if rlast = '1' then
-                fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
-                fl_wr <= fl_wr + 1;
-              end if;
-          end case;
-          if rlast = '1' and to_integer(rkind) /= PH_FIN then
-            rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= rb;
-            rq_wr <= rq_wr + 1;
-            rq_pushed := true;
-          end if;
-        end if;
-
-        -- a completed fill enters the queue on a clock no retire is using it
-        if fill_pend = '1' and not rq_pushed then
-          rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= pend_b;
-          rq_wr <= rq_wr + 1;
-          fill_pend <= '0';
-        end if;
-
-        -- ============ burst engine ============
-        nxt_consumed := false;
-        if cur_valid = '1' then
-          if cur_idx = cur_end then
-            if nxt_valid = '1' then
-              cur_b   <= nxt_b;  cur_ph <= nxt_ph;  cur_lvl <= nxt_lvl;
-              cur_idx <= (others => '0');
-              cur_end <= burst_end(nxt_ph, nxt_lvl);
-              nxt_consumed := true;
-            else
-              cur_valid <= '0';
-            end if;
-          else
-            cur_idx <= cur_idx + 1;
-          end if;
-        elsif nxt_valid = '1' then
-          cur_valid <= '1';
-          cur_b   <= nxt_b;  cur_ph <= nxt_ph;  cur_lvl <= nxt_lvl;
-          cur_idx <= (others => '0');
-          cur_end <= burst_end(nxt_ph, nxt_lvl);
-          nxt_consumed := true;
-        end if;
-
-        if (nxt_valid = '0' or nxt_consumed) then
-          if not rq_empty then
-            b := rq(to_integer(rq_rd(LOG_NB - 1 downto 0)));
-            rq_rd     <= rq_rd + 1;
-            nxt_valid <= '1';
-            nxt_b     <= b;
-            nxt_ph    <= b_ph(to_integer(b));
-            nxt_lvl   <= b_lvl(to_integer(b));
-          else
-            nxt_valid <= '0';
-          end if;
-        end if;
-
-        -- ============ stage A0: tag, beside the memory address ============
-        a_valid(0) <= cur_valid;
-        if cur_valid = '1' then
-          b   := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
-          last := '0';
-          if idx = cur_end then last := '1'; end if;
-          a_k(0) <= lvl(2 downto 0);
-          i := resize(idx, LOG_W);
-          case to_integer(ph) is
-            when PH_FWD =>
-              n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
-              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
-                          & std_logic_vector(lvl)
-                          & std_logic_vector(resize(n, IDX_W)) & last;
-            when PH_INV =>
-              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
-                          & std_logic_vector(lvl)
-                          & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
-            when PH_BWD =>
-              n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
-              c := n(LOG_W - 1 downto 0) & idx(0);
-              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
-                          & std_logic_vector(lvl)
-                          & std_logic_vector(resize(c, IDX_W)) & last;
-            when others =>
-              -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
-              -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
-              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
-                          & std_logic_vector(lvl)
-                          & std_logic_vector(resize(i, IDX_W)) & last;
-          end case;
-          a_zaddr(0) <= leaf_addr(b, i);
-          a_ph(0)    <= ph;
-          if to_integer(lvl) = LOG_W - 1 then a_leafy(0) <= '1'; else a_leafy(0) <= '0'; end if;
-        end if;
-
-        -- ============ stage A1: the memories' output register ============
-        for s in 1 to RD_LAT - 1 loop
-          a_valid(s) <= a_valid(s - 1);
-          a_ph(s)    <= a_ph(s - 1);
-          a_k(s)     <= a_k(s - 1);
-          a_tag(s)   <= a_tag(s - 1);
-          a_zaddr(s) <= a_zaddr(s - 1);
-          a_leafy(s) <= a_leafy(s - 1);
-        end loop;
-
-        -- ============ stage A2: operands off the memories ============
-        ra_valid <= a_valid(RD_LAT - 1);
-        if a_valid(RD_LAT - 1) = '1' then
-          ra_ja    <= rr_la(2 downto 0);
-          ra_zaddr <= a_zaddr(RD_LAT - 1);
-          ra_c     <= rr_da;
-          ra_k     <= a_k(RD_LAT - 1);
-          ra_tag   <= a_tag(RD_LAT - 1);
-          case to_integer(a_ph(RD_LAT - 1)) is
-            when PH_FWD =>
-              if a_leafy(RD_LAT - 1) = '1' then ra_a <= rr_da; else ra_a <= rr_ta; end if;
-              if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
-            when PH_INV =>
-              ra_a <= rr_ta;
-              ra_b <= rr_tb;
-            when PH_BWD =>
-              ra_a <= rr_ta;
-              if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
-            when PH_LAM =>
-              ra_a <= rr_la(M + 2 downto 3);                        -- y
-              ra_b <= rr_tb;
-            when others =>
-              ra_a <= rr_ta;
-              ra_b <= rr_la(LA_W - 1 downto M + 3);                 -- x
-          end case;
-          ra_ph <= a_ph(RD_LAT - 1);
-        end if;
-
-        -- ============ stage B: form operands ============
-        mul_valid <= ra_valid;
-        mul_tag   <= ra_tag;
-        if ra_valid = '1' then
-          oa := ra_a;
-          ob := ra_b;
-          case to_integer(ra_ph) is
-            when PH_INV =>
-              ob := inv_frob(ra_b, ra_k);
-            when PH_LAM =>
-              oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
-            when PH_FIN =>
-              -- ra_a = lam, ra_b = x, ra_c = d
-              x3 := gf_frob(ra_a, 1) xor ra_a xor ra_c;
-              ob := ra_b xor x3;
-              m_z(ra_zaddr) <= x3;
-            when others =>
-              null;
-          end case;
-          mul_a <= oa;
-          mul_b <= ob;
-        end if;
-
-        -- ============ output: weight and DP test over four clocks ============
-        o2_valid <= o1_valid;
-        o2_x     <= o1_x;
-        o2_y     <= o1_y;
-        o2_tag   <= o1_tag;
-        o2_parts <= gf_weight_parts(o1_x);
-
-        o3_valid <= o2_valid;
-        o3_x     <= o2_x;
-        o3_y     <= o2_y;
-        o3_tag   <= o2_tag;
-        o3_quads <= hw_quads(o2_parts);
-
-        o4_valid <= o3_valid;
-        o4_x     <= o3_x;
-        o4_y     <= o3_y;
-        o4_tag   <= o3_tag;
-        o4_hw    <= hw_sum(o3_quads);
-
-        out_valid <= o4_valid;
-        out_x     <= o4_x;
-        out_y     <= o4_y;
-        out_tag   <= o4_tag;
-        out_hw    <= o4_hw;
-        if to_integer(o4_hw) <= DP_WEIGHT then
-          out_dp <= '1';
-        else
-          out_dp <= '0';
-        end if;
       end if;
     end if;
   end process;
