@@ -13,9 +13,11 @@
 #   ./build_afi.sh list                 every build in the bucket
 #
 # Geometry of the image, all optional:
-#   NENG       walker engines (default 48; 13.1k LUTs each as synthesised,
-#              the VU47P has 1.30M, so 48 is half the device)
-#   ID_W       walks per engine = 2**ID_W (default 8)
+#   NENG       walker engines (default 48; about 9k LUTs and 22 RAMB36 each
+#              with the memories in block RAM; the VU47P has 1.30M LUTs and
+#              2 016 RAMB36, so 64 fit and 48 leaves margin)
+#   ID_W       walks per engine = 2**ID_W (default 9: 512 walks fill the
+#              FIFO's block RAM exactly)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
 #              the challenge's; must equal campaign.json dpWeight)
 #   CLK_MHZ    engine clock: 250, 300, 333 (default), 350, 375 or 400; or set
@@ -54,7 +56,7 @@ SG=$STACK-worker
 BUILD_TYPE=${BUILD_TYPE:-r6i.4xlarge}
 KEY_NAME=${KEY_NAME:-}
 NENG=${NENG:-48}
-ID_W=${ID_W:-8}
+ID_W=${ID_W:-9}
 DP_WEIGHT=${DP_WEIGHT:-34}
 CLK_MHZ=${CLK_MHZ:-333}
 case $CLK_MHZ in
