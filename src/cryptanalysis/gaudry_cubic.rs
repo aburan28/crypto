@@ -2486,6 +2486,25 @@ pub enum Solver {
     MeetInTheMiddle,
     /// Gaudry's `O(1)` symmetrised-`S₄` solve per residual.
     Groebner,
+    /// **Joux–Vitse**: look for decompositions into `k − 1 = 2` base
+    /// points instead of `k = 3`, with one Weil-restricted `S₃` pair
+    /// test on the residual itself.
+    ///
+    /// The trade is the one that variant is named for.  The solve
+    /// collapses — no Macaulay matrix, no eigenvalues, just a resultant
+    /// of two conics and Cantor–Zassenhaus, so the per-residual cost
+    /// falls from `≈ 0.9·10⁶` `F_p` multiplications to `≈ 1.8·10³`.
+    /// Against that, a random residual is a *pair* far less often than
+    /// it is a triple: `≈ 2|F|²/p³` against `≈ |F|³/6p³`, a factor
+    /// `≈ p/12` fewer, so the residual count rises from `Θ(|F|)` to
+    /// `Θ(p³/|F|) = Θ(p²)`.
+    ///
+    /// For `k = 3` that is `n^{2/3}` residuals against `n^{1/3}`, and
+    /// the exponent moves the wrong way — the variant's exponential
+    /// saving in the Gröbner step has nothing to bite on at `k = 3`.
+    /// It is here to be measured rather than assumed; see
+    /// `RESEARCH_RESIDUAL_WALKS.md` §11.9.
+    PairOnly,
 }
 
 /// Collect relations by full decomposition of random `R = aG + bQ` until
@@ -2654,9 +2673,21 @@ pub fn run_gaudry_opts(
                 rep.oracle_fp_muls += stats.fp_muls - before;
                 decs
             }
+            Solver::PairOnly => {
+                // One pair test on the residual itself: `R = ±P_i ±P_j`.
+                let (decs, muls) = weil_s3_pair_test(inst, base, &r, &mut rng);
+                rep.oracle_fp_muls += muls;
+                rep.pair_tests += 1;
+                decs
+            }
         };
         if cross_check {
             let other = match solver {
+                // The pair channel has no independent second oracle
+                // here: `weil_s3_pair_test` *is* what the other two use
+                // for pairs, so cross-checking it against them would be
+                // checking it against itself.
+                Solver::PairOnly => decs.clone(),
                 Solver::MeetInTheMiddle => {
                     let mut st = SolveStats::default();
                     subspace_triple_oracle_groebner(
@@ -3403,5 +3434,48 @@ mod tests {
         assert!(grob.solve_stats.solves == grob.residuals);
         let rho = run_rho3(&inst, 1);
         assert_eq!(rho.correct, Some(true), "{rho:?}");
+    }
+
+    /// The Joux–Vitse `k − 1` variant recovers the same planted
+    /// logarithm, from decompositions into **two** base points and no
+    /// Macaulay step at all.
+    ///
+    /// The two properties worth pinning are the ones that make it a
+    /// different method rather than a tuning of the other two: it must
+    /// build no symmetrised-`S₄` machinery (`solve_stats.solves == 0`),
+    /// and it must need far more residuals per relation, because that
+    /// is the trade it is making.
+    #[test]
+    fn the_pair_only_variant_recovers_the_logarithm_without_a_macaulay_step() {
+        let inst = generate_instance3(67, 11);
+        let mut rng = StdRng::seed_from_u64(2);
+        let base = SubspaceBase::build(&inst, &mut rng);
+
+        let pair = run_gaudry_with(&inst, &base, 1, 400_000, Solver::PairOnly, false);
+        assert_eq!(pair.correct, Some(true), "{pair:?}");
+        assert_eq!(
+            pair.solve_stats.solves, 0,
+            "PairOnly must not run the S4 solve at all"
+        );
+        assert_eq!(pair.solve_stats.macaulay_muls, 0);
+        assert!(pair.relations_verified > 0);
+
+        // The trade: many more residuals per relation than the
+        // three-point oracle needs on the same instance.
+        let grob = run_gaudry_with(&inst, &base, 1, 20_000, Solver::Groebner, false);
+        assert_eq!(grob.correct, Some(true), "{grob:?}");
+        let pair_per_rel = pair.residuals as f64 / pair.relations_verified.max(1) as f64;
+        let grob_per_rel = grob.residuals as f64 / grob.relations_verified.max(1) as f64;
+        assert!(
+            pair_per_rel > 4.0 * grob_per_rel,
+            "pair {pair_per_rel:.1} vs triple {grob_per_rel:.1} residuals per relation"
+        );
+        // …bought by a per-residual cost orders of magnitude lower.
+        let pair_each = pair.oracle_fp_muls / pair.residuals.max(1);
+        let grob_each = grob.oracle_fp_muls / grob.residuals.max(1);
+        assert!(
+            pair_each * 50 < grob_each,
+            "pair {pair_each} vs triple {grob_each} F_p muls per residual"
+        );
     }
 }

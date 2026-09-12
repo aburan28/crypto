@@ -1585,6 +1585,87 @@ are identical, so the check is pinned as losing nothing.  `xcheck` on
 the `p = 271` protocol run is `0/728` against the meet-in-the-middle
 oracle, with `retries=0` and `fallback=1` unchanged.
 
+### 11.9 Joux–Vitse: decompositions into `k − 1` points
+
+§11.7 closed by naming the two things that make an index calculus
+matter in practice, one of which was *"Joux–Vitse's `F₄`-based variant,
+decompositions into `k − 1` points"*.  Built and measured here.
+
+**What it is.**  Instead of asking whether a residual is a sum of `k = 3`
+factor-base points, ask whether it is a sum of `2`.  The solve then
+collapses: `S₃(x₁, x₂, x_R) = 0` Weil-restricts to three quadratics in
+two `F_p` unknowns, so a resultant of two conics and Cantor–Zassenhaus
+settle it — no Macaulay matrix, no eigenvalues, no characteristic
+polynomial.  `weil_s3_pair_test` already existed as the inner loop of
+the meet-in-the-middle oracle; `Solver::PairOnly` calls it once on the
+residual itself.
+
+**The trade.**  A random residual is a pair far less often than it is a
+triple — `≈ 2|F|²/p³` against `≈ |F|³/6p³`, a factor `≈ p/12` fewer — so
+the residual count goes from `Θ(|F|) = Θ(n^{1/3})` to
+`Θ(p³/|F|) = Θ(p²) = Θ(n^{2/3})`.
+
+**Measured.**  Same instances, same seed, same accounting as §11.5; every
+row recovered the planted `d`:
+
+| `p` | `n` | variant | residuals | decomp | `F_p` muls / residual | total ops | `S` | rho `S` | `S` / rho |
+|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | three-point | 941 | 123 | 873,241 | 13.1·10⁶ | 2,939 | 0.8 | 3,674× |
+| 271 | 2^24.2 | **pair-only** | 20,832 | 38 | **1,513** | 1.9·10⁶ | **427** | 0.8 | **534×** |
+| 523 | 2^27.1 | three-point | 1,461 | 245 | 890,384 | 20.8·10⁶ | 1,738 | 1.4 | 1,241× |
+| 523 | 2^27.1 | **pair-only** | 157,837 | 143 | 1,557 | 15.9·10⁶ | **1,331** | 1.4 | **951×** |
+| 1039 | 2^30.1 | three-point | 3,038 | 461 | 903,689 | 43.9·10⁶ | **1,312** | 1.3 | **1,009×** |
+| 1039 | 2^30.1 | pair-only | 486,963 | 231 | 1,810 | 55.4·10⁶ | 1,655 | 1.3 | 1,273× |
+| 2083 | 2^33.1 | three-point | 5,528 | 1,004 | 919,646 | 82.3·10⁶ | **866** | 1.6 | **541×** |
+| 2083 | 2^33.1 | pair-only | 1,276,421 | 323 | 1,857 | 157.8·10⁶ | 1,659 | 1.6 | 1,037× |
+
+Fitted exponents over the four sizes:
+
+| variant | residuals | total ops | `S` |
+|---|---:|---:|---:|
+| three-point (§11.6 solver) | `n^{0.29}` | `n^{0.30}` | `n^{-0.20}` |
+| pair-only | `n^{0.67}` | `n^{0.72}` | `n^{+0.22}` |
+
+Reading it:
+
+- **The `2/3` is exact.**  The predicted residual exponent for `k − 1`
+  decompositions at `k = 3` is `2/3`; measured `0.666` over four sizes.
+  That is the cleanest confirmation of a predicted exponent in this
+  note.
+- **The constant is `580×` better and the exponent is worse.**
+  Per-residual cost falls from `≈ 0.9·10⁶` `F_p` multiplications to
+  `≈ 1.5·10³`.  That is the whole Joux–Vitse promise, delivered.  But
+  `S` *rises* as `n^{0.22}` where the three-point solve's *falls* as
+  `n^{-0.20}`, so the win is bounded.
+- **They cross inside the measured range**, between `p = 523` and
+  `p = 1039`, near `n ≈ 2^{28.5}`.  Below it pair-only is the best
+  oracle in this module — `534×` rho at 24 bits against the three-point
+  solve's `3,674×`, a factor of `6.9`.  Above it, it loses, and by 33
+  bits it is `1.9×` worse.
+- **Why it does not scale here.**  The variant's saving is the collapse
+  of the Gröbner step, and at `k = 3` that step is a `64`-solution
+  system in three unknowns — expensive, but only by a constant.  The
+  variant pays an honest `Θ(p)` in decomposition rate for it.  Trading a
+  constant for a factor of `p` is a good trade exactly while the
+  constant dominates, which is what the crossover at `2^{28.5}` is.  The
+  `k − 1` idea is built for the regime where the `k`-point Gröbner step
+  is *exponentially* expensive, and `k = 3` is not that regime.
+
+Class: **advance below `2^{28.5}`, relabelling above it** — `S` genuinely
+falls against every other oracle here at the small sizes, and genuinely
+rises at the large ones; the ratio to rho never approaches `1` at any
+size, so this changes the constant and not the conclusion.  Rho still
+costs `S ≈ 1.3` and the best row in this table is `427`.
+
+One property worth recording because it is easy to misread: pair-only
+does **not** compute the factor-base logarithms.  It stops when the `d`
+column alone becomes determined — the same `solved()` criterion the
+other two solvers use, so the comparison is like for like — which
+happens when a combination of relations cancels every base column.  With
+weight-2 relations that is a cycle, and it arrives long before the
+`|F|`-row system is anywhere near full rank: `38` relations against
+`130` unknowns at `p = 271`.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
