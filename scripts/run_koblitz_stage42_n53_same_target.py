@@ -104,13 +104,15 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     cargo = shutil.which("cargo")
     rustc = shutil.which("rustc")
     require(cargo is not None and rustc is not None, "Stage-42 Rust toolchain is unavailable")
-    cargo_path = str(Path(cargo).resolve(strict=True))
-    rustc_path = str(Path(rustc).resolve(strict=True))
-    environment = custody.safe_child_environment()
-    environment["PATH"] = ":".join(dict.fromkeys([str(Path(cargo_path).parent), str(Path(rustc_path).parent), environment["PATH"]]))
-    environment["RUSTC"] = rustc_path
+    # Preserve the rustup shim names. Resolving them to the shared rustup
+    # binary changes argv[0] and no longer selects cargo/rustc. Reuse the
+    # audited build environment, including isolated CARGO_HOME and the host's
+    # RUSTUP_HOME binding.
+    cargo_path = Path(cargo).absolute()
+    rustc_path = Path(rustc).absolute()
+    environment = stage33.build_environment(output, cargo_path, rustc_path)
     environment["CARGO_TARGET_DIR"] = str(target)
-    command = [cargo_path, "build", "--release", "--locked", "--jobs", str(args.jobs), "--example", "koblitz_rank_fixture", "--example", "koblitz_rho_fixture"]
+    command = [str(cargo_path), "build", "--release", "--locked", "--jobs", str(args.jobs), "--example", "koblitz_rank_fixture", "--example", "koblitz_rho_fixture"]
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.monotonic()
@@ -135,6 +137,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         shutil.copy2(source_binary, destination)
         binaries[name] = custody.executable_identity(destination, f"Stage-42 {name}", executable=True)
     shutil.rmtree(target)
+    shutil.rmtree(output / "cargo-home")
     result = {
         "schema": BUILD_SCHEMA,
         "status": "complete_clean_build",
