@@ -492,8 +492,20 @@ pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
     Ok(doc)
 }
 pub(crate) fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
+    ic_options_with_descent(strategy, summands, None, max_trials, seed)
+}
+
+/// [`ic_options`] with a separate summand count for the descent.
+pub(crate) fn ic_options_with_descent(
+    strategy: Solver,
+    summands: u8,
+    descent_summands: Option<u8>,
+    max_trials: u32,
+    seed: u64,
+) -> KoblitzIcOptions {
     KoblitzIcOptions {
         m: summands as usize,
+        descent_m: descent_summands.map(usize::from),
         strategy: strategy.strategy(),
         collapse_negation: true,
         collapse_projected_orbits: true,

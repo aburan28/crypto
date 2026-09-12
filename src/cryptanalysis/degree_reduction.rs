@@ -78,6 +78,7 @@ use std::collections::BTreeMap;
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::descent_algebraic::{early_defect, rank_profile, RankRow};
+use crate::cryptanalysis::descent_expansion::spearman;
 use crate::cryptanalysis::descent_lowgamma::{
     descend_on_subspace, is_decomposable_on_subspace, BasisFamily, FactorSubspace,
 };
@@ -1647,6 +1648,148 @@ pub fn collect_rho_matched_cells(
     out
 }
 
+// ── Size-controlled correlation (EXP-R4b) ───────────────────────────
+
+/// One `(block, x, y)` observation for a blocked correlation.
+///
+/// `block` is the nuisance stratum to hold fixed — for the FFD program's
+/// curve that is the operating point `(n, n')`, which fixes the variable
+/// count and hence the system's size.
+#[derive(Clone, Debug)]
+pub struct BlockedObs {
+    /// Stratum label. Observations sharing a label are compared only
+    /// against each other by the three controlled statistics.
+    pub block: String,
+    /// Predictor (here: the early Hilbert-function defect `Δ_low`).
+    pub x: f64,
+    /// Response (here: the measured solving degree `D*`).
+    pub y: f64,
+}
+
+/// A pooled correlation next to three size-controlled counterparts.
+///
+/// The point of computing four numbers rather than one is that a pooled
+/// correlation across strata of different size cannot distinguish "the
+/// predictor tracks the response" from "both track the stratum". The three
+/// controlled statistics each remove the stratum in a different way, so
+/// agreement between them is evidence the relation is real and disagreement
+/// localises which part of the pooled figure was the nuisance variable:
+///
+/// * `mean_per_block` — correlate inside each stratum, then average. Gives
+///   every stratum equal weight regardless of how many cells it holds, and
+///   is the most direct reading of "does it hold at fixed size?".
+/// * `blocked_rank` — rank within each stratum, pool the ranks, correlate
+///   once. Uses all cells in a single statistic, so small strata do not
+///   dominate, but it needs the strata to be rank-comparable.
+/// * `fixed_effects` — subtract each stratum's mean from its members and
+///   correlate the residuals. Works on raw values rather than ranks, so it
+///   is sensitive to magnitude as well as order.
+#[derive(Clone, Debug)]
+pub struct SizeControl {
+    /// Total observations.
+    pub n_cells: usize,
+    /// Distinct strata.
+    pub n_blocks: usize,
+    /// Spearman `ρ_s` over all cells at once — the uncontrolled figure.
+    pub pooled: Option<f64>,
+    /// Mean of the per-stratum Spearman `ρ_s`, over strata where it is
+    /// defined.
+    pub mean_per_block: Option<f64>,
+    /// Pearson `r` of within-stratum ranks, pooled.
+    pub blocked_rank: Option<f64>,
+    /// Pearson `r` of within-stratum demeaned residuals.
+    pub fixed_effects: Option<f64>,
+    /// Per-stratum `(label, cells, ρ_s)`, sorted by label.
+    pub per_block: Vec<(String, usize, Option<f64>)>,
+}
+
+/// 1-based ranks with ties averaged — the ranking [`spearman`] uses,
+/// exposed here because the blocked statistic ranks *within* a stratum.
+fn rank_within(v: &[f64]) -> Vec<f64> {
+    let n = v.len();
+    let mut idx: Vec<usize> = (0..n).collect();
+    idx.sort_by(|&a, &b| v[a].partial_cmp(&v[b]).unwrap_or(std::cmp::Ordering::Equal));
+    let mut r = vec![0.0; n];
+    let mut i = 0;
+    while i < n {
+        let mut j = i;
+        while j + 1 < n && (v[idx[j + 1]] - v[idx[i]]).abs() < 1e-12 {
+            j += 1;
+        }
+        let avg = (i + j) as f64 / 2.0 + 1.0;
+        for k in i..=j {
+            r[idx[k]] = avg;
+        }
+        i = j + 1;
+    }
+    r
+}
+
+/// Compute the pooled correlation and its three size-controlled
+/// counterparts over `obs`.
+///
+/// Strata with fewer than 3 observations contribute `None` to
+/// `per_block` (and so are skipped by `mean_per_block`) but still
+/// contribute their ranks and residuals to the two pooled-controlled
+/// statistics, where they are harmless.
+pub fn size_control(obs: &[BlockedObs]) -> SizeControl {
+    let pooled = spearman(
+        &obs.iter().map(|o| o.x).collect::<Vec<_>>(),
+        &obs.iter().map(|o| o.y).collect::<Vec<_>>(),
+    );
+    let mut blocks: BTreeMap<&str, Vec<&BlockedObs>> = BTreeMap::new();
+    for o in obs {
+        blocks.entry(o.block.as_str()).or_default().push(o);
+    }
+    let mut per_block = Vec::new();
+    let (mut brx, mut bry) = (Vec::new(), Vec::new());
+    let (mut fex, mut fey) = (Vec::new(), Vec::new());
+    for (label, rows) in &blocks {
+        let xs: Vec<f64> = rows.iter().map(|o| o.x).collect();
+        let ys: Vec<f64> = rows.iter().map(|o| o.y).collect();
+        per_block.push((label.to_string(), rows.len(), spearman(&xs, &ys)));
+        brx.extend(rank_within(&xs));
+        bry.extend(rank_within(&ys));
+        let mx = xs.iter().sum::<f64>() / xs.len() as f64;
+        let my = ys.iter().sum::<f64>() / ys.len() as f64;
+        fex.extend(xs.iter().map(|a| a - mx));
+        fey.extend(ys.iter().map(|b| b - my));
+    }
+    let defined: Vec<f64> = per_block.iter().filter_map(|(_, _, r)| *r).collect();
+    SizeControl {
+        n_cells: obs.len(),
+        n_blocks: blocks.len(),
+        pooled,
+        mean_per_block: if defined.is_empty() {
+            None
+        } else {
+            Some(defined.iter().sum::<f64>() / defined.len() as f64)
+        },
+        blocked_rank: pearson_corr(&brx, &bry),
+        fixed_effects: pearson_corr(&fex, &fey),
+        per_block,
+    }
+}
+
+/// Pearson `r`. `None` for fewer than 3 pairs or zero variance on either
+/// side — the latter matters here because a stratum where every `D*` is
+/// equal contributes an all-zero residual column.
+fn pearson_corr(x: &[f64], y: &[f64]) -> Option<f64> {
+    let n = x.len();
+    if n < 3 || y.len() != n {
+        return None;
+    }
+    let mx = x.iter().sum::<f64>() / n as f64;
+    let my = y.iter().sum::<f64>() / n as f64;
+    let sxy: f64 = x.iter().zip(y).map(|(a, b)| (a - mx) * (b - my)).sum();
+    let sxx: f64 = x.iter().map(|a| (a - mx).powi(2)).sum();
+    let syy: f64 = y.iter().map(|b| (b - my).powi(2)).sum();
+    if sxx <= 0.0 || syy <= 0.0 {
+        return None;
+    }
+    Some(sxy / (sxx * syy).sqrt())
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -2398,5 +2541,133 @@ mod tests {
             last <= first + 1e-9,
             "mean D* rose under slicing: {first} → {last}"
         );
+    }
+
+    // ── Size-controlled correlation (EXP-R4b) ───────────────────────
+
+    fn obs(rows: &[(&str, f64, f64)]) -> Vec<BlockedObs> {
+        rows.iter()
+            .map(|&(b, x, y)| BlockedObs {
+                block: b.to_string(),
+                x,
+                y,
+            })
+            .collect()
+    }
+
+    /// The construction EXP-R4b exists to detect: inside every stratum the
+    /// predictor is *uncorrelated* with the response, but both rise with the
+    /// stratum index. A pooled correlation reads that as a strong positive
+    /// relation; all three controlled statistics must report nothing.
+    #[test]
+    fn pure_size_proxy_is_caught() {
+        let mut rows = Vec::new();
+        for (b, base) in [("s1", 0.0), ("s2", 100.0), ("s3", 200.0)] {
+            // Within a block, y's ranking of x is the permutation
+            // (2,4,1,3), whose rank displacements square-sum to 10 — exactly
+            // the value that makes Spearman zero at n = 4. So the within-
+            // block relation is *nil* by construction, while `base` makes
+            // both columns climb together across blocks. That is the size-
+            // proxy shape: all of the pooled signal is the stratum.
+            for (dx, dy) in [(0.0, 1.0), (1.0, 3.0), (2.0, 0.0), (3.0, 2.0)] {
+                rows.push((b, base + dx, base + dy));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        assert_eq!(c.n_cells, 12);
+        assert_eq!(c.n_blocks, 3);
+        let pooled = c.pooled.expect("pooled defined");
+        assert!(pooled > 0.85, "pooled must see the stratum trend: {pooled}");
+        for (name, v) in [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ] {
+            let v = v.expect("controlled statistic defined");
+            assert!(
+                v.abs() < 1e-9,
+                "{name} must not inherit the stratum trend: {v}"
+            );
+        }
+    }
+
+    /// The converse: a relation that holds identically inside every stratum
+    /// must survive all three controls, even when the strata are offset from
+    /// each other so the pooled figure is diluted.
+    #[test]
+    fn within_block_relation_survives_control() {
+        let mut rows = Vec::new();
+        for (b, off) in [("s1", 0.0), ("s2", 5.0), ("s3", 10.0)] {
+            for i in 0..5 {
+                let x = i as f64;
+                rows.push((b, off + x, off - 2.0 * x));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        for (name, v) in [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ] {
+            let v = v.expect("controlled statistic defined");
+            assert!(v < -0.99, "{name} must recover the exact relation: {v}");
+        }
+    }
+
+    /// Strata are held to equal weight by `mean_per_block` whatever their
+    /// size, which is the reason to report it alongside the two pooled
+    /// controls rather than instead of them.
+    #[test]
+    fn per_block_is_reported_and_sorted() {
+        let rows = obs(&[
+            ("b", 1.0, 1.0),
+            ("b", 2.0, 2.0),
+            ("b", 3.0, 3.0),
+            ("a", 1.0, 3.0),
+            ("a", 2.0, 2.0),
+            ("a", 3.0, 1.0),
+        ]);
+        let c = size_control(&rows);
+        let labels: Vec<&str> = c.per_block.iter().map(|(l, _, _)| l.as_str()).collect();
+        assert_eq!(labels, vec!["a", "b"], "per-block output is sorted");
+        assert_eq!(c.per_block[0].2, Some(-1.0));
+        assert_eq!(c.per_block[1].2, Some(1.0));
+        // They cancel exactly, so the mean is 0 even though each block is
+        // perfectly correlated. Averaging correlations is not averaging data.
+        let m = c.mean_per_block.expect("defined");
+        assert!(m.abs() < 1e-12, "opposing blocks cancel: {m}");
+    }
+
+    /// A stratum with no variance in the response contributes no
+    /// correlation, and must not be silently scored as zero.
+    #[test]
+    fn degenerate_block_is_skipped_not_zeroed() {
+        let rows = obs(&[
+            ("flat", 1.0, 4.0),
+            ("flat", 2.0, 4.0),
+            ("flat", 3.0, 4.0),
+            ("live", 1.0, 3.0),
+            ("live", 2.0, 2.0),
+            ("live", 3.0, 1.0),
+        ]);
+        let c = size_control(&rows);
+        assert_eq!(c.per_block[0].2, None, "flat block has no rho_s");
+        assert_eq!(c.per_block[1].2, Some(-1.0));
+        let m = c.mean_per_block.expect("defined from the live block alone");
+        assert!(
+            (m + 1.0).abs() < 1e-12,
+            "a skipped block must not be averaged in as 0: {m}"
+        );
+    }
+
+    /// Too few observations to say anything: every statistic reports `None`
+    /// rather than a number manufactured from 2 points.
+    #[test]
+    fn undersized_input_reports_nothing() {
+        let c = size_control(&obs(&[("a", 1.0, 2.0), ("a", 2.0, 1.0)]));
+        assert_eq!(c.pooled, None);
+        assert_eq!(c.mean_per_block, None);
+        assert_eq!(c.blocked_rank, None);
+        assert_eq!(c.fixed_effects, None);
     }
 }

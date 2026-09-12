@@ -452,6 +452,14 @@ trial dearer.
 `PairSumTable::build` refuses a base whose table would exceed 4 GiB, so
 an over-large base fails with a number instead of an allocation.
 
+**`descent_summands`** lets the descent ask for a different number of
+summands than collection, which shares only the base and its pair table.
+Collection wants few probes (each costs two scalar multiplications) so
+it takes three; the descent walks its probes by `+G` in blocks sharing
+one inversion, which makes a probe cheaper than the lookup after it, so
+two wins. At degree 41 that is 14.35 ms a target against 8.63 on a
+5248-point base, and 7.20 against 4.65 on a 10496-point one.
+
 ### Ledger rungs, ready to run
 
 `docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the

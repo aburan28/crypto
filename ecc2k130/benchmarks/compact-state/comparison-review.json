@@ -1,0 +1,223 @@
+{
+  "valid": true,
+  "status": "Completed compact-state full-walk receipt passed independent offline audit",
+  "rawSha256": "3ca122fd091eb92b20b71d3568934a241136d91aa025426d109d670d510f84d9",
+  "auditorSha256": "d2c85c8c5d8501f17c13a6d2848aafda7a971ae6917095b0ba456300d6337eb7",
+  "weightedPrefixModes": {
+    "control": 2,
+    "compact1": 2
+  },
+  "compactStateModes": {
+    "control": 0,
+    "compact1": 1
+  },
+  "canonicalInputsOnly": true,
+  "rootPredispatchReviewSha256": "25b240a60e34e723a0dc0824743833bdaaaf9b7d5f9dbcfbd229db9474d28387",
+  "predispatchReviewSha256": "9abbec982ea111403a86c2279a95ac67e467c0efc4d21ed25beac791f4b1ea44",
+  "driverFreezeSha256": "0ec25810c7b558d3d6232437858b66abcef0894fb318c2214728ad636cacf498",
+  "prebuildSha256": "3f238d5897fd838e6f51f26a8cc869244be94d7ae694f8286afad17557fa570c",
+  "sourceManifestHashes": {
+    "control": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+    "compact1": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c"
+  },
+  "sourceFilesPerMode": 159,
+  "binaries": {
+    "control": "7c93146d5181092dd0942eb0138a457ecc9a0de3cb6ba8a53e8c49a4a06a0cc0",
+    "compact1": "6beb356a2b4ce5f9481a00be38068897ddd3bc0485896c1b46ea8d9b2d608582"
+  },
+  "arithmeticBinaries": {
+    "control": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+    "compact1": "704d9551f2b94b1ebda0ea9d049127d587aae8d421ddc0f23722f7a0269e7d08"
+  },
+  "storageBinaries": {
+    "control": "394ff4cfb88759b800dad9ea04a91715128ff4ad90663e2fca7511cc3fae69e3",
+    "compact1": "fcdea266be2c1ef8907feee51194e964507c50348c9da11c5af1850ce5c03b30"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-e68e0f96-715f-3d8f-99e2-95e0be2f3ddf",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-e68e0f96-715f-3d8f-99e2-95e0be2f3ddf",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "35"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-e68e0f96-715f-3d8f-99e2-95e0be2f3ddf",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-e68e0f96-715f-3d8f-99e2-95e0be2f3ddf",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2400 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "63"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRequiredCommandsCompletedWithExpectedStatus": true,
+  "gpuPairedFrobeniusPairsPerMode": 6240,
+  "gpuPairedFrobeniusOutputsPerMode": 12480,
+  "arithmeticModeLineAndAllSixPassLinesRequired": true,
+  "checkpointChildren": 28,
+  "expectedCheckpointRejections": 2,
+  "checkpointComparisons": 12,
+  "storageCasesPerMode": 128,
+  "storageRecordsPerMode": 297344,
+  "warmupsExcluded": 2,
+  "timedRows": 17,
+  "scalarUpdatesEveryTimedRow": 201863462912,
+  "scalarWalks": 6160384,
+  "stepsPerWalk": 32768,
+  "batches": {
+    "control": 16,
+    "compact1": 16
+  },
+  "workers": {
+    "control": 385024,
+    "compact1": 385024
+  },
+  "screenQualified": true,
+  "screenWinner": "compact1",
+  "screenRatesM": [
+    {
+      "mode": "control",
+      "rate": 13697.886
+    },
+    {
+      "mode": "compact1",
+      "rate": 14488.383
+    },
+    {
+      "mode": "control",
+      "rate": 13601.359
+    }
+  ],
+  "controlDriftPercent": -0.7046853799192121,
+  "qualificationThresholdM": 13766.375429999998,
+  "statistics": {
+    "confirmation": {
+      "control": {
+        "ratesM": [
+          13563.471,
+          13548.376,
+          13534.959
+        ],
+        "medianM": 13548.376,
+        "minimumM": 13534.959,
+        "maximumM": 13563.471
+      },
+      "compact1": {
+        "ratesM": [
+          14436.292,
+          14403.112,
+          14386.056
+        ],
+        "medianM": 14403.112,
+        "minimumM": 14386.056,
+        "maximumM": 14436.292
+      }
+    },
+    "collection": {
+      "control": {
+        "ratesM": [
+          13127.485,
+          13130.461,
+          13135.49
+        ],
+        "medianM": 13130.461,
+        "minimumM": 13127.485,
+        "maximumM": 13135.49
+      },
+      "compact1": {
+        "ratesM": [
+          13929.753,
+          13936.629,
+          13919.56
+        ],
+        "medianM": 13929.753,
+        "minimumM": 13919.56,
+        "maximumM": 13936.629
+      }
+    }
+  },
+  "pairedComparisons": {
+    "confirmation": {
+      "ratios": [
+        1.064350858272193,
+        1.0630877088146948,
+        1.062881387376201
+      ],
+      "medianPairedRatio": 1.0630877088146948,
+      "ratioOfMedians": 1.0630877088146948
+    },
+    "collection": {
+      "ratios": [
+        1.061113610108867,
+        1.0613967780719962,
+        1.0596909593779904
+      ],
+      "medianPairedRatio": 1.061113610108867,
+      "ratioOfMedians": 1.0608731102434257
+    }
+  },
+  "corpusIdentity": {
+    "records": 5149,
+    "bytes": 164768,
+    "sortedSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b",
+    "matchingCorpora": 6
+  },
+  "goalEvaluation": {
+    "targetBillionScalarUpdatesPerSecond": 15,
+    "repeatedConfirmationAvailable": true,
+    "benchmarkMedianAtLeast15B": false,
+    "allThreeBenchmarkSamplesAtLeast15B": false,
+    "collectionMedianAtLeast15B": false,
+    "benchmarkAndCollectionMediansAtLeast15B": false,
+    "candidateMode": "compact1",
+    "candidateBenchmarkMedianB": 14.403111999999998,
+    "candidateCollectionMedianB": 13.929753
+  },
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Complete scalar rates apply to this fixed oneGPU public walk workload. Warmups/screen peaks are excluded from repeated goal evaluation; benchmark and DP34 medians remain separate.",
+    "Compact physical storage is the varied configuration. WP2, B16, minBlocks2, T256, TILE256 and CLMAD1 remain fixed; compiler scheduling and register allocation may differ.",
+    "Weighted-prefix equivalence is validated for canonical131-bit fields with denominator tags cleared before arithmetic, including the existing whole-batch zero-denominator convention. Arbitrary noncanonical field inputs are outside this proof.",
+    "Checkpoint v2 intentionally rejects different batch/worker headers even at equal payload length; same-geometry and same-batch cross-mode resume are checked separately.",
+    "Temporary checkpoint and DP payload bytes are not retained; this audit verifies their recorded hashes, sizes, counts and bound executable helpers rather than independently rehashing those transient payloads.",
+    "API occupancy predictions and endpoint GPU telemetry do not prove achieved occupancy, cache hits, continuous clocks or a universal hardware ceiling."
+  ],
+  "ownerTerminalConfirmation": {
+    "session": 79881,
+    "app": "ap-ES20aKv9ORAjHHKMPsgo20",
+    "exitCode": 0,
+    "artifact": "/private/tmp/ecc2k-compact-state-walk-20260912/result.json",
+    "sha256": "3ca122fd091eb92b20b71d3568934a241136d91aa025426d109d670d510f84d9"
+  },
+  "rawArtifactPreserved": true,
+  "auditAmendment": {
+    "originalAuditorSha256": "7bd4fed468ba5c42cd078546e4706a0da2bd698cf9064a00f1e303ec75d7be95",
+    "originalReviewSha256": "d2c87792d4d532b7d0c2dee605553f6aef597f73f082079f8fe37453a8341bce",
+    "intermediateAuditorSha256": "71f3427c56d620bf3ab5d033bff342320cae713651d81ecba79aeaf654356920",
+    "intermediateReviewSha256": "39b238c5bbf5ca655d3aae73e220c2d337dc64f4887fa2b1b29f0268aeac2bed",
+    "classification": "bounded cumulative-counter checker correction",
+    "reason": "Fresh invocations require no reload and stored<=current DPs. Only the known small reports2 stage may include a prior corpus: prior reports must all be replayed, corpus/checkpoint paths must match, the reload line must report that prior record/distinct-orbit count, and every progress stored counter must equal prior records plus current DPs.",
+    "runtimeSourceOrArtifactChanged": false
+  }
+}

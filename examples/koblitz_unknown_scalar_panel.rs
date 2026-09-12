@@ -512,6 +512,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
     )?;
     let options = KoblitzIcOptions {
         m: 2,
+        descent_m: None,
         factor_index: 0,
         extra_relations: 2,
         max_trials: profile.max_trials(),

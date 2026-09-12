@@ -2,6 +2,21 @@
 // Each element occupies five uint32_t words. Squaring is a bit permutation;
 // multiplication uses gamma_i*gamma_j = gamma_(i+j) + gamma_(i-j).
 #pragma once
+#ifndef ECC_PACKED_WEIGHTED_PREFIX
+#define ECC_PACKED_WEIGHTED_PREFIX 0
+#endif
+#if ECC_PACKED_WEIGHTED_PREFIX < 0 || ECC_PACKED_WEIGHTED_PREFIX > 2
+#error "ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2"
+#endif
+#ifndef ECC_PACKED_SHARED_SIGMA
+#define ECC_PACKED_SHARED_SIGMA 0
+#endif
+#if ECC_PACKED_SHARED_SIGMA != 0 && ECC_PACKED_SHARED_SIGMA != 1
+#error "ECC_PACKED_SHARED_SIGMA must be 0 or 1"
+#endif
+#if ECC_PACKED_SHARED_SIGMA && ECC_PACKED_WEIGHTED_PREFIX != 2
+#error "ECC_PACKED_SHARED_SIGMA requires weighted-prefix mode 2"
+#endif
 #ifndef ECC_PACKED_CLMAD
 #define ECC_PACKED_CLMAD 0
 #endif
@@ -252,6 +267,9 @@ ECC_HD P131 sqr131(const P131 &a){
 #endif
 #if ECC_PACKED_PERM_SIGMA < 0 || ECC_PACKED_PERM_SIGMA > 3
 #error "ECC_PACKED_PERM_SIGMA must be a bit mask from 0 to 3"
+#endif
+#if ECC_PACKED_SHARED_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
+#error "ECC_PACKED_SHARED_SIGMA requires the walk permutation network"
 #endif
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"

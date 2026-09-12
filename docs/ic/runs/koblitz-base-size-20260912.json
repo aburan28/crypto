@@ -119,5 +119,95 @@
   "logical_cores": 4,
   "memory_megabytes": 16075,
   "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "descent_summands": {
+  "why": "Collection and the descent share the factor base and its pair table, not the number of summands. Three summands need 3!r/|F|^3 probes of |F| lookups each; two need 2r/|F|^2 probes of one lookup. Collection wants few probes because each costs two scalar multiplications, so it takes three. The descent walks its probes by +G in blocks that share one field inversion, which brings a probe below the cost of the lookup after it, so two wins there.",
+  "measured": [
+   {
+    "base_points": 5248,
+    "collection_summands": 3,
+    "descent_summands": 3,
+    "descent_seconds_per_target": 0.014351,
+    "descent_probes_per_target": 21,
+    "rho_seconds_per_target": 0.119546,
+    "ratio": {
+     "amortised": 1.1147073470552187,
+     "charged": 8.330119882435675
+    },
+    "verdict": {
+     "amortised_crossover": true,
+     "charged_crossover": true,
+     "charged_margin": 0.8799537084564014,
+     "whole_process_crossover": true
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 5248,
+    "collection_summands": 3,
+    "descent_summands": 2,
+    "descent_seconds_per_target": 0.008626,
+    "descent_probes_per_target": 43529,
+    "rho_seconds_per_target": 0.117185,
+    "ratio": {
+     "amortised": 1.1935607622190292,
+     "charged": 13.584986458357402
+    },
+    "verdict": {
+     "amortised_crossover": true,
+     "charged_crossover": true,
+     "charged_margin": 0.9263893266978704,
+     "whole_process_crossover": true
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 10496,
+    "collection_summands": 3,
+    "descent_summands": 3,
+    "descent_seconds_per_target": 0.007196,
+    "descent_probes_per_target": 2,
+    "rho_seconds_per_target": 0.118489,
+    "ratio": {
+     "amortised": 0.39399825929435073,
+     "charged": 16.465314565661213
+    },
+    "verdict": {
+     "amortised_crossover": false,
+     "charged_crossover": true,
+     "charged_margin": 0.9392662681291541,
+     "whole_process_crossover": false
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 10496,
+    "collection_summands": 3,
+    "descent_summands": 2,
+    "descent_seconds_per_target": 0.004655,
+    "descent_probes_per_target": 9427,
+    "rho_seconds_per_target": 0.115535,
+    "ratio": {
+     "amortised": 0.4281531323533789,
+     "charged": 24.82053709514668
+    },
+    "verdict": {
+     "amortised_crossover": false,
+     "charged_crossover": true,
+     "charged_margin": 0.9597107832047866,
+     "whole_process_crossover": false
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   }
+  ],
+  "floor": "A solved target ends with one [d]G = Q check in the general arithmetic, 1.16 ms at this degree against 0.025 ms in the single-word representation. It is kept in the general arithmetic deliberately, as a check independent of the arithmetic that did the search, and rho pays the same on its own candidate. At 8.6 ms a target it is now 13% of the descent."
  }
 }

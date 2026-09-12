@@ -376,8 +376,9 @@ fn main() {
         .iter()
         .map(|c| {
             format!(
-                "{{\"group\":\"{}\",\"vars\":{},\"eqs\":{},\"rho\":{:.4},\"dstar\":{},\"defects\":[{}]}}",
+                "{{\"group\":\"{}\",\"family\":\"{:?}\",\"vars\":{},\"eqs\":{},\"rho\":{:.4},\"dstar\":{},\"defects\":[{}]}}",
                 c.group,
+                c.family,
                 c.vars,
                 c.eqs,
                 c.rho,

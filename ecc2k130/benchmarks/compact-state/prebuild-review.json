@@ -1,0 +1,137 @@
+{
+  "valid": true,
+  "scope": "Terminal six-build compact-state CPU preflight review; no GPU request or executable/device test was run in this phase.",
+  "sourceFiles": 159,
+  "runtimeSourceAddition": [
+    "src/testpackedstatecuda.cu"
+  ],
+  "hostSourceReceiptSha256": "b4cf0f933b2c9aacad237960f5cb3a5ecd392e539fc9c4bc090027994e49d0a6",
+  "cpuReviewSha256": "720902d4cf8a2a5e294898b4359a6d700b9247e1402f4141ca16d5d1b8d5bee4",
+  "storageStaticReviewSha256": "fdb73d262f2e3caaf3b30829286feb449534409457c2fa259700a85be6576735",
+  "storageSourceSha256": "6c4956263002e12cefcb360fa6dfdbfe6fd5514b4de411358d20f3e982c24eba",
+  "driverSha256": "3f3cd43f4a447244a0e166cfae851e1064a7c14bf4b123475f086d8ed830ad2b",
+  "driverFreezeSha256": "0ec25810c7b558d3d6232437858b66abcef0894fb318c2214728ad636cacf498",
+  "rawBuildSha256": "3f238d5897fd838e6f51f26a8cc869244be94d7ae694f8286afad17557fa570c",
+  "rawBuildReturnSha256": "91011c0168921c2c8f901fdcce067e87430a2ff094bd8add204bec38e3bd91d7",
+  "reviewScriptSha256": "0baf5ffa8fdabf316813edbb620c6918171f3d0d4329ab127fe888d59bbe1007",
+  "compiler": "13.3.73",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "clientArithmeticStorageCompiles": 6,
+  "gpuSubmitted": false,
+  "executableRun": false,
+  "cpuSession": 41085,
+  "appId": "ap-u1tdwaxmEged6HRntqIejC",
+  "exitCode": 0,
+  "rows": {
+    "control": {
+      "compactState": 0,
+      "weightedPrefix": 2,
+      "batch": 16,
+      "workers": 385024,
+      "binarySha256": "7c93146d5181092dd0942eb0138a457ecc9a0de3cb6ba8a53e8c49a4a06a0cc0",
+      "arithmeticBinarySha256": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+      "storageBinarySha256": "394ff4cfb88759b800dad9ea04a91715128ff4ad90663e2fca7511cc3fae69e3",
+      "sourceSha256": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+      "completeCode": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4480,
+          "encodingSha256": "f9123321be17df29903d0e25ac0a02ddd4210262bfdd68b99d96f90c3ae50e23"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "5ec682ad010e0cefadb29600653aec8be7152e7b93f6da2ed04879c1354143db"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 100,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuRawSha256": "f8e4852045e50b6edbf71742326ac5003fe3eaf2502f0188387258513266e625",
+      "cpuCubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395"
+    },
+    "compact1": {
+      "compactState": 1,
+      "weightedPrefix": 2,
+      "batch": 16,
+      "workers": 385024,
+      "binarySha256": "6beb356a2b4ce5f9481a00be38068897ddd3bc0485896c1b46ea8d9b2d608582",
+      "arithmeticBinarySha256": "704d9551f2b94b1ebda0ea9d049127d587aae8d421ddc0f23722f7a0269e7d08",
+      "storageBinarySha256": "fcdea266be2c1ef8907feee51194e964507c50348c9da11c5af1850ce5c03b30",
+      "sourceSha256": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+      "completeCode": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4416,
+          "encodingSha256": "a7153ee6953b8112f17a6514818cce66d91b3d774e0027cf5dea11a6b02703b1"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 108,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuRawSha256": "f8e4852045e50b6edbf71742326ac5003fe3eaf2502f0188387258513266e625",
+      "cpuCubinSha256": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4"
+    }
+  },
+  "hostTestReceiptHashes": {
+    "result.json": "b7f9658e50ac7b81aab7de652c14f5dc61a01296069f0dd322225a35d8da37f1",
+    "counter-result.json": "9bb5ff5680f351b4a344f5cb6fc32008c02b7f05d8134305f860f5bf323a924f",
+    "storage-result.json": "a759f6a6a3245701753d0af1f451425ba5446ca42066aa2e862b451e8fb47cc9"
+  },
+  "runtimePlan": {
+    "storageCasesPerMode": 128,
+    "storageRecordsPerMode": 297344,
+    "arithmeticPairedFrobeniusPerMode": 6240,
+    "checkpointThreads": [
+      8,
+      256,
+      257
+    ],
+    "checkpointChildren": 28,
+    "expectedRejections": 2,
+    "checkpointComparisons": 12,
+    "normalizedStates": [
+      64,
+      16384
+    ],
+    "warmupsExcluded": 2,
+    "screenRows": 3,
+    "qualifiedTimedRows": 17,
+    "unqualifiedTimedRows": 5,
+    "updatesPerTimedRow": 201863462912,
+    "conditionalPairedBenchmarkRepeats": 3,
+    "conditionalPairedCollectionRepeats": 3,
+    "matchingCorporaOnQualification": 6
+  },
+  "findings": [],
+  "limits": [
+    "CPU compilation establishes deployable code and exact native/control bindings; actual storage/accessor, arithmetic, client/state/checkpoint/ownership behavior remains unexecuted on the GPU.",
+    "The compact0 client matches the reviewed weighted2 control code; no full-client binary byte identity with old host-marker/source versions is assumed.",
+    "Mode1 vector-low/byte-tail native instructions were established in the root wrapper review and are retained by exact full-client encoding equality; no throughput gain follows from them.",
+    "The new storage component covers synthetic0..63 tails, complete physical images and output canaries; it is distinct from whole-walk and checkpoint integration.",
+    "All timed workload and source/binary/storage identities must remain fixed and pass the prepared runtime gates before any performance result is accepted."
+  ]
+}

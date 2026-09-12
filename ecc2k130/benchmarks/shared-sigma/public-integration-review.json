@@ -1,0 +1,177 @@
+{
+  "valid": true,
+  "status": "bounded_public_integration_review_pass_no_actionable_findings",
+  "reviewer": "/root/weighted_public_audit",
+  "worktree": "/private/tmp/ecc2k-validated-shared-preset-pr-20260912",
+  "head": "b586f11d35e0c643caea00e31f552e9eed17b24c",
+  "branch": "codex/ecc2k130-validated-shared-preset",
+  "transferManifestSha256": "cd62523969f75f4dfdd220800fb749f27897c17d10ba759a9d678c9a4c909c30",
+  "producerHandoffSha256": "634e5f649e2c5bf1dd0a14ef9d98c0404f9f5da273be1d44e4cd4138d0727499",
+  "reviewScope": {
+    "trackedTransferredFiles": 7,
+    "additionalRootDocumentationFiles": 2,
+    "newEvidenceFiles": 17,
+    "changedTrackedFiles": {
+      "ecc2k130/Makefile": "2c133130601964671fadcccb2f96ea0e09833548f8b802406b8c0abe30b2bdfa",
+      "ecc2k130/README.md": "0eca897b237910d4594f101164dad8d5a6c2ea3549e296d04516cc317b24475d",
+      "ecc2k130/RTX-PRO6000.md": "4dfaf5df529e8cd3d3763c3c9bf3b907a24efed595931e9629c55dc1f7b3583f",
+      "ecc2k130/SHARED-SIGMA.md": "ae4fee8b81fe8cd25291ceb60de6e202090d2417ebe4774565829e7231196640",
+      "ecc2k130/codegen/testdirectbuild.py": "379e5342591cae5c0fd17f9657bf6e5d9f73cc3e27ec064ab55276a41d131e3a",
+      "ecc2k130/codegen/testpackedauditreport.py": "a852a564de5393a158018c1479dbcdfc1e9e01d35e4a68681d53508c4bda62a4",
+      "ecc2k130/include/packedengine.cuh": "054645487d1c39a6daf9ac0e4de537eca420c889b7a7958a6c79b0c8db6a3496",
+      "ecc2k130/modal_app.py": "5a58523ceeae9d9755b25a7e7d99f49e7e8a7f7f5256919dc96eaa4440a43421",
+      "ecc2k130/packed_audit.py": "e1b81ddb0169c3907420974cefcb23b1aa0bfa97258434feb93a4bb001d5ae0e"
+    },
+    "all24TransferredFilesMatch": true,
+    "gitDiffCheckPassed": true,
+    "rootGuidanceSha256": "a6cd4d2a12dcabc0ca085bb8251c9617d761d6327fb844609d563787a3d685f5",
+    "classification": "Engineering finite exact-step benchmarking only; no attack advancement, exponent, cryptanalytic ratio, private-key recovery or new scientific boundary claim."
+  },
+  "findings": [],
+  "codeReview": {
+    "guards": "Environment strictly accepts0/1; shared1 requires WP2 and walk-network bit1. Existing WP2 parents are validated upstream. C++ defaults/guards and runtime marker remain consistent.",
+    "imageAndCache": "Shared selection appears in image environment, baked build command, BAKED identity, buildFor requested identity/rebuild command and runBench no-rebuild comparison. The new test first proves a matching untouched bake succeeds, then toggles only shared mode and requires rejection before another measurement.",
+    "ranking": "All packed benchmark and collection sample gates parse one observed0/1 marker, store actual and expected separately, invalidate missing/duplicate/wrong values and zero invalid rates. Non-packed paths retain None.",
+    "profile": "Successful packed profile results require one matching observed shared marker. Unavailable profiler results preserve the original failure kind instead of being relabeled as identity failures.",
+    "probeOrder": "Applicable WP2 walk-network audits run arithmetic, optional tiled storage, shared probe, integration, then timing. Probe uses exactly the same make flags and is phony; nonzero exit or any wrong/missing/duplicate marker/PASS inventory aborts before integration/timing.",
+    "probeInventory": {
+      "scenarios": 21,
+      "inputPairs": 21036,
+      "blockSnapshots": 114,
+      "maskWords": 51072,
+      "fixedProbeThreadsPerBlock": 256
+    },
+    "storage": "Existing tiled storage gate retains128 cases and18584*B records with B1..64 validation before build; untiled audits retain their existing batch compatibility.",
+    "legacy": "WP0/WP1 skip the inapplicable shared probe and keep existing arithmetic/client paths. Untiled WP2 still runs the shared probe. Shared0 remains the general default.",
+    "preset": "RTX shared default1 and explicit override0 flow through both Make targets; compact override remains independent. Preset B16/T256/min2/workers385024 and exact count contract are unchanged.",
+    "resources": "Only a host diagnostic for the current device reserved shared bytes was added. Core measured source matches, and generic ranking does not hardcode1792/2816 resource accounting."
+  },
+  "bindings": {
+    "evidenceIndexSha256": "e2fa2e26bb6813e00245d4e3088a99e605db557249af0081d587bee0f7ba96ce",
+    "archivePayloads": 15,
+    "archivePayloadHashesAndSizesMatch": true,
+    "driverFreezeEntries": 5,
+    "embeddedPrebuildSha256": "dbd875ce652415c4b192d61db00606e5924b605f53ebf0ac028d1379751a0a6d",
+    "embeddedPrebuildBytes": 3890900,
+    "all40CoreSourceFilesMatchMeasuredBothModes": true,
+    "coreSourceCanonicalSha256": "999477bae30ca9b3c1739b3c75bc2ec050cd460794e4f63b83f2c91cbb933964",
+    "additionalGeneratorsMatch": {
+      "codegen/gensigma.py": "6360039e5ff0b2c31ff092c4eb2c1e006e5e681eb19cae88f35c6c1be5f3e0a7",
+      "codegen/gen.py": "cb5c82187ea771204c505213ff6f02e639ffb450125974608d9de122890941d0",
+      "codegen/genpackedproduct.py": "490760f7345e742b360bbbd3676a61cb9910ce43817c227365ec71e746fe8602",
+      "codegen/gendirectreduce.py": "8da4febbad7f8d5892552377a0f8dd93c922557a0f905ec5a5c628dd3247c130"
+    },
+    "measured160SourceCanonicalSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+    "rawComparisonSha256": "ce331c88a096637a23f9f5a4d632a535f1c5d89e2d112d31e41599f7446df406",
+    "retainedIndependentReviewSha256": "3073c6ee74924851293bc410e8cd05892743bbe51a59453d8549d5f269f5bc7c",
+    "runtimeCalibrationSha256": "96b593c7198204bb1f3401ee48402d93fa16ce809592ef7bfc23d236d67c34ed",
+    "initialFinalModeAndCalibrationBindingsMatch": true
+  },
+  "documentedMeasurementRecomputed": {
+    "statistics": {
+      "confirmation_control": {
+        "ratesM": [
+          14327.94,
+          14284.151,
+          14296.584
+        ],
+        "medianB": 14.296584000000001,
+        "rangeB": [
+          14.284151,
+          14.32794
+        ]
+      },
+      "confirmation_shared1": {
+        "ratesM": [
+          14478.495,
+          14407.711,
+          14411.102
+        ],
+        "medianB": 14.411102000000001,
+        "rangeB": [
+          14.407710999999999,
+          14.478495
+        ]
+      },
+      "confirmation_gainPercent": 0.8010165225483146,
+      "collection_control": {
+        "ratesM": [
+          13960.757,
+          13960.68,
+          13974.133
+        ],
+        "medianB": 13.960757,
+        "rangeB": [
+          13.96068,
+          13.974133
+        ]
+      },
+      "collection_shared1": {
+        "ratesM": [
+          14093.912,
+          14092.497,
+          14103.56
+        ],
+        "medianB": 14.093912,
+        "rangeB": [
+          14.092497,
+          14.10356
+        ]
+      },
+      "collection_gainPercent": 0.9537806581691788
+    },
+    "timedRows": 17,
+    "updatesPerTimedRow": 201863462912,
+    "allTimedRowsCompletedZeroDrops": true,
+    "screenRatesM": [
+      14483.28,
+      14557.651,
+      14377.588
+    ],
+    "qualificationThresholdM": 14555.696399999999,
+    "screenControlDriftPercent": -0.729751824172431,
+    "collectionRecordsEach": 5149,
+    "collectionBytesEach": 164768,
+    "allSixSortedCorpusHashesMatch": true,
+    "sortedCorpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+  },
+  "docsReview": "SHARED-SIGMA, README and RTX-PRO6000 separate matched finite gains from prior public absolute rates, disclose the narrow screen qualification/drift and runtime-versus-compiled shared accounting, call the work engineering, state the public audit is pending and keep26B unmet.",
+  "tests": {
+    "producerReportedFocusedWrapperTests": 48,
+    "producerReportedCheckCliTests": 75,
+    "producerTestedImplementationHashesMatch": true,
+    "unchangedBroadSuitesRepeatedByReviewer": false,
+    "independentActions": [
+      "Read changed source/test/doc bodies and relevant current call paths.",
+      "Parsed four changed Python files for syntax.",
+      "Rehashed transfer/archive/core source and checked git diff scope/whitespace.",
+      "Recomputed documented raw row statistics/counts/calibration bindings."
+    ],
+    "testExecutionClaim": "Producer passing tests are retained handoff evidence; this reviewer did not rerun those suites."
+  },
+  "limits": [
+    "Approval is scoped to these file hashes and integration behavior, not a new public GPU audit.",
+    "The retained full native-code/correctness panel is hash-bound; its complete independent GPU auditor was not rerun by this review.",
+    "The standalone shared-table probe uses256-thread test blocks; it does not independently certify every possible client block width. Actual integration runs the selected client geometry.",
+    "Generic public audit retains corpus counts/bytes; the matched frozen comparison supplies sorted-multiset hashes. No public corpus-content hash is invented.",
+    "No universal speedup, performance-counter causality, exponent improvement or achieved26B goal is claimed."
+  ],
+  "publicCommandGpuAudit": "Pending at this review; root owns the first public Make audit.",
+  "reviewerCorrection": {
+    "initialFailureSha256": "85695e4079dee357d79ec1617e1c9af8fae70cfe8f1de875c14aab3454951ed2",
+    "initialScriptSha256": "5d6c52a1152b056620cf8b3e43720acb7b1414d2dda988abb1135e8851f30c82",
+    "reason": "Initial offline assertion compared mutable temperature/clock telemetry. Successor checks stable GPU name, UUID and driver identity; original raw artifact is unchanged."
+  },
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "goalAchieved": false,
+  "actions": {
+    "sourceEdits": false,
+    "suiteRuns": 0,
+    "cudaCompilerRuns": 0,
+    "gpuJobs": 0,
+    "commits": 0,
+    "pushes": 0,
+    "prActions": 0
+  },
+  "reviewScriptSha256": "d39c3b17374d2aa2189cb5a6b9318cd4855e14394dcc7724fd1b9bef9ced23c2"
+}

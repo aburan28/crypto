@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every index-calculus variant built for the elliptic-curve discrete logarithm in this repository, scored in operations per root-n against Pollard rho and a generic-group floor.">
+<!--
+  Standalone build of the cost ledger in RESEARCH_RESIDUAL_WALKS.md §§9-11.
+  Open it directly in a browser; it loads two webfont families from Google
+  Fonts and needs nothing else.  Every figure on the page is taken from the
+  frozen experiment JSON in experiments/; see the footer for the conversion
+  factors and for which numbers are extrapolations rather than measurements.
+-->
+<style>
+  html { color-scheme: light dark; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Index Calculus Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #e7ebef;
+    --surface: #fbfcfd;
+    --surface-sunk: #f0f3f6;
+    --ink: #0e1922;
+    --ink-2: #354855;
+    --muted: #576976;
+    --rule: #ccd5dc;
+    --rule-soft: #dde4e9;
+    --data: #1f6fd0;
+    --data-soft: #d7e4f6;
+    --bound: #b3372a;
+    --bound-soft: #f3dcd8;
+    --shadow: 0 1px 2px rgba(14, 25, 34, .06), 0 8px 24px -16px rgba(14, 25, 34, .18);
+
+    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d1318;
+      --surface: #151d24;
+      --surface-sunk: #101820;
+      --ink: #e3eaef;
+      --ink-2: #b6c5cf;
+      --muted: #8799a6;
+      --rule: #25323a;
+      --rule-soft: #1d272e;
+      --data: #4e92de;
+      --data-soft: #1c2e42;
+      --bound: #d9604e;
+      --bound-soft: #38221f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0d1318;
+    --surface: #151d24;
+    --surface-sunk: #101820;
+    --ink: #e3eaef;
+    --ink-2: #b6c5cf;
+    --muted: #8799a6;
+    --rule: #25323a;
+    --rule-soft: #1d272e;
+    --data: #4e92de;
+    --data-soft: #1c2e42;
+    --bound: #d9604e;
+    --bound-soft: #38221f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding-inline: 20px;
+    padding-block: 40px 64px;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1020px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  /* ---------- header ---------- */
+  header { display: flex; flex-direction: column; gap: 14px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(30px, 5.4vw, 45px);
+    line-height: 1.08;
+    letter-spacing: -.012em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .verdict {
+    font-family: var(--serif);
+    font-size: clamp(17px, 2.3vw, 20px);
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }
+  .fact dt {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .fact dd {
+    margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500;
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+  }
+  .fact p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+  /* ---------- panels ---------- */
+  section { display: flex; flex-direction: column; gap: 0; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .panel-head { padding: 18px 20px 0; display: flex; flex-direction: column; gap: 5px; }
+  .panel-head h2 {
+    font-family: var(--serif); font-weight: 500; font-size: 21px;
+    letter-spacing: -.008em; margin: 0;
+  }
+  .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }
+
+  .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }
+  .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 20px;
+    padding: 4px 20px 18px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }
+  .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }
+  .swatch.bound { background: var(--bound); width: 3px; height: 14px; }
+
+  /* ---------- two-up ---------- */
+  .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+
+  /* ---------- ledger rows ---------- */
+  .ledger { padding: 14px 20px 20px; display: flex; flex-direction: column; }
+  .lrow { display: grid; grid-template-columns: 1fr 96px; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }
+  .lrow:last-child { border-bottom: 0; }
+  .lrow .name { font-size: 13.5px; line-height: 1.35; }
+  .lrow .num {
+    font-family: var(--mono); font-size: 13.5px; font-weight: 500;
+    font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap;
+  }
+  .lbar { grid-column: 1 / -1; height: 8px; background: var(--surface-sunk); border-radius: 0 4px 4px 0; }
+  .lbar i { display: block; height: 100%; background: var(--data); border-radius: 0 4px 4px 0; }
+
+  /* ---------- exponent track ---------- */
+  .exp { padding: 14px 20px 8px; }
+  .erow { display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; align-items: stretch; gap: 12px; }
+  .erow .name { font-size: 13px; line-height: 1.3; align-self: center; }
+  .erow .num {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    font-variant-numeric: tabular-nums; text-align: right; align-self: center;
+  }
+  .track { position: relative; min-height: 38px; }
+  .track::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    height: 1px; background: var(--rule);
+  }
+  .track::after {
+    content: ""; position: absolute; left: 38.5%; top: 0; bottom: 0;
+    width: 2px; margin-left: -1px; background: var(--bound);
+  }
+  .dot {
+    position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%; background: var(--data); box-shadow: 0 0 0 2px var(--surface);
+  }
+  .exp-axis {
+    display: grid; grid-template-columns: minmax(118px, 1.2fr) minmax(120px, 2fr) 44px; gap: 12px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--muted); padding-bottom: 12px;
+  }
+  .exp-axis .ticks { position: relative; height: 14px; }
+  .exp-axis .ticks b { position: absolute; top: 0; font-weight: 400; transform: translateX(-50%); white-space: nowrap; }
+  .rho-flag {
+    position: absolute; top: 0; left: 38.5%; transform: translateX(-50%);
+    color: var(--bound); font-weight: 500; white-space: nowrap;
+  }
+
+  /* ---------- table ---------- */
+  .table-scroll { overflow-x: auto; padding: 4px 0 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }
+  caption { text-align: left; padding: 0 20px 12px; font-size: 13.5px; color: var(--muted); }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); }
+  th:first-child, td:first-child { padding-left: 20px; }
+  th:last-child, td:last-child { padding-right: 20px; }
+  thead th {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted); font-weight: 500;
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr.group td {
+    background: var(--surface-sunk); font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); padding-block: 7px;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .chip {
+    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
+    letter-spacing: .07em; text-transform: uppercase; padding: 2.5px 7px;
+    border-radius: 2px; white-space: nowrap;
+    background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--rule);
+  }
+  .chip.advance { background: var(--data-soft); color: var(--data); border-color: transparent; }
+  .chip.relabel { background: var(--bound-soft); color: var(--bound); border-color: transparent; }
+
+  /* ---------- closing ---------- */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px; }
+  .note { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 18px 20px; }
+  .note h3 {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 9px; font-weight: 500;
+  }
+  .note p { margin: 0 0 9px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+  .note p:last-child { margin-bottom: 0; }
+  .note strong { color: var(--ink); font-weight: 600; }
+  code { font-family: var(--mono); font-size: .93em; }
+
+  footer {
+    font-size: 12.5px; color: var(--muted); line-height: 1.6;
+    border-top: 1px solid var(--rule); padding-top: 16px;
+  }
+  footer p { margin: 0 0 6px; }
+  footer p:last-child { margin-bottom: 0; }
+
+  /* ---------- chart interaction ---------- */
+  .bar-group { cursor: default; }
+  .bar-group rect.hit { fill: transparent; }
+  .bar-group:hover rect.hit, .bar-group:focus-visible rect.hit { fill: var(--surface-sunk); }
+  .bar-group:focus-visible { outline: none; }
+  .bar-group:focus-visible rect.hit { stroke: var(--data); stroke-width: 1.5; }
+
+  #tip {
+    position: fixed; z-index: 10; pointer-events: none; opacity: 0;
+    transition: opacity .12s ease;
+    background: var(--ink); color: var(--ground);
+    padding: 8px 11px; border-radius: 3px; max-width: 260px;
+    font-size: 12px; line-height: 1.45; box-shadow: 0 6px 20px -8px rgba(0,0,0,.5);
+  }
+  #tip.on { opacity: 1; }
+  #tip b { display: block; font-size: 12.5px; margin-bottom: 3px; }
+  #tip span { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 560px) {
+    .erow, .exp-axis { grid-template-columns: 1fr 40px; }
+    .erow .track { grid-column: 1 / -1; }
+    .exp-axis .ticks { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
+    <h1>Index Calculus Scoreboard</h1>
+    <p class="verdict">Every index-calculus variant built for the elliptic-curve discrete logarithm
+      in this repository, scored in one unit against two boundaries: a generic-group floor that no
+      amount of engineering can cross, and Pollard rho measured on the same curves. Nothing built
+      here comes within 500× of rho at any size the experiments reach.</p>
+
+    <dl class="facts">
+      <div class="fact">
+        <dt>The unit</dt>
+        <dd>S = ops / &radic;n</dd>
+        <p>Group operations per square root of the group order, so rho is flat at every size.</p>
+      </div>
+      <div class="fact">
+        <dt>Boundary 1 · the floor</dt>
+        <dd>&kappa; &ge; &radic;(2(B+1)/&gamma;)</dd>
+        <p>Generic relation yield is at most &gamma;P&sup2;/2n, which bounds the count factor from below.</p>
+      </div>
+      <div class="fact">
+        <dt>Boundary 2 · the reference</dt>
+        <dd>rho, S &asymp; 1.3</dd>
+        <p>Measured 1.2 to 1.8 across four group sizes on the same instances and accounting.</p>
+      </div>
+    </dl>
+  </header>
+
+  <!-- ============ MAIN CHART ============ -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Cost relative to Pollard rho</h2>
+      <p>Each bar is one variant's total operation count divided by rho's, on the same curves with the
+        same accounting: precomputation, table setup, relation verification, oracle work and linear
+        algebra all inside the number. Logarithmic axis. Where two rounds of tuning were measured,
+        the hairline marks where the variant started.</p>
+    </div>
+
+    <div class="chart-scroll">
+      <svg viewBox="0 0 980 434" role="img" aria-labelledby="c1t">
+        <title id="c1t">Cost of each index-calculus variant as a multiple of Pollard rho, from 16 times to 9,294 times, on a logarithmic axis</title>
+
+        <!-- gridlines -->
+        <g stroke="var(--rule-soft)" stroke-width="1">
+          <line x1="435" y1="14" x2="435" y2="402"></line>
+          <line x1="570" y1="14" x2="570" y2="402"></line>
+          <line x1="705" y1="14" x2="705" y2="402"></line>
+          <line x1="840" y1="14" x2="840" y2="402"></line>
+        </g>
+
+        <!-- rho boundary -->
+        <line x1="300" y1="14" x2="300" y2="408" stroke="var(--bound)" stroke-width="2"></line>
+        <text x="304" y="24" fill="var(--bound)" font-family="var(--mono)" font-size="11.5" font-weight="500">Pollard rho = 1&times;</text>
+
+        <!-- group A -->
+        <text x="20" y="52" fill="var(--ink-2)" font-family="var(--mono)" font-size="10.5" letter-spacing="1" >PRIME FIELD · E(F_p) · 28 BITS · B = 256</text>
+
+        <g class="bar-group" tabindex="0" data-name="Mutation walk (B)" data-s="S = 19.7, from 50.6" data-class="Engineering: cost fell 2.6×, ratio to the floor unmoved">
+          <rect class="hit" x="14" y="63" width="952" height="28" rx="2"></rect>
+          <text x="284" y="81" text-anchor="end" fill="var(--ink)" font-size="13">Mutation walk (B)</text>
+          <line x1="464" y1="77" x2="519" y2="77" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+          <line x1="519" y1="70" x2="519" y2="84" stroke="var(--muted)" stroke-width="1.5"></line>
+          <rect x="300" y="70" width="164" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="82" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">16&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Residual walk, r-adding (C1)" data-s="S = 39.4, from 139.3" data-class="Engineering: cost fell 3.5×, ratio to the floor unmoved">
+          <rect class="hit" x="14" y="97" width="952" height="28" rx="2"></rect>
+          <text x="284" y="115" text-anchor="end" fill="var(--ink)" font-size="13">Residual walk, r-adding (C1)</text>
+          <line x1="505" y1="111" x2="579" y2="111" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+          <line x1="579" y1="104" x2="579" y2="118" stroke="var(--muted)" stroke-width="1.5"></line>
+          <rect x="300" y="104" width="205" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="116" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">33&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Triple oracle, meet in the middle" data-s="S = 90.1" data-class="Relabelling: walked count fell 100×, total cost rose 4.6×">
+          <rect class="hit" x="14" y="131" width="952" height="28" rx="2"></rect>
+          <text x="284" y="149" text-anchor="end" fill="var(--ink)" font-size="13">Triple oracle, meet in the middle</text>
+          <rect x="300" y="138" width="253" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="150" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">75&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Independent samples (A)" data-s="S = 1,850.6" data-class="Baseline: one fresh decomposition per residual">
+          <rect class="hit" x="14" y="165" width="952" height="28" rx="2"></rect>
+          <text x="284" y="183" text-anchor="end" fill="var(--ink)" font-size="13">Independent samples (A)</text>
+          <rect x="300" y="172" width="430" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="184" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">1,542&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Semaev S₃ pair oracle" data-s="S = 3,183" data-class="Relabelling: one square root per base element, per residual">
+          <rect class="hit" x="14" y="199" width="952" height="28" rx="2"></rect>
+          <text x="284" y="217" text-anchor="end" fill="var(--ink)" font-size="13">Semaev S&#8323; pair oracle</text>
+          <rect x="300" y="206" width="462" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="218" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">2,653&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Algebraic S₄ triple oracle" data-s="S = 11,153" data-class="Relabelling: B² quadratics per residual, the worst cell measured">
+          <rect class="hit" x="14" y="233" width="952" height="28" rx="2"></rect>
+          <text x="284" y="251" text-anchor="end" fill="var(--ink)" font-size="13">Algebraic S&#8324; triple oracle</text>
+          <rect x="300" y="240" width="536" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="252" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">9,294&times;</text>
+        </g>
+
+        <!-- group B -->
+        <text x="20" y="292" fill="var(--ink-2)" font-family="var(--mono)" font-size="10.5" letter-spacing="1">SUBSPACE BASE · E(F_p&sup3;) · 33 BITS</text>
+
+        <g class="bar-group" tabindex="0" data-name="Meet-in-the-middle triple oracle" data-s="S = 3,805" data-class="Advance in count: relations fall to n^(1/3), but each residual costs a loop over the base">
+          <rect class="hit" x="14" y="303" width="952" height="28" rx="2"></rect>
+          <text x="284" y="321" text-anchor="end" fill="var(--ink)" font-size="13">Meet-in-the-middle triple oracle</text>
+          <rect x="300" y="310" width="452" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="322" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">2,238&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="O(1) S₄ solve, after two tuning rounds" data-s="S = 898, from 4,623" data-class="Engineering: the solve constant fell 5.5×; best cell on the board">
+          <rect class="hit" x="14" y="337" width="952" height="28" rx="2"></rect>
+          <text x="284" y="355" text-anchor="end" fill="var(--ink)" font-size="13">O(1) S&#8324; solve, tuned</text>
+          <line x1="668" y1="351" x2="764" y2="351" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+          <line x1="764" y1="344" x2="764" y2="358" stroke="var(--muted)" stroke-width="1.5"></line>
+          <rect x="300" y="344" width="368" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="356" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">528&times;</text>
+        </g>
+
+        <g class="bar-group" tabindex="0" data-name="Double large primes" data-s="S = 3,378" data-class="Advance in exponent: total work n^0.44, the only end-to-end exponent under rho">
+          <rect class="hit" x="14" y="371" width="952" height="28" rx="2"></rect>
+          <text x="284" y="389" text-anchor="end" fill="var(--ink)" font-size="13">+ double large primes</text>
+          <rect x="300" y="378" width="445" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="390" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">1,987&times;</text>
+        </g>
+
+        <!-- axis -->
+        <line x1="300" y1="402" x2="840" y2="402" stroke="var(--rule)" stroke-width="1"></line>
+        <g fill="var(--muted)" font-family="var(--mono)" font-size="11" text-anchor="middle">
+          <text x="300" y="420">1&times;</text>
+          <text x="435" y="420">10&times;</text>
+          <text x="570" y="420">100&times;</text>
+          <text x="705" y="420">1,000&times;</text>
+          <text x="840" y="420">10,000&times;</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch"></i> cost now</span>
+      <span><i class="swatch ghost"></i> cost before tuning</span>
+      <span><i class="swatch bound"></i> rho, the reference boundary</span>
+    </div>
+  </div>
+
+  <!-- ============ TWO PANELS ============ -->
+  <div class="duo">
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>What tuning actually bought</h2>
+        <p>Field multiplications per residual for Gaudry's three-unknown solve, the constant that
+          decides whether the method is viable. Four steps, no new mathematics.</p>
+      </div>
+      <div class="ledger">
+        <div class="lrow">
+          <div class="name">First working version</div>
+          <div class="num">4,817,000</div>
+          <div class="lbar"><i style="width:100%"></i></div>
+        </div>
+        <div class="lrow">
+          <div class="name">Honest multiplication count <span class="chip">accounting</span></div>
+          <div class="num">3,230,000</div>
+          <div class="lbar"><i style="width:67%"></i></div>
+        </div>
+        <div class="lrow">
+          <div class="name">Echelon form with back-substitution <span class="chip">engineering</span></div>
+          <div class="num">1,527,000</div>
+          <div class="lbar"><i style="width:31.7%"></i></div>
+        </div>
+        <div class="lrow">
+          <div class="name">Macaulay's row selection <span class="chip">engineering</span></div>
+          <div class="num">879,000</div>
+          <div class="lbar"><i style="width:18.2%"></i></div>
+        </div>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span>5.5&times; total &middot; relation-phase crossover moved 2^111 &rarr; 2^96</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>The exponents that decide it</h2>
+        <p>Fitted growth in the group order over four sizes. Anything right of rho's one half loses
+          as curves get bigger, however cheap its constant.</p>
+      </div>
+      <div class="exp">
+        <div class="erow">
+          <div class="name">Relations, plain</div>
+          <div class="track"><i class="dot" style="left:9.2%" title="n^0.31"></i></div>
+          <div class="num">0.31</div>
+        </div>
+        <div class="erow">
+          <div class="name">Total, plain</div>
+          <div class="track"><i class="dot" style="left:10.8%" title="n^0.32"></i></div>
+          <div class="num">0.32</div>
+        </div>
+        <div class="erow">
+          <div class="name">Total, large primes</div>
+          <div class="track"><i class="dot" style="left:29.2%" title="n^0.44"></i></div>
+          <div class="num">0.44</div>
+        </div>
+        <div class="erow">
+          <div class="name">Linear algebra, large primes</div>
+          <div class="track"><i class="dot" style="left:47.7%" title="n^0.56"></i></div>
+          <div class="num">0.56</div>
+        </div>
+        <div class="erow">
+          <div class="name">Linear algebra, Wiedemann</div>
+          <div class="track"><i class="dot" style="left:66.2%" title="n^0.68"></i></div>
+          <div class="num">0.68</div>
+        </div>
+        <div class="erow">
+          <div class="name">Linear algebra, dense</div>
+          <div class="track"><i class="dot" style="left:92.3%" title="n^0.85"></i></div>
+          <div class="num">0.85</div>
+        </div>
+        <div class="exp-axis">
+          <div></div>
+          <div class="ticks">
+            <b style="left:0">0.25</b>
+            <b class="rho-flag">rho 0.50</b>
+            <b style="left:100%">0.90</b>
+          </div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TABLE ============ -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Every variant, classified</h2>
+      <p>The count factor over its floor is the test for a non-generic advance; the multiple of
+        rho is the test for practical value. A change that moves neither is engineering, and a
+        headline count that falls while total cost rises is a relabelling.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Prime-field cells at 28 bits with base 256; subspace cells at 33 bits, two seeds each, every run recovering the planted logarithm.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Variant</th>
+            <th scope="col" class="n">S</th>
+            <th scope="col" class="n">vs rho</th>
+            <th scope="col" class="n">Count / floor</th>
+            <th scope="col">Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="5">Prime field, generic levers</td></tr>
+          <tr><td>Independent samples (A)</td><td class="n">1,850.6</td><td class="n">1,542&times;</td><td class="n">1.00</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>Mutation walk (B), tuned</td><td class="n">19.7</td><td class="n">16&times;</td><td class="n">1.02</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Residual walk (C1), tuned</td><td class="n">39.4</td><td class="n">33&times;</td><td class="n">1.00</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Signed-pair seeding</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">1.05</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Sixfold fold at <code>j = 0</code></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">1.02</td><td><span class="chip">engineering</span></td></tr>
+          <tr class="group"><td colspan="5">Prime field, summation-polynomial oracles</td></tr>
+          <tr><td>Triple oracle, meet in the middle</td><td class="n">90.1</td><td class="n">75&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Semaev S&#8323; pair oracle</td><td class="n">3,183</td><td class="n">2,653&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Algebraic S&#8324; triple oracle</td><td class="n">11,153</td><td class="n">9,294&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr class="group"><td colspan="5">Subspace base on E(F_p&sup3;)</td></tr>
+          <tr><td>Meet-in-the-middle triple oracle</td><td class="n">3,805</td><td class="n">2,238&times;</td><td class="n">sub-birthday</td><td><span class="chip advance">advance, count</span></td></tr>
+          <tr><td>O(1) S&#8324; solve, first build</td><td class="n">4,623</td><td class="n">2,719&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, structure</span></td></tr>
+          <tr><td>O(1) S&#8324; solve, tuned</td><td class="n">898</td><td class="n">528&times;</td><td class="n">&mdash;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Double large primes</td><td class="n">3,378</td><td class="n">1,987&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, exponent</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ SOLVING-DEGREE LEVERS ============ -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>The solving-degree levers, classified</h2>
+      <p>A second ledger, in a second unit, because these levers change the
+        <em>presentation</em> of one decomposition instance rather than the cost of a whole
+        discrete logarithm. None of them produces an <code>S</code>, so none belongs in the
+        table above; the unit here is log&#8322; operations for one Macaulay solve,
+        <code>rows&middot;cols^(&omega;&minus;1)</code> at <code>&omega; = 2.807</code>, expectated
+        over the measured <code>D*</code> histogram. The boundary is the
+        <code>D* = 2</code> Nullstellensatz floor, so the ratio column is what a lever has to
+        move. <strong>Nothing here changes any number in the table above</strong> &mdash; no lever
+        has reached a full discrete logarithm.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Lever L5 at n = 10, l = 5, 12 selection + 12 disjoint holdout targets, every cell a
+          refutation cross-checked against a brute-force decomposition search
+          (<code>experiments/isogeny_class_search.json</code>). L2&ndash;L4 verdicts from
+          <code>experiments/degree_reduction_*.json</code>, whose rounds predate this panel and are
+          carried here as verdicts rather than re-derived figures.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Lever / variant</th>
+            <th scope="col" class="n">log&#8322; ops</th>
+            <th scope="col" class="n">Ratio to floor</th>
+            <th scope="col">Correct</th>
+            <th scope="col">Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="5">L5 &middot; the curve (isogeny class) &mdash; ECC2K-130, this round</td></tr>
+          <tr><td>Floor &mdash; every cell at <code>D* = 2</code></td><td class="n">13.82</td><td class="n">2^+0.00</td><td>&mdash;</td><td><span class="chip">floor</span></td></tr>
+          <tr><td>Koblitz curve <code>a&#8326; = 1</code>, on the holdout <em>(reference)</em></td><td class="n">23.07</td><td class="n">2^+9.26</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>Best curve selected on target set A, scored on A</td><td class="n">13.82</td><td class="n">2^+0.00</td><td>yes</td><td><span class="chip relabel">selection, biased</span></td></tr>
+          <tr><td>The same curve, scored on the disjoint holdout B</td><td class="n">24.20</td><td class="n">2^+10.38</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td><code>2^N</code> enumeration of <code>V &times; V</code> <em>(reference)</em></td><td class="n">13.32</td><td class="n">2^&minus;0.49</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr class="group"><td colspan="5">Earlier levers, carried as verdicts</td></tr>
+          <tr><td>L2 &middot; symmetrisation</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td><td><span class="chip">blocked below &#8467; = 6</span></td></tr>
+          <tr><td>L3 &middot; hybrid slicing</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>L4 &middot; degree falls (mutants)</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span>L5 killed: the selected curve is <code>2^+1.13</code> worse than the untouched curve on
+        fresh targets, and the count of curves holding the floor for <em>every</em> target falls
+        68 &rarr; 34 &rarr; 0 at n = 8.</span>
+    </div>
+  </div>
+
+  <!-- ============ NOTES ============ -->
+  <div class="notes">
+    <div class="note">
+      <h3>What was actually found</h3>
+      <p><strong>The walk hypothesis is closed.</strong> Collision search over partial decompositions
+        cannot beat independent sampling, because the relation yield is bounded by a counting
+        argument. Every lever tried left the ratio to that floor between 1.00 and 1.07.</p>
+      <p><strong>Published constants are soft.</strong> The three-unknown solve lost a factor of 5.5
+        to ordinary linear algebra, worth fifteen bits of crossover. If the same slack exists
+        elsewhere, quoted crossover sizes are optimistic.</p>
+      <p><strong>The n<sup>4/9</sup> is real.</strong> Measured 0.44 against the predicted 0.444,
+        end to end, every run recovering the planted logarithm.</p>
+    </div>
+    <div class="note">
+      <h3>Where the boundaries bite</h3>
+      <p><strong>The plain method never wins.</strong> Relations cost n<sup>1/3</sup> and its linear
+        algebra n<sup>0.68</sup>, so cost bottoms out near 200&times; rho around 2<sup>50</sup> and
+        rises after. No reduction in the solve constant changes that.</p>
+      <p><strong>The large-prime variant wins too late.</strong> Its score falls as
+        n<sup>&minus;1/18</sup>, so closing the measured factor of 1,987 takes roughly two hundred
+        doublings of the group order.</p>
+      <p><strong>One loose end.</strong> Row weight doubles across the measured range, which pushes
+        the large-prime linear algebra to n<sup>0.56</sup>. Capping the merge level is the missing
+        piece.</p>
+    </div>
+    <div class="note">
+      <h3>What would count next</h3>
+      <p>One candidate carries orders of magnitude rather than factors: decomposing into two base
+        points instead of three, trading a far rarer decomposition for a much cheaper test.</p>
+      <p>If that also lands far above rho at these sizes, the fixed-degree direction is
+        quantitatively closed at toy scale, and this ledger is the result.</p>
+      <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
+        the crossovers by measurement rather than extrapolation.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
+      <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>.
+      Reporting convention in <code>AGENTS.md</code>.</p>
+    <p>Operation counts are affine curve additions; field multiplications convert at a measured 63 per
+      addition on F_p&sup3;, and multiplications modulo n at 9 field multiplications. Crossover sizes
+      beyond 2<sup>33</sup> are extrapolations from the fitted exponents, marked as such, not measurements.</p>
+  </footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+  (function () {
+    var tip = document.getElementById('tip');
+    var groups = document.querySelectorAll('.bar-group');
+
+    function show(el, x, y) {
+      tip.innerHTML = '<b>' + el.dataset.name + '</b><span>' + el.dataset.s + '</span><br>' + el.dataset.class;
+      tip.classList.add('on');
+      var r = tip.getBoundingClientRect();
+      var left = Math.min(Math.max(8, x + 14), window.innerWidth - r.width - 8);
+      var top = Math.min(Math.max(8, y + 14), window.innerHeight - r.height - 8);
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+    function hide() { tip.classList.remove('on'); }
+
+    groups.forEach(function (g) {
+      g.addEventListener('mousemove', function (e) { show(g, e.clientX, e.clientY); });
+      g.addEventListener('mouseleave', hide);
+      g.addEventListener('focus', function () {
+        var b = g.getBoundingClientRect();
+        show(g, b.left + 40, b.top);
+      });
+      g.addEventListener('blur', hide);
+    });
+    window.addEventListener('scroll', hide, { passive: true });
+  })();
+</script>
+</body>
+</html>
