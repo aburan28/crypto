@@ -8,16 +8,23 @@ on:
       - "scripts/run_koblitz_stage35_algebraic_walk.py"
       - "scripts/verify_koblitz_stage35_result.py"
       - "scripts/compose_koblitz_stage36_gate_audit.py"
+      - "scripts/verify_koblitz_stage37_repeat.py"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-n41-algebraic-walk-params.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE35_N41_ALGEBRAIC_WALK.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE35_N41_ALGEBRAIC_WALK_RESULTS.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE37_ALGEBRAIC_WALK_REPEAT.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage35-algebraic-walk-evidence-34693802792.tar.gz"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage35-algebraic-walk-evidence-34693802792.tar.gz.sha256"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-workflow-34693802792.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-artifacts-34693802792.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-algebraic-walk-result-20260912/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-36-current-gate-audit-20260912/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage37-algebraic-walk-repeat-34694400320.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage37-algebraic-walk-repeat-34694400320.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-37-repeat-workflow-34694400320.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-37-repeat-artifacts-34694400320.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-37-algebraic-walk-repeat-result-20260912/**"
       - ".github/workflows/koblitz-stage35-algebraic-walk.yml"
   workflow_dispatch:
 
@@ -46,6 +53,10 @@ jobs:
           if test -f research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-36-current-gate-audit-20260912/audit.json; then
             python3 scripts/compose_koblitz_stage36_gate_audit.py verify \
               > "$RUNNER_TEMP/stage36-gate-audit.json"
+          fi
+          if test -f research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-37-algebraic-walk-repeat-result-20260912/verification.json; then
+            python3 scripts/verify_koblitz_stage37_repeat.py verify \
+              > "$RUNNER_TEMP/stage37-repeat-verification.json"
           fi
           git diff --exit-code
           test -z "$(git status --porcelain=v1 --untracked-files=all)"
