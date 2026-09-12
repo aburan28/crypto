@@ -328,6 +328,25 @@ driver without `--collect-units` collects whatever units of the first
 `collection.units` are still missing itself, then merges everything
 present. Inside a unit the trials run in parallel over the cores.
 
+A unit costs what its trials cost and nothing more: the collector — whose
+point index map is keyed by big integers and takes about as long to build
+as a short unit takes to run — is built once for the whole stage rather
+than once per unit, so splitting the same work into eight units instead
+of one no longer adds to the bill.
+
+Two setup costs alongside it were the same shape. Selecting a subgroup
+base rebuilt the whole base after every batch of eight abscissae, which
+is quadratic in the abscissae; it now skips the rebuilds that could only
+have come back short, since an abscissa carries at most two points. And
+the projected signed-orbit map — every base point multiplied by the
+cofactor, then each one's whole Frobenius orbit walked — ran in
+big-integer arithmetic; it now runs in single words where the field fits,
+which it does for every degree this pipeline reaches. At degree 53 on a
+15264-point base, selecting goes from 8.60 s to 0.94 s and the orbit map
+from 8.16 s to 0.048 s, and the base and its columns are unchanged. The
+pair table's 6.7 s is real `|F|²/2` work and is untouched; it is now the
+dominant fixed cost, and unlike the scanning it does not grow with `r`.
+
 A relation file carries only the probe scalar and the factor-base point
 indices of each relation, bound to the parameter digest, curve, factor
 base and summand count. On merge every relation is re-verified in the
@@ -467,6 +486,15 @@ boundary ledger as parameter files — 32 known-answer targets each, the
 ρ baseline on, collection units sized to the base:
 
     ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
+
+`docs/ic/params/k0n53-subgroup.json` is the largest subgroup this family
+offers (44 bits, 38× the degree-41 rung). It solves 32 of 32 with a
+49 ms descent against ρ's 1.216 s, and
+`docs/ic/runs/koblitz-degree53-and-reach-20260912.json` carries it
+together with the projection of where the advantage runs out: the
+charged class survives to about a 52-bit subgroup, and the whole-process
+class needs a batch of targets that grows with `r` (16 at 40 bits, 96 at
+45, 834 at 50). Relation collection is what stops it, not the descent.
 
 `docs/ic/params/k0n{31,37,39,41}-subgroup.json` are the same four rungs
 with subgroup bases; `docs/ic/runs/koblitz-subgroup-bases-20260912.json`
