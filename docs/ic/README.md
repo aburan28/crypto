@@ -418,6 +418,27 @@ The baseline is a real opponent, not a formality, so read it first:
   which is exactly how an earlier revision of this baseline produced a
   spurious charged crossover at `n = 41`.
 
+### Choosing a factor base
+
+Five families are recipes (`ic search --family`): `factor`, `divisor`
+and `union` are linear — an invariant subspace, a divisor of `x^e − 1`,
+or a union of Frobenius translates of a seed span — and `subgroup` is
+not. The linear families exist because the algebraic oracles need them:
+Semaev's polynomials and the Weil descent are written over a subspace.
+The pair-table oracle is a meet-in-the-middle search and needs no
+structure at all, and for it the structure is a cost, not a feature.
+
+`subgroup` draws abscissae pseudo-randomly and keeps `[h]P` for the
+cofactor `h`, so every base point lies in the prime-order subgroup the
+targets live in. Sums of such points cannot leave that subgroup, and the
+measured decomposition rate lands on the `|F|³/(3!·r)` a random base
+would give — at degree 41, one target in 28 against one in 273 for the
+subspace union of the same size, with the same column count. Selection
+uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
+
+Use it with the pair-table solver. `groebner` and `sat` need a linear
+domain and will refuse.
+
 ### Ledger rungs, ready to run
 
 `docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the
@@ -425,6 +446,13 @@ boundary ledger as parameter files — 32 known-answer targets each, the
 ρ baseline on, collection units sized to the base:
 
     ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
+
+`docs/ic/params/k0n{31,37,39,41}-subgroup.json` are the same four rungs
+with subgroup bases; `docs/ic/runs/koblitz-subgroup-bases-20260912.json`
+records them, and the charged ρ/IC ratio there crosses 1 at degrees 37,
+39 and 41 (8.3 at 41). Read that file's `what_this_is_not` before
+quoting it — in particular, its degree-41 whole-process verdict is a
+bulk statement about 32 targets, not a single-instance one.
 
 `docs/ic/runs/koblitz-scaling-20260911.json` records two consecutive
 series of all four, with per-stage timings, filter and Wiedemann

@@ -297,6 +297,7 @@ pub enum FamilyArg {
     Factor,
     Divisor,
     Union,
+    Subgroup,
     All,
 }
 #[derive(Clone, Debug, Args)]
@@ -1299,7 +1300,13 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         FamilyArg::Factor => vec![Family::Factor],
         FamilyArg::Divisor => vec![Family::Divisor],
         FamilyArg::Union => vec![Family::Union],
-        FamilyArg::All => vec![Family::Factor, Family::Divisor, Family::Union],
+        FamilyArg::Subgroup => vec![Family::Subgroup],
+        FamilyArg::All => vec![
+            Family::Factor,
+            Family::Divisor,
+            Family::Union,
+            Family::Subgroup,
+        ],
     };
     let options = SearchOptions {
         m: args.summands as usize,
