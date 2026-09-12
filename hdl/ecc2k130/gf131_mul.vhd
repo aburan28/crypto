@@ -15,6 +15,9 @@
 --
 -- The tag rides alongside in a shift register and is never inspected, so
 -- one multiplier serves any number of independent contexts at II = 1.
+-- ahead_tag is the tag of the product that will retire AHEAD clocks from
+-- now, so that a consumer can start a synchronous memory read the result
+-- will need and have the data the clock it arrives.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,7 +27,8 @@ use work.gf131_pkg.all;
 
 entity gf131_mul is
   generic (
-    TAG_W : natural := 8
+    TAG_W : natural := 8;
+    AHEAD : natural := 0                     -- ahead_tag leads out_tag by this
   );
   port (
     clk       : in  std_logic;
@@ -35,7 +39,9 @@ entity gf131_mul is
     in_tag    : in  std_logic_vector(TAG_W - 1 downto 0);
     out_valid : out std_logic;
     out_r     : out gf_t;
-    out_tag   : out std_logic_vector(TAG_W - 1 downto 0)
+    out_tag   : out std_logic_vector(TAG_W - 1 downto 0);
+    ahead_valid : out std_logic;
+    ahead_tag   : out std_logic_vector(TAG_W - 1 downto 0)
   );
 end entity;
 
@@ -84,7 +90,11 @@ begin
     end if;
   end process;
 
-  out_valid <= vl(MUL_LATENCY - 1);
-  out_tag   <= tg(MUL_LATENCY - 1);
+  assert AHEAD < MUL_LATENCY report "gf131_mul: AHEAD must be below the latency" severity failure;
+
+  out_valid   <= vl(MUL_LATENCY - 1);
+  out_tag     <= tg(MUL_LATENCY - 1);
+  ahead_valid <= vl(MUL_LATENCY - 1 - AHEAD);
+  ahead_tag   <= tg(MUL_LATENCY - 1 - AHEAD);
 
 end architecture;

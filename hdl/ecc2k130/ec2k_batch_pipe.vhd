@@ -40,17 +40,25 @@
 -- a burst will overwrite happens at issue, and the overwrite happens at
 -- retire MUL_LATENCY clocks later; this needs MUL_LATENCY >= 2.
 --
--- Memories.  Each array has exactly one writer so it maps to distributed
--- RAM rather than flip-flops: x, y, d, j, tag, valid are written only when a
--- batch fills (d = x + sigma^j(x) is formed once, there, rather than at each
--- of its three uses); the tree only when a product retires; z (x3) only from
--- the issue side.  Each array is also read through one address per port per
--- clock -- the phase picks which array feeds an operand, never which address
--- an array sees -- so a port costs one LUTRAM copy, not one per use.  The
--- port addresses are registered a clock before the read and the read a
--- clock before operands are formed, so no path runs level-and-index
--- arithmetic -> RAM or RAM -> sigma -> XOR in one clock (the former was the
--- worst path at 3 ns).
+-- Memories.  The field-element arrays are block RAM: synchronous read with
+-- the output register, two clocks from address to data, one write port and
+-- one read port each, so an array read through two addresses is kept
+-- twice.  The first version had them in distributed RAM, 3k LUTs per
+-- engine; that fitted, but in a full device the write address and enable of
+-- a 131 x 256 LUTRAM fan out to a thousand LUTs spread over the SLICEMs of
+-- a whole region, and those nets were what failed timing in every engine of
+-- a 48-engine build.  A block RAM's address pins fan out to two.
+--
+--   leaf_a  (x, y, j)         written at fill, read at issue
+--   leaf_b  (y, tag, valid)   written at fill, read at retire
+--   d_a, d_b                  written at fill, read at issue (two ports)
+--   t_a, t_b                  the tree: written at retire, read at issue
+--   z                         x3: written at issue, read at retire
+--
+-- Issue reads are addressed from the burst engine's registers and land two
+-- clocks later in stage A2; retire reads are addressed from the
+-- multiplier's look-ahead tag (gf131_mul AHEAD = 2) so the data arrives
+-- with the product.  The retire path itself is a memory write plus one XOR.
 --
 -- Batches shorter than W -- the tail of a run, or a testbench -- would wait
 -- forever for leaves that never come, so a batch that has been partly
@@ -95,6 +103,9 @@ architecture rtl of ec2k_batch_pipe is
   constant W  : natural := 2 ** LOG_W;
   constant NB : natural := 2 ** LOG_NB;
 
+  -- clocks from a memory address to its data
+  constant RD_LAT : natural := 2;
+
   function maxn (a, b : natural) return natural is
   begin
     if a > b then return a; else return b; end if;
@@ -122,11 +133,18 @@ architecture rtl of ec2k_batch_pipe is
   subtype tag_t  is std_logic_vector(TAG_W - 1 downto 0);
   subtype mtag_t is std_logic_vector(MTAG_W - 1 downto 0);
 
+  -- memory words
+  constant LA_W : natural := 2 * M + 3;            -- x, y, j
+  constant LB_W : natural := M + TAG_W + 1;        -- y, tag, valid
+  subtype la_word_t is std_logic_vector(LA_W - 1 downto 0);
+  subtype lb_word_t is std_logic_vector(LB_W - 1 downto 0);
+  subtype laddr_t is natural range 0 to NB * W - 1;
+  subtype taddr_t is natural range 0 to NB * 2 * W - 1;
+
+  type la_mem_t is array (0 to NB * W - 1) of la_word_t;
+  type lb_mem_t is array (0 to NB * W - 1) of lb_word_t;
   type gf_leaf_mem_t is array (0 to NB * W - 1) of gf_t;
   type gf_tree_mem_t is array (0 to NB * 2 * W - 1) of gf_t;
-  type j_mem_t   is array (0 to NB * W - 1) of std_logic_vector(2 downto 0);
-  type tag_mem_t is array (0 to NB * W - 1) of tag_t;
-  type v_mem_t   is array (0 to NB * W - 1) of std_logic;
   type ph_mem_t  is array (0 to NB - 1) of ph_t;
   type lvl_mem_t is array (0 to NB - 1) of lvl_t;
   type q_t       is array (0 to NB - 1) of bid_t;
@@ -140,12 +158,12 @@ architecture rtl of ec2k_batch_pipe is
     return q;
   end function;
 
-  function leaf_addr (b : bid_t; i : unsigned) return natural is
+  function leaf_addr (b : bid_t; i : unsigned) return laddr_t is
   begin
     return to_integer(b & i(LOG_W - 1 downto 0));
   end function;
 
-  function tree_addr (b : bid_t; n : node_t) return natural is
+  function tree_addr (b : bid_t; n : node_t) return taddr_t is
   begin
     return to_integer(b & n);
   end function;
@@ -177,13 +195,33 @@ architecture rtl of ec2k_batch_pipe is
   end function;
 
   -- ------------------------------------------------------------------ --
-  -- memories
+  -- memories (block RAM; see the header)
   -- ------------------------------------------------------------------ --
-  signal lx, ly, ld, lz : gf_leaf_mem_t := (others => (others => '0'));
-  signal lj   : j_mem_t   := (others => (others => '0'));
-  signal ltag : tag_mem_t := (others => (others => '0'));
-  signal lval : v_mem_t   := (others => '0');
-  signal tr   : gf_tree_mem_t := (others => (others => '0'));
+  signal m_la       : la_mem_t;
+  signal m_lb       : lb_mem_t;
+  signal m_da, m_db : gf_leaf_mem_t;
+  signal m_z        : gf_leaf_mem_t;
+  signal m_ta, m_tb : gf_tree_mem_t;
+
+  attribute ram_style : string;
+  attribute ram_style of m_la : signal is "block";
+  attribute ram_style of m_lb : signal is "block";
+  attribute ram_style of m_da : signal is "block";
+  attribute ram_style of m_db : signal is "block";
+  attribute ram_style of m_z  : signal is "block";
+  attribute ram_style of m_ta : signal is "block";
+  attribute ram_style of m_tb : signal is "block";
+
+  -- read side: address (combinational), latch output, output register
+  signal ra_qa, ra_qb : laddr_t;
+  signal ra_ta, ra_tb : taddr_t;
+  signal ra_lr        : laddr_t;              -- retire (look-ahead) address
+  signal rd_la : la_word_t;
+  signal rd_lb : lb_word_t;
+  signal rd_da, rd_db, rd_z, rd_ta, rd_tb : gf_t;
+  signal rr_la : la_word_t;
+  signal rr_lb : lb_word_t;
+  signal rr_da, rr_db, rr_z, rr_ta, rr_tb : gf_t;
 
   signal b_ph  : ph_mem_t  := (others => (others => '0'));
   signal b_lvl : lvl_mem_t := (others => (others => '0'));
@@ -231,24 +269,25 @@ architecture rtl of ec2k_batch_pipe is
   -- the dummy leaf's d, a constant
   constant DUMMY_D : gf_t := DUMMY_X xor gf_sigma_j(DUMMY_X, "000");
 
-  -- stage A0: port addresses, registered so the memory read starts from a
-  -- flop rather than from the burst engine's level-and-index arithmetic
-  signal aa_valid : std_logic := '0';
-  signal aa_ph    : ph_t := (others => '0');
-  signal aa_k     : unsigned(2 downto 0) := (others => '0');
-  signal aa_leafy : std_logic := '0';
-  signal aa_tag   : mtag_t := (others => '0');
-  signal aa_ta, aa_tb : natural range 0 to NB * 2 * W - 1 := 0;
-  signal aa_qa, aa_qb : natural range 0 to NB * W - 1 := 0;
+  -- stages A0, A1 ride beside the memory read; A2 has the operands
+  type ph_pipe_t   is array (0 to RD_LAT - 1) of ph_t;
+  type k_pipe_t    is array (0 to RD_LAT - 1) of unsigned(2 downto 0);
+  type mtag_pipe_t is array (0 to RD_LAT - 1) of mtag_t;
+  type la_pipe_t   is array (0 to RD_LAT - 1) of laddr_t;
+  signal a_valid : std_logic_vector(0 to RD_LAT - 1) := (others => '0');
+  signal a_leafy : std_logic_vector(0 to RD_LAT - 1) := (others => '0');
+  signal a_ph    : ph_pipe_t := (others => (others => '0'));
+  signal a_k     : k_pipe_t := (others => (others => '0'));
+  signal a_tag   : mtag_pipe_t := (others => (others => '0'));
+  signal a_zaddr : la_pipe_t := (others => 0);
 
-  -- stage A1: raw operands read from memory
   signal ra_valid : std_logic := '0';
   signal ra_a, ra_b, ra_c : gf_t := (others => '0');
   signal ra_ph    : ph_t := (others => '0');
   signal ra_ja    : std_logic_vector(2 downto 0) := (others => '0');
   signal ra_k     : unsigned(2 downto 0) := (others => '0');
   signal ra_tag   : mtag_t := (others => '0');
-  signal ra_zaddr : natural range 0 to NB * W - 1 := 0;
+  signal ra_zaddr : laddr_t := 0;
 
   -- multiplier
   signal mul_valid : std_logic := '0';
@@ -257,6 +296,9 @@ architecture rtl of ec2k_batch_pipe is
   signal res_valid : std_logic;
   signal res_r     : gf_t;
   signal res_tag   : mtag_t;
+  signal ahd_tag   : mtag_t;
+  signal ahd_b     : bid_t;
+  signal ahd_i     : idx_t;
 
   -- output: three registers so the weight of x3 has three clocks (group
   -- popcounts, their sum, the compare)
@@ -272,14 +314,100 @@ begin
   assert MUL_LATENCY >= 2 report "in-place tree update needs MUL_LATENCY >= 2" severity failure;
 
   mul : entity work.gf131_mul
-    generic map (TAG_W => MTAG_W)
+    generic map (TAG_W => MTAG_W, AHEAD => RD_LAT)
     port map (
       clk => clk, rst => rst,
       in_valid => mul_valid, in_a => mul_a, in_b => mul_b, in_tag => mul_tag,
-      out_valid => res_valid, out_r => res_r, out_tag => res_tag);
+      out_valid => res_valid, out_r => res_r, out_tag => res_tag,
+      ahead_valid => open, ahead_tag => ahd_tag);
 
   rq_empty <= rq_wr = rq_rd;
   fl_empty <= fl_wr = fl_rd;
+
+  -- ---------------------------------------------------------------- --
+  -- memory read ports: synchronous read, then the output register.  The
+  -- writes are in the main process (one writer each).
+  -- ---------------------------------------------------------------- --
+  mem_rd : process (clk)
+  begin
+    if rising_edge(clk) then
+      rd_la <= m_la(ra_qa);
+      rd_da <= m_da(ra_qa);
+      rd_db <= m_db(ra_qb);
+      rd_lb <= m_lb(ra_lr);
+      rd_ta <= m_ta(ra_ta);
+      rd_tb <= m_tb(ra_tb);
+      rd_z  <= m_z(ra_lr);
+    end if;
+  end process;
+
+  mem_oreg : process (clk)
+  begin
+    if rising_edge(clk) then
+      rr_la <= rd_la;
+      rr_lb <= rd_lb;
+      rr_da <= rd_da;
+      rr_db <= rd_db;
+      rr_ta <= rd_ta;
+      rr_tb <= rd_tb;
+      rr_z  <= rd_z;
+    end if;
+  end process;
+
+  -- retire-side read address, from the product that retires RD_LAT clocks
+  -- from now
+  ahd_b <= unsigned(ahd_tag(MTAG_W - 1 downto KIND_W + IDX_W + 1));
+  ahd_i <= unsigned(ahd_tag(IDX_W downto 1));
+  ra_lr <= leaf_addr(ahd_b, ahd_i);
+
+  -- ---------------------------------------------------------------- --
+  -- issue-side read addresses: one per memory port, from the burst
+  -- engine's registers; the phase later picks which port feeds an operand
+  -- ---------------------------------------------------------------- --
+  addr : process (cur_b, cur_ph, cur_lvl, cur_idx)
+    variable b       : bid_t;
+    variable ph      : ph_t;
+    variable lvl     : lvl_t;
+    variable idx     : idx_t;
+    variable n, s    : node_t;
+    variable pa, pb  : node_t;
+    variable i       : leaf_t;
+    variable qa, qb  : leaf_t;
+  begin
+    b := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
+    i  := resize(idx, LOG_W);
+    qa := i;  qb := i;
+    pa := '1' & i;  pb := '1' & i;
+    case to_integer(ph) is
+      when PH_FWD =>
+        n  := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
+        pa := n(LOG_W - 1 downto 0) & '0';
+        pb := n(LOG_W - 1 downto 0) & '1';
+        qa := pa(LOG_W - 1 downto 0);
+        qb := pb(LOG_W - 1 downto 0);
+      when PH_INV =>
+        case to_integer(lvl(2 downto 0)) is
+          when 0 | 1 =>
+            pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(1, LOG_W + 1);
+          when 7 =>
+            pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
+          when others =>
+            pa := to_unsigned(0, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
+        end case;
+      when PH_BWD =>
+        n  := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
+        s  := n(LOG_W - 1 downto 0) & (not idx(0));
+        pa := n;
+        pb := s;
+        qb := s(LOG_W - 1 downto 0);
+      when others =>
+        null;
+    end case;
+    ra_ta <= tree_addr(b, pa);
+    ra_tb <= tree_addr(b, pb);
+    ra_qa <= leaf_addr(b, qa);
+    ra_qb <= leaf_addr(b, qb);
+  end process;
 
   -- ---------------------------------------------------------------- --
   -- input handshake
@@ -296,13 +424,9 @@ begin
     variable ph      : ph_t;
     variable lvl     : lvl_t;
     variable idx     : idx_t;
-    variable n, c, s : node_t;
-    variable pa, pb  : node_t;                 -- tree port addresses
+    variable n, c    : node_t;
     variable i       : leaf_t;
-    variable qa, qb  : leaf_t;                 -- leaf port addresses
     variable last    : std_logic;
-    variable leafy   : boolean;
-    variable ta, tb, da, db, xa, ya : gf_t;    -- what the ports read
     variable oa, ob  : gf_t;
     variable x3, y3  : gf_t;
     variable rb      : bid_t;
@@ -313,7 +437,8 @@ begin
     variable ri      : leaf_t;
     variable nxt_consumed : boolean;
     variable rq_pushed    : boolean;
-    variable la      : natural range 0 to NB * W - 1;
+    variable j       : std_logic_vector(2 downto 0);
+    variable la      : laddr_t;
   begin
     if rising_edge(clk) then
       if rst = '1' then
@@ -324,7 +449,7 @@ begin
         fl <= q_identity;
         fl_wr <= to_unsigned(NB, LOG_NB + 1); fl_rd <= (others => '0');
         cur_valid <= '0'; nxt_valid <= '0';
-        aa_valid <= '0'; ra_valid <= '0'; mul_valid <= '0';
+        a_valid <= (others => '0'); ra_valid <= '0'; mul_valid <= '0';
         o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; out_valid <= '0';
       else
         rq_pushed := false;
@@ -362,18 +487,16 @@ begin
         elsif p1_take = '1' or dummy_fill = '1' then
           la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
           if p1_take = '1' then
-            lx(la)   <= p1_x;
-            ly(la)   <= p1_y;
-            ld(la)   <= p1_x xor gf_sigma_j(p1_x, std_logic_vector(p1_hw(3 downto 1)));
-            lj(la)   <= std_logic_vector(p1_hw(3 downto 1));
-            ltag(la) <= p1_tag;
-            lval(la) <= '1';
+            j        := std_logic_vector(p1_hw(3 downto 1));
+            m_la(la) <= p1_x & p1_y & j;
+            m_lb(la) <= p1_y & p1_tag & '1';
+            m_da(la) <= p1_x xor gf_sigma_j(p1_x, j);
+            m_db(la) <= p1_x xor gf_sigma_j(p1_x, j);
           else
-            lx(la)   <= DUMMY_X;
-            ly(la)   <= (others => '0');
-            ld(la)   <= DUMMY_D;
-            lj(la)   <= (others => '0');
-            lval(la) <= '0';
+            m_la(la) <= DUMMY_X & GF_ZERO & "000";
+            m_lb(la) <= GF_ZERO & tag_t'(others => '0') & '0';
+            m_da(la) <= DUMMY_D;
+            m_db(la) <= DUMMY_D;
           end if;
           idle_cnt <= (others => '0');
           if fill_cnt = W - 1 then
@@ -406,7 +529,8 @@ begin
           ri    := ridx(LOG_W - 1 downto 0);
           case to_integer(rkind) is
             when PH_FWD =>
-              tr(tree_addr(rb, rn)) <= res_r;
+              m_ta(tree_addr(rb, rn)) <= res_r;
+              m_tb(tree_addr(rb, rn)) <= res_r;
               if rlast = '1' then
                 if b_lvl(to_integer(rb)) = 0 then
                   b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
@@ -418,9 +542,15 @@ begin
             when PH_INV =>
               -- t(1) holds the root, then beta_2, then 1/root; t(0) the accumulator
               case to_integer(ridx(2 downto 0)) is
-                when 0      => tr(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
-                when 7      => tr(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
-                when others => tr(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
+                when 0 =>
+                  m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
+                  m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
+                when 7 =>
+                  m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
+                  m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
+                when others =>
+                  m_ta(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
+                  m_tb(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
               end case;
               if ridx(2 downto 0) = 7 then
                 b_ph(to_integer(rb))  <= to_unsigned(PH_BWD, KIND_W);
@@ -429,7 +559,8 @@ begin
                 b_lvl(to_integer(rb)) <= resize(ridx(2 downto 0) + 1, LVL_W);
               end if;
             when PH_BWD =>
-              tr(tree_addr(rb, rn)) <= res_r;
+              m_ta(tree_addr(rb, rn)) <= res_r;
+              m_tb(tree_addr(rb, rn)) <= res_r;
               if rlast = '1' then
                 if b_lvl(to_integer(rb)) = LOG_W - 1 then
                   b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
@@ -438,17 +569,18 @@ begin
                 end if;
               end if;
             when PH_LAM =>
-              tr(tree_addr(rb, ('1' & ri))) <= res_r;           -- leaf W+i := lam
+              m_ta(tree_addr(rb, ('1' & ri))) <= res_r;             -- leaf W+i := lam
+              m_tb(tree_addr(rb, ('1' & ri))) <= res_r;
               if rlast = '1' then
                 b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
               end if;
             when others =>
-              la := leaf_addr(rb, ri);
-              y3 := res_r xor lz(la) xor ly(la);
-              o1_valid <= lval(la);
-              o1_x     <= lz(la);
+              -- rr_lb / rr_z were read for this leaf through the look-ahead tag
+              y3 := res_r xor rr_z xor rr_lb(LB_W - 1 downto TAG_W + 1);
+              o1_valid <= rr_lb(0);
+              o1_x     <= rr_z;
               o1_y     <= y3;
-              o1_tag   <= ltag(la);
+              o1_tag   <= rr_lb(TAG_W downto 1);
               if rlast = '1' then
                 fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
                 fl_wr <= fl_wr + 1;
@@ -504,100 +636,74 @@ begin
           end if;
         end if;
 
-        -- ============ stage A0: addresses ============
-        -- Every memory port gets exactly one address (pa, pb for the two
-        -- tree ports; qa, qb for the leaf arrays); the phase later picks
-        -- which port feeds each operand.
-        aa_valid <= cur_valid;
+        -- ============ stage A0: tag, beside the memory address ============
+        a_valid(0) <= cur_valid;
         if cur_valid = '1' then
           b   := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
           last := '0';
           if idx = cur_end then last := '1'; end if;
-          leafy := to_integer(lvl) = LOG_W - 1;
-          aa_k  <= lvl(2 downto 0);
-          i  := resize(idx, LOG_W);
-          qa := i;  qb := i;
-          pa := '1' & i;  pb := '1' & i;
+          a_k(0) <= lvl(2 downto 0);
+          i := resize(idx, LOG_W);
           case to_integer(ph) is
             when PH_FWD =>
-              n  := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
-              -- children 2n, 2n+1: tree nodes, or at the last level the
-              -- leaves' d
-              pa := n(LOG_W - 1 downto 0) & '0';
-              pb := n(LOG_W - 1 downto 0) & '1';
-              qa := pa(LOG_W - 1 downto 0);
-              qb := pb(LOG_W - 1 downto 0);
-              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
-                        & std_logic_vector(resize(n, IDX_W)) & last;
+              n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
+              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(resize(n, IDX_W)) & last;
             when PH_INV =>
-              -- one multiply per burst; the chain step k is the batch level
-              case to_integer(lvl(2 downto 0)) is
-                when 0 | 1 =>
-                  pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(1, LOG_W + 1);
-                when 7 =>
-                  pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
-                when others =>
-                  pa := to_unsigned(0, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
-              end case;
-              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
-                        & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
+              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
             when PH_BWD =>
               n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
               c := n(LOG_W - 1 downto 0) & idx(0);
-              s := n(LOG_W - 1 downto 0) & (not idx(0));
-              -- parent n and sibling s: a tree node, or at the last level a
-              -- leaf's d
-              pa := n;
-              pb := s;
-              qb := s(LOG_W - 1 downto 0);
-              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
-                        & std_logic_vector(resize(c, IDX_W)) & last;
+              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(resize(c, IDX_W)) & last;
             when others =>
               -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
               -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
-              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
-                        & std_logic_vector(resize(i, IDX_W)) & last;
+              a_tag(0) <= std_logic_vector(b) & std_logic_vector(ph)
+                          & std_logic_vector(resize(i, IDX_W)) & last;
           end case;
-          aa_ta <= tree_addr(b, pa);
-          aa_tb <= tree_addr(b, pb);
-          aa_qa <= leaf_addr(b, qa);
-          aa_qb <= leaf_addr(b, qb);
-          aa_ph <= ph;
-          if leafy then aa_leafy <= '1'; else aa_leafy <= '0'; end if;
+          a_zaddr(0) <= leaf_addr(b, i);
+          a_ph(0)    <= ph;
+          if to_integer(lvl) = LOG_W - 1 then a_leafy(0) <= '1'; else a_leafy(0) <= '0'; end if;
         end if;
 
-        -- ============ stage A1: read ============
-        ra_valid <= aa_valid;
-        if aa_valid = '1' then
-          ta := tr(aa_ta);
-          tb := tr(aa_tb);
-          da := ld(aa_qa);
-          db := ld(aa_qb);
-          xa := lx(aa_qa);
-          ya := ly(aa_qa);
-          ra_ja    <= lj(aa_qa);
-          ra_zaddr <= aa_qa;
-          ra_c     <= da;
-          ra_k     <= aa_k;
-          ra_tag   <= aa_tag;
-          case to_integer(aa_ph) is
+        -- ============ stage A1: the memories' output register ============
+        for s in 1 to RD_LAT - 1 loop
+          a_valid(s) <= a_valid(s - 1);
+          a_ph(s)    <= a_ph(s - 1);
+          a_k(s)     <= a_k(s - 1);
+          a_tag(s)   <= a_tag(s - 1);
+          a_zaddr(s) <= a_zaddr(s - 1);
+          a_leafy(s) <= a_leafy(s - 1);
+        end loop;
+
+        -- ============ stage A2: operands off the memories ============
+        ra_valid <= a_valid(RD_LAT - 1);
+        if a_valid(RD_LAT - 1) = '1' then
+          ra_ja    <= rr_la(2 downto 0);
+          ra_zaddr <= a_zaddr(RD_LAT - 1);
+          ra_c     <= rr_da;
+          ra_k     <= a_k(RD_LAT - 1);
+          ra_tag   <= a_tag(RD_LAT - 1);
+          case to_integer(a_ph(RD_LAT - 1)) is
             when PH_FWD =>
-              if aa_leafy = '1' then ra_a <= da; else ra_a <= ta; end if;
-              if aa_leafy = '1' then ra_b <= db; else ra_b <= tb; end if;
+              if a_leafy(RD_LAT - 1) = '1' then ra_a <= rr_da; else ra_a <= rr_ta; end if;
+              if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
             when PH_INV =>
-              ra_a <= ta;
-              ra_b <= tb;
+              ra_a <= rr_ta;
+              ra_b <= rr_tb;
             when PH_BWD =>
-              ra_a <= ta;
-              if aa_leafy = '1' then ra_b <= db; else ra_b <= tb; end if;
+              ra_a <= rr_ta;
+              if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
             when PH_LAM =>
-              ra_a <= ya;
-              ra_b <= tb;
+              ra_a <= rr_la(M + 2 downto 3);                        -- y
+              ra_b <= rr_tb;
             when others =>
-              ra_a <= ta;
-              ra_b <= xa;
+              ra_a <= rr_ta;
+              ra_b <= rr_la(LA_W - 1 downto M + 3);                 -- x
           end case;
-          ra_ph <= aa_ph;
+          ra_ph <= a_ph(RD_LAT - 1);
         end if;
 
         -- ============ stage B: form operands ============
@@ -615,7 +721,7 @@ begin
               -- ra_a = lam, ra_b = x, ra_c = d
               x3 := gf_frob(ra_a, 1) xor ra_a xor ra_c;
               ob := ra_b xor x3;
-              lz(ra_zaddr) <= x3;
+              m_z(ra_zaddr) <= x3;
             when others =>
               null;
           end case;
