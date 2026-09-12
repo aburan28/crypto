@@ -608,7 +608,7 @@
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=41 fixed-algebraic online charged crossover with full-cost loss; n=53 deterministic four-thread same-target direct remains a whole-process loss",
+            "summary": "n=41 fixed-algebraic online charged crossover with full-cost loss; n=53 preferred 4,096-cursor four-thread same-target direct remains a whole-process loss",
             "metrics": {
               "n41_timing_class": "algorithmic_charged_online",
               "n41_ic_over_rho_online_wall_ratio": 0.28554556054870023,
@@ -617,16 +617,25 @@
               "n41_four_core_amortised_ic_over_rho_wall_ratio": 3.605523155126031,
               "n53_timing_class": "whole_process_wall",
               "n53_sequential_direct_over_rho_wall_ratio": 9.431191019720737,
-              "n53_parallel_direct_over_rho_wall_ratio": 5.9746498402870625,
-              "n53_parallel_direct_wall_speedup": 1.5785345203205414,
-              "n53_parallel_direct_core_seconds_ratio": 1.4829302318645805,
-              "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 25.28170945400123,
+              "n53_parallel_direct_over_rho_wall_ratio": 5.2430745581412,
+              "n53_parallel_direct_wall_speedup": 1.0782133221818146,
+              "n53_parallel_direct_core_seconds_ratio": 0.953495691088828,
+              "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 23.257293292281137,
               "automorphism_discount": "signed Frobenius, sqrt(2n), A=2*n family",
               "same_target_n53": true,
-              "whole_process_wall_crossover": false
+              "whole_process_wall_crossover": false,
+              "n53_preferred_query_mode": "pair_pair_parallel_4096",
+              "n53_preferred_direct_wall_seconds": 26.767457699000005,
+              "n53_parallel_direct_wall_speedup_baseline": "pair_pair_parallel_1024 same-run",
+              "n53_parallel_direct_core_seconds_ratio_baseline": "pair_pair_parallel_1024 same-run",
+              "n53_parallel_4096_support_queries": 85699806,
+              "n53_parallel_4096_batch_inversions": 28308,
+              "n53_stage44_parallel_direct_over_rho_wall_ratio": 5.9746498402870625,
+              "n53_stage44_parallel_vs_sequential_wall_speedup": 1.5785345203205414,
+              "n53_stage44_parallel_vs_sequential_core_seconds_ratio": 1.4829302318645805
             },
             "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_PARALLEL_WALL_LOSS",
-            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation; four-thread n=53 remains 5.975x slower on the exact same target and costs 1.483x sequential CPU. Not asymptotic sub-rho, key recovery, or SOTA."
+            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation; preferred four-thread n=53 remains 5.243x slower on the exact same target. The 4,096 mode is 1.078x faster in wall and uses 0.953x CPU versus 1,024 in the same hosted run. Not asymptotic sub-rho, key recovery, or SOTA."
           },
           "next_target": {
             "summary": "Achieve whole-process same-target wall crossover at n=41 or n=53 while retaining build, setup, relation, LA, memory, parallel CPU, and rho charges",
@@ -637,14 +646,15 @@
               "timing class and automorphism discount explicit",
               "whole-process direct/rho ratio < 1"
             ],
-            "n53_probe_note": "Current deterministic four-thread n=53 direct/rho wall ratio is 5.975; support setup and pair-pair query remain the measured bottlenecks."
+            "n53_probe_note": "Preferred deterministic four-thread 4,096-cursor n=53 direct/rho wall ratio is 5.243; support setup and pair-pair query remain the measured bottlenecks."
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-39-fixed-algebraic-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-40-parallel-precompute-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-44-n53-parallel-result-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-44-n53-parallel-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-49-n53-width-results-20260912/verification.json"
           ],
           "history": [
             {
