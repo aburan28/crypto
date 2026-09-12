@@ -57,7 +57,7 @@ how much they are allowed to change:
 |---|---|---|---|---|
 | **L1** | **Factor-base structure** — subfield, Koblitz, sparse normal basis | the *ideal itself* (multiplicative closure injects relations) | only works on special curves/fields | **measured** by the FFD program: Subfield mean `D*` 2.04 vs Random 3.53 at `2n'=n`, and `Δ_low(Subfield)/Δ_low(Random)` diverges 6.7 → 67 |
 | **L2** | **Symmetrisation** — solve in the elementary symmetric variables `e_1..e_m` instead of `x_1..x_m` (Faugère–Gaudry–Huot–Renault) | the *variables*; the ideal is the same up to a change of coordinates | free (a one-off rewrite) | infrastructure exists (`symmetrized_semaev.rs`) but **has never been measured against `D*` or `Δ_low`** |
-| **L3** | **Hybrid slicing** — guess `k` variables, solve `2^k` slices, raising `ρ = #eqs/#vars` | the *determination ratio* | `2^k` multiplicative | **killed, iteration 1** — see §5 |
+| **L3** | **Hybrid slicing** — guess `k` variables, solve `2^k` slices, raising `ρ = #eqs/#vars` | the *determination ratio* | `2^k` multiplicative | **killed, iteration 1** (degenerate optimum) — but one-sided guessing is the cheapest route to the `D*=2` floor, and iteration 3 found it *dominates* the mutant route once guessing is allowed |
 | **L4** | **Degree falls (mutants)** — add the *nonzero* low-degree remainders of top-degree cancellations to the generator set, so `x_k · g` rows become available a degree early | the *generating set*; ideal and variables unchanged | the extraction's own climb to degree 3 | **supported on degrees, regime-dependent on cost — iteration 2.** `D*` drops 4.00 → 2.00 on the generic family; net of extraction cost it pays only where the base degree is high |
 
 L1 is the known part of the map and is not this thread's subject. L2, L3
@@ -108,10 +108,35 @@ the first obstruction to this and it is worth stating up front:
 > mean `D*` runs 2.75 → 2.45 → 2.00. The screen is not wrong; it is being
 > read outside the regime it was fitted in.
 
-Any lever that changes the variable count (L3 does; L2 does) therefore
-needs a **shape-corrected** defect before `Δ_low` can score it. That is
-now ledger row **R4′**, and it is a prerequisite for R4 rather than a
-by-product of it.
+**Corrected by iteration 4 (EXP-R4′), and the correction cuts deeper than
+the original claim.** The diagnosis above — "wrong units, needs a
+shape-corrected denominator" — is wrong. Five candidate normalisations were
+measured against `D*` on three designed groups, and the pattern is stable
+over four seeds:
+
+- Across shapes, *pooled*, the size-normalised variants look excellent
+  (`ρ_s` ≈ −0.89 to −0.91). That would say `Δ_low` is already shape-robust
+  and iteration 1 merely read it noisily.
+- But **hold `vars` fixed and the same variants collapse to `ρ_s` ≈ −0.16
+  to −0.34.** Every variant that clears the bar pooled fails it once size
+  is controlled.
+
+So the strong pooled figure is a **size proxy**: `D*` and a size-normalised
+defect both trend with `N`, and pooling across sizes reads that shared trend
+as correlation. The problem was never the denominator — the quantity being
+rescaled does not carry enough structure once the size trend is removed.
+No renormalisation can fix that, which is why R4′ is killed rather than
+solved.
+
+*Worth checking upstream:* the FFD program's own `ρ_s = −0.79` was likewise
+pooled across `2n' ∈ {4,…,14}`. It may share this property. That is a
+caveat to test, not a refutation — what EXP-G measured (cell means over ten
+operating points) is related to but not identical with what EXP-R4′
+measures, and this thread has not re-run their sweep.
+
+**Consequence for L2:** do not lean on `Δ_low` to score symmetrisation.
+Compare symmetrised against raw at **matched `(vars, eqs, ρ)`** and score on
+measured `D*` and total work — the way iterations 2 and 3 did.
 
 ---
 
@@ -160,9 +185,11 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R2** | **Symmetrisation (L2) lowers `D*`** on the descended system at matched `(n, n')` | `open` | — (needs a symmetrised descent; `symmetrized_semaev.rs` has the algebra but not the descent) |
 | **R3** | **Adding degree falls (L4) as explicit generators lowers `D*`** at matched targets | **`supported`** | EXP-R3, iteration 2. All three families, 3 operating points each, 8 matched targets per cell: `D*` strictly lower wherever there was headroom. Generic (Random) family **4.00 → 2.00** on 8/8 targets at `N = 12, 14`. `worsened = 0` everywhere, as the ideal-membership invariant requires. |
 | **R3′** | The `D*` drop **survives its own cost** — extraction must climb to degree 3, so the net saving must still be positive | **regime-dependent** | EXP-R3: net `+1.44` bits mean on Random (positive at every `N`, seeds 7/11/23 give +1.44/+1.45/+1.49); `−0.60` on Coordinate (sign varies); `−6.36` on Subfield (**killed** — the system already solved at `D* ≈ 2.1`, so the climb to 3 is pure overhead). L4 pays where the system is hard and costs where it is easy. |
-| **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | `open` | blocked on R4′ |
-| **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | `open` | EXP-R1 shows the raw `Δ_low` is not (§2.1) |
-| **R5** | **Levers compose**: a structural lever (L1/L2/L4) plus one-sided guessing reaches the floor at `c < 1/2` | `open` | — (the composition test; the only route left to beating `2^N`, given R1) |
+| **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed`** | Follows from R4″: a pooled correlation over mixed sizes is a size proxy here, so "pooled `ρ_s`" cannot establish the claim however the defect is scaled. Scoring a lever needs matched shape and total work, not a defect correlation. |
+| **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | **`killed`** | EXP-R4′, iteration 4. Five normalisations × three designed groups × four seeds. Nothing clears `ρ_s ≤ −0.6` on all three; the un-normalised variants fail cross-shape as expected (the control that shows the test has power), and the normalised ones pass *pooled* only. |
+| **R4″** | The strong pooled defect↔`D*` correlation is a **size proxy**, not structure | **`supported`** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. |
+| **R5** | **Levers compose**: one-sided guessing plus the mutant route beats guessing alone | **`killed`** | EXP-R5, iteration 3. The pre-registered gate (collapse fraction `c < 1/2`) is **degenerate** — the composed route hits `c = 0` in every cell, because mutants reach the floor with no guessing at all. Scored on total work instead (G-R5′): composed loses to raw guessing by a **flat −2.87 bits** at every `N` and seed, and neither route beats `2^N`. |
+| **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
 
 ### Pre-registered gates
 
@@ -192,9 +219,30 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   stood going in — booking only the cheap final solve would count the same
   degree twice.
 - **G-R4.** *Supported* at pooled `ρ_s ≤ −0.6` over ≥ 30 lever-generated
-  cells. *Killed* at `|ρ_s| < 0.2` or a sign flip.
+  cells. *Killed* at `|ρ_s| < 0.2` or a sign flip. **(Retired, iteration 4:
+  a pooled `ρ_s` over mixed sizes is not evidence here — see G-R4″.)**
+- **G-R4′** *(registered iteration 4)*. A defect variant is *supported* if
+  it reaches `ρ_s ≤ −0.6` on all three groups — `within-shape` (vars held),
+  `rho-varies` (slicing), `rho-matched` (sizes vary at `ρ ≈ 1`). *Killed* if
+  none does.
+- **G-R4″** *(registered iteration 4)*. The **size-controlled** statistic —
+  the mean of the per-`vars` Spearman — is what decides whether a pooled
+  correlation is structure. A variant's pooled figure counts as real only if
+  its size-controlled figure also clears −0.6; otherwise the pooled figure is
+  recorded as a size proxy.
 - **G-R5.** *Supported* if `c(composed) < c(one-side)` at ≥ 2 operating
-  points, seed-robust.
+  points, seed-robust. **(Retired as degenerate, iteration 3: the composed
+  route reaches the floor at `k = 0`, so the gate passes by construction
+  and measures nothing.)**
+- **G-R5′** *(registered iteration 3, replacing the degenerate G-R5)*.
+  Minimise total work over `k` for each route —
+  `raw(k) = 2^k·macaulay(N−k, n, D*_raw)` versus
+  `composed(k) = 2^k·[extract(N−k) + macaulay(N−k, aug, D*_mut)]` —
+  and compare the best of each against the other and against `2^N`.
+  *Supported* if composed beats both everywhere; *killed* if it loses to
+  the raw route with a flat gap; *blocked* only if the gap closes by
+  ≥ 0.25 bits per size step (a materiality threshold, added because the
+  first version of the test called a 0.01-bit wobble "closing").
 
 ---
 
@@ -202,6 +250,141 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-12 — iteration 4 (EXP-R4′ — the defect screen is a size proxy)
+
+- **Task picked.** R4′, promoted to queue head by iteration 3: L2 is the
+  only untested lever and it changes the variable count, so `Δ_low` cannot
+  score it until we know whether a shape-corrected defect exists.
+- **The hypothesis going in was wrong, which is why it was worth running.**
+  I expected over-determination to flip the law's sign (both `D*` and the
+  defect fall as `ρ` rises), making `rho-varies` the failing group. The data
+  says the opposite: `rho-varies` is where the normalised variants score
+  *best*.
+- **Experiment** (`degree_reduction::{DefectVariant, collect_defect_cells,
+  collect_rho_matched_cells}`, `examples/degree_reduction_defect.rs`,
+  snapshot `experiments/degree_reduction_defect.json`). Five candidate
+  defect summaries — normalised (the incumbent `Δ_low`), raw, generic-rank
+  fraction, per-equation, row fraction — scored against `D*` on three
+  designed groups: `within-shape` (vars held, family/target vary),
+  `rho-varies` (slicing, both shape and `ρ` move), `rho-matched` (sizes vary
+  along `2n'=n`, `ρ ≈ 1` held).
+- **Result — R4′ KILLED, and the reason is not units.**
+
+  | variant | pooled (`rho-matched`) | size-controlled |
+  |---|---:|---:|
+  | normalised (`Δ_low`) | **−0.891** | −0.292 |
+  | raw | −0.884 | −0.292 |
+  | generic-frac | −0.905 | −0.164 |
+  | per-equation | −0.905 | −0.292 |
+  | row-frac | −0.905 | −0.164 |
+
+  Every variant that clears the bar *pooled* fails it once `vars` is held
+  fixed. `D*` and a size-normalised defect both trend with `N`, and pooling
+  across sizes reads that shared trend as correlation. **The pooled figure
+  is a size proxy** (→ R4″). No denominator repairs that, because the
+  problem is not the denominator.
+- **Controls that show the test has power.** The un-normalised variants
+  (raw, per-equation) score −0.10…−0.21 on `rho-varies` while the
+  normalised ones score −0.85…−0.94 — exactly the expected failure of an
+  unscaled quantity when the variable count moves. And within a fixed shape
+  all five variants rank instances *identically* (they are monotone
+  transforms of `Σδ` there), which a test asserts; that is why no
+  renormalisation can improve the within-shape column.
+- **Method corrections made during the iteration**, both of which changed
+  the numbers:
+  1. The first grouping pooled `vars = 12` and `vars = 14` into
+     "within-shape" — already a cross-shape comparison wearing the wrong
+     label. Now one correlation per fixed `vars`.
+  2. The −0.6 threshold is calibrated against EXP-G's `ρ_s = −0.79`, which
+     was measured on **cell means**. Correlating raw instances against a
+     threshold fitted to aggregates compares unlike things; the pooled
+     groups are now aggregated to `(family, vars)` means first.
+  Statistics were also raised from 6 to 48 targets per cell after the first
+  run proved seed-unstable (`ρ_s` swinging −0.24…−0.90 across seeds). At 48
+  the figures are stable over seeds 7/11/23/41.
+- **A caveat that points upstream, stated as a caveat.** The FFD program's
+  own `ρ_s = −0.79` was also pooled across `2n' ∈ {4,…,14}`, so it may share
+  this property. This thread has not re-run EXP-G and what it measured is
+  related but not identical, so this is a flag to check, not a refutation.
+  If it does hold there, the `Δ_low` screen — the FFD proposal's headline
+  deliverable — is weaker than advertised, and that matters to the defensive
+  side of the program as much as this one.
+- **Gate verdicts.** G-R4′: **killed**. G-R4″ (registered this iteration):
+  **supported**. G-R4: **retired** — a pooled `ρ_s` over mixed sizes cannot
+  establish it.
+- **Ledger delta.** R4′ open→killed; R4 open→killed; R4″ registered→
+  supported. §2.1's iteration-1 diagnosis corrected.
+- **Next.** R4′'s kill *unblocks* R2 rather than blocking it: the
+  prescription is simply not to use `Δ_low` for scoring. L2 is measured the
+  way iterations 2 and 3 measured their levers — matched `(vars, eqs, ρ)`,
+  scored on `D*` and total work. `binary_semaev_s4.rs` already carries a
+  symmetrised `S₄` descent with its correspondence system (`m = 3`, where
+  the `m!` saving is actually meaningful, unlike the `m = 2` harness the
+  rest of this thread runs on), so the build is smaller than it looked.
+
+### 2026-09-12 — iteration 3 (EXP-R5 — the levers are substitutes, not complements)
+
+- **Task picked.** R5, the composition test promoted to the head of the
+  queue by iteration 2: one-sided guessing reaches the floor at `c = 1/2`
+  (R1′) and mutants lower the working degree on the hard family (R3), so
+  does composing them reach the floor more cheaply than either alone?
+- **The pre-registered gate turned out degenerate — reported as a gate
+  failure, not a result.** G-R5 asked for `c(composed) < 1/2`. The composed
+  route gives `c = 0.000` in every cell: the mutant system is already at
+  `D* = 2` with **no guessing at all**, which is iteration 2's finding
+  restated. The gate passes by construction. This is the *third* instance of
+  one error in this thread — a metric that counts one resource while
+  ignoring what the other costs (iteration 1: boundary optimum; iteration 2:
+  uncharged extraction). Replaced by **G-R5′**, scored on total work.
+- **Experiment** (`degree_reduction::run_composed_sweep`,
+  `examples/degree_reduction_composed.rs`, snapshot
+  `experiments/degree_reduction_composed.json`). For each non-decomposable
+  target and each `k`, take slices under one-sided guessing and measure each
+  slice **twice** — raw, and saturated with its own degree-3 falls — so the
+  two routes are compared on identical systems. Then minimise
+  `2^k·macaulay(...)` (raw) and `2^k·[extract + macaulay(...)]` (composed)
+  over `k`.
+- **Result — R5 KILLED.** The composed route is worse at its own optimum,
+  by a gap that does not move:
+
+  | `N` | log₂ 2^N | best raw | best composed | composed − raw |
+  |---:|---:|---:|---:|---:|
+  | 10 | 13.32 | 14.94 | 17.82 | **−2.89** |
+  | 12 | 15.58 | 17.20 | 20.07 | **−2.87** |
+  | 14 | 17.81 | 19.42 | 22.29 | **−2.87** |
+
+  Identical on Random and Coordinate (at the optimum both families sit at
+  the `D* = 2` floor, so the cost is shape-determined), and stable across
+  seeds 7/11/23. Neither route beats `2^N` enumeration at these sizes, and
+  **both optima sit at the largest `k` scanned** — the iteration-1
+  degeneracy again, now flagged automatically by
+  `ComposedSweep::optimum_is_interior`.
+- **Result — R5′ SUPPORTED, and it explains the kill.** At `k = 0` the
+  mutants are worth `+1.1…+1.75` bits on Random (iteration 2, reproduced).
+  The instant guessing is allowed the sign flips and stays flipped at every
+  `k > 0`. The mechanism is not subtle: **both levers drive the system to
+  the same `D* = 2` floor**, and once a slice is already there, the mutant
+  route's degree-3 extraction is pure overhead — exactly the Subfield effect
+  of iteration 2, reappearing because guessing *manufactures* easy slices.
+  So the two levers are **substitutes, not complements**; there is no
+  composition gain to find, and the flatness of the gap in `N` says that is
+  structural rather than a small-size artifact.
+- **Method note.** The first version of G-R5′ called the `−2.89 → −2.87`
+  drift "closing". It is not — that is a flat line. The gate now requires
+  the gap to shrink by ≥ 0.25 bits per size step before it may be called
+  closing; the threshold was added after seeing the wobble, and is recorded
+  here rather than quietly applied.
+- **Gate verdicts.** G-R5: **retired as degenerate**. G-R5′: **killed**
+  (both families).
+- **Ledger delta.** R5 open→killed; R5′ registered→supported.
+- **Where the thread stands.** Of the three levers that apply to *any*
+  curve, L3 is killed, L4 is supported on degrees but pays only where the
+  base degree is high, and their composition is killed. **L2
+  (symmetrisation) is the only untested lever left**, and it is now the
+  thread's whole remaining upside — with R4′ (a shape-corrected defect)
+  needed first if `Δ_low` is to score it, since symmetrisation changes the
+  variable count.
 
 ### 2026-09-11 — iteration 2 (EXP-R3 — degree falls are real, and they pay where the system is hard)
 
@@ -328,29 +511,26 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 Re-prioritised from the ledger each iteration; this is the current guess.
 
-1. **EXP-R5 — composition (R5).** *(promoted after iteration 2.)* One-sided
-   guessing reaches the `D*=2` floor at `c = 1/2` (R1′); L4 lowers the
-   working degree on the hard family (R3). Compose them: does the mutant
-   route reach the floor at `c < 1/2`? This is the only remaining path to
-   beating the `2^N` baseline iteration 1 established, and both halves are
-   now built.
-2. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
+1. **EXP-R2 — symmetrisation on `S₄` (R2).** *(Queue head after iteration
+   4.)* The thread's whole remaining upside, and no longer blocked: R4′
+   settled that `Δ_low` should not be used to score it, so L2 is measured on
+   `D*` and total work at matched `(vars, eqs, ρ)`.
+   `binary_semaev_s4.rs` already builds the symmetrised `S₄` descent plus
+   its correspondence system at `m = 3` — the regime where the `m!` saving
+   is meaningful, unlike the `m = 2` (`S₃`) harness the rest of this thread
+   uses. Two build items: (a) a Macaulay/refutation path that accepts
+   arbitrary-degree ANF, since the correspondence half is cubic and the
+   current harness is quadratic-only; (b) the eliminated presentation
+   (substitute `eᵢ = σᵢ(x)`) as the matched non-symmetrised baseline — same
+   ideal, no new algebra needed.
+3. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
    +0.94 → +1.75 → +1.62 over `N = 10,12,14`. Degree-3 extraction is cheap
    enough to run at `N = 16–18` even where `D*` itself is out of reach, using
    the *working degree* rather than measured `D*` on the base side.
-3. **EXP-R4′ — shape-corrected defect (R4′).** Needed before `Δ_low` can
-   score any lever that changes the variable count. Candidates: normalise
-   by the *generic* rank rather than the column count, or compare raw
-   syzygy counts `Σδ` at matched `(vars, eqs)`. Pure post-processing of
-   data the existing harness already emits.
-4. **EXP-R2 — symmetrised descent (R2).** The most interesting lever and
-   the most work: `symmetrized_semaev.rs` has the symmetric-function
-   algebra but the descent is built on raw coordinates, so the
-   `e`-variable descent has to be written. Do it after R4′ so the result
-   can be scored on both `D*` and a defect that means something.
-5. **EXP-R2b — symmetrisation composed with L4.** If R2 shows symmetrisation
-   moves `D*` at all, the two generating-set levers should be measured
-   together rather than separately.
+4. **EXP-R2b — symmetrisation composed with L4.** Only if R2 shows
+   symmetrisation moves `D*` at all — and iteration 3's R5′ is a warning
+   that two levers aiming at the same floor tend to be substitutes, so this
+   should be scored on total work from the start, never on a degree count.
 
 ---
 
