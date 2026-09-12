@@ -80,6 +80,7 @@ def observe_direct(path: Path, optimized: bool = False) -> dict[str, Any]:
     if optimized:
         require(summary.get("required_surplus_relations") == 0, "optimized direct retained surplus relations")
         require(summary.get("rank_aware_pair_scan") is True, "optimized direct did not use rank-aware collection")
+        require(summary.get("rank_target_deficiency") == 3, "optimized direct rank-deficiency trigger changed")
         require(summary.get("field_product_pipeline") == "x86_64_pclmul_n53_fused_reduce", "optimized direct did not use fused field products")
     return value
 
@@ -103,6 +104,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if args.optimized:
         direct_environment["KIC_RANK_SURPLUS"] = "0"
         direct_environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
+        direct_environment["KIC_RANK_TARGET_DEFICIENCY"] = "3"
         direct_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
         direct_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     rho_environment = custody.safe_child_environment()

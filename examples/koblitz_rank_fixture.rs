@@ -2107,6 +2107,10 @@ fn main() {
         .map(|value| value.parse().unwrap())
         .unwrap_or(32);
     let rank_aware_pair_scan = std::env::var("KIC_RANK_AWARE_PAIR_SCAN").as_deref() == Ok("1");
+    let rank_target_deficiency: usize = std::env::var("KIC_RANK_TARGET_DEFICIENCY")
+        .ok()
+        .map(|value| value.parse().unwrap())
+        .unwrap_or(1);
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -2117,6 +2121,7 @@ fn main() {
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
     assert!(!rank_aware_pair_scan || query_mode.pair_pair_parallel());
+    assert!(rank_target_deficiency > 0);
     assert!(!parallel_support_expansion || pair_mode == PairMode::SignedExpanded);
     assert!(!pipelined_support_expansion || parallel_support_expansion);
 
@@ -2646,11 +2651,12 @@ fn main() {
             target_generation_ns += target_generation_started.elapsed().as_nanos();
             let query_started = Instant::now();
             let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
-            let targeted_column = if rank_aware_pair_scan && echelon.rank >= columns {
-                echelon.pivots[..columns].iter().position(Option::is_none)
-            } else {
-                None
-            };
+            let targeted_column =
+                if rank_aware_pair_scan && echelon.rank + rank_target_deficiency >= columns + 1 {
+                    echelon.pivots[..columns].iter().position(Option::is_none)
+                } else {
+                    None
+                };
             rank_targeted_trials += usize::from(targeted_column.is_some());
             if let Some(column) = targeted_column {
                 if rank_target_slot_column != Some(column) {
@@ -3138,6 +3144,7 @@ fn main() {
                 "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
                 "required_surplus_relations":required_rank_surplus,
                 "rank_aware_pair_scan":rank_aware_pair_scan,
+                "rank_target_deficiency":rank_target_deficiency,
                 "rank_targeted_trials":rank_targeted_trials,
                 "rank_targeted_nonincrements":rank_targeted_nonincrements,
                 "rank_target_slot_index_builds":rank_target_slot_index_builds,
