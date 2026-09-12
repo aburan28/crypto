@@ -1,0 +1,85 @@
+name: ECC2K-130 status pages
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/ecc2k130-status.yml"
+      - "scripts/rho_status/**"
+      - "docs/ecc2k130-status/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ecc2k130-status.yml"
+      - "scripts/rho_status/**"
+      - "docs/ecc2k130-status/**"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ecc2k130-status-pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline snapshot tests
+        run: python3 scripts/rho_status/test_rho_status.py
+
+  publish:
+    needs: test
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Snapshot via walker SSH hop
+        env:
+          RHO_WALKER_HOST: ${{ secrets.RHO_WALKER_HOST }}
+          RHO_CAMPAIGN: ecc2k-130
+          RHO_STATUS_OUT: docs/ecc2k130-status/status.json
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null "$RUNNER_TEMP/walker.pem"
+          printf '%s\n' "${{ secrets.RHO_WALKER_SSH_KEY }}" > "$RUNNER_TEMP/walker.pem"
+          export RHO_WALKER_SSH_KEY="$RUNNER_TEMP/walker.pem"
+          chmod +x scripts/rho_status/fetch_via_walker.sh
+          scripts/rho_status/fetch_via_walker.sh
+          python3 -c 'import json,sys; d=json.load(open("docs/ecc2k130-status/status.json")); assert d["campaign_id"]=="ecc2k-130"; assert "point_key" not in json.dumps(d)'
+
+      - name: Merge previous Pages history
+        env:
+          PAGES_HISTORY_URL: https://aburan28.github.io/crypto/ecc2k130-status/history.json
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PAGES_HISTORY_URL" -o /tmp/history-prev.json || echo '{"points":[]}' > /tmp/history-prev.json
+          python3 scripts/rho_status/render.py \
+            --status docs/ecc2k130-status/status.json \
+            --history-in /tmp/history-prev.json \
+            --history-out docs/ecc2k130-status/history.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/ecc2k130-status
+      - id: deploy
+        uses: actions/deploy-pages@v4

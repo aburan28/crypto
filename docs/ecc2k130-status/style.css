@@ -1,0 +1,66 @@
+:root {
+  --bg: #0b1020;
+  --panel: #141a2f;
+  --ink: #e8edf7;
+  --muted: #93a0bf;
+  --line: #2a3354;
+  --good: #3ee0a2;
+  --warn: #f4c15d;
+  --bad: #ff6b7a;
+  --idle: #7f8db3;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(1200px 600px at 10% -10%, #1c2748 0%, var(--bg) 55%);
+  color: var(--ink);
+  font: 16px/1.45 "IBM Plex Sans", "Source Sans 3", ui-sans-serif, sans-serif;
+}
+body { padding: 32px 20px 48px; }
+main { max-width: 1100px; margin: 0 auto; }
+.kicker, .mono, table { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace; }
+.kicker {
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+h1 { margin: 8px 0 6px; font-size: 34px; font-weight: 650; }
+.sub { color: var(--muted); max-width: 70ch; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0; }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-width: 150px;
+  flex: 1;
+}
+.card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+.card .value { font-size: 30px; margin-top: 6px; font-weight: 650; }
+.banner {
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: #18203a;
+  font-weight: 650;
+}
+.banner.COLLECTING { color: var(--good); }
+.banner.COLLISION_RECORDED { color: var(--bad); background: #2a1520; }
+.banner.IDLE_OR_STALE { color: var(--warn); }
+.banner.EMPTY, .banner.UNREACHABLE { color: var(--idle); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-top: 12px; }
+.bar { flex: 1; background: #3d6dff; min-height: 2px; border-radius: 3px 3px 0 0; opacity: 0.85; }
+.note, footer { color: var(--muted); font-size: 13px; }
+footer { margin-top: 28px; max-width: 80ch; }
+a { color: #9db7ff; }
+.hidden { display: none; }
+@media (max-width: 720px) {
+  h1 { font-size: 26px; }
+  .card .value { font-size: 24px; }
+}

@@ -194,6 +194,10 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
 
 ## Monitoring
 
+* Public hourly DP counts (GitHub Pages): [`docs/ecc2k130-status/`](../../docs/ecc2k130-status/)
+  via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
+  That job hops through the tagged `rho-ecc2k-walker` host; it does not open
+  RDS to the internet.
 * `status.py` sums live workers' rates, checkpointed iterations × walks per
   slot (survives restarts), uploaded points, and the fraction of 2^60.9.
 * Per instance: `journalctl -u 'ecc2k130-worker@*' -f`, or without ssh the
