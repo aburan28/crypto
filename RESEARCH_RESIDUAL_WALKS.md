@@ -1365,7 +1365,139 @@ factor of two left in it, and the Krylov alternatives to the
 characteristic polynomial cost the same `≈ 64³`.  `C₃ ≈ 0.88 · 10⁶`
 is where this design settles: `5.5×` below §11.4, crossover of the
 relation phase with rho at `n ≈ 2^{96}`, break-even with the
-meet-in-the-middle oracle at `|F| ≈ 240`, `n ≈ 2^{27}`.
+meet-in-the-middle oracle at `|F| ≈ 240`, `n ≈ 2^{27}`.  §11.7 prices
+the other half of the method and says what that `2^{96}` leaves out.
+
+### 11.7 The other half of the method: linear algebra and large primes
+
+§11.4–11.6 priced the relation phase, and the `2^{96}` of §11.6 is a
+statement about that phase alone.  The method also has to solve the
+relation system, and with `|F| ≈ p/2 ∝ n^{1/3}` unknowns that is where
+the exponent really lives.  Gaudry's answer is the double-large-prime
+variation: a small base `F' ⊂ F`, relations allowed to carry up to two
+points of `F \ F'`, those cancelled by structured elimination, and a
+system over `|F'|` unknowns only.  This round builds both halves and
+measures them in the same units as the rest of the note.
+
+**What was built** (`GaudryOptions`; bench `--sparse-la`,
+`--lp-frac r`, `--lp-rule`, `--max-lp k`, `--protocol-la`):
+
+- **Sequential Wiedemann** over `Z/nZ` — `u64` Berlekamp–Massey, the
+  solution checked against every row, the logarithm confirmed by one
+  scalar multiplication in the group — preceded by **filtering**: a
+  column of weight one determines nothing, so its relation is dropped,
+  to a fixed point, and the surplus above square is then trimmed by
+  removing the relation that creates the fewest new singletons (the
+  step every sieve pipeline runs between collection and the solve;
+  compare `cryptanalysis::koblitz_sparse_la::filter_relations`).  The
+  incremental elimination of `RelationSystem` counts its
+  multiplications too, so the two are comparable.  Multiplications
+  modulo `n ≈ p³` are charged `9` `F_p` multiplications (schoolbook)
+  when they enter `S`.
+- **Large-prime elimination** with arbitrary coefficients: one pivot
+  relation per large prime; a new relation is reduced by the pivots of
+  its large primes until none is left (a full relation over `F'`) or
+  one is left without a pivot (it becomes that prime's pivot).  Pivots
+  only ever contain primes that had no pivot when stored, so reduction
+  terminates.  Checked against a hidden solution: every combined
+  relation still holds.  `|F'| = ⌈|F|^{2/3}⌉` below, Gaudry's rule.
+
+Filtering is not a refinement, it is the difference between working
+and not.  A random square selection from a sparse system misses
+`≈ e^{-w}` of its columns entirely — coupon collector, `w` the row
+weight — and is then singular by construction.  Without it, `p = 1039`
+took `445` failed solves, `66,481` residuals and `4.5 · 10⁹`
+multiplications modulo `n`; with it, the same instance takes one
+solve, `2,867` residuals and `2.5 · 10⁶`, filtering `533` relations to
+a `387`-row core.
+
+**Measured** (`--protocol-la --groebner`, the solver of §11.6, two
+seeds per size, every run correct, `experiments/21_gaudry_cubic_la.json`;
+per-size means):
+
+| `p` | `n` | variant | `|F'|` | unknowns | row weight | residuals | LA (mults mod `n`) | LA share of `S` | `S` | `S` / rho `S` |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | dense | 132 | 133 | 4 | 857 | 40,000 | 0.05 % | 2,696 | 2,328× |
+| 271 | 2^24.2 | Wiedemann | 132 | 100 | 4.0 | 898 | 170,000 | 0.19 % | 2,830 | 2,443× |
+| 271 | 2^24.2 | + large primes | 26 | 24 | 8.9 | 1,465 | 24,000 | 0.02 % | 4,634 | 4,000× |
+| 523 | 2^27.1 | dense | 248 | 249 | 4 | 1,670 | 167,000 | 0.10 % | 1,989 | 1,680× |
+| 523 | 2^27.1 | Wiedemann | 248 | 181 | 4.0 | 1,754 | 556,000 | 0.32 % | 2,094 | 1,769× |
+| 523 | 2^27.1 | + large primes | 40 | 40 | 11.2 | 3,454 | 74,000 | 0.02 % | 4,119 | 3,480× |
+| 1039 | 2^30.1 | dense | 520 | 521 | 4 | 2,842 | 885,000 | 0.31 % | 1,236 | 903× |
+| 1039 | 2^30.1 | Wiedemann | 520 | 371 | 4.0 | 3,069 | 2,340,000 | 0.74 % | 1,340 | 979× |
+| 1039 | 2^30.1 | + large primes | 65 | 64 | 14.0 | 7,860 | 238,000 | 0.03 % | 3,406 | 2,488× |
+| 2083 | 2^33.1 | dense | 1,068 | 1,069 | 4 | 5,748 | 7,313,000 | 1.22 % | 898 | 528× |
+| 2083 | 2^33.1 | Wiedemann | 1,068 | 783 | 4.0 | 6,215 | 10,428,000 | 1.61 % | 974 | 574× |
+| 2083 | 2^33.1 | + large primes | 105 | 104 | 17.9 | 21,871 | 738,000 | 0.03 % | 3,378 | 1,989× |
+
+Fitted exponents (least squares over the four sizes):
+
+| variant | total ops | residuals | linear algebra, in `n` | linear algebra, in the number of unknowns `N` |
+|---|---:|---:|---:|---:|
+| dense (incremental elimination) | `n^{0.32}` | `n^{0.31}` | `n^{0.85}` | `N^{2.47}` |
+| Wiedemann | `n^{0.32}` | `n^{0.31}` | `n^{0.68}` | `N^{2.00}` |
+| + double large primes | `n^{0.44}` | `n^{0.44}` | `n^{0.56}` | — |
+
+Reading it:
+
+- **Wiedemann is the wrong tool at these sizes, and the right one
+  later.**  Its `N^{2.00}` is exactly the `2N` matrix–vector products
+  on rows of weight `4` plus Berlekamp–Massey; the incremental
+  elimination is `N^{2.47}`, not `N³`, because the pivot rows of a
+  weight-`4` system stay sparse.  The constants put the crossover at
+  `N ≈ 11,300` unknowns — `p ≈ 22,600`, `n ≈ 2^{43}` — well past
+  anything this module runs.  Filtering also shrinks the system by
+  `25–30 %` (`1,069 → 783` unknowns at 33 bits), which is a real
+  saving that the dense path cannot use because it consumes relations
+  as they arrive.
+- **The plain method cannot beat rho at any size, whatever `C₃` is.**
+  Relations cost `n^{1/3}` and the linear algebra `n^{0.68}` at best,
+  so `S = ops/√n` falls as `n^{-1/6}` while the linear-algebra term
+  rises as `n^{+0.18}`.  Extrapolating the two measured terms, `S`
+  bottoms out at `≈ 265` around `n ≈ 2^{50}` and rises after that: the
+  method's best moment is still `≈ 200×` rho.  The `2^{96}` of §11.6
+  was the crossover of the relation phase in isolation, and this is
+  what it leaves out.
+- **The `n^{4/9}` is real.**  With `|F'| = |F|^{2/3}` the total is
+  `n^{0.44}` against the `4/9 = 0.444` of Gaudry's theorem for
+  `k = 3`, and the residual count carries it: keeping only
+  decompositions with at most two large primes keeps
+  `≈ 3|F|^{-1/3}` of them (`16 % → 4 %` measured across the range), so
+  residuals grow as `|F|^{4/3}`.  The system shrinks from `1,069` to
+  `104` unknowns at 33 bits and its linear algebra by `10×`.  That is
+  the exponent the method is famous for, measured.
+- **And it is bought at `3.8×` the work at 33 bits** (`S` `3,378`
+  against `898`), because `n^{4/9}` beats `n^{1/3}` only after the
+  plain method's linear algebra takes over, around `2^{50}` above.
+  The gap between the two variants is still widening over the measured
+  range, exactly as two exponents `0.44 > 0.32` must.
+- **Fill-in is the loose end.**  Row weight grows `8.9 → 17.9` as
+  the eliminator combines longer chains, so the large-prime linear
+  algebra measures `n^{0.56}`, above its own `4/9`.  From a `0.03 %`
+  share that takes until `n ≈ 2^{98}` to matter, but it means the
+  `n^{4/9}` as built is a relation-phase exponent, not an end-to-end
+  one; sieve implementations cap the merge level for exactly this
+  reason, and that is the piece this module does not have.
+- **Where the crossover with rho actually is.**  `S` for the
+  large-prime variant falls as `n^{4/9 - 1/2} = n^{-1/18}`, measured
+  `n^{-0.079}` over this range.  Closing the measured factor of
+  `1,989` at 33 bits at that rate takes `≈ 200` doublings of `n`: the
+  crossover is somewhere past `2^{230}`.  The exponent is genuine and
+  the constant is hopeless, and for a `k = 3` index calculus built out
+  of a `64`-solution `S₄` system that is the whole story — which is
+  why the attacks that matter in practice either cut the constant by
+  orders of magnitude (Joux–Vitse's `F₄`-based variant, decompositions
+  into `k − 1` points) or change the target (Weil-descent curves,
+  §§ on GHS elsewhere in this repository).
+
+So the ledger closes where it started, with numbers instead of
+adjectives: on `E(F_{p³})` at the sizes this module runs, Pollard rho
+costs `S ≈ 1.3` and every index-calculus variant here costs between
+`528×` and `4,000×` that; the relation phase is genuinely `n^{1/3}`
+and genuinely `O(1)` per residual; the linear algebra is genuinely the
+thing that decides the exponent; and the double-large-prime variation
+genuinely delivers `n^{4/9}` — asymptotically below rho, and out of
+reach by two hundred bits.
 
 ## References
 
