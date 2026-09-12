@@ -45,4 +45,4 @@ pub mod record;
 
 pub use connection::{drive_handshake, RecordKeys, State, TlsClient, TlsServer};
 pub use handshake::{ClientHello, Finished, HandshakeType, ServerHello};
-pub use record::{ContentType, decrypt_record, encrypt_record, parse_tls_record};
+pub use record::{decrypt_record, encrypt_record, parse_tls_record, ContentType};

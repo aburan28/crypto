@@ -210,10 +210,7 @@ impl F2BoolPoly {
                 out.push(m);
             }
         }
-        F2BoolPoly {
-            terms: out,
-            n_vars,
-        }
+        F2BoolPoly { terms: out, n_vars }
     }
 
     /// `p + q` = XOR of monomial sets.  Merge two sorted lists.
@@ -543,10 +540,7 @@ mod tests {
         let p = F2BoolPoly::from_monos(vec![F2BoolMono::var(0).mul(F2BoolMono::var(1))], 3);
         let q = F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::var(2)], 3);
         let s = spoly(&p, &q);
-        let expected = F2BoolPoly::from_monos(
-            vec![F2BoolMono::var(1).mul(F2BoolMono::var(2))],
-            3,
-        );
+        let expected = F2BoolPoly::from_monos(vec![F2BoolMono::var(1).mul(F2BoolMono::var(2))], 3);
         assert_eq!(s, expected);
     }
 
@@ -557,10 +551,7 @@ mod tests {
         let p = F2BoolPoly::from_monos(vec![F2BoolMono::var(0).mul(F2BoolMono::var(1))], 3);
         let b = F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::var(2)], 3);
         let r = reduce(&p, &[b]);
-        let expected = F2BoolPoly::from_monos(
-            vec![F2BoolMono::var(1).mul(F2BoolMono::var(2))],
-            3,
-        );
+        let expected = F2BoolPoly::from_monos(vec![F2BoolMono::var(1).mul(F2BoolMono::var(2))], 3);
         assert_eq!(r, expected);
     }
 
@@ -613,10 +604,7 @@ mod tests {
     /// excludes only (1,1,*), so 2³ - 2 = 6 solutions.
     #[test]
     fn gb_multivariate_solution_count() {
-        let f = F2BoolPoly::from_monos(
-            vec![F2BoolMono::var(0).mul(F2BoolMono::var(1))],
-            3,
-        );
+        let f = F2BoolPoly::from_monos(vec![F2BoolMono::var(0).mul(F2BoolMono::var(1))], 3);
         let gb = groebner_basis_f2(vec![f], 3);
         let sols = solve_system_f2(&gb, 3);
         assert_eq!(sols.len(), 6, "v_0 v_1 = 0 in 3 vars has 6 solutions");
@@ -643,10 +631,7 @@ mod tests {
             4,
         );
         let f2 = F2BoolPoly::from_monos(vec![F2BoolMono::var(1), F2BoolMono::var(3)], 4);
-        let f3 = F2BoolPoly::from_monos(
-            vec![F2BoolMono::var(0).mul(F2BoolMono::var(3))],
-            4,
-        );
+        let f3 = F2BoolPoly::from_monos(vec![F2BoolMono::var(0).mul(F2BoolMono::var(3))], 4);
         for f in [&f1, &f2, &f3] {
             assert_eq!(f.eval(v_star), 0, "input system unsat at v*");
         }

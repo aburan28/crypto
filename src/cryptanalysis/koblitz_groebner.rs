@@ -509,14 +509,33 @@ fn max_f4_cols() -> usize {
 ///
 /// Returns `None` if the matrix would exceed the size limits.
 pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    matrix_f4_f2_counted(polys, n_vars, degree).map(|(rows, _)| rows)
+}
+
+/// As [`matrix_f4_f2`], but also returns the number of 64-bit word XORs
+/// the row reduction performed.
+///
+/// The count exists so an F4 reduction can be priced in the same unit as
+/// the other engines that solve these systems — notably
+/// [`crate::cryptanalysis::crossbred`], whose preprocessing is the same
+/// kind of elimination on the same kind of matrix.  It measures the
+/// elimination only: building the matrix and reading the rows back out
+/// are not counted, because they are linear in the matrix size and the
+/// elimination is not.
+pub fn matrix_f4_f2_counted(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<F2BoolPoly>, u64)> {
     if polys.is_empty() {
-        return Some(Vec::new());
+        return Some((Vec::new(), 0));
     }
     let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
     if matrix.is_empty() {
-        return Some(Vec::new());
+        return Some((Vec::new(), 0));
     }
-    let rank = rref_f2(&mut matrix, cols.len());
+    let mut word_ops = 0u64;
+    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
 
     let n_vars_out = polys[0].n_vars;
     let words = cols.len().div_ceil(64);
@@ -531,7 +550,7 @@ pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
-    Some(out)
+    Some((out, word_ops))
 }
 
 /// Build the Macaulay matrix: every product `p · m` with
@@ -613,6 +632,13 @@ fn build_macaulay(
 /// Reduced row echelon form over `F_2`; returns the rank, with the
 /// pivot rows moved to the front of `matrix`.
 fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let mut ignored = 0u64;
+    rref_f2_counted(matrix, n_cols, &mut ignored)
+}
+
+/// [`rref_f2`], accumulating the 64-bit word XORs it performs into
+/// `word_ops`.
+fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
     for c in 0..n_cols {
@@ -628,6 +654,7 @@ fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
                 for k in 0..words {
                     matrix[r][k] ^= matrix[pivot_row][k];
                 }
+                *word_ops += words as u64;
             }
         }
         pivot_row += 1;

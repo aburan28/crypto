@@ -46,20 +46,19 @@ use super::experiment::{
     self, log_table_from_doc, log_table_to_doc, FactorBaseDocument, LinearAlgebraMode,
     LogTableDocument, Solver,
 };
-use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
-use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use clap::{Args, ValueEnum};
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, FactorBaseLogSolver,
-    FactorBaseLogTable,
+    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x,
     solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
-    IndividualLogSolver,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
-    RelationCollector, RelationWorkUnit,
+    FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase, IndividualLogSolver,
+    KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable, RelationCollector,
+    RelationWorkUnit,
 };
+use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
@@ -326,11 +325,21 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
         return Err("collection.unit_trials must be 1..=100000000".into());
     }
     if col.units == 0 || col.max_units < col.units || col.max_units > 100_000 {
-        return Err("collection.units must be at least 1 and at most collection.max_units (≤ 100000)".into());
+        return Err(
+            "collection.units must be at least 1 and at most collection.max_units (≤ 100000)"
+                .into(),
+        );
     }
     for (i, t) in p.targets.iter().enumerate() {
-        if [t.known_log.is_some(), t.random_seed.is_some(), t.public_hash_seed.is_some()]
-            .into_iter().filter(|set| *set).count() != 1
+        if [
+            t.known_log.is_some(),
+            t.random_seed.is_some(),
+            t.public_hash_seed.is_some(),
+        ]
+        .into_iter()
+        .filter(|set| *set)
+        .count()
+            != 1
         {
             return Err(format!(
                 "target {i}: set exactly one of known_log, random_seed, or public_hash_seed"
@@ -494,7 +503,10 @@ pub fn parse_units(text: &str) -> Result<UnitList, String> {
             Some((a, b)) => (a.trim().parse::<usize>(), b.trim().parse::<usize>()),
             None => (part.parse::<usize>(), part.parse::<usize>()),
         };
-        let (lo, hi) = (lo.map_err(|e| format!("{part:?}: {e}"))?, hi.map_err(|e| format!("{part:?}: {e}"))?);
+        let (lo, hi) = (
+            lo.map_err(|e| format!("{part:?}: {e}"))?,
+            hi.map_err(|e| format!("{part:?}: {e}"))?,
+        );
         if lo > hi {
             return Err(format!("{part:?}: empty range"));
         }
@@ -561,7 +573,9 @@ fn known_scalar(c: &KoblitzCurve, t: &TargetSpec) -> Result<BigUint, String> {
     let k = if let Some(s) = &t.known_log {
         super::params::number(s)?
     } else {
-        let seed = t.random_seed.expect("validated known-scalar target has known_log or random_seed");
+        let seed = t
+            .random_seed
+            .expect("validated known-scalar target has known_log or random_seed");
         let mut rng = StdRng::seed_from_u64(seed ^ 0x534f_4c56_4552_5447);
         BigUint::from(rng.gen_range(1..c.subgroup_order.to_u64_digits()[0]))
     };
@@ -779,13 +793,27 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "ic — workflow {:?} in {} ({}); {}; {} summands; engine {}",
         p.name,
         args.dir.display(),
-        if resumed { format!("resuming, run {}", state.runs) } else { "fresh".into() },
-        experiment::curve_label(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b),
+        if resumed {
+            format!("resuming, run {}", state.runs)
+        } else {
+            "fresh".into()
+        },
+        experiment::curve_label(
+            p.curve.degree,
+            p.curve.curve_a,
+            p.curve.subfield,
+            p.curve.curve_b
+        ),
         p.summands,
         p.solver.name()
     ));
 
-    let c = experiment::curve(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b)?;
+    let c = experiment::curve(
+        p.curve.degree,
+        p.curve.curve_a,
+        p.curve.subfield,
+        p.curve.curve_b,
+    )?;
     let mut stage_reports: Vec<Value> = Vec::new();
     let mut overall_failed: Option<String> = None;
 
@@ -812,10 +840,18 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     let best = report.best().ok_or(
                         "factor-base search found no candidate that decomposes any target",
                     )?;
-                    let top: Vec<Value> = report.candidates.iter().take(5).map(candidate_json).collect();
-                    (best.spec.clone(), Some(json!({"candidates_scored":report.candidates.len(),
+                    let top: Vec<Value> = report
+                        .candidates
+                        .iter()
+                        .take(5)
+                        .map(candidate_json)
+                        .collect();
+                    (
+                        best.spec.clone(),
+                        Some(json!({"candidates_scored":report.candidates.len(),
                         "targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
-                        "elapsed_ms":report.elapsed_ms,"top":top})))
+                        "elapsed_ms":report.elapsed_ms,"top":top})),
+                    )
                 }
             };
             let fb = experiment::materialize(&c, &spec)?;
@@ -836,7 +872,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             };
             write_atomic(&state_path, &state)?;
             if let Some(sr) = search_report {
-                stage_reports.push(json!({"stage":"select","status":"complete","ran":true,"search":sr}));
+                stage_reports
+                    .push(json!({"stage":"select","status":"complete","ran":true,"search":sr}));
             }
             say(&format!(
                 "[1/4] select: complete — {} ({} points, {} signed orbits)",
@@ -848,13 +885,27 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         };
     if !select_ran {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":false}));
-    } else if stage_reports.last().map_or(true, |v| v["stage"] != "select") {
+    } else if stage_reports
+        .last()
+        .map_or(true, |v| v["stage"] != "select")
+    {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":true}));
     }
-    let columns = crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
+    let columns =
+        crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
     let factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
     if args.stop_after == Some(Stage::Select) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            factor_base_summary,
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 2: collect (work units) ──────────────────────────────
@@ -880,10 +931,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     p.collection.max_units
                 ));
             }
-            list.iter().copied().filter(|u| !units.contains_key(u)).collect()
+            list.iter()
+                .copied()
+                .filter(|u| !units.contains_key(u))
+                .collect()
         }
         None if logs_done => Vec::new(),
-        None => (0..p.collection.units).filter(|u| !units.contains_key(u)).collect(),
+        None => (0..p.collection.units)
+            .filter(|u| !units.contains_key(u))
+            .collect(),
     };
     if ignored > 0 {
         say(&format!(
@@ -921,7 +977,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
     let requested_present = (0..p.collection.units).all(|u| units.contains_key(&u));
     state.collect = StageState {
-        status: if requested_present || logs_done { StageStatus::Complete } else { StageStatus::Pending },
+        status: if requested_present || logs_done {
+            StageStatus::Complete
+        } else {
+            StageStatus::Pending
+        },
         artifact: Some(RELATIONS_DIR.into()),
         elapsed_seconds: state.collect.elapsed_seconds + t1.elapsed().as_secs_f64(),
         reason: None,
@@ -954,7 +1014,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     if worker_mode || args.stop_after == Some(Stage::Collect) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            factor_base_summary,
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 3: logs (merge, verify, solve) ───────────────────────
@@ -965,8 +1035,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         if doc.spec != spec {
             return Err("logs.json was built over a different factor base".into());
         }
-        say(&format!("[3/4] logs: reused {} ({} columns, re-verified)", LOGS_FILE, table.len()));
-        stage_reports.push(json!({"stage":"logs","status":"complete","ran":false,"columns":table.len()}));
+        say(&format!(
+            "[3/4] logs: reused {} ({} columns, re-verified)",
+            LOGS_FILE,
+            table.len()
+        ));
+        stage_reports
+            .push(json!({"stage":"logs","status":"complete","ran":false,"columns":table.len()}));
         Some(table)
     } else {
         say(&format!(
@@ -974,13 +1049,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             state.relations_collected,
             units.len()
         ));
-        let merged: Vec<CollectedRelation> =
-            units.values().flat_map(|d| d.relations.iter().cloned()).collect();
+        let merged: Vec<CollectedRelation> = units
+            .values()
+            .flat_map(|d| d.relations.iter().cloned())
+            .collect();
         // One solver for the whole stage: the orbit map of the base and
         // the verification of a relation are each paid once, however many
         // rounds of collection it takes to determine the columns.
-        let mut solver = FactorBaseLogSolver::new(&c, &fb, &ic)
-            .ok_or("factor base has no projected columns")?;
+        let mut solver =
+            FactorBaseLogSolver::new(&c, &fb, &ic).ok_or("factor base has no projected columns")?;
         solver.push(&merged);
         let mut loaded = merged.len();
         let mut outcome = solver.try_solve();
@@ -1016,7 +1093,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let trials_total: u64 = units.values().map(|d| d.count).sum();
         let outcome = outcome.or_else(|| {
             Some((
-                FactorBaseLogTable { columns: Vec::new() },
+                FactorBaseLogTable {
+                    columns: Vec::new(),
+                },
                 solver.report(),
             ))
         });
@@ -1068,7 +1147,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 None
             }
             None => {
-                let reason = "factor base has no usable projected columns for this summand count".to_string();
+                let reason = "factor base has no usable projected columns for this summand count"
+                    .to_string();
                 state.logs = StageState {
                     status: StageStatus::Failed,
                     artifact: None,
@@ -1076,24 +1156,46 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     reason: Some(reason.clone()),
                 };
                 write_atomic(&state_path, &state)?;
-                stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason}));
+                stage_reports
+                    .push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason}));
                 overall_failed = Some(reason);
                 None
             }
         }
     };
     let Some(table) = table else {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, overall_failed, begin, "failed"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            factor_base_summary,
+            None,
+            overall_failed,
+            begin,
+            "failed",
+        ));
     };
     if args.stop_after == Some(Stage::Logs) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            factor_base_summary,
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 3: solve (per-target resumable) ──────────────────────
     let t2 = Instant::now();
     let mut solutions: SolutionsDocument = if sol_path.exists() {
         let d: SolutionsDocument = read_json(&sol_path)?;
-        if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c) {
+        if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c)
+        {
             return Err("solutions.json belongs to a different run".into());
         }
         d
@@ -1108,9 +1210,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             solutions: Vec::new(),
         }
     };
-    let already: std::collections::HashSet<usize> =
-        solutions.solutions.iter().filter(|s| s.verified).map(|s| s.index).collect();
-    let pending: Vec<usize> = (0..p.targets.len()).filter(|i| !already.contains(i)).collect();
+    let already: std::collections::HashSet<usize> = solutions
+        .solutions
+        .iter()
+        .filter(|s| s.verified)
+        .map(|s| s.index)
+        .collect();
+    let pending: Vec<usize> = (0..p.targets.len())
+        .filter(|i| !already.contains(i))
+        .collect();
     say(&format!(
         "[4/4] solve: {} targets, {} already solved, {} pending",
         p.targets.len(),
@@ -1119,7 +1227,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     ));
     // The pair table is shared with collection; built once per process.
     let mut pair_table_seconds = 0.0f64;
-    if ic.strategy == DecompositionStrategy::PairTable && (!pending.is_empty() || p.baseline.rho) && pair.is_none() {
+    if ic.strategy == DecompositionStrategy::PairTable
+        && (!pending.is_empty() || p.baseline.rho)
+        && pair.is_none()
+    {
         let tp = Instant::now();
         pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
         pair_table_seconds = tp.elapsed().as_secs_f64();
@@ -1143,13 +1254,19 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             Some((d, r)) => (Some(d), r.trials),
             None => (None, 0),
         };
-        let verified = recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
-            && expected.as_ref().map_or(true, |known| recovered.as_ref() == Some(known));
+        let verified = recovered
+            .as_ref()
+            .is_some_and(|d| c.mul(c.generator(), d) == q)
+            && expected
+                .as_ref()
+                .map_or(true, |known| recovered.as_ref() == Some(known));
         // Replace any earlier unverified attempt for this index.
         solutions.solutions.retain(|s| s.index != i);
         solutions.solutions.push(Solution {
             index: i,
-            expected: expected.as_ref().map(ToString::to_string)
+            expected: expected
+                .as_ref()
+                .map(ToString::to_string)
                 .unwrap_or_else(|| "not_constructed".into()),
             target: Some(target_record),
             recovered: recovered.map(|d| d.to_string()),
@@ -1175,10 +1292,20 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     let all_verified = state.solved_targets == p.targets.len();
     state.solve = StageState {
-        status: if all_verified { StageStatus::Complete } else { StageStatus::Failed },
+        status: if all_verified {
+            StageStatus::Complete
+        } else {
+            StageStatus::Failed
+        },
         artifact: Some(SOLUTIONS_FILE.into()),
         elapsed_seconds: t2.elapsed().as_secs_f64(),
-        reason: (!all_verified).then(|| format!("{} of {} targets unsolved", p.targets.len() - state.solved_targets, p.targets.len())),
+        reason: (!all_verified).then(|| {
+            format!(
+                "{} of {} targets unsolved",
+                p.targets.len() - state.solved_targets,
+                p.targets.len()
+            )
+        }),
     };
     write_atomic(&state_path, &state)?;
     stage_reports.push(json!({"stage":"solve","status":if all_verified{"complete"}else{"failed"},"ran":true,
@@ -1189,7 +1316,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // ── Baseline: signed-Frobenius ρ on the same targets, same process ──
     if p.baseline.rho {
         let t3 = Instant::now();
-        say(&format!("[ρ]   baseline: signed-Frobenius rho on {} targets …", p.targets.len()));
+        say(&format!(
+            "[ρ]   baseline: signed-Frobenius rho on {} targets …",
+            p.targets.len()
+        ));
         let mut rows = Vec::with_capacity(p.targets.len());
         let (mut rho_seconds, mut rho_iterations, mut rho_verified) = (0.0f64, 0u64, 0usize);
         for i in 0..p.targets.len() {
@@ -1204,16 +1334,23 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             let report = koblitz_signed_frobenius_rho_with_progress(&c, &q, &options, &mut |_| {});
             let secs = t.elapsed().as_secs_f64();
             let verified = report.verified
-                && report.recovered_log.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
-                && expected.as_ref().map_or(true, |known| report.recovered_log.as_ref() == Some(known));
+                && report
+                    .recovered_log
+                    .as_ref()
+                    .is_some_and(|d| c.mul(c.generator(), d) == q)
+                && expected
+                    .as_ref()
+                    .map_or(true, |known| report.recovered_log.as_ref() == Some(known));
             rho_seconds += secs;
             rho_iterations += report.iterations;
             rho_verified += usize::from(verified);
-            rows.push(json!({"index":i,"verified":verified,"iterations":report.iterations,
+            rows.push(
+                json!({"index":i,"verified":verified,"iterations":report.iterations,
                 "restarts":report.restarts_attempted,"seconds":secs,
                 "walk_group_additions":report.charges.walk_group_additions,
                 "recovered":report.recovered_log.as_ref().map(ToString::to_string),
-                "target":target_record}));
+                "target":target_record}),
+            );
             say(&format!(
                 "      target {i}: rho {} after {} iterations ({:.3}s)",
                 if verified { "verified" } else { "FAILED" },
@@ -1222,13 +1359,31 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             ));
         }
         let targets = p.targets.len().max(1) as f64;
-        let descent_total: f64 = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.elapsed_seconds).sum();
-        let descent_trials: usize = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.descent_trials).sum();
-        let precompute = state.select.elapsed_seconds + state.collect.elapsed_seconds + state.logs.elapsed_seconds;
+        let descent_total: f64 = solutions
+            .solutions
+            .iter()
+            .filter(|x| x.verified)
+            .map(|x| x.elapsed_seconds)
+            .sum();
+        let descent_trials: usize = solutions
+            .solutions
+            .iter()
+            .filter(|x| x.verified)
+            .map(|x| x.descent_trials)
+            .sum();
+        let precompute = state.select.elapsed_seconds
+            + state.collect.elapsed_seconds
+            + state.logs.elapsed_seconds;
         let ic_charged = descent_total / targets;
         let ic_amortised = (precompute + pair_table_seconds + descent_total) / targets;
         let rho_per_target = rho_seconds / targets;
-        let ratio = |ic: f64| if ic > 0.0 { rho_per_target / ic } else { f64::INFINITY };
+        let ratio = |ic: f64| {
+            if ic > 0.0 {
+                rho_per_target / ic
+            } else {
+                f64::INFINITY
+            }
+        };
         let vs_rho = json!({
             "n":c.n,"subgroup_order":c.subgroup_order.to_string(),"targets":p.targets.len(),
             "claim_boundary":if p.targets.iter().any(|target| target.public_hash_seed.is_some()) {
@@ -1254,14 +1409,25 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             "targets_detail":rows,
             "elapsed_seconds":t3.elapsed().as_secs_f64()});
         write_atomic(&args.dir.join(BASELINE_FILE), &vs_rho)?;
-        stage_reports.push(json!({"stage":"baseline","status":"complete","ran":true,"vs_rho":vs_rho}));
+        stage_reports
+            .push(json!({"stage":"baseline","status":"complete","ran":true,"vs_rho":vs_rho}));
         say(&format!(
             "[ρ]   baseline: rho {:.4}s/target ({} verified) vs descent {:.4}s/target, amortised {:.4}s/target — charged ratio {:.1}×, amortised {:.2}×",
             rho_per_target, rho_verified, ic_charged, ic_amortised, ratio(ic_charged), ratio(ic_amortised)
         ));
     }
     let status = if all_verified { "complete" } else { "failed" };
-    Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, Some(&solutions), overall_failed, begin, status))
+    Ok(finish(
+        &p,
+        &state,
+        &args,
+        stage_reports,
+        factor_base_summary,
+        Some(&solutions),
+        overall_failed,
+        begin,
+        status,
+    ))
 }
 
 #[allow(clippy::too_many_arguments)]

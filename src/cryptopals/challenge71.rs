@@ -38,8 +38,8 @@
 use crate::cryptopals::Report;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 /// A "partial bit" array: each position is `Some(0)`, `Some(1)`, or
 /// `None` (unknown).  Index 0 is the least-significant bit.
@@ -76,8 +76,7 @@ pub fn cold_boot_recover_p(
     }
     // Initial state at bit 0: p_lsb = 1 (primes are odd), so
     // q_lsb = N (mod 2) = 1.
-    let mut candidates: Vec<(BigUint, BigUint)> =
-        vec![(BigUint::one(), BigUint::one())];
+    let mut candidates: Vec<(BigUint, BigUint)> = vec![(BigUint::one(), BigUint::one())];
 
     for level in 1..bits {
         let mask = BigUint::one() << (level + 1);
@@ -103,8 +102,11 @@ pub fn cold_boot_recover_p(
                 // The new_p's parity at position 0 is 1 (odd), so
                 // new_p · 2^level mod 2^(level+1) = 2^level (since other bits don't survive).
                 // Thus q_bit = (needed >> level) & 1.
-                let derived_q_bit = ((&needed >> level) & BigUint::one()).to_u32_digits()
-                    .get(0).copied().unwrap_or(0) as u8;
+                let derived_q_bit = ((&needed >> level) & BigUint::one())
+                    .to_u32_digits()
+                    .get(0)
+                    .copied()
+                    .unwrap_or(0) as u8;
                 if let Some(known) = q_bit_known {
                     if derived_q_bit != known {
                         continue; // prune
@@ -161,10 +163,18 @@ pub fn run() -> Report {
     let partial_q = corrupt(q, bits, unknown_prob, &mut rng);
     let known_p = partial_p.iter().filter(|b| b.is_some()).count();
     let known_q = partial_q.iter().filter(|b| b.is_some()).count();
-    r.line(format!("N has {} bits, prime p has {} bits", n.bits(), bits));
+    r.line(format!(
+        "N has {} bits, prime p has {} bits",
+        n.bits(),
+        bits
+    ));
     r.line(format!(
         "Known bits: p={}/{}  q={}/{}  (unknown_prob = {:.0}%)",
-        known_p, bits, known_q, bits, unknown_prob * 100.0
+        known_p,
+        bits,
+        known_q,
+        bits,
+        unknown_prob * 100.0
     ));
     match cold_boot_recover_p(&partial_p, &partial_q, n, bits) {
         Some(recovered) => {
@@ -190,8 +200,8 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(42);
         let partial_p = corrupt(&kp.private.p, bits, 0.30, &mut rng);
         let partial_q = corrupt(&kp.private.q, bits, 0.30, &mut rng);
-        let recovered = cold_boot_recover_p(&partial_p, &partial_q, &kp.public.n, bits)
-            .expect("must recover");
+        let recovered =
+            cold_boot_recover_p(&partial_p, &partial_q, &kp.public.n, bits).expect("must recover");
         assert_eq!(recovered, kp.private.p);
     }
 }

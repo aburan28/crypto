@@ -21,7 +21,10 @@ pub fn run() -> Report {
     let (l, k, pt, _) = best.unwrap();
     r.line(format!("source hex line : {}", l));
     r.line(format!("key             : 0x{k:02x}"));
-    r.line(format!("plaintext       : {:?}", String::from_utf8_lossy(&pt)));
+    r.line(format!(
+        "plaintext       : {:?}",
+        String::from_utf8_lossy(&pt)
+    ));
     let expected = b"Now that the party is jumping\n";
     assert_eq!(pt, expected);
     r.succeed()

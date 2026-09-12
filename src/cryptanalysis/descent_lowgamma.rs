@@ -52,9 +52,7 @@
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::descent_expansion::{report_from_graph, Biadjacency, ExpansionReport};
-use crate::cryptanalysis::ffd_harness::{
-    quad_monomial_index, weil_descend_s3, F2BoolPoly,
-};
+use crate::cryptanalysis::ffd_harness::{quad_monomial_index, weil_descend_s3, F2BoolPoly};
 use crate::cryptanalysis::pc_degree_harness::refutation_scan;
 
 // ── Factor-base subspace ────────────────────────────────────────────
@@ -85,12 +83,18 @@ impl FactorSubspace {
     /// Build a structured subspace. `seed` is used only by `Random`.
     /// Returns `None` if the family is infeasible (e.g. `Subfield` with
     /// `n' ∤ n`).
-    pub fn build(family: BasisFamily, n: u32, n_sub: u32, irr: &IrreduciblePoly, seed: u64) -> Option<Self> {
+    pub fn build(
+        family: BasisFamily,
+        n: u32,
+        n_sub: u32,
+        irr: &IrreduciblePoly,
+        seed: u64,
+    ) -> Option<Self> {
         assert!(n_sub >= 1 && n_sub <= n);
         let cols = match family {
-            BasisFamily::Coordinate => {
-                (0..n_sub).map(|p| F2mElement::from_bit_positions(&[p], n)).collect()
-            }
+            BasisFamily::Coordinate => (0..n_sub)
+                .map(|p| F2mElement::from_bit_positions(&[p], n))
+                .collect(),
             BasisFamily::Subfield => subfield_basis(n, n_sub, irr)?,
             BasisFamily::Random => random_fullrank_basis(n, n_sub, seed),
         };
@@ -131,7 +135,11 @@ fn subfield_basis(n: u32, d: u32, irr: &IrreduciblePoly) -> Option<Vec<F2mElemen
     }
     if d == n {
         // The whole field; standard basis {z^0, …, z^{n-1}}.
-        return Some((0..n).map(|i| F2mElement::from_bit_positions(&[i], n)).collect());
+        return Some(
+            (0..n)
+                .map(|i| F2mElement::from_bit_positions(&[i], n))
+                .collect(),
+        );
     }
     // Matrix of L(x) = Frob^d(x) + x over F_2: column i = L(z^i) as bits.
     // L is F_2-linear, so L(Σ x_i z^i) = Σ x_i L(z^i).
@@ -492,7 +500,9 @@ pub fn run_lowgamma_cell(
 
     for t in 0..trials {
         let v = match family {
-            BasisFamily::Random => FactorSubspace::build(family, n, n_sub, irr, seed ^ (0x1000 + t as u64)),
+            BasisFamily::Random => {
+                FactorSubspace::build(family, n, n_sub, irr, seed ^ (0x1000 + t as u64))
+            }
             _ => FactorSubspace::build(family, n, n_sub, irr, 0),
         }?;
         let b = rand_nz(n, &mut next);
@@ -516,8 +526,16 @@ pub fn run_lowgamma_cell(
         trials,
         decomposed,
         decomp_rate: decomposed as f64 / trials.max(1) as f64,
-        gamma_mean: if gcount > 0 { gsum / gcount as f64 } else { f64::NAN },
-        dstar_mean: if nondecomp > 0 { Some(dsum / nondecomp as f64) } else { None },
+        gamma_mean: if gcount > 0 {
+            gsum / gcount as f64
+        } else {
+            f64::NAN
+        },
+        dstar_mean: if nondecomp > 0 {
+            Some(dsum / nondecomp as f64)
+        } else {
+            None
+        },
         nondecomp,
     })
 }
@@ -567,7 +585,10 @@ mod tests {
         let via_restrict = restrict_to_subspace(&full, n, n_sub);
         assert_eq!(via_sub.len(), via_restrict.len());
         for (p, q) in via_sub.iter().zip(via_restrict.iter()) {
-            assert_eq!(p.coeffs, q.coeffs, "coordinate substitution must equal restrict_to_subspace");
+            assert_eq!(
+                p.coeffs, q.coeffs,
+                "coordinate substitution must equal restrict_to_subspace"
+            );
         }
     }
 
@@ -588,7 +609,11 @@ mod tests {
         // wsq ∈ span{1, w} ⇔ rank{1, w, wsq} = 2.
         let mut test = cols.clone();
         test.push(wsq);
-        assert_eq!(rank_f2m(&test, n), 2, "subfield must be closed under squaring");
+        assert_eq!(
+            rank_f2m(&test, n),
+            2,
+            "subfield must be closed under squaring"
+        );
     }
 
     /// Subfield is rejected when `n' ∤ n`.
@@ -707,7 +732,11 @@ mod tests {
         let irr = choose_irreducible(n);
         let b = F2mElement::from_bit_positions(&[0, 3], n);
         let x3 = F2mElement::from_bit_positions(&[1], n);
-        for fam in [BasisFamily::Coordinate, BasisFamily::Subfield, BasisFamily::Random] {
+        for fam in [
+            BasisFamily::Coordinate,
+            BasisFamily::Subfield,
+            BasisFamily::Random,
+        ] {
             let v = FactorSubspace::build(fam, n, n_sub, &irr, 0x99).unwrap();
             let pt = measure_on_subspace(n, &v, &irr, &b, &x3, 2 * n_sub + 2);
             assert_eq!(pt.report.left, n as usize);

@@ -113,6 +113,7 @@ pub mod coleman_integration;
 pub mod coordinate_descent;
 pub mod coordinate_quotients;
 pub mod coordinate_search;
+pub mod crossbred;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
@@ -144,11 +145,11 @@ pub mod invalid_curve_attack;
 pub mod j0_twists;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
+pub mod koblitz_fast;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
-pub mod koblitz_fast;
 pub mod koblitz_sparse_la;
 pub mod koblitz_symmetrised;
 pub mod lattice;
@@ -249,34 +250,34 @@ pub use koblitz_bench::{
 };
 pub use koblitz_groebner::{
     build_decomposition_system, first_fall_degree, macaulay_profile, matrix_f4_f2,
-    solve_boolean_system, solve_boolean_system_filtered, sym_semaev_s3, DecompositionSystem,
-    FieldStructure, MacaulayProfile, SolveOptions, SolveStats, SolverEngine, SymElement,
+    matrix_f4_f2_counted, solve_boolean_system, solve_boolean_system_filtered, sym_semaev_s3,
+    DecompositionSystem, FieldStructure, MacaulayProfile, SolveOptions, SolveStats, SolverEngine,
+    SymElement,
 };
 pub use koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, available_subspace_dimensions,
     build_explicit_frobenius_orbit_factor_base, build_frobenius_factor_base,
-    build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base, cyclotomic_cosets,
-    enumerate_decompose, factor_x_n_minus_1, find_irreducible, find_irreducible_sparse,
-    frobenius_eigenvalue, groebner_decompose, individual_log, individual_log_with_pair_table,
+    build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
+    build_subgroup_orbit_factor_base, cyclotomic_cosets, enumerate_decompose, factor_x_n_minus_1,
+    find_irreducible, find_irreducible_sparse, frobenius_eigenvalue, frobenius_eigenvalue_q,
+    groebner_decompose, individual_log, individual_log_with_pair_table, invariant_factors,
     invariant_subspace_basis, is_irreducible_f2, koblitz_index_calculus_dlp,
     koblitz_index_calculus_dlp_with_factor_base,
     koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
     koblitz_signed_frobenius_rho_reference, koblitz_signed_frobenius_rho_with_progress,
-    koblitz_speedup_model, linearised_kernel, IndividualLogSolver,
-    linearised_kernel_basis, order_of_2_mod_n, pack_point, point_key, points_with_x, probe_scalar,
+    koblitz_speedup_model, linearised_kernel, linearised_kernel_basis, order_of_2_mod_n,
+    pack_point, point_key, points_with_x, probe_scalar, q_linearised_kernel_basis,
     restrict_factor_base_to_orbits, sat_decompose, saturate_factor_base_two_torsion,
-    solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2,
-    subspace_basis_for_divisor, verify_collected_relation, CollectedRelation, CollectionReport,
-    DecompositionStrategy, FactorBaseDomain, FactorBaseLogTable, FrobeniusFactorBase,
-    IndividualLogReport, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, KoblitzIcReport,
-    KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
+    solve_factor_base_logs, solve_factor_base_logs_from_relations, span_f2, subfield_group_order,
+    subspace_basis_for_divisor, subspace_basis_for_factors, top_factor_indices,
+    verify_collected_relation, CollectedRelation, CollectionReport, DecompositionStrategy,
+    FactorBaseDomain, FactorBaseLogSolver, FactorBaseLogTable, FrobeniusFactorBase,
+    IndividualLogReport, IndividualLogSolver, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
+    KoblitzIcReport, KoblitzRankRecord, KoblitzRelation, KoblitzRelationAttemptDisposition,
     KoblitzRelationAttemptRecord, KoblitzSignedRhoCharges, KoblitzSignedRhoEvent,
     KoblitzSignedRhoOptions, KoblitzSignedRhoReport, KoblitzSpeedup, LinearAlgebra, LogTableReport,
     PairSumTable, RelationCollector, RelationWorkUnit, SatDecompositionOptions,
-    SatDecompositionStats, PRECOMPUTE_BATCH_TRIALS, invariant_factors, top_factor_indices,
-    subspace_basis_for_factors, q_linearised_kernel_basis, subfield_group_order,
-    frobenius_eigenvalue_q, MAX_SUBFIELD_DEGREE, build_subgroup_orbit_factor_base,
-    FactorBaseLogSolver,
+    SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
 };
 pub use koblitz_sparse_la::{
     block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,

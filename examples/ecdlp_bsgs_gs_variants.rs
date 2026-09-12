@@ -15,8 +15,8 @@
 use crypto_lib::cryptanalysis::ecdlp_variants::{
     bsgs_average_case, bsgs_interleaving, bsgs_interleaving_block, bsgs_interleaving_negation,
     bsgs_negation, bsgs_textbook, demo_group_mid, gaudry_schost, gaudry_schost_montgomery,
-    gaudry_schost_negation, grumpy_giants, grumpy_giants_block, grumpy_giants_negation, DlpSolution,
-    EcGroup, GaudrySchostOptions,
+    gaudry_schost_negation, grumpy_giants, grumpy_giants_block, grumpy_giants_negation,
+    DlpSolution, EcGroup, GaudrySchostOptions,
 };
 use crypto_lib::ecc::point::Point;
 use num_bigint::BigUint;
@@ -111,17 +111,29 @@ fn main() {
             gaudry_schost(grp, q, &gs_opts(0x6))
         }),
     ];
-    print_block("── base ─────────────────────────────────────────────", &base, sqrt_n);
+    print_block(
+        "── base ─────────────────────────────────────────────",
+        &base,
+        sqrt_n,
+    );
 
     let neg = [
         bench("BSGS + negation (#7)", &g, bsgs_negation),
-        bench("interleaving + negation (#8)", &g, bsgs_interleaving_negation),
+        bench(
+            "interleaving + negation (#8)",
+            &g,
+            bsgs_interleaving_negation,
+        ),
         bench("grumpy + negation (#9)", &g, grumpy_giants_negation),
         bench("Gaudry–Schost + negation (#11)", &g, |grp, q| {
             gaudry_schost_negation(grp, q, &gs_opts(0xB))
         }),
     ];
-    print_block("── with negation map ────────────────────────────────", &neg, sqrt_n);
+    print_block(
+        "── with negation map ────────────────────────────────",
+        &neg,
+        sqrt_n,
+    );
 
     let block = [
         bench("interleaving BSGS + block (#12)", &g, |grp, q| {

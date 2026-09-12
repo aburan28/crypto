@@ -6063,20 +6063,28 @@ mod tests {
         // Work per target should fall as 1/|F|^2: the witness rate rises
         // as |F|^3 and a trial costs |F| lookups.  Where does that stop
         // paying?
-        let n: u32 = std::env::var("SWEEP_N").map(|v| v.parse().unwrap()).unwrap_or(41);
+        let n: u32 = std::env::var("SWEEP_N")
+            .map(|v| v.parse().unwrap())
+            .unwrap_or(41);
         let kc = KoblitzCurve::new(0, n).unwrap();
         let fc = FastCurve::new(&kc.curve).unwrap();
         let r = kc.subgroup_order.to_u64_digits()[0];
         let g = fc.lift(kc.generator());
-        eprintln!("{:>7} {:>7} {:>9} {:>10} {:>9} {:>10} {:>11} {:>9}",
-            "points", "absc", "entries", "table MB", "build s", "1/rate", "ms/trial", "ms/target");
+        eprintln!(
+            "{:>7} {:>7} {:>9} {:>10} {:>9} {:>10} {:>11} {:>9}",
+            "points", "absc", "entries", "table MB", "build s", "1/rate", "ms/trial", "ms/target"
+        );
         let mut size = 1300usize;
         while size <= 24_000 {
             let t = std::time::Instant::now();
-            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 5, size) else { break };
+            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 5, size) else {
+                break;
+            };
             let select = t.elapsed().as_secs_f64();
             let t = std::time::Instant::now();
-            let Some(table) = PairSumTable::build(&kc, &fb) else { break };
+            let Some(table) = PairSumTable::build(&kc, &fb) else {
+                break;
+            };
             let build = t.elapsed().as_secs_f64();
             let mut rng = StdRng::seed_from_u64(77);
             let trials = 400;
@@ -6089,10 +6097,17 @@ mod tests {
                 .count();
             let per_trial = t.elapsed().as_secs_f64() * 1000.0 / trials as f64;
             let rate = hits.max(1) as f64 / trials as f64;
-            eprintln!("{:>7} {:>7} {:>9} {:>10.0} {:>9.1} {:>10.0} {:>11.3} {:>9.1}",
-                fb.points.len(), fb.subspace.len(), table.len(),
-                table.len() as f64 * 16.0 / 1e6, select + build, 1.0 / rate,
-                per_trial, per_trial / rate);
+            eprintln!(
+                "{:>7} {:>7} {:>9} {:>10.0} {:>9.1} {:>10.0} {:>11.3} {:>9.1}",
+                fb.points.len(),
+                fb.subspace.len(),
+                table.len(),
+                table.len() as f64 * 16.0 / 1e6,
+                select + build,
+                1.0 / rate,
+                per_trial,
+                per_trial / rate
+            );
             size *= 2;
         }
     }

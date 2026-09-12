@@ -51,8 +51,8 @@
 use crate::cryptopals::challenge63::{pack, unpack, Gf128};
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{encrypt_block, AesKey};
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 /// 128×128 matrix over GF(2).  Stored as 128 column vectors (`u128`
 /// each).  Row `i` of column `j` is `(cols[j] >> i) & 1`.

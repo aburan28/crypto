@@ -207,51 +207,93 @@ impl SaferK64 {
         let mut ki: usize = 0;
         for _ in 0..self.rounds {
             // Mixed XOR / add with round key 1.
-            ki += 1; a ^= self.key[ki];
-            ki += 1; b = b.wrapping_add(self.key[ki]);
-            ki += 1; c = c.wrapping_add(self.key[ki]);
-            ki += 1; d ^= self.key[ki];
-            ki += 1; e ^= self.key[ki];
-            ki += 1; f = f.wrapping_add(self.key[ki]);
-            ki += 1; g = g.wrapping_add(self.key[ki]);
-            ki += 1; h ^= self.key[ki];
+            ki += 1;
+            a ^= self.key[ki];
+            ki += 1;
+            b = b.wrapping_add(self.key[ki]);
+            ki += 1;
+            c = c.wrapping_add(self.key[ki]);
+            ki += 1;
+            d ^= self.key[ki];
+            ki += 1;
+            e ^= self.key[ki];
+            ki += 1;
+            f = f.wrapping_add(self.key[ki]);
+            ki += 1;
+            g = g.wrapping_add(self.key[ki]);
+            ki += 1;
+            h ^= self.key[ki];
 
             // Nonlinear layer with round key 2.
-            ki += 1; a = EXP_TAB[a as usize].wrapping_add(self.key[ki]);
-            ki += 1; b = LOG_TAB[b as usize] ^ self.key[ki];
-            ki += 1; c = LOG_TAB[c as usize] ^ self.key[ki];
-            ki += 1; d = EXP_TAB[d as usize].wrapping_add(self.key[ki]);
-            ki += 1; e = EXP_TAB[e as usize].wrapping_add(self.key[ki]);
-            ki += 1; f = LOG_TAB[f as usize] ^ self.key[ki];
-            ki += 1; g = LOG_TAB[g as usize] ^ self.key[ki];
-            ki += 1; h = EXP_TAB[h as usize].wrapping_add(self.key[ki]);
+            ki += 1;
+            a = EXP_TAB[a as usize].wrapping_add(self.key[ki]);
+            ki += 1;
+            b = LOG_TAB[b as usize] ^ self.key[ki];
+            ki += 1;
+            c = LOG_TAB[c as usize] ^ self.key[ki];
+            ki += 1;
+            d = EXP_TAB[d as usize].wrapping_add(self.key[ki]);
+            ki += 1;
+            e = EXP_TAB[e as usize].wrapping_add(self.key[ki]);
+            ki += 1;
+            f = LOG_TAB[f as usize] ^ self.key[ki];
+            ki += 1;
+            g = LOG_TAB[g as usize] ^ self.key[ki];
+            ki += 1;
+            h = EXP_TAB[h as usize].wrapping_add(self.key[ki]);
 
             // 3 levels of PHT with a fixed permutation between levels.
-            pht(&mut a, &mut b); pht(&mut c, &mut d);
-            pht(&mut e, &mut f); pht(&mut g, &mut h);
-            pht(&mut a, &mut c); pht(&mut e, &mut g);
-            pht(&mut b, &mut d); pht(&mut f, &mut h);
-            pht(&mut a, &mut e); pht(&mut b, &mut f);
-            pht(&mut c, &mut g); pht(&mut d, &mut h);
+            pht(&mut a, &mut b);
+            pht(&mut c, &mut d);
+            pht(&mut e, &mut f);
+            pht(&mut g, &mut h);
+            pht(&mut a, &mut c);
+            pht(&mut e, &mut g);
+            pht(&mut b, &mut d);
+            pht(&mut f, &mut h);
+            pht(&mut a, &mut e);
+            pht(&mut b, &mut f);
+            pht(&mut c, &mut g);
+            pht(&mut d, &mut h);
             // Byte permutation: (b,c,d,e,f,g) → (e,c→b stays, …).  C
             // expansion: `t=b; b=e; e=c; c=t; t=d; d=f; f=g; g=t;`.
-            let t = b; b = e; e = c; c = t;
-            let t = d; d = f; f = g; g = t;
+            let t = b;
+            b = e;
+            e = c;
+            c = t;
+            let t = d;
+            d = f;
+            f = g;
+            g = t;
         }
 
         // Final output transformation: just the "mixed XOR / add" with
         // the trailing half-key, no nonlinear layer / PHT.
-        ki += 1; a ^= self.key[ki];
-        ki += 1; b = b.wrapping_add(self.key[ki]);
-        ki += 1; c = c.wrapping_add(self.key[ki]);
-        ki += 1; d ^= self.key[ki];
-        ki += 1; e ^= self.key[ki];
-        ki += 1; f = f.wrapping_add(self.key[ki]);
-        ki += 1; g = g.wrapping_add(self.key[ki]);
-        ki += 1; h ^= self.key[ki];
+        ki += 1;
+        a ^= self.key[ki];
+        ki += 1;
+        b = b.wrapping_add(self.key[ki]);
+        ki += 1;
+        c = c.wrapping_add(self.key[ki]);
+        ki += 1;
+        d ^= self.key[ki];
+        ki += 1;
+        e ^= self.key[ki];
+        ki += 1;
+        f = f.wrapping_add(self.key[ki]);
+        ki += 1;
+        g = g.wrapping_add(self.key[ki]);
+        ki += 1;
+        h ^= self.key[ki];
 
-        block[0] = a; block[1] = b; block[2] = c; block[3] = d;
-        block[4] = e; block[5] = f; block[6] = g; block[7] = h;
+        block[0] = a;
+        block[1] = b;
+        block[2] = c;
+        block[3] = d;
+        block[4] = e;
+        block[5] = f;
+        block[6] = g;
+        block[7] = h;
     }
 
     /// Decrypt one 64-bit block in place.
@@ -264,47 +306,88 @@ impl SaferK64 {
         // fetch).
         let mut ki = SAFER_BLOCK_LEN * (1 + 2 * self.rounds);
         h ^= self.key[ki];
-        ki -= 1; g = g.wrapping_sub(self.key[ki]);
-        ki -= 1; f = f.wrapping_sub(self.key[ki]);
-        ki -= 1; e ^= self.key[ki];
-        ki -= 1; d ^= self.key[ki];
-        ki -= 1; c = c.wrapping_sub(self.key[ki]);
-        ki -= 1; b = b.wrapping_sub(self.key[ki]);
-        ki -= 1; a ^= self.key[ki];
+        ki -= 1;
+        g = g.wrapping_sub(self.key[ki]);
+        ki -= 1;
+        f = f.wrapping_sub(self.key[ki]);
+        ki -= 1;
+        e ^= self.key[ki];
+        ki -= 1;
+        d ^= self.key[ki];
+        ki -= 1;
+        c = c.wrapping_sub(self.key[ki]);
+        ki -= 1;
+        b = b.wrapping_sub(self.key[ki]);
+        ki -= 1;
+        a ^= self.key[ki];
 
         for _ in 0..self.rounds {
             // Inverse byte permutation:
             // `t=e; e=b; b=c; c=t; t=f; f=d; d=g; g=t;`.
-            let t = e; e = b; b = c; c = t;
-            let t = f; f = d; d = g; g = t;
-            ipht(&mut a, &mut e); ipht(&mut b, &mut f);
-            ipht(&mut c, &mut g); ipht(&mut d, &mut h);
-            ipht(&mut a, &mut c); ipht(&mut e, &mut g);
-            ipht(&mut b, &mut d); ipht(&mut f, &mut h);
-            ipht(&mut a, &mut b); ipht(&mut c, &mut d);
-            ipht(&mut e, &mut f); ipht(&mut g, &mut h);
+            let t = e;
+            e = b;
+            b = c;
+            c = t;
+            let t = f;
+            f = d;
+            d = g;
+            g = t;
+            ipht(&mut a, &mut e);
+            ipht(&mut b, &mut f);
+            ipht(&mut c, &mut g);
+            ipht(&mut d, &mut h);
+            ipht(&mut a, &mut c);
+            ipht(&mut e, &mut g);
+            ipht(&mut b, &mut d);
+            ipht(&mut f, &mut h);
+            ipht(&mut a, &mut b);
+            ipht(&mut c, &mut d);
+            ipht(&mut e, &mut f);
+            ipht(&mut g, &mut h);
 
-            ki -= 1; h = h.wrapping_sub(self.key[ki]);
-            ki -= 1; g ^= self.key[ki];
-            ki -= 1; f ^= self.key[ki];
-            ki -= 1; e = e.wrapping_sub(self.key[ki]);
-            ki -= 1; d = d.wrapping_sub(self.key[ki]);
-            ki -= 1; c ^= self.key[ki];
-            ki -= 1; b ^= self.key[ki];
-            ki -= 1; a = a.wrapping_sub(self.key[ki]);
+            ki -= 1;
+            h = h.wrapping_sub(self.key[ki]);
+            ki -= 1;
+            g ^= self.key[ki];
+            ki -= 1;
+            f ^= self.key[ki];
+            ki -= 1;
+            e = e.wrapping_sub(self.key[ki]);
+            ki -= 1;
+            d = d.wrapping_sub(self.key[ki]);
+            ki -= 1;
+            c ^= self.key[ki];
+            ki -= 1;
+            b ^= self.key[ki];
+            ki -= 1;
+            a = a.wrapping_sub(self.key[ki]);
 
-            ki -= 1; h = LOG_TAB[h as usize] ^ self.key[ki];
-            ki -= 1; g = EXP_TAB[g as usize].wrapping_sub(self.key[ki]);
-            ki -= 1; f = EXP_TAB[f as usize].wrapping_sub(self.key[ki]);
-            ki -= 1; e = LOG_TAB[e as usize] ^ self.key[ki];
-            ki -= 1; d = LOG_TAB[d as usize] ^ self.key[ki];
-            ki -= 1; c = EXP_TAB[c as usize].wrapping_sub(self.key[ki]);
-            ki -= 1; b = EXP_TAB[b as usize].wrapping_sub(self.key[ki]);
-            ki -= 1; a = LOG_TAB[a as usize] ^ self.key[ki];
+            ki -= 1;
+            h = LOG_TAB[h as usize] ^ self.key[ki];
+            ki -= 1;
+            g = EXP_TAB[g as usize].wrapping_sub(self.key[ki]);
+            ki -= 1;
+            f = EXP_TAB[f as usize].wrapping_sub(self.key[ki]);
+            ki -= 1;
+            e = LOG_TAB[e as usize] ^ self.key[ki];
+            ki -= 1;
+            d = LOG_TAB[d as usize] ^ self.key[ki];
+            ki -= 1;
+            c = EXP_TAB[c as usize].wrapping_sub(self.key[ki]);
+            ki -= 1;
+            b = EXP_TAB[b as usize].wrapping_sub(self.key[ki]);
+            ki -= 1;
+            a = LOG_TAB[a as usize] ^ self.key[ki];
         }
 
-        block[0] = a; block[1] = b; block[2] = c; block[3] = d;
-        block[4] = e; block[5] = f; block[6] = g; block[7] = h;
+        block[0] = a;
+        block[1] = b;
+        block[2] = c;
+        block[3] = d;
+        block[4] = e;
+        block[5] = f;
+        block[6] = g;
+        block[7] = h;
     }
 }
 

@@ -71,7 +71,10 @@ struct Frac {
 
 impl Frac {
     fn from_int(v: &BigInt) -> Frac {
-        Frac { n: v.clone(), d: BigInt::one() }
+        Frac {
+            n: v.clone(),
+            d: BigInt::one(),
+        }
     }
     fn reduce(mut self) -> Frac {
         if self.d.is_negative() {
@@ -86,13 +89,25 @@ impl Frac {
         self
     }
     fn sub(&self, o: &Frac) -> Frac {
-        Frac { n: &self.n * &o.d - &o.n * &self.d, d: &self.d * &o.d }.reduce()
+        Frac {
+            n: &self.n * &o.d - &o.n * &self.d,
+            d: &self.d * &o.d,
+        }
+        .reduce()
     }
     fn mul(&self, o: &Frac) -> Frac {
-        Frac { n: &self.n * &o.n, d: &self.d * &o.d }.reduce()
+        Frac {
+            n: &self.n * &o.n,
+            d: &self.d * &o.d,
+        }
+        .reduce()
     }
     fn div(&self, o: &Frac) -> Frac {
-        Frac { n: &self.n * &o.d, d: &self.d * &o.n }.reduce()
+        Frac {
+            n: &self.n * &o.d,
+            d: &self.d * &o.n,
+        }
+        .reduce()
     }
     fn is_zero(&self) -> bool {
         self.n.is_zero()
@@ -304,7 +319,10 @@ fn solve_f64(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
         .collect();
     for col in 0..n {
         let pivot = (col..n).max_by(|&x, &y| {
-            m[x][col].abs().partial_cmp(&m[y][col].abs()).unwrap_or(std::cmp::Ordering::Equal)
+            m[x][col]
+                .abs()
+                .partial_cmp(&m[y][col].abs())
+                .unwrap_or(std::cmp::Ordering::Equal)
         })?;
         if m[pivot][col].abs() < 1e-12 {
             return None;
@@ -326,12 +344,7 @@ fn solve_f64(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
 /// One step of Babai reduction: `(F, G) −= round((F·f̄ + G·ḡ)/(f·f̄ + g·ḡ))·(f, g)`.
 /// `k` is estimated in floating point (any rounding slop just costs an
 /// extra iteration); the subtraction is exact.
-fn reduce_fg(
-    f: &[BigInt],
-    g: &[BigInt],
-    big_f: &mut Vec<BigInt>,
-    big_g: &mut Vec<BigInt>,
-) -> bool {
+fn reduce_fg(f: &[BigInt], g: &[BigInt], big_f: &mut Vec<BigInt>, big_g: &mut Vec<BigInt>) -> bool {
     use num_traits::ToPrimitive;
     let f_adj = poly_adjoint_big(f);
     let g_adj = poly_adjoint_big(g);
@@ -347,14 +360,20 @@ fn reduce_fg(
     }
     // k ≈ num/den in Q[x]/(xⁿ+1): solve den·k = num, round.
     let m = mul_matrix_big(&den);
-    let mf: Vec<Vec<f64>> =
-        m.iter().map(|row| row.iter().map(|c| c.to_f64().unwrap_or(0.0)).collect()).collect();
+    let mf: Vec<Vec<f64>> = m
+        .iter()
+        .map(|row| row.iter().map(|c| c.to_f64().unwrap_or(0.0)).collect())
+        .collect();
     let numf: Vec<f64> = num.iter().map(|c| c.to_f64().unwrap_or(0.0)).collect();
-    let Some(sol) = solve_f64(&mf, &numf) else { return false };
+    let Some(sol) = solve_f64(&mf, &numf) else {
+        return false;
+    };
     // k can start resultant-sized (≫ 2⁶³), so convert via BigInt.
     use num_traits::FromPrimitive;
-    let k: Vec<BigInt> =
-        sol.iter().map(|&s| BigInt::from_f64(s.round()).unwrap_or_else(BigInt::zero)).collect();
+    let k: Vec<BigInt> = sol
+        .iter()
+        .map(|&s| BigInt::from_f64(s.round()).unwrap_or_else(BigInt::zero))
+        .collect();
     if k.iter().all(|c| c.is_zero()) {
         return false;
     }
@@ -387,9 +406,8 @@ fn ntru_solve(f: &[i64], g: &[i64]) -> Option<(Vec<i64>, Vec<i64>)> {
             break;
         }
     }
-    let to_i64 = |v: &[BigInt]| -> Option<Vec<i64>> {
-        v.iter().map(|c| i64::try_from(c).ok()).collect()
-    };
+    let to_i64 =
+        |v: &[BigInt]| -> Option<Vec<i64>> { v.iter().map(|c| i64::try_from(c).ok()).collect() };
     Some((to_i64(&big_f)?, to_i64(&big_g)?))
 }
 
@@ -428,8 +446,12 @@ pub fn fn_dsa_keygen() -> (FnDsaPublicKey, FnDsaSecretKey) {
     loop {
         let f = random_small_poly();
         let g = random_small_poly();
-        let Some(f_inv) = poly_inv_mod_q(&f) else { continue };
-        let Some((big_f, big_g)) = ntru_solve(&f, &g) else { continue };
+        let Some(f_inv) = poly_inv_mod_q(&f) else {
+            continue;
+        };
+        let Some((big_f, big_g)) = ntru_solve(&f, &g) else {
+            continue;
+        };
         // Reject if the completed basis is still too skewed for Babai
         // to land inside the verification bound.
         let norm2: i64 = big_f.iter().chain(&big_g).map(|c| c * c).sum();
@@ -463,12 +485,22 @@ fn secret_basis(sk: &FnDsaSecretKey) -> Vec<Vec<f64>> {
     for s in 0..N {
         let a = shift(&sk.g, s);
         let b = shift(&sk.f, s);
-        rows.push(a.iter().map(|&x| x as f64).chain(b.iter().map(|&x| -x as f64)).collect());
+        rows.push(
+            a.iter()
+                .map(|&x| x as f64)
+                .chain(b.iter().map(|&x| -x as f64))
+                .collect(),
+        );
     }
     for s in 0..N {
         let a = shift(&sk.big_g, s);
         let b = shift(&sk.big_f, s);
-        rows.push(a.iter().map(|&x| x as f64).chain(b.iter().map(|&x| -x as f64)).collect());
+        rows.push(
+            a.iter()
+                .map(|&x| x as f64)
+                .chain(b.iter().map(|&x| -x as f64))
+                .collect(),
+        );
     }
     rows
 }
@@ -538,8 +570,9 @@ pub fn fn_dsa_sign(sk: &FnDsaSecretKey, msg: &[u8]) -> FnDsaSignature {
         target.extend(std::iter::repeat(0f64).take(N));
         let v = nearest_plane(&basis, &target);
 
-        let s1: Vec<i64> =
-            (0..N).map(|i| (c[i] as f64 - v[i]).round() as i64).collect();
+        let s1: Vec<i64> = (0..N)
+            .map(|i| (c[i] as f64 - v[i]).round() as i64)
+            .collect();
         let s2: Vec<i64> = (0..N).map(|i| (-v[N + i]).round() as i64).collect();
         let norm2: i64 = s1.iter().chain(&s2).map(|x| x * x).sum();
         if norm2 <= BOUND {
@@ -566,8 +599,8 @@ pub fn fn_dsa_verify(pk: &FnDsaPublicKey, msg: &[u8], sig: &FnDsaSignature) -> b
     let c = hash_to_point(&sig.salt, msg);
     let s2h = poly_mul_mod_q(&sig.s2, &pk.h);
     let s1: Vec<i64> = (0..N).map(|i| centered(c[i] - s2h[i])).collect();
-    let norm2: i64 = s1.iter().map(|x| x * x).sum::<i64>()
-        + sig.s2.iter().map(|x| x * x).sum::<i64>();
+    let norm2: i64 =
+        s1.iter().map(|x| x * x).sum::<i64>() + sig.s2.iter().map(|x| x * x).sum::<i64>();
     norm2 <= BOUND
 }
 
@@ -632,9 +665,15 @@ mod tests {
         // without overflowing the modular multiply or the norm (no debug
         // panic, no release wraparound).
         let (pk, _) = fn_dsa_keygen();
-        let sig = FnDsaSignature { salt: vec![0u8; SALT_BYTES], s2: vec![i64::MAX; N] };
+        let sig = FnDsaSignature {
+            salt: vec![0u8; SALT_BYTES],
+            s2: vec![i64::MAX; N],
+        };
         assert!(!fn_dsa_verify(&pk, b"m", &sig));
-        let sig2 = FnDsaSignature { salt: vec![0u8; SALT_BYTES], s2: vec![i64::MIN; N] };
+        let sig2 = FnDsaSignature {
+            salt: vec![0u8; SALT_BYTES],
+            s2: vec![i64::MIN; N],
+        };
         assert!(!fn_dsa_verify(&pk, b"m", &sig2));
     }
 
@@ -651,7 +690,10 @@ mod tests {
     fn zero_s2_forgery_fails() {
         // s2 = 0 forces s1 = c, essentially uniform mod q: far above β.
         let (pk, _) = fn_dsa_keygen();
-        let sig = FnDsaSignature { salt: vec![0u8; SALT_BYTES], s2: vec![0; N] };
+        let sig = FnDsaSignature {
+            salt: vec![0u8; SALT_BYTES],
+            s2: vec![0; N],
+        };
         assert!(!fn_dsa_verify(&pk, b"forgery", &sig));
     }
 }
