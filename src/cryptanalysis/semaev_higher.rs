@@ -107,17 +107,11 @@ impl UPoly {
     }
     pub fn constant(c: FieldElement) -> Self {
         let p = c.modulus.clone();
-        Self {
-            coeffs: vec![c],
-            p,
-        }
+        Self { coeffs: vec![c], p }
     }
     pub fn x(p: BigUint) -> Self {
         Self {
-            coeffs: vec![
-                FieldElement::zero(p.clone()),
-                FieldElement::one(p.clone()),
-            ],
+            coeffs: vec![FieldElement::zero(p.clone()), FieldElement::one(p.clone())],
             p,
         }
     }
@@ -172,7 +166,10 @@ impl UPoly {
         Self::from_coeffs(out, self.p.clone())
     }
     pub fn scale(&self, c: &FieldElement) -> Self {
-        Self::from_coeffs(self.coeffs.iter().map(|x| x.mul(c)).collect(), self.p.clone())
+        Self::from_coeffs(
+            self.coeffs.iter().map(|x| x.mul(c)).collect(),
+            self.p.clone(),
+        )
     }
     /// Evaluate at `x ∈ F_p`.
     pub fn eval(&self, x: &FieldElement) -> FieldElement {
@@ -219,12 +216,7 @@ pub fn s3_in_last(
 /// with the last variable in slot 2 instead of slot 3 — they're the
 /// same by symmetry.  Provided for clarity of the recurrence call
 /// sites.
-pub fn s3_in_x2(
-    x1: &FieldElement,
-    x3: &FieldElement,
-    a: &FieldElement,
-    b: &FieldElement,
-) -> UPoly {
+pub fn s3_in_x2(x1: &FieldElement, x3: &FieldElement, a: &FieldElement, b: &FieldElement) -> UPoly {
     s3_in_last(x1, x3, a, b)
 }
 
@@ -260,11 +252,7 @@ pub fn s4_in_last(
     let four = FieldElement::new(BigUint::from(4u32), p.clone());
 
     // β_2(Y) = X_3² - 2 X_3 Y + Y² = (X_3 - Y)² as a poly in Y.
-    let b2: Vec<FieldElement> = vec![
-        x3.mul(x3),
-        two.mul(x3).neg(),
-        FieldElement::one(p.clone()),
-    ];
+    let b2: Vec<FieldElement> = vec![x3.mul(x3), two.mul(x3).neg(), FieldElement::one(p.clone())];
     // β_1(Y) = -2[(X_3+Y)(X_3 Y + a) + 2 b]
     //        = -2[ X_3² Y + a X_3 + X_3 Y² + a Y + 2 b ]
     //        = -2 X_3 Y² - 2 (X_3² + a) Y - 2 (a X_3 + 2 b).
@@ -349,11 +337,7 @@ pub fn s4_in_last_proper(
     // β(X, Y) = S_3(X_3, Y, X) — bivariate.  Build each X-coefficient
     // as a UPoly in Y.
     let b2 = UPoly::from_coeffs(
-        vec![
-            x3.mul(x3),
-            two.mul(x3).neg(),
-            FieldElement::one(p.clone()),
-        ],
+        vec![x3.mul(x3), two.mul(x3).neg(), FieldElement::one(p.clone())],
         p.clone(),
     );
     let b1 = UPoly::from_coeffs(
@@ -414,11 +398,7 @@ pub fn s5_in_last(
     let four = FieldElement::new(BigUint::from(4u32), p.clone());
 
     let b2 = UPoly::from_coeffs(
-        vec![
-            x4.mul(x4),
-            two.mul(x4).neg(),
-            FieldElement::one(p.clone()),
-        ],
+        vec![x4.mul(x4), two.mul(x4).neg(), FieldElement::one(p.clone())],
         p.clone(),
     );
     let b1 = UPoly::from_coeffs(
@@ -452,10 +432,7 @@ pub fn s5_in_last(
 ///   `X^i` in β, as a UPoly in Y).
 ///
 /// Returns the resultant as a UPoly in Y.
-pub fn sylvester_resultant_in_x(
-    alpha_coeffs: &[FieldElement],
-    b_coeffs: &[UPoly],
-) -> UPoly {
+pub fn sylvester_resultant_in_x(alpha_coeffs: &[FieldElement], b_coeffs: &[UPoly]) -> UPoly {
     let p = alpha_coeffs[0].modulus.clone();
     let m = alpha_coeffs.len() - 1; // deg α
     let n = b_coeffs.len() - 1; // deg β
@@ -499,9 +476,7 @@ fn upoly_matrix_det(mat: &[Vec<UPoly>], p: &BigUint) -> UPoly {
         return mat[0][0].clone();
     }
     if n == 2 {
-        return mat[0][0]
-            .mul(&mat[1][1])
-            .sub(&mat[0][1].mul(&mat[1][0]));
+        return mat[0][0].mul(&mat[1][1]).sub(&mat[0][1].mul(&mat[1][0]));
     }
     // Laplace along the first row.
     let mut acc = UPoly::zero(p.clone());
@@ -511,7 +486,10 @@ fn upoly_matrix_det(mat: &[Vec<UPoly>], p: &BigUint) -> UPoly {
         }
         let mut submat: Vec<Vec<UPoly>> = Vec::with_capacity(n - 1);
         for r in 1..n {
-            let row: Vec<UPoly> = (0..n).filter(|c| *c != j).map(|c| mat[r][c].clone()).collect();
+            let row: Vec<UPoly> = (0..n)
+                .filter(|c| *c != j)
+                .map(|c| mat[r][c].clone())
+                .collect();
             submat.push(row);
         }
         let term = mat[0][j].mul(&upoly_matrix_det(&submat, p));
@@ -655,8 +633,9 @@ fn s4_third_symbolic(
         // X^0
         UPoly::from_coeffs(
             vec![
-                two.mul(&FieldElement::new(BigUint::from(2u32), p.clone()).mul(b)).neg(), // -4 b
-                two.mul(a).neg(),                                                          // -2 a Y
+                two.mul(&FieldElement::new(BigUint::from(2u32), p.clone()).mul(b))
+                    .neg(), // -4 b
+                two.mul(a).neg(), // -2 a Y
                 FieldElement::zero(p.clone()),
             ],
             p.clone(),
@@ -664,9 +643,9 @@ fn s4_third_symbolic(
         // X^1
         UPoly::from_coeffs(
             vec![
-                two.mul(a).neg(),               // -2 a
+                two.mul(a).neg(), // -2 a
                 FieldElement::zero(p.clone()),
-                two.clone().neg(),              // -2 Y²
+                two.clone().neg(), // -2 Y²
             ],
             p.clone(),
         ),
@@ -722,9 +701,8 @@ fn s4_third_symbolic(
     // Each α_i is in F_p, each β_i ∈ F_p[X, Y].  Multiplication by a
     // constant scales each X-degree's Y-coefficient.
 
-    let scale_vec_by_const = |v: &[UPoly], c: &FieldElement| -> Vec<UPoly> {
-        v.iter().map(|p| p.scale(c)).collect()
-    };
+    let scale_vec_by_const =
+        |v: &[UPoly], c: &FieldElement| -> Vec<UPoly> { v.iter().map(|p| p.scale(c)).collect() };
     let sub_vecs = |u: &[UPoly], v: &[UPoly], p: &BigUint| -> Vec<UPoly> {
         let len = u.len().max(v.len());
         let mut out = vec![UPoly::zero(p.clone()); len];
@@ -865,14 +843,7 @@ mod tests {
     #[test]
     fn s5_in_last_is_degree_eight() {
         let (p, a, b) = toy_curve();
-        let s5 = s5_in_last(
-            &fe(5, &p),
-            &fe(11, &p),
-            &fe(19, &p),
-            &fe(23, &p),
-            &a,
-            &b,
-        );
+        let s5 = s5_in_last(&fe(5, &p), &fe(11, &p), &fe(19, &p), &fe(23, &p), &a, &b);
         let d = s5.degree().expect("non-zero polynomial");
         assert!(d <= 8, "S_5 should have X-degree ≤ 8, got {}", d);
         // Generic case: degree exactly 8.
@@ -885,22 +856,8 @@ mod tests {
     #[test]
     fn s5_in_last_is_symmetric_in_first_four_args() {
         let (p, a, b) = toy_curve();
-        let s_orig = s5_in_last(
-            &fe(5, &p),
-            &fe(11, &p),
-            &fe(19, &p),
-            &fe(23, &p),
-            &a,
-            &b,
-        );
-        let s_swap = s5_in_last(
-            &fe(11, &p),
-            &fe(5, &p),
-            &fe(19, &p),
-            &fe(23, &p),
-            &a,
-            &b,
-        );
+        let s_orig = s5_in_last(&fe(5, &p), &fe(11, &p), &fe(19, &p), &fe(23, &p), &a, &b);
+        let s_swap = s5_in_last(&fe(11, &p), &fe(5, &p), &fe(19, &p), &fe(23, &p), &a, &b);
         for i in 0..s_orig.coeffs.len().max(s_swap.coeffs.len()) {
             let c1 = s_orig.coeffs.get(i).cloned().unwrap_or(fe(0, &p));
             let c2 = s_swap.coeffs.get(i).cloned().unwrap_or(fe(0, &p));

@@ -95,7 +95,12 @@ pub fn cheon_attack(
     // Build a baby-step table: { (i · G) → i } for i ∈ [0, d_factor).
     let mut table: HashMap<BigUint, BigUint> = HashMap::new();
     let mut current = Point::Infinity;
-    let d_factor_u64 = d_factor.to_u64_digits().get(0).copied().unwrap_or(0).min(1_000_000);
+    let d_factor_u64 = d_factor
+        .to_u64_digits()
+        .get(0)
+        .copied()
+        .unwrap_or(0)
+        .min(1_000_000);
     let mut found = None;
     for i in 0..d_factor_u64 {
         inner_steps += 1;
@@ -116,7 +121,8 @@ pub fn cheon_attack(
             inner_steps,
             outer_steps,
             naive_cost: isqrt(n.to_u64_digits().get(0).copied().unwrap_or(0)),
-            predicted_cost: isqrt(d_factor_u64) + isqrt(cofactor.to_u64_digits().get(0).copied().unwrap_or(0)),
+            predicted_cost: isqrt(d_factor_u64)
+                + isqrt(cofactor.to_u64_digits().get(0).copied().unwrap_or(0)),
             elapsed_ms: t0.elapsed().as_millis(),
         };
     }
@@ -254,14 +260,7 @@ mod tests {
         let d_g = g.scalar_mul(&d_truth, &a_fe);
         let d2_g = d_g.scalar_mul(&d_truth, &a_fe);
         // 198 = 2 · 3² · 11.  Use d_factor = 11.
-        let report = cheon_attack(
-            &curve,
-            &g,
-            &d_g,
-            &d2_g,
-            &curve.n,
-            &BigUint::from(11u32),
-        );
+        let report = cheon_attack(&curve, &g, &d_g, &d2_g, &curve.n, &BigUint::from(11u32));
         assert_eq!(report.recovered_d, Some(d_truth));
     }
 
@@ -274,14 +273,7 @@ mod tests {
         let a_fe = curve.a_fe();
         let d_g = g.scalar_mul(&BigUint::from(50u32), &a_fe);
         let d2_g = d_g.scalar_mul(&BigUint::from(50u32), &a_fe);
-        let report = cheon_attack(
-            &curve,
-            &g,
-            &d_g,
-            &d2_g,
-            &curve.n,
-            &BigUint::from(11u32),
-        );
+        let report = cheon_attack(&curve, &g, &d_g, &d2_g, &curve.n, &BigUint::from(11u32));
         // naive √199 ≈ 14.
         // Cheon √11 + √18 ≈ 3 + 4 = 7.
         assert!(report.predicted_cost <= report.naive_cost);

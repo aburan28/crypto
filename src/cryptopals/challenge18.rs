@@ -25,8 +25,7 @@ pub fn ctr_xor(data: &[u8], key: &AesKey, nonce: u64) -> Vec<u8> {
     out
 }
 
-const CT_B64: &str =
-    "L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==";
+const CT_B64: &str = "L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==";
 
 pub fn run() -> Report {
     let mut r = Report::new(18, "AES-CTR mode");

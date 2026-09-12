@@ -224,7 +224,13 @@ pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Op
     let mut pivots: Vec<(u64, u64)> = Vec::with_capacity(m as usize);
     for i in 0..m {
         let basis = F2mElement::from_bit_positions(&[i], m);
-        let mut img = basis.square(irr).add(&basis).raw_bits().first().copied().unwrap_or(0);
+        let mut img = basis
+            .square(irr)
+            .add(&basis)
+            .raw_bits()
+            .first()
+            .copied()
+            .unwrap_or(0);
         let mut pre = 1u64 << i;
         for &(pimg, ppre) in &pivots {
             let lead = 1u64 << (63 - pimg.leading_zeros());

@@ -233,7 +233,11 @@ fn display(report: &Value) {
                         .map_or("∞".to_string(), |v| format!("{v:.1}"))
                 );
             }
-            for v in report["validation"]["runs"].as_array().into_iter().flatten() {
+            for v in report["validation"]["runs"]
+                .as_array()
+                .into_iter()
+                .flatten()
+            {
                 println!(
                     "  validated #{}: eligible {}; median process seconds {}",
                     v["rank"], v["eligible"], v["median_process_seconds"]
@@ -267,13 +271,14 @@ fn display(report: &Value) {
         Some("solve") => {
             println!(
                 "Solve: {}; database columns {} (re-verified)",
-                report["status"],
-                report["database"]["columns"]
+                report["status"], report["database"]["columns"]
             );
             if let Some(result) = report.get("result") {
                 println!(
                     "Expected: {}; recovered: {}; verified: {}; descent trials: {}",
-                    result["expected"], result["recovered"], result["verified"],
+                    result["expected"],
+                    result["recovered"],
+                    result["verified"],
                     report["counts"]["descent_trials"]
                 );
             }
@@ -283,7 +288,11 @@ fn display(report: &Value) {
                 "Workflow: {}; run {}{}; {}",
                 report["status"],
                 report["run_number"],
-                if report["resumed"] == true { " (resumed)" } else { "" },
+                if report["resumed"] == true {
+                    " (resumed)"
+                } else {
+                    ""
+                },
                 report["run_directory"].as_str().unwrap_or("?")
             );
             for st in report["stages"].as_array().into_iter().flatten() {
@@ -316,7 +325,10 @@ fn display(report: &Value) {
                 }
             }
             if let Some(sol) = report.get("solutions").filter(|v| !v.is_null()) {
-                println!("Solutions: {} verified of {}", sol["verified"], sol["count"]);
+                println!(
+                    "Solutions: {} verified of {}",
+                    sol["verified"], sol["count"]
+                );
             }
             if let Some(f) = report["failure"].as_str() {
                 println!("Failure: {f}");

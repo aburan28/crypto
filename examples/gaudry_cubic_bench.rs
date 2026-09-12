@@ -13,6 +13,10 @@
 //! cargo run --release --example gaudry_cubic_bench -- --protocol --groebner --sizes 271,523,1039 --json experiments/21_gaudry_cubic_groebner.json
 //! ```
 //!
+//! `--pair-only` collects decompositions into `k − 1 = 2` base points
+//! (Joux–Vitse) instead of 3, with one Weil-restricted `S₃` pair test
+//! per residual and no Macaulay step at all.
+//!
 //! `--groebner` uses Gaudry's `O(1)` symmetrised-`S₄` solve instead of
 //! the `2|F|` pair tests; `--cross-check` runs both on every residual
 //! and counts disagreements.
@@ -126,6 +130,7 @@ fn main() {
             }
             "--protocol" => protocol = true,
             "--groebner" => solver = Solver::Groebner,
+            "--pair-only" => solver = Solver::PairOnly,
             "--cross-check" => cross_check = true,
             "--sparse-la" => sparse_la = true,
             "--lp-frac" => {

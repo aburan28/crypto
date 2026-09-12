@@ -51,7 +51,10 @@ use crate::symmetric::aes::{encrypt_block, AesKey};
 /// CBC-MAC = take the last CBC ciphertext block as the tag.
 /// Input must be a multiple of 16 bytes.  Caller supplies padding.
 pub fn cbc_mac(key: &AesKey, iv: &[u8; 16], msg: &[u8]) -> [u8; 16] {
-    assert!(msg.len() % 16 == 0, "cbc_mac: message must be block-aligned");
+    assert!(
+        msg.len() % 16 == 0,
+        "cbc_mac: message must be block-aligned"
+    );
     let mut state = *iv;
     for chunk in msg.chunks_exact(16) {
         for i in 0..16 {
@@ -175,8 +178,7 @@ pub fn part2_forge(
     let mut spliced = Vec::new();
     spliced.extend_from_slice(&splice);
     spliced.extend_from_slice(attacker_suffix_tail);
-    let attacker_only_tag =
-        cbc_mac(&bank.key, &[0u8; 16], &pad_block(&spliced));
+    let attacker_only_tag = cbc_mac(&bank.key, &[0u8; 16], &pad_block(&spliced));
 
     // The forged full message that the bank sees:
     //   victim's message || S[0] || S[1..]
@@ -218,7 +220,10 @@ pub fn run() -> Report {
         String::from_utf8_lossy(&forged_msg).trim_end_matches('\0')
     ));
     r.line(format!("  forged  iv    = {}", hex::encode(forged_iv)));
-    r.line(format!("  forged  tag   = {}  (reused)", hex::encode(captured_tag)));
+    r.line(format!(
+        "  forged  tag   = {}  (reused)",
+        hex::encode(captured_tag)
+    ));
     r.line(format!("  bank.verify   = {}", ok1));
     assert!(ok1, "part 1 forgery must verify");
 

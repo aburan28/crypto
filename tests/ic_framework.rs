@@ -459,7 +459,10 @@ fn factor_base_logarithm_database_precomputes_then_descends() {
     assert!(dense["linear_algebra"]["sparse"].is_null());
     let a: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
     let b: Value = serde_json::from_slice(&std::fs::read(&dense_db).unwrap()).unwrap();
-    assert_eq!(a["columns"], b["columns"], "sparse and dense databases differ");
+    assert_eq!(
+        a["columns"], b["columns"],
+        "sparse and dense databases differ"
+    );
     std::fs::remove_file(dense_db).unwrap();
 
     for k in ["1", "53", "126"] {
@@ -539,7 +542,15 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let d = dir.to_str().unwrap();
 
     // Stage by stage: each rerun reuses what the previous one produced.
-    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--stop-after", "select"]);
+    let (ok, v) = command(&[
+        "workflow",
+        "--params",
+        p,
+        "--dir",
+        d,
+        "--stop-after",
+        "select",
+    ]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "stopped");
     assert_eq!(v["run_number"], 1);
@@ -550,19 +561,46 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     // A collection worker (another process, possibly another machine)
     // runs one work unit and stops; running it again does nothing.
     let unit1 = dir.join("relations").join("unit-00001.json");
-    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "1"]);
+    let (ok, v) = command(&[
+        "workflow",
+        "--params",
+        p,
+        "--dir",
+        d,
+        "--collect-units",
+        "1",
+    ]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "stopped");
     assert_eq!(v["stages"][1]["stage"], "collect");
     assert_eq!(v["stages"][1]["worker"], true);
     assert_eq!(v["stages"][1]["units"]["ran_now"], 1);
     assert_eq!(v["stages"][1]["units"]["present"], 1);
-    assert_eq!(v["stages"][1]["status"], "partial", "unit 0 is still missing");
+    assert_eq!(
+        v["stages"][1]["status"], "partial",
+        "unit 0 is still missing"
+    );
     assert!(unit1.exists() && !dir.join("logs.json").exists());
-    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "1"]);
+    let (ok, v) = command(&[
+        "workflow",
+        "--params",
+        p,
+        "--dir",
+        d,
+        "--collect-units",
+        "1",
+    ]);
     assert!(ok, "{v}");
     assert_eq!(v["stages"][1]["units"]["ran_now"], 0);
-    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--collect-units", "99"]);
+    let (ok, v) = command(&[
+        "workflow",
+        "--params",
+        p,
+        "--dir",
+        d,
+        "--collect-units",
+        "99",
+    ]);
     assert!(!ok, "a unit beyond max_units is refused: {v}");
 
     // Forge one relation in the worker's file and drop in a file from
@@ -576,9 +614,21 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let mut foreign = unit.clone();
     foreign["params_digest"] = json!("0".repeat(64));
     foreign["unit"] = json!(7);
-    std::fs::write(dir.join("relations").join("unit-00007.json"), serde_json::to_vec(&foreign).unwrap()).unwrap();
+    std::fs::write(
+        dir.join("relations").join("unit-00007.json"),
+        serde_json::to_vec(&foreign).unwrap(),
+    )
+    .unwrap();
 
-    let (ok, v) = command(&["workflow", "--params", p, "--dir", d, "--stop-after", "logs"]);
+    let (ok, v) = command(&[
+        "workflow",
+        "--params",
+        p,
+        "--dir",
+        d,
+        "--stop-after",
+        "logs",
+    ]);
     assert!(ok, "{v}");
     assert_eq!(v["resumed"], true);
     let stages = v["stages"].as_array().unwrap();
@@ -596,8 +646,16 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     assert_eq!(stages[2]["linear_algebra"]["mode"], "sparse");
     // Three columns; the filtering statistics are reported and whatever
     // the merge leaves (at most the three) goes to block Wiedemann.
-    assert_eq!(stages[2]["linear_algebra"]["sparse"]["filter"]["columns_in"], 3);
-    assert!(stages[2]["linear_algebra"]["sparse"]["core_dimension"].as_u64().unwrap() <= 3);
+    assert_eq!(
+        stages[2]["linear_algebra"]["sparse"]["filter"]["columns_in"],
+        3
+    );
+    assert!(
+        stages[2]["linear_algebra"]["sparse"]["core_dimension"]
+            .as_u64()
+            .unwrap()
+            <= 3
+    );
     assert!(dir.join("logs.json").exists());
     assert!(dir.join("relations").join("unit-00000.json").exists());
 
@@ -644,7 +702,10 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "complete");
-    assert_eq!(v["run_number"], 6, "the refused worker run persisted nothing");
+    assert_eq!(
+        v["run_number"], 6,
+        "the refused worker run persisted nothing"
+    );
     assert_eq!(v["stages"][3]["solved_now"], 0);
     assert_eq!(v["stages"][3]["already_solved"], 4);
     assert_eq!(v["state"]["units_collected"], 2);
@@ -685,8 +746,19 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
 fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
     // E_{0,2}/GF(4) over GF(2^14): the 4-power Frobenius family.
     let (ok, run) = command(&[
-        "run", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
-        "--solver", "pair-table", "--known-log", "53",
+        "run",
+        "--degree",
+        "14",
+        "--subfield",
+        "2",
+        "--curve-a",
+        "0",
+        "--curve-b",
+        "2",
+        "--solver",
+        "pair-table",
+        "--known-log",
+        "53",
     ]);
     assert!(ok, "{run}");
     assert_eq!(run["result"]["verified"], true);
@@ -694,8 +766,19 @@ fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
 
     let db = path();
     let (ok, logs) = command(&[
-        "logs", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
-        "--solver", "pair-table", "--database", db.to_str().unwrap(),
+        "logs",
+        "--degree",
+        "14",
+        "--subfield",
+        "2",
+        "--curve-a",
+        "0",
+        "--curve-b",
+        "2",
+        "--solver",
+        "pair-table",
+        "--database",
+        db.to_str().unwrap(),
     ]);
     assert!(ok, "{logs}");
     assert_eq!(logs["status"], "complete");
@@ -706,8 +789,21 @@ fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
     assert_eq!(doc["degree"], 14);
 
     let (ok, solve) = command(&[
-        "solve", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "2",
-        "--logs", db.to_str().unwrap(), "--known-log", "4000", "--solver", "pair-table",
+        "solve",
+        "--degree",
+        "14",
+        "--subfield",
+        "2",
+        "--curve-a",
+        "0",
+        "--curve-b",
+        "2",
+        "--logs",
+        db.to_str().unwrap(),
+        "--known-log",
+        "4000",
+        "--solver",
+        "pair-table",
     ]);
     assert!(ok, "{solve}");
     assert_eq!(solve["result"]["verified"], true);
@@ -716,19 +812,48 @@ fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
     // The database is bound to the subfield curve: a Koblitz reading of
     // the same degree is refused, and so is another b.
     let (ok, v) = command(&[
-        "solve", "--degree", "14", "--curve-a", "0", "--logs", db.to_str().unwrap(), "--known-log", "5",
+        "solve",
+        "--degree",
+        "14",
+        "--curve-a",
+        "0",
+        "--logs",
+        db.to_str().unwrap(),
+        "--known-log",
+        "5",
     ]);
     assert!(!ok, "{v}");
     let (ok, v) = command(&[
-        "solve", "--degree", "14", "--subfield", "2", "--curve-a", "0", "--curve-b", "3",
-        "--logs", db.to_str().unwrap(), "--known-log", "5",
+        "solve",
+        "--degree",
+        "14",
+        "--subfield",
+        "2",
+        "--curve-a",
+        "0",
+        "--curve-b",
+        "3",
+        "--logs",
+        db.to_str().unwrap(),
+        "--known-log",
+        "5",
     ]);
     assert!(!ok, "{v}");
     std::fs::remove_file(db).unwrap();
 
     // Koblitz documents are unchanged: no subfield fields are written.
     let db = path();
-    let (ok, _) = command(&["logs", "--degree", "9", "--curve-a", "0", "--solver", "pair-table", "--database", db.to_str().unwrap()]);
+    let (ok, _) = command(&[
+        "logs",
+        "--degree",
+        "9",
+        "--curve-a",
+        "0",
+        "--solver",
+        "pair-table",
+        "--database",
+        db.to_str().unwrap(),
+    ]);
     assert!(ok);
     let doc: Value = serde_json::from_slice(&std::fs::read(&db).unwrap()).unwrap();
     assert!(doc.get("subfield").is_none() && doc.get("curve_b").is_none());
@@ -737,6 +862,16 @@ fn subfield_curves_run_precompute_and_descend_with_bound_documents() {
     // Parameter validation: n/k must be odd, coefficients below q.
     let (ok, _) = command(&["run", "--degree", "12", "--subfield", "2", "--curve-b", "2"]);
     assert!(!ok);
-    let (ok, _) = command(&["run", "--degree", "14", "--subfield", "2", "--curve-a", "4", "--curve-b", "2"]);
+    let (ok, _) = command(&[
+        "run",
+        "--degree",
+        "14",
+        "--subfield",
+        "2",
+        "--curve-a",
+        "4",
+        "--curve-b",
+        "2",
+    ]);
     assert!(!ok);
 }
