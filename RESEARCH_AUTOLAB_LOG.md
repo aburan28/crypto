@@ -7859,3 +7859,195 @@ applied to structured problems.
 ### Commits made
 
 (see PR — `cryptanalysis::quasi_subfield`, two examples, research note)
+
+---
+
+## 2026-09-12 (autolab run, twelfth session — IC boundary beats)
+
+### Task picked
+
+Run the registered IC boundary beats. Ledger priority 1 was the Koblitz
+`vs_rho` push: whole-process wall at `n = 37`, or charged at `n = 41` with a
+≥20% margin, after the `n = 53` construction probe.
+
+### Work done
+
+Ran all four registered beats (`smoke.koblitz.vs_rho.n13`,
+`koblitz.vs_rho.n37_wall`, `koblitz.vs_rho.n41_charged`,
+`koblitz.vs_rho.n53_probe`), then the 1024-target panel at `n = 37` across all
+three target modes. No beat was won. Two things had to be fixed before the
+numbers meant anything.
+
+### Finding 1: the wall metric was timing process startup
+
+`run_timed` measured one `subprocess.run` per arm, and the autolab builds the
+producers immediately before it, so every `whole_process_wall` number the
+control plane had ever recorded was a first-execution measurement. On this host
+the first execution of a freshly linked binary costs 183–484 ms against 7 ms
+warm — page-in and signature validation, not algorithm. Copying the binary to a
+new path and running it reproduces this on demand: 207 ms cold, 7.7 ms on the
+immediately following run.
+
+That term is roughly constant per process, so it lands on both arms and drags
+every ratio toward parity, which flatters whichever arm is slower. At `n = 13`
+it *was* the result:
+
+| | recorded (cold) | honest (warm) |
+|---|---|---|
+| `n = 13` | 219.5 ms vs 227.9 ms → **1.038x, IC ahead** | 6.9 ms vs 3.0 ms → 0.437x, IC behind |
+| `n = 37` | 514.7 ms vs 202.3 ms → 0.393x | 112.9 ms vs 16.5 ms → 0.146x |
+
+The smoke beat's apparent IC win was entirely the artifact. The fix warms each
+binary by running it with no arguments — both producers reject that at once
+while still paying the whole load cost — then reports the median of `--repeats`
+timed runs, stopping early past 20 s so a quarter-hour rung is not repeated.
+The discarded cost is recorded as `cold_start_wall_ms` rather than hidden.
+
+No ledger row needed retracting *for this*: the bias ran toward parity and the
+`vs_rho` row already said `whole_process_wall_crossover = false`. It would have
+mattered for the next attempt, not the last one. The charged timing class reads
+the producer's own instrumentation and is unaffected — `n = 41` measures 0.033x
+before and after, which is the control.
+
+### Finding 2: the headline `vs_rho` record was stale, and never replayable
+
+The row claimed `N37_DIRECT_1024_CHARGED_CROSSOVER`. Three independent problems:
+
+1. Its evidence pointer,
+   `research/sat_factor_base_review_20260908/autolab_n37_direct_retry/…/verdict.json`,
+   is absent from the tree and appears in **no commit** (`git log --all` over
+   that path is empty). The row was never independently replayable.
+2. Commit `52e305e7` replaced the ρ baseline's Floyd cycle finding — which on a
+   negation-quotient walk meets itself at fruitless cycles — with the
+   distinguished-point method, and states that the old baseline recovered 0 of
+   32 logarithms at degree 41 while the workflow reported a 1.009 crossover
+   "that was nothing but a broken opponent", and that there is no crossover at
+   31, 37, 39 or 41. It landed 2026-09-11, one day after the row was written.
+   The row was never revisited.
+3. Remeasured on current producers at `n = 37`, 1024 targets, with ρ verifying
+   1024/1024:
+
+| target mode | charged ms/target | collection | of which solution validation |
+|---|---|---|---|
+| `partition_walk` | **14.78** | 14.63 | 7.78 |
+| `coefficient_walk` | 15.33 | 15.05 | 8.03 |
+| `independent` | 20.27 | 20.25 | 7.74 |
+| ρ | **12.82** | | |
+
+Index calculus is 1.15x behind in its best mode and 1.58x in the one the
+registered beat runs; on whole-process wall over the same panel it is 6.45x.
+
+The row is retracted into `history` with the reason, and `current` now records
+`NO_CROSSOVER_MEASURED_N13_N37_N41_N53`.
+
+### Finding 3: my own first remeasurement double-counted setup
+
+The table above is the second version. The first one read 29.47 / 30.34 / 34.05
+ms/target and put index calculus 2.30x behind, and I had written it into the
+ledger before checking where the number came from.
+
+It came from summing the direct producer's per-target `charged_total_ms`. That
+field is `setup_ms + fixture_setup_ms + collection_ms`, where `setup_ms` is the
+*shared* support-table build. Summing it over a batch charges the same 14 ms
+support build once per target, 1024 times over. The producer's own batch
+summary already gets this right: `full_algorithm_charged_total_ms` is
+`curve_setup_ms + setup_ms + online_charged_ms`, with setup counted once. At
+`n = 37` the difference is 34.08 against 20.27 for the same run.
+
+The error inverted a conclusion, not just a digit. Believing setup was charged
+per target, I wrote that no reachable target mode shares one base across
+targets and that the "amortized" configuration the retracted record described
+was unreachable through the control plane. Both are false. The batch does share
+one base; support plus curve setup is about 15 ms for the *whole* 1024-target
+batch, under 0.02 ms/target. Setup amortization is not a lever in either
+direction, and the entire gap is per-target relation collection.
+
+The retraction stands and the verdict is unchanged — every mode is still behind
+ρ — but the margin is 1.15x, not 2.30x, and the reason is different. Both the
+ledger and this log had to be rewritten from the artifacts a second time.
+
+The general lesson is the same one that produced Finding 2: a number is only as
+good as the file you can point at. The ledger now has an acceptance gate for it
+("charged cost read from the batch summary, never summed from per-target rows")
+and the evidence README leads with the pitfall.
+
+### Full beat results (warm harness)
+
+| rung | timing class | IC | ρ | ρ/IC |
+|---|---|---|---|---|
+| `n = 13` | whole_process_wall | 6.94 ms | 3.03 ms | 0.437x |
+| `n = 37` | whole_process_wall | 112.85 ms | 16.52 ms | 0.146x |
+| `n = 41` | algorithmic_charged | 7698.89 ms | 247.48 ms | 0.032x |
+| `n = 53` | whole_process_wall | 870.77 s | 4.84 s | 0.0056x |
+
+Above 1 would be an index-calculus win. The gap widens monotonically with `n`,
+which is the opposite of what a crossover story needs.
+
+### Findings
+
+**`n = 41` is the wrong next target and should never have been one.** The
+previous row asked for a charged win there with a ≥20% margin. Discount the
+6877 ms support build entirely and per-target collection at `n = 41` is still
+821.7 ms against ρ's 247.5 ms, so the amortization-invariant part is already
+3.3x over budget: no number of targets can cross it. The gate was unreachable by
+construction, not merely unmet. Priority 1 is now `n = 37`, the only rung where
+the two are within a factor of 1.2 of each other.
+
+**The direct arm's largest charged component is an assertion.**
+`solution_validation_ms` is 7.78 of `partition_walk`'s 14.78 ms/target, 53%. It
+re-derives the discrete log of every factor-base representative with a scalar
+multiplication and replays every collected relation against the solved vector,
+under `assert_eq!`, to confirm an answer the linear solve has already produced.
+The whole 1.96 ms/target gap sits inside it several times over.
+
+That is not a free win, and I have deliberately not taken it. ρ spends 1.28
+ms/target on its own `validation_ms`, and the two checks are not comparable in
+kind or cost. Dropping IC's validation while keeping ρ's would produce a 1.65x
+"win" that is purely an accounting choice — exactly the move the ledger's claim
+hygiene rule forbids. The legitimate versions are to make the check cheap, or to
+define a verification policy and apply it identically to both arms and say so.
+The measured ratios in the ledger charge each arm its full cost as its producer
+defines it; the decomposition is recorded separately and labelled diagnostic.
+
+**Two measurement asymmetries, both recorded, neither corrected for.** ρ's
+`setup_ms` includes building its own target `Q = d0·G`, which is instance
+generation — the direct arm reports the equivalent as `fixture_generation_ms`
+and does not charge it. That runs against ρ. The validation asymmetry above runs
+against IC. Rather than adjust either, both are written into
+`target_mode_sweep.json` so the next reader can decide.
+
+**`n = 53` measures feasibility, not competitiveness.** Both arms recover, which
+is the point of the construction probe, but IC is 180x ρ there.
+
+### Process notes
+
+- Setting `stdout_stable` by comparing raw producer stdout reported `False`
+  everywhere, because every row carries its own measured durations. Comparing
+  rows with `*_ms` keys dropped makes it mean what it should, and it is `True`
+  on every arm of every beat above — the repeats really are the same
+  computation.
+- Four unit tests now cover `run_timed`, including that the warmup runs and is
+  excluded from the samples. Deleting the warmup line makes that test fail,
+  which is the check that it is testing anything.
+- The first amortization estimate used ρ's *cold* cost and concluded `n = 37`
+  had a 10x margin in hand once the base amortized. That was the same
+  first-execution artifact one level up. Against warm ρ the margin is negative.
+- The target-mode sweep and the per-rung cost breakdown are now committed under
+  `autolab/evidence/20260912-koblitz-vs-rho-no-crossover/`, with the scripts
+  that produced them. `autolab/.gitignore` excludes `runs/*`, so leaving the
+  ledger pointing into `runs/` would have reproduced the exact dangling-pointer
+  failure this session retracted a record for. The producer logs stay out: 56 MB
+  across five runs, and the per-relation records carry point coordinates, target
+  point keys and walk coefficients. Only the aggregate layers are promoted.
+
+### Next step proposal
+
+`n = 37` charged, `target_mode=partition_walk`: 14.78 ms/target against ρ's
+12.82, a 1.96 ms gap. It is the only rung on the board where the two are close,
+and everything above `n = 37` diverges. The first thing to look at is
+`solution_validation_ms`, which is 53% of the direct arm's cost — under the
+verification-policy constraint above, not as a subtraction.
+
+### Commits made
+
+(see PR — autolab timing fix + tests, ledger retraction, scoreboard)
