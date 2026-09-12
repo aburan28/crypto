@@ -78,7 +78,7 @@ namespace reg {
 enum : uint32_t {
     MAGIC = 0x000, CTRL = 0x004, STATUS = 0x008, GEOM = 0x00C,
     STEPS_LO = 0x010, STEPS_HI = 0x014, DPS = 0x018, DROPPED = 0x01C,
-    LD_ID = 0x020, LD_X = 0x024, LD_Y = 0x038, LD_GO = 0x04C,
+    LD_ID = 0x020, LD_X = 0x024, LD_Y = 0x038, LD_GO = 0x04C, CLOCK = 0x050,
     DP_ID = 0x080, DP_STEPS_LO = 0x084, DP_STEPS_HI = 0x088,
     DP_X = 0x090, DP_Y = 0x0A4, DP_POP = 0x0B8,
 };
@@ -289,6 +289,7 @@ struct SimBus : Bus {
             return (fifo.empty() ? 0 : ST_DP_AVAIL) |
                    ((uint32_t)std::min<size_t>(fifo.size(), 255) << 16);
         case GEOM: return geo.encode();
+        case CLOCK: return 333333;   // kHz, as an image built with the defaults reports
         case STEPS_LO: stepsHi = (uint32_t)(steps >> 32); return (uint32_t)steps;
         case STEPS_HI: return stepsHi;
         case DPS: return dps;
@@ -684,9 +685,13 @@ struct Client {
             fprintf(stderr, "--run-id must fit 16 bits\n");
             return 1;
         }
-        printf("backend %s: %d engine(s) x %u walks = %u walks, dp weight %d, batches of %d, %d in flight\n",
+        const uint32_t clkKhz = bus->peek(reg::CLOCK);   // 0 from images older than the register
+        printf("backend %s: %d engine(s) x %u walks = %u walks, dp weight %d, batches of %d, %d in flight, "
+               "engine clock %s\n",
                o.sim ? "fpga-sim" : "fpga", geo.neng, 1u << geo.idW, nw, geo.dpWeight, 1 << geo.logW,
-               1 << geo.logNb);
+               1 << geo.logNb,
+               clkKhz ? (std::to_string(clkKhz / 1000) + "." + std::to_string(clkKhz / 100 % 10) + " MHz").c_str()
+                      : "not reported (250 MHz shell clock)");
 
         // corpus, then walk state
         if (int rc = reloadCorpus()) return rc < 0 ? 0 : rc;
