@@ -1969,6 +1969,10 @@ fn main() {
         .ok()
         .map(|value| value.parse().unwrap())
         .unwrap_or(0);
+    let required_rank_surplus: usize = std::env::var("KIC_RANK_SURPLUS")
+        .ok()
+        .map(|value| value.parse().unwrap())
+        .unwrap_or(32);
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
@@ -2358,7 +2362,7 @@ fn main() {
 
         while trials < target_cap {
             if let Some(full_at) = rank_full_at {
-                if accepted >= full_at + 32 {
+                if accepted >= full_at + required_rank_surplus {
                     break;
                 }
             } else if accepted >= relation_cap {
@@ -2839,10 +2843,14 @@ fn main() {
         let q_key = point_key(&q);
         let generator_key = point_key(curve.generator());
         let status = if rank_full_at
-            .map(|full_at| accepted >= full_at + 32)
+            .map(|full_at| accepted >= full_at + required_rank_surplus)
             .unwrap_or(false)
         {
-            "RANK_PLUS_32"
+            match required_rank_surplus {
+                0 => "FULL_RANK",
+                32 => "RANK_PLUS_32",
+                _ => "RANK_PLUS_SURPLUS",
+            }
         } else if accepted >= relation_cap {
             "RANK_DEFICIENT"
         } else {
@@ -2892,6 +2900,7 @@ fn main() {
                 "scalar_multiple_rows":scalar_multiple_rows,
                 "full_rank_at_relation":rank_full_at,
                 "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
+                "required_surplus_relations":required_rank_surplus,
                 "relation_cap_without_rank":relation_cap,
                 "relation_cap_extra":relation_cap_extra,
                 "collection_ms":collection_ms,
