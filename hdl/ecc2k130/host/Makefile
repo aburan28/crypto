@@ -32,7 +32,7 @@ pci: $(SRC) $(wildcard $(INC)/*.h)
 	    -L$(SDK_DIR)/userspace/lib/so -lfpga_mgmt -Wl,-rpath,$(SDK_DIR)/userspace/lib/so -o $(BIN)
 
 test: $(BIN)
-	./test.sh ./$(BIN)
+	bash ./test.sh ./$(BIN)
 
 clean:
 	rm -f $(BIN)
