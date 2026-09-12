@@ -193,12 +193,12 @@ static void throughput() {
          * of that instead.  Restoring the input each rep is what makes
          * the timed launch measure the same thing the warm-up did.
          *
-         * The copy is outside the event window, so only the kernels
-         * are timed. */
+         * `cudaMemcpy` on the default stream is synchronous, and the
+         * copy sits before `cudaEventRecord`, so only the kernels are
+         * timed. */
         for (int rep = 0; rep < 2; rep++) {
             CUDA_OK(cudaMemcpy(d_a, host.data(), sz * batch * sizeof(uint32_t),
                                cudaMemcpyHostToDevice));
-            CUDA_OK(cudaDeviceSynchronize());
             if (rep == 1) CUDA_OK(cudaEventRecord(t0));
             to_mont_kernel<<<256, 256>>>(d_a, sz * batch);
             rref_batch_kernel<<<batch, MAC_THREADS, shared_bytes()>>>(
