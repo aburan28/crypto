@@ -49,3 +49,16 @@ gpu/btcpuzzle/tune_kangaroo
 
 # FPGA host program for the ECC2K-130 engine (built from hdl/ecc2k130/host)
 hdl/ecc2k130/host/ecc2k130-fpga
+
+# F2 custom-logic build tree (hdl/ecc2k130/aws/cl_ecc2k130): symlinks that
+# build_afi.sh drops in from the HDK, and Vivado's outputs
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/aws_build_dcp_from_cl.py
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/build_all.tcl
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/build_level_1_cl.tcl
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/*.log
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/*.jou
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/.Xil/
+hdl/ecc2k130/aws/cl_ecc2k130/build/checkpoints/
+hdl/ecc2k130/aws/cl_ecc2k130/build/reports/
+hdl/ecc2k130/aws/cl_ecc2k130/build/src_post_encryption/
+hdl/ecc2k130/aws/cl_ecc2k130/build/constraints/generated_cl_clocks_aws.xdc
