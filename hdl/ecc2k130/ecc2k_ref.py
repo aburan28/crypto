@@ -312,7 +312,7 @@ def cost():
     print('toOnb (c-powers -> gamma): %5d XOR2, widest output %d inputs'
           % (toOnbXor, max(toOnbIn)))
     print('Karatsuba levels (gf2_kmul), n x n product over GF(2):')
-    for levels in range(4):
+    for levels in range(5):
         a, x, leaf = kmulCost(M, levels)
         print('  %d level(s): leaf %3d bits, %5d AND, %5d XOR2; per multiply %5d AND, %5d XOR2,'
               ' latency %d clk' % (levels, leaf, a, x, a, 2 * prepXor + x + toOnbXor,
