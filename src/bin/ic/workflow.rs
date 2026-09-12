@@ -274,6 +274,15 @@ pub struct WorkflowParams {
     /// cheap ones.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub descent_summands: Option<u8>,
+    /// Factor-base summands collection scans per probe, when it should
+    /// scan fewer than all of them. A full three-summand scan encounters
+    /// each triple with three possible third summands and keeps one
+    /// sorted witness; a window accepts any of those raw witnesses at a
+    /// fraction of the scan cost and walks the extra probes it needs.
+    /// Omitted means the whole base and one scalar multiplication per
+    /// probe. A separate selection run must tune this value.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub collection_window: Option<u32>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -321,6 +330,17 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if let Some(d) = p.descent_summands {
         if !(2..=4).contains(&d) {
             return Err("descent_summands must be 2, 3 or 4".into());
+        }
+    }
+    if let Some(w) = p.collection_window {
+        if w == 0 {
+            return Err("collection_window must scan at least one summand".into());
+        }
+        if p.summands != 3 {
+            return Err("collection_window applies to three-summand collection".into());
+        }
+        if p.solver != Solver::PairTable {
+            return Err("collection_window requires the pair-table solver".into());
         }
     }
     if p.summands < 2 || p.summands > 4 {
@@ -439,6 +459,10 @@ pub struct RelationUnitDocument {
     pub seed: u64,
     pub start: u64,
     pub count: u64,
+    /// Third-summand lookups paid by this unit. Older full-scan unit
+    /// documents predate this counter and deserialize as zero.
+    #[serde(default)]
+    pub summands_scanned: u64,
     pub relations: Vec<CollectedRelation>,
     pub elapsed_seconds: f64,
 }
@@ -864,6 +888,14 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":true}));
     }
     let columns = crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
+    if let Some(window) = p.collection_window {
+        if window as usize >= fb.points.len() {
+            return Err(format!(
+                "collection_window must be smaller than the {}-point factor base",
+                fb.points.len()
+            ));
+        }
+    }
     let factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
     if args.stop_after == Some(Stage::Select) {
         return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
@@ -876,6 +908,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             p.solver,
             p.summands,
             p.descent_summands,
+            p.collection_window,
             p.max_trials,
             p.seed,
         ),
@@ -911,6 +944,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut units_ran = 0usize;
     let mut relations_now = 0usize;
     let mut trials_now = 0u64;
+    let mut summands_scanned_now = 0u64;
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -919,21 +953,29 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             units.len()
         ));
     }
-    for &u in &wanted {
-        let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, u)?;
-        say(&format!(
-            "      unit {u:05}: {} relations from {} probes ({:.2}s)",
-            doc.relations.len(),
-            doc.count,
-            doc.elapsed_seconds
-        ));
-        units_ran += 1;
-        relations_now += doc.relations.len();
-        trials_now += doc.count;
-        units.insert(u, doc);
-        state.units_collected = units.len();
-        state.relations_collected = units.values().map(|d| d.relations.len()).sum();
-        write_atomic(&state_path, &state)?;
+    if !wanted.is_empty() {
+        if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+            pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+        }
+        let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
+            .ok_or("factor base cannot decompose with this summand count")?;
+        for &u in &wanted {
+            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
+            say(&format!(
+                "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+                doc.relations.len(),
+                doc.count,
+                doc.elapsed_seconds
+            ));
+            units_ran += 1;
+            relations_now += doc.relations.len();
+            trials_now += doc.count;
+            summands_scanned_now += doc.summands_scanned;
+            units.insert(u, doc);
+            state.units_collected = units.len();
+            state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+            write_atomic(&state_path, &state)?;
+        }
     }
     state.units_collected = units.len();
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
@@ -946,6 +988,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     };
     write_atomic(&state_path, &state)?;
     let trials_total: u64 = units.values().map(|d| d.count).sum();
+    let summands_scanned_total: u64 = units.values().map(|d| d.summands_scanned).sum();
     stage_reports.push(json!({"stage":"collect",
         "status":if state.collect.status == StageStatus::Complete {"complete"} else {"partial"},
         "ran":units_ran > 0,"worker":worker_mode,
@@ -953,7 +996,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                  "max":p.collection.max_units,"ignored":ignored,"trials_per_unit":p.collection.unit_trials,
                  "indices":units.keys().copied().collect::<Vec<_>>()},
         "trials_now":trials_now,"relations_now":relations_now,
+        "summands_scanned_now":summands_scanned_now,
         "trials_total":trials_total,"relations_total":state.relations_collected,
+        "summands_scanned_total":summands_scanned_total,
         "elapsed_seconds":t1.elapsed().as_secs_f64()}));
     if units_ran == 0 {
         say(&format!(
@@ -1004,34 +1049,49 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let mut outcome = solver.try_solve();
         let mut extended = 0usize;
         // Undetermined: collect further units up to the budget, solving
-        // again after each.
-        while outcome.is_none() {
-            let report = solver.report();
-            let next = units.keys().max().map_or(0, |m| m + 1);
-            if next >= p.collection.max_units {
-                break;
+        // again after each.  One collector serves every round, and its
+        // borrow of the pair table ends with this block so the descent
+        // can still build one if collection never ran.
+        if outcome.is_none() {
+            let collector = {
+                if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+                    pair = Some(
+                        PairSumTable::build(&c, &fb)
+                            .ok_or("field too wide for the pair table")?,
+                    );
+                }
+                RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
+                    .ok_or("factor base cannot decompose with this summand count")?
+            };
+            while outcome.is_none() {
+                let report = solver.report();
+                let next = units.keys().max().map_or(0, |m| m + 1);
+                if next >= p.collection.max_units {
+                    break;
+                }
+                say(&format!(
+                    "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
+                    report.relations, report.rejected_relations, report.duplicate_relations, report.columns
+                ));
+                let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
+                say(&format!(
+                    "      unit {next:05}: {} relations from {} probes ({:.2}s)",
+                    doc.relations.len(),
+                    doc.count,
+                    doc.elapsed_seconds
+                ));
+                solver.push(&doc.relations);
+                loaded += doc.relations.len();
+                units.insert(next, doc);
+                extended += 1;
+                state.units_collected = units.len();
+                state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+                write_atomic(&state_path, &state)?;
+                outcome = solver.try_solve();
             }
-            say(&format!(
-                "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
-                report.relations, report.rejected_relations, report.duplicate_relations, report.columns
-            ));
-            let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, next)?;
-            say(&format!(
-                "      unit {next:05}: {} relations from {} probes ({:.2}s)",
-                doc.relations.len(),
-                doc.count,
-                doc.elapsed_seconds
-            ));
-            solver.push(&doc.relations);
-            loaded += doc.relations.len();
-            units.insert(next, doc);
-            extended += 1;
-            state.units_collected = units.len();
-            state.relations_collected = units.values().map(|d| d.relations.len()).sum();
-            write_atomic(&state_path, &state)?;
-            outcome = solver.try_solve();
         }
         let trials_total: u64 = units.values().map(|d| d.count).sum();
+        let summands_scanned_total: u64 = units.values().map(|d| d.summands_scanned).sum();
         let outcome = outcome.or_else(|| {
             Some((
                 FactorBaseLogTable { columns: Vec::new() },
@@ -1054,6 +1114,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     "columns":report.columns,"trials":trials_total,"relations":report.relations,
                     "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
+                    "summands_scanned":summands_scanned_total,
                     "verification_seconds":report.collection_seconds,
                     "linear_algebra":experiment::linear_algebra_json(&report),
                     "elapsed_seconds":t2.elapsed().as_secs_f64()}));
@@ -1081,6 +1142,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason,
                     "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
+                    "summands_scanned":summands_scanned_total,
                     "linear_algebra":experiment::linear_algebra_json(&report)}));
                 overall_failed = Some(reason);
                 None
@@ -1297,7 +1359,8 @@ fn finish(
     json!({"schema_version":1,"operation":"workflow","status":status,
         "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,
-        "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),"solver":p.solver,
+        "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),
+        "collection_window":p.collection_window,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,
@@ -1355,24 +1418,21 @@ fn load_units(
     Ok((units, ignored))
 }
 
-/// Collect one work unit and write its file atomically.
+/// Collect one work unit and write its relation file.  The collector is
+/// built once for the whole stage and handed in: its point index map is
+/// keyed by big integers and costs about as much to build as a short
+/// unit costs to run, so rebuilding it per unit made a run's cost depend
+/// on how finely the trials were partitioned.
 #[allow(clippy::too_many_arguments)]
 fn collect_unit(
     c: &KoblitzCurve,
-    fb: &FrobeniusFactorBase,
-    ic: &KoblitzIcOptions,
-    pair: &mut Option<PairSumTable>,
+    collector: &RelationCollector<'_>,
     p: &WorkflowParams,
     digest: &str,
     spec: &FactorBaseSpec,
     rel_dir: &Path,
     unit: usize,
 ) -> Result<RelationUnitDocument, String> {
-    if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
-        *pair = Some(PairSumTable::build(c, fb).ok_or("field too wide for the pair table")?);
-    }
-    let collector = RelationCollector::with_pair_table(c, fb, ic, pair.as_ref())
-        .ok_or("factor base cannot decompose with this summand count")?;
     let work = RelationWorkUnit {
         seed: p.seed,
         start: (unit as u64)
@@ -1394,6 +1454,7 @@ fn collect_unit(
         seed: work.seed,
         start: work.start,
         count: work.count,
+        summands_scanned: report.summands_scanned,
         relations,
         elapsed_seconds: report.elapsed_seconds,
     };
