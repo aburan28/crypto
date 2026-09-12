@@ -1,0 +1,100 @@
+{
+ "claim_boundary": "extrapolation_from_measured_constants",
+ "date": "2026-09-12",
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "operation": "koblitz_reach_versus_memory",
+ "schema_version": 1,
+ "sized_for_a_charged_ratio_of_ten": [
+  {
+   "break_even_targets": 17,
+   "collection_seconds": 16.3,
+   "descent_seconds_per_target": 0.2731,
+   "factor_base_points": 22662,
+   "memory_bytes": 1260851310,
+   "memory_tebibytes": 0.0011,
+   "pair_table_seconds": 25.7,
+   "precompute_seconds": 42.0,
+   "rho_seconds_per_target": 2.7312,
+   "subgroup_bits": 48
+  },
+  {
+   "break_even_targets": 37,
+   "collection_seconds": 1042.5,
+   "descent_seconds_per_target": 4.3699,
+   "factor_base_points": 90650,
+   "memory_bytes": 20173620956,
+   "memory_tebibytes": 0.0183,
+   "pair_table_seconds": 410.9,
+   "precompute_seconds": 1453.4,
+   "rho_seconds_per_target": 43.6991,
+   "subgroup_bits": 56
+  },
+  {
+   "break_even_targets": 116,
+   "collection_seconds": 66719.6,
+   "descent_seconds_per_target": 69.9185,
+   "factor_base_points": 362599,
+   "memory_bytes": 322777935295,
+   "memory_tebibytes": 0.2936,
+   "pair_table_seconds": 6573.9,
+   "precompute_seconds": 73293.5,
+   "rho_seconds_per_target": 699.1851,
+   "subgroup_bits": 64
+  },
+  {
+   "break_even_targets": 435,
+   "collection_seconds": 4270057.0,
+   "descent_seconds_per_target": 1118.6961,
+   "factor_base_points": 1450395,
+   "memory_bytes": 5164446964720,
+   "memory_tebibytes": 4.697,
+   "pair_table_seconds": 105182.2,
+   "precompute_seconds": 4375239.3,
+   "rho_seconds_per_target": 11186.961,
+   "subgroup_bits": 72
+  },
+  {
+   "break_even_targets": 1707,
+   "collection_seconds": 273283651.0,
+   "descent_seconds_per_target": 17899.1377,
+   "factor_base_points": 5801578,
+   "memory_bytes": 82631151435514,
+   "memory_tebibytes": 75.1526,
+   "pair_table_seconds": 1682915.5,
+   "precompute_seconds": 274966566.5,
+   "rho_seconds_per_target": 178991.3767,
+   "subgroup_bits": 80
+  }
+ ],
+ "software": {
+  "commit": "ab7413e898cb4f1ee01134f84e552241c55091f6",
+  "profile": "release"
+ },
+ "the_law": {
+  "charged_crossover_at_4_gibibytes_bits": 58.2,
+  "constants_measured_at_degree_61": {
+   "bytes_per_stored_pair": 4.91,
+   "collection_lookup_nanoseconds": 40,
+   "descent_probe_microseconds": 0.249,
+   "pair_table_nanoseconds_per_pair": 100,
+   "rho_step_microseconds": 1.435
+  },
+  "cross_check": "An independent extrapolation from the degree-61 charged ratio of 61.2 along the same square-root slope gives about 60 bits; these agree to within two bits.",
+  "crossover": "r_max proportional to M^2",
+  "descent": "2r/|F|^2 probes, and |F| = sqrt(2M/c) for M bytes at c bytes a stored pair, so r*c*t_probe/M -- linear in r, inverse in memory",
+  "rho": "sqrt(pi r/2)/sqrt(2n) steps"
+ },
+ "what_it_does_support": "The shape: reach quadratic in memory, precompute linear in r. A tool for many logarithms on one curve and never for one logarithm -- 17 targets to pay for itself at 48 bits, about 1700 at 80.",
+ "what_this_is": "The cost laws collapsed into one statement and priced from measured constants: the charged reach of this method grows as the square of the memory budget, two bits a quadrupling.",
+ "why_the_large_rows_are_not_predictions": [
+  "The lookup cost is held at 40 ns, which is a DRAM miss. At 75 TiB the pair table is not in DRAM on any machine and a lookup becomes an SSD or network access, ten to a thousand times slower, which multiplies the collection column. The M^2 law is clean but its constant holds only while the table answers at memory speed, and the law itself pushes the table out of that memory.",
+  "The decomposition rates |F|^3/(3!r) and |F|^2/(2r) treat pair and triple sums as uniform over the group. Well supported at the sizes measured here; not proved at any size.",
+  "Constants measured at a 48-bit subgroup are extrapolated to 80, a factor of 10^10 in r.",
+  "Collection parallelises and the years quoted are core-years, but the pair table is a shared structure every worker must reach, and sharding it is engineering this note has not done."
+ ]
+}

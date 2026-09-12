@@ -1656,3 +1656,83 @@ probes and ρ still costs `√(πr/2)/√(2n)` steps; linear still loses to a
 square root, and the boundary is still a boundary. What moved is where it
 sits, and it moved because a constant that looked fixed turned out not to
 be — four times in a row.
+
+## The whole thing in one law
+
+Four sections of this note moved constants, and one moved the quantity
+the constants divide. It is worth collapsing all of it into the statement
+it adds up to, because that statement outlives any particular
+optimisation.
+
+Two facts do the work. The descent needs `2r/|F|²` probes. The factor
+base is bounded by memory, `|F| = √(2M/c)` for `M` bytes at `c` bytes a
+stored pair. Substitute:
+
+```text
+    descent cost  =  r · c · t_probe / M          — linear in r, inverse in memory
+    ρ cost        =  √(πr/2)/√(2n) · t_step       — square root of r
+```
+
+Setting them equal and solving for `r`:
+
+```text
+    r_max  ∝  M²
+```
+
+**The reach of this method grows as the square of the memory budget** —
+exactly two bits per quadrupling. Everything else in this note is inside
+that proportionality constant.
+
+With the constants the degree-61 run measured (0.249 µs a descent probe,
+1.435 µs a ρ step, 4.91 bytes a stored pair) the charged crossover sits
+at **58.2 bits at four gibibytes**, which agrees to within two bits with
+the independent extrapolation from the measured ratio a section ago.
+
+### What it would take
+
+Sizing memory for a charged ratio of ten — the descent a tenth of a ρ
+walk, a real margin rather than a tie — and pricing the whole process:
+
+| subgroup | memory | `\|F\|` | pair table | collection | descent | ρ/target | break-even targets |
+|---|---|---|---|---|---|---|---|
+| 48 bits | 1.2 GiB | 22 700 | 26 s | 16 s | 0.27 s | 2.7 s | 17 |
+| 56 bits | 18 GiB | 90 600 | 7 min | 17 min | 4.4 s | 44 s | 37 |
+| 64 bits | 0.29 TiB | 363 000 | 1.8 h | 18.5 h | 70 s | 12 min | 116 |
+| 72 bits | 4.7 TiB | 1.45 M | 29 h | 49 days | 19 min | 3.1 h | 435 |
+| 80 bits | 75 TiB | 5.8 M | 19 days | 8.7 years | 5 h | 50 h | 1707 |
+
+Collection dominates the precompute from 56 bits on, exactly as the
+`2r/(n|F|)` law says it must, and the pair table — the thing that felt
+expensive at degree 61 — becomes a rounding error.
+
+### Why the last row is not a claim
+
+That table extrapolates constants measured at a 48-bit subgroup out to 80
+bits, a factor of `10¹⁰` in `r`. Three things about it should stop anyone
+reading the bottom row as a prediction.
+
+**The lookup cost is assumed constant, and it is not.** Every figure
+takes 40 ns a lookup, which is a DRAM miss. At 75 TiB the pair table is
+not in DRAM on any machine; a lookup becomes an SSD or a network access,
+somewhere between ten and a thousand times slower, and the collection
+column is where that multiplies. Eight years becomes centuries at the
+wrong end of that range. The `M²` law is clean, but its constant is only
+constant while the table fits in memory that answers at memory speed —
+and the whole point of the law is that it pushes the table out of that
+memory.
+
+**The decomposition rate is assumed to hold.** The `|F|³/(3!r)` and
+`|F|²/(2r)` rates come from treating pair and triple sums as uniform over
+the group. That is well supported at the sizes measured here and is not
+proved at any size.
+
+**Nothing here parallelises for free.** Collection does, and the eight
+years is core-years; the pair table is a shared structure that every
+worker must reach, and sharding it is a different piece of engineering
+that this note has not done.
+
+What the table does support is the shape: **this method's reach is
+quadratic in memory and its precompute is linear in `r`**, so it is a
+tool for many logarithms on one curve and never for one logarithm. At 48
+bits it pays for itself after 17 targets; at 80 bits, after about 1700 —
+if you have 75 terabytes that answer in 40 nanoseconds.

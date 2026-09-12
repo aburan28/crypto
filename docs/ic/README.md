@@ -486,6 +486,15 @@ times fewer probes. Below the budget nothing changes: a base that fits
 with its summands keeps them. Below even the compact size the build
 still refuses with a number instead of an allocation.
 
+`docs/ic/runs/koblitz-reach-versus-memory-20260912.json` collapses the
+cost laws into one statement: the descent costs `2r/|F|²` probes and
+`|F| = √(2M/c)`, so the charged reach grows as **`M²`** — two bits a
+quadrupling of memory, 58.2 bits at four gibibytes on the measured
+constants. Read its `why_the_large_rows_are_not_predictions` before
+quoting the table: every figure holds a lookup at 40 ns, which stops
+being true once the pair table leaves DRAM, and that is precisely what
+the law asks for.
+
 `docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
 offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
 a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
