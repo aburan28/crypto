@@ -141,6 +141,10 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_PACKED_SHARED_SIGMA
+    // All block threads participate, including inactive partial-tile workers.
+    initSigmaWalkShared131();
+#endif
     if (tid >= p.threads) return;
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_POLY_STATE
     unsigned *polyDenominators=denominators+size_t(p.threads)*ECC_BATCH*5;
@@ -190,7 +194,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_WEIGHTED_PREFIX
             const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_WEIGHTED_PREFIX == 2
+#if ECC_PACKED_SHARED_SIGMA
+            const SigmaWalkPair131 sigmas = sigmaWalkNetworkPairShared131(x, normalY, j - 3);
+#else
             const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
+#endif
             P131 d = add131(x, sigmas.first);
             P131 ep = toPolynomial131(add131(normalY, sigmas.second));
 #else

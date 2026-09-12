@@ -42,6 +42,7 @@ PACKED_GENERATED_PRODUCT ?= 0
 PACKED_CLMAD ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
+PACKED_SHARED_SIGMA ?= 0
 PACKED_STATE_TILE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
@@ -79,6 +80,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
+       -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
 
 all: cpu
@@ -219,6 +221,11 @@ test-packed-storage-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedstatecuda.cu -o build/test-packed-storage-cuda
 	./build/test-packed-storage-cuda
 
+test-shared-sigma-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
+	./build/test-shared-sigma-cuda
+
 test-timing:
 	mkdir -p build
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
@@ -308,6 +315,7 @@ clean:
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
 	rm -f build/test-packed-clmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
+	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
