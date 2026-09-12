@@ -1,0 +1,103 @@
+{
+  "agent_priorities": [
+    {
+      "beat": "Push past prior ceiling: construct+measure n=53 vs_rho probe; then wall at n=37 or charged at n=41 with >=20% margin",
+      "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho"
+    },
+    {
+      "beat": "Balanced base at n=53 under resource gate (materialized or implicit+storage lower bound)",
+      "rank": 2,
+      "regime": "koblitz",
+      "stage": "factor_base"
+    },
+    {
+      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged",
+      "rank": 3,
+      "regime": "koblitz",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged",
+      "rank": 4,
+      "regime": "binary",
+      "stage": "decomposition"
+    },
+    {
+      "beat": "j=0 known-answer IC at 16 bits agreeing with rho",
+      "rank": 5,
+      "regime": "prime",
+      "stage": "end_to_end_dlp"
+    },
+    {
+      "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs",
+      "rank": 6,
+      "regime": "binary_and_prime",
+      "stage": "relation_yield"
+    },
+    {
+      "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts",
+      "rank": 7,
+      "regime": "all",
+      "stage": "decomposition"
+    }
+  ],
+  "checks": [
+    {
+      "detail": "schema_version=2",
+      "name": "ledger_schema_v2",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cargo",
+      "name": "cargo",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/rustc",
+      "name": "rustc",
+      "ok": true
+    },
+    {
+      "detail": "/opt/homebrew/bin/cryptominisat5",
+      "name": "cryptominisat5_optional",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/crypto-ecc2k-status-wt/examples/koblitz_rank_fixture.rs",
+      "name": "producer_source_direct",
+      "ok": true
+    },
+    {
+      "detail": "/Volumes/SSD990/crypto-ecc2k-status-wt/examples/koblitz_rho_fixture.rs",
+      "name": "producer_source_rho",
+      "ok": true
+    },
+    {
+      "detail": "d65c34739154af84f49f5c59a441c5634b3f3b3a",
+      "name": "git_head",
+      "ok": true
+    },
+    {
+      "detail": "0 dirty paths",
+      "name": "git_status_recorded",
+      "ok": true
+    }
+  ],
+  "claim_boundary": "preflight only; not a fixed-arm cost, relation, rank, memory, rho, or crossover result",
+  "created_at": "2026-09-12T16:32:30.468914+00:00",
+  "host": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "kind": "local_autolab_preflight",
+  "ledger_sha256": "d43c2f370db390f3f73f52738ced8d32cfc8549f2b69e809eb10df9fb405a909",
+  "ok": true,
+  "protocol_sha256": "b879bdee6d0802c537b0e348499962a69b12b2ca34244af269f26bc39a7447cb",
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

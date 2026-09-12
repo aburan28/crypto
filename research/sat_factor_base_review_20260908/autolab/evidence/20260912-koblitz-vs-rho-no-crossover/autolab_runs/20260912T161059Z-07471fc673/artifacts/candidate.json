@@ -1,0 +1,38 @@
+{
+  "beat_id": "smoke.koblitz.vs_rho.n13",
+  "claim_check": {
+    "fail_closed": true,
+    "missing_global_provenance": [],
+    "missing_stage_fields": [],
+    "required_global_provenance": [
+      "fixture_hash",
+      "executable_or_source_hash",
+      "host_id",
+      "resource_caps",
+      "seeds",
+      "claim_boundary_non_claims"
+    ],
+    "required_stage_fields": [
+      "n_or_bits",
+      "timing_class",
+      "ic_cost",
+      "rho_cost",
+      "automorphism_discount",
+      "all_stages_charged_same_series",
+      "verdict",
+      "claim_boundary",
+      "independent_replay_pointer"
+    ],
+    "schema_version": 2,
+    "stage": "vs_rho",
+    "status": "PASS"
+  },
+  "claim_draft_sha256": "808c86a6978f18045eeed105c8d88f81998b9dc162afbc412cd94a062d031509",
+  "created_at": "2026-09-12T16:11:00.069905+00:00",
+  "ledger_sha256": "d43c2f370db390f3f73f52738ced8d32cfc8549f2b69e809eb10df9fb405a909",
+  "note": "Draft only. Promote the ledger only after independent validation and a claim-check PASS with every required measurement field.",
+  "run_id": "20260912T161059Z-07471fc673",
+  "schema_version": "1.0",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}
