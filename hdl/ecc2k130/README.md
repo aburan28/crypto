@@ -54,20 +54,20 @@ output:
 === gf131_mul_tb ===
 gf131_mul_tb: PASS -- 256 multiplications, II=1, latency 10 clk
 === ec2k_batch_tb ===
-ec2k_batch_tb: 200 steps in 1292 clk = 646/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
+ec2k_batch_tb: 200 steps in 1330 clk = 665/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
 ec2k_batch_tb: PASS
 === ec2k_step_tb ===
 ec2k_step_tb: 200 steps in 2051 clk with 16 slots (10 multiplies per step)
 ec2k_step_tb: PASS
 === ec2k_walker_tb ===
-ec2k_walker_tb: 64 distinguished points from 797 steps in 17113 clk (32 walks, batches of 8, 4 in flight)
+ec2k_walker_tb: 64 distinguished points from 797 steps in 19194 clk (32 walks, batches of 8, 4 in flight)
 ec2k_walker_tb: PASS
 === ec2k_axil_tb ===
-ec2k_axil_tb: 64 distinguished points, 797 steps through 2 engine(s) of 16 walks, 7011 status polls
+ec2k_axil_tb: 64 distinguished points, 797 steps through 2 engine(s) of 16 walks, 7672 status polls
 ec2k_axil_tb: PASS
 
 $ make rate
-ec2k_batch_tb: 6144 steps in 33511 clk = 545/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
+ec2k_batch_tb: 6144 steps in 34042 clk = 554/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
 ```
 
 The multiplier vectors include zero, one (which is the all-ones vector in
@@ -228,9 +228,18 @@ retire eight clocks later.
 The unit is built to make the clock the multiplier's, not the
 scheduler's:
 
-- every memory has exactly one writer, so it maps to distributed RAM, not
-  flip-flops: `x, y, j, tag, valid` are written only by the fill, the tree
-  only by retire, `z` (holding `d`, then `x3`) only by the issue side;
+- every memory is **block RAM** with exactly one writer and one read
+  address: the leaves as two tables (`x, y, j` for the issue side, `y,
+  tag, valid` for the retire side), written only by the fill; the product
+  tree twice (the tree levels read two entries per product), written only
+  by retire; `z` (holding `d`, then `x3`), written only by the issue side;
+  `d = x + sigma^j(x)` stored twice at fill rather than formed at each
+  use. A block RAM read is two clocks — address register, array, output
+  register — so the retire side, which reads `y`, `tag` and `z` to finish
+  a step, addresses them from a look-ahead copy of the multiplier's tag
+  two clocks before the product lands (`gf131_mul`'s `AHEAD` port). No
+  word is written within two clocks of being read, so the read-during-
+  write behaviour of the RAM never matters;
 - the port addresses are registered a clock before the read and operands
   are read a clock before they are formed, so no path runs level/index
   arithmetic → RAM or RAM → `sigma^j` → XOR in one clock, and the retire
@@ -253,19 +262,24 @@ batch and its flush wait, then `make rate` with 6144 steps in full batches):
 
 | W | Batches in flight | 200 steps | 6144 steps | Bound `5 + 5/W` |
 |---|---|---|---|---|
-| 8 | 8 | 7.44 | 5.95 | 5.63 |
-| 16 | 4 | 8.61 | 7.16 | 5.31 |
-| 16 | 8 | 6.46 | **5.45** (5.49 with the address stage) | 5.31 |
-| 16 | 16 | 5.91 | 5.32 | 5.31 |
-| 32 | 8 | 6.51 | 5.21 | 5.16 |
+| 8 | 8 | 8.06 | 6.83 | 5.63 |
+| 16 | 4 | 9.16 | 7.57 | 5.31 |
+| 16 | 8 | 6.65 | 5.54 | 5.31 |
+| 16 | 16 | 5.96 | **5.32** | 5.31 |
+| 32 | 8 | 6.64 | 5.24 | 5.16 |
 
-Clocks per step, multiplier latency 10. At the default `W = 16` with 8
-batches in flight the long run sits 0.14 above the bound; about 500 clocks
-of the 33511 are the fill of the first batch and the drain of the last,
-the rest is the inversion's eight dependent single-multiply bursts, whose
-latency eight batches cover almost but not quite (sixteen do). Four
-batches are not enough. Memory per batch of `W` is `6W` field elements
-(four leaf arrays and a tree of `2W`), 768 × 131 bits at the default.
+Clocks per step, multiplier latency 10, memories in block RAM (two-clock
+reads; with LUTRAM's one-clock reads the same table read 5.95 / 7.16 /
+5.49 / 5.32 / 5.21). With 8 batches in flight the long run sits 0.23 above
+the bound: about 500 clocks of the 34042 are the fill of the first batch
+and the drain of the last, the rest is the inversion's eight dependent
+single-multiply bursts, each now twelve clocks from issue to the next
+issue, which eight batches do not quite cover and sixteen do. Sixteen is
+the default: block RAMs are 512 deep whatever the design asks for, so the
+tree's 16 × 32 entries fill them exactly and the second eight batches are
+free. Memory per batch of `W` is `10W` field elements as stored (two leaf
+tables, `d` twice, the tree twice), 16 RAMB36 and a RAMB18 per step unit
+at the default.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -284,13 +298,19 @@ port with its id and step count and goes idle until the host loads a new
 start point into that id. The step count rides through the step unit in
 the tag rather than in a per-walk counter memory, so the retire path has
 no read-modify-write of a RAM and there is no state indexed by walk id at
-all. That is the same division
-of labour as the GPU client, whose kernel reports `(seed, endpoint)` and
-whose host owns restarts, the corpus and collision resolution
-(`ecc2k130/README.md`, "Distinguished points and restarts"). `NWALK` should
-comfortably exceed the `W · 2^LOG_NB` walks the step unit holds, so a full
-batch is always forming; when it does not (start-up, a host slow to reload)
-the flush keeps things moving at reduced efficiency, never a stall.
+all. The FIFO is block RAM too — 512 words of 304 bits, four RAMB36 and a
+RAMB18 — read through a four-entry prefetch buffer that hides the two-clock
+read, so the step unit sees a walk every clock it can take one. That is
+the same division of labour as the GPU client, whose kernel reports
+`(seed, endpoint)` and whose host owns restarts, the corpus and collision
+resolution (`ecc2k130/README.md`, "Distinguished points and restarts").
+`NWALK` should comfortably exceed the `W · 2^LOG_NB` walks the step unit
+holds, so a full batch is always forming; when it does not (start-up, a
+host slow to reload) the flush keeps things moving at reduced efficiency,
+never a stall. The default is 512 walks (`ID_W = 9`) over 256 in the step
+unit, and `ec2k_walker_tb -gRATE_CLK=40000`, which keeps every id loaded,
+measures **5.29 clocks per step** through the walker (5.54 with 8 batches
+in flight and 256 walks).
 
 `ec2k_walker_tb` plays host: it loads 64 start points 32 at a time, checks
 every report's id, step count and point against the trajectory the client's
@@ -389,46 +409,57 @@ runs the whole `worker.py` contract against, down to feeding the resulting
 
 ## Capacity — synthesised
 
-Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, one `ec2k_walker`
-(256 walks, W = 16, 8 batches in flight):
+Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, two `ec2k_walker`
+behind the register block and the clock bridge (512 walks, W = 16, 16
+batches in flight):
 
-| | LUTs | of which LUTRAM | FFs |
-|---|---|---|---|
-| `ec2k_walker` (whole engine) | **13 106** | 4 576 (+314 SRL) | 7 442 |
-| ├ walker body (FIFO with held reports) | ~2 300 | ~1 700 | ~400 |
-| └ `ec2k_batch_pipe` | ~10 800 | ~3 100 | ~7 000 |
-| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stages) | ~6 000 | ~3 100 | ~2 400 |
-| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 |
+| | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 |
+|---|---|---|---|---|---|
+| `ec2k_walker` (whole engine) | **8 100 – 8 410** | 180 (+316 SRL) | 7 404 | 20 | 2 |
+| ├ walker body (FIFO, prefetch buffer, held report) | ~600 | 180 | ~500 | 4 | 1 |
+| └ `ec2k_batch_pipe` | ~7 700 | 0 | ~6 900 | 16 | 1 |
+| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages) | ~2 900 | 0 | ~2 300 | 16 | 1 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 | 0 | 0 |
+| `ec2k_axil` own (queue, registers, spine head) | 647 | 356 | 2 032 | 0 | 0 |
+| `ec2k_axil_cdc` | 228 | 0 | 201 | 0 | 0 |
 
-(The whole-engine row is the current pipeline; the breakdown is from the
-synthesis one revision earlier, before the address and weight stages and
-the count-in-tag walker, which moved a few hundred LUTs between rows.)
-The register block around the engines (`ec2k_axil` with its spine) adds
-about 400 LUTs and 1 200 FFs of its own plus a stage of roughly 300 LUTs
-and 870 FFs per engine; the clock bridge (`ec2k_axil_cdc`) 247 LUTs and
-201 FFs.
+(The two engines differ by 310 LUTs from `-keep_equivalent_registers`
+falling differently; the breakdown rows are apportioned from the earlier
+LUTRAM synthesis, 13 106 LUTs, less the 4 400 LUTRAM and its address
+decode that the block RAMs replaced.) The register block's stage on the
+spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
+an engine are the walker's four-word prefetch buffer.
 
-Worst slack at a 4.0 ns clock is +1.98 ns, so the fabric is not what
-limits the clock, and on F2 the engines run on their own MMCM clock behind
-`ec2k_axil_cdc` rather than on the shell's 250 MHz (`aws/README.md`,
-"Clocking"). At 3.0 ns two engines with the register block and the bridge
-show **+1.10 ns**; the worst path is the output weight's 22-group adder
-tree (1.72 ns, six levels), then the bridge's read-address decode into the
-register mux and the queue's LUTRAM read into the read-data register (1.6
-ns each). Earlier worst paths and what removed them: the operand stage's
-level/index arithmetic into a LUTRAM read (+0.83 ns; an address stage) and
-the walker's step-counter read-modify-write (1.6 ns; the count now rides
-in the tag). The multiplier is 37% of an engine and its leaf products
-(`gf2_kmul`'s `leaf.r`, 3.9k LUTs) are the single largest item; the
-memories are the next (3.1k LUTRAM in the step unit, 1.7k in the walker).
-No DSPs or block RAM are used.
+Worst slack at a 3.0 ns clock is **+1.08 ns** for the whole probe, and
+none of the sixteen worst paths touches a memory: the output weight's
+22-group adder tree (1.74 ns, six levels), the queue write pointer into
+the credit counter (1.70 ns) and the bridge's read-address decode into
+the register mux (1.67 ns). Earlier worst paths and what removed them: the
+operand stage's level/index arithmetic into a LUTRAM read (+0.83 ns; an
+address stage) and the walker's step-counter read-modify-write (1.6 ns;
+the count now rides in the tag). The multiplier is now 58% of an engine
+and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) the single
+largest item. The one distributed RAM left is the register block's
+64-deep report queue (356 LUTRAM, one copy on the die). No DSPs or URAM
+are used.
+
+Why block RAM and not the distributed RAM the first revisions used: the
+first 48-engine implementation (`aws/README.md`) placed at −2.5 ns on a
+4 ns clock with a quarter of a millisecond of total negative slack, and
+the paths that failed were the same in every engine — the write address
+and write enable of each LUTRAM array, a net of 1 000 to 1 800 loads that
+the placer spreads over every SLICEM of a clock region and that physical
+optimisation cannot split, because the loads are memory primitives, not
+logic. 4 800 LUTRAM per engine was never going to place tightly 48 times
+over. A block RAM has the same fanout inside one hard block.
 
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
-logic cells), so an engine is 1.01% of the device: **48 engines is half
-the device**, 64 is 65%, and ~70% is where routing of a design this
-regular typically starts to fail timing. At 5.49 clocks per step and
-333 MHz that is 61 M steps/s per engine and **2.9 G steps/s at 48
-engines, 3.9 G at 64**; at the shell's 250 MHz, 2.2 G and 2.9 G.
+logic cells) and **2 016 RAMB36**, so an engine is 0.65% of the LUTs and
+1.04% of the block RAM: **48 engines is a third of the device**, 64 is
+41% of the LUTs and 67% of the RAM, and about 80 would be the RAM's
+ceiling with the shell's share left over. At 5.29 clocks per step and
+333 MHz that is 63 M steps/s per engine and **3.0 G steps/s at 48
+engines, 4.0 G at 64**; at the shell's 250 MHz, 2.3 G and 3.0 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
