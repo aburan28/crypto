@@ -1311,6 +1311,146 @@ pub fn curve_effect_test(
     }
 }
 
+// ── Part E: what the residual per-curve variation actually is ───────
+
+/// Spearman rank correlation, with ties averaged.
+pub fn spearman(xs: &[f64], ys: &[f64]) -> f64 {
+    fn ranks(v: &[f64]) -> Vec<f64> {
+        let mut idx: Vec<usize> = (0..v.len()).collect();
+        idx.sort_by(|a, b| v[*a].partial_cmp(&v[*b]).unwrap());
+        let mut r = vec![0.0; v.len()];
+        let mut i = 0;
+        while i < idx.len() {
+            let mut j = i;
+            while j + 1 < idx.len() && v[idx[j + 1]] == v[idx[i]] {
+                j += 1;
+            }
+            let avg = (i + j) as f64 / 2.0 + 1.0;
+            for k in i..=j {
+                r[idx[k]] = avg;
+            }
+            i = j + 1;
+        }
+        r
+    }
+    let (rx, ry) = (ranks(xs), ranks(ys));
+    let n = xs.len() as f64;
+    let mx = rx.iter().sum::<f64>() / n;
+    let my = ry.iter().sum::<f64>() / n;
+    let mut num = 0.0;
+    let mut dx = 0.0;
+    let mut dy = 0.0;
+    for i in 0..xs.len() {
+        num += (rx[i] - mx) * (ry[i] - my);
+        dx += (rx[i] - mx).powi(2);
+        dy += (ry[i] - my).powi(2);
+    }
+    if dx == 0.0 || dy == 0.0 {
+        return 0.0;
+    }
+    num / (dx.sqrt() * dy.sqrt())
+}
+
+/// Why per-curve `D*` statistics vary at all, once the exact criterion is
+/// known.
+///
+/// The criterion of [`syzygy_mechanism`] partitions the targets of a given
+/// curve three ways:
+///
+/// 1. `a₆ ∉ S^⊥(x_R)` — refutes at the `D* = 2` floor.
+/// 2. `a₆ ∈ S^⊥(x_R)` and the target **decomposes** — satisfiable, so `D*` is
+///    undefined and the cell is skipped.  For an attacker this is a *success*:
+///    a decomposition is a relation.
+/// 3. `a₆ ∈ S^⊥(x_R)` and it does not decompose — refutes **above** the floor.
+///    This is the only case that costs an attacker anything.
+///
+/// Case 3 is therefore squeezed by case 2: a curve whose factor base
+/// decomposes more targets has fewer chances to land above the floor.  If that
+/// is what drives the residual variation, then the "curve effect" on the
+/// solving degree is really variation in **relation yield** — a different
+/// quantity, and one where more yield helps the attacker for reasons unrelated
+/// to `d_reg`.
+#[derive(Clone, Debug)]
+pub struct YieldExplanation {
+    pub n: u32,
+    pub l: u32,
+    pub targets: usize,
+    pub curves: usize,
+    /// Per curve: how many targets decompose (case 2).
+    pub decomposable_min: u32,
+    pub decomposable_max: u32,
+    pub decomposable_mean: f64,
+    /// Per curve: how many refute above the floor (case 3).
+    pub above_floor_min: u32,
+    pub above_floor_max: u32,
+    pub above_floor_mean: f64,
+    /// `ρ_s` between the case-2 count and the case-3 count.  The hypothesis
+    /// predicts a clearly negative value.
+    pub rho_count: f64,
+    /// `ρ_s` between the case-2 count and the case-3 *rate* (per refutable
+    /// target), which removes the mechanical "fewer refutable targets means
+    /// fewer bad ones" effect.
+    pub rho_rate: f64,
+    /// Curves with no above-floor target at all, over every target in the
+    /// field — the uniformly-easy curves an isogeny walk would need.
+    pub zero_above_floor: Vec<u64>,
+}
+
+/// Measure the case-2 / case-3 relationship over **every** curve and **every**
+/// target above the factor-base subspace.
+pub fn yield_explanation(
+    n: u32,
+    l: u32,
+    d_max: u32,
+    irr: &IrreduciblePoly,
+) -> YieldExplanation {
+    let base = 1u64 << l;
+    let max_t = (1u64 << n) - base;
+    let targets: Vec<F2mElement> = (0..max_t).map(|i| f2m_from_u64(base + i, n)).collect();
+
+    let mut decomposable = Vec::with_capacity((1 << n) - 1);
+    let mut above = Vec::with_capacity((1 << n) - 1);
+    let mut rate = Vec::with_capacity((1 << n) - 1);
+    let mut zero_above_floor = Vec::new();
+
+    for a6_int in 1u64..(1u64 << n) {
+        let a6 = f2m_from_u64(a6_int, n);
+        let d = targets
+            .iter()
+            .filter(|x| is_decomposable(n, l, irr, &a6, x))
+            .count() as u32;
+        let (hist, _, refutable) = measure_curve(n, l, d_max, irr, &a6, &targets);
+        let ab: u32 = hist.iter().filter(|(k, _)| **k > 2).map(|(_, c)| *c).sum();
+        decomposable.push(d as f64);
+        above.push(ab as f64);
+        rate.push(if refutable > 0 {
+            ab as f64 / refutable as f64
+        } else {
+            0.0
+        });
+        if ab == 0 {
+            zero_above_floor.push(a6_int);
+        }
+    }
+
+    let mean = |v: &[f64]| v.iter().sum::<f64>() / v.len() as f64;
+    YieldExplanation {
+        n,
+        l,
+        targets: targets.len(),
+        curves: decomposable.len(),
+        decomposable_min: decomposable.iter().cloned().fold(f64::MAX, f64::min) as u32,
+        decomposable_max: decomposable.iter().cloned().fold(0.0, f64::max) as u32,
+        decomposable_mean: mean(&decomposable),
+        above_floor_min: above.iter().cloned().fold(f64::MAX, f64::min) as u32,
+        above_floor_max: above.iter().cloned().fold(0.0, f64::max) as u32,
+        above_floor_mean: mean(&above),
+        rho_count: spearman(&decomposable, &above),
+        rho_rate: spearman(&decomposable, &rate),
+        zero_above_floor,
+    }
+}
+
 // ── Small numeric helpers ───────────────────────────────────────────
 
 /// `log₂` of a positive `BigInt`, accurate enough for cost reporting.
@@ -1806,6 +1946,47 @@ mod tests {
             counts[2], 0,
             "some curve survived 32 targets on the floor: {counts:?}"
         );
+    }
+
+    /// The residual per-curve variation is decomposition yield, not a
+    /// solving-degree property: a curve whose factor base decomposes more
+    /// targets has fewer targets left that can refute above the floor.
+    #[test]
+    fn above_floor_count_is_explained_by_decomposition_yield() {
+        let n = 8u32;
+        let irr = first_irreducible(n);
+        let y = yield_explanation(n, 4, 7, &irr);
+        println!(
+            "n={} l={} targets={} curves={}\n               decomposable per curve: min {} max {} mean {:.1}\n               above-floor per curve:  min {} max {} mean {:.1}\n               rho_s(decomposable, above-floor count) = {:+.4}\n               rho_s(decomposable, above-floor rate)  = {:+.4}\n               curves with zero above-floor targets: {} {:?}",
+            y.n, y.l, y.targets, y.curves,
+            y.decomposable_min, y.decomposable_max, y.decomposable_mean,
+            y.above_floor_min, y.above_floor_max, y.above_floor_mean,
+            y.rho_count, y.rho_rate,
+            y.zero_above_floor.len(),
+            &y.zero_above_floor[..y.zero_above_floor.len().min(10)]
+        );
+        assert_eq!(y.curves, (1usize << n) - 1, "every curve must be swept");
+        assert!(y.targets > 0);
+        // Case 3 is squeezed by case 2, so the correlation is negative.
+        assert!(
+            y.rho_count < -0.3,
+            "expected a clearly negative count correlation, got {:.4}",
+            y.rho_count
+        );
+        // Sanity: the spread is real, not a constant column.
+        assert!(y.above_floor_max > y.above_floor_min);
+        assert!(y.decomposable_max > y.decomposable_min);
+    }
+
+    /// Spearman on known input.
+    #[test]
+    fn spearman_matches_hand_values() {
+        // Perfectly anti-correlated.
+        assert!((spearman(&[1.0, 2.0, 3.0, 4.0], &[4.0, 3.0, 2.0, 1.0]) + 1.0).abs() < 1e-12);
+        // Perfectly correlated.
+        assert!((spearman(&[1.0, 2.0, 3.0], &[10.0, 20.0, 30.0]) - 1.0).abs() < 1e-12);
+        // A constant column has no rank variation.
+        assert_eq!(spearman(&[1.0, 1.0, 1.0], &[1.0, 2.0, 3.0]), 0.0);
     }
 
     /// `h(O_f)` against hand values: `h(O_263) = 262` because 263 splits,

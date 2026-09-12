@@ -336,8 +336,9 @@ Four numbers come out, and the last one decides.
 | **R6′** | The residual `D*` variation is a **curve** effect an attacker can move to | **`killed`** | EXP-R6. The exact criterion of §3.1 makes it a `(curve, target)` property; zero disagreements with the solver over every curve at four targets; holdout margin negative at the largest size. |
 | **R6″** | The exhaustive search over the class is *feasible* | **`killed`** | Boundary A (`2^65.06` vertices vs `2^60.81` ρ, or `2^64.83` plain ρ) and B (263 reachable). The search that does terminate covers `2^{−57}` of the class. |
 | **R6‴** | `D* = 2` density over curves is `1 − 2^{−dim S}` per target | **`supported`** (exact) | `dim S = 1` at `n ∈ {8, 10}`, escape count `128/255` and `512/1023`, matching `(2^n − 2^{n−1})/(2^n − 1)`; mismatches `0`. |
-| **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** | EXP-R6. Survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10` over `T = 8/16/32/48/64`. Monotone and reaching zero. |
+| **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** (exhaustively) | EXP-R6: survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10`. **EXP-R6c settles it without extrapolation: over *all* 240 targets above the factor base at `n = 8`, `0` of 255 curves avoid above-floor targets entirely.** Mean above-floor count is `39.1` per curve (min 26, max 56) — such targets are common, and the `T = 64` zeroes were small-sample. |
 | **R6b** | `a₆` reaches the **leading form** at some `m ≥ 4`, making `d_reg` curve-dependent where index calculus is asymptotically interesting | **`killed`** | EXP-R6b, iteration 2. Computed symbolically for `m ∈ {2,3,4,5}`: the top Boolean degree is `m(m−1)`, always `a₆`-free, with `a₆` exactly **2** degrees below at every `m`. Constant gap, not a narrowing one. `S₄` validated against the repo's own implementation; `S₅` against 1146 genuine decompositions. |
+| **R6c** | The residual per-curve variation in `D*` statistics is a *solving-degree* property of the curve | **`killed`** | EXP-R6c, iteration 3. It is **decomposition yield**: `ρ_s(decomposable targets, above-floor targets) = −0.9801` over all 255 curves × 240 targets at `n = 8`, and `−0.9648` against the above-floor *rate*, so it is not the mechanical "fewer refutable targets means fewer bad ones". A curve that decomposes more targets has fewer left that can refute above the floor — a relation-yield property, not a `d_reg` one. |
 
 ### Pre-registered gates
 
@@ -371,6 +372,7 @@ Four numbers come out, and the last one decides.
 | `…::exhaustive_a6_sweep` | every curve over `F_{2^n}`, with `D*` and first-fall histograms |
 | `…::curve_effect_test` | variance decomposition plus the disjoint-holdout winner's-curse control |
 | `…::uniform_floor_survivors` | the decisive statistic: curves on the `D* = 2` floor for *every* target, swept over the whole curve space |
+| `…::yield_explanation` / `spearman` | the three-way target partition behind the residual variation, and its correlation with decomposition yield |
 | `…::all_traces` | exact point counting, for the class-size cross-validation |
 | `cryptanalysis::semaev_leading_form` | symbolic `S_{m+1}` over `F_2[a₆]` by the resultant recursion, and the Boolean-degree profile that decides Boundary C at each `m` (4 tests) |
 | `examples/isogeny_class_search.rs` | EXP-R6 driver → `experiments/isogeny_class_search.json` |
@@ -384,6 +386,74 @@ Run: `cargo run --release --example isogeny_class_search`.
 ---
 
 ## 5. Iteration log
+
+### 2026-09-12 — iteration 3 (EXP-R6c — the residual effect is decomposition yield)
+
+**Task.** The other item iteration 1 left open: a variance ratio of `1.4`
+rather than `1.0`, and one curve holding the `D* = 2` floor over 64 targets at
+`n = 10`.  Iteration 1 called it "a small residual curve effect that is not
+zero" and left it unexplained, which is the kind of remainder that quietly
+becomes a claim if nobody chases it.
+
+**Two wrong explanations first, both discarded.**
+
+1. *A decomposability artifact* — the survivor statistic skips decomposable
+   targets, so a curve with few refutable targets could be credited vacuously.
+   **Wrong:** `a₆ = 13` had 35 refutable targets of 64 and all 35 refuted at
+   the floor.  Nothing vacuous about it.
+2. *Target correlation* — the exact criterion lets the survivor count be
+   computed with no Gröbner work at all (the survivor set is the complement of
+   a union of `T` subspaces), and that computation gives `0` survivors by
+   `T = 16` for both consecutive and spread targets.  **Also wrong, as an
+   answer to this question:** it counts a *decomposable* target as a failure to
+   escape.  For an attacker a decomposable target is a success — it is a
+   relation — so that statistic answers a question nobody asked.  The measured
+   statistic, over non-decomposable targets, is the attack-relevant one and it
+   stands.
+
+**Experiment.** The criterion partitions a curve's targets three ways: `a₆ ∉
+S^⊥` (refutes at the floor); `a₆ ∈ S^⊥` and decomposable (skipped, a success);
+`a₆ ∈ S^⊥` and not decomposable (**above** the floor — the only costly case).
+The third is squeezed by the second, so the hypothesis is that the residual
+variation *is* decomposition yield.  `yield_explanation` measures both counts
+over **every** curve and **every** target above the factor base.
+
+**Result** (`n = 8`, `l = 4`, 255 curves × 240 targets, exhaustive):
+
+| quantity | min | max | mean |
+|---|---:|---:|---:|
+| decomposable targets per curve | 58 | 92 | 78.9 |
+| above-floor targets per curve | 26 | 56 | 39.1 |
+
+```
+  ρ_s(decomposable count, above-floor count) = −0.9801
+  ρ_s(decomposable count, above-floor rate)  = −0.9648
+  curves with zero above-floor targets       = 0 of 255
+```
+
+- The correlation is **near-deterministic**, and it survives normalising by
+  refutable count — so it is not the mechanical "fewer refutable targets means
+  fewer bad ones".
+- **No curve is uniformly easy** once every target is used: `0` of 255.  The
+  `T = 64` zeroes of iteration 1 were small-sample; above-floor targets are in
+  fact common (mean 39 per curve).
+
+**Gate verdict.** **R6c killed.** The residual variation is a *relation-yield*
+property, not a solving-degree one — a different quantity, tracked elsewhere in
+this repository, and one where more yield helps an attacker for reasons that
+have nothing to do with `d_reg`.
+
+**Ledger delta.** R6c `killed`; R6⁗ upgraded from "monotone and reaching zero"
+to exhaustive at `n = 8`. Limitation 4 rewritten from an unexplained remainder
+to an explained one.
+
+**Class of the change.** **Accounting** — a caveat was resolved, not an attack
+improved.
+
+**Next.** Same measurement at `n = 10` (running when this was written) to check
+the mechanism at a second size.
+
+---
 
 ### 2026-09-12 — iteration 2 (EXP-R6b — Boundary C holds to `m = 5`, and the ceiling is explained)
 
@@ -574,15 +644,23 @@ earlier lessons:
    — but the explicit enumeration is not done.  Doing it needs
    `H_{−7·263²}` mod 2 (degree 262, coefficients of several thousand bits) or
    a degree-34584 division-polynomial factorisation over `F_{2^131}`; see §8.
-4. **There is a small residual curve effect, and it is not zero.** The
-   variance ratio sits at `1.4` rather than `1.0`, and the survivor count
-   decays more slowly than independent targets would give — at `n = 10` one
-   curve (`a₆ = 13`) is still on the floor at `T = 64`.  Consecutive targets
-   are correlated and this design does not fully separate that from a genuine
-   curve effect.  What is established is that the effect is far too small to
-   matter — the holdout margin is *negative* at the largest size, and the
-   survivor count is monotone and reaches zero at `n = 8` — not that it is
-   exactly zero.  Calling it zero would be overclaiming.
+4. **The residual curve effect is now explained, and it is not about the
+   solving degree** (EXP-R6c, iteration 3).  Iteration 1 flagged a variance
+   ratio of `1.4` and one curve (`a₆ = 13`) holding the floor over 64 targets
+   at `n = 10`, and left it as an unexplained remainder.  It is decomposition
+   yield.  The exact criterion partitions a curve's targets three ways — `a₆`
+   escapes `S^⊥` (refutes at the floor); `a₆ ∈ S^⊥` and the target decomposes
+   (satisfiable, skipped, and for an attacker a *success*: a relation); `a₆ ∈
+   S^⊥` and it does not decompose (refutes **above** the floor, the only costly
+   case).  The third is squeezed by the second, and the squeeze is nearly
+   deterministic: `ρ_s = −0.9801` between the decomposable count and the
+   above-floor count over all 255 curves × 240 targets at `n = 8`, and
+   `−0.9648` against the rate.  So the "curve effect" is variation in relation
+   yield, a different quantity from `d_reg`, and one where more yield helps an
+   attacker for reasons unrelated to the solving degree.  Over the *full*
+   target set no curve is uniformly easy at all: `0` of 255.
+   *What remains genuinely open:* the same measurement at `n = 10` was still
+   running when this was written, and the mechanism is established at one size.
 5. **Single field representation.** The sweeps use the first irreducible
    polynomial of each degree, and ECC2K-130's own field is a permuted
    type-II ONB, not a polynomial basis.  The class structure is
