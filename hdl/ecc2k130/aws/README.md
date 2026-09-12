@@ -174,10 +174,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | **13 146**, of which 4 812 LUTRAM; 7 388 FF |
-| Register block (`ec2k_axil`, 4 engines) | — | 1 449 LUTs, 1 773 FF in total |
+| LUT per engine (step unit + walker) | ~10k | **13 106**, of which 4 576 LUTRAM; 7 442 FF |
+| Register block (`ec2k_axil`) | — | ~400 LUTs, 1 200 FF, plus a spine stage of ~300 LUTs, ~870 FF per engine; bridge 247 LUTs, 201 FF |
 | BRAM | 0 | 0 |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +0.83 ns at 3.0 ns (synthesis); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.10 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
@@ -187,3 +187,13 @@ stage had become its own LUTRAM copy. Both are fixed
 found them is a plain out-of-context `synth_design` of one entity with a
 LUT histogram by driven signal, which is the tool to reach for if a future
 build's numbers do not add up.
+
+The first 48-engine *implementation* (250 MHz, the flat register block of
+that revision) placed at **−2.5 ns** on the 4 ns clock while the engine
+alone synthesised at +2 ns: the placer's log shows it replicating the
+load and run registers across SLRs and re-placing the report holding
+registers behind the 48:1 mux, i.e. the interconnect between the register
+block and engines spread over three SLRs, not the arithmetic. That is what
+the spine in `ec2k_axil` is for ([`../README.md`](../README.md), "The
+host interface"): every inter-engine wire is register to neighbour, and
+the block has no path that touches more than one engine.
