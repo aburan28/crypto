@@ -296,6 +296,7 @@ struct CompactPairTable {
     x_filter_mask: usize,
     x_filter_exact: bool,
     x_filter_split_hash: bool,
+    x_filter_insert_hash_reuse: bool,
     mask: usize,
     len: usize,
     x_only: bool,
@@ -335,6 +336,8 @@ impl CompactPairTable {
             x_filter_exact,
             x_filter_split_hash: std::env::var("KIC_DISABLE_SPLIT_BLOOM_HASH").as_deref()
                 != Ok("1"),
+            x_filter_insert_hash_reuse: std::env::var("KIC_DISABLE_INSERT_HASH_REUSE").as_deref()
+                != Ok("1"),
             mask: capacity - 1,
             len: 0,
             x_only,
@@ -352,7 +355,8 @@ impl CompactPairTable {
 
     fn insert(&mut self, key: (u64, u64), value: QuotientPairWitness) {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
-        let mut index = Self::hash(hash_key) as usize & self.mask;
+        let mixed = Self::hash(hash_key);
+        let mut index = mixed as usize & self.mask;
         loop {
             if self.keys_x[index] == u64::MAX {
                 self.keys_x[index] = key.0;
@@ -365,7 +369,11 @@ impl CompactPairTable {
                 }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
-                    self.insert_x_filter(key.0);
+                    if self.x_filter_insert_hash_reuse {
+                        self.insert_x_filter_with_mixed(key.0, mixed);
+                    } else {
+                        self.insert_x_filter(key.0);
+                    }
                 }
                 self.len += 1;
                 return;
@@ -417,17 +425,25 @@ impl CompactPairTable {
     }
 
     fn insert_x_filter(&mut self, x: u64) {
-        let (first, second) = self.x_filter_indices(x);
+        let mixed = Self::hash((x, 0));
+        self.insert_x_filter_with_mixed(x, mixed);
+    }
+
+    fn insert_x_filter_with_mixed(&mut self, x: u64, mixed: u64) {
+        let (first, second) = self.x_filter_indices_with_mixed(x, mixed);
         self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
         self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
     }
 
     fn x_filter_indices(&self, x: u64) -> (usize, usize) {
+        self.x_filter_indices_with_mixed(x, Self::hash((x, 0)))
+    }
+
+    fn x_filter_indices_with_mixed(&self, x: u64, mixed: u64) -> (usize, usize) {
         if self.x_filter_exact {
             let index = x as usize;
             return (index, index);
         }
-        let mixed = Self::hash((x, 0));
         let first = mixed as usize & self.x_filter_mask;
         let second = if self.x_filter_split_hash {
             (mixed >> 32) as usize & self.x_filter_mask
@@ -491,6 +507,10 @@ impl CompactPairTable {
         } else {
             "two_independent_64_bit_mixes"
         }
+    }
+
+    fn x_filter_insert_hash_reuse(&self) -> bool {
+        self.x_filter_insert_hash_reuse
     }
 
     fn slots(&self) -> usize {
@@ -2571,6 +2591,7 @@ fn main() {
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
             "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
+            "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
@@ -3404,6 +3425,7 @@ fn main() {
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
                 "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
+                "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
@@ -3648,21 +3670,24 @@ mod packed_tests {
     #[test]
     fn bloom_hash_strategies_retain_every_inserted_x() {
         for split_hash in [false, true] {
-            let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
-            table.x_filter_split_hash = split_hash;
-            let keys: Vec<_> = (0..512u64)
-                .map(|index| {
-                    let x =
-                        CompactPairTable::hash((index, index.rotate_left(17))) & ((1u64 << 37) - 1);
-                    (x + 1, index)
-                })
-                .collect();
-            for &key in &keys {
-                table.insert(key, QuotientPairWitness::default());
-            }
-            for &key in &keys {
-                assert!(table.might_contain_x(key.0));
-                assert!(table.get(key).is_some());
+            for reuse_insert_hash in [false, true] {
+                let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
+                table.x_filter_split_hash = split_hash;
+                table.x_filter_insert_hash_reuse = reuse_insert_hash;
+                let keys: Vec<_> = (0..512u64)
+                    .map(|index| {
+                        let x = CompactPairTable::hash((index, index.rotate_left(17)))
+                            & ((1u64 << 37) - 1);
+                        (x + 1, index)
+                    })
+                    .collect();
+                for &key in &keys {
+                    table.insert(key, QuotientPairWitness::default());
+                }
+                for &key in &keys {
+                    assert!(table.might_contain_x(key.0));
+                    assert!(table.get(key).is_some());
+                }
             }
         }
     }
