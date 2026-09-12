@@ -664,8 +664,13 @@ impl SweepSummary {
     pub fn max_d_star(&self) -> Option<u32> {
         self.pooled_d_star.keys().max().copied()
     }
-    /// True iff `D*` took the same value on every measured cell — the
-    /// prediction of Boundary C.
+    /// True iff `D*` took the same value on every measured cell.
+    ///
+    /// This is **not** what Boundary C predicts, and in practice it is false:
+    /// `C` governs the leading forms, while `D*` is an affine quantity the
+    /// curve does move (`{2, 3, 4}` over all 255 curves at `n = 8`).  The
+    /// predicate is kept because a flat sweep would mean the instrument had
+    /// stopped discriminating, which is worth being able to detect.
     pub fn d_star_is_constant(&self) -> bool {
         self.pooled_d_star.len() == 1
     }

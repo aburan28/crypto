@@ -319,6 +319,9 @@ Run: `cargo run --release --example isogeny_class_search`.
 
 ### 2026-09-12 — iteration 1 (EXP-R6 — the lever is empty, and every reason is derived)
 
+> This note's iteration 1 is `RESEARCH_DEGREE_REDUCTION.md`'s **iteration 7**;
+> the two numberings are separate because this is a separate note.
+
 **Task.** Score L5: search the isogeny class of ECC2K-130 for a curve with a
 lower solving degree.
 
