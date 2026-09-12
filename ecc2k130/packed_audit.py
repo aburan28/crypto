@@ -62,6 +62,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
                   expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1", packedCompactState=None,
+                  expectedPackedSharedSigma=client.PACKED_SHARED_SIGMA == "1", packedSharedSigma=None,
                   expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX), packedWeightedPrefix=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
@@ -98,6 +99,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
              f"PACKED_CLMAD={client.PACKED_CLMAD}",
              f"PACKED_COMPACT_STATE={client.PACKED_COMPACT_STATE}",
+             f"PACKED_SHARED_SIGMA={client.PACKED_SHARED_SIGMA}",
              f"PACKED_WEIGHTED_PREFIX={client.PACKED_WEIGHTED_PREFIX}",
              f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
@@ -154,6 +156,31 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                     or [line for line in storage["output"].splitlines() if line.startswith("PASS:")] != [storagePass]):
                 raise RuntimeError("packed GPU storage identity or complete validation counts disagree")
             storage.update(cases=128, records=18584 * batch)
+        # The probe's C++ guards require WP2 and the walk permutation network.
+        # Exercise both shared/global controls when applicable, including
+        # untiled WP2 builds, without changing the WP0/WP1 audit paths.
+        result["sharedSigmaProbeApplicable"] = (client.PACKED_WEIGHTED_PREFIX == "2"
+                                               and bool(int(client.PACKED_PERM_SIGMA) & 1))
+        if result["sharedSigmaProbeApplicable"]:
+            probeCommand = list(result["deviceArithmetic"]["command"])
+            probeCommand[1] = "test-shared-sigma-cuda"
+            probe = result["deviceSharedSigma"] = run(probeCommand, 300)
+            if probe["returncode"]:
+                raise RuntimeError("packed GPU shared sigma validation failed")
+            sharedModes = re.findall(r"^packed shared sigma probe: (.*)$", probe["output"], re.MULTILINE)
+            actualShared = sharedModes[0] if len(sharedModes) == 1 else None
+            result["packedSharedSigma"] = ((actualShared == "1")
+                                           if actualShared in ("0", "1") else None)
+            probe.update(expectedPackedSharedSigma=client.PACKED_SHARED_SIGMA == "1",
+                         packedSharedSigma=result["packedSharedSigma"])
+            probePasses = [
+                "PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing",
+                "PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks",
+            ]
+            if (sharedModes != [client.PACKED_SHARED_SIGMA]
+                    or [line for line in probe["output"].splitlines() if line.startswith("PASS:")] != probePasses):
+                raise RuntimeError("packed GPU shared sigma identity or complete validation counts disagree")
+            probe.update(scenarios=21, inputPairs=21036, blockSnapshots=114, maskWords=51072)
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:
@@ -170,6 +197,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
             raise RuntimeError("throughput benchmark failed or completed scalar counts disagree")
         result["packedStateTile"] = benchmarkSamples[0]["packedStateTile"]
         result["packedCompactState"] = benchmarkSamples[0]["packedCompactState"]
+        result["packedSharedSigma"] = benchmarkSamples[0]["packedSharedSigma"]
 
         # Time real collection with CPU trail replay disabled only after the
         # integration test has independently replayed reports. Each sample

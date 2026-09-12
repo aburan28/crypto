@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,18 +47,19 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
             f'packed native carryless multiply: {clmad}\n'
             f'packed weighted prefix: {weighted}\n'
             f'packed compact state: {compact}\n'
+            f'packed shared sigma: {shared}\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -328,25 +329,29 @@ class GeneratedProductBuildTests(unittest.TestCase):
                       clmad='0', clmad_arithmetic=None, batch=32,
                       weighted='0', weighted_arithmetic=None, paired_sigma=None,
                       tile='0', compact='0', storage_output=None, storage_returncode=0,
-                      failed_compact_phase=None, failed_compact_marker=None, build_calls=None):
+                      failed_compact_phase=None, failed_compact_marker=None, build_calls=None,
+                      shared='0', shared_probe_output=None, shared_probe_returncode=0,
+                      failed_shared_phase=None, failed_shared_marker=None, block_threads=128):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact)
+            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact, shared=shared)
             workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
                 compactMarker = compact if failed_compact_phase != phase else failed_compact_marker
+                sharedMarker = shared if failed_shared_phase != phase else failed_shared_marker
                 text = (f'packed direct reduction: 1\n'
                         f'packed generated product: {marker}\n'
                         f'packed state tile: {tile}\n'
                         f'packed native carryless multiply: {clmad}\n'
                         f'packed weighted prefix: {weighted}\n'
                         f'packed compact state: {compactMarker}\n'
+                        f'packed shared sigma: {sharedMarker}\n'
                         f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {workers * batch} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
                         'finished: 6000.000 M it/s, 1 distinguished points (0 verified against the reference, 0 dropped)\n')
-                return text.replace('packed generated product: None\n', '').replace('packed compact state: None\n', '')
+                return text.replace('packed generated product: None\n', '').replace('packed compact state: None\n', '').replace('packed shared sigma: None\n', '')
             env['sh'] = lambda *a, **k: (0, output(0, 'benchmark'))
             function('checkPackedReduction', env)
             function('measureBench', env)
@@ -367,6 +372,12 @@ class GeneratedProductBuildTests(unittest.TestCase):
                             f'PASS: 128 GPU storage cases, {18584 * batch} records, independent physical images and logical reads with canaries\n')
                     return SimpleNamespace(returncode=storage_returncode,
                                            stdout=text if storage_output is None else storage_output, stderr='')
+                elif command[:2] == ['make', 'test-shared-sigma-cuda']:
+                    text = (f'packed shared sigma probe: {shared}\n'
+                            'PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing\n'
+                            'PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks\n')
+                    return SimpleNamespace(returncode=shared_probe_returncode,
+                                           stdout=text if shared_probe_output is None else shared_probe_output, stderr='')
                 elif command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
                              + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
@@ -384,7 +395,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
             audit_env = dict(client=client, re=re, json=json, time=time, tempfile=tempfile,
                              print=lambda *a, **k: None, subprocess=SimpleNamespace(run=run), Path=path)
             function('checkScalarCounts', audit_env, 'packed_audit.py')
-            result = function('runAudit', audit_env, 'packed_audit.py')(repeats=1, workers=workers, batch=batch)
+            result = function('runAudit', audit_env, 'packed_audit.py')(repeats=1, workers=workers, batch=batch, blockThreads=block_threads)
             return result, commands
 
     def test_native_audit_forwards_flag_and_records_expected_and_actual_modes(self):
@@ -869,6 +880,227 @@ class CompactStateBuildTests(unittest.TestCase):
         self.assertTrue(result['valid'], result.get('error'))
         self.assertEqual(builds, [128])
         self.assertNotIn('deviceStorage', result)
+
+
+class SharedSigmaBuildTests(unittest.TestCase):
+    def test_environment_defaults_and_enforces_mode_and_network_parents(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_SHARED_SIGMA' for t in node.targets))
+        guards = body[index:index + 3]
+        for weighted in ('0', '1', '2'):
+            for network in ('0', '1', '2', '3'):
+                for mode in (None, '0', '1', '', '2', '-1', 'true'):
+                    env = dict(PACKED_WEIGHTED_PREFIX=weighted, PACKED_PERM_SIGMA=network,
+                               os=SimpleNamespace(environ={} if mode is None else {'ECC_PACKED_SHARED_SIGMA': mode}))
+                    allowed = mode in (None, '0') or (mode == '1' and weighted == '2' and int(network) & 1)
+                    with self.subTest(mode=mode, weighted=weighted, network=network):
+                        if allowed:
+                            execute(guards, env)
+                            self.assertEqual(env['PACKED_SHARED_SIGMA'], mode or '0')
+                        else:
+                            with self.assertRaises(ValueError): execute(guards, env)
+
+    def test_image_and_matching_cache_bind_only_the_shared_mode_change(self):
+        class Image:
+            def __init__(self): self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for mode in ('0', '1'):
+            env = environment('1', '1', tile='256', clmad='1', weighted='2', compact='1', shared=mode)
+            image = Image()
+            env.update(GENCODE='fixture', LOCAL=ROOT,
+                       modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)))
+            assignment('image', env)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_SHARED_SIGMA'], mode)
+            gpu_builds = [c for c in image.calls['run_commands'] if 'make gpu ' in c]
+            self.assertEqual(len(gpu_builds), 1)
+            self.assertEqual(gpu_builds[0].split().count('PACKED_SHARED_SIGMA=' + mode), 1)
+            self.assertEqual(env['BAKED']['packedSharedSigma'], mode == '1')
+        env = environment('1', '1', tile='256', clmad='1', weighted='2', compact='1')
+        commands, measured = [], []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda c, **k: (commands.append(c) or 0, 'built'),
+                   benchmarkIdentity=lambda *a, **k: {},
+                   measureBench=lambda *a, **k: (measured.append(a) or dict(valid=True, rate=6000.0)))
+        build = function('buildFor', env)
+        bench = function('runBench', env)
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertEqual(commands, [])
+        positive = bench(rebuild=False, packed=True, threads=256)
+        self.assertTrue(positive['valid'])
+        self.assertFalse(positive['packedSharedSigma'])
+        self.assertEqual(len(measured), 1)
+        # Keep every geometry/parent field identical: only the shared mode differs.
+        env['PACKED_SHARED_SIGMA'] = '1'
+        with self.assertRaisesRegex(ValueError, 'matching baked binary'):
+            bench(rebuild=False, packed=True, threads=256)
+        self.assertEqual(len(measured), 1)
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertEqual(commands[-1].split().count('PACKED_SHARED_SIGMA=1'), 1)
+        env['PACKED_SHARED_SIGMA'] = '0'
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertEqual(commands[-1].split().count('PACKED_SHARED_SIGMA=0'), 1)
+        self.assertEqual(len(commands), 2)
+
+    def test_every_packed_rate_requires_one_exact_shared_marker(self):
+        for mode in ('0', '1'):
+            env = environment('1', '1', tile='256', clmad='1', weighted='2', compact='1', shared=mode)
+            check = function('checkPackedReduction', env)
+            text = raw('1', '1', tile='256', clmad='1', weighted='2', compact='1', shared=mode)
+            marker = f'packed shared sigma: {mode}\n'
+            good = benchResult('fixture', 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedSharedSigma'], mode == '1')
+            self.assertEqual(good['expectedPackedSharedSigma'], mode == '1')
+            for output, rc in [(text.replace(marker, ''), 0), (text + marker, 0),
+                               (text.replace(marker, f'packed shared sigma: {1-int(mode)}\n'), 0),
+                               (text.replace(marker, 'packed shared sigma: true\n'), 0), (text, 9)]:
+                sample = benchResult('fixture', rc, output)
+                self.assertFalse(check(sample))
+                self.assertEqual(sample['rate'], 0)
+                self.assertFalse(summarizeSamples([good, sample])['valid'])
+            # Function shared bytes are platform observations, not a generic
+            # ranking constant. Device-specific resource audits inspect raw output.
+            for size in (1792, 2816, 4096):
+                sample = benchResult('fixture', 0, text + f'packed kernel: 80 registers/thread, 0 local bytes/thread, {size} shared bytes/block, single-product multiplier\n')
+                self.assertTrue(check(sample))
+            env['sh'] = lambda *a, **k: (0, text.replace(marker, ''))
+            measure = function('measureBench', env)
+            self.assertFalse(measure(1, 1, 0, False, 1, packed=True)['valid'])
+            self.assertTrue(measure(1, 1, 0, False, 1, packed=False)['valid'])
+
+    def test_identity_bench_autotune_and_compile_metadata_retain_shared_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, contents in [('Makefile', ''), ('modal_app.py', ''), ('ecc2k130', 'binary'),
+                                   ('generated/eccF131.h', 'LEAF = 66')]:
+                p = root / name
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(contents)
+            for mode in ('0', '1'):
+                env = environment('1', '1', tile='256', clmad='1', weighted='2', compact='1', shared=mode)
+                env.update(REMOTE=directory, sh=lambda *a, **k: (0, 'fixture'),
+                           buildFor=lambda *a, **k: (True, 'built'))
+                identity = function('benchmarkIdentity', env)
+                self.assertEqual(identity(True)['packedSharedSigma'], mode == '1')
+                self.assertIsNone(identity(False)['packedSharedSigma'])
+                self.assertEqual(function('runCompileCheck', env)()['packedSharedSigma'], mode == '1')
+                env.update(measureBench=lambda *a, **k: dict(valid=True, rate=6000.0),
+                           os=SimpleNamespace(makedirs=lambda *a, **k: None),
+                           open=lambda *a, **k: io.StringIO(), volume=SimpleNamespace(commit=lambda: None))
+                self.assertEqual(function('runBench', env)(rebuild=False, packed=True, threads=256)['packedSharedSigma'], mode == '1')
+                function('autotuneConfigs', env)
+                tune = function('runAutotune', env)(configs='0:32:256:2', packed=True)
+                self.assertEqual(tune['results'][0]['packedSharedSigma'], mode == '1')
+                self.assertEqual(tune['results'][0]['identity']['packedSharedSigma'], mode == '1')
+
+    def test_profile_records_actual_shared_mode_and_rejects_wrong_marker(self):
+        for mode in ('0', '1'):
+            env = environment('1', '1', tile='256', clmad='1', weighted='2', compact='1', shared=mode)
+            marker = f'packed shared sigma: {mode}\n'
+            env.update(NCU_BINARY='fixture-ncu', HOUR=3600,
+                       sh=lambda *a, **k: (0, 'fixture version'), profilerVersionError=lambda text: None,
+                       buildFor=lambda *a, **k: (True, 'built'), benchmarkIdentity=lambda packed: {'packedSharedSigma': mode == '1'},
+                       profileResult=lambda rc, text: dict(available=True))
+            profile = function('runProfile', env)
+            for output in (marker, '', marker * 2, f'packed shared sigma: {1-int(mode)}\n'):
+                env['shStream'] = lambda *a, output=output, **k: (0, output)
+                result = profile(packed=True, threads=256)
+                self.assertEqual(result['expectedPackedSharedSigma'], mode == '1')
+                self.assertEqual(result['available'], output == marker)
+                if output == marker:
+                    self.assertEqual(result['packedSharedSigma'], mode == '1')
+                else:
+                    self.assertEqual(result['kind'], 'packed_identity_mismatch')
+            legacy = profile(packed=False)
+            self.assertTrue(legacy['available'])
+            self.assertIsNone(legacy['packedSharedSigma'])
+            env['profileResult'] = lambda rc, text: dict(available=False, kind='counter_permission_denied')
+            self.assertEqual(profile(packed=True, threads=256)['kind'], 'counter_permission_denied')
+
+    def test_audit_forwards_same_flags_to_applicable_probe_and_records_actual_mode(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for tile in ('0', '256'):
+                result, commands = fixture.audit_fixture('1', clmad='1', weighted='2', tile=tile,
+                                                        compact='1' if tile == '256' else '0', shared=mode,
+                                                        batch=16, block_threads=256)
+                self.assertTrue(result['valid'], result.get('error'))
+                self.assertTrue(result['sharedSigmaProbeApplicable'])
+                index = next(i for i, c in enumerate(commands) if c[:2] == ['make', 'test-shared-sigma-cuda'])
+                self.assertEqual(commands[index][2:], commands[0][2:])
+                self.assertEqual(commands[index].count('PACKED_SHARED_SIGMA=' + mode), 1)
+                self.assertIn('THREADS=256', commands[index])
+                self.assertEqual(commands[index + 1][0], 'python3')
+                probe = result['deviceSharedSigma']
+                self.assertEqual([probe[k] for k in ('scenarios', 'inputPairs', 'blockSnapshots', 'maskWords')],
+                                 [21, 21036, 114, 51072])
+                for row in [result, probe, *result['benchmark']['samples'], *result['collection']]:
+                    self.assertEqual(row['expectedPackedSharedSigma'], mode == '1')
+                    self.assertEqual(row['packedSharedSigma'], mode == '1')
+        for weighted in ('0', '1'):
+            result, commands = fixture.audit_fixture('1', weighted=weighted)
+            self.assertTrue(result['valid'], result.get('error'))
+            self.assertFalse(result['sharedSigmaProbeApplicable'])
+            self.assertNotIn('deviceSharedSigma', result)
+            self.assertFalse(any(c[:2] == ['make', 'test-shared-sigma-cuda'] for c in commands))
+            self.assertFalse(result['packedSharedSigma'])
+
+    def test_failed_or_malformed_probe_stops_before_integration_and_timing(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            marker = f'packed shared sigma probe: {mode}\n'
+            passes = ('PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing\n'
+                      'PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks\n')
+            text = marker + passes
+            malformed = ['', passes, text + marker, text + text,
+                         text.replace(marker, f'packed shared sigma probe: {1-int(mode)}\n'),
+                         text.replace(marker, 'packed shared sigma probe: true\n'),
+                         text.replace('21 GPU', '20 GPU'), text.replace('21036 input', '21035 input'),
+                         text.replace('114 complete', '113 complete'), text.replace('51072 words', '51071 words'),
+                         marker + passes.splitlines()[0] + '\n', text + 'PASS: unexpected suite\n']
+            for output, rc in [(bad, 0) for bad in malformed] + [(text, 9)]:
+                with self.subTest(mode=mode, output=output, returncode=rc):
+                    result, commands = fixture.audit_fixture('1', clmad='1', weighted='2', tile='256',
+                                                            compact='1', shared=mode, batch=16, block_threads=256,
+                                                            shared_probe_output=output, shared_probe_returncode=rc)
+                    self.assertFalse(result['valid'])
+                    self.assertIn('shared sigma', result['error'])
+                    self.assertEqual(len(commands), 3)
+                    self.assertNotIn('integration', result)
+                    self.assertNotIn('benchmark', result)
+                    self.assertNotIn('collection', result)
+
+    def test_audit_timed_rows_cannot_change_or_omit_the_probe_mode(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for phase in ('benchmark', 'collection'):
+                for marker in (None, str(1-int(mode)), mode + '\npacked shared sigma: ' + mode):
+                    result, _ = fixture.audit_fixture('1', clmad='1', weighted='2', tile='256', compact='1',
+                                                     shared=mode, batch=16, block_threads=256,
+                                                     failed_shared_phase=phase, failed_shared_marker=marker)
+                    self.assertFalse(result['valid'])
+                    self.assertIn('deviceSharedSigma', result)
+                    rows = result['benchmark']['samples'] if phase == 'benchmark' else result['collection']
+                    self.assertFalse(rows[0]['valid'])
+                    self.assertEqual(rows[0]['rate'], 0)
+
+    def test_rtx_preset_defaults_and_override_keep_the_measured_geometry(self):
+        for mode in (None, '0', '1'):
+            for target in ('bench-rtx-pro6000', 'audit-rtx-pro6000'):
+                command = ['make', '-n', target]
+                if mode is not None: command.append('RTX_PRO6000_SHARED_SIGMA=' + mode)
+                result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn('ECC_PACKED_SHARED_SIGMA=' + (mode or '1'), result.stdout)
+                self.assertIn('ECC_PACKED_WEIGHTED_PREFIX=2', result.stdout)
+                self.assertIn('--batch 16', result.stdout)
+                self.assertIn('--workers 385024', result.stdout)
+                self.assertIn('--min-blocks 2', result.stdout)
 
 
 if __name__ == '__main__':

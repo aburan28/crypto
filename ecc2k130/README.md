@@ -9,6 +9,11 @@ complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
 The public command measured **13.898911 B/s** with DP34 collection. Its
 matched comparison measured 14.403112 B/s benchmark and 13.929753 B/s
 collection; that comparison establishes the code change's gain.
+The current preset adds [shared Frobenius masks](SHARED-SIGMA.md). Its own
+matched comparison measured **14.411102 B/s** benchmark and **14.093912 B/s**
+collection, gains of **0.801%** and **0.954%** over its simultaneous global-mask
+control. These engineering changes preserve the complete scalar iteration;
+the separate allocations' absolute rates are not a comparison of gains.
 The
 [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
@@ -20,7 +25,9 @@ or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
 CUDA 13.3.1 and the measured arithmetic/storage settings. The controlled compact
 comparison measured a 6.31% benchmark gain and 6.09% collection gain over
 the previous weighted preset at the same logical population. A separate audit
-of the updated public command passed. See
+of that compact public command passed. The new shared-mask public integration
+is awaiting its first GPU audit; use `RTX_PRO6000_SHARED_SIGMA=0` to select the
+global-mask control. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical

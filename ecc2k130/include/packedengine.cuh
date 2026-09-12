@@ -168,6 +168,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+#if ECC_PACKED_SHARED_SIGMA
+        int diagnosticDevice = -1, driverReservedShared = -1;
+        CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
+        CUDA_CHECK(cudaDeviceGetAttribute(&driverReservedShared,
+            cudaDevAttrReservedSharedMemoryPerBlock, diagnosticDevice));
+        printf("packed driver reserved shared bytes/block: %d, device %d\n",
+               driverReservedShared, diagnosticDevice);
+#endif
         printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);

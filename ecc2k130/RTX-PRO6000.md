@@ -8,7 +8,7 @@ make audit-rtx-pro6000
 ```
 
 The first target runs three complete walk benchmarks. The second performs
-GPU arithmetic and integration checks, three benchmarks, and three DP
+GPU arithmetic, storage, shared-mask and integration checks, three benchmarks, and three DP
 collection runs; it writes `build/rtx-pro6000-audit.json`. Both allocate one
 RTX PRO 6000 Blackwell Server Edition through Modal. Set `MODAL=/path/to/modal`
 when using a specific client environment.
@@ -39,6 +39,9 @@ It selects [compact physical field storage](COMPACT-STATE.md), using aligned
 16-byte low records and one high byte per field. Set
 `RTX_PRO6000_COMPACT_STATE=0` to use the previous tiled layout in either Make
 target. The general compact build option defaults to 0.
+The preset also stages the paired [Frobenius masks in shared memory](SHARED-SIGMA.md).
+Set `RTX_PRO6000_SHARED_SIGMA=0` to select the global-memory control in either
+Make target. The general `PACKED_SHARED_SIGMA` build option defaults to 0.
 
 The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
 NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or
@@ -50,7 +53,33 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Compact-state preset comparison
+## Shared-mask preset comparison
+
+The [controlled comparison](benchmarks/shared-sigma/comparison.json) keeps
+the compiler, compact layout, arithmetic, batch and scalar population fixed
+on one RTX PRO 6000. Three alternating pairs per workload measured:
+
+| Workload | Variant | Median B/s | Throughput / control | Correctness |
+|---|---|---:|---:|---|
+| Complete scalar benchmark | Global masks | 14.296584 | 1.000000 | Passed |
+| Complete scalar benchmark | Shared masks | **14.411102** | **1.008010** | Passed |
+| DP34 collection | Global masks | 13.960757 | 1.000000 | Passed |
+| DP34 collection | Shared masks | **14.093912** | **1.009538** | Passed |
+
+This is an engineering improvement to the same iteration function and work
+accounting. All three pairs favored shared masks in both workloads. Each
+timed row completed 201,863,462,912 scalar updates; all six collection
+multisets matched, with 5,149 records and zero drops. The added device probe
+passed 21 scenarios, 21,036 pairs, 114 complete block snapshots and 51,072
+mask words in both build modes. Existing arithmetic, storage, client and
+checkpoint checks also passed. The [independent review](benchmarks/shared-sigma/comparison-review.json)
+records exact source, native-code and runtime bindings.
+
+The Make/Modal integration is awaiting its first public-command GPU audit.
+The separate compact audit below remains the previous public absolute-rate
+measurement. The active 26 B/s target remains unachieved.
+
+## Historical compact-state preset comparison
 
 The [controlled comparison](benchmarks/compact-state/comparison.json) keeps
 WP2, B16/T256/minBlocks2, 385,024 workers, CUDA 13.3.73 and native arithmetic
