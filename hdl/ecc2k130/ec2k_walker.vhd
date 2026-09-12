@@ -6,12 +6,23 @@
 -- same division of labour as the GPU client: the walk kernel reports
 -- (seed, endpoint) pairs and the host owns restarts, corpus and collisions.
 --
--- Walks live in a ready FIFO of (id, x, y) rather than a memory: a walk is
--- either inside the step unit or waiting in the FIFO, and a completed step
--- goes straight back into the FIFO unless it is distinguished.  A load from
--- the host enters the same FIFO; it is accepted only on clocks when no step
--- completes, so the FIFO and the per-walk step-count memory each have one
--- write port (both are distributed RAM).
+-- Walks live in a ready FIFO of (id, x, y, dp) rather than a memory: a walk
+-- is either inside the step unit, waiting in the FIFO, or sitting in the
+-- report register.  Every completed step goes back into the FIFO; the
+-- distinguished ones carry the dp flag, and when one reaches the head it is
+-- moved into the report register instead of the step unit, where it waits
+-- for the host's acknowledgement.  So a report is never lost however
+-- slowly the host drains, and however many distinguished points retire on
+-- consecutive clocks: the FIFO is the backlog and it can hold every walk.
+-- A load from the host enters the same FIFO; it is accepted only on clocks
+-- when no step completes, so the FIFO and the per-walk step-count memory
+-- each have one write port (all distributed RAM).
+--
+-- Report handshake: dp_valid holds with stable data until the clock after
+-- dp_ack is seen high; the host side pulses dp_ack for one clock when it
+-- has taken the report, and must not take it again while its own ack is
+-- still in flight (ec2k_axil does exactly that).  Both ends are registers,
+-- so the wires between an engine and the register block have a full clock.
 --
 -- Throughput is that of the step unit: 5 + 5/W clocks per step per
 -- multiplier, provided NWALK comfortably covers the 2**(LOG_W + LOG_NB)
@@ -44,8 +55,10 @@ entity ec2k_walker is
     ld_id      : in  unsigned(ID_W - 1 downto 0);
     ld_x       : in  gf_t;
     ld_y       : in  gf_t;
-    -- distinguished point: walk dp_id reached (dp_x, dp_y) after dp_steps steps
+    -- distinguished point: walk dp_id reached (dp_x, dp_y) after dp_steps
+    -- steps; held until the clock after dp_ack
     dp_valid   : out std_logic;
+    dp_ack     : in  std_logic;
     dp_id      : out unsigned(ID_W - 1 downto 0);
     dp_steps   : out unsigned(CNT_W - 1 downto 0);
     dp_x       : out gf_t;
@@ -63,13 +76,17 @@ architecture rtl of ec2k_walker is
 
   type gf_mem_t  is array (0 to NWALK - 1) of gf_t;
   type id_mem_t  is array (0 to NWALK - 1) of id_t;
+  type v_mem_t   is array (0 to NWALK - 1) of std_logic;
   type cnt_mem_t is array (0 to NWALK - 1) of unsigned(CNT_W - 1 downto 0);
 
   -- ready FIFO
   signal f_x, f_y : gf_mem_t := (others => (others => '0'));
   signal f_id     : id_mem_t := (others => (others => '0'));
+  signal f_dp     : v_mem_t  := (others => '0');
   signal f_wr, f_rd : unsigned(ID_W downto 0) := (others => '0');
   signal f_empty, f_full : boolean;
+  signal head     : natural range 0 to NWALK - 1;
+  signal head_dp  : std_logic;
 
   signal cnt : cnt_mem_t := (others => (others => '0'));
 
@@ -82,7 +99,10 @@ architecture rtl of ec2k_walker is
   signal s_out_hw       : hw_t;
   signal s_out_tag      : std_logic_vector(ID_W - 1 downto 0);
 
-  signal requeue : boolean;
+  -- report register
+  signal dpv     : std_logic := '0';
+  signal take_dp : boolean;
+
   signal ld_rdy  : std_logic;
 
 begin
@@ -99,20 +119,24 @@ begin
 
   f_empty <= f_wr = f_rd;
   f_full  <= f_wr(ID_W) /= f_rd(ID_W) and f_wr(ID_W - 1 downto 0) = f_rd(ID_W - 1 downto 0);
+  head    <= to_integer(f_rd(ID_W - 1 downto 0));
+  head_dp <= f_dp(head);
 
-  -- a completed, non-distinguished step takes the FIFO's write port; any
-  -- completed step takes the counter array's write port, so a load is
-  -- accepted only on clocks with no retirement (keeps cnt single-writer,
-  -- hence distributed RAM instead of 2**ID_W * CNT_W flip-flops)
-  requeue <= s_out_valid = '1' and s_out_dp = '0';
-  ld_rdy  <= '1' when rst = '0' and s_out_valid = '0' and not f_full else '0';
+  -- every completed step takes the write port of the FIFO and of the
+  -- counter array, so a load is accepted only on clocks with no retirement
+  -- (keeps both single-writer, hence distributed RAM)
+  ld_rdy   <= '1' when rst = '0' and s_out_valid = '0' and not f_full else '0';
   ld_ready <= ld_rdy;
 
-  -- head of the FIFO is offered to the step unit every clock
-  s_in_valid <= '0' when f_empty or rst = '1' else '1';
-  s_in_x     <= f_x(to_integer(f_rd(ID_W - 1 downto 0)));
-  s_in_y     <= f_y(to_integer(f_rd(ID_W - 1 downto 0)));
-  s_in_tag   <= std_logic_vector(f_id(to_integer(f_rd(ID_W - 1 downto 0))));
+  -- head of the FIFO: a walk is offered to the step unit, a distinguished
+  -- point to the report register once that is free (or being freed)
+  s_in_valid <= '0' when f_empty or rst = '1' or head_dp = '1' else '1';
+  s_in_x     <= f_x(head);
+  s_in_y     <= f_y(head);
+  s_in_tag   <= std_logic_vector(f_id(head));
+  take_dp    <= not f_empty and rst = '0' and head_dp = '1' and (dpv = '0' or dp_ack = '1');
+
+  dp_valid <= dpv;
 
   main : process (clk)
     variable w  : natural range 0 to NWALK - 1;
@@ -122,43 +146,47 @@ begin
       if rst = '1' then
         f_wr <= (others => '0');
         f_rd <= (others => '0');
-        dp_valid   <= '0';
+        dpv        <= '0';
         step_pulse <= '0';
       else
-        dp_valid   <= '0';
         step_pulse <= '0';
 
-        -- pop: the step unit took the head
+        -- pop: the step unit took the head, or the head is a report
         if s_in_valid = '1' and s_in_ready = '1' then
           f_rd <= f_rd + 1;
+        elsif take_dp then
+          f_rd     <= f_rd + 1;
+          dpv      <= '1';
+          dp_id    <= f_id(head);
+          dp_x     <= f_x(head);
+          dp_y     <= f_y(head);
+          dp_steps <= cnt(to_integer(f_id(head)));
+        end if;
+        if dp_ack = '1' and not take_dp then
+          dpv <= '0';
         end if;
 
-        -- a completed step: count it, then re-queue or report; else a host
-        -- load, which starts the walk's counter.  One if/elsif chain so
-        -- every array below has exactly one write port.
+        -- a completed step: count it and re-queue it, flagged if
+        -- distinguished; else a host load, which starts the walk's counter.
+        -- One if/elsif chain so every array below has exactly one write
+        -- port.
         if s_out_valid = '1' then
           w := to_integer(unsigned(s_out_tag));
           n := cnt(w) + 1;
           cnt(w)     <= n;
           step_pulse <= '1';
-          if s_out_dp = '1' then
-            dp_valid <= '1';
-            dp_id    <= unsigned(s_out_tag);
-            dp_steps <= n;
-            dp_x     <= s_out_x;
-            dp_y     <= s_out_y;
-          else
-            f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_x;
-            f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_y;
-            f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= unsigned(s_out_tag);
-            f_wr <= f_wr + 1;
-          end if;
+          f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_x;
+          f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_y;
+          f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= unsigned(s_out_tag);
+          f_dp(to_integer(f_wr(ID_W - 1 downto 0))) <= s_out_dp;
+          f_wr <= f_wr + 1;
         elsif ld_valid = '1' and ld_rdy = '1' then
           w := to_integer(ld_id);
           cnt(w) <= (others => '0');
           f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_x;
           f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_y;
           f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= ld_id;
+          f_dp(to_integer(f_wr(ID_W - 1 downto 0))) <= '0';
           f_wr <= f_wr + 1;
         end if;
       end if;

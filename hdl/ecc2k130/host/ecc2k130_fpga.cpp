@@ -84,7 +84,7 @@ enum : uint32_t {
 };
 static const uint32_t MAGIC_VALUE = 0x2C130001u;
 static const uint32_t CTRL_RUN = 1u, CTRL_CLEAR = 2u;
-static const uint32_t ST_LD_BUSY = 1u, ST_DP_AVAIL = 2u, ST_OVERFLOW = 4u;
+static const uint32_t ST_LD_BUSY = 1u, ST_DP_AVAIL = 2u;   // bit 2 (was DP_OVERFLOW) reads 0
 }  // namespace reg
 
 struct Geometry {
@@ -233,24 +233,34 @@ struct PciBus : Bus {
 #endif
 
 // Behavioural model of ec2k_axil: same registers, same handshakes, walks
-// advanced in software each time STATUS is read.  Loads complete at once,
-// the DP queue is 64 deep and overflows the same way.
+// advanced in software each time STATUS is read.  Loads complete at once;
+// the DP queue is 64 deep and, as in hardware, a report that finds it full
+// waits in its engine (here: a per-walk pending flag) rather than being
+// lost, so DROPPED and STATUS.DP_OVERFLOW are always zero.
 struct SimBus : Bus {
     Geometry geo;
     unsigned stepsPerPoll;
-    struct Walk { bool live = false; P131 x, y; uint32_t steps = 0; };
+    struct Walk { bool live = false, pending = false; P131 x, y; uint32_t steps = 0; };
     struct Dp { uint32_t gid, steps; P131 x, y; };
     std::vector<Walk> walks;
     std::deque<Dp> fifo;
     uint32_t ctrl = 0, ldId = 0, ldx[5] = {0}, ldy[5] = {0};
     uint64_t steps = 0;
-    uint32_t stepsHi = 0, dps = 0, dropped = 0;
-    bool overflow = false;
+    uint32_t stepsHi = 0, dps = 0;
 
     SimBus(const Geometry &g, unsigned spp) : geo(g), stepsPerPoll(spp), walks(g.walks()) {}
 
+    void report(unsigned g) {
+        Walk &w = walks[g];
+        if (fifo.size() >= 64) { w.pending = true; return; }
+        fifo.push_back(Dp{g, w.steps, w.x, w.y});
+        w.pending = false;
+        dps++;
+    }
     void advance() {
         if (!(ctrl & reg::CTRL_RUN)) return;
+        for (unsigned g = 0; g < walks.size(); ++g)
+            if (walks[g].pending) report(g);
         for (unsigned g = 0; g < walks.size(); ++g) {
             Walk &w = walks[g];
             if (!w.live) continue;
@@ -260,8 +270,7 @@ struct SimBus : Bus {
                 steps++;
                 if (weight(w.x) <= geo.dpWeight) {
                     w.live = false;
-                    if (fifo.size() >= 64) { dropped++; overflow = true; }
-                    else { fifo.push_back(Dp{g, w.steps, w.x, w.y}); dps++; }
+                    report(g);
                 }
             }
         }
@@ -277,13 +286,13 @@ struct SimBus : Bus {
         case CTRL: return ctrl & CTRL_RUN;
         case STATUS:
             advance();
-            return (fifo.empty() ? 0 : ST_DP_AVAIL) | (overflow ? ST_OVERFLOW : 0) |
+            return (fifo.empty() ? 0 : ST_DP_AVAIL) |
                    ((uint32_t)std::min<size_t>(fifo.size(), 255) << 16);
         case GEOM: return geo.encode();
         case STEPS_LO: stepsHi = (uint32_t)(steps >> 32); return (uint32_t)steps;
         case STEPS_HI: return stepsHi;
         case DPS: return dps;
-        case DROPPED: return dropped;
+        case DROPPED: return 0;
         case LD_ID: return ldId;
         case DP_ID: return fifo.empty() ? 0 : fifo.front().gid;
         case DP_STEPS_LO: return fifo.empty() ? 0 : fifo.front().steps;
@@ -298,8 +307,8 @@ struct SimBus : Bus {
         switch (off) {
         case CTRL:
             ctrl = v & CTRL_RUN;
-            if (!(v & CTRL_RUN)) for (Walk &w : walks) w.live = false;
-            if (v & CTRL_CLEAR) { steps = 0; dps = 0; dropped = 0; overflow = false; fifo.clear(); }
+            if (!(v & CTRL_RUN)) for (Walk &w : walks) w.live = w.pending = false;
+            if (v & CTRL_CLEAR) { steps = 0; dps = 0; fifo.clear(); }
             break;
         case LD_ID: ldId = v; break;
         case LD_GO:
