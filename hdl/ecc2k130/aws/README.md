@@ -280,7 +280,19 @@ by letting an input stage take a walk only when it is empty, so its
 enable is its own valid bit (5.31 clocks per step in simulation, from
 5.29). The 300-bit insert mux's select is likewise now a register in
 its own stage, and the leaf writes go through a register with one
-address copy per table. An 80-engine build of the revision with the
-retire-free memories (`20260912-204307-n80-c333`, 17 tiles per engine,
-67% of the block RAM) placed at +0.089 ns and was routing when this was
-written.
+address copy per table.
+
+**80 engines at 333 MHz met timing too** (`20260912-204307-n80-c333`,
+the revision with the retire-free memories: 17 tiles per engine): placed
+at +0.089 ns, routed at **WNS +0.027 ns, TNS 0, WHS +0.010**; 686 854
+LUTs (52.7%), 1 280 RAMB36 + 160 RAMB18 (67% of the block RAM). Its
+worst paths are spread over the engines now — a burst level into a tree
+address, an input register into a `d` table's data pins, `ra_valid` into
+the multiplier operand register's enables, the FIFO's write pointer into
+its write enable — each around 2.97 ns, no single net to remove. Its
+manifest was written by the checked flow (`pci_subsystem_id=0xEC13`), so
+AFI `agfi-03f41bca67d09198c` loads as submitted. At 5.31 clocks per step:
+5.0 G steps/s. An 80-engine build of the revision with the three path
+fixes above (`20260912-224741-n80-c333`) and a 96-engine one
+(`20260912-230411-n96-c333`, 81% of the block RAM) were running when
+this was written.
