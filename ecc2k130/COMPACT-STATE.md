@@ -146,5 +146,8 @@ carry `ECC_PACKED_COMPACT_STATE`. A packed rate with a missing, duplicate or
 wrong layout marker is rejected. Tiled audits also require the complete
 storage test before client integration or timing. The updated RTX Make
 preset selects compact mode; use `RTX_PRO6000_COMPACT_STATE=0` for the previous
-layout. A separate audit of the updated public command is pending. The 15 B/s
+layout. The [public integration review](benchmarks/compact-state/public-integration-review.json)
+and [additive resolution](benchmarks/compact-state/public-integration-resolution.json)
+record the early tiled-batch limit and the isolated cache-mismatch regression
+test. All 39 wrapper tests pass. A separate audit of the updated public command is pending. The 15 B/s
 target remains unachieved.
