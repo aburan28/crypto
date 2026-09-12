@@ -1,13 +1,14 @@
 # hdl/ecc2k130 — FPGA engine for the ECC2K-130 walk
 
 The ECC2K-130 iteration function in portable VHDL-2008: a pipelined
-GF(2^131) multiplier in the permuted type-II optimal normal basis, a step
-unit that computes `R + sigma^j(R)` around it, and a sequencer that runs
-many walks through the step unit and reports distinguished points. It is
-the hardware counterpart of the GPU client in [`ecc2k130/`](../../ecc2k130/):
-same field, same basis, same iteration function, same distinguished-point
-rule, and the same oracle — every vector the testbenches check against
-comes from the client's own field model in `ecc2k130/codegen/`.
+Karatsuba GF(2^131) multiplier in the permuted type-II optimal normal
+basis, a step unit that computes `R + sigma^j(R)` for a batch of walks
+around it with one shared inversion, and a sequencer that runs many walks
+through the step unit and reports distinguished points. It is the hardware
+counterpart of the GPU client in [`ecc2k130/`](../../ecc2k130/): same
+field, same basis, same iteration function, same distinguished-point rule,
+and the same oracle — every vector the testbenches check against comes from
+the client's own field model in `ecc2k130/codegen/`.
 
 Reference part is the AMD Virtex UltraScale+ VU47P (AWS `f2.6xlarge`), the
 same one `hdl/ecc/` and `hdl/sha1/` target, but there are no vendor
@@ -20,20 +21,23 @@ derived, or estimated.
 
 | File | What it is |
 |---|---|
-| `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
-| `gf131_mul.vhd` | GF(2^131) multiplier, II = 1, latency 11, no DSPs |
-| `ec2k_step_pipe.vhd` | One walk step around one shared multiplier: inversion (8 multiplies) plus addition (2), many steps in flight |
-| `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output |
-| `gf131_mul_tb.vhd`, `ec2k_step_tb.vhd`, `ec2k_walker_tb.vhd` | Self-checking testbenches |
+| `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, two-clock weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
+| `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, latency `2 LEVELS + 1` |
+| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 8, no DSPs |
+| `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
+| `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
+| `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
+| `gf131_mul_tb.vhd`, `ec2k_batch_tb.vhd`, `ec2k_step_tb.vhd`, `ec2k_walker_tb.vhd` | Self-checking testbenches |
 | `gf131_tb_pkg.vhd` | Hex helpers shared by the testbenches |
-| `ecc2k_ref.py` | Reference model of every hardware algorithm, proved against `ecc2k130/codegen/field.py`; generates the vectors |
-| `vectors_ecc2k130.txt` | Generated: 256 products, 64 steps, 40 walks to a distinguished point |
+| `ecc2k_ref.py` | Reference model of every hardware algorithm, proved against `ecc2k130/codegen/field.py`; generates the vectors; gate counts |
+| `vectors_ecc2k130.txt` | Generated: 256 products, 200 steps, 64 walks to a distinguished point |
 | `aws/` | Out-of-context synthesis script for the VU47P |
 
 ## Run
 
 ```bash
-make            # analyse, elaborate and run the three testbenches
+make            # analyse, elaborate and run the four testbenches
+make rate       # steady-state clocks per step of the batched unit, 6144 steps
 make check      # prove the hardware algorithms against the client's field model
 make vectors    # regenerate the vector file
 make cost       # gate counts of the multiplier from its constant matrices
@@ -44,13 +48,19 @@ output:
 
 ```
 === gf131_mul_tb ===
-gf131_mul_tb: PASS -- 256 multiplications, II=1, latency 11 clk
+gf131_mul_tb: PASS -- 256 multiplications, II=1, latency 8 clk
+=== ec2k_batch_tb ===
+ec2k_batch_tb: 200 steps in 1256 clk = 628/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
+ec2k_batch_tb: PASS
 === ec2k_step_tb ===
-ec2k_step_tb: 64 steps in 665 clk with 16 slots (10 multiplies per step)
+ec2k_step_tb: 200 steps in 2013 clk with 16 slots (10 multiplies per step)
 ec2k_step_tb: PASS
 === ec2k_walker_tb ===
-ec2k_walker_tb: 40 distinguished points from 576 steps in 7639 clk (16 walks, 16 slots)
+ec2k_walker_tb: 64 distinguished points from 797 steps in 15102 clk (32 walks, batches of 8, 4 in flight)
 ec2k_walker_tb: PASS
+
+$ make rate
+ec2k_batch_tb: 6144 steps in 33160 clk = 539/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
 ```
 
 The multiplier vectors include zero, one (which is the all-ones vector in
@@ -59,6 +69,10 @@ bottom coordinates alone; each product is checked against the file and
 against `gf_mul_ref`, the direct normal-basis convolution computed in
 simulation, which shares nothing with the multiplier's route. The step and
 walk vectors are random points of order `l` on the challenge curve itself.
+The 200 step vectors are twelve full batches of sixteen and a partial one,
+so the flush path that pads a short batch is exercised on every run, and
+`ec2k_batch_tb` passes for every `W` from 2 to 32 with 2 to 16 batches in
+flight.
 
 ## The field
 
@@ -97,34 +111,49 @@ against the client's field model before any vector is written.
 ```
 stage 0        latch a, b
 stage 1        a' = prep(a), b' = prep(b)          gamma -> c-powers
-stages 2..9    h ^= a' * b'[17-bit digit r] << 17r   8 rows
-stage 10       r = to_onb(h)                       c-powers -> gamma
+stage 2        Karatsuba level 1 pre-add           a0, a1, a0+a1 (66 bits)
+stage 3        Karatsuba level 2 pre-add           (33 bits)
+stage 4        nine 33 x 33 schoolbook products
+stage 5        level 2 post-combine
+stage 6        level 1 post-combine                261-bit product
+stage 7        r = to_onb(h)                       c-powers -> gamma
 ```
 
-The rows are operand scanning over GF(2)[c] with no carries: a row is
-131 × 17 AND gates and an XOR tree five deep, two or three LUT6 levels.
-That is what keeps the clock short without splitting anything.
+`gf2_kmul` is a recursive entity: each level is a registered pre-add, three
+instances of itself on the halves, and a registered post-combine. Over
+GF(2) Karatsuba is exact with no subtractions, so the unequal halves
+(66 + 65) cost nothing — the high half is zero-extended and the top product
+bits are provably zero and dropped. Every stage is one or a few LUT levels:
+pre-add and post-combine are one XOR each per bit, the leaf is 33 AND terms
+per output bit (three per LUT6 with their XORs, three to four levels), and
+the widest thing anywhere is the 66-input column of `prep`.
 
-Gate count per multiplier, read off the constant matrices (`make cost`), **derived**:
+Gate count per multiplier, read off the constant matrices and the recurrence
+(`make cost`), **derived**:
 
-| | AND | XOR2 | Widest XOR |
-|---|---|---|---|
-| prep, both operands | | 1982 | 66 inputs |
-| 131 × 131 product | 17161 | 16900 | |
-| to_onb | | 3167 | 44 inputs |
-| **total** | **17161** | **22049** | |
+| Levels | Leaf | AND | XOR2 (product) | XOR2 (per multiply, with prep and to_onb) | Latency |
+|---|---|---|---|---|---|
+| 0 (schoolbook) | 131 | 17161 | 16900 | 22049 | 4 |
+| 1 | 66 | 13068 | 13199 | 18348 | 6 |
+| **2 (default)** | **33** | **9801** | **10520** | **15669** | **8** |
+| 3 | 17 | 7803 | 9404 | 14553 | 10 |
 
-No DSP48 is involved anywhere — binary-field arithmetic has no carries, so
-the DSP's adder is useless to it and the multiplier is pure LUT fabric.
-Folding three AND terms and their XORs into one LUT6 and the remaining XORs
-five per LUT gives roughly **8k LUTs and 5k flip-flops per multiplier,
-estimated**. Compare `hdl/ecc/`: the secp256k1 multiplier is 256 DSPs plus
-~10k LUTs for the same II = 1.
+`prep` is 991 XOR2 per operand, `to_onb` 3167. No DSP48 is involved
+anywhere — binary-field arithmetic has no carries, so the DSP's adder is
+useless to it and the multiplier is pure LUT fabric. Folding three AND
+terms and their XORs into one LUT6 and the remaining XORs five per LUT
+gives roughly **5–6k LUTs and 3k flip-flops per multiplier at two levels,
+estimated**, against ~8k for the schoolbook version this replaces. Three
+levels save another 2k ANDs for 1.5k fewer XORs and two more clocks of
+latency; where the LUT optimum sits is a synthesis question, which is why
+`MUL_KARATSUBA` in `gf131_pkg.vhd` is a constant to sweep. Compare
+`hdl/ecc/`: the secp256k1 multiplier is 256 DSPs plus ~10k LUTs for the
+same II = 1.
 
 The `tag` rides alongside and the datapath never looks at it, so one
 multiplier serves any number of independent contexts back-to-back.
 
-## The step unit
+## The step
 
 ```
 j   = 3 + ((HW(x) >> 1) & 7)
@@ -142,33 +171,87 @@ multiplies**, each `beta_{2k} = beta_k * sigma^k(beta_k)`. On a prime field
 the same inversion is about 270 multiplies (`docs/ecc_fpga_cost_model.md`),
 which is why `hdl/ecc/` has to batch inversions across walks and leaves the
 inverter outside. Here a whole step — inversion included — is **ten
-multiplies and nothing else**.
+multiplies and nothing else**, and that is what `ec2k_step_pipe` does: up to
+`2^SLOT_W` independent steps in flight around one multiplier, dataflow
+scheduled through a ready queue, 10.4 clocks per step with 16 slots
+(measured, saturated).
 
-Ten dependent multiplies cannot fill an 11-deep pipeline, so the unit keeps
-up to `2^SLOT_W` independent steps in flight, one per slot. Scheduling is
-dataflow: when a product retires, the slot's next operands are formed and
-the slot is pushed on a ready queue; each clock the head of the queue
-issues. New requests issue only when the queue is empty, so in-flight work
-has priority and the multiplier never idles while anything is ready. Slot
-and chain state ride in the multiplier tag; results route back with no
-matching logic.
+## The batched step unit
 
-Measured in simulation (`ec2k_step_tb`, 64 independent steps back-to-back):
+Eight of those ten multiplies are the inversion, and inversions batch:
+with `W` walks, `1/d_1 .. 1/d_W` cost one inversion plus `3(W-1)`
+multiplies (Montgomery's trick). `ec2k_batch_pipe` takes `W` walks as the
+leaves of a binary product tree:
 
-| Slots | Clocks | Clocks per step |
-|---|---|---|
-| 8 | 1051 | 16.4 |
-| 16 | 665 | **10.4** |
-| 32 | 665 | 10.4 |
+```
+forward    t(n) = t(2n) t(2n+1)                      W-1 multiplies, log W levels
+invert     t(1) = 1/t(1)                              8 multiplies
+backward   t(2n) = t(n) t(2n+1),  t(2n+1) = t(n) t(2n)  2(W-1) multiplies, in place
+lam        lam_i = (y_i + y2_i) t(W+i)                 W
+y3         y3_i  = lam_i (x_i + x3_i) + x3_i + y_i     W
+```
 
-With `MUL_LATENCY + 2 = 13` or more steps in flight the multiplier is
-saturated and a step costs exactly its ten multiplies. The default of 16
-slots is the smallest power of two that does it.
+**`5W + 5` multiplies per batch, `5 + 5/W` per step: 5.31 at `W = 16`**
+against 10 — the same trick the GPU client plays with 32 walks per word,
+and the single largest lever on throughput.
+
+Every tree level, every inversion step, and each of the `lam` and `y3`
+passes is a *burst* of independent multiplies that issue on consecutive
+clocks. A batch is a chain of `2 log W + 10` bursts. When the last product
+of a burst retires — products retire in issue order, the multiplier being a
+fixed-latency pipe — the batch is pushed on a ready queue with its next
+burst; the issue engine streams bursts from the head of the queue with the
+following batch prefetched, so no clock is lost between bursts. Bursts from
+different batches interleave freely and a handful of batches in flight
+(`2^LOG_NB`) keeps the multiplier saturated. The tree is updated in place:
+every read of a value a burst overwrites happens at issue, the overwrite at
+retire eight clocks later.
+
+The unit is built to make the clock the multiplier's, not the
+scheduler's:
+
+- every memory has exactly one writer, so it maps to distributed RAM, not
+  flip-flops: `x, y, j, tag, valid` are written only by the fill, the tree
+  only by retire, `z` (holding `d`, then `x3`) only by the issue side;
+- operands are read one clock before they are formed, so no path runs
+  RAM → `sigma^j` → XOR in one clock, and the retire path is a memory
+  write plus one XOR — there is no `sigma` and no popcount in it;
+- the Hamming weight, 131 bits wide, is taken over two clocks: 22 groups
+  of six bits (one LUT6 per output bit) and then the sum, both on input
+  and on output;
+- batch and burst state ride in the multiplier tag, so results route
+  back with no matching logic.
+
+A batch shorter than `W` — the tail of a run, a slow host, a testbench —
+would wait forever for leaves that never come, so a partly filled batch
+with nothing arriving for `FLUSH_CLK` clocks is padded with dummy leaves
+(`x = gamma_1`, whose `d = gamma_1 + gamma_8` is nonzero and keeps the
+product tree invertible) that produce no output.
+
+Measured in simulation (`ec2k_batch_tb`, 200 steps including a partial
+batch and its flush wait, then `make rate` with 6144 steps in full batches):
+
+| W | Batches in flight | 200 steps | 6144 steps | Bound `5 + 5/W` |
+|---|---|---|---|---|
+| 8 | 8 | 7.04 | 5.86 | 5.63 |
+| 16 | 4 | 8.09 | 6.78 | 5.31 |
+| 16 | 8 | 6.28 | **5.39** | 5.31 |
+| 16 | 16 | 5.88 | 5.32 | 5.31 |
+| 32 | 8 | 6.40 | 5.19 | 5.16 |
+
+Clocks per step. At the default `W = 16` with 8 batches in flight the
+long run sits 0.08 above the bound, and that residue is the fill of the
+first batch and the drain of the last (about 500 clocks of a 33160-clock
+run), not steady-state bubbles: the multiplier is saturated. Four batches
+are not enough to cover the eight dependent single-multiply bursts of the
+inversion; eight are. Memory per batch of `W` is `5W` field elements
+(three leaf arrays and a tree of `2W`), 640 × 131 bits at the default.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
-matching the client: the chain returns `1/0 = 0` and the step produces
-garbage, as the client does. On the challenge curve the case has
-probability about `2^-131` per step.
+matching the client: the chain returns `1/0 = 0`, the product tree zeroes
+and every step in the batch produces garbage, as the client's batched
+inversion does. On the challenge curve the case has probability about
+`2^-131` per step.
 
 ## The walker
 
@@ -180,24 +263,29 @@ on the `dp_*` port with its id and step count and the walk goes idle until
 the host loads a new start point into that id. That is the same division
 of labour as the GPU client, whose kernel reports `(seed, endpoint)` and
 whose host owns restarts, the corpus and collision resolution
-(`ecc2k130/README.md`, "Distinguished points and restarts").
+(`ecc2k130/README.md`, "Distinguished points and restarts"). `NWALK` should
+comfortably exceed the `W · 2^LOG_NB` walks the step unit holds, so a full
+batch is always forming; when it does not (start-up, a host slow to reload)
+the flush keeps things moving at reduced efficiency, never a stall.
 
-`ec2k_walker_tb` plays host: it loads 40 start points sixteen at a time,
-checks every report's id, step count and point against the trajectory the
-client's reference model walked from the same start (under a loose cutoff
-of 56 so walks report within a few dozen steps), and reloads. Walks
-interleave arbitrarily inside the engine; the per-id bookkeeping makes the
-check independent of that. The clocks-per-step figure the walker testbench
-prints is not a throughput measurement: the walk population dwindles as
-records run out, and the step testbench is the one that measures the
-saturated rate.
+`ec2k_walker_tb` plays host: it loads 64 start points 32 at a time, checks
+every report's id, step count and point against the trajectory the client's
+reference model walked from the same start (under a loose cutoff of 56 so
+walks report within a few dozen steps), and reloads. Walks interleave
+arbitrarily inside the engine; the per-id bookkeeping makes the check
+independent of that. The clocks-per-step figure the walker testbench prints
+is not a throughput measurement: the walk population dwindles as records
+run out and the tail is spent in partial batches waiting for the flush;
+`make rate` is the one that measures the saturated rate.
 
 ## Capacity and what it would mean — estimated
 
-Per VU47P (2.85M LUTs), at ~12k LUTs per step unit including its
-multiplier, slot memories and `sigma` multiplexers: **150–200 step units**,
-LUT-bound, no DSPs or BRAM binding. At 10 clocks per step and 300–400 MHz
-that is 30–40 M steps/s per unit and **5–8 G steps/s per FPGA**.
+Per VU47P (2.85M LUTs), at ~10k LUTs per batched step unit — a 5–6k LUT
+multiplier, 640 × 131 bits of distributed RAM with two read ports on the
+leaf and tree arrays (~2k), the `sigma^j` selection muxes on the operand
+path (~1.5k), and control — **200–250 step units**, LUT-bound, no DSPs or
+BRAM binding. At 5.3 clocks per step and 300–400 MHz that is 56–75 M
+steps/s per unit and **11–19 G steps/s per FPGA**.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
@@ -205,26 +293,27 @@ walks per word and spending 8859 instructions per multiply. The GPU has no
 carryless multiply; the FPGA is nothing but carryless multiplies. That is
 the structural reason a binary Koblitz curve suits an FPGA where the prime
 field secp256k1 (`docs/ecc_fpga_cost_model.md`) does not: there the FPGA
-advantage was "roughly 2x, fragile"; here the multiplier costs no DSPs and
-the inversion costs eight multiplies.
+advantage was "roughly 2x, fragile"; here the multiplier costs no DSPs, the
+inversion costs eight multiplies, and a step costs 5.3.
 
-None of this is measured. `aws/` synthesises the three modules on an AWS
+None of this is measured. `aws/` synthesises the four modules on an AWS
 build instance and brings back LUT, FF and Fmax; the estimates above are
-what those numbers replace. The likely critical path is not the multiplier
-but the step unit's retire path — a slot-memory read, `gf_sigma_j`, XORs,
-write-back in one clock — and splitting it costs one clock of step latency
-and nothing in throughput.
+what those numbers replace. If the clock lands low the place to look is the
+multiplier's leaf stage (33 AND terms per bit, three to four LUT levels;
+`MUL_KARATSUBA = 3` halves it) and the operand-forming stage of the step
+unit (`sigma^j` is three 2:1 mux levels after a fixed permutation, then one
+XOR).
 
 ## What is not here
 
-- **Montgomery batching.** The GPU client shares one inversion across 32
-  walks, so its inversion cost per step is `3 + 8/32` multiplies instead of
-  8. Doing the same here would take a step from 10 multiplies to about 5,
-  close to a 2x throughput gain for more slot state and a longer chain. It is the
-  single highest-value change and it is not implemented.
-- **Karatsuba.** One level (66 + 65) turns 17161 AND gates into 13068, a
-  24% saving on the product; the client's generator found one level to be
-  the sweet spot on the GPU. The rows are a drop-in place to put it.
+- **A wider inversion share.** `W = 32` takes the bound from 5.31 to 5.16
+  multiplies per step for twice the memory per batch; the generic is
+  there and passes, the default stays at 16 because the last 3% costs
+  as much RAM as the first 47% did.
+- **A second multiplier per step unit.** The scheduler issues one product
+  per clock; doubling that means two multipliers behind one ready queue
+  and a two-port tree. The same throughput comes for free from
+  instantiating two step units, which is the plan.
 - **The AWS shell.** Like `hdl/ecc/`, this is a bare datapath with a clock,
   a load port and a report port. A loadable FPGA image needs the `aws-fpga`
   custom-logic wrapper, AXI interfaces and a host program; see

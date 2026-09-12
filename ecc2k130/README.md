@@ -28,10 +28,11 @@ a Frobenius-based iteration function, bitsliced, with the field arithmetic
 emitted by a code generator.
 
 The same iteration function exists in VHDL in [`hdl/ecc2k130/`](../hdl/ecc2k130/):
-a GF(2^131) multiplier in this normal basis, a step unit that does the whole
-`R + sigma^j(R)` in ten multiplies (inversion is eight, since squaring is
-wiring), and a walker that reports distinguished points. Its testbenches are
-checked against the field model in `codegen/`.
+a Karatsuba GF(2^131) multiplier in this normal basis, a step unit that does
+`R + sigma^j(R)` in `5 + 5/W` multiplies by sharing one eight-multiply
+inversion across a batch of `W` walks (the same Montgomery trick as this
+client's 32-walk words), and a walker that reports distinguished points.
+Its testbenches are checked against the field model in `codegen/`.
 
 Two targets are configured:
 
