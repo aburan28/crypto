@@ -21,6 +21,14 @@ SHIPPER=$!
 finish() {
     echo "afi build $TAG finished $(date -u)"
     kill $SHIPPER 2>/dev/null
+    # Reports and the vivado log are worth having even when the build
+    # failed; the utilisation of a design that did not fit is the point.
+    if [ -n "${CL_DIR:-}" ] && [ -d "$CL_DIR/build/reports" ]; then
+        aws s3 cp "$CL_DIR/build/reports" "s3://$BUCKET/fpga/builds/$TAG/reports/" --recursive --only-show-errors 2>/dev/null
+        for l in "$CL_DIR"/build/scripts/*.vivado.log; do
+            [ -f "$l" ] && aws s3 cp "$l" "s3://$BUCKET/fpga/builds/$TAG/vivado.log" --only-show-errors 2>/dev/null
+        done
+    fi
     ship
     [ "${NO_SHUTDOWN:-0}" = 1 ] || shutdown -h now
 }
