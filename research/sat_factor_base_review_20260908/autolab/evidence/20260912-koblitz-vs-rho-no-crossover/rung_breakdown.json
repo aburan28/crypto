@@ -1,0 +1,149 @@
+{
+  "derived_from": "research/sat_factor_base_review_20260908/autolab/runs/<run_id>/logs/*.jsonl",
+  "direct_charged_definition": "Prefer direct_batch_totals_ms.full_algorithm_charged_total_ms, which charges curve and support-table setup once for the batch. The per-target charged field re-adds the shared setup for every target and must not be summed across a batch.",
+  "note": "Aggregates only. The source logs are gitignored because they are tens of megabytes and carry point-level records; this file is the committed reduction of their cost fields.",
+  "rho_over_ic_note": "above 1.0 would be an index-calculus win",
+  "rungs": [
+    {
+      "beat_id": "smoke.koblitz.vs_rho.n13",
+      "direct_batch_summary_absent": "single-fixture run; per-target setup_ms is the full support-table build with nothing to amortize it against",
+      "direct_ms_per_target": {
+        "charged_total": 0.833999,
+        "collection": 0.800583,
+        "fixture_setup": 4.1e-05,
+        "linear_solve": 0.003541,
+        "setup": 0.033374999999999995,
+        "solution_validation": 0.028709
+      },
+      "ic_cost_ms": 6.944499999999909,
+      "n": 13,
+      "rho_cost_ms": 3.034749999999864,
+      "rho_ms_per_target": {
+        "setup": 0.3145,
+        "total": 0.40908300000000003,
+        "validation": 0.064958,
+        "walk": 0.029625,
+        "walk_steps": 24.0
+      },
+      "rho_over_ic": 0.43700050399595414,
+      "rho_targets_verified": "1/1",
+      "run_id": "20260912T161059Z-07471fc673",
+      "targets": 1,
+      "timing_class": "whole_process_wall"
+    },
+    {
+      "beat_id": "koblitz.vs_rho.n37_wall",
+      "direct_batch_summary_absent": "single-fixture run; per-target setup_ms is the full support-table build with nothing to amortize it against",
+      "direct_ms_per_target": {
+        "charged_total": 34.330917,
+        "collection": 20.355125,
+        "fixture_setup": 0.00025,
+        "linear_solve": 0.01525,
+        "setup": 13.975542,
+        "solution_validation": 7.823416999999999
+      },
+      "ic_cost_ms": 112.84775000000002,
+      "n": 37,
+      "rho_cost_ms": 16.524916000000054,
+      "rho_ms_per_target": {
+        "setup": 3.912666,
+        "total": 12.522333,
+        "validation": 1.341792,
+        "walk": 7.267875,
+        "walk_steps": 2057.0
+      },
+      "rho_over_ic": 0.14643549384015234,
+      "rho_targets_verified": "1/1",
+      "run_id": "20260912T161100Z-5f1d599743",
+      "targets": 1,
+      "timing_class": "whole_process_wall"
+    },
+    {
+      "beat_id": "koblitz.vs_rho.n41_charged",
+      "direct_batch_summary_absent": "single-fixture run; per-target setup_ms is the full support-table build with nothing to amortize it against",
+      "direct_ms_per_target": {
+        "charged_total": 7698.893375000001,
+        "collection": 821.667625,
+        "fixture_setup": 0.000458,
+        "linear_solve": 2.2912090000000003,
+        "setup": 6877.225292,
+        "solution_validation": 143.765167
+      },
+      "ic_cost_ms": 7698.893375000001,
+      "n": 41,
+      "rho_cost_ms": 247.476041,
+      "rho_ms_per_target": {
+        "setup": 6.440791000000001,
+        "total": 247.476041,
+        "validation": 1.964458,
+        "walk": 239.070792,
+        "walk_steps": 59943.0
+      },
+      "rho_over_ic": 0.03214436529327827,
+      "rho_targets_verified": "1/1",
+      "run_id": "20260912T161101Z-d038475a6b",
+      "targets": 1,
+      "timing_class": "algorithmic_charged"
+    },
+    {
+      "beat_id": "koblitz.vs_rho.n53_probe",
+      "direct_batch_summary_absent": "single-fixture run; per-target setup_ms is the full support-table build with nothing to amortize it against",
+      "direct_ms_per_target": {
+        "charged_total": 868836.0326250001,
+        "collection": 862295.426958,
+        "fixture_setup": 0.000125,
+        "linear_solve": 2.911709,
+        "setup": 6540.605541999999,
+        "solution_validation": 318.153083
+      },
+      "ic_cost_ms": 870766.0317500001,
+      "n": 53,
+      "rho_cost_ms": 4839.18712500008,
+      "rho_ms_per_target": {
+        "setup": 11.844624999999999,
+        "total": 4910.829207999999,
+        "validation": 3.08725,
+        "walk": 4895.897333,
+        "walk_steps": 783787.0
+      },
+      "rho_over_ic": 0.005557390789894096,
+      "rho_targets_verified": "1/1",
+      "run_id": "20260912T161208Z-d6cb39c596",
+      "targets": 1,
+      "timing_class": "whole_process_wall"
+    },
+    {
+      "beat_id": "koblitz.vs_rho.n37_wall",
+      "direct_batch_totals_ms": {
+        "curve_setup_ms": 3.549,
+        "full_algorithm_charged_total_ms": 20576.25072200001,
+        "online_charged_ms": 20558.703347000013,
+        "support_setup_ms": 13.998375000000001,
+        "target_mode": "independent"
+      },
+      "direct_ms_per_target": {
+        "charged_total": 34.07523373730468,
+        "collection": 20.07668641601563,
+        "fixture_setup": 0.00017232128906249908,
+        "linear_solve": 0.014890709960937467,
+        "setup": 13.99837499999971,
+        "solution_validation": 7.660311819335942
+      },
+      "ic_cost_ms": 84863.937334,
+      "n": 37,
+      "rho_cost_ms": 13167.042167000005,
+      "rho_ms_per_target": {
+        "setup": 3.960819071289057,
+        "total": 12.800855353515614,
+        "validation": 1.2687142412109391,
+        "walk": 7.571322041015636,
+        "walk_steps": 2178.634765625
+      },
+      "rho_over_ic": 0.1551547404073219,
+      "rho_targets_verified": "1024/1024",
+      "run_id": "20260912T163230Z-3f7e563ca0",
+      "targets": 1024,
+      "timing_class": "whole_process_wall"
+    }
+  ]
+}

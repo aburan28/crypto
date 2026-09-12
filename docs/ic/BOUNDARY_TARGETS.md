@@ -144,6 +144,52 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 single-instance, not asymptotic sub-ρ, not key recovery, not deployed-curve
 security impact, not whole-process wall-clock.
 
+### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
+
+Separate measurement, separate base family, not a competing record. The
+`koblitz.vs_rho.*` autolab beats use a `signed_expanded` / `pair_pair_16`
+construction rather than the `two_torsion_saturated` base behind the row above.
+On that family, index calculus is behind ρ at every rung measured — `n = 13`,
+37, 41 and 53. Full writeup and committed bundles:
+[`evidence/20260912-koblitz-vs-rho-no-crossover/`](../../research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/).
+
+At `n = 37` over 1024 targets, charged ms/target, with ρ verifying 1024/1024:
+
+| arm | charged ms/target | ρ/IC |
+|---|---|---|
+| ρ | **12.82** | 1.000 |
+| `partition_walk` | 14.78 | 0.868 |
+| `coefficient_walk` | 15.33 | 0.836 |
+| `independent` | 20.27 | 0.633 |
+
+Three things this turned up that apply to any future `vs_rho` claim:
+
+- **Read charged cost off the batch summary.** The direct producer's per-target
+  `charged_total_ms` re-adds the shared support-table `setup_ms` for *every*
+  target, so summing it across a batch double-counts the base once per target.
+  At `n = 37` that reports 34.08 ms/target where
+  `full_algorithm_charged_total_ms` gives 20.27 for the same run, and it makes
+  setup amortization look like the bottleneck when setup is under 0.02
+  ms/target.
+- **Sweep the target mode.** All three beats pin `target_mode=independent`, the
+  most expensive of the three and 37% above `partition_walk`, so a stage read
+  off one beat understates the method.
+- **The direct arm's largest charged component is an assertion.** 7.78 of
+  `partition_walk`'s 14.78 ms/target is `solution_validation_ms`, which
+  re-derives every factor-base discrete log by scalar multiplication and
+  replays every relation under `assert_eq!` to confirm what the linear solve
+  already produced. Cutting it is the obvious lever, but ρ spends 1.28
+  ms/target on its own validation; dropping one side only would turn a 1.15x
+  loss into a 1.65x "win" by accounting alone.
+
+**The two `n = 41` results are not reconciled.** The row above reports an online
+charged crossover at IC/ρ 0.286 over 5 targets; the autolab beat measures
+per-target collection at 821.7 ms against ρ's 247.5 ms, 3.3x the other way.
+Different base families, target counts, and cost boundaries — the row's own
+amortized ratio is 5.03x and its full available wall is 110.79x, so the 0.286
+excludes base construction rather than disputing it. Neither `n = 41` number
+should be quoted without its configuration.
+
 ---
 
 ## Regime C — Prime fields
@@ -170,6 +216,9 @@ security impact, not whole-process wall-clock.
 ## Global agent priorities (beat these in order)
 
 1. **Koblitz `vs_rho` → whole-process same-target wall crossover at `n = 41` or `n = 53`.**
+   On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
+   at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
+   with `solution_validation_ms`, 53% of the direct arm's charged cost.
 2. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
 3. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
 4. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**

@@ -1,0 +1,25 @@
+{
+  "children_cpu_system_ms": 1191.177,
+  "children_cpu_user_ms": 869157.1760000001,
+  "cold_start_wall_ms": 199.917708,
+  "command": [
+    "/Volumes/SSD990/crypto-ecc2k-status-wt/target/release/examples/koblitz_rank_fixture",
+    "53",
+    "0",
+    "1",
+    "16",
+    "4527817298429979527",
+    "signed_quotient",
+    "independent",
+    "pointwise",
+    "1"
+  ],
+  "exit_code": 0,
+  "seed": 4527817298429979527,
+  "stdout_stable": true,
+  "timed_repeats": 1,
+  "whole_process_wall_ms": 870766.0317500001,
+  "whole_process_wall_samples_ms": [
+    870766.0317500001
+  ]
+}
