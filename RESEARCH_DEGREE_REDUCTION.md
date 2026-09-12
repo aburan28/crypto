@@ -69,6 +69,18 @@ attacker gets for free, since nothing requires the curve you attack to be
 the curve you were given — and the only one whose verdict is settled by a
 derivation rather than a sweep.
 
+> **Can L1 be acquired by moving to an isogenous curve?**  No — settled
+> in `RESEARCH_ISOGENY_DEGREE_SEARCH.md`, negatively and for three
+> independent reasons.  The curve parameter enters the Semaev system
+> only as its **constant term**, so the leading forms, and with them the
+> degree of regularity, are identical across an entire isogeny class
+> (checked exhaustively over every ordinary binary curve at `n ≤ 9` and
+> every class member at `n ≤ 17`: zero improvements in 2 994 curve
+> comparisons).  For ECC2K-130 specifically the class holds `2^65.06`
+> curves — `19×` more work than the rho it would improve — and because
+> 131 is prime it contains exactly **one** curve with subfield
+> structure: ECC2K-130 itself.
+
 ### 2.0 Syzygies are not degree falls (the iteration-1 error, corrected)
 
 Iteration 1 described L4 as "add the relation EXP-J identified." That was

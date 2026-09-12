@@ -6,12 +6,20 @@
 //
 //   unsigned      32 lanes, CUDA devices
 //   uint64_t      64 lanes, portable host fallback
+//   Bits128      128 lanes, aarch64 NEON hosts
 //   Bits256/512  256/512 lanes, AVX2 / AVX-512 hosts
 //
 // ECC_XOR3 / ECC_XORAND / ECC_MAJ / ECC_SEL are single instructions on both of
 // the interesting targets: LOP3.LUT on sm_50 and later, and vpternlogd on
 // AVX-512.  They use the same truth-table constants, computed for
 // a = 0xF0, b = 0xCC, c = 0xAA.
+//
+// aarch64 has no general three-input logic unit, but it has the two cases the
+// walk actually spends its instructions on: BSL is exactly ECC_SEL, and EOR3
+// (FEAT_SHA3, present on Neoverse V1/V2 and every Apple core) is exactly
+// ECC_XOR3.  Both are one instruction, so on that target the wide word is a
+// strict instruction-count win over the 64-bit fallback and not merely a wider
+// one.
 #pragma once
 
 #include <stdint.h>
@@ -222,12 +230,93 @@ inline Bits256 eccWordFromLimbs<Bits256>(const unsigned long long *p) {
 }
 #endif  // AVX
 
+// ---------------------------------------------------------------------------
+// aarch64 NEON: 128 lanes
+// ---------------------------------------------------------------------------
+#if !defined(__CUDACC__) && defined(__ARM_NEON) && defined(__aarch64__)
+#include <arm_neon.h>
+
+struct alignas(16) Bits128 {
+    uint64x2_t v;
+    Bits128() {}
+    Bits128(int x) { v = vreinterpretq_u64_u32(vdupq_n_u32(x ? 0xffffffffu : 0u)); }
+    explicit Bits128(uint64x2_t w) : v(w) {}
+    Bits128 operator^(const Bits128 &o) const { return Bits128(veorq_u64(v, o.v)); }
+    Bits128 operator&(const Bits128 &o) const { return Bits128(vandq_u64(v, o.v)); }
+    Bits128 operator|(const Bits128 &o) const { return Bits128(vorrq_u64(v, o.v)); }
+    Bits128 operator~() const {
+        return Bits128(vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(v))));
+    }
+    Bits128 &operator^=(const Bits128 &o) { v = veorq_u64(v, o.v); return *this; }
+    Bits128 &operator&=(const Bits128 &o) { v = vandq_u64(v, o.v); return *this; }
+    Bits128 &operator|=(const Bits128 &o) { v = vorrq_u64(v, o.v); return *this; }
+    bool operator==(const Bits128 &o) const {
+        const uint64x2_t d = veorq_u64(v, o.v);
+        return (vgetq_lane_u64(d, 0) | vgetq_lane_u64(d, 1)) == 0ull;
+    }
+    bool operator!=(const Bits128 &o) const { return !(*this == o); }
+    // uint64_t is unsigned long on LP64 and unsigned long long on Darwin, and
+    // the NEON intrinsics insist on their own spelling, so go through it.
+    unsigned long long limb(int i) const {
+        uint64_t tmp[2];
+        vst1q_u64(tmp, v);
+        return (unsigned long long)tmp[i];
+    }
+    static Bits128 fromLimbs(const unsigned long long *p) {
+        const uint64_t tmp[2] = {(uint64_t)p[0], (uint64_t)p[1]};
+        return Bits128(vld1q_u64(tmp));
+    }
+};
+
+// BSL selects bit by bit from two sources under a mask, which is ECC_SEL
+// exactly.  The scalar form costs four operations, so this is the one
+// substitution that changes the shape of sigmaJ rather than just its width.
+inline Bits128 eccSel(const Bits128 &a, const Bits128 &b, const Bits128 &c) {
+    return Bits128(vbslq_u64(a.v, b.v, c.v));
+}
+// (a & b) | (c & (a ^ b)) is a select on a ^ b between c and a & b.
+inline Bits128 eccMaj(const Bits128 &a, const Bits128 &b, const Bits128 &c) {
+    return Bits128(vbslq_u64(veorq_u64(a.v, b.v), c.v, vandq_u64(a.v, b.v)));
+}
+#if defined(__ARM_FEATURE_SHA3)
+inline Bits128 eccXor3(const Bits128 &a, const Bits128 &b, const Bits128 &c) {
+    return Bits128(veor3q_u64(a.v, b.v, c.v));
+}
+#endif
+// There is no and-xor fusion on aarch64; BCAX inverts its third operand, which
+// costs back what it saves.  Two instructions, same as the scalar path.
+inline Bits128 eccXorAnd(const Bits128 &a, const Bits128 &b, const Bits128 &c) {
+    return Bits128(veorq_u64(a.v, vandq_u64(b.v, c.v)));
+}
+
+template <>
+struct WordTraits<Bits128> {
+    static const int LANES = 128;
+};
+template <>
+inline int laneBit<Bits128>(const Bits128 &w, int lane) {
+    return (int)((w.limb(lane >> 6) >> (lane & 63)) & 1ull);
+}
+template <>
+inline Bits128 laneMask<Bits128>(int lane) {
+    unsigned long long tmp[2] = {0, 0};
+    tmp[lane >> 6] = 1ull << (lane & 63);
+    return Bits128::fromLimbs(tmp);
+}
+template <>
+inline Bits128 eccWordFromLimbs<Bits128>(const unsigned long long *p) {
+    return Bits128::fromLimbs(p);
+}
+#endif  // aarch64 NEON
+
 // Host word selection: widest available unless overridden with ECC_HOST_WORD.
 #if !defined(ECC_HOST_WORD)
 #if defined(__AVX512F__) && !defined(__CUDACC__)
 #define ECC_HOST_WORD Bits512
 #elif defined(__AVX2__) && !defined(__CUDACC__)
 #define ECC_HOST_WORD Bits256
+#elif defined(__ARM_NEON) && defined(__aarch64__) && !defined(__CUDACC__)
+#define ECC_HOST_WORD Bits128
 #else
 #define ECC_HOST_WORD unsigned long long
 #endif
