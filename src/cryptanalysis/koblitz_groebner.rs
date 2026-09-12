@@ -515,6 +515,183 @@ pub fn build_decomposition_system(
     })
 }
 
+// ── Block structure ────────────────────────────────────────────────
+
+impl DecompositionSystem {
+    /// The **block partition** the variables fall into: one block of
+    /// `ℓ` per summand, then one block of `n` per intermediate point of
+    /// the chain, in the layout order
+    /// [`build_decomposition_system`] uses.
+    ///
+    /// The system is *multilinear* with respect to this partition —
+    /// degree at most one in each block — which is a much stronger
+    /// statement than its total degree.  For `m = 2` the single `S₃`
+    /// link is `(x₁+x₂)²x_R² + x₁x₂x_R + (x₁x₂)² + b`: every term is
+    /// bilinear in the two summand blocks, because squaring is
+    /// `F_2`-linear and `x₁x₂` is bilinear.  For `m ≥ 3` the chained
+    /// links keep the property with the intermediate blocks joining in,
+    /// so the system is total-degree 3 but multidegree `(1,1,…,1)`.
+    ///
+    /// That is what [`matrix_f4_f2_blocked`] exploits.
+    pub fn blocks(&self, n: u32) -> Vec<usize> {
+        let mut v = vec![self.ell; self.m];
+        v.extend(std::iter::repeat_n(n as usize, self.m.saturating_sub(2)));
+        v
+    }
+}
+
+/// Per-block degree of a Boolean monomial under a block partition.
+///
+/// `blocks` gives block sizes in variable-index order, so block `i`
+/// owns a contiguous range of variables.
+pub fn block_degrees(mask: u64, blocks: &[usize]) -> Vec<u32> {
+    let mut out = Vec::with_capacity(blocks.len());
+    let mut lo = 0usize;
+    for &w in blocks {
+        let hi = (lo + w).min(64);
+        let window = if lo >= 64 {
+            0
+        } else if hi - lo >= 64 {
+            u64::MAX
+        } else {
+            ((1u64 << (hi - lo)) - 1) << lo
+        };
+        out.push((mask & window).count_ones());
+        lo = hi;
+    }
+    out
+}
+
+/// Largest per-block degree over the terms of a polynomial.
+pub fn poly_block_degrees(p: &F2BoolPoly, blocks: &[usize]) -> Vec<u32> {
+    let mut out = vec![0u32; blocks.len()];
+    for t in &p.terms {
+        for (o, d) in out.iter_mut().zip(block_degrees(t.mask, blocks)) {
+            *o = (*o).max(d);
+        }
+    }
+    out
+}
+
+/// **Matrix-F4 with a multidegree bound** instead of a total-degree one.
+///
+/// The ordinary [`matrix_f4_f2`] shifts every input polynomial by every
+/// monomial that keeps the *total* degree within `degree`.  On a system
+/// that is multilinear with respect to a block partition that is
+/// wasteful: it spends most of its columns on monomials with a high
+/// degree inside one block, and those are precisely the monomials the
+/// structure says cannot help.
+///
+/// This bounds the degree **per block** instead.  A shift is kept only
+/// when every term of the product stays inside the bounds, so every row
+/// is still an honest multiple of an input polynomial and a returned
+/// constant `1` is still a genuine certificate of infeasibility — the
+/// row space is a subspace of the total-degree one, never larger.
+///
+/// The column count goes from `C(v, ≤D)` to `Π_i C(v_i, ≤d_i)`, which
+/// on the decomposition systems is where the saving is.
+///
+/// Returns the reduced rows and the 64-bit word XORs the elimination
+/// performed, or `None` if the matrix would exceed the size limits.
+pub fn matrix_f4_f2_blocked(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    blocks: &[usize],
+    bounds: &[u32],
+) -> Option<(Vec<F2BoolPoly>, u64)> {
+    if polys.is_empty() || blocks.len() != bounds.len() {
+        return Some((Vec::new(), 0));
+    }
+    let within = |mask: u64| -> bool {
+        block_degrees(mask, blocks)
+            .iter()
+            .zip(bounds)
+            .all(|(d, b)| d <= b)
+    };
+
+    // Candidate shifts: monomials already inside the bounds.  A shift
+    // that breaks a bound on its own can only break it further after
+    // multiplication.
+    let total_bound: u32 = bounds.iter().sum();
+    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+    for p in polys {
+        for mult in monomials_up_to(n_vars, total_bound) {
+            if !within(mult) {
+                continue;
+            }
+            let row = {
+                let mut all: Vec<u64> = p.terms.iter().map(|t| t.mask | mult).collect();
+                all.sort_unstable();
+                let mut row: Vec<u64> = Vec::with_capacity(all.len());
+                let mut i = 0;
+                while i < all.len() {
+                    let mut j = i;
+                    while j < all.len() && all[j] == all[i] {
+                        j += 1;
+                    }
+                    if (j - i) % 2 == 1 {
+                        row.push(all[i]);
+                    }
+                    i = j;
+                }
+                row
+            };
+            // Every term must stay inside the bounds, or the row would
+            // need a column the bound excludes and truncating it would
+            // leave the ideal.
+            if row.is_empty() || !row.iter().all(|&m| within(m)) {
+                continue;
+            }
+            rows_monos.push(row);
+            if rows_monos.len() > max_f4_rows() {
+                return None;
+            }
+        }
+    }
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), 0));
+    }
+
+    let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
+    cols.sort_unstable();
+    cols.dedup();
+    if cols.len() > max_f4_cols() {
+        return None;
+    }
+    cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+    let index: std::collections::HashMap<u64, usize> =
+        cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+
+    let words = cols.len().div_ceil(64);
+    let mut matrix: Vec<Vec<u64>> = rows_monos
+        .iter()
+        .map(|monos| {
+            let mut row = vec![0u64; words];
+            for m in monos {
+                let c = index[m];
+                row[c / 64] |= 1 << (c % 64);
+            }
+            row
+        })
+        .collect();
+
+    let mut word_ops = 0u64;
+    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+
+    let n_vars_out = polys[0].n_vars;
+    let mut out = Vec::with_capacity(rank);
+    for row in matrix.iter().take(rank) {
+        let monos: Vec<F2BoolMono> = (0..cols.len())
+            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
+            .map(|c| F2BoolMono::from_mask(cols[c]))
+            .collect();
+        if !monos.is_empty() {
+            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+        }
+    }
+    Some((out, word_ops))
+}
+
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
 
 /// All monomials of degree `≤ deg` over `n_vars` Boolean variables, as
@@ -1382,6 +1559,86 @@ mod tests {
             .map(|t| t.mask)
             .fold(0, |a, b| a | b);
         assert_eq!(top >> two, 0, "fixed system used a variable beyond 2ℓ");
+    }
+
+    /// The decomposition systems really are multilinear with respect to
+    /// the block partition — degree at most one per block — at every
+    /// `m`.  That is the premise of [`matrix_f4_f2_blocked`], and it is
+    /// a stronger statement than the total degree, which is 2 for
+    /// `m = 2` and 3 once the chain appears.
+    #[test]
+    fn the_decomposition_systems_are_multilinear_in_their_blocks() {
+        use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base;
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let x_r = match kc.add(&fb.points[0], &fb.points[3]) {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("P1 + P2 = O"),
+        };
+
+        for m in [2usize, 3] {
+            let Some(sys) =
+                build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, &st)
+            else {
+                continue;
+            };
+            let blocks = sys.blocks(kc.n);
+            assert_eq!(blocks.iter().sum::<usize>(), sys.n_vars, "m={m}");
+
+            let total = sys
+                .equations
+                .iter()
+                .flat_map(|e| e.terms.iter())
+                .map(|t| t.mask.count_ones())
+                .max()
+                .unwrap_or(0);
+            assert_eq!(total, if m == 2 { 2 } else { 3 }, "m={m} total degree");
+
+            for (k, e) in sys.equations.iter().enumerate() {
+                let d = poly_block_degrees(e, &blocks);
+                assert!(
+                    d.iter().all(|&x| x <= 1),
+                    "m={m} equation {k} has block degrees {d:?}, not multilinear"
+                );
+            }
+        }
+    }
+
+    /// The blocked Macaulay matrix must produce only genuine ideal
+    /// members: whatever it returns has to vanish on every root of the
+    /// original system.  It is allowed to be weaker than the
+    /// total-degree matrix — its row space is a subspace — but never
+    /// wrong.
+    #[test]
+    fn the_blocked_macaulay_returns_only_ideal_members() {
+        use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base;
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let x_r = match kc.add(&fb.points[0], &fb.points[3]) {
+            crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+            _ => panic!("P1 + P2 = O"),
+        };
+        let sys =
+            build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, 2, &st).unwrap();
+        let blocks = sys.blocks(kc.n);
+
+        let roots: Vec<u64> = (0..(1u64 << sys.n_vars))
+            .filter(|&p| sys.equations.iter().all(|q| q.eval(p) == 0))
+            .collect();
+        assert!(!roots.is_empty());
+
+        for bound in [1u32, 2, 3] {
+            let bounds = vec![bound; blocks.len()];
+            let (rows, _) =
+                matrix_f4_f2_blocked(&sys.equations, sys.n_vars, &blocks, &bounds).unwrap();
+            for r in &rows {
+                for &pt in &roots {
+                    assert_eq!(r.eval(pt), 0, "bound {bound}: blocked row misses a root");
+                }
+            }
+        }
     }
 
     /// A real decomposition is a root of the built system.

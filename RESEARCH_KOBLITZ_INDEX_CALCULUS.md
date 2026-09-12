@@ -677,15 +677,88 @@ step if the base sizes get there.
 
 - Couveignes–Lercier invariant factor bases via isogenies between
   algebraic tori and elliptic curves — a second, denser family.
-- Exploiting the block/homogeneous structure of the resulting
-  polynomial systems in the Gröbner step.  The systems are now actually
-  built (`koblitz_groebner`), so this is measurable rather than
-  hypothetical: the `m ≥ 3` chained systems are where it would pay.
+- ~~Exploiting the block/homogeneous structure of the resulting
+  polynomial systems in the Gröbner step.~~  **Measured; it does not
+  pay as a Macaulay-shift restriction.**  See
+  [below](#the-block-structure-measured--2026-09-12).
 - Precise complexity estimates across characteristics.
 - Multiple invariant factor bases: a single one need not yield `n`
   *independent* relations, so the paper takes several.  The module
   exposes `factor_index` to select which factor of `x^n − 1` builds the
   base, but the driver uses one at a time.
+
+## The block structure, measured — 2026-09-12
+
+**Module:** `koblitz_groebner::{blocks, block_degrees, poly_block_degrees,
+matrix_f4_f2_blocked}`.
+**Bench:** `cargo run --release --example blocked_macaulay_bench`.
+
+The open problem above supposed the decomposition systems have a block
+structure worth exploiting, and that `m ≥ 3` is where it would pay.
+The structure is real and stronger than expected; the exploitation does
+not work, for a reason that is clear once the structure is written down.
+
+**The structure.**  Partition the variables the way
+`build_decomposition_system` lays them out — one block of `ℓ` per
+summand, one block of `n` per intermediate point of the chain.  The
+systems are **multilinear** with respect to that partition: degree at
+most *one* in every block, at every `m`, even though the total degree
+is 2 for `m = 2` and 3 once the chain appears.  Squaring is `F_2`-linear
+in characteristic 2 and `x₁x₂` is bilinear, which is where it comes
+from.  `the_decomposition_systems_are_multilinear_in_their_blocks` pins
+it for `m = 2, 3`.
+
+**Why it cannot be used as a shift restriction.**  A Macaulay matrix
+multiplies each equation by shift monomials.  If `p` has block degree
+`≤ 1` everywhere and `m` is a shift, then `p·m` has block degree
+`1 + deg_i(m)` in block `i`.  So the *only* shift that preserves
+multilinearity is the trivial one, and a Macaulay matrix bounded to
+multidegree `(1,1,…,1)` is exactly the original equations — no new
+information at all.  Allowing a bound of `2` per block admits shifts
+again, but over `k` blocks that reaches total degree `2k`, which is a
+*larger* matrix than the comparable total-degree one.
+
+**Measured.**  Random `x_R`, so the systems do not decompose and the
+event measured is the infeasibility certificate — rejection is most of
+an attack's work, and refuting is what the note says the algebra is for.
+Cost in 64-bit word XORs, summed over the targets where both engines
+refuted:
+
+| `n` | `m` | `v` | blocks | plain refuted | plain deg / ops | blocked refuted | blocked bound / ops | speedup |
+|---:|---:|---:|:--|---:|---:|---:|---:|---:|
+| 9 | 2 | 12 | `[6, 6]` | 5/8 | 2 / 169 | 5/8 | 1 / 169 | 1.00× |
+| 9 | 3 | 27 | `[6, 6, 6, 9]` | 0/8 (capped) | — | 0/8 (capped) | — | — |
+| 13 | 2 | 24 | `[12, 12]` | 3/8 | 2 / 660 | 3/8 | 1 / 660 | 1.00× |
+| 13 | 3 | 49 | `[12, 12, 12, 13]` | 0/8 (capped) | — | 0/8 (capped) | — | — |
+| 15 | 2 | 8 | `[4, 4]` | 8/8 | 3 / 19,383 | 8/8 | 2 / 91,925 | 0.21× |
+
+Reading it:
+
+- **`1.00×` is not a coincidence.**  Where the minimum setting refutes,
+  the two matrices are *the same matrix*: the deciding total degree
+  equals the system's own degree, so the only shift is trivial, and the
+  blocked bound of 1 admits exactly that shift too.
+- **Where they differ, blocked is worse** (`0.21×` at `n = 15`), for the
+  reason above: a per-block bound of 2 over 2 blocks reaches total
+  degree 4 where the plain matrix needed 3.
+- **`m ≥ 3` is out of reach, not negative.**  At `v = 27` and `v = 49`
+  the Macaulay matrix exceeds the size caps before any setting refutes,
+  in both engines.  The note predicted `m ≥ 3` is "where it would pay";
+  this says nothing either way about that, because neither engine gets
+  there.  `(capped)` marks those rows so they are not read as results.
+
+Class: **engineering**, and a negative one — the ratio to the floor does
+not move and neither does `S`.
+
+**What the real technique would be.**  Multilinearity is exploitable,
+just not by restricting shifts.  Faugère, Safey El Din and Spaenlehauer's
+work on bilinear and multihomogeneous systems uses the *Jacobian*
+syzygies the bilinear structure forces — rows that are predicted to
+reduce to zero and can be left out — and computes in multidegree with a
+bound derived from the block sizes rather than a uniform one.  That is a
+different algorithm, not a parameter change to this one, and it is
+unbuilt.  The uniform per-block bound tried here is the cheap version of
+the idea, and the cheap version is the one that does not work.
 
 ## Tests
 
