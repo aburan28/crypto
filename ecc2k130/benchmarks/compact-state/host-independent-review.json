@@ -1,0 +1,136 @@
+{
+  "findings": [],
+  "hostEvidence": {
+    "autoFit": {
+      "binariesAndLogsRehashed": 2,
+      "exactSourceMethodVerified": true,
+      "note": "188SM/two-block response is injected; minimum-one-block fallback and quarter-memory reserve are preserved.",
+      "receiptSha256": "6eff64dcf2bbc1523d7eaa05c2ba1fb0e17e7286c81756c8fe04a3d859ac2cee",
+      "stubCases": 16
+    },
+    "checkpoint": {
+      "actualSourceMethodExtractionVerified": true,
+      "byteComparisons": 18,
+      "checkpointFilesRehashed": 24,
+      "compiledBinariesRehashed": 2,
+      "fixtureSha256": "3d6439b18f8689895192a7733fb1fe25a832418848fed420846b0d15a63c8d76",
+      "hostRuns": 4,
+      "initialPlusReseedKernelInvocations": 120,
+      "initialReseedPointCases": 60,
+      "malformedPrewriteRejections": 54,
+      "note": "Actual generic save/restore, exact-payload/header checks and packed hooks under exact-length host memcpy shims; no device transfer.",
+      "receiptSha256": "5b96fb57f17497a5d8eb14b7cb4e024a740ec03aa4d1761dbfe2c41cb07365f9",
+      "resumedScalarUpdates": 33344,
+      "workerCounts": [
+        8,
+        256,
+        257
+      ]
+    },
+    "codec": {
+      "all64Tails": true,
+      "allListedArtifactsRehashed": true,
+      "cases": 400,
+      "receiptSha256": "be5e36be8e1c99c46c13ccb5e5fc7fb12a04358a41207a320f72da1fe7b4ccb7",
+      "records": 1493328
+    },
+    "defaults": {
+      "makeOutputsReadBack": [
+        0,
+        1
+      ],
+      "newHeaderDependencyPresent": true,
+      "note": "Preprocessed outputs were not retained separately; reviewed receipt and producer script, without rerunning the14 comparisons. Blank lines only were normalized.",
+      "receiptSha256": "5361f71056fc882026162d7338951209618632ee829e5cae7d9c37502b02c790",
+      "recordedInvalidGuardFailures": 7,
+      "recordedPreprocessingComparisons": 14
+    },
+    "kernel": {
+      "actualHostRuns": 30,
+      "compileBinariesAndLogsRehashed": 8,
+      "crossLayoutStateByteComparisons": 15,
+      "fixtureSha256": "6667d20f629cea2e67378673086c6909ed93ee4a9376542a46f5afd219fcef53",
+      "independentReferenceFullRows": 8,
+      "note": "Actual init/walk/load/store run with serial host index/atomic shims. Source arithmetic hooks count boundaries; CLMAD uses host fallback.",
+      "positiveTrails": 364,
+      "receiptSha256": "efdc3e7cf0f5e5de7d7e10b3da4225dba2eebb8baeccbb06cf1812c7f8b85d73",
+      "referenceScalarSteps": 9590,
+      "reportReplays": 632,
+      "runStateAndLogFilesRehashed": 30,
+      "zeroBatchSteps": 130
+    }
+  },
+  "limits": [
+    "Host evidence does not validate the __CUDA_ARCH__ uint4 branch, device byte-store concurrency, native instructions, GPU resource usage or speed.",
+    "Reference and cross-layout host fixtures use production accessors/basis conversions at some boundaries; separate independently encoded codec checks complement rather than eliminate all common assumptions.",
+    "Preserved autoThreads fallback selects one block even if the reported memory budget cannot fit it; passing stub cases does not guarantee allocation under exhausted memory.",
+    "Padding is not logical field data; checkpoint import zeroes physical padding. Arbitrary noncanonical32-bit high-word equivalence is not promised.",
+    "Malformed-header/truncated/extra-length rejection evidence does not imply cryptographic checkpoint authentication or resilience to concurrent file mutation.",
+    "This final artifact readback completed after root reported dispatching the separate CPU-only compilation comparison; only preliminary no-blocking-source findings preceded that dispatch.",
+    "The separate CPU comparison and future GPU/accessor/whole-client tests require their own receipts. No throughput improvement, production promotion or target-goal completion follows from this review."
+  ],
+  "overflowBoundary": {
+    "claim": "On a64-bit size_t host/device and the selected B1/B4/B16/B32 configurations, new size/offset products fit for nonnegative int worker values. INT_MAX check is capacity arithmetic only.",
+    "inheritedLimit": "The existing launch expression P.threads+ECC_THREADS-1 uses signed int; no universal full-client INT_MAX claim is made.",
+    "notClaimed": [
+      "All arbitrary size_t counts or compile-time batch values are safe.",
+      "INT_MAX workers are supported end-to-end by the client or feasible to allocate."
+    ],
+    "remainingCallerObligations": "Valid nonnegative slot/tid, slot<B,tid<N; representable size products and successful allocation. The helper documents rather than checks these obligations."
+  },
+  "producerReceipt": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/compact-state-host-implementation-review.json",
+    "sha256": "b4cf0f933b2c9aacad237960f5cb3a5ecd392e539fc9c4bc090027994e49d0a6"
+  },
+  "scope": "Independent read-only source review and retained-artifact readback. No host-suite rerun, CUDA compilation, GPU/device execution, source change or throughput measurement by this reviewer.",
+  "source": {
+    "addedFiles": {
+      "include/packedcompactstate.cuh": "1f2bb0215807ef3dc0880c417c515185da9200ee4a8fcc983759cb57309249c4"
+    },
+    "allFilesRehashed": true,
+    "baseline": "/private/tmp/ecc2k-weighted-prefix-walk-20260912/source",
+    "boundFiles": 158,
+    "canonicalManifestSha256": "aa6bb5a5d3cf02c2dd70263858919cb73c0fee689ab7b5fe35827de16da52cf9",
+    "changedExistingFiles": {
+      "Makefile": "163cf38b7177df0d594051d046182232fcaabe1d3c5591a207da09be2dfc913a",
+      "include/packedengine.cuh": "87db8db43b302d28217ca445540e35b44ee102726d18016a88d45b33abef25fb",
+      "include/packedkernels.cuh": "fb1d3a63a914a2636a650a60c43300abd0fbabe9935232f70ff89cf62bb03791"
+    },
+    "initAndWalkBodiesByteIdenticalToBaseline": true,
+    "mainAndAllArithmeticFilesUnchanged": true,
+    "manifestPath": "/private/tmp/ecc2k-compact-state-host-20260912/source-manifest.json",
+    "manifestSha256": "8807022f1ab1c64b69c6ce2b21f3dd9991322b066d04c6239a9d3b3f7198dda1",
+    "path": "/private/tmp/ecc2k-compact-state-src-20260912",
+    "unboundFile": "build/.gitkeep, byte-identical to baseline"
+  },
+  "sourceFindings": {
+    "allowedModes": [
+      0,
+      1
+    ],
+    "autoFit": "4*17+4+2*8=88 bytes per slot/worker at full tiles; old layout100. B16 gives1408 versus1600 bytes per worker.",
+    "byteRangesNonoverlapping": true,
+    "checkpoint": "Version2, one lane, unchanged40+60*B*N bytes; compact bytes decode to logical polynomial SoA before normal-basis export; normal-basis import converts before zero-filled physical packing. Each X/Y transfer staging vector is resized independently.",
+    "default": 0,
+    "deviceAccessIntent": "uint4 low load/store and independent unsigned-byte tail; native lowering untested by host evidence",
+    "fieldAllocations": "X/Y/pchain and the single denominator all use physicalFieldCount()*4. No added per-slot array.",
+    "fieldBytesPerSlotTile": 4352,
+    "guardedParents": [
+      "TILE256",
+      "threads256",
+      "polynomial state",
+      "denominator cache",
+      "polynomial chains"
+    ],
+    "hostAccessUsesMemcpyAndUnsignedByteAliasing": true,
+    "logicalFieldWords": "5*B*N, unchanged",
+    "lowPlaneBytes": 4096,
+    "lowRecordOffsets16ByteAligned": true,
+    "metadata": "dead, seed, start, report buffers, counters, logical identities and arithmetic unchanged",
+    "physicalFieldWords": "1088*B*ceil(N/256)",
+    "supportedTailDomain": "0..7 for canonical X/Y/prefix;0..63 including cached denominator metadata",
+    "tailPlaneBytes": 256
+  },
+  "status": "bounded source and retained host evidence review passed",
+  "valid": true
+}

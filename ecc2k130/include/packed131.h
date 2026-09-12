@@ -2,6 +2,12 @@
 // Each element occupies five uint32_t words. Squaring is a bit permutation;
 // multiplication uses gamma_i*gamma_j = gamma_(i+j) + gamma_(i-j).
 #pragma once
+#ifndef ECC_PACKED_WEIGHTED_PREFIX
+#define ECC_PACKED_WEIGHTED_PREFIX 0
+#endif
+#if ECC_PACKED_WEIGHTED_PREFIX < 0 || ECC_PACKED_WEIGHTED_PREFIX > 2
+#error "ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2"
+#endif
 #ifndef ECC_PACKED_CLMAD
 #define ECC_PACKED_CLMAD 0
 #endif

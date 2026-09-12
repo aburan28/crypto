@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0', clmad='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,16 +47,18 @@ def environment(mode='0', generated='0', tile='0', clmad='0'):
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0', clmad='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
             f'packed native carryless multiply: {clmad}\n'
+            f'packed weighted prefix: {weighted}\n'
+            f'packed compact state: {compact}\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -323,35 +325,53 @@ class GeneratedProductBuildTests(unittest.TestCase):
             self.assertEqual(tune['results'][0]['packedGeneratedProduct'], mode == '1')
 
     def audit_fixture(self, mode, arithmetic=None, failed_phase=None, failed_marker=None,
-                      clmad='0', clmad_arithmetic=None, batch=32):
+                      clmad='0', clmad_arithmetic=None, batch=32,
+                      weighted='0', weighted_arithmetic=None, paired_sigma=None,
+                      tile='0', compact='0', storage_output=None, storage_returncode=0,
+                      failed_compact_phase=None, failed_compact_marker=None, build_calls=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode, clmad=clmad)
+            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact)
             workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
+                compactMarker = compact if failed_compact_phase != phase else failed_compact_marker
                 text = (f'packed direct reduction: 1\n'
                         f'packed generated product: {marker}\n'
-                        'packed state tile: 0\n'
+                        f'packed state tile: {tile}\n'
                         f'packed native carryless multiply: {clmad}\n'
+                        f'packed weighted prefix: {weighted}\n'
+                        f'packed compact state: {compactMarker}\n'
                         f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {workers * batch} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
                         'finished: 6000.000 M it/s, 1 distinguished points (0 verified against the reference, 0 dropped)\n')
-                return text.replace('packed generated product: None\n', '')
+                return text.replace('packed generated product: None\n', '').replace('packed compact state: None\n', '')
             env['sh'] = lambda *a, **k: (0, output(0, 'benchmark'))
             function('checkPackedReduction', env)
             function('measureBench', env)
             client = SimpleNamespace(**env)
             client.REMOTE = directory
-            client.buildFor = lambda requested, *a, **k: (requested == batch, 'built')
+            def build(requested, *args, **kwargs):
+                if build_calls is not None:
+                    build_calls.append(requested)
+                return requested == batch, 'built'
+            client.buildFor = build
             client.benchmarkIdentity = lambda **k: {'packedGeneratedProduct': mode == '1'}
             client.volume = SimpleNamespace(commit=lambda: None)
             def run(command, **kwargs):
                 commands.append(command)
-                if command[0] == 'make':
+                if command[:2] == ['make', 'test-packed-storage-cuda']:
+                    text = (f'packed storage compact state: {compact}\n'
+                            f'packed storage batch: {batch}\n'
+                            f'PASS: 128 GPU storage cases, {18584 * batch} records, independent physical images and logical reads with canaries\n')
+                    return SimpleNamespace(returncode=storage_returncode,
+                                           stdout=text if storage_output is None else storage_output, stderr='')
+                elif command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
                              + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
+                            + (f'packed arithmetic weighted prefix: {weighted}\n' if weighted_arithmetic is None else weighted_arithmetic)
+                            + ('PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n' if paired_sigma is None else paired_sigma)
                             + (f'packed arithmetic generated product: {mode}\n' if arithmetic is None else arithmetic))
                 elif command[0] == 'python3':
                     text = 'integration passed\n'
@@ -589,6 +609,266 @@ class ClmadBuildTests(unittest.TestCase):
                 self.assertIn('CLMAD identity', failed['error'])
                 self.assertEqual(len(commands), 1)
                 self.assertNotIn('integration', failed)
+
+
+class WeightedPrefixBuildTests(unittest.TestCase):
+    def weighted_environment_nodes(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_WEIGHTED_PREFIX' for t in node.targets))
+        return body[index:index + 4]
+
+    def test_environment_enforces_modes_and_required_parent_options(self):
+        body = self.weighted_environment_nodes()
+        parents = ('POLY_STATE', 'POLY_CHAIN', 'CACHE_DENOM', 'PAIR_PRODUCTS')
+        def env(value, **overrides):
+            result = dict(os=SimpleNamespace(environ={} if value is None else {'ECC_PACKED_WEIGHTED_PREFIX': value}),
+                          PACKED_PERM_SIGMA='3', **{'PACKED_' + key: '1' for key in parents})
+            result.update(overrides)
+            return result
+        for value in (None, '0', '1', '2', '-1', '3', '', 'true'):
+            scope = env(value)
+            if value in (None, '0', '1', '2'):
+                execute(body, scope)
+                self.assertEqual(scope['PACKED_WEIGHTED_PREFIX'], value or '0')
+            else:
+                with self.assertRaises(ValueError): execute(body, scope)
+        for parent in parents:
+            for mode in ('1', '2'):
+                with self.assertRaises(ValueError):
+                    execute(body, env(mode, **{'PACKED_' + parent: '0'}))
+            execute(body, env('0', **{'PACKED_' + parent: '0'}))
+        for mask in ('0', '2'):
+            with self.assertRaises(ValueError): execute(body, env('2', PACKED_PERM_SIGMA=mask))
+            execute(body, env('1', PACKED_PERM_SIGMA=mask))
+
+    def test_image_and_rebuild_identity_bind_the_exact_schedule(self):
+        class Image:
+            def __init__(self): self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for mode in ('0', '1', '2'):
+            scope = environment('1', '1', clmad='1', weighted=mode)
+            image = Image()
+            scope.update(CUDA_VERSION='13.3.1', GENCODE='fixture', LOCAL=ROOT,
+                         modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)))
+            assignment('image', scope)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_WEIGHTED_PREFIX'], mode)
+            builds = [line for line in image.calls['run_commands'] if 'make gpu ' in line]
+            self.assertEqual(len(builds), 1)
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, builds[0])
+            self.assertEqual(scope['BAKED']['packedWeightedPrefix'], int(mode))
+        scope = environment('1', '1', clmad='1')
+        commands = []
+        scope.update(sh=lambda *a, **k: (0, ''),
+                     shStream=lambda command, **k: (commands.append(command) or 0, 'built'))
+        build = function('buildFor', scope)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        for mode in ('2', '1', '0'):
+            scope['PACKED_WEIGHTED_PREFIX'] = mode
+            with self.assertRaisesRegex(ValueError, 'matching baked binary'):
+                function('runBench', scope)(rebuild=False, packed=True)
+            self.assertTrue(build(32, 128, 0)[0])
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, commands[-1])
+
+    def test_missing_wrong_or_duplicate_schedule_cannot_rank(self):
+        for mode in ('0', '1', '2'):
+            check = function('checkPackedReduction', environment('1', '1', clmad='1', weighted=mode))
+            text = raw('1', '1', clmad='1', weighted=mode)
+            good = benchResult('fixture', 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedWeightedPrefix'], int(mode))
+            marker = f'packed weighted prefix: {mode}\n'
+            for bad in (text.replace(marker, ''), text + marker,
+                        raw('1', '1', clmad='1', weighted=str((int(mode) + 1) % 3)),
+                        raw('1', '1', clmad='1', weighted='3')):
+                row = benchResult('fixture', 0, bad)
+                self.assertFalse(check(row))
+                self.assertEqual(row['rate'], 0)
+                self.assertFalse(summarizeSamples([good, row])['valid'])
+
+    def test_audit_requires_schedule_and_paired_device_validation(self):
+        fixture = GeneratedProductBuildTests()
+        paired = 'PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n'
+        for mode in ('0', '1', '2'):
+            result, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, batch=16)
+            self.assertTrue(result['valid'], result.get('error'))
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, commands[0])
+            for row in [result, result['deviceArithmetic'], *result['benchmark']['samples'], *result['collection']]:
+                self.assertEqual(row['expectedPackedWeightedPrefix'], int(mode))
+                self.assertEqual(row['packedWeightedPrefix'], int(mode))
+            for marker in ('', f'packed arithmetic weighted prefix: {(int(mode) + 1) % 3}\n',
+                           f'packed arithmetic weighted prefix: {mode}\n' * 2):
+                failed, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, weighted_arithmetic=marker)
+                self.assertFalse(failed['valid'])
+                self.assertIn('weighted prefix identity', failed['error'])
+                self.assertEqual(len(commands), 1)
+                self.assertNotIn('integration', failed)
+            for marker in ('', paired * 2):
+                failed, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, paired_sigma=marker)
+                self.assertFalse(failed['valid'])
+                self.assertIn('paired Frobenius validation', failed['error'])
+                self.assertEqual(len(commands), 1)
+                self.assertNotIn('integration', failed)
+
+
+class CompactStateBuildTests(unittest.TestCase):
+    def test_environment_requires_a_valid_mode_and_all_layout_parents(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_COMPACT_STATE' for t in node.targets))
+        compact_nodes = body[index:index + 3]
+        def scope(value, **overrides):
+            env = dict(os=SimpleNamespace(environ={} if value is None else {'ECC_PACKED_COMPACT_STATE': value}),
+                       PACKED_STATE_TILE='256', PACKED_POLY_STATE='1',
+                       PACKED_POLY_CHAIN='1', PACKED_CACHE_DENOM='1')
+            env.update(overrides)
+            return env
+        for mode in (None, '0', '1'):
+            env = scope(mode)
+            execute(compact_nodes, env)
+            self.assertEqual(env['PACKED_COMPACT_STATE'], mode or '0')
+        for mode in ('2', '-1', '', 'true'):
+            with self.assertRaises(ValueError): execute(compact_nodes, scope(mode))
+        for parent in ('STATE_TILE', 'POLY_STATE', 'POLY_CHAIN', 'CACHE_DENOM'):
+            with self.assertRaises(ValueError):
+                execute(compact_nodes, scope('1', **{'PACKED_' + parent: '0'}))
+            execute(compact_nodes, scope('0', **{'PACKED_' + parent: '0'}))
+
+    def test_image_build_cache_and_rebuild_keep_the_selected_layout(self):
+        class Image:
+            def __init__(self): self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for mode in ('0', '1'):
+            env = environment('1', '1', tile='256', clmad='1', weighted='2', compact=mode)
+            image = Image()
+            env.update(CUDA_VERSION='13.3.1', GENCODE='fixture', LOCAL=ROOT,
+                       modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)))
+            assignment('image', env)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_COMPACT_STATE'], mode)
+            build_lines = [line for line in image.calls['run_commands'] if 'make gpu ' in line]
+            self.assertEqual(len(build_lines), 1)
+            self.assertIn('PACKED_COMPACT_STATE=' + mode, build_lines[0])
+            self.assertEqual(env['BAKED']['packedCompactState'], mode == '1')
+        env = environment('1', '1', tile='256', clmad='1', weighted='2')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda command, **k: (commands.append(command) or 0, 'built'))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertEqual(commands, [])
+        measured = []
+        env.update(benchmarkIdentity=lambda *a, **k: {},
+                   measureBench=lambda *a, **k: (measured.append(a) or dict(valid=True, rate=6000.0)))
+        bench = function('runBench', env)
+        matching = bench(rebuild=False, packed=True, threads=256)
+        self.assertTrue(matching['valid'])
+        self.assertFalse(matching['packedCompactState'])
+        self.assertEqual(len(measured), 1)
+        env['PACKED_COMPACT_STATE'] = '1'
+        with self.assertRaisesRegex(ValueError, 'matching baked binary'):
+            bench(rebuild=False, packed=True, threads=256)
+        self.assertEqual(len(measured), 1)
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertIn('PACKED_COMPACT_STATE=1', commands[-1])
+        env['PACKED_COMPACT_STATE'] = '0'
+        self.assertTrue(build(32, 256, 0)[0])
+        self.assertIn('PACKED_COMPACT_STATE=0', commands[-1])
+        self.assertFalse(build(32, 128, 0)[0])
+
+    def test_missing_wrong_or_duplicate_layout_cannot_rank(self):
+        for mode in ('0', '1'):
+            env = environment('1', '1', tile='256', clmad='1', weighted='2', compact=mode)
+            check = function('checkPackedReduction', env)
+            text = raw('1', '1', tile='256', clmad='1', weighted='2', compact=mode)
+            good = benchResult('fixture', 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedCompactState'], mode == '1')
+            marker = f'packed compact state: {mode}\n'
+            for bad in (text.replace(marker, ''), text + marker,
+                        text.replace(marker, f'packed compact state: {1-int(mode)}\n'),
+                        text.replace(marker, 'packed compact state: 2\n')):
+                row = benchResult('fixture', 0, bad)
+                self.assertFalse(check(row))
+                self.assertEqual(row['rate'], 0)
+                self.assertFalse(summarizeSamples([good, row])['valid'])
+
+    def test_audit_requires_complete_storage_validation_before_timing(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for batch in (8, 16, 32):
+                result, commands = fixture.audit_fixture('1', clmad='1', weighted='2',
+                                                        tile='256', compact=mode, batch=batch)
+                self.assertTrue(result['valid'], result.get('error'))
+                self.assertEqual(commands[1][:2], ['make', 'test-packed-storage-cuda'])
+                self.assertIn('PACKED_COMPACT_STATE=' + mode, commands[1])
+                self.assertIn('BATCH=' + str(batch), commands[1])
+                self.assertEqual(result['deviceStorage']['cases'], 128)
+                self.assertEqual(result['deviceStorage']['records'], 18584 * batch)
+                for row in [result, result['deviceStorage'], *result['benchmark']['samples'], *result['collection']]:
+                    self.assertEqual(row['expectedPackedCompactState'], mode == '1')
+                    self.assertEqual(row['packedCompactState'], mode == '1')
+            text = (f'packed storage compact state: {mode}\npacked storage batch: 16\n'
+                    'PASS: 128 GPU storage cases, 297344 records, independent physical images and logical reads with canaries\n')
+            variants = ['', text.replace(f'compact state: {mode}', f'compact state: {1-int(mode)}'),
+                        text + f'packed storage compact state: {1-int(mode)}\n',
+                        text.replace('batch: 16', 'batch: 32'),
+                        text.replace('128 GPU', '127 GPU'), text.replace('297344 records', '297343 records'),
+                        text + text]
+            for bad in variants:
+                result, commands = fixture.audit_fixture('1', clmad='1', weighted='2', tile='256',
+                                                        compact=mode, batch=16, storage_output=bad)
+                self.assertFalse(result['valid'])
+                self.assertIn('storage identity', result['error'])
+                self.assertEqual(len(commands), 2)
+                self.assertNotIn('integration', result)
+                self.assertNotIn('benchmark', result)
+            result, commands = fixture.audit_fixture('1', tile='256', compact=mode, storage_returncode=9)
+            self.assertFalse(result['valid'])
+            self.assertIn('storage validation failed', result['error'])
+            self.assertEqual(len(commands), 2)
+
+    def test_audit_timed_rows_cannot_change_the_layout(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for phase in ('benchmark', 'collection'):
+                for marker in (None, str(1-int(mode))):
+                    result, _ = fixture.audit_fixture('1', clmad='1', weighted='2', tile='256',
+                                                     compact=mode, batch=16,
+                                                     failed_compact_phase=phase, failed_compact_marker=marker)
+                    self.assertFalse(result['valid'])
+                    self.assertIn('deviceStorage', result)
+
+    def test_tiled_storage_batch_limit_is_checked_before_any_build(self):
+        fixture = GeneratedProductBuildTests()
+        for mode in ('0', '1'):
+            for batch in (65, 128):
+                builds = []
+                result, commands = fixture.audit_fixture('1', tile='256', compact=mode,
+                                                        batch=batch, build_calls=builds)
+                self.assertFalse(result['valid'])
+                self.assertIn('batch sizes 1 through 64', result['error'])
+                self.assertEqual(builds, [])
+                self.assertEqual(commands, [])
+                self.assertNotIn('build', result)
+                self.assertNotIn('identity', result)
+            for batch in (1, 64):
+                result, _ = fixture.audit_fixture('1', tile='256', compact=mode, batch=batch)
+                self.assertTrue(result['valid'], result.get('error'))
+                self.assertEqual(result['deviceStorage']['records'], 18584 * batch)
+        builds = []
+        result, _ = fixture.audit_fixture('1', tile='0', compact='0', batch=128, build_calls=builds)
+        self.assertTrue(result['valid'], result.get('error'))
+        self.assertEqual(builds, [128])
+        self.assertNotIn('deviceStorage', result)
 
 
 if __name__ == '__main__':

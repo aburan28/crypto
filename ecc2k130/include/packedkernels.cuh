@@ -2,6 +2,15 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_PACKED_COMPACT_STATE
+#define ECC_PACKED_COMPACT_STATE 0
+#endif
+#if ECC_PACKED_COMPACT_STATE != 0 && ECC_PACKED_COMPACT_STATE != 1
+#error "ECC_PACKED_COMPACT_STATE must be 0 or 1"
+#endif
+#if ECC_PACKED_COMPACT_STATE
+#include "packedcompactstate.cuh"
+#endif
 
 namespace eccPacked131 {
 #ifndef ECC_PACKED_CACHE_DENOM
@@ -34,6 +43,12 @@ namespace eccPacked131 {
 #if ECC_PACKED_POLY_STATE && (!ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_POLY_STATE requires the denominator cache and polynomial chains"
 #endif
+#if ECC_PACKED_WEIGHTED_PREFIX && (!ECC_PACKED_POLY_STATE || !ECC_PACKED_POLY_CHAIN || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_PAIR_PRODUCTS)
+#error "ECC_PACKED_WEIGHTED_PREFIX requires polynomial state, polynomial chains, denominator cache and paired products"
+#endif
+#if ECC_PACKED_WEIGHTED_PREFIX == 2 && !(ECC_PACKED_PERM_SIGMA & 1)
+#error "ECC_PACKED_WEIGHTED_PREFIX=2 requires the walk permutation network"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -45,6 +60,9 @@ namespace eccPacked131 {
 #endif
 #if ECC_PACKED_STATE_TILE && ECC_THREADS != 256
 #error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256"
+#endif
+#if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
+#error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
 #endif
 #if ECC_PACKED_STATE_TILE
 ECC_HD size_t physicalStateThreads(size_t threads) {
@@ -58,6 +76,9 @@ ECC_HD size_t stateWordIndex(int slot, int word, int tid) {
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
+#if ECC_PACKED_COMPACT_STATE
+    return compactLoad131(p, slot, tid);
+#else
     P131 a;
 #pragma unroll
 #if ECC_PACKED_STATE_TILE
@@ -66,13 +87,18 @@ __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int t
     for (int i = 0; i < 5; ++i) a.v[i] = p[(size_t(slot) * 5 + i) * threads + tid];
 #endif
     return a;
+#endif
 }
 __device__ __forceinline__ void store(unsigned *p, int slot, int tid, int threads, P131 a) {
+#if ECC_PACKED_COMPACT_STATE
+    compactStore131(p, slot, tid, a);
+#else
 #pragma unroll
 #if ECC_PACKED_STATE_TILE
     for (int i = 0; i < 5; ++i) p[stateWordIndex(slot, i, tid)] = a.v[i];
 #else
     for (int i = 0; i < 5; ++i) p[(size_t(slot) * 5 + i) * threads + tid] = a.v[i];
+#endif
 #endif
 }
 __device__ __forceinline__ void toLimbs(P131 a, unsigned long long *out) {
@@ -161,6 +187,27 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if !ECC_PACKED_CACHE_DENOM
             js[slot] = j;
 #endif
+#if ECC_PACKED_WEIGHTED_PREFIX
+            const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
+#if ECC_PACKED_WEIGHTED_PREFIX == 2
+            const SigmaWalkPair131 sigmas = sigmaWalkNetworkPair131(x, normalY, j - 3);
+            P131 d = add131(x, sigmas.first);
+            P131 ep = toPolynomial131(add131(normalY, sigmas.second));
+#else
+            P131 d = add131(x, sigma131(x, j));
+            P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
+#endif
+            P131 dp = toPolynomial131(d);
+            // W_i = E_i * product_{k<i}(D_k). Every prefix slot is used.
+            if (slot) {
+                PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
+                store(p.pchain, slot, tid, p.threads, pair.first);
+                prod = pair.second;
+            } else {
+                prod = dp;
+                store(p.pchain, slot, tid, p.threads, ep);
+            }
+#else
             P131 d = add131(x, sigma131(x, j));
 #if ECC_PACKED_POLY_CHAIN
             P131 dp = toPolynomial131(d);
@@ -172,6 +219,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             prod = slot == 0 ? d : mul131(prod, d);
 #endif
             if (slot + 1 < ECC_BATCH) store(p.pchain, slot, tid, p.threads, prod);
+#endif
 #if ECC_PACKED_CACHE_DENOM
             // The high 29 bits are unused by the field. Keep the jump index
             // beside the denominator, eliminating the separate local array.
@@ -192,6 +240,19 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #pragma unroll 1
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
+#if ECC_PACKED_WEIGHTED_PREFIX
+            P131 dp = load(denominators, slot, tid, p.threads);
+            dp.v[4] &= 7;
+            P131 lambdaPoly;
+            if (slot) {
+                PolynomialPair pair = mulPolynomialPair131(inv,
+                    load(p.pchain, slot, tid, p.threads), dp);
+                lambdaPoly = pair.first;
+                inv = pair.second;
+            } else {
+                lambdaPoly = mulPolynomial131(inv, load(p.pchain, 0, tid, p.threads));
+            }
+#else
 #if ECC_PACKED_POLY_STATE
             P131 dp = load(denominators, slot, tid, p.threads), ii;
             const int j = 3 + ((dp.v[4] >> 3) & 7);
@@ -233,6 +294,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             } else ii = inv;
 #if ECC_PACKED_POLY_STATE
             P131 lambdaPoly = mulPolynomial131(ep, ii);
+#endif
+#endif
+#if ECC_PACKED_POLY_STATE
             P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
             P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
             P131 ny = add131(add131(product, nx), y);
