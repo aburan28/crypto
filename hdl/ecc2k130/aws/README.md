@@ -65,17 +65,19 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, 13.1k LUTs as synthesised (`../README.md`, "Capacity");
-the VU47P has 1.30M. The default 48 is half the device; read
+its walk memory, about 8.4k LUTs, 20 RAMB36 and 2 RAMB18 as synthesised
+(`../README.md`, "Capacity"); the VU47P has 1.30M LUTs and 2 016 RAMB36.
+The default 48 is a third of the device; 64 is 41% of the LUTs and 67% of
+the block RAM, and the RAM is what runs out first, around 80. Read
 `synth_utilization` and the post-route timing from the reports, then go to
-what fits. Utilisation above ~70% of the LUTs (~64 engines) is where
-routing starts to fail timing on this fabric.
+what fits.
 
-`ID_W` sets walks per engine, `2^ID_W`. Each walk is 262 bits of RAM, and
-the step unit holds `W · 2^LOG_NB` = 128 walks at once; 256 (the default)
-keeps a full batch forming while reports and reloads drain. More walks
-means more work lost on a restart and a longer time to the first report,
-nothing else.
+`ID_W` sets walks per engine, `2^ID_W`. Each walk is 304 bits of block
+RAM, and the step unit holds `W · 2^LOG_NB` = 256 walks at once; 512 (the
+default) keeps a full batch forming while reports and reloads drain and
+fills the FIFO's block RAMs exactly, so fewer walks would save nothing.
+More walks means more work lost on a restart and a longer time to the
+first report, nothing else.
 
 ## Clocking
 
@@ -174,10 +176,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | **13 106**, of which 4 576 LUTRAM; 7 442 FF |
-| Register block (`ec2k_axil`) | — | ~400 LUTs, 1 200 FF, plus a spine stage of ~300 LUTs, ~870 FF per engine; bridge 247 LUTs, 201 FF |
-| BRAM | 0 | 0 |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.10 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 100 – 8 410** with them in block RAM, 180 LUTRAM left; 7 404 FF |
+| Register block (`ec2k_axil`) | — | 647 LUTs, 2 032 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge 228 LUTs, 201 FF |
+| BRAM | 0 | **20 RAMB36 + 2 RAMB18 per engine** since the memories moved out of LUTRAM (below) |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.08 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
@@ -197,3 +199,18 @@ block and engines spread over three SLRs, not the arithmetic. That is what
 the spine in `ec2k_axil` is for ([`../README.md`](../README.md), "The
 host interface"): every inter-engine wire is register to neighbour, and
 the block has no path that touches more than one engine.
+
+The same log, read to the end, showed a second failure inside every
+engine, and the larger one: total negative slack was −246 µs over 18 000
+endpoints, "long congestion 32×32" in two SLRs, and the nets that could
+not be fixed were the write address and write enable of each LUTRAM array
+(`f_wr`, `leaf_addr`, `fb`, the multiplier tag's address decode — 1 400
+to 1 800 loads each), which physical optimisation reports it cannot
+replicate because the loads are memory primitives. 4 800 LUTRAM per
+engine, 48 times, spread across every SLICEM of a region is a design
+that cannot place tightly. Every wide memory is now block RAM
+([`../README.md`](../README.md), "Capacity"), with the read latency of
+two hidden by a look-ahead tag on the retire side and a prefetch buffer
+in the walker; the engine lost 4 700 LUTs and gained 21 block RAMs,
+and the free depth of a block RAM made 512 walks and 16 batches in flight
+the default, 5.29 clocks per step against 5.54.
