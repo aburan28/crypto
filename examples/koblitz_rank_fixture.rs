@@ -1680,6 +1680,72 @@ fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> V
         .collect()
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn batch_raw_add_keys_n53(
+    curve: &KoblitzCurve,
+    pairs: &[(RawPoint, RawPoint)],
+) -> Vec<(u64, u64)> {
+    debug_assert_eq!(curve.n, 53);
+    let mut denominators = vec![0u64; pairs.len()];
+    let mut prefixes = vec![0u64; pairs.len()];
+    let mut product = 1u64;
+    for (index, &(left, right)) in pairs.iter().enumerate() {
+        let denominator = match (left, right) {
+            (Some((x1, _)), Some((x2, _))) if x1 != x2 => x1 ^ x2,
+            _ => 0,
+        };
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = unsafe { pclmul_reduce_n53(product, denominator) };
+        }
+    }
+    let mut inverse_product = unsafe { inverse_n53_unchecked(product) };
+    let mut inverses = vec![0u64; pairs.len()];
+    for index in (0..pairs.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = unsafe { pclmul_reduce_n53(inverse_product, prefixes[index]) };
+        inverse_product = unsafe { pclmul_reduce_n53(inverse_product, denominator) };
+    }
+    pairs
+        .iter()
+        .enumerate()
+        .map(|(index, &(left, right))| {
+            let (Some((x1, y1)), Some((x2, y2))) = (left, right) else {
+                return raw_compact_key(raw_add_point(curve, left, right));
+            };
+            if denominators[index] == 0 {
+                return raw_compact_key(raw_add_point(curve, left, right));
+            }
+            let lambda = unsafe { pclmul_reduce_n53(y1 ^ y2, inverses[index]) };
+            let x3 =
+                unsafe { pclmul_reduce_n53(lambda, lambda) } ^ lambda ^ x1 ^ x2 ^ curve.a as u64;
+            let y3 = unsafe { pclmul_reduce_n53(lambda, x1 ^ x3) } ^ x3 ^ y1;
+            (x3 + 1, y3)
+        })
+        .collect()
+}
+
+fn batch_raw_add_keys_selected(
+    curve: &KoblitzCurve,
+    pairs: &[(RawPoint, RawPoint)],
+    specialized_n53: bool,
+) -> Vec<(u64, u64)> {
+    if specialized_n53 && curve.n == 53 && combined_n53_fast_path_enabled() {
+        #[cfg(target_arch = "x86_64")]
+        {
+            // SAFETY: the combined predicate includes the runtime PCLMUL
+            // check and exact fused degree-53 reduction controls.
+            return unsafe { batch_raw_add_keys_n53(curve, pairs) };
+        }
+    }
+    batch_raw_add_keys(curve, pairs)
+}
+
 fn raw_fibers(points: &[RawPoint]) -> Vec<RawFiber> {
     let mut grouped: BTreeMap<u64, Vec<(usize, u64)>> = BTreeMap::new();
     for (index, point) in points.iter().enumerate() {
@@ -2692,6 +2758,8 @@ fn main() {
         std::env::var("KIC_DISABLE_SPECIALIZED_N53_PAIR_BATCH").as_deref() != Ok("1");
     let specialized_n53_support_expansion =
         std::env::var("KIC_DISABLE_SPECIALIZED_N53_SUPPORT_EXPANSION").as_deref() != Ok("1");
+    let specialized_n53_pair_sums =
+        std::env::var("KIC_DISABLE_SPECIALIZED_N53_PAIR_SUMS").as_deref() != Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -2813,7 +2881,8 @@ fn main() {
                     }
                 }
             }
-            let sum_keys = batch_raw_add_keys(&curve, &operands);
+            let sum_keys =
+                batch_raw_add_keys_selected(&curve, &operands, specialized_n53_pair_sums);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
             if parallel_support_expansion {
                 const JOB_CHUNK: usize = 1_024;
@@ -2988,6 +3057,7 @@ fn main() {
             "parallel_support_expansion":parallel_support_expansion,
             "pipelined_support_expansion":pipelined_support_expansion,
             "specialized_n53_support_expansion":parallel_support_expansion && specialized_n53_support_expansion && n==53 && combined_n53_fast_path_enabled(),
+            "specialized_n53_pair_sums":specialized_n53_pair_sums && n==53 && combined_n53_fast_path_enabled(),
             "parallel_support_expansion_threads":if pipelined_support_expansion {3} else if parallel_support_expansion {rayon::current_num_threads()} else {0},
             "parallel_support_expansion_job_batch":if pipelined_support_expansion {32768} else if parallel_support_expansion {65536} else {0},
             "parallel_support_expansion_job_chunk":if parallel_support_expansion {1024} else {0},
@@ -4204,6 +4274,28 @@ mod packed_tests {
         let generic = expand_support_batch(&curve, &jobs, &sum_keys, &frobenius_next_index, 4);
         let specialized =
             unsafe { expand_support_batch_n53(&curve, &jobs, &sum_keys, &frobenius_next_index, 4) };
+        assert_eq!(specialized, generic);
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn specialized_n53_pair_sums_match_generic() {
+        if !combined_n53_fast_path_enabled() {
+            return;
+        }
+        let curve = KoblitzCurve::new(0, 53).unwrap();
+        let generator = to_raw_point(curve.generator());
+        let mut points: Vec<_> = (1..=48u64)
+            .map(|scalar| raw_scalar_point(&curve, generator, scalar))
+            .collect();
+        points.push(None);
+        let mut pairs = Vec::new();
+        for index in 0..points.len() {
+            pairs.push((points[index], points[(index * 17 + 3) % points.len()]));
+            pairs.push((points[index], points[index]));
+        }
+        let generic = batch_raw_add_keys(&curve, &pairs);
+        let specialized = unsafe { batch_raw_add_keys_n53(&curve, &pairs) };
         assert_eq!(specialized, generic);
     }
 
