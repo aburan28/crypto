@@ -127,11 +127,18 @@ code spends its instructions on. `BSL` is `ECC_SEL` exactly, and `EOR3`
 exactly, so the NEON word is an instruction-count win and not only a width
 win. `-march=native` does not imply `+sha3` on every toolchain, so the
 Makefile probes for a spelling that defines `__ARM_FEATURE_SHA3`. It only
-probes when the CPU reports `sha3` and `MARCH` is left at `native`, since
-every toolchain accepts `-march=armv8.2-a+sha3` whether or not the core can
-run it, and a binary built that way would `SIGILL` on Neoverse N1 or a
-Cortex-A72. Such a core still gets NEON and `BSL`, just two `EOR`s for
-`ECC_XOR3`; `make test-logic` prints which of the two is in effect.
+probes when the CPU reports `sha3` and `MARCH` is left at `native`, because a
+compiler accepting a spelling says nothing about the core.
+
+That is not hypothetical. On a Graviton2 (`c6g.xlarge`, Neoverse N1, no `sha3`
+in `/proc/cpuinfo`) an ungated probe picks a SHA3 spelling for *both*
+compilers -- clang accepts `-march=native+sha3` and gcc falls through to
+`-march=armv8.2-a+sha3`, each defining the macro on a core that cannot execute
+the instruction. Built that way the walk contains 8907 `eor3` and dies on
+`--test` with `SIGILL`. Gated, both compilers select plain `-march=native`,
+the binary contains no `eor3`, and the suite passes. Such a core keeps NEON
+and `BSL` and pays two `EOR`s for `ECC_XOR3`, which is most of the win;
+`make test-logic` prints which of the two it was built with.
 
 ### Two field backends
 
@@ -311,15 +318,23 @@ gcc emits 9372 instructions for the `GF(2^131)` multiply leaf, 59% of them
 loads and stores against spilled temporaries, where clang emits 1902 plus
 five outlined calls.
 
-On Graviton3 (`c7g.xlarge`, Neoverse V1), measured on one core while the other
-four ran a production walk, so the absolute rates are roughly half of an idle
-core and only the ratios are meaningful. Median of seven, interleaved, spread
-under 0.5%:
+On Graviton, each on a dedicated idle instance, median of five interleaved,
+spread under 0.5%. Neoverse V1 has `FEAT_SHA3` and N1 does not, so the N1 rows
+are what the fallback path is worth:
 
-| compiler | 64 lanes | NEON 128 | speedup |
-|---|---|---|---|
-| g++ 13.3 | 2.606 M | 5.286 M | 2.03x |
-| clang 18.1 | 3.725 M | 6.215 M | 2.38x over g++/64 |
+| host | compiler | 64 lanes | NEON 128 | speedup |
+|---|---|---|---|---|
+| Graviton3 `c7g.xlarge` (V1, SHA3) | g++ 13.3 | 2.608 M | 5.297 M | 2.03x |
+| Graviton3 `c7g.xlarge` (V1, SHA3) | clang 18.1 | 3.737 M | 6.214 M | 2.38x over g++/64 |
+| Graviton2 `c6g.xlarge` (N1, no SHA3) | g++ 13.3 | 2.020 M | 3.661 M | 1.81x |
+| Graviton2 `c6g.xlarge` (N1, no SHA3) | clang 18.1 | 2.976 M | 4.220 M | 2.09x over g++/64 |
+
+A core with no three-input XOR still gets 1.81x from the wider word and `BSL`
+alone, close to the 1.76x the M4 Pro ablation attributes to the same two.
+
+The Graviton3 figures above were first taken on a box also running four
+production walkers, and a dedicated instance reproduces them to within 0.5%,
+so that measurement was not as contended as it looked.
 
 Older Apple Silicon measurements, before the NEON word existed (M4 Pro,
 10P+4E cores, `GF(2^131)`, 64-bit lanes, sustained, `--steps 8192
