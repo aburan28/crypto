@@ -56,7 +56,7 @@ how much they are allowed to change:
 | # | Lever | What it changes | What it costs | Status |
 |---|---|---|---|---|
 | **L1** | **Factor-base structure** — subfield, Koblitz, sparse normal basis | the *ideal itself* (multiplicative closure injects relations) | only works on special curves/fields | **measured** by the FFD program: Subfield mean `D*` 2.04 vs Random 3.53 at `2n'=n`, and `Δ_low(Subfield)/Δ_low(Random)` diverges 6.7 → 67 |
-| **L2** | **Symmetrisation** — solve in the elementary symmetric variables `e_1..e_m` instead of `x_1..x_m` (Faugère–Gaudry–Huot–Renault) | the *variables*; the ideal is the same up to a change of coordinates | free (a one-off rewrite) | infrastructure exists (`symmetrized_semaev.rs`) but **has never been measured against `D*` or `Δ_low`** |
+| **L2** | **Symmetrisation** — solve over the elementary symmetric variables instead of the `Xᵢ` (Faugère–Gaudry–Huot–Renault) | the *variables*: `3ℓ` at degree 6 → `9ℓ−3` at degree 3 | 3× the variables for ½ the degree | **blocked on reach, iteration 5 — but bounded.** The exact Macaulay-width crossover is `ℓ = 6`; below it symmetrisation is the *wider* presentation, and `ℓ ≤ 3` is all a dense Macaulay scan reaches |
 | **L3** | **Hybrid slicing** — guess `k` variables, solve `2^k` slices, raising `ρ = #eqs/#vars` | the *determination ratio* | `2^k` multiplicative | **killed, iteration 1** (degenerate optimum) — but one-sided guessing is the cheapest route to the `D*=2` floor, and iteration 3 found it *dominates* the mutant route once guessing is allowed |
 | **L4** | **Degree falls (mutants)** — add the *nonzero* low-degree remainders of top-degree cancellations to the generator set, so `x_k · g` rows become available a degree early | the *generating set*; ideal and variables unchanged | the extraction's own climb to degree 3 | **supported on degrees, regime-dependent on cost — iteration 2.** `D*` drops 4.00 → 2.00 on the generic family; net of extraction cost it pays only where the base degree is high |
 
@@ -182,7 +182,8 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 |---|---|---|---|
 | **R1** | **Hybrid slicing (L3) has an interior cost optimum that beats `2^N` enumeration**, at every operating point, with the collapse fraction not rising in `N` | **`killed`** | EXP-R1, iteration 1. At every one of 9 cells (`N ∈ {10,12,14}` × 3 guess patterns) and both `ω`, the optimum sits at the largest `k` scanned — the model is choosing exhaustive search. The margins it reports (−0.29 → +0.19 bits at `ω`=2.807) are artifacts of where the scan was truncated. And the collapse fraction *rises* with `N` for 2 of 3 patterns. |
 | **R1′** | Among guess patterns, **one-sided** guessing (all `k` bits from the `X₁` half) reaches the `D* = 2` floor at the fewest guessed bits, at `c = k₂/N = 1/2` independent of `N` | **`supported`** | EXP-R1: `c(one-side) = 0.500` at `N = 10, 12, 14` — exactly `k₂ = n'` every time — vs balanced 0.800/0.667/0.786 and spread —/0.750/0.714. Flat where the others drift, and identical across seeds 7/11/23 (9 cells, no exceptions). |
-| **R2** | **Symmetrisation (L2) lowers `D*`** on the descended system at matched `(n, n')` | `open` | — (needs a symmetrised descent; `symmetrized_semaev.rs` has the algebra but not the descent) |
+| **R2** | **Symmetrisation (L2) lowers `D*`** at matched shape | **`blocked`** (structurally, not incidentally) | EXP-R2, iteration 5. The two presentations are never simultaneously measurable: at `ℓ = 2` the eliminated system has degree-6 generators in 6 variables, so its multilinear Macaulay tower has **zero multiplier budget** and cannot refute at all; at `ℓ ≥ 3` the symmetrised system's `9ℓ−3` variables exceed the elimination budget before it refutes. Raising the budget does not help — see R2′. |
+| **R2′** | Symmetrisation's Macaulay width crosses below elimination's only at **`ℓ = 6`** | **`supported`** (exact, no solver) | EXP-R2: `cols(9ℓ−3, 3)` vs `cols(3ℓ, 6)` — 576 vs 64 at `ℓ=2`, 12384 vs 9949 at `ℓ=5`, 22152 vs 31180 at `ℓ=6`, and the gap widens to 7× by `ℓ=10`. Below `ℓ=6` symmetrisation trades 3× the variables for ½ the degree and **loses**. |
 | **R3** | **Adding degree falls (L4) as explicit generators lowers `D*`** at matched targets | **`supported`** | EXP-R3, iteration 2. All three families, 3 operating points each, 8 matched targets per cell: `D*` strictly lower wherever there was headroom. Generic (Random) family **4.00 → 2.00** on 8/8 targets at `N = 12, 14`. `worsened = 0` everywhere, as the ideal-membership invariant requires. |
 | **R3′** | The `D*` drop **survives its own cost** — extraction must climb to degree 3, so the net saving must still be positive | **regime-dependent** | EXP-R3: net `+1.44` bits mean on Random (positive at every `N`, seeds 7/11/23 give +1.44/+1.45/+1.49); `−0.60` on Coordinate (sign varies); `−6.36` on Subfield (**killed** — the system already solved at `D* ≈ 2.1`, so the climb to 3 is pure overhead). L4 pays where the system is hard and costs where it is easy. |
 | **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed`** | Follows from R4″: a pooled correlation over mixed sizes is a size proxy here, so "pooled `ρ_s`" cannot establish the claim however the defect is scaled. Scoring a lever needs matched shape and total work, not a defect correlation. |
@@ -203,9 +204,14 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   **and** `c(one-side)` is non-increasing. *Killed* if one-sided is ever
   worse than balanced, or if `c(one-side)` rises.
 - **G-R2.** *Supported* if mean `D*` on the symmetrised system is strictly
-  below the raw system at matched `(n, n')` and matched targets, over ≥ 3
-  operating points, with the gap not shrinking in `N`. *Killed* if the gap
-  is ≤ 0 at the largest `N`.
+  below the raw system at matched `(n, ℓ)` and matched targets, over ≥ 3
+  operating points, with the gap not shrinking. *Killed* if the gap is ≤ 0
+  at the largest size. **(Iteration 5: blocked — fewer than 3 cells are
+  simultaneously measurable, for the structural reason in R2.)**
+- **G-R2′** *(registered iteration 5)*. The Macaulay-width comparison
+  `cols(9ℓ−3, 3)` vs `cols(3ℓ, 6)` is exact and needs no solver. *Supported*
+  if a crossover exists at finite `ℓ` — which bounds where L2 can possibly
+  pay, whether or not any solver reaches it.
 - **G-R3.** *Supported* if adding the degree-fall generator strictly lowers
   mean `D*` at matched targets over ≥ 3 operating points. *Killed* if `D*`
   is unchanged — which would mean the solver was already finding the
@@ -250,6 +256,61 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-12 — iteration 5 (EXP-R2 — L2 is bounded, and out of this instrument's reach)
+
+- **Task picked.** R2, the last untested lever and the thread's remaining
+  upside. Unblocked by iteration 4, which settled that `Δ_low` must not be
+  used to score it.
+- **Why `S₄`.** Symmetrisation's saving scales like `m!`. The rest of this
+  thread runs on `S₃` (`m = 2`), where `m! = 2` — testing L2 there would
+  measure noise. `binary_semaev_s4.rs` already carries a symmetrised `S₄`
+  descent at `m = 3`, the first `m` where index calculus beats Pollard ρ at
+  all. So L2 was testable, on a harness the thread had not used.
+- **Built** (`src/cryptanalysis/degree_reduction_anf.rs`, 6 tests): an
+  **arbitrary-degree ANF Macaulay path**, since the thread's harness is
+  quadratic-only and both halves of the `S₄` model exceed that. It reuses the
+  same bit-packed elimination and the same "is `1` in the row space" test, so
+  the degrees are commensurable with iterations 1–4. Plus the **eliminated
+  presentation** — substitute `eᵢ = σᵢ(x)` — which gives the *same ideal*
+  over `3ℓ` variables at degree 6, so the baseline is exact rather than an
+  independently re-derived system. A test checks the two presentations agree
+  on every one of the `2^{3ℓ}` assignments.
+- **Result — G-R2 BLOCKED, structurally.** The two presentations are never
+  simultaneously measurable:
+
+  | `ℓ` | symmetrised | eliminated |
+  |---|---|---|
+  | 2 | `D* = 4` measured | **degenerate** — degree-6 generators in 6 variables leave *zero* multiplier budget, so the tower cannot refute whatever the satisfiability |
+  | 3 | **censored** at `D ≥ 5` (24 variables) | `D* = 8–9` measured |
+
+  Two honesty guards were added for exactly these failure modes
+  (`elim_degenerate`, `censored_at`), because a degenerate or censored scan
+  reports "no refutation" and must never be read as one.
+- **Result — R2′ SUPPORTED, and it is the iteration's real deliverable.**
+  Whether symmetrisation can pay is an arithmetic question with an exact
+  answer, no solver required. Macaulay width at each presentation's
+  generator degree:
+
+  | `ℓ` | `cols(9ℓ−3, 3)` | `cols(3ℓ, 6)` | narrower |
+  |---:|---:|---:|---|
+  | 2 | 576 | 64 | eliminated |
+  | 5 | 12 384 | 9 949 | eliminated |
+  | **6** | **22 152** | **31 180** | **symmetrised** |
+  | 10 | 109 824 | 768 212 | symmetrised (7×) |
+
+  **Symmetrisation is the narrower presentation only from `ℓ = 6` upward.**
+  Below that it trades 3× the variables for ½ the degree and loses. Since a
+  dense Macaulay scan reaches `ℓ ≤ 3`, **EXP-R2 as designed could not have
+  answered the question at any budget** — the block is not a compute
+  shortfall, it is that the interesting regime starts past the instrument.
+- **What it would take:** a solver handling 51 variables at degree 3 — real
+  F4/F5 with sparse linear algebra, not a dense scan. That is a different
+  engineering project, and naming it precisely is more useful than a
+  censored number.
+- **Gate verdicts.** G-R2: **blocked** (< 3 comparable cells, structurally).
+  G-R2′ (registered this iteration): **supported**.
+- **Ledger delta.** R2 open→blocked; R2′ registered→supported.
 
 ### 2026-09-12 — iteration 4 (EXP-R4′ — the defect screen is a size proxy)
 
@@ -507,32 +568,42 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 ---
 
-## 6. The experiment queue
+## 6. Where the thread stands, and the queue
 
-Re-prioritised from the ledger each iteration; this is the current guess.
+**All four levers have now been tested.** That was the thread's charter, so
+this is a natural reporting point rather than a pause.
 
-1. **EXP-R2 — symmetrisation on `S₄` (R2).** *(Queue head after iteration
-   4.)* The thread's whole remaining upside, and no longer blocked: R4′
-   settled that `Δ_low` should not be used to score it, so L2 is measured on
-   `D*` and total work at matched `(vars, eqs, ρ)`.
-   `binary_semaev_s4.rs` already builds the symmetrised `S₄` descent plus
-   its correspondence system at `m = 3` — the regime where the `m!` saving
-   is meaningful, unlike the `m = 2` (`S₃`) harness the rest of this thread
-   uses. Two build items: (a) a Macaulay/refutation path that accepts
-   arbitrary-degree ANF, since the correspondence half is cubic and the
-   current harness is quadratic-only; (b) the eliminated presentation
-   (substitute `eᵢ = σᵢ(x)`) as the matched non-symmetrised baseline — same
-   ideal, no new algebra needed.
+| # | Lever | Outcome |
+|---|---|---|
+| **L1** | factor-base structure | the FFD program's own result; not this thread's subject |
+| **L2** | symmetrisation | **blocked structurally** — cannot pay below `ℓ = 6`, and a dense Macaulay scan reaches `ℓ ≤ 3` |
+| **L3** | hybrid slicing | **killed** — the cost optimum is exhaustive search |
+| **L4** | degree falls (mutants) | **supported on degrees**; net of its own extraction cost it pays only where the base degree is high |
+| — | L3 ∘ L4 | **killed** — the levers are substitutes, not complements |
+
+Nothing found here reduces the solving degree at a price worth paying in the
+regime the instrument can see. The two positive results are narrow and
+specific: mutants buy exactly one degree on the generic family (`+1.44` bits,
+iteration 2), and one-sided guessing reaches the `D*=2` floor at `c = 1/2`
+(iteration 1). The two most useful results are negative and structural:
+levers aimed at the same floor do not compose (iteration 3), and the `Δ_low`
+screen is a size proxy rather than a predictor (iteration 4).
+
+**Queue, if the thread continues:**
+
+1. **EXP-R2b — reach for L2.** The only way to answer the lever that is
+   bounded rather than killed. Needs a sparse F4/F5 reaching ~51 variables at
+   degree 3 (`ℓ = 6`). This is an engineering project, not an experiment, and
+   should not be started without deciding that L2 is worth that much.
+2. **EXP-R4b — is the upstream law also a size proxy?** Iteration 4 flagged
+   that the FFD program's `ρ_s = −0.79` was pooled across `2n' ∈ {4,…,14}`,
+   the same way this thread's pooled figures were. Re-running EXP-G with a
+   size-controlled statistic is cheap and settles it. This matters to the
+   *defensive* program more than to this one, since `Δ_low` is its headline
+   screening deliverable.
 3. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
-   +0.94 → +1.75 → +1.62 over `N = 10,12,14`. Degree-3 extraction is cheap
-   enough to run at `N = 16–18` even where `D*` itself is out of reach, using
-   the *working degree* rather than measured `D*` on the base side.
-4. **EXP-R2b — symmetrisation composed with L4.** Only if R2 shows
-   symmetrisation moves `D*` at all — and iteration 3's R5′ is a warning
-   that two levers aiming at the same floor tend to be substitutes, so this
-   should be scored on total work from the start, never on a degree count.
-
----
+   `+0.94 → +1.75 → +1.62` over `N = 10,12,14`. Degree-3 extraction is cheap
+   enough to run at `N = 16–18`.
 
 ## 7. Honest limitations
 
