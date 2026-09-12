@@ -2588,6 +2588,61 @@ fn expand_support_batch(
         .collect()
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn expand_support_batch_n53(
+    curve: &KoblitzCurve,
+    jobs: &[PairExpansionJob],
+    sum_keys: &[(u64, u64)],
+    frobenius_next_index: &[usize],
+    job_chunk: usize,
+) -> Vec<(Vec<ExpandedSupportEntry>, usize)> {
+    debug_assert_eq!(curve.n, 53);
+    jobs.par_chunks(job_chunk)
+        .zip(sum_keys.par_chunks(job_chunk))
+        .map(|(job_chunk, key_chunk)| {
+            let mut entries = Vec::with_capacity(job_chunk.len() * 53);
+            let mut maps = 0usize;
+            for (&(_, _, _, left, right), &key) in job_chunk.iter().zip(key_chunk) {
+                let mut image_key = key;
+                let mut image_indices = [left, right];
+                for exponent in 0..53 {
+                    entries.push((image_key, image_indices));
+                    if exponent + 1 < 53 && image_key.0 != 0 {
+                        let x = unsafe { pclmul_reduce_n53(image_key.0 - 1, image_key.0 - 1) };
+                        let y = unsafe { pclmul_reduce_n53(image_key.1, image_key.1) };
+                        image_key = (x + 1, y);
+                        image_indices = image_indices.map(|index| frobenius_next_index[index]);
+                        maps += 1;
+                    }
+                }
+            }
+            (entries, maps)
+        })
+        .collect()
+}
+
+fn expand_support_batch_selected(
+    curve: &KoblitzCurve,
+    jobs: &[PairExpansionJob],
+    sum_keys: &[(u64, u64)],
+    frobenius_next_index: &[usize],
+    job_chunk: usize,
+    specialized_n53: bool,
+) -> Vec<(Vec<ExpandedSupportEntry>, usize)> {
+    if specialized_n53 && curve.n == 53 && combined_n53_fast_path_enabled() {
+        #[cfg(target_arch = "x86_64")]
+        {
+            // SAFETY: the combined predicate includes the runtime PCLMUL
+            // check and exact fused degree-53 reduction controls.
+            return unsafe {
+                expand_support_batch_n53(curve, jobs, sum_keys, frobenius_next_index, job_chunk)
+            };
+        }
+    }
+    expand_support_batch(curve, jobs, sum_keys, frobenius_next_index, job_chunk)
+}
+
 fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
@@ -2635,6 +2690,8 @@ fn main() {
         std::env::var("KIC_DISABLE_COMPACT_PAIR_SCRATCH").as_deref() != Ok("1");
     let specialized_n53_pair_batch =
         std::env::var("KIC_DISABLE_SPECIALIZED_N53_PAIR_BATCH").as_deref() != Ok("1");
+    let specialized_n53_support_expansion =
+        std::env::var("KIC_DISABLE_SPECIALIZED_N53_SUPPORT_EXPANSION").as_deref() != Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -2789,12 +2846,13 @@ fn main() {
                             for batch_start in (0..jobs.len()).step_by(job_batch) {
                                 let batch_end = (batch_start + job_batch).min(jobs.len());
                                 let expanded = pool.install(|| {
-                                    expand_support_batch(
+                                    expand_support_batch_selected(
                                         &curve,
                                         &jobs[batch_start..batch_end],
                                         &sum_keys[batch_start..batch_end],
                                         &frobenius_next_index,
                                         JOB_CHUNK,
+                                        specialized_n53_support_expansion,
                                     )
                                 });
                                 sender.send(expanded).expect("support expansion consumer");
@@ -2807,12 +2865,13 @@ fn main() {
                 } else {
                     for batch_start in (0..jobs.len()).step_by(job_batch) {
                         let batch_end = (batch_start + job_batch).min(jobs.len());
-                        consume(expand_support_batch(
+                        consume(expand_support_batch_selected(
                             &curve,
                             &jobs[batch_start..batch_end],
                             &sum_keys[batch_start..batch_end],
                             &frobenius_next_index,
                             JOB_CHUNK,
+                            specialized_n53_support_expansion,
                         ));
                     }
                 }
@@ -2928,6 +2987,7 @@ fn main() {
             "support_index_ms":pair_ms,
             "parallel_support_expansion":parallel_support_expansion,
             "pipelined_support_expansion":pipelined_support_expansion,
+            "specialized_n53_support_expansion":parallel_support_expansion && specialized_n53_support_expansion && n==53 && combined_n53_fast_path_enabled(),
             "parallel_support_expansion_threads":if pipelined_support_expansion {3} else if parallel_support_expansion {rayon::current_num_threads()} else {0},
             "parallel_support_expansion_job_batch":if pipelined_support_expansion {32768} else if parallel_support_expansion {65536} else {0},
             "parallel_support_expansion_job_chunk":if parallel_support_expansion {1024} else {0},
@@ -4124,6 +4184,27 @@ mod packed_tests {
             specialized_scratch.prefixes_and_inverses,
             generic_scratch.prefixes_and_inverses
         );
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn specialized_n53_support_expansion_matches_generic() {
+        if !combined_n53_fast_path_enabled() {
+            return;
+        }
+        let curve = KoblitzCurve::new(0, 53).unwrap();
+        let generator = to_raw_point(curve.generator());
+        let jobs: Vec<PairExpansionJob> = (0..16usize)
+            .map(|index| (index, index, 1, index, (index + 1) % 16))
+            .collect();
+        let sum_keys: Vec<_> = (0..16u64)
+            .map(|index| raw_compact_key(raw_scalar_point(&curve, generator, index + 1)))
+            .collect();
+        let frobenius_next_index: Vec<_> = (0..16usize).collect();
+        let generic = expand_support_batch(&curve, &jobs, &sum_keys, &frobenius_next_index, 4);
+        let specialized =
+            unsafe { expand_support_batch_n53(&curve, &jobs, &sum_keys, &frobenius_next_index, 4) };
+        assert_eq!(specialized, generic);
     }
 
     #[test]
