@@ -2,6 +2,15 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_PACKED_COMPACT_STATE
+#define ECC_PACKED_COMPACT_STATE 0
+#endif
+#if ECC_PACKED_COMPACT_STATE != 0 && ECC_PACKED_COMPACT_STATE != 1
+#error "ECC_PACKED_COMPACT_STATE must be 0 or 1"
+#endif
+#if ECC_PACKED_COMPACT_STATE
+#include "packedcompactstate.cuh"
+#endif
 
 namespace eccPacked131 {
 #ifndef ECC_PACKED_CACHE_DENOM
@@ -52,6 +61,9 @@ namespace eccPacked131 {
 #if ECC_PACKED_STATE_TILE && ECC_THREADS != 256
 #error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256"
 #endif
+#if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
+#error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
+#endif
 #if ECC_PACKED_STATE_TILE
 ECC_HD size_t physicalStateThreads(size_t threads) {
     return ((threads + 255) / 256) * 256;
@@ -64,6 +76,9 @@ ECC_HD size_t stateWordIndex(int slot, int word, int tid) {
 static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
 
 __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
+#if ECC_PACKED_COMPACT_STATE
+    return compactLoad131(p, slot, tid);
+#else
     P131 a;
 #pragma unroll
 #if ECC_PACKED_STATE_TILE
@@ -72,13 +87,18 @@ __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int t
     for (int i = 0; i < 5; ++i) a.v[i] = p[(size_t(slot) * 5 + i) * threads + tid];
 #endif
     return a;
+#endif
 }
 __device__ __forceinline__ void store(unsigned *p, int slot, int tid, int threads, P131 a) {
+#if ECC_PACKED_COMPACT_STATE
+    compactStore131(p, slot, tid, a);
+#else
 #pragma unroll
 #if ECC_PACKED_STATE_TILE
     for (int i = 0; i < 5; ++i) p[stateWordIndex(slot, i, tid)] = a.v[i];
 #else
     for (int i = 0; i < 5; ++i) p[(size_t(slot) * 5 + i) * threads + tid] = a.v[i];
+#endif
 #endif
 }
 __device__ __forceinline__ void toLimbs(P131 a, unsigned long long *out) {
