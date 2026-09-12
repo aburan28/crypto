@@ -90,22 +90,36 @@ row-per-thread mapping wastes about half the lanes.
 Which wins is a hardware question. Both are checked for correctness;
 neither is assumed faster.
 
-## The one place a GPU is at a disadvantage
+## Carry-less multiply: native, and I got this wrong first
 
-The CPU path uses `pclmulqdq` — a single carry-less multiply — and folds
-the 128-bit product through a byte-indexed table. The note measures that
-as roughly `6×` over a shift-and-xor loop.
+The first version of this directory asserted that NVIDIA hardware has no
+carry-less multiply, built `gf_mul` as an `n`-iteration shift-reduce
+loop, and used that as the headline cost caveat. **That is wrong.**
 
-NVIDIA hardware has no carry-less multiply, so `gf_mul` is the
-interleaved shift-reduce loop: `n` iterations, branch-free (the
-conditionals are arithmetic masks, so a warp never diverges on operand
-values), but still `n` times the work of one `pclmulqdq`.
+PTX 9.3 introduced `clmad`, documented for `sm_80` and later, and this
+repository already uses it:
+[`ecc2k130/NATIVE-CARRYLESS.md`](../../ecc2k130/NATIVE-CARRYLESS.md)
+measures a **22.4 %** end-to-end gain from switching that client's packed
+backend onto `clmad.lo.u64` / `clmad.hi.u64` — 7.110 → 8.704 billion walk
+updates per second on an RTX PRO 6000 under CUDA 13.3.
 
-That is the honest counterweight to the lane count: a GPU brings ~10⁴
-lanes and gives back ~6× per lane on the field's hottest operation. The
-fix is **bit-slicing** the field across threads rather than packing it
-into a word — a different data layout, not a tuning of this one, and not
-implemented.
+So `gf_mul` now has two paths that must agree:
+
+- `GF2N_CLMAD=1` (default on `__CUDA_ARCH__ >= 800`) — one `clmad.lo`
+  and one `clmad.hi` for the 128-bit carry-less product.
+- the portable fallback — a branch-free software carry-less product,
+  used on the host, on pre-Ampere targets, and with `-DGF2N_CLMAD=0`.
+
+Both feed the **same** `gf_reduce128`, which is where all the
+field-specific logic lives, so the host tests cover the part that can be
+subtly wrong and the two device paths differ only in where the product
+comes from. `./bench2 selftest` closes the rest on hardware.
+
+The correction matters beyond this file: the "GPU has no carry-less
+multiply" claim was the main reason an FPGA looked attractive for this
+kernel, and removing it removes the argument.
+[`docs/ecc_fpga_cost_model.md`](../../docs/ecc_fpga_cost_model.md) §7
+reworks that comparison.
 
 ## One deliberate difference from the CPU path
 
