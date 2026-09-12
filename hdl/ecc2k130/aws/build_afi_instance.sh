@@ -93,7 +93,9 @@ mkdir -p "$CL_DIR/build/checkpoints" "$CL_DIR/build/reports"
 
 # ---- build -----------------------------------------------------------------
 export ECC_NENG=$NENG ECC_ID_W=$ID_W ECC_DP_WEIGHT=$DP_WEIGHT
-echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, tag $TAG"
+MMCM_MULT=${MMCM_MULT:-4}; MMCM_DIV=${MMCM_DIV:-3}; CLK_MHZ=${CLK_MHZ:-333}
+export ECC_MMCM_MULT=$MMCM_MULT ECC_MMCM_DIV=$MMCM_DIV
+echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz, tag $TAG"
 python3 aws_build_dcp_from_cl.py --cl cl_ecc2k130 --tag "$TAG" || fail "aws_build_dcp_from_cl.py"
 
 TARBALL="$CL_DIR/build/checkpoints/$TAG.Developer_CL.tar"
@@ -120,19 +122,19 @@ done
 
 # ---- AFI -------------------------------------------------------------------
 out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" \
-      --description "ECC2K-130 rho engine, $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, timing $TIMING" \
+      --description "ECC2K-130 rho engine, $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, $CLK_MHZ MHz, timing $TIMING" \
       --input-storage-location "Bucket=$BUCKET,Key=$PREFIX/$TAG.Developer_CL.tar" \
       --logs-storage-location "Bucket=$BUCKET,Key=$PREFIX/afi-logs" \
       --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=ecc2k130},{Key=BuildTag,Value=$TAG}]" \
       --output json) || fail "create-fpga-image"
 echo "$out"
-python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" > afi.json <<'EOF'
+python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" "$CLK_MHZ" > afi.json <<'EOF'
 import json, sys
-out, tag, neng, idw, dpw, timing = sys.argv[1:]
+out, tag, neng, idw, dpw, timing, mhz = sys.argv[1:]
 d = json.loads(out)
 json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], "tag": tag,
            "neng": int(neng), "idW": int(idw), "dpWeight": int(dpw),
-           "walks": int(neng) << int(idw), "timing": timing}, sys.stdout, indent=1)
+           "walks": int(neng) << int(idw), "clkMhz": int(mhz), "timing": timing}, sys.stdout, indent=1)
 EOF
 aws s3 cp afi.json "s3://$BUCKET/$PREFIX/afi.json" --only-show-errors || fail "upload afi.json"
 cat afi.json

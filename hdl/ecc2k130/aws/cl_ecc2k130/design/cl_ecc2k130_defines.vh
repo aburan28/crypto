@@ -44,4 +44,15 @@
 `define ECC_DP_FIFO_W 6
 `endif
 
+// engine clock = 250 MHz * ECC_MMCM_MULT / ECC_MMCM_DIV, VCO = 250 * MULT
+// within 800..1600 MHz; both may be fractional in eighths (4, 3 = 333.3 MHz;
+// 4, 4 = 250; 6, 5 = 300; 6, 4 = 375; 4, 2.5 = 400).  build_afi.sh's
+// CLK_MHZ sets them.
+`ifndef ECC_MMCM_MULT
+`define ECC_MMCM_MULT 4
+`endif
+`ifndef ECC_MMCM_DIV
+`define ECC_MMCM_DIV 3
+`endif
+
 `endif
