@@ -69,9 +69,13 @@ package gf131_pkg is
   constant DUMMY_X : gf_t := (0 => '1', others => '0');
 
   -- Weight in two clocks: 22 groups of 6 bits (one LUT6 per output bit),
-  -- then the sum.
+  -- then the sum; or in three, with the 22 groups first summed four at a
+  -- time (six partial sums of up to 24), which halves the depth of the
+  -- adder tree where the full weight is needed.
   constant HW_GROUPS : natural := (M + 5) / 6;
   type hw_parts_t is array (0 to HW_GROUPS - 1) of unsigned(2 downto 0);
+  constant HW_NQUAD : natural := (HW_GROUPS + 3) / 4;
+  type hw_quads_t is array (0 to HW_NQUAD - 1) of unsigned(4 downto 0);
 
   function fold (e : integer) return natural;
 
@@ -83,6 +87,8 @@ package gf131_pkg is
   function gf_weight  (a : gf_t) return hw_t;
   function gf_weight_parts (a : gf_t) return hw_parts_t;
   function hw_sum (p : hw_parts_t) return hw_t;
+  function hw_quads (p : hw_parts_t) return hw_quads_t;
+  function hw_sum (q : hw_quads_t) return hw_t;
 
   -- the multiplier's two constant linear maps
   function gf_prep   (a : gf_t)    return poly_t;
@@ -171,6 +177,31 @@ package body gf131_pkg is
   begin
     for g in 0 to HW_GROUPS - 1 loop
       s := s + to_integer(p(g));
+    end loop;
+    return to_unsigned(s, hw_t'length);
+  end function;
+
+  function hw_quads (p : hw_parts_t) return hw_quads_t is
+    variable q : hw_quads_t;
+    variable s : natural;
+  begin
+    for k in 0 to HW_NQUAD - 1 loop
+      s := 0;
+      for g in 4 * k to 4 * k + 3 loop
+        if g < HW_GROUPS then
+          s := s + to_integer(p(g));
+        end if;
+      end loop;
+      q(k) := to_unsigned(s, 5);
+    end loop;
+    return q;
+  end function;
+
+  function hw_sum (q : hw_quads_t) return hw_t is
+    variable s : natural := 0;
+  begin
+    for k in 0 to HW_NQUAD - 1 loop
+      s := s + to_integer(q(k));
     end loop;
     return to_unsigned(s, hw_t'length);
   end function;

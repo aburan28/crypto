@@ -176,10 +176,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 100 – 8 410** with them in block RAM, 180 LUTRAM left; 7 404 FF |
-| Register block (`ec2k_axil`) | — | 647 LUTs, 2 032 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge 228 LUTs, 201 FF |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 100 – 8 420** with them in block RAM, 180 LUTRAM left; 7 420 FF |
+| Register block (`ec2k_axil`) | — | 902 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
 | BRAM | 0 | **20 RAMB36 + 2 RAMB18 per engine** since the memories moved out of LUTRAM (below) |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.08 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.18 ns at 3.0 ns (synthesis, two engines with register block and bridge; +1.25 inside an engine); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
