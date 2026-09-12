@@ -17,6 +17,7 @@ from run_koblitz_stage26_affinity_cell import TreeSampler
 import run_koblitz_stage33_n41_unknown_scalar as stage33
 import run_koblitz_stage42_n53_same_target as stage42
 import run_koblitz_stage44_n53_parallel as stage44
+import run_koblitz_stage61_production_rank as stage61
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -62,9 +63,9 @@ def self_test() -> dict[str, Any]:
     }
 
 
-def observe_direct(path: Path) -> dict[str, Any]:
+def observe_direct(path: Path, optimized: bool = False) -> dict[str, Any]:
     rows = stage44.parse_lines(path)
-    value = stage44.direct_observation(rows)
+    value = stage61.direct_observation(path, "FULL_RANK") if optimized else stage44.direct_observation(rows)
     base, summary = value["base"], value["summary"]
     require(base.get("selection_uses_scalar_labels") is False, "Stage-57 factor base used scalar labels")
     require(summary.get("published_q") == EXPECTED_Q, "Stage-57 public target changed")
@@ -76,6 +77,10 @@ def observe_direct(path: Path) -> dict[str, Any]:
     require(summary.get("factor_base_logs_known_by_construction") is False, "Stage-57 direct used constructed factor-base logs")
     require(summary.get("linear_solution_verified") is True and summary.get("all_relations_group_verified") is True, "Stage-57 direct verification failed")
     require(summary.get("field_mul_backend") == "x86_64_pclmulqdq", "Stage-57 direct did not use PCLMUL")
+    if optimized:
+        require(summary.get("required_surplus_relations") == 0, "optimized direct retained surplus relations")
+        require(summary.get("rank_aware_pair_scan") is True, "optimized direct did not use rank-aware collection")
+        require(summary.get("field_product_pipeline") == "x86_64_pclmul_n53_fused_reduce", "optimized direct did not use fused field products")
     return value
 
 
@@ -95,6 +100,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     direct_environment = custody.safe_child_environment()
     direct_environment["KIC_INCREMENTAL_RANK_CROSSCHECK"] = "0"
     direct_environment["RAYON_NUM_THREADS"] = "4"
+    if args.optimized:
+        direct_environment["KIC_RANK_SURPLUS"] = "0"
+        direct_environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
+        direct_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
+        direct_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     rho_environment = custody.safe_child_environment()
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
@@ -104,7 +114,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         rho_process = stage33.metered(role="rho", command=rho_command, cwd=REPO, evidence=evidence, timeout=args.timeout, environment=rho_environment)
     outer = stage33.outer_resources(started, before_self, before_children, sampler)
     require(stage33.process_complete(direct_process) and stage33.process_complete(rho_process), "Stage-57 process failed")
-    direct_value = observe_direct(evidence / "direct.stdout")
+    direct_value = observe_direct(evidence / "direct.stdout", args.optimized)
     rho_rows = stage44.parse_lines(evidence / "rho.stdout")
     require(len(rho_rows) == 1, "Stage-57 rho row count changed")
     rho_value = rho_rows[0]
@@ -126,6 +136,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     result = {
         "schema": RUN_SCHEMA,
         "status": "complete_n53_public_unknown_scalar",
+        "optimized_stack": args.optimized,
         "constants": self_test(),
         "build_binding": {"result": custody.executable_identity(build_root / "result.json", "Stage-57 build result", executable=False), "seal": custody.executable_identity(build_root / "result-seal.json", "Stage-57 build seal", executable=False), "source_state": build["source_state"], "binaries": build["binaries"], "outer_resources": build["outer_resources"], "process": build["process"]},
         "direct_process": direct_process,
@@ -162,7 +173,8 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
     seal = stage33.verify_seal(output, RUN_SEAL_SCHEMA, "run_frozen")
     result = load(output / "result.json", "Stage-57 result")
     require(result.get("schema") == RUN_SCHEMA and result.get("status") == "complete_n53_public_unknown_scalar", "Stage-57 result is incomplete")
-    direct_value = observe_direct(output / "evidence/direct.stdout")
+    optimized = result.get("optimized_stack") is True
+    direct_value = observe_direct(output / "evidence/direct.stdout", optimized)
     require(result.get("direct_base") == direct_value["base"] and result.get("direct_summary") == direct_value["summary"] and result.get("relation_hashes") == direct_value["relation_hashes"], "Stage-57 direct evidence changed")
     rho_rows = stage44.parse_lines(output / "evidence/rho.stdout")
     require(len(rho_rows) == 1 and result.get("rho") == rho_rows[0], "Stage-57 rho evidence changed")
@@ -216,6 +228,7 @@ def main() -> None:
     run_parser.add_argument("--build", type=Path, required=True)
     run_parser.add_argument("--output", type=Path, required=True)
     run_parser.add_argument("--timeout", type=int, default=1800)
+    run_parser.add_argument("--optimized", action="store_true")
     verify_parser = sub.add_parser("verify")
     verify_parser.add_argument("--build", type=Path, required=True)
     verify_parser.add_argument("--output", type=Path, required=True)
