@@ -11,3 +11,13 @@ The local same-target validation used a fresh public scalar and independent algo
 Stage 42 adds an explicit public validation scalar to both producers. Each producer still consumes its ordinary seeded scalar draw before applying the explicit value, so the subsequent random stream is unchanged. The collector receives only the point `Q`; the scalar is retained by the validator and emitted with `fixture_scalar_source = explicit_public_validation_scalar`. The production runner uses untouched SHA-256-derived scalar and algorithm seeds, meters the clean build plus both arms with watchdogs and process-tree RSS, and refuses any target-coordinate or recovered-scalar mismatch.
 
 These stages establish a finite n=53 construction, rank, tuning, and same-target comparison. They do not use imported points, establish an unknown-scalar n=53 attack, change the asymptotic exponent, satisfy licensed Magma or unaffiliated reproduction, or establish a Koblitz index-calculus SOTA result.
+
+## Hosted same-target result
+
+[Run `34705118094`](https://github.com/aburan28/crypto/actions/runs/34705118094) completed from merge commit `0654c7dd16b8dfd7a61b8770583ac39316b5ff6b` and passed an independent replay after download. Both arms constructed the public point `(2565091273463387, 5885236316843894)` and recovered validation scalar `476811900269`.
+
+The direct arm used 9,964 factor-base points, 94 orbit columns, and a 95-column relation matrix. It reached full rank at relation 157 and retained 32 surplus relations, so 189 of 189 trials produced verified four-summand relations. Support-table setup took 7.399 seconds and collection took 31.132 seconds. Whole-process direct wall was 39.781 seconds, 39.776 core-seconds, and 1,526,292,480 bytes peak RSS.
+
+Packed signed-Frobenius rho used the same target and took 3.279 seconds wall, 3.278 core-seconds, and 35,438,592 bytes peak RSS. Direct was therefore 12.131 times slower by whole-process wall and 11.993 times slower using the producer-reported algorithm charges. The clean build plus direct cost was 37.698 times rho wall.
+
+The fresh build plus both scientific arms used 126.968 seconds sequential wall, 272.392 core-seconds, and at most 1,718,968,320 bytes sampled process-tree RSS. The tuning archive retains the original 873.382-second pointwise control, the signed-quotient batch candidates, the signed-expanded and eta ladders, the rejected 1024-entry query width, and the separate local same-target validation. The hosted artifact remains the admitted n=53 result.
