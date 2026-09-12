@@ -524,12 +524,19 @@ fn solve_fixture(
     mode: Quotient,
     fixture_index: u64,
     fixture_seed: u64,
+    explicit_fixture_scalar: Option<u64>,
 ) -> serde_json::Value {
     let modulus = curve.subgroup_order.to_u64_digits()[0];
     let lambda = curve.lambda.to_u64_digits()[0];
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
     let mut rng = StdRng::seed_from_u64(fixture_seed);
-    let d0 = rng.gen_range(1..modulus);
+    let generated_scalar = rng.gen_range(1..modulus);
+    let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
+    let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
+        "explicit_public_validation_scalar"
+    } else {
+        "seeded_fixture_scalar"
+    };
     let q = curve.mul(curve.generator(), &BigUint::from(d0));
     let mut charges = Charges {
         scalar_multiplications: 1,
@@ -631,6 +638,7 @@ fn solve_fixture(
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
         "published_fixture_scalar":d0,
+        "fixture_scalar_source":fixture_scalar_source,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -669,13 +677,20 @@ fn solve_fixture_packed(
     mode: Quotient,
     fixture_index: u64,
     fixture_seed: u64,
+    explicit_fixture_scalar: Option<u64>,
 ) -> serde_json::Value {
     let modulus = curve.subgroup_order.to_u64_digits()[0];
     let lambda = curve.lambda.to_u64_digits()[0];
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
     let generator = raw_point(curve.generator());
     let mut rng = StdRng::seed_from_u64(fixture_seed);
-    let d0 = rng.gen_range(1..modulus);
+    let generated_scalar = rng.gen_range(1..modulus);
+    let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
+    let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
+        "explicit_public_validation_scalar"
+    } else {
+        "seeded_fixture_scalar"
+    };
     let mut charges = Charges::default();
     let started = Instant::now();
     let q = raw_scalar_mul(curve, generator, d0);
@@ -782,6 +797,7 @@ fn solve_fixture_packed(
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
         "published_fixture_scalar":d0,
+        "fixture_scalar_source":fixture_scalar_source,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -824,8 +840,8 @@ fn raw_make_jump_ref(jumps: &[RawJump], index: usize) -> &RawJump {
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     assert!(
-        (5..=7).contains(&args.len()),
-        "usage: <n> <a> <mode> <fixtures> [reference|packed] [batch_seed]"
+        (5..=8).contains(&args.len()),
+        "usage: <n> <a> <mode> <fixtures> [reference|packed] [batch_seed] [explicit_fixture_scalar]"
     );
     let n: u32 = args[1].parse().unwrap();
     let a: u8 = args[2].parse().unwrap();
@@ -833,10 +849,19 @@ fn main() {
     let fixtures: u64 = args[4].parse().unwrap();
     let backend = args.get(5).map(String::as_str).unwrap_or("reference");
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
+    let explicit_fixture_scalar = args.get(7).map(|value| value.parse::<u64>().unwrap());
     assert!(matches!(backend, "reference" | "packed"));
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
+    let modulus = curve.subgroup_order.to_u64_digits()[0];
+    if let Some(scalar) = explicit_fixture_scalar {
+        assert!(fixtures == 1, "an explicit scalar requires one fixture");
+        assert!(
+            (1..modulus).contains(&scalar),
+            "explicit scalar must be in 1..r"
+        );
+    }
     for fixture_index in 0..fixtures {
         let material = if let Some(batch_seed) = batch_seed {
             format!(
@@ -849,9 +874,9 @@ fn main() {
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let result = if backend == "packed" {
-            solve_fixture_packed(&curve, mode, fixture_index, seed)
+            solve_fixture_packed(&curve, mode, fixture_index, seed, explicit_fixture_scalar)
         } else {
-            solve_fixture(&curve, mode, fixture_index, seed)
+            solve_fixture(&curve, mode, fixture_index, seed, explicit_fixture_scalar)
         };
         println!("{}", result);
     }

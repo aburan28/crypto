@@ -1629,8 +1629,8 @@ fn solve_full_column_rank_system(
 fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
-        (6..=10).contains(&arguments.len()),
-        "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures]"
+        (6..=11).contains(&arguments.len()),
+        "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures] [explicit_fixture_scalar]"
     );
     let n: u32 = arguments[1].parse().unwrap();
     let a: u8 = arguments[2].parse().unwrap();
@@ -1651,6 +1651,7 @@ fn main() {
         .unwrap_or("1")
         .parse()
         .unwrap();
+    let explicit_fixture_scalar = arguments.get(10).map(|value| value.parse::<u64>().unwrap());
     let summary_only = std::env::var("KIC_SUMMARY_ONLY").as_deref() == Ok("1");
     let batch_corpus = std::env::var("KIC_BATCH_CORPUS").ok();
     let relation_cap_extra: usize = std::env::var("KIC_RELATION_CAP_EXTRA")
@@ -1668,6 +1669,16 @@ fn main() {
     let curve_setup_ms = curve_setup_started.elapsed().as_secs_f64() * 1000.0;
     let setup_started = Instant::now();
     let modulus = curve.subgroup_order.to_u64().unwrap();
+    if let Some(scalar) = explicit_fixture_scalar {
+        assert!(
+            batch_fixtures == 1,
+            "an explicit scalar requires one fixture"
+        );
+        assert!(
+            (1..modulus).contains(&scalar),
+            "explicit scalar must be in 1..r"
+        );
+    }
     let signed_size = signed_scalars(curve.lambda.to_u64().unwrap(), modulus, n).len();
     let columns = balanced_orbits(
         &curve.subgroup_order,
@@ -1900,7 +1911,16 @@ fn main() {
         let fixture_seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let mut rng = StdRng::seed_from_u64(fixture_seed);
         let fixture_generation_started = Instant::now();
-        let d0 = rng.gen_range(1..modulus);
+        // Consume the ordinary draw even when a public explicit scalar is
+        // supplied, so changing only the target does not change the relation
+        // coefficient stream that follows.
+        let generated_scalar = rng.gen_range(1..modulus);
+        let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
+        let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
+            "explicit_public_validation_scalar"
+        } else {
+            "seeded_fixture_scalar"
+        };
         let q = curve.mul(curve.generator(), &BigUint::from(d0));
         let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
         let generator_raw = to_raw_point(curve.generator());
@@ -2427,6 +2447,7 @@ fn main() {
                 "fixture_index":fixture_index,
                 "fixture_seed":fixture_seed,
                 "published_fixture_scalar":d0,
+                "fixture_scalar_source":fixture_scalar_source,
                 "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
                 "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
                 "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
