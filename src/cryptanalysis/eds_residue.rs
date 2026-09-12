@@ -512,16 +512,28 @@ pub fn format_report(r: &EdsReport) -> String {
         } else {
             "✗ MISMATCH"
         },
-        cons = if r.apparition_consistent { "✓ holds" } else { "✗ FAILS" },
+        cons = if r.apparition_consistent {
+            "✓ holds"
+        } else {
+            "✗ FAILS"
+        },
         ma = r.mult_a,
         mb = r.mult_b,
-        mlaw = if r.mult_law_holds { "✓ verified" } else { "✗ FAILS" },
+        mlaw = if r.mult_law_holds {
+            "✓ verified"
+        } else {
+            "✗ FAILS"
+        },
         ca = sgn(r.chi_a),
         cb = sgn(r.chi_b),
         pw = r.period_w,
         jw = if r.order > 0 { r.period_w / r.order } else { 0 },
         pc = r.period_chi,
-        jc = if r.order > 0 { r.period_chi / r.order } else { 0 },
+        jc = if r.order > 0 {
+            r.period_chi / r.order
+        } else {
+            0
+        },
         qr = qr,
         nqr = nqr,
         zero = zero,
@@ -675,7 +687,6 @@ pub fn localisation(
         decimation_ok,
     })
 }
-
 
 // The BigUint analysis path above is the validated reference; for sweeping
 // thousands of curves we need a faster integer path.  Everything here works
@@ -1078,7 +1089,11 @@ pub fn census(
         min_order = min_order.min(r.order);
     }
     let mean = if n > 0 { sum / n as f64 } else { 0.0 };
-    let var = if n > 0 { sum_sq / n as f64 - mean * mean } else { 0.0 };
+    let var = if n > 0 {
+        sum_sq / n as f64 - mean * mean
+    } else {
+        0.0
+    };
     for c in by_class.iter_mut() {
         if c.0 > 0 {
             c.1 /= c.0 as f64;
@@ -1355,7 +1370,10 @@ mod tests {
         let (px, py, _) = find_toy_point(&p, &a, &b, 1, 7).unwrap();
         let r = analyze(&p, &a, &b, &px, &py);
         // W(n) = 0 ⟺ [n]P = O, checked against honest point arithmetic.
-        assert!(r.apparition_consistent, "apparition law W(n)=0 ⟺ [n]P=O must hold");
+        assert!(
+            r.apparition_consistent,
+            "apparition law W(n)=0 ⟺ [n]P=O must hold"
+        );
     }
 
     #[test]
@@ -1378,8 +1396,8 @@ mod tests {
         // vanishing locus of the 2-D net.
         let k_true = (ord / 2).max(2) % ord;
         let grid = ord + 1;
-        let (k_rec, (za, zb)) =
-            recover_dl_from_net_zeros(&px, &py, &a, &p, ord, k_true, grid).expect("found a net zero");
+        let (k_rec, (za, zb)) = recover_dl_from_net_zeros(&px, &py, &a, &p, ord, k_true, grid)
+            .expect("found a net zero");
         assert_eq!(k_rec % ord, k_true % ord, "net zero must encode the DL");
         // Verify the recovered relation: za + zb·k ≡ 0 (mod ord).
         let lhs = (za as u64 + (zb as u64) * (k_true % ord)) % ord;
@@ -1410,7 +1428,11 @@ mod tests {
     fn census_runs_and_is_sane() {
         // Small fast sweep on p=4099 (≡3 mod 4).
         let (s, recs) = census(4099, 12, 12, 50, 5000);
-        assert!(s.curves >= 20, "expected a decent number of curves, got {}", s.curves);
+        assert!(
+            s.curves >= 20,
+            "expected a decent number of curves, got {}",
+            s.curves
+        );
         // Per-curve sanity: QR+NQR ≈ order-1 (block excludes the single zero).
         for r in &recs {
             assert_eq!(r.qr + r.nqr, r.order - 1);
@@ -1522,7 +1544,12 @@ mod tests {
 
     #[test]
     fn sqrt_u64_roundtrips_both_residues() {
-        for &p in &[4099u64 /*≡3*/, 4093 /*≡1*/, 10009 /*≡1*/, 10007 /*≡3*/] {
+        for &p in &[
+            4099u64, /*≡3*/
+            4093,    /*≡1*/
+            10009,   /*≡1*/
+            10007,   /*≡3*/
+        ] {
             let mut squares = 0;
             for v in 1..200u64 {
                 let sq = (v * v) % p;
@@ -1583,9 +1610,18 @@ mod tests {
         // p ≡ 3 (mod 4): the sign is resolved (k exact), and the residue
         // window scales ~ log2(m).
         let p3 = BigUint::from(2003u32);
-        let (px, py, m3) = find_toy_point(&p3, &BigUint::from(11u32), &BigUint::from(19u32), 1, 30)
-            .unwrap();
-        let s3 = localisation_sweep(&p3, &BigUint::from(11u32), &BigUint::from(19u32), &px, &py, m3, 48, 120);
+        let (px, py, m3) =
+            find_toy_point(&p3, &BigUint::from(11u32), &BigUint::from(19u32), 1, 30).unwrap();
+        let s3 = localisation_sweep(
+            &p3,
+            &BigUint::from(11u32),
+            &BigUint::from(19u32),
+            &px,
+            &py,
+            m3,
+            48,
+            120,
+        );
         assert!(s3.decimation_ok);
         assert_eq!(s3.pinned, s3.tested, "every k pins up to ±");
         assert_eq!(s3.sign_resolved, s3.pinned, "p≡3 resolves the sign");
@@ -1599,9 +1635,18 @@ mod tests {
 
         // p ≡ 1 (mod 4): k pins, but only up to sign (sign never resolved).
         let p1 = BigUint::from(1009u32);
-        let (qx, qy, m1) = find_toy_point(&p1, &BigUint::from(37u32), &BigUint::from(2u32), 1, 30)
-            .unwrap();
-        let s1 = localisation_sweep(&p1, &BigUint::from(37u32), &BigUint::from(2u32), &qx, &qy, m1, 48, 120);
+        let (qx, qy, m1) =
+            find_toy_point(&p1, &BigUint::from(37u32), &BigUint::from(2u32), 1, 30).unwrap();
+        let s1 = localisation_sweep(
+            &p1,
+            &BigUint::from(37u32),
+            &BigUint::from(2u32),
+            &qx,
+            &qy,
+            m1,
+            48,
+            120,
+        );
         assert!(s1.decimation_ok);
         assert_eq!(s1.pinned, s1.tested, "every k pins up to ±");
         assert_eq!(s1.sign_resolved, 0, "p≡1 cannot resolve the sign");
@@ -1610,8 +1655,8 @@ mod tests {
     /// OEIS A006769: integer EDS for curve 37a, point (0,0), n = 0..25.
     fn a006769() -> [i64; 26] {
         [
-            0, 1, 1, -1, 1, 2, -1, -3, -5, 7, -4, -23, 29, 59, 129, -314, -65, 1529, -3689,
-            -8209, -16264, 83313, 113689, -620297, 2382785, 7869898,
+            0, 1, 1, -1, 1, 2, -1, -3, -5, 7, -4, -23, 29, 59, 129, -314, -65, 1529, -3689, -8209,
+            -16264, 83313, 113689, -620297, 2382785, 7869898,
         ]
     }
 
@@ -1658,7 +1703,12 @@ mod tests {
                 p
             );
             let j = br.chi_period / br.order;
-            assert!(j == 1 || j == 2, "χ-period must be r or 2r, got j={} (p={})", j, p);
+            assert!(
+                j == 1 || j == 2,
+                "χ-period must be r or 2r, got j={} (p={})",
+                j,
+                p
+            );
         }
     }
 
@@ -1692,7 +1742,12 @@ mod tests {
             let r = rep.order as usize;
             let w = eds_sequence(&p, &a, &b, &px, &py, r + 3);
             // A·B = W(r+1)
-            assert_eq!((&rep.mult_a * &rep.mult_b) % &p, w[r + 1], "AB=W(r+1) p={}", pp);
+            assert_eq!(
+                (&rep.mult_a * &rep.mult_b) % &p,
+                w[r + 1],
+                "AB=W(r+1) p={}",
+                pp
+            );
             // Bʳ = −W(r+1)·W(r−1)
             let bpow = rep.mult_b.modpow(&BigUint::from(rep.order), &p);
             let rhs = m_sub(&BigUint::zero(), &((&w[r + 1] * &w[r - 1]) % &p), &p);

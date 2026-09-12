@@ -30,17 +30,17 @@
 //! residue lifts when CRT-combining `k` residues.  We resolve it by
 //! running the kangaroo against each lift.
 
+use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use crate::cryptopals::challenge58::kangaroo;
 use crate::cryptopals::challenge59::cryptopals_curve;
 use crate::cryptopals::set8_util::{
     biguint_to_bytes_be, crt_combine, hmac_sha256, parse_big, small_factors,
 };
 use crate::cryptopals::Report;
-use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use num_bigint::{BigInt, BigUint, ToBigInt};
 use num_traits::{One, Zero};
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 fn mod_inv(a: &BigUint, p: &BigUint) -> BigUint {
     use num_integer::Integer;
@@ -268,11 +268,10 @@ pub fn collect_twist_residues(
             }
         };
         let (tag, msg) = alice.oracle(&pt_u);
-        let b =
-            match recover_residue_ladder(&pt_u, &r, &alice.a, &alice.p, msg, &tag) {
-                Some(b) => b,
-                None => continue,
-            };
+        let b = match recover_residue_ladder(&pt_u, &r, &alice.a, &alice.p, msg, &tag) {
+            Some(b) => b,
+            None => continue,
+        };
         residues.push((b, r));
     }
     residues
@@ -297,7 +296,10 @@ pub fn run() -> Report {
     let twist_n = twist_order(&p, &curve_order);
     r.line(format!("twist order  : {}", twist_n));
     let factors = small_factors(&twist_n, 1 << 24);
-    r.line(format!("twist factors (first few): {:?}", &factors[..factors.len().min(8)]));
+    r.line(format!(
+        "twist factors (first few): {:?}",
+        &factors[..factors.len().min(8)]
+    ));
 
     // Sanity: ladder(4, n) == 0 (base point times its order).
     let base_u = BigUint::from(4u32);
@@ -341,8 +343,14 @@ pub fn run() -> Report {
         let plus_match = recovered == mod_check;
         let neg_recovered = ((&m + &mod_check) - &combined) % &m;
         let neg_match = neg_recovered == mod_check;
-        r.line(format!("Recovered d mod m matches Alice (+sign): {}", plus_match));
-        r.line(format!("Recovered d mod m matches Alice (−sign): {}", neg_match));
+        r.line(format!(
+            "Recovered d mod m matches Alice (+sign): {}",
+            plus_match
+        ));
+        r.line(format!(
+            "Recovered d mod m matches Alice (−sign): {}",
+            neg_match
+        ));
     }
     let _ = (BigInt::zero(), kangaroo);
     r.succeed()

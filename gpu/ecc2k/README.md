@@ -191,6 +191,50 @@ Two things stand out against the prime-field walk in `gpu/ecc`, which needs
   transfers between consumer and datacenter Blackwell for these kernels in
   a way it does not for the prime-field ones.
 
+## The `|F|²` pair table
+
+`pairtable.cuh` builds the meet-in-the-middle table that
+`RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measures as the whole wall-clock
+cost of a relation-collection worker:
+
+> two workers run concurrently on the same four cores collected units 0
+> and 1 in 23 s each (each builds its own `|F|²` pair table, **which is
+> the whole cost**; the 64 probes are milliseconds)
+
+The table is `|F|(|F|+1)/2` curve additions and nothing else.
+
+**What makes it more than batch point addition.** An affine addition on
+a binary curve costs one inversion, and an inversion is ~`m` squarings
+and `m` multiplications — two orders of magnitude more than the three
+multiplications the rest of the addition needs. So the table is not
+built with `|F|²/2` inversions: fixing `P_i` and forming the whole row's
+denominators `x(P_i) + x(P_j)` lets Montgomery's trick invert them with
+**one** inversion and `3(k−1)` multiplications, exactly as
+`PairSumTable::build_within` does on the CPU.
+
+Montgomery's trick is a sequential prefix product, so it does not
+parallelise across a row — it parallelises across *rows*, and there are
+`|F|` of them. One thread owns one row. That leaves a triangular
+imbalance (row 0 does `|F|` additions, the last does one), so the kernel
+grid-strides and the host can pick a grid smaller than `|F|`.
+
+**Packing is bit-for-bit `koblitz_fast::FastPoint::pack`**, so a table
+built here and one built there sort and look up identically:
+`infinity → 0`, `(x, y) → ((x+1) << 1) | (y > (x ^ y))`. The low bit is
+the part that needed a test: on a binary curve `−P = (x, x+y)`, so `P`
+and `−P` share an abscissa and a single bit of `y` separates them only
+when `x` is odd. Comparing `y` against `x+y` separates them always.
+
+`make test` runs `test_pt_*` for every curve: batch inversion against
+one-at-a-time inversion (with a planted zero, which every real row has
+at `j = i`), every row of a 48-point triangle against unbatched
+`Koblitz::add`, every sum re-checked as on-curve, and the packing
+checked for collisions and for keeping `P` from `−P`. The row test
+deliberately includes negated points so that `P_i + P_j = O` occurs —
+without them the infinity branch is never taken and the test would claim
+coverage it does not have. `ecc2k95` skips it: at `m = 97` a point does
+not fit in a `u64` and `FastCurve` refuses the same case.
+
 ## Files
 
 | File | What it is |

@@ -162,17 +162,7 @@ pub fn measure_one(
     // Equivalently: the first D at which non-trivial syzygies among
     // the Macaulay-shifted equations are detected (rank < rows) and
     // the system has not yet trivially saturated (rank < cols).
-    let mut per_degree = Vec::new();
-    let mut fall_degree: Option<u32> = None;
-    for d in 2..=d_max {
-        let measurement = build_and_rank_macaulay(&eqs, num_vars, d);
-        let nontrivial_syzygy = measurement.rank < measurement.rows_constructed;
-        let not_saturated = measurement.rank < measurement.cols;
-        if fall_degree.is_none() && nontrivial_syzygy && not_saturated {
-            fall_degree = Some(d);
-        }
-        per_degree.push(measurement);
-    }
+    let (fall_degree, per_degree) = measure_polys(&eqs, num_vars, d_max);
 
     FfdRow {
         n,
@@ -181,6 +171,41 @@ pub fn measure_one(
         per_degree,
         fall_degree,
     }
+}
+
+/// **Measure FFD for an already-built system**, so callers that
+/// Weil-descend with their own parameters — a subspace-restricted
+/// factor base, a curve chosen by an isogeny search — get the *same*
+/// operational first-fall-degree definition the sweep uses rather than
+/// a lookalike.
+///
+/// The definition, unchanged from [`measure_one`]: the smallest `D ≥ 2`
+/// at which the Macaulay matrix has `rank < rows_constructed` (a
+/// non-trivial syzygy) **and** `rank < cols` (the system has not
+/// saturated).  Rows are the products of each equation with every
+/// monomial of degree `≤ D − 2`, which is the convention this harness
+/// was calibrated with; note that it assumes every equation is
+/// quadratic, and multiplies a lower-degree equation by too little.
+/// [`crate::cryptanalysis::koblitz_groebner::first_fall_degree`] fills
+/// the matrix to degree `D` per equation instead, so the two agree
+/// exactly when no equation has dropped below degree 2.
+pub fn measure_polys(
+    eqs: &[F2BoolPoly],
+    num_vars: u32,
+    d_max: u32,
+) -> (Option<u32>, Vec<MacaulayMeasurement>) {
+    let mut per_degree = Vec::new();
+    let mut fall_degree: Option<u32> = None;
+    for d in 2..=d_max {
+        let measurement = build_and_rank_macaulay(eqs, num_vars, d);
+        let nontrivial_syzygy = measurement.rank < measurement.rows_constructed;
+        let not_saturated = measurement.rank < measurement.cols;
+        if fall_degree.is_none() && nontrivial_syzygy && not_saturated {
+            fall_degree = Some(d);
+        }
+        per_degree.push(measurement);
+    }
+    (fall_degree, per_degree)
 }
 
 // ── Weil descent of binary S₃ ───────────────────────────────────────
@@ -226,7 +251,9 @@ impl F2BoolPoly {
         let s_const = self.coeffs[0];
         let s_lin: Vec<bool> = (0..num_vars).map(|i| self.coeffs[1 + i as usize]).collect();
         let o_const = other.coeffs[0];
-        let o_lin: Vec<bool> = (0..num_vars).map(|i| other.coeffs[1 + i as usize]).collect();
+        let o_lin: Vec<bool> = (0..num_vars)
+            .map(|i| other.coeffs[1 + i as usize])
+            .collect();
 
         // const × const
         if s_const && o_const {
@@ -1119,7 +1146,11 @@ mod tests {
             acc
         };
 
-        for (v1, v2) in [(0b00000u32, 0b00000u32), (0b10110, 0b01101), (0b11111, 0b00001)] {
+        for (v1, v2) in [
+            (0b00000u32, 0b00000u32),
+            (0b10110, 0b01101),
+            (0b11111, 0b00001),
+        ] {
             let bits = |v: u32| -> Vec<u32> { (0..l).filter(|k| (v >> k) & 1 == 1).collect() };
             let x1 = F2mElement::from_bit_positions(&bits(v1), n);
             let x2 = F2mElement::from_bit_positions(&bits(v2), n);

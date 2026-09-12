@@ -9,9 +9,7 @@
 //! 3. For each column, run single-byte XOR recovery.
 //! 4. Stitch the single-byte keys back together → full key.
 
-use crate::cryptopals::low_util::{
-    b64_decode, break_single_xor, hamming, xor_repeating,
-};
+use crate::cryptopals::low_util::{b64_decode, break_single_xor, hamming, xor_repeating};
 use crate::cryptopals::Report;
 
 const DATA: &str = include_str!("data_6.txt");
@@ -50,7 +48,9 @@ pub fn run() -> Report {
     for &k in &candidates {
         let mut key = vec![0u8; k];
         for col in 0..k {
-            let column: Vec<u8> = ct.iter().enumerate()
+            let column: Vec<u8> = ct
+                .iter()
+                .enumerate()
                 .filter_map(|(i, &b)| if i % k == col { Some(b) } else { None })
                 .collect();
             let (kb, _, _) = break_single_xor(&column);
@@ -66,8 +66,14 @@ pub fn run() -> Report {
     }
     let (k, pt, key) = best.unwrap();
     r.line(format!("Chosen keysize : {}", k));
-    r.line(format!("Recovered key  : {:?}", String::from_utf8_lossy(&key)));
-    r.line(format!("Plaintext head : {:?}", &String::from_utf8_lossy(&pt)[..60]));
+    r.line(format!(
+        "Recovered key  : {:?}",
+        String::from_utf8_lossy(&key)
+    ));
+    r.line(format!(
+        "Plaintext head : {:?}",
+        &String::from_utf8_lossy(&pt)[..60]
+    ));
     // The Vanilla Ice masterpiece "Play That Funky Music."
     let expected_key = b"Terminator X: Bring the noise";
     assert_eq!(key.as_slice(), expected_key);

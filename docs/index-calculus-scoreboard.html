@@ -338,19 +338,19 @@
     </div>
 
     <div class="chart-scroll">
-      <svg viewBox="0 0 980 434" role="img" aria-labelledby="c1t">
+      <svg viewBox="0 0 980 468" role="img" aria-labelledby="c1t">
         <title id="c1t">Cost of each index-calculus variant as a multiple of Pollard rho, from 16 times to 9,294 times, on a logarithmic axis</title>
 
         <!-- gridlines -->
         <g stroke="var(--rule-soft)" stroke-width="1">
-          <line x1="435" y1="14" x2="435" y2="402"></line>
-          <line x1="570" y1="14" x2="570" y2="402"></line>
-          <line x1="705" y1="14" x2="705" y2="402"></line>
-          <line x1="840" y1="14" x2="840" y2="402"></line>
+          <line x1="435" y1="14" x2="435" y2="436"></line>
+          <line x1="570" y1="14" x2="570" y2="436"></line>
+          <line x1="705" y1="14" x2="705" y2="436"></line>
+          <line x1="840" y1="14" x2="840" y2="436"></line>
         </g>
 
         <!-- rho boundary -->
-        <line x1="300" y1="14" x2="300" y2="408" stroke="var(--bound)" stroke-width="2"></line>
+        <line x1="300" y1="14" x2="300" y2="442" stroke="var(--bound)" stroke-width="2"></line>
         <text x="304" y="24" fill="var(--bound)" font-family="var(--mono)" font-size="11.5" font-weight="500">Pollard rho = 1&times;</text>
 
         <!-- group A -->
@@ -428,14 +428,21 @@
           <text x="850" y="390" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">1,987&times;</text>
         </g>
 
+        <g class="bar-group" tabindex="0" data-name="Pair-only decompositions (Joux&ndash;Vitse k&minus;1)" data-s="S = 1,659 at 33 bits; 427 at 24 bits" data-class="Relabelling here: the per-residual constant fell 580×, but residuals rise as n^(2/3) and S rises with them. An advance below 2^28.5, where it is the best cell on the board.">
+          <rect class="hit" x="14" y="405" width="952" height="28" rx="2"></rect>
+          <text x="284" y="423" text-anchor="end" fill="var(--ink)" font-size="13">Pair-only (k&minus;1) decompositions</text>
+          <rect x="300" y="412" width="407" height="14" rx="4" fill="var(--data)"></rect>
+          <text x="850" y="424" fill="var(--ink)" font-family="var(--mono)" font-size="13" font-weight="500">1,037&times;</text>
+        </g>
+
         <!-- axis -->
-        <line x1="300" y1="402" x2="840" y2="402" stroke="var(--rule)" stroke-width="1"></line>
+        <line x1="300" y1="436" x2="840" y2="436" stroke="var(--rule)" stroke-width="1"></line>
         <g fill="var(--muted)" font-family="var(--mono)" font-size="11" text-anchor="middle">
-          <text x="300" y="420">1&times;</text>
-          <text x="435" y="420">10&times;</text>
-          <text x="570" y="420">100&times;</text>
-          <text x="705" y="420">1,000&times;</text>
-          <text x="840" y="420">10,000&times;</text>
+          <text x="300" y="454">1&times;</text>
+          <text x="435" y="454">10&times;</text>
+          <text x="570" y="454">100&times;</text>
+          <text x="705" y="454">1,000&times;</text>
+          <text x="840" y="454">10,000&times;</text>
         </g>
       </svg>
     </div>
@@ -477,9 +484,15 @@
           <div class="num">879,000</div>
           <div class="lbar"><i style="width:18.2%"></i></div>
         </div>
+        <div class="lrow">
+          <div class="name">No retries once the border is unreachable <span class="chip">engineering</span></div>
+          <div class="num">875,934</div>
+          <div class="lbar"><i style="width:18.2%"></i></div>
+        </div>
       </div>
       <div class="legend" style="padding-top:0">
         <span>5.5&times; total &middot; relation-phase crossover moved 2^111 &rarr; 2^96</span>
+        <span>Last step is 0.35% on the protocol stream, 1.0% on random residuals at p = 271</span>
       </div>
     </div>
 
@@ -504,6 +517,16 @@
           <div class="name">Total, large primes</div>
           <div class="track"><i class="dot" style="left:29.2%" title="n^0.44"></i></div>
           <div class="num">0.44</div>
+        </div>
+        <div class="erow">
+          <div class="name">Residuals, pair-only</div>
+          <div class="track"><i class="dot" style="left:64.6%" title="n^0.67, predicted 2/3"></i></div>
+          <div class="num">0.67</div>
+        </div>
+        <div class="erow">
+          <div class="name">Total, pair-only</div>
+          <div class="track"><i class="dot" style="left:72.3%" title="n^0.72"></i></div>
+          <div class="num">0.72</div>
         </div>
         <div class="erow">
           <div class="name">Linear algebra, large primes</div>
@@ -543,7 +566,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <caption>Prime-field cells at 28 bits with base 256; subspace cells at 33 bits, two seeds each, every run recovering the planted logarithm.</caption>
+        <caption>Prime-field cells at 28 bits with base 256; subspace cells at 33 bits, every run recovering the planted logarithm. The pair-only row is a relabelling at 33 bits and an advance below 2<sup>28.5</sup>, where its S of 427 is the lowest cell measured.</caption>
         <thead>
           <tr>
             <th scope="col">Variant</th>
@@ -569,6 +592,7 @@
           <tr><td>O(1) S&#8324; solve, first build</td><td class="n">4,623</td><td class="n">2,719&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, structure</span></td></tr>
           <tr><td>O(1) S&#8324; solve, tuned</td><td class="n">898</td><td class="n">528&times;</td><td class="n">&mdash;</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>Double large primes</td><td class="n">3,378</td><td class="n">1,987&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, exponent</span></td></tr>
+          <tr><td>Pair-only (k&minus;1) decompositions</td><td class="n">1,659</td><td class="n">1,037&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -586,6 +610,15 @@
         elsewhere, quoted crossover sizes are optimistic.</p>
       <p><strong>The n<sup>4/9</sup> is real.</strong> Measured 0.44 against the predicted 0.444,
         end to end, every run recovering the planted logarithm.</p>
+      <p><strong>The 2/3 is exact too.</strong> Pair-only decompositions were predicted to need
+        n<sup>2/3</sup> residuals at k = 3; measured 0.666 over four sizes, the cleanest confirmation
+        of a predicted exponent on this board.</p>
+      <p><strong>One diagnosis on this board was wrong.</strong> The residuals no Macaulay degree
+        closes were recorded as having solutions at infinity, fixable by saturation. Measured, the
+        ideal is zero-dimensional, the affine variety carries one F_p-point where a positive-
+        dimensional component would carry about p, and a generic change of coordinates rescued none
+        of 28. It is the staircase border meeting the degree cut &mdash; a truncation artefact, so
+        the fix is a border basis, not saturation.</p>
     </div>
     <div class="note">
       <h3>Where the boundaries bite</h3>
@@ -601,10 +634,17 @@
     </div>
     <div class="note">
       <h3>What would count next</h3>
-      <p>One candidate carries orders of magnitude rather than factors: decomposing into two base
-        points instead of three, trading a far rarer decomposition for a much cheaper test.</p>
-      <p>If that also lands far above rho at these sizes, the fixed-degree direction is
-        quantitatively closed at toy scale, and this ledger is the result.</p>
+      <p><strong>The candidate this panel named has been measured.</strong> Decomposing into two base
+        points instead of three does carry orders of magnitude: the per-residual constant falls
+        580&times;, from 0.9 million field multiplications to 1,513. It also lands far above rho, at
+        1,037&times; at 33 bits, so by this ledger's own test the fixed-degree direction is
+        quantitatively closed at toy scale.</p>
+      <p>What is left is not a cheaper oracle. Two routes were measured and both are shut: a
+        Gr&ouml;bner solve on the descended system for fixed <code>X&#8321;</code> has a deciding
+        degree that grows as <code>&#8467;/2</code>, and the multilinear block structure of these
+        systems cannot be used as a Macaulay shift restriction at all, because the only shift that
+        preserves multilinearity is the trivial one. The open direction is a border basis in place
+        of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
@@ -612,7 +652,9 @@
 
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
-      <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>.
+      <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
+      with the pair-only cells from <code>gaudry_cubic_bench --pair-only</code> and the closed routes
+      from <code>examples/fixed_x1_oracle.rs</code> and <code>examples/blocked_macaulay_bench.rs</code>.
       Reporting convention in <code>AGENTS.md</code>.</p>
     <p>Operation counts are affine curve additions; field multiplications convert at a measured 63 per
       addition on F_p&sup3;, and multiplications modulo n at 9 field multiplications. Crossover sizes

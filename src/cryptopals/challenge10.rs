@@ -51,7 +51,10 @@ pub fn run() -> Report {
     let key = AesKey::new(KEY).unwrap();
     let iv = [0u8; 16];
     let pt = cbc_decrypt_no_iv_prefix(&ct, &key, &iv).expect("CBC decrypt");
-    r.line(format!("plaintext head: {:?}", &String::from_utf8_lossy(&pt)[..40]));
+    r.line(format!(
+        "plaintext head: {:?}",
+        &String::from_utf8_lossy(&pt)[..40]
+    ));
     // Round-trip sanity.
     let re_ct = cbc_encrypt_no_iv_prefix(&pt, &key, &iv);
     assert_eq!(re_ct, ct);

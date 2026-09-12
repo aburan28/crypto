@@ -92,19 +92,17 @@ fn f2_of(x: u64) -> Fp2 {
 
 /// Doubling step: `(g_{T,T}(R), 2T)`; `T` an `F_p` affine point, `R` an
 /// `F_{p²}` point.  Returns `g ∈ F_{p²}` and `2T ∈ E(F_p)` (`None` = `O`).
-fn step_double_fp2(
-    t: (u64, u64),
-    rx: Fp2,
-    ry: Fp2,
-    a: u64,
-    p: u64,
-) -> Option<(Fp2, Pt)> {
+fn step_double_fp2(t: (u64, u64), rx: Fp2, ry: Fp2, a: u64, p: u64) -> Option<(Fp2, Pt)> {
     let (x1, y1) = t;
     if y1 == 0 {
         // 2T = O; vertical tangent x − x1.
         return Some((f2_sub(rx, f2_of(x1), p), None));
     }
-    let lam = mulm(addm(mulm(3, mulm(x1, x1, p), p), a, p), invm(mulm(2, y1, p), p), p);
+    let lam = mulm(
+        addm(mulm(3, mulm(x1, x1, p), p), a, p),
+        invm(mulm(2, y1, p), p),
+        p,
+    );
     let x3 = subm(subm(mulm(lam, lam, p), x1, p), x1, p);
     let y3 = subm(mulm(lam, subm(x1, x3, p), p), y1, p);
     // l(R) = R_y − y1 − λ(R_x − x1)
@@ -121,14 +119,7 @@ fn step_double_fp2(
 }
 
 /// Addition step: `(g_{T,P}(R), T+P)`.
-fn step_add_fp2(
-    t: Pt,
-    pp: (u64, u64),
-    rx: Fp2,
-    ry: Fp2,
-    a: u64,
-    p: u64,
-) -> Option<(Fp2, Pt)> {
+fn step_add_fp2(t: Pt, pp: (u64, u64), rx: Fp2, ry: Fp2, a: u64, p: u64) -> Option<(Fp2, Pt)> {
     let (x1, y1) = match t {
         Some(v) => v,
         None => return Some(((1, 0), Some(pp))),

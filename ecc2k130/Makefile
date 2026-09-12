@@ -19,6 +19,10 @@
 MODAL   ?= modal
 NVCC    ?= nvcc
 CXX     ?= g++
+# Apple's clang needs the runtime named separately; everywhere else the driver
+# flag is enough.  Only the host walk is threaded, so this is all it reaches.
+#   make cpu CXX=clang++ OMPFLAGS="-Xpreprocessor -fopenmp -lomp"
+OMPFLAGS ?= -fopenmp
 CLANG   ?= clang
 PTXAS   ?= ptxas
 PTX     ?= /tmp/autolab.ptx
@@ -50,9 +54,46 @@ ifeq ($(GLOBAL_CG),1)
 GPUFLAGS += -Xptxas --def-load-cache=cg
 endif
 # The CPU build picks the widest word the target supports (AVX-512 -> 512 lanes,
-# AVX2 -> 256, otherwise 64).  Use a portable baseline when the build machine
-# and the run machine may differ.
+# AVX2 -> 256, NEON -> 128, otherwise 64).  Use a portable baseline when the
+# build machine and the run machine may differ.  That lever does not work on
+# Apple clang, whose driver keeps the host CPU's features regardless of -march:
+# MARCH=armv8-a leaves __ARM_FEATURE_SHA3 undefined yet the backend still folds
+# XOR trees into EOR3.  Build portable binaries on the target OS.
 MARCH   ?= native
+
+# On aarch64 the wide word is NEON, and EOR3 (FEAT_SHA3) is most of what makes
+# it faster than the 64-bit fallback rather than merely wider.  -march=native
+# does not always imply +sha3 -- GCC on Darwin reports no SHA3 for native on
+# cores that have it -- so ask the compiler which spelling actually defines the
+# feature macro and take the first that does.  A compiler-accepted +sha3
+# spelling is not proof the host can execute EOR3 (armv8.2-a+sha3 is accepted
+# on any recent toolchain), so those candidates are used only when the CPU
+# reports FEAT_SHA3.  They also rewrite the requested -march, so only search
+# when MARCH is native: an explicit MARCH names a target this host is not
+# evidence about.  Falling through to plain MARCH still gets NEON and BSL,
+# just not the three-input XOR.
+HOSTARCH := $(shell uname -m)
+HOSTOS   := $(shell uname -s)
+ifneq (,$(filter arm64 aarch64,$(HOSTARCH)))
+# Linux lists sha3 in cpuinfo Features when FEAT_SHA3 is present.  Darwin has
+# no /proc, and every Apple Silicon core has SHA3, so a missing
+# hw.optional.arm.FEAT_SHA3 key means present there and absent anywhere else.
+ifeq ($(HOSTOS),Darwin)
+HOSTSHA3 := $(shell sysctl -n hw.optional.arm.FEAT_SHA3 2>/dev/null || echo 1)
+else
+HOSTSHA3 := $(shell grep -m1 '^Features' /proc/cpuinfo 2>/dev/null | grep -c -w sha3)
+endif
+sha3flag = $(shell $(CXX) $(1) -dM -E -x c++ /dev/null 2>/dev/null | grep -c __ARM_FEATURE_SHA3)
+SHA3TRY := $(if $(filter native,$(MARCH)), \
+    $(if $(filter-out 0,$(HOSTSHA3)), \
+        -march=native+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3))
+ARCHFLAGS := $(firstword \
+    $(foreach f,-march=$(MARCH) $(SHA3TRY), \
+        $(if $(filter-out 0,$(call sha3flag,$(f))),$(f))) \
+    -march=$(MARCH))
+else
+ARCHFLAGS := -march=$(MARCH)
+endif
 ARCH    ?= -gencode arch=compute_80,code=sm_80 \
            -gencode arch=compute_86,code=sm_86 \
            -gencode arch=compute_89,code=sm_89 \
@@ -87,9 +128,19 @@ all: cpu
 
 # The generated leaf is sized to a register file: the largest halving-chain
 # multiply whose peak liveness still fits REGS live values.  255 is a GPU's
-# register budget and gives a 66-word leaf at m=131; a host has 16 general
-# registers, so REGS=32 is the number to regenerate with when tuning the CPU
-# reference build, and the two targets genuinely do not want the same leaf.
+# register budget and gives a 66-word leaf at m=131.
+#
+# A smaller leaf for the host is the obvious thing to want and it is measurably
+# wrong.  Single core, M4 Pro, NEON words, curve 131, median of five:
+#
+#   REGS=32   leaf 9     9.820 M it/s
+#   REGS=64   leaf 17   10.052
+#   REGS=128  leaf 33   10.799
+#   REGS=255  leaf 66   11.353
+#
+# The leaf spills either way -- 59% of the emitted multiply is loads and stores
+# even at leaf 66 -- and spilling to a hot stack is cheaper than the extra
+# Karatsuba level a small leaf buys.  Both targets want the same leaf.
 REGS ?= 255
 
 generate:
@@ -113,7 +164,7 @@ check-verilog:
 cpu: ecc2k130-cpu
 
 ecc2k130-cpu: src/main.cu $(HDRS) $(GEN)
-	$(CXX) -O3 -std=c++17 -march=$(MARCH) -fopenmp $(DEFS) -DECC_NO_CUDA \
+	$(CXX) -O3 -std=c++17 $(ARCHFLAGS) $(OMPFLAGS) $(DEFS) -DECC_NO_CUDA \
 	    -Wall -Wno-unused-function -Wno-unknown-pragmas -x c++ src/main.cu -o $@
 
 gpu: ecc2k130
@@ -231,7 +282,15 @@ test-timing:
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
 	./build/test-timing
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing check-verilog ecc2k130-cpu
+# Every host word type this machine can build, against the scalar definitions.
+# Built at the tuned architecture so the wide word under test is the one the
+# walk will actually use.
+test-logic:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
+	./build/test-logic
+
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing test-logic check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -318,6 +377,6 @@ clean:
 	rm -f build/test-packed-clmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
-	rm -f build/test-timing
+	rm -f build/test-timing build/test-logic
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

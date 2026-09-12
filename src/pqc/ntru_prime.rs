@@ -409,7 +409,10 @@ mod tests {
         let kp = ntru_prime_keygen();
         let zero = NtruPrimeCiphertext { c: NpPoly::zero() };
 
-        assert_eq!(ntru_prime_decapsulate(&zero, &kp.sk), rejection_key(&kp.sk, &zero));
+        assert_eq!(
+            ntru_prime_decapsulate(&zero, &kp.sk),
+            rejection_key(&kp.sk, &zero)
+        );
     }
 
     #[test]

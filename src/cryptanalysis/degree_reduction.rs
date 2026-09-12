@@ -1648,6 +1648,129 @@ pub fn collect_rho_matched_cells(
     out
 }
 
+// ── Presentation dose-response (EXP-R4d) ────────────────────────────
+
+/// One target measured under three presentations of the **same system at
+/// the same variable count**: the raw descended system, the system after a
+/// single saturation round, and the fully saturated system.
+///
+/// The three differ only in how many degree-3 falls have been folded into
+/// the generating set, so this is a *dose* axis for lever L4 with nothing
+/// cross-shape in it. That matters because R4′ established that `Δ_low`
+/// cannot compare instances across shapes; holding `vars` and the target
+/// fixed removes that objection entirely, leaving only the question R4
+/// actually asked — does the lever act *through* the defect?
+#[derive(Clone, Debug)]
+pub struct PresentationRow {
+    pub full_vars: u32,
+    /// Generator counts under the three presentations.
+    pub eqs: [u32; 3],
+    /// `Δ_low` under raw / one-round / saturated.
+    pub defect: [f64; 3],
+    /// `D*` under raw / one-round / saturated.
+    pub dstar: [u32; 3],
+}
+
+/// Labels for the three presentations, in the order they appear in
+/// [`PresentationRow`]'s arrays.
+pub const PRESENTATIONS: [&str; 3] = ["raw", "one-round", "saturated"];
+
+/// Measure `targets` non-decomposable targets under all three
+/// presentations at one `(family, n, n')` cell.
+///
+/// Returns one row per target for which every presentation refuted within
+/// `d_max`; a target that censors under any presentation is dropped
+/// entirely rather than contributing a partial row, so the three columns
+/// are always the same set of targets.
+#[allow(clippy::too_many_arguments)]
+pub fn run_presentation_cell(
+    family: BasisFamily,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    targets: u32,
+    d_max: u32,
+    rounds: u32,
+    seed: u64,
+) -> Vec<PresentationRow> {
+    let full_vars = 2 * n_sub;
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    let mut out = Vec::new();
+    let mut attempts = 0u32;
+    while (out.len() as u32) < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                match FactorSubspace::build(
+                    family,
+                    n,
+                    n_sub,
+                    irr,
+                    seed ^ (0x9E37 + attempts as u64),
+                ) {
+                    Some(v) => v,
+                    None => return out,
+                }
+            }
+            _ => match FactorSubspace::build(family, n, n_sub, irr, 0) {
+                Some(v) => v,
+                None => return out,
+            },
+        };
+        let b = rand_nz(n, &mut next);
+        let x3 = rand_nz(n, &mut next);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+        let raw = descend_on_subspace(n, &v, irr, &b, &x3);
+        // One round, then saturation. `saturate_with_falls` with
+        // `rounds = 1` is exactly the first round of the full run, so the
+        // dose axis is nested by construction.
+        let (one, _) = saturate_with_falls(&raw, full_vars, 1);
+        let (sat, _) = saturate_with_falls(&raw, full_vars, rounds);
+
+        let mut dstar = [0u32; 3];
+        let mut defect = [0.0f64; 3];
+        let mut eqs = [0u32; 3];
+        let mut ok = true;
+        for (i, sys) in [&raw, &one, &sat].into_iter().enumerate() {
+            let ne = sys.len() as u32;
+            let Some(d) = refutation_scan(sys, full_vars, d_max).1 else {
+                ok = false;
+                break;
+            };
+            let profile = rank_profile(sys, full_vars, ne, 3.min(d_max));
+            eqs[i] = ne;
+            dstar[i] = d;
+            defect[i] = early_defect(&profile, 3);
+        }
+        if !ok {
+            continue;
+        }
+        out.push(PresentationRow {
+            full_vars,
+            eqs,
+            defect,
+            dstar,
+        });
+    }
+    out
+}
+
 // ── Size-controlled correlation (EXP-R4b) ───────────────────────────
 
 /// One `(block, x, y)` observation for a blocked correlation.
@@ -1678,9 +1801,13 @@ pub struct BlockedObs {
 /// * `mean_per_block` — correlate inside each stratum, then average. Gives
 ///   every stratum equal weight regardless of how many cells it holds, and
 ///   is the most direct reading of "does it hold at fixed size?".
-/// * `blocked_rank` — rank within each stratum, pool the ranks, correlate
-///   once. Uses all cells in a single statistic, so small strata do not
-///   dominate, but it needs the strata to be rank-comparable.
+/// * `blocked_rank` — rank within each stratum, rescale to a common mean
+///   of 1/2, pool the ranks, correlate once. Uses all cells in a single
+///   statistic, so small strata do not dominate. The rescaling is what
+///   makes unequal strata rank-comparable: raw 1-based ranks have mean
+///   `(n_g+1)/2`, and pooling them would add a between-block term
+///   `Σ n_g (μ_g−μ)²` that is a function of the block size this
+///   statistic exists to remove.
 /// * `fixed_effects` — subtract each stratum's mean from its members and
 ///   correlate the residuals. Works on raw values rather than ranks, so it
 ///   is sensitive to magnitude as well as order.
@@ -1695,7 +1822,7 @@ pub struct SizeControl {
     /// Mean of the per-stratum Spearman `ρ_s`, over strata where it is
     /// defined.
     pub mean_per_block: Option<f64>,
-    /// Pearson `r` of within-stratum ranks, pooled.
+    /// Pearson `r` of within-stratum ranks, rescaled to mean 1/2 and pooled.
     pub blocked_rank: Option<f64>,
     /// Pearson `r` of within-stratum demeaned residuals.
     pub fixed_effects: Option<f64>,
@@ -1748,8 +1875,13 @@ pub fn size_control(obs: &[BlockedObs]) -> SizeControl {
         let xs: Vec<f64> = rows.iter().map(|o| o.x).collect();
         let ys: Vec<f64> = rows.iter().map(|o| o.y).collect();
         per_block.push((label.to_string(), rows.len(), spearman(&xs, &ys)));
-        brx.extend(rank_within(&xs));
-        bry.extend(rank_within(&ys));
+        // Scale by n_g+1 so every stratum has rank mean 1/2. Without this,
+        // unequal blocks inject Σ n_g (μ_g−μ)² into the pooled Pearson —
+        // a non-negative function of block size that attenuates a negative
+        // within-stratum law.
+        let scale = rows.len() as f64 + 1.0;
+        brx.extend(rank_within(&xs).into_iter().map(|r| r / scale));
+        bry.extend(rank_within(&ys).into_iter().map(|r| r / scale));
         let mx = xs.iter().sum::<f64>() / xs.len() as f64;
         let my = ys.iter().sum::<f64>() / ys.len() as f64;
         fex.extend(xs.iter().map(|a| a - mx));
@@ -2543,6 +2675,65 @@ mod tests {
         );
     }
 
+    // ── Presentation dose-response (EXP-R4d) ────────────────────────
+
+    /// The mechanical fact EXP-R4d turns on, and the reason `Δ_low` cannot
+    /// score a lever's *output*: the cutoff-3 defect **is** the space of
+    /// degree-3 falls, and saturation adds precisely those as generators.
+    /// So a saturated system has no degree-3 defect left — the lever's
+    /// action is to consume the quantity a screen would measure.
+    ///
+    /// Asserted on a real descended system rather than a constructed one,
+    /// because the claim is about what `saturate_with_falls` does to
+    /// `early_defect`, not about arithmetic.
+    #[test]
+    fn saturation_consumes_the_early_defect() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Coordinate, 10, 5, &irr, 4, 6, 6, 7);
+        assert!(!rows.is_empty(), "need at least one measurable target");
+        for r in &rows {
+            assert_eq!(
+                r.defect[2], 0.0,
+                "saturated presentation must have zero cutoff-3 defect, got {}",
+                r.defect[2]
+            );
+            assert!(
+                r.eqs[0] < r.eqs[2],
+                "saturation must add generators: {} -> {}",
+                r.eqs[0],
+                r.eqs[2]
+            );
+        }
+        // At least one target must have had something to consume, or the
+        // test is vacuous.
+        assert!(
+            rows.iter().any(|r| r.defect[0] > 0.0),
+            "no target had a raw defect — the assertion above proves nothing"
+        );
+    }
+
+    /// The dose axis is nested: one round is a prefix of full saturation,
+    /// so generator counts must be monotone and `D*` must never rise
+    /// (adding ideal elements cannot make a system harder).
+    #[test]
+    fn presentation_dose_axis_is_monotone() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Random, 10, 5, &irr, 4, 6, 6, 11);
+        assert!(!rows.is_empty());
+        for r in &rows {
+            assert!(
+                r.eqs[0] <= r.eqs[1] && r.eqs[1] <= r.eqs[2],
+                "generator counts must be nested: {:?}",
+                r.eqs
+            );
+            assert!(
+                r.dstar[0] >= r.dstar[1] && r.dstar[1] >= r.dstar[2],
+                "D* must not rise along the dose axis: {:?}",
+                r.dstar
+            );
+        }
+    }
+
     // ── Size-controlled correlation (EXP-R4b) ───────────────────────
 
     fn obs(rows: &[(&str, f64, f64)]) -> Vec<BlockedObs> {
@@ -2614,6 +2805,56 @@ mod tests {
         }
     }
 
+    /// Raw 1-based ranks have mean `(n_g+1)/2`. Pooling them across
+    /// unequal strata injects a between-block term `Σ n_g (μ_g−μ)²` that
+    /// is a function of block size — the nuisance this statistic exists
+    /// to remove — and that term is non-negative, so it attenuates a
+    /// negative within-stratum law. The tests above cannot catch this:
+    /// they use equal-sized blocks, where the extra term is zero.
+    #[test]
+    fn blocked_rank_does_not_mix_unequal_stratum_sizes() {
+        // Perfect negative relation, sizes 3 and 9. Unscaled ranks give
+        // Pearson ≈ −0.51; after rescaling it must recover −1.
+        let mut rows = Vec::new();
+        for i in 0..3 {
+            rows.push(("small", i as f64, -(i as f64)));
+        }
+        for i in 0..9 {
+            rows.push(("large", i as f64, -(i as f64)));
+        }
+        let c = size_control(&obs(&rows));
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br < -0.99,
+            "unequal strata must not attenuate a within-stratum law: {br}"
+        );
+
+        // The other direction: within-stratum Spearman is exactly zero
+        // at n = 4 (permutation (2,4,1,3), Σd² = 10) and at n = 8
+        // (permutation (7,1,5,3,6,4,8,2), Σd² = 84). Unscaled ranks
+        // would report a positive blocked_rank from the mean gap alone.
+        let rows = obs(&[
+            ("n4", 0.0, 1.0),
+            ("n4", 1.0, 3.0),
+            ("n4", 2.0, 0.0),
+            ("n4", 3.0, 2.0),
+            ("n8", 0.0, 7.0),
+            ("n8", 1.0, 1.0),
+            ("n8", 2.0, 5.0),
+            ("n8", 3.0, 3.0),
+            ("n8", 4.0, 6.0),
+            ("n8", 5.0, 4.0),
+            ("n8", 6.0, 8.0),
+            ("n8", 7.0, 2.0),
+        ]);
+        let c = size_control(&rows);
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br.abs() < 1e-9,
+            "unequal zero-within blocks must not inherit a size term: {br}"
+        );
+    }
+
     /// Strata are held to equal weight by `mean_per_block` whatever their
     /// size, which is the reason to report it alongside the two pooled
     /// controls rather than instead of them.
@@ -2657,6 +2898,52 @@ mod tests {
         assert!(
             (m + 1.0).abs() < 1e-12,
             "a skipped block must not be averaged in as 0: {m}"
+        );
+    }
+
+    /// The three controlled statistics exist so that **agreement between
+    /// them** is the evidence. That only works if they agree when they
+    /// should — and the `blocked_rank` bias fixed in `e16b67c` was
+    /// invisible to every test here because all of them used equal-sized
+    /// blocks, where the bias term is identically zero.
+    ///
+    /// So: unequal strata (2, 5, 11) carrying the *same* within-stratum
+    /// relation, offset from each other so the pooled figure is diluted.
+    /// All three controlled statistics must land on it together. A bias
+    /// that is a function of block size splits them apart, which is what
+    /// should have been read off the `−0.3494 / −0.1189 / −0.3248` triple
+    /// rather than published.
+    #[test]
+    fn controlled_statistics_agree_under_unequal_strata() {
+        let mut rows = Vec::new();
+        for (label, n, off) in [("a", 2, 0.0), ("b", 5, 40.0), ("c", 11, 80.0)] {
+            for i in 0..n {
+                let x = i as f64;
+                rows.push((label, off + x, off - 3.0 * x));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        assert_eq!(c.n_cells, 18);
+        assert_eq!(c.n_blocks, 3);
+        let vals = [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ];
+        for (name, v) in vals {
+            let v = v.expect("defined");
+            assert!(
+                v < -0.99,
+                "{name} must recover the within-stratum law under unequal sizes: {v}"
+            );
+        }
+        let spread = vals
+            .iter()
+            .filter_map(|(_, v)| *v)
+            .fold((f64::MAX, f64::MIN), |(lo, hi), v| (lo.min(v), hi.max(v)));
+        assert!(
+            spread.1 - spread.0 < 1e-6,
+            "the three must agree, not merely all be negative: {spread:?}"
         );
     }
 

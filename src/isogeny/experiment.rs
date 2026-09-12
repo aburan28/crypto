@@ -204,9 +204,13 @@ fn generate_random_curves(bits: u32, count: u32, seed: u64) -> Vec<SmallCurve> {
     let mut attempts = 0;
     while result.len() < count as usize && attempts < count as u64 * 64 {
         attempts += 1;
-        rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rng_state = rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let a = (rng_state >> 7) % p;
-        rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rng_state = rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let b = (rng_state >> 7) % p;
         // Discriminant condition: 4 a³ + 27 b² ≠ 0 (mod p).
         let disc = (4 * ((a as u128 * a as u128 % p as u128) * a as u128 % p as u128)

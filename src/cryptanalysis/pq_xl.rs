@@ -124,11 +124,7 @@ fn enumerate_monomials(n_vars: usize, max_deg: u32) -> Vec<F2BoolMono> {
 
 /// Index from monomial to its column in the [`enumerate_monomials`] list.
 fn mono_index(monos: &[F2BoolMono]) -> std::collections::HashMap<F2BoolMono, usize> {
-    monos
-        .iter()
-        .enumerate()
-        .map(|(i, m)| (*m, i))
-        .collect()
+    monos.iter().enumerate().map(|(i, m)| (*m, i)).collect()
 }
 
 /// Convert a polynomial to a sparse row, given the monomial→column
@@ -236,18 +232,16 @@ fn gaussian_eliminate_sparse(rows: &mut Vec<F2SparseRow>, n_cols: usize) {
 /// 1, or the LT staircase covers everything below some bound) or
 /// `D` reaches `n_vars` (where the boolean ring has 2^n monomials
 /// and we can't do better).
-pub fn boolean_xl(
-    polys: Vec<F2BoolPoly>,
-    n_vars: usize,
-    max_deg: u32,
-) -> Vec<F2BoolPoly> {
+pub fn boolean_xl(polys: Vec<F2BoolPoly>, n_vars: usize, max_deg: u32) -> Vec<F2BoolPoly> {
     assert!(n_vars <= 24, "XL toy implementation capped at 24 variables");
     let monos = enumerate_monomials(n_vars, max_deg);
     let mono_to_col = mono_index(&monos);
     let n_cols = monos.len();
     let mut rows = build_macaulay_matrix(&polys, &monos, &mono_to_col, max_deg);
     gaussian_eliminate_sparse(&mut rows, n_cols);
-    rows.into_iter().map(|r| row_to_poly(&r, &monos, n_vars)).collect()
+    rows.into_iter()
+        .map(|r| row_to_poly(&r, &monos, n_vars))
+        .collect()
 }
 
 /// **Iterative boolean XL until the polynomial set stabilises**.
@@ -261,8 +255,12 @@ pub fn boolean_xl_iterate(polys: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolPo
     let mut current = polys;
     let mut prev_lt_signature: Vec<F2BoolMono> = collect_lts(&current);
     prev_lt_signature.sort_by(cmp_mono_owned);
-    let mut d = current.iter().map(|p| p.lt().map(|m| m.degree()).unwrap_or(0))
-        .max().unwrap_or(0).max(1);
+    let mut d = current
+        .iter()
+        .map(|p| p.lt().map(|m| m.degree()).unwrap_or(0))
+        .max()
+        .unwrap_or(0)
+        .max(1);
     let cap = n_vars as u32;
     while d <= cap {
         let reduced = boolean_xl(current.clone(), n_vars, d);
@@ -313,8 +311,12 @@ mod tests {
     /// Sparse row XOR cancellation: `[0, 2, 5]` XOR `[0, 2, 7]` = `[5, 7]`.
     #[test]
     fn sparse_row_xor_cancels() {
-        let mut a = F2SparseRow { cols: vec![0, 2, 5] };
-        let b = F2SparseRow { cols: vec![0, 2, 7] };
+        let mut a = F2SparseRow {
+            cols: vec![0, 2, 5],
+        };
+        let b = F2SparseRow {
+            cols: vec![0, 2, 7],
+        };
         a.xor_assign(&b);
         assert_eq!(a.cols, vec![5, 7]);
     }
@@ -364,8 +366,9 @@ mod tests {
         let f2 = F2BoolPoly::from_monos(vec![F2BoolMono::var(1), F2BoolMono::one()], 4);
         let f3 = F2BoolPoly::from_monos(vec![F2BoolMono::var(2), F2BoolMono::var(0)], 4);
         let f4 = F2BoolPoly::from_monos(vec![F2BoolMono::var(3), F2BoolMono::var(1)], 4);
-        let sols: std::collections::HashSet<u64> =
-            boolean_xl_solve(vec![f1, f2, f3, f4], 4).into_iter().collect();
+        let sols: std::collections::HashSet<u64> = boolean_xl_solve(vec![f1, f2, f3, f4], 4)
+            .into_iter()
+            .collect();
         assert_eq!(sols.len(), 1);
         assert!(sols.contains(&v_star));
     }
@@ -386,18 +389,14 @@ mod tests {
     fn xl_handles_idempotency_silently() {
         // v_0² + v_0 = 0 in the boolean ring.  Building the polynomial
         // [v_0, v_0] in `from_monos` cancels → zero polynomial.
-        let zero_poly =
-            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::var(0)], 2);
+        let zero_poly = F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::var(0)], 2);
         assert!(zero_poly.is_zero());
         // Use a non-trivial f to get a non-empty input.
         let f = F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], 2);
         let sols = boolean_xl_solve(vec![f], 2);
         // v_0 + 1 = 0 → v_0 = 1.  v_1 free.  Solutions: {1, 3}.
         let sol_set: std::collections::HashSet<u64> = sols.into_iter().collect();
-        assert_eq!(
-            sol_set,
-            [0b01u64, 0b11].iter().copied().collect()
-        );
+        assert_eq!(sol_set, [0b01u64, 0b11].iter().copied().collect());
     }
 
     /// **Multivariate-mul cancellation**: `(v_0 + 1) · v_0 = v_0 + v_0 = 0`
