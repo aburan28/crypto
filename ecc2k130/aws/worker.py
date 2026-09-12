@@ -113,6 +113,10 @@ def instanceId():
 
 
 def gpuName(gpu):
+    # Non-GPU clients (the FPGA host program) have no nvidia-smi; the
+    # bootstrap tells us what the device is instead.
+    if os.environ.get("ECC_DEVICE_NAME"):
+        return os.environ["ECC_DEVICE_NAME"]
     try:
         r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
                            capture_output=True, text=True)
