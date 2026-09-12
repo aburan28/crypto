@@ -104,12 +104,22 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     cargo = shutil.which("cargo")
     rustc = shutil.which("rustc")
     require(cargo is not None and rustc is not None, "Stage-42 Rust toolchain is unavailable")
-    cargo_path = str(Path(cargo).resolve(strict=True))
-    rustc_path = str(Path(rustc).resolve(strict=True))
+    # Keep the rustup shim invocation names. Resolving either symlink to the
+    # shared `rustup` binary would change argv[0] and stop selecting cargo or
+    # rustc correctly.
+    cargo_path = str(Path(cargo).absolute())
+    rustc_path = str(Path(rustc).absolute())
     environment = custody.safe_child_environment()
     environment["PATH"] = ":".join(dict.fromkeys([str(Path(cargo_path).parent), str(Path(rustc_path).parent), environment["PATH"]]))
     environment["RUSTC"] = rustc_path
     environment["CARGO_TARGET_DIR"] = str(target)
+    home = Path(os.environ.get("HOME", "/home/runner"))
+    environment["HOME"] = str(home)
+    environment["CARGO_HOME"] = os.environ.get("CARGO_HOME", str(home / ".cargo"))
+    if os.environ.get("RUSTUP_HOME"):
+        environment["RUSTUP_HOME"] = os.environ["RUSTUP_HOME"]
+    elif (home / ".rustup").is_dir():
+        environment["RUSTUP_HOME"] = str(home / ".rustup")
     command = [cargo_path, "build", "--release", "--locked", "--jobs", str(args.jobs), "--example", "koblitz_rank_fixture", "--example", "koblitz_rho_fixture"]
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
