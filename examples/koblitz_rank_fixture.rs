@@ -509,7 +509,49 @@ fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
     wide as u64
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn pclmul_u64(left: u64, right: u64) -> u128 {
+    use std::arch::x86_64::*;
+    let x = _mm_set_epi64x(0, left as i64);
+    let y = _mm_set_epi64x(0, right as i64);
+    let product = _mm_clmulepi64_si128::<0x00>(x, y);
+    let low = _mm_cvtsi128_si64(product) as u64;
+    let high = _mm_cvtsi128_si64(_mm_srli_si128::<8>(product)) as u64;
+    (high as u128) << 64 | low as u128
+}
+
+#[inline(always)]
+fn pclmul_enabled() -> bool {
+    #[cfg(target_arch = "x86_64")]
+    {
+        use std::sync::OnceLock;
+        static ENABLED: OnceLock<bool> = OnceLock::new();
+        *ENABLED.get_or_init(|| {
+            std::env::var("KIC_DISABLE_PCLMUL").as_deref() != Ok("1")
+                && std::arch::is_x86_feature_detected!("pclmulqdq")
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        false
+    }
+}
+
+fn field_mul_backend() -> &'static str {
+    if pclmul_enabled() {
+        "x86_64_pclmulqdq"
+    } else {
+        "portable_sparse_carryless"
+    }
+}
+
 fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+    #[cfg(target_arch = "x86_64")]
+    if pclmul_enabled() {
+        // SAFETY: the cached runtime feature check above guards every call.
+        return reduce_raw(curve, unsafe { pclmul_u64(left, right) });
+    }
     if curve.n <= 31 {
         let mut product = 0u64;
         let mut value = right;
@@ -2010,6 +2052,7 @@ fn main() {
             "factor_base_points":base.points.len(),
             "base_hash":&base_hash,
             "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+            "field_mul_backend":field_mul_backend(),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
             "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
@@ -2694,6 +2737,7 @@ fn main() {
                 "pair_index_mode":pair_mode.name(),
                 "pair_canonicalization_maps":pair_canonicalization_maps,
                 "pair_batch_inversions":pair_batch_inversions,
+                "field_mul_backend":field_mul_backend(),
                 "query_group_additions":query_additions,
                 "query_canonicalization_maps":query_canonicalization_maps,
                 "query_x_filter_rejections":query_x_filter_rejections,
