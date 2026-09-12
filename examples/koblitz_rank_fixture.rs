@@ -585,7 +585,7 @@ fn compact_point_key(point: &BinaryPoint) -> (u64, u64) {
     }
 }
 
-fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
+fn square_raw_dispatched(curve: &KoblitzCurve, value: u64) -> u64 {
     #[cfg(target_arch = "x86_64")]
     if pclmul_enabled() {
         if curve.n == 53 && n53_fast_reduction_enabled() && fused_pcl_n53_enabled() {
@@ -614,6 +614,17 @@ fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
         bits &= bits - 1;
     }
     reduce_raw(curve, wide)
+}
+
+#[inline(always)]
+fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
+    #[cfg(target_arch = "x86_64")]
+    if curve.n == 53 && combined_n53_fast_path_enabled() {
+        // SAFETY: the combined cached predicate includes the runtime PCLMUL
+        // feature check and both exact degree-53 reduction controls.
+        return unsafe { pclmul_reduce_n53(value, value) };
+    }
+    square_raw_dispatched(curve, value)
 }
 
 fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
@@ -710,6 +721,25 @@ fn pclmul_enabled() -> bool {
     }
 }
 
+#[inline(always)]
+fn combined_n53_fast_path_enabled() -> bool {
+    #[cfg(target_arch = "x86_64")]
+    {
+        use std::sync::OnceLock;
+        static ENABLED: OnceLock<bool> = OnceLock::new();
+        *ENABLED.get_or_init(|| {
+            std::env::var("KIC_DISABLE_COMBINED_N53_FAST_PATH").as_deref() != Ok("1")
+                && pclmul_enabled()
+                && n53_fast_reduction_enabled()
+                && fused_pcl_n53_enabled()
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        false
+    }
+}
+
 fn field_mul_backend() -> &'static str {
     if pclmul_enabled() {
         "x86_64_pclmulqdq"
@@ -745,7 +775,15 @@ fn field_product_pipeline(curve: &KoblitzCurve) -> &'static str {
     }
 }
 
-fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+fn field_product_dispatch(curve: &KoblitzCurve) -> &'static str {
+    if curve.n == 53 && combined_n53_fast_path_enabled() {
+        "inline_combined_n53_predicate"
+    } else {
+        "legacy_per_operation_feature_dispatch"
+    }
+}
+
+fn mul_raw_dispatched(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
     #[cfg(target_arch = "x86_64")]
     if pclmul_enabled() {
         if curve.n == 53 && n53_fast_reduction_enabled() && fused_pcl_n53_enabled() {
@@ -773,6 +811,17 @@ fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
         value &= value - 1;
     }
     reduce_raw(curve, product)
+}
+
+#[inline(always)]
+fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+    #[cfg(target_arch = "x86_64")]
+    if curve.n == 53 && combined_n53_fast_path_enabled() {
+        // SAFETY: the combined cached predicate includes the runtime PCLMUL
+        // feature check and both exact degree-53 reduction controls.
+        return unsafe { pclmul_reduce_n53(left, right) };
+    }
+    mul_raw_dispatched(curve, left, right)
 }
 
 fn inverse_raw(curve: &KoblitzCurve, value: u64) -> u64 {
@@ -2712,6 +2761,7 @@ fn main() {
             "field_square_backend":field_square_backend(&curve),
             "field_reduction_backend":field_reduction_backend(&curve),
             "field_product_pipeline":field_product_pipeline(&curve),
+            "field_product_dispatch":field_product_dispatch(&curve),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
             "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
@@ -3497,6 +3547,7 @@ fn main() {
                 "field_square_backend":field_square_backend(&curve),
                 "field_reduction_backend":field_reduction_backend(&curve),
                 "field_product_pipeline":field_product_pipeline(&curve),
+                "field_product_dispatch":field_product_dispatch(&curve),
                 "query_group_additions":query_additions,
                 "query_canonicalization_maps":query_canonicalization_maps,
                 "query_x_filter_rejections":query_x_filter_rejections,
