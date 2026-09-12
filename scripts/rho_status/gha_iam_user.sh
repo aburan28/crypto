@@ -6,7 +6,8 @@
 #   AWS_PROFILE=admin ./scripts/rho_status/gha_iam_user.sh
 #   AWS_PROFILE=admin ./scripts/rho_status/gha_iam_user.sh --push-github
 #
-# Creates user ecc2k130-status-gha with DescribeInstances only, mints one
+# Creates user ecc2k130-status-gha with walker describe + temporary SSH
+# SG punch-hole (authorize/revoke TCP/22 for the runner /32), mints one
 # access key, and optionally writes it to GitHub Actions secrets
 # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY on aburan28/crypto.
 #
@@ -41,7 +42,13 @@ aws iam put-user-policy --user-name "$USER_NAME" --policy-name describe-walker -
     {
       "Sid": "FindTaggedWalker",
       "Effect": "Allow",
-      "Action": ["ec2:DescribeInstances", "ec2:DescribeTags"],
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags",
+        "ec2:DescribeSecurityGroups",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress"
+      ],
       "Resource": "*"
     }
   ]

@@ -37,16 +37,16 @@ user keys.
 2. **Secrets** (repo or environment `github-pages`):
    - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — from
      `ecc2k130-status-gha`, not from `adam`.
-   - `RHO_WALKER_SSH_KEY` — private key for `ubuntu` on the walker
-     (the `meow34` key the instance was launched with).
-   - Optional: `RHO_WALKER_HOST` if you want to pin a host and skip the
-     lookup.
+   - `RHO_WALKER_SSH_KEY` — the GHA deploy key (ed25519). You do **not**
+     need the instance launch key (`meow34`). The matching public key is
+     `scripts/rho_status/gha_walker.pub` and is installed on
+     `ubuntu@walker`. The job opens TCP/22 from the runner's public IP
+     for the duration of the hop, then revokes that rule.
 
 3. **Pages**: Settings → Pages → Source = **GitHub Actions**.
 
-4. Keep SSH ingress on the walker SG limited to operators. The Action
-   uses the same key; if you later rotate the spot box, retag the new
-   instance `Name=rho-ecc2k-walker` and allow the operator IP again.
+4. If the walker is replaced, install `gha_walker.pub` on the new box
+   and keep the tag `Name=rho-ecc2k-walker`.
 
 The workflow does **not** need `DATABASE_URL`. The walker already has it.
 
@@ -59,8 +59,8 @@ python3 scripts/rho_status/test_rho_status.py
 # From a host that can reach RDS (the walker, or an SSH tunnel)
 python3 scripts/rho_status/snapshot.py --out /tmp/status.json
 
-# From a laptop with AWS + walker SSH key
-RHO_WALKER_SSH_KEY=$HOME/.ssh/meow34.pem \
+# From a laptop with AWS creds + the GHA deploy key
+RHO_WALKER_SSH_KEY=$HOME/.ssh/gha_walker \
   scripts/rho_status/fetch_via_walker.sh
 ```
 
