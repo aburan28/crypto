@@ -10,6 +10,7 @@ minimums.
 | 0 | Existing native product and software top-three-bit correction |
 | 1 | Fold the two middle Karatsuba reconstruction words into native addends |
 | 2 | Also use native addends for the top-three-bit cross terms |
+| 3 | Use native low products with software high carries and a software three-bit product |
 
 CLMAD first selects the low or high 64 bits of a carryless product, then
 XORs its 64-bit addend into that selected half. The implementation uses this
@@ -70,3 +71,25 @@ screen supplies no hardware-pipe ceiling measurement. Mode 2 is not selected
 by the RTX preset, and the implementation PR remains a draft while a hybrid
 with fewer native top-term multiplies is evaluated. The 15 B/s target remains
 unachieved.
+
+## Mode-3 hybrid result
+
+Mode 3 reduces the ordinary field product to ten native carryless
+instructions (seven low, three high), with software operations for the
+two-bit high carries and the three-bit top product. Its ordinary / paired /
+normal-basis helpers compiled to 134 / 249 / 323 non-NOP instructions at
+the same 122 walk registers and zero spills.
+
+The [fixed-geometry GPU screen](benchmarks/carryless-addends/hybrid-comparison.json)
+passed both arithmetic suites, full client checks, common-state comparisons
+and all 20 checkpoint children. Each of the five timed rows completed
+201,863,462,912 scalar updates. Screening measured 13.486482 B/s for the
+first control, **12.601867 B/s for mode 3**, and 13.414589 B/s for the final
+control. The candidate failed qualification, so no repeated confirmation or
+timed DP34 collection followed. The [artifact audit](benchmarks/carryless-addends/hybrid-comparison-review.json)
+passed.
+
+Mode 3 remains opt-in and is not selected by the RTX preset. A separate
+dependency assessment is testing whether computing independent native
+products before combining their results avoids the latency introduced by
+chained addend operands. No performance gain is claimed for that hypothesis.

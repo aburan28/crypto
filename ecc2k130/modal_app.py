@@ -93,8 +93,8 @@ PACKED_CLMAD = os.environ.get("ECC_PACKED_CLMAD", "0")
 if PACKED_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_CLMAD must be 0 or 1")
 PACKED_CLMAD_FUSED = os.environ.get("ECC_PACKED_CLMAD_FUSED", "0")
-if PACKED_CLMAD_FUSED not in ("0", "1", "2"):
-    raise ValueError("ECC_PACKED_CLMAD_FUSED must be 0, 1 or 2")
+if PACKED_CLMAD_FUSED not in ("0", "1", "2", "3"):
+    raise ValueError("ECC_PACKED_CLMAD_FUSED must be 0, 1, 2 or 3")
 if PACKED_CLMAD_FUSED != "0" and PACKED_CLMAD != "1":
     raise ValueError("ECC_PACKED_CLMAD_FUSED requires ECC_PACKED_CLMAD=1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
@@ -381,7 +381,7 @@ def checkPackedReduction(sample):
     fused = re.findall(r'^packed carryless addends: (.*)$', sample.get('raw', ''), re.MULTILINE)
     actualFused = fused[0] if len(fused) == 1 else None
     sample['expectedPackedClmadFused'] = int(PACKED_CLMAD_FUSED)
-    sample['packedClmadFused'] = int(actualFused) if actualFused in ('0', '1', '2') else None
+    sample['packedClmadFused'] = int(actualFused) if actualFused in ('0', '1', '2', '3') else None
     if actualFused != PACKED_CLMAD_FUSED:
         sample['valid'] = False
         sample.setdefault('error', 'packed carryless addends identity is missing, duplicated or different from the requested build')

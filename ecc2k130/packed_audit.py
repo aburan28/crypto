@@ -122,7 +122,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
         fusionModes = re.findall(r"^packed arithmetic carryless addends: (.*)$",
                                  result["deviceArithmetic"]["output"], re.MULTILINE)
         actualFusion = fusionModes[0] if len(fusionModes) == 1 else None
-        result["packedClmadFused"] = int(actualFusion) if actualFusion in ("0", "1", "2") else None
+        result["packedClmadFused"] = int(actualFusion) if actualFusion in ("0", "1", "2", "3") else None
         result["deviceArithmetic"].update(
             expectedPackedClmadFused=int(client.PACKED_CLMAD_FUSED),
             packedClmadFused=result["packedClmadFused"])

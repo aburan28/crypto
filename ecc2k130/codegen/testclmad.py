@@ -60,17 +60,17 @@ class ClmadGuardTests(unittest.TestCase):
         self.assertEqual(default.stdout, disabled.stdout)
 
     def test_addend_fusion_rejects_invalid_or_disabled_native_modes(self):
-        for value in ('-1', '3'):
+        for value in ('-1', '4'):
             result = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_FUSED=' + value)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn('ECC_PACKED_CLMAD_FUSED must be 0, 1 or 2', result.stderr)
-        for value in ('1', '2'):
+            self.assertIn('ECC_PACKED_CLMAD_FUSED must be 0, 1, 2 or 3', result.stderr)
+        for value in ('1', '2', '3'):
             result = self.preprocess('-DECC_PACKED_CLMAD=0', '-DECC_PACKED_CLMAD_FUSED=' + value)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('ECC_PACKED_CLMAD_FUSED requires ECC_PACKED_CLMAD', result.stderr)
 
     def test_addend_fusion_host_simulation_and_device_selection(self):
-        for value in ('1', '2'):
+        for value in ('1', '2', '3'):
             flags = ['-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_FUSED=' + value]
             host = self.preprocess(*flags)
             self.assertEqual(host.returncode, 0, host.stderr)

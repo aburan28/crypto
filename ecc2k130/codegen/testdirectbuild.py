@@ -601,10 +601,10 @@ class ClmadAddendBuildTests(unittest.TestCase):
         index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
                      and any(isinstance(t, ast.Name) and t.id == 'PACKED_CLMAD_FUSED' for t in node.targets))
         for native in ('0', '1'):
-            for value in (None, '0', '1', '2', '-1', '3', '', 'true'):
+            for value in (None, '0', '1', '2', '3', '-1', '4', '', 'true'):
                 env = dict(PACKED_CLMAD=native,
                            os=SimpleNamespace(environ={} if value is None else {'ECC_PACKED_CLMAD_FUSED': value}))
-                allowed = value in (None, '0') or (native == '1' and value in ('1', '2'))
+                allowed = value in (None, '0') or (native == '1' and value in ('1', '2', '3'))
                 with self.subTest(native=native, value=value):
                     if allowed:
                         execute(body[index:index + 3], env)
@@ -621,7 +621,7 @@ class ClmadAddendBuildTests(unittest.TestCase):
                     self.calls[name] = args
                     return self
                 return record
-        for mode in ('0', '1', '2'):
+        for mode in ('0', '1', '2', '3'):
             env = environment('1', '1', clmad='1', fused=mode)
             image = Image()
             env.update(CUDA_VERSION='13.3.1', GENCODE='fixture', LOCAL=ROOT,
@@ -639,7 +639,7 @@ class ClmadAddendBuildTests(unittest.TestCase):
         build = function('buildFor', env)
         self.assertTrue(build(32, 128, 0)[0])
         self.assertEqual(commands, [])
-        for mode in ('2', '1', '0'):
+        for mode in ('3', '2', '1', '0'):
             env['PACKED_CLMAD_FUSED'] = mode
             with self.assertRaisesRegex(ValueError, 'matching baked binary'):
                 function('runBench', env)(rebuild=False, packed=True)
@@ -647,7 +647,7 @@ class ClmadAddendBuildTests(unittest.TestCase):
             self.assertIn('PACKED_CLMAD_FUSED=' + mode, commands[-1])
 
     def test_missing_wrong_or_duplicate_addend_modes_cannot_rank(self):
-        for mode in ('0', '1', '2'):
+        for mode in ('0', '1', '2', '3'):
             check = function('checkPackedReduction', environment('1', '1', clmad='1', fused=mode))
             text = raw('1', '1', clmad='1', fused=mode)
             good = benchResult('fixture', 0, text)
@@ -655,8 +655,8 @@ class ClmadAddendBuildTests(unittest.TestCase):
             self.assertEqual(good['packedClmadFused'], int(mode))
             marker = f'packed carryless addends: {mode}\n'
             for bad in (text.replace(marker, ''), text + marker,
-                        raw('1', '1', clmad='1', fused=str((int(mode) + 1) % 3)),
-                        raw('1', '1', clmad='1', fused='3')):
+                        raw('1', '1', clmad='1', fused=str((int(mode) + 1) % 4)),
+                        raw('1', '1', clmad='1', fused='4')):
                 sample = benchResult('fixture', 0, bad)
                 self.assertFalse(check(sample))
                 self.assertEqual(sample['rate'], 0)
@@ -664,14 +664,14 @@ class ClmadAddendBuildTests(unittest.TestCase):
 
     def test_audit_binds_both_arithmetic_and_timed_addend_modes(self):
         fixture = GeneratedProductBuildTests()
-        for mode in ('0', '1', '2'):
+        for mode in ('0', '1', '2', '3'):
             result, commands = fixture.audit_fixture('1', clmad='1', fused=mode, batch=16)
             self.assertTrue(result['valid'], result.get('error'))
             self.assertIn('PACKED_CLMAD_FUSED=' + mode, commands[0])
             for row in [result, result['deviceArithmetic'], *result['benchmark']['samples'], *result['collection']]:
                 self.assertEqual(row['expectedPackedClmadFused'], int(mode))
                 self.assertEqual(row['packedClmadFused'], int(mode))
-            for marker in ('', f'packed arithmetic carryless addends: {(int(mode) + 1) % 3}\n',
+            for marker in ('', f'packed arithmetic carryless addends: {(int(mode) + 1) % 4}\n',
                            f'packed arithmetic carryless addends: {mode}\n' * 2):
                 failed, commands = fixture.audit_fixture('1', clmad='1', fused=mode, fused_arithmetic=marker)
                 self.assertFalse(failed['valid'])

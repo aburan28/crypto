@@ -17,8 +17,8 @@
 #ifndef ECC_PACKED_CLMAD_FUSED
 #define ECC_PACKED_CLMAD_FUSED 0
 #endif
-#if ECC_PACKED_CLMAD_FUSED < 0 || ECC_PACKED_CLMAD_FUSED > 2
-#error "ECC_PACKED_CLMAD_FUSED must be 0, 1 or 2"
+#if ECC_PACKED_CLMAD_FUSED < 0 || ECC_PACKED_CLMAD_FUSED > 3
+#error "ECC_PACKED_CLMAD_FUSED must be 0, 1, 2 or 3"
 #endif
 #if ECC_PACKED_CLMAD_FUSED && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_CLMAD_FUSED requires ECC_PACKED_CLMAD"
@@ -168,6 +168,27 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
     c[4]=uint32_t(c2); c[5]=uint32_t(c2>>32);
     c[6]=uint32_t(c3); c[7]=uint32_t(c3>>32);
     c[8]=uint32_t(c4);
+#elif ECC_PACKED_CLMAD_FUSED == 3
+    clmul128(c,a.v,b.v);
+    const uint64_t a0=uint64_t(a.v[0])|(uint64_t(a.v[1])<<32);
+    const uint64_t a1=uint64_t(a.v[2])|(uint64_t(a.v[3])<<32);
+    const uint64_t b0=uint64_t(b.v[0])|(uint64_t(b.v[1])<<32);
+    const uint64_t b1=uint64_t(b.v[2])|(uint64_t(b.v[3])<<32);
+    const uint32_t at=a.v[4]&7u, bt=b.v[4]&7u;
+    const uint32_t ma0=0u-(at&1u), ma1=0u-((at>>1)&1u), ma2=0u-((at>>2)&1u);
+    const uint32_t mb1=0u-((bt>>1)&1u), mb2=0u-((bt>>2)&1u);
+    const uint32_t h0=((a.v[1]>>31)&mb1)^((a.v[1]>>30)&mb2)
+                     ^((b.v[1]>>31)&ma1)^((b.v[1]>>30)&ma2);
+    const uint32_t h1=((a.v[3]>>31)&mb1)^((a.v[3]>>30)&mb2)
+                     ^((b.v[3]>>31)&ma1)^((b.v[3]>>30)&ma2);
+    uint64_t c2=uint64_t(c[4])|(uint64_t(c[5])<<32);
+    uint64_t c3=uint64_t(c[6])|(uint64_t(c[7])<<32);
+    c2=clmadLo64(a0,bt,clmadLo64(b0,at,c2));
+    c3=clmadLo64(a1,bt,clmadLo64(b1,at,c3^uint64_t(h0)));
+    const uint32_t c4=h1^(bt&ma0)^((bt&ma1)<<1)^((bt&ma2)<<2);
+    c[4]=uint32_t(c2); c[5]=uint32_t(c2>>32);
+    c[6]=uint32_t(c3); c[7]=uint32_t(c3>>32);
+    c[8]=c4;
 #else
     clmul128(c,a.v,b.v); c[8]=0;
 #pragma unroll
