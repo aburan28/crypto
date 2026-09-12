@@ -1,9 +1,11 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed CUDA backend](PACKED.md) has measured **13.206088 billion
+The optional [packed CUDA backend](PACKED.md) has measured **13.323276 billion
 complete scalar walk iterations/s** on RTX PRO 6000 Blackwell using
 [native carryless multiplication](NATIVE-CARRYLESS.md) and the
-[16-slot batch preset](BATCH-TUNING.md). Collection measured **12.936060 B/s**.
+[16-slot batch preset](BATCH-TUNING.md) with
+[weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md).
+Collection measured **13.054029 B/s**.
 The
 [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
@@ -12,9 +14,9 @@ format, while checkpoints have a separate backend version.
 
 For the validated RTX PRO 6000 configuration, use `make bench-rtx-pro6000`
 or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
-CUDA 13.3.1 and the measured arithmetic settings. The controlled batch
-comparison measured a 52.26% benchmark gain and 52.04% collection gain over
-the previous native batch-32 preset at the same logical population. See
+CUDA 13.3.1 and the measured arithmetic settings. The controlled weighted-prefix
+comparison measured a 1.62% benchmark gain and 1.58% collection gain over
+the previous batch-16 preset at the same logical population. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
@@ -58,7 +60,7 @@ code that would run on a GPU is what the test suite exercises.
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per core |
-| CUDA client | complete packed walks measured at 13.206088 B/s on one RTX PRO 6000 |
+| CUDA client | complete packed walks measured at 13.323276 B/s on one RTX PRO 6000 |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
 

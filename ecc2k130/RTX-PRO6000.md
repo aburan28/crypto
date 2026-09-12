@@ -32,6 +32,9 @@ warp accesses while simplifying field addressing.
 These settings retain the existing iteration, DP report and packed-checkpoint
 semantics. The linked comparison validates normal-to-polynomial resume and
 the reverse direction, and measures both modes on one GPU.
+The current preset also enables [weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md),
+reusing the existing scratch buffer and sharing the coordinate-permutation
+mask stream.
 
 The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
 NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or
@@ -43,7 +46,24 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Batch-16 preset comparison
+## Weighted-prefix preset comparison
+
+The [controlled comparison](benchmarks/weighted-prefix/comparison.json)
+keeps the batch, workers, compiler, arithmetic and state layout fixed on one
+GPU. Three paired repetitions per workload measured:
+
+| Workload | Previous batch-16 median B/s | Weighted + paired median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 13.110335 | **13.323276** | **1.6242%** |
+| DP34 collection | 12.851526 | **13.054029** | **1.5757%** |
+
+Every pair favored the candidate. Each sample completed 201,863,462,912
+scalar updates. All six collection multisets matched, with 5,149 records
+and zero drops. Arithmetic, direct paired-permutation, full client,
+normalized-state and checkpoint checks passed. A separate audit of the
+updated public Make command is pending.
+
+## Historical batch-16 preset comparison
 
 The [controlled batch comparison](benchmarks/batch-tuning/comparison.json)
 keeps native carryless arithmetic, the compiler, tile size and logical work
