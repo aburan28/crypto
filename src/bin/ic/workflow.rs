@@ -267,6 +267,13 @@ pub struct WorkflowParams {
     pub curve: CurveParams,
     #[serde(default = "default_summands")]
     pub summands: u8,
+    /// Summands the descent asks for, when it should differ from
+    /// `summands`. Collection and descent share the base and its pair
+    /// table, not this: collection wants few probes because each costs
+    /// a scalar multiplication, the descent walks its probes and wants
+    /// cheap ones.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub descent_summands: Option<u8>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -310,6 +317,11 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
         serde_json::from_slice(&data).map_err(|e| format!("invalid workflow parameters: {e}"))?;
     if p.schema_version != 1 {
         return Err("unsupported workflow schema version".into());
+    }
+    if let Some(d) = p.descent_summands {
+        if !(2..=4).contains(&d) {
+            return Err("descent_summands must be 2, 3 or 4".into());
+        }
     }
     if p.summands < 2 || p.summands > 4 {
         return Err("summands must be 2, 3 or 4".into());
@@ -860,7 +872,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // ── Stage 2: collect (work units) ──────────────────────────────
     let t1 = Instant::now();
     let ic = experiment::with_linear_algebra(
-        experiment::ic_options(p.solver, p.summands, p.max_trials, p.seed),
+        experiment::ic_options_with_descent(
+            p.solver,
+            p.summands,
+            p.descent_summands,
+            p.max_trials,
+            p.seed,
+        ),
         p.linear_algebra.mode,
         p.linear_algebra.sparse,
     );
