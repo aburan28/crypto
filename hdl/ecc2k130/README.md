@@ -246,8 +246,10 @@ scheduler's:
   path is a memory write plus one XOR — there is no `sigma` and no
   popcount in it;
 - the Hamming weight, 131 bits wide, is taken over two clocks on input
-  (22 groups of six bits, one LUT6 per output bit, then the sum) and
-  three on output (groups, sum, compare);
+  (22 groups of six bits, one LUT6 per output bit, then the sum, of which
+  only `hw/2 mod 8` is used) and four on output (groups, sums of four
+  groups, their sum, compare — the 22-way sum in one clock was the
+  engine's worst path);
 - batch and burst state ride in the multiplier tag, so results route
   back with no matching logic.
 
@@ -415,13 +417,13 @@ batches in flight):
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 |
 |---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **8 100 – 8 410** | 180 (+316 SRL) | 7 404 | 20 | 2 |
+| `ec2k_walker` (whole engine) | **8 100 – 8 420** | 180 (+318 SRL) | 7 420 | 20 | 2 |
 | ├ walker body (FIFO, prefetch buffer, held report) | ~600 | 180 | ~500 | 4 | 1 |
 | └ `ec2k_batch_pipe` | ~7 700 | 0 | ~6 900 | 16 | 1 |
 | &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages) | ~2 900 | 0 | ~2 300 | 16 | 1 |
 | &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 | 0 | 0 |
-| `ec2k_axil` own (queue, registers, spine head) | 647 | 356 | 2 032 | 0 | 0 |
-| `ec2k_axil_cdc` | 228 | 0 | 201 | 0 | 0 |
+| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 902 | 356 | 2 380 | 0 | 0 |
+| `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 |
 
 (The two engines differ by 310 LUTs from `-keep_equivalent_registers`
 falling differently; the breakdown rows are apportioned from the earlier
@@ -430,14 +432,21 @@ decode that the block RAMs replaced.) The register block's stage on the
 spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
 an engine are the walker's four-word prefetch buffer.
 
-Worst slack at a 3.0 ns clock is **+1.08 ns** for the whole probe, and
-none of the sixteen worst paths touches a memory: the output weight's
-22-group adder tree (1.74 ns, six levels), the queue write pointer into
-the credit counter (1.70 ns) and the bridge's read-address decode into
-the register mux (1.67 ns). Earlier worst paths and what removed them: the
-operand stage's level/index arithmetic into a LUTRAM read (+0.83 ns; an
-address stage) and the walker's step-counter read-modify-write (1.6 ns;
-the count now rides in the tag). The multiplier is now 58% of an engine
+Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe and
+**+1.25 ns** inside an engine, and none of the sixteen worst paths touches
+a memory: the register block's read mux from its address register (1.64
+ns, ten bits fanning out to five hundred LUTs), then the output weight's
+second-stage sum (1.58 ns) and the retire side's batch-level update, a
+16:1 mux of the level array into a decrement and back (1.56 ns). Earlier
+worst paths and what removed them: the operand stage's level/index
+arithmetic into a LUTRAM read (+0.83 ns; an address stage); the walker's
+step-counter read-modify-write (1.6 ns; the count now rides in the tag);
+the 22-group weight sum in one clock (1.74 ns; sums of four, then of
+six); the queue's pointer subtraction into the credit compare (1.70 ns;
+occupancy is a counter); the bridge's address into the read mux and the
+queue's LUTRAM read into it (1.67 ns; the address is registered in the
+block, the queue head is read into registers a clock ahead, and a write
+no longer overlaps its own response). The multiplier is now 58% of an engine
 and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) the single
 largest item. The one distributed RAM left is the register block's
 64-deep report queue (356 LUTRAM, one copy on the die). No DSPs or URAM

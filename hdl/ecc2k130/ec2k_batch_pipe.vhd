@@ -300,13 +300,15 @@ architecture rtl of ec2k_batch_pipe is
   signal ahd_b     : bid_t;
   signal ahd_i     : idx_t;
 
-  -- output: three registers so the weight of x3 has three clocks (group
-  -- popcounts, their sum, the compare)
-  signal o1_valid, o2_valid, o3_valid : std_logic := '0';
-  signal o1_x, o1_y, o2_x, o2_y, o3_x, o3_y : gf_t := (others => '0');
-  signal o1_tag, o2_tag, o3_tag : tag_t := (others => '0');
+  -- output: four registers so the weight of x3 has four clocks (group
+  -- popcounts, sums of four groups, their sum, the compare); the 22-way
+  -- sum in one clock was the engine's worst path at 3 ns
+  signal o1_valid, o2_valid, o3_valid, o4_valid : std_logic := '0';
+  signal o1_x, o1_y, o2_x, o2_y, o3_x, o3_y, o4_x, o4_y : gf_t := (others => '0');
+  signal o1_tag, o2_tag, o3_tag, o4_tag : tag_t := (others => '0');
   signal o2_parts : hw_parts_t := (others => (others => '0'));
-  signal o3_hw    : hw_t := (others => '0');
+  signal o3_quads : hw_quads_t := (others => (others => '0'));
+  signal o4_hw    : hw_t := (others => '0');
 
 begin
 
@@ -450,7 +452,7 @@ begin
         fl_wr <= to_unsigned(NB, LOG_NB + 1); fl_rd <= (others => '0');
         cur_valid <= '0'; nxt_valid <= '0';
         a_valid <= (others => '0'); ra_valid <= '0'; mul_valid <= '0';
-        o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; out_valid <= '0';
+        o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; o4_valid <= '0'; out_valid <= '0';
       else
         rq_pushed := false;
 
@@ -729,7 +731,7 @@ begin
           mul_b <= ob;
         end if;
 
-        -- ============ output: weight and DP test over three clocks ============
+        -- ============ output: weight and DP test over four clocks ============
         o2_valid <= o1_valid;
         o2_x     <= o1_x;
         o2_y     <= o1_y;
@@ -740,14 +742,20 @@ begin
         o3_x     <= o2_x;
         o3_y     <= o2_y;
         o3_tag   <= o2_tag;
-        o3_hw    <= hw_sum(o2_parts);
+        o3_quads <= hw_quads(o2_parts);
 
-        out_valid <= o3_valid;
-        out_x     <= o3_x;
-        out_y     <= o3_y;
-        out_tag   <= o3_tag;
-        out_hw    <= o3_hw;
-        if to_integer(o3_hw) <= DP_WEIGHT then
+        o4_valid <= o3_valid;
+        o4_x     <= o3_x;
+        o4_y     <= o3_y;
+        o4_tag   <= o3_tag;
+        o4_hw    <= hw_sum(o3_quads);
+
+        out_valid <= o4_valid;
+        out_x     <= o4_x;
+        out_y     <= o4_y;
+        out_tag   <= o4_tag;
+        out_hw    <= o4_hw;
+        if to_integer(o4_hw) <= DP_WEIGHT then
           out_dp <= '1';
         else
           out_dp <= '0';

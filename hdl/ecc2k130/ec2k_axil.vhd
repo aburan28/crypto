@@ -237,6 +237,10 @@ architecture rtl of ec2k_axil is
   -- distinguished-point queue
   constant QD : natural := 2 ** DP_FIFO_W;
   signal credits    : natural range 0 to QD := 0;      -- issued, not yet back
+  -- credits + queued, kept as a counter so the issue decision is a
+  -- register against a constant and not pointer subtraction, addition and
+  -- compare in one clock (the block's worst path at 3 ns otherwise)
+  signal occ        : natural range 0 to QD := 0;
   type gid_mem_t is array (0 to QD - 1) of gid_t;
   type cnt_mem_t is array (0 to QD - 1) of cnt_t;
   type gf_mem_t  is array (0 to QD - 1) of gf_t;
@@ -244,12 +248,26 @@ architecture rtl of ec2k_axil is
   signal q_steps : cnt_mem_t;
   signal q_x, q_y : gf_mem_t;
   signal q_wr, q_rd : unsigned(DP_FIFO_W downto 0) := (others => '0');
+  -- the head entry, read out of the LUTRAM every clock at the read
+  -- pointer, so an AXI read is a mux of registers and the RAM's address
+  -- is a register with nothing in front of it.  It lags a pop by one
+  -- clock, and a read decode waits out that clock (head_wait) so the
+  -- head is exact whatever the master's timing.
+  signal q_head_gid   : gid_t := (others => '0');
+  signal q_head_steps : cnt_t := (others => '0');
+  signal q_head_x, q_head_y : gf_t := (others => '0');
+  signal head_wait : std_logic := '0';
   signal q_empty, q_full : boolean;
   signal q_count : unsigned(DP_FIFO_W downto 0);
 
   -- AXI
-  signal aw_got, w_got : std_logic := '0';
-  signal aw_addr  : std_logic_vector(11 downto 2) := (others => '0');
+  signal aw_got, w_got, ar_got : std_logic := '0';
+  signal aw_addr, ar_addr : std_logic_vector(11 downto 2) := (others => '0');
+  -- left alone, Vivado replicates the read address once per LUT of the
+  -- read mux, 1 200 flip-flops for ten bits; a fanout limit gets a
+  -- handful of copies instead
+  attribute MAX_FANOUT : string;
+  attribute MAX_FANOUT of ar_addr : signal is "64";
   signal w_data   : word_t := (others => '0');
   signal bvalid   : std_logic := '0';
   signal rvalid   : std_logic := '0';
@@ -381,7 +399,7 @@ begin
   s_wready  <= not w_got;
   s_bvalid  <= bvalid;
   s_bresp   <= "00";
-  s_arready <= not rvalid;
+  s_arready <= not (rvalid or ar_got);
   s_rvalid  <= rvalid;
   s_rdata   <= rdata;
   s_rresp   <= "00";
@@ -390,7 +408,7 @@ begin
     variable do_write, do_read : boolean;
     variable waddr, raddr : natural range 0 to 1023;
     variable clear, pop, push : boolean;
-    variable cr, occ : natural range 0 to 2 * QD + 1;
+    variable cr, oc : natural range 0 to 2 * QD + 1;
   begin
     if rising_edge(clk) then
       clear := false;
@@ -401,25 +419,31 @@ begin
       -- has passed the far end and everything it dropped has drained.
       dn_ldv(0) <= '0';
       dn_cr(0)  <= '0';
-      if run = '0' then
-        credits <= 0;
+      if run = '0' or warm /= WARM_CLK then
+        -- no credits out, so the occupancy is the queue's
+        cr := 0;
+        oc := to_integer(q_count);
         ld_pend <= '0';
         ld_sent <= '0';
-        warm    <= 0;
-      elsif warm /= WARM_CLK then
-        warm <= warm + 1;
+        if run = '0' then
+          warm <= 0;
+        else
+          warm <= warm + 1;
+        end if;
       else
-        -- queued + outstanding credits: a report moves one to the other,
-        -- an unused credit frees one; a pop this clock is not counted yet
-        cr  := credits;
-        occ := credits + to_integer(q_count);
+        -- occ = credits + queued: a report moves one to the other, an
+        -- issue adds one, an unused credit or a pop frees one.  The issue
+        -- decision reads the counter as it stood at the clock edge; a
+        -- credit returning this clock is reissued next clock, not this.
+        cr := credits;
+        oc := occ;
         if up_valid(0) = '1' then
           push := true;
           cr   := cr - 1;
         end if;
         if up_cret(0) = '1' then
-          cr  := cr - 1;
-          occ := occ - 1;
+          cr := cr - 1;
+          oc := oc - 1;
         end if;
         if up_lddone(0) = '1' then
           ld_pend <= '0';
@@ -432,8 +456,8 @@ begin
         if occ < QD then
           dn_cr(0) <= '1';
           cr := cr + 1;
+          oc := oc + 1;
         end if;
-        credits <= cr;
       end if;
 
       -- AXI write channel: address and data arrive independently
@@ -448,7 +472,10 @@ begin
       if bvalid = '1' and s_bready = '1' then
         bvalid <= '0';
       end if;
-      do_write := aw_got = '1' and w_got = '1' and (bvalid = '0' or s_bready = '1');
+      -- a write waits for the previous response to be taken rather than
+      -- overlapping it, so nothing here depends on the master's bready in
+      -- the same clock (that path ran from the bridge into the queue)
+      do_write := aw_got = '1' and w_got = '1' and bvalid = '0';
       if do_write then
         waddr := to_integer(unsigned(aw_addr));
         aw_got <= '0';
@@ -477,9 +504,16 @@ begin
       if rvalid = '1' and s_rready = '1' then
         rvalid <= '0';
       end if;
-      do_read := s_arvalid = '1' and rvalid = '0';
+      -- the address is registered a clock before the decode, so the read
+      -- mux starts from a register in this block, not from the bridge
+      if s_arvalid = '1' and ar_got = '0' and rvalid = '0' then
+        ar_addr <= s_araddr(11 downto 2);
+        ar_got  <= '1';
+      end if;
+      do_read := ar_got = '1' and head_wait = '0';
       if do_read then
-        raddr := to_integer(unsigned(s_araddr(11 downto 2)));
+        raddr := to_integer(unsigned(ar_addr));
+        ar_got <= '0';
         rvalid <= '1';
         rdata  <= (others => '0');
         case raddr is
@@ -506,11 +540,11 @@ begin
           when 9 to 13  => rdata <= word_of(ld_x, raddr - 9);
           when 14 to 18 => rdata <= word_of(ld_y, raddr - 14);
           when 20 => rdata <= std_logic_vector(to_unsigned(CLK_KHZ, 32));
-          when 32 => rdata <= std_logic_vector(resize(q_gid(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 32));
-          when 33 => rdata <= std_logic_vector(resize(q_steps(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 64)(31 downto 0));
-          when 34 => rdata <= std_logic_vector(resize(q_steps(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 64)(63 downto 32));
-          when 36 to 40 => rdata <= word_of(q_x(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), raddr - 36);
-          when 41 to 45 => rdata <= word_of(q_y(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), raddr - 41);
+          when 32 => rdata <= std_logic_vector(resize(q_head_gid, 32));
+          when 33 => rdata <= std_logic_vector(resize(q_head_steps, 64)(31 downto 0));
+          when 34 => rdata <= std_logic_vector(resize(q_head_steps, 64)(63 downto 32));
+          when 36 to 40 => rdata <= word_of(q_head_x, raddr - 36);
+          when 41 to 45 => rdata <= word_of(q_head_y, raddr - 41);
           when others => null;
         end case;
       end if;
@@ -528,6 +562,7 @@ begin
       end if;
       if pop then
         q_rd <= q_rd + 1;
+        oc   := oc - 1;
       end if;
 
       -- steps: the spine's running sum, NENG clocks late
@@ -540,10 +575,24 @@ begin
         nstep_r  <= (others => '0');
         q_wr     <= (others => '0');
         q_rd     <= (others => '0');
+        oc       := cr;                        -- the queue is empty, credits stay out
       end if;
+      credits <= cr;
+      occ     <= oc;
+
+      head_wait    <= '0';
+      if pop or push or clear then
+        head_wait <= '1';
+      end if;
+      q_head_gid   <= q_gid(to_integer(q_rd(DP_FIFO_W - 1 downto 0)));
+      q_head_steps <= q_steps(to_integer(q_rd(DP_FIFO_W - 1 downto 0)));
+      q_head_x     <= q_x(to_integer(q_rd(DP_FIFO_W - 1 downto 0)));
+      q_head_y     <= q_y(to_integer(q_rd(DP_FIFO_W - 1 downto 0)));
 
       if rst = '1' then
         run      <= '0';
+        credits  <= 0;
+        occ      <= 0;
         steps    <= (others => '0');
         dps      <= (others => '0');
         nstep_r  <= (others => '0');
@@ -551,6 +600,8 @@ begin
         q_rd     <= (others => '0');
         aw_got   <= '0';
         w_got    <= '0';
+        ar_got   <= '0';
+        head_wait <= '0';
         bvalid   <= '0';
         rvalid   <= '0';
       end if;
