@@ -966,6 +966,16 @@ crosses**: the charged ratio is below 1 everywhere, and the closest
 (`n = 41`, ≈ 0.64–0.73) is the rung where ρ has the most room left,
 not the least.
 
+A third series was run later on a verifiably idle host, from the
+committed parameter files, to check the first two for measurement load.
+Per-target times came out 3% to 20% faster at `n = 37` and `n = 39`, so
+the first two series did carry some background load — but the ρ step
+counts are identical and the charged ratios agree across all three
+(0.72/0.74/0.75, 0.20/0.21/0.21, 0.067/0.051/0.060, 0.73/0.64/0.66),
+because load moves both sides of a same-process comparison together.
+That is the reason to quote the ratio rather than the wall time: the
+ratio is what survives an imperfectly quiet machine.
+
 Three things the table says plainly:
 
 1. **The descent is decomposition-bound.** Trials per target track
