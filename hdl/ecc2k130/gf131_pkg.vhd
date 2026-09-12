@@ -56,9 +56,12 @@ package gf131_pkg is
   -- Multiplier pipeline: one input latch, one basis-conversion stage, a
   -- Karatsuba tree of MUL_KARATSUBA levels (each one pre-add stage and one
   -- post-combine stage around its three halves) with a one-stage schoolbook
-  -- leaf, and one back-conversion stage.  Two levels give a 33-bit leaf.
-  constant MUL_KARATSUBA : natural := 2;
-  constant MUL_LATENCY   : natural := 2 * MUL_KARATSUBA + 4;          -- 8
+  -- leaf, and one back-conversion stage.  Three levels give a 17-bit leaf;
+  -- synthesised on the VU47P that is 4855 LUTs against 5547 at two levels
+  -- and 5019 at four, with the best slack of the three (README, "The
+  -- multiplier").
+  constant MUL_KARATSUBA : natural := 3;
+  constant MUL_LATENCY   : natural := 2 * MUL_KARATSUBA + 4;          -- 10
 
   -- A point whose x has weight 1 sits on no walk but has d = x + sigma^3(x)
   -- = gamma_1 + gamma_8 /= 0, so it can pad a batch without zeroing the
