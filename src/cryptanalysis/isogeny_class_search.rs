@@ -1509,6 +1509,20 @@ pub fn is_probable_prime(n: &BigInt) -> bool {
         2u32, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
     ] {
         let a = BigInt::from(a);
+        // A witness that is a multiple of `n` gives `x = 0`, which never
+        // reaches `n - 1`, and would report a prime as composite.  The
+        // trial-division prefix above now covers every base in this list, so
+        // this guard is unreachable as the two lists stand; it is kept
+        // because that is precisely the coupling that broke once — bases ran
+        // to 53 while trial division stopped at 37, so 41, 43, 47 and 53
+        // were reported composite — and extending one list without the other
+        // must not be able to reintroduce it.  Skipping is sound rather than
+        // merely convenient: it can only ever trigger at `n <= 53`, where
+        // the retained bases 2..37 are the first twelve primes and
+        // deterministic for every `n` below 3.317e24.
+        if &a >= n {
+            continue;
+        }
         let mut x = a.modpow(&d, n);
         if x.is_one() || x == n_minus_1 {
             continue;
@@ -2027,6 +2041,48 @@ mod tests {
         assert_eq!(
             class_number_of_conductor(&[(BigInt::from(3u32), 2)]),
             BigInt::from(12u32)
+        );
+    }
+
+    /// Cross-check the primality test against a sieve rather than against a
+    /// hand-picked list, so a witness/trial-division mismatch cannot hide in
+    /// the gap between the two.  Bugbot caught exactly such a gap: the bases
+    /// run to 53 but trial division stopped at 37, so 41, 43, 47 and 53 were
+    /// reported composite because the witness `a = n` gives `x = 0`.
+    #[test]
+    fn primality_agrees_with_a_sieve_below_1000() {
+        const LIMIT: usize = 1000;
+        let mut sieve = vec![true; LIMIT];
+        sieve[0] = false;
+        sieve[1] = false;
+        for i in 2..LIMIT {
+            if sieve[i] {
+                let mut j = i * i;
+                while j < LIMIT {
+                    sieve[j] = false;
+                    j += i;
+                }
+            }
+        }
+        for (n, &expected) in sieve.iter().enumerate() {
+            assert_eq!(
+                is_probable_prime(&BigInt::from(n)),
+                expected,
+                "primality disagrees with the sieve at {n}"
+            );
+        }
+        // The four values the witness list used to swallow, named explicitly
+        // so a regression reports them rather than only a sieve index.
+        for p in [41u32, 43, 47, 53] {
+            assert!(is_probable_prime(&BigInt::from(p)), "{p} must be prime");
+        }
+        // And a factorisation whose final cofactor is one of them now
+        // completes instead of surviving the rho budget.  1763 = 41 · 43.
+        let (factors, complete) = factor_bigint(&BigInt::from(1763u32), 1 << 12);
+        assert!(complete, "41 · 43 must factor completely");
+        assert_eq!(
+            factors,
+            vec![(BigInt::from(41u32), 1), (BigInt::from(43u32), 1)]
         );
     }
 
