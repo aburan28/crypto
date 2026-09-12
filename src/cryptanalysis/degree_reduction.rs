@@ -77,7 +77,7 @@
 use std::collections::BTreeMap;
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::descent_algebraic::{early_defect, rank_profile};
+use crate::cryptanalysis::descent_algebraic::{early_defect, rank_profile, RankRow};
 use crate::cryptanalysis::descent_lowgamma::{
     descend_on_subspace, is_decomposable_on_subspace, BasisFamily, FactorSubspace,
 };
@@ -1402,6 +1402,251 @@ pub fn run_composed_sweep(
     })
 }
 
+// ── R4': is the Δ_low screen fixable by renormalising? ──────────────
+//
+// Iteration 1 found the `Δ_low` screen reads wrong across systems of
+// different shape: under slicing, `D*` falls monotonically while `Δ_low`
+// wanders. The obvious diagnosis was units — `Δ_low = Σδ / cols(D_low)` is
+// normalised by a monomial count that shrinks with the variable count — and
+// the obvious fix a better normaliser. This section tests that diagnosis
+// instead of assuming it.
+//
+// The design separates the two candidate causes by measuring three groups:
+//
+// | group | what varies | what is held | tests |
+// |---|---|---|---|
+// | `within-shape` | factor-base family, target | `(vars, eqs)`, `ρ` | the regime the FFD law was fitted in |
+// | `rho-varies`   | `k` (slicing) | `eqs` | shape *and* `ρ` both move |
+// | `rho-matched`  | `(n, n')` together at `2n'=n` | `ρ ≈ 1` | shape moves, `ρ` does not |
+//
+// If a renormalisation rescues `rho-varies`, the problem was units. If the
+// law holds in `within-shape` and `rho-matched` but fails in `rho-varies`
+// for *every* variant, the problem is not units at all — it is that
+// over-determination changes the law's sign, and no rescaling fixes a sign
+// flip. The prescription would then be "compare at matched `ρ`", which is
+// what any lever that changes the variable count (L2) needs to know.
+
+/// Candidate scalar summaries of the low-degree rank defect.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DefectVariant {
+    /// `Σδ / cols(cutoff)` — the FFD program's `Δ_low`, as fitted. The
+    /// incumbent, and the one iteration 1 found shape-dependent.
+    Normalised,
+    /// `Σδ` — the raw excess-syzygy count, no normalisation at all.
+    Raw,
+    /// `Σ δ(D)/r_gen(D)` — defect as a fraction of the *generic* rank.
+    /// The leading correction candidate: `r_gen` already encodes both the
+    /// variable and the equation count, so the ratio is shape-aware by
+    /// construction rather than by a chosen denominator.
+    GenericFraction,
+    /// `Σδ / #eqs` — per-equation excess.
+    PerEquation,
+    /// `Σ δ(D)/rows(D)` — the fraction of multiplied rows that are wasted.
+    RowFraction,
+}
+
+/// Every variant, in report order.
+pub const DEFECT_VARIANTS: [DefectVariant; 5] = [
+    DefectVariant::Normalised,
+    DefectVariant::Raw,
+    DefectVariant::GenericFraction,
+    DefectVariant::PerEquation,
+    DefectVariant::RowFraction,
+];
+
+impl DefectVariant {
+    pub fn label(&self) -> &'static str {
+        match self {
+            DefectVariant::Normalised => "normalised",
+            DefectVariant::Raw => "raw",
+            DefectVariant::GenericFraction => "generic-frac",
+            DefectVariant::PerEquation => "per-equation",
+            DefectVariant::RowFraction => "row-frac",
+        }
+    }
+
+    /// Evaluate the variant on a rank profile, summing degrees `≤ cutoff`.
+    pub fn value(&self, profile: &[RankRow], cutoff: u32, eqs: u32) -> f64 {
+        let rows = profile.iter().filter(|r| r.degree <= cutoff);
+        match self {
+            DefectVariant::Normalised => {
+                let mut sum = 0.0;
+                let mut norm = 1.0;
+                for r in rows {
+                    sum += r.defect as f64;
+                    norm = r.cols.max(1) as f64;
+                }
+                sum / norm
+            }
+            DefectVariant::Raw => rows.map(|r| r.defect as f64).sum(),
+            DefectVariant::GenericFraction => rows
+                .map(|r| r.defect as f64 / r.generic_rank.max(1) as f64)
+                .sum(),
+            DefectVariant::PerEquation => {
+                rows.map(|r| r.defect as f64).sum::<f64>() / eqs.max(1) as f64
+            }
+            DefectVariant::RowFraction => {
+                rows.map(|r| r.defect as f64 / r.rows.max(1) as f64).sum()
+            }
+        }
+    }
+}
+
+/// One measured instance: every defect variant, plus the `D*` they are
+/// supposed to predict.
+#[derive(Clone, Debug)]
+pub struct DefectCell {
+    /// `"within-shape"`, `"rho-varies"` or `"rho-matched"`.
+    pub group: &'static str,
+    /// Factor-base family, so pooled groups can be aggregated to cell means
+    /// the way the FFD program's EXP-G does before correlating.
+    pub family: BasisFamily,
+    pub vars: u32,
+    pub eqs: u32,
+    /// `#eqs / #vars` — the determination ratio.
+    pub rho: f64,
+    pub dstar: u32,
+    /// Values parallel to [`DEFECT_VARIANTS`].
+    pub defects: Vec<f64>,
+}
+
+fn defect_cell(
+    group: &'static str,
+    family: BasisFamily,
+    eqs: &[F2BoolPoly],
+    vars: u32,
+    n_eqs: u32,
+    d_max: u32,
+    cutoff: u32,
+) -> Option<DefectCell> {
+    let (_, dstar, _) = refutation_scan(eqs, vars, d_max);
+    let dstar = dstar?;
+    let profile = rank_profile(eqs, vars, n_eqs, cutoff.min(d_max));
+    Some(DefectCell {
+        group,
+        family,
+        vars,
+        eqs: n_eqs,
+        rho: n_eqs as f64 / vars.max(1) as f64,
+        dstar,
+        defects: DEFECT_VARIANTS
+            .iter()
+            .map(|v| v.value(&profile, cutoff, n_eqs))
+            .collect(),
+    })
+}
+
+/// Collect the `within-shape` and `rho-varies` groups at one operating
+/// point: `k = 0` gives the fixed-shape cells (varying only the factor-base
+/// family and target), and `k > 0` slices give the cells where both shape
+/// and `ρ` move.
+#[allow(clippy::too_many_arguments)]
+pub fn collect_defect_cells(
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    families: &[BasisFamily],
+    k_values: &[u32],
+    targets: u32,
+    d_max: u32,
+    cutoff: u32,
+    seed: u64,
+) -> Vec<DefectCell> {
+    let full_vars = 2 * n_sub;
+    let mut out = Vec::new();
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    for &family in families {
+        let mut found = 0u32;
+        let mut attempts = 0u32;
+        while found < targets && attempts < targets * 64 + 256 {
+            attempts += 1;
+            let Some(v) = (match family {
+                BasisFamily::Random => {
+                    FactorSubspace::build(family, n, n_sub, irr, seed ^ (0x9E37 + attempts as u64))
+                }
+                _ => FactorSubspace::build(family, n, n_sub, irr, 0),
+            }) else {
+                break;
+            };
+            let b = rand_nz(n, &mut next);
+            let x3 = rand_nz(n, &mut next);
+            if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+                continue;
+            }
+            found += 1;
+            let base = descend_on_subspace(n, &v, irr, &b, &x3);
+
+            if let Some(c) = defect_cell("within-shape", family, &base, full_vars, n, d_max, cutoff)
+            {
+                out.push(c);
+            }
+            for &k in k_values {
+                if k == 0 || k >= full_vars.saturating_sub(1) {
+                    continue;
+                }
+                let idx = GuessPattern::OneSide.pick(full_vars, k, &mut next);
+                let mut assign: Vec<Option<bool>> = vec![None; full_vars as usize];
+                for &i in &idx {
+                    assign[i as usize] = Some((next() >> 23) & 1 == 1);
+                }
+                let (slice, nv) = specialize(&base, full_vars, &assign);
+                if let Some(c) = defect_cell("rho-varies", family, &slice, nv, n, d_max, cutoff) {
+                    out.push(c);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Collect the `rho-matched` group: vary `(n, n')` together along the
+/// critical line `2n' = n`, so the variable count changes while `ρ ≈ 1`
+/// stays put. This is the control that separates "shape" from "regime".
+pub fn collect_rho_matched_cells(
+    points: &[(u32, u32)],
+    irrs: &[IrreduciblePoly],
+    families: &[BasisFamily],
+    targets: u32,
+    d_max: u32,
+    cutoff: u32,
+    seed: u64,
+) -> Vec<DefectCell> {
+    let mut out = Vec::new();
+    for (idx, &(n, n_sub)) in points.iter().enumerate() {
+        let Some(irr) = irrs.get(idx) else { continue };
+        let cells = collect_defect_cells(
+            n,
+            n_sub,
+            irr,
+            families,
+            &[],
+            targets,
+            d_max,
+            cutoff,
+            seed ^ ((n as u64) << 8),
+        );
+        out.extend(cells.into_iter().map(|mut c| {
+            c.group = "rho-matched";
+            c
+        }));
+    }
+    out
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -2023,6 +2268,108 @@ mod tests {
             sw.optimum_is_interior(|r| r.log2_composed_total(2.807)),
             argmin < sw.k_max()
         );
+    }
+
+    // ── R4': defect variants ────────────────────────────────────────
+
+    /// Within a fixed shape every variant is a monotone transform of `Σδ`
+    /// (the denominators depend only on `(vars, eqs, degree)`, which are
+    /// held), so they must *rank* instances identically. This is what makes
+    /// the "within-shape" column of EXP-R4′ a property of the defect rather
+    /// than of the chosen normaliser — and it is why a renormalisation
+    /// cannot rescue a weak within-shape signal.
+    #[test]
+    fn defect_variants_rank_identically_within_a_fixed_shape() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let cells = collect_defect_cells(
+            n,
+            5,
+            &irr,
+            &[BasisFamily::Coordinate, BasisFamily::Random],
+            &[],
+            6,
+            7,
+            3,
+            0x5A17,
+        );
+        let ws: Vec<&DefectCell> = cells.iter().filter(|c| c.group == "within-shape").collect();
+        assert!(ws.len() >= 3, "need a few cells to compare rankings");
+        assert!(ws.iter().all(|c| c.vars == ws[0].vars));
+
+        let order = |i: usize| -> Vec<usize> {
+            let mut idx: Vec<usize> = (0..ws.len()).collect();
+            idx.sort_by(|&a, &b| {
+                ws[a].defects[i]
+                    .partial_cmp(&ws[b].defects[i])
+                    .unwrap()
+                    .then(a.cmp(&b))
+            });
+            idx
+        };
+        let base = order(0);
+        for i in 1..DEFECT_VARIANTS.len() {
+            assert_eq!(
+                order(i),
+                base,
+                "{} ranks instances differently from {} at fixed shape",
+                DEFECT_VARIANTS[i].label(),
+                DEFECT_VARIANTS[0].label()
+            );
+        }
+    }
+
+    /// Every variant is a sum of non-negative terms (`δ ≥ 0` by
+    /// construction), so none may go negative.
+    #[test]
+    fn defect_variant_values_are_non_negative() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let cells =
+            collect_defect_cells(n, 5, &irr, &[BasisFamily::Random], &[2, 4], 4, 7, 3, 0xD1FF);
+        assert!(!cells.is_empty());
+        for c in &cells {
+            for (i, d) in c.defects.iter().enumerate() {
+                assert!(
+                    *d >= 0.0 && d.is_finite(),
+                    "{} produced {d} at vars={}",
+                    DEFECT_VARIANTS[i].label(),
+                    c.vars
+                );
+            }
+        }
+    }
+
+    /// Group labelling and bookkeeping: `k = 0` cells are the fixed-shape
+    /// group at full width, sliced cells are the `ρ`-varying group and are
+    /// strictly narrower, and `ρ` must agree with `eqs / vars`.
+    #[test]
+    fn defect_cells_are_labelled_and_measured_consistently() {
+        let n = 12;
+        let irr = choose_irreducible(n);
+        let cells = collect_defect_cells(
+            n,
+            6,
+            &irr,
+            &[BasisFamily::Coordinate],
+            &[2, 4],
+            3,
+            7,
+            3,
+            0x7A66,
+        );
+        assert!(cells.iter().any(|c| c.group == "within-shape"));
+        assert!(cells.iter().any(|c| c.group == "rho-varies"));
+        for c in &cells {
+            assert_eq!(c.eqs, n);
+            assert!((c.rho - c.eqs as f64 / c.vars as f64).abs() < 1e-9);
+            assert!(c.dstar >= 2);
+            match c.group {
+                "within-shape" => assert_eq!(c.vars, 12),
+                "rho-varies" => assert!(c.vars < 12, "a slice must be narrower"),
+                other => panic!("unexpected group {other}"),
+            }
+        }
     }
 
     /// The load-bearing claim of the whole lever: raising the determination
