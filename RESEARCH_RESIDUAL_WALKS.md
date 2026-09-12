@@ -1490,6 +1490,11 @@ Reading it:
   into `k − 1` points) or change the target (Weil-descent curves,
   §§ on GHS elsewhere in this repository).
 
+The whole ledger is also drawn on one page in
+`docs/index-calculus-scoreboard.html`: every variant of §§9–11 as a
+multiple of rho on one logarithmic axis, the `C₃` steps of §11.5–11.6,
+and the fitted exponents above against rho's one half.
+
 So the ledger closes where it started, with numbers instead of
 adjectives: on `E(F_{p³})` at the sizes this module runs, Pollard rho
 costs `S ≈ 1.3` and every index-calculus variant here costs between
