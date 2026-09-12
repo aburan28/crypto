@@ -682,7 +682,6 @@ unsafe fn pclmul_u64(left: u64, right: u64) -> u128 {
 }
 
 #[cfg(target_arch = "x86_64")]
-#[inline(always)]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn pclmul_reduce_n53(left: u64, right: u64) -> u64 {
     use std::arch::x86_64::*;
