@@ -803,10 +803,12 @@ independent walks to keep it saturated at three clocks per addition.
 `hdl/ecc2k130/` is the FPGA counterpart of the `ecc2k130/` GPU client: the
 same permuted type-II normal basis, in which squaring is wiring, so
 inversion is eight multiplies and a whole walk step `R + sigma^j(R)` is ten.
-A GF(2^131) multiplier at one product per clock with no DSPs, a step unit
-that keeps sixteen walks in flight to run it saturated at ten clocks per
-step, and a sequencer that reports distinguished points to the host; the
-testbenches replay walks from the client's own reference model.
+A Karatsuba GF(2^131) multiplier at one product per clock with no DSPs, a
+step unit that shares one inversion across sixteen walks through a product
+tree and streams batches of independent multiplies to run the multiplier
+saturated at 5.3 clocks per step (measured in simulation), and a sequencer
+that reports distinguished points to the host; the testbenches replay walks
+from the client's own reference model.
 
 `gpu/ecc2k/` targets Koblitz curves over F(2^m), where the Frobenius map is
 a free endomorphism: walking on the classes {±τ^i P} shortens the search by

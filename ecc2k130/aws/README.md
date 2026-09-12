@@ -180,6 +180,11 @@ python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./
 ./fleet.sh down                  # workers checkpoint on the way out
 ```
 
+FPGAs join the same campaign: [`hdl/ecc2k130/aws/`](../../hdl/ecc2k130/aws/)
+builds an F2 image of the VHDL engine and runs an F2 fleet whose workers are
+this `worker.py` with `ECC_CLIENT` pointing at the FPGA host program. Same
+bucket, same slots, same `dp/`; step 5 does not change.
+
 `campaign.json` lives in the bucket and is read by every worker at start.
 Change `restartHours`, `uploadEvery` or `verify` freely. Never change
 `workers`, `batch`, `blockThreads`, `minBlocks`, `curve` or `dpWeight` once
