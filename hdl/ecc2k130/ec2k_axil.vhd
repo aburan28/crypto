@@ -311,10 +311,83 @@ begin
         dp_x => e_dp_x(i), dp_y => e_dp_y(i), step_pulse => e_step(i));
 
     stage : process (clk)
-      variable pending, accept : boolean;
+      variable pending, accept, insert : boolean;
     begin
       if rising_edge(clk) then
         rst_eng_r(i) <= rst_src(i);
+
+        -- Data moves unconditionally and is never reset: a reset that held
+        -- 1 300 data flip-flops per stage still was a net from the stage's
+        -- reset register into every one of their clock enables, and the
+        -- first routed 48-engine image closed by 0.02 ns on exactly that
+        -- net.  Only the valid bits, the credit and the ack see the reset.
+        dn_gid(i + 1) <= dn_gid(i);
+        dn_x(i + 1)   <= dn_x(i);
+        dn_y(i + 1)   <= dn_y(i);
+        if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i then
+          l_id(i) <= dn_gid(i)(ID_W - 1 downto 0);
+          l_x(i)  <= dn_x(i);
+          l_y(i)  <= dn_y(i);
+        end if;
+
+        -- a report is pending from the clock the walker raises dp_valid
+        -- until the clock after our ack (the walker updates on seeing it)
+        pending := e_dp_valid(i) = '1' and e_dp_ack(i) = '0';
+        insert  := hold(i) = '1' and pending and up_valid(i + 1) = '0';
+        if insert then
+          up_gid(i)   <= mk_gid(i, e_dp_id(i));
+          up_steps(i) <= e_dp_steps(i);
+          up_x(i)     <= e_dp_x(i);
+          up_y(i)     <= e_dp_y(i);
+        else
+          up_gid(i)   <= up_gid(i + 1);
+          up_steps(i) <= up_steps(i + 1);
+          up_x(i)     <= up_x(i + 1);
+          up_y(i)     <= up_y(i + 1);
+        end if;
+
+        -- down: loads shift through; the one for this engine is kept and
+        -- offered until the walker takes it (a walker takes a load only on
+        -- clocks with no step retiring, so this can be a while)
+        dn_ldv(i + 1) <= dn_ldv(i);
+        accept := l_valid(i) = '1' and e_ld_ready(i) = '1';
+        if accept then
+          l_valid(i) <= '0';
+        end if;
+        if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i then
+          l_valid(i) <= '1';
+        end if;
+
+        -- credits: keep the first one that passes while a report waits
+        if dn_cr(i) = '1' and hold(i) = '0' and pending then
+          hold(i)      <= '1';
+          dn_cr(i + 1) <= '0';
+        else
+          dn_cr(i + 1) <= dn_cr(i);
+        end if;
+
+        -- up: insert into an empty slot once a credit is held, else pass
+        -- the slot on
+        e_dp_ack(i) <= '0';
+        if insert then
+          up_valid(i) <= '1';
+          e_dp_ack(i) <= '1';
+          hold(i)     <= '0';
+        else
+          up_valid(i) <= up_valid(i + 1);
+        end if;
+        up_cret(i) <= up_cret(i + 1);
+        if accept then
+          up_lddone(i) <= '1';
+        else
+          up_lddone(i) <= up_lddone(i + 1);
+        end if;
+        if e_step(i) = '1' then
+          up_nstep(i) <= up_nstep(i + 1) + 1;
+        else
+          up_nstep(i) <= up_nstep(i + 1);
+        end if;
+
         if rst_eng_r(i) = '1' then
           dn_ldv(i + 1)  <= '0';
           dn_cr(i + 1)   <= '0';
@@ -325,66 +398,6 @@ begin
           l_valid(i)     <= '0';
           hold(i)        <= '0';
           e_dp_ack(i)    <= '0';
-        else
-          -- down: loads shift through; the one for this engine is kept and
-          -- offered until the walker takes it (a walker takes a load only on
-          -- clocks with no step retiring, so this can be a while)
-          dn_ldv(i + 1) <= dn_ldv(i);
-          dn_gid(i + 1) <= dn_gid(i);
-          dn_x(i + 1)   <= dn_x(i);
-          dn_y(i + 1)   <= dn_y(i);
-          accept := l_valid(i) = '1' and e_ld_ready(i) = '1';
-          if accept then
-            l_valid(i) <= '0';
-          end if;
-          if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i then
-            l_valid(i) <= '1';
-            l_id(i)    <= dn_gid(i)(ID_W - 1 downto 0);
-            l_x(i)     <= dn_x(i);
-            l_y(i)     <= dn_y(i);
-          end if;
-
-          -- a report is pending from the clock the walker raises dp_valid
-          -- until the clock after our ack (the walker updates on seeing it)
-          pending := e_dp_valid(i) = '1' and e_dp_ack(i) = '0';
-
-          -- credits: keep the first one that passes while a report waits
-          if dn_cr(i) = '1' and hold(i) = '0' and pending then
-            hold(i)      <= '1';
-            dn_cr(i + 1) <= '0';
-          else
-            dn_cr(i + 1) <= dn_cr(i);
-          end if;
-
-          -- up: insert into an empty slot once a credit is held, else pass
-          -- the slot on
-          e_dp_ack(i) <= '0';
-          if hold(i) = '1' and pending and up_valid(i + 1) = '0' then
-            up_valid(i) <= '1';
-            up_gid(i)   <= mk_gid(i, e_dp_id(i));
-            up_steps(i) <= e_dp_steps(i);
-            up_x(i)     <= e_dp_x(i);
-            up_y(i)     <= e_dp_y(i);
-            e_dp_ack(i) <= '1';
-            hold(i)     <= '0';
-          else
-            up_valid(i) <= up_valid(i + 1);
-            up_gid(i)   <= up_gid(i + 1);
-            up_steps(i) <= up_steps(i + 1);
-            up_x(i)     <= up_x(i + 1);
-            up_y(i)     <= up_y(i + 1);
-          end if;
-          up_cret(i) <= up_cret(i + 1);
-          if accept then
-            up_lddone(i) <= '1';
-          else
-            up_lddone(i) <= up_lddone(i + 1);
-          end if;
-          if e_step(i) = '1' then
-            up_nstep(i) <= up_nstep(i + 1) + 1;
-          else
-            up_nstep(i) <= up_nstep(i + 1);
-          end if;
         end if;
       end if;
     end process;

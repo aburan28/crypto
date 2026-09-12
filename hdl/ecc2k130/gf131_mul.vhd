@@ -81,11 +81,11 @@ begin
   control : process (clk)
   begin
     if rising_edge(clk) then
+      tg <= in_tag & tg(0 to MUL_LATENCY - 2);
       if rst = '1' then
         vl <= (others => '0');
       else
         vl <= vl(MUL_LATENCY - 2 downto 0) & in_valid;
-        tg <= in_tag & tg(0 to MUL_LATENCY - 2);
       end if;
     end if;
   end process;
