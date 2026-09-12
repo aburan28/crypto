@@ -247,7 +247,12 @@ impl QuotientPairWitness {
 struct CompactPairTable {
     keys_x: Vec<u64>,
     keys_y: Vec<u64>,
-    values: Vec<QuotientPairWitness>,
+    // Cursor scans need only x and y to form the left pair point. Keep the
+    // relation labels in separate cold arrays and load them after an exact
+    // right-pair hit; this also removes four bytes of struct padding per slot.
+    columns: Vec<[u16; 2]>,
+    coefficients: Vec<[u64; 2]>,
+    image_y: Vec<u64>,
     x_filter: Vec<u64>,
     x_filter_mask: usize,
     x_filter_exact: bool,
@@ -274,7 +279,9 @@ impl CompactPairTable {
             } else {
                 vec![0; capacity]
             },
-            values: vec![QuotientPairWitness::default(); capacity],
+            columns: vec![[0; 2]; capacity],
+            coefficients: vec![[0; 2]; capacity],
+            image_y: vec![0; capacity],
             x_filter: if filter_bits != 0 {
                 vec![0; filter_bits.div_ceil(u64::BITS as usize)]
             } else {
@@ -306,7 +313,9 @@ impl CompactPairTable {
                 if !self.x_only {
                     self.keys_y[index] = key.1;
                 }
-                self.values[index] = value;
+                self.columns[index] = value.columns;
+                self.coefficients[index] = value.coefficients;
+                self.image_y[index] = value.image_y;
                 if self.x_only {
                     self.insert_x_filter(key.0);
                 }
@@ -320,7 +329,7 @@ impl CompactPairTable {
         }
     }
 
-    fn get(&self, key: (u64, u64)) -> Option<&QuotientPairWitness> {
+    fn get(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         if self.x_only && !self.might_contain_x(key.0) {
             return None;
         }
@@ -331,7 +340,11 @@ impl CompactPairTable {
                 return None;
             }
             if self.keys_x[index] == key.0 && (self.x_only || self.keys_y[index] == key.1) {
-                return Some(&self.values[index]);
+                return Some(QuotientPairWitness {
+                    columns: self.columns[index],
+                    coefficients: self.coefficients[index],
+                    image_y: self.image_y[index],
+                });
             }
             index = (index + 1) & self.mask;
         }
@@ -369,9 +382,11 @@ impl CompactPairTable {
     }
 
     fn allocated_bytes(&self) -> usize {
-        self.keys_x.len()
-            * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>())
+        self.keys_x.len() * std::mem::size_of::<u64>()
             + self.keys_y.len() * std::mem::size_of::<u64>()
+            + self.columns.len() * std::mem::size_of::<[u16; 2]>()
+            + self.coefficients.len() * std::mem::size_of::<[u64; 2]>()
+            + self.image_y.len() * std::mem::size_of::<u64>()
             + self.x_filter.len() * std::mem::size_of::<u64>()
     }
 
@@ -393,39 +408,50 @@ impl CompactPairTable {
         self.keys_x.len()
     }
 
-    fn signed_pair_at_slot(
-        &self,
-        slot: usize,
-        negative: bool,
-        modulus: u64,
-    ) -> Option<(RawPoint, [(usize, u64); 2])> {
+    fn signed_point_at_slot(&self, slot: usize, negative: bool) -> Option<RawPoint> {
         let key_x = *self.keys_x.get(slot)?;
         if key_x == u64::MAX || (key_x == 0 && negative) {
             return None;
         }
-        let witness = self.values[slot];
-        let mut labels = witness.labels();
         let point = if key_x == 0 {
             None
         } else {
             let x = key_x - 1;
-            let mut y = witness.image_y;
+            let mut y = self.image_y[slot];
             if negative {
                 y ^= x;
-                labels = labels.map(|(column, coefficient)| {
-                    (
-                        column,
-                        if coefficient == 0 {
-                            0
-                        } else {
-                            modulus - coefficient
-                        },
-                    )
-                });
             }
             Some((x, y))
         };
-        Some((point, labels))
+        Some(point)
+    }
+
+    fn signed_labels_at_slot(
+        &self,
+        slot: usize,
+        negative: bool,
+        modulus: u64,
+    ) -> [(usize, u64); 2] {
+        debug_assert!(self.keys_x.get(slot).is_some_and(|&key| key != u64::MAX));
+        let mut labels = QuotientPairWitness {
+            columns: self.columns[slot],
+            coefficients: self.coefficients[slot],
+            image_y: 0,
+        }
+        .labels();
+        if negative {
+            labels = labels.map(|(column, coefficient)| {
+                (
+                    column,
+                    if coefficient == 0 {
+                        0
+                    } else {
+                        modulus - coefficient
+                    },
+                )
+            });
+        }
+        labels
     }
 }
 
@@ -1206,7 +1232,7 @@ fn lookup_signed_expanded_pair(
 #[derive(Default)]
 struct PairPairChunkScratch {
     points: Vec<RawPoint>,
-    labels: Vec<[(usize, u64); 2]>,
+    signed_slots: Vec<usize>,
     rests: Vec<(usize, (u64, u64))>,
     batch: RawBatchScratch,
 }
@@ -1236,17 +1262,15 @@ fn pair_pair_cursor_chunk(
 ) -> PairPairChunkResult {
     let slots = quotient_pairs.slots();
     scratch.points.clear();
-    scratch.labels.clear();
+    scratch.signed_slots.clear();
     scratch.points.reserve(cursor_end - cursor_start);
-    scratch.labels.reserve(cursor_end - cursor_start);
+    scratch.signed_slots.reserve(cursor_end - cursor_start);
     for cursor in cursor_start..cursor_end {
         let slot = (start_slot + cursor / 2) & (slots - 1);
         let negative = cursor & 1 == 1;
-        if let Some((point, pair_labels)) =
-            quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
-        {
+        if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative) {
             scratch.points.push(point);
-            scratch.labels.push(pair_labels);
+            scratch.signed_slots.push(slot << 1 | usize::from(negative));
         }
     }
     if scratch.points.is_empty() {
@@ -1273,7 +1297,9 @@ fn pair_pair_cursor_chunk(
             result.exact_table_misses += 1;
             continue;
         };
-        let left_labels = scratch.labels[position];
+        let signed_slot = scratch.signed_slots[position];
+        let left_labels =
+            quotient_pairs.signed_labels_at_slot(signed_slot >> 1, signed_slot & 1 == 1, modulus);
         let left_indices = left_labels.map(|label| label_to_index[&label]);
         result.witness = Some((
             [
@@ -2113,7 +2139,7 @@ fn main() {
         };
         let mut fiber_rest_scratch = Vec::with_capacity(128);
         let mut pair_point_scratch = Vec::with_capacity(64);
-        let mut pair_label_scratch = Vec::with_capacity(64);
+        let mut pair_signed_slot_scratch = Vec::with_capacity(64);
         let mut pair_rest_scratch = Vec::with_capacity(64);
         let mut pair_batch_scratch = RawBatchScratch::default();
         let parallel_lanes = if query_mode.pair_pair_parallel() {
@@ -2260,16 +2286,15 @@ fn main() {
                     let mut cursor = 0usize;
                     while cursor < 2 * slots && witness.is_none() {
                         pair_point_scratch.clear();
-                        pair_label_scratch.clear();
+                        pair_signed_slot_scratch.clear();
                         while cursor < 2 * slots && pair_point_scratch.len() < width {
                             let slot = (start_slot + cursor / 2) & (slots - 1);
                             let negative = cursor & 1 == 1;
                             cursor += 1;
-                            if let Some((point, labels)) =
-                                quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
+                            if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative)
                             {
                                 pair_point_scratch.push(point);
-                                pair_label_scratch.push(labels);
+                                pair_signed_slot_scratch.push(slot << 1 | usize::from(negative));
                             }
                         }
                         if pair_point_scratch.is_empty() {
@@ -2297,7 +2322,12 @@ fn main() {
                                 query_exact_table_misses += 1;
                                 continue;
                             };
-                            let left_labels = pair_label_scratch[position];
+                            let signed_slot = pair_signed_slot_scratch[position];
+                            let left_labels = quotient_pairs.signed_labels_at_slot(
+                                signed_slot >> 1,
+                                signed_slot & 1 == 1,
+                                modulus,
+                            );
                             let left_indices = left_labels.map(|label| label_to_index[&label]);
                             witness = Some((
                                 vec![
