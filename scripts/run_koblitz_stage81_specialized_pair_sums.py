@@ -185,8 +185,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     require(
         baseline["base"].get("specialized_n53_support_expansion")
         == candidate["base"].get("specialized_n53_support_expansion")
-        is True,
-        "matched specialized support expansion changed",
+        is False,
+        "matched generic support expansion changed",
     )
     require(
         baseline["base"].get("specialized_n53_pair_sums") is False,
