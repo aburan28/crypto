@@ -3,7 +3,7 @@
   "experiment": "EXP-R6",
   "lever": "L5 curve-side (isogeny)",
   "seed": 7,
-  "generated_unix": 1789213502,
+  "generated_unix": 1789215278,
   "omega": 2.807,
   "verdict": "KILLED",
   "class": {
@@ -16,8 +16,11 @@
     "crater_size": 1,
     "class_size": "38531015900842054149",
     "log2_class_size": 65.0627,
-    "log2_rho_reference": 60.3090,
-    "log2_class_over_rho": 4.7536
+    "log2_rho_reference": 60.8090,
+    "rho_automorphism_order": 262,
+    "log2_rho_plain": 64.8257,
+    "log2_class_over_rho": 4.2536,
+    "log2_class_over_rho_plain": 0.2369
   },
   "reach": [
     {"degree_budget": "100", "reachable": "1", "log2_reachable": 0.0000, "log2_fraction_of_class": -65.0627, "exhaustive": false},
