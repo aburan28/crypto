@@ -36,7 +36,8 @@ else
     echo "created user $USER_NAME"
 fi
 
-aws iam put-user-policy --user-name "$USER_NAME" --policy-name describe-walker --policy-document '{
+aws iam put-user-policy --user-name "$USER_NAME" --policy-name describe-walker --policy-document "$(cat <<EOF
+{
   "Version": "2012-10-17",
   "Statement": [
     {
@@ -45,14 +46,29 @@ aws iam put-user-policy --user-name "$USER_NAME" --policy-name describe-walker -
       "Action": [
         "ec2:DescribeInstances",
         "ec2:DescribeTags",
-        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSecurityGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PunchWalkerSshOnly",
+      "Effect": "Allow",
+      "Action": [
         "ec2:AuthorizeSecurityGroupIngress",
         "ec2:RevokeSecurityGroupIngress"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:ec2:${AWS_DEFAULT_REGION}:${ACCOUNT}:security-group/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Name": "rho-ecc2k-walker",
+          "ec2:ResourceTag/Purpose": "ecc2k-dp-walker"
+        }
+      }
     }
   ]
-}'
+}
+EOF
+)"
 
 existing=$(aws iam list-access-keys --user-name "$USER_NAME" --query 'length(AccessKeyMetadata)' --output text)
 if [ "$existing" != 0 ] && [ "$existing" != "0" ]; then
