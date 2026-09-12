@@ -7705,3 +7705,157 @@ and their interaction is unmeasured.
 ### Commits made
 
 (see PR — `SplitRule` and its test, research note §18)
+
+## 2026-09-12 (autolab run, tenth session on exotic coordinates)
+
+### Task picked
+
+Asked directly whether the thread had found a new point representation,
+the honest answer was "no, and here is why".  Asked then to check the
+literature, which the note's header had named but no session had
+actually read.
+
+### Work done
+
+Read Faugère–Huot–Joux–Renault–Vitse (EUROCRYPT 2014), the
+Galbraith–Gaudry survey (ePrint 2015/1022), and the abstract of
+Galbraith–Gebregiyorgis (ePrint 2014/806); wrote research note §19 and
+annotated §15 and §16 with corrections.
+
+### Findings
+
+**The structural content of §1–§16 is published, and the framing had
+drifted.**  §3's lemma is [FHJRV] Lemma 6 and Remark 9; §1 and §6's
+linearising frames are their Proposition 8, in the same two normal
+forms; §6's characteristic-2 symmetrised `S₃` is their §5.1 with the
+Koblitz case being `b = 1` and a Möbius re-normalisation; §10's group
+closure is [FGHR]'s; §10.3's full `E[2]` invariants are [FHJRV] §4.2;
+and §15's classification of the isogeny lines as changes of curve
+restates their §2, which excludes exactly those morphisms for exactly
+that reason.  §16's "closing lemma" answers from the other side a
+question they closed more generally.
+
+**The note's header was right and the later sections drifted from
+it.**  The first session named all three papers as prior art the
+search must at least rediscover.  Nothing reopened that question as
+the sections accumulated, and the summaries given in conversation
+drifted furthest of all.  The lesson is procedural: a note that opens
+by naming its prior art has to re-read it at the point where it starts
+classifying, not only at the point where it starts.
+
+**What is left is thin and negative.**  [FHJRV] set up arbitrary
+torsion order and instantiate only order 2; they have no 3-torsion
+example, no `j = 0` or `j = 1728` case.  §13's `y`-line chart and
+§15 #2's `x²`-line are those uninstantiated cases — and both are
+negative in this note's own measurements.  A DLP 2014 talk by Vitse is
+described in the survey as a systematic study of which subgroups can be
+used and may cover them; no manuscript was found.
+
+**The comparison the thread never made.**  Galbraith–Gebregiyorgis
+studied this exact setting and concluded Pollard rho remains much
+faster than index calculus for these curves.  Every comparison in §8,
+§14, §17 and §18 is between two index-calculus coordinate systems, none
+against rho.  The wins are inside a family already shown to be
+uncompetitive.
+
+**Also unattributed until now:** the chained system is the known
+"splitting trick", and §18's `MinTermWeight` is the MOM heuristic.
+
+### Next step proposal
+
+Two honest options.  Either stop the representation search, which is
+closed and was closed before it started, or change the question to the
+one the literature leaves open: not "is there a better coordinate" but
+"is the index-calculus family reachable at all", which needs a
+measurement against Pollard rho rather than against another coordinate
+system.  The second is a larger and more useful piece of work, and
+nothing in this note bears on it yet.
+
+### Commits made
+
+(see PR — research note §19, corrections to §15 and §16)
+
+## 2026-09-12 (autolab run, eleventh session — a different question)
+
+### Task picked
+
+"We can do better than the papers."  §19 had just closed the
+representation search as rediscovery, so the first job was to find a
+question the literature actually leaves open rather than one it had
+already answered.
+
+### Work done
+
+Read forward from the 2015 Galbraith–Gaudry survey, which is where §19
+stopped, to Huang–Kosters–Petit–Yeo–Yun (J. Math. Cryptol. 2020) on
+quasi-subfield polynomials.  That paper ends on a stated open problem.
+The repository's own `research/ecdlp_autolab` program had dismissed
+quasi-subfield polynomials, but only for prime fields, where the
+construction degenerates to a one-element factor base; over `F_{2^n}`
+it does not degenerate, and that is the setting the binary machinery
+here already covers.
+
+New module `cryptanalysis::quasi_subfield` (10 tests), two examples, and
+research note `RESEARCH_QUASI_SUBFIELD.md`.
+
+### Findings
+
+**The `n mod n0` term in their Lemma 4.1 cannot be removed.**  Over
+`F_{2^7}` there are non-subfield quasi-subfield polynomials sitting
+strictly below the stripped bound: `λ = X² + X` at `n0 = 3` and
+`λ = X⁴ + X² + X` at `n0 = 4`.  The second is checked by hand as well as
+by machine — as an operator it is `σ⁴ + σ² + σ + 1`, and
+`t⁴ + t² + t + 1 = (t + 1)(t³ + t² + 1)` with both factors dividing
+`t⁷ + 1`.  This answers the paper's "question of particular interest",
+in the direction that keeps their approach alive.
+
+**Existence is governed by the factorisation of `t^n − 1`, not by
+counting.**  Every quasi-subfield polynomial found by exhaustive search
+over all subspaces is accounted for by a Frobenius-stable one, i.e. by a
+divisor of `t^n − 1` with the required gap; the two computations agree
+on existence at every cell brute force can reach.  The first-moment
+heuristic predicts 2 to 1024 solutions at `n = 9…13` and the true count
+is zero in every one of those cells.  The criterion costs
+`2^{j_max+1}` trial divisions against the census's `2^{(j_max+1)·n}`
+rank computations, which is what makes cryptographic `n` reachable.
+
+**The supply is thin.**  Odd `n ≤ 600`, `n0 < 64`: 560 cells admit one,
+483 of them the subfield case.  At prime `n` only 13 non-subfield cells
+exist, ten of them the useless trace hyperplane.  The single cell with a
+ratio small enough to matter is `n = 73`, `n0 = 9`, from
+`g = t⁹ + t + 1`, clearing the definition by `1 < 81/73`.
+
+**The binding constraint is not `deg λ`.**  The paper's own Remark 3.1
+optimises to `Õ(q^{n(1−α+4.876α²)})`, whose minimum over `α` is
+`1 − 1/(4·4.876) = 0.9487`, against the generic `0.5` — and that minimum
+does not involve `deg λ`.  So no quasi-subfield polynomial beats generic
+algorithms within this framework; doing so needs the solving-exponent
+constant below `0.5` against `4.876` today.  The open problem is stated
+in terms of the factor base and is actually about the solver.
+
+### Process notes
+
+- The reach sweep's first output was wrong and looked exciting: it
+  reported hits at every `n ≥ 131`.  Forming `t^n` as a `u128` bitmask
+  wraps silently at the word width, so `t^131 + 1` was being compared
+  against `t^3 + 1`.  Divisibility is now `t^n ≡ 1 (mod g)` by
+  square-and-multiply, with a regression test at
+  `n = 163, 233, 283, 409, 571`.  A sweep whose hits cluster exactly
+  where a word boundary sits is an arithmetic bug, not a discovery.
+- A broken cyclotomic-factor construction was caught the same way, by a
+  test asserting the factors multiply back to `t^n + 1`; it was replaced
+  with trial division rather than debugged.
+
+### Next step proposal
+
+The solver exponent, not the factor base.  `c < 0.5` in
+`1 − α + c α²` is what beating generic requires, and `4.876` is Rojas's
+general-purpose bound applied to a very structured system.  Whether the
+quasi-subfield systems admit anything better is the question that
+matters, and it is the same shape as the question §18 left about
+splitting rules: the literature's pessimism is about generic solvers
+applied to structured problems.
+
+### Commits made
+
+(see PR — `cryptanalysis::quasi_subfield`, two examples, research note)

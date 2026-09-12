@@ -92,11 +92,30 @@ if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
 PACKED_CLMAD = os.environ.get("ECC_PACKED_CLMAD", "0")
 if PACKED_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_CLMAD must be 0 or 1")
+PACKED_WEIGHTED_PREFIX = os.environ.get("ECC_PACKED_WEIGHTED_PREFIX", "0")
+if PACKED_WEIGHTED_PREFIX not in ("0", "1", "2"):
+    raise ValueError("ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2")
+if PACKED_WEIGHTED_PREFIX != "0" and any(value != "1" for value in
+        (PACKED_POLY_STATE, PACKED_POLY_CHAIN, PACKED_CACHE_DENOM, PACKED_PAIR_PRODUCTS)):
+    raise ValueError("ECC_PACKED_WEIGHTED_PREFIX requires polynomial state, polynomial chains, denominator cache and paired products")
+if PACKED_WEIGHTED_PREFIX == "2" and not (int(PACKED_PERM_SIGMA) & 1):
+    raise ValueError("ECC_PACKED_WEIGHTED_PREFIX=2 requires the walk permutation network")
+PACKED_SHARED_SIGMA = os.environ.get("ECC_PACKED_SHARED_SIGMA", "0")
+if PACKED_SHARED_SIGMA not in ("0", "1"):
+    raise ValueError("ECC_PACKED_SHARED_SIGMA must be 0 or 1")
+if PACKED_SHARED_SIGMA == "1" and (PACKED_WEIGHTED_PREFIX != "2" or not (int(PACKED_PERM_SIGMA) & 1)):
+    raise ValueError("ECC_PACKED_SHARED_SIGMA=1 requires weighted-prefix mode 2 and the walk permutation network")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
 if PACKED_STATE_TILE == "256" and (PACKED_POLY_STATE != "1" or PACKED_CACHE_DENOM != "1" or PACKED_POLY_CHAIN != "1"):
     raise ValueError("ECC_PACKED_STATE_TILE=256 requires polynomial state, denominator cache and polynomial chains")
+PACKED_COMPACT_STATE = os.environ.get("ECC_PACKED_COMPACT_STATE", "0")
+if PACKED_COMPACT_STATE not in ("0", "1"):
+    raise ValueError("ECC_PACKED_COMPACT_STATE must be 0 or 1")
+if PACKED_COMPACT_STATE == "1" and (PACKED_STATE_TILE != "256" or any(value != "1" for value in
+        (PACKED_POLY_STATE, PACKED_POLY_CHAIN, PACKED_CACHE_DENOM))):
+    raise ValueError("ECC_PACKED_COMPACT_STATE=1 requires TILE256, polynomial state, polynomial chains and denominator cache")
 
 # Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
 # H200, B200 and B300; append ":n" for several of them.
@@ -141,6 +160,9 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
          "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
          "packedClmad": PACKED_CLMAD == "1",
+         "packedCompactState": PACKED_COMPACT_STATE == "1",
+         "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
+         "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
          "packedStateTile": int(PACKED_STATE_TILE)}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
@@ -170,6 +192,9 @@ image = (
           "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
           "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
           "ECC_PACKED_CLMAD": PACKED_CLMAD,
+          "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
+          "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
+          "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
           "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
     .apt_install("build-essential")
     .add_local_dir(
@@ -193,7 +218,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_STATE_TILE={PACKED_STATE_TILE}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}',
     )
 )
 
@@ -288,6 +313,9 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
             "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
             "packedClmad": PACKED_CLMAD == "1",
+            "packedCompactState": PACKED_COMPACT_STATE == "1",
+            "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
+            "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
             "packedStateTile": int(PACKED_STATE_TILE)}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
@@ -314,7 +342,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_STATE_TILE={PACKED_STATE_TILE}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -351,6 +379,9 @@ def benchmarkIdentity(packed=False):
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
+                packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
 
@@ -361,6 +392,8 @@ def checkPackedReduction(sample):
         ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
         ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
         ('native carryless multiply', 'packedClmad', 'expectedPackedClmad', PACKED_CLMAD),
+        ('compact state', 'packedCompactState', 'expectedPackedCompactState', PACKED_COMPACT_STATE),
+        ('shared sigma', 'packedSharedSigma', 'expectedPackedSharedSigma', PACKED_SHARED_SIGMA),
     ):
         modes = re.findall(r'^packed ' + marker + r': (.*)$', sample.get('raw', ''), re.MULTILINE)
         actual = modes[0] if len(modes) == 1 else None
@@ -369,6 +402,13 @@ def checkPackedReduction(sample):
         sample['valid'] = bool(sample.get('valid') and actual == expected)
         if actual != expected:
             sample.setdefault('error', 'packed ' + marker + ' identity is missing, duplicated or different from the requested build')
+    weighted = re.findall(r'^packed weighted prefix: (.*)$', sample.get('raw', ''), re.MULTILINE)
+    actualWeighted = weighted[0] if len(weighted) == 1 else None
+    sample['expectedPackedWeightedPrefix'] = int(PACKED_WEIGHTED_PREFIX)
+    sample['packedWeightedPrefix'] = int(actualWeighted) if actualWeighted in ('0', '1', '2') else None
+    if actualWeighted != PACKED_WEIGHTED_PREFIX:
+        sample['valid'] = False
+        sample.setdefault('error', 'packed weighted prefix identity is missing, duplicated or different from the requested build')
     tiles = re.findall(r'^packed state tile: (.*)$', sample.get('raw', ''), re.MULTILINE)
     actualTile = tiles[0] if len(tiles) == 1 else None
     sample['expectedPackedStateTile'] = int(PACKED_STATE_TILE)
@@ -498,12 +538,18 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
+                packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
                 packedPolynomialState=PACKED_POLY_STATE == '1',
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedCompactState=PACKED_COMPACT_STATE == '1',
+                packedSharedSigma=PACKED_SHARED_SIGMA == '1',
+                packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE))
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
@@ -591,6 +637,9 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                    packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                    packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                   packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
+                   packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                   packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                    packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
         if not ok:
@@ -720,8 +769,18 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     result.update(gpu=name, cc=arch, batch=batch, threads=threads, leaf=leaf,
                   minBlocks=minBlocks, workers=workers, identity=identity,
                   streamKarat=streamKarat, smemSpill=smemSpill, globalCg=globalCg,
+                  expectedPackedSharedSigma=(PACKED_SHARED_SIGMA == "1") if packed else None,
                   preferL1=preferL1, packed=packed, profilerBinary=NCU_BINARY, profilerVersion=ver,
                   command=command)
+    if packed:
+        sharedModes = re.findall(r'^packed shared sigma: (.*)$', out, re.MULTILINE)
+        actualShared = sharedModes[0] if len(sharedModes) == 1 else None
+        result['packedSharedSigma'] = (actualShared == '1') if actualShared in ('0', '1') else None
+        if result.get('available') and sharedModes != [PACKED_SHARED_SIGMA]:
+            result.update(available=False, kind='packed_identity_mismatch',
+                          why='packed shared sigma identity is missing, duplicated or different from the requested build')
+    else:
+        result['packedSharedSigma'] = None
     return result
 
 
@@ -1106,6 +1165,9 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedCompactState=PACKED_COMPACT_STATE == '1',
+                packedSharedSigma=PACKED_SHARED_SIGMA == '1',
+                packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE),
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
 

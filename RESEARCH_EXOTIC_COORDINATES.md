@@ -1366,6 +1366,12 @@ point and, in Gaudry's setting, a base on which the invariants stay in
 
 ## 15. Charts beyond the `x`-line: four point representations, classified
 
+> **Correction (§19).**  The framework here — equivariant maps to a
+> line, and the exclusion of those factoring through an isogeny — is
+> [FHJRV]'s, published in 2014.  #3 and #4's classification as changes
+> of curve restates their §2.  Read this section as a computational
+> confirmation, not a discovery.
+
 **Code:** `coordinate_quotients::{Line, Chart, descended_map,
 linearised_chart}`, `examples/exotic_charts.rs`, `examples/three_torsion.rs`.
 
@@ -1428,6 +1434,12 @@ on `x`, τ_{T₄} on `x`) where the lemma says they must.
 
 ## 16. Which translations a line can carry: the closing lemma
 
+> **Correction (§19).**  "Closing lemma" overstates it.  The question
+> was already closed, more generally, by [FHJRV]'s criterion on when
+> the dihedral group embeds in `PGL₂`.  The lemma below is a
+> complementary special case, arrived at independently and without
+> knowledge of that work.
+
 **Code:** the unit test
 `a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed`
 in `coordinate_quotients.rs`.
@@ -1464,7 +1476,7 @@ torsion translation reaches a line only through an isogeny (§15 #3,
 coordinates, §10.5's list of groups, and this, the representation
 search of this note is closed on the structural side: what remains
 open is the solver side (§14) and the Koblitz comparison the seventh
-log entry proposes.
+log entry proposes.  (It was closed in the literature first; see §19.)
 
 ---
 
@@ -1713,3 +1725,97 @@ the orbit structure would do better, or would explain *why*
 `MostFrequent` helps there, is open.  Everything here is at Macaulay
 cap 3; the interaction between the cap and the rule is unmeasured, and
 §17 showed the cap is worth orders of magnitude on its own.
+
+## 19. Prior art: what this note rediscovered
+
+The header of this note names the three papers the search "must at
+least rediscover", and that framing was right.  What drifted is the
+later sections: §15 and §16 read as original classification, and the
+summaries given outside the note drifted further, to the point of
+claiming new point representations.  This section is the line-by-line
+check that should have been run before those claims were made.  The
+measurements stand.  The discovery framing does not, and is corrected
+here rather than in place, so the record of what was believed when
+remains readable.
+
+### The two papers that contain most of it
+
+**[FHJRV]** J.-C. Faugère, L. Huot, A. Joux, G. Renault, V. Vitse,
+*Symmetrized Summation Polynomials: Using Small Order Torsion Points to
+Speed Up Elliptic Curve Index Calculus*, EUROCRYPT 2014, LNCS 8441,
+40–57.  Open copy: `inria.hal.science/hal-00935050`.
+
+**[FGHR]** J.-C. Faugère, P. Gaudry, L. Huot, G. Renault, *Using
+Symmetries in the Index Calculus for Elliptic Curves Discrete
+Logarithm*, J. Cryptology 27(4):595–635, 2014.
+
+The correspondence is close enough to be stated line by line.
+
+| this note | prior art |
+|---|---|
+| §3: every degree-2 coordinate is a Möbius frame on the `x`-line | [FHJRV] Lemma 6 and Remark 9: *every* degree-2 morphism `φ` satisfies `φ(P + T) = f_T(φ(P))` for a homography `f_T` |
+| §1, §6: the linearising frames `t ↦ −t` in odd characteristic and `t ↦ t + 1` in characteristic 2 | [FHJRV] Proposition 8, which shows `f_T` may be taken as exactly these two normal forms |
+| §1, §6: a rational 2-torsion point halves the degree per variable | [FHJRV] and [FGHR]; this is the papers' subject |
+| §6: the characteristic-2 Artin–Schreier symmetrised `S₃` | [FHJRV] §5.1, `P_{φ,3} = s₃ + Ls₂ + L²(e₁² + e₁) + L³ + γ(e₁ + λ)²` with `L = λ² + λ`, on `y² + xy = x³ + ax² + b` with `φ(P) = γx(P) + γ + λ`, `γ⁴ = b`.  Koblitz curves are the case `b = 1`, `γ = 1`, and the note's `u = 1/(x + 1)` is a Möbius re-normalisation of that `φ` |
+| §10: closing translations and `[−1]` into a group and taking orbit invariants | [FGHR], groups of order `2^{m−1} m!` and `4^{m−1} m!` from `P ↦ −P` and `P ↦ P + T` with `T` of order 2 or 4 |
+| §10.3, §6.4: joint invariants of the full `E[2]` | [FHJRV] §4.2, the reflexion group `(Z/2Z × Z/2Z)^{n−1} ⋊ S_n`, with the factor base divided by 8 |
+| §15 #3, #4: the isogeny lines are a change of curve, not a gain | [FHJRV] §2, which proves the decomposition attack on `E` through a `φ` factoring as `φ' ∘ ψ` is *equivalent* to the attack on `E'` through `φ'`, and excludes such morphisms for that reason |
+| §16: which translations an automorphism quotient carries | The same phenomenon, from the other side.  [FHJRV] ask when an equivariant `φ` exists for a given translation and answer with a group-theoretic criterion: the dihedral group `D_m` embeds in `PGL₂(F_q)` only when `m` divides `q − 1` or `q + 1`, or `m = char`.  §16 fixes the four automorphism quotients instead and asks which translations descend.  The two are complementary rather than identical, but §16 is not the closing of an open question — the question was closed more generally, and earlier |
+
+Two further attributions the note never made:
+
+- The **chained system** the note calls the production path, with
+  intermediate points `T_i` linking copies of `S₃`, is the "splitting
+  trick" or "unrolling the resultant", found independently by several
+  groups around 2015: Huang–Kosters–Yeo (CRYPTO 2015),
+  Huang–Petit–Shinohara–Takagi (ePrint 2015/358), Karabina (ePrint
+  2015/319), Semaev (ePrint 2015/310).
+- The **`MinTermWeight` split rule** of §18 is the MOM heuristic from
+  the DPLL literature, not a new idea; only its measurement on these
+  systems is.
+
+### What is left, and it is thin
+
+[FHJRV] set up arbitrary torsion order `m` and then instantiate only
+`m = 2`, "the most important case in practice".  Their text contains no
+3-torsion example, no `j = 0` or `j = 1728` case, and no root of unity.
+So §13's `y`-line chart on `j = 0` and §15 #2's `x²`-line on
+`j = 1728` are instantiations of their framework at cases they set up
+and did not work out.  Vanessa Vitse gave a talk at DLP 2014, Ascona —
+*Summation polynomials and symmetries for the ECDLP over extension
+fields* — described in the Galbraith–Gaudry survey as "a more
+systematic study of which subgroups could be used"; it may well cover
+both.  It is cited there as a talk, and no manuscript was found.
+
+Both instantiations are in any case negative results in this note's own
+measurements: §14.3 shows the 3-torsion frame does not pay at `m = 3`,
+and §15 shows the `x²`-line's relation has degree 4 per point where
+Semaev's has 2.
+
+### The comparison this note never made
+
+Galbraith and Gebregiyorgis, *Summation Polynomial Algorithms for
+Elliptic Curves in Characteristic Two*, INDOCRYPT 2014 (ePrint
+2014/806), studied this exact setting — `F_{2^n}` with `n` prime,
+symmetry-breaking factor bases, SAT against Gröbner — and concluded
+that **Pollard rho remains much faster than index calculus** for these
+curves at any reasonable size.
+
+Every comparison in §8, §14, §17 and §18 is between two index-calculus
+coordinate systems.  None of them is against rho.  The wins are real
+and reproducible, and they are wins inside a family already shown to be
+uncompetitive with the method an attacker would actually use.  A
+factor of 6.8 at `n = 17` does not change that, and the note should not
+be read as if it might.
+
+### What this does not retract
+
+The measurements, the engine and the corrections stand: the quotient
+engine reproduces [FGHR]'s and [FHJRV]'s invariants from a group and a
+seed without being told the answer, which is a check on both; §17's
+finding that the Macaulay cap is absolute and that the symmetrised
+system is the *smaller* Macaulay problem is about this repository's
+solver and is not in the literature; and §18's split-rule measurement
+is new as a measurement.  What is retracted is the claim of having
+found new point representations.  The search rediscovered a known
+classification and confirmed it computationally.

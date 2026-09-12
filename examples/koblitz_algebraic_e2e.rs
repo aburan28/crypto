@@ -293,6 +293,7 @@ fn main() {
 
     let options = KoblitzIcOptions {
         m,
+        descent_m: None,
         factor_index: factor_indices[0],
         extra_relations: 2,
         max_trials,
