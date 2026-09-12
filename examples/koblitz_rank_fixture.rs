@@ -535,6 +535,17 @@ impl CompactPairTable {
         Some(point)
     }
 
+    /// Return the positive point as `(x + 1, y)`, with `(0, 0)` encoding
+    /// infinity. The outer `Option` still distinguishes an empty table slot.
+    fn compact_point_at_slot(&self, slot: usize) -> Option<(u64, u64)> {
+        let key_x = *self.keys_x.get(slot)?;
+        if key_x == u64::MAX {
+            None
+        } else {
+            Some((key_x, self.image_y[slot]))
+        }
+    }
+
     fn signed_labels_at_slot(
         &self,
         slot: usize,
@@ -1351,6 +1362,107 @@ fn batch_raw_target_minus_signed_points_x_filtered(
     attempted
 }
 
+/// Dual-sign batch inversion over compact `(x + 1, y)` points. This is the
+/// same exact computation as `batch_raw_target_minus_signed_points_x_filtered`
+/// without carrying a 24-byte `Option<(u64, u64)>` through every scratch pass.
+fn batch_compact_target_minus_signed_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[(u64, u64)],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, bool, (u64, u64))>,
+    scratch: &mut RawBatchScratch,
+) -> usize {
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        let mut attempted = 0usize;
+        for (index, &(key_x, y)) in points.iter().enumerate() {
+            if key_x == 0 {
+                attempted += 1;
+                if table.might_contain_x(0) {
+                    output.push((index, false, (0, 0)));
+                }
+                continue;
+            }
+            let x = key_x - 1;
+            attempted += 1;
+            if table.might_contain_x(key_x) {
+                output.push((index, false, (key_x, y ^ x)));
+            }
+            attempted += 1;
+            if table.might_contain_x(key_x) {
+                output.push((index, true, (key_x, y)));
+            }
+        }
+        return attempted;
+    };
+
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes_and_inverses.resize(points.len(), 0);
+    let mut product = 1u64;
+    for (index, &(key_x, _)) in points.iter().enumerate() {
+        let denominator = if key_x == 0 {
+            0
+        } else {
+            target_x ^ (key_x - 1)
+        };
+        scratch.denominators[index] = denominator;
+        if denominator != 0 {
+            scratch.prefixes_and_inverses[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    for index in (0..points.len()).rev() {
+        let denominator = scratch.denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        let inverse = mul_raw(curve, inverse_product, scratch.prefixes_and_inverses[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+        scratch.prefixes_and_inverses[index] = inverse;
+    }
+
+    let mut attempted = 0usize;
+    for (index, &(key_x, y)) in points.iter().enumerate() {
+        if key_x == 0 {
+            let key = raw_compact_key(target);
+            attempted += 1;
+            if table.might_contain_x(key.0) {
+                output.push((index, false, key));
+            }
+            continue;
+        }
+        let x = key_x - 1;
+        if scratch.denominators[index] == 0 {
+            let point = Some((x, y));
+            for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
+                let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
+                attempted += 1;
+                if table.might_contain_x(key.0) {
+                    output.push((index, negative, key));
+                }
+            }
+            continue;
+        }
+
+        let inverse = scratch.prefixes_and_inverses[index];
+        for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
+            let lambda = mul_raw(curve, numerator, inverse);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let rest_x = x3 + 1;
+            attempted += 1;
+            if !table.might_contain_x(rest_x) {
+                continue;
+            }
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            output.push((index, negative, (rest_x, y3)));
+        }
+    }
+    attempted
+}
+
 fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> Vec<(u64, u64)> {
     let mut denominators = vec![0u64; pairs.len()];
     let mut prefixes = vec![0u64; pairs.len()];
@@ -1597,6 +1709,7 @@ fn lookup_signed_expanded_pair(
 #[derive(Default)]
 struct PairPairChunkScratch {
     points: Vec<RawPoint>,
+    compact_points: Vec<(u64, u64)>,
     signed_slots: Vec<usize>,
     separate_rests: Vec<(usize, (u64, u64))>,
     dual_rests: Vec<(usize, bool, (u64, u64))>,
@@ -1628,17 +1741,25 @@ fn pair_pair_cursor_chunk(
     cursor_start: usize,
     cursor_end: usize,
     dual_sign: bool,
+    compact_scratch: bool,
     scratch: &mut PairPairChunkScratch,
 ) -> PairPairChunkResult {
     let slots = quotient_pairs.slots();
     scratch.points.clear();
+    scratch.compact_points.clear();
     scratch.signed_slots.clear();
     let step = if dual_sign { 2 } else { 1 };
     if dual_sign {
         assert_eq!(cursor_start & 1, 0);
         assert_eq!(cursor_end & 1, 0);
     }
-    scratch.points.reserve((cursor_end - cursor_start) / step);
+    if compact_scratch && dual_sign {
+        scratch
+            .compact_points
+            .reserve((cursor_end - cursor_start) / step);
+    } else {
+        scratch.points.reserve((cursor_end - cursor_start) / step);
+    }
     scratch
         .signed_slots
         .reserve((cursor_end - cursor_start) / step);
@@ -1654,15 +1775,34 @@ fn pair_pair_cursor_chunk(
             (start_slot + cursor / 2) & (slots - 1)
         };
         let negative = !dual_sign && cursor & 1 == 1;
-        if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative) {
-            scratch.points.push(point);
+        let occupied = if compact_scratch && dual_sign {
+            quotient_pairs.compact_point_at_slot(slot).map(|point| {
+                scratch.compact_points.push(point);
+            })
+        } else {
+            quotient_pairs
+                .signed_point_at_slot(slot, negative)
+                .map(|point| {
+                    scratch.points.push(point);
+                })
+        };
+        if occupied.is_some() {
             scratch.signed_slots.push(slot << 1 | usize::from(negative));
         }
     }
-    if scratch.points.is_empty() {
+    if scratch.points.is_empty() && scratch.compact_points.is_empty() {
         return PairPairChunkResult::default();
     }
-    let attempted = if dual_sign {
+    let attempted = if dual_sign && compact_scratch {
+        batch_compact_target_minus_signed_points_x_filtered(
+            curve,
+            target,
+            &scratch.compact_points,
+            quotient_pairs,
+            &mut scratch.dual_rests,
+            &mut scratch.batch,
+        )
+    } else if dual_sign {
         batch_raw_target_minus_signed_points_x_filtered(
             curve,
             target,
@@ -1690,7 +1830,15 @@ fn pair_pair_cursor_chunk(
         additions: attempted,
         x_filter_rejections: attempted - filtered_hits,
         batch_inversions: usize::from(target.is_some()),
-        shared_denominator_inputs: if dual_sign { scratch.points.len() } else { 0 },
+        shared_denominator_inputs: if dual_sign {
+            if compact_scratch {
+                scratch.compact_points.len()
+            } else {
+                scratch.points.len()
+            }
+        } else {
+            0
+        },
         ..PairPairChunkResult::default()
     };
     let mut consume = |position: usize, negative: bool, rest_key: (u64, u64)| {
@@ -2283,6 +2431,8 @@ fn main() {
         .unwrap_or(1);
     let dual_sign_pair_scan =
         std::env::var("KIC_DISABLE_DUAL_SIGN_PAIR_SCAN").as_deref() != Ok("1");
+    let compact_pair_scratch =
+        std::env::var("KIC_DISABLE_COMPACT_PAIR_SCRATCH").as_deref() != Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -2877,6 +3027,7 @@ fn main() {
                                     cursor_start,
                                     (cursor_start + width).min(cursors),
                                     dual_sign_pair_scan,
+                                    compact_pair_scratch,
                                     scratch,
                                 )
                             })
@@ -3358,6 +3509,9 @@ fn main() {
                 "query_parallel_chunks":query_parallel_chunks,
                 "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
+                "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
+                "query_raw_point_scratch_bytes":std::mem::size_of::<RawPoint>(),
+                "query_compact_point_scratch_bytes":std::mem::size_of::<(u64,u64)>(),
                 "target_mode":target_mode.name(),
                 "target_walk_additions":target_walk_additions,
                 "target_walk_restarts":target_walk_restarts,
@@ -3665,6 +3819,24 @@ mod packed_tests {
         assert_eq!(dual_attempted, separate_attempted);
         assert_eq!(dual, separate_normalized);
         assert_eq!(dual_scratch.denominators.len() * 2, signed_points.len());
+
+        let compact_points: Vec<_> = points.iter().copied().map(raw_compact_key).collect();
+        let mut compact = Vec::new();
+        let mut compact_scratch = RawBatchScratch::default();
+        let compact_attempted = batch_compact_target_minus_signed_points_x_filtered(
+            &curve,
+            target,
+            &compact_points,
+            &table,
+            &mut compact,
+            &mut compact_scratch,
+        );
+        assert_eq!(compact_attempted, dual_attempted);
+        assert_eq!(compact, dual);
+        assert!(
+            std::mem::size_of::<(u64, u64)>() < std::mem::size_of::<RawPoint>(),
+            "compact point scratch must reduce each entry"
+        );
     }
 
     #[test]
