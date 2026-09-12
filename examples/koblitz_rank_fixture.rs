@@ -267,6 +267,18 @@ impl QuotientPairWitness {
             (self.columns[1] as usize, self.coefficients[1]),
         ]
     }
+
+    fn from_point_indices(indices: [usize; 2], image_y: u64) -> Self {
+        Self {
+            columns: indices.map(|index| u16::try_from(index).expect("factor-base index fits u16")),
+            coefficients: [0; 2],
+            image_y,
+        }
+    }
+
+    fn point_indices(self) -> [usize; 2] {
+        self.columns.map(usize::from)
+    }
 }
 
 struct CompactPairTable {
@@ -274,7 +286,9 @@ struct CompactPairTable {
     keys_y: Vec<u64>,
     // Cursor scans need only x and y to form the left pair point. Keep the
     // relation labels in separate cold arrays and load them after an exact
-    // right-pair hit; this also removes four bytes of struct padding per slot.
+    // right-pair hit. In the signed-expanded table `columns` stores the two
+    // factor-base point indices directly, so its 16-byte coefficient payload
+    // is not allocated at all.
     columns: Vec<[u16; 2]>,
     coefficients: Vec<[u64; 2]>,
     image_y: Vec<u64>,
@@ -305,7 +319,11 @@ impl CompactPairTable {
                 vec![0; capacity]
             },
             columns: vec![[0; 2]; capacity],
-            coefficients: vec![[0; 2]; capacity],
+            coefficients: if x_only {
+                Vec::new()
+            } else {
+                vec![[0; 2]; capacity]
+            },
             image_y: vec![0; capacity],
             x_filter: if filter_bits != 0 {
                 vec![0; filter_bits.div_ceil(u64::BITS as usize)]
@@ -339,7 +357,9 @@ impl CompactPairTable {
                     self.keys_y[index] = key.1;
                 }
                 self.columns[index] = value.columns;
-                self.coefficients[index] = value.coefficients;
+                if !self.x_only {
+                    self.coefficients[index] = value.coefficients;
+                }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
                     self.insert_x_filter(key.0);
@@ -367,7 +387,11 @@ impl CompactPairTable {
             if self.keys_x[index] == key.0 && (self.x_only || self.keys_y[index] == key.1) {
                 return Some(QuotientPairWitness {
                     columns: self.columns[index],
-                    coefficients: self.coefficients[index],
+                    coefficients: if self.x_only {
+                        [0; 2]
+                    } else {
+                        self.coefficients[index]
+                    },
                     image_y: self.image_y[index],
                 });
             }
@@ -456,14 +480,13 @@ impl CompactPairTable {
         slot: usize,
         negative: bool,
         modulus: u64,
-    ) -> [(usize, u64); 2] {
+        point_labels: &[(usize, u64)],
+        label_to_index: &HashMap<(usize, u64), usize>,
+    ) -> ([usize; 2], [(usize, u64); 2]) {
         debug_assert!(self.keys_x.get(slot).is_some_and(|&key| key != u64::MAX));
-        let mut labels = QuotientPairWitness {
-            columns: self.columns[slot],
-            coefficients: self.coefficients[slot],
-            image_y: 0,
-        }
-        .labels();
+        debug_assert!(self.x_only);
+        let mut indices = self.columns[slot].map(usize::from);
+        let mut labels = indices.map(|index| point_labels[index]);
         if negative {
             labels = labels.map(|(column, coefficient)| {
                 (
@@ -475,8 +498,9 @@ impl CompactPairTable {
                     },
                 )
             });
+            indices = labels.map(|label| label_to_index[&label]);
         }
-        labels
+        (indices, labels)
     }
 }
 
@@ -491,6 +515,13 @@ fn compact_point_key(point: &BinaryPoint) -> (u64, u64) {
 }
 
 fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
+    #[cfg(target_arch = "x86_64")]
+    if pclmul_enabled() {
+        // In characteristic two the carryless product value * value has no
+        // cross terms, so it is exactly the interleaved polynomial square.
+        // SAFETY: the cached runtime feature check guards every call.
+        return reduce_raw(curve, unsafe { pclmul_u64(value, value) });
+    }
     if curve.n <= 31 {
         let mut wide = value;
         wide = (wide | (wide << 16)) & 0x0000_ffff_0000_ffff;
@@ -568,6 +599,16 @@ fn field_mul_backend() -> &'static str {
         "x86_64_pclmulqdq"
     } else {
         "portable_sparse_carryless"
+    }
+}
+
+fn field_square_backend(curve: &KoblitzCurve) -> &'static str {
+    if pclmul_enabled() {
+        "x86_64_pclmulqdq"
+    } else if curve.n <= 31 {
+        "portable_interleaved_bit_spread"
+    } else {
+        "portable_sparse_bit_interleave"
     }
 }
 
@@ -1307,17 +1348,19 @@ fn lookup_signed_expanded_pair(
     rest_key: (u64, u64),
     modulus: u64,
     quotient_pairs: &CompactPairTable,
+    point_labels: &[(usize, u64)],
     label_to_index: &HashMap<(usize, u64), usize>,
 ) -> Option<([usize; 2], [(usize, u64); 2])> {
     quotient_pairs.get(rest_key).map(|pair| {
-        let stored = pair.labels();
+        let stored_indices = pair.point_indices();
+        let stored = stored_indices.map(|index| point_labels[index]);
         let image_y = pair.image_y;
-        let labels = if rest_key.1 == image_y {
-            stored
+        let (indices, labels) = if rest_key.1 == image_y {
+            (stored_indices, stored)
         } else {
             let raw_x = rest_key.0.saturating_sub(1);
             assert_eq!(rest_key.1, image_y ^ raw_x);
-            stored.map(|(column, coefficient)| {
+            let labels = stored.map(|(column, coefficient)| {
                 (
                     column,
                     if coefficient == 0 {
@@ -1326,9 +1369,9 @@ fn lookup_signed_expanded_pair(
                         modulus - coefficient
                     },
                 )
-            })
+            });
+            (labels.map(|label| label_to_index[&label]), labels)
         };
-        let indices = labels.map(|label| label_to_index[&label]);
         (indices, labels)
     })
 }
@@ -1357,6 +1400,7 @@ fn pair_pair_cursor_chunk(
     curve: &KoblitzCurve,
     target: RawPoint,
     quotient_pairs: &CompactPairTable,
+    point_labels: &[(usize, u64)],
     label_to_index: &HashMap<(usize, u64), usize>,
     modulus: u64,
     start_slot: usize,
@@ -1395,16 +1439,24 @@ fn pair_pair_cursor_chunk(
         ..PairPairChunkResult::default()
     };
     for &(position, rest_key) in &scratch.rests {
-        let Some((right_indices, right_labels)) =
-            lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index)
-        else {
+        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+            rest_key,
+            modulus,
+            quotient_pairs,
+            point_labels,
+            label_to_index,
+        ) else {
             result.exact_table_misses += 1;
             continue;
         };
         let signed_slot = scratch.signed_slots[position];
-        let left_labels =
-            quotient_pairs.signed_labels_at_slot(signed_slot >> 1, signed_slot & 1 == 1, modulus);
-        let left_indices = left_labels.map(|label| label_to_index[&label]);
+        let (left_indices, left_labels) = quotient_pairs.signed_labels_at_slot(
+            signed_slot >> 1,
+            signed_slot & 1 == 1,
+            modulus,
+            point_labels,
+            label_to_index,
+        );
         result.witness = Some((
             [
                 left_indices[0],
@@ -1465,14 +1517,18 @@ fn lookup_pair_witness(
             (witness, maps)
         }
         PairMode::SignedExpanded => {
-            let witness =
-                lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index).map(
-                    |(pair_indices, pair_labels)| {
-                        let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
-                        let indices = [pair_indices[0], pair_indices[1], right];
-                        (indices, labels)
-                    },
-                );
+            let witness = lookup_signed_expanded_pair(
+                rest_key,
+                modulus,
+                quotient_pairs,
+                &base.point_labels,
+                label_to_index,
+            )
+            .map(|(pair_indices, pair_labels)| {
+                let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
+                let indices = [pair_indices[0], pair_indices[1], right];
+                (indices, labels)
+            });
             (witness, 0)
         }
     }
@@ -1978,6 +2034,14 @@ fn main() {
         .map(|(index, label)| (label, index))
         .collect();
     assert_eq!(label_to_index.len(), base.points.len());
+    let frobenius_next_index: Vec<usize> = base
+        .point_labels
+        .iter()
+        .map(|&(column, coefficient)| {
+            let next = ((coefficient as u128 * lambda as u128) % modulus as u128) as u64;
+            label_to_index[&(column, next)]
+        })
+        .collect();
     match pair_mode {
         PairMode::Full => {
             for left in 0..base.points.len() {
@@ -2010,7 +2074,7 @@ fn main() {
                     };
                     for &relative in relatives {
                         let right = label_to_index[&(right_column, relative)];
-                        jobs.push((left_column, right_column, relative));
+                        jobs.push((left_column, right_column, relative, left, right));
                         operands.push((
                             to_raw_point(&base.points[left]),
                             to_raw_point(&base.points[right]),
@@ -2020,7 +2084,9 @@ fn main() {
             }
             let sum_keys = batch_raw_add_keys(&curve, &operands);
             pair_batch_inversions = usize::from(!sum_keys.is_empty());
-            for ((left_column, right_column, relative), key) in jobs.into_iter().zip(sum_keys) {
+            for ((left_column, right_column, relative, left, right), key) in
+                jobs.into_iter().zip(sum_keys)
+            {
                 if pair_mode == PairMode::SignedQuotient {
                     let (canonical, multiplier, maps) =
                         canonical_signed_key(&curve, key, modulus, lambda);
@@ -2041,28 +2107,17 @@ fn main() {
                     );
                 } else {
                     let mut image_key = key;
-                    let mut multiplier = 1u64;
+                    let mut image_indices = [left, right];
                     for exponent in 0..curve.n {
                         quotient_pairs.insert(
                             image_key,
-                            QuotientPairWitness::new(
-                                [
-                                    (left_column, multiplier),
-                                    (
-                                        right_column,
-                                        ((relative as u128 * multiplier as u128) % modulus as u128)
-                                            as u64,
-                                    ),
-                                ],
-                                image_key.1,
-                            ),
+                            QuotientPairWitness::from_point_indices(image_indices, image_key.1),
                         );
                         if exponent + 1 < curve.n && image_key.0 != 0 {
                             let x = square_raw(&curve, image_key.0 - 1);
                             let y = square_raw(&curve, image_key.1);
                             image_key = (x + 1, y);
-                            multiplier =
-                                ((multiplier as u128 * lambda as u128) % modulus as u128) as u64;
+                            image_indices = image_indices.map(|index| frobenius_next_index[index]);
                             pair_canonicalization_maps += 1;
                         }
                     }
@@ -2121,6 +2176,7 @@ fn main() {
             "base_hash":&base_hash,
             "field_modulus_low_terms":curve.curve.irreducible.low_terms,
             "field_mul_backend":field_mul_backend(),
+            "field_square_backend":field_square_backend(&curve),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
             "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
@@ -2394,6 +2450,7 @@ fn main() {
                                     &curve,
                                     target,
                                     &quotient_pairs,
+                                    &base.point_labels,
                                     &label_to_index,
                                     modulus,
                                     start_slot,
@@ -2454,18 +2511,20 @@ fn main() {
                                 rest_key,
                                 modulus,
                                 &quotient_pairs,
+                                &base.point_labels,
                                 &label_to_index,
                             ) else {
                                 query_exact_table_misses += 1;
                                 continue;
                             };
                             let signed_slot = pair_signed_slot_scratch[position];
-                            let left_labels = quotient_pairs.signed_labels_at_slot(
+                            let (left_indices, left_labels) = quotient_pairs.signed_labels_at_slot(
                                 signed_slot >> 1,
                                 signed_slot & 1 == 1,
                                 modulus,
+                                &base.point_labels,
+                                &label_to_index,
                             );
-                            let left_indices = left_labels.map(|label| label_to_index[&label]);
                             witness = Some((
                                 vec![
                                     left_indices[0],
@@ -2848,6 +2907,7 @@ fn main() {
                 "pair_canonicalization_maps":pair_canonicalization_maps,
                 "pair_batch_inversions":pair_batch_inversions,
                 "field_mul_backend":field_mul_backend(),
+                "field_square_backend":field_square_backend(&curve),
                 "query_group_additions":query_additions,
                 "query_canonicalization_maps":query_canonicalization_maps,
                 "query_x_filter_rejections":query_x_filter_rejections,
