@@ -177,6 +177,56 @@ begin
     variable held  : natural range 0 to OB_N + 2;
   begin
     if rising_edge(clk) then
+      -- the reset, applied last, touches the pointers and flags only; the
+      -- report register and the buffer are data (see ec2k_axil's stage)
+      step_pulse <= '0';
+
+      -- prefetch: keep the buffer fed, never more than it can hold
+      held := to_integer(ob_wr - ob_rd);
+      if rv(0) = '1' then held := held + 1; end if;
+      if rv(1) = '1' then held := held + 1; end if;
+      issue := not f_empty and held < OB_N;
+      if issue then
+        f_rd <= f_rd + 1;
+      end if;
+      if issue then rv(0) <= '1'; else rv(0) <= '0'; end if;
+      rv(1) <= rv(0);
+      if rv(1) = '1' then
+        ob(to_integer(ob_wr(OB_LOG - 1 downto 0))) <= rr_w;
+        ob_wr <= ob_wr + 1;
+      end if;
+
+      -- pop: the step unit took the head, or the head is a report
+      if s_in_valid = '1' and s_in_ready = '1' then
+        ob_rd <= ob_rd + 1;
+      elsif take_dp then
+        ob_rd    <= ob_rd + 1;
+        dpv      <= '1';
+        dp_id    <= unsigned(head_w(Y_LO - 1 downto ID_LO));
+        dp_x     <= head_w(FW - 1 downto X_LO);
+        dp_y     <= head_w(X_LO - 1 downto Y_LO);
+        dp_steps <= unsigned(head_w(ID_LO - 1 downto CNT_LO));
+      end if;
+      if dp_ack = '1' and not take_dp then
+        dpv <= '0';
+      end if;
+
+      -- a completed step: re-queue it with its count plus one, flagged
+      -- if distinguished; else a host load, which starts at zero.  One
+      -- if/elsif chain so the memory has exactly one write port.
+      wr := to_integer(f_wr(ID_W - 1 downto 0));
+      if s_out_valid = '1' then
+        step_pulse <= '1';
+        f_mem(wr) <= s_out_x & s_out_y & s_out_tag(TAG_W - 1 downto CNT_W)
+                     & std_logic_vector(unsigned(s_out_tag(CNT_W - 1 downto 0)) + 1)
+                     & s_out_dp;
+        f_wr <= f_wr + 1;
+      elsif ld_valid = '1' and ld_rdy = '1' then
+        f_mem(wr) <= ld_x & ld_y & std_logic_vector(ld_id)
+                     & std_logic_vector(to_unsigned(0, CNT_W)) & '0';
+        f_wr <= f_wr + 1;
+      end if;
+
       if rst = '1' then
         f_wr  <= (others => '0');
         f_rd  <= (others => '0');
@@ -185,54 +235,6 @@ begin
         rv    <= (others => '0');
         dpv        <= '0';
         step_pulse <= '0';
-      else
-        step_pulse <= '0';
-
-        -- prefetch: keep the buffer fed, never more than it can hold
-        held := to_integer(ob_wr - ob_rd);
-        if rv(0) = '1' then held := held + 1; end if;
-        if rv(1) = '1' then held := held + 1; end if;
-        issue := not f_empty and held < OB_N;
-        if issue then
-          f_rd <= f_rd + 1;
-        end if;
-        if issue then rv(0) <= '1'; else rv(0) <= '0'; end if;
-        rv(1) <= rv(0);
-        if rv(1) = '1' then
-          ob(to_integer(ob_wr(OB_LOG - 1 downto 0))) <= rr_w;
-          ob_wr <= ob_wr + 1;
-        end if;
-
-        -- pop: the step unit took the head, or the head is a report
-        if s_in_valid = '1' and s_in_ready = '1' then
-          ob_rd <= ob_rd + 1;
-        elsif take_dp then
-          ob_rd    <= ob_rd + 1;
-          dpv      <= '1';
-          dp_id    <= unsigned(head_w(Y_LO - 1 downto ID_LO));
-          dp_x     <= head_w(FW - 1 downto X_LO);
-          dp_y     <= head_w(X_LO - 1 downto Y_LO);
-          dp_steps <= unsigned(head_w(ID_LO - 1 downto CNT_LO));
-        end if;
-        if dp_ack = '1' and not take_dp then
-          dpv <= '0';
-        end if;
-
-        -- a completed step: re-queue it with its count plus one, flagged
-        -- if distinguished; else a host load, which starts at zero.  One
-        -- if/elsif chain so the memory has exactly one write port.
-        wr := to_integer(f_wr(ID_W - 1 downto 0));
-        if s_out_valid = '1' then
-          step_pulse <= '1';
-          f_mem(wr) <= s_out_x & s_out_y & s_out_tag(TAG_W - 1 downto CNT_W)
-                       & std_logic_vector(unsigned(s_out_tag(CNT_W - 1 downto 0)) + 1)
-                       & s_out_dp;
-          f_wr <= f_wr + 1;
-        elsif ld_valid = '1' and ld_rdy = '1' then
-          f_mem(wr) <= ld_x & ld_y & std_logic_vector(ld_id)
-                       & std_logic_vector(to_unsigned(0, CNT_W)) & '0';
-          f_wr <= f_wr + 1;
-        end if;
       end if;
     end if;
   end process;
