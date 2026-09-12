@@ -1,5 +1,5 @@
 -- ec2k_walker.vhd
--- The rho sequencer around one ec2k_step_pipe: NWALK independent walks,
+-- The rho sequencer around one ec2k_batch_pipe: NWALK independent walks,
 -- each stepped until it lands on a distinguished point, which is reported
 -- to the host with its walk id and step count.  The host then loads a fresh
 -- start point into that id.  Nothing else crosses the boundary, which is the
@@ -13,8 +13,12 @@
 -- completed step needs re-queuing, so the FIFO has one write port.  Step
 -- counts sit in a small per-walk memory.
 --
--- Throughput is that of the step unit: one step per ten clocks per
--- multiplier, provided NWALK covers the step unit's slots.
+-- Throughput is that of the step unit: 5 + 5/W clocks per step per
+-- multiplier, provided NWALK comfortably covers the 2**(LOG_W + LOG_NB)
+-- walks the step unit holds, so a full batch is always forming.  When
+-- fewer walks than that are live (start-up, or a host that is slow to
+-- reload) the step unit's flush completes partial batches with dummy leaves
+-- after FLUSH_CLK idle clocks, at a cost in efficiency but never a stall.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,8 +28,10 @@ use work.gf131_pkg.all;
 
 entity ec2k_walker is
   generic (
-    ID_W      : natural := 5;                -- NWALK = 2**ID_W
-    SLOT_W    : natural := 4;                -- step unit slots
+    ID_W      : natural := 8;                -- NWALK = 2**ID_W
+    LOG_W     : natural := 4;                -- step unit: walks per batch
+    LOG_NB    : natural := 3;                -- step unit: batches in flight
+    FLUSH_CLK : natural := 32;
     CNT_W     : natural := 32;
     DP_WEIGHT : natural := DP_WEIGHT_DEFAULT
   );
@@ -81,8 +87,9 @@ architecture rtl of ec2k_walker is
 
 begin
 
-  step : entity work.ec2k_step_pipe
-    generic map (TAG_W => ID_W, SLOT_W => SLOT_W, DP_WEIGHT => DP_WEIGHT)
+  step : entity work.ec2k_batch_pipe
+    generic map (TAG_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
+                 FLUSH_CLK => FLUSH_CLK, DP_WEIGHT => DP_WEIGHT)
     port map (
       clk => clk, rst => rst,
       in_valid => s_in_valid, in_ready => s_in_ready,
