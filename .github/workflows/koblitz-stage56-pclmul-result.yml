@@ -1,0 +1,28 @@
+name: Koblitz Stage 56 PCLMUL result
+
+on:
+  pull_request:
+    paths:
+      - "scripts/verify_koblitz_stage56_pclmul_result.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage56-n53-pclmul-evidence-34712955835.tar.gz*"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-56-*-34712955835.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-56-n53-pclmul-result-20260912/**"
+      - ".github/workflows/koblitz-stage56-pclmul-result.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-hosted-result:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify hosted PCLMUL result
+        run: |
+          python3 -m py_compile scripts/verify_koblitz_stage56_pclmul_result.py
+          python3 scripts/verify_koblitz_stage56_pclmul_result.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-56-n53-pclmul-result-20260912 \
+            > "$RUNNER_TEMP/stage56-verification.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
