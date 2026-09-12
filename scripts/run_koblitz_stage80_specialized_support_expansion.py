@@ -88,7 +88,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     candidate_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     candidate_environment["RAYON_NUM_THREADS"] = "4"
     baseline_environment = dict(candidate_environment)
-    baseline_environment["KIC_DISABLE_SPECIALIZED_N53_SUPPORT_EXPANSION"] = "1"
+    candidate_environment["KIC_ENABLE_SPECIALIZED_N53_SUPPORT_EXPANSION"] = "1"
     rho_environment = custody.safe_child_environment()
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
