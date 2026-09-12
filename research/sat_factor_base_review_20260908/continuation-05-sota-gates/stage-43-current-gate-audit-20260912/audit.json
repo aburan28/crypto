@@ -1,0 +1,1598 @@
+{
+  "all_seven_gates_passed": false,
+  "boundary_ledger_binding": {
+    "ledger": {
+      "path": "docs/ic/boundary_targets.json",
+      "sha256": "2e20728d76b53231c24b431f3e0e19afad2a825541dfa5d3235ac87100149ce5"
+    },
+    "scoreboard": {
+      "path": "docs/ic/BOUNDARY_TARGETS.md",
+      "sha256": "e8993ef7f2475d2a887a1a5ed765470782fff215de3f510c59d8281f84d5345a"
+    }
+  },
+  "current_measurements": {
+    "n41_fixed_algebraic": {
+      "factor_base_discovery_scalar_labels": 0,
+      "factor_base_discovery_target_samples": 0,
+      "fresh_build_plus_science_over_rho": 110.79138179659516,
+      "ic_over_rho_amortised_wall_ratio": 5.025824680629552,
+      "ic_over_rho_online_wall_ratio": 0.28554556054870023,
+      "precompute_seconds": 4.3102452929999995
+    },
+    "n41_four_core": {
+      "five_target_ic_wall_speedup": 2.4106094702697174,
+      "four_core_five_target_ic_seconds_median": 2.4798440384999996,
+      "four_core_fresh_build_plus_cell_wall_over_matched_rho": 139.5462193305516,
+      "four_core_ic_over_rho_amortised_wall_ratio_median": 3.605523155126031,
+      "four_core_precompute_seconds_median": 2.0106184209999998,
+      "four_core_process_core_seconds_median": 6.7660975,
+      "improvement_factor_over_stage35": 8.00358350524383,
+      "improvement_factor_over_stage39": 1.3939238397302358,
+      "precompute_wall_speedup": 2.6556256327565007,
+      "process_core_seconds_increase_factor": 1.286947617650063,
+      "single_core_five_target_ic_seconds_median": 5.977935524,
+      "single_core_precompute_seconds_median": 5.3394498165,
+      "single_core_process_core_seconds_median": 5.257477,
+      "stage35_ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+      "stage39_ic_over_rho_amortised_wall_ratio": 5.025824680629552
+    },
+    "n53_same_target": {
+      "direct_over_rho_wall_ratio": 12.131346003064046,
+      "direct_wall_seconds": 39.78060466400001,
+      "factor_base_points": 9964,
+      "fresh_build_plus_direct_over_rho": 37.698324546302224,
+      "orbit_columns": 94,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "relations": 189,
+      "rho_wall_seconds": 3.2791583599999967
+    }
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_full_cost_accounting": {
+      "missing": [
+        "licensed Magma execution resources",
+        "acquisition of the preinstalled operating system and Rust toolchain"
+      ],
+      "proved": [
+        "Phase-B solver acquisition, builds, one-CPU cells, direct MITM, correction, conflicts, wall, and process-tree memory are charged",
+        "Stage-33 fresh dependency acquisition, four-job build, algebraic discovery, predicate materialization, relations, sparse linear algebra, descent, rho, one-CPU time, and process-tree memory are charged",
+        "Stage-39 fixed algebraic construction, relations, LA, unknown-scalar descent, rho, build, core-seconds, wall, and tree RSS are charged",
+        "Stage-40 charges the complete one/four/four/one parallel control and reports wall speedup plus added CPU cost",
+        "Stage-42 charges clean build and same-target n=53 direct/rho arms with watchdog, CPU, wall, and process-tree RSS"
+      ],
+      "status": "partial"
+    },
+    "2_same_instance_backend_matrix": {
+      "missing": [
+        "licensed Magma F4 on all 160 exact inputs"
+      ],
+      "proved": [
+        "native XOR SAT, WDSat, CryptoMiniSat, and direct MITM on the exact 160-input packet",
+        "standard n=31/n=41 and GGMP n=31 cells"
+      ],
+      "status": "partial"
+    },
+    "3_required_resource_fields": {
+      "missing": [
+        "the same fields for the licensed Magma arm"
+      ],
+      "proved": [
+        "single-core elapsed, total core-seconds, peak process and process-tree memory, conflicts or operation counters, and workflow wall are retained for executed arms",
+        "Stage-42 n=53 retains single-process wall, total core-seconds, direct/rho peak RSS, support/query operations, build resources, and workflow wall"
+      ],
+      "status": "partial"
+    },
+    "4_scaling": {
+      "limitations": [
+        "n=59 remains PDP-only",
+        "all completed DLP controls are public synthetic toy subgroups",
+        "finite measurements do not establish asymptotic scaling"
+      ],
+      "proved": [
+        "PDP matrix at n=31, n=41, and n=59",
+        "end-to-end public unknown-scalar controls at n=31 and n=41",
+        "Stage-42 constructs, ranks, solves, and verifies a same-target known-answer n=53 direct instance",
+        "Stage-42 measures a 9,964-point/94-column n=53 base and exact rho comparison"
+      ],
+      "status": "finite_n31_n41_n53_end_to_end_and_n59_pdp_complete"
+    },
+    "5_unknown_scalar": {
+      "limitations": [
+        "n=53 is explicit public known-answer validation, not an unknown-scalar run",
+        "finite public synthetic controls only"
+      ],
+      "proved": [
+        "5 degree-23 public targets",
+        "5 degree-31 public hash targets",
+        "5 degree-41 public hash targets",
+        "factor-base logs were not known by construction and every recovery was group-certified",
+        "Stage-39 n=41 uses zero factor-base discovery target samples or scalar labels and derives every log from relations"
+      ],
+      "status": "finite_n23_n31_n41_unknown_complete_n53_known_answer_only"
+    },
+    "6_automorphism_rho": {
+      "limitations": [
+        "n=41 crossover is online only and assumes the factor-base log database exists",
+        "n=41 amortized and full available costs do not cross",
+        "n=53 same-target whole-process direct does not cross",
+        "parallel n=41 latency improvement spends more total CPU",
+        "all improvements are finite constants and do not change the asymptotic exponent"
+      ],
+      "proved": [
+        "Stage-39 n=41 online IC/rho ratio is 0.285545560549 (3.502068 times faster after precomputation)",
+        "Stage-39 n=41 amortized IC remains 5.025825 times slower and fresh build plus science remains 110.791382 times rho",
+        "Stage-40 four-core n=41 precompute wall is 2.655626 times faster while process CPU costs 1.286948 times the one-core median",
+        "Stage-40 four-core amortized IC remains 3.605523 times slower than same-instance rho",
+        "Stage-42 n=53 direct and packed signed-Frobenius rho use exactly the same public target and recovered scalar",
+        "Stage-42 n=53 direct remains 12.131346 times slower by whole-process wall and fresh build plus direct remains 37.698325 times rho"
+      ],
+      "status": "n41_online_crossover_n41_amortised_loss_n53_same_target_wall_loss"
+    },
+    "7_external_reproduction_and_novelty": {
+      "missing": [
+        "unaffiliated sealed reproduction",
+        "source-pinned external novelty and correctness verdict"
+      ],
+      "proved": [
+        "project issue 97 contains Stage-39, Stage-40, and Stage-42 source pins, artifacts, commands, and gate boundaries",
+        "upstream EC-Index-Calculus-Benchmarks issue 1 contains the same reproduction request and current n=53 result"
+      ],
+      "status": "missing"
+    }
+  },
+  "gates_missing": [
+    "7_external_reproduction_and_novelty"
+  ],
+  "gates_partial": [
+    "1_full_cost_accounting",
+    "2_same_instance_backend_matrix",
+    "3_required_resource_fields"
+  ],
+  "gates_passed": [
+    "4_scaling",
+    "5_unknown_scalar",
+    "6_automorphism_rho"
+  ],
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "overall": "n=41 fixed-algebraic online crossover and n=53 same-target construction/rank are verified; amortized/full cost, Magma, and external gates remain false",
+  "phase_b_binding": {
+    "backend_rows": 480,
+    "charged_total_core_seconds_available": 21038.596137,
+    "classification_counts": {
+      "inconclusive": 219,
+      "true_negative": 120,
+      "true_positive": 141
+    },
+    "instances": 160,
+    "score_sha256": "ae7cc2f59a04e153f59ad1de65704c233f6fa8960976dd95593abdd8df9d1897",
+    "verification": {
+      "backend_rows": 480,
+      "charged_total_core_seconds_available": 21038.596137,
+      "classification_counts": {
+        "inconclusive": 219,
+        "true_negative": 120,
+        "true_positive": 141
+      },
+      "corrected_rows": 2,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "instances": 160,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "maximum_recorded_individual_or_tree_rss_bytes": 1526329344,
+      "schema": "koblitz_stage26_stage32_composed_verification.v1",
+      "score_inventory_sha256": "a86226326b54e697e4e530b80d218e60d049c37dde2ff9f296b918a4671ea5ef",
+      "score_sha256": "ae7cc2f59a04e153f59ad1de65704c233f6fa8960976dd95593abdd8df9d1897",
+      "solver_error_rows_after": 0,
+      "stage26_run_id": 34632018379,
+      "stage32_charged_increment_total_core_seconds": 426.718011,
+      "stage32_run_id": 34649735091,
+      "status": "base_matrix_and_two_row_capacity_correction_verified",
+      "summed_workflow_wall_seconds": 11545.0,
+      "wdsat_total_core_seconds_corrected_panel": 7404.749336
+    }
+  },
+  "predecessor_stage34": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-34-current-gate-audit-20260911/audit.json",
+    "sha256": "8af2ab179afb2702452af0a153f225da34efd1e377c737af77123ef2406e6b43"
+  },
+  "predecessor_stage36": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-36-current-gate-audit-20260912/audit.json",
+    "sha256": "e0b9d5f913b787ebe8e1f57a11703b78380b2599fb6b65b218f92ea896177c6a"
+  },
+  "schema": "koblitz_stage43_current_gate_audit.v1",
+  "stage33_binding": {
+    "score_sha256": "34cfd5ccb28932c434449b06fde398b2ee45f6b6405c7fe8679e5342fd1c7fd1",
+    "verification": {
+      "archive": {
+        "bytes": 1711461,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz",
+        "sha256": "da22772f7452ff138f0c9e3eb00e6bb223240e3703a647a3aa19bc2519c6f8e1"
+      },
+      "artifact": {
+        "digest": "sha256:9096d4747fc168a5c246af552d9399bc410e6ca61e3b634f866457c4e813b7a7",
+        "expires_at": "2026-12-10T22:14:35Z",
+        "id": 10284816498,
+        "name": "koblitz-stage33-n41-public-34653116265",
+        "size_in_bytes": 1758641
+      },
+      "build_seal_sha256": "0a9418051b1876aff651656e1943908e938734caff13f36e88a0b83831d8b012",
+      "descent_trials": 2066,
+      "factor_base_discovery": {
+        "algebraic_recipe": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "kind": "frobenius_union",
+            "seed_masks": [
+              1,
+              2,
+              4,
+              8,
+              16,
+              32
+            ]
+          }
+        },
+        "elapsed_seconds": 5.575777741,
+        "exhaustive_targets": false,
+        "factor_base_logs_known_by_construction": false,
+        "future_target_scalars_available_to_search": false,
+        "sampled_targets": 1024,
+        "selected": {
+          "abscissae": 2380,
+          "columns": 29,
+          "dimension": 41,
+          "domain": "two_torsion_saturation",
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "signed_orbits": 60,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        "target_subgroup_enumerated": false
+      },
+      "full_cost_gate_passed": false,
+      "ic_over_rho_amortised_wall_ratio": 36.39144848536493,
+      "ic_over_rho_charged_wall_ratio": 2.2493512858487117,
+      "independent_external_reproduction_satisfied": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "linear_algebra": {
+        "attempts": 1,
+        "mode": "sparse",
+        "seconds": 0.000124052,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 3,
+          "core_nonzeros": 30,
+          "filter": {
+            "columns_in": 29,
+            "columns_out": 3,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 21,
+            "nonzeros_in": 112,
+            "nonzeros_out": 30,
+            "rows_in": 39,
+            "rows_out": 13,
+            "singletons_removed": 5,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 26,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 4,
+            "extra_steps": 0,
+            "generator_degree": 0,
+            "products": 11,
+            "sequence_length": 10
+          }
+        }
+      },
+      "preinstalled_operating_system_and_rust_toolchain_charged": false,
+      "relations": 39,
+      "remaining_blockers": [
+        "licensed Magma F4 has not executed the same 160-input packet",
+        "the larger n=59 regime remains a PDP benchmark rather than an end-to-end unknown-scalar run",
+        "preinstalled operating-system and Rust-toolchain acquisition remain outside the Stage-33 charge",
+        "unaffiliated reproduction and source-pinned novelty review remain absent"
+      ],
+      "resources": {
+        "build_outer_total_core_seconds": 309.31055,
+        "build_process_total_core_seconds": 270.75774700000005,
+        "charged_sequential_wall_seconds_available": 119.87066223599999,
+        "charged_total_core_seconds_available": 328.73222499999997,
+        "maximum_sampled_process_tree_rss_bytes": 1609519104,
+        "production_job_wall_seconds": 134.0,
+        "scientific_outer_core_seconds": 19.421675,
+        "scientific_process_core_seconds": 14.191111,
+        "scientific_process_peak_rss_bytes": 303247360,
+        "scientific_process_wall_seconds": 19.372771432999997,
+        "scientific_single_core_elapsed_seconds": 19.442666161999995,
+        "workflow_wall_seconds": 195.0
+      },
+      "rho_iterations": 425616,
+      "run_seal_sha256": "a37d3bfee31741efbb05ed689acc54225606726a9d01077790fd3d085f350a06",
+      "sat_conflict_semantics": "not applicable to the direct pair-table end-to-end arm; the same-instance SAT conflict matrix is retained in Phase B",
+      "sat_conflicts": null,
+      "schema": "koblitz_stage33_hosted_result.v1",
+      "source_commit": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+      "status": "hosted_n41_public_unknown_scalar_verified",
+      "target_scalars_constructed_or_supplied": false,
+      "targets_verified": 5,
+      "verification": {
+        "charged_sequential_wall_seconds_available": 119.87066223599999,
+        "charged_total_core_seconds_available": 328.73222499999997,
+        "descent_trials": 2066,
+        "factor_base": {
+          "abscissae": 2380,
+          "columns": 29,
+          "dimension": 41,
+          "domain": "two_torsion_saturation",
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "signed_orbits": 60,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        "factor_base_search": {
+          "candidates_scored": 2,
+          "elapsed_ms": 5575.777741,
+          "exhaustive_targets": false,
+          "targets": 1024,
+          "top": [
+            {
+              "columns": 29,
+              "coverage": 0.0029296875,
+              "expected_trials": 10922.666666666666,
+              "family": "two_torsion_saturated",
+              "points": 4759,
+              "spec": {
+                "kind": "two_torsion_saturated",
+                "parent": {
+                  "kind": "frobenius_union",
+                  "seed_masks": [
+                    1,
+                    2,
+                    4,
+                    8,
+                    16,
+                    32
+                  ]
+                }
+              }
+            },
+            {
+              "columns": 29,
+              "coverage": 0.001953125,
+              "expected_trials": 16384.0,
+              "family": "frobenius_union",
+              "points": 2381,
+              "spec": {
+                "kind": "frobenius_union",
+                "seed_masks": [
+                  1,
+                  2,
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            }
+          ]
+        },
+        "full_cost_gate_passed": false,
+        "independent_external_reproduction_satisfied": false,
+        "koblitz_index_calculus_sota": false,
+        "licensed_magma_complete": false,
+        "linear_algebra": {
+          "attempts": 1,
+          "mode": "sparse",
+          "seconds": 0.000124052,
+          "sparse": {
+            "attempts": 1,
+            "core_dimension": 3,
+            "core_nonzeros": 30,
+            "filter": {
+              "columns_in": 29,
+              "columns_out": 3,
+              "dependent_rows_dropped": 0,
+              "duplicates_removed": 0,
+              "excess_rows_removed": 0,
+              "merged_columns": 21,
+              "nonzeros_in": 112,
+              "nonzeros_out": 30,
+              "rows_in": 39,
+              "rows_out": 13,
+              "singletons_removed": 5,
+              "uncovered_columns": 0
+            },
+            "reconstructed_columns": 26,
+            "wiedemann": {
+              "block_m": 4,
+              "block_n": 4,
+              "dimension": 4,
+              "extra_steps": 0,
+              "generator_degree": 0,
+              "products": 11,
+              "sequence_length": 10
+            }
+          }
+        },
+        "maximum_sampled_process_tree_rss_bytes": 1609519104,
+        "relations": 39,
+        "rho_iterations": 425616,
+        "rho_over_ic_amortised_ratio": 0.027478983157324905,
+        "rho_over_ic_charged_ratio": 0.44457262246732,
+        "sat_conflicts": null,
+        "schema": "koblitz_stage33_verification.v1",
+        "score_inventory_sha256": "77ae4470b0b68d91fc294b4779fbb33859debb9f254ad4de482523291232221a",
+        "single_core_elapsed_seconds": 19.442666161999995,
+        "source_commit": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+        "status": "n41_public_unknown_scalar_build_and_run_verified",
+        "targets_verified": 5,
+        "workflow_outer_core_seconds": 19.421675
+      },
+      "workflow": {
+        "head_sha": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+        "production_job_id": 103439777634,
+        "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34653116265/job/103439777634",
+        "production_job_wall_seconds": 134.0,
+        "run_id": 34653116265,
+        "url": "https://github.com/aburan28/crypto/actions/runs/34653116265",
+        "workflow_wall_seconds": 195.0
+      }
+    }
+  },
+  "stage33_full_cost_vs_rho": {
+    "amortised_precompute_and_descent_over_rho_wall_ratio": 36.39144848536493,
+    "automorphism_discount": {
+      "family": "signed Frobenius classes, A = 2n",
+      "n": 41,
+      "sqrt_2n": 9.055385138137417
+    },
+    "charged_build_plus_science_over_rho_wall_ratio": 239.49089315586298,
+    "charged_build_plus_science_wall_seconds": 119.87066223599999,
+    "online_descent_over_rho_wall_ratio": 2.2493512858487117,
+    "rho_same_five_targets_wall_seconds": 0.500522841,
+    "scientific_outer_over_rho_wall_ratio": 38.84471310670914,
+    "scientific_outer_wall_seconds": 19.442666161999995,
+    "verdict": "rho_faster_under_every_stage33_cost_scope"
+  },
+  "stage35_algebraic_walk": {
+    "amortised_crossover": false,
+    "amortised_ic_over_rho_wall_ratio": 28.85710565214139,
+    "claim_boundary": "finite_post_precomputation_online_crossover_only",
+    "collection_summands": 3,
+    "descent_summands": 2,
+    "descent_trials": 2417575,
+    "factor_base_algebraically_defined": true,
+    "full_available_wall_over_same_targets_rho": 208.5295271781092,
+    "online_crossover": true,
+    "online_ratio_improvement_factor": 4.608396703584263,
+    "stage33_online_ic_over_rho_wall_ratio": 2.2493512858487117,
+    "stage35_online_ic_over_rho_wall_ratio": 0.4880984495321851,
+    "target_or_log_labels_used_for_selection": false,
+    "target_subgroup_enumerated": false,
+    "targets_verified": 5,
+    "whole_process_crossover": false
+  },
+  "stage35_binding": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-35-algebraic-walk-result-20260912/verification.json",
+    "sha256": "50c303f43c4ee2e794a6755b3859369749e43409f59f43dd169eaba2d61c755d",
+    "verification": {
+      "amortised_crossover": false,
+      "archive": {
+        "bytes": 1721932,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage35-algebraic-walk-evidence-34693802792.tar.gz",
+        "sha256": "51b7b4797bfa6c7e54acca7cf47d016a8fa08813d99087e861553cdcc4265583"
+      },
+      "artifact": {
+        "digest": "sha256:d67480bbb4f4ac7ee805fedff050df95eacb3456a487e4dc2a2a7c7b4a1e33af",
+        "expires_at": "2026-12-11T12:29:20Z",
+        "id": 10298541006,
+        "name": "koblitz-stage35-algebraic-walk-34693802792",
+        "size_in_bytes": 1768313
+      },
+      "build_seal_sha256": "841b127844245245af7d12d49c512feb3e07e8a443c04f26b227c923e4d19789",
+      "collection_summands": 3,
+      "comparison": {
+        "claim_boundary": "finite_post_precomputation_online_crossover_only",
+        "descent_seconds_total": 0.246046139,
+        "online_ratio_improvement_factor": 4.608396703584263,
+        "precompute_seconds": 14.300567224000002,
+        "rho_seconds_total": 0.504091212,
+        "stage33_online_ic_over_rho_wall_ratio": 2.2493512858487117,
+        "stage35_amortised_crossover": false,
+        "stage35_amortised_ic_over_rho_wall_ratio": 28.85710565214139,
+        "stage35_full_available_wall_over_same_targets_rho": 208.5295271781092,
+        "stage35_online_crossover": true,
+        "stage35_online_ic_over_rho_wall_ratio": 0.4880984495321851,
+        "stage35_whole_process_crossover": false
+      },
+      "descent_summands": 2,
+      "descent_trials": 2417575,
+      "factor_base": {
+        "algebraically_defined": true,
+        "selected": {
+          "abscissae": 2380,
+          "columns": 29,
+          "dimension": 41,
+          "domain": "two_torsion_saturation",
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "signed_orbits": 60,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        "target_or_log_labels_used_for_selection": false,
+        "target_subgroup_enumerated": false
+      },
+      "factor_base_logs_known_by_construction": false,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "relations": 39,
+      "remaining_blockers": [
+        "licensed Magma F4 has not executed the same 160-input packet",
+        "fresh build plus scientific wall remains more than 200 times the rho wall for these five targets",
+        "unaffiliated reproduction and source-pinned novelty review remain absent",
+        "the crossover changes a finite constant, not the asymptotic exponent"
+      ],
+      "resources": {
+        "build_outer_total_core_seconds": 293.008288,
+        "build_process_total_core_seconds": 268.513322,
+        "charged_sequential_wall_seconds_available": 105.117902093,
+        "charged_total_core_seconds_available": 308.81072,
+        "maximum_sampled_process_tree_rss_bytes": 1642135552,
+        "production_job_wall_seconds": 117.0,
+        "scientific_outer_core_seconds": 15.802432,
+        "scientific_process_core_seconds": 12.712212000000001,
+        "scientific_process_peak_rss_bytes": 303366144,
+        "scientific_process_wall_seconds": 15.770824553000011,
+        "scientific_single_core_elapsed_seconds": 15.831464483000005,
+        "workflow_wall_seconds": 165.0
+      },
+      "rho_iterations": 425616,
+      "run_seal_sha256": "8d5e56ab832b49ede3b636daa041789c24185aa871f3036ff8c58325215defbc",
+      "sat_conflict_semantics": "not applicable to the pair-table individual-log arm; Phase B retains SAT conflicts",
+      "sat_conflicts": null,
+      "schema": "koblitz_stage35_hosted_result.v1",
+      "source_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+      "status": "hosted_n41_algebraic_walk_verified",
+      "target_scalars_constructed_or_supplied": false,
+      "targets_verified": 5,
+      "verification": {
+        "charged_sequential_wall_seconds_available": 105.117902093,
+        "charged_total_core_seconds_available": 308.81072,
+        "descent_trials": 2417575,
+        "factor_base": {
+          "abscissae": 2380,
+          "columns": 29,
+          "dimension": 41,
+          "domain": "two_torsion_saturation",
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "signed_orbits": 60,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        "full_available_wall_over_same_targets_rho": 208.5295271781092,
+        "full_cost_gate_passed": false,
+        "ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+        "ic_over_rho_online_wall_ratio": 0.4880984495321851,
+        "independent_external_reproduction_satisfied": false,
+        "inventory_sha256": "bb3820e9e47e49ac877bb13b9ec757be4b4279033985afa07a1eac9870d8a1dd",
+        "koblitz_index_calculus_sota": false,
+        "licensed_magma_complete": false,
+        "maximum_sampled_process_tree_rss_bytes": 1642135552,
+        "relations": 39,
+        "rho_iterations": 425616,
+        "rho_over_ic_amortised_wall_ratio": 0.034653510024689305,
+        "rho_over_ic_online_wall_ratio": 2.0487670078822084,
+        "sat_conflicts": null,
+        "schema": "koblitz_stage35_verification.v1",
+        "scientific_outer_core_seconds": 15.802432,
+        "single_core_elapsed_seconds": 15.831464483000005,
+        "source_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+        "status": "n41_algebraic_walk_build_and_run_verified",
+        "targets_verified": 5
+      },
+      "walked_probe_cap": 100000000,
+      "whole_process_crossover": false,
+      "workflow": {
+        "head_sha": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+        "production_job_id": 103553770353,
+        "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34693802792/job/103553770353",
+        "production_job_wall_seconds": 117.0,
+        "run_id": 34693802792,
+        "url": "https://github.com/aburan28/crypto/actions/runs/34693802792",
+        "workflow_wall_seconds": 165.0
+      }
+    }
+  },
+  "stage39_binding": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-39-fixed-algebraic-result-20260912/verification.json",
+    "sha256": "83d5691724f90b76ad8e7859d6e3fef074dd138278c6c503be087c02dd0ea379",
+    "verification": {
+      "archive": {
+        "bytes": 1768849,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage39-fixed-algebraic-evidence-34699822015.tar.gz",
+        "sha256": "1cd78062386964d17ace3057659692b06c34e56cb0f484258423a561860d17fc"
+      },
+      "artifact": {
+        "digest": "sha256:c97eb111c5c4904ec1c42093a8bd2f673367e60cc5370a4dd23123a47ec2e098",
+        "expires_at": "2026-12-11T14:37:19Z",
+        "id": 10300470572,
+        "name": "koblitz-stage39-fixed-algebraic-34699822015",
+        "size_in_bytes": 1803531
+      },
+      "build_seal_sha256": "2ceb76e76cec2daca07d469a746287f5be6b7c22e0f7253ef1d1150b6f7223d6",
+      "comparison": {
+        "amortised_crossover": false,
+        "descent_seconds_total": 0.259641126,
+        "improvement_factor_over_stage35": 5.74176527950964,
+        "improvement_factor_over_stage38": 3.6712712601154838,
+        "online_crossover": true,
+        "precompute_speedup_over_stage38": 2.0877737693059877,
+        "rho_seconds_total": 0.909280906,
+        "stage35_ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+        "stage38_ic_over_rho_amortised_wall_ratio": 18.451165708374354,
+        "stage38_precompute_seconds": 8.998817062,
+        "stage39_ic_over_rho_amortised_wall_ratio": 5.025824680629552,
+        "stage39_ic_over_rho_online_wall_ratio": 0.28554556054870023,
+        "stage39_precompute_seconds": 4.3102452929999995,
+        "stage39_rho_over_ic_online_wall_ratio": 3.502068104572925,
+        "whole_process_crossover": false
+      },
+      "downloaded_verification_sha256": "ad8d37b5ffc006ed67f274e2a71515a30f6ac88c508429867ed465c3c17549e2",
+      "factor_base_algebraically_defined": true,
+      "factor_base_discovery": {
+        "construction_elapsed_seconds": 0.417714513,
+        "method": "fixed_algebraic_rule",
+        "predicate_materialization_charged": true,
+        "public_parameters": {
+          "collection_m": 3,
+          "ell": 6,
+          "n": 41
+        },
+        "recipe": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "kind": "frobenius_union",
+            "seed_masks": [
+              1,
+              2,
+              4,
+              8,
+              16,
+              32
+            ]
+          }
+        },
+        "target_samples": 0,
+        "target_scalar_labels": 0,
+        "target_subgroup_enumerated": false
+      },
+      "factor_base_discovery_scalar_labels": 0,
+      "factor_base_discovery_target_samples": 0,
+      "factor_base_logs_known_by_construction": false,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "invalid_predecessor": {
+        "reason": "predecessor identity stored an absolute checkout path and failed independent replay",
+        "relation_seed": 41231,
+        "run_id": 34699355146,
+        "scientific_result_admitted": false,
+        "status": "completed_invalid",
+        "target_seeds": [
+          41201,
+          41202,
+          41203,
+          41204,
+          41205
+        ]
+      },
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "relations": {
+        "accepted": 35,
+        "columns": 29,
+        "duplicates": 0,
+        "linear_algebra": {
+          "attempts": 1,
+          "mode": "sparse",
+          "seconds": 0.000115988,
+          "sparse": {
+            "attempts": 1,
+            "core_dimension": 3,
+            "core_nonzeros": 27,
+            "filter": {
+              "columns_in": 29,
+              "columns_out": 3,
+              "dependent_rows_dropped": 0,
+              "duplicates_removed": 0,
+              "excess_rows_removed": 0,
+              "merged_columns": 23,
+              "nonzeros_in": 105,
+              "nonzeros_out": 27,
+              "rows_in": 35,
+              "rows_out": 9,
+              "singletons_removed": 3,
+              "uncovered_columns": 0
+            },
+            "reconstructed_columns": 26,
+            "wiedemann": {
+              "block_m": 4,
+              "block_n": 4,
+              "dimension": 4,
+              "extra_steps": 0,
+              "generator_degree": 0,
+              "products": 11,
+              "sequence_length": 10
+            }
+          }
+        },
+        "rejected": 0,
+        "summands_scanned": 17088512,
+        "trials": 114688,
+        "units": 14
+      },
+      "remaining_blockers": [
+        "fresh build plus scientific wall is 110.79 times the matched rho wall for these five targets",
+        "licensed Magma F4 has not executed the same comparison packet",
+        "unaffiliated reproduction and source-pinned novelty review remain absent",
+        "the result is a finite constant improvement and does not change the asymptotic exponent"
+      ],
+      "resources": {
+        "build_outer_total_core_seconds": 319.57141599999994,
+        "build_outer_wall_seconds": 95.11440442399999,
+        "build_process_total_core_seconds": 285.07819700000005,
+        "charged_sequential_wall_seconds_available": 100.74048801699996,
+        "charged_total_core_seconds_available": 325.1759349999999,
+        "maximum_sampled_process_tree_rss_bytes": 1672077312,
+        "production_job_wall_seconds": 113.0,
+        "scientific_outer_core_seconds": 5.604519000000001,
+        "scientific_process_core_seconds": 4.06369,
+        "scientific_process_peak_rss_bytes": 265326592,
+        "scientific_process_wall_seconds": 5.551878913999985,
+        "scientific_single_core_elapsed_seconds": 5.626083592999976,
+        "workflow_wall_seconds": 129.0
+      },
+      "run_seal_sha256": "3a571b654c8035fdf184e3772d88c6f88cabebb013aab93b604f075b725a8faa",
+      "sat_conflict_semantics": "not applicable to this direct pair-table run; Phase B retains the same-instance SAT conflict matrix",
+      "sat_conflicts": null,
+      "schema": "koblitz_stage39_hosted_result.v1",
+      "source_commit": "6f7ff404d615e11df73c0a0e0607bf504b2e09af",
+      "status": "hosted_fixed_algebraic_holdout_verified",
+      "target_scalars_constructed_or_supplied": false,
+      "target_subgroup_enumerated_for_factor_base": false,
+      "verification": {
+        "amortised_ratio_improvement_factor": 3.6712712601154838,
+        "charged_sequential_wall_seconds_available": 100.74048801699996,
+        "charged_total_core_seconds_available": 325.1759349999999,
+        "descent_trials": 1615551,
+        "factor_base": {
+          "abscissae": 2380,
+          "columns": 29,
+          "dimension": 41,
+          "domain": "two_torsion_saturation",
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "signed_orbits": 60,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        "factor_base_discovery": {
+          "construction_elapsed_seconds": 0.417714513,
+          "method": "fixed_algebraic_rule",
+          "predicate_materialization_charged": true,
+          "public_parameters": {
+            "collection_m": 3,
+            "ell": 6,
+            "n": 41
+          },
+          "recipe": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          },
+          "target_samples": 0,
+          "target_scalar_labels": 0,
+          "target_subgroup_enumerated": false
+        },
+        "full_available_wall_over_same_targets_rho": 110.79138179659516,
+        "full_cost_gate_passed": false,
+        "ic_over_rho_amortised_wall_ratio": 5.025824680629552,
+        "ic_over_rho_online_wall_ratio": 0.28554556054870023,
+        "independent_external_reproduction_satisfied": false,
+        "inventory_sha256": "657d3305d08ca85eb0094995bfbbcff6b5ddfef030802a6fc1ced810fa62b679",
+        "koblitz_index_calculus_sota": false,
+        "licensed_magma_complete": false,
+        "maximum_sampled_process_tree_rss_bytes": 1672077312,
+        "precompute_seconds": 4.3102452929999995,
+        "precompute_speedup_over_stage38": 2.0877737693059877,
+        "relation_trials": 114688,
+        "relations": 35,
+        "rho_iterations": 792990,
+        "rho_over_ic_amortised_wall_ratio": 0.19897232067290033,
+        "rho_over_ic_online_wall_ratio": 3.502068104572925,
+        "sat_conflicts": null,
+        "schema": "koblitz_stage39_verification.v1",
+        "scientific_outer_core_seconds": 5.604519000000001,
+        "single_core_elapsed_seconds": 5.626083592999976,
+        "source_commit": "6f7ff404d615e11df73c0a0e0607bf504b2e09af",
+        "stage38_ic_over_rho_amortised_wall_ratio": 18.451165708374354,
+        "stage38_precompute_seconds": 8.998817062,
+        "status": "n41_fixed_algebraic_holdout_build_and_run_verified",
+        "summands_scanned": 17088512,
+        "targets_verified": 5
+      },
+      "workflow": {
+        "head_sha": "6f7ff404d615e11df73c0a0e0607bf504b2e09af",
+        "production_job_id": 103569507710,
+        "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34699822015/job/103569507710",
+        "production_job_wall_seconds": 113.0,
+        "run_id": 34699822015,
+        "url": "https://github.com/aburan28/crypto/actions/runs/34699822015",
+        "validation_job_id": 103569480804,
+        "validation_job_url": "https://github.com/aburan28/crypto/actions/runs/34699822015/job/103569480804",
+        "validation_job_wall_seconds": 9.0,
+        "workflow_wall_seconds": 129.0
+      }
+    }
+  },
+  "stage40_binding": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-40-parallel-precompute-result-20260912/verification.json",
+    "sha256": "ac23457c2597911f16c47d3b3ba1c3046990b68c4e138dcf26bcec48cde894c9",
+    "verification": {
+      "archive": {
+        "bytes": 1809554,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage40-parallel-precompute-evidence-34700889826.tar.gz",
+        "sha256": "805754402f3ce0de3783864b9893fefb18f39b18101d11d6e9d98bd54ee90d34"
+      },
+      "artifact": {
+        "digest": "sha256:83473ff7c3dcef85789624fcfc33b144bc4de7886e88b49d42b34425e4e38bc4",
+        "expires_at": "2026-12-11T15:00:01Z",
+        "id": 10300312749,
+        "name": "koblitz-stage40-parallel-precompute-34700889826",
+        "size_in_bytes": 1885170
+      },
+      "build_seal_sha256": "a1aafb4547569648b3db3c564ab0a16c92d9e91ef9a79cc9b30dd556f67aac44",
+      "comparison": {
+        "five_target_ic_wall_speedup": 2.4106094702697174,
+        "four_core_five_target_ic_seconds_median": 2.4798440384999996,
+        "four_core_fresh_build_plus_cell_wall_over_matched_rho": 139.5462193305516,
+        "four_core_ic_over_rho_amortised_wall_ratio_median": 3.605523155126031,
+        "four_core_precompute_seconds_median": 2.0106184209999998,
+        "four_core_process_core_seconds_median": 6.7660975,
+        "improvement_factor_over_stage35": 8.00358350524383,
+        "improvement_factor_over_stage39": 1.3939238397302358,
+        "precompute_wall_speedup": 2.6556256327565007,
+        "process_core_seconds_increase_factor": 1.286947617650063,
+        "single_core_five_target_ic_seconds_median": 5.977935524,
+        "single_core_precompute_seconds_median": 5.3394498165,
+        "single_core_process_core_seconds_median": 5.257477,
+        "stage35_ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+        "stage39_ic_over_rho_amortised_wall_ratio": 5.025824680629552
+      },
+      "downloaded_verification_sha256": "fc72898413b0cd551f083d9ce2e057d30b51e83a1cc6d9387731ccc5bf2f72e8",
+      "factor_base_algebraically_defined": true,
+      "factor_base_discovery_scalar_labels": 0,
+      "factor_base_discovery_target_samples": 0,
+      "factor_base_logs_known_by_construction": false,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "mathematical_outputs_identical": true,
+      "remaining_blockers": [
+        "four-core amortized wall remains 3.61 times matched rho",
+        "fresh build plus a four-core cell remains over 100 times matched rho wall",
+        "licensed Magma and unaffiliated reproduction remain absent",
+        "parallelism changes a finite wall constant, not the asymptotic exponent"
+      ],
+      "resources": {
+        "all_four_cells_outer_core_seconds": 29.628403000000002,
+        "all_four_cells_outer_wall_seconds": 20.626937114999976,
+        "build_outer_total_core_seconds": 309.378183,
+        "build_outer_wall_seconds": 92.70083664,
+        "build_process_total_core_seconds": 277.94422099999997,
+        "charged_sequential_wall_seconds_available": 113.32777375499998,
+        "charged_total_core_seconds_available": 339.00658599999997,
+        "maximum_sampled_process_tree_rss_bytes": 1701056512,
+        "production_job_wall_seconds": 125.0,
+        "workflow_wall_seconds": 139.0
+      },
+      "run_seal_sha256": "09a901d75ec01e5db02115bf77faf3e487cd21f9b4faa053ee90a0a2fed20351",
+      "same_instance_in_every_cell": true,
+      "sat_conflicts": null,
+      "schema": "koblitz_stage40_hosted_result.v1",
+      "source_commit": "62eb3e1fc008cf33bb9e910d7a61993cd8b6921f",
+      "status": "hosted_abba_parallel_precompute_verified",
+      "summary": {
+        "five_target_ic_wall_speedup": 2.4106094702697174,
+        "four_core_amortised_ic_over_rho_wall_ratio_median": 3.605523155126031,
+        "four_core_five_target_ic_seconds_median": 2.4798440384999996,
+        "four_core_precompute_seconds_median": 2.0106184209999998,
+        "four_core_process_core_seconds_median": 6.7660975,
+        "precompute_wall_speedup": 2.6556256327565007,
+        "single_core_five_target_ic_seconds_median": 5.977935524,
+        "single_core_precompute_seconds_median": 5.3394498165,
+        "single_core_process_core_seconds_median": 5.257477
+      },
+      "target_scalars_constructed_or_supplied": false,
+      "target_subgroup_enumerated_for_factor_base": false,
+      "verification": {
+        "charged_sequential_wall_seconds_available": 113.32777375499998,
+        "charged_total_core_seconds_available": 339.00658599999997,
+        "full_cost_gate_passed": false,
+        "independent_external_reproduction_satisfied": false,
+        "inventory_sha256": "615cfe7748af7271814d9a2b963bf911aa2db0772c8aa3c8e97cf78a378d1faa",
+        "koblitz_index_calculus_sota": false,
+        "licensed_magma_complete": false,
+        "maximum_sampled_process_tree_rss_bytes": 1701056512,
+        "schema": "koblitz_stage40_verification.v1",
+        "source_commit": "62eb3e1fc008cf33bb9e910d7a61993cd8b6921f",
+        "status": "abba_parallel_precompute_verified",
+        "summary": {
+          "five_target_ic_wall_speedup": 2.4106094702697174,
+          "four_core_amortised_ic_over_rho_wall_ratio_median": 3.605523155126031,
+          "four_core_five_target_ic_seconds_median": 2.4798440384999996,
+          "four_core_precompute_seconds_median": 2.0106184209999998,
+          "four_core_process_core_seconds_median": 6.7660975,
+          "precompute_wall_speedup": 2.6556256327565007,
+          "single_core_five_target_ic_seconds_median": 5.977935524,
+          "single_core_precompute_seconds_median": 5.3394498165,
+          "single_core_process_core_seconds_median": 5.257477
+        }
+      },
+      "workflow": {
+        "head_sha": "62eb3e1fc008cf33bb9e910d7a61993cd8b6921f",
+        "production_job_id": 103572373049,
+        "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34700889826/job/103572373049",
+        "production_job_wall_seconds": 125.0,
+        "run_id": 34700889826,
+        "url": "https://github.com/aburan28/crypto/actions/runs/34700889826",
+        "validation_job_id": 103572346602,
+        "validation_job_url": "https://github.com/aburan28/crypto/actions/runs/34700889826/job/103572346602",
+        "validation_job_wall_seconds": 9.0,
+        "workflow_wall_seconds": 139.0
+      }
+    }
+  },
+  "stage42_binding": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
+    "sha256": "6b16b952e9c0f8b4a4cfe0f049d94180f24075d1d0c29a2f6f3435639d83a6c0",
+    "verification": {
+      "artifact": {
+        "digest": "sha256:6b753a15ce81f1ffebb0298d3044e88b8eecb40c55c91091098012d2ffa42467",
+        "expires_at": "2026-12-11T16:24:17Z",
+        "id": 10300903216,
+        "name": "koblitz-stage42-n53-same-target-34705118094",
+        "size_in_bytes": 2028499
+      },
+      "build_seal_sha256": "f98c3a9141a9963fd53b1825802ca83850099f0e527b8467e32b4197813ab00c",
+      "factor_base_logs_known_by_construction": false,
+      "factor_base_selection_uses_scalar_labels": false,
+      "fixture_scalar_used_by_collector": false,
+      "full_cost_gate_passed": false,
+      "hosted": {
+        "build_outer_resources": {
+          "average_parallelism": 2.6464243937530254,
+          "process_tree_rss_samples": 2906,
+          "sample_interval_seconds": 0.02,
+          "sampled_peak_process_tree_rss_bytes": 1718968320,
+          "total_core_seconds": 221.871382,
+          "wall_seconds": 83.83817143000002
+        },
+        "charged_sequential_wall_seconds_available": 126.96813243100004,
+        "charged_total_core_seconds_available": 272.39222,
+        "comparison": {
+          "direct_charged_over_rho_algorithm_ratio": 11.99305101371775,
+          "direct_over_rho_whole_process_wall_ratio": 12.131346003064046,
+          "fresh_build_plus_direct_over_rho_wall_ratio": 37.698324546302224,
+          "whole_process_crossover": false
+        },
+        "direct_process": {
+          "command": [
+            "/home/runner/work/_temp/stage42-build/bin/koblitz_rank_fixture",
+            "53",
+            "0",
+            "1",
+            "128",
+            "18118074343025384088",
+            "signed_expanded",
+            "independent",
+            "pair_pair_256",
+            "1",
+            "476811900269"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 1526292480,
+            "single_core_seconds": 39.775872,
+            "system_seconds": 0.230981,
+            "total_core_seconds": 39.775872,
+            "user_seconds": 39.544891,
+            "wall_seconds": 39.78060466400001
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "role": "direct",
+          "timed_out": false,
+          "watchdog_seconds": 1800.0
+        },
+        "maximum_sampled_process_tree_rss_bytes": 1718968320,
+        "observation": {
+          "base": {
+            "a": 0,
+            "base_construction_ms": 16.699279,
+            "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+            "eta": {
+              "denominator": 128,
+              "numerator": 1
+            },
+            "factor_base_points": 9964,
+            "field_x_values_scanned": 192,
+            "n": 53,
+            "orbit_columns": 94,
+            "pair_index_mode": "signed_expanded",
+            "point_selection": "small-cofactor projections of the first affine curve points in coordinate order",
+            "selection_uses_scalar_labels": false,
+            "support_index_entries": 24805379,
+            "support_index_ms": 7381.059994,
+            "support_table_allocated_bytes": 1409286144
+          },
+          "direct": {
+            "admitted_relations": 189,
+            "all_relations_group_verified": true,
+            "charged_total_ms": 38530.882304,
+            "collection_ms": 31131.886746,
+            "decomposition_arity": 4,
+            "factor_base_points": 9964,
+            "fixture_scalar_source": "explicit_public_validation_scalar",
+            "full_rank_at_relation": 157,
+            "linear_solution_verified": true,
+            "matrix_columns": 95,
+            "orbit_columns": 94,
+            "published_fixture_scalar": 476811900269,
+            "published_q": [
+              2565091273463387,
+              5885236316843894
+            ],
+            "query_batch_inversions": 330495,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 83945915,
+            "recovered_fixture_scalar": 476811900269,
+            "setup_ms": 7398.995368,
+            "status": "RANK_PLUS_32",
+            "support_queries": 84606720,
+            "target_trials": 189
+          },
+          "rho": {
+            "a": 0,
+            "arithmetic_backend": "packed_u64_polynomial_basis",
+            "automorphism_size": 106,
+            "fixture_scalar_source": "explicit_public_validation_scalar",
+            "n": 53,
+            "published_fixture_scalar": 476811900269,
+            "published_q": [
+              2565091273463387,
+              5885236316843894
+            ],
+            "quotient_mode": "signed_frobenius",
+            "recovered_fixture_scalar": 476811900269,
+            "reference_group_validation": true,
+            "restarts": 108,
+            "setup_ms": 16.604731,
+            "total_ms": 3212.7673149999996,
+            "validation_ms": 3.6669379999999996,
+            "verified": true,
+            "walk_ms": 3192.495646,
+            "walk_steps": 369507
+          }
+        },
+        "outer_resources": {
+          "average_parallelism": 1.171362941849834,
+          "process_tree_rss_samples": 1782,
+          "sample_interval_seconds": 0.02,
+          "sampled_peak_process_tree_rss_bytes": 1566576640,
+          "total_core_seconds": 50.520838,
+          "wall_seconds": 43.12996100100003
+        },
+        "rho_process": {
+          "command": [
+            "/home/runner/work/_temp/stage42-build/bin/koblitz_rho_fixture",
+            "53",
+            "0",
+            "signed_frobenius",
+            "1",
+            "packed",
+            "16969290756857938023",
+            "476811900269"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 35438592,
+            "single_core_seconds": 3.278365,
+            "system_seconds": 0.006999999999999999,
+            "total_core_seconds": 3.278365,
+            "user_seconds": 3.271365,
+            "wall_seconds": 3.2791583599999967
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "role": "rho",
+          "timed_out": false,
+          "watchdog_seconds": 1800.0
+        }
+      },
+      "hosted_archive": {
+        "bytes": 2025679,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage42-n53-same-target-evidence-34705118094.tar.gz",
+        "sha256": "e412da0265cb82c5618e4118c7fe1c7a3531a521e6ed22090e9d3f1c4a6da2b6"
+      },
+      "independent_external_reproduction_satisfied": false,
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "pointwise_resource_cap_enforced": false,
+      "remaining_blockers": [
+        "hosted same-target direct wall remains 12.13 times signed-Frobenius rho",
+        "fresh build plus direct remains 37.70 times rho wall",
+        "the original autolab pointwise arm did not enforce its memory cap or sample peak RSS",
+        "licensed same-instance Magma and unaffiliated reproduction remain absent",
+        "the finite n=53 optimization does not change the asymptotic exponent"
+      ],
+      "run_seal_sha256": "702b137cde2c59cbf84a7bb0fb61ff13e79699b125eee9c24798a6c638a9957a",
+      "same_public_target": true,
+      "sat_conflicts": null,
+      "schema": "koblitz_stage42_hosted_result.v1",
+      "source_commit": "0654c7dd16b8dfd7a61b8770583ac39316b5ff6b",
+      "status": "hosted_n53_same_target_verified",
+      "target_scalar_retained_for_validation": true,
+      "target_subgroup_enumerated_for_factor_base": false,
+      "tuning": {
+        "local_same_target": {
+          "direct_over_rho_wall_ratio": 2.972973817506388,
+          "direct_peak_rss_bytes": 1561165824,
+          "direct_wall_seconds": 25.372817917028442,
+          "published_fixture_scalar": 3499506542931,
+          "published_q": [
+            4831897703993312,
+            2257074655544889
+          ],
+          "rho_peak_rss_bytes": 174342144,
+          "rho_wall_seconds": 8.53449087496847
+        },
+        "pointwise": {
+          "charged_seconds": 871.232147042,
+          "claim_check": "PASS",
+          "collection_seconds": 864.664691083,
+          "direct_over_rho_wall_ratio": 165.8328153579238,
+          "eta": {
+            "denominator": 16,
+            "numerator": 1
+          },
+          "factor_base_points": 19928,
+          "label": "pointwise-autolab",
+          "orbit_columns": 188,
+          "pair_mode": "signed_quotient",
+          "peak_rss_bytes": null,
+          "query_canonicalization_maps": 7242172392,
+          "query_mode": "pointwise",
+          "relations": 445,
+          "resource_cap_enforced": false,
+          "rho_wall_seconds": 5.266643499955535,
+          "setup_seconds": 6.567455834,
+          "status": "PENDING_INDEPENDENT_VALIDATION",
+          "support_table_allocated_bytes": 100663296,
+          "total_core_seconds": 872.8607200000001,
+          "trials": 7317,
+          "whole_process_wall_seconds": 873.3823190841358
+        },
+        "rows": [
+          {
+            "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+            "charged_seconds": 481.94217175100005,
+            "collection_seconds": 475.567612375,
+            "decomposition_arity": 3,
+            "eta": {
+              "denominator": 16,
+              "numerator": 1
+            },
+            "factor_base_points": 19928,
+            "label": "signed-quotient fiber64",
+            "orbit_columns": 188,
+            "pair_mode": "signed_quotient",
+            "peak_rss_bytes": 669384704,
+            "published_fixture_scalar": 18369406604825,
+            "query_canonicalization_maps": 7242172392,
+            "query_mode": "fiber_batch_64",
+            "query_x_filter_rejections": 0,
+            "recovered_fixture_scalar": 18369406604825,
+            "relations": 445,
+            "setup_seconds": 6.374559334,
+            "support_index_entries": 1872660,
+            "support_queries": 139301312,
+            "support_table_allocated_bytes": 100663296,
+            "total_core_seconds": 483.481211,
+            "trials": 7317,
+            "whole_process_wall_seconds": 483.8671362909954
+          },
+          {
+            "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+            "charged_seconds": 496.4033769580001,
+            "collection_seconds": 489.987812666,
+            "decomposition_arity": 3,
+            "eta": {
+              "denominator": 16,
+              "numerator": 1
+            },
+            "factor_base_points": 19928,
+            "label": "signed-quotient batch inverse",
+            "orbit_columns": 188,
+            "pair_mode": "signed_quotient",
+            "peak_rss_bytes": 666550272,
+            "published_fixture_scalar": 18369406604825,
+            "query_canonicalization_maps": 7242172392,
+            "query_mode": "batch_inverse",
+            "query_x_filter_rejections": 0,
+            "recovered_fixture_scalar": 18369406604825,
+            "relations": 445,
+            "setup_seconds": 6.415564167,
+            "support_index_entries": 1872660,
+            "support_queries": 139272546,
+            "support_table_allocated_bytes": 100663296,
+            "total_core_seconds": 497.885722,
+            "trials": 7317,
+            "whole_process_wall_seconds": 498.38785683293827
+          },
+          {
+            "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+            "charged_seconds": 61.76207475099999,
+            "collection_seconds": 36.946371792,
+            "decomposition_arity": 3,
+            "eta": {
+              "denominator": 16,
+              "numerator": 1
+            },
+            "factor_base_points": 19928,
+            "label": "signed-expanded fiber64",
+            "orbit_columns": 188,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 6195249152,
+            "published_fixture_scalar": 18369406604825,
+            "query_canonicalization_maps": 0,
+            "query_mode": "fiber_batch_64",
+            "query_x_filter_rejections": 138215221,
+            "recovered_fixture_scalar": 18369406604825,
+            "relations": 445,
+            "setup_seconds": 24.815702792,
+            "support_index_entries": 99250928,
+            "support_queries": 139301312,
+            "support_table_allocated_bytes": 5637144576,
+            "total_core_seconds": 63.255956,
+            "trials": 7317,
+            "whole_process_wall_seconds": 63.8722398749087
+          },
+          {
+            "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+            "charged_seconds": 33.832001084000005,
+            "collection_seconds": 10.759213,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 16,
+              "numerator": 1
+            },
+            "factor_base_points": 19928,
+            "label": "eta16 pair-pair256",
+            "orbit_columns": 188,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 6205095936,
+            "published_fixture_scalar": 18369406604825,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 37173939,
+            "recovered_fixture_scalar": 18369406604825,
+            "relations": 368,
+            "setup_seconds": 23.072787959000003,
+            "support_index_entries": 99250928,
+            "support_queries": 37465856,
+            "support_table_allocated_bytes": 5637144576,
+            "total_core_seconds": 35.584861,
+            "trials": 368,
+            "whole_process_wall_seconds": 35.60594874992967
+          },
+          {
+            "base_hash": "e7f3f5301e7c786a0d6eea17f31784bb9d231a89fbeb82105d7dee9f3e2e93e6",
+            "charged_seconds": 24.194839459,
+            "collection_seconds": 16.901458959,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 96,
+              "numerator": 1
+            },
+            "factor_base_points": 11024,
+            "label": "eta96 pair-pair256",
+            "orbit_columns": 104,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 1656815616,
+            "published_fixture_scalar": 5819095729567,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 65559360,
+            "recovered_fixture_scalar": 5819095729567,
+            "relations": 201,
+            "setup_seconds": 7.29338025,
+            "support_index_entries": 30365450,
+            "support_queries": 66319104,
+            "support_table_allocated_bytes": 1409286144,
+            "total_core_seconds": 25.151518000000003,
+            "trials": 201,
+            "whole_process_wall_seconds": 25.175506834173575
+          },
+          {
+            "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+            "charged_seconds": 20.772952333000003,
+            "collection_seconds": 15.204275958,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 128,
+              "numerator": 1
+            },
+            "factor_base_points": 9964,
+            "label": "eta128 pair-pair256",
+            "orbit_columns": 94,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 1562394624,
+            "published_fixture_scalar": 9008342344719,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 58787681,
+            "recovered_fixture_scalar": 9008342344719,
+            "relations": 142,
+            "setup_seconds": 5.56867625,
+            "support_index_entries": 24805379,
+            "support_queries": 59250176,
+            "support_table_allocated_bytes": 1409286144,
+            "total_core_seconds": 21.480876,
+            "trials": 142,
+            "whole_process_wall_seconds": 21.52021741704084
+          },
+          {
+            "base_hash": "650dcaf308702ca1d90cba1283d83a52ab9c6cc6b84b923325b7974dedb59cc9",
+            "charged_seconds": 27.488593375999997,
+            "collection_seconds": 23.509526625,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 192,
+              "numerator": 1
+            },
+            "factor_base_points": 8798,
+            "label": "eta192 pair-pair256",
+            "orbit_columns": 83,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 1542258688,
+            "published_fixture_scalar": 16145800275121,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 94754399,
+            "recovered_fixture_scalar": 16145800275121,
+            "relations": 150,
+            "setup_seconds": 3.979066584,
+            "support_index_entries": 19338005,
+            "support_queries": 95213824,
+            "support_table_allocated_bytes": 1409286144,
+            "total_core_seconds": 28.217852,
+            "trials": 150,
+            "whole_process_wall_seconds": 28.241221207892522
+          },
+          {
+            "base_hash": "2a98997ee96c263daa07a71144cd7409b8e7526fc826cd300ed65e29112403cc",
+            "charged_seconds": 65.655906624,
+            "collection_seconds": 64.419238666,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 1024,
+              "numerator": 1
+            },
+            "factor_base_points": 4982,
+            "label": "eta1024 pair-pair256",
+            "orbit_columns": 47,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 393314304,
+            "published_fixture_scalar": 8705220756585,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_256",
+            "query_x_filter_rejections": 339316432,
+            "recovered_fixture_scalar": 8705220756585,
+            "relations": 80,
+            "setup_seconds": 1.236667708,
+            "support_index_entries": 6197609,
+            "support_queries": 341976101,
+            "support_table_allocated_bytes": 352321536,
+            "total_core_seconds": 66.04795,
+            "trials": 101,
+            "whole_process_wall_seconds": 66.07839795807377
+          },
+          {
+            "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+            "charged_seconds": 21.104591875,
+            "collection_seconds": 15.443826208,
+            "decomposition_arity": 4,
+            "eta": {
+              "denominator": 128,
+              "numerator": 1
+            },
+            "factor_base_points": 9964,
+            "label": "eta128 pair-pair1024",
+            "orbit_columns": 94,
+            "pair_mode": "signed_expanded",
+            "peak_rss_bytes": 1562525696,
+            "published_fixture_scalar": 9008342344719,
+            "query_canonicalization_maps": 0,
+            "query_mode": "pair_pair_1024",
+            "query_x_filter_rejections": 58842022,
+            "recovered_fixture_scalar": 9008342344719,
+            "relations": 142,
+            "setup_seconds": 5.6607655,
+            "support_index_entries": 24805379,
+            "support_queries": 59304960,
+            "support_table_allocated_bytes": 1409286144,
+            "total_core_seconds": 21.828179,
+            "trials": 142,
+            "whole_process_wall_seconds": 22.264516207855195
+          }
+        ],
+        "winner": {
+          "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+          "charged_seconds": 20.772952333000003,
+          "collection_seconds": 15.204275958,
+          "decomposition_arity": 4,
+          "eta": {
+            "denominator": 128,
+            "numerator": 1
+          },
+          "factor_base_points": 9964,
+          "label": "eta128 pair-pair256",
+          "orbit_columns": 94,
+          "pair_mode": "signed_expanded",
+          "peak_rss_bytes": 1562394624,
+          "published_fixture_scalar": 9008342344719,
+          "query_canonicalization_maps": 0,
+          "query_mode": "pair_pair_256",
+          "query_x_filter_rejections": 58787681,
+          "recovered_fixture_scalar": 9008342344719,
+          "relations": 142,
+          "setup_seconds": 5.56867625,
+          "support_index_entries": 24805379,
+          "support_queries": 59250176,
+          "support_table_allocated_bytes": 1409286144,
+          "total_core_seconds": 21.480876,
+          "trials": 142,
+          "whole_process_wall_seconds": 21.52021741704084
+        }
+      },
+      "tuning_archive": {
+        "bytes": 5514473,
+        "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage41-n53-tuning-evidence-20260912.tar.gz",
+        "sha256": "d2b81e2010a98042a1c278a5e5959a0422fb31cbdd11544a45d351c25068e092"
+      },
+      "verification": {
+        "charged_sequential_wall_seconds_available": 126.96813243100004,
+        "charged_total_core_seconds_available": 272.39222,
+        "direct_over_rho_wall_ratio": 12.131346003064046,
+        "direct_wall_seconds": 39.78060466400001,
+        "factor_base_points": 9964,
+        "full_cost_gate_passed": false,
+        "independent_external_reproduction_satisfied": false,
+        "inventory_sha256": "b8e9cdd3a3067d2c43041bacf23c17d39ca57d080b4f37b79d81e2244cabc128",
+        "koblitz_index_calculus_sota": false,
+        "licensed_magma_complete": false,
+        "maximum_sampled_process_tree_rss_bytes": 1718968320,
+        "orbit_columns": 94,
+        "published_fixture_scalar": 476811900269,
+        "published_q": [
+          2565091273463387,
+          5885236316843894
+        ],
+        "relations": 189,
+        "rho_wall_seconds": 3.2791583599999967,
+        "schema": "koblitz_stage42_verification.v1",
+        "source_commit": "0654c7dd16b8dfd7a61b8770583ac39316b5ff6b",
+        "status": "n53_same_target_build_and_run_verified"
+      },
+      "workflow": {
+        "head_sha": "0654c7dd16b8dfd7a61b8770583ac39316b5ff6b",
+        "production_job_id": 103583913238,
+        "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34705118094/job/103583913238",
+        "production_job_wall_seconds": 140.0,
+        "run_id": 34705118094,
+        "url": "https://github.com/aburan28/crypto/actions/runs/34705118094",
+        "workflow_wall_seconds": 246.0
+      }
+    }
+  },
+  "status": "current_evidence_audited_n53_same_target_loss_gates_incomplete"
+}
