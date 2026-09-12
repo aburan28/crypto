@@ -2116,7 +2116,7 @@ fn prefetch(address: *const u64) {
 /// Hash of a packed pair sum for the presence filter, independent of the
 /// bucket index (which uses the key's high bits).
 #[inline]
-fn pair_filter_hash(key: u64) -> u64 {
+pub fn pair_filter_hash(key: u64) -> u64 {
     let mut h = key.wrapping_mul(0xff51_afd7_ed55_8ccd);
     h ^= h >> 33;
     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
@@ -2331,6 +2331,96 @@ impl PairSumTable {
             self.curve.add(s, self.points[i])
         });
         (sum == target).then_some(idxs)
+    }
+
+    /// Decompose scanning only a cyclic window of the base.
+    ///
+    /// The full `m = 3` scan spends `|F|` filter probes per target and
+    /// finds each decomposition three times over — once as `k = i`,
+    /// once as `k = j`, once as `k = k` — then throws two of the three
+    /// away to keep witnesses sorted.  A window of `len` summands keeps
+    /// all three chances but pays for only `len` of them: a triple is
+    /// caught whenever *any* of its three indices falls in the window,
+    /// so the yield per probe falls by `1 − (1 − f)³ ≈ 3f` while the
+    /// cost falls by `f`.  Per *lookup* that is three times the
+    /// relations, bought with more targets rather than more scanning.
+    ///
+    /// `start` is taken modulo the base size and the window wraps.  A
+    /// window at least as long as the base is the full scan.  Witnesses
+    /// come back unsorted, and the sum is re-checked in the group
+    /// exactly as [`Self::decompose_fast`] checks it.
+    pub fn decompose_fast_window(
+        &self,
+        target: FastPoint,
+        m: usize,
+        start: usize,
+        len: usize,
+    ) -> Option<Vec<usize>> {
+        let mut found: Option<Vec<usize>> = None;
+        self.witnesses_fast_window(target, m, start, len, &mut |witness| {
+            found = Some(witness.to_vec());
+            false
+        });
+        let idxs = found?;
+        let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
+            self.curve.add(s, self.points[i])
+        });
+        (sum == target).then_some(idxs)
+    }
+
+    /// [`Self::decompose_fast_window`]'s enumerator.  For `m = 2` the
+    /// lookup is already `O(1)` and the window is ignored; for `m = 3`
+    /// the window bounds the third summand and witnesses may repeat a
+    /// triple up to three times, once per index that lands in it.
+    pub fn witnesses_fast_window(
+        &self,
+        target: FastPoint,
+        m: usize,
+        start: usize,
+        len: usize,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
+        let base = self.points.len();
+        if m != 3 || base == 0 || len >= base {
+            self.witnesses_fast(target, m, sink);
+            return;
+        }
+        if len == 0 {
+            return;
+        }
+        let start = start % base;
+        let tail = len.min(base - start);
+        let mut rests = Vec::with_capacity(len);
+        let mut scratch = BatchScratch::default();
+        self.curve
+            .add_many(target, &self.negated[start..start + tail], &mut rests, &mut scratch);
+        if tail < len {
+            self.curve
+                .add_many(target, &self.negated[..len - tail], &mut rests, &mut scratch);
+        }
+        const LOOKAHEAD: usize = 32;
+        for rest in rests.iter().take(LOOKAHEAD) {
+            prefetch(&self.present[self.filter_word(rest.pack())]);
+        }
+        for (offset, rest) in rests.iter().enumerate() {
+            if let Some(ahead) = rests.get(offset + LOOKAHEAD) {
+                prefetch(&self.present[self.filter_word(ahead.pack())]);
+            }
+            let key = rest.pack();
+            if !self.admitted(key) {
+                continue;
+            }
+            let k = if offset < tail {
+                start + offset
+            } else {
+                offset - tail
+            };
+            for &(_, i, j) in self.lookup_admitted(key) {
+                if !sink(&[i as usize, j as usize, k]) {
+                    return;
+                }
+            }
+        }
     }
 
     /// **Enumerate every sorted witness** `i_1 ≤ … ≤ i_m` with
@@ -3204,6 +3294,24 @@ pub struct KoblitzIcOptions {
     ///
     /// `None` uses `m`.
     pub descent_m: Option<usize>,
+    /// Factor-base summands relation collection scans per probe, when it
+    /// should scan fewer than all of them.
+    ///
+    /// A full `m = 3` scan finds every triple three times — once for
+    /// each of its indices standing as the third summand — and discards
+    /// two to keep the witness sorted.  Scanning a window of `w`
+    /// summands keeps all three chances and pays for `w` of them: the
+    /// yield per probe falls to about `3w/|F|` of the full scan's while
+    /// the cost falls to `w/|F|`, so relations per *lookup* rise towards
+    /// three times as the window shrinks.  The probes that buys are
+    /// walked rather than multiplied ([`walked_probe_scalar`]), which is
+    /// what makes buying them cheap.
+    ///
+    /// Small windows lose to the arithmetic eventually; measured best
+    /// near `|F|/16`.  `None` scans the whole base and draws every probe
+    /// with its own scalar multiplication, the behaviour every recorded
+    /// run before this option was added.
+    pub collection_window: Option<usize>,
     /// Index of the irreducible factor of `x^n − 1` defining the
     /// factor base.
     pub factor_index: usize,
@@ -3275,6 +3383,7 @@ impl Default for KoblitzIcOptions {
         Self {
             m: 2,
             descent_m: None,
+            collection_window: None,
             factor_index: 0,
             extra_relations: 4,
             max_trials: 20_000,
@@ -5345,6 +5454,11 @@ pub struct CollectionReport {
     pub trials: usize,
     /// Probes that decomposed.
     pub relations: usize,
+    /// Factor-base summands scanned across every probe: the lookups the
+    /// unit actually paid for, which a window makes smaller than
+    /// `trials × |F|`.
+    #[serde(default)]
+    pub summands_scanned: u64,
     pub elapsed_seconds: f64,
 }
 
@@ -5355,6 +5469,35 @@ pub fn probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
     let key =
         seed ^ 0x5052_4f42_4553_4551 ^ trial.wrapping_mul(0x9e37_79b9_7f4a_7c15).rotate_left(17);
     StdRng::seed_from_u64(key).gen_range(1..r_u64.max(2))
+}
+
+/// Trials sharing one scalar multiplication when the collector walks
+/// its probes.  A run costs one multiplication and `PROBE_RUN − 1`
+/// additions, so the arithmetic per probe falls by roughly the run
+/// length while the run stays short enough to keep the trial range
+/// worth parallelising.
+pub const PROBE_RUN: u64 = 64;
+
+/// The step a walked run takes between consecutive trials, fixed by the
+/// seed so the sequence is reproducible.
+pub fn probe_run_stride(seed: u64, r_u64: u64) -> u64 {
+    StdRng::seed_from_u64(seed ^ 0x5354_5249_4445_5f30).gen_range(1..r_u64.max(2))
+}
+
+/// The probe scalar of trial `t` when the collector walks its probes:
+/// run `t / PROBE_RUN` starts at [`probe_scalar`] of the run index and
+/// each trial within it adds one [`probe_run_stride`].  Still a function
+/// of `(seed, t)` alone, so any partition of the trial range yields the
+/// same relations — a unit that starts mid-run simply pays for its own
+/// first multiplication.
+/// A run's scalar may come back as `0`, meaning the probe is the point
+/// at infinity; such a trial decomposes into nothing and reports no
+/// relation, so every reported `a` still satisfies `0 < a < r`.
+pub fn walked_probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
+    let r = r_u64.max(2) as u128;
+    let anchor = probe_scalar(seed, trial / PROBE_RUN, r_u64) as u128;
+    let offset = (trial % PROBE_RUN) as u128 * probe_run_stride(seed, r_u64) as u128;
+    ((anchor + offset) % r) as u64
 }
 
 enum PairSource<'a> {
@@ -5461,9 +5604,39 @@ impl<'a> RelationCollector<'a> {
         self.r_u64
     }
 
+    /// The window of factor-base summands a probe scans, and whether
+    /// probes are walked: `Some(w)` when
+    /// [`KoblitzIcOptions::collection_window`] asks for fewer summands
+    /// than the base has and the fast oracle can honour it.
+    fn window(&self) -> Option<usize> {
+        let w = self.opts.collection_window?;
+        if self.opts.m != 3
+            || self.opts.strategy != DecompositionStrategy::PairTable
+            || self.fast.is_none()
+            || self.pair_table().is_none()
+            || w == 0
+            || w >= self.fb.points.len()
+        {
+            return None;
+        }
+        Some(w)
+    }
+
+    /// The probe scalar of trial `t`, walked or multiplied as the
+    /// options ask.  A function of `(seed, t)` either way.
+    pub fn probe_scalar_of(&self, seed: u64, trial: u64) -> u64 {
+        match self.window() {
+            Some(_) => walked_probe_scalar(seed, trial, self.r_u64),
+            None => probe_scalar(seed, trial, self.r_u64),
+        }
+    }
+
     /// Collect the relations of one work unit, trials in parallel,
     /// returned in trial order.
     pub fn collect(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
+        if let Some(window) = self.window() {
+            return self.collect_walked(unit, window);
+        }
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
         let end = unit.start.saturating_add(unit.count);
@@ -5510,9 +5683,75 @@ impl<'a> RelationCollector<'a> {
             .filter_map(probe)
             .collect();
         relations.sort_by_key(|r| r.trial);
+        let trials = (end - unit.start) as usize;
         let report = CollectionReport {
-            trials: (end - unit.start) as usize,
+            trials,
             relations: relations.len(),
+            summands_scanned: match self.opts.m {
+                3 => trials as u64 * self.fb.points.len() as u64,
+                _ => 0,
+            },
+            elapsed_seconds: begin.elapsed().as_secs_f64(),
+        };
+        (relations, report)
+    }
+
+    /// [`Self::collect`] with a windowed third summand and walked
+    /// probes: trials are grouped into runs of [`PROBE_RUN`], each run
+    /// paying one scalar multiplication and then stepping by the seed's
+    /// stride, and each probe scanning `window` summands from a rotating
+    /// offset so no column is favoured.  Runs are independent, so the
+    /// unit still parallelises and still depends only on `(seed, t)`.
+    fn collect_walked(
+        &self,
+        unit: RelationWorkUnit,
+        window: usize,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        let begin = std::time::Instant::now();
+        let end = unit.start.saturating_add(unit.count);
+        let (fc, g_fast) = self.fast.as_ref().expect("window() checked the fast curve");
+        let pair = self.pair_table().expect("window() checked the pair table");
+        let base = self.fb.points.len();
+        let stride = probe_run_stride(unit.seed, self.r_u64);
+        let stride_point = fc.mul_u64(*g_fast, stride);
+        // Runs of the probe sequence this unit covers, clipped to it.
+        let first_run = unit.start / PROBE_RUN;
+        let last_run = end.saturating_sub(1) / PROBE_RUN;
+        let mut relations: Vec<CollectedRelation> = (first_run..=last_run)
+            .into_par_iter()
+            .flat_map_iter(|run| {
+                let run_start = (run * PROBE_RUN).max(unit.start);
+                let run_end = ((run + 1) * PROBE_RUN).min(end);
+                let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+                let mut point = fc.mul_u64(*g_fast, a);
+                let mut found = Vec::new();
+                for t in run_start..run_end {
+                    if !point.infinity && a != 0 {
+                        // A rotating offset, so no column is favoured by
+                        // sitting where the window always starts.
+                        let offset = pair_filter_hash(
+                            unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15),
+                        ) as usize
+                            % base;
+                        if let Some(points) = pair.decompose_fast_window(point, 3, offset, window) {
+                            found.push(CollectedRelation { trial: t, a, points });
+                        }
+                    }
+                    // The next trial of the run is one stride further
+                    // along, matching [`walked_probe_scalar`] without
+                    // re-deriving the run's anchor.
+                    a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                    point = fc.add(point, stride_point);
+                }
+                found
+            })
+            .collect();
+        relations.sort_by_key(|r| r.trial);
+        let trials = (end - unit.start) as usize;
+        let report = CollectionReport {
+            trials,
+            relations: relations.len(),
+            summands_scanned: trials as u64 * window as u64,
             elapsed_seconds: begin.elapsed().as_secs_f64(),
         };
         (relations, report)
@@ -7644,6 +7883,127 @@ mod tests {
             allow_direct_relation: false,
             max_trials: 40_000,
             ..KoblitzIcOptions::default()
+        }
+    }
+
+    /// The window options a windowed-collection test uses.
+    fn windowed_options(window: usize) -> KoblitzIcOptions {
+        KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::PairTable,
+            collection_window: Some(window),
+            collapse_negation: true,
+            collapse_projected_orbits: true,
+            allow_direct_relation: false,
+            max_trials: 200_000,
+            ..KoblitzIcOptions::default()
+        }
+    }
+
+    #[test]
+    fn a_windowed_witness_still_sums_to_its_target() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector =
+            RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let (relations, report) = collector.collect(RelationWorkUnit {
+            seed: 5,
+            start: 0,
+            count: 4096,
+        });
+        assert!(report.relations > 0, "the window found nothing to check");
+        for rel in &relations {
+            assert_eq!(rel.points.len(), 3);
+            assert_eq!(rel.a, walked_probe_scalar(5, rel.trial, collector.scalar_bound()));
+            // Unsorted witnesses are fine; the group equation is not.
+            assert!(verify_collected_relation(&kc, &fb, 3, rel));
+        }
+    }
+
+    #[test]
+    fn a_window_finds_more_relations_per_lookup_than_the_full_scan() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let base = fb.points.len();
+        // Both scan the same number of summands, so the comparison is
+        // relations bought per unit of the cost that actually dominates.
+        let divisor = 16;
+        let full = KoblitzIcOptions {
+            collection_window: None,
+            ..windowed_options(base)
+        };
+        let windowed = windowed_options(base / divisor);
+        let measure = |opts: &KoblitzIcOptions, trials: u64| {
+            let collector = RelationCollector::with_pair_table(&kc, &fb, opts, Some(&pair))
+                .expect("collector");
+            collector
+                .collect(RelationWorkUnit {
+                    seed: 9,
+                    start: 0,
+                    count: trials,
+                })
+                .1
+        };
+        let a = measure(&full, 2048);
+        let b = measure(&windowed, 2048 * divisor as u64);
+        assert_eq!(
+            a.summands_scanned, b.summands_scanned,
+            "the two runs must pay for the same number of lookups"
+        );
+        assert!(
+            b.relations > a.relations * 2,
+            "a window keeps all three chances per triple, so the same lookups \
+             should buy nearly three times the relations: full {} windowed {}",
+            a.relations,
+            b.relations
+        );
+    }
+
+    #[test]
+    fn walked_work_units_partition_the_probe_sequence_exactly() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector =
+            RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let whole = collector
+            .collect(RelationWorkUnit {
+                seed: 12,
+                start: 0,
+                count: 2000,
+            })
+            .0;
+        // Boundaries deliberately cut runs of PROBE_RUN in half: a unit
+        // that starts mid-run pays for its own first multiplication and
+        // must still report the same relations.
+        let mut split = Vec::new();
+        for (start, count) in [(0u64, 37u64), (37, 512), (549, 3), (552, 1448)] {
+            split.extend(collector.collect(RelationWorkUnit {
+                seed: 12,
+                start,
+                count,
+            })
+            .0);
+        }
+        split.sort_by_key(|r| r.trial);
+        assert!(!whole.is_empty());
+        assert_eq!(whole, split);
+    }
+
+    #[test]
+    fn windowed_collection_precomputes_the_same_logarithms() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).expect("log database");
+        assert!(report.relations >= table.columns.len());
+        // Every column's logarithm checked against the group itself.
+        for (point, log) in &table.columns {
+            assert_eq!(*point, kc.mul(kc.generator(), log));
         }
     }
 

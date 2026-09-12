@@ -274,6 +274,15 @@ pub struct WorkflowParams {
     /// cheap ones.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub descent_summands: Option<u8>,
+    /// Factor-base summands collection scans per probe, when it should
+    /// scan fewer than all of them. A full three-summand scan finds
+    /// every triple three times and keeps one; a window keeps all three
+    /// chances at a fraction of the cost and walks the extra probes it
+    /// needs, which is worth about three times the relations per lookup
+    /// near `|F|/32`. Omitted means the whole base, and probes drawn one
+    /// scalar multiplication at a time.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub collection_window: Option<u32>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -321,6 +330,14 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if let Some(d) = p.descent_summands {
         if !(2..=4).contains(&d) {
             return Err("descent_summands must be 2, 3 or 4".into());
+        }
+    }
+    if let Some(w) = p.collection_window {
+        if w == 0 {
+            return Err("collection_window must scan at least one summand".into());
+        }
+        if p.summands != 3 {
+            return Err("collection_window applies to three-summand collection".into());
         }
     }
     if p.summands < 2 || p.summands > 4 {
@@ -876,6 +893,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             p.solver,
             p.summands,
             p.descent_summands,
+            p.collection_window,
             p.max_trials,
             p.seed,
         ),
@@ -919,21 +937,28 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             units.len()
         ));
     }
-    for &u in &wanted {
-        let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, u)?;
-        say(&format!(
-            "      unit {u:05}: {} relations from {} probes ({:.2}s)",
-            doc.relations.len(),
-            doc.count,
-            doc.elapsed_seconds
-        ));
-        units_ran += 1;
-        relations_now += doc.relations.len();
-        trials_now += doc.count;
-        units.insert(u, doc);
-        state.units_collected = units.len();
-        state.relations_collected = units.values().map(|d| d.relations.len()).sum();
-        write_atomic(&state_path, &state)?;
+    if !wanted.is_empty() {
+        if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+            pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+        }
+        let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
+            .ok_or("factor base cannot decompose with this summand count")?;
+        for &u in &wanted {
+            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
+            say(&format!(
+                "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+                doc.relations.len(),
+                doc.count,
+                doc.elapsed_seconds
+            ));
+            units_ran += 1;
+            relations_now += doc.relations.len();
+            trials_now += doc.count;
+            units.insert(u, doc);
+            state.units_collected = units.len();
+            state.relations_collected = units.values().map(|d| d.relations.len()).sum();
+            write_atomic(&state_path, &state)?;
+        }
     }
     state.units_collected = units.len();
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
@@ -1004,7 +1029,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let mut outcome = solver.try_solve();
         let mut extended = 0usize;
         // Undetermined: collect further units up to the budget, solving
-        // again after each.
+        // again after each.  One collector serves every round, and its
+        // borrow of the pair table ends with this block so the descent
+        // can still build one if collection never ran.
+        if outcome.is_none() {
+        let collector = {
+            if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+                pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+            }
+            RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
+                .ok_or("factor base cannot decompose with this summand count")?
+        };
         while outcome.is_none() {
             let report = solver.report();
             let next = units.keys().max().map_or(0, |m| m + 1);
@@ -1015,7 +1050,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
                 report.relations, report.rejected_relations, report.duplicate_relations, report.columns
             ));
-            let doc = collect_unit(&c, &fb, &ic, &mut pair, &p, &digest, &spec, &rel_dir, next)?;
+            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
             say(&format!(
                 "      unit {next:05}: {} relations from {} probes ({:.2}s)",
                 doc.relations.len(),
@@ -1030,6 +1065,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             state.relations_collected = units.values().map(|d| d.relations.len()).sum();
             write_atomic(&state_path, &state)?;
             outcome = solver.try_solve();
+        }
         }
         let trials_total: u64 = units.values().map(|d| d.count).sum();
         let outcome = outcome.or_else(|| {
@@ -1357,22 +1393,20 @@ fn load_units(
 
 /// Collect one work unit and write its file atomically.
 #[allow(clippy::too_many_arguments)]
+/// Collect one work unit and write its relation file.  The collector is
+/// built once for the whole stage and handed in: its point index map is
+/// keyed by big integers and costs about as much to build as a short
+/// unit costs to run, so rebuilding it per unit made a run's cost depend
+/// on how finely the trials were partitioned.
 fn collect_unit(
     c: &KoblitzCurve,
-    fb: &FrobeniusFactorBase,
-    ic: &KoblitzIcOptions,
-    pair: &mut Option<PairSumTable>,
+    collector: &RelationCollector<'_>,
     p: &WorkflowParams,
     digest: &str,
     spec: &FactorBaseSpec,
     rel_dir: &Path,
     unit: usize,
 ) -> Result<RelationUnitDocument, String> {
-    if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
-        *pair = Some(PairSumTable::build(c, fb).ok_or("field too wide for the pair table")?);
-    }
-    let collector = RelationCollector::with_pair_table(c, fb, ic, pair.as_ref())
-        .ok_or("factor base cannot decompose with this summand count")?;
     let work = RelationWorkUnit {
         seed: p.seed,
         start: (unit as u64)

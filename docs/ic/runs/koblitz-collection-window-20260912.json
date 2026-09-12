@@ -1,0 +1,130 @@
+{
+ "claim_boundary": "synthetic_known_answer",
+ "date": "2026-09-12",
+ "degree_53": {
+  "change": {
+   "collect_stage_seconds": 1.48,
+   "lookups_per_relation": 2.74,
+   "note": "The collect stage includes the one-time pair-table build, about 6.5 s at this base size and the same for both. Net of it the scanning is 17.5 ms a relation full against 7.6 ms windowed, about 2.3 times; a windowed lookup costs some 20% more in wall time because its prefetch pipeline restarts every window.",
+   "precompute_seconds": 1.18
+  },
+  "control_full_scan": {
+   "collect_seconds": 14.487455439,
+   "collection_window": null,
+   "descent_seconds_per_target": 0.050314166812500005,
+   "logs_seconds": 9.010091737,
+   "precompute_seconds": 32.075485527,
+   "ratio": {
+    "amortised": 1.1554447024280965,
+    "charged": 24.174216165005085
+   },
+   "relations": 458,
+   "rho_seconds_per_target": 1.2163055446875,
+   "rho_verified": 32,
+   "summands_scanned": 242514432,
+   "trials": 15888,
+   "unit_trials": 3972,
+   "units": 4,
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.9586336122265833,
+    "whole_process_crossover": true
+   },
+   "verified": 32
+  },
+  "curve": "K_0 / F_2^53",
+  "factor_base": {
+   "abscissae": 7632,
+   "points": 15264,
+   "projected_columns": 144
+  },
+  "subgroup_bits": 45,
+  "subgroup_order": 21044858204113,
+  "targets": 32,
+  "windowed": {
+   "collect_seconds": 9.781881199,
+   "collection_window": 477,
+   "descent_seconds_per_target": 0.04935917846874999,
+   "logs_seconds": 8.920014195,
+   "precompute_seconds": 27.292282463,
+   "ratio": {
+    "amortised": 1.3307705719400815,
+    "charged": 24.325332747083035
+   },
+   "relations": 432,
+   "rho_seconds_per_target": 1.200678440375,
+   "rho_verified": 32,
+   "summands_scanned": 83364336,
+   "trials": 174768,
+   "unit_trials": 43692,
+   "units": 4,
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.9588905931771924,
+    "whole_process_crossover": true
+   },
+   "verified": 32
+  }
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "operation": "koblitz_collection_window_and_per_unit_cost",
+ "per_unit_collector_cost": {
+  "degree_41_collect_seconds_by_units": {
+   "after": {
+    "1_unit": 0.916,
+    "4_units": 0.973,
+    "8_units": 0.976
+   },
+   "before": {
+    "1_unit": 0.922,
+    "4_units": 1.253,
+    "8_units": 1.698
+   }
+  },
+  "degree_53_full_scan_collect_seconds": {
+   "after": 14.487,
+   "before": 25.199
+  },
+  "what": "The collector's point index map is keyed by big integers and was rebuilt for every work unit. Building it once per stage removed a cost that scaled with how finely the trial range was partitioned."
+ },
+ "schema_version": 1,
+ "software": {
+  "commit": "242a5ed48839bca98e4996893656eaecadeea9c5",
+  "profile": "release"
+ },
+ "the_floor": {
+  "argument": "One lookup asks whether R - P_k is a stored pair sum, which holds with probability |F|^2/2r. No oracle of this shape can spend fewer than 2r/|F|^2 lookups per relation.",
+  "lookups_per_relation_ideal": 180651,
+  "measured": {
+   "degree_41": {
+    "full_over_ideal": 2.99,
+    "full_scan": 119273,
+    "ideal": 39922,
+    "window_over_32": 41323,
+    "window_over_ideal": 1.04
+   },
+   "degree_53": {
+    "full_over_ideal": 2.93,
+    "full_scan": 529507,
+    "ideal": 180651,
+    "window_over_32": 192973,
+    "window_over_ideal": 1.07
+   }
+  }
+ },
+ "verification": "Every relation is re-checked in the group before it enters the linear algebra, windowed witnesses included, which arrive unsorted. Both runs solved 32 of 32 targets and had all 32 independently confirmed by the signed-Frobenius rho walk.",
+ "what_this_is": "Relation collection taken to its floor. A three-summand scan finds every triple three times and keeps one; scanning a window of the base keeps all three chances at a fraction of the cost. Measured against a full-scan control in the same session, on the same binary, at K_0/F_2^53.",
+ "what_this_is_not": [
+  "Not a claim about any curve in use: K_0 over F_2^53 has a 45-bit subgroup.",
+  "Not an asymptotic improvement: collection still costs lookups linear in r, the constant is three times smaller.",
+  "Not a change to the descent or to rho, whose per-target costs move only by run-to-run noise here.",
+  "Not a distributed measurement: both runs collected their units in one process."
+ ]
+}
