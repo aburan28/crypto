@@ -7705,3 +7705,72 @@ and their interaction is unmeasured.
 ### Commits made
 
 (see PR — `SplitRule` and its test, research note §18)
+
+## 2026-09-12 (autolab run, tenth session on exotic coordinates)
+
+### Task picked
+
+Asked directly whether the thread had found a new point representation,
+the honest answer was "no, and here is why".  Asked then to check the
+literature, which the note's header had named but no session had
+actually read.
+
+### Work done
+
+Read Faugère–Huot–Joux–Renault–Vitse (EUROCRYPT 2014), the
+Galbraith–Gaudry survey (ePrint 2015/1022), and the abstract of
+Galbraith–Gebregiyorgis (ePrint 2014/806); wrote research note §19 and
+annotated §15 and §16 with corrections.
+
+### Findings
+
+**The structural content of §1–§16 is published, and the framing had
+drifted.**  §3's lemma is [FHJRV] Lemma 6 and Remark 9; §1 and §6's
+linearising frames are their Proposition 8, in the same two normal
+forms; §6's characteristic-2 symmetrised `S₃` is their §5.1 with the
+Koblitz case being `b = 1` and a Möbius re-normalisation; §10's group
+closure is [FGHR]'s; §10.3's full `E[2]` invariants are [FHJRV] §4.2;
+and §15's classification of the isogeny lines as changes of curve
+restates their §2, which excludes exactly those morphisms for exactly
+that reason.  §16's "closing lemma" answers from the other side a
+question they closed more generally.
+
+**The note's header was right and the later sections drifted from
+it.**  The first session named all three papers as prior art the
+search must at least rediscover.  Nothing reopened that question as
+the sections accumulated, and the summaries given in conversation
+drifted furthest of all.  The lesson is procedural: a note that opens
+by naming its prior art has to re-read it at the point where it starts
+classifying, not only at the point where it starts.
+
+**What is left is thin and negative.**  [FHJRV] set up arbitrary
+torsion order and instantiate only order 2; they have no 3-torsion
+example, no `j = 0` or `j = 1728` case.  §13's `y`-line chart and
+§15 #2's `x²`-line are those uninstantiated cases — and both are
+negative in this note's own measurements.  A DLP 2014 talk by Vitse is
+described in the survey as a systematic study of which subgroups can be
+used and may cover them; no manuscript was found.
+
+**The comparison the thread never made.**  Galbraith–Gebregiyorgis
+studied this exact setting and concluded Pollard rho remains much
+faster than index calculus for these curves.  Every comparison in §8,
+§14, §17 and §18 is between two index-calculus coordinate systems, none
+against rho.  The wins are inside a family already shown to be
+uncompetitive.
+
+**Also unattributed until now:** the chained system is the known
+"splitting trick", and §18's `MinTermWeight` is the MOM heuristic.
+
+### Next step proposal
+
+Two honest options.  Either stop the representation search, which is
+closed and was closed before it started, or change the question to the
+one the literature leaves open: not "is there a better coordinate" but
+"is the index-calculus family reachable at all", which needs a
+measurement against Pollard rho rather than against another coordinate
+system.  The second is a larger and more useful piece of work, and
+nothing in this note bears on it yet.
+
+### Commits made
+
+(see PR — research note §19, corrections to §15 and §16)
