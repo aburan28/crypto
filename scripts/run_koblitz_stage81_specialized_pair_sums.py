@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare generic and direct-PCLMUL n=53 Frobenius support expansion."""
+"""Compare generic and direct-PCLMUL n=53 initial support pair sums."""
 
 from __future__ import annotations
 
@@ -23,17 +23,17 @@ import run_koblitz_stage65_n53_reduction as stage65
 
 
 REPO = Path(__file__).resolve().parents[1]
-RUN_SCHEMA = "koblitz_stage80_specialized_support_expansion.v1"
-RUN_SEAL_SCHEMA = "koblitz_stage80_specialized_support_expansion_seal.v1"
+RUN_SCHEMA = "koblitz_stage81_specialized_pair_sums.v1"
+RUN_SEAL_SCHEMA = "koblitz_stage81_specialized_pair_sums_seal.v1"
 
 
-class Stage80Error(RuntimeError):
+class Stage81Error(RuntimeError):
     pass
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
-        raise Stage80Error(message)
+        raise Stage81Error(message)
 
 
 def load(path: Path, context: str) -> dict[str, Any]:
@@ -46,13 +46,13 @@ def self_test() -> dict[str, Any]:
     predecessor = stage65.self_test()
     require(predecessor.get("status") == "PASS", "Stage-65 control failed")
     return {
-        "schema": "koblitz_stage80_self_test.v1",
+        "schema": "koblitz_stage81_self_test.v1",
         "status": "PASS",
-        "checks": 23,
+        "checks": 24,
         "n": 53,
         "field_modulus": "x^53 + x^6 + x^2 + x + 1",
-        "baseline_expansion": "generic_frobenius_squares",
-        "candidate_expansion": "direct_pclmul_n53_frobenius_squares",
+        "baseline_pair_sums": "generic_batch_add",
+        "candidate_pair_sums": "direct_pclmul_n53_batch_add",
         "parallel_threads": 4,
         "same_target": True,
         "exact_relation_hash_equality_required": True,
@@ -61,9 +61,9 @@ def self_test() -> dict[str, Any]:
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
-    require(platform.system() == "Linux", "Stage-80 requires Linux process accounting")
+    require(platform.system() == "Linux", "Stage-81 requires Linux process accounting")
     output = args.output.resolve()
-    require(not output.exists() and not output.is_symlink(), "Stage-80 output must be new")
+    require(not output.exists() and not output.is_symlink(), "Stage-81 output must be new")
     build_root = args.build.resolve(strict=True)
     build = stage42.validate_build(build_root)
     output.mkdir(parents=True)
@@ -88,18 +88,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     candidate_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     candidate_environment["RAYON_NUM_THREADS"] = "4"
     baseline_environment = dict(candidate_environment)
-    candidate_environment["KIC_ENABLE_SPECIALIZED_N53_SUPPORT_EXPANSION"] = "1"
+    baseline_environment["KIC_DISABLE_SPECIALIZED_N53_PAIR_SUMS"] = "1"
     rho_environment = custody.safe_child_environment()
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.monotonic()
     with TreeSampler() as sampler:
         baseline_process = stage33.metered(
-            role="generic-expansion", command=direct_command, cwd=REPO,
+            role="generic-pair-sums", command=direct_command, cwd=REPO,
             evidence=evidence, timeout=args.timeout, environment=baseline_environment,
         )
         candidate_process = stage33.metered(
-            role="specialized-expansion", command=direct_command, cwd=REPO,
+            role="specialized-pair-sums", command=direct_command, cwd=REPO,
             evidence=evidence, timeout=args.timeout, environment=candidate_environment,
         )
         rho_process = stage33.metered(
@@ -107,9 +107,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             evidence=evidence, timeout=args.timeout, environment=rho_environment,
         )
     outer = stage33.outer_resources(started, before_self, before_children, sampler)
-    require(all(stage33.process_complete(row) for row in (baseline_process, candidate_process, rho_process)), "Stage-80 process failed")
-    baseline = stage61.direct_observation(evidence / "generic-expansion.stdout", "FULL_RANK")
-    candidate = stage61.direct_observation(evidence / "specialized-expansion.stdout", "FULL_RANK")
+    require(all(stage33.process_complete(row) for row in (baseline_process, candidate_process, rho_process)), "Stage-81 process failed")
+    baseline = stage61.direct_observation(evidence / "generic-pair-sums.stdout", "FULL_RANK")
+    candidate = stage61.direct_observation(evidence / "specialized-pair-sums.stdout", "FULL_RANK")
     baseline_summary = baseline["summary"]
     candidate_summary = candidate["summary"]
     require(baseline["base"]["base_hash"] == candidate["base"]["base_hash"], "factor base changed")
@@ -183,12 +183,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "matched specialized pair-query batch changed",
     )
     require(
-        baseline["base"].get("specialized_n53_support_expansion") is False,
-        "generic support-expansion baseline was not selected",
+        baseline["base"].get("specialized_n53_support_expansion")
+        == candidate["base"].get("specialized_n53_support_expansion")
+        is False,
+        "matched generic support expansion changed",
     )
     require(
-        candidate["base"].get("specialized_n53_support_expansion") is True,
-        "specialized n53 support expansion was not selected",
+        baseline["base"].get("specialized_n53_pair_sums") is False,
+        "generic pair-sum baseline was not selected",
+    )
+    require(
+        candidate["base"].get("specialized_n53_pair_sums") is True,
+        "specialized n53 pair sums were not selected",
     )
     require(candidate_summary.get("field_mul_backend") == candidate_summary.get("field_square_backend") == "x86_64_pclmulqdq", "PCLMUL backend unavailable")
     rho_rows = stage44.parse_lines(evidence / "rho.stdout")
@@ -198,24 +204,24 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     candidate_wall = candidate_process["metrics"]["wall_seconds"]
     rho_wall = rho_process["metrics"]["wall_seconds"]
     comparison = {
-        "specialized_support_expansion_direct_wall_speedup": baseline_wall / candidate_wall,
-        "specialized_support_expansion_setup_speedup": baseline_summary["setup_ms"] / candidate_summary["setup_ms"],
-        "specialized_support_expansion_collection_speedup": baseline_summary["collection_ms"] / candidate_summary["collection_ms"],
-        "specialized_support_expansion_core_seconds_ratio": candidate_process["metrics"]["total_core_seconds"] / baseline_process["metrics"]["total_core_seconds"],
-        "specialized_support_expansion_peak_rss_ratio": candidate_process["metrics"]["peak_rss_bytes"] / baseline_process["metrics"]["peak_rss_bytes"],
-        "specialized_support_expansion_over_rho_wall_ratio": candidate_wall / rho_wall,
-        "generic_expansion_over_rho_wall_ratio": baseline_wall / rho_wall,
-        "fresh_build_plus_specialized_support_expansion_over_rho_wall_ratio": (build["outer_resources"]["wall_seconds"] + candidate_wall) / rho_wall,
-        "specialized_support_expansion_whole_process_crossover": candidate_wall < rho_wall,
+        "specialized_pair_sums_direct_wall_speedup": baseline_wall / candidate_wall,
+        "specialized_pair_sums_setup_speedup": baseline_summary["setup_ms"] / candidate_summary["setup_ms"],
+        "specialized_pair_sums_collection_speedup": baseline_summary["collection_ms"] / candidate_summary["collection_ms"],
+        "specialized_pair_sums_core_seconds_ratio": candidate_process["metrics"]["total_core_seconds"] / baseline_process["metrics"]["total_core_seconds"],
+        "specialized_pair_sums_peak_rss_ratio": candidate_process["metrics"]["peak_rss_bytes"] / baseline_process["metrics"]["peak_rss_bytes"],
+        "specialized_pair_sums_over_rho_wall_ratio": candidate_wall / rho_wall,
+        "generic_pair_sums_over_rho_wall_ratio": baseline_wall / rho_wall,
+        "fresh_build_plus_specialized_pair_sums_over_rho_wall_ratio": (build["outer_resources"]["wall_seconds"] + candidate_wall) / rho_wall,
+        "specialized_pair_sums_whole_process_crossover": candidate_wall < rho_wall,
         "baseline_exact_table_misses": baseline_summary["query_exact_table_misses"],
         "candidate_exact_table_misses": candidate_summary["query_exact_table_misses"],
     }
     result = {
         "schema": RUN_SCHEMA,
-        "status": "complete_n53_specialized_support_expansion_rho",
+        "status": "complete_n53_specialized_pair_sums_rho",
         "build_binding": {
-            "result": custody.executable_identity(build_root / "result.json", "Stage-80 build result", executable=False),
-            "seal": custody.executable_identity(build_root / "result-seal.json", "Stage-80 build seal", executable=False),
+            "result": custody.executable_identity(build_root / "result.json", "Stage-81 build result", executable=False),
+            "seal": custody.executable_identity(build_root / "result-seal.json", "Stage-81 build seal", executable=False),
             "source_state": build["source_state"],
             "outer_resources": build["outer_resources"],
         },
@@ -248,16 +254,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 def verify(build_root: Path, output: Path) -> dict[str, Any]:
     build = stage42.validate_build(build_root)
     seal = stage33.verify_seal(output, RUN_SEAL_SCHEMA, "run_frozen")
-    result = load(output / "result.json", "Stage-80 result")
-    require(result.get("schema") == RUN_SCHEMA and result.get("status") == "complete_n53_specialized_support_expansion_rho", "Stage-80 result is incomplete")
-    baseline = stage61.direct_observation(output / "evidence/generic-expansion.stdout", "FULL_RANK")
-    candidate = stage61.direct_observation(output / "evidence/specialized-expansion.stdout", "FULL_RANK")
-    require(baseline == result["baseline"] and candidate == result["candidate"], "Stage-80 transcript changed")
-    require(baseline["relation_hashes"] == candidate["relation_hashes"], "Stage-80 relation equality changed")
-    require(result.get("full_cost_gate_passed") is False and result.get("koblitz_index_calculus_sota") is False, "Stage-80 claim widened")
+    result = load(output / "result.json", "Stage-81 result")
+    require(result.get("schema") == RUN_SCHEMA and result.get("status") == "complete_n53_specialized_pair_sums_rho", "Stage-81 result is incomplete")
+    baseline = stage61.direct_observation(output / "evidence/generic-pair-sums.stdout", "FULL_RANK")
+    candidate = stage61.direct_observation(output / "evidence/specialized-pair-sums.stdout", "FULL_RANK")
+    require(baseline == result["baseline"] and candidate == result["candidate"], "Stage-81 transcript changed")
+    require(baseline["relation_hashes"] == candidate["relation_hashes"], "Stage-81 relation equality changed")
+    require(result.get("full_cost_gate_passed") is False and result.get("koblitz_index_calculus_sota") is False, "Stage-81 claim widened")
     return {
-        "schema": "koblitz_stage80_verification.v1",
-        "status": "n53_specialized_support_expansion_verified",
+        "schema": "koblitz_stage81_verification.v1",
+        "status": "n53_specialized_pair_sums_verified",
         "source_commit": build["source_state"]["commit"],
         "relations": candidate["summary"]["admitted_relations"],
         "support_queries": candidate["summary"]["support_queries"],
@@ -301,8 +307,8 @@ def main() -> None:
         else:
             value = verify(args.build.resolve(strict=True), args.output.resolve(strict=True))
         print(json.dumps(value, indent=2, sort_keys=True))
-    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage80Error, stage65.Stage65Error, stage64.Stage64Error, stage61.Stage61Error, stage42.Stage42Error, custody.PhaseBError) as error:
-        raise SystemExit(f"stage80-specialized-support-expansion: {error}")
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage81Error, stage65.Stage65Error, stage64.Stage64Error, stage61.Stage61Error, stage42.Stage42Error, custody.PhaseBError) as error:
+        raise SystemExit(f"stage81-specialized-pair-sums: {error}")
 
 
 if __name__ == "__main__":
