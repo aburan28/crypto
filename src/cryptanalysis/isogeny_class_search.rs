@@ -36,12 +36,13 @@
 //! ```
 //!
 //! Pollard ρ on the 130-bit prime subgroup costs `2^64.33` group
-//! operations, or `2^60.31` with the `√(2·131)` negation-plus-Frobenius
-//! speedup the ECC2K-130 effort actually uses.  **Enumerating the isogeny
+//! operations with the negation map (`√(πr/4)`), or `2^60.81` after the
+//! further `√131` Frobenius speedup — combined `√(πr/524)`, the figure
+//! the ECC2K-130 effort actually uses.  **Enumerating the isogeny
 //! class costs more than solving the DLP by ρ**, at one operation per
 //! vertex, before any per-vertex Gröbner work is charged.  So an
 //! *exhaustive* search of the class is ruled out by counting alone, and
-//! only a search touching `≤ 2^{-4.75}` of it could ever pay.
+//! only a search touching `≤ 2^{-4.25}` of it could ever pay.
 //!
 //! ## Boundary B — 263 of those `2^65` vertices are reachable, and that is all
 //!
@@ -1517,15 +1518,17 @@ mod tests {
     fn class_is_larger_than_the_rho_reference() {
         let class = koblitz_isogeny_class(131, 5_000_000);
         let log2_class = class.log2_class_size();
-        // ρ with the √(2·131) Frobenius/negation speedup.
+        // √(πr/4) already includes negation; divide only by √131 for
+        // Frobenius, equivalently √(πr/524).  Pinning 60.81 catches a
+        // repeat of the √(πr/4)/√(2·131) double-count.
         let r = 680564733841876926932320129493409985129f64;
-        let log2_rho =
-            (std::f64::consts::PI * r / 4.0).sqrt().log2() - (2.0f64 * 131.0).sqrt().log2();
+        let log2_rho = (std::f64::consts::PI * r / 524.0).sqrt().log2();
         assert!(
             log2_class > log2_rho,
             "class 2^{log2_class:.2} must exceed rho 2^{log2_rho:.2}"
         );
         assert!((log2_class - 65.06).abs() < 0.02, "got 2^{log2_class}");
+        assert!((log2_rho - 60.81).abs() < 0.02, "got 2^{log2_rho}");
     }
 
     /// Boundary B: only 263 vertices are reachable with a feasible isogeny

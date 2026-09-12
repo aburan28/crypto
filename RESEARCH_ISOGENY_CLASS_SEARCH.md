@@ -14,8 +14,8 @@ lower Gröbner **solving degree**?
 All four boundaries below are *derived* rather than measured, and between them
 they leave the lever no room:
 
-- the class has `2^65.06` vertices against ρ's `2^60.31` operations, so
-  enumerating it is already `2^4.75×` more expensive than just solving the
+- the class has `2^65.06` vertices against ρ's `2^60.81` operations, so
+  enumerating it is already `2^4.25×` more expensive than just solving the
   DLP (**A**);
 - exactly **263** of those vertices are reachable by a computable isogeny —
   everything else needs an isogeny of degree `146505763881528721` whose
@@ -99,12 +99,13 @@ element of the field, equals `Σ_{f|c} h(O_f)` on the nose
 (`class_size_formula_matches_exact_point_counting`).
 
 Pollard ρ on the 130-bit subgroup costs `√(πr/4) = 2^64.33` group
-operations, or **`2^60.31`** with the `√(2·131)` negation-plus-Frobenius
-speedup the ECC2K-130 effort actually uses.  So:
+operations with the negation map, or **`2^60.81`** after the further
+`√131` Frobenius speedup — combined `√(πr/524)`, the figure the
+ECC2K-130 effort actually uses.  So:
 
-> **Boundary A.** Visiting every vertex of the isogeny class costs `2^4.75×`
+> **Boundary A.** Visiting every vertex of the isogeny class costs `2^4.25×`
 > a full ρ run, at one operation per vertex and before any Gröbner work.  A
-> search over more than `2^{−4.75} ≈ 3.7%` of the class is beaten by ρ on
+> search over more than `2^{−4.25} ≈ 5.3%` of the class is beaten by ρ on
 > enumeration alone, whatever it finds.
 
 ### B — 263 vertices are reachable, and that is the whole search (floor, reachability)
@@ -268,7 +269,7 @@ Four numbers come out, and the last one decides.
 |---|---|---|---|
 | **R6** | Some curve in the ECC2K-130 isogeny class has a materially lower solving degree than `E` | **`killed`** | Boundaries C and D, both exact: `d_reg` is constant on the class, and the one `D*`-lowering mechanism needs a subfield `F_{2^131}` does not have. No search required. |
 | **R6′** | The residual `D*` variation is a **curve** effect an attacker can move to | **`killed`** | EXP-R6. The exact criterion of §3.1 makes it a `(curve, target)` property; zero disagreements with the solver over every curve at four targets; holdout margin negative at the largest size. |
-| **R6″** | The exhaustive search over the class is *feasible* | **`killed`** | Boundary A (`2^65.06` vertices vs `2^60.31` ρ) and B (263 reachable). The search that does terminate covers `2^{−57}` of the class. |
+| **R6″** | The exhaustive search over the class is *feasible* | **`killed`** | Boundary A (`2^65.06` vertices vs `2^60.81` ρ) and B (263 reachable). The search that does terminate covers `2^{−57}` of the class. |
 | **R6‴** | `D* = 2` density over curves is `1 − 2^{−dim S}` per target | **`supported`** (exact) | `dim S = 1` at `n ∈ {8, 10}`, escape count `128/255` and `512/1023`, matching `(2^n − 2^{n−1})/(2^n − 1)`; mismatches `0`. |
 | **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** | EXP-R6. Survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10` over `T = 8/16/32/48/64`. Monotone and reaching zero. |
 
@@ -334,7 +335,7 @@ selection and holdout target sets.
 
 **Result.**
 
-- **A.** class `2^65.06`, ρ `2^60.31` → enumeration costs `2^4.75×` ρ.
+- **A.** class `2^65.06`, ρ `2^60.81` → enumeration costs `2^4.25×` ρ.
 - **B.** reachable `263` (`2^{−57.0}` of the class); every prime `< 263` has
   a single-vertex graph. `Φ₂(X,1)` root set `{1}`, `Φ₃(X,1)` empty — the CM
   prediction and the modular polynomial agree.
@@ -497,8 +498,8 @@ earlier lessons:
 - **D. Bernstein, L. De Feo, A. Leroux, B. Smith**, *Faster computation of
   isogenies of large prime degree*, ANTS 2020 — the √élu bound of §2B.
 - **D. Bailey et al.**, *Breaking ECC2K-130*, eprint 2009/541 — the source of
-  the curve and of the negation-plus-Frobenius ρ technique whose `√(2·131)`
-  speedup factor §2A applies.  The `2^60.31` there is computed from
-  `√(πr/4)/√(2·131)`, not quoted from the paper.
+  the curve and of the negation-plus-Frobenius ρ technique whose combined
+  `√(πr/524)` cost §2A applies.  The `2^60.81` there is computed from
+  `√(πr/4)/√131`, not quoted from the paper.
 - `RESEARCH_DEGREE_REDUCTION.md` — levers L1–L4, the cost model and the
   baselines this thread reuses.

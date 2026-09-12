@@ -12,7 +12,7 @@
 //!
 //! | # | Boundary | Kind | Value |
 //! |---|---|---|---|
-//! | **A** | the isogeny class has more vertices than ρ has group operations | floor (counting) | `2^65.06` vertices vs `2^60.31` ρ operations |
+//! | **A** | the isogeny class has more vertices than ρ has group operations | floor (counting) | `2^65.06` vertices vs `2^60.81` ρ operations |
 //! | **B** | vertices reachable by a computable isogeny | floor (reachability) | `263` of `2^65.06`, i.e. `2^-56.9` of the class |
 //! | **C** | the curve enters the descended system **below** the leading form | exact, algebraic | `d_reg` and fall-availability are constant on the class |
 //! | **D** | the only measured `D*`-lowering mechanism (L1 subfield) needs a subfield | exact | `131` is prime; isogenies do not change the field |
@@ -58,11 +58,12 @@ use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const OMEGA: f64 = 2.807;
-/// ρ on the 130-bit prime subgroup, with the `√(2·131)` negation +
-/// Frobenius speedup the ECC2K-130 effort actually uses.
+/// ρ on the 130-bit prime subgroup.  `√(πr/4)` already includes the
+/// negation map; the order-131 Frobenius contributes a further `√131`.
+/// Combined: classes of size `2·131`, cost `√(πr/524)`.
 fn log2_rho_reference() -> f64 {
     let r = 680564733841876926932320129493409985129f64;
-    (std::f64::consts::PI * r / 4.0).sqrt().log2() - (2.0f64 * 131.0).sqrt().log2()
+    (std::f64::consts::PI * r / 524.0).sqrt().log2()
 }
 
 fn main() {

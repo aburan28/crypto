@@ -200,7 +200,7 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
 | **R6** | **Some curve in the ECC2K-130 isogeny class has a materially lower solving degree** than the Koblitz curve (lever L5) | **`killed`** | Boundaries C and D of `RESEARCH_ISOGENY_CLASS_SEARCH.md`, both exact and needing no search: `a₆ = 1/j` is the whole curve-dependence of the descended Semaev system and it enters *below* the leading form (a constant at `m = 2`; Boolean degree `≤ 5` of `6` at `m = 3`), so `d_reg` is constant on the class; and L1's subfield mechanism needs a proper subfield of `F_{2^131}`, which does not exist and which no isogeny creates. |
 | **R6′** | The residual variation in the **affine** `D*` across curves is a *curve* effect an attacker can move to | **`killed`** | EXP-R6, iteration 7. The exact criterion `D* = 2 ⟺ a₆ ∉ S^⊥` with `S^⊥` fixed *by the target* holds with **0** disagreements over every curve at four targets; the best curve selected on one target set is `2^{+1.13}` worse than the unmodified baseline on a disjoint one. |
-| **R6″** | An exhaustive search of the isogeny class is *feasible* | **`killed`** | The class has `2^65.06` vertices against ρ's `2^60.31` operations, so enumeration is `2^4.75×` a full ρ run; and only `263` vertices are reachable without a degree-`146505763881528721` isogeny (kernel polynomial degree `2^56`). |
+| **R6″** | An exhaustive search of the isogeny class is *feasible* | **`killed`** | The class has `2^65.06` vertices against ρ's `2^60.81` operations, so enumeration is `2^4.25×` a full ρ run; and only `263` vertices are reachable without a degree-`146505763881528721` isogeny (kernel polynomial degree `2^56`). |
 
 ### Pre-registered gates
 
@@ -314,7 +314,7 @@ lever no room.
   leading forms — is **constant on the whole isogeny class**, and a curve
   change can only *lose* a degree fall, never create one lower.
 - **The class is bigger than ρ.** `Σ_{f|c} h(O_f) = 2^65.06` vertices
-  (`c = 263 · 146505763881528721`, `h(−7) = 1`) against ρ's `2^60.31`.
+  (`c = 263 · 146505763881528721`, `h(−7) = 1`) against ρ's `2^60.81`.
 - **263 vertices are reachable.** `h(−7) = 1` makes every crater a single
   vertex, so horizontal isogenies return to `E` and descending ones need
   `ℓ | c`: every prime below 263 has a *single-vertex* graph, cross-checked
