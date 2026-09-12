@@ -19,6 +19,10 @@
 MODAL   ?= modal
 NVCC    ?= nvcc
 CXX     ?= g++
+# Apple's clang needs the runtime named separately; everywhere else the driver
+# flag is enough.  Only the host walk is threaded, so this is all it reaches.
+#   make cpu CXX=clang++ OMPFLAGS="-Xpreprocessor -fopenmp -lomp"
+OMPFLAGS ?= -fopenmp
 CLANG   ?= clang
 PTXAS   ?= ptxas
 PTX     ?= /tmp/autolab.ptx
@@ -104,9 +108,19 @@ all: cpu
 
 # The generated leaf is sized to a register file: the largest halving-chain
 # multiply whose peak liveness still fits REGS live values.  255 is a GPU's
-# register budget and gives a 66-word leaf at m=131; a host has 16 general
-# registers, so REGS=32 is the number to regenerate with when tuning the CPU
-# reference build, and the two targets genuinely do not want the same leaf.
+# register budget and gives a 66-word leaf at m=131.
+#
+# A smaller leaf for the host is the obvious thing to want and it is measurably
+# wrong.  Single core, M4 Pro, NEON words, curve 131, median of five:
+#
+#   REGS=32   leaf 9     9.820 M it/s
+#   REGS=64   leaf 17   10.052
+#   REGS=128  leaf 33   10.799
+#   REGS=255  leaf 66   11.353
+#
+# The leaf spills either way -- 59% of the emitted multiply is loads and stores
+# even at leaf 66 -- and spilling to a hot stack is cheaper than the extra
+# Karatsuba level a small leaf buys.  Both targets want the same leaf.
 REGS ?= 255
 
 generate:
@@ -130,7 +144,7 @@ check-verilog:
 cpu: ecc2k130-cpu
 
 ecc2k130-cpu: src/main.cu $(HDRS) $(GEN)
-	$(CXX) -O3 -std=c++17 $(ARCHFLAGS) -fopenmp $(DEFS) -DECC_NO_CUDA \
+	$(CXX) -O3 -std=c++17 $(ARCHFLAGS) $(OMPFLAGS) $(DEFS) -DECC_NO_CUDA \
 	    -Wall -Wno-unused-function -Wno-unknown-pragmas -x c++ src/main.cu -o $@
 
 gpu: ecc2k130
@@ -248,7 +262,15 @@ test-timing:
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
 	./build/test-timing
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing check-verilog ecc2k130-cpu
+# Every host word type this machine can build, against the scalar definitions.
+# Built at the tuned architecture so the wide word under test is the one the
+# walk will actually use.
+test-logic:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
+	./build/test-logic
+
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing test-logic check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -335,6 +357,6 @@ clean:
 	rm -f build/test-packed-clmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
-	rm -f build/test-timing
+	rm -f build/test-timing build/test-logic
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
