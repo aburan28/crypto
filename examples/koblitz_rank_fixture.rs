@@ -13,6 +13,7 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rayon::prelude::*;
 use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::time::Instant;
@@ -62,6 +63,7 @@ enum QueryMode {
     PairPair64,
     PairPair128,
     PairPair256,
+    PairPairParallel512,
 }
 
 impl QueryMode {
@@ -84,6 +86,7 @@ impl QueryMode {
             "pair_pair_64" => Self::PairPair64,
             "pair_pair_128" => Self::PairPair128,
             "pair_pair_256" => Self::PairPair256,
+            "pair_pair_parallel_512" => Self::PairPairParallel512,
             _ => panic!("unknown query mode {value}"),
         }
     }
@@ -107,6 +110,7 @@ impl QueryMode {
             Self::PairPair64 => "pair_pair_64",
             Self::PairPair128 => "pair_pair_128",
             Self::PairPair256 => "pair_pair_256",
+            Self::PairPairParallel512 => "pair_pair_parallel_512",
         }
     }
 
@@ -128,7 +132,8 @@ impl QueryMode {
             | Self::PairPair32
             | Self::PairPair64
             | Self::PairPair128
-            | Self::PairPair256 => None,
+            | Self::PairPair256
+            | Self::PairPairParallel512 => None,
         }
     }
 
@@ -148,8 +153,13 @@ impl QueryMode {
             Self::PairPair64 => Some(64),
             Self::PairPair128 => Some(128),
             Self::PairPair256 => Some(256),
+            Self::PairPairParallel512 => Some(512),
             _ => None,
         }
+    }
+
+    fn pair_pair_parallel(self) -> bool {
+        matches!(self, Self::PairPairParallel512)
     }
 }
 
@@ -1169,6 +1179,86 @@ fn lookup_signed_expanded_pair(
     })
 }
 
+#[derive(Default)]
+struct PairPairChunkResult {
+    witness: Option<([usize; 4], [(usize, u64); 4])>,
+    additions: usize,
+    x_filter_rejections: usize,
+    exact_table_misses: usize,
+    batch_inversions: usize,
+}
+
+/// Evaluate one fixed cursor interval of the signed-expanded pair table.
+/// Intervals are independent and their results are consumed in cursor order,
+/// so a parallel wave returns the same earliest witness as a serial scan.
+fn pair_pair_cursor_chunk(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    quotient_pairs: &CompactPairTable,
+    label_to_index: &HashMap<(usize, u64), usize>,
+    modulus: u64,
+    start_slot: usize,
+    cursor_start: usize,
+    cursor_end: usize,
+) -> PairPairChunkResult {
+    let slots = quotient_pairs.slots();
+    let mut points = Vec::with_capacity(cursor_end - cursor_start);
+    let mut labels = Vec::with_capacity(cursor_end - cursor_start);
+    for cursor in cursor_start..cursor_end {
+        let slot = (start_slot + cursor / 2) & (slots - 1);
+        let negative = cursor & 1 == 1;
+        if let Some((point, pair_labels)) =
+            quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
+        {
+            points.push(point);
+            labels.push(pair_labels);
+        }
+    }
+    if points.is_empty() {
+        return PairPairChunkResult::default();
+    }
+    let mut rests = Vec::with_capacity(points.len());
+    let attempted = batch_raw_target_minus_points_x_filtered(
+        curve,
+        target,
+        &points,
+        quotient_pairs,
+        &mut rests,
+    );
+    let mut result = PairPairChunkResult {
+        additions: attempted,
+        x_filter_rejections: attempted - rests.len(),
+        batch_inversions: usize::from(target.is_some()),
+        ..PairPairChunkResult::default()
+    };
+    for &(position, rest_key) in &rests {
+        let Some((right_indices, right_labels)) =
+            lookup_signed_expanded_pair(rest_key, modulus, quotient_pairs, label_to_index)
+        else {
+            result.exact_table_misses += 1;
+            continue;
+        };
+        let left_labels = labels[position];
+        let left_indices = left_labels.map(|label| label_to_index[&label]);
+        result.witness = Some((
+            [
+                left_indices[0],
+                left_indices[1],
+                right_indices[0],
+                right_indices[1],
+            ],
+            [
+                left_labels[0],
+                left_labels[1],
+                right_labels[0],
+                right_labels[1],
+            ],
+        ));
+        break;
+    }
+    result
+}
+
 fn lookup_pair_witness(
     pair_mode: PairMode,
     curve: &KoblitzCurve,
@@ -1976,6 +2066,8 @@ fn main() {
         let mut query_exact_table_misses = 0usize;
         let mut target_walk_additions = 0usize;
         let mut query_batch_inversions = 0usize;
+        let mut query_parallel_waves = 0usize;
+        let mut query_parallel_chunks = 0usize;
         let mut reference_validation_records = Vec::new();
         let mut walk_seen = HashSet::new();
         let mut target_walk_restarts = 0usize;
@@ -2078,62 +2170,103 @@ fn main() {
                 let slots = quotient_pairs.slots();
                 let start_slot =
                     CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1);
-                let mut cursor = 0usize;
-                while cursor < 2 * slots && witness.is_none() {
-                    pair_point_scratch.clear();
-                    pair_label_scratch.clear();
-                    while cursor < 2 * slots && pair_point_scratch.len() < width {
-                        let slot = (start_slot + cursor / 2) & (slots - 1);
-                        let negative = cursor & 1 == 1;
-                        cursor += 1;
-                        if let Some((point, labels)) =
-                            quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
-                        {
-                            pair_point_scratch.push(point);
-                            pair_label_scratch.push(labels);
+                if query_mode.pair_pair_parallel() {
+                    let cursors = 2 * slots;
+                    let chunks = cursors.div_ceil(width);
+                    let lanes = rayon::current_num_threads().max(1);
+                    let mut wave_start = 0usize;
+                    while wave_start < chunks && witness.is_none() {
+                        let wave_end = (wave_start + lanes).min(chunks);
+                        let results: Vec<PairPairChunkResult> = (wave_start..wave_end)
+                            .into_par_iter()
+                            .map(|chunk| {
+                                let cursor_start = chunk * width;
+                                pair_pair_cursor_chunk(
+                                    &curve,
+                                    target,
+                                    &quotient_pairs,
+                                    &label_to_index,
+                                    modulus,
+                                    start_slot,
+                                    cursor_start,
+                                    (cursor_start + width).min(cursors),
+                                )
+                            })
+                            .collect();
+                        query_parallel_waves += 1;
+                        query_parallel_chunks += results.len();
+                        for result in results {
+                            query_additions += result.additions;
+                            decomposition_queries += result.additions;
+                            query_x_filter_rejections += result.x_filter_rejections;
+                            query_exact_table_misses += result.exact_table_misses;
+                            query_batch_inversions += result.batch_inversions;
+                            if witness.is_none() {
+                                if let Some((indices, labels)) = result.witness {
+                                    witness = Some((indices.to_vec(), labels.to_vec()));
+                                }
+                            }
                         }
+                        wave_start = wave_end;
                     }
-                    if pair_point_scratch.is_empty() {
-                        continue;
-                    }
-                    let attempted = batch_raw_target_minus_points_x_filtered(
-                        &curve,
-                        target,
-                        &pair_point_scratch,
-                        &quotient_pairs,
-                        &mut pair_rest_scratch,
-                    );
-                    query_additions += attempted;
-                    decomposition_queries += attempted;
-                    query_x_filter_rejections += attempted - pair_rest_scratch.len();
-                    query_batch_inversions += usize::from(target.is_some());
-                    for &(position, rest_key) in &pair_rest_scratch {
-                        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
-                            rest_key,
-                            modulus,
-                            &quotient_pairs,
-                            &label_to_index,
-                        ) else {
-                            query_exact_table_misses += 1;
+                } else {
+                    let mut cursor = 0usize;
+                    while cursor < 2 * slots && witness.is_none() {
+                        pair_point_scratch.clear();
+                        pair_label_scratch.clear();
+                        while cursor < 2 * slots && pair_point_scratch.len() < width {
+                            let slot = (start_slot + cursor / 2) & (slots - 1);
+                            let negative = cursor & 1 == 1;
+                            cursor += 1;
+                            if let Some((point, labels)) =
+                                quotient_pairs.signed_pair_at_slot(slot, negative, modulus)
+                            {
+                                pair_point_scratch.push(point);
+                                pair_label_scratch.push(labels);
+                            }
+                        }
+                        if pair_point_scratch.is_empty() {
                             continue;
-                        };
-                        let left_labels = pair_label_scratch[position];
-                        let left_indices = left_labels.map(|label| label_to_index[&label]);
-                        witness = Some((
-                            vec![
-                                left_indices[0],
-                                left_indices[1],
-                                right_indices[0],
-                                right_indices[1],
-                            ],
-                            vec![
-                                left_labels[0],
-                                left_labels[1],
-                                right_labels[0],
-                                right_labels[1],
-                            ],
-                        ));
-                        break;
+                        }
+                        let attempted = batch_raw_target_minus_points_x_filtered(
+                            &curve,
+                            target,
+                            &pair_point_scratch,
+                            &quotient_pairs,
+                            &mut pair_rest_scratch,
+                        );
+                        query_additions += attempted;
+                        decomposition_queries += attempted;
+                        query_x_filter_rejections += attempted - pair_rest_scratch.len();
+                        query_batch_inversions += usize::from(target.is_some());
+                        for &(position, rest_key) in &pair_rest_scratch {
+                            let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                                rest_key,
+                                modulus,
+                                &quotient_pairs,
+                                &label_to_index,
+                            ) else {
+                                query_exact_table_misses += 1;
+                                continue;
+                            };
+                            let left_labels = pair_label_scratch[position];
+                            let left_indices = left_labels.map(|label| label_to_index[&label]);
+                            witness = Some((
+                                vec![
+                                    left_indices[0],
+                                    left_indices[1],
+                                    right_indices[0],
+                                    right_indices[1],
+                                ],
+                                vec![
+                                    left_labels[0],
+                                    left_labels[1],
+                                    right_labels[0],
+                                    right_labels[1],
+                                ],
+                            ));
+                            break;
+                        }
                     }
                 }
             } else if let Some(width) = query_mode.fiber_width() {
@@ -2490,6 +2623,9 @@ fn main() {
                 "query_mode":query_mode.name(),
                 "decomposition_arity":if query_mode.pair_pair_width().is_some() {4} else {3},
                 "query_batch_inversions":query_batch_inversions,
+                "query_parallel_threads":if query_mode.pair_pair_parallel() {rayon::current_num_threads()} else {1},
+                "query_parallel_waves":query_parallel_waves,
+                "query_parallel_chunks":query_parallel_chunks,
                 "target_mode":target_mode.name(),
                 "target_walk_additions":target_walk_additions,
                 "target_walk_restarts":target_walk_restarts,

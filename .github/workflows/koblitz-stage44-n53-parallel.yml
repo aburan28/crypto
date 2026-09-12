@@ -1,0 +1,88 @@
+name: Koblitz Stage 44 n53 parallel query
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage44_n53_parallel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE44_N53_PARALLEL_QUERY.md"
+      - ".github/workflows/koblitz-stage44-n53-parallel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate deterministic parallel relation queries
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage44_n53_parallel.py
+          python3 scripts/run_koblitz_stage44_n53_parallel.py self-test
+          python3 scripts/run_koblitz_stage42_n53_same_target.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/validation-build" \
+            --jobs 4 \
+            --timeout 1200
+          "$RUNNER_TEMP/validation-build/bin/koblitz_rank_fixture" \
+            13 0 1 2 12345 signed_expanded independent pair_pair_256 1 3 \
+            > "$RUNNER_TEMP/sequential-n13.jsonl"
+          RAYON_NUM_THREADS=4 "$RUNNER_TEMP/validation-build/bin/koblitz_rank_fixture" \
+            13 0 1 2 12345 signed_expanded independent pair_pair_parallel_512 1 3 \
+            > "$RUNNER_TEMP/parallel-n13.jsonl"
+          python3 - "$RUNNER_TEMP/sequential-n13.jsonl" "$RUNNER_TEMP/parallel-n13.jsonl" <<'PY'
+          import json, pathlib, sys
+          rows = [[json.loads(line) for line in pathlib.Path(path).read_text().splitlines()] for path in sys.argv[1:]]
+          hashes = [[row["relation_hash"] for row in arm if row.get("kind") == "relation_rank_receipt"] for arm in rows]
+          summaries = [next(row for row in arm if row.get("kind") == "relation_rank_summary") for arm in rows]
+          assert hashes[0] == hashes[1]
+          assert summaries[0]["target_trials"] == summaries[1]["target_trials"]
+          assert summaries[0]["recovered_fixture_scalar"] == summaries[1]["recovered_fixture_scalar"] == 3
+          assert summaries[1]["query_parallel_threads"] == 4
+          assert summaries[1]["support_queries"] >= summaries[0]["support_queries"]
+          PY
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-parallel-query:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage44_n53_parallel.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage44-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run sequential, four-core, and rho on the Stage 42 target
+        run: |
+          python3 scripts/run_koblitz_stage44_n53_parallel.py run \
+            --build "$RUNNER_TEMP/stage44-build" \
+            --output "$RUNNER_TEMP/stage44-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage44_n53_parallel.py verify \
+            --build "$RUNNER_TEMP/stage44-build" \
+            --output "$RUNNER_TEMP/stage44-run" \
+            > "$RUNNER_TEMP/stage44-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage44-n53-parallel-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage44-build
+            ${{ runner.temp }}/stage44-run
+            ${{ runner.temp }}/stage44-verification.json
