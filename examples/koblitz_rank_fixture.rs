@@ -540,6 +540,10 @@ fn compact_point_key(point: &BinaryPoint) -> (u64, u64) {
 fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
     #[cfg(target_arch = "x86_64")]
     if pclmul_enabled() {
+        if curve.n == 53 && n53_fast_reduction_enabled() && fused_pcl_n53_enabled() {
+            // SAFETY: the cached runtime feature check guards every call.
+            return unsafe { pclmul_reduce_n53(value, value) };
+        }
         // In characteristic two the carryless product value * value has no
         // cross terms, so it is exactly the interleaved polynomial square.
         // SAFETY: the cached runtime feature check guards every call.
@@ -618,6 +622,29 @@ unsafe fn pclmul_u64(left: u64, right: u64) -> u128 {
     (high as u128) << 64 | low as u128
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn pclmul_reduce_n53(left: u64, right: u64) -> u64 {
+    use std::arch::x86_64::*;
+    const MASK: u64 = (1u64 << 53) - 1;
+    let x = _mm_set_epi64x(0, left as i64);
+    let y = _mm_set_epi64x(0, right as i64);
+    let product = _mm_clmulepi64_si128::<0x00>(x, y);
+    let low = _mm_cvtsi128_si64(product) as u64;
+    let high_word = _mm_cvtsi128_si64(_mm_srli_si128::<8>(product)) as u64;
+    let high = (low >> 53) | (high_word << 11);
+    let first = (low & MASK) ^ high ^ (high << 1) ^ (high << 2) ^ (high << 6);
+    let overflow = first >> 53;
+    (first & MASK) ^ overflow ^ (overflow << 1) ^ (overflow << 2) ^ (overflow << 6)
+}
+
+#[inline(always)]
+fn fused_pcl_n53_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_DISABLE_FUSED_PCL_N53").as_deref() != Ok("1"))
+}
+
 #[inline(always)]
 fn pclmul_enabled() -> bool {
     #[cfg(target_arch = "x86_64")]
@@ -661,9 +688,22 @@ fn field_reduction_backend(curve: &KoblitzCurve) -> &'static str {
     }
 }
 
+fn field_product_pipeline(curve: &KoblitzCurve) -> &'static str {
+    if curve.n == 53 && pclmul_enabled() && n53_fast_reduction_enabled() && fused_pcl_n53_enabled()
+    {
+        "x86_64_pclmul_n53_fused_reduce"
+    } else {
+        "separate_product_and_reduction"
+    }
+}
+
 fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
     #[cfg(target_arch = "x86_64")]
     if pclmul_enabled() {
+        if curve.n == 53 && n53_fast_reduction_enabled() && fused_pcl_n53_enabled() {
+            // SAFETY: the cached runtime feature check guards every call.
+            return unsafe { pclmul_reduce_n53(left, right) };
+        }
         // SAFETY: the cached runtime feature check above guards every call.
         return reduce_raw(curve, unsafe { pclmul_u64(left, right) });
     }
@@ -2344,6 +2384,7 @@ fn main() {
             "field_mul_backend":field_mul_backend(),
             "field_square_backend":field_square_backend(&curve),
             "field_reduction_backend":field_reduction_backend(&curve),
+            "field_product_pipeline":field_product_pipeline(&curve),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
             "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
@@ -3119,6 +3160,7 @@ fn main() {
                 "field_mul_backend":field_mul_backend(),
                 "field_square_backend":field_square_backend(&curve),
                 "field_reduction_backend":field_reduction_backend(&curve),
+                "field_product_pipeline":field_product_pipeline(&curve),
                 "query_group_additions":query_additions,
                 "query_canonicalization_maps":query_canonicalization_maps,
                 "query_x_filter_rejections":query_x_filter_rejections,

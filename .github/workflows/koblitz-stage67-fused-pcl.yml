@@ -1,0 +1,66 @@
+name: Koblitz Stage 67 n53 fused PCLMUL reduction
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage67_fused_pcl.py"
+      - ".github/workflows/koblitz-stage67-fused-pcl.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate fused PCLMUL controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage67_fused_pcl.py
+          python3 scripts/run_koblitz_stage67_fused_pcl.py self-test
+          cargo test --release --example koblitz_rank_fixture packed_tests::packed_field_and_group_operations_match_reference
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-fused-pcl:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage67_fused_pcl.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage67-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare separate pipeline, fused pipeline, and rho
+        run: |
+          python3 scripts/run_koblitz_stage67_fused_pcl.py run \
+            --build "$RUNNER_TEMP/stage67-build" \
+            --output "$RUNNER_TEMP/stage67-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage67_fused_pcl.py verify \
+            --build "$RUNNER_TEMP/stage67-build" \
+            --output "$RUNNER_TEMP/stage67-run" \
+            > "$RUNNER_TEMP/stage67-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage67-fused-pcl-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage67-build
+            ${{ runner.temp }}/stage67-run
+            ${{ runner.temp }}/stage67-verification.json
