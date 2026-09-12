@@ -140,6 +140,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             require(stage33.process_complete(process) and workflow is not None and baseline is not None, f"Stage-38 {name} did not complete")
             logs = next(item for item in workflow["stages"] if item["stage"] == "logs")
             ic = baseline["ic"]
+            collect_seconds = workflow["state"]["collect"]["elapsed_seconds"]
+            logs_seconds = workflow["state"]["logs"]["elapsed_seconds"]
             row = {
                 "label": name,
                 "collection_window": window,
@@ -152,6 +154,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "units": logs["units_used"],
                 "summands_scanned": logs["summands_scanned"],
                 "summands_scanned_per_relation": logs["summands_scanned"] / logs["relations"],
+                "select_seconds": workflow["state"]["select"]["elapsed_seconds"],
+                "collect_seconds": collect_seconds,
+                "logs_seconds": logs_seconds,
+                "collection_and_logs_seconds": collect_seconds + logs_seconds,
                 "precompute_seconds": ic["precompute_seconds"],
                 "descent_seconds_total": ic["descent_seconds_total"],
                 "five_target_ic_seconds": ic["precompute_seconds"] + ic["descent_seconds_total"],
@@ -163,7 +169,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             custody.write_json_new(root / "cell-result.json", row)
             rows.append(row)
     outer = stage33.outer_resources(started, before_self, before_children, sampler)
-    winner = min(rows, key=lambda row: row["five_target_ic_seconds"])
+    # The window changes relation collection and the log solve fed by those
+    # relations. Select on those stages only: repeating the identical factor-
+    # base search and target descent in every cell is still charged, but their
+    # timing noise must not choose the window.
+    winner = min(rows, key=lambda row: row["collection_and_logs_seconds"])
     full = next(row for row in rows if row["collection_window"] is None)
     build_outer = build["outer_resources"]
     result = {
@@ -184,10 +194,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "winner": {
             "label": winner["label"],
             "collection_window": winner["collection_window"],
+            "selection_metric": "collection_and_logs_seconds",
+            "collection_and_logs_seconds": winner["collection_and_logs_seconds"],
             "five_target_ic_seconds": winner["five_target_ic_seconds"],
             "precompute_seconds": winner["precompute_seconds"],
             "summands_scanned": winner["summands_scanned"],
             "summands_scanned_per_relation": winner["summands_scanned_per_relation"],
+            "relative_collection_and_logs_speedup_over_full_scan": full["collection_and_logs_seconds"] / winner["collection_and_logs_seconds"],
             "relative_five_target_speedup_over_full_scan": full["five_target_ic_seconds"] / winner["five_target_ic_seconds"],
             "relative_lookup_reduction_from_full_scan": full["summands_scanned"] / winner["summands_scanned"],
         },
@@ -224,8 +237,9 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         baseline = validate_cell(row["workflow"], output / "cells" / label(expected), expected)
         require(row.get("rho_over_ic_online_wall_ratio") == baseline["ratio"]["charged"], "Stage-38 online ratio changed")
         require(row.get("rho_over_ic_amortised_wall_ratio") == baseline["ratio"]["amortised"], "Stage-38 amortised ratio changed")
-    winner = min(rows, key=lambda row: row["five_target_ic_seconds"])
+    winner = min(rows, key=lambda row: row["collection_and_logs_seconds"])
     require(result.get("winner", {}).get("label") == winner["label"], "Stage-38 winner changed")
+    require(result["winner"].get("selection_metric") == "collection_and_logs_seconds", "Stage-38 selection metric changed")
     require(result.get("factor_base_algebraically_defined") is True and result.get("target_subgroup_enumerated_for_factor_base") is False, "Stage-38 factor-base boundary changed")
     require(result.get("full_cost_gate_passed") is False and result.get("koblitz_index_calculus_sota") is False, "Stage-38 claim widened")
     return {
@@ -236,7 +250,8 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         "winner": result["winner"],
         "rows": [{key: row[key] for key in (
             "label", "collection_window", "relations", "trials", "units",
-            "summands_scanned", "summands_scanned_per_relation", "precompute_seconds",
+            "summands_scanned", "summands_scanned_per_relation", "select_seconds",
+            "collect_seconds", "logs_seconds", "collection_and_logs_seconds", "precompute_seconds",
             "descent_seconds_total", "five_target_ic_seconds", "rho_seconds_total",
             "rho_over_ic_online_wall_ratio", "rho_over_ic_amortised_wall_ratio",
         )} for row in rows],

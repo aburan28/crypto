@@ -13,7 +13,7 @@ The hosted sweep runs six cells on one inherited Linux CPU from one clean binary
 - 8,192 probes per work unit, one initial unit, and at most 64 units;
 - the exact Stage-35 algebraic search, five public targets, two-summand descent, and signed-Frobenius rho in every cell.
 
-The winner is the minimum measured five-target IC time, `precompute + descent`. Selection occurs only after all six cells finish and does not change their public target stream or factor-base candidates. A later holdout must confirm any chosen window.
+The winner minimizes `collection + logs`, the two stages the window changes. Every cell still charges the repeated factor-base search and five-target descent, but their timing noise cannot choose this parameter. Selection occurs only after all six cells finish and does not change their public target stream or factor-base candidates. A later holdout must confirm any chosen window.
 
 A local same-binary feasibility sweep found all six cells complete. Relative to the new full-scan control, windows reduced the final third-summand lookup charge while keeping 29 certified columns. Window 595 gave the lowest local precompute, 3.661 seconds versus 4.373 seconds full scan; window 149 gave 3.632 seconds in a consecutive run. These timings select no claim: the hosted sweep determines the candidate and a separate run must validate it.
 
