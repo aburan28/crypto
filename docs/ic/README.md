@@ -468,6 +468,15 @@ boundary ledger as parameter files — 32 known-answer targets each, the
 
     ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
 
+`docs/ic/params/k0n53-subgroup.json` is the largest subgroup this family
+offers (44 bits, 38× the degree-41 rung). It solves 32 of 32 with a
+49 ms descent against ρ's 1.216 s, and
+`docs/ic/runs/koblitz-degree53-and-reach-20260912.json` carries it
+together with the projection of where the advantage runs out: the
+charged class survives to about a 52-bit subgroup, and the whole-process
+class needs a batch of targets that grows with `r` (16 at 40 bits, 96 at
+45, 834 at 50). Relation collection is what stops it, not the descent.
+
 `docs/ic/params/k0n{31,37,39,41}-subgroup.json` are the same four rungs
 with subgroup bases; `docs/ic/runs/koblitz-subgroup-bases-20260912.json`
 records them, and the charged ρ/IC ratio there crosses 1 at degrees 37,

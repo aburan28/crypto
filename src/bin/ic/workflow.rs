@@ -346,6 +346,13 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if p.summands < 2 || p.summands > 4 {
         return Err("summands must be 2, 3 or 4".into());
     }
+    // A probe used to cost two scalar multiplications, which made a
+    // million of them an hour's work and this ceiling the real budget.
+    // A walked probe costs about 0.13 microseconds, so a million is a
+    // fraction of a second and the ceiling bites long before any time
+    // budget does: at degree 53 a descent needs 187000 probes on
+    // average, and a target that happens to need five times the mean
+    // was failing against the old limit rather than against the clock.
     if p.max_trials == 0 || p.max_trials > 100_000_000 {
         return Err("max_trials must be 1..=100000000".into());
     }

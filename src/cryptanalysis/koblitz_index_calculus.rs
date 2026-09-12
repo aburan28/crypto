@@ -6574,6 +6574,19 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
+    fn subgroup_sizes_by_degree() {
+        for n in 31..=59u32 {
+            for a in [0u8, 1] {
+                if let Some(kc) = KoblitzCurve::new(a, n) {
+                    let r = kc.subgroup_order.to_string();
+                    eprintln!("RUNG n={n} a={a} r={r} h={} bits={}", kc.cofactor, kc.subgroup_order.bits());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn descent_summands_may_differ_from_the_collection_summands() {
         // The log database is built with three summands; the descent
         // asks for two, walking its probes.  Both must return the same

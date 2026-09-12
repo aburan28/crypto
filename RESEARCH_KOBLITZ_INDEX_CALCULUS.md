@@ -1269,3 +1269,74 @@ the general arithmetic on purpose — a check that shares no code with the
 arithmetic that did the search is worth more than the milliseconds — and
 ρ pays the same on its own candidate. At 8.6 ms a target it is 13% of
 the descent, and at the wide base a quarter of it.
+
+## Degree 53, and where this stops winning — 2026-09-12
+
+`K_0/F_2^53` carries the largest subgroup in this family: 44 bits,
+`r = 21 044 858 204 113`, 38 times the degree-41 rung. It runs end to
+end, with a 15264-point subgroup base, collection at three summands and
+the descent walking two:
+
+| stage | |
+|-------|--|
+| base | 15264 points, 7632 abscissae, 144 columns |
+| relations | 458 from 15888 probes |
+| precompute | 35.9 s (collect 17.7, logs 9.2, pair table the rest) |
+| descent | **49.2 ms** a target, 243863 probes |
+| ρ | **1.216 s** a target, 996618 steps |
+| verdict | charged **24.7**, amortised 1.04, whole-process **yes** |
+
+32 of 32 targets solved, 32 of 32 ρ walks recovered and verified.
+
+The first attempt lost one target of the 32 — not to the mathematics but
+to `max_trials`, which was capped at a million. That ceiling was set when
+a probe cost two scalar multiplications and a million of them was an
+hour; a walked probe costs 0.2 µs, so a million is a fifth of a second
+and the cap was cutting off targets that happened to need five times the
+mean. It is now a hundred million.
+
+### Where it stops
+
+At a fixed memory budget the factor base is fixed, and then everything is
+determined:
+
+```text
+    descent        2r/|F|²      probes        — linear in r
+    collection     9r/(n|F|)    lookups       — linear in r
+    ρ              √(πr/2)/√(2n) steps        — square root of r
+```
+
+Linear loses to a square root. The only question is where, and the
+constants this run measured — 0.20 µs a probe, 1.22 µs a ρ step, a
+15264-point base — answer it:
+
+| subgroup bits | descent | ρ | charged | precompute | break-even targets |
+|---------------|---------|---|---------|------------|--------------------|
+| 40 | 0.002 s | 0.156 s | 82 | 2 s | 16 |
+| 45 | 0.061 s | 0.881 s | 14 | 79 s | 96 |
+| 48 | 0.488 s | 2.49 s | 5.1 | 632 s | 315 |
+| 50 | 1.95 s | 4.98 s | 2.6 | 2528 s | 834 |
+| 52 | 7.80 s | 9.96 s | 1.3 | 10112 s | 4679 |
+| 53 | 15.6 s | 14.1 s | 0.9 | 20224 s | never |
+| 56 | 125 s | 39.9 s | 0.3 | — | never |
+
+**The charged advantage survives to about a 52-bit subgroup and is gone
+by 53.** The whole-process advantage dies sooner in practice: it needs a
+batch of targets that grows with `r` — 16 at 40 bits, 96 at 45, 315 at
+48, 834 at 50 — because the precompute grows linearly while ρ grows as a
+square root.
+
+So **relation collection is what stops this, not the descent**. The
+descent is the part that has been optimised hardest and it is not the
+binding cost past 48 bits; collecting the relations that build the
+database is.
+
+More memory moves the boundary by about half a bit per doubling of `|F|`
+— `|F|` enters the descent squared, so a 4× table buys one bit. That is
+the shape of the whole result: every improvement in this note moved a
+constant, and the exponent has not moved at all.
+
+A last caveat on the table: it is arithmetic on two measured constants,
+not a series of runs. Checked against the degree-53 run it under-predicts
+the win by about 1.7×, mostly because that run's ρ walks took 1.8× their
+expected step count.
