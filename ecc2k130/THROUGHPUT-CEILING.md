@@ -133,8 +133,10 @@ of 5.16. Streaming x/y from DRAM instead costs about 100 bytes per update,
   speed. The helpers are 68 percent of the path; a 10 percent gain needs
   about 430 instructions per update removed.
 * The measured `IADD3`/`IMAD` dual-issue headroom (69–78 lanes per SM-clock
-  against 62 for pure `LOP3`) suggests at most 10–25 percent from rebalancing
-  disjoint-mask combines onto adds, unmeasured.
+  against 62 for pure `LOP3`) suggested rebalancing disjoint-mask combines
+  onto adds. Tried and rejected: moving every eligible combine to `IADD3`
+  left the multiplier's throughput unchanged and cost 0.78 percent of walk
+  speed through extra spills ([ADD-COMBINE.md](ADD-COMBINE.md)).
 * Nsight Compute cannot run in the Modal environment; an EC2 G7e instance
   with the same GPU can profile the exact binary and confirm the
   `pipe_alu`/`pipe_fma` utilisation this document infers.

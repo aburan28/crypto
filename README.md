@@ -760,6 +760,7 @@ gpu/ecc2k/                     — CUDA kernels: F(2^m) Koblitz curves, Frobeniu
 gpu/btcpuzzle/                 — CUDA kernels: Pollard kangaroo for interval ECDLP (Bitcoin puzzle series)
 hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
 hdl/ecc/                       — VHDL: pipelined secp256k1 modular multiplier + point adder
+hdl/ecc2k130/                  — VHDL: GF(2^131) normal-basis multiplier, ECC2K-130 step unit, rho walker
 ```
 
 ### Hardware acceleration
@@ -787,6 +788,10 @@ cd gpu/btcpuzzle && make test
 
 # FPGA datapath — GHDL simulation of the multiplier and the point adder
 cd hdl/ecc && make
+
+# FPGA engine for ECC2K-130 — GF(2^131) multiplier, step unit, walker,
+# checked against the ecc2k130 client's field model
+cd hdl/ecc2k130 && make
 ```
 
 `gpu/ecc/` covers batch scalar multiplication and a distinguished-point
@@ -794,6 +799,16 @@ r-adding rho walk with the negation map and fruitless-cycle escape.
 `hdl/ecc/` implements the same walk's datapath: a 256-bit modular
 multiplier at one multiply per clock, and a point adder that interleaves
 independent walks to keep it saturated at three clocks per addition.
+
+`hdl/ecc2k130/` is the FPGA counterpart of the `ecc2k130/` GPU client: the
+same permuted type-II normal basis, in which squaring is wiring, so
+inversion is eight multiplies and a whole walk step `R + sigma^j(R)` is ten.
+A Karatsuba GF(2^131) multiplier at one product per clock with no DSPs, a
+step unit that shares one inversion across sixteen walks through a product
+tree and streams batches of independent multiplies to run the multiplier
+saturated at 5.3 clocks per step (measured in simulation), and a sequencer
+that reports distinguished points to the host; the testbenches replay walks
+from the client's own reference model.
 
 `gpu/ecc2k/` targets Koblitz curves over F(2^m), where the Frobenius map is
 a free endomorphism: walking on the classes {±τ^i P} shortens the search by
@@ -829,6 +844,7 @@ problems generally.
 - [`gpu/ecc2k/README.md`](./gpu/ecc2k/README.md) — Koblitz / ECC2K-95 kernels and the Frobenius-class walk.
 - [`gpu/btcpuzzle/README.md`](./gpu/btcpuzzle/README.md) — Pollard kangaroo for interval ECDLP.
 - [`hdl/ecc/README.md`](./hdl/ecc/README.md) — FPGA secp256k1 datapath.
+- [`hdl/ecc2k130/README.md`](./hdl/ecc2k130/README.md) — FPGA ECC2K-130 engine: normal-basis multiplier, step unit, walker.
 - [`docs/ecc_fpga_cost_model.md`](./docs/ecc_fpga_cost_model.md) — ECDLP: FPGA vs GPU cost model.
 - [`docs/sha1_fpga_cost_model.md`](./docs/sha1_fpga_cost_model.md) — SHA-1 collisions: FPGA vs GPU cost model.
 

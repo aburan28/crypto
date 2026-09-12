@@ -25,6 +25,7 @@ is not evidence of fewer memory instructions or higher speed.
 | Option | Default | Purpose |
 |---|---|---|
 | `--stream-karat` / `STREAM_KARAT=1` | off | Compute and consume one Karatsuba subproduct at a time |
+| `PACKED_ADD_COMBINE=1` (make only) | off | Join `clmul32` class products with adds; measured 0.78% slower, see [ADD-COMBINE.md](ADD-COMBINE.md) |
 | `--smem-spill` / `SMEM_SPILL=1` | off | CUDA 13+ opt-in shared-memory register spilling |
 | `--global-cg` / `GLOBAL_CG=1` | off | Compile global loads with the L2-only cache policy |
 | `--prefer-l1` | off | Request more L1 cache for the walk kernel |
