@@ -1530,7 +1530,23 @@ costs hours on the larger fields and its trend is already fixed by the
 | `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
 | | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | 994 608 / 405 |
 | `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | 0/3, budget / 907 | – | – |
-| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | TBD-KD-G5 |
+| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | not run (see below) |
+
+The one cell left empty is `K₁/F₂²³` symmetrised at cap 5.  It was
+given three hours and produced no target in that time, so it was
+stopped rather than left running; the run is reproducible with
+
+```bash
+F4_F2_MAX_ROWS=60000 F4_F2_MAX_COLS=300000 \
+  cargo run --release --example symmetrised_oracle_bench -- \
+  --only 1 23 3 --no-sat --no-direct --no-x --targets 3 \
+  --node-budget 3000 --f4-degree 5
+```
+
+for anyone with more machine to spend.  That it does not finish is
+itself consistent with the reading below: 34 unknowns is past the size
+at which another Macaulay degree is affordable, as `n = 17` already
+showed at 25.  Nothing in the reading rests on the cell.
 
 ### Reading
 

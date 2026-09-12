@@ -7614,6 +7614,11 @@ within a 3 000-split budget; the symmetrised one finds two of three in
   two running benches with it.  Long sweeps want their results written
   per-cell as they complete, which these did — only the last cell was
   lost and had to be re-run.
+- That re-run (`K₁/F₂²³` symmetrised at cap 5) was given three hours,
+  produced no target, and was stopped.  §17 records it as not run with
+  the command to reproduce it, rather than leaving the table open on a
+  cell nothing in the reading depends on.  A sweep needs a stated
+  budget before it starts, not after.
 
 ### Next step proposal
 
