@@ -23,7 +23,7 @@ derived, or estimated.
 |---|---|
 | `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, two-clock weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
 | `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, latency `2 LEVELS + 1` |
-| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 8, no DSPs |
+| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 10, no DSPs |
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
 | `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
@@ -51,22 +51,22 @@ output:
 
 ```
 === gf131_mul_tb ===
-gf131_mul_tb: PASS -- 256 multiplications, II=1, latency 8 clk
+gf131_mul_tb: PASS -- 256 multiplications, II=1, latency 10 clk
 === ec2k_batch_tb ===
-ec2k_batch_tb: 200 steps in 1256 clk = 628/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
+ec2k_batch_tb: 200 steps in 1292 clk = 646/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
 ec2k_batch_tb: PASS
 === ec2k_step_tb ===
-ec2k_step_tb: 200 steps in 2013 clk with 16 slots (10 multiplies per step)
+ec2k_step_tb: 200 steps in 2051 clk with 16 slots (10 multiplies per step)
 ec2k_step_tb: PASS
 === ec2k_walker_tb ===
-ec2k_walker_tb: 64 distinguished points from 797 steps in 15102 clk (32 walks, batches of 8, 4 in flight)
+ec2k_walker_tb: 64 distinguished points from 797 steps in 17113 clk (32 walks, batches of 8, 4 in flight)
 ec2k_walker_tb: PASS
 === ec2k_axil_tb ===
-ec2k_axil_tb: 64 distinguished points, 797 steps through 2 engine(s) of 16 walks, 6096 status polls
+ec2k_axil_tb: 64 distinguished points, 797 steps through 2 engine(s) of 16 walks, 7011 status polls
 ec2k_axil_tb: PASS
 
 $ make rate
-ec2k_batch_tb: 6144 steps in 33160 clk = 539/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
+ec2k_batch_tb: 6144 steps in 33511 clk = 545/100 clk per step, W = 16, 8 batches in flight (85 multiplies per batch)
 ```
 
 The multiplier vectors include zero, one (which is the all-ones vector in
@@ -119,10 +119,12 @@ stage 0        latch a, b
 stage 1        a' = prep(a), b' = prep(b)          gamma -> c-powers
 stage 2        Karatsuba level 1 pre-add           a0, a1, a0+a1 (66 bits)
 stage 3        Karatsuba level 2 pre-add           (33 bits)
-stage 4        nine 33 x 33 schoolbook products
-stage 5        level 2 post-combine
-stage 6        level 1 post-combine                261-bit product
-stage 7        r = to_onb(h)                       c-powers -> gamma
+stage 4        Karatsuba level 3 pre-add           (17 bits)
+stage 5        27 products of 17 x 17, schoolbook
+stage 6        level 3 post-combine
+stage 7        level 2 post-combine
+stage 8        level 1 post-combine                261-bit product
+stage 9        r = to_onb(h)                       c-powers -> gamma
 ```
 
 `gf2_kmul` is a recursive entity: each level is a registered pre-add, three
@@ -130,8 +132,8 @@ instances of itself on the halves, and a registered post-combine. Over
 GF(2) Karatsuba is exact with no subtractions, so the unequal halves
 (66 + 65) cost nothing — the high half is zero-extended and the top product
 bits are provably zero and dropped. Every stage is one or a few LUT levels:
-pre-add and post-combine are one XOR each per bit, the leaf is 33 AND terms
-per output bit (three per LUT6 with their XORs, three to four levels), and
+pre-add and post-combine are one XOR each per bit, the leaf is 17 AND terms
+per output bit (three per LUT6 with their XORs, two to three levels), and
 the widest thing anywhere is the 66-input column of `prep`.
 
 Gate count per multiplier, read off the constant matrices and the recurrence
@@ -141,20 +143,29 @@ Gate count per multiplier, read off the constant matrices and the recurrence
 |---|---|---|---|---|---|
 | 0 (schoolbook) | 131 | 17161 | 16900 | 22049 | 4 |
 | 1 | 66 | 13068 | 13199 | 18348 | 6 |
-| **2 (default)** | **33** | **9801** | **10520** | **15669** | **8** |
-| 3 | 17 | 7803 | 9404 | 14553 | 10 |
+| 2 | 33 | 9801 | 10520 | 15669 | 8 |
+| **3 (default)** | **17** | **7803** | **9404** | **14553** | **10** |
+| 4 | 9 | 6561 | 9512 | 14661 | 12 |
 
 `prep` is 991 XOR2 per operand, `to_onb` 3167. No DSP48 is involved
 anywhere — binary-field arithmetic has no carries, so the DSP's adder is
-useless to it and the multiplier is pure LUT fabric. Folding three AND
-terms and their XORs into one LUT6 and the remaining XORs five per LUT
-gives roughly **5–6k LUTs and 3k flip-flops per multiplier at two levels,
-estimated**, against ~8k for the schoolbook version this replaces. Three
-levels save another 2k ANDs for 1.5k fewer XORs and two more clocks of
-latency; where the LUT optimum sits is a synthesis question, which is why
-`MUL_KARATSUBA` in `gf131_pkg.vhd` is a constant to sweep. Compare
-`hdl/ecc/`: the secp256k1 multiplier is 256 DSPs plus ~10k LUTs for the
-same II = 1.
+useless to it and the multiplier is pure LUT fabric.
+
+Where the LUT optimum sits was a synthesis question; Vivado 2025.2 on the
+VU47P answers it (`gf131_mul` out of context, 4.0 ns clock), **measured**:
+
+| Levels | LUTs | FFs | worst slack |
+|---|---|---|---|
+| 2 | 5 547 | 2 892 | +1.79 ns |
+| **3** | **4 855** | 4 647 | **+2.68 ns** |
+| 4 | 5 019 | 7 262 | +2.79 ns |
+
+Three levels are 12% fewer LUTs than two and the leaf stage is a LUT level
+shallower; four adds back more combine XORs than it removes ANDs. The two
+extra clocks of latency cost 1% of the step unit's throughput (5.45
+against 5.39 clocks per step, `make rate`), and flip-flops are not what
+this device runs out of. Compare `hdl/ecc/`: the secp256k1 multiplier is
+256 DSPs plus ~10k LUTs for the same II = 1.
 
 The `tag` rides alongside and the datapath never looks at it, so one
 multiplier serves any number of independent contexts back-to-back.
@@ -239,19 +250,19 @@ batch and its flush wait, then `make rate` with 6144 steps in full batches):
 
 | W | Batches in flight | 200 steps | 6144 steps | Bound `5 + 5/W` |
 |---|---|---|---|---|
-| 8 | 8 | 7.04 | 5.86 | 5.63 |
-| 16 | 4 | 8.09 | 6.78 | 5.31 |
-| 16 | 8 | 6.28 | **5.39** | 5.31 |
-| 16 | 16 | 5.88 | 5.32 | 5.31 |
-| 32 | 8 | 6.40 | 5.19 | 5.16 |
+| 8 | 8 | 7.44 | 5.95 | 5.63 |
+| 16 | 4 | 8.61 | 7.16 | 5.31 |
+| 16 | 8 | 6.46 | **5.45** | 5.31 |
+| 16 | 16 | 5.91 | 5.32 | 5.31 |
+| 32 | 8 | 6.51 | 5.21 | 5.16 |
 
-Clocks per step. At the default `W = 16` with 8 batches in flight the
-long run sits 0.08 above the bound, and that residue is the fill of the
-first batch and the drain of the last (about 500 clocks of a 33160-clock
-run), not steady-state bubbles: the multiplier is saturated. Four batches
-are not enough to cover the eight dependent single-multiply bursts of the
-inversion; eight are. Memory per batch of `W` is `5W` field elements
-(three leaf arrays and a tree of `2W`), 640 × 131 bits at the default.
+Clocks per step, multiplier latency 10. At the default `W = 16` with 8
+batches in flight the long run sits 0.14 above the bound; about 500 clocks
+of the 33511 are the fill of the first batch and the drain of the last,
+the rest is the inversion's eight dependent single-multiply bursts, whose
+latency eight batches cover almost but not quite (sixteen do). Four
+batches are not enough. Memory per batch of `W` is `6W` field elements
+(four leaf arrays and a tree of `2W`), 768 × 131 bits at the default.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -296,13 +307,20 @@ walkers, each with `2^ID_W` walks, addressed as one flat space of
   when the engine has taken it. Loading an id that is still walking
   duplicates the walk, since the walker has no kill; the host only reloads
   an id after that id has reported.
-- **Report.** Every engine's `dp_*` port lands in a holding register; a
-  rotating pointer drains them into a `2^DP_FIFO_W`-deep queue the host
-  reads through `DP_ID`, `DP_STEPS`, `DP_X*`, `DP_Y*` and pops with
-  `DP_POP`. A holding register overwritten before it was drained counts in
-  `DROPPED` and sets the sticky `STATUS.DP_OVERFLOW`; that only happens if
-  the host stops polling for a long time, since reports arrive at
-  `NENG · rate / 2^DP_WEIGHT` and the drain runs at one per clock.
+- **Report.** A distinguished step goes back into the walker's ready FIFO
+  flagged `dp`; when it reaches the head it is moved into the engine's
+  report register instead of the step unit and held there, valid, until
+  the register block acknowledges it (a one-clock `dp_ack`; both ends are
+  registers, so engine-to-block wires have a full clock). The block takes
+  each engine's report into a holding register and a rotating pointer
+  drains those into a `2^DP_FIFO_W`-deep queue the host reads through
+  `DP_ID`, `DP_STEPS`, `DP_X*`, `DP_Y*` and pops with `DP_POP`. Nothing in
+  this chain can lose a report — a full queue or a slow host only delays
+  them, with the walker's FIFO as the backlog — so `DROPPED` and
+  `STATUS.DP_OVERFLOW` read 0 and exist for register-map compatibility.
+  (The first version had a one-deep holding register that a second report
+  on the next clock overwrote, which two distinguished leaves in one batch
+  do; a lost report idles that walk until the host restarts.)
 - **Count.** `STEPS` (64-bit, high word latched on the low read) is the
   total steps of every engine; `DPS` the reports queued. `GEOM` reads back
   `ID_W`, `LOG_W`, `LOG_NB`, `DP_WEIGHT` and `NENG`, so the host can refuse
@@ -338,22 +356,25 @@ Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, one `ec2k_walker`
 
 | | LUTs | of which LUTRAM | FFs |
 |---|---|---|---|
-| `ec2k_walker` (whole engine) | **13 681** | 4 644 | 5 624 |
-| ├ walker body (ready FIFO, counters) | 2 159 | 1 568 | 371 |
-| └ `ec2k_batch_pipe` | 11 522 | 3 076 | 5 253 |
-| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stage) | 5 975 | 3 076 | 2 361 |
-| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 5 547 | 0 | 2 892 |
+| `ec2k_walker` (whole engine) | **13 146** | 4 812 | 7 388 |
+| ├ walker body (FIFO with held reports, counters) | 2 311 | 1 736 | 384 |
+| └ `ec2k_batch_pipe` | 10 835 | 3 076 | 7 004 |
+| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stage) | 6 012 | 3 076 | 2 361 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 |
 
-Worst slack at a 4.0 ns clock is +1.98 ns (engine alone), so the fabric
-is not what limits the clock; the shell's `clk_main_a0` recipe is. The
-multiplier is 40% of an engine and its leaf products
-(`gf2_kmul`'s `leaf.r`, 5.0k LUTs) are the single largest item; the
-memories are the next (3.1k LUTRAM in the step unit, 1.6k in the walker).
-No DSPs or block RAM are used.
+The register block around them (`ec2k_axil`, 4 engines) adds 1 449 LUTs
+and 1 773 FFs in total, not per engine.
+
+Worst slack at a 4.0 ns clock is +1.98 ns (engine alone and with the
+register block around four of them), so the fabric is not what limits the
+clock; the shell's `clk_main_a0` recipe is. The multiplier is 37% of an
+engine and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) are the
+single largest item; the memories are the next (3.1k LUTRAM in the step
+unit, 1.7k in the walker). No DSPs or block RAM are used.
 
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
-logic cells), so an engine is 1.05% of the device: **48 engines is half
-the device**, 64 is two thirds, and ~70% is where routing of a design this
+logic cells), so an engine is 1.01% of the device: **48 engines is half
+the device**, 64 is 65%, and ~70% is where routing of a design this
 regular typically starts to fail timing. At 5.3 clocks per step and the
 250 MHz shell clock that is 47 M steps/s per engine and **2.3 G steps/s
 at 48 engines, 3.0 G at 64**; a 400 MHz clock recipe, which the slack
