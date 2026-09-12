@@ -812,6 +812,7 @@ problems generally.
 ## Documentation
 
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
+- [`AGENTS.md`](./AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
 - [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`); the S₃/S₄ decomposition oracles and Gaudry's subspace setting on E(F_{p³}) (`experiments/20_residual_walk_{oracle,s4,mitm3}.json`, `experiments/21_gaudry_cubic.json`); Gaudry's O(1) three-unknown S₄ solve and its measured constant `C₃` (`experiments/21_gaudry_cubic_groebner.json`), the `C₃` optimisation ledger (`experiments/21_gaudry_cubic_c3.json`, §11.5–11.6), and the linear algebra: dense vs sparse Wiedemann with filtering, and the double-large-prime variation measured at `n^{4/9}` (`experiments/21_gaudry_cubic_la.json`, §11.7).
