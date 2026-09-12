@@ -27,7 +27,8 @@ derived, or estimated.
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
 | `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
-| `ec2k_axil.vhd` | **The host interface.** AXI4-Lite register block around `NENG` walkers: load registers, a distinguished-point queue, step/point/drop counters, geometry readback |
+| `ec2k_axil.vhd` | **The host interface.** AXI4-Lite register block around `NENG` walkers: load registers, a distinguished-point queue, step/point counters, geometry and clock readback |
+| `ec2k_axil_cdc.vhd` | AXI4-Lite clock-domain bridge, so the block and the engines run on a faster clock than the host port's |
 | `gf131_mul_tb.vhd`, `ec2k_batch_tb.vhd`, `ec2k_step_tb.vhd`, `ec2k_walker_tb.vhd`, `ec2k_axil_tb.vhd` | Self-checking testbenches |
 | `gf131_tb_pkg.vhd` | Hex helpers shared by the testbenches |
 | `ecc2k_ref.py` | Reference model of every hardware algorithm, proved against `ecc2k130/codegen/field.py`; generates the vectors; gate counts |
@@ -230,12 +231,14 @@ scheduler's:
 - every memory has exactly one writer, so it maps to distributed RAM, not
   flip-flops: `x, y, j, tag, valid` are written only by the fill, the tree
   only by retire, `z` (holding `d`, then `x3`) only by the issue side;
-- operands are read one clock before they are formed, so no path runs
-  RAM → `sigma^j` → XOR in one clock, and the retire path is a memory
-  write plus one XOR — there is no `sigma` and no popcount in it;
-- the Hamming weight, 131 bits wide, is taken over two clocks: 22 groups
-  of six bits (one LUT6 per output bit) and then the sum, both on input
-  and on output;
+- the port addresses are registered a clock before the read and operands
+  are read a clock before they are formed, so no path runs level/index
+  arithmetic → RAM or RAM → `sigma^j` → XOR in one clock, and the retire
+  path is a memory write plus one XOR — there is no `sigma` and no
+  popcount in it;
+- the Hamming weight, 131 bits wide, is taken over two clocks on input
+  (22 groups of six bits, one LUT6 per output bit, then the sum) and
+  three on output (groups, sum, compare);
 - batch and burst state ride in the multiplier tag, so results route
   back with no matching logic.
 
@@ -324,13 +327,26 @@ walkers, each with `2^ID_W` walks, addressed as one flat space of
 - **Count.** `STEPS` (64-bit, high word latched on the low read) is the
   total steps of every engine; `DPS` the reports queued. `GEOM` reads back
   `ID_W`, `LOG_W`, `LOG_NB`, `DP_WEIGHT` and `NENG`, so the host can refuse
-  an image built for a different campaign; `MAGIC` is `0x2C130001`.
+  an image built for a different campaign; `CLOCK` the engine clock in
+  kHz, so the operator can see which image is loaded; `MAGIC` is
+  `0x2C130001`.
 
 `CTRL.RUN` holds the engines in reset while clear, `CTRL.CLEAR` zeroes the
 counters and the queue. The register map with byte offsets is at the top of
 `ec2k_axil.vhd`. `ec2k_axil_tb` replays the walker testbench's 64 walks
 through the registers alone, spread over two engines, and checks the same
 per-id bookkeeping.
+
+`ec2k_axil_cdc` is the bridge that lets the block run on a clock of its
+own: an AXI-Lite slave on the host's clock and a master on the engines',
+one write and one read in flight, each a four-phase level handshake whose
+flags cross through `ASYNC_REG` synchronisers and whose data is written a
+clock before its flag and copied only after the flag has been seen. The
+register names spell out what crosses (`cdc_*_meta`, `cdc_*_src`,
+`cdc_*_cap`) so the constraints can be two lines. It costs 250 LUTs and
+about 50 ns per access, and `ec2k_axil_tb -gCDC=true` runs the same test
+through it with the engines on a 7 ns clock against the host's 10 ns
+(`make test` runs both; ratios from 3 to 21 ns have been run).
 
 The step tests weight *after* each step, never the point the host loaded,
 so a distinguished start point would walk on forever; the host tests start
@@ -367,7 +383,10 @@ and 1 773 FFs in total, not per engine.
 
 Worst slack at a 4.0 ns clock is +1.98 ns (engine alone and with the
 register block around four of them), so the fabric is not what limits the
-clock; the shell's `clk_main_a0` recipe is. The multiplier is 37% of an
+clock, and on F2 the engines run on their own MMCM clock behind
+`ec2k_axil_cdc` rather than on the shell's 250 MHz (`aws/README.md`,
+"Clocking"); at 3.0 ns the same synthesis shows +0.83 ns, with the worst
+path the operand stage's address formation into a LUTRAM read. The multiplier is 37% of an
 engine and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) are the
 single largest item; the memories are the next (3.1k LUTRAM in the step
 unit, 1.7k in the walker). No DSPs or block RAM are used.
@@ -375,10 +394,9 @@ unit, 1.7k in the walker). No DSPs or block RAM are used.
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
 logic cells), so an engine is 1.01% of the device: **48 engines is half
 the device**, 64 is 65%, and ~70% is where routing of a design this
-regular typically starts to fail timing. At 5.3 clocks per step and the
-250 MHz shell clock that is 47 M steps/s per engine and **2.3 G steps/s
-at 48 engines, 3.0 G at 64**; a 400 MHz clock recipe, which the slack
-above supports if implementation agrees, would give 1.6x that.
+regular typically starts to fail timing. At 5.45 clocks per step and
+333 MHz that is 61 M steps/s per engine and **2.9 G steps/s at 48
+engines, 3.9 G at 64**; at the shell's 250 MHz, 2.2 G and 2.9 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32

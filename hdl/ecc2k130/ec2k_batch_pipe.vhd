@@ -46,9 +46,11 @@
 -- of its three uses); the tree only when a product retires; z (x3) only from
 -- the issue side.  Each array is also read through one address per port per
 -- clock -- the phase picks which array feeds an operand, never which address
--- an array sees -- so a port costs one LUTRAM copy, not one per use.  Reads
--- happen one clock before operands are formed, so no path runs
--- RAM -> sigma -> XOR in one clock.
+-- an array sees -- so a port costs one LUTRAM copy, not one per use.  The
+-- port addresses are registered a clock before the read and the read a
+-- clock before operands are formed, so no path runs level-and-index
+-- arithmetic -> RAM or RAM -> sigma -> XOR in one clock (the former was the
+-- worst path at 3 ns).
 --
 -- Batches shorter than W -- the tail of a run, or a testbench -- would wait
 -- forever for leaves that never come, so a batch that has been partly
@@ -229,7 +231,17 @@ architecture rtl of ec2k_batch_pipe is
   -- the dummy leaf's d, a constant
   constant DUMMY_D : gf_t := DUMMY_X xor gf_sigma_j(DUMMY_X, "000");
 
-  -- stage A: raw operands read from memory
+  -- stage A0: port addresses, registered so the memory read starts from a
+  -- flop rather than from the burst engine's level-and-index arithmetic
+  signal aa_valid : std_logic := '0';
+  signal aa_ph    : ph_t := (others => '0');
+  signal aa_k     : unsigned(2 downto 0) := (others => '0');
+  signal aa_leafy : std_logic := '0';
+  signal aa_tag   : mtag_t := (others => '0');
+  signal aa_ta, aa_tb : natural range 0 to NB * 2 * W - 1 := 0;
+  signal aa_qa, aa_qb : natural range 0 to NB * W - 1 := 0;
+
+  -- stage A1: raw operands read from memory
   signal ra_valid : std_logic := '0';
   signal ra_a, ra_b, ra_c : gf_t := (others => '0');
   signal ra_ph    : ph_t := (others => '0');
@@ -246,11 +258,13 @@ architecture rtl of ec2k_batch_pipe is
   signal res_r     : gf_t;
   signal res_tag   : mtag_t;
 
-  -- output: two registers so the weight of x3 has two clocks
-  signal o1_valid, o2_valid : std_logic := '0';
-  signal o1_x, o1_y, o2_x, o2_y : gf_t := (others => '0');
-  signal o1_tag, o2_tag : tag_t := (others => '0');
+  -- output: three registers so the weight of x3 has three clocks (group
+  -- popcounts, their sum, the compare)
+  signal o1_valid, o2_valid, o3_valid : std_logic := '0';
+  signal o1_x, o1_y, o2_x, o2_y, o3_x, o3_y : gf_t := (others => '0');
+  signal o1_tag, o2_tag, o3_tag : tag_t := (others => '0');
   signal o2_parts : hw_parts_t := (others => (others => '0'));
+  signal o3_hw    : hw_t := (others => '0');
 
 begin
 
@@ -310,8 +324,8 @@ begin
         fl <= q_identity;
         fl_wr <= to_unsigned(NB, LOG_NB + 1); fl_rd <= (others => '0');
         cur_valid <= '0'; nxt_valid <= '0';
-        ra_valid <= '0'; mul_valid <= '0';
-        o1_valid <= '0'; o2_valid <= '0'; out_valid <= '0';
+        aa_valid <= '0'; ra_valid <= '0'; mul_valid <= '0';
+        o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; out_valid <= '0';
       else
         rq_pushed := false;
 
@@ -490,17 +504,17 @@ begin
           end if;
         end if;
 
-        -- ============ stage A: address and read ============
+        -- ============ stage A0: addresses ============
         -- Every memory port gets exactly one address (pa, pb for the two
-        -- tree ports; qa, qb for the leaf arrays), then the phase picks
+        -- tree ports; qa, qb for the leaf arrays); the phase later picks
         -- which port feeds each operand.
-        ra_valid <= cur_valid;
+        aa_valid <= cur_valid;
         if cur_valid = '1' then
           b   := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
           last := '0';
           if idx = cur_end then last := '1'; end if;
           leafy := to_integer(lvl) = LOG_W - 1;
-          ra_k  <= lvl(2 downto 0);
+          aa_k  <= lvl(2 downto 0);
           i  := resize(idx, LOG_W);
           qa := i;  qb := i;
           pa := '1' & i;  pb := '1' & i;
@@ -513,7 +527,7 @@ begin
               pb := n(LOG_W - 1 downto 0) & '1';
               qa := pa(LOG_W - 1 downto 0);
               qb := pb(LOG_W - 1 downto 0);
-              ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
+              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(n, IDX_W)) & last;
             when PH_INV =>
               -- one multiply per burst; the chain step k is the batch level
@@ -525,7 +539,7 @@ begin
                 when others =>
                   pa := to_unsigned(0, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
               end case;
-              ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
+              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
             when PH_BWD =>
               n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
@@ -536,34 +550,46 @@ begin
               pa := n;
               pb := s;
               qb := s(LOG_W - 1 downto 0);
-              ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
+              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(c, IDX_W)) & last;
             when others =>
               -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
               -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
-              ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
+              aa_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(i, IDX_W)) & last;
           end case;
+          aa_ta <= tree_addr(b, pa);
+          aa_tb <= tree_addr(b, pb);
+          aa_qa <= leaf_addr(b, qa);
+          aa_qb <= leaf_addr(b, qb);
+          aa_ph <= ph;
+          if leafy then aa_leafy <= '1'; else aa_leafy <= '0'; end if;
+        end if;
 
-          ta := tr(tree_addr(b, pa));
-          tb := tr(tree_addr(b, pb));
-          da := ld(leaf_addr(b, qa));
-          db := ld(leaf_addr(b, qb));
-          xa := lx(leaf_addr(b, qa));
-          ya := ly(leaf_addr(b, qa));
-          ra_ja    <= lj(leaf_addr(b, qa));
-          ra_zaddr <= leaf_addr(b, qa);
+        -- ============ stage A1: read ============
+        ra_valid <= aa_valid;
+        if aa_valid = '1' then
+          ta := tr(aa_ta);
+          tb := tr(aa_tb);
+          da := ld(aa_qa);
+          db := ld(aa_qb);
+          xa := lx(aa_qa);
+          ya := ly(aa_qa);
+          ra_ja    <= lj(aa_qa);
+          ra_zaddr <= aa_qa;
           ra_c     <= da;
-          case to_integer(ph) is
+          ra_k     <= aa_k;
+          ra_tag   <= aa_tag;
+          case to_integer(aa_ph) is
             when PH_FWD =>
-              if leafy then ra_a <= da; else ra_a <= ta; end if;
-              if leafy then ra_b <= db; else ra_b <= tb; end if;
+              if aa_leafy = '1' then ra_a <= da; else ra_a <= ta; end if;
+              if aa_leafy = '1' then ra_b <= db; else ra_b <= tb; end if;
             when PH_INV =>
               ra_a <= ta;
               ra_b <= tb;
             when PH_BWD =>
               ra_a <= ta;
-              if leafy then ra_b <= db; else ra_b <= tb; end if;
+              if aa_leafy = '1' then ra_b <= db; else ra_b <= tb; end if;
             when PH_LAM =>
               ra_a <= ya;
               ra_b <= tb;
@@ -571,7 +597,7 @@ begin
               ra_a <= ta;
               ra_b <= xa;
           end case;
-          ra_ph <= ph;
+          ra_ph <= aa_ph;
         end if;
 
         -- ============ stage B: form operands ============
@@ -597,19 +623,25 @@ begin
           mul_b <= ob;
         end if;
 
-        -- ============ output: weight and DP test over two clocks ============
+        -- ============ output: weight and DP test over three clocks ============
         o2_valid <= o1_valid;
         o2_x     <= o1_x;
         o2_y     <= o1_y;
         o2_tag   <= o1_tag;
         o2_parts <= gf_weight_parts(o1_x);
 
-        out_valid <= o2_valid;
-        out_x     <= o2_x;
-        out_y     <= o2_y;
-        out_tag   <= o2_tag;
-        out_hw    <= hw_sum(o2_parts);
-        if to_integer(hw_sum(o2_parts)) <= DP_WEIGHT then
+        o3_valid <= o2_valid;
+        o3_x     <= o2_x;
+        o3_y     <= o2_y;
+        o3_tag   <= o2_tag;
+        o3_hw    <= hw_sum(o2_parts);
+
+        out_valid <= o3_valid;
+        out_x     <= o3_x;
+        out_y     <= o3_y;
+        out_tag   <= o3_tag;
+        out_hw    <= o3_hw;
+        if to_integer(o3_hw) <= DP_WEIGHT then
           out_dp <= '1';
         else
           out_dp <= '0';
