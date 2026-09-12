@@ -153,14 +153,26 @@
 //! consequence — that a curve selected as best on one target set keeps no
 //! margin on a disjoint one.
 //!
-//! ## Boundary D — the one mechanism that *does* lower `D*` is unreachable
+//! ## Boundary D — factor-base structure belongs to the field, not the curve
 //!
 //! The only lever the FFD program has measured to lower `D*` materially is
 //! L1, a **subfield** factor base (mean `D*` 2.04 against 3.53 for a random
-//! base).  It needs a proper subfield of the base field.  `131` is prime,
-//! so `F_{2^131}` has none but `F_2`, and an isogeny does not change the
-//! base field.  L1 is unreachable from ECC2K-130 by any isogeny, whatever
-//! the curve.
+//! base).  An isogeny is defined over the field it starts in, so `F_{2^131}`
+//! and every `F_2`-subspace of it are identical before and after: whatever
+//! factor-base structure exists over that field is available on **every curve
+//! in the class equally**, and so distinguishes none of them.  An isogeny
+//! cannot make a factor-base mechanism available that `E` did not already
+//! have.
+//!
+//! An earlier revision argued instead that `131` is prime, so `F_{2^131}` has
+//! no proper subfield and L1 is therefore unreachable.  True of proper
+//! subfields but too strong as a claim about the mechanism: subfield-*like*
+//! bases do not need one — quasi-subfield polynomials
+//! (Huang–Kosters–Petit–Yeo–Yun) supply them at prime `n`, and
+//! `RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield examples over
+//! `F_{2^7}`.  The field-invariance form above does not depend on that question
+//! either way.  For `n = 131` the census in that note happens to find no
+//! quasi-subfield cell either, so the mechanism is doubly out of reach here.
 //!
 //! ## What is therefore measured
 //!

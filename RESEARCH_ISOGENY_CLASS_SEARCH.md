@@ -26,8 +26,9 @@ they leave the lever no room:
   degree `≤ 5` of `6` at `m = 3`), so the degree of regularity is *constant
   on the whole class* (**C**);
 - and the one mechanism that does lower `D*` — an L1 subfield factor base,
-  mean `D*` 2.04 against 3.53 — needs a proper subfield, which `F_{2^131}`
-  does not have and an isogeny cannot create (**D**).
+  mean `D*` 2.04 against 3.53 — is a property of the *field and subspace*,
+  which an isogeny leaves untouched, so it is available on every curve in the
+  class equally or on none (**D**).
 
 What Boundary C leaves is the **affine** refutation degree `D*`, which the
 curve does move because the curve *is* the inhomogeneous part.  EXP-R6
@@ -265,17 +266,47 @@ inhomogeneous part, so `D*` does vary with `a₆` — at `n = 8, l = 4` over all
 255 curves it takes values `{2, 3, 4}`.  That variation is the lever's whole
 remaining surface, and §3–§4 are about it.
 
-### D — the one mechanism that works is unreachable (exact)
+### D — factor-base structure is a property of the field, not the curve (exact)
 
 The only lever the FFD program has measured to lower `D*` materially is L1,
 a **subfield** factor base: mean `D*` 2.04 against 3.53 for a random base,
-with `Δ_low` ratios diverging 6.7 → 67.  It requires a proper subfield of
-the base field.  `131` is prime, so `F_{2^131}` has none but `F_2`, and an
-isogeny is defined over the same field it starts in.
+with `Δ_low` ratios diverging 6.7 → 67.
 
-> **Boundary D.** L1 is unreachable from ECC2K-130 by any isogeny, for every
-> curve in the class.  The prime extension degree is not a property an
-> isogeny can change.
+The load-bearing point is not that such structure is unavailable over
+`F_{2^131}` — it is that **an isogeny cannot change whether it is available**.
+An isogeny is defined over the field it starts in, so `F_{2^131}` and every
+`F_2`-subspace of it are identical before and after.  Whatever factor-base
+structure exists over that field is therefore available on **every curve in
+the class equally**, the Koblitz curve included, and confers no advantage on
+any particular one.
+
+> **Boundary D.** L1 and every other factor-base construction are properties
+> of the field and the subspace, not of the curve.  An isogeny changes the
+> curve and fixes the field, so it cannot make a factor-base mechanism
+> available that was not already available on `E`.
+
+*A first version of this boundary said instead that "L1 is unreachable because
+`131` is prime, so `F_{2^131}` has no proper subfield."*  That is true of
+proper subfields but too strong as stated, because subfield-*like* factor bases
+do not require one: Huang–Kosters–Petit–Yeo–Yun's **quasi-subfield**
+polynomials `L(X) = X^{q^{n_0}} − λ(X)` give a subfield-shaped factor base at
+prime `n`, and `RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield
+examples over `F_{2^7}`.  The reformulation above does not depend on the
+question either way.
+
+For ECC2K-130 the concrete facts happen to point the same way, and they come
+from that note's census rather than from this thread:
+
+- `131` is prime, so the only proper subfield is `F_2`;
+- at prime `n`, non-subfield quasi-subfield polynomials are very rare — 13
+  cells over all odd `n ≤ 600` with `n_0 < 64`, most of them the useless
+  `n_0 = n − 1` trace hyperplane — and **`n = 131` is not among them**;
+- and even where they exist the framework's exponent bottoms out at `0.9487`
+  against the generic `0.5`, independently of `deg λ`, so a quasi-subfield base
+  would not beat generic algorithms anyway.
+
+So the mechanism is doubly out of reach here — but Boundary D rests on the
+field-invariance argument, which would hold even if it were not.
 
 ### Reference
 
@@ -728,3 +759,10 @@ earlier lessons:
   `√(πr/2m)` at `m = 262`, not quoted from the paper.
 - `RESEARCH_DEGREE_REDUCTION.md` — levers L1–L4, the cost model and the
   baselines this thread reuses.
+- `RESEARCH_QUASI_SUBFIELD.md` — the quasi-subfield census §2D leans on, and
+  the reason the reformulated Boundary D does not depend on it.
+- **M.-D. Huang, M. Kosters, C. Petit, S. L. Yeo, Y. Yun**, *Quasi-subfield
+  polynomials and the elliptic curve discrete logarithm problem*,
+  J. Math. Cryptol. 14(1):25–38, 2020 — subfield-like factor bases at prime
+  `n`, which is why §2D is phrased around field-invariance rather than around
+  the absence of a proper subfield.
