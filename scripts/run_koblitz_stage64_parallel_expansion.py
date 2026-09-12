@@ -87,6 +87,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     serial_environment["KIC_RANK_SURPLUS"] = "0"
     serial_environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
     serial_environment["RAYON_NUM_THREADS"] = "4"
+    if args.pipeline:
+        serial_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
     parallel_environment = dict(serial_environment)
     parallel_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
     if args.pipeline:
@@ -116,7 +118,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     parallel_summary = parallel["summary"]
     require(serial["base"]["base_hash"] == parallel["base"]["base_hash"], "factor base changed")
     require(serial["base"]["support_index_entries"] == parallel["base"]["support_index_entries"], "support entries changed")
-    require(serial["base"].get("parallel_support_expansion") is False, "serial control changed")
+    require(serial["base"].get("parallel_support_expansion") is args.pipeline, "baseline expansion mode changed")
     require(parallel["base"].get("parallel_support_expansion") is True, "parallel expansion was not enabled")
     require(parallel["base"].get("pipelined_support_expansion") is args.pipeline, "pipeline mode changed")
     expected_batch = 32_768 if args.pipeline else 65_536
