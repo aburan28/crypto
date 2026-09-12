@@ -1246,8 +1246,8 @@ the count is sub-birthday (`κ ∝ n^{-1/6}`) and the cost per relation
 is a constant — and the constant, measured honestly in the same units
 as everything else in this note, places the crossover with rho near
 `2^{111}`.  That is the number to improve on: any change to the solver
-is scored by `C₃`, and the target is `13 · n^{1/6}`.  §11.5 is the
-first round of that.
+is scored by `C₃`, and the target is `13 · n^{1/6}`.  §11.5 and §11.6
+are the first two rounds of that.
 
 ### 11.5 Lowering `C₃`: the Macaulay step
 
@@ -1338,6 +1338,34 @@ Every run recovered the planted `d`.  What changed and what did not:
   floor for this design is therefore `C₃ ≈ 3–5 · 10⁵`, a crossover
   near `2^{90}`; the note's conclusion stands, with the number
   sharpened.
+
+### 11.6 `C₃`, round 2: Macaulay's row selection
+
+One more step on the ledger of §11.5, measured the same way (`p =
+271`, seed `1`, `--cross-check`, same residual stream):
+
+| step | rows | Macaulay (forward / normal forms) | charpoly / eigenvectors / roots | `C₃` | ratio to §11.4 | cross-check |
+|---|---:|---:|---:|---:|---:|---:|
+| §11.5 result | 252 | 1,155,000 (610,000 / 540,000) | 372,000 | 1,527,000 | 0.32 | 0 / 728 |
+| Macaulay's row selection | 226 | 507,000 (153,000 / 354,000) | 273,000 / 58,000 / 33,000 | 879,000 | 0.18 | 0 / 728 |
+
+The learned mask of §11.5 dropped the rows that *happened* to reduce
+to zero and gained `2 %`; Macaulay's rule drops the rows that are
+*redundant by construction* — after triangularising the three
+components so that their grevlex leading monomials are distinct, the
+shift `m · f_i` is left out whenever `m` is divisible by the leading
+monomial of an earlier component (`26` rows of `252`) — and gains
+`1.7×`, because those are the shifts whose rows are reduced through
+the longest pivot chains before they vanish.  The rank is `222` in
+both cases and the cross-check is clean.  What remains is `17 %`
+forward elimination, `40 %` normal forms, `31 %` the characteristic
+polynomial of a `64 × 64` matrix (Hessenberg, `≈ 64³`), `10 %`
+eigenvectors and roots; none of the three big parts has an obvious
+factor of two left in it, and the Krylov alternatives to the
+characteristic polynomial cost the same `≈ 64³`.  `C₃ ≈ 0.88 · 10⁶`
+is where this design settles: `5.5×` below §11.4, crossover of the
+relation phase with rho at `n ≈ 2^{96}`, break-even with the
+meet-in-the-middle oracle at `|F| ≈ 240`, `n ≈ 2^{27}`.
 
 ## References
 
