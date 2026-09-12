@@ -198,9 +198,9 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R3e** | *(observation, not a pre-registered prediction)* On the **Subfield** family the **raw, unaugmented** solve is converging on the `2^N` boundary: margin `−4.99 → −1.19` bits over `N = 10…20` | **`observed`; explained, and not an advance** | EXP-R3b. At `N = 20` the plain Gröbner solve on a Subfield factor base is only `1.19` bits behind enumeration, and the trend would cross near `N ≈ 22–24`. This is **arithmetic, not cryptanalysis**: Subfield's `D*` is pinned at `2.12–2.25`, i.e. at the Nullstellensatz floor, so its solve is `poly(N)` while enumeration is `2^N` — a crossover is guaranteed and measures the family's *degeneracy*, which is the FFD program's own L1 result (§2), not a lever of this thread. Recorded because a bare "Gröbner overtakes brute force at `N ≈ 23`" would read as a breakthrough and is not one. Note also that **L4 makes this family dramatically worse** (augmented margin `−10.49` vs raw `−4.99` at `N = 10`): on the only family approaching the boundary, this thread's lever actively hurts. |
 | **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | **`killed` as stated** | A pooled *instance-level* `ρ_s` over mixed sizes cannot establish this (R4″), so the gate as written measures nothing. This is a kill of the **statistic**, not of the defect: EXP-R4b shows the family-level version of the same correlation is strong and size-robust (R4c). Scoring a lever still needs matched shape and total work — but "score the lever *family*, not the instance" is now an open question, not a closed one. |
 | **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | **`killed`** | EXP-R4′, iteration 4. Five normalisations × three designed groups × four seeds. Nothing clears `ρ_s ≤ −0.6` on all three; the un-normalised variants fail cross-shape as expected (the control that shows the test has power), and the normalised ones pass *pooled* only. |
-| **R4″** | The strong pooled **instance-level** defect↔`D*` correlation — one point per target — is a **size proxy**, not structure | **`supported`, scope corrected iteration 6** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. EXP-R4b reproduces it on the same snapshot (instance level, size-controlled: **−0.12…−0.35**). **As originally written this row said "the strong pooled defect↔`D*` correlation", with no unit qualifier, and iteration 4 read that as reaching the FFD program's published figure. It does not — see R4b.** |
+| **R4″** | The strong pooled **instance-level** defect↔`D*` correlation — one point per target — is a **size proxy**, not structure | **`supported`, scope corrected iteration 6** | EXP-R4′: pooled `ρ_s` −0.89…−0.91 collapses to **−0.16…−0.34** once `vars` is held fixed, for every variant that passed pooled. Stable over seeds 7/11/23/41 at 48 targets/cell. EXP-R4b reproduces it on the same snapshot (instance level, size-controlled: **−0.32…−0.35**; first published as −0.12…−0.35, see the iteration-7 correction). **As originally written this row said "the strong pooled defect↔`D*` correlation", with no unit qualifier, and iteration 4 read that as reaching the FFD program's published figure. It does not — see R4b.** |
 | **R4b** | The FFD program's own published `Δ_low ↔ D*` law (EXP-G, `ρ_s = −0.79`) shares R4″'s defect and is **also a size proxy** | **`killed`** | EXP-R4b, iteration 6. On EXP-G's own 50 cells the law survives every size control: mean per-block **−0.6998**, blocked rank **−0.6983**, fixed-effects **−0.7499** against pooled −0.7929. In the ECDLP-relevant critical regime (`2n' = n`) size control makes it *stronger*, not weaker: **−0.9124** controlled vs −0.7781 pooled. This thread raised the flag; this thread withdraws it. |
-| **R4c** | `Δ_low` is a **family-level** discriminator (it ranks factor-base constructions) but not an **instance-level** one (it does not rank targets within a construction) | **`supported`** | EXP-R4b Panel B, on iteration 4's *own* 2016-cell snapshot, size-controlled both ways: instance level **−0.35** (mean per-block) / **−0.12** (blocked rank); family level **−0.85** (blocked rank), with the three families ordered correctly in **4 of the 4** size blocks where `D*` varies at all (the other two are floored at `D* = 2`). Same cells, same defect, same `D*` — only the unit of analysis differs. |
+| **R4c** | `Δ_low` is a **family-level** discriminator (it ranks factor-base constructions) but not an **instance-level** one (it does not rank targets within a construction) | **`supported`** | EXP-R4b Panel B, on iteration 4's *own* 2016-cell snapshot, size-controlled both ways: instance level **−0.35** (mean per-block) / **−0.33** (blocked rank, corrected iteration 7 — first published as −0.12); family level **−0.85** (blocked rank), with the three families ordered correctly in **4 of the 4** size blocks where `D*` varies at all (the other two are floored at `D* = 2`). Same cells, same defect, same `D*` — only the unit of analysis differs. |
 | **R5** | **Levers compose**: one-sided guessing plus the mutant route beats guessing alone | **`killed`** | EXP-R5, iteration 3. The pre-registered gate (collapse fraction `c < 1/2`) is **degenerate** — the composed route hits `c = 0` in every cell, because mutants reach the floor with no guessing at all. Scored on total work instead (G-R5′): composed loses to raw guessing by a **flat −2.87 bits** at every `N` and seed, and neither route beats `2^N`. |
 | **R5′** | Mutants and guessing are **substitutes, not complements** — both drive the system to `D* = 2`, and guessing gets there more cheaply per unit work | **`supported`** | EXP-R5: at `k = 0` the mutants are worth `+1.1…+1.75` bits on Random (iteration 2's result), but the moment guessing is allowed the advantage inverts and stays inverted at every `k > 0`. The gap is flat in `N`, so it is structural, not a small-size artifact. |
 
@@ -384,6 +384,31 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   and it worked because it was fixed in iteration 1 and is not allowed to
   move. That is what §3 is for, and from now on every lever verdict carries
   the column.
+- **A bug in iteration 6's code, found from outside the thread.** While
+  this iteration ran, Cursor Agent pushed a fix to `size_control`
+  (`e16b67c`): raw 1-based within-stratum ranks have mean `(n_g+1)/2`, so
+  pooling them across **unequal** strata reintroduces a between-block term
+  `Σ n_g (μ_g−μ)²` — a function of block size, which is the exact nuisance
+  `blocked_rank` exists to remove. It is right. Verified and merged, with
+  its test.
+
+  What it changes, checked cell by cell rather than assumed: **exactly one
+  number.** Panel A's strata are all 5 cells and the family-level panel's
+  are all 3, and with equal strata the injected term is zero — so
+  `−0.6983`, the critical-regime `−0.9023`, and the family-level `−0.8528`
+  are untouched. The instance-level panel is the one with unequal strata
+  (144…432), and its blocked rank moves **`−0.1189 → −0.3301`**. The
+  instance/family gap is therefore `0.52`, not the `0.73` first published;
+  R4c's direction and conclusion are unaffected.
+
+  The part worth keeping is *how it was missable*. My three instance-level
+  statistics read `−0.3494`, `−0.1189`, `−0.3248` — one of them a clear
+  outlier against the other two, in a function whose whole purpose is that
+  the three should agree. I wrote three statistics precisely so that
+  disagreement would be informative, then did not read the disagreement.
+  The tests did not catch it either, because every block I wrote in them
+  was equal-sized. **A test suite that only exercises the balanced case
+  cannot see a bias that is defined as a function of imbalance.**
 - **Next.** The queue is thin and should be honest about it. L4 is now
   measured to `N = 20` and loses ground; L3 and L3∘L4 are killed; L2 is
   bounded below `ℓ = 6` and out of reach. **No lever in the taxonomy has a
@@ -436,11 +461,15 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   |---|---:|---:|
   | pooled `ρ_s` | −0.5164 | −0.8734 |
   | mean per-block `ρ_s` | −0.3494 | −1.0000 |
-  | blocked rank `r` | **−0.1189** | **−0.8528** |
+  | blocked rank `r` | **−0.3301**† | **−0.8528** |
   | fixed-effects `r` | −0.3248 | −0.8337 |
 
+  † *Corrected in iteration 7 from the −0.1189 first published here; see
+  that entry. The family-level column and all of panel A are unchanged —
+  their strata are equal-sized, where the bug has no effect.*
+
   Same snapshot, same defect, same `D*`, same size control. Only the unit of
-  analysis differs, and it is worth 0.73 in blocked rank. The three families
+  analysis differs, and it is worth 0.52 in blocked rank. The three families
   are ordered correctly in **4 of the 4** size blocks where `D*` varies at
   all; the other two (`vars = 4, 6`) are floored at `D* = 2`.
 - **Diagnosis.** EXP-G's within-block contrast is across three structurally

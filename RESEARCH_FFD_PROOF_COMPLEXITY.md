@@ -259,7 +259,7 @@ so the weakness tracks the determination ratio rather than the size.
 One scope limit the same experiment establishes: this is a **family-level**
 law. The unit of analysis above is the `(operating point, family)` cell, and
 the defect does *not* rank individual targets within a family — size-
-controlled, that correlation is −0.12 to −0.35. `Δ_low` screens
+controlled, that correlation is −0.32 to −0.35. `Δ_low` screens
 constructions, which is what §9 proposes it for; it does not screen targets.
 
 This **reconciles the dispute** instead of picking a side:
@@ -606,7 +606,7 @@ map.
    with reach — and it is **not a size proxy**: size-controlled three ways
    the critical-regime figure rises to −0.91/−0.90/−0.82 (§3.3, EXP-R4b).
    The support is for a **family-level** law; the same experiment shows the
-   defect does not rank targets *within* a family (−0.12…−0.35), so P3-alg
+   defect does not rank targets *within* a family (−0.32…−0.35), so P3-alg
    licenses screening constructions, not instances.
 
 5. **(The lower-bound antecedent — §3.4.)** For the generic (Random)

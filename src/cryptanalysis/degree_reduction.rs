@@ -2719,6 +2719,52 @@ mod tests {
         );
     }
 
+    /// The three controlled statistics exist so that **agreement between
+    /// them** is the evidence. That only works if they agree when they
+    /// should — and the `blocked_rank` bias fixed in `e16b67c` was
+    /// invisible to every test here because all of them used equal-sized
+    /// blocks, where the bias term is identically zero.
+    ///
+    /// So: unequal strata (2, 5, 11) carrying the *same* within-stratum
+    /// relation, offset from each other so the pooled figure is diluted.
+    /// All three controlled statistics must land on it together. A bias
+    /// that is a function of block size splits them apart, which is what
+    /// should have been read off the `−0.3494 / −0.1189 / −0.3248` triple
+    /// rather than published.
+    #[test]
+    fn controlled_statistics_agree_under_unequal_strata() {
+        let mut rows = Vec::new();
+        for (label, n, off) in [("a", 2, 0.0), ("b", 5, 40.0), ("c", 11, 80.0)] {
+            for i in 0..n {
+                let x = i as f64;
+                rows.push((label, off + x, off - 3.0 * x));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        assert_eq!(c.n_cells, 18);
+        assert_eq!(c.n_blocks, 3);
+        let vals = [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ];
+        for (name, v) in vals {
+            let v = v.expect("defined");
+            assert!(
+                v < -0.99,
+                "{name} must recover the within-stratum law under unequal sizes: {v}"
+            );
+        }
+        let spread = vals
+            .iter()
+            .filter_map(|(_, v)| *v)
+            .fold((f64::MAX, f64::MIN), |(lo, hi), v| (lo.min(v), hi.max(v)));
+        assert!(
+            spread.1 - spread.0 < 1e-6,
+            "the three must agree, not merely all be negative: {spread:?}"
+        );
+    }
+
     /// Too few observations to say anything: every statistic reports `None`
     /// rather than a number manufactured from 2 points.
     #[test]
