@@ -1,0 +1,66 @@
+name: Koblitz Stage 80 n53 specialized support expansion
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage80_specialized_support_expansion.py"
+      - ".github/workflows/koblitz-stage80-specialized-support-expansion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate specialized support-expansion controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage80_specialized_support_expansion.py
+          python3 scripts/run_koblitz_stage80_specialized_support_expansion.py self-test
+          cargo test --release --example koblitz_rank_fixture
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-specialized-support-expansion:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage80_specialized_support_expansion.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage80-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare generic expansion, specialized expansion, and rho
+        run: |
+          python3 scripts/run_koblitz_stage80_specialized_support_expansion.py run \
+            --build "$RUNNER_TEMP/stage80-build" \
+            --output "$RUNNER_TEMP/stage80-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage80_specialized_support_expansion.py verify \
+            --build "$RUNNER_TEMP/stage80-build" \
+            --output "$RUNNER_TEMP/stage80-run" \
+            > "$RUNNER_TEMP/stage80-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage80-specialized-support-expansion-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage80-build
+            ${{ runner.temp }}/stage80-run
+            ${{ runner.temp }}/stage80-verification.json
