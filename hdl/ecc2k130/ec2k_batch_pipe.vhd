@@ -41,17 +41,21 @@
 -- retire MUL_LATENCY clocks later; this needs MUL_LATENCY >= 2.
 --
 -- Memories.  Each array has exactly one writer so it maps to distributed
--- RAM rather than flip-flops: x, y, j, tag, valid are written only when a
--- batch fills; the tree only when a product retires; z (which holds d, then
--- x3) only from the issue side.  Reads happen one clock before operands
--- are formed, so no path runs RAM -> sigma -> XOR in one clock.
+-- RAM rather than flip-flops: x, y, d, j, tag, valid are written only when a
+-- batch fills (d = x + sigma^j(x) is formed once, there, rather than at each
+-- of its three uses); the tree only when a product retires; z (x3) only from
+-- the issue side.  Each array is also read through one address per port per
+-- clock -- the phase picks which array feeds an operand, never which address
+-- an array sees -- so a port costs one LUTRAM copy, not one per use.  Reads
+-- happen one clock before operands are formed, so no path runs
+-- RAM -> sigma -> XOR in one clock.
 --
 -- Batches shorter than W -- the tail of a run, or a testbench -- would wait
 -- forever for leaves that never come, so a batch that has been partly
 -- filled for FLUSH_CLK clocks with nothing arriving is padded with dummy
 -- leaves (weight-1 x, d /= 0) that produce no output.
 --
--- Slot memory per batch of W: W (x, y, z) + 2W tree words, all 131 bits.
+-- Slot memory per batch of W: W (x, y, d, z) + 2W tree words, all 131 bits.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -173,7 +177,7 @@ architecture rtl of ec2k_batch_pipe is
   -- ------------------------------------------------------------------ --
   -- memories
   -- ------------------------------------------------------------------ --
-  signal lx, ly, lz : gf_leaf_mem_t := (others => (others => '0'));
+  signal lx, ly, ld, lz : gf_leaf_mem_t := (others => (others => '0'));
   signal lj   : j_mem_t   := (others => (others => '0'));
   signal ltag : tag_mem_t := (others => (others => '0'));
   signal lval : v_mem_t   := (others => '0');
@@ -222,12 +226,14 @@ architecture rtl of ec2k_batch_pipe is
   signal cur_lvl, nxt_lvl : lvl_t := (others => '0');
   signal cur_idx, cur_end : idx_t := (others => '0');
 
+  -- the dummy leaf's d, a constant
+  constant DUMMY_D : gf_t := DUMMY_X xor gf_sigma_j(DUMMY_X, "000");
+
   -- stage A: raw operands read from memory
   signal ra_valid : std_logic := '0';
   signal ra_a, ra_b, ra_c : gf_t := (others => '0');
   signal ra_ph    : ph_t := (others => '0');
-  signal ra_leafy : std_logic := '0';        -- this level touches leaves
-  signal ra_ja, ra_jb : std_logic_vector(2 downto 0) := (others => '0');
+  signal ra_ja    : std_logic_vector(2 downto 0) := (others => '0');
   signal ra_k     : unsigned(2 downto 0) := (others => '0');
   signal ra_tag   : mtag_t := (others => '0');
   signal ra_zaddr : natural range 0 to NB * W - 1 := 0;
@@ -277,9 +283,12 @@ begin
     variable lvl     : lvl_t;
     variable idx     : idx_t;
     variable n, c, s : node_t;
+    variable pa, pb  : node_t;                 -- tree port addresses
     variable i       : leaf_t;
+    variable qa, qb  : leaf_t;                 -- leaf port addresses
     variable last    : std_logic;
     variable leafy   : boolean;
+    variable ta, tb, da, db, xa, ya : gf_t;    -- what the ports read
     variable oa, ob  : gf_t;
     variable x3, y3  : gf_t;
     variable rb      : bid_t;
@@ -341,12 +350,14 @@ begin
           if p1_take = '1' then
             lx(la)   <= p1_x;
             ly(la)   <= p1_y;
+            ld(la)   <= p1_x xor gf_sigma_j(p1_x, std_logic_vector(p1_hw(3 downto 1)));
             lj(la)   <= std_logic_vector(p1_hw(3 downto 1));
             ltag(la) <= p1_tag;
             lval(la) <= '1';
           else
             lx(la)   <= DUMMY_X;
             ly(la)   <= (others => '0');
+            ld(la)   <= DUMMY_D;
             lj(la)   <= (others => '0');
             lval(la) <= '0';
           end if;
@@ -480,42 +491,39 @@ begin
         end if;
 
         -- ============ stage A: address and read ============
+        -- Every memory port gets exactly one address (pa, pb for the two
+        -- tree ports; qa, qb for the leaf arrays), then the phase picks
+        -- which port feeds each operand.
         ra_valid <= cur_valid;
         if cur_valid = '1' then
           b   := cur_b;  ph := cur_ph;  lvl := cur_lvl;  idx := cur_idx;
           last := '0';
           if idx = cur_end then last := '1'; end if;
-          leafy := false;
+          leafy := to_integer(lvl) = LOG_W - 1;
           ra_k  <= lvl(2 downto 0);
+          i  := resize(idx, LOG_W);
+          qa := i;  qb := i;
+          pa := '1' & i;  pb := '1' & i;
           case to_integer(ph) is
             when PH_FWD =>
-              n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
-              if to_integer(lvl) = LOG_W - 1 then
-                -- children are leaves 2 idx and 2 idx + 1: d is formed in stage B
-                leafy := true;
-                i := shift_left(resize(idx, LOG_W), 1);
-                ra_a  <= lx(leaf_addr(b, i));
-                ra_ja <= lj(leaf_addr(b, i));
-                ra_b  <= lx(leaf_addr(b, i or to_unsigned(1, LOG_W)));
-                ra_jb <= lj(leaf_addr(b, i or to_unsigned(1, LOG_W)));
-              else
-                ra_a <= tr(tree_addr(b, n(LOG_W - 1 downto 0) & '0'));
-                ra_b <= tr(tree_addr(b, n(LOG_W - 1 downto 0) & '1'));
-              end if;
+              n  := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx, LOG_W + 1);
+              -- children 2n, 2n+1: tree nodes, or at the last level the
+              -- leaves' d
+              pa := n(LOG_W - 1 downto 0) & '0';
+              pb := n(LOG_W - 1 downto 0) & '1';
+              qa := pa(LOG_W - 1 downto 0);
+              qb := pb(LOG_W - 1 downto 0);
               ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(n, IDX_W)) & last;
             when PH_INV =>
               -- one multiply per burst; the chain step k is the batch level
               case to_integer(lvl(2 downto 0)) is
                 when 0 | 1 =>
-                  ra_a <= tr(tree_addr(b, to_unsigned(1, LOG_W + 1)));
-                  ra_b <= tr(tree_addr(b, to_unsigned(1, LOG_W + 1)));
+                  pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(1, LOG_W + 1);
                 when 7 =>
-                  ra_a <= tr(tree_addr(b, to_unsigned(1, LOG_W + 1)));
-                  ra_b <= tr(tree_addr(b, to_unsigned(0, LOG_W + 1)));
+                  pa := to_unsigned(1, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
                 when others =>
-                  ra_a <= tr(tree_addr(b, to_unsigned(0, LOG_W + 1)));
-                  ra_b <= tr(tree_addr(b, to_unsigned(0, LOG_W + 1)));
+                  pa := to_unsigned(0, LOG_W + 1);  pb := to_unsigned(0, LOG_W + 1);
               end case;
               ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(lvl(2 downto 0), IDX_W)) & '1';
@@ -523,36 +531,47 @@ begin
               n := to_unsigned(2 ** to_integer(lvl), LOG_W + 1) + resize(idx(IDX_W - 1 downto 1), LOG_W + 1);
               c := n(LOG_W - 1 downto 0) & idx(0);
               s := n(LOG_W - 1 downto 0) & (not idx(0));
-              ra_a <= tr(tree_addr(b, n));
-              if to_integer(lvl) = LOG_W - 1 then
-                leafy := true;
-                ra_b  <= lx(leaf_addr(b, s(LOG_W - 1 downto 0)));
-                ra_jb <= lj(leaf_addr(b, s(LOG_W - 1 downto 0)));
-              else
-                ra_b <= tr(tree_addr(b, s));
-              end if;
+              -- parent n and sibling s: a tree node, or at the last level a
+              -- leaf's d
+              pa := n;
+              pb := s;
+              qb := s(LOG_W - 1 downto 0);
               ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(c, IDX_W)) & last;
-            when PH_LAM =>
-              i := resize(idx, LOG_W);
-              ra_a  <= ly(leaf_addr(b, i));
-              ra_ja <= lj(leaf_addr(b, i));
-              ra_b  <= tr(tree_addr(b, '1' & i));
-              ra_c  <= lx(leaf_addr(b, i));
-              ra_zaddr <= leaf_addr(b, i);
-              ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
-                        & std_logic_vector(resize(i, IDX_W)) & last;
             when others =>
-              i := resize(idx, LOG_W);
-              ra_a  <= tr(tree_addr(b, '1' & i));
-              ra_b  <= lx(leaf_addr(b, i));
-              ra_c  <= lz(leaf_addr(b, i));
-              ra_zaddr <= leaf_addr(b, i);
+              -- LAM: y_i (+ sigma^j in stage B) times 1/d_i from leaf W+i
+              -- FIN: lam_i from leaf W+i times x_i + x3_i, with d_i for x3
               ra_tag <= std_logic_vector(b) & std_logic_vector(ph)
                         & std_logic_vector(resize(i, IDX_W)) & last;
           end case;
+
+          ta := tr(tree_addr(b, pa));
+          tb := tr(tree_addr(b, pb));
+          da := ld(leaf_addr(b, qa));
+          db := ld(leaf_addr(b, qb));
+          xa := lx(leaf_addr(b, qa));
+          ya := ly(leaf_addr(b, qa));
+          ra_ja    <= lj(leaf_addr(b, qa));
+          ra_zaddr <= leaf_addr(b, qa);
+          ra_c     <= da;
+          case to_integer(ph) is
+            when PH_FWD =>
+              if leafy then ra_a <= da; else ra_a <= ta; end if;
+              if leafy then ra_b <= db; else ra_b <= tb; end if;
+            when PH_INV =>
+              ra_a <= ta;
+              ra_b <= tb;
+            when PH_BWD =>
+              ra_a <= ta;
+              if leafy then ra_b <= db; else ra_b <= tb; end if;
+            when PH_LAM =>
+              ra_a <= ya;
+              ra_b <= tb;
+            when others =>
+              ra_a <= ta;
+              ra_b <= xa;
+          end case;
           ra_ph <= ph;
-          if leafy then ra_leafy <= '1'; else ra_leafy <= '0'; end if;
         end if;
 
         -- ============ stage B: form operands ============
@@ -562,25 +581,17 @@ begin
           oa := ra_a;
           ob := ra_b;
           case to_integer(ra_ph) is
-            when PH_FWD =>
-              if ra_leafy = '1' then
-                oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
-                ob := ra_b xor gf_sigma_j(ra_b, ra_jb);
-              end if;
             when PH_INV =>
               ob := inv_frob(ra_b, ra_k);
-            when PH_BWD =>
-              if ra_leafy = '1' then
-                ob := ra_b xor gf_sigma_j(ra_b, ra_jb);
-              end if;
             when PH_LAM =>
               oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
-              lz(ra_zaddr) <= ra_c xor gf_sigma_j(ra_c, ra_ja);   -- d, for x3 later
-            when others =>
+            when PH_FIN =>
               -- ra_a = lam, ra_b = x, ra_c = d
               x3 := gf_frob(ra_a, 1) xor ra_a xor ra_c;
               ob := ra_b xor x3;
               lz(ra_zaddr) <= x3;
+            when others =>
+              null;
           end case;
           mul_a <= oa;
           mul_b <= ob;
