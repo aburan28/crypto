@@ -5,10 +5,14 @@
 -- read back through the queue and checked against the record, and at the
 -- end the step and DP counters must agree with the records too.
 --
+-- With CDC=true the register block runs on its own clock of T_ENG_PS ps
+-- behind the ec2k_axil_cdc bridge, as it does on F2 with the engine clock
+-- above the shell's; the host side stays on the 10 ns clock.
+--
 --   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd \
---        ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd ec2k_axil_tb.vhd
+--        ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd ec2k_axil_cdc.vhd ec2k_axil_tb.vhd
 --   ghdl -e --std=08 ec2k_axil_tb
---   ghdl -r --std=08 ec2k_axil_tb [-gNENG=1]
+--   ghdl -r --std=08 ec2k_axil_tb [-gNENG=1] [-gCDC=true -gT_ENG_PS=7000]
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,7 +28,9 @@ entity ec2k_axil_tb is
     NENG    : natural := 2;
     ID_W    : natural := 4;
     LOG_W   : natural := 3;
-    LOG_NB  : natural := 2
+    LOG_NB  : natural := 2;
+    CDC     : boolean := false;
+    T_ENG_PS : natural := 7000
   );
 end entity;
 
@@ -37,11 +43,22 @@ architecture sim of ec2k_axil_tb is
   signal rst : std_logic := '1';
   signal running : boolean := true;
 
+  -- the register block's clock and reset: the host clock, or its own
+  signal eclk : std_logic := '0';
+  signal erst : std_logic := '1';
+
   signal awaddr, araddr, wdata, rdata : std_logic_vector(31 downto 0) := (others => '0');
   signal awvalid, awready, wvalid, wready, bvalid, bready : std_logic := '0';
   signal arvalid, arready, rvalid, rready : std_logic := '0';
   signal wstrb : std_logic_vector(3 downto 0) := "1111";
   signal bresp, rresp : std_logic_vector(1 downto 0);
+
+  -- the register block's side of the bridge
+  signal m_awaddr, m_araddr, m_wdata, m_rdata : std_logic_vector(31 downto 0);
+  signal m_awvalid, m_awready, m_wvalid, m_wready, m_bvalid, m_bready : std_logic;
+  signal m_arvalid, m_arready, m_rvalid, m_rready : std_logic;
+  signal m_wstrb : std_logic_vector(3 downto 0);
+  signal m_bresp, m_rresp : std_logic_vector(1 downto 0);
 
   type gf_array_t  is array (0 to MAXBLK - 1) of gf_t;
   type nat_array_t is array (0 to MAXBLK - 1) of natural;
@@ -68,16 +85,57 @@ begin
 
   clk <= not clk after 5 ns when running else '0';
 
+  same_clock : if not CDC generate
+    eclk <= clk;
+    erst <= rst;
+    m_awaddr <= awaddr; m_awvalid <= awvalid; awready <= m_awready;
+    m_wdata <= wdata; m_wstrb <= wstrb; m_wvalid <= wvalid; wready <= m_wready;
+    bresp <= m_bresp; bvalid <= m_bvalid; m_bready <= bready;
+    m_araddr <= araddr; m_arvalid <= arvalid; arready <= m_arready;
+    rdata <= m_rdata; rresp <= m_rresp; rvalid <= m_rvalid; m_rready <= rready;
+  end generate;
+
+  own_clock : if CDC generate
+    eclk <= not eclk after (T_ENG_PS / 2) * 1 ps when running else '0';
+
+    -- the engine-side reset releases a few of its clocks after the host's
+    erst_sync : process (eclk)
+      variable pipe : std_logic_vector(2 downto 0) := "111";
+    begin
+      if rising_edge(eclk) then
+        pipe := pipe(1 downto 0) & rst;
+        erst <= pipe(2);
+      end if;
+    end process;
+
+    bridge : entity work.ec2k_axil_cdc
+      generic map (SYNC_FF => 3)
+      port map (
+        s_clk => clk, s_rst => rst,
+        s_awaddr => awaddr, s_awvalid => awvalid, s_awready => awready,
+        s_wdata => wdata, s_wstrb => wstrb, s_wvalid => wvalid, s_wready => wready,
+        s_bresp => bresp, s_bvalid => bvalid, s_bready => bready,
+        s_araddr => araddr, s_arvalid => arvalid, s_arready => arready,
+        s_rdata => rdata, s_rresp => rresp, s_rvalid => rvalid, s_rready => rready,
+        m_clk => eclk, m_rst => erst,
+        m_awaddr => m_awaddr, m_awvalid => m_awvalid, m_awready => m_awready,
+        m_wdata => m_wdata, m_wstrb => m_wstrb, m_wvalid => m_wvalid, m_wready => m_wready,
+        m_bresp => m_bresp, m_bvalid => m_bvalid, m_bready => m_bready,
+        m_araddr => m_araddr, m_arvalid => m_arvalid, m_arready => m_arready,
+        m_rdata => m_rdata, m_rresp => m_rresp, m_rvalid => m_rvalid, m_rready => m_rready);
+  end generate;
+
   dut : entity work.ec2k_axil
     generic map (NENG => NENG, ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
-                 FLUSH_CLK => 16, CNT_W => 32, DP_WEIGHT => 56, DP_FIFO_W => 3)
+                 FLUSH_CLK => 16, CNT_W => 32, DP_WEIGHT => 56, DP_FIFO_W => 3,
+                 CLK_KHZ => 333333)
     port map (
-      clk => clk, rst => rst,
-      s_awaddr => awaddr, s_awvalid => awvalid, s_awready => awready,
-      s_wdata => wdata, s_wstrb => wstrb, s_wvalid => wvalid, s_wready => wready,
-      s_bresp => bresp, s_bvalid => bvalid, s_bready => bready,
-      s_araddr => araddr, s_arvalid => arvalid, s_arready => arready,
-      s_rdata => rdata, s_rresp => rresp, s_rvalid => rvalid, s_rready => rready);
+      clk => eclk, rst => erst,
+      s_awaddr => m_awaddr, s_awvalid => m_awvalid, s_awready => m_awready,
+      s_wdata => m_wdata, s_wstrb => m_wstrb, s_wvalid => m_wvalid, s_wready => m_wready,
+      s_bresp => m_bresp, s_bvalid => m_bvalid, s_bready => m_bready,
+      s_araddr => m_araddr, s_arvalid => m_arvalid, s_arready => m_arready,
+      s_rdata => m_rdata, s_rresp => m_rresp, s_rvalid => m_rvalid, s_rready => m_rready);
 
   loader : process
     file f        : text;
@@ -200,10 +258,14 @@ begin
     wait until rising_edge(clk);
     wait until rising_edge(clk);
     rst <= '0';
-    wait until rising_edge(clk);
+    for i in 1 to 8 loop                      -- the engine-side reset lags
+      wait until rising_edge(clk);
+    end loop;
 
     rd(16#000#, v);
     assert v = x"2C130001" report "bad MAGIC " & to_hstring(v) severity failure;
+    rd(16#050#, v);
+    assert to_integer(unsigned(v)) = 333333 report "bad CLOCK " & to_hstring(v) severity error;
     rd(16#00C#, geom);
     assert to_integer(unsigned(geom(7 downto 0))) = ID_W
        and to_integer(unsigned(geom(31 downto 24))) = NENG
@@ -315,10 +377,18 @@ begin
 
     wait until rising_edge(clk);
     if errors = 0 then
-      report "ec2k_axil_tb: " & integer'image(reports) & " distinguished points, "
-             & integer'image(want_steps) & " steps through " & integer'image(NENG)
-             & " engine(s) of " & integer'image(2 ** ID_W) & " walks, "
-             & integer'image(polls) & " status polls";
+      if CDC then
+        report "ec2k_axil_tb: " & integer'image(reports) & " distinguished points, "
+               & integer'image(want_steps) & " steps through " & integer'image(NENG)
+               & " engine(s) of " & integer'image(2 ** ID_W) & " walks, "
+               & integer'image(polls) & " status polls, engines on a "
+               & integer'image(T_ENG_PS) & " ps clock behind the bridge";
+      else
+        report "ec2k_axil_tb: " & integer'image(reports) & " distinguished points, "
+               & integer'image(want_steps) & " steps through " & integer'image(NENG)
+               & " engine(s) of " & integer'image(2 ** ID_W) & " walks, "
+               & integer'image(polls) & " status polls";
+      end if;
       report "ec2k_axil_tb: PASS";
     else
       report "ec2k_axil_tb: FAIL -- " & integer'image(errors) & " errors" severity failure;

@@ -31,6 +31,8 @@
 --   0x024  LD_X0..4  RW  0x024 0x028 0x02C 0x030 0x034
 --   0x038  LD_Y0..4  RW  0x038 0x03C 0x040 0x044 0x048
 --   0x04C  LD_GO     WO  any write: hand (LD_ID, LD_X, LD_Y) to its engine
+--   0x050  CLOCK     RO  engine clock in kHz (the CLK_KHZ generic; 0 if the
+--                        image did not say)
 --   0x080  DP_ID     RO  gid of the walk at the head of the queue
 --   0x084  DP_STEPS_LO RO  steps that walk took from its start point
 --   0x088  DP_STEPS_HI RO
@@ -63,7 +65,8 @@ entity ec2k_axil is
     FLUSH_CLK : natural := 32;
     CNT_W     : natural := 32;
     DP_WEIGHT : natural := DP_WEIGHT_DEFAULT;
-    DP_FIFO_W : natural := 6                 -- queue depth = 2**DP_FIFO_W
+    DP_FIFO_W : natural := 6;                -- queue depth = 2**DP_FIFO_W
+    CLK_KHZ   : natural := 0                 -- reported in CLOCK, nothing else
   );
   port (
     clk       : in  std_logic;
@@ -143,8 +146,10 @@ architecture rtl of ec2k_axil is
     end loop;
   end procedure;
 
-  -- engines
+  -- engines; the reset is registered once per engine so that no single
+  -- flop fans out to every engine on the die
   signal rst_eng    : std_logic;
+  signal rst_eng_r  : std_logic_vector(0 to NENG - 1) := (others => '1');
   signal e_ld_valid : std_logic_vector(0 to NENG - 1);
   signal e_ld_ready : std_logic_vector(0 to NENG - 1);
   signal e_dp_valid : std_logic_vector(0 to NENG - 1);
@@ -203,11 +208,18 @@ begin
   rst_eng <= rst or not run;
 
   engines : for i in 0 to NENG - 1 generate
+    rst_reg : process (clk)
+    begin
+      if rising_edge(clk) then
+        rst_eng_r(i) <= rst_eng;
+      end if;
+    end process;
+
     eng : entity work.ec2k_walker
       generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
                    FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, DP_WEIGHT => DP_WEIGHT)
       port map (
-        clk => clk, rst => rst_eng,
+        clk => clk, rst => rst_eng_r(i),
         ld_valid => e_ld_valid(i), ld_ready => e_ld_ready(i),
         ld_id => ld_gid(ID_W - 1 downto 0), ld_x => ld_x, ld_y => ld_y,
         dp_valid => e_dp_valid(i), dp_ack => e_dp_ack(i),
@@ -309,6 +321,7 @@ begin
           when 8 => rdata <= ld_id_reg;
           when 9 to 13  => rdata <= word_of(ld_x, raddr - 9);
           when 14 to 18 => rdata <= word_of(ld_y, raddr - 14);
+          when 20 => rdata <= std_logic_vector(to_unsigned(CLK_KHZ, 32));
           when 32 => rdata <= std_logic_vector(resize(q_gid(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 32));
           when 33 => rdata <= std_logic_vector(resize(q_steps(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 64)(31 downto 0));
           when 34 => rdata <= std_logic_vector(resize(q_steps(to_integer(q_rd(DP_FIFO_W - 1 downto 0))), 64)(63 downto 32));
