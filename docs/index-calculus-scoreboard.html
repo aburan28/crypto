@@ -598,6 +598,56 @@
     </div>
   </div>
 
+  <!-- ============ SOLVING-DEGREE LEVERS ============ -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>The solving-degree levers, classified</h2>
+      <p>A second ledger, in a second unit, because these levers change the
+        <em>presentation</em> of one decomposition instance rather than the cost of a whole
+        discrete logarithm. None of them produces an <code>S</code>, so none belongs in the
+        table above; the unit here is log&#8322; operations for one Macaulay solve,
+        <code>rows&middot;cols^(&omega;&minus;1)</code> at <code>&omega; = 2.807</code>, expectated
+        over the measured <code>D*</code> histogram. The boundary is the
+        <code>D* = 2</code> Nullstellensatz floor, so the ratio column is what a lever has to
+        move. <strong>Nothing here changes any number in the table above</strong> &mdash; no lever
+        has reached a full discrete logarithm.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Lever L5 at n = 10, l = 5, 12 selection + 12 disjoint holdout targets, every cell a
+          refutation cross-checked against a brute-force decomposition search
+          (<code>experiments/isogeny_class_search.json</code>). L2&ndash;L4 verdicts from
+          <code>experiments/degree_reduction_*.json</code>, whose rounds predate this panel and are
+          carried here as verdicts rather than re-derived figures.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Lever / variant</th>
+            <th scope="col" class="n">log&#8322; ops</th>
+            <th scope="col" class="n">Ratio to floor</th>
+            <th scope="col">Correct</th>
+            <th scope="col">Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="5">L5 &middot; the curve (isogeny class) &mdash; ECC2K-130, this round</td></tr>
+          <tr><td>Floor &mdash; every cell at <code>D* = 2</code></td><td class="n">13.82</td><td class="n">2^+0.00</td><td>&mdash;</td><td><span class="chip">floor</span></td></tr>
+          <tr><td>Koblitz curve <code>a&#8326; = 1</code>, on the holdout <em>(reference)</em></td><td class="n">23.07</td><td class="n">2^+9.26</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>Best curve selected on target set A, scored on A</td><td class="n">13.82</td><td class="n">2^+0.00</td><td>yes</td><td><span class="chip relabel">selection, biased</span></td></tr>
+          <tr><td>The same curve, scored on the disjoint holdout B</td><td class="n">24.20</td><td class="n">2^+10.38</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td><code>2^N</code> enumeration of <code>V &times; V</code> <em>(reference)</em></td><td class="n">13.32</td><td class="n">2^&minus;0.49</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr class="group"><td colspan="5">Earlier levers, carried as verdicts</td></tr>
+          <tr><td>L2 &middot; symmetrisation</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td><td><span class="chip">blocked below &#8467; = 6</span></td></tr>
+          <tr><td>L3 &middot; hybrid slicing</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>L4 &middot; degree falls (mutants)</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend" style="padding-top:0">
+      <span>L5 killed &middot; selected curve 2^+1.13 worse on fresh targets</span>
+      <span>curves holding the floor for every target: 68 &rarr; 34 &rarr; 0 at n = 8</span>
+    </div>
+  </div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">
