@@ -90,6 +90,33 @@ timed DP34 collection followed. The [artifact audit](benchmarks/carryless-addend
 passed.
 
 Mode 3 remains opt-in and is not selected by the RTX preset. A separate
-dependency assessment is testing whether computing independent native
-products before combining their results avoids the latency introduced by
-chained addend operands. No performance gain is claimed for that hypothesis.
+dependency assessment tested independent native products before combining
+their results. Its measured outcome is recorded below.
+
+## Independent-product follow-up
+
+The retained [prototype header](benchmarks/carryless-addends/independent-top-prototype.h)
+adds experimental modes 4 and 5. They are not exposed by the public mode
+selector. Mode 4 restores independent Karatsuba leaves; mode 5 also computes
+all four top-term native products with zero addends before combining them.
+PTX and SASS analysis found maximum native multiply dependency depths of
+three and one, respectively, versus four in mode 3.
+
+The [GPU comparison](benchmarks/carryless-addends/independent-comparison.json)
+passed arithmetic, client, normalized-state and all 36 checkpoint children,
+including three expected worker-geometry rejections. Every timed sample
+completed 201,863,462,912 scalar updates.
+
+| Screening order | Variant | Complete scalar rate B/s |
+|---:|---|---:|
+| 1 | Control | 13.384979 |
+| 2 | Independent core, mode 4 | 12.411916 |
+| 3 | Independent core and top products, mode 5 | 12.232020 |
+| 4 | Control | 13.327505 |
+
+Neither candidate qualified. Three warmups are excluded from the table;
+no repeated confirmation or timed collection was triggered. The
+[artifact audit](benchmarks/carryless-addends/independent-comparison-review.json)
+passed all seven timed rows. Reducing dependency depth did not improve
+throughput in this screen. The tested native top-term constructions are
+therefore retained as unsuccessful experiments, with no RTX preset change.
