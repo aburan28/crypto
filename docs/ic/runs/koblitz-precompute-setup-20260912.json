@@ -1,0 +1,104 @@
+{
+ "attribution": "The single-word orbit map reached main separately (PR #217); this record measures it because the end-to-end figures depend on it, and because main carries no written account of it. The factor-base selection fix is the code this record accompanies.",
+ "claim_boundary": "synthetic_known_answer",
+ "date": "2026-09-12",
+ "end_to_end": {
+  "degree_53_shipped_parameters": {
+   "amortised_ratio_history": {
+    "before_any_of_this": 1.037,
+    "with_both": 2.161,
+    "with_both_and_a_collection_window_of_F_over_32": 2.405
+   },
+   "curve": "K_0 / F_2^53",
+   "descent_seconds_per_target": 0.04878924706250001,
+   "factor_base": {
+    "columns": 144,
+    "points": 15264
+   },
+   "parameters": "docs/ic/params/k0n53-subgroup.json as it ships: full scan, no collection window",
+   "precompute_seconds": 16.515170663,
+   "precompute_seconds_history": {
+    "before_any_of_this": 35.936,
+    "with_both": 16.515,
+    "with_both_and_a_collection_window_of_F_over_32": 14.829,
+    "with_the_orbit_map_alone": 24.1
+   },
+   "ratio": {
+    "amortised": 2.160907447547633,
+    "charged": 25.019271118773272
+   },
+   "relations": 458,
+   "rho_seconds_per_target": 1.2206713999375003,
+   "rho_verified": 32,
+   "stage_seconds": {
+    "collect": 14.667,
+    "logs": 0.855,
+    "select": 0.992,
+    "solve": 1.745
+   },
+   "subgroup_bits": 45,
+   "targets": 32,
+   "trials": 15888,
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.9600308100402795,
+    "whole_process_crossover": true
+   },
+   "verified": 32
+  }
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "operation": "koblitz_precompute_setup_costs",
+ "schema_version": 1,
+ "software": {
+  "commit": "2175c00aed8bec797fae958ff6ecf28ce65ca3c2",
+  "profile": "release"
+ },
+ "the_three_setup_costs": {
+  "measured_at": "K_0/F_2^53, a 15264-point subgroup-orbit base, each in isolation",
+  "note": "The orbit map is built twice in a workflow run -- once for the factor-base summary and once inside the log system -- so its cost counted twice. The pair table is genuine O(|F|^2) work: |F|^2/2 point additions and a 1.9 GB sort. It is now the dominant fixed cost, and unlike the scanning it does not grow with r.",
+  "pair_sum_table_seconds": {
+   "after": 6.668,
+   "before": 6.724,
+   "note": "untouched; the difference is run-to-run noise"
+  },
+  "projected_signed_orbit_map_seconds": {
+   "after": 0.048,
+   "before": 8.163
+  },
+  "select_factor_base_seconds": {
+   "after": 0.936,
+   "before": 8.602
+  }
+ },
+ "what_changed": [
+  {
+   "same_answer_because": "An abscissa carries at most two points, so 2*|abscissae| bounds what a representative set can yield. While that bound is below the target a build could only have come back short and the loop would have gone round again, so skipping it changes nothing. The base is the same 15264 points and 144 columns.",
+   "speedup": 9.2,
+   "status": "this change",
+   "what": "subgroup base selection stops rebuilding what it has already built",
+   "why": "It rebuilt the whole base after every batch of eight abscissae -- 954 rebuilds over a growing list to reach 15264 points -- which is quadratic in the abscissae."
+  },
+  {
+   "same_answer_because": "The general map canonicalises and sorts by point_key = (x+1, y) lexicographically. FastPoint::pack is ((x+1) << 1 | sign) where sign marks which of y and x^y is larger, so within one abscissa it separates P from -P in the same order y does. The two orders agree, so the two maps pick the same representatives, and a test compares them point for point at degrees 15, 19, 31 and 37.",
+   "speedup": 170,
+   "status": "already on main (PR #217)",
+   "what": "projected_signed_orbit_map in single-word arithmetic",
+   "why": "It projects every base point by the cofactor and then walks each one's whole signed Frobenius orbit -- about 1.6 million point operations at this size -- in big-integer arithmetic."
+  }
+ ],
+ "what_this_is": "Once relation collection reached its floor, the logarithm precompute was no longer dominated by collecting -- it was dominated by three fixed setup costs of about eight seconds each. Two were accidental. This records both and measures what removing them buys.",
+ "what_this_is_not": [
+  "Not an algorithmic result: no cost law changed, two implementations of the same computation got faster.",
+  "Not a change to the descent or to rho, whose per-target costs move only by run-to-run noise.",
+  "Not a claim about any curve in use: K_0 over F_2^53 has a 45-bit subgroup.",
+  "Not a measurement of the collection window, which landed separately and is selected on its own run; the end-to-end figures here use the full scan.",
+  "The 'with the orbit map alone' row is arithmetic on the isolated measurements, not a separate end-to-end run."
+ ]
+}

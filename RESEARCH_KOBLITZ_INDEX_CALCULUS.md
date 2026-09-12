@@ -1340,3 +1340,179 @@ A last caveat on the table: it is arithmetic on two measured constants,
 not a series of runs. Checked against the degree-53 run it under-predicts
 the win by about 1.7×, mostly because that run's ρ walks took 1.8× their
 expected step count.
+
+## Collection, taken to its floor
+
+The previous section ended by naming relation collection as the binding
+cost past 48 bits. It was, and it was spending three times what it had
+to.
+
+A three-summand probe asks whether a random `R = [a]G` is a sum of three
+factor-base points, and it asks by scanning: for each `k` it looks up
+`R − P_k` in the pair-sum table. If `R = P_i + P_j + P_k` the scan finds
+that triple three times — once with each of its indices standing as the
+third summand — and the code kept exactly one of the three, the one whose
+witness came out sorted (`j ≤ k`). The other two chances were computed
+and thrown away.
+
+They needn't be. Scanning a **window** of `w` summands instead of all of
+them, and dropping the sorting condition, keeps all three chances at
+`w/|F|` of the cost: a triple is caught whenever *any* of its three
+indices lands in the window, which happens with probability
+`1 − (1 − w/|F|)³ ≈ 3w/|F|`. Three times the relations per lookup, paid
+for with more targets rather than more scanning — so the targets have to
+be cheap, which is why the probes are now walked (runs of 64 trials
+sharing one scalar multiplication and stepping by a seed-fixed stride)
+rather than multiplied one at a time.
+
+There is a floor to this, and the window reaches it. A single lookup
+succeeds with probability `|F|²/2r`, so no oracle of this shape can spend
+fewer than
+
+```text
+    2r/|F|²   lookups per relation
+```
+
+Measured against that bound, the full scan and a window of `|F|/32`:
+
+| | lookups per relation | ideal | ratio |
+|---|---|---|---|
+| degree 41, full scan | 119 273 | 39 922 | 2.99 |
+| degree 41, window `|F|/32` | 41 323 | 39 922 | **1.04** |
+| degree 53, full scan | 529 507 | 180 651 | 2.93 |
+| degree 53, window `|F|/32` | 192 973 | 180 651 | **1.07** |
+
+The waste was exactly the factor of three the argument predicts, and
+what is left is within 7% of the bound. There is nothing further to win
+here without a different oracle.
+
+Note what the limit says: `2r/|F|²` lookups per relation is the same
+count as the walking descent's `2r/|F|²` probes. As the window narrows
+to a single summand, a collection probe *is* a two-summand descent probe
+— one target, one lookup. Collection and the descent were never two
+algorithms; the full scan was the only thing making them look different.
+
+### What it costs in practice
+
+At `K_0/F_2^53`, 32 targets, against a full-scan control run in the same
+session on the same binary:
+
+| | full scan | window `|F|/32` |
+|---|---|---|
+| trials | 15 888 | 174 768 |
+| relations | 458 | 432 |
+| summands scanned | 242.5 M | 83.4 M |
+| collect stage | 14.49 s | 9.78 s |
+| precompute | 32.08 s | 27.29 s |
+| amortised ratio vs ρ | 1.155 | **1.331** |
+
+Both solved 32 of 32 and had all 32 confirmed by the ρ walk. The collect
+stage carries the one-time pair-table build — about 6.5 s at this base
+size, the same for both — and net of it the scanning costs 17.5 ms a
+relation against 7.6 ms, about 2.3 times. That is short of the 2.7 times
+fewer lookups because a windowed lookup costs some 20% more in wall
+time: its prefetch pipeline restarts every window instead of running the
+length of the base. Batching several windows into one scan to fix that
+was tried and measured; it was a wash, and the simpler code stands.
+
+### A cost that was not algorithmic at all
+
+The same measurement turned up something else. The collector's
+point-index map is keyed by big integers, and it was being rebuilt for
+every work unit. It costs about as much to build as a short unit costs to
+run, so the price of a run depended on how finely its trials had been
+partitioned — precisely the parameter a distributed collection is
+supposed to be free to choose:
+
+| | 1 unit | 4 units | 8 units |
+|---|---|---|---|
+| degree 41 collect, before | 0.92 s | 1.25 s | 1.70 s |
+| degree 41 collect, after | 0.92 s | 0.97 s | 0.98 s |
+
+Building it once per stage removed it. At degree 53 the same fix took the
+full-scan collect stage from 25.20 s to 14.49 s — larger than the window
+saves, on a base of 15264 points. Together the two changes take the
+degree-53 collect stage from 25.20 s to 9.78 s.
+
+It is worth saying plainly that the second of these was not a discovery
+about index calculus. It was a cost that had been sitting in the
+distributed collector since it was written, invisible because nothing had
+ever compared a run against itself at two partition sizes.
+
+## What was left once collecting stopped being the cost
+
+Flooring collection had a side effect worth reporting on its own. With
+the scan no longer dominating, the degree-53 precompute turned out to be
+three fixed setup costs of about eight seconds each:
+
+```text
+    select the factor base          8.4 s
+    projected signed-orbit map      8.2 s   (built twice per run)
+    pair-sum table                  7.5 s
+```
+
+Two of the three were accidental.
+
+**The orbit map.** It projects every base point by the cofactor and then
+walks each one's whole signed Frobenius orbit — about 1.6 million point
+operations on a 15264-point base — and it did all of it in big-integer
+arithmetic while the rest of the pipeline had long since moved to single
+words. Moving it costs an argument rather than a leap of faith: the
+general map canonicalises and sorts by `point_key = (x + 1, y)`
+lexicographically, and `FastPoint::pack` is `((x + 1) << 1 | sign)` where
+`sign` marks which of `y` and `x ^ y` is the larger — so within one
+abscissa it separates `P` from `−P` in exactly the order `y` does. The
+two orders agree, the two maps choose the same representatives, and a
+test compares them point for point at four degrees. **8.2 s → 0.047 s**,
+twice per run.
+
+**Selecting the base.** It drew abscissae in batches of eight and rebuilt
+the entire base after each batch — 954 rebuilds over a growing list to
+reach 15264 points, quadratic in the abscissae. It need not rebuild at
+every boundary: an abscissa carries at most two points, so `2·|abscissae|`
+bounds what a representative set can yield, and while that bound is below
+the target a build could only have come back short and the loop would
+have gone round again. Skipping those builds changes nothing — same
+15264 points, same 144 columns. **8.4 s → 0.93 s**.
+
+The pair table's 7.5 s is real work: `|F|²/2` point additions and a
+1.9 GB sort. It is now the dominant fixed cost, and unlike the scanning
+it does not grow with `r`.
+
+### The precompute over this line of work
+
+Measured at `K_0/F_{2^53}` on a 15264-point base, each cost in isolation:
+
+| | before | after |
+|---|---|---|
+| select the factor base | 8.60 s | **0.94 s** |
+| projected signed-orbit map | 8.16 s | **0.048 s** |
+| pair-sum table | 6.67 s | 6.67 s (untouched) |
+
+End to end on the parameters the repository ships, 32 targets:
+
+| | precompute | amortised ratio vs ρ |
+|---|---|---|
+| before any of this | 35.9 s | 1.04 |
+| with the orbit map alone | ~24.1 s | — |
+| with both | **16.5 s** | **2.16** |
+
+A collection window of `|F|/32` takes it further still, to 14.8 s and a
+ratio of 2.41, but a window is chosen on its own selection run rather
+than carried by a rung parameter file, so the table above is the
+like-for-like reading. The window and these fixes are independent and
+their effects compose.
+
+32 of 32 solved and 32 of 32 confirmed by ρ at every step. The
+whole-process advantage at this degree went from marginal to a factor of
+two and a half, and none of it came from a better algorithm — the cost
+laws in the previous sections are unchanged. What changed is that the
+implementation now spends its time where those laws say it should.
+
+It is worth being blunt about the pattern. Both of these had been sitting
+in the pipeline since the code was written, and neither was visible until
+something else stopped being the bottleneck. The window made collection
+cheap enough that eight seconds of setup became the thing to look at;
+before that, they were noise inside a larger number. Profiling only finds
+what is currently largest, which means a real speedup is usually followed
+by another one.

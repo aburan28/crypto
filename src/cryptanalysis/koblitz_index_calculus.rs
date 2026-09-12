@@ -1742,6 +1742,16 @@ pub fn build_subgroup_orbit_factor_base(
     let cap = 1u64 << kc.n;
     let mut drawn = 0u64;
     let budget = 1024u64 * points as u64;
+    // Rebuilding at every batch boundary is quadratic — 954 rebuilds over
+    // a growing representative list to reach 15264 points at degree 53,
+    // which is most of what selecting a base costs.  An abscissa carries
+    // at most two points, so `2·|abscissae|` bounds what a representative
+    // set can yield; while that bound is below the target a build could
+    // only have come back short and the loop would have gone round again,
+    // so skipping it changes nothing.  The abscissa set is maintained
+    // here as the batches arrive, which costs one Frobenius orbit per new
+    // representative rather than one per representative per round.
+    let mut abscissae: HashSet<BigUint> = HashSet::new();
     while base.as_ref().is_none_or(|b| b.points.len() < points) {
         let mut added = 0usize;
         while added < batch {
@@ -1771,8 +1781,16 @@ pub fn build_subgroup_orbit_factor_base(
             let BinaryPoint::Affine { x, .. } = curve.lower(projected) else {
                 continue;
             };
+            let mut orbit = F2mElement::from_biguint(&x.to_biguint(), kc.n);
+            for _ in 0..kc.extension_degree() {
+                abscissae.insert(orbit.to_biguint());
+                orbit = kc.frobenius_x(&orbit);
+            }
             representatives.push(x);
             added += 1;
+        }
+        if 2 * abscissae.len() < points {
+            continue;
         }
         base = build_explicit_frobenius_orbit_factor_base(kc, &representatives);
     }
