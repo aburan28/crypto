@@ -121,6 +121,7 @@ def verify_result() -> dict[str, Any]:
     selection = committed["selection"]
     require(selection["winner"] == winner and selection["full_scan"] == full, "Stage-38 selected rows changed")
     require(selection["collection_and_logs_speedup"] == full["collection_and_logs_seconds"] / winner["collection_and_logs_seconds"], "Stage-38 collection speedup changed")
+    require(selection["five_target_ic_speedup"] == full["five_target_ic_seconds"] / winner["five_target_ic_seconds"], "Stage-38 five-target speedup changed")
     require(selection["lookup_reduction"] == full["summands_scanned"] / winner["summands_scanned"], "Stage-38 lookup reduction changed")
     require(committed.get("factor_base_algebraically_defined") is True and committed.get("target_subgroup_enumerated_for_factor_base") is False, "Stage-38 factor-base boundary changed")
     require(committed.get("target_scalars_constructed_or_supplied") is False and committed.get("factor_base_logs_known_by_construction") is False, "Stage-38 scalar-label boundary changed")
