@@ -24,7 +24,7 @@
 # Variables: AWS_DEFAULT_REGION (us-west-2), STACK (ecc2k130), BUCKET,
 # TABLE (DynamoDB slot registry, blank = S3 registry; must match infra.sh),
 # TYPES (default all three F2 sizes), AMI (override the FPGA Developer AMI
-# lookup), KEY_NAME, ROOT_GB (default 100), MAX_SPOT_PER_FPGA_HOUR.
+# lookup), KEY_NAME, ROOT_GB (default 150), MAX_SPOT_PER_FPGA_HOUR.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -38,7 +38,7 @@ SG=$STACK-worker
 LT=$STACK-fpga
 TYPES=${TYPES:-f2.6xlarge,f2.12xlarge,f2.48xlarge}
 KEY_NAME=${KEY_NAME:-}
-ROOT_GB=${ROOT_GB:-100}
+ROOT_GB=${ROOT_GB:-150}     # the FPGA Developer AMI's root snapshot is 120 GB
 FLEET_FILE=.f2-fleet-id-$AWS_DEFAULT_REGION
 
 fpgasOf() {
@@ -73,7 +73,7 @@ infra)
     # works, this is just the one AWS tests F2 on.
     if [ -z "${AMI:-}" ]; then
         AMI=$(aws ec2 describe-images --owners aws-marketplace \
-              --filters "Name=name,Values=*FPGA Developer AMI*" "Name=state,Values=available" \
+              --filters "Name=name,Values=FPGA Developer AMI (Ubuntu)*" "Name=state,Values=available" \
                         "Name=architecture,Values=x86_64" \
               --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)
         if [ -z "$AMI" ] || [ "$AMI" = None ]; then
@@ -81,7 +81,7 @@ infra)
             exit 1
         fi
     fi
-    read -r AMINAME ROOTDEV <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[Name,RootDeviceName]' --output text)"
+    read -r ROOTDEV AMINAME <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[RootDeviceName,Name]' --output text)"
     echo "AMI $AMI ($AMINAME, root $ROOTDEV)"
 
     sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" -e "s/__REGION__/$AWS_DEFAULT_REGION/g" \

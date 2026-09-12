@@ -21,6 +21,14 @@ SHIPPER=$!
 finish() {
     echo "afi build $TAG finished $(date -u)"
     kill $SHIPPER 2>/dev/null
+    # Reports and the vivado log are worth having even when the build
+    # failed; the utilisation of a design that did not fit is the point.
+    if [ -n "${CL_DIR:-}" ] && [ -d "$CL_DIR/build/reports" ]; then
+        aws s3 cp "$CL_DIR/build/reports" "s3://$BUCKET/fpga/builds/$TAG/reports/" --recursive --only-show-errors 2>/dev/null
+        for l in "$CL_DIR"/build/scripts/*.vivado.log; do
+            [ -f "$l" ] && aws s3 cp "$l" "s3://$BUCKET/fpga/builds/$TAG/vivado.log" --only-show-errors 2>/dev/null
+        done
+    fi
     ship
     [ "${NO_SHUTDOWN:-0}" = 1 ] || shutdown -h now
 }
@@ -30,13 +38,26 @@ fail() { echo "FAILED: $*"; exit 1; }
 
 # ---- tools -----------------------------------------------------------------
 # The FPGA Developer AMI has Vivado under /tools/Xilinx; a login shell would
-# put it on PATH, user data does not.
+# put it on PATH, user data does not.  Two layouts: Vivado/<ver> up to
+# 2024.2, <ver>/Vivado from 2025.1.  settings64.sh also sets XILINX_VIVADO,
+# which hdk_setup.sh wants.
 if ! command -v vivado >/dev/null 2>&1; then
-    for d in /tools/Xilinx/Vivado/*/bin /opt/Xilinx/Vivado/*/bin; do
-        [ -d "$d" ] && export PATH="$PATH:$d"
+    for s in /tools/Xilinx/*/Vivado/settings64.sh /tools/Xilinx/Vivado/*/settings64.sh \
+             /opt/Xilinx/*/Vivado/settings64.sh /opt/Xilinx/Vivado/*/settings64.sh; do
+        [ -f "$s" ] || continue
+        echo "sourcing $s"
+        set +u; source "$s"; set -u
+        break
     done
 fi
-command -v vivado >/dev/null 2>&1 || fail "vivado not found; is this the FPGA Developer AMI?"
+if ! command -v vivado >/dev/null 2>&1; then
+    v=$(find /tools /opt /usr/local -maxdepth 6 -type f -name vivado -path '*/bin/vivado' 2>/dev/null | sort | tail -1)
+    [ -n "$v" ] && export PATH="$PATH:$(dirname "$v")"
+fi
+command -v vivado >/dev/null 2>&1 || {
+    echo "looked for vivado; /tools: $(ls /tools 2>/dev/null | tr '\n' ' ') /tools/Xilinx: $(ls /tools/Xilinx 2>/dev/null | tr '\n' ' ') /opt: $(ls /opt 2>/dev/null | tr '\n' ' ')"
+    fail "vivado not found; is this the FPGA Developer AMI?"
+}
 command -v aws >/dev/null 2>&1 || fail "aws cli not found"
 command -v python3 >/dev/null 2>&1 || fail "python3 not found"
 echo "vivado: $(vivado -version 2>/dev/null | head -1)"

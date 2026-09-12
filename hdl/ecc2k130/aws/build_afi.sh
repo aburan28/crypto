@@ -13,7 +13,8 @@
 #   ./build_afi.sh list                 every build in the bucket
 #
 # Geometry of the image, all optional:
-#   NENG       walker engines (default 32; ~10k LUTs each, the VU47P has 2.85M)
+#   NENG       walker engines (default 48; 13.7k LUTs each as synthesised,
+#              the VU47P has 1.30M, so 48 is half the device)
 #   ID_W       walks per engine = 2**ID_W (default 8)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
 #              the challenge's; must equal campaign.json dpWeight)
@@ -47,7 +48,7 @@ PROFILE=$STACK-fpga-build
 SG=$STACK-worker
 BUILD_TYPE=${BUILD_TYPE:-r6i.4xlarge}
 KEY_NAME=${KEY_NAME:-}
-NENG=${NENG:-32}
+NENG=${NENG:-48}
 ID_W=${ID_W:-8}
 DP_WEIGHT=${DP_WEIGHT:-34}
 REPO=$(cd ../../.. && pwd)
@@ -82,33 +83,50 @@ launch)
         || { echo "no source in the bucket; run ./build_afi.sh push first" >&2; exit 1; }
 
     # ---- role: S3 on the bucket, and the two FPGA image calls ----------
-    if ! aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
-        aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
-          "Version": "2012-10-17",
-          "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
-        }' >/dev/null
-        echo "created role $ROLE"
-    fi
-    aws iam put-role-policy --role-name "$ROLE" --policy-name fpga-build --policy-document "{
-      \"Version\": \"2012-10-17\",
-      \"Statement\": [
-        {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
-        {\"Effect\": \"Allow\", \"Action\": [\"ec2:CreateFpgaImage\", \"ec2:DescribeFpgaImages\", \"ec2:CreateTags\"], \"Resource\": \"*\"}
-      ]
-    }"
-    aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-    if ! aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
-        aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null
-        aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE"
-        echo "created instance profile $PROFILE; waiting for IAM to propagate"
-        sleep 15
+    # Without IAM rights (or with NO_ROLE=1) the instance gets a 36 h session
+    # token of the calling user in its user data instead.  That is the
+    # caller's own permissions on the caller's own instance for the length
+    # of one build, and it is what a role would have given it, scoped wider;
+    # the role is preferred whenever it can be made.
+    ensureRole() {
+        aws iam get-role --role-name "$ROLE" >/dev/null 2>&1 \
+        || aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
+             "Version": "2012-10-17",
+             "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
+           }' >/dev/null || return 1
+        aws iam put-role-policy --role-name "$ROLE" --policy-name fpga-build --policy-document "{
+          \"Version\": \"2012-10-17\",
+          \"Statement\": [
+            {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
+            {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
+            {\"Effect\": \"Allow\", \"Action\": [\"ec2:CreateFpgaImage\", \"ec2:DescribeFpgaImages\", \"ec2:CreateTags\"], \"Resource\": \"*\"}
+          ]
+        }" || return 1
+        aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore || return 1
+        if ! aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+            aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
+            aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
+            echo "created instance profile $PROFILE; waiting for IAM to propagate"
+            sleep 15
+        fi
+    }
+    profileOpt=()
+    credLine=""
+    if [ "${NO_ROLE:-0}" != 1 ] && ensureRole 2>/dev/null; then
+        profileOpt=(--iam-instance-profile "Name=$PROFILE")
+        echo "instance profile $PROFILE"
+    else
+        echo "no IAM rights to make role $ROLE; the instance will use a 36 h session token of $(aws sts get-caller-identity --query Arn --output text)" >&2
+        read -r AK SK ST <<<"$(aws sts get-session-token --duration-seconds 129600 \
+                              --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)"
+        [ -n "$ST" ] || { echo "sts get-session-token failed" >&2; exit 1; }
+        credLine="export AWS_ACCESS_KEY_ID=$AK AWS_SECRET_ACCESS_KEY=$SK AWS_SESSION_TOKEN=$ST"
     fi
 
     # ---- AMI: the FPGA Developer AMI carries Vivado and its licence ----
     if [ -z "${AMI:-}" ]; then
         AMI=$(aws ec2 describe-images --owners aws-marketplace \
-              --filters "Name=name,Values=*FPGA Developer AMI*" "Name=state,Values=available" \
+              --filters "Name=name,Values=FPGA Developer AMI (Ubuntu)*" "Name=state,Values=available" \
                         "Name=architecture,Values=x86_64" \
               --query 'sort_by(Images,&CreationDate)[-1].ImageId' --output text)
         if [ -z "$AMI" ] || [ "$AMI" = None ]; then
@@ -116,7 +134,7 @@ launch)
             exit 1
         fi
     fi
-    read -r AMINAME ROOTDEV <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[Name,RootDeviceName]' --output text)"
+    read -r ROOTDEV AMINAME <<<"$(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].[RootDeviceName,Name]' --output text)"
     echo "AMI $AMI ($AMINAME, root $ROOTDEV)"
 
     VPC=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
@@ -130,13 +148,14 @@ launch)
         echo '#!/bin/bash'
         echo "BUCKET=$BUCKET; TAG=$TAG; REGION=$AWS_DEFAULT_REGION"
         echo "NENG=$NENG; ID_W=$ID_W; DP_WEIGHT=$DP_WEIGHT; NO_SHUTDOWN=${KEEP:-0}"
+        [ -n "$credLine" ] && echo "$credLine"
         cat build_afi_instance.sh
     } > "$ud"
     keyOpt=()
     [ -n "$KEY_NAME" ] && keyOpt=(--key-name "$KEY_NAME")
     IID=$(aws ec2 run-instances --image-id "$AMI" --instance-type "$BUILD_TYPE" \
-          --iam-instance-profile "Name=$PROFILE" --security-group-ids "$SGID" \
-          --user-data "file://$ud" "${keyOpt[@]}" \
+          ${profileOpt[@]+"${profileOpt[@]}"} --security-group-ids "$SGID" \
+          --user-data "file://$ud" ${keyOpt[@]+"${keyOpt[@]}"} \
           --block-device-mappings "[{\"DeviceName\":\"$ROOTDEV\",\"Ebs\":{\"VolumeSize\":200,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]" \
           --instance-initiated-shutdown-behavior terminate \
           --metadata-options HttpTokens=required,HttpPutResponseHopLimit=2 \
