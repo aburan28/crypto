@@ -88,14 +88,18 @@ fn f4_verdict(system: &[F2BoolPoly], n_vars: usize, max_degree: u32) -> (bool, u
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    // `n:m` pairs — field degree and summand count.
+    // Bare `n`, or `n:m` — field degree and (optional) summand count.
+    // A bare integer uses m = 2, matching the documented `9 11 13` form.
     let cases: Vec<(u32, usize)> = if args.is_empty() {
         vec![(9, 2), (13, 2), (7, 3), (9, 3)]
     } else {
         args.iter()
             .filter_map(|a| {
-                let (n, m) = a.split_once(':')?;
-                Some((n.parse().ok()?, m.parse().ok()?))
+                if let Some((n, m)) = a.split_once(':') {
+                    Some((n.parse().ok()?, m.parse().ok()?))
+                } else {
+                    Some((a.parse().ok()?, 2))
+                }
             })
             .collect()
     };
