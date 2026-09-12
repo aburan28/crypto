@@ -77,12 +77,28 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("checkip.amazonaws.com", text)
         self.assertIn("gha-ecc2k130-status", text)
         self.assertIn("gha_walker.pub", text)
+        self.assertIn("InvalidPermission.Duplicate", text)
+        self.assertIn("ecc2k-dp-walker", text)
         self.assertNotIn("meow34", text)
         pub = os.path.join(HERE, "gha_walker.pub")
         with open(pub, encoding="utf-8") as fh:
             line = fh.read().strip()
         self.assertTrue(line.startswith("ssh-ed25519 "))
         self.assertIn("ecc2k130-status-gha", line)
+
+    def test_gha_iam_user_scopes_sg_mutate_to_walker_tags(self):
+        path = os.path.join(HERE, "gha_iam_user.sh")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("PunchWalkerSshOnly", text)
+        self.assertIn('ec2:ResourceTag/Name": "rho-ecc2k-walker"', text)
+        self.assertIn('ec2:ResourceTag/Purpose": "ecc2k-dp-walker"', text)
+        self.assertIn("security-group/*", text)
+        authorize_star = (
+            '"ec2:AuthorizeSecurityGroupIngress"' in text
+            and '"Resource": "*"' in text.split("PunchWalkerSshOnly", 1)[1]
+        )
+        self.assertFalse(authorize_star)
 
 
 class HistoryTests(unittest.TestCase):

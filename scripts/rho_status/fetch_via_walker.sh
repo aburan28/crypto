@@ -47,6 +47,15 @@ if [ -z "$HOST" ] || [ "$HOST" = None ] || [ -z "$SG" ] || [ "$SG" = None ]; the
     exit 1
 fi
 
+SG_NAME=$(aws ec2 describe-security-groups --region "$REGION" --group-ids "$SG" \
+    --query 'SecurityGroups[0].Tags[?Key==`Name`].Value | [0]' --output text)
+SG_PURPOSE=$(aws ec2 describe-security-groups --region "$REGION" --group-ids "$SG" \
+    --query 'SecurityGroups[0].Tags[?Key==`Purpose`].Value | [0]' --output text)
+if [ "$SG_NAME" != "rho-ecc2k-walker" ] || [ "$SG_PURPOSE" != "ecc2k-dp-walker" ]; then
+    echo "refusing to mutate $SG (Name=$SG_NAME Purpose=$SG_PURPOSE)" >&2
+    exit 1
+fi
+
 MYIP=$(curl -fsS --max-time 10 https://checkip.amazonaws.com | tr -d '[:space:]')
 if ! [[ "$MYIP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "could not determine public IPv4 for SG punch-hole" >&2
@@ -64,13 +73,21 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if aws ec2 authorize-security-group-ingress --region "$REGION" \
-    --group-id "$SG" --ip-permissions "$PERM" >/dev/null 2>&1; then
+set +e
+AUTH_ERR=$(aws ec2 authorize-security-group-ingress --region "$REGION" \
+    --group-id "$SG" --ip-permissions "$PERM" 2>&1)
+AUTH_RC=$?
+set -e
+if [ "$AUTH_RC" -eq 0 ]; then
     OPENED=1
     sleep 2
-else
+elif grep -q 'InvalidPermission.Duplicate' <<<"$AUTH_ERR"; then
     # Rule already present (operator laptop, or a previous run). Do not revoke it.
     OPENED=0
+else
+    printf '%s\n' "$AUTH_ERR" >&2
+    echo "authorize-security-group-ingress failed for $SG $CIDR" >&2
+    exit 1
 fi
 
 SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USER@$HOST")
