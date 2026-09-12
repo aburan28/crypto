@@ -255,7 +255,7 @@ batch and its flush wait, then `make rate` with 6144 steps in full batches):
 |---|---|---|---|---|
 | 8 | 8 | 7.44 | 5.95 | 5.63 |
 | 16 | 4 | 8.61 | 7.16 | 5.31 |
-| 16 | 8 | 6.46 | **5.45** | 5.31 |
+| 16 | 8 | 6.46 | **5.45** (5.49 with the address stage) | 5.31 |
 | 16 | 16 | 5.91 | 5.32 | 5.31 |
 | 32 | 8 | 6.51 | 5.21 | 5.16 |
 
@@ -276,11 +276,15 @@ inversion does. On the challenge curve the case has probability about
 ## The walker
 
 `ec2k_walker` is the sequencer `hdl/ecc/` leaves as "not here". Walks live
-in a ready FIFO of `(id, x, y)`: a walk is either inside the step unit or
-waiting in the FIFO, and a completed step goes straight back into the FIFO
-unless its `x` has weight at most `DP_WEIGHT`, in which case it is reported
-on the `dp_*` port with its id and step count and the walk goes idle until
-the host loads a new start point into that id. That is the same division
+in a ready FIFO of `(id, steps, x, y, dp)`: a walk is either inside the
+step unit or waiting in the FIFO, and a completed step goes straight back
+into the FIFO with its count plus one, flagged if its `x` has weight at most
+`DP_WEIGHT`; a flagged walk reaching the head is reported on the `dp_*`
+port with its id and step count and goes idle until the host loads a new
+start point into that id. The step count rides through the step unit in
+the tag rather than in a per-walk counter memory, so the retire path has
+no read-modify-write of a RAM and there is no state indexed by walk id at
+all. That is the same division
 of labour as the GPU client, whose kernel reports `(seed, endpoint)` and
 whose host owns restarts, the corpus and collision resolution
 (`ecc2k130/README.md`, "Distinguished points and restarts"). `NWALK` should
@@ -309,21 +313,16 @@ walkers, each with `2^ID_W` walks, addressed as one flat space of
   limb order as the client's `Elem`), then `LD_GO`; `STATUS.LD_BUSY` clears
   when the engine has taken it. Loading an id that is still walking
   duplicates the walk, since the walker has no kill; the host only reloads
-  an id after that id has reported.
+  an id after that id has reported. A load while `RUN` is clear is dropped.
 - **Report.** A distinguished step goes back into the walker's ready FIFO
   flagged `dp`; when it reaches the head it is moved into the engine's
   report register instead of the step unit and held there, valid, until
-  the register block acknowledges it (a one-clock `dp_ack`; both ends are
-  registers, so engine-to-block wires have a full clock). The block takes
-  each engine's report into a holding register and a rotating pointer
-  drains those into a `2^DP_FIFO_W`-deep queue the host reads through
-  `DP_ID`, `DP_STEPS`, `DP_X*`, `DP_Y*` and pops with `DP_POP`. Nothing in
-  this chain can lose a report — a full queue or a slow host only delays
-  them, with the walker's FIFO as the backlog — so `DROPPED` and
-  `STATUS.DP_OVERFLOW` read 0 and exist for register-map compatibility.
-  (The first version had a one-deep holding register that a second report
-  on the next clock overwrote, which two distinguished leaves in one batch
-  do; a lost report idles that walk until the host restarts.)
+  the register block acknowledges it. Reports then travel to a
+  `2^DP_FIFO_W`-deep queue the host reads through `DP_ID`, `DP_STEPS`,
+  `DP_X*`, `DP_Y*` and pops with `DP_POP`. Nothing in this chain can lose
+  a report — a full queue or a slow host only delays them, with the
+  walker's FIFO as the backlog — so `DROPPED` and `STATUS.DP_OVERFLOW`
+  read 0 and exist for register-map compatibility.
 - **Count.** `STEPS` (64-bit, high word latched on the low read) is the
   total steps of every engine; `DPS` the reports queued. `GEOM` reads back
   `ID_W`, `LOG_W`, `LOG_NB`, `DP_WEIGHT` and `NENG`, so the host can refuse
@@ -331,11 +330,34 @@ walkers, each with `2^ID_W` walks, addressed as one flat space of
   kHz, so the operator can see which image is loaded; `MAGIC` is
   `0x2C130001`.
 
-`CTRL.RUN` holds the engines in reset while clear, `CTRL.CLEAR` zeroes the
+The engines hang off a **spine**, one register stage per engine, chained,
+because with 48 or 64 engines over the VU47P's three SLRs it is the
+interconnect and not the arithmetic that breaks timing: the first 48-engine
+build, with the load registers fanned out to every engine and a 48:1 mux
+of reports back, placed at −2.5 ns slack on a 4 ns clock while the engine
+alone had +2 ns. On the spine every wire runs register to register between
+neighbours. Down it, a load `(gid, x, y)` shifts outward a stage per clock
+and the stage whose engine it names keeps a copy and offers it until taken;
+up it, a report slot `(gid, steps, x, y)` shifts inward and an engine drops
+its report into an empty slot passing by, with the load acknowledgement
+and a running sum of step pulses riding beside it (so `STEPS` needs no
+popcount over the die either). The chain never stalls and never drops, by
+credit: the block issues one credit per free queue slot not already spoken
+for, an engine with a report waiting takes the first credit that passes
+and only then inserts, and a credit that reaches the far end unused comes
+back up to be reissued — queue occupancy plus outstanding credits never
+exceeds the queue depth. It costs about 870 flip-flops and 300 LUTs per
+engine, a few percent, and `NENG` clocks of latency on events that happen
+a few hundred times a second.
+
+`CTRL.RUN` holds the engines in reset while clear — the reset sweeps down
+the spine a stage per clock and the block ignores the chain for
+`2·NENG + 8` clocks after `RUN` rises — and `CTRL.CLEAR` zeroes the
 counters and the queue. The register map with byte offsets is at the top of
 `ec2k_axil.vhd`. `ec2k_axil_tb` replays the walker testbench's 64 walks
-through the registers alone, spread over two engines, and checks the same
-per-id bookkeeping.
+through the registers alone, spread over two engines (one, three and four
+have been run), with an 8-deep queue so the credits are exercised, and
+checks the same per-id bookkeeping.
 
 `ec2k_axil_cdc` is the bridge that lets the block run on a clock of its
 own: an AXI-Lite slave on the host's clock and a master on the engines',
@@ -372,29 +394,39 @@ Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, one `ec2k_walker`
 
 | | LUTs | of which LUTRAM | FFs |
 |---|---|---|---|
-| `ec2k_walker` (whole engine) | **13 146** | 4 812 | 7 388 |
-| ├ walker body (FIFO with held reports, counters) | 2 311 | 1 736 | 384 |
-| └ `ec2k_batch_pipe` | 10 835 | 3 076 | 7 004 |
-| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stage) | 6 012 | 3 076 | 2 361 |
+| `ec2k_walker` (whole engine) | **13 106** | 4 576 (+314 SRL) | 7 442 |
+| ├ walker body (FIFO with held reports) | ~2 300 | ~1 700 | ~400 |
+| └ `ec2k_batch_pipe` | ~10 800 | ~3 100 | ~7 000 |
+| &nbsp;&nbsp; ├ step unit body (memories, scheduler, operand stages) | ~6 000 | ~3 100 | ~2 400 |
 | &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 |
 
-The register block around them (`ec2k_axil`, 4 engines) adds 1 449 LUTs
-and 1 773 FFs in total, not per engine.
+(The whole-engine row is the current pipeline; the breakdown is from the
+synthesis one revision earlier, before the address and weight stages and
+the count-in-tag walker, which moved a few hundred LUTs between rows.)
+The register block around the engines (`ec2k_axil` with its spine) adds
+about 400 LUTs and 1 200 FFs of its own plus a stage of roughly 300 LUTs
+and 870 FFs per engine; the clock bridge (`ec2k_axil_cdc`) 247 LUTs and
+201 FFs.
 
-Worst slack at a 4.0 ns clock is +1.98 ns (engine alone and with the
-register block around four of them), so the fabric is not what limits the
-clock, and on F2 the engines run on their own MMCM clock behind
+Worst slack at a 4.0 ns clock is +1.98 ns, so the fabric is not what
+limits the clock, and on F2 the engines run on their own MMCM clock behind
 `ec2k_axil_cdc` rather than on the shell's 250 MHz (`aws/README.md`,
-"Clocking"); at 3.0 ns the same synthesis shows +0.83 ns, with the worst
-path the operand stage's address formation into a LUTRAM read. The multiplier is 37% of an
-engine and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) are the
-single largest item; the memories are the next (3.1k LUTRAM in the step
-unit, 1.7k in the walker). No DSPs or block RAM are used.
+"Clocking"). At 3.0 ns two engines with the register block and the bridge
+show **+1.10 ns**; the worst path is the output weight's 22-group adder
+tree (1.72 ns, six levels), then the bridge's read-address decode into the
+register mux and the queue's LUTRAM read into the read-data register (1.6
+ns each). Earlier worst paths and what removed them: the operand stage's
+level/index arithmetic into a LUTRAM read (+0.83 ns; an address stage) and
+the walker's step-counter read-modify-write (1.6 ns; the count now rides
+in the tag). The multiplier is 37% of an engine and its leaf products
+(`gf2_kmul`'s `leaf.r`, 3.9k LUTs) are the single largest item; the
+memories are the next (3.1k LUTRAM in the step unit, 1.7k in the walker).
+No DSPs or block RAM are used.
 
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
 logic cells), so an engine is 1.01% of the device: **48 engines is half
 the device**, 64 is 65%, and ~70% is where routing of a design this
-regular typically starts to fail timing. At 5.45 clocks per step and
+regular typically starts to fail timing. At 5.49 clocks per step and
 333 MHz that is 61 M steps/s per engine and **2.9 G steps/s at 48
 engines, 3.9 G at 64**; at the shell's 250 MHz, 2.2 G and 2.9 G.
 
