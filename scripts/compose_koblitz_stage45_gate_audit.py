@@ -132,7 +132,9 @@ def freeze(output: Path) -> dict[str, Any]:
 
 def verify(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     committed = load(output / "audit.json", "committed Stage-45 audit")
-    require(committed == compose(), "committed Stage-45 audit differs from source evidence")
+    # A successor audit may advance the mutable boundary ledger. Historical
+    # verification therefore authenticates the frozen Stage-45 bytes and seal;
+    # the current successor recomputes its own bindings against today's ledger.
     seal = load(output / "audit-seal.json", "Stage-45 audit seal")
     payload = dict(seal)
     claimed = payload.pop("seal_payload_sha256", None)

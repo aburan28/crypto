@@ -1,0 +1,48 @@
+name: Koblitz Stage 50 gate audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/ic/boundary_targets.json"
+      - "docs/ic/BOUNDARY_TARGETS.md"
+      - "scripts/compose_koblitz_stage45_gate_audit.py"
+      - "scripts/verify_koblitz_stage49_width_results.py"
+      - "scripts/compose_koblitz_stage50_gate_audit.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage46-n53-scratch-evidence-34709425290.tar.gz*"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage47-n53-width-evidence-34709970211.tar.gz*"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage48-n53-width-evidence-34710311549.tar.gz*"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-4[678]-*-347*.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-49-n53-width-results-20260912/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-50-current-gate-audit-20260912/**"
+      - ".github/workflows/koblitz-stage50-gate-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify hosted width results and seven-gate audit
+        run: |
+          python3 -m py_compile \
+            scripts/compose_koblitz_stage45_gate_audit.py \
+            scripts/verify_koblitz_stage49_width_results.py \
+            scripts/compose_koblitz_stage50_gate_audit.py
+          python3 scripts/compose_koblitz_stage45_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-45-current-gate-audit-20260912 \
+            > "$RUNNER_TEMP/stage45-historical-verification.json"
+          python3 scripts/verify_koblitz_stage49_width_results.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-49-n53-width-results-20260912 \
+            > "$RUNNER_TEMP/stage49-verification.json"
+          python3 scripts/compose_koblitz_stage50_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-50-current-gate-audit-20260912 \
+            > "$RUNNER_TEMP/stage50-verification.json"
+          python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py preflight \
+            > "$RUNNER_TEMP/boundary-preflight.json"
+          python3 -m json.tool docs/ic/boundary_targets.json > /dev/null
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
