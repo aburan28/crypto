@@ -2058,6 +2058,9 @@ pub struct GaudryReport {
     pub la_rows: usize,
     pub la_avg_weight: f64,
     pub la_attempts: u64,
+    /// Relations dropped by the filtering step (singleton columns and
+    /// the surplus above square).
+    pub la_filtered_out: usize,
     /// `F_p`-multiplication equivalents charged per multiplication
     /// modulo `n` (`n ≈ p³`: schoolbook, `9`).
     pub la_fp_equiv: f64,
@@ -2223,6 +2226,84 @@ fn berlekamp_massey_u64(seq: &[u64], n: u64, ops: &mut u64) -> Vec<u64> {
     }
     c.truncate(l + 1);
     c
+}
+
+/// A square, singleton-free selection of relations: which relations
+/// (`rows`) and which columns (`columns`) it spans.
+pub struct SquareCore {
+    pub rows: Vec<usize>,
+    pub columns: Vec<bool>,
+}
+
+/// Filtering, as every sieve pipeline does it between relation
+/// collection and the logarithm solve (compare
+/// [`super::koblitz_sparse_la::filter_relations`]): a column of weight
+/// one determines nothing, so its relation is dropped, which may
+/// create new singletons; then the surplus above square is trimmed,
+/// dropping the relation that creates the fewest new singletons and
+/// re-filtering.  `keep` (the `d` column) is never treated as a
+/// singleton.  `None` when the relations left do not cover their own
+/// columns — collect more.
+pub fn square_core(rels: &[SparseRel], keep: usize) -> Option<SquareCore> {
+    let ncols = rels
+        .iter()
+        .flat_map(|r| r.cols.iter().map(|&(c, _)| c + 1))
+        .max()
+        .unwrap_or(0)
+        .max(keep + 1);
+    let mut alive: Vec<bool> = vec![true; rels.len()];
+    let weights = |alive: &[bool]| -> Vec<usize> {
+        let mut w = vec![0usize; ncols];
+        for (i, r) in rels.iter().enumerate() {
+            if alive[i] {
+                for &(c, _) in &r.cols {
+                    w[c] += 1;
+                }
+            }
+        }
+        w
+    };
+    loop {
+        // Singleton elimination to a fixed point.
+        loop {
+            let w = weights(&alive);
+            let mut dropped = false;
+            for (i, r) in rels.iter().enumerate() {
+                if alive[i] && r.cols.iter().any(|&(c, _)| c != keep && w[c] == 1) {
+                    alive[i] = false;
+                    dropped = true;
+                }
+            }
+            if !dropped {
+                break;
+            }
+        }
+        let w = weights(&alive);
+        let n_rows = alive.iter().filter(|&&a| a).count();
+        let n_cols = w.iter().filter(|&&x| x > 0).count();
+        if n_rows == 0 || w[keep] == 0 {
+            return None;
+        }
+        if n_rows == n_cols {
+            return Some(SquareCore {
+                rows: (0..rels.len()).filter(|&i| alive[i]).collect(),
+                columns: (0..ncols).map(|c| w[c] > 0).collect(),
+            });
+        }
+        if n_rows < n_cols {
+            return None;
+        }
+        // Surplus: drop the relation touching the fewest weight-2
+        // columns, so the fewest new singletons appear.
+        let victim = (0..rels.len()).filter(|&i| alive[i]).min_by_key(|&i| {
+            rels[i]
+                .cols
+                .iter()
+                .filter(|&&(c, _)| c != keep && w[c] == 2)
+                .count()
+        })?;
+        alive[victim] = false;
+    }
 }
 
 /// Sequential Wiedemann for `A x = b` with `A` the square sparse
@@ -2430,6 +2511,7 @@ pub fn run_gaudry_opts(
         la_rows: 0,
         la_avg_weight: 0.0,
         la_attempts: 0,
+        la_filtered_out: 0,
         la_fp_equiv,
         small_base: small,
         max_large_primes: max_lp,
@@ -2538,54 +2620,49 @@ pub fn run_gaudry_opts(
                 if opts.sparse_la {
                     full_rels.push(full);
                     rep.relations_independent = full_rels.len() as u64;
-                    // Unknowns that appear in no relation yet cannot be
-                    // determined and would make every square selection
-                    // singular: solve on the active columns only.
-                    let mut active = vec![false; unknowns];
-                    for r in &full_rels {
-                        for &(c, _) in &r.cols {
-                            active[c] = true;
-                        }
-                    }
-                    let n_active = active.iter().filter(|&&a| a).count();
-                    if active[small] && full_rels.len() >= n_active.max(next_attempt) {
-                        la_attempts += 1;
-                        let mut map = vec![usize::MAX; unknowns];
-                        let mut k = 0;
-                        for c in 0..unknowns {
-                            if active[c] {
-                                map[c] = k;
-                                k += 1;
+                    if full_rels.len() >= next_attempt {
+                        // Filter to a square core before solving: a
+                        // random square selection of a sparse system
+                        // misses ≈ e^{-w} of the columns entirely
+                        // (coupon collector) and is then singular by
+                        // construction.
+                        let core = square_core(&full_rels, small);
+                        if let Some(core) = core {
+                            la_attempts += 1;
+                            let mut map = vec![usize::MAX; unknowns];
+                            let mut k = 0;
+                            for c in 0..unknowns {
+                                if core.columns[c] {
+                                    map[c] = k;
+                                    k += 1;
+                                }
                             }
-                        }
-                        let mut idx: Vec<usize> = (0..full_rels.len()).collect();
-                        if full_rels.len() > n_active {
-                            for i in (1..idx.len()).rev() {
-                                let j = rng.gen_range(0..=i);
-                                idx.swap(i, j);
+                            let sel: Vec<SparseRel> = core
+                                .rows
+                                .iter()
+                                .map(|&i| SparseRel {
+                                    cols: full_rels[i]
+                                        .cols
+                                        .iter()
+                                        .map(|&(c, v)| (map[c], v))
+                                        .collect(),
+                                    rhs: full_rels[i].rhs,
+                                })
+                                .collect();
+                            la_rows_used = sel.len();
+                            rep.la_unknowns = sel.len();
+                            rep.la_filtered_out = full_rels.len() - sel.len();
+                            let x = wiedemann_u64(&sel, sel.len(), n, &mut rng, &mut la_ops);
+                            // Accept only a logarithm the group confirms.
+                            let dd = x.map(|x| x[map[small]]);
+                            if dd.is_some_and(|dd| curve.mul(&curve.g, dd) == inst.q) {
+                                rep.solved = true;
+                                rep.correct = Some(dd == Some(inst.d));
+                            } else {
+                                next_attempt = full_rels.len() + (sel.len() / 20).max(1);
                             }
-                        }
-                        let sel: Vec<SparseRel> = idx[..n_active]
-                            .iter()
-                            .map(|&i| SparseRel {
-                                cols: full_rels[i]
-                                    .cols
-                                    .iter()
-                                    .map(|&(c, v)| (map[c], v))
-                                    .collect(),
-                                rhs: full_rels[i].rhs,
-                            })
-                            .collect();
-                        la_rows_used = sel.len();
-                        rep.la_unknowns = n_active;
-                        let x = wiedemann_u64(&sel, n_active, n, &mut rng, &mut la_ops);
-                        // Accept only a logarithm the group confirms.
-                        let dd = x.map(|x| x[map[small]]);
-                        if dd.is_some_and(|dd| curve.mul(&curve.g, dd) == inst.q) {
-                            rep.solved = true;
-                            rep.correct = Some(dd == Some(inst.d));
                         } else {
-                            next_attempt = full_rels.len() + (n_active / 20).max(1);
+                            next_attempt = full_rels.len() + (unknowns / 20).max(1);
                         }
                     }
                 } else {
@@ -2970,6 +3047,88 @@ mod tests {
         let mut ops = 0u64;
         let c = berlekamp_massey_u64(&seq, n, &mut ops);
         assert_eq!(c, vec![1, n - 1, n - 1]);
+    }
+
+    #[test]
+    fn square_core_is_square_and_free_of_singletons() {
+        let n = 1_000_003u64;
+        let mut rng = StdRng::seed_from_u64(17);
+        let ncols = 60usize;
+        let keep = ncols - 1;
+        let x: Vec<u64> = (0..ncols).map(|_| rng.gen_range(0..n)).collect();
+        // Relations of weight 4: three random columns plus `keep`, as
+        // the Gaudry rows are shaped.
+        let make = |rng: &mut StdRng| -> SparseRel {
+            let mut cols: Vec<(usize, u64)> = vec![(keep, rng.gen_range(1..n))];
+            while cols.len() < 4 {
+                let c = rng.gen_range(0..keep);
+                if cols.iter().all(|&(cc, _)| cc != c) {
+                    cols.push((c, rng.gen_range(1..n)));
+                }
+            }
+            cols.sort_unstable();
+            let rhs = cols
+                .iter()
+                .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+            SparseRel { cols, rhs }
+        };
+        // The failure mode a square selection has: a column no
+        // selected relation touches (coupon collector leaves ≈ e^{-w}
+        // of them untouched when the selection is as small as the
+        // number of columns) makes the matrix singular by
+        // construction.
+        let mut ops = 0u64;
+        let mut rels: Vec<SparseRel> = (0..ncols).map(|_| make(&mut rng)).collect();
+        for r in rels.iter_mut() {
+            // Move every use of column 0 elsewhere: nothing touches it.
+            for e in r.cols.iter_mut() {
+                if e.0 == 0 {
+                    e.0 = 1;
+                }
+            }
+            r.cols.sort_unstable();
+            r.cols.dedup_by_key(|e| e.0);
+        }
+        assert!(
+            wiedemann_u64(&rels, ncols, n, &mut rng, &mut ops).is_none(),
+            "a selection that misses a column must be singular"
+        );
+        // With enough relations the filtered core is square, covers
+        // every column it spans at weight ≥ 2, and solves.
+        let rels: Vec<SparseRel> = (0..6 * ncols).map(|_| make(&mut rng)).collect();
+        let core = square_core(&rels, keep).expect("core");
+        let n_cols = core.columns.iter().filter(|&&c| c).count();
+        assert_eq!(core.rows.len(), n_cols, "core must be square");
+        assert!(core.columns[keep]);
+        let mut weight = vec![0usize; core.columns.len()];
+        for &i in &core.rows {
+            for &(c, _) in &rels[i].cols {
+                assert!(core.columns[c], "core row uses a column outside the core");
+                weight[c] += 1;
+            }
+        }
+        assert!(
+            (0..core.columns.len()).all(|c| !core.columns[c] || c == keep || weight[c] >= 2),
+            "no singleton column may remain"
+        );
+        let mut map = vec![usize::MAX; core.columns.len()];
+        let mut k = 0;
+        for c in 0..core.columns.len() {
+            if core.columns[c] {
+                map[c] = k;
+                k += 1;
+            }
+        }
+        let sel: Vec<SparseRel> = core
+            .rows
+            .iter()
+            .map(|&i| SparseRel {
+                cols: rels[i].cols.iter().map(|&(c, v)| (map[c], v)).collect(),
+                rhs: rels[i].rhs,
+            })
+            .collect();
+        let sol = wiedemann_u64(&sel, n_cols, n, &mut rng, &mut ops).expect("core solves");
+        assert_eq!(sol[map[keep]], x[keep]);
     }
 
     #[test]
