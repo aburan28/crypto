@@ -179,14 +179,14 @@ static void throughput() {
         }
         CUDA_OK(cudaMalloc(&d_piv, (size_t)rows * batch * sizeof(int)));
         CUDA_OK(cudaMalloc(&d_rank, (size_t)batch * sizeof(int)));
-        CUDA_OK(cudaMemcpy(d_a, host.data(), sz * batch * sizeof(uint32_t),
-                           cudaMemcpyHostToDevice));
-
         cudaEvent_t t0, t1;
         CUDA_OK(cudaEventCreate(&t0));
         CUDA_OK(cudaEventCreate(&t1));
-        /* One warm-up launch, then the timed one. */
+        /* One warm-up launch, then the timed one.  Recopy the host
+         * matrix each time: to_mont and rref overwrite d_a in place. */
         for (int rep = 0; rep < 2; rep++) {
+            CUDA_OK(cudaMemcpy(d_a, host.data(), sz * batch * sizeof(uint32_t),
+                               cudaMemcpyHostToDevice));
             if (rep == 1) CUDA_OK(cudaEventRecord(t0));
             to_mont_kernel<<<256, 256>>>(d_a, sz * batch);
             rref_batch_kernel<<<batch, MAC_THREADS, shared_bytes()>>>(

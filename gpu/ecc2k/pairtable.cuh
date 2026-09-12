@@ -34,19 +34,20 @@
  *
  * ## Scratch
  *
- * A row of `k` needs `k` field elements of scratch for the prefix
- * products.  At `|F|` in the thousands that is far too much for shared
- * memory per thread, so the caller passes a global scratch buffer of
- * `rows_in_flight * |F|` elements.  Sizing it is the host's job; see
- * `pt_scratch_elems`.
+ * A row of `k` needs `k` field elements for the denominators and `k`
+ * more for the prefix products.  The host path (`pt_row`) takes those
+ * as two arrays; the kernel packs both into one global buffer, so the
+ * caller allocates `rows_in_flight * 2 * |F|` elements.  Sizing it is
+ * the host's job; see `pt_scratch_elems`.
  */
 #ifndef GPU_ECC2K_PAIRTABLE_CUH
 #define GPU_ECC2K_PAIRTABLE_CUH
 
 #include "koblitz.cuh"
 
-/* Field elements of scratch one thread needs for a base of `n_points`. */
-G2_HD size_t pt_scratch_elems(size_t n_points) { return n_points; }
+/* Field elements of scratch one thread needs for a base of `n_points`:
+ * denominators and the prefix-product workspace. */
+G2_HD size_t pt_scratch_elems(size_t n_points) { return 2 * n_points; }
 
 /* Batch inversion (Montgomery's trick).
  *
