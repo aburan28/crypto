@@ -1530,7 +1530,23 @@ costs hours on the larger fields and its trend is already fixed by the
 | `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
 | | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | 994 608 / 405 |
 | `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | 0/3, budget / 907 | – | – |
-| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | TBD-KD-G5 |
+| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | not run (see below) |
+
+The one cell left empty is `K₁/F₂²³` symmetrised at cap 5.  It was
+given three hours and produced no target in that time, so it was
+stopped rather than left running; the run is reproducible with
+
+```bash
+F4_F2_MAX_ROWS=60000 F4_F2_MAX_COLS=300000 \
+  cargo run --release --example symmetrised_oracle_bench -- \
+  --only 1 23 3 --no-sat --no-direct --no-x --targets 3 \
+  --node-budget 3000 --f4-degree 5
+```
+
+for anyone with more machine to spend.  That it does not finish is
+itself consistent with the reading below: 34 unknowns is past the size
+at which another Macaulay degree is affordable, as `n = 17` already
+showed at 25.  Nothing in the reading rests on the cell.
 
 ### Reading
 
@@ -1604,3 +1620,96 @@ the systems.  A solver that chose its splitting variable by the
 symmetrised system's structure — the orbit an unknown belongs to —
 might not spend 3 219 decisions where the `x`-chained system spends 49.
 That is the next thing worth building on this side.
+
+## 18. The splitting rule, and what it does to §17's one loss
+
+**Code:** `koblitz_groebner::{SplitRule, choose_split, split_rule_default}`,
+`SolveOptions::split_rule`, `SOLVER_SPLIT_RULE`.
+
+§17 ended by naming the splitter as the next thing to build: what sinks
+the symmetrised system at `n = 17` is split count, not matrix size, and
+the solver has always branched on the lowest free variable.  On the
+descent systems the variable index runs point by point — block `i` of
+the symmetrised system is `i·(ℓ−1) … (i+1)(ℓ−1)−1`, with the
+trace-correction bit `ε` last — so that rule fixes one summand's bits
+completely before touching the next, and touches `ε` only at the end.
+
+Three rules are now selectable.  `LowestFree` is the historical one and
+stays the default, so every earlier measurement keeps its meaning.
+`MostFrequent` takes the free variable occurring in the most monomials
+of the current system, the one whose substitution removes the most
+terms.  `MinTermWeight` weights each occurrence by `2^{1−d}` for a
+degree-`d` monomial, so a variable in short monomials outranks one
+buried in long products — short monomials are nearer to forcing an
+assignment, so it trades bulk term removal for propagation.  Both read
+the system; neither knows anything about the layout.
+
+### Method
+
+Splits are exact and reproduce to the unit between runs; milliseconds
+move with machine load.  Read the split column as the measurement and
+the time column as its consequence.  The `n = 17` row below was
+re-measured on an idle machine: the split counts came back identical
+and the times within 5%.
+
+All cells: Macaulay cap 3, size caps 60 000 × 300 000, four targets
+(three at `n = 23`), no SAT, medians per verdict.  Every gate passed in
+all twenty runs — no rule changed an answer, as the unit test requires.
+
+| instance | arm | `LowestFree` ms / splits | `MostFrequent` | `MinTermWeight` |
+|---|---|---|---|---|
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 7 815 / 787 | 2 742 / 418 | **1 379 / 52** |
+| | symmetrised | **22 / 237** | 28 / 298 | 37 / 342 |
+| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 4 991 / 502 | **1 671 / 156** | 9 282 / 198 |
+| | symmetrised | 5.9, 21 / **29** | **4.6**, 25 / 74 | 6.0, 31 / 79 |
+| `K₁/F₂¹⁷` (all found) | `x`-chained | **2 746 / 49** | 8 601 / 221 | 6 714 / 213 |
+| | symmetrised | 4 860 / 3 219 | **1 266 / 756** | 8 259 / 6 583 |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | budget / **907** | budget / 1 308 | budget / 1 361 |
+| | symmetrised | 5 664 (2 of 3) / **135** | **4 872** (2 of 3) / 220 | 5 704 (2 of 3) / 310 |
+
+### Reading
+
+**§17's one loss is a property of the splitting rule, not of the two
+systems.**  At `n = 17` under `LowestFree` the symmetrised system takes
+4 860 ms against the `x`-chained system's 2 746 — the ×1.6 loss §8
+recorded and §17 confirmed.  Under `MostFrequent`, the rule a solver
+would ship for *both* arms, it takes 1 266 ms against 8 601: a ×6.8
+win.  Nothing about either system changed.  The instance that has stood
+since §8 as the exception to the symmetrised system's advantage is an
+exception only under one particular way of choosing a branch variable.
+
+**But not because the symmetrised system searches less.**  In splits it
+still loses at `n = 17` under the same rule, 756 against 221.  It wins
+on time because each of its splits is far cheaper: 25 unknowns against
+44, which is §17's size advantage paying out through a second channel.
+The two sections agree — size is what the 2-torsion frame buys — and
+§18 adds that the saving reaches the wall clock only once the splitter
+stops wasting the search.
+
+**No rule dominates, and the spread is large.**  `MinTermWeight` is the
+best rule measured anywhere — it refutes on `K₀/F₂¹⁵`'s `x`-chained
+system in 52 splits against `LowestFree`'s 787, a factor of 15 — and
+also the worst for the symmetrised system at every instance.
+`MostFrequent` roughly halves or thirds the `x`-chained system's splits
+at `n = 15` and multiplies them by 4.5 at `n = 17`.  A rule that reads
+the current system does well where there is search to prune and costs
+overhead where there is not; which case an instance is in is not
+predictable from its coordinate frame.
+
+**The other rows are unchanged.**  At `n = 15` the symmetrised system
+still wins by two to three orders of magnitude under every rule, and
+its own best rule is still the default.  At `n = 23` the `x`-chained
+system is inconclusive on all three targets under all three rules, the
+symmetrised system answers two of three under all three, and the
+default remains its cheapest in splits.  Only `n = 17` moves.
+
+### What this section does not settle
+
+These rules are static scores recomputed per node from the current
+system.  The orbit-aware rule §17 actually proposed — branch by the
+Frobenius orbit an unknown belongs to — is still untried; frequency is
+a proxy that happens to find something useful at `n = 17`, and whether
+the orbit structure would do better, or would explain *why*
+`MostFrequent` helps there, is open.  Everything here is at Macaulay
+cap 3; the interaction between the cap and the rule is unmeasured, and
+§17 showed the cap is worth orders of magnitude on its own.

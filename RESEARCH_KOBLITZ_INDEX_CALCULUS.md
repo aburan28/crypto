@@ -966,6 +966,16 @@ crosses**: the charged ratio is below 1 everywhere, and the closest
 (`n = 41`, ≈ 0.64–0.73) is the rung where ρ has the most room left,
 not the least.
 
+A third series was run later on a verifiably idle host, from the
+committed parameter files, to check the first two for measurement load.
+Per-target times came out 3% to 20% faster at `n = 37` and `n = 39`, so
+the first two series did carry some background load — but the ρ step
+counts are identical and the charged ratios agree across all three
+(0.72/0.74/0.75, 0.20/0.21/0.21, 0.067/0.051/0.060, 0.73/0.64/0.66),
+because load moves both sides of a same-process comparison together.
+That is the reason to quote the ratio rather than the wall time: the
+ratio is what survives an imperfectly quiet machine.
+
 Three things the table says plainly:
 
 1. **The descent is decomposition-bound.** Trials per target track
@@ -996,3 +1006,149 @@ Three things the table says plainly:
   records for this size use many cores and tighter inner loops. Until a
   rung beats a ρ that has had the same attention, a ratio near 1 is a
   statement about two implementations, not about two algorithms.
+
+## The factor base was the wrong shape — 2026-09-12
+
+Every factor-base family in this pipeline was linear: an invariant
+subspace, a union of Frobenius translates of one, or a subset of those.
+That is not a design choice, it is an inheritance. Semaev's polynomials
+and the Weil descent are *written over a subspace*, so an algebraic
+oracle needs one. The pair-table oracle does not — it is a
+meet-in-the-middle search that never looks at the base's structure — and
+the structure turns out to be expensive.
+
+### What the structure costs
+
+At `n = 41`, over 3000 random subgroup targets with `m = 3`, measuring
+how often a target is a sum of three base points:
+
+| base | points | columns | decomposes | vs `|F|³/(3!·r)` |
+|------|--------|---------|------------|------------------|
+| 2-torsion-saturated union, seed dim 6 | 4759 | 60 | 1 in 273 | 8.9× worse |
+| Frobenius-closed, random abscissae | 5494 | 67 | 1 in 67 | 3.4× worse |
+| **drawn from the prime-order subgroup** | 4838 | 59 | **1 in 28** | **matches** |
+
+Two separate effects, and the second is the larger:
+
+1. **Linearity.** The sums of a subspace union concentrate: the sumset of
+   a structured set is far from uniform, so its sums hit a given target
+   less often than three random points would.
+2. **The cofactor.** A relation and a descent both ask for a target *of
+   `⟨G⟩`* to be a sum of base points. A point outside `⟨G⟩` can only sum
+   into it when the cofactor parts of the summands cancel, so a base
+   drawn from the whole curve spends most of its sums in the wrong
+   coset. Restricting the base to `⟨G⟩` removes that loss entirely — the
+   measured rate lands exactly on the random-base expectation.
+
+The column count is unchanged (`≈ |F|/2n` either way), so the linear
+algebra does not pay for the improvement.
+
+### Selecting a subgroup base without knowing any logarithm
+
+`build_subgroup_orbit_factor_base(kc, seed, points)` draws a random
+abscissa, lifts it to a point `P`, and takes `[h]P` for the cofactor
+`h`. That lands in `⟨G⟩` for **every** `P`, so no draw is wasted, and
+knowing `P` says nothing about `log [h]P`.
+
+The first version tested `[r]P = O` and rejected what failed. That is
+also logarithm-free, but at `n = 39` the cofactor is 8012, so it threw
+away 8011 of every 8012 draws and the select stage took **607 seconds**.
+Multiplying by the cofactor instead made it immeasurable. When a
+rejection test and a construction agree, take the construction.
+
+### What it does to the rungs
+
+Same curves, same 32 targets, same ρ baseline, same process; only the
+factor base changes:
+
+| `n` | descent/target, union → subgroup | ρ/target | charged ρ/IC | crossovers (charged / amortised / whole-process) |
+|-----|----------------------------------|----------|--------------|--------------------------------------------------|
+| 31 | 1.5 ms → 1.3 ms | 1.2 ms | 0.95 | no / no / no |
+| 37 | 18.3 ms → 2.9 ms | 5.8 ms | 2.01 | **yes** / no / no |
+| 39 | 44.1 ms → 2.7 ms | 3.6 ms | 1.36 | **yes** / no / no |
+| 41 | 152.9 ms → 14.4 ms | 119.5 ms | **8.33** | **yes** / **yes** / **yes** |
+
+All 32 targets solved and all 32 ρ runs recovered and verified at every
+rung. Evidence: `docs/ic/runs/koblitz-subgroup-bases-20260912.json`.
+
+**Read the degree-41 row carefully.** The whole-process verdict compares
+one precompute plus 32 descents (3.4 s) against 32 ρ walks (3.8 s). It is
+a *bulk* statement. For a **single** target the precompute is paid whole,
+so IC costs 3.0 s against ρ's 0.12 s and ρ wins by about 24×. The
+crossover is in amortising a database over many targets, which is what
+the CADO-style split was built for and what the ledger's charged class
+was defined to measure.
+
+Two more things this is not. It is not asymptotic: the work per target is
+still `Θ(r/|F|²)` with `|F|` capped by the pair table's memory, so this
+moves the constant and not the exponent. And ρ has room left — the
+baseline here is one core with batched inversions at about 1.2 µs a step,
+where a tuned implementation would do better — so the honest reading of
+a ratio near 1 is still "two implementations", not "two algorithms". At
+8.3× the degree-41 charged ratio has more margin than that objection can
+absorb, but the amortised and whole-process verdicts there (1.11 and a
+0.4 s gap) do not.
+
+### A driver that pays its setup once
+
+Sizing collection to the base exposed a waste: when the first units do
+not determine the columns, the driver collected another unit and called
+the solver again — and the solver rebuilt the signed-orbit map of the
+base and re-verified *every* relation each time, quadratically.
+`FactorBaseLogSolver` now holds that setup and takes relations
+incrementally, verifying each exactly once. At `n = 39` the logs stage
+went from 16.6 s to 3.6 s over four extension rounds, at `n = 31` from
+8.0 s to 1.1 s over nine.
+
+### How large should the base be? — 2026-09-12
+
+With a subgroup base the decomposition rate is the one a random base
+gives, so the cost model is finally clean and can be used to *choose* a
+base rather than to explain one. A target decomposes with probability
+`|F|³/(3!·r)`, and an `m = 3` trial costs `|F|` table lookups, so the
+work per target is
+
+```text
+    (3!·r / |F|³) · Θ(|F|)  =  Θ(r / |F|²)
+```
+
+— four times cheaper for every doubling of the base, until the rate
+saturates at one witness per trial and growth only makes each trial
+dearer. The pair table is quadratic in `|F|`, so the precompute rises
+four times per doubling at the same moment.
+
+Measured at `n = 41` (`docs/ic/runs/koblitz-base-size-20260912.json`):
+
+| points | abscissae | table | build | trials/target | ms/target |
+|--------|-----------|-------|-------|---------------|-----------|
+| 1312 | 656 | 14 MB | 0.1 s | 400 | 47.8 |
+| 2624 | 1312 | 55 MB | 0.4 s | 133 | 29.2 |
+| 5248 | 2624 | 220 MB | 1.7 s | 29 | 13.7 |
+| 10496 | 5248 | 881 MB | 6.6 s | 3 | 3.5 |
+| 20992 | 10496 | 3.5 GB | 32.3 s | 1 | 2.3 |
+
+The `1/|F|²` law holds exactly to 10496 points, where the rate saturates
+and the last doubling buys 1.5× for four times the memory.
+
+**So the base is a function of the target count, not of the curve.**
+Total cost is `precompute(|F|) + T·descent(|F|)`, and end to end over
+256 targets at `n = 41`:
+
+| base | precompute | descent/target | total | ρ total |
+|------|-----------|----------------|-------|---------|
+| 5248 points | 3.0 s | 16.2 ms | **7.2 s** | 31.5 s |
+| 10496 points | 9.0 s | 7.2 ms | 10.9 s | 31.1 s |
+
+256 of 256 solved, 256 of 256 ρ walks recovered and verified, both runs.
+The two lines cross at about **665 targets**: below that the smaller base
+wins on total cost, above it the larger. Against ρ's 121 ms per target
+they cross at roughly 29 and 85 targets respectively — which is the
+honest way to state a whole-process win, as a *number of targets* rather
+than a verdict.
+
+The abscissa cap was `2^12`, which put the measured optimum out of
+reach; it is now `2^13`. What the cap was really protecting is the pair
+table, so `PairSumTable::build` now refuses past a stated byte budget
+(4 GiB by default, about 16000 points) instead of attempting an
+allocation the machine cannot meet — a base one doubling too large now
+fails with a number rather than an OOM.
