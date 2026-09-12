@@ -246,14 +246,42 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         baseline = stage39.validate_workflow(workflow, root / "workflow", TARGET_SEEDS)
         fingerprints.append(semantic_fingerprint(workflow, root / "workflow"))
         require(row["precompute_seconds"] == baseline["ic"]["precompute_seconds"], "Stage-40 precompute changed")
+        expected_cpus = row["affinity"]["requested"]
+        require(len(expected_cpus) == row["threads"] and row["affinity"]["parent_effective"] == row["affinity"]["child_effective"] == expected_cpus, "Stage-40 affinity changed")
     require(all(value == fingerprints[0] for value in fingerprints) and result.get("semantic_fingerprint") == fingerprints[0], "Stage-40 mathematical outputs differ")
     singles = [row for row in rows if row["threads"] == 1]
     fours = [row for row in rows if row["threads"] == 4]
     summary = result["summary"]
     single_pre = statistics.median(row["precompute_seconds"] for row in singles)
     four_pre = statistics.median(row["precompute_seconds"] for row in fours)
-    require(summary["single_core_precompute_seconds_median"] == single_pre and summary["four_core_precompute_seconds_median"] == four_pre, "Stage-40 precompute medians changed")
+    single_total = statistics.median(row["five_target_ic_seconds"] for row in singles)
+    four_total = statistics.median(row["five_target_ic_seconds"] for row in fours)
+    single_core = statistics.median(row["process"]["metrics"]["total_core_seconds"] for row in singles)
+    four_core = statistics.median(row["process"]["metrics"]["total_core_seconds"] for row in fours)
+    four_amortised = statistics.median(row["ic_over_rho_amortised_wall_ratio"] for row in fours)
+    require(
+        summary == {
+            "single_core_precompute_seconds_median": single_pre,
+            "four_core_precompute_seconds_median": four_pre,
+            "precompute_wall_speedup": single_pre / four_pre,
+            "single_core_five_target_ic_seconds_median": single_total,
+            "four_core_five_target_ic_seconds_median": four_total,
+            "five_target_ic_wall_speedup": single_total / four_total,
+            "single_core_process_core_seconds_median": single_core,
+            "four_core_process_core_seconds_median": four_core,
+            "four_core_amortised_ic_over_rho_wall_ratio_median": four_amortised,
+        },
+        "Stage-40 summary changed",
+    )
     require(summary["precompute_wall_speedup"] == single_pre / four_pre, "Stage-40 speedup changed")
+    charged_core = build["outer_resources"]["total_core_seconds"] + math.fsum(row["outer_resources"]["total_core_seconds"] for row in rows)
+    charged_wall = build["outer_resources"]["wall_seconds"] + math.fsum(row["outer_resources"]["wall_seconds"] for row in rows)
+    peak = max(build["outer_resources"]["sampled_peak_process_tree_rss_bytes"], *(row["outer_resources"]["sampled_peak_process_tree_rss_bytes"] for row in rows))
+    require(result["charged_total_core_seconds_available"] == charged_core and result["charged_sequential_wall_seconds_available"] == charged_wall, "Stage-40 total resource charge changed")
+    require(result["maximum_sampled_process_tree_rss_bytes"] == peak, "Stage-40 memory charge changed")
+    predecessor = load(PREDECESSOR, "Stage-39 hosted result")
+    require(result.get("predecessor_stage39") == {"identity": predecessor_identity(), "verification": predecessor["verification"]}, "Stage-40 predecessor binding changed")
+    require(result.get("same_instance_in_every_cell") is True and result.get("factor_base_discovery_target_samples") == result.get("factor_base_discovery_scalar_labels") == 0, "Stage-40 instance boundary changed")
     require(result.get("full_cost_gate_passed") is False and result.get("koblitz_index_calculus_sota") is False, "Stage-40 claim widened")
     return {
         "schema": "koblitz_stage40_verification.v1",
