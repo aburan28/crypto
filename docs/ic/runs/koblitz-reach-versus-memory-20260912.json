@@ -1,100 +1,115 @@
 {
  "claim_boundary": "extrapolation_from_measured_constants",
+ "correction": "An earlier revision of this record and of the research note asserted M^2 from the algebra alone, before the three-width test was run, and described it as two bits a quadrupling where the algebra gives two bits a doubling. Both are corrected here.",
  "date": "2026-09-12",
+ "fitted_exponents": {
+  "bits_per_doubling_of_memory": 1.64,
+  "comment": "the probe-count law is confirmed to within 1.5%",
+  "comment_on_probe_cost": "0.148 us into a table of 0.2 GB against 0.249 us into one of 3 GB -- sixty per cent dearer across a range where the table is DRAM-resident throughout",
+  "descent_seconds_in_F": -1.64,
+  "model": -2.0,
+  "model_assumes": 0.0,
+  "probe_count_in_F": -2.03,
+  "reach_exponent_in_memory": 1.64,
+  "seconds_per_probe_in_F": 0.4
+ },
  "host": {
   "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
   "logical_cores": 4,
   "memory_megabytes": 16075,
   "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
  },
+ "measured_at_degree_61": {
+  "curve": "K_0 / F_2^61",
+  "subgroup_bits": 48,
+  "targets_each": 32,
+  "widths": [
+   {
+    "charged_ratio": 7.2,
+    "columns": 80,
+    "descent_probes_per_target": 3068736,
+    "descent_seconds_per_target": 0.45540862009375,
+    "factor_base_points": 9760,
+    "microseconds_per_probe": 0.148,
+    "predicted_2r_over_F2": 3419948,
+    "rho_seconds_per_target": 3.2791324416875,
+    "rho_verified": 32,
+    "verified": 32
+   },
+   {
+    "charged_ratio": 27.79,
+    "columns": 152,
+    "descent_probes_per_target": 545117,
+    "descent_seconds_per_target": 0.11640466821875001,
+    "factor_base_points": 18544,
+    "microseconds_per_probe": 0.214,
+    "predicted_2r_over_F2": 947354,
+    "rho_seconds_per_target": 3.23470603075,
+    "rho_verified": 32,
+    "verified": 32
+   },
+   {
+    "charged_ratio": 61.16,
+    "columns": 296,
+    "descent_probes_per_target": 213109,
+    "descent_seconds_per_target": 0.05310339306250002,
+    "factor_base_points": 36112,
+    "microseconds_per_probe": 0.249,
+    "predicted_2r_over_F2": 249814,
+    "rho_seconds_per_target": 3.2479423494375004,
+    "rho_verified": 32,
+    "verified": 32
+   }
+  ]
+ },
  "operation": "koblitz_reach_versus_memory",
  "schema_version": 1,
- "sized_for_a_charged_ratio_of_ten": [
+ "software": {
+  "commit": "988a39ae4b42f1fe4553c5b987890abe0169b9d0",
+  "profile": "release"
+ },
+ "the_exponent_is_an_upper_bound": "The 0.40 was measured across tables of 0.2 to 3 GB, every one served by DRAM. The point of the law is to make the table bigger, and past DRAM a lookup becomes an SSD or a network access -- two to four orders of magnitude slower, not sixty per cent. So 1.64 is the exponent before the memory hierarchy has its real say, and the memory figures are floors on the cost rather than estimates of it.",
+ "the_law": {
+  "algebra": "descent 2r/|F|^2 probes with |F| = sqrt(2M/c) gives r*c*t_probe/M, linear in r and inverse in memory, against rho's sqrt(pi r/2)/sqrt(2n) steps; equal at r proportional to M^2, two bits a doubling",
+  "what_the_algebra_omits": "that t_probe is a random access into a table quadratic in |F|, and grows with it"
+ },
+ "what_it_costs": [
   {
-   "break_even_targets": 17,
-   "collection_seconds": 16.3,
-   "descent_seconds_per_target": 0.2731,
-   "factor_base_points": 22662,
-   "memory_bytes": 1260851310,
-   "memory_tebibytes": 0.0011,
-   "pair_table_seconds": 25.7,
-   "precompute_seconds": 42.0,
-   "rho_seconds_per_target": 2.7312,
+   "memory_tebibytes_at_the_measured_exponent": 0.0008,
+   "memory_tebibytes_if_a_probe_cost_the_same": 0.001,
+   "ratio": 0.8,
    "subgroup_bits": 48
   },
   {
-   "break_even_targets": 37,
-   "collection_seconds": 1042.5,
-   "descent_seconds_per_target": 4.3699,
-   "factor_base_points": 90650,
-   "memory_bytes": 20173620956,
-   "memory_tebibytes": 0.0183,
-   "pair_table_seconds": 410.9,
-   "precompute_seconds": 1453.4,
-   "rho_seconds_per_target": 43.6991,
+   "memory_tebibytes_at_the_measured_exponent": 0.0226,
+   "memory_tebibytes_if_a_probe_cost_the_same": 0.0157,
+   "ratio": 1.4,
    "subgroup_bits": 56
   },
   {
-   "break_even_targets": 116,
-   "collection_seconds": 66719.6,
-   "descent_seconds_per_target": 69.9185,
-   "factor_base_points": 362599,
-   "memory_bytes": 322777935295,
-   "memory_tebibytes": 0.2936,
-   "pair_table_seconds": 6573.9,
-   "precompute_seconds": 73293.5,
-   "rho_seconds_per_target": 699.1851,
+   "memory_tebibytes_at_the_measured_exponent": 0.6658,
+   "memory_tebibytes_if_a_probe_cost_the_same": 0.2504,
+   "ratio": 2.7,
    "subgroup_bits": 64
   },
   {
-   "break_even_targets": 435,
-   "collection_seconds": 4270057.0,
-   "descent_seconds_per_target": 1118.6961,
-   "factor_base_points": 1450395,
-   "memory_bytes": 5164446964720,
-   "memory_tebibytes": 4.697,
-   "pair_table_seconds": 105182.2,
-   "precompute_seconds": 4375239.3,
-   "rho_seconds_per_target": 11186.961,
+   "memory_tebibytes_at_the_measured_exponent": 19.5785,
+   "memory_tebibytes_if_a_probe_cost_the_same": 4.0069,
+   "ratio": 4.9,
    "subgroup_bits": 72
   },
   {
-   "break_even_targets": 1707,
-   "collection_seconds": 273283651.0,
-   "descent_seconds_per_target": 17899.1377,
-   "factor_base_points": 5801578,
-   "memory_bytes": 82631151435514,
-   "memory_tebibytes": 75.1526,
-   "pair_table_seconds": 1682915.5,
-   "precompute_seconds": 274966566.5,
-   "rho_seconds_per_target": 178991.3767,
+   "memory_tebibytes_at_the_measured_exponent": 575.7305,
+   "memory_tebibytes_if_a_probe_cost_the_same": 64.1103,
+   "ratio": 9.0,
    "subgroup_bits": 80
   }
  ],
- "software": {
-  "commit": "ab7413e898cb4f1ee01134f84e552241c55091f6",
-  "profile": "release"
- },
- "the_law": {
-  "charged_crossover_at_4_gibibytes_bits": 58.2,
-  "constants_measured_at_degree_61": {
-   "bytes_per_stored_pair": 4.91,
-   "collection_lookup_nanoseconds": 40,
-   "descent_probe_microseconds": 0.249,
-   "pair_table_nanoseconds_per_pair": 100,
-   "rho_step_microseconds": 1.435
-  },
-  "cross_check": "An independent extrapolation from the degree-61 charged ratio of 61.2 along the same square-root slope gives about 60 bits; these agree to within two bits.",
-  "crossover": "r_max proportional to M^2",
-  "descent": "2r/|F|^2 probes, and |F| = sqrt(2M/c) for M bytes at c bytes a stored pair, so r*c*t_probe/M -- linear in r, inverse in memory",
-  "rho": "sqrt(pi r/2)/sqrt(2n) steps"
- },
- "what_it_does_support": "The shape: reach quadratic in memory, precompute linear in r. A tool for many logarithms on one curve and never for one logarithm -- 17 targets to pay for itself at 48 bits, about 1700 at 80.",
- "what_this_is": "The cost laws collapsed into one statement and priced from measured constants: the charged reach of this method grows as the square of the memory budget, two bits a quadrupling.",
- "why_the_large_rows_are_not_predictions": [
-  "The lookup cost is held at 40 ns, which is a DRAM miss. At 75 TiB the pair table is not in DRAM on any machine and a lookup becomes an SSD or network access, ten to a thousand times slower, which multiplies the collection column. The M^2 law is clean but its constant holds only while the table answers at memory speed, and the law itself pushes the table out of that memory.",
-  "The decomposition rates |F|^3/(3!r) and |F|^2/(2r) treat pair and triple sums as uniform over the group. Well supported at the sizes measured here; not proved at any size.",
-  "Constants measured at a 48-bit subgroup are extrapolated to 80, a factor of 10^10 in r.",
-  "Collection parallelises and the years quoted are core-years, but the pair table is a shared structure every worker must reach, and sharding it is engineering this note has not done."
+ "what_this_is": "The cost laws collapsed into reach against memory, and then tested at three factor-base widths on one degree. The probe-count law holds; the assumption hidden beside it -- that a probe costs the same whatever the table size -- does not, and it is what sets the exponent.",
+ "what_this_is_not": [
+  "Not a measured boundary: constants from a 48-bit subgroup are carried to 80, a factor of 10^10 in r.",
+  "Not a claim about any curve in use.",
+  "The three widths were measured at 32 targets each, which is a small sample for a geometric distribution -- the middle width's 0.58 against the outer two's 0.90 and 0.85 is that noise, and the exponents are fitted across all three rather than read off a pair.",
+  "Collection parallelises; the pair table is shared state every worker must reach, and sharding it is not done here."
  ]
 }

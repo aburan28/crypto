@@ -1657,82 +1657,79 @@ square root, and the boundary is still a boundary. What moved is where it
 sits, and it moved because a constant that looked fixed turned out not to
 be — four times in a row.
 
-## The whole thing in one law
+## The whole thing in one law, and what measuring it cost
 
 Four sections of this note moved constants, and one moved the quantity
 the constants divide. It is worth collapsing all of it into the statement
-it adds up to, because that statement outlives any particular
-optimisation.
+it adds up to — and then testing that statement, which turns out to be
+the part that matters.
 
 Two facts do the work. The descent needs `2r/|F|²` probes. The factor
 base is bounded by memory, `|F| = √(2M/c)` for `M` bytes at `c` bytes a
-stored pair. Substitute:
-
-```text
-    descent cost  =  r · c · t_probe / M          — linear in r, inverse in memory
-    ρ cost        =  √(πr/2)/√(2n) · t_step       — square root of r
-```
-
-Setting them equal and solving for `r`:
+stored pair. Substitute, set equal to ρ's `√(πr/2)/√(2n)` steps, and
 
 ```text
     r_max  ∝  M²
 ```
 
-**The reach of this method grows as the square of the memory budget** —
-exactly two bits per quadrupling. Everything else in this note is inside
-that proportionality constant.
+— two bits of reach per **doubling** of memory. That is the clean answer,
+and it is wrong, in a way that only a measurement finds.
 
-With the constants the degree-61 run measured (0.249 µs a descent probe,
-1.435 µs a ρ step, 4.91 bytes a stored pair) the charged crossover sits
-at **58.2 bits at four gibibytes**, which agrees to within two bits with
-the independent extrapolation from the measured ratio a section ago.
+### Testing it
 
-### What it would take
+The law rests on `2r/|F|²` probes at a probe cost that does not depend on
+`|F|`. Both halves are checkable: run one degree at three base widths and
+fit. At `K_0/F_{2^61}`, 32 targets each:
 
-Sizing memory for a charged ratio of ten — the descent a tenth of a ρ
-walk, a real margin rather than a tie — and pricing the whole process:
+| `\|F\|` | probes/target | `2r/\|F\|²` | measured/predicted | µs a probe | charged |
+|---|---|---|---|---|---|
+| 9 760 | 3 068 736 | 3 419 948 | 0.90 | 0.148 | 7.20 |
+| 18 544 | 545 117 | 947 354 | 0.58 | 0.214 | 27.79 |
+| 36 112 | 213 109 | 249 814 | 0.85 | 0.249 | 61.16 |
 
-| subgroup | memory | `\|F\|` | pair table | collection | descent | ρ/target | break-even targets |
-|---|---|---|---|---|---|---|---|
-| 48 bits | 1.2 GiB | 22 700 | 26 s | 16 s | 0.27 s | 2.7 s | 17 |
-| 56 bits | 18 GiB | 90 600 | 7 min | 17 min | 4.4 s | 44 s | 37 |
-| 64 bits | 0.29 TiB | 363 000 | 1.8 h | 18.5 h | 70 s | 12 min | 116 |
-| 72 bits | 4.7 TiB | 1.45 M | 29 h | 49 days | 19 min | 3.1 h | 435 |
-| 80 bits | 75 TiB | 5.8 M | 19 days | 8.7 years | 5 h | 50 h | 1707 |
+Fitting across the three:
 
-Collection dominates the precompute from 56 bits on, exactly as the
-`2r/(n|F|)` law says it must, and the pair table — the thing that felt
-expensive at degree 61 — becomes a rounding error.
+```text
+    probe count      ∝ |F|^−2.03      the model says −2
+    seconds a probe  ∝ |F|^+0.40      the model says 0
+    descent seconds  ∝ |F|^−1.64
+```
 
-### Why the last row is not a claim
+**The probe-count law is confirmed to within 1.5%.** What is not
+confirmed is the part nobody wrote down: a probe is not a fixed cost. It
+is a random access into a table that grows quadratically with the base,
+and it gets slower as the table grows — 0.148 µs into a table of 0.2 GB,
+0.249 µs into one of 3 GB. Sixty per cent dearer, across a range where
+the table is comfortably in DRAM the whole time.
 
-That table extrapolates constants measured at a 48-bit subgroup out to 80
-bits, a factor of `10¹⁰` in `r`. Three things about it should stop anyone
-reading the bottom row as a prediction.
+Carry that through and the law becomes
 
-**The lookup cost is assumed constant, and it is not.** Every figure
-takes 40 ns a lookup, which is a DRAM miss. At 75 TiB the pair table is
-not in DRAM on any machine; a lookup becomes an SSD or a network access,
-somewhere between ten and a thousand times slower, and the collection
-column is where that multiplies. Eight years becomes centuries at the
-wrong end of that range. The `M²` law is clean, but its constant is only
-constant while the table fits in memory that answers at memory speed —
-and the whole point of the law is that it pushes the table out of that
-memory.
+```text
+    r_max  ∝  M^1.64
+```
 
-**The decomposition rate is assumed to hold.** The `|F|³/(3!r)` and
-`|F|²/(2r)` rates come from treating pair and triple sums as uniform over
-the group. That is well supported at the sizes measured here and is not
-proved at any size.
+which is 1.64 bits a doubling, not 2. The difference compounds: at 64
+bits it asks for 0.67 TiB instead of 0.25, at 72 bits for 20 TiB instead
+of 4, and at 80 bits for **576 TiB instead of 64** — nine times the
+memory, for the same reach.
 
-**Nothing here parallelises for free.** Collection does, and the eight
-years is core-years; the pair table is a shared structure that every
-worker must reach, and sharding it is a different piece of engineering
-that this note has not done.
+### The exponent is an upper bound, not an estimate
 
-What the table does support is the shape: **this method's reach is
-quadratic in memory and its precompute is linear in `r`**, so it is a
-tool for many logarithms on one curve and never for one logarithm. At 48
-bits it pays for itself after 17 targets; at 80 bits, after about 1700 —
-if you have 75 terabytes that answer in 40 nanoseconds.
+The 0.40 was measured across tables of 0.2 to 3 GB. Every one of them fit
+in this machine's memory and was served by DRAM. The whole point of the
+`M` law is to make the table bigger, and past DRAM a lookup becomes an
+SSD or a network access — two to four orders of magnitude slower, not
+sixty per cent. So 1.64 is what the exponent looks like *before* the
+memory hierarchy has its real say, and the true large-scale figure is
+lower. The 576 TiB row is a floor on the cost, not an estimate of it.
+
+I had written `M²` into this note and into a pull request before running
+the three-width test, on the strength of the algebra alone. The algebra
+was right about the probes and silent about their cost, and it was the
+silence that mattered. The honest form of the result is the shape, which
+survives both versions:
+
+**Reach grows with memory, sub-quadratically and by a factor the memory
+hierarchy sets; precompute grows linearly in `r`.** This is a method for
+many logarithms on one curve, and never for one — 17 targets to pay for
+itself at 48 bits, and hundreds to thousands beyond that.

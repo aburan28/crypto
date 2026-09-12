@@ -487,13 +487,17 @@ with its summands keeps them. Below even the compact size the build
 still refuses with a number instead of an allocation.
 
 `docs/ic/runs/koblitz-reach-versus-memory-20260912.json` collapses the
-cost laws into one statement: the descent costs `2r/|F|²` probes and
-`|F| = √(2M/c)`, so the charged reach grows as **`M²`** — two bits a
-quadrupling of memory, 58.2 bits at four gibibytes on the measured
-constants. Read its `why_the_large_rows_are_not_predictions` before
-quoting the table: every figure holds a lookup at 40 ns, which stops
-being true once the pair table leaves DRAM, and that is precisely what
-the law asks for.
+cost laws into reach against memory, and then tests them at three
+factor-base widths on one degree. The probe-count law `2r/|F|²` is
+confirmed to within 1.5%; what is not confirmed is the assumption beside
+it, that a probe costs the same whatever the table size. It does not — a
+probe is a random access into a table quadratic in `|F|`, and it measured
+0.148 µs into 0.2 GB against 0.249 µs into 3 GB. The reach therefore
+grows as **`M^1.64`**, not `M²`: 1.64 bits a doubling of memory, and at
+80 bits 576 TiB rather than 64. Read the file's
+`the_exponent_is_an_upper_bound` before quoting any of it — 0.40 was
+fitted entirely inside DRAM, and the law's whole purpose is to push the
+table out of it.
 
 `docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
 offers: `K_0/F_{2^61}`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
