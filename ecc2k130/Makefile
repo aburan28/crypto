@@ -6,6 +6,8 @@
 #   make gpu          CUDA build (needs nvcc)
 #   make ptx          device-only compile + ptxas report (needs clang or nvcc,
 #                     but no GPU) -- register, spill and code-size numbers
+#   make verilog      emit the FPGA datapath from the same IR (python3 only)
+#   make check-verilog  simulate the emitted RTL against the field model
 #
 # Build-time knobs:
 #   BATCH      walks batched into one field inversion per thread (default 32)
@@ -38,6 +40,12 @@ PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
 PACKED_ADD_COMBINE ?= 0
+PACKED_GENERATED_PRODUCT ?= 0
+PACKED_CLMAD ?= 0
+PACKED_WEIGHTED_PREFIX ?= 0
+PACKED_COMPACT_STATE ?= 0
+PACKED_SHARED_SIGMA ?= 0
+PACKED_STATE_TILE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -59,7 +67,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -69,7 +77,13 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_BY_VALUE=$(PACKED_BY_VALUE) -DECC_PACKED_PERM_SIGMA=$(PACKED_PERM_SIGMA) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
-       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE)
+       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
+       -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
+       -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
+       -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
+       -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
+       -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
+       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
 
 all: cpu
 
@@ -86,6 +100,17 @@ generate:
 	cd codegen && python3 gensigma.py
 	cd codegen && python3 genpolyreduce.py
 	cd codegen && python3 gendirectreduce.py
+	python3 codegen/genpackedproduct.py
+
+# FPGA datapath: the same IR emitted as pipelined Verilog instead of C.
+# See ../FPGA-CEILING.md; needs python3 only, no FPGA toolchain.
+verilog:
+	cd codegen && python3 genverilog.py --out ../generated/rtl
+
+# Read the emitted RTL back and simulate it against field.Onb.  Checks the
+# emission (stage crossings, register chains, output wiring), not the IR.
+check-verilog:
+	cd codegen && python3 testverilog.py --rtl ../generated/rtl
 
 cpu: ecc2k130-cpu
 
@@ -164,31 +189,53 @@ test-schedule:
 
 test-packed:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-base
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-single
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-base
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-single
 	./build/test-packed-base
 	./build/test-packed-single
 
 test-packed-network:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
-	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-generated
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
 	./build/test-packed-network
 	./build/test-packed-network-direct
+	./build/test-packed-network-generated
 	./build/test-packed-network-add
+
+test-generated-product:
+	python3 codegen/genpackedproduct.py --check
+	python3 -m unittest discover -s codegen -p testgeneratedproduct.py
+
+test-clmad:
+	python3 -m unittest discover -s codegen -p testclmad.py
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
+	./build/test-packed-clmad-host
 
 test-packed-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedcuda.cu -o build/test-packed-cuda
 	./build/test-packed-cuda
 
+test-packed-storage-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedstatecuda.cu -o build/test-packed-storage-cuda
+	./build/test-packed-storage-cuda
+
+test-shared-sigma-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
+	./build/test-shared-sigma-cuda
+
 test-timing:
 	mkdir -p build
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
 	./build/test-timing
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-timing ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -245,29 +292,36 @@ modal:
 	modal run modal_app.py::bench --gpu H100
 
 # Audited packed configuration for the RTX PRO 6000 Blackwell Server Edition.
-RTX_PRO6000_WORKERS ?= 192512
-RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.0.0 \
+RTX_PRO6000_WORKERS ?= 385024
+RTX_PRO6000_COMPACT_STATE ?= 1
+RTX_PRO6000_SHARED_SIGMA ?= 1
+RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
                  ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
-                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE) \
+                 ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
-	    --batch 32 --threads 256 --leaf 0 --min-blocks 2 \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
 audit-rtx-pro6000:
 	mkdir -p build
-	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --min-blocks 2 --block-threads 256 --repeats 3 --workers $(RTX_PRO6000_WORKERS) \
+	$(RTX_PRO6000_ENV) $(MODAL) run packed_audit.py --batch 16 --min-blocks 2 --block-threads 256 --repeats 3 --workers $(RTX_PRO6000_WORKERS) \
 	    --output build/rtx-pro6000-audit.json
 
 clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
-	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-add
-	rm -f build/test-packed-cuda
+	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
+	rm -f build/test-packed-clmad-host
+	rm -f build/test-packed-cuda build/test-packed-storage-cuda
+	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-packed-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

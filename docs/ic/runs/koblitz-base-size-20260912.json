@@ -1,0 +1,213 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_factor_base_size_sweep",
+ "date": "2026-09-12",
+ "curve": "K_0 / F_2^41",
+ "what_this_is": "How the cost of a degree-41 discrete logarithm moves with the size of a subgroup factor base, and the rule that follows for choosing one: a sweep of base sizes measuring the decomposition rate and the cost of a trial, then two end-to-end runs over 256 targets at the two sizes that matter.",
+ "the_model": "With a subgroup base the decomposition rate is the |F|^3/(3! r) a random base gives, and an m = 3 trial costs |F| table lookups, so work per target falls as r/|F|^2 \u2014 four times cheaper per doubling \u2014 until the rate saturates at one witness per trial and further growth only makes each trial dearer. The pair table is quadratic in |F|, so the precompute rises four times per doubling at once.",
+ "how_to_choose": "Base size is a function of how many targets share the database. Total cost is precompute(|F|) + T * descent(|F|). Measured: 3.0 s + T*16.2 ms at 5248 points against 9.0 s + T*7.2 ms at 10496, so the larger base wins beyond about 665 targets and loses below it. Both beat the rho baseline's 121 ms/target above roughly 29 and 85 targets respectively.",
+ "sweep": [
+  {
+   "points": 1312,
+   "abscissae": 656,
+   "entries": 861328,
+   "table_megabytes": 14.0,
+   "build_seconds": 0.1,
+   "trials_per_target": 400.0,
+   "ms_per_trial": 0.119,
+   "ms_per_target": 47.8
+  },
+  {
+   "points": 2624,
+   "abscissae": 1312,
+   "entries": 3444000,
+   "table_megabytes": 55.0,
+   "build_seconds": 0.4,
+   "trials_per_target": 133.0,
+   "ms_per_trial": 0.219,
+   "ms_per_target": 29.2
+  },
+  {
+   "points": 5248,
+   "abscissae": 2624,
+   "entries": 13773376,
+   "table_megabytes": 220.0,
+   "build_seconds": 1.7,
+   "trials_per_target": 29.0,
+   "ms_per_trial": 0.481,
+   "ms_per_target": 13.7
+  },
+  {
+   "points": 10496,
+   "abscissae": 5248,
+   "entries": 55088256,
+   "table_megabytes": 881.0,
+   "build_seconds": 6.6,
+   "trials_per_target": 3.0,
+   "ms_per_trial": 1.02,
+   "ms_per_target": 3.5
+  },
+  {
+   "points": 20992,
+   "abscissae": 10496,
+   "entries": 220342528,
+   "table_megabytes": 3525.0,
+   "build_seconds": 32.3,
+   "trials_per_target": 1.0,
+   "ms_per_trial": 2.14,
+   "ms_per_target": 2.3
+  }
+ ],
+ "end_to_end_256_targets": {
+  "small": {
+   "points": 5248,
+   "targets": 256,
+   "precompute_seconds": 3.01,
+   "descent_seconds_per_target": 0.016238,
+   "ic_total_seconds": 7.167,
+   "rho_total_seconds": 31.49,
+   "rho_seconds_per_target": 0.123008,
+   "ratio": {
+    "amortised": 4.393815699789997,
+    "charged": 7.57544297870583
+   },
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.8679945182333301,
+    "whole_process_crossover": true
+   },
+   "ic_verified": 256,
+   "rho_verified": 256
+  },
+  "wide": {
+   "points": 10496,
+   "targets": 256,
+   "precompute_seconds": 9.038,
+   "descent_seconds_per_target": 0.007169,
+   "ic_total_seconds": 10.873,
+   "rho_total_seconds": 31.148,
+   "rho_seconds_per_target": 0.121671,
+   "ratio": {
+    "amortised": 2.8647268953416294,
+    "charged": 16.972929578543994
+   },
+   "verdict": {
+    "amortised_crossover": true,
+    "charged_crossover": true,
+    "charged_margin": 0.9410826519150748,
+    "whole_process_crossover": true
+   },
+   "ic_verified": 256,
+   "rho_verified": 256
+  }
+ },
+ "break_even_targets": 665,
+ "what_this_is_not": [
+  "Not asymptotic: this chooses a constant; work per target is still Theta(r/|F|^2).",
+  "Not a single-instance result: every whole-process figure amortises one precompute over many targets.",
+  "Not independent: one build, one host, one series per configuration.",
+  "Applies to the pair-table oracle only; the algebraic oracles need a linear base."
+ ],
+ "claim_boundary": "synthetic_known_answer",
+ "software": {
+  "commit": "206838387f243703e7c7a79ab1122fdec0bcd50e",
+  "profile": "release"
+ },
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "descent_summands": {
+  "why": "Collection and the descent share the factor base and its pair table, not the number of summands. Three summands need 3!r/|F|^3 probes of |F| lookups each; two need 2r/|F|^2 probes of one lookup. Collection wants few probes because each costs two scalar multiplications, so it takes three. The descent walks its probes by +G in blocks that share one field inversion, which brings a probe below the cost of the lookup after it, so two wins there.",
+  "measured": [
+   {
+    "base_points": 5248,
+    "collection_summands": 3,
+    "descent_summands": 3,
+    "descent_seconds_per_target": 0.014351,
+    "descent_probes_per_target": 21,
+    "rho_seconds_per_target": 0.119546,
+    "ratio": {
+     "amortised": 1.1147073470552187,
+     "charged": 8.330119882435675
+    },
+    "verdict": {
+     "amortised_crossover": true,
+     "charged_crossover": true,
+     "charged_margin": 0.8799537084564014,
+     "whole_process_crossover": true
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 5248,
+    "collection_summands": 3,
+    "descent_summands": 2,
+    "descent_seconds_per_target": 0.008626,
+    "descent_probes_per_target": 43529,
+    "rho_seconds_per_target": 0.117185,
+    "ratio": {
+     "amortised": 1.1935607622190292,
+     "charged": 13.584986458357402
+    },
+    "verdict": {
+     "amortised_crossover": true,
+     "charged_crossover": true,
+     "charged_margin": 0.9263893266978704,
+     "whole_process_crossover": true
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 10496,
+    "collection_summands": 3,
+    "descent_summands": 3,
+    "descent_seconds_per_target": 0.007196,
+    "descent_probes_per_target": 2,
+    "rho_seconds_per_target": 0.118489,
+    "ratio": {
+     "amortised": 0.39399825929435073,
+     "charged": 16.465314565661213
+    },
+    "verdict": {
+     "amortised_crossover": false,
+     "charged_crossover": true,
+     "charged_margin": 0.9392662681291541,
+     "whole_process_crossover": false
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   },
+   {
+    "base_points": 10496,
+    "collection_summands": 3,
+    "descent_summands": 2,
+    "descent_seconds_per_target": 0.004655,
+    "descent_probes_per_target": 9427,
+    "rho_seconds_per_target": 0.115535,
+    "ratio": {
+     "amortised": 0.4281531323533789,
+     "charged": 24.82053709514668
+    },
+    "verdict": {
+     "amortised_crossover": false,
+     "charged_crossover": true,
+     "charged_margin": 0.9597107832047866,
+     "whole_process_crossover": false
+    },
+    "targets": 32,
+    "ic_verified": 32,
+    "rho_verified": 32
+   }
+  ],
+  "floor": "A solved target ends with one [d]G = Q check in the general arithmetic, 1.16 ms at this degree against 0.025 ms in the single-word representation. It is kept in the general arithmetic deliberately, as a check independent of the arithmetic that did the search, and rho pays the same on its own candidate. At 8.6 ms a target it is now 13% of the descent."
+ }
+}

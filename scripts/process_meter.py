@@ -22,16 +22,44 @@ def main() -> None:
     parser.add_argument("--stdout", type=Path, required=True)
     parser.add_argument("--stderr", type=Path, required=True)
     parser.add_argument("--metrics", type=Path, required=True)
+    parser.add_argument("--exclusive-create", action="store_true")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command and args.command[0] == "--" else args.command
     if not command:
         parser.error("a command is required after --")
 
+    outputs = (args.stdout, args.stderr, args.metrics)
+    if len({path.resolve() for path in outputs}) != len(outputs):
+        parser.error("stdout, stderr, and metrics paths must be distinct")
+    reserved: list[tuple[Path, int]] = []
+    try:
+        if args.exclusive_create:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+            if hasattr(os, "O_NOFOLLOW"):
+                flags |= os.O_NOFOLLOW
+            for path in outputs:
+                reserved.append((path, os.open(path, flags, 0o644)))
+        else:
+            for path in outputs:
+                reserved.append(
+                    (path, os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644))
+                )
+    except OSError as error:
+        for created_path, descriptor in reserved:
+            os.close(descriptor)
+            if args.exclusive_create:
+                try:
+                    created_path.unlink()
+                except OSError:
+                    pass
+        parser.error(f"cannot reserve output artifacts: {error}")
+
+    descriptors = {path: descriptor for path, descriptor in reserved}
     before = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.perf_counter()
     timed_out = threading.Event()
-    with args.stdout.open("w") as stdout, args.stderr.open("w") as stderr:
+    with os.fdopen(descriptors[args.stdout], "w") as stdout, os.fdopen(descriptors[args.stderr], "w") as stderr:
         process = subprocess.Popen(
             command,
             cwd=args.cwd,
@@ -93,7 +121,10 @@ def main() -> None:
             "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
         },
     }
-    args.metrics.write_text(json.dumps(record, indent=2) + "\n")
+    with os.fdopen(descriptors[args.metrics], "w") as metrics:
+        metrics.write(json.dumps(record, indent=2) + "\n")
+        metrics.flush()
+        os.fsync(metrics.fileno())
 
 
 if __name__ == "__main__":

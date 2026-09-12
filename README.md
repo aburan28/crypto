@@ -392,12 +392,13 @@ that makes adding new attacks cheap.
 | Module                                       | Attack                                                  |
 |----------------------------------------------|---------------------------------------------------------|
 | `cryptanalysis::pollard_rho`                 | Pollard ρ for DLP / ECDLP, multi-shard, distinguished-points |
-| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
+| `cryptanalysis::pollard_collab`              | **Collaborative p2p rho**: indexed work units, self-verifying DP check-ins, CRDT merge, mailbox + TCP gossip + [cairn](https://github.com/aburan28/cairn) piecework transports — [design](./docs/POLLARD_COLLAB_DESIGN.md) |
 | `cryptanalysis::preprocessing_rho`           | Bernstein-Lange precomputation rho                       |
 | `cryptanalysis::ml_rho_walks`                | Pollard ρ walks under learned partition functions       |
 | `cryptanalysis::aut_folded_rho`              | Automorphism-folded rho (CM curves)                      |
 | `cryptanalysis::ec_index_calculus`           | Semaev S₃ index calculus on prime-field curves          |
 | `cryptanalysis::residual_walk`               | Partial-decomposition residual walks: rho-style collision search over factor-base decompositions, measured against plain rho |
+| `cryptanalysis::gaudry_cubic`                | Gaudry-style index calculus on E(F_{p³}) with the subspace factor base {x ∈ F_p}: Weil-restricted S₃ pair test, meet-in-the-middle triple oracle, Gaudry's O(1) three-unknown S₄ solve (symmetrised Weil restriction, Macaulay matrix with row selection, eigenvalues of the multiplication matrix), sparse Wiedemann linear algebra with singleton filtering, the double-large-prime variation, rho reference |
 | `cryptanalysis::ec_index_calculus_j0`        | ζ-orbit-reduced IC on j=0 curves + Eisenstein-smooth FB |
 | `cryptanalysis::koblitz_index_calculus`      | Frobenius-invariant-factor-base IC on Koblitz curves (GGMP) |
 | `cryptanalysis::koblitz_groebner`            | Semaev S₃ Weil restriction + matrix-F4 decomposition oracle |
@@ -407,6 +408,8 @@ that makes adding new attacks cheap.
 | `cryptanalysis::coordinate_search`           | Algorithmic search for point coordinates that shrink the decomposition system (symmetry detection, linearising frames, interpolated summation polynomials) |
 | `cryptanalysis::koblitz_symmetrised`         | The symmetrised (Artin–Schreier frame) Koblitz decomposition systems in the F4 and SAT oracles, with a paired, enumeration-gated benchmark |
 | `cryptanalysis::coordinate_quotients`        | Invariants of any finite group of point maps by orbit sums: relation subgroup by experiment, minimal-degree relation, exact collapse |
+| `cryptanalysis::f4_fp`                        | Degree-bounded F4 over a small prime field: normal strategy, symbolic preprocessing, parallel dense row reduction mod `p`, cooperative deadline, solving by root finding and substitution — the engine that times the coordinate-descent systems at `m = 3` |
+| `cryptanalysis::coordinate_descent`          | Fixed-target quotient systems over `F_{p^k}` descended to `F_p` (Gaudry's setting) and timed on the F_p Gröbner engine; `Chart` puts frames on the `y`-line, where 3-torsion translations of `j = 0` curves are Möbius maps (`examples/three_torsion.rs`) |
 | `cryptanalysis::j0_twists`                   | 6-twist enumeration on j=0 curves + smoothness flagging |
 | `cryptanalysis::canonical_lift`              | Smart attack on anomalous curves (canonical lifting)    |
 | `cryptanalysis::cm_canonical_lift`           | CM-curve canonical lift + p-adic logarithm              |
@@ -685,9 +688,23 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
-Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).  A proposal for running the same search as a paid `piecework` objective on
-[cairn](https://github.com/aburan28/cairn), where each distinguished point is a
-verified artifact, is [aburan28/cairn#143](https://github.com/aburan28/cairn/pull/143).
+Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node can
+post the same search as a `piecework` objective, where each distinguished
+point is a verified artifact paid from a pool
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md),
+built in [aburan28/cairn#144](https://github.com/aburan28/cairn/pull/144)).
+`--cairn` commits and reveals every point as a claim and reads the objective's
+log back as the shared DP table, so a collision with anyone else's point is
+seen here and, with `--answer-objective`, `k` is claimed too:
+
+```bash
+crypto cryptanalysis rho-collab work --job nums-50-rho.json --node carol \
+    --cairn http://127.0.0.1:8080 --objective sha256:… --answer-objective sha256:… \
+    --identity carol.json          # or --submitter carol for an unsigned nickname
+crypto cryptanalysis rho-collab status --job nums-50-rho.json --cairn http://127.0.0.1:8080 --objective sha256:…
+```
+
+Design notes: [`docs/POLLARD_COLLAB_DESIGN.md`](./docs/POLLARD_COLLAB_DESIGN.md).
 
 ### Index calculus (ECDLP, prime fields)
 
@@ -808,9 +825,11 @@ problems generally.
 ## Documentation
 
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
+- [`AGENTS.md`](./AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
+- [`docs/index-calculus-scoreboard.html`](./docs/index-calculus-scoreboard.html) — one-page visual scoreboard of the ECDLP cost ledger: every index-calculus variant against Pollard rho and the generic-group floor, the solve-constant ledger, and the fitted exponents. Open it in a browser.
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`RESEARCH_P256.md`](./RESEARCH_P256.md) — P-256 specific structural studies.
-- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`).
+- [`RESEARCH_RESIDUAL_WALKS.md`](./RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`); the S₃/S₄ decomposition oracles and Gaudry's subspace setting on E(F_{p³}) (`experiments/20_residual_walk_{oracle,s4,mitm3}.json`, `experiments/21_gaudry_cubic.json`); Gaudry's O(1) three-unknown S₄ solve and its measured constant `C₃` (`experiments/21_gaudry_cubic_groebner.json`), the `C₃` optimisation ledger (`experiments/21_gaudry_cubic_c3.json`, §11.5–11.6), and the linear algebra: dense vs sparse Wiedemann with filtering, and the double-large-prime variation measured at `n^{4/9}` (`experiments/21_gaudry_cubic_la.json`, §11.7).
 - [`RESEARCH_TII_MCELIECE.md`](./RESEARCH_TII_MCELIECE.md) — TII McEliece key-recovery challenges: attack ideas + imported keys (`research/tii_mceliece/`).
 - [`RESEARCH_EXOTIC_COORDINATES.md`](./RESEARCH_EXOTIC_COORDINATES.md) — algorithmic search for exotic point coordinates that make decomposition relations cheaper (prime, binary, Koblitz).
 - [`DEFERRED.md`](./DEFERRED.md) — known gaps + deferred work.

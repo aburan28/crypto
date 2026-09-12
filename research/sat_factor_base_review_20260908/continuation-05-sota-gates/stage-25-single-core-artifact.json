@@ -1,0 +1,70 @@
+{
+  "additive_retained_math_replay": {
+    "check_count": 1251,
+    "independent_external_reproduction_satisfied": false,
+    "independent_mathematical_payload_replay_completed": false,
+    "result": {
+      "bytes": 15636,
+      "path": "stage-25-single-core-math-replay.json",
+      "sha256": "d955cdb4427b5be142c7ac18095b59dfab0e2eed39f34c1e8160a993f733f0b2"
+    },
+    "retained_mathematical_witness_replay_completed": true,
+    "status": "PASS"
+  },
+  "artifact": {
+    "expires_at": "2026-12-10T16:40:13Z",
+    "github_digest": "sha256:b04d812c6b2b50f206d46d90ab62450d4ec9a458919e8c0489f5ab9b201a2c70",
+    "id": 10274255852,
+    "name": "koblitz-stage25-single-core-34623323265",
+    "size_in_bytes": 44156452
+  },
+  "claim_boundary": {
+    "covers_stage20_n31_n41_n59_backend_matrix": false,
+    "finite_degree23_single_cpu_control": true,
+    "full_cost_gate_passed": false,
+    "independent_external_reproduction_satisfied": false,
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_executed": false,
+    "simultaneous_process_tree_memory_measured": false,
+    "source_dependency_toolchain_or_license_acquisition_charged": false
+  },
+  "committed_files": {
+    "stage-25-single-core-affinity.json": {
+      "bytes": 593,
+      "sha256": "8ef90e46df0420b5e8148b5e89fd6a1b447c7bdcb6bf0215041a3420e114e1b3"
+    },
+    "stage-25-single-core-result-seal.json": {
+      "bytes": 1826,
+      "sha256": "7992177fb55231d674ba0debb3c23b13d5c14ed141915d78f7b914d6d4e6886f"
+    },
+    "stage-25-single-core-result.json": {
+      "bytes": 3395,
+      "sha256": "307d137cc92fad4d7998e040dfc322001930f868b7b0403e27f85e9a1a92f134"
+    },
+    "stage-25-single-core-verification.json": {
+      "bytes": 365,
+      "sha256": "a97a393154faec3e7a14a7ac4f01298a8b10f5c81c71c2b15a8dcd467e4c4b8f"
+    }
+  },
+  "portable_stage23": {
+    "bundle_inventory_sha256": "77c446a13b2d62ce8df47e7cda27b163449d666c4189dc1d08dd73b52a7b34ba",
+    "bundle_manifest_sha256": "9a317f260e29ecccb5f45467bb5f6a4769bbb9efd8f77de872402fa4b8fa6dec",
+    "bundle_seal_sha256": "db6d22811de297587e3810ba504596e81d182a2c7b1eadfbaa7ef95e7913ebcd",
+    "completed_rows": 5,
+    "downloaded_artifact_hidden_files_preserved": true,
+    "omitted_build_files": 651,
+    "source_run_inventory_sha256": "b71e5c6772e3eec488355ec14b0da7a1f89cedb8f57a99c4765145128c98ce2c",
+    "status": "compact_terminal_evidence_structurally_verified"
+  },
+  "pull_request": 144,
+  "recorded_at": "2026-09-11",
+  "schema": "koblitz_stage25_github_artifact_record.v1",
+  "status": "github_artifact_downloaded_and_portable_stage23_verified",
+  "workflow_run": {
+    "execution_source_commit": "4f0bcbd87dc3e4d7c9a26f5e8bec290d3430c04e",
+    "head_branch": "codex/koblitz-stage25-single-core-20260911",
+    "head_sha": "ab9e29b5fe31c93b6b8446e2218cf5c63baf9d7a",
+    "id": 34623323265,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34623323265"
+  }
+}

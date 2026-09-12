@@ -1,0 +1,1615 @@
+{
+  "valid": true,
+  "scope": "Host-validated weighted-prefix source, three CPU-only CUDA13.3.73 sm120 wrapper compiles and retained code/call accounting. No GPU, executable or full-client execution.",
+  "sourceFullManifestSha256": "d83af92454f0453d62d36ac3376a928c7ed0b5c5159074ddf13fec67d8f073eb",
+  "sourceSubsetManifestSha256": "9c08b8a91c2e63c1eb455653621932afecb16199e154c1ae46154b76dfb924fb",
+  "hostReceiptSha256": "c55436f2bad3dfbab362efc16273c2f02b5a9759c32d3e15fa884913b660ea8d",
+  "driverSha256": "add97ff1395fb5b16c6e4c269ec22eda8ead4a6d1275f00187e3330be5dcfa56",
+  "driverFreezeSha256": "9b54adc52eda951e9a46e2d6cea8013b98a91785e11102e69b174c180b26f136",
+  "reviewScriptSha256": "3c40c325c76b73d3a0c4a922bdcd437951e4cc9c4fd10a0f63a8a4317a418228",
+  "rawSha256": "030baf7ef38c0ccd0b01d6ea97f0b56a2ea5866823517fad553851780884e3f2",
+  "rawPath": "/private/tmp/ecc2k-weighted-prefix-cpu-20260912/compile-result.json",
+  "remoteArtifact": "/data/weighted-prefix-cpu/1789184917500890518/result.json",
+  "pathReviewSha256": "06036ef45d7f3b3c58a861f2251238243d9d9da8f64244969852649d6edbf20a",
+  "pathReviewScriptSha256": "fd1bba5ba54278e9794bdbaa53903cf154b2ba1a2598dc847e649f8765d15d3e",
+  "appId": "ap-0yAqDFMLbl9YRa6HexTGDH",
+  "cpuSession": 15470,
+  "cpuExitCode": 0,
+  "compileAttempts": 3,
+  "gpuAllocated": false,
+  "compiler": "13.3.73",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "nativeControlCubinIdentical": true,
+  "nativeControlCompleteWalkInitEncodingIdentical": true,
+  "allModesInitEncodingIdentical": true,
+  "findings": [],
+  "rows": {
+    "weighted0": {
+      "mode": 0,
+      "command": [
+        "nvcc",
+        "-O3",
+        "-std=c++17",
+        "-arch=sm_120",
+        "-I",
+        "/root/source",
+        "-DECC_PACKED_SINGLE_PRODUCT=1",
+        "-DECC_PACKED_CACHE_DENOM=1",
+        "-DECC_PACKED_BY_VALUE=1",
+        "-DECC_PACKED_PERM_SIGMA=3",
+        "-DECC_PACKED_POLY_CHAIN=1",
+        "-DECC_PACKED_UNROLL_INV=1",
+        "-DECC_PACKED_PAIR_PRODUCTS=1",
+        "-DECC_PACKED_POLY_STATE=1",
+        "-DECC_SMEM_SPILL=0",
+        "-DECC_PACKED_DIRECT_REDUCE=1",
+        "-DECC_PACKED_GENERATED_PRODUCT=1",
+        "-DECC_BATCH=16",
+        "-DECC_THREADS=256",
+        "-DECC_MINBLOCKS=2",
+        "-DECC_PACKED_STATE_TILE=256",
+        "-DECC_PACKED_CLMAD=1",
+        "-DECC_PACKED_WEIGHTED_PREFIX=0",
+        "-cubin",
+        "/tmp/poly_regcoords_probe.cu",
+        "-o",
+        "/data/weighted-prefix-cpu/1789184917500890518/weighted0/walk.cubin",
+        "-Xptxas",
+        "-v",
+        "--keep",
+        "--keep-dir",
+        "/tmp/weighted-prefix-keep-weighted0"
+      ],
+      "cubinSha256": "20b8b53fad686c12eabd2d2a187468015a5d3eddaa82e58b56859d5f59c18528",
+      "ptxSha256": "fe2e01995b392f1a991d7462afdf3086993bfc63fa10228d72f1db1bb17c61b8",
+      "sassTextSha256": "2f292cf07096420c5cbfd840375cd3bac665463f9926932fd6e69864f3ab1101",
+      "functions": {
+        "walk": {
+          "resources": {
+            "registers": 122,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 4288,
+            "encodingSha256": "249df4247d545e0e02d328bdac6e6777ef1358faceb0ff0cb71c3369c2a2d629"
+          },
+          "callerStaticNonNop": 1683,
+          "completeSectionStaticNonNop": 4215,
+          "callSites": [
+            {
+              "address": "0x10c0",
+              "target": 42544,
+              "instruction": "CALL.REL.NOINC 0xa630"
+            },
+            {
+              "address": "0x1730",
+              "target": 26960,
+              "instruction": "CALL.REL.NOINC 0x6950"
+            },
+            {
+              "address": "0x2530",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x3520",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x3540",
+              "target": 52080,
+              "instruction": "CALL.REL.NOINC 0xcb70"
+            },
+            {
+              "address": "0x35d0",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x35f0",
+              "target": 47328,
+              "instruction": "CALL.REL.NOINC 0xb8e0"
+            },
+            {
+              "address": "0x3680",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x36a0",
+              "target": 38192,
+              "instruction": "CALL.REL.NOINC 0x9530"
+            },
+            {
+              "address": "0x3720",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x3740",
+              "target": 33920,
+              "instruction": "CALL.REL.NOINC 0x8480"
+            },
+            {
+              "address": "0x37c0",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x3ff0",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x4010",
+              "target": 29904,
+              "instruction": "CALL.REL.NOINC 0x74d0"
+            },
+            {
+              "address": "0x4090",
+              "target": 62528,
+              "instruction": "CALL.REL.NOINC 0xf440"
+            },
+            {
+              "address": "0x53e0",
+              "target": 42544,
+              "instruction": "CALL.REL.NOINC 0xa630"
+            },
+            {
+              "address": "0x5a60",
+              "target": 56832,
+              "instruction": "CALL.REL.NOINC 0xde00"
+            },
+            {
+              "address": "0x5ac0",
+              "target": 26960,
+              "instruction": "CALL.REL.NOINC 0x6950"
+            },
+            {
+              "address": "0x6760",
+              "target": 26960,
+              "instruction": "CALL.REL.NOINC 0x6950"
+            }
+          ],
+          "helpers": {
+            "16mulPolynomial131ENS0_4P131ES1_": {
+              "staticNonNop": 171,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6950",
+              "end": "0x74d0",
+              "normalizedInstructionsSha256": "e46cdd9f325f589a0dde55ab871528c85a1f10c9b81468c84907ea9f819aa9c6"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x74d0",
+              "end": "0x8480",
+              "normalizedInstructionsSha256": "e7ae06a485831247823a54242185bdbef170bb809baee6b7ad1c67b64bca60f8"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x8480",
+              "end": "0x9530",
+              "normalizedInstructionsSha256": "caa0fc49352cef4942255c4ca3b4d3502ef4183850878797965bfe5137528b7f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x9530",
+              "end": "0xa630",
+              "normalizedInstructionsSha256": "21e493f66d48f2b451457975f06aea269159974d8563196c6395e7849edf3934"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei": {
+              "staticNonNop": 299,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xa630",
+              "end": "0xb8e0",
+              "normalizedInstructionsSha256": "baa15167884e63069d3e0df57b14e9fc52b8ef6f6706827c55205511bfc451d7"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xb8e0",
+              "end": "0xcb70",
+              "normalizedInstructionsSha256": "c4a6e9058742eca1c332fcf0b4ee4c8277c305b71318cf8c98045442174850fc"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xcb70",
+              "end": "0xde00",
+              "normalizedInstructionsSha256": "caf931991acd66fb9111fa70caa64d71a645e5eac51e8681b157ab4b7deb5c6b"
+            },
+            "20mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "staticNonNop": 325,
+              "CLMAD": {
+                "CLMAD.LO": 6,
+                "CLMAD.HI": 6
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xde00",
+              "end": "0xf440",
+              "normalizedInstructionsSha256": "5709e078e9464bddfc99be080533c587358df3092bb93851a0707a064146dcd5"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 353,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xf440",
+              "end": "0x10c00",
+              "normalizedInstructionsSha256": "28270e1f6d18ba4d501959dece647404d0b478584681b97f5222f19fdb0be0f6"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13116mulPolynomial131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        },
+        "init": {
+          "resources": {
+            "registers": 98,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 3048,
+            "encodingSha256": "5ec682ad010e0cefadb29600653aec8be7152e7b93f6da2ed04879c1354143db"
+          },
+          "callerStaticNonNop": 1222,
+          "completeSectionStaticNonNop": 3018,
+          "callSites": [
+            {
+              "address": "0x1050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2070",
+              "target": 36976,
+              "instruction": "CALL.REL.NOINC 0x9070"
+            },
+            {
+              "address": "0x20f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2110",
+              "target": 32224,
+              "instruction": "CALL.REL.NOINC 0x7de0"
+            },
+            {
+              "address": "0x2190",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x21b0",
+              "target": 27872,
+              "instruction": "CALL.REL.NOINC 0x6ce0"
+            },
+            {
+              "address": "0x2240",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2260",
+              "target": 23600,
+              "instruction": "CALL.REL.NOINC 0x5c30"
+            },
+            {
+              "address": "0x22f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b20",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b40",
+              "target": 19584,
+              "instruction": "CALL.REL.NOINC 0x4c80"
+            },
+            {
+              "address": "0x2be0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3410",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3cf0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3f80",
+              "target": 47552,
+              "instruction": "CALL.REL.NOINC 0xb9c0"
+            }
+          ],
+          "helpers": {
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x4c80",
+              "end": "0x5c30",
+              "normalizedInstructionsSha256": "8de6e6f742bb151f9314134e2d6ddff0cb9e333a511ac192216cc62842c5511f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x5c30",
+              "end": "0x6ce0",
+              "normalizedInstructionsSha256": "882053854f7acabbe65af4231260c53e139c784f48f12582e8088b59a377af78"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6ce0",
+              "end": "0x7de0",
+              "normalizedInstructionsSha256": "ae83b13dcb77a2a4905e47a844c9071e9b9f01ff9eec8414110b2baf3edb9357"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x7de0",
+              "end": "0x9070",
+              "normalizedInstructionsSha256": "dd7221a82fa800a89c1890acb4acd6c1a153125674959570d2af418caaf15a54"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x9070",
+              "end": "0xa300",
+              "normalizedInstructionsSha256": "61fa528b45250c59a2c15166cd7759ee8f93c1b6ffe267a3ffd698ac19513213"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 352,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xa300",
+              "end": "0xb9c0",
+              "normalizedInstructionsSha256": "e1512ab28ad41691c12937ab407247ca44662fb319d352dafde740fdc78c4b1c"
+            },
+            "$__internal_0_$__cuda_sm20_div_u64": {
+              "staticNonNop": 60,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xb9c0",
+              "end": "0xbe80",
+              "normalizedInstructionsSha256": "71517fb14c82a088102d6e5db11b46025fc052e4f2ab2a4feb49a756837fee7a"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        }
+      },
+      "selectedPathPerScalar": {
+        "nonNop": 2375.125,
+        "fieldStateAndFlagLogicalLoadBytes": 102.75,
+        "maskTableLogicalLoadBytes": 476.0,
+        "totalLogicalLoadBytes": 578.75,
+        "fieldStateLogicalStoreBytes": 78.75,
+        "CLMAD": 31.875,
+        "localBytes": 0.0
+      },
+      "selectedPathHelperCalls": {
+        "19sigmaWalkNetwork131ENS0_4P131Ei": 32,
+        "16mulPolynomial131ENS0_4P131ES1_": 47,
+        "6mul131ENS0_4P131ES1_": 8,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": 15
+      }
+    },
+    "weighted1": {
+      "mode": 1,
+      "command": [
+        "nvcc",
+        "-O3",
+        "-std=c++17",
+        "-arch=sm_120",
+        "-I",
+        "/root/source",
+        "-DECC_PACKED_SINGLE_PRODUCT=1",
+        "-DECC_PACKED_CACHE_DENOM=1",
+        "-DECC_PACKED_BY_VALUE=1",
+        "-DECC_PACKED_PERM_SIGMA=3",
+        "-DECC_PACKED_POLY_CHAIN=1",
+        "-DECC_PACKED_UNROLL_INV=1",
+        "-DECC_PACKED_PAIR_PRODUCTS=1",
+        "-DECC_PACKED_POLY_STATE=1",
+        "-DECC_SMEM_SPILL=0",
+        "-DECC_PACKED_DIRECT_REDUCE=1",
+        "-DECC_PACKED_GENERATED_PRODUCT=1",
+        "-DECC_BATCH=16",
+        "-DECC_THREADS=256",
+        "-DECC_MINBLOCKS=2",
+        "-DECC_PACKED_STATE_TILE=256",
+        "-DECC_PACKED_CLMAD=1",
+        "-DECC_PACKED_WEIGHTED_PREFIX=1",
+        "-cubin",
+        "/tmp/poly_regcoords_probe.cu",
+        "-o",
+        "/data/weighted-prefix-cpu/1789184917500890518/weighted1/walk.cubin",
+        "-Xptxas",
+        "-v",
+        "--keep",
+        "--keep-dir",
+        "/tmp/weighted-prefix-keep-weighted1"
+      ],
+      "cubinSha256": "a459b25faf3f417e18c7d6492ef5473eed899443e3c659dd3b04f76fc64dab8b",
+      "ptxSha256": "8435ebf453b1546cd8b5f8064e698f8b8ff8bdb4c7ef2195190901909b02113f",
+      "sassTextSha256": "3632997532a38bea97cea68ca4d5c86950db4261f009cd0db2684fb704edf2ac",
+      "functions": {
+        "walk": {
+          "resources": {
+            "registers": 101,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 4288,
+            "encodingSha256": "3c673abce7d383b76c3fa65a7d42a5c83ae62d9d2cfd05df966cad8bc3eeaaf5"
+          },
+          "callerStaticNonNop": 1679,
+          "completeSectionStaticNonNop": 4209,
+          "callSites": [
+            {
+              "address": "0x1530",
+              "target": 42480,
+              "instruction": "CALL.REL.NOINC 0xa5f0"
+            },
+            {
+              "address": "0x15f0",
+              "target": 42480,
+              "instruction": "CALL.REL.NOINC 0xa5f0"
+            },
+            {
+              "address": "0x2130",
+              "target": 56752,
+              "instruction": "CALL.REL.NOINC 0xddb0"
+            },
+            {
+              "address": "0x2f40",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x3f30",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x3f50",
+              "target": 52000,
+              "instruction": "CALL.REL.NOINC 0xcb20"
+            },
+            {
+              "address": "0x3ff0",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x4010",
+              "target": 47248,
+              "instruction": "CALL.REL.NOINC 0xb890"
+            },
+            {
+              "address": "0x40b0",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x40d0",
+              "target": 38128,
+              "instruction": "CALL.REL.NOINC 0x94f0"
+            },
+            {
+              "address": "0x4150",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x4170",
+              "target": 33856,
+              "instruction": "CALL.REL.NOINC 0x8440"
+            },
+            {
+              "address": "0x41f0",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x4a20",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x4a40",
+              "target": 29840,
+              "instruction": "CALL.REL.NOINC 0x7490"
+            },
+            {
+              "address": "0x4ab0",
+              "target": 62544,
+              "instruction": "CALL.REL.NOINC 0xf450"
+            },
+            {
+              "address": "0x59c0",
+              "target": 56752,
+              "instruction": "CALL.REL.NOINC 0xddb0"
+            },
+            {
+              "address": "0x5ae0",
+              "target": 26896,
+              "instruction": "CALL.REL.NOINC 0x6910"
+            },
+            {
+              "address": "0x67c0",
+              "target": 26896,
+              "instruction": "CALL.REL.NOINC 0x6910"
+            }
+          ],
+          "helpers": {
+            "16mulPolynomial131ENS0_4P131ES1_": {
+              "staticNonNop": 172,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6910",
+              "end": "0x7490",
+              "normalizedInstructionsSha256": "c7d2c87d0509904dc1a0d047b58199456ef66c83f846c1c1abe0650a690bc2b2"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x7490",
+              "end": "0x8440",
+              "normalizedInstructionsSha256": "23ae311ac6a1809039f4814b0462345f47b9437bc9c84cfe0064ade5007c548c"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x8440",
+              "end": "0x94f0",
+              "normalizedInstructionsSha256": "9597180d334f546ee0a1d470add5fe988aa3bd8af4406e6193516f377221e11f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x94f0",
+              "end": "0xa5f0",
+              "normalizedInstructionsSha256": "af484d1b7ce788ce44188a9bb167cfe5831b9072818b31f47f8fa475f1bcc64d"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei": {
+              "staticNonNop": 298,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xa5f0",
+              "end": "0xb890",
+              "normalizedInstructionsSha256": "9d31d5dc27bd91f8ac816c2b28deb958946d7d05d7b1c22a0760906355e711ac"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xb890",
+              "end": "0xcb20",
+              "normalizedInstructionsSha256": "1de204380e42cd5116a3daa48ba043a1d1592c1a1bc05f75b1c5b4e37b19006a"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xcb20",
+              "end": "0xddb0",
+              "normalizedInstructionsSha256": "fa8e9380fe7963e0777c2c3726787b5f460afd68aa31e12d79761e1efa1e498b"
+            },
+            "20mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "staticNonNop": 323,
+              "CLMAD": {
+                "CLMAD.LO": 6,
+                "CLMAD.HI": 6
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xddb0",
+              "end": "0xf450",
+              "normalizedInstructionsSha256": "22b5a35811e2adeaa242b03a791c02eb9acf3a159209d04fec22c6ef23716bc1"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 353,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xf450",
+              "end": "0x10c00",
+              "normalizedInstructionsSha256": "bdf6f8b6cd92343d1bd11c67be6589b3ac68eb3c028d8617572ec446bd82cde8"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13116mulPolynomial131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        },
+        "init": {
+          "resources": {
+            "registers": 98,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 3048,
+            "encodingSha256": "5ec682ad010e0cefadb29600653aec8be7152e7b93f6da2ed04879c1354143db"
+          },
+          "callerStaticNonNop": 1222,
+          "completeSectionStaticNonNop": 3018,
+          "callSites": [
+            {
+              "address": "0x1050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2070",
+              "target": 36976,
+              "instruction": "CALL.REL.NOINC 0x9070"
+            },
+            {
+              "address": "0x20f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2110",
+              "target": 32224,
+              "instruction": "CALL.REL.NOINC 0x7de0"
+            },
+            {
+              "address": "0x2190",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x21b0",
+              "target": 27872,
+              "instruction": "CALL.REL.NOINC 0x6ce0"
+            },
+            {
+              "address": "0x2240",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2260",
+              "target": 23600,
+              "instruction": "CALL.REL.NOINC 0x5c30"
+            },
+            {
+              "address": "0x22f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b20",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b40",
+              "target": 19584,
+              "instruction": "CALL.REL.NOINC 0x4c80"
+            },
+            {
+              "address": "0x2be0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3410",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3cf0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3f80",
+              "target": 47552,
+              "instruction": "CALL.REL.NOINC 0xb9c0"
+            }
+          ],
+          "helpers": {
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x4c80",
+              "end": "0x5c30",
+              "normalizedInstructionsSha256": "8de6e6f742bb151f9314134e2d6ddff0cb9e333a511ac192216cc62842c5511f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x5c30",
+              "end": "0x6ce0",
+              "normalizedInstructionsSha256": "882053854f7acabbe65af4231260c53e139c784f48f12582e8088b59a377af78"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6ce0",
+              "end": "0x7de0",
+              "normalizedInstructionsSha256": "ae83b13dcb77a2a4905e47a844c9071e9b9f01ff9eec8414110b2baf3edb9357"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x7de0",
+              "end": "0x9070",
+              "normalizedInstructionsSha256": "dd7221a82fa800a89c1890acb4acd6c1a153125674959570d2af418caaf15a54"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x9070",
+              "end": "0xa300",
+              "normalizedInstructionsSha256": "61fa528b45250c59a2c15166cd7759ee8f93c1b6ffe267a3ffd698ac19513213"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 352,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xa300",
+              "end": "0xb9c0",
+              "normalizedInstructionsSha256": "e1512ab28ad41691c12937ab407247ca44662fb319d352dafde740fdc78c4b1c"
+            },
+            "$__internal_0_$__cuda_sm20_div_u64": {
+              "staticNonNop": 60,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xb9c0",
+              "end": "0xbe80",
+              "normalizedInstructionsSha256": "71517fb14c82a088102d6e5db11b46025fc052e4f2ab2a4feb49a756837fee7a"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        }
+      },
+      "selectedPathPerScalar": {
+        "nonNop": 2345.0,
+        "fieldStateAndFlagLogicalLoadBytes": 124.0,
+        "maskTableLogicalLoadBytes": 476.0,
+        "totalLogicalLoadBytes": 600.0,
+        "fieldStateLogicalStoreBytes": 80.0,
+        "CLMAD": 31.875,
+        "localBytes": 0.0
+      },
+      "selectedPathHelperCalls": {
+        "19sigmaWalkNetwork131ENS0_4P131Ei": 32,
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+        "6mul131ENS0_4P131ES1_": 8,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+        "16mulPolynomial131ENS0_4P131ES1_": 17
+      }
+    },
+    "weighted2": {
+      "mode": 2,
+      "command": [
+        "nvcc",
+        "-O3",
+        "-std=c++17",
+        "-arch=sm_120",
+        "-I",
+        "/root/source",
+        "-DECC_PACKED_SINGLE_PRODUCT=1",
+        "-DECC_PACKED_CACHE_DENOM=1",
+        "-DECC_PACKED_BY_VALUE=1",
+        "-DECC_PACKED_PERM_SIGMA=3",
+        "-DECC_PACKED_POLY_CHAIN=1",
+        "-DECC_PACKED_UNROLL_INV=1",
+        "-DECC_PACKED_PAIR_PRODUCTS=1",
+        "-DECC_PACKED_POLY_STATE=1",
+        "-DECC_SMEM_SPILL=0",
+        "-DECC_PACKED_DIRECT_REDUCE=1",
+        "-DECC_PACKED_GENERATED_PRODUCT=1",
+        "-DECC_BATCH=16",
+        "-DECC_THREADS=256",
+        "-DECC_MINBLOCKS=2",
+        "-DECC_PACKED_STATE_TILE=256",
+        "-DECC_PACKED_CLMAD=1",
+        "-DECC_PACKED_WEIGHTED_PREFIX=2",
+        "-cubin",
+        "/tmp/poly_regcoords_probe.cu",
+        "-o",
+        "/data/weighted-prefix-cpu/1789184917500890518/weighted2/walk.cubin",
+        "-Xptxas",
+        "-v",
+        "--keep",
+        "--keep-dir",
+        "/tmp/weighted-prefix-keep-weighted2"
+      ],
+      "cubinSha256": "3f13927e27c3c7ede49ff83c88e0a3722f2d063f06d2092e1531751935441395",
+      "ptxSha256": "08c96546d2220b7eae29364b35e162ac04fa92bb56b8f9e6fad4cdc6f69279c7",
+      "sassTextSha256": "d491d2716bafcf65ce954d93f4c5ef5b70da56e257dfed36f6f1e8ac2d807ecd",
+      "functions": {
+        "walk": {
+          "resources": {
+            "registers": 100,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 4480,
+            "encodingSha256": "f9123321be17df29903d0e25ac0a02ddd4210262bfdd68b99d96f90c3ae50e23"
+          },
+          "callerStaticNonNop": 1667,
+          "completeSectionStaticNonNop": 4404,
+          "callSites": [
+            {
+              "address": "0x14e0",
+              "target": 57584,
+              "instruction": "CALL.REL.NOINC 0xe0f0"
+            },
+            {
+              "address": "0x2070",
+              "target": 51792,
+              "instruction": "CALL.REL.NOINC 0xca50"
+            },
+            {
+              "address": "0x2e80",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x3e70",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x3e90",
+              "target": 47040,
+              "instruction": "CALL.REL.NOINC 0xb7c0"
+            },
+            {
+              "address": "0x3f30",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x3f50",
+              "target": 42288,
+              "instruction": "CALL.REL.NOINC 0xa530"
+            },
+            {
+              "address": "0x3ff0",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x4010",
+              "target": 37936,
+              "instruction": "CALL.REL.NOINC 0x9430"
+            },
+            {
+              "address": "0x4090",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x40b0",
+              "target": 33664,
+              "instruction": "CALL.REL.NOINC 0x8380"
+            },
+            {
+              "address": "0x4130",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x4960",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x4980",
+              "target": 29648,
+              "instruction": "CALL.REL.NOINC 0x73d0"
+            },
+            {
+              "address": "0x49f0",
+              "target": 65664,
+              "instruction": "CALL.REL.NOINC 0x10080"
+            },
+            {
+              "address": "0x5900",
+              "target": 51792,
+              "instruction": "CALL.REL.NOINC 0xca50"
+            },
+            {
+              "address": "0x5a20",
+              "target": 26704,
+              "instruction": "CALL.REL.NOINC 0x6850"
+            },
+            {
+              "address": "0x6700",
+              "target": 26704,
+              "instruction": "CALL.REL.NOINC 0x6850"
+            }
+          ],
+          "helpers": {
+            "16mulPolynomial131ENS0_4P131ES1_": {
+              "staticNonNop": 172,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6850",
+              "end": "0x73d0",
+              "normalizedInstructionsSha256": "2c65885f390a698b4b8b26eb98c126316f980b9e539b29767299d64b8a7a458b"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x73d0",
+              "end": "0x8380",
+              "normalizedInstructionsSha256": "23ae311ac6a1809039f4814b0462345f47b9437bc9c84cfe0064ade5007c548c"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x8380",
+              "end": "0x9430",
+              "normalizedInstructionsSha256": "9597180d334f546ee0a1d470add5fe988aa3bd8af4406e6193516f377221e11f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x9430",
+              "end": "0xa530",
+              "normalizedInstructionsSha256": "af484d1b7ce788ce44188a9bb167cfe5831b9072818b31f47f8fa475f1bcc64d"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xa530",
+              "end": "0xb7c0",
+              "normalizedInstructionsSha256": "1de204380e42cd5116a3daa48ba043a1d1592c1a1bc05f75b1c5b4e37b19006a"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xb7c0",
+              "end": "0xca50",
+              "normalizedInstructionsSha256": "fa8e9380fe7963e0777c2c3726787b5f460afd68aa31e12d79761e1efa1e498b"
+            },
+            "20mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "staticNonNop": 323,
+              "CLMAD": {
+                "CLMAD.LO": 6,
+                "CLMAD.HI": 6
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xca50",
+              "end": "0xe0f0",
+              "normalizedInstructionsSha256": "e99820a57a8bc40663fa0ef25451abb1a86172306ac6424cd2c03108cab67761"
+            },
+            "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": {
+              "staticNonNop": 505,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0xe0f0",
+              "end": "0x10080",
+              "normalizedInstructionsSha256": "54cbf1a0e30e9040cef6f49aa8e0ae649e0ccc70f1c36eed26f2c7db74294f59"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 353,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x10080",
+              "end": "0x11800",
+              "normalizedInstructionsSha256": "a0a4795b6fbf58bfd2a28baf325a7aee4b355f88960a70aa37c27f99efaeb428"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13116mulPolynomial131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13123sigmaWalkNetworkPair131ENS0_4P131ES1_i": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        },
+        "init": {
+          "resources": {
+            "registers": 98,
+            "stackBytes": 0,
+            "sharedBytes": 0,
+            "declaredLocalBytes": 0
+          },
+          "code": {
+            "instructionSlots": 3048,
+            "encodingSha256": "5ec682ad010e0cefadb29600653aec8be7152e7b93f6da2ed04879c1354143db"
+          },
+          "callerStaticNonNop": 1222,
+          "completeSectionStaticNonNop": 3018,
+          "callSites": [
+            {
+              "address": "0x1050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2050",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2070",
+              "target": 36976,
+              "instruction": "CALL.REL.NOINC 0x9070"
+            },
+            {
+              "address": "0x20f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2110",
+              "target": 32224,
+              "instruction": "CALL.REL.NOINC 0x7de0"
+            },
+            {
+              "address": "0x2190",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x21b0",
+              "target": 27872,
+              "instruction": "CALL.REL.NOINC 0x6ce0"
+            },
+            {
+              "address": "0x2240",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2260",
+              "target": 23600,
+              "instruction": "CALL.REL.NOINC 0x5c30"
+            },
+            {
+              "address": "0x22f0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b20",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x2b40",
+              "target": 19584,
+              "instruction": "CALL.REL.NOINC 0x4c80"
+            },
+            {
+              "address": "0x2be0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3410",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3cf0",
+              "target": 41728,
+              "instruction": "CALL.REL.NOINC 0xa300"
+            },
+            {
+              "address": "0x3f80",
+              "target": 47552,
+              "instruction": "CALL.REL.NOINC 0xb9c0"
+            }
+          ],
+          "helpers": {
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "staticNonNop": 251,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x4c80",
+              "end": "0x5c30",
+              "normalizedInstructionsSha256": "8de6e6f742bb151f9314134e2d6ddff0cb9e333a511ac192216cc62842c5511f"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "staticNonNop": 267,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x5c30",
+              "end": "0x6ce0",
+              "normalizedInstructionsSha256": "882053854f7acabbe65af4231260c53e139c784f48f12582e8088b59a377af78"
+            },
+            "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "staticNonNop": 272,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0x6ce0",
+              "end": "0x7de0",
+              "normalizedInstructionsSha256": "ae83b13dcb77a2a4905e47a844c9071e9b9f01ff9eec8414110b2baf3edb9357"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x7de0",
+              "end": "0x9070",
+              "normalizedInstructionsSha256": "dd7221a82fa800a89c1890acb4acd6c1a153125674959570d2af418caaf15a54"
+            },
+            "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "staticNonNop": 297,
+              "CLMAD": {},
+              "globalLoads": {
+                "LDG.E.CONSTANT": 56
+              },
+              "staticLocalInstructions": 0,
+              "start": "0x9070",
+              "end": "0xa300",
+              "normalizedInstructionsSha256": "61fa528b45250c59a2c15166cd7759ee8f93c1b6ffe267a3ffd698ac19513213"
+            },
+            "6mul131ENS0_4P131ES1_": {
+              "staticNonNop": 352,
+              "CLMAD": {
+                "CLMAD.LO": 3,
+                "CLMAD.HI": 3
+              },
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xa300",
+              "end": "0xb9c0",
+              "normalizedInstructionsSha256": "e1512ab28ad41691c12937ab407247ca44662fb319d352dafde740fdc78c4b1c"
+            },
+            "$__internal_0_$__cuda_sm20_div_u64": {
+              "staticNonNop": 60,
+              "CLMAD": {},
+              "globalLoads": {},
+              "staticLocalInstructions": 0,
+              "start": "0xb9c0",
+              "end": "0xbe80",
+              "normalizedInstructionsSha256": "71517fb14c82a088102d6e5db11b46025fc052e4f2ab2a4feb49a756837fee7a"
+            }
+          },
+          "ptxasScopedFunctions": {
+            "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            },
+            "_ZN54_INTERNAL_cfbdefe2_23_poly_regcoords_probe_cu_82d13a5812eccPacked1316mul131ENS0_4P131ES1_": {
+              "stackFrameBytes": 0,
+              "spillStoreBytes": 0,
+              "spillLoadBytes": 0
+            }
+          }
+        }
+      },
+      "selectedPathPerScalar": {
+        "nonNop": 2242.0,
+        "fieldStateAndFlagLogicalLoadBytes": 124.0,
+        "maskTableLogicalLoadBytes": 252.0,
+        "totalLogicalLoadBytes": 376.0,
+        "fieldStateLogicalStoreBytes": 80.0,
+        "CLMAD": 31.875,
+        "localBytes": 0.0
+      },
+      "selectedPathHelperCalls": {
+        "23sigmaWalkNetworkPair131ENS0_4P131ES1_i": 16,
+        "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+        "6mul131ENS0_4P131ES1_": 8,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+        "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+        "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+        "16mulPolynomial131ENS0_4P131ES1_": 17
+      }
+    }
+  },
+  "limits": [
+    "Entry register counts and zero stack/shared/local are compiler resource properties, not measured residency or throughput.",
+    "Both candidates remain unvalidated on a GPU; host compilation executed CLMAD software fallbacks.",
+    "Complete selected-path instruction visits include all B16 live slots, no DP/guard and helper returns. They exclude launch prologue/exit, reseed/checkpoint/driver work and are not cycles.",
+    "The same 85 field products / 510 CLMAD operations per B16 worker-step remain. The pair helper performs two full products.",
+    "Mode2 emits 56 actual SASS mask loads for its paired sigma helper, versus two56-load scalar calls per coordinate pair in modes0/1. Logical load bytes are not DRAM bytes, cache misses or runtime traffic measurements.",
+    "Fewer registers, helper calls, mask loads or instruction visits do not establish a speedup. Full-client compilation/correctness/runtime binding would be a separate phase."
+  ]
+}

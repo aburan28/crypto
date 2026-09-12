@@ -21,7 +21,7 @@ import modal_app as client
 app = modal.App("ecc2k130-packed-audit")
 
 
-def checkScalarCounts(sample, workers, dpWeight):
+def checkScalarCounts(sample, workers, dpWeight, batch=32):
     """Require the requested packed geometry and its exact completed work."""
     client.checkPackedReduction(sample)
     raw = sample.get("raw", "")
@@ -33,16 +33,17 @@ def checkScalarCounts(sample, workers, dpWeight):
     actual = walks = expected = None
     shapeOk = len(backend) == 1
     if shapeOk:
-        actual, batch, walks, weight, steps = map(int, backend[0])
+        actual, actualBatch, walks, weight, steps = map(int, backend[0])
         expected = walks * 1024 * 32
-        shapeOk = (actual > 0 and batch == 32 and walks == actual * batch
+        shapeOk = (actual > 0 and batch > 0 and actualBatch == batch and walks == actual * batch
                    and steps == 1024 and weight == dpWeight
                    and (workers == 0 or actual == workers))
     counts = [int(row[0]) for row in progress]
     countsOk = (shapeOk and bool(counts) and counts[-1] == expected
                 and counts == sorted(counts) and all(0 < count <= expected for count in counts)
                 and all(int(row[1]) == 0 for row in progress))
-    sample.update(requestedWorkers=workers, actualWorkers=actual, scalarWalks=walks,
+    sample.update(requestedWorkers=workers, actualWorkers=actual, requestedBatch=batch,
+                  actualBatch=int(backend[0][1]) if len(backend) == 1 else None, scalarWalks=walks,
                   expectedIterations=expected, reportedIterations=counts[-1] if counts else None)
     sample["valid"] = bool(sample.get("valid") and completed["valid"] and countsOk)
     sample["rate"] = completed["rate"] if sample["valid"] else 0.0
@@ -53,16 +54,25 @@ def checkScalarCounts(sample, workers, dpWeight):
 
 @app.function(image=client.image, gpu=client.DEFAULT_GPU, timeout=1800,
               volumes={"/data": client.volume})
-def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
+def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
     result = dict(valid=False, minBlocks=minBlocks, repeats=repeats,
-                  batch=32, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
-                  packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1")
+                  batch=batch, blockThreads=blockThreads, requestedWorkers=workers, steps=1024, launches=32,
+                  packedDirectReduction=client.PACKED_DIRECT_REDUCE == "1",
+                  expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
+                  packedGeneratedProduct=None,
+                  expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
+                  expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1", packedCompactState=None,
+                  expectedPackedSharedSigma=client.PACKED_SHARED_SIGMA == "1", packedSharedSigma=None,
+                  expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX), packedWeightedPrefix=None,
+                  expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
-        if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0:
-            raise ValueError("min-blocks, repeats and block-threads must be positive")
+        if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0 or batch <= 0:
+            raise ValueError("min-blocks, repeats, block-threads and batch must be positive")
         if workers < 0:
             raise ValueError("workers must be nonnegative (0 selects automatic workers)")
-        ok, build = client.buildFor(32, blockThreads, 0, minBlocks=minBlocks)
+        if client.PACKED_STATE_TILE == "256" and batch > 64:
+            raise ValueError("tiled storage validation supports batch sizes 1 through 64")
+        ok, build = client.buildFor(batch, blockThreads, 0, minBlocks=minBlocks)
         result["build"] = build
         if not ok:
             raise RuntimeError("CUDA build failed")
@@ -79,19 +89,98 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
         arch = client.computeCapability()
         result["deviceArithmetic"] = run(
             ["make", "test-packed-cuda", f"ARCH=-gencode arch=compute_{arch},code=sm_{arch}",
-             "BATCH=32", f"THREADS={blockThreads}", f"MINBLOCKS={minBlocks}",
+             f"BATCH={batch}", f"THREADS={blockThreads}", f"MINBLOCKS={minBlocks}",
              f"PACKED_SINGLE_PRODUCT={client.PACKED_SINGLE_PRODUCT}",
              f"PACKED_CACHE_DENOM={client.PACKED_CACHE_DENOM}", f"PACKED_BY_VALUE={client.PACKED_BY_VALUE}",
              f"PACKED_PERM_SIGMA={client.PACKED_PERM_SIGMA}", f"PACKED_POLY_CHAIN={client.PACKED_POLY_CHAIN}",
              f"PACKED_UNROLL_INV={client.PACKED_UNROLL_INV}", f"PACKED_PAIR_PRODUCTS={client.PACKED_PAIR_PRODUCTS}",
              f"PACKED_POLY_STATE={client.PACKED_POLY_STATE}",
-             f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}"], 120)
+             f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
+             f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
+             f"PACKED_CLMAD={client.PACKED_CLMAD}",
+             f"PACKED_COMPACT_STATE={client.PACKED_COMPACT_STATE}",
+             f"PACKED_SHARED_SIGMA={client.PACKED_SHARED_SIGMA}",
+             f"PACKED_WEIGHTED_PREFIX={client.PACKED_WEIGHTED_PREFIX}",
+             f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
         arithmeticModes = re.findall(r"^packed arithmetic direct reduction: (.*)$",
                                      result["deviceArithmetic"]["output"], re.MULTILINE)
         if arithmeticModes != [client.PACKED_DIRECT_REDUCE]:
             raise RuntimeError("packed GPU arithmetic reducer identity disagrees with the requested build")
+        generatedModes = re.findall(r"^packed arithmetic generated product: (.*)$",
+                                    result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualGenerated = generatedModes[0] if len(generatedModes) == 1 else None
+        result["packedGeneratedProduct"] = (actualGenerated == "1") if actualGenerated in ("0", "1") else None
+        result["deviceArithmetic"].update(
+            expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
+            packedGeneratedProduct=result["packedGeneratedProduct"])
+        if generatedModes != [client.PACKED_GENERATED_PRODUCT]:
+            raise RuntimeError("packed GPU arithmetic generated product identity disagrees with the requested build")
+        clmadModes = re.findall(r"^packed arithmetic native carryless multiply: (.*)$",
+                                result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualClmad = clmadModes[0] if len(clmadModes) == 1 else None
+        result["packedClmad"] = (actualClmad == "1") if actualClmad in ("0", "1") else None
+        result["deviceArithmetic"].update(expectedPackedClmad=client.PACKED_CLMAD == "1",
+                                          packedClmad=result["packedClmad"])
+        if clmadModes != [client.PACKED_CLMAD]:
+            raise RuntimeError("packed GPU arithmetic CLMAD identity disagrees with the requested build")
+        weightedModes = re.findall(r"^packed arithmetic weighted prefix: (.*)$",
+                                   result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualWeighted = weightedModes[0] if len(weightedModes) == 1 else None
+        result["packedWeightedPrefix"] = int(actualWeighted) if actualWeighted in ("0", "1", "2") else None
+        result["deviceArithmetic"].update(
+            expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX),
+            packedWeightedPrefix=result["packedWeightedPrefix"])
+        if weightedModes != [client.PACKED_WEIGHTED_PREFIX]:
+            raise RuntimeError("packed GPU arithmetic weighted prefix identity disagrees with the requested build")
+        pairedSigmaPass = "PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing"
+        if result["deviceArithmetic"]["output"].splitlines().count(pairedSigmaPass) != 1:
+            raise RuntimeError("packed GPU paired Frobenius validation did not complete exactly once")
+        if client.PACKED_STATE_TILE == "256":
+            # This exercises actual load/store accessors for either tiled layout.
+            # It runs before client integration and every timed sample.
+            storageCommand = list(result["deviceArithmetic"]["command"])
+            storageCommand[1] = "test-packed-storage-cuda"
+            storage = result["deviceStorage"] = run(storageCommand, 300)
+            if storage["returncode"]:
+                raise RuntimeError("packed GPU storage validation failed")
+            storageModes = re.findall(r"^packed storage compact state: (.*)$", storage["output"], re.MULTILINE)
+            storageBatches = re.findall(r"^packed storage batch: (.*)$", storage["output"], re.MULTILINE)
+            actualCompact = storageModes[0] if len(storageModes) == 1 else None
+            storage.update(expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1",
+                           packedCompactState=(actualCompact == "1") if actualCompact in ("0", "1") else None)
+            storagePass = (f"PASS: 128 GPU storage cases, {18584 * batch} records, "
+                           "independent physical images and logical reads with canaries")
+            if (storageModes != [client.PACKED_COMPACT_STATE] or storageBatches != [str(batch)]
+                    or [line for line in storage["output"].splitlines() if line.startswith("PASS:")] != [storagePass]):
+                raise RuntimeError("packed GPU storage identity or complete validation counts disagree")
+            storage.update(cases=128, records=18584 * batch)
+        # The probe's C++ guards require WP2 and the walk permutation network.
+        # Exercise both shared/global controls when applicable, including
+        # untiled WP2 builds, without changing the WP0/WP1 audit paths.
+        result["sharedSigmaProbeApplicable"] = (client.PACKED_WEIGHTED_PREFIX == "2"
+                                               and bool(int(client.PACKED_PERM_SIGMA) & 1))
+        if result["sharedSigmaProbeApplicable"]:
+            probeCommand = list(result["deviceArithmetic"]["command"])
+            probeCommand[1] = "test-shared-sigma-cuda"
+            probe = result["deviceSharedSigma"] = run(probeCommand, 300)
+            if probe["returncode"]:
+                raise RuntimeError("packed GPU shared sigma validation failed")
+            sharedModes = re.findall(r"^packed shared sigma probe: (.*)$", probe["output"], re.MULTILINE)
+            actualShared = sharedModes[0] if len(sharedModes) == 1 else None
+            result["packedSharedSigma"] = ((actualShared == "1")
+                                           if actualShared in ("0", "1") else None)
+            probe.update(expectedPackedSharedSigma=client.PACKED_SHARED_SIGMA == "1",
+                         packedSharedSigma=result["packedSharedSigma"])
+            probePasses = [
+                "PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing",
+                "PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks",
+            ]
+            if (sharedModes != [client.PACKED_SHARED_SIGMA]
+                    or [line for line in probe["output"].splitlines() if line.startswith("PASS:")] != probePasses):
+                raise RuntimeError("packed GPU shared sigma identity or complete validation counts disagree")
+            probe.update(scenarios=21, inputPairs=21036, blockSnapshots=114, maskWords=51072)
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:
@@ -100,12 +189,15 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
         result["benchmark"] = client.measureBench(1024, 32, workers, False, repeats, packed=True)
         benchmarkSamples = result["benchmark"].get("samples", [])
         for sample in benchmarkSamples:
-            checkScalarCounts(sample, workers, 0)
+            checkScalarCounts(sample, workers, 0, batch)
         result["benchmark"] = client.summarizeSamples(benchmarkSamples)
         if len(benchmarkSamples) != repeats:
             result["benchmark"].update(valid=False, rate=0.0, error="benchmark did not complete every requested repetition")
         if not result["benchmark"]["valid"]:
             raise RuntimeError("throughput benchmark failed or completed scalar counts disagree")
+        result["packedStateTile"] = benchmarkSamples[0]["packedStateTile"]
+        result["packedCompactState"] = benchmarkSamples[0]["packedCompactState"]
+        result["packedSharedSigma"] = benchmarkSamples[0]["packedSharedSigma"]
 
         # Time real collection with CPU trail replay disabled only after the
         # integration test has independently replayed reports. Each sample
@@ -121,7 +213,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
                     command += ["--threads", str(workers)]
                 row = run(command, 180)
                 sample = client.benchResult(row["command"], row["returncode"], row["output"])
-                checkScalarCounts(sample, workers, 34)
+                checkScalarCounts(sample, workers, 34, batch)
                 records = corpus.stat().st_size if corpus.exists() else 0
                 final = re.findall(r"finished:.*?, (\d+) distinguished points "
                                    r"\(0 verified against the reference, (\d+) dropped\)",
@@ -150,8 +242,9 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0):
 
 @app.local_entrypoint()
 def main(output: str = "packed-audit.json", min_blocks: int = 4, repeats: int = 3,
-         block_threads: int = 128, workers: int = 0):
-    result = runAudit.remote(minBlocks=min_blocks, repeats=repeats, blockThreads=block_threads, workers=workers)
+         block_threads: int = 128, workers: int = 0, batch: int = 32):
+    result = runAudit.remote(minBlocks=min_blocks, repeats=repeats, blockThreads=block_threads, workers=workers,
+                             batch=batch)
     Path(output).write_text(json.dumps(result, indent=2) + "\n")
     print(f"Audit saved to {output}")
     if not result["valid"]:

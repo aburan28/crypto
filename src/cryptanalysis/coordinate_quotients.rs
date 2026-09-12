@@ -48,7 +48,7 @@ use std::collections::{HashMap, HashSet};
 
 use super::coordinate_search::{
     detect_symmetries, kernel, linearising_frame, relation_tuple, Auto, Curve, FrameKind, Gf,
-    Mobius, Pt, Rng64, Scope, SymmetryKind, INF,
+    Mobius, MobiusKind, Pt, Rng64, Scope, SymmetryKind, INF,
 };
 
 /// Exponent vectors over `nv` variables with total degree exactly `d`.
@@ -85,6 +85,162 @@ pub fn monomials_up_to_total_degree(nv: usize, d: u32) -> Vec<Vec<u32>> {
 /// invariants in total, so the monomial count stays sane.
 pub const MAX_E_PER_SEED: usize = 4;
 pub const MAX_INVARIANTS: usize = 14;
+
+// ── Charts: a Möbius frame on the `x`- or the `y`-line ─────────────
+
+/// Which coordinate line a frame lives on.  Every point map that commutes
+/// with the order-3 automorphism of a `j = 0` curve descends to the
+/// `y`-line (the quotient by that automorphism), which is where rational
+/// 3-torsion translations become Möbius maps.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Line {
+    X,
+    Y,
+    /// `x²`: the quotient of the `x`-line by the order-4 automorphism
+    /// `(x, y) ↦ (−x, iy)` of `y² = x³ + ax` (`i ∈ F_q`).
+    X2,
+    /// `x(P) + x(P + T)` for a 2-torsion point `T`: the `x`-line of the
+    /// 2-isogenous curve `E/⟨T⟩` (Vélu, up to an affine change), where a
+    /// 4-torsion point `Q` with `2Q = T` becomes 2-torsion and its
+    /// translation a Möbius involution.
+    Iso2(Pt),
+    /// `x(P) + x(P + T) + x(P − T)` for a 3-torsion point `T`: the
+    /// `x`-line of `E/⟨T⟩`, where a 2-torsion translation stays a Möbius
+    /// involution and the two together give the 6-torsion.
+    Iso3(Pt),
+}
+
+/// A coordinate on the curve: a Möbius frame applied to `x(P)` or `y(P)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Chart {
+    pub line: Line,
+    pub mob: Mobius,
+}
+
+impl Chart {
+    pub fn x(mob: Mobius) -> Self {
+        Chart { line: Line::X, mob }
+    }
+    pub fn y(mob: Mobius) -> Self {
+        Chart { line: Line::Y, mob }
+    }
+    pub fn on(line: Line, mob: Mobius) -> Self {
+        Chart { line, mob }
+    }
+    /// The underlying coordinate before the frame, `INF` at a pole.
+    pub fn base_value(line: Line, curve: &Curve, p: Pt) -> u64 {
+        let f = &curve.f;
+        match line {
+            Line::X => p.x(),
+            Line::Y => p.y(),
+            Line::X2 => {
+                let x = p.x();
+                if x == INF {
+                    INF
+                } else {
+                    f.mul(x, x)
+                }
+            }
+            Line::Iso2(t) => {
+                let (a, b) = (p.x(), curve.add(p, t).x());
+                if a == INF || b == INF {
+                    INF
+                } else {
+                    f.add(a, b)
+                }
+            }
+            Line::Iso3(t) => {
+                let (a, b, c) = (p.x(), curve.add(p, t).x(), curve.sub(p, t).x());
+                if a == INF || b == INF || c == INF {
+                    INF
+                } else {
+                    f.add(f.add(a, b), c)
+                }
+            }
+        }
+    }
+    /// The chart value at `P`, `INF` at a pole.
+    pub fn apply_on(&self, curve: &Curve, p: Pt) -> u64 {
+        self.mob
+            .apply(&curve.f, Chart::base_value(self.line, curve, p))
+    }
+    /// The chart value at `P` for the `x`- and `y`-lines (the lines that
+    /// need no curve arithmetic); use [`Chart::apply_on`] in general.
+    pub fn apply(&self, f: &Gf, p: Pt) -> u64 {
+        let t = match self.line {
+            Line::X => p.x(),
+            Line::Y => p.y(),
+            Line::X2 => {
+                let x = p.x();
+                if x == INF {
+                    INF
+                } else {
+                    f.mul(x, x)
+                }
+            }
+            Line::Iso2(_) | Line::Iso3(_) => {
+                panic!("Chart::apply on an isogeny line needs the curve: use apply_on")
+            }
+        };
+        self.mob.apply(f, t)
+    }
+    pub fn describe(&self, f: &Gf) -> String {
+        let inner = self.mob.describe(f);
+        match self.line {
+            Line::X => inner.replace('t', "x"),
+            Line::Y => inner.replace('t', "y"),
+            Line::X2 => inner.replace('t', "x²"),
+            Line::Iso2(_) => inner.replace('t', "x′"),
+            Line::Iso3(_) => inner.replace('t', "x″"),
+        }
+    }
+}
+
+/// The Möbius map a point map induces on a line, if it induces one:
+/// fitted on three points, verified on all.
+pub fn descended_map(curve: &Curve, pts: &[Pt], line: Line, g: &PointMap) -> Option<Mobius> {
+    let f = &curve.f;
+    let val = |p: Pt| Chart::base_value(line, curve, p);
+    let mut pairs: Vec<(u64, u64)> = Vec::new();
+    let mut seen = HashSet::new();
+    for &p in pts {
+        let (t, s) = (val(p), val(g.apply(curve, p)));
+        if t != INF && s != INF && seen.insert(t) {
+            pairs.push((t, s));
+        }
+        if pairs.len() == 3 {
+            break;
+        }
+    }
+    let m = Mobius::fit(f, &pairs)?;
+    let ok = pts.iter().all(|&p| {
+        let (t, s) = (val(p), val(g.apply(curve, p)));
+        // poles of the base coordinate carry no information
+        t == INF || s == INF || m.apply(f, t) == s
+    });
+    ok.then_some(m)
+}
+
+/// A chart on `line` in which `g` (an involution on that line) is
+/// linearised — `t ↦ −t` in odd characteristic, `t ↦ t + 1` in
+/// characteristic 2 — when its fixed points are rational; otherwise the
+/// plain line.  `None` if `g` is not a Möbius map on the line at all.
+pub fn linearised_chart(
+    curve: &Curve,
+    pts: &[Pt],
+    line: Line,
+    g: &PointMap,
+) -> Option<(Chart, FrameKind, Mobius)> {
+    let m = descended_map(curve, pts, line, g)?;
+    let fr = linearising_frame(&curve.f, &m);
+    Some((Chart::on(line, fr.mob), fr.kind, m))
+}
+
+impl From<Mobius> for Chart {
+    fn from(mob: Mobius) -> Self {
+        Chart::x(mob)
+    }
+}
 
 // ── Point maps and their group ─────────────────────────────────────
 
@@ -144,10 +300,17 @@ impl PointMap {
 
 /// In odd characteristic negation is the scaling by `−1`; use one name for
 /// it so group closure does not count the same map twice.
+/// `(x, y) ↦ (u²x, u³y)` is an automorphism only of a curve with
+/// `a₁ = a₃ = 0`; there, in odd characteristic, negation is `Scale(−1)`.
+fn short_form(curve: &Curve) -> bool {
+    curve.a1 == 0 && curve.a3 == 0
+}
+
 fn canonical_auto(curve: &Curve, a: Auto) -> Auto {
     match a {
-        Auto::Neg if curve.f.p != 2 => Auto::Scale(curve.f.neg(1)),
+        Auto::Neg if curve.f.p != 2 && short_form(curve) => Auto::Scale(curve.f.neg(1)),
         Auto::Scale(u) if curve.f.p == 2 && u != 1 => Auto::Neg,
+        Auto::Scale(u) if curve.f.p != 2 && !short_form(curve) && u == curve.f.neg(1) => Auto::Neg,
         other => other,
     }
 }
@@ -160,8 +323,8 @@ fn compose_auto(curve: &Curve, a: Auto, b: Auto) -> Auto {
         (Auto::Neg, Auto::Neg) => Auto::Scale(1),
         (Auto::Scale(u), Auto::Scale(v)) => Auto::Scale(f.mul(u, v)),
         (Auto::Neg, Auto::Scale(u)) | (Auto::Scale(u), Auto::Neg) => {
-            if f.p == 2 {
-                // only Scale(1) exists in char 2 for these curves
+            if f.p == 2 || !short_form(curve) {
+                // only ±1 exist here, and Scale(u) with u ≠ 1 is not one
                 Auto::Neg
             } else {
                 Auto::Scale(f.neg(u))
@@ -284,10 +447,10 @@ impl Seed {
         }
     }
     /// Value on a tuple, `None` at a pole.
-    pub fn eval(&self, curve: &Curve, frame: &Mobius, tuple: &[Pt]) -> Option<u64> {
+    pub fn eval(&self, curve: &Curve, chart: &Chart, tuple: &[Pt]) -> Option<u64> {
         let f = &curve.f;
         let u = |p: Pt| -> Option<u64> {
-            let v = frame.apply(f, p.x());
+            let v = chart.apply_on(curve, p);
             (v != INF).then_some(v)
         };
         match self {
@@ -344,7 +507,7 @@ fn elementary_symmetric(f: &Gf, xs: &[u64]) -> Vec<u64> {
 /// `None` if any is a pole.
 fn orbit_set(
     curve: &Curve,
-    frame: &Mobius,
+    chart: &Chart,
     gamma: &[Vec<PointMap>],
     seed: &Seed,
     tuple: &[Pt],
@@ -356,7 +519,7 @@ fn orbit_set(
             .zip(g)
             .map(|(&p, gm)| gm.apply(curve, p))
             .collect();
-        vals.push(seed.eval(curve, frame, &moved)?);
+        vals.push(seed.eval(curve, chart, &moved)?);
     }
     vals.sort_unstable();
     vals.dedup();
@@ -369,7 +532,7 @@ fn orbit_set(
 pub struct QuotientSystem {
     pub group: Vec<PointMap>,
     pub gamma: Vec<Vec<PointMap>>,
-    pub frame: Mobius,
+    pub chart: Chart,
     pub seeds: Vec<Seed>,
     pub invariants: Vec<Invariant>,
     pub m: usize,
@@ -436,7 +599,7 @@ impl QuotientSystem {
                             let proj = self.projection(i);
                             let mut vals: Vec<u64> = Vec::new();
                             for g in &proj {
-                                let v = self.frame.apply(f, g.apply(curve, tuple[i]).x());
+                                let v = self.chart.apply_on(curve, g.apply(curve, tuple[i]));
                                 if v == INF {
                                     return None;
                                 }
@@ -460,7 +623,7 @@ impl QuotientSystem {
                         e[..e.len() - 1].to_vec()
                     }
                     _ => {
-                        let set = orbit_set(curve, &self.frame, &self.gamma, &inv.seed, tuple)?;
+                        let set = orbit_set(curve, &self.chart, &self.gamma, &inv.seed, tuple)?;
                         if set.len() != inv.orbit_size {
                             return None;
                         }
@@ -481,11 +644,12 @@ pub fn build_quotient_system(
     curve: &Curve,
     pts: &[Pt],
     generators: &[PointMap],
-    frame: Mobius,
+    chart: impl Into<Chart>,
     seeds: &[Seed],
     m: usize,
     rng: &mut Rng64,
 ) -> Option<QuotientSystem> {
+    let chart: Chart = chart.into();
     let group = group_closure(curve, generators, 512)?;
     let gamma = relation_subgroup(curve, pts, &group, m, 12, rng);
     if gamma.is_empty() {
@@ -501,7 +665,7 @@ pub fn build_quotient_system(
     for seed in seeds {
         let sets: Vec<Vec<u64>> = probes
             .iter()
-            .filter_map(|t| orbit_set(curve, &frame, &gamma, seed, t))
+            .filter_map(|t| orbit_set(curve, &chart, &gamma, seed, t))
             .collect();
         if sets.len() < 8 {
             continue;
@@ -538,11 +702,11 @@ pub fn build_quotient_system(
     }
     let affine_on_u = group
         .iter()
-        .all(|g| map_is_affine_on_u(curve, pts, &frame, g));
+        .all(|g| map_is_affine_on_u(curve, pts, &chart, g));
     Some(QuotientSystem {
         group,
         gamma,
-        frame,
+        chart,
         seeds: seeds.to_vec(),
         invariants,
         m,
@@ -551,13 +715,13 @@ pub fn build_quotient_system(
 }
 
 /// Does `u(γP) = a·u(P) + b` for constants `a, b`, on every point?
-fn map_is_affine_on_u(curve: &Curve, pts: &[Pt], frame: &Mobius, g: &PointMap) -> bool {
+fn map_is_affine_on_u(curve: &Curve, pts: &[Pt], chart: &Chart, g: &PointMap) -> bool {
     let f = &curve.f;
     let pairs: Vec<(u64, u64)> = pts
         .iter()
         .filter_map(|&p| {
-            let a = frame.apply(f, p.x());
-            let b = frame.apply(f, g.apply(curve, p).x());
+            let a = chart.apply_on(curve, p);
+            let b = chart.apply_on(curve, g.apply(curve, p));
             (a != INF && b != INF).then_some((a, b))
         })
         .collect();
@@ -709,15 +873,62 @@ pub fn interpolate_quotient(
     max_monomials: usize,
     rng: &mut Rng64,
 ) -> Result<QuotientRelation, String> {
+    interpolate_quotient_boxed(curve, pts, qs, max_total_degree, max_monomials, None, rng)
+}
+
+/// [`interpolate_quotient`] with a per-variable degree cap on top of the
+/// total degree: `caps = (point, tuple)` bounds the exponent of every
+/// invariant seeded by a single point, and of every other invariant.  The
+/// total degree still grows one step at a time, so the relation found is
+/// still of minimal total degree within the box; the box only keeps the
+/// monomial count down where the relation is known to be of bounded
+/// degree in each point (as summation relations are).
+pub fn interpolate_quotient_boxed(
+    curve: &Curve,
+    pts: &[Pt],
+    qs: &QuotientSystem,
+    max_total_degree: u32,
+    max_monomials: usize,
+    caps: Option<(u32, u32)>,
+    rng: &mut Rng64,
+) -> Result<QuotientRelation, String> {
     let f = &curve.f;
     let nv = qs.invariants.len();
     let names: Vec<String> = qs.invariants.iter().map(|i| i.name()).collect();
+    let var_caps: Vec<u32> = qs
+        .invariants
+        .iter()
+        .map(|inv| match (caps, &inv.seed) {
+            (None, _) => u32::MAX,
+            (Some((p, _)), Seed::Point(_)) => p,
+            (Some((_, t)), _) => t,
+        })
+        .collect();
     let mut rel_samples: Vec<Vec<u64>> = Vec::new();
     let mut all_samples: Vec<Vec<u64>> = Vec::new();
     let mut cache = EvalCache::default();
     let mut identities_seen = Vec::new();
-    for d in 1..=max_total_degree {
-        let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d);
+    let mut last_len = 0usize;
+    // Experiment overrides: `QUOTIENT_START_DEGREE` skips the lower total
+    // degrees (one kernel computation on the full box instead of one per
+    // degree; the relation found is then the sparsest in the box, not of
+    // minimal total degree), `QUOTIENT_MAX_MONOMIALS` raises the cap.
+    let env_u32 = |k: &str| std::env::var(k).ok().and_then(|v| v.parse::<u32>().ok());
+    let start = env_u32("QUOTIENT_START_DEGREE").unwrap_or(1).max(1);
+    let max_monomials = env_u32("QUOTIENT_MAX_MONOMIALS")
+        .map(|m| m as usize)
+        .unwrap_or(max_monomials);
+    for d in start..=max_total_degree {
+        let monos: Vec<Vec<u32>> = monomials_up_to_total_degree(nv, d)
+            .into_iter()
+            .filter(|e| e.iter().zip(&var_caps).all(|(k, c)| k <= c))
+            .collect();
+        if monos.len() == last_len {
+            // the box is saturated: nothing new at this total degree
+            identities_seen.push(0usize);
+            continue;
+        }
+        last_len = monos.len();
         if monos.len() > max_monomials {
             return Err(format!(
                 "no relation up to total degree {}; degree {d} needs {} monomials (cap {max_monomials}); identities per degree {:?}",
@@ -918,15 +1129,46 @@ pub fn run_quotient(
     pts: &[Pt],
     label: &str,
     generators: &[PointMap],
-    frame: Mobius,
+    chart: impl Into<Chart>,
     seeds: &[Seed],
     m: usize,
     max_total_degree: u32,
     max_tuples: usize,
     rng: &mut Rng64,
 ) -> Option<QuotientReport> {
-    let qs = build_quotient_system(curve, pts, generators, frame, seeds, m, rng)?;
-    let relation = interpolate_quotient(curve, pts, &qs, max_total_degree, 3000, rng);
+    run_quotient_boxed(
+        curve,
+        pts,
+        label,
+        generators,
+        chart,
+        seeds,
+        m,
+        max_total_degree,
+        None,
+        max_tuples,
+        rng,
+    )
+}
+
+/// [`run_quotient`] with the per-variable degree caps of
+/// [`interpolate_quotient_boxed`].
+#[allow(clippy::too_many_arguments)]
+pub fn run_quotient_boxed(
+    curve: &Curve,
+    pts: &[Pt],
+    label: &str,
+    generators: &[PointMap],
+    chart: impl Into<Chart>,
+    seeds: &[Seed],
+    m: usize,
+    max_total_degree: u32,
+    caps: Option<(u32, u32)>,
+    max_tuples: usize,
+    rng: &mut Rng64,
+) -> Option<QuotientReport> {
+    let qs = build_quotient_system(curve, pts, generators, chart.into(), seeds, m, rng)?;
+    let relation = interpolate_quotient_boxed(curve, pts, &qs, max_total_degree, 3000, caps, rng);
     let weighted_degree = relation.as_ref().ok().and_then(|r| qs.weighted_degree(r));
     let collapse = exact_collapse(curve, pts, &qs, max_tuples);
     Some(QuotientReport {
@@ -1112,5 +1354,262 @@ mod tests {
         assert!(rel.verified_on >= 100);
         let (_, _, col) = r.collapse.unwrap();
         assert!((col - 32.0).abs() < 0.5, "collapse {col}");
+    }
+
+    #[test]
+    fn three_torsion_is_velu_on_the_x_line_and_mobius_on_the_y_line() {
+        // y² = x³ + 2 over F_1009 (p ≡ 1 mod 3): T = (0, √2) has order 3.
+        let f = Gf::prime(1009);
+        let b = 2;
+        let t = f.sqrt(b).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), 0, b, "j=0");
+        let t3 = Pt::Aff(0, t);
+        assert_eq!(c.mul(t3, 3), Pt::Inf);
+        let pts = c.affine_points();
+        let mut rng = Rng64::new(5);
+        let gens = vec![PointMap::translate(t3), PointMap::negate()];
+        // x-line: the only non-constant orbit invariant of x is Vélu's
+        // e₁ = x + 4b/x², the x-coordinate on E/⟨T⟩.
+        let qs = build_quotient_system(
+            &c,
+            &pts,
+            &gens,
+            Mobius::identity(),
+            &[Seed::Point(0), Seed::Point(1), Seed::Point(2)],
+            2,
+            &mut rng,
+        )
+        .unwrap();
+        assert_eq!(qs.group.len(), 6);
+        assert_eq!(qs.gamma.len(), 18);
+        assert_eq!(
+            qs.invariants.len(),
+            3,
+            "e₂ and e₃ of the orbit are constant"
+        );
+        assert!(
+            !qs.affine_on_u,
+            "a 3-torsion translation is not Möbius on x"
+        );
+        let four_b = f.mul(f.add(f.add(1, 1), f.add(1, 1)), b);
+        let mut cache = EvalCache::default();
+        for _ in 0..20 {
+            let tuple = relation_tuple(&c, &pts, 2, &mut rng);
+            if tuple.iter().any(|p| p.x() == 0) {
+                continue;
+            }
+            let vals = qs.evaluate(&c, &tuple, &mut cache).unwrap();
+            for (v, p) in vals.iter().zip(&tuple) {
+                let x = p.x();
+                let velu = f.add(x, f.div(four_b, f.mul(x, x)));
+                assert_eq!(*v, velu);
+            }
+        }
+        // y-line: v = (y − s)/(y + s), s = √b·√−3, has τ_T as v ↦ ω^{±1} v
+        // and −1 as v ↦ 1/v, so the quotient engine sees an affine map
+        // and the invariant v³.
+        let three = f.add(f.add(1, 1), 1);
+        let s = f.mul(t, f.sqrt(f.neg(three)).unwrap());
+        let chart = Chart::y(Mobius {
+            a: 1,
+            b: f.neg(s),
+            c: 1,
+            d: s,
+        });
+        let omega = (2..f.q).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        for &p in &pts {
+            let v = chart.apply(&f, p);
+            let vt = chart.apply(&f, c.add(p, t3));
+            if v == INF || vt == INF || v == 0 {
+                continue;
+            }
+            assert!(vt == f.mul(omega, v) || vt == f.mul(f.mul(omega, omega), v));
+            assert_eq!(chart.apply(&f, c.neg(p)), f.inv(v));
+        }
+        let qs = build_quotient_system(
+            &c,
+            &pts,
+            &[PointMap::translate(t3)],
+            chart,
+            &[Seed::Point(0), Seed::Point(1), Seed::Point(2)],
+            2,
+            &mut rng,
+        )
+        .unwrap();
+        assert!(qs.affine_on_u);
+        assert_eq!(qs.gamma.len(), 9);
+        assert_eq!(
+            qs.invariants.iter().map(|i| i.name()).collect::<Vec<_>>(),
+            ["e3[u1]", "e3[u2]", "e3[u3]"]
+        );
+        let tuple = relation_tuple(&c, &pts, 2, &mut rng);
+        let vals = qs.evaluate(&c, &tuple, &mut EvalCache::default()).unwrap();
+        for (v, p) in vals.iter().zip(&tuple) {
+            let u = chart.apply(&f, *p);
+            assert_eq!(*v, f.pow(u, 3));
+        }
+    }
+
+    #[test]
+    fn torsion_translations_become_mobius_maps_on_the_new_lines() {
+        let f = Gf::prime(1009);
+        // (a) j = 1728, a a non-square: τ_T is Möbius on x (x ↦ a/x) with
+        // irrational fixed points, and Möbius on x² with rational ones.
+        let a = (2..f.p).find(|&a| f.sqrt(a).is_none()).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), a, 0, "j=1728");
+        let pts = c.affine_points();
+        let tau = PointMap::translate(Pt::Aff(0, 0));
+        let on_x = descended_map(&c, &pts, Line::X, &tau).unwrap();
+        assert_eq!(on_x.kind(&f), MobiusKind::Inversion(a));
+        let (_, kind_x, _) = linearised_chart(&c, &pts, Line::X, &tau).unwrap();
+        assert_eq!(kind_x, FrameKind::Trace, "±√a irrational");
+        let (chart, kind, m) = linearised_chart(&c, &pts, Line::X2, &tau).unwrap();
+        assert_eq!(m.kind(&f), MobiusKind::Inversion(f.mul(a, a)));
+        assert_eq!(kind, FrameKind::Sign);
+        for &p in pts.iter().take(200) {
+            let v = chart.apply_on(&c, p);
+            let vt = chart.apply_on(&c, c.add(p, Pt::Aff(0, 0)));
+            if v != INF && vt != INF {
+                assert_eq!(vt, f.neg(v));
+            }
+        }
+        // (b) rational 4-torsion: τ_{T₄} is not Möbius on x but is on the
+        // 2-isogeny line, as an involution
+        let b = 2u64;
+        let c4 = Curve {
+            a1: 1,
+            a2: f.neg(b),
+            a3: f.neg(b),
+            a4: 0,
+            a6: 0,
+            label: "4-torsion".into(),
+            f: f.clone(),
+        };
+        let pts = c4.affine_points();
+        let t4 = Pt::Aff(0, 0);
+        assert_eq!(c4.mul(t4, 4), Pt::Inf);
+        let t2 = c4.mul(t4, 2);
+        let tau4 = PointMap::translate(t4);
+        assert!(descended_map(&c4, &pts, Line::X, &tau4).is_none());
+        let m = descended_map(&c4, &pts, Line::Iso2(t2), &tau4).unwrap();
+        assert_eq!(m.order(&f, 8), Some(2));
+        // (c) 6-torsion on y² = x³ + 1: τ_{T₂} and ω are Möbius on the
+        // 3-isogeny line, τ_{T₃} acts trivially there
+        let cb = Curve::short_weierstrass(f.clone(), 0, 1, "j=0");
+        let pts = cb.affine_points();
+        let t3 = Pt::Aff(0, 1);
+        let t2 = torsion_points(&cb, &pts, 2)[0];
+        let line = Line::Iso3(t3);
+        assert!(descended_map(&cb, &pts, Line::X, &PointMap::translate(t3)).is_none());
+        let m2 = descended_map(&cb, &pts, line, &PointMap::translate(t2)).unwrap();
+        assert_eq!(m2.order(&f, 8), Some(2));
+        let m3 = descended_map(&cb, &pts, line, &PointMap::translate(t3)).unwrap();
+        assert!(m3.is_identity(&f));
+        let omega = (2..f.p).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        let om = PointMap {
+            auto: Auto::Scale(omega),
+            t: Pt::Inf,
+        };
+        let mo = descended_map(&cb, &pts, line, &om).unwrap();
+        assert!(matches!(mo.kind(&f), MobiusKind::Scaling(_)));
+    }
+
+    #[test]
+    fn four_torsion_on_the_two_isogeny_line_gives_a_system() {
+        let f = Gf::prime(1009);
+        let b = 2u64;
+        let c4 = Curve {
+            a1: 1,
+            a2: f.neg(b),
+            a3: f.neg(b),
+            a4: 0,
+            a6: 0,
+            label: "4-torsion".into(),
+            f: f.clone(),
+        };
+        let pts = c4.affine_points();
+        let t4 = Pt::Aff(0, 0);
+        let t2 = c4.mul(t4, 2);
+        let tau4 = PointMap::translate(t4);
+        let (chart, kind, _) = linearised_chart(&c4, &pts, Line::Iso2(t2), &tau4).unwrap();
+        assert_eq!(kind, FrameKind::Sign);
+        let mut rng = Rng64::new(9);
+        let group = group_closure(&c4, &[tau4, PointMap::negate()], 64).unwrap();
+        assert_eq!(group.len(), 8);
+        let gamma = relation_subgroup(&c4, &pts, &group, 2, 12, &mut rng);
+        assert_eq!(gamma.len(), 32, "16 translation triples × global sign");
+        let probes: Vec<Vec<Pt>> = (0..24)
+            .map(|_| relation_tuple(&c4, &pts, 2, &mut rng))
+            .collect();
+        let ok = probes
+            .iter()
+            .filter(|t| orbit_set(&c4, &chart, &gamma, &Seed::Point(0), t).is_some())
+            .count();
+        assert!(ok >= 8, "only {ok} probe tuples have a full orbit set");
+        let qs = build_quotient_system(
+            &c4,
+            &pts,
+            &[tau4, PointMap::negate()],
+            chart,
+            &[
+                Seed::Point(0),
+                Seed::Point(1),
+                Seed::Point(2),
+                Seed::Product,
+            ],
+            2,
+            &mut rng,
+        );
+        assert!(qs.is_some());
+    }
+
+    #[test]
+    fn a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed() {
+        // On E/⟨α⟩ the translation by Q is a Möbius map iff α(Q) = Q, i.e.
+        // Q ∈ E[1 − α]: E[2] for α = −1 (the Klein group on x), the three
+        // points {O, ±T₃} for α = ω on the y-line, {O, T₂} for α = i on the
+        // x²-line.  So no line carries all of E[3].
+        let f = Gf::prime(1009);
+        // j = 0 with full rational E[3]: −4b a cube and −3b a square
+        let cube = |a: u64| f.pow(a, (f.p - 1) / 3) == 1;
+        let b = (1..f.p)
+            .find(|&b| {
+                f.sqrt(b).is_some()
+                    && cube(f.neg(f.mul(4, b)))
+                    && f.sqrt(f.neg(f.mul(3, b))).is_some()
+            })
+            .unwrap();
+        let c = Curve::short_weierstrass(f.clone(), 0, b, "j=0");
+        let pts = c.affine_points();
+        let e3 = torsion_points(&c, &pts, 3);
+        assert_eq!(e3.len(), 8, "full E[3] rational");
+        let omega = (2..f.p).find(|&u| u != 1 && f.pow(u, 3) == 1).unwrap();
+        let om = Auto::Scale(omega);
+        let mut descend = 0;
+        for &q in &e3 {
+            let fixed = c.apply_auto(om, q) == q;
+            let m = descended_map(&c, &pts, Line::Y, &PointMap::translate(q));
+            assert_eq!(m.is_some(), fixed, "{q:?}");
+            descend += usize::from(fixed);
+        }
+        assert_eq!(descend, 2, "only ±T₃ = (0, ±√b)");
+        // j = 1728 with full rational E[2]: a a square (x² + a splits)
+        let i = (2..f.p).find(|&u| f.mul(u, u) == f.neg(1)).unwrap();
+        let a = (2..f.p).find(|&a| f.sqrt(f.neg(a)).is_some()).unwrap();
+        let c = Curve::short_weierstrass(f.clone(), a, 0, "j=1728");
+        let pts = c.affine_points();
+        let e2 = torsion_points(&c, &pts, 2);
+        assert_eq!(e2.len(), 3);
+        let iota = Auto::Scale(i);
+        let mut descend = 0;
+        for &q in &e2 {
+            let fixed = c.apply_auto(iota, q) == q;
+            let m = descended_map(&c, &pts, Line::X2, &PointMap::translate(q));
+            assert_eq!(m.is_some(), fixed, "{q:?}");
+            descend += usize::from(fixed);
+            // on the x-line (quotient by −1) every 2-torsion translation descends
+            assert!(descended_map(&c, &pts, Line::X, &PointMap::translate(q)).is_some());
+        }
+        assert_eq!(descend, 1, "only T = (0, 0)");
     }
 }

@@ -238,6 +238,30 @@ Seed-robust at this reach (critical ρ_s ∈ [−0.70,−0.81], slope ∈
 over-determined slope is shallow only because `D*` is saturated at the
 Nullstellensatz floor of 2 there (§6), not because the law weakens.
 
+**Size-controlled (EXP-R4b, `RESEARCH_DEGREE_REDUCTION.md` R4b).** Because
+the table above pools ten operating points of different size, it was
+challenged as a possible size proxy — a correlation that reads a shared
+trend in `2n'` as a relation. It is not. Holding the operating point fixed
+and recomputing three ways:
+
+| regime | pooled | mean per-block | blocked rank | fixed-effects |
+|---|---:|---:|---:|---:|
+| all cells | −0.7929 | −0.6998 | −0.6983 | −0.7499 |
+| **critical `2n'=n`** | −0.7781 | **−0.9124** | **−0.9023** | **−0.8186** |
+| over-determined | −0.7334 | −0.3809 | −0.3979 | −0.5752 |
+
+In the critical regime — the ECDLP case — size control makes the law
+**stronger** than pooling it. The over-determined row weakens under control
+exactly as P6 requires (`D*` floored at 2 leaves no variance to explain),
+and the three weakest individual blocks are the `n'=2` points at every `n`,
+so the weakness tracks the determination ratio rather than the size.
+
+One scope limit the same experiment establishes: this is a **family-level**
+law. The unit of analysis above is the `(operating point, family)` cell, and
+the defect does *not* rank individual targets within a family — size-
+controlled, that correlation is −0.12 to −0.35. `Δ_low` screens
+constructions, which is what §9 proposes it for; it does not screen targets.
+
 This **reconciles the dispute** instead of picking a side:
 
 - The HKY counterexamples and the Galbraith–Gebregiyorgis "nice" cases
@@ -507,6 +531,13 @@ Four pieces, each a thin extension of code already in `cryptanalysis/`:
 
 ## 5. The attacker's corollary (so this is two-sided, not just defense)
 
+> **Now an active thread:** `RESEARCH_DEGREE_REDUCTION.md` builds out this
+> section — the lever taxonomy (factor-base structure / symmetrisation /
+> hybrid slicing / precomputed degree falls), a ledger R1–R5 with
+> pre-registered gates, and `src/cryptanalysis/degree_reduction.rs`.
+> Iteration 1 killed the hybrid-slicing lever and flagged that the `Δ_low`
+> screen below is calibrated only *within* a fixed system shape.
+
 The same theory hands the *attacker* a search target: **maximize the early
 Hilbert defect `Δ_low`**. It unifies every known speedup as "inject
 low-degree algebraic relations":
@@ -572,7 +603,11 @@ map.
    ∈ [−7.6,−8.5]). The kill condition is now the *reverse*: if at larger
    reach the slope flattens to 0 or flips sign, the algebraic predictor
    fails too and the bridge has no working predictor. So far it strengthens
-   with reach.
+   with reach — and it is **not a size proxy**: size-controlled three ways
+   the critical-regime figure rises to −0.91/−0.90/−0.82 (§3.3, EXP-R4b).
+   The support is for a **family-level** law; the same experiment shows the
+   defect does not rank targets *within* a family (−0.12…−0.35), so P3-alg
+   licenses screening constructions, not instances.
 
 5. **(The lower-bound antecedent — §3.4.)** For the generic (Random)
    factor base in the critical regime, the early defect must **vanish** as

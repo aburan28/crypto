@@ -534,6 +534,11 @@ statement about `koblitz_groebner`'s engine limits, not about the
 polynomial; it is also exactly the gap §7 flagged between a modelled
 system and a measured solve.
 
+(§17 reruns this comparison with the degree cap and the size caps made
+explicit, and corrects the account of what the shipped cap of 3 did to
+each arm.  The `n = 17` verdict survives; the reason stated here does
+not, in the form it is stated.)
+
 **Where the `m = 3` gain comes from is now measured, not argued.**  The
 direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
 chained intermediate points is worth ×12 on its own, and the symmetry is
@@ -922,3 +927,895 @@ held on every point of every `φ⁻¹(F_u)`.
 - §10.5 item 1: done, negative.  The remaining items stand, and the
   union-base ceiling measured here is the number a mixed oracle would
   have to justify itself against.
+
+## 12. `F_{p^k}`: the Klein invariants meet a subspace factor base
+
+**Code:** `coordinate_search::Gf::extension`,
+`src/cryptanalysis/coordinate_descent.rs`, `examples/klein_descent.rs`.
+
+§10.3 left the Klein group's worth as "a question about bits, not
+degrees", unanswerable on a prime field because there is no subspace
+factor base there.  Gaudry's setting has one: `E/F_{p^k}` with the base
+`{P : x(P) ∈ F_p}`, and if the coordinate change is `F_p`-rational every
+invariant of a factor-base point is in `F_p`, so a relation over
+`F_{p^k}` in `F_p`-unknowns is `k` relations over `F_p` — the digits of
+its coefficients — and the repo's `F_p` Buchberger can solve it.
+
+### 12.1 What had to be built
+
+- `Gf::extension(p, k)`: `F_{p^k} = F_p[t]/(f)` with elements as base-`p`
+  digit vectors, so the digits *are* the coordinates a descent reads
+  off; log tables for multiplication; the search and quotient engines
+  run on it unchanged (the interpolated `S₃` over `F_{13²}` matches the
+  closed form; the Frobenius is detected as a global symmetry).
+- **Fixed-target quotients.**  The decomposition problem fixes `R`, so
+  the symmetry group is `Γ₀ = Γ ∩ (G^m × {id})`, the seeds are functions
+  of the summands only, and the relation is interpolated from summand
+  tuples with `Σ P_i = R` for that `R`, with identities among the
+  invariants quotiented out and *kept* — they are equations of the
+  descended system.  Every invariant is checked to be `F_p`-valued on
+  the base before anything is descended or timed.
+- **The setting itself.**  A curve *over* `F_p` makes the base
+  `E(F_p)`, a subgroup, and every target that decomposes is `F_p`-rational
+  — the first version of the example measured exactly that degenerate
+  case.  The family `y² = x(x² − αx + 1)`, `α ∉ F_p`, has `T = (0, 0)`
+  with `x(P + T) = 1/x`, fixed points `±1`, hence an `F_p`-rational sign
+  frame `u = (x − 1)/(x + 1)` and the base `{u ∈ F_p} = {x ∈ F_p}` minus
+  the frame's pole, while the curve is not over `F_p`; the other two
+  2-torsion points are rational iff `α² − 4` is a square.
+
+### 12.2 The Klein group does not descend, and why
+
+On every curve in Gaudry's setting the invariants of the full `E[2]`
+are **not** `F_p`-valued on the base (the `F_p?` column); the single
+involution's are.  The reason is structural: the base is an `F_p`-line
+in `P¹` (the sign frame's `F_p ∪ {∞}`), and for the Klein
+symmetrisation to apply, that line must be stable under all three
+involutions `x ↦ e_T + c_T/(x − e_T)`.  That forces every `e_T` and
+`c_T` into `F_p`, i.e. all three 2-torsion abscissae into `F_p`, i.e. the
+curve over `F_p` — the degenerate case.  On the over-`F_p` control the
+Klein invariants are indeed `F_p`-valued, and the base is `E(F_p)`.
+
+So §6.4's "complete `E[2]`" and §10.3's fourfold collapse are real on
+the curve but unusable with a subspace factor base on any curve for
+which that base is worth having.  The Klein direction closes here, on a
+measured negative.
+
+### 12.3 One involution against Gaudry, descended
+
+`m = 2`, `k = 3`, targets: four sums of two base points with
+`x(R) ∉ F_p`, four random points.  Both arms agree on every verdict.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | GB ms found / refuted |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.6 |
+| | one `T`, `w = u²`, `Πu` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.2 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 3 | 4 | 9 | 0.4 / 0.7 |
+| | one `T` | 2 | 3 | 4 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| `α`-curve / `F₁₃⁴`, full 2-torsion | `x` (Gaudry) | 1 | 2 | 4 | 4 | 9 | 0.3 / 0.8 |
+| | one `T` | 2 | 3 | 5 | 2 | 5 | 0.1 / 0.1 |
+| | Klein | 4 | 5 | – | – | – | **not `F_p`-valued** |
+| control `y² = x³ − x / F₂₉³` (over `F_p`) | all three | | | | | | no decomposable target off `E(F_p)` exists; Klein `F_p`-valued |
+
+At `m = 2` the one-involution system is the smaller one on every count
+the Gröbner engine sees — total degree 2 against 4, five terms against
+nine — at the price of one more unknown (`Πu`) and one more equation
+(the identity `(Πu)² = w₁w₂`), and it is three to seven times faster on
+Buchberger, with identical verdicts on every target.  These are
+sub-millisecond systems; the ranking, not the ratio, is the result.
+
+### 12.4 `m = 3`
+
+`m = 3` needed two things the `m = 2` run did not: a degree *box* for the
+interpolation (Semaev's `S₄` has total degree 12 but degree 4 in each
+point, and 12 in five unknowns is far over the monomial cap; with the
+box it is recovered with its 125 terms after descent), and a wall-clock
+budget per Buchberger run, because the repo's Buchberger does not
+return from the descended `S₄` in any useful time.  Budget 180 s, two
+decomposable and two random targets per curve.
+
+| curve | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s, every target |
+| | one `T`, `w = u²`, `Πu` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s, every target |
+| | Klein | 16 | 9 | – | 2 | 8 | **no** | – |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > 180 s (first target) |
+| | one `T` | 4 | 4 | 8 | 4 | 35 | yes | > 180 s (first target) |
+
+The run was stopped there: every timed-out Buchberger keeps running on
+its own thread, and after eight of them the machine was at load 16 on
+four cores and starving the other experiments.  The remaining curves
+(`F₁₇³`, the over-`F_p` control) were not run at `m = 3`; nothing in the
+first two suggests they would differ.
+
+What `m = 3` settles is the shape and not the time.  The one-involution
+system is a third of the degree (4 against 12) and a quarter of the
+size (35 terms against 125) of Gaudry's, at the cost of one more unknown
+and five more equations (the descended identities), and the Klein
+group is again not `F_p`-valued — the §12.2 obstruction does not depend
+on `m`.  The repo's Buchberger finishes neither system inside three
+minutes on any target, so it cannot rank them; that is a statement
+about the solver (a textbook Buchberger, no F4/F5, no degree bound), not
+about the systems, and the `m = 2` ranking (§12.3) stands as the only
+timed one.  An F4 over `F_p` with a degree bound is the tool this row
+needs; the repo's `groebner_f4` is Buchberger-based despite its name.
+
+---
+
+## 13. Higher-order seeds: rational 3-torsion on `j = 0` curves
+
+**Code:** `coordinate_quotients::{Chart, Line, run_quotient_boxed}`,
+`coordinate_descent::compare_arms`, `examples/three_torsion.rs`.
+
+§10.5's last open item.  Setting: `E : y² = x³ + b` over `F_q` with
+`q ≡ 1 (mod 3)` (so the order-3 automorphism `ω : (x, y) ↦ (ωx, y)` is
+rational) and `b` a square, so `T = (0, √b)` is a rational point of
+order 3.  Two toy curves over `F₁₀₀₉`: **A** `b = 2` (no rational
+2-torsion, `#E = 1053`) and **B** `b = 1` (full rational 2-torsion as
+well, a 6-torsion point, `#E = 948`).
+
+### 13.1 Where a 3-torsion translation is a Möbius map
+
+§3's lemma stands: `τ_T` does not act on the `x`-line, and the quotient
+engine on `x` finds exactly what the lemma predicts.  The orbit
+`{x(P), x(P + T), x(P − T)}` has `e₂ = 0` and `e₃ = −4b` constant, and
+the one non-constant invariant is
+
+    e₁ = x + 4b/x² = (x³ + 4b)/x²,
+
+Vélu's `x`-coordinate on `E/⟨T⟩` (unit test
+`three_torsion_is_velu_on_the_x_line_and_mobius_on_the_y_line`).
+"Translation-invariant coordinates factor through isogenies" — a change
+of curve, nothing else.
+
+But `τ_T` commutes with `ω` (`ω` fixes `T`), so it descends to the
+quotient `E → E/⟨ω⟩ ≅ P¹`, which is the **`y`-line**.  There
+
+    y(P + T) = √b (y − 3√b) / (y + √b),
+
+a Möbius map of order 3 with fixed points `±√b·√−3` — rational exactly
+when `−3` is a square, i.e. `q ≡ 1 (mod 3)`, the same condition that
+makes `ω` rational.  The chart
+
+    v = (y − s)/(y + s),   s = √b·√−3,
+
+diagonalises it: `τ_T : v ↦ ω^{±1} v`, and `−1 : v ↦ 1/v`.  So on the
+`v`-line `⟨τ_T, −1⟩` is the dihedral group of order 6 in `PGL₂`, `ω`
+acts trivially, and the invariants of a single point are `v³` (under
+the translation) and `V = v³ + v⁻³` (under the whole group) — the
+3-torsion analogue, one degree up, of the 2-torsion sign frame `t ↦ −t`
+with invariant `t²`.  The engine gained a `Chart` (a Möbius frame on
+the `x`- or the `y`-line) to run on it; the chart's action is verified
+on every point of the curve before anything is measured.
+
+### 13.2 Results at `m = 2`
+
+Exact collapse over all relation tuples; relation of minimal total
+degree; `p = 1009`.
+
+| curve | line, group `G` | `|G|` | `|Γ|` | invariants | relation (degrees per invariant) | terms | collapse |
+|---|---|---:|---:|---|---|---:|---:|
+| A | `x`, `⟨−1⟩` (Semaev) | 2 | 2 | `x_i` | `S₃`, `[2, 2, 2]` | 9 | 2.0 |
+| A | `x`, `⟨τ₃, −1⟩` | 6 | 18 | `e₁[x_i]` (Vélu), orbit sums of `Πx, Σx` | degree 1 among the tuple invariants only | 5 | 18.0 |
+| A | `x`, `⟨τ₃, −1, ω⟩` | 18 | 54 | `e₃[x_i]`, orbit sums of `Πx` | degree 1 among the tuple invariants only | 3 | 54.5 |
+| A | `y`, `⟨−1⟩` (`y`-Semaev) | 2 | 2 | `y_i²`, `(Πy)²`, `(Σy)²` | `[3, 3, 3, 1, 3]` | 34 | 6.0 (misses `ω`) |
+| A | `v`, `⟨τ₃⟩` | 3 | 9 | `v_i³`, `Πv` | `[1, 1, 1, 2]` | 8 | 27.0 (misses `ω`) |
+| A | `v`, `⟨τ₃, −1⟩` | 6 | 18 | `V_i = v_i³ + v_i⁻³`, `P = Πv + 1/Πv` | `[1, 1, 1, 3]` | 10 | 54.9 (misses `ω`) |
+| A | `v`, `⟨τ₃, −1, ω⟩` | 18 | 54 | same | same, `[1, 1, 1, 3]` | 10 | 54.8 — separates `Γ`-orbits |
+| A | `v`, `⟨τ₃, −1, ω⟩` + `Σv` seed | 18 | 54 | `V_i`, `P`, `e₃[Σv]` | same; `Σv` unused | 10 | 54.8 |
+| B | `u` (sign frame), `⟨τ₂, −1⟩` (control) | 4 | 8 | `w_i = u_i²`, `Πu` | `[1, 1, 1, 2]` | 9 | 8.0 |
+| B | `u`, `⟨τ₂, τ₃, −1⟩ = ⟨τ₆, −1⟩` | 12 | 72 | `e₂, e₄` of the 6-orbit of `u_i`, orbit sums of `Πu, Σu` | `[1, ·, 1, ·, 1, ·, 1, 1, …]`, linear in `e₂[u_i]` | 6 | 72.0 |
+| B | `v`, `⟨τ₃, −1, ω⟩` | 18 | 54 | `V_i`, `P` | `[1, 1, 1, 3]` | 10 | 54.7 |
+
+The `v`-line relations, read off the interpolated coefficients
+(`−12 = 997`, `−2 = 1007` mod 1009):
+
+- under the translations alone, with `Πv` as the tuple invariant,
+
+      (v₁³ − 1)(v₂³ − 1)(v₃³ − 1) = (v₁v₂v₃ − 1)³        for P₁ + P₂ + P₃ = O;
+
+- under the full group, with `V_i = v_i³ + v_i⁻³` and `P = Πv + 1/Πv`,
+
+      (V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³,
+
+  which is the same identity squared (`V − 2 = (v³ − 1)²/v³`), and is
+  **multilinear in the point invariants**: degree 1 in each `V_i`, all
+  the remaining degree in the single tuple unknown `P`.
+
+Three things the table settles.
+
+1. **The degree does drop, one order up from §3.**  Per variable, the
+   summation relation has degree 2 in `x` (Semaev), 3 in `y`
+   (`y : E → P¹` has degree 3), and 1 in `V = v³ + v⁻³` — as
+   `S₃` goes from degree 2 in `x` to degree 1 in `w = t²` on the sign
+   frame (§3.2, §10.1).  The mechanism is the same: the tuple invariant
+   (`P` here, `s = Σu` there) carries the degree the point invariants
+   lose, and an identity among the invariants (`(Πv)³ = v₁³v₂³v₃³`,
+   i.e. `P³ − 3P = Π³ + Π⁻³` expressed in the `V_i`) ties it back —
+   quotiented out by the engine, kept as an equation by the descent.
+2. **The collapse is `|Γ| = 54`, exactly, and the 0.7–0.9 excess is
+   degenerate tuples** (points with `v ∈ {0, ∞}` or in `E[3]`), as the
+   `ω`-less runs show by missing exactly the factor 3 the automorphism
+   adds.  On curve B the 6-torsion group collapses 72 tuples per vector
+   on the `u`-line, again exactly.
+3. **On the `x`-line the 3-torsion group is worthless**, as §3 said: the
+   only point invariant is Vélu's coordinate, and the minimal-degree
+   relation the engine finds is a linear one among the *tuple*
+   invariants — an artefact of the orbit sums of `Πx`, not a
+   decomposition relation.  (The Vélu coordinate's own relation is `S₃`
+   on `E/⟨T⟩`, degree 2, which the engine would report at total degree 4
+   if the tuple seeds were dropped.)
+
+### 13.3 What the multilinear relation is worth — the §11 accounting
+
+`V` identifies a point up to `⟨T, ω, −1⟩`: 18 points per value (6 values
+of `v`, 3 points per value).  The projected-relation accounting of
+§11.4 applies verbatim: `[3]` kills `T`, `ω` is an endomorphism acting as
+a known scalar `λ` (`λ² + λ + 1 ≡ 0 mod ℓ`) on the prime-order subgroup,
+and `−1` is a sign, so a base `{V(P) ∈ S}` of `18|S|` points is `|S|`
+columns (signed `ω`-orbits of `[3]P`), and one solve is one row.  No
+free relations — that was §11's correction, and it holds here.
+
+What is left is the solve: at `m = 2`, unknowns `(V₁, V₂, P)` with the
+multilinear relation, the identity tying `P` to the `V_i` (descended
+as an equation), and `V_R` known, against Semaev's
+`(x₁, x₂)` with one equation of degree 2 in each.  That is the shape
+§12.3 found cheaper by 3–7× for one involution.  §13.4 measures it.
+
+### 13.4 Gaudry's setting over `F₃₁³`: two bases
+
+`E : y² = x³ + b` over `F₃₁³` with `b ∉ F_p`, `b` a square and `−b` a
+cube (`#E = 29484`, `T₃` rational).  Two factor bases, each
+`F_p`-definable, each with the same four arms; `m = 2`, six decomposable
+targets per base.
+
+The second base needs a word.  `{v ∈ F_p}` is `{y ∈ s·F_p}`, whose
+`x³ = −b(3r² + 1)`, `r ∈ F_p`; every element of `F_p` is a cube in
+`F_{p³}` (`p ≡ 1 mod 3`), so that base has `≈ 3p` points when `−b` is a
+cube and two points when it is not — and `−b` a cube is exactly
+`E[2] ⊂ E(F_{p³})`.  The first draft of the example took the first
+square `b ∉ F_p` and got a two-point base; the choice above is forced.
+
+| base | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | GB ms (median) |
+|---|---|---:|---:|---:|---:|---:|---|---:|
+| `{x ∈ F_p}` (20 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 2 | 3 | 4 | 9 | yes | 0.5 |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 3 | 4 | – | 1 | 4 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | 3 | – | 3 | 6 | **no** | – |
+| | `v`, `⟨τ₃, −1⟩` | 3 | 3 | – | 2 | 6 | **no** | – |
+| `{v ∈ F_p}` (86 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 2 | – | 4 | 9 | **no** | – |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 3 | 4 | – | 1 | 4 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | 3 | 7 | 3 | 6 | yes | 0.1 |
+| | `v`, `⟨τ₃, −1⟩` | 3 | 3 | 3 | 2 | 6 | yes | 0.0 |
+
+No arm crosses bases: the `x`-line systems are `F_p`-valued only on the
+`x`-base, the `v`-line systems only on the `v`-base (the chart's
+coefficients `s = √b√−3` are in `F_{p³}`, so `x ∈ F_p` says nothing
+about `v` and conversely).  So the Vélu arm fails here for the reason
+§12.2 gave for the Klein group — its transport is not over `F_p` — and
+the 3-torsion frame does **not** improve Gaudry's base; what it does is
+define a second base of its own, on which its system is the smallest
+one measured in this note: three `F_p`-unknowns, three `F_p`-equations,
+total degree 2, six terms, against Gaudry's two unknowns, three
+equations of degree 4, nine terms on the other base, and against the
+plain `y`-line system on the same base (seven equations, degree 3).
+Every verdict agrees (no refutation on decomposable targets).  As in
+§12.3 these are sub-millisecond Buchberger runs and only the ranking is
+the result; at this size the two bases are also of different sizes (20
+against 86 points, both `≈ p` up to the constants above), so the
+relation *yield* per base is not compared here.
+
+### 13.5 `m = 3`
+
+Curve A, `p = 1009`, the same boxes as §12.4 (a per-variable cap on
+the point invariants and on the tuple invariant on top of the total
+degree; without it `S₄` itself is out of reach).
+
+| line, group `G` | `|Γ|` | invariants | box (point, tuple) | relation | terms |
+|---|---:|---|---|---|---:|
+| `x`, `⟨−1⟩` (Semaev) | 2 | `x_i` | (4, –), total ≤ 16 | `S₄`, `[4, 4, 4, 4]`, total degree 12 | 191 |
+| `x`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | Vélu `e₁[x_i]`, orbit sums of `Πx, Σx` | (4, 8) | none under the monomial cap (12 invariants) / none up to total degree 11 | – |
+| `y`, `⟨−1⟩` | 2 | `y_i²`, `(Πy)²`, `(Σy)²` | (4, 8) | none up to total degree 8 (`y` has degree 9 per point) | – |
+| `v`, `⟨τ₃⟩` | 27 | `v_i³`, `Πv` | (3, 8), total ≤ 20 | `[3, 3, 3, 3, 8]`, total degree 10 | 310 |
+| `v`, `⟨τ₃, −1⟩` / `⟨τ₃, −1, ω⟩` | 54 / 162 | `V_i = v_i³ + v_i⁻³`, `P = Πv + 1/Πv` | (3, 8), total ≤ 20 | none | – |
+| same | | same | (4, 8), 5625 monomials, one kernel at total degree 24 | none | – |
+| same | | same | (3, 12), 3328 monomials, one kernel at total degree 24 | none | – |
+| same, `+ Σv` seed | 162 | `V_i`, `P`, `e₃, e₄[Σv]` | (3, 8) | none under the monomial cap | – |
+
+So at `m = 3` the 3-torsion frame behaves like the 2-torsion one **only
+on the translation side**: in `v_i³` the relation has degree 3 in each
+point where Semaev's has 4 (one degree down, as `w = u²` takes `S₄` from
+4 to 2 — a smaller step here), with the tuple unknown `Πv` carrying
+degree 8.  Folding the sign in as well, which at `m = 2` gave the
+multilinear `(V₁ − 2)(V₂ − 2)(V₃ − 2) = (P − 2)³`, gives **nothing** in
+any box tried: there is no relation among `V_i = v_i³ + v_i⁻³` and
+`P = Πv + 1/Πv` of degree ≤ 4 in each `V_i` and ≤ 8 in `P`, nor of
+degree ≤ 3 and ≤ 12.  The `m = 2` multilinearity was a small-`m`
+accident of the sign symmetrisation, not a pattern.  This is the same
+place §10.4 found the Klein group's advantage thinning at `m = 3`.
+
+For the decomposition problem itself the sign is irrelevant anyway: a
+fixed target breaks the global sign, so the fixed-target group `Γ₀` is
+the translations alone, and the `m = 3` system on the `v`-base is the
+`v_i³, Πv` one — four `F_p`-unknowns, total degree 9, 118 terms before
+descent, against Gaudry's three unknowns, total degree 12, 125 terms.
+Measured over `F₃₁³`:
+
+| base | arm | `Γ₀` | `F_p`-unknowns | `F_p`-equations | total degree | terms | `F_p`-valued | Buchberger (180 s budget) |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` (20 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | 3 | 12 | 125 | yes | > budget, both targets |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box (`y` has degree 9 per point) | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | – | 9 | 118 | **no** | – |
+| `{v ∈ F_p}` (86 points) | `x`, `⟨−1⟩` (Gaudry) | 1 | 3 | – | 12 | 125 | **no** | – |
+| | `x`, `⟨τ₃, −1⟩` (Vélu) | 9 | 7 | – | 4 | 27 | **no** | – |
+| | `v`, `⟨−1⟩` | 1 | – | – | – | – | no relation in the box | – |
+| | `v`, `⟨τ₃, −1⟩` | 9 | 4 | 167 | 9 | 118 | yes | > budget, both targets |
+
+The same picture as §12.4: bases and `F_p`-valuedness exactly as at
+`m = 2`, a smaller-degree system on the `v`-base (9 against 12), and a
+Buchberger that finishes neither.  The 167 descended equations of the
+`v`-system are the 3 digits of the relation plus the identities among
+`v_i³` and `Πv` up to the box's degree — an F4 with a degree bound
+would take most of them as redundant; Buchberger does not.
+
+---
+
+## 14. A degree-bounded F4 over `F_p`, and the `m = 3` rows it settles
+
+**Code:** `src/cryptanalysis/f4_fp.rs`; `coordinate_descent::compare_arms`
+(`GB_ENGINE`, `F4_MAX_DEGREE`); `examples/klein_descent.rs`,
+`examples/three_torsion.rs --descent-only`.
+
+§12.4 and §13.5 closed on systems the repo's Buchberger could not
+finish.  The solver is now there: Faugère's F4 with the normal
+selection strategy, a degree bound on the critical pairs (the basis is
+the degree-`D` truncation — enough to decide consistency and solve when
+the solving degree is at most `D`), symbolic preprocessing, dense row
+reduction mod `p` with rows in parallel, the product criterion, a
+cooperative deadline, and solving by root finding on a univariate basis
+element and substitution.  Every reported solution is checked against
+the system; the unit tests compare with brute force on random
+zero-dimensional systems.  What it reports besides the time is the
+**solving degree** — the degree of the last step that produced a new
+basis element or the constant `1` — and the largest matrix, which are
+the numbers that transfer between sizes.
+
+### 14.1 `m = 2`: agreement, and the solving degrees
+
+On every arm and target of §12.3 and §13.4 the F4 verdict equals
+Buchberger's (found / refuted), and at this size both are milliseconds
+(F4's setup is the larger constant).  The solving degrees: Gaudry's
+`S₃` 3–5, the one-involution system 2, the `v`-base 3-torsion system 2
+against 4 for the plain `y`-line system on the same base.
+
+### 14.2 `m = 3`: the Klein descent, timed at last
+
+`GB_ENGINE=f4`, bound 24, 300 s budget, two decomposable and two
+random targets per curve.
+
+| curve | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix |
+|---|---|---:|---:|---:|---:|---:|---|
+| `α`-curve / `F₂₉³`, full 2-torsion | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 35 800 | 14 | 2250 × 2594 |
+| | one `T`, `w = u²`, `Πu` | 4 / 8 | 4 | 35 | 790 | 7 | 740 × 822 |
+| | Klein | 9 / – | 2 | 8 | not `F_p`-valued | | |
+| `α`-curve / `F₂₉³`, one 2-torsion point | `x` (Gaudry) | 3 / 3 | 12 | 125 | 22 800 | 14 | 2173 × 2515 |
+| | one `T` | 4 / 8 | 4 | 35 | 540 | 7 | 714 × 796 |
+| `α`-curve / `F₁₇³`, full 2-torsion | `x` (Gaudry) | 3 / 3 | 12 | 125 | 21 900 | 14 | 2164 × 2513 |
+| | one `T` | 4 / 8 | 4 | 35 | 680 | 7 | 740 × 822 |
+| control `y² = x³ − x / F₂₉³` (over `F_p`), random target | `x` (Gaudry) | 3 / 3 | 12 | 125 | 48 400, refuted | 14 | 2157 × 2493 |
+| | one `T` | 4 / 8 | 4 | 35 | 760, refuted | 7 | 707 × 789 |
+| | Klein (`F_p`-valued here, base a subgroup) | 9 / 32 | 2 | 8 | 300 | 2 | 271 × 190 |
+
+Same verdict on every target.  The one-involution system solves
+**30–60× faster** than Gaudry's at `m = 3`, at **half the solving degree
+(7 against 14)** and a matrix a ninth of the size.  At `m = 2` the ratio
+was 3–7× on Buchberger with degree 2 against 4; the gap widens with
+`m`, as the halving of the relation's degree per point (§3, §10) would
+predict for an F4 whose cost is governed by the solving degree.  This is
+the first timed row of the whole thread where the coordinate change is
+worth more than a constant, and it is the ordinary one — one rational
+2-torsion point, the sign frame, the product invariant — not any of the
+larger groups.
+
+### 14.3 The 3-torsion frame at `m = 3`
+
+`y² = x³ + b` over `F₃₁³` (§13.4's curve), `GB_ENGINE=f4`, bound 24,
+300 s budget, two decomposable targets per base.
+
+| base | arm | `F_p`-unknowns / equations | total degree | terms | F4 ms (median) | solving degree | matrix | verdict |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| `{x ∈ F_p}` | `x` (Gaudry, descended `S₄`) | 3 / 3 | 12 | 125 | 19 000–35 000 | 14 | 2166 × 2512 | found (6) |
+| `{v ∈ F_p}` | `v_i³`, `Πv` under `⟨τ₃⟩` | 4 / 167 (autoreduced before the solve) | 9 | 118 | 152 000 | 12 | 5953 × 6598 | found (162) |
+
+The first attempt handed F4 the 167 descended equations as they came
+— every identity up to the relation's degree, multiples included —
+and went undetermined at 300 s on a 6065 × 6710 matrix; autoreducing
+the generating set first (`f4_fp::autoreduce`; not `interreduce`, which
+is sound only on a Gröbner-like set and silently dropped the digit
+equations sharing a leading monomial — caught by the solution count)
+brought it inside the budget but barely changed the matrix: the size
+is the system's, not the redundancy's.
+
+So at `m = 3` the 3-torsion frame **does not pay**: a lower solving
+degree (12 against 14) on a matrix two and a half times larger, and
+five to eight times the time, where the 2-torsion frame (§14.2) halves
+the degree and divides the time by thirty.  The two frames differ in
+what the tuple unknown carries — `Πu` of degree 3 in the `u_i` for the
+2-torsion frame, `Πv` of degree 8 in the relation for the 3-torsion one
+(§13.5) — and F4 pays for that degree in columns.  The `m = 2`
+advantage of the `v`-base system (§13.4) is a small-`m` result, like
+its multilinearity.
+
+### 14.4 What this changes
+
+The thread's standing summary — "a real reduction of the relation
+degree per point at every `m`, no free relations once the projection is
+accounted for, and a solve smaller by a constant the solver cannot
+rank" — loses its last clause for the 2-torsion frame: its solve is
+smaller by a factor that grows with `m`, and at `m = 3` it is measured.
+The 3-torsion frame keeps only the first clause.  The gain is still per
+solve, not per relation (§11.4), and still needs a rational 2-torsion
+point and, in Gaudry's setting, a base on which the invariants stay in
+`F_p` (§12.2).
+
+---
+
+## 15. Charts beyond the `x`-line: four point representations, classified
+
+> **Correction (§19).**  The framework here — equivariant maps to a
+> line, and the exclusion of those factoring through an isogeny — is
+> [FHJRV]'s, published in 2014.  #3 and #4's classification as changes
+> of curve restates their §2.  Read this section as a computational
+> confirmation, not a discovery.
+
+**Code:** `coordinate_quotients::{Line, Chart, descended_map,
+linearised_chart}`, `examples/exotic_charts.rs`, `examples/three_torsion.rs`.
+
+§3's lemma — a degree-2 coordinate is a Möbius frame on the `x`-line,
+and only 2-torsion translations act on that line — bounds what the
+`x`-line can carry.  The way past it is to change the line: a quotient
+of `E` by a finite group of point maps that *contains* the translation
+one wants, so that the translation descends to a Möbius map there.
+Four such lines were built, the induced Möbius map fitted on three
+points and verified on every point of the curve, linearised when its
+fixed points are rational, and run through the quotient engine
+(`p = 1009`, `m = 2`, exact collapse).
+
+| # | curve | line (degree on `E`) | map that descends | as Möbius map | frame | invariant per point | relation (degrees) | terms | collapse = `|Γ|` |
+|---|---|---|---|---|---|---|---|---:|---:|
+| 1 | `y² = x³ + b`, `q ≡ 1 mod 3` | `y` (3): quotient by `ω` | 3-torsion `τ_T` | `y ↦ √b(y − 3√b)/(y + √b)`, order 3 | `v = (y − s)/(y + s)`: `v ↦ ωv` | `V = v³ + v⁻³` | `(V₁−2)(V₂−2)(V₃−2) = (P−2)³`, `[1, 1, 1, 3]` | 10 | 54 |
+| 2 | `y² = x³ + ax`, `p ≡ 1 mod 4` | `x²` (4): quotient by `i` | 2-torsion `τ_T` (`x ↦ a/x`) | `x² ↦ a²/x²`, fixed points `±a` | sign frame on `x²`, **rational for every `a`** (on `x` only for `a` a square) | `W = ((x² − a)/(x² + a))²` | `[4, 4, 1, 4]` with `Πu` | 30 | 16 (with `i`) |
+| 3 | Tate normal form, rational `T₄` | `x′ = x(P) + x(P + T₂)` (2): `E/⟨T₂⟩` | 4-torsion `τ_{T₄}` (not Möbius on `x`) | involution `x′ ↦ c/x′` | sign frame on `x′` | `W = u′²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 32 (= 8 × 4) |
+| 4 | `y² = x³ + 1`, rational `T₆` | `x″ = x + x(P+T₃) + x(P−T₃)` (3): `E/⟨T₃⟩` (Vélu) | 2-torsion `τ_{T₂}` (with `τ_{T₃}` trivial, `ω` a scaling) | involution, and `ω: x″ ↦ ωx″` | sign frame on `x″` | `W = u″²` | `[1, 1, 1, 2]` with `Πu`, the 2-torsion shape | 9 | 72 (with `T₃`); with `ω` too `|G| = 72`, `|Γ| = 864`, collapse 892 ≈ 864, and the minimal-degree relation degenerates to a linear one among the orbit sums, as on the `x`-line in §13.2 |
+
+Two of the four are new lines in the strict sense and two are the old
+line on another curve, and the engine says which is which.
+
+- **#1 and #2 are quotients by automorphisms** (`ω` of order 3, `i` of
+  order 4), which exist only at `j = 0` and `j = 1728`.  On them a
+  translation that is invisible on `x` (3-torsion) or a frame that is
+  irrational on `x` (2-torsion with `a` a non-square) becomes a
+  rational linear map.  #1 gives a lower relation degree than the
+  `x`-line (§13.2); #2 does not — its relation has degree 4 per point
+  where Semaev's has 2 — so #2 is a representation that exists where
+  the sign frame does not, not a better one.
+- **#3 and #4 are isogeny lines**: the `x`-line of `E/⟨T⟩` pulled back
+  to `E`.  A translation by a point `Q` with `[k]Q ∈ ⟨T⟩` descends
+  because its image on `E/⟨T⟩` is torsion of lower order, and the
+  representation is exactly the 2-torsion sign frame *of the isogenous
+  curve*: #4's relation is the 9-term one of §10.1 to the coefficient,
+  with the collapse multiplied by the kernel order (72 = 8 × 9).  This is
+  the §3 lemma "translation-invariant coordinates factor through
+  isogenies" seen from the other side: the engine finds the coordinate
+  the isogeny already had.  By the §11 accounting the extra collapse is
+  the cofactor's, not a new relation, so #3 and #4 are changes of curve —
+  legitimate, sometimes convenient (a curve with rational 4- or
+  6-torsion has a 2-isogenous neighbour where the same sign frame
+  applies and may be cheaper), but not new gains.
+
+At `m = 3` the two isogeny lines give the `x`-line's own `m = 3`
+relation again — 93 terms, degrees `[4, 4, 4, 1, 3, 0, 1]` in
+`(W₁..W₄, Πu, e₂[Σu], e₄[Σu])`, total degree 6, exactly the control of
+§13.2 — with `|Γ| = 128 = 16 × 8` and `432 = 54 × 8`.  The
+classification holds at every `m` measured.
+
+What the four have in common is the recipe: pick a point map `g` that
+does not act on the `x`-line, find a quotient line on which it does
+(`descended_map` fits and verifies the Möbius map; `linearised_chart`
+frames it), and let the quotient engine measure the invariants.  Every
+line in the table was found this way, and the fits fail loudly (τ_{T₃}
+on `x`, τ_{T₄} on `x`) where the lemma says they must.
+
+---
+
+## 16. Which translations a line can carry: the closing lemma
+
+> **Correction (§19).**  "Closing lemma" overstates it.  The question
+> was already closed, more generally, by [FHJRV]'s criterion on when
+> the dihedral group embeds in `PGL₂`.  The lemma below is a
+> complementary special case, arrived at independently and without
+> knowledge of that work.
+
+**Code:** the unit test
+`a_translation_descends_to_the_quotient_by_an_automorphism_iff_its_point_is_fixed`
+in `coordinate_quotients.rs`.
+
+§15 raised the one untried representation: a `j = 0` curve with the
+full `E[3]` rational, the 3-torsion analogue of the Klein group.  It
+does not exist, and the reason classifies every line of §15 at once.
+
+**Lemma.**  Let `α` be an automorphism of `E` whose quotient `E/⟨α⟩` is
+a line (`α = −1, ω, i, −ω`).  The translation `τ_Q` descends to a
+Möbius map on that line iff `τ_Q` normalises `⟨α⟩`, i.e. iff
+`α(Q) = Q`, i.e. iff `Q ∈ E[1 − α]`.  The order of `E[1 − α]` is the
+norm of `1 − α` in the endomorphism ring:
+
+| `α` | line | `N(1 − α)` | `E[1 − α]` | translations that descend |
+|---|---|---:|---|---|
+| `−1` | `x` | 4 | `E[2]` | the Klein group (§6.4, §10.3) |
+| `ω` (`j = 0`) | `y` | 3 | `{O, ±T₃}`, `T₃ = (0, √b)` | one 3-torsion subgroup (§13) |
+| `i` (`j = 1728`) | `x²` | 2 | `{O, (0, 0)}` | one 2-torsion point (§15 #2) |
+| `−ω` (`j = 0`, order 6) | `x³` | 1 | `{O}` | none |
+
+Checked on `F₁₀₀₉`: on `y² = x³ + b` with all eight 3-torsion points
+rational (`−4b` a cube, `−3b` a square), `descended_map` on the
+`y`-line succeeds for exactly the two points fixed by `ω`; on
+`y² = x³ + ax` with full 2-torsion it succeeds on `x²` for exactly
+`(0, 0)`, while on `x` it succeeds for all three.
+
+So an automorphism quotient carries at most `N(1 − α)` torsion points,
+and the table is complete: the Klein group on `x` is the largest such
+representation, the `y`-line 3-torsion and the `x²`-line 2-torsion are
+the other two, and the order-6 quotient carries nothing.  Every other
+torsion translation reaches a line only through an isogeny (§15 #3,
+#4), which is a change of curve.  With §3's lemma on degree-2
+coordinates, §10.5's list of groups, and this, the representation
+search of this note is closed on the structural side: what remains
+open is the solver side (§14) and the Koblitz comparison the seventh
+log entry proposes.  (It was closed in the literature first; see §19.)
+
+---
+
+## 17. The Koblitz comparison at equal Macaulay degree
+
+**Code:** `PairedOptions::{f4_max_degree, chained_x}` (`--f4-degree`,
+`--no-x`), `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS`,
+`SolveStats::{max_degree_built, oversize}`, the `built` column of
+`format_paired`; `examples/symmetrised_oracle_bench.rs`.
+
+### What the engine's degree cap actually means
+
+§8 compared the `x`-chained and the symmetrised systems under the
+repo's Boolean solver as it ships: matrix-F4 up to Macaulay degree 3,
+then splitting.  Reading `reduce_system` again for this section shows
+that the cap is an **absolute** Macaulay degree, not a number of rounds
+above a system's own degree.  At every node the engine sets
+`base = max(degree of the residual system, 2)` and builds matrices at
+`base, base+1, …, max(cap, base)`, stopping early when a row becomes
+the constant `1` or forces a variable.
+
+Two consequences, both of which §8 missed.
+
+1. A cap of `d` gives the degree-3 `x`-chained system `d − 3` rounds of
+   multiplication above its own equations and the degree-4 symmetrised
+   system only `d − 4`.  **Equal caps are not equal algebra.**  Going
+   from cap 3 to cap 4 hands the `x`-chained arm a whole extra degree at
+   the root and hands the symmetrised arm nothing there.
+2. The cap never *lowers* the first matrix: `max(cap, base)` means the
+   symmetrised system's degree-4 matrix gets built even at cap 3.  So
+   §8's setting did not starve the symmetrised arm at the root, as a
+   first reading of the cap suggests.  What it starved were the deeper
+   nodes, where propagation has already pulled the residual system down
+   to degree 3 and a cap of 4 buys a round there.  That is why raising
+   the cap moves the symmetrised arm's split count at all.
+
+The `built` column added here reports the highest degree at which a
+matrix was actually built, and flags targets where a matrix was refused
+for exceeding the size caps — so the table below states measured
+algebra rather than a flag value.  It immediately settles one thing the
+first draft of this section could only infer: at cap 5 on `K₀/F₂¹⁵` the
+`x`-chained arm reports `built = 4` with a refusal, while the
+symmetrised arm reports `built = 5`.  **The symmetrised system fits a
+degree-5 Macaulay matrix where the `x`-chained one does not**, at caps
+of 60 000 rows and 300 000 columns — three and seven and a half times
+the shipped ones.
+
+### The rerun
+
+Both arms, Macaulay caps 3, 4 and 5, size caps raised to 60 000 rows
+and 300 000 columns, four decomposable-or-refuted targets per instance
+(three at `n = 23`), no SAT.  "Effort" is splits.  Cells marked
+sym-only were run with `--no-x`: at a raised cap the `x`-chained arm
+costs hours on the larger fields and its trend is already fixed by the
+`n = 15` rows.
+
+| instance | arm | vars | own deg | cap 3: ms / splits | cap 4: ms / splits | cap 5: ms / splits |
+|---|---|---:|---:|---|---|---|
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 30 | 3 | 9 071 / 787 | 348 459 / 31 | 357 960 / 31 (built 4: the degree-5 matrix was refused) |
+| | symmetrised | 13 | 4 | 26 / 237 | 30 / 16 | 75 / 15 |
+| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 30 | 3 | 5 795 / 502 | 217 128 / 24 | 232 031 / 24 |
+| | symmetrised | 13 | 4 | 6 found, 26 refuted / 29 | 9, 29 / 8 | 35, 63 / 6 |
+| `K₁/F₂¹⁷` (all found) | `x`-chained | 44 | 3 | 3 963 / 49 | – | – |
+| | symmetrised | 25 | 4 | 5 537 / 3 219 | 20 269 / 3 176 | 994 608 / 405 |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | 59 | 3 | 0/3, budget / 907 | – | – |
+| | symmetrised | 34 | 4 | 5 664 (2 of 3) / 135 | 45 633 (2 of 3) / 15 | not run (see below) |
+
+The one cell left empty is `K₁/F₂²³` symmetrised at cap 5.  It was
+given three hours and produced no target in that time, so it was
+stopped rather than left running; the run is reproducible with
+
+```bash
+F4_F2_MAX_ROWS=60000 F4_F2_MAX_COLS=300000 \
+  cargo run --release --example symmetrised_oracle_bench -- \
+  --only 1 23 3 --no-sat --no-direct --no-x --targets 3 \
+  --node-budget 3000 --f4-degree 5
+```
+
+for anyone with more machine to spend.  That it does not finish is
+itself consistent with the reading below: 34 unknowns is past the size
+at which another Macaulay degree is affordable, as `n = 17` already
+showed at 25.  Nothing in the reading rests on the cell.
+
+### Reading
+
+**The cap buys splits and pays in time, and the exchange rate is set by
+the number of unknowns.**  Every arm at every instance loses split count
+as the cap rises and gains wall time.  What differs is the rate.  On the
+30-variable `x`-chained system at `K₀/F₂¹⁵`, cap 3 → 4 divides the
+splits by 25 and multiplies the time by 38.  On the 13-variable
+symmetrised system at the same instance it divides the splits by 15 and
+multiplies the time by 1.15.  At `n = 17`, where the symmetrised system
+has 25 variables, cap 4 → 5 divides its splits by 8 and multiplies its
+time by 49 — the symmetrised system at 25 variables behaves like the
+`x`-chained system at 30, not like itself at 13.  **The variable count,
+not the coordinate frame, is what decides whether extra Macaulay degree
+is affordable.**
+
+**Equal caps favour the `x`-chained arm, and comparing along the
+diagonal is the fair reading.**  Because the cap is absolute, the
+comparable pairs are (`x`-chained at cap `d`, symmetrised at cap
+`d + 1`): each arm then gets the same number of rounds above its own
+equations.  Along that diagonal:
+
+| instance | `x` at cap 3 vs sym at cap 4 | `x` at cap 4 vs sym at cap 5 |
+|---|---|---|
+| `K₀/F₂¹⁵` | 9 071 vs 30 ms — **×300** | 348 459 vs 75 ms — **×4 600** |
+| `K₁/F₂¹⁵` | 5 795 vs 9 ms — **×640** | 217 128 vs 35 ms — **×6 200** |
+| `K₁/F₂¹⁷` | 3 963 vs 20 269 ms — **×0.2** | not run vs 994 608 ms |
+
+**§8's `n = 17` verdict survives the correction; its explanation does
+not.**  §8 attributed the loss there to the symmetrised system being
+the one that outgrew the engine — "the better F4 instance only while
+its degree-4 Macaulay matrix fits".  The `built` column says the
+opposite happens at the raised caps: on `K₀/F₂¹⁵` at cap 5 it is the
+30-variable `x`-chained system whose matrix is refused (`built = 4`
+with a refusal flag) while the 13-variable symmetrised one builds
+degree 5.  The symmetrised system is the *smaller* Macaulay problem at
+equal degree, as its variable count implies.  What sinks it at
+`n = 17` is not matrix size but split count: 3 219 against 49 at cap 3,
+and still 405 against 49 after a cap rise that costs it a factor of 180
+in time.  The dimension-9 subspace there gives every target on the
+order of a hundred decompositions, and the symmetrised system pays for
+each of them in search; the `x`-chained system's extra 19 unknowns buy
+it a shape the splitter closes in fifty decisions.
+
+**At `n = 23` the symmetrised system is the only arm that answers.**
+Under a 3 000-split budget the 59-variable `x`-chained system is
+inconclusive on all three targets at cap 3, having spent 907 splits;
+the symmetrised system finds two of three in 5.7 s.  Raising its cap to
+4 cuts its splits from 135 to 15 and costs it a factor of 8 in time,
+and it still answers two of three.  Nothing about the equal-degree
+rerun changes the `n = 23` row, which is the row that matters for the
+scaling target.
+
+**What this says about the coordinate change.**  The 2-torsion frame's
+gain on the Koblitz side is a gain in *system size* — 34 unknowns
+against 59 at `n = 23`, 13 against 30 at `n = 15` — and size is what
+makes algebra affordable: the symmetrised system can be given another
+Macaulay degree for a factor of 1.15 where the `x`-chained system pays
+38.  It is not a gain in search behaviour, and where search dominates
+(`n = 17`, every target decomposable many times over) the larger system
+wins.  That is the same conclusion §14 reached over `F_p` by a
+different route — the frame halves the relation's degree per point, and
+what that buys is a solve whose matrices stay small — with the Koblitz
+caveat that a small system is not automatically a small search.
+
+### What this section does not settle
+
+The split heuristic is the repo's own (lowest free variable), and the
+`n = 17` result is a statement about that heuristic as much as about
+the systems.  A solver that chose its splitting variable by the
+symmetrised system's structure — the orbit an unknown belongs to —
+might not spend 3 219 decisions where the `x`-chained system spends 49.
+That is the next thing worth building on this side.
+
+## 18. The splitting rule, and what it does to §17's one loss
+
+**Code:** `koblitz_groebner::{SplitRule, choose_split, split_rule_default}`,
+`SolveOptions::split_rule`, `SOLVER_SPLIT_RULE`.
+
+§17 ended by naming the splitter as the next thing to build: what sinks
+the symmetrised system at `n = 17` is split count, not matrix size, and
+the solver has always branched on the lowest free variable.  On the
+descent systems the variable index runs point by point — block `i` of
+the symmetrised system is `i·(ℓ−1) … (i+1)(ℓ−1)−1`, with the
+trace-correction bit `ε` last — so that rule fixes one summand's bits
+completely before touching the next, and touches `ε` only at the end.
+
+Three rules are now selectable.  `LowestFree` is the historical one and
+stays the default, so every earlier measurement keeps its meaning.
+`MostFrequent` takes the free variable occurring in the most monomials
+of the current system, the one whose substitution removes the most
+terms.  `MinTermWeight` weights each occurrence by `2^{1−d}` for a
+degree-`d` monomial, so a variable in short monomials outranks one
+buried in long products — short monomials are nearer to forcing an
+assignment, so it trades bulk term removal for propagation.  Both read
+the system; neither knows anything about the layout.
+
+### Method
+
+Splits are exact and reproduce to the unit between runs; milliseconds
+move with machine load.  Read the split column as the measurement and
+the time column as its consequence.  The `n = 17` row below was
+re-measured on an idle machine: the split counts came back identical
+and the times within 5%.
+
+All cells: Macaulay cap 3, size caps 60 000 × 300 000, four targets
+(three at `n = 23`), no SAT, medians per verdict.  Every gate passed in
+all twenty runs — no rule changed an answer, as the unit test requires.
+
+| instance | arm | `LowestFree` ms / splits | `MostFrequent` | `MinTermWeight` |
+|---|---|---|---|---|
+| `K₀/F₂¹⁵` (all refuted) | `x`-chained | 7 815 / 787 | 2 742 / 418 | **1 379 / 52** |
+| | symmetrised | **22 / 237** | 28 / 298 | 37 / 342 |
+| `K₁/F₂¹⁵` (3 found, 1 refuted) | `x`-chained | 4 991 / 502 | **1 671 / 156** | 9 282 / 198 |
+| | symmetrised | 5.9, 21 / **29** | **4.6**, 25 / 74 | 6.0, 31 / 79 |
+| `K₁/F₂¹⁷` (all found) | `x`-chained | **2 746 / 49** | 8 601 / 221 | 6 714 / 213 |
+| | symmetrised | 4 860 / 3 219 | **1 266 / 756** | 8 259 / 6 583 |
+| `K₁/F₂²³` (3 targets, 3 000 splits) | `x`-chained | budget / **907** | budget / 1 308 | budget / 1 361 |
+| | symmetrised | 5 664 (2 of 3) / **135** | **4 872** (2 of 3) / 220 | 5 704 (2 of 3) / 310 |
+
+### Reading
+
+**§17's one loss is a property of the splitting rule, not of the two
+systems.**  At `n = 17` under `LowestFree` the symmetrised system takes
+4 860 ms against the `x`-chained system's 2 746 — the ×1.6 loss §8
+recorded and §17 confirmed.  Under `MostFrequent`, the rule a solver
+would ship for *both* arms, it takes 1 266 ms against 8 601: a ×6.8
+win.  Nothing about either system changed.  The instance that has stood
+since §8 as the exception to the symmetrised system's advantage is an
+exception only under one particular way of choosing a branch variable.
+
+**But not because the symmetrised system searches less.**  In splits it
+still loses at `n = 17` under the same rule, 756 against 221.  It wins
+on time because each of its splits is far cheaper: 25 unknowns against
+44, which is §17's size advantage paying out through a second channel.
+The two sections agree — size is what the 2-torsion frame buys — and
+§18 adds that the saving reaches the wall clock only once the splitter
+stops wasting the search.
+
+**No rule dominates, and the spread is large.**  `MinTermWeight` is the
+best rule measured anywhere — it refutes on `K₀/F₂¹⁵`'s `x`-chained
+system in 52 splits against `LowestFree`'s 787, a factor of 15 — and
+also the worst for the symmetrised system at every instance.
+`MostFrequent` roughly halves or thirds the `x`-chained system's splits
+at `n = 15` and multiplies them by 4.5 at `n = 17`.  A rule that reads
+the current system does well where there is search to prune and costs
+overhead where there is not; which case an instance is in is not
+predictable from its coordinate frame.
+
+**The other rows are unchanged.**  At `n = 15` the symmetrised system
+still wins by two to three orders of magnitude under every rule, and
+its own best rule is still the default.  At `n = 23` the `x`-chained
+system is inconclusive on all three targets under all three rules, the
+symmetrised system answers two of three under all three, and the
+default remains its cheapest in splits.  Only `n = 17` moves.
+
+### What this section does not settle
+
+These rules are static scores recomputed per node from the current
+system.  The orbit-aware rule §17 actually proposed — branch by the
+Frobenius orbit an unknown belongs to — is still untried; frequency is
+a proxy that happens to find something useful at `n = 17`, and whether
+the orbit structure would do better, or would explain *why*
+`MostFrequent` helps there, is open.  Everything here is at Macaulay
+cap 3; the interaction between the cap and the rule is unmeasured, and
+§17 showed the cap is worth orders of magnitude on its own.
+
+## 19. Prior art: what this note rediscovered
+
+The header of this note names the three papers the search "must at
+least rediscover", and that framing was right.  What drifted is the
+later sections: §15 and §16 read as original classification, and the
+summaries given outside the note drifted further, to the point of
+claiming new point representations.  This section is the line-by-line
+check that should have been run before those claims were made.  The
+measurements stand.  The discovery framing does not, and is corrected
+here rather than in place, so the record of what was believed when
+remains readable.
+
+### The two papers that contain most of it
+
+**[FHJRV]** J.-C. Faugère, L. Huot, A. Joux, G. Renault, V. Vitse,
+*Symmetrized Summation Polynomials: Using Small Order Torsion Points to
+Speed Up Elliptic Curve Index Calculus*, EUROCRYPT 2014, LNCS 8441,
+40–57.  Open copy: `inria.hal.science/hal-00935050`.
+
+**[FGHR]** J.-C. Faugère, P. Gaudry, L. Huot, G. Renault, *Using
+Symmetries in the Index Calculus for Elliptic Curves Discrete
+Logarithm*, J. Cryptology 27(4):595–635, 2014.
+
+The correspondence is close enough to be stated line by line.
+
+| this note | prior art |
+|---|---|
+| §3: every degree-2 coordinate is a Möbius frame on the `x`-line | [FHJRV] Lemma 6 and Remark 9: *every* degree-2 morphism `φ` satisfies `φ(P + T) = f_T(φ(P))` for a homography `f_T` |
+| §1, §6: the linearising frames `t ↦ −t` in odd characteristic and `t ↦ t + 1` in characteristic 2 | [FHJRV] Proposition 8, which shows `f_T` may be taken as exactly these two normal forms |
+| §1, §6: a rational 2-torsion point halves the degree per variable | [FHJRV] and [FGHR]; this is the papers' subject |
+| §6: the characteristic-2 Artin–Schreier symmetrised `S₃` | [FHJRV] §5.1, `P_{φ,3} = s₃ + Ls₂ + L²(e₁² + e₁) + L³ + γ(e₁ + λ)²` with `L = λ² + λ`, on `y² + xy = x³ + ax² + b` with `φ(P) = γx(P) + γ + λ`, `γ⁴ = b`.  Koblitz curves are the case `b = 1`, `γ = 1`, and the note's `u = 1/(x + 1)` is a Möbius re-normalisation of that `φ` |
+| §10: closing translations and `[−1]` into a group and taking orbit invariants | [FGHR], groups of order `2^{m−1} m!` and `4^{m−1} m!` from `P ↦ −P` and `P ↦ P + T` with `T` of order 2 or 4 |
+| §10.3, §6.4: joint invariants of the full `E[2]` | [FHJRV] §4.2, the reflexion group `(Z/2Z × Z/2Z)^{n−1} ⋊ S_n`, with the factor base divided by 8 |
+| §15 #3, #4: the isogeny lines are a change of curve, not a gain | [FHJRV] §2, which proves the decomposition attack on `E` through a `φ` factoring as `φ' ∘ ψ` is *equivalent* to the attack on `E'` through `φ'`, and excludes such morphisms for that reason |
+| §16: which translations an automorphism quotient carries | The same phenomenon, from the other side.  [FHJRV] ask when an equivariant `φ` exists for a given translation and answer with a group-theoretic criterion: the dihedral group `D_m` embeds in `PGL₂(F_q)` only when `m` divides `q − 1` or `q + 1`, or `m = char`.  §16 fixes the four automorphism quotients instead and asks which translations descend.  The two are complementary rather than identical, but §16 is not the closing of an open question — the question was closed more generally, and earlier |
+
+Two further attributions the note never made:
+
+- The **chained system** the note calls the production path, with
+  intermediate points `T_i` linking copies of `S₃`, is the "splitting
+  trick" or "unrolling the resultant", found independently by several
+  groups around 2015: Huang–Kosters–Yeo (CRYPTO 2015),
+  Huang–Petit–Shinohara–Takagi (ePrint 2015/358), Karabina (ePrint
+  2015/319), Semaev (ePrint 2015/310).
+- The **`MinTermWeight` split rule** of §18 is the MOM heuristic from
+  the DPLL literature, not a new idea; only its measurement on these
+  systems is.
+
+### What is left, and it is thin
+
+[FHJRV] set up arbitrary torsion order `m` and then instantiate only
+`m = 2`, "the most important case in practice".  Their text contains no
+3-torsion example, no `j = 0` or `j = 1728` case, and no root of unity.
+So §13's `y`-line chart on `j = 0` and §15 #2's `x²`-line on
+`j = 1728` are instantiations of their framework at cases they set up
+and did not work out.  Vanessa Vitse gave a talk at DLP 2014, Ascona —
+*Summation polynomials and symmetries for the ECDLP over extension
+fields* — described in the Galbraith–Gaudry survey as "a more
+systematic study of which subgroups could be used"; it may well cover
+both.  It is cited there as a talk, and no manuscript was found.
+
+Both instantiations are in any case negative results in this note's own
+measurements: §14.3 shows the 3-torsion frame does not pay at `m = 3`,
+and §15 shows the `x²`-line's relation has degree 4 per point where
+Semaev's has 2.
+
+### The comparison this note never made
+
+Galbraith and Gebregiyorgis, *Summation Polynomial Algorithms for
+Elliptic Curves in Characteristic Two*, INDOCRYPT 2014 (ePrint
+2014/806), studied this exact setting — `F_{2^n}` with `n` prime,
+symmetry-breaking factor bases, SAT against Gröbner — and concluded
+that **Pollard rho remains much faster than index calculus** for these
+curves at any reasonable size.
+
+Every comparison in §8, §14, §17 and §18 is between two index-calculus
+coordinate systems.  None of them is against rho.  The wins are real
+and reproducible, and they are wins inside a family already shown to be
+uncompetitive with the method an attacker would actually use.  A
+factor of 6.8 at `n = 17` does not change that, and the note should not
+be read as if it might.
+
+### What this does not retract
+
+The measurements, the engine and the corrections stand: the quotient
+engine reproduces [FGHR]'s and [FHJRV]'s invariants from a group and a
+seed without being told the answer, which is a check on both; §17's
+finding that the Macaulay cap is absolute and that the symmetrised
+system is the *smaller* Macaulay problem is about this repository's
+solver and is not in the literature; and §18's split-rule measurement
+is new as a measurement.  What is retracted is the claim of having
+found new point representations.  The search rediscovered a known
+classification and confirmed it computationally.

@@ -1,0 +1,11 @@
+{
+  "schema": "degree_reduction_symmetrise/v1",
+  "experiment": "EXP-R2",
+  "seed": 7,
+  "generated_at": 1789206070,
+  "omega": 2.807,
+  "budget_word_ops": 60000000000,
+  "crossover_l": 6,
+  "widths": [{"l":2,"sym_vars":15,"elim_vars":6,"cols_sym_3":576,"cols_elim_6":64},{"l":3,"sym_vars":24,"elim_vars":9,"cols_sym_3":2325,"cols_elim_6":466},{"l":4,"sym_vars":33,"elim_vars":12,"cols_sym_3":6018,"cols_elim_6":2510},{"l":5,"sym_vars":42,"elim_vars":15,"cols_sym_3":12384,"cols_elim_6":9949},{"l":6,"sym_vars":51,"elim_vars":18,"cols_sym_3":22152,"cols_elim_6":31180},{"l":7,"sym_vars":60,"elim_vars":21,"cols_sym_3":36051,"cols_elim_6":82160},{"l":8,"sym_vars":69,"elim_vars":24,"cols_sym_3":54810,"cols_elim_6":190051},{"l":9,"sym_vars":78,"elim_vars":27,"cols_sym_3":79158,"cols_elim_6":397594},{"l":10,"sym_vars":87,"elim_vars":30,"cols_sym_3":109824,"cols_elim_6":768212},{"l":11,"sym_vars":96,"elim_vars":33,"cols_sym_3":147537,"cols_elim_6":1391842},{"l":12,"sym_vars":105,"elim_vars":36,"cols_sym_3":193026,"cols_elim_6":2391496}],
+  "cells": [{"n":6,"l":2,"sym_vars":15,"sym_eqs":15,"sym_deg":3,"elim_vars":6,"elim_eqs":6,"elim_deg":6,"sym_dstar":4,"elim_dstar":null,"sym_censored_at":null,"elim_censored_at":null,"elim_degenerate":true},{"n":6,"l":3,"sym_vars":24,"sym_eqs":21,"sym_deg":3,"elim_vars":9,"elim_eqs":6,"elim_deg":6,"sym_dstar":null,"elim_dstar":9,"sym_censored_at":5,"elim_censored_at":null,"elim_degenerate":false},{"n":8,"l":2,"sym_vars":15,"sym_eqs":17,"sym_deg":3,"elim_vars":6,"elim_eqs":8,"elim_deg":6,"sym_dstar":4,"elim_dstar":6,"sym_censored_at":null,"elim_censored_at":null,"elim_degenerate":true},{"n":8,"l":3,"sym_vars":24,"sym_eqs":23,"sym_deg":3,"elim_vars":9,"elim_eqs":8,"elim_deg":6,"sym_dstar":null,"elim_dstar":9,"sym_censored_at":5,"elim_censored_at":null,"elim_degenerate":false},{"n":10,"l":2,"sym_vars":15,"sym_eqs":19,"sym_deg":3,"elim_vars":6,"elim_eqs":10,"elim_deg":6,"sym_dstar":4,"elim_dstar":6,"sym_censored_at":null,"elim_censored_at":null,"elim_degenerate":true},{"n":10,"l":3,"sym_vars":24,"sym_eqs":25,"sym_deg":3,"elim_vars":9,"elim_eqs":10,"elim_deg":6,"sym_dstar":null,"elim_dstar":8,"sym_censored_at":5,"elim_censored_at":null,"elim_degenerate":false}]
+}

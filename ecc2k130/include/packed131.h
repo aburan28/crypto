@@ -2,6 +2,33 @@
 // Each element occupies five uint32_t words. Squaring is a bit permutation;
 // multiplication uses gamma_i*gamma_j = gamma_(i+j) + gamma_(i-j).
 #pragma once
+#ifndef ECC_PACKED_WEIGHTED_PREFIX
+#define ECC_PACKED_WEIGHTED_PREFIX 0
+#endif
+#if ECC_PACKED_WEIGHTED_PREFIX < 0 || ECC_PACKED_WEIGHTED_PREFIX > 2
+#error "ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2"
+#endif
+#ifndef ECC_PACKED_SHARED_SIGMA
+#define ECC_PACKED_SHARED_SIGMA 0
+#endif
+#if ECC_PACKED_SHARED_SIGMA != 0 && ECC_PACKED_SHARED_SIGMA != 1
+#error "ECC_PACKED_SHARED_SIGMA must be 0 or 1"
+#endif
+#if ECC_PACKED_SHARED_SIGMA && ECC_PACKED_WEIGHTED_PREFIX != 2
+#error "ECC_PACKED_SHARED_SIGMA requires weighted-prefix mode 2"
+#endif
+#ifndef ECC_PACKED_CLMAD
+#define ECC_PACKED_CLMAD 0
+#endif
+#if ECC_PACKED_CLMAD != 0 && ECC_PACKED_CLMAD != 1
+#error "ECC_PACKED_CLMAD must be 0 or 1"
+#endif
+#if ECC_PACKED_CLMAD && defined(__CUDACC__) && (__CUDACC_VER_MAJOR__ < 13 || (__CUDACC_VER_MAJOR__ == 13 && __CUDACC_VER_MINOR__ < 3))
+#error "ECC_PACKED_CLMAD requires CUDA 13.3 or newer (PTX 9.3)"
+#endif
+#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
+#error "ECC_PACKED_CLMAD requires sm_80 or newer"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
 #ifndef ECC_PACKED_ADD_COMBINE
@@ -61,8 +88,18 @@ ECC_HD uint32_t clmul32(uint32_t x, uint32_t y, uint32_t *hi) {
 #endif
 }
 
-/* 2 x 2 words -> 4 words, Karatsuba (3 clmul32 instead of 4). */
+/* 2 x 2 words -> 4 words. The software path uses three clmul32 leaves;
+   CLMAD retains both halves of the native 64-bit carryless product. */
 ECC_HD void clmul64(uint32_t r[4], const uint32_t a[2], const uint32_t b[2]) {
+#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+    const uint64_t aa = uint64_t(a[0]) | (uint64_t(a[1]) << 32);
+    const uint64_t bb = uint64_t(b[0]) | (uint64_t(b[1]) << 32);
+    uint64_t lo, hi;
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(lo) : "l"(aa), "l"(bb));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(hi) : "l"(aa), "l"(bb));
+    r[0] = uint32_t(lo); r[1] = uint32_t(lo >> 32);
+    r[2] = uint32_t(hi); r[3] = uint32_t(hi >> 32);
+#else
     uint32_t lo0, hi0, lo1, hi1, lom, him;
     lo0 = clmul32(a[0], b[0], &hi0);
     lo1 = clmul32(a[1], b[1], &hi1);
@@ -74,6 +111,7 @@ ECC_HD void clmul64(uint32_t r[4], const uint32_t a[2], const uint32_t b[2]) {
     r[1] = hi0 ^ lom;
     r[2] = lo1 ^ him;
     r[3] = hi1;
+#endif
 }
 
 /* 4 x 4 words -> 8 words, Karatsuba again: 3 clmul64 = 9 clmul32. */
@@ -147,21 +185,43 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #else
 #include "packedpolyreduce131.h"
 #endif
+#ifndef ECC_PACKED_GENERATED_PRODUCT
+#define ECC_PACKED_GENERATED_PRODUCT 0
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT != 0 && ECC_PACKED_GENERATED_PRODUCT != 1
+#error "ECC_PACKED_GENERATED_PRODUCT must be 0 or 1"
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_DIRECT_REDUCE
+#error "ECC_PACKED_GENERATED_PRODUCT requires ECC_PACKED_DIRECT_REDUCE"
+#endif
+#if ECC_PACKED_GENERATED_PRODUCT
+#include "packedgeneratedproduct131.h"
+#endif
 ECC_HD P131 fromPolynomial131(const P131 &a) {
     const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
     return fromPolynomialProduct131(h);
 }
 static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+// Native carryless products supersede the generated software multiplier.
+#if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
+    return generatedProduct131(a,b);
+#else
     uint32_t h[9]; product131(a,b,h);
     return reducePolynomial131(h);
+#endif
 }
 struct PolynomialPair { P131 first,second; };
 static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+#if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
+    P131 first=generatedProduct131(a,b);
+    return PolynomialPair{first,generatedProduct131(a,c)};
+#else
     uint32_t h[9];
     product131(a,b,h);
     P131 first=reducePolynomial131(h);
     product131(a,c,h);
     return PolynomialPair{first,reducePolynomial131(h)};
+#endif
 }
 #ifndef ECC_PACKED_SINGLE_PRODUCT
 #define ECC_PACKED_SINGLE_PRODUCT 0
@@ -242,6 +302,9 @@ ECC_HD P131 sqr131(const P131 &a){
 #endif
 #if ECC_PACKED_PERM_SIGMA < 0 || ECC_PACKED_PERM_SIGMA > 3
 #error "ECC_PACKED_PERM_SIGMA must be a bit mask from 0 to 3"
+#endif
+#if ECC_PACKED_SHARED_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
+#error "ECC_PACKED_SHARED_SIGMA requires the walk permutation network"
 #endif
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"

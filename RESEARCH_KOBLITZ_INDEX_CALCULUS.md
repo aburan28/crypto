@@ -572,6 +572,107 @@ logarithm / descent stage a full pipeline needs.  Tested by
 against brute-forced logs) and `ic`'s
 `factor_base_logarithm_database_precomputes_then_descends`.
 
+## The resumable workflow driver — 2026-09-11
+
+**Tool:** `ic workflow --params wf.json --dir runs/…` (`src/bin/ic/workflow.rs`).
+**Docs:** `docs/ic/README.md`.
+
+The stages above now run as a number-field-sieve-style workflow: a
+parameter file names the curve, the factor-base source (an explicit
+recipe or the census search), the oracle and the targets; the driver
+executes **select → logs → solve** with every output on disk in a run
+directory and a `state.json` manifest carrying the parameter digest and
+each stage's status.  A rerun reloads existing artifacts, re-verifies
+them against the reconstructed curve — a stale or tampered
+`logs.json` is an error, never trusted — and continues from the first
+incomplete stage; the solve stage rewrites `solutions.json` after each
+target, so an interrupted batch resumes at the first unsolved one.  A
+parameter file whose digest differs is refused, so one directory never
+mixes two experiments.  `individual_log_with_pair_table` lets the batch
+build the `|F|²` pair table once instead of once per target.
+
+Exercised end to end on `K_0/2^9` (stop after select, resume through
+logs, finish solve, full reuse, tamper rejection, digest refusal) and on
+`K_1/2^15` with `mode: search`, where the census picked the same
+30-point one-column pruned union as the interactive search and all five
+targets descended in one relation each; the interactive `ic` tests cover
+the stage-by-stage resume.
+
+## Relation filtering and block Wiedemann — 2026-09-11
+
+**Module:** `koblitz_sparse_la` (`filter_relations`,
+`block_wiedemann_kernel`, `solve_sparse_system`).
+**Wiring:** `KoblitzIcOptions::linear_algebra`, `ic logs
+--linear-algebra sparse|dense --block-size`, the workflow's
+`linear_algebra` block.  **Docs:** `docs/ic/README.md`.
+
+The precompute solved its relation matrix by dense big-integer
+elimination, re-run on the whole matrix after every new relation.  Each
+relation has at most `m` nonzero entries, so the matrix is as sparse as
+a sieve matrix, and the stages a number-field-sieve driver puts between
+relation collection and the logarithm solve now exist for the ECDLP
+pipeline:
+
+- **Filtering** (`filter_relations`), in CADO's order: duplicate rows
+  out; singleton columns eliminated with their row and recovered by
+  back-substitution; excess rows removed down to a target excess by the
+  clique rule (rows are joined by weight-2 columns with union–find, the
+  heaviest row of the largest component goes first, and each removal
+  cascades through the singletons it creates); light columns merged by
+  structured Gaussian elimination under a fill-in bound.  Every
+  elimination is kept as `(pivot row, column)`; reconstruction runs the
+  stack backwards, then propagates through the *original* rows while
+  some row has one unknown, then solves whatever is left densely — so
+  the sparse path determines exactly the columns the original system
+  determines (`filtering_preserves_the_solution_and_reconstructs_every_column`
+  checks determinacy against an independent rank computation on random
+  systems).
+- **Block Wiedemann** (`block_wiedemann_kernel`).  The core is made
+  square by folding its excess rows into random earlier rows with random
+  coefficients, homogenised to `M (x, 1)ᵀ = 0` (never materialised: the
+  operator applies `A` and subtracts `t·b`), and a kernel vector is
+  found from the `m × n` Krylov blocks `X Mⁱ Y`.  The matrix
+  Berlekamp–Massey step is the iterative shifted minimal approximant
+  basis of `[a(λ) | I_m]` with shift `(0ⁿ, 1ᵐ)`: every basis column
+  `[f; g]` has `a·f + g ≡ 0 (mod λ^L)` with `deg g ≤ δ − 1`, which is
+  exactly the block recurrence `Σ_k S_{s−k} f_k = 0` for `δ ≤ s < L`.
+  Two details that the tests forced:  (i) Horner runs from the top
+  power (`f_0` multiplies `M^e`), and (ii) `Y = M·Z` for random `Z`
+  (Coppersmith) — with random `Y` the vector identities
+  `Σ_k M^{δ−k} Y f_k = 0` are exact in the block case and yield
+  nothing, while evaluating the same generator on `Z` gives a vector
+  `M` kills within `δ − e + 1` steps.  Sparse matrix-times-block
+  products run in parallel over rows; `u64` arithmetic throughout
+  (`r < 2^63`).
+- **Safety.**  The solve is skipped until every column occurs in some
+  row (a cheap test the dense path never made — it eliminated the full
+  matrix to discover the deficiency), a failed Wiedemann run is retried
+  with a fresh fold, the solution is checked against every relation,
+  and the table is still certified in the group.  The two paths certify
+  identical databases (`sparse_and_dense_linear_algebra_certify_the_same_log_table`
+  on `K_0/2^9` and `K_1/2^11`; `ic`'s
+  `factor_base_logarithm_database_precomputes_then_descends` compares
+  the written files).
+
+Measured:
+
+| system | filter | core | block Wiedemann | solve |
+|:-------|:-------|:-----|:----------------|------:|
+| `K_0/2^31`, 35 columns, 74 relations (`ic logs`, sparse) | 4 singletons, 7 excess rows, 20 merged | 11 × 11, 158 nonzeros | 4×4, 14 Krylov terms, 17 products | 0.4 ms for all 40 attempts (dense: 22 ms) |
+| synthetic, 3 000 columns, 18 000 rows of weight 3 (unit test) | 1 411 singletons, 14 968 excess rows, 1 273 merged | 316 × 316, 4 644 nonzeros | 4×4, 168 terms, 248 products | 48 ms |
+
+At 35 columns the linear algebra was never the cost (the run is the
+`|F|²` pair table, 16 s either way), so the point of the measurement is
+that the sparse path is exact and no slower; the second row is the
+regime it is for.  The dense reference is `O(rows · cols²)` big-integer
+operations per attempt and keeps the full `rows × cols` `BigUint`
+matrix in memory, which is what stopped the precompute from being run
+on bases with thousands of columns; the sparse path keeps `≤ m`
+entries per relation and costs one Krylov sequence.  The matrix
+Berlekamp–Massey step is the quadratic iterative one (`O(L² m² (n+m))`),
+fine to `10^4`–`10^5` columns; Thomé's subquadratic variant is the next
+step if the base sizes get there.
+
 ## Open problems from the talk (unimplemented)
 
 - Couveignes–Lercier invariant factor bases via isogenies between
@@ -651,3 +752,447 @@ In `koblitz_groebner`:
   (F4)*, J. Pure Appl. Algebra 139 (1999).
 - G. Bard, *Algebraic Cryptanalysis*, Springer 2009, ch. 13 — the
   Boolean-ring representation.
+
+## Distributed relation collection — 2026-09-11
+
+**Modules:** `koblitz_index_calculus::{RelationCollector, RelationWorkUnit,
+CollectedRelation, probe_scalar, verify_collected_relation,
+solve_factor_base_logs_from_relations}`.
+**Tool:** `ic workflow --collect-units …` (worker), `ic workflow` (driver).
+**Docs:** `docs/ic/README.md`.
+
+Relation collection is the embarrassingly parallel half of the pipeline,
+and a number-field-sieve run splits it into work units that clients
+sieve independently and a server merges.  The workflow now has the same
+shape.  The probe scalar of trial `t` is a function of the parameter
+seed and `t` alone (a generator keyed by the pair), so the probe
+sequence is one fixed sequence and a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it.  `RelationCollector`
+builds the decomposition state once per process (index map, field
+structure, the `|F|²` pair table) and runs the trials of a unit in
+parallel over the cores, returning the relations in trial order; the
+single-process precompute `solve_factor_base_logs` draws its probes from
+the same sequence in parallel batches of 64, so a local run and a
+distributed one see identical relations (pinned by
+`work_units_partition_the_probe_sequence_exactly`: the union of any
+partition of a range, in any order, equals the whole range).
+
+A worker (`ic workflow --params … --dir … --collect-units 4-7`) writes
+`relations/unit-NNNNN.json` per unit and stops.  A relation file carries
+only the probe scalar and the factor-base point indices of each
+relation, bound to the parameter digest, curve, base recipe and summand
+count.  The driver merges every valid unit present, **re-verifies each
+relation in the group** (`[a]G == Σ P_i`, exactly `m` indices in range)
+and drops exact duplicates before the linear algebra, so a corrupt or
+forged file costs a rejected relation and nothing else, and a file from
+another run or base is ignored rather than merged.  If the accepted
+relations do not determine every column, the driver collects further
+units itself up to `collection.max_units`, solving again after each,
+and otherwise fails closed with the counts.  The workflow test runs a
+worker for one unit, forges a relation in its file, drops in a file
+from another digest, lets the driver fill the missing unit, and checks
+that the forgery is the one rejected relation, the foreign file the one
+ignored unit, and the three targets still descend; the library test
+solves the same database from two out-of-order units with a duplicate
+and a forgery mixed in and compares it column for column with the
+single-process table.
+
+Measured on `K_0/2^31` over the search-selected 35-column base
+(`m = 3`, `unit_trials = 64`): two workers run concurrently on the same
+four cores collected units 0 and 1 in 23 s each (each builds its own
+`|F|²` pair table, which is the whole cost; the 64 probes are
+milliseconds), then the driver merged 78 relations from the two units,
+re-verified them, filtered the 78 × 35 system to a 13-column core, ran
+block Wiedemann and certified all 35 logarithms in 0.7 s for the logs
+stage, and descended three targets in two relations each — 13.8 s
+wall for the driver, again dominated by its pair table.
+
+This is the stage that makes the pipeline's collection cost scale with
+machines rather than cores: every unit is independent, the merge is one
+scalar multiplication per relation, and the linear algebra of the
+previous entry is what turns the merged relations into the database.
+
+## Beyond Koblitz: subfield curves `E/GF(2^k)` over `GF(2^{ke})` — 2026-09-11
+
+**Modules:** `koblitz_index_calculus::{KoblitzCurve::subfield, invariant_factors,
+top_factor_indices, subspace_basis_for_factors, q_linearised_kernel_basis,
+subfield_group_order, frobenius_eigenvalue_q}`; `binary_semaev::solve_artin_schreier`.
+**Tool:** `ic run|search|logs|solve --subfield k --curve-a a --curve-b b`,
+workflow `curve.subfield` / `curve.curve_b`.
+**Docs:** `docs/ic/README.md`.
+
+Everything the pipeline does with a Koblitz curve uses one fact: the
+curve is defined over a subfield, so a power of Frobenius is an
+endomorphism acting as a known scalar `λ` on the prime-order subgroup,
+and the invariant factor bases are the `π`-stable subspaces.  The
+pipeline now takes that fact at its generality (GGMP §4 with `q = 2^k`):
+
+- `KoblitzCurve::subfield(k, n, a, b)` builds `y² + xy = x³ + ax² + b`
+  with `a, b ∈ GF(2^k) ⊂ GF(2^n)`, `n = k·e`, `e` odd, the coefficients
+  named by coordinates in the `F_2`-basis of the subfield (the kernel of
+  `X^{2^k} + X`).  `#E(GF(2^k))` is counted by enumeration, the trace
+  `t` of the `q`-power Frobenius follows, and `#E(GF(2^n))` comes from
+  `s_i = t·s_{i−1} − q·s_{i−2}` — the Koblitz recurrence with `2`
+  replaced by `q`; `λ` is the root of `λ² − tλ + q` with `π(G) = [λ]G`.
+  `KoblitzCurve::new(a, n)` is `subfield(1, n, a, 1)` and a test pins
+  every field of the two equal, so the Koblitz path is unchanged.
+- The invariant subspaces are the kernels of `q`-linearised polynomials
+  `Σ c_i X^{q^i}`, `c_i ∈ GF(q)`, classified by the irreducible factors
+  of `x^e − 1` over `GF(q)`.  Those are found by Cantor–Zassenhaus over
+  `GF(q)` run inside `GF(2^n)` (`F2mPoly` arithmetic with coefficients
+  in the subfield: distinct-degree splitting by `gcd(x^{q^d} − x, ·)`,
+  equal-degree splitting with the absolute-trace map of random
+  `GF(q)[x]` elements), sorted canonically; for `k = 1` the list is the
+  `F_2` bit-mask list in the same order, so recipe indices, documents
+  and reports are unchanged.  A factor of degree `d` gives `2^{kd}`
+  abscissae and orbits of length dividing `e`.  Every factor-base
+  constructor, the search families, the pair table, the cofactor
+  admissibility walk, relation rewriting, filtering, block Wiedemann,
+  the log database and the descent then work as they are, with
+  `kc.frobenius` the `q`-power map; the only oracle-side change is the
+  Kosters–Yeo trace row's constant, `Tr(a)` for `a` in the subfield.
+- The Artin–Schreier solver used to brute-force `2^m` candidates for
+  even `m` (and refuse `m > 20`).  Even field degrees are the normal
+  case for even `k`, so `t² + t = c` is now solved as the `F_2`-linear
+  system it is (bit-packed elimination, `m ≤ 63`), which took a
+  `GF(2^18)` point lookup from 29 ms to microseconds.
+
+Two structural observations from the first instances:
+
+- Point counts check out against full enumeration on `E_{0,2}/GF(4)`
+  over `GF(2^6)`, `GF(2^10)` and `GF(2^14)` (76, 964 and 16 636 points);
+  `E_{0,2}/GF(4)` over `GF(2^14)` has `r = 4159`, `h = 4`, and `x^7 − 1`
+  factors over `GF(4)` as degrees `(1, 3, 3)`, giving invariant bases
+  of 3, 43 and 71 points — the 71-point one solves the DLP and
+  precomputes a certified log database with two summands (pinned by
+  `subfield_factor_bases_are_invariant_and_solve_the_dlp`).
+- When `x^e − 1` splits into binomials `x^d − c` over `GF(q)` (`e = 9`,
+  `q = 4`: degrees `1, 1, 1, 3, 3`), each invariant subspace minus `0`
+  is a multiplicative coset `{x : x^d = c}` and its inverses form the
+  reciprocal factor's coset, which has absolute trace `0`.  With
+  `Tr(a) = 1` and `b = 1` the Artin–Schreier condition
+  `Tr(x + a + b/x²) = 0` then fails for every `x ≠ 0` in every such
+  subspace: `E_{2,1}/GF(4)` over `GF(2^18)` has *no* factor-base points
+  at all beyond `(0, √b)`, on any of its five invariant subspaces, while
+  `b ∈ {ω, ω²}` on the same field restores them.  The search scores
+  such bases at zero and a run over one reports a base with no usable
+  columns; the choice of `b` is a genuine parameter of the family, not
+  a cosmetic one.
+
+## Scaling to the ledger rungs, and a ρ baseline that was lying — 2026-09-11
+
+The pipeline now runs end to end at the boundary ledger's Koblitz rungs
+— `K_0/F_{2^n}` for `n = 31, 37, 39, 41`, 32 synthetic known-answer
+targets each, with the in-process signed-Frobenius ρ baseline. The
+parameter files are `docs/ic/params/k0n{31,37,39,41}.json` and the
+measurements `docs/ic/runs/koblitz-scaling-20260911.json` (two
+consecutive series from one build on one host).
+
+### Single-word arithmetic
+
+Every hot loop used to run on `Vec<u64>`-backed field elements that
+allocate on each operation, which for the `n ≤ 62` fields this pipeline
+actually uses costs about two orders of magnitude more than the
+arithmetic. `cryptanalysis::koblitz_fast` puts a point in two `u64`s on
+top of the existing carry-less `Gf2`:
+
+- `add`, `double`, `mul`, the `2^k` Frobenius, and the packed identity,
+  all checked against `binary_ecc::curve` on random points including
+  `O`, `P + P`, `P + (−P)` and points outside the prime-order subgroup;
+- `add_many` (one summand, many addends) and `add_pairwise` (matched
+  slices), each spending **one** field inversion for the whole slice by
+  Montgomery's trick, which is what a point addition's inversion costs
+  when enough of them happen together.
+
+The pair-sum table builds its rows with `add_many`, and answers a lookup
+through a bucket index plus a presence filter — one bit per hashed key,
+four bits per entry — so the overwhelming majority of lookups, which
+miss, never touch the hundreds of megabytes of entries. Measured at
+`n = 41`: the descent went 242 → 157 ms per target from the filter
+alone. The descent's target-independent setup (signed-orbit map, column
+logarithms, oracle tables) moved into `IndividualLogSolver`, built once
+per batch rather than once per target.
+
+Degree 31, 32 targets, before → after the single-word rewrite: descent
+715 → 1.6 ms per target, collection 12.4 → 1.1 s.
+
+### The ρ baseline was failing, not losing
+
+The first version of the scaling run reported a **charged crossover of
+1.009 at `n = 41`**. It was an artifact, and the way it failed is worth
+recording.
+
+That baseline used Floyd cycle finding. On a negation-quotient walk the
+canonical representative flips the sign of the coefficients, so a walk
+can return to *its own previous state*: going round such a cycle adds a
+jump and then subtracts it, and the accumulated coefficients come back
+unchanged. Floyd's meeting then happens at that cycle — tortoise and
+hare holding identical `(a, b)` — and the collision carries no
+information. Every restart burned itself on one within a few hundred
+steps: at `n = 41` the baseline recovered **0 of 32** logarithms while
+charging 1.4M iterations, and a ρ that never finishes is trivially
+"slower" than anything.
+
+The replacement is the distinguished-point method:
+
+- one trajectory per walk; a direct-mapped cache of recent points
+  (4096 slots) catches short cycles *and* nearby collisions; a sparse
+  table of stored points — about one in `2^6` of the expected walk
+  length — catches the long-range collision;
+- a cycle is escaped by doubling **the cycle's own smallest state**, so
+  every path entering the same cycle leaves it at the same point and the
+  walk stays a deterministic map; a repeat doubles further;
+- walks are stepped in batches sharing one field inversion
+  (`parallel_walks`, default 32), scaled down when the whole walk is
+  shorter than the setup would cost — at `n = 31` a 171-step walk would
+  otherwise spend more on 32 jump tables than on walking.
+
+The general-arithmetic walk stays as `koblitz_signed_frobenius_rho_reference`
+and is asserted equal step for step, on every charge counter. Two tests
+hold the walk to theory: the mean step count against
+`√(πr/2) / √(2n)`, and the degree-41 rung (ignored by default).
+
+### What the rungs actually measure
+
+| `n` | `r` bits | base points | columns | relations | core | collect | logs | trials/target | descent/target | ρ/target | ρ steps | charged ρ/IC |
+|-----|---------|-------------|---------|-----------|------|---------|------|---------------|----------------|----------|---------|--------------|
+| 31 | 21 | 2170 | 35 | 78 | 13 | 1.1 s | 0.6 s | 2 | 1.6 ms | 1.2 ms | 171 | 0.73 |
+| 37 | 28 | 3851 | 26 | 39 | 6 | 1.5 s | 1.4 s | 62 | 22.9 ms | 4.8 ms | 2259 | 0.21 |
+| 39 | 27 | 5151 | 33 | 49 | 7 | 12.2 s | 8.2 s | 125 | 52.8 ms | 2.7 ms | 1072 | 0.05 |
+| 41 | 40 | 4759 | 29 | 52 | 10 | 2.0 s | 5.3 s | 387 | 141 ms | 90 ms | 126425 | 0.64 |
+
+All 32 targets solve and all 32 ρ runs verify at every rung. **No rung
+crosses**: the charged ratio is below 1 everywhere, and the closest
+(`n = 41`, ≈ 0.64–0.73) is the rung where ρ has the most room left,
+not the least.
+
+A third series was run later on a verifiably idle host, from the
+committed parameter files, to check the first two for measurement load.
+Per-target times came out 3% to 20% faster at `n = 37` and `n = 39`, so
+the first two series did carry some background load — but the ρ step
+counts are identical and the charged ratios agree across all three
+(0.72/0.74/0.75, 0.20/0.21/0.21, 0.067/0.051/0.060, 0.73/0.64/0.66),
+because load moves both sides of a same-process comparison together.
+That is the reason to quote the ratio rather than the wall time: the
+ratio is what survives an imperfectly quiet machine.
+
+Three things the table says plainly:
+
+1. **The descent is decomposition-bound.** Trials per target track
+   `1/coverage` — 2 at `n = 31`, 387 at `n = 41` — and each trial is a
+   pair-table search over the whole base. Everything else (linear
+   algebra at 0.2 ms, relation collection, the log database) is noise
+   by comparison. A faster descent means a base with better coverage
+   per abscissa, not faster field arithmetic.
+2. **The linear algebra has stopped being the problem.** Filtering
+   reduces 26–35 columns to cores of 6–13 and block Wiedemann solves
+   them in under 0.3 ms; `n = 39`'s 5151-point base costs 12 s to
+   *collect* relations for and 8 ms to solve.
+3. **`n = 39` is the wrong kind of rung.** Its cofactor is 8012 and its
+   subgroup only 27 bits, so ρ finishes in a thousand steps while the
+   base is the largest of the four. Degree 41, with `h = 4` and a 40-bit
+   subgroup, is the honest one.
+
+### Where the remaining headroom is
+
+- **Coverage per abscissa.** At `n = 41` the census measures coverage
+  `2^-8` on a 4759-point base: 387 trials per target. The union and
+  2-torsion-saturated families at seed dimension 6 are the largest
+  bases inside the 4096-abscissa cap; past that the pair table is
+  quadratic in abscissae, so the next gain has to come from bases whose
+  *witness* count per point is higher, not from more points.
+- **ρ still has room**, which is the honest reading of any ratio near 1:
+  the walk is a single core with batched inversions, while the published
+  records for this size use many cores and tighter inner loops. Until a
+  rung beats a ρ that has had the same attention, a ratio near 1 is a
+  statement about two implementations, not about two algorithms.
+
+## The factor base was the wrong shape — 2026-09-12
+
+Every factor-base family in this pipeline was linear: an invariant
+subspace, a union of Frobenius translates of one, or a subset of those.
+That is not a design choice, it is an inheritance. Semaev's polynomials
+and the Weil descent are *written over a subspace*, so an algebraic
+oracle needs one. The pair-table oracle does not — it is a
+meet-in-the-middle search that never looks at the base's structure — and
+the structure turns out to be expensive.
+
+### What the structure costs
+
+At `n = 41`, over 3000 random subgroup targets with `m = 3`, measuring
+how often a target is a sum of three base points:
+
+| base | points | columns | decomposes | vs `|F|³/(3!·r)` |
+|------|--------|---------|------------|------------------|
+| 2-torsion-saturated union, seed dim 6 | 4759 | 60 | 1 in 273 | 8.9× worse |
+| Frobenius-closed, random abscissae | 5494 | 67 | 1 in 67 | 3.4× worse |
+| **drawn from the prime-order subgroup** | 4838 | 59 | **1 in 28** | **matches** |
+
+Two separate effects, and the second is the larger:
+
+1. **Linearity.** The sums of a subspace union concentrate: the sumset of
+   a structured set is far from uniform, so its sums hit a given target
+   less often than three random points would.
+2. **The cofactor.** A relation and a descent both ask for a target *of
+   `⟨G⟩`* to be a sum of base points. A point outside `⟨G⟩` can only sum
+   into it when the cofactor parts of the summands cancel, so a base
+   drawn from the whole curve spends most of its sums in the wrong
+   coset. Restricting the base to `⟨G⟩` removes that loss entirely — the
+   measured rate lands exactly on the random-base expectation.
+
+The column count is unchanged (`≈ |F|/2n` either way), so the linear
+algebra does not pay for the improvement.
+
+### Selecting a subgroup base without knowing any logarithm
+
+`build_subgroup_orbit_factor_base(kc, seed, points)` draws a random
+abscissa, lifts it to a point `P`, and takes `[h]P` for the cofactor
+`h`. That lands in `⟨G⟩` for **every** `P`, so no draw is wasted, and
+knowing `P` says nothing about `log [h]P`.
+
+The first version tested `[r]P = O` and rejected what failed. That is
+also logarithm-free, but at `n = 39` the cofactor is 8012, so it threw
+away 8011 of every 8012 draws and the select stage took **607 seconds**.
+Multiplying by the cofactor instead made it immeasurable. When a
+rejection test and a construction agree, take the construction.
+
+### What it does to the rungs
+
+Same curves, same 32 targets, same ρ baseline, same process; only the
+factor base changes:
+
+| `n` | descent/target, union → subgroup | ρ/target | charged ρ/IC | crossovers (charged / amortised / whole-process) |
+|-----|----------------------------------|----------|--------------|--------------------------------------------------|
+| 31 | 1.5 ms → 1.3 ms | 1.2 ms | 0.95 | no / no / no |
+| 37 | 18.3 ms → 2.9 ms | 5.8 ms | 2.01 | **yes** / no / no |
+| 39 | 44.1 ms → 2.7 ms | 3.6 ms | 1.36 | **yes** / no / no |
+| 41 | 152.9 ms → 14.4 ms | 119.5 ms | **8.33** | **yes** / **yes** / **yes** |
+
+All 32 targets solved and all 32 ρ runs recovered and verified at every
+rung. Evidence: `docs/ic/runs/koblitz-subgroup-bases-20260912.json`.
+
+**Read the degree-41 row carefully.** The whole-process verdict compares
+one precompute plus 32 descents (3.4 s) against 32 ρ walks (3.8 s). It is
+a *bulk* statement. For a **single** target the precompute is paid whole,
+so IC costs 3.0 s against ρ's 0.12 s and ρ wins by about 24×. The
+crossover is in amortising a database over many targets, which is what
+the CADO-style split was built for and what the ledger's charged class
+was defined to measure.
+
+Two more things this is not. It is not asymptotic: the work per target is
+still `Θ(r/|F|²)` with `|F|` capped by the pair table's memory, so this
+moves the constant and not the exponent. And ρ has room left — the
+baseline here is one core with batched inversions at about 1.2 µs a step,
+where a tuned implementation would do better — so the honest reading of
+a ratio near 1 is still "two implementations", not "two algorithms". At
+8.3× the degree-41 charged ratio has more margin than that objection can
+absorb, but the amortised and whole-process verdicts there (1.11 and a
+0.4 s gap) do not.
+
+### A driver that pays its setup once
+
+Sizing collection to the base exposed a waste: when the first units do
+not determine the columns, the driver collected another unit and called
+the solver again — and the solver rebuilt the signed-orbit map of the
+base and re-verified *every* relation each time, quadratically.
+`FactorBaseLogSolver` now holds that setup and takes relations
+incrementally, verifying each exactly once. At `n = 39` the logs stage
+went from 16.6 s to 3.6 s over four extension rounds, at `n = 31` from
+8.0 s to 1.1 s over nine.
+
+### How large should the base be? — 2026-09-12
+
+With a subgroup base the decomposition rate is the one a random base
+gives, so the cost model is finally clean and can be used to *choose* a
+base rather than to explain one. A target decomposes with probability
+`|F|³/(3!·r)`, and an `m = 3` trial costs `|F|` table lookups, so the
+work per target is
+
+```text
+    (3!·r / |F|³) · Θ(|F|)  =  Θ(r / |F|²)
+```
+
+— four times cheaper for every doubling of the base, until the rate
+saturates at one witness per trial and growth only makes each trial
+dearer. The pair table is quadratic in `|F|`, so the precompute rises
+four times per doubling at the same moment.
+
+Measured at `n = 41` (`docs/ic/runs/koblitz-base-size-20260912.json`):
+
+| points | abscissae | table | build | trials/target | ms/target |
+|--------|-----------|-------|-------|---------------|-----------|
+| 1312 | 656 | 14 MB | 0.1 s | 400 | 47.8 |
+| 2624 | 1312 | 55 MB | 0.4 s | 133 | 29.2 |
+| 5248 | 2624 | 220 MB | 1.7 s | 29 | 13.7 |
+| 10496 | 5248 | 881 MB | 6.6 s | 3 | 3.5 |
+| 20992 | 10496 | 3.5 GB | 32.3 s | 1 | 2.3 |
+
+The `1/|F|²` law holds exactly to 10496 points, where the rate saturates
+and the last doubling buys 1.5× for four times the memory.
+
+**So the base is a function of the target count, not of the curve.**
+Total cost is `precompute(|F|) + T·descent(|F|)`, and end to end over
+256 targets at `n = 41`:
+
+| base | precompute | descent/target | total | ρ total |
+|------|-----------|----------------|-------|---------|
+| 5248 points | 3.0 s | 16.2 ms | **7.2 s** | 31.5 s |
+| 10496 points | 9.0 s | 7.2 ms | 10.9 s | 31.1 s |
+
+256 of 256 solved, 256 of 256 ρ walks recovered and verified, both runs.
+The two lines cross at about **665 targets**: below that the smaller base
+wins on total cost, above it the larger. Against ρ's 121 ms per target
+they cross at roughly 29 and 85 targets respectively — which is the
+honest way to state a whole-process win, as a *number of targets* rather
+than a verdict.
+
+The abscissa cap was `2^12`, which put the measured optimum out of
+reach; it is now `2^13`. What the cap was really protecting is the pair
+table, so `PairSumTable::build` now refuses past a stated byte budget
+(4 GiB by default, about 16000 points) instead of attempting an
+allocation the machine cannot meet — a base one doubling too large now
+fails with a number rather than an OOM.
+
+### Collection and the descent need not agree on `m`
+
+They share the factor base and its pair table. They do not share the
+number of summands, and they should not: the two have different cost
+shapes.
+
+```text
+    three summands:  3!·r/|F|³ probes  ×  |F| lookups each
+    two summands:    2r/|F|²   probes  ×  1 lookup each
+```
+
+Collection wants **few** probes, because each one costs two scalar
+multiplications to build — so it takes three summands and does a long
+scan per probe. The descent can make a probe nearly free: a probe is any
+`[a]G + [b]Q`, so step one by `+G` instead of drawing a new pair, and
+step 64 of them together so a single field inversion serves the lot.
+Once a probe costs less than the lookup after it, two summands win.
+
+The walks have to start a stride apart on the same line rather than from
+64 independent draws — 3 scalar multiplications and 63 additions instead
+of 128 scalar multiplications. On a walk of only a few hundred rounds
+that setup was most of the descent: it cost 9.4 ms a target before the
+change and 4.65 ms after.
+
+Measured at `n = 41`, collection at three summands throughout:
+
+| base | descent `m` | ms/target | probes/target | charged ρ/IC |
+|------|-------------|-----------|---------------|--------------|
+| 5248 | 3 | 14.35 | 21 | 8.3 |
+| 5248 | **2** | **8.63** | 43529 | **13.6** |
+| 10496 | 3 | 7.20 | 2 | 16.5 |
+| 10496 | **2** | **4.65** | 9427 | **24.8** |
+
+All 32 targets solved in every configuration. `descent_summands` in a
+workflow parameter file selects it; it defaults to `summands`.
+
+A floor is now visible underneath: a solved target ends with one
+`[d]G = Q` check in the general arithmetic, which costs 1.16 ms at this
+degree against 0.025 ms in the single-word representation. It stays in
+the general arithmetic on purpose — a check that shares no code with the
+arithmetic that did the search is worth more than the milliseconds — and
+ρ pays the same on its own candidate. At 8.6 ms a target it is 13% of
+the descent, and at the wide base a quarter of it.

@@ -1,23 +1,63 @@
 # Koblitz index-calculus SOTA gate status
 
-The campaign has advanced from a scalar-labelled degree-19 factor base to algebraically defined factor bases, matched PDP exports, two degree-9 scalar-blind runs, six degree-15 scalar-blind runs, six degree-23 scalar-blind runs over target-independent divisor bases, and same-target signed-Frobenius rho controls. It has not established a new state of the art.
+Current through Stage 34, 2026-09-11. The machine-readable audit is
+`stage-34-current-gate-audit-20260911/audit.json`.
+
+The campaign has target-independent algebraic factor bases; matched native-XOR,
+WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
+balanced 160-instance PDP panel through `n=59`; and public unknown-scalar
+end-to-end runs at degrees 23, 31, and 41. It has not passed all seven gates and
+does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | Passed for the recorded local runs | Stages 2, 7, 8 and 10 charge factor-base construction, relation collection, linear algebra and matched rho through degree 23. Stages 12 and 14 reduce charged degree-23 public discovery from 10.86 to 0.70 core-seconds without changing its algebra. Stage 13 isolates producer, native SAT, MITM, WDSat/CMS validators and builds, meters every whole cell externally, and charges the original panel, GGMP discovery, failed WDSat arm, and correction for 1,582.11 total core-seconds. Stage 18 retains twelve process-scoped discovery/IC/rho receipts totaling 738.116323 scientific-task core-seconds and separately charges its inclusive 744.324230-core-second outer envelope. | Future parallel or external runs must retain the same accounting discipline; this pass does not compensate for missing Magma execution. |
-| 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | Partial | Five target-matched replicates exist at n=31 standard, n=31 GGMP, n=41 and n=59. All Stage 13 solver results admitted as point decompositions have rational point witnesses. Native XOR, WDSat, CryptoMiniSat and MITM have isolated receipts; the GGMP predicate has separately charged public discovery. Amendment 03 additively adjudicates one `n=31` GGMP response whose exact source marker was split across two calculator-response lines; the immutable original receipt remains non-admitted. Its separate successor completed the other nine never-started requests. Together with Stages 15–17, all fifteen public-calculator-eligible n=31/n=41 cells now have source-equivalent direct sparse F4 terminals. | The basis polynomials, five n=59 cells, process-scoped Magma resource receipts and Magma-linked point witnesses remain absent. A licensed complete matrix is still required. |
-| 3. Single-core, core-seconds, memory, conflicts, wall | Passed for executed process-scoped backends | Stage 13 reports five-replicate distributions of process wall, user/system CPU, single-core and total core-seconds, peak RSS, conflicts when exposed, point-witness validation, WDSat build costs, and whole-cell envelopes. Stage 18 adds process-scoped fields for two public discoveries and five degree-23 IC/rho pairs, including 48,792,465 aggregate SAT conflicts. Stages 15–19 retain fifteen Magma internal F4 timers and opaque service headers as supporting fields. The nine Amendment 03 successor transport children charge 2.035780 local core-seconds and 53.343016 summed wall-seconds with 35,684,352-byte maximum client RSS; the complete sequential parent spans 70.228145 seconds. These are delivery/custody measurements, not Magma process metrics. | Magma still lacks process-scoped user/system CPU, peak RSS and complete-cell receipts; a licensed run must supply the same fields as the other backends. |
-| 4. Scale through n=31, n=41 and larger PDP | Passed for the frozen planted-PDP panel | Five source-bound replicates run at n=31, n=41 and n=59. Direct MITM verifies every planted target; all SAT solvers are inconclusive at n=59 under their caps. | Balanced random SAT/UNSAT panels and a fitted scaling law remain required for a broader complexity or SOTA claim. |
-| 5. Unknown scalar with no constructed factor-base logs | Passed at toy degrees 9, 15 and 23 | Two degree-9 runs, six degree-15 runs, and six degree-23 runs recovered and point-verified their scalars. The frozen Stage 18 panel contributes five SHA-derived degree-23 targets from distinct signed-Frobenius orbits; all five recovered without factor-base log labels. The degree-15 and degree-23 bases were selected from public divisor algebra before target construction, and public cofactor projection supplied their relation columns. | Independent curves and larger unknown-scalar regimes remain required for a broader result. |
-| 6. Automorphism-optimized Pollard rho | Passed as a toy implementation control | The signed-Frobenius quotient walk recovered every valid matched target. In the five-target Stage 18 degree-23 panel, IC consumed 737.110841 core-seconds versus 0.269064 for matched rho; charging both public discoveries gives a 2,742.274176 aggregate core-time ratio in rho's favor. Rho was faster in every pair. | The full crossover comparison at larger regimes remains open. |
-| 7. External reproduction and novelty review | Partial | A separate internal reviewer returned `QUALIFIED`. GitHub Actions run 34428320022 reproduced public factor-base discovery and scalar-blind IC/rho controls through degree 23 on fresh Linux x86-64 and retained the complete artifact. An explicit review request is open as issue #97. A licensed-host runner and source-pinned novelty-review template now make the remaining return packet concrete. | Unaffiliated reproduction of the n=31/41/59 matrix and a completed external novelty review. A project-authored workflow, empty template, or synthetic runner test is not independent methodology or novelty evidence. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds across acquisition, builds, four one-CPU SAT cells, direct MITM, and the WDSat correction. Stage 33 separately charges fresh Cargo acquisition, a sampled four-job clean build, algebraic factor-base discovery/materialization, 14,336 relation probes, sparse linear algebra, five descents, rho, and the one-CPU outer envelope: 328.732225 core-seconds, 119.870662 sequential wall-seconds, and 1,609,519,104 bytes maximum sampled tree RSS. | Licensed Magma process resources are absent. Stage 33 excludes acquisition of the preinstalled operating system and Rust toolchain. |
+| 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
+| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains process wall, total core-seconds, peak RSS, conflict or operation counters, outer process-tree memory, and workflow wall. Stage 33 adds a true inherited-one-CPU end-to-end `n=41` receipt. | Supply the same fields for licensed Magma F4. |
+| 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage** | Phase B covers standard `n=31`, GGMP `n=31`, standard `n=41`, and standard `n=59`. End-to-end public unknown-scalar controls now cover `n=31` and `n=41`. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` arm remains PDP-only. |
+| 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, and 41** | Each degree has five public targets whose expected scalars were not constructed. The degree-31 and degree-41 workflows derived factor-base logs from verified relations and group-certified every column. Stage 33 selected its base before generating its five future targets. | Unaffiliated replay remains part of gate 7. No deployed-size conclusion follows. |
+| 6. Full cost against automorphism-optimized Pollard rho | **Satisfied for the finite 23/31/41 controls; no crossover** | Stage 33 uses signed-Frobenius classes (`A=2n`). IC was 2.249351 times slower online and 36.391448 times slower after amortizing discovery, relations, and logs. The complete available fresh-build-plus-science wall was 119.870662 seconds, or 239.490893 times the 0.500523-second rho wall for the same five targets. Rho is faster under every retained Stage-33 scope. | Preinstalled OS/toolchain acquisition is excluded. No asymptotic or cryptographic-size inference is supported. |
+| 7. Independent external reproduction and novelty review | **Missing** | Issue [#97](https://github.com/aburan28/crypto/issues/97) now contains current source pins, the Stage-22 Magma packet, Phase-B and Stage-33 artifacts, exact verifier commands, primary-source links, and the `CONCUR` / `QUALIFIED` / `BREAKS` format. | An unaffiliated reviewer must return a sealed reproduction and source-pinned novelty/correctness assessment. Project-authored CI and replays do not satisfy independence. |
 
-The degree-59 result is especially constraining: direct MITM found the planted decomposition in 3.13 seconds, while native SAT stopped at 100,000 conflicts and both WDSat and CryptoMiniSat reached 120-second watchdogs. Those capped solver outcomes are inconclusive, but they do not support a SAT advantage.
+## Current Phase-B matrix
 
-The degree-15 result repairs the earlier undersized-base failure. A public census selected the 281-point degree-8 divisor kernel `[2,4]`; public cofactor projection reduced eleven input signed orbits to six relation columns. Six scalar-blind runs then completed, including a frozen five-target panel. This is stronger end-to-end toy evidence, but automorphism rho remained faster in every matched pair.
+The corrected 480-row SAT view has 141 true positives, 120 true negatives, 219
+inconclusive outcomes, no false classifications, and no solver errors. Standard
+`n=31` and `n=41` resolve all 40 targets under all three SAT backends. The
+`n=31` GGMP cell yields 2 native, 1 WDSat, and 18 CryptoMiniSat true positives;
+the rest are inconclusive. All three SAT backends are inconclusive on the 40
+`n=59` targets under their caps. Direct MITM classifies all 160 inputs: 80 true
+positives and 80 true negatives.
 
-The degree-23 result extends scalar-blind completion to an order-2,095,853 subgroup. The original run required 94 relations, 147 targets and 8,977,482 conflicts; 53 capped SAT targets remained unknown. Stage 18 then froze five additional targets from distinct signed-Frobenius orbits. All five recovered from 470 total relations over 786 trials, with 48,792,465 aggregate conflicts and 316 capped targets retained as unknown. Those five IC processes consumed 737.110841 core-seconds versus 0.269064 for their matched rho controls; the two public discovery processes add 0.736418 core-seconds. The original Stage 18 outer driver returned 1 after every task had completed because it inspected an active staging directory during finalization. An additive certificate preserves that failure, verifies the immutable task receipts, and charges the 744.324230-core-second inclusive outer envelope without rerunning a task or inserting it into the algorithm ratios. This widens the measured toy gap in rho's favor.
+| Backend | Core-seconds | Summed process wall | Peak RSS | Conflicts or operations |
+|:--|--:|--:|--:|--:|
+| Native XOR SAT | 958.931674 | 1,278.114043 s | 140,333,056 B | 9,233,732 conflicts |
+| WDSat, corrected view | 7,404.749336 | 9,524.938771 s | 24,252,416 B | 7,599,249 conflicts |
+| CryptoMiniSat | 6,237.273520 | 8,137.581155 s | 122,703,872 B | 19,480,743 conflicts |
+| Direct MITM | 759.710741 inclusive outer | 766.538655 s one-CPU elapsed | 85,479,424 B tree | 4,804,252 additions; 4,768,800 pair entries |
 
-The repeated Stage 13 panel closes the former native/MITM accounting gap and supplies five planted-PDP replicates through n=59. Direct MITM has the lowest median core time in every cell. At n=59, native XOR stops at 100,000 conflicts in all five runs, WDSat and CryptoMiniSat reach their watchdogs, and MITM completes in a 3.86-second median core time. Stages 15–17, the exact-fold Amendment 03 adjudication, and the nine clean successor receipts supply source-equivalent F4 terminals for all fifteen public-calculator-eligible n=31/n=41 cells across standard and GGMP representations. The five n=59 cells exceed the public input cap. The complete process-scoped Magma matrix, Magma-linked point witnesses and balanced random SAT/UNSAT evidence remain absent.
+The original Stage-26 cells remain immutable. Stage 32 adds 426.718011 charged
+core-seconds to turn the two `n=59` WDSat buffer assertions into clean
+timeout-inconclusive terminals. The classifications do not change.
 
-The narrow supported conclusion remains: this is a strong internal engineering and toy-research improvement. It is not a new Koblitz index-calculus SOTA result.
+## Current n=41 end-to-end result
+
+Stage 33 compares the algebraic Frobenius union generated by masks
+`[1,2,4,8,16,32]` with its two-torsion saturation on 1,024 separately sampled
+subgroup points. It does not enumerate the subgroup or receive the five future
+targets. It selects the saturated base: 2,380 abscissae, 4,759 rational points,
+60 signed orbits, and 29 projected columns.
+
+Collection retains 39 verified relations from 14,336 probes. Sparse filtering
+reduces 29 columns to a 3-column, 13-row core; one block-Wiedemann attempt
+reconstructs the other 26 columns, and group multiplication certifies all 29
+logs. Five domain-separated public hash targets then solve in 2,066 descent
+trials. The scientific outer envelope is 19.442666 seconds on one inherited CPU,
+19.421675 core-seconds, and 345,550,848 bytes sampled process-tree peak.
+
+The narrow supported conclusion is unchanged: this is strong internal
+engineering and finite public toy-research evidence. The known SAT-based
+point-decomposition and Frobenius-invariant-factor-base literature remain the
+prior-art baseline. Pollard rho remains faster. Licensed Magma and unaffiliated
+reproduction/novelty review remain open. This is not a new Koblitz
+index-calculus SOTA result.

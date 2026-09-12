@@ -1,0 +1,197 @@
+{
+  "schema": "koblitz_unknown_scalar_panel_protocol.v1",
+  "recorded_at": "2026-09-10",
+  "status": "frozen_before_production_execution",
+  "objective": "Run a five-target public-synthetic arbitrary-target degree-23 index-calculus panel and compare every exact target with signed-Frobenius/negation quotient Pollard rho without constructing target scalar labels.",
+  "scope": {
+    "public_synthetic_targets_only": true,
+    "private_or_imported_targets": false,
+    "target_scalar_constructed_or_recorded": false,
+    "factor_base_discrete_log_labels_constructed_or_supplied": false,
+    "private_key_recovery": false
+  },
+  "curve": {
+    "family": "Koblitz",
+    "equation": "y^2 + x*y = x^3 + a*x^2 + 1",
+    "n": 23,
+    "a": 0,
+    "group_order": "8383412",
+    "subgroup_order": "2095853",
+    "cofactor": "4"
+  },
+  "targets": {
+    "count": 5,
+    "generator_mode": "koblitz_unknown_scalar_panel targets production",
+    "target_domain_hex": "6b6f626c69747a2d737461676532332d7075626c69632d7461726765742d763100",
+    "construction": "domain-separated BLAKE3 x/sign draw, exact uniform-affine decoding, public cofactor projection, reject infinity and duplicates",
+    "panel_identity_bound_before_solver_processes": true,
+    "ic_seed_domain_hex": "6b6f626c69747a2d737461676532332d69632d736565642d763100",
+    "rho_seed_domain_hex": "6b6f626c69747a2d737461676532332d72686f2d736565642d763100",
+    "target_id_domain_hex": "6b6f626c69747a2d737461676532332d7461726765742d69642d763100",
+    "target_scalar_constructed_or_recorded": false,
+    "target_subgroup_membership_required": true,
+    "all_targets_unique": true
+  },
+  "factor_base": {
+    "selection_source": "stage-10-selected-protocol.json",
+    "selection_reused_without_target_dependent_changes": true,
+    "kind": "GGMP divisor linearized-polynomial kernel",
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "divisor_polynomial": 5279,
+    "dimension": 12,
+    "abscissae": 4096,
+    "rational_points": 4281,
+    "signed_frobenius_orbits_before_projection": 95,
+    "projected_signed_frobenius_columns": 93,
+    "summands": 2,
+    "factor_base_logs_constructed_or_supplied": false,
+    "log_learning_boundary": "Factor-base orbit logs and target scalar are learned only from collected relation rows and modular linear algebra."
+  },
+  "public_discovery": {
+    "curve_variants": [
+      0,
+      1
+    ],
+    "requested_dimension": 12,
+    "fresh_process_per_variant": true,
+    "charged_once_per_panel": true,
+    "target_unavailable_during_selection": true,
+    "relation_yield_and_solver_timing_unavailable_during_selection": true
+  },
+  "index_calculus": {
+    "engine": "native XOR SAT",
+    "conflict_budget_per_relation_target": 100000,
+    "max_trials": 1000,
+    "max_models_per_target": 64,
+    "relation_batch_size": 1,
+    "parallel_workers": 1,
+    "direct_relation_forbidden": true,
+    "invalid_models_forbidden": true,
+    "collapse_negation": true,
+    "collapse_projected_orbits": true,
+    "stop_on_verified_rank": true,
+    "extra_relations": 2,
+    "required_retained_payloads": [
+      "one record for every relation candidate, including refuted, Unknown, invalid, and direct-skipped outcomes",
+      "every admitted relation row with coefficients and orbit-column entries",
+      "matrix dimensions, rank history, terminal rank, and modular solve attempts, including an incomplete max-trial return",
+      "exact progress events from factor-base setup through point verification"
+    ]
+  },
+  "rho": {
+    "algorithm": "same-target signed-Frobenius/negation quotient r-adding Pollard rho",
+    "jump_count": 16,
+    "max_restarts": 64,
+    "max_iterations_per_restart": 268435456,
+    "progress_interval": 256,
+    "fresh_deterministic_jump_table_per_restart": true,
+    "target_scalar_not_used_for_verification": true,
+    "required_operation_ledger": [
+      "coefficient draws",
+      "setup scalar multiplications and group additions",
+      "walk group additions",
+      "canonicalizations, Frobenius maps, and negations",
+      "partition hashes, collisions, and failed collisions",
+      "candidate-verification scalar multiplications"
+    ]
+  },
+  "execution": {
+    "task_order": "one fresh locked build; two public discovery processes; one target-panel process; then five IC/rho pairs in target order",
+    "expected_child_processes": 14,
+    "parallel_workers": 1,
+    "requested_threads_per_process": 1,
+    "in_stage_retries": 0,
+    "build_watchdog_seconds": 1800,
+    "discovery_watchdog_seconds": 300,
+    "target_generation_watchdog_seconds": 60,
+    "ic_watchdog_seconds": 600,
+    "rho_watchdog_seconds": 600,
+    "whole_driver_watchdog_seconds": 7200,
+    "process_meter": "scripts/process_meter.py with exclusive-create output reservation",
+    "whole_driver_outer_meter_required": true,
+    "write_once_output": true,
+    "failed_timed_out_orphaned_and_incomplete_tasks_retained": true,
+    "orphan_group_terminated_is_complete": false
+  },
+  "accounting": {
+    "required_process_metrics": [
+      "wall_seconds",
+      "user_seconds",
+      "system_seconds",
+      "total_core_seconds",
+      "peak_rss_bytes"
+    ],
+    "single_core_elapsed_seconds": null,
+    "single_core_seconds_legacy_alias": "total_core_seconds",
+    "peak_rss_scope": "maximum process high-water mark; not summed or simultaneous aggregate parallel memory",
+    "timing_stage_overlap": "forbidden; rho walk timing closes before candidate verification begins",
+    "required_index_calculus_stages": [
+      "curve and target subgroup validation",
+      "factor-base predicate and materialization",
+      "projected-orbit construction and cofactor admission",
+      "every relation candidate and every capped Unknown",
+      "relation matrix construction and rank checks",
+      "modular linear algebra",
+      "recovered-scalar point verification"
+    ],
+    "required_rho_stages": [
+      "target subgroup validation",
+      "jump-table and initial-state setup",
+      "quotient walk and restarts",
+      "collision processing",
+      "recovered-scalar point verification"
+    ],
+    "ratios": {
+      "online": "sum(IC process total_core_seconds) / sum(rho process total_core_seconds)",
+      "setup_charged": "(public discovery process total_core_seconds + sum(IC process total_core_seconds)) / sum(rho process total_core_seconds)",
+      "whole_driver": "reported separately and never divided into a synthetic algorithm ratio"
+    }
+  },
+  "row_acceptance": {
+    "same_exact_target_for_ic_and_rho": true,
+    "ic_complete": "recovered scalar exists, [d]G equals the public target, direct relation is false, invalid models are zero, and retained attempts/matrix/rank/progress are internally complete",
+    "rho_complete": "recovered scalar exists, [d]G equals the same public target, and the operation ledger balances",
+    "completed_row_requires_both_algorithms_verified": true,
+    "nonzero_timeout_cap_or_missing_log_status": "incomplete_inconclusive",
+    "incomplete_is_not_a_negative_result": true
+  },
+  "panel_acceptance": {
+    "expected_targets": 5,
+    "all_targets_unique": true,
+    "all_five_rows_complete_required_for_panel_success": true,
+    "incomplete_rows_retained": true,
+    "no_target_scalar_fields_in_target_or_solver_inputs": true,
+    "factor_base_log_labels_absent": true,
+    "all_process_and_artifact_hashes_bound": true,
+    "project_verifier_reconstruction": "Rebuild the exact task prefix, intents, commands, watchdogs, environments, inputs, raw metrics, receipts, parsed results, rows, resources, ratios, and panel state from sealed files.",
+    "scientific_measurement_admitted_by_control_plane": false,
+    "pending_independent_payload_replay": true,
+    "independent_external_reproduction_satisfied": false,
+    "full_cost_gate_passed": false,
+    "koblitz_index_calculus_sota": false
+  },
+  "smoke": {
+    "profile": "smoke",
+    "curve_n": 7,
+    "curve_a": 1,
+    "targets": 2,
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "scientific_evidence": false,
+    "must_exercise_target_ic_rho_progress_rank_and_verification": true
+  },
+  "forbidden_inference": [
+    "An incomplete IC or rho row is evidence against the algorithm or target.",
+    "Recovered target scalars or factor-base logs were supplied as labels.",
+    "One five-target n=23 panel establishes an asymptotic scaling law.",
+    "A component or best-of-run ratio is a whole-process crossover.",
+    "Project-authored verification is independent external reproduction or novelty review.",
+    "This panel establishes a cryptographic-size attack, deployed-key result, or Koblitz index-calculus SOTA."
+  ],
+  "claim_boundary": "A complete panel would measure five public-synthetic scalar-hidden degree-23 IC and matched signed-Frobenius rho rows with full retained relation and operation evidence. It cannot by itself establish asymptotic crossover, cryptographic-size security impact, novelty, external reproduction, or SOTA."
+}

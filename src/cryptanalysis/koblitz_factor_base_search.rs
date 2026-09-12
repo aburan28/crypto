@@ -53,11 +53,12 @@ use serde::{Deserialize, Serialize};
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
 use super::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, build_frobenius_factor_base,
+    invariant_factors, top_factor_indices, build_frobenius_factor_base,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     projected_signed_orbit_count, restrict_factor_base_to_orbits,
     saturate_factor_base_two_torsion, span_f2, FactorBaseDomain, FrobeniusFactorBase,
     KoblitzCurve, PairSumTable,
+    build_subgroup_orbit_factor_base,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -83,6 +84,28 @@ pub enum FactorBaseSpec {
     /// The parent base closed under translation by the rational
     /// 2-torsion point `(0, 1)`.
     TwoTorsionSaturated { parent: Box<FactorBaseSpec> },
+    /// Frobenius orbits of abscissae drawn pseudo-randomly from `seed`,
+    /// keeping only points of the prime-order subgroup.
+    ///
+    /// Every other family here is linear: a subspace, a union of
+    /// Frobenius translates of one, or a subset of those.  That
+    /// structure is what the algebraic oracles need — Semaev's
+    /// polynomials and the Weil descent are written over a subspace —
+    /// but the pair-table oracle needs no structure at all, and the
+    /// structure costs witnesses: a sum of three points of a subspace
+    /// union lands on a given target far less often than three random
+    /// points would.  Restricting to the subgroup removes the rest of
+    /// the deficit, because a sum of subgroup points cannot leave the
+    /// subgroup the targets live in.
+    ///
+    /// Membership is tested by `[r]P = O`, which needs no logarithm, so
+    /// this reveals nothing about the points it selects.
+    SubgroupOrbits {
+        /// Seed of the abscissa sampler; the recipe is reproducible.
+        seed: u64,
+        /// Sampling stops once the base has at least this many points.
+        points: usize,
+    },
     /// The parent base restricted to the signed Frobenius orbits whose
     /// canonical (smallest) abscissa is listed.
     Pruned {
@@ -98,6 +121,7 @@ impl FactorBaseSpec {
             Self::Factor { .. } => "factor",
             Self::Divisor { .. } => "divisor",
             Self::FrobeniusUnion { .. } => "frobenius_union",
+            Self::SubgroupOrbits { .. } => "subgroup_orbits",
             Self::TwoTorsionSaturated { .. } => "two_torsion_saturated",
             Self::Pruned { .. } => "pruned",
         }
@@ -115,9 +139,9 @@ impl FactorBaseSpec {
     pub fn materialize(&self, kc: &KoblitzCurve) -> Result<FrobeniusFactorBase, String> {
         match self {
             Self::Factor { index } => build_frobenius_factor_base(kc, *index)
-                .ok_or_else(|| format!("no degree-ord_n(2) factor with index {index} at n = {}", kc.n)),
+                .ok_or_else(|| format!("no top-degree invariant factor with index {index} on {}", kc.label())),
             Self::Divisor { indices } => {
-                let factors = all_factors_of_x_n_minus_1(kc.n);
+                let factors = invariant_factors(kc);
                 let mut sorted = indices.clone();
                 sorted.sort_unstable();
                 sorted.dedup();
@@ -126,9 +150,10 @@ impl FactorBaseSpec {
                 }
                 if sorted.iter().any(|&i| i >= factors.len()) {
                     return Err(format!(
-                        "divisor index out of range: x^{} − 1 has {} irreducible factors",
-                        kc.n,
-                        factors.len()
+                        "divisor index out of range: x^{} − 1 has {} irreducible factors over GF(2^{})",
+                        kc.extension_degree(),
+                        factors.len(),
+                        kc.k
                     ));
                 }
                 build_frobenius_factor_base_from_divisor(kc, &sorted)
@@ -147,6 +172,9 @@ impl FactorBaseSpec {
                     .collect();
                 build_frobenius_union_factor_base(kc, &basis)
                     .ok_or_else(|| "seed masks are linearly dependent or unusable".into())
+            }
+            Self::SubgroupOrbits { seed, points } => {
+                build_subgroup_orbit_factor_base(kc, *seed, *points)
             }
             Self::TwoTorsionSaturated { parent } => {
                 let inner = parent.materialize(kc)?;
@@ -468,6 +496,10 @@ pub enum Family {
     Divisor,
     /// Frobenius unions of random seed spaces.
     Union,
+    /// Frobenius orbits sampled from the prime-order subgroup.  Carries
+    /// no linear structure, so only the pair-table oracle can use it —
+    /// and it is the family that decomposes targets most often.
+    Subgroup,
 }
 
 /// Search controls.
@@ -512,7 +544,12 @@ impl Default for SearchOptions {
             min_dimension: 3,
             max_dimension: 10,
             max_abscissae: 2048,
-            families: vec![Family::Factor, Family::Divisor, Family::Union],
+            families: vec![
+                Family::Factor,
+                Family::Divisor,
+                Family::Union,
+                Family::Subgroup,
+            ],
             union_seed_dimensions: (2, 5),
             union_samples: 3,
             sample_targets: 1024,
@@ -751,15 +788,19 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
     }
     let mut push = |spec: FactorBaseSpec| push_unique(&mut specs, &mut seen, spec);
     if opts.families.contains(&Family::Factor) {
-        let count = super::koblitz_index_calculus::factor_x_n_minus_1(kc.n).len();
+        let count = top_factor_indices(kc).len();
         for index in 0..count {
             push(FactorBaseSpec::Factor { index });
         }
     }
     if opts.families.contains(&Family::Divisor) {
-        let factors = all_factors_of_x_n_minus_1(kc.n);
+        let factors = invariant_factors(kc);
         if !factors.is_empty() && factors.len() <= 20 {
-            let degrees: Vec<u32> = factors.iter().map(|f| 63 - f.leading_zeros()).collect();
+            // F_2-dimension of each factor's invariant subspace.
+            let degrees: Vec<u32> = factors
+                .iter()
+                .map(|f| kc.k * f.degree().unwrap_or(0) as u32)
+                .collect();
             for mask in 1usize..(1usize << factors.len()) {
                 let indices: Vec<usize> = (0..factors.len())
                     .filter(|i| (mask >> i) & 1 == 1)
@@ -797,6 +838,23 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
             }
             for masks in seeds {
                 push(FactorBaseSpec::FrobeniusUnion { seed_masks: masks });
+            }
+        }
+    }
+    if opts.families.contains(&Family::Subgroup) && kc.n < 64 {
+        // One candidate per point budget in the dimension window, so the
+        // sizes line up with what the union family reaches.
+        let (lo, hi) = opts.union_seed_dimensions;
+        for dim in lo.max(1)..=hi.min(12) {
+            let points = (1usize << dim) * kc.n as usize;
+            if points > 2 * opts.max_abscissae {
+                continue;
+            }
+            for sample in 0..=opts.union_samples.min(2) {
+                push(FactorBaseSpec::SubgroupOrbits {
+                    seed: opts.seed ^ (0x5355_4247_5250_0000 + dim as u64 * 31 + sample as u64),
+                    points,
+                });
             }
         }
     }

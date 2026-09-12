@@ -1,0 +1,528 @@
+{
+  "valid": true,
+  "status": "independent G1+AoSoA source/control and focused host interaction gate passed",
+  "source": "/private/tmp/ecc2k-g1-aosoa-src",
+  "sourceManifestSha256": "91c4f7b1455dd7a0179542164a0691a4c4ebd89c5984703b8125da0031316f30",
+  "sourceFiles": 109,
+  "sourceUnchangedAfterTests": true,
+  "sourceChecks": {
+    "valid": true,
+    "sourceManifestSha256": "91c4f7b1455dd7a0179542164a0691a4c4ebd89c5984703b8125da0031316f30",
+    "sourceFiles": 109,
+    "changedFiles": [
+      "Makefile",
+      "include/packedengine.cuh",
+      "include/packedkernels.cuh",
+      "src/main.cu"
+    ],
+    "unchangedG1HeadersGeneratorWrappers": true,
+    "exactAoSoAKernelAndMainTransplant": true,
+    "exactPackedEngineTransplantApartFromExistingG1Marker": true,
+    "exactTwoLineMakeDelta": true,
+    "defaultTokenChecks": [
+      {
+        "explicitTile0": false,
+        "tokenSha256": "c6bf3f43effadca6da2f0b47dbb8ff782dd82c3e786d2c0aa2ccc32b4eb7468b"
+      },
+      {
+        "explicitTile0": true,
+        "tokenSha256": "c6bf3f43effadca6da2f0b47dbb8ff782dd82c3e786d2c0aa2ccc32b4eb7468b"
+      }
+    ],
+    "enabledTileAndG1Selection": true,
+    "makeDryRuns": [
+      {
+        "tile": 0,
+        "command": [
+          "make",
+          "-n",
+          "-B",
+          "gpu",
+          "ARCH=-gencode arch=compute_120,code=sm_120",
+          "BATCH=32",
+          "THREADS=256",
+          "MINBLOCKS=2",
+          "PACKED_SINGLE_PRODUCT=1",
+          "PACKED_CACHE_DENOM=1",
+          "PACKED_BY_VALUE=1",
+          "PACKED_PERM_SIGMA=3",
+          "PACKED_POLY_CHAIN=1",
+          "PACKED_UNROLL_INV=1",
+          "PACKED_PAIR_PRODUCTS=1",
+          "PACKED_POLY_STATE=1",
+          "PACKED_DIRECT_REDUCE=1",
+          "PACKED_GENERATED_PRODUCT=1",
+          "PACKED_STATE_TILE=0"
+        ],
+        "output": "nvcc -O3 -std=c++17 -gencode arch=compute_120,code=sm_120 -DECC_BATCH=32 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_STATE_TILE=0 -Xptxas -v -lineinfo -Xcompiler -O3 \\\n\t    -Xcompiler -fopenmp src/main.cu -o ecc2k130 -lgomp\n"
+      },
+      {
+        "tile": 256,
+        "command": [
+          "make",
+          "-n",
+          "-B",
+          "gpu",
+          "ARCH=-gencode arch=compute_120,code=sm_120",
+          "BATCH=32",
+          "THREADS=256",
+          "MINBLOCKS=2",
+          "PACKED_SINGLE_PRODUCT=1",
+          "PACKED_CACHE_DENOM=1",
+          "PACKED_BY_VALUE=1",
+          "PACKED_PERM_SIGMA=3",
+          "PACKED_POLY_CHAIN=1",
+          "PACKED_UNROLL_INV=1",
+          "PACKED_PAIR_PRODUCTS=1",
+          "PACKED_POLY_STATE=1",
+          "PACKED_DIRECT_REDUCE=1",
+          "PACKED_GENERATED_PRODUCT=1",
+          "PACKED_STATE_TILE=256"
+        ],
+        "output": "nvcc -O3 -std=c++17 -gencode arch=compute_120,code=sm_120 -DECC_BATCH=32 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_STATE_TILE=256 -Xptxas -v -lineinfo -Xcompiler -O3 \\\n\t    -Xcompiler -fopenmp src/main.cu -o ecc2k130 -lgomp\n"
+      }
+    ]
+  },
+  "fixedGeneratedProduct": 1,
+  "tileModes": [
+    0,
+    256
+  ],
+  "kernelCasesPerMode": 5,
+  "kernelScalarUpdatesPerMode": 2112,
+  "reportsPerMode": 108,
+  "guardRestartsPerMode": 64,
+  "kernelTranscriptSha256": "c69d655f02945fa15f11e940bc0f3e92859bab2a5a750b4e5b8872ed55975c73",
+  "checkpointThreads": [
+    8,
+    257
+  ],
+  "checkpointModeExecutions": 8,
+  "checkpointByteComparisons": 12,
+  "checkpointScalarUpdates": 33920,
+  "trueInitReseedCalls": 84,
+  "priorNativeGoldenComparisons": [
+    {
+      "threads": 8,
+      "phase": "initial",
+      "sha256": "5a4a65fa34a50dd7413feafb70c3aa76a30989e18942ba615c173154fce6aa2b",
+      "bytes": 15400
+    },
+    {
+      "threads": 8,
+      "phase": "resumed",
+      "sha256": "d3f71f75cfa59e19966073591917f0743766744cfdd6c34b94caa873d7ad4b0a",
+      "bytes": 15400
+    },
+    {
+      "threads": 257,
+      "phase": "initial",
+      "sha256": "e18ebefe3a5eddfa768f3b4d3f14fd708c829821a27415279f7d51c1c96e1862",
+      "bytes": 493480
+    },
+    {
+      "threads": 257,
+      "phase": "resumed",
+      "sha256": "fb5e43c753f8f2b44e507084b5bc442407fa0c1ebb2aa2e0bc0872f8ce9215e9",
+      "bytes": 493480
+    }
+  ],
+  "checkpointExtraction": {
+    "sourceMainSha256": "1aacf9eba08a76d825434d081caa998ca4d615065b21006b1c8d33b940ffd2ab",
+    "sourcePackedEngineSha256": "995020ceb0b4740e9bac52927735c4bcfc740cb66451620adf2cb68d2f23b04a",
+    "genericMethodsSha256": "677b614372a90b95e8351ba645db6005c87935f9108d6c46d3a315092810e8e8",
+    "packedOverridesSha256": "805f283d3213db00d9124d4656109b94a70621c5f20ff7d754dcae5fe199eab3",
+    "extractedSha256": "bc9d1de445492e0774733b0672a160587a28fc244cc745ed3ac2871b604b3abf",
+    "exactPriorSerializationAndHooksUnchanged": true,
+    "sourceManifestSha256": "91c4f7b1455dd7a0179542164a0691a4c4ebd89c5984703b8125da0031316f30"
+  },
+  "kernelReceipt": {
+    "valid": true,
+    "kind": "representative actual-kernel CPU comparison against independent scalar-state reference",
+    "rows": {
+      "0": {
+        "command": [
+          "clang++",
+          "-std=c++17",
+          "-O2",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-Wno-unknown-pragmas",
+          "-I/private/tmp/ecc2k-g1-aosoa-src/include",
+          "-DECC_BATCH=32",
+          "-DECC_THREADS=256",
+          "-DECC_MINBLOCKS=2",
+          "-DECC_PACKED_SINGLE_PRODUCT=1",
+          "-DECC_PACKED_CACHE_DENOM=1",
+          "-DECC_PACKED_BY_VALUE=1",
+          "-DECC_PACKED_PERM_SIGMA=3",
+          "-DECC_PACKED_POLY_CHAIN=1",
+          "-DECC_PACKED_UNROLL_INV=1",
+          "-DECC_PACKED_PAIR_PRODUCTS=1",
+          "-DECC_PACKED_POLY_STATE=1",
+          "-DECC_PACKED_DIRECT_REDUCE=1",
+          "-DECC_PACKED_GENERATED_PRODUCT=1",
+          "-DECC_PACKED_STATE_TILE=0",
+          "/private/tmp/ecc2k-g1-aosoa-review/kernel.cpp",
+          "-o",
+          "/private/tmp/ecc2k-g1-aosoa-review/kernel-0"
+        ],
+        "output": "PASS mode=0 batch=32 case=regular updates=576 reports=0 guard=0 drops=0\nPASS mode=0 batch=32 case=reports updates=1024 reports=108 guard=0 drops=0\nPASS mode=0 batch=32 case=guard_boundary updates=128 reports=0 guard=64 drops=0\nPASS mode=0 batch=32 case=zero_first updates=192 reports=0 guard=0 drops=0\nPASS mode=0 batch=32 case=zero_numerator updates=192 reports=0 guard=0 drops=0\n",
+        "binarySha256": "5679ea0b1c11e9d032cf385177896fb536e61691c140af95d6b22742babc0865",
+        "transcriptSha256": "c69d655f02945fa15f11e940bc0f3e92859bab2a5a750b4e5b8872ed55975c73",
+        "cases": [
+          {
+            "case": "regular",
+            "batch": 32,
+            "updates": 576,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "reports",
+            "batch": 32,
+            "updates": 1024,
+            "reports": 108,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "guard_boundary",
+            "batch": 32,
+            "updates": 128,
+            "reports": 0,
+            "guardRestarts": 64,
+            "drops": 0
+          },
+          {
+            "case": "zero_first",
+            "batch": 32,
+            "updates": 192,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "zero_numerator",
+            "batch": 32,
+            "updates": 192,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          }
+        ]
+      },
+      "256": {
+        "command": [
+          "clang++",
+          "-std=c++17",
+          "-O2",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-Wno-unknown-pragmas",
+          "-I/private/tmp/ecc2k-g1-aosoa-src/include",
+          "-DECC_BATCH=32",
+          "-DECC_THREADS=256",
+          "-DECC_MINBLOCKS=2",
+          "-DECC_PACKED_SINGLE_PRODUCT=1",
+          "-DECC_PACKED_CACHE_DENOM=1",
+          "-DECC_PACKED_BY_VALUE=1",
+          "-DECC_PACKED_PERM_SIGMA=3",
+          "-DECC_PACKED_POLY_CHAIN=1",
+          "-DECC_PACKED_UNROLL_INV=1",
+          "-DECC_PACKED_PAIR_PRODUCTS=1",
+          "-DECC_PACKED_POLY_STATE=1",
+          "-DECC_PACKED_DIRECT_REDUCE=1",
+          "-DECC_PACKED_GENERATED_PRODUCT=1",
+          "-DECC_PACKED_STATE_TILE=256",
+          "/private/tmp/ecc2k-g1-aosoa-review/kernel.cpp",
+          "-o",
+          "/private/tmp/ecc2k-g1-aosoa-review/kernel-256"
+        ],
+        "output": "PASS mode=256 batch=32 case=regular updates=576 reports=0 guard=0 drops=0\nPASS mode=256 batch=32 case=reports updates=1024 reports=108 guard=0 drops=0\nPASS mode=256 batch=32 case=guard_boundary updates=128 reports=0 guard=64 drops=0\nPASS mode=256 batch=32 case=zero_first updates=192 reports=0 guard=0 drops=0\nPASS mode=256 batch=32 case=zero_numerator updates=192 reports=0 guard=0 drops=0\n",
+        "binarySha256": "1c39f247f072138d2b05866c99bae6fb63a002d131051cc8ee32a24ef2c3508c",
+        "transcriptSha256": "c69d655f02945fa15f11e940bc0f3e92859bab2a5a750b4e5b8872ed55975c73",
+        "cases": [
+          {
+            "case": "regular",
+            "batch": 32,
+            "updates": 576,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "reports",
+            "batch": 32,
+            "updates": 1024,
+            "reports": 108,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "guard_boundary",
+            "batch": 32,
+            "updates": 128,
+            "reports": 0,
+            "guardRestarts": 64,
+            "drops": 0
+          },
+          {
+            "case": "zero_first",
+            "batch": 32,
+            "updates": 192,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          },
+          {
+            "case": "zero_numerator",
+            "batch": 32,
+            "updates": 192,
+            "reports": 0,
+            "guardRestarts": 0,
+            "drops": 0
+          }
+        ]
+      }
+    }
+  },
+  "checkpointReceipt": {
+    "valid": true,
+    "builds": {
+      "0": {
+        "command": [
+          "clang++",
+          "-O2",
+          "-std=c++17",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-Wno-unknown-pragmas",
+          "-I/private/tmp/ecc2k-g1-aosoa-src/include",
+          "-DECC_BATCH=32",
+          "-DECC_THREADS=256",
+          "-DECC_MINBLOCKS=2",
+          "-DECC_PACKED_SINGLE_PRODUCT=1",
+          "-DECC_PACKED_CACHE_DENOM=1",
+          "-DECC_PACKED_BY_VALUE=1",
+          "-DECC_PACKED_PERM_SIGMA=3",
+          "-DECC_PACKED_POLY_CHAIN=1",
+          "-DECC_PACKED_UNROLL_INV=1",
+          "-DECC_PACKED_PAIR_PRODUCTS=1",
+          "-DECC_PACKED_POLY_STATE=1",
+          "-DECC_PACKED_DIRECT_REDUCE=1",
+          "-DECC_PACKED_GENERATED_PRODUCT=1",
+          "-DECC_PACKED_STATE_TILE=0",
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint.cpp",
+          "-o",
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-0"
+        ],
+        "returncode": 0,
+        "output": "",
+        "binarySha256": "6cdd438905a1fdf6e4dc99cf6870ad2736e95bcbe4c24456293663ba9eda8492"
+      },
+      "256": {
+        "command": [
+          "clang++",
+          "-O2",
+          "-std=c++17",
+          "-fsanitize=undefined",
+          "-fno-sanitize-recover=all",
+          "-Wno-unknown-pragmas",
+          "-I/private/tmp/ecc2k-g1-aosoa-src/include",
+          "-DECC_BATCH=32",
+          "-DECC_THREADS=256",
+          "-DECC_MINBLOCKS=2",
+          "-DECC_PACKED_SINGLE_PRODUCT=1",
+          "-DECC_PACKED_CACHE_DENOM=1",
+          "-DECC_PACKED_BY_VALUE=1",
+          "-DECC_PACKED_PERM_SIGMA=3",
+          "-DECC_PACKED_POLY_CHAIN=1",
+          "-DECC_PACKED_UNROLL_INV=1",
+          "-DECC_PACKED_PAIR_PRODUCTS=1",
+          "-DECC_PACKED_POLY_STATE=1",
+          "-DECC_PACKED_DIRECT_REDUCE=1",
+          "-DECC_PACKED_GENERATED_PRODUCT=1",
+          "-DECC_PACKED_STATE_TILE=256",
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint.cpp",
+          "-o",
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-256"
+        ],
+        "returncode": 0,
+        "output": "",
+        "binarySha256": "c8e1a7f44707a6735d94466f09f8e680c8b1bf48df912a6b1f7cf6014888719e"
+      }
+    },
+    "runs": [
+      {
+        "tile": 0,
+        "action": "create",
+        "command": [
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-0",
+          "create",
+          "/private/tmp/ecc2k-g1-aosoa-review",
+          "/private/tmp/ecc2k-g1-aosoa-review/create-0"
+        ],
+        "returncode": 0,
+        "output": "PASS tile=0 action=create N=8 physical=8 init/reseed=9 malformed=0 scalarUpdates=256\nPASS tile=0 action=create N=257 physical=257 init/reseed=12 malformed=0 scalarUpdates=8224\n"
+      },
+      {
+        "tile": 256,
+        "action": "create",
+        "command": [
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-256",
+          "create",
+          "/private/tmp/ecc2k-g1-aosoa-review",
+          "/private/tmp/ecc2k-g1-aosoa-review/create-256"
+        ],
+        "returncode": 0,
+        "output": "PASS tile=256 action=create N=8 physical=256 init/reseed=9 malformed=0 scalarUpdates=256\nPASS tile=256 action=create N=257 physical=512 init/reseed=12 malformed=0 scalarUpdates=8224\n"
+      },
+      {
+        "tile": 0,
+        "action": "cross",
+        "command": [
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-0",
+          "cross",
+          "/private/tmp/ecc2k-g1-aosoa-review/create-256",
+          "/private/tmp/ecc2k-g1-aosoa-review/cross-0"
+        ],
+        "returncode": 0,
+        "output": "PASS tile=0 action=cross N=8 physical=8 init/reseed=0 malformed=0 scalarUpdates=256\nPASS tile=0 action=cross N=257 physical=257 init/reseed=0 malformed=0 scalarUpdates=8224\n"
+      },
+      {
+        "tile": 256,
+        "action": "cross",
+        "command": [
+          "/private/tmp/ecc2k-g1-aosoa-review/checkpoint-256",
+          "cross",
+          "/private/tmp/ecc2k-g1-aosoa-review/create-0",
+          "/private/tmp/ecc2k-g1-aosoa-review/cross-256"
+        ],
+        "returncode": 0,
+        "output": "PASS tile=256 action=cross N=8 physical=256 init/reseed=0 malformed=0 scalarUpdates=256\nPASS tile=256 action=cross N=257 physical=512 init/reseed=0 malformed=0 scalarUpdates=8224\n"
+      }
+    ],
+    "comparisons": [
+      {
+        "n": 8,
+        "kind": "initial",
+        "sha256": "5a4a65fa34a50dd7413feafb70c3aa76a30989e18942ba615c173154fce6aa2b",
+        "bytes": 15400
+      },
+      {
+        "n": 8,
+        "kind": "resumed",
+        "sha256": "d3f71f75cfa59e19966073591917f0743766744cfdd6c34b94caa873d7ad4b0a",
+        "bytes": 15400
+      },
+      {
+        "n": 257,
+        "kind": "initial",
+        "sha256": "e18ebefe3a5eddfa768f3b4d3f14fd708c829821a27415279f7d51c1c96e1862",
+        "bytes": 493480
+      },
+      {
+        "n": 257,
+        "kind": "resumed",
+        "sha256": "fb5e43c753f8f2b44e507084b5bc442407fa0c1ebb2aa2e0bc0872f8ce9215e9",
+        "bytes": 493480
+      },
+      {
+        "tile": 0,
+        "n": 8,
+        "kind": "cross-roundtrip",
+        "sha256": "5a4a65fa34a50dd7413feafb70c3aa76a30989e18942ba615c173154fce6aa2b",
+        "bytes": 15400
+      },
+      {
+        "tile": 0,
+        "n": 8,
+        "kind": "cross-resumed",
+        "sha256": "d3f71f75cfa59e19966073591917f0743766744cfdd6c34b94caa873d7ad4b0a",
+        "bytes": 15400
+      },
+      {
+        "tile": 0,
+        "n": 257,
+        "kind": "cross-roundtrip",
+        "sha256": "e18ebefe3a5eddfa768f3b4d3f14fd708c829821a27415279f7d51c1c96e1862",
+        "bytes": 493480
+      },
+      {
+        "tile": 0,
+        "n": 257,
+        "kind": "cross-resumed",
+        "sha256": "fb5e43c753f8f2b44e507084b5bc442407fa0c1ebb2aa2e0bc0872f8ce9215e9",
+        "bytes": 493480
+      },
+      {
+        "tile": 256,
+        "n": 8,
+        "kind": "cross-roundtrip",
+        "sha256": "5a4a65fa34a50dd7413feafb70c3aa76a30989e18942ba615c173154fce6aa2b",
+        "bytes": 15400
+      },
+      {
+        "tile": 256,
+        "n": 8,
+        "kind": "cross-resumed",
+        "sha256": "d3f71f75cfa59e19966073591917f0743766744cfdd6c34b94caa873d7ad4b0a",
+        "bytes": 15400
+      },
+      {
+        "tile": 256,
+        "n": 257,
+        "kind": "cross-roundtrip",
+        "sha256": "e18ebefe3a5eddfa768f3b4d3f14fd708c829821a27415279f7d51c1c96e1862",
+        "bytes": 493480
+      },
+      {
+        "tile": 256,
+        "n": 257,
+        "kind": "cross-resumed",
+        "sha256": "fb5e43c753f8f2b44e507084b5bc442407fa0c1ebb2aa2e0bc0872f8ce9215e9",
+        "bytes": 493480
+      }
+    ],
+    "sourceHashes": {
+      "src/main.cu": "1aacf9eba08a76d825434d081caa998ca4d615065b21006b1c8d33b940ffd2ab",
+      "include/packedengine.cuh": "995020ceb0b4740e9bac52927735c4bcfc740cb66451620adf2cb68d2f23b04a",
+      "include/packedkernels.cuh": "5019d302f24a284b96df57f5a613d62d5b919b09675294a94890329fd444fc15"
+    },
+    "fixtureSha256": "c01f296d08e676603a9426c464c07bac923db38da46c7205f9247f20bd249edb",
+    "extraction": {
+      "sourceMainSha256": "1aacf9eba08a76d825434d081caa998ca4d615065b21006b1c8d33b940ffd2ab",
+      "sourcePackedEngineSha256": "995020ceb0b4740e9bac52927735c4bcfc740cb66451620adf2cb68d2f23b04a",
+      "genericMethodsSha256": "677b614372a90b95e8351ba645db6005c87935f9108d6c46d3a315092810e8e8",
+      "packedOverridesSha256": "805f283d3213db00d9124d4656109b94a70621c5f20ff7d754dcae5fe199eab3",
+      "extractedSha256": "bc9d1de445492e0774733b0672a160587a28fc244cc745ed3ac2871b604b3abf",
+      "exactPriorSerializationAndHooksUnchanged": true,
+      "sourceManifestSha256": "91c4f7b1455dd7a0179542164a0691a4c4ebd89c5984703b8125da0031316f30"
+    },
+    "runnerSha256": "d01152f0065db00a567898cfd6edb45e2225c6b13ecab2982325bb44f2d79ed1"
+  },
+  "reviewArtifacts": {
+    "source-results.json": "ebc1b59388e904005e597ec5467636b0441e3bf31b3abfccee5d5afe94f6c246",
+    "kernel.cpp": "dca5a3c59cd911af18f53d6ca29e906c45f924a3884183f1187f1315e7aedbdb",
+    "kernel_check.py": "db5f997d88ce5ffbaa74e4971337bd99362289bdcf88383a702f7d5e2f14eb35",
+    "kernel-results.json": "dc8afea5ad42b650bf47d4bb2aace5fdf873f10d3c43bdb26e72b4ce1f9c394a",
+    "checkpoint.cpp": "c01f296d08e676603a9426c464c07bac923db38da46c7205f9247f20bd249edb",
+    "checkpoint-extracted.inc": "bc9d1de445492e0774733b0672a160587a28fc244cc745ed3ac2871b604b3abf",
+    "checkpoint_check.py": "d01152f0065db00a567898cfd6edb45e2225c6b13ecab2982325bb44f2d79ed1",
+    "checkpoint-results.json": "ce00dd53be685570aa1a27aa9d58101596dcea80d0b54922da51107740dbaca6",
+    "extraction.json": "660eef26e0fd7da66d0fbec3c89f7277ed57026d2f4b81b8431f83082cab82d5"
+  },
+  "findings": [],
+  "cpuCalibrationGatePassed": true,
+  "cudaCompilerInvokedByReview": false,
+  "gpuAllocated": false,
+  "prSourceModified": false,
+  "limits": [
+    "Only relevant composition interactions were rerun under hostClang/UBSan; no repeated fullfield basis/old eight-N address/malformedfile panel.",
+    "Real save/restore/header validation and packed staging methods are extracted unchanged from the newsource and run with exact-size hostcopy shims; no CUDA transfer/runtime behavior asserted.",
+    "N8/257 includes padded/tile-crossing storage, sampled actualinit/reseed logicalIDs, bidirectional checkpointresume and scalarreference checks. Full kernel cases include reports,reseed,guards,zero denominator andzero numerator.",
+    "This pass releases the root-authorized two-mode CPU-only calibration; it is not GPU admission or performance evidence."
+  ]
+}

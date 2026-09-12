@@ -1,0 +1,76 @@
+name: Koblitz Stage 32 WDSat capacity correction
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_koblitz_stage32_wdsat_correction.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-config.h"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-capacity-protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE32_WDSAT_CAPACITY.md"
+      - ".github/workflows/koblitz-stage32-wdsat-capacity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/run_koblitz_stage32_wdsat_correction.py self-test
+
+  correction:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download exact Stage-26 backend
+        uses: actions/download-artifact@v4
+        with:
+          name: koblitz-stage26-tools-34632018379
+          path: ${{ runner.temp }}/stage26-tools
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 34632018379
+      - name: Acquire and build corrected WDSat
+        run: |
+          mkdir "$RUNNER_TEMP/stage32-acquisition"
+          /usr/bin/time -v -o "$RUNNER_TEMP/stage32-acquisition/wdsat-clone.time" git clone https://github.com/aburan28/WDSat.git "$RUNNER_TEMP/wdsat-source"
+          git -C "$RUNNER_TEMP/wdsat-source" checkout 55d55b2620d768d9f7c78dcd8990a0689533c1d0
+          python3 scripts/build_koblitz_phase_b_wdsat.py \
+            --protocol research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-capacity-protocol.json \
+            --source "$RUNNER_TEMP/wdsat-source" \
+            --config research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-config.h \
+            --output "$RUNNER_TEMP/stage32-wdsat-build"
+      - name: Extract exact packet and rerun two failed inputs
+        run: |
+          chmod 755 "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend" "$RUNNER_TEMP/stage32-wdsat-build/wdsat_solver"
+          mkdir "$RUNNER_TEMP/stage32-packet"
+          tar -xzf research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage26-affinity-inputs-successor-05-20260911.tar.gz -C "$RUNNER_TEMP/stage32-packet"
+          python3 scripts/run_koblitz_stage32_wdsat_correction.py run \
+            --packet "$RUNNER_TEMP/stage32-packet/koblitz-stage26-affinity-inputs-successor-05-20260911" \
+            --output "$RUNNER_TEMP/stage32-correction" \
+            --wdsat "$RUNNER_TEMP/stage32-wdsat-build/wdsat_solver" \
+            --wdsat-build-seal "$RUNNER_TEMP/stage32-wdsat-build/build-seal.json" \
+            --backend "$RUNNER_TEMP/stage26-tools/koblitz_pdp_backend"
+          python3 scripts/run_koblitz_stage32_wdsat_correction.py verify \
+            --output "$RUNNER_TEMP/stage32-correction" \
+            > "$RUNNER_TEMP/stage32-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage32-wdsat-capacity-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage32-acquisition
+            ${{ runner.temp }}/stage32-wdsat-build
+            ${{ runner.temp }}/stage32-correction
+            ${{ runner.temp }}/stage32-verification.json

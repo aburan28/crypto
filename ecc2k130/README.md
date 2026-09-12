@@ -1,22 +1,40 @@
 # ECC2K-130 and ECC2K-95
 
-The optional [packed CUDA backend](PACKED.md) has measured above
-6 billion scalar walk iterations/s on RTX PRO 6000 Blackwell. The
-[polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
+The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
+complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
+[native carryless multiplication](NATIVE-CARRYLESS.md) and the
+[16-slot batch preset](BATCH-TUNING.md) with
+[weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md), plus
+[compact physical field storage](COMPACT-STATE.md) and
+[shared Frobenius masks](SHARED-SIGMA.md).
+The public command measured **14.106673 B/s** with DP34 collection. The shared-mask
+matched comparison measured **14.411102 B/s** benchmark and **14.093912 B/s**
+collection, gains of **0.801%** and **0.954%** over its paired global-mask
+control. These engineering changes preserve the complete scalar iteration.
+Use the paired comparison to assess the gain; the public run verifies reproduction.
+The [polynomial-coordinate storage option](POLYNOMIAL-STATE.md) reduces basis
 conversions and denominator-cache traffic while preserving checkpoint compatibility. Use `--packed`
 with the benchmark/validation entry points; its reports retain the existing
 format, while checkpoints have a separate backend version.
 
 For the validated RTX PRO 6000 configuration, use `make bench-rtx-pro6000`
 or `make audit-rtx-pro6000`. These Modal presets select the packed backend,
-CUDA 13.0 and the measured arithmetic settings. The current preset audit
-measured 6.905 B scalar walk iterations/s. A separate paired comparison
-measured a 1.17% benchmark gain and 1.14% collection gain from direct reduction. See
+CUDA 13.3.1 and the measured arithmetic/storage settings. The controlled compact
+comparison measured a 6.31% benchmark gain and 6.09% collection gain over
+the previous weighted preset at the same logical population. A separate audit
+of the shared-mask public command passed arithmetic, storage, shared-mask and
+client checks before all six timed samples completed their exact work budget.
+Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
-[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records measured
-instruction-pipe and memory ceilings for this GPU and shows why one card
-cannot reach 15–20 B iterations/s with any known arithmetic.
+[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
+instruction-pipe and memory probes for the earlier software arithmetic.
+The native carryless and batch comparisons above give the current complete
+walk measurements; the current 26 B/s target remains unachieved.
+[FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
+measures the generated field circuits as 6-input lookup tables, and finds one
+FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
+and about 5–10x better per watt.
 
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
@@ -56,16 +74,14 @@ code that would run on a GPU is what the test suite exercises.
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per core |
-| CUDA client | host and device both compile; **never run on a GPU here** |
+| CUDA client | public-command median of 14.637530 B/s for complete packed walks on one RTX PRO 6000 |
 | Modal integration | validate, benchmark, autotune, search, fan out |
 | ECC2K-95 instance | parameters recovered and independently verified |
 
-No GPU was available while this was written, so the CUDA path is verified by
-compiling it — host and device halves, plus `ptxas` register allocation — and
-by running the identical arithmetic on the CPU. `modal_app.py` exists to close
-that gap: it builds the client on a Modal GPU, runs the same validation there,
-recovers discrete logarithms on the device, and autotunes the build knobs
-against real hardware.
+Initial development used host execution and CUDA compilation checks. The
+packed backend now also has device arithmetic, complete client and checkpoint
+validation on the RTX PRO 6000. The public Modal audit runs these checks before
+timing complete walks; retained results and their limits are linked above.
 
 ## The problems
 
@@ -669,6 +685,8 @@ make bench        # throughput on the challenge curve
 make gpu          # CUDA client (needs nvcc)
 make check-cuda   # type-check host and device with clang, no GPU or nvcc needed
 make ptx          # device compile + ptxas report, no GPU needed
+make verilog      # emit the FPGA datapath from the same IR, no toolchain needed
+make check-verilog # simulate the emitted RTL against the field model
 ```
 
 Build-time knobs: `BATCH` (walks batched per inversion, default 32), `THREADS`

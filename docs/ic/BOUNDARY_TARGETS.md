@@ -41,7 +41,17 @@ it inapplicable (state why).
 | `relation_yield` | `n` (or `bits`); base id / hash; `eta` or coverage policy; `pr_decomposition` or hit-rate with CI; `trials_per_relation`; target mix (`natural` / `planted_sat` / `proven_unsat` counts) |
 | `rank` | `n` (or `bits`); `K` (orbit columns); `relations_collected`; `relations_needed` (usually `K` or `K+1`); `surplus`; `matrix_dims` `{rows,cols}`; `sparse_or_dense`; `rank_accumulation` (terminal rank + whether recomputed per row); `la_wall_ms` and/or `la_charged_ms` |
 | `end_to_end_dlp` | `n` (or `bits`); recovered `d` with `[d]G = Q`; stage timers (`factor_base`→`relations`→`la`→`verify`); `claim_boundary` (`synthetic_known_answer` / …) |
-| `vs_rho` | `n` (or `bits`); `timing_class` ∈ {`algorithmic_charged`, `projection_matched`, `whole_process_wall`}; IC cost; ρ cost; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); all material stages charged in the **same** process series; `verdict`; `claim_boundary`; independent-replay pointer |
+| `vs_rho` | `n` (or `bits`); `timing_class` ∈ {`algorithmic_charged`, `projection_matched`, `whole_process_wall`}; IC cost; ρ cost; **`automorphism_discount`** (Koblitz: typically `√(2n)` / `A=2n`); all material stages charged in the **same** process series; `verdict`; `claim_boundary`; independent-replay pointer; **ρ health**: recovered-and-verified count (must equal the target count) and measured steps against `√(πr/2)/√A` |
+
+**A ρ baseline that does not finish is not a win.** Every `vs_rho` row
+must report how many targets its ρ side actually recovered and verified,
+and how its step count compares with `√(πr/2)/√A`. A baseline that
+exhausts its iteration budget, or runs orders of magnitude above that
+bound, makes every ratio in the row meaningless — see the
+negation-map fruitless-cycle failure recorded in
+[`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
+("The ρ baseline was failing, not losing"), which produced a spurious
+charged crossover at `n = 41` until the walk was fixed.
 
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.

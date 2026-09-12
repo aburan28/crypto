@@ -2,8 +2,8 @@
 
 The standalone ic executable inspects elliptic-curve parameters and runs
 bounded, reproducible index-calculus experiments on internally generated
-known-answer Koblitz instances. Imported points are used only for mathematical
-validation.
+known-answer or public hash-derived Koblitz targets. Imported parameter-file
+points are used only for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
@@ -51,12 +51,30 @@ constructs the target from the declared known answer, then checks both the
 recovered value and the group identity. No public point file can be passed
 to the run command.
 
+The staged `workflow` command also accepts a scalar-blind public target:
+
+```json
+{"targets":[{"public_hash_seed":29}]}
+```
+
+This form hashes the curve identity, seed, and counter to an abscissa,
+chooses a lift from the next digest bit, and applies the public cofactor.
+It constructs and records no target scalar. Both individual descent and
+the signed-Frobenius rho baseline accept a recovered value only after
+checking `[d]G = Q`. The older `known_log` and `random_seed` forms retain
+their expected-scalar check as an additional known-answer control.
+
 The following knobs are recorded in each run report:
 
-- degree: odd values 3 through 41; a curve is usable only when its largest
-  prime factor exceeds the cofactor, which above 23 holds for degrees 29
-  (curve-a 1), 31, 37, and 39 (curve-a 0);
-- curve-a: 0 or 1, with b fixed to 1;
+- degree: the field degree n; odd values 3 through 63 for the Koblitz
+  family (a curve is usable only when its largest prime factor exceeds
+  the cofactor, which above 23 holds for degrees 29 (curve-a 1), 31, 37,
+  and 39 (curve-a 0)), or k times an odd number for a subfield curve;
+- curve-a: 0 or 1, with b fixed to 1, for a Koblitz curve; the
+  coordinate of a in the subfield basis otherwise;
+- subfield: the degree k of the subfield the curve is defined over,
+  q = 2^k (default 1, the Koblitz family; up to 8), see below;
+- curve-b: the coordinate of b in the subfield basis (default 1);
 - known-log: a positive scalar smaller than the selected subgroup order;
 - random-target: draw a known-answer scalar reproducibly from seed;
 - seed: seed for the generated fixture and relation sampler;
@@ -96,6 +114,42 @@ restores the earlier accounting for matched comparisons: one column per
 Frobenius orbit, no projection merge, a fixed surplus of relations, and a
 single solve at the end. Incomplete results exit unsuccessfully and remain
 incomplete in JSON reports.
+
+### Subfield curves beyond the Koblitz family
+
+    ./target/release/ic run --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --solver pair-table
+    ./target/release/ic search --degree 22 --subfield 2 --curve-a 1 --curve-b 3 --family divisor
+    ./target/release/ic logs --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --database logs14.json
+
+The Galbraith–Granger–Merz–Petit construction needs only that the curve
+be defined over a subfield: with `--subfield k` the synthetic curve is
+`y² + xy = x³ + a x² + b` with `a, b ∈ GF(2^k) ⊂ GF(2^n)`, `n = k · e`
+and `e` odd, and the `2^k`-power Frobenius `π` plays the role squaring
+plays on a Koblitz curve. `a` and `b` are named by their coordinates in
+an `F_2`-basis of the subfield (the kernel of `X^{2^k} + X`), so
+`--subfield 1 --curve-a a --curve-b 1` is exactly `K_a`. Point counting
+goes through `#E(GF(2^k))`, found by enumeration, and the trace
+recurrence `s_i = t·s_{i−1} − q·s_{i−2}`; `λ` is the root of
+`λ² − tλ + q` with `π(G) = [λ]G`.
+
+The invariant factor bases are the kernels of `q`-linearised
+polynomials `Σ c_i X^{q^i}` with `c_i ∈ GF(q)`, classified by the
+irreducible factors of `x^e − 1` over `GF(q)` (Cantor–Zassenhaus over
+`GF(q)`, carried out inside `GF(2^n)`); a factor of degree `d` gives a
+subspace of `2^{kd}` abscissae whose points fall into orbits of length
+dividing `e`. Recipe indices refer to that factor list, which for `k = 1`
+is the familiar `F_2` list in the same order, so every Koblitz recipe,
+document and report is unchanged. Documents record `subfield` and
+`curve_b` (omitted when 1) and are bound to them. Two things differ
+from the Koblitz case in practice: an even `n` is allowed (the
+Artin–Schreier solve for even degree is a linear solve, not the
+half-trace), and when `x^e − 1` splits into binomials `x^d − c` over
+`GF(q)` the invariant subspaces are multiplicative cosets whose
+inverses land in the reciprocal factor's subspace, so a curve with
+`Tr(a) = 1` and `b = 1` has no points over them at all — the search
+scores such bases at zero and a run over one reports a base with no
+usable columns, so pick `b` (or `a`) accordingly, as the examples above
+do.
 
 ## Searching for a factor base
 
@@ -187,6 +241,245 @@ target then needs one or two relations. The `logs` trial budget
 (`--max-trials`, default 200000) bounds the search for a full-rank
 relation set; a base whose coverage cannot determine every column
 reports `incomplete` rather than emitting an unverified database.
+
+### Linear algebra: relation filtering and block Wiedemann
+
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
+
+Each relation has at most `m` nonzero entries, so the relation matrix is
+sparse in exactly the way a number-field-sieve matrix is. By default
+(`--linear-algebra sparse`) `ic logs` solves it the way CADO-NFS does:
+
+1. **Filtering** — duplicate rows are dropped; a column occurring in only
+   one row (a *singleton*) is removed with that row and recovered later
+   by back-substitution; surplus rows beyond a small excess are removed,
+   choosing rows whose removal cascades through the weight-2 columns
+   (the clique rule); light columns are merged away by structured
+   Gaussian elimination under a fill-in bound. Every elimination is
+   recorded, so the eliminated logarithms are reconstructed exactly from
+   the core solution (back-substitution, then propagation through the
+   original rows, then a small dense residual if anything is left).
+2. **Block Wiedemann** — the reduced core is made square by folding its
+   excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
+   and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
+   `block_size × block_size` blocks through a matrix Berlekamp–Massey
+   step (a shifted minimal approximant basis). Only sparse
+   matrix-times-block products touch the matrix, in parallel over rows.
+
+The sparse path never attempts a solve before every column occurs in
+some row, and the solution is checked against every relation before
+the group certification `[x_o]G == R_o` runs. `--linear-algebra dense`
+keeps the reference behaviour: full big-integer elimination after every
+new relation. Both paths certify the same database (the `ic` tests
+compare them); the report's `linear_algebra` object records the mode,
+the attempts, the time, and for the sparse path the filtering counts
+and the Wiedemann run (`core_dimension`, `sequence_length`, products).
+
+## Running the pipeline as a resumable workflow
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --stop-after logs
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31          # resumes
+
+Like a number-field-sieve run, `ic workflow` executes the pipeline as
+stages whose outputs live on disk, so a run can be stopped, inspected
+and resumed without redoing finished work:
+
+1. **select** — the factor base, either an explicit recipe or the
+   best-by-census candidate of the factor-base search; written as
+   `factor_base.json`.
+2. **collect** — relations, in work units (see below); each unit is
+   written as `relations/unit-NNNNN.json`.
+3. **logs** — the units are merged, every relation re-verified in the
+   group and deduplicated, and the factor-base logarithm database solved
+   (`logs.json`), every column certified by `[x]G == R`. If the
+   relations do not yet determine every column, further units are
+   collected up to `collection.max_units`.
+4. **solve** — each target descended with one relation reusing the
+   database; `solutions.json` is rewritten after every target, so an
+   interrupted run resumes at the first unsolved one. The pair table is
+   built once per process and shared by collection and descent.
+
+`state.json` records a BLAKE3 digest of the parameter file and each
+stage's status. A rerun in the same directory reloads existing
+artifacts, re-verifies them against the reconstructed curve (a stale or
+tampered artifact is an error, never trusted), and continues from the
+first incomplete stage; a parameter file whose digest differs is refused
+so one directory never mixes two experiments. Artifacts are written
+atomically. `--stop-after select|collect|logs|solve` ends the run early.
+
+### Distributed relation collection
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 0-3    # worker A
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 4-7    # worker B
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31                        # merge, solve, descend
+
+Relation collection is embarrassingly parallel, and the workflow splits
+it the way a sieve is split into `q`-ranges. The probe scalar of trial
+`t` depends only on the parameter seed and `t`, so the probe sequence
+is one fixed, reproducible sequence; a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it. Any process with the
+parameter file (and `factor_base.json`, when the base came from the
+search) can run a set of units with `--collect-units` — it writes
+`relations/unit-NNNNN.json` for each and stops — and the files from
+several workers or machines are simply placed in the run directory. The
+driver without `--collect-units` collects whatever units of the first
+`collection.units` are still missing itself, then merges everything
+present. Inside a unit the trials run in parallel over the cores.
+
+A relation file carries only the probe scalar and the factor-base point
+indices of each relation, bound to the parameter digest, curve, factor
+base and summand count. On merge every relation is re-verified in the
+group (`[a]G == Σ P_i`, exactly `m` indices, all in range) and exact
+duplicates are dropped, so a corrupt or forged file cannot poison the
+database — a rejected relation is counted, never used — and a file from
+another run or base is ignored, not merged. Partition invariance is
+tested: the union of any set of units equals the relations of a
+single-process run over the same range, and `ic logs` itself now draws
+its probes from the same sequence in parallel batches.
+
+Parameters (`collection`, all optional):
+
+    "collection":{"unit_trials":4096,"units":4,"max_units":64}
+
+`unit_trials` probes per unit; `units` the number the driver collects
+before the first solve; `max_units` the most it may collect when the
+relations do not yet determine every column. The report's collect stage
+lists the units present, run and ignored; the logs stage reports the
+relations loaded, rejected and deduplicated and which units were used.
+
+A parameter file (schema_version 1):
+
+    {"schema_version":1,"name":"k0n31","curve":{"degree":31,"curve_a":0},
+     "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
+     "linear_algebra":{"mode":"sparse",
+                       "sparse":{"wiedemann":{"block_m":4,"block_n":4},
+                                 "filter":{"target_excess":32,"merge_max_weight":8}}},
+     "collection":{"unit_trials":4096,"units":4,"max_units":64},
+     "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
+                    "max_dimension":11,"targets":256,"saturate":false},
+     "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
+
+`factor_base.mode` is `spec` (with a recipe as written by `ic search`)
+or `search` (the census search's knobs; the best candidate is taken
+without child validation). Each target is a synthetic known-answer
+instance: `known_log` names the scalar, `random_seed` draws one
+reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
+or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
+filtering + block Wiedemann, with every knob of the sparse solver under
+`sparse`) or `dense`. `collection` sizes the work units (above). The
+report lists every stage with whether it ran or was reused — the collect
+stage with its units, the logs stage with its verification counts and
+linear-algebra statistics — and every solution with its expected and
+recovered scalar.
+
+### The ρ baseline (`vs_rho`)
+
+    "baseline":{"rho":true,"rho_seed":5931241263826122831,"rho_max_iterations":268435456}
+
+With `baseline.rho` the driver runs the signed-Frobenius Pollard ρ
+(`koblitz_signed_frobenius_rho_with_progress`, which already carries the
+Koblitz automorphism discount: it walks the `A = 2n` classes) on the
+same known-answer targets, in the same process, after the descent, and
+writes `baseline.json` plus a `vs_rho` block in the report with the
+three timing classes the boundary ledger distinguishes:
+
+- **charged** — per-target descent wall (one decomposition and a lookup
+  against the reused database) against the ρ walk on the same target;
+- **amortised** — select + collect + logs + pair-table wall divided over
+  the targets, plus the descent;
+- **whole process** — the precompute counted once against the ρ total.
+
+Each comes with the ratio `ρ / IC` and a boolean verdict; a verdict is
+`true` only when every target was solved *and* ρ-verified. The ledger's
+`vs_rho` row asks for exactly these fields (`timing_class`,
+`automorphism_discount`, both costs, `claim_boundary`); the report
+carries them, but promoting a row still goes through the ledger's own
+autolab and independent-replay process.
+
+The baseline is a real opponent, not a formality, so read it first:
+
+- It walks the `A = 2n` signed Frobenius classes, by the
+  distinguished-point method — a direct-mapped cache of recent points
+  for the short cycles, a sparse table of stored points for the
+  long-range collision.
+- Fruitless cycles (a cycle whose jumps cancel, which the negation map
+  makes common) are escaped by doubling the cycle's own smallest state,
+  so the walk stays a deterministic map. `charges.fruitless_cycles`
+  counts them.
+- Walks are stepped in batches sharing one field inversion
+  (`parallel_walks`, default 32, scaled down on instances whose whole
+  walk is shorter than the setup would cost).
+- Its step count tracks `√(πr/2) / √(2n)`; a run far above that is a
+  broken baseline, and a `vs_rho` verdict built on one means nothing.
+  `rho.verified` must equal the target count — **a ρ that fails to
+  recover its logarithms makes every ratio in the block meaningless**,
+  which is exactly how an earlier revision of this baseline produced a
+  spurious charged crossover at `n = 41`.
+
+### Choosing a factor base
+
+Five families are recipes (`ic search --family`): `factor`, `divisor`
+and `union` are linear — an invariant subspace, a divisor of `x^e − 1`,
+or a union of Frobenius translates of a seed span — and `subgroup` is
+not. The linear families exist because the algebraic oracles need them:
+Semaev's polynomials and the Weil descent are written over a subspace.
+The pair-table oracle is a meet-in-the-middle search and needs no
+structure at all, and for it the structure is a cost, not a feature.
+
+`subgroup` draws abscissae pseudo-randomly and keeps `[h]P` for the
+cofactor `h`, so every base point lies in the prime-order subgroup the
+targets live in. Sums of such points cannot leave that subgroup, and the
+measured decomposition rate lands on the `|F|³/(3!·r)` a random base
+would give — at degree 41, one target in 28 against one in 273 for the
+subspace union of the same size, with the same column count. Selection
+uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
+
+Use it with the pair-table solver. `groebner` and `sat` need a linear
+domain and will refuse.
+
+**How big?** With a subgroup base the work per target falls as
+`r/|F|²` — four times cheaper per doubling — while the pair table grows
+as `|F|²`, so the answer depends on how many targets share the database.
+At degree 41: 5248 points costs 3.0 s of precompute and 16.2 ms a
+target, 10496 points costs 9.0 s and 7.2 ms, and the two cross at about
+665 targets. `docs/ic/runs/koblitz-base-size-20260912.json` has the
+sweep and both end-to-end runs. Past about 10500 points at that degree
+the decomposition rate saturates and further growth only makes each
+trial dearer.
+
+`PairSumTable::build` refuses a base whose table would exceed 4 GiB, so
+an over-large base fails with a number instead of an allocation.
+
+**`descent_summands`** lets the descent ask for a different number of
+summands than collection, which shares only the base and its pair table.
+Collection wants few probes (each costs two scalar multiplications) so
+it takes three; the descent walks its probes by `+G` in blocks sharing
+one inversion, which makes a probe cheaper than the lookup after it, so
+two wins. At degree 41 that is 14.35 ms a target against 8.63 on a
+5248-point base, and 7.20 against 4.65 on a 10496-point one.
+
+### Ledger rungs, ready to run
+
+`docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the
+boundary ledger as parameter files — 32 known-answer targets each, the
+ρ baseline on, collection units sized to the base:
+
+    ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
+
+`docs/ic/params/k0n{31,37,39,41}-subgroup.json` are the same four rungs
+with subgroup bases; `docs/ic/runs/koblitz-subgroup-bases-20260912.json`
+records them, and the charged ρ/IC ratio there crosses 1 at degrees 37,
+39 and 41 (8.3 at 41). Read that file's `what_this_is_not` before
+quoting it — in particular, its degree-41 whole-process verdict is a
+bulk statement about 32 targets, not a single-instance one.
+
+`docs/ic/runs/koblitz-scaling-20260911.json` records two consecutive
+series of all four, with per-stage timings, filter and Wiedemann
+statistics, and both ρ and IC verification counts. No rung crosses: the
+charged ρ/IC ratio is below 1 at every one. Read its
+`what_this_is_not` before quoting any number from it.
 
 ## Random fixtures and custom parameters
 

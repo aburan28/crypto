@@ -1,4 +1,10 @@
-# Why one RTX PRO 6000 cannot reach 20 B iterations/s
+# Historical software-arithmetic throughput model
+
+This document retains the CUDA 13.0 software-arithmetic probes and model.
+The later [native carryless implementation](NATIVE-CARRYLESS.md) changes the
+instruction mix, and [batch tuning](BATCH-TUNING.md) measured 13.206088 B
+complete scalar updates/s. The conclusions below describe the earlier path
+and do not establish a universal limit for the current implementation.
 
 Measured on 2026-09-10 with [benchmarks/hardware-limits/probe.cu](benchmarks/hardware-limits/probe.cu)
 on one RTX PRO 6000 Blackwell Server Edition (driver 580.95.05, CUDA 13.0.48,
@@ -139,3 +145,8 @@ of 5.16. Streaming x/y from DRAM instead costs about 100 bytes per update,
   more. Twenty billion updates per second on this curve therefore needs
   about three of these GPUs, as [aws/README.md](aws/README.md) already
   budgets.
+* Changing platform does not escape this bound either. An FPGA has no shared
+  integer pipe — the walk's bit operations occupy fabric instead of issue
+  slots — but [FPGA-CEILING.md](FPGA-CEILING.md) estimates one VU47P at 5–12 B
+  iterations/s, competitive with one GPU rather than past it, because the same
+  five multiplications per step bind both platforms.

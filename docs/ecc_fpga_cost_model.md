@@ -9,6 +9,14 @@ The sibling document `docs/sha1_fpga_cost_model.md` does this for SHA-1
 collisions, where FPGAs win by more than 10x. **The answer here is
 different**, and the reason is instructive.
 
+There is a third case, between the two: `ecc2k130/FPGA-CEILING.md` costs a rho
+on a *binary* curve, `GF(2^131)`. Being carry-free it is LUT-bound like SHA-1
+rather than DSP-bound like this document, but a field multiplication is still
+thousands of gates and five are needed per step, so the FPGA lands at roughly
+GPU speed, ~2x the cost-efficiency and ~5-10x the energy efficiency. The
+binding resource, not the curve, is what decides which of the three answers
+applies.
+
 Numbers are labelled: **measured** (from simulation or static analysis in
 this repository), **derived** (arithmetic on measured values and published
 part parameters), **estimated** (engineering judgement, stated as such).

@@ -8,34 +8,247 @@ make audit-rtx-pro6000
 ```
 
 The first target runs three complete walk benchmarks. The second performs
-GPU arithmetic and integration checks, three benchmarks, and three DP
+GPU arithmetic, storage, shared-mask and integration checks, three benchmarks, and three DP
 collection runs; it writes `build/rtx-pro6000-audit.json`. Both allocate one
 RTX PRO 6000 Blackwell Server Edition through Modal. Set `MODAL=/path/to/modal`
 when using a specific client environment.
 
-The preset selects CUDA 13.0.0, the packed backend, batch 32, 256 threads per
-block, minBlocks 2, 192,512 worker threads, 1,024 steps per launch and 32 launches.
-The selected worker count is twice the automatic count on the tested 188-SM
+The preset selects CUDA 13.3.1, the packed backend, batch 16, 256 threads per
+block, minBlocks 2, 385,024 worker threads, 1,024 steps per launch and 32 launches.
+The selected worker count is four times the automatic count on the tested 188-SM
 server GPU. Set `RTX_PRO6000_WORKERS=0` to use automatic workers, or provide
 an explicit count to either Make target. Existing checkpoints still require
 their original worker and batch counts; benchmark and audit presets do not
 resume user checkpoints. It enables the single
 polynomial product, denominator cache, by-value operands, both Frobenius
 networks, polynomial chains, explicit inversion schedule and paired products.
-The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md)
-and [direct-order polynomial reduction](DIRECT-REDUCTION.md).
+The preset also enables [polynomial coordinate storage](POLYNOMIAL-STATE.md),
+[direct-order polynomial reduction](DIRECT-REDUCTION.md), and the
+[generated polynomial-product schedule](GENERATED-PRODUCT.md) as its software
+fallback. [Native carryless multiplication](NATIVE-CARRYLESS.md) takes
+precedence in the current preset. It groups
+packed state into [256-worker tiles](TILED-STATE.md), preserving coalesced
+warp accesses while simplifying field addressing.
 These settings retain the existing iteration, DP report and packed-checkpoint
 semantics. The linked comparison validates normal-to-polynomial resume and
 the reverse direction, and measures both modes on one GPU.
+The current preset also enables [weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md),
+reusing the existing scratch buffer and sharing the coordinate-permutation
+mask stream.
+It selects [compact physical field storage](COMPACT-STATE.md), using aligned
+16-byte low records and one high byte per field. Set
+`RTX_PRO6000_COMPACT_STATE=0` to use the previous tiled layout in either Make
+target. The general compact build option defaults to 0.
+The preset also stages the paired [Frobenius masks in shared memory](SHARED-SIGMA.md).
+Set `RTX_PRO6000_SHARED_SIGMA=0` to select the global-memory control in either
+Make target. The general `PACKED_SHARED_SIGMA` build option defaults to 0.
 
-CUDA 13.0 requires a compatible driver; the tested driver is 580.95.05.
-NVIDIA lists 580.65.06 for the Linux CUDA 13.0 GA toolkit in its
-[release notes](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-toolkit-release-notes/index.html#cuda-driver).
+The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
+NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or
+newer, subject to its feature and native-code conditions. The comparison
+disabled PTX JIT and validated the actual device paths before timing. See
+[NVIDIA’s compatibility guidance](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html).
 
-The measured hardware ceilings that bound this preset are in
+Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
+with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Direct-order reduction comparison
+## Shared-mask preset comparison
+
+The [controlled comparison](benchmarks/shared-sigma/comparison.json) keeps
+the compiler, compact layout, arithmetic, batch and scalar population fixed
+on one RTX PRO 6000. Three alternating pairs per workload measured:
+
+| Workload | Variant | Median B/s | Throughput / control | Correctness |
+|---|---|---:|---:|---|
+| Complete scalar benchmark | Global masks | 14.296584 | 1.000000 | Passed |
+| Complete scalar benchmark | Shared masks | **14.411102** | **1.008010** | Passed |
+| DP34 collection | Global masks | 13.960757 | 1.000000 | Passed |
+| DP34 collection | Shared masks | **14.093912** | **1.009538** | Passed |
+
+This is an engineering improvement to the same iteration function and work
+accounting. All three pairs favored shared masks in both workloads. Each
+timed row completed 201,863,462,912 scalar updates; all six collection
+multisets matched, with 5,149 records and zero drops. The added device probe
+passed 21 scenarios, 21,036 pairs, 114 complete block snapshots and 51,072
+mask words in both build modes. Existing arithmetic, storage, client and
+checkpoint checks also passed. The [independent review](benchmarks/shared-sigma/comparison-review.json)
+records exact source, native-code and runtime bindings.
+
+The separate [public Make-command audit](benchmarks/shared-sigma/native-audit.json)
+measured a **14.637530 B/s** benchmark median (14.537769–14.781098) and
+**14.106673 B/s** collection median (14.073041–14.159239). Arithmetic,
+storage, shared-mask and full client checks passed before timing. All six
+samples completed 201,863,462,912 scalar updates, with the selected shared
+mode and zero drops; each collection retained 5,149 records (164,768 bytes).
+The [audit review](benchmarks/shared-sigma/native-audit-review.json) binds the
+committed source, actual flags, resources and complete counts. The public
+artifact retains corpus counts/sizes; content equality is established by
+the separate matched comparison. This run reproduces the published command
+on another allocation and does not estimate an additional code-change gain.
+The active 26 B/s target remains unachieved.
+
+## Historical compact-state preset comparison
+
+The [controlled comparison](benchmarks/compact-state/comparison.json) keeps
+WP2, B16/T256/minBlocks2, 385,024 workers, CUDA 13.3.73 and native arithmetic
+fixed on one RTX PRO 6000. Three alternating paired repetitions measured:
+
+| Workload | Previous weighted median B/s | Compact median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 13.548376 | **14.403112** | **6.3088%** |
+| DP34 collection | 13.130461 | **13.929753** | **6.0873%** |
+
+Every pair favored the candidate. Each sample completed 201,863,462,912
+scalar updates; all six collections matched 5,149 records, 164,768 bytes
+and zero drops. Device storage/arithmetic, full client, normalized-state
+and 28 checkpoint child checks passed before timing. The independent
+artifact review passed all 17 timed rows and final code/source/GPU bindings.
+
+The separate [public Make-command audit](benchmarks/compact-state/native-audit.json)
+measured a **14.472716 B/s** benchmark median (14.334753–14.672410) and
+**13.898911 B/s** collection median (13.880479–13.904571). All six samples
+completed the same scalar budget, and each collection recorded 5,149 points
+with zero drops. Arithmetic, storage and client checks passed before timing.
+This validates the public command on a separate allocation; the matched
+comparison above estimates the gain. The current 26 B/s target remains unachieved.
+
+## Historical weighted-prefix preset comparison
+
+The [controlled comparison](benchmarks/weighted-prefix/comparison.json)
+keeps the batch, workers, compiler, arithmetic and state layout fixed on one
+GPU. Three paired repetitions per workload measured:
+
+| Workload | Previous batch-16 median B/s | Weighted + paired median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 13.110335 | **13.323276** | **1.6242%** |
+| DP34 collection | 12.851526 | **13.054029** | **1.5757%** |
+
+Every pair favored the candidate. Each sample completed 201,863,462,912
+scalar updates. All six collection multisets matched, with 5,149 records
+and zero drops. Arithmetic, direct paired-permutation, full client,
+normalized-state and checkpoint checks passed.
+
+The separate [public Make-command audit](benchmarks/weighted-prefix/native-audit.json)
+measured **13.761732 B/s** benchmark median (13.669981–13.868451) and
+**13.284582 B/s** collection median (13.269334–13.327483). All six samples
+completed the same scalar budget with mode 2, batch 16 and 385,024 workers;
+each collection recorded 5,149 points and zero drops. GPU arithmetic and
+client replay/restart/checkpoint tests passed before timing. This result
+validates the published command on a separate allocation; the paired
+comparison above estimates the gain. The 15 B/s target remains unachieved.
+
+## Historical batch-16 preset comparison
+
+The [controlled batch comparison](benchmarks/batch-tuning/comparison.json)
+keeps native carryless arithmetic, the compiler, tile size and logical work
+fixed on one GPU. Three alternating paired repetitions measured:
+
+| Workload | Previous batch-32 median B/s | Batch-16 median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 8.673447 | **13.206088** | **52.2588%** |
+| DP34 collection | 8.508196 | **12.936060** | **52.0423%** |
+
+Every timed sample completed 201,863,462,912 scalar updates. All six
+collection multisets matched, with 5,149 records and zero drops. The five
+screened configurations passed arithmetic, full client, normalized-state,
+checkpoint and runtime geometry checks. [BATCH-TUNING.md](BATCH-TUNING.md)
+records ranges, screening results and the batch-specific checkpoint boundary.
+The separate [public Make-command audit](benchmarks/batch-tuning/native-audit.json)
+measured **13.283756 B/s** benchmark median (13.151469–13.434216) and
+**12.813626 B/s** collection median (12.800253–12.815682). All six samples
+completed the same scalar budget with batch 16 and 385,024 workers; each
+collection recorded 5,149 points with zero drops. This validates the updated
+command on a separate allocation. The paired comparison above estimates
+the preset's gain.
+
+## Historical native carryless preset comparison
+
+The [controlled native comparison](benchmarks/clmad/comparison.json) measured
+**8.703518 B complete scalar updates/s**, versus **7.110440 B/s** for the
+software control (+22.4048%). DP34 collection measured **8.534325 B/s** versus
+**7.015447 B/s** (+21.6505%). All three pairs per workload favored the native
+implementation. The six collection multisets matched, with 5,149 records
+and zero drops. Every timed sample completed 201,863,462,912 scalar updates.
+See [NATIVE-CARRYLESS.md](NATIVE-CARRYLESS.md) for the ranges, correctness
+checks, compiler requirements and public-code binding.
+
+The [public preset audit](benchmarks/clmad/native-audit.json) ran the command
+above and measured **8.671278 B/s** benchmark median and **8.507975 B/s**
+collection median on a separate GPU allocation. Arithmetic and integration
+checks passed; all six samples completed 201,863,462,912 updates. Each
+collection retained 5,149 records with zero drops. These native-command
+measurements validate reproduction and are separate from the paired gain.
+
+## Historical tiled-state preset comparison
+
+The [controlled tiled-state comparison](benchmarks/tiled-state/comparison.json)
+keeps generated-product arithmetic, CUDA 13.3.73, B32/T256/minBlocks2 and
+192,512 workers fixed on one GPU. Three paired confirmations measured:
+
+| Workload | Untiled median B/s | Tiled median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 6.852888 | **6.994745** | **2.07%** |
+| DP34 collection | 6.766691 | **6.894434** | **1.89%** |
+
+Every sample completed 201,863,462,912 scalar updates. Every pair favored
+tiling; all six collection hashes matched, with 5,149 records and zero drops.
+Arithmetic, integration, normalized-state and bidirectional checkpoint
+resume checks passed. [TILED-STATE.md](TILED-STATE.md) gives ranges, source
+bindings and the distinction between logical checkpoints and padded storage.
+
+The separate [public preset audit](benchmarks/tiled-state/native-audit.json)
+ran `make audit-rtx-pro6000` and measured **7.088708 B/s** benchmark median
+(7.071418–7.132367) and **6.962796 B/s** collection median
+(6.962669–6.963781). All six runs completed the exact scalar budget with tile
+256; every collection recorded 5,149 points with zero drops. This validates
+the published command and does not estimate an additional percentage gain.
+
+## Historical generated-product preset comparison
+
+The [controlled comparison](benchmarks/generated-product/comparison.json)
+compares the previous CUDA 13.0 native preset with generated products on
+CUDA 13.3. Both run on one RTX PRO 6000 with the same worker population,
+launch geometry and **201,863,462,912 complete scalar updates per sample**.
+Three alternating confirmation runs per mode measured:
+
+| Workload | Previous preset | Generated product + CUDA 13.3 | Change |
+|---|---:|---:|---:|
+| Benchmark median B scalar updates/s | 6.860749 | **6.924275** | +0.926% |
+| DP34 collection median B scalar updates/s | 6.764850 | **6.819016** | +0.801% |
+
+The candidate was faster in every paired benchmark and collection run. All
+six collections had identical sorted record multisets: 5,149 records,
+164,768 bytes and zero drops. The GPU arithmetic suites, full client checks
+and common-state comparisons passed. Warmups and initial screening samples
+are excluded from these confirmation medians. The independent
+[artifact review](benchmarks/generated-product/comparison-review.json) binds
+source, binaries, compiler versions, complete code and exact counters.
+
+This measures the combined source/compiler/linked-runtime change; it does
+not isolate a generator-only gain. General generated-product defaults remain
+off. [GENERATED-PRODUCT.md](GENERATED-PRODUCT.md) gives the implementation,
+reproduction commands, ranges and validation scope.
+
+The [published-command audit](benchmarks/generated-product/native-audit.json)
+ran `make audit-rtx-pro6000` from the public implementation on a separate
+allocation and measured:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **6.960528** | 6.937184–6.963077 |
+| DP34 collection | **6.809915** | 6.807981–6.817479 |
+
+Every repetition completed the same 201,863,462,912 scalar updates with the
+requested generated-product mode. Each collection recorded 5,149 points,
+164,768 bytes and zero drops. GPU arithmetic and full client integration
+checks passed. This audit retains corpus counts and sizes; matching content
+hashes are supplied by the paired comparison. The separate native result
+validates the published command and does not measure another percentage gain.
+Source, linked-binary and public-device-code bindings are documented in
+[GENERATED-PRODUCT.md](GENERATED-PRODUCT.md).
+
+## Historical direct-order reduction comparison
 
 The [paired reducer comparison](benchmarks/direct-reduction/comparison.json)
 uses identical B32/T256/min2 settings, 192,512 workers and
@@ -54,7 +267,7 @@ comparisons passed before timing. Warm-ups are excluded from these medians.
 [DIRECT-REDUCTION.md](DIRECT-REDUCTION.md) records ranges, derivation, the
 instruction/spill tradeoff and source/binary provenance.
 
-The [updated native preset audit](benchmarks/direct-reduction/native-audit.json)
+The [earlier direct-reduction preset audit](benchmarks/direct-reduction/native-audit.json)
 runs the normal `make audit-rtx-pro6000` entry point on a separate allocation:
 
 | Workload | Median B scalar updates/s | Range across three repetitions |
@@ -193,5 +406,5 @@ options; the current preset also selects polynomial coordinate storage. Compiler
 output are included in the comparison artifact.
 
 These measurements count complete scalar walk iterations. They do not
-establish 60 B iterations/s, performance on other GPUs, or live clock traces;
+establish 15 B iterations/s, performance on other GPUs, or live clock traces;
 the GPU-state metadata is a snapshot taken before validation.

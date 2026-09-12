@@ -1,0 +1,235 @@
+{
+  "valid": true,
+  "status": "frozen host-validated compact-state prototype; no CUDA compilation or GPU execution",
+  "source": {
+    "path": "/private/tmp/ecc2k-compact-state-src-20260912",
+    "baseline": "/private/tmp/ecc2k-weighted-prefix-walk-20260912/source",
+    "boundFiles": 158,
+    "physicalFiles": 159,
+    "excluded": "build/.gitkeep unchanged, matching prior manifest convention",
+    "manifestPath": "/private/tmp/ecc2k-compact-state-host-20260912/source-manifest.json",
+    "manifestSha256": "8807022f1ab1c64b69c6ce2b21f3dd9991322b066d04c6239a9d3b3f7198dda1",
+    "canonicalManifestSha256": "aa6bb5a5d3cf02c2dd70263858919cb73c0fee689ab7b5fe35827de16da52cf9",
+    "changedExistingFiles": {
+      "Makefile": "163cf38b7177df0d594051d046182232fcaabe1d3c5591a207da09be2dfc913a",
+      "include/packedengine.cuh": "87db8db43b302d28217ca445540e35b44ee102726d18016a88d45b33abef25fb",
+      "include/packedkernels.cuh": "fb1d3a63a914a2636a650a60c43300abd0fbabe9935232f70ff89cf62bb03791"
+    },
+    "addedFiles": {
+      "include/packedcompactstate.cuh": "1f2bb0215807ef3dc0880c417c515185da9200ee4a8fcc983759cb57309249c4"
+    },
+    "patchSha256": "5dd1c39e95680066c98ba24f115133851436b097d7ad8d4d3fd51249ceb6bf86"
+  },
+  "configuration": {
+    "macro": "ECC_PACKED_COMPACT_STATE",
+    "makeVariable": "PACKED_COMPACT_STATE",
+    "default": 0,
+    "values": [
+      0,
+      1
+    ],
+    "runtimeMarker": "packed compact state: <mode>",
+    "requiredParents": [
+      "TILE256",
+      "POLY_STATE",
+      "CACHE_DENOM",
+      "POLY_CHAIN"
+    ],
+    "testedWeightedMode": 2,
+    "hostFlags": {
+      "ECC_THREADS": 256,
+      "ECC_MINBLOCKS": 2,
+      "ECC_PACKED_SINGLE_PRODUCT": 1,
+      "ECC_PACKED_BY_VALUE": 1,
+      "ECC_PACKED_PERM_SIGMA": 3,
+      "ECC_PACKED_DIRECT_REDUCE": 1,
+      "ECC_PACKED_GENERATED_PRODUCT": 1,
+      "ECC_PACKED_CLMAD": 1,
+      "ECC_PACKED_CACHE_DENOM": 1,
+      "ECC_PACKED_POLY_CHAIN": 1,
+      "ECC_PACKED_PAIR_PRODUCTS": 1,
+      "ECC_PACKED_POLY_STATE": 1,
+      "ECC_PACKED_UNROLL_INV": 1,
+      "ECC_PACKED_STATE_TILE": 256,
+      "ECC_PACKED_WEIGHTED_PREFIX": 2
+    },
+    "targetBatch": 16,
+    "noPublicEdits": true,
+    "noCudaCompiler": true,
+    "noGpuJobs": true
+  },
+  "representation": {
+    "tileBytes": 4352,
+    "lowPlaneBytes": 4096,
+    "topPlaneBytes": 256,
+    "transferWordsPerSlotTile": 1088,
+    "lowByteOffset": "4352*((tid/256)*B+slot)+16*(tid%256)",
+    "topByteOffset": "4352*((tid/256)*B+slot)+4096+(tid%256)",
+    "physicalFieldCount": "1088*B*ceil(N/256) unsigned transfer words",
+    "logicalFieldCount": "5*B*N words, unchanged",
+    "logicalId": "slot*N+tid, unchanged",
+    "fieldDomain": "canonical131-bit X/Y/weighted-prefix values (top0..7); denominator storage also carries jump bits (top0..63). Arbitrary32-bit top-word equivalence is not claimed.",
+    "deviceAccessIntent": "Explicit uint4 low load/store plus unsigned-byte top load/store. Native lowering and GPU alignment/ownership remain untested.",
+    "hostAccess": "std::memcpy for16 low bytes; unsigned byte load/store; no host uint4 cast or assumed host vector alignment.",
+    "allocatedFieldArrays": "Same four X/Y/pchain/D buffers; no new per-slot array. Existing physicalFieldCount byte calculation sizes every field allocation.",
+    "metadata": "dead is unchanged32-bit logical storage; seed/start remain64-bit logical storage; DP records/counters/constants unchanged.",
+    "autoFit": "For full256-worker tiles and one denominator field,100*B to88*B bytes per worker; actual occupancy API still decides block capacity. Minimum-one-block fallback is preserved."
+  },
+  "preservedBehavior": {
+    "initAndWalkBodiesByteIdentical": true,
+    "onlyFieldAccessRoutingChanged": true,
+    "allWeightedPrefixesWritten": true,
+    "tagBitsRetainedByCodec": true,
+    "zeroDenominatorBatchPoisoning": true,
+    "reportGuardReseedOrdering": true,
+    "checkpointVersion": 2,
+    "checkpointLanes": 1,
+    "diskFieldLayout": "five-word logical normal-basis SoA, unchanged",
+    "diskBytes": "40+60*B*N",
+    "exportOrder": "complete compact transfer -> logical polynomial SoA -> existing normal-basis conversion",
+    "importOrder": "logical normal-basis read -> existing polynomial conversion -> zero-filled compact physical buffer",
+    "genericSaveRestoreMainUnchanged": true,
+    "samePerFieldStagingResizePreserved": true
+  },
+  "codecHostEvidence": {
+    "receiptPath": "/private/tmp/ecc2k-compact-codec-host-20260912/review.json",
+    "receiptSha256": "be5e36be8e1c99c46c13ccb5e5fc7fb12a04358a41207a320f72da1fe7b4ccb7",
+    "hostCases": 400,
+    "records": 1493328,
+    "tailValues": "all0..63",
+    "batches": [
+      1,
+      4,
+      16,
+      32
+    ],
+    "workerCases": [
+      0,
+      1,
+      7,
+      31,
+      32,
+      33,
+      127,
+      128,
+      129,
+      255,
+      256,
+      257,
+      511,
+      512,
+      513,
+      1023,
+      1024,
+      1025
+    ],
+    "additionalCapacityArithmetic": "INT_MAX at the tested batches",
+    "hostBases": "256-aligned and4-byte-shifted bases; both use the safe scalar host path",
+    "coverage": "Independent whole-buffer byte image, disjoint byte ranges,16-byte low offsets, canaries, untouched padding and non-mutating loads; Clang/UBSan.",
+    "limit": "Device uint4 branch was not compiled or executed."
+  },
+  "actualKernelHostEvidence": {
+    "receiptPath": "/private/tmp/ecc2k-compact-state-host-20260912/host-results.json",
+    "receiptSha256": "efdc3e7cf0f5e5de7d7e10b3da4225dba2eebb8baeccbb06cf1812c7f8b85d73",
+    "fixtureSha256": "6667d20f629cea2e67378673086c6909ed93ee4a9376542a46f5afd219fcef53",
+    "driverSha256": "a04924f4f6e3d2f642a08d90348f9f09ea4a536f4f8147b702f58fef89ae034b",
+    "hostCompiles": 8,
+    "actualKernelRuns": 30,
+    "crossLayoutComparisons": 15,
+    "batches": [
+      1,
+      4,
+      16,
+      32
+    ],
+    "workersAllBatches": [
+      1,
+      3,
+      257
+    ],
+    "additionalB16Workers": [
+      8,
+      255,
+      256
+    ],
+    "independentReferenceScalarSteps": 9590,
+    "zeroBatchSteps": 130,
+    "replayedReports": 632,
+    "positiveTrails": 364,
+    "coverage": "Actual production load/store, init and walk with256-thread index emulation; physical byte canaries/padding; independent cyclic-convolution field reference on full rows; persistent X/Y/seed/start/dead/count/report byte equality; report overflow, guard, reseed, zero steps, every zero-D slot and noncanonical nonzero dead values.",
+    "ledger": "WP2 B+1 ordinary and2(B-1) paired boundary calls plus one eight-product inverse per worker/step; unchanged by compact mode.",
+    "limits": [
+      "Serial host atomics/index emulation does not establish device concurrency or native access widths.",
+      "CLMAD1 uses its host software fallback.",
+      "Transient D/prefix byte images differ by layout and are not included in persistent comparison; codec testing independently preserves all64 legal tag values, while unchanged walk source creates/strips those tags at the same boundaries."
+    ]
+  },
+  "actualCheckpointEvidence": {
+    "receiptPath": "/private/tmp/ecc2k-compact-state-host-20260912/checkpoint-results.json",
+    "receiptSha256": "5b96fb57f17497a5d8eb14b7cb4e024a740ec03aa4d1761dbfe2c41cb07365f9",
+    "fixtureSha256": "3d6439b18f8689895192a7733fb1fe25a832418848fed420846b0d15a63c8d76",
+    "extractionReceiptSha256": "0e73b8c34475d822acc8fe5f844c7bce554234913aab83c0c95d835f4d7db465",
+    "extractedIncludeSha256": "9a827faa05ddafb17ddcd7cf82ee2c2be888ca84f455f5561dc69f4d14bc7217",
+    "implementationScope": "Actual unmodified production CkptHeader/compatibility/exact-payload functions, generic save/restore methods and updated packed field-count/basis/layout hooks. Only the enclosing test engine and CUDA memcpy/sync/allocation backing are host shims.",
+    "isCodecModelSubstitute": false,
+    "hostCompiles": 2,
+    "hostRuns": 4,
+    "workerCounts": [
+      8,
+      256,
+      257
+    ],
+    "batch": 16,
+    "byteComparisons": 18,
+    "headerAndMalformedPayloadRejections": 54,
+    "invalidRestoreDeviceWrites": 0,
+    "initialAndReseedPointCases": 60,
+    "initialPlusReseedKernelInvocations": 120,
+    "resumedScalarUpdates": 33344,
+    "coverage": "Both layout create paths and both cross-layout restore directions; identical external initial, roundtrip and resumed checkpoints; actual resumed walk compared to scalar reference; exact logical/physical transfer sizes for both X/Y; imported padding zero; noncanonical dead values retained. N256 specifically exercises physical storage smaller than the logical field.",
+    "legacyRawKeyNote": "The reused checkpoint runner labels compact0/1 as tile in some JSON keys; its actual compiler flags keep STATE_TILE=256 and vary COMPACT_STATE=0/1.",
+    "limits": [
+      "CUDA transfers are host memcpy shims checking exact registered buffer lengths. No device transfer occurred.",
+      "Wrong header fields and truncated/extra payloads are rejected before any shim device write and before changing the returned iteration. Invalid files are opened read-only by the actual method, but not separately rehashed before the fixture deletes them.",
+      "The comparison is checkpoint roundtrip plus one resumed next step; it is not a GPU checkpoint integration run."
+    ]
+  },
+  "automaticFitHostEvidence": {
+    "receiptPath": "/private/tmp/ecc2k-compact-state-host-20260912/autofit-results.json",
+    "receiptSha256": "6eff64dcf2bbc1523d7eaa05c2ba1fb0e17e7286c81756c8fe04a3d859ac2cee",
+    "cases": 16,
+    "scope": "Exact production autoThreads method with injected188SM/two-block API result and a range of free-memory sizes. Actual returned full-tile worker counts match independent88B/100B allocation accounting. Hardware occupancy is not measured."
+  },
+  "defaultAndBuildChecks": {
+    "receiptPath": "/private/tmp/ecc2k-compact-state-host-20260912/source-checks.json",
+    "receiptSha256": "5361f71056fc882026162d7338951209618632ee829e5cae7d9c37502b02c790",
+    "defaultPreprocessedComparisons": 14,
+    "normalization": "Only blank lines removed; every remaining preprocessed line matches the weighted baseline. Initial strict text check differed by one blank line before the namespace.",
+    "invalidGuards": 7,
+    "makeDefineOnce": [
+      0,
+      1
+    ],
+    "codecInHdrs": true,
+    "resolvedFinding": "Independent review found missing new-header Make dependency; it was added before sealing.",
+    "limit": "Kernel/arithmetic default tokens match; engine output intentionally gains compact-state0 identity."
+  },
+  "independentIntegrationReview": {
+    "path": "/private/tmp/ecc2k-compact-integration-review-20260912/review.json",
+    "sha256": "ca5f9f5d3e01da39d2c0b962defdf22fc87790ac6cbb218e0d26a72f99019e04",
+    "openFindings": []
+  },
+  "remainingDeviceChecks": [
+    "Compile default and compact at identical WP2/B16/T256/min2/TILE256/CLMAD1 settings, bind complete default walk/init encoding to the existing weighted2 control, and inspect actual low128-bit and top-byte accesses, all resources/helper spills and call paths. No such compilation has occurred here.",
+    "Execute the separately prepared GPU accessor fixture with independent full physical byte images,0..63 tails, inactive padding and per-worker ownership checks. Verify actual16-byte device addresses and no widened neighboring-byte read-modify-write.",
+    "Execute existing GPU arithmetic/paired-Frobenius, full client/reference, normalized states, zero/report/guard and real cross-layout checkpoint tests before timing. Host shims alone are insufficient.",
+    "A later fixed-population paired full-walk comparison must keep exact scalar counts and source/binary/layout identities, excluded warmups and matching DP34 corpora. Neither17-byte compression nor source uint4 intent proves a runtime/SASS gain."
+  ],
+  "findings": [],
+  "limits": [
+    "Only this combined vector-low/byte-tail candidate was implemented; no layout sweep, CUDA compiler, GPU allocation, numerical solver or public-source edit occurred.",
+    "Canonical fields and six-bit cached denominator tails are the supported state domain. Padding and arbitrary high words are not field data.",
+    "Size-product arithmetic was tested at the selected B1/B4/B16/B32 configurations, including INT_MAX capacity calculations; arbitrary extreme compile-time batch settings are not admitted.",
+    "The existing weighted runtime source and previous frozen measurement/auditor artifacts remain unchanged."
+  ]
+}

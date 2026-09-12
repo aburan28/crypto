@@ -1,0 +1,49 @@
+{
+  "valid": true,
+  "status": "CPU prebuild complete and handed to root; GPU remains unsubmitted",
+  "session": 14855,
+  "app": "ap-daT6hxLS2qS9p3tLbnnc36",
+  "exitCode": 0,
+  "driver": "/private/tmp/ecc2k-shared-sigma-walk-20260912/run.py",
+  "driverSha256": "9069cc089710d455ff7546c09fe95de6415eb76b9b0b02639ebe3e46ef16a718",
+  "driverFreezeSha256": "da0457aea44201d89425d9c8edaa6e28b395bcfd5abf1029e720b17b38716c6d",
+  "preparationReviewSha256": "70e77f56f092a27c6f6bbe049ed98066860bfa9bb577986262db14acc010d4d6",
+  "prebuildPath": "/private/tmp/ecc2k-shared-sigma-walk-20260912/plan/full-client-build.json",
+  "prebuildSha256": "dbd875ce652415c4b192d61db00606e5924b605f53ebf0ac028d1379751a0a6d",
+  "prebuildBytes": 3890900,
+  "reviewPath": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/shared-sigma-walk-prebuild-review.json",
+  "reviewSha256": "e16182856b78355c699912f8113b8c9f3719af487a5f1bf2ded3b2ef280df852",
+  "source": "/private/tmp/ecc2k-shared-sigma-walk-20260912/source",
+  "sourceFileCount": 160,
+  "sourceCanonicalSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+  "sourceDelta": "Only packedengine.cuh gains the SHARED_SIGMA1 host current-device/reserved-shared diagnostic.",
+  "diagnosticSha256": "054645487d1c39a6daf9ac0e4de537eca420c889b7a7958a6c79b0c8db6a3496",
+  "calibration": "Pending. Two first untimed128-update actual-client invocations; candidate reservation must be1024 and functionStatic must equal2816 or1792 by the explicit equation; exact result is hash-bound for every later check and checkpoint subprocess.",
+  "binaries": {
+    "control": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+    "shared1": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52"
+  },
+  "arithmeticBinaries": {
+    "control": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+    "shared1": "d88738a146ac085cb48ccdef821119b75687e656f6907487b96bb21b504a06d0"
+  },
+  "storageBinaries": {
+    "control": "26b60cd1827b48c95932326deeab2c1b554bd86eb5a693b018748c6e059b53b2",
+    "shared1": "2626a242efe7fc48e628adf0c7f0703e30d7ccf38b920a8b1bbfea1887c871fc"
+  },
+  "sharedProbeBinaries": {
+    "control": "3be33676d953bdd5d7739f9fbba61f038ffb1bbda8fc9e0967bf0e5735444fc2",
+    "shared1": "de04f0753ca89e33539875ccaffceb1391e724d4d52671e31117b620035a9085"
+  },
+  "builds": 8,
+  "gpuRequested": false,
+  "deviceExecuted": false,
+  "rootReviewChecklist": [
+    "Verify source/header delta and exact160-file runtime closure; kernel/helper encodings match the two reviewed CPU rows.",
+    "Review first calibration publication, file/environment hash custody, and exact subsequent marker checks in nested checkpoint subprocesses.",
+    "Confirm all arithmetic/storage/shared-probe/client/state/checkpoint gates precede ranking and28checkpointchildren/12comparisons remain intact.",
+    "Keep initial pending resource snapshot and separately recorded observed function/reserved/compiler extents; no arbitrary shared-memory fallback.",
+    "Confirm2excludedwarmups/3screens andconditional3bench+3DP34pairs at201863462912updates; no calibration rate enters ranking."
+  ],
+  "goalBillionScalarUpdatesPerSecond": 26
+}
