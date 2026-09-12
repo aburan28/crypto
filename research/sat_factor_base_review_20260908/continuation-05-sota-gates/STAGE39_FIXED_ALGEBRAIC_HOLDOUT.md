@@ -15,3 +15,17 @@ A local same-binary tuning stream, relation seed 41131 and targets 41101 through
 This stage tests a setup constant and the stricter algebraic-definition boundary. It does not supply licensed Magma measurements, external reproduction, a full-cost crossover, a changed asymptotic exponent, or a Koblitz index-calculus SOTA result.
 
 The first hosted attempt, run `34699355146`, completed the computation but failed independent custody replay because `predecessor_stage38.identity.path` stored the runner's absolute checkout path. Its relation seed 41231 and target seeds 41201 through 41205 are retired. The sealed output remains `completed_invalid` for scientific admission: its timings are not promoted here. The retry stores the same predecessor bytes under a repository-relative path and uses the untouched 413xx streams above.
+
+## Hosted result
+
+The corrected retry, [run `34699822015`](https://github.com/aburan28/crypto/actions/runs/34699822015), completed from merge commit `6f7ff404d615e11df73c0a0e0607bf504b2e09af` and passed a fresh replay after download. It reconstructed the 4,759-point, 29-column factor base from the fixed public recipe in 0.418 seconds, with zero discovery target samples or scalar labels. Fourteen relation units produced 35 accepted and group-verified relations from 114,688 probes and 17,088,512 charged third-summand lookups. Sparse linear algebra covered every column; all five public targets were solved and group-verified.
+
+| Measurement | Stage 35 | Stage 38 | Stage 39 |
+|---|---:|---:|---:|
+| Precompute wall | 14.301 s | 8.999 s | **4.310 s** |
+| IC/rho, amortized | 28.86x slower | 18.45x slower | **5.03x slower** |
+| IC/rho, online | 2.05x faster | 1.22x faster | **3.50x faster** |
+
+The fixed algebraic construction makes precomputation 2.09 times faster than Stage 38. The amortized ratio improves by 3.67 times over Stage 38 and 5.74 times over Stage 35. Target difficulty varied on the fresh stream: five descents took 0.260 seconds and matched signed-Frobenius rho took 0.909 seconds. The same-target ratios are valid for this finite panel; the cross-stage improvement is a cost ratio, not a claim that the target streams have equal difficulty.
+
+The singleton scientific run used 5.626 seconds wall, 5.605 core-seconds, and at most 307,417,088 bytes sampled process-tree RSS. Including the fresh four-core build gives 100.740 seconds sequential wall, 325.176 core-seconds, and 1,672,077,312 bytes maximum sampled process-tree RSS. That complete available wall remains 110.79 times the same-target rho wall. The result therefore remains below the full-cost, licensed-Magma, unaffiliated-reproduction, and SOTA gates.
