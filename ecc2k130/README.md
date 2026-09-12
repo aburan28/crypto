@@ -26,7 +26,7 @@ of the updated public command passed. See
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
 The native carryless and batch comparisons above give the current complete
-walk measurements; the 15 B/s target remains unachieved.
+walk measurements; the current 26 B/s target remains unachieved.
 [FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance

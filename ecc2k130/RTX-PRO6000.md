@@ -73,7 +73,7 @@ measured a **14.472716 B/s** benchmark median (14.334753–14.672410) and
 completed the same scalar budget, and each collection recorded 5,149 points
 with zero drops. Arithmetic, storage and client checks passed before timing.
 This validates the public command on a separate allocation; the matched
-comparison above estimates the gain. The 15 B/s target remains unachieved.
+comparison above estimates the gain. The current 26 B/s target remains unachieved.
 
 ## Historical weighted-prefix preset comparison
 

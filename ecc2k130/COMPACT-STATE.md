@@ -200,3 +200,24 @@ children passed, including six directed cross-batch and three worker-geometry
 rejections. The [independent audit](benchmarks/compact-state/smaller-batches-review.json)
 passed. The measured batch-16 preset is retained. The 15 B/s target remains
 unachieved.
+
+## Batch-18 follow-up and current objective
+
+A [B16/B18 comparison](benchmarks/compact-state/batch18.json) used the same
+13,860,864-walk population: 866,304 workers for B16 and 770,048 for B18.
+Each of its five timed rows completed **454,192,791,552 scalar updates**.
+The two excluded warmups were followed by B16 control at 14.468385 B/s,
+B18 at 14.292785 B/s, and B16 control at 14.461831 B/s. B18 did not clear
+the 14.540726925 B/s qualification threshold, so no confirmation or timed
+collection followed. This is a bounded screen, not a repeated slowdown
+estimate.
+
+All correctness gates and 24 checkpoint children passed with their expected
+outcomes, including four geometry rejections. The
+[offline checker](benchmarks/compact-state/batch18-review.json) passed;
+its authorship and after-announcement/before-raw freeze chronology are
+recorded. Batch 16 remains selected.
+
+The current objective is **26 B complete scalar iterations/s on one RTX PRO
+6000**. Earlier immutable run receipts retain the goal that applied when
+they were created. The verified public median remains 14.472716 B/s.
