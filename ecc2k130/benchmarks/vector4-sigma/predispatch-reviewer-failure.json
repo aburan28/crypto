@@ -1,0 +1,12 @@
+{
+  "valid": false,
+  "status": "reviewer_encoding_string_normalization_failure_gpu_not_submitted",
+  "exitCode": 1,
+  "toolChunkId": "387912",
+  "scriptSha256": "ceb51e0bb34d5c88953e8bd10523a04c9fe8bdf10673e857694a485993490180",
+  "failedAssertion": "canonical encoding digest after full actual native-byte equality had passed",
+  "diagnosis": "Reviewer formatted64-bit instruction words with hex(value), omitting leading zeros; frozen digest preserves16 hex digits. Actual binary-byte comparison before assertion passed.",
+  "frozenSourceOrRunnerModified": false,
+  "gpuSubmitted": false,
+  "nextAction": "Await root direction under explicit no-fix-after-review-failure instruction."
+}
