@@ -2,9 +2,9 @@
 //! Point-defined factor base, exact-support relation collection, and rank trace.
 //!
 //! This is the fully charged V2 control for the Koblitz crossover task.  The
-//! base is selected only from public point coordinates.  A published fixture
-//! scalar is retained by the validator, but it is never used to select a base,
-//! target arm, or decomposition.
+//! base is selected only from public point coordinates. Known-answer controls
+//! retain a validation scalar; `hash:SEED` derives a subgroup point without
+//! constructing its scalar and accepts recovery only after `[d]G = Q`.
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -42,6 +42,31 @@ enum TargetMode {
     Independent,
     CoefficientWalk,
     PartitionWalk,
+}
+
+#[derive(Clone, Copy)]
+enum FixtureTarget {
+    SeededScalar,
+    ExplicitScalar(u64),
+    PublicHash(u64),
+}
+
+impl FixtureTarget {
+    fn parse(value: Option<&str>) -> Self {
+        match value {
+            None => Self::SeededScalar,
+            Some(value) if value.starts_with("hash:") => Self::PublicHash(
+                value[5..]
+                    .parse()
+                    .expect("public hash target seed must be a u64"),
+            ),
+            Some(value) => Self::ExplicitScalar(
+                value
+                    .parse()
+                    .expect("explicit validation scalar must be a u64"),
+            ),
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -590,6 +615,43 @@ type RawPoint = Option<(u64, u64)>;
 
 fn to_raw_point(point: &BinaryPoint) -> RawPoint {
     raw_affine(point)
+}
+
+fn public_hash_target(curve: &KoblitzCurve, seed: u64) -> (BinaryPoint, u64) {
+    const DOMAIN: &[u8] = b"ic-workflow-public-target-v1\0";
+    let mask = (1u64 << curve.n) - 1;
+    for counter in 0u64..1_000_000 {
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(DOMAIN);
+        hasher.update(&curve.n.to_le_bytes());
+        hasher.update(&[curve.a]);
+        hasher.update(&curve.k.to_le_bytes());
+        hasher.update(&curve.b_index.to_le_bytes());
+        hasher.update(&seed.to_le_bytes());
+        hasher.update(&counter.to_le_bytes());
+        let digest = hasher.finalize();
+        let bytes = digest.as_bytes();
+        let mut word = [0u8; 8];
+        word.copy_from_slice(&bytes[..8]);
+        let x = F2mElement::from_biguint(&BigUint::from(u64::from_le_bytes(word) & mask), curve.n);
+        let mut lifts = points_with_x(&curve.curve, &x);
+        lifts.sort_by_key(point_key);
+        if lifts.is_empty() {
+            continue;
+        }
+        let raw = lifts[usize::from(bytes[8] & 1) % lifts.len()].clone();
+        let target = curve.mul(&raw, &curve.cofactor);
+        if target == BinaryPoint::Infinity {
+            continue;
+        }
+        assert_eq!(
+            curve.mul(&target, &curve.subgroup_order),
+            BinaryPoint::Infinity,
+            "public hash target must enter the prime-order subgroup"
+        );
+        return (target, counter);
+    }
+    panic!("public hash-to-curve target attempt cap exhausted");
 }
 
 fn raw_neg_point(point: RawPoint) -> RawPoint {
@@ -1823,7 +1885,7 @@ fn main() {
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
         (6..=11).contains(&arguments.len()),
-        "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures] [explicit_fixture_scalar]"
+        "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures] [explicit_fixture_scalar|hash:public_seed]"
     );
     let n: u32 = arguments[1].parse().unwrap();
     let a: u8 = arguments[2].parse().unwrap();
@@ -1844,7 +1906,7 @@ fn main() {
         .unwrap_or("1")
         .parse()
         .unwrap();
-    let explicit_fixture_scalar = arguments.get(10).map(|value| value.parse::<u64>().unwrap());
+    let fixture_target = FixtureTarget::parse(arguments.get(10).map(String::as_str));
     let summary_only = std::env::var("KIC_SUMMARY_ONLY").as_deref() == Ok("1");
     let batch_corpus = std::env::var("KIC_BATCH_CORPUS").ok();
     let relation_cap_extra: usize = std::env::var("KIC_RELATION_CAP_EXTRA")
@@ -1862,7 +1924,7 @@ fn main() {
     let curve_setup_ms = curve_setup_started.elapsed().as_secs_f64() * 1000.0;
     let setup_started = Instant::now();
     let modulus = curve.subgroup_order.to_u64().unwrap();
-    if let Some(scalar) = explicit_fixture_scalar {
+    if let FixtureTarget::ExplicitScalar(scalar) = fixture_target {
         assert!(
             batch_fixtures == 1,
             "an explicit scalar requires one fixture"
@@ -1870,6 +1932,12 @@ fn main() {
         assert!(
             (1..modulus).contains(&scalar),
             "explicit scalar must be in 1..r"
+        );
+    }
+    if matches!(fixture_target, FixtureTarget::PublicHash(_)) {
+        assert!(
+            batch_fixtures == 1,
+            "a public hash target requires one fixture"
         );
     }
     let signed_size = signed_scalars(curve.lambda.to_u64().unwrap(), modulus, n).len();
@@ -2109,13 +2177,39 @@ fn main() {
         // supplied, so changing only the target does not change the relation
         // coefficient stream that follows.
         let generated_scalar = rng.gen_range(1..modulus);
-        let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
-        let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
-            "explicit_public_validation_scalar"
+        let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+            match fixture_target {
+                FixtureTarget::SeededScalar => (
+                    Some(generated_scalar),
+                    curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                    "seeded_fixture_scalar",
+                    None,
+                    None,
+                ),
+                FixtureTarget::ExplicitScalar(scalar) => (
+                    Some(scalar),
+                    curve.mul(curve.generator(), &BigUint::from(scalar)),
+                    "explicit_public_validation_scalar",
+                    None,
+                    None,
+                ),
+                FixtureTarget::PublicHash(public_seed) => {
+                    let (target, counter) = public_hash_target(&curve, public_seed);
+                    (
+                        None,
+                        target,
+                        "public_hash_unknown_scalar",
+                        Some(public_seed),
+                        Some(counter),
+                    )
+                }
+            };
+        let target_scalar_constructed = known_scalar.is_some();
+        let target_kind = if target_scalar_constructed {
+            "known_scalar_multiple"
         } else {
-            "seeded_fixture_scalar"
+            "public_hash_to_curve_cofactor"
         };
-        let q = curve.mul(curve.generator(), &BigUint::from(d0));
         let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
         let generator_raw = to_raw_point(curve.generator());
         let q_raw = to_raw_point(&q);
@@ -2605,7 +2699,11 @@ fn main() {
                         "fixture_seed":fixture_seed,
                         "base_hash":&base_hash,
                         "relation_hash":relation_hash,
-                        "published_fixture_scalar":d0,
+                        "published_fixture_scalar":known_scalar,
+                        "target_scalar_constructed":target_scalar_constructed,
+                        "target_kind":target_kind,
+                        "public_hash_seed":public_hash_seed,
+                        "public_hash_counter":public_hash_counter,
                         "trial":trials,
                         "accepted_relation":accepted,
                         "coefficient_a":coefficient_a,
@@ -2642,7 +2740,14 @@ fn main() {
         let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
         let solution_validation_started = Instant::now();
         if let Some(solution) = &solution {
-            assert_eq!(solution[columns], d0);
+            if let Some(expected) = known_scalar {
+                assert_eq!(solution[columns], expected);
+            }
+            assert_eq!(
+                curve.mul(curve.generator(), &BigUint::from(solution[columns])),
+                q,
+                "recovered scalar must reconstruct the public target"
+            );
             for (column, representative) in base.representatives.iter().enumerate() {
                 assert_eq!(
                     curve.mul(curve.generator(), &BigUint::from(solution[column])),
@@ -2700,13 +2805,18 @@ fn main() {
                 "evidence_class":"measured_exact_support_relation",
                 "fixture_index":fixture_index,
                 "fixture_seed":fixture_seed,
-                "published_fixture_scalar":d0,
+                "published_fixture_scalar":known_scalar,
                 "fixture_scalar_source":fixture_scalar_source,
+                "target_scalar_constructed":target_scalar_constructed,
+                "target_kind":target_kind,
+                "public_hash_seed":public_hash_seed,
+                "public_hash_counter":public_hash_counter,
                 "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
                 "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
                 "published_q_point_key":[q_key.0.to_string(),q_key.1.to_string()],
                 "recovered_fixture_scalar":solution.as_ref().map(|values| values[columns]),
                 "factor_base_log_solution":solution.as_ref().map(|values| &values[..columns]),
+                "factor_base_logs_known_by_construction":false,
                 "linear_solution_verified":solution.is_some(),
                 "n":n,
                 "a":a,
@@ -2780,7 +2890,11 @@ fn main() {
                     "rank_and_diagnostics":rank_diagnostics_ns as f64/1_000_000.0,
                     "receipt_construction":receipt_construction_ns as f64/1_000_000.0
                 },
-                "claim_boundary":"public synthetic relation/rank control; fixture scalar retained only for validation"
+                "claim_boundary":if target_scalar_constructed {
+                    "public synthetic relation/rank control; fixture scalar retained only for validation"
+                } else {
+                    "public_hash_unknown_scalar"
+                }
             })
         );
     }

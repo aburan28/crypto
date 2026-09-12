@@ -6,8 +6,8 @@
 //! walk.  It never accepts an external point or a secret scalar.
 
 use crypto_lib::binary_ecc::curve::point_neg;
-use crypto_lib::binary_ecc::BinaryPoint;
-use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::{points_with_x, KoblitzCurve};
 use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -26,6 +26,31 @@ enum Quotient {
     Ordinary,
     Negation,
     SignedFrobenius,
+}
+
+#[derive(Clone, Copy)]
+enum FixtureTarget {
+    SeededScalar,
+    ExplicitScalar(u64),
+    PublicHash(u64),
+}
+
+impl FixtureTarget {
+    fn parse(value: Option<&str>) -> Self {
+        match value {
+            None => Self::SeededScalar,
+            Some(value) if value.starts_with("hash:") => Self::PublicHash(
+                value[5..]
+                    .parse()
+                    .expect("public hash target seed must be a u64"),
+            ),
+            Some(value) => Self::ExplicitScalar(
+                value
+                    .parse()
+                    .expect("explicit validation scalar must be a u64"),
+            ),
+        }
+    }
 }
 
 impl Quotient {
@@ -519,25 +544,83 @@ fn raw_make_jumps(
         .collect()
 }
 
+fn public_hash_target(curve: &KoblitzCurve, seed: u64) -> (BinaryPoint, u64) {
+    const DOMAIN: &[u8] = b"ic-workflow-public-target-v1\0";
+    let mask = (1u64 << curve.n) - 1;
+    for counter in 0u64..1_000_000 {
+        let mut hasher = blake3::Hasher::new();
+        hasher.update(DOMAIN);
+        hasher.update(&curve.n.to_le_bytes());
+        hasher.update(&[curve.a]);
+        hasher.update(&curve.k.to_le_bytes());
+        hasher.update(&curve.b_index.to_le_bytes());
+        hasher.update(&seed.to_le_bytes());
+        hasher.update(&counter.to_le_bytes());
+        let digest = hasher.finalize();
+        let bytes = digest.as_bytes();
+        let mut word = [0u8; 8];
+        word.copy_from_slice(&bytes[..8]);
+        let x = F2mElement::from_biguint(&BigUint::from(u64::from_le_bytes(word) & mask), curve.n);
+        let mut lifts = points_with_x(&curve.curve, &x);
+        lifts.sort_by_key(point_key);
+        if lifts.is_empty() {
+            continue;
+        }
+        let raw = lifts[usize::from(bytes[8] & 1) % lifts.len()].clone();
+        let target = curve.mul(&raw, &curve.cofactor);
+        if target == BinaryPoint::Infinity {
+            continue;
+        }
+        assert_eq!(
+            curve.mul(&target, &curve.subgroup_order),
+            BinaryPoint::Infinity
+        );
+        return (target, counter);
+    }
+    panic!("public hash-to-curve target attempt cap exhausted");
+}
+
 fn solve_fixture(
     curve: &KoblitzCurve,
     mode: Quotient,
     fixture_index: u64,
     fixture_seed: u64,
-    explicit_fixture_scalar: Option<u64>,
+    fixture_target: FixtureTarget,
 ) -> serde_json::Value {
     let modulus = curve.subgroup_order.to_u64_digits()[0];
     let lambda = curve.lambda.to_u64_digits()[0];
     let signed_size = signed_automorphism_size(lambda, modulus, curve.n);
     let mut rng = StdRng::seed_from_u64(fixture_seed);
     let generated_scalar = rng.gen_range(1..modulus);
-    let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
-    let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
-        "explicit_public_validation_scalar"
-    } else {
-        "seeded_fixture_scalar"
-    };
-    let q = curve.mul(curve.generator(), &BigUint::from(d0));
+    let target_generation_started = Instant::now();
+    let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+        match fixture_target {
+            FixtureTarget::SeededScalar => (
+                Some(generated_scalar),
+                curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                "seeded_fixture_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::ExplicitScalar(scalar) => (
+                Some(scalar),
+                curve.mul(curve.generator(), &BigUint::from(scalar)),
+                "explicit_public_validation_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::PublicHash(seed) => {
+                let (target, counter) = public_hash_target(curve, seed);
+                (
+                    None,
+                    target,
+                    "public_hash_unknown_scalar",
+                    Some(seed),
+                    Some(counter),
+                )
+            }
+        };
+    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let mut charges = Charges {
         scalar_multiplications: 1,
         ..Charges::default()
@@ -614,7 +697,9 @@ fn solve_fixture(
     }
     let walk_ms = walk_started.elapsed().as_secs_f64() * 1000.0;
     let recovered = recovered.expect("public rho fixture exceeded the frozen step/restart cap");
-    assert_eq!(recovered, d0);
+    if let Some(expected) = known_scalar {
+        assert_eq!(recovered, expected);
+    }
     let table_entries = table.len();
     let generator_point_key = point_key(curve.generator());
     let q_point_key = point_key(&q);
@@ -637,8 +722,12 @@ fn solve_fixture(
         },
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
-        "published_fixture_scalar":d0,
+        "published_fixture_scalar":known_scalar,
         "fixture_scalar_source":fixture_scalar_source,
+        "target_scalar_constructed":known_scalar.is_some(),
+        "target_kind":if known_scalar.is_some() {"known_scalar_multiple"} else {"public_hash_to_curve_cofactor"},
+        "public_hash_seed":public_hash_seed,
+        "public_hash_counter":public_hash_counter,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -654,8 +743,9 @@ fn solve_fixture(
         "table_entries":table_entries,
         "table_payload_lower_bound_bytes":table_entries * (1 + 5 * std::mem::size_of::<u64>()),
         "setup_ms":setup_ms,
+        "target_generation_ms":target_generation_ms,
         "walk_ms":walk_ms,
-        "total_ms":setup_ms + walk_ms,
+        "total_ms":target_generation_ms + setup_ms + walk_ms,
         "charges":{
             "group_additions":charges.group_additions,
             "scalar_multiplications":charges.scalar_multiplications,
@@ -668,7 +758,7 @@ fn solve_fixture(
             "failed_collisions":charges.failed_collisions,
             "fruitless_cycle_restarts":charges.fruitless_cycle_restarts
         },
-        "scope":"published synthetic toy fixture; no external point, unknown scalar, or production key"
+        "scope":if known_scalar.is_some() {"published synthetic toy fixture; no external point or production key"} else {"public_hash_unknown_scalar"}
     })
 }
 
@@ -677,7 +767,7 @@ fn solve_fixture_packed(
     mode: Quotient,
     fixture_index: u64,
     fixture_seed: u64,
-    explicit_fixture_scalar: Option<u64>,
+    fixture_target: FixtureTarget,
 ) -> serde_json::Value {
     let modulus = curve.subgroup_order.to_u64_digits()[0];
     let lambda = curve.lambda.to_u64_digits()[0];
@@ -685,15 +775,38 @@ fn solve_fixture_packed(
     let generator = raw_point(curve.generator());
     let mut rng = StdRng::seed_from_u64(fixture_seed);
     let generated_scalar = rng.gen_range(1..modulus);
-    let d0 = explicit_fixture_scalar.unwrap_or(generated_scalar);
-    let fixture_scalar_source = if explicit_fixture_scalar.is_some() {
-        "explicit_public_validation_scalar"
-    } else {
-        "seeded_fixture_scalar"
-    };
+    let target_generation_started = Instant::now();
+    let (known_scalar, reference_q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+        match fixture_target {
+            FixtureTarget::SeededScalar => (
+                Some(generated_scalar),
+                curve.mul(curve.generator(), &BigUint::from(generated_scalar)),
+                "seeded_fixture_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::ExplicitScalar(scalar) => (
+                Some(scalar),
+                curve.mul(curve.generator(), &BigUint::from(scalar)),
+                "explicit_public_validation_scalar",
+                None,
+                None,
+            ),
+            FixtureTarget::PublicHash(seed) => {
+                let (target, counter) = public_hash_target(curve, seed);
+                (
+                    None,
+                    target,
+                    "public_hash_unknown_scalar",
+                    Some(seed),
+                    Some(counter),
+                )
+            }
+        };
+    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let mut charges = Charges::default();
     let started = Instant::now();
-    let q = raw_scalar_mul(curve, generator, d0);
+    let q = raw_point(&reference_q);
     charges.scalar_multiplications += 1;
     let jumps = raw_make_jumps(curve, generator, q, &mut rng, modulus, &mut charges);
     let setup_ms = started.elapsed().as_secs_f64() * 1000.0;
@@ -766,8 +879,9 @@ fn solve_fixture_packed(
     let walk_ms = walk_started.elapsed().as_secs_f64() * 1000.0;
     let recovered = recovered.expect("packed public rho fixture exceeded cap");
     let validation_started = Instant::now();
-    assert_eq!(recovered, d0);
-    let reference_q = curve.mul(curve.generator(), &BigUint::from(d0));
+    if let Some(expected) = known_scalar {
+        assert_eq!(recovered, expected);
+    }
     assert_eq!(raw_point(&reference_q), q);
     assert_eq!(
         curve.mul(curve.generator(), &BigUint::from(recovered)),
@@ -796,8 +910,12 @@ fn solve_fixture_packed(
         },
         "fixture_index":fixture_index,
         "fixture_seed":fixture_seed,
-        "published_fixture_scalar":d0,
+        "published_fixture_scalar":known_scalar,
         "fixture_scalar_source":fixture_scalar_source,
+        "target_scalar_constructed":known_scalar.is_some(),
+        "target_kind":if known_scalar.is_some() {"known_scalar_multiple"} else {"public_hash_to_curve_cofactor"},
+        "public_hash_seed":public_hash_seed,
+        "public_hash_counter":public_hash_counter,
         "recovered_fixture_scalar":recovered,
         "generator":[generator_point_key.1,generator_point_key.2],
         "published_q":[q_point_key.1,q_point_key.2],
@@ -814,9 +932,10 @@ fn solve_fixture_packed(
         "table_entries":table_entries,
         "table_payload_lower_bound_bytes":table_entries * (1 + 5 * std::mem::size_of::<u64>()),
         "setup_ms":setup_ms,
+        "target_generation_ms":target_generation_ms,
         "walk_ms":walk_ms,
         "validation_ms":validation_ms,
-        "total_ms":setup_ms + walk_ms + validation_ms,
+        "total_ms":target_generation_ms + setup_ms + walk_ms + validation_ms,
         "charges":{
             "group_additions":charges.group_additions,
             "scalar_multiplications":charges.scalar_multiplications,
@@ -829,7 +948,7 @@ fn solve_fixture_packed(
             "failed_collisions":charges.failed_collisions,
             "fruitless_cycle_restarts":charges.fruitless_cycle_restarts
         },
-        "scope":"published synthetic toy fixture; no external point, unknown scalar, or production key"
+        "scope":if known_scalar.is_some() {"published synthetic toy fixture; no external point or production key"} else {"public_hash_unknown_scalar"}
     })
 }
 
@@ -841,7 +960,7 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     assert!(
         (5..=8).contains(&args.len()),
-        "usage: <n> <a> <mode> <fixtures> [reference|packed] [batch_seed] [explicit_fixture_scalar]"
+        "usage: <n> <a> <mode> <fixtures> [reference|packed] [batch_seed] [explicit_fixture_scalar|hash:public_seed]"
     );
     let n: u32 = args[1].parse().unwrap();
     let a: u8 = args[2].parse().unwrap();
@@ -849,18 +968,21 @@ fn main() {
     let fixtures: u64 = args[4].parse().unwrap();
     let backend = args.get(5).map(String::as_str).unwrap_or("reference");
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
-    let explicit_fixture_scalar = args.get(7).map(|value| value.parse::<u64>().unwrap());
+    let fixture_target = FixtureTarget::parse(args.get(7).map(String::as_str));
     assert!(matches!(backend, "reference" | "packed"));
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     let modulus = curve.subgroup_order.to_u64_digits()[0];
-    if let Some(scalar) = explicit_fixture_scalar {
+    if let FixtureTarget::ExplicitScalar(scalar) = fixture_target {
         assert!(fixtures == 1, "an explicit scalar requires one fixture");
         assert!(
             (1..modulus).contains(&scalar),
             "explicit scalar must be in 1..r"
         );
+    }
+    if matches!(fixture_target, FixtureTarget::PublicHash(_)) {
+        assert!(fixtures == 1, "a public hash target requires one fixture");
     }
     for fixture_index in 0..fixtures {
         let material = if let Some(batch_seed) = batch_seed {
@@ -874,9 +996,9 @@ fn main() {
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let result = if backend == "packed" {
-            solve_fixture_packed(&curve, mode, fixture_index, seed, explicit_fixture_scalar)
+            solve_fixture_packed(&curve, mode, fixture_index, seed, fixture_target)
         } else {
-            solve_fixture(&curve, mode, fixture_index, seed, explicit_fixture_scalar)
+            solve_fixture(&curve, mode, fixture_index, seed, fixture_target)
         };
         println!("{}", result);
     }
