@@ -1487,7 +1487,9 @@ pub fn is_probable_prime(n: &BigInt) -> bool {
     if n < &two {
         return false;
     }
-    for p in [2u32, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+    for p in [
+        2u32, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
+    ] {
         let bp = BigInt::from(p);
         if n == &bp {
             return true;
