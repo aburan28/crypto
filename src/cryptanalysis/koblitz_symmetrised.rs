@@ -71,8 +71,9 @@ use rand::{Rng, SeedableRng};
 use crate::binary_ecc::curve::point_neg;
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, first_fall_degree, solve_boolean_system_filtered, FieldStructure,
-    SolveOptions, SolveStats, SolverEngine, SymElement, MAX_VARS,
+    build_decomposition_system, first_fall_degree, solve_boolean_system_filtered,
+    split_rule_default, FieldStructure, SolveOptions, SolveStats, SolverEngine, SymElement,
+    MAX_VARS,
 };
 use crate::cryptanalysis::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base_from_divisor, enumerate_decompose,
@@ -785,6 +786,7 @@ pub fn symmetrised_groebner_decompose_accepting(
         engine,
         max_solutions: usize::MAX,
         node_budget,
+        split_rule: split_rule_default(),
     };
     let mut found: Option<(Vec<usize>, bool)> = None;
     let (_, stats): (Vec<u64>, SolveStats) =
@@ -833,6 +835,7 @@ pub fn direct_x_groebner_decompose(
         engine,
         max_solutions: usize::MAX,
         node_budget,
+        split_rule: split_rule_default(),
     };
     let mut found: Option<Vec<usize>> = None;
     let (_, stats) = solve_boolean_system_filtered(&equations, n_vars, &opts, |root| {

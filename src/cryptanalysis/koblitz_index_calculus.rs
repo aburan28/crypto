@@ -139,8 +139,8 @@ use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, FieldStructure,
-    SolveOptions, SolveStats, SolverEngine,
+    build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, split_rule_default,
+    FieldStructure, SolveOptions, SolveStats, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -1409,7 +1409,10 @@ fn poly_bitmask(p: &F2mPoly) -> Option<u64> {
 /// coefficients from the leading one down.
 fn poly_sort_key(p: &F2mPoly) -> (usize, Vec<BigUint>) {
     let deg = p.degree().unwrap_or(0);
-    (deg, (0..=deg).rev().map(|i| p.coeff(i).to_biguint()).collect())
+    (
+        deg,
+        (0..=deg).rev().map(|i| p.coeff(i).to_biguint()).collect(),
+    )
 }
 
 /// **Every monic irreducible factor of `x^e − 1` over `F_q`**,
@@ -1439,7 +1442,8 @@ pub fn invariant_factors(kc: &KoblitzCurve) -> Vec<F2mPoly> {
     coeffs[0] = F2mElement::one(n);
     coeffs[ext] = F2mElement::one(n);
     let mut remaining = F2mPoly::from_coeffs(coeffs, n);
-    let mut rng = StdRng::seed_from_u64(0x5355_4246_4945_4c44 ^ u64::from(n) ^ (u64::from(kc.k) << 32));
+    let mut rng =
+        StdRng::seed_from_u64(0x5355_4246_4945_4c44 ^ u64::from(n) ^ (u64::from(kc.k) << 32));
     let mut factors: Vec<F2mPoly> = Vec::new();
     let x = F2mPoly::x(n);
     let mut h = x.clone();
@@ -1516,7 +1520,11 @@ fn equal_degree_split(
 /// For `k = 1` this is the order of [`factor_x_n_minus_1`].
 pub fn top_factor_indices(kc: &KoblitzCurve) -> Vec<usize> {
     let factors = invariant_factors(kc);
-    let top = factors.iter().filter_map(F2mPoly::degree).max().unwrap_or(0);
+    let top = factors
+        .iter()
+        .filter_map(F2mPoly::degree)
+        .max()
+        .unwrap_or(0);
     factors
         .iter()
         .enumerate()
@@ -2176,9 +2184,9 @@ impl PairSumTable {
             false
         });
         let idxs = found?;
-        let sum = idxs
-            .iter()
-            .fold(FastPoint::INFINITY, |s, &i| self.curve.add(s, self.points[i]));
+        let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
+            self.curve.add(s, self.points[i])
+        });
         (sum == target).then_some(idxs)
     }
 
@@ -2344,6 +2352,7 @@ pub fn groebner_decompose(
         engine,
         max_solutions: usize::MAX,
         node_budget,
+        split_rule: split_rule_default(),
     };
     let mut found: Option<Vec<usize>> = None;
     let (_, stats) = solve_boolean_system_filtered(&sys.equations, sys.n_vars, &opts, |root| {
@@ -4332,7 +4341,11 @@ impl FastRhoWalk<'_> {
 
     /// The smallest `(x, y)` over the signed Frobenius orbit of the
     /// state, with the coefficients scaled by the matching `±λ^k`.
-    fn canonicalize(&self, state: FastRhoState, charges: &mut KoblitzSignedRhoCharges) -> FastRhoState {
+    fn canonicalize(
+        &self,
+        state: FastRhoState,
+        charges: &mut KoblitzSignedRhoCharges,
+    ) -> FastRhoState {
         charges.canonicalizations += 1;
         if state.point.infinity {
             return state;
@@ -4641,10 +4654,7 @@ fn signed_rho_fast(
                             match table.get(&key) {
                                 Some(&previous) => Some(previous),
                                 None => {
-                                    table.insert(
-                                        key,
-                                        (state.coefficient_a, state.coefficient_b),
-                                    );
+                                    table.insert(key, (state.coefficient_a, state.coefficient_b));
                                     None
                                 }
                             }
@@ -4655,9 +4665,7 @@ fn signed_rho_fast(
                 };
                 match repeated {
                     None => {}
-                    Some(previous)
-                        if previous == (state.coefficient_a, state.coefficient_b) =>
-                    {
+                    Some(previous) if previous == (state.coefficient_a, state.coefficient_b) => {
                         report.charges.fruitless_cycles += 1;
                         let attempt = escapes.get(&key).copied().unwrap_or(0);
                         let (escaped, cycle_key) =
@@ -4789,8 +4797,10 @@ pub fn koblitz_signed_frobenius_rho_reference(
             restart,
             jumps: jumps.len(),
         });
-        report.parallel_walks =
-            rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus_u64, curve.n));
+        report.parallel_walks = rho_effective_walks(
+            options.parallel_walks,
+            rho_expected_steps(modulus_u64, curve.n),
+        );
         let mut states: Vec<KoblitzSignedRhoState> = (0..report.parallel_walks)
             .map(|_| {
                 let (point, a, b) = draw(&mut report);
@@ -4838,8 +4848,18 @@ pub fn koblitz_signed_frobenius_rho_reference(
                 let key = point_key(&state.point);
                 let (x0, y0) = coordinates(&state.point);
                 let coefficients = (
-                    state.coefficient_a.to_u64_digits().first().copied().unwrap_or(0),
-                    state.coefficient_b.to_u64_digits().first().copied().unwrap_or(0),
+                    state
+                        .coefficient_a
+                        .to_u64_digits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0),
+                    state
+                        .coefficient_b
+                        .to_u64_digits()
+                        .first()
+                        .copied()
+                        .unwrap_or(0),
                 );
                 let slot = recent_slot(x0, y0);
                 let seen = match &recent[slot] {
@@ -4909,12 +4929,8 @@ pub fn koblitz_signed_frobenius_rho_reference(
                 break;
             }
             for index in 0..examined {
-                states[index] = signed_rho_step(
-                    curve,
-                    &jumps,
-                    states[index].clone(),
-                    &mut report.charges,
-                );
+                states[index] =
+                    signed_rho_step(curve, &jumps, states[index].clone(), &mut report.charges);
             }
         }
         report.walk_ns += walk_started.elapsed().as_nanos();
@@ -5906,7 +5922,12 @@ mod tests {
                 // Each charged iteration examines one state, which either
                 // advances (one hash) or escapes (at least one hash, at
                 // most the 64-state enumeration bound).
-                assert!(report.iterations.saturating_sub(report.parallel_walks as u64) <= c.partition_hashes);
+                assert!(
+                    report
+                        .iterations
+                        .saturating_sub(report.parallel_walks as u64)
+                        <= c.partition_hashes
+                );
                 assert!(c.partition_hashes <= report.iterations + 64 * c.fruitless_cycles);
                 assert_eq!(c.frobenius_maps, c.negations_examined);
                 assert_eq!(c.frobenius_maps % u64::from(n), 0);
@@ -5929,7 +5950,8 @@ mod tests {
                 let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
                 let hits = table.lookup(sum.pack());
                 assert!(
-                    hits.iter().any(|&(_, a, b)| (a as usize, b as usize) == (i, j)),
+                    hits.iter()
+                        .any(|&(_, a, b)| (a as usize, b as usize) == (i, j)),
                     "pair ({i}, {j}) missing from the table"
                 );
             }
@@ -5967,7 +5989,10 @@ mod tests {
             assert_eq!(report.recovered_log, Some(d));
             escaped_total += report.charges.fruitless_cycles;
         }
-        assert!(escaped_total > 0, "the two-jump walk never met a fruitless cycle");
+        assert!(
+            escaped_total > 0,
+            "the two-jump walk never met a fruitless cycle"
+        );
     }
 
     #[test]
@@ -5994,7 +6019,10 @@ mod tests {
                     },
                     &mut |_| {},
                 );
-                assert!(report.verified, "K_{a}/2^{n} seed {seed} did not recover the log");
+                assert!(
+                    report.verified,
+                    "K_{a}/2^{n} seed {seed} did not recover the log"
+                );
                 assert_eq!(report.recovered_log, Some(d));
                 total += report.iterations as f64;
             }
@@ -6051,8 +6079,7 @@ mod tests {
                 parallel_walks: 4,
             };
             let fast = koblitz_signed_frobenius_rho_with_progress(&kc, &q, &options, &mut |_| {});
-            let reference =
-                koblitz_signed_frobenius_rho_reference(&kc, &q, &options, &mut |_| {});
+            let reference = koblitz_signed_frobenius_rho_reference(&kc, &q, &options, &mut |_| {});
             assert!(fast.verified, "K_{a}/2^{n}: fast walk found the log");
             assert_eq!(fast.recovered_log, Some(d.clone()));
             assert_eq!(fast.recovered_log, reference.recovered_log);
@@ -6085,7 +6112,10 @@ mod tests {
             assert_eq!(again, d);
             assert_eq!(report.trials, report_again.trials);
         }
-        assert_eq!(solver.solve(&BinaryPoint::Infinity).unwrap().0, BigUint::zero());
+        assert_eq!(
+            solver.solve(&BinaryPoint::Infinity).unwrap().0,
+            BigUint::zero()
+        );
     }
 
     #[test]
@@ -7891,21 +7921,39 @@ mod subfield_tests {
             assert_eq!(koblitz.trace, general.trace);
             assert_eq!(koblitz.curve.generator, general.curve.generator);
             assert_eq!(koblitz.group_order, koblitz_point_count(a, n));
-            assert_eq!((koblitz.k, koblitz.q, koblitz.a_index, koblitz.b_index), (1, 2, u64::from(a), 1));
+            assert_eq!(
+                (koblitz.k, koblitz.q, koblitz.a_index, koblitz.b_index),
+                (1, 2, u64::from(a), 1)
+            );
             assert_eq!(koblitz.subfield_basis, vec![F2mElement::one(n)]);
             assert_eq!(koblitz.label(), format!("K_{a} / GF(2^{n})"));
             // The factor list and the legacy family are the F_2 ones.
-            let masks: Vec<u64> = invariant_factors(&koblitz).iter().map(|f| poly_bitmask(f).unwrap()).collect();
+            let masks: Vec<u64> = invariant_factors(&koblitz)
+                .iter()
+                .map(|f| poly_bitmask(f).unwrap())
+                .collect();
             assert_eq!(masks, all_factors_of_x_n_minus_1(n));
-            assert_eq!(top_factor_indices(&koblitz).len(), factor_x_n_minus_1(n).len());
+            assert_eq!(
+                top_factor_indices(&koblitz).len(),
+                factor_x_n_minus_1(n).len()
+            );
             for (i, &idx) in top_factor_indices(&koblitz).iter().enumerate() {
                 assert_eq!(masks[idx], factor_x_n_minus_1(n)[i]);
             }
         }
         assert!(KoblitzCurve::new(2, 9).is_none());
-        assert!(KoblitzCurve::subfield(1, 9, 0, 2).is_none(), "b must be 1 over F_2");
-        assert!(KoblitzCurve::subfield(2, 9, 0, 1).is_none(), "k must divide n");
-        assert!(KoblitzCurve::subfield(2, 12, 0, 1).is_none(), "n / k must be odd");
+        assert!(
+            KoblitzCurve::subfield(1, 9, 0, 2).is_none(),
+            "b must be 1 over F_2"
+        );
+        assert!(
+            KoblitzCurve::subfield(2, 9, 0, 1).is_none(),
+            "k must divide n"
+        );
+        assert!(
+            KoblitzCurve::subfield(2, 12, 0, 1).is_none(),
+            "n / k must be odd"
+        );
         assert!(KoblitzCurve::subfield(2, 10, 4, 1).is_none(), "a below q");
         assert!(KoblitzCurve::subfield(9, 27, 0, 1).is_none(), "k ≤ 8");
     }
@@ -7916,8 +7964,18 @@ mod subfield_tests {
         // full enumeration of the abscissae; the coefficients lie in
         // the subfield and the group order is where it should be.
         let mut checked = 0;
-        for (k, n, a, b) in [(2u32, 6u32, 0u64, 2u64), (2, 10, 0, 2), (2, 14, 0, 2), (3, 9, 1, 1), (3, 9, 2, 5), (4, 12, 3, 5), (2, 10, 3, 3)] {
-            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+        for (k, n, a, b) in [
+            (2u32, 6u32, 0u64, 2u64),
+            (2, 10, 0, 2),
+            (2, 14, 0, 2),
+            (3, 9, 1, 1),
+            (3, 9, 2, 5),
+            (4, 12, 3, 5),
+            (2, 10, 3, 3),
+        ] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else {
+                continue;
+            };
             checked += 1;
             let irr = &kc.curve.irreducible;
             let q = 1u64 << k;
@@ -7935,40 +7993,85 @@ mod subfield_tests {
                 let x = F2mElement::from_biguint(&BigUint::from(raw), n);
                 count += points_with_x(&kc.curve, &x).len() as u64;
             }
-            assert_eq!(BigUint::from(count), kc.group_order, "k={k} n={n} a={a} b={b}");
+            assert_eq!(
+                BigUint::from(count),
+                kc.group_order,
+                "k={k} n={n} a={a} b={b}"
+            );
             assert_eq!(&kc.subgroup_order * &kc.cofactor, kc.group_order);
-            assert!((kc.trace.unsigned_abs() as f64) <= 2.0 * (q as f64).sqrt() + 1e-9, "Hasse over F_q");
-            assert_eq!(kc.mul(kc.generator(), &kc.subgroup_order), BinaryPoint::Infinity);
+            assert!(
+                (kc.trace.unsigned_abs() as f64) <= 2.0 * (q as f64).sqrt() + 1e-9,
+                "Hasse over F_q"
+            );
+            assert_eq!(
+                kc.mul(kc.generator(), &kc.subgroup_order),
+                BinaryPoint::Infinity
+            );
         }
         assert!(checked >= 3, "only {checked} instances constructed");
     }
 
     #[test]
     fn the_q_frobenius_acts_as_lambda_on_subfield_curves() {
-        for (k, n, a, b) in [(2u32, 10u32, 0u64, 2u64), (2, 14, 0, 2), (2, 14, 1, 2), (3, 15, 1, 3)] {
-            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+        for (k, n, a, b) in [
+            (2u32, 10u32, 0u64, 2u64),
+            (2, 14, 0, 2),
+            (2, 14, 1, 2),
+            (3, 15, 1, 3),
+        ] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else {
+                continue;
+            };
             let r = &kc.subgroup_order;
             // λ² − tλ + q ≡ 0 (mod r).
-            let t = if kc.trace >= 0 { BigUint::from(kc.trace as u64) % r } else { r - BigUint::from((-kc.trace) as u64) % r };
+            let t = if kc.trace >= 0 {
+                BigUint::from(kc.trace as u64) % r
+            } else {
+                r - BigUint::from((-kc.trace) as u64) % r
+            };
             let lhs = (&kc.lambda * &kc.lambda + BigUint::from(kc.q)) % r;
             let rhs = (&t * &kc.lambda) % r;
             assert_eq!(lhs, rhs, "characteristic equation");
             let g = kc.generator();
             for s in [1u64, 2, 3, 17, 1000] {
                 let p = kc.mul(g, &BigUint::from(s));
-                assert_eq!(kc.frobenius(&p), kc.mul(&p, &kc.lambda), "k={k} n={n}: π ≠ [λ] on [{s}]G");
-                assert_eq!(kc.frobenius(&p), BinaryPoint::Affine {
-                    x: match &p { BinaryPoint::Affine { x, .. } => x.square_k_times(k, &kc.curve.irreducible), _ => unreachable!() },
-                    y: match &p { BinaryPoint::Affine { y, .. } => y.square_k_times(k, &kc.curve.irreducible), _ => unreachable!() },
-                });
+                assert_eq!(
+                    kc.frobenius(&p),
+                    kc.mul(&p, &kc.lambda),
+                    "k={k} n={n}: π ≠ [λ] on [{s}]G"
+                );
+                assert_eq!(
+                    kc.frobenius(&p),
+                    BinaryPoint::Affine {
+                        x: match &p {
+                            BinaryPoint::Affine { x, .. } =>
+                                x.square_k_times(k, &kc.curve.irreducible),
+                            _ => unreachable!(),
+                        },
+                        y: match &p {
+                            BinaryPoint::Affine { y, .. } =>
+                                y.square_k_times(k, &kc.curve.irreducible),
+                            _ => unreachable!(),
+                        },
+                    }
+                );
             }
         }
     }
 
     #[test]
     fn invariant_factors_over_the_subfield_factor_x_e_minus_1() {
-        for (k, n, a, b) in [(2u32, 10u32, 0u64, 2u64), (2, 14, 0, 2), (2, 18, 2, 2), (3, 15, 1, 3), (4, 20, 3, 5), (2, 26, 0, 2)] {
-            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else { continue };
+        for (k, n, a, b) in [
+            (2u32, 10u32, 0u64, 2u64),
+            (2, 14, 0, 2),
+            (2, 18, 2, 2),
+            (3, 15, 1, 3),
+            (4, 20, 3, 5),
+            (2, 26, 0, 2),
+        ] {
+            let Some(kc) = KoblitzCurve::subfield(k, n, a, b) else {
+                continue;
+            };
             let irr = &kc.curve.irreducible;
             let e = kc.extension_degree();
             let factors = invariant_factors(&kc);
@@ -7984,23 +8087,34 @@ mod subfield_tests {
             let mut coeffs = vec![F2mElement::zero(n); e as usize + 1];
             coeffs[0] = F2mElement::one(n);
             coeffs[e as usize] = F2mElement::one(n);
-            assert!(product.eq_poly(&F2mPoly::from_coeffs(coeffs, n)), "k={k} n={n}: product is not x^e − 1");
+            assert!(
+                product.eq_poly(&F2mPoly::from_coeffs(coeffs, n)),
+                "k={k} n={n}: product is not x^e − 1"
+            );
             // Degrees are the q-cyclotomic coset sizes mod e.
             let q_mod = (kc.q % u64::from(e)) as u32;
             let mut seen = vec![false; e as usize];
             let mut sizes = Vec::new();
             for start in 0..e {
-                if seen[start as usize] { continue; }
+                if seen[start as usize] {
+                    continue;
+                }
                 let mut x = start;
                 let mut size = 0;
-                while !seen[x as usize] { seen[x as usize] = true; size += 1; x = (x * q_mod) % e; }
+                while !seen[x as usize] {
+                    seen[x as usize] = true;
+                    size += 1;
+                    x = (x * q_mod) % e;
+                }
                 sizes.push(size);
             }
             sizes.sort_unstable();
             let mut degrees: Vec<usize> = factors.iter().map(|f| f.degree().unwrap()).collect();
             degrees.sort_unstable();
             assert_eq!(degrees, sizes, "k={k} n={n}");
-            assert!(top_factor_indices(&kc).iter().all(|&i| factors[i].degree() == Some(*sizes.last().unwrap())));
+            assert!(top_factor_indices(&kc)
+                .iter()
+                .all(|&i| factors[i].degree() == Some(*sizes.last().unwrap())));
             // The canonical order is deterministic across rebuilds.
             let again = invariant_factors(&kc);
             assert!(factors.iter().zip(&again).all(|(x, y)| x.eq_poly(y)));
@@ -8013,7 +8127,10 @@ mod subfield_tests {
                 let keys: HashSet<BigUint> = span.iter().map(F2mElement::to_biguint).collect();
                 assert_eq!(keys.len(), span.len());
                 for x in &span {
-                    assert!(keys.contains(&kc.frobenius_x(x).to_biguint()), "not π_q-invariant");
+                    assert!(
+                        keys.contains(&kc.frobenius_x(x).to_biguint()),
+                        "not π_q-invariant"
+                    );
                     let mut img = F2mElement::zero(n);
                     for (i, c) in f.coeffs.iter().enumerate() {
                         img = img.add(&c.mul(&x.square_k_times(i as u32 * k, irr), irr));
@@ -8030,7 +8147,9 @@ mod subfield_tests {
         let kc = KoblitzCurve::subfield(2, 14, 0, 2).unwrap();
         let factors = invariant_factors(&kc);
         let idx = (0..factors.len())
-            .filter_map(|i| build_frobenius_factor_base_from_divisor(&kc, &[i]).map(|fb| (fb.points.len(), i)))
+            .filter_map(|i| {
+                build_frobenius_factor_base_from_divisor(&kc, &[i]).map(|fb| (fb.points.len(), i))
+            })
             .max()
             .map(|(_, i)| i)
             .unwrap();
@@ -8038,11 +8157,18 @@ mod subfield_tests {
         assert!(fb.points.len() > 20, "{} points", fb.points.len());
         let keys = fb.index_map();
         for p in &fb.points {
-            assert!(keys.contains_key(&point_key(&kc.frobenius(p))), "base not π_q-invariant");
+            assert!(
+                keys.contains_key(&point_key(&kc.frobenius(p))),
+                "base not π_q-invariant"
+            );
             assert!(keys.contains_key(&point_key(&point_neg(p))));
         }
         for orbit in &fb.orbits {
-            assert_eq!(kc.extension_degree() % orbit.len() as u32, 0, "orbit length divides e");
+            assert_eq!(
+                kc.extension_degree() % orbit.len() as u32,
+                0,
+                "orbit length divides e"
+            );
         }
         assert!(fb.m_can_decompose(&kc, 2));
         let o = opts(2);

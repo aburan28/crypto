@@ -783,6 +783,100 @@ pub struct SolveOptions {
     /// Cap on algebraic reductions (one per splitting node, plus one
     /// per propagation round).
     pub node_budget: usize,
+    /// How the splitter picks its variable when the algebra stalls.
+    pub split_rule: SplitRule,
+}
+
+/// Which free variable the splitter branches on.
+///
+/// Every rule picks *some* unassigned variable, so the search stays
+/// exhaustive whichever is chosen; they differ only in how quickly the
+/// branch closes.  `LowestFree` is the historical behaviour and stays
+/// the default so existing measurements keep their meaning.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum SplitRule {
+    /// Lowest-indexed unassigned variable.  On the descent systems the
+    /// variable index runs point by point, so this fixes one summand's
+    /// bits before touching the next.
+    #[default]
+    LowestFree,
+    /// The free variable occurring in the most monomials of the current
+    /// system.  Substituting it removes the most terms.
+    MostFrequent,
+    /// Occurrences weighted by `2^{1-d}` for a degree-`d` monomial, so a
+    /// variable sitting in short monomials outranks one buried in long
+    /// ones (the classic MOM rule).  A short monomial is closer to
+    /// forcing an assignment, so this favours propagation over bulk
+    /// term removal.
+    MinTermWeight,
+}
+
+/// The splitting rule the decomposition entry points use when their
+/// caller does not build [`SolveOptions`] itself, overridable through
+/// the `SOLVER_SPLIT_RULE` environment variable (`lowest`, `frequent`,
+/// `mom`).  Unset means [`SplitRule::LowestFree`], so the production
+/// paths and every earlier measurement are unchanged by default.
+pub fn split_rule_default() -> SplitRule {
+    match std::env::var("SOLVER_SPLIT_RULE").ok().as_deref() {
+        Some("frequent") => SplitRule::MostFrequent,
+        Some("mom") => SplitRule::MinTermWeight,
+        _ => SplitRule::LowestFree,
+    }
+}
+
+/// Pick the variable to split on among those still unassigned.
+///
+/// Returns `None` only when every variable is assigned.  A free
+/// variable that no longer occurs in the system is a don't-care: the
+/// occurrence-based rules score it zero, and the lowest such variable
+/// is taken when nothing scores higher.
+fn choose_split(
+    system: &[F2BoolPoly],
+    assignment: &[Option<bool>],
+    rule: SplitRule,
+) -> Option<usize> {
+    let lowest = assignment.iter().position(|a| a.is_none())?;
+    if rule == SplitRule::LowestFree {
+        return Some(lowest);
+    }
+    let mut score = vec![0f64; assignment.len()];
+    for p in system {
+        for t in &p.terms {
+            let d = t.mask.count_ones();
+            if d == 0 {
+                continue;
+            }
+            let w = match rule {
+                SplitRule::MinTermWeight => (2.0f64).powi(1 - d as i32),
+                _ => 1.0,
+            };
+            let mut m = t.mask;
+            while m != 0 {
+                let v = m.trailing_zeros() as usize;
+                m &= m - 1;
+                if v < score.len() && assignment[v].is_none() {
+                    score[v] += w;
+                }
+            }
+        }
+    }
+    // Highest score wins; ties go to the lowest index, so the rule is
+    // deterministic and degrades to LowestFree on an empty system.
+    let best = score
+        .iter()
+        .enumerate()
+        .filter(|(v, _)| assignment[*v].is_none())
+        .fold(
+            (lowest, 0f64),
+            |(bv, bs), (v, &sc)| {
+                if sc > bs {
+                    (v, sc)
+                } else {
+                    (bv, bs)
+                }
+            },
+        );
+    Some(best.0)
 }
 
 impl Default for SolveOptions {
@@ -791,6 +885,7 @@ impl Default for SolveOptions {
             engine: SolverEngine::default(),
             max_solutions: 32,
             node_budget: 4096,
+            split_rule: SplitRule::default(),
         }
     }
 }
@@ -971,7 +1066,7 @@ fn solve_rec(
         }
     }
 
-    match assignment.iter().position(|a| a.is_none()) {
+    match choose_split(&system, &assignment, opts.split_rule) {
         None => {
             let mut pt = 0u64;
             for (i, a) in assignment.iter().enumerate() {
@@ -1237,6 +1332,77 @@ mod tests {
                 let zj = F2mElement::from_bit_positions(&[j], curve.m);
                 let want = zi.mul(&zj, &curve.irreducible);
                 assert_eq!(st.reduced[i as usize][j as usize], want.raw_bits()[0]);
+            }
+        }
+    }
+
+    /// A splitting rule may change how fast the search closes, never
+    /// what it finds: on random Boolean systems all three rules return
+    /// the same solution set, and it is the true one.
+    #[test]
+    fn every_split_rule_finds_exactly_the_solutions() {
+        use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+        let mut seed = 0x9E3779B97F4A7C15u64;
+        let mut next = move || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for case in 0..12 {
+            let n_vars = 6 + (case % 3);
+            let n_eqs = 3 + (case % 4);
+            let equations: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let terms: Vec<F2BoolMono> = (0..4)
+                        .map(|_| {
+                            let r = next();
+                            // A degree-≤2 monomial over the first n_vars.
+                            let a = (r % n_vars as u64) as u32;
+                            let b = ((r >> 8) % n_vars as u64) as u32;
+                            if (r >> 16) & 1 == 0 {
+                                F2BoolMono::var(a)
+                            } else {
+                                F2BoolMono {
+                                    mask: (1u64 << a) | (1u64 << b),
+                                }
+                            }
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(terms, n_vars)
+                })
+                .collect();
+
+            // Truth by enumeration.
+            let mut truth: Vec<u64> = Vec::new();
+            for pt in 0u64..(1u64 << n_vars) {
+                if equations.iter().all(|e| e.eval(pt) == 0) {
+                    truth.push(pt);
+                }
+            }
+
+            for rule in [
+                SplitRule::LowestFree,
+                SplitRule::MostFrequent,
+                SplitRule::MinTermWeight,
+            ] {
+                let opts = SolveOptions {
+                    engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                    max_solutions: usize::MAX,
+                    node_budget: 100_000,
+                    split_rule: rule,
+                };
+                let (mut got, stats) = solve_boolean_system(&equations, n_vars, &opts);
+                got.sort_unstable();
+                got.dedup();
+                assert!(
+                    !stats.exhausted,
+                    "case {case} rule {rule:?} ran out of budget"
+                );
+                assert_eq!(
+                    got, truth,
+                    "case {case} rule {rule:?} disagrees with enumeration"
+                );
             }
         }
     }
