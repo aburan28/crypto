@@ -8,15 +8,24 @@
 // no DMA, no interrupts: the engine's traffic is a dozen register accesses
 // per distinguished point, one every 2**26 steps per walk.
 //
-// Clocking.  Everything runs on clk_main_a0, which the F2 shell fixes at
-// 250 MHz.  The engine's timing headroom above that is unknown until the
-// first build reports it; if it is large, the next step is AWS_CLK_GEN
-// (clk_extra_a2 at 375 MHz) with a clock-domain crossing on the load and
-// report paths, see ../README.md.
+// Clocking.  The shell fixes clk_main_a0 at 250 MHz and the engine closes
+// well above that, so the register block and the engines run on their own
+// clock, clk_eng, made from clk_main_a0 by one MMCM (MMCM_ENG):
+//
+//   f(clk_eng) = 250 MHz * ECC_MMCM_MULT / ECC_MMCM_DIV
+//
+// with the VCO at 250 * ECC_MMCM_MULT MHz, which must stay within 800 to
+// 1600.  The defaults (4, 3) give 333.3 MHz; build_afi.sh's CLK_MHZ picks
+// the pair.  The OCL port stays on clk_main_a0 and crosses to clk_eng in
+// BRIDGE (ec2k_axil_cdc, VHDL), whose synchronisers and data captures are
+// the only paths between the two domains; cl_timing_user.xdc constrains
+// them by name.  The engine reset is the shell reset or the MMCM losing
+// lock, asserted asynchronously and released synchronously to clk_eng,
+// then registered once more before it fans out.
 //
 // Geometry is set at build time through cl_ecc2k130_defines.vh
-// (ECC_NENG, ECC_ID_W, ECC_DP_WEIGHT); build_afi.sh passes them as
-// -verilog_define so one source builds every image.
+// (ECC_NENG, ECC_ID_W, ECC_DP_WEIGHT, ECC_MMCM_*); build_afi.sh passes
+// them as -verilog_define so one source builds every image.
 
 module cl_ecc2k130
     #(
@@ -47,35 +56,127 @@ module cl_ecc2k130
   end
 
 //=============================================================================
-// RESET
+// SHELL-SIDE RESET
 //=============================================================================
 
-  // rst_main_n is synchronous to clk_main_a0; two flops give the fanout to
-  // every engine its own stage, and the block's reset is active high.
-  logic [1:0] rst_pipe = 2'b11;
-  logic       rst;
-  always_ff @(posedge clk_main_a0) rst_pipe <= {rst_pipe[0], ~rst_main_n};
-  assign rst = rst_pipe[1];
+  // rst_main_n is synchronous to clk_main_a0; registered twice for fanout,
+  // active high for the VHDL.
+  logic [1:0] rst_sh_pipe = 2'b11;
+  logic       rst_sh;
+  always_ff @(posedge clk_main_a0) rst_sh_pipe <= {rst_sh_pipe[0], ~rst_main_n};
+  assign rst_sh = rst_sh_pipe[1];
 
 //=============================================================================
-// OCL -> ec2k_axil
+// ENGINE CLOCK
 //=============================================================================
 
-  ec2k_axil
+  localparam real    ECC_MMCM_MULT_R = `ECC_MMCM_MULT;
+  localparam real    ECC_MMCM_DIV_R  = `ECC_MMCM_DIV;
+  localparam integer ECC_CLK_KHZ     = int'(250000.0 * ECC_MMCM_MULT_R / ECC_MMCM_DIV_R);
+
+  logic clk_fb, clk_fb_buf, clk_eng_raw, clk_eng, mmcm_locked;
+
+  MMCME4_ADV
     #(
-      .NENG      (`ECC_NENG),
-      .ID_W      (`ECC_ID_W),
-      .LOG_W     (`ECC_LOG_W),
-      .LOG_NB    (`ECC_LOG_NB),
-      .FLUSH_CLK (`ECC_FLUSH_CLK),
-      .CNT_W     (32),
-      .DP_WEIGHT (`ECC_DP_WEIGHT),
-      .DP_FIFO_W (`ECC_DP_FIFO_W)
+      .BANDWIDTH          ("OPTIMIZED"),
+      .CLKIN1_PERIOD      (4.000),
+      .DIVCLK_DIVIDE      (1),
+      .CLKFBOUT_MULT_F    (ECC_MMCM_MULT_R),
+      .CLKFBOUT_PHASE     (0.0),
+      .CLKOUT0_DIVIDE_F   (ECC_MMCM_DIV_R),
+      .CLKOUT0_DUTY_CYCLE (0.5),
+      .CLKOUT0_PHASE      (0.0),
+      .COMPENSATION       ("AUTO"),
+      .STARTUP_WAIT       ("FALSE")
       )
-  ENGINE
+  MMCM_ENG
     (
-      .clk       (clk_main_a0),
-      .rst       (rst),
+      .CLKIN1       (clk_main_a0),
+      .CLKIN2       (1'b0),
+      .CLKINSEL     (1'b1),
+      .CLKFBIN      (clk_fb_buf),
+      .CLKFBOUT     (clk_fb),
+      .CLKFBOUTB    (),
+      .CLKOUT0      (clk_eng_raw),
+      .CLKOUT0B     (),
+      .CLKOUT1      (),
+      .CLKOUT1B     (),
+      .CLKOUT2      (),
+      .CLKOUT2B     (),
+      .CLKOUT3      (),
+      .CLKOUT3B     (),
+      .CLKOUT4      (),
+      .CLKOUT5      (),
+      .CLKOUT6      (),
+      .DADDR        (7'd0),
+      .DCLK         (1'b0),
+      .DEN          (1'b0),
+      .DI           (16'd0),
+      .DWE          (1'b0),
+      .DO           (),
+      .DRDY         (),
+      .PSCLK        (1'b0),
+      .PSEN         (1'b0),
+      .PSINCDEC     (1'b0),
+      .PSDONE       (),
+      .LOCKED       (mmcm_locked),
+      .CLKINSTOPPED (),
+      .CLKFBSTOPPED (),
+      .PWRDWN       (1'b0),
+      .RST          (rst_sh),
+      .CDDCDONE     (),
+      .CDDCREQ      (1'b0)
+      );
+
+  BUFG BUFG_FB  (.I(clk_fb),      .O(clk_fb_buf));
+  BUFG BUFG_ENG (.I(clk_eng_raw), .O(clk_eng));
+
+//=============================================================================
+// ENGINE-SIDE RESET
+//=============================================================================
+
+  // Asserted at once by the shell reset or loss of lock, released after
+  // four clk_eng edges of neither; then registered twice more for fanout.
+  logic rst_eng_async, rst_eng_a;
+  logic [1:0] rst_eng_pipe = 2'b11;
+  logic       rst_eng;
+
+  assign rst_eng_async = rst_sh | ~mmcm_locked;
+
+  xpm_cdc_async_rst
+    #(
+      .DEST_SYNC_FF    (4),
+      .INIT_SYNC_FF    (1),
+      .RST_ACTIVE_HIGH (1)
+      )
+  RST_ENG_SYNC
+    (
+      .src_arst  (rst_eng_async),
+      .dest_clk  (clk_eng),
+      .dest_arst (rst_eng_a)
+      );
+
+  always_ff @(posedge clk_eng) rst_eng_pipe <= {rst_eng_pipe[0], rst_eng_a};
+  assign rst_eng = rst_eng_pipe[1];
+
+//=============================================================================
+// OCL -> BRIDGE (clk_main_a0 -> clk_eng) -> ec2k_axil
+//=============================================================================
+
+  logic [31:0] e_awaddr, e_wdata, e_araddr, e_rdata;
+  logic [3:0]  e_wstrb;
+  logic [1:0]  e_bresp, e_rresp;
+  logic        e_awvalid, e_awready, e_wvalid, e_wready, e_bvalid, e_bready;
+  logic        e_arvalid, e_arready, e_rvalid, e_rready;
+
+  ec2k_axil_cdc
+    #(
+      .SYNC_FF (3)
+      )
+  BRIDGE
+    (
+      .s_clk     (clk_main_a0),
+      .s_rst     (rst_sh),
       .s_awaddr  (ocl_cl_awaddr),
       .s_awvalid (ocl_cl_awvalid),
       .s_awready (cl_ocl_awready),
@@ -92,7 +193,61 @@ module cl_ecc2k130
       .s_rdata   (cl_ocl_rdata),
       .s_rresp   (cl_ocl_rresp),
       .s_rvalid  (cl_ocl_rvalid),
-      .s_rready  (ocl_cl_rready)
+      .s_rready  (ocl_cl_rready),
+      .m_clk     (clk_eng),
+      .m_rst     (rst_eng),
+      .m_awaddr  (e_awaddr),
+      .m_awvalid (e_awvalid),
+      .m_awready (e_awready),
+      .m_wdata   (e_wdata),
+      .m_wstrb   (e_wstrb),
+      .m_wvalid  (e_wvalid),
+      .m_wready  (e_wready),
+      .m_bresp   (e_bresp),
+      .m_bvalid  (e_bvalid),
+      .m_bready  (e_bready),
+      .m_araddr  (e_araddr),
+      .m_arvalid (e_arvalid),
+      .m_arready (e_arready),
+      .m_rdata   (e_rdata),
+      .m_rresp   (e_rresp),
+      .m_rvalid  (e_rvalid),
+      .m_rready  (e_rready)
+      );
+
+  ec2k_axil
+    #(
+      .NENG      (`ECC_NENG),
+      .ID_W      (`ECC_ID_W),
+      .LOG_W     (`ECC_LOG_W),
+      .LOG_NB    (`ECC_LOG_NB),
+      .FLUSH_CLK (`ECC_FLUSH_CLK),
+      .CNT_W     (32),
+      .DP_WEIGHT (`ECC_DP_WEIGHT),
+      .DP_FIFO_W (`ECC_DP_FIFO_W),
+      .CLK_KHZ   (ECC_CLK_KHZ)
+      )
+  ENGINE
+    (
+      .clk       (clk_eng),
+      .rst       (rst_eng),
+      .s_awaddr  (e_awaddr),
+      .s_awvalid (e_awvalid),
+      .s_awready (e_awready),
+      .s_wdata   (e_wdata),
+      .s_wstrb   (e_wstrb),
+      .s_wvalid  (e_wvalid),
+      .s_wready  (e_wready),
+      .s_bresp   (e_bresp),
+      .s_bvalid  (e_bvalid),
+      .s_bready  (e_bready),
+      .s_araddr  (e_araddr),
+      .s_arvalid (e_arvalid),
+      .s_arready (e_arready),
+      .s_rdata   (e_rdata),
+      .s_rresp   (e_rresp),
+      .s_rvalid  (e_rvalid),
+      .s_rready  (e_rready)
       );
 
 //=============================================================================

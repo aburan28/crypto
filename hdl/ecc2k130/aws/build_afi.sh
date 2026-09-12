@@ -18,6 +18,11 @@
 #   ID_W       walks per engine = 2**ID_W (default 8)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
 #              the challenge's; must equal campaign.json dpWeight)
+#   CLK_MHZ    engine clock: 250, 300, 333 (default), 350, 375 or 400; or set
+#              MMCM_MULT and MMCM_DIV directly (engine clock = 250 * MULT /
+#              DIV, VCO = 250 * MULT within 800..1600).  Below 250 there is
+#              no point; above what the routed design closes, the image is
+#              flagged timing violated and its reports fail verification.
 # Build instance:
 #   BUILD_TYPE  default r6i.4xlarge (128 GB; Vivado on a VU47P wants > 64)
 #   AMI         override the FPGA Developer AMI lookup (needs a Marketplace
@@ -51,6 +56,20 @@ KEY_NAME=${KEY_NAME:-}
 NENG=${NENG:-48}
 ID_W=${ID_W:-8}
 DP_WEIGHT=${DP_WEIGHT:-34}
+CLK_MHZ=${CLK_MHZ:-333}
+case $CLK_MHZ in
+    250) M=4 D=4 ;;
+    300) M=6 D=5 ;;
+    333) M=4 D=3 ;;
+    350) M=4.375 D=3.125 ;;
+    375) M=6 D=4 ;;
+    400) M=4 D=2.5 ;;
+    *)   [ -n "${MMCM_MULT:-}" ] && [ -n "${MMCM_DIV:-}" ] \
+             || { echo "CLK_MHZ=$CLK_MHZ has no table entry; set MMCM_MULT and MMCM_DIV" >&2; exit 1; } ;;
+esac
+MMCM_MULT=${MMCM_MULT:-$M}
+MMCM_DIV=${MMCM_DIV:-$D}
+CLK_MHZ=$(python3 -c "print(round(250 * $MMCM_MULT / $MMCM_DIV))")
 REPO=$(cd ../../.. && pwd)
 
 cmd=${1:-status}
@@ -78,7 +97,7 @@ push)
     ;;
 
 launch)
-    TAG=${2:-$(date -u +%Y%m%d-%H%M%S)-n$NENG}
+    TAG=${2:-$(date -u +%Y%m%d-%H%M%S)-n$NENG-c$CLK_MHZ}
     aws s3api head-object --bucket "$BUCKET" --key fpga/source.tar.gz >/dev/null 2>&1 \
         || { echo "no source in the bucket; run ./build_afi.sh push first" >&2; exit 1; }
 
@@ -148,6 +167,7 @@ launch)
         echo '#!/bin/bash'
         echo "BUCKET=$BUCKET; TAG=$TAG; REGION=$AWS_DEFAULT_REGION"
         echo "NENG=$NENG; ID_W=$ID_W; DP_WEIGHT=$DP_WEIGHT; NO_SHUTDOWN=${KEEP:-0}"
+        echo "MMCM_MULT=$MMCM_MULT; MMCM_DIV=$MMCM_DIV; CLK_MHZ=$CLK_MHZ"
         [ -n "$credLine" ] && echo "$credLine"
         cat build_afi_instance.sh
     } > "$ud"
@@ -162,7 +182,7 @@ launch)
           --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-fpga-build-$TAG},{Key=Project,Value=$STACK},{Key=BuildTag,Value=$TAG}]" \
           --query 'Instances[0].InstanceId' --output text)
     rm -f "$ud"
-    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT"
+    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)"
     echo "follow with: ./build_afi.sh status $TAG   (the instance terminates itself when done)"
     ;;
 

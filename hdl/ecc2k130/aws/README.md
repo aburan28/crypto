@@ -79,15 +79,36 @@ nothing else.
 
 ## Clocking
 
-The engines run on `clk_main_a0`, which the F2 shell fixes at 250 MHz, with
-no clock-domain crossing: the register block and the engines share the
-clock, and the OCL AXI-Lite port is on it too. The engine alone synthesises
-with +1.98 ns of slack at 4.0 ns, so 250 MHz leaves margin for the first
-build and costs at most a third of the throughput. If the timing report shows real slack,
-the next step is the HDK's `AWS_CLK_GEN` block, which offers `clk_extra_a2`
-at 375 MHz among others; that needs an AXI-Lite clock converter between
-the OCL port and `ec2k_axil` (or `ec2k_axil` on the fast clock with the
-converter in front), a small change to `cl_ecc2k130.sv`.
+The F2 shell fixes `clk_main_a0` at 250 MHz, and the engine synthesises
+with +1.98 ns of slack at 4.0 ns, so the CL makes its own clock: one
+`MMCME4_ADV` (`MMCM_ENG` in `cl_ecc2k130.sv`) multiplies `clk_main_a0` by
+`ECC_MMCM_MULT / ECC_MMCM_DIV` into `clk_eng`, and the register block and
+every engine run on that. `build_afi.sh` takes `CLK_MHZ` (250, 300, 333 —
+the default — 350, 375, 400) or the raw `MMCM_MULT` / `MMCM_DIV` pair;
+the VCO at `250 · MULT` MHz must stay within 800–1600, and both values may
+be fractional in eighths. The image reports the frequency it was built
+for in the `CLOCK` register and the host prints it.
+
+The shell's OCL port stays on `clk_main_a0` and crosses to `clk_eng` in
+`BRIDGE`, an `ec2k_axil_cdc` (`../ec2k_axil_cdc.vhd`): one transaction of
+each kind in flight, level handshakes through `ASYNC_REG` synchronisers,
+data written a clock before its flag and copied a synchroniser after it.
+Those synchroniser inputs and data copies are the only paths between the
+two clocks, and `cl_timing_user.xdc` constrains exactly them by name
+(false path into `cdc_*_meta`, `set_max_delay -datapath_only` from
+`cdc_*_src` to `cdc_*_cap`). Because both clocks come from the same
+source, Vivado times anything else that crosses against their edge
+relationship, so a path that was forgotten fails timing rather than
+sneaking through. The engine reset is the shell reset or the MMCM losing
+lock, through an `xpm_cdc_async_rst` into `clk_eng` and one more register
+per engine inside `ec2k_axil`, so no single flop drives every engine.
+
+The MMCM and bridge cost 250 LUTs. Above what the routed design closes,
+the build is flagged `timingViolated` in `afi.json`; such an image runs
+(the host verifies every report by rewalking it, so a wrong step costs
+throughput, not corpus integrity) but should be rebuilt one table entry
+lower. The 250 MHz entry (`MMCM_MULT=4 MMCM_DIV=4`) is the baseline with
+the same structure.
 
 ## What each F2 instance does
 
@@ -156,7 +177,7 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per engine (step unit + walker) | ~10k | **13 146**, of which 4 812 LUTRAM; 7 388 FF |
 | Register block (`ec2k_axil`, 4 engines) | — | 1 449 LUTs, 1 773 FF in total |
 | BRAM | 0 | 0 |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns for the engine alone; the shell fixes `clk_main_a0` at 250 MHz |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +0.83 ns at 3.0 ns (synthesis); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
