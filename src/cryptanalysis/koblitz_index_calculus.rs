@@ -2116,7 +2116,7 @@ fn prefetch(address: *const u64) {
 /// Hash of a packed pair sum for the presence filter, independent of the
 /// bucket index (which uses the key's high bits).
 #[inline]
-pub fn pair_filter_hash(key: u64) -> u64 {
+fn pair_filter_hash(key: u64) -> u64 {
     let mut h = key.wrapping_mul(0xff51_afd7_ed55_8ccd);
     h ^= h >> 33;
     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
@@ -2392,11 +2392,19 @@ impl PairSumTable {
         let tail = len.min(base - start);
         let mut rests = Vec::with_capacity(len);
         let mut scratch = BatchScratch::default();
-        self.curve
-            .add_many(target, &self.negated[start..start + tail], &mut rests, &mut scratch);
+        self.curve.add_many(
+            target,
+            &self.negated[start..start + tail],
+            &mut rests,
+            &mut scratch,
+        );
         if tail < len {
-            self.curve
-                .add_many(target, &self.negated[..len - tail], &mut rests, &mut scratch);
+            self.curve.add_many(
+                target,
+                &self.negated[..len - tail],
+                &mut rests,
+                &mut scratch,
+            );
         }
         const LOOKAHEAD: usize = 32;
         for rest in rests.iter().take(LOOKAHEAD) {
@@ -3297,20 +3305,19 @@ pub struct KoblitzIcOptions {
     /// Factor-base summands relation collection scans per probe, when it
     /// should scan fewer than all of them.
     ///
-    /// A full `m = 3` scan finds every triple three times — once for
-    /// each of its indices standing as the third summand — and discards
-    /// two to keep the witness sorted.  Scanning a window of `w`
-    /// summands keeps all three chances and pays for `w` of them: the
-    /// yield per probe falls to about `3w/|F|` of the full scan's while
-    /// the cost falls to `w/|F|`, so relations per *lookup* rise towards
-    /// three times as the window shrinks.  The probes that buys are
-    /// walked rather than multiplied ([`walked_probe_scalar`]), which is
-    /// what makes buying them cheap.
+    /// A full `m = 3` scan encounters a triple with each of its indices
+    /// standing as the third summand, and keeps only the sorted witness.
+    /// Scanning a window of `w` summands accepts any of those three raw
+    /// witnesses and pays for `w` of them. The yield per probe falls to
+    /// about `3w/|F|` of the full scan's while the cost falls to
+    /// `w/|F|`, so relations per *lookup* can rise towards three times
+    /// as the window shrinks. The added probes are walked instead of
+    /// multiplied.
     ///
-    /// Small windows lose to the arithmetic eventually; measured best
-    /// near `|F|/16`.  `None` scans the whole base and draws every probe
-    /// with its own scalar multiplication, the behaviour every recorded
-    /// run before this option was added.
+    /// Small windows eventually lose to probe arithmetic, so callers
+    /// must tune the window on a separate selection run. `None` scans
+    /// the whole base and draws every probe with its own scalar
+    /// multiplication, the behaviour before this option was added.
     pub collection_window: Option<usize>,
     /// Index of the irreducible factor of `x^n − 1` defining the
     /// factor base.
@@ -5476,11 +5483,11 @@ pub fn probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
 /// additions, so the arithmetic per probe falls by roughly the run
 /// length while the run stays short enough to keep the trial range
 /// worth parallelising.
-pub const PROBE_RUN: u64 = 64;
+const PROBE_RUN: u64 = 64;
 
 /// The step a walked run takes between consecutive trials, fixed by the
 /// seed so the sequence is reproducible.
-pub fn probe_run_stride(seed: u64, r_u64: u64) -> u64 {
+fn probe_run_stride(seed: u64, r_u64: u64) -> u64 {
     StdRng::seed_from_u64(seed ^ 0x5354_5249_4445_5f30).gen_range(1..r_u64.max(2))
 }
 
@@ -5493,7 +5500,7 @@ pub fn probe_run_stride(seed: u64, r_u64: u64) -> u64 {
 /// A run's scalar may come back as `0`, meaning the probe is the point
 /// at infinity; such a trial decomposes into nothing and reports no
 /// relation, so every reported `a` still satisfies `0 < a < r`.
-pub fn walked_probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
+fn walked_probe_scalar(seed: u64, trial: u64, r_u64: u64) -> u64 {
     let r = r_u64.max(2) as u128;
     let anchor = probe_scalar(seed, trial / PROBE_RUN, r_u64) as u128;
     let offset = (trial % PROBE_RUN) as u128 * probe_run_stride(seed, r_u64) as u128;
@@ -5622,15 +5629,6 @@ impl<'a> RelationCollector<'a> {
         Some(w)
     }
 
-    /// The probe scalar of trial `t`, walked or multiplied as the
-    /// options ask.  A function of `(seed, t)` either way.
-    pub fn probe_scalar_of(&self, seed: u64, trial: u64) -> u64 {
-        match self.window() {
-            Some(_) => walked_probe_scalar(seed, trial, self.r_u64),
-            None => probe_scalar(seed, trial, self.r_u64),
-        }
-    }
-
     /// Collect the relations of one work unit, trials in parallel,
     /// returned in trial order.
     pub fn collect(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
@@ -5687,9 +5685,12 @@ impl<'a> RelationCollector<'a> {
         let report = CollectionReport {
             trials,
             relations: relations.len(),
-            summands_scanned: match self.opts.m {
-                3 => trials as u64 * self.fb.points.len() as u64,
-                _ => 0,
+            summands_scanned: if self.opts.m == 3
+                && self.opts.strategy == DecompositionStrategy::PairTable
+            {
+                trials as u64 * self.fb.points.len() as u64
+            } else {
+                0
             },
             elapsed_seconds: begin.elapsed().as_secs_f64(),
         };
@@ -5709,6 +5710,17 @@ impl<'a> RelationCollector<'a> {
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let end = unit.start.saturating_add(unit.count);
+        if end == unit.start {
+            return (
+                Vec::new(),
+                CollectionReport {
+                    trials: 0,
+                    relations: 0,
+                    summands_scanned: 0,
+                    elapsed_seconds: begin.elapsed().as_secs_f64(),
+                },
+            );
+        }
         let (fc, g_fast) = self.fast.as_ref().expect("window() checked the fast curve");
         let pair = self.pair_table().expect("window() checked the pair table");
         let base = self.fb.points.len();
@@ -5729,12 +5741,16 @@ impl<'a> RelationCollector<'a> {
                     if !point.infinity && a != 0 {
                         // A rotating offset, so no column is favoured by
                         // sitting where the window always starts.
-                        let offset = pair_filter_hash(
-                            unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15),
-                        ) as usize
-                            % base;
+                        let offset =
+                            pair_filter_hash(unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                                as usize
+                                % base;
                         if let Some(points) = pair.decompose_fast_window(point, 3, offset, window) {
-                            found.push(CollectedRelation { trial: t, a, points });
+                            found.push(CollectedRelation {
+                                trial: t,
+                                a,
+                                points,
+                            });
                         }
                     }
                     // The next trial of the run is one stride further
@@ -7906,17 +7922,23 @@ mod tests {
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
         let pair = PairSumTable::build(&kc, &fb).unwrap();
         let opts = windowed_options(fb.points.len() / 8);
-        let collector =
-            RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
         let (relations, report) = collector.collect(RelationWorkUnit {
             seed: 5,
             start: 0,
             count: 4096,
         });
         assert!(report.relations > 0, "the window found nothing to check");
+        assert_eq!(
+            report.summands_scanned,
+            report.trials as u64 * opts.collection_window.unwrap() as u64
+        );
         for rel in &relations {
             assert_eq!(rel.points.len(), 3);
-            assert_eq!(rel.a, walked_probe_scalar(5, rel.trial, collector.scalar_bound()));
+            assert_eq!(
+                rel.a,
+                walked_probe_scalar(5, rel.trial, collector.scalar_bound())
+            );
             // Unsorted witnesses are fine; the group equation is not.
             assert!(verify_collected_relation(&kc, &fb, 3, rel));
         }
@@ -7937,8 +7959,8 @@ mod tests {
         };
         let windowed = windowed_options(base / divisor);
         let measure = |opts: &KoblitzIcOptions, trials: u64| {
-            let collector = RelationCollector::with_pair_table(&kc, &fb, opts, Some(&pair))
-                .expect("collector");
+            let collector =
+                RelationCollector::with_pair_table(&kc, &fb, opts, Some(&pair)).expect("collector");
             collector
                 .collect(RelationWorkUnit {
                     seed: 9,
@@ -7968,8 +7990,7 @@ mod tests {
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
         let pair = PairSumTable::build(&kc, &fb).unwrap();
         let opts = windowed_options(fb.points.len() / 8);
-        let collector =
-            RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
         let whole = collector
             .collect(RelationWorkUnit {
                 seed: 12,
@@ -7982,12 +8003,15 @@ mod tests {
         // must still report the same relations.
         let mut split = Vec::new();
         for (start, count) in [(0u64, 37u64), (37, 512), (549, 3), (552, 1448)] {
-            split.extend(collector.collect(RelationWorkUnit {
-                seed: 12,
-                start,
-                count,
-            })
-            .0);
+            split.extend(
+                collector
+                    .collect(RelationWorkUnit {
+                        seed: 12,
+                        start,
+                        count,
+                    })
+                    .0,
+            );
         }
         split.sort_by_key(|r| r.trial);
         assert!(!whole.is_empty());
