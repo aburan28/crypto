@@ -12,7 +12,10 @@ lower Gröbner **solving degree**?
 
 **Bottom line.** No, and the reason is not a search that came up empty.
 All four boundaries below are *derived* rather than measured, and between them
-they leave the lever no room:
+they leave the lever no room.  The `m = 2` case of this was established
+independently and merged first — see §0 — so what is new here is that the
+conclusion survives at `m = 3, 4, 5`, where the `m = 2` argument does not
+reach:
 
 - the class has `2^65.06` vertices against ρ's `2^60.81` operations, so
   enumerating it is already `2^4.25×` more expensive than just solving the
@@ -43,6 +46,62 @@ measured directly: the number of curves that stay on the `D* = 2` floor for
 which is what moving along an isogeny class would have to find, does not
 exist.  A curve selected as best on one target set is `2^{+1.13}` **worse**
 than the unmodified Koblitz curve on a disjoint one.
+
+---
+
+## 0. Relation to `RESEARCH_ISOGENY_DEGREE_SEARCH.md` — read this first
+
+**An independent session asked the same question and merged first.**
+`RESEARCH_ISOGENY_DEGREE_SEARCH.md` (PR #206, module
+`cryptanalysis::isogeny_degree_search`) was written without contact with this
+one and reaches the same core conclusion.  Where the two overlap they agree on
+**every** number:
+
+| quantity | this note | theirs |
+|---|---|---|
+| `t_131` | `−22283658519494248867` | same |
+| conductor | `263 · 146505763881528721` | same |
+| class size | `38531015900842054149 = 2^65.06` | same |
+| `m = 2` finding | `a₆` is the constant term; leading forms curve-free | same |
+
+Two independent derivations agreeing to the digit is worth more than either
+alone, and their note should be treated as the primary reference for the parts
+below that duplicate it.  In particular they have machinery this thread does
+not: exhaustive class enumeration via Kloosterman sums by FWHT (§3.1), the
+Weil-descent/GHS emptiness argument over `F_{2^131}` (§4.3), and a
+quasi-subfield resolution through the same divisor-set lemma.
+
+**What this thread adds is the item their §7.1 lists as open.** They state
+leading-form invariance as a property of `S₃` — "whose curve-dependence is the
+single additive `+ b`" — and name as the thing that would reopen the question:
+
+> *"A presentation whose positive-degree part depends on the curve … higher
+> summation polynomials solved directly rather than chained … would not inherit
+> it, and would have to be **measured rather than argued**."*
+
+That is exactly right, and it is what §2C here measures.  At `m ≥ 3` their
+premise genuinely fails: `a₆` is **no longer** merely a constant term — it
+reaches Boolean degree 4 at `m = 3`, 10 at `m = 4`, 18 at `m = 5`.  The
+conclusion nevertheless survives, because `a₆` stops **strictly below the
+leading form** at every one, by a constant margin of 2, under a ceiling
+`m(m−1)` that is proved for all `m`.  So the negative result holds where the
+`m = 2` argument does not reach, and holds for a different reason than the one
+that establishes it at `m = 2`.
+
+The other genuinely additive pieces are the exact criterion
+`D* = 2 ⟺ a₆ ∉ S^⊥` for which curves get an infeasibility certificate — their
+§4.1 correctly identifies that the constants can still move this and measures
+the tail, and §3 here closes it in closed form with zero disagreements — and
+EXP-R6c, which explains the residual per-curve variation as decomposition
+yield at `ρ_s = −0.98`.
+
+**On consolidation.** Two modules now cover overlapping ground
+(`isogeny_class_search` here, `isogeny_degree_search` on `main`).  That is a
+maintenance question for the repository owner rather than something to settle
+unilaterally in a PR: the natural split is to keep theirs as the home of the
+class structure and the `m = 2` theorem, and this one for the symbolic
+higher-`m` work, the criterion and the yield explanation.  Flagged, not acted
+on.
 
 ---
 
