@@ -1678,9 +1678,13 @@ pub struct BlockedObs {
 /// * `mean_per_block` — correlate inside each stratum, then average. Gives
 ///   every stratum equal weight regardless of how many cells it holds, and
 ///   is the most direct reading of "does it hold at fixed size?".
-/// * `blocked_rank` — rank within each stratum, pool the ranks, correlate
-///   once. Uses all cells in a single statistic, so small strata do not
-///   dominate, but it needs the strata to be rank-comparable.
+/// * `blocked_rank` — rank within each stratum, rescale to a common mean
+///   of 1/2, pool the ranks, correlate once. Uses all cells in a single
+///   statistic, so small strata do not dominate. The rescaling is what
+///   makes unequal strata rank-comparable: raw 1-based ranks have mean
+///   `(n_g+1)/2`, and pooling them would add a between-block term
+///   `Σ n_g (μ_g−μ)²` that is a function of the block size this
+///   statistic exists to remove.
 /// * `fixed_effects` — subtract each stratum's mean from its members and
 ///   correlate the residuals. Works on raw values rather than ranks, so it
 ///   is sensitive to magnitude as well as order.
@@ -1695,7 +1699,7 @@ pub struct SizeControl {
     /// Mean of the per-stratum Spearman `ρ_s`, over strata where it is
     /// defined.
     pub mean_per_block: Option<f64>,
-    /// Pearson `r` of within-stratum ranks, pooled.
+    /// Pearson `r` of within-stratum ranks, rescaled to mean 1/2 and pooled.
     pub blocked_rank: Option<f64>,
     /// Pearson `r` of within-stratum demeaned residuals.
     pub fixed_effects: Option<f64>,
@@ -1748,8 +1752,13 @@ pub fn size_control(obs: &[BlockedObs]) -> SizeControl {
         let xs: Vec<f64> = rows.iter().map(|o| o.x).collect();
         let ys: Vec<f64> = rows.iter().map(|o| o.y).collect();
         per_block.push((label.to_string(), rows.len(), spearman(&xs, &ys)));
-        brx.extend(rank_within(&xs));
-        bry.extend(rank_within(&ys));
+        // Scale by n_g+1 so every stratum has rank mean 1/2. Without this,
+        // unequal blocks inject Σ n_g (μ_g−μ)² into the pooled Pearson —
+        // a non-negative function of block size that attenuates a negative
+        // within-stratum law.
+        let scale = rows.len() as f64 + 1.0;
+        brx.extend(rank_within(&xs).into_iter().map(|r| r / scale));
+        bry.extend(rank_within(&ys).into_iter().map(|r| r / scale));
         let mx = xs.iter().sum::<f64>() / xs.len() as f64;
         let my = ys.iter().sum::<f64>() / ys.len() as f64;
         fex.extend(xs.iter().map(|a| a - mx));
@@ -2612,6 +2621,56 @@ mod tests {
             let v = v.expect("controlled statistic defined");
             assert!(v < -0.99, "{name} must recover the exact relation: {v}");
         }
+    }
+
+    /// Raw 1-based ranks have mean `(n_g+1)/2`. Pooling them across
+    /// unequal strata injects a between-block term `Σ n_g (μ_g−μ)²` that
+    /// is a function of block size — the nuisance this statistic exists
+    /// to remove — and that term is non-negative, so it attenuates a
+    /// negative within-stratum law. The tests above cannot catch this:
+    /// they use equal-sized blocks, where the extra term is zero.
+    #[test]
+    fn blocked_rank_does_not_mix_unequal_stratum_sizes() {
+        // Perfect negative relation, sizes 3 and 9. Unscaled ranks give
+        // Pearson ≈ −0.51; after rescaling it must recover −1.
+        let mut rows = Vec::new();
+        for i in 0..3 {
+            rows.push(("small", i as f64, -(i as f64)));
+        }
+        for i in 0..9 {
+            rows.push(("large", i as f64, -(i as f64)));
+        }
+        let c = size_control(&obs(&rows));
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br < -0.99,
+            "unequal strata must not attenuate a within-stratum law: {br}"
+        );
+
+        // The other direction: within-stratum Spearman is exactly zero
+        // at n = 4 (permutation (2,4,1,3), Σd² = 10) and at n = 8
+        // (permutation (7,1,5,3,6,4,8,2), Σd² = 84). Unscaled ranks
+        // would report a positive blocked_rank from the mean gap alone.
+        let rows = obs(&[
+            ("n4", 0.0, 1.0),
+            ("n4", 1.0, 3.0),
+            ("n4", 2.0, 0.0),
+            ("n4", 3.0, 2.0),
+            ("n8", 0.0, 7.0),
+            ("n8", 1.0, 1.0),
+            ("n8", 2.0, 5.0),
+            ("n8", 3.0, 3.0),
+            ("n8", 4.0, 6.0),
+            ("n8", 5.0, 4.0),
+            ("n8", 6.0, 8.0),
+            ("n8", 7.0, 2.0),
+        ]);
+        let c = size_control(&rows);
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br.abs() < 1e-9,
+            "unequal zero-within blocks must not inherit a size term: {br}"
+        );
     }
 
     /// Strata are held to equal weight by `mean_per_block` whatever their
