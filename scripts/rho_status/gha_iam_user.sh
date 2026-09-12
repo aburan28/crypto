@@ -59,6 +59,9 @@ key=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["AccessKey"]["Acce
 secret=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["AccessKey"]["SecretAccessKey"])' <<<"$creds")
 
 echo "minted access key $key for arn:aws:iam::${ACCOUNT}:user/${USER_NAME}"
+echo "AWS_ACCESS_KEY_ID=$key"
+echo "AWS_SECRET_ACCESS_KEY=$secret"
+echo "this is the only copy of the secret; store it before re-running"
 
 if [ "$PUSH" -eq 1 ]; then
     printf '%s' "$key" | gh secret set AWS_ACCESS_KEY_ID --repo "$REPO"
