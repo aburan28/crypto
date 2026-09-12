@@ -203,6 +203,14 @@ architecture rtl of ec2k_axil is
   signal dn_gid          : gid_arr_t(0 to NENG);
   signal dn_x, dn_y      : gf_arr_t(0 to NENG);
   signal up_valid, up_cret, up_lddone : std_logic_vector(0 to NENG) := (others => '0');
+  -- up_valid_n(i) is what up_valid(i) registers next; stage i - 1 keeps
+  -- its own copy of "the slot above is free" from it, so the select of
+  -- its 300-bit insert mux is a register beside the mux, not the stage
+  -- above's valid bit routed across the die into 300 LUTs (a 0.06 ns
+  -- path in the routed 64-engine image)
+  signal up_valid_n      : std_logic_vector(0 to NENG) := (others => '0');
+  signal up_slot_free    : std_logic_vector(0 to NENG - 1) := (others => '1');
+  signal pend, ins       : std_logic_vector(0 to NENG - 1);
   signal up_gid          : gid_arr_t(0 to NENG);
   signal up_steps        : cnt_arr_t(0 to NENG);
   signal up_x, up_y      : gf_arr_t(0 to NENG);
@@ -283,6 +291,7 @@ begin
   dn_x(0)   <= ld_x;
   dn_y(0)   <= ld_y;
   up_valid(NENG)  <= '0';
+  up_valid_n(NENG) <= '0';
   up_cret(NENG)   <= dn_cr(NENG);
   up_lddone(NENG) <= '0';
   up_gid(NENG)    <= (others => '0');
@@ -310,11 +319,21 @@ begin
         dp_id => e_dp_id(i), dp_steps => e_dp_steps(i),
         dp_x => e_dp_x(i), dp_y => e_dp_y(i), step_pulse => e_step(i));
 
+    -- a report is pending from the clock the walker raises dp_valid until
+    -- the clock after our ack (the walker updates on seeing it); it is
+    -- inserted into the passing slot once a credit is held and the slot
+    -- is free
+    pend(i) <= e_dp_valid(i) and not e_dp_ack(i);
+    ins(i)  <= hold(i) and pend(i) and up_slot_free(i);
+    up_valid_n(i) <= '0' when rst_eng_r(i) = '1' else
+                     '1' when ins(i) = '1' else up_valid(i + 1);
+
     stage : process (clk)
       variable pending, accept, insert : boolean;
     begin
       if rising_edge(clk) then
         rst_eng_r(i) <= rst_src(i);
+        up_slot_free(i) <= not up_valid_n(i + 1);
 
         -- Data moves unconditionally and is never reset: a reset that held
         -- 1 300 data flip-flops per stage still was a net from the stage's
@@ -330,10 +349,8 @@ begin
           l_y(i)  <= dn_y(i);
         end if;
 
-        -- a report is pending from the clock the walker raises dp_valid
-        -- until the clock after our ack (the walker updates on seeing it)
-        pending := e_dp_valid(i) = '1' and e_dp_ack(i) = '0';
-        insert  := hold(i) = '1' and pending and up_valid(i + 1) = '0';
+        pending := pend(i) = '1';
+        insert  := ins(i) = '1';
         if insert then
           up_gid(i)   <= mk_gid(i, e_dp_id(i));
           up_steps(i) <= e_dp_steps(i);
@@ -369,12 +386,10 @@ begin
         -- up: insert into an empty slot once a credit is held, else pass
         -- the slot on
         e_dp_ack(i) <= '0';
+        up_valid(i) <= up_valid_n(i);
         if insert then
-          up_valid(i) <= '1';
           e_dp_ack(i) <= '1';
           hold(i)     <= '0';
-        else
-          up_valid(i) <= up_valid(i + 1);
         end if;
         up_cret(i) <= up_cret(i + 1);
         if accept then
