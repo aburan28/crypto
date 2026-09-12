@@ -59,8 +59,13 @@ collection multisets matched, with 5,149 records and zero drops. The five
 screened configurations passed arithmetic, full client, normalized-state,
 checkpoint and runtime geometry checks. [BATCH-TUNING.md](BATCH-TUNING.md)
 records ranges, screening results and the batch-specific checkpoint boundary.
-This controlled comparison establishes the selected settings. A separate
-audit of the updated public Make command is pending.
+The separate [public Make-command audit](benchmarks/batch-tuning/native-audit.json)
+measured **13.283756 B/s** benchmark median (13.151469–13.434216) and
+**12.813626 B/s** collection median (12.800253–12.815682). All six samples
+completed the same scalar budget with batch 16 and 385,024 workers; each
+collection recorded 5,149 points with zero drops. This validates the updated
+command on a separate allocation. The paired comparison above estimates
+the preset's gain.
 
 ## Historical native carryless preset comparison
 

@@ -43,9 +43,34 @@ Their sorted record multisets share SHA-256
 The retained artifact records those hashes and sizes; transient corpus and
 checkpoint payloads were not retained.
 
-The benchmark median is still below the 15 B/s objective. A separate audit
-of the updated public Make command is pending; these paired measurements
-establish the selected configuration's gain on the measured workload.
+The benchmark median is still below the 15 B/s objective. These paired
+measurements establish the selected configuration's gain on the measured
+workload.
+
+## Public-command audit
+
+The separate [public audit](benchmarks/batch-tuning/native-audit.json) ran
+`make audit-rtx-pro6000` from commit
+`8ff25658aef2c213624ce14b8838d8a8a40f7be8` on a fresh allocation:
+
+| Workload | Median B scalar updates/s | Range across three repetitions |
+|---|---:|---:|
+| Complete walk benchmark | **13.283756** | 13.151469–13.434216 |
+| DP34 collection | **12.813626** | 12.800253–12.815682 |
+
+All six samples completed 201,863,462,912 scalar updates with the requested
+batch 16, 385,024 workers and native carryless mode. Each collection recorded
+5,149 points and zero drops. GPU arithmetic and full client integration
+passed. The [artifact audit](benchmarks/batch-tuning/native-audit-review.json)
+recomputes the source identity, batch/worker geometry, completed counts and
+summary statistics against the frozen public checkout.
+
+This result validates the published command on a separate allocation. It
+retains corpus counts and sizes; content equality is supplied by the paired
+comparison. Its binary identity is reported before validation, and its
+artifact does not contain a post-run hash or full native-code capture.
+The raw public result SHA-256 is
+`cf91f9ae23742aaff5bd5505bb3b0fbf1712e0ea336460eb77a0068788555587`.
 
 ## Screening and state tradeoff
 
