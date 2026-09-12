@@ -149,5 +149,54 @@ preset selects compact mode; use `RTX_PRO6000_COMPACT_STATE=0` for the previous
 layout. The [public integration review](benchmarks/compact-state/public-integration-review.json)
 and [additive resolution](benchmarks/compact-state/public-integration-resolution.json)
 record the early tiled-batch limit and the isolated cache-mismatch regression
-test. All 39 wrapper tests pass. A separate audit of the updated public command is pending. The 15 B/s
-target remains unachieved.
+test. All 39 wrapper tests pass.
+
+## Public-command audit
+
+The updated `make audit-rtx-pro6000` completed successfully from committed
+source `979ff992c5a9c7ae42f7142c34bfe0c12750fc0d`. The
+[retained audit](benchmarks/compact-state/native-audit.json) measured:
+
+| Workload | Median B/s | Range across three repetitions |
+|---|---:|---:|
+| Complete scalar benchmark | **14.472716** | 14.334753–14.672410 |
+| DP34 collection | **13.898911** | 13.880479–13.904571 |
+
+All six runs completed 201,863,462,912 scalar updates with compact mode 1,
+WP2, batch 16 and 385,024 workers. Each collection recorded 5,149 points,
+164,768 bytes and zero drops. Arithmetic, 128-case storage validation and
+full client integration passed before timing. The kernel reported 108
+registers and zero local/shared bytes.
+
+The [frozen artifact check](benchmarks/compact-state/native-audit-review.json)
+verified all 217 committed files, the 70-file remote source aggregate,
+the selected core/test source bindings, exact commands, modes, counters
+and statistics. The public artifact records corpus counts and sizes; it
+does not retain content hashes, post-run source/binary hashes, full native
+code or the JIT environment. The stronger controlled-comparison evidence
+above has its own explicit scope. These separate-allocation absolute rates
+validate the public command and do not add another measured percentage gain.
+The public raw SHA-256 is
+`c8adf89e64fcf7f430a4b493722fb85b89ac2588a5802f6b7ef2c3954a92fd52`.
+
+## Smaller-batch follow-up
+
+A separate [three-batch screen](benchmarks/compact-state/smaller-batches.json)
+kept compact mode and arithmetic fixed. B16/B12/B10 used respectively
+384,000 / 512,000 / 614,400 workers for the same 6,144,000 scalar walks
+and **201,326,592,000 updates per timed row**. Screening rates were:
+
+| Sample order | Rate B/s |
+|---|---:|
+| B16 control | 14.263307 |
+| B12 | 13.754580 |
+| B10 | 13.697268 |
+| B16 control | 14.246895 |
+
+Neither candidate cleared the predefined threshold. Three warmups were
+excluded; there were seven complete timed rows and no confirmation or timed
+DP34 phase. Arithmetic, storage, normalized states and all 39 checkpoint
+children passed, including six directed cross-batch and three worker-geometry
+rejections. The [independent audit](benchmarks/compact-state/smaller-batches-review.json)
+passed. The measured batch-16 preset is retained. The 15 B/s target remains
+unachieved.

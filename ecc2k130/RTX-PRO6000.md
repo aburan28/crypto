@@ -66,8 +66,14 @@ scalar updates; all six collections matched 5,149 records, 164,768 bytes
 and zero drops. Device storage/arithmetic, full client, normalized-state
 and 28 checkpoint child checks passed before timing. The independent
 artifact review passed all 17 timed rows and final code/source/GPU bindings.
-A separate audit of the updated public Make command is pending. The 15 B/s
-target remains unachieved.
+
+The separate [public Make-command audit](benchmarks/compact-state/native-audit.json)
+measured a **14.472716 B/s** benchmark median (14.334753–14.672410) and
+**13.898911 B/s** collection median (13.880479–13.904571). All six samples
+completed the same scalar budget, and each collection recorded 5,149 points
+with zero drops. Arithmetic, storage and client checks passed before timing.
+This validates the public command on a separate allocation; the matched
+comparison above estimates the gain. The 15 B/s target remains unachieved.
 
 ## Historical weighted-prefix preset comparison
 
