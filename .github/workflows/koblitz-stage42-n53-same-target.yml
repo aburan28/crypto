@@ -6,6 +6,14 @@ on:
       - "examples/koblitz_rank_fixture.rs"
       - "examples/koblitz_rho_fixture.rs"
       - "scripts/run_koblitz_stage42_n53_same_target.py"
+      - "scripts/verify_koblitz_stage42_result.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage41-n53-tuning-evidence-20260912.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage41-n53-tuning-evidence-20260912.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage42-n53-same-target-evidence-34705118094.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage42-n53-same-target-evidence-34705118094.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-workflow-34705118094.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-artifacts-34705118094.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE41_42_N53_SAME_TARGET.md"
       - ".github/workflows/koblitz-stage42-n53-same-target.yml"
   workflow_dispatch:
@@ -23,7 +31,11 @@ jobs:
       - name: Validate explicit same-target producer boundary
         run: |
           python3 -m py_compile scripts/run_koblitz_stage42_n53_same_target.py
+          python3 -m py_compile scripts/verify_koblitz_stage42_result.py
           python3 scripts/run_koblitz_stage42_n53_same_target.py self-test
+          python3 scripts/verify_koblitz_stage42_result.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912 \
+            > "$RUNNER_TEMP/stage42-result-verification.json"
           python3 scripts/run_koblitz_stage42_n53_same_target.py build \
             --source "$GITHUB_WORKSPACE" \
             --output "$RUNNER_TEMP/validation-build" \
