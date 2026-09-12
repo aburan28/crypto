@@ -14,9 +14,11 @@ NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 
 CURVES := ecc2k95 k23 k41
 GEN    := $(foreach c,$(CURVES),curve_$(c).h vec_$(c).h)
-TESTS  := test_ecc2k95 test_k23 test_k41
+TESTS  := test_ecc2k95 test_k23 test_k41 \
+          $(foreach c,$(CURVES),test_pt_$(c))
 
-HDRS := f2m.cuh koblitz.cuh rho2k.cuh scalar_ring.hpp rho2k_host.hpp
+HDRS := f2m.cuh koblitz.cuh rho2k.cuh scalar_ring.hpp rho2k_host.hpp \
+        pairtable.cuh
 
 .PHONY: all test bench clean gen
 all: test
@@ -30,6 +32,11 @@ vec_%.h: ecref2k.py
 
 define TEST_RULE
 test_$(1): test_cpu2k.cpp $$(HDRS) curve_$(1).h vec_$(1).h
+	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' \
+	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -o $$@ $$<
+
+# The |F|^2 pair table: batched row sums against unbatched addition.
+test_pt_$(1): test_pairtable.cpp $$(HDRS) curve_$(1).h vec_$(1).h
 	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' \
 	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -o $$@ $$<
 endef
