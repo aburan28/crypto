@@ -726,7 +726,11 @@ struct Client {
         signal(SIGINT, onStop);
         signal(SIGTERM, onStop);
 
+        // The engines step while the walks are still being loaded (7 s for
+        // 24k walks over AXI-Lite), so the rate is measured from here, not
+        // from the counter's zero; the iteration totals keep every step.
         const double t0 = nowSeconds();
+        const u64 stepsT0 = steps0 + ((u64)bus->peek(reg::STEPS_LO) | ((u64)bus->peek(reg::STEPS_HI) << 32));
         double lastPrint = t0, lastCkpt = t0;
         u64 lost = 0, devSteps = 0;
         bool warnedLost = false;
@@ -760,8 +764,9 @@ struct Client {
             if (now - lastPrint > 2.0 || leaving) {
                 const double el = now - t0;
                 const double it = (double)(devSteps - steps0);
+                const double rate = (double)(devSteps - stepsT0);
                 printf("  %8.1f s  %10.3f M it/s  %10llu iterations  %8llu dp  %8llu stored  %8llu dropped\n",
-                       el, el > 0 ? it / el / 1e6 : 0.0, (unsigned long long)it, (unsigned long long)totalDp,
+                       el, el > 0 ? rate / el / 1e6 : 0.0, (unsigned long long)it, (unsigned long long)totalDp,
                        (unsigned long long)sol.inserted, (unsigned long long)lost);
                 if (lost && !warnedLost && lost * 10 > totalDp + lost) {
                     printf("  warning: dropping %.1f%% of reports; the host is not polling the queue fast enough\n",
@@ -785,7 +790,7 @@ struct Client {
         } else if (rc == 0) {
             const double el = nowSeconds() - t0;
             printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",
-                   el > 0 ? (double)(devSteps - steps0) / el / 1e6 : 0.0, (unsigned long long)totalDp,
+                   el > 0 ? (double)(devSteps - stepsT0) / el / 1e6 : 0.0, (unsigned long long)totalDp,
                    (unsigned long long)verified, (unsigned long long)lost);
         }
         fflush(stdout);
