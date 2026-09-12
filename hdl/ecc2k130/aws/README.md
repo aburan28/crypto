@@ -214,3 +214,16 @@ two hidden by a look-ahead tag on the retire side and a prefetch buffer
 in the walker; the engine lost 4 700 LUTs and gained 21 block RAMs,
 and the free depth of a block RAM made 512 walks and 16 batches in flight
 the default, 5.29 clocks per step against 5.54.
+
+**The 48-engine build of that revision met timing at 333 MHz**
+(`20260912-181902-n48-c333`, AFI `agfi-0977ae08fec2f9ced`): placed at
++0.418 ns with no failing endpoint and no congestion worse than 8×8,
+routed at **WNS +0.022 ns, TNS 0, WHS +0.009**; 403 891 LUTs (31%),
+397 918 FFs (15%), 960 RAMB36 + 96 RAMB18 (50% of the block RAM), no
+DSP or URAM. Its ten worst paths were all one net, a spine stage's reset
+register into the clock enables of the 1 300 data flip-flops it held
+during reset, 2.3 ns of route for one LUT across an SLR boundary — so
+data registers no longer see the reset anywhere in the design (the batch
+pipe, walker and multiplier had the same shape inside every engine). The
+first revision's 48-engine build, for the record, routed at −1.65 ns on
+the 4 ns clock with −221 µs of total negative slack.
