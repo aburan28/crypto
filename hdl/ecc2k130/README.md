@@ -15,9 +15,10 @@ same one `hdl/ecc/` and `hdl/sha1/` target, but there are no vendor
 primitives: plain `ieee.std_logic_1164` and `numeric_std`, simulates under
 GHDL, reads into any synthesis flow. Every number below is labelled
 measured (in simulation or on the device), derived, or estimated. **The
-48-engine image runs on an `f2.6xlarge` at 3.01 G steps/s** (`aws/README.md`,
-"What came back"): 48 × 333 MHz / 5.31 clocks per step, with 64 of its
-distinguished points checked against the client's reference walk.
+64-engine image runs on an `f2.6xlarge` at 4.01 G steps/s** and the
+48-engine one at 3.01 G (`aws/README.md`, "What came back"): 333 MHz /
+5.31 clocks per step per engine, with the distinguished points sampled
+from both checked against the client's reference walk.
 
 ## Files
 
@@ -516,11 +517,11 @@ Two things the first synthesis taught, both fixed:
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **A campaign on F2 instances.** The 48-engine image runs on an
-  `f2.6xlarge` at the predicted rate (3.01 G steps/s, `aws/README.md`,
-  "What came back") and the 64-engine image has met timing; what has not
-  happened yet is a fleet of workers feeding the shared corpus for hours,
-  which is `f2.sh up` once the account has the worker instance profile.
+- **A campaign on F2 instances.** The 48- and 64-engine images run on an
+  `f2.6xlarge` at the predicted rates (3.01 and 4.01 G steps/s,
+  `aws/README.md`, "What came back"); what has not happened yet is a
+  fleet of workers feeding the shared corpus for hours, which is `f2.sh
+  up` once the account has the worker instance profile.
 - **Reading a walk back.** The engine's walk state is write-only from the
   host, so walks in flight are lost when a worker restarts; each of them
   is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for
