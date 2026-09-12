@@ -44,16 +44,20 @@ jobs:
           RAYON_NUM_THREADS=4 "$RUNNER_TEMP/validation-build/bin/koblitz_rank_fixture" \
             13 0 1 2 12345 signed_expanded independent pair_pair_parallel_512 1 3 \
             > "$RUNNER_TEMP/parallel-n13.jsonl"
-          python3 - "$RUNNER_TEMP/sequential-n13.jsonl" "$RUNNER_TEMP/parallel-n13.jsonl" <<'PY'
+          RAYON_NUM_THREADS=4 "$RUNNER_TEMP/validation-build/bin/koblitz_rank_fixture" \
+            13 0 1 2 12345 signed_expanded independent pair_pair_parallel_1024 1 3 \
+            > "$RUNNER_TEMP/parallel-1024-n13.jsonl"
+          python3 - "$RUNNER_TEMP/sequential-n13.jsonl" "$RUNNER_TEMP/parallel-n13.jsonl" "$RUNNER_TEMP/parallel-1024-n13.jsonl" <<'PY'
           import json, pathlib, sys
           rows = [[json.loads(line) for line in pathlib.Path(path).read_text().splitlines()] for path in sys.argv[1:]]
           hashes = [[row["relation_hash"] for row in arm if row.get("kind") == "relation_rank_receipt"] for arm in rows]
           summaries = [next(row for row in arm if row.get("kind") == "relation_rank_summary") for arm in rows]
-          assert hashes[0] == hashes[1]
-          assert summaries[0]["target_trials"] == summaries[1]["target_trials"]
-          assert summaries[0]["recovered_fixture_scalar"] == summaries[1]["recovered_fixture_scalar"] == 3
-          assert summaries[1]["query_parallel_threads"] == 4
+          assert hashes[0] == hashes[1] == hashes[2]
+          assert summaries[0]["target_trials"] == summaries[1]["target_trials"] == summaries[2]["target_trials"]
+          assert all(summary["recovered_fixture_scalar"] == 3 for summary in summaries)
+          assert summaries[1]["query_parallel_threads"] == summaries[2]["query_parallel_threads"] == 4
           assert summaries[1]["support_queries"] >= summaries[0]["support_queries"]
+          assert summaries[2]["support_queries"] >= summaries[0]["support_queries"]
           PY
           git diff --exit-code
           test -z "$(git status --porcelain=v1 --untracked-files=all)"
