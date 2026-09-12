@@ -58,11 +58,36 @@ how much they are allowed to change:
 | **L1** | **Factor-base structure** — subfield, Koblitz, sparse normal basis | the *ideal itself* (multiplicative closure injects relations) | only works on special curves/fields | **measured** by the FFD program: Subfield mean `D*` 2.04 vs Random 3.53 at `2n'=n`, and `Δ_low(Subfield)/Δ_low(Random)` diverges 6.7 → 67 |
 | **L2** | **Symmetrisation** — solve in the elementary symmetric variables `e_1..e_m` instead of `x_1..x_m` (Faugère–Gaudry–Huot–Renault) | the *variables*; the ideal is the same up to a change of coordinates | free (a one-off rewrite) | infrastructure exists (`symmetrized_semaev.rs`) but **has never been measured against `D*` or `Δ_low`** |
 | **L3** | **Hybrid slicing** — guess `k` variables, solve `2^k` slices, raising `ρ = #eqs/#vars` | the *determination ratio* | `2^k` multiplicative | **killed, iteration 1** — see §5 |
-| **L4** | **Precomputed degree falls** — add known low-degree consequences to the generator set so the solver starts where it would otherwise have to climb | the *generating set*; ideal and variables unchanged | one-off precomputation | not built; EXP-J has already *identified* the relation to add |
+| **L4** | **Degree falls (mutants)** — add the *nonzero* low-degree remainders of top-degree cancellations to the generator set, so `x_k · g` rows become available a degree early | the *generating set*; ideal and variables unchanged | the extraction's own climb to degree 3 | **supported on degrees, regime-dependent on cost — iteration 2.** `D*` drops 4.00 → 2.00 on the generic family; net of extraction cost it pays only where the base degree is high |
 
 L1 is the known part of the map and is not this thread's subject. L2, L3
 and L4 are presentation changes that apply to *any* curve, which is what
 makes them worth measuring.
+
+### 2.0 Syzygies are not degree falls (the iteration-1 error, corrected)
+
+Iteration 1 described L4 as "add the relation EXP-J identified." That was
+wrong, and the distinction it missed is the one that decides whether L4
+exists at all.
+
+EXP-J's relation is `Σ_i ℓ_i · f_i ≡ 0` — a **pure syzygy**. It vanishes
+identically, so it yields no polynomial; adding it to the generating set
+adds nothing. Pure syzygies cost the solver zero reductions, a constant
+factor (exactly what F5's criterion removes), not a degree.
+
+A **degree fall** is the other outcome of the same cancellation: a
+combination of degree-`D` rows whose degree-`D` part cancels leaving a
+**nonzero** remainder of degree `≤ D−1`. Its value is not that the solver
+cannot find it — at degree `D` the remainder is already in the row space —
+but that once `g` is a *generator*, the rows `x_k · g` are available at
+degree `D`, and those are degree-`D+1` products of the original generators.
+The Macaulay tower genuinely accelerates. This is the mutant mechanism of
+MutantXL and the degree-fall strategy used against HFE.
+
+The two populations turn out to be wildly different sizes on these systems:
+`degree_reduction::extract_degree_falls` counts **0–4** pure syzygies (EXP-J's
+population, consistent with its `δ(3)=1`) against **20–112** genuine falls,
+per instance. The falls were never measured before.
 
 ### 2.1 The objective function, and its calibration limit
 
@@ -133,7 +158,8 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R1** | **Hybrid slicing (L3) has an interior cost optimum that beats `2^N` enumeration**, at every operating point, with the collapse fraction not rising in `N` | **`killed`** | EXP-R1, iteration 1. At every one of 9 cells (`N ∈ {10,12,14}` × 3 guess patterns) and both `ω`, the optimum sits at the largest `k` scanned — the model is choosing exhaustive search. The margins it reports (−0.29 → +0.19 bits at `ω`=2.807) are artifacts of where the scan was truncated. And the collapse fraction *rises* with `N` for 2 of 3 patterns. |
 | **R1′** | Among guess patterns, **one-sided** guessing (all `k` bits from the `X₁` half) reaches the `D* = 2` floor at the fewest guessed bits, at `c = k₂/N = 1/2` independent of `N` | **`supported`** | EXP-R1: `c(one-side) = 0.500` at `N = 10, 12, 14` — exactly `k₂ = n'` every time — vs balanced 0.800/0.667/0.786 and spread —/0.750/0.714. Flat where the others drift, and identical across seeds 7/11/23 (9 cells, no exceptions). |
 | **R2** | **Symmetrisation (L2) lowers `D*`** on the descended system at matched `(n, n')` | `open` | — (needs a symmetrised descent; `symmetrized_semaev.rs` has the algebra but not the descent) |
-| **R3** | **Adding the EXP-J degree-fall relation (L4) as an explicit generator lowers `D*`** at matched targets | `open` | — (EXP-J already identified the relation: `ℓ·(Σ_{i∈S} f_i) ≡ 0` with `ℓ` an `X₁↔X₂`-symmetric linear form) |
+| **R3** | **Adding degree falls (L4) as explicit generators lowers `D*`** at matched targets | **`supported`** | EXP-R3, iteration 2. All three families, 3 operating points each, 8 matched targets per cell: `D*` strictly lower wherever there was headroom. Generic (Random) family **4.00 → 2.00** on 8/8 targets at `N = 12, 14`. `worsened = 0` everywhere, as the ideal-membership invariant requires. |
+| **R3′** | The `D*` drop **survives its own cost** — extraction must climb to degree 3, so the net saving must still be positive | **regime-dependent** | EXP-R3: net `+1.44` bits mean on Random (positive at every `N`, seeds 7/11/23 give +1.44/+1.45/+1.49); `−0.60` on Coordinate (sign varies); `−6.36` on Subfield (**killed** — the system already solved at `D* ≈ 2.1`, so the climb to 3 is pure overhead). L4 pays where the system is hard and costs where it is easy. |
 | **R4** | **Every lever acts through `Δ_low`**: pooled across lever-generated systems, `ρ_s(Δ_low, D*) ≤ −0.6` | `open` | blocked on R4′ |
 | **R4′** | A **shape-corrected** defect exists that is comparable across systems with different variable counts | `open` | EXP-R1 shows the raw `Δ_low` is not (§2.1) |
 | **R5** | **Levers compose**: a structural lever (L1/L2/L4) plus one-sided guessing reaches the floor at `c < 1/2` | `open` | — (the composition test; the only route left to beating `2^N`, given R1) |
@@ -156,7 +182,15 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 - **G-R3.** *Supported* if adding the degree-fall generator strictly lowers
   mean `D*` at matched targets over ≥ 3 operating points. *Killed* if `D*`
   is unchanged — which would mean the solver was already finding the
-  relation for free, and L4 is empty.
+  relation for free, and L4 is empty. (Scored on degrees as written;
+  iteration 2 found this necessary but not sufficient, hence G-R3′.)
+- **G-R3′** *(registered iteration 2, after G-R3 proved insufficient)*.
+  Net log₂ saving `= cost(base at D*_base) − [cost(extraction) +
+  cost(augmented solve)]`. *Supported* for a family if positive at every
+  measured `N`; *killed* if negative at every `N`; *blocked* if the sign
+  varies. Extraction is charged per saturation round on the system as it
+  stood going in — booking only the cheap final solve would count the same
+  degree twice.
 - **G-R4.** *Supported* at pooled `ρ_s ≤ −0.6` over ≥ 30 lever-generated
   cells. *Killed* at `|ρ_s| < 0.2` or a sign flip.
 - **G-R5.** *Supported* if `c(composed) < c(one-side)` at ≥ 2 operating
@@ -168,6 +202,65 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 > Newest at top. Format mirrors `RESEARCH_FFD_WORKFLOW.md` §7:
 > *Task · Experiment · Result · Gate verdict · Ledger delta · Next.*
+
+### 2026-09-11 — iteration 2 (EXP-R3 — degree falls are real, and they pay where the system is hard)
+
+- **Task picked.** R3 (lever L4), per iteration 1's queue: with hybrid
+  slicing dead, the remaining levers have to lower `D*` structurally, and L4
+  was the cheapest to test.
+- **Correction found before running anything.** Iteration 1 said EXP-J had
+  "already identified the relation to add." It had not — EXP-J's relation is
+  `Σ ℓ_i f_i ≡ 0`, a **pure syzygy**, which contributes no polynomial at all.
+  Adding it is adding zero. The object worth adding is a **degree fall**: a
+  top-degree cancellation with a *nonzero* remainder (§2.0). The experiment
+  was rebuilt around that distinction, which is also what makes it
+  non-trivial: the two populations are 0–4 syzygies against 20–112 falls per
+  instance, and only the syzygy population had ever been counted.
+- **Experiment** (`degree_reduction::{extract_degree_falls, saturate_with_falls,
+  run_mutant_cell}`, `examples/degree_reduction_mutants.rs`, snapshot
+  `experiments/degree_reduction_mutants.json`). Per non-decomposable target:
+  measure `D*`; extract the degree-3 falls; iterate to saturation (≤ 6
+  rounds, MutantXL-style, since a new generator creates new products);
+  re-measure `D*` on the *same* target. Three families × `N ∈ {10,12,14}` ×
+  8 matched targets.
+- **Result — R3 SUPPORTED.** `D*` drops wherever there is headroom, and the
+  effect is largest exactly where the defensive program says the problem is
+  hardest:
+
+  | family | base `D*` | augmented `D*` | working degree | improved |
+  |---|---|---|---|---|
+  | **Random** (generic) | 4.00 | **2.00** | 3.00 | 8/8 at `N`=12,14 |
+  | Coordinate | 2.50 | 2.00 | 3.00 | 2/8 |
+  | Subfield | 2.17 | 2.00 | 3.00 | 1/8 |
+
+  `worsened = 0` in every cell, as ideal membership requires — the invariant
+  that makes the measurement trustworthy, and a test asserts it.
+- **Second correction, made after the first numbers.** The initial cost
+  accounting charged only the augmented *solve* (`D* = 2`) and reported a
+  saving of +8 to +11 bits. That books the same degree twice: extraction has
+  to build the degree-3 rows and take a kernel, every round. Charging it
+  (`G-R3′`) cuts the Random saving to **+1.44 bits mean** — still positive at
+  every `N` and seed-robust (+1.44/+1.45/+1.49 over seeds 7/11/23) — and
+  turns Coordinate break-even and Subfield sharply negative. The honest
+  statement is about the **working degree** `max(3, D*_aug)`: L4 converts the
+  generic family's degree-4 solve into a degree-3 one. Exactly one degree.
+- **Result — R3′ regime-dependent.** Net saving `+1.44` (Random, supported),
+  `−0.60` (Coordinate, sign varies), `−6.36` (Subfield, killed). The pattern
+  is coherent: extraction costs a degree-3 climb, so a system that already
+  solved near degree 2 pays for a degree it did not need. **L4 pays where the
+  system is hard and costs where it is already easy** — the mirror image of
+  L1, which only helps on special curves.
+- **Gate verdicts.** G-R3: **supported** (all three families). G-R3′:
+  **supported** on Random, **blocked** on Coordinate, **killed** on Subfield.
+- **Ledger delta.** R3 open→supported; R3′ registered→regime-dependent.
+- **Next.** Two things follow. (i) The Random-family saving *grows* with `N`
+  (+0.94 → +1.75 → +1.62); whether that is a trend or noise needs `N = 16–18`,
+  which the degree-3 extraction can reach cheaply even though `D*` cannot.
+  (ii) R5 (composition) is now testable and is the interesting one: one-sided
+  guessing reaches the floor at `c = 1/2`, and L4 lowers the degree on the
+  hard family — composing them asks whether the mutant route reaches the
+  floor at `c < 1/2`, which is the only way anything here beats the `2^N`
+  baseline iteration 1 established.
 
 ### 2026-09-11 — iteration 1 (EXP-R1 — hybrid slicing is degenerate; one-sided guessing is not)
 
@@ -235,23 +328,29 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 
 Re-prioritised from the ledger each iteration; this is the current guess.
 
-1. **EXP-R3 — the degree-fall generator (R3).** Cheapest structural lever:
-   EXP-J already identified the relation (`ℓ·(Σ_{i∈S} f_i) ≡ 0`, `ℓ`
-   symmetric). Add its degree-fall consequence to the generating set and
-   re-measure `D*` on matched targets. Two-sided gate, no new algebra.
-2. **EXP-R4′ — shape-corrected defect (R4′).** Needed before `Δ_low` can
+1. **EXP-R5 — composition (R5).** *(promoted after iteration 2.)* One-sided
+   guessing reaches the `D*=2` floor at `c = 1/2` (R1′); L4 lowers the
+   working degree on the hard family (R3). Compose them: does the mutant
+   route reach the floor at `c < 1/2`? This is the only remaining path to
+   beating the `2^N` baseline iteration 1 established, and both halves are
+   now built.
+2. **EXP-R3b — reach for the R3′ trend.** The Random-family net saving grows
+   +0.94 → +1.75 → +1.62 over `N = 10,12,14`. Degree-3 extraction is cheap
+   enough to run at `N = 16–18` even where `D*` itself is out of reach, using
+   the *working degree* rather than measured `D*` on the base side.
+3. **EXP-R4′ — shape-corrected defect (R4′).** Needed before `Δ_low` can
    score any lever that changes the variable count. Candidates: normalise
    by the *generic* rank rather than the column count, or compare raw
    syzygy counts `Σδ` at matched `(vars, eqs)`. Pure post-processing of
    data the existing harness already emits.
-3. **EXP-R2 — symmetrised descent (R2).** The most interesting lever and
+4. **EXP-R2 — symmetrised descent (R2).** The most interesting lever and
    the most work: `symmetrized_semaev.rs` has the symmetric-function
    algebra but the descent is built on raw coordinates, so the
    `e`-variable descent has to be written. Do it after R4′ so the result
    can be scored on both `D*` and a defect that means something.
-4. **EXP-R5 — composition (R5).** One-sided guessing plus whichever of
-   L2/L4 survives. This is the only remaining route to `c < 1/2`, and
-   therefore the only one that could beat the `2^N` baseline R1 established.
+5. **EXP-R2b — symmetrisation composed with L4.** If R2 shows symmetrisation
+   moves `D*` at all, the two generating-set levers should be measured
+   together rather than separately.
 
 ---
 
@@ -267,9 +366,15 @@ Re-prioritised from the ledger each iteration; this is the current guess.
   targets, i.e. on the failing relation attempts. That is the right cost
   driver for index calculus (most attempts fail), but it is not identical
   to the solving degree on a satisfiable instance.
-- **The cost model is a proxy.** `cols^ω` ignores sparsity, and real F4/F5
-  never builds the full Macaulay matrix. It is used only for *comparisons
-  at matched shape*, which is what it can support.
+- **The cost model is a proxy.** `cols^ω` (EXP-R1) and
+  `rows·cols^{ω−1}` (EXP-R3) ignore sparsity, and real F4/F5 never builds the
+  full Macaulay matrix. They are used only for *comparisons at matched
+  shape*. EXP-R3 in particular charges extraction at the same crude rate as
+  the solve; a real implementation would share work between the two, so the
+  Random-family `+1.44` bits is a conservative floor rather than an estimate.
+- **L4's saving is one degree, not two.** The `D* = 4.00 → 2.00` drop is
+  real but must be read as `working degree 4 → 3`: the extraction itself
+  operates at degree 3. Quoting the augmented `D*` alone double-counts.
 - **Nothing here threatens a deployed curve**, and nothing here is
   expected to. The deliverable is a screen and a map of which
   presentations can and cannot help — which is a parameter-selection
@@ -283,6 +388,9 @@ Re-prioritised from the ledger each iteration; this is the current guess.
   index calculus for elliptic curve DLP*, J. Cryptology 2014. (L2)
 - L. Bettale, J.-C. Faugère, L. Perret, *Hybrid approach for solving
   multivariate systems over finite fields*, J. Math. Cryptol. 2009. (L3)
+- J. Ding, J. Buchmann, M. S. E. Mohamed, W. S. A. E. Mohamed, R.-P.
+  Weinmann, *MutantXL*, SCC 2008; M. S. E. Mohamed et al., *MXL2*, PQCrypto
+  2008. (L4 — the mutant/degree-fall mechanism)
 - M.-D. Huang, M. Kosters, S. L. Yeo, *Last fall degree, HFE, and Weil
   descent attacks on ECDLP*, CRYPTO 2015. (what `D*` is)
 - S. Galbraith, S. Gebregiyorgis, *Summation polynomial algorithms for
