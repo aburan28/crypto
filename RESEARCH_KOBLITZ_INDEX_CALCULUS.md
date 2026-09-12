@@ -1713,6 +1713,32 @@ bits it asks for 0.67 TiB instead of 0.25, at 72 bits for 20 TiB instead
 of 4, and at 80 bits for **576 TiB instead of 64** — nine times the
 memory, for the same reach.
 
+### What the probe cost is not
+
+The obvious suspect for that `|F|^0.40` is the TLB. A probe is one random
+access into the presence filter, the filter is quadratic in the base —
+326 MB at 36112 points — and four-kilobyte pages make that eighty
+thousand page-table entries for a structure walked at random. Two-megabyte
+pages would cut the entries by five hundred.
+
+So: `madvise(MADV_HUGEPAGE)` on the filter and the rests before either is
+filled, and the three widths re-run. No change — 1.01, 0.94 and 1.02
+times the previous cost a probe, the fitted exponents unmoved.
+
+That is not a result, though, and it is worth being clear why.
+`AnonHugePages` in `/proc/meminfo` stayed at zero for the life of a
+process holding a three-gigabyte table: this kernel granted no huge pages
+at all, whatever the advice, and the sysfs knob reading `madvise` did not
+mean the sandbox would deliver. The measurement says the mechanism was
+unavailable, not that the hypothesis was wrong. The change was reverted
+rather than kept unverified, since it wanted an `unsafe` call to buy
+something nothing here could demonstrate.
+
+So the cause of the `0.40` is still open — TLB misses, cache pressure,
+memory bandwidth, or some mixture. It is worth settling by whoever has a
+host that grants huge pages, because the exponent is exactly what turns
+64 TiB into 576 at eighty bits.
+
 ### The exponent is an upper bound, not an estimate
 
 The 0.40 was measured across tables of 0.2 to 3 GB. Every one of them fit

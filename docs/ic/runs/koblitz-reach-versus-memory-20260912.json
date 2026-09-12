@@ -105,6 +105,13 @@
    "subgroup_bits": 80
   }
  ],
+ "what_the_probe_cost_is_not": {
+  "but_the_test_is_void": "AnonHugePages in /proc/meminfo stayed at 0 kB for the life of a process holding a 3 GB table, so this kernel granted no huge pages whatever the advice -- the sysfs knob reads 'madvise' but the sandbox does not deliver. The measurement therefore says nothing about the hypothesis; it says the mechanism was unavailable. The change was reverted rather than carried unverified, since it needed an unsafe call to buy a benefit nothing here could demonstrate.",
+  "hypothesis": "The |F|^0.40 in a probe's cost looked like TLB pressure: a probe is one random access into the presence filter, which is quadratic in the base -- 326 MB at 36112 points -- and four-kilobyte pages make that eighty thousand page-table entries for a table walked at random.",
+  "result": "No change: 1.01, 0.94 and 1.02 times the previous cost a probe at the three widths, and the fitted exponents unmoved at +0.40 and -1.63.",
+  "still_open": "Whether the 0.40 is TLB misses, cache pressure, or memory bandwidth is not settled. A host that grants transparent huge pages would settle the first of the three in one run, and it matters: the exponent is what turns 64 TiB into 576 at 80 bits.",
+  "tested": "madvise(MADV_HUGEPAGE) on the filter and the rests before either is filled, then the three widths re-run end to end."
+ },
  "what_this_is": "The cost laws collapsed into reach against memory, and then tested at three factor-base widths on one degree. The probe-count law holds; the assumption hidden beside it -- that a probe costs the same whatever the table size -- does not, and it is what sets the exponent.",
  "what_this_is_not": [
   "Not a measured boundary: constants from a 48-bit subgroup are carried to 80, a factor of 10^10 in r.",
