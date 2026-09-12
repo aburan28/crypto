@@ -2759,7 +2759,7 @@ fn main() {
     let specialized_n53_support_expansion =
         std::env::var("KIC_ENABLE_SPECIALIZED_N53_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let specialized_n53_pair_sums =
-        std::env::var("KIC_DISABLE_SPECIALIZED_N53_PAIR_SUMS").as_deref() != Ok("1");
+        std::env::var("KIC_ENABLE_SPECIALIZED_N53_PAIR_SUMS").as_deref() == Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
