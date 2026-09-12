@@ -229,15 +229,18 @@ The unit is built to make the clock the multiplier's, not the
 scheduler's:
 
 - every memory is **block RAM** with exactly one writer and one read
-  address: the leaves as two tables (`x, y, j` for the issue side, `y,
-  tag, valid` for the retire side), written only by the fill; the product
-  tree twice (the tree levels read two entries per product), written only
-  by retire; `z` (holding `d`, then `x3`), written only by the issue side;
-  `d = x + sigma^j(x)` stored twice at fill rather than formed at each
-  use. A block RAM read is two clocks — address register, array, output
-  register — so the retire side, which reads `y`, `tag` and `z` to finish
-  a step, addresses them from a look-ahead copy of the multiplier's tag
-  two clocks before the product lands (`gf131_mul`'s `AHEAD` port). No
+  address: the leaf table (`x, y, j, tag, valid`), written only by the
+  fill; the product tree twice (the tree levels read two entries per
+  product), written only by retire; `d = x + sigma^j(x)` stored twice at
+  fill rather than formed at each use. A block RAM read is two clocks —
+  address register, array, output register. Nothing is read at retire:
+  the final multiply of a walk, `lam · (x + x3)`, has `y`, the tag and
+  `x3 = lam^2 + lam + d` in hand when it issues, and they ride a shift
+  register beside the multiplier (SRLs, about 300 LUTs) and meet the
+  product on the way out. (An earlier version kept a second leaf table
+  and an `x3` table for the retire side to read through a look-ahead copy
+  of the multiplier's tag: 4 RAMB36 + 1 RAMB18 of the engine's 20 + 2,
+  and block RAM is what bounds the number of engines in a device.) No
   word is written within two clocks of being read, so the read-during-
   write behaviour of the RAM never matters;
 - the port addresses are registered a clock before the read and operands
@@ -279,9 +282,9 @@ single-multiply bursts, each now twelve clocks from issue to the next
 issue, which eight batches do not quite cover and sixteen do. Sixteen is
 the default: block RAMs are 512 deep whatever the design asks for, so the
 tree's 16 × 32 entries fill them exactly and the second eight batches are
-free. Memory per batch of `W` is `10W` field elements as stored (two leaf
-tables, `d` twice, the tree twice), 16 RAMB36 and a RAMB18 per step unit
-at the default.
+free. Memory per batch of `W` is `8W` field elements as stored (the leaf
+table's `x` and `y`, `d` twice, the tree twice), 12 RAMB36 and a RAMB18
+per step unit at the default.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -417,12 +420,12 @@ batches in flight):
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 |
 |---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **8 100 – 8 420** | 180 (+318 SRL) | 7 420 | 20 | 2 |
+| `ec2k_walker` (whole engine) | **8 260 – 8 570** | 180 (+586 SRL) | 7 660 | 16 | 2 |
 | ├ walker body (FIFO, prefetch buffer, held report) | ~600 | 180 | ~500 | 4 | 1 |
-| └ `ec2k_batch_pipe` | ~7 700 | 0 | ~6 900 | 16 | 1 |
-| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages) | ~2 900 | 0 | ~2 300 | 16 | 1 |
+| └ `ec2k_batch_pipe` | ~7 900 | 0 | ~7 100 | 12 | 1 |
+| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~3 100 | 0 | ~2 500 | 12 | 1 |
 | &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 | 0 | 0 |
-| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 902 | 356 | 2 380 | 0 | 0 |
+| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 883 | 356 | 2 380 | 0 | 0 |
 | `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 |
 
 (The two engines differ by 310 LUTs from `-keep_equivalent_registers`
@@ -430,15 +433,17 @@ falling differently; the breakdown rows are apportioned from the earlier
 LUTRAM synthesis, 13 106 LUTs, less the 4 400 LUTRAM and its address
 decode that the block RAMs replaced.) The register block's stage on the
 spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
-an engine are the walker's four-word prefetch buffer.
+an engine are the walker's four-word prefetch buffer. Before the final
+multiply's companions moved into a shift register the engine was 8 100 –
+8 420 LUTs, 322 SRL, 7 420 FF and **20 RAMB36 + 2 RAMB18**: 150 LUTs and
+260 SRLs bought four RAMB36 tiles.
 
-Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe and
-**+1.25 ns** inside an engine, and none of the eighty worst paths touches
+Worst slack at a 3.0 ns clock is **+1.13 ns** for the whole probe and
+**+1.23 ns** inside an engine, and none of the eighty worst paths touches
 a memory's data: the register block's read mux from its address register
-(1.64 ns, ten bits fanning out to five hundred LUTs), then the output
-weight's second-stage sum (1.58 ns), a free-list pointer into the flush
-counter's reset (1.38 ns) and the burst level into a tree address (1.15
-ns plus the block RAM's setup). Earlier worst paths and what removed
+(1.64 ns, ten bits fanning out to five hundred LUTs), then the burst
+index into a tree address (1.23 ns plus the block RAM's setup) and the
+output weight's second-stage sum (1.20 ns). Earlier worst paths and what removed
 them: the operand stage's level/index arithmetic into a LUTRAM read
 (+0.83 ns; an address stage); the walker's step-counter read-modify-write
 (1.6 ns; the count now rides in the tag); the 22-group weight sum in one
@@ -467,12 +472,14 @@ logic. 4 800 LUTRAM per engine was never going to place tightly 48 times
 over. A block RAM has the same fanout inside one hard block.
 
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
-logic cells) and **2 016 RAMB36**, so an engine is 0.65% of the LUTs and
-1.04% of the block RAM: **48 engines is a third of the device**, 64 is
-41% of the LUTs and 67% of the RAM, and about 80 would be the RAM's
-ceiling with the shell's share left over. At 5.29 clocks per step and
-333 MHz that is 63 M steps/s per engine and **3.0 G steps/s at 48
-engines, 4.0 G at 64**; at the shell's 250 MHz, 2.3 G and 3.0 G.
+logic cells) and **2 016 RAMB36**, so an engine is 0.66% of the LUTs and
+0.84% of the block RAM (17 tiles: 16 RAMB36 and two RAMB18 sharing one):
+**48 engines is a third of the device** (the routed 48-engine image of
+the 21-tile revision used 31% of the LUTs and 50% of the RAM), 64 is 42%
+of the LUTs and 54% of the RAM, 80 is 53% and 67%, 96 is 63% and 81%. At
+5.29 clocks per step and 333 MHz that is 63 M steps/s per engine and
+**3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80**; at the
+shell's 250 MHz, 2.3 G, 3.0 G and 3.8 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
@@ -509,9 +516,10 @@ Two things the first synthesis taught, both fixed:
   instantiating two step units, which is the plan.
 - **A run on an F2 instance.** The 48-engine image at 333 MHz has been
   placed and routed and **meets timing** (`aws/README.md`, "What came
-  back"; AFI `agfi-0977ae08fec2f9ced`), but no worker has loaded it yet;
-  the measured steps per second against the 3.0 G the clock and the rate
-  promise is the next number.
+  back"); its first AFI would not load (a manifest id the HDK script
+  clipped) and the corrected one, `agfi-08bd9e69a78e4dc79`, is what an
+  f2.6xlarge loads next; the measured steps per second against the 3.0 G
+  the clock and the rate promise is the next number.
 - **Reading a walk back.** The engine's walk state is write-only from the
   host, so walks in flight are lost when a worker restarts; each of them
   is at most `2^DP_WEIGHT` steps of work and the fresh seeds make up for
