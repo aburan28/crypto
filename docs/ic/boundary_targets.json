@@ -359,29 +359,55 @@
         "factor_base": {
           "status": "record",
           "current": {
-            "summary": "Exact/optimized bases at n=19; curve+generator construction verified at n=53 (past prior MAX_N=41); minimum base feasible at n=41",
+            "summary": "Balanced point-defined n=53 base measured and retained under the 16 GiB gate; n=41 fixed Frobenius-union algebraic base also retained",
             "metrics": {
-              "exact_n": 19,
-              "feasible_n": 41,
-              "construction_n_max": 53,
-              "construction_method": "frobenius_invariant_linearized_or_point_defined",
+              "n": 53,
+              "eta": {
+                "numerator": 1,
+                "denominator": 128
+              },
+              "orbit_columns": 94,
+              "factor_base_points": 9964,
+              "construction_method": "coordinate-defined small-cofactor projections closed under signed Frobenius orbits",
               "materialized": true,
-              "construction_wall_ms": null,
-              "retained_bytes": null
+              "construction_wall_ms": 16.699279,
+              "support_index_wall_ms": 7381.059994,
+              "retained_bytes": 1409286144,
+              "measured_peak_rss_bytes": 1526292480,
+              "field_x_values_scanned": 192,
+              "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+              "selection_uses_scalar_labels": false,
+              "target_subgroup_enumerated": false
             },
-            "verdict": "N53_CURVE_CONSTRUCTION_OK"
+            "verdict": "N53_BALANCED_POINT_DEFINED_BASE_MEASURED"
           },
           "next_target": {
-            "summary": "Balanced base at n=53 under crossover-task resource gate (materialized or implicit+storage lower bound); publish construction RSS + retained bytes",
+            "summary": "Reduce n=53 retained support below 1 GiB without increasing same-target direct wall; preserve closure and zero scalar-label selection",
             "acceptance_gates": [
               "Frobenius+negation closure verified",
-              "construction RSS and retained bytes logged"
+              "construction RSS and retained bytes logged",
+              "same-target direct wall does not regress"
             ]
           },
           "evidence": [
-            "research/sat_factor_base_review_20260908/"
+            "research/sat_factor_base_review_20260908/",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Exact/optimized bases at n=19; curve+generator construction verified at n=53 (past prior MAX_N=41); minimum base feasible at n=41",
+              "metrics": {
+                "exact_n": 19,
+                "feasible_n": 41,
+                "construction_n_max": 53,
+                "construction_method": "frobenius_invariant_linearized_or_point_defined",
+                "materialized": true,
+                "construction_wall_ms": null,
+                "retained_bytes": null
+              },
+              "verdict": "N53_CURVE_CONSTRUCTION_OK"
+            }
+          ]
         },
         "decomposition": {
           "status": "record",
@@ -487,81 +513,151 @@
         "rank": {
           "status": "record",
           "current": {
-            "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank (relation-matrix LA, not GB FFD)",
+            "summary": "n=53 same-target direct run reaches rank 95 with 32 surplus relations; full transcript and solve retained (relation-matrix LA, not GB FFD)",
             "metrics": {
-              "full_rank_n": 37,
-              "fixture_rank_n": 41,
-              "amortized_targets": 1024,
-              "sparse_or_dense": null,
-              "la_charged_ms": null,
-              "note": "Do not report this stage as FFD"
+              "n": 53,
+              "K": 94,
+              "relations_collected": 189,
+              "relations_needed": 157,
+              "surplus": 32,
+              "matrix_dims": {
+                "rows": 189,
+                "cols": 95
+              },
+              "terminal_rank": 95,
+              "sparse_or_dense": "incremental dense echelon with final full-column-rank solve",
+              "rank_accumulation": "dense until full, then ambient-dimension bound",
+              "la_wall_ms": 0.70034,
+              "solution_validation_ms": 205.572453,
+              "reference_validation_ms": 954.934171,
+              "note": "Relation-matrix rank is not FFD or degree of regularity."
             }
           },
           "next_target": {
-            "summary": "Single-process rank to K+1 at n=41 with replayable rows; publish dims, surplus, LA cost",
+            "summary": "Independently replay the n=53 row transcript and reduce surplus or LA validation cost without changing rank",
             "acceptance_gates": [
-              "independent matrix replay or preserved row transcript",
-              "matrix_dims and la_wall_ms_or_la_charged_ms logged"
+              "independent matrix replay",
+              "terminal rank 95",
+              "matrix dimensions and LA wall retained"
             ]
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/",
-            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/"
+            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank (relation-matrix LA, not GB FFD)",
+              "metrics": {
+                "full_rank_n": 37,
+                "fixture_rank_n": 41,
+                "amortized_targets": 1024,
+                "sparse_or_dense": null,
+                "la_charged_ms": null,
+                "note": "Do not report this stage as FFD"
+              }
+            }
+          ]
         },
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps",
+            "summary": "Public synthetic known-answer recovery at n=53 with full factor-base, support, relation, rank, solve, and group verification stages",
             "metrics": {
-              "demo_n_max": 13,
-              "ic_degree_doc_max": 23,
-              "claim_boundary": "synthetic_known_answer"
+              "n": 53,
+              "claim_boundary": "synthetic_known_answer_explicit_public_validation_scalar",
+              "published_q": [
+                2565091273463387,
+                5885236316843894
+              ],
+              "recovered_d": 476811900269,
+              "factor_base_points": 9964,
+              "orbit_columns": 94,
+              "relations": 189,
+              "direct_whole_process_wall_ms": 39780.604664,
+              "rho_same_target_wall_ms": 3279.15836,
+              "verified": true,
+              "factor_base_logs_known_by_construction": false
             }
           },
           "next_target": {
-            "summary": "Known-answer full IC at n=23 with stage timers",
+            "summary": "Public hash-derived unknown-scalar n=53 run with factor-base logs derived from relations and the same complete stage/resource receipts",
             "acceptance_gates": [
-              "progress events FB\u2192relations\u2192LA\u2192verify",
-              "[d]G = Q"
+              "target scalar not constructed or supplied",
+              "factor-base logs derived and group-certified",
+              "all stage timers and [d]G=Q verification retained"
             ]
           },
           "evidence": [
             "docs/ic/README.md",
-            "tests/ic_progress.rs"
+            "tests/ic_progress.rs",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps",
+              "metrics": {
+                "demo_n_max": 13,
+                "ic_degree_doc_max": 23,
+                "claim_boundary": "synthetic_known_answer"
+              }
+            }
+          ]
         },
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=37 charged-time crossover (amortized exact-support V2); n=41 base feasible only",
+            "summary": "n=41 fixed-algebraic online charged crossover with full-cost loss; n=53 exact same-target whole-process loss measured",
             "metrics": {
-              "n": 37,
-              "timing_class": "algorithmic_charged",
-              "whole_process_wall_crossover": false,
-              "amortized_targets": 1024,
-              "automorphism_discount": "sqrt(2n) / A=2*n family",
-              "n41_status": "N41_MINIMUM_BASE_FEASIBLE_only_not_crossover"
+              "n41_timing_class": "algorithmic_charged_online",
+              "n41_ic_over_rho_online_wall_ratio": 0.28554556054870023,
+              "n41_ic_over_rho_amortised_wall_ratio": 5.025824680629552,
+              "n41_full_available_wall_over_rho": 110.79138179659516,
+              "n41_four_core_amortised_ic_over_rho_wall_ratio": 3.605523155126031,
+              "n53_timing_class": "whole_process_wall",
+              "n53_direct_over_rho_wall_ratio": 12.131346003064046,
+              "n53_direct_charged_over_rho_algorithm_ratio": 11.99305101371775,
+              "n53_fresh_build_plus_direct_over_rho_wall_ratio": 37.698324546302224,
+              "automorphism_discount": "signed Frobenius, sqrt(2n), A=2*n family",
+              "same_target_n53": true,
+              "whole_process_wall_crossover": false
             },
-            "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
-            "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
+            "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_WALL_LOSS",
+            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation; n=53 loses whole-process on the exact same target. Not asymptotic sub-rho, key recovery, or SOTA."
           },
           "next_target": {
-            "summary": "After n=53 construction+probe: win whole-process wall at n=37 OR charged at n=41 (>=20% margin); then charged/wall at n=53 with balanced eta",
+            "summary": "Achieve whole-process same-target wall crossover at n=41 or n=53 while retaining build, setup, relation, LA, memory, and rho charges",
             "acceptance_gates": [
               "all stages charged",
-              "independent validation",
-              "explicit verdict field for wall or next-rung",
-              "timing_class and automorphism_discount explicit"
+              "independent external validation",
+              "same target in direct and rho",
+              "timing class and automorphism discount explicit",
+              "whole-process direct/rho ratio < 1"
             ],
-            "n53_probe_note": "IC producer RANK_PLUS_32 and rho recover at n=53 (draft vs_rho costs); not a ledger promotion"
+            "n53_probe_note": "Current n=53 same-target direct/rho wall ratio is 12.131; support setup and pair-pair query remain the measured bottlenecks."
           },
           "evidence": [
-            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json"
+            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-39-fixed-algebraic-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-40-parallel-precompute-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "n=37 charged-time crossover (amortized exact-support V2); n=41 base feasible only",
+              "metrics": {
+                "n": 37,
+                "timing_class": "algorithmic_charged",
+                "whole_process_wall_crossover": false,
+                "amortized_targets": 1024,
+                "automorphism_discount": "sqrt(2n) / A=2*n family",
+                "n41_status": "N41_MINIMUM_BASE_FEASIBLE_only_not_crossover"
+              },
+              "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
+              "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
+            }
+          ]
         }
       }
     },

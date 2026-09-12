@@ -1,0 +1,32 @@
+name: Koblitz Stage 43 gate audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/ic/boundary_targets.json"
+      - "docs/ic/BOUNDARY_TARGETS.md"
+      - "scripts/compose_koblitz_stage43_gate_audit.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-43-current-gate-audit-20260912/**"
+      - ".github/workflows/koblitz-stage43-gate-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source results, boundary twins, and seven-gate audit
+        run: |
+          python3 -m py_compile scripts/compose_koblitz_stage43_gate_audit.py
+          python3 scripts/compose_koblitz_stage43_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-43-current-gate-audit-20260912 \
+            > "$RUNNER_TEMP/stage43-verification.json"
+          python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py preflight \
+            > "$RUNNER_TEMP/boundary-preflight.json"
+          python3 -m json.tool docs/ic/boundary_targets.json > /dev/null
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
