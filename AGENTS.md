@@ -122,6 +122,48 @@ and had been read as a statement about the method.
   practicality note, never as the metric; operation counts are the
   metric because they survive hardware.
 
+### 7. Keep the scoreboard current
+
+The table lives in two places and both are part of the deliverable:
+the prose table in the thread's note, and the drawn one in
+`docs/index-calculus-scoreboard.html`.  **A round is not finished until
+the page carries its numbers.**  The page is the thing a reader opens
+first, so a stale page is worse than no page: it reports a verdict the
+measurements no longer support.
+
+The repository file is canonical.  Edit `docs/index-calculus-scoreboard.html`
+and let any published copy be a republish of it, never the other way
+round; a figure that exists only in a published copy is lost.
+
+What a round owes the page:
+
+- **A row per variant**, in the same unit and against the same
+  boundaries as everything already on it.  A new variant that does not
+  fit the axis means the axis was wrong, not that the variant is
+  exempt.
+- **A superseded figure moves, it does not vanish.**  When tuning
+  lowers a cost, the old value becomes the "before" mark on that row.
+  Deleting it hides the size of the gain and lets an engineering step
+  read as an advance.
+- **The class chip set** to advance, engineering, relabelling or
+  accounting, by the test in §3 and not by how the change felt to make.
+- **The exponent panel and the boundary facts re-derived** whenever a
+  fit changes or a phase is priced for the first time.  An exponent on
+  the page that predates a new phase measurement is the §5 mistake,
+  drawn.
+- **The verdict rewritten** when the verdict changes.  The sentence at
+  the top of the page is a claim; a round that falsifies it rewrites it
+  in the same commit.
+
+Two standing constraints on the page itself: every number on it comes
+from the frozen experiment files, so the page cites and never computes;
+and anything that is not a measurement stays marked as what it is, an
+extrapolation with the exponents it rests on named.
+
+The update rides in the commit or pull request that lands the
+measurement.  It is not a follow-up task, and "the page is out of date"
+is not a state this repository has.
+
 ## Worked example
 
 `RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
@@ -134,5 +176,11 @@ negative result stated in numbers: on `E(F_{p³})` at the sizes that fit,
 rho costs `S ≈ 1.3` and every index-calculus variant built costs
 between `528×` and `4,000×` that, with the asymptotically better variant
 crossing rho only past `2^{230}`.
+
+`docs/index-calculus-scoreboard.html` is the same ledger drawn, and
+the reference for what §7 asks of a round: the boundaries as the axis
+and the reference line, the `C₃` steps with their classes, the fitted
+exponents against rho's one half, and the extrapolated crossovers
+marked as extrapolations.
 
 That is what a finished thread looks like when the answer is no.
