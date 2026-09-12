@@ -240,3 +240,35 @@ the manifest corrected by hand was resubmitted as
 `20260912-181902-n48-c333-idfix`); `build_afi_instance.sh` now checks the
 manifest against the defines and rewrites it inside the tarball, and the
 subsystem id is `EC13`.
+
+**That image runs.** On an `f2.6xlarge` (FPGA Developer AMI, `sdk_setup.sh`,
+`make pci`, `fpga-load-local-image -S 0 -I agfi-08bd9e69a78e4dc79`), the
+host program reads `MAGIC`, `GEOM` (48 × 512 walks, dp weight 34) and
+`CLOCK` (333.3 MHz), loads the 24 576 walks in 7.3 s over AXI-Lite, and
+then holds **3 010.7 M steps/s** for as long as it runs (2 995 at 2 s,
+3 010 from 10 s on; 103 G iterations in a 40 s run) — 48 × 333.3 MHz /
+3.011 G = **5.31 clocks per step** against the 5.29 the simulation gave,
+with **0 dropped reports** and, in a run with `--verify 64`, all 64 sampled
+distinguished points equal to the client's reference walk from the same
+seed. (Verification is a software walk of up to `2^26` steps per point on
+the host, so with it on, the host stops draining the queue, the credits
+run out and the engines stall — 748 M steps/s in that run; workers run
+`--verify 0` and the campaign's merge checks the corpus.) The rate
+counter counts from reset, so the first version of the host program
+reported 8 G/s over the first seconds; it now measures from the end of
+the load.
+
+**64 engines at 333 MHz also met timing** (`20260912-193357-n64-c333`,
+the same revision as the 48-engine image): placed at +0.360 ns, routed at
+**WNS +0.040 ns, TNS 0**, 539 553 LUTs (41.4%), 532 647 FFs (20.4%),
+1 280 RAMB36 + 128 RAMB18 (67%). Its worst paths are now inside the
+engines and the spine, not the reset: a fill's batch id into a leaf
+table's write address (3.0 ns with the block RAM's setup) and a stage's
+`up_valid` into the 300-bit insert mux of the stage below. Its manifest
+had the same clipped id; the corrected resubmission is
+`agfi-00c9bd0dc08fef595` (`20260912-193357-n64-c333-idfix`), and at 5.31
+clocks per step it should hold 4.0 G steps/s. A second 64-engine build
+of the revision with the level in the tag and reset-free data registers
+(`20260912-201058-n64-c333`) and an 80-engine build of the revision with
+the retire-free memories (`20260912-204307-n80-c333`, 17 tiles per
+engine, 67% of the block RAM) were running when this was written.
