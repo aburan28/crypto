@@ -24,7 +24,7 @@
 # Variables: AWS_DEFAULT_REGION (us-west-2), STACK (ecc2k130), BUCKET,
 # TABLE (DynamoDB slot registry, blank = S3 registry; must match infra.sh),
 # TYPES (default all three F2 sizes), AMI (override the FPGA Developer AMI
-# lookup), KEY_NAME, ROOT_GB (default 100), MAX_SPOT_PER_FPGA_HOUR.
+# lookup), KEY_NAME, ROOT_GB (default 150), MAX_SPOT_PER_FPGA_HOUR.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -38,7 +38,7 @@ SG=$STACK-worker
 LT=$STACK-fpga
 TYPES=${TYPES:-f2.6xlarge,f2.12xlarge,f2.48xlarge}
 KEY_NAME=${KEY_NAME:-}
-ROOT_GB=${ROOT_GB:-100}
+ROOT_GB=${ROOT_GB:-150}     # the FPGA Developer AMI's root snapshot is 120 GB
 FLEET_FILE=.f2-fleet-id-$AWS_DEFAULT_REGION
 
 fpgasOf() {

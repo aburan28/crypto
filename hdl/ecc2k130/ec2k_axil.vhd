@@ -152,6 +152,10 @@ architecture rtl of ec2k_axil is
   signal steps_hi   : word_t := (others => '0');
   signal dps, dropped : unsigned(31 downto 0) := (others => '0');
   signal overflow   : std_logic := '0';
+  -- the per-clock step and drop counts are registered before they are added
+  -- into the wide counters, so no path runs popcount -> 64-bit add
+  signal drop_v     : std_logic_vector(0 to NENG - 1) := (others => '0');
+  signal nstep_r, ndrop_r : natural range 0 to NENG := 0;
 
   -- load
   signal ld_pend    : std_logic := '0';
@@ -333,15 +337,11 @@ begin
       end if;
 
       -- capture reports; a report into an occupied holding register is lost
-      ndrop := 0;
-      nstep := 0;
       for i in 0 to NENG - 1 loop
-        if e_step(i) = '1' then
-          nstep := nstep + 1;
-        end if;
+        drop_v(i) <= '0';
         if e_dp_valid(i) = '1' then
           if h_valid(i) = '1' and not (drain and h_ptr = i) then
-            ndrop := ndrop + 1;
+            drop_v(i) <= '1';
           else
             h_valid(i) <= '1';
             h_id(i)    <= e_dp_id(i);
@@ -352,7 +352,7 @@ begin
         end if;
       end loop;
 
-      -- queue pointers and counters
+      -- queue pointers and counters (steps and dropped lag by two clocks)
       if push then
         q_wr <= q_wr + 1;
         dps  <= dps + 1;
@@ -360,9 +360,21 @@ begin
       if pop then
         q_rd <= q_rd + 1;
       end if;
-      steps <= steps + nstep;
-      if ndrop > 0 then
-        dropped  <= dropped + ndrop;
+      nstep := 0;
+      ndrop := 0;
+      for i in 0 to NENG - 1 loop
+        if e_step(i) = '1' then
+          nstep := nstep + 1;
+        end if;
+        if drop_v(i) = '1' then
+          ndrop := ndrop + 1;
+        end if;
+      end loop;
+      nstep_r <= nstep;
+      ndrop_r <= ndrop;
+      steps   <= steps + nstep_r;
+      if ndrop_r > 0 then
+        dropped  <= dropped + ndrop_r;
         overflow <= '1';
       end if;
 
@@ -371,6 +383,9 @@ begin
         dps      <= (others => '0');
         dropped  <= (others => '0');
         overflow <= '0';
+        nstep_r  <= 0;
+        ndrop_r  <= 0;
+        drop_v   <= (others => '0');
         q_wr     <= (others => '0');
         q_rd     <= (others => '0');
         h_valid  <= (others => '0');
@@ -383,6 +398,9 @@ begin
         dps      <= (others => '0');
         dropped  <= (others => '0');
         overflow <= '0';
+        nstep_r  <= 0;
+        ndrop_r  <= 0;
+        drop_v   <= (others => '0');
         q_wr     <= (others => '0');
         q_rd     <= (others => '0');
         h_valid  <= (others => '0');
