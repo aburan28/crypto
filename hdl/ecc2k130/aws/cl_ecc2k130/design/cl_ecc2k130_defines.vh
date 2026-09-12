@@ -11,22 +11,25 @@
 `ifndef CL_ECC2K130_DEFINES
 `define CL_ECC2K130_DEFINES
 
-// walker engines; 13.1k LUTs each as synthesised, the VU47P has 1.30M
+// walker engines; ~9k LUTs and 22 RAMB36 each as synthesised, the VU47P
+// has 1.30M LUTs and 2016 RAMB36
 `ifndef ECC_NENG
 `define ECC_NENG 48
 `endif
 
-// walks per engine = 2**ECC_ID_W; must comfortably cover 2**(LOG_W+LOG_NB)
+// walks per engine = 2**ECC_ID_W; must comfortably cover 2**(LOG_W+LOG_NB),
+// and 512 fills the FIFO's block RAM column exactly
 `ifndef ECC_ID_W
-`define ECC_ID_W 8
+`define ECC_ID_W 9
 `endif
 
-// step unit: walks per Montgomery batch and batches in flight
+// step unit: walks per Montgomery batch and batches in flight (16 x 16
+// fills the 512-deep block RAMs; 5.29 clocks per step against 5.54 at 8)
 `ifndef ECC_LOG_W
 `define ECC_LOG_W 4
 `endif
 `ifndef ECC_LOG_NB
-`define ECC_LOG_NB 3
+`define ECC_LOG_NB 4
 `endif
 
 // idle clocks before a partial batch is padded and issued
