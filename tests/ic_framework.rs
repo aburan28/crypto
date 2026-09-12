@@ -525,7 +525,7 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
         &params,
         serde_json::to_vec(&json!({
             "schema_version":1,"name":"k0n9","curve":{"degree":9,"curve_a":0},
-            "summands":2,"solver":"pair_table","seed":1,
+            "summands":2,"solver":"pair_table","seed":1,"max_trials":100000000,
             "linear_algebra":{"mode":"sparse","sparse":{"wiedemann":{"block_m":2,"block_n":2}}},
             "collection":{"unit_trials":128,"units":2,"max_units":8},
             "baseline":{"rho":true,"rho_max_iterations":100000},
@@ -604,6 +604,8 @@ fn workflow_runs_in_stages_and_resumes_without_redoing_work() {
     let (ok, v) = command(&["workflow", "--params", p, "--dir", d]);
     assert!(ok, "{v}");
     assert_eq!(v["status"], "complete");
+    assert_eq!(v["summands"], 2);
+    assert_eq!(v["descent_summands"], 2);
     assert_eq!(
         v["evidence_scope"],
         "mixed_synthetic_known_answer_and_public_hash_unknown_scalar"
