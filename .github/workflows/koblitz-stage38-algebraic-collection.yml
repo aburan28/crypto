@@ -31,6 +31,8 @@ jobs:
           cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
           RUSTFLAGS=-Awarnings cargo test --locked --lib window -- --test-threads=1
           RUSTFLAGS=-Awarnings cargo test --locked --lib \
+            the_single_word_orbit_map_agrees_with_the_general_one -- --test-threads=1
+          RUSTFLAGS=-Awarnings cargo test --locked --lib \
             walked_work_units_partition_the_probe_sequence_exactly -- --test-threads=1
           RUSTFLAGS=-Awarnings cargo test --locked --test ic_framework \
             workflow_runs_in_stages_and_resumes_without_redoing_work -- --exact
