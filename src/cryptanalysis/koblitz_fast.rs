@@ -329,11 +329,10 @@ mod tests {
         for _ in 0..4 {
             let k = BigUint::from(rng.gen_range(1..(1u64 << 20)));
             let x = crate::binary_ecc::F2mElement::from_biguint(&k, kc.n);
-            if let Some(p) = crate::cryptanalysis::koblitz_index_calculus::points_with_x(
-                &kc.curve, &x,
-            )
-            .into_iter()
-            .next()
+            if let Some(p) =
+                crate::cryptanalysis::koblitz_index_calculus::points_with_x(&kc.curve, &x)
+                    .into_iter()
+                    .next()
             {
                 points.push(p);
             }
@@ -366,7 +365,10 @@ mod tests {
                 }
                 let k = BigUint::from(0x9e37_79b9u64 + u64::from(n));
                 assert_eq!(fc.lower(fc.mul(fp, &k)), scalar_mul(&kc.curve, p, &k));
-                assert_eq!(fc.mul(fp, &k), fc.mul_u64(fp, 0x9e37_79b9u64 + u64::from(n)));
+                assert_eq!(
+                    fc.mul(fp, &k),
+                    fc.mul_u64(fp, 0x9e37_79b9u64 + u64::from(n))
+                );
             }
         }
     }

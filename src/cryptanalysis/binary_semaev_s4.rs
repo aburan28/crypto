@@ -529,18 +529,18 @@ pub fn weil_descend_s4(
 
     let mut f3 = AnfF2m::zero(0);
     let terms: Vec<AnfF2m> = vec![
-        AnfF2m::from_const(&xr4, n),           // x_R⁴
-        e1_4,                                  // e₁⁴
-        e3_4,                                  // e₃⁴
-        e2_4.mul_const(&xr4, n),               // e₂⁴ x_R⁴
-        e3_3.mul_const(&xr1, n),               // e₃³ x_R
-        e3.mul(&e2_2).mul_const(&xr3, n),      // e₃ e₂² x_R³
-        e3.mul(&e1_2).mul_const(&xr1, n),      // e₃ e₁² x_R
-        e3.mul_const(&xr3, n),                 // e₃ x_R³
-        e1_2.mul(&e3_2).mul_const(&xr2, n),    // e₁² e₃² x_R²
-        e3_2.mul_const(&xr4, n),               // e₃² x_R⁴
-        e3_2.clone(),                          // e₃²
-        e2_2.mul_const(&xr2, n),               // e₂² x_R²
+        AnfF2m::from_const(&xr4, n),        // x_R⁴
+        e1_4,                               // e₁⁴
+        e3_4,                               // e₃⁴
+        e2_4.mul_const(&xr4, n),            // e₂⁴ x_R⁴
+        e3_3.mul_const(&xr1, n),            // e₃³ x_R
+        e3.mul(&e2_2).mul_const(&xr3, n),   // e₃ e₂² x_R³
+        e3.mul(&e1_2).mul_const(&xr1, n),   // e₃ e₁² x_R
+        e3.mul_const(&xr3, n),              // e₃ x_R³
+        e1_2.mul(&e3_2).mul_const(&xr2, n), // e₁² e₃² x_R²
+        e3_2.mul_const(&xr4, n),            // e₃² x_R⁴
+        e3_2.clone(),                       // e₃²
+        e2_2.mul_const(&xr2, n),            // e₂² x_R²
     ];
     for t in &terms {
         f3 = f3.xor(t);
@@ -602,10 +602,7 @@ pub fn elementary_symmetric_3(
     irr: &IrreduciblePoly,
 ) -> (F2mElement, F2mElement, F2mElement) {
     let e1 = x1.add(x2).add(x3);
-    let e2 = x1
-        .mul(x2, irr)
-        .add(&x1.mul(x3, irr))
-        .add(&x2.mul(x3, irr));
+    let e2 = x1.mul(x2, irr).add(&x1.mul(x3, irr)).add(&x2.mul(x3, irr));
     let e3 = x1.mul(x2, irr).mul(x3, irr);
     (e1, e2, e3)
 }
@@ -729,8 +726,7 @@ mod tests {
         let mut e_assign = vec![false; sys.n_e_vars() as usize];
         for i in 0..3 {
             for d in 0..e_len(i + 1, l) {
-                e_assign[sys.e_var(i, d) as usize] =
-                    sys.correspondence[i][d].eval(&x_assign);
+                e_assign[sys.e_var(i, d) as usize] = sys.correspondence[i][d].eval(&x_assign);
             }
         }
 
@@ -767,9 +763,18 @@ mod tests {
         assert_eq!(sys.semaev.len(), n as usize);
         assert!(sys.semaev.iter().all(|e| e.degree() <= 2));
         // The correspondence carries the cubic part: e₃ = X₁X₂X₃.
-        assert_eq!(sys.correspondence[0].iter().map(|p| p.degree()).max(), Some(1));
-        assert_eq!(sys.correspondence[1].iter().map(|p| p.degree()).max(), Some(2));
-        assert_eq!(sys.correspondence[2].iter().map(|p| p.degree()).max(), Some(3));
+        assert_eq!(
+            sys.correspondence[0].iter().map(|p| p.degree()).max(),
+            Some(1)
+        );
+        assert_eq!(
+            sys.correspondence[1].iter().map(|p| p.degree()).max(),
+            Some(2)
+        );
+        assert_eq!(
+            sys.correspondence[2].iter().map(|p| p.degree()).max(),
+            Some(3)
+        );
     }
 
     /// A curve other than `b = 1` must be refused, not silently

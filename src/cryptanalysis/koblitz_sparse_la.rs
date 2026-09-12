@@ -62,8 +62,8 @@ use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 // ── Modular arithmetic over Z/rZ with r < 2^63 ─────────────────────
 
@@ -347,7 +347,11 @@ impl Workspace {
     /// Eliminate column `c` (weight ≥ 1) with its lightest row as pivot.
     /// Returns the columns whose weight changed, or `Err` on a
     /// contradiction.
-    fn eliminate(&mut self, c: u32, max_row_weight: usize) -> Result<Option<Vec<u32>>, Inconsistent> {
+    fn eliminate(
+        &mut self,
+        c: u32,
+        max_row_weight: usize,
+    ) -> Result<Option<Vec<u32>>, Inconsistent> {
         let m = self.modulus;
         let members = self.col_rows[c as usize].clone();
         if members.is_empty() {
@@ -356,7 +360,12 @@ impl Workspace {
         let pivot_id = members
             .iter()
             .copied()
-            .min_by_key(|&r| (self.rows[r].as_ref().map_or(usize::MAX, SparseRow::weight), r))
+            .min_by_key(|&r| {
+                (
+                    self.rows[r].as_ref().map_or(usize::MAX, SparseRow::weight),
+                    r,
+                )
+            })
             .expect("nonempty");
         let pivot_weight = self.rows[pivot_id].as_ref().expect("active").weight();
         // Fill-in bound: every other row grows by at most pivot_weight − 2.
@@ -482,7 +491,9 @@ pub fn filter_relations(
 
     // Singletons.
     if opts.remove_singletons {
-        let seeds: Vec<u32> = (0..columns as u32).filter(|&c| ws.column_weight(c) == 1).collect();
+        let seeds: Vec<u32> = (0..columns as u32)
+            .filter(|&c| ws.column_weight(c) == 1)
+            .collect();
         ws.cascade_singletons(seeds)?;
     }
 
@@ -511,7 +522,9 @@ pub fn filter_relations(
             let mut size: HashMap<usize, usize> = HashMap::new();
             let mut heaviest: HashMap<usize, (usize, usize)> = HashMap::new();
             for id in 0..n {
-                let Some(row) = ws.rows[id].as_ref() else { continue };
+                let Some(row) = ws.rows[id].as_ref() else {
+                    continue;
+                };
                 let root = find_root(&mut parent, id);
                 *size.entry(root).or_insert(0) += 1;
                 let entry = heaviest.entry(root).or_insert((0, id));
@@ -600,9 +613,17 @@ impl FilteredSystem {
     /// has exactly one unknown, then solving whatever remains densely.
     /// `None` when the original system does not determine every column
     /// (the caller collects more relations).
-    pub fn reconstruct(&self, core_solution: &[u64], original_rows: &[SparseRow]) -> Option<Vec<u64>> {
+    pub fn reconstruct(
+        &self,
+        core_solution: &[u64],
+        original_rows: &[SparseRow],
+    ) -> Option<Vec<u64>> {
         let m = self.modulus;
-        assert_eq!(core_solution.len(), self.core_columns.len(), "core solution width");
+        assert_eq!(
+            core_solution.len(),
+            self.core_columns.len(),
+            "core solution width"
+        );
         let mut value: Vec<Option<u64>> = vec![None; self.columns];
         for (&c, &v) in self.core_columns.iter().zip(core_solution) {
             value[c as usize] = Some(v);
@@ -667,7 +688,8 @@ impl FilteredSystem {
             .filter(|&c| value[c as usize].is_none())
             .collect();
         if !unknown.is_empty() {
-            let index: HashMap<u32, usize> = unknown.iter().enumerate().map(|(i, &c)| (c, i)).collect();
+            let index: HashMap<u32, usize> =
+                unknown.iter().enumerate().map(|(i, &c)| (c, i)).collect();
             let mut rows = Vec::new();
             let mut rhs = Vec::new();
             for row in original_rows {
@@ -695,7 +717,11 @@ impl FilteredSystem {
 }
 
 /// Gauss–Jordan over `Z/rZ` in `u64`; `Some` only for a unique solution.
-pub fn dense_solve_unique(mut rows: Vec<Vec<u64>>, mut rhs: Vec<u64>, modulus: u64) -> Option<Vec<u64>> {
+pub fn dense_solve_unique(
+    mut rows: Vec<Vec<u64>>,
+    mut rhs: Vec<u64>,
+    modulus: u64,
+) -> Option<Vec<u64>> {
     let cols = rows.first().map_or(0, Vec::len);
     if cols == 0 {
         return rhs.iter().all(|&b| b == 0).then_some(Vec::new());
@@ -924,7 +950,12 @@ struct BasisColumn {
 /// with shift `(0ⁿ, 1ᵐ)`: every column `[f; g]` satisfies
 /// `a·f + g ≡ 0 (mod λ^L)` with `deg f ≤ δ`, `deg g ≤ δ − 1`, hence the
 /// block recurrence `Σ_{k≤δ} S_{s−k} f_k = 0` for `δ ≤ s < L`.
-fn minimal_approximant_basis(seq: &[Vec<u64>], m: usize, n: usize, modulus: u64) -> Vec<BasisColumn> {
+fn minimal_approximant_basis(
+    seq: &[Vec<u64>],
+    m: usize,
+    n: usize,
+    modulus: u64,
+) -> Vec<BasisColumn> {
     let big_l = seq.len();
     let mut cols: Vec<BasisColumn> = Vec::with_capacity(n + m);
     for j in 0..n {
@@ -1008,8 +1039,11 @@ fn minimal_approximant_basis(seq: &[Vec<u64>], m: usize, n: usize, modulus: u64)
         for &(p, _) in &pivots {
             let col = &mut cols[p];
             col.f.insert(0, vec![0u64; n]);
-            col.residual.copy_within(t * m..(big_l - 1) * m, (t + 1) * m);
-            col.residual[t * m..(t + 1) * m].iter_mut().for_each(|v| *v = 0);
+            col.residual
+                .copy_within(t * m..(big_l - 1) * m, (t + 1) * m);
+            col.residual[t * m..(t + 1) * m]
+                .iter_mut()
+                .for_each(|v| *v = 0);
             col.delta += 1;
         }
     }
@@ -1189,7 +1223,13 @@ pub enum SparseSolveOutcome {
 /// Fold rows `C..R` of a full-column-rank system into rows `< C` at
 /// random with random coefficients, giving a square system with the same
 /// solution.
-fn fold_square(rows: &[SparseRow], n_cols: usize, modulus: u64, fold: usize, rng: &mut StdRng) -> Vec<SparseRow> {
+fn fold_square(
+    rows: &[SparseRow],
+    n_cols: usize,
+    modulus: u64,
+    fold: usize,
+    rng: &mut StdRng,
+) -> Vec<SparseRow> {
     let mut square: Vec<SparseRow> = rows[..n_cols].to_vec();
     for extra in &rows[n_cols..] {
         for _ in 0..fold.max(1) {
@@ -1272,7 +1312,10 @@ pub fn solve_sparse_system(
             let Some(inv) = (t != 0).then(|| invmod(t, modulus)).flatten() else {
                 continue;
             };
-            let x: Vec<u64> = z[..core_cols].iter().map(|&v| mulmod(v, inv, modulus)).collect();
+            let x: Vec<u64> = z[..core_cols]
+                .iter()
+                .map(|&v| mulmod(v, inv, modulus))
+                .collect();
             if core.iter().all(|row| row.evaluate(&x, modulus) == row.rhs) {
                 core_solution = Some(x);
                 break;
@@ -1286,7 +1329,10 @@ pub fn solve_sparse_system(
         return (SparseSolveOutcome::Undetermined, report);
     };
     report.reconstructed_columns = columns - core_cols;
-    if rows.iter().all(|row| row.evaluate(&full, modulus) == row.rhs) {
+    if rows
+        .iter()
+        .all(|row| row.evaluate(&full, modulus) == row.rhs)
+    {
         (SparseSolveOutcome::Solved(full), report)
     } else {
         (SparseSolveOutcome::Inconsistent, report)
@@ -1317,7 +1363,9 @@ mod tests {
             .collect();
         let mut rank = 0;
         for col in 0..columns {
-            let Some(piv) = (rank..m.len()).find(|&r| m[r][col] != 0) else { continue };
+            let Some(piv) = (rank..m.len()).find(|&r| m[r][col] != 0) else {
+                continue;
+            };
             m.swap(rank, piv);
             let inv = invmod(m[rank][col] as u64, modulus).unwrap() as u128;
             for r in rank + 1..m.len() {
@@ -1355,7 +1403,9 @@ mod tests {
         let sol: Vec<u64> = sol.iter().map(|v| to_u64_mod(v, modulus)).collect();
         // The reference returns a partial solution when the system is
         // underdetermined; only accept it when it satisfies every row.
-        rows.iter().all(|r| r.evaluate(&sol, modulus) == r.rhs).then_some(sol)
+        rows.iter()
+            .all(|r| r.evaluate(&sol, modulus) == r.rhs)
+            .then_some(sol)
     }
 
     /// Random relation-shaped system (row weight ≤ `weight`) with a
@@ -1404,7 +1454,11 @@ mod tests {
         let row = SparseRow::new(vec![(3, P + 2), (1, 5), (3, P - 2), (0, P)], 2 * P + 7, P);
         assert_eq!(row.entries, vec![(1, 5)]);
         assert_eq!(row.rhs, 7);
-        let dense = vec![BigUint::from(0u32), BigUint::from(P + 4), BigUint::from(3u32)];
+        let dense = vec![
+            BigUint::from(0u32),
+            BigUint::from(P + 4),
+            BigUint::from(3u32),
+        ];
         let from_dense = SparseRow::from_dense(&dense, &BigUint::from(P), P);
         assert_eq!(from_dense.entries, vec![(1, 4), (2, 3)]);
         assert_eq!(from_dense.rhs, 0);
@@ -1468,14 +1522,22 @@ mod tests {
             // The planted solution satisfies every core row (they are
             // combinations of the originals).
             for row in &filtered.core_rows {
-                assert_eq!(row.evaluate(&x, P), row.rhs, "trial {trial}: core row broken");
+                assert_eq!(
+                    row.evaluate(&x, P),
+                    row.rhs,
+                    "trial {trial}: core row broken"
+                );
                 for &(c, _) in &row.entries {
                     assert!(filtered.core_columns.contains(&c));
                 }
             }
             // Reconstruct from the planted core values: exact whenever the
             // original system determines every column.
-            let core: Vec<u64> = filtered.core_columns.iter().map(|&c| x[c as usize]).collect();
+            let core: Vec<u64> = filtered
+                .core_columns
+                .iter()
+                .map(|&c| x[c as usize])
+                .collect();
             let full = filtered.reconstruct(&core, &rows);
             let determined = dense_reference(&rows, columns, P).is_some();
             assert_eq!(full.is_some(), determined, "trial {trial}: determinacy");
@@ -1483,7 +1545,10 @@ mod tests {
                 assert_eq!(full, x, "trial {trial}");
             }
         }
-        assert!(merged_any && purged_any, "the random trials exercised merge and purge");
+        assert!(
+            merged_any && purged_any,
+            "the random trials exercised merge and purge"
+        );
     }
 
     #[test]
@@ -1496,7 +1561,16 @@ mod tests {
             r(vec![(2, 1), (3, 5)], 6), // column 3 is a singleton
             r(vec![(0, 1), (2, 1)], 2),
         ];
-        let f = filter_relations(rows.clone(), 4, P, &FilterOptions { merge_max_weight: 0, ..FilterOptions::default() }).unwrap();
+        let f = filter_relations(
+            rows.clone(),
+            4,
+            P,
+            &FilterOptions {
+                merge_max_weight: 0,
+                ..FilterOptions::default()
+            },
+        )
+        .unwrap();
         assert_eq!(f.report.duplicates_removed, 1);
         assert_eq!(f.report.singletons_removed, 1);
         assert_eq!(f.core_columns, vec![0, 1, 2]);
@@ -1544,7 +1618,13 @@ mod tests {
     #[test]
     fn approximant_basis_satisfies_the_block_recurrence() {
         let mut rng = StdRng::seed_from_u64(4);
-        for &(m, n, big_n) in &[(1usize, 1usize, 9usize), (2, 2, 13), (3, 2, 20), (2, 4, 17), (4, 4, 40)] {
+        for &(m, n, big_n) in &[
+            (1usize, 1usize, 9usize),
+            (2, 2, 13),
+            (3, 2, 20),
+            (2, 4, 17),
+            (4, 4, 40),
+        ] {
             // A random dense square matrix; the sequence X Mᵗ Y.
             let mat: Vec<u64> = (0..big_n * big_n).map(|_| rng.gen_range(0..P)).collect();
             let x: Vec<u64> = (0..m * big_n).map(|_| rng.gen_range(0..P)).collect();
@@ -1557,7 +1637,8 @@ mod tests {
                 for i in 0..m {
                     for j in 0..n {
                         for r in 0..big_n {
-                            s[i * n + j] = addmod(s[i * n + j], mulmod(x[i * big_n + r], v[r * n + j], P), P);
+                            s[i * n + j] =
+                                addmod(s[i * n + j], mulmod(x[i * big_n + r], v[r * n + j], P), P);
                         }
                     }
                 }
@@ -1566,7 +1647,11 @@ mod tests {
                 for r in 0..big_n {
                     for j in 0..n {
                         for c in 0..big_n {
-                            w[r * n + j] = addmod(w[r * n + j], mulmod(mat[r * big_n + c], v[c * n + j], P), P);
+                            w[r * n + j] = addmod(
+                                w[r * n + j],
+                                mulmod(mat[r * big_n + c], v[c * n + j], P),
+                                P,
+                            );
                         }
                     }
                 }
@@ -1589,14 +1674,20 @@ mod tests {
                             }
                         }
                     }
-                    assert!(acc.iter().all(|&a| a == 0), "m={m} n={n}: recurrence fails at t={t}");
+                    assert!(
+                        acc.iter().all(|&a| a == 0),
+                        "m={m} n={n}: recurrence fails at t={t}"
+                    );
                 }
             }
             // The n lowest-degree columns carry the Kalman degree N.
             let mut deltas: Vec<usize> = basis.iter().map(|c| c.delta).collect();
             deltas.sort_unstable();
             let low: usize = deltas[..n].iter().sum();
-            assert!(low >= big_n && low <= big_n + n, "m={m} n={n}: low degrees {deltas:?}");
+            assert!(
+                low >= big_n && low <= big_n + n,
+                "m={m} n={n}: low degrees {deltas:?}"
+            );
         }
     }
 
@@ -1612,27 +1703,42 @@ mod tests {
                     let b: Vec<u64> = rows.iter().map(|r| r.rhs).collect();
                     let nonsingular = dense_reference(&rows, big_n, modulus).is_some();
                     let op = Homogenised { a: &a, b: &b };
-                    let opts = BlockWiedemannOptions { block_m: m, block_n: n, margin: 8 };
+                    let opts = BlockWiedemannOptions {
+                        block_m: m,
+                        block_n: n,
+                        margin: 8,
+                    };
                     let found = block_wiedemann_kernel(&op, &opts, rng.gen());
                     let Some((z, report)) = found else {
                         // Only a singular A can defeat the kernel search.
-                        assert!(!nonsingular, "m={m} n={n} trial {trial}: no kernel vector for a nonsingular system");
+                        assert!(
+                            !nonsingular,
+                            "m={m} n={n} trial {trial}: no kernel vector for a nonsingular system"
+                        );
                         continue;
                     };
                     assert!(z.iter().any(|&v| v != 0));
                     // z is in the kernel of the homogenised operator.
                     let mut img = vec![0u64; big_n + 1];
                     op.apply(&z, 1, &mut img);
-                    assert!(img.iter().all(|&v| v == 0), "m={m} n={n}: not a kernel vector");
+                    assert!(
+                        img.iter().all(|&v| v == 0),
+                        "m={m} n={n}: not a kernel vector"
+                    );
                     if nonsingular {
                         let t = z[big_n];
                         assert_ne!(t, 0, "kernel vector must have t ≠ 0 for nonsingular A");
                         let inv = invmod(t, modulus).unwrap();
-                        let sol: Vec<u64> = z[..big_n].iter().map(|&v| mulmod(v, inv, modulus)).collect();
+                        let sol: Vec<u64> = z[..big_n]
+                            .iter()
+                            .map(|&v| mulmod(v, inv, modulus))
+                            .collect();
                         assert_eq!(sol, x, "m={m} n={n} trial {trial} dim {big_n}");
                     }
                     assert_eq!(report.dimension, big_n + 1);
-                    assert!(report.sequence_length >= (big_n + 1).div_ceil(m) + (big_n + 1).div_ceil(n));
+                    assert!(
+                        report.sequence_length >= (big_n + 1).div_ceil(m) + (big_n + 1).div_ceil(n)
+                    );
                 }
             }
         }
@@ -1657,12 +1763,18 @@ mod tests {
                     assert!(z.iter().any(|&v| v != 0));
                     let mut img = vec![0u64; big_n];
                     a.apply(&z, 1, &mut img);
-                    assert!(img.iter().all(|&v| v == 0), "trial {trial}: not in the kernel");
+                    assert!(
+                        img.iter().all(|&v| v == 0),
+                        "trial {trial}: not in the kernel"
+                    );
                     found = true;
                     break;
                 }
             }
-            assert!(found, "trial {trial}: singular matrix of dimension {big_n} yielded no kernel vector");
+            assert!(
+                found,
+                "trial {trial}: singular matrix of dimension {big_n} yielded no kernel vector"
+            );
         }
     }
 
@@ -1714,22 +1826,36 @@ mod tests {
             match outcome {
                 SparseSolveOutcome::Solved(sol) => {
                     assert_eq!(sol, x, "trial {trial}");
-                    assert!(reference.is_some(), "trial {trial}: sparse solved an underdetermined system?");
+                    assert!(
+                        reference.is_some(),
+                        "trial {trial}: sparse solved an underdetermined system?"
+                    );
                     assert_eq!(report.filter.rows_in, rows_n);
-                    assert_eq!(report.core_dimension + report.reconstructed_columns, columns);
+                    assert_eq!(
+                        report.core_dimension + report.reconstructed_columns,
+                        columns
+                    );
                     solved += 1;
                 }
                 SparseSolveOutcome::Undetermined => {
                     // The sparse path may fail to converge on a determined
                     // system only through the random fold; with three
                     // attempts that should be rare, so demand agreement.
-                    assert!(reference.is_none(), "trial {trial}: dense determined it but sparse gave up ({report:?})");
+                    assert!(
+                        reference.is_none(),
+                        "trial {trial}: dense determined it but sparse gave up ({report:?})"
+                    );
                     undetermined += 1;
                 }
-                SparseSolveOutcome::Inconsistent => panic!("trial {trial}: consistent system reported inconsistent"),
+                SparseSolveOutcome::Inconsistent => {
+                    panic!("trial {trial}: consistent system reported inconsistent")
+                }
             }
         }
-        assert!(solved >= 10 && undetermined >= 1, "solved {solved}, undetermined {undetermined}");
+        assert!(
+            solved >= 10 && undetermined >= 1,
+            "solved {solved}, undetermined {undetermined}"
+        );
     }
 
     #[test]
@@ -1742,7 +1868,10 @@ mod tests {
         rows[7].rhs = addmod(rows[7].rhs, 1, P);
         let (after, _) = solve_sparse_system(&rows, 20, P, &SparseSolveOptions::default());
         assert!(
-            matches!(after, SparseSolveOutcome::Inconsistent | SparseSolveOutcome::Undetermined),
+            matches!(
+                after,
+                SparseSolveOutcome::Inconsistent | SparseSolveOutcome::Undetermined
+            ),
             "a corrupted relation must not yield a verified solution: {after:?}"
         );
     }
@@ -1765,15 +1894,28 @@ mod tests {
             })
             .collect();
         let begin = std::time::Instant::now();
-        let (outcome, report) = solve_sparse_system(&rows, columns, P, &SparseSolveOptions::default());
-        println!("3000-column sparse solve in {:.3}s: {report:?}", begin.elapsed().as_secs_f64());
+        let (outcome, report) =
+            solve_sparse_system(&rows, columns, P, &SparseSolveOptions::default());
+        println!(
+            "3000-column sparse solve in {:.3}s: {report:?}",
+            begin.elapsed().as_secs_f64()
+        );
         match outcome {
             SparseSolveOutcome::Solved(sol) => assert_eq!(sol, x),
             other => panic!("expected a solution: {other:?} ({report:?})"),
         }
-        assert!(report.filter.excess_rows_removed > 0, "purge ran: {report:?}");
-        assert!(report.core_dimension < columns, "filtering shrank the core: {report:?}");
-        assert_eq!(report.core_dimension + report.reconstructed_columns, columns);
+        assert!(
+            report.filter.excess_rows_removed > 0,
+            "purge ran: {report:?}"
+        );
+        assert!(
+            report.core_dimension < columns,
+            "filtering shrank the core: {report:?}"
+        );
+        assert_eq!(
+            report.core_dimension + report.reconstructed_columns,
+            columns
+        );
         assert!(report.wiedemann.is_some());
     }
 
@@ -1841,10 +1983,11 @@ mod tests {
         if columns <= 3000 {
             let begin = std::time::Instant::now();
             let reference = dense_reference(&rows, columns, P);
-            println!("dense big-integer reference: {:.3}s", begin.elapsed().as_secs_f64());
+            println!(
+                "dense big-integer reference: {:.3}s",
+                begin.elapsed().as_secs_f64()
+            );
             assert_eq!(reference.as_ref(), Some(&x));
         }
     }
 }
-
-

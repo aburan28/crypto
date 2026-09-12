@@ -119,7 +119,9 @@ pub fn frobenius_trace_bsgs(curve: &SmallCurve) -> Option<i64> {
         .wrapping_add(curve.a)
         .wrapping_add(curve.b);
     for _draw in 0..4 {
-        rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rng_state = rng_state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let point = sample_random_point(curve, &mut rng_state)?;
         let k = bsgs_find_zero_in_hasse(curve, &point, n_lo, n_hi)?;
         let ord = refine_point_order(curve, &point, k);
@@ -163,15 +165,14 @@ fn point_key(p: &crate::ecc::point::Point) -> [u8; 17] {
 /// random offset using a small linear-congruential walk; finds the
 /// first `x` with `rhs(x)` a quadratic residue, then computes a
 /// square root via Tonelli-Shanks (or `rhs = 0` directly).
-pub fn sample_random_point(
-    curve: &SmallCurve,
-    rng: &mut u64,
-) -> Option<crate::ecc::point::Point> {
+pub fn sample_random_point(curve: &SmallCurve, rng: &mut u64) -> Option<crate::ecc::point::Point> {
     use crate::ecc::point::Point;
     let p = curve.p;
     let cp = curve.to_curve_params();
     for _ in 0..p {
-        *rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        *rng = rng
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let x = ((*rng >> 7) % p) as u64;
         let rhs = curve.rhs(x);
         if rhs == 0 {
@@ -327,17 +328,13 @@ fn bsgs_find_zero_in_hasse(
 
 /// Strip small prime factors `q` from `k` as long as `(k/q)·P = O`.
 /// The result is `ord(P)`.  Trial-divides primes up to `√k`.
-fn refine_point_order(
-    curve: &SmallCurve,
-    point: &crate::ecc::point::Point,
-    mut k: u64,
-) -> u64 {
+fn refine_point_order(curve: &SmallCurve, point: &crate::ecc::point::Point, mut k: u64) -> u64 {
     use crate::ecc::point::Point;
     let cp = curve.to_curve_params();
     let a_fe = cp.a_fe();
     let primes: &[u64] = &[
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83,
-        89, 97,
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+        97,
     ];
     for &q in primes {
         while k > 1 && k % q == 0 {
@@ -598,10 +595,7 @@ pub fn verify_cm(curve: &SmallCurve, expected_disc: i64) -> bool {
     // a perfect-square factor.
     let ratio = BigInt::from(data.frobenius_disc) / BigInt::from(expected_disc);
     let ratio = ratio.abs();
-    let r_u: u128 = ratio
-        .to_string()
-        .parse()
-        .unwrap_or(0);
+    let r_u: u128 = ratio.to_string().parse().unwrap_or(0);
     let sq = (r_u as f64).sqrt() as u128;
     sq * sq == r_u
 }
@@ -640,8 +634,11 @@ mod tests {
                 }
             }
             let brute = curve.p as i64 + 1 - count;
-            assert_eq!(bsgs, brute,
-                "BSGS / brute-force disagree on (a={}, b={})", a, b);
+            assert_eq!(
+                bsgs, brute,
+                "BSGS / brute-force disagree on (a={}, b={})",
+                a, b
+            );
         }
     }
 
@@ -659,8 +656,12 @@ mod tests {
         };
         let t = frobenius_trace_bsgs(&curve).expect("BSGS succeeded");
         let bound = 2.0 * (curve.p as f64).sqrt();
-        assert!((t.abs() as f64) <= bound + 1.0,
-            "trace {} outside Hasse bound 2√p ≈ {}", t, bound);
+        assert!(
+            (t.abs() as f64) <= bound + 1.0,
+            "trace {} outside Hasse bound 2√p ≈ {}",
+            t,
+            bound
+        );
     }
 
     #[test]

@@ -203,13 +203,33 @@ fn main() {
         };
         // Subfield (unique) — exists because n_sub | n by construction.
         if let Some(v) = FactorSubspace::build(BasisFamily::Subfield, n, n_sub, &irr, 0) {
-            if let Some(c) = run_cell(n, n_sub, BasisFamily::Subfield, "subfield".into(), &v, &irr, trials, d_cap, &mut rng) {
+            if let Some(c) = run_cell(
+                n,
+                n_sub,
+                BasisFamily::Subfield,
+                "subfield".into(),
+                &v,
+                &irr,
+                trials,
+                d_cap,
+                &mut rng,
+            ) {
                 cells.push(c);
             }
         }
         // Coordinate (unique baseline).
         if let Some(v) = FactorSubspace::build(BasisFamily::Coordinate, n, n_sub, &irr, 0) {
-            if let Some(c) = run_cell(n, n_sub, BasisFamily::Coordinate, "coord".into(), &v, &irr, trials, d_cap, &mut rng) {
+            if let Some(c) = run_cell(
+                n,
+                n_sub,
+                BasisFamily::Coordinate,
+                "coord".into(),
+                &v,
+                &irr,
+                trials,
+                d_cap,
+                &mut rng,
+            ) {
                 cells.push(c);
             }
         }
@@ -217,7 +237,17 @@ fn main() {
         for r in 0..random_reseeds {
             let bseed = seed ^ ((n as u64) << 16) ^ ((n_sub as u64) << 8) ^ r as u64 ^ 0x7000;
             if let Some(v) = FactorSubspace::build(BasisFamily::Random, n, n_sub, &irr, bseed) {
-                if let Some(c) = run_cell(n, n_sub, BasisFamily::Random, format!("rand{r}"), &v, &irr, trials, d_cap, &mut rng) {
+                if let Some(c) = run_cell(
+                    n,
+                    n_sub,
+                    BasisFamily::Random,
+                    format!("rand{r}"),
+                    &v,
+                    &irr,
+                    trials,
+                    d_cap,
+                    &mut rng,
+                ) {
                     cells.push(c);
                 }
             }
@@ -259,7 +289,10 @@ fn main() {
     let mut within_ok = 0usize;
     let mut within_total = 0usize;
     for &(n, n_sub, _, _) in points {
-        let grp: Vec<&Cell> = cells.iter().filter(|c| c.n == n && c.n_sub == n_sub).collect();
+        let grp: Vec<&Cell> = cells
+            .iter()
+            .filter(|c| c.n == n && c.n_sub == n_sub)
+            .collect();
         if grp.len() < 2 {
             continue;
         }
@@ -310,7 +343,10 @@ fn main() {
     println!("\n  GATE G-P3-alg (pooled): {verdict}");
 
     // ── Snapshot ──
-    let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+    let ts = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
     let cell_json = |c: &Cell| {
         format!(
             "{{\"n\":{},\"n_sub\":{},\"family\":\"{:?}\",\"tag\":\"{}\",\"early_defect\":{:.5},\"dstar\":{:.4},\"trials\":{},\"censored\":{}}}",

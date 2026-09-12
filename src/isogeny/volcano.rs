@@ -120,7 +120,12 @@ pub fn neighbors_ell(curve: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
 /// **callers must determine** whether level 0 corresponds to the
 /// crater (we tag this in `start_on_crater` using the conductor's
 /// `ℓ`-adic valuation, which is derived from the Frobenius trace).
-pub fn map_volcano(curve: &SmallCurve, ell: u64, max_depth: usize, max_vertices: usize) -> VolcanoMap {
+pub fn map_volcano(
+    curve: &SmallCurve,
+    ell: u64,
+    max_depth: usize,
+    max_vertices: usize,
+) -> VolcanoMap {
     let cm = cm_discriminant(curve);
     // ν_ℓ(f): the start curve sits at level ν.  If ν = 0 then
     // we are already on the crater.
@@ -153,10 +158,12 @@ pub fn map_volcano(curve: &SmallCurve, ell: u64, max_depth: usize, max_vertices:
             let j = j_invariant(&iso.codomain);
             if seen.insert(j) {
                 visited += 1;
-                levels
-                    .entry(d + 1)
-                    .or_default()
-                    .push((j, iso.codomain.p, iso.codomain.a, iso.codomain.b));
+                levels.entry(d + 1).or_default().push((
+                    j,
+                    iso.codomain.p,
+                    iso.codomain.a,
+                    iso.codomain.b,
+                ));
                 frontier.push_back((iso.codomain, d + 1));
                 if visited >= max_vertices {
                     break;
@@ -245,8 +252,7 @@ pub fn crater_size(curve: &SmallCurve, ell: u64, max_steps: usize) -> usize {
             .iter()
             .filter(|iso| {
                 let c = cm_discriminant(&iso.codomain);
-                c.endomorphism_disc == start_disc
-                    && Some(j_invariant(&iso.codomain)) != previous_j
+                c.endomorphism_disc == start_disc && Some(j_invariant(&iso.codomain)) != previous_j
             })
             .collect();
         if horizontal.is_empty() {

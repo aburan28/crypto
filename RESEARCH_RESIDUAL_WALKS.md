@@ -1504,6 +1504,173 @@ thing that decides the exponent; and the double-large-prime variation
 genuinely delivers `n^{4/9}` — asymptotically below rho, and out of
 reach by two hundred bits.
 
+### 11.8 The unsolved residuals: the diagnosis in §11.4 was wrong
+
+§11.4 said of the residuals that no Macaulay degree closes:
+
+> Those are residuals whose affine system has solutions at infinity (or
+> a positive-dimensional component), which no affine Macaulay degree
+> resolves; a homogeneous or saturated formulation would.
+
+That was a guess, and it is wrong in both halves.  This round measured
+it, and the class of the entry is **accounting**: the cost does not
+move by much, but the reason on the record has to be the right one,
+because the fix it implies is a different piece of work.
+
+**What was measured.**  4,000 random residuals at each of `p = 271`,
+`523`, `1039`, seed 7, with `GAUDRY_DEBUG_SOLVE` reporting the failing
+monomial:
+
+| `p` | residuals | unsolved | rate | failing border monomial at degree 10 |
+|---:|---:|---:|---:|:--|
+| 271 | 4,000 | 18 | 0.45 % | `e₁ · e₃⁹` |
+| 523 | 4,000 | 7 | 0.18 % | `e₁ · e₃⁹` |
+| 1039 | 4,000 | 3 | 0.075 % | `e₁ · e₃⁹` |
+
+The rate falls roughly as `1/p`, so this is a codimension-one
+degeneracy, not a structural feature of the method.
+
+**Not solutions at infinity.**  The failing residuals' affine ideal is
+zero-dimensional by the standard staircase test: every variable has a
+pure power among the leading monomials, which is exactly what bounds
+the staircase in that direction.  The quotient is finite, of dimension
+`61` rather than Bézout's `64`, and stays `61` at degrees 10, 11, 12
+and 13.
+
+**Not a positive-dimensional component either.**  Enumerating all
+`p³ = 19.9 · 10⁶` triples at `p = 271` on two failing residuals gives
+**one** `F_p`-point each, against `0` for the residuals that solve
+normally.  A positive-dimensional component defined over `F_p` would
+carry `≈ p` points, not one.
+
+**Not non-generic coordinates.**  Galligo says a generic linear change
+of coordinates makes the initial ideal Borel-fixed, which would give a
+compact staircase.  Substituting `e = A e'` for random invertible `A`
+and re-solving rescued **0 of 28** failing residuals across the three
+sizes.  The code for it is not kept; the negative result is.
+
+**What it actually is.**  The multiplication matrix needs the normal
+form of `e₁ · b` for every standard monomial `b`.  A column is
+reducible only if it is a pivot, and `standard` is defined as the
+non-pivot columns of degree `≤ degree − 1`, so a product landing on a
+*non-pivot column of degree exactly `degree`* is neither reducible nor
+standard and has no normal form at all.  At degree 10 the standard set
+contains `e₃⁹`, and `e₁ · e₃⁹` is one of the three non-pivot columns of
+degree exactly 10.  Raising the degree reproduces the same situation
+one rung up — at degree 11 the standard set contains `e₃¹⁰` and
+`e₁ · e₃¹⁰` is the blocker — which is why §11.4 already observed that
+every retry ends in the fallback.  It is the **border of the staircase
+meeting the degree cut**, a truncation artefact of the fixed-degree
+Macaulay formulation, not a property of the variety.
+
+The real fix is therefore a border-basis or a proper F4/F5 termination
+criterion, not saturation.  That is a larger piece of work than the
+`0.04 %` of total cost it would recover, so it stays unbuilt — but it
+is now the right unbuilt thing.
+
+**What was taken, since the retries are provably useless.**  The border
+condition is detectable before the multiplication matrix is built, from
+the pivot set alone.  Detecting it and going straight to the fallback
+removes three `Θ(d⁶)` reductions on exactly those residuals.  Same
+residual stream, same seeds, `GAUDRY_BORDER_RETRY=1` restores the old
+behaviour:
+
+| `p` | `C₃` with retries | `C₃` without | saving | unsolved, both |
+|---:|---:|---:|---:|---:|
+| 271 | 888,392 | 879,363 | 1.02 % | 18 |
+| 523 | 896,243 | 892,719 | 0.39 % | 7 |
+| 1039 | 905,207 | 903,692 | 0.17 % | 3 |
+
+Class: **engineering**, and a small one — the ratio to the floor does
+not move, and the saving falls as `1/p` because the failure rate does.
+The reason it is worth committing is not the 1 %: it is that
+`the_border_check_sends_only_the_residuals_no_degree_solves_to_the_fallback`
+runs the same 600-residual stream both ways and asserts the *answers*
+are identical, so the check is pinned as losing nothing.  `xcheck` on
+the `p = 271` protocol run is `0/728` against the meet-in-the-middle
+oracle, with `retries=0` and `fallback=1` unchanged.
+
+### 11.9 Joux–Vitse: decompositions into `k − 1` points
+
+§11.7 closed by naming the two things that make an index calculus
+matter in practice, one of which was *"Joux–Vitse's `F₄`-based variant,
+decompositions into `k − 1` points"*.  Built and measured here.
+
+**What it is.**  Instead of asking whether a residual is a sum of `k = 3`
+factor-base points, ask whether it is a sum of `2`.  The solve then
+collapses: `S₃(x₁, x₂, x_R) = 0` Weil-restricts to three quadratics in
+two `F_p` unknowns, so a resultant of two conics and Cantor–Zassenhaus
+settle it — no Macaulay matrix, no eigenvalues, no characteristic
+polynomial.  `weil_s3_pair_test` already existed as the inner loop of
+the meet-in-the-middle oracle; `Solver::PairOnly` calls it once on the
+residual itself.
+
+**The trade.**  A random residual is a pair far less often than it is a
+triple — `≈ 2|F|²/p³` against `≈ |F|³/6p³`, a factor `≈ p/12` fewer — so
+the residual count goes from `Θ(|F|) = Θ(n^{1/3})` to
+`Θ(p³/|F|) = Θ(p²) = Θ(n^{2/3})`.
+
+**Measured.**  Same instances, same seed, same accounting as §11.5; every
+row recovered the planted `d`:
+
+| `p` | `n` | variant | residuals | decomp | `F_p` muls / residual | total ops | `S` | rho `S` | `S` / rho |
+|---:|---:|:--|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | three-point | 941 | 123 | 873,241 | 13.1·10⁶ | 2,939 | 0.8 | 3,674× |
+| 271 | 2^24.2 | **pair-only** | 20,832 | 38 | **1,513** | 1.9·10⁶ | **427** | 0.8 | **534×** |
+| 523 | 2^27.1 | three-point | 1,461 | 245 | 890,384 | 20.8·10⁶ | 1,738 | 1.4 | 1,241× |
+| 523 | 2^27.1 | **pair-only** | 157,837 | 143 | 1,557 | 15.9·10⁶ | **1,331** | 1.4 | **951×** |
+| 1039 | 2^30.1 | three-point | 3,038 | 461 | 903,689 | 43.9·10⁶ | **1,312** | 1.3 | **1,009×** |
+| 1039 | 2^30.1 | pair-only | 486,963 | 231 | 1,810 | 55.4·10⁶ | 1,655 | 1.3 | 1,273× |
+| 2083 | 2^33.1 | three-point | 5,528 | 1,004 | 919,646 | 82.3·10⁶ | **866** | 1.6 | **541×** |
+| 2083 | 2^33.1 | pair-only | 1,276,421 | 323 | 1,857 | 157.8·10⁶ | 1,659 | 1.6 | 1,037× |
+
+Fitted exponents over the four sizes:
+
+| variant | residuals | total ops | `S` |
+|---|---:|---:|---:|
+| three-point (§11.6 solver) | `n^{0.29}` | `n^{0.30}` | `n^{-0.20}` |
+| pair-only | `n^{0.67}` | `n^{0.72}` | `n^{+0.22}` |
+
+Reading it:
+
+- **The `2/3` is exact.**  The predicted residual exponent for `k − 1`
+  decompositions at `k = 3` is `2/3`; measured `0.666` over four sizes.
+  That is the cleanest confirmation of a predicted exponent in this
+  note.
+- **The constant is `580×` better and the exponent is worse.**
+  Per-residual cost falls from `≈ 0.9·10⁶` `F_p` multiplications to
+  `≈ 1.5·10³`.  That is the whole Joux–Vitse promise, delivered.  But
+  `S` *rises* as `n^{0.22}` where the three-point solve's *falls* as
+  `n^{-0.20}`, so the win is bounded.
+- **They cross inside the measured range**, between `p = 523` and
+  `p = 1039`, near `n ≈ 2^{28.5}`.  Below it pair-only is the best
+  oracle in this module — `534×` rho at 24 bits against the three-point
+  solve's `3,674×`, a factor of `6.9`.  Above it, it loses, and by 33
+  bits it is `1.9×` worse.
+- **Why it does not scale here.**  The variant's saving is the collapse
+  of the Gröbner step, and at `k = 3` that step is a `64`-solution
+  system in three unknowns — expensive, but only by a constant.  The
+  variant pays an honest `Θ(p)` in decomposition rate for it.  Trading a
+  constant for a factor of `p` is a good trade exactly while the
+  constant dominates, which is what the crossover at `2^{28.5}` is.  The
+  `k − 1` idea is built for the regime where the `k`-point Gröbner step
+  is *exponentially* expensive, and `k = 3` is not that regime.
+
+Class: **advance below `2^{28.5}`, relabelling above it** — `S` genuinely
+falls against every other oracle here at the small sizes, and genuinely
+rises at the large ones; the ratio to rho never approaches `1` at any
+size, so this changes the constant and not the conclusion.  Rho still
+costs `S ≈ 1.3` and the best row in this table is `427`.
+
+One property worth recording because it is easy to misread: pair-only
+does **not** compute the factor-base logarithms.  It stops when the `d`
+column alone becomes determined — the same `solved()` criterion the
+other two solvers use, so the comparison is like for like — which
+happens when a combination of relations cancels every base column.  With
+weight-2 relations that is a cycle, and it arrives long before the
+`|F|`-row system is anywhere near full rank: `38` relations against
+`130` unknowns at `p = 271`.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

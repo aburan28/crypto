@@ -127,19 +127,29 @@ extern "C" {
 // Stub implementations when not linked — surface NotLinked on every call.
 #[cfg(not(hashclash_linked))]
 unsafe fn cpc_init(
-    _prefix_p: *const c_uchar, _len_p: c_ulong,
-    _prefix_q: *const c_uchar, _len_q: c_ulong,
-) -> *mut CpcHandle { std::ptr::null_mut() }
+    _prefix_p: *const c_uchar,
+    _len_p: c_ulong,
+    _prefix_q: *const c_uchar,
+    _len_q: c_ulong,
+) -> *mut CpcHandle {
+    std::ptr::null_mut()
+}
 
 #[cfg(not(hashclash_linked))]
-unsafe fn cpc_run(_h: *mut CpcHandle, _o: *const CpcOptions) -> c_int { -1 }
+unsafe fn cpc_run(_h: *mut CpcHandle, _o: *const CpcOptions) -> c_int {
+    -1
+}
 
 #[cfg(not(hashclash_linked))]
 unsafe fn cpc_get_result(
     _h: *mut CpcHandle,
-    _om: *mut c_uchar, _omc: *mut c_ulong,
-    _omp: *mut c_uchar, _ompc: *mut c_ulong,
-) -> c_int { -1 }
+    _om: *mut c_uchar,
+    _omc: *mut c_ulong,
+    _omp: *mut c_uchar,
+    _ompc: *mut c_ulong,
+) -> c_int {
+    -1
+}
 
 #[cfg(not(hashclash_linked))]
 unsafe fn cpc_free(_h: *mut CpcHandle) {}
@@ -203,8 +213,10 @@ impl ChosenPrefixCollision {
             let mut cap_mp = cap as c_ulong;
             let rc = cpc_get_result(
                 handle,
-                out_m.as_mut_ptr(), &mut cap_m,
-                out_mp.as_mut_ptr(), &mut cap_mp,
+                out_m.as_mut_ptr(),
+                &mut cap_m,
+                out_mp.as_mut_ptr(),
+                &mut cap_mp,
             );
             cpc_free(handle);
             if rc != 0 {

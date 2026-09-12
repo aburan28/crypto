@@ -10,6 +10,7 @@ pub mod ec_kcdsa;
 pub mod ecdh;
 pub mod ecdsa;
 pub mod ed25519;
+pub mod ed448;
 pub mod field;
 pub mod gost_3410_2012;
 pub mod keys;
@@ -23,7 +24,6 @@ pub mod sm2;
 pub mod visualize;
 pub mod x25519;
 pub mod x448;
-pub mod ed448;
 
 pub use curve::CurveParams;
 pub use ec_kcdsa::{
@@ -34,7 +34,6 @@ pub use ecdh::{ecdh, ecdh_raw};
 pub use ecdsa::{sign, sign_hash, verify, verify_hash, EcdsaSignature};
 pub use ed25519::{ed25519_pubkey, ed25519_sign, ed25519_verify};
 pub use ed448::{ed448_keygen, ed448_sign, ed448_verify};
-pub use x448::{x448, x448_keygen};
 pub use field::FieldElement;
 pub use gost_3410_2012::{
     sign as gost_sign, sign_hash as gost_sign_hash, sign_hash_with_k as gost_sign_hash_with_k,
@@ -49,3 +48,4 @@ pub use sm2::{
     za as sm2_za, Sm2Signature, DEFAULT_ID as SM2_DEFAULT_ID,
 };
 pub use x25519::{clamp, x25519, x25519_base};
+pub use x448::{x448, x448_keygen};

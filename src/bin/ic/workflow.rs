@@ -897,6 +897,14 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         }
     }
     let factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    // Projecting the materialized base into signed Frobenius columns is
+    // part of constructing its usable predicate. It used to sit between
+    // the select and collect timers, which omitted one complete orbit-map
+    // build from the amortized cost. Fresh runs charge it to selection.
+    if select_ran {
+        state.select.elapsed_seconds = t0.elapsed().as_secs_f64();
+        write_atomic(&state_path, &state)?;
+    }
     if args.stop_after == Some(Stage::Select) {
         return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
     }

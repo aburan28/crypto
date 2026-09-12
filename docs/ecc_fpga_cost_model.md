@@ -79,10 +79,13 @@ the DSPs at some LUT cost — worth doing, not done here.
 ### Per-part capacity — derived
 
 Reference part is the AMD Virtex UltraScale+ VU47P on AWS `f2.6xlarge`, the
-same part the SHA-1 model uses: 2.85M LUTs, 9024 DSP, 84 Mb BRAM.
+same part the SHA-1 model uses: 1,303,680 LUTs (2.85M *logic cells*), 9024
+DSP, 84 Mb BRAM.  Section 7c records the correction.
 
 - DSP-bound: 9024 / 256 = **35 multiplier pipelines**
-- LUT check: 35 x 10k = 350k LUTs of 2.85M — not binding
+- LUT check: 35 x 10k = 350k LUTs of 1.30M — not binding (see section 7c:
+  the 2.85M figure quoted here for the part is its *logic-cell* count,
+  not its LUT count)
 - Context memory: 16 slots x 6 x 256 bits per engine, ~1.5 Mb total — not binding
 
 DSPs bind, comfortably. That is the signature of a multiply-dominated
@@ -172,6 +175,115 @@ recommendation in the SHA-1 document, and the reversal is the finding.
   generic prime both platforms fall back to Montgomery
   multiplication, and the FPGA loses slightly more, since its reduction
   stages are hard-wired to 2^256 = 2^32 + 977.
+
+## 7. Index calculus: the two new kernels
+
+Sections 1-5 cost *rho*. `gpu/macaulay/` and `gpu/semaev/` are the two
+kernels an index-calculus run would want instead, and they fall on
+opposite sides of the same LUT-versus-DSP line that decides everything
+above. Neither is worth RTL, for different reasons.
+
+### 7a. The Macaulay reduction over `F_p` — the FPGA loses outright
+
+`gaudry_cubic` reduces one `226 x 286` matrix over `F_p` per residual
+(`RESEARCH_RESIDUAL_WALKS.md` 11.6). The primitive is a **32-bit
+Montgomery multiply**, `p < 2^31`.
+
+| | FPGA (VU47P) | GPU (132 SM, 1.755 GHz) |
+|---|---|---|
+| Primitive | 32x32 multiply | 32x32 multiply |
+| Per unit | ~4 DSP48E2 for the two multiplies of a REDC — derived | ~5 integer instructions — estimated |
+| Units available | 9024 / 4 = **2,256** — derived | 132 x 128 = **16,896 lanes** — part spec |
+| Clock | 500 MHz (short carry chains, unlike the 296-bit adders of section 2) — estimated | 1.755 GHz |
+| Throughput | 1.1e12 mulmod/s — derived | 5.9e12 mulmod/s — derived |
+
+**The GPU wins by about 5x**, and the reason is the same one section 4
+gives: a small modular multiply is *exactly* what a GPU's integer
+multiply-add pipes are built for, and there are 16,896 of them against
+9,024 DSPs. The 256-bit case of section 2 was close only because a
+256-bit multiply costs 256 DSPs, which throws away the FPGA's count
+advantage; at 32 bits there is no such tax and the raw unit counts
+decide.
+
+Nothing in `hdl/ecc/` is reusable here either: `fp_mul_secp256k1.vhd` is
+a 256-bit engine with reduction stages hard-wired to `2^256 - 2^32 -
+977`. An `F_p` Macaulay engine would be new RTL for a fight it loses.
+
+### 7b. The binary decomposition sweep — the FPGA is competitive, and that is all
+
+`semaev_decomp` / `gpu/semaev` sweep pairs over `GF(2^n)` with `n = 3l`,
+so `n <= 54` at the `l = 18` this would be built to reach. Carry-free,
+so **LUTs bind** — the SHA-1 regime, not the ECDLP one.
+
+`ecc2k130/FPGA-CEILING.md` already costs this regime at `m = 131` and
+its measured scaling transfers directly. Bernstein et al.'s post-place
+multiplier areas give a growth exponent of **1.41** in field size
+(3,071 LUTs at `m = 113`, 3,620 at `m = 127`), so
+
+    3,071 x (54/113)^1.41 = 1,085 LUTs per GF(2^54) multiplier   (derived)
+
+VU47P carries **1,303,680 LUTs**. At 60% utilisation and the 79%
+multiplier share `FPGA-CEILING.md` measures:
+
+    0.60 x 1,303,680 x 0.79 / 1,085 = 569 multipliers             (derived)
+
+At the 250-350 MHz that document estimates for this fabric, and the
+**190 field multiplications per pair** measured in
+`RESEARCH_SEMAEV_DECOMPOSITION.md`:
+
+    569 x 300e6 / 190 = 0.90 G pairs/s per VU47P                  (derived)
+
+The GPU side is where I had this badly wrong, and the correction is the
+finding:
+
+> **NVIDIA has a native carry-less multiply.** PTX 9.3 introduced
+> `clmad`, documented for `sm_80` and later, and
+> `ecc2k130/NATIVE-CARRYLESS.md` *measures* a 22.4% end-to-end gain from
+> it on the ECC2K-130 client (7.110 -> 8.704 B walk updates/s, RTX PRO
+> 6000, CUDA 13.3).
+
+The first version of `gpu/semaev` asserted the opposite, built `gf_mul`
+as an `n`-iteration shift-reduce loop, and rested its whole cost
+argument on the gap. With `clmad`, one `GF(2^54)` multiply is two
+carry-less multiply-adds plus a reduction — call it **12 instructions,
+estimated** — instead of the ~324 the loop needs:
+
+    16,896 lanes x 1.755 GHz / (12 x 190) = 13 G pairs/s          (derived)
+
+So the FPGA is at roughly **0.07x** the GPU on this kernel, not the
+order of magnitude the no-`clmad` premise implied. Even discounting the
+GPU heavily for occupancy and for the reduction being more than 12
+instructions, it does not reach parity.
+
+That lands in the same place `FPGA-CEILING.md` lands for ECC2K-130 —
+**competitive with, not decisively better than, one GPU** — and for the
+same reason, with the binary-field primitive now native on both sides.
+
+### 7c. An accounting correction to section 2
+
+Section 2 states the VU47P as "2.85M LUTs". That is its **logic-cell**
+count; the part has **1,303,680 LUTs** and 2,607,360 flip-flops, which
+is the figure `ecc2k130/FPGA-CEILING.md` uses. The LUT budget in
+section 2 is therefore 2.19x smaller than written.
+
+The conclusion there is unaffected — 35 engines x 10k LUTs = 350k is
+27% of 1.30M rather than 12% of 2.85M, so DSPs still bind, comfortably —
+but the margin is narrower than it reads, and a Karatsuba variant that
+trades DSPs for LUTs has less room than section 5 implies.
+
+### 7d. Recommendation
+
+**Do not write RTL for either kernel.** For the Macaulay reduction the
+FPGA loses on unit count and there is nothing to reuse. For the binary
+sweep the FPGA is competitive rather than better, and the one argument
+that made it look better than that was mine and was wrong.
+
+The ordering that follows is the same one section 4 reaches for rho, now
+for both new kernels: write the GPU kernel, use `clmad`, and spend the
+quarter an FPGA campaign would cost on the thing neither platform can
+buy. Under `AGENTS.md` both kernels are **engineering** rows — they move
+wall-clock, and `RESEARCH_RESIDUAL_WALKS.md` 11.7 puts the crossover with
+rho past `2^230` regardless of how fast either phase runs.
 
 ## 6. Reproducing
 

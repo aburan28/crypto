@@ -13,8 +13,8 @@ use crate::cryptopals::challenge33::nist_p_g;
 use crate::cryptopals::Report;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::{One, Zero};
-use rand::SeedableRng;
 use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 pub fn run() -> Report {
     let mut r = Report::new(35, "DH with malicious g");

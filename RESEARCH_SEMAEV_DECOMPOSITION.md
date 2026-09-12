@@ -243,10 +243,11 @@ cargo test --release --lib cryptanalysis::semaev_decomp
 ## What's still open
 
 - **A sub-`2^{2l}` oracle** is the only thing that would matter, and
-  nothing here is one.  The route worth trying is Gröbner basis (F4/F5)
-  on the descended system for fixed `X₁`, which is a bivariate problem
-  in `2l` unknowns — the premise being to exploit the algebra rather
-  than search around it.  `src/cryptanalysis/groebner_f4.rs` exists.
+  nothing here is one.  The route worth trying was Gröbner basis (F4/F5)
+  on the descended system for fixed `X₁`, a bivariate problem in `2l`
+  unknowns — the premise being to exploit the algebra rather than search
+  around it.  **That route has now been measured, and it does not pay.**
+  See [below](#the-fixed-x₁-route-measured).
 - **Frobenius-stable factor bases.**  On the Koblitz curve
   `y² + xy = x³ + x² + 1`, `φ(x,y) = (x², y²)` is an endomorphism, so a
   relation for `x_R` gives relations for `x_R^{2^i}` free — a factor-`n`
@@ -267,6 +268,71 @@ cargo test --release --lib cryptanalysis::semaev_decomp
   Gray-coding the pair loop makes the quartic's constant and leading
   coefficients pure XOR updates.  Together maybe 25%, which is why
   neither is done.
+
+## The fixed-`X₁` route, measured
+
+**Module:** `koblitz_groebner::sym_semaev_s4`.
+**Bench:** `cargo run --release --example fixed_x1_oracle -- 3 4 5 6 7`.
+
+The idea was: sweep the `2^l` choices of `X₁`, and for each one solve
+the remaining system algebraically instead of enumerating `X₂`.  Fixing
+`X₁` makes the symmetrised `S₄` a system of `n = 3l` Boolean equations
+in the `2l` unknowns of `X₂` and `X₃` — overdetermined by half, which
+is exactly the regime where algebra usually beats search.
+
+The whole question is whether the **deciding degree** — the lowest
+Macaulay degree at which the reduction either refutes the system or
+pins every unknown — stays bounded as `l` grows.  One system at a
+*fixed* degree `D` costs `C(2l + D, D)^ω`, polynomial in `l`; so a
+bounded degree gives `2^l · poly(l)` overall and beats `2^{2l}`, and a
+growing one does not.
+
+Six targets per rung, every `X₁` swept for the correctness gate, eight
+sampled for the degree statistic.  `agree` is against `decompose`, the
+pairs-and-solve oracle, on every target:
+
+| `l` | `n` | unknowns | agree | decided | deciding degree (min/med/max) | word ops / system | word ops / target |
+|---:|---:|---:|:--:|---:|---:|---:|---:|
+| 3 | 9 | 6 | yes | 44/48 | 2/5/6 | 1,767 | 1.4·10⁴ |
+| 4 | 12 | 8 | yes | 47/48 | 2/6/6 | 171,200 | 2.7·10⁶ |
+| 5 | 15 | 10 | yes | 47/48 | 2/6/6 | 2,664,637 | 8.5·10⁷ |
+| 6 | 18 | 12 | yes | 48/48 | 2/7/7 | 296,608,530 | 1.9·10¹⁰ |
+| 7 | 21 | 14 | yes | 48/48 | 2/7/7 | 3,531,751,712 | 4.5·10¹¹ |
+
+**The deciding degree is not bounded.**  Its median runs `5, 6, 6, 7,
+7` against `l = 3…7`, a least-squares slope of **`0.500`** — the degree
+tracks `l/2`.  That is the whole answer, and it is structural rather
+than an artefact of the engine: the degree of regularity is a property
+of the ideal, and F5's criteria remove zero reductions without lowering
+it, so a better Gröbner implementation moves the constant and not the
+slope.
+
+With `D ≈ l/2` the Macaulay matrix has `C(2.5l, 0.5l) ≈ 2^{1.81l}`
+columns, so its elimination alone is `≈ 2^{3.6l}` at `ω = 2` — already
+past the `2^{2l}` boundary **for a single `X₁`**, before the `2^l`
+sweep is paid at all.  The route is not marginally short, it is short
+by a factor exponential in `l`.
+
+The measured total is `2^{6.26·l}` over `l = 3…7`, against the `2^{2l}`
+boundary.  Read that exponent with its range in mind: at these sizes
+the polynomial factor still dominates the `2^l` sweep, so `6.26` is an
+overestimate of the asymptote.  The deciding-degree slope is the number
+that decides the question, and `0.5` decides it against.
+
+As a practicality note and not as the metric: at `l = 7` this route
+spends `4.5·10¹¹` word operations per target where the pairs-and-solve
+oracle takes `0.007 s`.
+
+So the last open route to a sub-`2^{2l}` oracle on this system is
+closed, and the note's bottom line stands unchanged and now for a
+measured reason: index calculus built on **any** oracle polynomial in
+the factor base costs `2^n`, and the algebra does not get under that
+bound here either.
+
+What is *not* ruled out: a different system (`S₅` with a larger `m`, a
+different factor base shape), or an oracle that is not of the
+fix-one-summand form at all.  This measures the route the note named,
+not every route.
 
 ## References
 

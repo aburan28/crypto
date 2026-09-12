@@ -248,9 +248,18 @@ mod tests {
         // Expected: bytes 0..4 unchanged; bytes 4..12 = iv[4..12] xor BE64(0xDEADBEEF)
         // BE64(0xDEADBEEF) = 00 00 00 00 DE AD BE EF.
         let expect = [
-            iv[0], iv[1], iv[2], iv[3],
-            iv[4] ^ 0x00, iv[5] ^ 0x00, iv[6] ^ 0x00, iv[7] ^ 0x00,
-            iv[8] ^ 0xDE, iv[9] ^ 0xAD, iv[10] ^ 0xBE, iv[11] ^ 0xEF,
+            iv[0],
+            iv[1],
+            iv[2],
+            iv[3],
+            iv[4] ^ 0x00,
+            iv[5] ^ 0x00,
+            iv[6] ^ 0x00,
+            iv[7] ^ 0x00,
+            iv[8] ^ 0xDE,
+            iv[9] ^ 0xAD,
+            iv[10] ^ 0xBE,
+            iv[11] ^ 0xEF,
         ];
         assert_eq!(n, expect);
     }

@@ -23,8 +23,8 @@
 //! picks `N' = p'·q'` with `p' − 1` and `q' − 1` both smooth, so
 //! Pohlig-Hellman makes the dlog tractable.
 
-use crate::cryptopals::Report;
 use crate::cryptopals::set8_util::{crt_combine, crt_pair, parse_big};
+use crate::cryptopals::Report;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
@@ -185,8 +185,8 @@ pub fn rsa_pkcs1_pad(msg: &[u8], modulus_bytes: usize) -> BigUint {
     let h = sha256(msg);
     // DigestInfo prefix for SHA-256: 19-byte ASN.1 wrapper.
     let digest_info: [u8; 19] = [
-        0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04,
-        0x02, 0x01, 0x05, 0x00, 0x04, 0x20,
+        0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01,
+        0x05, 0x00, 0x04, 0x20,
     ];
     let t_len = digest_info.len() + 32;
     assert!(modulus_bytes >= t_len + 11);
@@ -323,12 +323,7 @@ fn is_small_prime(n: u64) -> bool {
 
 /// Build an RSA DSKS forgery for `(m, s)` originally signed under
 /// `(e, N)`.  Returns `(e', N')` with `s^e' ≡ pad(m) mod N'`.
-pub fn forge_rsa(
-    m: &[u8],
-    s: &BigUint,
-    bits_target: u32,
-    seed: u64,
-) -> Option<(BigUint, BigUint)> {
+pub fn forge_rsa(m: &[u8], s: &BigUint, bits_target: u32, seed: u64) -> Option<(BigUint, BigUint)> {
     // 1. Find two distinct smooth primes p', q' such that p'·q'
     //    has at least `bits_target` bits.
     let (p_prime, _) = smooth_prime(bits_target / 2 + 1, 1 << 16, seed)?;
@@ -362,8 +357,7 @@ pub fn run() -> Report {
     let curve = CurveParams::secp256k1();
     let msg = b"crazy flamboyant for the rap enjoyment";
     let _alice = crate::ecc::keys::EccKeyPair::generate(&curve);
-    let sig =
-        crate::ecc::ecdsa::sign(msg, &_alice.private, &curve);
+    let sig = crate::ecc::ecdsa::sign(msg, &_alice.private, &curve);
     r.line("ECDSA DSKS — Alice signs, Eve forges (G', Q'):");
     let forged = forge_ecdsa(&curve, &sig.r, &sig.s, msg, 5);
     let ok = verify_with_g(
@@ -374,7 +368,10 @@ pub fn run() -> Report {
         &sig.r,
         &sig.s,
     );
-    r.line(format!("  Alice's signature (r, s) verifies under (G', Q'): {}", ok));
+    r.line(format!(
+        "  Alice's signature (r, s) verifies under (G', Q'): {}",
+        ok
+    ));
     assert!(ok);
 
     // ── RSA portion ──
@@ -384,7 +381,10 @@ pub fn run() -> Report {
     let alice_rsa = crate::asymmetric::rsa::RsaKeyPair::generate(256);
     let msg2 = b"crazy flamboyant for the rap enjoyment";
     let s = crate::asymmetric::rsa::rsa_sign(msg2, &alice_rsa.private);
-    r.line(format!("Alice (N, e) = ({}, {})", alice_rsa.public.n, alice_rsa.public.e));
+    r.line(format!(
+        "Alice (N, e) = ({}, {})",
+        alice_rsa.public.n, alice_rsa.public.e
+    ));
     let _ = parse_big;
     match forge_rsa(msg2, &s, 256, 99) {
         Some((e_prime, n_prime)) => {
