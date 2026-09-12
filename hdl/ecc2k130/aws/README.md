@@ -65,11 +65,11 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, estimated at ~10k LUTs (`../README.md`, "Capacity");
-the VU47P has 2.85M. Start at 32 to get a timing and utilisation baseline
-in a build of tolerable length, read `synth_utilization` and the
-post-route timing from the reports, then go to what fits. Utilisation above
-~70% of the LUTs is where routing starts to fail timing on this fabric.
+its walk memory, 13.7k LUTs as synthesised (`../README.md`, "Capacity");
+the VU47P has 1.30M. The default 48 is half the device; read
+`synth_utilization` and the post-route timing from the reports, then go to
+what fits. Utilisation above ~70% of the LUTs (~64 engines) is where
+routing starts to fail timing on this fabric.
 
 `ID_W` sets walks per engine, `2^ID_W`. Each walk is 262 bits of RAM, and
 the step unit holds `W · 2^LOG_NB` = 128 walks at once; 256 (the default)
@@ -81,9 +81,9 @@ nothing else.
 
 The engines run on `clk_main_a0`, which the F2 shell fixes at 250 MHz, with
 no clock-domain crossing: the register block and the engines share the
-clock, and the OCL AXI-Lite port is on it too. The engine is estimated at
-300–400 MHz, so 250 MHz leaves margin for the first build and costs at
-most a third of the throughput. If the timing report shows real slack,
+clock, and the OCL AXI-Lite port is on it too. The engine alone synthesises
+with +1.98 ns of slack at 4.0 ns, so 250 MHz leaves margin for the first
+build and costs at most a third of the throughput. If the timing report shows real slack,
 the next step is the HDK's `AWS_CLK_GEN` block, which offers `clk_extra_a2`
 at 375 MHz among others; that needs an AXI-Lite clock converter between
 the OCL port and `ec2k_axil` (or `ec2k_axil` on the fast clock with the
