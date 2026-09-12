@@ -62,13 +62,20 @@ MARCH   ?= native
 # it faster than the 64-bit fallback rather than merely wider.  -march=native
 # does not always imply +sha3 -- GCC on Darwin reports no SHA3 for native on
 # cores that have it -- so ask the compiler which spelling actually defines the
-# feature macro and take the first that does.  Falling through to plain MARCH
-# still gets NEON and BSL, just not the three-input XOR.
+# feature macro and take the first that does.  A compiler-accepted +sha3
+# spelling is not proof the host can execute EOR3 (armv8.2-a+sha3 is accepted
+# on any recent toolchain), so those candidates are used only when the CPU
+# reports FEAT_SHA3.  Falling through to plain MARCH still gets NEON and BSL,
+# just not the three-input XOR.
 HOSTARCH := $(shell uname -m)
 ifneq (,$(filter arm64 aarch64,$(HOSTARCH)))
+# Linux lists sha3 in cpuinfo Features when FEAT_SHA3 is present.  Darwin has
+# no /proc; every Apple Silicon core has SHA3, and sysctl names it
+# hw.optional.arm.FEAT_SHA3 when the key exists.
+HOSTSHA3 := $(shell if [ -r /proc/cpuinfo ]; then grep -m1 '^Features' /proc/cpuinfo | grep -c -w sha3; else sysctl -n hw.optional.arm.FEAT_SHA3 2>/dev/null || echo 1; fi)
 sha3flag = $(shell $(CXX) $(1) -dM -E -x c++ /dev/null 2>/dev/null | grep -c __ARM_FEATURE_SHA3)
 ARCHFLAGS := $(firstword \
-    $(foreach f,-march=$(MARCH) -march=$(MARCH)+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3, \
+    $(foreach f,-march=$(MARCH) $(if $(filter-out 0,$(HOSTSHA3)),-march=$(MARCH)+sha3 -mcpu=native+sha3 -march=armv8.2-a+sha3), \
         $(if $(filter-out 0,$(call sha3flag,$(f))),$(f))) \
     -march=$(MARCH))
 else
