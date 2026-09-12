@@ -9,9 +9,9 @@
 -- Walks live in a ready FIFO of (id, x, y) rather than a memory: a walk is
 -- either inside the step unit or waiting in the FIFO, and a completed step
 -- goes straight back into the FIFO unless it is distinguished.  A load from
--- the host enters the same FIFO; it is accepted only on clocks when no
--- completed step needs re-queuing, so the FIFO has one write port.  Step
--- counts sit in a small per-walk memory.
+-- the host enters the same FIFO; it is accepted only on clocks when no step
+-- completes, so the FIFO and the per-walk step-count memory each have one
+-- write port (both are distributed RAM).
 --
 -- Throughput is that of the step unit: 5 + 5/W clocks per step per
 -- multiplier, provided NWALK comfortably covers the 2**(LOG_W + LOG_NB)
@@ -100,9 +100,12 @@ begin
   f_empty <= f_wr = f_rd;
   f_full  <= f_wr(ID_W) /= f_rd(ID_W) and f_wr(ID_W - 1 downto 0) = f_rd(ID_W - 1 downto 0);
 
-  -- a completed, non-distinguished step takes the FIFO's write port
+  -- a completed, non-distinguished step takes the FIFO's write port; any
+  -- completed step takes the counter array's write port, so a load is
+  -- accepted only on clocks with no retirement (keeps cnt single-writer,
+  -- hence distributed RAM instead of 2**ID_W * CNT_W flip-flops)
   requeue <= s_out_valid = '1' and s_out_dp = '0';
-  ld_rdy  <= '1' when rst = '0' and not requeue and not f_full else '0';
+  ld_rdy  <= '1' when rst = '0' and s_out_valid = '0' and not f_full else '0';
   ld_ready <= ld_rdy;
 
   -- head of the FIFO is offered to the step unit every clock
@@ -130,27 +133,13 @@ begin
           f_rd <= f_rd + 1;
         end if;
 
-        -- push: a re-queued step, else a host load
-        if requeue then
-          w := to_integer(unsigned(s_out_tag));
-          f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_x;
-          f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_y;
-          f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= unsigned(s_out_tag);
-          f_wr <= f_wr + 1;
-        elsif ld_valid = '1' and ld_rdy = '1' then
-          w := to_integer(ld_id);
-          f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_x;
-          f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_y;
-          f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= ld_id;
-          f_wr <= f_wr + 1;
-          cnt(w) <= (others => '0');
-        end if;
-
-        -- account for the completed step; report if distinguished
+        -- a completed step: count it, then re-queue or report; else a host
+        -- load, which starts the walk's counter.  One if/elsif chain so
+        -- every array below has exactly one write port.
         if s_out_valid = '1' then
           w := to_integer(unsigned(s_out_tag));
           n := cnt(w) + 1;
-          cnt(w) <= n;
+          cnt(w)     <= n;
           step_pulse <= '1';
           if s_out_dp = '1' then
             dp_valid <= '1';
@@ -158,7 +147,19 @@ begin
             dp_steps <= n;
             dp_x     <= s_out_x;
             dp_y     <= s_out_y;
+          else
+            f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_x;
+            f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= s_out_y;
+            f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= unsigned(s_out_tag);
+            f_wr <= f_wr + 1;
           end if;
+        elsif ld_valid = '1' and ld_rdy = '1' then
+          w := to_integer(ld_id);
+          cnt(w) <= (others => '0');
+          f_x(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_x;
+          f_y(to_integer(f_wr(ID_W - 1 downto 0)))  <= ld_y;
+          f_id(to_integer(f_wr(ID_W - 1 downto 0))) <= ld_id;
+          f_wr <= f_wr + 1;
         end if;
       end if;
     end if;
