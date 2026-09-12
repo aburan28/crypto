@@ -295,6 +295,7 @@ struct CompactPairTable {
     x_filter: Vec<u64>,
     x_filter_mask: usize,
     x_filter_exact: bool,
+    x_filter_split_hash: bool,
     mask: usize,
     len: usize,
     x_only: bool,
@@ -332,6 +333,8 @@ impl CompactPairTable {
             },
             x_filter_mask: filter_bits.saturating_sub(1),
             x_filter_exact,
+            x_filter_split_hash: std::env::var("KIC_DISABLE_SPLIT_BLOOM_HASH").as_deref()
+                != Ok("1"),
             mask: capacity - 1,
             len: 0,
             x_only,
@@ -424,9 +427,13 @@ impl CompactPairTable {
             let index = x as usize;
             return (index, index);
         }
-        let first = Self::hash((x, 0)) as usize & self.x_filter_mask;
-        let second = Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize
-            & self.x_filter_mask;
+        let mixed = Self::hash((x, 0));
+        let first = mixed as usize & self.x_filter_mask;
+        let second = if self.x_filter_split_hash {
+            (mixed >> 32) as usize & self.x_filter_mask
+        } else {
+            Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize & self.x_filter_mask
+        };
         (first, second)
     }
 
@@ -474,6 +481,16 @@ impl CompactPairTable {
 
     fn x_filter_bits(&self) -> usize {
         self.x_filter.len() * u64::BITS as usize
+    }
+
+    fn x_filter_hash_strategy(&self) -> &'static str {
+        if self.x_filter_exact {
+            "exact_index"
+        } else if self.x_filter_split_hash {
+            "single_mix_split_29_bit_indices"
+        } else {
+            "two_independent_64_bit_mixes"
+        }
     }
 
     fn slots(&self) -> usize {
@@ -2553,6 +2570,7 @@ fn main() {
             "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+            "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
@@ -3385,6 +3403,7 @@ fn main() {
                 "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+                "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
@@ -3624,6 +3643,28 @@ mod packed_tests {
         assert_eq!(dual_attempted, separate_attempted);
         assert_eq!(dual, separate_normalized);
         assert_eq!(dual_scratch.denominators.len() * 2, signed_points.len());
+    }
+
+    #[test]
+    fn bloom_hash_strategies_retain_every_inserted_x() {
+        for split_hash in [false, true] {
+            let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
+            table.x_filter_split_hash = split_hash;
+            let keys: Vec<_> = (0..512u64)
+                .map(|index| {
+                    let x =
+                        CompactPairTable::hash((index, index.rotate_left(17))) & ((1u64 << 37) - 1);
+                    (x + 1, index)
+                })
+                .collect();
+            for &key in &keys {
+                table.insert(key, QuotientPairWitness::default());
+            }
+            for &key in &keys {
+                assert!(table.might_contain_x(key.0));
+                assert!(table.get(key).is_some());
+            }
+        }
     }
 
     #[test]
