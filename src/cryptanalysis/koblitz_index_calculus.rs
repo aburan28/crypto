@@ -2427,11 +2427,23 @@ impl PairSumTable {
         })
     }
 
-    /// The word a key is stored as.  A hash rather than the key's low
-    /// bits, so the representation does not depend on the bucket width
-    /// and works at any degree the single-word arithmetic reaches — at
-    /// `n = 61` a packed sum is 63 bits and no affordable bucket index
-    /// leaves 32 of them over.
+    /// The word a key is stored as: a hash, so the bucket width is free
+    /// to be chosen for run length alone.
+    ///
+    /// The alternative is the key's own low bits, which a bucket index
+    /// wide enough leaves exactly 32 of — but "wide enough" is
+    /// `key_bits − 32`, and a packed sum is `n + 2` bits.  At `n = 53`
+    /// that asks for 23 bucket bits and run length already wants 26, so
+    /// it costs nothing; at `n = 59` it asks for 29 and at `n = 61` for
+    /// 31, and an index of `2³¹` words is four gibibytes spent on
+    /// nothing but making a rest fit.  A 36000-point base needs 2.97 GiB
+    /// hashed at any degree, against 4.72 at `n = 59` and 6.72 at
+    /// `n = 61` — over the budget, so the wide base was simply not
+    /// available there.
+    ///
+    /// Neither form can give a wrong answer: build and lookup narrow a
+    /// key the same way, so there are no false negatives either way.
+    /// Only one of them fits.
     fn compact_rest(key: u64) -> u32 {
         pair_filter_hash(key) as u32
     }
@@ -2750,24 +2762,31 @@ impl PairSumTable {
                 }
             }
             4 => {
-                // Walk the table as the second half: R − (P_k + P_l).
-                // Only the full representation can be walked; the
-                // compact one holds no summands to walk.
-                let mut last_key: Option<u64> = None;
-                let mut rest = FastPoint::INFINITY;
-                for &(key, k, l) in &self.entries {
-                    if last_key != Some(key) {
-                        let pair = self
-                            .curve
-                            .add(self.points[k as usize], self.points[l as usize]);
-                        rest = self.curve.add(target, self.curve.neg(pair));
-                        last_key = Some(key);
-                    }
-                    let mut pairs = Vec::new();
-                    self.pairs_for(rest, &mut pairs);
-                    for &(i, j) in &pairs {
-                        if j <= k && !sink(&[i as usize, j as usize, k as usize, l as usize]) {
-                            return;
+                // Every second half `R − (P_k + P_l)`, walked over the
+                // base rather than over the stored triples: the compact
+                // representation does not keep those, and walking them
+                // there would have reported no witness for a target that
+                // has one — a false "no" from an oracle, which is worse
+                // than a loud failure.  One batched inversion a row
+                // keeps the arithmetic close to what the triples cost.
+                let mut sums = Vec::new();
+                let mut scratch = BatchScratch::default();
+                let mut pairs = Vec::new();
+                for l in 0..self.points.len() {
+                    sums.clear();
+                    self.curve.add_many(
+                        self.points[l],
+                        &self.points[..=l],
+                        &mut sums,
+                        &mut scratch,
+                    );
+                    for (k, &pair) in sums.iter().enumerate() {
+                        let rest = self.curve.add(target, self.curve.neg(pair));
+                        self.pairs_for(rest, &mut pairs);
+                        for &(i, j) in &pairs {
+                            if j as usize <= k && !sink(&[i as usize, j as usize, k, l]) {
+                                return;
+                            }
                         }
                     }
                 }
@@ -8426,6 +8445,59 @@ mod tests {
             checked_hits > 0 && checked_misses > 0,
             "degree {degree}: the test checked only one side"
         );
+    }
+
+    #[test]
+    fn the_compact_table_decomposes_at_every_summand_count() {
+        // The three and four summand searches used to walk the stored
+        // triples, which the compact table does not keep: a compact
+        // table would have reported no witness for a target that has
+        // one.  A false "no" from a decomposition oracle is silent, so
+        // it is pinned here rather than left to a panic.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let compact = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::compact_byte_size(fb.points.len(), kc.n),
+        )
+        .expect("the compact table fits its own budget");
+        assert!(compact.is_compact() && !full.is_compact());
+
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        for m in [2usize, 3, 4] {
+            let mut found = 0usize;
+            // Sums of exactly m base points, which both must decompose.
+            for t in 0..24usize {
+                let mut target = FastPoint::INFINITY;
+                let mut chosen = Vec::new();
+                for s in 0..m {
+                    let idx = (t * 7 + s * 13) % fb.points.len();
+                    chosen.push(idx);
+                    target = fc.add(target, fc.lift(&fb.points[idx]));
+                }
+                if target.infinity {
+                    continue;
+                }
+                let a = full.decompose_fast(target, m);
+                let b = compact.decompose_fast(target, m);
+                assert_eq!(
+                    a.is_some(),
+                    b.is_some(),
+                    "m = {m}: the two representations disagreed on whether a target decomposes"
+                );
+                if let Some(idxs) = b {
+                    assert_eq!(idxs.len(), m);
+                    let sum = idxs
+                        .iter()
+                        .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, fc.lift(&fb.points[i])));
+                    assert_eq!(sum, target, "m = {m}: a compact witness did not sum to its target");
+                    found += 1;
+                }
+            }
+            assert!(found > 0, "m = {m}: the compact table decomposed nothing at all");
+        }
     }
 
     #[test]

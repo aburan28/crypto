@@ -1541,6 +1541,16 @@ hash of the sum — never a false negative, and a false positive about one
 time in `2²⁸`. What that gives up is the answer: a hit knows a
 decomposition may exist but not of what.
 
+A hash rather than the key's own low bits, which would be exact if the
+bucket index were wide enough to leave 32 of them over. "Wide enough" is
+`key_bits − 32`, and a packed sum is `n + 2` bits: at `n = 53` that asks
+for 23 bucket bits while run length already wants 26, so it costs
+nothing, but at `n = 61` it asks for 31, and an index of `2³¹` words is
+four gibibytes spent on nothing but making a rest fit. A 36000-point base
+needs 2.97 GiB hashed at any degree, against 6.72 at `n = 61`. Neither
+form can give a wrong answer — build and lookup narrow a key the same
+way — but only one of them fits.
+
 The answer is recoverable, and recovering it is what makes the
 approximation safe. `target − P_i` is a base point exactly when `i` is a
 summand, so one `|F|`-long scan finds the pair — and the scan asks the
