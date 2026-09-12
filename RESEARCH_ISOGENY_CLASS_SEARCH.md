@@ -525,8 +525,10 @@ counterexample at `m ≥ 6`.  `S₇ = Res(S₄, S₅)` is the next computable st
 
 ### 2026-09-12 — iteration 1 (EXP-R6 — the lever is empty, and every reason is derived)
 
-> This note's iteration 1 is `RESEARCH_DEGREE_REDUCTION.md`'s **iteration 7**;
-> the two numberings are separate because this is a separate note.
+> This note's iteration 1 is `RESEARCH_DEGREE_REDUCTION.md`'s **iteration 9**;
+> the two numberings are separate because this is a separate note, and the
+> degree-reduction thread advanced its own count twice while this branch was
+> open (its iterations 7 and 8 are EXP-R3b and EXP-R4d).
 
 **Task.** Score L5: search the isogeny class of ECC2K-130 for a curve with a
 lower solving degree.

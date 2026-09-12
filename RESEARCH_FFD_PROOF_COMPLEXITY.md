@@ -259,8 +259,37 @@ so the weakness tracks the determination ratio rather than the size.
 One scope limit the same experiment establishes: this is a **family-level**
 law. The unit of analysis above is the `(operating point, family)` cell, and
 the defect does *not* rank individual targets within a family — size-
-controlled, that correlation is −0.12 to −0.35. `Δ_low` screens
+controlled, that correlation is −0.32 to −0.35. `Δ_low` screens
 constructions, which is what §9 proposes it for; it does not screen targets.
+
+**The scope limit is sharper than "weak" — the sign flips (EXP-R4d,
+`RESEARCH_DEGREE_REDUCTION.md` R4e).** Holding the family *and* the size
+fixed, `ρ_s(Δ_low, D*)` is **positive** in 10 of 10 decidable cells
+(`+0.62…+1.00`), against the `−0.85` the same data gives between families.
+That is Simpson's paradox with an identifiable cause: `Δ_low` sums degrees
+`≤ 3`, so a system can only exhibit a degree-3 defect if its Macaulay tower
+*reaches* degree 3 in a deficient state. A target refuting at `D* = 2` never
+exercises degree 3, so its cutoff-3 defect is ≈ 0 by construction — at
+`(n, n') = (14, 7)` on the Coordinate family, `D* = 2` targets average
+`Δ_low = 0.00213` against `0.03511` for `D* = 4`. Within a homogeneous group
+the statistic is partly a proxy for *"did this instance need degree 3"*,
+which is `D*` itself.
+
+Two consequences for how the screen may be used:
+
+1. **Never rank instances inside a construction by `Δ_low`.** Picking the
+   lowest-defect target in a family selects the *hardest*, not the easiest.
+   This is a stronger prohibition than the weak-correlation one above, and
+   no renormalisation addresses it — a sign is not a scaling.
+2. **`Δ_low` cannot score a *transformed* system** (R4f). Adding a system's
+   degree-3 falls as generators drives its cutoff-3 defect to exactly zero —
+   measured on 192 of 192 targets, and necessarily so, since the cutoff-3
+   defect *is* the space of those falls. Any comparison of "defect before"
+   against "defect after" a degree-fall step is therefore a comparison
+   against 0, whatever the step achieved.
+
+Neither touches the between-family law in the table above, which is what §9
+proposes `Δ_low` for. They bound where it may be applied.
 
 This **reconciles the dispute** instead of picking a side:
 
@@ -606,7 +635,7 @@ map.
    with reach — and it is **not a size proxy**: size-controlled three ways
    the critical-regime figure rises to −0.91/−0.90/−0.82 (§3.3, EXP-R4b).
    The support is for a **family-level** law; the same experiment shows the
-   defect does not rank targets *within* a family (−0.12…−0.35), so P3-alg
+   defect does not rank targets *within* a family (−0.32…−0.35), so P3-alg
    licenses screening constructions, not instances.
 
 5. **(The lower-bound antecedent — §3.4.)** For the generic (Random)

@@ -186,6 +186,7 @@ pub mod residual_walk;
 pub mod sat;
 pub mod sbox;
 pub mod semaev_corpus;
+pub mod quasi_subfield;
 pub mod semaev_decomp;
 pub mod semaev_leading_form;
 pub mod semaev_higher;

@@ -20,8 +20,8 @@ Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 ## One-time GitHub + IAM setup
 
 The publish job authenticates to AWS with a dedicated IAM user
-`ecc2k130-status-gha` (DescribeInstances only). Do not upload the `adam`
-user keys.
+`ecc2k130-status-gha` (describe walker + TCP/22 on the tagged walker
+SG only). Do not upload the `adam` user keys.
 
 1. **Create the service user and GitHub secrets** (administrator profile;
    `adam` cannot create IAM users or access keys):
@@ -46,7 +46,8 @@ user keys.
 3. **Pages**: Settings → Pages → Source = **GitHub Actions**.
 
 4. If the walker is replaced, install `gha_walker.pub` on the new box
-   and keep the tag `Name=rho-ecc2k-walker`.
+   and keep instance tag `Name=rho-ecc2k-walker` plus SG tags
+   `Name=rho-ecc2k-walker` and `Purpose=ecc2k-dp-walker`.
 
 The workflow does **not** need `DATABASE_URL`. The walker already has it.
 
