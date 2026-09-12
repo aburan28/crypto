@@ -63,10 +63,9 @@ class WorkflowTests(unittest.TestCase):
         path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
-        self.assertIn("role-to-assume: arn:aws:iam::590183823895:role/ecc2k130-status-gha", text)
-        self.assertIn("id-token: write", text)
-        self.assertNotIn("aws-access-key-id", text)
-        self.assertNotIn("AWS_SECRET_ACCESS_KEY", text)
+        self.assertIn("aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}", text)
+        self.assertIn("aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}", text)
+        self.assertNotIn("role-to-assume", text)
 
 
 class HistoryTests(unittest.TestCase):

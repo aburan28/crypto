@@ -19,21 +19,24 @@ Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
 ## One-time GitHub + IAM setup
 
-The publish job authenticates to AWS with GitHub OIDC. It assumes
-`arn:aws:iam::590183823895:role/ecc2k130-status-gha` and never uses
-static access keys.
+The publish job authenticates to AWS with a dedicated IAM user
+`ecc2k130-status-gha` (DescribeInstances only). Do not upload the `adam`
+user keys.
 
-1. **Create the role** (administrator profile; `adam` cannot create IAM):
+1. **Create the service user and GitHub secrets** (administrator profile;
+   `adam` cannot create IAM users or access keys):
 
    ```bash
-   AWS_PROFILE=admin ./scripts/rho_status/gha_iam_role.sh
+   AWS_PROFILE=admin ./scripts/rho_status/gha_iam_user.sh --push-github
    ```
 
-   That installs the GitHub OIDC provider if missing and a role that can
-   only `ec2:DescribeInstances` / `ec2:DescribeTags`. Trust is limited to
-   `repo:aburan28/crypto:environment:github-pages` and `ref:refs/heads/main`.
+   Preferred longer-term: GitHub OIDC via
+   `AWS_PROFILE=admin ./scripts/rho_status/gha_iam_role.sh` and switch the
+   workflow back to `role-to-assume`.
 
 2. **Secrets** (repo or environment `github-pages`):
+   - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — from
+     `ecc2k130-status-gha`, not from `adam`.
    - `RHO_WALKER_SSH_KEY` — private key for `ubuntu` on the walker
      (the `meow34` key the instance was launched with).
    - Optional: `RHO_WALKER_HOST` if you want to pin a host and skip the
@@ -45,8 +48,7 @@ static access keys.
    uses the same key; if you later rotate the spot box, retag the new
    instance `Name=rho-ecc2k-walker` and allow the operator IP again.
 
-The workflow does **not** need `DATABASE_URL` or `AWS_ACCESS_KEY_ID`.
-The walker already has the database URL; AWS uses the OIDC role.
+The workflow does **not** need `DATABASE_URL`. The walker already has it.
 
 ## Local commands
 
