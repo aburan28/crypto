@@ -565,6 +565,17 @@ fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
 }
 
 fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
+    if curve.n == 53 && n53_fast_reduction_enabled() {
+        debug_assert_eq!(curve.curve.irreducible.low_terms, [0, 1, 2, 6]);
+        const MASK: u64 = (1u64 << 53) - 1;
+        // x^53 = x^6 + x^2 + x + 1. A product has degree at most
+        // 104, so one full fold leaves at most six high bits and a second
+        // fixed fold completes the reduction.
+        let high = (wide >> 53) as u64;
+        let first = (wide as u64 & MASK) ^ high ^ (high << 1) ^ (high << 2) ^ (high << 6);
+        let overflow = first >> 53;
+        return (first & MASK) ^ overflow ^ (overflow << 1) ^ (overflow << 2) ^ (overflow << 6);
+    }
     if curve.n <= 31 && wide <= u64::MAX as u128 {
         let mut narrow = wide as u64;
         let mask = (1u64 << curve.n) - 1;
@@ -586,6 +597,13 @@ fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
         }
     }
     wide as u64
+}
+
+#[inline(always)]
+fn n53_fast_reduction_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_DISABLE_N53_FAST_REDUCTION").as_deref() != Ok("1"))
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -632,6 +650,14 @@ fn field_square_backend(curve: &KoblitzCurve) -> &'static str {
         "portable_interleaved_bit_spread"
     } else {
         "portable_sparse_bit_interleave"
+    }
+}
+
+fn field_reduction_backend(curve: &KoblitzCurve) -> &'static str {
+    if curve.n == 53 && n53_fast_reduction_enabled() {
+        "n53_fixed_two_fold"
+    } else {
+        "generic_polynomial_fold"
     }
 }
 
@@ -2263,6 +2289,7 @@ fn main() {
             "field_modulus_low_terms":curve.curve.irreducible.low_terms,
             "field_mul_backend":field_mul_backend(),
             "field_square_backend":field_square_backend(&curve),
+            "field_reduction_backend":field_reduction_backend(&curve),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
             "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
@@ -3035,6 +3062,7 @@ fn main() {
                 "pair_batch_inversions":pair_batch_inversions,
                 "field_mul_backend":field_mul_backend(),
                 "field_square_backend":field_square_backend(&curve),
+                "field_reduction_backend":field_reduction_backend(&curve),
                 "query_group_additions":query_additions,
                 "query_canonicalization_maps":query_canonicalization_maps,
                 "query_x_filter_rejections":query_x_filter_rejections,
