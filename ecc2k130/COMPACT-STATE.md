@@ -5,8 +5,9 @@ CUDA backend. The default is 0. It requires `PACKED_STATE_TILE=256`, polynomial
 state, polynomial chains and the denominator cache. The tested arithmetic
 configuration uses weighted-prefix mode 2 and batch 16.
 
-This prototype has passed host validation and a two-build CUDA compiler
-comparison. Full device validation and complete-walk timing are pending.
+The implementation has passed host and device validation, a two-build CUDA
+compiler comparison, and a matched complete-walk benchmark. The general
+option defaults to 0; the RTX preset selects 1 based on the comparison below.
 The current measured RTX preset is documented in [RTX-PRO6000.md](RTX-PRO6000.md).
 
 ## Representation
@@ -44,7 +45,7 @@ coordinates before encoding into a zero-filled physical buffer. The generic
 checkpoint methods resize staging for each X/Y field, including geometries
 where the physical buffer is smaller than the logical payload.
 
-## Validation so far
+## Host and compiler validation
 
 The [host receipt](benchmarks/compact-state/host-review.json) records:
 
@@ -95,10 +96,55 @@ image includes untouched padding and surrounding guards; separate logical
 reads include output guards. Tail patterns identify both worker and slot
 across rounds and sweep all 64 legal values. The
 [static test review](benchmarks/compact-state/storage-test-static-review.json)
-records the address-signature checks. The device test has not yet run.
+records the address-signature checks. Both layouts passed all 128 cases
+and 297,344 records on the GPU before timing. The synthetic probe supports
+batch sizes 1 through 64.
 
-The next measurement uses the same logical population and complete scalar
-iteration budget as the current weighted preset, after device arithmetic,
-storage, client and checkpoint checks. This prototype is currently exposed
-through direct Make builds; Modal option wiring and a preset change await
-a successful complete-walk comparison. The 15 B/s target remains unachieved.
+## Complete-walk GPU comparison
+
+The [retained comparison](benchmarks/compact-state/comparison.json) ran
+both layouts on one RTX PRO 6000 Blackwell Server Edition, with native
+sm_120 code and PTX JIT disabled. Both used WP2/B16/T256/minBlocks2,
+385,024 workers, and 32 launches of 1,024 steps. Every timed row completed
+**201,863,462,912 scalar updates**.
+
+Compact mode passed the bracketed screen and three alternating paired
+confirmations per workload. The two warmups and three screening samples
+are excluded from these confirmation statistics:
+
+| Workload | Control median B/s | Compact median B/s | Ratio-of-medians gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 13.548376 | **14.403112** | **6.3088%** |
+| DP34 collection | 13.130461 | **13.929753** | **6.0873%** |
+
+Benchmark ranges were 13.534959–13.563471 B/s for the control and
+14.386056–14.436292 for compact mode. Collection ranges were
+13.127485–13.135490 and 13.919560–13.936629 B/s. Every pair favored compact
+mode. All six collections produced the same sorted multiset: 5,149 records,
+164,768 bytes and zero drops, with SHA-256
+`ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b`.
+
+Both modes passed the six arithmetic suites, the synthetic storage test,
+full client replay/restart tests, and normalized-state comparisons. All 28
+checkpoint children had their expected outcomes, including two worker-geometry
+rejections and preserved incompatible files. Twelve same/cross-layout
+checkpoint comparisons covered 8, 256 and 257 workers.
+
+The [independent result audit](benchmarks/compact-state/comparison-review.json)
+passed all 17 timed rows, exact counts, ordered correctness gates, statistics
+and final source/binary/GPU bindings. Its additive checker correction handles
+cumulative stored counts only for the known resumed-corpus validation stage;
+fresh timing processes retain the stricter count checks. The original checker
+failure is retained separately; no runtime data or GPU run changed.
+The raw artifact SHA-256 is
+`3ca122fd091eb92b20b71d3568934a241136d91aa025426d109d670d510f84d9`.
+Transient corpus payloads were not retained; the artifact records their
+sizes, counts and content hashes.
+
+The public image, build-cache identity, rebuild commands and benchmark records
+carry `ECC_PACKED_COMPACT_STATE`. A packed rate with a missing, duplicate or
+wrong layout marker is rejected. Tiled audits also require the complete
+storage test before client integration or timing. The updated RTX Make
+preset selects compact mode; use `RTX_PRO6000_COMPACT_STATE=0` for the previous
+layout. A separate audit of the updated public command is pending. The 15 B/s
+target remains unachieved.

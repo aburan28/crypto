@@ -282,13 +282,14 @@ modal:
 
 # Audited packed configuration for the RTX PRO 6000 Blackwell Server Edition.
 RTX_PRO6000_WORKERS ?= 385024
+RTX_PRO6000_COMPACT_STATE ?= 1
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
                  ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
                  ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
                  ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
-                 ECC_PACKED_WEIGHTED_PREFIX=2
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -306,7 +307,7 @@ clean:
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
 	rm -f build/test-packed-clmad-host
-	rm -f build/test-packed-cuda
+	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-timing
 
 .PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
