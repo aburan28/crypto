@@ -682,6 +682,7 @@ unsafe fn pclmul_u64(left: u64, right: u64) -> u128 {
 }
 
 #[cfg(target_arch = "x86_64")]
+#[inline(always)]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn pclmul_reduce_n53(left: u64, right: u64) -> u64 {
     use std::arch::x86_64::*;
@@ -1512,6 +1513,131 @@ fn batch_compact_target_minus_signed_points_x_filtered(
     attempted
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn inverse_n53_unchecked(value: u64) -> u64 {
+    debug_assert_ne!(value, 0);
+    const EXPONENT: u64 = (1u64 << 53) - 2;
+    let mut result = 1u64;
+    let mut base = value;
+    for bit in 0..53 {
+        if (EXPONENT >> bit) & 1 == 1 {
+            result = unsafe { pclmul_reduce_n53(result, base) };
+        }
+        base = unsafe { pclmul_reduce_n53(base, base) };
+    }
+    result
+}
+
+/// Degree-53 PCLMUL specialization of the compact dual-sign batch. The caller
+/// checks the combined runtime predicate once per chunk; no feature dispatch
+/// remains inside the field-operation loops.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn batch_compact_n53_target_minus_signed_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[(u64, u64)],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, bool, (u64, u64))>,
+    scratch: &mut RawBatchScratch,
+) -> usize {
+    debug_assert_eq!(curve.n, 53);
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        let mut attempted = 0usize;
+        for (index, &(key_x, y)) in points.iter().enumerate() {
+            if key_x == 0 {
+                attempted += 1;
+                if table.might_contain_x(0) {
+                    output.push((index, false, (0, 0)));
+                }
+                continue;
+            }
+            let x = key_x - 1;
+            attempted += 1;
+            if table.might_contain_x(key_x) {
+                output.push((index, false, (key_x, y ^ x)));
+            }
+            attempted += 1;
+            if table.might_contain_x(key_x) {
+                output.push((index, true, (key_x, y)));
+            }
+        }
+        return attempted;
+    };
+
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes_and_inverses.resize(points.len(), 0);
+    let mut product = 1u64;
+    for (index, &(key_x, _)) in points.iter().enumerate() {
+        let denominator = if key_x == 0 {
+            0
+        } else {
+            target_x ^ (key_x - 1)
+        };
+        scratch.denominators[index] = denominator;
+        if denominator != 0 {
+            scratch.prefixes_and_inverses[index] = product;
+            product = unsafe { pclmul_reduce_n53(product, denominator) };
+        }
+    }
+    let mut inverse_product = unsafe { inverse_n53_unchecked(product) };
+    for index in (0..points.len()).rev() {
+        let denominator = scratch.denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        let inverse =
+            unsafe { pclmul_reduce_n53(inverse_product, scratch.prefixes_and_inverses[index]) };
+        inverse_product = unsafe { pclmul_reduce_n53(inverse_product, denominator) };
+        scratch.prefixes_and_inverses[index] = inverse;
+    }
+
+    let mut attempted = 0usize;
+    for (index, &(key_x, y)) in points.iter().enumerate() {
+        if key_x == 0 {
+            let key = raw_compact_key(target);
+            attempted += 1;
+            if table.might_contain_x(key.0) {
+                output.push((index, false, key));
+            }
+            continue;
+        }
+        let x = key_x - 1;
+        if scratch.denominators[index] == 0 {
+            let point = Some((x, y));
+            for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
+                let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
+                attempted += 1;
+                if table.might_contain_x(key.0) {
+                    output.push((index, negative, key));
+                }
+            }
+            continue;
+        }
+
+        let inverse = scratch.prefixes_and_inverses[index];
+        for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
+            let lambda = unsafe { pclmul_reduce_n53(numerator, inverse) };
+            let x3 = unsafe { pclmul_reduce_n53(lambda, lambda) }
+                ^ lambda
+                ^ target_x
+                ^ x
+                ^ curve.a as u64;
+            let rest_x = x3 + 1;
+            attempted += 1;
+            if !table.might_contain_x(rest_x) {
+                continue;
+            }
+            let y3 = unsafe { pclmul_reduce_n53(lambda, target_x ^ x3) } ^ x3 ^ target_y;
+            output.push((index, negative, (rest_x, y3)));
+        }
+    }
+    attempted
+}
+
 fn batch_raw_add_keys(curve: &KoblitzCurve, pairs: &[(RawPoint, RawPoint)]) -> Vec<(u64, u64)> {
     let mut denominators = vec![0u64; pairs.len()];
     let mut prefixes = vec![0u64; pairs.len()];
@@ -1791,6 +1917,7 @@ fn pair_pair_cursor_chunk(
     cursor_end: usize,
     dual_sign: bool,
     compact_scratch: bool,
+    specialized_n53_batch: bool,
     scratch: &mut PairPairChunkScratch,
 ) -> PairPairChunkResult {
     let slots = quotient_pairs.slots();
@@ -1842,7 +1969,32 @@ fn pair_pair_cursor_chunk(
     if scratch.points.is_empty() && scratch.compact_points.is_empty() {
         return PairPairChunkResult::default();
     }
-    let attempted = if dual_sign && compact_scratch {
+    let use_specialized_n53_batch = dual_sign
+        && compact_scratch
+        && specialized_n53_batch
+        && curve.n == 53
+        && combined_n53_fast_path_enabled();
+    let attempted = if use_specialized_n53_batch {
+        #[cfg(target_arch = "x86_64")]
+        {
+            // SAFETY: the combined predicate includes the runtime PCLMUL
+            // feature check and the exact fused degree-53 reduction controls.
+            unsafe {
+                batch_compact_n53_target_minus_signed_points_x_filtered(
+                    curve,
+                    target,
+                    &scratch.compact_points,
+                    quotient_pairs,
+                    &mut scratch.dual_rests,
+                    &mut scratch.batch,
+                )
+            }
+        }
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            unreachable!("the specialized n53 batch is x86_64-only")
+        }
+    } else if dual_sign && compact_scratch {
         batch_compact_target_minus_signed_points_x_filtered(
             curve,
             target,
@@ -2482,6 +2634,8 @@ fn main() {
         std::env::var("KIC_DISABLE_DUAL_SIGN_PAIR_SCAN").as_deref() != Ok("1");
     let compact_pair_scratch =
         std::env::var("KIC_DISABLE_COMPACT_PAIR_SCRATCH").as_deref() != Ok("1");
+    let specialized_n53_pair_batch =
+        std::env::var("KIC_DISABLE_SPECIALIZED_N53_PAIR_BATCH").as_deref() != Ok("1");
     let parallel_support_expansion =
         std::env::var("KIC_PARALLEL_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let pipelined_support_expansion =
@@ -3078,6 +3232,7 @@ fn main() {
                                     (cursor_start + width).min(cursors),
                                     dual_sign_pair_scan,
                                     compact_pair_scratch,
+                                    specialized_n53_pair_batch,
                                     scratch,
                                 )
                             })
@@ -3561,6 +3716,7 @@ fn main() {
                 "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
+                "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
                 "query_raw_point_scratch_bytes":std::mem::size_of::<RawPoint>(),
                 "query_compact_point_scratch_bytes":std::mem::size_of::<(u64,u64)>(),
                 "target_mode":target_mode.name(),
@@ -3913,6 +4069,62 @@ mod packed_tests {
                 }
             }
         }
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn specialized_n53_pair_batch_matches_generic() {
+        if !combined_n53_fast_path_enabled() {
+            return;
+        }
+        let curve = KoblitzCurve::new(0, 53).unwrap();
+        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(71u64)));
+        let points: Vec<_> = (1..=48u64)
+            .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
+            .collect();
+        let mut signed_points = Vec::with_capacity(points.len() * 2);
+        for &point in &points {
+            signed_points.push(point);
+            signed_points.push(raw_neg_point(point));
+        }
+        let keys = batch_raw_target_minus_keys(&curve, target, &signed_points);
+        let mut table = CompactPairTable::with_capacity(keys.len() * 2, true, (1usize << 53) + 1);
+        for &key in &keys {
+            table.insert(key, QuotientPairWitness::default());
+        }
+        let compact_points: Vec<_> = points.iter().copied().map(raw_compact_key).collect();
+        let mut generic = Vec::new();
+        let mut generic_scratch = RawBatchScratch::default();
+        let generic_attempted = batch_compact_target_minus_signed_points_x_filtered(
+            &curve,
+            target,
+            &compact_points,
+            &table,
+            &mut generic,
+            &mut generic_scratch,
+        );
+        let mut specialized = Vec::new();
+        let mut specialized_scratch = RawBatchScratch::default();
+        let specialized_attempted = unsafe {
+            batch_compact_n53_target_minus_signed_points_x_filtered(
+                &curve,
+                target,
+                &compact_points,
+                &table,
+                &mut specialized,
+                &mut specialized_scratch,
+            )
+        };
+        assert_eq!(specialized_attempted, generic_attempted);
+        assert_eq!(specialized, generic);
+        assert_eq!(
+            specialized_scratch.denominators,
+            generic_scratch.denominators
+        );
+        assert_eq!(
+            specialized_scratch.prefixes_and_inverses,
+            generic_scratch.prefixes_and_inverses
+        );
     }
 
     #[test]
