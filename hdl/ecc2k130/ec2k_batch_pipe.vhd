@@ -49,23 +49,27 @@
 -- a whole region, and those nets were what failed timing in every engine of
 -- a 48-engine build.  A block RAM's address pins fan out to two.
 --
---   leaf_a  (x, y, j)         written at fill, read at issue
---   leaf_b  (y, tag, valid)   written at fill, read at retire
+--   leaf    (x, y, j, valid)  written at fill, read at issue
 --   d_a, d_b                  written at fill, read at issue (two ports)
 --   t_a, t_b                  the tree: written at retire, read at issue
---   z                         x3: written at issue, read at retire
 --
 -- Issue reads are addressed from the burst engine's registers and land two
--- clocks later in stage A2; retire reads are addressed from the
--- multiplier's look-ahead tag (gf131_mul AHEAD = 2) so the data arrives
--- with the product.  The retire path itself is a memory write plus one XOR.
+-- clocks later in stage A2.  Nothing is read at retire: the final multiply
+-- of a walk (lam times x + x3) has y, the tag and x3 in hand when it issues,
+-- and they ride a shift register beside the multiplier (SRLs, ~300 LUTs)
+-- and meet the product on the way out.  An earlier version kept a second
+-- leaf table (y, tag, valid) and an x3 table for the retire side to read
+-- through the multiplier's look-ahead tag; that was 4 RAMB36 + 1 RAMB18 of
+-- the engine's 20 + 2, and block RAM is the resource that bounds the number
+-- of engines in a device.  The retire path itself is a memory write plus
+-- one XOR.
 --
 -- Batches shorter than W -- the tail of a run, or a testbench -- would wait
 -- forever for leaves that never come, so a batch that has been partly
 -- filled for FLUSH_CLK clocks with nothing arriving is padded with dummy
 -- leaves (weight-1 x, d /= 0) that produce no output.
 --
--- Slot memory per batch of W: W (x, y, d, z) + 2W tree words, all 131 bits.
+-- Slot memory per batch of W: W (x, y, d) + 2W tree words, all 131 bits.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -138,15 +142,24 @@ architecture rtl of ec2k_batch_pipe is
   subtype mtag_t is std_logic_vector(MTAG_W - 1 downto 0);
 
   -- memory words
-  constant LA_W : natural := 2 * M + 3;            -- x, y, j
-  constant LB_W : natural := M + TAG_W + 1;        -- y, tag, valid
+  -- leaf word: x, y, j, tag, valid (fields from the top)
+  constant LA_W   : natural := 2 * M + 3 + TAG_W + 1;
+  constant LA_X   : natural := LA_W - 1;             -- x  = (LA_X downto LA_Y + 1)
+  constant LA_Y   : natural := M + 3 + TAG_W;        -- y  = (LA_Y downto LA_J + 1)
+  constant LA_J   : natural := TAG_W + 3;            -- j  = (LA_J downto LA_J - 2)
+  constant LA_TAG : natural := TAG_W;                -- tag = (LA_TAG downto 1), valid = (0)
   subtype la_word_t is std_logic_vector(LA_W - 1 downto 0);
-  subtype lb_word_t is std_logic_vector(LB_W - 1 downto 0);
   subtype laddr_t is natural range 0 to NB * W - 1;
   subtype taddr_t is natural range 0 to NB * 2 * W - 1;
+  -- what the final multiply carries to its retire: x3, y, tag, valid
+  constant FP_W : natural := 2 * M + TAG_W + 1;
+  subtype fp_word_t is std_logic_vector(FP_W - 1 downto 0);
+  -- loaded in stage A2, read when the product retires: A2 -> B -> the
+  -- multiplier's MUL_LATENCY -> the retire clock
+  constant FP_DEPTH : natural := MUL_LATENCY + 2;
+  type fp_pipe_t is array (0 to FP_DEPTH - 1) of fp_word_t;
 
   type la_mem_t is array (0 to NB * W - 1) of la_word_t;
-  type lb_mem_t is array (0 to NB * W - 1) of lb_word_t;
   type gf_leaf_mem_t is array (0 to NB * W - 1) of gf_t;
   type gf_tree_mem_t is array (0 to NB * 2 * W - 1) of gf_t;
   type ph_mem_t  is array (0 to NB - 1) of ph_t;
@@ -202,30 +215,27 @@ architecture rtl of ec2k_batch_pipe is
   -- memories (block RAM; see the header)
   -- ------------------------------------------------------------------ --
   signal m_la       : la_mem_t;
-  signal m_lb       : lb_mem_t;
   signal m_da, m_db : gf_leaf_mem_t;
-  signal m_z        : gf_leaf_mem_t;
   signal m_ta, m_tb : gf_tree_mem_t;
 
   attribute ram_style : string;
   attribute ram_style of m_la : signal is "block";
-  attribute ram_style of m_lb : signal is "block";
   attribute ram_style of m_da : signal is "block";
   attribute ram_style of m_db : signal is "block";
-  attribute ram_style of m_z  : signal is "block";
   attribute ram_style of m_ta : signal is "block";
   attribute ram_style of m_tb : signal is "block";
 
   -- read side: address (combinational), latch output, output register
   signal ra_qa, ra_qb : laddr_t;
   signal ra_ta, ra_tb : taddr_t;
-  signal ra_lr        : laddr_t;              -- retire (look-ahead) address
   signal rd_la : la_word_t;
-  signal rd_lb : lb_word_t;
-  signal rd_da, rd_db, rd_z, rd_ta, rd_tb : gf_t;
+  signal rd_da, rd_db, rd_ta, rd_tb : gf_t;
   signal rr_la : la_word_t;
-  signal rr_lb : lb_word_t;
-  signal rr_da, rr_db, rr_z, rr_ta, rr_tb : gf_t;
+  signal rr_da, rr_db, rr_ta, rr_tb : gf_t;
+
+  -- the final multiply's companions, shifted every clock like the
+  -- multiplier's own tag so bubbles keep them aligned
+  signal fp : fp_pipe_t := (others => (others => '0'));
 
   signal b_ph  : ph_mem_t  := (others => (others => '0'));
   signal b_lvl : lvl_mem_t := (others => (others => '0'));
@@ -277,21 +287,19 @@ architecture rtl of ec2k_batch_pipe is
   type ph_pipe_t   is array (0 to RD_LAT - 1) of ph_t;
   type k_pipe_t    is array (0 to RD_LAT - 1) of unsigned(2 downto 0);
   type mtag_pipe_t is array (0 to RD_LAT - 1) of mtag_t;
-  type la_pipe_t   is array (0 to RD_LAT - 1) of laddr_t;
   signal a_valid : std_logic_vector(0 to RD_LAT - 1) := (others => '0');
   signal a_leafy : std_logic_vector(0 to RD_LAT - 1) := (others => '0');
   signal a_ph    : ph_pipe_t := (others => (others => '0'));
   signal a_k     : k_pipe_t := (others => (others => '0'));
   signal a_tag   : mtag_pipe_t := (others => (others => '0'));
-  signal a_zaddr : la_pipe_t := (others => 0);
 
   signal ra_valid : std_logic := '0';
-  signal ra_a, ra_b, ra_c : gf_t := (others => '0');
+  signal ra_a, ra_b : gf_t := (others => '0');
+  signal ra_x3    : gf_t := (others => '0');    -- FIN: lam^2 + lam + d
   signal ra_ph    : ph_t := (others => '0');
   signal ra_ja    : std_logic_vector(2 downto 0) := (others => '0');
   signal ra_k     : unsigned(2 downto 0) := (others => '0');
   signal ra_tag   : mtag_t := (others => '0');
-  signal ra_zaddr : laddr_t := 0;
 
   -- multiplier
   signal mul_valid : std_logic := '0';
@@ -300,9 +308,6 @@ architecture rtl of ec2k_batch_pipe is
   signal res_valid : std_logic;
   signal res_r     : gf_t;
   signal res_tag   : mtag_t;
-  signal ahd_tag   : mtag_t;
-  signal ahd_b     : bid_t;
-  signal ahd_i     : idx_t;
 
   -- output: four registers so the weight of x3 has four clocks (group
   -- popcounts, sums of four groups, their sum, the compare); the 22-way
@@ -320,12 +325,12 @@ begin
   assert MUL_LATENCY >= 2 report "in-place tree update needs MUL_LATENCY >= 2" severity failure;
 
   mul : entity work.gf131_mul
-    generic map (TAG_W => MTAG_W, AHEAD => RD_LAT)
+    generic map (TAG_W => MTAG_W)
     port map (
       clk => clk, rst => rst,
       in_valid => mul_valid, in_a => mul_a, in_b => mul_b, in_tag => mul_tag,
       out_valid => res_valid, out_r => res_r, out_tag => res_tag,
-      ahead_valid => open, ahead_tag => ahd_tag);
+      ahead_valid => open, ahead_tag => open);
 
   rq_empty <= rq_wr = rq_rd;
   fl_empty <= fl_wr = fl_rd;
@@ -340,10 +345,8 @@ begin
       rd_la <= m_la(ra_qa);
       rd_da <= m_da(ra_qa);
       rd_db <= m_db(ra_qb);
-      rd_lb <= m_lb(ra_lr);
       rd_ta <= m_ta(ra_ta);
       rd_tb <= m_tb(ra_tb);
-      rd_z  <= m_z(ra_lr);
     end if;
   end process;
 
@@ -351,20 +354,12 @@ begin
   begin
     if rising_edge(clk) then
       rr_la <= rd_la;
-      rr_lb <= rd_lb;
       rr_da <= rd_da;
       rr_db <= rd_db;
       rr_ta <= rd_ta;
       rr_tb <= rd_tb;
-      rr_z  <= rd_z;
     end if;
   end process;
-
-  -- retire-side read address, from the product that retires RD_LAT clocks
-  -- from now
-  ahd_b <= unsigned(ahd_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
-  ahd_i <= unsigned(ahd_tag(IDX_W downto 1));
-  ra_lr <= leaf_addr(ahd_b, ahd_i);
 
   -- ---------------------------------------------------------------- --
   -- issue-side read addresses: one per memory port, from the burst
@@ -435,6 +430,7 @@ begin
     variable last    : std_logic;
     variable oa, ob  : gf_t;
     variable x3, y3  : gf_t;
+    variable fp_in   : fp_word_t;
     variable rb      : bid_t;
     variable rkind   : ph_t;
     variable rlvl    : lvl_t;
@@ -487,13 +483,11 @@ begin
         la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
         if p1_take = '1' then
           j        := std_logic_vector(p1_hw(3 downto 1));
-          m_la(la) <= p1_x & p1_y & j;
-          m_lb(la) <= p1_y & p1_tag & '1';
+          m_la(la) <= p1_x & p1_y & j & p1_tag & '1';
           m_da(la) <= p1_x xor gf_sigma_j(p1_x, j);
           m_db(la) <= p1_x xor gf_sigma_j(p1_x, j);
         else
-          m_la(la) <= DUMMY_X & GF_ZERO & "000";
-          m_lb(la) <= GF_ZERO & tag_t'(others => '0') & '0';
+          m_la(la) <= DUMMY_X & GF_ZERO & "000" & tag_t'(others => '0') & '0';
           m_da(la) <= DUMMY_D;
           m_db(la) <= DUMMY_D;
         end if;
@@ -575,12 +569,13 @@ begin
               b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
             end if;
           when others =>
-            -- rr_lb / rr_z were read for this leaf through the look-ahead tag
-            y3 := res_r xor rr_z xor rr_lb(LB_W - 1 downto TAG_W + 1);
-            o1_valid <= rr_lb(0);
-            o1_x     <= rr_z;
+            -- x3, y, tag and valid rode beside the multiply in fp
+            y3 := res_r xor fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1)
+                        xor fp(FP_DEPTH - 1)(M + TAG_W downto TAG_W + 1);
+            o1_valid <= fp(FP_DEPTH - 1)(0);
+            o1_x     <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
             o1_y     <= y3;
-            o1_tag   <= rr_lb(TAG_W downto 1);
+            o1_tag   <= fp(FP_DEPTH - 1)(TAG_W downto 1);
             if rlast = '1' then
               fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
               fl_wr <= fl_wr + 1;
@@ -667,7 +662,6 @@ begin
                         & std_logic_vector(lvl)
                         & std_logic_vector(resize(i, IDX_W)) & last;
         end case;
-        a_zaddr(0) <= leaf_addr(b, i);
         a_ph(0)    <= ph;
         if to_integer(lvl) = LOG_W - 1 then a_leafy(0) <= '1'; else a_leafy(0) <= '0'; end if;
       end if;
@@ -678,16 +672,20 @@ begin
         a_ph(s)    <= a_ph(s - 1);
         a_k(s)     <= a_k(s - 1);
         a_tag(s)   <= a_tag(s - 1);
-        a_zaddr(s) <= a_zaddr(s - 1);
         a_leafy(s) <= a_leafy(s - 1);
       end loop;
 
       -- ============ stage A2: operands off the memories ============
+      -- The FIN leaf's x3 = lam^2 + lam + d is formed here (lam from the
+      -- tree, d from its table) and enters fp with y, the tag and valid;
+      -- fp shifts every clock, whatever is in A2.
+      x3 := gf_frob(rr_ta, 1) xor rr_ta xor rr_da;
+      fp_in := x3 & rr_la(LA_Y downto LA_J + 1) & rr_la(LA_TAG downto 0);
+      fp <= fp_in & fp(0 to FP_DEPTH - 2);
       ra_valid <= a_valid(RD_LAT - 1);
       if a_valid(RD_LAT - 1) = '1' then
-        ra_ja    <= rr_la(2 downto 0);
-        ra_zaddr <= a_zaddr(RD_LAT - 1);
-        ra_c     <= rr_da;
+        ra_ja    <= rr_la(LA_J downto LA_J - 2);
+        ra_x3    <= x3;
         ra_k     <= a_k(RD_LAT - 1);
         ra_tag   <= a_tag(RD_LAT - 1);
         case to_integer(a_ph(RD_LAT - 1)) is
@@ -701,11 +699,11 @@ begin
             ra_a <= rr_ta;
             if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
           when PH_LAM =>
-            ra_a <= rr_la(M + 2 downto 3);                        -- y
+            ra_a <= rr_la(LA_Y downto LA_J + 1);                  -- y
             ra_b <= rr_tb;
           when others =>
             ra_a <= rr_ta;
-            ra_b <= rr_la(LA_W - 1 downto M + 3);                 -- x
+            ra_b <= rr_la(LA_X downto LA_Y + 1);                  -- x
         end case;
         ra_ph <= a_ph(RD_LAT - 1);
       end if;
@@ -722,10 +720,8 @@ begin
           when PH_LAM =>
             oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
           when PH_FIN =>
-            -- ra_a = lam, ra_b = x, ra_c = d
-            x3 := gf_frob(ra_a, 1) xor ra_a xor ra_c;
-            ob := ra_b xor x3;
-            m_z(ra_zaddr) <= x3;
+            -- ra_a = lam, ra_b = x
+            ob := ra_b xor ra_x3;
           when others =>
             null;
         end case;
