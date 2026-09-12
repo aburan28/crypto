@@ -2094,6 +2094,25 @@ pub fn pack_point(p: &BinaryPoint) -> u64 {
     }
 }
 
+/// Ask the processor to start fetching this address.
+///
+/// The three-summand search probes the presence filter once per base
+/// point, at addresses that are random and far apart, so it spends most
+/// of its time waiting on memory rather than computing.  The keys are
+/// all known before any of them is needed, which is exactly the case a
+/// prefetch is for: issue the loads for a block, then read them.
+#[inline(always)]
+fn prefetch(address: *const u64) {
+    #[cfg(target_arch = "x86_64")]
+    // SAFETY: a prefetch has no architectural effect beyond the cache;
+    // any address is allowed, valid or not.
+    unsafe {
+        std::arch::x86_64::_mm_prefetch::<{ std::arch::x86_64::_MM_HINT_T0 }>(address as *const i8);
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    let _ = address;
+}
+
 /// Hash of a packed pair sum for the presence filter, independent of the
 /// bucket index (which uses the key's high bits).
 #[inline]
@@ -2243,13 +2262,32 @@ impl PairSumTable {
         &self.curve
     }
 
+    /// Index of the filter word holding this key's bit.
+    #[inline]
+    fn filter_word(&self, key: u64) -> usize {
+        ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
+    }
+
+    /// Whether the filter admits this key.  A `false` is certain; a
+    /// `true` still has to be checked against the entries.
+    #[inline]
+    fn admitted(&self, key: u64) -> bool {
+        let h = (pair_filter_hash(key) & self.present_mask) as usize;
+        self.present[h >> 6] >> (h & 63) & 1 == 1
+    }
+
     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
     #[inline]
     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
-        if self.present[h >> 6] >> (h & 63) & 1 == 0 {
+        if !self.admitted(key) {
             return &[];
         }
+        self.lookup_admitted(key)
+    }
+
+    /// [`Self::lookup`] for a key the filter has already admitted.
+    #[inline]
+    fn lookup_admitted(&self, key: u64) -> &[(u64, u32, u32)] {
         let bucket = (key >> self.bucket_shift) as usize;
         let Some(&lo) = self.bucket_start.get(bucket) else {
             return &[];
@@ -2330,8 +2368,22 @@ impl PairSumTable {
                 let mut scratch = BatchScratch::default();
                 self.curve
                     .add_many(target, &self.negated, &mut rests, &mut scratch);
+                // The filter probes are random addresses in a table far
+                // larger than the cache, and every key is known before
+                // any is read: run a block ahead, prefetching.
+                const LOOKAHEAD: usize = 32;
+                for rest in rests.iter().take(LOOKAHEAD) {
+                    prefetch(&self.present[self.filter_word(rest.pack())]);
+                }
                 for (k, rest) in rests.iter().enumerate() {
-                    for &(_, i, j) in self.lookup(rest.pack()) {
+                    if let Some(ahead) = rests.get(k + LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(ahead.pack())]);
+                    }
+                    let key = rest.pack();
+                    if !self.admitted(key) {
+                        continue;
+                    }
+                    for &(_, i, j) in self.lookup_admitted(key) {
                         if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
                             return;
                         }
@@ -3137,6 +3189,21 @@ pub fn projected_signed_orbit_count(kc: &KoblitzCurve, fb: &FrobeniusFactorBase)
 pub struct KoblitzIcOptions {
     /// Number of factor-base points a relation decomposes into.
     pub m: usize,
+    /// Summands the **descent** asks for, when it should differ from
+    /// `m`.  Collection and descent share the factor base and its pair
+    /// table but nothing forces them to share this: a relation is worth
+    /// the same however many base points it names, and the two have
+    /// different cost shapes.
+    ///
+    /// Three summands need `3!·r/|F|³` probes of `|F|` lookups each; two
+    /// need `2r/|F|²` probes of one lookup. Collection wants few probes
+    /// because each costs a scalar multiplication, so it takes three.
+    /// The descent walks its probes by `+G` and batches the inversions,
+    /// which makes a probe nearly free, so two wins there — measured 3.7
+    /// times cheaper per logarithm at degree 41 on a 10496-point base.
+    ///
+    /// `None` uses `m`.
+    pub descent_m: Option<usize>,
     /// Index of the irreducible factor of `x^n − 1` defining the
     /// factor base.
     pub factor_index: usize,
@@ -3207,6 +3274,7 @@ impl Default for KoblitzIcOptions {
     fn default() -> Self {
         Self {
             m: 2,
+            descent_m: None,
             factor_index: 0,
             extra_relations: 4,
             max_trials: 20_000,
@@ -5962,6 +6030,115 @@ impl<'a> IndividualLogSolver<'a> {
         .map_or(Probe::Miss, Probe::Decomposed)
     }
 
+    /// Summands the descent asks for.
+    fn descent_m(&self) -> usize {
+        self.opts.descent_m.unwrap_or(self.opts.m)
+    }
+
+    /// Turn a decomposition of `[a]G + [b]Q` into the logarithm, or
+    /// `None` when this relation cannot give one.
+    fn logarithm_from(&self, q: &BinaryPoint, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        let kc = self.kc;
+        let r = &kc.subgroup_order;
+        let (a, b) = (BigUint::from(a), BigUint::from(b));
+        let relation = relation_from_decomposition_with_mode(
+            kc,
+            self.fb,
+            idxs,
+            &a,
+            &b,
+            self.opts.collapse_negation,
+            Some(&self.projected),
+        );
+        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
+        let mut sum = BigUint::zero();
+        for (coeff, log) in relation.row.iter().zip(&self.column_log) {
+            if !coeff.is_zero() {
+                sum = (sum + coeff * log) % r;
+            }
+        }
+        let ha = (&self.h * &a) % r;
+        let numerator = (sum + r - ha) % r;
+        let hb = (&self.h * &b) % r;
+        let d = (numerator * mod_inverse(&hb, r)?) % r;
+        (kc.mul(kc.generator(), &d) == *q).then_some(d)
+    }
+
+    /// **Walk the probes instead of drawing them.**
+    ///
+    /// A probe is any `[a]G + [b]Q`, and stepping one by `+G` costs a
+    /// single point addition against the two scalar multiplications a
+    /// fresh draw costs. Several walks step together so one field
+    /// inversion serves them all, which brings a probe under the cost
+    /// of the table lookup that follows it — the regime where asking
+    /// for two summands beats asking for three.
+    ///
+    /// `None` when the field is too wide for the single-word
+    /// arithmetic; the caller falls back to drawing.
+    fn solve_by_walking(
+        &self,
+        q: &BinaryPoint,
+        report: &mut IndividualLogReport,
+    ) -> Option<Option<BigUint>> {
+        let (fc, g) = self.fast.as_ref()?;
+        let pair = self.pair?;
+        let m = self.descent_m();
+        let q_fast = fc.lift(q);
+        const WALKS: usize = 64;
+        // Walks must not tread on each other, so they start one stride
+        // apart on the same line and each is stepped by G.  Building
+        // them that way costs three scalar multiplications and 63
+        // additions, where drawing each start costs two scalar
+        // multiplications apiece — which on a walk of a few hundred
+        // rounds is most of the descent.
+        let stride = (self.r_u64 / WALKS as u64).max(1 << 20);
+        let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x57_41_4c_4b_44_45_53_00);
+        let a0 = rng.gen_range(1..self.r_u64);
+        let b = rng.gen_range(1..self.r_u64);
+        let stride_point = fc.mul_u64(*g, stride);
+        let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(WALKS);
+        let mut states: Vec<FastPoint> = Vec::with_capacity(WALKS);
+        let mut state = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
+        let mut a = a0;
+        for _ in 0..WALKS {
+            coefficients.push((a, b));
+            states.push(state);
+            state = fc.add(state, stride_point);
+            a = (a + stride) % self.r_u64;
+        }
+        let step = vec![*g; WALKS];
+        let mut advanced = Vec::with_capacity(WALKS);
+        let mut scratch = BatchScratch::default();
+        while report.trials < self.opts.max_trials {
+            for (state, (a, b)) in states.iter().zip(coefficients.iter()) {
+                report.trials += 1;
+                if state.infinity {
+                    // [a]G + [b]Q = O already yields d.
+                    if let Some(d) = solve_for_d(&BigUint::from(*a), &BigUint::from(*b), &self.kc.subgroup_order) {
+                        if self.kc.mul(self.kc.generator(), &d) == *q {
+                            return Some(Some(d));
+                        }
+                    }
+                    continue;
+                }
+                let Some(idxs) = pair.decompose_fast(*state, m) else {
+                    continue;
+                };
+                if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                    return Some(Some(d));
+                }
+            }
+            // Advance every walk by G, sharing one inversion.
+            advanced.clear();
+            fc.add_pairwise(&states, &step, &mut advanced, &mut scratch);
+            states.copy_from_slice(&advanced);
+            for (a, _) in coefficients.iter_mut() {
+                *a = (*a + 1) % self.r_u64;
+            }
+        }
+        Some(None)
+    }
+
     /// The logarithm of `q` to the base's generator, verified as
     /// `[d]G = Q` in the general arithmetic before it is returned.
     pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
@@ -5973,6 +6150,16 @@ impl<'a> IndividualLogSolver<'a> {
             // Q = O has logarithm 0.
             report.log = Some(BigUint::zero());
             return Some((BigUint::zero(), report));
+        }
+        // The walk needs the single-word arithmetic and a pair table;
+        // without either, fall through to drawing probes.
+        if self.opts.strategy == DecompositionStrategy::PairTable {
+            if let Some(found) = self.solve_by_walking(q, &mut report) {
+                return found.map(|d| {
+                    report.log = Some(d.clone());
+                    (d, report)
+                });
+            }
         }
         let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x44_45_53_43_45_4e_54_00);
@@ -6046,6 +6233,47 @@ mod tests {
     use super::*;
 
     #[test]
+    fn descent_summands_may_differ_from_the_collection_summands() {
+        // The log database is built with three summands; the descent
+        // asks for two, walking its probes.  Both must return the same
+        // logarithm, and the walk must not need more probes than the
+        // 2r/|F|^2 its rate predicts.
+        let kc = KoblitzCurve::new(0, 23).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 900).unwrap();
+        let collect = KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::PairTable,
+            max_trials: 200_000,
+            ..KoblitzIcOptions::default()
+        };
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &collect).expect("log database");
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let walking = KoblitzIcOptions {
+            descent_m: Some(2),
+            ..collect.clone()
+        };
+        let three = IndividualLogSolver::new(&kc, &fb, &table, &collect, Some(&pair)).unwrap();
+        let two = IndividualLogSolver::new(&kc, &fb, &table, &walking, Some(&pair)).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        for d in [3u64, 11, 12_345 % r, r - 5] {
+            let d = BigUint::from(d);
+            let q = kc.mul(kc.generator(), &d);
+            let (found3, _) = three.solve(&q).expect("three summands descend");
+            let (found2, report2) = two.solve(&q).expect("two summands descend");
+            assert_eq!(found3, d);
+            assert_eq!(found2, d);
+            // Rate is |F|^2/(2r) per probe, so a run of 64 times the mean
+            // would be a broken walk rather than bad luck.
+            let expected = 2.0 * r as f64 / (fb.points.len() as f64).powi(2);
+            assert!(
+                (report2.trials as f64) < 64.0 * expected.max(1.0),
+                "two-summand walk took {} probes against a {expected:.0}-probe mean",
+                report2.trials
+            );
+        }
+    }
+
+    #[test]
     fn pair_table_refuses_a_base_beyond_its_byte_budget() {
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
@@ -6055,61 +6283,6 @@ mod tests {
         // The default budget is far above a base this size.
         assert!(needed < PairSumTable::DEFAULT_BYTE_BUDGET);
         assert!(PairSumTable::build(&kc, &fb).is_some());
-    }
-
-    #[test]
-    #[ignore]
-    fn subgroup_base_size_sweep() {
-        // Work per target should fall as 1/|F|^2: the witness rate rises
-        // as |F|^3 and a trial costs |F| lookups.  Where does that stop
-        // paying?
-        let n: u32 = std::env::var("SWEEP_N")
-            .map(|v| v.parse().unwrap())
-            .unwrap_or(41);
-        let kc = KoblitzCurve::new(0, n).unwrap();
-        let fc = FastCurve::new(&kc.curve).unwrap();
-        let r = kc.subgroup_order.to_u64_digits()[0];
-        let g = fc.lift(kc.generator());
-        eprintln!(
-            "{:>7} {:>7} {:>9} {:>10} {:>9} {:>10} {:>11} {:>9}",
-            "points", "absc", "entries", "table MB", "build s", "1/rate", "ms/trial", "ms/target"
-        );
-        let mut size = 1300usize;
-        while size <= 24_000 {
-            let t = std::time::Instant::now();
-            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 5, size) else {
-                break;
-            };
-            let select = t.elapsed().as_secs_f64();
-            let t = std::time::Instant::now();
-            let Some(table) = PairSumTable::build(&kc, &fb) else {
-                break;
-            };
-            let build = t.elapsed().as_secs_f64();
-            let mut rng = StdRng::seed_from_u64(77);
-            let trials = 400;
-            let t = std::time::Instant::now();
-            let hits = (0..trials)
-                .filter(|_| {
-                    let target = fc.mul_u64(g, rng.gen_range(1..r));
-                    table.decompose_fast(target, 3).is_some()
-                })
-                .count();
-            let per_trial = t.elapsed().as_secs_f64() * 1000.0 / trials as f64;
-            let rate = hits.max(1) as f64 / trials as f64;
-            eprintln!(
-                "{:>7} {:>7} {:>9} {:>10.0} {:>9.1} {:>10.0} {:>11.3} {:>9.1}",
-                fb.points.len(),
-                fb.subspace.len(),
-                table.len(),
-                table.len() as f64 * 16.0 / 1e6,
-                select + build,
-                1.0 / rate,
-                per_trial,
-                per_trial / rate
-            );
-            size *= 2;
-        }
     }
 
     #[test]
@@ -6178,6 +6351,7 @@ mod tests {
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
         let opts = KoblitzIcOptions {
             m: 3,
+            descent_m: None,
             strategy: DecompositionStrategy::PairTable,
             max_trials: 200_000,
             ..KoblitzIcOptions::default()

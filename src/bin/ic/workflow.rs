@@ -266,6 +266,13 @@ pub struct WorkflowParams {
     pub curve: CurveParams,
     #[serde(default = "default_summands")]
     pub summands: u8,
+    /// Summands the descent asks for, when it should differ from
+    /// `summands`. Collection and descent share the base and its pair
+    /// table, not this: collection wants few probes because each costs
+    /// a scalar multiplication, the descent walks its probes and wants
+    /// cheap ones.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub descent_summands: Option<u8>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -310,11 +317,16 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if p.schema_version != 1 {
         return Err("unsupported workflow schema version".into());
     }
+    if let Some(d) = p.descent_summands {
+        if !(2..=4).contains(&d) {
+            return Err("descent_summands must be 2, 3 or 4".into());
+        }
+    }
     if p.summands < 2 || p.summands > 4 {
         return Err("summands must be 2, 3 or 4".into());
     }
-    if p.max_trials == 0 || p.max_trials > 1_000_000 {
-        return Err("max_trials must be 1..=1000000".into());
+    if p.max_trials == 0 || p.max_trials > 100_000_000 {
+        return Err("max_trials must be 1..=100000000".into());
     }
     experiment::field_degree(&p.curve.degree.to_string())?;
     if p.curve.subfield == 1 && p.curve.curve_a > 1 {
@@ -911,7 +923,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // ── Stage 2: collect (work units) ──────────────────────────────
     let t1 = Instant::now();
     let ic = experiment::with_linear_algebra(
-        experiment::ic_options(p.solver, p.summands, p.max_trials, p.seed),
+        experiment::ic_options_with_descent(
+            p.solver,
+            p.summands,
+            p.descent_summands,
+            p.max_trials,
+            p.seed,
+        ),
         p.linear_algebra.mode,
         p.linear_algebra.sparse,
     );
@@ -1444,7 +1462,8 @@ fn finish(
 ) -> Value {
     json!({"schema_version":1,"operation":"workflow","status":status,
         "evidence_scope":evidence_scope(p),
-        "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,"summands":p.summands,"solver":p.solver,
+        "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,
+        "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,

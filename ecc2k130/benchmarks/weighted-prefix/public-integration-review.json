@@ -1,0 +1,134 @@
+{
+  "valid": true,
+  "scope": "Bounded read-only public integration review at exact commit; no public GPU measurement.",
+  "repository": "/private/tmp/ecc2k-weighted-prefix-implementation-pr-20260912",
+  "head": "5d36f28ae9e6ee8d7bdf0f6d7387a88e1f33397e",
+  "base": "85b9c0b325c5423d64332f886e07d4366645d29c",
+  "changedFiles": {
+    "ecc2k130/Makefile": {
+      "sha256": "dac2f30a422383ee93b96205ba5a32802366b276e4a3558a322f7a7e13df8446",
+      "gitBlob": "17c5f8f81b61aaf8dfcab04b28dbb76cae554b2e"
+    },
+    "ecc2k130/WEIGHTED-PREFIX.md": {
+      "sha256": "c1102086db6ce61be07faebbb12c4a79739cff740c9aedf2b320162df927f492",
+      "gitBlob": "2a30fb6b3e0075924aca3cd80a9ee983edeceaf0"
+    },
+    "ecc2k130/codegen/gensigma.py": {
+      "sha256": "7e85e7a0b0ffe7eb2544e0aac9b5321e9f0f961d3304d8a6afce6d6aac651fce",
+      "gitBlob": "5b21b3031f386354e5bbdc1c1b4d072fa60526d3"
+    },
+    "ecc2k130/codegen/testdirectbuild.py": {
+      "sha256": "c71c955bbbf7c230e4e0c2a95cc9bf9d307d25be6f9ed4e96fe88de4987afba7",
+      "gitBlob": "35277cd8ce9e8f600026fdd267f66f61c59644b3"
+    },
+    "ecc2k130/codegen/testpackedauditreport.py": {
+      "sha256": "ffb18f53962493daec72623f3408b473b9f0ca3f5207833611481a194eaa87b0",
+      "gitBlob": "c24b2936b4053f9fcc0aff715ef034f98ee0cf50"
+    },
+    "ecc2k130/include/packed131.h": {
+      "sha256": "17ca3b08d05dd7458a9eefffe8992c2fe17a7e1e1f74e3660fb9ae64fb7a3bf3",
+      "gitBlob": "f738484174de734adec3c882a5f05fbb74d3affa"
+    },
+    "ecc2k130/include/packedengine.cuh": {
+      "sha256": "49bd45beff150a2f25689330ce9a17e9c00eae3418a30d14515b9e5921ec9297",
+      "gitBlob": "3d457f418a3cf5bb6710fb837ad3b18fac6c9862"
+    },
+    "ecc2k130/include/packedkernels.cuh": {
+      "sha256": "4b377843513b192e316ddc2f8b4d41adde4ac98d631e248b2e24921d6ecc56da",
+      "gitBlob": "285411532001a4da053a9b6556c8bae7c1827bd1"
+    },
+    "ecc2k130/include/packedsigma131.h": {
+      "sha256": "318567aa80945fc342265ca9e621f10f2da9b4efe4b48d4924576b197fdc9caa",
+      "gitBlob": "19b0bbd326365dac3a6d1ed5e1d5705fb39c0b5a"
+    },
+    "ecc2k130/modal_app.py": {
+      "sha256": "a91f7c19cc3ba84302996786d748178635ead33bb9e83c28b36d3a34cb2df61d",
+      "gitBlob": "3ed37fff6ce65848bfb48b6ec9c348593dec7276"
+    },
+    "ecc2k130/packed_audit.py": {
+      "sha256": "2d02f77273e1a3c2d958bce370c1df4f642b1724d2985110936cfab1141469d4",
+      "gitBlob": "38303016ca4554b47a29c8195e4dbb422d4ef68f"
+    },
+    "ecc2k130/src/testpackedcuda.cu": {
+      "sha256": "e5d09cd9260e92d5afc8b58328ed98e080b19e122f0a24323164497ef8124598",
+      "gitBlob": "74d5bce825b16f7e086bedad3e947d6d90f89238"
+    }
+  },
+  "workingTreeCleanAtFinalReadback": true,
+  "findings": [],
+  "coreReview": {
+    "path": "/private/tmp/ecc2k-weighted-public-core-review-20260912/review.json",
+    "sha256": "afb5a8d54ace7df7e9f3e022856c1edc3cede74b50c7c06af6d66c04ff9fd7b0",
+    "verdict": "No actionable findings. Five core/generator files and runtime test are exact frozen private copies; only Make default/define forwarding is new relative to the public base. The existing B16/385024 RTX preset is preserved."
+  },
+  "plumbingReview": [
+    "ECC_PACKED_WEIGHTED_PREFIX is a string enum0/1/2 with default0. Nonzero values require polynomial state/chains, denominator cache and paired products; mode2 additionally requires the walk-network bit. Existing parent guards run before the new guard.",
+    "Image environment and image Make command carry the selected mode. BAKED/buildFor/runBench reuse identities include the exact integer schedule, so switching modes cannot reuse the old baked binary.",
+    "Rebuild commands, benchmarkIdentity, benchmark/autotune/compile-check result metadata carry the selected schedule. Default bitsliced metadata uses None.",
+    "checkPackedReduction requires exactly one matching runtime weighted-prefix marker. Missing, duplicate, invalid or mismatched markers keep the sample invalid and force its rankable rate to zero.",
+    "packed_audit forwards the mode into the arithmetic Make target, checks exactly one matching arithmetic marker, and requires exactly one6240-pair PASS line before integration or any timing. Failures stop the audit path before benchmarking.",
+    "Benchmark and collection samples pass the same marker/count validator; expected and actual schedule values are retained as integers. Batch/worker/full scalar count gates remain intact.",
+    "The copied test calls the pair helper directly in mode2 and scalar sigma twice in modes0/1; both outputs, all basis directions and dense/edge pairs are checked. Sentinel and padding checks and all five existing suites are preserved.",
+    "Documentation keeps the mode default0 and describes host/compiler evidence without promoting a measured GPU gain."
+  ],
+  "hostTests": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "codegen",
+        "-p",
+        "testdirectbuild.py"
+      ],
+      "cwd": "/private/tmp/ecc2k-weighted-prefix-implementation-pr-20260912/ecc2k130",
+      "returncode": 0,
+      "testMethods": 33,
+      "logSha256": "645800e196d87bb288a4feadd8575416b398df3768a2b74028acf37fc59ef517",
+      "scope": "AST-isolated/mocked wrapper, image/cache/identity and report-gate tests; no Modal import/job, real client, CUDA compiler or GPU execution."
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "codegen",
+        "-p",
+        "testpackedauditreport.py"
+      ],
+      "cwd": "/private/tmp/ecc2k-weighted-prefix-implementation-pr-20260912/ecc2k130",
+      "returncode": 0,
+      "testMethods": 5,
+      "logSha256": "533131dad8973c589ae697ab1dd346cc55caa134cd1e536cedf26f1b057c0f1f",
+      "scope": "AST-isolated/mocked wrapper, image/cache/identity and report-gate tests; no Modal import/job, real client, CUDA compiler or GPU execution."
+    }
+  ],
+  "totalHostTestMethods": 38,
+  "initialInvocationIssue": {
+    "command": [
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "codegen.testdirectbuild",
+      "codegen.testpackedauditreport"
+    ],
+    "returncode": 1,
+    "logSha256": "48fc10d3c4a5ad664fbf60e6f8b0255a67480bf303f4d0ef3022024befbfcdc6",
+    "classification": "Review invocation setup error: the dotted module form lacked the codegen directory on the import path for benchreport. No test methods ran. The repository-style unittest discovery invocations above passed; no source change was needed."
+  },
+  "reviewScriptSha256": "1b34a17a08cb43d345e2705c9224a8a63e00a5c1cfa4cae96374171c98e97a90",
+  "limits": [
+    "No public command, compiler, GPU, numerical solver or live job/log/result was executed or read. Root owns the separate pending private GPU comparison.",
+    "The host tests use AST extraction and mocked image/build/process interactions. They validate control/identity gates, not deployed Modal behavior or CUDA execution.",
+    "Public source binding here is to the exact commit and frozen private core/test copies. The public full-client binary has not been independently compiled or measured by this review.",
+    "Public audit artifact coverage remains distinct from the stronger private matched panel; this review does not create corpus-content or post-binary evidence absent from a future command artifact.",
+    "The preserved B16 preset and default schedule0 are not a promotion of modes1/2. No throughput gain or15B achievement is established."
+  ]
+}

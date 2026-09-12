@@ -1,0 +1,65 @@
+{
+  "base": "dbb202bf8946f780ec2c0879f4f67233e5e1fc64",
+  "confirmed": {
+    "coreImplementation": "Preceding compact source and storage fixture remain byte-identical between dbb202b and1362a7e.",
+    "genericStorageCounts": "128cases and18584*batch records; B16 yields297344. Formula agrees with the unchanged fixture schedule.",
+    "imageAndCache": "Selected mode is copied into image env, baked identity, image build flags, rebuild flags, buildFor want and runBench no-rebuild identity.",
+    "metadata": "benchmarkIdentity, runBench, runAutotune and runCompileCheck carry packedCompactState.",
+    "modeValidation": "Only0/1 accepted; default0; mode1 requires TILE256 and polynomial/cache/chain parents. buildFor preserves the threads256 guard.",
+    "ranking": "checkPackedReduction rejects missing, wrong, invalid or duplicate compact markers, marks samples invalid and zeros their rates before summary/ranking.",
+    "storageGate": "Tiled mode0/1 run the actual storage fixture before integration/benchmark/collection; nonzero exits, malformed mode/batch markers, missing/duplicate PASS lines or incorrect case/record counts fail closed.",
+    "untiledCompatibility": "Untiled compact0 skips the tiled-only storage fixture, and its benchmark marker is still checked. Existing source always emits compact state0."
+  },
+  "fileSha256": {
+    "codegen/testdirectbuild.py": "8fde950cf0c65c82022c688e45ce7fa2d9d42aec9bdee79d817df244ce0ede51",
+    "codegen/testpackedauditreport.py": "c63d2f9231f02f9013982636e9df83521ba5256e7ff6eb93ffb1af2b42e4db18",
+    "modal_app.py": "8195c621d0279b751fa338d694264e7f5bf0afda661526cd860bfb02fd166057",
+    "packed_audit.py": "b1813ac81dadf22586f1f7227389691fda893d52b3f21b57aaa88c5e752dd9c7"
+  },
+  "findings": [
+    {
+      "detail": "runAudit currently admits every positive batch, calls buildFor, and runs the arithmetic phase before invoking test-packed-storage-cuda. The newly mandatory storage fixture has a compile-time1..64 batch contract, so this accepted request inevitably fails after avoidable client build/arithmetic work on the GPU allocation. The measured B16 preset is unaffected.",
+      "file": "ecc2k130/packed_audit.py",
+      "line": 68,
+      "priority": 2,
+      "recommendation": "Validate the tiled-audit batch range1..64 before buildFor, and give a specific error. Preserve positive batches for the untiled legacy path. Add boundary controls for1/64 and rejection before build/storage/timing for65.",
+      "title": "Reject unsupported tiled-audit batches before building",
+      "trigger": "PACKED_STATE_TILE=256 and batch>64, such as65."
+    },
+    {
+      "detail": "The fixture has a TILE256 baked binary with256 threads, but the runBench call omits threads and therefore uses its128-thread default. It raises the matching-baked-binary error even when the compact-state identity is unchanged, so the assertion would not catch losing the compact key from the no-rebuild comparison. The current production comparison does include the correct key.",
+      "file": "ecc2k130/codegen/testdirectbuild.py",
+      "line": 766,
+      "priority": 3,
+      "recommendation": "Pass threads=256 for this assertion and include a matching-mode success control at the same geometry before toggling compact mode.",
+      "title": "Isolate compact-mode mismatch in the no-rebuild test"
+    }
+  ],
+  "limits": [
+    "Review is bound to1362a7e, not later documentation/preset commits or mutable working-tree contents.",
+    "No new device performance or correctness result follows from this wrapper review. The previously validated14.403112/13.929753B/s comparison is separate and the15B/s target remains unmet.",
+    "Test execution success is owner-reported; test source and method counts were inspected without repeating the suite."
+  ],
+  "method": "Read immutable Git blobs and scoped diffs at1362a7e. Reviewed source/control flow and test coverage; no test suite repetition, CUDA/CPU compilation, remote job, source edit or PR action.",
+  "reviewCompleted": true,
+  "reviewedHead": "1362a7e772d4e4fb86fdfa8dc296cdb36a7888ba",
+  "scope": [
+    "modal_app.py",
+    "packed_audit.py",
+    "codegen/testdirectbuild.py",
+    "codegen/testpackedauditreport.py"
+  ],
+  "status": "two bounded changes recommended at reviewed commit",
+  "valid": false,
+  "validationEvidence": {
+    "ownerReported": "make check-cli passed38direct-wrapper,19report,7autotune and1polystate methods/checks plus generator/CLI checks.",
+    "relevantCoverage": "New tests cover0/1/env parents, image flag propagation, rebuild changes, invalid/duplicate ranking markers, storage identity/failure/counts and wrong compact modes during timing. Their successful storage batches are8/16/32; the1/64/65 fixture contract boundary is not covered.",
+    "reviewerRerun": false,
+    "staticallyCountedUnitTestMethods": {
+      "codegen/testdirectbuild.py": 38,
+      "codegen/testpackedauditreport.py": 5,
+      "codegen/testpolystateaudit.py": 1
+    }
+  },
+  "worktree": "/private/tmp/ecc2k-compact-state-implementation-pr-20260912"
+}

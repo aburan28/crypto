@@ -1,0 +1,155 @@
+{
+  "amortised_crossover": false,
+  "archive": {
+    "bytes": 1721932,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage35-algebraic-walk-evidence-34693802792.tar.gz",
+    "sha256": "51b7b4797bfa6c7e54acca7cf47d016a8fa08813d99087e861553cdcc4265583"
+  },
+  "artifact": {
+    "digest": "sha256:d67480bbb4f4ac7ee805fedff050df95eacb3456a487e4dc2a2a7c7b4a1e33af",
+    "expires_at": "2026-12-11T12:29:20Z",
+    "id": 10298541006,
+    "name": "koblitz-stage35-algebraic-walk-34693802792",
+    "size_in_bytes": 1768313
+  },
+  "build_seal_sha256": "841b127844245245af7d12d49c512feb3e07e8a443c04f26b227c923e4d19789",
+  "collection_summands": 3,
+  "comparison": {
+    "claim_boundary": "finite_post_precomputation_online_crossover_only",
+    "descent_seconds_total": 0.246046139,
+    "online_ratio_improvement_factor": 4.608396703584263,
+    "precompute_seconds": 14.300567224000002,
+    "rho_seconds_total": 0.504091212,
+    "stage33_online_ic_over_rho_wall_ratio": 2.2493512858487117,
+    "stage35_amortised_crossover": false,
+    "stage35_amortised_ic_over_rho_wall_ratio": 28.85710565214139,
+    "stage35_full_available_wall_over_same_targets_rho": 208.5295271781092,
+    "stage35_online_crossover": true,
+    "stage35_online_ic_over_rho_wall_ratio": 0.4880984495321851,
+    "stage35_whole_process_crossover": false
+  },
+  "descent_summands": 2,
+  "descent_trials": 2417575,
+  "factor_base": {
+    "algebraically_defined": true,
+    "selected": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "target_or_log_labels_used_for_selection": false,
+    "target_subgroup_enumerated": false
+  },
+  "factor_base_logs_known_by_construction": false,
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "relations": 39,
+  "remaining_blockers": [
+    "licensed Magma F4 has not executed the same 160-input packet",
+    "fresh build plus scientific wall remains more than 200 times the rho wall for these five targets",
+    "unaffiliated reproduction and source-pinned novelty review remain absent",
+    "the crossover changes a finite constant, not the asymptotic exponent"
+  ],
+  "resources": {
+    "build_outer_total_core_seconds": 293.008288,
+    "build_process_total_core_seconds": 268.513322,
+    "charged_sequential_wall_seconds_available": 105.117902093,
+    "charged_total_core_seconds_available": 308.81072,
+    "maximum_sampled_process_tree_rss_bytes": 1642135552,
+    "production_job_wall_seconds": 117.0,
+    "scientific_outer_core_seconds": 15.802432,
+    "scientific_process_core_seconds": 12.712212000000001,
+    "scientific_process_peak_rss_bytes": 303366144,
+    "scientific_process_wall_seconds": 15.770824553000011,
+    "scientific_single_core_elapsed_seconds": 15.831464483000005,
+    "workflow_wall_seconds": 165.0
+  },
+  "rho_iterations": 425616,
+  "run_seal_sha256": "8d5e56ab832b49ede3b636daa041789c24185aa871f3036ff8c58325215defbc",
+  "sat_conflict_semantics": "not applicable to the pair-table individual-log arm; Phase B retains SAT conflicts",
+  "sat_conflicts": null,
+  "schema": "koblitz_stage35_hosted_result.v1",
+  "source_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+  "status": "hosted_n41_algebraic_walk_verified",
+  "target_scalars_constructed_or_supplied": false,
+  "targets_verified": 5,
+  "verification": {
+    "charged_sequential_wall_seconds_available": 105.117902093,
+    "charged_total_core_seconds_available": 308.81072,
+    "descent_trials": 2417575,
+    "factor_base": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "full_available_wall_over_same_targets_rho": 208.5295271781092,
+    "full_cost_gate_passed": false,
+    "ic_over_rho_amortised_wall_ratio": 28.85710565214139,
+    "ic_over_rho_online_wall_ratio": 0.4880984495321851,
+    "independent_external_reproduction_satisfied": false,
+    "inventory_sha256": "bb3820e9e47e49ac877bb13b9ec757be4b4279033985afa07a1eac9870d8a1dd",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_complete": false,
+    "maximum_sampled_process_tree_rss_bytes": 1642135552,
+    "relations": 39,
+    "rho_iterations": 425616,
+    "rho_over_ic_amortised_wall_ratio": 0.034653510024689305,
+    "rho_over_ic_online_wall_ratio": 2.0487670078822084,
+    "sat_conflicts": null,
+    "schema": "koblitz_stage35_verification.v1",
+    "scientific_outer_core_seconds": 15.802432,
+    "single_core_elapsed_seconds": 15.831464483000005,
+    "source_commit": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+    "status": "n41_algebraic_walk_build_and_run_verified",
+    "targets_verified": 5
+  },
+  "walked_probe_cap": 100000000,
+  "whole_process_crossover": false,
+  "workflow": {
+    "head_sha": "11dc73b8f1aed58d0d6f29d1d95bbc6a156a1387",
+    "production_job_id": 103553770353,
+    "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34693802792/job/103553770353",
+    "production_job_wall_seconds": 117.0,
+    "run_id": 34693802792,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34693802792",
+    "workflow_wall_seconds": 165.0
+  }
+}

@@ -78,6 +78,7 @@ use std::collections::BTreeMap;
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::descent_algebraic::{early_defect, rank_profile, RankRow};
+use crate::cryptanalysis::descent_expansion::spearman;
 use crate::cryptanalysis::descent_lowgamma::{
     descend_on_subspace, is_decomposable_on_subspace, BasisFamily, FactorSubspace,
 };
@@ -1647,6 +1648,280 @@ pub fn collect_rho_matched_cells(
     out
 }
 
+// ── Presentation dose-response (EXP-R4d) ────────────────────────────
+
+/// One target measured under three presentations of the **same system at
+/// the same variable count**: the raw descended system, the system after a
+/// single saturation round, and the fully saturated system.
+///
+/// The three differ only in how many degree-3 falls have been folded into
+/// the generating set, so this is a *dose* axis for lever L4 with nothing
+/// cross-shape in it. That matters because R4′ established that `Δ_low`
+/// cannot compare instances across shapes; holding `vars` and the target
+/// fixed removes that objection entirely, leaving only the question R4
+/// actually asked — does the lever act *through* the defect?
+#[derive(Clone, Debug)]
+pub struct PresentationRow {
+    pub full_vars: u32,
+    /// Generator counts under the three presentations.
+    pub eqs: [u32; 3],
+    /// `Δ_low` under raw / one-round / saturated.
+    pub defect: [f64; 3],
+    /// `D*` under raw / one-round / saturated.
+    pub dstar: [u32; 3],
+}
+
+/// Labels for the three presentations, in the order they appear in
+/// [`PresentationRow`]'s arrays.
+pub const PRESENTATIONS: [&str; 3] = ["raw", "one-round", "saturated"];
+
+/// Measure `targets` non-decomposable targets under all three
+/// presentations at one `(family, n, n')` cell.
+///
+/// Returns one row per target for which every presentation refuted within
+/// `d_max`; a target that censors under any presentation is dropped
+/// entirely rather than contributing a partial row, so the three columns
+/// are always the same set of targets.
+#[allow(clippy::too_many_arguments)]
+pub fn run_presentation_cell(
+    family: BasisFamily,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    targets: u32,
+    d_max: u32,
+    rounds: u32,
+    seed: u64,
+) -> Vec<PresentationRow> {
+    let full_vars = 2 * n_sub;
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    let mut out = Vec::new();
+    let mut attempts = 0u32;
+    while (out.len() as u32) < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                match FactorSubspace::build(
+                    family,
+                    n,
+                    n_sub,
+                    irr,
+                    seed ^ (0x9E37 + attempts as u64),
+                ) {
+                    Some(v) => v,
+                    None => return out,
+                }
+            }
+            _ => match FactorSubspace::build(family, n, n_sub, irr, 0) {
+                Some(v) => v,
+                None => return out,
+            },
+        };
+        let b = rand_nz(n, &mut next);
+        let x3 = rand_nz(n, &mut next);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+        let raw = descend_on_subspace(n, &v, irr, &b, &x3);
+        // One round, then saturation. `saturate_with_falls` with
+        // `rounds = 1` is exactly the first round of the full run, so the
+        // dose axis is nested by construction.
+        let (one, _) = saturate_with_falls(&raw, full_vars, 1);
+        let (sat, _) = saturate_with_falls(&raw, full_vars, rounds);
+
+        let mut dstar = [0u32; 3];
+        let mut defect = [0.0f64; 3];
+        let mut eqs = [0u32; 3];
+        let mut ok = true;
+        for (i, sys) in [&raw, &one, &sat].into_iter().enumerate() {
+            let ne = sys.len() as u32;
+            let Some(d) = refutation_scan(sys, full_vars, d_max).1 else {
+                ok = false;
+                break;
+            };
+            let profile = rank_profile(sys, full_vars, ne, 3.min(d_max));
+            eqs[i] = ne;
+            dstar[i] = d;
+            defect[i] = early_defect(&profile, 3);
+        }
+        if !ok {
+            continue;
+        }
+        out.push(PresentationRow {
+            full_vars,
+            eqs,
+            defect,
+            dstar,
+        });
+    }
+    out
+}
+
+// ── Size-controlled correlation (EXP-R4b) ───────────────────────────
+
+/// One `(block, x, y)` observation for a blocked correlation.
+///
+/// `block` is the nuisance stratum to hold fixed — for the FFD program's
+/// curve that is the operating point `(n, n')`, which fixes the variable
+/// count and hence the system's size.
+#[derive(Clone, Debug)]
+pub struct BlockedObs {
+    /// Stratum label. Observations sharing a label are compared only
+    /// against each other by the three controlled statistics.
+    pub block: String,
+    /// Predictor (here: the early Hilbert-function defect `Δ_low`).
+    pub x: f64,
+    /// Response (here: the measured solving degree `D*`).
+    pub y: f64,
+}
+
+/// A pooled correlation next to three size-controlled counterparts.
+///
+/// The point of computing four numbers rather than one is that a pooled
+/// correlation across strata of different size cannot distinguish "the
+/// predictor tracks the response" from "both track the stratum". The three
+/// controlled statistics each remove the stratum in a different way, so
+/// agreement between them is evidence the relation is real and disagreement
+/// localises which part of the pooled figure was the nuisance variable:
+///
+/// * `mean_per_block` — correlate inside each stratum, then average. Gives
+///   every stratum equal weight regardless of how many cells it holds, and
+///   is the most direct reading of "does it hold at fixed size?".
+/// * `blocked_rank` — rank within each stratum, rescale to a common mean
+///   of 1/2, pool the ranks, correlate once. Uses all cells in a single
+///   statistic, so small strata do not dominate. The rescaling is what
+///   makes unequal strata rank-comparable: raw 1-based ranks have mean
+///   `(n_g+1)/2`, and pooling them would add a between-block term
+///   `Σ n_g (μ_g−μ)²` that is a function of the block size this
+///   statistic exists to remove.
+/// * `fixed_effects` — subtract each stratum's mean from its members and
+///   correlate the residuals. Works on raw values rather than ranks, so it
+///   is sensitive to magnitude as well as order.
+#[derive(Clone, Debug)]
+pub struct SizeControl {
+    /// Total observations.
+    pub n_cells: usize,
+    /// Distinct strata.
+    pub n_blocks: usize,
+    /// Spearman `ρ_s` over all cells at once — the uncontrolled figure.
+    pub pooled: Option<f64>,
+    /// Mean of the per-stratum Spearman `ρ_s`, over strata where it is
+    /// defined.
+    pub mean_per_block: Option<f64>,
+    /// Pearson `r` of within-stratum ranks, rescaled to mean 1/2 and pooled.
+    pub blocked_rank: Option<f64>,
+    /// Pearson `r` of within-stratum demeaned residuals.
+    pub fixed_effects: Option<f64>,
+    /// Per-stratum `(label, cells, ρ_s)`, sorted by label.
+    pub per_block: Vec<(String, usize, Option<f64>)>,
+}
+
+/// 1-based ranks with ties averaged — the ranking [`spearman`] uses,
+/// exposed here because the blocked statistic ranks *within* a stratum.
+fn rank_within(v: &[f64]) -> Vec<f64> {
+    let n = v.len();
+    let mut idx: Vec<usize> = (0..n).collect();
+    idx.sort_by(|&a, &b| v[a].partial_cmp(&v[b]).unwrap_or(std::cmp::Ordering::Equal));
+    let mut r = vec![0.0; n];
+    let mut i = 0;
+    while i < n {
+        let mut j = i;
+        while j + 1 < n && (v[idx[j + 1]] - v[idx[i]]).abs() < 1e-12 {
+            j += 1;
+        }
+        let avg = (i + j) as f64 / 2.0 + 1.0;
+        for k in i..=j {
+            r[idx[k]] = avg;
+        }
+        i = j + 1;
+    }
+    r
+}
+
+/// Compute the pooled correlation and its three size-controlled
+/// counterparts over `obs`.
+///
+/// Strata with fewer than 3 observations contribute `None` to
+/// `per_block` (and so are skipped by `mean_per_block`) but still
+/// contribute their ranks and residuals to the two pooled-controlled
+/// statistics, where they are harmless.
+pub fn size_control(obs: &[BlockedObs]) -> SizeControl {
+    let pooled = spearman(
+        &obs.iter().map(|o| o.x).collect::<Vec<_>>(),
+        &obs.iter().map(|o| o.y).collect::<Vec<_>>(),
+    );
+    let mut blocks: BTreeMap<&str, Vec<&BlockedObs>> = BTreeMap::new();
+    for o in obs {
+        blocks.entry(o.block.as_str()).or_default().push(o);
+    }
+    let mut per_block = Vec::new();
+    let (mut brx, mut bry) = (Vec::new(), Vec::new());
+    let (mut fex, mut fey) = (Vec::new(), Vec::new());
+    for (label, rows) in &blocks {
+        let xs: Vec<f64> = rows.iter().map(|o| o.x).collect();
+        let ys: Vec<f64> = rows.iter().map(|o| o.y).collect();
+        per_block.push((label.to_string(), rows.len(), spearman(&xs, &ys)));
+        // Scale by n_g+1 so every stratum has rank mean 1/2. Without this,
+        // unequal blocks inject Σ n_g (μ_g−μ)² into the pooled Pearson —
+        // a non-negative function of block size that attenuates a negative
+        // within-stratum law.
+        let scale = rows.len() as f64 + 1.0;
+        brx.extend(rank_within(&xs).into_iter().map(|r| r / scale));
+        bry.extend(rank_within(&ys).into_iter().map(|r| r / scale));
+        let mx = xs.iter().sum::<f64>() / xs.len() as f64;
+        let my = ys.iter().sum::<f64>() / ys.len() as f64;
+        fex.extend(xs.iter().map(|a| a - mx));
+        fey.extend(ys.iter().map(|b| b - my));
+    }
+    let defined: Vec<f64> = per_block.iter().filter_map(|(_, _, r)| *r).collect();
+    SizeControl {
+        n_cells: obs.len(),
+        n_blocks: blocks.len(),
+        pooled,
+        mean_per_block: if defined.is_empty() {
+            None
+        } else {
+            Some(defined.iter().sum::<f64>() / defined.len() as f64)
+        },
+        blocked_rank: pearson_corr(&brx, &bry),
+        fixed_effects: pearson_corr(&fex, &fey),
+        per_block,
+    }
+}
+
+/// Pearson `r`. `None` for fewer than 3 pairs or zero variance on either
+/// side — the latter matters here because a stratum where every `D*` is
+/// equal contributes an all-zero residual column.
+fn pearson_corr(x: &[f64], y: &[f64]) -> Option<f64> {
+    let n = x.len();
+    if n < 3 || y.len() != n {
+        return None;
+    }
+    let mx = x.iter().sum::<f64>() / n as f64;
+    let my = y.iter().sum::<f64>() / n as f64;
+    let sxy: f64 = x.iter().zip(y).map(|(a, b)| (a - mx) * (b - my)).sum();
+    let sxx: f64 = x.iter().map(|a| (a - mx).powi(2)).sum();
+    let syy: f64 = y.iter().map(|b| (b - my).powi(2)).sum();
+    if sxx <= 0.0 || syy <= 0.0 {
+        return None;
+    }
+    Some(sxy / (sxx * syy).sqrt())
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -2398,5 +2673,288 @@ mod tests {
             last <= first + 1e-9,
             "mean D* rose under slicing: {first} → {last}"
         );
+    }
+
+    // ── Presentation dose-response (EXP-R4d) ────────────────────────
+
+    /// The mechanical fact EXP-R4d turns on, and the reason `Δ_low` cannot
+    /// score a lever's *output*: the cutoff-3 defect **is** the space of
+    /// degree-3 falls, and saturation adds precisely those as generators.
+    /// So a saturated system has no degree-3 defect left — the lever's
+    /// action is to consume the quantity a screen would measure.
+    ///
+    /// Asserted on a real descended system rather than a constructed one,
+    /// because the claim is about what `saturate_with_falls` does to
+    /// `early_defect`, not about arithmetic.
+    #[test]
+    fn saturation_consumes_the_early_defect() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Coordinate, 10, 5, &irr, 4, 6, 6, 7);
+        assert!(!rows.is_empty(), "need at least one measurable target");
+        for r in &rows {
+            assert_eq!(
+                r.defect[2], 0.0,
+                "saturated presentation must have zero cutoff-3 defect, got {}",
+                r.defect[2]
+            );
+            assert!(
+                r.eqs[0] < r.eqs[2],
+                "saturation must add generators: {} -> {}",
+                r.eqs[0],
+                r.eqs[2]
+            );
+        }
+        // At least one target must have had something to consume, or the
+        // test is vacuous.
+        assert!(
+            rows.iter().any(|r| r.defect[0] > 0.0),
+            "no target had a raw defect — the assertion above proves nothing"
+        );
+    }
+
+    /// The dose axis is nested: one round is a prefix of full saturation,
+    /// so generator counts must be monotone and `D*` must never rise
+    /// (adding ideal elements cannot make a system harder).
+    #[test]
+    fn presentation_dose_axis_is_monotone() {
+        let irr = choose_irreducible(10);
+        let rows = run_presentation_cell(BasisFamily::Random, 10, 5, &irr, 4, 6, 6, 11);
+        assert!(!rows.is_empty());
+        for r in &rows {
+            assert!(
+                r.eqs[0] <= r.eqs[1] && r.eqs[1] <= r.eqs[2],
+                "generator counts must be nested: {:?}",
+                r.eqs
+            );
+            assert!(
+                r.dstar[0] >= r.dstar[1] && r.dstar[1] >= r.dstar[2],
+                "D* must not rise along the dose axis: {:?}",
+                r.dstar
+            );
+        }
+    }
+
+    // ── Size-controlled correlation (EXP-R4b) ───────────────────────
+
+    fn obs(rows: &[(&str, f64, f64)]) -> Vec<BlockedObs> {
+        rows.iter()
+            .map(|&(b, x, y)| BlockedObs {
+                block: b.to_string(),
+                x,
+                y,
+            })
+            .collect()
+    }
+
+    /// The construction EXP-R4b exists to detect: inside every stratum the
+    /// predictor is *uncorrelated* with the response, but both rise with the
+    /// stratum index. A pooled correlation reads that as a strong positive
+    /// relation; all three controlled statistics must report nothing.
+    #[test]
+    fn pure_size_proxy_is_caught() {
+        let mut rows = Vec::new();
+        for (b, base) in [("s1", 0.0), ("s2", 100.0), ("s3", 200.0)] {
+            // Within a block, y's ranking of x is the permutation
+            // (2,4,1,3), whose rank displacements square-sum to 10 — exactly
+            // the value that makes Spearman zero at n = 4. So the within-
+            // block relation is *nil* by construction, while `base` makes
+            // both columns climb together across blocks. That is the size-
+            // proxy shape: all of the pooled signal is the stratum.
+            for (dx, dy) in [(0.0, 1.0), (1.0, 3.0), (2.0, 0.0), (3.0, 2.0)] {
+                rows.push((b, base + dx, base + dy));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        assert_eq!(c.n_cells, 12);
+        assert_eq!(c.n_blocks, 3);
+        let pooled = c.pooled.expect("pooled defined");
+        assert!(pooled > 0.85, "pooled must see the stratum trend: {pooled}");
+        for (name, v) in [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ] {
+            let v = v.expect("controlled statistic defined");
+            assert!(
+                v.abs() < 1e-9,
+                "{name} must not inherit the stratum trend: {v}"
+            );
+        }
+    }
+
+    /// The converse: a relation that holds identically inside every stratum
+    /// must survive all three controls, even when the strata are offset from
+    /// each other so the pooled figure is diluted.
+    #[test]
+    fn within_block_relation_survives_control() {
+        let mut rows = Vec::new();
+        for (b, off) in [("s1", 0.0), ("s2", 5.0), ("s3", 10.0)] {
+            for i in 0..5 {
+                let x = i as f64;
+                rows.push((b, off + x, off - 2.0 * x));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        for (name, v) in [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ] {
+            let v = v.expect("controlled statistic defined");
+            assert!(v < -0.99, "{name} must recover the exact relation: {v}");
+        }
+    }
+
+    /// Raw 1-based ranks have mean `(n_g+1)/2`. Pooling them across
+    /// unequal strata injects a between-block term `Σ n_g (μ_g−μ)²` that
+    /// is a function of block size — the nuisance this statistic exists
+    /// to remove — and that term is non-negative, so it attenuates a
+    /// negative within-stratum law. The tests above cannot catch this:
+    /// they use equal-sized blocks, where the extra term is zero.
+    #[test]
+    fn blocked_rank_does_not_mix_unequal_stratum_sizes() {
+        // Perfect negative relation, sizes 3 and 9. Unscaled ranks give
+        // Pearson ≈ −0.51; after rescaling it must recover −1.
+        let mut rows = Vec::new();
+        for i in 0..3 {
+            rows.push(("small", i as f64, -(i as f64)));
+        }
+        for i in 0..9 {
+            rows.push(("large", i as f64, -(i as f64)));
+        }
+        let c = size_control(&obs(&rows));
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br < -0.99,
+            "unequal strata must not attenuate a within-stratum law: {br}"
+        );
+
+        // The other direction: within-stratum Spearman is exactly zero
+        // at n = 4 (permutation (2,4,1,3), Σd² = 10) and at n = 8
+        // (permutation (7,1,5,3,6,4,8,2), Σd² = 84). Unscaled ranks
+        // would report a positive blocked_rank from the mean gap alone.
+        let rows = obs(&[
+            ("n4", 0.0, 1.0),
+            ("n4", 1.0, 3.0),
+            ("n4", 2.0, 0.0),
+            ("n4", 3.0, 2.0),
+            ("n8", 0.0, 7.0),
+            ("n8", 1.0, 1.0),
+            ("n8", 2.0, 5.0),
+            ("n8", 3.0, 3.0),
+            ("n8", 4.0, 6.0),
+            ("n8", 5.0, 4.0),
+            ("n8", 6.0, 8.0),
+            ("n8", 7.0, 2.0),
+        ]);
+        let c = size_control(&rows);
+        let br = c.blocked_rank.expect("defined");
+        assert!(
+            br.abs() < 1e-9,
+            "unequal zero-within blocks must not inherit a size term: {br}"
+        );
+    }
+
+    /// Strata are held to equal weight by `mean_per_block` whatever their
+    /// size, which is the reason to report it alongside the two pooled
+    /// controls rather than instead of them.
+    #[test]
+    fn per_block_is_reported_and_sorted() {
+        let rows = obs(&[
+            ("b", 1.0, 1.0),
+            ("b", 2.0, 2.0),
+            ("b", 3.0, 3.0),
+            ("a", 1.0, 3.0),
+            ("a", 2.0, 2.0),
+            ("a", 3.0, 1.0),
+        ]);
+        let c = size_control(&rows);
+        let labels: Vec<&str> = c.per_block.iter().map(|(l, _, _)| l.as_str()).collect();
+        assert_eq!(labels, vec!["a", "b"], "per-block output is sorted");
+        assert_eq!(c.per_block[0].2, Some(-1.0));
+        assert_eq!(c.per_block[1].2, Some(1.0));
+        // They cancel exactly, so the mean is 0 even though each block is
+        // perfectly correlated. Averaging correlations is not averaging data.
+        let m = c.mean_per_block.expect("defined");
+        assert!(m.abs() < 1e-12, "opposing blocks cancel: {m}");
+    }
+
+    /// A stratum with no variance in the response contributes no
+    /// correlation, and must not be silently scored as zero.
+    #[test]
+    fn degenerate_block_is_skipped_not_zeroed() {
+        let rows = obs(&[
+            ("flat", 1.0, 4.0),
+            ("flat", 2.0, 4.0),
+            ("flat", 3.0, 4.0),
+            ("live", 1.0, 3.0),
+            ("live", 2.0, 2.0),
+            ("live", 3.0, 1.0),
+        ]);
+        let c = size_control(&rows);
+        assert_eq!(c.per_block[0].2, None, "flat block has no rho_s");
+        assert_eq!(c.per_block[1].2, Some(-1.0));
+        let m = c.mean_per_block.expect("defined from the live block alone");
+        assert!(
+            (m + 1.0).abs() < 1e-12,
+            "a skipped block must not be averaged in as 0: {m}"
+        );
+    }
+
+    /// The three controlled statistics exist so that **agreement between
+    /// them** is the evidence. That only works if they agree when they
+    /// should — and the `blocked_rank` bias fixed in `e16b67c` was
+    /// invisible to every test here because all of them used equal-sized
+    /// blocks, where the bias term is identically zero.
+    ///
+    /// So: unequal strata (2, 5, 11) carrying the *same* within-stratum
+    /// relation, offset from each other so the pooled figure is diluted.
+    /// All three controlled statistics must land on it together. A bias
+    /// that is a function of block size splits them apart, which is what
+    /// should have been read off the `−0.3494 / −0.1189 / −0.3248` triple
+    /// rather than published.
+    #[test]
+    fn controlled_statistics_agree_under_unequal_strata() {
+        let mut rows = Vec::new();
+        for (label, n, off) in [("a", 2, 0.0), ("b", 5, 40.0), ("c", 11, 80.0)] {
+            for i in 0..n {
+                let x = i as f64;
+                rows.push((label, off + x, off - 3.0 * x));
+            }
+        }
+        let c = size_control(&obs(&rows));
+        assert_eq!(c.n_cells, 18);
+        assert_eq!(c.n_blocks, 3);
+        let vals = [
+            ("mean_per_block", c.mean_per_block),
+            ("blocked_rank", c.blocked_rank),
+            ("fixed_effects", c.fixed_effects),
+        ];
+        for (name, v) in vals {
+            let v = v.expect("defined");
+            assert!(
+                v < -0.99,
+                "{name} must recover the within-stratum law under unequal sizes: {v}"
+            );
+        }
+        let spread = vals
+            .iter()
+            .filter_map(|(_, v)| *v)
+            .fold((f64::MAX, f64::MIN), |(lo, hi), v| (lo.min(v), hi.max(v)));
+        assert!(
+            spread.1 - spread.0 < 1e-6,
+            "the three must agree, not merely all be negative: {spread:?}"
+        );
+    }
+
+    /// Too few observations to say anything: every statistic reports `None`
+    /// rather than a number manufactured from 2 points.
+    #[test]
+    fn undersized_input_reports_nothing() {
+        let c = size_control(&obs(&[("a", 1.0, 2.0), ("a", 2.0, 1.0)]));
+        assert_eq!(c.pooled, None);
+        assert_eq!(c.mean_per_block, None);
+        assert_eq!(c.blocked_rank, None);
+        assert_eq!(c.fixed_effects, None);
     }
 }

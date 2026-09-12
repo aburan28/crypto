@@ -1225,3 +1225,47 @@ table, so `PairSumTable::build` now refuses past a stated byte budget
 (4 GiB by default, about 16000 points) instead of attempting an
 allocation the machine cannot meet — a base one doubling too large now
 fails with a number rather than an OOM.
+
+### Collection and the descent need not agree on `m`
+
+They share the factor base and its pair table. They do not share the
+number of summands, and they should not: the two have different cost
+shapes.
+
+```text
+    three summands:  3!·r/|F|³ probes  ×  |F| lookups each
+    two summands:    2r/|F|²   probes  ×  1 lookup each
+```
+
+Collection wants **few** probes, because each one costs two scalar
+multiplications to build — so it takes three summands and does a long
+scan per probe. The descent can make a probe nearly free: a probe is any
+`[a]G + [b]Q`, so step one by `+G` instead of drawing a new pair, and
+step 64 of them together so a single field inversion serves the lot.
+Once a probe costs less than the lookup after it, two summands win.
+
+The walks have to start a stride apart on the same line rather than from
+64 independent draws — 3 scalar multiplications and 63 additions instead
+of 128 scalar multiplications. On a walk of only a few hundred rounds
+that setup was most of the descent: it cost 9.4 ms a target before the
+change and 4.65 ms after.
+
+Measured at `n = 41`, collection at three summands throughout:
+
+| base | descent `m` | ms/target | probes/target | charged ρ/IC |
+|------|-------------|-----------|---------------|--------------|
+| 5248 | 3 | 14.35 | 21 | 8.3 |
+| 5248 | **2** | **8.63** | 43529 | **13.6** |
+| 10496 | 3 | 7.20 | 2 | 16.5 |
+| 10496 | **2** | **4.65** | 9427 | **24.8** |
+
+All 32 targets solved in every configuration. `descent_summands` in a
+workflow parameter file selects it; it defaults to `summands`.
+
+A floor is now visible underneath: a solved target ends with one
+`[d]G = Q` check in the general arithmetic, which costs 1.16 ms at this
+degree against 0.025 ms in the single-word representation. It stays in
+the general arithmetic on purpose — a check that shares no code with the
+arithmetic that did the search is worth more than the milliseconds — and
+ρ pays the same on its own candidate. At 8.6 ms a target it is 13% of
+the descent, and at the wide base a quarter of it.
