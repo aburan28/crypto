@@ -18,6 +18,7 @@ import os
 import platform
 import resource
 import shutil
+import statistics
 import subprocess
 import sys
 import time
@@ -412,9 +413,30 @@ def build_producers() -> dict[str, str]:
     return binaries
 
 
-def run_timed(command: list[str], *, env: dict[str, str], cwd: Path) -> dict[str, Any]:
-    started = time.perf_counter()
+RESOURCE_RECEIPT_FIELDS = (
+    "exit_code",
+    "whole_process_wall_ms",
+    "whole_process_wall_samples_ms",
+    "cold_start_wall_ms",
+    "timed_repeats",
+    "stdout_stable",
+    "children_cpu_user_ms",
+    "children_cpu_system_ms",
+    "command",
+    "seed",
+)
+
+DEFAULT_TIMED_REPEATS = 3
+# Past this, further repeats cost more than the spread they resolve, so stop
+# after the first timed execution.
+REPEAT_BUDGET_MS = 20_000.0
+
+
+def _run_once(
+    command: list[str], *, env: dict[str, str], cwd: Path
+) -> tuple[subprocess.CompletedProcess[str], float, float, float]:
     usage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
+    started = time.perf_counter()
     completed = subprocess.run(
         command,
         cwd=cwd,
@@ -427,12 +449,79 @@ def run_timed(command: list[str], *, env: dict[str, str], cwd: Path) -> dict[str
     # Children CPU deltas (seconds -> ms). Wall is the outer process wait.
     cpu_user_ms = (usage_after.ru_utime - usage_before.ru_utime) * 1000.0
     cpu_system_ms = (usage_after.ru_stime - usage_before.ru_stime) * 1000.0
+    return completed, elapsed_ms, cpu_user_ms, cpu_system_ms
+
+
+def _timing_free(text: str) -> str:
+    """Producer stdout with its own timing fields dropped.
+
+    Every row carries measured durations, so raw stdout never repeats exactly.
+    What should repeat is the computation: base hash, rank, status, solution.
+    """
+    rows = []
+    for row in parse_json_lines(text):
+        rows.append(
+            {
+                k: v
+                for k, v in row.items()
+                if not k.endswith("_ms") and k != "timing_breakdown_ms"
+            }
+        )
+    return json.dumps(rows, sort_keys=True)
+
+
+def run_timed(
+    command: list[str],
+    *,
+    env: dict[str, str],
+    cwd: Path,
+    repeats: int = DEFAULT_TIMED_REPEATS,
+) -> dict[str, Any]:
+    """Time a producer without charging it for first-execution cost.
+
+    The first execution of a freshly linked binary pays page-in and, on macOS,
+    signature validation: measured here at 183-484 ms against 7 ms warm, which
+    is 30x the whole n=13 comparison and larger than either arm at n=37. Timing
+    a single run therefore adds a roughly constant per-process term to both
+    arms, which drags every ratio toward parity and flatters whichever arm is
+    slower.
+
+    The warmup runs the binary with no arguments, which both producers reject
+    immediately. That still pays the whole load cost -- after it the real run
+    drops from 190 ms to 7.7 ms -- so a rung that takes a quarter of an hour is
+    not run twice to save 200 ms.
+
+    The producers take their seed in argv and are deterministic, so repeats are
+    the same computation; `stdout_stable` records whether that held, comparing
+    the rows with their own timing fields dropped.
+    """
+    require(repeats >= 1, f"repeats must be >= 1, got {repeats}")
+    _, cold_wall_ms, _, _ = _run_once([command[0]], env=env, cwd=cwd)
+
+    walls: list[float] = []
+    users: list[float] = []
+    systems: list[float] = []
+    outputs: list[str] = []
+    completed: subprocess.CompletedProcess[str] | None = None
+    for _ in range(repeats):
+        completed, wall_ms, user_ms, system_ms = _run_once(command, env=env, cwd=cwd)
+        walls.append(wall_ms)
+        users.append(user_ms)
+        systems.append(system_ms)
+        outputs.append(_timing_free(completed.stdout))
+        if completed.returncode != 0 or wall_ms > REPEAT_BUDGET_MS:
+            break
+
     return {
         "command": command,
         "exit_code": completed.returncode,
-        "whole_process_wall_ms": elapsed_ms,
-        "children_cpu_user_ms": cpu_user_ms,
-        "children_cpu_system_ms": cpu_system_ms,
+        "whole_process_wall_ms": statistics.median(walls),
+        "whole_process_wall_samples_ms": walls,
+        "cold_start_wall_ms": cold_wall_ms,
+        "timed_repeats": len(walls),
+        "stdout_stable": len(set(outputs)) <= 1,
+        "children_cpu_user_ms": statistics.median(users),
+        "children_cpu_system_ms": statistics.median(systems),
         "stdout": completed.stdout,
         "stderr": completed.stderr,
     }
@@ -581,6 +670,28 @@ def draft_vs_rho_claim(
             "direct": direct_obs["whole_process_wall_ms"],
             "rho": rho_obs["whole_process_wall_ms"],
         },
+        "whole_process_wall_method": {
+            "description": (
+                "median of timed executions after one discarded warmup; "
+                "first-execution cost is reported separately and not charged"
+            ),
+            "cold_start_wall_ms": {
+                "direct": direct_obs.get("cold_start_wall_ms"),
+                "rho": rho_obs.get("cold_start_wall_ms"),
+            },
+            "samples_ms": {
+                "direct": direct_obs.get("whole_process_wall_samples_ms"),
+                "rho": rho_obs.get("whole_process_wall_samples_ms"),
+            },
+            "timed_repeats": {
+                "direct": direct_obs.get("timed_repeats"),
+                "rho": rho_obs.get("timed_repeats"),
+            },
+            "stdout_stable": {
+                "direct": direct_obs.get("stdout_stable"),
+                "rho": rho_obs.get("stdout_stable"),
+            },
+        },
         "direct_rows": len(direct_rows),
         "rho_rows": len(rho_rows),
     }
@@ -597,6 +708,8 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     if fixtures is None:
         fixtures = int(beat.get("fixtures", beat.get("fixtures_default", 1)))
     require(fixtures > 0, "fixtures must be positive")
+    repeats = getattr(arguments, "repeats", None) or DEFAULT_TIMED_REPEATS
+    require(repeats > 0, "repeats must be positive")
 
     with RunnerLock():
         preflight_receipt = preflight(protocol, ledger)
@@ -681,42 +794,22 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             {"direct": direct_cmd, "rho": rho_cmd, "fixtures": fixtures},
         )
 
-        direct_obs = run_timed(direct_cmd, env=env, cwd=REPO)
+        direct_obs = run_timed(direct_cmd, env=env, cwd=REPO, repeats=repeats)
         direct_obs["seed"] = direct_seed
         (run / "logs/direct.stdout.jsonl").write_text(direct_obs["stdout"])
         (run / "logs/direct.stderr.txt").write_text(direct_obs["stderr"])
         write_json(
             run / "receipts/direct.resource.json",
-            {
-                k: direct_obs[k]
-                for k in (
-                    "exit_code",
-                    "whole_process_wall_ms",
-                    "children_cpu_user_ms",
-                    "children_cpu_system_ms",
-                    "command",
-                    "seed",
-                )
-            },
+            {k: direct_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
         )
 
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO)
+        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO, repeats=repeats)
         rho_obs["seed"] = rho_seed
         (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
         (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
         write_json(
             run / "receipts/rho.resource.json",
-            {
-                k: rho_obs[k]
-                for k in (
-                    "exit_code",
-                    "whole_process_wall_ms",
-                    "children_cpu_user_ms",
-                    "children_cpu_system_ms",
-                    "command",
-                    "seed",
-                )
-            },
+            {k: rho_obs[k] for k in RESOURCE_RECEIPT_FIELDS},
         )
 
         claim = draft_vs_rho_claim(
@@ -880,6 +973,15 @@ def parser() -> argparse.ArgumentParser:
         "--fixtures",
         type=int,
         help="Override fixture count (default from beat; use 1024 for full n37/n41)",
+    )
+    launch_parser.add_argument(
+        "--repeats",
+        type=int,
+        help=(
+            "Timed executions per arm after a discarded warmup exec "
+            f"(default {DEFAULT_TIMED_REPEATS}; stops early once a run "
+            f"exceeds {int(REPEAT_BUDGET_MS / 1000)}s)"
+        ),
     )
     launch_parser.add_argument(
         "--prepare-only",
