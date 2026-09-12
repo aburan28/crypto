@@ -53,12 +53,22 @@ package gf131_pkg is
   -- ECC2K-130 distinguished-point cutoff (ecc2k130/generated/eccF131.h)
   constant DP_WEIGHT_DEFAULT : natural := 34;
 
-  -- Multiplier pipeline: one input latch, one basis-conversion stage,
-  -- MUL_ROWS operand-scanning rows of MUL_DIGIT bits each, one
-  -- back-conversion stage.
-  constant MUL_DIGIT   : natural := 17;
-  constant MUL_ROWS    : natural := (M + MUL_DIGIT - 1) / MUL_DIGIT;  -- 8
-  constant MUL_LATENCY : natural := MUL_ROWS + 3;                     -- 11
+  -- Multiplier pipeline: one input latch, one basis-conversion stage, a
+  -- Karatsuba tree of MUL_KARATSUBA levels (each one pre-add stage and one
+  -- post-combine stage around its three halves) with a one-stage schoolbook
+  -- leaf, and one back-conversion stage.  Two levels give a 33-bit leaf.
+  constant MUL_KARATSUBA : natural := 2;
+  constant MUL_LATENCY   : natural := 2 * MUL_KARATSUBA + 4;          -- 8
+
+  -- A point whose x has weight 1 sits on no walk but has d = x + sigma^3(x)
+  -- = gamma_1 + gamma_8 /= 0, so it can pad a batch without zeroing the
+  -- product tree.  Padded leaves never produce output.
+  constant DUMMY_X : gf_t := (0 => '1', others => '0');
+
+  -- Weight in two clocks: 22 groups of 6 bits (one LUT6 per output bit),
+  -- then the sum.
+  constant HW_GROUPS : natural := (M + 5) / 6;
+  type hw_parts_t is array (0 to HW_GROUPS - 1) of unsigned(2 downto 0);
 
   function fold (e : integer) return natural;
 
@@ -68,10 +78,15 @@ package gf131_pkg is
   -- sigma^(3+s), s in 0..7, as sigma^3 then conditional sigma^1,2,4
   function gf_sigma_j (a : gf_t; s : std_logic_vector(2 downto 0)) return gf_t;
   function gf_weight  (a : gf_t) return hw_t;
+  function gf_weight_parts (a : gf_t) return hw_parts_t;
+  function hw_sum (p : hw_parts_t) return hw_t;
 
   -- the multiplier's two constant linear maps
   function gf_prep   (a : gf_t)    return poly_t;
   function gf_to_onb (h : dpoly_t) return gf_t;
+
+  -- schoolbook product over GF(2)[c], any width: 2n-1 bits from two n-bit
+  function gf2_polymul (a, b : std_logic_vector) return std_logic_vector;
 
   -- independent oracle: direct product in the normal basis, O(m^2) loop
   function gf_mul_ref (a, b : gf_t) return gf_t;
@@ -128,6 +143,48 @@ package body gf131_pkg is
       end if;
     end loop;
     return to_unsigned(cnt, hw_t'length);
+  end function;
+
+  function gf_weight_parts (a : gf_t) return hw_parts_t is
+    variable p   : hw_parts_t;
+    variable cnt : natural;
+  begin
+    for g in 0 to HW_GROUPS - 1 loop
+      cnt := 0;
+      for k in 0 to 5 loop
+        if 6 * g + k < M then
+          if a(6 * g + k) = '1' then
+            cnt := cnt + 1;
+          end if;
+        end if;
+      end loop;
+      p(g) := to_unsigned(cnt, 3);
+    end loop;
+    return p;
+  end function;
+
+  function hw_sum (p : hw_parts_t) return hw_t is
+    variable s : natural := 0;
+  begin
+    for g in 0 to HW_GROUPS - 1 loop
+      s := s + to_integer(p(g));
+    end loop;
+    return to_unsigned(s, hw_t'length);
+  end function;
+
+  function gf2_polymul (a, b : std_logic_vector) return std_logic_vector is
+    constant NA : natural := a'length;
+    constant NB : natural := b'length;
+    alias aa : std_logic_vector(NA - 1 downto 0) is a;
+    alias bb : std_logic_vector(NB - 1 downto 0) is b;
+    variable r : std_logic_vector(NA + NB - 2 downto 0) := (others => '0');
+  begin
+    for i in 0 to NA - 1 loop
+      for j in 0 to NB - 1 loop
+        r(i + j) := r(i + j) xor (aa(i) and bb(j));
+      end loop;
+    end loop;
+    return r;
   end function;
 
   -- ------------------------------------------------------------------ --
