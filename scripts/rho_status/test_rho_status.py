@@ -59,13 +59,30 @@ class SnapshotTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
-    def test_publish_job_uses_oidc_role(self):
+    def test_publish_job_uses_access_keys_and_deploy_key(self):
         path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
         self.assertIn("aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}", text)
         self.assertIn("aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}", text)
+        self.assertIn("secrets.RHO_WALKER_SSH_KEY", text)
         self.assertNotIn("role-to-assume", text)
+
+    def test_fetch_script_punches_runner_ip_not_launch_key(self):
+        path = os.path.join(HERE, "fetch_via_walker.sh")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("authorize-security-group-ingress", text)
+        self.assertIn("revoke-security-group-ingress", text)
+        self.assertIn("checkip.amazonaws.com", text)
+        self.assertIn("gha-ecc2k130-status", text)
+        self.assertIn("gha_walker.pub", text)
+        self.assertNotIn("meow34", text)
+        pub = os.path.join(HERE, "gha_walker.pub")
+        with open(pub, encoding="utf-8") as fh:
+            line = fh.read().strip()
+        self.assertTrue(line.startswith("ssh-ed25519 "))
+        self.assertIn("ecc2k130-status-gha", line)
 
 
 class HistoryTests(unittest.TestCase):
