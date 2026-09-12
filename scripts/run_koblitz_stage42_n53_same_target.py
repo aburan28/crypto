@@ -86,6 +86,7 @@ def source_state(source: Path) -> dict[str, Any]:
 
 
 def build(args: argparse.Namespace) -> dict[str, Any]:
+    require(platform.system() == "Linux", "Stage-42 build requires Linux process accounting")
     source = args.source.resolve(strict=True)
     output = args.output.resolve()
     require(source == REPO, "Stage-42 build source must be this repository")
@@ -100,9 +101,16 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     had_lock = root_lock.exists()
     old_lock = root_lock.read_bytes() if had_lock else None
     root_lock.write_bytes(LOCK.read_bytes())
+    cargo = shutil.which("cargo")
+    rustc = shutil.which("rustc")
+    require(cargo is not None and rustc is not None, "Stage-42 Rust toolchain is unavailable")
+    cargo_path = str(Path(cargo).resolve(strict=True))
+    rustc_path = str(Path(rustc).resolve(strict=True))
     environment = custody.safe_child_environment()
+    environment["PATH"] = ":".join(dict.fromkeys([str(Path(cargo_path).parent), str(Path(rustc_path).parent), environment["PATH"]]))
+    environment["RUSTC"] = rustc_path
     environment["CARGO_TARGET_DIR"] = str(target)
-    command = ["cargo", "build", "--release", "--locked", "--jobs", str(args.jobs), "--example", "koblitz_rank_fixture", "--example", "koblitz_rho_fixture"]
+    command = [cargo_path, "build", "--release", "--locked", "--jobs", str(args.jobs), "--example", "koblitz_rank_fixture", "--example", "koblitz_rho_fixture"]
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.monotonic()
@@ -184,6 +192,7 @@ def analyze(direct_rows: list[dict[str, Any]], rho: dict[str, Any]) -> dict[str,
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    require(platform.system() == "Linux", "Stage-42 run requires Linux process accounting")
     output = args.output.resolve()
     require(not output.exists() and not output.is_symlink(), "Stage-42 run output must be new")
     build_root = args.build.resolve(strict=True)
