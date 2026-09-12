@@ -620,6 +620,7 @@
   }
 
   var lastStatus = null;
+  var historyLoaded = false;
 
   async function load() {
     var status;
@@ -673,9 +674,11 @@
     if (history) {
       drawTotals(history.points || []);
       drawHistory(history.points || []);
-    } else {
+      historyLoaded = true;
+    } else if (!historyLoaded) {
       var historyBody = el("history-body");
-      if (historyBody && !historyBody.children.length) {
+      if (historyBody) {
+        historyBody.textContent = "";
         emptyRow(historyBody, 6, "Could not read history.json (" + historyError + ").");
       }
     }
