@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-09-10",
+  "updated": "2026-09-12",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Push past prior ceiling: construct+measure n=53 vs_rho probe; then wall at n=37 or charged at n=41 with >=20% margin"
+      "beat": "Whole-process same-target wall crossover at n=41 or n=53 with every build, setup and resource charge retained. On the autolab base family the nearest charged gap is n=37 at 1.15x (partition_walk, 14.778 ms per target against rho 12.822); start there with solution_validation_ms, 53% of the direct arm's charged cost."
     },
     {
       "rank": 2,
@@ -633,7 +633,11 @@
               "independent external validation",
               "same target in direct and rho",
               "timing class and automorphism discount explicit",
-              "whole-process direct/rho ratio < 1"
+              "whole-process direct/rho ratio < 1",
+              "evidence directory committed to the tree, not merely referenced",
+              "charged cost read from the producer batch summary, never summed from per-target rows",
+              "target mode swept, not left at the beat default, and the best one quoted",
+              "any cost component excluded from one arm excluded from the other on a stated policy"
             ],
             "n53_probe_note": "Current n=53 same-target direct/rho wall ratio is 12.131; support setup and pair-pair query remain the measured bottlenecks."
           },
@@ -641,7 +645,9 @@
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-39-fixed-algebraic-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-40-parallel-precompute-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/README.md",
+            "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json"
           ],
           "history": [
             {
@@ -655,9 +661,85 @@
                 "n41_status": "N41_MINIMUM_BASE_FEASIBLE_only_not_crossover"
               },
               "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
-              "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
+              "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery.",
+              "retracted": {
+                "on": "2026-09-12",
+                "note": "Superseded by the current record on the same day. Recorded here because the row was not merely superseded, it was wrong, and the reasons apply to any future n=37 claim.",
+                "reason": "Measured against a rho baseline that did not solve. Commit 52e305e7 replaced Floyd cycle finding, which on a negation-quotient walk meets itself at fruitless cycles, with the distinguished-point method, and records that the old baseline recovered 0 of 32 logarithms at degree 41 while the workflow reported a 1.009 crossover, and that there is no crossover at 31, 37, 39 or 41. That landed 2026-09-11, one day after this row was written, and the row was not revisited.",
+                "evidence_pointer_status": "dangling: research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json is absent from the tree and appears in no commit, so the row was never independently replayable",
+                "remeasured_at": "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json"
+              }
             }
-          ]
+          ],
+          "n37_autolab_remeasurement_20260912": {
+            "status": "measured_observation_not_a_record",
+            "summary": "n=37 over 1024 targets on the autolab producers: index calculus is behind rho in every target mode. Best is partition_walk at 14.778 ms per target charged against rho's 12.822, a factor of 1.15, with rho verifying 1024/1024.",
+            "verdict": "NO_CROSSOVER_MEASURED_N13_N37_N41_N53_ON_AUTOLAB_PRODUCERS",
+            "configuration": "signed_expanded pair index, pair_pair_16 query, eta=1/2, one process per arm. This is the autolab beat configuration, not the two_torsion_saturated fixed-algebraic base the current record uses.",
+            "timing_class": "algorithmic_charged",
+            "automorphism_discount": "sqrt(2*n), A=2*n signed Frobenius",
+            "all_stages_charged_same_series": true,
+            "rho_targets_verified": "1024/1024",
+            "ic_cost": 14.7777,
+            "rho_cost": 12.8217,
+            "cost_unit": "ms per target, 1024 targets",
+            "ic_cost_by_target_mode": {
+              "coefficient_walk": 15.33,
+              "independent": 20.2703,
+              "partition_walk": 14.7777
+            },
+            "registered_beat_note": "All koblitz.vs_rho.* beats pin target_mode=independent, the most expensive of the three at 20.270 ms per target, 37% above partition_walk. Reading this stage off one beat makes the method look worse than its best measured mode.",
+            "charged_definition": "direct: full_algorithm_charged_total_ms from the producer batch summary (curve setup + support-table setup charged once, plus per-target fixture setup and relation collection). rho: sum of per-target total_ms (setup + walk + validation).",
+            "charged_definition_pitfall": "Do not sum the direct producer's per-target charged_total_ms across a batch: it re-adds the shared support-table setup_ms for every target. At n=37 that reports 34.075 ms per target where the batch summary's full_algorithm_charged_total_ms gives 20.270 for the same run, and it makes setup amortization look like the bottleneck when setup is under 0.02 ms per target.",
+            "cost_decomposition_ms_per_target": {
+              "rho": {
+                "setup": 3.9759,
+                "total": 12.8217,
+                "validation": 1.2815,
+                "walk": 7.5644
+              },
+              "partition_walk": {
+                "batch_setup_amortized": 0.0154,
+                "collection": 14.6342,
+                "fixture_setup": 0.1281,
+                "of_which_linear_solve": 0.0156,
+                "of_which_solution_validation": 7.7804
+              }
+            },
+            "largest_direct_component": "solution_validation_ms, 7.780 of 14.778 ms per target (53%). It re-derives every factor-base discrete log by scalar multiplication and replays every relation under assert_eq!, confirming an answer the linear solve already produced. Making it cheap is the obvious lever; subtracting it from the direct arm while rho keeps its own 1.281 ms validation would manufacture a 1.65x win and is forbidden by claim_hygiene.",
+            "measurement_asymmetries": [
+              "rho charges setup_ms for building the target point Q = d0*G and the jump table. Constructing Q is instance generation, which the direct arm reports separately as fixture_generation_ms and does not charge. This asymmetry runs against rho.",
+              "solution_validation_ms re-derives the discrete log of every factor-base representative with a scalar multiplication and replays every collected relation against the solved vector, under assert_eq!. It confirms an answer the linear solve already produced rather than producing it. It is the largest single component of the direct arm's charged cost and is the obvious place to look next; it is not subtracted from any ratio quoted here."
+            ],
+            "other_rungs": {
+              "n13_whole_process_wall": {
+                "ic_ms": 6.944,
+                "rho_ms": 3.035,
+                "rho_over_ic": 0.437
+              },
+              "n41_algorithmic_charged": {
+                "ic_ms": 7698.893,
+                "rho_ms": 247.476,
+                "rho_over_ic": 0.0321,
+                "ic_collection_only_ms": 821.668,
+                "ic_support_setup_ms": 6877.225,
+                "note": "Single target. Discount the support build entirely and collection alone is still 3.3x rho, so on this base family no number of targets sharing one base crosses at n=41."
+              },
+              "n53_whole_process_wall": {
+                "ic_ms": 870766.0,
+                "rho_ms": 4839.2,
+                "rho_over_ic": 0.00556
+              },
+              "ratio_note": "rho_cost / ic_cost; above 1 would be an index-calculus win"
+            },
+            "claim_boundary": "Public synthetic Koblitz fixtures only. Not key recovery, not asymptotic sub-rho, not imported points. A negative result for this base family at these rungs, not a proof that no crossover exists.",
+            "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json"
+          },
+          "open_reconciliation": {
+            "question": "Both n=41 results in this record are live and point opposite ways. The current record reports an online charged crossover at ic_over_rho_online = 0.286 on a two_torsion_saturated base over 5 targets; the autolab remeasurement above reports per-target relation collection at 821.7 ms against rho's 247.5 ms on a signed_expanded base, 3.3x the other way.",
+            "not_yet_a_contradiction": "Different factor-base families, different target counts, and different cost boundaries. The current record's own amortised ratio is 5.026 and its full available wall is 110.79x rho, so the 0.286 figure excludes base construction rather than disagreeing about it.",
+            "to_settle_it": "Run both base families through one harness at one target count with one charged definition, and state which costs are inside the boundary. Until then neither n=41 number should be quoted without its configuration."
+          }
         }
       }
     },
