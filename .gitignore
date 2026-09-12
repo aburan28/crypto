@@ -52,3 +52,9 @@ gpu/macaulay/params.h
 gpu/macaulay/vectors.h
 gpu/macaulay/test_cpu_main
 gpu/macaulay/bench
+
+# gpu/semaev generated headers, test binary and CUDA bench binary
+gpu/semaev/params.h
+gpu/semaev/vectors.h
+gpu/semaev/test_cpu_main
+gpu/semaev/bench2
