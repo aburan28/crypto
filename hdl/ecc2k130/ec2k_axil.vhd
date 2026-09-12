@@ -18,14 +18,15 @@
 --   0x000  MAGIC     RO  0x2C13_0001
 --   0x004  CTRL      RW  bit0 RUN (engines held in reset while 0)
 --                        bit1 CLEAR (self-clearing: counters and DP FIFO)
---   0x008  STATUS    RO  bit0 LD_BUSY, bit1 DP_AVAIL, bit2 DP_OVERFLOW (sticky
---                        until CLEAR), bits 23:16 DP FIFO occupancy
+--   0x008  STATUS    RO  bit0 LD_BUSY, bit1 DP_AVAIL, bit2 always 0 (was
+--                        DP_OVERFLOW), bits 23:16 DP FIFO occupancy
 --   0x00C  GEOM      RO  [7:0] ID_W, [11:8] LOG_W, [15:12] LOG_NB,
 --                        [23:16] DP_WEIGHT, [31:24] NENG
 --   0x010  STEPS_LO  RO  completed steps, all engines; reading LO latches HI
 --   0x014  STEPS_HI  RO
 --   0x018  DPS       RO  distinguished points queued
---   0x01C  DROPPED   RO  distinguished points lost to a full queue
+--   0x01C  DROPPED   RO  always 0: the engines hold their reports until the
+--                        queue takes them, nothing is dropped
 --   0x020  LD_ID     RW  gid of the walk to (re)start
 --   0x024  LD_X0..4  RW  0x024 0x028 0x02C 0x030 0x034
 --   0x038  LD_Y0..4  RW  0x038 0x03C 0x040 0x044 0x048
@@ -36,6 +37,12 @@
 --   0x090  DP_X0..4  RO  0x090 0x094 0x098 0x09C 0x0A0
 --   0x0A4  DP_Y0..4  RO  0x0A4 0x0A8 0x0AC 0x0B0 0x0B4
 --   0x0B8  DP_POP    WO  any write: drop the head of the queue
+--
+-- Reports flow engine -> holding register -> queue.  Each engine holds a
+-- report in its own register (and its FIFO behind that) until this block
+-- acknowledges it, so a slow host or a burst of distinguished points only
+-- delays reports, never loses them.  The holding registers are drained
+-- round-robin, one per clock, into the queue the host reads.
 --
 -- Clearing RUN drops every walk in flight.  The host client treats a
 -- restart like the GPU client treats a checkpoint restore of a fresh run:
@@ -141,6 +148,7 @@ architecture rtl of ec2k_axil is
   signal e_ld_valid : std_logic_vector(0 to NENG - 1);
   signal e_ld_ready : std_logic_vector(0 to NENG - 1);
   signal e_dp_valid : std_logic_vector(0 to NENG - 1);
+  signal e_dp_ack   : std_logic_vector(0 to NENG - 1) := (others => '0');
   signal e_dp_id    : id_arr_t(0 to NENG - 1);
   signal e_dp_steps : cnt_arr_t(0 to NENG - 1);
   signal e_dp_x, e_dp_y : gf_arr_t(0 to NENG - 1);
@@ -150,12 +158,10 @@ architecture rtl of ec2k_axil is
   signal run        : std_logic := '0';
   signal steps      : unsigned(63 downto 0) := (others => '0');
   signal steps_hi   : word_t := (others => '0');
-  signal dps, dropped : unsigned(31 downto 0) := (others => '0');
-  signal overflow   : std_logic := '0';
-  -- the per-clock step and drop counts are registered before they are added
-  -- into the wide counters, so no path runs popcount -> 64-bit add
-  signal drop_v     : std_logic_vector(0 to NENG - 1) := (others => '0');
-  signal nstep_r, ndrop_r : natural range 0 to NENG := 0;
+  signal dps        : unsigned(31 downto 0) := (others => '0');
+  -- the per-clock step count is registered before it is added into the
+  -- 64-bit counter, so no path runs popcount -> 64-bit add
+  signal nstep_r    : natural range 0 to NENG := 0;
 
   -- load
   signal ld_pend    : std_logic := '0';
@@ -163,7 +169,9 @@ architecture rtl of ec2k_axil is
   signal ld_x, ld_y : gf_t := (others => '0');
   signal ld_id_reg  : word_t := (others => '0');
 
-  -- per-engine holding register between the walker and the queue
+  -- per-engine holding register between the walker and the queue; a report
+  -- is taken when the register is free (or being drained this clock) and
+  -- the previous ack has been seen, then acked for one clock
   signal h_valid    : std_logic_vector(0 to NENG - 1) := (others => '0');
   signal h_id       : id_arr_t(0 to NENG - 1);
   signal h_steps    : cnt_arr_t(0 to NENG - 1);
@@ -202,7 +210,8 @@ begin
         clk => clk, rst => rst_eng,
         ld_valid => e_ld_valid(i), ld_ready => e_ld_ready(i),
         ld_id => ld_gid(ID_W - 1 downto 0), ld_x => ld_x, ld_y => ld_y,
-        dp_valid => e_dp_valid(i), dp_id => e_dp_id(i), dp_steps => e_dp_steps(i),
+        dp_valid => e_dp_valid(i), dp_ack => e_dp_ack(i),
+        dp_id => e_dp_id(i), dp_steps => e_dp_steps(i),
         dp_x => e_dp_x(i), dp_y => e_dp_y(i), step_pulse => e_step(i));
 
     e_ld_valid(i) <= '1' when ld_pend = '1' and run = '1' and eng_of(ld_gid) = i else '0';
@@ -227,7 +236,6 @@ begin
     variable waddr, raddr : natural range 0 to 1023;
     variable clear, pop, push, drain : boolean;
     variable nstep : natural range 0 to NENG;
-    variable ndrop : natural range 0 to NENG;
     variable g     : gid_t;
   begin
     if rising_edge(clk) then
@@ -284,7 +292,7 @@ begin
           when 2 =>
             rdata(0) <= ld_pend;
             rdata(1) <= '0' when q_empty else '1';
-            rdata(2) <= overflow;
+            rdata(2) <= '0';
             rdata(16 + DP_FIFO_W downto 16) <= std_logic_vector(q_count);
           when 3 =>
             rdata(7 downto 0)   <= std_logic_vector(to_unsigned(ID_W, 8));
@@ -297,7 +305,7 @@ begin
             steps_hi <= std_logic_vector(steps(63 downto 32));
           when 5 => rdata <= steps_hi;
           when 6 => rdata <= std_logic_vector(dps);
-          when 7 => rdata <= std_logic_vector(dropped);
+          when 7 => rdata <= (others => '0');
           when 8 => rdata <= ld_id_reg;
           when 9 to 13  => rdata <= word_of(ld_x, raddr - 9);
           when 14 to 18 => rdata <= word_of(ld_y, raddr - 14);
@@ -336,23 +344,21 @@ begin
         h_ptr <= h_ptr + 1;
       end if;
 
-      -- capture reports; a report into an occupied holding register is lost
+      -- take reports into free holding registers and ack them
       for i in 0 to NENG - 1 loop
-        drop_v(i) <= '0';
-        if e_dp_valid(i) = '1' then
-          if h_valid(i) = '1' and not (drain and h_ptr = i) then
-            drop_v(i) <= '1';
-          else
-            h_valid(i) <= '1';
-            h_id(i)    <= e_dp_id(i);
-            h_steps(i) <= e_dp_steps(i);
-            h_x(i)     <= e_dp_x(i);
-            h_y(i)     <= e_dp_y(i);
-          end if;
+        e_dp_ack(i) <= '0';
+        if e_dp_valid(i) = '1' and e_dp_ack(i) = '0'
+           and (h_valid(i) = '0' or (drain and h_ptr = i)) then
+          h_valid(i)  <= '1';
+          h_id(i)     <= e_dp_id(i);
+          h_steps(i)  <= e_dp_steps(i);
+          h_x(i)      <= e_dp_x(i);
+          h_y(i)      <= e_dp_y(i);
+          e_dp_ack(i) <= '1';
         end if;
       end loop;
 
-      -- queue pointers and counters (steps and dropped lag by two clocks)
+      -- queue pointers and counters (steps lags by two clocks)
       if push then
         q_wr <= q_wr + 1;
         dps  <= dps + 1;
@@ -361,31 +367,18 @@ begin
         q_rd <= q_rd + 1;
       end if;
       nstep := 0;
-      ndrop := 0;
       for i in 0 to NENG - 1 loop
         if e_step(i) = '1' then
           nstep := nstep + 1;
         end if;
-        if drop_v(i) = '1' then
-          ndrop := ndrop + 1;
-        end if;
       end loop;
       nstep_r <= nstep;
-      ndrop_r <= ndrop;
       steps   <= steps + nstep_r;
-      if ndrop_r > 0 then
-        dropped  <= dropped + ndrop_r;
-        overflow <= '1';
-      end if;
 
       if clear then
         steps    <= (others => '0');
         dps      <= (others => '0');
-        dropped  <= (others => '0');
-        overflow <= '0';
         nstep_r  <= 0;
-        ndrop_r  <= 0;
-        drop_v   <= (others => '0');
         q_wr     <= (others => '0');
         q_rd     <= (others => '0');
         h_valid  <= (others => '0');
@@ -396,11 +389,8 @@ begin
         ld_pend  <= '0';
         steps    <= (others => '0');
         dps      <= (others => '0');
-        dropped  <= (others => '0');
-        overflow <= '0';
         nstep_r  <= 0;
-        ndrop_r  <= 0;
-        drop_v   <= (others => '0');
+        e_dp_ack <= (others => '0');
         q_wr     <= (others => '0');
         q_rd     <= (others => '0');
         h_valid  <= (others => '0');

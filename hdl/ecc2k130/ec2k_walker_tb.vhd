@@ -52,6 +52,7 @@ architecture sim of ec2k_walker_tb is
   signal ld_id     : unsigned(ID_W - 1 downto 0) := (others => '0');
   signal ld_x, ld_y : gf_t := (others => '0');
   signal dp_valid  : std_logic;
+  signal dp_ack    : std_logic := '0';
   signal dp_id     : unsigned(ID_W - 1 downto 0);
   signal dp_steps  : unsigned(CNT_W - 1 downto 0);
   signal dp_x, dp_y : gf_t;
@@ -78,7 +79,7 @@ begin
       clk => clk, rst => rst,
       ld_valid => ld_valid, ld_ready => ld_ready,
       ld_id => ld_id, ld_x => ld_x, ld_y => ld_y,
-      dp_valid => dp_valid, dp_id => dp_id, dp_steps => dp_steps,
+      dp_valid => dp_valid, dp_ack => dp_ack, dp_id => dp_id, dp_steps => dp_steps,
       dp_x => dp_x, dp_y => dp_y, step_pulse => step_pulse);
 
   loader : process
@@ -149,7 +150,11 @@ begin
         ld_cur   := -1;
       end if;
 
-      if dp_valid = '1' then
+      -- take a report the way ec2k_axil does: ack for one clock, and skip
+      -- the clock after, when the walker is still showing the acked one
+      dp_ack <= '0';
+      if dp_valid = '1' and dp_ack = '0' then
+        dp_ack <= '1';
         w := to_integer(dp_id);
         if cur(w) < 0 then
           report "report from idle walk " & integer'image(w) severity error;
