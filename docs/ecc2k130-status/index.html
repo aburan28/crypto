@@ -674,7 +674,11 @@
     if (history) {
       drawTotals(history.points || []);
       drawHistory(history.points || []);
-      historyLoaded = true;
+      // Only a history with rows in it is worth protecting from a later
+      // failure message: an empty one leaves the same "nothing here" row a
+      // failure would, and would otherwise keep saying there is no history
+      // when the truth is that the file could not be read.
+      historyLoaded = (history.points || []).length > 0;
     } else if (!historyLoaded) {
       var historyBody = el("history-body");
       if (historyBody) {
