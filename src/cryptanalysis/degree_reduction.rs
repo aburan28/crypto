@@ -1116,6 +1116,292 @@ pub fn run_mutant_cell(
     })
 }
 
+// ── R5: composing one-sided guessing with the mutant route ──────────
+//
+// Iteration 1 killed hybrid slicing on its own (the cost optimum is
+// exhaustive search) but left one usable fact: **one-sided** guessing
+// reaches the `D* = 2` floor at exactly `k₂ = n'`, i.e. a collapse fraction
+// `c = 1/2`, flat across sizes and seeds. Iteration 2 showed lever L4
+// lowers the working degree on the hard family.
+//
+// The composition asks whether the mutant route reaches the floor at
+// `c < 1/2`. That threshold is the whole question: total work is
+// `2^{cN} · poly`, so `c < 1/2` is strictly better than pure one-sided
+// guessing, and it is the only route left to beating the `2^N` enumeration
+// baseline that iteration 1 established.
+//
+// The comparison is **matched per slice**: the same specialised system is
+// measured twice, once raw and once saturated with its own degree falls.
+
+/// One `k` of the composed sweep: raw vs mutant `D*` on the same slices.
+#[derive(Clone, Debug)]
+pub struct ComposedRow {
+    pub k: u32,
+    pub vars: u32,
+    pub slices: u32,
+    /// Slices where either route failed to refute within `d_max`.
+    pub censored: u32,
+    pub raw_dstar_mean: f64,
+    pub raw_dstar_max: u32,
+    pub mut_dstar_mean: f64,
+    pub mut_dstar_max: u32,
+    /// `max(3, D*_mut)` averaged — the degree the mutant route actually
+    /// touches, since extraction itself works at degree 3 (iteration 2).
+    pub mut_working_mean: f64,
+    pub new_generators_mean: f64,
+    /// Mean equation count of a saturated slice (extra Macaulay rows).
+    pub aug_eqs_mean: f64,
+    /// log2 of the mean per-slice extraction cost (all saturation rounds).
+    pub log2_extraction_cost: f64,
+}
+
+impl ComposedRow {
+    /// log2 total work of the **raw** guess-only route at this `k`:
+    /// `2^k` slices, each a Macaulay solve at its own `D*`.
+    pub fn log2_raw_total(&self, eqs: u32, omega: f64) -> f64 {
+        self.k as f64 + log2_macaulay_cost(self.vars, eqs, self.raw_dstar_mean.ceil() as u32, omega)
+    }
+
+    /// log2 total work of the **composed** route at this `k`: `2^k` slices,
+    /// each paying its degree-3 extraction *plus* the augmented solve.
+    ///
+    /// Charging extraction is the whole point — iteration 2 established that
+    /// booking only the cheap augmented solve double-counts the degree the
+    /// extraction itself had to climb to.
+    pub fn log2_composed_total(&self, omega: f64) -> f64 {
+        let solve = log2_macaulay_cost(
+            self.vars,
+            self.aug_eqs_mean.round().max(1.0) as u32,
+            self.mut_dstar_mean.ceil() as u32,
+            omega,
+        );
+        self.k as f64 + (self.log2_extraction_cost.exp2() + solve.exp2()).log2()
+    }
+}
+
+/// The composed sweep at one operating point.
+#[derive(Clone, Debug)]
+pub struct ComposedSweep {
+    pub family: BasisFamily,
+    pub pattern: GuessPattern,
+    pub n: u32,
+    pub n_sub: u32,
+    pub full_vars: u32,
+    pub targets: u32,
+    pub rounds: u32,
+    pub rows: Vec<ComposedRow>,
+}
+
+impl ComposedSweep {
+    /// Smallest `k/N` at which **every** sampled slice of the raw system is
+    /// at the `D* = 2` floor.
+    pub fn raw_collapse_fraction(&self) -> Option<f64> {
+        self.rows
+            .iter()
+            .find(|r| r.censored == 0 && r.raw_dstar_max <= 2)
+            .map(|r| r.k as f64 / self.full_vars as f64)
+    }
+
+    /// Largest `k` scanned.
+    pub fn k_max(&self) -> u32 {
+        self.rows.last().map(|r| r.k).unwrap_or(0)
+    }
+
+    /// Does a route's cost curve have an **interior** minimum?
+    ///
+    /// Same honesty check as [`HybridSweep::optimum_is_interior`], and it
+    /// matters for the same reason: the `k = N` endpoint of either route is
+    /// exhaustive search, so at toy sizes a cost model will slide the optimum
+    /// to the largest `k` scanned and call that a result. `cost` picks the
+    /// route (raw or composed) to check.
+    pub fn optimum_is_interior(&self, cost: impl Fn(&ComposedRow) -> f64) -> bool {
+        self.rows
+            .iter()
+            .map(|r| (r.k, cost(r)))
+            .filter(|(_, c)| c.is_finite())
+            .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+            .map(|(k, _)| k < self.k_max())
+            .unwrap_or(false)
+    }
+
+    /// Same for the mutant-augmented system — the quantity G-R5 tests.
+    pub fn mutant_collapse_fraction(&self) -> Option<f64> {
+        self.rows
+            .iter()
+            .find(|r| r.censored == 0 && r.mut_dstar_max <= 2)
+            .map(|r| r.k as f64 / self.full_vars as f64)
+    }
+}
+
+/// Run the composed (guess-then-mutate) sweep.
+///
+/// For each non-decomposable target and each `k`, take `slices_per_k` random
+/// assignments of the `k` guessed variables and measure the resulting
+/// slice's `D*` **twice** — raw, and after saturating it with its own
+/// degree-3 falls — so the two routes are compared on identical systems.
+#[allow(clippy::too_many_arguments)]
+pub fn run_composed_sweep(
+    family: BasisFamily,
+    pattern: GuessPattern,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    k_max: u32,
+    targets: u32,
+    slices_per_k: u32,
+    d_max: u32,
+    rounds: u32,
+    seed: u64,
+) -> Option<ComposedSweep> {
+    let full_vars = 2 * n_sub;
+    let k_max = k_max.min(full_vars.saturating_sub(2));
+
+    let mut t_state = seed | 1;
+    let mut next_target = move || {
+        t_state ^= t_state >> 12;
+        t_state ^= t_state << 25;
+        t_state ^= t_state >> 27;
+        t_state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let mut s_state = seed.rotate_left(32) | 1;
+    let mut next_slice = move || {
+        s_state ^= s_state >> 12;
+        s_state ^= s_state << 25;
+        s_state ^= s_state >> 27;
+        s_state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    struct Acc {
+        slices: u32,
+        censored: u32,
+        raw_sum: f64,
+        raw_max: u32,
+        mut_sum: f64,
+        mut_max: u32,
+        working_sum: f64,
+        newgen_sum: f64,
+        extract_linear: f64,
+        aug_eqs_sum: f64,
+    }
+    let mut acc: Vec<Acc> = (0..=k_max)
+        .map(|_| Acc {
+            slices: 0,
+            censored: 0,
+            raw_sum: 0.0,
+            raw_max: 0,
+            mut_sum: 0.0,
+            mut_max: 0,
+            working_sum: 0.0,
+            newgen_sum: 0.0,
+            extract_linear: 0.0,
+            aug_eqs_sum: 0.0,
+        })
+        .collect();
+
+    let mut found = 0u32;
+    let mut attempts = 0u32;
+    while found < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                FactorSubspace::build(family, n, n_sub, irr, seed ^ (0x9E37 + attempts as u64))?
+            }
+            _ => FactorSubspace::build(family, n, n_sub, irr, 0)?,
+        };
+        let b = rand_nz(n, &mut next_target);
+        let x3 = rand_nz(n, &mut next_target);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+        found += 1;
+        let eqs = descend_on_subspace(n, &v, irr, &b, &x3);
+
+        for k in 0..=k_max {
+            let reps = if k == 0 { 1 } else { slices_per_k };
+            for _ in 0..reps {
+                let idx = pattern.pick(full_vars, k, &mut next_slice);
+                let mut assign: Vec<Option<bool>> = vec![None; full_vars as usize];
+                for &i in &idx {
+                    assign[i as usize] = Some((next_slice() >> 23) & 1 == 1);
+                }
+                let (slice, nv) = specialize(&eqs, full_vars, &assign);
+
+                let a = &mut acc[k as usize];
+                a.slices += 1;
+
+                let (_, raw, _) = refutation_scan(&slice, nv, d_max);
+                let (sat, per_round) = saturate_with_falls(&slice, nv, rounds);
+                let (_, mutd, _) = refutation_scan(&sat, nv, d_max);
+
+                // Charge every saturation round on the system as it stood
+                // going in — the same accounting iteration 2 settled on.
+                let mut eqs_so_far = slice.len() as u32;
+                let mut extract = 0.0f64;
+                for added in &per_round {
+                    extract += log2_macaulay_cost(nv, eqs_so_far, 3, 2.807).exp2();
+                    eqs_so_far += *added as u32;
+                }
+
+                match (raw, mutd) {
+                    (Some(r), Some(m)) => {
+                        a.raw_sum += r as f64;
+                        a.raw_max = a.raw_max.max(r);
+                        a.mut_sum += m as f64;
+                        a.mut_max = a.mut_max.max(m);
+                        a.working_sum += m.max(3) as f64;
+                        a.newgen_sum += per_round.iter().sum::<usize>() as f64;
+                        a.extract_linear += extract;
+                        a.aug_eqs_sum += sat.len() as f64;
+                    }
+                    _ => a.censored += 1,
+                }
+            }
+        }
+    }
+    if found == 0 {
+        return None;
+    }
+
+    let rows = (0..=k_max)
+        .map(|k| {
+            let a = &acc[k as usize];
+            let m = (a.slices - a.censored).max(1) as f64;
+            ComposedRow {
+                k,
+                vars: full_vars - k,
+                slices: a.slices,
+                censored: a.censored,
+                raw_dstar_mean: a.raw_sum / m,
+                raw_dstar_max: a.raw_max,
+                mut_dstar_mean: a.mut_sum / m,
+                mut_dstar_max: a.mut_max,
+                mut_working_mean: a.working_sum / m,
+                new_generators_mean: a.newgen_sum / m,
+                aug_eqs_mean: a.aug_eqs_sum / m,
+                log2_extraction_cost: (a.extract_linear / m).log2(),
+            }
+        })
+        .collect();
+
+    Some(ComposedSweep {
+        family,
+        pattern,
+        n,
+        n_sub,
+        full_vars,
+        targets: found,
+        rounds,
+        rows,
+    })
+}
+
 // ── Tests ───────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -1634,6 +1920,109 @@ mod tests {
                 "early stop only when a round yields nothing"
             );
         }
+    }
+
+    // ── R5: composition ─────────────────────────────────────────────
+
+    /// On every slice the mutant route sees the *same* system as the raw
+    /// route plus extra ideal elements, so its `D*` can never be higher.
+    /// This is the invariant that makes the matched comparison meaningful.
+    #[test]
+    fn composed_mutant_never_above_raw_on_the_same_slices() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let sw = run_composed_sweep(
+            BasisFamily::Coordinate,
+            GuessPattern::OneSide,
+            n,
+            5,
+            &irr,
+            5,
+            3,
+            3,
+            7,
+            3,
+            0xC0DE,
+        )
+        .unwrap();
+        for r in &sw.rows {
+            assert!(
+                r.mut_dstar_mean <= r.raw_dstar_mean + 1e-9,
+                "k={}: mutant D* {} above raw {}",
+                r.k,
+                r.mut_dstar_mean,
+                r.raw_dstar_mean
+            );
+            assert!(r.mut_dstar_max <= r.raw_dstar_max);
+        }
+    }
+
+    /// The mutant route can only reach the degree-2 floor at the same `k` or
+    /// earlier than the raw route, so its collapse fraction must not exceed
+    /// the raw one.
+    #[test]
+    fn composed_collapse_fraction_is_at_most_the_raw_one() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let sw = run_composed_sweep(
+            BasisFamily::Random,
+            GuessPattern::OneSide,
+            n,
+            5,
+            &irr,
+            8,
+            3,
+            3,
+            7,
+            3,
+            0xFACE,
+        )
+        .unwrap();
+        if let (Some(raw), Some(mutant)) =
+            (sw.raw_collapse_fraction(), sw.mutant_collapse_fraction())
+        {
+            assert!(
+                mutant <= raw + 1e-9,
+                "mutant collapse {mutant} later than raw {raw}"
+            );
+        }
+    }
+
+    /// The boundary check must fire here too — the `k = N` endpoint of either
+    /// route is exhaustive search, and a cost optimum sitting at the largest
+    /// `k` scanned is that, not an optimum.
+    #[test]
+    fn composed_boundary_flag_agrees_with_the_argmin() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let sw = run_composed_sweep(
+            BasisFamily::Coordinate,
+            GuessPattern::OneSide,
+            n,
+            5,
+            &irr,
+            6,
+            2,
+            2,
+            7,
+            3,
+            0x0B0E,
+        )
+        .unwrap();
+        let argmin = sw
+            .rows
+            .iter()
+            .min_by(|a, b| {
+                a.log2_composed_total(2.807)
+                    .partial_cmp(&b.log2_composed_total(2.807))
+                    .unwrap()
+            })
+            .unwrap()
+            .k;
+        assert_eq!(
+            sw.optimum_is_interior(|r| r.log2_composed_total(2.807)),
+            argmin < sw.k_max()
+        );
     }
 
     /// The load-bearing claim of the whole lever: raising the determination
