@@ -41,6 +41,7 @@ PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 PACKED_CLMAD ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
+PACKED_COMPACT_STATE ?= 0
 PACKED_STATE_TILE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
@@ -63,7 +64,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -77,6 +78,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
+       -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
 
 all: cpu
@@ -212,6 +214,11 @@ test-packed-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedcuda.cu -o build/test-packed-cuda
 	./build/test-packed-cuda
 
+test-packed-storage-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedstatecuda.cu -o build/test-packed-storage-cuda
+	./build/test-packed-storage-cuda
+
 test-timing:
 	mkdir -p build
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
@@ -275,13 +282,14 @@ modal:
 
 # Audited packed configuration for the RTX PRO 6000 Blackwell Server Edition.
 RTX_PRO6000_WORKERS ?= 385024
+RTX_PRO6000_COMPACT_STATE ?= 1
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
                  ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
                  ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
                  ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
-                 ECC_PACKED_WEIGHTED_PREFIX=2
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -299,7 +307,7 @@ clean:
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
 	rm -f build/test-packed-clmad-host
-	rm -f build/test-packed-cuda
+	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-timing
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-timing rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

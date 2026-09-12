@@ -35,6 +35,10 @@ the reverse direction, and measures both modes on one GPU.
 The current preset also enables [weighted prefixes and paired Frobenius](WEIGHTED-PREFIX.md),
 reusing the existing scratch buffer and sharing the coordinate-permutation
 mask stream.
+It selects [compact physical field storage](COMPACT-STATE.md), using aligned
+16-byte low records and one high byte per field. Set
+`RTX_PRO6000_COMPACT_STATE=0` to use the previous tiled layout in either Make
+target. The general compact build option defaults to 0.
 
 The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
 NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or
@@ -46,7 +50,32 @@ Hardware instruction and memory probes for the earlier CUDA 13.0 preset,
 with the associated performance model, are in
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md).
 
-## Weighted-prefix preset comparison
+## Compact-state preset comparison
+
+The [controlled comparison](benchmarks/compact-state/comparison.json) keeps
+WP2, B16/T256/minBlocks2, 385,024 workers, CUDA 13.3.73 and native arithmetic
+fixed on one RTX PRO 6000. Three alternating paired repetitions measured:
+
+| Workload | Previous weighted median B/s | Compact median B/s | Gain |
+|---|---:|---:|---:|
+| Complete scalar benchmark | 13.548376 | **14.403112** | **6.3088%** |
+| DP34 collection | 13.130461 | **13.929753** | **6.0873%** |
+
+Every pair favored the candidate. Each sample completed 201,863,462,912
+scalar updates; all six collections matched 5,149 records, 164,768 bytes
+and zero drops. Device storage/arithmetic, full client, normalized-state
+and 28 checkpoint child checks passed before timing. The independent
+artifact review passed all 17 timed rows and final code/source/GPU bindings.
+
+The separate [public Make-command audit](benchmarks/compact-state/native-audit.json)
+measured a **14.472716 B/s** benchmark median (14.334753–14.672410) and
+**13.898911 B/s** collection median (13.880479–13.904571). All six samples
+completed the same scalar budget, and each collection recorded 5,149 points
+with zero drops. Arithmetic, storage and client checks passed before timing.
+This validates the public command on a separate allocation; the matched
+comparison above estimates the gain. The 15 B/s target remains unachieved.
+
+## Historical weighted-prefix preset comparison
 
 The [controlled comparison](benchmarks/weighted-prefix/comparison.json)
 keeps the batch, workers, compiler, arithmetic and state layout fixed on one
