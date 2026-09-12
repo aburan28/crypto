@@ -1,0 +1,14 @@
+{
+  "status": "public-command upload infrastructure failure",
+  "ownerSession": 46383,
+  "exitCode": 2,
+  "sourceCommit": "bf10b66025a04aadf1db84fe0554c3e0092fbd39",
+  "sourceFilesUnchanged": true,
+  "sourceFreezeSha256": "de3e40f26b950fd83253da59b560db5368bfef6f50dd4c3360e1a1e2eaa8b7ab",
+  "failureLog": "/private/tmp/ecc2k-weighted-prefix-public-upload-failure-20260912.log",
+  "failureLogSha256": "03c01f65aa4ef87db0ffd550e32a4b795f87c7554e3362e0e034d1f492c5473c",
+  "reason": "Live log was written inside the directory being uploaded by Modal; upload detects the changing file.",
+  "retry": "Same committed source and command; log redirected outside the source directory.",
+  "recordedAt": "2026-09-12T04:51:07.790830+00:00",
+  "gpuMeasurementReached": false
+}

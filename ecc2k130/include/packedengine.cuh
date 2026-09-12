@@ -16,7 +16,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
 #if ECC_PACKED_STATE_TILE
     size_t physicalFieldCount() const override {
+#if ECC_PACKED_COMPACT_STATE
+        // Transfer words are opaque physical storage, not logical P131 limbs.
+        return eccPacked131::compactPhysicalFieldWords(size_t(P.threads));
+#else
         return eccPacked131::physicalStateThreads(size_t(P.threads)) * BATCH * 5;
+#endif
     }
 #endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
@@ -42,7 +47,16 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         }
     }
     void exportCheckpointField(std::vector<unsigned> &words) const override {
-#if ECC_PACKED_STATE_TILE
+#if ECC_PACKED_COMPACT_STATE
+        std::vector<unsigned> logical(fieldCount());
+        for (int slot = 0; slot < BATCH; ++slot)
+            for (int tid = 0; tid < P.threads; ++tid) {
+                const auto a = eccPacked131::compactLoad131(words.data(), slot, tid);
+                for (int word = 0; word < 5; ++word)
+                    logical[(size_t(slot) * 5 + word) * P.threads + tid] = a.v[word];
+            }
+        words.swap(logical);
+#elif ECC_PACKED_STATE_TILE
         // The transfer contains every physical tile, including padding. Disk
         // coordinates remain logical SoA and use normal basis in version 2.
         std::vector<unsigned> logical(fieldCount());
@@ -57,7 +71,17 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
     void importCheckpointField(std::vector<unsigned> &words) const override {
         convertCheckpointField(words, true);
-#if ECC_PACKED_STATE_TILE
+#if ECC_PACKED_COMPACT_STATE
+        std::vector<unsigned> physical(physicalFieldCount(), 0u);
+        for (int slot = 0; slot < BATCH; ++slot)
+            for (int tid = 0; tid < P.threads; ++tid) {
+                eccPacked131::P131 a;
+                for (int word = 0; word < 5; ++word)
+                    a.v[word] = words[(size_t(slot) * 5 + word) * P.threads + tid];
+                eccPacked131::compactStore131(physical.data(), slot, tid, a);
+            }
+        words.swap(physical);
+#elif ECC_PACKED_STATE_TILE
         // Start with zero padding. Keep device metadata indexed by logical
         // slot*P.threads+tid; only the coordinate field is tiled here.
         std::vector<unsigned> physical(physicalFieldCount(), 0u);
@@ -84,8 +108,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             &blocks, eccPacked131::walk, ECC_THREADS, 0));
         size_t freeBytes, totalBytes;
         CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
+#if ECC_PACKED_COMPACT_STATE
+        // autoThreads rounds to complete 256-worker tiles; each stored field
+        // consumes sixteen low bytes and one top byte per worker/slot.
+        const size_t perThread = size_t(BATCH) *
+            ((3 + denominatorFields) * 17 + sizeof(unsigned) + 2 * sizeof(u64));
+#else
         const size_t perThread = size_t(BATCH) *
             ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
+#endif
         size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
         if (threads > fits) threads = fits;
@@ -137,6 +168,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+#if ECC_PACKED_SHARED_SIGMA
+        int diagnosticDevice = -1, driverReservedShared = -1;
+        CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
+        CUDA_CHECK(cudaDeviceGetAttribute(&driverReservedShared,
+            cudaDevAttrReservedSharedMemoryPerBlock, diagnosticDevice));
+        printf("packed driver reserved shared bytes/block: %d, device %d\n",
+               driverReservedShared, diagnosticDevice);
+#endif
         printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
@@ -147,6 +186,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
+        printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
+        printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
+        printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);

@@ -1,0 +1,166 @@
+{
+  "valid": true,
+  "records": {
+    "control": {
+      "command": [
+        "/root/control",
+        "--packed",
+        "--curve",
+        "131",
+        "--run-id",
+        "1",
+        "--threads",
+        "8",
+        "--steps",
+        "1",
+        "--launches",
+        "1",
+        "--verify",
+        "0",
+        "--bench"
+      ],
+      "returncode": 0,
+      "output": "packed kernel: 108 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 0\npacked state tile: 256\nbackend cuda-packed131: 8 threads x 16 slots x 1 lanes = 128 walks, dp weight 0, 1 steps per launch\n       0.0 s       1.151 M it/s         128 iterations         0 dp         0 stored         0 dropped\n  finished: 0.975 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+      "timedOut": false,
+      "binarySha256Before": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+      "binarySha256After": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+      "sourceSha256Before": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "sourceSha256After": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "calibration": {
+        "valid": true,
+        "mode": "control",
+        "observedFunctionSharedBytes": 0,
+        "observedDeviceReservedBytes": null,
+        "compiledSharedExtentBytes": 0,
+        "resources": {
+          "registers": 108,
+          "localBytes": 0,
+          "sharedBytes": 0
+        },
+        "includedInRanking": false,
+        "completed": {
+          "valid": true,
+          "name": "control",
+          "command": [
+            "/root/control",
+            "--packed",
+            "--curve",
+            "131",
+            "--run-id",
+            "1",
+            "--threads",
+            "8",
+            "--steps",
+            "1",
+            "--launches",
+            "1",
+            "--verify",
+            "0",
+            "--bench"
+          ],
+          "returncode": 0,
+          "raw": "packed kernel: 108 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 0\npacked state tile: 256\nbackend cuda-packed131: 8 threads x 16 slots x 1 lanes = 128 walks, dp weight 0, 1 steps per launch\n       0.0 s       1.151 M it/s         128 iterations         0 dp         0 stored         0 dropped\n  finished: 0.975 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "rate": 0.975,
+          "expectedIterations": 128,
+          "reportedIterations": 128,
+          "reports": 0,
+          "verified": 0,
+          "dropped": 0,
+          "runtimeResources": {
+            "registers": 108,
+            "localBytes": 0,
+            "sharedBytes": 0
+          },
+          "runtimeWeightedPrefix": 2,
+          "runtimeCompactState": 1,
+          "runtimeSharedSigma": 0
+        }
+      }
+    },
+    "shared1": {
+      "command": [
+        "/root/shared1",
+        "--packed",
+        "--curve",
+        "131",
+        "--run-id",
+        "1",
+        "--threads",
+        "8",
+        "--steps",
+        "1",
+        "--launches",
+        "1",
+        "--verify",
+        "0",
+        "--bench"
+      ],
+      "returncode": 0,
+      "output": "packed kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked state tile: 256\nbackend cuda-packed131: 8 threads x 16 slots x 1 lanes = 128 walks, dp weight 0, 1 steps per launch\n       0.0 s       1.466 M it/s         128 iterations         0 dp         0 stored         0 dropped\n  finished: 1.141 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+      "timedOut": false,
+      "binarySha256Before": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52",
+      "binarySha256After": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52",
+      "sourceSha256Before": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "sourceSha256After": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "calibration": {
+        "valid": true,
+        "mode": "shared1",
+        "observedFunctionSharedBytes": 1792,
+        "observedDeviceReservedBytes": 1024,
+        "compiledSharedExtentBytes": 2816,
+        "resources": {
+          "registers": 104,
+          "localBytes": 0,
+          "sharedBytes": 1792
+        },
+        "includedInRanking": false,
+        "completed": {
+          "valid": true,
+          "name": "shared1",
+          "command": [
+            "/root/shared1",
+            "--packed",
+            "--curve",
+            "131",
+            "--run-id",
+            "1",
+            "--threads",
+            "8",
+            "--steps",
+            "1",
+            "--launches",
+            "1",
+            "--verify",
+            "0",
+            "--bench"
+          ],
+          "returncode": 0,
+          "raw": "packed kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked state tile: 256\nbackend cuda-packed131: 8 threads x 16 slots x 1 lanes = 128 walks, dp weight 0, 1 steps per launch\n       0.0 s       1.466 M it/s         128 iterations         0 dp         0 stored         0 dropped\n  finished: 1.141 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+          "rate": 1.141,
+          "expectedIterations": 128,
+          "reportedIterations": 128,
+          "reports": 0,
+          "verified": 0,
+          "dropped": 0,
+          "runtimeResources": {
+            "registers": 104,
+            "localBytes": 0,
+            "sharedBytes": 1792
+          },
+          "runtimeWeightedPrefix": 2,
+          "runtimeCompactState": 1,
+          "runtimeSharedSigma": 1
+        }
+      }
+    }
+  },
+  "binarySha256": {
+    "control": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+    "shared1": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52"
+  },
+  "sourceHashes": {
+    "control": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+    "shared1": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868"
+  },
+  "expectedFileSha256": "1e035c3f2883d778f55664f15fc56322a1334d64c92052f3309d6135b8a574b6"
+}

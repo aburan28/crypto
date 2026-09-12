@@ -1,0 +1,166 @@
+{
+  "valid": true,
+  "scope": "Independent predispatch source, native-code, prebuild, calibration and bounded-workload review; no GPU execution or throughput conclusion yet",
+  "reviewedAtUtc": "2026-09-12T10:17:05.912518+00:00",
+  "owner": "/root/shared_gpu_validation",
+  "prebuildTerminal": {
+    "session": 14855,
+    "exitCode": 0,
+    "app": "ap-daT6hxLS2qS9p3tLbnnc36",
+    "confirmation": "Producer terminal receipt relayed by root"
+  },
+  "driverFreezeSha256": "da0457aea44201d89425d9c8edaa6e28b395bcfd5abf1029e720b17b38716c6d",
+  "driverSha256": "9069cc089710d455ff7546c09fe95de6415eb76b9b0b02639ebe3e46ef16a718",
+  "driverFiles": {
+    "run.py": "9069cc089710d455ff7546c09fe95de6415eb76b9b0b02639ebe3e46ef16a718",
+    "plan/expected.json": "1e035c3f2883d778f55664f15fc56322a1334d64c92052f3309d6135b8a574b6",
+    "plan/gates.py": "6dd4241fc3a1a013c0bdb46211ba756b1986c6d6c058b792f68f83c73cb132b6",
+    "plan/build.py": "538aa273effa2ff0bab1a94267b40808fc379d40532fc6f0394add1405361d42",
+    "plan/checkpoint_gate.py": "e2409782aa9fa773648e928f73b2ee05dc9442d479e45147122594fcf5a9ba7f"
+  },
+  "prebuildSha256": "dbd875ce652415c4b192d61db00606e5924b605f53ebf0ac028d1379751a0a6d",
+  "prebuildBytes": 3890900,
+  "prebuildReviewSha256": "e16182856b78355c699912f8113b8c9f3719af487a5f1bf2ded3b2ef280df852",
+  "prebuildHandoffSha256": "cafb56d5045fc4700c082d04bee0a5d130aebccfdd67236825925c8fb6f6e458",
+  "sourceFiles": 160,
+  "sourceHashes": {
+    "control": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+    "shared1": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868"
+  },
+  "sourceDeltaFromReviewedSnapshot": [
+    "include/packedengine.cuh"
+  ],
+  "fullNativeCode": {
+    "control": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4416,
+          "encodingSha256": "a7153ee6953b8112f17a6514818cce66d91b3d774e0027cf5dea11a6b02703b1",
+          "instructionTextSha256": "7fc30a4a840e3ffd33c48b6db395f882033c5e4387f66b1db5dc76976e1e50cd"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 108,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "d7ec0fe66c1d187ffcf1eb340fb1af99fe3e3aa29124436bc4744eecfe4ce6cb",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    },
+    "shared1": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4528,
+          "encodingSha256": "54a0d24cd6f8d1d9fe625c4f2e583b002af42dde15cb5b7b3375be84f666a837",
+          "instructionTextSha256": "027000298030fc60ac1a18acde77dc1c91097090670630bde843cdc984d311ce"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "d7ec0fe66c1d187ffcf1eb340fb1af99fe3e3aa29124436bc4744eecfe4ce6cb",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    }
+  },
+  "binaries": {
+    "control": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+    "shared1": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52"
+  },
+  "arithmeticBinaries": {
+    "control": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+    "shared1": "d88738a146ac085cb48ccdef821119b75687e656f6907487b96bb21b504a06d0"
+  },
+  "storageBinaries": {
+    "control": "26b60cd1827b48c95932326deeab2c1b554bd86eb5a693b018748c6e059b53b2",
+    "shared1": "2626a242efe7fc48e628adf0c7f0703e30d7ccf38b920a8b1bbfea1887c871fc"
+  },
+  "sharedProbeBinaries": {
+    "control": "3be33676d953bdd5d7739f9fbba61f038ffb1bbda8fc9e0967bf0e5735444fc2",
+    "shared1": "de04f0753ca89e33539875ccaffceb1391e724d4d52671e31117b620035a9085"
+  },
+  "compileAttempts": 8,
+  "runtimeResources": "Pending first two untimed calibrations",
+  "calibrationReview": {
+    "firstClients": "8 workers x 16 slots x 1 step x 1 launch = 128 updates each; no reports",
+    "candidateReservedBytes": 1024,
+    "candidateFirstObservationAccepted": [
+      1792,
+      2816
+    ],
+    "laterResourceRule": "Every client marker must exactly match first calibration; no alternate-size fallback",
+    "custody": "Fresh exclusive-create calibration payload hash and expected source/binary hashes; nested checkpoint children import the hash; final hash checked",
+    "compiledSharedExtentBytes": 2816
+  },
+  "preTimingGates": {
+    "arithmeticPassLinesPerMode": 6,
+    "storageCasesPerMode": 128,
+    "storageRecordsPerMode": 297344,
+    "sharedProbeScenariosPerMode": 21,
+    "sharedProbeInputPairsPerMode": 21036,
+    "sharedProbeBlockSnapshotsPerMode": 114,
+    "sharedProbeWordsPerMode": 51072,
+    "normalizedStates": [
+      64,
+      16384
+    ],
+    "checkpointChildren": 28,
+    "checkpointSuccesses": 26,
+    "checkpointExpectedWorkerRejections": 2,
+    "checkpointComparisons": 12
+  },
+  "timing": {
+    "scalarWalks": 6160384,
+    "workers": 385024,
+    "steps": 1024,
+    "launches": 32,
+    "updatesPerRow": 201863462912,
+    "excludedWarmups": 2,
+    "bracketScreenRows": 3,
+    "qualification": "candidate > 1.005 * max(two controls)",
+    "rowsIfUnqualified": 5,
+    "rowsIfQualified": 17,
+    "conditionalBenchmarkPairs": 3,
+    "conditionalDp34Pairs": 3,
+    "allSixFreshCorporaMustMatch": true,
+    "zeroDroppedReports": true,
+    "targetBillionScalarUpdatesPerSecond": 26
+  },
+  "authorizedNextAction": "Exactly one existing run.py::main GPU invocation on one RTX-PRO-6000; no retry or variant",
+  "limitations": [
+    "No runtime resource size or device correctness established by CPU evidence.",
+    "No target-solving or corpus-solver command is in this fixed invocation plan.",
+    "Independent review does not establish speedup or the 26B/s goal."
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  "valid": true,
+  "evidenceClass": "finite same-GPU arithmetic and walk benchmark with complete bounded validation",
+  "reviewer": "/root/shared_gpu_validation",
+  "reviewedAtUtc": "2026-09-12T10:30:51.847853+00:00",
+  "submission": {
+    "count": 1,
+    "execSession": 73822,
+    "terminalExitCode": 0,
+    "app": "ap-7tbIJ899Zxa86ccjfx4XZq",
+    "retries": 0
+  },
+  "rawArtifact": {
+    "path": "/private/tmp/ecc2k-shared-sigma-walk-20260912/result.json",
+    "sha256": "ce331c88a096637a23f9f5a4d632a535f1c5d89e2d112d31e41599f7446df406",
+    "bytes": 4614229,
+    "remoteArtifact": "/data/shared-sigma-walk/1789208626831975044.json",
+    "returnReceipt": "/private/tmp/ecc2k-shared-sigma-walk-20260912/result.json.return.json",
+    "returnReceiptSha256": "ad9bf0567c09a067a99f86693a4ca7113430a771945d4aa83519509a0aa9d1c2",
+    "log": "/private/tmp/ecc2k-shared-sigma-gpu-run-20260912.log",
+    "logSha256": "1f15a90994e515039787267270607d2026fed50073d2934e0b29124b58e0832f"
+  },
+  "predispatchReview": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/shared-sigma-gpu-predispatch-review.json",
+    "sha256": "17e9806465392b81667557ef22674590399446788d8b893ba03774efab99af65"
+  },
+  "frozenArtifactsUnchanged": true,
+  "driverSha256": "9069cc089710d455ff7546c09fe95de6415eb76b9b0b02639ebe3e46ef16a718",
+  "driverFreezeSha256": "da0457aea44201d89425d9c8edaa6e28b395bcfd5abf1029e720b17b38716c6d",
+  "prebuildSha256": "dbd875ce652415c4b192d61db00606e5924b605f53ebf0ac028d1379751a0a6d",
+  "sourceHashes": {
+    "control": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+    "shared1": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868"
+  },
+  "sourceFileCount": 160,
+  "layoutHelperSha256": "5b8edbf0346c9d48f89680ca030b8b1d38ef90d2cbdd86959f8db2c818c937f7",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "toolchains": {
+    "control": "13.3.73",
+    "shared1": "13.3.73"
+  },
+  "nativeOnlyJitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-8ecf1cd9-adf6-bb4c-2550-1918fb792f28",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-8ecf1cd9-adf6-bb4c-2550-1918fb792f28",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "36"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-8ecf1cd9-adf6-bb4c-2550-1918fb792f28",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-8ecf1cd9-adf6-bb4c-2550-1918fb792f28",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2362 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "69"
+    }
+  },
+  "modeBindings": {
+    "control": {
+      "mode": "control",
+      "toolchain": "13.3.73",
+      "binarySha256": "4c05d504eb3e097534d3ad1e7e8f1ff219305fa83ecfd2b7eea835166dd59f99",
+      "arithmeticBinarySha256": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+      "storageBinarySha256": "26b60cd1827b48c95932326deeab2c1b554bd86eb5a693b018748c6e059b53b2",
+      "sharedProbeBinarySha256": "3be33676d953bdd5d7739f9fbba61f038ffb1bbda8fc9e0967bf0e5735444fc2",
+      "runtimeCalibrationSha256": "96b593c7198204bb1f3401ee48402d93fa16ce809592ef7bfc23d236d67c34ed",
+      "sourceSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "sourceFileCount": 160,
+      "flags": {
+        "THREADS": 256,
+        "STREAM_KARAT": 0,
+        "SMEM_SPILL": 0,
+        "PACKED_SINGLE_PRODUCT": 1,
+        "PACKED_CACHE_DENOM": 1,
+        "PACKED_BY_VALUE": 1,
+        "PACKED_PERM_SIGMA": 3,
+        "PACKED_POLY_CHAIN": 1,
+        "PACKED_UNROLL_INV": 1,
+        "PACKED_PAIR_PRODUCTS": 1,
+        "PACKED_POLY_STATE": 1,
+        "PACKED_DIRECT_REDUCE": 1,
+        "PACKED_GENERATED_PRODUCT": 1,
+        "PACKED_CLMAD": 1,
+        "PACKED_STATE_TILE": 256,
+        "PACKED_WEIGHTED_PREFIX": 2,
+        "BATCH": 16,
+        "MINBLOCKS": 2,
+        "PACKED_COMPACT_STATE": 1,
+        "PACKED_SHARED_SIGMA": 0
+      },
+      "runtimeResources": {
+        "registers": 108,
+        "localBytes": 0,
+        "sharedBytes": 0
+      },
+      "entrypoint": "/root/control"
+    },
+    "shared1": {
+      "mode": "shared1",
+      "toolchain": "13.3.73",
+      "binarySha256": "b615b2035a7c7b77038c99f41647c6da59bf2148b64be395d3f00ebb632c8f52",
+      "arithmeticBinarySha256": "d88738a146ac085cb48ccdef821119b75687e656f6907487b96bb21b504a06d0",
+      "storageBinarySha256": "2626a242efe7fc48e628adf0c7f0703e30d7ccf38b920a8b1bbfea1887c871fc",
+      "sharedProbeBinarySha256": "de04f0753ca89e33539875ccaffceb1391e724d4d52671e31117b620035a9085",
+      "runtimeCalibrationSha256": "96b593c7198204bb1f3401ee48402d93fa16ce809592ef7bfc23d236d67c34ed",
+      "sourceSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+      "sourceFileCount": 160,
+      "flags": {
+        "THREADS": 256,
+        "STREAM_KARAT": 0,
+        "SMEM_SPILL": 0,
+        "PACKED_SINGLE_PRODUCT": 1,
+        "PACKED_CACHE_DENOM": 1,
+        "PACKED_BY_VALUE": 1,
+        "PACKED_PERM_SIGMA": 3,
+        "PACKED_POLY_CHAIN": 1,
+        "PACKED_UNROLL_INV": 1,
+        "PACKED_PAIR_PRODUCTS": 1,
+        "PACKED_POLY_STATE": 1,
+        "PACKED_DIRECT_REDUCE": 1,
+        "PACKED_GENERATED_PRODUCT": 1,
+        "PACKED_CLMAD": 1,
+        "PACKED_STATE_TILE": 256,
+        "PACKED_WEIGHTED_PREFIX": 2,
+        "BATCH": 16,
+        "MINBLOCKS": 2,
+        "PACKED_COMPACT_STATE": 1,
+        "PACKED_SHARED_SIGMA": 1
+      },
+      "runtimeResources": {
+        "registers": 104,
+        "localBytes": 0,
+        "sharedBytes": 1792
+      },
+      "entrypoint": "/root/shared1"
+    }
+  },
+  "fullNativeCode": {
+    "control": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4416,
+          "encodingSha256": "a7153ee6953b8112f17a6514818cce66d91b3d774e0027cf5dea11a6b02703b1",
+          "instructionTextSha256": "7fc30a4a840e3ffd33c48b6db395f882033c5e4387f66b1db5dc76976e1e50cd"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 108,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "d7ec0fe66c1d187ffcf1eb340fb1af99fe3e3aa29124436bc4744eecfe4ce6cb",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    },
+    "shared1": {
+      "valid": true,
+      "sections": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "instructionSlots": 4528,
+          "encodingSha256": "54a0d24cd6f8d1d9fe625c4f2e583b002af42dde15cb5b7b3375be84f666a837",
+          "instructionTextSha256": "027000298030fc60ac1a18acde77dc1c91097090670630bde843cdc984d311ce"
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "instructionSlots": 3048,
+          "encodingSha256": "c24a292d7031215f7329d77e974a936f5c3dff650e1a7a8831c22b1b645e94ff",
+          "instructionTextSha256": "766eec000dc93adaf75869ba51d9451b4c0b8fa984e4f0ab4c4c62845e489b9e"
+        }
+      },
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "declaredLocalBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "declaredLocalBytes": 0
+        }
+      },
+      "cpuReceiptSha256": "d7ec0fe66c1d187ffcf1eb340fb1af99fe3e3aa29124436bc4744eecfe4ce6cb",
+      "comparison": "Full walk/init instruction encodings, including scoped helper bodies; metadata and pretty-printer text need not be identical."
+    }
+  },
+  "cpuCubinSha256": {
+    "control": "bc7ac573730f8e012eeccfc72c1a897743acec63ab3d362c69f0fa63bdf393b4",
+    "shared1": "908ee02ee31a9e46061a6d796c594081e67c1b9cc5285bbd13ced20b47c07e83"
+  },
+  "calibration": {
+    "payloadSha256": "96b593c7198204bb1f3401ee48402d93fa16ce809592ef7bfc23d236d67c34ed",
+    "runtimeResources": {
+      "control": {
+        "registers": 108,
+        "localBytes": 0,
+        "sharedBytes": 0
+      },
+      "shared1": {
+        "registers": 104,
+        "localBytes": 0,
+        "sharedBytes": 1792
+      }
+    },
+    "compiledResources": {
+      "control": {
+        "registers": 108,
+        "localBytes": 0,
+        "sharedBytes": 0
+      },
+      "shared1": {
+        "registers": 104,
+        "localBytes": 0,
+        "sharedBytes": 2816
+      }
+    },
+    "firstCandidateFunctionSharedBytes": 1792,
+    "deviceReservedBytes": 1024,
+    "compiledCandidateExtentBytes": 2816,
+    "observedConvention": "Function sharedSizeBytes excludes the separately observed device reservation; 1792 + 1024 = 2816",
+    "firstCalibrationUpdatesPerMode": 128,
+    "excludedFromRanking": true,
+    "allLaterRecordedMarkersExact": true,
+    "beforeAfterPayloadIdentical": true
+  },
+  "validation": {
+    "arithmeticPassLinesPerMode": [
+      "PASS: 3120 GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases",
+      "PASS: 2526 GPU polynomial reductions against long division, including ignored upper-word bits and canonical outputs",
+      "PASS: 18194 GPU polynomial products, including all 17161 basis pairs",
+      "PASS: 18194 GPU paired polynomial products against independent multiplication",
+      "PASS: 1157 GPU polynomial squares against independent multiplication and long division",
+      "PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing"
+    ],
+    "storage": {
+      "control": {
+        "valid": true,
+        "mode": "control",
+        "compactState": 1,
+        "batch": 16,
+        "cases": 128,
+        "records": 297344
+      },
+      "shared1": {
+        "valid": true,
+        "mode": "shared1",
+        "compactState": 1,
+        "batch": 16,
+        "cases": 128,
+        "records": 297344
+      }
+    },
+    "sharedProbe": {
+      "control": {
+        "valid": true,
+        "mode": "control",
+        "sharedSigma": 0,
+        "scenarios": 21,
+        "inputPairs": 21036,
+        "blockSnapshots": 114,
+        "maskWords": 51072
+      },
+      "shared1": {
+        "valid": true,
+        "mode": "shared1",
+        "sharedSigma": 1,
+        "scenarios": 21,
+        "inputPairs": 21036,
+        "blockSnapshots": 114,
+        "maskWords": 51072
+      }
+    },
+    "integrationPassLinesPerMode": [
+      "PASS: DP replay across launch boundaries, restart and checkpoint resume",
+      "PASS: byte-identical resume, scalar iteration count, incompatible checkpoint preserved",
+      "PASS: overdue walks restart without false distinguished-point reports"
+    ],
+    "normalizedStates": {
+      "small": {
+        "totalScalarSlots": 64,
+        "stateHashes": {
+          "whole": "02f544f7fa031933ba63adc1685f6bd10677fa8a04668732e04b94c0c5be774a",
+          "reports1": "7efbbbc6f30ef8a9bc8a58b0349d6de451afd264dab375d71a489da30a03d29a",
+          "reports2": "0a09fba97bd4a645daabea05a3cec05a46c34f3d4702558f28138dd7b126bb4d",
+          "guard": "f9be07631403a376209f8d31b5431a83662e36a557d0e1a2f77d74764e4a6299"
+        },
+        "reportsPerMode": 256,
+        "sortedCorpusSha256": "c4b5b3b68cc0ffa091e0a8ddc71b5931c1cd534f65f7fd70037711cb6c9d6469",
+        "clientRowsPerMode": 4
+      },
+      "fullBlocks": {
+        "totalScalarSlots": 16384,
+        "stateHashes": {
+          "whole": "5efc3170b10391672942889e978155254fc779d1b4672ba9a97deef06fece3c5"
+        },
+        "reportsPerMode": 0,
+        "sortedCorpusSha256": null,
+        "clientRowsPerMode": 1
+      }
+    },
+    "checkpoints": {
+      "children": 28,
+      "successes": 26,
+      "expectedWorkerRejections": 2,
+      "comparisons": 12,
+      "threads": [
+        8,
+        256,
+        257
+      ],
+      "coverage": {
+        "uninterrupted": 6,
+        "prefix": 6,
+        "same-mode-resume": 6,
+        "same-batch-cross-mode-resume": 6,
+        "cross-batch-prefix": 2,
+        "cross-batch-rejection": 0,
+        "worker-geometry-rejection": 2
+      },
+      "allRecordedResumeHashesEqual": true,
+      "rejectedInputHashesPreserved": true
+    },
+    "occupancy": {
+      "control": {
+        "smCount": 188,
+        "residentBlocksPerSm": 2,
+        "blockThreads": 256,
+        "autoWorkers": 96256,
+        "includedInRanking": false
+      },
+      "shared1": {
+        "smCount": 188,
+        "residentBlocksPerSm": 2,
+        "blockThreads": 256,
+        "autoWorkers": 96256,
+        "includedInRanking": false
+      }
+    },
+    "preTimingTopLevelCommands": 27,
+    "totalTopLevelCommands": 45
+  },
+  "timing": {
+    "scalarWalks": 6160384,
+    "workers": 385024,
+    "batch": 16,
+    "steps": 1024,
+    "launches": 32,
+    "updatesPerRow": 201863462912,
+    "rows": 17,
+    "excludedWarmups": 2,
+    "screenRows": 3,
+    "confirmationRows": 6,
+    "collectionRows": 6,
+    "allRowsCompleted": true,
+    "allRowsZeroDrops": true,
+    "allRowsSameSourceBinaryCalibrationBindings": true,
+    "screenRatesM": [
+      14483.28,
+      14557.651,
+      14377.588
+    ],
+    "screenQualificationThresholdM": 14555.696399999999,
+    "screenControlDriftPercent": -0.729751824172431,
+    "screenQualified": true,
+    "metrics": {
+      "confirmation": {
+        "modes": {
+          "control": {
+            "samplesM": [
+              14327.94,
+              14284.151,
+              14296.584
+            ],
+            "medianM": 14296.584,
+            "minM": 14284.151,
+            "maxM": 14327.94,
+            "medianB": 14.296584000000001,
+            "minB": 14.284151,
+            "maxB": 14.32794
+          },
+          "shared1": {
+            "samplesM": [
+              14478.495,
+              14407.711,
+              14411.102
+            ],
+            "medianM": 14411.102,
+            "minM": 14407.711,
+            "maxM": 14478.495,
+            "medianB": 14.411102000000001,
+            "minB": 14.407710999999999,
+            "maxB": 14.478495
+          }
+        },
+        "medianGainPercent": 0.8010165225483235,
+        "medianGainPercentDecimal": "0.801016522548323431667313000",
+        "pairedGainPercent": [
+          1.0507791071151888,
+          0.8650146585540855,
+          0.8010165225483235
+        ],
+        "allThreePairsPositive": true
+      },
+      "collection": {
+        "modes": {
+          "control": {
+            "samplesM": [
+              13960.757,
+              13960.68,
+              13974.133
+            ],
+            "medianM": 13960.757,
+            "minM": 13960.68,
+            "maxM": 13974.133,
+            "medianB": 13.960757,
+            "minB": 13.96068,
+            "maxB": 13.974133
+          },
+          "shared1": {
+            "samplesM": [
+              14093.912,
+              14092.497,
+              14103.56
+            ],
+            "medianM": 14093.912,
+            "minM": 14092.497,
+            "maxM": 14103.56,
+            "medianB": 14.093912,
+            "minB": 14.092497,
+            "maxB": 14.10356
+          }
+        },
+        "medianGainPercent": 0.9537806581691809,
+        "medianGainPercentDecimal": "0.953780658169180940546418800",
+        "pairedGainPercent": [
+          0.9537806581691809,
+          0.9442018583622002,
+          0.9261898394698261
+        ],
+        "allThreePairsPositive": true
+      }
+    }
+  },
+  "collectionEvidence": {
+    "freshCorpora": 6,
+    "recordsEach": 5149,
+    "bytesEach": 164768,
+    "allSixSortedSha256Equal": true,
+    "sortedSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b",
+    "timedReferenceVerifiedRecordsPerRow": 0
+  },
+  "goal": {
+    "targetBillionScalarUpdatesPerSecond": 26,
+    "achieved": false,
+    "candidateBenchmarkMedianB": 14.411102000000001,
+    "candidateCollectionMedianB": 14.093912,
+    "requiredFactorFromCandidateBenchmarkMedian": 1.804164594768672
+  },
+  "limitations": [
+    "One fixed configuration, one GPU and one finite panel; no cross-device or repeated-panel performance conclusion.",
+    "Control screen drift was -0.729751824172431 percent; three alternating pairs support the bounded comparison but do not prove universal causality or a statistical population estimate.",
+    "Runtime shared size and occupancy were observed, but bank-conflict behavior, memory-traffic savings and performance-counter attribution were not measured.",
+    "The six temporary DP34 corpora were compared and hashed inside the frozen runner; the returned raw artifact retains sizes, counts and hashes rather than the corpus bytes. Timed rows deliberately use --verify 0; separate finite correctness gates supply reference checks.",
+    "No challenge-solving, private-key recovery, new kernel variant, public PR mutation or multi-GPU rate aggregation was performed.",
+    "The 26 billion complete scalar updates per second target remains unmet."
+  ]
+}
