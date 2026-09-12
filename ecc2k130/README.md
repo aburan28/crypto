@@ -32,7 +32,11 @@ a Karatsuba GF(2^131) multiplier in this normal basis, a step unit that does
 `R + sigma^j(R)` in `5 + 5/W` multiplies by sharing one eight-multiply
 inversion across a batch of `W` walks (the same Montgomery trick as this
 client's 32-walk words), and a walker that reports distinguished points.
-Its testbenches are checked against the field model in `codegen/`.
+Its testbenches are checked against the field model in `codegen/`. An
+AXI-Lite register block, a host program that speaks `aws/worker.py`'s
+client contract, and the AWS F2 image and fleet scripts are there too
+(`hdl/ecc2k130/aws/README.md`); FPGA workers feed the same corpus as the
+GPUs.
 
 Two targets are configured:
 
