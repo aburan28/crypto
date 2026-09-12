@@ -265,10 +265,22 @@ the same revision as the 48-engine image): placed at +0.360 ns, routed at
 engines and the spine, not the reset: a fill's batch id into a leaf
 table's write address (3.0 ns with the block RAM's setup) and a stage's
 `up_valid` into the 300-bit insert mux of the stage below. Its manifest
-had the same clipped id; the corrected resubmission is
-`agfi-00c9bd0dc08fef595` (`20260912-193357-n64-c333-idfix`), and at 5.31
-clocks per step it should hold 4.0 G steps/s. A second 64-engine build
-of the revision with the level in the tag and reset-free data registers
-(`20260912-201058-n64-c333`) and an 80-engine build of the revision with
-the retire-free memories (`20260912-204307-n80-c333`, 17 tiles per
-engine, 67% of the block RAM) were running when this was written.
+had the same clipped id; the corrected resubmission,
+**`agfi-00c9bd0dc08fef595`** (`20260912-193357-n64-c333-idfix`), loads,
+answers 64 × 512 walks at 333.3 MHz, takes 9.7 s to seed, and holds
+**4 013.7 M steps/s** (0 dropped; 32 points verified in a second run) —
+5.32 clocks per step. It is the promoted image.
+
+The same 64 engines with the level in the tag and reset-free data
+registers (`20260912-201058-n64-c333`) placed at +0.427 ns (against
++0.360) and routed at **+0.026 ns**, its worst path now the fill's state
+(`fill_pend → fill_ok → p1_take → p0_adv → in_ready`) into the 300
+clock enables of the step unit's first input register — since removed
+by letting an input stage take a walk only when it is empty, so its
+enable is its own valid bit (5.31 clocks per step in simulation, from
+5.29). The 300-bit insert mux's select is likewise now a register in
+its own stage, and the leaf writes go through a register with one
+address copy per table. An 80-engine build of the revision with the
+retire-free memories (`20260912-204307-n80-c333`, 17 tiles per engine,
+67% of the block RAM) placed at +0.089 ns and was routing when this was
+written.
