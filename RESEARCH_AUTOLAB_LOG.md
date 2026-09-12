@@ -7866,9 +7866,10 @@ applied to structured problems.
 
 ### Task picked
 
-Run the registered IC boundary beats. Ledger priority 1 was the Koblitz
-`vs_rho` push: whole-process wall at `n = 37`, or charged at `n = 41` with a
-≥20% margin, after the `n = 53` construction probe.
+Run the registered IC boundary beats. Ledger priority 1 at the time was the
+Koblitz `vs_rho` push: whole-process wall at `n = 37`, or charged at `n = 41`
+with a ≥20% margin, after the `n = 53` construction probe. The `vs_rho` record
+moved on `main` mid-session; see Finding 2.
 
 ### Work done
 
@@ -7937,8 +7938,13 @@ The row claimed `N37_DIRECT_1024_CHARGED_CROSSOVER`. Three independent problems:
 Index calculus is 1.15x behind in its best mode and 1.58x in the one the
 registered beat runs; on whole-process wall over the same panel it is 6.45x.
 
-The row is retracted into `history` with the reason, and `current` now records
-`NO_CROSSOVER_MEASURED_N13_N37_N41_N53`.
+While this was being measured, `e14e1d8a` on `main` superseded the row from a
+different direction — a `two_torsion_saturated` base at `n = 41` and the `n = 53`
+same-target result — and moved it into `history` with no note. So the row is
+already gone; what was missing is *why*. This session adds the retraction reason
+to that history entry and records the remeasurement beside the new record as an
+observation, not as a competing claim. `current` is left alone: stage 39/40/42
+is a different base family and I have not audited it.
 
 ### Finding 3: my own first remeasurement double-counted setup
 
@@ -7985,13 +7991,25 @@ which is the opposite of what a crossover story needs.
 
 ### Findings
 
-**`n = 41` is the wrong next target and should never have been one.** The
-previous row asked for a charged win there with a ≥20% margin. Discount the
-6877 ms support build entirely and per-target collection at `n = 41` is still
-821.7 ms against ρ's 247.5 ms, so the amortization-invariant part is already
-3.3x over budget: no number of targets can cross it. The gate was unreachable by
-construction, not merely unmet. Priority 1 is now `n = 37`, the only rung where
-the two are within a factor of 1.2 of each other.
+**On this base family, `n = 41` is unreachable, and the two `n = 41` results now
+in the ledger disagree.** The retracted row asked for a charged win at `n = 41`
+with a ≥20% margin. On the autolab's `signed_expanded` base, discount the 6877 ms
+support build entirely and per-target collection there is still 821.7 ms against
+ρ's 247.5 ms — 3.3x over budget in the amortization-invariant term, so no number
+of targets can cross it. The gate was unreachable by construction on this
+family, not merely unmet.
+
+The record `main` installed the same day reports the opposite at the same rung:
+`ic_over_rho_online = 0.286` on a `two_torsion_saturated` base over 5 targets.
+That is not yet a contradiction — different base family, different target count,
+and its own `amortised` ratio is 5.03 with a full available wall of 110.79x, so
+the 0.286 excludes base construction rather than disputing its size. But the two
+cannot both be quoted bare. Logged in the ledger as `open_reconciliation`: run
+both families through one harness, at one target count, with one stated cost
+boundary. Until then neither `n = 41` number travels without its configuration.
+
+`n = 37` is the only rung on the autolab family where the two are within a factor
+of 1.2 of each other.
 
 **The direct arm's largest charged component is an assertion.**
 `solution_validation_ms` is 7.78 of `partition_walk`'s 14.78 ms/target, 53%. It
