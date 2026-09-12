@@ -1213,7 +1213,7 @@ impl SymmetrisedS4 {
 
     /// The three `F_p`-components of `H(e₁, e₂, e₃, x_R)` as sparse
     /// coefficient maps over the monomials of total degree ≤ 4.
-    fn weil_restrict(&self, f: &Fp3, x_r: &E3) -> [HashMap<[u8; 3], u64>; 3] {
+    pub fn weil_restrict(&self, f: &Fp3, x_r: &E3) -> [HashMap<[u8; 3], u64>; 3] {
         let mut out = [HashMap::new(), HashMap::new(), HashMap::new()];
         let mut pow = [Fp3::ONE; 5];
         for i in 1..5 {
@@ -1396,6 +1396,11 @@ pub struct SolveStats {
     pub retried_at_degree_11: u64,
     pub retried_at_degree_12: u64,
     pub retried_at_degree_13: u64,
+    /// Residuals whose multiplication matrix could not be built because
+    /// a border monomial landed on a non-pivot column at the top
+    /// degree.  These go straight to the fallback instead of paying
+    /// degrees 11, 12 and 13 to fail the same way.
+    pub border_unreachable: u64,
     /// Residuals given up on after degree 13 (affine Macaulay matrix
     /// never closed the quotient); these are routed to the MITM oracle.
     pub unsolved: u64,
@@ -1437,20 +1442,53 @@ pub fn solve_s4_subspace(
     let comps = pre.weil_restrict(f, x_r);
     muls += pre.terms.len() as u64 * 15;
 
+    let mut border_retry_seen = false;
     for degree in [10u8, 11, 12, 13] {
-        match solve_at_degree(inst, &comps, degree, rng, stats, &mut muls) {
+        let mut border_unreachable = false;
+        match solve_at_degree(
+            inst,
+            &comps,
+            degree,
+            rng,
+            stats,
+            &mut muls,
+            &mut border_unreachable,
+        ) {
             Some(res) => {
                 stats.fp_muls += muls;
                 return Some(res);
             }
-            None => match degree {
-                10 => stats.retried_at_degree_11 += 1,
-                11 => stats.retried_at_degree_12 += 1,
-                12 => stats.retried_at_degree_13 += 1,
-                _ => stats.unsolved += 1,
-            },
+            None => {
+                // The border monomial the multiplication matrix needs
+                // is a non-pivot column at the top degree.  Raising the
+                // degree reproduces the same situation one rung up —
+                // measured: every retry in this module's runs ended in
+                // the fallback, none in a solution — so stop now rather
+                // than paying degrees 11, 12 and 13 at `Θ(d⁶)` each.
+                border_retry_seen |= border_unreachable;
+                if border_unreachable && !border_retry_enabled() {
+                    stats.border_unreachable += 1;
+                    stats.unsolved += 1;
+                    if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
+                        eprintln!("  degree {degree}: border unreachable, no retry");
+                    }
+                    stats.fp_muls += muls;
+                    return None;
+                }
+                match degree {
+                    10 => stats.retried_at_degree_11 += 1,
+                    11 => stats.retried_at_degree_12 += 1,
+                    12 => stats.retried_at_degree_13 += 1,
+                    _ => {}
+                }
+            }
         }
     }
+
+    if border_retry_seen {
+        stats.border_unreachable += 1;
+    }
+    stats.unsolved += 1;
     if std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some() {
         eprintln!("  gave up after degree 13");
     }
@@ -1458,9 +1496,21 @@ pub fn solve_s4_subspace(
     None
 }
 
+/// Keep retrying degrees 11-13 after the border check has already shown
+/// they must fail.  Off by default; `GAUDRY_BORDER_RETRY=1` restores the
+/// pre-check behaviour so the saving stays measurable both ways and the
+/// earlier runs in `RESEARCH_RESIDUAL_WALKS.md` can be reproduced.
+fn border_retry_enabled() -> bool {
+    std::env::var_os("GAUDRY_BORDER_RETRY").is_some()
+}
+
 /// One attempt at Macaulay degree `degree`; `None` when the quotient
 /// does not close at that degree.  On success returns the sorted
 /// solution triples.
+/// `border_unreachable` is set when the multiplication matrix cannot be
+/// built because a border monomial falls on a non-pivot column at the
+/// top degree — a truncation artefact that recurs identically one
+/// degree up, so the caller uses it to stop retrying.
 fn solve_at_degree(
     inst: &Instance3,
     comps: &[HashMap<[u8; 3], u64>; 3],
@@ -1468,6 +1518,7 @@ fn solve_at_degree(
     rng: &mut StdRng,
     stats: &mut SolveStats,
     muls: &mut u64,
+    border_unreachable: &mut bool,
 ) -> Option<Vec<[u64; 3]>> {
     let p = inst.curve.field.p;
     let debug = std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some();
@@ -1508,6 +1559,7 @@ fn solve_at_degree(
     let pivots = echelon_mod_p(&mut mat, p, muls);
     stats.echelon_muls += *muls - before;
     let pivot_set: std::collections::HashSet<usize> = pivots.iter().copied().collect();
+
     // Standard monomials: non-pivot columns of degree ≤ degree − 1.
     let standard: Vec<usize> = (0..cols.len())
         .filter(|&c| !pivot_set.contains(&c))
@@ -1526,6 +1578,45 @@ fn solve_at_degree(
         stats.macaulay_muls += *muls - before;
         return None;
     }
+
+    // **Is the border reachable?**  The multiplication matrix needs the
+    // normal form of `e₁ · b` for every standard `b`.  A column is
+    // reducible only if it is a pivot, and `standard` deliberately
+    // stops at degree `degree − 1`, so a product landing on a *non-pivot
+    // column of degree exactly `degree`* has no normal form at all.
+    //
+    // That is the failure this solver actually hits — not solutions at
+    // infinity.  The ideal here is zero-dimensional (every variable has
+    // a pure power among the leading monomials) and the quotient is
+    // finite; it is the border of the staircase that the degree cut
+    // truncates.  Raising the degree re-creates the same situation one
+    // rung up, which is why every retry in the measured runs ended in
+    // the fallback and none in a solution.  Detect it once and let the
+    // caller stop, rather than paying degrees 11, 12 and 13 at `Θ(d⁶)`
+    // each to fail identically.
+    let standard_set: std::collections::HashSet<usize> = standard.iter().copied().collect();
+    let unreachable = standard.iter().find_map(|&bc| {
+        let b = cols[bc];
+        let shifted = [b[0] + 1, b[1], b[2]];
+        match col_index.get(&shifted) {
+            None => Some(shifted),
+            Some(&sc) if !pivot_set.contains(&sc) && !standard_set.contains(&sc) => Some(shifted),
+            Some(_) => None,
+        }
+    });
+    if let Some(m) = unreachable {
+        *border_unreachable = true;
+        if debug {
+            eprintln!(
+                "  degree {degree}: border monomial {m:?} (deg {}) is neither a pivot nor \
+                 standard — no normal form exists at this degree",
+                m[0] + m[1] + m[2]
+            );
+        }
+        stats.macaulay_muls += *muls - before;
+        return None;
+    }
+
     stats.quotient_dim_total += dim as u64;
     let std_index: HashMap<usize, usize> =
         standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
@@ -1851,12 +1942,31 @@ fn mult_matrix(
     muls: &mut u64,
 ) -> Option<Vec<Vec<u64>>> {
     let dim = standard.len();
+    let debug = std::env::var_os("GAUDRY_DEBUG_SOLVE").is_some();
     let mut m = vec![vec![0u64; dim]; dim];
     for (bi, &bc) in standard.iter().enumerate() {
         let b = cols[bc];
         let shifted = [b[0] + var[0], b[1] + var[1], b[2] + var[2]];
-        let &sc = col_index.get(&shifted)?;
-        let nf = nfs.nf(sc, muls)?;
+        let Some(&sc) = col_index.get(&shifted) else {
+            if debug {
+                eprintln!(
+                    "    mult_matrix: {shifted:?} (deg {}) is not a column",
+                    shifted[0] + shifted[1] + shifted[2]
+                );
+            }
+            return None;
+        };
+        let Some(nf) = nfs.nf(sc, muls) else {
+            if debug {
+                eprintln!(
+                    "    mult_matrix: no normal form for {shifted:?} (deg {}), from standard \
+                     {b:?} (deg {})",
+                    shifted[0] + shifted[1] + shifted[2],
+                    b[0] + b[1] + b[2]
+                );
+            }
+            return None;
+        };
         for (ri, &val) in nf.iter().enumerate() {
             m[ri][bi] = val;
         }
@@ -3008,6 +3118,70 @@ mod tests {
         // few need the degree-11 matrix.
         assert!(stats.retried_at_degree_11 * 10 <= stats.solves, "{stats:?}");
         assert!(stats.quotient_dim_total >= 40 * 60, "{stats:?}");
+    }
+
+    /// The border check must be *exactly* the residuals no Macaulay
+    /// degree solves — it may not lose a single solution.
+    ///
+    /// This is the guard on the one thing that could go wrong: the
+    /// check runs before the multiplication matrix is built, so a
+    /// false positive would silently send a solvable residual to the
+    /// fallback and cost a relation.  Running the same residual stream
+    /// with and without the retries (`GAUDRY_BORDER_RETRY`) has to give
+    /// the same answer on every residual, not merely the same counts.
+    #[test]
+    fn the_border_check_sends_only_the_residuals_no_degree_solves_to_the_fallback() {
+        let inst = generate_instance3(271, 1);
+        let pre = SymmetrisedS4::precompute(&inst.curve);
+        let p = inst.curve.field.p;
+
+        let run = |retry: bool| -> (Vec<Option<Vec<[u64; 3]>>>, SolveStats) {
+            // The env var is process-wide, so the two passes are run
+            // back to back rather than in parallel.
+            if retry {
+                std::env::set_var("GAUDRY_BORDER_RETRY", "1");
+            } else {
+                std::env::remove_var("GAUDRY_BORDER_RETRY");
+            }
+            let mut rng = StdRng::seed_from_u64(7);
+            let mut stats = SolveStats::default();
+            let mut out = Vec::new();
+            for k in 0..600u64 {
+                let x_r = E3([
+                    (k * 7919 + 1) % p,
+                    (k * 104_729 + 13) % p,
+                    (k * 15_485_863 + 7) % p,
+                ]);
+                out.push(solve_s4_subspace(&inst, &pre, &x_r, &mut rng, &mut stats));
+            }
+            (out, stats)
+        };
+
+        let (with_retry, stats_retry) = run(true);
+        let (without, stats_skip) = run(false);
+        std::env::remove_var("GAUDRY_BORDER_RETRY");
+
+        assert_eq!(
+            with_retry, without,
+            "skipping the retries changed an answer"
+        );
+        assert!(
+            stats_retry.border_unreachable > 0,
+            "no residual hit the border case, so this test proves nothing"
+        );
+        assert_eq!(
+            stats_retry.border_unreachable, stats_skip.border_unreachable,
+            "the two passes disagree about which residuals are border cases"
+        );
+        // The retries the check removes, and the work they cost.
+        assert!(stats_retry.retried_at_degree_11 > 0);
+        assert_eq!(stats_skip.retried_at_degree_11, 0);
+        assert!(
+            stats_skip.fp_muls < stats_retry.fp_muls,
+            "skipping three Theta(d^6) reductions should cost less: {} vs {}",
+            stats_skip.fp_muls,
+            stats_retry.fp_muls
+        );
     }
 
     #[test]
