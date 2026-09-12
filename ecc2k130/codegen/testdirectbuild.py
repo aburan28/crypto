@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0', clmad='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,16 +47,17 @@ def environment(mode='0', generated='0', tile='0', clmad='0'):
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0', clmad='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
             f'packed native carryless multiply: {clmad}\n'
+            f'packed weighted prefix: {weighted}\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -323,10 +324,11 @@ class GeneratedProductBuildTests(unittest.TestCase):
             self.assertEqual(tune['results'][0]['packedGeneratedProduct'], mode == '1')
 
     def audit_fixture(self, mode, arithmetic=None, failed_phase=None, failed_marker=None,
-                      clmad='0', clmad_arithmetic=None, batch=32):
+                      clmad='0', clmad_arithmetic=None, batch=32,
+                      weighted='0', weighted_arithmetic=None, paired_sigma=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode, clmad=clmad)
+            env = environment('1', mode, clmad=clmad, weighted=weighted)
             workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
@@ -334,6 +336,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                         f'packed generated product: {marker}\n'
                         'packed state tile: 0\n'
                         f'packed native carryless multiply: {clmad}\n'
+                        f'packed weighted prefix: {weighted}\n'
                         f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {workers * batch} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
@@ -352,6 +355,8 @@ class GeneratedProductBuildTests(unittest.TestCase):
                 if command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
                              + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
+                            + (f'packed arithmetic weighted prefix: {weighted}\n' if weighted_arithmetic is None else weighted_arithmetic)
+                            + ('PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n' if paired_sigma is None else paired_sigma)
                             + (f'packed arithmetic generated product: {mode}\n' if arithmetic is None else arithmetic))
                 elif command[0] == 'python3':
                     text = 'integration passed\n'
@@ -587,6 +592,111 @@ class ClmadBuildTests(unittest.TestCase):
                 failed, commands = fixture.audit_fixture('1', clmad=mode, clmad_arithmetic=marker)
                 self.assertFalse(failed['valid'])
                 self.assertIn('CLMAD identity', failed['error'])
+                self.assertEqual(len(commands), 1)
+                self.assertNotIn('integration', failed)
+
+
+class WeightedPrefixBuildTests(unittest.TestCase):
+    def weighted_environment_nodes(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_WEIGHTED_PREFIX' for t in node.targets))
+        return body[index:index + 4]
+
+    def test_environment_enforces_modes_and_required_parent_options(self):
+        body = self.weighted_environment_nodes()
+        parents = ('POLY_STATE', 'POLY_CHAIN', 'CACHE_DENOM', 'PAIR_PRODUCTS')
+        def env(value, **overrides):
+            result = dict(os=SimpleNamespace(environ={} if value is None else {'ECC_PACKED_WEIGHTED_PREFIX': value}),
+                          PACKED_PERM_SIGMA='3', **{'PACKED_' + key: '1' for key in parents})
+            result.update(overrides)
+            return result
+        for value in (None, '0', '1', '2', '-1', '3', '', 'true'):
+            scope = env(value)
+            if value in (None, '0', '1', '2'):
+                execute(body, scope)
+                self.assertEqual(scope['PACKED_WEIGHTED_PREFIX'], value or '0')
+            else:
+                with self.assertRaises(ValueError): execute(body, scope)
+        for parent in parents:
+            for mode in ('1', '2'):
+                with self.assertRaises(ValueError):
+                    execute(body, env(mode, **{'PACKED_' + parent: '0'}))
+            execute(body, env('0', **{'PACKED_' + parent: '0'}))
+        for mask in ('0', '2'):
+            with self.assertRaises(ValueError): execute(body, env('2', PACKED_PERM_SIGMA=mask))
+            execute(body, env('1', PACKED_PERM_SIGMA=mask))
+
+    def test_image_and_rebuild_identity_bind_the_exact_schedule(self):
+        class Image:
+            def __init__(self): self.calls = {}
+            def __getattr__(self, name):
+                def record(*args, **kwargs):
+                    self.calls[name] = args
+                    return self
+                return record
+        for mode in ('0', '1', '2'):
+            scope = environment('1', '1', clmad='1', weighted=mode)
+            image = Image()
+            scope.update(CUDA_VERSION='13.3.1', GENCODE='fixture', LOCAL=ROOT,
+                         modal=SimpleNamespace(Image=SimpleNamespace(from_registry=lambda *a, **k: image)))
+            assignment('image', scope)
+            self.assertEqual(image.calls['env'][0]['ECC_PACKED_WEIGHTED_PREFIX'], mode)
+            builds = [line for line in image.calls['run_commands'] if 'make gpu ' in line]
+            self.assertEqual(len(builds), 1)
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, builds[0])
+            self.assertEqual(scope['BAKED']['packedWeightedPrefix'], int(mode))
+        scope = environment('1', '1', clmad='1')
+        commands = []
+        scope.update(sh=lambda *a, **k: (0, ''),
+                     shStream=lambda command, **k: (commands.append(command) or 0, 'built'))
+        build = function('buildFor', scope)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        for mode in ('2', '1', '0'):
+            scope['PACKED_WEIGHTED_PREFIX'] = mode
+            with self.assertRaisesRegex(ValueError, 'matching baked binary'):
+                function('runBench', scope)(rebuild=False, packed=True)
+            self.assertTrue(build(32, 128, 0)[0])
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, commands[-1])
+
+    def test_missing_wrong_or_duplicate_schedule_cannot_rank(self):
+        for mode in ('0', '1', '2'):
+            check = function('checkPackedReduction', environment('1', '1', clmad='1', weighted=mode))
+            text = raw('1', '1', clmad='1', weighted=mode)
+            good = benchResult('fixture', 0, text)
+            self.assertTrue(check(good))
+            self.assertEqual(good['packedWeightedPrefix'], int(mode))
+            marker = f'packed weighted prefix: {mode}\n'
+            for bad in (text.replace(marker, ''), text + marker,
+                        raw('1', '1', clmad='1', weighted=str((int(mode) + 1) % 3)),
+                        raw('1', '1', clmad='1', weighted='3')):
+                row = benchResult('fixture', 0, bad)
+                self.assertFalse(check(row))
+                self.assertEqual(row['rate'], 0)
+                self.assertFalse(summarizeSamples([good, row])['valid'])
+
+    def test_audit_requires_schedule_and_paired_device_validation(self):
+        fixture = GeneratedProductBuildTests()
+        paired = 'PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n'
+        for mode in ('0', '1', '2'):
+            result, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, batch=16)
+            self.assertTrue(result['valid'], result.get('error'))
+            self.assertIn('PACKED_WEIGHTED_PREFIX=' + mode, commands[0])
+            for row in [result, result['deviceArithmetic'], *result['benchmark']['samples'], *result['collection']]:
+                self.assertEqual(row['expectedPackedWeightedPrefix'], int(mode))
+                self.assertEqual(row['packedWeightedPrefix'], int(mode))
+            for marker in ('', f'packed arithmetic weighted prefix: {(int(mode) + 1) % 3}\n',
+                           f'packed arithmetic weighted prefix: {mode}\n' * 2):
+                failed, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, weighted_arithmetic=marker)
+                self.assertFalse(failed['valid'])
+                self.assertIn('weighted prefix identity', failed['error'])
+                self.assertEqual(len(commands), 1)
+                self.assertNotIn('integration', failed)
+            for marker in ('', paired * 2):
+                failed, commands = fixture.audit_fixture('1', clmad='1', weighted=mode, paired_sigma=marker)
+                self.assertFalse(failed['valid'])
+                self.assertIn('paired Frobenius validation', failed['error'])
                 self.assertEqual(len(commands), 1)
                 self.assertNotIn('integration', failed)
 

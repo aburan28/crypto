@@ -18,7 +18,7 @@ class PackedAuditCountTests(unittest.TestCase):
         modeHelper = next(node for node in ast.parse(modePath.read_text()).body
                           if isinstance(node, ast.FunctionDef) and node.name == 'checkPackedReduction')
         modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0',
-                             PACKED_STATE_TILE='0', PACKED_CLMAD='0')
+                             PACKED_STATE_TILE='0', PACKED_CLMAD='0', PACKED_WEIGHTED_PREFIX='0')
         exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
         namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
                          checkPackedReduction=modeNamespace['checkPackedReduction']))
@@ -33,6 +33,7 @@ class PackedAuditCountTests(unittest.TestCase):
                 'packed direct reduction: 0\n'
                 'packed generated product: 0\n'
                 'packed native carryless multiply: 0\n'
+                'packed weighted prefix: 0\n'
                 'packed state tile: 0\n'
                 f'1.0 s 6000.000 M it/s {expected // 2} iterations 0 dp 0 stored 0 dropped\n'
                 f'2.0 s 6000.000 M it/s {expected} iterations 0 dp 0 stored 0 dropped\n'
@@ -70,6 +71,9 @@ class PackedAuditCountTests(unittest.TestCase):
             'missing native carryless mode': raw.replace('packed native carryless multiply: 0\n', ''),
             'wrong native carryless mode': raw.replace('packed native carryless multiply: 0', 'packed native carryless multiply: 1'),
             'duplicate native carryless mode': raw + 'packed native carryless multiply: 0\n',
+            'missing weighted prefix': raw.replace('packed weighted prefix: 0\n', ''),
+            'wrong weighted prefix': raw.replace('packed weighted prefix: 0', 'packed weighted prefix: 2'),
+            'duplicate weighted prefix': raw + 'packed weighted prefix: 0\n',
             'missing tile': raw.replace('packed state tile: 0\n', ''),
             'wrong tile': raw.replace('packed state tile: 0', 'packed state tile: 256'),
             'duplicate malformed tile': raw + 'packed state tile: 1\n',

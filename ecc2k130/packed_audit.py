@@ -61,6 +61,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
+                  expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX), packedWeightedPrefix=None,
                   expectedPackedStateTile=int(client.PACKED_STATE_TILE), packedStateTile=None)
     try:
         if minBlocks <= 0 or repeats <= 0 or blockThreads <= 0 or batch <= 0:
@@ -93,6 +94,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
              f"PACKED_CLMAD={client.PACKED_CLMAD}",
+             f"PACKED_WEIGHTED_PREFIX={client.PACKED_WEIGHTED_PREFIX}",
              f"PACKED_STATE_TILE={client.PACKED_STATE_TILE}"], 120)
         if result["deviceArithmetic"]["returncode"]:
             raise RuntimeError("packed GPU arithmetic failed")
@@ -117,6 +119,18 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                                           packedClmad=result["packedClmad"])
         if clmadModes != [client.PACKED_CLMAD]:
             raise RuntimeError("packed GPU arithmetic CLMAD identity disagrees with the requested build")
+        weightedModes = re.findall(r"^packed arithmetic weighted prefix: (.*)$",
+                                   result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualWeighted = weightedModes[0] if len(weightedModes) == 1 else None
+        result["packedWeightedPrefix"] = int(actualWeighted) if actualWeighted in ("0", "1", "2") else None
+        result["deviceArithmetic"].update(
+            expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX),
+            packedWeightedPrefix=result["packedWeightedPrefix"])
+        if weightedModes != [client.PACKED_WEIGHTED_PREFIX]:
+            raise RuntimeError("packed GPU arithmetic weighted prefix identity disagrees with the requested build")
+        pairedSigmaPass = "PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing"
+        if result["deviceArithmetic"]["output"].splitlines().count(pairedSigmaPass) != 1:
+            raise RuntimeError("packed GPU paired Frobenius validation did not complete exactly once")
         result["integration"] = run(
             ["python3", "codegen/testpackedclient.py", "./ecc2k130"], 600)
         if result["integration"]["returncode"]:

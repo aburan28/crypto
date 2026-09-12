@@ -11,6 +11,19 @@ permutation network.
 | 1 | Numerator-weighted prefixes with separate coordinate permutations |
 | 2 | Numerator-weighted prefixes with a shared x/y permutation-mask stream |
 
+To validate the optional mode through the public RTX preset:
+
+```sh
+ECC_PACKED_WEIGHTED_PREFIX=2 make audit-rtx-pro6000
+```
+
+The environment value is retained in the image, baked-build identity,
+rebuild command and benchmark metadata. Arithmetic and timed records must
+contain one matching schedule marker. The audit also requires the direct
+paired-Frobenius GPU check to complete, with 6,240 pairs compared against
+independent routing. Mode 0 remains the preset default while the matched
+GPU comparison is pending.
+
 Let `D_i` and `E_i` be the existing coordinate differences, and let `P_i` be
 the product of denominators before slot `i`. The new schedule stores
 `W_i = E_i * P_i` in the existing prefix buffer. Slot zero directly copies
