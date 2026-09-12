@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose the Stage 49 n=53 width result into the current gate audit."""
+"""Compose the Stage 52 lazy-label result into the current gate audit."""
 
 from __future__ import annotations
 
@@ -10,20 +10,20 @@ from pathlib import Path
 from typing import Any
 
 import run_koblitz_blind_pdp_phase_b as custody
-import compose_koblitz_stage45_gate_audit as stage45
-import verify_koblitz_stage49_width_results as stage49
+import compose_koblitz_stage50_gate_audit as stage50
+import verify_koblitz_stage52_lazy_result as stage52
 
 
 REPO = Path(__file__).resolve().parents[1]
 STAGE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
-STAGE45 = STAGE / "stage-45-current-gate-audit-20260912/audit.json"
-STAGE49 = STAGE / "stage-49-n53-width-results-20260912/verification.json"
+STAGE50 = STAGE / "stage-50-current-gate-audit-20260912/audit.json"
+STAGE52 = STAGE / "stage-52-n53-lazy-result-20260912/verification.json"
 LEDGER = REPO / "docs/ic/boundary_targets.json"
 SCOREBOARD = REPO / "docs/ic/BOUNDARY_TARGETS.md"
 STATUS = STAGE / "GATE_STATUS.md"
-DEFAULT_OUTPUT = STAGE / "stage-50-current-gate-audit-20260912"
-SCHEMA = "koblitz_stage50_current_gate_audit.v1"
-SEAL_SCHEMA = "koblitz_stage50_current_gate_audit_seal.v1"
+DEFAULT_OUTPUT = STAGE / "stage-53-current-gate-audit-20260912"
+SCHEMA = "koblitz_stage53_current_gate_audit.v1"
+SEAL_SCHEMA = "koblitz_stage53_current_gate_audit_seal.v1"
 
 
 class AuditError(RuntimeError):
@@ -44,15 +44,14 @@ def load(path: Path, context: str) -> dict[str, Any]:
 def validate_current_documents() -> dict[str, Any]:
     ledger = load(LEDGER, "IC boundary ledger")
     current = ledger["regimes"]["koblitz"]["records"]["vs_rho"]["current"]
-    require(current.get("verdict") == "N41_ONLINE_CHARGED_CROSSOVER_N53_PARALLEL_WALL_LOSS", "Stage-50 ledger verdict changed")
+    require(current.get("verdict") == "N41_ONLINE_CHARGED_CROSSOVER_N53_PARALLEL_WALL_LOSS", "Stage-53 ledger verdict changed")
     metrics = current["metrics"]
-    require(metrics.get("n53_preferred_query_mode") == "pair_pair_parallel_4096", "Stage-50 preferred mode changed")
-    require(metrics.get("n53_parallel_direct_over_rho_wall_ratio") == 5.2430745581412, "Stage-50 n=53 ratio changed")
-    require(metrics.get("n53_parallel_direct_core_seconds_ratio") == 0.953495691088828, "Stage-50 n=53 CPU ratio changed")
-    scoreboard = SCOREBOARD.read_text()
-    status = STATUS.read_text()
-    for marker in ("5.243x slower", "1.078x faster", "0.953x the CPU", "Stages 46–49"):
-        require(marker in scoreboard + status, f"Stage-50 documents are missing {marker!r}")
+    require(metrics.get("n53_preferred_query_mode") == "pair_pair_parallel_4096", "Stage-53 preferred mode changed")
+    require(metrics.get("n53_parallel_direct_over_rho_wall_ratio") == 5.16632272222771, "Stage-53 ratio changed")
+    require(metrics.get("n53_parallel_4096_support_table_allocated_bytes") == 1_275_068_416, "Stage-53 support allocation changed")
+    documents = SCOREBOARD.read_text() + STATUS.read_text()
+    for marker in ("5.166x slower", "1.074x faster", "0.956x the CPU", "134,217,728"):
+        require(marker in documents, f"Stage-53 documents are missing {marker!r}")
     return {
         "ledger": {"path": str(LEDGER.relative_to(REPO)), "sha256": custody.sha256_file(LEDGER, "IC boundary ledger")},
         "scoreboard": {"path": str(SCOREBOARD.relative_to(REPO)), "sha256": custody.sha256_file(SCOREBOARD, "IC boundary scoreboard")},
@@ -61,54 +60,52 @@ def validate_current_documents() -> dict[str, Any]:
 
 
 def compose() -> dict[str, Any]:
-    predecessor = stage45.verify(STAGE45.parent)
-    latest = stage49.verify(STAGE49.parent)
-    require(predecessor == load(STAGE45, "Stage-45 predecessor"), "Stage-45 predecessor binding changed")
-    require(latest == load(STAGE49, "Stage-49 result"), "Stage-49 result binding changed")
-    stage48_result = latest["stages"]["48"]
-    verification = stage48_result["verification"]
+    predecessor = stage50.verify(STAGE50.parent)
+    latest = stage52.verify(STAGE52.parent)
+    require(predecessor == load(STAGE50, "Stage-50 predecessor"), "Stage-50 predecessor binding changed")
+    require(latest == load(STAGE52, "Stage-52 result"), "Stage-52 result binding changed")
+    verification = latest["hosted"]["verification"]
     result = copy.deepcopy(predecessor)
     result.update({
         "schema": SCHEMA,
-        "status": "current_evidence_audited_n53_4096_wall_loss_gates_incomplete",
-        "predecessor_stage45": {"path": str(STAGE45.relative_to(REPO)), "sha256": custody.sha256_file(STAGE45, "Stage-45 audit")},
-        "stage49_binding": {"path": str(STAGE49.relative_to(REPO)), "sha256": custody.sha256_file(STAGE49, "Stage-49 result"), "verification": latest},
+        "status": "current_evidence_audited_n53_lazy_4096_wall_loss_gates_incomplete",
+        "predecessor_stage50": {"path": str(STAGE50.relative_to(REPO)), "sha256": custody.sha256_file(STAGE50, "Stage-50 audit")},
+        "stage52_binding": {"path": str(STAGE52.relative_to(REPO)), "sha256": custody.sha256_file(STAGE52, "Stage-52 result"), "verification": latest},
         "boundary_ledger_binding": validate_current_documents(),
         "all_seven_gates_passed": False,
         "independent_external_reproduction_satisfied": False,
         "licensed_magma_complete": False,
         "full_cost_gate_passed": False,
         "koblitz_index_calculus_sota": False,
-        "overall": "n=41 fixed-algebraic online crossover and n=53 scratch/width latency improvements are verified; n=53 whole-process, amortized/full cost, Magma, and external gates remain false",
+        "overall": "n=41 fixed-algebraic online crossover and n=53 scratch/width/lazy-label improvements are verified; n=53 whole-process, amortized/full cost, Magma, and external gates remain false",
     })
     measurement = result["current_measurements"]["n53_same_target"]
     measurement.update({
         "preferred_query_mode": "pair_pair_parallel_4096",
-        "parallel_1024_wall_seconds_stage48": verification["baseline_wall_seconds"],
-        "parallel_4096_wall_seconds_stage48": verification["candidate_wall_seconds"],
-        "rho_wall_seconds_stage48": verification["rho_wall_seconds"],
+        "parallel_1024_wall_seconds_stage52": verification["baseline_wall_seconds"],
+        "parallel_4096_wall_seconds_stage52": verification["candidate_wall_seconds"],
+        "rho_wall_seconds_stage52": verification["rho_wall_seconds"],
         "parallel_direct_wall_seconds": verification["candidate_wall_seconds"],
         "parallel_direct_over_rho_wall_ratio": verification["candidate_over_rho_wall_ratio"],
         "parallel_direct_wall_speedup": verification["candidate_direct_wall_speedup"],
-        "parallel_direct_wall_speedup_baseline": "pair_pair_parallel_1024 same-run",
         "parallel_direct_core_seconds_ratio": verification["candidate_direct_core_seconds_ratio"],
-        "parallel_direct_core_seconds_ratio_baseline": "pair_pair_parallel_1024 same-run",
         "fresh_build_plus_parallel_over_rho": verification["fresh_build_plus_candidate_over_rho_wall_ratio"],
+        "support_table_allocated_bytes": latest["support_table_allocated_bytes"],
+        "support_table_bytes_saved": latest["support_table_bytes_saved"],
     })
     gate1 = result["gates"]["1_full_cost_accounting"]
-    gate1["proved"].append("Stages 46–49 charge clean builds, same-target direct width arms, rho, terminal-wave overshoot, wall, core-seconds, and process-tree RSS")
+    gate1["proved"].append("Stage-52 charges the clean build, lazy-label 1,024/4,096 direct arms, rho, wall, core-seconds, and process-tree RSS")
     gate3 = result["gates"]["3_required_resource_fields"]
-    gate3["proved"].append("Stage-49 retains hosted scratch/width wall, CPU, RSS, query, inversion, wave/chunk, artifact, and workflow receipts")
+    gate3["proved"].append("Stage-52 reports a 1,392,087,040-byte preferred-direct peak and 1,275,068,416-byte retained support allocation")
     gate6 = result["gates"]["6_automorphism_rho"]
-    gate6["status"] = "n41_online_crossover_n41_amortised_loss_n53_4096_same_target_wall_loss"
+    gate6["status"] = "n41_online_crossover_n41_amortised_loss_n53_lazy_4096_same_target_wall_loss"
     gate6["proved"] = [
         "Stage-39 n=41 online IC/rho ratio is 0.285545560549 while amortized IC remains 5.025825 times slower",
         "Stage-40 four-core n=41 amortized IC remains 3.605523 times slower and spends 1.286948 times one-core process CPU",
-        "Stages 46–49 preserve the same 189 n=53 relation hashes, public target, rank endpoint, and recovered scalar",
-        "Stage-47 1,024 cursors are 1.038787 times faster in wall and use 0.941426 times the CPU of 512 in the same hosted run",
-        "Stage-48 4,096 cursors are 1.078213 times faster in wall and use 0.953496 times the CPU of 1,024 in the same hosted run",
-        "Stage-48 4,096-cursor n=53 direct remains 5.243075 times slower than same-target signed-Frobenius rho",
-        "Stage-48 fresh build plus preferred direct remains 23.257293 times rho wall",
+        "Stages 46–52 preserve the same 189 n=53 relation hashes, public target, rank endpoint, and recovered scalar",
+        "Stage-52 4,096 cursors are 1.073641 times faster in wall and use 0.956319 times the CPU of 1,024 in the same hosted run",
+        "Stage-52 lazy-label preferred direct remains 5.166323 times slower than same-target signed-Frobenius rho",
+        "Stage-52 fresh build plus preferred direct remains 22.668683 times rho wall",
     ]
     gate6["limitations"] = [
         "n=41 crossover is online only and assumes a factor-base log database",
@@ -121,7 +118,7 @@ def compose() -> dict[str, Any]:
 
 
 def freeze(output: Path) -> dict[str, Any]:
-    require(not output.exists() and not output.is_symlink(), "Stage-50 output must be new")
+    require(not output.exists() and not output.is_symlink(), "Stage-53 output must be new")
     output.mkdir()
     custody.write_json_new(output / "audit.json", compose())
     inventory = custody.all_regular_inventory(output, {"audit-seal.json"})
@@ -132,15 +129,14 @@ def freeze(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
-    committed = load(output / "audit.json", "committed Stage-50 audit")
-    # Successor audits may advance the mutable boundary documents. Authenticate
-    # the frozen historical bytes here; the current successor recomputes them.
-    seal = load(output / "audit-seal.json", "Stage-50 audit seal")
+    committed = load(output / "audit.json", "committed Stage-53 audit")
+    require(committed == compose(), "committed Stage-53 audit differs from source evidence")
+    seal = load(output / "audit-seal.json", "Stage-53 audit seal")
     payload = dict(seal)
     claimed = payload.pop("seal_payload_sha256", None)
-    require(seal.get("schema") == SEAL_SCHEMA and claimed == custody.canonical_sha256(payload), "Stage-50 audit seal changed")
+    require(seal.get("schema") == SEAL_SCHEMA and claimed == custody.canonical_sha256(payload), "Stage-53 audit seal changed")
     inventory = custody.all_regular_inventory(output, {"audit-seal.json"})
-    require(inventory == seal["inventory"] and custody.canonical_sha256(inventory) == seal["inventory_sha256"], "Stage-50 audit inventory changed")
+    require(inventory == seal["inventory"] and custody.canonical_sha256(inventory) == seal["inventory_sha256"], "Stage-53 audit inventory changed")
     return committed
 
 
@@ -156,7 +152,7 @@ def main() -> None:
         value = freeze(args.output.resolve()) if args.command == "compose" else verify(args.output.resolve())
         print(json.dumps(value, indent=2, sort_keys=True))
     except (OSError, ValueError, KeyError, AuditError, custody.PhaseBError) as error:
-        raise SystemExit(f"stage50-audit: {error}")
+        raise SystemExit(f"stage53-audit: {error}")
 
 
 if __name__ == "__main__":
