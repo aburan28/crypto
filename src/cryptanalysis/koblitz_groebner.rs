@@ -346,6 +346,70 @@ pub fn sym_semaev_s3(
     acc.coords
 }
 
+/// **The symmetrised fourth summation polynomial**, Weil-restricted.
+///
+/// Returns the `n` Boolean coordinates of
+///
+/// ```text
+///   f₃ = x_R⁴ + e₁⁴ + e₃⁴ + e₂⁴x_R⁴ + e₃³x_R + e₃e₂²x_R³ + e₃e₁²x_R
+///        + e₃x_R³ + e₁²e₃²x_R² + e₃²x_R⁴ + e₃² + e₂²x_R²
+/// ```
+///
+/// where `e₁, e₂, e₃` are the elementary symmetric functions of `x₁,
+/// x₂, x₃`.  It vanishes exactly when some choice of signs makes
+/// `±P₁ ± P₂ ± P₃ ± R = O`, so unlike the chained `S₃` of
+/// [`build_decomposition_system`] it needs **no intermediate unknowns**
+/// — which is the whole reason it is here.  Fixing `x₁` to a constant
+/// leaves a system in the `2ℓ` unknowns of `x₂` and `x₃` alone, and
+/// that is the object
+/// [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
+/// names as the one route to a sub-`2^{2ℓ}` decomposition oracle.
+///
+/// Any of `x₁, x₂, x₃` may be a [`SymElement::constant`]; the degree of
+/// the result in the Boolean unknowns drops accordingly.
+///
+/// Specialised to `b = 1` (the Koblitz curve `y² + xy = x³ + x² + 1`),
+/// which is what the twelve constants above are folded for.
+pub fn sym_semaev_s4(
+    x1: &SymElement,
+    x2: &SymElement,
+    x3: &SymElement,
+    x_r: &F2mElement,
+    st: &FieldStructure,
+) -> Vec<F2BoolPoly> {
+    let n_vars = x1.coords[0].n_vars;
+    let n = st.n;
+
+    let e1 = x1.add(x2).add(x3);
+    let p12 = x1.mul(x2, st);
+    let e2 = p12.add(&x1.mul(x3, st)).add(&x2.mul(x3, st));
+    let e3 = p12.mul(x3, st);
+
+    let e1_sq = e1.square(st);
+    let e2_sq = e2.square(st);
+    let e3_sq = e3.square(st);
+
+    // Powers of the known target, as constants.
+    let xr1 = SymElement::constant(x_r, n, n_vars);
+    let xr2 = xr1.square(st);
+    let xr3 = xr2.mul(&xr1, st);
+    let xr4 = xr2.square(st);
+
+    let mut acc = xr4.clone();
+    acc = acc.add(&e1_sq.square(st)); // e₁⁴
+    acc = acc.add(&e3_sq.square(st)); // e₃⁴
+    acc = acc.add(&e2_sq.square(st).mul(&xr4, st)); // e₂⁴x_R⁴
+    acc = acc.add(&e3_sq.mul(&e3, st).mul(&xr1, st)); // e₃³x_R
+    acc = acc.add(&e3.mul(&e2_sq, st).mul(&xr3, st)); // e₃e₂²x_R³
+    acc = acc.add(&e3.mul(&e1_sq, st).mul(&xr1, st)); // e₃e₁²x_R
+    acc = acc.add(&e3.mul(&xr3, st)); // e₃x_R³
+    acc = acc.add(&e1_sq.mul(&e3_sq, st).mul(&xr2, st)); // e₁²e₃²x_R²
+    acc = acc.add(&e3_sq.mul(&xr4, st)); // e₃²x_R⁴
+    acc = acc.add(&e3_sq); // e₃²
+    acc = acc.add(&e2_sq.mul(&xr2, st)); // e₂²x_R²
+    acc.coords
+}
+
 /// The Boolean system whose roots are the `m`-point decompositions of a
 /// target with abscissa `x_r` over the subspace spanned by `basis`.
 #[derive(Clone, Debug)]
@@ -1209,6 +1273,115 @@ mod tests {
             }
             assert_eq!(F2mElement::from_bit_positions(&got, n), scalar);
         }
+    }
+
+    /// The symbolic `S₄` must agree with the scalar symmetrised `S₄`
+    /// that `semaev_decomp` evaluates, on every point of the subspace.
+    ///
+    /// This is the gate on the twelve folded constants: they are
+    /// transcribed here from the same derivation `binary_semaev_s4`
+    /// uses, and a transcription error would produce a system that is
+    /// wrong in a way no downstream test would catch — the roots would
+    /// simply be different, and every one of them would fail the group
+    /// re-check and silently cost relations.
+    #[test]
+    fn symbolic_s4_matches_the_scalar_symmetrised_s4() {
+        use crate::cryptanalysis::semaev_decomp::{eval_f3, Gf2};
+
+        let mut compared = 0u64;
+        for (n, l) in [(6u32, 2u32), (9, 3), (12, 4)] {
+            let irr = find_irreducible(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let gf = Gf2::new(&irr);
+            let basis: Vec<F2mElement> = (0..l)
+                .map(|k| F2mElement::from_bit_positions(&[k], n))
+                .collect();
+            let n_vars = 3 * l as usize;
+            let x1 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+            let x2 = SymElement::from_subspace_vars(&basis, l as usize, n, n_vars);
+            let x3 = SymElement::from_subspace_vars(&basis, 2 * l as usize, n, n_vars);
+
+            for xr_raw in [1u64, 5, 37, 100] {
+                let x_r = fe(xr_raw % (1 << n), n);
+                let eqs = sym_semaev_s4(&x1, &x2, &x3, &x_r, &st);
+                assert_eq!(eqs.len(), n as usize);
+                for point in 0..(1u64 << n_vars) {
+                    let v1 = gf.from_element(&x1.eval(point, n));
+                    let v2 = gf.from_element(&x2.eval(point, n));
+                    let v3 = gf.from_element(&x3.eval(point, n));
+                    let scalar = eval_f3(v1, v2, v3, gf.from_element(&x_r), &gf);
+                    let mut got = Vec::new();
+                    for (k, e) in eqs.iter().enumerate() {
+                        if e.eval(point) == 1 {
+                            got.push(k as u32);
+                        }
+                    }
+                    assert_eq!(
+                        F2mElement::from_bit_positions(&got, n),
+                        gf.to_element(scalar),
+                        "n={n} l={l} x_r={xr_raw} point={point}"
+                    );
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared > 10_000, "only {compared} points compared");
+    }
+
+    /// Fixing `x₁` really does leave a system in `2ℓ` unknowns, and it
+    /// really is lower degree than the three-unknown one — that is the
+    /// premise of the fixed-`x₁` route.
+    #[test]
+    fn fixing_x1_leaves_a_system_in_two_summands() {
+        let (n, l) = (12u32, 4u32);
+        let irr = find_irreducible(n).unwrap();
+        let st = FieldStructure::new(n, &irr);
+        let basis: Vec<F2mElement> = (0..l)
+            .map(|k| F2mElement::from_bit_positions(&[k], n))
+            .collect();
+        let x_r = fe(37, n);
+
+        let deg = |eqs: &[F2BoolPoly]| -> u32 {
+            eqs.iter()
+                .flat_map(|e| e.terms.iter())
+                .map(|t| t.mask.count_ones())
+                .max()
+                .unwrap_or(0)
+        };
+
+        // All three unknown: 3ℓ variables.
+        let free = 3 * l as usize;
+        let full = sym_semaev_s4(
+            &SymElement::from_subspace_vars(&basis, 0, n, free),
+            &SymElement::from_subspace_vars(&basis, l as usize, n, free),
+            &SymElement::from_subspace_vars(&basis, 2 * l as usize, n, free),
+            &x_r,
+            &st,
+        );
+
+        // `x₁` fixed: 2ℓ variables, and a lower-degree system.
+        let two = 2 * l as usize;
+        let fixed = sym_semaev_s4(
+            &SymElement::constant(&basis[0], n, two),
+            &SymElement::from_subspace_vars(&basis, 0, n, two),
+            &SymElement::from_subspace_vars(&basis, l as usize, n, two),
+            &x_r,
+            &st,
+        );
+
+        assert!(
+            deg(&fixed) < deg(&full),
+            "fixing x1 should drop the degree: {} vs {}",
+            deg(&fixed),
+            deg(&full)
+        );
+        // Nothing in the fixed system may touch a variable above 2ℓ.
+        let top: u64 = fixed
+            .iter()
+            .flat_map(|e| e.terms.iter())
+            .map(|t| t.mask)
+            .fold(0, |a, b| a | b);
+        assert_eq!(top >> two, 0, "fixed system used a variable beyond 2ℓ");
     }
 
     /// A real decomposition is a root of the built system.
