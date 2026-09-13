@@ -6,10 +6,13 @@
 #
 # Assumes the AWS Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 24.04):
 # NVIDIA driver 580+, aws cli v2, python3 and Docker are already present.  The
-# client is a static-cudart binary built by build.sh.  If the campaign has no
-# published binary yet, this instance builds it (Docker, ~10 minutes) from the
-# source tarball push_source.sh uploaded, so a pilot needs no interactive
-# access.  The GPU arithmetic fixture must pass before any worker starts.
+# client is a static-cudart binary built by build.sh from CUDA 13.3, which the
+# 580 driver runs under CUDA 13.x minor-version compatibility because the build
+# carries native sm_120 code and never needs the PTX JIT.  If the campaign has
+# no published binary yet, this instance builds it (Docker, ~10 minutes) from
+# the source tarball push_source.sh uploaded, so a pilot needs no interactive
+# access.  The GPU fixtures must pass, and must report the preset's arithmetic,
+# before any worker starts.
 # One systemd unit per GPU runs worker.py; logs are copied to S3 every
 # five minutes so the campaign can be watched without ssh.
 
@@ -54,24 +57,47 @@ if [ -z "$BIN" ] || ! aws s3api head-object --bucket "$BUCKET" --key "$BIN" >/de
     BIN=$(field binaryKey)
 fi
 PREFIX=$(dirname "$BIN")
+FIXTURES="test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda"
 aws s3 cp "s3://$BUCKET/$BIN" ecc2k130 --only-show-errors || { echo "client binary $BIN missing"; exit 1; }
-aws s3 cp "s3://$BUCKET/$PREFIX/test-packed-cuda" test-packed-cuda --only-show-errors || true
+for f in $FIXTURES; do
+    aws s3 cp "s3://$BUCKET/$PREFIX/$f" "$f" --only-show-errors \
+        || { echo "fixture $f missing from $PREFIX; not starting workers"; exit 1; }
+done
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
-chmod +x ecc2k130 test-packed-cuda 2>/dev/null
+chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib
 cat manifest.json 2>/dev/null
 
 # The build must agree with the reference arithmetic on this GPU before it
-# walks: the fixture checks Frobenius vectors, reductions, products, squares.
-if [ -x test-packed-cuda ]; then
-    if timeout 900 ./test-packed-cuda > fixture.log 2>&1; then
-        echo "GPU arithmetic fixture passed"; tail -n 6 fixture.log
+# walks.  test-packed-cuda checks Frobenius vectors, reductions, products and
+# squares; test-packed-storage-cuda checks the compact physical layout against
+# logical reads; test-shared-sigma-cuda checks the shared-memory Frobenius
+# masks against independent routing.  Each also prints which arithmetic it was
+# compiled with, and a binary built without the native carryless products or
+# the compact storage walks at half the audited rate while looking healthy, so
+# the markers are checked too.
+LOGS=""
+for f in $FIXTURES; do
+    LOGS="$LOGS $f.log"
+    if timeout 900 "./$f" > "$f.log" 2>&1; then
+        echo "$f passed"; tail -n 4 "$f.log"
     else
-        echo "GPU ARITHMETIC FIXTURE FAILED; not starting workers"; tail -n 30 fixture.log; exit 1
+        echo "$f FAILED; not starting workers"; tail -n 30 "$f.log"; exit 1
     fi
-fi
+done
+for marker in "packed arithmetic native carryless multiply: 1" \
+              "packed arithmetic weighted prefix: 2" \
+              "packed storage compact state: 1" \
+              "packed storage batch: $(field batch)" \
+              "packed shared sigma probe: 1"; do
+    # One stream, so grep -c counts lines rather than naming files.
+    if [ "$(cat $LOGS | grep -c -x -F "$marker")" != 1 ]; then
+        echo "BUILD DOES NOT REPORT '$marker' EXACTLY ONCE; not starting workers"; exit 1
+    fi
+done
+echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
 cat > /etc/ecc2k130.env <<EOF
