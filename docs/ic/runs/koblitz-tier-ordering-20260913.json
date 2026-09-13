@@ -1,0 +1,51 @@
+{
+  "operation": "koblitz_pair_table_tier_ordering",
+  "date": "2026-09-13",
+  "what": "The same 36112-point base run end to end through two pair-table tiers, identical parameter files but for the byte budget, which is what chooses the tier. A width where the compact table fits comfortably and the fold is never selected.",
+  "the_claim_under_test": "build_within takes the first representation that fits, and PR #311 justifies that order with 'for a base that fits without it the fold only spends squarings'. That is charged reasoning -- precompute assumed already paid. Amortised it looked wrong.",
+  "predicted_before_the_run": {
+    "build": "compact 63.0 s against folded 2.2 s, a factor 29 (not the 122 the pair-count ratio alone suggests: a folded pair costs 4.2x more to build because it canonicalises)",
+    "probe": "folded about 2.7x DEARER, from the 110 ns and 300 ns measured earlier",
+    "total_at_32_targets": "64.5 s against 6.3 s, about 10x"
+  },
+  "measured": {
+    "points": 36112,
+    "signed_orbits": 296,
+    "targets": 32,
+    "compact": {
+      "stage_seconds": {
+        "select": 2.7,
+        "collect": 66.9,
+        "logs": 1.8,
+        "solve": 2.4
+      },
+      "precompute_seconds": 71.4,
+      "descent_seconds_per_target": 0.0613,
+      "charged": 46.5,
+      "amortised": 1.24,
+      "peak_rss_mib": 4174,
+      "relations": 556,
+      "verified": 32
+    },
+    "folded": {
+      "stage_seconds": {
+        "select": 2.6,
+        "collect": 7.5,
+        "logs": 1.6,
+        "solve": 1.9
+      },
+      "precompute_seconds": 11.6,
+      "descent_seconds_per_target": 0.0502,
+      "charged": 58.8,
+      "amortised": 7.15,
+      "peak_rss_mib": 57,
+      "relations": 556,
+      "verified": 32
+    }
+  },
+  "verdict": "The fold wins on every axis at a width where it is never chosen: precompute 6.2x, amortised ratio 5.8x (1.24 -> 7.15), resident memory 73x (4174 MiB -> 57 MiB). 32 of 32 verified both ways.",
+  "the_prediction_that_was_wrong": "The probe. It was predicted 2.7x dearer and measured 1.22x CHEAPER, 0.0613 -> 0.0502 seconds a target. The folded table is 57 MiB and stays in cache where the compact one is 4.2 GiB and does not, and that outweighs the canonicalisation. So there is no trade-off at this width at all -- the earlier framing of the fold as 'cheaper storage bought with a dearer probe' is only true when both tables are out of cache.",
+  "why_the_total_gain_is_5.8_and_not_the_predicted_10": "The prediction modelled total = build + descent and ignored the stages common to both tiers. Base selection (2.7 s) and relation verification (1.8 s) are identical either way and do not shrink, so they dilute the ratio. Directionally right, quantitatively about 1.8x optimistic.",
+  "correctness_cross_check": "Both runs produced 556 relations from 130000 probes, certified the same 296 columns with none rejected, filtered to the same core of 43 with the same 83 singletons. The two tiers are answering identically; only the cost differs.",
+  "what_it_implies": "The tier order is wrong for this regime. It is ordered by what fits, which is right for a base whose precompute is already paid and wrong when precompute is the bill. Whether the default should simply prefer the fold depends on where the compact table stops being cache-resident; below roughly 3800 points it would be, but at that width the descent needs 2r/|F|^2 = 4e7 probes a target and the pipeline is not worth running. A second width is being measured before the default is changed."
+}
