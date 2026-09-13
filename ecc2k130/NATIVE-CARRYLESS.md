@@ -19,6 +19,9 @@ NVIDIA introduced the operation in PTX 9.3 and documents support for targets
 native execution and performance were tested on `sm_120` using CUDA 13.3.73.
 [PTX carryless multiply-add specification](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#integer-arithmetic-instructions-clmad).
 
+The optional [native squaring candidate](NATIVE-SQUARE.md) extends carryless
+arithmetic to bit spreading. It defaults off and has no measured GPU gain.
+
 ## Complete-walk measurement
 
 The [controlled comparison](benchmarks/clmad/comparison.json) ran both

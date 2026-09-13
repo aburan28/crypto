@@ -52,6 +52,21 @@ class ClmadGuardTests(unittest.TestCase):
         self.assertIn('clmad.lo.u64', result.stdout)
         self.assertIn('clmad.hi.u64', result.stdout)
 
+    def test_square_selection_and_host_fallback(self):
+        host = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=1')
+        self.assertEqual(host.returncode, 0, host.stderr)
+        self.assertNotIn('clmad.lo.u64', host.stdout)
+        device = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=1',
+                                 '-D__CUDACC__', '-D__CUDACC_VER_MAJOR__=13',
+                                 '-D__CUDACC_VER_MINOR__=3', '-D__CUDA_ARCH__=1200')
+        self.assertEqual(device.returncode, 0, device.stderr)
+        self.assertIn('clmad.lo.u64 %0, %1, %1, 0;', device.stdout)
+        for flags in (('-DECC_PACKED_CLMAD_SQUARE=1',),
+                      ('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=2')):
+            result = self.preprocess(*flags)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('ECC_PACKED_CLMAD_SQUARE', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()
