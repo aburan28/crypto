@@ -645,6 +645,7 @@
     <div class="legend" style="padding-top:0">
       <span>L5 killed &middot; selected curve 2^+1.13 worse on fresh targets</span>
       <span>curves holding the floor for every target: 68 &rarr; 34 &rarr; 0 at n = 8</span>
+      <span>what a lever would have to buy at ECC2K-130: 2^&minus;72 on the oracle</span>
     </div>
   </div>
 
@@ -690,6 +691,21 @@
         subgroup E(F<sub>2</sub><sup>e</sup>) and no relation exists at any cost. Checked for
         e = 1&hellip;16; embedding degree &gt; 10<sup>7</sup> closes the transfer route
         (<code>experiments/ecc2k130_extension_field_boundary.json</code>).</p>
+      <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
+        At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
+        &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.38&times; over twelve toy cells,
+        it needs only dim&thinsp;V&thinsp;&ge;&thinsp;45 at m&thinsp;=&thinsp;3, the cofactor-4 class
+        admits every m&thinsp;&ge;&thinsp;2 measured on the curve itself, and certified
+        m&thinsp;=&thinsp;2,&thinsp;3,&thinsp;4 witnesses with S<sub>4</sub>&thinsp;=&thinsp;0 are in
+        the artefact. Finding one is what costs: relations &times; targets &times; oracle
+        = m&thinsp;&middot;&thinsp;2<sup>131</sup> <em>independently of the factor-base dimension</em>,
+        so the best memory-free variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
+        table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries plain BSGS on the
+        same memory is cheaper than the best decomposition cell, and rho is cheaper than both while
+        storing nothing. Stated as a demand on the oracle: it would have to beat exhaustive search
+        over its own candidate set by 2<sup>70.19&thinsp;+&thinsp;log&#8322;&thinsp;m</sup>, a number
+        that does not move with m or with l because it <em>is</em> the product law
+        (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>
