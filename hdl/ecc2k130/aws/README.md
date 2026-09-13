@@ -297,10 +297,28 @@ manifest was written by the checked flow (`pci_subsystem_id=0xEC13`), so
 AFI **`agfi-03f41bca67d09198c`** loaded as submitted: 80 × 512 walks at
 333.3 MHz, 12.2 s to seed, **5 015.8 M steps/s** held (0 dropped; 32
 points verified in a second run), 5.32 clocks per step. It is the
-promoted image. An 80-engine build of the revision with the three path
-fixes above (`20260912-224741-n80-c333`) and a 96-engine one
-(`20260912-230411-n96-c333`, 81% of the block RAM) were running when
-this was written.
+promoted image.
+
+The 80-engine build of the revision with the three path fixes above
+(`20260912-224741-n80-c333`) placed at +0.300 ns (against +0.089) and
+routed at +0.016 (`agfi-0e21ecc9f59b3c5c0`, not measured: same engines,
+same clock). **96 engines at 333 MHz met timing** too
+(`20260912-230411-n96-c333`): placed at +0.381, routed at **+0.002 ns**,
+809 266 LUTs (62%), 1 632 block RAM tiles (81%), AFI
+**`agfi-0b503e1c5b319ef8b`**. Every worst path of both images was a
+control net fanning out to a stage's data registers — the spine's
+insert-mux select (`e_dp_ack`/`hold` → 310 loads, 2.8 ns of route),
+`p1_valid` into the input stage's 310 clock enables (2.9 ns), `a_valid`
+into the operand registers' 440 — so the revision after them has no
+clock enables on the operand, multiplier and retire registers or the
+leaf write stage (the data moves every clock; the valid bits say what
+counts), and a fanout limit on every remaining control net over 250
+loads (`report_high_fanout_nets` on the synthesised probe found them:
+the input stages' "empty", the walker's report load, the inversion's
+Frobenius select, the spine's insert and load enables), so the driver is
+replicated and each copy sits among its loads. The limit has to go on
+the net the loads see — on the valid register it did nothing, the loads
+saw Vivado's inverter.
 
 Past 96 the block RAM is gone, so the product tree — the largest array,
 2W words per batch, kept twice — moved to **UltraRAM**, of which the
@@ -314,7 +332,9 @@ clocks instead of two, 5.31 clocks per step unchanged with sixteen
 batches in flight). 112 engines is then 73% of the LUTs, 72% of the
 block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%. Builds of
 both (`20260913-002654-n112-c333`, `20260913-002701-n128-c333`) were
-running when this was written, as was `20260913-005436-n112-c333`, the
-first with the **32 × 8 batch geometry** now the default: the same 256
+running when this was written, as were `20260913-005436-n112-c333`, the
+first with the **32 × 8 batch geometry** now the default (the same 256
 walks and the same memory per step unit as 16 × 16, 5.16 clocks per
-step against 5.31 (the bound is `5 + 5/W`), 200 fewer LUTs per engine.
+step against 5.31 — the bound is `5 + 5/W` — and 200 fewer LUTs per
+engine), and `20260913-012736-n128-c333` with the enable-free stages
+above.
