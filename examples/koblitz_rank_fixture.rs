@@ -297,6 +297,8 @@ struct CompactPairTable {
     x_filter_exact: bool,
     x_filter_split_hash: bool,
     x_filter_insert_hash_reuse: bool,
+    x_filter_direct_bits: bool,
+    x_filter_window_shift: u32,
     mask: usize,
     len: usize,
     x_only: bool,
@@ -338,6 +340,15 @@ impl CompactPairTable {
                 != Ok("1"),
             x_filter_insert_hash_reuse: std::env::var("KIC_DISABLE_INSERT_HASH_REUSE").as_deref()
                 != Ok("1"),
+            x_filter_direct_bits: std::env::var("KIC_ENABLE_DIRECT_X_FILTER_BITS").as_deref()
+                == Ok("1"),
+            x_filter_window_shift: if filter_bits == 0 || x_filter_exact {
+                0
+            } else {
+                let field_bits = (x_domain - 1).trailing_zeros();
+                let filter_index_bits = filter_bits.trailing_zeros();
+                field_bits.saturating_sub(filter_index_bits)
+            },
             mask: capacity - 1,
             len: 0,
             x_only,
@@ -369,7 +380,9 @@ impl CompactPairTable {
                 }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
-                    if self.x_filter_insert_hash_reuse {
+                    if self.x_filter_direct_bits {
+                        self.insert_x_filter_direct(key.0);
+                    } else if self.x_filter_insert_hash_reuse {
                         self.insert_x_filter_with_mixed(key.0, mixed);
                     } else {
                         self.insert_x_filter(key.0);
@@ -389,6 +402,14 @@ impl CompactPairTable {
         if self.x_only && !self.might_contain_x(key.0) {
             return None;
         }
+        self.get_after_x_filter(key)
+    }
+
+    /// Exact table lookup for a key that already passed `might_contain_x`.
+    /// Pair-query batches use this to avoid reading the Bloom filter twice for
+    /// every surviving candidate. The open-addressed table remains the exact
+    /// fallback, so this changes no membership decision.
+    fn get_after_x_filter(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
         let mut index = Self::hash(hash_key) as usize & self.mask;
         loop {
@@ -429,6 +450,12 @@ impl CompactPairTable {
         self.insert_x_filter_with_mixed(x, mixed);
     }
 
+    fn insert_x_filter_direct(&mut self, x: u64) {
+        let (first, second) = self.x_filter_direct_indices(x);
+        self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
+        self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
+    }
+
     fn insert_x_filter_with_mixed(&mut self, x: u64, mixed: u64) {
         let (first, second) = self.x_filter_indices_with_mixed(x, mixed);
         self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
@@ -436,6 +463,13 @@ impl CompactPairTable {
     }
 
     fn x_filter_indices(&self, x: u64) -> (usize, usize) {
+        if self.x_filter_exact {
+            let index = x as usize;
+            return (index, index);
+        }
+        if self.x_filter_direct_bits {
+            return self.x_filter_direct_indices(x);
+        }
         self.x_filter_indices_with_mixed(x, Self::hash((x, 0)))
     }
 
@@ -444,12 +478,23 @@ impl CompactPairTable {
             let index = x as usize;
             return (index, index);
         }
+        if self.x_filter_direct_bits {
+            return self.x_filter_direct_indices(x);
+        }
         let first = mixed as usize & self.x_filter_mask;
         let second = if self.x_filter_split_hash {
             (mixed >> 32) as usize & self.x_filter_mask
         } else {
             Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize & self.x_filter_mask
         };
+        (first, second)
+    }
+
+    #[inline(always)]
+    fn x_filter_direct_indices(&self, x: u64) -> (usize, usize) {
+        debug_assert!(!self.x_filter_exact);
+        let first = x as usize & self.x_filter_mask;
+        let second = (x >> self.x_filter_window_shift) as usize & self.x_filter_mask;
         (first, second)
     }
 
@@ -502,6 +547,8 @@ impl CompactPairTable {
     fn x_filter_hash_strategy(&self) -> &'static str {
         if self.x_filter_exact {
             "exact_index"
+        } else if self.x_filter_direct_bits {
+            "direct_low_and_high_x_bit_windows"
         } else if self.x_filter_split_hash {
             "single_mix_split_29_bit_indices"
         } else {
@@ -510,7 +557,11 @@ impl CompactPairTable {
     }
 
     fn x_filter_insert_hash_reuse(&self) -> bool {
-        self.x_filter_insert_hash_reuse
+        self.x_filter_insert_hash_reuse && !self.x_filter_direct_bits
+    }
+
+    fn x_filter_direct_bits(&self) -> bool {
+        self.x_filter_direct_bits && !self.x_filter_exact
     }
 
     fn slots(&self) -> usize {
@@ -1514,7 +1565,7 @@ fn batch_compact_target_minus_signed_points_x_filtered(
 
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
-unsafe fn inverse_n53_unchecked(value: u64) -> u64 {
+unsafe fn inverse_n53_binary_unchecked(value: u64) -> u64 {
     debug_assert_ne!(value, 0);
     const EXPONENT: u64 = (1u64 << 53) - 2;
     let mut result = 1u64;
@@ -1526,6 +1577,57 @@ unsafe fn inverse_n53_unchecked(value: u64) -> u64 {
         base = unsafe { pclmul_reduce_n53(base, base) };
     }
     result
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn frobenius_power_n53_unchecked(mut value: u64, squarings: u32) -> u64 {
+    for _ in 0..squarings {
+        value = unsafe { pclmul_reduce_n53(value, value) };
+    }
+    value
+}
+
+/// Itoh--Tsujii inversion for GF(2^53). The addition chain
+/// 1,2,4,8,16,32,48,52 computes x^(2^52-1), followed by one square.
+/// This uses 52 squarings and seven general multiplications instead of the
+/// binary method's 53 squarings and 52 general multiplications.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn inverse_n53_itoh_unchecked(value: u64) -> u64 {
+    debug_assert_ne!(value, 0);
+    let beta_1 = value;
+    let beta_2 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_1, 1), beta_1) };
+    let beta_4 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_2, 2), beta_2) };
+    let beta_8 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_4, 4), beta_4) };
+    let beta_16 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_8, 8), beta_8) };
+    let beta_32 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_16, 16), beta_16) };
+    let beta_48 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_32, 16), beta_16) };
+    let beta_52 = unsafe { pclmul_reduce_n53(frobenius_power_n53_unchecked(beta_48, 4), beta_4) };
+    unsafe { pclmul_reduce_n53(beta_52, beta_52) }
+}
+
+fn itoh_n53_inverse_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_ITOH_N53_INVERSE").as_deref() == Ok("1"))
+}
+
+fn prefiltered_exact_lookup_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED
+        .get_or_init(|| std::env::var("KIC_ENABLE_PREFILTERED_EXACT_LOOKUP").as_deref() == Ok("1"))
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn inverse_n53_selected_unchecked(value: u64) -> u64 {
+    if itoh_n53_inverse_enabled() {
+        unsafe { inverse_n53_itoh_unchecked(value) }
+    } else {
+        unsafe { inverse_n53_binary_unchecked(value) }
+    }
 }
 
 /// Degree-53 PCLMUL specialization of the compact dual-sign batch. The caller
@@ -1582,7 +1684,7 @@ unsafe fn batch_compact_n53_target_minus_signed_points_x_filtered(
             product = unsafe { pclmul_reduce_n53(product, denominator) };
         }
     }
-    let mut inverse_product = unsafe { inverse_n53_unchecked(product) };
+    let mut inverse_product = unsafe { inverse_n53_selected_unchecked(product) };
     for index in (0..points.len()).rev() {
         let denominator = scratch.denominators[index];
         if denominator == 0 {
@@ -1701,7 +1803,7 @@ unsafe fn batch_raw_add_keys_n53(
             product = unsafe { pclmul_reduce_n53(product, denominator) };
         }
     }
-    let mut inverse_product = unsafe { inverse_n53_unchecked(product) };
+    let mut inverse_product = unsafe { inverse_n53_selected_unchecked(product) };
     let mut inverses = vec![0u64; pairs.len()];
     for index in (0..pairs.len()).rev() {
         let denominator = denominators[index];
@@ -1920,8 +2022,14 @@ fn lookup_signed_expanded_pair(
     quotient_pairs: &CompactPairTable,
     point_labels: &[(usize, u64)],
     label_to_index: &HashMap<(usize, u64), usize>,
+    x_prefiltered: bool,
 ) -> Option<([usize; 2], [(usize, u64); 2])> {
-    quotient_pairs.get(rest_key).map(|pair| {
+    let pair = if x_prefiltered {
+        quotient_pairs.get_after_x_filter(rest_key)
+    } else {
+        quotient_pairs.get(rest_key)
+    };
+    pair.map(|pair| {
         let stored_indices = pair.point_indices();
         let stored = stored_indices.map(|index| point_labels[index]);
         let image_y = pair.image_y;
@@ -2114,6 +2222,7 @@ fn pair_pair_cursor_chunk(
             quotient_pairs,
             point_labels,
             label_to_index,
+            prefiltered_exact_lookup_enabled(),
         ) else {
             result.exact_table_misses += 1;
             return false;
@@ -2206,6 +2315,7 @@ fn lookup_pair_witness(
                 quotient_pairs,
                 &base.point_labels,
                 label_to_index,
+                false,
             )
             .map(|(pair_indices, pair_labels)| {
                 let labels = [pair_labels[0], pair_labels[1], base.point_labels[right]];
@@ -3075,6 +3185,7 @@ fn main() {
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
             "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
             "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
+            "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
@@ -3421,6 +3532,7 @@ fn main() {
                                 &quotient_pairs,
                                 &base.point_labels,
                                 &label_to_index,
+                                prefiltered_exact_lookup_enabled(),
                             ) else {
                                 query_exact_table_misses += 1;
                                 continue;
@@ -3846,6 +3958,8 @@ fn main() {
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
                 "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
+                "query_itoh_n53_inverse":query_mode.pair_pair_parallel() && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled() && itoh_n53_inverse_enabled(),
+                "query_prefiltered_exact_lookup":query_mode.pair_pair_width().is_some() && prefiltered_exact_lookup_enabled(),
                 "query_raw_point_scratch_bytes":std::mem::size_of::<RawPoint>(),
                 "query_compact_point_scratch_bytes":std::mem::size_of::<(u64,u64)>(),
                 "target_mode":target_mode.name(),
@@ -3916,6 +4030,7 @@ fn main() {
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
                 "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
                 "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
+                "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
@@ -4177,24 +4292,27 @@ mod packed_tests {
 
     #[test]
     fn bloom_hash_strategies_retain_every_inserted_x() {
-        for split_hash in [false, true] {
-            for reuse_insert_hash in [false, true] {
-                let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
-                table.x_filter_split_hash = split_hash;
-                table.x_filter_insert_hash_reuse = reuse_insert_hash;
-                let keys: Vec<_> = (0..512u64)
-                    .map(|index| {
-                        let x = CompactPairTable::hash((index, index.rotate_left(17)))
-                            & ((1u64 << 37) - 1);
-                        (x + 1, index)
-                    })
-                    .collect();
-                for &key in &keys {
-                    table.insert(key, QuotientPairWitness::default());
-                }
-                for &key in &keys {
-                    assert!(table.might_contain_x(key.0));
-                    assert!(table.get(key).is_some());
+        for direct_bits in [false, true] {
+            for split_hash in [false, true] {
+                for reuse_insert_hash in [false, true] {
+                    let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
+                    table.x_filter_split_hash = split_hash;
+                    table.x_filter_insert_hash_reuse = reuse_insert_hash;
+                    table.x_filter_direct_bits = direct_bits;
+                    let keys: Vec<_> = (0..512u64)
+                        .map(|index| {
+                            let x = CompactPairTable::hash((index, index.rotate_left(17)))
+                                & ((1u64 << 37) - 1);
+                            (x + 1, index)
+                        })
+                        .collect();
+                    for &key in &keys {
+                        table.insert(key, QuotientPairWitness::default());
+                    }
+                    for &key in &keys {
+                        assert!(table.might_contain_x(key.0));
+                        assert!(table.get(key).is_some());
+                    }
                 }
             }
         }
@@ -4207,6 +4325,18 @@ mod packed_tests {
             return;
         }
         let curve = KoblitzCurve::new(0, 53).unwrap();
+        let mask = (1u64 << 53) - 1;
+        let mut inverse_state = 0xd6e8_feb8_6659_fd93u64;
+        for _ in 0..256 {
+            inverse_state = inverse_state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1);
+            let value = (inverse_state & mask).max(1);
+            let binary = unsafe { inverse_n53_binary_unchecked(value) };
+            let itoh = unsafe { inverse_n53_itoh_unchecked(value) };
+            assert_eq!(itoh, binary);
+            assert_eq!(unsafe { pclmul_reduce_n53(value, itoh) }, 1);
+        }
         let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(71u64)));
         let points: Vec<_> = (1..=48u64)
             .map(|scalar| to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar))))
