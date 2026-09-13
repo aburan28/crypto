@@ -110,5 +110,12 @@ class IsolatedLaunch(unittest.TestCase):
         self.assertEqual(subprocess.run(['bash','-n'],input=script,text=True,capture_output=True).returncode,0)
         with self.assertRaises(ValueError): aws.launch_request(template,'subnet',script,'token')
 
+    def test_capacity_fallback_cannot_select_multi_gpu_sizes(self):
+        request=aws.launch_request(self.template(),'subnet','script','token',instance_type='g7e.4xlarge')
+        self.assertEqual(request['InstanceType'],'g7e.4xlarge')
+        self.assertEqual((request['MinCount'],request['MaxCount']),(1,1))
+        with self.assertRaises(ValueError):
+            aws.launch_request(self.template(),'subnet','script','token',instance_type='g7e.48xlarge')
+
 
 if __name__=='__main__': unittest.main()

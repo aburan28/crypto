@@ -5,16 +5,20 @@ benchmark and 14.106673 B/s DP34 collection audit. Those are measured reference
 values from [SHARED-SIGMA.md](SHARED-SIGMA.md), not a fundamental 14 B/s ceiling
 and not matched controls for these candidates. Neither new flag is promoted.
 
-The [AWS execution attempt](https://github.com/aburan28/crypto/actions/runs/34762622979)
-passed all six offline runner/isolation tests, then stopped in AWS credential
-configuration: **“The security token included in the request is invalid.”**
-The benchmark step was skipped and no GPU instance launched. The
-[attempt receipt](benchmarks/native-candidates/aws-attempt.json) records this
-authentication blocker. Refresh the repository's AWS credentials and rerun
-that workflow to execute the prepared comparison. No faster rate is claimed.
-An [additional attempt](https://github.com/aburan28/crypto/actions/runs/34762827266)
-with support for the optional `AWS_SESSION_TOKEN` repository secret failed at
-the same authentication step. Neither attempt allocated a GPU.
+The direct AWS attempt authenticated successfully and passed EC2 launch permission
+checks. GPU allocation remains blocked by **InsufficientInstanceCapacity**:
+`g7e.2xlarge` failed in all four us-west-2 zones, and automatic placement failed
+for both permitted single-GPU sizes. An earlier automatic-placement request
+timed out; its exact client token was checked for an unacknowledged instance.
+The [capacity attempt receipt](benchmarks/native-candidates/aws-capacity-attempt.json)
+records the requests and final instance check. No GPU timings were obtained.
+
+Earlier Actions runs
+[34762622979](https://github.com/aburan28/crypto/actions/runs/34762622979) and
+[34762827266](https://github.com/aburan28/crypto/actions/runs/34762827266)
+failed authentication using repository secrets. Their
+[receipt](benchmarks/native-candidates/aws-attempt.json) is historical; the
+subsequent direct credentials worked. Neither candidate is promoted.
 
 This is **engineering**. The generic-group work boundary and walk rules do not
 change. At batch 16, every variant still uses `5 + 5/16 = 5.3125` field products
@@ -136,3 +140,14 @@ or instance profile. The controller still checks launch permissions first,
 retains results and terminates its exact instance. URLs are not placed in the
 repository or result receipt. The existing instance-profile path remains the
 default. Both startup variants pass offline shell and isolation checks.
+
+## Capacity placement options
+
+`--availability-zone us-west-2b` selects an existing eligible default subnet.
+Alternatively, `--automatic-placement` lets EC2 select a zone, after verifying
+that the existing VPC is default and its default subnets enable public IPs.
+These options are mutually exclusive. `--instance-type g7e.4xlarge` is the only
+alternative to the default `g7e.2xlarge`; AWS hardware metadata must confirm
+exactly one GPU. Both sizes use the same GPU comparison geometry. Eight offline
+benchmark and launch checks pass; startup, device execution and timing remain
+pending a successful allocation.
