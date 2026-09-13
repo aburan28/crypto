@@ -1,7 +1,8 @@
 """Exhaustive projected-solution comparison, not an attack-speed benchmark.
 
 Run from any directory with pycryptosat installed. The contract is frozen in
-experiments/nagao_relation_contract.json. Existing files are never overwritten.
+research/nagao_relations/experiments/nagao_relation_contract.json.
+Existing files are never overwritten.
 """
 
 import argparse
@@ -160,7 +161,7 @@ def compareInstance(onb, curve, target, weight, variant, expected, seconds, maxi
 
 def runPanel(results=None):
     root = Path(__file__).resolve().parents[2]
-    contractPath = root / 'experiments/nagao_relation_contract.json'
+    contractPath = root / 'research/nagao_relations/experiments/nagao_relation_contract.json'
     contract = json.loads(contractPath.read_text())
     if results is None:
         results = []

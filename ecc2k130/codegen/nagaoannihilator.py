@@ -381,7 +381,7 @@ def main():
     output = runExperiment(arguments.fieldDegree, arguments.subspaceDimension)
     code = Path(__file__).resolve().parent
     root = code.parents[1]
-    contract = root / 'experiments/nagao_relation_contract.json'
+    contract = root / 'research/nagao_relations/experiments/nagao_relation_contract.json'
     output['provenance'] = {
         'command': [sys.executable] + sys.argv,
         'python': platform.python_version(), 'platform': platform.platform(),

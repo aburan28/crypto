@@ -253,6 +253,12 @@ comment; it changes no equations or saved observations. The initial runner
 launch failed before any target evaluation because its contract path ascended
 one directory too far; the path was fixed before the recorded campaign.
 
+The study note and frozen experiment files were subsequently moved together
+under `research/nagao_relations/` at the user's request. Frozen JSON contents
+retain their original command paths and source hashes; those describe the
+historical run. Current runners load the relocated contract. Run the commands
+above from the repository root.
+
 The current priority is to compile the exact H-divides-L_V condition and compare
 it against the norm backend. Direct incidence remains available as a control
 and for alternative solvers; its 24 timeouts apply only to this encoding,
