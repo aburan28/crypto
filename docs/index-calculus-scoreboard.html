@@ -709,6 +709,21 @@
     </div>
   </div>
 
+  <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
+    <p>Completed on one RTX PRO 4500 Blackwell Server Edition. All device and integration
+    checks passed; no candidate met the acceptance rule. Every variant retains 5.3125
+    field products per scalar update (ratio 1.0 to control). The generic-group boundary
+    and exponent are unchanged; these throughput figures are practicality measurements.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Benchmark candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">DP34 candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Native square</td><td>4.688480 / 4.756701</td><td>0.985658</td><td>4.632716 / 4.547623</td><td>1.018712</td><td>pass / not accepted</td></tr><tr><td>Three-limb Karatsuba</td><td>4.188512 / 4.629912</td><td>0.904663</td><td>4.148491 / 4.547263</td><td>0.912305</td><td>pass / not accepted</td></tr><tr><td>Both</td><td>4.040647 / 4.579588</td><td>0.882317</td><td>4.007592 / 4.550207</td><td>0.880749</td><td>pass / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three runs, in billions of scalar updates/s, with a
+    separately interleaved matched control. Each sample completed 201,863,462,912 updates.
+    Acceptance requires at least 1% improvement in both workloads and every pair faster.
+    The historical 14.637530 B/s RTX PRO 6000 result is a different GPU, not a matched control.</p>
+    <p>Frozen source: <a href="../ecc2k130/benchmarks/native-candidates/g7/summary.json">G7 measurement receipt</a>;
+    <a href="../ecc2k130/G7-NATIVE-RESULTS.md">experiment report and raw output</a>.</p>
+  </section>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
@@ -753,3 +768,4 @@
 </script>
 </body>
 </html>
+

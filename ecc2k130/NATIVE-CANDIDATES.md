@@ -1,4 +1,7 @@
-# Native arithmetic candidates: compiled, throughput unmeasured
+# Native arithmetic candidates: G7 measured, no accepted speedup
+
+**Update:** The full [G7 comparison](G7-NATIVE-RESULTS.md) passed correctness but
+accepted no candidate. G7e throughput remains unmeasured for these flags.
 
 The objective is to improve on the existing 14.637530 B scalar updates/s
 benchmark and 14.106673 B/s DP34 collection audit. Those are measured reference
@@ -133,7 +136,7 @@ to add: GPU timing is pending and the operation-count ratio is unchanged.
 For a G7e template that already supplies its AMI, subnet security group and
 100-GiB disposable root disk, use `--launch-template NAME --presigned-transfer`
 with `aws/native_benchmark.py`. The controller uses its normal AWS credential
-chain. It signs one-hour URLs for exactly three objects under the unique
+chain. It signs two-hour URLs for exactly three objects under the unique
 benchmark prefix: source GET, results PUT and completion-status PUT. The VM
 receives these limited transfer capabilities and no long-lived AWS credentials
 or instance profile. The controller still checks launch permissions first,
@@ -172,3 +175,10 @@ region while EC2 runs elsewhere. The retry selected Amazon-owned Deep Learning
 Base OSS Nvidia Driver GPU AMIs (Ubuntu 24.04), an existing default security
 group with outbound connectivity, and a disposable 100-GiB root disk. No IAM,
 network, quota or production-template changes were made.
+
+## G7 measurement
+
+`--instance-type g7.4xlarge` permits one RTX PRO 4500 Blackwell Server Edition.
+The runner still requires sm_120 and records whether the GPU matches the
+historical RTX PRO 6000 model. Full results are in [G7-NATIVE-RESULTS.md](G7-NATIVE-RESULTS.md).
+No candidate passed acceptance; defaults remain off.
