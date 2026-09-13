@@ -691,6 +691,16 @@
         subgroup E(F<sub>2</sub><sup>e</sup>) and no relation exists at any cost. Checked for
         e = 1&hellip;16; embedding degree &gt; 10<sup>7</sup> closes the transfer route
         (<code>experiments/ecc2k130_extension_field_boundary.json</code>).</p>
+      <p><strong>A bigger genus is not a lever either.</strong> A cover over F<sub>2</sub><sup>131</sup>
+        is priced by that field, so the cheapest one, genus 2, costs 2<sup>131</sup> &mdash;
+        2<sup>70.19</sup>&times; rho, the same row as the bigger field. Over F<sub>2</sub>, the only
+        proper subfield, index calculus would be cheap: genus 130 would cost 2<sup>37.17</sup>,
+        2<sup>23.64</sup>&times; <em>below</em> the reference. But because 2 is a primitive root
+        mod 131, the GHS genus available to <em>every</em> curve over F<sub>2</sub><sup>131</sup> is
+        1, 2<sup>129</sup> or 2<sup>130</sup>, and at genus 1 the transfer is exactly the zero map on
+        the target subgroup. The window that would pay is genus 130 to between 290 and 300; the gap to the
+        nearest available genus is 2<sup>120.77</sup>
+        (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.38&times; over twelve toy cells,
