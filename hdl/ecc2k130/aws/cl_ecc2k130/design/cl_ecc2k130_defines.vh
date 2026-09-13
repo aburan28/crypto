@@ -23,13 +23,15 @@
 `define ECC_ID_W 9
 `endif
 
-// step unit: walks per Montgomery batch and batches in flight (16 x 16
-// fills the 512-deep block RAMs; 5.29 clocks per step against 5.54 at 8)
+// step unit: walks per Montgomery batch and batches in flight.  32 x 8
+// holds the same 256 walks and the same memory as 16 x 16 (leaf tables
+// 256 deep, tree 512) and runs 5.16 clocks per step against 5.31: the
+// bound is 5 + 5/W.
 `ifndef ECC_LOG_W
-`define ECC_LOG_W 4
+`define ECC_LOG_W 5
 `endif
 `ifndef ECC_LOG_NB
-`define ECC_LOG_NB 4
+`define ECC_LOG_NB 3
 `endif
 
 // idle clocks before a partial batch is padded and issued
