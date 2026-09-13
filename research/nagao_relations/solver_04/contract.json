@@ -1,0 +1,35 @@
+{
+  "hypothesis": "Conditioned quadratic support improves verified relation completion/cost against norm and chained S3 on fresh targets.",
+  "panels": [
+    {
+      "n": 5,
+      "d": 3
+    },
+    {
+      "n": 9,
+      "d": 4
+    },
+    {
+      "n": 11,
+      "d": 5
+    }
+  ],
+  "variants": [
+    "chained-s3",
+    "rr-norm",
+    "fixed-u"
+  ],
+  "modes": [
+    "first",
+    "enumerate"
+  ],
+  "seed": 2026091304,
+  "seconds_per_instance": 3,
+  "targets": "Four uniform and four known-decomposable affine targets per size, excluding every target from solver_02/03. Strata may overlap; separate reporting.",
+  "domain": "Same restricted three-summand x-subspace factor base as solver_02; exact signed target; projected x-tuples counted once.",
+  "budget": "One all-phase soft deadline per cell includes construction/loading, every u branch, failed candidates, extraction, verification. Divide remaining budget by remaining branches. All incomplete branches retained as unknown. No baseline setup exemption.",
+  "validation": "All 6944 coefficient/branch triples at n5 d3 on one fixed target, full output vectors and existential equivalence to cubic support. Every trial checked against exact group oracle. Complete mode requires projected set equality.",
+  "metrics": "All phase timing, first verified relation, unique projected enumeration, duplicates, rejected candidates, branch counts and CNF construction totals. Solver operations and full DLP S/rho are null; diagnostic timing is preliminary only.",
+  "falsification": "Any algebra/model/oracle mismatch invalidates correctness; no improvement versus norm rejects this candidate on this panel. Twenty percent lower all-cost per verified relation at three increasing sizes against strongest matched Semaev remains the goal, unestablished without symmetrized S4 and operation accounting.",
+  "baseline_gap": "Repository transformed-coordinate symmetrized S4 changes factor base and allows two-torsion shifts. Not included until exact same-base, exact-target adapter is validated."
+}

@@ -691,6 +691,134 @@
     </div>
   </div>
 
+  <!-- ============ NAGAO IMPLEMENTATION STATUS ============ -->
+  <div class="panel" id="nagao-relations">
+    <div class="panel-head">
+      <h2>Nagao relation encodings: correctness before cost</h2>
+      <p>Three-point decomposition on <code>y&sup2;+xy=x&sup3;+1</code>, with distinct
+        nonzero factor abscissas, all different from the target abscissa. The two Riemann&ndash;Roch
+        frontends construct no summation polynomial. The reference is exhaustive group arithmetic
+        on the identical domain. These are engineering candidates; full-attack <code>S</code>,
+        rho ratios and runtime-floor ratios are unmeasured.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Frozen source: <code>research/nagao_relations/experiments/nagao_relation_comparison_20260913.json</code>.
+          Complete projected x-solution sets, across 86 five-bit and 24 nine-bit target cases.
+          The aggregate artifact is incomplete because 24 incidence cases hit their watchdog.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">Complete / attempted</th>
+          <th scope="col" class="n">Watchdogs</th><th scope="col">Correctness</th>
+          <th scope="col">S / rho ratio</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Chained S3 + verified lifts</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">reference</span></td></tr>
+          <tr><td>RR incidence</td><td class="n">86 / 110</td><td class="n">24</td>
+            <td>Completed sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+          <tr><td>RR norm</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p><strong>Function-first support test:</strong> the residual norm <code>H</code> divides
+        the subspace polynomial <code>L_V</code>. Searching function coefficients before extracting
+        roots matched all 43 affine targets in each of two five-bit subspace panels: dimension two
+        yielded zero signed triples; dimension three yielded 72 verified signed triples across
+        33 targets. These signed counts differ from the projected x-tuples above. Sources:
+        <code>research/nagao_relations/experiments/nagao_annihilator_n5_d{2,3}_20260913.json</code> and
+        <code>research/nagao_relations/README.md</code>.</p>
+      <p>The next experiment compiles the support test into a search solver. Exhaustive coefficient
+        enumeration is a correctness instrument. No speedup, exponent improvement or rho crossover
+        has been established; the existing attack-cost ledger is unchanged.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="nagao-followup-01">
+    <div class="panel-head">
+      <h2>Nagao follow-up: denser bases and larger instances</h2>
+      <p>Source: <code>research/nagao_relations/followup_01/summary.json</code> and
+        <code>raw.jsonl</code> in that folder. Eight uniform targets per field, weight two,
+        three summands, five seconds per instance. No incorrect admitted relation was recorded.
+        These are engineering observations; full-DLP S and rho ratios remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <thead><tr><th scope="col">Field degree</th><th scope="col">Variant</th>
+        <th scope="col">Complete / attempted</th><th scope="col">Complete verified x-tuples</th>
+        <th scope="col">Partial verified x-tuples</th><th scope="col">S / rho</th></tr></thead>
+      <tbody>
+        <tr><td>9</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>128</td><td>Unmeasured</td></tr>
+        <tr><td>9</td><td>RR norm</td><td>8 / 8</td><td>363</td><td>&mdash;</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>4</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>RR norm</td><td>0 / 8</td><td>&mdash;</td><td>9</td><td>Unmeasured</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>Function-coefficient search matched the complete signed-point oracle:
+      864 triples over all 43 five-bit targets for dim(V)=4; 1,780 over eight sampled targets
+      for dim(V)=5. Under a unit-cost field-API model its ratios to brute point enumeration
+      were 3.188 and 0.540, respectively. The latter uses the entire field as the x-domain;
+      neither ratio compares with the best Semaev solver or establishes an attack speedup.
+      Incomplete SAT cases are watchdog outcomes, never UNSAT evidence. The next tests target
+      support-divisibility circuits and coefficient conditioning.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-solver-02">
+    <div class="panel-head"><h2>Compiled support: exact formulation, negative solver result</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_02/summary.json</code>;
+    proof and hypothesis ledger in that folder's README. 992 coefficient checks
+    passed; 96 matched trials had no validation errors. Both root-free variants
+    timed out in all larger-field cases. Two-bit conditioning exhausted its first
+    branch. Norm remains the promising control; no attack improvement is established.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts;
+    first verified relation or oracle-confirmed restricted UNSAT. Three-second search
+    budget, matched subspace bases. U = uniform; D = known decomposable.
+    Strata may overlap and are not a natural-yield estimate.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th>
+    <th>n9 d4 D</th><th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead>
+    <tbody><tr><td>chained-s3</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>2 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>3 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-conditioned</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Timeouts remain unknown. The n11 norm uniform decisions
+    include two SAT and one UNSAT. Exact encodings preserve genuine target support;
+    the counting boundary does not move. Symmetrized S4 and calibrated all-phase costs
+    are still missing, so the 20% improvement goal remains unestablished.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-solver-03">
+    <div class="panel-head"><h2>Hybrid support and fair scheduling: bounded negative results</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_03/summary.json</code>.
+    96 trials with no validation errors; 7,936 hybrid and 992 cubic vector checks passed.
+    Hybrid resolves two nine-bit instance slots but fails to outperform norm.
+    Fair scheduling reached all four branches on every larger case with no completions.
+    Both hypotheses fail their panel-specific improvement criterion.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts; three-second search budget.
+    U: uniform; D: known decomposable. Strata may overlap. Timeouts are unknown.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th><th>n9 d4 D</th>
+    <th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-fair</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>hybrid</td><td>4/4</td><td>4/4</td><td>1/4</td><td>1/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Fixed support gives no counting-yield gain.
+    Strongest Semaev comparison and calibrated all-phase costs remain missing.
+    The new coefficient-conditioned linear-membership proof in the research note
+    is a candidate for a future solver experiment, not a measured improvement.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-goal-round-20260913"><div class="panel-head">
+<h2>Function-first goal: eleven-bit panel cleared; cost goal remains open</h2>
+<p>Frozen sources: <code>research/nagao_relations/solver_04/summary.json</code>,
+<code>solver_05/summary.json</code>, <code>solver_06/summary.json</code>;
+combined ledger <code>research/nagao_relations/goal_round_20260913.json</code>.
+288 trials, zero validation errors. The hybrid quadratic solver completed all
+first and enumeration slots; exact same-base elementary S4 wins at smaller sizes.
+No three-size 20% all-cost improvement is established.</p></div><div class="table-scroll"><table><caption>first: verified resolutions / attempts; U uniform, D known decomposable.</caption><thead><tr><th>Variant</th><th>n5 U</th><th>n5 D</th><th>n9 U</th><th>n9 D</th><th>n11 U</th><th>n11 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>fixed-u</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>1/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-function</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-transformed</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="table-scroll"><table><caption>enumerate: verified resolutions / attempts; U uniform, D known decomposable.</caption><thead><tr><th>Variant</th><th>n5 U</th><th>n5 D</th><th>n9 U</th><th>n9 D</th><th>n11 U</th><th>n11 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>fixed-u</td><td>4/4</td><td>4/4</td><td>2/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-function</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-transformed</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="panel-head"><p>Three-second all-phase soft budget.
+Target strata may overlap and are not pooled as natural yield. Timeouts remain unknown.
+The direct solver's slowest cell was 1.092205 seconds. Its field API counts lack
+comparable SAT operation counts; S and rho ratios remain unmeasured. Fixed support
+preserves the counting boundary. These are engineering observations.</p></div></div>
+
+  <div class="panel" id="nagao-scaling-23-29"><div class="panel-head"><h2>Hybrid support reaches 23 and 29 bits with a small fixed base</h2>
+<p>Frozen source: <code>research/nagao_relations/scaling_23_29.json</code>, derived from solver_07/08/09 raw records.
+240 trials, zero validation errors. Image-space support resolved all target/mode slots; maximum 3.391237 seconds.
+Larger fields use dimension-six bases. Uniform targets there all lack restricted relations; supported targets are diagnostic samples.
+This is engineering progress, not a counting-yield or ECDLP advance.</p></div><div class="table-scroll"><table><caption>first: verified resolutions within five seconds / attempts; U uniform, D from factor triples.</caption><thead><tr><th>Variant</th><th>n11 d5 U</th><th>n11 d5 D</th><th>n23 d6 U</th><th>n23 d6 D</th><th>n29 d6 U</th><th>n29 d6 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>quadratic-original</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-optimized</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-image</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>chained-s3</td><td>0/4</td><td>1/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="table-scroll"><table><caption>enumerate: verified resolutions within five seconds / attempts; U uniform, D from factor triples.</caption><thead><tr><th>Variant</th><th>n11 d5 U</th><th>n11 d5 D</th><th>n23 d6 U</th><th>n23 d6 D</th><th>n29 d6 U</th><th>n29 d6 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>quadratic-original</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-optimized</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-image</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="panel-head"><p>Counted field API operations on completed eleven-bit enumeration fall by about 71% versus the original hybrid.
+SAT work lacks a calibrated matching unit. No full-DLP S or rho ratio is measured.
+Increasing factor-base dimension remains the next scaling test.</p></div></div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">
