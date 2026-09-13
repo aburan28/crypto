@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ECC2K-130 campaign status · aburan28/crypto</title>
-<meta name="description" content="Hourly aggregates from the Certicom ECC2K-130 distinguished-point collection: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
-<meta property="og:description" content="Hourly distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign. Counts only: no walk coefficients, no point keys.">
+<meta property="og:description" content="Distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="./style.css">
@@ -32,8 +32,9 @@
   <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
   <h1>Campaign status</h1>
   <p class="sub">
-    Hourly read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table. The page publishes counts only &mdash; walk
+    Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
+    distinguished-point table, refreshed every 15 minutes. The page publishes
+    counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
@@ -152,8 +153,8 @@
   <section aria-labelledby="h-history">
     <h2 id="h-history">Snapshot history</h2>
     <p class="note">
-      The last 168 snapshots published by the hourly GitHub Action, newest
-      first.
+      Every snapshot the publishing Action has posted in the last seven
+      days, newest first. It runs every 15 minutes.
     </p>
     <details class="alt">
       <summary id="history-summary">Snapshot table</summary>
@@ -194,9 +195,14 @@
 
   var HOUR_MS = 3600 * 1000;
   var REFRESH_MS = 60 * 1000;
-  // The publishing Action runs hourly; two missed runs is a real problem.
-  var STALE_AFTER_MS = 2 * HOUR_MS;
-  var HISTORY_LIMIT = 168;
+  // The publishing Action runs every 15 minutes, so an hour is four missed
+  // runs: late enough that GitHub's scheduler jitter does not trip it, early
+  // enough to say so before the counts are badly out of date.
+  var STALE_AFTER_MS = HOUR_MS;
+  // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
+  // the interval the snapshot query buckets over — a window in the data, not
+  // in the publish cadence, so it does not move when the cron does.
+  var HOURLY_BUCKET_LIMIT = 168;
 
   var STATE_TEXT = {
     COLLECTING: "Collecting. New distinguished points arrived in the last hour.",
@@ -332,7 +338,7 @@
     var start = floorHour(rows[0].at);
     var end = floorHour(rows[rows.length - 1].at);
     if (endReference) end = Math.max(end, floorHour(endReference));
-    var count = Math.min(Math.round((end - start) / HOUR_MS) + 1, HISTORY_LIMIT);
+    var count = Math.min(Math.round((end - start) / HOUR_MS) + 1, HOURLY_BUCKET_LIMIT);
     var first = end - (count - 1) * HOUR_MS;
 
     var series = [];

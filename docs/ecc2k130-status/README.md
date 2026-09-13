@@ -1,7 +1,7 @@
 # ECC2K-130 status page
 
 Static dashboard for the `ecc2k-130` distinguished-point campaign,
-published at <https://aburan28.github.io/crypto/status/>. The hourly Action
+published at <https://aburan28.github.io/crypto/status/>. The Action
 overwrites `status.json` and `history.json`; this HTML only renders those
 files, and `scripts/site/build.py` lays them out for publishing.
 

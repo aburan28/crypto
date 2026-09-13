@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge hourly snapshots into history.json for the public status page.
+"""Merge published snapshots into history.json for the public status page.
 
 The HTML/CSS in docs/ecc2k130-status/ is static. This script only maintains
 the JSON the page fetches.
@@ -12,7 +12,10 @@ import json
 import os
 from datetime import datetime, timezone
 
-HISTORY_LIMIT = 168
+# Seven days of snapshots at the publish cadence in ecc2k130-status.yml
+# (96 a day, every 15 minutes). This is a count, so it tracks the cron: at a
+# slower cadence it covers more than a week, at a faster one less.
+HISTORY_LIMIT = 672
 
 
 def load_json(path, default):
