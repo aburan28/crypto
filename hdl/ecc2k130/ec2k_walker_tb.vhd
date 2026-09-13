@@ -35,6 +35,9 @@ entity ec2k_walker_tb is
     ID_W    : natural := 5;
     LOG_W   : natural := 3;
     LOG_NB  : natural := 2;
+    -- 3 low count bits, so the walks' few dozen steps wrap them several
+    -- times and the reported count comes from the walker's high table too
+    CNT_LO_W : natural := 3;
     -- > 0: no checking; load NWALK walks, reload every report with its own
     -- point, and print the steady-state clocks per step over RATE_CLK clocks
     RATE_CLK : natural := 0
@@ -77,7 +80,7 @@ begin
 
   dut : entity work.ec2k_walker
     generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB, FLUSH_CLK => 16,
-                 CNT_W => CNT_W, DP_WEIGHT => 56)
+                 CNT_W => CNT_W, CNT_LO_W => CNT_LO_W, DP_WEIGHT => 56)
     port map (
       clk => clk, rst => rst,
       ld_valid => ld_valid, ld_ready => ld_ready,

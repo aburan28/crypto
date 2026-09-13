@@ -86,6 +86,7 @@ entity ec2k_axil is
     LOG_NB    : natural := 3;
     FLUSH_CLK : natural := 32;
     CNT_W     : natural := 32;
+    CNT_LO_W  : natural := 13;               -- of which travel with the walk (ec2k_walker)
     DP_WEIGHT : natural := DP_WEIGHT_DEFAULT;
     DP_FIFO_W : natural := 6;                -- queue depth = 2**DP_FIFO_W
     CLK_KHZ   : natural := 0                 -- reported in CLOCK, nothing else
@@ -324,7 +325,8 @@ begin
 
     eng : entity work.ec2k_walker
       generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
-                   FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, DP_WEIGHT => DP_WEIGHT)
+                   FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, CNT_LO_W => CNT_LO_W,
+                   DP_WEIGHT => DP_WEIGHT)
       port map (
         clk => clk, rst => rst_eng_r(i),
         ld_valid => l_valid(i), ld_ready => e_ld_ready(i),

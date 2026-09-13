@@ -29,6 +29,9 @@ entity ec2k_axil_tb is
     ID_W    : natural := 4;
     LOG_W   : natural := 3;
     LOG_NB  : natural := 2;
+    -- 3 low count bits, so the walks' few dozen steps wrap them several
+    -- times and the reported count comes from the walker's high table too
+    CNT_LO_W : natural := 3;
     CDC     : boolean := false;
     T_ENG_PS : natural := 7000
   );
@@ -127,8 +130,8 @@ begin
 
   dut : entity work.ec2k_axil
     generic map (NENG => NENG, ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
-                 FLUSH_CLK => 16, CNT_W => 32, DP_WEIGHT => 56, DP_FIFO_W => 3,
-                 CLK_KHZ => 333333)
+                 FLUSH_CLK => 16, CNT_W => 32, CNT_LO_W => CNT_LO_W, DP_WEIGHT => 56,
+                 DP_FIFO_W => 3, CLK_KHZ => 333333)
     port map (
       clk => eclk, rst => erst,
       s_awaddr => m_awaddr, s_awvalid => m_awvalid, s_awready => m_awready,
