@@ -65,11 +65,13 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, about 8.4k LUTs, 12 RAMB36 + 2 RAMB18 and 4 URAM288 as
-synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs,
-2 016 RAMB36 and 960 URAM288. 96 engines is 63% of the LUTs, 62% of the
-block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128 is 83% /
-83% / 53%; the LUTs run out first. (With the product tree in block RAM,
+its walk memory, about 7.3k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and
+66 DSPs as synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M
+LUTs, 2 016 RAMB36, 960 URAM288 and 9 024 DSPs. 128 engines is 74% of
+the LUTs, 83% of the block RAM, 53% of the UltraRAM and 94% of the DSPs;
+136 with `DSP_LEAVES=10` is 80% / 88% / 57% / 90%. (With the all-LUT
+multiplier, 8.1k LUTs per engine, 96 engines was 63% of the LUTs, 112
+73% and 128 83%; with the product tree in block RAM,
 17 tiles per engine, 48 was a third of the device, 64 42% of the LUTs
 and 54% of the RAM, 80 53% and 67%, 96 63% and 81%, and the RAM ran out
 first.) Read `synth_utilization` and the post-route timing from the
@@ -177,10 +179,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 
 | Quantity | Estimate | Synthesised |
 |---|---|---|
-| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
+| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, 4 855 at three, 5 019 at four, all LUT leaves; **~4 330 at three with eleven leaves in DSPs** (now the default) |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
-| DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; **8 150 – 8 440** with the tree in UltraRAM, 180 LUTRAM and 586 SRL left; 8 340 FF |
+| DSP per multiplier | 0 | **66** (eleven 17-bit leaves as 2 × 3 grids of 24 × 15 integer products; 0 with `MUL_DSP_LEAVES = 0`) |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; **7 170 – 7 320** with eleven multiplier leaves in DSPs, 180 LUTRAM and 614 SRL left; 9 550 FF |
 | Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
 | BRAM | 0 | **12 RAMB36 + 2 RAMB18 and 4 URAM288 per engine** (the product tree in UltraRAM); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
 | Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
@@ -336,8 +338,22 @@ batches in flight). 112 engines is then 73% of the LUTs, 72% of the
 block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%. Builds of
 both (`20260913-002654-n112-c333`, `20260913-002701-n128-c333`) were
 running when this was written, as were `20260913-005436-n112-c333`, the
-first with the **32 × 8 batch geometry** now the default (the same 256
-walks and the same memory per step unit as 16 × 16, 5.16 clocks per
-step against 5.31 — the bound is `5 + 5/W` — and 200 fewer LUTs per
-engine), and `20260913-012736-n128-c333` with the enable-free stages
-above.
+first with the **32 × 8 batch geometry** (the same 256 walks and the
+same memory per step unit as 16 × 16, 5.16 clocks per step against 5.31
+— the bound is `5 + 5/W` — and 200 fewer LUTs per engine),
+`20260913-012736-n128-c333` and `20260913-023919-n128-c333` with the
+enable-free stages and the fanout limits above, `20260913-030605-n112-c375`
+(the same source at **375 MHz**) and `20260913-030804-n120-c333`.
+
+With the LUTs binding, the last empty resource was the **9 024 DSP48E2
+blocks**: eleven of the multiplier's 27 leaf products are now integer
+products in DSPs that count AND terms (`gf2_dsp_leaf.vhd`; the main
+README, "Leaves in DSPs"), 66 DSPs per engine for 790 fewer LUTs
+(7 170 – 7 320 per engine, −9.7%), same slack in the probe. The
+multiplier is 13 clocks instead of 10, which 8 batches in flight no
+longer hide, so the default geometry is **32 × 16** (5.22 clocks per
+step; 32 × 8 reads 5.38). 128 engines is then 74% of the LUTs, 83% of
+the block RAM, 53% of the UltraRAM and 94% of the DSPs;
+`20260913-034430-n128-c333` builds it, and `20260913-034437-n136-c333`
+136 engines with ten DSP leaves each (`DSP_LEAVES=10`: 80% / 88% / 57% /
+90%).
