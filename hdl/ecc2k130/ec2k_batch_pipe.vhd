@@ -269,6 +269,13 @@ architecture rtl of ec2k_batch_pipe is
   signal p1_hw    : hw_t := (others => '0');
   signal p0_adv, p1_take : std_logic;
   signal in_rdy   : std_logic;
+  -- each stage's valid is the clock enable of its 310 data flip-flops (a
+  -- stage holds a walk until the next is empty), and from one register
+  -- that was a 2.9 ns route in the 80-engine image; replicated, each
+  -- copy sits among its loads.  Every other stage moves data every clock.
+  attribute MAX_FANOUT : string;
+  attribute MAX_FANOUT of p0_valid : signal is "100";
+  attribute MAX_FANOUT of p1_valid : signal is "100";
 
   -- ------------------------------------------------------------------ --
   -- fill
@@ -587,20 +594,32 @@ begin
         m_ta(tw_a) <= tw_d;
         m_tb(tw_b) <= tw_d;
       end if;
+      -- The data of the retire registers moves every clock, valid or not
+      -- (tw_en and o1_valid say what counts), so no decode of the tag
+      -- fans out to their clock enables.
+      rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
+      rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
+      rlvl  := unsigned(res_tag(LVL_W + IDX_W downto IDX_W + 1));
+      ridx  := unsigned(res_tag(IDX_W downto 1));
+      rlast := res_tag(0);
+      rn    := ridx(LOG_W downto 0);
+      ri    := ridx(LOG_W - 1 downto 0);
+      if to_integer(rkind) = PH_INV and ridx(2 downto 0) = 7 then
+        tw_d <= gf_frob(res_r, 1);
+      else
+        tw_d <= res_r;
+      end if;
+      y3 := res_r xor fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1)
+                  xor fp(FP_DEPTH - 1)(M + TAG_W downto TAG_W + 1);
+      o1_x   <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
+      o1_y   <= y3;
+      o1_tag <= fp(FP_DEPTH - 1)(TAG_W downto 1);
       o1_valid <= '0';
       if res_valid = '1' then
-        rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
-        rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
-        rlvl  := unsigned(res_tag(LVL_W + IDX_W downto IDX_W + 1));
-        ridx  := unsigned(res_tag(IDX_W downto 1));
-        rlast := res_tag(0);
-        rn    := ridx(LOG_W downto 0);
-        ri    := ridx(LOG_W - 1 downto 0);
         case to_integer(rkind) is
           when PH_FWD =>
             tw_en <= '1';
             tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
-            tw_d  <= res_r;
             if rlast = '1' then
               if rlvl = 0 then
                 b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
@@ -613,18 +632,12 @@ begin
             -- t(1) holds the root, then beta_2, then 1/root; t(0) the accumulator
             tw_en <= '1';
             case to_integer(ridx(2 downto 0)) is
-              when 0 =>
+              when 0 | 7 =>
                 tw_a <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
                 tw_b <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
-                tw_d <= res_r;
-              when 7 =>
-                tw_a <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
-                tw_b <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
-                tw_d <= gf_frob(res_r, 1);
               when others =>
                 tw_a <= tree_addr(rb, to_unsigned(0, LOG_W + 1));
                 tw_b <= tree_addr(rb, to_unsigned(0, LOG_W + 1));
-                tw_d <= res_r;
             end case;
             if ridx(2 downto 0) = 7 then
               b_ph(to_integer(rb))  <= to_unsigned(PH_BWD, KIND_W);
@@ -635,7 +648,6 @@ begin
           when PH_BWD =>
             tw_en <= '1';
             tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
-            tw_d  <= res_r;
             if rlast = '1' then
               if rlvl = LOG_W - 1 then
                 b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
@@ -646,18 +658,12 @@ begin
           when PH_LAM =>
             tw_en <= '1';                                         -- leaf W+i := lam
             tw_a  <= tree_addr(rb, ('1' & ri));  tw_b <= tree_addr(rb, ('1' & ri));
-            tw_d  <= res_r;
             if rlast = '1' then
               b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
             end if;
           when others =>
             -- x3, y, tag and valid rode beside the multiply in fp
-            y3 := res_r xor fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1)
-                        xor fp(FP_DEPTH - 1)(M + TAG_W downto TAG_W + 1);
             o1_valid <= fp(FP_DEPTH - 1)(0);
-            o1_x     <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
-            o1_y     <= y3;
-            o1_tag   <= fp(FP_DEPTH - 1)(TAG_W downto 1);
             if rlast = '1' then
               fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
               fl_wr <= fl_wr + 1;
@@ -764,52 +770,51 @@ begin
       x3 := gf_frob(rr_ta, 1) xor rr_ta xor rr_da;
       fp_in := x3 & rr_la(LA_Y downto LA_J + 1) & rr_la(LA_TAG downto 0);
       fp <= fp_in & fp(0 to FP_DEPTH - 2);
+      -- The operand registers load every clock, valid or not (ra_valid
+      -- says which clocks count, and stage B and the multiplier likewise):
+      -- a clock enable from the valid bit was 440 loads on one net.
       ra_valid <= a_valid(RD_LAT - 1);
-      if a_valid(RD_LAT - 1) = '1' then
-        ra_ja    <= rr_la(LA_J downto LA_J - 2);
-        ra_x3    <= x3;
-        ra_k     <= a_k(RD_LAT - 1);
-        ra_tag   <= a_tag(RD_LAT - 1);
-        case to_integer(a_ph(RD_LAT - 1)) is
-          when PH_FWD =>
-            if a_leafy(RD_LAT - 1) = '1' then ra_a <= rr_da; else ra_a <= rr_ta; end if;
-            if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
-          when PH_INV =>
-            ra_a <= rr_ta;
-            ra_b <= rr_tb;
-          when PH_BWD =>
-            ra_a <= rr_ta;
-            if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
-          when PH_LAM =>
-            ra_a <= rr_la(LA_Y downto LA_J + 1);                  -- y
-            ra_b <= rr_tb;
-          when others =>
-            ra_a <= rr_ta;
-            ra_b <= rr_la(LA_X downto LA_Y + 1);                  -- x
-        end case;
-        ra_ph <= a_ph(RD_LAT - 1);
-      end if;
+      ra_ja    <= rr_la(LA_J downto LA_J - 2);
+      ra_x3    <= x3;
+      ra_k     <= a_k(RD_LAT - 1);
+      ra_tag   <= a_tag(RD_LAT - 1);
+      case to_integer(a_ph(RD_LAT - 1)) is
+        when PH_FWD =>
+          if a_leafy(RD_LAT - 1) = '1' then ra_a <= rr_da; else ra_a <= rr_ta; end if;
+          if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
+        when PH_INV =>
+          ra_a <= rr_ta;
+          ra_b <= rr_tb;
+        when PH_BWD =>
+          ra_a <= rr_ta;
+          if a_leafy(RD_LAT - 1) = '1' then ra_b <= rr_db; else ra_b <= rr_tb; end if;
+        when PH_LAM =>
+          ra_a <= rr_la(LA_Y downto LA_J + 1);                    -- y
+          ra_b <= rr_tb;
+        when others =>
+          ra_a <= rr_ta;
+          ra_b <= rr_la(LA_X downto LA_Y + 1);                    -- x
+      end case;
+      ra_ph <= a_ph(RD_LAT - 1);
 
       -- ============ stage B: form operands ============
       mul_valid <= ra_valid;
       mul_tag   <= ra_tag;
-      if ra_valid = '1' then
-        oa := ra_a;
-        ob := ra_b;
-        case to_integer(ra_ph) is
-          when PH_INV =>
-            ob := inv_frob(ra_b, ra_k);
-          when PH_LAM =>
-            oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
-          when PH_FIN =>
-            -- ra_a = lam, ra_b = x
-            ob := ra_b xor ra_x3;
-          when others =>
-            null;
-        end case;
-        mul_a <= oa;
-        mul_b <= ob;
-      end if;
+      oa := ra_a;
+      ob := ra_b;
+      case to_integer(ra_ph) is
+        when PH_INV =>
+          ob := inv_frob(ra_b, ra_k);
+        when PH_LAM =>
+          oa := ra_a xor gf_sigma_j(ra_a, ra_ja);
+        when PH_FIN =>
+          -- ra_a = lam, ra_b = x
+          ob := ra_b xor ra_x3;
+        when others =>
+          null;
+      end case;
+      mul_a <= oa;
+      mul_b <= ob;
 
       -- ============ output: weight and DP test over four clocks ============
       o2_valid <= o1_valid;
