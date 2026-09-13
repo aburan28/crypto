@@ -73,7 +73,7 @@ package gf131_pkg is
   constant MUL_DSP_LEAVES : natural := 11;
   constant DSP_LEAF_LAT   : natural := 4;
   constant LEAF_LAT       : natural := 1 + (DSP_LEAF_LAT - 1) * minimum(MUL_DSP_LEAVES, 1);
-  -- latch, prep, the tree, to_onb in two stages (gf131_mul)
+  -- latch, prep, the tree, a copy of its top register, to_onb (gf131_mul)
   constant MUL_LATENCY    : natural := 2 * MUL_KARATSUBA + 4 + LEAF_LAT;   -- 11, or 14 with DSP leaves
 
   -- A point whose x has weight 1 sits on no walk but has d = x + sigma^3(x)
