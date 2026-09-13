@@ -113,6 +113,8 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--region',default='us-west-2')
     parser.add_argument('--launch-template',default='ecc2k130-worker')
+    parser.add_argument('--launch-config',type=Path,help='explicit AMI/security-group/root-disk JSON instead of an existing template')
+    parser.add_argument('--s3-region',help='region of the existing benchmark bucket; defaults to EC2 region')
     parser.add_argument('--availability-zone',help='select an existing eligible subnet in this zone')
     parser.add_argument('--instance-type',choices=('g7e.2xlarge','g7e.4xlarge'),default='g7e.2xlarge')
     parser.add_argument('--automatic-placement',action='store_true',
@@ -130,12 +132,15 @@ def main():
     config=Config(connect_timeout=30,read_timeout=30,retries={'max_attempts':2,'mode':'standard'})
     session=boto3.Session(region_name=args.region)
     ec2=session.client('ec2',config=config)
-    s3=session.client('s3',config=config.merge(Config(signature_version='s3v4')))
+    s3=session.client('s3',region_name=args.s3_region or args.region,config=config.merge(Config(signature_version='s3v4')))
     account=session.client('sts',config=config).get_caller_identity()['Account']
     if not re.fullmatch(r'\d{12}',account): raise RuntimeError('invalid account identifier')
     bucket='ecc2k130-'+account
     token=uuid.uuid4().hex;prefix='benchmarks/native/'+token
-    template=ec2.describe_launch_template_versions(LaunchTemplateName=args.launch_template,Versions=['$Default'])['LaunchTemplateVersions'][0]
+    if args.launch_config:
+        template={'VersionNumber':None,'LaunchTemplateData':json.loads(args.launch_config.read_text())}
+    else:
+        template=ec2.describe_launch_template_versions(LaunchTemplateName=args.launch_template,Versions=['$Default'])['LaunchTemplateVersions'][0]
     data=template['LaunchTemplateData']
     hardware=ec2.describe_instance_types(InstanceTypes=[args.instance_type])['InstanceTypes'][0]
     if sum(gpu['Count'] for gpu in hardware.get('GpuInfo',{}).get('Gpus',[]))!=1:
@@ -174,7 +179,8 @@ def main():
     receipt=dict(valid=False,region=args.region,instanceType=args.instance_type,token=token,
                  availabilityZone=None if args.automatic_placement else eligible[0]['AvailabilityZone'],
                  automaticPlacement=args.automatic_placement,
-                 templateName=args.launch_template,presignedTransfer=args.presigned_transfer,
+                 templateName=None if args.launch_config else args.launch_template,presignedTransfer=args.presigned_transfer,
+                 s3Region=args.s3_region or args.region,
                  templateVersion=template['VersionNumber'],sourceSha256=source_sha,
                  resultPrefix=prefix,instanceId=None)
     def save(): (out/'launch.json').write_text(json.dumps(receipt,indent=2)+'\n')

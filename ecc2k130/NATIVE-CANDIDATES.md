@@ -151,3 +151,24 @@ alternative to the default `g7e.2xlarge`; AWS hardware metadata must confirm
 exactly one GPU. Both sizes use the same GPU comparison geometry. Eight offline
 benchmark and launch checks pass; startup, device execution and timing remain
 pending a successful allocation.
+
+## Cross-region measurement retry
+
+A subsequent retry attempted automatic placement in three regions. The
+existing us-west-2 single-GPU setup and us-east-1 `g7e.2xlarge` returned
+`InsufficientInstanceCapacity`. us-east-2 `g7e.2xlarge` failed because the
+regional instance-bucket vCPU quota was zero. us-east-1 `g7e.4xlarge` exceeded
+the available quota within its 32-vCPU limit. These are allocation failures,
+not failed device correctness tests; no GPU timing was obtained. The
+[retry receipt](benchmarks/native-candidates/aws-cross-region-attempt.json)
+records the final exact-token checks.
+
+For a region without a worker template, `--launch-config PATH` accepts an
+explicit JSON object containing `ImageId`, `SecurityGroupIds` and
+`BlockDeviceMappings`, plus `IamInstanceProfile` when not using presigned
+transfer. The existing one-GPU and disposable-disk checks still apply.
+`--s3-region us-west-2` keeps the approved source/results bucket in its original
+region while EC2 runs elsewhere. The retry selected Amazon-owned Deep Learning
+Base OSS Nvidia Driver GPU AMIs (Ubuntu 24.04), an existing default security
+group with outbound connectivity, and a disposable 100-GiB root disk. No IAM,
+network, quota or production-template changes were made.
