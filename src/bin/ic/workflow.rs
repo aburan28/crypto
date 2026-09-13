@@ -786,6 +786,22 @@ fn candidate_json(c: &Candidate) -> Value {
 }
 
 /// Run (or resume) the workflow described by `args.params` in `args.dir`.
+/// Name the representation a run actually used, in its factor-base
+/// summary.
+///
+/// The byte budget chooses the tier, and the tiers differ by an order of
+/// magnitude in build cost and resident memory.  A report that does not
+/// say which one was chosen cannot be compared against another's, and a
+/// run that selected a different tier than its author believed looks
+/// exactly like a run that did not.
+fn with_tier(mut summary: Value, pair: Option<&PairSumTable>) -> Value {
+    if let (Some(t), Some(obj)) = (pair, summary.as_object_mut()) {
+        obj.insert("pair_table_tier".into(), Value::from(t.tier()));
+        obj.insert("pair_table_stored_pairs".into(), Value::from(t.len()));
+    }
+    summary
+}
+
 /// The pair table for this run, under the params' byte budget.
 ///
 /// `PairSumTable::build_within` picks the first representation that fits
@@ -1067,7 +1083,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     if worker_mode || args.stop_after == Some(Stage::Collect) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
     }
 
     // ── Stage 3: logs (merge, verify, solve) ───────────────────────
@@ -1213,10 +1229,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         }
     };
     let Some(table) = table else {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, overall_failed, begin, "failed"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, overall_failed, begin, "failed"));
     };
     if args.stop_after == Some(Stage::Logs) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
     }
 
     // ── Stage 3: solve (per-target resumable) ──────────────────────
@@ -1391,7 +1407,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     let status = if all_verified { "complete" } else { "failed" };
-    Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, Some(&solutions), overall_failed, begin, status))
+    Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), Some(&solutions), overall_failed, begin, status))
 }
 
 #[allow(clippy::too_many_arguments)]

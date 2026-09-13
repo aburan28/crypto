@@ -2894,6 +2894,22 @@ impl PairSumTable {
         }
     }
 
+    /// Which representation this table is, for a run to record.
+    ///
+    /// The tiers differ by an order of magnitude in build cost and in
+    /// resident memory, and a run that selected a different one than its
+    /// author believed looks exactly like a run that did not.  A report
+    /// that does not name the tier cannot be compared with another.
+    pub fn tier(&self) -> &'static str {
+        if self.fold {
+            "folded"
+        } else if self.is_compact() {
+            "compact"
+        } else {
+            "full"
+        }
+    }
+
     /// Whether this table folds its keys by the signed Frobenius group.
     pub fn is_folded(&self) -> bool {
         self.fold
