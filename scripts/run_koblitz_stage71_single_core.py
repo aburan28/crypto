@@ -85,6 +85,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     effective_cpus = sorted(os.sched_getaffinity(0))
     inherited_cpus = child_affinity()
     require(effective_cpus == inherited_cpus == [selected_cpu], "single-CPU affinity was not inherited")
+    host_identity = stage33.linux_host_identity()
+    require(host_identity["cpu"]["effective_affinity"] == [selected_cpu], "host receipt lost CPU-0 affinity")
     output.mkdir(parents=True)
     evidence = output / "evidence"
     evidence.mkdir()
@@ -126,6 +128,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     require(summary.get("rank_aware_pair_scan") is True, "direct did not use rank-aware collection")
     require(summary.get("rank_target_deficiency") == 1, "direct rank-deficiency trigger changed")
     require(summary.get("field_product_pipeline") == "x86_64_pclmul_n53_fused_reduce", "direct did not use fused field products")
+    require(direct_value["base"].get("support_x_prefilter_hash_strategy") == "direct_low_and_high_x_bit_windows", "direct lost selected x filter")
+    require(summary.get("query_itoh_n53_inverse") is True, "direct lost Itoh inverse")
+    require(summary.get("fixed_base_reference_validation") is True, "direct lost fixed-base validation")
     require(summary.get("recovered_fixture_scalar") == stage42.EXPLICIT_SCALAR, "direct recovered scalar changed")
     rho_rows = stage44.parse_lines(evidence / "single-core-rho.stdout")
     require(len(rho_rows) == 1 and rho_rows[0].get("verified") is True, "rho verification failed")
@@ -149,6 +154,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "child_effective_cpus": inherited_cpus,
             "inheritance_verified": True,
         },
+        "host_identity": host_identity,
         "build_binding": {
             "result": custody.executable_identity(build_root / "result.json", "Stage-71 build result", executable=False),
             "seal": custody.executable_identity(build_root / "result-seal.json", "Stage-71 build seal", executable=False),
@@ -184,6 +190,8 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
     result = load(output / "result.json", "Stage-71 result")
     require(result.get("schema") == RUN_SCHEMA and result.get("status") == "complete_n53_single_core_direct_rho", "Stage-71 result is incomplete")
     require(result.get("affinity", {}).get("inheritance_verified") is True and len(result["affinity"]["parent_effective_cpus"]) == 1, "Stage-71 affinity changed")
+    stage33.validate_linux_host_identity(result["host_identity"])
+    require(result["host_identity"]["cpu"]["effective_affinity"] == result["affinity"]["parent_effective_cpus"], "Stage-71 host affinity changed")
     direct = stage61.direct_observation(output / "evidence/single-core-direct.stdout", "FULL_RANK")
     require(direct["summary"].get("rank_aware_pair_scan") is True, "verified direct lost rank-aware collection")
     require(direct["summary"].get("rank_target_deficiency") == 1, "verified rank-deficiency trigger changed")
@@ -204,6 +212,7 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         "status": "n53_single_core_verified",
         "source_commit": build["source_state"]["commit"],
         "selected_cpu": result["affinity"]["selected_cpu"],
+        "host_identity": result["host_identity"],
         "relations": direct["summary"]["admitted_relations"],
         "support_queries": direct["summary"]["support_queries"],
         "direct_wall_seconds": dw,

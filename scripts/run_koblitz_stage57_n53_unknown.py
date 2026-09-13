@@ -82,6 +82,9 @@ def observe_direct(path: Path, optimized: bool = False) -> dict[str, Any]:
         require(summary.get("rank_aware_pair_scan") is True, "optimized direct did not use rank-aware collection")
         require(summary.get("rank_target_deficiency") == 3, "optimized direct rank-deficiency trigger changed")
         require(summary.get("field_product_pipeline") == "x86_64_pclmul_n53_fused_reduce", "optimized direct did not use fused field products")
+        require(value["base"].get("support_x_prefilter_hash_strategy") == "direct_low_and_high_x_bit_windows", "optimized direct lost selected x filter")
+        require(summary.get("query_itoh_n53_inverse") is True, "optimized direct lost Itoh inverse")
+        require(summary.get("fixed_base_reference_validation") is True, "optimized direct lost fixed-base validation")
     return value
 
 
@@ -91,6 +94,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     require(not output.exists() and not output.is_symlink(), "Stage-57 output must be new")
     build_root = args.build.resolve(strict=True)
     build = stage42.validate_build(build_root)
+    host_identity = stage33.linux_host_identity()
     output.mkdir(parents=True)
     evidence = output / "evidence"
     evidence.mkdir()
@@ -144,6 +148,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "direct_process": direct_process,
         "rho_process": rho_process,
         "outer_resources": outer,
+        "host_identity": host_identity,
         "direct_base": direct_value["base"],
         "direct_summary": direct_value["summary"],
         "relation_hashes": direct_value["relation_hashes"],
@@ -176,6 +181,7 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
     result = load(output / "result.json", "Stage-57 result")
     require(result.get("schema") == RUN_SCHEMA and result.get("status") == "complete_n53_public_unknown_scalar", "Stage-57 result is incomplete")
     optimized = result.get("optimized_stack") is True
+    stage33.validate_linux_host_identity(result["host_identity"])
     direct_value = observe_direct(output / "evidence/direct.stdout", optimized)
     require(result.get("direct_base") == direct_value["base"] and result.get("direct_summary") == direct_value["summary"] and result.get("relation_hashes") == direct_value["relation_hashes"], "Stage-57 direct evidence changed")
     rho_rows = stage44.parse_lines(output / "evidence/rho.stdout")
@@ -196,6 +202,7 @@ def verify(build_root: Path, output: Path) -> dict[str, Any]:
         "schema": "koblitz_stage57_verification.v1",
         "status": "n53_public_unknown_scalar_verified",
         "source_commit": build["source_state"]["commit"],
+        "host_identity": result["host_identity"],
         "published_q": EXPECTED_Q,
         "recovered_scalar": recovered,
         "relations": len(result["relation_hashes"]),
