@@ -387,6 +387,25 @@ says −19% at W = 8 and cannot say what the reads cost.
 host reference squares, so the walk comparison that was already there checks
 the table path against the thing it replaces, on hardware, for free.
 
+**The walk's own τ^j chain is the obvious next target and does not survive
+the same arithmetic.** It is the larger half — about 12.5 squarings a step
+against the inversion's 11.25 at W = 8 — so tabling it looks like the bigger
+win. Price it the way the trade actually runs, in ALU instructions saved per
+table read added:
+
+| | ALU replaced | reads added | ALU per read | tables |
+|---|---|---|---|---|
+| inversion τ^k | 780 | 50 | **15.4** | 4 (k fixed) |
+| walk τ^j chain | 584 | 202 | **2.9** | 8 (j data-dependent) |
+
+The inversion wins because Montgomery's trick has already divided its reads
+by W while the squarings it replaces are not divided by anything. The walk
+chain gets no such discount: it runs twice per step per walk, so the same
+substitution buys three ALU instructions per read instead of fifteen, on
+eight tables rather than four because j is data-dependent. A table read has
+to be cheaper than three ALU slots for that to pay, which on a GPU it
+generally is not. Not implemented, and the number above is why.
+
 ## Occupancy: measured
 
 `./ptx_stats2k.sh`, `k2k_rho_walk_lowmem<8>`, block size 128:
