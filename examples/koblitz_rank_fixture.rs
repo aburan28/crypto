@@ -349,8 +349,8 @@ impl CompactPairTable {
                 != Ok("1"),
             x_filter_insert_hash_reuse: std::env::var("KIC_DISABLE_INSERT_HASH_REUSE").as_deref()
                 != Ok("1"),
-            x_filter_direct_bits: std::env::var("KIC_ENABLE_DIRECT_X_FILTER_BITS").as_deref()
-                == Ok("1"),
+            x_filter_direct_bits: std::env::var("KIC_DISABLE_DIRECT_X_FILTER_BITS").as_deref()
+                != Ok("1"),
             x_filter_blocked: std::env::var("KIC_ENABLE_BLOCKED_X_FILTER").as_deref() == Ok("1"),
             x_filter_window_shift: if filter_bits == 0 || x_filter_exact {
                 0
@@ -1650,14 +1650,14 @@ unsafe fn inverse_n53_itoh_unchecked(value: u64) -> u64 {
 fn itoh_n53_inverse_enabled() -> bool {
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
-    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_ITOH_N53_INVERSE").as_deref() == Ok("1"))
+    *ENABLED.get_or_init(|| std::env::var("KIC_DISABLE_ITOH_N53_INVERSE").as_deref() != Ok("1"))
 }
 
 fn prefiltered_exact_lookup_enabled() -> bool {
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED
-        .get_or_init(|| std::env::var("KIC_ENABLE_PREFILTERED_EXACT_LOOKUP").as_deref() == Ok("1"))
+        .get_or_init(|| std::env::var("KIC_DISABLE_PREFILTERED_EXACT_LOOKUP").as_deref() != Ok("1"))
 }
 
 #[cfg(target_arch = "x86_64")]

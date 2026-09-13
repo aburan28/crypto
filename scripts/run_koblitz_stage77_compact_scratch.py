@@ -86,6 +86,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     candidate_environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
     candidate_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
     candidate_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
+    candidate_environment["KIC_DISABLE_DIRECT_X_FILTER_BITS"] = "1"
     candidate_environment["RAYON_NUM_THREADS"] = "4"
     baseline_environment = dict(candidate_environment)
     baseline_environment["KIC_DISABLE_COMPACT_PAIR_SCRATCH"] = "1"

@@ -95,12 +95,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         str(stage42.RHO_BATCH_SEED), str(stage42.EXPLICIT_SCALAR),
     ]
     mixed_environment = selected_environment()
-    prefiltered_environment = dict(mixed_environment)
-    prefiltered_environment["KIC_ENABLE_PREFILTERED_EXACT_LOOKUP"] = "1"
-    direct_bits_environment = dict(prefiltered_environment)
-    direct_bits_environment["KIC_ENABLE_DIRECT_X_FILTER_BITS"] = "1"
+    mixed_environment["KIC_DISABLE_PREFILTERED_EXACT_LOOKUP"] = "1"
+    mixed_environment["KIC_DISABLE_DIRECT_X_FILTER_BITS"] = "1"
+    mixed_environment["KIC_DISABLE_ITOH_N53_INVERSE"] = "1"
+    prefiltered_environment = selected_environment()
+    prefiltered_environment["KIC_DISABLE_DIRECT_X_FILTER_BITS"] = "1"
+    prefiltered_environment["KIC_DISABLE_ITOH_N53_INVERSE"] = "1"
+    direct_bits_environment = selected_environment()
+    direct_bits_environment["KIC_DISABLE_ITOH_N53_INVERSE"] = "1"
     itoh_environment = dict(direct_bits_environment)
-    itoh_environment["KIC_ENABLE_ITOH_N53_INVERSE"] = "1"
+    itoh_environment.pop("KIC_DISABLE_ITOH_N53_INVERSE")
     rho_environment = custody.safe_child_environment()
 
     before_self = resource.getrusage(resource.RUSAGE_SELF)
