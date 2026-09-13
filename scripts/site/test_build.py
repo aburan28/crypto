@@ -90,6 +90,19 @@ class BuildTests(unittest.TestCase):
             page = read(os.path.join(self.out, rel))
             self.assertNotIn("innerHTML", page, rel)
 
+    def test_landing_page_operations_total_cites_the_campaign_constants(self):
+        # The landing page turns the distinguished-point count into a
+        # group-operation total, so it depends on two figures it does not
+        # measure: the campaign's report rate at HW(x) <= 34, and the
+        # expected cost of a collision. Both are documented in ecc2k130/;
+        # pin them together so the page cannot drift from what it cites.
+        page = read(os.path.join(self.out, "index.html"))
+        campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
+        self.assertIn('id="live-ops"', page)
+        for exponent in ("2^25.27", "2^60.9"):
+            self.assertIn(exponent, page, exponent)
+            self.assertIn(exponent, campaign, exponent)
+
     def test_internal_links_resolve(self):
         missing = []
         for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
