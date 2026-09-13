@@ -13,24 +13,27 @@ the client's own field model in `ecc2k130/codegen/`.
 Reference part is the AMD Virtex UltraScale+ VU47P (AWS `f2.6xlarge`), the
 same one `hdl/ecc/` and `hdl/sha1/` target, but there are no vendor
 primitives: plain `ieee.std_logic_1164` and `numeric_std`, simulates under
-GHDL, reads into any synthesis flow. Every number below is labelled
-measured (in simulation or on the device), derived, or estimated. **The
-96-engine image runs on an `f2.6xlarge` at 6.02 G steps/s**, the
-80-engine one at 5.02 G, the 64-engine one at 4.01 G and the 48-engine
-one at 3.01 G (`aws/README.md`, "What came back"): 333 MHz / 5.31 clocks
-per step per engine, with the distinguished points sampled from each
-checked against the client's reference walk. The current revision keeps
-the product tree in UltraRAM and batches 32 walks (5.16 clocks per
-step); 112- and 128-engine builds of it were in flight when this was
-written.
+GHDL, reads into any synthesis flow (the DSP leaves of the multiplier are
+unsigned integer products the synthesiser puts in DSP48E2 blocks). Every
+number below is labelled measured (in simulation or on the device),
+derived, or estimated. **The 96-engine image runs on an `f2.6xlarge` at
+6.02 G steps/s**, the 80-engine one at 5.02 G, the 64-engine one at 4.01
+G and the 48-engine one at 3.01 G (`aws/README.md`, "What came back"):
+333 MHz / 5.31 clocks per step per engine, with the distinguished points
+sampled from each checked against the client's reference walk. The
+current revision keeps the product tree in UltraRAM, counts eleven of the
+multiplier's 27 leaves in DSPs (the engine is 7.3k LUTs from 8.1k) and
+batches 32 walks 16 deep (5.22 clocks per step); 112-, 120-, 128- and
+136-engine builds were in flight when this was written.
 
 ## Files
 
 | File | What it is |
 |---|---|
 | `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, two-clock weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
-| `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, latency `2 LEVELS + 1` |
-| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 10, no DSPs |
+| `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, the first `DSP_LEAVES` leaves in DSPs, latency `2 LEVELS + LEAF_LAT` |
+| `gf2_dsp_leaf.vhd` | The DSP leaf: a 17-bit GF(2) product as six 24 × 15 integer products with the coefficients three bits apart, plus the corner in LUTs; four clocks |
+| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 13 (10 with LUT leaves only) |
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
 | `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
@@ -128,12 +131,14 @@ stage 1        a' = prep(a), b' = prep(b)          gamma -> c-powers
 stage 2        Karatsuba level 1 pre-add           a0, a1, a0+a1 (66 bits)
 stage 3        Karatsuba level 2 pre-add           (33 bits)
 stage 4        Karatsuba level 3 pre-add           (17 bits)
-stage 5        27 products of 17 x 17, schoolbook
-stage 6        level 3 post-combine
-stage 7        level 2 post-combine
-stage 8        level 1 post-combine                261-bit product
-stage 9        r = to_onb(h)                       c-powers -> gamma
+stage 5..8     27 products of 17 x 17: 11 in DSPs (4 clocks), 16 schoolbook (1, padded)
+stage 9        level 3 post-combine
+stage 10       level 2 post-combine
+stage 11       level 1 post-combine                261-bit product
+stage 12       r = to_onb(h)                       c-powers -> gamma
 ```
+
+(With `MUL_DSP_LEAVES = 0` the leaf is one clock and the latency 10.)
 
 `gf2_kmul` is a recursive entity: each level is a registered pre-add, three
 instances of itself on the halves, and a registered post-combine. Over
@@ -155,9 +160,9 @@ Gate count per multiplier, read off the constant matrices and the recurrence
 | **3 (default)** | **17** | **7803** | **9404** | **14553** | **10** |
 | 4 | 9 | 6561 | 9512 | 14661 | 12 |
 
-`prep` is 991 XOR2 per operand, `to_onb` 3167. No DSP48 is involved
-anywhere — binary-field arithmetic has no carries, so the DSP's adder is
-useless to it and the multiplier is pure LUT fabric.
+`prep` is 991 XOR2 per operand, `to_onb` 3167. Binary-field arithmetic has
+no carries, so the DSP's adder is useless to it — but its multiplier is
+not, see "Leaves in DSPs" below.
 
 Where the LUT optimum sits was a synthesis question; Vivado 2025.2 on the
 VU47P answers it (`gf131_mul` out of context, 4.0 ns clock), **measured**:
@@ -177,6 +182,47 @@ this device runs out of. Compare `hdl/ecc/`: the secp256k1 multiplier is
 
 The `tag` rides alongside and the datapath never looks at it, so one
 multiplier serves any number of independent contexts back-to-back.
+
+### Leaves in DSPs
+
+Once the engine count was bound by LUTs (128 engines are 83% of them with
+the all-LUT multiplier) the device's 9 024 DSP48E2 blocks, all empty,
+were the resource left. An integer product of two packed polynomials
+counts the AND terms a GF(2) product would XOR:
+
+```
+A = sum a_u 2^(3u),  B = sum b_v 2^(3v)   =>   A B = sum_k c_k 2^(3k),
+c_k = #{(u, v) : u + v = k, a_u = b_v = 1}
+```
+
+With the coefficients three bits apart and at most five on one side,
+`c_k <= 5` never carries into the next field, and bit `3k` of the integer
+product is the GF(2) coefficient for free. The DSP48E2 multiplies 27 × 18
+signed, so one block covers eight coefficients against five (24 × 15
+unsigned); `gf2_dsp_leaf` does a 17-bit leaf as a 2 × 3 grid of them
+(`a[0..15]` × `b[0..14]`), A/B, M and P registered inside the block, plus
+the corner the grid misses (`a[16]` against all of `b`, `a[0..15]` against
+`b[15..16]` — one to three AND terms per output bit, one LUT6) a clock
+earlier, and one XOR of the parities into place. Nothing in the source is
+Xilinx-specific: an `unsigned * unsigned` GHDL simulates and Vivado puts
+in a DSP (`use_dsp = "yes"`).
+
+Leaves are numbered in instantiation order and the first `MUL_DSP_LEAVES`
+(11) are DSP leaves; every leaf must retire on the same clock, so the
+largest subtrees with no DSP leaf get their output delayed by the three
+clocks (flip-flops, not SRLs — a LUT per bit would have cost what the
+leaves save). Synthesised (`cl_probe`, 2 engines, 3.0 ns), **measured**:
+
+| | LUTs / engine | FFs | DSPs | slack |
+|---|---|---|---|---|
+| 27 LUT leaves | 7 974 – 8 106 | 8 062 | 0 | +1.18 ns (probe) / +1.24 (engine) |
+| **11 DSP leaves** | **7 170 – 7 318** | 9 546 | **66** | +1.18 / +1.24, no DSP path in the 80 worst |
+
+A DSP leaf is six DSPs and ~70 LUTs against ~140: −788 LUTs per engine
+(−9.7%). 128 engines take 8 448 DSPs (94%); 136 fit 10 leaves each
+(`DSP_LEAVES=10` in `build_afi.sh`). The price is three clocks of
+latency (13 from 10), which 8 batches in flight no longer hide (5.38
+clocks per step at 32 × 8); 16 do — see "The batched step unit".
 
 ## The step
 
@@ -300,12 +346,17 @@ batches do not cover and sixteen nearly do. Memory per batch of `W` is
 `8W` field elements as stored (the leaf table's `x` and `y`, `d` twice,
 the tree twice), and a block RAM is 72 × 512 whatever the design asks
 for, so a 131-bit table of 128 or 256 entries costs the same two RAMB36
-and the UltraRAMs are 4096 deep: any geometry holding 256 walks costs
-8 RAMB36 + 1 RAMB18 + 4 URAM288 per step unit. **The image's default is
-32 × 8** (`cl_ecc2k130_defines.vh`): the same 256 walks and the same
-memory as 16 × 16, and the walker testbench with 512 walks runs **5.16
-clocks per step against 5.31** — the bound is `5 + 5/W` — with 200 fewer
-LUTs (half the per-batch state). The testbenches' default stays 16 × 8.
+and the UltraRAMs are 4096 deep: any geometry holding 256 or 512 walks
+costs 8 RAMB36 + 1 RAMB18 + 4 URAM288 per step unit. With the 10-clock
+multiplier the image's default was 32 × 8: the same 256 walks and the
+same memory as 16 × 16, and the walker testbench with 512 walks ran
+**5.16 clocks per step against 5.31** — the bound is `5 + 5/W`. With the
+13-clock multiplier (DSP leaves) eight batches no longer cover the
+inversion chain and 32 × 8 reads 5.38; **the image's default is now
+32 × 16** (`cl_ecc2k130_defines.vh`), all 512 of the engine's walks in
+the step unit, at **5.22** (16 × 16: 5.31, 64 × 4: 6.06; all measured in
+the walker testbench with 512 walks, `-gLOG_W=5 -gLOG_NB=4`). The
+testbenches' default stays 16 × 8.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -439,20 +490,21 @@ Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, two `ec2k_walker`
 behind the register block and the clock bridge (512 walks, W = 16, 16
 batches in flight):
 
-| | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM |
-|---|---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **7 970 – 8 110** | 180 (+590 SRL) | 8 060 | 12 | 2 | 4 |
-| ├ walker body (FIFO, prefetch buffer, held report) | ~600 | 180 | ~500 | 4 | 1 | 0 |
-| └ `ec2k_batch_pipe` | ~7 800 | 0 | ~7 800 | 8 | 1 | 4 |
-| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~3 000 | 0 | ~3 200 | 8 | 1 | 4 |
-| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba) | 4 823 | 0 | 4 643 | 0 | 0 | 0 |
-| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 883 | 356 | 2 380 | 0 | 0 | 0 |
-| `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 |
+| | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM | DSP |
+|---|---|---|---|---|---|---|---|
+| `ec2k_walker` (whole engine) | **7 170 – 7 320** | 180 (+614 SRL) | 9 550 | 12 | 2 | 4 | 66 |
+| ├ walker body (FIFO, prefetch buffer, held report) | 366 | 176 | 337 | 4 | 1 | 0 | 0 |
+| └ `ec2k_batch_pipe` | ~6 950 | 4 | ~9 200 | 8 | 1 | 4 | 66 |
+| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | 2 630 | 4 | 2 994 | 8 | 1 | 4 | 0 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | ~4 330 (5 117 with LUT leaves) | 0 | ~6 100 | 0 | 0 | 0 | 66 |
+| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 890 | 356 | 2 391 | 0 | 0 | 0 | 0 |
+| `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 | 0 |
 
-(The two engines differ by 130 LUTs from `-keep_equivalent_registers`
-falling differently; the breakdown rows are apportioned from the earlier
-LUTRAM synthesis, 13 106 LUTs, less the 4 400 LUTRAM and its address
-decode that the block RAMs replaced.) The register block's stage on the
+(The two engines differ by 150 LUTs from `-keep_equivalent_registers`
+falling differently; the body rows are from a hierarchical synthesis of
+one engine with LUT leaves, where the multiplier was 5 117 LUTs: 4 428 in
+the Karatsuba tree, of which 3 800 in the 27 leaf products, and 689 in
+`prep`, `to_onb` and the tag pipe.) The register block's stage on the
 spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
 an engine are the walker's four-word prefetch buffer. Before the final
 multiply's companions moved into a shift register the engine was 8 100 –
@@ -460,9 +512,9 @@ multiply's companions moved into a shift register the engine was 8 100 –
 260 SRLs bought four RAMB36 tiles. With the tree in block RAM it was
 8 260 – 8 570 LUTs, 7 660 FF and 16 RAMB36 + 2 RAMB18 (the routed 48-,
 64-, 80- and 96-engine images); the UltraRAM tree with its address and
-write registers costs 220 FFs and buys four more tiles, and 32 × 8
-batches (half the per-batch state) and the enable-free stages take 250
-LUTs back.
+write registers costs 220 FFs and buys four more tiles, 32-walk batches
+and the enable-free stages take 250 LUTs back (7 970 – 8 110), and the
+eleven DSP leaves another 790 for 1 480 FFs and 66 DSPs.
 
 Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe (the
 register block's read mux, one copy on the die) and **+1.24 ns** inside
@@ -487,11 +539,11 @@ into registers a clock ahead, and a write no longer overlaps its own
 response); the retire side's batch-level update, a 16:1 mux of the level
 array into a decrement and back (1.56 ns; the level rides in the
 multiplier tag too, so retire writes the array and never reads it). The
-multiplier is now 58% of an engine
-and its leaf products (`gf2_kmul`'s `leaf.r`, 3.9k LUTs) the single
-largest item. The one distributed RAM left is the register block's
-64-deep report queue (356 LUTRAM, one copy on the die). No DSPs are
-used; the UltraRAMs hold only the product trees.
+multiplier is now 59% of an engine and its sixteen LUT leaf products
+(~2.2k LUTs) the single largest item; the other eleven leaves are the
+engine's 66 DSPs. The one distributed RAM left is the register block's
+64-deep report queue (356 LUTRAM, one copy on the die); the UltraRAMs
+hold only the product trees.
 
 Why block RAM and not the distributed RAM the first revisions used: the
 first 48-engine implementation (`aws/README.md`) placed at −2.5 ns on a
@@ -504,22 +556,24 @@ logic. 4 800 LUTRAM per engine was never going to place tightly 48 times
 over. A block RAM has the same fanout inside one hard block.
 
 The VU47P has **1 303 680 LUTs** (the "2.85M" in the marketing sheet is
-logic cells), **2 016 RAMB36** and **960 URAM288**, so an engine is 0.65%
-of the LUTs, 0.64% of the block RAM (13 tiles: 12 RAMB36 and two RAMB18
-sharing one) and 0.42% of the UltraRAM. With the tree in block RAM (17
+logic cells), **2 016 RAMB36**, **960 URAM288** and **9 024 DSP48E2**, so
+an engine is 0.56% of the LUTs, 0.64% of the block RAM (13 tiles: 12
+RAMB36 and two RAMB18 sharing one), 0.42% of the UltraRAM and 0.73% of
+the DSPs. With the tree in block RAM (17
 tiles) **48 engines was a third of the device** (the routed 48-engine
 image of the 21-tile revision used 31% of the LUTs and 50% of the RAM),
 64 was 42% of the LUTs and 54% of the RAM, 80 was 53% and 67% (the routed
 80-engine image: 686 854 LUTs, 1 360 tiles) and 96 63% and 81% — block RAM
 ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
-is 83% / 83% / 53%, and the LUTs bound the count. At 5.31 clocks per step
-and 333 MHz that is 63 M steps/s per engine and **3.0 G steps/s at 48
-engines, 4.0 G at 64, 5.0 G at 80, 6.0 G at 96 — all four measured on
-the device**;
-at 5.16 clocks per step (32 × 8) 64.6 M per engine, 7.2 G at 112 and
-8.3 G at 128; at the shell's 250 MHz the measured three would be 2.3,
-3.0 and 3.8 G.
+is 83% / 83% / 53%, and the LUTs bound the count. With eleven leaves in
+DSPs 128 engines is 74% of the LUTs, 83% of the block RAM, 53% of the
+UltraRAM and 94% of the DSPs; 136 engines with ten leaves each is 80% /
+88% / 57% / 90%. At 5.31 clocks per step and 333 MHz that is 63 M
+steps/s per engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G
+at 80, 6.0 G at 96 — all four measured on the device**; at 5.22 clocks
+per step (32 × 16) 63.9 M per engine, 8.2 G at 128 and 8.7 G at 136; at
+the shell's 250 MHz the measured four would be 2.3, 3.0, 3.8 and 4.5 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
@@ -527,8 +581,9 @@ walks per word and spending 8859 instructions per multiply. The GPU has no
 carryless multiply; the FPGA is nothing but carryless multiplies. That is
 the structural reason a binary Koblitz curve suits an FPGA where the prime
 field secp256k1 (`docs/ecc_fpga_cost_model.md`) does not: there the FPGA
-advantage was "roughly 2x, fragile"; here the multiplier costs no DSPs, the
-inversion costs eight multiplies, and a step costs 5.3.
+advantage was "roughly 2x, fragile"; here a multiplier is 4.3k LUTs and 66 DSPs
+that count AND terms, the inversion costs eight multiplies, and a step
+costs 5.2.
 
 Two things the first synthesis taught, both fixed:
 
