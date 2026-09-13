@@ -211,6 +211,11 @@ architecture rtl of ec2k_axil is
   signal up_valid_n      : std_logic_vector(0 to NENG) := (others => '0');
   signal up_slot_free    : std_logic_vector(0 to NENG - 1) := (others => '1');
   signal pend, ins       : std_logic_vector(0 to NENG - 1);
+  -- the select of the 300-bit insert mux: from one LUT it was the worst
+  -- path of the routed 80-engine image (2.8 ns of route to 310 loads);
+  -- replicated, each copy sits among its loads
+  attribute MAX_FANOUT : string;
+  attribute MAX_FANOUT of ins : signal is "64";
   signal up_gid          : gid_arr_t(0 to NENG);
   signal up_steps        : cnt_arr_t(0 to NENG);
   signal up_x, up_y      : gf_arr_t(0 to NENG);
@@ -274,7 +279,6 @@ architecture rtl of ec2k_axil is
   -- left alone, Vivado replicates the read address once per LUT of the
   -- read mux, 1 200 flip-flops for ten bits; a fanout limit gets a
   -- handful of copies instead
-  attribute MAX_FANOUT : string;
   attribute MAX_FANOUT of ar_addr : signal is "64";
   signal w_data   : word_t := (others => '0');
   signal bvalid   : std_logic := '0';
