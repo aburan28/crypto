@@ -69,12 +69,26 @@ def direct_observation(path: Path, expected_status: str) -> dict[str, Any]:
     require(summary.get("status") == expected_status, f"unexpected {expected_status} endpoint")
     require(summary.get("linear_solution_verified") is True, "linear solution was not verified")
     require(summary.get("all_relations_group_verified") is True, "a relation failed group verification")
-    require(len(receipts) == summary.get("admitted_relations"), "relation transcript is incomplete")
+    if receipts:
+        relation_hashes = [row["relation_hash"] for row in receipts]
+    else:
+        relation_hashes = summary.get("relation_hashes")
+        require(
+            summary.get("summary_only_timing") is True
+            and summary.get("relation_receipts_emitted") is False,
+            "missing relation receipts outside compact evidence mode",
+        )
+    require(
+        isinstance(relation_hashes, list)
+        and all(isinstance(value, str) and len(value) == 64 for value in relation_hashes)
+        and len(relation_hashes) == summary.get("admitted_relations"),
+        "relation transcript is incomplete",
+    )
     require(base.get("selection_uses_scalar_labels") is False, "factor base used scalar labels")
     return {
         "base": base,
         "summary": summary,
-        "relation_hashes": [row["relation_hash"] for row in receipts],
+        "relation_hashes": relation_hashes,
     }
 
 
