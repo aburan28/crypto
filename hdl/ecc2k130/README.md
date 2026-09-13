@@ -24,7 +24,7 @@ sampled from each checked against the client's reference walk. With the
 product tree in UltraRAM and 32-walk batches, **the 128-engine image at
 333 MHz holds 8.25 G steps/s** (5.17 clocks per step on the device; 112
 engines at 375 MHz 8.12 G, 120 at 333 MHz 7.73 G). The current revision
-counts eleven of the multiplier's 27 leaves in DSPs (the engine is 7.1k
+counts eleven of the multiplier's 27 leaves in DSPs (the engine is 6.9k
 LUTs from 8.1k), batches 64 walks 8 deep (5.16 clocks per step with
 either multiplier) and registers the walker's FIFO write and head, the
 multiplier's product before its back-conversion and each batch's phase
@@ -38,7 +38,7 @@ builds of it were in flight when this was written.
 |---|---|
 | `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, two-clock weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
 | `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, the first `DSP_LEAVES` leaves in DSPs, latency `2 LEVELS + LEAF_LAT` |
-| `gf2_dsp_leaf.vhd` | The DSP leaf: a 17-bit GF(2) product as six 24 × 15 integer products with the coefficients three bits apart, plus the corner in LUTs; four clocks |
+| `gf2_dsp_leaf.vhd` | The DSP leaf: a 17-bit GF(2) product as six 25 × 16 integer products (9 + 8 by 6 + 6 + 5 coefficients, three bits apart) whose parities are XORed into place; four clocks |
 | `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 14 (11 with LUT leaves only) |
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
@@ -210,15 +210,21 @@ A = sum a_u 2^(3u),  B = sum b_v 2^(3v)   =>   A B = sum_k c_k 2^(3k),
 c_k = #{(u, v) : u + v = k, a_u = b_v = 1}
 ```
 
-With the coefficients three bits apart and at most five on one side,
-`c_k <= 5` never carries into the next field, and bit `3k` of the integer
+With the coefficients three bits apart and at most six on one side,
+`c_k <= 6` never carries into the next field, and bit `3k` of the integer
 product is the GF(2) coefficient for free. The DSP48E2 multiplies 27 × 18
-signed, so one block covers eight coefficients against five (24 × 15
-unsigned); `gf2_dsp_leaf` does a 17-bit leaf as a 2 × 3 grid of them
-(`a[0..15]` × `b[0..14]`), A/B, M and P registered inside the block, plus
-the corner the grid misses (`a[16]` against all of `b`, `a[0..15]` against
-`b[15..16]` — one to three AND terms per output bit, one LUT6) a clock
-earlier, and one XOR of the parities into place. Nothing in the source is
+signed, 26 × 17 unsigned, so one block covers nine coefficients (25
+bits) against six (16 bits), 54 AND terms; `gf2_dsp_leaf` splits `a` into
+pieces of at most nine and `b` into pieces of at most six, as even as they
+go, and takes every pair: a 17-bit leaf is `9 + 8` against `6 + 6 + 5`,
+six DSPs covering all 289 terms, A/B, M and P registered inside the
+block, and one XOR of the parities into place — 22 LUTs, the only ones in
+the leaf. (The first version packed 8 × 5 per block, 24 × 15 bits, and
+the 2 × 3 grid missed a corner — `a[16]` against all of `b`, `a[0..15]`
+against `b[15..16]`, 49 terms — done in LUTs a clock earlier and XORed in
+beside the parities: 40 LUTs and ~100 flip-flops more per leaf, −212
+LUTs and −647 FFs per multiplier for the wider pieces, −156 LUTs and
+−976 FFs per engine in the probe.) Nothing in the source is
 Xilinx-specific: an `unsigned * unsigned` GHDL simulates and Vivado puts
 in a DSP (`use_dsp = "yes"`).
 
@@ -233,12 +239,14 @@ leaves save). Synthesised (`cl_probe`, 2 engines, 3.0 ns), **measured**:
 | 27 LUT leaves | 7 974 – 8 106 | 8 062 | 0 | +1.18 ns (probe) / +1.24 (engine) |
 | **11 DSP leaves** | **7 170 – 7 318** | 9 546 | **66** | +1.18 / +1.24, no DSP path in the 80 worst |
 
-(Both at 32 × 8, before the walker's registers, the single-writer arrays
-and the copy register; the current engine is 7 000 – 7 150 and 10 420
-FFs, see "Capacity".)
+(Both at 32 × 8, before the walker's registers, the single-writer arrays,
+the copy register and the wider DSP pieces; the current engine is
+6 840 – 6 990 LUTs and 9 440 FFs, see "Capacity".)
 
-A DSP leaf is six DSPs and ~70 LUTs against ~140: −788 LUTs per engine
-(−9.7%). The device has 9 024 DSPs but the CL's pblock holds **7 992**
+A DSP leaf was six DSPs and ~40 LUTs against ~140, −788 LUTs per engine
+(−9.7%), and is now six DSPs and 22 LUTs, another −156 (the multiplier
+is 4 004 LUTs on its own, 5 117 with LUT leaves). The device has 9 024
+DSPs but the CL's pblock holds **7 992**
 (the shell keeps the rest), and a design over it fails the placer's
 utilisation DRC before anything is placed — two builds found this out
 — so 120 engines can take eleven leaves (7 920), 128 ten (7 680), 136
@@ -534,11 +542,11 @@ behind the register block and the clock bridge (512 walks, batches of
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM | DSP |
 |---|---|---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **7 000 – 7 150** | 196 (+616 SRL) | 10 420 | 12 | 2 | 4 | 66 |
+| `ec2k_walker` (whole engine) | **6 840 – 6 990** | 196 (+592 SRL) | 9 440 | 12 | 2 | 4 | 66 |
 | ├ walker body (FIFO and its write register, prefetch buffer, head register) | ~375 | 176 | ~970 | 4 | 1 | 0 | 0 |
-| └ `ec2k_batch_pipe` | ~6 780 | 20 | ~9 450 | 8 | 1 | 4 | 66 |
+| └ `ec2k_batch_pipe` | ~6 620 | 20 | ~8 470 | 8 | 1 | 4 | 66 |
 | &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~2 430 | 20 | ~3 090 | 8 | 1 | 4 | 0 |
-| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | ~4 350 (5 134 with LUT leaves) | 0 | ~6 360 | 0 | 0 | 0 | 66 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | 4 004 on its own (5 134 with LUT leaves) | 0 | 5 788 | 0 | 0 | 0 | 66 |
 | `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 892 | 356 | 2 399 | 0 | 0 | 0 | 0 |
 | `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 | 0 |
 
@@ -549,7 +557,8 @@ the Karatsuba tree, of which 3 800 in the 27 leaf products, and 689 in
 `prep`, `to_onb` and the tag pipe — carried forward by the deltas each
 later change measured on the whole engine: the walker's two registers
 +9 LUTs and +633 FFs, the single-writer phase and level arrays −191 LUTs
-and +16 LUTRAM, the multiplier's copy register +17 LUTs and +261 FFs.)
+and +16 LUTRAM, the multiplier's copy register +17 LUTs and +261 FFs,
+the wider DSP pieces −156 LUTs and −976 FFs.)
 The register block's stage on the spine is roughly 300 LUTs and 870 FFs
 per engine; of the 196 LUTRAM in an engine 176 are the walker's
 four-word prefetch buffer and 20 the eight-entry phase and level arrays,
@@ -564,9 +573,9 @@ multiply's companions moved into a shift register the engine was 8 100 –
 write registers costs 220 FFs and buys four more tiles, 32-walk batches
 and the enable-free stages take 250 LUTs back (7 970 – 8 110), the
 eleven DSP leaves another 790 for 1 480 FFs and 66 DSPs (7 170 – 7 320),
-and the single-writer phase and level arrays 190 more; the walker's two
-registers and the multiplier's copy register are 26 LUTs and 900 FFs of
-the 7 000 – 7 150 and 10 420 above.
+the single-writer phase and level arrays 190 more and the wider DSP
+pieces 156; the walker's two registers and the multiplier's copy
+register are 26 LUTs and 900 FFs of the 6 840 – 6 990 and 9 440 above.
 
 Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe (the
 register block's read mux, one copy on the die) and **+1.24 ns** inside
@@ -619,11 +628,11 @@ image of the 21-tile revision used 31% of the LUTs and 50% of the RAM),
 ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
 is 83% / 83% / 53%, and the LUTs bound the count. With eleven leaves in
-DSPs 128 engines is 72% of the LUTs (engine plus its spine stage, at
-the current 7 000 – 7 150), 83% of the block RAM, 53% of the UltraRAM
+DSPs 128 engines is 70% of the LUTs (engine plus its spine stage, at
+the current 6 840 – 6 990), 83% of the block RAM, 53% of the UltraRAM
 and 94% of the device's DSPs — over the CL pblock's 7 992, so 128
-engines take ten leaves (7 680), 136 and 144 nine: 136 is 76% of the
-LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 81% / 93% /
+engines take ten leaves (7 680), 136 and 144 nine: 136 is 75% of the
+LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 79% / 93% /
 60%. At 5.31 clocks per step and 333 MHz that is 63 M steps/s per
 engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80,
 6.0 G at 96 — all four measured on the device**; at 5.17 (32 × 8, the
