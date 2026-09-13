@@ -312,8 +312,14 @@ architecture rtl of ec2k_batch_pipe is
   signal tw_a, tw_b : taddr_t := 0;
   signal tw_d      : gf_t := (others => '0');
 
-  -- ready queue and free list of batch ids
+  -- ready queue and free list of batch ids.  A queue entry says whether
+  -- the batch is fresh from the fill: the burst engine then starts it at
+  -- the first forward level itself, so b_ph and b_lvl are written by the
+  -- retire alone (with the fill as a second writer every entry sat behind
+  -- a priority mux of both decodes, five LUT levels from the fill's batch
+  -- id in the routed 128-engine image at 375 MHz).
   signal rq : q_t := (others => (others => '0'));
+  signal rq_new : std_logic_vector(0 to NB - 1) := (others => '0');
   signal rq_wr, rq_rd : unsigned(LOG_NB downto 0) := (others => '0');
   signal fl : q_t := q_identity;
   signal fl_wr : unsigned(LOG_NB downto 0) := to_unsigned(NB, LOG_NB + 1);
@@ -597,9 +603,8 @@ begin
       elsif w_ce = '1' then
         idle_cnt <= (others => '0');
         if fill_cnt = W - 1 then
-          -- batch complete: first forward level is the parents of the leaves
-          b_ph(to_integer(fb))  <= to_unsigned(PH_FWD, KIND_W);
-          b_lvl(to_integer(fb)) <= to_unsigned(LOG_W - 1, LVL_W);
+          -- batch complete: it enters the ready queue as fresh, and starts
+          -- at the first forward level, the parents of the leaves
           fill_pend <= '1';
           pend_b    <= fb;
           fb_valid  <= '0';
@@ -652,10 +657,13 @@ begin
             tw_en <= '1';
             tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
             if rlast = '1' then
+              -- the phase is written every time: a fresh batch's entry
+              -- still says what its id's previous use ended as
               if rlvl = 0 then
                 b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
                 b_lvl(to_integer(rb)) <= (others => '0');
               else
+                b_ph(to_integer(rb))  <= to_unsigned(PH_FWD, KIND_W);
                 b_lvl(to_integer(rb)) <= rlvl - 1;
               end if;
             end if;
@@ -701,7 +709,8 @@ begin
             end if;
         end case;
         if rlast = '1' and to_integer(rkind) /= PH_FIN then
-          rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= rb;
+          rq(to_integer(rq_wr(LOG_NB - 1 downto 0)))     <= rb;
+          rq_new(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= '0';
           rq_wr <= rq_wr + 1;
           rq_pushed := true;
         end if;
@@ -709,7 +718,8 @@ begin
 
       -- a completed fill enters the queue on a clock no retire is using it
       if fill_pend = '1' and not rq_pushed then
-        rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= pend_b;
+        rq(to_integer(rq_wr(LOG_NB - 1 downto 0)))     <= pend_b;
+        rq_new(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= '1';
         rq_wr <= rq_wr + 1;
         fill_pend <= '0';
       end if;
@@ -743,8 +753,13 @@ begin
           rq_rd     <= rq_rd + 1;
           nxt_valid <= '1';
           nxt_b     <= b;
-          nxt_ph    <= b_ph(to_integer(b));
-          nxt_lvl   <= b_lvl(to_integer(b));
+          if rq_new(to_integer(rq_rd(LOG_NB - 1 downto 0))) = '1' then
+            nxt_ph  <= to_unsigned(PH_FWD, KIND_W);
+            nxt_lvl <= to_unsigned(LOG_W - 1, LVL_W);
+          else
+            nxt_ph  <= b_ph(to_integer(b));
+            nxt_lvl <= b_lvl(to_integer(b));
+          end if;
         else
           nxt_valid <= '0';
         end if;
