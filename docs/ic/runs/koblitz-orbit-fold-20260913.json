@@ -92,9 +92,10 @@
       "widening": 1.4120879120879122,
       "secs_per_decomposition": [
         0.0027,
+        0.0014,
         0.0013263390044652727
       ],
-      "speedup": 2.035678654484366,
+      "speedup": "1.93x and 2.04x on two runs of the same configuration",
       "recover_ms": [
         0.037,
         0.044477333333333334
@@ -102,7 +103,7 @@
       "hit_rate": 1.0,
       "bytes": "2454915392"
     },
-    "verdict": "1.93x against a prediction of about 1.9x, with recovery growing 0.037 -> 0.042 ms as sqrt(2) says it should. The hit rate reached 1.000: every one of 21779 targets decomposed. This is the test that matters -- not that the fold is fast, but that widening the base is worth something again.",
+    "verdict": "1.9x to 2.0x on two runs, against a prediction of about 1.9x, with recovery growing 0.037 -> 0.042/0.044 ms as sqrt(2) says it should. The hit rate reached 1.000: every one of 21779 and 22619 targets decomposed. Both runs are recorded because a thirty-second window at a millisecond-scale cost is a few thousand samples of a geometric variable, and this note has once already mistaken two points of that noise for a law. This is the test that matters -- not that the fold is fast, but that widening the base is worth something again.",
     "second_run": {
       "budget_gib": 4,
       "degree": 61,

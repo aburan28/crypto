@@ -2085,11 +2085,17 @@ the folded base by `√2`, from 177632 to 250832:
 | | `\|F\|` | s a decomposition | recovery |
 |---|---|---|---|
 | before | 177632 | 0.0027 | 0.037 ms |
-| `× √2` | 250832 | **0.0014** | 0.042 ms |
+| `× √2` | 250832 | **0.0014 / 0.0013** | 0.042 / 0.044 ms |
 
-**1.93× against a prediction of about 1.9×**, with the recovery growing
-by the `√2` the model says it should. The hit rate reached 1.000 — every
-one of 21779 targets decomposed at the first scan.
+Two runs of the same configuration, so **1.93× and 2.04×** — call it 1.9
+to 2.0 against a prediction of about 1.9. The recovery grew by the `√2`
+the model says it should, and the hit rate reached 1.000: every one of
+the 21779 and 22619 targets decomposed at the first scan.
+
+(The spread is why both are here. A thirty-second window at a
+millisecond-scale cost is a few thousand samples of a geometric variable,
+and this note has already once mistaken two points of that noise for a
+law.)
 
 That is the result, more than the 168 is. A speedup is a number; a
 restored lever is a direction. Before the orbit tag, more memory bought
