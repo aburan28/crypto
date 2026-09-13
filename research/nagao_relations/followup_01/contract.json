@@ -1,0 +1,16 @@
+{
+  "scope": "Restricted three-point PDP on y^2+xy=x^3+1; distinct nonzero factor abscissas different from target x",
+  "purpose": "Test norm versus chained S3 beyond the original panel and inspect coefficient-search cost as the factor-base subspace grows",
+  "sat_panels": [{"n":9,"weight":2,"targets":8},{"n":11,"weight":2,"targets":8}],
+  "sat_variants": ["chained-s3","rr-norm"],
+  "seed":2026091301,
+  "seconds_per_instance":5,
+  "maximum_projected_models":10000,
+  "coefficient_panels":[{"n":5,"dimension":4,"targets":"all"},{"n":5,"dimension":5,"targets":8}],
+  "reference":"Complete independent group-law enumeration on identical targets and factor bases",
+  "correctness_target":"Zero missing or extra solutions in completed instances; every admitted certificate verifies",
+  "boundary":"Encoding changes cannot change the supported-target set at fixed base and arity. Full-DLP S and rho ratios unmeasured.",
+  "metrics":"Completion, exact solution sets, circuit evaluation counts, separate field primitive categories, diagnostic timings. No SAT search operation counter is available.",
+  "inference":"Timeout means incomplete, not UNSAT or a mathematical rejection; no speedup/exponent claim from diagnostic wall times",
+  "artifact_policy":"Append each finished case to raw.jsonl; retain exceptions and incomplete cases; write summary to new file"
+}
