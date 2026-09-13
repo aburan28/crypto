@@ -3419,16 +3419,18 @@ impl PairSumTable {
                 // [`FrobeniusCanon`] the key is a rotation and
                 // [`Self::keys_of`] runs it one point at a time, but it
                 // is still some seventy-six nanoseconds of dependent
-                // work, which is long enough that two consecutive
-                // probes do not both fit in the reorder window — so
-                // fused, each probe's memory round trip is exposed in
-                // full.  Split, the lookups are adjacent and
-                // independent and overlap: 275 ns a probe becomes 155
-                // at `n = 61`.  A compact table, whose key is a `pack`,
-                // gains a twelfth of that, which is what says the cause
-                // is the length of the key and not the blocking itself.
+                // work before the address it will load is known — long
+                // enough that consecutive probes' memory round trips do
+                // not overlap when the two are fused.  Split, the
+                // lookups are adjacent and independent and do overlap.
+                // A compact table, whose key is a `pack`, gains a third
+                // where this gains four fifths, which is what says the
+                // cause is the length of the key; which resource the
+                // length exhausts is not established.
                 // `examples/koblitz_orbit_fold_width.rs` measures the
-                // sweep.  Do not unroll this back into a single loop.
+                // sweep, `docs/ic/runs/koblitz-probe-shape-20260913.json`
+                // records it.  Do not unroll this back into a single
+                // loop.
                 const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
                 let mut rests = Vec::with_capacity(BLOCK);

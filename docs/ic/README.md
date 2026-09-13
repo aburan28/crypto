@@ -743,15 +743,19 @@ against 3.3×.
   shift reduction for a sparse irreducible, and the normal-basis
   rotation.  At `n = 61` that is 846.8 / 733.7 / 1299.3 ns against
   **85.5**.
-- The same harness also prices a probe in the three shapes the code
-  probes in, because they are far enough apart that "a probe" has to say
-  which: one target at a time the fold costs **3.1×**, blocked 1024 and
-  prefetched **1.9×**, and inside the descent's own `m = 3` scan
-  **1.5×**.  What is left in that last one, 83 ns a base point, is the
-  canonicalisation, measured alone at 76 — so the fold's cost in the
-  descent is the canon and nothing else.
-  `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, with the
-  compact table as the control that says why blocking pays.
+- `examples/koblitz_orbit_fold_width.rs` also prices a probe in the three
+  shapes the code probes in, because they are far enough apart that "a
+  probe" has to say which.  Median of three runs at `n = 61`: one target
+  at a time the fold costs **2.8×**, blocked at the descent's own
+  `BLOCK = 1024` and prefetched **2.0×**, and inside the `m = 3` scan
+  itself **1.51×**.  What separates the columns of that last one is
+  **74 ns** a base point, and the canonicalisation measured alone is
+  **76** — so the fold's cost in the descent is the canon and nothing
+  else.  Read it down the columns: blocking buys the folded table
+  **1.83×** and the compact table, the control, **1.35×**, which is what
+  says the cause is the key's length.
+  `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, and what
+  it does not claim.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over

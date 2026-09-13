@@ -241,7 +241,10 @@ fn main() {
         // is not the only cold one.
         fused_on(&stream);
         fused_on(&stream_b);
-        for c in [1usize, 4, 16, 64, 256, 4096] {
+        // 1024 is `BLOCK` in `witnesses_fast_inner`, so it is the one
+        // the descent actually uses and the one the note quotes; the
+        // rest of the sweep is there to show where the gain saturates.
+        for c in [1usize, 4, 16, 64, 256, 1024, 4096] {
             // Each side is measured on both streams and averaged, so a
             // difference between the streams cannot be read as a
             // difference between the loops.
@@ -363,11 +366,16 @@ fn main() {
         probe_ns.push(ns);
         recover_ms.push(ms);
         descent_ns_v.push(descent_ns);
+        // The descent's own block size, not the best of the sweep: a
+        // figure quoted as "blocked 1024" has to be the one measured at
+        // 1024.
         blocked_ns.push(
             chunked
                 .iter()
-                .map(|c| c["chunked_prefetch_ns"].as_f64().unwrap())
-                .fold(f64::INFINITY, f64::min),
+                .find(|c| c["chunk"] == 1024)
+                .expect("the sweep must measure BLOCK")["chunked_prefetch_ns"]
+                .as_f64()
+                .unwrap(),
         );
         chunk_sweep.push(json!({"table": name, "sweep": chunked}));
     }
