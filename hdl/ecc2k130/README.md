@@ -19,7 +19,9 @@ measured (in simulation or on the device), derived, or estimated. **The
 64-engine one at 4.01 G and the 48-engine one at 3.01 G (`aws/README.md`,
 "What came back"): 333 MHz / 5.31 clocks per step per engine, with the
 distinguished points sampled from each checked against the client's
-reference walk.
+reference walk. The current revision keeps the product tree in UltraRAM
+and batches 32 walks (5.16 clocks per step); 112- and 128-engine builds
+of it were in flight when this was written.
 
 ## Files
 
@@ -293,13 +295,16 @@ batches in flight the long run sits 0.36 above the bound: about 500
 clocks of the 34 800 are the fill of the first batch and the drain of the
 last, the rest is the inversion's eight dependent single-multiply bursts,
 each now thirteen clocks from issue to the next issue, which eight
-batches do not cover and sixteen nearly do. Sixteen is the default: a
-block RAM is 72 × 512 whatever the design asks for, so a 131-bit table
-of 128 or 256 entries costs the same two RAMB36, and the UltraRAMs are
-4096 deep; the second eight batches are free.
-Memory per batch of `W` is `8W` field elements as stored (the leaf
-table's `x` and `y`, `d` twice, the tree twice), 8 RAMB36 + 1 RAMB18 and
-4 URAM288 per step unit at the default.
+batches do not cover and sixteen nearly do. Memory per batch of `W` is
+`8W` field elements as stored (the leaf table's `x` and `y`, `d` twice,
+the tree twice), and a block RAM is 72 × 512 whatever the design asks
+for, so a 131-bit table of 128 or 256 entries costs the same two RAMB36
+and the UltraRAMs are 4096 deep: any geometry holding 256 walks costs
+8 RAMB36 + 1 RAMB18 + 4 URAM288 per step unit. **The image's default is
+32 × 8** (`cl_ecc2k130_defines.vh`): the same 256 walks and the same
+memory as 16 × 16, and the walker testbench with 512 walks runs **5.16
+clocks per step against 5.31** — the bound is `5 + 5/W` — with 200 fewer
+LUTs (half the per-batch state). The testbenches' default stays 16 × 8.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -499,8 +504,9 @@ ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
 is 83% / 83% / 53%, and the LUTs bound the count. At 5.31 clocks per step
 and 333 MHz that is 63 M steps/s per engine and **3.0 G steps/s at 48
-engines, 4.0 G at 64, 5.0 G at 80 — all three measured on the device**,
-7.0 G at 112 and 8.0 G at 128; at the shell's 250 MHz they would be 2.3,
+engines, 4.0 G at 64, 5.0 G at 80 — all three measured on the device**;
+at 5.16 clocks per step (32 × 8) 64.6 M per engine, 7.2 G at 112 and
+8.3 G at 128; at the shell's 250 MHz the measured three would be 2.3,
 3.0 and 3.8 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
@@ -528,10 +534,6 @@ Two things the first synthesis taught, both fixed:
 
 ## What is not here
 
-- **A wider inversion share.** `W = 32` takes the bound from 5.31 to 5.16
-  multiplies per step for twice the memory per batch; the generic is
-  there and passes, the default stays at 16 because the last 3% costs
-  as much RAM as the first 47% did.
 - **A second multiplier per step unit.** The scheduler issues one product
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
