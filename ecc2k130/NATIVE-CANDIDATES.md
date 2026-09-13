@@ -27,7 +27,7 @@ This is **engineering**. The generic-group work boundary and walk rules do not
 change. At batch 16, every variant still uses `5 + 5/16 = 5.3125` field products
 per scalar update, a field-product cost ratio of **1.0** to the control. There
 is no claim of a discrete-logarithm exponent improvement. Wall-clock speed is
-the practical objective; it remains unmeasured for the new variants.
+the practical objective; the G7 measurements accepted no candidate.
 
 ## Two independent changes
 
@@ -97,7 +97,7 @@ python3 codegen/native_candidate_bench.py --out /tmp/native-gpu
 ```
 
 Use a new output directory for each invocation. Full mode requires exactly one
-RTX PRO 6000 Blackwell Server Edition. It binds all clients to that GPU's UUID,
+RTX PRO 6000 Blackwell Server Edition or RTX PRO 4500 sm_120 device. It binds all clients to that GPU's UUID,
 disables PTX JIT, retains hashes and raw output, and executes all device probes
 and client DP replay/restart/resume/guard checks before timing. It also compares
 normal-basis checkpoints across all binaries at 8, 128 and 257 workers.
@@ -126,10 +126,10 @@ workflow; its recorded result determines whether validation succeeded.
 
 The first workflow run failed authentication before reaching EC2; it did not
 exercise the EC2 startup, device gates, timings or termination path. Those paths
-have offline checks and remain pending live validation.
+have now completed live validation on G7; see the measured report.
 
-The index-calculus scoreboard has no new throughput or operation-count result
-to add: GPU timing is pending and the operation-count ratio is unchanged.
+The index-calculus scoreboard now carries the G7 throughput measurements.
+The operation-count ratio is unchanged and no candidate passed acceptance.
 
 ## Existing templates without instance roles
 
@@ -152,8 +152,8 @@ that the existing VPC is default and its default subnets enable public IPs.
 These options are mutually exclusive. `--instance-type g7e.4xlarge` is the only
 alternative to the default `g7e.2xlarge`; AWS hardware metadata must confirm
 exactly one GPU. Both sizes use the same GPU comparison geometry. Eight offline
-benchmark and launch checks pass; startup, device execution and timing remain
-pending a successful allocation.
+benchmark and launch checks pass. G7 subsequently completed startup, device
+execution and timing; the full report is linked below.
 
 ## Cross-region measurement retry
 
