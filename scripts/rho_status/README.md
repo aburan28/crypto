@@ -91,7 +91,7 @@ per-worker counts, and 7-day hourly buckets. `state` is one of
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.
 
-The iteration total on the dashboard and the operations figure on the
+The operations total on the dashboard and the matching figure on the
 landing page are **not** in `status.json`: no worker reports an iteration
 counter. Both pages derive them from the point count, one point per
 `2^25.27` iterations at `HW(x) <= 34` (`ecc2k130/aws/README.md`), and show
@@ -99,3 +99,9 @@ the result against the `2^60.9` expected cost of a collision. The exponent
 is a parameter of this campaign's distinguishing rule, so the pages apply
 it to `ecc2k-130` only, and `scripts/site/test_build.py` pins both copies
 of it to the campaign document.
+
+The dashboard's progress bar is filled from the ratio of the **work**,
+`2^(n - 60.9)`, never from the ratio of the exponents: `n = 39` is two
+thirds of the way along the exponent and about a millionth of a millionth
+of the way through the work. A test pins that, because it is the kind of
+bar that gets "fixed" into a lie by anyone trying to make it look fuller.
