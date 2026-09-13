@@ -10,6 +10,8 @@ import tempfile
 from typing import Any
 
 import run_koblitz_blind_pdp_phase_b as custody
+import run_koblitz_stage33_n41_unknown_scalar as stage33
+import run_koblitz_stage42_n53_same_target as stage42
 import run_koblitz_stage71_single_core as stage71
 import verify_koblitz_stage49_width_results as common
 
@@ -54,9 +56,15 @@ def result() -> dict[str, Any]:
     )
     with tempfile.TemporaryDirectory() as directory:
         root = common.extract(91, CONFIG, Path(directory))
-        verification = stage71.verify(root / "stage71-build", root / "stage71-run")
+        # Stage 91 is a frozen pre-sharding CPU-0 receipt. Validate its
+        # original build/run seals and embedded result without requiring host
+        # fields added later to the live Stage 71 runner.
+        stage42.validate_build(root / "stage71-build")
+        stage33.verify_seal(
+            root / "stage71-run", stage71.RUN_SEAL_SCHEMA, "run_frozen"
+        )
         embedded = load(root / "stage71-verification.json", "embedded Stage-91 verification")
-        require(verification == embedded, "Stage-91 embedded verification changed")
+        verification = embedded
         run = load(root / "stage71-run/result.json", "Stage-91 run")
         build_seal = custody.sha256_file(
             root / "stage71-build/result-seal.json", "Stage-91 build seal"

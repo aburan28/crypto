@@ -133,16 +133,16 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Algebraic point-defined `n = 53` base: 9,964 points, 94 signed-Frobenius orbit columns, 24,805,379 exact support entries, 738,197,504-byte packed support table and 2,111,100-byte targeted-column index; selection uses no scalar labels or target-subgroup enumeration. Current selected setup is 2.245890 s | Reduce retained support below 512 MiB without regressing the exact 95-relation solve | Orbit closure verified; construction RSS + retained bytes logged; same-target wall retained | `stage-89-current-selected-panel-20260912/verification.json` |
+| `factor_base` | Algebraic point-defined `n = 53` base: 9,964 points, 94 signed-Frobenius orbit columns, and 24,805,379 exact support entries. Four direct-routed shards build the 738,197,504-byte table in a 1.379006 s median while preserving the 95-relation solve; selection uses no scalar labels or target-subgroup enumeration | Reduce retained support below 512 MiB without regressing the exact 95-relation solve or selected online crossover | Same base/support cardinality; terminal rank 95; construction wall/core/RSS + retained bytes logged | `stage-108-routing-selection-archive-20260913/verification.json` |
 | `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `RESEARCH_KOBLITZ_SCALING_TARGET.md`; `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` |
 | `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
 | `rank` | Rank-aware `n = 53` collection reaches augmented rank 95 with exactly 95 rows and zero surplus; current final solve is 0.542 ms after 48,531,878 support queries; relation-matrix LA, not GB FFD | Unaffiliated replay of the 95-row transcript and a distribution across public targets | Preserved transcript; matrix dimensions and LA wall logged; terminal rank unchanged; no log labels used by targeting | `stage-89-current-selected-panel-20260912/verification.json` |
-| `end_to_end_dlp` | Optimized public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 50,656,466 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Current direct is 5.629163 s and 1.279112x rho | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-89-current-selected-panel-20260912/verification.json` |
-| `vs_rho` | `n = 41` retains an **online charged crossover** with full-cost loss. Five selected-stack `n = 53` whole-process ratios are 0.9465x, 1.0193x, 1.0950x, 0.9324x, and 1.0188x: two wins, three losses, median 1.0188x. Current four-thread head is 5.228 s wall / 9.194 core-s / 1,053,990,912 B RSS versus 5.132 s rho; selected CPU-0 direct is 9.406 s wall / 6.868 core-s / 863,047,680 B RSS and remains 1.354x rho wall / 1.340x core. Fresh-build ratios remain 20.263x and 14.691x respectively | Reproducible whole-process same-target crossover at `n = 53` while preserving parallel/single-core charges | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol median ratio < 1 | Stages 39, 40, 89, and 92 sealed results |
+| `end_to_end_dlp` | Selected public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 40,136,342 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Direct is 4.307977 s versus 4.362556 s rho, ratio 0.987489 | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-108-routing-selection-archive-20260913/verification.json` |
+| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results |
 
 **Explicit non-claims for the current `vs_rho` record:** not Semaev-SAT, not
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
-whole-process crossover, and not a state-of-the-art result.
+full-cost/core crossover, and not a state-of-the-art result.
 
 ---
 
@@ -169,13 +169,14 @@ whole-process crossover, and not a state-of-the-art result.
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz `vs_rho` → reproduce a fixed-protocol selected-stack median below 0.95x at `n = 53`; current five-run median is 1.0188x.**
-2. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
-3. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
-4. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
-5. Fill missing `relation_yield` / `rank` publications (binary + prime) so later
+1. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
+2. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
+3. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
+4. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
+5. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
+6. Fill missing `relation_yield` / `rank` publications (binary + prime) so later
    `vs_rho` attempts have honest stage costs.
-6. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
+7. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
    cites only wall-clock or conflict counts.
 
 ---

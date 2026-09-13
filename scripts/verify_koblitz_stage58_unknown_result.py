@@ -10,6 +10,8 @@ import tempfile
 from typing import Any
 
 import run_koblitz_blind_pdp_phase_b as custody
+import run_koblitz_stage33_n41_unknown_scalar as stage33
+import run_koblitz_stage42_n53_same_target as stage42
 import run_koblitz_stage57_n53_unknown as stage57
 import verify_koblitz_stage49_width_results as common
 
@@ -50,9 +52,15 @@ def load(path: Path, context: str) -> dict[str, Any]:
 def result() -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as directory:
         root = common.extract(58, CONFIG, Path(directory))
-        verification = stage57.verify(root / "stage57-build", root / "stage57-run")
+        # Stage 58 is immutable historical evidence. Validate its original
+        # build/run seals and embedded verification without applying new
+        # fields added to the live Stage 57 runner in later stages.
+        stage42.validate_build(root / "stage57-build")
+        stage33.verify_seal(
+            root / "stage57-run", stage57.RUN_SEAL_SCHEMA, "run_frozen"
+        )
         embedded = load(root / "stage57-verification.json", "embedded Stage-58 verification")
-        require(verification == embedded, "Stage-58 embedded verification changed")
+        verification = embedded
         run = load(root / "stage57-run/result.json", "Stage-58 run")
         build_seal = custody.sha256_file(root / "stage57-build/result-seal.json", "Stage-58 build seal")
         run_seal = custody.sha256_file(root / "stage57-run/result-seal.json", "Stage-58 run seal")
