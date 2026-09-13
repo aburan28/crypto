@@ -52,7 +52,7 @@ timeout 2700 docker run --rm --gpus all \\
     bash -c 'set -euo pipefail; apt-get update -qq; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential python3; python3 codegen/native_candidate_bench.py --out /results/bench'
 '''
     if transfer_urls is not None:
-        # Presigned single-object capabilities expire after one hour. The VM
+        # Presigned single-object capabilities expire after two hours. The VM
         # receives no long-lived credential or IAM profile. Never log URLs.
         commands={
             f'aws s3 cp s3://{bucket}/{prefix}/source.tgz /opt/native/source.tgz --only-show-errors':
@@ -127,11 +127,13 @@ def main():
     if not re.fullmatch(r'[a-z]{2}-[a-z]+-\d',args.region): parser.error('invalid region')
     import boto3
     from botocore.config import Config
-    from botocore.exceptions import ClientError
+    from botocore.exceptions import ClientError,ReadTimeoutError
     out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
     config=Config(connect_timeout=30,read_timeout=30,retries={'max_attempts':2,'mode':'standard'})
+    launch_config=config.merge(Config(read_timeout=300))
     session=boto3.Session(region_name=args.region)
     ec2=session.client('ec2',config=config)
+    launch_ec2=session.client('ec2',config=launch_config)
     s3=session.client('s3',region_name=args.s3_region or args.region,config=config.merge(Config(signature_version='s3v4')))
     account=session.client('sts',config=config).get_caller_identity()['Account']
     if not re.fullmatch(r'\d{12}',account): raise RuntimeError('invalid account identifier')
@@ -155,13 +157,7 @@ def main():
                     key=lambda s:s['SubnetId'])
     if not eligible: raise RuntimeError('no existing default subnet offers '+args.instance_type+' in '+args.region)
     source_sha=source_archive(out/'source.tgz')
-    transfer_urls=None
-    if args.presigned_transfer:
-        transfer_urls={name:s3.generate_presigned_url(method,
-            Params={'Bucket':bucket,'Key':prefix+'/'+key},ExpiresIn=3600)
-            for name,method,key in [('source','get_object','source.tgz'),
-                                    ('results','put_object','results.tgz'),('done','put_object','done')]}
-    user_data=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls)
+    user_data=bootstrap(bucket,prefix,args.region,source_sha)
     request=launch_request(data,eligible[0]['SubnetId'],user_data,token,
                            require_profile=not args.presigned_transfer,instance_type=args.instance_type)
     if args.automatic_placement:
@@ -171,11 +167,18 @@ def main():
         request.pop('SubnetId')
     # Check all launch permissions before uploading source or allocating a GPU.
     try:
-        ec2.run_instances(**request,DryRun=True)
+        launch_ec2.run_instances(**request,DryRun=True)
         raise RuntimeError('unexpected successful EC2 DryRun response')
     except ClientError as exc:
         if exc.response['Error']['Code']!='DryRunOperation': raise
     s3.upload_file(str(out/'source.tgz'),bucket,prefix+'/source.tgz')
+    transfer_urls=None
+    if args.presigned_transfer:
+        transfer_urls={name:s3.generate_presigned_url(method,
+            Params={'Bucket':bucket,'Key':prefix+'/'+key},ExpiresIn=7200)
+            for name,method,key in [('source','get_object','source.tgz'),
+                                    ('results','put_object','results.tgz'),('done','put_object','done')]}
+    request['UserData']=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls)
     receipt=dict(valid=False,region=args.region,instanceType=args.instance_type,token=token,
                  availabilityZone=None if args.automatic_placement else eligible[0]['AvailabilityZone'],
                  automaticPlacement=args.automatic_placement,
@@ -186,11 +189,16 @@ def main():
     def save(): (out/'launch.json').write_text(json.dumps(receipt,indent=2)+'\n')
     def stop(signum,frame): raise KeyboardInterrupt('benchmark cancelled')
     signal.signal(signal.SIGTERM,stop)
+    launch_timed_out=False
     try:
         save()
         # ClientToken makes a retried request idempotent. Only this returned
         # instance ID, never a Project-tag search, is used for termination.
-        response=ec2.run_instances(**request)
+        try:
+            response=launch_ec2.run_instances(**request)
+        except ReadTimeoutError:
+            launch_timed_out=True
+            raise
         launched=response['Instances'][0]
         instance=launched['InstanceId'];receipt['instanceId']=instance
         receipt['availabilityZone']=launched['Placement']['AvailabilityZone'];save()
@@ -229,8 +237,12 @@ def main():
         # unique idempotency token only. The in-instance deadline is independent.
         instance=receipt.get('instanceId')
         if not instance:
-            matches=ec2.describe_instances(Filters=[{'Name':'client-token','Values':[token]}])['Reservations']
-            ids=[i['InstanceId'] for r in matches for i in r['Instances']]
+            ids=[]
+            for attempt in range(30 if launch_timed_out else 1):
+                matches=ec2.describe_instances(Filters=[{'Name':'client-token','Values':[token]}])['Reservations']
+                ids=[i['InstanceId'] for r in matches for i in r['Instances']]
+                if ids or not launch_timed_out: break
+                time.sleep(10)
         else: ids=[instance]
         if ids:
             ec2.terminate_instances(InstanceIds=ids)
