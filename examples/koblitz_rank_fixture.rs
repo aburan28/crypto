@@ -565,7 +565,7 @@ impl CompactPairTable {
         let mut keys_x = Vec::with_capacity(dense_len);
         let mut image_y = Vec::with_capacity(dense_len);
         let mut columns = Vec::with_capacity(dense_len);
-        for (shard_index, shard) in self.shards.iter().enumerate() {
+        let mut copy_shard = |shard_index: usize, shard: &CompactPairTable| {
             for slot in 0..slots_per_shard {
                 if shard.keys_x[slot] == u64::MAX {
                     continue;
@@ -576,6 +576,21 @@ impl CompactPairTable {
                 image_y.push(shard.image_y[slot]);
                 columns.push(shard.columns[slot]);
             }
+        };
+        if streamed_dense_compaction_enabled() {
+            // Consume shards one at a time. The final Vec capacities reserve
+            // address space up front but only commit pages as each shard is
+            // copied; dropping the consumed shard before touching the next
+            // dense segment avoids retaining both complete representations at
+            // peak.
+            for (shard_index, shard) in std::mem::take(&mut self.shards).into_iter().enumerate() {
+                copy_shard(shard_index, &shard);
+            }
+        } else {
+            for (shard_index, shard) in self.shards.iter().enumerate() {
+                copy_shard(shard_index, shard);
+            }
+            self.shards.clear();
         }
         assert_eq!(keys_x.len(), dense_len);
 
@@ -590,7 +605,6 @@ impl CompactPairTable {
         assert_eq!(rank as usize, dense_len);
 
         let filter_bits = (dense_len.max(4) * 8).next_power_of_two();
-        self.shards.clear();
         self.dense_original_slots_per_shard = slots_per_shard;
         self.dense_shard_count = shard_count;
         self.dense_occupancy = occupancy;
@@ -2087,6 +2101,14 @@ fn mixed_shard_routing_enabled() -> bool {
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_MIXED_SHARD_ROUTING").as_deref() == Ok("1"))
+}
+
+fn streamed_dense_compaction_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        std::env::var("KIC_DISABLE_STREAMED_DENSE_COMPACTION").as_deref() != Ok("1")
+    })
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -3667,6 +3689,7 @@ fn main() {
             "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shard_count()},
             "support_table_shard_routing":quotient_pairs.shard_routing(),
             "support_table_dense":quotient_pairs.is_dense(),
+            "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
             "support_table_slots":quotient_pairs.slots(),
             "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
             "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
@@ -4550,6 +4573,7 @@ fn main() {
                 "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shard_count()},
                 "support_table_shard_routing":quotient_pairs.shard_routing(),
                 "support_table_dense":quotient_pairs.is_dense(),
+                "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
                 "support_table_slots":quotient_pairs.slots(),
                 "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
                 "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
