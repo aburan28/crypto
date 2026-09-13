@@ -440,7 +440,7 @@ batches in flight):
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM |
 |---|---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **8 150 – 8 440** | 180 (+586 SRL) | 8 340 | 12 | 2 | 4 |
+| `ec2k_walker` (whole engine) | **7 970 – 8 110** | 180 (+590 SRL) | 8 060 | 12 | 2 | 4 |
 | ├ walker body (FIFO, prefetch buffer, held report) | ~600 | 180 | ~500 | 4 | 1 | 0 |
 | └ `ec2k_batch_pipe` | ~7 800 | 0 | ~7 800 | 8 | 1 | 4 |
 | &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~3 000 | 0 | ~3 200 | 8 | 1 | 4 |
@@ -448,7 +448,7 @@ batches in flight):
 | `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 883 | 356 | 2 380 | 0 | 0 | 0 |
 | `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 |
 
-(The two engines differ by 290 LUTs from `-keep_equivalent_registers`
+(The two engines differ by 130 LUTs from `-keep_equivalent_registers`
 falling differently; the breakdown rows are apportioned from the earlier
 LUTRAM synthesis, 13 106 LUTs, less the 4 400 LUTRAM and its address
 decode that the block RAMs replaced.) The register block's stage on the
@@ -458,13 +458,23 @@ multiply's companions moved into a shift register the engine was 8 100 –
 8 420 LUTs, 322 SRL, 7 420 FF and **20 RAMB36 + 2 RAMB18**: 150 LUTs and
 260 SRLs bought four RAMB36 tiles. With the tree in block RAM it was
 8 260 – 8 570 LUTs, 7 660 FF and 16 RAMB36 + 2 RAMB18 (the routed 48-,
-64- and 80-engine images); the UltraRAM tree with its address and write
-registers costs 220 FFs and buys four more tiles.
+64-, 80- and 96-engine images); the UltraRAM tree with its address and
+write registers costs 220 FFs and buys four more tiles, and 32 × 8
+batches (half the per-batch state) and the enable-free stages take 250
+LUTs back.
 
-Worst slack at a 3.0 ns clock is **+1.24 ns** for the whole probe and
-inside an engine, and none of the eighty worst paths touches a memory:
-the output weight's second-stage sum (1.58 ns) and the FIFO's write
-enables (1.13 ns) lead. Earlier worst paths and what removed
+Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe (the
+register block's read mux, one copy on the die) and **+1.24 ns** inside
+an engine, and none of the eighty worst paths touches a memory: the
+output weight's second-stage sum (1.58 ns) and the FIFO's write enables
+(1.17 ns) lead. The routed 80- and 96-engine images had every worst path
+on a control net into a stage's data registers — the insert-mux select,
+the input stage's valid, the operand stage's valid, 310 – 440 loads
+each, 2.8 – 2.9 ns of route — so the operand, multiplier, retire and
+leaf-write stages now move data every clock with no enable at all, and
+every remaining control net over 250 loads carries a fanout limit so its
+driver is replicated among the loads (`report_high_fanout_nets` on the
+probe: nothing per engine above 180 now). Earlier worst paths and what removed
 them: the operand stage's level/index arithmetic into a LUTRAM read
 (+0.83 ns; an address stage); the walker's step-counter read-modify-write
 (1.6 ns; the count now rides in the tag); the 22-group weight sum in one
