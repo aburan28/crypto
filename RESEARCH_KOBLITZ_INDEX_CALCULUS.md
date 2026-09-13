@@ -2026,8 +2026,9 @@ Subtracting the canonicalisation from the probe says where the rest sits:
 after, `362.7 − 85.5 ≈ 277` ns; before, `1211.3 − 846.8 ≈ 365` ns, taking
 the serial figure because `contains_pair` runs one point at a time.
 Against a compact probe's 133 to 147 ns, **the folded table costs about
-twice the compact one per probe with no canonicalisation in it at all**,
-and that is now three quarters of what the fold charges.
+twice the compact one per probe with no canonicalisation in it at all**.
+The fold's whole penalty is now `362.7 − 133.5 = 229` ns, and 144 of
+those — about two thirds — are that difference rather than the key.
 
 One candidate looked compelling and turned out to be worth nothing,
 which is worth writing down. The folded bucket index is `key >>
@@ -2053,10 +2054,21 @@ four bits an entry, `2³⁰` bits at this width, and lands at 11.3%
 occupancy — so seven probes in eight never reach a bucket at all, and
 the one that does reads a *contiguous* run of `u32` that the prefetcher
 handles. Amortised, the whole scan is about four cache lines a probe
-whatever its length. What is left is the two *dependent* random reads
-that precede it: the filter word in 128 MB, then the run's first line in
-a gigabyte. That is the shape of the remaining 277 ns, and shortening
-runs does nothing about it.
+whatever its length, which is why shortening runs does nothing.
+
+Where the 144 ns *does* go is not known, and the obvious answer is
+already ruled out: the filter is not a differentiator, because both
+tables get the same one. `4 × 137 655 528` and `4 × 258 632 192` are both
+30 bits wide, so the compact table carries the identical `2³⁰`-bit filter
+at 12.0% occupancy against the folded table's 11.3%, and both probes pay
+the same dependent read into the same 128 MB. What differs is the rests
+array — 1 GB against 550 MB, both far past any TLB reach, so a doubling
+should not be worth 144 ns — and whether `canon`'s ALU latency delays the
+filter address enough to lose an overlap the compact path keeps. Neither
+is measured. The measurement that would separate them is to probe the
+folded table with `pack()` as the key: wrong answers, identical memory
+traffic. If it falls to 133 the cost is exposed latency; if it stays at
+277 it is the table.
 
 Two smaller honesty notes on the table above. The unfolded baseline
 drifted 0.5770 s to 0.6250 s a decomposition between the two runs — about

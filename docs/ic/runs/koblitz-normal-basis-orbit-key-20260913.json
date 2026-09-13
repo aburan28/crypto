@@ -42,7 +42,7 @@
     }
   },
   "the_honest_number": "3.3x for the fold at equal memory, from 2.3x. The folded probe is 3.34x cheaper and the folded build 2.81x, but a decomposed target is only 1.32x faster.",
-  "what_is_binding_now": "Not the canonicalisation. With it subtracted the folded probe is still about 277 ns against a compact probe's 133-147, and that gap is three quarters of what the fold now charges.",
+  "what_is_binding_now": "Not the canonicalisation. The fold's whole penalty is 362.7 - 133.5 = 229 ns and only 85.5 of that is the key: about two thirds is the folded table costing roughly twice the compact one per probe with no canonicalisation in it at all. Where those 144 ns go is unmeasured, and the obvious answer is ruled out - both tables carry the identical 2^30-bit presence filter (4 * 137655528 and 4 * 258632192 are both 30 bits wide), at 12.0% and 11.3% occupancy, so the filter read is not a differentiator. What differs is the rests array, 1 GB against 550 MB, and whether canon's latency costs an overlap the compact path keeps. The measurement that would separate them: probe the folded table with pack() as the key - wrong answers, identical memory traffic.",
   "noise": "The unfolded baseline drifted 0.5770 -> 0.6250 s a decomposition between the two runs, about 8%, which the net figures carry. The folded column is given raw beside them for that reason.",
   "not_claimed": [
     "That the tier order in build_within should change. For a base already fixed the fold spends the canonicalisation and buys nothing; what it buys is a wider base, and choosing one is the caller's decision and a separate measurement.",
@@ -66,6 +66,6 @@
       "folded_probe_ns_mixed_index": 359.8,
       "verdict": "noise; the change was measured and reverted rather than shipped"
     },
-    "why": "The presence filter sits in front of the scan at four bits an entry, 2^30 bits here, and lands at 11.3% occupancy, so seven probes in eight never reach a bucket; the one that does reads a contiguous run of u32 the prefetcher handles, about four cache lines a probe amortised whatever the run length. The remaining 277 ns is the two dependent random reads before it - the filter word in 128 MB, then the run's first line in a gigabyte - and shortening runs does nothing about that."
+    "why": "The presence filter sits in front of the scan at four bits an entry, 2^30 bits here, and lands at 11.3% occupancy, so seven probes in eight never reach a bucket; the one that does reads a contiguous run of u32 the prefetcher handles, about four cache lines a probe amortised whatever the run length. Shortening runs therefore does nothing. This does not explain the remaining 144 ns either - see what_is_binding_now."
   }
 }
