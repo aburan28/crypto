@@ -714,5 +714,7 @@ than 2.8×.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
   `O(|F|)` summand recovery a hit would otherwise charge to it.
+- `docs/ic/params/k0n61-subgroup-folded.json` asks for a 300000-point
+  base, which only the folded tier can hold.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
   `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
