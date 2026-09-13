@@ -42,12 +42,30 @@
     }
   },
   "the_honest_number": "3.3x for the fold at equal memory, from 2.3x. The folded probe is 3.34x cheaper and the folded build 2.81x, but a decomposed target is only 1.32x faster.",
-  "what_is_binding_now": "Not the canonicalisation. With it subtracted the folded probe is still about 277 ns against a compact probe's 133-147, and that gap is three quarters of what the fold now charges. The cause is not the table's size: the folded bucket index is the key's top bits unhashed, and a canonical key is a minimum over ~n values carrying 6-7 leading zeros where a packed point carries one. Extrapolating the observed key distribution to 258632192 pairs over 2^24 buckets, the mean run is 892 (58x the 15.4 the sizing law intends) for the polynomial key and 595 (39x) for the normal-basis key; hashing the key before taking the index gives 17.1 and 10.7. Pre-existing, unchanged here, one line to fix, and the next measurement.",
+  "what_is_binding_now": "Not the canonicalisation. With it subtracted the folded probe is still about 277 ns against a compact probe's 133-147, and that gap is three quarters of what the fold now charges.",
   "noise": "The unfolded baseline drifted 0.5770 -> 0.6250 s a decomposition between the two runs, about 8%, which the net figures carry. The folded column is given raw beside them for that reason.",
   "not_claimed": [
     "That the tier order in build_within should change. For a base already fixed the fold spends the canonicalisation and buys nothing; what it buys is a wider base, and choosing one is the caller's decision and a separate measurement.",
     "That an optimal normal basis is involved. Every F_2^n has a normal basis and the rotation property holds in all of them; optimality is about multiplication, which this never does.",
     "That the CUDA pair table in gpu/ecc2k/ folds at all. It does not, and nothing here changed that.",
-    "That the m = 3 scan is where the remaining penalty lives. The bucket skew above is measured; the scan is not."
-  ]
+    "That either the m = 3 scan or the bucket skew is where the remaining penalty lives. The skew was measured and ruled out; the scan has not been measured at all."
+  ],
+  "a_negative_result": {
+    "hypothesis": "The folded bucket index is the key's high bits unhashed, and a canonical key is a minimum over ~n values carrying 6-7 leading zeros where a packed point carries one, so the runs should be far longer than the sizing law intends and that should be the remaining cost.",
+    "the_skew_is_real": {
+      "measured_on": "the real table at n = 61, 258632192 entries over 2^24 buckets",
+      "mean_run_a_key_lands_in_raw_key": 584.0,
+      "mean_run_a_key_lands_in_mixed_key": 17.4,
+      "design": 15.4,
+      "buckets_used_raw": 739718,
+      "buckets_used_mixed": 16769521,
+      "of": 16777216
+    },
+    "and_it_costs_nothing": {
+      "folded_probe_ns_raw_index": 362.7,
+      "folded_probe_ns_mixed_index": 359.8,
+      "verdict": "noise; the change was measured and reverted rather than shipped"
+    },
+    "why": "The presence filter sits in front of the scan at four bits an entry, 2^30 bits here, and lands at 11.3% occupancy, so seven probes in eight never reach a bucket; the one that does reads a contiguous run of u32 the prefetcher handles, about four cache lines a probe amortised whatever the run length. The remaining 277 ns is the two dependent random reads before it - the filter word in 128 MB, then the run's first line in a gigabyte - and shortening runs does nothing about that."
+  }
 }

@@ -2029,24 +2029,34 @@ Against a compact probe's 133 to 147 ns, **the folded table costs about
 twice the compact one per probe with no canonicalisation in it at all**,
 and that is now three quarters of what the fold charges.
 
-Not because it is larger. The folded bucket index is `key >>
+One candidate looked compelling and turned out to be worth nothing,
+which is worth writing down. The folded bucket index is `key >>
 bucket_shift` — the key's top bits, unhashed — and a canonical key is a
 *minimum* over about `n` values, so it carries six or seven leading zeros
-where a packed point carries one. Extrapolating the observed key
-distribution over real pair sums at `n = 61` to the table's own
-258 632 192 pairs and `2²⁴` buckets:
+where a packed point carries one. That is not a small distortion.
+Instrumenting the real table at `n = 61`, 258 632 192 entries over `2²⁴`
+buckets:
 
-| bucket index | mean run, polynomial key | mean run, normal-basis key | design |
+| bucket index | mean run a key lands in | buckets used | design |
 |---|---|---|---|
-| the raw key, as today | 892 (58x) | 595 (39x) | 15.4 |
-| the key hashed first | 17.1 (1.1x) | 10.7 (0.7x) | 15.4 |
+| the raw key | **584.0** | 739 718 of 16 777 216 | 15.4 |
+| the key mixed first | 17.4 | 16 769 521 | 15.4 |
 
-A folded probe walks tens of times the run the sizing law intended, in
-either key. It is pre-existing — the polynomial key is the worse of the
-two — and the fix is to hash before taking the index, which is a line.
-The compact table has no such skew, because a packed point is uniform.
-That is the next measurement, and it is better grounded than the `m = 3`
-scan as an answer to where the remaining factor of 2.7 lives.
+Thirty-four times the run the sizing law intends, and 4.4% of the
+buckets holding everything. Mixing the key before taking the index fixes
+it exactly as predicted — and moves the probe by **2.9 ns out of 362.7**,
+which is noise. So the change was measured and then thrown away rather
+than shipped.
+
+The reason is the presence filter in front of the scan. It is sized at
+four bits an entry, `2³⁰` bits at this width, and lands at 11.3%
+occupancy — so seven probes in eight never reach a bucket at all, and
+the one that does reads a *contiguous* run of `u32` that the prefetcher
+handles. Amortised, the whole scan is about four cache lines a probe
+whatever its length. What is left is the two *dependent* random reads
+that precede it: the filter word in 128 MB, then the run's first line in
+a gigabyte. That is the shape of the remaining 277 ns, and shortening
+runs does nothing about it.
 
 Two smaller honesty notes on the table above. The unfolded baseline
 drifted 0.5770 s to 0.6250 s a decomposition between the two runs — about
