@@ -817,6 +817,35 @@
         (<code>experiments/ecc2k130_point_decomposition.json</code>,
         <code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
     </div>
+      <p><strong>The six pre-registered experiments have been run, and no falsifier fired.</strong>
+        The product law is now evidence at n&thinsp;=&thinsp;13 and n&thinsp;=&thinsp;19 rather than
+        arithmetic: every end-to-end rung recovered its planted logarithm, every relation was re-added
+        in the group before entering the matrix, and the slope of log&#8322;(total) against n is 1.037
+        against a falsifier of 0.95. Two rungs, not the four the design asked for &mdash;
+        n&thinsp;=&thinsp;11 is <em>excluded</em> because its 23-torsion has rank two, so no cyclic
+        subgroup of order p exists to pose the logarithm in, and n&thinsp;&ge;&thinsp;29 needs field
+        tables that do not fit in memory. The slope is a two-point fit and cannot fire its own
+        falsifier in either direction; it is reported as such.</p>
+      <p>Sweeping the factor-base dimension at n&thinsp;=&thinsp;19 moves the yield &lambda; by a
+        factor of <strong>6,600</strong> and moves &Lambda;&thinsp;=&thinsp;ops/2<sup>n</sup> by 2.4:
+        the dimension is measured not to be a lever, which is the whole content of the product law.
+        The model's predicted rise above the saturating dimension does not occur &mdash; it is an
+        artefact of charging one relation per target &mdash; so the model is conservative there, not
+        wrong. The Frobenius orbit collapse delivers <strong>exactly n</strong> (13.0/13, 19.0/19)
+        with relations that reach full rank and solve, which confirms the unchecked half of the
+        seven-bit correction above. And the yield is Poisson to 0.90&ndash;1.10 across eight cells
+        counted exhaustively over the whole odd subgroup, once the subsets containing a point and its
+        negative are removed; those degeneracies, not the tail, are the entire source of the raw
+        1.44&ndash;2.98 over-dispersion.</p>
+      <p><strong>Two constants the law prices at one are measured optimistic.</strong> Reaching full
+        rank took 2.0&times; the |F| relations the law budgets at n&thinsp;=&thinsp;19, because
+        decompositions harvested from one target are correlated; and large-prime pairing, whose guard
+        does hold, produces relations that are 5&ndash;11&times; redundant &mdash; at
+        m&thinsp;=&thinsp;2 they are <em>differences</em> P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub>
+        and so cannot span the base at all. Exponents untouched, verdict at n&thinsp;=&thinsp;131
+        untouched; class <span class="chip">accounting</span>
+        (<code>experiments/ecc2k130_decomposition_runs.json</code>).</p>
+    </div>
     <div class="note">
       <h3>What would count next</h3>
       <p><strong>The candidate this panel named has been measured.</strong> Decomposing into two base
