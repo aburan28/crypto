@@ -71,10 +71,12 @@ timeout 2700 docker run --rm --gpus all \\
     return script
 
 
-def launch_request(template,subnet,user_data,token,require_profile=True):
+def launch_request(template,subnet,user_data,token,require_profile=True,instance_type='g7e.2xlarge'):
     # Whitelist fields: never inherit production UserData, tags, spot/fleet
     # settings, extra disks or a live worker's network interface.
     required=('ImageId','SecurityGroupIds','BlockDeviceMappings')
+    if instance_type not in ('g7e.2xlarge','g7e.4xlarge'):
+        raise ValueError('only the bounded single-GPU G7e sizes are allowed')
     if require_profile: required+=('IamInstanceProfile',)
     for field in required:
         if not template.get(field): raise ValueError('launch template lacks '+field)
@@ -88,7 +90,7 @@ def launch_request(template,subnet,user_data,token,require_profile=True):
           {'Key':'BenchmarkToken','Value':token}]
     request=dict(ImageId=template['ImageId'],
         SecurityGroupIds=template['SecurityGroupIds'],BlockDeviceMappings=disks,
-        SubnetId=subnet,InstanceType='g7e.2xlarge',MinCount=1,MaxCount=1,ClientToken=token,
+        SubnetId=subnet,InstanceType=instance_type,MinCount=1,MaxCount=1,ClientToken=token,
         # boto3 performs the base64 encoding for RunInstances.
         UserData=user_data,
         InstanceInitiatedShutdownBehavior='terminate',
@@ -111,15 +113,21 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--region',default='us-west-2')
     parser.add_argument('--launch-template',default='ecc2k130-worker')
+    parser.add_argument('--availability-zone',help='select an existing eligible subnet in this zone')
+    parser.add_argument('--instance-type',choices=('g7e.2xlarge','g7e.4xlarge'),default='g7e.2xlarge')
+    parser.add_argument('--automatic-placement',action='store_true',
+                        help='let AWS select capacity in the existing default VPC')
     parser.add_argument('--presigned-transfer',action='store_true',
                         help='use expiring object URLs instead of an instance IAM profile')
     args=parser.parse_args()
+    if args.automatic_placement and args.availability_zone:
+        parser.error('automatic placement and an explicit availability zone are mutually exclusive')
     if not re.fullmatch(r'[a-z]{2}-[a-z]+-\d',args.region): parser.error('invalid region')
     import boto3
     from botocore.config import Config
     from botocore.exceptions import ClientError
     out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
-    config=Config(connect_timeout=10,read_timeout=30,retries={'max_attempts':3,'mode':'standard'})
+    config=Config(connect_timeout=30,read_timeout=30,retries={'max_attempts':2,'mode':'standard'})
     session=boto3.Session(region_name=args.region)
     ec2=session.client('ec2',config=config)
     s3=session.client('s3',config=config.merge(Config(signature_version='s3v4')))
@@ -129,13 +137,18 @@ def main():
     token=uuid.uuid4().hex;prefix='benchmarks/native/'+token
     template=ec2.describe_launch_template_versions(LaunchTemplateName=args.launch_template,Versions=['$Default'])['LaunchTemplateVersions'][0]
     data=template['LaunchTemplateData']
+    hardware=ec2.describe_instance_types(InstanceTypes=[args.instance_type])['InstanceTypes'][0]
+    if sum(gpu['Count'] for gpu in hardware.get('GpuInfo',{}).get('Gpus',[]))!=1:
+        raise RuntimeError('benchmark requires exactly one GPU')
     group=ec2.describe_security_groups(GroupIds=data['SecurityGroupIds'])['SecurityGroups'][0]
     subnets=ec2.describe_subnets(Filters=[{'Name':'vpc-id','Values':[group['VpcId']]},
                                         {'Name':'default-for-az','Values':['true']}])['Subnets']
     zones={item['Location'] for item in ec2.describe_instance_type_offerings(LocationType='availability-zone',
-        Filters=[{'Name':'instance-type','Values':['g7e.2xlarge']}])['InstanceTypeOfferings']}
-    eligible=sorted((s for s in subnets if s['AvailabilityZone'] in zones and s['MapPublicIpOnLaunch']),key=lambda s:s['SubnetId'])
-    if not eligible: raise RuntimeError('no existing default subnet offers g7e.2xlarge in '+args.region)
+        Filters=[{'Name':'instance-type','Values':[args.instance_type]}])['InstanceTypeOfferings']}
+    eligible=sorted((s for s in subnets if s['AvailabilityZone'] in zones and s['MapPublicIpOnLaunch']
+                     and (args.availability_zone is None or s['AvailabilityZone']==args.availability_zone)),
+                    key=lambda s:s['SubnetId'])
+    if not eligible: raise RuntimeError('no existing default subnet offers '+args.instance_type+' in '+args.region)
     source_sha=source_archive(out/'source.tgz')
     transfer_urls=None
     if args.presigned_transfer:
@@ -145,7 +158,12 @@ def main():
                                     ('results','put_object','results.tgz'),('done','put_object','done')]}
     user_data=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls)
     request=launch_request(data,eligible[0]['SubnetId'],user_data,token,
-                           require_profile=not args.presigned_transfer)
+                           require_profile=not args.presigned_transfer,instance_type=args.instance_type)
+    if args.automatic_placement:
+        vpc=ec2.describe_vpcs(VpcIds=[group['VpcId']])['Vpcs'][0]
+        if not vpc.get('IsDefault') or not all(s['MapPublicIpOnLaunch'] for s in subnets):
+            raise RuntimeError('automatic placement requires the existing default VPC and public default subnets')
+        request.pop('SubnetId')
     # Check all launch permissions before uploading source or allocating a GPU.
     try:
         ec2.run_instances(**request,DryRun=True)
@@ -153,7 +171,9 @@ def main():
     except ClientError as exc:
         if exc.response['Error']['Code']!='DryRunOperation': raise
     s3.upload_file(str(out/'source.tgz'),bucket,prefix+'/source.tgz')
-    receipt=dict(valid=False,region=args.region,instanceType='g7e.2xlarge',token=token,
+    receipt=dict(valid=False,region=args.region,instanceType=args.instance_type,token=token,
+                 availabilityZone=None if args.automatic_placement else eligible[0]['AvailabilityZone'],
+                 automaticPlacement=args.automatic_placement,
                  templateName=args.launch_template,presignedTransfer=args.presigned_transfer,
                  templateVersion=template['VersionNumber'],sourceSha256=source_sha,
                  resultPrefix=prefix,instanceId=None)
@@ -165,7 +185,9 @@ def main():
         # ClientToken makes a retried request idempotent. Only this returned
         # instance ID, never a Project-tag search, is used for termination.
         response=ec2.run_instances(**request)
-        instance=response['Instances'][0]['InstanceId'];receipt['instanceId']=instance;save()
+        launched=response['Instances'][0]
+        instance=launched['InstanceId'];receipt['instanceId']=instance
+        receipt['availabilityZone']=launched['Placement']['AvailabilityZone'];save()
         print('Started isolated benchmark',instance,flush=True)
         deadline=time.monotonic()+50*60
         while time.monotonic()<deadline:
