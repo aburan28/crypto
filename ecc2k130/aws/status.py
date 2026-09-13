@@ -99,7 +99,7 @@ def main():
     ap.add_argument("--bucket", default=os.environ.get("ECC_BUCKET"), help="campaign bucket (slots/ prefix)")
     ap.add_argument("--table", default=os.environ.get("ECC_TABLE", ""), help="DynamoDB table, if slots live there")
     ap.add_argument("--local", default=os.environ.get("ECC_LOCAL_STORE"), help="rehearsal store directory")
-    ap.add_argument("--walks", type=int, default=192512 * 32, help="walks per slot (workers x batch)")
+    ap.add_argument("--walks", type=int, default=385024 * 16, help="walks per slot (workers x batch)")
     ap.add_argument("--watch", type=float, default=0)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()

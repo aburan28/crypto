@@ -11,21 +11,33 @@ running on spot capacity, and an external merge that finds the collision
 across the whole corpus.
 
 Nothing in the C++/CUDA client changes. The binary is the audited RTX PRO
-6000 preset (`make audit-rtx-pro6000`: batch 32, 256-thread blocks, minBlocks
-2, 192,512 workers, every packed arithmetic option, CUDA 13.0), built for
+6000 preset (`make audit-rtx-pro6000`: CUDA 13.3.1, batch 16, 256-thread
+blocks, minBlocks 2, 385,024 workers, and every packed arithmetic option —
+[native carryless products](../NATIVE-CARRYLESS.md),
+[compact field storage](../COMPACT-STATE.md) in
+[256-worker tiles](../TILED-STATE.md),
+[weighted prefixes](../WEIGHTED-PREFIX.md) and
+[shared Frobenius masks](../SHARED-SIGMA.md)), built for
 `sm_120`. EC2 **G7e** instances carry exactly that GPU, the RTX PRO 6000
-Blackwell Server Edition, so the measured 6.9 B iterations/s per GPU should
-carry over; the pilot below measures it rather than assuming it.
+Blackwell Server Edition, so the measured 14.6 B iterations/s per GPU
+(14.1 B/s while collecting) should carry over; the pilot below measures it
+rather than assuming it.
+
+Native carryless multiplication is what moved the campaign off CUDA 13.0 and
+off batch 32: it needs `clmad`, and therefore CUDA 13.3 or newer, and it turned
+out to prefer 16 slots per worker over 32. Those two changes and the storage
+work around them are worth 2.08x per GPU over the 6.77 B/s the fleet was first
+sized for, so every number below moved with them.
 
 ## The numbers that decide the plan
 
 | Quantity | Value | Source |
 |---|---:|---|
 | Expected iterations to a collision | 2^60.9 = 2.15e18 | Bailey et al., *Breaking ECC2K-130* |
-| Per-GPU rate, DP34 collection | 6.77 B/s | `../RTX-PRO6000.md` native audit |
-| GPU-hours at the expected work | 88,300 | 2.15e18 / 6.77e9 / 3600 |
-| Distinguished points at weight 34 | 2^35.6 records, ~425 GB | one report per 2^25.27 iterations |
-| Points per GPU | ~167/s, ~0.46 GB/day | same |
+| Per-GPU rate, DP34 collection | 14.11 B/s | `../RTX-PRO6000.md` shared-mask audit |
+| GPU-hours at the expected work | 42,400 | 2.15e18 / 14.11e9 / 3600 |
+| Distinguished points at weight 34 | 2^35.6 records, ~1.7 TB | one report per 2^25.27 iterations |
+| Points per GPU | ~349/s, ~0.96 GB/day | same |
 
 Wall-clock and cost at the *expected* work, using prices observed in
 us-west-2 on 2026-09-11 (spot g7e.2xlarge $1.31/h, on-demand $3.36/h;
@@ -33,11 +45,11 @@ g7e.48xlarge on-demand $33.14/h = $4.14 per GPU-hour):
 
 | GPUs | g7e.48xlarge equiv. | Expected wall-clock | Spot at $1.31/GPU-h | On-demand 2xlarge | On-demand 48xlarge |
 |---:|---:|---:|---:|---:|---:|
-| 3 | – | 3.4 years | | | |
-| 8 | 1 | 460 days | $116k | $297k | $366k |
-| 32 | 4 | 115 days | $116k | $297k | $366k |
-| 128 | 16 | 29 days | $116k | $297k | $366k |
-| 512 | 64 | 7.2 days | $116k | $297k | $366k |
+| 3 | – | 1.6 years | | | |
+| 8 | 1 | 221 days | $56k | $142k | $175k |
+| 32 | 4 | 55 days | $56k | $142k | $175k |
+| 128 | 16 | 14 days | $56k | $142k | $175k |
+| 512 | 64 | 3.4 days | $56k | $142k | $175k |
 
 Cost is a property of the work, not of the fleet size; the fleet size buys
 wall-clock. Two corrections to keep in mind:
@@ -45,15 +57,17 @@ wall-clock. Two corrections to keep in mind:
 * The expected work is a mean. The chance a collision has *not* happened
   after c times the expected work is about exp(-πc²/4): 17% at 1.5×, 4% at
   2×. Budget for 1.5× before treating the run as unlucky.
-* Every walk in flight when the collision lands is wasted, about 10 GPU-hours
-  per GPU at weight 34 (6.16 M walks × 2^25.27 steps). That is 1.5% of the
-  work at 128 GPUs and 12% at 1,024; above a few hundred GPUs lower the cutoff
+* Every walk in flight when the collision lands is wasted, about 4.9 GPU-hours
+  per GPU at weight 34 (6.16 M walks × 2^25.27 steps). The faster GPU walks
+  that state out proportionally faster, so this is still 1.5% of the work at
+  128 GPUs and 12% at 1,024; above a few hundred GPUs lower the cutoff
   (`dpWeight` 33 halves the waste and doubles the corpus) **before** the
   campaign starts, never during it.
 
-If the goal is only the 15–20 B/s that one GPU could not reach, three GPUs
-do it: a single `g7e.24xlarge` (4 GPUs, ~$6.7/h spot in us-west-2a today) is
-about 27 B/s.
+One GPU is now past the 15 B/s a single card was once thought unable to reach
+(14.6 B/s benchmarking, 14.1 B/s collecting), and two clear the 26 B/s target:
+a single `g7e.12xlarge` is about 28 B/s and a `g7e.24xlarge` (4 GPUs, ~$6.7/h
+spot in us-west-2a today) about 56 B/s.
 
 ## How the pieces fit
 
@@ -112,9 +126,10 @@ about 27 B/s.
   which every worker checks before claiming a slot.
 * **Spot.** `bootstrap.sh` installs a watcher for the two-minute interruption
   notice; it stops the units, the supervisors forward SIGTERM, the clients
-  checkpoint, and the final upload runs inside the notice window (a 192,512
-  worker checkpoint is ~350 MB). The fleet replaces the instance and the
-  replacement resumes the slot.
+  checkpoint, and the final upload runs inside the notice window (a 385,024
+  worker checkpoint is ~370 MB: it holds the 6.16 M logical walks at 60 bytes
+  each, not the compact physical layout, so the new geometry did not move it).
+  The fleet replaces the instance and the replacement resumes the slot.
 
 ## Prerequisites (do these once, they take longer than everything else)
 
@@ -136,9 +151,13 @@ about 27 B/s.
 4. **Docker on the build host.** The Deep Learning Base OSS Nvidia Driver GPU
    AMI (Ubuntu 24.04, driver 580, G7e supported) ships Docker, the NVIDIA
    container toolkit, the AWS CLI and Python 3, which is all the fleet needs.
-   The client is built once in `nvidia/cuda:13.0.0-devel-ubuntu24.04`, the
+   The client is built once in `nvidia/cuda:13.3.1-devel-ubuntu24.04`, the
    image the Modal audit used, and links cudart statically, so instances
-   need no CUDA toolkit.
+   need no CUDA toolkit. CUDA 13.3 is a requirement, not a preference:
+   `clmad` is what the 14 B/s arithmetic is made of. The AMI's 580 driver
+   runs it under CUDA 13.x minor-version compatibility because `build.sh`
+   emits native `sm_120` code and the client never needs the PTX JIT;
+   `ARCHES="89 90 120"` if a non-Blackwell instance type joins later.
 
 ## Runbook
 
@@ -163,9 +182,12 @@ All commands from this directory, with the default region set (`us-west-2`).
 # 3. pilot: one spot GPU (sizes with one GPU only, so "1" cannot over-fill)
 TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
-ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s per GPU expected
+ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
-#    bootstrap runs the GPU arithmetic fixture (test-packed-cuda) before any worker starts
+#    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
+#    masks) and checks that they report the preset's arithmetic before any
+#    worker starts: a build that silently fell back to software carryless
+#    products would walk at half this rate and look perfectly healthy
 
 # 4. scale (GPUs, not instances)
 ./fleet.sh scale 64                 # spot only
@@ -185,7 +207,12 @@ Change `restartHours`, `uploadEvery` or `verify` freely. Never change
 `workers`, `batch`, `blockThreads`, `minBlocks`, `curve` or `dpWeight` once
 any slot exists: the first four make every existing checkpoint unloadable
 (each slot would be retired and its in-flight work lost), the last two break
-the collision guarantee. Start a new bucket for a different geometry.
+the collision guarantee. Start a new bucket for a different geometry. Moving
+to this preset *is* such a change — 16 slots over 385,024 workers where the
+first sizing had 32 over 192,512 — so a bucket that already holds checkpoints
+from the CUDA 13.0 build needs a new one rather than a rebuild. `dpWeight` is
+unchanged, so a corpus collected under the old geometry still merges against
+the new one.
 
 `verify` is 0 for production: `--verify N` replays N reported points through
 the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk
@@ -206,7 +233,7 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   minutes). The supervisor logs a line a minute: rate, iterations this run,
   points, uploaded, checkpoint.
 * `fleet.sh status` shows which sizes and AZs the fleet actually got.
-* Points per GPU-day should be ~14 M (2^25.27 per report). Far fewer with a
+* Points per GPU-day should be ~30 M (2^25.27 per report). Far fewer with a
   normal rate means dropped reports (`dpCap` too small; the client warns).
 
 ## Failure modes and what the design does about them
@@ -219,7 +246,7 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
 | Client refuses a checkpoint (exit 6) | slot retired | new slot claimed; retired checkpoint kept under `ckpt/retired/` |
 | Reference mismatch (exit 3) | worker stops, slot marked `error` | a bad build must not walk; check `manifest.json`, rebuild |
 | Two workers on one slot | impossible while leases hold; if a worker's heartbeat is refused it stops itself | duplicate work only, never wrong answers |
-| Disk/memory growth (dp file, client's in-process store) | ~0.5 GB/day/GPU each | `restartHours` graceful restart rotates the dp file and clears the store, resuming the checkpoint |
+| Disk/memory growth (dp file, client's in-process store) | ~1 GB/day/GPU each | `restartHours` graceful restart rotates the dp file and clears the store, resuming the checkpoint; the launch template's root volume is 150 GB so the eight-GPU sizes have headroom |
 | Merge never run | collision sits in the corpus | run `merge.py` on a schedule (cron/`--watch`); it is incremental |
 
 ## What is verified and what is not
@@ -234,3 +261,10 @@ Not yet verified, because it needs the account and a GPU: that the `adam` user
 may create the IAM role; the G7e per-GPU rate under AWS's clocks; the spot
 notice path end to end; the fleet's replacement behaviour. The pilot step
 exists to settle all four for the price of one spot GPU-hour.
+
+The 14.1 B/s the plan above is sized on was measured on Modal, on one RTX PRO
+6000 Blackwell Server Edition, by `make audit-rtx-pro6000` — the same knobs
+`build.sh` compiles, but not the same machine, driver or container. What the
+pilot can settle cheaply is whether AWS's copy of that GPU walks at the same
+rate; the fixtures only establish that the arithmetic it walks with is the
+audited one.
