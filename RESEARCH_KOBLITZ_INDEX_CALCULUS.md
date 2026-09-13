@@ -2109,8 +2109,9 @@ and the number to read off it is 17.4 against 584.0, not 17.4 exactly.
 Thirty-four times the run the sizing law intends, out of 4.4% of the
 buckets. And a measurement of the *miss* path alone — 200 000 probes of
 which 20 hit — moves by 2.9 ns out of 362.7 when the index is fixed (a
-different host from the 374 → 285 above, so those absolute numbers and
-these do not reconcile; the 2.9 does), which is how completely the filter
+different host from the 374 → 285 above, so the absolute figures are not
+comparable; the 2.9 is a same-host before/after), which is how completely
+the filter
 hides it: seven probes in eight never reach a bucket, and the one that
 does reads a contiguous run of `u32`
 that the prefetcher handles, about four cache lines a probe amortised
