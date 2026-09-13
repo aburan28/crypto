@@ -1,0 +1,16 @@
+{
+  "runUrl": "https://github.com/aburan28/crypto/actions/runs/34762622979",
+  "runId": 34762622979,
+  "jobId": 103737984935,
+  "sourceRevision": "65319513f93f7375852bf356f319597326ad95a0",
+  "trigger": "push",
+  "conclusion": "failure",
+  "offlineBenchmarkAndIsolationTests": {"passed": 6, "failed": 0},
+  "failedStep": "Configure existing AWS credentials",
+  "error": "The security token included in the request is invalid.",
+  "errorTimestamp": "2026-09-13T14:25:43.4682705Z",
+  "awsBenchmarkStep": "skipped",
+  "gpuInstanceLaunched": false,
+  "gpuExecution": false,
+  "measuredThroughput": null
+}

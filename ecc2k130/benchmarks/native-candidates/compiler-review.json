@@ -1262,5 +1262,32 @@
   },
   "gpuExecution": false,
   "evidence": "CUDA compile only. Static instruction counts are not dynamic work or throughput.",
-  "fullInvocationReceiptSha256": "a225ec9d6767988ec8cedee6cc51d2f6822b90d5b5a564ef9cb40d584fc640f4"
+  "fullInvocationReceiptSha256": "a225ec9d6767988ec8cedee6cc51d2f6822b90d5b5a564ef9cb40d584fc640f4",
+  "sourceRevision": "65319513f93f7375852bf356f319597326ad95a0",
+  "sourceReconstruction": {
+    "appendOneTrailingNewlineTo": [
+      "include/bigmod.h",
+      "include/bitslice.h",
+      "include/curveparams.h",
+      "include/fieldbs.h",
+      "include/fieldpb.h",
+      "include/kernel.h",
+      "include/packedcompactstate.cuh",
+      "include/packedkernels.cuh",
+      "include/ref.h",
+      "include/solver.h",
+      "include/walk.h",
+      "src/main.cu",
+      "src/profile_probe.cu",
+      "src/ptxspike.cu",
+      "src/testlogic.cpp",
+      "src/testpacked.cpp",
+      "src/testpackedstatecuda.cu",
+      "src/testschedule.cpp",
+      "src/testsharedsigmacuda.cu",
+      "src/testtiming.cpp"
+    ],
+    "generatedByMake": [],
+    "note": "The local connector reconstruction appended one trailing newline to these unchanged files. Apply this exact newline-only adjustment to the named revision to reproduce the frozen device-source hashes. No executable source differs."
+  }
 }
