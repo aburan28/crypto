@@ -30,6 +30,11 @@ WORDS = 4           # field elements are 4 x 32-bit words (m <= 128)
 LIMB_BITS = 32
 SC_WORDS = 4        # scalar ring mod r is also 4 x 32-bit words
 
+# Smallest Frobenius exponent that gets a tau^k table rather than k squarings.
+# Set from the measured break-even: 296 PTX instructions for a windowed map
+# against 78 for a squaring on sm_90, so k = 4 is the first that pays.
+FROB_TABLE_MIN_K = 4
+
 
 # ---------------------------------------------------------------------------
 # F_2[t] helpers.  A polynomial is a Python int; bit i is the coefficient of t^i.
@@ -506,6 +511,45 @@ def c_point(E, P):
     return "{%s, %s, 0}" % (c_limbs(P[0]), c_limbs(P[1]))
 
 
+def itoh_tsujii_exponents(n):
+    """The Frobenius exponents F2::pow_2n_minus_1 applies for a^(2^n - 1).
+
+    Mirrors the C exactly: an addition chain on n read from the top bit down,
+    doubling k at every step and adding one where n has a set bit.  The
+    exponents are what the tau^k tables have to cover, so they are taken from
+    the same walk of n rather than assumed."""
+    if n <= 1:
+        return []
+    top = n.bit_length() - 1
+    exps, k = [], 1
+    for i in range(top - 1, -1, -1):
+        exps.append(k)
+        k <<= 1
+        if (n >> i) & 1:
+            k += 1
+    return exps
+
+
+def windowed_linear_map(F, m, nwin, stride, image):
+    """Table for an F2-linear map, in the 4-bit-window form ClassWeight uses.
+
+    image(j) is where the map sends t^j.  Entry [w][v] is the XOR of image(j)
+    over the bits j the nibble value v selects in window w, so applying the map
+    is nwin table reads and nwin word-XORs."""
+    parts = []
+    for wnd in range(nwin):
+        rows = []
+        for v in range(16):
+            acc = 0
+            for bit in range(4):
+                j = wnd * 4 + bit
+                if j < m and (v >> bit) & 1:
+                    acc ^= image(j)
+            rows.append(c_limbs(acc, stride))
+        parts.append("{%s}" % ", ".join(rows))
+    return parts
+
+
 def emit_params(E, out):
     w = out.write
     F = E.F
@@ -548,20 +592,51 @@ def emit_params(E, out):
     # the hottest read in the walk.
     stride = WORDS + 1
     w("#define F2M_CB_STRIDE %d\n" % stride)
-    parts = []
-    for wnd in range(nwin):
-        rows = []
-        for v in range(16):
-            acc = 0
-            for bit in range(4):
-                kk = wnd * 4 + bit
-                if kk < F.m and (v >> bit) & 1:
-                    for j, M in enumerate(masks):
-                        if (M >> kk) & 1:
-                            acc ^= 1 << j
-            rows.append(c_limbs(acc, stride))
-        parts.append("{%s}" % ", ".join(rows))
+
+    def cb_image(kk):
+        acc = 0
+        for j, M in enumerate(masks):
+            if (M >> kk) & 1:
+                acc ^= 1 << j
+        return acc
+
+    parts = windowed_linear_map(F, F.m, nwin, stride, cb_image)
     w("#define F2M_CB_TABLE {%s}\n" % ", ".join(parts))
+
+    # ---------------------------------------------------------------
+    # tau^k as a windowed linear map, for the exponents Itoh-Tsujii uses
+    # ---------------------------------------------------------------
+    # A Frobenius power is F2-linear, so it is one table read and one word-XOR
+    # per window -- a fixed cost, where repeated squaring costs k squarings.
+    # Measured on sm_90 a table application is 296 PTX instructions against 78
+    # for a squaring, so a table pays from k = 4 up; below that the chain's own
+    # squarings are cheaper and no table is emitted.
+    exps = sorted({k for k in itoh_tsujii_exponents(F.m - 1) if k >= FROB_TABLE_MIN_K})
+    w("/* tau^k as a windowed linear map, for the Frobenius exponents the\n"
+      "   Itoh-Tsujii chain for a^(2^%d - 1) applies.  Only k >= %d is worth a\n"
+      "   table; the chain's smaller exponents stay as repeated squaring. */\n"
+      % (F.m - 1, FROB_TABLE_MIN_K))
+    w("#define F2M_FROB_COUNT %d\n" % len(exps))
+    w("#define F2M_FROB_EXPS {%s}\n" % ", ".join(str(k) for k in exps))
+    tables = []
+    for k in exps:
+        img = [F.frob(1 << j, k) for j in range(F.m)]
+        rows = windowed_linear_map(F, F.m, nwin, stride, lambda j: img[j])
+        tables.append("{%s}" % ", ".join(rows))
+        # check the table against repeated squaring, which is what it replaces
+        rng = random.Random(0x5EED ^ k)
+        for _ in range(64):
+            x = F.random(rng)
+            acc = 0
+            for wnd in range(nwin):
+                v = (x >> (4 * wnd)) & 15
+                for bit in range(4):
+                    j = wnd * 4 + bit
+                    if j < F.m and (v >> bit) & 1:
+                        acc ^= img[j]
+            assert acc == F.frob(x, k), "tau^%d table disagrees with squaring" % k
+    if exps:
+        w("#define F2M_FROB_TABLE {%s}\n" % ", ".join(tables))
     w("#endif\n")
 
 

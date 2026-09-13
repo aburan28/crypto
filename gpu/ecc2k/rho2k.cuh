@@ -234,6 +234,10 @@ struct rho2k_ctx {
     uint32_t nthreads;
     uint32_t walks_per_thread;
     const uint32_t *cb;         /* class-weight change-of-basis table */
+    /* tau^k tables for the Itoh-Tsujii chain, or null to take the inversion
+     * as repeated squaring.  Null is the behaviour this had before the tables
+     * existed; see the FrobPow comment in f2m.cuh for what the choice trades. */
+    const uint32_t *ftb;
     pt2k P, Q;
     rho2k_params prm;
     rho2k_dp *dp_out;
@@ -352,7 +356,7 @@ G2_HD void r2k_step_batch(const rho2k_ctx &c, uint32_t t) {
         inv[w] = den[w];
     }
 
-    F2::batch_inv(inv, W, scratch);
+    F2::batch_inv(inv, W, scratch, c.ftb);
 
     /* den still holds x1 + x2, so phase_b never re-derives tau^j(x).  That
      * costs one extra field element per walk of scratch; the lowmem variant
@@ -390,7 +394,7 @@ G2_HD void r2k_step_batch_lowmem(const rho2k_ctx &c, uint32_t t) {
         chain[w] = acc;
     }
 
-    f2e run = F2::inv(acc);
+    f2e run = F2::inv(acc, c.ftb);
 
     for (int w = W - 1; w >= 0; w--) {
         uint32_t idx = t + (uint32_t)w * c.nthreads;
@@ -423,7 +427,7 @@ G2_HD void r2k_step_thread_ref(const rho2k_ctx &c, uint32_t t) {
         if (m == R2K_MODE_INF) {
             r2k_reseed(c, idx, st, 0);
         } else {
-            r2k_phase_b(st, j, den, F2::inv(den));
+            r2k_phase_b(st, j, den, F2::inv(den, c.ftb));
             r2k_post(c, idx, st);
         }
         r2k_store(c, idx, st);
