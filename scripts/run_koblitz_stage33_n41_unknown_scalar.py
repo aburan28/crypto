@@ -160,6 +160,93 @@ def process_complete(value: dict[str, Any]) -> bool:
     )
 
 
+def linux_host_identity() -> dict[str, Any]:
+    """Return a canonical performance-host receipt for Linux measurements."""
+    require(platform.system() == "Linux", "host identity requires Linux")
+    cpuinfo = Path("/proc/cpuinfo").read_text()
+    first_block = cpuinfo.split("\n\n", 1)[0]
+    parsed: dict[str, str] = {}
+    for line in first_block.splitlines():
+        if ":" in line:
+            key, value = line.split(":", 1)
+            parsed[key.strip()] = value.strip()
+    fields = {
+        key: parsed.get(key)
+        for key in (
+            "vendor_id",
+            "cpu family",
+            "model",
+            "model name",
+            "stepping",
+            "microcode",
+            "cache size",
+            "physical id",
+            "siblings",
+            "cpu cores",
+        )
+    }
+    require(
+        all(isinstance(fields[key], str) and fields[key] for key in ("vendor_id", "model name", "cpu family", "model", "stepping")),
+        "Linux CPU identity is incomplete",
+    )
+    cache = []
+    cache_root = Path("/sys/devices/system/cpu/cpu0/cache")
+    if cache_root.is_dir():
+        for index in sorted(cache_root.glob("index*"), key=lambda path: path.name):
+            row = {"index": index.name}
+            for name in ("level", "type", "size", "coherency_line_size", "number_of_sets", "ways_of_associativity", "shared_cpu_list"):
+                path = index / name
+                row[name] = path.read_text().strip() if path.is_file() else None
+            cache.append(row)
+    def optional(path: str) -> str | None:
+        item = Path(path)
+        return item.read_text().strip() if item.is_file() else None
+    payload = {
+        "schema": "koblitz_linux_host_identity.v1",
+        "kernel": {
+            "system": platform.system(),
+            "release": platform.release(),
+            "version": platform.version(),
+            "machine": platform.machine(),
+        },
+        "cpu": {
+            **fields,
+            "flags": sorted(parsed.get("flags", "").split()),
+            "logical_cpu_count": os.cpu_count(),
+            "effective_affinity": sorted(os.sched_getaffinity(0)),
+            "scaling_governor_cpu0": optional("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
+            "scaling_min_freq_cpu0": optional("/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"),
+            "scaling_max_freq_cpu0": optional("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"),
+        },
+        "cache": cache,
+        "cgroup": {
+            "cpu_max": optional("/sys/fs/cgroup/cpu.max"),
+            "cpuset_cpus_effective": optional("/sys/fs/cgroup/cpuset.cpus.effective"),
+        },
+    }
+    return {**payload, "identity_sha256": custody.canonical_sha256(payload)}
+
+
+def validate_linux_host_identity(value: dict[str, Any]) -> dict[str, Any]:
+    require(isinstance(value, dict), "host identity must be an object")
+    payload = dict(value)
+    claimed = payload.pop("identity_sha256", None)
+    require(
+        payload.get("schema") == "koblitz_linux_host_identity.v1"
+        and claimed == custody.canonical_sha256(payload),
+        "host identity self-hash changed",
+    )
+    cpu = payload.get("cpu")
+    require(
+        isinstance(cpu, dict)
+        and isinstance(cpu.get("model name"), str)
+        and isinstance(cpu.get("effective_affinity"), list)
+        and bool(cpu["effective_affinity"]),
+        "host CPU identity is incomplete",
+    )
+    return value
+
+
 def outer_resources(
     started: float,
     before_self: resource.struct_rusage,
