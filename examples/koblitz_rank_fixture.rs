@@ -424,7 +424,14 @@ impl CompactPairTable {
 
     #[inline(always)]
     fn shard_for_x(&self, x: u64) -> usize {
-        self.shard_for_mixed(Self::hash((x, 0)))
+        if mixed_shard_routing_enabled() {
+            self.shard_for_mixed(Self::hash((x, 0)))
+        } else {
+            // The two direct Bloom windows use low and high x bits. Their xor
+            // balances the four shards while leaving both filter marginals
+            // distributed, and avoids a full splitmix hash on every query.
+            (x ^ (x >> 29)) as usize & (self.shards.len() - 1)
+        }
     }
 
     fn hash((x, y): (u64, u64)) -> u64 {
@@ -440,7 +447,7 @@ impl CompactPairTable {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
         let mixed = Self::hash(hash_key);
         if !self.shards.is_empty() {
-            let shard = self.shard_for_mixed(mixed);
+            let shard = self.shard_for_x(key.0);
             self.shards[shard].insert_with_mixed(key, value, mixed);
             return;
         }
@@ -526,7 +533,7 @@ impl CompactPairTable {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
         let mixed = Self::hash(hash_key);
         if !self.shards.is_empty() {
-            let shard = self.shard_for_mixed(mixed);
+            let shard = self.shard_for_x(key.0);
             return self.shards[shard].get_after_x_filter_with_mixed(key, mixed);
         }
         self.get_after_x_filter_with_mixed(key, mixed)
@@ -779,11 +786,22 @@ impl CompactPairTable {
         }
     }
 
+    fn shard_routing(&self) -> &'static str {
+        if self.shards.is_empty() {
+            "unsharded"
+        } else if mixed_shard_routing_enabled() {
+            "splitmix_bucket_bits"
+        } else {
+            "xor_low_and_high_x_windows"
+        }
+    }
+
     fn split_global_slot(&self, slot: usize) -> (&CompactPairTable, usize) {
         debug_assert!(!self.shards.is_empty());
         let shard_slots = self.shards[0].slots();
-        let shard = slot / shard_slots;
-        (&self.shards[shard], slot % shard_slots)
+        debug_assert!(shard_slots.is_power_of_two());
+        let shard = slot >> shard_slots.trailing_zeros();
+        (&self.shards[shard], slot & (shard_slots - 1))
     }
 
     fn signed_point_at_slot(&self, slot: usize, negative: bool) -> Option<RawPoint> {
@@ -1885,6 +1903,12 @@ fn prefiltered_exact_lookup_enabled() -> bool {
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED
         .get_or_init(|| std::env::var("KIC_DISABLE_PREFILTERED_EXACT_LOOKUP").as_deref() != Ok("1"))
+}
+
+fn mixed_shard_routing_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_MIXED_SHARD_ROUTING").as_deref() == Ok("1"))
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -3455,6 +3479,7 @@ fn main() {
             "support_payload_lower_bound_bytes":support_index_entries * (4 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
             "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
             "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+            "support_table_shard_routing":quotient_pairs.shard_routing(),
             "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
@@ -4333,6 +4358,7 @@ fn main() {
                 "support_index_entries":support_index_entries,
                 "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
                 "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+                "support_table_shard_routing":quotient_pairs.shard_routing(),
                 "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
@@ -4550,6 +4576,7 @@ mod packed_tests {
         assert_eq!(sharded.slots(), serial.slots());
         assert_eq!(sharded.x_filter_bits(), serial.x_filter_bits());
         assert!(sharded.x_filter_direct_bits());
+        assert_eq!(sharded.shard_routing(), "xor_low_and_high_x_windows");
         for &(key, _) in &entries {
             assert!(sharded.might_contain_x(key.0));
             let expected = serial.get(key).unwrap();
