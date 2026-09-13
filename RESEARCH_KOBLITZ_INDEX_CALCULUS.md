@@ -1974,7 +1974,11 @@ is a different function of the point. That does not matter. A key has
 only to be constant on orbits and distinct across them, which a bijective
 linear map followed by a rotation-invariant minimum is — and a table is
 built and queried with the same one. Both properties are tested directly
-at degrees 13 through 61, against the squaring chain it replaces.
+at degrees 13 through 61, against the squaring chain it replaces, and by
+full enumeration of the field at 8, 12, 16 and 20 — composite degrees,
+where an orbit is shorter than `n` and its coordinate word is a repeating
+pattern that its own rotation fixes, which is the case a least-rotation
+key has to get right and a sampled prime-degree test cannot reach.
 
 | | squaring chain | rotation |
 |---|---|---|
@@ -2096,13 +2100,19 @@ How far below the middle, instrumented on the real table at `n = 61`,
 | bucket index | mean run a key lands in | buckets used | design |
 |---|---|---|---|
 | the raw key | **584.0** | 739 718 of 16 777 216 | 15.4 |
-| the hash | 17.4 | 16 769 521 | 15.4 |
+| a mixed key | 17.4 | 16 769 521 | 15.4 |
+
+The second row is a multiply-xorshift mixer, not `pair_filter_hash`
+itself; it stands in for what any avalanching hash does to this key,
+and the number to read off it is 17.4 against 584.0, not 17.4 exactly.
 
 Thirty-four times the run the sizing law intends, out of 4.4% of the
 buckets. And a measurement of the *miss* path alone — 200 000 probes of
-which 20 hit — moves by 2.9 ns out of 362.7 when the index is fixed,
-which is how completely the filter hides it: seven probes in eight never
-reach a bucket, and the one that does reads a contiguous run of `u32`
+which 20 hit — moves by 2.9 ns out of 362.7 when the index is fixed (a
+different host from the 374 → 285 above, so those absolute numbers and
+these do not reconcile; the 2.9 does), which is how completely the filter
+hides it: seven probes in eight never reach a bucket, and the one that
+does reads a contiguous run of `u32`
 that the prefetcher handles, about four cache lines a probe amortised
 whatever its length. A benchmark of misses would have certified this bug
 as absent.

@@ -23,7 +23,7 @@
     "why_it_happens": "A canonical key is a minimum over n rotations, so it sits far below the middle of its range and its high bits are not uniform. Indexing buckets by those bits piles the table into a low slice of the index.",
     "measured_on": "the real folded table at n = 61, 258632192 entries over 2^24 buckets",
     "raw_key": {"mean_run_a_key_lands_in": 584.0, "buckets_used": 739718},
-    "hashed_key": {"mean_run_a_key_lands_in": 17.4, "buckets_used": 16769521},
+    "hashed_key": {"mean_run_a_key_lands_in": 17.4, "buckets_used": 16769521, "hash": "a multiply-xorshift mixer, not pair_filter_hash itself - it stands in for what any avalanching hash does to this key, so the figure to read is 17.4 against 584.0 rather than 17.4 exactly"},
     "buckets": 16777216,
     "design": 15.4
   },

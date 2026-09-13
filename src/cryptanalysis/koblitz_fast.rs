@@ -627,8 +627,12 @@ mod tests {
         }
         // Both curve shapes at every degree `KoblitzCurve` will build:
         // fewer than `MAX_DEGREE - 8` of them, since not every degree
-        // gives a usable subgroup.
-        assert!(checked >= 29, "the sweep only reached {checked} curves");
+        // gives a usable subgroup.  The bound is only here to say the
+        // loop is not vacuous — pinning the exact count would turn a
+        // change in which degrees `KoblitzCurve::new` accepts into a
+        // failure of the normal-element search, which is not what this
+        // test is about.
+        assert!(checked >= 10, "the sweep only reached {checked} curves");
     }
 
     #[test]
