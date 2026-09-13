@@ -2150,6 +2150,69 @@ fn pair_filter_hash(key: u64) -> u64 {
 /// `|F|²` lookups of `R − (P_k + P_l)` walked off the table itself.
 /// The factor-base search uses the same table to count *every*
 /// witness of a target, which is what exact yield needs.
+/// **Packed base point to its index**, open-addressed.
+///
+/// [`PairSumTable::recover_pair`] asks this `|F|` times for every witness
+/// a search finds, so on a wide base it is one of the two things the
+/// recovery scan is made of.  A `std::collections::HashMap` answers it
+/// through SipHash, which is tens of nanoseconds on a `u64` key before
+/// any memory is touched — a strong hash bought for keys that are
+/// already the output of a packing, and paid `|F|` times over.
+///
+/// This uses the hash the presence filter already computes and probes
+/// linearly.  A packed affine point is `2(x + 1) + s ≥ 2`, so zero is
+/// free to mean *empty* and no separate occupancy word is needed.
+#[derive(Clone, Debug, Default)]
+struct PointIndex {
+    /// `(packed point, index)`, zero key for an empty slot.
+    slots: Vec<(u64, u32)>,
+    mask: usize,
+}
+
+impl PointIndex {
+    /// Load factor one half, rounded to a power of two.
+    fn build(points: &[FastPoint]) -> Self {
+        let capacity = (points.len() * 2).next_power_of_two().max(2);
+        let mut index = Self {
+            slots: vec![(0, 0); capacity],
+            mask: capacity - 1,
+        };
+        for (i, p) in points.iter().enumerate() {
+            let key = p.pack();
+            if key == 0 {
+                continue;
+            }
+            let mut at = (pair_filter_hash(key) as usize) & index.mask;
+            while index.slots[at].0 != 0 {
+                if index.slots[at].0 == key {
+                    break;
+                }
+                at = (at + 1) & index.mask;
+            }
+            index.slots[at] = (key, i as u32);
+        }
+        index
+    }
+
+    #[inline]
+    fn get(&self, key: u64) -> Option<u32> {
+        if key == 0 || self.slots.is_empty() {
+            return None;
+        }
+        let mut at = (pair_filter_hash(key) as usize) & self.mask;
+        loop {
+            let (k, i) = self.slots[at];
+            if k == 0 {
+                return None;
+            }
+            if k == key {
+                return Some(i);
+            }
+            at = (at + 1) & self.mask;
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
@@ -2180,7 +2243,7 @@ pub struct PairSumTable {
     rests: Vec<u32>,
     /// `pack()` of each base point to its index, for recovering the
     /// summands of a compact hit.  `|F|` entries, not `|F|²`.
-    index_of_point: HashMap<u64, u32>,
+    index_of_point: PointIndex,
     /// Single-word arithmetic on the curve, for the table build and the
     /// `|F|` subtractions of a three-summand search.
     curve: FastCurve,
@@ -2365,7 +2428,7 @@ impl PairSumTable {
         Some(Self {
             entries,
             rests: Vec::new(),
-            index_of_point: HashMap::new(),
+            index_of_point: PointIndex::default(),
             curve,
             points,
             negated,
@@ -2470,11 +2533,7 @@ impl PairSumTable {
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
             .collect();
-        let index_of_point = points
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (p.pack(), i as u32))
-            .collect();
+        let index_of_point = PointIndex::build(&points);
         Some(Self {
             entries: Vec::new(),
             rests,
@@ -2584,11 +2643,7 @@ impl PairSumTable {
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
             .collect();
-        let index_of_point = points
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (p.pack(), i as u32))
-            .collect();
+        let index_of_point = PointIndex::build(&points);
         Some(Self {
             entries: Vec::new(),
             rests,
@@ -2807,17 +2862,26 @@ impl PairSumTable {
     /// `i` is a summand.  Paid on a hit, which is rare — that is the
     /// trade the compact table makes.
     fn recover_pair(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
-        let mut rests = Vec::with_capacity(self.points.len());
+        // A block at a time rather than the whole base at once: the
+        // differences are written and then read back exactly once, and
+        // at `|F| = 177632` a buffer for all of them is four megabytes
+        // that leaves the cache before it is used.  One batched
+        // inversion per block is still one per thousand additions.
+        const BLOCK: usize = 4096;
+        let mut rests = Vec::with_capacity(BLOCK);
         let mut scratch = BatchScratch::default();
-        self.curve
-            .add_many(target, &self.negated, &mut rests, &mut scratch);
-        for (i, rest) in rests.iter().enumerate() {
-            if rest.infinity {
-                continue;
-            }
-            if let Some(&j) = self.index_of_point.get(&rest.pack()) {
-                if i as u32 <= j {
-                    out.push((i as u32, j));
+        for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
+            rests.clear();
+            self.curve.add_many(target, addends, &mut rests, &mut scratch);
+            for (offset, rest) in rests.iter().enumerate() {
+                if rest.infinity {
+                    continue;
+                }
+                if let Some(j) = self.index_of_point.get(rest.pack()) {
+                    let i = (b * BLOCK + offset) as u32;
+                    if i <= j {
+                        out.push((i, j));
+                    }
                 }
             }
         }
@@ -2907,11 +2971,16 @@ impl PairSumTable {
     /// single-word arithmetic.
     pub fn decompose_fast(&self, target: FastPoint, m: usize) -> Option<Vec<usize>> {
         let mut found: Option<Vec<usize>> = None;
-        self.witnesses_fast(target, m, &mut |witness| {
+        // Any witness, not the sorted one: one decomposition is wanted,
+        // and insisting on `j ≤ k` here throws away two recoveries in
+        // three to get the same answer later.  Sorted on the way out, so
+        // what a caller sees is unchanged.
+        self.witnesses_fast_inner(target, m, false, &mut |witness| {
             found = Some(witness.to_vec());
             false
         });
-        let idxs = found?;
+        let mut idxs = found?;
+        idxs.sort_unstable();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -3047,6 +3116,28 @@ impl PairSumTable {
         m: usize,
         sink: &mut dyn FnMut(&[usize]) -> bool,
     ) {
+        self.witnesses_fast_inner(target, m, true, sink)
+    }
+
+    /// [`Self::witnesses_fast`], optionally without the sorted-witness
+    /// condition.
+    ///
+    /// Enumerating every *sorted* witness is what exact yield needs, and
+    /// the condition `j ≤ k` is how a triple found three times over —
+    /// once for each of its indices playing the role of `k` — is counted
+    /// once.  A search that wants a single decomposition needs none of
+    /// that: it rejects two witnesses in three *after* paying the
+    /// `O(|F|)` recovery scan that produced them, which on a wide base
+    /// is the dominant cost of the whole search.  With `sorted` false
+    /// the same triples come back unordered and possibly repeated, and
+    /// a witness arrives about three times sooner.
+    fn witnesses_fast_inner(
+        &self,
+        target: FastPoint,
+        m: usize,
+        sorted: bool,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
         match m {
             2 => {
                 let mut pairs = Vec::new();
@@ -3099,7 +3190,9 @@ impl PairSumTable {
                         let k = b * BLOCK + offset;
                         self.pairs_for_key(*rest, keys[offset], &mut pairs);
                         for &(i, j) in &pairs {
-                            if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                            if (!sorted || j as usize <= k)
+                                && !sink(&[i as usize, j as usize, k])
+                            {
                                 return;
                             }
                         }
@@ -3129,7 +3222,9 @@ impl PairSumTable {
                         let rest = self.curve.add(target, self.curve.neg(pair));
                         self.pairs_for(rest, &mut pairs);
                         for &(i, j) in &pairs {
-                            if j as usize <= k && !sink(&[i as usize, j as usize, k, l]) {
+                            if (!sorted || j as usize <= k)
+                                && !sink(&[i as usize, j as usize, k, l])
+                            {
                                 return;
                             }
                         }

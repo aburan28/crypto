@@ -1913,9 +1913,10 @@ Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
 first witness:
 
-**0.476 s → 0.168 s, a factor of 2.8.**
-
-Real, and a twentieth of what the probe count alone suggested.
+**0.500 s → 0.018 s, a factor of 27.8** — but only after three further
+changes, and on the code as it stood it was 2.0×. What happened in
+between is the rest of this section, and it is the more useful half of
+the result.
 
 ### Two things the measurement had to be rescued from
 
@@ -1965,26 +1966,61 @@ at degrees 13 through 61, against the squaring chain it replaces.
 The build gained the same factor as the probe, which it should: it
 canonicalises every pair it stores.
 
-### What is binding now — and it has moved
+### The recovery, and the search that threw it away
 
-Not the canonicalisation any more. **The summand recovery.** The compact
-representation does not store which two base points made a sum; it
-recovers them by a scan over the whole base, and that scan is `O(|F|)` —
-0.94 ms at `|F| = 16592`, **12.88 ms** at `|F| = 177632`. It grows with
-the very base the fold exists to widen.
+With the canonicalisation cheap, the cost moved to **summand recovery**.
+The compact representation does not store which two base points made a
+sum; it recovers them by a scan over the whole base, `O(|F|)` — 0.94 ms
+at `|F| = 16592` and 12.88 ms at `|F| = 177632`. It grows with the very
+base the fold exists to widen.
 
-Worse, a three-summand search pays it once per witness it *finds*, not
-once per witness it keeps: the sorted-witness condition `j ≤ k` throws
-most of them away, and each rejected one has already cost a full scan.
-About nine tenths of the time per decomposition is now there.
+Two things were wrong with it. The smaller: `recover_pair` looked each
+difference up in a `std::collections::HashMap`, whose default hasher is
+SipHash — a strong hash bought for keys that are already the output of a
+packing, and paid `|F|` times. An open-addressed table using the hash the
+presence filter already computes, and a scan blocked so its scratch stays
+in cache rather than four megabytes of it going out and coming back, took
+12.88 ms to **8.66 ms**.
 
-There is an obvious thing to try. `recover_pair` looks each difference up
-in a `std::collections::HashMap`, whose default hasher is SipHash — tens
-of nanoseconds on a `u64` key, paid `|F|` times. The table already
-computes a cheap hash for its presence filter. That is a change to the
-unfolded compact path as much as the folded one, and it is not yet built
-or measured.
+The larger was not in the recovery at all. A three-summand search paid it
+once per witness it *found*, not once per witness it kept. The condition
+`j ≤ k` is a sorted-witness condition: it is how a triple found three
+times over — once for each of its indices playing the role of `k` — gets
+counted once, and enumerating every sorted witness is exactly what exact
+yield needs. But a descent does not want an enumeration. It wants one
+decomposition, and it re-checks the sum in the group before returning it.
+So it was rejecting two witnesses in three *after* paying the `O(|F|)`
+scan that produced them, to arrive at the same answer later.
+
+`decompose_fast` now takes any witness and sorts on the way out, so what
+a caller sees is unchanged. Recoveries per decomposition fell from about
+eleven to about one, and the scan reaches a witness about three times
+sooner.
+
+### What the fold is actually worth
+
+| | s per decomposed target | the fold |
+|---|---|---|
+| the code as it stood | 0.229 | 2.0× |
+| key as a rotation | 0.168 | 2.8× |
+| faster recovery | 0.150 | 3.2× |
+| any witness, not the sorted one | **0.018** | **27.8×** |
+
+The fold was worth 2.0× on the code as it stood, and 27.8× once the three
+things that a base eight times wider exposes were fixed. Two of the three
+were not about the fold at all — they were costs that only a wide base
+makes visible, and that the compact table had been paying quietly at every
+width.
+
+Neither half is now lopsided: of the 18 ms, about 6.7 ms is the 17840
+probes and about 8.7 ms the single recovery.
 
 The `M²/(log M)²` reach law is unchanged in shape by any of this. What
 the fold moves is the constant, by putting `n` times more base behind the
 same byte.
+
+The lesson is the one this note keeps relearning. The algebra said `2n`
+and it was right about `2n`; what it could not say was that at `n` times
+the base, two costs nobody had been watching — a hash function chosen for
+strength, and a sortedness condition kept for an enumeration nothing was
+enumerating — would be most of the bill.

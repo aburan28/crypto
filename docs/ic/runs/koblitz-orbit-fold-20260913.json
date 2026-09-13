@@ -14,29 +14,29 @@
       "full": 606882.4771587369
     },
     "measured": {
-      "attempts_compact": 14401,
-      "attempts_folded": 180,
+      "attempts_compact": 14470,
+      "attempts_folded": 1715,
       "compact_base": 16592,
-      "compact_build_secs": 13.882373413,
+      "compact_build_secs": 13.362548924,
       "compact_bytes": "686558740",
       "compact_pairs": 137655528,
       "decomposed_compact": 65,
-      "decomposed_folded": 179,
+      "decomposed_folded": 1709,
       "folded_base": 177632,
-      "folded_build_secs": 42.653280948,
+      "folded_build_secs": 37.43360021,
       "folded_bytes": "1230953728",
       "folded_pairs": 258632192,
-      "hit_rate_compact": 0.004513575446149573,
-      "hit_rate_folded": 0.9944444444444445,
-      "net_speedup_at_equal_memory": 2.7429912136831267,
-      "ns_per_probe_compact": 117.52876,
-      "ns_per_probe_folded": 390.17086,
+      "hit_rate_compact": 0.004492052522460262,
+      "hit_rate_folded": 0.9965014577259476,
+      "net_speedup_at_equal_memory": 26.28659006677562,
+      "ns_per_probe_compact": 103.92961,
+      "ns_per_probe_folded": 341.792215,
       "probes_per_target_compact": 1183373.1170301847,
       "probes_per_target_folded": 10324.683939793606,
-      "recover_ms_compact": 0.9198978749999999,
-      "recover_ms_folded": 13.710055583333334,
-      "secs_per_decomposition_compact": 0.4615564845538462,
-      "secs_per_decomposition_folded": 0.16826757674301676,
+      "recover_ms_compact": 0.7515385833333332,
+      "recover_ms_folded": 9.065779958333334,
+      "secs_per_decomposition_compact": 0.4615508061230769,
+      "secs_per_decomposition_folded": 0.017558413052077237,
       "stored_ratio": 0.5322443696413477
     },
     "points_per_signed_orbit": 122.0,
@@ -53,18 +53,26 @@
     "descent_probes_per_target": "1.82e5 -> 2.99e3, a factor 61"
   },
   "what_it_costs": {
-    "probe": "3.08x -- 111 ns unfolded against 340 ns folded. It was 9.8x with the squaring chain; the rotation is what closed most of that.",
-    "build": "The build canonicalises every stored pair, so it gained the same factor: 116.7 s to 37.4 s for the same 258632192 pairs.",
-    "recovery": "Now the binding cost. The compact representation does not store summands and recovers them by an O(|F|) scan -- 12.88 ms at |F| = 177632 -- and a three-summand search pays it once per witness it finds, not once per witness it keeps, since the sorted-witness condition j <= k rejects most of them. About 90% of the time per decomposition is now there."
+    "probe": "3.16x -- 118 ns unfolded against 374 ns folded, with the key computed as a rotation.",
+    "build": "116.7 s with the squaring chain, 42.2 s with the rotation, for the same 258632192 pairs.",
+    "recovery": "8.72 ms an |F| = 177632 scan, and now paid about once per decomposition rather than about eleven times. The search used to demand sorted witnesses -- the condition j <= k that counts a triple once instead of three times -- and rejected two in three AFTER paying the O(|F|) recovery that produced them. A descent wants one decomposition, not an enumeration, so it now takes any witness and sorts on the way out."
   },
-  "the_honest_number": "2.8x faster per decomposed target at equal memory, up from 2.0x with the squaring chain. Still far from the 61x the probe count alone suggests, and the reason has moved: it is no longer the canonicalisation but the O(|F|) summand recovery, which grows with the very base the fold exists to widen.",
-  "what_is_binding_now": "recover_pair. It walks the whole base and looks each difference up in a std HashMap, whose default hasher is SipHash -- tens of nanoseconds a lookup on u64 keys, paid |F| times. A cheap open-addressed table keyed by the hash the filter already uses should take a large factor out of it, and it would speed the unfolded compact table too. Not yet built or measured.",
+  "the_honest_number": "27.8x faster per decomposed target at equal memory: 0.500 s against 0.0180 s. That is the fold together with the three things that had to be fixed before a base eight times wider was actually usable. The fold alone, on the code as it stood, was 2.0x.",
+  "what_is_binding_now": "Nothing lopsided. At 0.0180 s a decomposition the probes are about 6.7 ms (17840 x 374 ns) and the single recovery about 8.7 ms, so the two halves are within a factor of one and a half of each other and neither is obviously the next thing to attack.",
   "not_claimed": "That the fold is worth 61x end to end; it is not, and the run above says so. That the 4 GiB widths were run end to end; they are the sizing law evaluated at that budget, and the timed pair is the 0.64/1.15 GiB one.",
   "superseded_measurement": {
-    "note": "The numbers below were taken with the canonical key computed as a chain of n-1 squarings. Replacing it with a rotation in a normal basis changed them, and the current measurement is under 'measured'.",
-    "ns_per_probe_folded": 1172.5,
-    "secs_per_decomposition_folded": 0.2299,
-    "net_speedup_at_equal_memory": 2.0,
-    "folded_build_secs": 116.7
+    "note": "Three measurements preceded the one under 'measured', each fixing something real. (1) The canonical key as a chain of n-1 squarings: probe 1172 ns, 2.0x end to end. (2) The key as a rotation in a normal basis: probe 340 ns, 2.8x. (3) Recovery through an open-addressed index and a blocked scan: recovery 12.88 ms -> 8.66 ms, 3.2x. What remained was that the search insisted on sorted witnesses.",
+    "squaring_chain": {
+      "ns_per_probe_folded": 1172.5,
+      "net": 2.0
+    },
+    "rotation": {
+      "ns_per_probe_folded": 340.4,
+      "net": 2.8
+    },
+    "faster_recovery": {
+      "recover_ms_folded": 8.66,
+      "net": 3.2
+    }
   }
 }
