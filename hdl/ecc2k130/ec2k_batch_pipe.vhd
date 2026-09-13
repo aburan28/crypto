@@ -38,23 +38,38 @@
 --
 -- Overwriting the tree in place is safe because every read of a value that
 -- a burst will overwrite happens at issue, and the overwrite happens at
--- retire MUL_LATENCY clocks later; this needs MUL_LATENCY >= 2.
+-- retire MUL_LATENCY clocks later; this needs MUL_LATENCY >= 2.  A burst
+-- that reads what the previous one wrote issues at least two clocks after
+-- that write has landed, so no word is read on the clock it is written and
+-- the memories' collision behaviour never matters (checked in simulation).
 --
--- Memories.  The field-element arrays are block RAM: synchronous read with
--- the output register, two clocks from address to data, one write port and
--- one read port each, so an array read through two addresses is kept
--- twice.  The first version had them in distributed RAM, 3k LUTs per
--- engine; that fitted, but in a full device the write address and enable of
--- a 131 x 256 LUTRAM fan out to a thousand LUTs spread over the SLICEMs of
--- a whole region, and those nets were what failed timing in every engine of
--- a 48-engine build.  A block RAM's address pins fan out to two.
+-- Memories.  The field-element arrays are memory blocks: the address
+-- register, the synchronous read, the output register, three clocks from
+-- the burst engine to the data; one write port and one read port each, so
+-- an array read through two addresses is kept twice.  The first version had
+-- them in distributed RAM, 3k LUTs per engine; that fitted, but in a full
+-- device the write address and enable of a 131 x 256 LUTRAM fan out to a
+-- thousand LUTs spread over the SLICEMs of a whole region, and those nets
+-- were what failed timing in every engine of a 48-engine build.  A memory
+-- block's address pins fan out to two.
 --
---   leaf    (x, y, j, valid)  written at fill, read at issue
---   d_a, d_b                  written at fill, read at issue (two ports)
---   t_a, t_b                  the tree: written at retire, read at issue
+--   leaf    (x, y, j, valid)  block RAM, written at fill, read at issue
+--   d_a, d_b                  block RAM, written at fill, read at issue
+--   t_a, t_b                  UltraRAM: the tree, written at retire, read
+--                             at issue
 --
--- Issue reads are addressed from the burst engine's registers and land two
--- clocks later in stage A2.  Nothing is read at retire: the final multiply
+-- The tree is the largest array (2W words per batch) and it goes in
+-- UltraRAM, of which the device has 960 blocks the design otherwise leaves
+-- empty, while block RAM is what bounds the number of engines: 17 tiles per
+-- engine with the tree in block RAM, 13 with it in UltraRAM.  Two 72-bit
+-- UltraRAMs hold a 131 x 512 copy; their depth (4096) is mostly unused, but
+-- the ports are the resource, not the bits.  Both memories' write and read
+-- addresses come from registers of their own so the placer can put them
+-- beside the blocks, which for the UltraRAM columns are further from an
+-- engine's logic than its block RAMs.
+--
+-- Issue reads are addressed from the burst engine's registers and land
+-- three clocks later in stage A3.  Nothing is read at retire: the final multiply
 -- of a walk (lam times x + x3) has y, the tag and x3 in hand when it issues,
 -- and they ride a shift register beside the multiplier (SRLs, ~300 LUTs)
 -- and meet the product on the way out.  An earlier version kept a second
@@ -107,8 +122,9 @@ architecture rtl of ec2k_batch_pipe is
   constant W  : natural := 2 ** LOG_W;
   constant NB : natural := 2 ** LOG_NB;
 
-  -- clocks from a memory address to its data
-  constant RD_LAT : natural := 2;
+  -- clocks from the burst engine's registers to the memories' data: the
+  -- address register, the synchronous read, the output register
+  constant RD_LAT : natural := 3;
 
   function maxn (a, b : natural) return natural is
   begin
@@ -154,7 +170,7 @@ architecture rtl of ec2k_batch_pipe is
   -- what the final multiply carries to its retire: x3, y, tag, valid
   constant FP_W : natural := 2 * M + TAG_W + 1;
   subtype fp_word_t is std_logic_vector(FP_W - 1 downto 0);
-  -- loaded in stage A2, read when the product retires: A2 -> B -> the
+  -- loaded in stage A3, read when the product retires: A3 -> B -> the
   -- multiplier's MUL_LATENCY -> the retire clock
   constant FP_DEPTH : natural := MUL_LATENCY + 2;
   type fp_pipe_t is array (0 to FP_DEPTH - 1) of fp_word_t;
@@ -212,7 +228,7 @@ architecture rtl of ec2k_batch_pipe is
   end function;
 
   -- ------------------------------------------------------------------ --
-  -- memories (block RAM; see the header)
+  -- memories (the leaf tables block RAM, the tree UltraRAM; see the header)
   -- ------------------------------------------------------------------ --
   signal m_la       : la_mem_t;
   signal m_da, m_db : gf_leaf_mem_t;
@@ -222,12 +238,15 @@ architecture rtl of ec2k_batch_pipe is
   attribute ram_style of m_la : signal is "block";
   attribute ram_style of m_da : signal is "block";
   attribute ram_style of m_db : signal is "block";
-  attribute ram_style of m_ta : signal is "block";
-  attribute ram_style of m_tb : signal is "block";
+  attribute ram_style of m_ta : signal is "ultra";
+  attribute ram_style of m_tb : signal is "ultra";
 
-  -- read side: address (combinational), latch output, output register
+  -- read side: address (combinational, then registered), latch output,
+  -- output register
   signal ra_qa, ra_qb : laddr_t;
   signal ra_ta, ra_tb : taddr_t;
+  signal ad_qa, ad_qb : laddr_t := 0;
+  signal ad_ta, ad_tb : taddr_t := 0;
   signal rd_la : la_word_t;
   signal rd_da, rd_db, rd_ta, rd_tb : gf_t;
   signal rr_la : la_word_t;
@@ -267,6 +286,10 @@ architecture rtl of ec2k_batch_pipe is
   signal w_la_a, w_da_a, w_db_a : laddr_t := 0;
   signal w_la_word : la_word_t := (others => '0');
   signal w_d       : gf_t := (others => '0');
+  -- the registered tree write, likewise
+  signal tw_en     : std_logic := '0';
+  signal tw_a, tw_b : taddr_t := 0;
+  signal tw_d      : gf_t := (others => '0');
 
   -- ready queue and free list of batch ids
   signal rq : q_t := (others => (others => '0'));
@@ -288,7 +311,7 @@ architecture rtl of ec2k_batch_pipe is
   -- the dummy leaf's d, a constant
   constant DUMMY_D : gf_t := DUMMY_X xor gf_sigma_j(DUMMY_X, "000");
 
-  -- stages A0, A1 ride beside the memory read; A2 has the operands
+  -- stages A0 .. A2 ride beside the memory read; A3 has the operands
   type ph_pipe_t   is array (0 to RD_LAT - 1) of ph_t;
   type k_pipe_t    is array (0 to RD_LAT - 1) of unsigned(2 downto 0);
   type mtag_pipe_t is array (0 to RD_LAT - 1) of mtag_t;
@@ -341,19 +364,38 @@ begin
   fl_empty <= fl_wr = fl_rd;
 
   -- ---------------------------------------------------------------- --
-  -- memory read ports: synchronous read, then the output register.  The
-  -- writes are in the main process (one writer each).
+  -- memory read ports: the address register (one per port, so each sits
+  -- beside its memory), the synchronous read, then the output register.
+  -- The writes are in the main process (one writer each).
   -- ---------------------------------------------------------------- --
   mem_rd : process (clk)
   begin
     if rising_edge(clk) then
-      rd_la <= m_la(ra_qa);
-      rd_da <= m_da(ra_qa);
-      rd_db <= m_db(ra_qb);
-      rd_ta <= m_ta(ra_ta);
-      rd_tb <= m_tb(ra_tb);
+      ad_qa <= ra_qa;
+      ad_qb <= ra_qb;
+      ad_ta <= ra_ta;
+      ad_tb <= ra_tb;
+      rd_la <= m_la(ad_qa);
+      rd_da <= m_da(ad_qa);
+      rd_db <= m_db(ad_qb);
+      rd_ta <= m_ta(ad_ta);
+      rd_tb <= m_tb(ad_tb);
     end if;
   end process;
+
+  -- in simulation: a tree word is never read, by a multiply that will use
+  -- it, on the clock it is written (the design does not depend on which
+  -- value a colliding read returns; the address registers do follow the
+  -- idle burst engine, so only reads with a_valid count)
+  -- pragma translate_off
+  tree_collision : process (clk)
+  begin
+    if rising_edge(clk) then
+      assert not (tw_en = '1' and a_valid(0) = '1' and (tw_a = ad_ta or tw_b = ad_tb))
+        report "ec2k_batch_pipe: tree read/write collision" severity failure;
+    end if;
+  end process;
+  -- pragma translate_on
 
   mem_oreg : process (clk)
   begin
@@ -536,6 +578,15 @@ begin
       end if;
 
       -- ============ retire ============
+      -- The tree writes go through one register stage too: the product
+      -- register feeds a mux (the inversion's Frobenius) and the address
+      -- decode, and the UltraRAM columns are further from an engine's
+      -- logic than its block RAMs.
+      tw_en <= '0';
+      if tw_en = '1' then
+        m_ta(tw_a) <= tw_d;
+        m_tb(tw_b) <= tw_d;
+      end if;
       o1_valid <= '0';
       if res_valid = '1' then
         rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
@@ -547,8 +598,9 @@ begin
         ri    := ridx(LOG_W - 1 downto 0);
         case to_integer(rkind) is
           when PH_FWD =>
-            m_ta(tree_addr(rb, rn)) <= res_r;
-            m_tb(tree_addr(rb, rn)) <= res_r;
+            tw_en <= '1';
+            tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
+            tw_d  <= res_r;
             if rlast = '1' then
               if rlvl = 0 then
                 b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
@@ -559,16 +611,20 @@ begin
             end if;
           when PH_INV =>
             -- t(1) holds the root, then beta_2, then 1/root; t(0) the accumulator
+            tw_en <= '1';
             case to_integer(ridx(2 downto 0)) is
               when 0 =>
-                m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
-                m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= res_r;
+                tw_a <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
+                tw_b <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
+                tw_d <= res_r;
               when 7 =>
-                m_ta(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
-                m_tb(tree_addr(rb, to_unsigned(1, LOG_W + 1))) <= gf_frob(res_r, 1);
+                tw_a <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
+                tw_b <= tree_addr(rb, to_unsigned(1, LOG_W + 1));
+                tw_d <= gf_frob(res_r, 1);
               when others =>
-                m_ta(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
-                m_tb(tree_addr(rb, to_unsigned(0, LOG_W + 1))) <= res_r;
+                tw_a <= tree_addr(rb, to_unsigned(0, LOG_W + 1));
+                tw_b <= tree_addr(rb, to_unsigned(0, LOG_W + 1));
+                tw_d <= res_r;
             end case;
             if ridx(2 downto 0) = 7 then
               b_ph(to_integer(rb))  <= to_unsigned(PH_BWD, KIND_W);
@@ -577,8 +633,9 @@ begin
               b_lvl(to_integer(rb)) <= resize(ridx(2 downto 0) + 1, LVL_W);
             end if;
           when PH_BWD =>
-            m_ta(tree_addr(rb, rn)) <= res_r;
-            m_tb(tree_addr(rb, rn)) <= res_r;
+            tw_en <= '1';
+            tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
+            tw_d  <= res_r;
             if rlast = '1' then
               if rlvl = LOG_W - 1 then
                 b_ph(to_integer(rb)) <= to_unsigned(PH_LAM, KIND_W);
@@ -587,8 +644,9 @@ begin
               end if;
             end if;
           when PH_LAM =>
-            m_ta(tree_addr(rb, ('1' & ri))) <= res_r;             -- leaf W+i := lam
-            m_tb(tree_addr(rb, ('1' & ri))) <= res_r;
+            tw_en <= '1';                                         -- leaf W+i := lam
+            tw_a  <= tree_addr(rb, ('1' & ri));  tw_b <= tree_addr(rb, ('1' & ri));
+            tw_d  <= res_r;
             if rlast = '1' then
               b_ph(to_integer(rb)) <= to_unsigned(PH_FIN, KIND_W);
             end if;
@@ -690,7 +748,7 @@ begin
         if to_integer(lvl) = LOG_W - 1 then a_leafy(0) <= '1'; else a_leafy(0) <= '0'; end if;
       end if;
 
-      -- ============ stage A1: the memories' output register ============
+      -- ============ stages A1, A2: the memories' read and output register ============
       for s in 1 to RD_LAT - 1 loop
         a_valid(s) <= a_valid(s - 1);
         a_ph(s)    <= a_ph(s - 1);
@@ -699,10 +757,10 @@ begin
         a_leafy(s) <= a_leafy(s - 1);
       end loop;
 
-      -- ============ stage A2: operands off the memories ============
+      -- ============ stage A3: operands off the memories ============
       -- The FIN leaf's x3 = lam^2 + lam + d is formed here (lam from the
       -- tree, d from its table) and enters fp with y, the tag and valid;
-      -- fp shifts every clock, whatever is in A2.
+      -- fp shifts every clock, whatever is in A3.
       x3 := gf_frob(rr_ta, 1) xor rr_ta xor rr_da;
       fp_in := x3 & rr_la(LA_Y downto LA_J + 1) & rr_la(LA_TAG downto 0);
       fp <= fp_in & fp(0 to FP_DEPTH - 2);
@@ -785,7 +843,7 @@ begin
 
       if rst = '1' then
         p0_valid <= '0'; p1_valid <= '0';
-        fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0'; w_en <= '0';
+        fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0'; w_en <= '0'; tw_en <= '0';
         idle_cnt <= (others => '0'); flushing <= '0';
         rq_wr <= (others => '0'); rq_rd <= (others => '0');
         fl <= q_identity;
