@@ -61,6 +61,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                   expectedPackedGeneratedProduct=client.PACKED_GENERATED_PRODUCT == "1",
                   packedGeneratedProduct=None,
                   expectedPackedClmad=client.PACKED_CLMAD == "1", packedClmad=None,
+                  expectedPackedClmadSquare=client.PACKED_CLMAD_SQUARE == "1", packedClmadSquare=None,
                   expectedPackedCompactState=client.PACKED_COMPACT_STATE == "1", packedCompactState=None,
                   expectedPackedSharedSigma=client.PACKED_SHARED_SIGMA == "1", packedSharedSigma=None,
                   expectedPackedWeightedPrefix=int(client.PACKED_WEIGHTED_PREFIX), packedWeightedPrefix=None,
@@ -98,6 +99,7 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
              f"PACKED_DIRECT_REDUCE={client.PACKED_DIRECT_REDUCE}",
              f"PACKED_GENERATED_PRODUCT={client.PACKED_GENERATED_PRODUCT}",
              f"PACKED_CLMAD={client.PACKED_CLMAD}",
+             f"PACKED_CLMAD_SQUARE={client.PACKED_CLMAD_SQUARE}",
              f"PACKED_COMPACT_STATE={client.PACKED_COMPACT_STATE}",
              f"PACKED_SHARED_SIGMA={client.PACKED_SHARED_SIGMA}",
              f"PACKED_WEIGHTED_PREFIX={client.PACKED_WEIGHTED_PREFIX}",
@@ -125,6 +127,14 @@ def runAudit(minBlocks=4, repeats=3, blockThreads=128, workers=0, batch=32):
                                           packedClmad=result["packedClmad"])
         if clmadModes != [client.PACKED_CLMAD]:
             raise RuntimeError("packed GPU arithmetic CLMAD identity disagrees with the requested build")
+        squareModes = re.findall(r"^packed arithmetic native carryless square: (.*)$",
+                                result["deviceArithmetic"]["output"], re.MULTILINE)
+        actualSquare = squareModes[0] if len(squareModes) == 1 else None
+        result["packedClmadSquare"] = (actualSquare == "1") if actualSquare in ("0", "1") else None
+        result["deviceArithmetic"].update(expectedPackedClmadSquare=client.PACKED_CLMAD_SQUARE == "1",
+                                          packedClmadSquare=result["packedClmadSquare"])
+        if squareModes != [client.PACKED_CLMAD_SQUARE]:
+            raise RuntimeError("packed GPU arithmetic CLMAD square identity disagrees with the requested build")
         weightedModes = re.findall(r"^packed arithmetic weighted prefix: (.*)$",
                                    result["deviceArithmetic"]["output"], re.MULTILINE)
         actualWeighted = weightedModes[0] if len(weightedModes) == 1 else None

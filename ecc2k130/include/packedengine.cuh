@@ -186,6 +186,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
+        printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);

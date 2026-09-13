@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0', square='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,16 +47,17 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_CLMAD_SQUARE=square, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared)
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0', square='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
             f'packed native carryless multiply: {clmad}\n'
+            f'packed native carryless square: {square}\n'
             f'packed weighted prefix: {weighted}\n'
             f'packed compact state: {compact}\n'
             f'packed shared sigma: {shared}\n'
@@ -331,10 +332,11 @@ class GeneratedProductBuildTests(unittest.TestCase):
                       tile='0', compact='0', storage_output=None, storage_returncode=0,
                       failed_compact_phase=None, failed_compact_marker=None, build_calls=None,
                       shared='0', shared_probe_output=None, shared_probe_returncode=0,
-                      failed_shared_phase=None, failed_shared_marker=None, block_threads=128):
+                      failed_shared_phase=None, failed_shared_marker=None, block_threads=128,
+                      square='0', square_arithmetic=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact, shared=shared)
+            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact, shared=shared, square=square)
             workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
@@ -344,6 +346,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                         f'packed generated product: {marker}\n'
                         f'packed state tile: {tile}\n'
                         f'packed native carryless multiply: {clmad}\n'
+                        f'packed native carryless square: {square}\n'
                         f'packed weighted prefix: {weighted}\n'
                         f'packed compact state: {compactMarker}\n'
                         f'packed shared sigma: {sharedMarker}\n'
@@ -380,6 +383,7 @@ class GeneratedProductBuildTests(unittest.TestCase):
                                            stdout=text if shared_probe_output is None else shared_probe_output, stderr='')
                 elif command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
+                            + (f'packed arithmetic native carryless square: {square}\n' if square_arithmetic is None else square_arithmetic)
                              + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
                             + (f'packed arithmetic weighted prefix: {weighted}\n' if weighted_arithmetic is None else weighted_arithmetic)
                             + ('PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n' if paired_sigma is None else paired_sigma)
@@ -524,6 +528,62 @@ class StateTileBuildTests(unittest.TestCase):
                 self.assertFalse(check(sample))
                 self.assertEqual(sample['rate'], 0)
                 self.assertFalse(summarizeSamples([good, sample])['valid'])
+
+
+class ClmadSquareBuildTests(unittest.TestCase):
+    def test_environment_guards(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_CLMAD_SQUARE' for t in node.targets))
+        for multiply in ('0', '1'):
+            for value in (None, '0', '1', '', '2', '-1', 'true'):
+                env = dict(PACKED_CLMAD=multiply, os=SimpleNamespace(
+                    environ={} if value is None else {'ECC_PACKED_CLMAD_SQUARE': value}))
+                allowed = value in (None, '0') or (value == '1' and multiply == '1')
+                with self.subTest(multiply=multiply, square=value):
+                    if allowed:
+                        execute(body[index:index + 3], env)
+                        self.assertEqual(env['PACKED_CLMAD_SQUARE'], value or '0')
+                    else:
+                        with self.assertRaises(ValueError):
+                            execute(body[index:index + 3], env)
+
+    def test_cache_rebuild_and_mode_gate(self):
+        env = environment('1', '1', clmad='1')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda c, **k: (commands.append(c) or 0, 'built'))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        env['PACKED_CLMAD_SQUARE'] = '1'
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertIn('PACKED_CLMAD_SQUARE=1', commands[-1])
+        check = function('checkPackedReduction', env)
+        text = raw('1', '1', clmad='1', square='1')
+        marker = 'packed native carryless square: 1\n'
+        for bad in (text.replace(marker, ''), text + marker,
+                    text.replace(marker, 'packed native carryless square: 0\n'),
+                    text.replace(marker, 'packed native carryless square: true\n')):
+            sample = benchResult(['fixture'], 0, bad)
+            self.assertFalse(check(sample))
+            self.assertEqual(sample['rate'], 0)
+        self.assertTrue(check(benchResult(['fixture'], 0, text)))
+
+    def test_audit_checks_candidate_arithmetic_before_timing(self):
+        fixture = GeneratedProductBuildTests()
+        for square in ('0', '1'):
+            result, commands = fixture.audit_fixture('1', clmad='1', square=square)
+            self.assertTrue(result['valid'], result)
+            self.assertIn('PACKED_CLMAD_SQUARE=' + square, commands[0])
+            self.assertEqual(result['packedClmadSquare'], square == '1')
+            marker = 'packed arithmetic native carryless square: ' + square + '\n'
+            for bad in ('', marker * 2, 'packed arithmetic native carryless square: true\n',
+                        'packed arithmetic native carryless square: ' + str(1-int(square)) + '\n'):
+                result, commands = fixture.audit_fixture('1', clmad='1', square=square, square_arithmetic=bad)
+                self.assertFalse(result['valid'])
+                self.assertIn('CLMAD square identity', result['error'])
+                self.assertEqual(len(commands), 1)
 
 
 class ClmadBuildTests(unittest.TestCase):

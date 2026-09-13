@@ -29,6 +29,15 @@
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
 #error "ECC_PACKED_CLMAD requires sm_80 or newer"
 #endif
+#ifndef ECC_PACKED_CLMAD_SQUARE
+#define ECC_PACKED_CLMAD_SQUARE 0
+#endif
+#if ECC_PACKED_CLMAD_SQUARE != 0 && ECC_PACKED_CLMAD_SQUARE != 1
+#error "ECC_PACKED_CLMAD_SQUARE must be 0 or 1"
+#endif
+#if ECC_PACKED_CLMAD_SQUARE && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
@@ -232,6 +241,15 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #endif
 }
 ECC_HD uint64_t spread32p(uint32_t x){
+#if ECC_PACKED_CLMAD_SQUARE && defined(__CUDA_ARCH__)
+ // In F_2[X], (sum x_i X^i)^2 = sum x_i X^(2i). Zero extension
+ // bounds the degree by 62, so the low 64-bit product is the whole square.
+ // Used by both polynomial squaring and the normal-basis square permutation.
+ const uint64_t a = uint64_t(x);
+ uint64_t r;
+ asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"(a));
+ return r;
+#else
  uint64_t r=x;
  r=(r|(r<<16))&0x0000ffff0000ffffull;
  r=(r|(r<<8))&0x00ff00ff00ff00ffull;
@@ -239,6 +257,7 @@ ECC_HD uint64_t spread32p(uint32_t x){
  r=(r|(r<<2))&0x3333333333333333ull;
  r=(r|(r<<1))&0x5555555555555555ull;
  return r;
+#endif
 }
 // Polynomial coefficients square into the even positions of a degree-260
 // product. This is distinct from sqr131's normal-basis permutation.
