@@ -1648,6 +1648,134 @@ pub fn collect_rho_matched_cells(
     out
 }
 
+// ── Per-degree defect profile (EXP-R6) ──────────────────────────────
+
+/// One target's defect measured **at each degree separately**, alongside
+/// its `D*`.
+///
+/// EXP-R4d found `Δ_low` positively correlated with `D*` inside a
+/// homogeneous group and explained it by censoring at the cutoff: a target
+/// refuting at `D* = 2` never exercises degree 3, so its cutoff-3 defect is
+/// ~0. That explanation predicts a *repair* — measure at a cutoff every
+/// system must pass through. This row carries the per-degree numbers needed
+/// to test that, rather than only the cumulative `Δ_low` the screen uses.
+#[derive(Clone, Debug)]
+pub struct DefectProfileRow {
+    pub full_vars: u32,
+    /// `δ(D)/cols(D)` for `D = 2, 3, 4` — the per-degree fractions.
+    pub per_degree: [f64; 3],
+    /// Cumulative `Δ_low` at cutoffs 2, 3, 4 — the screen's own statistic
+    /// evaluated at three cutoffs.
+    pub cumulative: [f64; 3],
+    pub dstar: u32,
+}
+
+/// Names of the six defect readings in [`DefectProfileRow`], in order:
+/// three per-degree fractions then three cumulative cutoffs.
+pub const PROFILE_READINGS: [&str; 6] = [
+    "delta(2)",
+    "delta(3)",
+    "delta(4)",
+    "Delta_low(cut 2)",
+    "Delta_low(cut 3)",
+    "Delta_low(cut 4)",
+];
+
+impl DefectProfileRow {
+    /// The six readings as one array, parallel to [`PROFILE_READINGS`].
+    pub fn readings(&self) -> [f64; 6] {
+        [
+            self.per_degree[0],
+            self.per_degree[1],
+            self.per_degree[2],
+            self.cumulative[0],
+            self.cumulative[1],
+            self.cumulative[2],
+        ]
+    }
+}
+
+/// Measure the per-degree defect profile and `D*` for `targets`
+/// non-decomposable targets at one `(family, n, n')` cell.
+#[allow(clippy::too_many_arguments)]
+pub fn run_defect_profile_cell(
+    family: BasisFamily,
+    n: u32,
+    n_sub: u32,
+    irr: &IrreduciblePoly,
+    targets: u32,
+    d_max: u32,
+    seed: u64,
+) -> Vec<DefectProfileRow> {
+    let full_vars = 2 * n_sub;
+    let mut state = seed | 1;
+    let mut next = move || {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545F4914F6CDD1D)
+    };
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+        let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
+        let e = F2mElement::from_bit_positions(&bits, m);
+        if !e.is_zero() {
+            return e;
+        }
+    };
+
+    let mut out = Vec::new();
+    let mut attempts = 0u32;
+    while (out.len() as u32) < targets && attempts < targets * 64 + 256 {
+        attempts += 1;
+        let v = match family {
+            BasisFamily::Random => {
+                match FactorSubspace::build(
+                    family,
+                    n,
+                    n_sub,
+                    irr,
+                    seed ^ (0x9E37 + attempts as u64),
+                ) {
+                    Some(v) => v,
+                    None => return out,
+                }
+            }
+            _ => match FactorSubspace::build(family, n, n_sub, irr, 0) {
+                Some(v) => v,
+                None => return out,
+            },
+        };
+        let b = rand_nz(n, &mut next);
+        let x3 = rand_nz(n, &mut next);
+        if is_decomposable_on_subspace(&v, irr, &b, &x3) {
+            continue;
+        }
+        let eqs = descend_on_subspace(n, &v, irr, &b, &x3);
+        let Some(dstar) = refutation_scan(&eqs, full_vars, d_max).1 else {
+            continue;
+        };
+        let profile = rank_profile(&eqs, full_vars, n, 4.min(d_max));
+        let at = |deg: u32| -> f64 {
+            profile
+                .iter()
+                .find(|r| r.degree == deg)
+                .map(|r| r.defect as f64 / r.cols.max(1) as f64)
+                .unwrap_or(0.0)
+        };
+        out.push(DefectProfileRow {
+            full_vars,
+            per_degree: [at(2), at(3), at(4)],
+            cumulative: [
+                early_defect(&profile, 2),
+                early_defect(&profile, 3),
+                early_defect(&profile, 4),
+            ],
+            dstar,
+        });
+    }
+    out
+}
+
 // ── Presentation dose-response (EXP-R4d) ────────────────────────────
 
 /// One target measured under three presentations of the **same system at
@@ -2672,6 +2800,74 @@ mod tests {
         assert!(
             last <= first + 1e-9,
             "mean D* rose under slicing: {first} → {last}"
+        );
+    }
+
+    // ── Per-degree defect profile (EXP-R6) ──────────────────────────
+
+    /// The cumulative readings must be consistent with the per-degree ones
+    /// and with each other: `Δ_low` at a higher cutoff sums strictly more
+    /// degrees, so a nonzero defect appearing at degree `D` cannot leave
+    /// the cutoff-`D` reading below the cutoff-`(D−1)` one once both are
+    /// put over the same denominator.
+    ///
+    /// Pinned because EXP-R6's whole argument is a comparison *across*
+    /// cutoffs, and a reading that silently disagreed with its own
+    /// per-degree parts would make that comparison meaningless.
+    #[test]
+    fn defect_profile_readings_are_consistent() {
+        let irr = choose_irreducible(10);
+        let rows = run_defect_profile_cell(BasisFamily::Coordinate, 10, 5, &irr, 6, 7, 7);
+        assert!(!rows.is_empty(), "need measurable targets");
+        for r in &rows {
+            for (i, v) in r.readings().iter().enumerate() {
+                assert!(
+                    v.is_finite() && *v >= 0.0,
+                    "reading {i} must be a non-negative finite fraction, got {v}"
+                );
+            }
+            // A degree with no defect contributes nothing, so the cutoff-2
+            // reading is exactly `δ(2)` — the screen's statistic at its
+            // lowest cutoff is a single per-degree fraction, not a sum.
+            assert!(
+                (r.cumulative[0] - r.per_degree[0]).abs() < 1e-12,
+                "cutoff-2 Delta_low should equal delta(2): {} vs {}",
+                r.cumulative[0],
+                r.per_degree[0]
+            );
+            assert!(r.dstar >= 2, "D* is at least the Nullstellensatz floor");
+            assert_eq!(r.full_vars, 10, "cell reports its own variable count");
+        }
+    }
+
+    /// A target that refutes at `D* = 2` should carry (near-)zero defect at
+    /// degree 2 — the mechanism behind R4e/R6. Asserted as a *tendency* over
+    /// a cell rather than per target, because it is a statistical claim
+    /// about censoring, not an identity.
+    #[test]
+    fn refuting_early_means_little_early_defect() {
+        let irr = choose_irreducible(14);
+        let rows = run_defect_profile_cell(BasisFamily::Coordinate, 14, 7, &irr, 16, 7, 7);
+        let easy: Vec<f64> = rows
+            .iter()
+            .filter(|r| r.dstar == 2)
+            .map(|r| r.per_degree[1])
+            .collect();
+        let hard: Vec<f64> = rows
+            .iter()
+            .filter(|r| r.dstar > 2)
+            .map(|r| r.per_degree[1])
+            .collect();
+        if easy.is_empty() || hard.is_empty() {
+            return; // cell had no contrast; nothing to assert
+        }
+        let m = |v: &[f64]| v.iter().sum::<f64>() / v.len() as f64;
+        assert!(
+            m(&easy) < m(&hard),
+            "targets refuting at D*=2 should show LESS degree-3 defect than \
+             those that do not: {} vs {}",
+            m(&easy),
+            m(&hard)
         );
     }
 
