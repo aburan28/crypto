@@ -43,3 +43,17 @@ The strongest-baseline gate remains open until that adapter is validated.
 Frozen runs remain immutable under research/nagao_relations. Each successor
 records its contract before execution, source hashes, raw outcomes, scoped
 verdict, and scoreboard update. A timeout remains unknown.
+
+## Measured update: solver_04 through solver_06
+
+The hybrid direct quadratic solver cleared all eight eleven-bit development
+slots in both first-relation and complete-enumeration modes under three
+seconds, with exact oracle equality. A matched elementary-S4 circuit and
+transformed-S4 adapter are now implemented and validated. The adapter gap
+above is closed for the tested proper x-subspaces; strongest implementation
+and operation-accounting claims remain open. Elementary S4 wins at smaller
+sizes, so the three-size 20% acceptance gate is not met.
+
+See goal_round_20260913.md for the 288-trial ledger and remaining gates.
+The goal is active, not achieved. This file records the research objective;
+it does not configure an unattended background job.

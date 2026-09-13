@@ -315,3 +315,12 @@ failed their completion-improvement criterion against the relevant control.
 A new proof reduces quadratic support to linear image-space membership
 when its linear coefficient is fixed; the resulting branching solver is
 a proposed next experiment, not a measured result.
+
+## Function-first goal and fresh-target campaign
+
+The [goal](GOAL.md) sets a 20% all-cost improvement criterion at three sizes.
+The [288-trial follow-through](goal_round_20260913.md) records conditioned
+SAT, a direct quadratic function solver, and matched elementary/transformed
+S4 controls. The direct solver clears the finite eleven-bit panel in both
+first and complete-enumeration modes; S4 wins at smaller sizes. The goal
+remains open, with all-cost accounting and broader held-out scaling next.
