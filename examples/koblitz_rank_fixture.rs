@@ -380,7 +380,7 @@ impl CompactPairTable {
                 }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
-                    if self.x_filter_direct_bits {
+                    if self.x_filter_direct_bits && !self.x_filter_exact {
                         self.insert_x_filter_direct(key.0);
                     } else if self.x_filter_insert_hash_reuse {
                         self.insert_x_filter_with_mixed(key.0, mixed);
