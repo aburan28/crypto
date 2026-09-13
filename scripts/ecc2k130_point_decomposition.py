@@ -593,7 +593,7 @@ def log2_add(*terms: float) -> float:
     return hi + math.log2(sum(2.0 ** (t - hi) for t in terms))
 
 
-def cost_cell(m: int, l: float, n: int, split: int = 1):
+def cost_cell(m: int, l: float, n: int, split: int = 1, frobenius: bool = False):
     """One relation-collection-plus-linear-algebra run, in log2 operations.
 
     `split = v` tabulates the sums of every `v`-subset of the base once and
@@ -603,6 +603,13 @@ def cost_cell(m: int, l: float, n: int, split: int = 1):
     "Don't enumerate triples"), with only `O(|F|)` memory.  `v >= 2` buys speed
     with a table, and `v = m` tabulates every `m`-subset sum -- at which point the
     table is a baby-step table and the method is a generic algorithm in costume.
+
+    `frobenius` makes the base a union of `pi`-orbits.  GGMP's collapse needs only
+    `pi(F) = F`, not that `F` be a subspace, so it is available at any `n` and any
+    size: `|F|/n` unknowns, `|F|/n` relations, an `|F|/n`-square matrix.  What it
+    costs is the subspace root-find -- an orbit union has no low-degree membership
+    polynomial -- so the base has to be materialised and the last summand looked
+    up instead, `2^l` stored points for the same `C(|F|, m-1)` per target.
     """
     assert 1 <= split <= m
     log_subsets = log2_comb(l, m)                      # C(|F|, m)
@@ -610,17 +617,19 @@ def cost_cell(m: int, l: float, n: int, split: int = 1):
     log_targets_per_relation = max(0.0, -log_yield)
     log_setup = log2_comb(l, split) if split > 1 else -math.inf
     log_oracle = log2_comb(l, m - split) if m > split else 0.0
+    collapse = math.log2(n) if frobenius else 0.0      # |F| -> |F|/n unknowns
 
-    log_collection = l + log_targets_per_relation + log_oracle
-    log_linalg = math.log2(m) + 2 * l                  # sparse Wiedemann, m per row
-    terms = [log_collection, log_linalg] + ([log_setup] if split > 1 else [])
+    log_collection = (l - collapse) + log_targets_per_relation + log_oracle
+    log_linalg = math.log2(m) + 2 * (l - collapse)     # sparse Wiedemann, m per row
+    store = max(log_setup, l) if frobenius else log_setup
+    terms = [log_collection, log_linalg] + ([store] if store > -math.inf else [])
     return {
-        "m": m, "l": round(l, 2), "split": split,
+        "m": m, "l": round(l, 2), "split": split, "frobenius_stable": frobenius,
         "log2_factor_base": round(l, 2),
         "log2_decompositions_per_target": round(log_yield, 2),
         "log2_targets_per_relation": round(log_targets_per_relation, 2),
         "log2_oracle_per_target": round(log_oracle, 2),
-        "log2_table_entries": None if split == 1 else round(log_setup, 2),
+        "log2_table_entries": None if store == -math.inf else round(store, 2),
         "log2_collection": round(log_collection, 2),
         "log2_linear_algebra": round(log_linalg, 2),
         "log2_total": round(log2_add(*terms), 2),
@@ -835,6 +844,9 @@ def main() -> None:
     for m in range(2, 7):
         add(f"m = {m}, enumerate m-1 and root-find the last (the built oracle)",
             cost_cell(m, saturating_l(m, N131), N131, 1), "derived")
+    for m in range(2, 7):
+        add(f"m = {m}, Frobenius-stable orbit-union base, materialised",
+            cost_cell(m, saturating_l(m, N131), N131, 1, frobenius=True), "derived")
     for m in (2, 3, 4):
         for split in range(2, m + 1):
             add(f"m = {m}, tabulate {split}-subset sums, unbounded memory",
@@ -894,9 +906,15 @@ def main() -> None:
     # ---- 4. the Frobenius saving is not available at n = 131 --------------
     dims = available_subspace_dimensions(N131)
     assert dims == [0, 1, 130, 131], dims
+    orbit_rows = [cost_cell(m, saturating_l(m, N131), N131, 1, frobenius=True)
+                  for m in range(2, 9)]
     frobenius = {
-        "statement": "GGMP's n-fold relation saving and n^2-fold linear-algebra saving "
-                     "need a Frobenius-stable factor base; at n = 131 none of usable size exists",
+        "statement": "no Frobenius-stable *subspace* of usable dimension exists at n = 131, "
+                     "so the subspace root-finding oracle and the GGMP collapse cannot be had "
+                     "at once; the collapse alone needs only pi(F) = F and is available from "
+                     "any union of orbits, at the price of materialising the base",
+        "closed_form_with_collapse": "collection = m 2^n / n",
+        "orbit_union_rows": orbit_rows,
         "cyclotomic_coset_sizes_mod_131": cyclotomic_coset_sizes(N131),
         "available_invariant_dimensions": dims,
         "ord_131_of_2": mult_order(2, N131),
@@ -904,9 +922,11 @@ def main() -> None:
         "saving_forgone_relations": N131,
         "saving_forgone_linear_algebra": N131 ** 2,
         "log2_saving_forgone_linear_algebra": round(2 * math.log2(N131), 2),
-        "note": "even granting both savings for free, m 2^131 / 131^2 = 2^"
-                f"{round(math.log2(3) + 131 - 2 * math.log2(131), 2)} is still 2^"
-                f"{round(math.log2(3) + 131 - 2 * math.log2(131) - log2_rho, 2)} x rho",
+        "note": "the relation collapse alone gives m 2^131 / 131 = 2^"
+                f"{round(math.log2(3) + 131 - math.log2(131), 2)}, still 2^"
+                f"{round(math.log2(3) + 131 - math.log2(131) - log2_rho, 2)} x rho; granting "
+                "the linear-algebra saving on top changes nothing, because collection "
+                "dominates at every m",
     }
 
     best_row = min(rows, key=lambda x: x["log2_total"])
@@ -923,19 +943,25 @@ def main() -> None:
         "cost": cost,
         "frobenius_unavailable": frobenius,
         "headline": {
-            "cheapest_practical_variant_log2": min(
+            "cheapest_implicit_base_variant_log2": min(
                 x["log2_total"] for x in rows if x["log2_table_entries"] is None),
-            "cheapest_practical_ratio_log2": round(min(
+            "cheapest_implicit_base_ratio_log2": round(min(
                 x["log2_ratio_to_rho"] for x in rows if x["log2_table_entries"] is None), 2),
+            "cheapest_orbit_union_log2": min(
+                x["log2_total"] for x in rows if x.get("frobenius_stable")),
+            "cheapest_orbit_union_ratio_log2": round(min(
+                x["log2_ratio_to_rho"] for x in rows if x.get("frobenius_stable")), 2),
             "cheapest_any_memory_log2": best_row["log2_total"],
             "cheapest_any_memory_ratio_log2": best_row["log2_ratio_to_rho"],
             "cheapest_any_memory_entries_log2": best_row["log2_table_entries"],
         },
     }
     OUT.write_text(json.dumps(report, indent=2) + "\n")
-    print(f"\n  rho reference 2^{log2_rho:.4f}   cheapest memory-free variant "
-          f"2^{report['headline']['cheapest_practical_variant_log2']:.2f} "
-          f"= 2^{report['headline']['cheapest_practical_ratio_log2']:.2f} x rho")
+    print(f"\n  rho reference 2^{log2_rho:.4f}   cheapest implicit-base variant "
+          f"2^{report['headline']['cheapest_implicit_base_variant_log2']:.2f} "
+          f"= 2^{report['headline']['cheapest_implicit_base_ratio_log2']:.2f} x rho; "
+          f"cheapest orbit-union 2^{report['headline']['cheapest_orbit_union_log2']:.2f} "
+          f"= 2^{report['headline']['cheapest_orbit_union_ratio_log2']:.2f} x rho")
     print(f"  wrote {OUT.relative_to(REPO)}")
 
 

@@ -699,13 +699,34 @@
         m&thinsp;=&thinsp;2,&thinsp;3,&thinsp;4 witnesses with S<sub>4</sub>&thinsp;=&thinsp;0 are in
         the artefact. Finding one is what costs: relations &times; targets &times; oracle
         = m&thinsp;&middot;&thinsp;2<sup>131</sup> <em>independently of the factor-base dimension</em>,
-        so the best memory-free variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
+        so the best implicit-base variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
         table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries plain BSGS on the
         same memory is cheaper than the best decomposition cell, and rho is cheaper than both while
         storing nothing. Stated as a demand on the oracle: it would have to beat exhaustive search
         over its own candidate set by 2<sup>70.19&thinsp;+&thinsp;log&#8322;&thinsp;m</sup>, a number
         that does not move with m or with l because it <em>is</em> the product law
         (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
+      <p><strong>Accounting correction: the Frobenius collapse does not need a subspace.</strong>
+        The classification that leaves only dimensions 0,&thinsp;1,&thinsp;130,&thinsp;131 at n = 131
+        classifies invariant <em>subspaces</em>; GGMP's collapse asks only for &pi;(F) = F, and since
+        131 is prime every abscissa outside F<sub>2</sub> has an orbit of exactly 131, so a union of
+        orbits is Frobenius-stable at any size. The product law becomes m&thinsp;&middot;&thinsp;2<sup>n</sup>/n
+        and the bottom of the family moves from 2<sup>132.58</sup> to 2<sup>124.99</sup>,
+        2<sup>+64.18</sup>&times; rho &mdash; paid for by materialising the base (2<sup>44.5</sup>
+        points at m = 3, 2<sup>23.4</sup> at m = 6), because an orbit union has no low-degree
+        membership polynomial. What 131 being prime forbids is having the collapse <em>and</em> the
+        implicit base, not the collapse itself. Seven bits against a gap of sixty-four; class
+        <span class="chip">accounting</span>, not a gain
+        (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+      <p><strong>Deciding is not localising, and the difference is the whole margin.</strong>
+        A hypothetical decomposition oracle that answers yes/no for free on the <em>whole</em> base
+        still bottoms out at 2<sup>73.29</sup>, above the 2<sup>60.81</sup> reference at every m. One
+        that answers for arbitrary sub-bases &mdash; so a witness falls out of O(m&thinsp;log&thinsp;|F|)
+        free queries by bisection &mdash; reaches 2<sup>35.61</sup> and would break the curve from
+        m = 4. The gap runs from 2<sup>0.20</sup> at m = 2 to 2<sup>37.68</sup> at m = 8, and no
+        published hardness claim about decomposition oracles distinguishes the two. It is the first
+        question to put to any proposed oracle
+        (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>

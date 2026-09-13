@@ -43,7 +43,10 @@ how this route gets over-sold.  Concretely:
   operations for the entire attack — `2^71.77` times the rho reference at its
   best `m` — *independently of `l`*, because a larger factor base needs
   proportionally fewer targets and makes each target proportionally dearer
-  (§5).
+  (§5).  Making the base a union of Frobenius orbits divides that by `n`, at the
+  price of materialising it: `2^125.55`, `2^64.74×` rho, `2^44.5` stored points
+  (§6).  Both are hopeless; the second is the honest floor of the family and the
+  first version of this note quoted only the first (§6.1).
 - Stated as a demand on the oracle rather than as a cost: the decomposition
   oracle would have to beat exhaustive search over **its own candidate set**
   by a factor `2^{70.19 + log₂ m}`, and that number is the same for every `m`
@@ -112,6 +115,10 @@ the curve enumerated and the count checked against the Koblitz recurrence):
   from the model in §5.1, whose ingredients (`|F| ≈ 2^l`, yield `C(|F|,m)/#E`,
   oracle `C(|F|, m−split)`, Wiedemann `m·2^{2l}`) are each either measured
   above or standard.
+
+The follow-on experiments this note's open ends turn into, with their boundaries
+derived in advance, are in
+[`RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`](RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md).
 
 ## 2. Decompositions exist — the yield law
 
@@ -235,7 +242,7 @@ The model, with every phase priced (`AGENTS.md` §5):
 
 | phase | cost |
 |---|---|
-| relations needed | `\|F\| = 2^l` — no Frobenius orbit collapse is available (§6) |
+| relations needed | `\|F\| = 2^l` for a subspace base; `\|F\|/n` if the base is Frobenius-stable (§6) |
 | targets per relation | `2^n / C(\|F\|, m)` |
 | oracle per target | `C(\|F\|, m−1)`: walk the sub-tuples, root-find the last summand inside `V` |
 | linear algebra | `m·2^{2l}`, sparse block Wiedemann on an `\|F\| × \|F\|` matrix mod `r` |
@@ -252,8 +259,9 @@ and no search over `F` at all.  It is `926×` faster than enumeration at
 ```
 
 **independent of `l`** — because `C(|F|,m−1)/C(|F|,m) ≈ m/|F|`, and the `|F|`
-cancels the factor base.  Measured as flatness across the usable range, at
-`m = 3`:
+cancels the factor base.  A Frobenius-stable base collapses the leading `2^l`
+to `2^l/n` and makes it `m·2^n/n`; nothing else in the product moves.  Measured
+as flatness across the usable range, at `m = 3`:
 
 | `dim V` | 12 | 20 | 28 | 36 | 44 | 52 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -282,6 +290,10 @@ memory-free rows and the cost-minimising one for the rest.
 | `m = 4`, built oracle | 33.90 | — | 133.00 | `2^+72.19` | derived |
 | `m = 5`, built oracle | 27.58 | — | 133.32 | `2^+72.51` | derived |
 | `m = 6`, built oracle | 23.42 | — | 133.58 | `2^+72.77` | derived |
+| `m = 2`, orbit-union base, materialised | 66.00 | `2^66.00` | 124.99 | `2^+64.18` | derived |
+| **`m = 3`, orbit-union base, materialised** | 44.53 | `2^44.53` | **125.55** | **`2^+64.74`** | derived |
+| `m = 4`, orbit-union base, materialised | 33.90 | `2^33.90` | 125.97 | `2^+65.16` | derived |
+| `m = 6`, orbit-union base, materialised | 23.42 | `2^23.42` | 126.55 | `2^+65.74` | derived |
 | `m = 2`, pair table, unbounded memory | 43.25 | `2^85.50` | 89.36 | `2^+28.55` | derived |
 | `m = 3`, pair table, unbounded memory | 43.50 | `2^86.00` | 90.58 | `2^+29.77` | derived |
 | `m = 4`, triple table, unbounded memory | 27.50 | `2^79.92` | 81.29 | `2^+20.48` | derived |
@@ -291,10 +303,13 @@ memory-free rows and the cost-minimising one for the rest.
 | best cell, `≤ 2^60` entries | 9.25 | `2^58.70` | 81.55 | `2^+20.74` | generic in costume |
 | best cell, `≤ 2^70` entries | 10.50 | `2^68.70` | 72.88 | `2^+12.07` | generic in costume |
 
-The best memory-free cell is `2^132.58`, `2^71.77×` rho.  That is within a bit
-and a half of `2^70.19×`, the cheapest cell in the extension-field note's large
-horn — which is the same fact from the other side, and the reason it is worth
-saying plainly:
+The best cell with an *implicit* base — one defined by a polynomial, never
+stored — is `2^132.58`, `2^71.77×` rho.  That is within a bit and a half of
+`2^70.19×`, the cheapest cell in the extension-field note's large horn, which is
+the same fact from the other side.  Storing the base instead buys the Frobenius
+collapse and takes it to `2^125.55` at `m = 3`, `2^64.74×` rho, on `2^44.5`
+points — about 300 TB, so large but not the `2^86` of the pair-table rows.  Both
+say the same thing:
 
 > **Index calculus is priced by the ambient field; rho is priced by the
 > subgroup.**  ECC2K-130 has `r ≈ 2^129` filling a `2^131` field, so there is
@@ -359,6 +374,11 @@ Choosing a different `m`, a different `l`, a bigger factor base or a smaller
 one moves work between the columns and never changes that number.  **Every
 tuning knob on this attack is inside the identity, not outside it.**
 
+The one knob that is *not* inside it is the one §6 adds: a Frobenius-stable base
+divides the total by `n`, so the required speed-up becomes
+`2^{70.19 + log₂ m − log₂ n}` — seven bits easier, and the only lever in this
+note that moves the exponent at all rather than moving work between columns.
+
 ### 5.4 The two routes that might have moved it are already measured
 
 Both are in `RESEARCH_SEMAEV_DECOMPOSITION.md`, and both were measured
@@ -381,35 +401,77 @@ So the two candidates for the `2^{−72}` are both measured, and both go the
 wrong way.  What is *not* ruled out is an oracle that is not of the
 fix-some-summands form at all; this note prices the family, not the universe.
 
-## 6. The Frobenius saving is not available at `n = 131`
+## 6. The Frobenius collapse, and what it actually costs at `n = 131`
 
 GGMP's headline is that a **Frobenius-stable** factor base collapses `|F|`
 unknowns into `|F|/n` orbit unknowns: `≈ n` off relation collection and `≈ n²`
-off the linear algebra.  None of that is available here.
+off the linear algebra.  The condition for that is `π(F) = F` and nothing more.
 
-A Frobenius-stable `F_2`-subspace of `F_2^n` is a binary cyclic code of length
-`n`, so its dimension is a subset sum of the 2-cyclotomic coset sizes mod `n`.
-At `n = 131`, `2` is a primitive root, `ord_131(2) = 130`, there are exactly
-two cosets of sizes `1` and `130`, and therefore
-
-```text
-    available invariant dimensions at n = 131:   0, 1, 130, 131
-```
-
-— so the only invariant factor bases are `E(F_2)`, four points, and one of
-size `2^130`: nothing in between.  This is the
-same dichotomy `RESEARCH_ECC2K130_EXTENSION.md` proves survives every base
-change, and the census in `RESEARCH_QUASI_SUBFIELD.md` finds no non-subfield
-quasi-subfield polynomial at `n = 131` either.
-
-It would not have been enough in any case.  Grant both savings for free on top
-of the memory-free row:
+What is unavailable at `n = 131` is narrower than the saving: it is a
+Frobenius-stable **subspace**.  A Frobenius-stable `F_2`-subspace of `F_2^n` is
+a binary cyclic code of length `n`, so its dimension is a subset sum of the
+2-cyclotomic coset sizes mod `n`.  At `n = 131`, `2` is a primitive root,
+`ord_131(2) = 130`, there are exactly two cosets of sizes `1` and `130`, and
+therefore
 
 ```text
-    m · 2^131 / 131²  =  2^{118.52}  =  2^{57.71} × rho .
+    available invariant subspace dimensions at n = 131:   0, 1, 130, 131
 ```
 
-A factor of `n²` — `2^14.07` — against a gap of `2^71.77`.
+— so the only invariant factor bases *of subspace shape* are `E(F_2)`, four
+points, and one of size `2^130`: nothing in between.  This is the same dichotomy
+`RESEARCH_ECC2K130_EXTENSION.md` proves survives every base change, and the
+census in `RESEARCH_QUASI_SUBFIELD.md` finds no non-subfield quasi-subfield
+polynomial at `n = 131` either.
+
+**Frobenius-stable *sets*, on the other hand, are free.**  `n = 131` is prime,
+so every `x ∉ F_2` has a `π`-orbit of size exactly `131`; a union of `k` orbits
+is `π`-stable and has `131k` abscissae, for any `k`.  So the collapse is
+available at ECC2K-130 after all, at any base size, and the product law becomes
+
+```text
+    (2^l / n) · 2^n/C(|F|,m) · C(|F|,m−1)  =  m · 2^n / n .
+```
+
+What it costs is the other half of §5.1's oracle row.  An orbit union has no
+low-degree membership polynomial, so `L_V` and the subspace root-find are gone
+and the last summand has to be looked up in a **materialised** base instead —
+`2^l` stored points.  The per-target cost is unchanged (`C(|F|, m−1)`
+enumerations, an `O(1)` probe each instead of an `O(l)` gcd), so the trade is
+exactly `n` operations for `2^l` words of storage:
+
+| `m` | `dim`-equivalent base | stored points | `log₂` ops | ratio to rho |
+|---:|---:|---:|---:|---:|
+| 2 | 66.00 | `2^66.00` | 124.99 | `2^+64.18` |
+| 3 | 44.53 | `2^44.53` | 125.55 | `2^+64.74` |
+| 4 | 33.90 | `2^33.90` | 125.97 | `2^+65.16` |
+| 6 | 23.42 | `2^23.42` | 126.55 | `2^+65.74` |
+
+At `m = 6` the base is 90 MB and the attack still costs `2^126.55`.  The
+linear-algebra saving `n²` is real too and changes nothing, because collection
+dominates at every `m`.
+
+So the choice at ECC2K-130 is: an implicit base with a cheap algebraic oracle
+and no collapse, at `m·2^131`; or a stored base with the collapse and no
+algebra, at `m·2^131/n`.  **What `131` being prime forbids is having both**, and
+the difference between them is seven bits against a gap of sixty-four.
+
+### 6.1 An accounting correction
+
+The first version of this note priced only the first of those, wrote "no
+Frobenius orbit collapse is available" into §5.1, and quoted `2^132.58`,
+`2^71.77×` rho, as the bottom of the family.  That was wrong in a specific way:
+the classification it leaned on is a classification of invariant *subspaces*,
+and GGMP's collapse never asked for a subspace.  The corrected bottom of the
+family is `2^124.99`, `2^64.18×` rho.
+
+By §3 of `AGENTS.md` this is **accounting**: the numbers changed, no algorithm
+did, and the gain is not claimed as a result.  It was found while designing the
+follow-on experiments rather than by measuring anything, which is the argument
+for designing them.  The verdict is unchanged — seven bits off `2^71.77` is
+still `2^64` times rho — and the identity in §5.3 is unchanged with it, since
+the required oracle speed-up becomes `2^{70.19 + log₂ m − log₂ n}` and is still
+the product law read backwards.
 
 ## 7. What this does not settle
 
@@ -436,6 +498,12 @@ A factor of `n²` — `2^14.07` — against a gap of `2^71.77`.
 - **The `2^131` is an upper bound on this family's cost and a statement about
   today's oracles**, not a security proof.  §5.3 says exactly what would
   falsify it, and the number is written down.
+- **The orbit-union rows are derived and unrun.**  §6 asserts that a union of
+  `π`-orbits delivers the full `n`-fold collapse in a real pipeline; that is
+  GGMP's own condition and it is not measured here.  It is E6 of
+  `RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`, and the thing most likely to be
+  wrong about it is relation *independence*: `|F|/n` relations have to be
+  independent over the orbit unknowns, and nothing above checks that.
 
 ## References
 

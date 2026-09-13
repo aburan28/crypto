@@ -1,0 +1,832 @@
+{
+  "schema": "ecc2k130_decomposition_targets/v1",
+  "purpose": "pre-registered boundaries for the follow-on experiments to RESEARCH_ECC2K130_DECOMPOSITION.md",
+  "unit": "log2 group operations",
+  "log2_rho_reference": 60.809,
+  "E1_scale_model_ladder": {
+    "question": "does the product law hold on curves structurally identical to ECC2K-130 -- prime n, 2 primitive, no invariant subspace?",
+    "primary_metric": "Lambda = total operations / 2^n, predicted flat at m",
+    "secondary_metric": "log2 S = log2(total) - log2(subgroup)/2, predicted slope 1/2 against n",
+    "falsifier": "a least-squares slope of log2(total) against n below 0.95, or Lambda below 0.5*m, on four or more rungs",
+    "rungs": [
+      {
+        "n": 11,
+        "curve_order": "2116",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 4.52,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          10,
+          11
+        ],
+        "saturating_l_m3": 4.53,
+        "predicted_log2_total_m3": 12.92,
+        "predicted_lambda_m3": 3.784,
+        "predicted_log2_S_m3": 10.66,
+        "predicted_log2_total_orbit_base": 9.22,
+        "predicted_orbit_saving_log2": 3.7,
+        "end_to_end_feasible": true
+      },
+      {
+        "n": 13,
+        "curve_order": "8012",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 10.97,
+        "subgroup_is_faithful": true,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          12,
+          13
+        ],
+        "saturating_l_m3": 5.19,
+        "predicted_log2_total_m3": 14.8,
+        "predicted_lambda_m3": 3.482,
+        "predicted_log2_S_m3": 9.32,
+        "predicted_log2_total_orbit_base": 10.93,
+        "predicted_orbit_saving_log2": 3.87,
+        "end_to_end_feasible": true
+      },
+      {
+        "n": 19,
+        "curve_order": "523492",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 17.0,
+        "subgroup_is_faithful": true,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          18,
+          19
+        ],
+        "saturating_l_m3": 7.19,
+        "predicted_log2_total_m3": 20.64,
+        "predicted_lambda_m3": 3.117,
+        "predicted_log2_S_m3": 12.14,
+        "predicted_log2_total_orbit_base": 16.34,
+        "predicted_orbit_saving_log2": 4.3,
+        "end_to_end_feasible": true
+      },
+      {
+        "n": 29,
+        "curve_order": "536830604",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 13.97,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          28,
+          29
+        ],
+        "saturating_l_m3": 10.53,
+        "predicted_log2_total_m3": 30.59,
+        "predicted_lambda_m3": 3.01,
+        "predicted_log2_S_m3": 23.6,
+        "predicted_log2_total_orbit_base": 25.73,
+        "predicted_orbit_saving_log2": 4.86,
+        "end_to_end_feasible": true
+      },
+      {
+        "n": 37,
+        "curve_order": "137439487532",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 27.78,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          36,
+          37
+        ],
+        "saturating_l_m3": 13.19,
+        "predicted_log2_total_m3": 38.59,
+        "predicted_lambda_m3": 3.01,
+        "predicted_log2_S_m3": 24.7,
+        "predicted_log2_total_orbit_base": 33.38,
+        "predicted_orbit_saving_log2": 5.21,
+        "end_to_end_feasible": true
+      },
+      {
+        "n": 53,
+        "curve_order": "9007199311360364",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 44.26,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          52,
+          53
+        ],
+        "saturating_l_m3": 18.53,
+        "predicted_log2_total_m3": 54.58,
+        "predicted_lambda_m3": 2.99,
+        "predicted_log2_S_m3": 32.45,
+        "predicted_log2_total_orbit_base": 48.86,
+        "predicted_orbit_saving_log2": 5.72,
+        "end_to_end_feasible": false
+      },
+      {
+        "n": 59,
+        "curve_order": "576460751359875076",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 57.0,
+        "subgroup_is_faithful": true,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          58,
+          59
+        ],
+        "saturating_l_m3": 20.53,
+        "predicted_log2_total_m3": 60.58,
+        "predicted_lambda_m3": 2.99,
+        "predicted_log2_S_m3": 32.08,
+        "predicted_log2_total_orbit_base": 54.7,
+        "predicted_orbit_saving_log2": 5.88,
+        "end_to_end_feasible": false
+      },
+      {
+        "n": 61,
+        "curve_order": "2305843009055095052",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 47.21,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          60,
+          61
+        ],
+        "saturating_l_m3": 21.19,
+        "predicted_log2_total_m3": 62.58,
+        "predicted_lambda_m3": 2.99,
+        "predicted_log2_S_m3": 38.97,
+        "predicted_log2_total_orbit_base": 56.65,
+        "predicted_orbit_saving_log2": 5.93,
+        "end_to_end_feasible": false
+      },
+      {
+        "n": 67,
+        "curve_order": "147573952609023177892",
+        "cofactor": 4,
+        "log2_largest_prime_subgroup": 26.19,
+        "subgroup_is_faithful": false,
+        "available_invariant_dimensions": [
+          0,
+          1,
+          66,
+          67
+        ],
+        "saturating_l_m3": 23.19,
+        "predicted_log2_total_m3": 68.58,
+        "predicted_lambda_m3": 2.99,
+        "predicted_log2_S_m3": 55.48,
+        "predicted_log2_total_orbit_base": 62.52,
+        "predicted_orbit_saving_log2": 6.06,
+        "end_to_end_feasible": false
+      }
+    ],
+    "end_to_end_rungs": [
+      11,
+      13,
+      19,
+      29,
+      37
+    ],
+    "composed_rungs": [
+      53,
+      59,
+      61,
+      67
+    ],
+    "faithful_subgroup_rungs": [
+      13,
+      19,
+      59
+    ]
+  },
+  "E2_dimension_flatness": {
+    "question": "is the total really flat in the factor-base dimension?",
+    "cells": [
+      {
+        "m": 3,
+        "l": 8,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 8,
+        "log2_decompositions_per_target": -37.58,
+        "log2_targets_per_relation": 37.58,
+        "log2_oracle_per_target": 15.0,
+        "log2_table_entries": null,
+        "log2_collection": 60.58,
+        "log2_linear_algebra": 17.58,
+        "log2_total": 60.58
+      },
+      {
+        "m": 3,
+        "l": 12,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 12,
+        "log2_decompositions_per_target": -25.58,
+        "log2_targets_per_relation": 25.58,
+        "log2_oracle_per_target": 23.0,
+        "log2_table_entries": null,
+        "log2_collection": 60.58,
+        "log2_linear_algebra": 25.58,
+        "log2_total": 60.58
+      },
+      {
+        "m": 3,
+        "l": 16,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 16,
+        "log2_decompositions_per_target": -13.58,
+        "log2_targets_per_relation": 13.58,
+        "log2_oracle_per_target": 31.0,
+        "log2_table_entries": null,
+        "log2_collection": 60.58,
+        "log2_linear_algebra": 33.58,
+        "log2_total": 60.58
+      },
+      {
+        "m": 3,
+        "l": 20,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 20,
+        "log2_decompositions_per_target": -1.58,
+        "log2_targets_per_relation": 1.58,
+        "log2_oracle_per_target": 39.0,
+        "log2_table_entries": null,
+        "log2_collection": 60.58,
+        "log2_linear_algebra": 41.58,
+        "log2_total": 60.58
+      },
+      {
+        "m": 3,
+        "l": 24,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 24,
+        "log2_decompositions_per_target": 10.42,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 47.0,
+        "log2_table_entries": null,
+        "log2_collection": 71.0,
+        "log2_linear_algebra": 49.58,
+        "log2_total": 71.0
+      },
+      {
+        "m": 3,
+        "l": 28,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 28,
+        "log2_decompositions_per_target": 22.42,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 55.0,
+        "log2_table_entries": null,
+        "log2_collection": 83.0,
+        "log2_linear_algebra": 57.58,
+        "log2_total": 83.0
+      }
+    ],
+    "saturating_l": 20.53,
+    "falsifier": "any dimension whose measured total is below half the flat line"
+  },
+  "E3_detector_versus_localisation": {
+    "question": "how much of the difficulty is deciding, and how much is localising the witness?",
+    "floors": [
+      {
+        "m": 2,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 43.35,
+        "log2_floor": 89.25,
+        "log2_targets": 88.65,
+        "log2_linear_algebra": 87.7
+      },
+      {
+        "m": 2,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 45.7,
+        "log2_floor": 79.87,
+        "log2_targets": 79.27,
+        "log2_linear_algebra": 78.33
+      },
+      {
+        "m": 2,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 43.15,
+        "log2_floor": 89.45,
+        "log2_targets": 88.85,
+        "log2_linear_algebra": 87.3
+      },
+      {
+        "m": 2,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 43.65,
+        "log2_floor": 81.89,
+        "log2_targets": 81.32,
+        "log2_linear_algebra": 74.23
+      },
+      {
+        "m": 3,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 33.0,
+        "log2_floor": 68.58,
+        "log2_targets": 67.58,
+        "log2_linear_algebra": 67.58
+      },
+      {
+        "m": 3,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 34.75,
+        "log2_floor": 58.03,
+        "log2_targets": 57.05,
+        "log2_linear_algebra": 57.02
+      },
+      {
+        "m": 3,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 26.8,
+        "log2_floor": 80.72,
+        "log2_targets": 79.98,
+        "log2_linear_algebra": 55.18
+      },
+      {
+        "m": 3,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 26.8,
+        "log2_floor": 73.69,
+        "log2_targets": 72.95,
+        "log2_linear_algebra": 41.12
+      },
+      {
+        "m": 4,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 26.85,
+        "log2_floor": 56.41,
+        "log2_targets": 55.03,
+        "log2_linear_algebra": 55.7
+      },
+      {
+        "m": 4,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 28.25,
+        "log2_floor": 45.15,
+        "log2_targets": 43.8,
+        "log2_linear_algebra": 44.43
+      },
+      {
+        "m": 4,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 19.7,
+        "log2_floor": 77.36,
+        "log2_targets": 76.48,
+        "log2_linear_algebra": 41.4
+      },
+      {
+        "m": 4,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 19.7,
+        "log2_floor": 70.32,
+        "log2_targets": 69.45,
+        "log2_linear_algebra": 27.33
+      },
+      {
+        "m": 5,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 22.75,
+        "log2_floor": 48.44,
+        "log2_targets": 46.91,
+        "log2_linear_algebra": 47.82
+      },
+      {
+        "m": 5,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 23.95,
+        "log2_floor": 36.71,
+        "log2_targets": 35.07,
+        "log2_linear_algebra": 36.16
+      },
+      {
+        "m": 5,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 15.8,
+        "log2_floor": 75.57,
+        "log2_targets": 74.71,
+        "log2_linear_algebra": 33.92
+      },
+      {
+        "m": 5,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 15.8,
+        "log2_floor": 68.53,
+        "log2_targets": 67.67,
+        "log2_linear_algebra": 19.86
+      },
+      {
+        "m": 6,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 19.9,
+        "log2_floor": 42.85,
+        "log2_targets": 40.99,
+        "log2_linear_algebra": 42.38
+      },
+      {
+        "m": 6,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 20.9,
+        "log2_floor": 30.79,
+        "log2_targets": 28.96,
+        "log2_linear_algebra": 30.32
+      },
+      {
+        "m": 6,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 13.4,
+        "log2_floor": 74.49,
+        "log2_targets": 73.49,
+        "log2_linear_algebra": 29.38
+      },
+      {
+        "m": 6,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 13.4,
+        "log2_floor": 67.46,
+        "log2_targets": 66.46,
+        "log2_linear_algebra": 15.32
+      },
+      {
+        "m": 7,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 17.75,
+        "log2_floor": 38.74,
+        "log2_targets": 36.8,
+        "log2_linear_algebra": 38.31
+      },
+      {
+        "m": 7,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 18.65,
+        "log2_floor": 26.43,
+        "log2_targets": 24.37,
+        "log2_linear_algebra": 26.04
+      },
+      {
+        "m": 7,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 11.75,
+        "log2_floor": 73.78,
+        "log2_targets": 72.8,
+        "log2_linear_algebra": 26.31
+      },
+      {
+        "m": 7,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 11.75,
+        "log2_floor": 66.75,
+        "log2_targets": 65.77,
+        "log2_linear_algebra": 12.24
+      },
+      {
+        "m": 8,
+        "localising": true,
+        "frobenius_stable": false,
+        "l_star": 16.1,
+        "log2_floor": 35.61,
+        "log2_targets": 33.6,
+        "log2_linear_algebra": 35.2
+      },
+      {
+        "m": 8,
+        "localising": true,
+        "frobenius_stable": true,
+        "l_star": 16.9,
+        "log2_floor": 23.1,
+        "log2_targets": 20.97,
+        "log2_linear_algebra": 22.73
+      },
+      {
+        "m": 8,
+        "localising": false,
+        "frobenius_stable": false,
+        "l_star": 10.55,
+        "log2_floor": 73.29,
+        "log2_targets": 72.45,
+        "log2_linear_algebra": 24.1
+      },
+      {
+        "m": 8,
+        "localising": false,
+        "frobenius_stable": true,
+        "l_star": 10.55,
+        "log2_floor": 66.25,
+        "log2_targets": 65.42,
+        "log2_linear_algebra": 10.03
+      }
+    ],
+    "gaps": [
+      {
+        "m": 2,
+        "log2_localising_floor": 89.25,
+        "log2_detector_only_floor": 89.45,
+        "log2_gap": 0.2,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": false
+      },
+      {
+        "m": 3,
+        "log2_localising_floor": 68.58,
+        "log2_detector_only_floor": 80.72,
+        "log2_gap": 12.14,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": false
+      },
+      {
+        "m": 4,
+        "log2_localising_floor": 56.41,
+        "log2_detector_only_floor": 77.36,
+        "log2_gap": 20.95,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": true
+      },
+      {
+        "m": 5,
+        "log2_localising_floor": 48.44,
+        "log2_detector_only_floor": 75.57,
+        "log2_gap": 27.13,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": true
+      },
+      {
+        "m": 6,
+        "log2_localising_floor": 42.85,
+        "log2_detector_only_floor": 74.49,
+        "log2_gap": 31.64,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": true
+      },
+      {
+        "m": 7,
+        "log2_localising_floor": 38.74,
+        "log2_detector_only_floor": 73.78,
+        "log2_gap": 35.04,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": true
+      },
+      {
+        "m": 8,
+        "log2_localising_floor": 35.61,
+        "log2_detector_only_floor": 73.29,
+        "log2_gap": 37.68,
+        "detector_only_beats_rho": false,
+        "localising_beats_rho": true
+      }
+    ],
+    "min_detector_only_floor": 73.29,
+    "min_localising_floor": 35.61,
+    "falsifier": "a real oracle whose sub-base query costs less than the same query on the full base by more than the sub-base ratio"
+  },
+  "E4_large_primes": {
+    "question": "do large primes move the product law, or only relabel it?",
+    "unbounded_memory": [
+      {
+        "m": 2,
+        "l_star": 4.0,
+        "large_prime_dim": 128.0,
+        "log2_partial_relation_store": 66.5,
+        "log2_collection": 70.5,
+        "log2_linear_algebra": 9.0,
+        "log2_total": 70.5,
+        "log2_memory_cap": null
+      },
+      {
+        "m": 3,
+        "l_star": 4.0,
+        "large_prime_dim": 125.55,
+        "log2_partial_relation_store": 65.27,
+        "log2_collection": 72.31,
+        "log2_linear_algebra": 9.58,
+        "log2_total": 72.31,
+        "log2_memory_cap": null
+      },
+      {
+        "m": 4,
+        "l_star": 4.0,
+        "large_prime_dim": 123.55,
+        "log2_partial_relation_store": 64.27,
+        "log2_collection": 73.73,
+        "log2_linear_algebra": 10.0,
+        "log2_total": 73.73,
+        "log2_memory_cap": null
+      }
+    ],
+    "memory_capped": [
+      {
+        "m": 3,
+        "l_star": 4.0,
+        "large_prime_dim": 55.0,
+        "log2_partial_relation_store": 30.0,
+        "log2_collection": 107.58,
+        "log2_linear_algebra": 9.58,
+        "log2_total": 107.58,
+        "log2_memory_cap": 30
+      },
+      {
+        "m": 3,
+        "l_star": 4.0,
+        "large_prime_dim": 75.0,
+        "log2_partial_relation_store": 40.0,
+        "log2_collection": 97.58,
+        "log2_linear_algebra": 9.58,
+        "log2_total": 97.58,
+        "log2_memory_cap": 40
+      },
+      {
+        "m": 3,
+        "l_star": 4.0,
+        "large_prime_dim": 95.0,
+        "log2_partial_relation_store": 50.0,
+        "log2_collection": 87.58,
+        "log2_linear_algebra": 9.58,
+        "log2_total": 87.58,
+        "log2_memory_cap": 50
+      },
+      {
+        "m": 3,
+        "l_star": 4.0,
+        "large_prime_dim": 115.0,
+        "log2_partial_relation_store": 60.0,
+        "log2_collection": 77.58,
+        "log2_linear_algebra": 9.58,
+        "log2_total": 77.58,
+        "log2_memory_cap": 60
+      }
+    ],
+    "generic_line": [
+      {
+        "log2_table_entries": 30,
+        "log2_bsgs": 99.0
+      },
+      {
+        "log2_table_entries": 40,
+        "log2_bsgs": 89.0
+      },
+      {
+        "log2_table_entries": 50,
+        "log2_bsgs": 79.0
+      },
+      {
+        "log2_table_entries": 60,
+        "log2_bsgs": 69.0
+      }
+    ],
+    "falsifier": "a guarded cell below the BSGS line at the same memory",
+    "note": "the model is crude on purpose -- collision bookkeeping and relation independence are not priced -- so these are the numbers the experiment must beat or reproduce, not results"
+  },
+  "E5_yield_distribution": {
+    "statistic": "index of dispersion Var/mean of the per-target count",
+    "null_value": 1.0,
+    "effect_resolved": 0.2,
+    "sigmas": 3.0,
+    "targets_per_cell": 450,
+    "note": "the note's measured rate ratios ran 0.95 to 1.38, all but one above 1, which is the direction of under-dispersion; that is what this is sized to confirm or kill"
+  },
+  "E6_orbit_union_bases": {
+    "question": "does the Frobenius collapse really arrive from an orbit union, with no subspace anywhere?",
+    "closed_form": "collection = m 2^n / n",
+    "predicted_saving_log2_at_131": 7.03,
+    "rows_at_131": [
+      {
+        "m": 2,
+        "l": 66.0,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 66.0,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 66.0,
+        "log2_table_entries": 66.0,
+        "log2_collection": 124.97,
+        "log2_linear_algebra": 118.93,
+        "log2_total": 124.99
+      },
+      {
+        "m": 3,
+        "l": 44.53,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 44.53,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 88.06,
+        "log2_table_entries": 44.53,
+        "log2_collection": 125.55,
+        "log2_linear_algebra": 76.57,
+        "log2_total": 125.55
+      },
+      {
+        "m": 4,
+        "l": 33.9,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 33.9,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 99.1,
+        "log2_table_entries": 33.9,
+        "log2_collection": 125.97,
+        "log2_linear_algebra": 55.73,
+        "log2_total": 125.97
+      },
+      {
+        "m": 5,
+        "l": 27.58,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 27.58,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 105.74,
+        "log2_table_entries": 27.58,
+        "log2_collection": 126.29,
+        "log2_linear_algebra": 43.42,
+        "log2_total": 126.29
+      },
+      {
+        "m": 6,
+        "l": 23.42,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 23.42,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 110.17,
+        "log2_table_entries": 23.42,
+        "log2_collection": 126.55,
+        "log2_linear_algebra": 35.35,
+        "log2_total": 126.55
+      },
+      {
+        "m": 7,
+        "l": 20.47,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 20.47,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 113.34,
+        "log2_table_entries": 20.47,
+        "log2_collection": 126.77,
+        "log2_linear_algebra": 29.68,
+        "log2_total": 126.77
+      },
+      {
+        "m": 8,
+        "l": 18.29,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 18.29,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 115.71,
+        "log2_table_entries": 18.29,
+        "log2_collection": 126.97,
+        "log2_linear_algebra": 25.51,
+        "log2_total": 126.97
+      }
+    ],
+    "falsifier": "a measured saving on the ladder differing from n by more than 20%, or orbit unions of size below n at prime n"
+  }
+}
