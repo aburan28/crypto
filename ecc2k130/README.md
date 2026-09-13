@@ -30,7 +30,11 @@ Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
 The native carryless and batch comparisons above give the current complete
-walk measurements; the current 26 B/s target remains unachieved.
+walk measurements.  The single-GPU objective is priced in
+[THROUGHPUT-30B.md](THROUGHPUT-30B.md): 30 B/s needs a 2.05x instruction cut
+from a kernel already issuing at 95% of the best rate measured on the part, so
+halving every instruction in it still lands at 29.3 B/s.  Two GPUs cross 30 B/s
+on a 2.5% per-GPU gain, and three cross it today.
 [FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance

@@ -20,7 +20,7 @@
 use std::time::Instant;
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, NormalBasis};
+use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FrobeniusCanon};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -141,7 +141,7 @@ fn main() {
     // change of basis, then `n − 1` rotations and a running minimum.
     // No field arithmetic, and no dependency chain, so this is timed
     // one point at a time — the lane trick has nothing left to hide.
-    let nb = NormalBasis::new(&fc.field).expect("a normal element");
+    let nb = FrobeniusCanon::new(&fc.field, n).expect("a normal element");
     {
         let mut agree = true;
         for &s in sample.iter().take(4096) {

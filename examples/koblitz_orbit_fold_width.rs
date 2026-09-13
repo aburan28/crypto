@@ -20,7 +20,7 @@
 
 use std::time::Instant;
 
-use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::*;
 use serde_json::json;
 
@@ -106,14 +106,22 @@ fn main() {
         .nth(3)
         .and_then(|s| s.parse().ok())
         .unwrap_or(16000);
-    let widen = (per_orbit as f64).sqrt();
     let fb_c = build_subgroup_orbit_factor_base(&kc, 1, compact_points).expect("compact base");
-    let fb_f = build_subgroup_orbit_factor_base(
-        &kc,
-        1,
-        (compact_points as f64 * widen) as usize,
-    )
-    .expect("folded base");
+    // The folded base is chosen so its table costs the same BYTES as the
+    // compact one, by bisecting the sizing law — not by scaling the point
+    // count by a factor that is supposed to equal it.  A heuristic width
+    // is how an earlier version of this measurement came to give the
+    // folded table 1.8 times the memory while calling the comparison
+    // equal.
+    let budget_c = PairSumTable::compact_byte_size(fb_c.points.len(), degree);
+    let folded_points = widest(
+        |p| {
+            let orbits = ((p as f64 / per_orbit).ceil() as usize).max(1);
+            PairSumTable::folded_byte_size(orbits, p, degree)
+        },
+        budget_c,
+    );
+    let fb_f = build_subgroup_orbit_factor_base(&kc, 1, folded_points).expect("folded base");
     let (pc, pf) = (fb_c.points.len(), fb_f.points.len());
     let bytes_c = PairSumTable::compact_byte_size(pc, degree);
     let bytes_f = PairSumTable::folded_byte_size(fb_f.signed_orbits.len(), pf, degree);
@@ -194,21 +202,34 @@ fn main() {
         let ns = start.elapsed().as_secs_f64() * 1e9 / stream.len() as f64;
         // Recovery, on targets known to be sums of two base points.
         let mut out = Vec::new();
+        // Summands from far-apart orbits, and never a `±` pair: `P + (−P)`
+        // is `O`, whose key every orbit representative stores, and timing
+        // recovery on it would measure the one degenerate target rather
+        // than the ordinary case.
+        let stride = base.points.len() / 37;
         let known: Vec<_> = (0..24)
             .map(|i| {
                 fc.add(
-                    fc.lift(&base.points[i % base.points.len()]),
-                    fc.lift(&base.points[(i + 1) % base.points.len()]),
+                    fc.lift(&base.points[(i * stride) % base.points.len()]),
+                    fc.lift(&base.points[(i * stride + stride / 2 + 1) % base.points.len()]),
                 )
             })
+            .filter(|p| !p.infinity)
             .collect();
         let start = Instant::now();
         for &q in &known {
             table.pairs_for(q, &mut out);
         }
-        let ms = start.elapsed().as_secs_f64() * 1e3 / known.len() as f64;
+        let ms = start.elapsed().as_secs_f64() * 1e3 / known.len().max(1) as f64;
+        // And the worst case the orbit tag has: `O` is the sum of every
+        // `±` pair, so its key is stored once by every representative.
+        let start = Instant::now();
+        table.pairs_for(FastPoint::INFINITY, &mut out);
+        let degenerate_ms = start.elapsed().as_secs_f64() * 1e3;
+        let degenerate_pairs = out.len();
         println!(
-            "  {name:8} probe {ns:7.1} ns ({hits} of {} hit), recovery {ms:7.2} ms an |F| = {width} scan",
+            "  {name:8} probe {ns:7.1} ns ({hits} of {} hit), recovery {ms:7.3} ms; \
+             the degenerate key O: {degenerate_ms:7.2} ms for {degenerate_pairs} pairs",
             stream.len()
         );
         probe_ns.push(ns);

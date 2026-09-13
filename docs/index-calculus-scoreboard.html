@@ -645,6 +645,7 @@
     <div class="legend" style="padding-top:0">
       <span>L5 killed &middot; selected curve 2^+1.13 worse on fresh targets</span>
       <span>curves holding the floor for every target: 68 &rarr; 34 &rarr; 0 at n = 8</span>
+      <span>what a lever would have to buy at ECC2K-130: 2^&minus;72 on the oracle</span>
     </div>
   </div>
 
@@ -742,6 +743,79 @@
         the target subgroup. The window that would pay is genus 130 to between 290 and 300; the gap to the
         nearest available genus is 2<sup>120.77</sup>
         (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>).</p>
+      <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
+        At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
+        &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.38&times; over twelve toy cells,
+        it needs only dim&thinsp;V&thinsp;&ge;&thinsp;45 at m&thinsp;=&thinsp;3, the cofactor-4 class
+        admits every m&thinsp;&ge;&thinsp;2 measured on the curve itself, and certified
+        m&thinsp;=&thinsp;2,&thinsp;3,&thinsp;4 witnesses with S<sub>4</sub>&thinsp;=&thinsp;0 are in
+        the artefact. Finding one is what costs: relations &times; targets &times; oracle
+        = m&thinsp;&middot;&thinsp;2<sup>131</sup> <em>independently of the factor-base dimension</em>,
+        so the best implicit-base variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
+        table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries plain BSGS on the
+        same memory is cheaper than the best decomposition cell, and rho is cheaper than both while
+        storing nothing. Stated as a demand on the oracle: it would have to beat exhaustive search
+        over its own candidate set by 2<sup>70.19&thinsp;+&thinsp;log&#8322;&thinsp;m</sup>, a number
+        that does not move with m or with l because it <em>is</em> the product law
+        (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
+      <p><strong>A trace-zero factor base yields twice, and that is worth exactly one bit.</strong>
+        A base whose abscissae lie in ker&thinsp;Tr sits inside 2E, an index-2 <em>subgroup</em>, so
+        every sum of its points stays there &mdash; and the target subgroup is inside it too. The
+        sums are spread over #E/2, not #E, so a target is hit twice as often as
+        C(|F|,&thinsp;m)/#E says. Measured exhaustively over every target of the order-r subgroup at
+        n&thinsp;=&thinsp;13,&thinsp;17,&thinsp;19: the generic base occupies 0.98&ndash;1.00&thinsp;&times;&thinsp;#E
+        and the trace-zero base 0.49&ndash;0.50&thinsp;&times;&thinsp;#E, a yield factor of
+        1.97&ndash;2.04. The product law reads m&thinsp;&middot;&thinsp;2<sup>n&minus;1</sup>
+        for such a base, still flat in the dimension; the table above prices a generic subspace and
+        would move from 2<sup>132.58</sup> to 2<sup>131.58</sup>. One bit against a gap of
+        seventy-two; class <span class="chip">engineering</span>
+        (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
+      <p><strong>Accounting correction: the Frobenius collapse does not need a subspace.</strong>
+        The classification that leaves only dimensions 0,&thinsp;1,&thinsp;130,&thinsp;131 at n = 131
+        classifies invariant <em>subspaces</em>; GGMP's collapse asks only for &pi;(F) = F, and since
+        131 is prime every abscissa outside F<sub>2</sub> has an orbit of exactly 131, so a union of
+        orbits is Frobenius-stable at any size. The product law becomes m&thinsp;&middot;&thinsp;2<sup>n</sup>/n
+        and the bottom of the family moves from 2<sup>132.58</sup> to 2<sup>124.99</sup>,
+        2<sup>+64.18</sup>&times; rho &mdash; paid for by materialising the base (2<sup>44.5</sup>
+        points at m = 3, 2<sup>23.4</sup> at m = 6), because an orbit union has no low-degree
+        membership polynomial. What 131 being prime forbids is having the collapse <em>and</em> the
+        implicit base, not the collapse itself. Seven bits against a gap of sixty-four; class
+        <span class="chip">accounting</span>, not a gain
+        (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+      <p><strong>Deciding is localising, for any detector that takes its target as input.</strong>
+        A hypothetical decomposition oracle that answers only yes/no for the <em>whole</em> factor
+        base looks far weaker than one that hands over the summands. It is not. Let R decompose;
+        for each candidate P in the base draw a base point Q of the same cofactor class and ask the
+        detector about R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; a class match keeps the query inside
+        the target subgroup, so even a subgroup-only detector suffices. If P is a summand the query
+        point is <em>literally</em> an m-sum of base points and the answer is yes by construction; if
+        it is not, the point is generic and the answer is yes with probability &lambda;. Two
+        independent Q per candidate and the summands fall out of 2|F| whole-base queries, with no
+        sub-base query anywhere. The group operations that build them cost k&thinsp;&middot;&thinsp;2<sup>2l</sup>
+        against the m&thinsp;&middot;&thinsp;2<sup>2l</sup> the linear algebra already pays, so they
+        are absorbed.</p>
+      <p>Measured at n&thinsp;=&thinsp;13,&thinsp;17,&thinsp;19 over eight rungs, 64 built targets each,
+        zero sub-base queries on every one. The two ways it misfires are collisions of Q with a
+        summand or its negative &mdash; a miss at rate &Theta;(m/|F|) per draw, a false positive at
+        &Theta;(m/|F|)&thinsp;+&thinsp;&lambda; &mdash; and the measured rates stay inside
+        0.22&ndash;0.87 of those predictions across a sixteenfold range of m/|F| <em>and</em> of
+        &lambda;, with no third error term. Read off at the free-oracle optimum for m&thinsp;=&thinsp;4
+        (l&thinsp;=&thinsp;26.70, m/|F|&thinsp;=&thinsp;2<sup>&minus;24.70</sup>): localisation fails on
+        one target in 2<sup>20.66</sup>, losing 2<sup>6.04</sup> of the 2<sup>26.70</sup> relations
+        needed.</p>
+      <p>So there is <strong>one</strong> free-oracle floor, not two: 2<sup>56.76</sup> at
+        m&thinsp;=&thinsp;4, under the 2<sup>60.81</sup> reference from m&thinsp;=&thinsp;4 onward,
+        monotonically, with no table. The only detector this fails against is one restricted to a
+        fixed family of targets that refuses R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; it would have
+        to extract witnesses by meet-in-the-middle, bottoming at 2<sup>56.93</sup> with a
+        2<sup>53.82</sup>-entry table &mdash; and no proposed detector has that shape: a
+        resultant-vanishing test, a trace condition, a fixed-degree Gr&ouml;bner refutation and the
+        Nagao/Riemann&ndash;Roch coefficient search are all algorithms on the target's coordinates.
+        Two earlier revisions of this panel priced that distinction as the curve's protective margin,
+        first at 2<sup>37.68</sup> and then at 2<sup>11</sup>&ndash;2<sup>24</sup>. The margin is not
+        there; class <span class="chip">accounting</span> both times
+        (<code>experiments/ecc2k130_point_decomposition.json</code>,
+        <code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>

@@ -86,7 +86,8 @@ committed source, actual flags, resources and complete counts. The public
 artifact retains corpus counts/sizes; content equality is established by
 the separate matched comparison. This run reproduces the published command
 on another allocation and does not estimate an additional code-change gain.
-The active 26 B/s target remains unachieved.
+The active 26 B/s single-GPU target remains unachieved, and
+[THROUGHPUT-30B.md](THROUGHPUT-30B.md) prices what it would take.
 
 ## Historical compact-state preset comparison
 

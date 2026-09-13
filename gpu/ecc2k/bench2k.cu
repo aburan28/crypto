@@ -35,6 +35,25 @@ static int g_sms = 1;
 static const uint32_t *cb_flat() { return &f2m_cb_table[0][0][0]; }
 static const size_t cb_words = (size_t)F2M_CB_WINDOWS * 16 * F2M_CB_STRIDE;
 
+#if F2M_FROB_COUNT > 0
+static const uint32_t *frob_flat() { return &f2m_frob_table[0][0][0][0]; }
+static const size_t frob_words = (size_t)FrobPow::WORDS;
+
+/* Upload the tau^k tables and return a device pointer.
+ *
+ * Global, not staged into shared like the class-weight table.  The class
+ * weight is read every step of every walk; these are read once per inversion,
+ * which Montgomery's trick already amortises over W walks, so they are a
+ * W-times colder read on several times the bytes.  Shared memory is the wrong
+ * place for that. */
+static const uint32_t *upload_frob() {
+    uint32_t *d;
+    CU(cudaMalloc(&d, frob_words * 4));
+    CU(cudaMemcpy(d, frob_flat(), frob_words * 4, cudaMemcpyHostToDevice));
+    return d;
+}
+#endif
+
 static void print_device() {
     int dev = 0;
     cudaDeviceProp p;
@@ -162,6 +181,12 @@ static void selftest() {
     CU(cudaMalloc(&d_cb, cb_words * 4));
     CU(cudaMemcpy(d_cb, cb_flat(), cb_words * 4, cudaMemcpyHostToDevice));
     dc.cb = d_cb;
+#if F2M_FROB_COUNT > 0
+    /* The device takes its inversion through the tau^k tables while the host
+     * reference squares, so the walk comparison below checks the table path
+     * against the thing it replaces, on hardware. */
+    dc.ftb = upload_frob();
+#endif
     rho2k_dp *d_dp;
     uint32_t *d_cnt;
     CU(cudaMalloc(&d_dp, dpcap * sizeof(rho2k_dp)));
@@ -295,6 +320,9 @@ static void bench_field() {
 /* ---------------------------------------------------------------- */
 struct RhoOpts {
     uint32_t threads = 0, iters = 256, w = 8, dp = 0;
+    /* tau^k tables for the inversion: fewer instructions, more table traffic.
+     * Off by default because only the instruction side has been measured. */
+    uint32_t frob = 0;
     std::string variant = "lowmem";
 };
 
@@ -337,14 +365,19 @@ static void bench_rho(RhoOpts o) {
     CU(cudaMalloc(&d_cb, cb_words * 4));
     CU(cudaMemcpy(d_cb, cb_flat(), cb_words * 4, cudaMemcpyHostToDevice));
     dc.cb = d_cb;
+#if F2M_FROB_COUNT > 0
+    if (o.frob) dc.ftb = upload_frob();
+#endif
     CU(cudaMalloc(&dc.dp_out, (size_t)dpcap * sizeof(rho2k_dp)));
     CU(cudaMalloc(&dc.dp_count, 4));
     CU(cudaMemset(dc.dp_count, 0, 4));
 
     size_t smem = r2k_smem_bytes();
     uint32_t blocks = (T + R2K_BLOCK - 1) / R2K_BLOCK;
-    printf("  %u class walks (%u threads x %u), dp g <= %u, variant=%s\n",
-           nw, T, W, o.dp, o.variant.c_str());
+    printf("  %u class walks (%u threads x %u), dp g <= %u, variant=%s, "
+           "inversion=%s\n",
+           nw, T, W, o.dp, o.variant.c_str(),
+           dc.ftb ? "tau^k tables" : "repeated squaring");
     printf("  %u blocks x %d threads, %zu B shared\n", blocks, R2K_BLOCK, smem);
 
     k2k_rho_init<<<(T + 127) / 128, 128>>>(dc);
@@ -390,6 +423,7 @@ int main(int argc, char **argv) {
         else if (a == "--iters") o.iters = next();
         else if (a == "--w") o.w = next();
         else if (a == "--dp") o.dp = next();
+        else if (a == "--frob") o.frob = next();
         else if (a == "--variant" && i + 1 < argc) o.variant = argv[++i];
         else { fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
     }
