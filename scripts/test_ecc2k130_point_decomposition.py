@@ -129,6 +129,29 @@ class ToyTests(unittest.TestCase):
             self.assertAlmostEqual(b["measured_yield_factor"], 2.0, delta=0.1,
                                    msg=f"n={n}")
 
+    def test_a_whole_base_detector_localises_its_own_witness(self) -> None:
+        """§3.2: swapping a candidate summand for a class-matched base point
+        turns a yes/no detector into a witness finder, with no sub-base query."""
+        rng = random.Random(19)
+        for n, l, k in ((17, 6, 1), (17, 6, 2), (19, 7, 2)):
+            d = mod.swap_localisation(n, l, 2, k, 24, rng)
+            self.assertEqual(d["sub_base_queries"], 0)
+            self.assertEqual(d["queries_per_target"], k * d["factor_base_size"])
+            # both failure modes are collisions, so both stay within an O(1)
+            # factor of the collision scale they are predicted from
+            self.assertLess(d["miss_rate_over_k_times_collision_scale"], 2.0, d)
+            self.assertLess(d["false_positive_rate_over_collision_scale_to_k"],
+                            2.0, d)
+
+    def test_a_second_swap_query_squares_the_false_positive_rate(self) -> None:
+        rng = random.Random(23)
+        one = mod.swap_localisation(19, 7, 2, 1, 24, rng)
+        two = mod.swap_localisation(19, 7, 2, 2, 24, rng)
+        self.assertLess(two["false_positive_rate_per_non_summand"],
+                        one["false_positive_rate_per_non_summand"] / 3)
+        self.assertGreater(two["miss_rate_per_summand"],
+                           one["miss_rate_per_summand"])       # and costs misses
+
     def test_the_trace_zero_span_really_lies_in_the_kernel_of_the_trace(self) -> None:
         for n, l in ((13, 7), (17, 9), (19, 10)):
             field = mod.GF2m(n, mod.find_irreducible(n))

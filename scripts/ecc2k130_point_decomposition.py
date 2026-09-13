@@ -425,6 +425,147 @@ def yield_law(base_size: int, m: int, group_order: int) -> float:
     return math.comb(base_size, m) / group_order
 
 
+def swap_localisation(n: int, l: int, m: int, k: int, targets: int,
+                      rng: random.Random):
+    """Does a *whole-base* yes/no detector localise its own witness?
+
+    Given `R` that decomposes, walk the candidates `P in F` and ask the detector
+    about `R - P + Q` for a base point `Q` of the same cofactor class -- another
+    whole-base query, on another target of `<G>`, never a sub-base query.  If `P`
+    is a summand then `R - P + Q` is literally an `m`-sum of base points and the
+    answer is yes by construction.  If it is not, the point is generic and the
+    answer is yes with probability `lambda`.  So `k|F|` *free* queries name the
+    summands, and the only thing paid is the `k|F|` group operations that build
+    the query points.
+
+    Two failure modes, both collisions with an `O(m)`-element set inside the
+    class pool that `Q` is drawn from (size `|F|/cofactor`):
+
+      * `Q` equal to a remaining summand, or its negative, makes a true yes
+        vanish -- a *miss*, at rate `Theta(m/|F|)` per draw, so `k` draws miss
+        about `k` times as often;
+      * `Q` equal to the negative of a summand makes `R - P + Q` collapse to
+        `(the other summands) + (-P)`, which decomposes for *every* `P` -- a
+        *false positive*, at rate `Theta(m/|F|) + lambda` per draw, so `k`
+        independent draws take it to the `k`-th power.
+
+    That is the whole content of the measurement.  At toy sizes `m/|F|` is
+    percent-scale and the swap is ragged; it has to be shown ragged *in that
+    specific way*, tracking `m/|F|` as the base grows, before the rates may be
+    read off at the factor base of `2^20` where `m/|F|` is `2^-19`.
+
+    The curve is not enumerated here -- targets are *built* from known summands,
+    so `n` can run well past what `toy_instance` can hold.
+    """
+    field = GF2m(n, find_irreducible(n), tables=(n <= 20))
+    curve = Koblitz(field)
+    order = curve_order(n)
+    cofactor = 1 << ((order & -order).bit_length() - 1)
+    r = order // cofactor
+    assert cofactor >= 2, "no cofactor class to respect"
+
+    base = factor_base(curve, l)
+    base_set = set(base)
+    classes = curve.batch_mul(base, r)
+    pools: dict = {}
+    for P, c in zip(base, classes):
+        pools.setdefault(c, []).append(P)
+
+    pairs: dict = {}
+    for i in range(len(base)):
+        for j in range(i + 1, len(base)):
+            t = curve.add(base[i], base[j])
+            if t is not None:
+                pairs.setdefault(t, (base[i], base[j]))
+
+    def detector(T):
+        """Whole-base only: does `T` decompose into `m` distinct base points?"""
+        if T is None:
+            return None
+        if m == 2:
+            return pairs.get(T)
+        for P in base:
+            rest = curve.add(T, curve.neg(P))
+            if rest in pairs:
+                a, b = pairs[rest]
+                if P not in (a, b):
+                    return (P, a, b)
+        return None
+
+    def summands_of(T):
+        """Every base point appearing in *some* decomposition of `T`."""
+        out = set()
+        for P in base:
+            rest = curve.add(T, curve.neg(P))
+            if m == 2:
+                if rest is not None and rest != P and rest in base_set:
+                    out.add(P)
+            elif rest in pairs:
+                a, b = pairs[rest]
+                if P not in (a, b):
+                    out.update((P, a, b))
+        return out
+
+    # build decomposing targets from known summands, rather than hunting for them
+    built = []
+    guard = 0
+    while len(built) < targets and guard < 200 * targets:
+        guard += 1
+        picks = rng.sample(base, m)
+        R = None
+        for P in picks:
+            R = curve.add(R, P)
+        if R is None or curve.mul(R, r) is not None:      # must land in <G>
+            continue
+        built.append(R)
+    assert len(built) == targets, "could not build enough targets in <G>"
+
+    pool_mean = sum(len(v) for v in pools.values()) / len(pools)
+    misses = fps = summand_q = other_q = exact = 0
+    for R in built:
+        truth, yes = summands_of(R), set()
+        assert truth, "a built target must decompose"
+        for P in base:
+            pool = pools[curve.mul(P, r)]
+            answered = True
+            for _ in range(k):
+                Q = rng.choice(pool)
+                while Q == P and len(pool) > 1:
+                    Q = rng.choice(pool)
+                if detector(curve.add(curve.add(R, curve.neg(P)), Q)) is None:
+                    answered = False
+                    break
+            if P in truth:
+                summand_q += 1
+            else:
+                other_q += 1
+            if answered:
+                yes.add(P)
+        misses += len(truth - yes)
+        fps += len(yes - truth)
+        exact += yes == truth
+    lam = math.comb(len(base), m) / order
+    collide = m / pool_mean
+    return {
+        "n": n, "l": l, "m": m, "queries_per_candidate": k,
+        "curve_order": order, "cofactor": cofactor,
+        "factor_base_size": len(base),
+        "mean_class_pool": round(pool_mean, 1),
+        "lambda": round(lam, 6),
+        "collision_scale_m_over_pool": round(collide, 5),
+        "targets_tested": len(built),
+        "queries_per_target": k * len(base),
+        "sub_base_queries": 0,
+        "miss_rate_per_summand": round(misses / summand_q, 5),
+        "miss_rate_over_k_times_collision_scale": round(
+            misses / summand_q / (k * collide), 2),
+        "false_positive_rate_per_non_summand": round(fps / other_q, 6),
+        "false_positive_rate_over_collision_scale_to_k": round(
+            fps / other_q / (collide + lam) ** k, 2),
+        "exact_recovery_rate": round(exact / len(built), 3),
+    }
+
+
 def trace_zero_bonus(n: int, l: int):
     """Measure where the sums of a base pair land, for both kinds of base.
 
@@ -913,6 +1054,18 @@ def main() -> None:
               f"{b['trace_zero']['implied_spread_over_curve_order']:.2f} x #E trace-zero "
               f"-> yield factor {b['measured_yield_factor']:.2f}", flush=True)
 
+    # ---- a whole-base detector localises its own witness by swapping ------
+    swaps = [swap_localisation(n, l, 2, k, args.targets // 8 or 8, rng)
+             for n, l in ((13, 5), (17, 6), (19, 7), (19, 9)) for k in (1, 2)]
+    for d in swaps:
+        print(f"  swap     n={d['n']:3d} l={d['l']:2d} k={d['queries_per_candidate']} "
+              f"|F|={d['factor_base_size']:5d}  m/pool={d['collision_scale_m_over_pool']:.5f} "
+              f"lam={d['lambda']:.5f}  miss {d['miss_rate_per_summand']:.5f} "
+              f"(x{d['miss_rate_over_k_times_collision_scale']:.2f})  "
+              f"fp {d['false_positive_rate_per_non_summand']:.5f} "
+              f"(x{d['false_positive_rate_over_collision_scale_to_k']:.2f})  "
+              f"sub-base queries {d['sub_base_queries']}", flush=True)
+
     # ---- the existence witness, on the challenge curve ---------------------
     witnesses = [w for w in (witness_at_131(curve, r, 45, m, rng) for m in (2, 3, 4))
                  if w is not None]
@@ -1036,6 +1189,20 @@ def main() -> None:
                      "is hit twice as often as C(|F|, m)/#E predicts",
             "class": "engineering: one bit, a constant, not a change of exponent",
             "rungs": bonus,
+        },
+        "swap_localisation": {
+            "claim": "a detector that answers yes/no for the WHOLE base, but may "
+                     "be called on any target, localises its own witness: swap a "
+                     "candidate summand P for a class-matched base point Q and "
+                     "ask about R - P + Q.  No sub-base query is used anywhere "
+                     "(sub_base_queries = 0 on every rung).",
+            "failure_modes": "Q colliding with a summand or its negative, at "
+                             "Theta(m/|F|) per draw, and the cell's own lambda; "
+                             "k independent draws take the false positives to the "
+                             "k-th power and the misses up by a factor k",
+            "consequence": "deciding and localising are the same problem, so E3 "
+                           "has one free-oracle floor and not two",
+            "rungs": swaps,
         },
         "witnesses_at_131": witnesses,
         "cost": cost,

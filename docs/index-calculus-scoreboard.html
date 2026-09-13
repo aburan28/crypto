@@ -782,28 +782,40 @@
         implicit base, not the collapse itself. Seven bits against a gap of sixty-four; class
         <span class="chip">accounting</span>, not a gain
         (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
-      <p><strong>Deciding is worth less than localising, but it is not worthless.</strong>
-        A hypothetical decomposition oracle that answers yes/no for free on the <em>whole</em> base
-        leaves the witness to be extracted, and the right price for that is a meet-in-the-middle
-        &mdash; a table of every &#8968;m/2&#8969;-subset sum built once and shared across all targets,
-        then &#8970;m/2&#8971;-subset probes once per relation &mdash; not the
-        C(|F|,&nbsp;m&minus;1) search an earlier revision of this panel charged. Corrected, that
-        detector-only floor dips <em>below</em> the 2<sup>60.81</sup> reference at m = 5
-        (2<sup>59.75</sup>), m = 7 (2<sup>56.93</sup>) and m = 8 (2<sup>59.27</sup>) &mdash; it saws
-        rather than falling, because odd m splits its meet-in-the-middle more evenly than the even m
-        above it. The correction is worth up to 16 bits and it reverses the previous headline
-        (&ldquo;a free detector never reaches rho&rdquo;), which was an
-        <strong>accounting</strong> error, not a new result.</p>
-      <p>Localisation still buys two things. An oracle answering for arbitrary sub-bases &mdash; so a
-        witness falls out of O(m&thinsp;log&thinsp;|F|) free queries by bisection &mdash; is under the
-        reference from m = 4 onward <em>monotonically</em>, reaching 2<sup>35.61</sup>, and it needs
-        no table: every detector-only cell that reaches rho carries 2<sup>45</sup>&ndash;2<sup>57</sup>
-        entries, and at m = 5 that table (2<sup>56.97</sup>) is most of the 2<sup>59.75</sup> total.
-        The gap runs from 2<sup>0.20</sup> at m = 2 to 2<sup>23.66</sup> at m = 8. Both are floors, both
-        are derived rather than measured, and no published hardness claim about decomposition oracles
-        distinguishes the two. The question to put to any proposed oracle is the joint one &mdash;
-        cost and memory, scored against BSGS at that memory
-        (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+      <p><strong>Deciding is localising, for any detector that takes its target as input.</strong>
+        A hypothetical decomposition oracle that answers only yes/no for the <em>whole</em> factor
+        base looks far weaker than one that hands over the summands. It is not. Let R decompose;
+        for each candidate P in the base draw a base point Q of the same cofactor class and ask the
+        detector about R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; a class match keeps the query inside
+        the target subgroup, so even a subgroup-only detector suffices. If P is a summand the query
+        point is <em>literally</em> an m-sum of base points and the answer is yes by construction; if
+        it is not, the point is generic and the answer is yes with probability &lambda;. Two
+        independent Q per candidate and the summands fall out of 2|F| whole-base queries, with no
+        sub-base query anywhere. The group operations that build them cost k&thinsp;&middot;&thinsp;2<sup>2l</sup>
+        against the m&thinsp;&middot;&thinsp;2<sup>2l</sup> the linear algebra already pays, so they
+        are absorbed.</p>
+      <p>Measured at n&thinsp;=&thinsp;13,&thinsp;17,&thinsp;19 over eight rungs, 64 built targets each,
+        zero sub-base queries on every one. The two ways it misfires are collisions of Q with a
+        summand or its negative &mdash; a miss at rate &Theta;(m/|F|) per draw, a false positive at
+        &Theta;(m/|F|)&thinsp;+&thinsp;&lambda; &mdash; and the measured rates stay inside
+        0.22&ndash;0.87 of those predictions across a sixteenfold range of m/|F| <em>and</em> of
+        &lambda;, with no third error term. Read off at the free-oracle optimum for m&thinsp;=&thinsp;4
+        (l&thinsp;=&thinsp;26.70, m/|F|&thinsp;=&thinsp;2<sup>&minus;24.70</sup>): localisation fails on
+        one target in 2<sup>20.66</sup>, losing 2<sup>6.04</sup> of the 2<sup>26.70</sup> relations
+        needed.</p>
+      <p>So there is <strong>one</strong> free-oracle floor, not two: 2<sup>56.76</sup> at
+        m&thinsp;=&thinsp;4, under the 2<sup>60.81</sup> reference from m&thinsp;=&thinsp;4 onward,
+        monotonically, with no table. The only detector this fails against is one restricted to a
+        fixed family of targets that refuses R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; it would have
+        to extract witnesses by meet-in-the-middle, bottoming at 2<sup>56.93</sup> with a
+        2<sup>53.82</sup>-entry table &mdash; and no proposed detector has that shape: a
+        resultant-vanishing test, a trace condition, a fixed-degree Gr&ouml;bner refutation and the
+        Nagao/Riemann&ndash;Roch coefficient search are all algorithms on the target's coordinates.
+        Two earlier revisions of this panel priced that distinction as the curve's protective margin,
+        first at 2<sup>37.68</sup> and then at 2<sup>11</sup>&ndash;2<sup>24</sup>. The margin is not
+        there; class <span class="chip">accounting</span> both times
+        (<code>experiments/ecc2k130_point_decomposition.json</code>,
+        <code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>

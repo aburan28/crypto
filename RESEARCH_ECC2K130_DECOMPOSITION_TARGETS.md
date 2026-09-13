@@ -125,103 +125,95 @@ experiment that would catch a modelling error in E1 before it propagates.
 
 ---
 
-## E3 — Deciding versus localising: where the protection actually lives
+## E3 — What a free detector buys, and why deciding is localising
 
-**Question.**  This is the one with the most at stake, and the note only hints
-at it.  The background note's free-oracle floor grants a hypothetical oracle
-*everything* — it decides, and hands over the witness — and comes out at
+**Question.**  The background note's free-oracle floor grants a hypothetical
+oracle *everything* — it decides, and hands over the witness — and comes out at
 `2^56.40` for `m = 4`, **below rho**.  That is what says the counting argument
-does not protect this curve.  But an oracle that only answers **yes or no**, and
-leaves you to find the summands, is a different and much weaker object.  How
-much weaker is a derivable number, and it is large.
+does not protect this curve.  It is tempting to hope that an oracle answering
+only **yes or no** is a much weaker object, and that the gap is where the real
+protection lives.  This section used to say exactly that.  It was wrong twice,
+and the second correction is the interesting one.
 
-Turning a passed target into an explicit `m`-subset is a meet-in-the-middle, not
-a search: tabulate every `⌈m/2⌉`-subset sum of the base **once**, then for each
-*successful* target enumerate its `⌊m/2⌋`-subset complements and probe.  The
-table is shared across every target ever tried; only the probes recur, and they
-recur once per relation.  All costs are `log2` operations; the memory column is
-the entries that table holds.
+**It is not a weaker object.**  §3.2 of the note measures the reduction: let `R`
+decompose, walk the candidates `P ∈ F`, draw a base point `Q` of the same
+cofactor class, and ask the detector about `R − P + Q`.  The class match keeps
+the query inside `⟨G⟩`, so even a subgroup-only detector suffices.  If `P` is a
+summand then `R − P + Q` is literally an `m`-sum of base points and the answer
+is yes by construction; if it is not, the point is generic and the answer is yes
+with probability `λ`.  Two independent `Q` per candidate, and the summands fall
+out of `2|F|` **whole-base** queries — no sub-base query anywhere.  The queries
+are free by hypothesis; the group operations that build them cost `k·2^{2l}`
+against the `m·2^{2l}` the linear algebra already pays, so they are absorbed.
 
-| `m` | free localising detector | free detector, witness by MITM | gap | witness table | beats rho? |
-|---:|---:|---:|---:|---:|---|
-| 2 | `2^89.25` | `2^89.45` | `2^0.20` | `2^43.15` | neither |
-| 3 | `2^68.58` | `2^68.88` | `2^0.30` | `2^64.70` | neither |
-| 4 | `2^56.41` | `2^68.29` | `2^11.88` | `2^44.50` | localising only |
-| 5 | `2^48.44` | `2^59.75` | `2^11.31` | `2^56.97` | **both** |
-| 6 | `2^42.85` | `2^62.00` | `2^19.15` | `2^45.27` | localising only |
-| 7 | `2^38.74` | `2^56.93` | `2^18.19` | `2^53.82` | **both** |
-| 8 | `2^35.61` | `2^59.27` | `2^23.66` | `2^45.82` | **both** |
+So the column to compare is not "decides" against "localises" but
+**target-agnostic** against **target-restricted**: whether the detector is an
+algorithm on the target's coordinates, or answers only for some distinguished
+family of targets and refuses `R − P + Q`.
 
-*(The `m = 4` localising floor is the note's §5.3 free-oracle line; the two
-sweeps differ by 0.01 bits of grid, `2^56.40` there against `2^56.41` here.)*
+| `m` | free target-agnostic detector | witness route | free target-restricted detector | gap | beats rho? |
+|---:|---:|---|---:|---:|---|
+| 2 | `2^89.45` | table | `2^89.45` | `2^0.00` | neither |
+| 3 | `2^68.88` | table | `2^68.88` | `2^0.00` | neither |
+| 4 | `2^56.76` | swap | `2^68.29` | `2^11.53` | agnostic only |
+| 5 | `2^48.76` | swap | `2^59.75` | `2^10.99` | **both** |
+| 6 | `2^43.15` | swap | `2^62.00` | `2^18.85` | agnostic only |
+| 7 | `2^39.01` | swap | `2^56.93` | `2^17.92` | **both** |
+| 8 | `2^35.86` | swap | `2^59.27` | `2^23.41` | **both** |
 
-An earlier revision of this section charged the witness as a full `C(|F|, m−1)`
-search and concluded that a free non-localising detector never reaches rho,
-bottoming out at `2^73.29`.  **That was wrong by up to 16 bits, and the
-conclusion it carried was wrong too.**  A free detector alone *does* dip below
-rho — at `m = 5` (`2^−1.06`), `m = 7` (`2^−3.88`) and `m = 8` (`2^−1.54`) — so
-deciding for free is, at some `m`, already enough.
+An agnostic detector may still build the restricted one's table, so it takes
+whichever witness route is cheaper: the meet-in-the-middle table at `m = 2, 3`,
+where the two columns coincide exactly, and the swap from `m = 4` up, where it
+costs `0.2`–`0.35` bits over the free-oracle floor of §5.3.
 
-The distinction survives, in a weaker and more precise form:
+**The agnostic column is under rho from `m = 4`, monotonically, with no table.**
+The restricted column saws — it dips under at `m ∈ {5, 7, 8}` and back above at
+`6`, because its `⌈m/2⌉ / ⌊m/2⌋` meet-in-the-middle splits more evenly at odd
+`m` — and every restricted cell that reaches rho carries a `2^45`–`2^57`-entry
+table, which at `m = 5` is most of its total.  But the gap between the columns
+measures an **artificial restriction**, not the curve: no proposed detector has
+that shape.  A resultant-vanishing test, a trace condition, a partial Gröbner
+refutation at fixed degree, the Nagao/Riemann–Roch coefficient search are all
+algorithms on the target's coordinates and all swap for free.
 
-- **Localising crosses one summand earlier and never comes back up.**  It is
-  under rho from `m = 4` onward, monotonically; the detector-only floor saws,
-  because the MITM split `⌈m/2⌉ / ⌊m/2⌋` is better balanced at odd `m` than at
-  the even `m` above it.  At `m = 6` a free detector is back *above* rho.
-- **Localising is free of memory; deciding alone is not.**  Every detector-only
-  cell that reaches rho needs a witness table of `2^45`–`2^57` entries — at
-  `m = 5`, `2^56.97` entries against a `2^59.75` total, so the table *is* the
-  algorithm.  Priced against BSGS at the same memory (§5.3 of the note), that is
-  a much less interesting object than the row's total suggests.
-- **The gap is still 11 to 24 bits from `m = 4` up**, and at the useful end of
-  the range it is the difference between a floor near rho and one well under it.
-
-So the honest statement is not "the whole protective margin sits in that gap".
-It is: *localisation is worth 11–24 bits and removes a `2^45`-plus memory
-requirement, and a free detector that cannot localise still gets within a couple
-of bits of rho at the right `m`.*  No statement in the literature about
-decomposition-oracle hardness distinguishes the two, and the second half of that
-sentence is the part that should worry anyone proposing a detector.
-
-Both lines are **floors**: derived from the product law, not measured, and not
-attained by any algorithm in this repository or any other one known to it.
+*(Two superseded numbers, kept so the correction is legible.  The first revision
+charged the witness a naive `C(|F|, m−1)` search and reported the second column
+bottoming out at `2^73.29`, "above rho at every `m`" — wrong by up to sixteen
+bits.  The second revision fixed the price but kept the premise, and reported a
+`2^11`–`2^24` gap as the curve's protective margin.  The margin is not there.)*
 
 **Design.**  Two measurements, both at toy sizes on E1's harness:
 
-1. For each oracle the repository has — pairs-and-solve, matrix-F4, SAT — measure
-   the cost of a **sub-base query** `W ⊆ V` as a function of `dim W`, and the
-   multiplier between "decide" and "produce a witness".  Predicted for
-   pairs-and-solve: the query cost is `C(2^{dim W}, m−1)`, i.e. it localises for
-   free, and bisection costs about `2×` a single full query.
-2. Take any *proposed* cheap detector — a resultant-vanishing test, a trace
-   condition, a partial Gröbner refutation at fixed degree — and measure the same
-   two things.  A detector that does not localise is not thereby harmless — it
-   buys `2^56.93` at `m = 7` — but it has to carry a `2^53.82`-entry table to do
-   it, so the measurement to make is the *joint* one: cost **and** memory, scored
-   against the BSGS line at that memory, not cost alone.
+1. For each oracle the repository has — pairs-and-solve, matrix-F4, SAT —
+   measure the cost of a query on `R − P + Q` against a query on `R`. Predicted:
+   equal, because all three take the target as input like any other. Anything
+   that is *not* equal is the finding.
+2. Take any *proposed* cheap detector and measure the same ratio, plus the two
+   swap failure rates against the collision law of §3.2 (`miss ≈ k·m/|F|`,
+   `false positive ≈ (m/|F| + λ)^k`). A detector that swaps for free is scored
+   against §5.3's free-oracle floor directly, cost and memory together.
 
 The Nagao/Riemann–Roch encoding landed on main by #316
 (`research/nagao_relations/`) is the natural second case.  It is a different
 *relation representation* rather than a subspace-membership oracle — it searches
 for a function in `L(4O)` and reads the decomposition off its zeroes — so the
-question E3 asks lands on it unchanged and is worth asking early: does a
-coefficient search restricted to a sub-base cost less than the same search on
-the whole base, in proportion, or not at all?  That note is explicit that it is
-"implementation and toy correctness work, not an ECDLP speedup result", so
-nothing here is scored against it yet; E3 is the frame it would be scored in.
+question lands on it unchanged: does its coefficient search cost the same on
+`R − P + Q` as on `R`?  That note is explicit that it is "implementation and toy
+correctness work, not an ECDLP speedup result", so nothing here is scored
+against it yet; E3 is the frame it would be scored in.
 
-**Falsifier / what would count.**  For the localising line: a detector whose
-full-base query is cheaper than `C(|F|, m−1)` *and* whose sub-base query on `W`
-costs less than the full-base query times `(|W|/|F|)^{m−1}`.  That combination
-moves the `2^56.40` line into reach.  For the detector-only line, which this
-revision showed is already under rho at `m ∈ {5, 7, 8}`: a cheap full-base
-detector whose witness extraction beats the meet-in-the-middle — or, going the
-other way, a proof that the MITM table cannot be shared across targets, which
-would put the `2^73.29` line back.
+**Falsifier / what would count.**  A proposed detector whose cost on `R − P + Q`
+exceeds its cost on `R` by more than a constant — that, and only that, puts the
+restricted column back in play.  Failing that, the thing to exhibit is the
+detector itself: a full-base query cheaper than `C(|F|, m−1)`, scored against
+`2^56.40` with its memory priced against BSGS at the same memory.
 
-**Why this one is worth designing carefully.**  Both hypothetical oracles look
-identical when stated as "a fast decomposition oracle", and they differ by up to
-`2^37.68`.  Anyone proposing one should be asked which it is, first.
+**Why this one is worth designing carefully.**  "A fast decomposition oracle"
+covers three different objects, and two revisions of this section mispriced the
+distinctions between them.  What survives is the shortest of the three claims
+and the only one that holds: **for any detector that takes its target as input,
+deciding and localising are the same problem**, so there is one free-oracle floor
+and it is the one in §5.3 of the note.
 
 ---
 
@@ -370,16 +362,18 @@ one need not yield `n` *independent* relations").
 |---|---|---|---|---|
 | 1 | **E1** ladder | CPU-days | the `n = 131` derivation is evidence, not arithmetic | the whole note's exponent is wrong |
 | 2 | **E6** rank | hours on E1 | `m·2^n/n` stands as the family's floor | the seven-bit correction reverses |
-| 3 | **E3** localisation | days | proposed oracles get a sharp question to answer, cost *and* memory | a cheap detector exists — localising it reaches rho from `m = 4`, and even a non-localising one reaches it at `m ∈ {5, 7, 8}` if it can carry a `2^45`-plus table |
+| 3 | **E3** target-agnosticism | days | proposed detectors are scored against one floor, cost *and* memory, with no credit for answering yes/no only | a cheap detector exists — it reaches rho from `m = 4` whether or not it hands over the witness |
 | 4 | **E2** flatness | hours | `l` is confirmed not to be a lever | the cancellation is inexact and the exponent moves |
 | 5 | **E4** large primes | days | one more classical lever priced and closed | the first sub-rho decomposition cell in this repository |
 | 6 | **E5** dispersion | hours | the Poisson model is safe to extrapolate | a correction term to the saturation threshold |
 
-E3 is the one with a real chance of surprise, because nothing in the literature
-separates the two oracle strengths it separates — and because pricing the
-witness correctly already moved its headline once, from "a free detector never
-reaches rho" to "it reaches rho at three of seven summand counts, with a table
-that is itself the size of the algorithm".  E1 is the one to run first,
+E3 is the one whose design moved most while being written, and in the end it
+moved *against* the curve: its headline went from "a free detector never reaches
+rho", to "it reaches rho at three of seven summand counts with a table the size
+of the algorithm", to "the distinction it was built on does not exist for any
+detector anyone would propose". Two of those three were mine and both were
+accounting, not measurement — which is the argument for pre-registering a
+boundary and then checking it against a run rather than against intuition.  E1 is the one to run first,
 because every other row on this page is scored against a law that only E1 can
 confirm actually governs these curves.
 

@@ -77,7 +77,10 @@ Two boundaries, both derived, per §1 of `AGENTS.md`:
   for deciding whether a target decomposes.  Nothing built on an `m`-summand
   subspace factor base can go below that line however good the algebra gets.
   It is `2^56.40` at `m = 4` and falls with `m` (§5.3) — *below* rho, which is
-  the point: the floor is not what protects ECC2K-130.  The oracle is.
+  the point: the floor is not what protects ECC2K-130.  The oracle is.  And
+  "free" here need only mean a free **yes/no** answer: §3.2 measures a detector
+  turning itself into a witness finder with `k|F|` further whole-base queries,
+  at a cost the linear algebra absorbs.
 
 **Falsification target.**  This thread is a success if a decomposition oracle
 is exhibited that answers "is `R` a sum of `m` points of `F`?" in fewer than
@@ -107,14 +110,21 @@ polynomial `x^131 + x^13 + x² + x + 1` (checked irreducible at startup):
 **Measured at toy sizes** (`K_0/F_2^n`, `n = 11, 13, 17, 19`, every point of
 the curve enumerated and the count checked against the Koblitz recurrence):
 
-- the yield law, over twelve `(n, m, l)` cells and 512 targets each.
+- the yield law, over twelve `(n, m, l)` cells and 512 targets each;
+- where a trace-zero base's sums land (§3.1), exhaustively over every target of
+  `⟨G⟩` at `n = 13, 17, 19` — a mean, with no sampling and no Poisson step;
+- the two failure rates of swap localisation (§3.2), over eight rungs spanning a
+  sixteenfold range of `m/|F|` and of `λ`.
 
 **Derived**, not measured — and marked as such everywhere below:
 
 - every cost at `n = 131`.  Nothing in §5 is a run; they are operation counts
   from the model in §5.1, whose ingredients (`|F| ≈ 2^l`, yield `C(|F|,m)/#E`,
   oracle `C(|F|, m−split)`, Wiedemann `m·2^{2l}`) are each either measured
-  above or standard.
+  above or standard;
+- the swap's failure probability at 131 (§3.2) — the *form* of both rates and a
+  bound on their constants come from the toy runs, the numbers at `l* = 26.7` do
+  not.
 
 The follow-on experiments this note's open ends turn into, with their boundaries
 derived in advance, are in
@@ -244,6 +254,70 @@ Carried through, its headline would read `2^131.58` instead of `2^132.58`, and
 the orbit-union row `2^123.99` instead of `2^124.99`.  Against a gap to rho of
 `2^71.77` that changes nothing, which is the point of recording it here as a
 constant rather than re-cutting the table around it.
+
+### 3.2 A whole-base detector localises its own witness
+
+A hypothetical oracle that answers **yes or no** for the whole factor base looks
+much weaker than one that hands over the summands.  It is not, and this is the
+one place in this note where a measurement changed a design rather than
+confirming one.
+
+Let `R` decompose.  Walk the candidates `P ∈ F`; draw a base point `Q` of the
+same cofactor class; ask the detector about `R − P + Q`.  The class match keeps
+the query inside `⟨G⟩`, so even a detector that only accepts targets of the
+subgroup is enough.  If `P` is a summand, `R − P + Q` is *literally* an `m`-sum
+of base points — the other summands, plus `Q` — and the answer is yes by
+construction.  If `P` is not a summand, the point is generic and the answer is
+yes with probability `λ`.  Repeat with `k` independent `Q` and keep the `P` that
+answer yes every time.  **No sub-base query appears anywhere**, and the queries
+are free by hypothesis; what is paid is the `k|F|` group operations that build
+them, once per *successful* target.
+
+Two ways it misfires, both collisions with an `O(m)`-element set inside the
+class pool `Q` is drawn from:
+
+- `Q` equal to a remaining summand, or its negative, kills a true yes — a
+  **miss**, at rate `Θ(m/|F|)` per draw, so `k` draws miss about `k` times as
+  often;
+- `Q` equal to the negative of a summand collapses `R − P + Q` to
+  `(the other summands) + (−P)`, which decomposes for *every* `P` — a **false
+  positive**, at rate `Θ(m/|F|) + λ` per draw, so `k` draws take it to the
+  `k`-th power.
+
+Measured, 64 built targets a rung, `m = 2`, every rung reporting zero sub-base
+queries.  The two right-hand columns are the measured rate over the rate the
+collision argument predicts; they are what licenses reading the law off at 131:
+
+| `n` | `l` | `k` | `\|F\|` | `m/pool` | `λ` | miss | `/k·scale` | false pos. | `/scale^k` |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 13 | 5 | 1 | 33 | 0.2424 | 0.0659 | 0.1324 | 0.55 | 0.0972 | 0.32 |
+| 13 | 5 | 2 | 33 | 0.2424 | 0.0659 | 0.2462 | 0.51 | 0.0252 | 0.27 |
+| 17 | 6 | 1 | 65 | 0.1231 | 0.0159 | 0.0615 | 0.50 | 0.0447 | 0.32 |
+| 17 | 6 | 2 | 65 | 0.1231 | 0.0159 | 0.1953 | 0.79 | 0.0042 | 0.22 |
+| 19 | 7 | 1 | 139 | 0.0576 | 0.0183 | 0.0385 | 0.67 | 0.0311 | 0.41 |
+| 19 | 7 | 2 | 139 | 0.0576 | 0.0183 | 0.1000 | 0.87 | 0.0027 | 0.48 |
+| 19 | 9 | 1 | 527 | 0.0152 | 0.2648 | 0.0058 | 0.38 | 0.2390 | 0.85 |
+| 19 | 9 | 2 | 527 | 0.0152 | 0.2648 | 0.0225 | 0.74 | 0.0577 | 0.74 |
+
+Both ratios stay inside `[0.22, 0.87]` across a sixteenfold range of `m/|F|`
+**and** a sixteenfold range of `λ`.  There is no third error term.  At toy sizes
+`m/|F|` is percent-scale, so the swap is visibly ragged and exact recovery is
+rare; that is the point — it has to be shown ragged *in that specific way*
+before the rates may be read off where `m/|F|` is `2^−25`.
+
+**Consequence (derived, at 131).**  At the free-oracle optimum for `m = 4`
+(`l* = 26.70`), `m/|F| = 2^−24.70` and `λ = 2^−28.78`; with `k = 2` and the
+slack constants rounded up from the table above, a target's localisation fails
+with probability `2^−20.66`, so `2^6.04` relations are lost out of the `2^26.70`
+needed — one in a million.  The swap costs `k·2^{2l}` group operations against
+the `m·2^{2l}` the linear algebra already pays, so it is **absorbed**.
+
+**Deciding is localising.**  The only detector for which this fails is one that
+answers for a fixed family of targets and refuses `R − P + Q` — and no proposed
+detector has that shape: a resultant-vanishing test, a trace condition, a
+partial Gröbner refutation, the Nagao/Riemann–Roch coefficient search are all
+algorithms on the target's coordinates.  `RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`
+§E3 is built on this, and an earlier revision of it was built on the opposite.
 
 ## 4. A witness at full size
 
@@ -398,7 +472,9 @@ Three readings, in increasing order of usefulness.
 rho — `2^56.40` against `2^60.81` — so a free decomposition oracle *would*
 break ECC2K-130 by index calculus.  Anyone claiming the method is
 structurally impossible here is claiming more than the counting argument
-supports.
+supports.  Nor does it help to hope the oracle is only a *detector*: §3.2
+measures a whole-base yes/no answer localising its own witness, so the floor
+above is the floor for a yes/no oracle too.
 
 **The budget is absurd in absolute terms.**  At `m = 4` the oracle gets
 `2^5.71 ≈ 52` operations to decide whether a target is a sum of four points
@@ -540,6 +616,13 @@ the product law read backwards.
 - **The `2^131` is an upper bound on this family's cost and a statement about
   today's oracles**, not a security proof.  §5.3 says exactly what would
   falsify it, and the number is written down.
+- **The swap reduction is measured at `m = 2` only, and at `n ≤ 19`.**  §3.2
+  argues for general `m` — `R − P + Q` is an `m`-sum whenever `P` is a summand,
+  independently of `m` — but the runs are all `m = 2`, where the detector is a
+  set membership and a real factor base fits in memory.  The collision law it
+  fits (`Θ(m/|F|)`) carries an `m` that is never varied.  It is also *only* a
+  statement about a hypothetical oracle: no detector this repository can build
+  is cheap enough for the reduction to matter.
 - **The orbit-union rows are derived and unrun.**  §6 asserts that a union of
   `π`-orbits delivers the full `n`-fold collapse in a real pipeline; that is
   GGMP's own condition and it is not measured here.  It is E6 of

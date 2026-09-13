@@ -53,56 +53,80 @@ class LadderTests(unittest.TestCase):
 
 
 class DetectorTests(unittest.TestCase):
-    def test_localising_is_never_dearer_than_detector_only(self) -> None:
+    def test_an_agnostic_detector_is_never_dearer_than_a_restricted_one(self) -> None:
+        """It can do anything the restricted one can -- build the same table."""
         for m in range(2, 9):
-            a = T.detector_floor(m, 131, True)["log2_floor"]
-            b = T.detector_floor(m, 131, False)["log2_floor"]
+            a = T.detector_floor(m, 131, "target_agnostic")["log2_floor"]
+            b = T.detector_floor(m, 131, "target_restricted")["log2_floor"]
             self.assertLessEqual(a, b + 1e-9, f"m={m}")
 
-    def test_the_gap_widens_with_the_summand_count(self) -> None:
-        gaps = [T.detector_floor(m, 131, False)["log2_floor"]
-                - T.detector_floor(m, 131, True)["log2_floor"] for m in range(2, 9)]
-        self.assertLess(gaps[0], 1.0)        # at m = 2 the two coincide
-        self.assertGreater(gaps[-1], 20.0)   # by m = 8 they are far apart
-        # Not monotone in m: the witness meet-in-the-middle splits `ceil(m/2)` /
-        # `floor(m/2)`, so odd m is better balanced than the even m above it and
-        # the detector-only floor -- hence the gap -- saws.  Compare like parities.
-        self.assertEqual(gaps[0::2], sorted(gaps[0::2]))
-        self.assertEqual(gaps[1::2], sorted(gaps[1::2]))
+    def test_the_cheaper_witness_route_is_taken_at_each_summand_count(self) -> None:
+        """Below m = 4 the meet-in-the-middle table is cheaper than k|F| swap
+        queries a relation, and the two floors coincide; above it the swap wins."""
+        routes = {m: T.detector_floor(m, 131, "target_agnostic")["witness_route"]
+                  for m in range(2, 9)}
+        self.assertEqual(routes[2], "meet_in_the_middle")
+        self.assertEqual(routes[3], "meet_in_the_middle")
+        for m in range(4, 9):
+            self.assertEqual(routes[m], "swap", f"m={m}")
+        for m in (2, 3):                       # same route, so the same number
+            a = T.detector_floor(m, 131, "target_agnostic")
+            b = T.detector_floor(m, 131, "target_restricted")
+            self.assertEqual(a["log2_floor"], b["log2_floor"])
 
-    def test_the_witness_is_priced_by_meet_in_the_middle_not_by_search(self) -> None:
-        """Charging a naive `C(|F|, m-1)` witness search inflates the floor by
-        tens of bits; the table is built once and shared across every target."""
+    def test_swap_localisation_is_absorbed_by_the_linear_algebra(self) -> None:
+        """The swap costs k|F| group operations a relation against the m|F|^2 the
+        linear algebra already pays, so charging it moves the floor by under a
+        bit -- which is why deciding and localising land on the same line."""
+        for m in range(4, 9):
+            cell = T.detector_floor(m, 131, "target_agnostic")
+            self.assertLess(cell["log2_swap_localisation"],
+                            cell["log2_linear_algebra"], f"m={m}")
+            self.assertIsNone(cell["log2_table_entries"])
+
+    def test_deciding_reaches_rho_from_four_summands_and_stays(self) -> None:
+        """The corrected headline of E3.  A free detector that may be asked about
+        any target is under rho from m = 4 onward, monotonically and with no
+        table; only an oracle artificially restricted to a fixed family of
+        targets has to pay for a witness, and that column saws."""
+        agnostic = [T.detector_floor(m, 131, "target_agnostic")["log2_floor"]
+                    for m in range(2, 9)]
+        self.assertEqual(agnostic, sorted(agnostic, reverse=True))     # monotone
+        self.assertEqual([m for m in range(2, 9) if agnostic[m - 2] < RHO],
+                         [4, 5, 6, 7, 8])
+        restricted = [m for m in range(2, 9)
+                      if T.detector_floor(m, 131, "target_restricted")["log2_floor"]
+                      < RHO]
+        self.assertEqual(restricted, [5, 7, 8])
+
+    def test_the_swap_failure_rates_at_131_are_derived_from_the_measured_law(self) -> None:
+        """Both failure modes are collisions with an O(m)-element set, so at a
+        factor base of 2^16 and up they cost a negligible slice of the relations
+        -- and the slack factors must sit above what the toy runs actually saw."""
         for m in range(2, 9):
-            d = T.detector_floor(m, 131, False)
-            self.assertEqual(d["witness_split"], [(m + 1) // 2, m // 2])
-            l = d["l_star"]
-            naive = l + DEC.log2_comb(l, m - 1)
-            self.assertLessEqual(d["log2_witness_probes"], naive + 1e-9, f"m={m}")
-            self.assertLessEqual(d["log2_witness_table_entries"],
-                                 DEC.log2_comb(l, m) + 1e-9, f"m={m}")
-
-    def test_deciding_for_free_reaches_rho_but_only_localising_reaches_it_early(self) -> None:
-        """The corrected headline of E3.  A free detector alone does dip under
-        rho -- from m = 5, and only at some m -- but it needs a witness table of
-        2^45 to 2^57 entries to do it.  Localising crosses one summand earlier,
-        never comes back up, and needs no table at all."""
-        detector = [m for m in range(2, 9)
-                    if T.detector_floor(m, 131, False)["log2_floor"] < RHO]
-        localising = [m for m in range(2, 9)
-                      if T.detector_floor(m, 131, True)["log2_floor"] < RHO]
-        self.assertEqual(detector, [5, 7, 8])
-        self.assertEqual(localising, [4, 5, 6, 7, 8])
-        for m in detector:                       # the price of not localising
-            d = T.detector_floor(m, 131, False)
-            self.assertGreater(d["log2_witness_table_entries"], 40.0, f"m={m}")
+            l = T.detector_floor(m, 131, "target_agnostic")["l_star"]
+            r = T.swap_reliability_at_131(m, l)
+            self.assertTrue(r["negligible"], r)
+            self.assertLess(r["log2_relations_lost"], r["log2_relations_needed"])
+            # the second query is what makes it work: with one, the lambda
+            # channel alone throws |F|*lambda false positives a target
+            single = T.swap_reliability_at_131(m, l, k=1)
+            self.assertLess(r["log2_failure_probability_per_target"],
+                            single["log2_failure_probability_per_target"], f"m={m}")
+            self.assertFalse(single["negligible"], f"m={m}: k=1 should not suffice")
+            # a third does not help: misses grow linearly in k while false
+            # positives fall as the k-th power, and by k = 2 misses dominate
+            self.assertGreater(
+                T.swap_reliability_at_131(m, l, k=3)[
+                    "log2_failure_probability_per_target"],
+                r["log2_failure_probability_per_target"], f"m={m}")
 
     def test_the_frobenius_collapse_lowers_both_floors(self) -> None:
         for m in range(2, 9):
-            for loc in (True, False):
-                plain = T.detector_floor(m, 131, loc)["log2_floor"]
-                orbit = T.detector_floor(m, 131, loc, frobenius=True)["log2_floor"]
-                self.assertLess(orbit, plain, f"m={m} localising={loc}")
+            for mode in ("target_agnostic", "target_restricted"):
+                plain = T.detector_floor(m, 131, mode)["log2_floor"]
+                orbit = T.detector_floor(m, 131, mode, frobenius=True)["log2_floor"]
+                self.assertLess(orbit, plain, f"m={m} mode={mode}")
 
 
 class LargePrimeTests(unittest.TestCase):

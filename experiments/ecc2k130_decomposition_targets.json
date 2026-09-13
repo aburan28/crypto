@@ -300,434 +300,607 @@
     "saturating_l": 20.53,
     "falsifier": "any dimension whose measured total is below half the flat line"
   },
-  "E3_detector_versus_localisation": {
-    "question": "how much of the difficulty is deciding, and how much is localising the witness?",
+  "E3_detector_target_agnosticism": {
+    "question": "how much of the difficulty is deciding, and how much is producing the witness?",
+    "answer": "for a detector that is an algorithm on the target -- which is every candidate in this repository -- none of it.  The witness falls out of k|F| further whole-base queries by swapping one candidate summand for a class-matched base point, and the group operations that build those queries are absorbed by the linear algebra already being paid.  Deciding IS localising.",
     "floors": [
       {
         "m": 2,
-        "localising": true,
-        "frobenius_stable": false,
-        "l_star": 43.35,
-        "log2_floor": 89.25,
-        "log2_targets": 88.65,
-        "log2_linear_algebra": 87.7
-      },
-      {
-        "m": 2,
-        "localising": true,
-        "frobenius_stable": true,
-        "l_star": 45.7,
-        "log2_floor": 79.87,
-        "log2_targets": 79.27,
-        "log2_linear_algebra": 78.33
-      },
-      {
-        "m": 2,
-        "localising": false,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
         "l_star": 43.15,
         "log2_floor": 89.45,
         "log2_targets": 88.85,
         "log2_linear_algebra": 87.3,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           1,
           1
         ],
-        "log2_witness_table_entries": 43.15,
+        "log2_table_entries": 43.15,
         "log2_witness_probes": 86.3
       },
       {
         "m": 2,
-        "localising": false,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
         "l_star": 43.65,
         "log2_floor": 81.89,
         "log2_targets": 81.32,
         "log2_linear_algebra": 74.23,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           1,
           1
         ],
-        "log2_witness_table_entries": 43.65,
+        "log2_table_entries": 43.65,
+        "log2_witness_probes": 80.27
+      },
+      {
+        "m": 2,
+        "mode": "target_restricted",
+        "frobenius_stable": false,
+        "l_star": 43.15,
+        "log2_floor": 89.45,
+        "log2_targets": 88.85,
+        "log2_linear_algebra": 87.3,
+        "witness_route": "meet_in_the_middle",
+        "witness_split": [
+          1,
+          1
+        ],
+        "log2_table_entries": 43.15,
+        "log2_witness_probes": 86.3
+      },
+      {
+        "m": 2,
+        "mode": "target_restricted",
+        "frobenius_stable": true,
+        "l_star": 43.65,
+        "log2_floor": 81.89,
+        "log2_targets": 81.32,
+        "log2_linear_algebra": 74.23,
+        "witness_route": "meet_in_the_middle",
+        "witness_split": [
+          1,
+          1
+        ],
+        "log2_table_entries": 43.65,
         "log2_witness_probes": 80.27
       },
       {
         "m": 3,
-        "localising": true,
-        "frobenius_stable": false,
-        "l_star": 33.0,
-        "log2_floor": 68.58,
-        "log2_targets": 67.58,
-        "log2_linear_algebra": 67.58
-      },
-      {
-        "m": 3,
-        "localising": true,
-        "frobenius_stable": true,
-        "l_star": 34.75,
-        "log2_floor": 58.03,
-        "log2_targets": 57.05,
-        "log2_linear_algebra": 57.02
-      },
-      {
-        "m": 3,
-        "localising": false,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
         "l_star": 32.85,
         "log2_floor": 68.88,
         "log2_targets": 67.88,
         "log2_linear_algebra": 67.28,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           2,
           1
         ],
-        "log2_witness_table_entries": 64.7,
+        "log2_table_entries": 64.7,
         "log2_witness_probes": 65.7
       },
       {
         "m": 3,
-        "localising": false,
+        "mode": "target_agnostic",
+        "frobenius_stable": true,
+        "l_star": 33.15,
+        "log2_floor": 61.27,
+        "log2_targets": 60.25,
+        "log2_linear_algebra": 53.82,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 60.27,
+        "log2_table_entries": null
+      },
+      {
+        "m": 3,
+        "mode": "target_restricted",
+        "frobenius_stable": false,
+        "l_star": 32.85,
+        "log2_floor": 68.88,
+        "log2_targets": 67.88,
+        "log2_linear_algebra": 67.28,
+        "witness_route": "meet_in_the_middle",
+        "witness_split": [
+          2,
+          1
+        ],
+        "log2_table_entries": 64.7,
+        "log2_witness_probes": 65.7
+      },
+      {
+        "m": 3,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 31.9,
         "log2_floor": 63.79,
         "log2_targets": 62.75,
         "log2_linear_algebra": 51.32,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           2,
           1
         ],
-        "log2_witness_table_entries": 62.8,
+        "log2_table_entries": 62.8,
         "log2_witness_probes": 56.77
       },
       {
         "m": 4,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
-        "l_star": 26.85,
-        "log2_floor": 56.41,
-        "log2_targets": 55.03,
-        "log2_linear_algebra": 55.7
+        "l_star": 26.7,
+        "log2_floor": 56.76,
+        "log2_targets": 55.48,
+        "log2_linear_algebra": 55.4,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 54.4,
+        "log2_table_entries": null
       },
       {
         "m": 4,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
-        "l_star": 28.25,
-        "log2_floor": 45.15,
-        "log2_targets": 43.8,
-        "log2_linear_algebra": 44.43
+        "l_star": 27.05,
+        "log2_floor": 48.79,
+        "log2_targets": 47.4,
+        "log2_linear_algebra": 42.03,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 48.07,
+        "log2_table_entries": null
       },
       {
         "m": 4,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": false,
         "l_star": 22.75,
         "log2_floor": 68.29,
         "log2_targets": 67.33,
         "log2_linear_algebra": 47.5,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           2,
           2
         ],
-        "log2_witness_table_entries": 44.5,
+        "log2_table_entries": 44.5,
         "log2_witness_probes": 67.25
       },
       {
         "m": 4,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 22.75,
         "log2_floor": 61.26,
         "log2_targets": 60.3,
         "log2_linear_algebra": 33.43,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           2,
           2
         ],
-        "log2_witness_table_entries": 44.5,
+        "log2_table_entries": 44.5,
         "log2_witness_probes": 60.22
       },
       {
         "m": 5,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
-        "l_star": 22.75,
-        "log2_floor": 48.44,
-        "log2_targets": 46.91,
-        "log2_linear_algebra": 47.82
+        "l_star": 22.7,
+        "log2_floor": 48.76,
+        "log2_targets": 47.11,
+        "log2_linear_algebra": 47.72,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 46.4,
+        "log2_table_entries": null
       },
       {
         "m": 5,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
-        "l_star": 23.95,
-        "log2_floor": 36.71,
-        "log2_targets": 35.07,
-        "log2_linear_algebra": 36.16
+        "l_star": 23.0,
+        "log2_floor": 40.54,
+        "log2_targets": 38.87,
+        "log2_linear_algebra": 34.26,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 39.97,
+        "log2_table_entries": null
       },
       {
         "m": 5,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": false,
         "l_star": 19.85,
         "log2_floor": 59.75,
         "log2_targets": 58.51,
         "log2_linear_algebra": 42.02,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           3,
           2
         ],
-        "log2_witness_table_entries": 56.97,
+        "log2_table_entries": 56.97,
         "log2_witness_probes": 58.55
       },
       {
         "m": 5,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 19.1,
         "log2_floor": 55.62,
         "log2_targets": 54.47,
         "log2_linear_algebra": 26.46,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           3,
           2
         ],
-        "log2_witness_table_entries": 54.72,
+        "log2_table_entries": 54.72,
         "log2_witness_probes": 49.27
       },
       {
         "m": 6,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
-        "l_star": 19.9,
-        "log2_floor": 42.85,
-        "log2_targets": 40.99,
-        "log2_linear_algebra": 42.38
+        "l_star": 19.85,
+        "log2_floor": 43.15,
+        "log2_targets": 41.24,
+        "log2_linear_algebra": 42.28,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 40.7,
+        "log2_table_entries": null
       },
       {
         "m": 6,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
-        "l_star": 20.9,
-        "log2_floor": 30.79,
-        "log2_targets": 28.96,
-        "log2_linear_algebra": 30.32
+        "l_star": 20.1,
+        "log2_floor": 34.71,
+        "log2_targets": 32.96,
+        "log2_linear_algebra": 28.72,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 34.17,
+        "log2_table_entries": null
       },
       {
         "m": 6,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": false,
         "l_star": 15.95,
         "log2_floor": 62.0,
         "log2_targets": 60.74,
         "log2_linear_algebra": 34.48,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           3,
           3
         ],
-        "log2_witness_table_entries": 45.27,
+        "log2_table_entries": 45.27,
         "log2_witness_probes": 61.22
       },
       {
         "m": 6,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 15.95,
         "log2_floor": 54.97,
         "log2_targets": 53.71,
         "log2_linear_algebra": 20.42,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           3,
           3
         ],
-        "log2_witness_table_entries": 45.27,
+        "log2_table_entries": 45.27,
         "log2_witness_probes": 54.18
       },
       {
         "m": 7,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
-        "l_star": 17.75,
-        "log2_floor": 38.74,
-        "log2_targets": 36.8,
-        "log2_linear_algebra": 38.31
+        "l_star": 17.7,
+        "log2_floor": 39.01,
+        "log2_targets": 37.1,
+        "log2_linear_algebra": 38.21,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 36.4,
+        "log2_table_entries": null
       },
       {
         "m": 7,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
-        "l_star": 18.65,
-        "log2_floor": 26.43,
-        "log2_targets": 24.37,
-        "log2_linear_algebra": 26.04
+        "l_star": 18.0,
+        "log2_floor": 30.38,
+        "log2_targets": 28.27,
+        "log2_linear_algebra": 24.74,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 29.97,
+        "log2_table_entries": null
       },
       {
         "m": 7,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": false,
         "l_star": 14.6,
         "log2_floor": 56.93,
         "log2_targets": 55.7,
         "log2_linear_algebra": 32.01,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           4,
           3
         ],
-        "log2_witness_table_entries": 53.82,
+        "log2_table_entries": 53.82,
         "log2_witness_probes": 55.82
       },
       {
         "m": 7,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 14.15,
         "log2_floor": 52.75,
         "log2_targets": 51.37,
         "log2_linear_algebra": 17.04,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           4,
           3
         ],
-        "log2_witness_table_entries": 52.02,
+        "log2_table_entries": 52.02,
         "log2_witness_probes": 46.98
       },
       {
         "m": 8,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": false,
         "l_star": 16.1,
-        "log2_floor": 35.61,
+        "log2_floor": 35.86,
         "log2_targets": 33.6,
-        "log2_linear_algebra": 35.2
+        "log2_linear_algebra": 35.2,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 33.2,
+        "log2_table_entries": null
       },
       {
         "m": 8,
-        "localising": true,
+        "mode": "target_agnostic",
         "frobenius_stable": true,
-        "l_star": 16.9,
-        "log2_floor": 23.1,
-        "log2_targets": 20.97,
-        "log2_linear_algebra": 22.73
+        "l_star": 16.35,
+        "log2_floor": 27.05,
+        "log2_targets": 24.82,
+        "log2_linear_algebra": 21.63,
+        "witness_route": "swap",
+        "queries_per_candidate": 2,
+        "log2_swap_localisation": 26.67,
+        "log2_table_entries": null
       },
       {
         "m": 8,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": false,
         "l_star": 12.6,
         "log2_floor": 59.27,
         "log2_targets": 58.1,
         "log2_linear_algebra": 28.2,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           4,
           4
         ],
-        "log2_witness_table_entries": 45.82,
+        "log2_table_entries": 45.82,
         "log2_witness_probes": 58.42
       },
       {
         "m": 8,
-        "localising": false,
+        "mode": "target_restricted",
         "frobenius_stable": true,
         "l_star": 12.6,
         "log2_floor": 52.25,
         "log2_targets": 51.07,
         "log2_linear_algebra": 14.13,
+        "witness_route": "meet_in_the_middle",
         "witness_split": [
           4,
           4
         ],
-        "log2_witness_table_entries": 45.82,
+        "log2_table_entries": 45.82,
         "log2_witness_probes": 51.38
       }
     ],
     "gaps": [
       {
         "m": 2,
-        "log2_localising_floor": 89.25,
-        "log2_detector_only_floor": 89.45,
-        "log2_gap": 0.2,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": false,
-        "log2_detector_only_witness_table": 43.15,
-        "log2_localising_memory": 43.35
+        "log2_agnostic_floor": 89.45,
+        "agnostic_witness_route": "meet_in_the_middle",
+        "log2_restricted_floor": 89.45,
+        "log2_gap": 0.0,
+        "agnostic_beats_rho": false,
+        "restricted_beats_rho": false,
+        "log2_agnostic_table_entries": 43.15,
+        "log2_restricted_table_entries": 43.15
       },
       {
         "m": 3,
-        "log2_localising_floor": 68.58,
-        "log2_detector_only_floor": 68.88,
-        "log2_gap": 0.3,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": false,
-        "log2_detector_only_witness_table": 64.7,
-        "log2_localising_memory": 33.0
+        "log2_agnostic_floor": 68.88,
+        "agnostic_witness_route": "meet_in_the_middle",
+        "log2_restricted_floor": 68.88,
+        "log2_gap": 0.0,
+        "agnostic_beats_rho": false,
+        "restricted_beats_rho": false,
+        "log2_agnostic_table_entries": 64.7,
+        "log2_restricted_table_entries": 64.7
       },
       {
         "m": 4,
-        "log2_localising_floor": 56.41,
-        "log2_detector_only_floor": 68.29,
-        "log2_gap": 11.88,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": true,
-        "log2_detector_only_witness_table": 44.5,
-        "log2_localising_memory": 26.85
+        "log2_agnostic_floor": 56.76,
+        "agnostic_witness_route": "swap",
+        "log2_restricted_floor": 68.29,
+        "log2_gap": 11.53,
+        "agnostic_beats_rho": true,
+        "restricted_beats_rho": false,
+        "log2_agnostic_table_entries": null,
+        "log2_restricted_table_entries": 44.5
       },
       {
         "m": 5,
-        "log2_localising_floor": 48.44,
-        "log2_detector_only_floor": 59.75,
-        "log2_gap": 11.31,
-        "detector_only_beats_rho": true,
-        "localising_beats_rho": true,
-        "log2_detector_only_witness_table": 56.97,
-        "log2_localising_memory": 22.75
+        "log2_agnostic_floor": 48.76,
+        "agnostic_witness_route": "swap",
+        "log2_restricted_floor": 59.75,
+        "log2_gap": 10.99,
+        "agnostic_beats_rho": true,
+        "restricted_beats_rho": true,
+        "log2_agnostic_table_entries": null,
+        "log2_restricted_table_entries": 56.97
       },
       {
         "m": 6,
-        "log2_localising_floor": 42.85,
-        "log2_detector_only_floor": 62.0,
-        "log2_gap": 19.15,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": true,
-        "log2_detector_only_witness_table": 45.27,
-        "log2_localising_memory": 19.9
+        "log2_agnostic_floor": 43.15,
+        "agnostic_witness_route": "swap",
+        "log2_restricted_floor": 62.0,
+        "log2_gap": 18.85,
+        "agnostic_beats_rho": true,
+        "restricted_beats_rho": false,
+        "log2_agnostic_table_entries": null,
+        "log2_restricted_table_entries": 45.27
       },
       {
         "m": 7,
-        "log2_localising_floor": 38.74,
-        "log2_detector_only_floor": 56.93,
-        "log2_gap": 18.19,
-        "detector_only_beats_rho": true,
-        "localising_beats_rho": true,
-        "log2_detector_only_witness_table": 53.82,
-        "log2_localising_memory": 17.75
+        "log2_agnostic_floor": 39.01,
+        "agnostic_witness_route": "swap",
+        "log2_restricted_floor": 56.93,
+        "log2_gap": 17.92,
+        "agnostic_beats_rho": true,
+        "restricted_beats_rho": true,
+        "log2_agnostic_table_entries": null,
+        "log2_restricted_table_entries": 53.82
       },
       {
         "m": 8,
-        "log2_localising_floor": 35.61,
-        "log2_detector_only_floor": 59.27,
-        "log2_gap": 23.66,
-        "detector_only_beats_rho": true,
-        "localising_beats_rho": true,
-        "log2_detector_only_witness_table": 45.82,
-        "log2_localising_memory": 16.1
+        "log2_agnostic_floor": 35.86,
+        "agnostic_witness_route": "swap",
+        "log2_restricted_floor": 59.27,
+        "log2_gap": 23.41,
+        "agnostic_beats_rho": true,
+        "restricted_beats_rho": true,
+        "log2_agnostic_table_entries": null,
+        "log2_restricted_table_entries": 45.82
       }
     ],
-    "min_detector_only_floor": 56.93,
-    "min_localising_floor": 35.61,
-    "detector_only_rho_crossings": [
-      5,
-      7,
-      8
-    ],
-    "localising_rho_crossings": [
+    "min_agnostic_floor": 35.86,
+    "min_restricted_floor": 56.93,
+    "agnostic_rho_crossings": [
       4,
       5,
       6,
       7,
       8
     ],
-    "note": "the detector-only floor is not monotone in m: odd m splits its meet-in-the-middle witness more evenly than the next even m, so it dips below rho at 5 and 7 and back above at 6.  Both floors are derived, not measured, and both are floors -- no algorithm attains them.",
-    "falsifier": "a real oracle whose sub-base query costs less than the same query on the full base by more than the sub-base ratio"
+    "restricted_rho_crossings": [
+      5,
+      7,
+      8
+    ],
+    "swap_reliability": [
+      {
+        "m": 2,
+        "l": 43.15,
+        "queries_per_candidate": 2,
+        "log2_lambda": -45.7,
+        "log2_collision_scale": -42.15,
+        "log2_failure_probability_per_target": -39.09,
+        "log2_relations_lost": 4.06,
+        "log2_relations_needed": 43.15,
+        "fraction_of_relations_lost": 0.0,
+        "negligible": true
+      },
+      {
+        "m": 3,
+        "l": 32.85,
+        "queries_per_candidate": 2,
+        "log2_lambda": -35.03,
+        "log2_collision_scale": -31.27,
+        "log2_failure_probability_per_target": -27.63,
+        "log2_relations_lost": 5.22,
+        "log2_relations_needed": 32.85,
+        "fraction_of_relations_lost": 0.0,
+        "negligible": true
+      },
+      {
+        "m": 4,
+        "l": 26.7,
+        "queries_per_candidate": 2,
+        "log2_lambda": -28.78,
+        "log2_collision_scale": -24.7,
+        "log2_failure_probability_per_target": -20.66,
+        "log2_relations_lost": 6.04,
+        "log2_relations_needed": 26.7,
+        "fraction_of_relations_lost": 1e-06,
+        "negligible": true
+      },
+      {
+        "m": 5,
+        "l": 22.7,
+        "queries_per_candidate": 2,
+        "log2_lambda": -24.41,
+        "log2_collision_scale": -20.38,
+        "log2_failure_probability_per_target": -16.01,
+        "log2_relations_lost": 6.69,
+        "log2_relations_needed": 22.7,
+        "fraction_of_relations_lost": 1.5e-05,
+        "negligible": true
+      },
+      {
+        "m": 6,
+        "l": 19.85,
+        "queries_per_candidate": 2,
+        "log2_lambda": -21.39,
+        "log2_collision_scale": -17.27,
+        "log2_failure_probability_per_target": -12.64,
+        "log2_relations_lost": 7.21,
+        "log2_relations_needed": 19.85,
+        "fraction_of_relations_lost": 0.000157,
+        "negligible": true
+      },
+      {
+        "m": 7,
+        "l": 17.7,
+        "queries_per_candidate": 2,
+        "log2_lambda": -19.4,
+        "log2_collision_scale": -14.89,
+        "log2_failure_probability_per_target": -10.05,
+        "log2_relations_lost": 7.65,
+        "log2_relations_needed": 17.7,
+        "fraction_of_relations_lost": 0.000941,
+        "negligible": true
+      },
+      {
+        "m": 8,
+        "l": 16.1,
+        "queries_per_candidate": 2,
+        "log2_lambda": -17.5,
+        "log2_collision_scale": -13.1,
+        "log2_failure_probability_per_target": -8.07,
+        "log2_relations_lost": 8.03,
+        "log2_relations_needed": 16.1,
+        "fraction_of_relations_lost": 0.003733,
+        "negligible": true
+      }
+    ],
+    "note": "an agnostic detector may still build the meet-in-the-middle table, so it takes whichever witness route is cheaper: the table at m = 2, 3 (where the two floors coincide) and the swap from m = 4 up.  The restricted column prices an oracle that answers only for a distinguished family of targets and so cannot be swapped -- no proposed detector has that shape, which is what makes the gap a measure of an artificial restriction rather than of the curve's protection.  Both columns are derived, not measured, and both are floors -- no algorithm attains them.",
+    "falsifier": "a proposed detector whose cost on R - P + Q exceeds its cost on R by more than a constant, which would put the restricted column back in play"
   },
   "E4_large_primes": {
     "question": "do large primes move the product law, or only relabel it?",

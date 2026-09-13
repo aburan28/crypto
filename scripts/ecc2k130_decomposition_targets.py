@@ -9,10 +9,11 @@ hope:
   E1  a scale-model ladder -- prime `n` with `2` primitive, where no invariant
       subspace exists, exactly as at 131.  Predicts `Lambda = ops / 2^n` flat.
   E2  the `l`-flatness sweep at fixed `n`.  Predicts flat then rising.
-  E3  the two hypothetical-oracle floors: a free decomposition *detector* that
-      only answers for the whole base, against one that answers for sub-bases
-      and so localises a witness by bisection.  The gap between them is where
-      the curve's protection actually lives.
+  E3  what a free decomposition *detector* buys.  A detector that is an
+      algorithm on the target localises its own witness by swapping candidate
+      summands, so deciding and localising coincide; the second column prices
+      the artificial alternative, a detector restricted to a fixed family of
+      targets, and the gap measures the restriction, not the curve.
   E4  single large primes, guarded so the oracle still filters.
   E5  the yield distribution, not just its mean: sample sizes for a Poisson test.
   E6  Frobenius-stable orbit-union bases, on the ladder.
@@ -103,51 +104,87 @@ def ladder(max_n: int = 70):
 
 # ── E3: what a hypothetical oracle would have to be ──────────────────────
 
-def detector_floor(m: int, n: int, localising: bool, frobenius: bool = False):
-    """Floor for a free decomposition oracle of one of two strengths.
+def detector_floor(m: int, n: int, mode: str, frobenius: bool = False,
+                   k: int = 2):
+    """Floor for a free decomposition oracle, by what it is allowed to be asked.
 
-    *Localising* means the oracle answers "is there a decomposition with every
-    summand drawn from `W`?" for any sub-base `W`, so a witness falls out of
-    `O(m log |F|)` free queries and only the targets and the linear algebra are
-    charged.  *Non-localising* means it answers only for the whole base: the
-    detector filters the targets for free, but each target it passes still has
-    to be turned into an explicit `m`-subset.
+    `target_agnostic` -- the detector is an algorithm on the target's
+    coordinates, so it may be called on `R - P + Q` as cheaply as on `R`.  That
+    is enough to localise the witness with no sub-base query at all: walk the
+    candidates `P`, swap in a class-matched base point `Q`, and keep the `P`
+    whose query says yes `k` times running (`swap_localisation` in the companion
+    script measures the two ways this misfires and shows both are collisions of
+    size `Theta(m/|F|)`).  The queries are free by hypothesis; what is charged is
+    the `k|F|` group operations that build them, once per *successful* target.
 
-    Extracting that witness is *not* a `C(|F|, m-1)` search.  It is a
-    meet-in-the-middle: tabulate every `ceil(m/2)`-subset sum of the base once,
-    then for each *successful* target enumerate its `floor(m/2)`-subset
-    complements and probe.  The table is built one time and shared across every
-    target; only the probes recur, and they recur once per relation, not once
-    per target tried.  Charging the naive search instead inflates this line by
-    tens of bits and is what an earlier revision of this file did.
+    `target_restricted` -- the detector answers only for a distinguished family
+    of targets, so the swap is unavailable and the witness has to be extracted
+    by meet-in-the-middle: a table of every `ceil(m/2)`-subset sum built once and
+    shared, then `floor(m/2)`-subset probes per successful target.
 
-    Nothing below either line is reachable however good the algebra gets; the
-    distance between them is the value of localisation.
+    An earlier revision of this file called these two "non-localising" and
+    "localising" and charged the first a naive `C(|F|, m-1)` search.  Both were
+    wrong: the search is not the right price for the restricted oracle, and the
+    restriction is not a property any proposed detector actually has.
     """
+    assert mode in ("target_agnostic", "target_restricted"), mode
     collapse = math.log2(n) if frobenius else 0.0
     half_hi, half_lo = (m + 1) // 2, m // 2
 
     def f(l):
         targets = (l - collapse) + max(0.0, n - lc(l, m))
         linalg = math.log2(m) + 2 * (l - collapse)
-        parts = [targets, linalg]
-        table = witness = -math.inf
-        if not localising:
-            table = lc(l, half_hi)                     # built once, shared
-            witness = (l - collapse) + lc(l, half_lo)  # probes, per relation
-            parts += [table, witness]
-        return (la(*parts), targets, linalg, table, witness)
+        swap = math.log2(k) + (l - collapse) + l         # k|F| ops a relation
+        table = lc(l, half_hi)                           # built once, shared
+        witness = (l - collapse) + lc(l, half_lo)        # probes, per relation
+        mitm = la(table, witness)
+        # an agnostic detector may still build the table, so it takes whichever
+        # of the two witness paths is cheaper; a restricted one has only the table
+        use_swap = mode == "target_agnostic" and swap <= mitm
+        parts = [targets, linalg] + ([swap] if use_swap else [table, witness])
+        return (la(*parts), targets, linalg, use_swap, swap, table, witness)
 
-    tot, targets, linalg, table, witness, l = sweep(f)
-    out = {"m": m, "localising": localising, "frobenius_stable": frobenius,
+    tot, targets, linalg, use_swap, swap, table, witness, l = sweep(f)
+    out = {"m": m, "mode": mode, "frobenius_stable": frobenius,
            "l_star": l, "log2_floor": round(tot, 2),
            "log2_targets": round(targets, 2),
-           "log2_linear_algebra": round(linalg, 2)}
-    if not localising:
+           "log2_linear_algebra": round(linalg, 2),
+           "witness_route": "swap" if use_swap else "meet_in_the_middle"}
+    if use_swap:
+        out["queries_per_candidate"] = k
+        out["log2_swap_localisation"] = round(swap, 2)
+        out["log2_table_entries"] = None
+    else:
         out["witness_split"] = [half_hi, half_lo]
-        out["log2_witness_table_entries"] = round(table, 2)
+        out["log2_table_entries"] = round(table, 2)
         out["log2_witness_probes"] = round(witness, 2)
     return out
+
+
+def swap_reliability_at_131(m: int, l: float, k: int = 2,
+                            miss_slack: float = 1.5, fp_slack: float = 1.0):
+    """What the measured collision law implies for the swap at `n = 131`.
+
+    **Derived, not measured.**  `swap_localisation` in the companion script fixes
+    the *form* of both failure rates -- miss `~ k m/|F|`, false positive
+    `~ (m/|F| + lambda)^k` -- and bounds their constants over a sixteenfold range
+    of `m/|F|` and of `lambda`; the largest ratios it saw were `0.87` and `0.85`,
+    and the slacks here are those rounded up.  Nothing at 131 was run.
+    """
+    base = 2.0 ** l
+    lam = 2.0 ** (lc(l, m) - 131)
+    collide = m / base
+    per_summand_miss = miss_slack * k * collide
+    per_target_fp = base * fp_slack * (collide + lam) ** k
+    fail = m * per_summand_miss + per_target_fp
+    return {"m": m, "l": round(l, 2), "queries_per_candidate": k,
+            "log2_lambda": round(math.log2(lam), 2),
+            "log2_collision_scale": round(math.log2(collide), 2),
+            "log2_failure_probability_per_target": round(math.log2(fail), 2),
+            "log2_relations_lost": round(math.log2(fail) + l, 2),
+            "log2_relations_needed": round(l, 2),
+            "fraction_of_relations_lost": round(fail, 6),
+            "negligible": fail < 0.01}
 
 
 # ── E4: a single large prime, guarded so the oracle still filters ────────
@@ -239,41 +276,57 @@ def main() -> None:
 
     floors = []
     for m in range(2, 9):
-        for loc in (True, False):
+        for mode in ("target_agnostic", "target_restricted"):
             for frob in (False, True):
-                floors.append(detector_floor(m, N131, loc, frob))
+                floors.append(detector_floor(m, N131, mode, frob))
     gaps = []
     for m in range(2, 9):
-        a = next(f for f in floors if f["m"] == m and f["localising"]
-                 and not f["frobenius_stable"])
-        b = next(f for f in floors if f["m"] == m and not f["localising"]
-                 and not f["frobenius_stable"])
+        a = next(f for f in floors if f["m"] == m
+                 and f["mode"] == "target_agnostic" and not f["frobenius_stable"])
+        b = next(f for f in floors if f["m"] == m
+                 and f["mode"] == "target_restricted" and not f["frobenius_stable"])
         gaps.append({"m": m,
-                     "log2_localising_floor": a["log2_floor"],
-                     "log2_detector_only_floor": b["log2_floor"],
+                     "log2_agnostic_floor": a["log2_floor"],
+                     "agnostic_witness_route": a["witness_route"],
+                     "log2_restricted_floor": b["log2_floor"],
                      "log2_gap": round(b["log2_floor"] - a["log2_floor"], 2),
-                     "detector_only_beats_rho": b["log2_floor"] < log2_rho,
-                     "localising_beats_rho": a["log2_floor"] < log2_rho,
-                     "log2_detector_only_witness_table": b[
-                         "log2_witness_table_entries"],
-                     "log2_localising_memory": a["l_star"]})
+                     "agnostic_beats_rho": a["log2_floor"] < log2_rho,
+                     "restricted_beats_rho": b["log2_floor"] < log2_rho,
+                     "log2_agnostic_table_entries": a["log2_table_entries"],
+                     "log2_restricted_table_entries": b["log2_table_entries"]})
     e3 = {
         "question": "how much of the difficulty is deciding, and how much is "
-                    "localising the witness?",
+                    "producing the witness?",
+        "answer": "for a detector that is an algorithm on the target -- which is "
+                  "every candidate in this repository -- none of it.  The witness "
+                  "falls out of k|F| further whole-base queries by swapping one "
+                  "candidate summand for a class-matched base point, and the "
+                  "group operations that build those queries are absorbed by the "
+                  "linear algebra already being paid.  Deciding IS localising.",
         "floors": floors, "gaps": gaps,
-        "min_detector_only_floor": min(g["log2_detector_only_floor"] for g in gaps),
-        "min_localising_floor": min(g["log2_localising_floor"] for g in gaps),
-        "detector_only_rho_crossings": [g["m"] for g in gaps
-                                        if g["detector_only_beats_rho"]],
-        "localising_rho_crossings": [g["m"] for g in gaps
-                                     if g["localising_beats_rho"]],
-        "note": "the detector-only floor is not monotone in m: odd m splits its "
-                "meet-in-the-middle witness more evenly than the next even m, so "
-                "it dips below rho at 5 and 7 and back above at 6.  Both floors "
-                "are derived, not measured, and both are floors -- no algorithm "
-                "attains them.",
-        "falsifier": "a real oracle whose sub-base query costs less than the same "
-                     "query on the full base by more than the sub-base ratio",
+        "min_agnostic_floor": min(g["log2_agnostic_floor"] for g in gaps),
+        "min_restricted_floor": min(g["log2_restricted_floor"] for g in gaps),
+        "agnostic_rho_crossings": [g["m"] for g in gaps if g["agnostic_beats_rho"]],
+        "restricted_rho_crossings": [g["m"] for g in gaps
+                                     if g["restricted_beats_rho"]],
+        "swap_reliability": [
+            swap_reliability_at_131(
+                m, next(f["l_star"] for f in floors if f["m"] == m
+                        and f["mode"] == "target_agnostic"
+                        and not f["frobenius_stable"]))
+            for m in range(2, 9)],
+        "note": "an agnostic detector may still build the meet-in-the-middle "
+                "table, so it takes whichever witness route is cheaper: the table "
+                "at m = 2, 3 (where the two floors coincide) and the swap from "
+                "m = 4 up.  The restricted column prices an oracle that answers "
+                "only for a distinguished family of targets and so cannot be "
+                "swapped -- no proposed detector has that shape, which is what "
+                "makes the gap a measure of an artificial restriction rather "
+                "than of the curve's protection.  Both columns are derived, not "
+                "measured, and both are floors -- no algorithm attains them.",
+        "falsifier": "a proposed detector whose cost on R - P + Q exceeds its "
+                     "cost on R by more than a constant, which would put the "
+                     "restricted column back in play",
     }
 
     e4 = {
@@ -309,7 +362,7 @@ def main() -> None:
         "log2_rho_reference": round(log2_rho, 4),
         "E1_scale_model_ladder": e1,
         "E2_dimension_flatness": e2,
-        "E3_detector_versus_localisation": e3,
+        "E3_detector_target_agnosticism": e3,
         "E4_large_primes": e4,
         "E5_yield_distribution": e5,
         "E6_orbit_union_bases": e6,
@@ -320,14 +373,15 @@ def main() -> None:
     print(f"E1 ladder: n = {[c['n'] for c in rungs]}")
     print(f"   end-to-end {e1['end_to_end_rungs']}, composed {e1['composed_rungs']}, "
           f"faithful subgroup {e1['faithful_subgroup_rungs']}")
-    print(f"E3 detector-only floor bottoms at 2^{e3['min_detector_only_floor']:.2f}, "
-          f"localising at 2^{e3['min_localising_floor']:.2f}, "
+    print(f"E3 target-agnostic floor bottoms at 2^{e3['min_agnostic_floor']:.2f}, "
+          f"target-restricted at 2^{e3['min_restricted_floor']:.2f}, "
           f"rho at 2^{log2_rho:.2f}")
     for g in gaps:
-        print(f"   m={g['m']}  detector-only 2^{g['log2_detector_only_floor']:6.2f}  "
-              f"localising 2^{g['log2_localising_floor']:6.2f}  gap 2^{g['log2_gap']:.2f}"
-              f"   beats rho: detector {g['detector_only_beats_rho']}, "
-              f"localising {g['localising_beats_rho']}")
+        print(f"   m={g['m']}  agnostic 2^{g['log2_agnostic_floor']:6.2f} "
+              f"({g['agnostic_witness_route']:18s})  "
+              f"restricted 2^{g['log2_restricted_floor']:6.2f}  "
+              f"gap 2^{g['log2_gap']:.2f}   beats rho: agnostic "
+              f"{g['agnostic_beats_rho']}, restricted {g['restricted_beats_rho']}")
     for c in e4["unbounded_memory"]:
         if c:
             print(f"E4 m={c['m']} large prime: 2^{c['log2_total']:.2f} "
