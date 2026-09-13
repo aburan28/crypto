@@ -85,6 +85,13 @@ aws s3 cp "s3://$BUCKET/fpga/source.tar.gz" source.tar.gz --only-show-errors || 
 rm -rf src && mkdir src && tar xzf source.tar.gz -C src || fail "unpack source"
 export CL_DIR="$WORK/src/hdl/ecc2k130/aws/cl_ecc2k130"
 export ECC_RTL_DIR="$WORK/src/hdl/ecc2k130"
+# the DSP leaf count is a package constant (it sets the multiplier latency
+# the whole engine is built around), so an override edits the source
+if [ -n "${DSP_LEAVES:-}" ]; then
+    sed -i -E "s/(constant MUL_DSP_LEAVES *: *natural *:= *)[0-9]+;/\1$DSP_LEAVES;/" "$ECC_RTL_DIR/gf131_pkg.vhd"
+    grep -q "MUL_DSP_LEAVES *: *natural *:= *$DSP_LEAVES;" "$ECC_RTL_DIR/gf131_pkg.vhd" || fail "DSP_LEAVES override did not apply"
+    echo "DSP leaves: $DSP_LEAVES"
+fi
 cd "$CL_DIR/build/scripts"
 for f in aws_build_dcp_from_cl.py build_all.tcl build_level_1_cl.tcl; do
     ln -sf "$HDK_SHELL_DIR/build/scripts/$f" "$f"

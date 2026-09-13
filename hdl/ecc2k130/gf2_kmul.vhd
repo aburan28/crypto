@@ -1,7 +1,7 @@
 -- gf2_kmul.vhd
 -- Pipelined polynomial multiplier over GF(2), Karatsuba with a schoolbook
 -- leaf, as a recursive entity.  N-bit operands, 2N-1 bit product, fixed
--- latency 2*LEVELS + 1 clocks, one product per clock.
+-- latency 2*LEVELS + LEAF_LAT clocks, one product per clock.
 --
 --   a = a1 X^H + a0,  b = b1 X^H + b0,  H = ceil(N/2)
 --   a b = a0 b0  +  (a0 b0 + a1 b1 + (a0+a1)(b0+b1)) X^H  +  a1 b1 X^2H
@@ -21,6 +21,14 @@
 -- of 17161 for schoolbook, for about 850 extra XORs.  Deeper recursion
 -- trades more XORs for fewer ANDs; where the LUT optimum sits is a
 -- synthesis question (see README), which is why LEVELS is a generic.
+--
+-- The leaves are numbered 0 .. 3^LEVELS - 1 in instantiation order, and
+-- the first DSP_LEAVES of them are gf2_dsp_leaf (DSP48E2 products, latency
+-- DSP_LEAF_LAT) instead of the one-clock LUT schoolbook.  Every leaf must
+-- retire on the same clock, so the largest subtree that holds no DSP leaf
+-- gets its output delayed by the difference (PAD, set by the parent):
+-- with 11 of 27 leaves in DSPs that is one 131-bit subtree, two 65-bit and
+-- one 33-bit, under 900 flip-flops instead of 3 per bit of every LUT leaf.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -30,8 +38,11 @@ use work.gf131_pkg.all;
 
 entity gf2_kmul is
   generic (
-    N      : natural;
-    LEVELS : natural
+    N          : natural;
+    LEVELS     : natural;
+    DSP_LEAVES : natural := 0;             -- leaves 0 .. DSP_LEAVES-1 are DSP products
+    LEAF_BASE  : natural := 0;             -- number of the first leaf under this node
+    PAD        : natural := 0              -- extra output registers (set by the parent)
   );
   port (
     clk : in  std_logic;
@@ -42,16 +53,27 @@ entity gf2_kmul is
 end entity;
 
 architecture rtl of gf2_kmul is
-  constant H : natural := (N + 1) / 2;
+  constant H       : natural := (N + 1) / 2;
+  constant NLEAVES : natural := 3 ** LEVELS;
+  constant HAS_DSP : boolean := LEAF_BASE < DSP_LEAVES;
+
+  signal r0 : std_logic_vector(2 * N - 2 downto 0);
 begin
 
   leaf : if LEVELS = 0 generate
-    process (clk)
-    begin
-      if rising_edge(clk) then
-        r <= gf2_polymul(a, b);
-      end if;
-    end process;
+    lut : if not HAS_DSP generate
+      process (clk)
+      begin
+        if rising_edge(clk) then
+          r0 <= gf2_polymul(a, b);
+        end if;
+      end process;
+    end generate;
+    dsp : if HAS_DSP generate
+      u : entity work.gf2_dsp_leaf
+        generic map (N => N)
+        port map (clk => clk, a => a, b => b, r => r0);
+    end generate;
   end generate;
 
   node : if LEVELS > 0 generate
@@ -59,6 +81,17 @@ begin
     subtype prod_t is std_logic_vector(2 * H - 2 downto 0);
     signal a0, a1, am, b0, b1, bm : half_t := (others => '0');
     signal p0, p1, p2 : prod_t;
+
+    constant SUB : natural := NLEAVES / 3;           -- leaves per child
+    -- a child with no DSP leaf under a node that has one waits for it
+    function pad_for (child : natural) return natural is
+    begin
+      if HAS_DSP and not (LEAF_BASE + child * SUB < DSP_LEAVES) then
+        return DSP_LEAF_LAT - 1;
+      else
+        return 0;
+      end if;
+    end function;
   begin
 
     pre : process (clk)
@@ -79,13 +112,16 @@ begin
     end process;
 
     m0 : entity work.gf2_kmul
-      generic map (N => H, LEVELS => LEVELS - 1)
+      generic map (N => H, LEVELS => LEVELS - 1, DSP_LEAVES => DSP_LEAVES,
+                   LEAF_BASE => LEAF_BASE, PAD => pad_for(0))
       port map (clk => clk, a => a0, b => b0, r => p0);
     m1 : entity work.gf2_kmul
-      generic map (N => H, LEVELS => LEVELS - 1)
+      generic map (N => H, LEVELS => LEVELS - 1, DSP_LEAVES => DSP_LEAVES,
+                   LEAF_BASE => LEAF_BASE + SUB, PAD => pad_for(1))
       port map (clk => clk, a => am, b => bm, r => p1);
     m2 : entity work.gf2_kmul
-      generic map (N => H, LEVELS => LEVELS - 1)
+      generic map (N => H, LEVELS => LEVELS - 1, DSP_LEAVES => DSP_LEAVES,
+                   LEAF_BASE => LEAF_BASE + 2 * SUB, PAD => pad_for(2))
       port map (clk => clk, a => a1, b => b1, r => p2);
 
     post : process (clk)
@@ -98,10 +134,33 @@ begin
         w(2 * H - 2 downto 0) := p0;
         w(3 * H - 2 downto H) := w(3 * H - 2 downto H) xor mid;
         w(4 * H - 2 downto 2 * H) := w(4 * H - 2 downto 2 * H) xor p2;
-        r <= w(2 * N - 2 downto 0);
+        r0 <= w(2 * N - 2 downto 0);
       end if;
     end process;
 
+  end generate;
+
+  -- the delay a parent asks for: flip-flops, not shift-register LUTs
+  -- (a LUT per bit would cost what the DSP leaves save)
+  direct : if PAD = 0 generate
+    r <= r0;
+  end generate;
+  padded : if PAD > 0 generate
+    type pad_t is array (1 to PAD) of std_logic_vector(2 * N - 2 downto 0);
+    signal rp : pad_t;
+    attribute shreg_extract : string;
+    attribute shreg_extract of rp : signal is "no";
+  begin
+    process (clk)
+    begin
+      if rising_edge(clk) then
+        rp(1) <= r0;
+        for i in 2 to PAD loop
+          rp(i) <= rp(i - 1);
+        end loop;
+      end if;
+    end process;
+    r <= rp(PAD);
   end generate;
 
 end architecture;

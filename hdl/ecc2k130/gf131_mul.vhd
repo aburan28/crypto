@@ -4,8 +4,11 @@
 --
 --   stage 0                 latch a, b
 --   stage 1                 a' = prep(a), b' = prep(b)     gamma -> c-powers
---   stages 2 .. 2+2L        a' b' over GF(2)[c]             Karatsuba, L levels
---   stage 3+2L              r = to_onb(h)                   c-powers -> gamma
+--   stages 2 .. 1+2L+F      a' b' over GF(2)[c]             Karatsuba, L levels, leaf F clocks
+--   stage 2+2L+F            r = to_onb(h)                   c-powers -> gamma
+--
+-- F = LEAF_LAT is 1 for the LUT leaf and 4 when some leaves are DSP48E2
+-- products (gf2_dsp_leaf, gf131_pkg.MUL_DSP_LEAVES).
 --
 -- There is no reduction: the back-conversion maps every c^k, k = 2..262,
 -- straight to normal-basis coordinates.  Every stage is a few LUT levels
@@ -47,7 +50,7 @@ end entity;
 
 architecture rtl of gf131_mul is
 
-  constant KM_LAT : natural := 2 * MUL_KARATSUBA + 1;
+  constant KM_LAT : natural := 2 * MUL_KARATSUBA + LEAF_LAT;
 
   subtype tag_t is std_logic_vector(TAG_W - 1 downto 0);
   type tag_arr is array (0 to MUL_LATENCY - 1) of tag_t;
@@ -64,8 +67,12 @@ architecture rtl of gf131_mul is
 begin
 
   km : entity work.gf2_kmul
-    generic map (N => M, LEVELS => MUL_KARATSUBA)
+    generic map (N => M, LEVELS => MUL_KARATSUBA, DSP_LEAVES => MUL_DSP_LEAVES)
     port map (clk => clk, a => pa, b => pb, r => h);
+
+  -- latch, prep, the tree, to_onb
+  assert MUL_LATENCY = KM_LAT + 3
+    report "gf131_mul: MUL_LATENCY does not match the tree" severity failure;
 
   datapath : process (clk)
   begin

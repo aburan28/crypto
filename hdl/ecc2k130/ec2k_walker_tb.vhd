@@ -17,7 +17,7 @@
 -- batches waiting for the flush.  ec2k_batch_tb measures the saturated
 -- rate.
 --
---   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
+--   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
 --   ghdl -e --std=08 ec2k_walker_tb
 --   ghdl -r --std=08 ec2k_walker_tb
 

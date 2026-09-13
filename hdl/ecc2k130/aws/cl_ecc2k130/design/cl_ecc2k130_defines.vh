@@ -11,27 +11,29 @@
 `ifndef CL_ECC2K130_DEFINES
 `define CL_ECC2K130_DEFINES
 
-// walker engines; ~8.4k LUTs, 12 RAMB36 + 2 RAMB18 and 4 URAM288 each as
-// synthesised, the VU47P has 1.30M LUTs, 2016 RAMB36 and 960 URAM288
+// walker engines; ~7.3k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and 66 DSPs
+// each as synthesised; the VU47P has 1.30M LUTs, 2016 RAMB36, 960 URAM288
+// and 9024 DSPs
 `ifndef ECC_NENG
 `define ECC_NENG 48
 `endif
 
-// walks per engine = 2**ECC_ID_W; must comfortably cover 2**(LOG_W+LOG_NB),
-// and 512 fills the FIFO's block RAM column exactly
+// walks per engine = 2**ECC_ID_W; must cover 2**(LOG_W+LOG_NB), and 512
+// fills the FIFO's block RAM column exactly
 `ifndef ECC_ID_W
 `define ECC_ID_W 9
 `endif
 
-// step unit: walks per Montgomery batch and batches in flight.  32 x 8
-// holds the same 256 walks and the same memory as 16 x 16 (leaf tables
-// 256 deep, tree 512) and runs 5.16 clocks per step against 5.31: the
-// bound is 5 + 5/W.
+// step unit: walks per Montgomery batch and batches in flight.  The bound
+// is 5 + 5/W clocks per step, and with the 13-clock multiplier (DSP leaves)
+// it takes 16 batches in flight to hide the latency: 32 x 16 runs 5.22
+// clocks per step (32 x 8: 5.38, 16 x 16: 5.31), and its 512 walks are
+// exactly the leaf tables' and the FIFO's depth.
 `ifndef ECC_LOG_W
 `define ECC_LOG_W 5
 `endif
 `ifndef ECC_LOG_NB
-`define ECC_LOG_NB 3
+`define ECC_LOG_NB 4
 `endif
 
 // idle clocks before a partial batch is padded and issued

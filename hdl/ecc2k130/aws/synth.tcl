@@ -35,7 +35,7 @@ puts "== period    $period ns ([format %.1f [expr {1000.0/$period}]] MHz)"
 puts "== rtl from  $rtldir"
 
 # Each entry: top-level entity, and the sources it needs.
-set mul {gf131_pkg.vhd gf2_kmul.vhd gf131_mul.vhd}
+set mul {gf131_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd}
 set targets [list \
     gf131_mul       $mul \
     ec2k_batch_pipe [concat $mul ec2k_batch_pipe.vhd] \
