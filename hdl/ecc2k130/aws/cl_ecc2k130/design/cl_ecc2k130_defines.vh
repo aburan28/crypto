@@ -11,10 +11,11 @@
 `ifndef CL_ECC2K130_DEFINES
 `define CL_ECC2K130_DEFINES
 
-// walker engines; ~7.3k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and 66 DSPs
-// each as synthesised (~8.1k LUTs and no DSPs with MUL_DSP_LEAVES = 0); the
-// VU47P has 1.30M LUTs, 2016 RAMB36, 960 URAM288 and 9024 DSPs, of which
-// the CL's region holds 7992
+// walker engines; ~6.9k LUTs, 12 RAMB36, 4 URAM288 and 66 DSPs each as
+// synthesised (~7.7k LUTs and no DSPs with MUL_DSP_LEAVES = 0); the VU47P
+// has 1.30M LUTs, 2016 RAMB36, 960 URAM288 and 9024 DSPs, of which the
+// CL's region holds 7992 DSPs and 1788 RAMB36 (3576 RAMB18 sites): 144
+// engines is 3456 of those and the most that fit
 `ifndef ECC_NENG
 `define ECC_NENG 48
 `endif

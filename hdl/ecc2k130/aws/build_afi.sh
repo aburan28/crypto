@@ -15,10 +15,12 @@
 #   ./build_afi.sh list                 every build in the bucket
 #
 # Geometry of the image, all optional:
-#   NENG       walker engines (default 48; about 8.4k LUTs, 12 RAMB36 +
-#              2 RAMB18 and 4 URAM288 each; the VU47P has 1.30M LUTs,
-#              2 016 RAMB36 and 960 URAM288: 112 is 73% of the LUTs, 128 is
-#              83%; 48, 64 and 80 have run on a device)
+#   NENG       walker engines (default 48; about 6.9k LUTs, 12 RAMB36,
+#              4 URAM288 and 66 DSPs each; the VU47P has 1.30M LUTs,
+#              2 016 RAMB36 and 960 URAM288, and the CL's region 1 788 of
+#              the RAMB36: 128 is 68% of the LUTs, 144 is 77% and 3 456 of
+#              the region's 3 576 RAMB18 sites, the most that fit; 48 to
+#              128 have run on a device)
 #   ID_W       walks per engine = 2**ID_W (default 9: 512 walks fill the
 #              FIFO's block RAM exactly)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
