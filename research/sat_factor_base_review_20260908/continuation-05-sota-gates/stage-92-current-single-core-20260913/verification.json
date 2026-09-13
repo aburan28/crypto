@@ -1,0 +1,233 @@
+{
+  "affinity": {
+    "child_effective_cpus": [
+      0
+    ],
+    "inheritance_verified": true,
+    "initial_allowed_cpus": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "parent_effective_cpus": [
+      0
+    ],
+    "selected_cpu": 0
+  },
+  "archive": {
+    "bytes": 2112700,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage91-current-single-core-evidence-34726819616.tar.gz",
+    "sha256": "a9cbfac5578f1bd5d854dbafd199c37dfe2e62e12f9fabdd0e35ddbd2be1294c"
+  },
+  "artifact": {
+    "digest": "sha256:0dfb12d5a4d6cf42c46f4fbfcfaa1bc3a2dfe1e956d1dd4caecbee54ff17d49e",
+    "expires_at": "2026-12-11T23:59:52Z",
+    "id": 10307264889,
+    "name": "koblitz-stage71-single-core-34726819616",
+    "size_in_bytes": 2146049
+  },
+  "base": {
+    "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+    "factor_base_points": 9964,
+    "field_product_dispatch": "inline_combined_n53_predicate",
+    "field_product_pipeline": "x86_64_pclmul_n53_fused_reduce",
+    "orbit_columns": 94,
+    "specialized_n53_pair_sums": false,
+    "specialized_n53_support_expansion": false,
+    "support_index_entries": 24805379,
+    "support_table_allocated_bytes": 738197504,
+    "support_x_prefilter_hash_strategy": "single_mix_split_29_bit_indices",
+    "support_x_prefilter_insert_hash_reuse": true
+  },
+  "build_outer": {
+    "average_parallelism": 3.3925956914000968,
+    "process_tree_rss_samples": 1903,
+    "sample_interval_seconds": 0.02,
+    "sampled_peak_process_tree_rss_bytes": 1722978304,
+    "total_core_seconds": 314.236426,
+    "wall_seconds": 92.62418943600001
+  },
+  "build_seal_sha256": "0d1370c31f41f2cf99c063760ce904ca5d18d2c731f4c869ca645d738c25f0ce",
+  "charged_sequential_wall_seconds_available": 109.09425894000002,
+  "charged_total_core_seconds_available": 330.703912,
+  "comparison": {
+    "direct_core_over_rho_core_ratio": 1.3401796163922106,
+    "direct_over_rho_wall_ratio": 1.3543032952267562,
+    "fresh_build_plus_direct_over_rho_wall_ratio": 14.691007419878199,
+    "whole_process_crossover": false
+  },
+  "direct_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 863047680,
+    "single_core_seconds": 6.868316,
+    "system_seconds": 0.067326,
+    "total_core_seconds": 6.868316,
+    "user_seconds": 6.80099,
+    "wall_seconds": 9.405715520000001
+  },
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_selection_uses_scalar_labels": false,
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "maximum_sampled_process_tree_rss_bytes": 1722978304,
+  "predecessor_stage90": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-90-current-gate-audit-20260912/audit.json",
+    "sha256": "788f03100f027ce00411f87d14bd3cce49e8e747733c03afd79048fa70a5cc18"
+  },
+  "rho": {
+    "a": 0,
+    "arithmetic_backend": "packed_u64_polynomial_basis",
+    "automorphism_size": 106,
+    "charges": {
+      "canonicalizations": 369616,
+      "failed_collisions": 108,
+      "frobenius_maps": 19220032,
+      "fruitless_cycle_restarts": 108,
+      "group_additions": 369648,
+      "negations_examined": 19589648,
+      "partition_hashes": 369507,
+      "scalar_multiplications": 284,
+      "table_inserts": 369507,
+      "table_queries": 369616
+    },
+    "distinguished_bits": 0,
+    "evidence_class": "measured_rho_observation",
+    "field_modulus_low_terms": [
+      0,
+      1,
+      2,
+      6
+    ],
+    "fixture_index": 0,
+    "fixture_scalar_source": "explicit_public_validation_scalar",
+    "fixture_seed": 12669835094130415155,
+    "generator": [
+      198217578752339,
+      7929897206038174
+    ],
+    "generator_point_key": [
+      198217578752339,
+      7929897206038174
+    ],
+    "ideal_steps": 558444.48690292,
+    "jump_count": 32,
+    "kind": "rho_public_fixture",
+    "lambda": 10244141222326,
+    "n": 53,
+    "public_hash_counter": null,
+    "public_hash_seed": null,
+    "published_fixture_scalar": 476811900269,
+    "published_q": [
+      2565091273463387,
+      5885236316843894
+    ],
+    "published_q_point_key": [
+      2565091273463387,
+      5885236316843894
+    ],
+    "quotient_mode": "signed_frobenius",
+    "recovered_fixture_scalar": 476811900269,
+    "reference_group_validation": true,
+    "restarts": 108,
+    "schema_version": "1.0",
+    "scope": "published synthetic toy fixture; no external point or production key",
+    "setup_ms": 36.763600000000004,
+    "subgroup_order": 21044858204113,
+    "table_entries": 369507,
+    "table_payload_lower_bound_bytes": 15149787,
+    "target_generation_ms": 2.081735,
+    "target_kind": "known_scalar_multiple",
+    "target_scalar_constructed": true,
+    "task_id": "TASK-KIC-SAT-RHO-CROSSOVER-20260909",
+    "total_ms": 6828.4097950000005,
+    "validation_ms": 5.1255,
+    "verified": true,
+    "walk_ms": 6784.43896,
+    "walk_steps": 369507
+  },
+  "rho_process": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 35352576,
+    "single_core_seconds": 5.124922,
+    "system_seconds": 0.011866999999999999,
+    "total_core_seconds": 5.124922,
+    "user_seconds": 5.113055,
+    "wall_seconds": 6.945058432000025
+  },
+  "run_seal_sha256": "0eaf57f767a9dfd9d29b6e9a7d9156d375d487327d5be26e4c05b74ef7b3a0a2",
+  "schema": "koblitz_stage92_current_single_core.v1",
+  "science_outer": {
+    "average_parallelism": 0.999843139459771,
+    "process_tree_rss_samples": 411,
+    "sample_interval_seconds": 0.02,
+    "sampled_peak_process_tree_rss_bytes": 902311936,
+    "total_core_seconds": 16.467486,
+    "wall_seconds": 16.47006950400001
+  },
+  "source_commit": "8190f5bee6fdcee2f989125083eb2999229f4142",
+  "status": "current_selected_n53_cpu0_result_verified",
+  "summary": {
+    "admitted_relations": 95,
+    "all_relations_group_verified": true,
+    "charged_total_ms": 8313.434720000001,
+    "collection_ms": 4315.479935,
+    "factor_base_points": 9964,
+    "full_rank_at_relation": 95,
+    "linear_solution_verified": true,
+    "linear_solve_ms": 0.49469599999999997,
+    "matrix_columns": 95,
+    "orbit_columns": 94,
+    "published_q": [
+      2565091273463387,
+      5885236316843894
+    ],
+    "query_batch_inversions": 15775,
+    "query_compact_pair_scratch": true,
+    "query_dual_sign_denominator_sharing": true,
+    "query_exact_table_misses": 374402,
+    "query_mode": "pair_pair_parallel_4096",
+    "query_parallel_threads": 1,
+    "query_specialized_n53_pair_batch": true,
+    "recovered_fixture_scalar": 476811900269,
+    "reference_validation_ms": 641.83223,
+    "setup_ms": 3997.954525,
+    "solution_validation_ms": 312.670623,
+    "support_queries": 48089068,
+    "target_trials": 96
+  },
+  "target_subgroup_enumerated_for_factor_base": false,
+  "verification": {
+    "charged_sequential_wall_seconds_available": 109.09425894000002,
+    "charged_total_core_seconds_available": 330.703912,
+    "direct_core_over_rho_core_ratio": 1.3401796163922106,
+    "direct_core_seconds": 6.868316,
+    "direct_over_rho_wall_ratio": 1.3543032952267562,
+    "direct_peak_rss_bytes": 863047680,
+    "direct_wall_seconds": 9.405715520000001,
+    "fresh_build_plus_direct_over_rho_wall_ratio": 14.691007419878199,
+    "full_cost_gate_passed": false,
+    "inventory_sha256": "9f00a2b7c3b498dbbcedaa9aff641256a71cb8c9d02aa9cea73bf950c5befd20",
+    "koblitz_index_calculus_sota": false,
+    "maximum_sampled_process_tree_rss_bytes": 1722978304,
+    "relations": 95,
+    "rho_wall_seconds": 6.945058432000025,
+    "schema": "koblitz_stage71_verification.v1",
+    "selected_cpu": 0,
+    "source_commit": "8190f5bee6fdcee2f989125083eb2999229f4142",
+    "status": "n53_single_core_verified",
+    "support_queries": 48089068,
+    "whole_process_crossover": false
+  },
+  "workflow": {
+    "head_sha": "8190f5bee6fdcee2f989125083eb2999229f4142",
+    "production_job_id": 103642309836,
+    "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34726819616/job/103642309836",
+    "production_job_wall_seconds": 119.0,
+    "run_id": 34726819616,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34726819616",
+    "workflow_wall_seconds": 140.0
+  }
+}
