@@ -48,7 +48,14 @@ pub const MAX_FACTOR_DIMENSION: u32 = 13;
 /// sit above the memory bound rather than below it, and
 /// [`PairSumTable::build`] still refuses past its own byte budget with a
 /// number rather than an allocation.
-pub const MAX_ABSCISSAE: usize = 1 << 16;
+///
+/// Raised again for the same reason.  Folding the table by the signed
+/// Frobenius group stores `n` times fewer pairs and reaches about 330000
+/// points at four gibibytes — some 165000 abscissae — and `1 << 16` was
+/// under that, so the cap was once more the thing refusing a base the
+/// memory could hold.  `1 << 19` sits above the memory bound at every
+/// degree this pipeline runs.
+pub const MAX_ABSCISSAE: usize = 1 << 19;
 pub fn degree(value: &str) -> Result<u32, String> {
     let n = value
         .parse::<u32>()

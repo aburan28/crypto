@@ -304,6 +304,153 @@ impl FastCurve {
     }
 }
 
+/// **Canonical names for Frobenius orbits of abscissae**, in a normal
+/// basis where the Frobenius is a rotation.
+///
+/// The folded pair table needs one key per orbit of `x` under `x ↦ x²`,
+/// and the obvious one — the least element of the orbit — costs `n − 1`
+/// squarings, a dependency chain of spreads and reduction-table lookups.
+/// In a normal basis `{β, β², β⁴, …}` the same map is a one-bit cyclic
+/// rotation of the coordinate word, because `(Σ c_k β^{2^k})² =
+/// Σ c_k β^{2^{k+1}}`.  So the orbit of `x` is the set of rotations of
+/// its coordinate word, and the least rotation names it.
+///
+/// The change of basis is one `F_2`-linear map, applied as eight
+/// byte-table lookups; the minimum is `n` rotations of a word.  Nothing
+/// is squared and nothing is reduced.
+///
+/// The key it produces is *not* the least element of the orbit in the
+/// polynomial basis — it is a different function of the point.  What
+/// matters is only that it is constant on orbits and distinct across
+/// them, which a bijective linear map followed by a rotation-invariant
+/// minimum is.
+#[derive(Clone, Debug)]
+pub struct FrobeniusCanon {
+    n: u32,
+    mask: u64,
+    /// `tables[i][b]`: the normal coordinates of the field element whose
+    /// `i`-th byte is `b` and whose other bytes are zero.
+    tables: Vec<[u64; 256]>,
+}
+
+impl FrobeniusCanon {
+    /// Build the basis change, or `None` if no normal element turns up —
+    /// which the normal basis theorem says will not happen, but the
+    /// search is randomised and bounded rather than trusted.
+    pub fn new(field: &Gf2, n: u32) -> Option<Self> {
+        if n == 0 || n > 63 {
+            return None;
+        }
+        let mask = (1u64 << n) - 1;
+        // A normal element: one whose Frobenius orbit is a basis.
+        let mut inverse = None;
+        let mut candidate = 2u64;
+        for _ in 0..4096 {
+            candidate = candidate.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (candidate >> 29);
+            let gamma = candidate & mask;
+            if gamma == 0 {
+                continue;
+            }
+            // Columns of the map "normal coordinates -> field element".
+            let mut column = gamma;
+            let columns: Vec<u64> = (0..n)
+                .map(|_| {
+                    let c = column;
+                    column = field.sqr(column);
+                    c
+                })
+                .collect();
+            if let Some(inv) = invert_f2(&columns, n) {
+                inverse = Some(inv);
+                break;
+            }
+        }
+        let inverse = inverse?;
+        // Column `j` of the inverse, so a set bit of `x` contributes one
+        // XOR rather than one parity.
+        let by_bit: Vec<u64> = (0..n)
+            .map(|j| {
+                (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i))
+            })
+            .collect();
+        let bytes = ((n + 7) / 8) as usize;
+        let tables = (0..bytes)
+            .map(|bi| {
+                let mut table = [0u64; 256];
+                for (b, slot) in table.iter_mut().enumerate() {
+                    let mut acc = 0u64;
+                    for t in 0..8 {
+                        let j = bi * 8 + t;
+                        if (b >> t) & 1 == 1 && j < n as usize {
+                            acc ^= by_bit[j];
+                        }
+                    }
+                    *slot = acc;
+                }
+                table
+            })
+            .collect();
+        Some(Self { n, mask, tables })
+    }
+
+    /// The normal coordinates of a field element.
+    #[inline]
+    pub fn coords(&self, x: u64) -> u64 {
+        let mut acc = 0u64;
+        for (i, table) in self.tables.iter().enumerate() {
+            acc ^= table[((x >> (8 * i)) & 0xff) as usize];
+        }
+        acc
+    }
+
+    /// The least rotation of the normal coordinates: a name for the
+    /// Frobenius orbit of `x`, equal for every element of it and for no
+    /// element outside it.
+    #[inline]
+    pub fn canon(&self, x: u64) -> u64 {
+        let c = self.coords(x);
+        let n = self.n;
+        let mut best = c;
+        let mut v = c;
+        for _ in 1..n {
+            v = ((v << 1) | (v >> (n - 1))) & self.mask;
+            if v < best {
+                best = v;
+            }
+        }
+        best
+    }
+
+    /// The extension degree this was built for.
+    pub fn degree(&self) -> u32 {
+        self.n
+    }
+}
+
+/// Invert an `n × n` matrix over `F_2` given as its columns, returning
+/// the rows of the inverse; `None` when the columns are dependent.
+fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+    // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
+    let mut a: Vec<u64> = (0..n)
+        .map(|i| {
+            (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k))
+        })
+        .collect();
+    let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
+    for c in 0..n as usize {
+        let pivot = (c..n as usize).find(|&r| (a[r] >> c) & 1 == 1)?;
+        a.swap(c, pivot);
+        inv.swap(c, pivot);
+        for r in 0..n as usize {
+            if r != c && (a[r] >> c) & 1 == 1 {
+                a[r] ^= a[c];
+                inv[r] ^= inv[c];
+            }
+        }
+    }
+    Some(inv)
+}
+
 /// Reusable buffers for [`FastCurve::add_many`].
 #[derive(Clone, Debug, Default)]
 pub struct BatchScratch {

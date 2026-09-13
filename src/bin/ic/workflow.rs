@@ -283,6 +283,23 @@ pub struct WorkflowParams {
     /// probe. A separate selection run must tune this value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collection_window: Option<u32>,
+    /// Bytes the pair table may occupy, when it should differ from
+    /// [`PairSumTable::DEFAULT_BYTE_BUDGET`].
+    ///
+    /// The budget does not only refuse a base too wide to hold — it
+    /// *chooses the representation*, because `build_within` takes the
+    /// first tier that fits: summands, then compact rests, then the
+    /// signed-Frobenius fold.  A budget below what the compact table
+    /// wants therefore asks for the fold at a width where the compact
+    /// table would have fitted, which is the only way to compare the
+    /// two tiers at one width.
+    ///
+    /// That comparison is why this exists.  The tiers are ordered by
+    /// what fits, which is the right order for a base whose precompute
+    /// is already paid; it is not obviously the right order when the
+    /// precompute is the bill.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pair_table_bytes: Option<u64>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -769,6 +786,38 @@ fn candidate_json(c: &Candidate) -> Value {
 }
 
 /// Run (or resume) the workflow described by `args.params` in `args.dir`.
+/// Name the representation a run actually used, in its factor-base
+/// summary.
+///
+/// The byte budget chooses the tier, and the tiers differ by an order of
+/// magnitude in build cost and resident memory.  A report that does not
+/// say which one was chosen cannot be compared against another's, and a
+/// run that selected a different tier than its author believed looks
+/// exactly like a run that did not.
+fn with_tier(mut summary: Value, pair: Option<&PairSumTable>) -> Value {
+    if let (Some(t), Some(obj)) = (pair, summary.as_object_mut()) {
+        obj.insert("pair_table_tier".into(), Value::from(t.tier()));
+        obj.insert("pair_table_stored_pairs".into(), Value::from(t.len()));
+    }
+    summary
+}
+
+/// The pair table for this run, under the params' byte budget.
+///
+/// `PairSumTable::build_within` picks the first representation that fits
+/// the budget, so the budget is also the choice of tier.  Left unset the
+/// default applies and the tiers fall in their usual order.
+fn build_pair_table(
+    c: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    p: &WorkflowParams,
+) -> Option<PairSumTable> {
+    match p.pair_table_bytes {
+        Some(bytes) => PairSumTable::build_within(c, fb, u128::from(bytes)),
+        None => PairSumTable::build(c, fb),
+    }
+}
+
 pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
     let p = load_params(&args.params)?;
@@ -970,7 +1019,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     if !wanted.is_empty() {
         if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
-            pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+            pair = Some(
+                build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
+            );
         }
         let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
             .ok_or("factor base cannot decompose with this summand count")?;
@@ -1032,7 +1083,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     if worker_mode || args.stop_after == Some(Stage::Collect) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
     }
 
     // ── Stage 3: logs (merge, verify, solve) ───────────────────────
@@ -1071,7 +1122,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             let collector = {
                 if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
                     pair = Some(
-                        PairSumTable::build(&c, &fb)
+                        build_pair_table(&c, &fb, &p)
                             .ok_or("field too wide for the pair table")?,
                     );
                 }
@@ -1178,10 +1229,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         }
     };
     let Some(table) = table else {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, overall_failed, begin, "failed"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, overall_failed, begin, "failed"));
     };
     if args.stop_after == Some(Stage::Logs) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
     }
 
     // ── Stage 3: solve (per-target resumable) ──────────────────────
@@ -1216,7 +1267,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut pair_table_seconds = 0.0f64;
     if ic.strategy == DecompositionStrategy::PairTable && (!pending.is_empty() || p.baseline.rho) && pair.is_none() {
         let tp = Instant::now();
-        pair = Some(PairSumTable::build(&c, &fb).ok_or("field too wide for the pair table")?);
+        pair = Some(build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?);
         pair_table_seconds = tp.elapsed().as_secs_f64();
     }
     let mut solved_now = 0usize;
@@ -1356,7 +1407,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     let status = if all_verified { "complete" } else { "failed" };
-    Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, Some(&solutions), overall_failed, begin, status))
+    Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), Some(&solutions), overall_failed, begin, status))
 }
 
 #[allow(clippy::too_many_arguments)]
