@@ -29,6 +29,24 @@
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
 #error "ECC_PACKED_CLMAD requires sm_80 or newer"
 #endif
+#ifndef ECC_PACKED_CLMAD_SQUARE
+#define ECC_PACKED_CLMAD_SQUARE 0
+#endif
+#if ECC_PACKED_CLMAD_SQUARE != 0 && ECC_PACKED_CLMAD_SQUARE != 1
+#error "ECC_PACKED_CLMAD_SQUARE must be 0 or 1"
+#endif
+#if ECC_PACKED_CLMAD_SQUARE && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD"
+#endif
+#ifndef ECC_PACKED_KARAT3
+#define ECC_PACKED_KARAT3 0
+#endif
+#if ECC_PACKED_KARAT3 != 0 && ECC_PACKED_KARAT3 != 1
+#error "ECC_PACKED_KARAT3 must be 0 or 1"
+#endif
+#if ECC_PACKED_KARAT3 && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_KARAT3 requires ECC_PACKED_CLMAD"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
@@ -116,7 +134,42 @@ ECC_HD P131 reverse131(const P131 &a) {
     for(int i=0;i<5;i++) r.v[i]=(reverse32(a.v[4-i])>>29) | (i<4?reverse32(a.v[3-i])<<3:0);
     return r;
 }
+// Three limbs (64,64,3 bits): reuse the low diagonal products when
+// reconstructing the top cross terms. Five full 64-bit products replace
+// the old three products plus the bit-by-bit 128x3 tail.
+ECC_HD void product131Karat3(const P131 &a, const P131 &b, uint32_t *c) {
+    uint32_t lo[4], hi[4], mid[4], aa[2], bb[2];
+    clmul64(lo, a.v, b.v);
+    clmul64(hi, a.v + 2, b.v + 2);
+    const uint32_t a2 = a.v[4], b2 = b.v[4];
+    const uint32_t top = (b2 & (0u - (a2 & 1u)))
+        ^ ((b2 & (0u - ((a2 >> 1) & 1u))) << 1)
+        ^ ((b2 & (0u - ((a2 >> 2) & 1u))) << 2);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) { c[i] = lo[i]; c[i + 4] = hi[i]; }
+    c[8] = top;
+    aa[0] = a.v[0] ^ a.v[2]; aa[1] = a.v[1] ^ a.v[3];
+    bb[0] = b.v[0] ^ b.v[2]; bb[1] = b.v[1] ^ b.v[3];
+    clmul64(mid, aa, bb);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) c[i + 2] ^= mid[i] ^ lo[i] ^ hi[i];
+    aa[0] = a.v[0] ^ a2; aa[1] = a.v[1];
+    bb[0] = b.v[0] ^ b2; bb[1] = b.v[1];
+    clmul64(mid, aa, bb);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) c[i + 4] ^= mid[i] ^ lo[i] ^ (i == 0 ? top : 0u);
+    aa[0] = a.v[2] ^ a2; aa[1] = a.v[3];
+    bb[0] = b.v[2] ^ b2; bb[1] = b.v[3];
+    clmul64(mid, aa, bb);
+    c[6] ^= mid[0] ^ hi[0] ^ top;
+    c[7] ^= mid[1] ^ hi[1];
+    c[8] ^= mid[2] ^ hi[2];
+    // The omitted tenth word is zero: a 64x3 cross term has degree <=65.
+}
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
+#if ECC_PACKED_KARAT3
+    product131Karat3(a, b, c);
+#else
     clmul128(c,a.v,b.v); c[8]=0;
 #pragma unroll
     for(int k=0;k<3;k++) {
@@ -129,6 +182,7 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         }
         c[8]^=(b.v[4]&ma)<<k;
     }
+#endif
 }
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;
@@ -232,6 +286,15 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #endif
 }
 ECC_HD uint64_t spread32p(uint32_t x){
+#if ECC_PACKED_CLMAD_SQUARE && defined(__CUDA_ARCH__)
+ // In F_2[X], (sum x_i X^i)^2 = sum x_i X^(2i). Zero extension
+ // bounds the degree by 62, so the low 64-bit product is the whole square.
+ // Used by both polynomial squaring and the normal-basis square permutation.
+ const uint64_t a = uint64_t(x);
+ uint64_t r;
+ asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"(a));
+ return r;
+#else
  uint64_t r=x;
  r=(r|(r<<16))&0x0000ffff0000ffffull;
  r=(r|(r<<8))&0x00ff00ff00ff00ffull;
@@ -239,6 +302,7 @@ ECC_HD uint64_t spread32p(uint32_t x){
  r=(r|(r<<2))&0x3333333333333333ull;
  r=(r|(r<<1))&0x5555555555555555ull;
  return r;
+#endif
 }
 // Polynomial coefficients square into the even positions of a degree-260
 // product. This is distinct from sqr131's normal-basis permutation.
