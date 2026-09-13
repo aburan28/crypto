@@ -574,6 +574,29 @@ impl CompactPairTable {
         (1u64 << bits) - 1
     }
 
+    fn pack_dense_entry(
+        key_x: u64,
+        image_y: u64,
+        indices: [u16; 2],
+        key_x_bits: u32,
+        image_y_bits: u32,
+        point_index_bits: u32,
+    ) -> (u64, u64, u8) {
+        assert!(key_x <= Self::low_mask(key_x_bits));
+        assert!(image_y <= Self::low_mask(image_y_bits));
+        let witness_bits = 2 * point_index_bits;
+        let key_take = (u64::BITS - key_x_bits).min(witness_bits);
+        let image_take = (u64::BITS - image_y_bits).min(witness_bits - key_take);
+        assert!(witness_bits <= key_take + image_take + u8::BITS);
+        let point_mask = Self::low_mask(point_index_bits);
+        let witness = u64::from(indices[0]) | (u64::from(indices[1]) << point_index_bits);
+        assert_eq!(witness & point_mask, u64::from(indices[0]));
+        let packed_x = key_x | ((witness & Self::low_mask(key_take)) << key_x_bits);
+        let after_key = witness >> key_take;
+        let packed_y = image_y | ((after_key & Self::low_mask(image_take)) << image_y_bits);
+        (packed_x, packed_y, (after_key >> image_take) as u8)
+    }
+
     fn pack_dense_payload(&mut self, x_domain: usize) {
         assert!(self.is_dense() && self.x_only && !self.dense_packed_payload);
         assert_eq!(self.keys_x.len(), self.image_y.len());
@@ -588,28 +611,19 @@ impl CompactPairTable {
             .max()
             .unwrap_or(0);
         let point_index_bits = (u16::BITS - maximum_index.leading_zeros()).max(1);
-        let witness_bits = 2 * point_index_bits;
-        let key_spare = u64::BITS - key_x_bits;
-        let image_spare = u64::BITS - image_y_bits;
-        assert!(witness_bits <= key_spare + image_spare + u8::BITS);
-        let key_take = key_spare.min(witness_bits);
-        let image_take = image_spare.min(witness_bits - key_take);
-        let point_mask = Self::low_mask(point_index_bits);
         let mut spill = Vec::with_capacity(self.columns.len());
         for slot in 0..self.columns.len() {
-            assert!(self.keys_x[slot] <= Self::low_mask(key_x_bits));
-            assert!(self.image_y[slot] <= Self::low_mask(image_y_bits));
-            let indices = self.columns[slot];
-            let witness = u64::from(indices[0]) | (u64::from(indices[1]) << point_index_bits);
-            assert_eq!(witness & point_mask, u64::from(indices[0]));
-            if key_take != 0 {
-                self.keys_x[slot] |= (witness & Self::low_mask(key_take)) << key_x_bits;
-            }
-            let after_key = witness >> key_take;
-            if image_take != 0 {
-                self.image_y[slot] |= (after_key & Self::low_mask(image_take)) << image_y_bits;
-            }
-            spill.push((after_key >> image_take) as u8);
+            let (packed_x, packed_y, packed_spill) = Self::pack_dense_entry(
+                self.keys_x[slot],
+                self.image_y[slot],
+                self.columns[slot],
+                key_x_bits,
+                image_y_bits,
+                point_index_bits,
+            );
+            self.keys_x[slot] = packed_x;
+            self.image_y[slot] = packed_y;
+            spill.push(packed_spill);
         }
         self.dense_packed_payload = true;
         self.dense_key_x_bits = key_x_bits;
@@ -656,6 +670,15 @@ impl CompactPairTable {
     }
 
     fn compact_dense(&mut self, x_domain: usize) {
+        let packed = packed_dense_payload_enabled();
+        let fused = packed && fused_packed_dense_compaction_enabled();
+        self.compact_dense_with_mode(x_domain, fused);
+        if packed && !fused {
+            self.pack_dense_payload(x_domain);
+        }
+    }
+
+    fn compact_dense_with_mode(&mut self, x_domain: usize, fuse_packed_payload: bool) {
         assert!(!self.shards.is_empty());
         assert!(self.x_only);
         let shard_count = self.shards.len();
@@ -667,10 +690,25 @@ impl CompactPairTable {
             .all(|shard| shard.slots() == slots_per_shard));
         let dense_len = self.len();
         let total_slots = shard_count * slots_per_shard;
+        let image_y_bits = (x_domain - 1).trailing_zeros();
+        let key_x_bits = image_y_bits + 1;
+        let point_index_bits = if fuse_packed_payload {
+            let maximum_index = self
+                .shards
+                .iter()
+                .flat_map(|shard| shard.columns.iter())
+                .flat_map(|indices| indices.iter().copied())
+                .max()
+                .unwrap_or(0);
+            (u16::BITS - maximum_index.leading_zeros()).max(1)
+        } else {
+            0
+        };
         let mut occupancy = vec![0u64; total_slots.div_ceil(u64::BITS as usize)];
         let mut keys_x = Vec::with_capacity(dense_len);
         let mut image_y = Vec::with_capacity(dense_len);
-        let mut columns = Vec::with_capacity(dense_len);
+        let mut columns = Vec::with_capacity(if fuse_packed_payload { 0 } else { dense_len });
+        let mut witness_spill = Vec::with_capacity(if fuse_packed_payload { dense_len } else { 0 });
         let mut copy_shard = |shard_index: usize, shard: &CompactPairTable| {
             for slot in 0..slots_per_shard {
                 if shard.keys_x[slot] == u64::MAX {
@@ -678,9 +716,23 @@ impl CompactPairTable {
                 }
                 let global_slot = shard_index * slots_per_shard + slot;
                 occupancy[global_slot / 64] |= 1u64 << (global_slot % 64);
-                keys_x.push(shard.keys_x[slot]);
-                image_y.push(shard.image_y[slot]);
-                columns.push(shard.columns[slot]);
+                if fuse_packed_payload {
+                    let (packed_x, packed_y, packed_spill) = Self::pack_dense_entry(
+                        shard.keys_x[slot],
+                        shard.image_y[slot],
+                        shard.columns[slot],
+                        key_x_bits,
+                        image_y_bits,
+                        point_index_bits,
+                    );
+                    keys_x.push(packed_x);
+                    image_y.push(packed_y);
+                    witness_spill.push(packed_spill);
+                } else {
+                    keys_x.push(shard.keys_x[slot]);
+                    image_y.push(shard.image_y[slot]);
+                    columns.push(shard.columns[slot]);
+                }
             }
         };
         if streamed_dense_compaction_enabled() {
@@ -715,6 +767,11 @@ impl CompactPairTable {
         self.dense_shard_count = shard_count;
         self.dense_occupancy = occupancy;
         self.dense_rank_blocks = rank_blocks;
+        self.dense_packed_payload = fuse_packed_payload;
+        self.dense_key_x_bits = if fuse_packed_payload { key_x_bits } else { 0 };
+        self.dense_image_y_bits = if fuse_packed_payload { image_y_bits } else { 0 };
+        self.dense_point_index_bits = point_index_bits;
+        self.dense_witness_spill = witness_spill;
         self.keys_x = keys_x;
         self.keys_y.clear();
         self.columns = columns;
@@ -731,11 +788,8 @@ impl CompactPairTable {
         self.mask = 0;
         self.len = dense_len;
         for index in 0..self.keys_x.len() {
-            let key_x = self.keys_x[index];
+            let key_x = self.dense_key_x(index);
             self.insert_x_filter_direct(key_x);
-        }
-        if packed_dense_payload_enabled() {
-            self.pack_dense_payload(x_domain);
         }
     }
 
@@ -2260,6 +2314,14 @@ fn packed_dense_payload_enabled() -> bool {
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
     *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_PACKED_DENSE_PAYLOAD").as_deref() == Ok("1"))
+}
+
+fn fused_packed_dense_compaction_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        std::env::var("KIC_DISABLE_FUSED_PACKED_DENSE_COMPACTION").as_deref() != Ok("1")
+    })
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -3844,6 +3906,7 @@ fn main() {
             "support_table_dense":quotient_pairs.is_dense(),
             "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
             "support_dense_packed_payload":quotient_pairs.dense_packed_payload,
+            "support_dense_packed_fused_compaction":quotient_pairs.dense_packed_payload && fused_packed_dense_compaction_enabled(),
             "support_dense_witness_spill_bytes":quotient_pairs.dense_witness_spill.len()*std::mem::size_of::<u8>(),
             "support_dense_point_index_bits":quotient_pairs.dense_point_index_bits,
             "support_table_slots":quotient_pairs.slots(),
@@ -4731,6 +4794,7 @@ fn main() {
                 "support_table_dense":quotient_pairs.is_dense(),
                 "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
                 "support_dense_packed_payload":quotient_pairs.dense_packed_payload,
+                "support_dense_packed_fused_compaction":quotient_pairs.dense_packed_payload && fused_packed_dense_compaction_enabled(),
                 "support_dense_witness_spill_bytes":quotient_pairs.dense_witness_spill.len()*std::mem::size_of::<u8>(),
                 "support_dense_point_index_bits":quotient_pairs.dense_point_index_bits,
                 "support_table_slots":quotient_pairs.slots(),
@@ -5008,6 +5072,26 @@ mod packed_tests {
             assert_eq!(
                 packed.compact_point_at_slot(slot),
                 dense.compact_point_at_slot(slot)
+            );
+        }
+
+        let mut fused = CompactPairTable::with_capacity_sharded(1_024, true, x_domain, 4);
+        fused.insert_expanded_entries(entries.clone());
+        fused.compact_dense_with_mode(x_domain, true);
+        assert!(fused.dense_packed_payload);
+        assert_eq!(fused.allocated_bytes(), packed.allocated_bytes());
+        assert_eq!(fused.dense_point_index_bits, packed.dense_point_index_bits);
+        assert_eq!(fused.dense_witness_spill, packed.dense_witness_spill);
+        for &(key, _) in &entries {
+            let expected = packed.get(key).unwrap();
+            let actual = fused.get(key).unwrap();
+            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.image_y, expected.image_y);
+        }
+        for slot in 0..fused.slots() {
+            assert_eq!(
+                fused.compact_point_at_slot(slot),
+                packed.compact_point_at_slot(slot)
             );
         }
     }
