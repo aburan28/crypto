@@ -114,14 +114,15 @@ architecture rtl of ec2k_walker is
   signal ob_empty : boolean;
   signal head_w   : fword_t;
   signal head_dp  : std_logic;
-  -- the buffer's pointers select 4 x 304 bits of write enable and read
-  -- mux, the report register's load enable is 304 more: each such net
-  -- from one driver is a long route in a full device, so the drivers are
-  -- replicated
+  -- the buffer's write enables are one-hot registers decoded a clock
+  -- ahead (from the write pointer and the reads in flight), its read
+  -- pointer selects a 304-bit mux, the report register's load is 304
+  -- more: each such net from one driver is a long route in a full
+  -- device, so the drivers are replicated
+  signal ob_we    : std_logic_vector(0 to OB_N - 1) := (others => '0');
   attribute MAX_FANOUT : string;
-  attribute MAX_FANOUT of ob_wr : signal is "100";
+  attribute MAX_FANOUT of ob_we : signal is "100";
   attribute MAX_FANOUT of ob_rd : signal is "100";
-  attribute MAX_FANOUT of rv    : signal is "100";
 
   -- step unit; the tag is (id, steps so far)
   constant TAG_W : natural := ID_W + CNT_W;
@@ -200,8 +201,22 @@ begin
       end if;
       if issue then rv(0) <= '1'; else rv(0) <= '0'; end if;
       rv(1) <= rv(0);
+      -- the word read for rv(0) lands next clock at the pointer as it
+      -- will then be (plus one if a word lands this clock)
+      for k in 0 to OB_N - 1 loop
+        ob_we(k) <= '0';
+        if rv(0) = '1' then
+          if rv(1) = '1' then
+            if to_integer(ob_wr(OB_LOG - 1 downto 0) + 1) = k then ob_we(k) <= '1'; end if;
+          else
+            if to_integer(ob_wr(OB_LOG - 1 downto 0)) = k then ob_we(k) <= '1'; end if;
+          end if;
+        end if;
+        if ob_we(k) = '1' then
+          ob(k) <= rr_w;
+        end if;
+      end loop;
       if rv(1) = '1' then
-        ob(to_integer(ob_wr(OB_LOG - 1 downto 0))) <= rr_w;
         ob_wr <= ob_wr + 1;
       end if;
 
@@ -244,6 +259,7 @@ begin
         ob_wr <= (others => '0');
         ob_rd <= (others => '0');
         rv    <= (others => '0');
+        ob_we <= (others => '0');
         dpv        <= '0';
         step_pulse <= '0';
       end if;
