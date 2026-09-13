@@ -296,6 +296,13 @@ struct CompactPairTable {
     // locks.  The default remains the historical single table so the mode is
     // an explicit measured ablation.
     shards: Vec<CompactPairTable>,
+    // The dense mode keeps occupied entries in original slot order and uses a
+    // compact occupancy/rank index for exact probing. This removes empty-slot
+    // payloads while retaining deterministic open-address membership.
+    dense_original_slots_per_shard: usize,
+    dense_shard_count: usize,
+    dense_occupancy: Vec<u64>,
+    dense_rank_blocks: Vec<u32>,
     keys_x: Vec<u64>,
     keys_y: Vec<u64>,
     // Cursor scans need only x and y to form the left pair point. Keep the
@@ -343,6 +350,10 @@ impl CompactPairTable {
             shards: (0..shard_count)
                 .map(|_| Self::with_capacity_unsharded(per_shard, x_only, x_domain))
                 .collect(),
+            dense_original_slots_per_shard: 0,
+            dense_shard_count: 0,
+            dense_occupancy: Vec::new(),
+            dense_rank_blocks: Vec::new(),
             keys_x: Vec::new(),
             keys_y: Vec::new(),
             columns: Vec::new(),
@@ -374,6 +385,10 @@ impl CompactPairTable {
         };
         Self {
             shards: Vec::new(),
+            dense_original_slots_per_shard: 0,
+            dense_shard_count: 0,
+            dense_occupancy: Vec::new(),
+            dense_rank_blocks: Vec::new(),
             keys_x: vec![u64::MAX; capacity],
             keys_y: if x_only {
                 Vec::new()
@@ -414,12 +429,28 @@ impl CompactPairTable {
         }
     }
 
+    fn is_dense(&self) -> bool {
+        self.dense_shard_count != 0
+    }
+
+    fn shard_count(&self) -> usize {
+        if self.is_dense() {
+            self.dense_shard_count
+        } else {
+            self.shards.len().max(1)
+        }
+    }
+
     #[inline(always)]
     fn shard_for_mixed(&self, mixed: u64) -> usize {
-        debug_assert!(!self.shards.is_empty());
-        debug_assert!(self.shards.len().is_power_of_two());
-        let local_bits = self.shards[0].slots().trailing_zeros();
-        (mixed as usize >> local_bits) & (self.shards.len() - 1)
+        debug_assert!(self.shard_count().is_power_of_two());
+        let local_slots = if self.is_dense() {
+            self.dense_original_slots_per_shard
+        } else {
+            self.shards[0].slots()
+        };
+        let local_bits = local_slots.trailing_zeros();
+        (mixed as usize >> local_bits) & (self.shard_count() - 1)
     }
 
     #[inline(always)]
@@ -430,7 +461,7 @@ impl CompactPairTable {
             // The two direct Bloom windows use low and high x bits. Their xor
             // balances the four shards while leaving both filter marginals
             // distributed, and avoids a full splitmix hash on every query.
-            (x ^ (x >> 29)) as usize & (self.shards.len() - 1)
+            (x ^ (x >> 29)) as usize & (self.shard_count() - 1)
         }
     }
 
@@ -518,6 +549,94 @@ impl CompactPairTable {
             });
     }
 
+    fn compact_dense(&mut self, x_domain: usize) {
+        assert!(!self.shards.is_empty());
+        assert!(self.x_only);
+        let shard_count = self.shards.len();
+        let slots_per_shard = self.shards[0].slots();
+        assert!(shard_count.is_power_of_two() && slots_per_shard.is_power_of_two());
+        assert!(self
+            .shards
+            .iter()
+            .all(|shard| shard.slots() == slots_per_shard));
+        let dense_len = self.len();
+        let total_slots = shard_count * slots_per_shard;
+        let mut occupancy = vec![0u64; total_slots.div_ceil(u64::BITS as usize)];
+        let mut keys_x = Vec::with_capacity(dense_len);
+        let mut image_y = Vec::with_capacity(dense_len);
+        let mut columns = Vec::with_capacity(dense_len);
+        for (shard_index, shard) in self.shards.iter().enumerate() {
+            for slot in 0..slots_per_shard {
+                if shard.keys_x[slot] == u64::MAX {
+                    continue;
+                }
+                let global_slot = shard_index * slots_per_shard + slot;
+                occupancy[global_slot / 64] |= 1u64 << (global_slot % 64);
+                keys_x.push(shard.keys_x[slot]);
+                image_y.push(shard.image_y[slot]);
+                columns.push(shard.columns[slot]);
+            }
+        }
+        assert_eq!(keys_x.len(), dense_len);
+
+        const RANK_BLOCK_WORDS: usize = 4;
+        let mut rank_blocks = Vec::with_capacity(occupancy.len().div_ceil(RANK_BLOCK_WORDS) + 1);
+        let mut rank = 0u32;
+        for block in occupancy.chunks(RANK_BLOCK_WORDS) {
+            rank_blocks.push(rank);
+            rank += block.iter().map(|word| word.count_ones()).sum::<u32>();
+        }
+        rank_blocks.push(rank);
+        assert_eq!(rank as usize, dense_len);
+
+        let filter_bits = (dense_len.max(4) * 8).next_power_of_two();
+        self.shards.clear();
+        self.dense_original_slots_per_shard = slots_per_shard;
+        self.dense_shard_count = shard_count;
+        self.dense_occupancy = occupancy;
+        self.dense_rank_blocks = rank_blocks;
+        self.keys_x = keys_x;
+        self.keys_y.clear();
+        self.columns = columns;
+        self.coefficients.clear();
+        self.image_y = image_y;
+        self.x_filter = vec![0; filter_bits / 64];
+        self.x_filter_mask = filter_bits - 1;
+        self.x_filter_exact = false;
+        self.x_filter_split_hash = false;
+        self.x_filter_insert_hash_reuse = false;
+        self.x_filter_direct_bits = true;
+        self.x_filter_blocked = false;
+        self.x_filter_window_shift = (x_domain - 1).trailing_zeros() - filter_bits.trailing_zeros();
+        self.mask = 0;
+        self.len = dense_len;
+        for index in 0..self.keys_x.len() {
+            let key_x = self.keys_x[index];
+            self.insert_x_filter_direct(key_x);
+        }
+    }
+
+    fn dense_occupied(&self, slot: usize) -> bool {
+        self.dense_occupancy[slot / 64] & (1u64 << (slot % 64)) != 0
+    }
+
+    fn dense_rank(&self, slot: usize) -> usize {
+        const RANK_BLOCK_WORDS: usize = 4;
+        let word = slot / 64;
+        let bit = slot % 64;
+        let block = word / RANK_BLOCK_WORDS;
+        let mut rank = self.dense_rank_blocks[block] as usize;
+        let first_word = block * RANK_BLOCK_WORDS;
+        rank += self.dense_occupancy[first_word..word]
+            .iter()
+            .map(|value| value.count_ones() as usize)
+            .sum::<usize>();
+        if bit != 0 {
+            rank += (self.dense_occupancy[word] & ((1u64 << bit) - 1)).count_ones() as usize;
+        }
+        rank
+    }
+
     fn get(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         if self.x_only && !self.might_contain_x(key.0) {
             return None;
@@ -532,11 +651,36 @@ impl CompactPairTable {
     fn get_after_x_filter(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
         let mixed = Self::hash(hash_key);
+        if self.is_dense() {
+            return self.get_dense_with_mixed(key, mixed);
+        }
         if !self.shards.is_empty() {
             let shard = self.shard_for_x(key.0);
             return self.shards[shard].get_after_x_filter_with_mixed(key, mixed);
         }
         self.get_after_x_filter_with_mixed(key, mixed)
+    }
+
+    fn get_dense_with_mixed(&self, key: (u64, u64), mixed: u64) -> Option<QuotientPairWitness> {
+        debug_assert!(self.is_dense() && self.x_only);
+        let shard = self.shard_for_x(key.0);
+        let local_mask = self.dense_original_slots_per_shard - 1;
+        let mut local_slot = mixed as usize & local_mask;
+        loop {
+            let global_slot = shard * self.dense_original_slots_per_shard + local_slot;
+            if !self.dense_occupied(global_slot) {
+                return None;
+            }
+            let dense_slot = self.dense_rank(global_slot);
+            if self.keys_x[dense_slot] == key.0 {
+                return Some(QuotientPairWitness {
+                    columns: self.columns[dense_slot],
+                    coefficients: [0; 2],
+                    image_y: self.image_y[dense_slot],
+                });
+            }
+            local_slot = (local_slot + 1) & local_mask;
+        }
     }
 
     fn get_after_x_filter_with_mixed(
@@ -671,6 +815,8 @@ impl CompactPairTable {
             + self.coefficients.len() * std::mem::size_of::<[u64; 2]>()
             + self.image_y.len() * std::mem::size_of::<u64>()
             + self.x_filter.len() * std::mem::size_of::<u64>()
+            + self.dense_occupancy.len() * std::mem::size_of::<u64>()
+            + self.dense_rank_blocks.len() * std::mem::size_of::<u32>()
     }
 
     fn slots_for_column(
@@ -713,6 +859,9 @@ impl CompactPairTable {
     }
 
     fn x_filter_kind(&self) -> &'static str {
+        if self.is_dense() {
+            return "dense_half_size_two_window_prefilter_with_exact_ranked_fallback";
+        }
         if !self.shards.is_empty() {
             return "four_shard_two_hash_bloom_prefilter_with_exact_table_fallback";
         }
@@ -734,6 +883,9 @@ impl CompactPairTable {
     }
 
     fn x_filter_hash_strategy(&self) -> &'static str {
+        if self.is_dense() {
+            return "dense_direct_low_and_high_x_bit_windows";
+        }
         if !self.shards.is_empty() {
             return if self.shards[0].x_filter_direct_bits() {
                 "four_shard_direct_low_and_high_x_bit_windows"
@@ -787,12 +939,38 @@ impl CompactPairTable {
     }
 
     fn shard_routing(&self) -> &'static str {
-        if self.shards.is_empty() {
+        if self.is_dense() {
+            if mixed_shard_routing_enabled() {
+                "splitmix_bucket_bits"
+            } else {
+                "xor_low_and_high_x_windows"
+            }
+        } else if self.shards.is_empty() {
             "unsharded"
         } else if mixed_shard_routing_enabled() {
             "splitmix_bucket_bits"
         } else {
             "xor_low_and_high_x_windows"
+        }
+    }
+
+    fn scan_start(&self, key: (u64, u64)) -> usize {
+        if self.is_dense() {
+            let total_original_slots = self.dense_shard_count * self.dense_original_slots_per_shard;
+            let original_slot = Self::hash(key) as usize & (total_original_slots - 1);
+            self.dense_rank(original_slot) % self.len
+        } else {
+            Self::hash(key) as usize & (self.slots() - 1)
+        }
+    }
+
+    #[inline(always)]
+    fn wrap_scan_slot(&self, slot: usize) -> usize {
+        let slots = self.slots();
+        if slot >= slots {
+            slot - slots
+        } else {
+            slot
         }
     }
 
@@ -2384,7 +2562,6 @@ fn pair_pair_cursor_chunk(
     specialized_n53_batch: bool,
     scratch: &mut PairPairChunkScratch,
 ) -> PairPairChunkResult {
-    let slots = quotient_pairs.slots();
     scratch.points.clear();
     scratch.compact_points.clear();
     scratch.signed_slots.clear();
@@ -2412,7 +2589,7 @@ fn pair_pair_cursor_chunk(
                 ordered
             }] as usize
         } else {
-            (start_slot + cursor / 2) & (slots - 1)
+            quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
         };
         let negative = !dual_sign && cursor & 1 == 1;
         let occupied = if compact_scratch && dual_sign {
@@ -3169,6 +3346,7 @@ fn main() {
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     let fixed_base_reference_validation =
         std::env::var("KIC_DISABLE_FIXED_BASE_REFERENCE_VALIDATION").as_deref() != Ok("1");
+    let dense_support_table = std::env::var("KIC_ENABLE_DENSE_SUPPORT_TABLE").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
@@ -3176,6 +3354,11 @@ fn main() {
     assert!(rank_target_deficiency > 0);
     assert!(!parallel_support_expansion || pair_mode == PairMode::SignedExpanded);
     assert!(!pipelined_support_expansion || parallel_support_expansion);
+    assert!(!dense_support_table || pair_mode == PairMode::SignedExpanded);
+    assert!(
+        !dense_support_table
+            || std::env::var("KIC_ENABLE_SHARDED_SUPPORT_TABLE").as_deref() == Ok("1")
+    );
 
     let curve_setup_started = Instant::now();
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
@@ -3387,6 +3570,9 @@ fn main() {
             }
         }
     }
+    if dense_support_table {
+        quotient_pairs.compact_dense((1usize << n) + 1);
+    }
     let support_index_entries = match pair_mode {
         PairMode::Full => full_pairs.len(),
         PairMode::SignedQuotient | PairMode::SignedExpanded => quotient_pairs.len(),
@@ -3478,9 +3664,13 @@ fn main() {
             "support_index_entries":support_index_entries,
             "support_payload_lower_bound_bytes":support_index_entries * (4 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
             "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
-            "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+            "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shard_count()},
             "support_table_shard_routing":quotient_pairs.shard_routing(),
-            "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
+            "support_table_dense":quotient_pairs.is_dense(),
+            "support_table_slots":quotient_pairs.slots(),
+            "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
+            "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
+            "parallel_support_insertion":parallel_support_expansion && quotient_pairs.shard_count() > 1,
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
             "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
@@ -3756,7 +3946,7 @@ fn main() {
                 let start_slot = if slot_order.is_some() {
                     CompactPairTable::hash(raw_compact_key(target)) as usize % scan_slots
                 } else {
-                    CompactPairTable::hash(raw_compact_key(target)) as usize & (slots - 1)
+                    quotient_pairs.scan_start(raw_compact_key(target))
                 };
                 if query_mode.pair_pair_parallel() {
                     let cursors = 2 * scan_slots;
@@ -3813,7 +4003,7 @@ fn main() {
                         pair_point_scratch.clear();
                         pair_signed_slot_scratch.clear();
                         while cursor < 2 * slots && pair_point_scratch.len() < width {
-                            let slot = (start_slot + cursor / 2) & (slots - 1);
+                            let slot = quotient_pairs.wrap_scan_slot(start_slot + cursor / 2);
                             let negative = cursor & 1 == 1;
                             cursor += 1;
                             if let Some(point) = quotient_pairs.signed_point_at_slot(slot, negative)
@@ -4357,9 +4547,13 @@ fn main() {
                 "support_table_instance_reused":true,
                 "support_index_entries":support_index_entries,
                 "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
-                "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+                "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shard_count()},
                 "support_table_shard_routing":quotient_pairs.shard_routing(),
-                "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
+                "support_table_dense":quotient_pairs.is_dense(),
+                "support_table_slots":quotient_pairs.slots(),
+                "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
+                "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
+                "parallel_support_insertion":parallel_support_expansion && quotient_pairs.shard_count() > 1,
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
                 "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
@@ -4588,6 +4782,26 @@ mod packed_tests {
             .filter(|&slot| sharded.compact_point_at_slot(slot).is_some())
             .count();
         assert_eq!(occupied, sharded.len());
+
+        let sharded_bytes = sharded.allocated_bytes();
+        let mut dense = CompactPairTable::with_capacity_sharded(1_024, true, x_domain, 4);
+        dense.insert_expanded_entries(entries.clone());
+        dense.compact_dense(x_domain);
+        assert!(dense.is_dense());
+        assert_eq!(dense.shard_count(), 4);
+        assert_eq!(dense.len(), serial.len());
+        assert_eq!(dense.slots(), dense.len());
+        assert!(dense.allocated_bytes() < sharded_bytes);
+        for &(key, _) in &entries {
+            assert!(dense.might_contain_x(key.0));
+            let expected = serial.get(key).unwrap();
+            let actual = dense.get(key).unwrap();
+            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.image_y, expected.image_y);
+        }
+        let start = dense.scan_start(entries[0].0);
+        assert!(start < dense.slots());
+        assert_eq!(dense.wrap_scan_slot(start + dense.slots()), start);
     }
 
     #[test]
