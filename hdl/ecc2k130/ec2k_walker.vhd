@@ -39,7 +39,7 @@
 -- retire side's read-plus-write and the report register's read, the
 -- report waiting for a clock with no retirement) and cleared by a load.
 -- A walk is out of the step unit for hundreds of clocks between two
--- retirements, so the table's write, a clock after its read, is never
+-- retirements, so the table's write, two clocks after its read, is never
 -- overtaken.
 --
 -- Report handshake: dp_valid holds with stable data until the clock after
@@ -135,17 +135,25 @@ architecture rtl of ec2k_walker is
   signal rd_w, rr_w : fword_t;                -- read latch, output register
   signal rv         : std_logic_vector(0 to 1) := (others => '0');  -- reads in flight
 
-  -- the high count table (see the header): read by the walk id on the
-  -- retire side, or by the head's when nothing retires; written through a
-  -- register like the FIFO
+  -- the high count table (see the header): read by the retiring walk's
+  -- id, or by the head's when nothing retires, through an address
+  -- register (its 170 LUTRAM address pins are then a register's net, not
+  -- a mux's), and written through a register like the FIFO.  A retire's
+  -- read is issued the clock after it, the write the clock after that;
+  -- a report's read the clock after take_dp, the report valid the clock
+  -- after that.
   type hi_mem_t is array (0 to NWALK - 1) of hi_t;
   signal hi_mem  : hi_mem_t := (others => (others => '0'));
   attribute ram_style of hi_mem : signal is "distributed";
-  signal hi_ra   : id_t := (others => '0');   -- read address (combinational)
+  signal hi_ra   : id_t := (others => '0');   -- read address register
   signal hi_rd   : hi_t;                      -- what it reads
+  signal hi_inc  : std_logic := '0';          -- a retire wrapped the low count, last clock
+  signal hi_clr  : std_logic := '0';          -- a load was taken, last clock
+  signal hi_cid  : id_t := (others => '0');   -- its id
   signal hi_we   : std_logic := '0';
   signal hi_wa   : id_t := (others => '0');
   signal hi_wd   : hi_t := (others => '0');
+  signal rep_rd  : std_logic := '0';          -- the report's table read is in flight
 
   -- output buffer, and the head register the step unit and the report
   -- register see: the buffer is distributed RAM (176 LUTRAM; as registers
@@ -215,16 +223,14 @@ begin
   ld_ready <= ld_rdy;
 
   -- head of the FIFO: a walk is offered to the step unit, a distinguished
-  -- point to the report register once that is free (or being freed) and
-  -- the count table's port is (no step retiring this clock)
+  -- point to the report register once that is free (or being freed), its
+  -- previous report's table read is done, and the table's port is free
+  -- (no step retiring this clock)
   s_in_valid <= head_v and not rst_q and not head_dp;
   s_in_tag   <= head_w(Y_LO - 1 downto ID_LO) & head_w(ID_LO - 1 downto CNT_LO);
   take_dp    <= head_v = '1' and rst_q = '0' and head_dp = '1' and s_out_valid = '0'
-                and (dpv = '0' or dp_ack = '1');
+                and rep_rd = '0' and (dpv = '0' or dp_ack = '1');
 
-  -- the count table's read: the retiring walk's, else the head's
-  hi_ra <= unsigned(s_out_tag(TAG_W - 1 downto LO_W)) when s_out_valid = '1'
-           else unsigned(head_w(Y_LO - 1 downto ID_LO));
   hi_rd <= hi_mem(to_integer(hi_ra));
   -- the head register takes the buffer's oldest entry when it is empty or
   -- being consumed this clock
@@ -293,43 +299,67 @@ begin
       elsif take_dp or (s_in_valid = '1' and s_in_ready = '1') then
         head_v <= '0';
       end if;
+      -- the report: id, point and low count from the head, the table's
+      -- read next clock (the address register took the head's id, no
+      -- step having retired), then valid
+      if dp_ack = '1' then
+        dpv <= '0';
+      end if;
+      rep_rd <= '0';
       if take_dp then
-        dpv      <= '1';
+        rep_rd   <= '1';
         dp_id    <= unsigned(head_w(Y_LO - 1 downto ID_LO));
         dp_x     <= head_w(FW - 1 downto X_LO);
         dp_y     <= head_w(X_LO - 1 downto Y_LO);
-        dp_steps <= hi_rd & unsigned(head_w(ID_LO - 1 downto CNT_LO));
+        dp_steps(LO_W - 1 downto 0) <= unsigned(head_w(ID_LO - 1 downto CNT_LO));
       end if;
-      if dp_ack = '1' and not take_dp then
-        dpv <= '0';
+      if rep_rd = '1' then
+        dp_steps(CNT_W - 1 downto LO_W) <= hi_rd;
+        dpv <= '1';
+      end if;
+
+      -- the table's address register: the retiring walk's id, else the
+      -- head's; a clock later the write register takes what it read plus
+      -- one (a retire that wrapped the low count) or zero (a load), and
+      -- the array is written the clock after that.  A load is taken only
+      -- on a clock with no retirement, so the two never meet in the
+      -- write register.
+      hi_ra <= unsigned(head_w(Y_LO - 1 downto ID_LO));
+      if s_out_valid = '1' then
+        hi_ra <= unsigned(s_out_tag(TAG_W - 1 downto LO_W));
+      end if;
+      hi_we <= hi_inc or hi_clr;
+      if hi_clr = '1' then
+        hi_wa <= hi_cid;
+        hi_wd <= (others => '0');
+      else
+        hi_wa <= hi_ra;
+        hi_wd <= hi_rd + 1;
       end if;
 
       -- a completed step: re-queue it with its count plus one, flagged
-      -- if distinguished, the table's entry plus one when the low count
-      -- wraps; else a host load, which starts at zero in both.  One
-      -- if/elsif chain so each memory has exactly one write port; the
-      -- writes themselves are the write registers', next clock.
+      -- if distinguished; else a host load, which starts at zero.  One
+      -- if/elsif chain so the memory has exactly one write port; the
+      -- write itself is the write register's, next clock.
       fw_addr <= f_wr(ID_W - 1 downto 0);
       fw_we   <= '0';
-      hi_we   <= '0';
-      hi_wa   <= hi_ra;
+      hi_inc  <= '0';
+      hi_clr  <= '0';
+      hi_cid  <= ld_id;
       if s_out_valid = '1' then
         step_pulse <= '1';
-        fw_we <= '1';
-        lo1   := resize(unsigned(s_out_tag(LO_W - 1 downto 0)), LO_W + 1) + 1;
-        fw_w  <= s_out_x & s_out_y & s_out_tag(TAG_W - 1 downto LO_W)
-                 & std_logic_vector(lo1(LO_W - 1 downto 0)) & s_out_dp;
-        f_wr  <= f_wr + 1;
-        hi_we <= lo1(LO_W);
-        hi_wd <= hi_rd + 1;
+        fw_we  <= '1';
+        lo1    := resize(unsigned(s_out_tag(LO_W - 1 downto 0)), LO_W + 1) + 1;
+        fw_w   <= s_out_x & s_out_y & s_out_tag(TAG_W - 1 downto LO_W)
+                  & std_logic_vector(lo1(LO_W - 1 downto 0)) & s_out_dp;
+        f_wr   <= f_wr + 1;
+        hi_inc <= lo1(LO_W);
       elsif ld_valid = '1' and ld_rdy = '1' then
-        fw_we <= '1';
-        fw_w  <= ld_x & ld_y & std_logic_vector(ld_id)
-                 & std_logic_vector(to_unsigned(0, LO_W)) & '0';
-        f_wr  <= f_wr + 1;
-        hi_we <= '1';
-        hi_wa <= ld_id;
-        hi_wd <= (others => '0');
+        fw_we  <= '1';
+        fw_w   <= ld_x & ld_y & std_logic_vector(ld_id)
+                  & std_logic_vector(to_unsigned(0, LO_W)) & '0';
+        f_wr   <= f_wr + 1;
+        hi_clr <= '1';
       end if;
       if fw_we = '1' then
         f_wrc <= f_wrc + 1;
@@ -348,6 +378,9 @@ begin
         f_rd   <= (others => '0');
         fw_we  <= '0';
         hi_we  <= '0';
+        hi_inc <= '0';
+        hi_clr <= '0';
+        rep_rd <= '0';
         f_full <= '0';
         ob_wr  <= (others => '0');
         ob_rd  <= (others => '0');
