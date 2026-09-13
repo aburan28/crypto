@@ -103,10 +103,14 @@ code the kernels run, not a model of it.
 2. **Structural identities the oracle is not needed for.** τ is a field and
    group homomorphism, τ^m is the identity, negation preserves x, and
    `g` is invariant under all m Frobenius images of every test vector.
-3. **Every narrowed routine against the wide one it replaced.** `f2m_prod`
-   against `clmul128` and `f2m_reduce` against `f2m_reduce_generic`, on
-   60,002 products per curve: real multiplies, real squarings, random
-   buffers of the widest degree a product can have, and both corners.
+3. **Every faster routine against the one it replaced.** `f2m_prod` against
+   `clmul128` and `f2m_reduce` against `f2m_reduce_generic`, on 60,002
+   products per curve: real multiplies, real squarings, random buffers of
+   the widest degree a product can have, and both corners. Then each τ^k
+   table against repeated squaring, the inversion that uses it against the
+   inversion that does not, and a 300-step run of the real stepper with the
+   tables against the same run without, which has to come out bit-identical
+   down to the distinguished-point multiset.
 4. **The identity the whole attack rests on**: τ(G) = s·G, checked both
    against Python and by computing s·G on the device path.
 5. **Class equivariance**: f(τP) = τf(P) and f(−P) = −f(P) on sample points.
@@ -153,6 +157,7 @@ Measured statically (`./ptx_stats2k.sh`, clang for sm_90):
 | F(2^97) multiply | 304 | 6 carry-less 32×32 products, three-way Karatsuba |
 | F(2^97) squaring | 78 | 0.26 of a multiply — bit spreading, no multiplier |
 | F(2^97) class weight | 165 | 25 windowed table reads, once per walk step |
+| F(2^97) τ^k, windowed | 296 | 101 of them loads; worth it from k = 4 up |
 | secp256k1 multiply | 472 | for comparison, from `gpu/ecc`; 210 with its inline-PTX carry chains |
 
 The multiply was 405 and the squaring 79 before the widths below were cut
@@ -211,14 +216,14 @@ per-step cost:
 (Per step: 2 multiplies for the addition, 1 squaring for λ², 3 multiplies
 for Montgomery's trick, 2j squarings for the two Frobenius chains, one class
 weight, and one inversion — 96 squarings and 7 multiplies — split W ways.
-The operation counts are the same in both columns: nothing below changes
-what the walk computes, only what each field operation costs.)
+The operation counts are the same in both columns: the arithmetic narrowing
+below changes what a field operation costs, not what the walk computes.)
 
-Where the W = 8 step goes now: 44% multiplies, 27% the two Frobenius chains,
-25% the amortised inversion's squarings, 4% the class weight. Squarings have
-become the larger half, and both of their shares are τ^k for k up to 48 —
-which is where the next lever is, since a Frobenius power is a fixed linear
-map and need not cost k squarings.
+Where the W = 8 step goes: 44% multiplies, 27% the two Frobenius chains, 25%
+the amortised inversion's squarings, 4% the class weight. Squarings are the
+larger half, and every one of them is part of some τ^k — which is a fixed
+linear map and need not cost k squarings. That is the "τ^k is not k
+squarings" section below.
 
 **This table counts arithmetic only, and arithmetic is not what picks W.**
 `ptxas` puts `k2k_rho_walk<W>` at 344, 464, 656, 1048 and 1816 bytes of
@@ -328,6 +333,60 @@ squarings, from random buffers of the widest degree a product can have, and
 at both corners — plus the Python field vectors and the end-to-end solves
 that ran before.
 
+## τ^k is not k squarings
+
+Squaring is cheap, which is the whole reason to walk on Frobenius classes,
+and it makes it easy to miss that **τ^k is a linear map and its cost need not
+grow with k**. It is F2-linear, so it is fixed by where it sends each `t^j`,
+and applying it is the same 4-bit-window table read the class weight already
+does: 25 windows, one read and one word-XOR each, at any k.
+
+Measured on sm_90: **296 instructions for a window application against 78 for
+a squaring**, so a table pays from k = 4 up. That is the whole rule, and the
+generator applies it — `ecref2k.py` reads the Frobenius exponents out of the
+same walk of m−1 that `pow_2n_minus_1` does, keeps those ≥ 4, and emits a
+table for each. At m = 97 the Itoh–Tsujii chain applies τ at k = 1, 3, 6, 12,
+24, 48, so four tables come out: τ^6, τ^12, τ^24, τ^48. τ^48 alone is 3,744
+instructions of squaring replaced by 296.
+
+Counted by `./test_ecc2k95`, the W = 8 step goes from 25.33 squarings to
+14.08 squarings and 0.50 table applications, with the multiply count
+untouched:
+
+| Batch W | batched | batched + τ^k | ratio | lowmem |
+|---|---|---|---|---|
+| 1 | 11395 | **5559** | 0.488 | 12467 |
+| 2 | 7069 | **4151** | 0.587 | 7850 |
+| 4 | 4887 | **3428** | 0.701 | 5513 |
+| 8 | 3813 | **3083** | 0.809 | 4369 |
+| 16 | 3268 | **2904** | 0.889 | 3789 |
+| 32 | 3008 | **2824** | 0.939 | 3516 |
+
+The tables help most where the inversion is least amortised, so they pull the
+batching optimum down — and the interesting consequence is in the local
+memory, not the arithmetic. **W = 4 with tables costs 3,428 instructions a
+step against W = 8 without at 3,813, and `k2k_rho_walk<4>` is 656 bytes of
+local memory against `<8>`'s 1,048.** Fewer instructions and a third less
+spill traffic, from halving the batch.
+
+**This is a trade, and only one side of it is measured.** The tables replace
+arithmetic with table traffic: at m = 97 an inversion reads 4 × 25 × 4 = 400
+words, which at W = 8 is 50 words per walk step against the class weight's
+100 — the same kind of read at half the rate, on 32 KB more table. They stay
+in global memory rather than being staged into shared like the class-weight
+table, precisely because Montgomery's trick has already made them a W-times
+colder read; giving up shared memory for them would be paying occupancy for
+the coldest table in the kernel.
+
+So they are **off by default**: `rho2k_ctx.ftb` is null, which is the
+squaring chain this had before, and `./bench2k rho --frob 1` turns them on.
+Whoever runs this on a GPU first should measure both; the instruction count
+says −19% at W = 8 and cannot say what the reads cost.
+
+`./bench2k selftest` takes its device inversion through the tables while the
+host reference squares, so the walk comparison that was already there checks
+the table path against the thing it replaces, on hardware, for free.
+
 ## Occupancy: measured
 
 `./ptx_stats2k.sh`, `k2k_rho_walk_lowmem<8>`, block size 128:
@@ -402,8 +461,8 @@ not fit in a `u64` and `FastCurve` refuses the same case.
 
 | File | What it is |
 |---|---|
-| `ecref2k.py` | Python oracle: F(2^m), Koblitz curves, group order, the τ eigenvalue s, the normal-basis map, header and vector generation |
-| `f2m.cuh` | Binary field: carry-less multiply, squaring, Itoh–Tsujii inversion, batch inversion, the class weight |
+| `ecref2k.py` | Python oracle: F(2^m), Koblitz curves, group order, the τ eigenvalue s, the normal-basis map, the windowed linear-map tables, header and vector generation |
+| `f2m.cuh` | Binary field: carry-less multiply, squaring, Itoh–Tsujii inversion, batch inversion, the class weight, τ^k as a linear map |
 | `koblitz.cuh` | Points, Frobenius, scalar multiplication |
 | `rho2k.cuh` | The Frobenius-class walk, distinguished points, canonicalisation, batched stepping |
 | `scalar_ring.hpp` | Host-only Montgomery arithmetic mod r |

@@ -105,8 +105,8 @@ struct f2e {
  * with F2M_COUNT_OPS undefined every tick compiles away. */
 #ifdef F2M_COUNT_OPS
 struct f2m_ops {
-    static inline unsigned long long mul = 0, sqr = 0, weight = 0;
-    static void reset() { mul = sqr = weight = 0; }
+    static inline unsigned long long mul = 0, sqr = 0, weight = 0, frobtab = 0;
+    static void reset() { mul = sqr = weight = frobtab = 0; }
 };
 #define F2M_TICK(which) (f2m_ops::which++)
 #else
@@ -528,9 +528,19 @@ struct F2 {
         return a;
     }
 
+    /* tau^n, using a table when one covers this exponent.
+     *
+     * A Frobenius power is an F2-linear map, so it can be a windowed table
+     * read rather than n squarings -- see FrobPow below.  `ftb` is the table
+     * set, or null to always square; the exponents it covers are fixed at
+     * generation time, so this is a compile-time-unrolled search over at most
+     * F2M_FROB_COUNT of them. */
+    static G2_HD elt frob_tab(elt a, int n, const uint32_t *ftb);
+
     /* Itoh-Tsujii: a^(2^n - 1) by an addition chain on n, so the cost is
-     * about n squarings and 2*log2(n) multiplications. */
-    static G2_BIG elt pow_2n_minus_1(const elt &a, int n) {
+     * about n squarings and 2*log2(n) multiplications -- or, with tau^k
+     * tables, about one table application per step of the chain. */
+    static G2_BIG elt pow_2n_minus_1(const elt &a, int n, const uint32_t *ftb) {
         if (n <= 1) return a;
         int top = 31;
         while (top > 0 && !((n >> top) & 1)) top--;
@@ -538,7 +548,7 @@ struct F2 {
         int k = 1;
 #pragma unroll 1
         for (int i = top - 1; i >= 0; i--) {
-            r = mul(frob(r, k), r);
+            r = mul(frob_tab(r, k, ftb), r);
             k <<= 1;
             if ((n >> i) & 1) {
                 r = mul(sqr(r), a);
@@ -548,19 +558,23 @@ struct F2 {
         return r;
     }
 
-    /* a^-1 = a^(2^m - 2) = (a^(2^(m-1) - 1))^2.  inv(0) = 0. */
-    static G2_BIG elt inv(const elt &a) {
+    /* a^-1 = a^(2^m - 2) = (a^(2^(m-1) - 1))^2.  inv(0) = 0.
+     *
+     * `ftb` defaults to null, so every caller that does not have a table to
+     * hand keeps the pure squaring chain it had before. */
+    static G2_BIG elt inv(const elt &a, const uint32_t *ftb = nullptr) {
         if (is_zero(a)) return zero();
-        return sqr(pow_2n_minus_1(a, F2M_M - 1));
+        return sqr(pow_2n_minus_1(a, F2M_M - 1, ftb));
     }
 
     /* Montgomery's trick: one inversion for n elements.  Worth much less
-     * here than over a prime field -- an inversion is ~23 multiplies rather
+     * here than over a prime field -- an inversion is ~32 multiplies rather
      * than ~270 -- but still a 3-4x win at the batch sizes we use. */
-    static G2_BIG void batch_inv(elt *x, int n, elt *scratch) {
+    static G2_BIG void batch_inv(elt *x, int n, elt *scratch,
+                                 const uint32_t *ftb = nullptr) {
         scratch[0] = x[0];
         for (int i = 1; i < n; i++) scratch[i] = mul(scratch[i - 1], x[i]);
-        elt t = inv(scratch[n - 1]);
+        elt t = inv(scratch[n - 1], ftb);
         for (int i = n - 1; i > 0; i--) {
             elt xi = mul(t, scratch[i - 1]);
             t = mul(t, x[i]);
@@ -630,5 +644,75 @@ struct ClassWeight {
 
 /* The table itself, for host code and for uploading to the device. */
 static const uint32_t f2m_cb_table[F2M_CB_WINDOWS][16][F2M_CB_STRIDE] = F2M_CB_TABLE;
+
+/* ---------------------------------------------------------------- *
+ * Frobenius powers as a linear map
+ * ---------------------------------------------------------------- *
+ *
+ * tau^k(x) = x^(2^k) is F2-linear, so it is determined by where it sends each
+ * t^j, and applying it is the same windowed table read the class weight does
+ * -- a fixed cost, where repeated squaring costs k squarings.  On sm_90 a
+ * table application is 296 PTX instructions against 78 for a squaring, so it
+ * pays from k = 4 up; the generator emits a table only for the chain
+ * exponents above that, which at m = 97 are tau^6, tau^12, tau^24 and tau^48.
+ *
+ * The exponents are Itoh-Tsujii's, read out of the same walk of m-1 that
+ * pow_2n_minus_1 does, so there is exactly one table per step of the chain
+ * that wants one.
+ *
+ * THIS TRADES ARITHMETIC FOR TABLE TRAFFIC, and only the arithmetic side is
+ * measurable without a GPU.  At m = 97 the inversion reads 4 * 25 * 4 = 400
+ * words per call, which at W = 8 is 50 words per walk step against the class
+ * weight's 100 -- so it is the same kind of read, at half the rate, on top of
+ * 32 KB more table.  Which side wins is a memory-hierarchy question; the
+ * tables are opt-in for that reason, selected by passing the pointer rather
+ * than null, and every caller that passes null keeps the squaring chain.
+ */
+#if F2M_FROB_COUNT > 0
+struct FrobPow {
+    /* Words in one tau^k table, and in the whole set. */
+    static const int TABLE_WORDS = F2M_CB_WINDOWS * 16 * F2M_CB_STRIDE;
+    static const int WORDS = F2M_FROB_COUNT * TABLE_WORDS;
+
+    /* `tb` is the whole set in [exponent][window][nibble][word] order; `slot`
+     * picks the exponent.  Same passing convention as ClassWeight::of, for the
+     * same reason. */
+    static G2_HD f2e apply(const f2e &x, const uint32_t *tb, int slot) {
+        F2M_TICK(frobtab);
+        const uint32_t *t = tb + slot * TABLE_WORDS;
+        uint32_t acc[F2M_WORDS];
+#pragma unroll
+        for (int i = 0; i < F2M_WORDS; i++) acc[i] = 0;
+#pragma unroll
+        for (int w = 0; w < F2M_CB_WINDOWS; w++) {
+            uint32_t nib = (x.v[w >> 3] >> (4 * (w & 7))) & 15u;
+            const uint32_t *e = t + (w * 16 + (int)nib) * F2M_CB_STRIDE;
+#pragma unroll
+            for (int i = 0; i < F2M_WORDS; i++) acc[i] ^= e[i];
+        }
+        f2e r;
+#pragma unroll
+        for (int i = 0; i < F2M_WORDS; i++) r.v[i] = acc[i];
+        return r;
+    }
+};
+
+static const uint32_t f2m_frob_table[F2M_FROB_COUNT][F2M_CB_WINDOWS][16][F2M_CB_STRIDE]
+    = F2M_FROB_TABLE;
+#endif
+
+G2_HD f2e F2::frob_tab(f2e a, int n, const uint32_t *ftb) {
+#if F2M_FROB_COUNT > 0
+    if (ftb) {
+        constexpr int e[F2M_FROB_COUNT] = F2M_FROB_EXPS;
+#pragma unroll
+        for (int s = 0; s < F2M_FROB_COUNT; s++)
+            if (n == e[s]) return FrobPow::apply(a, ftb, s);
+    }
+#else
+    (void)ftb;
+#endif
+    return frob(a, n);
+}
 
 #endif /* GPU_ECC2K_F2M_CUH */
