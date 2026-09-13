@@ -3159,14 +3159,22 @@ fn main() {
             json!([x.to_string(), y.to_string()])
         })
         .collect();
-    let factor_base_point_keys: Vec<_> = base
-        .points
-        .iter()
-        .map(|point| {
-            let (x, y) = point_key(point);
-            json!([x.to_string(), y.to_string()])
-        })
-        .collect();
+    let factor_base_point_keys = (!summary_only).then(|| {
+        base.points
+            .iter()
+            .map(|point| {
+                let (x, y) = point_key(point);
+                json!([x.to_string(), y.to_string()])
+            })
+            .collect::<Vec<_>>()
+    });
+    let factor_base_point_coordinates = (!summary_only).then(|| {
+        base.points
+            .iter()
+            .map(|point| to_raw_point(point).map(|(x, y)| [x, y]))
+            .collect::<Vec<_>>()
+    });
+    let factor_base_point_labels = (!summary_only).then_some(&base.point_labels);
     let generator_key = point_key(curve.generator());
     let base_hash = blake3::hash(&serde_json::to_vec(&representative_keys).unwrap())
         .to_hex()
@@ -3194,12 +3202,13 @@ fn main() {
             "field_product_pipeline":field_product_pipeline(&curve),
             "field_product_dispatch":field_product_dispatch(&curve),
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
-            "factor_base_point_coordinates":base.points.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
+            "factor_base_point_coordinates":factor_base_point_coordinates,
             "factor_base_representatives":base.representatives.iter().map(|point| to_raw_point(point).map(|(x,y)| [x,y])).collect::<Vec<_>>(),
             "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
             "representative_point_keys":representative_keys,
             "factor_base_point_keys":factor_base_point_keys,
-            "factor_base_point_labels":base.point_labels,
+            "factor_base_point_labels":factor_base_point_labels,
+            "compact_evidence":summary_only,
             "point_selection":base.point_selection,
             "field_x_values_scanned":base.scanned_x,
             "base_construction_ms":base_ms,
@@ -3356,6 +3365,7 @@ fn main() {
         let mut rank_target_slot_column = None;
         let mut rank_target_slots = Vec::new();
         let mut reference_validation_records = Vec::new();
+        let mut relation_hashes = Vec::new();
         let mut walk_seen = HashSet::new();
         let mut target_walk_restarts = 0usize;
         let mut target_scalar_multiplications = match target_mode {
@@ -3786,6 +3796,21 @@ fn main() {
                     .collect::<Vec<_>>(),
                 witness_labels
             );
+            let (target_x, target_y) = raw_compact_key(target);
+            let relation_material = serde_json::to_vec(&json!({
+                "n":n,
+                "a":a,
+                "base_hash":&base_hash,
+                "trial":trials,
+                "coefficient_a":coefficient_a,
+                "coefficient_b":coefficient_b,
+                "target":[target_x,target_y],
+                "indices":&point_indices,
+                "row":&row
+            }))
+            .unwrap();
+            let relation_hash = blake3::hash(&relation_material).to_hex().to_string();
+            relation_hashes.push(relation_hash.clone());
             if !summary_only {
                 let labels: Vec<_> = point_indices
                     .iter()
@@ -3794,20 +3819,6 @@ fn main() {
                         json!({"column":column,"coefficient":coefficient})
                     })
                     .collect();
-                let (target_x, target_y) = raw_compact_key(target);
-                let relation_material = serde_json::to_vec(&json!({
-                    "n":n,
-                    "a":a,
-                    "base_hash":&base_hash,
-                    "trial":trials,
-                    "coefficient_a":coefficient_a,
-                    "coefficient_b":coefficient_b,
-                    "target":[target_x,target_y],
-                    "indices":&point_indices,
-                    "row":&row
-                }))
-                .unwrap();
-                let relation_hash = blake3::hash(&relation_material).to_hex().to_string();
                 println!(
                     "{}",
                     json!({
@@ -4028,6 +4039,8 @@ fn main() {
                 "terminal_dense_rank_crosschecks":terminal_dense_rank_crosschecks,
                 "variant":match pair_mode { PairMode::Full=>"V2_full_pair_support_index", PairMode::SignedQuotient=>"V2_signed_quotient_pair_support_index", PairMode::SignedExpanded=>"V2_signed_expanded_pair_support_index" },
                 "summary_only_timing":summary_only,
+                "relation_hashes":summary_only.then_some(&relation_hashes),
+                "relation_receipts_emitted":!summary_only,
                 "timing_breakdown_ms":{
                     "target_generation":target_generation_ns as f64/1_000_000.0,
                     "query":query_total_ns as f64/1_000_000.0,
