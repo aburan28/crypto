@@ -18,7 +18,7 @@ class PackedAuditCountTests(unittest.TestCase):
         modeHelper = next(node for node in ast.parse(modePath.read_text()).body
                           if isinstance(node, ast.FunctionDef) and node.name == 'checkPackedReduction')
         modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0',
-                             PACKED_STATE_TILE='0', PACKED_CLMAD='0', PACKED_CLMAD_SQUARE='0', PACKED_WEIGHTED_PREFIX='0',
+                             PACKED_STATE_TILE='0', PACKED_CLMAD='0', PACKED_CLMAD_SQUARE='0', PACKED_KARAT3='0', PACKED_WEIGHTED_PREFIX='0',
                              PACKED_COMPACT_STATE='0', PACKED_SHARED_SIGMA='0')
         exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
         namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
@@ -35,6 +35,7 @@ class PackedAuditCountTests(unittest.TestCase):
                 'packed generated product: 0\n'
                 'packed native carryless multiply: 0\n'
                 'packed native carryless square: 0\n'
+                'packed three-limb Karatsuba: 0\n'
                 'packed weighted prefix: 0\n'
                 'packed compact state: 0\n'
                 'packed shared sigma: 0\n'
@@ -127,3 +128,4 @@ class PackedAuditCountTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
