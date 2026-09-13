@@ -105,3 +105,11 @@ The dashboard's progress bar is filled from the ratio of the **work**,
 thirds of the way along the exponent and about a millionth of a millionth
 of the way through the work. A test pins that, because it is the kind of
 bar that gets "fixed" into a lie by anyone trying to make it look fuller.
+
+The dashboard also derives an ETA to that same `2^60.9` expected cost
+from the last-hour distinguished-point amount: operations per second
+are `(dps_last_hour × 2^25.27) / 3600`, and the ETA is the remaining
+work divided by that rate. When the hourly DP amount changes, the
+operation rate and the ETA both move with it at the fixed interval.
+The ETA is an expectation, not a deadline; `scripts/site/test_build.py`
+pins the formula.
