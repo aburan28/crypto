@@ -49,33 +49,40 @@
   "correctness_cross_check": "Both runs produced 556 relations from 130000 probes, certified the same 296 columns with none rejected, filtered to the same core of 43 with the same 83 singletons. The two tiers are answering identically; only the cost differs.",
   "what_it_implies": "The tier order is wrong for this regime. It is ordered by what fits, which is right for a base whose precompute is already paid and wrong when precompute is the bill. Whether the default should simply prefer the fold depends on where the compact table stops being cache-resident; below roughly 3800 points it would be, but at that width the descent needs 2r/|F|^2 = 4e7 probes a target and the pipeline is not worth running. A second width is being measured before the default is changed.",
   "second_width": {
-    "points": 12048,
+    "points": 12688,
     "targets": 32,
-    "measured": [
+    "a_correction": "The first attempt at this width measured full against compact and called it compact against folded. The budget was sized from the REQUESTED 12000 points, but the base closes under Frobenius to 12688, and at that size the compact table fits inside a budget computed to exclude it. The third run was then a duplicate of the first, and its agreement was read as confirming a prediction -- two identical configurations agreeing with themselves. The budget formula was wrong too: it assumed 2^26 buckets where compact_bucket_bits caps by run length and gives 2^23 here. Budgets now come from the code's own sizing, and every run records the tier it built.",
+    "ladder": [
       {
-        "points": 12688,
-        "tier": "compact",
-        "precompute": 20.0,
-        "descent": 0.3252,
+        "tier": "full",
+        "stored_pairs": 80499016,
+        "precompute_seconds": 20.0,
+        "descent_seconds_per_target": 0.3252,
         "charged": 9.0,
         "amortised": 3.07,
-        "rss_mib": 1592,
-        "verified": 32
+        "rss_mib": 1592
       },
       {
-        "points": 12688,
-        "tier": "folded",
-        "precompute": 16.8,
-        "descent": 0.301,
+        "tier": "compact",
+        "stored_pairs": 80499016,
+        "precompute_seconds": 16.8,
+        "descent_seconds_per_target": 0.301,
         "charged": 9.9,
         "amortised": 3.6,
-        "rss_mib": 526,
-        "verified": 32
+        "rss_mib": 526
+      },
+      {
+        "tier": "folded",
+        "stored_pairs": 666120,
+        "precompute_seconds": 13.9,
+        "descent_seconds_per_target": 0.2652,
+        "charged": 10.7,
+        "amortised": 4.07,
+        "rss_mib": 16
       }
     ],
-    "predicted": "the fold wins again but by less than the 5.8x at 36112, around 2 to 3x",
-    "verdict": "The fold wins again -- amortised 3.07 -> 3.60, and the descent is again faster, 0.3252 -> 0.3010 s a target -- but by 1.17x, not the 2 to 3x predicted. MISSED on magnitude, held on direction. The reason is structural: the build scales as |F|^2 while base selection, probing and verification scale slower, so the fold's advantage shrinks with the width. At 12000 points precompute is 20.0 s of which the build is about 7 s; at 36112 it is 71.4 s of which the build is about 63 s."
+    "verdict": "A monotone ladder, and it is the exact reverse of the one build_within climbs. The tiers are tried full, then compact, then folded; they measure folded, then compact, then full -- better on precompute, on descent, on charged ratio, on amortised ratio and on resident memory, at every step. 32 of 32 verified at all three."
   },
-  "conclusion": "Two widths, and the fold wins both on every axis measured -- precompute, descent, resident memory -- with the margin growing as the width grows: 1.17x at 12000 points, 5.8x at 36112. The regime where the compact tier could keep a cache advantage is below about 3800 points, where the descent needs 4e7 probes a target and the pipeline is not worth running. On this evidence there may be no width at which the compact tier is the right default, and the ordering in build_within -- which takes the first tier that FITS -- is wrong for any run whose precompute is not already paid.",
-  "not_claimed": "That the full tier, which stores summands and so needs no recovery scan at all, is also beaten. It was not tested here. Nor that flipping the default is free: the tier ladder is a documented contract with a test asserting it, and changing it touches every caller. The measurement says what it says; the change is a separate decision."
+  "conclusion": "Two widths with every tier verified from the report rather than inferred. At 12688 points the ladder is full 3.07, compact 3.60, folded 4.07; at 36112 it is compact 1.24 against folded 7.15. The fold wins everywhere measured, by 1.13x over compact at 12688 and 5.8x at 36112, so the margin grows with the width -- which follows from the build scaling as |F|^2 while base selection, probing and verification scale slower. Resident memory falls 100x at 12688 (1592 MiB to 16) and 73x at 36112.\n\nbuild_within takes the first tier that FITS. That is the right order for a base whose precompute is already paid and the exact wrong order for any run that has to pay it.",
+  "not_claimed": "That flipping the default is free. The ladder is a documented contract with a test asserting it, and it is reached by every caller. Nor that the fold wins below about 3800 points, where the compact table would be cache-resident too -- but there the descent needs 4e7 probes a target and nobody runs this pipeline."
 }

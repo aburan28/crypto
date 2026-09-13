@@ -2477,18 +2477,40 @@ where the compact one is 4.2 GiB and does not, and that outweighs the
 canonicalisation entirely. The framing of the fold as *cheaper storage
 bought with a dearer probe* holds only when both tables are out of cache.
 
-At a second width the direction holds and the margin shrinks:
+### A second width, and a comparison that had to be redone
 
-| | compact | folded | gain |
-|---|---|---|---|
-| 12688 points | 3.07 | 3.60 | 1.17× |
-| 36112 points | 1.24 | 7.15 | 5.8× |
+The first attempt at 12688 points measured the wrong thing. The budget
+was sized from the *requested* 12000 points, but a base closes under
+Frobenius — to 12688 — and at that size the compact table fits inside a
+budget computed to exclude it. So the three runs were full, compact and
+full; the fold never ran, and the "1.17× fold gain" was compact beating
+full. The third run was a duplicate of the first, and I read their
+agreement as confirming a prediction — two identical configurations
+agreeing with themselves.
 
-1.17× against a prediction of 2 to 3 — missed on magnitude again, and for
-a structural reason worth keeping: the build scales as `|F|²` while base
-selection, probing and verification scale slower, so the fold's advantage
-grows with the width. At 12688 points precompute is 20.0 s of which the
-build is about 7; at 36112 it is 71.4 s of which the build is about 63.
+Nothing in the report said which tier had been built, so there was
+nothing to contradict the budget I had *intended*. It records the tier
+now, and that is what caught this.
+
+Redone, with every tier read back from the report:
+
+| 12688 points | stored pairs | precompute | descent | amortised | resident |
+|---|---|---|---|---|---|
+| full | 80499016 | 20.0 s | 0.3252 s/t | 3.07 | 1592 MiB |
+| compact | 80499016 | 16.8 s | 0.3010 s/t | 3.60 | 526 MiB |
+| **folded** | **666120** | **13.9 s** | **0.2652 s/t** | **4.07** | **16 MiB** |
+
+A monotone ladder — and **the exact reverse of the one `build_within`
+climbs.** The tiers are tried full, then compact, then folded. They
+measure folded, then compact, then full: better on precompute, on the
+descent, on both ratios and on resident memory, at every step. 32 of 32
+verified at all three.
+
+Against the wider base the picture is consistent and the margin grows:
+1.13× over compact at 12688 points, 5.8× at 36112. That follows from the
+build scaling as `|F|²` while base selection, probing and verification
+scale slower — at 12688 precompute is 13.9 s of which the build is a
+fraction; at 36112 it is 71.4 s of which the build is about 63.
 
 ### Is there any width where compact is right?
 
