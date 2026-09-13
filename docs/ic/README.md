@@ -696,16 +696,32 @@ dense modular solver.
 
 The base is closed under `π` and negation, so its pair sums are too, and
 the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
-canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
-negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
-stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
-fewer descent probes, and **2.0×** end to end per decomposed target once
-the dearer probe and the wider recovery scan are paid.
+sign costs nothing, since negation does not move the abscissa; what is
+left is naming the orbit `{x^{2^k}}`. Measured at `n = 61`: 61 times
+fewer stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376),
+61 times fewer descent probes, and **3.3×** end to end per decomposed
+target once the dearer probe and the wider recovery scan are paid.
 
+The naming is done in a **normal basis**, where `π` is a one-bit
+rotation of the coordinate word and the orbit is that word's `n`
+rotations: the key is the least of them. In a polynomial basis the same
+key is `1 + min_k x^{2^k}`, `n − 1` squarings, and that cost the fold
+most of what it was worth — 733 ns against 85, and 2.0× end to end
+against 3.3×.
+
+- `koblitz_fast::NormalBasis` builds the basis and is the key; the two
+  keys pick different representatives of the same orbit, so a folded
+  table is not portable across the change.
 - `PairSumTable::build_within` reaches for the fold as its last tier, when
-  neither the full nor the compact table fits the budget.
+  neither the full nor the compact table fits the budget. That is still
+  right after the cheaper key: what the fold buys is a *wider* base, and
+  the base is fixed by the time the tier is chosen.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
   `O(|F|)` summand recovery a hit would otherwise charge to it.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
-  `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
+  `docs/ic/runs/koblitz-orbit-fold-20260913.json` is the fold as first
+  built and `docs/ic/runs/koblitz-normal-basis-orbit-key-20260913.json`
+  the before-and-after of the key, on one host.
+- `examples/koblitz_fold_cost.rs` prices the canonicalisation on its own,
+  four ways.

@@ -1,0 +1,52 @@
+{
+  "what": "The signed-Frobenius orbit key, moved from a polynomial-basis squaring chain to the least rotation of a normal-basis coordinate word",
+  "date": "2026-09-13",
+  "supersedes": "the canonicalisation cost recorded in koblitz-orbit-fold-20260913.json",
+  "machine": "4 cores, 15 GiB; both the before and the after below were measured on it, back to back",
+  "why_it_is_sound": "In a normal basis {theta, theta^2, theta^4, ...} the Frobenius permutes coordinates: x = sum c_i theta^(2^i) gives x^2 = sum c_i theta^(2^(i+1)), so squaring rotates the coordinate word by one bit and the Frobenius orbit of x is exactly the n rotations of one n-bit word. The least rotation names the orbit.",
+  "what_the_key_is_not": "The same representative. The polynomial key is the least element of the orbit; this is the least rotation of a coordinate word, which is some other member. Only the partition is shared - checked by enumerating all of F_2^n at n = 8, 12, 16, 20 (composite degrees included, so orbits shorter than n occur) with zero disagreements. A folded table built before this change and one built after are not interchangeable.",
+  "canonicalisation_ns_at_n_61": {
+    "harness": "examples/koblitz_fold_cost.rs 61, 200000 points",
+    "squaring_chain_serial": 846.8,
+    "squaring_chain_8_in_flight": 733.7,
+    "shift_reduced_squaring_8_in_flight": 1299.3,
+    "normal_basis_one_at_a_time": 85.5,
+    "speedup_against_best_squaring_variant": 8.58
+  },
+  "end_to_end": {
+    "harness": "examples/koblitz_orbit_fold_width.rs 61 4",
+    "degree": 61,
+    "budget_gib": 4,
+    "folded_base": 177632,
+    "compact_base": 16592,
+    "folded_pairs": 258632192,
+    "before": {
+      "key": "1 + min_k x^(2^k), polynomial basis",
+      "ns_per_probe_compact": 147.2,
+      "ns_per_probe_folded": 1211.3,
+      "probe_penalty": 8.23,
+      "folded_build_secs": 147.1,
+      "secs_per_decomposition_compact": 0.5770,
+      "secs_per_decomposition_folded": 0.2528,
+      "net_speedup_at_equal_memory": 2.28
+    },
+    "after": {
+      "key": "least rotation of the normal-basis coordinate word",
+      "ns_per_probe_compact": 133.5,
+      "ns_per_probe_folded": 362.7,
+      "probe_penalty": 2.72,
+      "folded_build_secs": 52.4,
+      "secs_per_decomposition_compact": 0.6250,
+      "secs_per_decomposition_folded": 0.1916,
+      "net_speedup_at_equal_memory": 3.26
+    }
+  },
+  "the_honest_number": "3.3x for the fold at equal memory, from 2.3x. The folded probe is 3.34x cheaper and the folded build 2.81x, but a decomposed target is only 1.32x faster.",
+  "what_is_binding_now": "Not the canonicalisation. The gap between a 3.34x cheaper probe and a 1.32x faster decomposition is the m = 3 scan around it, which prepares and probes a rest for every one of 177632 base points.",
+  "noise": "The unfolded baseline drifted 0.5770 -> 0.6250 s a decomposition between the two runs, about 8%, which the net figures carry. The folded column is given raw beside them for that reason.",
+  "not_claimed": [
+    "That the tier order in build_within should change. For a base already fixed the fold spends the canonicalisation and buys nothing; what it buys is a wider base, and choosing one is the caller's decision and a separate measurement.",
+    "That an optimal normal basis is involved. Every F_2^n has a normal basis and the rotation property holds in all of them; optimality is about multiplication, which this never does.",
+    "That the CUDA pair table in gpu/ecc2k/ folds at all. It does not, and nothing here changed that."
+  ]
+}

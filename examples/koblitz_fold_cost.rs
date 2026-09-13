@@ -20,7 +20,7 @@
 use std::time::Instant;
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, NormalBasis};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -136,6 +136,38 @@ fn main() {
         println!("irreducible is not sparse enough for a shift reduce; skipping (c)");
     }
 
+    // (c2) the same canonicalisation in a normal basis, where the
+    // Frobenius is a rotation of the coordinate word: one byte-table
+    // change of basis, then `n − 1` rotations and a running minimum.
+    // No field arithmetic, and no dependency chain, so this is timed
+    // one point at a time — the lane trick has nothing left to hide.
+    let nb = NormalBasis::new(&fc.field).expect("a normal element");
+    {
+        let mut agree = true;
+        for &s in sample.iter().take(4096) {
+            let mut v = s;
+            let mut best = s;
+            for _ in 1..n {
+                v = fc.field.sqr(v);
+                best = best.min(v);
+            }
+            // Different representative, same orbit: what must agree is
+            // that two elements share a key exactly when they share an
+            // orbit, which the library tests check by enumeration.  Here
+            // it is enough that the orbit's own images all key alike.
+            if nb.canon(s) != nb.canon(best) {
+                agree = false;
+                break;
+            }
+        }
+        println!("normal-basis key is constant on the Frobenius orbit: {agree}");
+    }
+    let start = Instant::now();
+    for t in 0..iters {
+        acc ^= nb.canon(sample[t & (sample.len() - 1)]);
+    }
+    let nb_ns = start.elapsed().as_secs_f64() * 1e9 / iters as f64;
+
     // (d) a real dependent random access, over a Sattolo cycle.
     for &log_bytes in &[27u32, 30, 32] {
         let entries = (1usize << log_bytes) / 8;
@@ -158,7 +190,7 @@ fn main() {
         }
         let probe_ns = start.elapsed().as_secs_f64() * 1e9 / probes as f64;
         acc ^= idx as u64;
-        let best_canon = if shift_ns.is_nan() {
+        let sqr_canon = if shift_ns.is_nan() {
             lanes_ns
         } else {
             shift_ns.min(lanes_ns)
@@ -166,12 +198,16 @@ fn main() {
         let fold = 2.0 * n as f64;
         println!(
             "table {:>4} MiB: probe {probe_ns:6.1} ns | canon serial {serial_ns:6.1} \
-             lanes {lanes_ns:6.1} shift {shift_ns:6.1} | fold {fold:.0}x probes, \
-             {:.2}x per probe -> net {:.1}x",
+             lanes {lanes_ns:6.1} shift {shift_ns:6.1} nb {nb_ns:6.1} | fold {fold:.0}x probes",
             (1usize << log_bytes) >> 20,
-            (probe_ns + best_canon) / probe_ns,
-            fold * probe_ns / (probe_ns + best_canon)
         );
+        for (name, canon) in [("squarings", sqr_canon), ("normal basis", nb_ns)] {
+            println!(
+                "                  {name:>12}: {:.2}x per probe -> net {:.1}x",
+                (probe_ns + canon) / probe_ns,
+                fold * probe_ns / (probe_ns + canon)
+            );
+        }
     }
     println!("(checksum {acc})");
 }

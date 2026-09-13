@@ -62,6 +62,196 @@ impl FastPoint {
     }
 }
 
+/// **A normal basis of `F_{2ⁿ}` over `F₂`, and the orbit key it makes
+/// cheap.**
+///
+/// In a normal basis `{θ, θ², θ⁴, …, θ^{2ⁿ⁻¹}}` the Frobenius is a
+/// relabelling: if `x = Σ cᵢ θ^{2ⁱ}` then `x² = Σ cᵢ θ^{2^{i+1}}`, so
+/// squaring **rotates the coordinate word by one bit** and the whole
+/// Frobenius orbit of `x` is the `n` rotations of one `n`-bit word.
+/// A canonical representative of the orbit is then the least rotation
+/// — bit shuffling, no field arithmetic at all — against the `n − 1`
+/// squarings the same representative costs in a polynomial basis.
+///
+/// The two keys pick *different* representatives of the same orbit, so
+/// they are not interchangeable across a stored table; what matters is
+/// that they induce the **same partition**, which the tests below check
+/// by enumeration.
+///
+/// Getting into the basis is one `F₂`-linear map, byte-tabled exactly
+/// like [`Gf2`]'s reduction: `⌈n/8⌉` indexed loads and xors.
+#[derive(Clone, Debug)]
+pub struct NormalBasis {
+    n: u32,
+    mask: u64,
+    /// `to[j * 256 + v]` = normal-basis coordinates of the element whose
+    /// polynomial coordinates are `v << (8j)`.
+    to: Vec<u64>,
+    chunks: usize,
+    /// The normal element, in polynomial coordinates.  Only the tests
+    /// use it, but it is what makes a failure diagnosable.
+    theta: u64,
+}
+
+impl NormalBasis {
+    /// Candidate normal elements tried before giving up.
+    ///
+    /// Normal elements are dense — their count is `Φ₂(zⁿ − 1)`, which
+    /// for the degrees here is a constant fraction of the field — so
+    /// the search ends in a handful of tries and the bound is only
+    /// there to keep a pathological field from looping.
+    const TRIES: u32 = 4096;
+
+    /// `None` only if no normal element turned up in [`Self::TRIES`],
+    /// which has not been observed for any `n ≤ 62`.
+    ///
+    /// The candidate sequence is a fixed LCG seeded from the
+    /// irreducible, so the basis a given field gets is deterministic:
+    /// two runs on the same curve produce the same keys.
+    pub fn new(field: &Gf2) -> Option<Self> {
+        let n = field.n;
+        debug_assert!(n >= 2 && n <= 63);
+        let mask = if n == 64 { !0u64 } else { (1u64 << n) - 1 };
+        let mut state = field.irr | 1;
+        for _ in 0..Self::TRIES {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let theta = (state >> 3) & mask;
+            if theta == 0 {
+                continue;
+            }
+            if let Some(nb) = Self::from_theta(field, theta) {
+                return Some(nb);
+            }
+        }
+        None
+    }
+
+    /// Build the basis on a specific candidate, or `None` when its
+    /// Frobenius orbit does not span.
+    fn from_theta(field: &Gf2, theta: u64) -> Option<Self> {
+        let n = field.n;
+        let mask = if n == 64 { !0u64 } else { (1u64 << n) - 1 };
+
+        // Column `i` of the change-of-basis matrix: `θ^{2^i}` in
+        // polynomial coordinates.  `x = B c`, and what we want is
+        // `B⁻¹`.
+        let mut cols = Vec::with_capacity(n as usize);
+        let mut cur = theta;
+        for _ in 0..n {
+            cols.push(cur);
+            cur = field.sqr(cur);
+        }
+        if cur != theta {
+            // `θ^{2^n} = θ` always; a mismatch means the field is not
+            // what it says it is.
+            return None;
+        }
+
+        // Gauss-Jordan on `[B | I]`, rows tagged by which columns they
+        // are made of.  A row that reduces to the unit vector `e_p`
+        // carries, in its tag, the normal-basis coordinates of `z^p`.
+        let mut rows: Vec<(u64, u64)> = cols
+            .iter()
+            .enumerate()
+            .map(|(i, &c)| (c, 1u64 << i))
+            .collect();
+        let mut done = 0usize;
+        for p in 0..n as usize {
+            let Some(r) = (done..rows.len()).find(|&r| rows[r].0 >> p & 1 == 1) else {
+                return None; // not a basis: this candidate is not normal
+            };
+            rows.swap(done, r);
+            let (pv, pt) = rows[done];
+            for (q, row) in rows.iter_mut().enumerate() {
+                if q != done && row.0 >> p & 1 == 1 {
+                    row.0 ^= pv;
+                    row.1 ^= pt;
+                }
+            }
+            done += 1;
+        }
+
+        // `of_bit[p]` = normal-basis coordinates of `z^p`.
+        let mut of_bit = vec![0u64; n as usize];
+        for &(v, tag) in &rows {
+            of_bit[v.trailing_zeros() as usize] = tag;
+        }
+
+        // Byte-table the map, the same shape as `Gf2::reduce`'s.
+        let chunks = ((n as usize) + 7) / 8;
+        let mut to = vec![0u64; chunks * 256];
+        for j in 0..chunks {
+            for v in 1usize..256 {
+                let low = v.trailing_zeros() as usize;
+                let bit = j * 8 + low;
+                let contrib = if bit < n as usize { of_bit[bit] } else { 0 };
+                to[j * 256 + v] = to[j * 256 + (v & (v - 1))] ^ contrib;
+            }
+        }
+        Some(Self {
+            n,
+            mask,
+            to,
+            chunks,
+            theta,
+        })
+    }
+
+    /// The normal element this basis was built on.
+    pub fn theta(&self) -> u64 {
+        self.theta
+    }
+
+    /// Polynomial coordinates to normal-basis coordinates:
+    /// `⌈n/8⌉` indexed loads.
+    #[inline(always)]
+    pub fn to_nb(&self, x: u64) -> u64 {
+        let mut acc = 0u64;
+        let mut v = x;
+        for j in 0..self.chunks {
+            acc ^= self.to[j * 256 + (v & 0xff) as usize];
+            v >>= 8;
+        }
+        acc
+    }
+
+    /// One squaring, as a rotation of the coordinate word.
+    #[inline(always)]
+    pub fn rot1(&self, c: u64) -> u64 {
+        ((c << 1) | (c >> (self.n - 1))) & self.mask
+    }
+
+    /// **The least rotation of a coordinate word**: one representative
+    /// per Frobenius orbit.
+    ///
+    /// The `n − 1` rotations are formed from `c` directly rather than
+    /// from each other, so they do not form a dependency chain and the
+    /// loop runs at the throughput of a shift pair and a `min` — the
+    /// reason a squaring chain wanted eight points in flight and this
+    /// does not.
+    ///
+    /// Orbits shorter than `n` (an `x` lying in a proper subfield) are
+    /// handled by the same expression: their rotations simply repeat.
+    #[inline]
+    pub fn canon_nb(&self, c: u64) -> u64 {
+        let mut best = c;
+        for i in 1..self.n {
+            let r = ((c << i) | (c >> (self.n - i))) & self.mask;
+            best = best.min(r);
+        }
+        best
+    }
+
+    /// [`Self::to_nb`] then [`Self::canon_nb`]: the orbit key of an
+    /// element given in polynomial coordinates.
+    #[inline]
+    pub fn canon(&self, x: u64) -> u64 {
+        self.canon_nb(self.to_nb(x))
+    }
+}
+
 /// `y² + xy = x³ + ax² + b` over `F_{2^n}`, `n ≤ 62`, in one word per
 /// coordinate.
 #[derive(Clone, Debug)]
@@ -70,6 +260,16 @@ pub struct FastCurve {
     pub n: u32,
     pub a: u64,
     pub b: u64,
+    /// A normal basis of the field, built once here so that a
+    /// Frobenius-orbit key costs a byte-table lookup and `n − 1`
+    /// rotations instead of `n − 1` squarings.  See [`NormalBasis`].
+    ///
+    /// `None` would mean no normal element turned up in
+    /// the candidates `NormalBasis::new` tries, which has not been
+    /// observed; callers that need the key keep a squaring-chain fallback
+    /// so a field that somehow fails the search still gives right answers,
+    /// slowly.
+    pub normal: Option<NormalBasis>,
 }
 
 impl FastCurve {
@@ -85,11 +285,13 @@ impl FastCurve {
         let field = Gf2::new(&curve.irreducible);
         let a = field.from_element(&curve.a);
         let b = field.from_element(&curve.b);
+        let normal = NormalBasis::new(&field);
         Some(Self {
             field,
             n: curve.m,
             a,
             b,
+            normal,
         })
     }
 
@@ -339,6 +541,132 @@ mod tests {
         }
         points.push(BinaryPoint::Infinity);
         points
+    }
+
+    /// Degrees the normal-basis tests sweep: primes, composites with
+    /// proper subfields (so orbits shorter than `n` occur), and the
+    /// degree the pipeline actually runs at.
+    const NB_DEGREES: [u32; 8] = [8, 12, 16, 20, 23, 31, 53, 61];
+
+    fn nb_field(n: u32) -> Gf2 {
+        Gf2::new(&crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n).unwrap())
+    }
+
+    #[test]
+    fn a_normal_basis_exists_and_its_frobenius_is_a_rotation() {
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let nb =
+                NormalBasis::new(&f).unwrap_or_else(|| panic!("degree {n}: no normal element"));
+            let mask = (1u64 << n) - 1;
+
+            // `θ^{2^i}` has coordinate word `1 << i`: the basis really
+            // is the Frobenius orbit of `θ`, in order.
+            let mut cur = nb.theta();
+            for i in 0..n {
+                assert_eq!(nb.to_nb(cur), 1u64 << i, "degree {n}, basis vector {i}");
+                cur = f.sqr(cur);
+            }
+            assert_eq!(cur, nb.theta(), "degree {n}: θ^(2^n) ≠ θ");
+
+            // The map is a bijection, so squaring in the field and
+            // rotating the word are the same thing.
+            let mut rng = StdRng::seed_from_u64(0xA110_0000 + n as u64);
+            let mut seen: std::collections::HashMap<u64, u64> = Default::default();
+            for _ in 0..2000 {
+                let x = rng.gen::<u64>() & mask;
+                let c = nb.to_nb(x);
+                assert_eq!(
+                    *seen.entry(c).or_insert(x),
+                    x,
+                    "degree {n}: to_nb sent two elements to {c:#x}"
+                );
+                assert_eq!(
+                    nb.to_nb(f.sqr(x)),
+                    nb.rot1(c),
+                    "degree {n}: nb(x²) is not a rotation of nb(x), x = {x:#x}"
+                );
+            }
+            assert_eq!(nb.to_nb(0), 0, "degree {n}: to_nb is not linear at 0");
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_is_constant_on_a_frobenius_orbit() {
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let nb = NormalBasis::new(&f).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0xB1A5_0000 + n as u64);
+            for _ in 0..300 {
+                let x = rng.gen::<u64>() & mask;
+                let want = nb.canon(x);
+                let mut v = x;
+                for k in 0..n {
+                    assert_eq!(
+                        nb.canon(v),
+                        want,
+                        "degree {n}: image {k} of {x:#x} keys apart"
+                    );
+                    v = f.sqr(v);
+                }
+                assert_eq!(v, x, "degree {n}: the orbit did not close");
+            }
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_partitions_exactly_as_the_squaring_chain() {
+        // The two keys pick different representatives; the claim is
+        // that they cut the field into the *same* orbits.  Small
+        // degrees are enumerated whole, larger ones sampled.
+        for n in [8u32, 12, 16, 20] {
+            let f = nb_field(n);
+            let nb = NormalBasis::new(&f).unwrap();
+            let mut poly_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut nb_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut mismatch = 0usize;
+            for x in 0..(1u64 << n) {
+                // The polynomial-basis key: least element of the orbit.
+                let mut v = x;
+                let mut best = x;
+                for _ in 1..n {
+                    v = f.sqr(v);
+                    best = best.min(v);
+                }
+                let (pk, nk) = (best, nb.canon(x));
+                let a = *poly_of.entry(pk).or_insert(nk);
+                let b = *nb_of.entry(nk).or_insert(pk);
+                if a != nk || b != pk {
+                    mismatch += 1;
+                }
+            }
+            assert_eq!(
+                mismatch, 0,
+                "degree {n}: the two keys disagree on {mismatch} elements"
+            );
+            assert_eq!(
+                poly_of.len(),
+                nb_of.len(),
+                "degree {n}: different orbit counts"
+            );
+        }
+    }
+
+    #[test]
+    fn every_fast_curve_carries_a_normal_basis() {
+        // `canon_key` has a squaring-chain fallback for `None`, but the
+        // fallback keys a table differently from the rotation one, so a
+        // field that quietly failed the search would build tables that
+        // do not match those of a run that succeeded.  It must not
+        // happen at any degree the pipeline reaches.
+        for n in 8u32..=FastCurve::MAX_DEGREE {
+            let Some(kc) = KoblitzCurve::new(0, n) else {
+                continue;
+            };
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            assert!(fc.normal.is_some(), "degree {n}: no normal basis");
+        }
     }
 
     #[test]

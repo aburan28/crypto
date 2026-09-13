@@ -1861,10 +1861,13 @@ move the abscissa at all — `−(x, y) = (x, x + y)` — so the sign half of
 the fold is free, and `π` acts on the abscissa as a squaring. The key is
 
 ```
-canon(P) = 1 + min_k x^{2^k}
+canon(P) = 1 + (one member of the orbit {x^{2^k}}, chosen the same way every time)
 ```
 
-`n − 1` squarings and a running minimum, no memory touched. That the
+which was `1 + min_k x^{2^k}` — `n − 1` squarings and a running minimum,
+no memory touched — and is now the least rotation of the abscissa's
+coordinate word in a normal basis, for the reasons under *What was
+binding* below. That the
 packed point already encoded the sign in its low bit is why the negation
 costs nothing: the two halves of a `±` pair differ in exactly that bit
 and in nothing else.
@@ -1903,7 +1906,9 @@ so plainly. Two things eat it:
 - **A probe got 9.8 times dearer** — 115 ns to 1125 ns. Nearly all of
   that is the canonicalisation: `n − 1` squarings is a dependency chain,
   and a squaring here is a bit-spread plus eight reduction-table
-  lookups, about 830 ns for the chain.
+  lookups, about 830 ns for the chain. *This is the measurement the
+  normal-basis key below replaces; it is left here because the sections
+  that follow are the argument for why it had to be replaced.*
 - **Recovery grew with the base.** The compact table does not store
   summands; it recovers them by an `|F|`-long scan on a hit. That was
   0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
@@ -1932,20 +1937,105 @@ whole row — `|F|` subtractions, and on a folded table `|F|`
 canonicalisations — before probing any of it, which is linear work paid
 in full however early the stop comes. On a base wide enough to decompose
 most targets that setup *is* the cost. Both now run a block at a time:
-long enough to amortise one field inversion and keep the squaring chains
-interleaved, short enough that an early exit throws away at most a block.
+long enough to amortise one field inversion, short enough that an early
+exit throws away at most a block. (The block also kept the squaring
+chains interleaved, which was the second reason for it and is no longer
+one — see *What was binding* below.)
 
-### What is binding now
+### What was binding: the canonicalisation, in the wrong basis
 
-The canonicalisation, and it is not obviously stuck there. `π` is a
-squaring only in a polynomial basis. In a *normal* basis it is a one-bit
-rotation, so the same minimum is `n` rotations — tens of nanoseconds
-rather than hundreds — and the basis change is one linear map, eight
-table lookups, done once per probe. That would put a folded probe below
-an unfolded one and leave most of the 61 intact.
+`π` is a squaring only in a *polynomial* basis. In a **normal** basis
+`{θ, θ², θ⁴, …}` the Frobenius is a relabelling of coordinates: if
+`x = Σ cᵢ θ^{2ⁱ}` then `x² = Σ cᵢ θ^{2^{i+1}}`, so squaring rotates the
+coordinate word by one bit and the whole orbit of `x` is the `n`
+rotations of one `n`-bit word. Its least rotation names the orbit.
 
-That is an opportunity, not a result: it has not been built or measured,
-and this note has been wrong before about what algebra alone predicts
-about cost. The `M²/(log M)²` reach law is unchanged in shape by any of
-this — what the fold moves is the constant, by putting `n` times more
-base behind the same byte.
+The previous revision of this note called that an opportunity and said
+it had not been built. It is built now, in
+[`NormalBasis`](src/cryptanalysis/koblitz_fast.rs) — a deterministic
+search for a normal element, the change of basis byte-tabled exactly
+like `Gf2`'s reduction, and `canon` as `⌈n/8⌉` indexed loads followed by
+`n − 1` shifts and a running minimum. Three things are worth saying
+about it before the numbers.
+
+**It is a different representative of the same orbit.** The polynomial
+key is the least *element*; the normal-basis key is the least *rotation
+of a coordinate word*, which is some other member of the orbit
+altogether. What the two share is the partition, and that is the only
+property the fold needs. `koblitz_fast`'s tests check it by
+enumerating all of `F_{2ⁿ}` at `n = 8, 12, 16, 20` — composite degrees
+included, so orbits shorter than `n` are exercised — and finding zero
+elements on which the two keys disagree. A consequence with teeth: a
+folded table built before this change and one built after are **not
+interchangeable**, and a build that canonicalised its own way while the
+probes canonicalised another would be a silent wall of false negatives
+rather than a failure. The build and the probe now call the same
+function, which is how that stays true.
+
+**There is no dependency chain left to hide.** The squaring chain was
+latency-bound, which is why the lookup path kept eight
+canonicalisations in flight. The rotations are formed from the
+coordinate word directly and do not depend on each other, so one point
+already saturates the shifter; the interleave is gone from both the
+lookup and the build.
+
+**The rotation loop does not need an optimal normal basis.** Every
+`F_{2ⁿ}` has a normal basis, and the rotation property holds in all of
+them — optimality is a statement about *multiplication*, which this
+never does. Normal elements are dense enough that a deterministic search
+seeded from the irreducible finds one within a handful of candidates at
+every degree `8 ≤ n ≤ 62` the pipeline reaches, which is a test rather
+than an assumption.
+
+### What the change is worth
+
+`examples/koblitz_fold_cost.rs` times the canonicalisation itself, at
+`n = 61`, 200 000 points:
+
+| canonicalisation | ns |
+|---|---|
+| squaring chain, serial | 846.8 |
+| squaring chain, 8 points in flight | 733.7 |
+| squaring by shifts (sparse irreducible), 8 in flight | 1299.3 |
+| **normal basis, one at a time** | **85.5** |
+
+**8.6 times cheaper than the best of the squaring variants** — measured
+against this repository's own reducer (a bit-spread and eight
+table lookups), not against a slow one.
+
+End to end, `examples/koblitz_orbit_fold_width.rs 61 4`, the same host,
+before and after:
+
+| | squaring-chain key | normal-basis key |
+|---|---|---|
+| folded probe | 1211.3 ns | **362.7 ns** |
+| against an unfolded probe | 8.23x | **2.72x** |
+| folded build, 258 632 192 pairs | 147.1 s | **52.4 s** |
+| s a decomposed target, folded | 0.2528 | **0.1916** |
+| the fold, at equal memory | 2.3x | **3.3x** |
+
+The build halving is the same key doing the same work on the other side
+of the table.
+
+### What is binding now, and it is not the canonicalisation
+
+The probe got 3.3 times cheaper and a decomposition only 1.32 times, and
+that gap is the finding. What is left around the probe is the `m = 3`
+scan itself: at `|F| = 177632` it prepares and probes a rest for every
+base point, and the canonicalisation is no longer the expensive part of
+doing that. Chasing the key further would buy very little; the scan is
+where the next factor is.
+
+Two smaller honesty notes on the table above. The unfolded baseline
+drifted 0.5770 s to 0.6250 s a decomposition between the two runs — about
+8%, thermal — and the `2.3x → 3.3x` row carries that noise, which is why
+the folded column is given raw beside it. And the tier order in
+`build_within` is unchanged: for a base already fixed, the fold spends
+the canonicalisation and buys nothing, because what it buys is a *wider*
+base. Whether a caller should now be reaching for a wider base than it
+does is a real question and a separate measurement, not a consequence of
+this one.
+
+The `M²/(log M)²` reach law is unchanged in shape by any of this — what
+the fold moves is the constant, by putting `n` times more base behind
+the same byte.

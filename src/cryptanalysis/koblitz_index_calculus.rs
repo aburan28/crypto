@@ -2214,9 +2214,13 @@ pub struct PairSumTable {
     /// times wider and a descent dividing `2r/|F|²` by `2n`.
     ///
     /// What it costs is that a lookup must canonicalise first
-    /// ([`Self::canon_key`]), which is `n − 1` squarings — so the fold
-    /// is taken only when the unfolded table would not fit at all, and
-    /// the tiers in [`Self::build_within`] reach for it last.
+    /// ([`Self::canon_key`]).  That used to be `n − 1` squarings, and it
+    /// made a folded probe 8.2 times an unfolded one at `n = 61`; in a
+    /// normal basis it is 2.7.  The tiers in [`Self::build_within`]
+    /// still reach for the fold last, for a reason that survives the
+    /// cheaper key and is given there.
+    /// `examples/koblitz_orbit_fold_width.rs` is where both numbers come
+    /// from.
     fold: bool,
 }
 
@@ -2267,7 +2271,8 @@ impl PairSumTable {
         orbits as u128 * points as u128
     }
 
-    /// Bits of a canonical key: `1 + min_k x^{2^k}` is at most `2^n`.
+    /// Bits of a canonical key: one plus an `n`-bit orbit
+    /// representative, so at most `2^n`.
     fn folded_key_bits(degree: u32) -> u32 {
         degree + 1
     }
@@ -2393,8 +2398,13 @@ impl PairSumTable {
             // Folding by the signed Frobenius group stores `2n` times
             // fewer keys, so a base too wide even for the compact table
             // may still fit — at the cost of canonicalising every
-            // lookup.  It is the last tier because for a base that fits
-            // without it the fold only spends squarings.
+            // lookup.  It is the last tier, and stays the last tier
+            // after the normal-basis key: what the fold buys is a
+            // *wider* base, and the base is already fixed by the time
+            // this runs, so at a width the compact table holds the fold
+            // would spend the canonicalisation for nothing.  Whether a
+            // caller should be reaching for a wider base than it does is
+            // a question for the caller.
             return Self::build_folded_within(kc, fb, byte_budget);
         }
         let pairs = Self::pair_count(n_points);
@@ -2520,8 +2530,8 @@ impl PairSumTable {
             return None;
         }
         let curve = FastCurve::new(&kc.curve)?;
-        // A canonical key is `1 + min_k x^{2^k}`, so it needs one bit
-        // more than an abscissa and two fewer than a packed point.
+        // A canonical key is one plus an `n`-bit word, so it needs one
+        // bit more than an abscissa and two fewer than a packed point.
         let key_bits = Self::folded_key_bits(curve.n);
         let bucket_bits = Self::folded_bucket_bits(pairs, curve.n);
         let bucket_shift = key_bits - bucket_bits;
@@ -2534,27 +2544,12 @@ impl PairSumTable {
             let mut sums = Vec::with_capacity(n_points);
             let mut scratch = BatchScratch::default();
             curve.add_many(points[reps[r]], &points, &mut sums, &mut scratch);
-            // The canonicalisation is the cost of this build, so it runs
-            // over lanes here exactly as it does on the lookup side.
-            const LANES: usize = 8;
-            for chunk in sums.chunks(LANES) {
-                let mut x = [0u64; LANES];
-                let mut best = [0u64; LANES];
-                for (l, &p) in chunk.iter().enumerate() {
-                    x[l] = p.x;
-                    best[l] = p.x;
-                }
-                for _ in 1..curve.n {
-                    for l in 0..chunk.len() {
-                        x[l] = curve.field.sqr(x[l]);
-                        if x[l] < best[l] {
-                            best[l] = x[l];
-                        }
-                    }
-                }
-                for (l, &p) in chunk.iter().enumerate() {
-                    f(if p.infinity { 0 } else { best[l] + 1 });
-                }
+            // The one key function, shared with the lookup side: a
+            // build that canonicalised its own way would store keys the
+            // probes could never match, which is a silent wall of false
+            // negatives rather than a failure.
+            for &p in &sums {
+                f(Self::canon_key(&curve, p));
             }
         };
         (0..reps.len()).into_par_iter().for_each(|r| {
@@ -2633,14 +2628,32 @@ impl PairSumTable {
         pair_filter_hash(key) as u32
     }
 
-    /// **The canonical key of a point under `⟨π, −1⟩`**: the least
-    /// abscissa in its Frobenius orbit, plus one so that `O` can be `0`.
+    /// **The canonical key of a point under `⟨π, −1⟩`**: one
+    /// representative of its Frobenius orbit, plus one so that `O` can
+    /// be `0`.
     ///
     /// Negation never moves the abscissa — `−(x, y) = (x, x + y)` — so
     /// the sign half of the fold costs nothing at all, and `π` acts on
-    /// the abscissa as a squaring.  The key is therefore
-    /// `1 + min_k x^{2^k}`, which takes `n − 1` squarings and a running
-    /// minimum and no memory at all.
+    /// the abscissa as a squaring.  What is left is to name the orbit
+    /// `{x^{2^k}}` by one of its members, and there are two ways:
+    ///
+    /// - `1 + min_k x^{2^k}` in the polynomial basis, which is `n − 1`
+    ///   squarings — a spread and eight reduction lookups each, and a
+    ///   dependency chain besides;
+    /// - the least **rotation** of the abscissa's coordinate word in a
+    ///   normal basis, where the Frobenius *is* a one-bit rotation.
+    ///   One byte-tabled change of basis, then `n − 1` shifts and a
+    ///   running minimum, none of them depending on the last.
+    ///
+    /// The second is what runs, and `examples/koblitz_fold_cost.rs`
+    /// measures it at 85 ns against 734 for the first at `n = 61` —
+    /// which is most of what the fold used to cost per probe.  The two
+    /// pick *different* representatives, so keys are not comparable
+    /// across the change; what they share is the partition, checked by
+    /// enumeration in
+    /// [`crate::cryptanalysis::koblitz_fast`]'s tests.  The squaring
+    /// chain stays as the fallback for a field with no normal basis in
+    /// hand, which no reachable degree has produced.
     ///
     /// It is a key, not a point: it identifies the orbit and nothing
     /// else.  Recovering which base points actually sum to a target is
@@ -2649,6 +2662,9 @@ impl PairSumTable {
     fn canon_key(curve: &FastCurve, p: FastPoint) -> u64 {
         if p.infinity {
             return 0;
+        }
+        if let Some(nb) = &curve.normal {
+            return nb.canon(p.x) + 1;
         }
         let mut x = p.x;
         let mut best = x;
@@ -2672,43 +2688,24 @@ impl PairSumTable {
         }
     }
 
-    /// [`Self::key_of`] over a slice, keeping `LANES` canonicalisations
-    /// in flight.
+    /// [`Self::key_of`] over a slice.
     ///
-    /// A squaring chain is a dependency chain, so one point at a time
-    /// runs at the latency of `n − 1` squarings; a decomposition scan
-    /// has a whole row of rests in hand at once and none of them depend
-    /// on each other.  Interleaving them turns the chain from
-    /// latency-bound into throughput-bound.  `out` is cleared first.
+    /// This used to keep `LANES` canonicalisations in flight, because a
+    /// squaring chain is a dependency chain and one point at a time ran
+    /// at the latency of `n − 1` squarings rather than their
+    /// throughput.  The rotations of [`Self::canon_key`]'s normal-basis
+    /// key are formed from the coordinate word directly and do not
+    /// depend on each other, so a single point already saturates the
+    /// shifter and the interleave has nothing left to hide.  `out` is
+    /// cleared first.
     fn keys_of(&self, points: &[FastPoint], out: &mut Vec<u64>) {
         out.clear();
         if !self.fold {
             out.extend(points.iter().map(|p| p.pack()));
             return;
         }
-        const LANES: usize = 8;
-        let n = self.curve.n;
-        let field = &self.curve.field;
-        out.resize(points.len(), 0);
-        for (chunk, keys) in points.chunks(LANES).zip(out.chunks_mut(LANES)) {
-            let mut x = [0u64; LANES];
-            let mut best = [0u64; LANES];
-            for (l, &p) in chunk.iter().enumerate() {
-                x[l] = p.x;
-                best[l] = p.x;
-            }
-            for _ in 1..n {
-                for l in 0..chunk.len() {
-                    x[l] = field.sqr(x[l]);
-                    if x[l] < best[l] {
-                        best[l] = x[l];
-                    }
-                }
-            }
-            for (l, &p) in chunk.iter().enumerate() {
-                keys[l] = if p.infinity { 0 } else { best[l] + 1 };
-            }
-        }
+        let curve = &self.curve;
+        out.extend(points.iter().map(|&p| Self::canon_key(curve, p)));
     }
 
     /// Whether this table folds its keys by the signed Frobenius group.
