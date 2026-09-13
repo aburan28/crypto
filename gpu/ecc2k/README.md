@@ -40,7 +40,7 @@ Making the walk descend to classes requires an iteration function that
 commutes with the class action. This uses the ECC2K-130 shape:
 
 ```
-j(P) = (g(x_P) mod 8) + 3
+j(P) = ((g(x_P) / 2) mod 8) + 3
 P   -> P + τ^j(P)
 ```
 
@@ -56,6 +56,15 @@ A distinguished point is `g(x) ≤ threshold`, also class-invariant, and it
 is reported as the canonical class representative: the smallest x among the
 m Frobenius images. Negation needs no handling in the representative
 because −(x, y) has the same x.
+
+**The `/2` is load-bearing.** `g` is even for every point of the curve —
+checked exactly over all 45,562 classes of the m = 23 subgroup, and by
+sampling at m = 97. Drop the halving and `g mod 8` only ever takes the
+values {0, 2, 4, 6}: the walk runs on four branches rather than eight, and
+collides later. Measured on the 40-bit curve, 64 walks, dp `g ≤ 11`, 160
+trials: 187,831 steps for the four-branch rule against 151,005 for this one.
+This is the rule Bailey et al. specify for ECC2K-130, and the one
+`ecc2k130/include/walk.h` implements.
 
 Arithmetic stays in the polynomial basis, where multiplication is
 practical; only `g` needs the normal basis, and that is a fixed linear map
@@ -109,21 +118,27 @@ but says nothing about whether the Frobenius speedup is real. Averaging
 over many instances does:
 
 ```
-[solve] 21-bit Koblitz DLP, 128 walks, 24 trials
-  mean 267 steps over 24 solves
-  sqrt(pi/2 * r/(2m)) = 268  -> measured 1.00x   [class walk]
-  sqrt(pi/2 * r/2)    = 1283 -> measured 0.21x   [negation only]
+[solve] 21-bit Koblitz DLP, 128 walks, 24 trials, dp threshold g <= 23 (rate 1/1)
+  mean 251 steps over 24 solves
+  sqrt(pi/2 * r/(2m)) = 268  -> measured 0.94x   [class walk]
+  sqrt(pi/2 * r/2)    = 1283 -> measured 0.20x   [negation only]
 
 [solve] 40-bit Koblitz DLP, 128 walks, 8 trials, dp threshold g <= 11 (rate 1/463)
-  mean 209744 steps over 8 solves
-  sqrt(pi/2 * r/(2m)) = 145129 -> measured 1.45x   [class walk]
-  sqrt(pi/2 * r/2)    = 929276 -> measured 0.23x   [negation only]
+  mean 191840 steps over 8 solves
+  sqrt(pi/2 * r/(2m)) = 145129 -> measured 1.32x   [class walk]
+  sqrt(pi/2 * r/2)    = 929276 -> measured 0.21x   [negation only]
 ```
 
-The 21-bit run lands on the class-walk prediction exactly. The 40-bit run
-sits 45% above it, and that excess is accounted for: 128 walks each need
-about 463 steps to reach a distinguished point, so 59k steps of the 210k
-are the DP tail, and 145k + 59k ≈ 204k.
+The 21-bit run lands on the class-walk prediction. The 40-bit run sits 32%
+above it, and that excess is accounted for: 128 walks each need about 463
+steps to reach a distinguished point, so 59k steps of the 192k are the DP
+tail, and 145k + 59k ≈ 204k.
+
+Rho collision times have a standard deviation about equal to their mean, so
+24 and 8 trials resolve these to roughly ±20% and ±35%. They confirm the
+√(2m) speedup; they are too noisy to rank iteration functions. The
+four-versus-eight-branch comparison quoted earlier used 160 trials against a
+fixed collision criterion rather than the full solve pipeline.
 
 ## What the field arithmetic actually costs
 
@@ -136,14 +151,24 @@ Measured statically (`./ptx_stats2k.sh`, clang for sm_90):
 | secp256k1 multiply | 472 | for comparison, from `gpu/ecc`; 210 with its inline-PTX carry chains |
 
 **A 97-bit binary field multiply costs about as much as a 256-bit prime
-field multiply.** That is the single most important fact about binary-field
-ECC on a GPU, and it has one cause: there is no carry-less multiply
-instruction. No PCLMULQDQ, no VMULL, nothing. The 32×32 carry-less product
-is synthesised from sixteen ordinary widening multiplies with the
-interleaved-mask trick — split each operand into four subsets by bit index
-mod 4, multiply as integers, mask. Within a subset the per-bit partial sums
-cannot exceed 8, which fits in the 4-bit gap between kept bits, so no carry
-ever crosses into a bit that matters.
+field multiply here** — because this backend multiplies in software. The
+32×32 carry-less product is synthesised from sixteen ordinary widening
+multiplies with the interleaved-mask trick — split each operand into four
+subsets by bit index mod 4, multiply as integers, mask. Within a subset the
+per-bit partial sums cannot exceed 8, which fits in the 4-bit gap between
+kept bits, so no carry ever crosses into a bit that matters.
+
+**That is an artefact of the emulation, not a property of GPUs.** The
+hardware instruction exists: PTX ISA 9.3 defines `clmad.lo.u64` /
+`clmad.hi.u64` for `sm_80` and later, and CUDA 13.3 or newer emits it.
+`ecc2k130/NATIVE-CARRYLESS.md` measured **+22.4%** on a complete ECC2K-130
+walk by switching to it, with the inline asm in
+`ecc2k130/include/packed131.h`. This backend has not been ported. Static
+counts here (clang, sm_90) put ~83% of a 128-bit carry-less product in the
+software `clmul32` emulation and ~55% of a squaring in the generic two-pass
+reducer, so both are worth more here than the 22.4% measured there —
+`ecc2k130/codegen/gendirectreduce.py` already generates the specialised
+reducer.
 
 What Koblitz curves give back:
 
@@ -155,17 +180,53 @@ What Koblitz curves give back:
 
 That last point changes the kernel's shape. Batching inversions across
 walks is worth 27× over a prime field; here it is worth 3–4×, and W beyond
-16 buys almost nothing:
+16 buys little. Counted at m = 97 with the distinguished-point test
+disabled, in multiply-equivalents at 1 squaring = 0.2 multiplies:
 
-| Batch W | Multiplies per rho step | |
+| Batch W | Per rho step | Breakdown |
 |---|---|---|
-| 1 | ~28 | one inversion per step |
-| 8 | ~11 | |
-| 16 | ~9.4 | |
-| 32 | ~8.7 | diminishing |
+| 1 | 30.95 | 9.00 mul + 109.75 sqr |
+| 2 | 19.31 | 7.00 mul + 61.56 sqr |
+| 4 | 13.51 | 6.00 mul + 37.55 sqr |
+| 8 | 10.62 | 5.50 mul + 25.60 sqr |
+| 16 | 9.17 | 5.25 mul + 19.62 sqr |
+| 32 | 8.44 | 5.12 mul + 16.59 sqr |
 
-(Per step: 2 for the addition, 1 squaring, 3 for Montgomery's trick, the
-Frobenius applications, the class weight, and 23/W for the inversion.)
+(Per step: 2 multiplies for the addition, 1 squaring for λ², 3 multiplies
+for Montgomery's trick, 2j squarings for the two Frobenius chains, one class
+weight, and one inversion — 97 squarings and ~7 multiplies — split W ways.)
+
+**This table counts arithmetic only, and arithmetic is not what picks W.**
+`ptxas` puts `k2k_rho_walk<W>` at 344, 464, 656, 1040 and 1816 bytes of
+per-thread local memory for W = 1, 2, 4, 8, 16 (sm_90, block 128,
+`R2K_MIN_BLOCKS=4`), and `k2k_rho_walk_lowmem<W>` at 400, 464 and 592 for
+W = 4, 8, 16. At 512 resident threads/SM, W = 16 on the batched variant is
+930 KB of local footprint per SM. Since the inversion being amortised is
+only ~23 multiply-equivalents to begin with, going from W = 8 to 16 buys
+1.45 multiplies against nearly doubled spill traffic. Nothing here has run
+on a GPU, so the crossover is unmeasured — pick W on hardware, not from this
+table, and weigh `lowmem` seriously: it costs 1.46 more multiply-equivalents
+per step at W = 8 and less than half the local memory.
+
+**Nothing in the step is computed twice.** A step needs τ^j(P) and g(x_P),
+and the obvious arrangement pays for each twice: both phases apply τ^j (and
+to both coordinates, though phase A only reads x), and the class weight is
+evaluated for the distinguished-point test and again for the next step's j.
+Instead phase A walks only the x chain and hands phase B the denominator
+x₁ + x₂ it already formed, phase B walks only the y chain, and the weight
+is carried in the walk state. At W = 8 that is 12.91 → 10.62
+multiply-equivalents and one class-weight evaluation per step instead of
+two — and that table is the hottest in the kernel. The `lowmem` variant
+takes the weight saving but still re-walks the x chain, 15.52 → 12.08.
+
+Carrying the denominator is a trade, not a free win: it costs one extra
+field element per walk, and that is why `k2k_rho_walk<8>` went from 872 to
+1040 bytes of local memory while `lowmem<8>` went from 448 to 464.
+`ecc2k130` makes both choices under a flag — `PACKED_CACHE_DENOM`, described
+in its `DENOMINATOR-CACHE.md`, against the recompute path its `walk.h`
+prices at "786 instructions for 1048 bytes of traffic per slot". Which side
+wins is a memory-hierarchy question, so the two variants here keep opposite
+answers until someone measures on a GPU.
 
 ## Occupancy: measured
 
@@ -173,10 +234,12 @@ Frobenius applications, the class weight, and 23/W for the inversion.)
 
 | Arch | `R2K_MIN_BLOCKS` | Registers | Stack | Resident threads/SM |
 |---|---|---|---|---|
-| sm_90 | unset | 142 | 440 B | 384 |
-| sm_100 | unset | 150 | 440 B | 384 |
-| sm_120 | unset | 148 | 440 B | 384 |
-| sm_90 / sm_100 / sm_120 | 4 | 128 | 448 B | 512 |
+| sm_90 | unset | 142 | 456 B | 384 |
+| sm_100 | unset | 142 | 456 B | 384 |
+| sm_120 | unset | 148 | 456 B | 384 |
+| sm_90 / sm_100 / sm_120 | 4 | 128 | 464 B | 512 |
+
+(clang 18.1.3 for sm_90, ptxas 12.9.86.)
 
 Two things stand out against the prime-field walk in `gpu/ecc`, which needs
 226 registers and 792 bytes of stack for 256 resident threads:

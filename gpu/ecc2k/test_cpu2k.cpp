@@ -215,7 +215,7 @@ static void test_canonical() {
 
 /* ---------------------------------------------------------------- */
 struct HostState {
-    std::vector<uint32_t> X, Y, steps, restarts;
+    std::vector<uint32_t> X, Y, steps, restarts, wgt;
     std::vector<rho2k_dp> dps;
     uint32_t dp_count = 0;
     rho2k_ctx ctx;
@@ -226,9 +226,11 @@ struct HostState {
         Y.assign(F2M_WORDS * n, 0);
         steps.assign(n, 0);
         restarts.assign(n, 0);
+        wgt.assign(n, 0);
         dps.resize(cap);
         ctx.X = X.data(); ctx.Y = Y.data();
         ctx.steps = steps.data(); ctx.restarts = restarts.data();
+        ctx.wgt = wgt.data();
         ctx.nthreads = T; ctx.walks_per_thread = W;
         ctx.cb = cb_flat();
         ctx.P = h.P; ctx.Q = h.Q; ctx.prm = h.prm;
@@ -237,7 +239,8 @@ struct HostState {
     }
 
     bool same(const HostState &o) const {
-        return X == o.X && Y == o.Y && steps == o.steps && restarts == o.restarts;
+        return X == o.X && Y == o.Y && steps == o.steps && restarts == o.restarts
+               && wgt == o.wgt;
     }
 
     std::vector<std::string> sorted_dps() const {

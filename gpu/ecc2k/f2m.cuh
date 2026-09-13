@@ -4,19 +4,27 @@
  * words.  This is the "packed" (as opposed to bitsliced) layout; see
  * README.md for why, and what it costs.
  *
- * The one thing a GPU does not have is a carry-less multiply.  There is no
- * PCLMULQDQ, no VMULL, nothing.  So the 32x32 carry-less product is built
- * out of ordinary integer multiplies with the classic interleaved-mask
- * trick: split each operand into four subsets by bit index mod 4, multiply
- * as integers, and mask.  Within a subset the partial sums per output bit
- * cannot exceed 8, which fits in the 4-bit gap between kept bits, so no
- * carry ever crosses into a bit we care about.  Sixteen widening multiplies
- * replace one CLMUL.
+ * This file multiplies in software, without a carry-less multiply
+ * instruction: the 32x32 carry-less product is built out of ordinary integer
+ * multiplies with the classic interleaved-mask trick -- split each operand
+ * into four subsets by bit index mod 4, multiply as integers, and mask.
+ * Within a subset the partial sums per output bit cannot exceed 8, which
+ * fits in the 4-bit gap between kept bits, so no carry ever crosses into a
+ * bit we care about.  Sixteen widening multiplies replace one CLMUL.
  *
- * That is the central fact about binary-field ECC on a GPU: the field is
- * three times narrower than secp256k1's, yet a multiplication costs about
- * the same, because the hardware helps with one and not the other.  What
- * Koblitz curves give back is squaring and Frobenius almost for free, cheap
+ * THE HARDWARE INSTRUCTION EXISTS.  PTX ISA 9.3 has clmad.lo.u64 /
+ * clmad.hi.u64 on sm_80 and later, needing CUDA 13.3 or newer to emit; see
+ * ecc2k130/NATIVE-CARRYLESS.md, which measured 22.4% on a complete ECC2K-130
+ * walk by switching to it, and ecc2k130/include/packed131.h for the inline
+ * asm.  This backend has not been ported to it.  Static count on this code
+ * (clang, sm_90): about 83% of a 128-bit carry-less product is the software
+ * clmul32 emulation, so the instruction should be worth considerably more
+ * here than it was there.
+ *
+ * With the software product, a multiplication in this three-times-narrower
+ * field costs about what a secp256k1 multiplication costs -- an artefact of
+ * the emulation, not a property of binary fields on a GPU.  What Koblitz
+ * curves give back is squaring and Frobenius almost for free, cheap
  * inversion (Itoh-Tsujii is ~23 multiplications, against 270 for a Fermat
  * inversion mod p) and, above all, the sqrt(2m) speedup from walking on
  * Frobenius classes.
