@@ -2261,3 +2261,47 @@ statement this work has produced of what it actually is: **a method for
 many logarithms on one curve, and never for one.** The reach law says how
 far memory can take you; this says how many targets you must have before
 taking it is worth anything.
+
+### The widest base is not the best base — 2026-09-13
+
+Two costs run opposite ways in the width. The folded table's build is
+quadratic in `|F|`; the descent falls as `1/|F|²`. So for `T` targets
+
+```
+total  =  A|F|²  +  T·B/|F|²        minimised at  |F| = (T·B/A)^{1/4}
+```
+
+The best width grows as the **fourth root** of the number of targets, and
+the total work at that width grows as `√T` — so cost per target falls as
+`1/√T`.
+
+With `A ≈ 1.13e-9` s per `|F|²` (a 102 s build at 300608) and `B ≈ 9.13e8`
+(a 0.0101 s descent at the same width), `T = 32` puts the optimum near
+**71000 points** — neither of the widths measured so far. Predicted
+amortised ratio: 3 to 4. *That was written into git before the run.*
+
+| points | tier | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|---|
+| 36112 | compact | 79.0 s | 0.0531 s/t | 61.2× | 1.288 |
+| **71248** | folded | **24.4 s** | 0.0235 s/t | 141.1× | **4.21** |
+| 300608 | folded | 156.9 s | 0.0101 s/t | 326.0× | 0.673 |
+
+**4.21, against a stated band of 3 to 4.** The optimum really does lie
+between the two widths measured before — 3.3 times better amortised than
+the narrow base, 6.3 times better than the wide one, 32 of 32 verified.
+
+Note the two columns pulling apart. The **charged** ratio climbs
+monotonically with width — 61 → 141 → 326 — because a wider base always
+makes the descent cheaper. The **amortised** ratio peaks and falls,
+because precompute is quadratic in the width while the descent is only
+inverse-quadratic. Optimising the charged number alone would have led
+straight to the widest base the memory could hold, which is the worst of
+the three.
+
+Two honesty notes. The model **located** the optimum without being right
+about the cost: at 71248 points precompute is 24.4 s of which the table
+build is a minority (select 6.0, collect 9.6, logs 8.8), where the model
+treats the build as the whole of it. And the relations-per-probe estimate
+used to size the collection was 0.0596 against a measured 0.033 — the
+workflow's extension rounds noticed and collected a third unit, which is
+why the run certified all 584 columns instead of failing short.
