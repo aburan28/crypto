@@ -2020,11 +2020,33 @@ of the table.
 ### What is binding now, and it is not the canonicalisation
 
 The probe got 3.3 times cheaper and a decomposition only 1.32 times, and
-that gap is the finding. What is left around the probe is the `m = 3`
-scan itself: at `|F| = 177632` it prepares and probes a rest for every
-base point, and the canonicalisation is no longer the expensive part of
-doing that. Chasing the key further would buy very little; the scan is
-where the next factor is.
+that gap is the finding. Chasing the key further would buy very little.
+
+Subtracting the canonicalisation from the probe says where the rest sits:
+after, `362.7 − 85.5 ≈ 277` ns; before, `1211.3 − 846.8 ≈ 365` ns, taking
+the serial figure because `contains_pair` runs one point at a time.
+Against a compact probe's 133 to 147 ns, **the folded table costs about
+twice the compact one per probe with no canonicalisation in it at all**,
+and that is now three quarters of what the fold charges.
+
+Not because it is larger. The folded bucket index is `key >>
+bucket_shift` — the key's top bits, unhashed — and a canonical key is a
+*minimum* over about `n` values, so it carries six or seven leading zeros
+where a packed point carries one. Extrapolating the observed key
+distribution over real pair sums at `n = 61` to the table's own
+258 632 192 pairs and `2²⁴` buckets:
+
+| bucket index | mean run, polynomial key | mean run, normal-basis key | design |
+|---|---|---|---|
+| the raw key, as today | 892 (58x) | 595 (39x) | 15.4 |
+| the key hashed first | 17.1 (1.1x) | 10.7 (0.7x) | 15.4 |
+
+A folded probe walks tens of times the run the sizing law intended, in
+either key. It is pre-existing — the polynomial key is the worse of the
+two — and the fix is to hash before taking the index, which is a line.
+The compact table has no such skew, because a packed point is uniform.
+That is the next measurement, and it is better grounded than the `m = 3`
+scan as an answer to where the remaining factor of 2.7 lives.
 
 Two smaller honesty notes on the table above. The unfolded baseline
 drifted 0.5770 s to 0.6250 s a decomposition between the two runs — about

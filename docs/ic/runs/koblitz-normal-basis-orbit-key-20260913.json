@@ -26,7 +26,7 @@
       "ns_per_probe_folded": 1211.3,
       "probe_penalty": 8.23,
       "folded_build_secs": 147.1,
-      "secs_per_decomposition_compact": 0.5770,
+      "secs_per_decomposition_compact": 0.577,
       "secs_per_decomposition_folded": 0.2528,
       "net_speedup_at_equal_memory": 2.28
     },
@@ -36,17 +36,18 @@
       "ns_per_probe_folded": 362.7,
       "probe_penalty": 2.72,
       "folded_build_secs": 52.4,
-      "secs_per_decomposition_compact": 0.6250,
+      "secs_per_decomposition_compact": 0.625,
       "secs_per_decomposition_folded": 0.1916,
       "net_speedup_at_equal_memory": 3.26
     }
   },
   "the_honest_number": "3.3x for the fold at equal memory, from 2.3x. The folded probe is 3.34x cheaper and the folded build 2.81x, but a decomposed target is only 1.32x faster.",
-  "what_is_binding_now": "Not the canonicalisation. The gap between a 3.34x cheaper probe and a 1.32x faster decomposition is the m = 3 scan around it, which prepares and probes a rest for every one of 177632 base points.",
+  "what_is_binding_now": "Not the canonicalisation. With it subtracted the folded probe is still about 277 ns against a compact probe's 133-147, and that gap is three quarters of what the fold now charges. The cause is not the table's size: the folded bucket index is the key's top bits unhashed, and a canonical key is a minimum over ~n values carrying 6-7 leading zeros where a packed point carries one. Extrapolating the observed key distribution to 258632192 pairs over 2^24 buckets, the mean run is 892 (58x the 15.4 the sizing law intends) for the polynomial key and 595 (39x) for the normal-basis key; hashing the key before taking the index gives 17.1 and 10.7. Pre-existing, unchanged here, one line to fix, and the next measurement.",
   "noise": "The unfolded baseline drifted 0.5770 -> 0.6250 s a decomposition between the two runs, about 8%, which the net figures carry. The folded column is given raw beside them for that reason.",
   "not_claimed": [
     "That the tier order in build_within should change. For a base already fixed the fold spends the canonicalisation and buys nothing; what it buys is a wider base, and choosing one is the caller's decision and a separate measurement.",
     "That an optimal normal basis is involved. Every F_2^n has a normal basis and the rotation property holds in all of them; optimality is about multiplication, which this never does.",
-    "That the CUDA pair table in gpu/ecc2k/ folds at all. It does not, and nothing here changed that."
+    "That the CUDA pair table in gpu/ecc2k/ folds at all. It does not, and nothing here changed that.",
+    "That the m = 3 scan is where the remaining penalty lives. The bucket skew above is measured; the scan is not."
   ]
 }
