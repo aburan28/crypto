@@ -114,6 +114,8 @@ class IsolatedLaunch(unittest.TestCase):
         request=aws.launch_request(self.template(),'subnet','script','token',instance_type='g7e.4xlarge')
         self.assertEqual(request['InstanceType'],'g7e.4xlarge')
         self.assertEqual((request['MinCount'],request['MaxCount']),(1,1))
+        g7=aws.launch_request(self.template(),'subnet','script','token',instance_type='g7.4xlarge')
+        self.assertEqual((g7['InstanceType'],g7['MinCount'],g7['MaxCount']),('g7.4xlarge',1,1))
         with self.assertRaises(ValueError):
             aws.launch_request(self.template(),'subnet','script','token',instance_type='g7e.48xlarge')
 

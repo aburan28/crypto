@@ -1,4 +1,4 @@
-"""One bounded, isolated G7e benchmark using the existing worker infrastructure.
+"""One bounded, isolated G7/G7e benchmark using the existing worker infrastructure.
 
 Uses existing AWS credentials through boto3's normal chain. Does not create IAM
 policies, edit a launch template, change a fleet, or use campaign checkpoints.
@@ -75,8 +75,8 @@ def launch_request(template,subnet,user_data,token,require_profile=True,instance
     # Whitelist fields: never inherit production UserData, tags, spot/fleet
     # settings, extra disks or a live worker's network interface.
     required=('ImageId','SecurityGroupIds','BlockDeviceMappings')
-    if instance_type not in ('g7e.2xlarge','g7e.4xlarge'):
-        raise ValueError('only the bounded single-GPU G7e sizes are allowed')
+    if instance_type not in ('g7e.2xlarge','g7e.4xlarge','g7.4xlarge'):
+        raise ValueError('only the bounded single-GPU G7/G7e sizes are allowed')
     if require_profile: required+=('IamInstanceProfile',)
     for field in required:
         if not template.get(field): raise ValueError('launch template lacks '+field)
@@ -116,7 +116,7 @@ def main():
     parser.add_argument('--launch-config',type=Path,help='explicit AMI/security-group/root-disk JSON instead of an existing template')
     parser.add_argument('--s3-region',help='region of the existing benchmark bucket; defaults to EC2 region')
     parser.add_argument('--availability-zone',help='select an existing eligible subnet in this zone')
-    parser.add_argument('--instance-type',choices=('g7e.2xlarge','g7e.4xlarge'),default='g7e.2xlarge')
+    parser.add_argument('--instance-type',choices=('g7e.2xlarge','g7e.4xlarge','g7.4xlarge'),default='g7e.2xlarge')
     parser.add_argument('--automatic-placement',action='store_true',
                         help='let AWS select capacity in the existing default VPC')
     parser.add_argument('--presigned-transfer',action='store_true',
@@ -253,3 +253,4 @@ def main():
 
 if __name__=='__main__':
     raise SystemExit(main())
+

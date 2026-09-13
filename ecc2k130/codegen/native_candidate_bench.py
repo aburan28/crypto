@@ -1,7 +1,8 @@
 """Frozen same-GPU comparison of native square and three-limb Karatsuba.
 
-Compile-only works without a GPU. Full mode requires one RTX PRO 6000 Blackwell
-Server Edition, CUDA 13.3.73, and keeps all four binaries on that same device.
+Compile-only works without a GPU. Full mode requires one sm_120 RTX PRO 6000
+Server Edition or RTX PRO 4500, CUDA 13.3.73, and keeps all four binaries on
+that same device. The receipt flags whether the historical GPU model matches.
 No campaign files or persistent worker state are read or changed.
 """
 import argparse
@@ -135,9 +136,10 @@ def validate_sample(row, mode, weight, corpus=None):
 
 def gpu_runs(out, result, repeats):
     identity=require(run(['nvidia-smi','--query-gpu=name,uuid,driver_version,compute_cap','--format=csv,noheader']))['raw'].strip().splitlines()
-    if len(identity)!=1 or 'RTX PRO 6000 Blackwell Server Edition' not in identity[0] or not identity[0].endswith('12.0'):
-        raise RuntimeError('requires exactly one RTX PRO 6000 Blackwell Server Edition sm_120 GPU')
+    if len(identity)!=1 or not any(model in identity[0] for model in ('RTX PRO 6000 Blackwell Server Edition','RTX PRO 4500')) or not identity[0].endswith('12.0'):
+        raise RuntimeError('requires exactly one RTX PRO 6000 Server or RTX PRO 4500 sm_120 GPU')
     result['gpuIdentity']=identity[0]
+    result['matchesHistoricalGpuModel']='RTX PRO 6000 Blackwell Server Edition' in identity[0]
     os.environ['CUDA_VISIBLE_DEVICES']=identity[0].split(',')[1].strip()
     os.environ['CUDA_DISABLE_PTX_JIT']='1'
     os.environ.pop('PYTHONOPTIMIZE',None)
@@ -231,6 +233,7 @@ def main():
         if nvcc is None: raise RuntimeError('nvcc unavailable')
         result['compiler']=require(run([nvcc,'--version']))['raw']
         if 'V13.3.73' not in result['compiler']: raise RuntimeError('comparison is pinned to nvcc 13.3.73')
+        (ROOT/'generated').mkdir(parents=True,exist_ok=True)
         require(run(['make','generate'],timeout=180))
         paths=sorted(p for base in ('include','src','generated','codegen') for p in (ROOT/base).rglob('*')
                      if p.is_file() and p.suffix in ('.h','.cuh','.cu','.cpp','.py'))
