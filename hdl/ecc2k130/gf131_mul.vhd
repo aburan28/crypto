@@ -5,16 +5,21 @@
 --   stage 0                 latch a, b
 --   stage 1                 a' = prep(a), b' = prep(b)     gamma -> c-powers
 --   stages 2 .. 1+2L+F      a' b' over GF(2)[c]             Karatsuba, L levels, leaf F clocks
---   stage 2+2L+F            r = to_onb(h)                   c-powers -> gamma
+--   stage 2+2L+F            r_lo = to_onb(h low half), r_hi = to_onb(h high half)
+--   stage 3+2L+F            r = r_lo xor r_hi               c-powers -> gamma
 --
 -- F = LEAF_LAT is 1 for the LUT leaf and 4 when some leaves are DSP48E2
 -- products (gf2_dsp_leaf, gf131_pkg.MUL_DSP_LEAVES).
 --
 -- There is no reduction: the back-conversion maps every c^k, k = 2..262,
--- straight to normal-basis coordinates.  Every stage is a few LUT levels
--- deep -- the widest single XOR is the 66-input column of prep -- and no
--- DSP is involved anywhere, so the clock is set by LUT-to-LUT routing and
--- nothing else.
+-- straight to normal-basis coordinates.  It takes two stages because of
+-- route, not depth: its inputs are the 261 bits of the tree's top
+-- register, spread over the whole multiplier, and in the routed
+-- 128-engine image at 375 MHz the XOR trees from them into out_r were
+-- 2.2 ns of route for 0.4 of logic.  Each half's terms come from one
+-- half of that register.  Every stage is a few LUT levels deep -- the
+-- widest single XOR is the 66-input column of prep -- so the clock is set
+-- by LUT-to-LUT routing and nothing else.
 --
 -- The tag rides alongside in a shift register and is never inspected, so
 -- one multiplier serves any number of independent contexts at II = 1.
@@ -58,6 +63,20 @@ architecture rtl of gf131_mul is
   signal s0_a, s0_b : gf_t := (others => '0');
   signal pa, pb     : poly_t := (others => '0');
   signal h          : dpoly_t;
+  signal r_lo, r_hi : gf_t := (others => '0');
+
+  -- the low or high half of h with the other half zero, so to_onb of it
+  -- is the XOR trees over that half's terms only
+  function half (h : dpoly_t; hi : boolean) return dpoly_t is
+    variable v : dpoly_t := (others => '0');
+  begin
+    if hi then
+      v(2 * M - 2 downto M) := h(2 * M - 2 downto M);
+    else
+      v(M - 1 downto 0) := h(M - 1 downto 0);
+    end if;
+    return v;
+  end function;
 
   -- valid and tag travel beside the datapath; index k is the value that
   -- entered k clocks ago
@@ -70,8 +89,8 @@ begin
     generic map (N => M, LEVELS => MUL_KARATSUBA, DSP_LEAVES => MUL_DSP_LEAVES)
     port map (clk => clk, a => pa, b => pb, r => h);
 
-  -- latch, prep, the tree, to_onb
-  assert MUL_LATENCY = KM_LAT + 3
+  -- latch, prep, the tree, to_onb in two
+  assert MUL_LATENCY = KM_LAT + 4
     report "gf131_mul: MUL_LATENCY does not match the tree" severity failure;
 
   datapath : process (clk)
@@ -81,7 +100,9 @@ begin
       s0_b  <= in_b;
       pa    <= gf_prep(s0_a);
       pb    <= gf_prep(s0_b);
-      out_r <= gf_to_onb(h);
+      r_lo  <= gf_to_onb(half(h, false));
+      r_hi  <= gf_to_onb(half(h, true));
+      out_r <= r_lo xor r_hi;
     end if;
   end process;
 
