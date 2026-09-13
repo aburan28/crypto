@@ -4295,23 +4295,26 @@ mod packed_tests {
         for direct_bits in [false, true] {
             for split_hash in [false, true] {
                 for reuse_insert_hash in [false, true] {
-                    let mut table = CompactPairTable::with_capacity(512, true, (1usize << 37) + 1);
-                    table.x_filter_split_hash = split_hash;
-                    table.x_filter_insert_hash_reuse = reuse_insert_hash;
-                    table.x_filter_direct_bits = direct_bits;
-                    let keys: Vec<_> = (0..512u64)
-                        .map(|index| {
-                            let x = CompactPairTable::hash((index, index.rotate_left(17)))
-                                & ((1u64 << 37) - 1);
-                            (x + 1, index)
-                        })
-                        .collect();
-                    for &key in &keys {
-                        table.insert(key, QuotientPairWitness::default());
-                    }
-                    for &key in &keys {
-                        assert!(table.might_contain_x(key.0));
-                        assert!(table.get(key).is_some());
+                    for degree in [23, 37] {
+                        let mut table =
+                            CompactPairTable::with_capacity(512, true, (1usize << degree) + 1);
+                        table.x_filter_split_hash = split_hash;
+                        table.x_filter_insert_hash_reuse = reuse_insert_hash;
+                        table.x_filter_direct_bits = direct_bits;
+                        let keys: Vec<_> = (0..512u64)
+                            .map(|index| {
+                                let x = CompactPairTable::hash((index, index.rotate_left(17)))
+                                    & ((1u64 << degree) - 1);
+                                (x + 1, index)
+                            })
+                            .collect();
+                        for &key in &keys {
+                            table.insert(key, QuotientPairWitness::default());
+                        }
+                        for &key in &keys {
+                            assert!(table.might_contain_x(key.0));
+                            assert!(table.get(key).is_some());
+                        }
                     }
                 }
             }
