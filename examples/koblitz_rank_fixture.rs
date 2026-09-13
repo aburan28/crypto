@@ -306,6 +306,7 @@ struct CompactPairTable {
     x_filter_split_hash: bool,
     x_filter_insert_hash_reuse: bool,
     x_filter_direct_bits: bool,
+    x_filter_blocked: bool,
     x_filter_window_shift: u32,
     mask: usize,
     len: usize,
@@ -350,6 +351,7 @@ impl CompactPairTable {
                 != Ok("1"),
             x_filter_direct_bits: std::env::var("KIC_ENABLE_DIRECT_X_FILTER_BITS").as_deref()
                 == Ok("1"),
+            x_filter_blocked: std::env::var("KIC_ENABLE_BLOCKED_X_FILTER").as_deref() == Ok("1"),
             x_filter_window_shift: if filter_bits == 0 || x_filter_exact {
                 0
             } else {
@@ -388,7 +390,9 @@ impl CompactPairTable {
                 }
                 self.image_y[index] = value.image_y;
                 if self.x_only {
-                    if self.x_filter_direct_bits && !self.x_filter_exact {
+                    if self.x_filter_blocked && !self.x_filter_exact {
+                        self.insert_x_filter_blocked(key.0);
+                    } else if self.x_filter_direct_bits && !self.x_filter_exact {
                         self.insert_x_filter_direct(key.0);
                     } else if self.x_filter_insert_hash_reuse {
                         self.insert_x_filter_with_mixed(key.0, mixed);
@@ -447,6 +451,10 @@ impl CompactPairTable {
         if !self.x_only {
             return true;
         }
+        if self.x_filter_blocked && !self.x_filter_exact {
+            let (word, mask) = self.x_filter_blocked_word_and_mask(x);
+            return self.x_filter[word] & mask == mask;
+        }
         let (first, second) = self.x_filter_indices(x);
         self.x_filter[first / u64::BITS as usize] & (1u64 << (first % u64::BITS as usize)) != 0
             && self.x_filter[second / u64::BITS as usize] & (1u64 << (second % u64::BITS as usize))
@@ -462,6 +470,11 @@ impl CompactPairTable {
         let (first, second) = self.x_filter_direct_indices(x);
         self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
         self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
+    }
+
+    fn insert_x_filter_blocked(&mut self, x: u64) {
+        let (word, mask) = self.x_filter_blocked_word_and_mask(x);
+        self.x_filter[word] |= mask;
     }
 
     fn insert_x_filter_with_mixed(&mut self, x: u64, mixed: u64) {
@@ -504,6 +517,19 @@ impl CompactPairTable {
         let first = x as usize & self.x_filter_mask;
         let second = (x >> self.x_filter_window_shift) as usize & self.x_filter_mask;
         (first, second)
+    }
+
+    #[inline(always)]
+    fn x_filter_blocked_word_and_mask(&self, x: u64) -> (usize, u64) {
+        debug_assert!(!self.x_filter_exact);
+        debug_assert!(self.x_filter.len().is_power_of_two());
+        let word = x as usize & (self.x_filter.len() - 1);
+        let fingerprint = x >> self.x_filter.len().trailing_zeros();
+        let mask = (1u64 << (fingerprint & 63))
+            | (1u64 << ((fingerprint >> 6) & 63))
+            | (1u64 << ((fingerprint >> 12) & 63))
+            | (1u64 << ((fingerprint >> 18) & 63));
+        (word, mask)
     }
 
     fn allocated_bytes(&self) -> usize {
@@ -555,6 +581,8 @@ impl CompactPairTable {
     fn x_filter_hash_strategy(&self) -> &'static str {
         if self.x_filter_exact {
             "exact_index"
+        } else if self.x_filter_blocked {
+            "blocked_one_word_four_bit_x_fingerprint"
         } else if self.x_filter_direct_bits {
             "direct_low_and_high_x_bit_windows"
         } else if self.x_filter_split_hash {
@@ -565,11 +593,15 @@ impl CompactPairTable {
     }
 
     fn x_filter_insert_hash_reuse(&self) -> bool {
-        self.x_filter_insert_hash_reuse && !self.x_filter_direct_bits
+        self.x_filter_insert_hash_reuse && !self.x_filter_direct_bits && !self.x_filter_blocked
     }
 
     fn x_filter_direct_bits(&self) -> bool {
-        self.x_filter_direct_bits && !self.x_filter_exact
+        self.x_filter_direct_bits && !self.x_filter_exact && !self.x_filter_blocked
+    }
+
+    fn x_filter_blocked(&self) -> bool {
+        self.x_filter_blocked && !self.x_filter_exact
     }
 
     fn slots(&self) -> usize {
@@ -3194,6 +3226,7 @@ fn main() {
             "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
             "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
             "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
+            "support_x_prefilter_blocked":quotient_pairs.x_filter_blocked(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
@@ -4039,6 +4072,7 @@ fn main() {
                 "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
                 "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
                 "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
+                "support_x_prefilter_blocked":quotient_pairs.x_filter_blocked(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
@@ -4300,28 +4334,31 @@ mod packed_tests {
 
     #[test]
     fn bloom_hash_strategies_retain_every_inserted_x() {
-        for direct_bits in [false, true] {
-            for split_hash in [false, true] {
-                for reuse_insert_hash in [false, true] {
-                    for degree in [23, 37] {
-                        let mut table =
-                            CompactPairTable::with_capacity(512, true, (1usize << degree) + 1);
-                        table.x_filter_split_hash = split_hash;
-                        table.x_filter_insert_hash_reuse = reuse_insert_hash;
-                        table.x_filter_direct_bits = direct_bits;
-                        let keys: Vec<_> = (0..512u64)
-                            .map(|index| {
-                                let x = CompactPairTable::hash((index, index.rotate_left(17)))
-                                    & ((1u64 << degree) - 1);
-                                (x + 1, index)
-                            })
-                            .collect();
-                        for &key in &keys {
-                            table.insert(key, QuotientPairWitness::default());
-                        }
-                        for &key in &keys {
-                            assert!(table.might_contain_x(key.0));
-                            assert!(table.get(key).is_some());
+        for blocked in [false, true] {
+            for direct_bits in [false, true] {
+                for split_hash in [false, true] {
+                    for reuse_insert_hash in [false, true] {
+                        for degree in [23, 37] {
+                            let mut table =
+                                CompactPairTable::with_capacity(512, true, (1usize << degree) + 1);
+                            table.x_filter_split_hash = split_hash;
+                            table.x_filter_insert_hash_reuse = reuse_insert_hash;
+                            table.x_filter_direct_bits = direct_bits;
+                            table.x_filter_blocked = blocked;
+                            let keys: Vec<_> = (0..512u64)
+                                .map(|index| {
+                                    let x = CompactPairTable::hash((index, index.rotate_left(17)))
+                                        & ((1u64 << degree) - 1);
+                                    (x + 1, index)
+                                })
+                                .collect();
+                            for &key in &keys {
+                                table.insert(key, QuotientPairWitness::default());
+                            }
+                            for &key in &keys {
+                                assert!(table.might_contain_x(key.0));
+                                assert!(table.get(key).is_some());
+                            }
                         }
                     }
                 }
