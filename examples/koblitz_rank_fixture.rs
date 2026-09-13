@@ -1228,6 +1228,12 @@ impl CompactPairTable {
         }
     }
 
+    #[inline(always)]
+    fn dense_compact_point_at_slot(&self, slot: usize) -> (u64, u64) {
+        debug_assert!(self.is_dense() && slot < self.len);
+        (self.dense_key_x(slot), self.dense_image_y(slot))
+    }
+
     fn signed_labels_at_slot(
         &self,
         slot: usize,
@@ -2324,6 +2330,12 @@ fn fused_packed_dense_compaction_enabled() -> bool {
     })
 }
 
+fn dense_scan_fast_path_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_DENSE_SCAN_FAST_PATH").as_deref() == Ok("1"))
+}
+
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn inverse_n53_selected_unchecked(value: u64) -> u64 {
@@ -2815,31 +2827,52 @@ fn pair_pair_cursor_chunk(
     scratch
         .signed_slots
         .reserve((cursor_end - cursor_start) / step);
-    for cursor in (cursor_start..cursor_end).step_by(step) {
-        let slot = if let Some(order) = slot_order {
-            let ordered = start_slot + cursor / 2;
-            order[if ordered >= order.len() {
-                ordered - order.len()
+    let dense_scan_fast_path =
+        dense_scan_fast_path_enabled() && quotient_pairs.is_dense() && compact_scratch && dual_sign;
+    if dense_scan_fast_path {
+        for cursor in (cursor_start..cursor_end).step_by(step) {
+            let slot = if let Some(order) = slot_order {
+                let ordered = start_slot + cursor / 2;
+                order[if ordered >= order.len() {
+                    ordered - order.len()
+                } else {
+                    ordered
+                }] as usize
             } else {
-                ordered
-            }] as usize
-        } else {
-            quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
-        };
-        let negative = !dual_sign && cursor & 1 == 1;
-        let occupied = if compact_scratch && dual_sign {
-            quotient_pairs.compact_point_at_slot(slot).map(|point| {
-                scratch.compact_points.push(point);
-            })
-        } else {
-            quotient_pairs
-                .signed_point_at_slot(slot, negative)
-                .map(|point| {
-                    scratch.points.push(point);
+                quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
+            };
+            scratch
+                .compact_points
+                .push(quotient_pairs.dense_compact_point_at_slot(slot));
+            scratch.signed_slots.push(slot << 1);
+        }
+    } else {
+        for cursor in (cursor_start..cursor_end).step_by(step) {
+            let slot = if let Some(order) = slot_order {
+                let ordered = start_slot + cursor / 2;
+                order[if ordered >= order.len() {
+                    ordered - order.len()
+                } else {
+                    ordered
+                }] as usize
+            } else {
+                quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
+            };
+            let negative = !dual_sign && cursor & 1 == 1;
+            let occupied = if compact_scratch && dual_sign {
+                quotient_pairs.compact_point_at_slot(slot).map(|point| {
+                    scratch.compact_points.push(point);
                 })
-        };
-        if occupied.is_some() {
-            scratch.signed_slots.push(slot << 1 | usize::from(negative));
+            } else {
+                quotient_pairs
+                    .signed_point_at_slot(slot, negative)
+                    .map(|point| {
+                        scratch.points.push(point);
+                    })
+            };
+            if occupied.is_some() {
+                scratch.signed_slots.push(slot << 1 | usize::from(negative));
+            }
         }
     }
     if scratch.points.is_empty() && scratch.compact_points.is_empty() {
@@ -4718,6 +4751,7 @@ fn main() {
                 "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
+                "query_dense_scan_fast_path":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled(),
                 "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
                 "query_itoh_n53_inverse":query_mode.pair_pair_parallel() && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled() && itoh_n53_inverse_enabled(),
                 "query_prefiltered_exact_lookup":query_mode.pair_pair_width().is_some() && prefiltered_exact_lookup_enabled(),
@@ -5050,6 +5084,12 @@ mod packed_tests {
         let start = dense.scan_start(entries[0].0);
         assert!(start < dense.slots());
         assert_eq!(dense.wrap_scan_slot(start + dense.slots()), start);
+        for slot in 0..dense.slots() {
+            assert_eq!(
+                dense.dense_compact_point_at_slot(slot),
+                dense.compact_point_at_slot(slot).unwrap()
+            );
+        }
 
         let dense_bytes = dense.allocated_bytes();
         let mut packed = CompactPairTable::with_capacity_sharded(1_024, true, x_domain, 4);
