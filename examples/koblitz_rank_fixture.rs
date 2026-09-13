@@ -1017,6 +1017,37 @@ fn raw_scalar_point(curve: &KoblitzCurve, point: RawPoint, scalar: u64) -> RawPo
     result
 }
 
+/// Independent reference-arithmetic table for repeated multiplication by one
+/// fixed point. Construction performs the same binary doublings as an ordinary
+/// scalar multiplication once; each later scalar needs only the selected
+/// additions. This changes no field or group arithmetic backend.
+fn reference_fixed_base_table(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
+    let mut table = Vec::with_capacity(u64::BITS as usize);
+    let mut current = point.clone();
+    for _ in 0..u64::BITS {
+        table.push(current.clone());
+        current = curve.add(&current, &current);
+    }
+    table
+}
+
+fn reference_fixed_base_mul(
+    curve: &KoblitzCurve,
+    table: &[BinaryPoint],
+    mut scalar: u64,
+) -> BinaryPoint {
+    let mut result = BinaryPoint::Infinity;
+    let mut bit = 0usize;
+    while scalar != 0 {
+        if scalar & 1 == 1 {
+            result = curve.add(&result, &table[bit]);
+        }
+        scalar >>= 1;
+        bit += 1;
+    }
+    result
+}
+
 fn raw_compact_key(point: RawPoint) -> (u64, u64) {
     point.map(|(x, y)| (x + 1, y)).unwrap_or((0, 0))
 }
@@ -2916,6 +2947,8 @@ fn main() {
         std::env::var("KIC_PIPELINED_SUPPORT_EXPANSION").as_deref() == Ok("1");
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
+    let fixed_base_reference_validation =
+        std::env::var("KIC_ENABLE_FIXED_BASE_REFERENCE_VALIDATION").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
@@ -3243,6 +3276,12 @@ fn main() {
         })
     );
 
+    let reference_generator_table_started = Instant::now();
+    let reference_generator_table = fixed_base_reference_validation
+        .then(|| reference_fixed_base_table(&curve, curve.generator()));
+    let reference_generator_table_ms =
+        reference_generator_table_started.elapsed().as_secs_f64() * 1000.0;
+
     let batch_started = Instant::now();
     let mut batch_online_charged_ms = 0.0f64;
     let mut batch_fixture_generation_ms = 0.0f64;
@@ -3303,6 +3342,10 @@ fn main() {
             "public_hash_to_curve_cofactor"
         };
         let fixture_generation_ms = fixture_generation_started.elapsed().as_secs_f64() * 1000.0;
+        let reference_q_table_started = Instant::now();
+        let reference_q_table =
+            fixed_base_reference_validation.then(|| reference_fixed_base_table(&curve, &q));
+        let reference_q_table_ms = reference_q_table_started.elapsed().as_secs_f64() * 1000.0;
         let generator_raw = to_raw_point(curve.generator());
         let q_raw = to_raw_point(&q);
         let fixture_setup_started = Instant::now();
@@ -3875,16 +3918,22 @@ fn main() {
             if let Some(expected) = known_scalar {
                 assert_eq!(solution[columns], expected);
             }
+            let recovered_target = if let Some(table) = &reference_generator_table {
+                reference_fixed_base_mul(&curve, table, solution[columns])
+            } else {
+                curve.mul(curve.generator(), &BigUint::from(solution[columns]))
+            };
             assert_eq!(
-                curve.mul(curve.generator(), &BigUint::from(solution[columns])),
-                q,
+                recovered_target, q,
                 "recovered scalar must reconstruct the public target"
             );
             for (column, representative) in base.representatives.iter().enumerate() {
-                assert_eq!(
-                    curve.mul(curve.generator(), &BigUint::from(solution[column])),
-                    *representative
-                );
+                let reconstructed = if let Some(table) = &reference_generator_table {
+                    reference_fixed_base_mul(&curve, table, solution[column])
+                } else {
+                    curve.mul(curve.generator(), &BigUint::from(solution[column]))
+                };
+                assert_eq!(reconstructed, *representative);
             }
             for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
                 let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
@@ -3897,10 +3946,17 @@ fn main() {
         let collection_ms = collection_started.elapsed().as_secs_f64() * 1000.0;
         let reference_validation_started = Instant::now();
         for (indices, coefficient_a, coefficient_b) in &reference_validation_records {
-            let target = curve.add(
-                &curve.mul(curve.generator(), &BigUint::from(*coefficient_a)),
-                &curve.mul(&q, &BigUint::from(*coefficient_b)),
-            );
+            let generator_multiple = if let Some(table) = &reference_generator_table {
+                reference_fixed_base_mul(&curve, table, *coefficient_a)
+            } else {
+                curve.mul(curve.generator(), &BigUint::from(*coefficient_a))
+            };
+            let q_multiple = if let Some(table) = &reference_q_table {
+                reference_fixed_base_mul(&curve, table, *coefficient_b)
+            } else {
+                curve.mul(&q, &BigUint::from(*coefficient_b))
+            };
+            let target = curve.add(&generator_multiple, &q_multiple);
             let sum = indices
                 .iter()
                 .fold(BinaryPoint::Infinity, |accumulator, &index| {
@@ -3986,6 +4042,9 @@ fn main() {
                 "curve_setup_ms":curve_setup_ms,
                 "fixture_setup_ms":fixture_setup_ms,
                 "fixture_generation_ms":fixture_generation_ms,
+                "fixed_base_reference_validation":fixed_base_reference_validation,
+                "reference_generator_table_ms":reference_generator_table_ms,
+                "reference_q_table_ms":reference_q_table_ms,
                 "charged_total_ms":setup_ms+fixture_setup_ms+collection_ms,
                 "pair_group_additions":pair_additions,
                 "pair_index_mode":pair_mode.name(),
@@ -4160,10 +4219,15 @@ mod packed_tests {
                 }
             }
             let generator_raw = to_raw_point(curve.generator());
+            let reference_table = reference_fixed_base_table(&curve, curve.generator());
             for scalar in 0..64u64 {
                 assert_eq!(
                     raw_scalar_point(&curve, generator_raw, scalar),
                     to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+                );
+                assert_eq!(
+                    reference_fixed_base_mul(&curve, &reference_table, scalar),
+                    curve.mul(curve.generator(), &BigUint::from(scalar))
                 );
             }
             let target = curve.mul(curve.generator(), &BigUint::from(71u64));
