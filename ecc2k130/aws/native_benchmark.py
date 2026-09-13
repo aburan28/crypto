@@ -9,6 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shlex
 import signal
 import tarfile
 import time
@@ -17,9 +18,9 @@ import uuid
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def bootstrap(bucket,prefix,region,source_sha):
+def bootstrap(bucket,prefix,region,source_sha,transfer_urls=None):
     # All substitutions are generated identifiers or validated AWS names.
-    return f'''#!/bin/bash
+    script = f'''#!/bin/bash
 set -euo pipefail
 systemd-run --unit=native-benchmark-deadline --on-active=55m /sbin/shutdown -h now
 mkdir -p /opt/native/src /opt/native/results
@@ -28,6 +29,7 @@ export AWS_DEFAULT_REGION={region}
 finish() {{
     rc=$?
     trap - EXIT
+    set +e
     printf '%s\\n' "$rc" > /opt/native/results/exit-code
     tar -czf /opt/native/results.tgz -C /opt/native/results .
     aws s3 cp /opt/native/results.tgz s3://{bucket}/{prefix}/results.tgz --only-show-errors || true
@@ -49,12 +51,32 @@ timeout 2700 docker run --rm --gpus all \\
     nvidia/cuda:13.3.1-devel-ubuntu24.04 \\
     bash -c 'set -euo pipefail; apt-get update -qq; DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential python3; python3 codegen/native_candidate_bench.py --out /results/bench'
 '''
+    if transfer_urls is not None:
+        # Presigned single-object capabilities expire after one hour. The VM
+        # receives no long-lived credential or IAM profile. Never log URLs.
+        commands={
+            f'aws s3 cp s3://{bucket}/{prefix}/source.tgz /opt/native/source.tgz --only-show-errors':
+                'curl --fail --silent --show-error --retry 2 --max-time 180 '
+                + shlex.quote(transfer_urls['source'])+' -o /opt/native/source.tgz',
+            f'aws s3 cp /opt/native/results.tgz s3://{bucket}/{prefix}/results.tgz --only-show-errors':
+                'curl --fail --silent --show-error --retry 2 --max-time 180 '
+                '--upload-file /opt/native/results.tgz '+shlex.quote(transfer_urls['results']),
+            f'aws s3 cp /opt/native/results/exit-code s3://{bucket}/{prefix}/done --only-show-errors':
+                'curl --fail --silent --show-error --retry 2 --max-time 60 '
+                '--upload-file /opt/native/results/exit-code '+shlex.quote(transfer_urls['done']),
+        }
+        for old,new in commands.items():
+            if script.count(old)!=1: raise ValueError('transfer command contract changed')
+            script=script.replace(old,new)
+    return script
 
 
-def launch_request(template,subnet,user_data,token):
+def launch_request(template,subnet,user_data,token,require_profile=True):
     # Whitelist fields: never inherit production UserData, tags, spot/fleet
     # settings, extra disks or a live worker's network interface.
-    for field in ('ImageId','IamInstanceProfile','SecurityGroupIds','BlockDeviceMappings'):
+    required=('ImageId','SecurityGroupIds','BlockDeviceMappings')
+    if require_profile: required+=('IamInstanceProfile',)
+    for field in required:
         if not template.get(field): raise ValueError('launch template lacks '+field)
     disks=template['BlockDeviceMappings']
     if len(disks)!=1 or not disks[0].get('Ebs',{}).get('DeleteOnTermination'):
@@ -64,7 +86,7 @@ def launch_request(template,subnet,user_data,token):
     tags=[{'Key':'Name','Value':'ecc-native-benchmark-'+token},
           {'Key':'Project','Value':'ecc2k130-benchmark'},
           {'Key':'BenchmarkToken','Value':token}]
-    return dict(ImageId=template['ImageId'],IamInstanceProfile=template['IamInstanceProfile'],
+    request=dict(ImageId=template['ImageId'],
         SecurityGroupIds=template['SecurityGroupIds'],BlockDeviceMappings=disks,
         SubnetId=subnet,InstanceType='g7e.2xlarge',MinCount=1,MaxCount=1,ClientToken=token,
         # boto3 performs the base64 encoding for RunInstances.
@@ -72,6 +94,8 @@ def launch_request(template,subnet,user_data,token):
         InstanceInitiatedShutdownBehavior='terminate',
         MetadataOptions={'HttpTokens':'required','HttpPutResponseHopLimit':2},
         TagSpecifications=[{'ResourceType':kind,'Tags':tags} for kind in ('instance','volume')])
+    if require_profile: request['IamInstanceProfile']=template['IamInstanceProfile']
+    return request
 
 
 def source_archive(path):
@@ -86,6 +110,9 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--region',default='us-west-2')
+    parser.add_argument('--launch-template',default='ecc2k130-worker')
+    parser.add_argument('--presigned-transfer',action='store_true',
+                        help='use expiring object URLs instead of an instance IAM profile')
     args=parser.parse_args()
     if not re.fullmatch(r'[a-z]{2}-[a-z]+-\d',args.region): parser.error('invalid region')
     import boto3
@@ -94,12 +121,13 @@ def main():
     out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
     config=Config(connect_timeout=10,read_timeout=30,retries={'max_attempts':3,'mode':'standard'})
     session=boto3.Session(region_name=args.region)
-    ec2=session.client('ec2',config=config);s3=session.client('s3',config=config)
+    ec2=session.client('ec2',config=config)
+    s3=session.client('s3',config=config.merge(Config(signature_version='s3v4')))
     account=session.client('sts',config=config).get_caller_identity()['Account']
     if not re.fullmatch(r'\d{12}',account): raise RuntimeError('invalid account identifier')
     bucket='ecc2k130-'+account
     token=uuid.uuid4().hex;prefix='benchmarks/native/'+token
-    template=ec2.describe_launch_template_versions(LaunchTemplateName='ecc2k130-worker',Versions=['$Default'])['LaunchTemplateVersions'][0]
+    template=ec2.describe_launch_template_versions(LaunchTemplateName=args.launch_template,Versions=['$Default'])['LaunchTemplateVersions'][0]
     data=template['LaunchTemplateData']
     group=ec2.describe_security_groups(GroupIds=data['SecurityGroupIds'])['SecurityGroups'][0]
     subnets=ec2.describe_subnets(Filters=[{'Name':'vpc-id','Values':[group['VpcId']]},
@@ -109,8 +137,15 @@ def main():
     eligible=sorted((s for s in subnets if s['AvailabilityZone'] in zones and s['MapPublicIpOnLaunch']),key=lambda s:s['SubnetId'])
     if not eligible: raise RuntimeError('no existing default subnet offers g7e.2xlarge in '+args.region)
     source_sha=source_archive(out/'source.tgz')
-    user_data=bootstrap(bucket,prefix,args.region,source_sha)
-    request=launch_request(data,eligible[0]['SubnetId'],user_data,token)
+    transfer_urls=None
+    if args.presigned_transfer:
+        transfer_urls={name:s3.generate_presigned_url(method,
+            Params={'Bucket':bucket,'Key':prefix+'/'+key},ExpiresIn=3600)
+            for name,method,key in [('source','get_object','source.tgz'),
+                                    ('results','put_object','results.tgz'),('done','put_object','done')]}
+    user_data=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls)
+    request=launch_request(data,eligible[0]['SubnetId'],user_data,token,
+                           require_profile=not args.presigned_transfer)
     # Check all launch permissions before uploading source or allocating a GPU.
     try:
         ec2.run_instances(**request,DryRun=True)
@@ -119,6 +154,7 @@ def main():
         if exc.response['Error']['Code']!='DryRunOperation': raise
     s3.upload_file(str(out/'source.tgz'),bucket,prefix+'/source.tgz')
     receipt=dict(valid=False,region=args.region,instanceType='g7e.2xlarge',token=token,
+                 templateName=args.launch_template,presignedTransfer=args.presigned_transfer,
                  templateVersion=template['VersionNumber'],sourceSha256=source_sha,
                  resultPrefix=prefix,instanceId=None)
     def save(): (out/'launch.json').write_text(json.dumps(receipt,indent=2)+'\n')

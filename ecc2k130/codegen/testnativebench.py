@@ -97,5 +97,18 @@ class IsolatedLaunch(unittest.TestCase):
             if kind=='large': data['BlockDeviceMappings'][0]['Ebs']['VolumeSize']=200
             with self.assertRaises(ValueError): aws.launch_request(data,'subnet','script','token')
 
+    def test_presigned_mode_has_no_instance_role_or_credential_material(self):
+        urls={k:'https://example.invalid/'+k+'?signature=test&expires=3600' for k in ('source','results','done')}
+        script=aws.bootstrap('bucket','benchmarks/test','us-west-2','a'*64,urls)
+        template=self.template();template.pop('IamInstanceProfile')
+        request=aws.launch_request(template,'subnet',script,'token',require_profile=False)
+        self.assertNotIn('IamInstanceProfile',request)
+        self.assertNotIn('aws s3 cp',script)
+        self.assertNotIn('AWS_SECRET_ACCESS_KEY',script)
+        self.assertNotIn('AWS_ACCESS_KEY_ID',script)
+        for url in urls.values():self.assertIn(url,script)
+        self.assertEqual(subprocess.run(['bash','-n'],input=script,text=True,capture_output=True).returncode,0)
+        with self.assertRaises(ValueError): aws.launch_request(template,'subnet',script,'token')
+
 
 if __name__=='__main__': unittest.main()

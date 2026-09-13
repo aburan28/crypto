@@ -123,3 +123,16 @@ have offline checks and remain pending live validation.
 
 The index-calculus scoreboard has no new throughput or operation-count result
 to add: GPU timing is pending and the operation-count ratio is unchanged.
+
+## Existing templates without instance roles
+
+For a G7e template that already supplies its AMI, subnet security group and
+100-GiB disposable root disk, use `--launch-template NAME --presigned-transfer`
+with `aws/native_benchmark.py`. The controller uses its normal AWS credential
+chain. It signs one-hour URLs for exactly three objects under the unique
+benchmark prefix: source GET, results PUT and completion-status PUT. The VM
+receives these limited transfer capabilities and no long-lived AWS credentials
+or instance profile. The controller still checks launch permissions first,
+retains results and terminates its exact instance. URLs are not placed in the
+repository or result receipt. The existing instance-profile path remains the
+default. Both startup variants pass offline shell and isolation checks.
