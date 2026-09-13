@@ -2446,3 +2446,64 @@ all. The number of targets sets how much of that memory it is worth
 using.** Every section of this note before the width curve was written as
 though only the first mattered, which is what optimising a charged ratio
 does to you.
+
+### The tier order is backwards where precompute is the bill — 2026-09-13
+
+`PairSumTable::build_within` takes the first representation that fits its
+byte budget — summands, then compact rests, then the signed-Frobenius
+fold. The section above justified that order in the pull request with:
+*"for a base that fits without it the fold only spends squarings"*.
+
+That is charged reasoning, precompute assumed already paid, which is the
+error this whole note has been finding all day. So it was worth testing:
+the same base, end to end, through both tiers, identical parameter files
+but for the byte budget — which is what chooses the tier.
+
+| 36112 points | compact | folded | |
+|---|---|---|---|
+| precompute | 71.4 s | **11.6 s** | 6.2× |
+| descent | 0.0613 s/t | **0.0502 s/t** | the fold is *faster* |
+| amortised, against ρ | 1.24 | **7.15** | **5.8×** |
+| peak resident | 4174 MiB | **57 MiB** | 73× |
+
+Both produced 556 relations from 130000 probes, certified the same 296
+columns, filtered to the same core of 43 with the same 83 singletons, and
+verified 32 of 32. The tiers answer identically; only the cost differs.
+
+**The probe prediction was wrong, in the fold's favour.** It was
+predicted 2.7× dearer — from 110 ns and 300 ns measured earlier — and
+came in 1.22× *cheaper*. The folded table is 57 MiB and stays in cache
+where the compact one is 4.2 GiB and does not, and that outweighs the
+canonicalisation entirely. The framing of the fold as *cheaper storage
+bought with a dearer probe* holds only when both tables are out of cache.
+
+At a second width the direction holds and the margin shrinks:
+
+| | compact | folded | gain |
+|---|---|---|---|
+| 12688 points | 3.07 | 3.60 | 1.17× |
+| 36112 points | 1.24 | 7.15 | 5.8× |
+
+1.17× against a prediction of 2 to 3 — missed on magnitude again, and for
+a structural reason worth keeping: the build scales as `|F|²` while base
+selection, probing and verification scale slower, so the fold's advantage
+grows with the width. At 12688 points precompute is 20.0 s of which the
+build is about 7; at 36112 it is 71.4 s of which the build is about 63.
+
+### Is there any width where compact is right?
+
+The fold wins the probe exactly when the folded table is cache-resident
+and the compact one is not. The compact table fits in about 32 MiB of
+cache only below roughly 3800 points — and there the descent needs
+`2r/|F|² ≈ 4 × 10⁷` probes a target, which is not a regime anyone runs
+this pipeline in.
+
+So on this evidence there may be **no width at which the compact tier is
+the right default**, and ordering the tiers by what *fits* is wrong for
+any run whose precompute is not already paid.
+
+Not claimed: that the full tier is beaten too — it stores summands and so
+needs no recovery scan at all, and it was not tested here. Nor that
+flipping the default is free: the ladder is a documented contract with a
+test asserting it, and it is reached by every caller. The measurement
+says what it says; the change is a separate decision.

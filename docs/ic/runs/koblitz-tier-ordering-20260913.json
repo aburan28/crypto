@@ -47,5 +47,35 @@
   "the_prediction_that_was_wrong": "The probe. It was predicted 2.7x dearer and measured 1.22x CHEAPER, 0.0613 -> 0.0502 seconds a target. The folded table is 57 MiB and stays in cache where the compact one is 4.2 GiB and does not, and that outweighs the canonicalisation. So there is no trade-off at this width at all -- the earlier framing of the fold as 'cheaper storage bought with a dearer probe' is only true when both tables are out of cache.",
   "why_the_total_gain_is_5.8_and_not_the_predicted_10": "The prediction modelled total = build + descent and ignored the stages common to both tiers. Base selection (2.7 s) and relation verification (1.8 s) are identical either way and do not shrink, so they dilute the ratio. Directionally right, quantitatively about 1.8x optimistic.",
   "correctness_cross_check": "Both runs produced 556 relations from 130000 probes, certified the same 296 columns with none rejected, filtered to the same core of 43 with the same 83 singletons. The two tiers are answering identically; only the cost differs.",
-  "what_it_implies": "The tier order is wrong for this regime. It is ordered by what fits, which is right for a base whose precompute is already paid and wrong when precompute is the bill. Whether the default should simply prefer the fold depends on where the compact table stops being cache-resident; below roughly 3800 points it would be, but at that width the descent needs 2r/|F|^2 = 4e7 probes a target and the pipeline is not worth running. A second width is being measured before the default is changed."
+  "what_it_implies": "The tier order is wrong for this regime. It is ordered by what fits, which is right for a base whose precompute is already paid and wrong when precompute is the bill. Whether the default should simply prefer the fold depends on where the compact table stops being cache-resident; below roughly 3800 points it would be, but at that width the descent needs 2r/|F|^2 = 4e7 probes a target and the pipeline is not worth running. A second width is being measured before the default is changed.",
+  "second_width": {
+    "points": 12048,
+    "targets": 32,
+    "measured": [
+      {
+        "points": 12688,
+        "tier": "compact",
+        "precompute": 20.0,
+        "descent": 0.3252,
+        "charged": 9.0,
+        "amortised": 3.07,
+        "rss_mib": 1592,
+        "verified": 32
+      },
+      {
+        "points": 12688,
+        "tier": "folded",
+        "precompute": 16.8,
+        "descent": 0.301,
+        "charged": 9.9,
+        "amortised": 3.6,
+        "rss_mib": 526,
+        "verified": 32
+      }
+    ],
+    "predicted": "the fold wins again but by less than the 5.8x at 36112, around 2 to 3x",
+    "verdict": "The fold wins again -- amortised 3.07 -> 3.60, and the descent is again faster, 0.3252 -> 0.3010 s a target -- but by 1.17x, not the 2 to 3x predicted. MISSED on magnitude, held on direction. The reason is structural: the build scales as |F|^2 while base selection, probing and verification scale slower, so the fold's advantage shrinks with the width. At 12000 points precompute is 20.0 s of which the build is about 7 s; at 36112 it is 71.4 s of which the build is about 63 s."
+  },
+  "conclusion": "Two widths, and the fold wins both on every axis measured -- precompute, descent, resident memory -- with the margin growing as the width grows: 1.17x at 12000 points, 5.8x at 36112. The regime where the compact tier could keep a cache advantage is below about 3800 points, where the descent needs 4e7 probes a target and the pipeline is not worth running. On this evidence there may be no width at which the compact tier is the right default, and the ordering in build_within -- which takes the first tier that FITS -- is wrong for any run whose precompute is not already paid.",
+  "not_claimed": "That the full tier, which stores summands and so needs no recovery scan at all, is also beaten. It was not tested here. Nor that flipping the default is free: the tier ladder is a documented contract with a test asserting it, and changing it touches every caller. The measurement says what it says; the change is a separate decision."
 }
