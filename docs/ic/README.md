@@ -723,3 +723,11 @@ than 2.8×.
   base, which only the folded tier can hold.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
   `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
+
+- `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
+  whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over
+  ρ charged, and an unplanned A/B of the orbit tag and row filter in the
+  real pipeline (collection units 31× faster, solve 65× faster, resident
+  memory halved, relation counts identical unit for unit). Amortised over
+  32 targets the wider base is *worse* than the 36112-point one; the two
+  cross at about 3600 targets.

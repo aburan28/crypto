@@ -1,0 +1,97 @@
+{
+  "operation": "koblitz_degree_61_folded_end_to_end",
+  "date": "2026-09-13",
+  "what": "The first end-to-end run at a width only the folded pair table can hold: K_0/GF(2^61), a 48-bit subgroup, 300608 base points in 2464 signed orbits. All four stages, 32 of 32 targets verified against a signed-Frobenius rho baseline.",
+  "measured": {
+    "factor_base": {
+      "abscissae": 150304,
+      "columns": 2464,
+      "dimension": 61,
+      "domain": "explicit_orbits(2464)",
+      "family": "subgroup_orbits",
+      "points": 300608,
+      "signed_orbits": 2464,
+      "spec": {
+        "kind": "subgroup_orbits",
+        "points": 300000,
+        "seed": 1
+      }
+    },
+    "relations": 73495,
+    "probes": 80000,
+    "stage_seconds": {
+      "select": 24.9,
+      "collect": 123.2,
+      "logs": 87.6,
+      "solve": 2.5
+    },
+    "precompute_seconds": 235.7,
+    "peak_rss_bytes": 2573864960,
+    "solutions_verified": 32,
+    "baseline": {
+      "amortised": 0.44746149456850043,
+      "charged": 330.6845366527052
+    }
+  },
+  "the_ab_that_matters": {
+    "what": "The same parameter file and the same base, run twice on binaries differing only by the orbit tag and the row filter. The relation counts came back identical unit for unit -- 18347, 18363, 18394, 18391 -- which is a stronger cross-check that the tagged, row-filtered table answers exactly as the untagged one than any unit test: a whole pipeline agreeing to the relation.",
+    "collect_unit_seconds": {
+      "before": 779.2,
+      "after": 24.8,
+      "factor": 31.4
+    },
+    "collect_stage_seconds": {
+      "before": 948.1,
+      "after": 123.2,
+      "factor": 7.7
+    },
+    "solve_stage_seconds": {
+      "before": 162.2,
+      "after": 2.5,
+      "factor": 64.9
+    },
+    "precompute_seconds": {
+      "before": 1061.6,
+      "after": 235.7,
+      "factor": 4.5
+    },
+    "peak_rss_gib": {
+      "before": 4.68,
+      "after": 2.4,
+      "note": "the row filter halves the stored pairs, and it shows in resident memory"
+    },
+    "descent_seconds_per_target": {
+      "before": 0.0381,
+      "after": 0.01,
+      "factor": 3.8
+    },
+    "charged_ratio_over_rho": {
+      "before": 86.7,
+      "after": 330.7
+    },
+    "why_the_before_was_slow": "Collection spent 11.85 ms a probe, which is about one O(|F|) recovery scan per probe at this width -- precisely the cost the orbit tag removes. The first run's binary predated it."
+  },
+  "against_the_previous_best_at_this_degree": {
+    "previous": {
+      "points": 36112,
+      "columns": 296,
+      "precompute_seconds": 78.99910203699999,
+      "descent_seconds_per_target": 0.05310339306250002,
+      "charged": 61.16261432889676,
+      "amortised": 1.2879331128075655
+    },
+    "folded": {
+      "points": 300608,
+      "columns": 2464,
+      "precompute_seconds": 235.7,
+      "descent_seconds_per_target": 0.01,
+      "charged": 330.6845366527052,
+      "amortised": 0.44746149456850043
+    },
+    "charged_improvement": "61.2x -> 330.7x over rho, a factor of 5.4",
+    "the_honest_qualification": "Amortised over 32 targets the folded width is WORSE: 0.45 against 1.288. The base has 8.3 times as many points and so 8.3 times as many orbits to solve logarithms for, and the precompute grew from 79.0 s to 235.7 s. A wider base buys a cheaper descent and charges for it once, up front.",
+    "break_even_targets": 3635,
+    "break_even_reading": "The folded width overtakes the 36112-point compact one at about 3635 targets: the extra 156.7 s of precompute divided by the 0.0431 s a target the descent saves. Below that the narrower base wins. This is the clearest statement yet of what the whole line of work is: a method for many logarithms on one curve, never for one."
+  },
+  "not_claimed": "That the folded width is better at every scale. At 32 targets it is not, and the amortised ratio says so. The charged ratio and the break-even count are the claims."
+}

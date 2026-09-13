@@ -2149,3 +2149,69 @@ were not uniform — would be the whole of the bill.
 Though the algebra had the last word after all: that the orbit of a
 summand survives the fold is a one-line consequence of `G` preserving
 orbits, and it is what turned the linear recovery into a constant one.
+
+## End to end at a width only the fold can hold — 2026-09-13
+
+Everything above is a microbenchmark: a decomposition oracle timed on its
+own. The pipeline has now been run whole at a width only the folded table
+can hold — `K_0/F_{2^61}`, a 48-bit subgroup, **300608 base points in
+2464 signed orbits** — through select, collect, logs and solve, with a
+signed-Frobenius ρ baseline on the same targets.
+
+**32 of 32 targets verified.** 73495 relations from 80000 probes; the
+sparse solve filtered `73495 × 2464` to a core of 236 and finished in
+0.088 s.
+
+### The A/B that was not planned
+
+The first attempt ran on a binary built two commits earlier, before the
+orbit tag and the row filter. That was a mistake, and it turned into the
+best measurement in this note: the same parameter file and the same base,
+run twice on binaries differing only by those two changes.
+
+The relation counts came back **identical, unit for unit** — 18347,
+18363, 18394, 18391 — which is a stronger check that the tagged,
+row-filtered table answers exactly as the untagged one than any unit
+test. A whole pipeline agreeing to the relation.
+
+| | before | after | |
+|---|---|---|---|
+| collect, the four units | 779.2 s | **24.8 s** | 31.4× |
+| collect stage | 948.1 s | 123.2 s | 7.7× |
+| solve stage | 162.2 s | **2.5 s** | 64.9× |
+| precompute | 1061.6 s | 235.7 s | 4.5× |
+| peak resident | 4.68 GiB | **2.40 GiB** | the row filter, visible |
+| descent | 0.0381 s/target | **0.0100 s/target** | 3.8× |
+| charged, against ρ | 86.7× | **330.7×** | |
+
+The *before* column is explained by one number: collection spent 11.85 ms
+a probe, which at this width is about one `O(|F|)` recovery scan per
+probe — precisely the cost the orbit tag removes.
+
+### Against the best this note had before
+
+| | 36112 points | 300608 points |
+|---|---|---|
+| columns to solve | 296 | 2464 |
+| precompute | 79.0 s | 235.7 s |
+| descent | 0.0531 s/target | **0.0100 s/target** |
+| charged, against ρ | 61.2× | **330.7×** |
+| amortised over 32 targets | **1.288** | 0.45 |
+
+Charged, the folded width is 5.4 times better. Amortised over 32 targets
+it is **worse**, and that is not a footnote — the base has 8.3 times as
+many points and therefore 8.3 times as many orbits to find logarithms
+for, so the precompute triples. A wider base buys a cheaper descent and
+charges for it once, up front.
+
+The two columns cross at
+
+```
+(235.7 − 79.0) s  ÷  (0.0531 − 0.0100) s/target  ≈  3600 targets
+```
+
+Below about 3600 targets the narrower base wins; above it the folded one
+does. That is the cleanest statement this work has produced of what it
+actually is: **a method for many logarithms on one curve, and never for
+one.** The reach law says how far memory can take you; this says how many
+targets you must have before taking it is worth anything.
