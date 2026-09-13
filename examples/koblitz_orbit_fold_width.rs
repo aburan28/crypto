@@ -20,7 +20,7 @@
 
 use std::time::Instant;
 
-use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::*;
 use serde_json::json;
 
@@ -194,21 +194,34 @@ fn main() {
         let ns = start.elapsed().as_secs_f64() * 1e9 / stream.len() as f64;
         // Recovery, on targets known to be sums of two base points.
         let mut out = Vec::new();
+        // Summands from far-apart orbits, and never a `±` pair: `P + (−P)`
+        // is `O`, whose key every orbit representative stores, and timing
+        // recovery on it would measure the one degenerate target rather
+        // than the ordinary case.
+        let stride = base.points.len() / 37;
         let known: Vec<_> = (0..24)
             .map(|i| {
                 fc.add(
-                    fc.lift(&base.points[i % base.points.len()]),
-                    fc.lift(&base.points[(i + 1) % base.points.len()]),
+                    fc.lift(&base.points[(i * stride) % base.points.len()]),
+                    fc.lift(&base.points[(i * stride + stride / 2 + 1) % base.points.len()]),
                 )
             })
+            .filter(|p| !p.infinity)
             .collect();
         let start = Instant::now();
         for &q in &known {
             table.pairs_for(q, &mut out);
         }
-        let ms = start.elapsed().as_secs_f64() * 1e3 / known.len() as f64;
+        let ms = start.elapsed().as_secs_f64() * 1e3 / known.len().max(1) as f64;
+        // And the worst case the orbit tag has: `O` is the sum of every
+        // `±` pair, so its key is stored once by every representative.
+        let start = Instant::now();
+        table.pairs_for(FastPoint::INFINITY, &mut out);
+        let degenerate_ms = start.elapsed().as_secs_f64() * 1e3;
+        let degenerate_pairs = out.len();
         println!(
-            "  {name:8} probe {ns:7.1} ns ({hits} of {} hit), recovery {ms:7.2} ms an |F| = {width} scan",
+            "  {name:8} probe {ns:7.1} ns ({hits} of {} hit), recovery {ms:7.3} ms; \
+             the degenerate key O: {degenerate_ms:7.2} ms for {degenerate_pairs} pairs",
             stream.len()
         );
         probe_ns.push(ns);

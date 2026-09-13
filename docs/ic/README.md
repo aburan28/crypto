@@ -699,9 +699,14 @@ the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
 canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
 negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
 stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
-fewer descent probes, and **27.8×** end to end per decomposed target —
-2.0× of which is the fold on the code as it stood, the rest being three
+fewer descent probes, and **168×** end to end per decomposed target —
+2.0× of which is the fold on the code as it stood, the rest being four
 costs that only a base eight times wider makes visible.
+
+Recovery is `O(n)`, not `O(|F|)`: a folded entry names the signed orbit
+one summand lies in, in the high half of its rest word, so recovering the
+summands walks 122 points rather than 177632. It costs no memory — the
+tag is spent out of the rest, not added to it.
 
 The key itself is the least rotation of the abscissa's coordinates in a
 normal basis, where the Frobenius *is* a rotation — `FrobeniusCanon` in

@@ -1913,7 +1913,7 @@ Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
 first witness:
 
-**0.500 s → 0.018 s, a factor of 27.8** — but only after three further
+**0.455 s → 0.0027 s, a factor of 168** — but only after four further
 changes, and on the code as it stood it was 2.0×. What happened in
 between is the rest of this section, and it is the more useful half of
 the result.
@@ -1997,6 +1997,66 @@ a caller sees is unchanged. Recoveries per decomposition fell from about
 eleven to about one, and the scan reaches a witness about three times
 sooner.
 
+### Recovery was still `O(|F|)`, and that cancelled the whole point
+
+At 18 ms a decomposition, about 6.7 ms was the probes and about 8.7 ms
+the single recovery. That is not merely unbalanced — it *cancels the
+lever the fold exists for*. Probes fall as `1/|F|²` and an `O(|F|)`
+recovery rises as `|F|`, so widening the base by `√2`:
+
+| | probes | recovery | total |
+|---|---|---|---|
+| `\|F\| = 177632` | 6.67 ms | 8.66 ms | 15.3 ms |
+| `\|F\| × √2` | 3.34 ms | 12.2 ms | 15.6 ms |
+
+A wash. The fold buys a base eight times wider and the recovery hands it
+straight back.
+
+### The orbit of a summand survives the fold
+
+It need not. A folded entry was built as `canon(P_{rep(r)} + P_j)`, so a
+target whose key matches it satisfies `g · target = P_{rep(r)} + P_j` for
+some `g ∈ G`, and therefore
+
+```
+target = g⁻¹P_{rep(r)} + g⁻¹P_j
+```
+
+with the first summand somewhere in the **same signed orbit `r`** —
+orbits being exactly what `G` preserves. So recovery never had to walk
+the base. It walks the `2n` points of orbit `r`: 122 against 177632.
+
+And the tag costs no memory, because it is spent out of the rest rather
+than added to it: the stored word becomes `(orbit << 16) | rest16`. The
+rest keeps sixteen bits, so a probe gets through wrongly about one time
+in four thousand rather than one in `2²⁸` — and a wrong admission now
+costs an orbit walk of a few microseconds instead of a scan of the base.
+Over the probes a decomposition spends that is some four false positives
+and tens of microseconds, against the milliseconds the shortened scan
+saves. Still no false negatives; the group has the last word either way.
+
+**Recovery: 8.66 ms → 0.037 ms.**
+
+### A bug the tag exposed
+
+Folded tables had been bucketing on the canonical key's high bits. A
+canonical key is a *minimum over `n` rotations*, which sits far below the
+middle of its range, so the whole table piled into the first few buckets.
+The presence filter hid it completely — a probe that misses never reaches
+a run — but every *hit* then walked an enormous one. It only became
+visible when recovery stopped dominating and a single lookup on the
+degenerate key took seconds.
+
+Folded tables now bucket on the hash the filter and the rest are already
+made of, which is flat. Probe 374 → 285 ns, and far more than that on
+hits.
+
+The degenerate key is worth naming: `O` is the sum of every `±` pair, so
+every orbit representative stores an entry under its key, and a lookup
+there is offered *every* orbit at once. Two membership tests that were
+linear-per-push went quadratic on it; they are sorts now, and it costs
+14 ms for the 88816 pairs it legitimately returns.
+
 ### What the fold is actually worth
 
 | | s per decomposed target | the fold |
@@ -2004,16 +2064,17 @@ sooner.
 | the code as it stood | 0.229 | 2.0× |
 | key as a rotation | 0.168 | 2.8× |
 | faster recovery | 0.150 | 3.2× |
-| any witness, not the sorted one | **0.018** | **27.8×** |
+| any witness, not the sorted one | 0.018 | 27.8× |
+| the orbit tag | **0.0027** | **168×** |
 
-The fold was worth 2.0× on the code as it stood, and 27.8× once the three
-things that a base eight times wider exposes were fixed. Two of the three
-were not about the fold at all — they were costs that only a wide base
-makes visible, and that the compact table had been paying quietly at every
-width.
+The fold was worth 2.0× on the code as it stood. The rest is four costs
+that only a base eight times wider makes visible, and three of the four
+were not about the fold at all — the compact table had been paying them
+quietly at every width.
 
-Neither half is now lopsided: of the 18 ms, about 6.7 ms is the 17840
-probes and about 8.7 ms the single recovery.
+What matters more than the 168 is that the probes are now 98.6% of a
+decomposition. The base-widening lever the fold exists for is connected
+again: a `√2` widening should be worth about 1.9× rather than nothing.
 
 The `M²/(log M)²` reach law is unchanged in shape by any of this. What
 the fold moves is the constant, by putting `n` times more base behind the
@@ -2021,6 +2082,11 @@ same byte.
 
 The lesson is the one this note keeps relearning. The algebra said `2n`
 and it was right about `2n`; what it could not say was that at `n` times
-the base, two costs nobody had been watching — a hash function chosen for
-strength, and a sortedness condition kept for an enumeration nothing was
-enumerating — would be most of the bill.
+the base, four costs nobody had been watching — a hash chosen for
+strength, a sortedness condition kept for an enumeration nothing was
+enumerating, a linear recovery, and a bucket index taken off bits that
+were not uniform — would be the whole of the bill.
+
+Though the algebra had the last word after all: that the orbit of a
+summand survives the fold is a one-line consequence of `G` preserving
+orbits, and it is what turned the linear recovery into a constant one.
