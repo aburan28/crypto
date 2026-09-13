@@ -59,11 +59,21 @@ fulfilledGpus() {
     esac
 }
 
+fulfilledOnDemandGpus() {
+    local raw
+    raw=$(aws ec2 describe-fleets --fleet-ids "$1" \
+        --query 'Fleets[0].FulfilledOnDemandCapacity' --output text)
+    case "$raw" in
+        None|'') echo 0 ;;
+        *) echo "${raw%.*}" ;;
+    esac
+}
+
 # Fulfill unmet Spot with On-Demand after a short wait. Spot stays the default
 # purchase type; On-Demand is only raised for the measured shortfall.
 fallbackOnDemand() {
     local id=$1 total=$2 base_ondemand=$3
-    local waited=0 fulfilled shortfall ondemand
+    local waited=0 fulfilled fulfilled_ondemand spot_fulfilled shortfall ondemand
     echo "waiting up to ${FALLBACK_WAIT_SECONDS}s for g7e Spot before On-Demand fallback"
     while [ "$waited" -lt "$FALLBACK_WAIT_SECONDS" ]; do
         fulfilled=$(fulfilledGpus "$id")
@@ -79,7 +89,9 @@ fallbackOnDemand() {
         echo "fleet $id: Spot filled $fulfilled/$total GPU(s); no On-Demand fallback"
         return 0
     fi
-    shortfall=$((total - fulfilled))
+    fulfilled_ondemand=$(fulfilledOnDemandGpus "$id")
+    spot_fulfilled=$((fulfilled - fulfilled_ondemand))
+    shortfall=$((total - base_ondemand - spot_fulfilled))
     ondemand=$((base_ondemand + shortfall))
     if [ "$ondemand" -gt "$total" ]; then ondemand=$total; fi
     aws ec2 modify-fleet --fleet-id "$id" --target-capacity-specification \
