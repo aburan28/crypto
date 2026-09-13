@@ -12,6 +12,9 @@ The benchmark step was skipped and no GPU instance launched. The
 [attempt receipt](benchmarks/native-candidates/aws-attempt.json) records this
 authentication blocker. Refresh the repository's AWS credentials and rerun
 that workflow to execute the prepared comparison. No faster rate is claimed.
+An [additional attempt](https://github.com/aburan28/crypto/actions/runs/34762827266)
+with support for the optional `AWS_SESSION_TOKEN` repository secret failed at
+the same authentication step. Neither attempt allocated a GPU.
 
 This is **engineering**. The generic-group work boundary and walk rules do not
 change. At batch 16, every variant still uses `5 + 5/16 = 5.3125` field products

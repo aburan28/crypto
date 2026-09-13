@@ -12,5 +12,19 @@
   "awsBenchmarkStep": "skipped",
   "gpuInstanceLaunched": false,
   "gpuExecution": false,
-  "measuredThroughput": null
+  "measuredThroughput": null,
+  "retryWithOptionalSessionToken": {
+    "runUrl": "https://github.com/aburan28/crypto/actions/runs/34762827266",
+    "runId": 34762827266,
+    "jobId": 103738533043,
+    "sourceRevision": "8b72008155369e0bd9a21d6265fa60e969a186d6",
+    "offlineTestsPassed": 6,
+    "conclusion": "failure",
+    "failedStep": "Configure existing AWS credentials",
+    "error": "The security token included in the request is invalid.",
+    "errorTimestamp": "2026-09-13T14:30:04.4018467Z",
+    "awsBenchmarkStep": "skipped",
+    "gpuInstanceLaunched": false,
+    "gpuExecution": false
+  }
 }
