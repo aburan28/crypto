@@ -690,6 +690,34 @@
     </div>
   </div>
 
+  <div class="panel" id="nagao-followup-01">
+    <div class="panel-head">
+      <h2>Nagao follow-up: denser bases and larger instances</h2>
+      <p>Source: <code>research/nagao_relations/followup_01/summary.json</code> and
+        <code>raw.jsonl</code> in that folder. Eight uniform targets per field, weight two,
+        three summands, five seconds per instance. No incorrect admitted relation was recorded.
+        These are engineering observations; full-DLP S and rho ratios remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <thead><tr><th scope="col">Field degree</th><th scope="col">Variant</th>
+        <th scope="col">Complete / attempted</th><th scope="col">Complete verified x-tuples</th>
+        <th scope="col">Partial verified x-tuples</th><th scope="col">S / rho</th></tr></thead>
+      <tbody>
+        <tr><td>9</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>128</td><td>Unmeasured</td></tr>
+        <tr><td>9</td><td>RR norm</td><td>8 / 8</td><td>363</td><td>&mdash;</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>4</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>RR norm</td><td>0 / 8</td><td>&mdash;</td><td>9</td><td>Unmeasured</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>Function-coefficient search matched the complete signed-point oracle:
+      864 triples over all 43 five-bit targets for dim(V)=4; 1,780 over eight sampled targets
+      for dim(V)=5. Under a unit-cost field-API model its ratios to brute point enumeration
+      were 3.188 and 0.540, respectively. The latter uses the entire field as the x-domain;
+      neither ratio compares with the best Semaev solver or establishes an attack speedup.
+      Incomplete SAT cases are watchdog outcomes, never UNSAT evidence. The next tests target
+      support-divisibility circuits and coefficient conditioning.</p></div>
+  </div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">

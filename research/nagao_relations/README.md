@@ -190,6 +190,10 @@ hashes, and failures. Outputs are written to new paths.
 
 ## Observations from the frozen correctness panel
 
+The subsequent [follow-up experiment](followup_01/README.md) tests denser bases,
+nine- and eleven-bit SAT instances, and larger subspace supports. Its results
+are additive; the original observations below remain unchanged.
+
 The raw SAT artifact is
 [`nagao_relation_comparison_20260913.json`](experiments/nagao_relation_comparison_20260913.json).
 Its aggregate `valid: false` means the full panel did not complete: all 24
