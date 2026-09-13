@@ -75,12 +75,16 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, about 6.6k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and
-66 DSPs as synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M
-LUTs, 2 016 RAMB36, 960 URAM288 and 9 024 DSPs, of which the CL's
-pblock holds 7 992. 128 engines is 67% of the LUTs, 83% of the block
-RAM and 53% of the UltraRAM, and takes ten DSP leaves (7 680 DSPs); 136
-with nine leaves is 72% / 88% / 57% and 144 76% / 93% / 60%. (With the
+its walk memory, about 6.9k LUTs, 12 RAMB36, 4 URAM288 and 66 DSPs as
+synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs,
+2 016 RAMB36, 960 URAM288 and 9 024 DSPs, of which the CL's pblock
+holds 7 992 DSPs and 3 576 RAMB18 sites (1 788 RAMB36). 128 engines is
+68% of the LUTs, 76% of the block RAM and 53% of the UltraRAM, and takes
+ten DSP leaves (7 680 DSPs); 136 with nine leaves is 73% / 81% / 57% and
+144 77% / 86% / 60% — 144 is the most the CL's block RAM holds (3 456 of
+3 576 sites; 152 would want 3 648), and it took the step count out of
+the walk words to get there: at 12 RAMB36 + 2 RAMB18 per engine, 144
+wanted 3 744 and `place_design` refused before placing anything. (With the
 all-LUT multiplier, 8.1k LUTs per engine, 96 engines was 63% of the
 LUTs, 112 73% and 128 83% — the 128-engine image that runs at 8.25 G
 steps/s; with the product tree in block RAM,
@@ -89,8 +93,11 @@ and 54% of the RAM, 80 53% and 67%, 96 63% and 81%, and the RAM ran out
 first.) Read `synth_utilization` and the post-route timing from the
 reports, then go to what fits.
 
-`ID_W` sets walks per engine, `2^ID_W`. Each walk is 304 bits of block
-RAM, and the step unit holds `W · 2^LOG_NB` walks at once — 512 at the
+`ID_W` sets walks per engine, `2^ID_W`. Each walk is 285 bits of block
+RAM in the FIFO (`x`, `y`, id, the low 13 bits of its step count, the
+DP flag; the high 19 bits are a per-walk table in distributed RAM) and
+288 in the step unit's leaf table, and the step unit holds `W · 2^LOG_NB`
+walks at once — 512 at the
 default 64 × 8, which 512 walks (the default) feed at 5.16 clocks per
 step in simulation and 5.17 on the device; the same 512 as 32 × 16
 starve at 5.21 – 5.22, see "What came back". 512 fills the FIFO's block
@@ -196,9 +203,9 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, 4 855 at three, 5 019 at four, all LUT leaves; **4 004 at three with eleven leaves in DSPs** (now the default) |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | **66** (eleven 17-bit leaves as 2 × 3 grids of 25 × 16 integer products; 0 with `MUL_DSP_LEAVES = 0`) |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; 7 170 – 7 320 with eleven multiplier leaves in DSPs; 7 000 – 7 150 with the single-writer level arrays; 6 840 – 6 990 with the DSP pieces widened to 9 × 6 coefficients; **6 540 – 6 690** with the output weight taken beside the final multiply, 196 LUTRAM and 329 SRL left; 9 455 FF |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; 7 170 – 7 320 with eleven multiplier leaves in DSPs; 7 000 – 7 150 with the single-writer level arrays; 6 840 – 6 990 with the DSP pieces widened to 9 × 6 coefficients; 6 540 – 6 690 with the output weight taken beside the final multiply; **6 790 – 6 940** with the step count's high bits in a LUTRAM table (376 LUTRAM and 310 SRL of it), which buys two RAMB18; 9 371 FF |
 | Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
-| BRAM | 0 | **12 RAMB36 + 2 RAMB18 and 4 URAM288 per engine** (the product tree in UltraRAM); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
+| BRAM | 0 | **12 RAMB36 and 4 URAM288 per engine** (the product tree in UltraRAM; the step count's high 19 bits in a LUTRAM table so the FIFO word and the leaf word each fit four RAMB36 — 12 + 2 RAMB18 while they carried all 32); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
 | Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
@@ -470,12 +477,36 @@ head of that pipe and ride along as nine bits, ready with the product:
 −306 LUTs per engine (the SRLs, 592 → 329), **6 540 – 6 690 LUTs and
 9 455 FFs**, rate 5.16 unchanged.
 
+**144 engines did not fit the block RAM.** `20260913-170445-n144-c333`
+(nine DSP leaves) failed `place_design`'s utilisation DRC: 144 × (12
+RAMB36 + 2 RAMB18) = 3 744 RAMB18 sites against the CL pblock's 3 576
+(the device has 4 032; the shell's columns are the rest). The two
+RAMB18 were the 32-bit step count: the walker's FIFO word (`x`, `y`, id,
+count, DP flag) was 304 bits and the step unit's leaf word (`x`, `y`,
+`j`, tag, valid) 307, each 512 deep, and four RAMB36 hold 288 bits at
+that depth. Now only the count's low 13 bits travel with the walk (285
+and 288 bits — the leaf word exactly full) and the high 19 sit in a
+512-entry LUTRAM table in the walker, read by the retiring walk's id
+through an address register and bumped through a write register on
+the clocks the low count wraps (once in 8 192 steps of a walk), cleared
+by a load, and read by the report register on a clock with no
+retirement (the main README, "The walker"). **12 RAMB36 and no RAMB18
+per engine**: 144 engines is 3 456 sites, and the most the block RAM
+holds (152 would want 3 648). The table, its read mux and incrementer
+are +180 LUTRAM and +93 logic LUTs per engine, the narrower tag −19 SRLs
+and −84 FFs: **6 790 – 6 940 LUTs and 9 371 FFs**, none of the probe's
+eighty worst paths in the table (the address register was needed: with
+the retiring id muxed straight into the LUTRAM address pins, that mux's
+170-load net, the read, the 8:1 mux and the incrementer were the
+engine's worst path at 1.67 ns before routing), rate 5.17 unchanged.
+`20260913-195641-n144-c333` (nine leaves) is the first build of it.
+`175919-n144-c333`, the same geometry on the revision before, and
+`084322-n136-c333` (32 × 16, routing at −4.3 ns after ten hours) were
+stopped.
+
 Builds of the revision with the walker's registers and 64 × 8
 (`20260913-170424-n128-c375` and `170431-n112-c400` with the LUT
-multiplier, `170438-n136-c333` and `170445-n144-c333` with nine DSP
-leaves: 144 engines is 81% of the LUTs, 93% of the block RAM, 60% of
-the UltraRAM and 97% of the CL's DSPs) and of the revision with the two
-above as well (`175911-n128-c375`, `175919-n144-c333` with nine leaves)
-were running when this was written, as was `20260913-084322-n136-c333`
-(nine leaves, 32 × 16, the revision before all of them), routing at
-−0.19 ns after eight hours.
+multiplier, `170438-n136-c333` with nine DSP leaves) and of the revision
+with the two above as well (`175911-n128-c375`) and with the output
+weight beside the multiply (`184712-n128-c375`) were running when this
+was written.
