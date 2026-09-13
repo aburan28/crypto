@@ -120,6 +120,9 @@ architecture rtl of ec2k_walker is
   -- register's load is 304 more: each such net from one driver is a long
   -- route in a full device, so those drivers are replicated
   attribute MAX_FANOUT : string;
+  -- the reset through a register of the walker's own (see ec2k_batch_pipe)
+  signal rst_q : std_logic := '1';
+  attribute MAX_FANOUT of rst_q : signal is "64";
   attribute MAX_FANOUT of ob_rd : signal is "100";
 
   -- step unit; the tag is (id, steps so far)
@@ -144,7 +147,7 @@ begin
     generic map (TAG_W => TAG_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
                  FLUSH_CLK => FLUSH_CLK, DP_WEIGHT => DP_WEIGHT)
     port map (
-      clk => clk, rst => rst,
+      clk => clk, rst => rst_q,
       in_valid => s_in_valid, in_ready => s_in_ready,
       in_x => head_w(FW - 1 downto X_LO), in_y => head_w(X_LO - 1 downto Y_LO),
       in_tag => s_in_tag,
@@ -159,18 +162,25 @@ begin
 
   -- every completed step takes the FIFO's write port, so a load is
   -- accepted only on clocks with no retirement
-  ld_rdy   <= '1' when rst = '0' and s_out_valid = '0' and not f_full else '0';
+  ld_rdy   <= '1' when rst_q = '0' and s_out_valid = '0' and not f_full else '0';
   ld_ready <= ld_rdy;
 
   -- head of the FIFO: a walk is offered to the step unit, a distinguished
   -- point to the report register once that is free (or being freed)
-  s_in_valid <= '0' when ob_empty or rst = '1' or head_dp = '1' else '1';
+  s_in_valid <= '0' when ob_empty or rst_q = '1' or head_dp = '1' else '1';
   s_in_tag   <= head_w(Y_LO - 1 downto ID_LO) & head_w(ID_LO - 1 downto CNT_LO);
-  take_dp    <= not ob_empty and rst = '0' and head_dp = '1' and (dpv = '0' or dp_ack = '1');
+  take_dp    <= not ob_empty and rst_q = '0' and head_dp = '1' and (dpv = '0' or dp_ack = '1');
 
   dp_valid <= dpv;
 
   -- the FIFO memory's read port and output register
+  rst_reg : process (clk)
+  begin
+    if rising_edge(clk) then
+      rst_q <= rst;
+    end if;
+  end process;
+
   mem_rd : process (clk)
   begin
     if rising_edge(clk) then
@@ -237,7 +247,7 @@ begin
         f_wr <= f_wr + 1;
       end if;
 
-      if rst = '1' then
+      if rst_q = '1' then
         f_wr  <= (others => '0');
         f_rd  <= (others => '0');
         ob_wr <= (others => '0');
