@@ -82,7 +82,8 @@
 -- Batches shorter than W -- the tail of a run, or a testbench -- would wait
 -- forever for leaves that never come, so a batch that has been partly
 -- filled for FLUSH_CLK clocks with nothing arriving is padded with dummy
--- leaves (weight-1 x, d /= 0) that produce no output.
+-- leaves (d /= 0, so the product tree stays invertible) that produce no
+-- output.
 --
 -- Slot memory per batch of W: W (x, y, d) + 2W tree words, all 131 bits.
 
@@ -548,11 +549,25 @@ begin
       -- of each table is its own copy, so the placer can put it beside the
       -- table's block RAMs (in the routed 64-engine image the fill's batch
       -- id into a leaf table's write address was the worst path, 3.0 ns).
-      w_en <= '0';
+      -- The stage loads every clock and w_en says which clocks write, so
+      -- its 460 flip-flops have no enable net.  A dummy leaf (the input
+      -- stage empty, w_ce from the flush) is whatever that stage last
+      -- held with the valid bit clear and a constant nonzero d, so only
+      -- d is muxed, on the stage's valid bit.
       if w_en = '1' then
         m_la(w_la_a) <= w_la_word;
         m_da(w_da_a) <= w_d;
         m_db(w_db_a) <= w_d;
+      end if;
+      la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
+      j  := std_logic_vector(p1_hw(3 downto 1));
+      w_en      <= w_ce;
+      w_la_a    <= la;  w_da_a <= la;  w_db_a <= la;
+      w_la_word <= p1_x & p1_y & j & p1_tag & p1_valid;
+      if p1_valid = '1' then
+        w_d <= p1_x xor gf_sigma_j(p1_x, j);
+      else
+        w_d <= DUMMY_D;
       end if;
       if fb_valid = '0' then
         if not fl_empty then
@@ -564,17 +579,6 @@ begin
           flushing <= '0';
         end if;
       elsif w_ce = '1' then
-        la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
-        w_en   <= '1';
-        w_la_a <= la;  w_da_a <= la;  w_db_a <= la;
-        if p1_take = '1' then
-          j         := std_logic_vector(p1_hw(3 downto 1));
-          w_la_word <= p1_x & p1_y & j & p1_tag & '1';
-          w_d       <= p1_x xor gf_sigma_j(p1_x, j);
-        else
-          w_la_word <= DUMMY_X & GF_ZERO & "000" & tag_t'(others => '0') & '0';
-          w_d       <= DUMMY_D;
-        end if;
         idle_cnt <= (others => '0');
         if fill_cnt = W - 1 then
           -- batch complete: first forward level is the parents of the leaves
