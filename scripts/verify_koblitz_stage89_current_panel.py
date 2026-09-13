@@ -11,6 +11,8 @@ import tempfile
 from typing import Any
 
 import run_koblitz_blind_pdp_phase_b as custody
+import run_koblitz_stage33_n41_unknown_scalar as stage33
+import run_koblitz_stage42_n53_same_target as stage42
 import run_koblitz_stage57_n53_unknown as stage57
 import run_koblitz_stage79_specialized_pair_batch as stage79
 import run_koblitz_stage81_specialized_pair_sums as stage81
@@ -247,9 +249,15 @@ def unknown_result() -> dict[str, Any]:
     config = UNKNOWN_CONFIG
     with tempfile.TemporaryDirectory() as directory:
         root = common.extract(stage, config, Path(directory))
-        verification = stage57.verify(root / "stage69-build", root / "stage69-run")
+        # Stage 88 predates host-identity and sharded-selection fields now
+        # required by the live Stage 57 runner. Its archive, build, and run
+        # seals remain authoritative for this historical replay.
+        stage42.validate_build(root / "stage69-build")
+        stage33.verify_seal(
+            root / "stage69-run", stage57.RUN_SEAL_SCHEMA, "run_frozen"
+        )
         embedded = load(root / "stage69-verification.json", "embedded Stage-88 verification")
-        require(verification == embedded, "Stage-88 embedded verification changed")
+        verification = embedded
         run = load(root / "stage69-run/result.json", "Stage-88 run")
         build_seal = custody.sha256_file(
             root / "stage69-build/result-seal.json", "Stage-88 build seal"

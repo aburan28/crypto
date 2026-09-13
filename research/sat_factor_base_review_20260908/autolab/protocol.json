@@ -121,7 +121,7 @@
       "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target"
     },
     "koblitz.vs_rho.n53_probe": {
-      "label": "Current boundary: selected n=53 five-run median crossover attempt from retained 1.019x loss",
+      "label": "Current boundary: selected n=53 online wall crossover with full-cost, core, and memory losses",
       "regime": "koblitz",
       "stage": "vs_rho",
       "priority": 1,
@@ -145,12 +145,13 @@
       },
       "resource_cap_bytes": 17179869184,
       "env": {
+        "KIC_ENABLE_SHARDED_SUPPORT_TABLE": "1",
         "KIC_INCREMENTAL_RANK_CROSSCHECK": "0",
-        "KIC_RANK_SURPLUS": "0",
-        "KIC_RANK_AWARE_PAIR_SCAN": "1",
-        "KIC_RANK_TARGET_DEFICIENCY": "1",
         "KIC_PARALLEL_SUPPORT_EXPANSION": "1",
         "KIC_PIPELINED_SUPPORT_EXPANSION": "1",
+        "KIC_RANK_AWARE_PAIR_SCAN": "1",
+        "KIC_RANK_SURPLUS": "0",
+        "KIC_RANK_TARGET_DEFICIENCY": "1",
         "RAYON_NUM_THREADS": "4"
       },
       "acceptance_gates": [
@@ -163,27 +164,48 @@
         "not a ledger promotion until independent validation"
       ],
       "ledger_next_target": "regimes.koblitz.records.vs_rho.next_target",
-      "note": "Stage 89 archives five selected-stack four-thread ratios: 0.946483, 1.019315, 1.094974, 0.932363, and 1.018776 (two wins, median loss). Stage 92 archives selected CPU-0 at 1.354303x rho wall and 1.340180x rho core. Preserve the stable selected default and exact 95-relation transcript; do not enable the variable support-expansion or initial-pair-sum specializations.",
+      "note": "Stage 108 archives a direct-routed four-shard selected panel with five EPYC 9V74 wins and 0.839190 median wall ratio, plus a scalar-blind EPYC 7763 run at 0.987489x rho. The known-target panel uses rank-target deficiency 1; the separate unknown-scalar launcher uses 3. Retained support is 738,197,504 bytes, median direct core is 2.261565x rho, fresh build plus direct is 17.636692x, and selected single-core evidence predates sharding.",
       "fixed_process_repetitions_required": 5,
       "selected_default": {
-        "split_bloom_indices": true,
-        "insert_hash_reuse": true,
-        "dual_sign_denominator_sharing": true,
-        "compact_query_scratch": true,
         "combined_n53_dispatch": true,
+        "compact_query_scratch": true,
+        "direct_low_high_x_filter": true,
+        "dual_sign_denominator_sharing": true,
+        "itoh_n53_inverse": true,
+        "parallel_support_insertion": true,
+        "prefiltered_exact_lookup": true,
         "specialized_n53_pair_batch": true,
+        "specialized_n53_pair_sums": false,
         "specialized_n53_support_expansion": false,
-        "specialized_n53_pair_sums": false
+        "support_table_shard_routing": "xor_low_and_high_x_windows",
+        "support_table_shards": 4
       },
       "current_single_core": {
-        "source_commit": "8190f5bee6fdcee2f989125083eb2999229f4142",
-        "direct_wall_seconds": 9.405715520000001,
+        "affinity_cpu": 0,
         "direct_core_seconds": 6.868316,
-        "rho_wall_seconds": 6.945058432000025,
-        "direct_over_rho_wall_ratio": 1.3543032952267562,
         "direct_over_rho_core_ratio": 1.3401796163922106,
+        "direct_over_rho_wall_ratio": 1.3543032952267562,
+        "direct_wall_seconds": 9.405715520000001,
+        "note": "Pre-sharding receipt; refresh required for the selected four-shard route.",
         "peak_rss_bytes": 863047680,
-        "affinity_cpu": 0
+        "rho_wall_seconds": 6.945058432000025,
+        "selected_stack_current": false,
+        "source_commit": "8190f5bee6fdcee2f989125083eb2999229f4142"
+      },
+      "current_selected_panel": {
+        "direct_over_rho_core_median": 2.2615649859983002,
+        "direct_wins": 5,
+        "fresh_build_ratio": 17.636691639458064,
+        "host": "AMD EPYC 9V74 80-Core Processor",
+        "median_ratio": 0.8391902594529497,
+        "ratios": [
+          0.8470950666326896,
+          0.8589372990417655,
+          0.8391902594529497,
+          0.8290808707265989,
+          0.8389296438435545
+        ],
+        "source_commit": "d961ef55998f1485440697ead1369381a4f9609d"
       }
     }
   },
