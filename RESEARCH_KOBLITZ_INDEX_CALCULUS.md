@@ -1829,3 +1829,123 @@ survives both versions:
 hierarchy sets; precompute grows linearly in `r`.** This is a method for
 many logarithms on one curve, and never for one — 17 targets to pay for
 itself at 48 bits, and hundreds to thousands beyond that.
+
+## The table was 2n times larger than the group allows — 2026-09-13
+
+Everything above treats the pair table's size as fixed by the base:
+`|F|(|F|+1)/2` sums, and the only question was how few bytes a sum could
+be stored in. Sixteen went to four and a half, and the reach law that
+came out of it — `r_max ∝ M²/(C + β log M)²` — took the count of pairs
+as given.
+
+It is not given. The factor base is closed under the Frobenius `π` and
+under negation; that is what makes the relation columns signed orbits
+rather than points, and it has been true of every base this pipeline has
+built. But if `F` is closed under both, so is the set of its pair sums:
+
+```
+π(P_i + P_j) = π(P_i) + π(P_j)        −(P_i + P_j) = (−P_i) + (−P_j)
+```
+
+both again sums of two base points, because `π` is an endomorphism and
+`F` contains the images. So `S = {P_i + P_j}` is a union of orbits of
+`G = ⟨π, −1⟩`, a group of order `2n`, and a table that answers *is `rest`
+in `S`* needs one key per orbit and not one per pair. The table had been
+storing every orbit `2n` times over.
+
+### What a canonical key costs
+
+The orbit's key has to be computable from a point alone, and the obvious
+one is the least element. It is cheaper than it looks. Negation does not
+move the abscissa at all — `−(x, y) = (x, x + y)` — so the sign half of
+the fold is free, and `π` acts on the abscissa as a squaring. The key is
+
+```
+canon(P) = 1 + min_k x^{2^k}
+```
+
+`n − 1` squarings and a running minimum, no memory touched. That the
+packed point already encoded the sign in its low bit is why the negation
+costs nothing: the two halves of a `±` pair differ in exactly that bit
+and in nothing else.
+
+### Building it without canonicalising a quadratic number of pairs
+
+Folding is worthless if the build has to form all `|F|²/2` sums to find
+out which are canonical. It does not. Walk `i` over one representative of
+each signed orbit and `j` over the whole base:
+
+> Given any pair `(P, Q)`, let `g ∈ G` carry `P` to the representative
+> `R` of its own signed orbit. Then `(R, gQ)` lies in the same `G`-orbit
+> of pairs and *is* enumerated.
+
+So the enumeration is onto the orbits whatever the stabilisers are —
+there are no false negatives — and it forms `|F|²/2n` sums rather than
+`|F|²/2`. What it does not remove is the unordered `i ≤ j` symmetry, so
+each orbit is stored about twice and the fold is worth `n`, not `2n`.
+Measured at `n = 61`: 61.0 times fewer stored pairs, against the 61 the
+argument predicts.
+
+### What it buys, and what it costs
+
+At a 4 GiB budget and `n = 61`:
+
+| representation | bytes a pair | base it affords | `2r/|F|²` probes |
+|---|---|---|---|
+| full, with summands | 16 | 23169 | 6.07e5 |
+| compact | ~4.5 | 42302 | 1.82e5 |
+| folded | ~4.5, `n` times fewer | **330376** | **2.99e3** |
+
+A base 7.81 times wider, and 61 times fewer probes a target. The
+temptation is to call that a 61-fold speedup. It is not, and the run says
+so plainly. Two things eat it:
+
+- **A probe got 9.8 times dearer** — 115 ns to 1125 ns. Nearly all of
+  that is the canonicalisation: `n − 1` squarings is a dependency chain,
+  and a squaring here is a bit-spread plus eight reduction-table
+  lookups, about 830 ns for the chain.
+- **Recovery grew with the base.** The compact table does not store
+  summands; it recovers them by an `|F|`-long scan on a hit. That was
+  0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
+  pays it once per witness it *finds*, not once per witness it keeps.
+
+Measured end to end at equal memory — seconds per decomposed target,
+which is the only figure immune to the fact that a scan stops at its
+first witness:
+
+**0.469 s → 0.229 s, a factor of 2.0.**
+
+Real, and a twentieth of what the probe count alone suggested.
+
+### Two things the measurement had to be rescued from
+
+The first attempt compared a folded table against a compact one small
+enough to sit in cache, which flattered the baseline; the second divided
+elapsed time by an assumed probe count, which is wrong in the one
+direction that mattered — the folded base decomposes 99.2% of targets
+against the compact base's 0.4%, so its scans stop early and never spend
+the probes they were charged for. Seconds per decomposition is the
+honest denominator, and it is the one the table above uses.
+
+The early stopping also found a real inefficiency. The scan prepared its
+whole row — `|F|` subtractions, and on a folded table `|F|`
+canonicalisations — before probing any of it, which is linear work paid
+in full however early the stop comes. On a base wide enough to decompose
+most targets that setup *is* the cost. Both now run a block at a time:
+long enough to amortise one field inversion and keep the squaring chains
+interleaved, short enough that an early exit throws away at most a block.
+
+### What is binding now
+
+The canonicalisation, and it is not obviously stuck there. `π` is a
+squaring only in a polynomial basis. In a *normal* basis it is a one-bit
+rotation, so the same minimum is `n` rotations — tens of nanoseconds
+rather than hundreds — and the basis change is one linear map, eight
+table lookups, done once per probe. That would put a folded probe below
+an unfolded one and leave most of the 61 intact.
+
+That is an opportunity, not a result: it has not been built or measured,
+and this note has been wrong before about what algebra alone predicts
+about cost. The `M²/(log M)²` reach law is unchanged in shape by any of
+this — what the fold moves is the constant, by putting `n` times more
+base behind the same byte.
