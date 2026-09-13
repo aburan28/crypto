@@ -1,0 +1,66 @@
+name: Koblitz Stage 121 n53 occupied-only dense scan
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage121_dense_scan.py"
+      - ".github/workflows/koblitz-stage121-dense-scan.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate occupied-only dense scan controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage121_dense_scan.py
+          python3 scripts/run_koblitz_stage121_dense_scan.py self-test
+          cargo test --release --example koblitz_rank_fixture
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-dense-scan:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage121_dense_scan.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage121-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Compare generic and occupied-only dense scans
+        run: |
+          python3 scripts/run_koblitz_stage121_dense_scan.py run \
+            --build "$RUNNER_TEMP/stage121-build" \
+            --output "$RUNNER_TEMP/stage121-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage121_dense_scan.py verify \
+            --build "$RUNNER_TEMP/stage121-build" \
+            --output "$RUNNER_TEMP/stage121-run" \
+            > "$RUNNER_TEMP/stage121-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage121-dense-scan-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage121-build
+            ${{ runner.temp }}/stage121-run
+            ${{ runner.temp }}/stage121-verification.json
