@@ -93,3 +93,22 @@ GPU identity, compiler output, registers/spills and raw outputs.
 The local environment used for this change has no CUDA toolkit, GPU or Modal
 runner. Preprocessing checks are not CUDA compilation; host fallback checks
 are not execution of the new instruction. Device performance remains unknown.
+
+## GPU-free symbolic validation
+
+`python3 codegen/prove_native_square.py` checks exact Boolean-polynomial
+identity for every one of the 2^32 inputs, without enumerating them. It reads
+`spread32p` from the actual header, accepts only the specified native branch
+(including the zero extension, identical operands, low-half selection and
+zero addend), and interprets the fallback's actual shifts and masks.
+
+The checker represents each output bit in algebraic normal form. It models
+OR as `a XOR b XOR (a AND b)` rather than silently treating OR as XOR. It
+independently expands the full carryless product, cancels cross terms, and
+checks both equality of all 64 retained output bits and zero in every
+discarded high-half bit. The result has 32 nonzero output bits.
+
+`testclmad.py` runs this check and rejects a corrupted mask, high-half
+selection and a changed native operand. All seven tests pass locally. These
+are exact source-semantic checks under the documented instruction semantics,
+not CUDA compilation or device execution. The existing GPU gate still applies.

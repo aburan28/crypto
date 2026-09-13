@@ -68,5 +68,26 @@ class ClmadGuardTests(unittest.TestCase):
             self.assertIn('ECC_PACKED_CLMAD_SQUARE', result.stderr)
 
 
+class NativeSquareProofTests(unittest.TestCase):
+    def test_exact_source_equivalence(self):
+        from prove_native_square import prove, HEADER
+        result = prove(HEADER.read_text())
+        self.assertTrue(result['equivalent'])
+        self.assertEqual(result['covered_inputs'], 2**32)
+        self.assertEqual(result['nonzero_output_bits'], 32)
+
+    def test_wrong_mask_and_changed_native_operands_are_detected(self):
+        from prove_native_square import prove, HEADER
+        source = HEADER.read_text()
+        bad_mask = source.replace('0x5555555555555555ull;', '0x5555555555555554ull;')
+        with self.assertRaisesRegex(AssertionError, 'inequivalent output bits'):
+            prove(bad_mask)
+        for before, after in [('clmad.lo.u64 %0, %1, %1, 0;', 'clmad.hi.u64 %0, %1, %1, 0;'),
+                              ('const uint64_t a = uint64_t(x);', 'const uint64_t a = uint64_t(x >> 1);')]:
+            with self.assertRaisesRegex(ValueError, 'native branch'):
+                prove(source.replace(before, after))
+
+
 if __name__ == '__main__':
     unittest.main()
+
