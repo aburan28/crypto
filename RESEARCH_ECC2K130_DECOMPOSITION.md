@@ -31,7 +31,9 @@ how this route gets over-sold.  Concretely:
 
 - **Existence** is not the obstacle.  The yield law
   `E[#decompositions] = C(|F|, m)/#E` is confirmed on twelve toy cells to
-  within a factor `1.38`, and at `n = 131` it says a typical target has a
+  within a factor `1.09` (one small-base outlier at `0.57` aside), and
+  exhaustively over every target of the odd subgroup in E5 of the run note; at
+  `n = 131` it says a typical target has a
   decomposition as soon as `m·l ≥ 131 + log₂ m!` — `l = 45` at `m = 3` (§2).
 - **Admissibility** is not the obstacle either.  The cofactor class that makes
   odd `m` decompose *nothing* on `K_1/F_2^7` does not bite here: measured on the
@@ -154,23 +156,35 @@ target:
 
 | `n` | `m` | `l` | `\|F\|` | rate measured | rate predicted | ratio |
 |---:|---:|---:|---:|---:|---:|---:|
-| 11 | 2 | 6 | 71 | 0.664 | 0.691 | 0.96 |
-| 11 | 3 | 4 | 21 | 0.562 | 0.467 | 1.20 |
-| 11 | 4 | 4 | 21 | 1.000 | 0.941 | 1.06 |
-| 13 | 2 | 7 | 129 | 0.712 | 0.643 | 1.11 |
-| 13 | 3 | 5 | 33 | 0.521 | 0.494 | 1.06 |
-| 13 | 4 | 4 | 19 | 0.530 | 0.384 | 1.38 |
+| 11 | 2 | 6 | 71 | 0.650 | 0.691 | 0.94 |
+| 11 | 3 | 4 | 21 | 0.470 | 0.467 | 1.01 |
+| 11 | 4 | 4 | 21 | 0.914 | 0.941 | 0.97 |
+| 13 | 2 | 7 | 129 | 0.704 | 0.643 | 1.09 |
+| 13 | 3 | 5 | 33 | 0.477 | 0.494 | 0.96 |
+| 13 | 4 | 4 | 19 | 0.311 | 0.384 | 0.81 |
 | 17 | 2 | 9 | 523 | 0.617 | 0.647 | 0.95 |
-| 17 | 3 | 6 | 65 | 0.336 | 0.284 | 1.19 |
-| 17 | 4 | 5 | 35 | 0.363 | 0.330 | 1.10 |
+| 17 | 3 | 6 | 65 | 0.309 | 0.284 | 1.09 |
+| 17 | 4 | 5 | 35 | 0.275 | 0.330 | 0.84 |
 | 19 | 2 | 10 | 1 005 | 0.643 | 0.619 | 1.04 |
-| 19 | 3 | 7 | 139 | 0.602 | 0.567 | 1.06 |
-| 19 | 4 | 5 | 29 | 0.049 | 0.044 | 1.10 |
+| 19 | 3 | 7 | 139 | 0.578 | 0.567 | 1.02 |
+| 19 | 4 | 5 | 29 | 0.025 | 0.044 | 0.57 |
 
-Measured over predicted stays in `[0.95, 1.38]` across rates spanning
-`0.049` to `1.000`.  The bias is upward and largest where the base is
-smallest (`|F| = 19`), which is where the Poisson approximation is worst; the
-law is right to about twenty per cent and that is all §5 needs of it.
+Measured over predicted stays in `[0.57, 1.09]` across rates spanning
+`0.025` to `0.914`.  The one outlier is the smallest base in the table
+(`|F| = 29` at `n = 19`), where the Poisson approximation is worst and 13 hits
+out of 512 targets is the whole measurement; drop that cell and the range is
+`[0.81, 1.09]`.  The law is right to about twenty per cent and that is all §5
+needs of it.
+
+*(These numbers replace a wider and wrongly-centred set — `[0.95, 1.38]`, eleven
+of twelve above `1.0`.  The measurement had been accepting decompositions with a
+**repeated summand**, which `C(|F|, m)` does not count, so it over-reported the
+hit rate.  The fix is due to a Cursor agent working on this branch; the same
+correction, independently, is what `scripts/ecc2k130_decomposition_experiments.py`
+enforces by canonicalising each subset.  E5 of
+[`RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md`](RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md)
+then counts the same quantity exhaustively and lands the mean within 5% of the
+law at every cell.)*
 
 Carried to the challenge parameters, `λ ≥ 1` needs `m·l ≥ 131 + log₂ m!`:
 
