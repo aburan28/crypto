@@ -15,10 +15,11 @@ same one `hdl/ecc/` and `hdl/sha1/` target, but there are no vendor
 primitives: plain `ieee.std_logic_1164` and `numeric_std`, simulates under
 GHDL, reads into any synthesis flow. Every number below is labelled
 measured (in simulation or on the device), derived, or estimated. **The
-64-engine image runs on an `f2.6xlarge` at 4.01 G steps/s** and the
-48-engine one at 3.01 G (`aws/README.md`, "What came back"): 333 MHz /
-5.31 clocks per step per engine, with the distinguished points sampled
-from both checked against the client's reference walk.
+80-engine image runs on an `f2.6xlarge` at 5.02 G steps/s**, the
+64-engine one at 4.01 G and the 48-engine one at 3.01 G (`aws/README.md`,
+"What came back"): 333 MHz / 5.31 clocks per step per engine, with the
+distinguished points sampled from each checked against the client's
+reference walk.
 
 ## Files
 
@@ -479,10 +480,11 @@ logic cells) and **2 016 RAMB36**, so an engine is 0.66% of the LUTs and
 0.84% of the block RAM (17 tiles: 16 RAMB36 and two RAMB18 sharing one):
 **48 engines is a third of the device** (the routed 48-engine image of
 the 21-tile revision used 31% of the LUTs and 50% of the RAM), 64 is 42%
-of the LUTs and 54% of the RAM, 80 is 53% and 67%, 96 is 63% and 81%. At
-5.29 clocks per step and 333 MHz that is 63 M steps/s per engine and
-**3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80**; at the
-shell's 250 MHz, 2.3 G, 3.0 G and 3.8 G.
+of the LUTs and 54% of the RAM, 80 is 53% and 67% (the routed 80-engine
+image: 686 854 LUTs, 1 360 tiles), 96 is 63% and 81%. At 5.31 clocks per
+step and 333 MHz that is 63 M steps/s per engine and **3.0 G steps/s at
+48 engines, 4.0 G at 64, 5.0 G at 80 — all three measured on the
+device**; at the shell's 250 MHz they would be 2.3, 3.0 and 3.8 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
@@ -517,9 +519,9 @@ Two things the first synthesis taught, both fixed:
   per clock; doubling that means two multipliers behind one ready queue
   and a two-port tree. The same throughput comes for free from
   instantiating two step units, which is the plan.
-- **A campaign on F2 instances.** The 48- and 64-engine images run on an
-  `f2.6xlarge` at the predicted rates (3.01 and 4.01 G steps/s,
-  `aws/README.md`, "What came back"); what has not happened yet is a
+- **A campaign on F2 instances.** The 48-, 64- and 80-engine images run
+  on an `f2.6xlarge` at the predicted rates (3.01, 4.01 and 5.02 G
+  steps/s, `aws/README.md`, "What came back"); what has not happened yet is a
   fleet of workers feeding the shared corpus for hours, which is `f2.sh
   up` once the account has the worker instance profile.
 - **Reading a walk back.** The engine's walk state is write-only from the
