@@ -304,3 +304,14 @@ Two-bit conditioning stalled in its first branch on every larger case.
 This supersedes the priority above: next test hybrid root retention and a
 fair conditioning schedule, while preparing a symmetrized-S4 cost comparison.
 The historical experiments remain unchanged; no attack improvement is claimed.
+
+## Hybrid support and fair scheduling (solver_03)
+
+The [follow-up proof and results](solver_03/README.md) add 96 matched trials
+and 7,936 hybrid vector checks. Hybrid resolved 2/8 nine-bit slots and 0/8
+eleven-bit slots; norm remained at 8/8 and 6/8. Fair scheduling reached
+all four branches but resolved none of the larger cases. Both hypotheses
+failed their completion-improvement criterion against the relevant control.
+A new proof reduces quadratic support to linear image-space membership
+when its linear coefficient is fixed; the resulting branching solver is
+a proposed next experiment, not a measured result.

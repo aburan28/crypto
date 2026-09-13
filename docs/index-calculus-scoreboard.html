@@ -738,6 +738,23 @@
     are still missing, so the 20% improvement goal remains unestablished.</p></div>
   </div>
 
+  <div class="panel" id="nagao-solver-03">
+    <div class="panel-head"><h2>Hybrid support and fair scheduling: bounded negative results</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_03/summary.json</code>.
+    96 trials with no validation errors; 7,936 hybrid and 992 cubic vector checks passed.
+    Hybrid resolves two nine-bit instance slots but fails to outperform norm.
+    Fair scheduling reached all four branches on every larger case with no completions.
+    Both hypotheses fail their panel-specific improvement criterion.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts; three-second search budget.
+    U: uniform; D: known decomposable. Strata may overlap. Timeouts are unknown.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th><th>n9 d4 D</th>
+    <th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-fair</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>hybrid</td><td>4/4</td><td>4/4</td><td>1/4</td><td>1/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Fixed support gives no counting-yield gain.
+    Strongest Semaev comparison and calibrated all-phase costs remain missing.
+    The new coefficient-conditioned linear-membership proof in the research note
+    is a candidate for a future solver experiment, not a measured improvement.</p></div>
+  </div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">
