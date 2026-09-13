@@ -291,8 +291,10 @@ address, an input register into a `d` table's data pins, `ra_valid` into
 the multiplier operand register's enables, the FIFO's write pointer into
 its write enable — each around 2.97 ns, no single net to remove. Its
 manifest was written by the checked flow (`pci_subsystem_id=0xEC13`), so
-AFI `agfi-03f41bca67d09198c` loads as submitted. At 5.31 clocks per step:
-5.0 G steps/s. An 80-engine build of the revision with the three path
+AFI **`agfi-03f41bca67d09198c`** loaded as submitted: 80 × 512 walks at
+333.3 MHz, 12.2 s to seed, **5 015.8 M steps/s** held (0 dropped; 32
+points verified in a second run), 5.32 clocks per step. It is the
+promoted image. An 80-engine build of the revision with the three path
 fixes above (`20260912-224741-n80-c333`) and a 96-engine one
 (`20260912-230411-n96-c333`, 81% of the block RAM) were running when
 this was written.
