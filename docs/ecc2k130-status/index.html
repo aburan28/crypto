@@ -55,17 +55,60 @@
     <button type="button" id="refresh">Refresh now</button>
   </div>
 
+  <section class="ops" aria-labelledby="h-ops">
+    <h2 id="h-ops">Group operations walked</h2>
+    <p class="ops-value mono" id="ops-value">&mdash;</p>
+    <p class="ops-sub" id="ops-sub">&nbsp;</p>
+
+    <div class="meter">
+      <div class="meter-head">
+        <span id="ops-bar-label">Share of the expected <span class="mono">2^60.9</span></span>
+        <span class="mono" id="ops-percent">&mdash;</span>
+      </div>
+      <div class="bar">
+        <div class="bar-fill" id="ops-fill"
+             role="progressbar"
+             aria-labelledby="ops-bar-label"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+             aria-valuetext="no operations derived yet"></div>
+      </div>
+      <p class="meter-foot" id="ops-bar-foot">&nbsp;</p>
+    </div>
+
+    <div class="meter">
+      <div class="meter-head">
+        <span id="ops-bits-label">Exponent reached, <strong>log scale</strong> &mdash; each bit is a
+          doubling of the work, so this bar is not progress</span>
+        <span class="mono" id="ops-bits">&mdash;</span>
+      </div>
+      <div class="bar log">
+        <div class="bar-fill" id="ops-bits-fill"
+             role="progressbar"
+             aria-labelledby="ops-bits-label"
+             aria-valuemin="0" aria-valuemax="60.9" aria-valuenow="0"
+             aria-valuetext="no operations derived yet"></div>
+      </div>
+      <p class="meter-foot">Full width is <span class="mono">2^60.9</span>, the same
+        boundary the bar above measures against.</p>
+    </div>
+    <p class="note" id="iterations-note">
+      Derived, not reported: a walk on this campaign reports one distinguished
+      point per <span class="mono">2^25.27</span> iterations at
+      <span class="mono">HW(x) &le; 34</span>, so the operation total behind
+      the point count is that count times the same factor. A collision is
+      expected after <span class="mono">2^60.9</span> operations (Bailey et
+      al., <em>Breaking ECC2K-130</em>). No worker publishes an operation
+      counter, and the exponent belongs to one campaign's distinguishing rule,
+      so the figure is only shown for <span class="mono">ecc2k-130</span>.
+    </p>
+  </section>
+
   <h2 class="sr-only">Headline counts</h2>
   <div class="row">
     <div class="card">
       <div class="label">Distinguished points</div>
       <div class="value mono" id="dps">&mdash;</div>
       <div class="foot" id="dps-foot">&nbsp;</div>
-    </div>
-    <div class="card">
-      <div class="label">Iterations</div>
-      <div class="value mono" id="iterations">&mdash;</div>
-      <div class="foot" id="iterations-foot">&nbsp;</div>
     </div>
     <div class="card">
       <div class="label">Last hour</div>
@@ -88,18 +131,6 @@
       <div class="foot" id="collisions-foot">&nbsp;</div>
     </div>
   </div>
-
-  <p class="note" id="iterations-note">
-    Iterations is derived, not reported: a walk on this campaign reports one
-    distinguished point per <span class="mono">2^25.27</span> iterations at
-    <span class="mono">HW(x) &le; 34</span>, so the walk total behind the
-    point count is that count times the same factor. The share beneath it is
-    measured against <span class="mono">2^60.9</span>, the expected cost of a
-    collision (Bailey et al., <em>Breaking ECC2K-130</em>). No worker
-    publishes an iteration counter, and the exponent belongs to one
-    campaign's distinguishing rule, so the figure is only shown for
-    <span class="mono">ecc2k-130</span>.
-  </p>
 
   <section aria-labelledby="h-rate">
     <h2 id="h-rate">Distinguished points per hour</h2>
@@ -260,6 +291,32 @@
     var dps = Number(status.dps);
     if (!isFinite(dps) || dps <= 0) return null;
     return Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+  }
+
+  // 2^x as a decimal magnitude, for readers who do not think in exponents.
+  // Beyond 2^53 the exact integer is not representable, and it would be a
+  // false precision anyway: the exponent is a rate estimate, so one digit of
+  // mantissa is all it supports.
+  function magnitude(log2value) {
+    var log10 = log2value * Math.LOG10E * Math.LN2;
+    var exponent = Math.floor(log10);
+    var mantissa = Math.pow(10, log10 - exponent);
+    if (mantissa >= 9.95) { mantissa /= 10; exponent += 1; }
+    return mantissa.toFixed(1) + " × 10^" + exponent;
+  }
+
+  // A share this small has no readable fixed-point form, so fall back to a
+  // mantissa and a power of ten rather than printing "0.00%".
+  function percentText(fraction) {
+    var percent = fraction * 100;
+    if (!isFinite(percent) || percent <= 0) return "0%";
+    if (percent >= 1) return percent.toFixed(1) + "%";
+    if (percent >= 0.01) return percent.toFixed(2) + "%";
+    var log10 = Math.log(percent) / Math.LN10;
+    var exponent = Math.floor(log10);
+    var mantissa = Math.pow(10, log10 - exponent);
+    if (mantissa >= 9.95) { mantissa /= 10; exponent += 1; }
+    return mantissa.toFixed(1) + " × 10^" + exponent + "%";
   }
 
   function parseTime(value) {
@@ -638,6 +695,61 @@
     }
   }
 
+  // The operations panel. The first bar is linear in work, so at 2^-21.5 of
+  // the expected total it has no visible width — that is the honest picture
+  // and the foot says so rather than padding the fill to something you can
+  // see. The second bar is the exponent on a log scale: legible, but each
+  // bit is a doubling, so it is labelled as not being progress.
+  function drawOperations(status) {
+    var log2ops = iterationsLog2(status);
+    var fill = el("ops-fill");
+    var bitsFill = el("ops-bits-fill");
+
+    if (log2ops === null) {
+      var why = !status || status.campaign_id !== CAMPAIGN
+        ? "Derived for " + CAMPAIGN + " only."
+        : "No distinguished points yet, so there is nothing to derive it from.";
+      el("ops-value").textContent = "—";
+      el("ops-sub").textContent = why;
+      el("ops-percent").textContent = "—";
+      el("ops-bits").textContent = "—";
+      el("ops-bar-foot").textContent = " ";
+      fill.style.width = "0%";
+      bitsFill.style.width = "0%";
+      fill.setAttribute("aria-valuenow", "0");
+      bitsFill.setAttribute("aria-valuenow", "0");
+      fill.setAttribute("aria-valuetext", why);
+      bitsFill.setAttribute("aria-valuetext", why);
+      return;
+    }
+
+    var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);
+    var percent = Math.min(100, share * 100);
+    var bits = Math.min(100, (log2ops / EXPECTED_ITERATIONS_LOG2) * 100);
+
+    el("ops-value").textContent = "2^" + log2ops.toFixed(1);
+    el("ops-sub").textContent = "≈ " + magnitude(log2ops) + " group operations, from " +
+      num(status.dps) + " distinguished points at 2^" + ITERATIONS_PER_DP_LOG2 + " each";
+    el("ops-percent").textContent = percentText(share);
+    el("ops-bits").textContent = log2ops.toFixed(1) + " of " + EXPECTED_ITERATIONS_LOG2 + " bits";
+
+    fill.style.width = percent + "%";
+    fill.setAttribute("aria-valuenow", percent.toFixed(6));
+    fill.setAttribute("aria-valuetext", percentText(share) + " of the expected 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " operations");
+    bitsFill.style.width = bits + "%";
+    bitsFill.setAttribute("aria-valuenow", log2ops.toFixed(1));
+    bitsFill.setAttribute("aria-valuetext", "2^" + log2ops.toFixed(1) + " of 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " operations, on a log scale");
+
+    // 2^-x of the expected work is thinner than a pixel on any screen the
+    // page is read on; say it in words instead of drawing a lie.
+    el("ops-bar-foot").textContent = share < 0.001
+      ? "2^" + (log2ops - EXPECTED_ITERATIONS_LOG2).toFixed(1) +
+        " of the expected work: the fill is far below one pixel wide, which is the result."
+      : "Linear in work: full width is a collision at the expected cost.";
+  }
+
   function setBanner(state, extra) {
     var banner = el("banner");
     var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
@@ -675,7 +787,7 @@
     } catch (err) {
       setBanner("UNREACHABLE", "Could not read status.json (" + err.message + ").");
       tickFreshness(lastStatus, "status.json unavailable · last try " + utc(new Date(), true));
-      placeholderTables("No data \u2014 the snapshot could not be read.");
+      placeholderTables("No data — the snapshot could not be read.");
       return;
     }
     lastStatus = status;
@@ -700,17 +812,7 @@
       : "");
 
     el("dps").textContent = num(status.dps);
-    var iterations = iterationsLog2(status);
-    el("iterations").textContent = iterations === null ? "—" : "2^" + iterations.toFixed(1);
-    if (iterations === null) {
-      el("iterations-foot").textContent = status.campaign_id === CAMPAIGN
-        ? "no points to derive it from yet"
-        : "derived for " + CAMPAIGN + " only";
-    } else {
-      el("iterations-foot").textContent =
-        "2^" + (iterations - EXPECTED_ITERATIONS_LOG2).toFixed(1) +
-        " of the 2^" + EXPECTED_ITERATIONS_LOG2 + " expected";
-    }
+    drawOperations(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
     el("workers").textContent = num(status.workers);

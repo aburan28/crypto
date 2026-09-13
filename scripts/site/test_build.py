@@ -111,7 +111,7 @@ class BuildTests(unittest.TestCase):
         dashboard = read(os.path.join(self.out, "status", "index.html"))
         landing = read(os.path.join(self.out, "index.html"))
         campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
-        self.assertIn('id="iterations"', dashboard)
+        self.assertIn('id="ops-value"', dashboard)
         for exponent in ("2^25.27", "2^60.9"):
             for name, page in (("dashboard", dashboard), ("landing", landing), ("campaign", campaign)):
                 self.assertIn(exponent, page, "%s is missing %s" % (name, exponent))
@@ -119,6 +119,24 @@ class BuildTests(unittest.TestCase):
             self.assertIn("ITERATIONS_PER_DP_LOG2 = 25.27;", page, name)
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
+
+    def test_dashboard_progress_bar_is_linear_in_work(self):
+        # The share of 2^60.9 walked so far is around 2^-21, so a bar drawn
+        # from the ratio of the EXPONENTS would read about two thirds full
+        # while the campaign has done a millionth of a millionth of the work.
+        # The visible progress bar must therefore be filled from the ratio of
+        # the work itself, and the log-scale bar beside it must say in the
+        # page that it is not progress. Both are easy to "fix" into a lie by
+        # someone making the bar look better, so pin them here.
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);", page)
+        self.assertIn("var percent = Math.min(100, share * 100);", page)
+        self.assertIn('fill.style.width = percent + "%";', page)
+        self.assertIn("this bar is not progress", page)
+        # A minimum width on the fill would draw a share that is not there.
+        match = re.search(r"\.bar-fill \{(.*?)\}", read(os.path.join(self.out, "status", "style.css")), re.S)
+        self.assertIsNotNone(match, "no .bar-fill rule in the dashboard stylesheet")
+        self.assertNotIn("min-width", match.group(1))
 
     def test_internal_links_resolve(self):
         missing = []
