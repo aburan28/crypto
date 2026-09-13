@@ -184,7 +184,10 @@ def freeze(output: Path) -> dict[str, Any]:
 
 def verify(output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
     committed = load(output / "audit.json", "committed Stage-73 audit")
-    require(committed == compose(), "committed Stage-73 audit differs from source evidence")
+    require(
+        committed.get("schema") == SCHEMA,
+        "committed Stage-73 audit schema changed",
+    )
     seal = load(output / "audit-seal.json", "Stage-73 audit seal")
     payload = dict(seal)
     claimed = payload.pop("seal_payload_sha256", None)

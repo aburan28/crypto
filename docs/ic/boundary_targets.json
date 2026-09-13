@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Close the retained n=53 fused whole-process gap from 1.183x to <1 while preserving full build, single-core, unknown-scalar, and rho charges"
+      "beat": "Move the selected n=53 five-run median from 1.0188x to <0.95 while preserving full build, refreshed single-core, unknown-scalar, and rho charges"
     },
     {
       "rank": 2,
@@ -359,7 +359,7 @@
         "factor_base": {
           "status": "record",
           "current": {
-            "summary": "Balanced algebraic point-defined n=53 base with packed support and fused arithmetic retained below 1 GiB table allocation",
+            "summary": "Selected algebraic point-defined n=53 base with stable packed support and specialized exact query stack",
             "metrics": {
               "n": 53,
               "eta": {
@@ -370,18 +370,23 @@
               "factor_base_points": 9964,
               "construction_method": "coordinate-defined small-cofactor projections closed under signed Frobenius orbits",
               "materialized": true,
-              "construction_wall_ms": 16.699279,
-              "support_setup_wall_ms": 2446.694071,
+              "construction_wall_ms": 5.029303,
+              "support_setup_wall_ms": 2245.889799,
+              "support_index_entries": 24805379,
               "retained_bytes": 738197504,
               "rank_target_index_bytes": 2111100,
-              "measured_peak_rss_bytes": 1051987968,
+              "measured_peak_rss_bytes": 1053990912,
               "field_x_values_scanned": 192,
               "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
               "selection_uses_scalar_labels": false,
               "target_subgroup_enumerated": false,
+              "support_x_prefilter_hash_strategy": "single_mix_split_29_bit_indices",
+              "support_x_prefilter_insert_hash_reuse": true,
+              "specialized_n53_support_expansion": false,
+              "specialized_n53_pair_sums": false,
               "field_product_pipeline": "x86_64_pclmul_n53_fused_reduce"
             },
-            "verdict": "N53_ALGEBRAIC_BASE_PACKED_BELOW_1GIB_TABLE"
+            "verdict": "N53_SELECTED_ALGEBRAIC_BASE_PACKED_BELOW_1GIB_TABLE"
           },
           "next_target": {
             "summary": "Reduce the n=53 support table below 512 MiB while preserving the exact 95-relation solution and same-target wall",
@@ -395,7 +400,8 @@
           "evidence": [
             "research/sat_factor_base_review_20260908/",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-68-n53-fused-result-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-68-n53-fused-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/verification.json"
           ],
           "history": [
             {
@@ -433,6 +439,31 @@
                 "target_subgroup_enumerated": false
               },
               "verdict": "N53_BALANCED_POINT_DEFINED_BASE_MEASURED"
+            },
+            {
+              "summary": "Balanced algebraic point-defined n=53 base with packed support and fused arithmetic retained below 1 GiB table allocation",
+              "metrics": {
+                "n": 53,
+                "eta": {
+                  "numerator": 1,
+                  "denominator": 128
+                },
+                "orbit_columns": 94,
+                "factor_base_points": 9964,
+                "construction_method": "coordinate-defined small-cofactor projections closed under signed Frobenius orbits",
+                "materialized": true,
+                "construction_wall_ms": 16.699279,
+                "support_setup_wall_ms": 2446.694071,
+                "retained_bytes": 738197504,
+                "rank_target_index_bytes": 2111100,
+                "measured_peak_rss_bytes": 1051987968,
+                "field_x_values_scanned": 192,
+                "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+                "selection_uses_scalar_labels": false,
+                "target_subgroup_enumerated": false,
+                "field_product_pipeline": "x86_64_pclmul_n53_fused_reduce"
+              },
+              "verdict": "N53_ALGEBRAIC_BASE_PACKED_BELOW_1GIB_TABLE"
             }
           ]
         },
@@ -540,7 +571,7 @@
         "rank": {
           "status": "record",
           "current": {
-            "summary": "Rank-aware n=53 collector reaches augmented rank 95 with 95 relations and zero surplus; relation-matrix LA retained separately from GB FFD",
+            "summary": "Selected rank-aware n=53 collector reaches augmented rank 95 with 95 relations and zero surplus using the specialized exact pair-query batch",
             "metrics": {
               "n": 53,
               "K": 94,
@@ -554,10 +585,12 @@
               "terminal_rank": 95,
               "sparse_or_dense": "incremental dense echelon with final full-column-rank solve",
               "rank_accumulation": "ordinary until final deficiency, then public orbit-column targeted scan",
-              "la_wall_ms": 0.97036,
-              "solution_validation_ms": 232.627444,
-              "reference_validation_ms": 469.781329,
+              "la_wall_ms": 0.541737,
+              "solution_validation_ms": 227.144222,
+              "reference_validation_ms": 470.378276,
               "rank_target_index_bytes": 2111100,
+              "support_queries": 48531878,
+              "query_specialized_n53_pair_batch": true,
               "note": "Relation-matrix rank is not FFD or degree of regularity."
             }
           },
@@ -574,7 +607,8 @@
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/",
             "research/sat_factor_base_review_20260908/autolab_n41_feasibility/",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-68-n53-fused-result-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-68-n53-fused-result-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/verification.json"
           ],
           "history": [
             {
@@ -608,13 +642,35 @@
                 "reference_validation_ms": 954.934171,
                 "note": "Relation-matrix rank is not FFD or degree of regularity."
               }
+            },
+            {
+              "summary": "Rank-aware n=53 collector reaches augmented rank 95 with 95 relations and zero surplus; relation-matrix LA retained separately from GB FFD",
+              "metrics": {
+                "n": 53,
+                "K": 94,
+                "relations_collected": 95,
+                "relations_needed": 95,
+                "surplus": 0,
+                "matrix_dims": {
+                  "rows": 95,
+                  "cols": 95
+                },
+                "terminal_rank": 95,
+                "sparse_or_dense": "incremental dense echelon with final full-column-rank solve",
+                "rank_accumulation": "ordinary until final deficiency, then public orbit-column targeted scan",
+                "la_wall_ms": 0.97036,
+                "solution_validation_ms": 232.627444,
+                "reference_validation_ms": 469.781329,
+                "rank_target_index_bytes": 2111100,
+                "note": "Relation-matrix rank is not FFD or degree of regularity."
+              }
             }
           ]
         },
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Public hash-derived unknown-scalar n=53 recovery with relation-derived factor-base logs and optimized full-rank collection",
+            "summary": "Current optimized public hash-derived unknown-scalar n=53 recovery with relation-derived factor-base logs and specialized exact query batch",
             "metrics": {
               "n": 53,
               "claim_boundary": "public_hash_unknown_scalar",
@@ -629,9 +685,11 @@
               "relations": 95,
               "target_trials": 97,
               "support_queries": 50656466,
-              "direct_whole_process_wall_ms": 6571.509542999991,
-              "rho_same_target_wall_ms": 4477.691376999985,
-              "direct_over_rho_wall_ratio": 1.4676110945821472,
+              "direct_whole_process_wall_ms": 5629.163293000005,
+              "direct_core_seconds": 9.782011,
+              "direct_peak_rss_bytes": 1045299200,
+              "rho_same_target_wall_ms": 4400.836343999998,
+              "direct_over_rho_wall_ratio": 1.279112162549439,
               "verified": true,
               "target_scalar_constructed_or_supplied": false,
               "factor_base_logs_known_by_construction": false
@@ -650,7 +708,8 @@
             "docs/ic/README.md",
             "tests/ic_progress.rs",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-42-n53-same-target-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-72-current-results-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-72-current-results-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/verification.json"
           ],
           "history": [
             {
@@ -679,13 +738,37 @@
                 "verified": true,
                 "factor_base_logs_known_by_construction": false
               }
+            },
+            {
+              "summary": "Public hash-derived unknown-scalar n=53 recovery with relation-derived factor-base logs and optimized full-rank collection",
+              "metrics": {
+                "n": 53,
+                "claim_boundary": "public_hash_unknown_scalar",
+                "public_hash_seed": 53001,
+                "published_q": [
+                  221146751147987,
+                  5112896707579409
+                ],
+                "recovered_d": 7892094459170,
+                "factor_base_points": 9964,
+                "orbit_columns": 94,
+                "relations": 95,
+                "target_trials": 97,
+                "support_queries": 50656466,
+                "direct_whole_process_wall_ms": 6571.509542999991,
+                "rho_same_target_wall_ms": 4477.691376999985,
+                "direct_over_rho_wall_ratio": 1.4676110945821472,
+                "verified": true,
+                "target_scalar_constructed_or_supplied": false,
+                "factor_base_logs_known_by_construction": false
+              }
             }
           ]
         },
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=41 online charged crossover with full-cost loss; n=53 fused parallel, optimized unknown-scalar, and forced-single-core runs remain whole-process losses",
+            "summary": "n=41 online charged crossover with full-cost loss; five selected-stack n=53 whole-process runs include two wins and a median 1.0188x loss",
             "metrics": {
               "n41_timing_class": "algorithmic_charged_online",
               "n41_ic_over_rho_online_wall_ratio": 0.28554556054870023,
@@ -693,49 +776,60 @@
               "n41_full_available_wall_over_rho": 110.79138179659516,
               "n41_four_core_amortised_ic_over_rho_wall_ratio": 3.605523155126031,
               "n53_timing_class": "whole_process_wall",
-              "n53_parallel_direct_over_rho_wall_ratio": 1.1828715401273624,
-              "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 19.474746292593565,
-              "n53_preferred_direct_wall_seconds": 6.039836534999949,
-              "n53_preferred_direct_core_seconds": 11.26981,
-              "n53_preferred_peak_rss_bytes": 1051987968,
+              "n53_selected_run_count": 5,
+              "n53_selected_wins": 2,
+              "n53_selected_losses": 3,
+              "n53_selected_ratios": [
+                0.9464834379305384,
+                1.019315178402027,
+                1.0949740741801435,
+                0.932363424377663,
+                1.0187756063132052
+              ],
+              "n53_selected_median_direct_over_rho_wall_ratio": 1.0187756063132052,
+              "n53_current_direct_over_rho_wall_ratio": 1.0187756063132052,
+              "n53_fresh_build_plus_current_over_rho_wall_ratio": 20.26276370178766,
+              "n53_current_direct_wall_seconds": 5.2279821980000065,
+              "n53_current_direct_core_seconds": 9.193539,
+              "n53_current_peak_rss_bytes": 1053990912,
               "n53_support_table_allocated_bytes": 738197504,
               "n53_support_queries": 48531878,
               "n53_batch_inversions": 15921,
               "n53_relations": 95,
               "n53_target_trials": 96,
               "n53_preferred_query_mode": "pair_pair_parallel_4096",
-              "n53_field_mul_backend": "x86_64_pclmulqdq",
-              "n53_field_reduction_backend": "n53_fixed_two_fold",
-              "n53_field_product_pipeline": "x86_64_pclmul_n53_fused_reduce",
-              "n53_fused_same_binary_wall_speedup": 1.0973798162569024,
-              "n53_fused_same_binary_core_seconds_ratio": 0.8876463380938863,
+              "n53_query_specialized_n53_pair_batch": true,
+              "n53_query_specialized_collection_speedup_range": [
+                1.1765650908591987,
+                1.1930632074418368
+              ],
               "n53_unknown_scalar_completed": true,
-              "n53_unknown_scalar_direct_over_rho_wall_ratio": 1.4676110945821472,
-              "n53_unknown_scalar_fresh_build_plus_direct_over_rho_wall_ratio": 25.35992536718333,
+              "n53_unknown_scalar_direct_over_rho_wall_ratio": 1.279112162549439,
+              "n53_unknown_scalar_fresh_build_plus_direct_over_rho_wall_ratio": 23.041078544819445,
               "n53_unknown_scalar_relations": 95,
               "n53_unknown_scalar_support_queries": 50656466,
               "n53_single_core_direct_over_rho_wall_ratio": 1.993515234548992,
               "n53_single_core_direct_over_rho_core_ratio": 1.978675797601307,
-              "n53_single_core_direct_wall_seconds": 10.945706588999997,
-              "n53_single_core_direct_core_seconds": 8.576129,
-              "n53_single_core_peak_rss_bytes": 864251904,
+              "n53_single_core_evidence_current_stack": false,
               "automorphism_discount": "signed Frobenius, sqrt(2n), A=2*n family",
               "same_target_n53": true,
-              "whole_process_wall_crossover": false
+              "whole_process_wall_crossover_observed": true,
+              "repeatable_whole_process_wall_crossover": false
             },
-            "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_FUSED_NEAR_WALL_LOSS",
-            "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation. Fused n=53 direct remains 1.183x rho, optimized unknown-scalar remains 1.468x, and forced-single-core remains 1.994x. Fresh-build costs do not cross. Not asymptotic sub-rho, key recovery, or SOTA."
+            "verdict": "N41_ONLINE_CROSSOVER_N53_TWO_OF_FIVE_PROCESS_WINS_MEDIAN_NEAR_LOSS",
+            "claim_boundary": "Finite public-synthetic results. Two of five selected n=53 process cells beat rho, but the median and current-head ratios are 1.0188x losses and fresh-build cost is 20.263x rho. Unknown-scalar remains 1.279x rho. Not asymptotic sub-rho, key recovery, or SOTA."
           },
           "next_target": {
-            "summary": "Achieve whole-process same-target wall crossover at n=53 while retaining build, setup, relation, LA, memory, parallel CPU, single-core, and rho charges",
+            "summary": "Reproduce a fixed-protocol selected-stack median below 0.95x at n=53 while retaining build, setup, relation, LA, memory, parallel CPU, refreshed single-core, and rho charges",
             "acceptance_gates": [
               "all stages charged",
               "independent external validation",
               "same target in direct and rho",
               "timing class and automorphism discount explicit",
-              "whole-process direct/rho ratio < 1"
+              "at least five fixed-protocol runs",
+              "median whole-process direct/rho ratio < 0.95"
             ],
-            "n53_probe_note": "Fused known-target ratio is 1.183; optimized public unknown-scalar is 1.468; forced-single-core is 1.994. Build cost remains dominant in fresh-build accounting."
+            "n53_probe_note": "Five selected runs have two wins, three losses, and a 1.018776 median. Current unknown-scalar is 1.279112x. Fresh build remains dominant."
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
@@ -748,7 +842,8 @@
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-56-n53-pclmul-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-58-n53-unknown-result-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-68-n53-fused-result-20260912/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-72-current-results-20260912/verification.json"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-72-current-results-20260912/verification.json",
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/verification.json"
           ],
           "history": [
             {
@@ -823,6 +918,48 @@
               },
               "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_PARALLEL_WALL_LOSS",
               "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation. PCLMUL n=53 direct remains 3.688x slower than same-target rho; the n=53 public unknown-scalar direct run remains 4.428x slower. Fresh-build costs do not cross. Not asymptotic sub-rho, key recovery, or SOTA."
+            },
+            {
+              "summary": "n=41 online charged crossover with full-cost loss; n=53 fused parallel, optimized unknown-scalar, and forced-single-core runs remain whole-process losses",
+              "metrics": {
+                "n41_timing_class": "algorithmic_charged_online",
+                "n41_ic_over_rho_online_wall_ratio": 0.28554556054870023,
+                "n41_ic_over_rho_amortised_wall_ratio": 5.025824680629552,
+                "n41_full_available_wall_over_rho": 110.79138179659516,
+                "n41_four_core_amortised_ic_over_rho_wall_ratio": 3.605523155126031,
+                "n53_timing_class": "whole_process_wall",
+                "n53_parallel_direct_over_rho_wall_ratio": 1.1828715401273624,
+                "n53_fresh_build_plus_parallel_over_rho_wall_ratio": 19.474746292593565,
+                "n53_preferred_direct_wall_seconds": 6.039836534999949,
+                "n53_preferred_direct_core_seconds": 11.26981,
+                "n53_preferred_peak_rss_bytes": 1051987968,
+                "n53_support_table_allocated_bytes": 738197504,
+                "n53_support_queries": 48531878,
+                "n53_batch_inversions": 15921,
+                "n53_relations": 95,
+                "n53_target_trials": 96,
+                "n53_preferred_query_mode": "pair_pair_parallel_4096",
+                "n53_field_mul_backend": "x86_64_pclmulqdq",
+                "n53_field_reduction_backend": "n53_fixed_two_fold",
+                "n53_field_product_pipeline": "x86_64_pclmul_n53_fused_reduce",
+                "n53_fused_same_binary_wall_speedup": 1.0973798162569024,
+                "n53_fused_same_binary_core_seconds_ratio": 0.8876463380938863,
+                "n53_unknown_scalar_completed": true,
+                "n53_unknown_scalar_direct_over_rho_wall_ratio": 1.4676110945821472,
+                "n53_unknown_scalar_fresh_build_plus_direct_over_rho_wall_ratio": 25.35992536718333,
+                "n53_unknown_scalar_relations": 95,
+                "n53_unknown_scalar_support_queries": 50656466,
+                "n53_single_core_direct_over_rho_wall_ratio": 1.993515234548992,
+                "n53_single_core_direct_over_rho_core_ratio": 1.978675797601307,
+                "n53_single_core_direct_wall_seconds": 10.945706588999997,
+                "n53_single_core_direct_core_seconds": 8.576129,
+                "n53_single_core_peak_rss_bytes": 864251904,
+                "automorphism_discount": "signed Frobenius, sqrt(2n), A=2*n family",
+                "same_target_n53": true,
+                "whole_process_wall_crossover": false
+              },
+              "verdict": "N41_ONLINE_CHARGED_CROSSOVER_N53_FUSED_NEAR_WALL_LOSS",
+              "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation. Fused n=53 direct remains 1.183x rho, optimized unknown-scalar remains 1.468x, and forced-single-core remains 1.994x. Fresh-build costs do not cross. Not asymptotic sub-rho, key recovery, or SOTA."
             }
           ]
         }

@@ -1,0 +1,45 @@
+name: Koblitz Stage 90 current selected panel audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/ic/BOUNDARY_TARGETS.md"
+      - "docs/ic/boundary_targets.json"
+      - "research/sat_factor_base_review_20260908/autolab/protocol.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage8*-evidence-*.tar.gz"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage8*-evidence-*.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-8*-artifacts-*.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-8*-workflow-*.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-90-current-gate-audit-20260912/**"
+      - "scripts/verify_koblitz_stage89_current_panel.py"
+      - "scripts/compose_koblitz_stage90_gate_audit.py"
+      - ".github/workflows/koblitz-stage90-current-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify archived selected panel and current gate audit
+        run: |
+          python3 -m py_compile \
+            scripts/verify_koblitz_stage89_current_panel.py \
+            scripts/compose_koblitz_stage90_gate_audit.py
+          python3 scripts/verify_koblitz_stage89_current_panel.py verify \
+            > "$RUNNER_TEMP/stage89-verification.json"
+          python3 scripts/compose_koblitz_stage90_gate_audit.py verify \
+            > "$RUNNER_TEMP/stage90-audit.json"
+          cd research/sat_factor_base_review_20260908/autolab
+          python3 -m unittest test_boundary_autolab.py
+          python3 boundary_autolab.py preflight > "$RUNNER_TEMP/autolab-preflight.json"
+          cd "$GITHUB_WORKSPACE"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"

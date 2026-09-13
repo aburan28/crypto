@@ -121,7 +121,7 @@
       "ledger_next_target": "regimes.koblitz.stages.vs_rho.next_target"
     },
     "koblitz.vs_rho.n53_probe": {
-      "label": "Current boundary: fused n=53 whole-process crossover attempt from retained 1.183x loss",
+      "label": "Current boundary: selected n=53 five-run median crossover attempt from retained 1.019x loss",
       "regime": "koblitz",
       "stage": "vs_rho",
       "priority": 1,
@@ -155,14 +155,26 @@
       },
       "acceptance_gates": [
         "algebraic factor base uses no scalar labels or target-subgroup enumeration",
-        "same public target in direct and rho",
+        "same public target in every direct/rho pair",
+        "at least five separately metered fixed-protocol process pairs",
         "all build/setup/relation/LA/wall/core/RSS resources charged",
         "measurement_schema.vs_rho required fields present",
-        "whole-process direct/rho ratio < 1",
+        "median whole-process direct/rho ratio < 0.95",
         "not a ledger promotion until independent validation"
       ],
       "ledger_next_target": "regimes.koblitz.records.vs_rho.next_target",
-      "note": "Retained Stage 68 baseline is 1.182872x rho with 95 relations and 48,531,878 queries. Use the current packed/fused/rank-aware/pipelined stack; do not rerun the obsolete signed_quotient pointwise probe."
+      "note": "Stage 89 archives five selected-stack ratios: 0.946483, 1.019315, 1.094974, 0.932363, and 1.018776 (two wins, median loss). Preserve the stable selected default and exact 95-relation/48,531,878-query transcript; do not enable the variable support-expansion or initial-pair-sum specializations.",
+      "fixed_process_repetitions_required": 5,
+      "selected_default": {
+        "split_bloom_indices": true,
+        "insert_hash_reuse": true,
+        "dual_sign_denominator_sharing": true,
+        "compact_query_scratch": true,
+        "combined_n53_dispatch": true,
+        "specialized_n53_pair_batch": true,
+        "specialized_n53_support_expansion": false,
+        "specialized_n53_pair_sums": false
+      }
     }
   },
   "lock": {
