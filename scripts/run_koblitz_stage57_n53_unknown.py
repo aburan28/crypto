@@ -48,7 +48,7 @@ def self_test() -> dict[str, Any]:
     return {
         "schema": "koblitz_stage57_self_test.v1",
         "status": "PASS",
-        "checks": 15,
+        "checks": 19,
         "n": 53,
         "a": 0,
         "eta": [1, 128],
@@ -60,6 +60,8 @@ def self_test() -> dict[str, Any]:
         "parallel_threads": 4,
         "support_table_shards": 4,
         "shard_routing": "xor_low_and_high_x_windows",
+        "dense_exact_support": True,
+        "retained_support_bytes": 534_380_608,
         "target_scalar_constructed_or_supplied": False,
         "factor_base_logs_known_by_construction": False,
     }
@@ -84,10 +86,13 @@ def observe_direct(path: Path, optimized: bool = False) -> dict[str, Any]:
         require(summary.get("rank_aware_pair_scan") is True, "optimized direct did not use rank-aware collection")
         require(summary.get("rank_target_deficiency") == 3, "optimized direct rank-deficiency trigger changed")
         require(summary.get("field_product_pipeline") == "x86_64_pclmul_n53_fused_reduce", "optimized direct did not use fused field products")
-        require(value["base"].get("support_x_prefilter_hash_strategy") == "four_shard_direct_low_and_high_x_bit_windows", "optimized direct lost selected sharded x filter")
+        require(value["base"].get("support_x_prefilter_hash_strategy") == "dense_direct_low_and_high_x_bit_windows", "optimized direct lost selected dense x filter")
         require(value["base"].get("support_table_shards") == 4, "optimized direct lost four-shard table")
         require(value["base"].get("support_table_shard_routing") == "xor_low_and_high_x_windows", "optimized direct lost selected shard routing")
         require(value["base"].get("parallel_support_insertion") is True, "optimized direct lost parallel support insertion")
+        require(value["base"].get("support_table_dense") is True, "optimized direct lost dense exact support")
+        require(value["base"].get("support_dense_streamed_compaction") is True, "optimized direct lost streamed compaction")
+        require(value["base"].get("support_table_allocated_bytes") == 534_380_608, "optimized dense support allocation changed")
         require(summary.get("query_itoh_n53_inverse") is True, "optimized direct lost Itoh inverse")
         require(summary.get("fixed_base_reference_validation") is True, "optimized direct lost fixed-base validation")
     return value
@@ -117,6 +122,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         direct_environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
         direct_environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
         direct_environment["KIC_ENABLE_SHARDED_SUPPORT_TABLE"] = "1"
+        direct_environment["KIC_ENABLE_DENSE_SUPPORT_TABLE"] = "1"
     rho_environment = custody.safe_child_environment()
     before_self = resource.getrusage(resource.RUSAGE_SELF)
     before_children = resource.getrusage(resource.RUSAGE_CHILDREN)
