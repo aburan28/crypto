@@ -681,6 +681,15 @@
       <p><strong>One loose end.</strong> Row weight doubles across the measured range, which pushes
         the large-prime linear algebra to n<sup>0.56</sup>. Capping the merge level is the missing
         piece.</p>
+      <p><strong>A bigger field is not a lever.</strong> Base-changing ECC2K-130 to
+        F<sub>2</sub><sup>131e</sup> leaves the target group and its 262 automorphisms untouched, so
+        the reference stays 2<sup>60.81</sup> at every e. Because 131 is prime, every subfield and
+        every Frobenius-stable subspace of that field is either of dimension &ge; 130 &mdash; a
+        2<sup>131</sup> factor base, 2<sup>70.19</sup>&times; rho at the cheapest e and rising with e
+        &mdash; or contained in F<sub>2</sub><sup>e</sup>, where the factor base lies inside the
+        subgroup E(F<sub>2</sub><sup>e</sup>) and no relation exists at any cost. Checked for
+        e = 1&hellip;16; embedding degree &gt; 10<sup>7</sup> closes the transfer route
+        (<code>experiments/ecc2k130_extension_field_boundary.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>
