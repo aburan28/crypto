@@ -2204,14 +2204,60 @@ many points and therefore 8.3 times as many orbits to find logarithms
 for, so the precompute triples. A wider base buys a cheaper descent and
 charges for it once, up front.
 
-The two columns cross at
+### Most of that precompute was not needed
+
+The run collected **73495 relations to certify 2464 columns** — a
+thirtyfold oversupply — and then spent 87.6 s of the logs stage verifying
+all of them, against 0.088 s for the solve itself. The unit counts had
+been inherited from the 36112-point file, where a probe yielded far less.
+
+Sized from the covering bound instead: each relation touches three
+orbits, so covering every column needs about `cols·ln(cols)/3 = 6414`
+relations before any margin for independence, and at the measured 0.919
+relations a probe, 14000 probes should give about 12900. It gave 12843,
+and **all 2464 columns certified with none rejected** — the margin is
+sized rather than lucky.
+
+| | oversupplied | sized |
+|---|---|---|
+| relations | 73495 from 80000 probes | 12843 from 14000 |
+| logs stage | 87.6 s | **24.7 s** |
+| precompute | 235.7 s | **156.9 s** |
+| amortised over 32 targets | 0.45 | **0.67** |
+| charged, against ρ | 330.7× | 326.0× |
+
+The charged ratio is unchanged within noise, as it must be: sizing the
+collection does not touch the descent.
+
+*(A first attempt at this measurement gave 137.9 s for collect. The test
+suite was running during that stage's table build. It was re-run with
+nothing else on the machine, and those are the numbers above.)*
+
+### Where the precompute actually goes
+
+| | seconds |
+|---|---|
+| select | 25.1 |
+| pair-table build | ~102 |
+| probing | 4.5 |
+| verifying relations | 24.7 |
+| **the linear algebra** | **0.029** |
+
+The sparse solve is two hundredths of a percent of precompute. The block
+Wiedemann machinery earlier in this note — the filtering, the Krylov
+sequence, all of it — solves a problem that is no longer anywhere near
+the cost. What precompute is made of at this width is the pair-table
+build and verifying relations in the general group arithmetic.
+
+### The crossing
 
 ```
-(235.7 − 79.0) s  ÷  (0.0531 − 0.0100) s/target  ≈  3600 targets
+(156.9 − 79.0) s  ÷  (0.0531 − 0.0101) s/target  ≈  1800 targets
 ```
 
-Below about 3600 targets the narrower base wins; above it the folded one
-does. That is the cleanest statement this work has produced of what it
-actually is: **a method for many logarithms on one curve, and never for
-one.** The reach law says how far memory can take you; this says how many
-targets you must have before taking it is worth anything.
+Below about 1800 targets the narrower base wins; above it the folded one
+does. It was 3600 before the collection was sized. That is the cleanest
+statement this work has produced of what it actually is: **a method for
+many logarithms on one curve, and never for one.** The reach law says how
+far memory can take you; this says how many targets you must have before
+taking it is worth anything.

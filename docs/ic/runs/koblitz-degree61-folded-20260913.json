@@ -90,8 +90,56 @@
     },
     "charged_improvement": "61.2x -> 330.7x over rho, a factor of 5.4",
     "the_honest_qualification": "Amortised over 32 targets the folded width is WORSE: 0.45 against 1.288. The base has 8.3 times as many points and so 8.3 times as many orbits to solve logarithms for, and the precompute grew from 79.0 s to 235.7 s. A wider base buys a cheaper descent and charges for it once, up front.",
-    "break_even_targets": 3635,
-    "break_even_reading": "The folded width overtakes the 36112-point compact one at about 3635 targets: the extra 156.7 s of precompute divided by the 0.0431 s a target the descent saves. Below that the narrower base wins. This is the clearest statement yet of what the whole line of work is: a method for many logarithms on one curve, never for one."
+    "break_even_targets": 1812,
+    "break_even_reading": "With the collection sized to the columns, the folded width overtakes the 36112-point compact one at about 1812 targets: the extra 77.9 s of precompute divided by the 0.0430 s a target the descent saves. It was 3635 before the sizing. Below that the narrower base wins. This remains the clearest statement of what the work is: a method for many logarithms on one curve, and never for one."
   },
-  "not_claimed": "That the folded width is better at every scale. At 32 targets it is not, and the amortised ratio says so. The charged ratio and the break-even count are the claims."
+  "not_claimed": "That the folded width is better at every scale. At 32 targets it is not, and the amortised ratio says so. The charged ratio and the break-even count are the claims.",
+  "sized_to_the_columns": {
+    "what": "The first run collected 73495 relations to certify 2464 columns -- a thirtyfold oversupply -- and spent 87.6 s of the logs stage verifying all of them, against 0.088 s for the solve. The units were inherited from the 36112-point file, where a probe yielded far less.",
+    "how_it_was_sized": "Each relation touches three orbits, so covering every column needs about cols*ln(cols)/3 = 6414 relations before any margin for independence. At the measured 0.919 relations a probe, 14000 probes should give about 12900, a margin of 1.8. It gave 12843, and all 2464 columns certified with 0 rejected -- so the margin is sized, not lucky.",
+    "measured": {
+      "relations": 12843,
+      "probes": 14000,
+      "stage_seconds": {
+        "select": 25.1,
+        "collect": 107.1,
+        "logs": 24.7,
+        "solve": 2.6
+      },
+      "precompute_seconds": 156.9,
+      "peak_rss_bytes": 2574188544,
+      "descent_seconds_per_target": 0.0101,
+      "charged": 326.0,
+      "amortised": 0.673,
+      "solutions_verified": 32
+    },
+    "against_the_oversupplied_run": {
+      "logs_seconds": {
+        "before": 87.6,
+        "after": 24.7
+      },
+      "precompute_seconds": {
+        "before": 235.7,
+        "after": 156.9
+      },
+      "amortised": {
+        "before": 0.447,
+        "after": 0.673
+      },
+      "charged": {
+        "before": 330.7,
+        "after": 326.0,
+        "note": "unchanged within noise, as it should be -- sizing the collection does not touch the descent"
+      }
+    },
+    "a_contaminated_measurement_discarded": "A first attempt at this gave collect 137.9 s and amortised 0.56. The test suite was run during that stage's pair-table build, so the stage total was contended; the unit times were clean and scaled correctly with the probe count. It was re-run with nothing else on the machine and those are the numbers above.",
+    "where_precompute_goes_now": {
+      "select": 25.1,
+      "pair_table_build": "about 102 s of the 107.1 s collect stage",
+      "probing": "4.5 s",
+      "relation_verification": "about 24.7 s",
+      "linear_algebra": 0.029,
+      "reading": "The sparse solve is 0.029 s -- 0.02% of precompute. The block Wiedemann work this repo did earlier is no longer anywhere near the cost. What precompute is made of at this width is the pair-table build and verifying relations in the general group arithmetic."
+    }
+  }
 }
