@@ -5,6 +5,14 @@ benchmark and 14.106673 B/s DP34 collection audit. Those are measured reference
 values from [SHARED-SIGMA.md](SHARED-SIGMA.md), not a fundamental 14 B/s ceiling
 and not matched controls for these candidates. Neither new flag is promoted.
 
+The [AWS execution attempt](https://github.com/aburan28/crypto/actions/runs/34762622979)
+passed all six offline runner/isolation tests, then stopped in AWS credential
+configuration: **“The security token included in the request is invalid.”**
+The benchmark step was skipped and no GPU instance launched. The
+[attempt receipt](benchmarks/native-candidates/aws-attempt.json) records this
+authentication blocker. Refresh the repository's AWS credentials and rerun
+that workflow to execute the prepared comparison. No faster rate is claimed.
+
 This is **engineering**. The generic-group work boundary and walk rules do not
 change. At batch 16, every variant still uses `5 + 5/16 = 5.3125` field products
 per scalar update, a field-product cost ratio of **1.0** to the control. There
@@ -44,6 +52,9 @@ retains the CUDA 13.3.73 sm_120 build commands, device-source and binary hashes,
 compiler output, resource reports and opcode counts. Four complete clients and
 their arithmetic, storage and shared-sigma probes compiled successfully. All
 use B16/T256/min2/CLMAD1/COMPACT1/WP2/TILE256/SHARED1.
+The receipt names the exact source revision and the trailing-newline-only
+adjustments made by local reconstruction; these reproduce its input hashes.
+Client compiler output is retained for the packed walk, init and their helpers.
 
 | Variant | Class | Static walk instructions | Ratio to control | Non-NOP instructions | Walk registers | Walk stack/local bytes | Correctness status |
 |---|---|---:|---:|---:|---:|---:|---|
@@ -102,6 +113,10 @@ terminates its exact instance on completion/failure, and a separate 55-minute
 instance shutdown deadline bounds an interrupted parent. The Docker workload
 has a 45-minute timeout. No GPU execution is implied merely by adding this
 workflow; its recorded result determines whether validation succeeded.
+
+The first workflow run failed authentication before reaching EC2; it did not
+exercise the EC2 startup, device gates, timings or termination path. Those paths
+have offline checks and remain pending live validation.
 
 The index-calculus scoreboard has no new throughput or operation-count result
 to add: GPU timing is pending and the operation-count ratio is unchanged.
