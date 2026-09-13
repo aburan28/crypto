@@ -2354,3 +2354,60 @@ ratio rises monotonically with width; the amortised ratio peaks and
 falls.** Optimising the charged number alone — which is what every
 earlier section of this note did — points at the widest base memory can
 hold, and that is the worst of the four.
+
+### The `T^{1/4}` law is wrong where it matters — 2026-09-13
+
+One prediction of the width model had not been tested: that the optimal
+width grows as the fourth root of the number of targets. It is the
+prediction that would make it a law rather than a curve fitted to four
+points, so it was worth the two runs.
+
+The idealised model says that at `T = 128` the optimum moves from 50752
+to about **71800**. The measured stage costs say it does not move at all,
+because precompute is not quadratic in the width in this range — it is
+base construction plus relation verification, both roughly linear, flat
+from 45872 to 50752 (15.6 s against 15.7 s) and then stepping at 71248
+(24.4 s). From those costs the optimum should still be near 50752, about
+19.9, with 71248 well below at about 15.4.
+
+Both predictions were in the repository before the runs.
+
+| at `T = 128` | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|
+| 50752 | 14.75 s | 0.0457 s/t | 67.2× | **19.09** |
+| 71248 | 24.58 s | 0.0285 s/t | 108.1× | 13.95 |
+
+*(128 of 128 verified at both widths.)*
+
+**The quartic law is wrong in this range.** The optimum does not move;
+50752 wins by 19.09 to 13.95, and the margin predicted from the measured
+costs — 19.9 against 15.4 — was right to within 4% and 9%.
+
+Why it fails is the useful part. `T^{1/4}` follows from
+`A|F|² + T·B/|F|²`, which assumes precompute is dominated by the
+quadratic pair-table build. At these widths it is not. A cost that is
+flat and then steps does not produce a smooth power law; it produces a
+**staircase**, and the optimum moves in jumps set by where the steps are.
+The step from 50752 to 71248 is crossed at
+
+```
+(24.58 − 14.75) s ÷ (0.0457 − 0.0285) s/target  ≈  572 targets
+```
+
+and the same arithmetic on the 32-target runs gave 435 — so somewhere
+between about 400 and 600, the spread being a fair measure of what two
+points can locate.
+
+This is the second time today a model has been right about a band and
+wrong about the mechanism. It located the 71248 optimum while treating
+the table build as the whole of precompute, when the build is a minority
+of it; and it produced an elegant `T^{1/4}` from the same wrong dominant
+term. A model can fit the numbers it was fitted to and still be wrong
+about which term matters, and the way to find that out is to make it
+predict somewhere it has not been fitted.
+
+Not claimed: that no power law describes the optimum at larger `T`. Once
+the base is wide enough that the quadratic build dominates precompute
+again, `A|F|²` becomes the leading term and `T^{1/4}` may well be
+recovered. What is falsified is the law in the range measured — which is
+the range where this pipeline is actually worth running.
