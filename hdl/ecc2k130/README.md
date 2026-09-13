@@ -24,9 +24,11 @@ sampled from each checked against the client's reference walk. With the
 product tree in UltraRAM and 32-walk batches, **the 128-engine image at
 333 MHz holds 8.25 G steps/s** (5.17 clocks per step on the device; 112
 engines at 375 MHz 8.12 G, 120 at 333 MHz 7.73 G). The current revision
-counts eleven of the multiplier's 27 leaves in DSPs (the engine is 7.3k
+counts eleven of the multiplier's 27 leaves in DSPs (the engine is 7.1k
 LUTs from 8.1k), batches 64 walks 8 deep (5.16 clocks per step with
-either multiplier) and registers the walker's FIFO write and head;
+either multiplier) and registers the walker's FIFO write and head, the
+multiplier's product before its back-conversion and each batch's phase
+once, in the retire;
 128-engine 375 MHz, 112-engine 400 MHz and 136- and 144-engine 333 MHz
 builds of it were in flight when this was written.
 
@@ -37,7 +39,7 @@ builds of it were in flight when this was written.
 | `gf131_pkg.vhd` | The field: coordinates, `sigma^k`, `sigma^j` selection, two-clock weight, the two constant basis-change maps built at elaboration, and an independent direct-product oracle |
 | `gf2_kmul.vhd` | Recursive Karatsuba polynomial multiplier over GF(2), `LEVELS` deep, schoolbook leaf, the first `DSP_LEAVES` leaves in DSPs, latency `2 LEVELS + LEAF_LAT` |
 | `gf2_dsp_leaf.vhd` | The DSP leaf: a 17-bit GF(2) product as six 24 × 15 integer products with the coefficients three bits apart, plus the corner in LUTs; four clocks |
-| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 13 (10 with LUT leaves only) |
+| `gf131_mul.vhd` | GF(2^131) multiplier around it, II = 1, latency 14 (11 with LUT leaves only) |
 | `ec2k_batch_pipe.vhd` | **The step unit.** W walks per batch, their inversions shared through a product tree: `5 + 5/W` multiplies per step, bursts of independent multiplies streamed from a ready queue |
 | `ec2k_step_pipe.vhd` | The simple step unit, one inversion per walk, 10 multiplies per step; kept as the readable reference |
 | `ec2k_walker.vhd` | The rho sequencer: N walks, host load port, distinguished-point output, around one `ec2k_batch_pipe` |
@@ -139,10 +141,19 @@ stage 5..8     27 products of 17 x 17: 11 in DSPs (4 clocks), 16 schoolbook (1, 
 stage 9        level 3 post-combine
 stage 10       level 2 post-combine
 stage 11       level 1 post-combine                261-bit product
-stage 12       r = to_onb(h)                       c-powers -> gamma
+stage 12       h' = h                              a copy the placer puts beside the XOR trees
+stage 13       r = to_onb(h')                      c-powers -> gamma
 ```
 
-(With `MUL_DSP_LEAVES = 0` the leaf is one clock and the latency 10.)
+(With `MUL_DSP_LEAVES = 0` the leaf is one clock and the latency 11.)
+Stage 12 is 261 flip-flops and 17 LUTs for route, not depth: the
+product register is spread over the whole multiplier, and in the routed
+128-engine image at 375 MHz the XOR trees from it into `out_r` were
+2.2 ns of route for 0.4 of logic, the image's worst path. Synthesis
+never saw it (the engine's worst synthesised path is the output weight's
+sum at +1.25 ns on a 3.0 ns clock, before and after); reducing each half
+of `h` into its own register instead was 333 LUTs, every tree's
+rounding twice, for the same depth.
 
 `gf2_kmul` is a recursive entity: each level is a registered pre-add, three
 instances of itself on the halves, and a registered post-combine. Over
@@ -221,6 +232,10 @@ leaves save). Synthesised (`cl_probe`, 2 engines, 3.0 ns), **measured**:
 |---|---|---|---|---|
 | 27 LUT leaves | 7 974 – 8 106 | 8 062 | 0 | +1.18 ns (probe) / +1.24 (engine) |
 | **11 DSP leaves** | **7 170 – 7 318** | 9 546 | **66** | +1.18 / +1.24, no DSP path in the 80 worst |
+
+(Both at 32 × 8, before the walker's registers, the single-writer arrays
+and the copy register; the current engine is 7 000 – 7 150 and 10 420
+FFs, see "Capacity".)
 
 A DSP leaf is six DSPs and ~70 LUTs against ~140: −788 LUTs per engine
 (−9.7%). The device has 9 024 DSPs but the CL's pblock holds **7 992**
@@ -372,8 +387,8 @@ is 64 × 8** (`cl_ecc2k130_defines.vh`; `LOG_W`/`LOG_NB` on
 tables and the tree as 32 × 16, **5.16 with either multiplier** (64 × 4:
 6.06; 16 × 16: 5.31; all measured in the walker testbench with 512
 walks), and 7 323 LUTs per engine against 32 × 16's 7 690 and 32 × 8's
-7 318 — the level bookkeeping scales with the number of batches, not
-their width. The testbenches' default stays 16 × 8.
+7 318 (same revision) — the level bookkeeping scales with the number of
+batches, not their width. The testbenches' default stays 16 × 8.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -514,34 +529,44 @@ runs the whole `worker.py` contract against, down to feeding the resulting
 ## Capacity — synthesised
 
 Vivado 2025.2, `xcvu47p-fsvh2892-2-e`, out of context, two `ec2k_walker`
-behind the register block and the clock bridge (512 walks, W = 16, 16
-batches in flight):
+behind the register block and the clock bridge (512 walks, batches of
+64, 8 in flight):
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM | DSP |
 |---|---|---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **7 170 – 7 320** | 180 (+614 SRL) | 9 550 | 12 | 2 | 4 | 66 |
-| ├ walker body (FIFO, prefetch buffer, held report) | 366 | 176 | 337 | 4 | 1 | 0 | 0 |
-| └ `ec2k_batch_pipe` | ~6 950 | 4 | ~9 200 | 8 | 1 | 4 | 66 |
-| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | 2 630 | 4 | 2 994 | 8 | 1 | 4 | 0 |
-| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | ~4 330 (5 117 with LUT leaves) | 0 | ~6 100 | 0 | 0 | 0 | 66 |
-| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 890 | 356 | 2 391 | 0 | 0 | 0 | 0 |
+| `ec2k_walker` (whole engine) | **7 000 – 7 150** | 196 (+616 SRL) | 10 420 | 12 | 2 | 4 | 66 |
+| ├ walker body (FIFO and its write register, prefetch buffer, head register) | ~375 | 176 | ~970 | 4 | 1 | 0 | 0 |
+| └ `ec2k_batch_pipe` | ~6 780 | 20 | ~9 450 | 8 | 1 | 4 | 66 |
+| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~2 430 | 20 | ~3 090 | 8 | 1 | 4 | 0 |
+| &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | ~4 350 (5 134 with LUT leaves) | 0 | ~6 360 | 0 | 0 | 0 | 66 |
+| `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 892 | 356 | 2 399 | 0 | 0 | 0 | 0 |
 | `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 | 0 |
 
 (The two engines differ by 150 LUTs from `-keep_equivalent_registers`
-falling differently; the body rows are from a hierarchical synthesis of
-one engine with LUT leaves, where the multiplier was 5 117 LUTs: 4 428 in
+falling differently; the body rows are a hierarchical synthesis of one
+engine with LUT leaves — where the multiplier was 5 117 LUTs: 4 428 in
 the Karatsuba tree, of which 3 800 in the 27 leaf products, and 689 in
-`prep`, `to_onb` and the tag pipe.) The register block's stage on the
-spine is roughly 300 LUTs and 870 FFs per engine; the 180 LUTRAM left in
-an engine are the walker's four-word prefetch buffer. Before the final
+`prep`, `to_onb` and the tag pipe — carried forward by the deltas each
+later change measured on the whole engine: the walker's two registers
++9 LUTs and +633 FFs, the single-writer phase and level arrays −191 LUTs
+and +16 LUTRAM, the multiplier's copy register +17 LUTs and +261 FFs.)
+The register block's stage on the spine is roughly 300 LUTs and 870 FFs
+per engine; of the 196 LUTRAM in an engine 176 are the walker's
+four-word prefetch buffer and 20 the eight-entry phase and level arrays,
+which became distributed RAM when the retire became their only writer
+(the fill used to write them too, and two write ports is flip-flops
+and a mux — 191 LUTs of it). Before the final
 multiply's companions moved into a shift register the engine was 8 100 –
 8 420 LUTs, 322 SRL, 7 420 FF and **20 RAMB36 + 2 RAMB18**: 150 LUTs and
 260 SRLs bought four RAMB36 tiles. With the tree in block RAM it was
 8 260 – 8 570 LUTs, 7 660 FF and 16 RAMB36 + 2 RAMB18 (the routed 48-,
 64-, 80- and 96-engine images); the UltraRAM tree with its address and
 write registers costs 220 FFs and buys four more tiles, 32-walk batches
-and the enable-free stages take 250 LUTs back (7 970 – 8 110), and the
-eleven DSP leaves another 790 for 1 480 FFs and 66 DSPs.
+and the enable-free stages take 250 LUTs back (7 970 – 8 110), the
+eleven DSP leaves another 790 for 1 480 FFs and 66 DSPs (7 170 – 7 320),
+and the single-writer phase and level arrays 190 more; the walker's two
+registers and the multiplier's copy register are 26 LUTs and 900 FFs of
+the 7 000 – 7 150 and 10 420 above.
 
 Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe (the
 register block's read mux, one copy on the die) and **+1.24 ns** inside
@@ -594,10 +619,11 @@ image of the 21-tile revision used 31% of the LUTs and 50% of the RAM),
 ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
 is 83% / 83% / 53%, and the LUTs bound the count. With eleven leaves in
-DSPs 128 engines is 74% of the LUTs, 83% of the block RAM, 53% of the
-UltraRAM and 94% of the device's DSPs — over the CL pblock's 7 992, so
-128 engines take ten leaves (7 680), 136 and 144 nine: 136 is 77% of
-the LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 82% / 93% /
+DSPs 128 engines is 72% of the LUTs (engine plus its spine stage, at
+the current 7 000 – 7 150), 83% of the block RAM, 53% of the UltraRAM
+and 94% of the device's DSPs — over the CL pblock's 7 992, so 128
+engines take ten leaves (7 680), 136 and 144 nine: 136 is 76% of the
+LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 81% / 93% /
 60%. At 5.31 clocks per step and 333 MHz that is 63 M steps/s per
 engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80,
 6.0 G at 96 — all four measured on the device**; at 5.17 (32 × 8, the

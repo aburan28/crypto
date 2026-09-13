@@ -296,8 +296,8 @@ promote)
 
 list)
     for t in $(aws s3 ls "s3://$BUCKET/fpga/builds/" | awk '{print $2}' | tr -d /); do
-        if aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null \
-            | python3 -c 'import json,sys; d=json.load(sys.stdin); print("%-28s %s  %3d eng x %4d walks  w<=%d" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"]))'; then :
+        if j=$(aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null) && [ -n "$j" ]; then
+            python3 -c 'import json,sys; d=json.loads(sys.argv[1]); print("%-28s %s  %3d eng x %4d walks  w<=%d  %s %s" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"], d.get("clkMhz", ""), d.get("timing", "")))' "$j"
         else
             echo "$t  (not submitted)"
         fi
