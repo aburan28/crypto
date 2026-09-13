@@ -699,8 +699,14 @@ the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
 canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
 negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
 stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
-fewer descent probes, and **2.0×** end to end per decomposed target once
+fewer descent probes, and **2.8×** end to end per decomposed target once
 the dearer probe and the wider recovery scan are paid.
+
+The key itself is the least rotation of the abscissa's coordinates in a
+normal basis, where the Frobenius *is* a rotation — `FrobeniusCanon` in
+`koblitz_fast.rs`. Computed instead as a chain of `n − 1` squarings a
+probe costs 1125 ns rather than 340 and the fold is worth 2.0× rather
+than 2.8×.
 
 - `PairSumTable::build_within` reaches for the fold as its last tier, when
   neither the full nor the compact table fits the budget.

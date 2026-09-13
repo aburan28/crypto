@@ -138,7 +138,7 @@ use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
-use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
+use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, split_rule_default,
     FieldStructure, SolveOptions, SolveStats, SolverEngine,
@@ -2218,6 +2218,11 @@ pub struct PairSumTable {
     /// is taken only when the unfolded table would not fit at all, and
     /// the tiers in [`Self::build_within`] reach for it last.
     fold: bool,
+    /// The basis change that makes a canonical key a rotation rather
+    /// than a chain of squarings.  `None` on an unfolded table, and on a
+    /// folded one only if no normal element was found — in which case
+    /// the squaring chain stands, giving the same answers more slowly.
+    canon: Option<FrobeniusCanon>,
 }
 
 impl PairSumTable {
@@ -2369,6 +2374,7 @@ impl PairSumTable {
             present,
             present_mask,
             fold: false,
+            canon: None,
         })
     }
 
@@ -2481,6 +2487,7 @@ impl PairSumTable {
             present,
             present_mask,
             fold: false,
+            canon: None,
         })
     }
 
@@ -2520,8 +2527,12 @@ impl PairSumTable {
             return None;
         }
         let curve = FastCurve::new(&kc.curve)?;
-        // A canonical key is `1 + min_k x^{2^k}`, so it needs one bit
-        // more than an abscissa and two fewer than a packed point.
+        // The normal basis, once, for the whole table: the build
+        // canonicalises every stored pair and every lookup canonicalises
+        // its target, and the two must name orbits the same way.
+        let canon = FrobeniusCanon::new(&curve.field, curve.n);
+        // A canonical key is one bit wider than an abscissa and two
+        // narrower than a packed point.
         let key_bits = Self::folded_key_bits(curve.n);
         let bucket_bits = Self::folded_bucket_bits(pairs, curve.n);
         let bucket_shift = key_bits - bucket_bits;
@@ -2534,27 +2545,8 @@ impl PairSumTable {
             let mut sums = Vec::with_capacity(n_points);
             let mut scratch = BatchScratch::default();
             curve.add_many(points[reps[r]], &points, &mut sums, &mut scratch);
-            // The canonicalisation is the cost of this build, so it runs
-            // over lanes here exactly as it does on the lookup side.
-            const LANES: usize = 8;
-            for chunk in sums.chunks(LANES) {
-                let mut x = [0u64; LANES];
-                let mut best = [0u64; LANES];
-                for (l, &p) in chunk.iter().enumerate() {
-                    x[l] = p.x;
-                    best[l] = p.x;
-                }
-                for _ in 1..curve.n {
-                    for l in 0..chunk.len() {
-                        x[l] = curve.field.sqr(x[l]);
-                        if x[l] < best[l] {
-                            best[l] = x[l];
-                        }
-                    }
-                }
-                for (l, &p) in chunk.iter().enumerate() {
-                    f(if p.infinity { 0 } else { best[l] + 1 });
-                }
+            for &p in &sums {
+                f(Self::canon_key_with(&curve, canon.as_ref(), p));
             }
         };
         (0..reps.len()).into_par_iter().for_each(|r| {
@@ -2609,6 +2601,7 @@ impl PairSumTable {
             present,
             present_mask,
             fold: true,
+            canon,
         })
     }
 
@@ -2647,8 +2640,23 @@ impl PairSumTable {
     /// done in the group, by [`Self::recover_pair`], and is unaffected.
     #[inline]
     fn canon_key(curve: &FastCurve, p: FastPoint) -> u64 {
+        Self::canon_key_with(curve, None, p)
+    }
+
+    /// [`Self::canon_key`] using a normal basis when one is in hand.
+    ///
+    /// The two disagree on what an orbit is *called* — one takes the
+    /// least element of the Frobenius orbit, the other the least
+    /// rotation of the normal coordinates — and agree exactly on which
+    /// points share a name, which is all a key has to do.  A table is of
+    /// course built and queried with the same one.
+    #[inline]
+    fn canon_key_with(curve: &FastCurve, canon: Option<&FrobeniusCanon>, p: FastPoint) -> u64 {
         if p.infinity {
             return 0;
+        }
+        if let Some(canon) = canon {
+            return canon.canon(p.x) + 1;
         }
         let mut x = p.x;
         let mut best = x;
@@ -2666,7 +2674,7 @@ impl PairSumTable {
     #[inline]
     fn key_of(&self, p: FastPoint) -> u64 {
         if self.fold {
-            Self::canon_key(&self.curve, p)
+            Self::canon_key_with(&self.curve, self.canon.as_ref(), p)
         } else {
             p.pack()
         }
@@ -2684,6 +2692,17 @@ impl PairSumTable {
         out.clear();
         if !self.fold {
             out.extend(points.iter().map(|p| p.pack()));
+            return;
+        }
+        if let Some(canon) = self.canon.as_ref() {
+            // A rotation has no dependency chain worth interleaving.
+            out.extend(points.iter().map(|p| {
+                if p.infinity {
+                    0
+                } else {
+                    canon.canon(p.x) + 1
+                }
+            }));
             return;
         }
         const LANES: usize = 8;
@@ -8784,6 +8803,72 @@ mod tests {
             assert_eq!(
                 reached, orbits,
                 "degree {degree}: reps x base missed a sum orbit"
+            );
+        }
+    }
+
+    #[test]
+    fn the_rotation_names_the_same_orbits_as_the_squaring_chain() {
+        // The normal basis renames every orbit — the least rotation of
+        // the coordinates is not the least element of the orbit — and
+        // must partition the field exactly as the squaring chain does,
+        // since that partition is what the folded table indexes by.
+        for degree in [13u32, 19, 23, 31, 53, 61] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let canon = FrobeniusCanon::new(&fc.field, fc.n)
+                .unwrap_or_else(|| panic!("degree {degree}: no normal element found"));
+            assert_eq!(canon.degree(), degree);
+            let mask = (1u64 << degree) - 1;
+            // A rotation is constant on a Frobenius orbit.
+            let mut x = 1u64;
+            let mut sample = Vec::new();
+            for _ in 0..2000 {
+                x = x.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (x >> 31);
+                sample.push(x & mask);
+            }
+            for &v in &sample {
+                let mut w = v;
+                for _ in 0..degree {
+                    w = fc.field.sqr(w);
+                    assert_eq!(
+                        canon.canon(v),
+                        canon.canon(w),
+                        "degree {degree}: the rotation moved within an orbit"
+                    );
+                }
+            }
+            // And it separates points the squaring chain separates: the
+            // two induce the same equivalence relation.
+            let chain = |v: u64| {
+                let mut x = v;
+                let mut best = v;
+                for _ in 1..degree {
+                    x = fc.field.sqr(x);
+                    best = best.min(x);
+                }
+                best
+            };
+            let mut by_chain: HashMap<u64, u64> = HashMap::new();
+            for &v in &sample {
+                let c = chain(v);
+                let r = canon.canon(v);
+                match by_chain.entry(c) {
+                    std::collections::hash_map::Entry::Occupied(e) => assert_eq!(
+                        *e.get(),
+                        r,
+                        "degree {degree}: one orbit got two rotation names"
+                    ),
+                    std::collections::hash_map::Entry::Vacant(e) => {
+                        e.insert(r);
+                    }
+                }
+            }
+            let names: HashSet<u64> = by_chain.values().copied().collect();
+            assert_eq!(
+                names.len(),
+                by_chain.len(),
+                "degree {degree}: two orbits shared a rotation name"
             );
         }
     }

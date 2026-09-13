@@ -4,7 +4,7 @@
   "machine": "the same host as the reach-versus-memory run",
   "why_it_is_sound": "The factor base is closed under pi and under negation, so the set of pair sums S is closed under both: pi(P+Q) = pi(P)+pi(Q) and -(P+Q) = (-P)+(-Q) are again sums of base points. A table answering 'is rest in S' therefore needs one key per orbit, not one per pair.",
   "why_the_enumeration_is_complete": "Walking i over one representative of each signed orbit and j over the whole base reaches every orbit of ordered pairs: given (P,Q), let g carry P to the representative R of its own orbit; then (R, gQ) lies in the same orbit and is enumerated. That holds whatever the stabilisers are, so there are no false negatives - only the factor two of redundancy that the unordered i <= j symmetry would remove.",
-  "the_canonical_key": "1 + min_k x^(2^k). Negation never moves the abscissa, since -(x,y) = (x,x+y), so the sign half of the fold is free and only the Frobenius orbit of the abscissa is searched: n-1 squarings and a running minimum, no memory.",
+  "the_canonical_key": "The least rotation of the abscissa's coordinates in a normal basis. In a normal basis {beta, beta^2, beta^4, ...} the Frobenius is a one-bit cyclic rotation of the coordinate word, since (sum c_k beta^(2^k))^2 = sum c_k beta^(2^(k+1)). So the orbit of x is the set of rotations of its coordinates and the least rotation names it: one linear map (eight byte-table lookups) and n rotations, nothing squared and nothing reduced. Negation never moves the abscissa, since -(x,y) = (x,x+y), so the sign half of the fold is free either way.",
   "measured": {
     "budget_gib": 4,
     "degree": 61,
@@ -14,29 +14,29 @@
       "full": 606882.4771587369
     },
     "measured": {
-      "attempts_compact": 13229,
-      "attempts_folded": 127,
+      "attempts_compact": 14401,
+      "attempts_folded": 180,
       "compact_base": 16592,
-      "compact_build_secs": 13.931594856,
+      "compact_build_secs": 13.882373413,
       "compact_bytes": "686558740",
       "compact_pairs": 137655528,
-      "decomposed_compact": 58,
-      "decomposed_folded": 126,
+      "decomposed_compact": 65,
+      "decomposed_folded": 179,
       "folded_base": 177632,
-      "folded_build_secs": 116.749072985,
+      "folded_build_secs": 42.653280948,
       "folded_bytes": "1230953728",
       "folded_pairs": 258632192,
-      "hit_rate_compact": 0.004384307203870285,
-      "hit_rate_folded": 0.9921259842519685,
-      "net_speedup_at_equal_memory": 2.160427436579761,
-      "ns_per_probe_compact": 140.377795,
-      "ns_per_probe_folded": 1172.51179,
+      "hit_rate_compact": 0.004513575446149573,
+      "hit_rate_folded": 0.9944444444444445,
+      "net_speedup_at_equal_memory": 2.7429912136831267,
+      "ns_per_probe_compact": 117.52876,
+      "ns_per_probe_folded": 390.17086,
       "probes_per_target_compact": 1183373.1170301847,
       "probes_per_target_folded": 10324.683939793606,
-      "recover_ms_compact": 0.942953375,
-      "recover_ms_folded": 12.3534515,
-      "secs_per_decomposition_compact": 0.5172733013448275,
-      "secs_per_decomposition_folded": 0.2394309998968254,
+      "recover_ms_compact": 0.9198978749999999,
+      "recover_ms_folded": 13.710055583333334,
+      "secs_per_decomposition_compact": 0.4615564845538462,
+      "secs_per_decomposition_folded": 0.16826757674301676,
       "stored_ratio": 0.5322443696413477
     },
     "points_per_signed_orbit": 122.0,
@@ -53,10 +53,18 @@
     "descent_probes_per_target": "1.82e5 -> 2.99e3, a factor 61"
   },
   "what_it_costs": {
-    "probe": "9.8x, and the canonicalisation is nearly all of it: n-1 squarings is about 830 ns serial on this machine, against a 115 ns probe.",
-    "recovery": "the O(|F|) summand scan grows with the wider base - 0.96 ms at |F| = 16592 against 12.61 ms at |F| = 177632 - and a scan pays it once per witness it finds, not once per decomposition."
+    "probe": "3.08x -- 111 ns unfolded against 340 ns folded. It was 9.8x with the squaring chain; the rotation is what closed most of that.",
+    "build": "The build canonicalises every stored pair, so it gained the same factor: 116.7 s to 37.4 s for the same 258632192 pairs.",
+    "recovery": "Now the binding cost. The compact representation does not store summands and recovers them by an O(|F|) scan -- 12.88 ms at |F| = 177632 -- and a three-summand search pays it once per witness it finds, not once per witness it keeps, since the sorted-witness condition j <= k rejects most of them. About 90% of the time per decomposition is now there."
   },
-  "the_honest_number": "2.0x faster per decomposed target at equal memory. Not the 61x the probe count suggests: the probe got 9.8x dearer and the recovery scan grew with the base, and those two eat most of it.",
-  "what_is_binding_now": "The canonicalisation. It is a chain of n-1 squarings, and a squaring here is a spread plus eight reduction-table lookups. In a normal basis the Frobenius is a one-bit rotation, so the same minimum would be n rotations - tens of nanoseconds rather than hundreds - which would put a folded probe below an unfolded one and leave the 61x nearly intact. That is measured as an opportunity, not claimed as a result.",
-  "not_claimed": "That the fold is worth 61x end to end; it is not, and the run above says so. That the 4 GiB widths were run end to end; they are the sizing law evaluated at that budget, and the timed pair is the 0.64/1.15 GiB one."
+  "the_honest_number": "2.8x faster per decomposed target at equal memory, up from 2.0x with the squaring chain. Still far from the 61x the probe count alone suggests, and the reason has moved: it is no longer the canonicalisation but the O(|F|) summand recovery, which grows with the very base the fold exists to widen.",
+  "what_is_binding_now": "recover_pair. It walks the whole base and looks each difference up in a std HashMap, whose default hasher is SipHash -- tens of nanoseconds a lookup on u64 keys, paid |F| times. A cheap open-addressed table keyed by the hash the filter already uses should take a large factor out of it, and it would speed the unfolded compact table too. Not yet built or measured.",
+  "not_claimed": "That the fold is worth 61x end to end; it is not, and the run above says so. That the 4 GiB widths were run end to end; they are the sizing law evaluated at that budget, and the timed pair is the 0.64/1.15 GiB one.",
+  "superseded_measurement": {
+    "note": "The numbers below were taken with the canonical key computed as a chain of n-1 squarings. Replacing it with a rotation in a normal basis changed them, and the current measurement is under 'measured'.",
+    "ns_per_probe_folded": 1172.5,
+    "secs_per_decomposition_folded": 0.2299,
+    "net_speedup_at_equal_memory": 2.0,
+    "folded_build_secs": 116.7
+  }
 }

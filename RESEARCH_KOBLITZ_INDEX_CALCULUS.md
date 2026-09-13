@@ -1900,10 +1900,10 @@ A base 7.81 times wider, and 61 times fewer probes a target. The
 temptation is to call that a 61-fold speedup. It is not, and the run says
 so plainly. Two things eat it:
 
-- **A probe got 9.8 times dearer** — 115 ns to 1125 ns. Nearly all of
-  that is the canonicalisation: `n − 1` squarings is a dependency chain,
-  and a squaring here is a bit-spread plus eight reduction-table
-  lookups, about 830 ns for the chain.
+- **A probe got 3.1 times dearer** — 111 ns to 340 ns. That is with the
+  canonicalisation done as a rotation (below); computed as `n − 1`
+  squarings it was 1125 ns and 9.8 times, and the squaring chain is what
+  most of the gap was.
 - **Recovery grew with the base.** The compact table does not store
   summands; it recovers them by an `|F|`-long scan on a hit. That was
   0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
@@ -1913,7 +1913,7 @@ Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
 first witness:
 
-**0.469 s → 0.229 s, a factor of 2.0.**
+**0.476 s → 0.168 s, a factor of 2.8.**
 
 Real, and a twentieth of what the probe count alone suggested.
 
@@ -1935,17 +1935,56 @@ most targets that setup *is* the cost. Both now run a block at a time:
 long enough to amortise one field inversion and keep the squaring chains
 interleaved, short enough that an early exit throws away at most a block.
 
-### What is binding now
+### The squaring chain was not the only way to name an orbit
 
-The canonicalisation, and it is not obviously stuck there. `π` is a
-squaring only in a polynomial basis. In a *normal* basis it is a one-bit
-rotation, so the same minimum is `n` rotations — tens of nanoseconds
-rather than hundreds — and the basis change is one linear map, eight
-table lookups, done once per probe. That would put a folded probe below
-an unfolded one and leave most of the 61 intact.
+`π` is a squaring only in a *polynomial* basis. In a normal basis
+`{β, β², β⁴, …}` it is a one-bit cyclic rotation, because
 
-That is an opportunity, not a result: it has not been built or measured,
-and this note has been wrong before about what algebra alone predicts
-about cost. The `M²/(log M)²` reach law is unchanged in shape by any of
-this — what the fold moves is the constant, by putting `n` times more
-base behind the same byte.
+```
+(Σ c_k β^{2^k})² = Σ c_k β^{2^{k+1}}
+```
+
+So the Frobenius orbit of `x` is the set of rotations of its coordinate
+word, and the least rotation names it: one change of basis — an `F_2`
+linear map, applied as eight byte-table lookups — and `n` rotations.
+Nothing squared and nothing reduced.
+
+The name it gives an orbit is *not* the least element of that orbit; it
+is a different function of the point. That does not matter. A key has
+only to be constant on orbits and distinct across them, which a bijective
+linear map followed by a rotation-invariant minimum is — and a table is
+built and queried with the same one. Both properties are tested directly
+at degrees 13 through 61, against the squaring chain it replaces.
+
+| | squaring chain | rotation |
+|---|---|---|
+| a probe | 1125 ns | **340 ns** |
+| the build, 2.59e8 pairs | 116.7 s | **37.4 s** |
+| the fold, end to end | 2.0× | **2.8×** |
+
+The build gained the same factor as the probe, which it should: it
+canonicalises every pair it stores.
+
+### What is binding now — and it has moved
+
+Not the canonicalisation any more. **The summand recovery.** The compact
+representation does not store which two base points made a sum; it
+recovers them by a scan over the whole base, and that scan is `O(|F|)` —
+0.94 ms at `|F| = 16592`, **12.88 ms** at `|F| = 177632`. It grows with
+the very base the fold exists to widen.
+
+Worse, a three-summand search pays it once per witness it *finds*, not
+once per witness it keeps: the sorted-witness condition `j ≤ k` throws
+most of them away, and each rejected one has already cost a full scan.
+About nine tenths of the time per decomposition is now there.
+
+There is an obvious thing to try. `recover_pair` looks each difference up
+in a `std::collections::HashMap`, whose default hasher is SipHash — tens
+of nanoseconds on a `u64` key, paid `|F|` times. The table already
+computes a cheap hash for its presence filter. That is a change to the
+unfolded compact path as much as the folded one, and it is not yet built
+or measured.
+
+The `M²/(log M)²` reach law is unchanged in shape by any of this. What
+the fold moves is the constant, by putting `n` times more base behind the
+same byte.
