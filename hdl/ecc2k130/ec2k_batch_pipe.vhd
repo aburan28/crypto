@@ -366,15 +366,22 @@ architecture rtl of ec2k_batch_pipe is
   signal res_r     : gf_t;
   signal res_tag   : mtag_t;
 
-  -- output: four registers so the weight of x3 has four clocks (group
-  -- popcounts, sums of four groups, their sum, the compare); the 22-way
-  -- sum in one clock was the engine's worst path at 3 ns
-  signal o1_valid, o2_valid, o3_valid, o4_valid : std_logic := '0';
-  signal o1_x, o1_y, o2_x, o2_y, o3_x, o3_y, o4_x, o4_y : gf_t := (others => '0');
-  signal o1_tag, o2_tag, o3_tag, o4_tag : tag_t := (others => '0');
-  signal o2_parts : hw_parts_t := (others => (others => '0'));
-  signal o3_quads : hw_quads_t := (others => (others => '0'));
-  signal o4_hw    : hw_t := (others => '0');
+  -- the weight of x3 and its DP test, taken over four clocks (group
+  -- popcounts, sums of four groups, their sum, the compare; the 22-way
+  -- sum in one clock was the engine's worst path at 3 ns) from the head
+  -- of fp as x3 enters it, so they ride beside the final multiply as
+  -- nine bits and are ready with the product.  They used to be taken
+  -- after the retire, with x3 and y waiting three clocks in 262 shift
+  -- register LUTs per engine.
+  signal w_parts : hw_parts_t := (others => (others => '0'));
+  signal w_quads : hw_quads_t := (others => (others => '0'));
+  signal w_hw    : hw_t := (others => '0');
+  -- w_hw is the weight of the x3 in fp(3); it and the DP bit shift on
+  -- beside fp from there to the retire
+  constant WP_DEPTH : natural := FP_DEPTH - 4;
+  type hw_pipe_t is array (0 to WP_DEPTH - 1) of hw_t;
+  signal w_pipe  : hw_pipe_t := (others => (others => '0'));
+  signal d_pipe  : std_logic_vector(0 to WP_DEPTH - 1) := (others => '0');
 
 begin
 
@@ -631,7 +638,7 @@ begin
         m_tb(tw_b) <= tw_d;
       end if;
       -- The data of the retire registers moves every clock, valid or not
-      -- (tw_en and o1_valid say what counts), so no decode of the tag
+      -- (tw_en and out_valid say what counts), so no decode of the tag
       -- fans out to their clock enables.
       rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
       rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
@@ -647,10 +654,12 @@ begin
       end if;
       y3 := res_r xor fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1)
                   xor fp(FP_DEPTH - 1)(M + TAG_W downto TAG_W + 1);
-      o1_x   <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
-      o1_y   <= y3;
-      o1_tag <= fp(FP_DEPTH - 1)(TAG_W downto 1);
-      o1_valid <= '0';
+      out_x   <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
+      out_y   <= y3;
+      out_tag <= fp(FP_DEPTH - 1)(TAG_W downto 1);
+      out_hw  <= w_pipe(WP_DEPTH - 1);
+      out_dp  <= d_pipe(WP_DEPTH - 1);
+      out_valid <= '0';
       if res_valid = '1' then
         case to_integer(rkind) is
           when PH_FWD =>
@@ -702,7 +711,7 @@ begin
             end if;
           when others =>
             -- x3, y, tag and valid rode beside the multiply in fp
-            o1_valid <= fp(FP_DEPTH - 1)(0);
+            out_valid <= fp(FP_DEPTH - 1)(0);
             if rlast = '1' then
               fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
               fl_wr <= fl_wr + 1;
@@ -862,35 +871,20 @@ begin
       mul_a <= oa;
       mul_b <= ob;
 
-      -- ============ output: weight and DP test over four clocks ============
-      o2_valid <= o1_valid;
-      o2_x     <= o1_x;
-      o2_y     <= o1_y;
-      o2_tag   <= o1_tag;
-      o2_parts <= gf_weight_parts(o1_x);
-
-      o3_valid <= o2_valid;
-      o3_x     <= o2_x;
-      o3_y     <= o2_y;
-      o3_tag   <= o2_tag;
-      o3_quads <= hw_quads(o2_parts);
-
-      o4_valid <= o3_valid;
-      o4_x     <= o3_x;
-      o4_y     <= o3_y;
-      o4_tag   <= o3_tag;
-      o4_hw    <= hw_sum(o3_quads);
-
-      out_valid <= o4_valid;
-      out_x     <= o4_x;
-      out_y     <= o4_y;
-      out_tag   <= o4_tag;
-      out_hw    <= o4_hw;
-      if to_integer(o4_hw) <= DP_WEIGHT then
-        out_dp <= '1';
+      -- ============ the weight of x3, beside fp ============
+      w_parts <= gf_weight_parts(fp(0)(FP_W - 1 downto M + TAG_W + 1));
+      w_quads <= hw_quads(w_parts);
+      w_hw    <= hw_sum(w_quads);
+      w_pipe(0) <= w_hw;
+      if to_integer(w_hw) <= DP_WEIGHT then
+        d_pipe(0) <= '1';
       else
-        out_dp <= '0';
+        d_pipe(0) <= '0';
       end if;
+      for s in 1 to WP_DEPTH - 1 loop
+        w_pipe(s) <= w_pipe(s - 1);
+        d_pipe(s) <= d_pipe(s - 1);
+      end loop;
 
       if rst_q = '1' then
         p0_valid <= '0'; p1_valid <= '0'; p0_emp <= '1'; p1_emp <= '1';
@@ -901,7 +895,7 @@ begin
         fl_wr <= to_unsigned(NB, LOG_NB + 1); fl_rd <= (others => '0');
         cur_valid <= '0'; nxt_valid <= '0';
         a_valid <= (others => '0'); ra_valid <= '0'; mul_valid <= '0';
-        o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; o4_valid <= '0'; out_valid <= '0';
+        out_valid <= '0';
       end if;
     end if;
   end process;
