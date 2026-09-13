@@ -11,8 +11,8 @@
 `ifndef CL_ECC2K130_DEFINES
 `define CL_ECC2K130_DEFINES
 
-// walker engines; ~9k LUTs and 22 RAMB36 each as synthesised, the VU47P
-// has 1.30M LUTs and 2016 RAMB36
+// walker engines; ~8.4k LUTs, 12 RAMB36 + 2 RAMB18 and 4 URAM288 each as
+// synthesised, the VU47P has 1.30M LUTs, 2016 RAMB36 and 960 URAM288
 `ifndef ECC_NENG
 `define ECC_NENG 48
 `endif
