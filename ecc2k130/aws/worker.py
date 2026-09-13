@@ -574,6 +574,7 @@ class Worker:
                 out.write(src.read(whole - offset))
             key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
             self.store.put(delta, key)
+            self.reportRds(delta, slot)
             os.remove(delta)
             self.state["dpOffset"] = whole
             # Cumulative across dp file rotations, so the dashboard's count
@@ -587,6 +588,24 @@ class Worker:
                 self.state["ckptIter"] = it
                 self.saveState()
             os.remove(snap)
+
+    def reportRds(self, deltaPath, slot):
+        """Copy new GPU records into rho-dp, including each walk's starting seed.
+
+        No-op unless DATABASE_URL / RHO_DP_DSN is set.  Failures are logged;
+        S3 already has the durable copy."""
+        if not (os.environ.get("DATABASE_URL") or os.environ.get("RHO_DP_DSN")):
+            return
+        try:
+            from rds_gpu import reportGpuDelta
+            stats = reportGpuDelta(deltaPath, worker_id=self.owner,
+                                   campaign=os.environ.get("RHO_CAMPAIGN", "ecc2k-130"))
+            log("rds: reported %d dp (%d new, %d collisions) including starting seeds"
+                % (stats["reported"], stats["new"], stats["collisions"]))
+            if stats.get("last_collision"):
+                log("rds collision: %s" % stats["last_collision"])
+        except Exception as e:
+            log("rds report failed (points remain in S3): %s" % e)
 
     # ---- one client run ---------------------------------------------------
     def runClient(self, slot):
