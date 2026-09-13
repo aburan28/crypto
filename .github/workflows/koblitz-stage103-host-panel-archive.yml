@@ -1,0 +1,26 @@
+name: Koblitz Stage 103 host-panel archive
+
+on:
+  pull_request:
+    paths:
+      - "scripts/verify_koblitz_stage103_host_panel.py"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-103-host-panel-archive-20260913/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage10*-evidence-*.tar.gz*"
+      - ".github/workflows/koblitz-stage103-host-panel-archive.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-host-panel-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay archived Stages 100 through 102
+        run: |
+          python3 -m py_compile scripts/verify_koblitz_stage103_host_panel.py
+          python3 scripts/verify_koblitz_stage103_host_panel.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-103-host-panel-archive-20260913
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
