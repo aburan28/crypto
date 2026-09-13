@@ -84,9 +84,17 @@
       </p>
       <dl class="live" id="live">
         <div><dt>Points</dt><dd class="mono" id="live-dps">&mdash;</dd></div>
+        <div><dt>Operations</dt><dd class="mono" id="live-ops">&mdash;</dd></div>
         <div><dt>Workers</dt><dd class="mono" id="live-workers">&mdash;</dd></div>
         <div><dt>State</dt><dd class="mono state" id="live-state">&mdash;</dd></div>
       </dl>
+      <p class="live-note">
+        Operations is the walk total behind that point count, as a power of
+        two: a walk reports once per <span class="mono">2^25.27</span>
+        iterations at <span class="mono">HW(x) &le; 34</span>, and a collision
+        is expected to cost <span class="mono">2^60.9</span> of them. It is
+        derived from the count above, not a counter the workers report.
+      </p>
       <p class="card-more">Open the dashboard</p>
     </a>
 
@@ -295,10 +303,24 @@
 <script>
 (function () {
   "use strict";
-  // Progressive enhancement: the card reads fine without these three numbers.
+  // A walk on ECC2K-130 reports a point when HW(x) <= 34, which happens once
+  // per 2^25.27 iterations (ecc2k130/aws/README.md), so the published point
+  // count and the campaign's group-operation total differ by that exponent.
+  // Applying it here rather than publishing it keeps the snapshot
+  // aggregates-only; it is a parameter of one campaign's distinguishing
+  // rule, so it is only applied to the campaign it was measured on.
+  var CAMPAIGN = "ecc2k-130";
+  var ITERATIONS_PER_DP_LOG2 = 25.27;
+
+  // Progressive enhancement: the card reads fine without these four numbers.
   var set = function (id, text) {
     var node = document.getElementById(id);
     if (node) node.textContent = text;
+  };
+  // Operations run, as the exponent: log2(dps) + log2(iterations per point).
+  var operations = function (status, dps) {
+    if (status.campaign_id !== CAMPAIGN || !isFinite(dps) || dps <= 0) return "—";
+    return "2^" + (Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2).toFixed(1);
   };
   fetch("./status.json", { cache: "no-store" })
     .then(function (response) {
@@ -309,6 +331,7 @@
       var dps = Number(status.dps);
       var workers = Number(status.workers);
       set("live-dps", isFinite(dps) ? dps.toLocaleString("en-US") : "—");
+      set("live-ops", operations(status, dps));
       set("live-workers", isFinite(workers) ? workers.toLocaleString("en-US") : "—");
       set("live-state", String(status.state || "—").toLowerCase().replace(/_/g, " "));
     })
