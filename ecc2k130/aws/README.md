@@ -97,7 +97,7 @@ resident blocks per SM (minBlocks 4) cost 34%
    | worker.py  --> ./ecc2k130 --packed --run-id slot+1 ...    |   systemd unit
    |              --dp-file dp.bin --checkpoint walk.ck        |   ecc2k130-worker@N
    +-----------------------------------------------------------+
-        instances: EC2 Fleet (maintain, spot, any g7e size), user-data = bootstrap.sh
+        instances: EC2 Fleet (maintain, prefer g7e spot, on-demand only for shortfall), user-data = bootstrap.sh
 
    merge.py (anywhere, no GPU): sync dp/ -> bucket by key -> sort -> equal keys with
    different seeds -> ecc2k130-cpu --load pair.bin -> k, verified [k]P == Q
@@ -136,12 +136,18 @@ resident blocks per SM (minBlocks 4) cost 34%
   handed to the host client, whose reload path recomputes both walks and
   verifies `[k]P == Q`. The solution lands in `s3://bucket/solution.json`,
   which every worker checks before claiming a slot.
-* **Spot.** `bootstrap.sh` installs a watcher for the two-minute interruption
-  notice; it stops the units, the supervisors forward SIGTERM, the clients
-  checkpoint, and the final upload runs inside the notice window (a 385,024
-  worker checkpoint is ~370 MB: it holds the 6.16 M logical walks at 60 bytes
-  each, not the compact physical layout, so the new geometry did not move it).
-  The fleet replaces the instance and the replacement resumes the slot.
+* **Spot first.** `fleet.sh up` requests g7e capacity as Spot
+  (`DefaultTargetCapacityType=spot`, `price-capacity-optimized` across every
+  default subnet). After `FALLBACK_WAIT_SECONDS` it raises
+  `OnDemandTargetCapacity` only for GPUs Spot has not filled — On-Demand is a
+  shortfall backfill, not the default. `--no-fallback` keeps a pure Spot
+  request (plus any `--on-demand` base). `bootstrap.sh` installs a watcher for
+  the two-minute interruption notice; it stops the units, the supervisors
+  forward SIGTERM, the clients checkpoint, and the final upload runs inside the
+  notice window (a 385,024 worker checkpoint is ~370 MB: it holds the 6.16 M
+  logical walks at 60 bytes each, not the compact physical layout, so the new
+  geometry did not move it). The fleet replaces the instance and the
+  replacement resumes the slot.
 
 ## Prerequisites (do these once, they take longer than everything else)
 
@@ -191,7 +197,9 @@ All commands from this directory, with the default region set (`us-west-2`).
 #    campaign.json at it; later instances just download.  To build elsewhere:
 #    BUCKET=ecc2k130-<account> ./build.sh <sourceKey>   (any Linux host with Docker)
 
-# 3. pilot: one spot GPU (sizes with one GPU only, so "1" cannot over-fill)
+# 3. pilot: one GPU (sizes with one GPU only, so "1" cannot over-fill)
+#    Prefer g7e Spot; after FALLBACK_WAIT_SECONDS (default 120) any shortfall
+#    is switched to On-Demand. Pass --no-fallback to stay Spot-only.
 TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
@@ -202,9 +210,10 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 #    products would walk at half this rate and look perfectly healthy
 
 # 4. scale (GPUs, not instances)
-./fleet.sh scale 64                 # spot only
-#    an on-demand base can only be set when the fleet is created:
+./fleet.sh scale 64                 # keeps the Spot / On-Demand mix from `up`
+#    recreate to change the On-Demand base or disable fallback:
 #    ./fleet.sh down && ./fleet.sh up 64 --on-demand 8
+#    ./fleet.sh down && ./fleet.sh up 64 --no-fallback
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
