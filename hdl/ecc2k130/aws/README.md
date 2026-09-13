@@ -75,12 +75,12 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, about 7.3k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and
+its walk memory, about 7.1k LUTs, 12 RAMB36 + 2 RAMB18, 4 URAM288 and
 66 DSPs as synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M
 LUTs, 2 016 RAMB36, 960 URAM288 and 9 024 DSPs, of which the CL's
-pblock holds 7 992. 128 engines is 74% of the LUTs, 83% of the block
+pblock holds 7 992. 128 engines is 72% of the LUTs, 83% of the block
 RAM and 53% of the UltraRAM, and takes ten DSP leaves (7 680 DSPs); 136
-with nine leaves is 77% / 88% / 57% and 144 82% / 93% / 60%. (With the
+with nine leaves is 76% / 88% / 57% and 144 81% / 93% / 60%. (With the
 all-LUT multiplier, 8.1k LUTs per engine, 96 engines was 63% of the
 LUTs, 112 73% and 128 83% — the 128-engine image that runs at 8.25 G
 steps/s; with the product tree in block RAM,
@@ -193,10 +193,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 
 | Quantity | Estimate | Synthesised |
 |---|---|---|
-| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, 4 855 at three, 5 019 at four, all LUT leaves; **~4 330 at three with eleven leaves in DSPs** (now the default) |
+| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, 4 855 at three, 5 019 at four, all LUT leaves; **~4 350 at three with eleven leaves in DSPs** (now the default) |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | **66** (eleven 17-bit leaves as 2 × 3 grids of 24 × 15 integer products; 0 with `MUL_DSP_LEAVES = 0`) |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; **7 170 – 7 320** with eleven multiplier leaves in DSPs, 180 LUTRAM and 614 SRL left; 9 550 FF |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; 7 170 – 7 320 with eleven multiplier leaves in DSPs; **7 000 – 7 150** with the single-writer level arrays, 196 LUTRAM and 616 SRL left; 10 420 FF |
 | Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
 | BRAM | 0 | **12 RAMB36 + 2 RAMB18 and 4 URAM288 per engine** (the product tree in UltraRAM); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
 | Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
@@ -438,10 +438,26 @@ call and **`./build_afi.sh submit TAG`** makes the image from the
 uploaded tarball; `wait` does so itself when the instance is gone with
 the tarball up and no `afi.json`.
 
-Builds of the revision with all of the above and 64 × 8
+Two more paths from that −0.21 list went the same way. The batch level
+bookkeeping: the fill and the retire both wrote each batch's phase and
+level, and an array with two write ports is flip-flops behind a mux;
+now the fill only pushes "new" with the batch's queue entry and the
+retire is the arrays' only writer, so they are 20 LUTRAM (−191 LUTs
+per engine, 7 132 at 64 × 8). The multiplier's output: its 261-bit
+product register is spread over the whole Karatsuba tree and the XOR
+trees from it into the output register were 2.2 ns of route for 0.4 of
+logic, so the product is copied into a register the placer can put
+beside those trees before the back-conversion (`MUL_LATENCY` 14 with
+DSP leaves, 11 without; +17 LUTs, +261 FFs; the engine is **7 000 –
+7 150 LUTs and 10 420 FFs**). Neither shows in synthesis, where the
+engine's worst path is the output weight's sum at +1.25 ns on 3.0.
+
+Builds of the revision with the walker's registers and 64 × 8
 (`20260913-170424-n128-c375` and `170431-n112-c400` with the LUT
 multiplier, `170438-n136-c333` and `170445-n144-c333` with nine DSP
-leaves: 144 engines is 82% of the LUTs, 93% of the block RAM, 60% of
-the UltraRAM and 97% of the CL's DSPs) were running when this was
-written, as was `20260913-084322-n136-c333` (nine leaves, 32 × 16, the
-revision before), routing at −0.19 ns after eight hours.
+leaves: 144 engines is 81% of the LUTs, 93% of the block RAM, 60% of
+the UltraRAM and 97% of the CL's DSPs) and of the revision with the two
+above as well (`175911-n128-c375`, `175919-n144-c333` with nine leaves)
+were running when this was written, as was `20260913-084322-n136-c333`
+(nine leaves, 32 × 16, the revision before all of them), routing at
+−0.19 ns after eight hours.
