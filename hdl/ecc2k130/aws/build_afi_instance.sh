@@ -85,6 +85,13 @@ aws s3 cp "s3://$BUCKET/fpga/source.tar.gz" source.tar.gz --only-show-errors || 
 rm -rf src && mkdir src && tar xzf source.tar.gz -C src || fail "unpack source"
 export CL_DIR="$WORK/src/hdl/ecc2k130/aws/cl_ecc2k130"
 export ECC_RTL_DIR="$WORK/src/hdl/ecc2k130"
+# the DSP leaf count is a package constant (it sets the multiplier latency
+# the whole engine is built around), so an override edits the source
+if [ -n "${DSP_LEAVES:-}" ]; then
+    sed -i -E "s/(constant MUL_DSP_LEAVES *: *natural *:= *)[0-9]+;/\1$DSP_LEAVES;/" "$ECC_RTL_DIR/gf131_pkg.vhd"
+    grep -q "MUL_DSP_LEAVES *: *natural *:= *$DSP_LEAVES;" "$ECC_RTL_DIR/gf131_pkg.vhd" || fail "DSP_LEAVES override did not apply"
+    echo "DSP leaves: $DSP_LEAVES"
+fi
 cd "$CL_DIR/build/scripts"
 for f in aws_build_dcp_from_cl.py build_all.tcl build_level_1_cl.tcl; do
     ln -sf "$HDK_SHELL_DIR/build/scripts/$f" "$f"
@@ -93,11 +100,49 @@ mkdir -p "$CL_DIR/build/checkpoints" "$CL_DIR/build/reports"
 
 # ---- build -----------------------------------------------------------------
 export ECC_NENG=$NENG ECC_ID_W=$ID_W ECC_DP_WEIGHT=$DP_WEIGHT
-echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, tag $TAG"
+MMCM_MULT=${MMCM_MULT:-4}; MMCM_DIV=${MMCM_DIV:-3}; CLK_MHZ=${CLK_MHZ:-333}
+export ECC_MMCM_MULT=$MMCM_MULT ECC_MMCM_DIV=$MMCM_DIV
+echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz, tag $TAG"
 python3 aws_build_dcp_from_cl.py --cl cl_ecc2k130 --tag "$TAG" || fail "aws_build_dcp_from_cl.py"
 
 TARBALL="$CL_DIR/build/checkpoints/$TAG.Developer_CL.tar"
 [ -f "$TARBALL" ] || { tail -60 "$TAG.vivado.log" 2>/dev/null; fail "no DCP tarball; see the vivado log"; }
+
+# The HDK's aws_build_dcp_from_cl.py (2.3.4) takes the PCIe ids for the
+# manifest out of cl_id_defines.vh with str.lstrip("32'h"), which also eats
+# a leading 2 or 3 of the id itself (0x2C13 became 0xC13; the loaded image
+# then fails with cl-id-mismatch and cannot be used).  Re-derive the four
+# ids properly and rewrite the manifest inside the tarball when they differ.
+fixdir=$(mktemp -d)
+tar -C "$fixdir" -xf "$TARBALL"
+if python3 - "$CL_DIR/design/cl_id_defines.vh" "$fixdir/to_aws/$TAG.manifest.txt" <<'EOF'
+import re, sys
+defs, mf = sys.argv[1:]
+ids = {}
+for line in open(defs):
+    m = re.match(r"\s*`define\s+CL_SH_ID([01])\s+32'h([0-9A-Fa-f]{4})_([0-9A-Fa-f]{4})", line)
+    if m:
+        hi, lo = m.group(2).upper(), m.group(3).upper()
+        if m.group(1) == "0":
+            ids["pci_device_id"], ids["pci_vendor_id"] = "0x" + hi, "0x" + lo
+        else:
+            ids["pci_subsystem_id"], ids["pci_subsystem_vendor_id"] = "0x" + hi, "0x" + lo
+text = open(mf).read()
+changed = False
+for k, v in ids.items():
+    new, n = re.subn(r"^%s=.*$" % k, "%s=%s" % (k, v), text, flags=re.M)
+    if n and new != text:
+        print("manifest %s corrected to %s" % (k, v)); text, changed = new, True
+if changed:
+    open(mf, "w").write(text)
+sys.exit(0 if changed else 1)
+EOF
+then
+    tar -C "$fixdir" -cf "$TARBALL" ./to_aws
+fi
+rm -rf "$fixdir"
+tar -xOf "$TARBALL" "./to_aws/$TAG.manifest.txt" | grep pci_
+
 if ls "$CL_DIR/build/checkpoints/"*VIOLATED* >/dev/null 2>&1; then
     echo "WARNING: timing was not met; the image will be flagged timingViolated in afi.json"
     TIMING=violated
@@ -120,19 +165,19 @@ done
 
 # ---- AFI -------------------------------------------------------------------
 out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" \
-      --description "ECC2K-130 rho engine, $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, timing $TIMING" \
+      --description "ECC2K-130 rho engine, $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, $CLK_MHZ MHz, timing $TIMING" \
       --input-storage-location "Bucket=$BUCKET,Key=$PREFIX/$TAG.Developer_CL.tar" \
       --logs-storage-location "Bucket=$BUCKET,Key=$PREFIX/afi-logs" \
       --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=ecc2k130},{Key=BuildTag,Value=$TAG}]" \
       --output json) || fail "create-fpga-image"
 echo "$out"
-python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" > afi.json <<'EOF'
+python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" "$CLK_MHZ" > afi.json <<'EOF'
 import json, sys
-out, tag, neng, idw, dpw, timing = sys.argv[1:]
+out, tag, neng, idw, dpw, timing, mhz = sys.argv[1:]
 d = json.loads(out)
 json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], "tag": tag,
            "neng": int(neng), "idW": int(idw), "dpWeight": int(dpw),
-           "walks": int(neng) << int(idw), "timing": timing}, sys.stdout, indent=1)
+           "walks": int(neng) << int(idw), "clkMhz": int(mhz), "timing": timing}, sys.stdout, indent=1)
 EOF
 aws s3 cp afi.json "s3://$BUCKET/$PREFIX/afi.json" --only-show-errors || fail "upload afi.json"
 cat afi.json

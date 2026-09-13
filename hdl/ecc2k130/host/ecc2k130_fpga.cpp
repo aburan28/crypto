@@ -78,13 +78,13 @@ namespace reg {
 enum : uint32_t {
     MAGIC = 0x000, CTRL = 0x004, STATUS = 0x008, GEOM = 0x00C,
     STEPS_LO = 0x010, STEPS_HI = 0x014, DPS = 0x018, DROPPED = 0x01C,
-    LD_ID = 0x020, LD_X = 0x024, LD_Y = 0x038, LD_GO = 0x04C,
+    LD_ID = 0x020, LD_X = 0x024, LD_Y = 0x038, LD_GO = 0x04C, CLOCK = 0x050,
     DP_ID = 0x080, DP_STEPS_LO = 0x084, DP_STEPS_HI = 0x088,
     DP_X = 0x090, DP_Y = 0x0A4, DP_POP = 0x0B8,
 };
 static const uint32_t MAGIC_VALUE = 0x2C130001u;
 static const uint32_t CTRL_RUN = 1u, CTRL_CLEAR = 2u;
-static const uint32_t ST_LD_BUSY = 1u, ST_DP_AVAIL = 2u, ST_OVERFLOW = 4u;
+static const uint32_t ST_LD_BUSY = 1u, ST_DP_AVAIL = 2u;   // bit 2 (was DP_OVERFLOW) reads 0
 }  // namespace reg
 
 struct Geometry {
@@ -233,24 +233,34 @@ struct PciBus : Bus {
 #endif
 
 // Behavioural model of ec2k_axil: same registers, same handshakes, walks
-// advanced in software each time STATUS is read.  Loads complete at once,
-// the DP queue is 64 deep and overflows the same way.
+// advanced in software each time STATUS is read.  Loads complete at once;
+// the DP queue is 64 deep and, as in hardware, a report that finds it full
+// waits in its engine (here: a per-walk pending flag) rather than being
+// lost, so DROPPED and STATUS.DP_OVERFLOW are always zero.
 struct SimBus : Bus {
     Geometry geo;
     unsigned stepsPerPoll;
-    struct Walk { bool live = false; P131 x, y; uint32_t steps = 0; };
+    struct Walk { bool live = false, pending = false; P131 x, y; uint32_t steps = 0; };
     struct Dp { uint32_t gid, steps; P131 x, y; };
     std::vector<Walk> walks;
     std::deque<Dp> fifo;
     uint32_t ctrl = 0, ldId = 0, ldx[5] = {0}, ldy[5] = {0};
     uint64_t steps = 0;
-    uint32_t stepsHi = 0, dps = 0, dropped = 0;
-    bool overflow = false;
+    uint32_t stepsHi = 0, dps = 0;
 
     SimBus(const Geometry &g, unsigned spp) : geo(g), stepsPerPoll(spp), walks(g.walks()) {}
 
+    void report(unsigned g) {
+        Walk &w = walks[g];
+        if (fifo.size() >= 64) { w.pending = true; return; }
+        fifo.push_back(Dp{g, w.steps, w.x, w.y});
+        w.pending = false;
+        dps++;
+    }
     void advance() {
         if (!(ctrl & reg::CTRL_RUN)) return;
+        for (unsigned g = 0; g < walks.size(); ++g)
+            if (walks[g].pending) report(g);
         for (unsigned g = 0; g < walks.size(); ++g) {
             Walk &w = walks[g];
             if (!w.live) continue;
@@ -260,8 +270,7 @@ struct SimBus : Bus {
                 steps++;
                 if (weight(w.x) <= geo.dpWeight) {
                     w.live = false;
-                    if (fifo.size() >= 64) { dropped++; overflow = true; }
-                    else { fifo.push_back(Dp{g, w.steps, w.x, w.y}); dps++; }
+                    report(g);
                 }
             }
         }
@@ -277,13 +286,14 @@ struct SimBus : Bus {
         case CTRL: return ctrl & CTRL_RUN;
         case STATUS:
             advance();
-            return (fifo.empty() ? 0 : ST_DP_AVAIL) | (overflow ? ST_OVERFLOW : 0) |
+            return (fifo.empty() ? 0 : ST_DP_AVAIL) |
                    ((uint32_t)std::min<size_t>(fifo.size(), 255) << 16);
         case GEOM: return geo.encode();
+        case CLOCK: return 333333;   // kHz, as an image built with the defaults reports
         case STEPS_LO: stepsHi = (uint32_t)(steps >> 32); return (uint32_t)steps;
         case STEPS_HI: return stepsHi;
         case DPS: return dps;
-        case DROPPED: return dropped;
+        case DROPPED: return 0;
         case LD_ID: return ldId;
         case DP_ID: return fifo.empty() ? 0 : fifo.front().gid;
         case DP_STEPS_LO: return fifo.empty() ? 0 : fifo.front().steps;
@@ -298,8 +308,8 @@ struct SimBus : Bus {
         switch (off) {
         case CTRL:
             ctrl = v & CTRL_RUN;
-            if (!(v & CTRL_RUN)) for (Walk &w : walks) w.live = false;
-            if (v & CTRL_CLEAR) { steps = 0; dps = 0; dropped = 0; overflow = false; fifo.clear(); }
+            if (!(v & CTRL_RUN)) for (Walk &w : walks) w.live = w.pending = false;
+            if (v & CTRL_CLEAR) { steps = 0; dps = 0; fifo.clear(); }
             break;
         case LD_ID: ldId = v; break;
         case LD_GO:
@@ -675,9 +685,13 @@ struct Client {
             fprintf(stderr, "--run-id must fit 16 bits\n");
             return 1;
         }
-        printf("backend %s: %d engine(s) x %u walks = %u walks, dp weight %d, batches of %d, %d in flight\n",
+        const uint32_t clkKhz = bus->peek(reg::CLOCK);   // 0 from images older than the register
+        printf("backend %s: %d engine(s) x %u walks = %u walks, dp weight %d, batches of %d, %d in flight, "
+               "engine clock %s\n",
                o.sim ? "fpga-sim" : "fpga", geo.neng, 1u << geo.idW, nw, geo.dpWeight, 1 << geo.logW,
-               1 << geo.logNb);
+               1 << geo.logNb,
+               clkKhz ? (std::to_string(clkKhz / 1000) + "." + std::to_string(clkKhz / 100 % 10) + " MHz").c_str()
+                      : "not reported (250 MHz shell clock)");
 
         // corpus, then walk state
         if (int rc = reloadCorpus()) return rc < 0 ? 0 : rc;
@@ -712,7 +726,11 @@ struct Client {
         signal(SIGINT, onStop);
         signal(SIGTERM, onStop);
 
+        // The engines step while the walks are still being loaded (7 s for
+        // 24k walks over AXI-Lite), so the rate is measured from here, not
+        // from the counter's zero; the iteration totals keep every step.
         const double t0 = nowSeconds();
+        const u64 stepsT0 = steps0 + ((u64)bus->peek(reg::STEPS_LO) | ((u64)bus->peek(reg::STEPS_HI) << 32));
         double lastPrint = t0, lastCkpt = t0;
         u64 lost = 0, devSteps = 0;
         bool warnedLost = false;
@@ -746,8 +764,9 @@ struct Client {
             if (now - lastPrint > 2.0 || leaving) {
                 const double el = now - t0;
                 const double it = (double)(devSteps - steps0);
+                const double rate = (double)(devSteps - stepsT0);
                 printf("  %8.1f s  %10.3f M it/s  %10llu iterations  %8llu dp  %8llu stored  %8llu dropped\n",
-                       el, el > 0 ? it / el / 1e6 : 0.0, (unsigned long long)it, (unsigned long long)totalDp,
+                       el, el > 0 ? rate / el / 1e6 : 0.0, (unsigned long long)it, (unsigned long long)totalDp,
                        (unsigned long long)sol.inserted, (unsigned long long)lost);
                 if (lost && !warnedLost && lost * 10 > totalDp + lost) {
                     printf("  warning: dropping %.1f%% of reports; the host is not polling the queue fast enough\n",
@@ -771,7 +790,7 @@ struct Client {
         } else if (rc == 0) {
             const double el = nowSeconds() - t0;
             printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",
-                   el > 0 ? (double)(devSteps - steps0) / el / 1e6 : 0.0, (unsigned long long)totalDp,
+                   el > 0 ? (double)(devSteps - stepsT0) / el / 1e6 : 0.0, (unsigned long long)totalDp,
                    (unsigned long long)verified, (unsigned long long)lost);
         }
         fflush(stdout);
