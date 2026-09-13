@@ -4,6 +4,7 @@
  * checks them against vectors from ecref2k.py:
  *
  *   1. binary field        add, mul, sqr, inv, Frobenius, class weight
+ *   1b. reduction          the specialised reducer against the generic one
  *   2. class weight        Frobenius invariance, on every vector
  *   3. curve               add, double, negate, scalar mul, tau(G) == s*G
  *   4. walk                128-step traces and the per-step exponent j
@@ -88,6 +89,68 @@ static void test_field() {
         F2::batch_inv(xs, 9, sc);
         for (int i = 0; i < 9; i++) CHECK(F2::eq(xs[i], ref[i]), "batch_inv #%d", i);
     }
+}
+
+/* The narrowed product and reduction against the full-width ones they replace.
+ *
+ * Both are narrowings: f2m_prod takes the product at the words an element
+ * occupies instead of the four the container has, and f2m_reduce folds only
+ * over the words a product of degree <= 2m-2 can reach.  That is what makes
+ * them cheaper and also the only way they can be wrong, so check them against
+ * the width-4 versions on the products a run actually forms -- from f2m_prod
+ * and from the bit spreading -- and on the degree-2m-2 corner where the
+ * narrowing is tightest. */
+static void test_reduce_specialisation() {
+    const int N = 20000;
+    int wrong_prod = 0;
+    printf("[arith] narrowed product and reduction against full width, "
+           "%d products\n", 3 * N + 2);
+    uint64_t s = 0x9E3779B97F4A7C15ull;
+    auto rnd = [&s]() {
+        s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+        return (uint32_t)(s >> 11);
+    };
+    auto same = [](const f2e &a, const f2e &b) {
+        for (int i = 0; i < F2M_WORDS; i++) if (a.v[i] != b.v[i]) return false;
+        return true;
+    };
+    int bad = 0;
+    uint32_t t[F2M_DWORDS];
+    for (int n = 0; n < N; n++) {
+        f2e a, b;
+        for (int i = 0; i < F2M_WORDS; i++) {
+            a.v[i] = rnd() & f2m_word_mask(i);
+            b.v[i] = rnd() & f2m_word_mask(i);
+        }
+        /* a real multiply's product, and the width-4 product it replaces */
+        f2m_prod(t, a.v, b.v);
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+        uint32_t w[F2M_DWORDS];
+        clmul128(w, a.v, b.v);
+        for (int i = 0; i < F2M_DWORDS; i++)
+            if (t[i] != w[i]) { wrong_prod++; break; }
+        /* a real squaring's product */
+        for (int i = 0; i < F2M_WORDS; i++) {
+            uint64_t sp = F2::spread32(a.v[i]);
+            t[2 * i] = (uint32_t)sp;
+            t[2 * i + 1] = (uint32_t)(sp >> 32);
+        }
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+        /* an arbitrary buffer of the widest degree a product can have */
+        for (int i = 0; i < F2M_DWORDS; i++) {
+            int lo = 32 * i, bits = (2 * F2M_M - 1) - lo;
+            t[i] = bits <= 0 ? 0u
+                 : (bits >= 32 ? rnd() : (rnd() & ((1u << bits) - 1u)));
+        }
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    }
+    /* the two corners: zero, and the top bit a product can carry */
+    for (int i = 0; i < F2M_DWORDS; i++) t[i] = 0;
+    if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    t[(2 * F2M_M - 2) / 32] = 1u << ((2 * F2M_M - 2) % 32);
+    if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    CHECK(bad == 0, "specialised reduce disagrees with generic on %d inputs", bad);
+    CHECK(wrong_prod == 0, "f2m_prod disagrees with clmul128 on %d inputs", wrong_prod);
 }
 
 static void test_class_weight() {
@@ -252,6 +315,80 @@ struct HostState {
     }
 };
 
+/* What a walk step costs, counted.
+ *
+ * The batching table in README.md used to be derived by hand from the step's
+ * shape.  Count it instead: run the real stepper with the distinguished-point
+ * test disabled, so no step reseeds and every walk pays exactly one step, and
+ * read the field-operation counters.  The numbers here are per walk step, so
+ * the inversion Montgomery's trick amortises shows up divided by W.
+ *
+ * The unit is field operations.  Converting to one number needs the cost of a
+ * squaring relative to a multiply, which is arithmetic-dependent and belongs
+ * with the instruction counts in README.md, not here. */
+#ifdef F2M_COUNT_OPS
+static void test_step_cost() {
+    printf("[step cost] field operations per walk step, dp disabled\n");
+    Rho2kHost h;
+    h.prm.nj = 8; h.prm.jmin = 3;
+    h.prm.dp_threshold = 0;          /* g > 0 always: no step reseeds */
+    h.prm.max_steps = 1u << 30;
+    h.cb = cb_flat();
+    h.P = Koblitz::generator();
+    uint32_t k[SC_WORDS] = {0x1234567u, 0x89abcdefu, 0, 0};
+    h.Q = Koblitz::mul(h.P, k);
+    h.build();
+
+    const int iters = 40;
+    printf("            batched            lowmem\n");
+    printf("       W   mul/step   sqr/step   mul/step   sqr/step   weight/step\n");
+    double prev = 1e30;
+    for (uint32_t W : {1u, 2u, 4u, 8u, 16u, 32u}) {
+        const uint32_t T = 2;
+        double mul[2], sqr[2], wgt[2];
+        for (int variant = 0; variant < 2; variant++) {
+            HostState s;
+            s.init(h, T, W, 1 << 20);
+            f2m_ops::reset();
+            for (int it = 0; it < iters; it++)
+                for (uint32_t t = 0; t < T; t++) {
+                    if (variant == 0) switch (W) {
+                        case 1: r2k_step_batch<1>(s.ctx, t); break;
+                        case 2: r2k_step_batch<2>(s.ctx, t); break;
+                        case 4: r2k_step_batch<4>(s.ctx, t); break;
+                        case 8: r2k_step_batch<8>(s.ctx, t); break;
+                        case 16: r2k_step_batch<16>(s.ctx, t); break;
+                        default: r2k_step_batch<32>(s.ctx, t); break;
+                    } else switch (W) {
+                        case 1: r2k_step_batch_lowmem<1>(s.ctx, t); break;
+                        case 2: r2k_step_batch_lowmem<2>(s.ctx, t); break;
+                        case 4: r2k_step_batch_lowmem<4>(s.ctx, t); break;
+                        case 8: r2k_step_batch_lowmem<8>(s.ctx, t); break;
+                        case 16: r2k_step_batch_lowmem<16>(s.ctx, t); break;
+                        default: r2k_step_batch_lowmem<32>(s.ctx, t); break;
+                    }
+                }
+            double steps = (double)iters * T * W;
+            mul[variant] = f2m_ops::mul / steps;
+            sqr[variant] = f2m_ops::sqr / steps;
+            wgt[variant] = f2m_ops::weight / steps;
+        }
+        printf("     %3u   %8.2f   %8.2f   %8.2f   %8.2f   %8.2f\n",
+               W, mul[0], sqr[0], mul[1], sqr[1], wgt[0]);
+        CHECK(wgt[0] <= 1.001 && wgt[1] <= 1.001,
+              "W=%u: %.2f and %.2f class weights per step, the step needs one",
+              W, wgt[0], wgt[1]);
+        CHECK(mul[0] + sqr[0] < prev, "W=%u did not amortise further than W=%u/2", W, W);
+        /* lowmem re-walks the x chain rather than carrying the denominator,
+         * so it must cost more squarings and never fewer of anything. */
+        CHECK(sqr[1] > sqr[0] && mul[1] >= mul[0] - 1e-9,
+              "W=%u: lowmem is not the more-arithmetic side of the trade", W);
+        prev = mul[0] + sqr[0];
+    }
+    f2m_ops::reset();
+}
+#endif
+
 static void test_batched_step() {
     const uint32_t T = 3, W = 8;
     printf("[batched step] T=%u W=%u\n", T, W);
@@ -415,11 +552,15 @@ int main() {
         return 2;
     }
     test_field();
+    test_reduce_specialisation();
     test_class_weight();
     test_points();
     test_walk_vectors();
     test_canonical();
     test_batched_step();
+#ifdef F2M_COUNT_OPS
+    test_step_cost();
+#endif
     test_solve();
     if (failures) { printf("FAILED: %d checks\n", failures); return 1; }
     printf("ALL PASSED\n");

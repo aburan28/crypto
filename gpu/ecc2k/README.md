@@ -103,13 +103,17 @@ code the kernels run, not a model of it.
 2. **Structural identities the oracle is not needed for.** τ is a field and
    group homomorphism, τ^m is the identity, negation preserves x, and
    `g` is invariant under all m Frobenius images of every test vector.
-3. **The identity the whole attack rests on**: τ(G) = s·G, checked both
+3. **Every narrowed routine against the wide one it replaced.** `f2m_prod`
+   against `clmul128` and `f2m_reduce` against `f2m_reduce_generic`, on
+   60,002 products per curve: real multiplies, real squarings, random
+   buffers of the widest degree a product can have, and both corners.
+4. **The identity the whole attack rests on**: τ(G) = s·G, checked both
    against Python and by computing s·G on the device path.
-4. **Class equivariance**: f(τP) = τf(P) and f(−P) = −f(P) on sample points.
-5. **Three steppers agree.** The batched, low-memory and unbatched
+5. **Class equivariance**: f(τP) = τf(P) and f(−P) = −f(P) on sample points.
+6. **Three steppers agree.** The batched, low-memory and unbatched
    implementations must produce bit-identical state over 300 iterations and
    the same multiset of distinguished points.
-6. **End to end, and quantitatively.** The toy curves are solved through the
+7. **End to end, and quantitatively.** The toy curves are solved through the
    full pipeline — walks, distinguished points, host replay, class
    relation, linear solve — and the recovered logarithm is verified.
 
@@ -146,12 +150,16 @@ Measured statically (`./ptx_stats2k.sh`, clang for sm_90):
 
 | Operation | PTX instructions | Notes |
 |---|---|---|
-| F(2^97) multiply | 405 | 9 carry-less 32×32 products, Karatsuba twice |
-| F(2^97) squaring | 79 | 0.20 of a multiply — bit spreading, no multiplier |
+| F(2^97) multiply | 304 | 6 carry-less 32×32 products, three-way Karatsuba |
+| F(2^97) squaring | 78 | 0.26 of a multiply — bit spreading, no multiplier |
+| F(2^97) class weight | 165 | 25 windowed table reads, once per walk step |
 | secp256k1 multiply | 472 | for comparison, from `gpu/ecc`; 210 with its inline-PTX carry chains |
 
-**A 97-bit binary field multiply costs about as much as a 256-bit prime
-field multiply here** — because this backend multiplies in software. The
+The multiply was 405 and the squaring 79 before the widths below were cut
+down; the whole before-and-after is in the next section.
+
+**A 97-bit binary field multiply still costs most of what a 256-bit prime
+field multiply costs** — because this backend multiplies in software. The
 32×32 carry-less product is synthesised from sixteen ordinary widening
 multiplies with the interleaved-mask trick — split each operand into four
 subsets by bit index mod 4, multiply as integers, mask. Within a subset the
@@ -163,50 +171,76 @@ hardware instruction exists: PTX ISA 9.3 defines `clmad.lo.u64` /
 `clmad.hi.u64` for `sm_80` and later, and CUDA 13.3 or newer emits it.
 `ecc2k130/NATIVE-CARRYLESS.md` measured **+22.4%** on a complete ECC2K-130
 walk by switching to it, with the inline asm in
-`ecc2k130/include/packed131.h`. This backend has not been ported. Static
-counts here (clang, sm_90) put ~83% of a 128-bit carry-less product in the
-software `clmul32` emulation and ~55% of a squaring in the generic two-pass
-reducer, so both are worth more here than the 22.4% measured there —
-`ecc2k130/codegen/gendirectreduce.py` already generates the specialised
-reducer.
+`ecc2k130/include/packed131.h`. This backend has not been ported, and it
+remains the largest single thing left on the table: six software `clmul32`
+leaves are still 96 of the multiply's 304 instructions in widening
+multiplies alone, where `clmad` would do a 128-bit product in six
+instructions and make the three-way split below unnecessary for the
+multiply. Porting it needs a `ptxas` from CUDA 13.3 or newer, which is why
+it is not done here — the toolchain `ptx_stats2k.sh` assembles from the pip
+wheels tops out at 12.9, and nothing in this directory has ever run on a GPU.
 
 What Koblitz curves give back:
 
-- **Squaring is a fifth of a multiply**, so τ is nearly free. This is the
-  whole basis of the 13.9× class speedup.
+- **Squaring is a quarter of a multiply**, so τ is nearly free. This is the
+  whole basis of the 13.9× class speedup. It was a fifth before the multiply
+  got cheaper; the ratio is a property of the pair, so it moves when either
+  side does, and anything quoted in "multiply-equivalents" has to name the
+  ratio it used.
 - **Inversion is cheap.** Itoh–Tsujii computes a^(2^m−2) with about 7
-  multiplications and 96 squarings, roughly 23 multiply-equivalents,
-  against 270 for a Fermat inversion modulo a prime.
+  multiplications and 96 squarings, against 270 multiplications for a Fermat
+  inversion modulo a prime.
 
 That last point changes the kernel's shape. Batching inversions across
 walks is worth 27× over a prime field; here it is worth 3–4×, and W beyond
-16 buys little. Counted at m = 97 with the distinguished-point test
-disabled, in multiply-equivalents at 1 squaring = 0.2 multiplies:
+16 buys little. The operation counts are counted, not derived: `make test`
+builds with `F2M_COUNT_OPS` and `./test_ecc2k95` runs the real stepper with
+the distinguished-point test disabled, so every walk pays exactly one step
+and none reseeds. Multiplying them by the instruction counts above gives the
+per-step cost:
 
-| Batch W | Per rho step | Breakdown |
-|---|---|---|
-| 1 | 30.95 | 9.00 mul + 109.75 sqr |
-| 2 | 19.31 | 7.00 mul + 61.56 sqr |
-| 4 | 13.51 | 6.00 mul + 37.55 sqr |
-| 8 | 10.62 | 5.50 mul + 25.60 sqr |
-| 16 | 9.17 | 5.25 mul + 19.62 sqr |
-| 32 | 8.44 | 5.12 mul + 16.59 sqr |
+| Batch W | mul | sqr | PTX instructions/step, before | after | ratio |
+|---|---|---|---|---|---|
+| 1 | 9.00 | 108.90 | 12425 | **11395** | 0.917 |
+| 2 | 7.00 | 61.23 | 7844 | **7069** | 0.901 |
+| 4 | 6.00 | 37.15 | 5534 | **4887** | 0.883 |
+| 8 | 5.50 | 25.33 | 4397 | **3813** | 0.867 |
+| 16 | 5.25 | 19.32 | 3820 | **3268** | 0.855 |
+| 32 | 5.12 | 16.49 | 3543 | **3008** | 0.849 |
 
 (Per step: 2 multiplies for the addition, 1 squaring for λ², 3 multiplies
 for Montgomery's trick, 2j squarings for the two Frobenius chains, one class
-weight, and one inversion — 97 squarings and ~7 multiplies — split W ways.)
+weight, and one inversion — 96 squarings and 7 multiplies — split W ways.
+The operation counts are the same in both columns: nothing below changes
+what the walk computes, only what each field operation costs.)
+
+Where the W = 8 step goes now: 44% multiplies, 27% the two Frobenius chains,
+25% the amortised inversion's squarings, 4% the class weight. Squarings have
+become the larger half, and both of their shares are τ^k for k up to 48 —
+which is where the next lever is, since a Frobenius power is a fixed linear
+map and need not cost k squarings.
 
 **This table counts arithmetic only, and arithmetic is not what picks W.**
-`ptxas` puts `k2k_rho_walk<W>` at 344, 464, 656, 1040 and 1816 bytes of
+`ptxas` puts `k2k_rho_walk<W>` at 344, 464, 656, 1048 and 1816 bytes of
 per-thread local memory for W = 1, 2, 4, 8, 16 (sm_90, block 128,
 `R2K_MIN_BLOCKS=4`), and `k2k_rho_walk_lowmem<W>` at 400, 464 and 592 for
 W = 4, 8, 16. At 512 resident threads/SM, W = 16 on the batched variant is
 930 KB of local footprint per SM. Since the inversion being amortised is
-only ~23 multiply-equivalents to begin with, going from W = 8 to 16 buys
-1.45 multiplies against nearly doubled spill traffic. Nothing here has run
-on a GPU, so the crossover is unmeasured — pick W on hardware, not from this
-table, and weigh `lowmem` seriously: it costs 1.46 more multiply-equivalents
-per step at W = 8 and less than half the local memory.
+only 9,616 instructions (31.6 multiplies) to begin with, going from W = 8 to
+16 buys 544 instructions a step, 14.3%, against nearly doubled spill traffic.
+Nothing here has run on a GPU, so the crossover is unmeasured — pick W on
+hardware, not from this table, and weigh `lowmem` seriously. It is counted
+in the same run, and it costs this much more arithmetic for less than half
+the local memory:
+
+| Batch W | batched | lowmem | ratio |
+|---|---|---|---|
+| 1 | 11395 | 12467 | 1.094 |
+| 2 | 7069 | 7850 | 1.110 |
+| 4 | 4887 | 5513 | 1.128 |
+| 8 | 3813 | 4369 | 1.146 |
+| 16 | 3268 | 3789 | 1.159 |
+| 32 | 3008 | 3516 | 1.169 |
 
 **Nothing in the step is computed twice.** A step needs τ^j(P) and g(x_P),
 and the obvious arrangement pays for each twice: both phases apply τ^j (and
@@ -214,10 +248,14 @@ to both coordinates, though phase A only reads x), and the class weight is
 evaluated for the distinguished-point test and again for the next step's j.
 Instead phase A walks only the x chain and hands phase B the denominator
 x₁ + x₂ it already formed, phase B walks only the y chain, and the weight
-is carried in the walk state. At W = 8 that is 12.91 → 10.62
+is carried in the walk state. At W = 8 that was 12.91 → 10.62
 multiply-equivalents and one class-weight evaluation per step instead of
 two — and that table is the hottest in the kernel. The `lowmem` variant
 takes the weight saving but still re-walks the x chain, 15.52 → 12.08.
+(Those four figures are multiply-equivalents at the 1 squaring = 0.2
+multiplies the arithmetic had when they were measured. The ratio is 0.26
+now, so they are not comparable with the instruction counts above; the
+operation counts they rest on are unchanged.)
 
 Carrying the denominator is a trade, not a free win: it costs one extra
 field element per walk, and that is why `k2k_rho_walk<8>` went from 872 to
@@ -227,6 +265,68 @@ in its `DENOMINATOR-CACHE.md`, against the recompute path its `walk.h`
 prices at "786 instructions for 1048 bytes of traffic per slot". Which side
 wins is a memory-hierarchy question, so the two variants here keep opposite
 answers until someone measures on a GPU.
+
+## The container is not the field
+
+`F2M_WORDS` is four words for every field here, and almost nothing needs all
+four. An element is `ceil(m/32)` words, of which `m/32` are full and, when m
+is not a multiple of 32, one holds `m mod 32` bits. A product of two of them
+has degree at most 2m−2, and each fold of the reduction shortens what is
+left again. Three places in the arithmetic could have been running at the
+container's width rather than the field's. Two of them were:
+
+- **The product.** Karatsuba over four words spends a full 32×32 leaf on a
+  top word that at m = 97 holds **one bit**. Splitting it off —
+  `A = A_lo + a_top·t^96`, so `A·B = A_lo·B_lo + (A_lo·b_top + a_top·B_lo)·t^96
+  + a_top·b_top·t^192` — leaves a three-word Karatsuba, six leaves instead of
+  nine, plus seven products by a single bit, which are masks. This is not a
+  quirk of m = 97: the Koblitz challenge fields sit just above a word
+  boundary, 131 = 4·32 + 3 as well.
+- **The reduction.** Both folds ran the full eight words. At m = 97 the
+  input is seven, `hi = T >> m` is three, the first fold reaches four, and
+  the second fold's `hi2` is **five bits** — an extract and two XORs, not a
+  second pass.
+- **The spread.** Nothing to do: the 64-bit form already lets `clang` drop
+  the top word's spread when it can see the operand is reduced. Rewriting it
+  as two 32-bit spreads of the half-words looks like the natural shape for
+  32-bit lanes and costs 104 instructions per chained squaring against 78,
+  so it is deliberately still in 64-bit form.
+
+Per operation, and per rho step at W = 8 (`./ptx_stats2k.sh`; the toy curves
+are here because they show what the container was costing when it is most of
+the element):
+
+| | m = 97 multiply | squaring | step, W = 8 | m = 41 mul | m = 23 mul |
+|---|---|---|---|---|---|
+| before | 405.1 | 79.1 | 4397 | 468.0 | 461.0 |
+| after | **304.0** | **78.0** | **3813** | **146.0** | **52.0** |
+| ratio | 0.750 | 0.986 | 0.867 | 0.312 | 0.113 |
+
+Widening multiplies per m = 97 multiply fall from 132 to 96, which is
+exactly the six surviving leaves. Registers and occupancy do not move:
+`k2k_rho_walk<8>` and `k2k_rho_walk_lowmem<8>` stay at 128 registers and 512
+resident threads/SM on sm_90, sm_100 and sm_120, with at most 8 more bytes
+of stack.
+
+As a practicality note and not as the metric, the 40-bit end-to-end solve in
+`make test` — eight real discrete logarithms on one core — drops from
+2.1–2.7 s to 1.02–1.05 s over three runs each. It takes the same 191,840
+steps on both sides, which is the point: same walk, cheaper arithmetic.
+
+**This is engineering, not an advance.** It changes what a field operation
+costs, not how many of them a walk does: the operation counts in the table
+above are identical on both sides, the walk computes the same function, and
+`S = operations/√n` — the unit `docs/index-calculus-scoreboard.html` is drawn
+in — is exactly flat. There is no row to add there.
+
+**How it is checked.** Both narrowings are the only way the arithmetic can
+now be wrong, so `make test` checks each against the full-width version it
+replaces, on every curve: `f2m_prod` against `clmul128` and `f2m_reduce`
+against `f2m_reduce_generic`, which is kept in `f2m.cuh` for exactly this
+purpose. 60,002 products per curve — from real multiplies, from real
+squarings, from random buffers of the widest degree a product can have, and
+at both corners — plus the Python field vectors and the end-to-end solves
+that ran before.
 
 ## Occupancy: measured
 

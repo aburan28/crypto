@@ -70,7 +70,7 @@ sq, _ = pick('ksqr')
 print("  multiply  %6.1f" % mu)
 print("  squaring  %6.1f   (%.2f of a multiply)" % (sq, sq / mu))
 w = sum(1 for o in ops if o.startswith('mul.wide'))
-print("  %d widening multiplies per field multiply (9 carry-less 32x32 products)"
+print("  %d widening multiplies per field multiply (16 per carry-less 32x32 product)"
       % (w / 11))
 PY
 
