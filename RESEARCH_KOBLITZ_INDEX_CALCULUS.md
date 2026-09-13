@@ -1536,18 +1536,29 @@ so the descent's `2r/|F|²` is directly proportional to the width of a
 stored pair. **Halving the bytes halves the descent.**
 
 Sixteen bytes is `(packed sum, i, j)`. The sum is what a lookup asks
-about; `i` and `j` are what it answers with. But a bucket index already
-pins the top bits of a sum, and the bits it leaves over fit a `u32` for
-every degree this pipeline reaches — so four bytes hold the whole key
-**exactly**, with no filter and no false positives. What that gives up is
-the answer: a hit knows a decomposition exists but not of what.
+about; `i` and `j` are what it answers with. Four bytes hold a bucketed
+hash of the sum — never a false negative, and a false positive about one
+time in `2²⁸`. What that gives up is the answer: a hit knows a
+decomposition may exist but not of what.
 
-The answer is recoverable. `target − P_i` is a base point exactly when
-`i` is a summand, so one `|F|`-long scan finds the pair. Hits are rare by
-construction — that is what a decomposition oracle *is* — so the scan is
-paid about once per relation rather than once per probe. Storage falls
-from sixteen bytes to about four and a half, counting the bucket index
-and the presence filter.
+A hash rather than the key's own low bits, which would be exact if the
+bucket index were wide enough to leave 32 of them over. "Wide enough" is
+`key_bits − 32`, and a packed sum is `n + 2` bits: at `n = 53` that asks
+for 23 bucket bits while run length already wants 26, so it costs
+nothing, but at `n = 61` it asks for 31, and an index of `2³¹` words is
+four gibibytes spent on nothing but making a rest fit. A 36000-point base
+needs 2.97 GiB hashed at any degree, against 6.72 at `n = 61`. Neither
+form can give a wrong answer — build and lookup narrow a key the same
+way — but only one of them fits.
+
+The answer is recoverable, and recovering it is what makes the
+approximation safe. `target − P_i` is a base point exactly when `i` is a
+summand, so one `|F|`-long scan finds the pair — and the scan asks the
+group, not the table, so a false positive costs a scan that comes back
+empty and never a wrong answer. Hits are rare by construction — that is
+what a decomposition oracle *is* — so the scan is paid about once per
+relation rather than once per probe. Storage falls from sixteen bytes to
+about four and a half, counting the bucket index and the presence filter.
 
 At four gibibytes that is a base of 42302 points instead of 23169, and
 3.33 times fewer descent probes.
@@ -1591,3 +1602,230 @@ eight bytes a pair the representation exists to avoid.
 It costs 66.3 s for 664.8 million pairs against 6.7 s for 116.5 million —
 100 ns a pair against 57. That factor is the second pass, and it is now
 the largest single item in a wide precompute.
+
+## Degree 61: a 48-bit subgroup, and the boundary moves
+
+`K_0/F_{2^61}` has a 48-bit prime-order subgroup,
+`r = 162 888 033 982 417` — 7.7 times the degree-53 rung and the largest
+this family offers inside single-word arithmetic. On a 36112-point
+compact-table base, 32 targets:
+
+| | |
+|---|---|
+| factor base | 36112 points / 296 columns |
+| precompute | 79.0 s |
+| descent | 53.1 ms/target, 213 108 probes |
+| signed-Frobenius ρ | 3.248 s/target, 2 263 934 steps |
+| charged ρ/IC | **61.2** |
+| amortised ρ/IC | **1.29** |
+
+32 of 32 solved, 32 of 32 confirmed by the ρ walk, and **all three
+verdicts true** — charged, amortised and whole-process — at 32 targets.
+
+That last point is worth dwelling on, because the earlier projection said
+otherwise. The reach table two sections up put the charged ratio at 5.1
+at 48 bits and said the whole-process class would need about 315 targets
+there. Measured: **61.2, and 32 targets sufficed.** The projection
+under-predicted by a factor of twelve.
+
+It was not wrong when it was written. It used the constants of a
+15264-point base with a full scan, and since then every one of those
+constants has moved: collection reached its `2r/|F|²` floor, two setup
+costs left the precompute, and the compact table more than doubled the
+base. A projection is only as good as the implementation it was measured
+on, and this one was overtaken three times in an afternoon.
+
+### Where the boundary is now
+
+The charged ratio falls as `√r`, so from 61.2 at 48 bits the charged
+advantage runs out around
+
+```text
+    48 + 2·log₂(61.2) ≈ 60 bits
+```
+
+against the 52 the earlier table gave. That is an extrapolation from one
+point along a theoretical slope, and it should be read as one — the two
+wide-base rungs actually measured (75.2 at 45 bits, 61.2 at 48) fall more
+slowly than `√r` predicts, which would put the boundary further out
+still. The slope is used because it is the one the cost laws predict, not
+because two points confirmed it.
+
+None of this touches the exponent. The descent still costs `2r/|F|²`
+probes and ρ still costs `√(πr/2)/√(2n)` steps; linear still loses to a
+square root, and the boundary is still a boundary. What moved is where it
+sits, and it moved because a constant that looked fixed turned out not to
+be — four times in a row.
+
+## The whole thing in one law, and what measuring it cost
+
+Four sections of this note moved constants, and one moved the quantity
+the constants divide. It is worth collapsing all of it into the statement
+it adds up to — and then testing that statement, which turns out to be
+the part that matters.
+
+Two facts do the work. The descent needs `2r/|F|²` probes. The factor
+base is bounded by memory, `|F| = √(2M/c)` for `M` bytes at `c` bytes a
+stored pair. Substitute, set equal to ρ's `√(πr/2)/√(2n)` steps, and
+
+```text
+    r_max  ∝  M²
+```
+
+— two bits of reach per **doubling** of memory. That is the clean answer,
+and it is wrong, in a way that only a measurement finds.
+
+### Testing it
+
+The law rests on `2r/|F|²` probes at a probe cost that does not depend on
+`|F|`. Both halves are checkable: run one degree at three base widths and
+fit. At `K_0/F_{2^61}`, 32 targets each:
+
+| `\|F\|` | probes/target | `2r/\|F\|²` | measured/predicted | µs a probe | charged |
+|---|---|---|---|---|---|
+| 9 760 | 3 068 736 | 3 419 948 | 0.90 | 0.148 | 7.20 |
+| 18 544 | 545 117 | 947 354 | 0.58 | 0.214 | 27.79 |
+| 36 112 | 213 109 | 249 814 | 0.85 | 0.249 | 61.16 |
+
+Fitting across the three:
+
+```text
+    probe count      ∝ |F|^−2.03      the model says −2
+    seconds a probe  ∝ |F|^+0.40      the model says 0
+    descent seconds  ∝ |F|^−1.64
+```
+
+**The probe-count law is confirmed to within 1.5%.** What is not
+confirmed is the part nobody wrote down: a probe is not a fixed cost. It
+is a random access into a table that grows quadratically with the base,
+and it gets slower as the table grows — 0.148 µs into a table of 0.2 GB,
+0.249 µs into one of 3 GB. Sixty per cent dearer, across a range where
+the table is comfortably in DRAM the whole time.
+
+Carry that through and the law becomes
+
+```text
+    r_max  ∝  M^1.64
+```
+
+which is 1.64 bits a doubling, not 2. The difference compounds: at 64
+bits it asks for 0.67 TiB instead of 0.25, at 72 bits for 20 TiB instead
+of 4, and at 80 bits for **576 TiB instead of 64** — nine times the
+memory, for the same reach.
+
+### What the probe cost is
+
+The `|F|^0.40` is not a property of this code. It is this machine's
+memory latency curve, and once that is measured the power law turns out
+to be the wrong shape entirely.
+
+A probe is one random read of the presence filter, and the filter is
+quadratic in the base: 32 MB at 9760 points, 128 MB at 18544, 512 MB at
+36112. Measuring the machine directly — a pointer chase, every load
+waiting on the last, over working sets from 1 MB to 4 GB:
+
+| working set | dependent | independent |
+|---|---|---|
+| 32 MB | 83 ns | 8.4 ns |
+| 128 MB | 115 ns | 14.7 ns |
+| 512 MB | 149 ns | 25.1 ns |
+| 4 GB | 236 ns | 37.0 ns |
+
+Dependent latency is **linear in the logarithm** of the working set —
+`−31.9 + 21.1·log₂(MB)`, fitting eight sizes with `r² = 0.949`. And the
+descent's probe cost, fitted against its own three filter sizes, is
+`26.9 + 25.2·log₂(MB)`.
+
+**25.2 ns per doubling against 21.1 ns per doubling.** Two independent
+measurements — one of the pipeline, one of the bare machine — agreeing on
+the slope. That is a mechanism rather than a curve fit, and it says the
+per-probe cost grows as a *logarithm* of the table, not as a power of
+`|F|`. The `0.40` was a local power-law fit to a logarithm across a range
+of only 16×.
+
+### Which makes the law better than the power-law fit said
+
+Carrying a logarithm through instead of an exponent:
+
+```text
+    descent  ∝  (r/|F|²)·(K + 2β·log₂|F|)
+    r_max    ∝  M² / (C + β·log₂M)²
+```
+
+Quadratic in memory with a log-squared penalty — not `M^1.64`. A
+logarithm is nearly a constant, so this sits much closer to the clean
+`M²` than the power-law fit suggested:
+
+| subgroup | if a probe were free of the table | power-law fit `\|F\|^0.40` | measured log law |
+|---|---|---|---|
+| 48 bits | 1.0 GiB | 0.8 GiB | 1.4 GiB |
+| 64 bits | 0.25 TiB | 0.67 TiB | 0.61 TiB |
+| 72 bits | 4.0 TiB | 19.6 TiB | 11.7 TiB |
+| 80 bits | 64 TiB | 576 TiB | **220 TiB** |
+
+So the honest figure at eighty bits is about 220 TiB rather than the 576
+the power-law fit gave — the fit over-charged the far end by a factor of
+2.6, because it extrapolated an exponent that was only ever a local
+approximation to a logarithm.
+
+### Where this stops being true
+
+All of it holds while the table is DRAM-backed. The 21 ns a doubling is a
+DRAM curve measured on DRAM; it is not a law of nature and it does not
+continue across the storage boundary. A 220 TiB table is not DRAM on any
+machine one buys, and the step from memory to flash is a discontinuity of
+two to three orders of magnitude, not another 21 ns. What the log law
+legitimately covers is the range where the table still fits in memory —
+which on a large server today is a few terabytes, so around 68 to 70
+bits.
+
+Beyond that the right model is not this one, and this note does not have
+it. The 80-bit row is arithmetic, not a prediction, and it is the
+arithmetic of a machine that does not exist.
+
+### What the probe cost is not
+
+The obvious suspect for that `|F|^0.40` is the TLB. A probe is one random
+access into the presence filter, the filter is quadratic in the base —
+326 MB at 36112 points — and four-kilobyte pages make that eighty
+thousand page-table entries for a structure walked at random. Two-megabyte
+pages would cut the entries by five hundred.
+
+So: `madvise(MADV_HUGEPAGE)` on the filter and the rests before either is
+filled, and the three widths re-run. No change — 1.01, 0.94 and 1.02
+times the previous cost a probe, the fitted exponents unmoved.
+
+That is not a result, though, and it is worth being clear why.
+`AnonHugePages` in `/proc/meminfo` stayed at zero for the life of a
+process holding a three-gigabyte table: this kernel granted no huge pages
+at all, whatever the advice, and the sysfs knob reading `madvise` did not
+mean the sandbox would deliver. The measurement says the mechanism was
+unavailable, not that the hypothesis was wrong. The change was reverted
+rather than kept unverified, since it wanted an `unsafe` call to buy
+something nothing here could demonstrate.
+
+So the cause of the `0.40` is still open — TLB misses, cache pressure,
+memory bandwidth, or some mixture. It is worth settling by whoever has a
+host that grants huge pages, because the exponent is exactly what turns
+64 TiB into 576 at eighty bits.
+
+### The exponent is an upper bound, not an estimate
+
+The 0.40 was measured across tables of 0.2 to 3 GB. Every one of them fit
+in this machine's memory and was served by DRAM. The whole point of the
+`M` law is to make the table bigger, and past DRAM a lookup becomes an
+SSD or a network access — two to four orders of magnitude slower, not
+sixty per cent. So 1.64 is what the exponent looks like *before* the
+memory hierarchy has its real say, and the true large-scale figure is
+lower. The 576 TiB row is a floor on the cost, not an estimate of it.
+
+I had written `M²` into this note and into a pull request before running
+the three-width test, on the strength of the algebra alone. The algebra
+was right about the probes and silent about their cost, and it was the
+silence that mattered. The honest form of the result is the shape, which
+survives both versions:
+
+**Reach grows with memory, sub-quadratically and by a factor the memory
+hierarchy sets; precompute grows linearly in `r`.** This is a method for
+many logarithms on one curve, and never for one — 17 targets to pay for
+itself at 48 bits, and hundreds to thousands beyond that.
