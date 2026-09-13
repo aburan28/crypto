@@ -661,11 +661,12 @@ pub fn reversed_semaev(m: usize, max_z: u32) -> F2Poly {
     // Reverse S_b's summand slots only — the target keeps its own degree.
     let sb = semaev_in(b, &sb_slots, SCRATCH).reverse_in(&(a - 1..m).collect::<Vec<_>>(), db);
 
-    resultant_sylvester_trunc(
-        &coeff_list(&sa.truncate(&t), YV),
-        &coeff_list(&sb.truncate(&t), YV),
-        &t,
-    )
+    // Read Y-degrees from the untruncated factors.  Truncating first can
+    // drop a leading coefficient whose Z-degree sits above `max_z` and
+    // shrink the Sylvester matrix; that determinant is not the truncation
+    // of the true resultant.  `resultant_sylvester_trunc` still reduces
+    // every entry, so the matrix just keeps the pre-truncation size.
+    resultant_sylvester_trunc(&coeff_list(&sa, YV), &coeff_list(&sb, YV), &t)
 }
 
 /// **The coefficient of `Π_{i≤m} Xᵢ^{D−k}` in `S_{m+1}`**, `D = 2^{m−1}`,
