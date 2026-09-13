@@ -164,6 +164,16 @@ decomposition-oracle hardness distinguishes the two.
    two things.  A detector that does not localise buys at most `2^{73.29}`, and
    the experiment is over before it starts.
 
+The Nagao/Riemann–Roch encoding landed on main by #316
+(`research/nagao_relations/`) is the natural second case.  It is a different
+*relation representation* rather than a subspace-membership oracle — it searches
+for a function in `L(4O)` and reads the decomposition off its zeroes — so the
+question E3 asks lands on it unchanged and is worth asking early: does a
+coefficient search restricted to a sub-base cost less than the same search on
+the whole base, in proportion, or not at all?  That note is explicit that it is
+"implementation and toy correctness work, not an ECDLP speedup result", so
+nothing here is scored against it yet; E3 is the frame it would be scored in.
+
 **Falsifier / what would count.**  A detector whose full-base query is cheaper
 than `C(|F|, m−1)` *and* whose sub-base query on `W` costs less than the
 full-base query times `(|W|/|F|)^{m−1}`.  That combination, and only that
@@ -266,6 +276,37 @@ an orbit union has no low-degree membership polynomial, so the base must be
 90 MB, at `m = 6`).  **`131` being prime forbids having both the collapse and
 the implicit base, not the collapse itself.**
 
+**The concrete shape to build it out of.**  "A union of orbits" is not a
+construction.  The natural one is a **Hamming-weight shell in a normal basis**:
+in the basis `{β, β², β⁴, …}` the Frobenius is a cyclic shift of the 131
+coordinates, so the weight-`w` shell is shift-invariant by definition, and
+because 131 is prime every shell with `0 < w < 131` is exactly `C(131,w)/131`
+orbits of size 131 — no fixed points to special-case.  The sizes land on what
+§6 of the background note asks for almost exactly:
+
+| `m` | orbit base wants | weight shell | shell size |
+|---:|---:|---:|---:|
+| 3 | `2^44.53` | `w = 9` | `2^44.43` |
+| 4 | `2^33.90` | `w = 6` | `2^32.54` |
+| 5 | `2^27.58` | `w = 5` | `2^28.15` |
+| 6 | `2^23.42` | `w = 4` | `2^23.48` |
+
+Shells jump three to five bits apart, so finer sizes need a union of adjacent
+shells or a shift-invariant subset of one; the membership test is a popcount
+either way.  **The representation is already in the repository and the factor
+base is not**: `ecc2k130/FROBENIUS-NETWORK.md` applies Frobenius as a fixed
+bit-permutation network over the permuted type-II ONB, and
+`src/bin/ic/params.rs` carries ECC2K-130 only as an abstract normal-basis
+profile with "point coordinates not imported".  So E6 needs the base built, not
+merely selected.
+
+*(A correction to something adjacent: `research/nagao_relations/README.md` on
+main states that this repository "already uses normal-basis Hamming-weight
+sets" as factor bases.  It does not — what exists is the ONB as a **field
+representation** for the rho client.  The observation underneath that sentence
+is right and is the same one as §6.1 of the background note; only the claim that
+it is implemented is not.)*
+
 **What is still to run.**  The derivation assumes `|F|/n` relations suffice,
 which needs them to be **independent over the orbit unknowns**.  That is the
 part most likely to be wrong, and it is measurable on E1's ladder:
@@ -308,8 +349,10 @@ confirm actually governs these curves.
   (`RESEARCH_SEMAEV_DECOMPOSITION.md`), and F5's criteria remove zero reductions
   without lowering the degree of regularity, so a better implementation moves the
   constant and not the slope.
-- **Non-subspace, non-orbit factor bases in general.**  A base needs either a
-  cheap algebraic membership test or materialisation; E6 covers the second, and
-  the first is exactly the quasi-subfield census that came back empty at 131.
-  A third option would be a new idea, and this list is for experiments, not for
-  ideas.
+- **Factor bases that are neither subspaces nor Frobenius-stable.**  A base
+  needs either a cheap algebraic membership test or materialisation; E6 covers
+  the second, and the first is exactly the quasi-subfield census that came back
+  empty at 131.  Note this excludes less than it first appears: normal-basis
+  weight shells, which look like a third shape, are shift-invariant and so are
+  orbit unions, already inside E6.  A base outside both would be a new idea, and
+  this list is for experiments, not for ideas.
