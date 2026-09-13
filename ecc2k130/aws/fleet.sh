@@ -49,8 +49,6 @@ fleetId() {
         --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text
 }
 
-# Fulfill unmet Spot with On-Demand after a short wait. Spot stays the default
-# purchase type; On-Demand is only raised for the measured shortfall.
 fulfilledGpus() {
     local raw
     raw=$(aws ec2 describe-fleets --fleet-ids "$1" \
