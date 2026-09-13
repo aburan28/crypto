@@ -303,6 +303,15 @@ struct CompactPairTable {
     dense_shard_count: usize,
     dense_occupancy: Vec<u64>,
     dense_rank_blocks: Vec<u32>,
+    // The optional packed dense layout stores the two point indices in unused
+    // high coordinate bits plus one spill byte. Degree 53 needs 54 bits for
+    // compact x, 53 bits for y, and 28 bits for two 14-bit indices, so the
+    // exact payload occupies 17 bytes instead of 20 bytes per support entry.
+    dense_packed_payload: bool,
+    dense_key_x_bits: u32,
+    dense_image_y_bits: u32,
+    dense_point_index_bits: u32,
+    dense_witness_spill: Vec<u8>,
     keys_x: Vec<u64>,
     keys_y: Vec<u64>,
     // Cursor scans need only x and y to form the left pair point. Keep the
@@ -354,6 +363,11 @@ impl CompactPairTable {
             dense_shard_count: 0,
             dense_occupancy: Vec::new(),
             dense_rank_blocks: Vec::new(),
+            dense_packed_payload: false,
+            dense_key_x_bits: 0,
+            dense_image_y_bits: 0,
+            dense_point_index_bits: 0,
+            dense_witness_spill: Vec::new(),
             keys_x: Vec::new(),
             keys_y: Vec::new(),
             columns: Vec::new(),
@@ -389,6 +403,11 @@ impl CompactPairTable {
             dense_shard_count: 0,
             dense_occupancy: Vec::new(),
             dense_rank_blocks: Vec::new(),
+            dense_packed_payload: false,
+            dense_key_x_bits: 0,
+            dense_image_y_bits: 0,
+            dense_point_index_bits: 0,
+            dense_witness_spill: Vec::new(),
             keys_x: vec![u64::MAX; capacity],
             keys_y: if x_only {
                 Vec::new()
@@ -549,6 +568,93 @@ impl CompactPairTable {
             });
     }
 
+    #[inline(always)]
+    fn low_mask(bits: u32) -> u64 {
+        debug_assert!(bits < u64::BITS);
+        (1u64 << bits) - 1
+    }
+
+    fn pack_dense_payload(&mut self, x_domain: usize) {
+        assert!(self.is_dense() && self.x_only && !self.dense_packed_payload);
+        assert_eq!(self.keys_x.len(), self.image_y.len());
+        assert_eq!(self.keys_x.len(), self.columns.len());
+        let image_y_bits = (x_domain - 1).trailing_zeros();
+        let key_x_bits = image_y_bits + 1;
+        assert!(key_x_bits < u64::BITS && image_y_bits < u64::BITS);
+        let maximum_index = self
+            .columns
+            .iter()
+            .flat_map(|indices| indices.iter().copied())
+            .max()
+            .unwrap_or(0);
+        let point_index_bits = (u16::BITS - maximum_index.leading_zeros()).max(1);
+        let witness_bits = 2 * point_index_bits;
+        let key_spare = u64::BITS - key_x_bits;
+        let image_spare = u64::BITS - image_y_bits;
+        assert!(witness_bits <= key_spare + image_spare + u8::BITS);
+        let key_take = key_spare.min(witness_bits);
+        let image_take = image_spare.min(witness_bits - key_take);
+        let point_mask = Self::low_mask(point_index_bits);
+        let mut spill = Vec::with_capacity(self.columns.len());
+        for slot in 0..self.columns.len() {
+            assert!(self.keys_x[slot] <= Self::low_mask(key_x_bits));
+            assert!(self.image_y[slot] <= Self::low_mask(image_y_bits));
+            let indices = self.columns[slot];
+            let witness = u64::from(indices[0]) | (u64::from(indices[1]) << point_index_bits);
+            assert_eq!(witness & point_mask, u64::from(indices[0]));
+            if key_take != 0 {
+                self.keys_x[slot] |= (witness & Self::low_mask(key_take)) << key_x_bits;
+            }
+            let after_key = witness >> key_take;
+            if image_take != 0 {
+                self.image_y[slot] |= (after_key & Self::low_mask(image_take)) << image_y_bits;
+            }
+            spill.push((after_key >> image_take) as u8);
+        }
+        self.dense_packed_payload = true;
+        self.dense_key_x_bits = key_x_bits;
+        self.dense_image_y_bits = image_y_bits;
+        self.dense_point_index_bits = point_index_bits;
+        self.dense_witness_spill = spill;
+        self.columns = Vec::new();
+    }
+
+    #[inline(always)]
+    fn dense_key_x(&self, slot: usize) -> u64 {
+        if self.dense_packed_payload {
+            self.keys_x[slot] & Self::low_mask(self.dense_key_x_bits)
+        } else {
+            self.keys_x[slot]
+        }
+    }
+
+    #[inline(always)]
+    fn dense_image_y(&self, slot: usize) -> u64 {
+        if self.dense_packed_payload {
+            self.image_y[slot] & Self::low_mask(self.dense_image_y_bits)
+        } else {
+            self.image_y[slot]
+        }
+    }
+
+    #[inline(always)]
+    fn dense_point_indices(&self, slot: usize) -> [usize; 2] {
+        if !self.dense_packed_payload {
+            return self.columns[slot].map(usize::from);
+        }
+        let witness_bits = 2 * self.dense_point_index_bits;
+        let key_take = (u64::BITS - self.dense_key_x_bits).min(witness_bits);
+        let image_take = (u64::BITS - self.dense_image_y_bits).min(witness_bits - key_take);
+        let witness = (self.keys_x[slot] >> self.dense_key_x_bits)
+            | ((self.image_y[slot] >> self.dense_image_y_bits) << key_take)
+            | (u64::from(self.dense_witness_spill[slot]) << (key_take + image_take));
+        let point_mask = Self::low_mask(self.dense_point_index_bits);
+        [
+            (witness & point_mask) as usize,
+            ((witness >> self.dense_point_index_bits) & point_mask) as usize,
+        ]
+    }
+
     fn compact_dense(&mut self, x_domain: usize) {
         assert!(!self.shards.is_empty());
         assert!(self.x_only);
@@ -628,6 +734,9 @@ impl CompactPairTable {
             let key_x = self.keys_x[index];
             self.insert_x_filter_direct(key_x);
         }
+        if packed_dense_payload_enabled() {
+            self.pack_dense_payload(x_domain);
+        }
     }
 
     fn dense_occupied(&self, slot: usize) -> bool {
@@ -686,11 +795,13 @@ impl CompactPairTable {
                 return None;
             }
             let dense_slot = self.dense_rank(global_slot);
-            if self.keys_x[dense_slot] == key.0 {
+            if self.dense_key_x(dense_slot) == key.0 {
                 return Some(QuotientPairWitness {
-                    columns: self.columns[dense_slot],
+                    columns: self
+                        .dense_point_indices(dense_slot)
+                        .map(|index| index as u16),
                     coefficients: [0; 2],
-                    image_y: self.image_y[dense_slot],
+                    image_y: self.dense_image_y(dense_slot),
                 });
             }
             local_slot = (local_slot + 1) & local_mask;
@@ -831,6 +942,7 @@ impl CompactPairTable {
             + self.x_filter.len() * std::mem::size_of::<u64>()
             + self.dense_occupancy.len() * std::mem::size_of::<u64>()
             + self.dense_rank_blocks.len() * std::mem::size_of::<u32>()
+            + self.dense_witness_spill.len() * std::mem::size_of::<u8>()
     }
 
     fn slots_for_column(
@@ -862,7 +974,11 @@ impl CompactPairTable {
             if self.keys_x[slot] == u64::MAX {
                 continue;
             }
-            let indices = self.columns[slot].map(usize::from);
+            let indices = if self.is_dense() {
+                self.dense_point_indices(slot)
+            } else {
+                self.columns[slot].map(usize::from)
+            };
             let left = point_labels[indices[0]].0;
             let right = point_labels[indices[1]].0;
             if left == column || right == column {
@@ -1001,7 +1117,14 @@ impl CompactPairTable {
             let (shard, local_slot) = self.split_global_slot(slot);
             return shard.signed_point_at_slot(local_slot, negative);
         }
-        let key_x = *self.keys_x.get(slot)?;
+        let key_x = if self.is_dense() {
+            if slot >= self.keys_x.len() {
+                return None;
+            }
+            self.dense_key_x(slot)
+        } else {
+            *self.keys_x.get(slot)?
+        };
         if key_x == u64::MAX || (key_x == 0 && negative) {
             return None;
         }
@@ -1009,7 +1132,11 @@ impl CompactPairTable {
             None
         } else {
             let x = key_x - 1;
-            let mut y = self.image_y[slot];
+            let mut y = if self.is_dense() {
+                self.dense_image_y(slot)
+            } else {
+                self.image_y[slot]
+            };
             if negative {
                 y ^= x;
             }
@@ -1025,11 +1152,25 @@ impl CompactPairTable {
             let (shard, local_slot) = self.split_global_slot(slot);
             return shard.compact_point_at_slot(local_slot);
         }
-        let key_x = *self.keys_x.get(slot)?;
+        let key_x = if self.is_dense() {
+            if slot >= self.keys_x.len() {
+                return None;
+            }
+            self.dense_key_x(slot)
+        } else {
+            *self.keys_x.get(slot)?
+        };
         if key_x == u64::MAX {
             None
         } else {
-            Some((key_x, self.image_y[slot]))
+            Some((
+                key_x,
+                if self.is_dense() {
+                    self.dense_image_y(slot)
+                } else {
+                    self.image_y[slot]
+                },
+            ))
         }
     }
 
@@ -1053,7 +1194,11 @@ impl CompactPairTable {
         }
         debug_assert!(self.keys_x.get(slot).is_some_and(|&key| key != u64::MAX));
         debug_assert!(self.x_only);
-        let mut indices = self.columns[slot].map(usize::from);
+        let mut indices = if self.is_dense() {
+            self.dense_point_indices(slot)
+        } else {
+            self.columns[slot].map(usize::from)
+        };
         let mut labels = indices.map(|index| point_labels[index]);
         if negative {
             labels = labels.map(|(column, coefficient)| {
@@ -2109,6 +2254,12 @@ fn streamed_dense_compaction_enabled() -> bool {
     *ENABLED.get_or_init(|| {
         std::env::var("KIC_DISABLE_STREAMED_DENSE_COMPACTION").as_deref() != Ok("1")
     })
+}
+
+fn packed_dense_payload_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_PACKED_DENSE_PAYLOAD").as_deref() == Ok("1"))
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -3369,6 +3520,7 @@ fn main() {
     let fixed_base_reference_validation =
         std::env::var("KIC_DISABLE_FIXED_BASE_REFERENCE_VALIDATION").as_deref() != Ok("1");
     let dense_support_table = std::env::var("KIC_ENABLE_DENSE_SUPPORT_TABLE").as_deref() == Ok("1");
+    let packed_dense_payload = packed_dense_payload_enabled();
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
@@ -3377,6 +3529,7 @@ fn main() {
     assert!(!parallel_support_expansion || pair_mode == PairMode::SignedExpanded);
     assert!(!pipelined_support_expansion || parallel_support_expansion);
     assert!(!dense_support_table || pair_mode == PairMode::SignedExpanded);
+    assert!(!packed_dense_payload || dense_support_table);
     assert!(
         !dense_support_table
             || std::env::var("KIC_ENABLE_SHARDED_SUPPORT_TABLE").as_deref() == Ok("1")
@@ -3690,6 +3843,9 @@ fn main() {
             "support_table_shard_routing":quotient_pairs.shard_routing(),
             "support_table_dense":quotient_pairs.is_dense(),
             "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
+            "support_dense_packed_payload":quotient_pairs.dense_packed_payload,
+            "support_dense_witness_spill_bytes":quotient_pairs.dense_witness_spill.len()*std::mem::size_of::<u8>(),
+            "support_dense_point_index_bits":quotient_pairs.dense_point_index_bits,
             "support_table_slots":quotient_pairs.slots(),
             "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
             "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
@@ -4574,6 +4730,9 @@ fn main() {
                 "support_table_shard_routing":quotient_pairs.shard_routing(),
                 "support_table_dense":quotient_pairs.is_dense(),
                 "support_dense_streamed_compaction":quotient_pairs.is_dense() && streamed_dense_compaction_enabled(),
+                "support_dense_packed_payload":quotient_pairs.dense_packed_payload,
+                "support_dense_witness_spill_bytes":quotient_pairs.dense_witness_spill.len()*std::mem::size_of::<u8>(),
+                "support_dense_point_index_bits":quotient_pairs.dense_point_index_bits,
                 "support_table_slots":quotient_pairs.slots(),
                 "support_dense_occupancy_bytes":quotient_pairs.dense_occupancy.len()*std::mem::size_of::<u64>(),
                 "support_dense_rank_bytes":quotient_pairs.dense_rank_blocks.len()*std::mem::size_of::<u32>(),
@@ -4775,13 +4934,14 @@ mod packed_tests {
 
     #[test]
     fn sharded_support_table_matches_exact_unsharded_membership() {
-        let entries: Vec<ExpandedSupportEntry> = (1..=256usize)
+        let mut entries: Vec<ExpandedSupportEntry> = (1..=256usize)
             .map(|index| {
                 let x = (index as u64).wrapping_mul(0x1f12_3bb5) & ((1u64 << 53) - 1);
                 let y = x.rotate_left(17) & ((1u64 << 53) - 1);
                 ((x + 1, y), [index, 511 - index])
             })
             .collect();
+        entries.push((((1u64 << 53), (1u64 << 53) - 1), [16_383, 12_345]));
         let x_domain = (1usize << 53) + 1;
         let mut serial = CompactPairTable::with_capacity_unsharded(1_024, true, x_domain);
         for &(key, indices) in &entries {
@@ -4826,6 +4986,30 @@ mod packed_tests {
         let start = dense.scan_start(entries[0].0);
         assert!(start < dense.slots());
         assert_eq!(dense.wrap_scan_slot(start + dense.slots()), start);
+
+        let dense_bytes = dense.allocated_bytes();
+        let mut packed = CompactPairTable::with_capacity_sharded(1_024, true, x_domain, 4);
+        packed.insert_expanded_entries(entries.clone());
+        packed.compact_dense(x_domain);
+        if !packed.dense_packed_payload {
+            packed.pack_dense_payload(x_domain);
+        }
+        assert!(packed.dense_packed_payload);
+        assert_eq!(packed.dense_point_index_bits, 14);
+        assert_eq!(packed.dense_witness_spill.len(), packed.len());
+        assert_eq!(dense_bytes - packed.allocated_bytes(), 3 * packed.len());
+        for &(key, _) in &entries {
+            let expected = serial.get(key).unwrap();
+            let actual = packed.get(key).unwrap();
+            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.image_y, expected.image_y);
+        }
+        for slot in 0..packed.slots() {
+            assert_eq!(
+                packed.compact_point_at_slot(slot),
+                dense.compact_point_at_slot(slot)
+            );
+        }
     }
 
     #[test]
