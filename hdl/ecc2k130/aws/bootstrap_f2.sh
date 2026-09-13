@@ -64,6 +64,7 @@ aws s3 cp "s3://$BUCKET/campaign.json" campaign.json --only-show-errors || { ech
 aws s3 cp "s3://$BUCKET/fpga/afi.json" afi.json --only-show-errors || { echo "no promoted image (fpga/afi.json); run build_afi.sh promote"; exit 1; }
 aws s3 cp "s3://$BUCKET/fpga/source.tar.gz" source.tar.gz --only-show-errors || { echo "no fpga/source.tar.gz; run build_afi.sh push"; exit 1; }
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/rds_gpu.py" rds_gpu.py --only-show-errors || exit 1
 field() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2], ""))' "$1" "$2"; }
 AGFI=$(field afi.json agfi)
 NENG=$(field afi.json neng)

@@ -91,18 +91,17 @@ class Store:
                 (campaign, CURVE, ORDER_N, 34, meta),
             )
 
+    REPORT_SQL = """
+                SELECT is_new, is_collision, prior_a, prior_b, prior_worker, collision_id
+                FROM report_dp(%s, %s, %s, %s, %s, %s, %s)
+                """
+
     def report(self, point_key, start_seed, *, campaign=CAMPAIGN, worker_id=None, steps=None):
         walk_seed = coeffBytes(start_seed)
         a = coeffBytes(start_seed, COEFF_MOD)
         b = coeffBytes(0, COEFF_MOD)
         with self._conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT is_new, is_collision, prior_a, prior_b, prior_worker, collision_id
-                FROM report_dp(%s, %s, %s, %s, %s, %s, %s)
-                """,
-                (campaign, point_key, a, b, walk_seed, steps, worker_id),
-            )
+            cur.execute(self.REPORT_SQL, (campaign, point_key, a, b, walk_seed, steps, worker_id))
             row = cur.fetchone()
         return {
             "is_new": bool(row[0]),
@@ -112,6 +111,38 @@ class Store:
             "walk_seed_hex": walk_seed.hex(),
         }
 
+    def reportMany(self, records, *, campaign=CAMPAIGN, worker_id=None, steps=None):
+        """report_dp each (seed, point_key), pipelined so one delta is not one RTT per row."""
+        items = list(records)
+        reported = new = collisions = 0
+        last = None
+        for i in range(0, len(items), 512):
+            batch = items[i:i + 512]
+            with self._conn.pipeline(), self._conn.cursor() as cur:
+                seeds = []
+                for seed, key in batch:
+                    walk_seed = coeffBytes(seed)
+                    a = coeffBytes(seed, COEFF_MOD)
+                    b = coeffBytes(0, COEFF_MOD)
+                    cur.execute(self.REPORT_SQL, (campaign, key, a, b, walk_seed, steps, worker_id))
+                    seeds.append(walk_seed)
+                for walk_seed in seeds:
+                    row = cur.fetchone()
+                    reported += 1
+                    out = {
+                        "is_new": bool(row[0]),
+                        "is_collision": bool(row[1]),
+                        "prior_worker": row[4],
+                        "collision_id": int(row[5]) if row[5] is not None else None,
+                        "walk_seed_hex": walk_seed.hex(),
+                    }
+                    if out["is_new"]:
+                        new += 1
+                    if out["is_collision"]:
+                        collisions += 1
+                        last = out
+        return {"reported": reported, "new": new, "collisions": collisions, "last_collision": last}
+
 
 def reportGpuDelta(path, *, worker_id, campaign=CAMPAIGN, dsn=None, start=0):
     """Report every whole GPU record in path. Returns {reported, new, collisions}."""
@@ -119,17 +150,7 @@ def reportGpuDelta(path, *, worker_id, campaign=CAMPAIGN, dsn=None, start=0):
     store = Store(dsn)
     try:
         store.register(campaign)
-        reported = new = collisions = 0
-        last = None
-        for seed, key in iterGpuRecords(data, start):
-            out = store.report(key, seed, campaign=campaign, worker_id=worker_id)
-            reported += 1
-            if out["is_new"]:
-                new += 1
-            if out["is_collision"]:
-                collisions += 1
-                last = out
-        return {"reported": reported, "new": new, "collisions": collisions, "last_collision": last}
+        return store.reportMany(iterGpuRecords(data, start), campaign=campaign, worker_id=worker_id)
     finally:
         store.close()
 

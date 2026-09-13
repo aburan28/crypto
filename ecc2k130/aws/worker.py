@@ -457,6 +457,9 @@ class Worker:
         self.proc = None
         self.cfg = None
         self.gpuName = gpuName(self.gpu)
+        self.rdsQ = queue.Queue()
+        self.rdsThread = None
+        self.rdsSeq = 0
         signal.signal(signal.SIGTERM, self.onStop)
         signal.signal(signal.SIGINT, self.onStop)
 
@@ -593,19 +596,37 @@ class Worker:
         """Copy new GPU records into rho-dp, including each walk's starting seed.
 
         No-op unless DATABASE_URL / RHO_DP_DSN is set.  Failures are logged;
-        S3 already has the durable copy."""
+        S3 already has the durable copy.  Ingest runs on a background thread
+        so a long report_dp batch cannot skip a lease heartbeat or delay the
+        checkpoint upload that follows."""
         if not (os.environ.get("DATABASE_URL") or os.environ.get("RHO_DP_DSN")):
             return
-        try:
-            from rds_gpu import reportGpuDelta
-            stats = reportGpuDelta(deltaPath, worker_id=self.owner,
-                                   campaign=os.environ.get("RHO_CAMPAIGN", "ecc2k-130"))
-            log("rds: reported %d dp (%d new, %d collisions) including starting seeds"
-                % (stats["reported"], stats["new"], stats["collisions"]))
-            if stats.get("last_collision"):
-                log("rds collision: %s" % stats["last_collision"])
-        except Exception as e:
-            log("rds report failed (points remain in S3): %s" % e)
+        self.rdsSeq += 1
+        pending = os.path.join(self.work, "rds-delta-%d-%d.bin" % (slot, self.rdsSeq))
+        shutil.copyfile(deltaPath, pending)
+        if self.rdsThread is None:
+            self.rdsThread = threading.Thread(target=self.rdsLoop, daemon=True)
+            self.rdsThread.start()
+        self.rdsQ.put(pending)
+
+    def rdsLoop(self):
+        while True:
+            pending = self.rdsQ.get()
+            try:
+                from rds_gpu import reportGpuDelta
+                stats = reportGpuDelta(pending, worker_id=self.owner,
+                                       campaign=os.environ.get("RHO_CAMPAIGN", "ecc2k-130"))
+                log("rds: reported %d dp (%d new, %d collisions) including starting seeds"
+                    % (stats["reported"], stats["new"], stats["collisions"]))
+                if stats.get("last_collision"):
+                    log("rds collision: %s" % stats["last_collision"])
+            except Exception as e:
+                log("rds report failed (points remain in S3): %s" % e)
+            finally:
+                try:
+                    os.remove(pending)
+                except OSError:
+                    pass
 
     # ---- one client run ---------------------------------------------------
     def runClient(self, slot):
