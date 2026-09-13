@@ -20,11 +20,15 @@ derived, or estimated. **The 96-engine image runs on an `f2.6xlarge` at
 6.02 G steps/s**, the 80-engine one at 5.02 G, the 64-engine one at 4.01
 G and the 48-engine one at 3.01 G (`aws/README.md`, "What came back"):
 333 MHz / 5.31 clocks per step per engine, with the distinguished points
-sampled from each checked against the client's reference walk. The
-current revision keeps the product tree in UltraRAM, counts eleven of the
-multiplier's 27 leaves in DSPs (the engine is 7.3k LUTs from 8.1k) and
-batches 32 walks 16 deep (5.22 clocks per step); 112-, 120-, 128- and
-136-engine builds were in flight when this was written.
+sampled from each checked against the client's reference walk. With the
+product tree in UltraRAM and 32-walk batches, **the 128-engine image at
+333 MHz holds 8.25 G steps/s** (5.17 clocks per step on the device; 112
+engines at 375 MHz 8.12 G, 120 at 333 MHz 7.73 G). The current revision
+counts eleven of the multiplier's 27 leaves in DSPs (the engine is 7.3k
+LUTs from 8.1k), batches 64 walks 8 deep (5.16 clocks per step with
+either multiplier) and registers the walker's FIFO write and head;
+128-engine 375 MHz, 112-engine 400 MHz and 136- and 144-engine 333 MHz
+builds of it were in flight when this was written.
 
 ## Files
 
@@ -219,10 +223,14 @@ leaves save). Synthesised (`cl_probe`, 2 engines, 3.0 ns), **measured**:
 | **11 DSP leaves** | **7 170 – 7 318** | 9 546 | **66** | +1.18 / +1.24, no DSP path in the 80 worst |
 
 A DSP leaf is six DSPs and ~70 LUTs against ~140: −788 LUTs per engine
-(−9.7%). 128 engines take 8 448 DSPs (94%); 136 fit 10 leaves each
-(`DSP_LEAVES=10` in `build_afi.sh`). The price is three clocks of
-latency (13 from 10), which 8 batches in flight no longer hide (5.38
-clocks per step at 32 × 8); 16 do — see "The batched step unit".
+(−9.7%). The device has 9 024 DSPs but the CL's pblock holds **7 992**
+(the shell keeps the rest), and a design over it fails the placer's
+utilisation DRC before anything is placed — two builds found this out
+— so 120 engines can take eleven leaves (7 920), 128 ten (7 680), 136
+and 144 nine (7 344 / 7 776; `DSP_LEAVES=` in `build_afi.sh`). The price
+is three clocks of latency (13 from 10), which 8 batches of 32 no longer
+hide (5.38 clocks per step); 8 batches of 64 do (5.16) — see "The
+batched step unit".
 
 ## The step
 
@@ -350,13 +358,22 @@ and the UltraRAMs are 4096 deep: any geometry holding 256 or 512 walks
 costs 8 RAMB36 + 1 RAMB18 + 4 URAM288 per step unit. With the 10-clock
 multiplier the image's default was 32 × 8: the same 256 walks and the
 same memory as 16 × 16, and the walker testbench with 512 walks ran
-**5.16 clocks per step against 5.31** — the bound is `5 + 5/W`. With the
-13-clock multiplier (DSP leaves) eight batches no longer cover the
-inversion chain and 32 × 8 reads 5.38; **the image's default is now
-32 × 16** (`cl_ecc2k130_defines.vh`), all 512 of the engine's walks in
-the step unit, at **5.22** (16 × 16: 5.31, 64 × 4: 6.06; all measured in
-the walker testbench with 512 walks, `-gLOG_W=5 -gLOG_NB=4`). The
-testbenches' default stays 16 × 8.
+**5.16 clocks per step against 5.31** — the bound is `5 + 5/W` — and
+the three images measured on the device (112, 120 and 128 engines) run
+5.17. With the 13-clock multiplier (DSP leaves) eight batches of 32 no
+longer cover the inversion chain and 32 × 8 reads 5.38. 32 × 16 reads
+5.22 — but so, at 5.21, does the 10-clock multiplier at 32 × 16, which
+32 × 8 beats: sixteen batches of 32 are all 512 of the engine's walks,
+so as a batch retires there is nothing queued to fill the next, and
+it starves (with 1 024 walks 32 × 16 runs 5.16 with either multiplier,
+but the FIFO would be 4 more RAMB36 per engine). **The image's default
+is 64 × 8** (`cl_ecc2k130_defines.vh`; `LOG_W`/`LOG_NB` on
+`build_afi.sh`): the same 512 walks in flight and the same words in the
+tables and the tree as 32 × 16, **5.16 with either multiplier** (64 × 4:
+6.06; 16 × 16: 5.31; all measured in the walker testbench with 512
+walks), and 7 323 LUTs per engine against 32 × 16's 7 690 and 32 × 8's
+7 318 — the level bookkeeping scales with the number of batches, not
+their width. The testbenches' default stays 16 × 8.
 
 Degenerate inputs (`d = 0`, i.e. `sigma^j(x) = x`) are not special-cased,
 matching the client: the chain returns `1/0 = 0`, the product tree zeroes
@@ -376,18 +393,28 @@ start point into that id. The step count rides through the step unit in
 the tag rather than in a per-walk counter memory, so the retire path has
 no read-modify-write of a RAM and there is no state indexed by walk id at
 all. The FIFO is block RAM — 512 words of 304 bits, four RAMB36 and a
-RAMB18 — read through a four-entry prefetch buffer that hides the two-clock
-read, so the step unit sees a walk every clock it can take one. That is
+RAMB18 — written through a register (enable, address and word, so the
+array's pins are driven from flip-flops the placer puts beside it; an
+allocating pointer serves the full test, a committed pointer a clock
+behind it the empty test, so a read never meets its write) and read
+through a four-entry prefetch buffer that hides the two-clock read,
+whose oldest entry moves into a head register as that empties: the step
+unit's input and every term of "the head is a report, take it" are
+flip-flops. In the routed 128-engine image at 375 MHz the write enable
+had been a pointer compare 2.0 – 2.6 ns of route from the array and the
+report register's 300 clock enables had hung off a LUTRAM read of the
+head; the two registers cost 9 LUTs and 633 FFs per engine. That is
 the same division of labour as the GPU client, whose kernel reports
 `(seed, endpoint)` and whose host owns restarts, the corpus and collision
 resolution (`ecc2k130/README.md`, "Distinguished points and restarts").
-`NWALK` should comfortably exceed the `W · 2^LOG_NB` walks the step unit
-holds, so a full batch is always forming; when it does not (start-up, a
-host slow to reload) the flush keeps things moving at reduced efficiency,
-never a stall. The default is 512 walks (`ID_W = 9`) over 256 in the step
-unit, and `ec2k_walker_tb -gRATE_CLK=40000`, which keeps every id loaded,
-measures **5.29 clocks per step** through the walker (5.54 with 8 batches
-in flight and 256 walks).
+`NWALK` should cover the `W · 2^LOG_NB` walks the step unit holds so a
+full batch is always forming — equal to it is fine at 64 × 8, not at
+32 × 16, see above; when it does not (start-up, a host slow to reload)
+the flush keeps things moving at reduced efficiency, never a stall. The
+default is 512 walks (`ID_W = 9`), and `ec2k_walker_tb -gRATE_CLK=40000`,
+which keeps every id loaded, measures **5.16 clocks per step** through
+the walker at 64 × 8 or 32 × 8 (5.29 at 16 × 16, 5.54 with 8 batches of
+16 and 256 walks).
 
 `ec2k_walker_tb` plays host: it loads 64 start points 32 at a time, checks
 every report's id, step count and point against the trajectory the client's
@@ -568,12 +595,16 @@ ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
 is 83% / 83% / 53%, and the LUTs bound the count. With eleven leaves in
 DSPs 128 engines is 74% of the LUTs, 83% of the block RAM, 53% of the
-UltraRAM and 94% of the DSPs; 136 engines with ten leaves each is 80% /
-88% / 57% / 90%. At 5.31 clocks per step and 333 MHz that is 63 M
-steps/s per engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G
-at 80, 6.0 G at 96 — all four measured on the device**; at 5.22 clocks
-per step (32 × 16) 63.9 M per engine, 8.2 G at 128 and 8.7 G at 136; at
-the shell's 250 MHz the measured four would be 2.3, 3.0, 3.8 and 4.5 G.
+UltraRAM and 94% of the device's DSPs — over the CL pblock's 7 992, so
+128 engines take ten leaves (7 680), 136 and 144 nine: 136 is 77% of
+the LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 82% / 93% /
+60%. At 5.31 clocks per step and 333 MHz that is 63 M steps/s per
+engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80,
+6.0 G at 96 — all four measured on the device**; at 5.17 (32 × 8, the
+LUT multiplier) **8.25 G at 128 engines and 333 MHz, 8.12 G at 112 and
+375 MHz, 7.73 G at 120 and 333 — also measured**; at 5.16 (64 × 8)
+64.6 M per engine, 8.8 G at 136, 9.3 G at 144 or at 128 and 375 MHz;
+at the shell's 250 MHz the first four would be 2.3, 3.0, 3.8 and 4.5 G.
 
 For scale, the measured client rate on an RTX PRO 6000 Blackwell is
 6.9 G iterations/s (`ecc2k130/RTX-PRO6000.md`), reached by bitslicing 32
