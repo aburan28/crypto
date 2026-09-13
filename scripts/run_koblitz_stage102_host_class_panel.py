@@ -46,17 +46,19 @@ def self_test() -> dict[str, Any]:
     return {
         "schema": "koblitz_stage102_self_test.v1",
         "status": "PASS",
-        "checks": 35,
+        "checks": 39,
         "n": 53,
         "pair_count": PAIR_COUNT,
         "parallel_width": 4096,
         "selected_stack": {
-            "x_filter": "direct_low_and_high_x_bit_windows",
+            "x_filter": "four_shard_direct_low_and_high_x_bit_windows",
             "prefiltered_exact_lookup": True,
             "itoh_tsujii_inverse": True,
             "blocked_filter": False,
             "compact_hash_complete_evidence": True,
             "fixed_base_reference_validation": True,
+            "support_table_shards": 4,
+            "shard_routing": "xor_low_and_high_x_windows",
         },
         "same_target": True,
         "separate_process_meter_per_arm": True,
@@ -72,6 +74,7 @@ def selected_environment() -> dict[str, str]:
     environment["KIC_RANK_AWARE_PAIR_SCAN"] = "1"
     environment["KIC_PARALLEL_SUPPORT_EXPANSION"] = "1"
     environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
+    environment["KIC_ENABLE_SHARDED_SUPPORT_TABLE"] = "1"
     environment["KIC_SUMMARY_ONLY"] = "1"
     environment["RAYON_NUM_THREADS"] = "4"
     return environment
@@ -139,7 +142,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         require(row["relation_hashes"] == first["relation_hashes"], f"direct pair {pair_index} relation transcript changed")
         require(summary["factor_base_log_solution"] == first_summary["factor_base_log_solution"], f"direct pair {pair_index} solution changed")
         require(base["base_hash"] == first_base["base_hash"], f"direct pair {pair_index} factor base changed")
-        require(base.get("support_x_prefilter_hash_strategy") == "direct_low_and_high_x_bit_windows", f"direct pair {pair_index} lost direct-bit filter")
+        require(base.get("support_x_prefilter_hash_strategy") == "four_shard_direct_low_and_high_x_bit_windows", f"direct pair {pair_index} lost sharded direct-bit filter")
+        require(base.get("support_table_shards") == 4, f"direct pair {pair_index} lost four-shard table")
+        require(base.get("support_table_shard_routing") == "xor_low_and_high_x_windows", f"direct pair {pair_index} lost selected shard routing")
+        require(base.get("parallel_support_insertion") is True, f"direct pair {pair_index} lost parallel support insertion")
         require(base.get("support_x_prefilter_direct_bits") is True, f"direct pair {pair_index} direct-bit flag changed")
         require(base.get("support_x_prefilter_blocked") is False, f"direct pair {pair_index} selected blocked filter")
         require(summary.get("query_prefiltered_exact_lookup") is True, f"direct pair {pair_index} lost prefiltered lookup")
