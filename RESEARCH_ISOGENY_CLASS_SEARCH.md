@@ -286,13 +286,98 @@ monomial is `Σᵢ wt(eᵢ)` over the `m` symbolic variables,
 
 So the *ceiling* is proved in general; what the computation adds is that the
 ceiling is **attained**, that the monomials attaining it are `a₆`-free, and
-that `a₆` stops two short of it.  Those three facts are established at
-`m ∈ {2,3,4,5}` and are what Boundary C rests on; they are not proved for all
-`m`, and §7 says so.
+that `a₆` stops two short of it.
 
-The gap being **constant rather than shrinking** is the load-bearing part.  A
-narrowing gap would predict the boundary failing at some larger `m`; a flat one
-says it does not erode.
+**The first two are now proved for every `m`** (iteration 4, below).  The
+third — the gap being exactly `2` rather than at least `1` — stays measured at
+`m ∈ {2,3,4,5}`, and it is the corroborating detail rather than the
+load-bearing one: what Boundary C needs, and what `boundary_c_holds()` tests,
+is that the ceiling is attained and that nothing carrying `a₆` reaches it.
+
+### C′ — the induction, and Boundary C for all `m` (EXP-R6d)
+
+The queue item left by iteration 2 was *the induction*: prove the gap for all
+`m`, or find a counterexample at `m ≥ 6`.  It resolves in the first direction,
+and the proof also makes `m = 6, 7` computable as independent corroboration.
+
+**Step 1 — the ceiling shape is forced, so the boundary is one coefficient.**
+For `m ≥ 3` the only exponent `e ≤ 2^{m−1}` with `wt(e) = m−1` is
+`e = 2^{m−1}−1`: a smaller `e` has at most `m−1` bits, with equality only when
+every one is set, and `wt(2^{m−1}) = 1 < m−1`.  So a monomial reaches
+`bdeg = m(m−1)` **iff all `m` summand exponents equal `2^{m−1}−1`**, and the
+whole boundary is decided by one coefficient — is
+`coeff(Π_{i≤m} Xᵢ^{2^{m−1}−1})` nonzero, and is it `a₆`-free?  This alone
+replaces a search over every monomial of `S_{m+1}` (190 252 of them at
+`m = 5`) with a single extraction.  `m = 2` is exempt: there `wt(1) = wt(2)`,
+so two shapes tie, and it is handled by direct expansion.
+
+**Step 2 — reverse at infinity.**  Substituting `Xᵢ = 1/Zᵢ` and clearing by
+`Π Zᵢ^{D}`, `D = 2^{m−1}`, sends `coeff(Π Xᵢ^{D−k})` to `coeff(Π Zᵢ^{k})`, so
+the `k = 1` case lives modulo `(Zᵢ²)`.  The reversal commutes with Semaev's
+recursion — reversing `S_a` at `2^{a−2}` and `S_b` at `2^{b−2}` leaves
+`2^{a+b−4} = D` on every summand slot, exactly what `S_{m+1}` needs — so the
+computation can be carried out inside the quotient.  That is what puts `S₇`
+and `S₈` in reach when their full expansions are not: the ceiling coefficient
+at `m = 5` costs **246 µs** this way against **480 ms** to expand `S₆`, and
+`m = 7` costs 2.6 ms.
+
+**Step 3 — the induction.**  For `S_n` with `n−2` arguments reversed at
+`D = 2^{n−2}` and two, `u` and `v`, left free:
+
+```
+    S̃_n  ≡  (u+v)^D  +  uv·(u+v)^{D−2}·Q          (mod Zᵢ²),      Q = Π Zᵢ.
+```
+
+*Base* `n = 3`: `S̃₃ = (u+v)² + uv·Z`, direct.  *Step*: write `n = a+b−2` with
+`a, b ≥ 3`, put `u` among `S_a`'s arguments and `v` among `S_b`'s.  Each factor
+then has exactly two unreversed arguments — its own free one and the resultant
+variable `Y` — so the hypothesis applies to both.  With `ε = Q_A`, `δ = Q_B`
+(hence `ε² = δ² = 0` and `εδ = Q`), each factor **factorises**:
+
+```
+    f = (Y+u)^{d_a−2}·[(Y+u)² + ε·uY],     g = (Y+v)^{d_b−2}·[(Y+v)² + δ·vY].
+```
+
+Resultants are multiplicative and all four pieces are monic in `Y`.  Writing
+`p = d_a−2`, `q = d_b−2` — both **even**, which is exactly what makes
+`(A + δB)^p = A^p` in characteristic 2 —
+
+```
+    Res((Y+u)^p, (Y+v)^q)        = (u+v)^{pq}
+    Res((Y+u)^p, (Y+v)²+δvY)     = (u+v)^{2p}
+    Res((Y+u)²+εuY, (Y+v)^q)     = (u+v)^{2q}
+    Res((Y+u)²+εuY, (Y+v)²+δvY)  = (u+v)⁴ + εδ·uv·(u+v)²
+```
+
+the last from the characteristic-2 quadratic resultant.  Multiplying, and
+using `pq + 2p + 2q + 4 = (p+2)(q+2) = d_a d_b = D`, gives
+`(u+v)^D + εδ·uv·(u+v)^{D−2}` — the claim at `n`. ∎
+
+**Corollary.**  Reversing the last free argument too (`u = 1/Z_u`, times
+`Z_u^D`) collapses the closed form, since `(1+vZ_u)^D = 1 + v^D Z_u^D ≡ 1` for
+`D` a power of two:
+
+```
+    S̃_{m+1}  ≡  1 + X_{m+1}·Z₁⋯Z_m            (mod Zᵢ²).
+```
+
+So `coeff(Π_{i≤m} Xᵢ^{2^{m−1}−1}) = X_{m+1}` **exactly** — one term, nonzero,
+`a₆`-free — and by Step 1 the ceiling `m(m−1)` is attained by exactly one
+monomial of `S_{m+1}`, namely `X_{m+1}·Π_{i≤m} Xᵢ^{2^{m−1}−1}`, which carries
+no `a₆`.  Two further consequences fall out of the same congruence:
+`coeff(Π Xᵢ^{D}) = 1`, and **every** mixed monomial with all summand exponents
+in `{D−1, D}` other than those two has coefficient zero.
+
+*Verification.* The closed form is checked against the built polynomial at
+`n = 3, 4, 5`; the reversal route is checked against the direct expansion of
+`S_{m+1}` at `m ≤ 5` for `k = 0, 1, 2` before being trusted where nothing else
+reaches; and the corollary is checked at `m = 2 … 7`.  `m = 6` and `m = 7` lie
+beyond the full expansion and are the proof's independent corroboration —
+iteration 2 had named `S₇` as the next step and expected it to be the frontier.
+
+The gap being **constant rather than shrinking** was the load-bearing part
+while this was empirical.  It is now moot for Boundary C: the leading form is
+`a₆`-free at every `m`, so there is no `m` at which the boundary erodes.
 
 *Verification.* Each `S_{m+1}` is checked three ways before its profile is
 believed: symmetry in all `m+1` arguments (on adjacent transpositions, which
@@ -304,8 +389,9 @@ over four curves on `F_{2^5}` it vanished on **all 1146** genuine 5-point
 decompositions and on no tuple lacking one.
 
 > **Boundary C.** The leading-form ideal of the descended Semaev system is
-> independent of the curve, for every `m ∈ {2, 3, 4, 5}` — `a₆` stays exactly
-> two Boolean degrees below the leading form at each.  Therefore the degree of
+> independent of the curve **for every `m`** — proved in C′ above; `a₆` stays
+> exactly two Boolean degrees below the leading form at every `m ≤ 5` where
+> the gap has been measured, and strictly below it at every `m`.  Therefore the degree of
 > regularity in the Bardet–Faugère–Salvy sense — a Hilbert-series invariant of
 > the leading forms — is **constant on the entire isogeny class**, and so is
 > the degree at which any top-degree cancellation first becomes *available*.
@@ -428,6 +514,7 @@ Four numbers come out, and the last one decides.
 | **R6‴** | `D* = 2` density over curves is `1 − 2^{−dim S}` per target | **`supported`** (exact) | `dim S = 1` at `n ∈ {8, 10}`, escape count `128/255` and `512/1023`, matching `(2^n − 2^{n−1})/(2^n − 1)`; mismatches `0`. |
 | **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** (exhaustively) | EXP-R6: survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10`. **EXP-R6c settles it without extrapolation, at both sizes: over *all* 240 targets at `n = 8`, `0` of 255 curves avoid above-floor targets entirely, and over all 992 targets at `n = 10`, `0` of 1023.** Mean above-floor count is `39.1` per curve (min 26, max 56) — such targets are common, and the `T = 64` zeroes were small-sample. |
 | **R6b** | `a₆` reaches the **leading form** at some `m ≥ 4`, making `d_reg` curve-dependent where index calculus is asymptotically interesting | **`killed`** | EXP-R6b, iteration 2. Computed symbolically for `m ∈ {2,3,4,5}`: the top Boolean degree is `m(m−1)`, always `a₆`-free, with `a₆` exactly **2** degrees below at every `m`. Constant gap, not a narrowing one. `S₄` validated against the repo's own implementation; `S₅` against 1146 genuine decompositions. |
+| **R6d** | `a₆` reaches the leading form at some `m` **beyond** the computable range, so Boundary C is an artefact of small `m` | **`killed` — and now a theorem** | EXP-R6d, iteration 4 (§2C′). The ceiling shape is forced for `m ≥ 3`, reducing the boundary to one coefficient; reversal at infinity plus an induction on the resultant recursion evaluates it as `X_{m+1}`, `a₆`-free, for **all** `m`. Corroborated at `m = 6, 7`, beyond the full expansion's reach. |
 | **R6c** | The residual per-curve variation in `D*` statistics is a *solving-degree* property of the curve | **`killed`** | EXP-R6c, iteration 3. It is **decomposition yield**: `ρ_s(decomposable targets, above-floor targets) = −0.9801` over all 255 curves × 240 targets at `n = 8`, and `−0.9648` against the above-floor *rate*, so it is not the mechanical "fewer refutable targets means fewer bad ones". A curve that decomposes more targets has fewer left that can refute above the floor — a relation-yield property, not a `d_reg` one. |
 
 ### Pre-registered gates
@@ -464,7 +551,7 @@ Four numbers come out, and the last one decides.
 | `…::uniform_floor_survivors` | the decisive statistic: curves on the `D* = 2` floor for *every* target, swept over the whole curve space |
 | `…::yield_explanation` / `spearman` | the three-way target partition behind the residual variation, and its correlation with decomposition yield |
 | `…::all_traces` | exact point counting, for the class-size cross-validation |
-| `cryptanalysis::semaev_leading_form` | symbolic `S_{m+1}` over `F_2[a₆]` by the resultant recursion, and the Boolean-degree profile that decides Boundary C at each `m` (4 tests) |
+| `cryptanalysis::semaev_leading_form` | symbolic `S_{m+1}` over `F_2[a₆]` by the resultant recursion, the Boolean-degree profile that decides Boundary C at each `m`, and the reversal-at-infinity route that proves it for all `m` and reaches `m = 7` (10 tests) |
 | `examples/isogeny_class_search.rs` | EXP-R6 driver → `experiments/isogeny_class_search.json` |
 
 `D*` is measured by the thread's existing `pc_degree_harness::refutation_scan`,
@@ -774,13 +861,22 @@ earlier lessons:
 ## 8. What would change the verdict
 
 - ~~**A counterexample to Boundary C at `m ≥ 4`.**~~ **Done — EXP-R6b,
-  iteration 2, and it did not find one.**  `S₅` and `S₆` were built and
-  profiled: `a₆` stays exactly two Boolean degrees below the leading form at
-  `m = 4` and `m = 5`, the same gap as at `m = 2, 3`.  What is left of this
-  item is the induction: a proof that the gap is 2 for *all* `m`, or a
-  counterexample at `m ≥ 6`.  `S₇` needs a resultant of two `S₄`-sized
-  quartics one level up, so the next step is `S₇ = Res(S₄, S₅)` — tractable,
-  since `S₆` took seconds.
+  iteration 2, and it did not find one.**
+- ~~**The induction: prove the gap for all `m`, or find a counterexample at
+  `m ≥ 6`.**~~ **Done — EXP-R6d, iteration 4, and it proves the boundary.**
+  §2C′ carries the proof: the ceiling shape is forced for `m ≥ 3`, which
+  reduces the boundary to one coefficient; reversal at infinity puts that
+  coefficient in the quotient modulo `(Zᵢ²)`; and an induction on Semaev's
+  recursion evaluates it in closed form as `X_{m+1}` — nonzero and `a₆`-free
+  at **every** `m`.  So Boundary C is no longer an empirical pattern with a
+  frontier at `m = 5`; it is a theorem.  As corroboration the same machinery
+  computes `m = 6` and `m = 7`, which iteration 2 had expected to be out of
+  reach, in 2.1 ms and 2.6 ms.
+  What the proof does **not** settle is the *size* of the gap: it gives
+  `a₆`-carrying `< m(m−1)`, while `= m(m−1) − 2` remains measured at
+  `m ≤ 5`.  That is a descriptive statistic, not what the boundary rests on,
+  and closing it would need coefficients at `Z`-degree `1 + 2^k`, which the
+  multilinear quotient does not see.
 - **A target-independent good curve.** The criterion of §3.1 says the good
   set is target-dependent.  A curve whose `a₆` escapes `S^⊥(x_R)` for a
   constant fraction of *all* targets, uniformly in `n`, would contradict it

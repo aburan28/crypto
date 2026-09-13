@@ -1050,7 +1050,7 @@ this is a natural reporting point rather than a pause.
 | **L2** | symmetrisation | **blocked structurally** — cannot pay below `ℓ = 6`, and a dense Macaulay scan reaches `ℓ ≤ 3` | none (untested at the size where it could pay) |
 | **L3** | hybrid slicing | **killed** — the cost optimum is exhaustive search | `accounting` — the apparent +8.83 bits was a boundary artifact |
 | **L4** | degree falls (mutants) | **supported on degrees to `N = 16`, then degrades** — the cascade dies at `N = 18` and the degree saving halves; on Random the margin to `2^N` widens, and on Subfield augmenting is far worse than not | `relabelling` — the net saving tripled while the Random boundary margin lost 3.18 bits at the break |
-| **L5** | the curve (isogeny class) | **killed** — `d_reg` is constant on the class for every `m ∈ {2,3,4,5}`, and 263 of `2^65.06` vertices are reachable | `accounting` — the boundaries moved, the algorithm did not |
+| **L5** | the curve (isogeny class) | **killed** — `d_reg` is constant on the class for **all** `m` (proved, EXP-R6d), and 263 of `2^65.06` vertices are reachable | `accounting` — the boundaries moved, the algorithm did not |
 | — | L3 ∘ L4 | **killed** — the levers are substitutes, not complements | none |
 
 **Ratio to the boundary: moving the wrong way.** Per AGENTS.md §3 the only
@@ -1136,11 +1136,13 @@ that has tested its whole taxonomy and found nothing that beats its boundary
 should say that plainly rather than generate further variations of the
 measurements it has already made.
 
-*(L5's own follow-ups are also closed: EXP-R6b computed Boundary C to
-`m = 5` and EXP-R6c explained its residual as decomposition yield. The one
-question left there is the induction — whether the `a₆`-below-the-leading-form
-gap is 2 for **all** `m`, not just the four computed. See
-`RESEARCH_ISOGENY_CLASS_SEARCH.md` §8.)*
+*(L5's own follow-ups are all closed: EXP-R6b computed Boundary C to `m = 5`,
+EXP-R6c explained its residual as decomposition yield, and EXP-R6d
+(iteration 4) settled the induction that was the last open question there —
+`a₆` stays strictly below the leading form at **every** `m`, proved rather
+than sampled, so `d_reg` is curve-independent on every isogeny class for all
+`m`. L5 is now killed by a theorem instead of by four data points. See
+`RESEARCH_ISOGENY_CLASS_SEARCH.md` §2C′.)*
 
 ## 7. Honest limitations
 
