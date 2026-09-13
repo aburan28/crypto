@@ -272,14 +272,21 @@ architecture rtl of ec2k_batch_pipe is
   signal in_rdy   : std_logic;
   -- "stage empty" is the clock enable of its 310 data flip-flops (a stage
   -- holds a walk until the next is empty), and from one LUT that was a
-  -- 2.9 ns route in the 80-engine image; with a fanout limit the driver
-  -- is replicated and each copy sits among its loads.  The limit has to
-  -- be on the net the loads see (the inverted valid), not on the valid
-  -- register.  The other stages of the unit move data every clock.
-  signal p0_empty, p1_empty : std_logic;
+  -- 2.9 ns route in the 80-engine image, and from a fanout-limited LUT
+  -- still the 0.066 ns path of the 128-engine one (the route from the
+  -- valid register to the replicated inverters).  So the stage keeps
+  -- "empty" as a register of its own, written wherever the valid is,
+  -- and the fanout limit replicates that register among its loads.  The
+  -- other stages of the unit move data every clock.
+  signal p0_emp, p1_emp : std_logic := '1';
   attribute MAX_FANOUT : string;
-  attribute MAX_FANOUT of p0_empty : signal is "100";
-  attribute MAX_FANOUT of p1_empty : signal is "100";
+  -- the reset arrives through a register of this unit's own, replicated
+  -- among its ~150 control loads (from the engine's reset register it was
+  -- the 0.049 ns path of the routed 112-engine 375 MHz image: pure route)
+  signal rst_q : std_logic := '1';
+  attribute MAX_FANOUT of rst_q : signal is "64";
+  attribute MAX_FANOUT of p0_emp : signal is "100";
+  attribute MAX_FANOUT of p1_emp : signal is "100";
 
   -- ------------------------------------------------------------------ --
   -- fill
@@ -371,7 +378,7 @@ begin
   mul : entity work.gf131_mul
     generic map (TAG_W => MTAG_W)
     port map (
-      clk => clk, rst => rst,
+      clk => clk, rst => rst_q,
       in_valid => mul_valid, in_a => mul_a, in_b => mul_b, in_tag => mul_tag,
       out_valid => res_valid, out_r => res_r, out_tag => res_tag,
       ahead_valid => open, ahead_tag => open);
@@ -484,12 +491,17 @@ begin
   fill_ok    <= fb_valid and not fill_pend;
   p1_take    <= p1_valid and fill_ok;
   p0_adv     <= p0_valid and not p1_valid;
-  p0_empty   <= not p0_valid;
-  p1_empty   <= not p1_valid;
-  in_rdy     <= p0_empty and not rst;
+  in_rdy     <= p0_emp and not rst_q;
   in_ready   <= in_rdy;
   dummy_fill <= flushing and fill_ok and not p1_valid;
   w_ce       <= p1_take or dummy_fill;
+
+  rst_reg : process (clk)
+  begin
+    if rising_edge(clk) then
+      rst_q <= rst;
+    end if;
+  end process;
 
   main : process (clk)
     variable b       : bid_t;
@@ -523,8 +535,9 @@ begin
       -- ============ input pipeline ============
       if p1_take = '1' then
         p1_valid <= '0';
+        p1_emp   <= '1';
       end if;
-      if p1_empty = '1' then
+      if p1_emp = '1' then
         p1_x     <= p0_x;
         p1_y     <= p0_y;
         p1_tag   <= p0_tag;
@@ -532,15 +545,18 @@ begin
       end if;
       if p0_adv = '1' then
         p1_valid <= '1';
+        p1_emp   <= '0';
         p0_valid <= '0';
+        p0_emp   <= '1';
       end if;
-      if p0_empty = '1' then
+      if p0_emp = '1' then
         p0_x     <= in_x;
         p0_y     <= in_y;
         p0_tag   <= in_tag;
         p0_parts <= gf_weight_parts(in_x);
-        if in_valid = '1' and rst = '0' then
+        if in_valid = '1' and rst_q = '0' then
           p0_valid <= '1';
+          p0_emp   <= '0';
         end if;
       end if;
 
@@ -861,8 +877,8 @@ begin
         out_dp <= '0';
       end if;
 
-      if rst = '1' then
-        p0_valid <= '0'; p1_valid <= '0';
+      if rst_q = '1' then
+        p0_valid <= '0'; p1_valid <= '0'; p0_emp <= '1'; p1_emp <= '1';
         fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0'; w_en <= '0'; tw_en <= '0';
         idle_cnt <= (others => '0'); flushing <= '0';
         rq_wr <= (others => '0'); rq_rd <= (others => '0');
