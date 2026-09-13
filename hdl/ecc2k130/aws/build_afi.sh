@@ -23,15 +23,23 @@
 #              FIFO's block RAM exactly)
 #   DP_WEIGHT  distinguished-point cutoff baked into the image (default 34,
 #              the challenge's; must equal campaign.json dpWeight)
+#   LOG_W, LOG_NB  walks per batch and batches in flight, as logs (default:
+#              the defines file's, 64 x 8; 2**(LOG_W+LOG_NB) must be at most
+#              2**ID_W, and equal to it is fine: 64 x 8 and 32 x 8 both run
+#              5.16 clocks per step, 32 x 16 starves at 5.21 - 5.22)
 #   CLK_MHZ    engine clock: 250, 300, 333 (default), 350, 375 or 400; or set
 #              MMCM_MULT and MMCM_DIV directly (engine clock = 250 * MULT /
 #              DIV, VCO = 250 * MULT within 800..1600).  Below 250 there is
 #              no point; above what the routed design closes, the image is
 #              flagged timing violated and its reports fail verification.
 #   DSP_LEAVES multiplier leaves in DSP48E2 blocks, 0..27 (default: the
-#              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~750 LUTs
-#              fewer per engine; the device has 9 024 DSPs, so 128 engines
-#              take 11 and 136 take 10)
+#              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~790 LUTs
+#              fewer per engine).  The CL's region holds 7 992 of the
+#              device's 9 024 DSPs (the shell has the rest), so 6 DSPs per
+#              leaf x leaves x NENG must stay under that: 120 engines take
+#              11, 128 take 10, 136 and 144 take 9; over it, place_design
+#              fails its utilisation DRC before placing anything.  0 is the
+#              all-LUT multiplier, 10 clocks instead of 13.
 # Build instance:
 #   BUILD_TYPE  default r6i.4xlarge (128 GB; Vivado on a VU47P wants > 64)
 #   AMI         override the FPGA Developer AMI lookup (needs a Marketplace
@@ -179,6 +187,7 @@ launch)
         echo "BUCKET=$BUCKET; TAG=$TAG; REGION=$AWS_DEFAULT_REGION"
         echo "NENG=$NENG; ID_W=$ID_W; DP_WEIGHT=$DP_WEIGHT; NO_SHUTDOWN=${KEEP:-0}"
         echo "MMCM_MULT=$MMCM_MULT; MMCM_DIV=$MMCM_DIV; CLK_MHZ=$CLK_MHZ; DSP_LEAVES=${DSP_LEAVES:-}"
+        echo "LOG_W=${LOG_W:-}; LOG_NB=${LOG_NB:-}"
         [ -n "$credLine" ] && echo "$credLine"
         cat build_afi_instance.sh
     } > "$ud"
@@ -193,7 +202,7 @@ launch)
           --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-fpga-build-$TAG},{Key=Project,Value=$STACK},{Key=BuildTag,Value=$TAG}]" \
           --query 'Instances[0].InstanceId' --output text)
     rm -f "$ud"
-    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)"
+    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)${LOG_W:+, LOG_W=$LOG_W}${LOG_NB:+, LOG_NB=$LOG_NB}${DSP_LEAVES:+, DSP_LEAVES=$DSP_LEAVES}"
     echo "follow with: ./build_afi.sh status $TAG   (the instance terminates itself when done)"
     ;;
 

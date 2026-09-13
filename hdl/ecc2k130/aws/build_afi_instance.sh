@@ -102,7 +102,10 @@ mkdir -p "$CL_DIR/build/checkpoints" "$CL_DIR/build/reports"
 export ECC_NENG=$NENG ECC_ID_W=$ID_W ECC_DP_WEIGHT=$DP_WEIGHT
 MMCM_MULT=${MMCM_MULT:-4}; MMCM_DIV=${MMCM_DIV:-3}; CLK_MHZ=${CLK_MHZ:-333}
 export ECC_MMCM_MULT=$MMCM_MULT ECC_MMCM_DIV=$MMCM_DIV
-echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz, tag $TAG"
+# the batch geometry, when given, goes the same way as the other defines
+[ -n "${LOG_W:-}" ] && export ECC_LOG_W=$LOG_W
+[ -n "${LOG_NB:-}" ] && export ECC_LOG_NB=$LOG_NB
+echo "building cl_ecc2k130: $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz${LOG_W:+, LOG_W $LOG_W}${LOG_NB:+, LOG_NB $LOG_NB}, tag $TAG"
 python3 aws_build_dcp_from_cl.py --cl cl_ecc2k130 --tag "$TAG" || fail "aws_build_dcp_from_cl.py"
 
 TARBALL="$CL_DIR/build/checkpoints/$TAG.Developer_CL.tar"
