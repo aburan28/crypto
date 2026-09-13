@@ -1,6 +1,6 @@
 # ECC2K-130 public status snapshot
 
-Hourly GitHub Action that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 15 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or

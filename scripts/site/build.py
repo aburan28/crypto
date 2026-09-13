@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Assemble the published GitHub Pages site for aburan28/crypto.
 
-The hourly ECC2K-130 workflow uploads the directory this script writes.
+The ECC2K-130 workflow uploads the directory this script writes, every 15
+minutes.
 Everything it publishes already exists in the repository; the script only
 copies and lays out, so the repository file stays canonical (AGENTS.md §7)
 and no published page is ever the only copy of a figure.
@@ -13,7 +14,7 @@ Layout, and why each path is where it is:
     /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
     /status/              the ECC2K-130 distinguished-point dashboard
     /status/status.json   snapshot, next to the page that reads it
-    /status/history.json  hourly history, likewise
+    /status/history.json  published history, likewise
     /status.json          same bytes at the root
     /history.json         same bytes at the root
 
