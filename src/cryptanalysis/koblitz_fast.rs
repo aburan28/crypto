@@ -110,8 +110,14 @@ impl NormalBasis {
     /// two runs on the same curve produce the same keys.
     pub fn new(field: &Gf2) -> Option<Self> {
         let n = field.n;
-        debug_assert!(n >= 2 && n <= 63);
-        let mask = if n == 64 { !0u64 } else { (1u64 << n) - 1 };
+        if !(2..=63).contains(&n) {
+            // A real guard rather than an assertion: the rotations below
+            // shift by `n - i`, which a degree of 0 or 1 would make
+            // meaningless, and a caller gets the squaring-chain
+            // fallback instead of a panic.
+            return None;
+        }
+        let mask = (1u64 << n) - 1;
         let mut state = field.irr | 1;
         for _ in 0..Self::TRIES {
             state = state
@@ -132,7 +138,7 @@ impl NormalBasis {
     /// Frobenius orbit does not span.
     fn from_theta(field: &Gf2, theta: u64) -> Option<Self> {
         let n = field.n;
-        let mask = if n == 64 { !0u64 } else { (1u64 << n) - 1 };
+        let mask = (1u64 << n) - 1;
 
         // Column `i` of the change-of-basis matrix: `θ^{2^i}` in
         // polynomial coordinates.  `x = B c`, and what we want is
