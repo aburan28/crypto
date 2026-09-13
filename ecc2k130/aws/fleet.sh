@@ -49,24 +49,34 @@ fleetId() {
         --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text
 }
 
-fulfilledGpus() {
-    local raw
-    raw=$(aws ec2 describe-fleets --fleet-ids "$1" \
-        --query 'Fleets[0].FulfilledCapacity' --output text)
-    case "$raw" in
+# Print an integer capacity field (None/empty/float → int).
+capacityInt() {
+    case "$1" in
         None|'') echo 0 ;;
-        *) echo "${raw%.*}" ;;
+        *) echo "${1%.*}" ;;
     esac
 }
 
+# Echo "fulfilled on_demand" for the fleet (Spot = fulfilled - on_demand).
+fleetFulfilled() {
+    local row fulfilled ondemand
+    row=$(aws ec2 describe-fleets --fleet-ids "$1" \
+        --query 'Fleets[0].[FulfilledCapacity,FulfilledOnDemandCapacity]' --output text)
+    fulfilled=$(capacityInt "${row%%$'\t'*}")
+    ondemand=$(capacityInt "${row#*$'\t'}")
+    if [ "$ondemand" -gt "$fulfilled" ]; then ondemand=$fulfilled; fi
+    echo "$fulfilled $ondemand"
+}
+
 # Fulfill unmet Spot with On-Demand after a short wait. Spot stays the default
-# purchase type; On-Demand is only raised for the measured shortfall.
+# purchase type; On-Demand covers only capacity Spot has not already filled
+# (FulfilledCapacity includes On-Demand, so do not add the --on-demand base again).
 fallbackOnDemand() {
-    local id=$1 total=$2 base_ondemand=$3
-    local waited=0 fulfilled shortfall ondemand
+    local id=$1 total=$2
+    local waited=0 fulfilled ondemand_fulfilled spot_fulfilled ondemand
     echo "waiting up to ${FALLBACK_WAIT_SECONDS}s for g7e Spot before On-Demand fallback"
     while [ "$waited" -lt "$FALLBACK_WAIT_SECONDS" ]; do
-        fulfilled=$(fulfilledGpus "$id")
+        read -r fulfilled ondemand_fulfilled < <(fleetFulfilled "$id")
         if [ "$fulfilled" -ge "$total" ]; then
             echo "fleet $id: Spot filled $fulfilled/$total GPU(s); no On-Demand fallback"
             return 0
@@ -74,17 +84,19 @@ fallbackOnDemand() {
         sleep 15
         waited=$((waited + 15))
     done
-    fulfilled=$(fulfilledGpus "$id")
+    read -r fulfilled ondemand_fulfilled < <(fleetFulfilled "$id")
     if [ "$fulfilled" -ge "$total" ]; then
         echo "fleet $id: Spot filled $fulfilled/$total GPU(s); no On-Demand fallback"
         return 0
     fi
-    shortfall=$((total - fulfilled))
-    ondemand=$((base_ondemand + shortfall))
+    spot_fulfilled=$((fulfilled - ondemand_fulfilled))
+    # Keep every Spot GPU already running; cover the remainder with On-Demand.
+    ondemand=$((total - spot_fulfilled))
+    if [ "$ondemand" -lt 0 ]; then ondemand=0; fi
     if [ "$ondemand" -gt "$total" ]; then ondemand=$total; fi
     aws ec2 modify-fleet --fleet-id "$id" --target-capacity-specification \
         "TotalTargetCapacity=$total,OnDemandTargetCapacity=$ondemand,DefaultTargetCapacityType=spot" >/dev/null
-    echo "fleet $id: Spot filled $fulfilled/$total; falling back to $ondemand On-Demand GPU(s) for the shortfall"
+    echo "fleet $id: Spot holds $spot_fulfilled/$total; falling back to $ondemand On-Demand GPU(s) for the shortfall"
 }
 
 cmd=${1:-status}
