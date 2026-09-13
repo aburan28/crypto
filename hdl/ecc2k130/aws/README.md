@@ -314,4 +314,7 @@ clocks instead of two, 5.31 clocks per step unchanged with sixteen
 batches in flight). 112 engines is then 73% of the LUTs, 72% of the
 block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%. Builds of
 both (`20260913-002654-n112-c333`, `20260913-002701-n128-c333`) were
-running when this was written.
+running when this was written, as was `20260913-005436-n112-c333`, the
+first with the **32 × 8 batch geometry** now the default: the same 256
+walks and the same memory per step unit as 16 × 16, 5.16 clocks per
+step against 5.31 (the bound is `5 + 5/W`), 200 fewer LUTs per engine.
