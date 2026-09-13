@@ -14,6 +14,7 @@ import random
 import subprocess
 import sys
 import time
+import traceback
 
 import cnf as cnfmod
 import curves
@@ -137,7 +138,7 @@ def compareInstance(onb, curve, target, weight, variant, expected, seconds, maxi
                 break
         else:
             solutions.add(coords)
-        # Block the actual model ordering (existing lex order is LSB first).
+        # Block the actual model ordering; the shared domain uses numeric order.
         solver.add_clause([-v if model[v] else v for vec in pvars for v in vec])
     finished = time.perf_counter()
     del solver
@@ -157,11 +158,12 @@ def compareInstance(onb, curve, target, weight, variant, expected, seconds, maxi
     }
 
 
-def runPanel():
+def runPanel(results=None):
     root = Path(__file__).resolve().parents[2]
     contractPath = root / 'experiments/nagao_relation_contract.json'
     contract = json.loads(contractPath.read_text())
-    results = []
+    if results is None:
+        results = []
     cases = []
     for panel in contract['sat_panel']:
         onb = field.Onb(panel['n'])
@@ -177,9 +179,18 @@ def runPanel():
         for target in targets:
             expected = table.get(target, set())
             for variant in contract['sat_variants']:
-                row = compareInstance(onb, curve, target, panel['weight'], variant, expected,
-                                      contract['sat_watchdog']['seconds_per_instance'],
-                                      contract['sat_watchdog']['maximum_projected_models'])
+                try:
+                    row = compareInstance(onb, curve, target, panel['weight'], variant, expected,
+                                          contract['sat_watchdog']['seconds_per_instance'],
+                                          contract['sat_watchdog']['maximum_projected_models'])
+                except Exception:
+                    row = {
+                        'variant': variant, 'field_degree': onb.m, 'weight': panel['weight'],
+                        'target': [onb.toCoords(value) for value in target],
+                        'complete': False, 'correct': False,
+                        'status': 'failed_infrastructure', 'traceback': traceback.format_exc(),
+                        'expected_projected_solutions': len(expected)
+                    }
                 results.append(row)
         print('completed n=%d weight=%d targets=%d' % (panel['n'], panel['weight'], len(targets)), file=sys.stderr)
     code = Path(__file__).resolve().parent
@@ -205,7 +216,14 @@ def main():
     args = parser.parse_args()
     if args.out.exists():
         parser.error('output already exists; choose a new immutable evidence path')
-    output = runPanel()
+    rows = []
+    try:
+        output = runPanel(rows)
+    except (Exception, KeyboardInterrupt):
+        output = {'schema': 'nagao-projected-solutions-v1', 'valid': False,
+                  'command': [sys.executable] + sys.argv,
+                  'status': 'failed_infrastructure', 'traceback': traceback.format_exc(),
+                  'results': rows}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open('x') as handle:
         json.dump(output, handle, indent=2)

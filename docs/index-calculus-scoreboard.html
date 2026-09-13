@@ -648,6 +648,48 @@
     </div>
   </div>
 
+  <!-- ============ NAGAO IMPLEMENTATION STATUS ============ -->
+  <div class="panel" id="nagao-relations">
+    <div class="panel-head">
+      <h2>Nagao relation encodings: correctness before cost</h2>
+      <p>Three-point decomposition on <code>y&sup2;+xy=x&sup3;+1</code>, with distinct
+        nonzero factor abscissas, all different from the target abscissa. The two Riemann&ndash;Roch
+        frontends construct no summation polynomial. The reference is exhaustive group arithmetic
+        on the identical domain. These are engineering candidates; full-attack <code>S</code>,
+        rho ratios and runtime-floor ratios are unmeasured.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Frozen source: <code>experiments/nagao_relation_comparison_20260913.json</code>.
+          Complete projected x-solution sets, across 86 five-bit and 24 nine-bit target cases.
+          The aggregate artifact is incomplete because 24 incidence cases hit their watchdog.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">Complete / attempted</th>
+          <th scope="col" class="n">Watchdogs</th><th scope="col">Correctness</th>
+          <th scope="col">S / rho ratio</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Chained S3 + verified lifts</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">reference</span></td></tr>
+          <tr><td>RR incidence</td><td class="n">86 / 110</td><td class="n">24</td>
+            <td>Completed sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+          <tr><td>RR norm</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p><strong>Function-first support test:</strong> the residual norm <code>H</code> divides
+        the subspace polynomial <code>L_V</code>. Searching function coefficients before extracting
+        roots matched all 43 affine targets in each of two five-bit subspace panels: dimension two
+        yielded zero signed triples; dimension three yielded 72 verified signed triples across
+        33 targets. These signed counts differ from the projected x-tuples above. Sources:
+        <code>experiments/nagao_annihilator_n5_d{2,3}_20260913.json</code> and
+        <code>RESEARCH_NAGAO_RELATIONS.md</code>.</p>
+      <p>The next experiment compiles the support test into a search solver. Exhaustive coefficient
+        enumeration is a correctness instrument. No speedup, exponent improvement or rho crossover
+        has been established; the existing attack-cost ledger is unchanged.</p>
+    </div>
+  </div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">
