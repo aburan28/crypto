@@ -461,9 +461,11 @@ begin
         -- no credits out, so the occupancy is the queue's
         cr := 0;
         oc := to_integer(q_count);
-        ld_pend <= '0';
-        ld_sent <= '0';
         if run = '0' then
+          -- a load while RUN is clear is dropped; one posted during
+          -- warm-up stays pending and is issued once the spine is live
+          ld_pend <= '0';
+          ld_sent <= '0';
           warm <= 0;
         else
           warm <= warm + 1;
