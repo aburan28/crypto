@@ -86,6 +86,7 @@ entity ec2k_axil is
     LOG_NB    : natural := 3;
     FLUSH_CLK : natural := 32;
     CNT_W     : natural := 32;
+    CNT_LO_W  : natural := 13;               -- of which travel with the walk (ec2k_walker)
     DP_WEIGHT : natural := DP_WEIGHT_DEFAULT;
     DP_FIFO_W : natural := 6;                -- queue depth = 2**DP_FIFO_W
     CLK_KHZ   : natural := 0                 -- reported in CLOCK, nothing else
@@ -226,9 +227,14 @@ architecture rtl of ec2k_axil is
   signal l_valid, hold   : std_logic_vector(0 to NENG - 1) := (others => '0');
   signal l_id            : id_arr_t(0 to NENG - 1);
   signal l_x, l_y        : gf_arr_t(0 to NENG - 1);
-  -- "this load is ours": the enable of the 270 kept-load flip-flops
+  -- "this load is ours": the enable of the 270 kept-load flip-flops.
+  -- dn_mine(i) travels with dn_ldv(i) and is decided a stage early, by
+  -- the stage that forwards the load, so the enable is a register and
+  -- not the gid compare: from the compare it was the worst path of the
+  -- routed 128-engine image (dn_gid -> l_x CE, 0.048 ns).
+  signal dn_mine         : std_logic_vector(0 to NENG) := (others => '0');
+  attribute MAX_FANOUT of dn_mine : signal is "100";
   signal l_take          : std_logic_vector(0 to NENG - 1);
-  attribute MAX_FANOUT of l_take : signal is "100";
 
   -- control / status
   signal run        : std_logic := '0';
@@ -319,7 +325,8 @@ begin
 
     eng : entity work.ec2k_walker
       generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB,
-                   FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, DP_WEIGHT => DP_WEIGHT)
+                   FLUSH_CLK => FLUSH_CLK, CNT_W => CNT_W, CNT_LO_W => CNT_LO_W,
+                   DP_WEIGHT => DP_WEIGHT)
       port map (
         clk => clk, rst => rst_eng_r(i),
         ld_valid => l_valid(i), ld_ready => e_ld_ready(i),
@@ -334,7 +341,7 @@ begin
     -- is free
     pend(i) <= e_dp_valid(i) and not e_dp_ack(i);
     ins(i)  <= hold(i) and pend(i) and up_slot_free(i);
-    l_take(i) <= '1' when dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i else '0';
+    l_take(i) <= dn_mine(i);
     up_valid_n(i) <= '0' when rst_eng_r(i) = '1' else
                      '1' when ins(i) = '1' else up_valid(i + 1);
 
@@ -377,6 +384,11 @@ begin
         -- offered until the walker takes it (a walker takes a load only on
         -- clocks with no step retiring, so this can be a while)
         dn_ldv(i + 1) <= dn_ldv(i);
+        if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i + 1 then
+          dn_mine(i + 1) <= '1';
+        else
+          dn_mine(i + 1) <= '0';
+        end if;
         accept := l_valid(i) = '1' and e_ld_ready(i) = '1';
         if accept then
           l_valid(i) <= '0';
@@ -415,6 +427,7 @@ begin
 
         if rst_eng_r(i) = '1' then
           dn_ldv(i + 1)  <= '0';
+          dn_mine(i + 1) <= '0';
           dn_cr(i + 1)   <= '0';
           up_valid(i)    <= '0';
           up_cret(i)     <= '0';
@@ -455,8 +468,9 @@ begin
 
       -- spine head.  Nothing moves until the reset sweep after RUN rose
       -- has passed the far end and everything it dropped has drained.
-      dn_ldv(0) <= '0';
-      dn_cr(0)  <= '0';
+      dn_ldv(0)  <= '0';
+      dn_mine(0) <= '0';
+      dn_cr(0)   <= '0';
       if run = '0' or warm /= WARM_CLK then
         -- no credits out, so the occupancy is the queue's
         cr := 0;
@@ -489,6 +503,9 @@ begin
         end if;
         if ld_pend = '1' and ld_sent = '0' then
           dn_ldv(0) <= '1';
+          if eng_of(ld_gid) = 0 then
+            dn_mine(0) <= '1';
+          end if;
           ld_sent   <= '1';
         end if;
         if occ < QD then

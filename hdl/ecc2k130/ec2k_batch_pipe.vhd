@@ -272,14 +272,21 @@ architecture rtl of ec2k_batch_pipe is
   signal in_rdy   : std_logic;
   -- "stage empty" is the clock enable of its 310 data flip-flops (a stage
   -- holds a walk until the next is empty), and from one LUT that was a
-  -- 2.9 ns route in the 80-engine image; with a fanout limit the driver
-  -- is replicated and each copy sits among its loads.  The limit has to
-  -- be on the net the loads see (the inverted valid), not on the valid
-  -- register.  The other stages of the unit move data every clock.
-  signal p0_empty, p1_empty : std_logic;
+  -- 2.9 ns route in the 80-engine image, and from a fanout-limited LUT
+  -- still the 0.066 ns path of the 128-engine one (the route from the
+  -- valid register to the replicated inverters).  So the stage keeps
+  -- "empty" as a register of its own, written wherever the valid is,
+  -- and the fanout limit replicates that register among its loads.  The
+  -- other stages of the unit move data every clock.
+  signal p0_emp, p1_emp : std_logic := '1';
   attribute MAX_FANOUT : string;
-  attribute MAX_FANOUT of p0_empty : signal is "100";
-  attribute MAX_FANOUT of p1_empty : signal is "100";
+  -- the reset arrives through a register of this unit's own, replicated
+  -- among its ~150 control loads (from the engine's reset register it was
+  -- the 0.049 ns path of the routed 112-engine 375 MHz image: pure route)
+  signal rst_q : std_logic := '1';
+  attribute MAX_FANOUT of rst_q : signal is "64";
+  attribute MAX_FANOUT of p0_emp : signal is "100";
+  attribute MAX_FANOUT of p1_emp : signal is "100";
 
   -- ------------------------------------------------------------------ --
   -- fill
@@ -305,8 +312,14 @@ architecture rtl of ec2k_batch_pipe is
   signal tw_a, tw_b : taddr_t := 0;
   signal tw_d      : gf_t := (others => '0');
 
-  -- ready queue and free list of batch ids
+  -- ready queue and free list of batch ids.  A queue entry says whether
+  -- the batch is fresh from the fill: the burst engine then starts it at
+  -- the first forward level itself, so b_ph and b_lvl are written by the
+  -- retire alone (with the fill as a second writer every entry sat behind
+  -- a priority mux of both decodes, five LUT levels from the fill's batch
+  -- id in the routed 128-engine image at 375 MHz).
   signal rq : q_t := (others => (others => '0'));
+  signal rq_new : std_logic_vector(0 to NB - 1) := (others => '0');
   signal rq_wr, rq_rd : unsigned(LOG_NB downto 0) := (others => '0');
   signal fl : q_t := q_identity;
   signal fl_wr : unsigned(LOG_NB downto 0) := to_unsigned(NB, LOG_NB + 1);
@@ -353,15 +366,22 @@ architecture rtl of ec2k_batch_pipe is
   signal res_r     : gf_t;
   signal res_tag   : mtag_t;
 
-  -- output: four registers so the weight of x3 has four clocks (group
-  -- popcounts, sums of four groups, their sum, the compare); the 22-way
-  -- sum in one clock was the engine's worst path at 3 ns
-  signal o1_valid, o2_valid, o3_valid, o4_valid : std_logic := '0';
-  signal o1_x, o1_y, o2_x, o2_y, o3_x, o3_y, o4_x, o4_y : gf_t := (others => '0');
-  signal o1_tag, o2_tag, o3_tag, o4_tag : tag_t := (others => '0');
-  signal o2_parts : hw_parts_t := (others => (others => '0'));
-  signal o3_quads : hw_quads_t := (others => (others => '0'));
-  signal o4_hw    : hw_t := (others => '0');
+  -- the weight of x3 and its DP test, taken over four clocks (group
+  -- popcounts, sums of four groups, their sum, the compare; the 22-way
+  -- sum in one clock was the engine's worst path at 3 ns) from the head
+  -- of fp as x3 enters it, so they ride beside the final multiply as
+  -- nine bits and are ready with the product.  They used to be taken
+  -- after the retire, with x3 and y waiting three clocks in 262 shift
+  -- register LUTs per engine.
+  signal w_parts : hw_parts_t := (others => (others => '0'));
+  signal w_quads : hw_quads_t := (others => (others => '0'));
+  signal w_hw    : hw_t := (others => '0');
+  -- w_hw is the weight of the x3 in fp(3); it and the DP bit shift on
+  -- beside fp from there to the retire
+  constant WP_DEPTH : natural := FP_DEPTH - 4;
+  type hw_pipe_t is array (0 to WP_DEPTH - 1) of hw_t;
+  signal w_pipe  : hw_pipe_t := (others => (others => '0'));
+  signal d_pipe  : std_logic_vector(0 to WP_DEPTH - 1) := (others => '0');
 
 begin
 
@@ -371,7 +391,7 @@ begin
   mul : entity work.gf131_mul
     generic map (TAG_W => MTAG_W)
     port map (
-      clk => clk, rst => rst,
+      clk => clk, rst => rst_q,
       in_valid => mul_valid, in_a => mul_a, in_b => mul_b, in_tag => mul_tag,
       out_valid => res_valid, out_r => res_r, out_tag => res_tag,
       ahead_valid => open, ahead_tag => open);
@@ -484,12 +504,17 @@ begin
   fill_ok    <= fb_valid and not fill_pend;
   p1_take    <= p1_valid and fill_ok;
   p0_adv     <= p0_valid and not p1_valid;
-  p0_empty   <= not p0_valid;
-  p1_empty   <= not p1_valid;
-  in_rdy     <= p0_empty and not rst;
+  in_rdy     <= p0_emp and not rst_q;
   in_ready   <= in_rdy;
   dummy_fill <= flushing and fill_ok and not p1_valid;
   w_ce       <= p1_take or dummy_fill;
+
+  rst_reg : process (clk)
+  begin
+    if rising_edge(clk) then
+      rst_q <= rst;
+    end if;
+  end process;
 
   main : process (clk)
     variable b       : bid_t;
@@ -523,8 +548,9 @@ begin
       -- ============ input pipeline ============
       if p1_take = '1' then
         p1_valid <= '0';
+        p1_emp   <= '1';
       end if;
-      if p1_empty = '1' then
+      if p1_emp = '1' then
         p1_x     <= p0_x;
         p1_y     <= p0_y;
         p1_tag   <= p0_tag;
@@ -532,15 +558,18 @@ begin
       end if;
       if p0_adv = '1' then
         p1_valid <= '1';
+        p1_emp   <= '0';
         p0_valid <= '0';
+        p0_emp   <= '1';
       end if;
-      if p0_empty = '1' then
+      if p0_emp = '1' then
         p0_x     <= in_x;
         p0_y     <= in_y;
         p0_tag   <= in_tag;
         p0_parts <= gf_weight_parts(in_x);
-        if in_valid = '1' and rst = '0' then
+        if in_valid = '1' and rst_q = '0' then
           p0_valid <= '1';
+          p0_emp   <= '0';
         end if;
       end if;
 
@@ -581,9 +610,8 @@ begin
       elsif w_ce = '1' then
         idle_cnt <= (others => '0');
         if fill_cnt = W - 1 then
-          -- batch complete: first forward level is the parents of the leaves
-          b_ph(to_integer(fb))  <= to_unsigned(PH_FWD, KIND_W);
-          b_lvl(to_integer(fb)) <= to_unsigned(LOG_W - 1, LVL_W);
+          -- batch complete: it enters the ready queue as fresh, and starts
+          -- at the first forward level, the parents of the leaves
           fill_pend <= '1';
           pend_b    <= fb;
           fb_valid  <= '0';
@@ -610,7 +638,7 @@ begin
         m_tb(tw_b) <= tw_d;
       end if;
       -- The data of the retire registers moves every clock, valid or not
-      -- (tw_en and o1_valid say what counts), so no decode of the tag
+      -- (tw_en and out_valid say what counts), so no decode of the tag
       -- fans out to their clock enables.
       rb    := unsigned(res_tag(MTAG_W - 1 downto KIND_W + LVL_W + IDX_W + 1));
       rkind := unsigned(res_tag(KIND_W + LVL_W + IDX_W downto LVL_W + IDX_W + 1));
@@ -626,20 +654,25 @@ begin
       end if;
       y3 := res_r xor fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1)
                   xor fp(FP_DEPTH - 1)(M + TAG_W downto TAG_W + 1);
-      o1_x   <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
-      o1_y   <= y3;
-      o1_tag <= fp(FP_DEPTH - 1)(TAG_W downto 1);
-      o1_valid <= '0';
+      out_x   <= fp(FP_DEPTH - 1)(FP_W - 1 downto M + TAG_W + 1);
+      out_y   <= y3;
+      out_tag <= fp(FP_DEPTH - 1)(TAG_W downto 1);
+      out_hw  <= w_pipe(WP_DEPTH - 1);
+      out_dp  <= d_pipe(WP_DEPTH - 1);
+      out_valid <= '0';
       if res_valid = '1' then
         case to_integer(rkind) is
           when PH_FWD =>
             tw_en <= '1';
             tw_a  <= tree_addr(rb, rn);  tw_b <= tree_addr(rb, rn);
             if rlast = '1' then
+              -- the phase is written every time: a fresh batch's entry
+              -- still says what its id's previous use ended as
               if rlvl = 0 then
                 b_ph(to_integer(rb))  <= to_unsigned(PH_INV, KIND_W);
                 b_lvl(to_integer(rb)) <= (others => '0');
               else
+                b_ph(to_integer(rb))  <= to_unsigned(PH_FWD, KIND_W);
                 b_lvl(to_integer(rb)) <= rlvl - 1;
               end if;
             end if;
@@ -678,14 +711,15 @@ begin
             end if;
           when others =>
             -- x3, y, tag and valid rode beside the multiply in fp
-            o1_valid <= fp(FP_DEPTH - 1)(0);
+            out_valid <= fp(FP_DEPTH - 1)(0);
             if rlast = '1' then
               fl(to_integer(fl_wr(LOG_NB - 1 downto 0))) <= rb;
               fl_wr <= fl_wr + 1;
             end if;
         end case;
         if rlast = '1' and to_integer(rkind) /= PH_FIN then
-          rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= rb;
+          rq(to_integer(rq_wr(LOG_NB - 1 downto 0)))     <= rb;
+          rq_new(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= '0';
           rq_wr <= rq_wr + 1;
           rq_pushed := true;
         end if;
@@ -693,7 +727,8 @@ begin
 
       -- a completed fill enters the queue on a clock no retire is using it
       if fill_pend = '1' and not rq_pushed then
-        rq(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= pend_b;
+        rq(to_integer(rq_wr(LOG_NB - 1 downto 0)))     <= pend_b;
+        rq_new(to_integer(rq_wr(LOG_NB - 1 downto 0))) <= '1';
         rq_wr <= rq_wr + 1;
         fill_pend <= '0';
       end if;
@@ -727,8 +762,13 @@ begin
           rq_rd     <= rq_rd + 1;
           nxt_valid <= '1';
           nxt_b     <= b;
-          nxt_ph    <= b_ph(to_integer(b));
-          nxt_lvl   <= b_lvl(to_integer(b));
+          if rq_new(to_integer(rq_rd(LOG_NB - 1 downto 0))) = '1' then
+            nxt_ph  <= to_unsigned(PH_FWD, KIND_W);
+            nxt_lvl <= to_unsigned(LOG_W - 1, LVL_W);
+          else
+            nxt_ph  <= b_ph(to_integer(b));
+            nxt_lvl <= b_lvl(to_integer(b));
+          end if;
         else
           nxt_valid <= '0';
         end if;
@@ -831,38 +871,23 @@ begin
       mul_a <= oa;
       mul_b <= ob;
 
-      -- ============ output: weight and DP test over four clocks ============
-      o2_valid <= o1_valid;
-      o2_x     <= o1_x;
-      o2_y     <= o1_y;
-      o2_tag   <= o1_tag;
-      o2_parts <= gf_weight_parts(o1_x);
-
-      o3_valid <= o2_valid;
-      o3_x     <= o2_x;
-      o3_y     <= o2_y;
-      o3_tag   <= o2_tag;
-      o3_quads <= hw_quads(o2_parts);
-
-      o4_valid <= o3_valid;
-      o4_x     <= o3_x;
-      o4_y     <= o3_y;
-      o4_tag   <= o3_tag;
-      o4_hw    <= hw_sum(o3_quads);
-
-      out_valid <= o4_valid;
-      out_x     <= o4_x;
-      out_y     <= o4_y;
-      out_tag   <= o4_tag;
-      out_hw    <= o4_hw;
-      if to_integer(o4_hw) <= DP_WEIGHT then
-        out_dp <= '1';
+      -- ============ the weight of x3, beside fp ============
+      w_parts <= gf_weight_parts(fp(0)(FP_W - 1 downto M + TAG_W + 1));
+      w_quads <= hw_quads(w_parts);
+      w_hw    <= hw_sum(w_quads);
+      w_pipe(0) <= w_hw;
+      if to_integer(w_hw) <= DP_WEIGHT then
+        d_pipe(0) <= '1';
       else
-        out_dp <= '0';
+        d_pipe(0) <= '0';
       end if;
+      for s in 1 to WP_DEPTH - 1 loop
+        w_pipe(s) <= w_pipe(s - 1);
+        d_pipe(s) <= d_pipe(s - 1);
+      end loop;
 
-      if rst = '1' then
-        p0_valid <= '0'; p1_valid <= '0';
+      if rst_q = '1' then
+        p0_valid <= '0'; p1_valid <= '0'; p0_emp <= '1'; p1_emp <= '1';
         fb_valid <= '0'; fill_cnt <= (others => '0'); fill_pend <= '0'; w_en <= '0'; tw_en <= '0';
         idle_cnt <= (others => '0'); flushing <= '0';
         rq_wr <= (others => '0'); rq_rd <= (others => '0');
@@ -870,7 +895,7 @@ begin
         fl_wr <= to_unsigned(NB, LOG_NB + 1); fl_rd <= (others => '0');
         cur_valid <= '0'; nxt_valid <= '0';
         a_valid <= (others => '0'); ra_valid <= '0'; mul_valid <= '0';
-        o1_valid <= '0'; o2_valid <= '0'; o3_valid <= '0'; o4_valid <= '0'; out_valid <= '0';
+        out_valid <= '0';
       end if;
     end if;
   end process;
