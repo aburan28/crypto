@@ -142,10 +142,12 @@ static void selftest() {
 
     const uint32_t T = 256, W = 8, nw = T * W, dpcap = 1 << 14;
     rho2k_ctx hc{}, dc{};
-    std::vector<uint32_t> hX(F2M_WORDS * nw), hY(F2M_WORDS * nw), hS(nw), hR(nw);
+    std::vector<uint32_t> hX(F2M_WORDS * nw), hY(F2M_WORDS * nw), hS(nw), hR(nw),
+        hW(nw);
     std::vector<rho2k_dp> hdp(dpcap);
     uint32_t hcount = 0;
     hc.X = hX.data(); hc.Y = hY.data(); hc.steps = hS.data(); hc.restarts = hR.data();
+    hc.wgt = hW.data();
     hc.nthreads = T; hc.walks_per_thread = W;
     hc.cb = cb_flat(); hc.P = h.P; hc.Q = h.Q; hc.prm = h.prm;
     hc.dp_out = hdp.data(); hc.dp_count = &hcount; hc.dp_cap = dpcap;
@@ -155,6 +157,7 @@ static void selftest() {
     CU(cudaMalloc(&dc.Y, F2M_WORDS * (size_t)nw * 4));
     CU(cudaMalloc(&dc.steps, (size_t)nw * 4));
     CU(cudaMalloc(&dc.restarts, (size_t)nw * 4));
+    CU(cudaMalloc(&dc.wgt, (size_t)nw * 4));
     uint32_t *d_cb;
     CU(cudaMalloc(&d_cb, cb_words * 4));
     CU(cudaMemcpy(d_cb, cb_flat(), cb_words * 4, cudaMemcpyHostToDevice));
@@ -178,13 +181,16 @@ static void selftest() {
     for (uint32_t it = 0; it < iters; it++)
         for (uint32_t t = 0; t < T; t++) r2k_step_batch<W>(hc, t);
 
-    std::vector<uint32_t> gX(F2M_WORDS * nw), gY(F2M_WORDS * nw), gS(nw), gR(nw);
+    std::vector<uint32_t> gX(F2M_WORDS * nw), gY(F2M_WORDS * nw), gS(nw), gR(nw),
+        gW(nw);
     CU(cudaMemcpy(gX.data(), dc.X, gX.size() * 4, cudaMemcpyDeviceToHost));
     CU(cudaMemcpy(gY.data(), dc.Y, gY.size() * 4, cudaMemcpyDeviceToHost));
     CU(cudaMemcpy(gS.data(), dc.steps, gS.size() * 4, cudaMemcpyDeviceToHost));
     CU(cudaMemcpy(gR.data(), dc.restarts, gR.size() * 4, cudaMemcpyDeviceToHost));
+    CU(cudaMemcpy(gW.data(), dc.wgt, gW.size() * 4, cudaMemcpyDeviceToHost));
     CHECK(gX == hX && gY == hY, "rho walk state after %u iterations", iters);
     CHECK(gS == hS && gR == hR, "rho step/restart counters");
+    CHECK(gW == hW, "carried class weights");
     uint32_t gcount = 0;
     CU(cudaMemcpy(&gcount, d_cnt, 4, cudaMemcpyDeviceToHost));
     CHECK(gcount == hcount, "dp count: device %u vs host %u", gcount, hcount);
@@ -225,6 +231,7 @@ static void selftest() {
 
     cudaFree(d_in); cudaFree(d_out); cudaFree(d_k);
     cudaFree(dc.X); cudaFree(dc.Y); cudaFree(dc.steps); cudaFree(dc.restarts);
+    cudaFree(dc.wgt);
     cudaFree(d_cb); cudaFree(d_dp); cudaFree(d_cnt);
     printf(failures ? "SELFTEST FAILED\n" : "selftest OK\n");
 }
@@ -325,6 +332,7 @@ static void bench_rho(RhoOpts o) {
     CU(cudaMalloc(&dc.Y, F2M_WORDS * (size_t)nw * 4));
     CU(cudaMalloc(&dc.steps, (size_t)nw * 4));
     CU(cudaMalloc(&dc.restarts, (size_t)nw * 4));
+    CU(cudaMalloc(&dc.wgt, (size_t)nw * 4));
     uint32_t *d_cb;
     CU(cudaMalloc(&d_cb, cb_words * 4));
     CU(cudaMemcpy(d_cb, cb_flat(), cb_words * 4, cudaMemcpyHostToDevice));
@@ -367,6 +375,7 @@ static void bench_rho(RhoOpts o) {
            CURVE2K_R_BITS, need, need / (steps / t) / (365.25 * 24 * 3600));
 
     cudaFree(dc.X); cudaFree(dc.Y); cudaFree(dc.steps); cudaFree(dc.restarts);
+    cudaFree(dc.wgt);
     cudaFree(d_cb); cudaFree(dc.dp_out); cudaFree(dc.dp_count);
 }
 

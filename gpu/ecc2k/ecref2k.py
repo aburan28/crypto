@@ -418,12 +418,19 @@ def hw_class(x, masks):
 class FrobWalk:
     """Frobenius-class r-adding walk, the ECC2K-130 iteration shape:
 
-        j(P) = (g(x_P) mod NJ) + JMIN
+        j(P) = ((g(x_P) / 2) mod NJ) + JMIN
         P   -> P + tau^j(P)
 
     j depends only on the Frobenius-invariant g, so the map descends to the
     classes {+-tau^i(P)}: f(tau P) = tau f(P) and f(-P) = -f(P).  Walking on
     classes of size 2m shortens the search by sqrt(2m).
+
+    The halving is not cosmetic.  g is the normal-basis Hamming weight of an
+    x that lies on the curve, and that is always even -- checked exactly over
+    all 45562 classes of the m=23 subgroup and over samples at m=97.  Without
+    the /2, g mod 8 only ever takes the values {0,2,4,6} and the walk runs on
+    four branches instead of eight.  This is the rule Bailey et al. use for
+    ECC2K-130, and the one ecc2k130/include/walk.h implements.
 
     A step multiplies the coefficients: P = aP0 + bQ0 becomes
     (1 + s^j)(aP0 + bQ0), so a <- a(1+s^j), b <- b(1+s^j) mod r.
@@ -436,7 +443,7 @@ class FrobWalk:
         self.E, self.masks = E, masks
 
     def j_of(self, P):
-        return (hw_class(P[0], self.masks) % self.NJ) + self.JMIN
+        return ((hw_class(P[0], self.masks) // 2) % self.NJ) + self.JMIN
 
     def step(self, P):
         j = self.j_of(P)
