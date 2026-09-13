@@ -730,7 +730,10 @@ against 3.3×.
   the base is fixed by the time the tier is chosen.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
-  `O(|F|)` summand recovery a hit would otherwise charge to it.
+  `O(|F|)` summand recovery a hit would otherwise charge to it — one
+  target at a time, which is *not* how the `m = 3` scan probes and costs
+  roughly twice as much on a folded table; see the probe-shape bullet
+  below before quoting it.
 - `docs/ic/params/k0n61-subgroup-folded.json` asks for a 300000-point
   base, which only the folded tier can hold.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
@@ -740,6 +743,15 @@ against 3.3×.
   shift reduction for a sparse irreducible, and the normal-basis
   rotation.  At `n = 61` that is 846.8 / 733.7 / 1299.3 ns against
   **85.5**.
+- The same harness also prices a probe in the three shapes the code
+  probes in, because they are far enough apart that "a probe" has to say
+  which: one target at a time the fold costs **3.1×**, blocked 1024 and
+  prefetched **1.9×**, and inside the descent's own `m = 3` scan
+  **1.5×**.  What is left in that last one, 83 ns a base point, is the
+  canonicalisation, measured alone at 76 — so the fold's cost in the
+  descent is the canon and nothing else.
+  `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, with the
+  compact table as the control that says why blocking pays.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over

@@ -1926,6 +1926,51 @@ so plainly. Two things eat it:
   0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
   pays it once per witness it *finds*, not once per witness it keeps.
 
+The first of those two is measured on a probe shape the descent does not
+use, and the factor is much smaller where it is actually paid. `340 ns`
+is `contains_pair` called on one target at a time. The `m = 3` scan
+computes its keys a block of 1024 at a time and then probes them, and at
+`n = 61` on the equal-memory pair above the three shapes are far apart:
+
+| | compact | folded | the fold costs |
+|---|---|---|---|
+| one probe at a time | 101 ns | 316 ns | **3.1x** |
+| blocked 1024, prefetched | 80 | 153 | **1.9x** |
+| the descent's own loop, a base point | 160 | 243 | **1.5x** |
+
+The last row is `witnesses_fast` with `m = 3` and a sink that never
+stops, so it is a true per-base-point figure and carries the batched
+inversion `add_many` does — about 80 ns on both tables, which is why it
+is the largest of the three and still the smallest ratio. What is left
+after it, 83 ns, is the canonicalisation, measured alone at 76. **The
+fold's cost in the descent is the canon and nothing else.** The 144 ns
+that earlier looked like an unexplained remainder is not in the pipeline;
+it is what a lone probe pays and the block does not.
+
+Why a block helps this much is worth stating, because the reason is not
+the one the code's comment gave. The key is some 76 ns of dependent work,
+which is long enough that two consecutive probes do not both fit in the
+reorder window — so fused, each probe's memory round trip is exposed in
+full, and split, the lookups are adjacent and independent and overlap. A
+compact table is the control: its key is a `pack`, nine nanoseconds, its
+probes already overlap, and blocking buys it 1.2x against the folded
+table's 1.9x. Chunk 1 is measured too and comes back at 1.00x, so the
+figure is the blocking and not the buffer.
+
+This is a different thing from interleaving lanes, which is measured
+elsewhere in this note and buys the rotation nothing: interleaving fills
+one *dependency* chain's latency with another chain's work, and a
+rotation has no chain to fill. Blocking separates the key from the
+lookup so the *memory* accesses can overlap. The rotation being short is
+what makes interleaving pointless; the rotation being 76 ns is what makes
+blocking pay.
+
+One arm still probes one at a time: `m = 4` walks every second half
+`R − (P_k + P_l)` and calls `pairs_for` on each, so it pays the 316 rather
+than the 153. It is quadratic in the base and the least used, which is
+presumably why it was never blocked; blocking it is the same change the
+`m = 3` arm already carries.
+
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
 first witness:

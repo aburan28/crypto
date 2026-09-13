@@ -3079,7 +3079,26 @@ impl PairSumTable {
     /// stored rest, about one time in `2²⁸`, which [`Self::pairs_for`]
     /// then resolves in the group.
     pub fn contains_pair(&self, target: FastPoint) -> bool {
-        let key = self.key_of(target);
+        self.contains_key(self.probe_key(target))
+    }
+
+    /// The key half of [`Self::contains_pair`], exposed so a benchmark
+    /// can time the two halves apart.
+    #[doc(hidden)]
+    pub fn probe_key(&self, target: FastPoint) -> u64 {
+        self.key_of(target)
+    }
+
+    /// The prefetch the blocked descent loop issues ahead of a key,
+    /// exposed so a benchmark can model that loop exactly.
+    #[doc(hidden)]
+    pub fn prefetch_key(&self, key: u64) {
+        prefetch(&self.present[self.filter_word(key)]);
+    }
+
+    /// The lookup half of [`Self::contains_pair`].
+    #[doc(hidden)]
+    pub fn contains_key(&self, key: u64) -> bool {
         if !self.admitted(key) {
             return false;
         }
@@ -3287,7 +3306,11 @@ impl PairSumTable {
             );
         }
         // Keys a block at a time: enough to keep `LANES`
-        // canonicalisations interleaved, little enough that a search
+        // canonicalisations interleaved — and, with a
+        // [`FrobeniusCanon`], enough to let consecutive lookups overlap
+        // their memory round trips, which the key's own latency
+        // prevents when the two are fused; see the `m = 3` arm of
+        // [`Self::witnesses_fast_inner`].  Little enough that a search
         // stopping at its first witness has not paid for the rest.
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
@@ -3390,6 +3413,22 @@ impl PairSumTable {
                 // amortise one field inversion and to keep `LANES`
                 // squaring chains interleaved, and short enough that an
                 // early exit throws away at most a block.
+                //
+                // The block earns its keep on a folded table even where
+                // there is nothing to interleave.  With a
+                // [`FrobeniusCanon`] the key is a rotation and
+                // [`Self::keys_of`] runs it one point at a time, but it
+                // is still some seventy-six nanoseconds of dependent
+                // work, which is long enough that two consecutive
+                // probes do not both fit in the reorder window — so
+                // fused, each probe's memory round trip is exposed in
+                // full.  Split, the lookups are adjacent and
+                // independent and overlap: 275 ns a probe becomes 155
+                // at `n = 61`.  A compact table, whose key is a `pack`,
+                // gains a twelfth of that, which is what says the cause
+                // is the length of the key and not the blocking itself.
+                // `examples/koblitz_orbit_fold_width.rs` measures the
+                // sweep.  Do not unroll this back into a single loop.
                 const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
                 let mut rests = Vec::with_capacity(BLOCK);

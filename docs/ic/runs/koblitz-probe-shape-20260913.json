@@ -1,0 +1,130 @@
+{
+  "what": "What 'a probe' costs on a folded pair table, in the three shapes the code probes in: one target at a time, in a block, and inside the descent's own m = 3 scan.",
+  "why": "RESEARCH_KOBLITZ_INDEX_CALCULUS.md reported the fold multiplying a probe by 3.1x, measured with contains_pair one target at a time. The m = 3 scan does not probe that way - it computes keys a block of 1024 at a time and then probes them - so the reported factor is not the one the pipeline pays.",
+  "harness": "examples/koblitz_orbit_fold_width.rs 61 4 16000",
+  "setup": {
+    "degree": 61,
+    "equal_memory": "0.64 GiB each",
+    "compact_base": 16592,
+    "folded_base": 183488,
+    "compact_pairs": 137655528,
+    "folded_pairs": 138074720,
+    "host": "4 cores, 15 GiB; the same host throughout, different from the one the 374 -> 285 bucket-hash figures come from"
+  },
+  "ns_a_probe": {
+    "one_at_a_time": {
+      "compact": 101,
+      "folded": 316,
+      "fold_costs": 3.1
+    },
+    "blocked_1024_prefetched": {
+      "compact": 80.3,
+      "folded": 153.4,
+      "fold_costs": 1.9
+    },
+    "descent_loop_per_base_point": {
+      "compact": 160.2,
+      "folded": 242.7,
+      "fold_costs": 1.5,
+      "note": "witnesses_fast with m = 3 and a sink that never stops, so the whole base is walked; carries add_many's batched inversion, about 80 ns on both tables"
+    }
+  },
+  "the_conclusion": "The fold's cost in the descent is 83 ns a base point, and the canonicalisation measured alone is 76. There is no unexplained remainder: the ~144 ns that a lone probe pays over the canon is the memory round trip the block overlaps and the fused loop does not.",
+  "why_blocking_pays": {
+    "mechanism": "The key is ~76 ns of dependent work, long enough that two consecutive probes do not both fit in the reorder window, so a fused loop exposes each probe's memory round trip in full. Split, the lookups are adjacent and independent and overlap.",
+    "the_control": "A compact table's key is a pack, ~9 ns; its probes already overlap and blocking buys it 1.2x, against the folded table's 1.9x. That the gain scales with the key's length and not with the blocking is what picks this explanation.",
+    "chunk_1_control": "1.00x on the folded table, so the figure is the blocking and not the buffer the chunked loop uses.",
+    "not_lane_interleaving": "A separate thing, measured elsewhere and worth nothing here: interleaving fills one dependency chain's latency with another chain's work, and a rotation has no chain to fill. Blocking lets the memory accesses overlap.",
+    "prefetch": "The descent also prefetches 32 keys ahead. Measured on top of the blocking it is worth a few per cent, not the effect."
+  },
+  "chunk_sweep": [
+    {
+      "sweep": [
+        {
+          "chunk": 1,
+          "chunked_ns": 132.813195,
+          "chunked_prefetch_ns": 136.8651425,
+          "fused_ns": 101.5086625
+        },
+        {
+          "chunk": 4,
+          "chunked_ns": 119.9435025,
+          "chunked_prefetch_ns": 116.95633000000001,
+          "fused_ns": 100.67504
+        },
+        {
+          "chunk": 16,
+          "chunked_ns": 94.93831,
+          "chunked_prefetch_ns": 90.20661,
+          "fused_ns": 98.06103
+        },
+        {
+          "chunk": 64,
+          "chunked_ns": 90.16051250000001,
+          "chunked_prefetch_ns": 85.65415250000001,
+          "fused_ns": 107.15876499999999
+        },
+        {
+          "chunk": 256,
+          "chunked_ns": 86.9671075,
+          "chunked_prefetch_ns": 84.1339775,
+          "fused_ns": 98.064295
+        },
+        {
+          "chunk": 4096,
+          "chunked_ns": 100.04578749999999,
+          "chunked_prefetch_ns": 80.2801025,
+          "fused_ns": 101.8401525
+        }
+      ],
+      "table": "compact"
+    },
+    {
+      "sweep": [
+        {
+          "chunk": 1,
+          "chunked_ns": 318.1521175,
+          "chunked_prefetch_ns": 322.89340500000003,
+          "fused_ns": 321.0252775
+        },
+        {
+          "chunk": 4,
+          "chunked_ns": 207.3862975,
+          "chunked_prefetch_ns": 202.80741749999999,
+          "fused_ns": 312.07874999999996
+        },
+        {
+          "chunk": 16,
+          "chunked_ns": 173.308135,
+          "chunked_prefetch_ns": 163.631695,
+          "fused_ns": 315.443715
+        },
+        {
+          "chunk": 64,
+          "chunked_ns": 166.63759,
+          "chunked_prefetch_ns": 159.25585,
+          "fused_ns": 313.90429499999993
+        },
+        {
+          "chunk": 256,
+          "chunked_ns": 163.8799725,
+          "chunked_prefetch_ns": 168.2682825,
+          "fused_ns": 318.006525
+        },
+        {
+          "chunk": 4096,
+          "chunked_ns": 163.529775,
+          "chunked_prefetch_ns": 153.41262,
+          "fused_ns": 315.14474500000006
+        }
+      ],
+      "table": "folded"
+    }
+  ],
+  "still_one_at_a_time": "The m = 4 arm of witnesses_fast_inner walks every second half R - (P_k + P_l) and calls pairs_for on each, so it pays the 316 rather than the 153. Quadratic in the base and the least used; not changed here.",
+  "not_claimed": [
+    "That the mechanism is L1 eviction between the canon's 16 KiB tables and the table's random lines. Three random lines a probe out of a 768-line L1 does not account for 130 ns, and the compact control points at the key's length instead.",
+    "That TLB pressure was measured. A 128 MiB filter walked at random misses the TLB on most probes and that cost is inside these numbers, but nothing here separates it from the rest of the round trip.",
+    "That these absolute numbers combine with any other run's. Same host throughout this record, different from the bucket-hash run."
+  ]
+}
