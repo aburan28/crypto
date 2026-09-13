@@ -2341,7 +2341,10 @@ impl PairSumTable {
     /// negatives — it is only redundant, by the factor two that the
     /// unordered `i ≤ j` symmetry would otherwise remove.
     fn folded_pair_count(orbits: usize, points: usize) -> u128 {
-        orbits as u128 * points as u128
+        // Row `α` walks only the points in orbits `≥ α`, which over all
+        // rows is half the rectangle: each sum orbit is stored once
+        // rather than once from each of its two summands.
+        orbits as u128 * points as u128 / 2 + points as u128
     }
 
     /// Bits of a canonical key: `1 + min_k x^{2^k}` is at most `2^n`.
@@ -2627,12 +2630,40 @@ impl PairSumTable {
         // points.  It fits in the rest's high half and costs no memory;
         // only a base with more orbits than a tag can name goes without.
         let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
+        // **Half the rows again.**  A sum orbit is enumerated twice, once
+        // from each of its two summands' orbits, and one of the two is
+        // enough: keeping the entry whose row is the *smaller* of the two
+        // orbits stores each sum orbit once and still tags it with an
+        // orbit a summand really lies in.
+        //
+        // The rule is "row `α` keeps `j` only when `orbit(j) ≥ α`", and
+        // covering survives it: given `rest = P_a + P_b` with
+        // `orbit(a) = α ≤ β = orbit(b)`, the `g` carrying `P_a` to
+        // `rep(α)` puts `g · rest` in row `α` with its second summand in
+        // orbit `β ≥ α`, so `canon(rest)` is still produced.  Row `β`
+        // skips the mirror image, and nothing else does.
+        //
+        // Ordering the base by orbit makes "orbit at least `α`" a
+        // suffix, so a row is a slice and no addend list is ever built.
+        let orbit_of_point: Vec<u32> = fb.signed_orbit_of.iter().map(|&(o, _, _)| o as u32).collect();
+        let mut order: Vec<u32> = (0..n_points as u32).collect();
+        order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
+        let by_orbit: Vec<FastPoint> = order.iter().map(|&i| points[i as usize]).collect();
+        // `suffix[o]` is where the points of orbit `o` begin.
+        let mut suffix = vec![0u32; fb.signed_orbits.len() + 1];
+        for (position, &i) in order.iter().enumerate() {
+            suffix[orbit_of_point[i as usize] as usize + 1] = position as u32 + 1;
+        }
+        for o in 0..fb.signed_orbits.len() {
+            suffix[o + 1] = suffix[o + 1].max(suffix[o]);
+        }
         let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
             let mut sums = Vec::with_capacity(n_points);
             let mut scratch = BatchScratch::default();
             let (orbit, rep) = reps[r];
-            curve.add_many(points[rep], &points, &mut sums, &mut scratch);
+            let from = suffix[orbit as usize] as usize;
+            curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
             for &p in &sums {
                 f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
             }

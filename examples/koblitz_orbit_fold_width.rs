@@ -106,14 +106,22 @@ fn main() {
         .nth(3)
         .and_then(|s| s.parse().ok())
         .unwrap_or(16000);
-    let widen = (per_orbit as f64).sqrt();
     let fb_c = build_subgroup_orbit_factor_base(&kc, 1, compact_points).expect("compact base");
-    let fb_f = build_subgroup_orbit_factor_base(
-        &kc,
-        1,
-        (compact_points as f64 * widen) as usize,
-    )
-    .expect("folded base");
+    // The folded base is chosen so its table costs the same BYTES as the
+    // compact one, by bisecting the sizing law — not by scaling the point
+    // count by a factor that is supposed to equal it.  A heuristic width
+    // is how an earlier version of this measurement came to give the
+    // folded table 1.8 times the memory while calling the comparison
+    // equal.
+    let budget_c = PairSumTable::compact_byte_size(fb_c.points.len(), degree);
+    let folded_points = widest(
+        |p| {
+            let orbits = ((p as f64 / per_orbit).ceil() as usize).max(1);
+            PairSumTable::folded_byte_size(orbits, p, degree)
+        },
+        budget_c,
+    );
+    let fb_f = build_subgroup_orbit_factor_base(&kc, 1, folded_points).expect("folded base");
     let (pc, pf) = (fb_c.points.len(), fb_f.points.len());
     let bytes_c = PairSumTable::compact_byte_size(pc, degree);
     let bytes_f = PairSumTable::folded_byte_size(fb_f.signed_orbits.len(), pf, degree);

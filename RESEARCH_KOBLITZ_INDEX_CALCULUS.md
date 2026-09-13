@@ -1881,10 +1881,24 @@ each signed orbit and `j` over the whole base:
 
 So the enumeration is onto the orbits whatever the stabilisers are —
 there are no false negatives — and it forms `|F|²/2n` sums rather than
-`|F|²/2`. What it does not remove is the unordered `i ≤ j` symmetry, so
-each orbit is stored about twice and the fold is worth `n`, not `2n`.
-Measured at `n = 61`: 61.0 times fewer stored pairs, against the 61 the
-argument predicts.
+`|F|²/2`. What it does not remove, at first, is the unordered `i ≤ j` symmetry, so
+each orbit is stored twice and the fold is worth `n` rather than `2n` —
+61.0 times fewer stored pairs at `n = 61`, against the 61 that argument
+predicts.
+
+That second factor is recoverable, and cheaply. A sum orbit is
+enumerated once from each of its two summands' orbits, and one of the
+two will do: keep the entry whose row is the **smaller** of them. The
+rule is *row `α` keeps `j` only when `orbit(j) ≥ α`*, and covering
+survives it — given `rest = P_a + P_b` with `orbit(a) = α ≤ β =
+orbit(b)`, the `g` carrying `P_a` to `rep(α)` puts `g · rest` in row `α`
+with its second summand in orbit `β ≥ α`, so `canon(rest)` is still
+produced, and row `β` skips the mirror image. Ordering the base by orbit
+makes "orbit at least `α`" a contiguous suffix, so a row is a slice and
+no addend list is ever built.
+
+With it the fold is worth the full `2n`: **121.9× measured**, and the
+base a 4 GiB budget affords goes 330376 → **467128**.
 
 ### What it buys, and what it costs
 
@@ -1894,9 +1908,9 @@ At a 4 GiB budget and `n = 61`:
 |---|---|---|---|
 | full, with summands | 16 | 23169 | 6.07e5 |
 | compact | ~4.5 | 42302 | 1.82e5 |
-| folded | ~4.5, `n` times fewer | **330376** | **2.99e3** |
+| folded | ~4.5, `2n` times fewer | **467128** | **1.49e3** |
 
-A base 7.81 times wider, and 61 times fewer probes a target. The
+A base 11.0 times wider, and 122 times fewer probes a target. The
 temptation is to call that a 61-fold speedup. It is not, and the run says
 so plainly. Two things eat it:
 
@@ -2057,6 +2071,22 @@ there is offered *every* orbit at once. Two membership tests that were
 linear-per-push went quadratic on it; they are sorts now, and it costs
 14 ms for the 88816 pairs it legitimately returns.
 
+### A measurement that was not comparing what it said
+
+Before the stage table, a correction to it. The folded base in those runs
+was chosen by scaling the compact point count by `√(2n)` — the right
+factor only once each sum orbit is stored *once*, which before the row
+filter it was not. So the folded table held about **1.8 times the bytes**
+of the compact one it was being compared against, and "at equal memory"
+was not.
+
+The example now picks the folded base by bisecting the sizing law against
+the compact table's byte count, so the two match by construction: 0.64
+GiB against 0.64 GiB, 137655528 stored pairs against 138074720. Every
+figure in the final row below is at matched bytes; the earlier rows are
+kept for the shape of the progression, and each of them flattered the
+fold by that 1.8.
+
 ### What the fold is actually worth
 
 | | s per decomposed target | the fold |
@@ -2065,7 +2095,8 @@ linear-per-push went quadratic on it; they are sorts now, and it costs
 | key as a rotation | 0.168 | 2.8× |
 | faster recovery | 0.150 | 3.2× |
 | any witness, not the sorted one | 0.018 | 27.8× |
-| the orbit tag | **0.0027** | **168×** |
+| the orbit tag | 0.0027 | 168× |
+| the row filter, at matched bytes | **0.0025** | **197×** |
 
 The fold was worth 2.0× on the code as it stood. The rest is four costs
 that only a base eight times wider makes visible, and three of the four

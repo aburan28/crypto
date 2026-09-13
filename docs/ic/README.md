@@ -697,11 +697,11 @@ dense modular solver.
 The base is closed under `π` and negation, so its pair sums are too, and
 the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
 canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
-negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
-stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
-fewer descent probes, and **168×** end to end per decomposed target —
-2.0× of which is the fold on the code as it stood, the rest being four
-costs that only a base eight times wider makes visible.
+negation does not move the abscissa. Measured at `n = 61`: 122 times fewer
+stored pairs, a base 11.0 times wider at 4 GiB (42302 → 467128), 122 times
+fewer descent probes, and **197×** end to end per decomposed target at
+matched bytes — 2.0× of which is the fold on the code as it stood, the
+rest being five costs that only a base eleven times wider makes visible.
 
 Recovery is `O(n)`, not `O(|F|)`: a folded entry names the signed orbit
 one summand lies in, in the high half of its rest word, so recovering the
