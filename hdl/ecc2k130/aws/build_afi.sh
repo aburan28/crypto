@@ -8,6 +8,8 @@
 #                                       places, routes and submits the AFI
 #                                       (hours; the instance shuts down after)
 #   ./build_afi.sh status [TAG]         instance state, build log tail, AFI state
+#   ./build_afi.sh submit [TAG]         create the AFI from the uploaded tarball
+#                                       when the instance could not (see below)
 #   ./build_afi.sh wait   [TAG]         block until the AFI is available
 #   ./build_afi.sh promote [TAG]        make it the image bootstrap_f2.sh loads
 #   ./build_afi.sh list                 every build in the bucket
@@ -45,7 +47,8 @@
 #   fpga/builds/TAG/build.log             the instance's log, refreshed every 5 min
 #   fpga/builds/TAG/TAG.Developer_CL.tar  the DCP tarball create-fpga-image ingests
 #   fpga/builds/TAG/reports/              utilisation and timing
-#   fpga/builds/TAG/afi.json              ids and geometry once submitted
+#   fpga/builds/TAG/build.json            geometry and timing once the tarball is up
+#   fpga/builds/TAG/afi.json              the same plus the image ids once submitted
 #   fpga/afi.json                         the promoted image
 
 set -euo pipefail
@@ -210,12 +213,51 @@ status)
     fi
     ;;
 
+submit)
+    # The instance calls create-fpga-image itself; this is for when it could
+    # not.  Launched on the caller's session token (no IAM rights to make the
+    # role), its S3 calls go through but the image service, reading the
+    # tarball on its behalf, refuses the token: InaccessibleStorageLocation.
+    # The tarball and build.json are in the bucket, so the call is made here.
+    [ -n "$TAG" ] || { echo "no builds yet" >&2; exit 1; }
+    if aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/afi.json" - >/dev/null 2>&1; then
+        echo "build $TAG already has an afi.json" >&2; exit 1
+    fi
+    aws s3api head-object --bucket "$BUCKET" --key "fpga/builds/$TAG/$TAG.Developer_CL.tar" >/dev/null 2>&1 \
+        || { echo "no DCP tarball for $TAG in the bucket; the build did not get that far" >&2; exit 1; }
+    b="${TMPDIR:-/tmp}/ecc-build.json"
+    if ! aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/build.json" "$b" --only-show-errors 2>/dev/null; then
+        # builds before build.json existed: the geometry is in the tag and the log
+        neng=$(sed -E 's/.*-n([0-9]+)-.*/\1/' <<<"$TAG"); mhz=$(sed -E 's/.*-c([0-9]+).*/\1/' <<<"$TAG")
+        timing=met
+        aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/build.log" - 2>/dev/null | grep -q "timing was not met" && timing=violated
+        printf '{"tag":"%s","neng":%d,"idW":%d,"dpWeight":%d,"walks":%d,"clkMhz":%d,"timing":"%s"}\n' \
+            "$TAG" "$neng" "$ID_W" "$DP_WEIGHT" "$((neng << ID_W))" "$mhz" "$timing" > "$b"
+    fi
+    desc=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print("ECC2K-130 rho engine, %d engines x %d walks, dp weight %d, %d MHz, timing %s" % (d["neng"], 1 << d["idW"], d["dpWeight"], d["clkMhz"], d["timing"]))' "$b")
+    out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" --description "$desc" \
+          --input-storage-location "Bucket=$BUCKET,Key=fpga/builds/$TAG/$TAG.Developer_CL.tar" \
+          --logs-storage-location "Bucket=$BUCKET,Key=fpga/builds/$TAG/afi-logs" \
+          --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=$STACK},{Key=BuildTag,Value=$TAG}]" \
+          --output json)
+    python3 -c 'import json,sys; d=json.loads(sys.argv[1]); b=json.load(open(sys.argv[2])); json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], **b}, open(sys.argv[3], "w"), indent=1)' \
+        "$out" "$b" "${TMPDIR:-/tmp}/ecc-afi.json"
+    aws s3 cp "${TMPDIR:-/tmp}/ecc-afi.json" "s3://$BUCKET/fpga/builds/$TAG/afi.json" --only-show-errors
+    cat "${TMPDIR:-/tmp}/ecc-afi.json"; echo
+    echo "submitted; ./build_afi.sh wait $TAG then ./build_afi.sh promote $TAG"
+    ;;
+
 wait)
     [ -n "$TAG" ] || { echo "no builds yet" >&2; exit 1; }
     echo "waiting for build $TAG (Vivado takes hours; AFI generation about an hour after that)"
     while ! aws s3 cp "s3://$BUCKET/fpga/builds/$TAG/afi.json" "${TMPDIR:-/tmp}/ecc-afi.json" --only-show-errors 2>/dev/null; do
         if [ "$(aws ec2 describe-instances --filters "Name=tag:BuildTag,Values=$TAG" "Name=instance-state-name,Values=pending,running,stopping" \
                  --query 'length(Reservations[].Instances[])' --output text)" = 0 ]; then
+            if aws s3api head-object --bucket "$BUCKET" --key "fpga/builds/$TAG/$TAG.Developer_CL.tar" >/dev/null 2>&1; then
+                echo "build instance is gone with the tarball uploaded but no AFI submitted; submitting from here"
+                "$0" submit "$TAG" || exit 1
+                continue
+            fi
             echo "build instance is gone and no AFI was submitted; read fpga/builds/$TAG/build.log" >&2
             exit 1
         fi

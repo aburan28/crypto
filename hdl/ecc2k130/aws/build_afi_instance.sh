@@ -164,20 +164,29 @@ for r in "$CL_DIR"/build/reports/*timing*.rpt; do
 done
 
 # ---- AFI -------------------------------------------------------------------
+# The geometry goes up first so that build_afi.sh submit can make the image
+# from the tarball if this call cannot: with the caller's session token in
+# place of a role (no IAM rights to make one), S3 answers us but the FPGA
+# image service, reading the tarball on our behalf, answers
+# InaccessibleStorageLocation.
+python3 - "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" "$CLK_MHZ" > build.json <<'EOF'
+import json, sys
+tag, neng, idw, dpw, timing, mhz = sys.argv[1:]
+json.dump({"tag": tag, "neng": int(neng), "idW": int(idw), "dpWeight": int(dpw),
+           "walks": int(neng) << int(idw), "clkMhz": int(mhz), "timing": timing}, sys.stdout, indent=1)
+EOF
+aws s3 cp build.json "s3://$BUCKET/$PREFIX/build.json" --only-show-errors || true
 out=$(aws ec2 create-fpga-image --name "ecc2k130-$TAG" \
       --description "ECC2K-130 rho engine, $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, $CLK_MHZ MHz, timing $TIMING" \
       --input-storage-location "Bucket=$BUCKET,Key=$PREFIX/$TAG.Developer_CL.tar" \
       --logs-storage-location "Bucket=$BUCKET,Key=$PREFIX/afi-logs" \
       --tag-specifications "ResourceType=fpga-image,Tags=[{Key=Project,Value=ecc2k130},{Key=BuildTag,Value=$TAG}]" \
-      --output json) || fail "create-fpga-image"
+      --output json) || fail "create-fpga-image (the tarball is uploaded: ./build_afi.sh submit $TAG makes the image from it)"
 echo "$out"
-python3 - "$out" "$TAG" "$NENG" "$ID_W" "$DP_WEIGHT" "$TIMING" "$CLK_MHZ" > afi.json <<'EOF'
+python3 - "$out" build.json > afi.json <<'EOF'
 import json, sys
-out, tag, neng, idw, dpw, timing, mhz = sys.argv[1:]
-d = json.loads(out)
-json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], "tag": tag,
-           "neng": int(neng), "idW": int(idw), "dpWeight": int(dpw),
-           "walks": int(neng) << int(idw), "clkMhz": int(mhz), "timing": timing}, sys.stdout, indent=1)
+d = json.loads(sys.argv[1]); b = json.load(open(sys.argv[2]))
+json.dump({"afi": d["FpgaImageId"], "agfi": d["FpgaImageGlobalId"], **b}, sys.stdout, indent=1)
 EOF
 aws s3 cp afi.json "s3://$BUCKET/$PREFIX/afi.json" --only-show-errors || fail "upload afi.json"
 cat afi.json
