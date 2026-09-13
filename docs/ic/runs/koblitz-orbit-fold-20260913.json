@@ -81,5 +81,69 @@
     }
   },
   "the_orbit_tag": "A folded entry was built as canon(P_rep(r) + P_j), so a target whose key matches it satisfies g.target = P_rep(r) + P_j for some g in G, and therefore target = g^-1 P_rep(r) + g^-1 P_j with the first summand in the SAME signed orbit r -- orbits being what G preserves. So recovery walks the 2n points of orbit r, not the base: 122 against 177632. The tag is stored in the high half of the rest word, so it costs no memory at all; the rest keeps sixteen bits, which lets a probe through wrongly about one time in four thousand rather than one in 2^28, and a wrong admission now costs an orbit walk of microseconds instead of a scan of the base.",
-  "a_bug_the_tag_exposed": "Folded tables had been bucketing on the canonical key's high bits, and a canonical key is a minimum over n rotations -- far below the middle of the range -- so the whole table piled into the first few buckets. The presence filter hid it, because a probe that misses never reaches a run, but every hit walked an enormous one. Folded tables now bucket on the hash the filter and the rest are already made of, which is flat. Probe 374 -> 285 ns, and it was worth far more than that on hits."
+  "a_bug_the_tag_exposed": "Folded tables had been bucketing on the canonical key's high bits, and a canonical key is a minimum over n rotations -- far below the middle of the range -- so the whole table piled into the first few buckets. The presence filter hid it, because a probe that misses never reaches a run, but every hit walked an enormous one. Folded tables now bucket on the hash the filter and the rest are already made of, which is flat. Probe 374 -> 285 ns, and it was worth far more than that on hits.",
+  "the_lever_is_connected_again": {
+    "what_was_predicted": "Before running it: with recovery at 1.4% of a decomposition, a sqrt(2) widening of the folded base should be worth about 1.9x, where before the orbit tag it was worth nothing (15.3 ms against 15.6 ms).",
+    "what_was_measured": {
+      "base": [
+        177632,
+        250832
+      ],
+      "widening": 1.4120879120879122,
+      "secs_per_decomposition": [
+        0.0027,
+        0.0013263390044652727
+      ],
+      "speedup": 2.035678654484366,
+      "recover_ms": [
+        0.037,
+        0.044477333333333334
+      ],
+      "hit_rate": 1.0,
+      "bytes": "2454915392"
+    },
+    "verdict": "1.93x against a prediction of about 1.9x, with recovery growing 0.037 -> 0.042 ms as sqrt(2) says it should. The hit rate reached 1.000: every one of 21779 targets decomposed. This is the test that matters -- not that the fold is fast, but that widening the base is worth something again.",
+    "second_run": {
+      "budget_gib": 4,
+      "degree": 61,
+      "descent_probes": {
+        "compact": 182052.80524787755,
+        "folded": 2984.710378978624,
+        "full": 606882.4771587369
+      },
+      "measured": {
+        "attempts_compact": 9610,
+        "attempts_folded": 22619,
+        "compact_base": 23424,
+        "compact_build_secs": 30.643692282,
+        "compact_bytes": "1368808928",
+        "compact_pairs": 274353600,
+        "decomposed_compact": 139,
+        "decomposed_folded": 22619,
+        "folded_base": 250832,
+        "folded_build_secs": 126.817663239,
+        "folded_bytes": "2454915392",
+        "folded_pairs": 515710592,
+        "hit_rate_compact": 0.014464099895941728,
+        "hit_rate_folded": 1.0,
+        "net_speedup_at_equal_memory": 162.7348005005617,
+        "ns_per_probe_compact": 129.187865,
+        "ns_per_probe_folded": 315.92812499999997,
+        "probes_per_target_compact": 593741.0257321587,
+        "probes_per_target_folded": 5177.895665668268,
+        "recover_ms_compact": 1.754377375,
+        "recover_ms_folded": 0.044477333333333334,
+        "secs_per_decomposition_compact": 0.2158415132877698,
+        "secs_per_decomposition_folded": 0.0013263390044652727,
+        "stored_ratio": 0.5319914003240018
+      },
+      "points_per_signed_orbit": 122.0,
+      "subgroup_bits": 48,
+      "widest_base": {
+        "compact": 42302,
+        "folded": 330376,
+        "full": 23169
+      }
+    }
+  }
 }

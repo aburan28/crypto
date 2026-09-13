@@ -2076,6 +2076,28 @@ What matters more than the 168 is that the probes are now 98.6% of a
 decomposition. The base-widening lever the fold exists for is connected
 again: a `√2` widening should be worth about 1.9× rather than nothing.
 
+### Which is the test worth running
+
+That last sentence was written before the run, and it is the only claim
+in this section that was a prediction rather than a description. Widening
+the folded base by `√2`, from 177632 to 250832:
+
+| | `\|F\|` | s a decomposition | recovery |
+|---|---|---|---|
+| before | 177632 | 0.0027 | 0.037 ms |
+| `× √2` | 250832 | **0.0014** | 0.042 ms |
+
+**1.93× against a prediction of about 1.9×**, with the recovery growing
+by the `√2` the model says it should. The hit rate reached 1.000 — every
+one of 21779 targets decomposed at the first scan.
+
+That is the result, more than the 168 is. A speedup is a number; a
+restored lever is a direction. Before the orbit tag, more memory bought
+nothing at all — the `O(|F|)` recovery exactly ate the `1/|F|²` fall in
+probes. The `M²/(log M)²` reach law had quietly stopped applying to this
+implementation, and nothing in the timings said so until the two halves
+were measured apart.
+
 The `M²/(log M)²` reach law is unchanged in shape by any of this. What
 the fold moves is the constant, by putting `n` times more base behind the
 same byte.
