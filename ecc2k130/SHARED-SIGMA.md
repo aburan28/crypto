@@ -157,4 +157,5 @@ corpus bindings belong to the separate controlled comparison above.
 
 This is a public-command reproduction on a separate GPU allocation, so its
 absolute rates do not estimate an additional paired gain. The objective
-remains 26 B complete scalar iterations/s on one GPU and is unachieved.
+remains 26 B complete scalar iterations/s on one GPU and is unachieved;
+[THROUGHPUT-30B.md](THROUGHPUT-30B.md) prices it against the current path.

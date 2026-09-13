@@ -336,6 +336,12 @@ check-cuda: src/main.cu $(HDRS) $(GEN)
 	    -include build/cudashim.h -S -o build/main_dev.ptx src/main.cu
 	$(PTXAS) -arch=$(SMARCH) -O3 -v build/main_dev.ptx -o build/main_dev.cubin
 
+# Where the packed walk's instructions go: no GPU needed.  Prints the ALU
+# composition of a scalar update and what a throughput objective implies.
+# See THROUGHPUT-30B.md.
+path-cost:
+	CUDAPATH=$(CUDAPATH) CLANG=$(CLANG)++ python3 path_cost.py $(PATH_COST_ARGS)
+
 # Offline device compile: no GPU needed, reports registers, spills and size.
 ptx: src/ptxspike.cu $(HDRS) $(GEN)
 	$(CLANG) -x cuda --cuda-device-only --cuda-gpu-arch=$(CLANGARCH) --cuda-path=$(CUDAPATH) \
@@ -379,4 +385,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic
 
-.PHONY: all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

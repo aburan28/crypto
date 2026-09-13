@@ -1,5 +1,11 @@
 # Historical software-arithmetic throughput model
 
+**Superseded for the current path by [THROUGHPUT-30B.md](THROUGHPUT-30B.md)**,
+which prices the objective against the native-carryless kernel that runs today.
+The instruction and memory probes below are still the measured hardware
+ceilings and that document uses them; the performance model built on them is
+not, because it describes a multiplier that was replaced.
+
 This document retains the CUDA 13.0 software-arithmetic probes and model.
 The later [native carryless implementation](NATIVE-CARRYLESS.md) changes the
 instruction mix, and [batch tuning](BATCH-TUNING.md) measured 13.206088 B
