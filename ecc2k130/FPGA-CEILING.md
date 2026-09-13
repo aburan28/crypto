@@ -1,17 +1,24 @@
 # Can one FPGA beat one GPU on the ECC2K-130 walk?
 
-[THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) shows that no arithmetic reaches
-15–20 B iterations/s on one RTX PRO 6000, because the walk's bit operations all
-issue through one 64-lane integer pipe. An FPGA has no such pipe: the same bit
-operations are laid down in space and every one of them executes on every
-clock. That is the reason to ask the question, and it is a real structural
-advantage — but it buys less than it sounds like.
+The walk's bit operations all issue through one RTX PRO 6000's integer pipe,
+and [THROUGHPUT-30B.md](THROUGHPUT-30B.md) measures the kernel sitting on it:
+74.1 lane-instructions per SM-clock, 95% of the best rate the hardware probe
+ever reached. An FPGA has no such pipe: the same bit operations are laid down
+in space and every one of them executes on every clock. That is the reason to
+ask the question, and it is a real structural advantage — but it buys less
+than it sounds like.
 
-**The answer: roughly a wash per chip, about 2x cheaper per solved instance,
-and about 5–10x better per watt.** A VU47P is estimated here at 5–12 B
-iterations/s against the GPU's measured 6.9 B/s. One FPGA does not clear the
-GPU's 17.6 B/s instruction ceiling, and the arithmetic — five multiplications
-and a batched inversion per step — binds both platforms equally.
+**The answer: slower per chip, about level on cost per solved instance, and
+about 2–5x better per watt.** A VU47P is estimated here at 5–12 B iterations/s
+against the GPU's measured 14.6 B/s. One FPGA does not clear the GPU's
+17.6 B/s bitsliced instruction ceiling, and the arithmetic — five
+multiplications and a batched inversion per step — binds both platforms
+equally.
+
+The cost advantage this document first reported was measured against the
+6.9 B/s software-multiplier preset. [Native carryless](NATIVE-CARRYLESS.md)
+products, batch 16 and the state-layout work have since roughly doubled the
+GPU side, which moves every comparison below.
 
 Numbers below are labelled **measured** (from circuits in this repository,
 verified against the field model), **derived** (arithmetic on measured values
@@ -43,7 +50,7 @@ three cases together:
 | Workload | Primitive | FPGA binding resource | FPGA advantage |
 |---|---|---|---|
 | SHA-1 collisions | 32-bit add/rotate/bool | LUTs | >10x |
-| **ECC2K-130 rho** | **`GF(2^131)` multiply (XOR/AND)** | **LUTs** | **~1x speed, ~2x cost, ~5-10x energy** |
+| **ECC2K-130 rho** | **`GF(2^131)` multiply (XOR/AND)** | **LUTs** | **~0.5x speed, ~1x cost, ~2-5x energy** |
 | secp256k1 rho | 256-bit modular multiply | DSPs | ~2x |
 
 The middle row does not reach the top row because the binary-field *multiply*
@@ -199,7 +206,7 @@ is the SHA-1 signature, not the secp256k1 one.
 
 | | RTX PRO 6000 | VU47P (f2.6xlarge) |
 |---|---:|---:|
-| Iterations/s | **6.905 B measured** (6.767 B collecting) | 5–12 B estimated, ~8 central |
+| Iterations/s | **14.638 B measured** (14.107 B collecting) | 5–12 B estimated, ~8 central |
 | Ceiling with any known arithmetic | 17.6 B absolute, 11–13 realistic | not established |
 | On-demand | $4.14/GPU-h (g7e.48xlarge) | $1.980/h |
 | Spot | $1.31/GPU-h | $0.709/h |
@@ -208,24 +215,28 @@ Expected work is 2^60.9 = 2.15e18 iterations, so at the central estimates:
 
 | | GPU-hours or FPGA-hours | Spot | On-demand |
 |---|---:|---:|---:|
-| RTX PRO 6000 at 6.77 B/s | 88,300 | **$116 k** | $366 k |
+| RTX PRO 6000 at 14.11 B/s | 42,400 | **$56 k** | $175 k |
 | VU47P at 8 B/s | 74,700 | **$53 k** | $148 k |
 | VU47P at 5 B/s (pessimistic) | 119,500 | $85 k | $237 k |
 | VU47P at 12 B/s (optimistic) | 49,800 | $35 k | $99 k |
 
 Cost is a property of the work, not the fleet size; the fleet buys wall-clock,
-exactly as [aws/README.md](aws/README.md) sets out. The FPGA is **about 2x
-cheaper per solved instance on spot** and about 2.5x on on-demand, and roughly
-half of that advantage is F2 spot pricing rather than silicon.
+exactly as [aws/README.md](aws/README.md) sets out. At the current GPU preset
+the two are **within a few percent per solved instance on spot** and the FPGA
+is about 1.2x cheaper on on-demand — and what is left of that edge is F2 spot
+pricing rather than silicon. The central estimate is also the only one that
+favours the FPGA at all now: at the optimistic 12 B/s it is about 1.5x cheaper
+on spot, at the pessimistic 5 B/s about 1.5x more expensive than the GPU.
 
 **Energy (estimated).** This is where the binary-field FPGA case is strongest
 and where this document is weakest, since nothing here was measured. The
 published data points are per-FPGA measurements: a Spartan-3 at 111 M
 iterations/s in 5 W (22 M/W) and a Spartan-6 at 300 M iterations/s in 8 W
-(37.5 M/W). One RTX PRO 6000 at 6.9 B/s on a several-hundred-watt board is
-roughly 12 M/W. A VU47P at 8 B/s in a plausible 75–150 W is 53–107 M/W, so
-**5–10x the GPU per joule** — consistent with the historical pattern and
-unverified here.
+(37.5 M/W). One RTX PRO 6000 at 14.6 B/s against its 600 W board limit is
+roughly 24 M/W. A VU47P at 8 B/s in a plausible 75–150 W is 53–107 M/W, so
+**2–5x the GPU per joule** — consistent with the historical pattern and
+unverified here. The GPU figure uses the board's power limit, not a measured
+draw under this kernel.
 
 ## 6. The datapath, generated (measured)
 

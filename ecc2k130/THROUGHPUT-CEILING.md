@@ -146,9 +146,10 @@ of 5.16. Streaming x/y from DRAM instead costs about 100 bytes per update,
   `pipe_alu`/`pipe_fma` utilisation this document infers.
 * The walk itself is at the known minimum of five multiplications plus one
   batched inversion per step; x-only and other schedules screened here cost
-  more. Twenty billion updates per second on this curve therefore needs
-  about three of these GPUs, as [aws/README.md](aws/README.md) already
-  budgets.
+  more. Twenty billion updates per second on this curve therefore needs more
+  than one of these GPUs — two at the rate the current kernel measures
+  ([THROUGHPUT-30B.md](THROUGHPUT-30B.md)), three at the rate this document
+  was written against — as [aws/README.md](aws/README.md) budgets.
 * Changing platform does not escape this bound either. An FPGA has no shared
   integer pipe — the walk's bit operations occupy fabric instead of issue
   slots — but [FPGA-CEILING.md](FPGA-CEILING.md) estimates one VU47P at 5–12 B

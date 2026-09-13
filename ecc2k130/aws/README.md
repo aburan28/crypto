@@ -69,6 +69,18 @@ One GPU is now past the 15 B/s a single card was once thought unable to reach
 a single `g7e.12xlarge` is about 28 B/s and a `g7e.24xlarge` (4 GPUs, ~$6.7/h
 spot in us-west-2a today) about 56 B/s.
 
+Scale with GPUs, not with processes per GPU. `bootstrap.sh` already starts one
+worker per device, so the eight-GPU sizes run eight; a *second* client sharing
+one GPU has nothing to fill. The kernel issues 74.1 lane-instructions per
+SM-clock, 95% of the best rate the hardware probe ever measured on this part
+([../THROUGHPUT-30B.md](../THROUGHPUT-30B.md)), from a grid four times the
+resident population — there are no idle issue slots and no tail to overlap.
+What a second client would change is the working set: 121.54 MiB per client
+against a 128 MB L2, and two of them land back in the regime batch 32 measured
+at 8.5 B/s. The nearest thing to a direct measurement agrees — doubling
+resident blocks per SM (minBlocks 4) cost 34%
+([../BATCH-TUNING.md](../BATCH-TUNING.md)).
+
 ## How the pieces fit
 
 ```
