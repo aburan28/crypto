@@ -30,6 +30,7 @@ if {[info exists ::env(ECC_RTL_DIR)]} {
 }
 set rtl_files {
   gf131_pkg.vhd
+  gf2_dsp_leaf.vhd
   gf2_kmul.vhd
   gf131_mul.vhd
   ec2k_batch_pipe.vhd

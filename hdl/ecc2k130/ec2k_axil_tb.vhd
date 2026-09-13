@@ -9,7 +9,7 @@
 -- behind the ec2k_axil_cdc bridge, as it does on F2 with the engine clock
 -- above the shell's; the host side stays on the 10 ns clock.
 --
---   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd \
+--   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd \
 --        ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd ec2k_axil_cdc.vhd ec2k_axil_tb.vhd
 --   ghdl -e --std=08 ec2k_axil_tb
 --   ghdl -r --std=08 ec2k_axil_tb [-gNENG=1] [-gCDC=true -gT_ENG_PS=7000]

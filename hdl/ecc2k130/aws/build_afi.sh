@@ -26,6 +26,10 @@
 #              DIV, VCO = 250 * MULT within 800..1600).  Below 250 there is
 #              no point; above what the routed design closes, the image is
 #              flagged timing violated and its reports fail verification.
+#   DSP_LEAVES multiplier leaves in DSP48E2 blocks, 0..27 (default: the
+#              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~750 LUTs
+#              fewer per engine; the device has 9 024 DSPs, so 128 engines
+#              take 11 and 136 take 10)
 # Build instance:
 #   BUILD_TYPE  default r6i.4xlarge (128 GB; Vivado on a VU47P wants > 64)
 #   AMI         override the FPGA Developer AMI lookup (needs a Marketplace
@@ -170,7 +174,7 @@ launch)
         echo '#!/bin/bash'
         echo "BUCKET=$BUCKET; TAG=$TAG; REGION=$AWS_DEFAULT_REGION"
         echo "NENG=$NENG; ID_W=$ID_W; DP_WEIGHT=$DP_WEIGHT; NO_SHUTDOWN=${KEEP:-0}"
-        echo "MMCM_MULT=$MMCM_MULT; MMCM_DIV=$MMCM_DIV; CLK_MHZ=$CLK_MHZ"
+        echo "MMCM_MULT=$MMCM_MULT; MMCM_DIV=$MMCM_DIV; CLK_MHZ=$CLK_MHZ; DSP_LEAVES=${DSP_LEAVES:-}"
         [ -n "$credLine" ] && echo "$credLine"
         cat build_afi_instance.sh
     } > "$ud"
