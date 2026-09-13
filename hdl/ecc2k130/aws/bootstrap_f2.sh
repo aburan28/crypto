@@ -89,7 +89,8 @@ NSLOT=$(fpga-describe-local-image-slots 2>/dev/null | grep -c AFIDEVICE)
 echo "$NSLOT FPGA slot(s)"
 for s in $(seq 0 $((NSLOT - 1))); do
     fpga-clear-local-image -S "$s" >/dev/null 2>&1 || true
-    fpga-load-local-image -S "$s" -I "$AGFI" -R || { echo "load into slot $s failed"; exit 1; }
+    # F2's tools rescan the PCI device by default and reject F1's -R flag
+    fpga-load-local-image -S "$s" -I "$AGFI" || { echo "load into slot $s failed"; exit 1; }
     for i in $(seq 1 30); do
         fpga-describe-local-image -S "$s" -H 2>/dev/null | grep -q " loaded " && break
         sleep 2

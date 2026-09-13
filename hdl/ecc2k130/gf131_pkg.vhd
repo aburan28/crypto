@@ -56,9 +56,23 @@ package gf131_pkg is
   -- Multiplier pipeline: one input latch, one basis-conversion stage, a
   -- Karatsuba tree of MUL_KARATSUBA levels (each one pre-add stage and one
   -- post-combine stage around its three halves) with a one-stage schoolbook
-  -- leaf, and one back-conversion stage.  Two levels give a 33-bit leaf.
-  constant MUL_KARATSUBA : natural := 2;
-  constant MUL_LATENCY   : natural := 2 * MUL_KARATSUBA + 4;          -- 8
+  -- leaf, and one back-conversion stage.  Three levels give a 17-bit leaf;
+  -- synthesised on the VU47P that is 4855 LUTs against 5547 at two levels
+  -- and 5019 at four, with the best slack of the three (README, "The
+  -- multiplier").
+  constant MUL_KARATSUBA : natural := 3;
+
+  -- Leaves in DSP48E2 blocks: the first MUL_DSP_LEAVES of the 3^3 = 27
+  -- leaves are integer products with the coefficients three bits apart
+  -- (gf2_dsp_leaf: six DSPs and ~70 LUTs for a 17-bit leaf against ~140
+  -- LUTs), four clocks instead of one, so every LUT leaf waits three.  The
+  -- VU47P has 9 024 DSPs the design otherwise leaves empty: 11 leaves per
+  -- engine is 66 DSPs, 128 engines are 8 448 of them, and the engine loses
+  -- ~750 of its ~8 100 LUTs.  0 keeps the all-LUT multiplier.
+  constant MUL_DSP_LEAVES : natural := 11;
+  constant DSP_LEAF_LAT   : natural := 4;
+  constant LEAF_LAT       : natural := 1 + (DSP_LEAF_LAT - 1) * minimum(MUL_DSP_LEAVES, 1);
+  constant MUL_LATENCY    : natural := 2 * MUL_KARATSUBA + 3 + LEAF_LAT;   -- 10, or 13 with DSP leaves
 
   -- A point whose x has weight 1 sits on no walk but has d = x + sigma^3(x)
   -- = gamma_1 + gamma_8 /= 0, so it can pad a batch without zeroing the
@@ -66,9 +80,13 @@ package gf131_pkg is
   constant DUMMY_X : gf_t := (0 => '1', others => '0');
 
   -- Weight in two clocks: 22 groups of 6 bits (one LUT6 per output bit),
-  -- then the sum.
+  -- then the sum; or in three, with the 22 groups first summed four at a
+  -- time (six partial sums of up to 24), which halves the depth of the
+  -- adder tree where the full weight is needed.
   constant HW_GROUPS : natural := (M + 5) / 6;
   type hw_parts_t is array (0 to HW_GROUPS - 1) of unsigned(2 downto 0);
+  constant HW_NQUAD : natural := (HW_GROUPS + 3) / 4;
+  type hw_quads_t is array (0 to HW_NQUAD - 1) of unsigned(4 downto 0);
 
   function fold (e : integer) return natural;
 
@@ -80,6 +98,8 @@ package gf131_pkg is
   function gf_weight  (a : gf_t) return hw_t;
   function gf_weight_parts (a : gf_t) return hw_parts_t;
   function hw_sum (p : hw_parts_t) return hw_t;
+  function hw_quads (p : hw_parts_t) return hw_quads_t;
+  function hw_sum (q : hw_quads_t) return hw_t;
 
   -- the multiplier's two constant linear maps
   function gf_prep   (a : gf_t)    return poly_t;
@@ -168,6 +188,31 @@ package body gf131_pkg is
   begin
     for g in 0 to HW_GROUPS - 1 loop
       s := s + to_integer(p(g));
+    end loop;
+    return to_unsigned(s, hw_t'length);
+  end function;
+
+  function hw_quads (p : hw_parts_t) return hw_quads_t is
+    variable q : hw_quads_t;
+    variable s : natural;
+  begin
+    for k in 0 to HW_NQUAD - 1 loop
+      s := 0;
+      for g in 4 * k to 4 * k + 3 loop
+        if g < HW_GROUPS then
+          s := s + to_integer(p(g));
+        end if;
+      end loop;
+      q(k) := to_unsigned(s, 5);
+    end loop;
+    return q;
+  end function;
+
+  function hw_sum (q : hw_quads_t) return hw_t is
+    variable s : natural := 0;
+  begin
+    for k in 0 to HW_NQUAD - 1 loop
+      s := s + to_integer(q(k));
     end loop;
     return to_unsigned(s, hw_t'length);
   end function;

@@ -13,7 +13,7 @@
 -- batch is full) that many times over, which amortises fill and drain and
 -- gives the steady-state rate; the check is by tag so repeats are fine.
 --
---   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_batch_tb.vhd
+--   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_batch_tb.vhd
 --   ghdl -e --std=08 ec2k_batch_tb
 --   ghdl -r --std=08 ec2k_batch_tb
 --   ghdl -r --std=08 ec2k_batch_tb -gROUNDS=8 -gNFEED=192

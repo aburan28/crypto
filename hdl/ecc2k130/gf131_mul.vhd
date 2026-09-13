@@ -4,8 +4,11 @@
 --
 --   stage 0                 latch a, b
 --   stage 1                 a' = prep(a), b' = prep(b)     gamma -> c-powers
---   stages 2 .. 2+2L        a' b' over GF(2)[c]             Karatsuba, L levels
---   stage 3+2L              r = to_onb(h)                   c-powers -> gamma
+--   stages 2 .. 1+2L+F      a' b' over GF(2)[c]             Karatsuba, L levels, leaf F clocks
+--   stage 2+2L+F            r = to_onb(h)                   c-powers -> gamma
+--
+-- F = LEAF_LAT is 1 for the LUT leaf and 4 when some leaves are DSP48E2
+-- products (gf2_dsp_leaf, gf131_pkg.MUL_DSP_LEAVES).
 --
 -- There is no reduction: the back-conversion maps every c^k, k = 2..262,
 -- straight to normal-basis coordinates.  Every stage is a few LUT levels
@@ -15,6 +18,9 @@
 --
 -- The tag rides alongside in a shift register and is never inspected, so
 -- one multiplier serves any number of independent contexts at II = 1.
+-- ahead_tag is the tag of the product that will retire AHEAD clocks from
+-- now, so that a consumer can start a synchronous memory read the result
+-- will need and have the data the clock it arrives.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,7 +30,8 @@ use work.gf131_pkg.all;
 
 entity gf131_mul is
   generic (
-    TAG_W : natural := 8
+    TAG_W : natural := 8;
+    AHEAD : natural := 0                     -- ahead_tag leads out_tag by this
   );
   port (
     clk       : in  std_logic;
@@ -35,13 +42,15 @@ entity gf131_mul is
     in_tag    : in  std_logic_vector(TAG_W - 1 downto 0);
     out_valid : out std_logic;
     out_r     : out gf_t;
-    out_tag   : out std_logic_vector(TAG_W - 1 downto 0)
+    out_tag   : out std_logic_vector(TAG_W - 1 downto 0);
+    ahead_valid : out std_logic;
+    ahead_tag   : out std_logic_vector(TAG_W - 1 downto 0)
   );
 end entity;
 
 architecture rtl of gf131_mul is
 
-  constant KM_LAT : natural := 2 * MUL_KARATSUBA + 1;
+  constant KM_LAT : natural := 2 * MUL_KARATSUBA + LEAF_LAT;
 
   subtype tag_t is std_logic_vector(TAG_W - 1 downto 0);
   type tag_arr is array (0 to MUL_LATENCY - 1) of tag_t;
@@ -58,8 +67,12 @@ architecture rtl of gf131_mul is
 begin
 
   km : entity work.gf2_kmul
-    generic map (N => M, LEVELS => MUL_KARATSUBA)
+    generic map (N => M, LEVELS => MUL_KARATSUBA, DSP_LEAVES => MUL_DSP_LEAVES)
     port map (clk => clk, a => pa, b => pb, r => h);
+
+  -- latch, prep, the tree, to_onb
+  assert MUL_LATENCY = KM_LAT + 3
+    report "gf131_mul: MUL_LATENCY does not match the tree" severity failure;
 
   datapath : process (clk)
   begin
@@ -75,16 +88,20 @@ begin
   control : process (clk)
   begin
     if rising_edge(clk) then
+      tg <= in_tag & tg(0 to MUL_LATENCY - 2);
       if rst = '1' then
         vl <= (others => '0');
       else
         vl <= vl(MUL_LATENCY - 2 downto 0) & in_valid;
-        tg <= in_tag & tg(0 to MUL_LATENCY - 2);
       end if;
     end if;
   end process;
 
-  out_valid <= vl(MUL_LATENCY - 1);
-  out_tag   <= tg(MUL_LATENCY - 1);
+  assert AHEAD < MUL_LATENCY report "gf131_mul: AHEAD must be below the latency" severity failure;
+
+  out_valid   <= vl(MUL_LATENCY - 1);
+  out_tag     <= tg(MUL_LATENCY - 1);
+  ahead_valid <= vl(MUL_LATENCY - 1 - AHEAD);
+  ahead_tag   <= tg(MUL_LATENCY - 1 - AHEAD);
 
 end architecture;

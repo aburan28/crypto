@@ -65,29 +65,55 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, 13.7k LUTs as synthesised (`../README.md`, "Capacity");
-the VU47P has 1.30M. The default 48 is half the device; read
-`synth_utilization` and the post-route timing from the reports, then go to
-what fits. Utilisation above ~70% of the LUTs (~64 engines) is where
-routing starts to fail timing on this fabric.
+its walk memory, about 8.4k LUTs, 12 RAMB36 + 2 RAMB18 and 4 URAM288 as
+synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs,
+2 016 RAMB36 and 960 URAM288. 96 engines is 63% of the LUTs, 62% of the
+block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128 is 83% /
+83% / 53%; the LUTs run out first. (With the product tree in block RAM,
+17 tiles per engine, 48 was a third of the device, 64 42% of the LUTs
+and 54% of the RAM, 80 53% and 67%, 96 63% and 81%, and the RAM ran out
+first.) Read `synth_utilization` and the post-route timing from the
+reports, then go to what fits.
 
-`ID_W` sets walks per engine, `2^ID_W`. Each walk is 262 bits of RAM, and
-the step unit holds `W · 2^LOG_NB` = 128 walks at once; 256 (the default)
-keeps a full batch forming while reports and reloads drain. More walks
-means more work lost on a restart and a longer time to the first report,
-nothing else.
+`ID_W` sets walks per engine, `2^ID_W`. Each walk is 304 bits of block
+RAM, and the step unit holds `W · 2^LOG_NB` = 256 walks at once; 512 (the
+default) keeps a full batch forming while reports and reloads drain and
+fills the FIFO's block RAMs exactly, so fewer walks would save nothing.
+More walks means more work lost on a restart and a longer time to the
+first report, nothing else.
 
 ## Clocking
 
-The engines run on `clk_main_a0`, which the F2 shell fixes at 250 MHz, with
-no clock-domain crossing: the register block and the engines share the
-clock, and the OCL AXI-Lite port is on it too. The engine alone synthesises
-with +1.98 ns of slack at 4.0 ns, so 250 MHz leaves margin for the first
-build and costs at most a third of the throughput. If the timing report shows real slack,
-the next step is the HDK's `AWS_CLK_GEN` block, which offers `clk_extra_a2`
-at 375 MHz among others; that needs an AXI-Lite clock converter between
-the OCL port and `ec2k_axil` (or `ec2k_axil` on the fast clock with the
-converter in front), a small change to `cl_ecc2k130.sv`.
+The F2 shell fixes `clk_main_a0` at 250 MHz, and the engine synthesises
+with +1.98 ns of slack at 4.0 ns, so the CL makes its own clock: one
+`MMCME4_ADV` (`MMCM_ENG` in `cl_ecc2k130.sv`) multiplies `clk_main_a0` by
+`ECC_MMCM_MULT / ECC_MMCM_DIV` into `clk_eng`, and the register block and
+every engine run on that. `build_afi.sh` takes `CLK_MHZ` (250, 300, 333 —
+the default — 350, 375, 400) or the raw `MMCM_MULT` / `MMCM_DIV` pair;
+the VCO at `250 · MULT` MHz must stay within 800–1600, and both values may
+be fractional in eighths. The image reports the frequency it was built
+for in the `CLOCK` register and the host prints it.
+
+The shell's OCL port stays on `clk_main_a0` and crosses to `clk_eng` in
+`BRIDGE`, an `ec2k_axil_cdc` (`../ec2k_axil_cdc.vhd`): one transaction of
+each kind in flight, level handshakes through `ASYNC_REG` synchronisers,
+data written a clock before its flag and copied a synchroniser after it.
+Those synchroniser inputs and data copies are the only paths between the
+two clocks, and `cl_timing_user.xdc` constrains exactly them by name
+(false path into `cdc_*_meta`, `set_max_delay -datapath_only` from
+`cdc_*_src` to `cdc_*_cap`). Because both clocks come from the same
+source, Vivado times anything else that crosses against their edge
+relationship, so a path that was forgotten fails timing rather than
+sneaking through. The engine reset is the shell reset or the MMCM losing
+lock, through an `xpm_cdc_async_rst` into `clk_eng` and one more register
+per engine inside `ec2k_axil`, so no single flop drives every engine.
+
+The MMCM and bridge cost 250 LUTs. Above what the routed design closes,
+the build is flagged `timingViolated` in `afi.json`; such an image runs
+(the host verifies every report by rewalking it, so a wrong step costs
+throughput, not corpus integrity) but should be rebuilt one table entry
+lower. The 250 MHz entry (`MMCM_MULT=4 MMCM_DIV=4`) is the baseline with
+the same structure.
 
 ## What each F2 instance does
 
@@ -95,8 +121,9 @@ converter in front), a small change to `cl_ecc2k130.sv`.
 for the management tools and the `fpga_mgmt` library, fetches
 `campaign.json`, `fpga/afi.json`, `fpga/source.tar.gz` and `aws/worker.py`
 from the bucket, builds `ecc2k130-fpga` with `make pci`, and runs its
-`--selftest`. Then per slot: `fpga-load-local-image -S slot -I agfi -R`,
-wait for `loaded`, and probe the slot with `ecc2k130-fpga --launches 1`,
+`--selftest`. Then per slot: `fpga-load-local-image -S slot -I agfi` (F2's
+tools rescan PCI by default and reject F1's `-R`), wait for `loaded`, and
+probe the slot with `ecc2k130-fpga --launches 1`,
 which checks `MAGIC` and `GEOM`. Only a slot that answers as this image
 gets a worker.
 
@@ -143,23 +170,174 @@ Read [`../../ecc/aws/README.md`](../../ecc/aws/README.md) first: it
 explains the cost, the termination trap, and why this is synthesis rather
 than an FPGA image.
 
-### What to compare against
+### What came back
 
-The estimates in [`../README.md`](../README.md) that the results replace:
+The estimates in [`../README.md`](../README.md) against what Vivado 2025.2
+synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 
-| Quantity | Estimate | Basis |
+| Quantity | Estimate | Synthesised |
 |---|---|---|
-| LUT per multiplier | 5–6k | 9801 AND folded three per LUT6 with their XORs, plus the remaining ~9k XOR2 at five per LUT6 |
-| FF per multiplier | ~3k | eight stages of 131–600 bits |
-| DSP per multiplier | 0 | binary-field arithmetic has no carries |
-| LUT per batched step unit | ~10k | multiplier, 640 × 131 bits of distributed RAM with two read ports on two of the arrays, `sigma^j` muxes on the operand path, two split popcounts |
-| BRAM | 0 | every array is small enough for LUTRAM and has one write port |
-| Clock | 300–400 MHz | leaf stage of the multiplier (33 AND terms per bit) and the operand-forming stage of the step unit are the deepest, three to four LUT levels |
+| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
+| FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
+| DSP per multiplier | 0 | 0 |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; **8 150 – 8 440** with the tree in UltraRAM, 180 LUTRAM and 586 SRL left; 8 340 FF |
+| Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
+| BRAM | 0 | **12 RAMB36 + 2 RAMB18 and 4 URAM288 per engine** (the product tree in UltraRAM); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
-If the clock lands low, sweep `MUL_KARATSUBA` in `gf131_pkg.vhd`: three
-levels give a 17-bit leaf, halving the deepest stage, for two more clocks
-of latency, which the scheduler absorbs by holding more batches in flight.
-If the LUT count lands high, the same sweep in the other direction tells
-whether Karatsuba's extra XORs are paying for themselves on this fabric.
-The step unit's retire path is a RAM write and one XOR; it should not be
-the limit.
+The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
+two-writer counter array in the walker had become 8k flip-flops behind a
+256:1 mux, and every distinct `array(expr)` in the step unit's operand
+stage had become its own LUTRAM copy. Both are fixed
+([`../README.md`](../README.md), "Capacity"); the per-module probe that
+found them is a plain out-of-context `synth_design` of one entity with a
+LUT histogram by driven signal, which is the tool to reach for if a future
+build's numbers do not add up.
+
+The first 48-engine *implementation* (250 MHz, the flat register block of
+that revision) placed at **−2.5 ns** on the 4 ns clock while the engine
+alone synthesised at +2 ns: the placer's log shows it replicating the
+load and run registers across SLRs and re-placing the report holding
+registers behind the 48:1 mux, i.e. the interconnect between the register
+block and engines spread over three SLRs, not the arithmetic. That is what
+the spine in `ec2k_axil` is for ([`../README.md`](../README.md), "The
+host interface"): every inter-engine wire is register to neighbour, and
+the block has no path that touches more than one engine.
+
+The same log, read to the end, showed a second failure inside every
+engine, and the larger one: total negative slack was −246 µs over 18 000
+endpoints, "long congestion 32×32" in two SLRs, and the nets that could
+not be fixed were the write address and write enable of each LUTRAM array
+(`f_wr`, `leaf_addr`, `fb`, the multiplier tag's address decode — 1 400
+to 1 800 loads each), which physical optimisation reports it cannot
+replicate because the loads are memory primitives. 4 800 LUTRAM per
+engine, 48 times, spread across every SLICEM of a region is a design
+that cannot place tightly. Every wide memory is now block RAM
+([`../README.md`](../README.md), "Capacity"), with the read latency of
+two hidden by a prefetch buffer in the walker and, on the retire side, by
+not reading at all (the final multiply carries what its retire needs);
+the engine lost 4 700 LUTs and gained 17 block RAM tiles, and the free
+depth of a block RAM made 512 walks and 16 batches in flight the
+default, 5.29 clocks per step against 5.54.
+
+**The 48-engine build of that revision met timing at 333 MHz**
+(`20260912-181902-n48-c333`): placed at +0.418 ns with no failing
+endpoint and no congestion worse than 8×8, routed at **WNS +0.022 ns,
+TNS 0, WHS +0.009**; 403 891 LUTs (31%), 397 918 FFs (15%), 960 RAMB36 +
+96 RAMB18 (50% of the block RAM), no DSP or URAM. Its ten worst paths
+were all one net, a spine stage's reset register into the clock enables
+of the 1 300 data flip-flops it held during reset, 2.3 ns of route for
+one LUT across an SLR boundary — so data registers no longer see the
+reset anywhere in the design (the batch pipe, walker and multiplier had
+the same shape inside every engine). The first revision's 48-engine
+build, for the record, routed at −1.65 ns on the 4 ns clock with −221 µs
+of total negative slack.
+
+Its AFI `agfi-0977ae08fec2f9ced` cannot be loaded: `fpga-load-local-image`
+answers `cl-id-mismatch`, because the HDK's `aws_build_dcp_from_cl.py`
+copies the PCIe ids from `cl_id_defines.vh` into the manifest with
+`str.lstrip("32'h")`, which also strips a leading `2` or `3` of the id
+itself — subsystem id `2C13` went in as `C13`. The same DCP tarball with
+the manifest corrected by hand was resubmitted as
+**`agfi-08bd9e69a78e4dc79`** (build directory
+`20260912-181902-n48-c333-idfix`); `build_afi_instance.sh` now checks the
+manifest against the defines and rewrites it inside the tarball, and the
+subsystem id is `EC13`.
+
+**That image runs.** On an `f2.6xlarge` (FPGA Developer AMI, `sdk_setup.sh`,
+`make pci`, `fpga-load-local-image -S 0 -I agfi-08bd9e69a78e4dc79`), the
+host program reads `MAGIC`, `GEOM` (48 × 512 walks, dp weight 34) and
+`CLOCK` (333.3 MHz), loads the 24 576 walks in 7.3 s over AXI-Lite, and
+then holds **3 010.7 M steps/s** for as long as it runs (2 995 at 2 s,
+3 010 from 10 s on; 103 G iterations in a 40 s run) — 48 × 333.3 MHz /
+3.011 G = **5.31 clocks per step** against the 5.29 the simulation gave,
+with **0 dropped reports** and, in a run with `--verify 64`, all 64 sampled
+distinguished points equal to the client's reference walk from the same
+seed. (Verification is a software walk of up to `2^26` steps per point on
+the host, so with it on, the host stops draining the queue, the credits
+run out and the engines stall — 748 M steps/s in that run; workers run
+`--verify 0` and the campaign's merge checks the corpus.) The rate
+counter counts from reset, so the first version of the host program
+reported 8 G/s over the first seconds; it now measures from the end of
+the load.
+
+**64 engines at 333 MHz also met timing** (`20260912-193357-n64-c333`,
+the same revision as the 48-engine image): placed at +0.360 ns, routed at
+**WNS +0.040 ns, TNS 0**, 539 553 LUTs (41.4%), 532 647 FFs (20.4%),
+1 280 RAMB36 + 128 RAMB18 (67%). Its worst paths are now inside the
+engines and the spine, not the reset: a fill's batch id into a leaf
+table's write address (3.0 ns with the block RAM's setup) and a stage's
+`up_valid` into the 300-bit insert mux of the stage below. Its manifest
+had the same clipped id; the corrected resubmission,
+**`agfi-00c9bd0dc08fef595`** (`20260912-193357-n64-c333-idfix`), loads,
+answers 64 × 512 walks at 333.3 MHz, takes 9.7 s to seed, and holds
+**4 013.7 M steps/s** (0 dropped; 32 points verified in a second run) —
+5.32 clocks per step. It is the promoted image.
+
+The same 64 engines with the level in the tag and reset-free data
+registers (`20260912-201058-n64-c333`) placed at +0.427 ns (against
++0.360) and routed at **+0.026 ns**, its worst path now the fill's state
+(`fill_pend → fill_ok → p1_take → p0_adv → in_ready`) into the 300
+clock enables of the step unit's first input register — since removed
+by letting an input stage take a walk only when it is empty, so its
+enable is its own valid bit (5.31 clocks per step in simulation, from
+5.29). The 300-bit insert mux's select is likewise now a register in
+its own stage, and the leaf writes go through a register with one
+address copy per table.
+
+**80 engines at 333 MHz met timing too** (`20260912-204307-n80-c333`,
+the revision with the retire-free memories: 17 tiles per engine): placed
+at +0.089 ns, routed at **WNS +0.027 ns, TNS 0, WHS +0.010**; 686 854
+LUTs (52.7%), 1 280 RAMB36 + 160 RAMB18 (67% of the block RAM). Its
+worst paths are spread over the engines now — a burst level into a tree
+address, an input register into a `d` table's data pins, `ra_valid` into
+the multiplier operand register's enables, the FIFO's write pointer into
+its write enable — each around 2.97 ns, no single net to remove. Its
+manifest was written by the checked flow (`pci_subsystem_id=0xEC13`), so
+AFI **`agfi-03f41bca67d09198c`** loaded as submitted: 80 × 512 walks at
+333.3 MHz, 12.2 s to seed, **5 015.8 M steps/s** held (0 dropped; 32
+points verified in a second run), 5.32 clocks per step. It is the
+promoted image.
+
+The 80-engine build of the revision with the three path fixes above
+(`20260912-224741-n80-c333`) placed at +0.300 ns (against +0.089) and
+routed at +0.016 (`agfi-0e21ecc9f59b3c5c0`, not measured: same engines,
+same clock). **96 engines at 333 MHz met timing** too
+(`20260912-230411-n96-c333`): placed at +0.381, routed at **+0.002 ns**,
+809 266 LUTs (62%), 1 632 block RAM tiles (81%). Its AFI
+**`agfi-0b503e1c5b319ef8b`** loaded as submitted: 96 × 512 walks at
+333.3 MHz, **6 018.0 M steps/s** held over 30 s (0 dropped; 32 points
+verified in a second run), 5.32 clocks per step. It is the promoted
+image. Every worst path of both images was a
+control net fanning out to a stage's data registers — the spine's
+insert-mux select (`e_dp_ack`/`hold` → 310 loads, 2.8 ns of route),
+`p1_valid` into the input stage's 310 clock enables (2.9 ns), `a_valid`
+into the operand registers' 440 — so the revision after them has no
+clock enables on the operand, multiplier and retire registers or the
+leaf write stage (the data moves every clock; the valid bits say what
+counts), and a fanout limit on every remaining control net over 250
+loads (`report_high_fanout_nets` on the synthesised probe found them:
+the input stages' "empty", the walker's report load, the inversion's
+Frobenius select, the spine's insert and load enables), so the driver is
+replicated and each copy sits among its loads. The limit has to go on
+the net the loads see — on the valid register it did nothing, the loads
+saw Vivado's inverter.
+
+Past 96 the block RAM is gone, so the product tree — the largest array,
+2W words per batch, kept twice — moved to **UltraRAM**, of which the
+VU47P has 960 blocks the design had left empty: 4 URAM288 per engine
+(two 72-bit blocks hold a 131 × 512 copy; the depth is mostly unused, the
+ports are the resource) and the engine drops from 17 block RAM tiles to
+13. Every memory address, read and write, is now a register of its own
+so the placer can put it beside the block; the UltraRAM columns are
+further from an engine's logic than its block RAMs (the reads take three
+clocks instead of two, 5.31 clocks per step unchanged with sixteen
+batches in flight). 112 engines is then 73% of the LUTs, 72% of the
+block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%. Builds of
+both (`20260913-002654-n112-c333`, `20260913-002701-n128-c333`) were
+running when this was written, as were `20260913-005436-n112-c333`, the
+first with the **32 × 8 batch geometry** now the default (the same 256
+walks and the same memory per step unit as 16 × 16, 5.16 clocks per
+step against 5.31 — the bound is `5 + 5/W` — and 200 fewer LUTs per
+engine), and `20260913-012736-n128-c333` with the enable-free stages
+above.

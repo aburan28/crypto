@@ -16,7 +16,7 @@ GHDL  ?= ghdl
 STD   ?= --std=08
 PY    ?= python3
 
-SRC := gf131_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_step_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd
+SRC := gf131_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_step_pipe.vhd ec2k_walker.vhd ec2k_axil.vhd ec2k_axil_cdc.vhd
 TBP := gf131_tb_pkg.vhd
 TBS := gf131_mul_tb ec2k_batch_tb ec2k_step_tb ec2k_walker_tb ec2k_axil_tb
 VEC := vectors_ecc2k130.txt
@@ -26,7 +26,9 @@ all test: $(VEC)
 	$(GHDL) -a $(STD) $(SRC) $(TBP) $(addsuffix .vhd,$(TBS))
 	@rc=0; for tb in $(TBS); do \
 	  $(GHDL) -e $(STD) $$tb && \
-	  echo "=== $$tb ===" && $(GHDL) -r $(STD) $$tb || rc=1; done; exit $$rc
+	  echo "=== $$tb ===" && $(GHDL) -r $(STD) $$tb || rc=1; done; \
+	  echo "=== ec2k_axil_tb (engines on a 7 ns clock behind ec2k_axil_cdc) ===" && \
+	  $(GHDL) -r $(STD) ec2k_axil_tb -gCDC=true -gT_ENG_PS=7000 || rc=1; exit $$rc
 
 # 32 rounds of 192 vectors = 6144 steps, every batch full
 rate: $(VEC)

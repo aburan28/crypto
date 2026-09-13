@@ -30,11 +30,13 @@ if {[info exists ::env(ECC_RTL_DIR)]} {
 }
 set rtl_files {
   gf131_pkg.vhd
+  gf2_dsp_leaf.vhd
   gf2_kmul.vhd
   gf131_mul.vhd
   ec2k_batch_pipe.vhd
   ec2k_walker.vhd
   ec2k_axil.vhd
+  ec2k_axil_cdc.vhd
 }
 foreach f $rtl_files {
   if {![file exists ${rtl_dir}/$f]} {

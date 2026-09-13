@@ -4,8 +4,8 @@
 #
 # Differences from synth_CL_TEMPLATE.tcl: the engine is VHDL-2008, read
 # with read_vhdl; and the geometry defines come from the environment
-# (ECC_NENG, ECC_ID_W, ECC_DP_WEIGHT, ...), which build_afi.sh sets, so one
-# source tree builds every image.
+# (ECC_NENG, ECC_ID_W, ECC_DP_WEIGHT, ECC_MMCM_MULT/DIV, ...), which
+# build_afi.sh sets, so one source tree builds every image.
 
 # Common header
 source ${HDK_SHELL_DIR}/build/scripts/synth_cl_header.tcl
@@ -40,7 +40,7 @@ print "Geometry"
 # Every ECC_* define present in the environment becomes a -verilog_define;
 # cl_ecc2k130_defines.vh supplies the defaults for the rest.
 set geometry {}
-foreach name {ECC_NENG ECC_ID_W ECC_LOG_W ECC_LOG_NB ECC_FLUSH_CLK ECC_DP_WEIGHT ECC_DP_FIFO_W} {
+foreach name {ECC_NENG ECC_ID_W ECC_LOG_W ECC_LOG_NB ECC_FLUSH_CLK ECC_DP_WEIGHT ECC_DP_FIFO_W ECC_MMCM_MULT ECC_MMCM_DIV} {
   if {[info exists ::env($name)]} {
     lappend geometry -verilog_define ${name}=$::env($name)
     print "  $name = $::env($name)"

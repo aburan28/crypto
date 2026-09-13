@@ -17,7 +17,7 @@
 -- batches waiting for the flush.  ec2k_batch_tb measures the saturated
 -- rate.
 --
---   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
+--   ghdl -a --std=08 gf131_pkg.vhd gf131_tb_pkg.vhd gf2_dsp_leaf.vhd gf2_kmul.vhd gf131_mul.vhd ec2k_batch_pipe.vhd ec2k_walker.vhd ec2k_walker_tb.vhd
 --   ghdl -e --std=08 ec2k_walker_tb
 --   ghdl -r --std=08 ec2k_walker_tb
 
@@ -34,7 +34,10 @@ entity ec2k_walker_tb is
     VECTORS : string := "vectors_ecc2k130.txt";
     ID_W    : natural := 5;
     LOG_W   : natural := 3;
-    LOG_NB  : natural := 2
+    LOG_NB  : natural := 2;
+    -- > 0: no checking; load NWALK walks, reload every report with its own
+    -- point, and print the steady-state clocks per step over RATE_CLK clocks
+    RATE_CLK : natural := 0
   );
 end entity;
 
@@ -52,6 +55,7 @@ architecture sim of ec2k_walker_tb is
   signal ld_id     : unsigned(ID_W - 1 downto 0) := (others => '0');
   signal ld_x, ld_y : gf_t := (others => '0');
   signal dp_valid  : std_logic;
+  signal dp_ack    : std_logic := '0';
   signal dp_id     : unsigned(ID_W - 1 downto 0);
   signal dp_steps  : unsigned(CNT_W - 1 downto 0);
   signal dp_x, dp_y : gf_t;
@@ -78,7 +82,7 @@ begin
       clk => clk, rst => rst,
       ld_valid => ld_valid, ld_ready => ld_ready,
       ld_id => ld_id, ld_x => ld_x, ld_y => ld_y,
-      dp_valid => dp_valid, dp_id => dp_id, dp_steps => dp_steps,
+      dp_valid => dp_valid, dp_ack => dp_ack, dp_id => dp_id, dp_steps => dp_steps,
       dp_x => dp_x, dp_y => dp_y, step_pulse => step_pulse);
 
   loader : process
@@ -125,10 +129,62 @@ begin
     variable ld_cur   : integer := -1;
     variable w        : natural;
     variable found    : boolean;
+    variable n_loaded, steps0, cyc0 : natural := 0;
   begin
     wait until loaded;
     assert dpw = 56 report "vector cutoff " & integer'image(dpw)
       & " does not match the DP_WEIGHT the walker was built with" severity failure;
+
+    if RATE_CLK > 0 then
+      wait until rising_edge(clk);
+      rst <= '0';
+      -- load every id from some record, then keep the population constant
+      -- by restarting each reported walk at its own point
+      while n_loaded < NWALK loop
+        wait until rising_edge(clk);
+        if ld_valid = '1' and ld_ready = '1' then
+          n_loaded := n_loaded + 1;
+          ld_valid <= '0';
+        end if;
+        if ld_valid = '0' or ld_ready = '1' then
+          if n_loaded + 1 <= NWALK then
+            ld_valid <= '1';
+            ld_id    <= to_unsigned(n_loaded mod NWALK, ID_W);
+            ld_x     <= bx0(n_loaded mod nblk);
+            ld_y     <= by0(n_loaded mod nblk);
+          end if;
+        end if;
+        dp_ack <= '0';
+        if dp_valid = '1' and dp_ack = '0' then
+          dp_ack <= '1';
+        end if;
+      end loop;
+      ld_valid <= '0';
+      wait until rising_edge(clk);
+      steps0 := steps;  cyc0 := cycles;
+      while cycles < cyc0 + RATE_CLK loop
+        wait until rising_edge(clk);
+        if ld_valid = '1' and ld_ready = '1' then
+          ld_valid <= '0';
+        end if;
+        dp_ack <= '0';
+        if dp_valid = '1' and dp_ack = '0' and ld_valid = '0' then
+          dp_ack   <= '1';
+          ld_valid <= '1';
+          ld_id    <= dp_id;
+          ld_x     <= dp_x;
+          ld_y     <= dp_y;
+        end if;
+      end loop;
+      report "ec2k_walker_tb: rate " & integer'image(steps - steps0) & " steps in "
+             & integer'image(cycles - cyc0) & " clk = "
+             & integer'image((100 * (cycles - cyc0)) / (steps - steps0)) & "/100 clk per step ("
+             & integer'image(NWALK) & " walks, batches of " & integer'image(2 ** LOG_W)
+             & ", " & integer'image(2 ** LOG_NB) & " in flight)";
+      running <= false;
+      wait;
+    end if;
+
     assert nblk >= NWALK report "need at least " & integer'image(NWALK) & " WALK records"
       severity failure;
     for i in 0 to NWALK - 1 loop
@@ -149,7 +205,11 @@ begin
         ld_cur   := -1;
       end if;
 
-      if dp_valid = '1' then
+      -- take a report the way ec2k_axil does: ack for one clock, and skip
+      -- the clock after, when the walker is still showing the acked one
+      dp_ack <= '0';
+      if dp_valid = '1' and dp_ack = '0' then
+        dp_ack <= '1';
         w := to_integer(dp_id);
         if cur(w) < 0 then
           report "report from idle walk " & integer'image(w) severity error;
