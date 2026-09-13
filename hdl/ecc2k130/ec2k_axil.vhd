@@ -226,6 +226,9 @@ architecture rtl of ec2k_axil is
   signal l_valid, hold   : std_logic_vector(0 to NENG - 1) := (others => '0');
   signal l_id            : id_arr_t(0 to NENG - 1);
   signal l_x, l_y        : gf_arr_t(0 to NENG - 1);
+  -- "this load is ours": the enable of the 270 kept-load flip-flops
+  signal l_take          : std_logic_vector(0 to NENG - 1);
+  attribute MAX_FANOUT of l_take : signal is "100";
 
   -- control / status
   signal run        : std_logic := '0';
@@ -261,6 +264,8 @@ architecture rtl of ec2k_axil is
   signal q_steps : cnt_mem_t;
   signal q_x, q_y : gf_mem_t;
   signal q_wr, q_rd : unsigned(DP_FIFO_W downto 0) := (others => '0');
+  -- the write pointer addresses 300 bits of LUTRAM
+  attribute MAX_FANOUT of q_wr : signal is "128";
   -- the head entry, read out of the LUTRAM every clock at the read
   -- pointer, so an AXI read is a mux of registers and the RAM's address
   -- is a register with nothing in front of it.  It lags a pop by one
@@ -329,6 +334,7 @@ begin
     -- is free
     pend(i) <= e_dp_valid(i) and not e_dp_ack(i);
     ins(i)  <= hold(i) and pend(i) and up_slot_free(i);
+    l_take(i) <= '1' when dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i else '0';
     up_valid_n(i) <= '0' when rst_eng_r(i) = '1' else
                      '1' when ins(i) = '1' else up_valid(i + 1);
 
@@ -347,7 +353,7 @@ begin
         dn_gid(i + 1) <= dn_gid(i);
         dn_x(i + 1)   <= dn_x(i);
         dn_y(i + 1)   <= dn_y(i);
-        if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i then
+        if l_take(i) = '1' then
           l_id(i) <= dn_gid(i)(ID_W - 1 downto 0);
           l_x(i)  <= dn_x(i);
           l_y(i)  <= dn_y(i);
@@ -375,7 +381,7 @@ begin
         if accept then
           l_valid(i) <= '0';
         end if;
-        if dn_ldv(i) = '1' and eng_of(dn_gid(i)) = i then
+        if l_take(i) = '1' then
           l_valid(i) <= '1';
         end if;
 

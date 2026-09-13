@@ -269,13 +269,16 @@ architecture rtl of ec2k_batch_pipe is
   signal p1_hw    : hw_t := (others => '0');
   signal p0_adv, p1_take : std_logic;
   signal in_rdy   : std_logic;
-  -- each stage's valid is the clock enable of its 310 data flip-flops (a
-  -- stage holds a walk until the next is empty), and from one register
-  -- that was a 2.9 ns route in the 80-engine image; replicated, each
-  -- copy sits among its loads.  Every other stage moves data every clock.
+  -- "stage empty" is the clock enable of its 310 data flip-flops (a stage
+  -- holds a walk until the next is empty), and from one LUT that was a
+  -- 2.9 ns route in the 80-engine image; with a fanout limit the driver
+  -- is replicated and each copy sits among its loads.  The limit has to
+  -- be on the net the loads see (the inverted valid), not on the valid
+  -- register.  The other stages of the unit move data every clock.
+  signal p0_empty, p1_empty : std_logic;
   attribute MAX_FANOUT : string;
-  attribute MAX_FANOUT of p0_valid : signal is "100";
-  attribute MAX_FANOUT of p1_valid : signal is "100";
+  attribute MAX_FANOUT of p0_empty : signal is "100";
+  attribute MAX_FANOUT of p1_empty : signal is "100";
 
   -- ------------------------------------------------------------------ --
   -- fill
@@ -288,7 +291,10 @@ architecture rtl of ec2k_batch_pipe is
   signal idle_cnt  : unsigned(15 downto 0) := (others => '0');
   signal flushing  : std_logic := '0';
   signal fill_ok, dummy_fill : std_logic;
-  -- the registered leaf write (address once per table)
+  -- the registered leaf write (address once per table); its load enable
+  -- is 460 flip-flops, replicated likewise
+  signal w_ce      : std_logic;
+  attribute MAX_FANOUT of w_ce : signal is "120";
   signal w_en      : std_logic := '0';
   signal w_la_a, w_da_a, w_db_a : laddr_t := 0;
   signal w_la_word : la_word_t := (others => '0');
@@ -334,6 +340,8 @@ architecture rtl of ec2k_batch_pipe is
   signal ra_ph    : ph_t := (others => '0');
   signal ra_ja    : std_logic_vector(2 downto 0) := (others => '0');
   signal ra_k     : unsigned(2 downto 0) := (others => '0');
+  -- the inversion step selects one of eight Frobenius powers for 131 bits
+  attribute MAX_FANOUT of ra_k : signal is "100";
   signal ra_tag   : mtag_t := (others => '0');
 
   -- multiplier
@@ -475,9 +483,12 @@ begin
   fill_ok    <= fb_valid and not fill_pend;
   p1_take    <= p1_valid and fill_ok;
   p0_adv     <= p0_valid and not p1_valid;
-  in_rdy     <= not p0_valid and not rst;
+  p0_empty   <= not p0_valid;
+  p1_empty   <= not p1_valid;
+  in_rdy     <= p0_empty and not rst;
   in_ready   <= in_rdy;
   dummy_fill <= flushing and fill_ok and not p1_valid;
+  w_ce       <= p1_take or dummy_fill;
 
   main : process (clk)
     variable b       : bid_t;
@@ -512,7 +523,7 @@ begin
       if p1_take = '1' then
         p1_valid <= '0';
       end if;
-      if p1_valid = '0' then
+      if p1_empty = '1' then
         p1_x     <= p0_x;
         p1_y     <= p0_y;
         p1_tag   <= p0_tag;
@@ -522,7 +533,7 @@ begin
         p1_valid <= '1';
         p0_valid <= '0';
       end if;
-      if p0_valid = '0' then
+      if p0_empty = '1' then
         p0_x     <= in_x;
         p0_y     <= in_y;
         p0_tag   <= in_tag;
@@ -552,7 +563,7 @@ begin
           idle_cnt <= (others => '0');
           flushing <= '0';
         end if;
-      elsif p1_take = '1' or dummy_fill = '1' then
+      elsif w_ce = '1' then
         la := leaf_addr(fb, fill_cnt(LOG_W - 1 downto 0));
         w_en   <= '1';
         w_la_a <= la;  w_da_a <= la;  w_db_a <= la;
