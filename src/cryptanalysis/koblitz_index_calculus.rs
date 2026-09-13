@@ -2202,6 +2202,22 @@ pub struct PairSumTable {
     /// few.  No false negatives, so the answer is unchanged.
     present: Vec<u64>,
     present_mask: u64,
+    /// Whether the stored keys are folded by the signed Frobenius group
+    /// `G = ⟨π, −1⟩`.
+    ///
+    /// The factor base is closed under `π` and under negation, so the
+    /// set of pair sums is closed under both too — `π(P_i + P_j) =
+    /// π(P_i) + π(P_j)` and `−(P_i + P_j) = (−P_i) + (−P_j)` are again
+    /// sums of base points.  A table answering `rest ∈ S?` therefore
+    /// needs one key per `G`-orbit rather than one per pair, which is
+    /// `2n` times fewer, and at a fixed budget that is a base `√(2n)`
+    /// times wider and a descent dividing `2r/|F|²` by `2n`.
+    ///
+    /// What it costs is that a lookup must canonicalise first
+    /// ([`Self::canon_key`]), which is `n − 1` squarings — so the fold
+    /// is taken only when the unfolded table would not fit at all, and
+    /// the tiers in [`Self::build_within`] reach for it last.
+    fold: bool,
 }
 
 impl PairSumTable {
@@ -2234,6 +2250,40 @@ impl PairSumTable {
     pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
         let pairs = Self::pair_count(points);
         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
+        pairs * 4 + buckets * 4 + pairs / 2
+    }
+
+    /// Stored keys for a folded table: one per `(orbit representative,
+    /// base point)` pair.
+    ///
+    /// Every `G`-orbit of ordered pairs is reached: given `(P, Q)`, let
+    /// `g ∈ G` carry `P` to the representative `R` of its own signed
+    /// orbit; then `(R, gQ)` lies in the same orbit of pairs and is
+    /// enumerated.  That holds whatever the stabilisers are, so the
+    /// enumeration is onto the orbits and the table has no false
+    /// negatives — it is only redundant, by the factor two that the
+    /// unordered `i ≤ j` symmetry would otherwise remove.
+    fn folded_pair_count(orbits: usize, points: usize) -> u128 {
+        orbits as u128 * points as u128
+    }
+
+    /// Bits of a canonical key: `1 + min_k x^{2^k}` is at most `2^n`.
+    fn folded_key_bits(degree: u32) -> u32 {
+        degree + 1
+    }
+
+    /// [`Self::compact_bucket_bits`] for a canonical key, which is one
+    /// bit narrower than a packed point rather than one wider — so the
+    /// bucket index has to be clamped to it, or the shift underflows at
+    /// the small degrees where run length would ask for everything.
+    fn folded_bucket_bits(pairs: u128, degree: u32) -> u32 {
+        Self::compact_bucket_bits(pairs, degree).min(Self::folded_key_bits(degree))
+    }
+
+    /// [`Self::compact_byte_size`] for the folded table.
+    pub fn folded_byte_size(orbits: usize, points: usize, degree: u32) -> u128 {
+        let pairs = Self::folded_pair_count(orbits, points);
+        let buckets = 1u128 << Self::folded_bucket_bits(pairs, degree);
         pairs * 4 + buckets * 4 + pairs / 2
     }
 
@@ -2318,6 +2368,7 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            fold: false,
         })
     }
 
@@ -2339,7 +2390,12 @@ impl PairSumTable {
             return None;
         }
         if Self::compact_byte_size(n_points, kc.n) > byte_budget {
-            return None;
+            // Folding by the signed Frobenius group stores `2n` times
+            // fewer keys, so a base too wide even for the compact table
+            // may still fit — at the cost of canonicalising every
+            // lookup.  It is the last tier because for a base that fits
+            // without it the fold only spends squarings.
+            return Self::build_folded_within(kc, fb, byte_budget);
         }
         let pairs = Self::pair_count(n_points);
         if pairs > u32::MAX as u128 {
@@ -2424,6 +2480,135 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            fold: false,
+        })
+    }
+
+    /// **The folded table**: one key per orbit of the signed Frobenius
+    /// group, built by walking `i` over one representative of each
+    /// signed orbit and `j` over the whole base.
+    ///
+    /// That enumerates `|F|²/2n` pairs rather than `|F|²/2`, so nothing
+    /// quadratic is canonicalised that need not be, and the keys it
+    /// produces cover every orbit the full enumeration would reach.
+    /// Duplicate `(bucket, rest)` pairs are left in place: two keys that
+    /// agree there are indistinguishable to a lookup anyway, so storing
+    /// one twice costs four bytes and can never lose an answer.
+    fn build_folded_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        let n_points = fb.points.len();
+        if n_points > u32::MAX as usize {
+            return None;
+        }
+        // One representative per signed Frobenius orbit.
+        let reps: Vec<usize> = fb
+            .signed_orbits
+            .iter()
+            .filter_map(|orbit| orbit.first().copied())
+            .collect();
+        if reps.is_empty() {
+            return None;
+        }
+        if Self::folded_byte_size(reps.len(), n_points, kc.n) > byte_budget {
+            return None;
+        }
+        let pairs = Self::folded_pair_count(reps.len(), n_points);
+        if pairs > u32::MAX as u128 {
+            return None;
+        }
+        let curve = FastCurve::new(&kc.curve)?;
+        // A canonical key is `1 + min_k x^{2^k}`, so it needs one bit
+        // more than an abscissa and two fewer than a packed point.
+        let key_bits = Self::folded_key_bits(curve.n);
+        let bucket_bits = Self::folded_bucket_bits(pairs, curve.n);
+        let bucket_shift = key_bits - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        let each_row = |r: usize, f: &mut dyn FnMut(u64)| {
+            let mut sums = Vec::with_capacity(n_points);
+            let mut scratch = BatchScratch::default();
+            curve.add_many(points[reps[r]], &points, &mut sums, &mut scratch);
+            // The canonicalisation is the cost of this build, so it runs
+            // over lanes here exactly as it does on the lookup side.
+            const LANES: usize = 8;
+            for chunk in sums.chunks(LANES) {
+                let mut x = [0u64; LANES];
+                let mut best = [0u64; LANES];
+                for (l, &p) in chunk.iter().enumerate() {
+                    x[l] = p.x;
+                    best[l] = p.x;
+                }
+                for _ in 1..curve.n {
+                    for l in 0..chunk.len() {
+                        x[l] = curve.field.sqr(x[l]);
+                        if x[l] < best[l] {
+                            best[l] = x[l];
+                        }
+                    }
+                }
+                for (l, &p) in chunk.iter().enumerate() {
+                    f(if p.infinity { 0 } else { best[l] + 1 });
+                }
+            }
+        };
+        (0..reps.len()).into_par_iter().for_each(|r| {
+            each_row(r, &mut |key| {
+                counts[(key >> bucket_shift) as usize + 1].fetch_add(1, Ordering::Relaxed);
+            });
+        });
+        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        let total = bucket_start[buckets] as usize;
+        let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+        let mut rests = vec![0u32; total];
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let words = (1usize << filter_bits) / 64;
+        let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+        let slots = rests.as_mut_ptr() as usize;
+        (0..reps.len()).into_par_iter().for_each(|r| {
+            each_row(r, &mut |key| {
+                let bucket = (key >> bucket_shift) as usize;
+                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+                // SAFETY: `slot` is this pair's own index, handed out
+                // once by the bucket's cursor and inside the run the
+                // counting pass measured for that bucket.
+                unsafe {
+                    *(slots as *mut u32).add(slot) = Self::compact_rest(key);
+                }
+                let h = (pair_filter_hash(key) & present_mask) as usize;
+                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+            });
+        });
+        let present: Vec<u64> = present_atomic
+            .iter()
+            .map(|w| w.load(Ordering::Relaxed))
+            .collect();
+        let index_of_point = points
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (p.pack(), i as u32))
+            .collect();
+        Some(Self {
+            entries: Vec::new(),
+            rests,
+            index_of_point,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+            fold: true,
         })
     }
 
@@ -2446,6 +2631,89 @@ impl PairSumTable {
     /// Only one of them fits.
     fn compact_rest(key: u64) -> u32 {
         pair_filter_hash(key) as u32
+    }
+
+    /// **The canonical key of a point under `⟨π, −1⟩`**: the least
+    /// abscissa in its Frobenius orbit, plus one so that `O` can be `0`.
+    ///
+    /// Negation never moves the abscissa — `−(x, y) = (x, x + y)` — so
+    /// the sign half of the fold costs nothing at all, and `π` acts on
+    /// the abscissa as a squaring.  The key is therefore
+    /// `1 + min_k x^{2^k}`, which takes `n − 1` squarings and a running
+    /// minimum and no memory at all.
+    ///
+    /// It is a key, not a point: it identifies the orbit and nothing
+    /// else.  Recovering which base points actually sum to a target is
+    /// done in the group, by [`Self::recover_pair`], and is unaffected.
+    #[inline]
+    fn canon_key(curve: &FastCurve, p: FastPoint) -> u64 {
+        if p.infinity {
+            return 0;
+        }
+        let mut x = p.x;
+        let mut best = x;
+        for _ in 1..curve.n {
+            x = curve.field.sqr(x);
+            if x < best {
+                best = x;
+            }
+        }
+        best + 1
+    }
+
+    /// The key this table stores a point under: the packed point, or its
+    /// orbit's canonical key when the table is folded.
+    #[inline]
+    fn key_of(&self, p: FastPoint) -> u64 {
+        if self.fold {
+            Self::canon_key(&self.curve, p)
+        } else {
+            p.pack()
+        }
+    }
+
+    /// [`Self::key_of`] over a slice, keeping `LANES` canonicalisations
+    /// in flight.
+    ///
+    /// A squaring chain is a dependency chain, so one point at a time
+    /// runs at the latency of `n − 1` squarings; a decomposition scan
+    /// has a whole row of rests in hand at once and none of them depend
+    /// on each other.  Interleaving them turns the chain from
+    /// latency-bound into throughput-bound.  `out` is cleared first.
+    fn keys_of(&self, points: &[FastPoint], out: &mut Vec<u64>) {
+        out.clear();
+        if !self.fold {
+            out.extend(points.iter().map(|p| p.pack()));
+            return;
+        }
+        const LANES: usize = 8;
+        let n = self.curve.n;
+        let field = &self.curve.field;
+        out.resize(points.len(), 0);
+        for (chunk, keys) in points.chunks(LANES).zip(out.chunks_mut(LANES)) {
+            let mut x = [0u64; LANES];
+            let mut best = [0u64; LANES];
+            for (l, &p) in chunk.iter().enumerate() {
+                x[l] = p.x;
+                best[l] = p.x;
+            }
+            for _ in 1..n {
+                for l in 0..chunk.len() {
+                    x[l] = field.sqr(x[l]);
+                    if x[l] < best[l] {
+                        best[l] = x[l];
+                    }
+                }
+            }
+            for (l, &p) in chunk.iter().enumerate() {
+                keys[l] = if p.infinity { 0 } else { best[l] + 1 };
+            }
+        }
+    }
+
+    /// Whether this table folds its keys by the signed Frobenius group.
+    pub fn is_folded(&self) -> bool {
+        self.fold
     }
 
     /// Whether this table keeps the summands of each pair.
@@ -2492,7 +2760,7 @@ impl PairSumTable {
     /// representation.
     #[inline]
     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
-        if self.is_compact() || !self.admitted(key) {
+        if self.is_compact() || self.fold || !self.admitted(key) {
             return &[];
         }
         self.lookup_admitted(key)
@@ -2536,11 +2804,40 @@ impl PairSumTable {
         }
     }
 
+    /// **Whether `target` is a sum of two base points**, without
+    /// recovering which two.
+    ///
+    /// This is the probe the descent actually spends: a decomposition
+    /// search asks this `2r/|F|²` times and recovers summands only on
+    /// the rare hit.  Separating it matters for measurement as well as
+    /// for callers — on a wide base the recovery scan is `O(|F|)` and
+    /// would otherwise be charged to the probes it sits among.
+    ///
+    /// A `false` is certain.  A `true` may be a false positive of the
+    /// stored rest, about one time in `2²⁸`, which [`Self::pairs_for`]
+    /// then resolves in the group.
+    pub fn contains_pair(&self, target: FastPoint) -> bool {
+        let key = self.key_of(target);
+        if !self.admitted(key) {
+            return false;
+        }
+        if self.is_compact() {
+            return self.compact_contains(key);
+        }
+        !self.lookup_admitted(key).is_empty()
+    }
+
     /// The summand pairs of `target`, however the table stores them.
     /// `out` is cleared first.
     pub fn pairs_for(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+        let key = self.key_of(target);
+        self.pairs_for_key(target, key, out)
+    }
+
+    /// [`Self::pairs_for`] for a target whose key is already in hand, so
+    /// that a scan canonicalising a row at a time does not do it twice.
+    fn pairs_for_key(&self, target: FastPoint, key: u64, out: &mut Vec<(u32, u32)>) {
         out.clear();
-        let key = target.pack();
         if !self.admitted(key) {
             return;
         }
@@ -2675,27 +2972,36 @@ impl PairSumTable {
                 &mut scratch,
             );
         }
+        // Keys a block at a time: enough to keep `LANES`
+        // canonicalisations interleaved, little enough that a search
+        // stopping at its first witness has not paid for the rest.
+        const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
-        for rest in rests.iter().take(LOOKAHEAD) {
-            prefetch(&self.present[self.filter_word(rest.pack())]);
-        }
+        let mut keys = Vec::with_capacity(BLOCK);
         let mut pairs = Vec::new();
-        for (offset, rest) in rests.iter().enumerate() {
-            if let Some(ahead) = rests.get(offset + LOOKAHEAD) {
-                prefetch(&self.present[self.filter_word(ahead.pack())]);
+        for (b, block) in rests.chunks(BLOCK).enumerate() {
+            self.keys_of(block, &mut keys);
+            for &key in keys.iter().take(LOOKAHEAD) {
+                prefetch(&self.present[self.filter_word(key)]);
             }
-            if !self.admitted(rest.pack()) {
-                continue;
-            }
-            let k = if offset < tail {
-                start + offset
-            } else {
-                offset - tail
-            };
-            self.pairs_for(*rest, &mut pairs);
-            for &(i, j) in &pairs {
-                if !sink(&[i as usize, j as usize, k]) {
-                    return;
+            for (within, rest) in block.iter().enumerate() {
+                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+                    prefetch(&self.present[self.filter_word(ahead)]);
+                }
+                if !self.admitted(keys[within]) {
+                    continue;
+                }
+                let offset = b * BLOCK + within;
+                let k = if offset < tail {
+                    start + offset
+                } else {
+                    offset - tail
+                };
+                self.pairs_for_key(*rest, keys[within], &mut pairs);
+                for &(i, j) in &pairs {
+                    if !sink(&[i as usize, j as usize, k]) {
+                        return;
+                    }
                 }
             }
         }
@@ -2733,30 +3039,50 @@ impl PairSumTable {
                 }
             }
             3 => {
-                // R − P_k for every k with one field inversion.
-                let mut rests = Vec::with_capacity(self.points.len());
-                let mut scratch = BatchScratch::default();
-                self.curve
-                    .add_many(target, &self.negated, &mut rests, &mut scratch);
-                // The filter probes are random addresses in a table far
-                // larger than the cache, and every key is known before
-                // any is read: run a block ahead, prefetching.
+                // `R − P_k` for every `k`, a block at a time.
+                //
+                // Everything this loop does before it probes —
+                // subtracting a base point, and on a folded table
+                // canonicalising the difference — is linear in the base,
+                // and the search stops at its first witness.  Done a row
+                // at a time that setup is paid in full however early the
+                // stop comes, and on a base wide enough to decompose
+                // most targets it is then the whole cost: at `|F| =
+                // 177632` the scan finds its witness in about three
+                // thousand probes and would have prepared a hundred and
+                // seventy-seven thousand.  A block is long enough to
+                // amortise one field inversion and to keep `LANES`
+                // squaring chains interleaved, and short enough that an
+                // early exit throws away at most a block.
+                const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
-                for rest in rests.iter().take(LOOKAHEAD) {
-                    prefetch(&self.present[self.filter_word(rest.pack())]);
-                }
+                let mut rests = Vec::with_capacity(BLOCK);
+                let mut scratch = BatchScratch::default();
+                let mut keys = Vec::with_capacity(BLOCK);
                 let mut pairs = Vec::new();
-                for (k, rest) in rests.iter().enumerate() {
-                    if let Some(ahead) = rests.get(k + LOOKAHEAD) {
-                        prefetch(&self.present[self.filter_word(ahead.pack())]);
+                for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
+                    // `add_many` appends, so the block starts empty.
+                    rests.clear();
+                    self.curve
+                        .add_many(target, addends, &mut rests, &mut scratch);
+                    let block = &rests[..];
+                    self.keys_of(block, &mut keys);
+                    for &key in keys.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(key)]);
                     }
-                    if !self.admitted(rest.pack()) {
-                        continue;
-                    }
-                    self.pairs_for(*rest, &mut pairs);
-                    for &(i, j) in &pairs {
-                        if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
-                            return;
+                    for (offset, rest) in block.iter().enumerate() {
+                        if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word(ahead)]);
+                        }
+                        if !self.admitted(keys[offset]) {
+                            continue;
+                        }
+                        let k = b * BLOCK + offset;
+                        self.pairs_for_key(*rest, keys[offset], &mut pairs);
+                        for &(i, j) in &pairs {
+                            if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
+                                return;
+                            }
                         }
                     }
                 }
@@ -6926,9 +7252,17 @@ mod tests {
         let narrow = PairSumTable::build_within(&kc, &fb, full - 1).expect("fits compactly");
         assert!(narrow.is_compact());
         assert_eq!(wide.len(), narrow.len());
-        // Below even that, it refuses with a number rather than an
+        // Below even that, the fold is the last tier: `2n` times fewer
+        // keys, bought with a canonicalisation on every lookup.
+        let folded_bytes =
+            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n);
+        assert!(folded_bytes < compact, "the folded table is narrower still");
+        let folded = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
+        assert!(folded.is_folded() && folded.is_compact());
+        assert!(folded.len() < narrow.len(), "the fold stored no less");
+        // And below that it refuses with a number rather than an
         // allocation the machine cannot meet.
-        assert!(PairSumTable::build_within(&kc, &fb, compact - 1).is_none());
+        assert!(PairSumTable::build_within(&kc, &fb, folded_bytes - 1).is_none());
         // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
         assert!(PairSumTable::build(&kc, &fb).is_some());
@@ -8368,6 +8702,207 @@ mod tests {
             })
             .collect();
         (orbit_of, representatives)
+    }
+
+    #[test]
+    fn the_signed_frobenius_orbit_closes_the_pair_sums() {
+        // The fold is only sound because the set of pair sums is closed
+        // under `π` and negation.  That is one line of algebra —
+        // `π(P + Q) = π(P) + π(Q)` — and this is the line being checked
+        // against the actual base the pipeline builds.
+        for degree in [13u32, 19, 23] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 1, 60).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let points: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+            let base: HashSet<u64> = points.iter().map(|p| p.pack()).collect();
+            for &p in &points {
+                assert!(base.contains(&fc.neg(p).pack()), "base not negation-closed");
+                assert!(
+                    base.contains(&fc.frobenius_k(p, 1).pack()),
+                    "base not Frobenius-closed"
+                );
+            }
+            let mut sums = HashSet::new();
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    sums.insert(fc.add(points[i], points[j]).pack());
+                }
+            }
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    let s = fc.add(points[i], points[j]);
+                    assert!(sums.contains(&fc.neg(s).pack()), "sums not negation-closed");
+                    assert!(
+                        sums.contains(&fc.frobenius_k(s, 1).pack()),
+                        "sums not Frobenius-closed"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn the_fold_is_exactly_two_n_and_reaches_every_orbit() {
+        // Two claims the memory law rests on: the fold is worth `2n`,
+        // not some smaller factor, and walking one representative per
+        // signed orbit against the whole base reaches every orbit — so
+        // the folded table has no false negatives.
+        for degree in [13u32, 19, 23] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 1, 60).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let points: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+
+            let mut keys = HashSet::new();
+            let mut orbits = HashSet::new();
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    let s = fc.add(points[i], points[j]);
+                    keys.insert(s.pack());
+                    orbits.insert(PairSumTable::canon_key(&fc, s));
+                }
+            }
+            let fold = keys.len() as f64 / orbits.len() as f64;
+            let want = 2.0 * degree as f64;
+            assert!(
+                (fold - want).abs() < 0.15 * want,
+                "degree {degree}: fold {fold:.1}, expected about {want}"
+            );
+
+            let reached: HashSet<u64> = fb
+                .signed_orbits
+                .iter()
+                .filter_map(|o| o.first().copied())
+                .flat_map(|r| {
+                    points
+                        .iter()
+                        .map(|&q| PairSumTable::canon_key(&fc, fc.add(points[r], q)))
+                        .collect::<Vec<_>>()
+                })
+                .collect();
+            assert_eq!(
+                reached, orbits,
+                "degree {degree}: reps x base missed a sum orbit"
+            );
+        }
+    }
+
+    #[test]
+    fn the_folded_table_answers_exactly_as_the_full_one() {
+        for (degree, points) in [(19u32, 300usize), (31, 400), (61, 400)] {
+            the_folded_table_agrees_at(degree, points);
+        }
+    }
+
+    fn the_folded_table_agrees_at(degree: u32, points: usize) {
+        let kc = KoblitzCurve::new(0, degree).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let orbits = fb.signed_orbits.len();
+        // A budget under the compact table's width but over the folded
+        // one's is exactly the tier that reaches for the fold.
+        let folded = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::folded_byte_size(orbits, fb.points.len(), kc.n),
+        )
+        .expect("the folded table fits its own budget");
+        assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
+        assert!(
+            folded.len() < full.len(),
+            "degree {degree}: the fold stored no less"
+        );
+        // A folded table keeps no summands, so `lookup` must say so
+        // rather than slice an empty `entries`.
+        assert!(folded.lookup(1_000_001).is_empty());
+
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        let mut hits = 0usize;
+        let mut misses = 0usize;
+        for t in 1u64..900 {
+            let target = fc.mul_u64(g, t);
+            if target.infinity {
+                continue;
+            }
+            let mut a = Vec::new();
+            let mut b = Vec::new();
+            full.pairs_for(target, &mut a);
+            folded.pairs_for(target, &mut b);
+            a.sort_unstable();
+            b.sort_unstable();
+            assert_eq!(a, b, "degree {degree}: disagreed on [{t}]G");
+            if a.is_empty() {
+                misses += 1;
+            } else {
+                hits += 1;
+            }
+        }
+        for i in 0..fb.points.len().min(64) {
+            for j in i..fb.points.len().min(64) {
+                let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
+                if sum.infinity {
+                    continue;
+                }
+                let mut a = Vec::new();
+                let mut b = Vec::new();
+                full.pairs_for(sum, &mut a);
+                folded.pairs_for(sum, &mut b);
+                a.sort_unstable();
+                b.sort_unstable();
+                assert!(a.contains(&(i as u32, j as u32)));
+                assert_eq!(a, b, "degree {degree}: disagreed on a stored pair sum");
+                hits += 1;
+            }
+        }
+        assert!(
+            hits > 0 && misses > 0,
+            "degree {degree}: the test checked only one side"
+        );
+    }
+
+    #[test]
+    fn the_folded_table_decomposes_at_every_summand_count() {
+        // The trap the compact table fell into once: a search path that
+        // walks `entries` reports no witness for a target that has one.
+        // Every `m` has to go through the folded lookup.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let folded = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+        )
+        .unwrap();
+        assert!(folded.is_folded());
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        for m in [2usize, 3, 4] {
+            let mut agreed = 0usize;
+            let mut found = 0usize;
+            for t in 1u64..120 {
+                let target = fc.mul_u64(g, t);
+                if target.infinity {
+                    continue;
+                }
+                let a = full.decompose_fast(target, m).is_some();
+                let b = folded.decompose_fast(target, m).is_some();
+                assert_eq!(a, b, "m = {m}: disagreed on whether [{t}]G decomposes");
+                agreed += 1;
+                if b {
+                    found += 1;
+                    // And the witness the folded table returns really sums.
+                    let w = folded.decompose_fast(target, m).unwrap();
+                    let sum = w
+                        .iter()
+                        .fold(FastPoint::INFINITY, |s, &i| fc.add(s, fc.lift(&fb.points[i])));
+                    assert_eq!(sum, target, "m = {m}: witness did not sum to its target");
+                }
+            }
+            assert!(agreed > 0 && found > 0, "m = {m}: nothing was decomposed");
+        }
     }
 
     #[test]

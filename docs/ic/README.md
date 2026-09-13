@@ -691,3 +691,21 @@ binding of recipes to their curve, and exclusive artifact creation. The
 library tests cross-check the pair table, the exact census, orbit pruning
 and the incremental relation solver against exhaustive search and the
 dense modular solver.
+
+## The pair table, folded by the signed Frobenius group
+
+The base is closed under `π` and negation, so its pair sums are too, and
+the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
+canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
+negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
+stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
+fewer descent probes, and **2.0×** end to end per decomposed target once
+the dearer probe and the wider recovery scan are paid.
+
+- `PairSumTable::build_within` reaches for the fold as its last tier, when
+  neither the full nor the compact table fits the budget.
+- `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
+- `PairSumTable::contains_pair` is the probe on its own, without the
+  `O(|F|)` summand recovery a hit would otherwise charge to it.
+- `examples/koblitz_orbit_fold_width.rs` is the measurement;
+  `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
