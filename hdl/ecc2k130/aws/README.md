@@ -304,8 +304,11 @@ The 80-engine build of the revision with the three path fixes above
 routed at +0.016 (`agfi-0e21ecc9f59b3c5c0`, not measured: same engines,
 same clock). **96 engines at 333 MHz met timing** too
 (`20260912-230411-n96-c333`): placed at +0.381, routed at **+0.002 ns**,
-809 266 LUTs (62%), 1 632 block RAM tiles (81%), AFI
-**`agfi-0b503e1c5b319ef8b`**. Every worst path of both images was a
+809 266 LUTs (62%), 1 632 block RAM tiles (81%). Its AFI
+**`agfi-0b503e1c5b319ef8b`** loaded as submitted: 96 × 512 walks at
+333.3 MHz, **6 018.0 M steps/s** held over 30 s (0 dropped; 32 points
+verified in a second run), 5.32 clocks per step. It is the promoted
+image. Every worst path of both images was a
 control net fanning out to a stage's data registers — the spine's
 insert-mux select (`e_dp_ack`/`hold` → 310 loads, 2.8 ns of route),
 `p1_valid` into the input stage's 310 clock enables (2.9 ns), `a_valid`
