@@ -173,6 +173,79 @@ button {
 button:hover:not(:disabled) { border-color: var(--data); }
 button:disabled { opacity: 0.55; cursor: progress; }
 
+/* ---- operations panel ---- */
+
+/* The headline figure of the page: one derived number, then the two bars
+   that place it against the expected cost of a collision. */
+.ops {
+  margin: 22px 0 0;
+  padding: 18px 20px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.ops h2 {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.ops-value {
+  margin: 4px 0 0;
+  font-size: clamp(40px, 9vw, 76px);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--good);
+}
+.ops-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ops .note { margin-top: 14px; }
+
+.meter { margin-top: 16px; }
+.meter-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 14px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.meter-head .mono { color: var(--ink); font-size: 13px; }
+.meter-head strong { color: var(--warn); font-weight: 600; }
+.meter-foot {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1em;
+}
+
+.bar {
+  margin-top: 6px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+/* No minimum width: a share too small to see must render as nothing, and
+   the text under the bar is what reports it. */
+.bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--good);
+  transition: width 400ms ease;
+}
+/* The log-scale bar is legible where the linear one is empty, so it is
+   drawn in the warning colour and never in the colour of a real result. */
+.bar.log .bar-fill { background: var(--warn); opacity: 0.75; }
+
 /* ---- cards ---- */
 
 .row {
