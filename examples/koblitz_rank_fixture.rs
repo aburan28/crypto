@@ -2948,7 +2948,7 @@ fn main() {
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     let fixed_base_reference_validation =
-        std::env::var("KIC_ENABLE_FIXED_BASE_REFERENCE_VALIDATION").as_deref() == Ok("1");
+        std::env::var("KIC_DISABLE_FIXED_BASE_REFERENCE_VALIDATION").as_deref() != Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(eta_numerator > 0 && eta_denominator > 0);
     assert!(batch_fixtures > 0);
