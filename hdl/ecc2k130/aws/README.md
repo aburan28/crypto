@@ -65,11 +65,14 @@ weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
 corpus.
 
 `NENG` is the number to sweep. Each engine is one batched step unit plus
-its walk memory, about 8.6k LUTs, 16 RAMB36 and 2 RAMB18 as synthesised
-(`../README.md`, "Capacity"); the VU47P has 1.30M LUTs and 2 016 RAMB36.
-The default 48 is a third of the device; 64 is 42% of the LUTs and 54% of
-the block RAM, 80 is 53% and 67%, 96 is 63% and 81%; the RAM is what runs
-out first. Read `synth_utilization` and the post-route timing from the
+its walk memory, about 8.4k LUTs, 12 RAMB36 + 2 RAMB18 and 4 URAM288 as
+synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs,
+2 016 RAMB36 and 960 URAM288. 96 engines is 63% of the LUTs, 62% of the
+block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128 is 83% /
+83% / 53%; the LUTs run out first. (With the product tree in block RAM,
+17 tiles per engine, 48 was a third of the device, 64 42% of the LUTs
+and 54% of the RAM, 80 53% and 67%, 96 63% and 81%, and the RAM ran out
+first.) Read `synth_utilization` and the post-route timing from the
 reports, then go to what fits.
 
 `ID_W` sets walks per engine, `2^ID_W`. Each walk is 304 bits of block
@@ -177,10 +180,10 @@ synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
 | LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, **4 855 at three** (now the default), 5 019 at four |
 | FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
 | DSP per multiplier | 0 | 0 |
-| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); **8 260 – 8 570** with them in block RAM, 180 LUTRAM and 586 SRL left; 7 660 FF |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; **8 150 – 8 440** with the tree in UltraRAM, 180 LUTRAM and 586 SRL left; 8 340 FF |
 | Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
-| BRAM | 0 | **16 RAMB36 + 2 RAMB18 per engine** since the memories moved out of LUTRAM (below); 20 + 2 before the retire side stopped reading memories |
-| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.13 ns at 3.0 ns (synthesis, two engines with register block and bridge; +1.23 inside an engine); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+| BRAM | 0 | **12 RAMB36 + 2 RAMB18 and 4 URAM288 per engine** (the product tree in UltraRAM); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
 
 The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
 two-writer counter array in the walker had become 8k flip-flops behind a
@@ -298,3 +301,17 @@ promoted image. An 80-engine build of the revision with the three path
 fixes above (`20260912-224741-n80-c333`) and a 96-engine one
 (`20260912-230411-n96-c333`, 81% of the block RAM) were running when
 this was written.
+
+Past 96 the block RAM is gone, so the product tree — the largest array,
+2W words per batch, kept twice — moved to **UltraRAM**, of which the
+VU47P has 960 blocks the design had left empty: 4 URAM288 per engine
+(two 72-bit blocks hold a 131 × 512 copy; the depth is mostly unused, the
+ports are the resource) and the engine drops from 17 block RAM tiles to
+13. Every memory address, read and write, is now a register of its own
+so the placer can put it beside the block; the UltraRAM columns are
+further from an engine's logic than its block RAMs (the reads take three
+clocks instead of two, 5.31 clocks per step unchanged with sixteen
+batches in flight). 112 engines is then 73% of the LUTs, 72% of the
+block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%. Builds of
+both (`20260913-002654-n112-c333`, `20260913-002701-n128-c333`) were
+running when this was written.
