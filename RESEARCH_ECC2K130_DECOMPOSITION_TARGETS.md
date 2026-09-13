@@ -291,7 +291,11 @@ quietly depends on it.
 
 ## E6 — Frobenius-stable bases without a subspace anywhere
 
-**Status: this one already fired, and corrected the background note.**
+**Status: its *design* already corrected the background note — by re-reading an
+argument, not by running anything.**  The experiment below has not been run.
+Nothing on this page has: all six are boundaries derived in advance, which is
+their point.  What E6 produced was an accounting correction found while stating
+what it would have to measure.
 
 **Question.**  The classification "the only invariant dimensions at `n = 131`
 are `0, 1, 130, 131`" is a classification of invariant **subspaces**.  GGMP's
