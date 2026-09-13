@@ -24,7 +24,7 @@ sampled from each checked against the client's reference walk. With the
 product tree in UltraRAM and 32-walk batches, **the 128-engine image at
 333 MHz holds 8.25 G steps/s** (5.17 clocks per step on the device; 112
 engines at 375 MHz 8.12 G, 120 at 333 MHz 7.73 G). The current revision
-counts eleven of the multiplier's 27 leaves in DSPs (the engine is 6.9k
+counts eleven of the multiplier's 27 leaves in DSPs (the engine is 6.6k
 LUTs from 8.1k), batches 64 walks 8 deep (5.16 clocks per step with
 either multiplier) and registers the walker's FIFO write and head, the
 multiplier's product before its back-conversion and each batch's phase
@@ -240,8 +240,9 @@ leaves save). Synthesised (`cl_probe`, 2 engines, 3.0 ns), **measured**:
 | **11 DSP leaves** | **7 170 – 7 318** | 9 546 | **66** | +1.18 / +1.24, no DSP path in the 80 worst |
 
 (Both at 32 × 8, before the walker's registers, the single-writer arrays,
-the copy register and the wider DSP pieces; the current engine is
-6 840 – 6 990 LUTs and 9 440 FFs, see "Capacity".)
+the copy register, the wider DSP pieces and the output weight beside
+the multiply; the current engine is 6 540 – 6 690 LUTs and 9 455 FFs,
+see "Capacity".)
 
 A DSP leaf was six DSPs and ~40 LUTs against ~140, −788 LUTs per engine
 (−9.7%), and is now six DSPs and 22 LUTs, another −156 (the multiplier
@@ -343,9 +344,13 @@ scheduler's:
   popcount in it;
 - the Hamming weight, 131 bits wide, is taken over two clocks on input
   (22 groups of six bits, one LUT6 per output bit, then the sum, of which
-  only `hw/2 mod 8` is used) and four on output (groups, sums of four
-  groups, their sum, compare — the 22-way sum in one clock was the
-  engine's worst path);
+  only `hw/2 mod 8` is used) and four for the output (groups, sums of
+  four groups, their sum, compare — the 22-way sum in one clock was the
+  engine's worst path), the latter from `x3` as it enters the final
+  multiply's side pipe, so the weight and the DP bit ride beside the
+  multiply as nine bits and are ready with the product; taking them
+  after the retire had `x3` and `y` waiting three clocks in 262 shift
+  register LUTs per engine (−306 LUTs in the probe: 6 540 – 6 690);
 - batch and burst state ride in the multiplier tag, so results route
   back with no matching logic.
 
@@ -542,10 +547,10 @@ behind the register block and the clock bridge (512 walks, batches of
 
 | | LUTs | of which LUTRAM | FFs | RAMB36 | RAMB18 | URAM | DSP |
 |---|---|---|---|---|---|---|---|
-| `ec2k_walker` (whole engine) | **6 840 – 6 990** | 196 (+592 SRL) | 9 440 | 12 | 2 | 4 | 66 |
+| `ec2k_walker` (whole engine) | **6 540 – 6 690** | 196 (+329 SRL) | 9 455 | 12 | 2 | 4 | 66 |
 | ├ walker body (FIFO and its write register, prefetch buffer, head register) | ~375 | 176 | ~970 | 4 | 1 | 0 | 0 |
-| └ `ec2k_batch_pipe` | ~6 620 | 20 | ~8 470 | 8 | 1 | 4 | 66 |
-| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~2 430 | 20 | ~3 090 | 8 | 1 | 4 | 0 |
+| └ `ec2k_batch_pipe` | ~6 310 | 20 | ~8 480 | 8 | 1 | 4 | 66 |
+| &nbsp;&nbsp; ├ step unit body (scheduler, operand and retire stages, the final multiply's shift register) | ~2 130 | 20 | ~3 100 | 8 | 1 | 4 | 0 |
 | &nbsp;&nbsp; └ `gf131_mul` (three-level Karatsuba, 11 DSP leaves) | 4 004 on its own (5 134 with LUT leaves) | 0 | 5 788 | 0 | 0 | 0 | 66 |
 | `ec2k_axil` own (queue and its head registers, AXI, spine head; two stages) | 892 | 356 | 2 399 | 0 | 0 | 0 | 0 |
 | `ec2k_axil_cdc` | 33 – 253 (the rest is merged into the block's read mux) | 0 | 201 | 0 | 0 | 0 | 0 |
@@ -558,7 +563,8 @@ the Karatsuba tree, of which 3 800 in the 27 leaf products, and 689 in
 later change measured on the whole engine: the walker's two registers
 +9 LUTs and +633 FFs, the single-writer phase and level arrays −191 LUTs
 and +16 LUTRAM, the multiplier's copy register +17 LUTs and +261 FFs,
-the wider DSP pieces −156 LUTs and −976 FFs.)
+the wider DSP pieces −156 LUTs and −976 FFs, the output weight taken
+beside the final multiply −306 LUTs.)
 The register block's stage on the spine is roughly 300 LUTs and 870 FFs
 per engine; of the 196 LUTRAM in an engine 176 are the walker's
 four-word prefetch buffer and 20 the eight-entry phase and level arrays,
@@ -573,9 +579,10 @@ multiply's companions moved into a shift register the engine was 8 100 –
 write registers costs 220 FFs and buys four more tiles, 32-walk batches
 and the enable-free stages take 250 LUTs back (7 970 – 8 110), the
 eleven DSP leaves another 790 for 1 480 FFs and 66 DSPs (7 170 – 7 320),
-the single-writer phase and level arrays 190 more and the wider DSP
-pieces 156; the walker's two registers and the multiplier's copy
-register are 26 LUTs and 900 FFs of the 6 840 – 6 990 and 9 440 above.
+the single-writer phase and level arrays 190 more, the wider DSP
+pieces 156 and the output weight beside the multiply 306; the walker's
+two registers and the multiplier's copy register are 26 LUTs and 900
+FFs of the 6 540 – 6 690 and 9 455 above.
 
 Worst slack at a 3.0 ns clock is **+1.18 ns** for the whole probe (the
 register block's read mux, one copy on the die) and **+1.24 ns** inside
@@ -628,11 +635,11 @@ image of the 21-tile revision used 31% of the LUTs and 50% of the RAM),
 ran out first. With the tree in UltraRAM 96 engines is 63% of the LUTs,
 62% of the block RAM and 40% of the UltraRAM, 112 is 73% / 72% / 47%, 128
 is 83% / 83% / 53%, and the LUTs bound the count. With eleven leaves in
-DSPs 128 engines is 70% of the LUTs (engine plus its spine stage, at
-the current 6 840 – 6 990), 83% of the block RAM, 53% of the UltraRAM
+DSPs 128 engines is 67% of the LUTs (engine plus its spine stage, at
+the current 6 540 – 6 690), 83% of the block RAM, 53% of the UltraRAM
 and 94% of the device's DSPs — over the CL pblock's 7 992, so 128
-engines take ten leaves (7 680), 136 and 144 nine: 136 is 75% of the
-LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 79% / 93% /
+engines take ten leaves (7 680), 136 and 144 nine: 136 is 72% of the
+LUTs, 88% of the block RAM and 57% of the UltraRAM, 144 76% / 93% /
 60%. At 5.31 clocks per step and 333 MHz that is 63 M steps/s per
 engine and **3.0 G steps/s at 48 engines, 4.0 G at 64, 5.0 G at 80,
 6.0 G at 96 — all four measured on the device**; at 5.17 (32 × 8, the
