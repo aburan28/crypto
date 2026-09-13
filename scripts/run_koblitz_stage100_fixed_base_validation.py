@@ -66,8 +66,8 @@ def selected_environment(candidate: bool) -> dict[str, str]:
     environment["KIC_PIPELINED_SUPPORT_EXPANSION"] = "1"
     environment["KIC_SUMMARY_ONLY"] = "1"
     environment["RAYON_NUM_THREADS"] = "4"
-    if candidate:
-        environment["KIC_ENABLE_FIXED_BASE_REFERENCE_VALIDATION"] = "1"
+    if not candidate:
+        environment["KIC_DISABLE_FIXED_BASE_REFERENCE_VALIDATION"] = "1"
     return environment
 
 

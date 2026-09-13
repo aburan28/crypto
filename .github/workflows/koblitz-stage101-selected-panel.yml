@@ -1,0 +1,68 @@
+name: Koblitz Stage 101 n53 compact fixed-base five-pair panel
+
+on:
+  pull_request:
+    paths:
+      - "examples/koblitz_rank_fixture.rs"
+      - "scripts/run_koblitz_stage94_filter_inverse.py"
+      - "scripts/run_koblitz_stage101_selected_panel.py"
+      - ".github/workflows/koblitz-stage101-selected-panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Validate selected-default panel controls
+        run: |
+          python3 -m py_compile scripts/run_koblitz_stage94_filter_inverse.py scripts/run_koblitz_stage101_selected_panel.py
+          python3 scripts/run_koblitz_stage94_filter_inverse.py self-test
+          python3 scripts/run_koblitz_stage101_selected_panel.py self-test
+          cargo test --release --example koblitz_rank_fixture
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  n53-selected-panel:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: validate-control
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Charge clean producer build
+        run: |
+          python3 scripts/run_koblitz_stage101_selected_panel.py build \
+            --source "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/stage101-build" \
+            --jobs 4 \
+            --timeout 1800
+      - name: Run five separately metered direct/rho pairs
+        run: |
+          python3 scripts/run_koblitz_stage101_selected_panel.py run \
+            --build "$RUNNER_TEMP/stage101-build" \
+            --output "$RUNNER_TEMP/stage101-run" \
+            --timeout 1800
+          python3 scripts/run_koblitz_stage101_selected_panel.py verify \
+            --build "$RUNNER_TEMP/stage101-build" \
+            --output "$RUNNER_TEMP/stage101-run" \
+            > "$RUNNER_TEMP/stage101-verification.json"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: koblitz-stage101-selected-panel-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/stage101-build
+            ${{ runner.temp }}/stage101-run
+            ${{ runner.temp }}/stage101-verification.json
