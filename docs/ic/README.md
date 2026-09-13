@@ -697,15 +697,51 @@ dense modular solver.
 The base is closed under `π` and negation, so its pair sums are too, and
 the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
 canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
-negation does not move the abscissa. Measured at `n = 61`: 61 times fewer
-stored pairs, a base 7.81 times wider at 4 GiB (42302 → 330376), 61 times
-fewer descent probes, and **2.0×** end to end per decomposed target once
-the dearer probe and the wider recovery scan are paid.
+negation does not move the abscissa. Measured at `n = 61`: 122 times fewer
+stored pairs, a base 11.0 times wider at 4 GiB (42302 → 467128), 122 times
+fewer descent probes, and **197×** end to end per decomposed target at
+matched bytes — 2.0× of which is the fold on the code as it stood, the
+rest being five costs that only a base eleven times wider makes visible.
+
+Recovery is `O(n)`, not `O(|F|)`: a folded entry names the signed orbit
+one summand lies in, in the high half of its rest word, so recovering the
+summands walks 122 points rather than 177632. It costs no memory — the
+tag is spent out of the rest, not added to it.
+
+The key itself is the least rotation of the abscissa's coordinates in a
+normal basis, where the Frobenius *is* a rotation — `FrobeniusCanon` in
+`koblitz_fast.rs`. Computed instead as a chain of `n − 1` squarings a
+probe costs 1125 ns rather than 340 and the fold is worth 2.0× rather
+than 2.8×.
 
 - `PairSumTable::build_within` reaches for the fold as its last tier, when
   neither the full nor the compact table fits the budget.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
   `O(|F|)` summand recovery a hit would otherwise charge to it.
+- `docs/ic/params/k0n61-subgroup-folded.json` asks for a 300000-point
+  base, which only the folded tier can hold.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
   `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
+
+- `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
+  whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over
+  ρ charged, and an unplanned A/B of the orbit tag and row filter in the
+  real pipeline (collection units 31× faster, solve 65× faster, resident
+  memory halved, relation counts identical unit for unit). Amortised over
+  32 targets the wider base is *worse* than the 36112-point one; the two
+  cross at about 3600 targets.
+
+- `docs/ic/runs/koblitz-width-curve-20260913.json` — four folded widths at
+  degree 61, 32 targets each, all verified. The charged ratio rises
+  monotonically with width (71 → 76 → 141 → 326); the amortised ratio is
+  flat at ~6.2 from 45872 to 50752, then falls to 4.21 and 0.673.
+  Optimising the charged number alone points at the widest base memory can
+  hold, which is the worst of them.
+
+**Two laws, two questions.** `r_max ∝ M²/(C + β·log M)²` says how large a
+subgroup can be attacked at all — a charged-regime statement, precompute
+assumed paid. The width curve says which width is cheapest for `T`
+targets at fixed `r`, where precompute is most of the bill. Memory sets
+the reach; the target count sets how much of that memory is worth using.
+

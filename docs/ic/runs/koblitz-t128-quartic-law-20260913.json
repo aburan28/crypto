@@ -1,0 +1,37 @@
+{
+  "operation": "koblitz_t128_quartic_law_test",
+  "date": "2026-09-13",
+  "what": "A test of the one prediction of the width model that had not been checked: that the optimal base width grows as T^(1/4) in the number of targets. Recorded in commit aa28fd0 before the runs.",
+  "the_two_predictions_in_conflict": {
+    "idealised_model": "total = A|F|^2 + T B/|F|^2, minimised at (T B/A)^(1/4). At T = 128 that moves the optimum from 50752 to about 71800, and roughly doubles the amortised ratio.",
+    "from_the_measured_stage_costs": "precompute is NOT quadratic in the width in this range -- it is base construction plus relation verification, both about linear, and it barely moves from 45872 to 50752 (15.6 s vs 15.7 s) before jumping at 71248 (24.4 s). So the optimum should STILL be near 50752 at T = 128, about 19.9, with 71248 well below at about 15.4."
+  },
+  "measured": {
+    "targets": 128,
+    "narrow": {
+      "points": 50752,
+      "orbits": 416,
+      "precompute_seconds": 14.75,
+      "descent_seconds_per_target": 0.0457,
+      "charged": 67.2,
+      "amortised": 19.09,
+      "rho_seconds_per_target": 3.0725,
+      "verified": 128
+    },
+    "wide": {
+      "points": 71248,
+      "orbits": 584,
+      "precompute_seconds": 24.58,
+      "descent_seconds_per_target": 0.0285,
+      "charged": 108.1,
+      "amortised": 13.95,
+      "rho_seconds_per_target": 3.0753,
+      "verified": 128
+    }
+  },
+  "verdict": "The quartic law is WRONG in this range. It said the optimum moves to about 71800 at T = 128; it does not move at all. 50752 wins, 19.09 against 13.95, and the predicted margin (19.9 against 15.4) was right to within 4% and 9%. 128 of 128 targets verified at both widths.",
+  "why_it_fails": "T^(1/4) follows from total = A|F|^2 + T B/|F|^2, which assumes precompute is dominated by the quadratic pair-table build. At these widths it is not. Precompute is base construction plus relation verification, both roughly linear, and it is flat from 45872 to 50752 and then steps at 71248. A cost that is flat and then steps does not give a smooth power law; it gives a staircase, and the optimum moves in jumps set by where the steps are rather than as any power of T.",
+  "the_crossover": "From the T = 128 precompute and descent, 50752 gives way to 71248 at (24.58 - 14.75)/(0.0457 - 0.0285) = 572 targets; the same arithmetic on the T = 32 runs gave 435. So somewhere between about 400 and 600, and the spread is a fair measure of how well two points can locate it.",
+  "the_same_error_twice": "This is the second time today a model has been right about a band and wrong about the mechanism. It located the 71248 optimum while treating the table build as the whole of precompute, when the build is a minority of it; and it produced an elegant T^(1/4) law from the same wrong dominant term. A model can fit the numbers it was fitted to and still be wrong about which term matters, and the way to find out is to make it predict somewhere it has not been fitted.",
+  "not_claimed": "That no power law describes the optimum at larger T. Once the base is wide enough for the quadratic build to dominate precompute again, A|F|^2 becomes the leading term and T^(1/4) may well be recovered. What is falsified is the law in the range measured, which is the range where the pipeline is actually worth running."
+}

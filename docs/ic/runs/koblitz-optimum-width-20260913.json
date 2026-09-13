@@ -1,0 +1,62 @@
+{
+  "operation": "koblitz_degree_61_optimum_width",
+  "date": "2026-09-13",
+  "what": "A test of a prediction recorded in git before the run: that the base width minimising total work for T targets is |F| = (T B / A)^(1/4), which at T = 32 puts the optimum near 71000 points -- neither of the widths measured before.",
+  "the_prediction": {
+    "model": "total for T targets = A |F|^2 + T B / |F|^2, minimised at |F| = (T B / A)^(1/4)",
+    "A": "1.13e-9 s per |F|^2, from a folded pair-table build of 102 s at |F| = 300608",
+    "B": "9.13e8, from a descent of 0.0101 s a target at the same width",
+    "predicted_optimum_points": 71000,
+    "predicted_amortised_ratio": "3 to 4",
+    "recorded_where": "commit 0326728, before the run"
+  },
+  "measured": {
+    "points": 71248,
+    "signed_orbits": 584,
+    "stage_seconds": {
+      "select": 6.0,
+      "collect": 9.6,
+      "logs": 8.8,
+      "solve": 1.4
+    },
+    "precompute_seconds": 24.4,
+    "peak_rss_mib": 174,
+    "relations": 1863,
+    "probes": 57000,
+    "units": 3,
+    "descent_seconds_per_target": 0.0235,
+    "charged": 141.1,
+    "amortised": 4.212,
+    "solutions_verified": 32
+  },
+  "the_three_widths_at_32_targets": [
+    {
+      "points": 36112,
+      "tier": "compact",
+      "precompute_s": 79.0,
+      "descent_s_per_target": 0.0531,
+      "charged": 61.2,
+      "amortised": 1.288
+    },
+    {
+      "points": 71248,
+      "tier": "folded",
+      "precompute_s": 24.4,
+      "descent_s_per_target": 0.0235,
+      "charged": 141.1,
+      "amortised": 4.212
+    },
+    {
+      "points": 300608,
+      "tier": "folded",
+      "precompute_s": 156.9,
+      "descent_s_per_target": 0.0101,
+      "charged": 326.0,
+      "amortised": 0.673
+    }
+  ],
+  "verdict": "The prediction held: 4.21 against a stated band of 3 to 4, and the optimum really is in between the two widths measured before -- 3.3 times better amortised than the 36112-point base and 6.3 times better than the 300608-point one. The widest base is NOT the best base. The charged ratio keeps rising with width (61 -> 141 -> 326) and the amortised one peaks and falls, because precompute is quadratic in the width and the descent is only inverse-quadratic.",
+  "where_the_model_was_wrong_anyway": "It located the optimum but not the cost. At 71248 points precompute is 24.4 s of which the pair-table build is a minority -- select 6.0 s, collect 9.6 s, logs 8.8 s -- where the model treats the build as the whole of it. The two-term form was too simple and still landed the optimum, which is worth knowing but is not the same as the model being right.",
+  "a_sizing_that_was_off": "The relations-per-probe estimate used to size the collection was 0.0596; the run measured 0.033, about 1.8 times fewer. The workflow's extension rounds noticed and collected a third unit, so 584 columns still certified with none rejected. The formula window * |F|^2 / (2r) * 3 is an overestimate at this width, and the driver covering for it is the reason the run did not simply fail short.",
+  "not_claimed": "That 71248 is the exact optimum -- the model locates it to within a factor that the three points here cannot resolve. What the three points do show is that it lies between 36112 and 300608, and that both of those are well off it."
+}

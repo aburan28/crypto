@@ -1881,10 +1881,24 @@ each signed orbit and `j` over the whole base:
 
 So the enumeration is onto the orbits whatever the stabilisers are —
 there are no false negatives — and it forms `|F|²/2n` sums rather than
-`|F|²/2`. What it does not remove is the unordered `i ≤ j` symmetry, so
-each orbit is stored about twice and the fold is worth `n`, not `2n`.
-Measured at `n = 61`: 61.0 times fewer stored pairs, against the 61 the
-argument predicts.
+`|F|²/2`. What it does not remove, at first, is the unordered `i ≤ j` symmetry, so
+each orbit is stored twice and the fold is worth `n` rather than `2n` —
+61.0 times fewer stored pairs at `n = 61`, against the 61 that argument
+predicts.
+
+That second factor is recoverable, and cheaply. A sum orbit is
+enumerated once from each of its two summands' orbits, and one of the
+two will do: keep the entry whose row is the **smaller** of them. The
+rule is *row `α` keeps `j` only when `orbit(j) ≥ α`*, and covering
+survives it — given `rest = P_a + P_b` with `orbit(a) = α ≤ β =
+orbit(b)`, the `g` carrying `P_a` to `rep(α)` puts `g · rest` in row `α`
+with its second summand in orbit `β ≥ α`, so `canon(rest)` is still
+produced, and row `β` skips the mirror image. Ordering the base by orbit
+makes "orbit at least `α`" a contiguous suffix, so a row is a slice and
+no addend list is ever built.
+
+With it the fold is worth the full `2n`: **121.9× measured**, and the
+base a 4 GiB budget affords goes 330376 → **467128**.
 
 ### What it buys, and what it costs
 
@@ -1894,16 +1908,16 @@ At a 4 GiB budget and `n = 61`:
 |---|---|---|---|
 | full, with summands | 16 | 23169 | 6.07e5 |
 | compact | ~4.5 | 42302 | 1.82e5 |
-| folded | ~4.5, `n` times fewer | **330376** | **2.99e3** |
+| folded | ~4.5, `2n` times fewer | **467128** | **1.49e3** |
 
-A base 7.81 times wider, and 61 times fewer probes a target. The
+A base 11.0 times wider, and 122 times fewer probes a target. The
 temptation is to call that a 61-fold speedup. It is not, and the run says
 so plainly. Two things eat it:
 
-- **A probe got 9.8 times dearer** — 115 ns to 1125 ns. Nearly all of
-  that is the canonicalisation: `n − 1` squarings is a dependency chain,
-  and a squaring here is a bit-spread plus eight reduction-table
-  lookups, about 830 ns for the chain.
+- **A probe got 3.1 times dearer** — 111 ns to 340 ns. That is with the
+  canonicalisation done as a rotation (below); computed as `n − 1`
+  squarings it was 1125 ns and 9.8 times, and the squaring chain is what
+  most of the gap was.
 - **Recovery grew with the base.** The compact table does not store
   summands; it recovers them by an `|F|`-long scan on a hit. That was
   0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
@@ -1913,9 +1927,10 @@ Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
 first witness:
 
-**0.469 s → 0.229 s, a factor of 2.0.**
-
-Real, and a twentieth of what the probe count alone suggested.
+**0.455 s → 0.0027 s, a factor of 168** — but only after four further
+changes, and on the code as it stood it was 2.0×. What happened in
+between is the rest of this section, and it is the more useful half of
+the result.
 
 ### Two things the measurement had to be rescued from
 
@@ -1935,17 +1950,499 @@ most targets that setup *is* the cost. Both now run a block at a time:
 long enough to amortise one field inversion and keep the squaring chains
 interleaved, short enough that an early exit throws away at most a block.
 
-### What is binding now
+### The squaring chain was not the only way to name an orbit
 
-The canonicalisation, and it is not obviously stuck there. `π` is a
-squaring only in a polynomial basis. In a *normal* basis it is a one-bit
-rotation, so the same minimum is `n` rotations — tens of nanoseconds
-rather than hundreds — and the basis change is one linear map, eight
-table lookups, done once per probe. That would put a folded probe below
-an unfolded one and leave most of the 61 intact.
+`π` is a squaring only in a *polynomial* basis. In a normal basis
+`{β, β², β⁴, …}` it is a one-bit cyclic rotation, because
 
-That is an opportunity, not a result: it has not been built or measured,
-and this note has been wrong before about what algebra alone predicts
-about cost. The `M²/(log M)²` reach law is unchanged in shape by any of
-this — what the fold moves is the constant, by putting `n` times more
-base behind the same byte.
+```
+(Σ c_k β^{2^k})² = Σ c_k β^{2^{k+1}}
+```
+
+So the Frobenius orbit of `x` is the set of rotations of its coordinate
+word, and the least rotation names it: one change of basis — an `F_2`
+linear map, applied as eight byte-table lookups — and `n` rotations.
+Nothing squared and nothing reduced.
+
+The name it gives an orbit is *not* the least element of that orbit; it
+is a different function of the point. That does not matter. A key has
+only to be constant on orbits and distinct across them, which a bijective
+linear map followed by a rotation-invariant minimum is — and a table is
+built and queried with the same one. Both properties are tested directly
+at degrees 13 through 61, against the squaring chain it replaces.
+
+| | squaring chain | rotation |
+|---|---|---|
+| a probe | 1125 ns | **340 ns** |
+| the build, 2.59e8 pairs | 116.7 s | **37.4 s** |
+| the fold, end to end | 2.0× | **2.8×** |
+
+The build gained the same factor as the probe, which it should: it
+canonicalises every pair it stores.
+
+### The recovery, and the search that threw it away
+
+With the canonicalisation cheap, the cost moved to **summand recovery**.
+The compact representation does not store which two base points made a
+sum; it recovers them by a scan over the whole base, `O(|F|)` — 0.94 ms
+at `|F| = 16592` and 12.88 ms at `|F| = 177632`. It grows with the very
+base the fold exists to widen.
+
+Two things were wrong with it. The smaller: `recover_pair` looked each
+difference up in a `std::collections::HashMap`, whose default hasher is
+SipHash — a strong hash bought for keys that are already the output of a
+packing, and paid `|F|` times. An open-addressed table using the hash the
+presence filter already computes, and a scan blocked so its scratch stays
+in cache rather than four megabytes of it going out and coming back, took
+12.88 ms to **8.66 ms**.
+
+The larger was not in the recovery at all. A three-summand search paid it
+once per witness it *found*, not once per witness it kept. The condition
+`j ≤ k` is a sorted-witness condition: it is how a triple found three
+times over — once for each of its indices playing the role of `k` — gets
+counted once, and enumerating every sorted witness is exactly what exact
+yield needs. But a descent does not want an enumeration. It wants one
+decomposition, and it re-checks the sum in the group before returning it.
+So it was rejecting two witnesses in three *after* paying the `O(|F|)`
+scan that produced them, to arrive at the same answer later.
+
+`decompose_fast` now takes any witness and sorts on the way out, so what
+a caller sees is unchanged. Recoveries per decomposition fell from about
+eleven to about one, and the scan reaches a witness about three times
+sooner.
+
+### Recovery was still `O(|F|)`, and that cancelled the whole point
+
+At 18 ms a decomposition, about 6.7 ms was the probes and about 8.7 ms
+the single recovery. That is not merely unbalanced — it *cancels the
+lever the fold exists for*. Probes fall as `1/|F|²` and an `O(|F|)`
+recovery rises as `|F|`, so widening the base by `√2`:
+
+| | probes | recovery | total |
+|---|---|---|---|
+| `\|F\| = 177632` | 6.67 ms | 8.66 ms | 15.3 ms |
+| `\|F\| × √2` | 3.34 ms | 12.2 ms | 15.6 ms |
+
+A wash. The fold buys a base eight times wider and the recovery hands it
+straight back.
+
+### The orbit of a summand survives the fold
+
+It need not. A folded entry was built as `canon(P_{rep(r)} + P_j)`, so a
+target whose key matches it satisfies `g · target = P_{rep(r)} + P_j` for
+some `g ∈ G`, and therefore
+
+```
+target = g⁻¹P_{rep(r)} + g⁻¹P_j
+```
+
+with the first summand somewhere in the **same signed orbit `r`** —
+orbits being exactly what `G` preserves. So recovery never had to walk
+the base. It walks the `2n` points of orbit `r`: 122 against 177632.
+
+And the tag costs no memory, because it is spent out of the rest rather
+than added to it: the stored word becomes `(orbit << 16) | rest16`. The
+rest keeps sixteen bits, so a probe gets through wrongly about one time
+in four thousand rather than one in `2²⁸` — and a wrong admission now
+costs an orbit walk of a few microseconds instead of a scan of the base.
+Over the probes a decomposition spends that is some four false positives
+and tens of microseconds, against the milliseconds the shortened scan
+saves. Still no false negatives; the group has the last word either way.
+
+**Recovery: 8.66 ms → 0.037 ms.**
+
+### A bug the tag exposed
+
+Folded tables had been bucketing on the canonical key's high bits. A
+canonical key is a *minimum over `n` rotations*, which sits far below the
+middle of its range, so the whole table piled into the first few buckets.
+The presence filter hid it completely — a probe that misses never reaches
+a run — but every *hit* then walked an enormous one. It only became
+visible when recovery stopped dominating and a single lookup on the
+degenerate key took seconds.
+
+Folded tables now bucket on the hash the filter and the rest are already
+made of, which is flat. Probe 374 → 285 ns, and far more than that on
+hits.
+
+The degenerate key is worth naming: `O` is the sum of every `±` pair, so
+every orbit representative stores an entry under its key, and a lookup
+there is offered *every* orbit at once. Two membership tests that were
+linear-per-push went quadratic on it; they are sorts now, and it costs
+14 ms for the 88816 pairs it legitimately returns.
+
+### A measurement that was not comparing what it said
+
+Before the stage table, a correction to it. The folded base in those runs
+was chosen by scaling the compact point count by `√(2n)` — the right
+factor only once each sum orbit is stored *once*, which before the row
+filter it was not. So the folded table held about **1.8 times the bytes**
+of the compact one it was being compared against, and "at equal memory"
+was not.
+
+The example now picks the folded base by bisecting the sizing law against
+the compact table's byte count, so the two match by construction: 0.64
+GiB against 0.64 GiB, 137655528 stored pairs against 138074720. Every
+figure in the final row below is at matched bytes; the earlier rows are
+kept for the shape of the progression, and each of them flattered the
+fold by that 1.8.
+
+### What the fold is actually worth
+
+| | s per decomposed target | the fold |
+|---|---|---|
+| the code as it stood | 0.229 | 2.0× |
+| key as a rotation | 0.168 | 2.8× |
+| faster recovery | 0.150 | 3.2× |
+| any witness, not the sorted one | 0.018 | 27.8× |
+| the orbit tag | 0.0027 | 168× |
+| the row filter, at matched bytes | **0.0025** | **197×** |
+
+The fold was worth 2.0× on the code as it stood. The rest is four costs
+that only a base eight times wider makes visible, and three of the four
+were not about the fold at all — the compact table had been paying them
+quietly at every width.
+
+What matters more than the 168 is that the probes are now 98.6% of a
+decomposition. The base-widening lever the fold exists for is connected
+again: a `√2` widening should be worth about 1.9× rather than nothing.
+
+### Which is the test worth running
+
+That last sentence was written before the run, and it is the only claim
+in this section that was a prediction rather than a description. Widening
+the folded base by `√2`, from 177632 to 250832:
+
+| | `\|F\|` | s a decomposition | recovery |
+|---|---|---|---|
+| before | 177632 | 0.0027 | 0.037 ms |
+| `× √2` | 250832 | **0.0014 / 0.0013** | 0.042 / 0.044 ms |
+
+Two runs of the same configuration, so **1.93× and 2.04×** — call it 1.9
+to 2.0 against a prediction of about 1.9. The recovery grew by the `√2`
+the model says it should, and the hit rate reached 1.000: every one of
+the 21779 and 22619 targets decomposed at the first scan.
+
+(The spread is why both are here. A thirty-second window at a
+millisecond-scale cost is a few thousand samples of a geometric variable,
+and this note has already once mistaken two points of that noise for a
+law.)
+
+That is the result, more than the 168 is. A speedup is a number; a
+restored lever is a direction. Before the orbit tag, more memory bought
+nothing at all — the `O(|F|)` recovery exactly ate the `1/|F|²` fall in
+probes. The `M²/(log M)²` reach law had quietly stopped applying to this
+implementation, and nothing in the timings said so until the two halves
+were measured apart.
+
+The `M²/(log M)²` reach law is unchanged in shape by any of this. What
+the fold moves is the constant, by putting `n` times more base behind the
+same byte.
+
+The lesson is the one this note keeps relearning. The algebra said `2n`
+and it was right about `2n`; what it could not say was that at `n` times
+the base, four costs nobody had been watching — a hash chosen for
+strength, a sortedness condition kept for an enumeration nothing was
+enumerating, a linear recovery, and a bucket index taken off bits that
+were not uniform — would be the whole of the bill.
+
+Though the algebra had the last word after all: that the orbit of a
+summand survives the fold is a one-line consequence of `G` preserving
+orbits, and it is what turned the linear recovery into a constant one.
+
+## End to end at a width only the fold can hold — 2026-09-13
+
+Everything above is a microbenchmark: a decomposition oracle timed on its
+own. The pipeline has now been run whole at a width only the folded table
+can hold — `K_0/F_{2^61}`, a 48-bit subgroup, **300608 base points in
+2464 signed orbits** — through select, collect, logs and solve, with a
+signed-Frobenius ρ baseline on the same targets.
+
+**32 of 32 targets verified.** 73495 relations from 80000 probes; the
+sparse solve filtered `73495 × 2464` to a core of 236 and finished in
+0.088 s.
+
+### The A/B that was not planned
+
+The first attempt ran on a binary built two commits earlier, before the
+orbit tag and the row filter. That was a mistake, and it turned into the
+best measurement in this note: the same parameter file and the same base,
+run twice on binaries differing only by those two changes.
+
+The relation counts came back **identical, unit for unit** — 18347,
+18363, 18394, 18391 — which is a stronger check that the tagged,
+row-filtered table answers exactly as the untagged one than any unit
+test. A whole pipeline agreeing to the relation.
+
+| | before | after | |
+|---|---|---|---|
+| collect, the four units | 779.2 s | **24.8 s** | 31.4× |
+| collect stage | 948.1 s | 123.2 s | 7.7× |
+| solve stage | 162.2 s | **2.5 s** | 64.9× |
+| precompute | 1061.6 s | 235.7 s | 4.5× |
+| peak resident | 4.68 GiB | **2.40 GiB** | the row filter, visible |
+| descent | 0.0381 s/target | **0.0100 s/target** | 3.8× |
+| charged, against ρ | 86.7× | **330.7×** | |
+
+The *before* column is explained by one number: collection spent 11.85 ms
+a probe, which at this width is about one `O(|F|)` recovery scan per
+probe — precisely the cost the orbit tag removes.
+
+### Against the best this note had before
+
+| | 36112 points | 300608 points |
+|---|---|---|
+| columns to solve | 296 | 2464 |
+| precompute | 79.0 s | 235.7 s |
+| descent | 0.0531 s/target | **0.0100 s/target** |
+| charged, against ρ | 61.2× | **330.7×** |
+| amortised over 32 targets | **1.288** | 0.45 |
+
+Charged, the folded width is 5.4 times better. Amortised over 32 targets
+it is **worse**, and that is not a footnote — the base has 8.3 times as
+many points and therefore 8.3 times as many orbits to find logarithms
+for, so the precompute triples. A wider base buys a cheaper descent and
+charges for it once, up front.
+
+### Most of that precompute was not needed
+
+The run collected **73495 relations to certify 2464 columns** — a
+thirtyfold oversupply — and then spent 87.6 s of the logs stage verifying
+all of them, against 0.088 s for the solve itself. The unit counts had
+been inherited from the 36112-point file, where a probe yielded far less.
+
+Sized from the covering bound instead: each relation touches three
+orbits, so covering every column needs about `cols·ln(cols)/3 = 6414`
+relations before any margin for independence, and at the measured 0.919
+relations a probe, 14000 probes should give about 12900. It gave 12843,
+and **all 2464 columns certified with none rejected** — the margin is
+sized rather than lucky.
+
+| | oversupplied | sized |
+|---|---|---|
+| relations | 73495 from 80000 probes | 12843 from 14000 |
+| logs stage | 87.6 s | **24.7 s** |
+| precompute | 235.7 s | **156.9 s** |
+| amortised over 32 targets | 0.45 | **0.67** |
+| charged, against ρ | 330.7× | 326.0× |
+
+The charged ratio is unchanged within noise, as it must be: sizing the
+collection does not touch the descent.
+
+*(A first attempt at this measurement gave 137.9 s for collect. The test
+suite was running during that stage's table build. It was re-run with
+nothing else on the machine, and those are the numbers above.)*
+
+### Where the precompute actually goes
+
+| | seconds |
+|---|---|
+| select | 25.1 |
+| pair-table build | ~102 |
+| probing | 4.5 |
+| verifying relations | 24.7 |
+| **the linear algebra** | **0.029** |
+
+The sparse solve is two hundredths of a percent of precompute. The block
+Wiedemann machinery earlier in this note — the filtering, the Krylov
+sequence, all of it — solves a problem that is no longer anywhere near
+the cost. What precompute is made of at this width is the pair-table
+build and verifying relations in the general group arithmetic.
+
+### The crossing
+
+```
+(156.9 − 79.0) s  ÷  (0.0531 − 0.0101) s/target  ≈  1800 targets
+```
+
+Below about 1800 targets the narrower base wins; above it the folded one
+does. It was 3600 before the collection was sized. That is the cleanest
+statement this work has produced of what it actually is: **a method for
+many logarithms on one curve, and never for one.** The reach law says how
+far memory can take you; this says how many targets you must have before
+taking it is worth anything.
+
+### The widest base is not the best base — 2026-09-13
+
+Two costs run opposite ways in the width. The folded table's build is
+quadratic in `|F|`; the descent falls as `1/|F|²`. So for `T` targets
+
+```
+total  =  A|F|²  +  T·B/|F|²        minimised at  |F| = (T·B/A)^{1/4}
+```
+
+The best width grows as the **fourth root** of the number of targets, and
+the total work at that width grows as `√T` — so cost per target falls as
+`1/√T`.
+
+With `A ≈ 1.13e-9` s per `|F|²` (a 102 s build at 300608) and `B ≈ 9.13e8`
+(a 0.0101 s descent at the same width), `T = 32` puts the optimum near
+**71000 points** — neither of the widths measured so far. Predicted
+amortised ratio: 3 to 4. *That was written into git before the run.*
+
+| points | tier | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|---|
+| 36112 | compact | 79.0 s | 0.0531 s/t | 61.2× | 1.288 |
+| **71248** | folded | **24.4 s** | 0.0235 s/t | 141.1× | **4.21** |
+| 300608 | folded | 156.9 s | 0.0101 s/t | 326.0× | 0.673 |
+
+**4.21, against a stated band of 3 to 4.** The optimum really does lie
+between the two widths measured before — 3.3 times better amortised than
+the narrow base, 6.3 times better than the wide one, 32 of 32 verified.
+
+Note the two columns pulling apart. The **charged** ratio climbs
+monotonically with width — 61 → 141 → 326 — because a wider base always
+makes the descent cheaper. The **amortised** ratio peaks and falls,
+because precompute is quadratic in the width while the descent is only
+inverse-quadratic. Optimising the charged number alone would have led
+straight to the widest base the memory could hold, which is the worst of
+the three.
+
+Two honesty notes. The model **located** the optimum without being right
+about the cost: at 71248 points precompute is 24.4 s of which the table
+build is a minority (select 6.0, collect 9.6, logs 8.8), where the model
+treats the build as the whole of it. And the relations-per-probe estimate
+used to size the collection was 0.0596 against a measured 0.033 — the
+workflow's extension rounds noticed and collected a third unit, which is
+why the run certified all 584 columns instead of failing short.
+
+### 71248 was not the optimum either
+
+The run's own numbers say so. The model is minimised where the table
+build equals the *total* descent cost over all `T` targets; at 71248 that
+is 24.4 s against 0.75 s, two orders of magnitude apart. A predicted band
+containing a measured value does not make the prediction right about
+where the optimum *is*, and three points cannot locate a maximum.
+
+So, narrower, in the same tier — and then narrower again:
+
+| points | orbits | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|---|
+| 45872 | 376 | 15.6 s | 0.0466 s/t | 70.9× | **6.18** |
+| 50752 | 416 | 15.7 s | 0.0435 s/t | 75.9× | **6.20** |
+| 71248 | 584 | 24.4 s | 0.0235 s/t | 141.1× | 4.21 |
+| 300608 | 2464 | 157.0 s | 0.0101 s/t | 326.0× | 0.673 |
+
+*(32 targets each, all 32 verified against ρ at every width.)*
+
+50752 was predicted at "about 6, better than 4.21" and measured 6.20 —
+direction and magnitude. 45872 was predicted at "about 6.7, better than
+6.20" and measured 6.18, which **misses on direction**: the curve is
+flat, not still improving. Base construction and relation verification
+stop falling as fast as the model assumes once the base is small, so
+narrowing past about 50000 buys nothing.
+
+### The optimum is a boundary, not a peak
+
+It cannot narrow much further in this tier anyway. At a 4 GiB budget the
+compact table fits up to about 42000 points, so the folded tier only ever
+sees bases above roughly 43000. The amortised optimum at 32 targets is a
+**plateau pressed against that boundary**, not an interior stationary
+point — and which side of the boundary wins is a question about the two
+tiers' build costs, `|F|²/2` pair operations against `|F|²/4n`, rather
+than about width at all.
+
+Which also disposes of the comparison that started this. The
+36112-point run at 1.288 is not *a narrower base doing worse*. It is the
+**compact tier** doing worse: 122 times the pair operations for a base
+only 1.4 times narrower than the folded 50752 that scored 6.20. Reading
+it as a width effect was a mistake, and it is the reason the first
+write-up of the optimum put it in the wrong place.
+
+What survives is the shape, and it is the useful part. **The charged
+ratio rises monotonically with width; the amortised ratio peaks and
+falls.** Optimising the charged number alone — which is what every
+earlier section of this note did — points at the widest base memory can
+hold, and that is the worst of the four.
+
+### The `T^{1/4}` law is wrong where it matters — 2026-09-13
+
+One prediction of the width model had not been tested: that the optimal
+width grows as the fourth root of the number of targets. It is the
+prediction that would make it a law rather than a curve fitted to four
+points, so it was worth the two runs.
+
+The idealised model says that at `T = 128` the optimum moves from 50752
+to about **71800**. The measured stage costs say it does not move at all,
+because precompute is not quadratic in the width in this range — it is
+base construction plus relation verification, both roughly linear, flat
+from 45872 to 50752 (15.6 s against 15.7 s) and then stepping at 71248
+(24.4 s). From those costs the optimum should still be near 50752, about
+19.9, with 71248 well below at about 15.4.
+
+Both predictions were in the repository before the runs.
+
+| at `T = 128` | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|
+| 50752 | 14.75 s | 0.0457 s/t | 67.2× | **19.09** |
+| 71248 | 24.58 s | 0.0285 s/t | 108.1× | 13.95 |
+
+*(128 of 128 verified at both widths.)*
+
+**The quartic law is wrong in this range.** The optimum does not move;
+50752 wins by 19.09 to 13.95, and the margin predicted from the measured
+costs — 19.9 against 15.4 — was right to within 4% and 9%.
+
+Why it fails is the useful part. `T^{1/4}` follows from
+`A|F|² + T·B/|F|²`, which assumes precompute is dominated by the
+quadratic pair-table build. At these widths it is not. A cost that is
+flat and then steps does not produce a smooth power law; it produces a
+**staircase**, and the optimum moves in jumps set by where the steps are.
+The step from 50752 to 71248 is crossed at
+
+```
+(24.58 − 14.75) s ÷ (0.0457 − 0.0285) s/target  ≈  572 targets
+```
+
+and the same arithmetic on the 32-target runs gave 435 — so somewhere
+between about 400 and 600, the spread being a fair measure of what two
+points can locate.
+
+This is the second time today a model has been right about a band and
+wrong about the mechanism. It located the 71248 optimum while treating
+the table build as the whole of precompute, when the build is a minority
+of it; and it produced an elegant `T^{1/4}` from the same wrong dominant
+term. A model can fit the numbers it was fitted to and still be wrong
+about which term matters, and the way to find that out is to make it
+predict somewhere it has not been fitted.
+
+Not claimed: that no power law describes the optimum at larger `T`. Once
+the base is wide enough that the quadratic build dominates precompute
+again, `A|F|²` becomes the leading term and `T^{1/4}` may well be
+recovered. What is falsified is the law in the range measured — which is
+the range where this pipeline is actually worth running.
+
+### Reconciling the reach law with the width curve
+
+This note now contains two results that look like they disagree.
+
+The **reach law** says `r_max ∝ M²/(C + β log M)²` — more memory, more
+reach. The **width curve** says the amortised ratio peaks at about 50000
+points and falls away, so at degree 61 more memory makes things *worse*.
+
+They are answers to different questions, and the note should say so
+rather than leave the reader to notice.
+
+- The reach law is about **whether the method works at all** on a
+  subgroup of size `r`. It is a statement in the charged regime, where
+  precompute is assumed already paid, and it asks how large `r` can be
+  before a decomposition stops being findable. There the only thing that
+  matters is `2r/|F|²` probes per target, and a wider base always helps.
+- The width curve is about **which width is cheapest for `T` targets at
+  a fixed `r`**. There precompute is not already paid — it is most of
+  the bill at small `T` — and a wider base costs more of it than it
+  saves.
+
+So the reach law sets a *floor* on the width: below some `|F|` the
+decompositions are not there to be found, whatever one is willing to
+spend. The width curve sets the *operating point* above that floor, and
+it depends on `T`. At degree 61 with `r ≈ 2⁴⁸` the floor is far below
+50000 and the two never bind at once; at a larger `r` the floor rises and
+would eventually push the operating point up with it.
+
+The honest summary of the whole line of work is therefore two sentences
+rather than one. **Memory sets how large a subgroup can be attacked at
+all. The number of targets sets how much of that memory it is worth
+using.** Every section of this note before the width curve was written as
+though only the first mattered, which is what optimising a charged ratio
+does to you.
