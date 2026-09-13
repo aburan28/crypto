@@ -1,122 +1,215 @@
 {
- "claim_boundary": "extrapolation_from_measured_constants",
- "correction": "An earlier revision of this record and of the research note asserted M^2 from the algebra alone, before the three-width test was run, and described it as two bits a quadrupling where the algebra gives two bits a doubling. Both are corrected here.",
- "date": "2026-09-12",
- "fitted_exponents": {
-  "bits_per_doubling_of_memory": 1.64,
-  "comment": "the probe-count law is confirmed to within 1.5%",
-  "comment_on_probe_cost": "0.148 us into a table of 0.2 GB against 0.249 us into one of 3 GB -- sixty per cent dearer across a range where the table is DRAM-resident throughout",
-  "descent_seconds_in_F": -1.64,
-  "model": -2.0,
-  "model_assumes": 0.0,
-  "probe_count_in_F": -2.03,
-  "reach_exponent_in_memory": 1.64,
-  "seconds_per_probe_in_F": 0.4
- },
- "host": {
-  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
-  "logical_cores": 4,
-  "memory_megabytes": 16075,
-  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
- },
- "measured_at_degree_61": {
-  "curve": "K_0 / F_2^61",
-  "subgroup_bits": 48,
-  "targets_each": 32,
-  "widths": [
-   {
-    "charged_ratio": 7.2,
-    "columns": 80,
-    "descent_probes_per_target": 3068736,
-    "descent_seconds_per_target": 0.45540862009375,
-    "factor_base_points": 9760,
-    "microseconds_per_probe": 0.148,
-    "predicted_2r_over_F2": 3419948,
-    "rho_seconds_per_target": 3.2791324416875,
-    "rho_verified": 32,
-    "verified": 32
-   },
-   {
-    "charged_ratio": 27.79,
-    "columns": 152,
-    "descent_probes_per_target": 545117,
-    "descent_seconds_per_target": 0.11640466821875001,
-    "factor_base_points": 18544,
-    "microseconds_per_probe": 0.214,
-    "predicted_2r_over_F2": 947354,
-    "rho_seconds_per_target": 3.23470603075,
-    "rho_verified": 32,
-    "verified": 32
-   },
-   {
-    "charged_ratio": 61.16,
-    "columns": 296,
-    "descent_probes_per_target": 213109,
-    "descent_seconds_per_target": 0.05310339306250002,
-    "factor_base_points": 36112,
-    "microseconds_per_probe": 0.249,
-    "predicted_2r_over_F2": 249814,
-    "rho_seconds_per_target": 3.2479423494375004,
-    "rho_verified": 32,
-    "verified": 32
-   }
+  "claim_boundary": "extrapolation_from_measured_constants",
+  "correction": "An earlier revision of this record and of the research note asserted M^2 from the algebra alone, before the three-width test was run, and described it as two bits a quadrupling where the algebra gives two bits a doubling. Both are corrected here. A later revision replaced the M^1.64 power-law fit with the measured logarithm: the per-probe growth is a memory-latency curve, so the law is M^2/(log M)^2 and the 80-bit figure falls from 576 TiB to about 220. The power-law fit over-charged the far end by 2.6 times because it extrapolated an exponent that was only ever a local approximation.",
+  "date": "2026-09-12",
+  "fitted_exponents": {
+    "bits_per_doubling_of_memory": 1.64,
+    "comment": "the probe-count law is confirmed to within 1.5%",
+    "comment_on_probe_cost": "0.148 us into a table of 0.2 GB against 0.249 us into one of 3 GB -- sixty per cent dearer across a range where the table is DRAM-resident throughout",
+    "descent_seconds_in_F": -1.64,
+    "model": -2.0,
+    "model_assumes": 0.0,
+    "probe_count_in_F": -2.03,
+    "reach_exponent_in_memory": 1.64,
+    "seconds_per_probe_in_F": 0.4,
+    "superseded": "The +0.40 on seconds-per-probe and the -1.64 on descent seconds are local power-law fits over a 16x range of table sizes. See what_the_probe_cost_is: the growth is logarithmic, matching this machine's measured random-access latency, so the reach law is M^2/(log M)^2 rather than M^1.64. The probe-count exponent of -2.03 is unaffected and still confirms the model to within 1.5%."
+  },
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory_megabytes": 16075,
+    "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+  },
+  "measured_at_degree_61": {
+    "curve": "K_0 / F_2^61",
+    "subgroup_bits": 48,
+    "targets_each": 32,
+    "widths": [
+      {
+        "charged_ratio": 7.2,
+        "columns": 80,
+        "descent_probes_per_target": 3068736,
+        "descent_seconds_per_target": 0.45540862009375,
+        "factor_base_points": 9760,
+        "microseconds_per_probe": 0.148,
+        "predicted_2r_over_F2": 3419948,
+        "rho_seconds_per_target": 3.2791324416875,
+        "rho_verified": 32,
+        "verified": 32
+      },
+      {
+        "charged_ratio": 27.79,
+        "columns": 152,
+        "descent_probes_per_target": 545117,
+        "descent_seconds_per_target": 0.11640466821875001,
+        "factor_base_points": 18544,
+        "microseconds_per_probe": 0.214,
+        "predicted_2r_over_F2": 947354,
+        "rho_seconds_per_target": 3.23470603075,
+        "rho_verified": 32,
+        "verified": 32
+      },
+      {
+        "charged_ratio": 61.16,
+        "columns": 296,
+        "descent_probes_per_target": 213109,
+        "descent_seconds_per_target": 0.05310339306250002,
+        "factor_base_points": 36112,
+        "microseconds_per_probe": 0.249,
+        "predicted_2r_over_F2": 249814,
+        "rho_seconds_per_target": 3.2479423494375004,
+        "rho_verified": 32,
+        "verified": 32
+      }
+    ]
+  },
+  "operation": "koblitz_reach_versus_memory",
+  "schema_version": 1,
+  "software": {
+    "commit": "988a39ae4b42f1fe4553c5b987890abe0169b9d0",
+    "profile": "release"
+  },
+  "the_exponent_is_an_upper_bound": "SUPERSEDED -- kept for the record. It read: the 0.40 was measured across tables of 0.2 to 3 GB, every one served by DRAM, so 1.64 is the exponent before the memory hierarchy has its real say and the memory figures are floors. That reasoning was right about the DRAM boundary and wrong about the shape: within DRAM the growth is a logarithm, not a power, so the figures were ceilings rather than floors over that range -- 576 TiB at eighty bits against the log law's 220. The DRAM boundary caveat itself stands and is restated in where_it_stops_being_true.",
+  "the_law": {
+    "algebra": "descent 2r/|F|^2 probes with |F| = sqrt(2M/c) gives r*c*t_probe/M, linear in r and inverse in memory, against rho's sqrt(pi r/2)/sqrt(2n) steps; equal at r proportional to M^2, two bits a doubling",
+    "what_the_algebra_omits": "that t_probe is a random access into a table quadratic in |F|, and grows with it"
+  },
+  "what_it_costs": [
+    {
+      "memory_tebibytes_at_the_measured_exponent": 0.0008,
+      "memory_tebibytes_if_a_probe_cost_the_same": 0.001,
+      "ratio": 0.8,
+      "subgroup_bits": 48
+    },
+    {
+      "memory_tebibytes_at_the_measured_exponent": 0.0226,
+      "memory_tebibytes_if_a_probe_cost_the_same": 0.0157,
+      "ratio": 1.4,
+      "subgroup_bits": 56
+    },
+    {
+      "memory_tebibytes_at_the_measured_exponent": 0.6658,
+      "memory_tebibytes_if_a_probe_cost_the_same": 0.2504,
+      "ratio": 2.7,
+      "subgroup_bits": 64
+    },
+    {
+      "memory_tebibytes_at_the_measured_exponent": 19.5785,
+      "memory_tebibytes_if_a_probe_cost_the_same": 4.0069,
+      "ratio": 4.9,
+      "subgroup_bits": 72
+    },
+    {
+      "memory_tebibytes_at_the_measured_exponent": 575.7305,
+      "memory_tebibytes_if_a_probe_cost_the_same": 64.1103,
+      "ratio": 9.0,
+      "subgroup_bits": 80
+    }
+  ],
+  "what_the_probe_cost_is": {
+    "corrected_law": "r_max proportional to M^2 / (C + beta*log2 M)^2 -- quadratic with a log-squared penalty, not M^1.64",
+    "dependent_latency_fit": "-31.9 + 21.1*log2(MB), r^2 = 0.949 over eight sizes from 32 MB to 4 GB",
+    "finding": "The |F|^0.40 is this machine's memory latency curve, and once measured the power law is the wrong shape: the per-probe cost grows as the logarithm of the table, not as a power of |F|. The 0.40 was a local power-law fit to a logarithm over a range of only 16x.",
+    "machine_curve_nanoseconds": [
+      {
+        "dependent_nanoseconds": 6.525,
+        "independent_nanoseconds": 2.245,
+        "megabytes": 1
+      },
+      {
+        "dependent_nanoseconds": 19.947,
+        "independent_nanoseconds": 2.153,
+        "megabytes": 4
+      },
+      {
+        "dependent_nanoseconds": 32.554,
+        "independent_nanoseconds": 4.866,
+        "megabytes": 16
+      },
+      {
+        "dependent_nanoseconds": 66.686,
+        "independent_nanoseconds": 8.766,
+        "megabytes": 32
+      },
+      {
+        "dependent_nanoseconds": 111.877,
+        "independent_nanoseconds": 12.069,
+        "megabytes": 64
+      },
+      {
+        "dependent_nanoseconds": 128.191,
+        "independent_nanoseconds": 15.599,
+        "megabytes": 128
+      },
+      {
+        "dependent_nanoseconds": 141.101,
+        "independent_nanoseconds": 19.829,
+        "megabytes": 256
+      },
+      {
+        "dependent_nanoseconds": 156.253,
+        "independent_nanoseconds": 27.091,
+        "megabytes": 512
+      },
+      {
+        "dependent_nanoseconds": 159.013,
+        "independent_nanoseconds": 27.686,
+        "megabytes": 1024
+      },
+      {
+        "dependent_nanoseconds": 180.618,
+        "independent_nanoseconds": 33.087,
+        "megabytes": 2048
+      },
+      {
+        "dependent_nanoseconds": 233.378,
+        "independent_nanoseconds": 37.449,
+        "megabytes": 4096
+      }
+    ],
+    "memory_for_a_charged_ratio_of_ten_tebibytes": {
+      "48_bits": {
+        "flat_probe": 0.00098,
+        "measured_log_law": 0.00134,
+        "power_law_fit": 0.00077
+      },
+      "56_bits": {
+        "flat_probe": 0.0157,
+        "measured_log_law": 0.0297,
+        "power_law_fit": 0.0226
+      },
+      "64_bits": {
+        "flat_probe": 0.25,
+        "measured_log_law": 0.605,
+        "power_law_fit": 0.666
+      },
+      "72_bits": {
+        "flat_probe": 4.01,
+        "measured_log_law": 11.7,
+        "power_law_fit": 19.6
+      },
+      "80_bits": {
+        "flat_probe": 64.1,
+        "measured_log_law": 220.0,
+        "power_law_fit": 576.0
+      }
+    },
+    "probe_cost_fit": "26.9 + 25.2*log2(MB), from the descent's own three filter sizes (32, 128, 512 MB)",
+    "where_it_stops_being_true": "The 21 ns a doubling is a DRAM curve measured on DRAM. It does not continue across the storage boundary: a 220 TiB table is not DRAM on any machine one buys, and memory to flash is a discontinuity of two to three orders of magnitude, not another 21 ns. The log law legitimately covers the range where the table still fits in memory -- a few terabytes on a large server, so about 68 to 70 bits. Past that the right model is not this one and this record does not have it.",
+    "why_this_is_a_mechanism": "25.2 ns a doubling against 21.1 ns a doubling -- two independent measurements, one of the pipeline and one of the bare machine, agreeing on the slope. Three points fitting a two-parameter model would not be much on its own; the agreement with the machine curve is the evidence."
+  },
+  "what_the_probe_cost_is_not": {
+    "but_the_test_is_void": "AnonHugePages in /proc/meminfo stayed at 0 kB for the life of a process holding a 3 GB table, so this kernel granted no huge pages whatever the advice -- the sysfs knob reads 'madvise' but the sandbox does not deliver. The measurement therefore says nothing about the hypothesis; it says the mechanism was unavailable. The change was reverted rather than carried unverified, since it needed an unsafe call to buy a benefit nothing here could demonstrate.",
+    "hypothesis": "The |F|^0.40 in a probe's cost looked like TLB pressure: a probe is one random access into the presence filter, which is quadratic in the base -- 326 MB at 36112 points -- and four-kilobyte pages make that eighty thousand page-table entries for a table walked at random.",
+    "result": "No change: 1.01, 0.94 and 1.02 times the previous cost a probe at the three widths, and the fitted exponents unmoved at +0.40 and -1.63.",
+    "still_open": "Whether the 0.40 is TLB misses, cache pressure, or memory bandwidth is not settled. A host that grants transparent huge pages would settle the first of the three in one run, and it matters: the exponent is what turns 64 TiB into 576 at 80 bits.",
+    "tested": "madvise(MADV_HUGEPAGE) on the filter and the rests before either is filled, then the three widths re-run end to end."
+  },
+  "what_this_is": "The cost laws collapsed into reach against memory, and then tested at three factor-base widths on one degree. The probe-count law holds; the assumption hidden beside it -- that a probe costs the same whatever the table size -- does not, and it is what sets the exponent.",
+  "what_this_is_not": [
+    "Not a measured boundary: constants from a 48-bit subgroup are carried to 80, a factor of 10^10 in r.",
+    "Not a claim about any curve in use.",
+    "The three widths were measured at 32 targets each, which is a small sample for a geometric distribution -- the middle width's 0.58 against the outer two's 0.90 and 0.85 is that noise, and the exponents are fitted across all three rather than read off a pair.",
+    "Collection parallelises; the pair table is shared state every worker must reach, and sharding it is not done here."
   ]
- },
- "operation": "koblitz_reach_versus_memory",
- "schema_version": 1,
- "software": {
-  "commit": "988a39ae4b42f1fe4553c5b987890abe0169b9d0",
-  "profile": "release"
- },
- "the_exponent_is_an_upper_bound": "The 0.40 was measured across tables of 0.2 to 3 GB, every one served by DRAM. The point of the law is to make the table bigger, and past DRAM a lookup becomes an SSD or a network access -- two to four orders of magnitude slower, not sixty per cent. So 1.64 is the exponent before the memory hierarchy has its real say, and the memory figures are floors on the cost rather than estimates of it.",
- "the_law": {
-  "algebra": "descent 2r/|F|^2 probes with |F| = sqrt(2M/c) gives r*c*t_probe/M, linear in r and inverse in memory, against rho's sqrt(pi r/2)/sqrt(2n) steps; equal at r proportional to M^2, two bits a doubling",
-  "what_the_algebra_omits": "that t_probe is a random access into a table quadratic in |F|, and grows with it"
- },
- "what_it_costs": [
-  {
-   "memory_tebibytes_at_the_measured_exponent": 0.0008,
-   "memory_tebibytes_if_a_probe_cost_the_same": 0.001,
-   "ratio": 0.8,
-   "subgroup_bits": 48
-  },
-  {
-   "memory_tebibytes_at_the_measured_exponent": 0.0226,
-   "memory_tebibytes_if_a_probe_cost_the_same": 0.0157,
-   "ratio": 1.4,
-   "subgroup_bits": 56
-  },
-  {
-   "memory_tebibytes_at_the_measured_exponent": 0.6658,
-   "memory_tebibytes_if_a_probe_cost_the_same": 0.2504,
-   "ratio": 2.7,
-   "subgroup_bits": 64
-  },
-  {
-   "memory_tebibytes_at_the_measured_exponent": 19.5785,
-   "memory_tebibytes_if_a_probe_cost_the_same": 4.0069,
-   "ratio": 4.9,
-   "subgroup_bits": 72
-  },
-  {
-   "memory_tebibytes_at_the_measured_exponent": 575.7305,
-   "memory_tebibytes_if_a_probe_cost_the_same": 64.1103,
-   "ratio": 9.0,
-   "subgroup_bits": 80
-  }
- ],
- "what_the_probe_cost_is_not": {
-  "but_the_test_is_void": "AnonHugePages in /proc/meminfo stayed at 0 kB for the life of a process holding a 3 GB table, so this kernel granted no huge pages whatever the advice -- the sysfs knob reads 'madvise' but the sandbox does not deliver. The measurement therefore says nothing about the hypothesis; it says the mechanism was unavailable. The change was reverted rather than carried unverified, since it needed an unsafe call to buy a benefit nothing here could demonstrate.",
-  "hypothesis": "The |F|^0.40 in a probe's cost looked like TLB pressure: a probe is one random access into the presence filter, which is quadratic in the base -- 326 MB at 36112 points -- and four-kilobyte pages make that eighty thousand page-table entries for a table walked at random.",
-  "result": "No change: 1.01, 0.94 and 1.02 times the previous cost a probe at the three widths, and the fitted exponents unmoved at +0.40 and -1.63.",
-  "still_open": "Whether the 0.40 is TLB misses, cache pressure, or memory bandwidth is not settled. A host that grants transparent huge pages would settle the first of the three in one run, and it matters: the exponent is what turns 64 TiB into 576 at 80 bits.",
-  "tested": "madvise(MADV_HUGEPAGE) on the filter and the rests before either is filled, then the three widths re-run end to end."
- },
- "what_this_is": "The cost laws collapsed into reach against memory, and then tested at three factor-base widths on one degree. The probe-count law holds; the assumption hidden beside it -- that a probe costs the same whatever the table size -- does not, and it is what sets the exponent.",
- "what_this_is_not": [
-  "Not a measured boundary: constants from a 48-bit subgroup are carried to 80, a factor of 10^10 in r.",
-  "Not a claim about any curve in use.",
-  "The three widths were measured at 32 targets each, which is a small sample for a geometric distribution -- the middle width's 0.58 against the outer two's 0.90 and 0.85 is that noise, and the exponents are fitted across all three rather than read off a pair.",
-  "Collection parallelises; the pair table is shared state every worker must reach, and sharding it is not done here."
- ]
 }

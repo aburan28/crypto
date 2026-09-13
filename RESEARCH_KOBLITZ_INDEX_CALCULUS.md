@@ -1713,6 +1713,76 @@ bits it asks for 0.67 TiB instead of 0.25, at 72 bits for 20 TiB instead
 of 4, and at 80 bits for **576 TiB instead of 64** — nine times the
 memory, for the same reach.
 
+### What the probe cost is
+
+The `|F|^0.40` is not a property of this code. It is this machine's
+memory latency curve, and once that is measured the power law turns out
+to be the wrong shape entirely.
+
+A probe is one random read of the presence filter, and the filter is
+quadratic in the base: 32 MB at 9760 points, 128 MB at 18544, 512 MB at
+36112. Measuring the machine directly — a pointer chase, every load
+waiting on the last, over working sets from 1 MB to 4 GB:
+
+| working set | dependent | independent |
+|---|---|---|
+| 32 MB | 83 ns | 8.4 ns |
+| 128 MB | 115 ns | 14.7 ns |
+| 512 MB | 149 ns | 25.1 ns |
+| 4 GB | 236 ns | 37.0 ns |
+
+Dependent latency is **linear in the logarithm** of the working set —
+`−31.9 + 21.1·log₂(MB)`, fitting eight sizes with `r² = 0.949`. And the
+descent's probe cost, fitted against its own three filter sizes, is
+`26.9 + 25.2·log₂(MB)`.
+
+**25.2 ns per doubling against 21.1 ns per doubling.** Two independent
+measurements — one of the pipeline, one of the bare machine — agreeing on
+the slope. That is a mechanism rather than a curve fit, and it says the
+per-probe cost grows as a *logarithm* of the table, not as a power of
+`|F|`. The `0.40` was a local power-law fit to a logarithm across a range
+of only 16×.
+
+### Which makes the law better than the power-law fit said
+
+Carrying a logarithm through instead of an exponent:
+
+```text
+    descent  ∝  (r/|F|²)·(K + 2β·log₂|F|)
+    r_max    ∝  M² / (C + β·log₂M)²
+```
+
+Quadratic in memory with a log-squared penalty — not `M^1.64`. A
+logarithm is nearly a constant, so this sits much closer to the clean
+`M²` than the power-law fit suggested:
+
+| subgroup | if a probe were free of the table | power-law fit `\|F\|^0.40` | measured log law |
+|---|---|---|---|
+| 48 bits | 1.0 GiB | 0.8 GiB | 1.4 GiB |
+| 64 bits | 0.25 TiB | 0.67 TiB | 0.61 TiB |
+| 72 bits | 4.0 TiB | 19.6 TiB | 11.7 TiB |
+| 80 bits | 64 TiB | 576 TiB | **220 TiB** |
+
+So the honest figure at eighty bits is about 220 TiB rather than the 576
+the power-law fit gave — the fit over-charged the far end by a factor of
+2.6, because it extrapolated an exponent that was only ever a local
+approximation to a logarithm.
+
+### Where this stops being true
+
+All of it holds while the table is DRAM-backed. The 21 ns a doubling is a
+DRAM curve measured on DRAM; it is not a law of nature and it does not
+continue across the storage boundary. A 220 TiB table is not DRAM on any
+machine one buys, and the step from memory to flash is a discontinuity of
+two to three orders of magnitude, not another 21 ns. What the log law
+legitimately covers is the range where the table still fits in memory —
+which on a large server today is a few terabytes, so around 68 to 70
+bits.
+
+Beyond that the right model is not this one, and this note does not have
+it. The 80-bit row is arithmetic, not a prediction, and it is the
+arithmetic of a machine that does not exist.
+
 ### What the probe cost is not
 
 The obvious suspect for that `|F|^0.40` is the TLB. A probe is one random
