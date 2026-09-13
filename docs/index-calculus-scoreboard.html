@@ -718,6 +718,26 @@
       support-divisibility circuits and coefficient conditioning.</p></div>
   </div>
 
+  <div class="panel" id="nagao-solver-02">
+    <div class="panel-head"><h2>Compiled support: exact formulation, negative solver result</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_02/summary.json</code>;
+    proof and hypothesis ledger in that folder's README. 992 coefficient checks
+    passed; 96 matched trials had no validation errors. Both root-free variants
+    timed out in all larger-field cases. Two-bit conditioning exhausted its first
+    branch. Norm remains the promising control; no attack improvement is established.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts;
+    first verified relation or oracle-confirmed restricted UNSAT. Three-second search
+    budget, matched subspace bases. U = uniform; D = known decomposable.
+    Strata may overlap and are not a natural-yield estimate.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th>
+    <th>n9 d4 D</th><th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead>
+    <tbody><tr><td>chained-s3</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>2 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>3 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-conditioned</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Timeouts remain unknown. The n11 norm uniform decisions
+    include two SAT and one UNSAT. Exact encodings preserve genuine target support;
+    the counting boundary does not move. Symmetrized S4 and calibrated all-phase costs
+    are still missing, so the 20% improvement goal remains unestablished.</p></div>
+  </div>
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">

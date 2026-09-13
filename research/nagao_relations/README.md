@@ -293,3 +293,14 @@ solver and watchdog. No general mathematical avenue is closed.
    <https://api.lib.kyushu-u.ac.jp/opac_download_md/19584/JMI2011A-9.pdf>.
 
 All three sources were retrieved and read during this implementation session.
+
+## Compiled support experiment (solver_02)
+
+The [new proof and hypothesis ledger](solver_02/README.md) records 96 matched
+first-relation trials and 992 coefficient checks. The support formulation
+passed validation but both root-free variants resolved none of the eight
+cases at each of n=9 and n=11. Norm resolved eight and six respectively.
+Two-bit conditioning stalled in its first branch on every larger case.
+This supersedes the priority above: next test hybrid root retention and a
+fair conditioning schedule, while preparing a symmetrized-S4 cost comparison.
+The historical experiments remain unchanged; no attack improvement is claimed.
