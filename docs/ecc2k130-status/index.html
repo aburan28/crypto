@@ -63,6 +63,11 @@
       <div class="foot" id="dps-foot">&nbsp;</div>
     </div>
     <div class="card">
+      <div class="label">Iterations</div>
+      <div class="value mono" id="iterations">&mdash;</div>
+      <div class="foot" id="iterations-foot">&nbsp;</div>
+    </div>
+    <div class="card">
       <div class="label">Last hour</div>
       <div class="value mono" id="dps_last_hour">&mdash;</div>
       <div class="foot" id="rate-foot">&nbsp;</div>
@@ -83,6 +88,18 @@
       <div class="foot" id="collisions-foot">&nbsp;</div>
     </div>
   </div>
+
+  <p class="note" id="iterations-note">
+    Iterations is derived, not reported: a walk on this campaign reports one
+    distinguished point per <span class="mono">2^25.27</span> iterations at
+    <span class="mono">HW(x) &le; 34</span>, so the walk total behind the
+    point count is that count times the same factor. The share beneath it is
+    measured against <span class="mono">2^60.9</span>, the expected cost of a
+    collision (Bailey et al., <em>Breaking ECC2K-130</em>). No worker
+    publishes an iteration counter, and the exponent belongs to one
+    campaign's distinguishing rule, so the figure is only shown for
+    <span class="mono">ecc2k-130</span>.
+  </p>
 
   <section aria-labelledby="h-rate">
     <h2 id="h-rate">Distinguished points per hour</h2>
@@ -204,6 +221,19 @@
   // in the publish cadence, so it does not move when the cron does.
   var HOURLY_BUCKET_LIMIT = 168;
 
+  // A walk on ECC2K-130 reports a point when HW(x) <= 34, which happens once
+  // per 2^25.27 iterations (ecc2k130/aws/README.md), so the walk total behind
+  // the published point count is that count times the same factor. Deriving
+  // it here rather than publishing it keeps the snapshot aggregates-only; it
+  // is a parameter of one campaign's distinguishing rule, so it is only
+  // applied to the campaign it was measured on. The landing page carries the
+  // same two constants, and scripts/site/test_build.py pins all three copies
+  // to each other.
+  var CAMPAIGN = "ecc2k-130";
+  var ITERATIONS_PER_DP_LOG2 = 25.27;
+  // Expected iterations to a collision: Bailey et al., Breaking ECC2K-130.
+  var EXPECTED_ITERATIONS_LOG2 = 60.9;
+
   var STATE_TEXT = {
     COLLECTING: "Collecting. New distinguished points arrived in the last hour.",
     IDLE_OR_STALE: "Store has points, but none in the last hour.",
@@ -220,6 +250,16 @@
     if (value === null || value === undefined || value === "") return "—";
     var n = Number(value);
     return isFinite(n) ? n.toLocaleString("en-US") : "—";
+  }
+
+  // Iterations walked so far, as an exponent: log2(dps) + the report rate.
+  // Null rather than zero when the figure would not mean anything — another
+  // campaign, or no points yet to derive it from — so the card can say which.
+  function iterationsLog2(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var dps = Number(status.dps);
+    if (!isFinite(dps) || dps <= 0) return null;
+    return Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
   }
 
   function parseTime(value) {
@@ -660,6 +700,17 @@
       : "");
 
     el("dps").textContent = num(status.dps);
+    var iterations = iterationsLog2(status);
+    el("iterations").textContent = iterations === null ? "—" : "2^" + iterations.toFixed(1);
+    if (iterations === null) {
+      el("iterations-foot").textContent = status.campaign_id === CAMPAIGN
+        ? "no points to derive it from yet"
+        : "derived for " + CAMPAIGN + " only";
+    } else {
+      el("iterations-foot").textContent =
+        "2^" + (iterations - EXPECTED_ITERATIONS_LOG2).toFixed(1) +
+        " of the 2^" + EXPECTED_ITERATIONS_LOG2 + " expected";
+    }
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
     el("workers").textContent = num(status.workers);

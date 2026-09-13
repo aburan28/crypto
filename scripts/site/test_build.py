@@ -103,6 +103,23 @@ class BuildTests(unittest.TestCase):
             self.assertIn(exponent, page, exponent)
             self.assertIn(exponent, campaign, exponent)
 
+    def test_dashboard_iteration_total_matches_the_landing_page(self):
+        # Both published pages turn the same point count into a walk total,
+        # so a constant edited on one of them only would publish two different
+        # iteration counts for one campaign. Pin the two pages to each other
+        # and to the campaign document both of them cite.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
+        self.assertIn('id="iterations"', dashboard)
+        for exponent in ("2^25.27", "2^60.9"):
+            for name, page in (("dashboard", dashboard), ("landing", landing), ("campaign", campaign)):
+                self.assertIn(exponent, page, "%s is missing %s" % (name, exponent))
+        for name, page in (("dashboard", dashboard), ("landing", landing)):
+            self.assertIn("ITERATIONS_PER_DP_LOG2 = 25.27;", page, name)
+            self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
+        self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
+
     def test_internal_links_resolve(self):
         missing = []
         for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
