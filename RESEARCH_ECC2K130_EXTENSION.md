@@ -205,7 +205,9 @@ the first place; §2 says the extension never supplies an invariant subspace
 that escapes it without landing in horn C.
 
 A factor base that is *not* Frobenius-stable forfeits the `n` / `n²` GGMP
-savings and lands in the repository's main thread rather than a new one: for a
+savings; [`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
+prices that family at `e = 1` in full and finds `m·2^131`, `2^71.77×` rho, with
+the `n²` saving granted for free still leaving `2^57.71×`.  For a
 fixed summand count `m` the subspace dimension must be `≈ N/m = 131e/m`, so
 `|F|` grows exponentially in `e` while the target stays at `2^129`.  At `e = 1`
 that is exactly the pipeline of `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`, whose

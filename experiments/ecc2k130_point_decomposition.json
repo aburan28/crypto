@@ -1,0 +1,1126 @@
+{
+  "schema": "ecc2k130_point_decomposition/v1",
+  "question": "can a target in <G> <= E(F_2^131) be written as a sum of m points whose abscissae lie in an F_2-subspace, and can such a sum be found?",
+  "verdict": "EXISTS AND IS ADMISSIBLE; NOT FINDABLE BELOW 2^131 WITH ANY ORACLE BUILT HERE",
+  "unit": "log2 group operations; S = ops / sqrt(r)",
+  "target": {
+    "curve": "K_0 : y^2 + xy = x^3 + 1 over F_2, used over F_2^131",
+    "reduction_polynomial": "x^131 + x^13 + x^2 + x + 1",
+    "order": "2722258935367507707729280517973639940516",
+    "cofactor": 4,
+    "r": "680564733841876926932320129493409985129",
+    "r_is_prime": true,
+    "log2_r": 129.0,
+    "group_structure": "cyclic Z/4r: the only rational 2-torsion point is (0, sqrt(b))",
+    "rho_automorphism_order": 262,
+    "log2_rho_reference": 60.809,
+    "S_rho_reference": 0.07743
+  },
+  "existence": {
+    "law": "E[# m-subsets of F summing to a fixed R] = C(|F|, m) / #E ~ 2^(m l) / (m! 2^n)",
+    "consequence_at_131": "a decomposition exists for a typical target as soon as m l >= 131 + log2 m!",
+    "toy_rungs": [
+      {
+        "n": 11,
+        "m": 2,
+        "l": 6,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 2116,
+        "cofactor": 4,
+        "factor_base_size": 71,
+        "targets": 512,
+        "decomposed": 340,
+        "rate_measured": 0.6641,
+        "rate_predicted": 0.691,
+        "expected_decompositions_per_target": 1.1744,
+        "ratio_measured_over_predicted": 0.961,
+        "witness_abscissae": [
+          "0xe",
+          "0x2e"
+        ]
+      },
+      {
+        "n": 11,
+        "m": 3,
+        "l": 4,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 2116,
+        "cofactor": 4,
+        "factor_base_size": 21,
+        "targets": 511,
+        "decomposed": 287,
+        "rate_measured": 0.5616,
+        "rate_predicted": 0.4666,
+        "expected_decompositions_per_target": 0.6285,
+        "ratio_measured_over_predicted": 1.204,
+        "witness_abscissae": [
+          "0x1",
+          "0x7",
+          "0x8"
+        ]
+      },
+      {
+        "n": 11,
+        "m": 4,
+        "l": 4,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 2116,
+        "cofactor": 4,
+        "factor_base_size": 21,
+        "targets": 512,
+        "decomposed": 512,
+        "rate_measured": 1.0,
+        "rate_predicted": 0.9409,
+        "expected_decompositions_per_target": 2.8284,
+        "ratio_measured_over_predicted": 1.063,
+        "witness_abscissae": [
+          "0x0",
+          "0x1",
+          "0xd",
+          "0xe"
+        ]
+      },
+      {
+        "n": 13,
+        "m": 2,
+        "l": 7,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 8012,
+        "cofactor": 4,
+        "factor_base_size": 129,
+        "targets": 510,
+        "decomposed": 363,
+        "rate_measured": 0.7118,
+        "rate_predicted": 0.6432,
+        "expected_decompositions_per_target": 1.0305,
+        "ratio_measured_over_predicted": 1.107,
+        "witness_abscissae": [
+          "0x29",
+          "0x3d"
+        ]
+      },
+      {
+        "n": 13,
+        "m": 3,
+        "l": 5,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 8012,
+        "cofactor": 4,
+        "factor_base_size": 33,
+        "targets": 512,
+        "decomposed": 267,
+        "rate_measured": 0.5215,
+        "rate_predicted": 0.4939,
+        "expected_decompositions_per_target": 0.681,
+        "ratio_measured_over_predicted": 1.056,
+        "witness_abscissae": [
+          "0x0",
+          "0x1",
+          "0x7"
+        ]
+      },
+      {
+        "n": 13,
+        "m": 4,
+        "l": 4,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 8012,
+        "cofactor": 4,
+        "factor_base_size": 19,
+        "targets": 511,
+        "decomposed": 271,
+        "rate_measured": 0.5303,
+        "rate_predicted": 0.3835,
+        "expected_decompositions_per_target": 0.4838,
+        "ratio_measured_over_predicted": 1.383,
+        "witness_abscissae": [
+          "0x5",
+          "0xf",
+          "0x5",
+          "0xf"
+        ]
+      },
+      {
+        "n": 17,
+        "m": 2,
+        "l": 9,
+        "two_is_primitive_mod_n": false,
+        "curve_order": 130972,
+        "cofactor": 4,
+        "factor_base_size": 523,
+        "targets": 512,
+        "decomposed": 316,
+        "rate_measured": 0.6172,
+        "rate_predicted": 0.6473,
+        "expected_decompositions_per_target": 1.0422,
+        "ratio_measured_over_predicted": 0.953,
+        "witness_abscissae": [
+          "0xdd",
+          "0x111"
+        ]
+      },
+      {
+        "n": 17,
+        "m": 3,
+        "l": 6,
+        "two_is_primitive_mod_n": false,
+        "curve_order": 130972,
+        "cofactor": 4,
+        "factor_base_size": 65,
+        "targets": 512,
+        "decomposed": 172,
+        "rate_measured": 0.3359,
+        "rate_predicted": 0.2836,
+        "expected_decompositions_per_target": 0.3335,
+        "ratio_measured_over_predicted": 1.185,
+        "witness_abscissae": [
+          "0x16",
+          "0x32",
+          "0x34"
+        ]
+      },
+      {
+        "n": 17,
+        "m": 4,
+        "l": 5,
+        "two_is_primitive_mod_n": false,
+        "curve_order": 130972,
+        "cofactor": 4,
+        "factor_base_size": 35,
+        "targets": 512,
+        "decomposed": 186,
+        "rate_measured": 0.3633,
+        "rate_predicted": 0.3295,
+        "expected_decompositions_per_target": 0.3998,
+        "ratio_measured_over_predicted": 1.102,
+        "witness_abscissae": [
+          "0x6",
+          "0x7",
+          "0xe",
+          "0x13"
+        ]
+      },
+      {
+        "n": 19,
+        "m": 2,
+        "l": 10,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 523492,
+        "cofactor": 4,
+        "factor_base_size": 1005,
+        "targets": 512,
+        "decomposed": 329,
+        "rate_measured": 0.6426,
+        "rate_predicted": 0.6185,
+        "expected_decompositions_per_target": 0.9637,
+        "ratio_measured_over_predicted": 1.039,
+        "witness_abscissae": [
+          "0x2b",
+          "0x393"
+        ]
+      },
+      {
+        "n": 19,
+        "m": 3,
+        "l": 7,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 523492,
+        "cofactor": 4,
+        "factor_base_size": 139,
+        "targets": 512,
+        "decomposed": 308,
+        "rate_measured": 0.6016,
+        "rate_predicted": 0.5668,
+        "expected_decompositions_per_target": 0.8367,
+        "ratio_measured_over_predicted": 1.061,
+        "witness_abscissae": [
+          "0xb",
+          "0x2b",
+          "0x3e"
+        ]
+      },
+      {
+        "n": 19,
+        "m": 4,
+        "l": 5,
+        "two_is_primitive_mod_n": true,
+        "curve_order": 523492,
+        "cofactor": 4,
+        "factor_base_size": 29,
+        "targets": 512,
+        "decomposed": 25,
+        "rate_measured": 0.0488,
+        "rate_predicted": 0.0444,
+        "expected_decompositions_per_target": 0.0454,
+        "ratio_measured_over_predicted": 1.101,
+        "witness_abscissae": [
+          "0x7",
+          "0xd",
+          "0x17",
+          "0x1f"
+        ]
+      }
+    ],
+    "ratio_measured_over_predicted_min": 0.953,
+    "ratio_measured_over_predicted_max": 1.383,
+    "saturating_dimension_at_131": {
+      "2": 66.0,
+      "3": 44.53,
+      "4": 33.9,
+      "5": 27.58,
+      "6": 23.42,
+      "7": 20.47,
+      "8": 18.29
+    }
+  },
+  "admissibility_at_131": [
+    {
+      "subspace": "span{1, z, ..., z^44}",
+      "dim": 45,
+      "measured_point_density_in_subspace": 0.4942,
+      "sampled": 256,
+      "class_histogram_in_E_over_G": {
+        "0": 60,
+        "1": 64,
+        "2": 68,
+        "3": 64
+      },
+      "classes_present": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "class_parity_equals_trace_of_abscissa": true,
+      "admissible_summand_counts": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "subspace": "span{z, z^2, ..., z^45}, inside ker Tr",
+      "dim": 45,
+      "measured_point_density_in_subspace": 0.4523,
+      "sampled": 256,
+      "class_histogram_in_E_over_G": {
+        "0": 128,
+        "1": 0,
+        "2": 128,
+        "3": 0
+      },
+      "classes_present": [
+        0,
+        2
+      ],
+      "class_parity_equals_trace_of_abscissa": true,
+      "admissible_summand_counts": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    }
+  ],
+  "witnesses_at_131": [
+    {
+      "m": 2,
+      "subspace_dim": 45,
+      "summand_abscissae": [
+        "0x124ef131bf8e",
+        "0x1417f3a9b6d6"
+      ],
+      "summand_ordinates": [
+        "0xb25030160e0dbbdc1e3d6b84b743465d",
+        "0x3a09622853057be4ace76cbb4d618e92a"
+      ],
+      "sum_x": "0x438fc5f0bd4e37c882a2fff08112b3cd6",
+      "sum_y": "0x366a1810739ba77328ae8ae3740b6b9f3",
+      "sum_is_on_curve": true,
+      "sum_lies_in_subgroup_of_order_r": true,
+      "every_summand_abscissa_in_subspace": true
+    },
+    {
+      "m": 3,
+      "subspace_dim": 45,
+      "summand_abscissae": [
+        "0x17e0fcba1baf",
+        "0x1ef434ab8c49",
+        "0x1bf1faf66546"
+      ],
+      "summand_ordinates": [
+        "0x249bb80bfc6bf4cac75ef0dfc631cef39",
+        "0x13c291606c7867cea161806aeac25524",
+        "0x1f08f88761328456f86437436174658f5"
+      ],
+      "sum_x": "0x5f51ebb34b6499bab2900fa7c032d9a06",
+      "sum_y": "0x2894e97000896584123c8ff637b9d1b81",
+      "sum_is_on_curve": true,
+      "sum_lies_in_subgroup_of_order_r": true,
+      "every_summand_abscissa_in_subspace": true,
+      "semaev_s4_at_summands_and_target": "0x0",
+      "semaev_s4_vanishes": true
+    },
+    {
+      "m": 4,
+      "subspace_dim": 45,
+      "summand_abscissae": [
+        "0xc931834240f",
+        "0x10e9d37cd5f",
+        "0x89117c92536",
+        "0x1d3eb127f142"
+      ],
+      "summand_ordinates": [
+        "0x6d0d7ce0c061f4eec520a2c4977979133",
+        "0x2ff265ee61d0d45bf98e0ba7e649e55a",
+        "0x3584cbd27f4655ca9d38a83ed4674c1bc",
+        "0x2c0489d54008711e41a9fd4078abdd097"
+      ],
+      "sum_x": "0xe62def6a9adc89577be43fa5b7c28f54",
+      "sum_y": "0x6c62fa0f7ad2c3c26991377c60bd31d0c",
+      "sum_is_on_curve": true,
+      "sum_lies_in_subgroup_of_order_r": true,
+      "every_summand_abscissa_in_subspace": true
+    }
+  ],
+  "cost": {
+    "unit": "log2 group operations, everything inside: targets tried, oracle work, table setup and linear algebra",
+    "model": {
+      "relations_needed": "|F| = 2^l (no Frobenius orbit collapse is available, see below)",
+      "targets_per_relation": "2^n / C(|F|, m)",
+      "oracle_per_target": "C(|F|, m - split) after tabulating C(|F|, split) sums",
+      "linear_algebra": "m 2^(2l), sparse Wiedemann on an |F| x |F| matrix mod r"
+    },
+    "the_product_law": "2^l relations x 2^n/C(|F|,m) targets x C(|F|,m-1) oracle = m 2^n, independent of l",
+    "flatness_check_m3": [
+      {
+        "m": 3,
+        "l": 12,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 12,
+        "log2_decompositions_per_target": -97.58,
+        "log2_targets_per_relation": 97.58,
+        "log2_oracle_per_target": 23.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 25.58,
+        "log2_total": 132.58
+      },
+      {
+        "m": 3,
+        "l": 20,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 20,
+        "log2_decompositions_per_target": -73.58,
+        "log2_targets_per_relation": 73.58,
+        "log2_oracle_per_target": 39.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 41.58,
+        "log2_total": 132.58
+      },
+      {
+        "m": 3,
+        "l": 28,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 28,
+        "log2_decompositions_per_target": -49.58,
+        "log2_targets_per_relation": 49.58,
+        "log2_oracle_per_target": 55.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 57.58,
+        "log2_total": 132.58
+      },
+      {
+        "m": 3,
+        "l": 36,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 36,
+        "log2_decompositions_per_target": -25.58,
+        "log2_targets_per_relation": 25.58,
+        "log2_oracle_per_target": 71.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 73.58,
+        "log2_total": 132.58
+      },
+      {
+        "m": 3,
+        "l": 44,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 44,
+        "log2_decompositions_per_target": -1.58,
+        "log2_targets_per_relation": 1.58,
+        "log2_oracle_per_target": 87.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 89.58,
+        "log2_total": 132.58
+      }
+    ],
+    "rows": [
+      {
+        "variant": "m = 2, enumerate m-1 and root-find the last (the built oracle)",
+        "m": 2,
+        "l": 66.0,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 66.0,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 66.0,
+        "log2_table_entries": null,
+        "log2_collection": 132.0,
+        "log2_linear_algebra": 133.0,
+        "log2_total": 133.58,
+        "log2_ratio_to_rho": 72.77,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 3, enumerate m-1 and root-find the last (the built oracle)",
+        "m": 3,
+        "l": 44.53,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 44.53,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 88.06,
+        "log2_table_entries": null,
+        "log2_collection": 132.58,
+        "log2_linear_algebra": 90.64,
+        "log2_total": 132.58,
+        "log2_ratio_to_rho": 71.77,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 4, enumerate m-1 and root-find the last (the built oracle)",
+        "m": 4,
+        "l": 33.9,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 33.9,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 99.1,
+        "log2_table_entries": null,
+        "log2_collection": 133.0,
+        "log2_linear_algebra": 69.79,
+        "log2_total": 133.0,
+        "log2_ratio_to_rho": 72.19,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 5, enumerate m-1 and root-find the last (the built oracle)",
+        "m": 5,
+        "l": 27.58,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 27.58,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 105.74,
+        "log2_table_entries": null,
+        "log2_collection": 133.32,
+        "log2_linear_algebra": 57.48,
+        "log2_total": 133.32,
+        "log2_ratio_to_rho": 72.51,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 6, enumerate m-1 and root-find the last (the built oracle)",
+        "m": 6,
+        "l": 23.42,
+        "split": 1,
+        "frobenius_stable": false,
+        "log2_factor_base": 23.42,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 110.17,
+        "log2_table_entries": null,
+        "log2_collection": 133.58,
+        "log2_linear_algebra": 49.42,
+        "log2_total": 133.58,
+        "log2_ratio_to_rho": 72.77,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 2, Frobenius-stable orbit-union base, materialised",
+        "m": 2,
+        "l": 66.0,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 66.0,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 66.0,
+        "log2_table_entries": 66.0,
+        "log2_collection": 124.97,
+        "log2_linear_algebra": 118.93,
+        "log2_total": 124.99,
+        "log2_ratio_to_rho": 64.18,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 3, Frobenius-stable orbit-union base, materialised",
+        "m": 3,
+        "l": 44.53,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 44.53,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 88.06,
+        "log2_table_entries": 44.53,
+        "log2_collection": 125.55,
+        "log2_linear_algebra": 76.57,
+        "log2_total": 125.55,
+        "log2_ratio_to_rho": 64.74,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 4, Frobenius-stable orbit-union base, materialised",
+        "m": 4,
+        "l": 33.9,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 33.9,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 99.1,
+        "log2_table_entries": 33.9,
+        "log2_collection": 125.97,
+        "log2_linear_algebra": 55.73,
+        "log2_total": 125.97,
+        "log2_ratio_to_rho": 65.16,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 5, Frobenius-stable orbit-union base, materialised",
+        "m": 5,
+        "l": 27.58,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 27.58,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 105.74,
+        "log2_table_entries": 27.58,
+        "log2_collection": 126.29,
+        "log2_linear_algebra": 43.42,
+        "log2_total": 126.29,
+        "log2_ratio_to_rho": 65.48,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 6, Frobenius-stable orbit-union base, materialised",
+        "m": 6,
+        "l": 23.42,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 23.42,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 110.17,
+        "log2_table_entries": 23.42,
+        "log2_collection": 126.55,
+        "log2_linear_algebra": 35.35,
+        "log2_total": 126.55,
+        "log2_ratio_to_rho": 65.74,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 2, tabulate 2-subset sums, unbounded memory",
+        "m": 2,
+        "l": 43.25,
+        "split": 2,
+        "frobenius_stable": false,
+        "log2_factor_base": 43.25,
+        "log2_decompositions_per_target": -45.5,
+        "log2_targets_per_relation": 45.5,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 85.5,
+        "log2_collection": 88.75,
+        "log2_linear_algebra": 87.5,
+        "log2_total": 89.36,
+        "log2_ratio_to_rho": 28.55,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "m = 3, tabulate 2-subset sums, unbounded memory",
+        "m": 3,
+        "l": 43.5,
+        "split": 2,
+        "frobenius_stable": false,
+        "log2_factor_base": 43.5,
+        "log2_decompositions_per_target": -3.08,
+        "log2_targets_per_relation": 3.08,
+        "log2_oracle_per_target": 43.5,
+        "log2_table_entries": 86.0,
+        "log2_collection": 90.08,
+        "log2_linear_algebra": 88.58,
+        "log2_total": 90.58,
+        "log2_ratio_to_rho": 29.77,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 3, tabulate 3-subset sums, unbounded memory",
+        "m": 3,
+        "l": 27.0,
+        "split": 3,
+        "frobenius_stable": false,
+        "log2_factor_base": 27.0,
+        "log2_decompositions_per_target": -52.58,
+        "log2_targets_per_relation": 52.58,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 78.42,
+        "log2_collection": 79.58,
+        "log2_linear_algebra": 55.58,
+        "log2_total": 80.12,
+        "log2_ratio_to_rho": 19.31,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "m = 4, tabulate 2-subset sums, unbounded memory",
+        "m": 4,
+        "l": 33.75,
+        "split": 2,
+        "frobenius_stable": false,
+        "log2_factor_base": 33.75,
+        "log2_decompositions_per_target": -0.58,
+        "log2_targets_per_relation": 0.58,
+        "log2_oracle_per_target": 66.5,
+        "log2_table_entries": 66.5,
+        "log2_collection": 100.83,
+        "log2_linear_algebra": 69.5,
+        "log2_total": 100.83,
+        "log2_ratio_to_rho": 40.02,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 4, tabulate 3-subset sums, unbounded memory",
+        "m": 4,
+        "l": 27.5,
+        "split": 3,
+        "frobenius_stable": false,
+        "log2_factor_base": 27.5,
+        "log2_decompositions_per_target": -25.58,
+        "log2_targets_per_relation": 25.58,
+        "log2_oracle_per_target": 27.5,
+        "log2_table_entries": 79.92,
+        "log2_collection": 80.58,
+        "log2_linear_algebra": 57.0,
+        "log2_total": 81.29,
+        "log2_ratio_to_rho": 20.48,
+        "class": "derived"
+      },
+      {
+        "variant": "m = 4, tabulate 4-subset sums, unbounded memory",
+        "m": 4,
+        "l": 20.0,
+        "split": 4,
+        "frobenius_stable": false,
+        "log2_factor_base": 20.0,
+        "log2_decompositions_per_target": -55.58,
+        "log2_targets_per_relation": 55.58,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 75.42,
+        "log2_collection": 75.58,
+        "log2_linear_algebra": 42.0,
+        "log2_total": 76.5,
+        "log2_ratio_to_rho": 15.69,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "best decomposition cell with at most 2^30 table entries (m = 4, tabulating 4-subset sums)",
+        "m": 4,
+        "l": 8.5,
+        "split": 4,
+        "frobenius_stable": false,
+        "log2_factor_base": 8.5,
+        "log2_decompositions_per_target": -101.58,
+        "log2_targets_per_relation": 101.58,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 29.42,
+        "log2_collection": 110.08,
+        "log2_linear_algebra": 19.0,
+        "log2_total": 110.08,
+        "log2_ratio_to_rho": 49.27,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "best decomposition cell with at most 2^40 table entries (m = 6, tabulating 6-subset sums)",
+        "m": 6,
+        "l": 8.0,
+        "split": 6,
+        "frobenius_stable": false,
+        "log2_factor_base": 8.0,
+        "log2_decompositions_per_target": -92.49,
+        "log2_targets_per_relation": 92.49,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 38.51,
+        "log2_collection": 100.49,
+        "log2_linear_algebra": 18.58,
+        "log2_total": 100.49,
+        "log2_ratio_to_rho": 39.68,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "best decomposition cell with at most 2^50 table entries (m = 8, tabulating 8-subset sums)",
+        "m": 8,
+        "l": 8.0,
+        "split": 8,
+        "frobenius_stable": false,
+        "log2_factor_base": 8.0,
+        "log2_decompositions_per_target": -82.3,
+        "log2_targets_per_relation": 82.3,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 48.7,
+        "log2_collection": 90.3,
+        "log2_linear_algebra": 19.0,
+        "log2_total": 90.3,
+        "log2_ratio_to_rho": 29.49,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "best decomposition cell with at most 2^60 table entries (m = 8, tabulating 8-subset sums)",
+        "m": 8,
+        "l": 9.25,
+        "split": 8,
+        "frobenius_stable": false,
+        "log2_factor_base": 9.25,
+        "log2_decompositions_per_target": -72.3,
+        "log2_targets_per_relation": 72.3,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 58.7,
+        "log2_collection": 81.55,
+        "log2_linear_algebra": 21.5,
+        "log2_total": 81.55,
+        "log2_ratio_to_rho": 20.74,
+        "class": "generic in costume"
+      },
+      {
+        "variant": "best decomposition cell with at most 2^70 table entries (m = 8, tabulating 8-subset sums)",
+        "m": 8,
+        "l": 10.5,
+        "split": 8,
+        "frobenius_stable": false,
+        "log2_factor_base": 10.5,
+        "log2_decompositions_per_target": -62.3,
+        "log2_targets_per_relation": 62.3,
+        "log2_oracle_per_target": 0.0,
+        "log2_table_entries": 68.7,
+        "log2_collection": 72.8,
+        "log2_linear_algebra": 24.0,
+        "log2_total": 72.88,
+        "log2_ratio_to_rho": 12.07,
+        "class": "generic in costume"
+      }
+    ],
+    "free_oracle_floor": [
+      {
+        "m": 2,
+        "l_star": 43.33,
+        "log2_floor": 89.25,
+        "log2_targets_at_l_star": 88.67,
+        "log2_linear_algebra_at_l_star": 87.66
+      },
+      {
+        "m": 3,
+        "l_star": 33.0,
+        "log2_floor": 68.58,
+        "log2_targets_at_l_star": 67.58,
+        "log2_linear_algebra_at_l_star": 67.58
+      },
+      {
+        "m": 4,
+        "l_star": 26.83,
+        "log2_floor": 56.4,
+        "log2_targets_at_l_star": 55.09,
+        "log2_linear_algebra_at_l_star": 55.66
+      },
+      {
+        "m": 5,
+        "l_star": 22.76,
+        "log2_floor": 48.44,
+        "log2_targets_at_l_star": 46.87,
+        "log2_linear_algebra_at_l_star": 47.84
+      },
+      {
+        "m": 6,
+        "l_star": 19.89,
+        "log2_floor": 42.85,
+        "log2_targets_at_l_star": 41.04,
+        "log2_linear_algebra_at_l_star": 42.36
+      },
+      {
+        "m": 7,
+        "l_star": 17.76,
+        "log2_floor": 38.74,
+        "log2_targets_at_l_star": 36.74,
+        "log2_linear_algebra_at_l_star": 38.33
+      },
+      {
+        "m": 8,
+        "l_star": 16.12,
+        "log2_floor": 35.61,
+        "log2_targets_at_l_star": 33.46,
+        "log2_linear_algebra_at_l_star": 35.24
+      }
+    ],
+    "oracle_budget_to_match_rho": [
+      {
+        "m": 2,
+        "l_star": 43.33,
+        "log2_search_space_per_target": 43.33,
+        "log2_oracle_budget_to_match_rho": -27.86,
+        "oracle_budget_operations": 0.0,
+        "log2_speedup_over_search_required": -71.19,
+        "reachable": false
+      },
+      {
+        "m": 3,
+        "l_star": 33.0,
+        "log2_search_space_per_target": 65.0,
+        "log2_oracle_budget_to_match_rho": -6.78,
+        "oracle_budget_operations": 0.01,
+        "log2_speedup_over_search_required": -71.78,
+        "reachable": false
+      },
+      {
+        "m": 4,
+        "l_star": 26.83,
+        "log2_search_space_per_target": 77.91,
+        "log2_oracle_budget_to_match_rho": 5.71,
+        "oracle_budget_operations": 52.49,
+        "log2_speedup_over_search_required": -72.19,
+        "reachable": false
+      },
+      {
+        "m": 5,
+        "l_star": 22.76,
+        "log2_search_space_per_target": 86.46,
+        "log2_oracle_budget_to_match_rho": 13.94,
+        "oracle_budget_operations": 15739.98,
+        "log2_speedup_over_search_required": -72.51,
+        "reachable": false
+      },
+      {
+        "m": 6,
+        "l_star": 19.89,
+        "log2_search_space_per_target": 92.54,
+        "log2_oracle_budget_to_match_rho": 19.77,
+        "oracle_budget_operations": 892308.75,
+        "log2_speedup_over_search_required": -72.78,
+        "reachable": false
+      },
+      {
+        "m": 7,
+        "l_star": 17.76,
+        "log2_search_space_per_target": 97.07,
+        "log2_oracle_budget_to_match_rho": 24.07,
+        "oracle_budget_operations": 17609230.68,
+        "log2_speedup_over_search_required": -73.0,
+        "reachable": false
+      },
+      {
+        "m": 8,
+        "l_star": 16.12,
+        "log2_search_space_per_target": 100.54,
+        "log2_oracle_budget_to_match_rho": 27.35,
+        "oracle_budget_operations": 171048302.47,
+        "log2_speedup_over_search_required": -73.19,
+        "reachable": false
+      }
+    ],
+    "memory_budgets_against_a_generic_algorithm": [
+      {
+        "log2_entries_cap": 30,
+        "m": 4,
+        "split": 4,
+        "log2_decomposition_total": 110.08,
+        "log2_bsgs_with_the_same_memory": 99.0,
+        "decomposition_beats_bsgs": false,
+        "log2_rho_needs_no_memory": 60.81
+      },
+      {
+        "log2_entries_cap": 40,
+        "m": 6,
+        "split": 6,
+        "log2_decomposition_total": 100.49,
+        "log2_bsgs_with_the_same_memory": 89.0,
+        "decomposition_beats_bsgs": false,
+        "log2_rho_needs_no_memory": 60.81
+      },
+      {
+        "log2_entries_cap": 50,
+        "m": 8,
+        "split": 8,
+        "log2_decomposition_total": 90.3,
+        "log2_bsgs_with_the_same_memory": 79.0,
+        "decomposition_beats_bsgs": false,
+        "log2_rho_needs_no_memory": 60.81
+      },
+      {
+        "log2_entries_cap": 60,
+        "m": 8,
+        "split": 8,
+        "log2_decomposition_total": 81.55,
+        "log2_bsgs_with_the_same_memory": 69.0,
+        "decomposition_beats_bsgs": false,
+        "log2_rho_needs_no_memory": 60.81
+      },
+      {
+        "log2_entries_cap": 70,
+        "m": 8,
+        "split": 8,
+        "log2_decomposition_total": 72.88,
+        "log2_bsgs_with_the_same_memory": 70,
+        "decomposition_beats_bsgs": false,
+        "log2_rho_needs_no_memory": 60.81
+      }
+    ]
+  },
+  "frobenius_unavailable": {
+    "statement": "no Frobenius-stable *subspace* of usable dimension exists at n = 131, so the subspace root-finding oracle and the GGMP collapse cannot be had at once; the collapse alone needs only pi(F) = F and is available from any union of orbits, at the price of materialising the base",
+    "closed_form_with_collapse": "collection = m 2^n / n",
+    "orbit_union_rows": [
+      {
+        "m": 2,
+        "l": 66.0,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 66.0,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 66.0,
+        "log2_table_entries": 66.0,
+        "log2_collection": 124.97,
+        "log2_linear_algebra": 118.93,
+        "log2_total": 124.99
+      },
+      {
+        "m": 3,
+        "l": 44.53,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 44.53,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 88.06,
+        "log2_table_entries": 44.53,
+        "log2_collection": 125.55,
+        "log2_linear_algebra": 76.57,
+        "log2_total": 125.55
+      },
+      {
+        "m": 4,
+        "l": 33.9,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 33.9,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 99.1,
+        "log2_table_entries": 33.9,
+        "log2_collection": 125.97,
+        "log2_linear_algebra": 55.73,
+        "log2_total": 125.97
+      },
+      {
+        "m": 5,
+        "l": 27.58,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 27.58,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 105.74,
+        "log2_table_entries": 27.58,
+        "log2_collection": 126.29,
+        "log2_linear_algebra": 43.42,
+        "log2_total": 126.29
+      },
+      {
+        "m": 6,
+        "l": 23.42,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 23.42,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 110.17,
+        "log2_table_entries": 23.42,
+        "log2_collection": 126.55,
+        "log2_linear_algebra": 35.35,
+        "log2_total": 126.55
+      },
+      {
+        "m": 7,
+        "l": 20.47,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 20.47,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 113.34,
+        "log2_table_entries": 20.47,
+        "log2_collection": 126.77,
+        "log2_linear_algebra": 29.68,
+        "log2_total": 126.77
+      },
+      {
+        "m": 8,
+        "l": 18.29,
+        "split": 1,
+        "frobenius_stable": true,
+        "log2_factor_base": 18.29,
+        "log2_decompositions_per_target": 0.0,
+        "log2_targets_per_relation": 0.0,
+        "log2_oracle_per_target": 115.71,
+        "log2_table_entries": 18.29,
+        "log2_collection": 126.97,
+        "log2_linear_algebra": 25.51,
+        "log2_total": 126.97
+      }
+    ],
+    "cyclotomic_coset_sizes_mod_131": [
+      1,
+      130
+    ],
+    "available_invariant_dimensions": [
+      0,
+      1,
+      130,
+      131
+    ],
+    "ord_131_of_2": 130,
+    "two_is_primitive_root_mod_131": true,
+    "saving_forgone_relations": 131,
+    "saving_forgone_linear_algebra": 17161,
+    "log2_saving_forgone_linear_algebra": 14.07,
+    "note": "the relation collapse alone gives m 2^131 / 131 = 2^125.55, still 2^64.74 x rho; granting the linear-algebra saving on top changes nothing, because collection dominates at every m"
+  },
+  "headline": {
+    "cheapest_implicit_base_variant_log2": 132.58,
+    "cheapest_implicit_base_ratio_log2": 71.77,
+    "cheapest_orbit_union_log2": 124.99,
+    "cheapest_orbit_union_ratio_log2": 64.18,
+    "cheapest_any_memory_log2": 72.88,
+    "cheapest_any_memory_ratio_log2": 12.07,
+    "cheapest_any_memory_entries_log2": 68.7
+  }
+}

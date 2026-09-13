@@ -334,6 +334,13 @@ different factor base shape), or an oracle that is not of the
 fix-one-summand form at all.  This measures the route the note named,
 not every route.
 
+[`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
+carries the `Θ(2^n)` law above to the challenge parameters and states it as a
+demand on the oracle instead of a cost: at `n = 131` a decomposition oracle
+would have to beat exhaustive search over its own candidate set by
+`2^{70.19 + log₂ m}`, and that figure is the same for every summand count and
+every factor-base dimension — which is the identity above, read backwards.
+
 ## References
 
 - **P. Gaudry**, *Index calculus for abelian varieties of small
