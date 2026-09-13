@@ -739,3 +739,9 @@ than 2.8×.
   Optimising the charged number alone points at the widest base memory can
   hold, which is the worst of them.
 
+**Two laws, two questions.** `r_max ∝ M²/(C + β·log M)²` says how large a
+subgroup can be attacked at all — a charged-regime statement, precompute
+assumed paid. The width curve says which width is cheapest for `T`
+targets at fixed `r`, where precompute is most of the bill. Memory sets
+the reach; the target count sets how much of that memory is worth using.
+

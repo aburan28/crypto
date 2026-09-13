@@ -2411,3 +2411,38 @@ the base is wide enough that the quadratic build dominates precompute
 again, `A|F|²` becomes the leading term and `T^{1/4}` may well be
 recovered. What is falsified is the law in the range measured — which is
 the range where this pipeline is actually worth running.
+
+### Reconciling the reach law with the width curve
+
+This note now contains two results that look like they disagree.
+
+The **reach law** says `r_max ∝ M²/(C + β log M)²` — more memory, more
+reach. The **width curve** says the amortised ratio peaks at about 50000
+points and falls away, so at degree 61 more memory makes things *worse*.
+
+They are answers to different questions, and the note should say so
+rather than leave the reader to notice.
+
+- The reach law is about **whether the method works at all** on a
+  subgroup of size `r`. It is a statement in the charged regime, where
+  precompute is assumed already paid, and it asks how large `r` can be
+  before a decomposition stops being findable. There the only thing that
+  matters is `2r/|F|²` probes per target, and a wider base always helps.
+- The width curve is about **which width is cheapest for `T` targets at
+  a fixed `r`**. There precompute is not already paid — it is most of
+  the bill at small `T` — and a wider base costs more of it than it
+  saves.
+
+So the reach law sets a *floor* on the width: below some `|F|` the
+decompositions are not there to be found, whatever one is willing to
+spend. The width curve sets the *operating point* above that floor, and
+it depends on `T`. At degree 61 with `r ≈ 2⁴⁸` the floor is far below
+50000 and the two never bind at once; at a larger `r` the floor rises and
+would eventually push the operating point up with it.
+
+The honest summary of the whole line of work is therefore two sentences
+rather than one. **Memory sets how large a subgroup can be attacked at
+all. The number of targets sets how much of that memory it is worth
+using.** Every section of this note before the width curve was written as
+though only the first mattered, which is what optimising a charged ratio
+does to you.
