@@ -2336,6 +2336,12 @@ fn dense_scan_fast_path_enabled() -> bool {
     *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_DENSE_SCAN_FAST_PATH").as_deref() == Ok("1"))
 }
 
+fn dense_derived_slots_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_DENSE_DERIVED_SLOTS").as_deref() == Ok("1"))
+}
+
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn inverse_n53_selected_unchecked(value: u64) -> u64 {
@@ -2824,11 +2830,14 @@ fn pair_pair_cursor_chunk(
     } else {
         scratch.points.reserve((cursor_end - cursor_start) / step);
     }
-    scratch
-        .signed_slots
-        .reserve((cursor_end - cursor_start) / step);
     let dense_scan_fast_path =
         dense_scan_fast_path_enabled() && quotient_pairs.is_dense() && compact_scratch && dual_sign;
+    let dense_derived_slots = dense_scan_fast_path && dense_derived_slots_enabled();
+    if !dense_derived_slots {
+        scratch
+            .signed_slots
+            .reserve((cursor_end - cursor_start) / step);
+    }
     if dense_scan_fast_path {
         for cursor in (cursor_start..cursor_end).step_by(step) {
             let slot = if let Some(order) = slot_order {
@@ -2844,7 +2853,9 @@ fn pair_pair_cursor_chunk(
             scratch
                 .compact_points
                 .push(quotient_pairs.dense_compact_point_at_slot(slot));
-            scratch.signed_slots.push(slot << 1);
+            if !dense_derived_slots {
+                scratch.signed_slots.push(slot << 1);
+            }
         }
     } else {
         for cursor in (cursor_start..cursor_end).step_by(step) {
@@ -2963,7 +2974,22 @@ fn pair_pair_cursor_chunk(
             result.exact_table_misses += 1;
             return false;
         };
-        let signed_slot = scratch.signed_slots[position];
+        let signed_slot = if dense_derived_slots {
+            let cursor = cursor_start + position * step;
+            let slot = if let Some(order) = slot_order {
+                let ordered = start_slot + cursor / 2;
+                order[if ordered >= order.len() {
+                    ordered - order.len()
+                } else {
+                    ordered
+                }] as usize
+            } else {
+                quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
+            };
+            slot << 1
+        } else {
+            scratch.signed_slots[position]
+        };
         let negative = negative ^ (signed_slot & 1 == 1);
         let (left_indices, left_labels) = quotient_pairs.signed_labels_at_slot(
             signed_slot >> 1,
@@ -4752,6 +4778,8 @@ fn main() {
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
                 "query_dense_scan_fast_path":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled(),
+                "query_dense_derived_slots":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled(),
+                "query_signed_slot_scratch_bytes_per_entry":if query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled() {0} else {std::mem::size_of::<usize>()},
                 "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
                 "query_itoh_n53_inverse":query_mode.pair_pair_parallel() && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled() && itoh_n53_inverse_enabled(),
                 "query_prefiltered_exact_lookup":query_mode.pair_pair_width().is_some() && prefiltered_exact_lookup_enabled(),
