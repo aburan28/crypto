@@ -90,9 +90,11 @@ GPU identity, compiler output, registers/spills and raw outputs.
    fresh allocation. A compile failure, correctness failure, collection
    regression or failure to meet the threshold leaves the default off.
 
-The local environment used for this change has no CUDA toolkit, GPU or Modal
-runner. Preprocessing checks are not CUDA compilation; host fallback checks
-are not execution of the new instruction. Device performance remains unknown.
+The follow-up [native candidate comparison](NATIVE-CANDIDATES.md) installs the
+pinned CUDA 13.3.73 toolchain locally and compiles all four variants and their
+GPU probes for sm_120. Native squaring reduces the static walk section from
+4,513 to 4,003 instructions. This is CUDA compilation evidence, not execution
+on a GPU or a throughput measurement. Device performance remains unknown.
 
 ## GPU-free symbolic validation
 
