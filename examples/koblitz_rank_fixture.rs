@@ -290,6 +290,12 @@ impl QuotientPairWitness {
 }
 
 struct CompactPairTable {
+    // Large signed-expanded tables may be split into four independent hash
+    // ranges.  Each range keeps the same open-addressed representation, but
+    // support entries can be inserted into all ranges in parallel without
+    // locks.  The default remains the historical single table so the mode is
+    // an explicit measured ablation.
+    shards: Vec<CompactPairTable>,
     keys_x: Vec<u64>,
     keys_y: Vec<u64>,
     // Cursor scans need only x and y to form the left pair point. Keep the
@@ -315,6 +321,48 @@ struct CompactPairTable {
 
 impl CompactPairTable {
     fn with_capacity(expected: usize, x_only: bool, x_domain: usize) -> Self {
+        let sharded = x_only
+            && expected >= 4
+            && std::env::var("KIC_ENABLE_SHARDED_SUPPORT_TABLE").as_deref() == Ok("1");
+        if sharded {
+            return Self::with_capacity_sharded(expected, x_only, x_domain, 4);
+        }
+        Self::with_capacity_unsharded(expected, x_only, x_domain)
+    }
+
+    fn with_capacity_sharded(
+        expected: usize,
+        x_only: bool,
+        x_domain: usize,
+        shard_count: usize,
+    ) -> Self {
+        assert!(x_only);
+        assert!(shard_count >= 2 && shard_count.is_power_of_two());
+        let per_shard = expected.div_ceil(shard_count);
+        Self {
+            shards: (0..shard_count)
+                .map(|_| Self::with_capacity_unsharded(per_shard, x_only, x_domain))
+                .collect(),
+            keys_x: Vec::new(),
+            keys_y: Vec::new(),
+            columns: Vec::new(),
+            coefficients: Vec::new(),
+            image_y: Vec::new(),
+            x_filter: Vec::new(),
+            x_filter_mask: 0,
+            x_filter_exact: false,
+            x_filter_split_hash: false,
+            x_filter_insert_hash_reuse: false,
+            x_filter_direct_bits: false,
+            x_filter_blocked: false,
+            x_filter_window_shift: 0,
+            mask: 0,
+            len: 0,
+            x_only,
+        }
+    }
+
+    fn with_capacity_unsharded(expected: usize, x_only: bool, x_domain: usize) -> Self {
         let capacity = expected.max(2).next_power_of_two();
         let x_filter_exact = x_only && x_domain <= (1usize << 29);
         let filter_bits = if !x_only {
@@ -325,6 +373,7 @@ impl CompactPairTable {
             (expected.max(4) * 16).next_power_of_two()
         };
         Self {
+            shards: Vec::new(),
             keys_x: vec![u64::MAX; capacity],
             keys_y: if x_only {
                 Vec::new()
@@ -365,6 +414,19 @@ impl CompactPairTable {
         }
     }
 
+    #[inline(always)]
+    fn shard_for_mixed(&self, mixed: u64) -> usize {
+        debug_assert!(!self.shards.is_empty());
+        debug_assert!(self.shards.len().is_power_of_two());
+        let local_bits = self.shards[0].slots().trailing_zeros();
+        (mixed as usize >> local_bits) & (self.shards.len() - 1)
+    }
+
+    #[inline(always)]
+    fn shard_for_x(&self, x: u64) -> usize {
+        self.shard_for_mixed(Self::hash((x, 0)))
+    }
+
     fn hash((x, y): (u64, u64)) -> u64 {
         let mut value = x ^ y.rotate_left(23) ^ 0x9e37_79b9_7f4a_7c15;
         value ^= value >> 30;
@@ -377,6 +439,16 @@ impl CompactPairTable {
     fn insert(&mut self, key: (u64, u64), value: QuotientPairWitness) {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
         let mixed = Self::hash(hash_key);
+        if !self.shards.is_empty() {
+            let shard = self.shard_for_mixed(mixed);
+            self.shards[shard].insert_with_mixed(key, value, mixed);
+            return;
+        }
+        self.insert_with_mixed(key, value, mixed);
+    }
+
+    fn insert_with_mixed(&mut self, key: (u64, u64), value: QuotientPairWitness, mixed: u64) {
+        debug_assert!(self.shards.is_empty());
         let mut index = mixed as usize & self.mask;
         loop {
             if self.keys_x[index] == u64::MAX {
@@ -410,6 +482,35 @@ impl CompactPairTable {
         }
     }
 
+    fn insert_expanded_entries(&mut self, entries: Vec<ExpandedSupportEntry>) {
+        if self.shards.is_empty() {
+            for (image_key, image_indices) in entries {
+                self.insert(
+                    image_key,
+                    QuotientPairWitness::from_point_indices(image_indices, image_key.1),
+                );
+            }
+            return;
+        }
+        let mut partitions: Vec<Vec<ExpandedSupportEntry>> =
+            (0..self.shards.len()).map(|_| Vec::new()).collect();
+        for entry @ (image_key, _) in entries {
+            let shard = self.shard_for_x(image_key.0);
+            partitions[shard].push(entry);
+        }
+        self.shards
+            .par_iter_mut()
+            .zip(partitions)
+            .for_each(|(shard, entries)| {
+                for (image_key, image_indices) in entries {
+                    shard.insert(
+                        image_key,
+                        QuotientPairWitness::from_point_indices(image_indices, image_key.1),
+                    );
+                }
+            });
+    }
+
     fn get(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         if self.x_only && !self.might_contain_x(key.0) {
             return None;
@@ -423,7 +524,21 @@ impl CompactPairTable {
     /// fallback, so this changes no membership decision.
     fn get_after_x_filter(&self, key: (u64, u64)) -> Option<QuotientPairWitness> {
         let hash_key = if self.x_only { (key.0, 0) } else { key };
-        let mut index = Self::hash(hash_key) as usize & self.mask;
+        let mixed = Self::hash(hash_key);
+        if !self.shards.is_empty() {
+            let shard = self.shard_for_mixed(mixed);
+            return self.shards[shard].get_after_x_filter_with_mixed(key, mixed);
+        }
+        self.get_after_x_filter_with_mixed(key, mixed)
+    }
+
+    fn get_after_x_filter_with_mixed(
+        &self,
+        key: (u64, u64),
+        mixed: u64,
+    ) -> Option<QuotientPairWitness> {
+        debug_assert!(self.shards.is_empty());
+        let mut index = mixed as usize & self.mask;
         loop {
             if self.keys_x[index] == u64::MAX {
                 return None;
@@ -444,12 +559,19 @@ impl CompactPairTable {
     }
 
     fn len(&self) -> usize {
-        self.len
+        if self.shards.is_empty() {
+            self.len
+        } else {
+            self.shards.iter().map(Self::len).sum()
+        }
     }
 
     fn might_contain_x(&self, x: u64) -> bool {
         if !self.x_only {
             return true;
+        }
+        if !self.shards.is_empty() {
+            return self.shards[self.shard_for_x(x)].might_contain_x(x);
         }
         if self.x_filter_blocked && !self.x_filter_exact {
             let (word, mask) = self.x_filter_blocked_word_and_mask(x);
@@ -533,6 +655,9 @@ impl CompactPairTable {
     }
 
     fn allocated_bytes(&self) -> usize {
+        if !self.shards.is_empty() {
+            return self.shards.iter().map(Self::allocated_bytes).sum();
+        }
         self.keys_x.len() * std::mem::size_of::<u64>()
             + self.keys_y.len() * std::mem::size_of::<u64>()
             + self.columns.len() * std::mem::size_of::<[u16; 2]>()
@@ -548,6 +673,22 @@ impl CompactPairTable {
         column_count: usize,
     ) -> Vec<u32> {
         assert!(self.x_only);
+        if !self.shards.is_empty() {
+            let shard_slots = self.shards[0].slots();
+            let mut result = Vec::with_capacity(self.len() * 2 / column_count + 1);
+            for (shard_index, shard) in self.shards.iter().enumerate() {
+                result.extend(
+                    shard
+                        .slots_for_column(point_labels, column, column_count)
+                        .into_iter()
+                        .map(|slot| {
+                            u32::try_from(shard_index * shard_slots + slot as usize)
+                                .expect("global support slot fits u32")
+                        }),
+                );
+            }
+            return result;
+        }
         assert!(self.keys_x.len() <= u32::MAX as usize);
         let mut result = Vec::with_capacity(self.len * 2 / column_count + 1);
         for slot in 0..self.keys_x.len() {
@@ -565,6 +706,9 @@ impl CompactPairTable {
     }
 
     fn x_filter_kind(&self) -> &'static str {
+        if !self.shards.is_empty() {
+            return "four_shard_two_hash_bloom_prefilter_with_exact_table_fallback";
+        }
         if !self.x_only {
             "disabled"
         } else if self.x_filter_exact {
@@ -575,10 +719,21 @@ impl CompactPairTable {
     }
 
     fn x_filter_bits(&self) -> usize {
-        self.x_filter.len() * u64::BITS as usize
+        if self.shards.is_empty() {
+            self.x_filter.len() * u64::BITS as usize
+        } else {
+            self.shards.iter().map(Self::x_filter_bits).sum()
+        }
     }
 
     fn x_filter_hash_strategy(&self) -> &'static str {
+        if !self.shards.is_empty() {
+            return if self.shards[0].x_filter_direct_bits() {
+                "four_shard_direct_low_and_high_x_bit_windows"
+            } else {
+                "four_shard_mixed_x_filter"
+            };
+        }
         if self.x_filter_exact {
             "exact_index"
         } else if self.x_filter_blocked {
@@ -593,22 +748,49 @@ impl CompactPairTable {
     }
 
     fn x_filter_insert_hash_reuse(&self) -> bool {
-        self.x_filter_insert_hash_reuse && !self.x_filter_direct_bits && !self.x_filter_blocked
+        if self.shards.is_empty() {
+            self.x_filter_insert_hash_reuse && !self.x_filter_direct_bits && !self.x_filter_blocked
+        } else {
+            self.shards.iter().all(Self::x_filter_insert_hash_reuse)
+        }
     }
 
     fn x_filter_direct_bits(&self) -> bool {
-        self.x_filter_direct_bits && !self.x_filter_exact && !self.x_filter_blocked
+        if self.shards.is_empty() {
+            self.x_filter_direct_bits && !self.x_filter_exact && !self.x_filter_blocked
+        } else {
+            self.shards.iter().all(Self::x_filter_direct_bits)
+        }
     }
 
     fn x_filter_blocked(&self) -> bool {
-        self.x_filter_blocked && !self.x_filter_exact
+        if self.shards.is_empty() {
+            self.x_filter_blocked && !self.x_filter_exact
+        } else {
+            self.shards.iter().all(Self::x_filter_blocked)
+        }
     }
 
     fn slots(&self) -> usize {
-        self.keys_x.len()
+        if self.shards.is_empty() {
+            self.keys_x.len()
+        } else {
+            self.shards.iter().map(Self::slots).sum()
+        }
+    }
+
+    fn split_global_slot(&self, slot: usize) -> (&CompactPairTable, usize) {
+        debug_assert!(!self.shards.is_empty());
+        let shard_slots = self.shards[0].slots();
+        let shard = slot / shard_slots;
+        (&self.shards[shard], slot % shard_slots)
     }
 
     fn signed_point_at_slot(&self, slot: usize, negative: bool) -> Option<RawPoint> {
+        if !self.shards.is_empty() {
+            let (shard, local_slot) = self.split_global_slot(slot);
+            return shard.signed_point_at_slot(local_slot, negative);
+        }
         let key_x = *self.keys_x.get(slot)?;
         if key_x == u64::MAX || (key_x == 0 && negative) {
             return None;
@@ -629,6 +811,10 @@ impl CompactPairTable {
     /// Return the positive point as `(x + 1, y)`, with `(0, 0)` encoding
     /// infinity. The outer `Option` still distinguishes an empty table slot.
     fn compact_point_at_slot(&self, slot: usize) -> Option<(u64, u64)> {
+        if !self.shards.is_empty() {
+            let (shard, local_slot) = self.split_global_slot(slot);
+            return shard.compact_point_at_slot(local_slot);
+        }
         let key_x = *self.keys_x.get(slot)?;
         if key_x == u64::MAX {
             None
@@ -645,6 +831,16 @@ impl CompactPairTable {
         point_labels: &[(usize, u64)],
         label_to_index: &HashMap<(usize, u64), usize>,
     ) -> ([usize; 2], [(usize, u64); 2]) {
+        if !self.shards.is_empty() {
+            let (shard, local_slot) = self.split_global_slot(slot);
+            return shard.signed_labels_at_slot(
+                local_slot,
+                negative,
+                modulus,
+                point_labels,
+                label_to_index,
+            );
+        }
         debug_assert!(self.keys_x.get(slot).is_some_and(|&key| key != u64::MAX));
         debug_assert!(self.x_only);
         let mut indices = self.columns[slot].map(usize::from);
@@ -3078,12 +3274,7 @@ fn main() {
                 let mut consume = |expanded: Vec<(Vec<ExpandedSupportEntry>, usize)>| {
                     for (entries, maps) in expanded {
                         pair_canonicalization_maps += maps;
-                        for (image_key, image_indices) in entries {
-                            quotient_pairs.insert(
-                                image_key,
-                                QuotientPairWitness::from_point_indices(image_indices, image_key.1),
-                            );
-                        }
+                        quotient_pairs.insert_expanded_entries(entries);
                     }
                 };
                 if pipelined_support_expansion {
@@ -3263,6 +3454,8 @@ fn main() {
             "support_index_entries":support_index_entries,
             "support_payload_lower_bound_bytes":support_index_entries * (4 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
             "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
+            "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+            "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
             "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
@@ -4139,6 +4332,8 @@ fn main() {
                 "support_table_instance_reused":true,
                 "support_index_entries":support_index_entries,
                 "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
+                "support_table_shards":if pair_mode==PairMode::Full {0} else {quotient_pairs.shards.len().max(1)},
+                "parallel_support_insertion":parallel_support_expansion && !quotient_pairs.shards.is_empty(),
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
                 "support_x_prefilter_hash_strategy":quotient_pairs.x_filter_hash_strategy(),
@@ -4332,6 +4527,40 @@ mod packed_tests {
                 assert!(table.get(*key).is_some());
             }
         }
+    }
+
+    #[test]
+    fn sharded_support_table_matches_exact_unsharded_membership() {
+        let entries: Vec<ExpandedSupportEntry> = (1..=256usize)
+            .map(|index| {
+                let x = (index as u64).wrapping_mul(0x1f12_3bb5) & ((1u64 << 53) - 1);
+                let y = x.rotate_left(17) & ((1u64 << 53) - 1);
+                ((x + 1, y), [index, 511 - index])
+            })
+            .collect();
+        let x_domain = (1usize << 53) + 1;
+        let mut serial = CompactPairTable::with_capacity_unsharded(1_024, true, x_domain);
+        for &(key, indices) in &entries {
+            serial.insert(key, QuotientPairWitness::from_point_indices(indices, key.1));
+        }
+        let mut sharded = CompactPairTable::with_capacity_sharded(1_024, true, x_domain, 4);
+        sharded.insert_expanded_entries(entries.clone());
+
+        assert_eq!(sharded.len(), serial.len());
+        assert_eq!(sharded.slots(), serial.slots());
+        assert_eq!(sharded.x_filter_bits(), serial.x_filter_bits());
+        assert!(sharded.x_filter_direct_bits());
+        for &(key, _) in &entries {
+            assert!(sharded.might_contain_x(key.0));
+            let expected = serial.get(key).unwrap();
+            let actual = sharded.get(key).unwrap();
+            assert_eq!(actual.columns, expected.columns);
+            assert_eq!(actual.image_y, expected.image_y);
+        }
+        let occupied = (0..sharded.slots())
+            .filter(|&slot| sharded.compact_point_at_slot(slot).is_some())
+            .count();
+        assert_eq!(occupied, sharded.len());
     }
 
     #[test]
