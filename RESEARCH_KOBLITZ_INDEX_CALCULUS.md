@@ -2305,3 +2305,52 @@ treats the build as the whole of it. And the relations-per-probe estimate
 used to size the collection was 0.0596 against a measured 0.033 — the
 workflow's extension rounds noticed and collected a third unit, which is
 why the run certified all 584 columns instead of failing short.
+
+### 71248 was not the optimum either
+
+The run's own numbers say so. The model is minimised where the table
+build equals the *total* descent cost over all `T` targets; at 71248 that
+is 24.4 s against 0.75 s, two orders of magnitude apart. A predicted band
+containing a measured value does not make the prediction right about
+where the optimum *is*, and three points cannot locate a maximum.
+
+So, narrower, in the same tier — and then narrower again:
+
+| points | orbits | precompute | descent | charged | **amortised** |
+|---|---|---|---|---|---|
+| 45872 | 376 | 15.6 s | 0.0466 s/t | 70.9× | **6.18** |
+| 50752 | 416 | 15.7 s | 0.0435 s/t | 75.9× | **6.20** |
+| 71248 | 584 | 24.4 s | 0.0235 s/t | 141.1× | 4.21 |
+| 300608 | 2464 | 157.0 s | 0.0101 s/t | 326.0× | 0.673 |
+
+*(32 targets each, all 32 verified against ρ at every width.)*
+
+50752 was predicted at "about 6, better than 4.21" and measured 6.20 —
+direction and magnitude. 45872 was predicted at "about 6.7, better than
+6.20" and measured 6.18, which **misses on direction**: the curve is
+flat, not still improving. Base construction and relation verification
+stop falling as fast as the model assumes once the base is small, so
+narrowing past about 50000 buys nothing.
+
+### The optimum is a boundary, not a peak
+
+It cannot narrow much further in this tier anyway. At a 4 GiB budget the
+compact table fits up to about 42000 points, so the folded tier only ever
+sees bases above roughly 43000. The amortised optimum at 32 targets is a
+**plateau pressed against that boundary**, not an interior stationary
+point — and which side of the boundary wins is a question about the two
+tiers' build costs, `|F|²/2` pair operations against `|F|²/4n`, rather
+than about width at all.
+
+Which also disposes of the comparison that started this. The
+36112-point run at 1.288 is not *a narrower base doing worse*. It is the
+**compact tier** doing worse: 122 times the pair operations for a base
+only 1.4 times narrower than the folded 50752 that scored 6.20. Reading
+it as a width effect was a mistake, and it is the reason the first
+write-up of the optimum put it in the wrong place.
+
+What survives is the shape, and it is the useful part. **The charged
+ratio rises monotonically with width; the amortised ratio peaks and
+falls.** Optimising the charged number alone — which is what every
+earlier section of this note did — points at the widest base memory can
+hold, and that is the worst of the four.

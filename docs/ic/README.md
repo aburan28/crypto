@@ -731,3 +731,11 @@ than 2.8×.
   memory halved, relation counts identical unit for unit). Amortised over
   32 targets the wider base is *worse* than the 36112-point one; the two
   cross at about 3600 targets.
+
+- `docs/ic/runs/koblitz-width-curve-20260913.json` — four folded widths at
+  degree 61, 32 targets each, all verified. The charged ratio rises
+  monotonically with width (71 → 76 → 141 → 326); the amortised ratio is
+  flat at ~6.2 from 45872 to 50752, then falls to 4.21 and 0.673.
+  Optimising the charged number alone points at the widest base memory can
+  hold, which is the worst of them.
+
