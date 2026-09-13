@@ -114,6 +114,14 @@ architecture rtl of ec2k_walker is
   signal ob_empty : boolean;
   signal head_w   : fword_t;
   signal head_dp  : std_logic;
+  -- the buffer's pointers select 4 x 304 bits of write enable and read
+  -- mux, the report register's load enable is 304 more: each such net
+  -- from one driver is a long route in a full device, so the drivers are
+  -- replicated
+  attribute MAX_FANOUT : string;
+  attribute MAX_FANOUT of ob_wr : signal is "100";
+  attribute MAX_FANOUT of ob_rd : signal is "100";
+  attribute MAX_FANOUT of rv    : signal is "100";
 
   -- step unit; the tag is (id, steps so far)
   constant TAG_W : natural := ID_W + CNT_W;
@@ -127,6 +135,7 @@ architecture rtl of ec2k_walker is
   -- report register
   signal dpv     : std_logic := '0';
   signal take_dp : boolean;
+  attribute MAX_FANOUT of take_dp : signal is "100";
 
   signal ld_rdy  : std_logic;
 
@@ -196,11 +205,13 @@ begin
         ob_wr <= ob_wr + 1;
       end if;
 
-      -- pop: the step unit took the head, or the head is a report
-      if s_in_valid = '1' and s_in_ready = '1' then
+      -- pop: the step unit took the head, or the head is a report (the
+      -- two exclude each other: a report is never offered to the step
+      -- unit)
+      if (s_in_valid = '1' and s_in_ready = '1') or take_dp then
         ob_rd <= ob_rd + 1;
-      elsif take_dp then
-        ob_rd    <= ob_rd + 1;
+      end if;
+      if take_dp then
         dpv      <= '1';
         dp_id    <= unsigned(head_w(Y_LO - 1 downto ID_LO));
         dp_x     <= head_w(FW - 1 downto X_LO);
