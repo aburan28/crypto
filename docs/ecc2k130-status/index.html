@@ -91,15 +91,26 @@
       <p class="meter-foot">Full width is <span class="mono">2^60.9</span>, the same
         boundary the bar above measures against.</p>
     </div>
+
+    <div class="eta" id="eta-block" aria-live="polite">
+      <div class="eta-label">ETA to the expected collision cost</div>
+      <p class="eta-value mono" id="eta-value">&mdash;</p>
+      <p class="eta-sub" id="eta-sub">&nbsp;</p>
+    </div>
+
     <p class="note" id="iterations-note">
       Derived, not reported: a walk on this campaign reports one distinguished
       point per <span class="mono">2^25.27</span> iterations at
       <span class="mono">HW(x) &le; 34</span>, so the operation total behind
-      the point count is that count times the same factor. A collision is
+      the point count is that count times the same factor &mdash; when the
+      number of points in an hour changes, the operation rate and the ETA
+      both move with that amount at the same interval. A collision is
       expected after <span class="mono">2^60.9</span> operations (Bailey et
-      al., <em>Breaking ECC2K-130</em>). No worker publishes an operation
-      counter, and the exponent belongs to one campaign's distinguishing rule,
-      so the figure is only shown for <span class="mono">ecc2k-130</span>.
+      al., <em>Breaking ECC2K-130</em>); the ETA is the wall-clock time to
+      that expected cost at the last-hour rate, not a deadline. No worker
+      publishes an operation counter, and the exponent belongs to one
+      campaign's distinguishing rule, so the figure is only shown for
+      <span class="mono">ecc2k-130</span>.
     </p>
   </section>
 
@@ -291,6 +302,47 @@
     var dps = Number(status.dps);
     if (!isFinite(dps) || dps <= 0) return null;
     return Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+  }
+
+  // Operation rate from the last-hour DP amount at this campaign's interval:
+  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null when the hour
+  // interval reported no points, so the ETA can say "no recent rate" rather
+  // than inventing one.
+  function opsPerSecond(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var dpsLastHour = Number(status.dps_last_hour);
+    if (!isFinite(dpsLastHour) || dpsLastHour <= 0) return null;
+    return (dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600;
+  }
+
+  // Seconds to the expected 2^60.9 cost at the last-hour rate. Null when the
+  // rate or the walked total is unknown; 0 when a collision is already on
+  // the board; negative when the walked total has passed the expected cost
+  // without a recorded collision (birthday variance — say so in the UI).
+  function etaSeconds(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    if ((Number(status.collisions) || 0) > 0) return 0;
+    var log2ops = iterationsLog2(status);
+    var rate = opsPerSecond(status);
+    if (log2ops === null || rate === null) return null;
+    var remaining = Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops);
+    return remaining / rate;
+  }
+
+  function formatDuration(seconds) {
+    if (!isFinite(seconds)) return null;
+    var abs = Math.abs(seconds);
+    var years = abs / (365.25 * 86400);
+    if (years >= 1.5) return years.toFixed(1) + " years";
+    if (years >= 0.95) return "about 1 year";
+    var days = abs / 86400;
+    if (days >= 1.5) return days.toFixed(1) + " days";
+    if (days >= 0.95) return "about 1 day";
+    var hours = abs / 3600;
+    if (hours >= 1.5) return hours.toFixed(1) + " hours";
+    if (hours >= 0.95) return "about 1 hour";
+    var mins = Math.max(1, Math.round(abs / 60));
+    return mins + (mins === 1 ? " min" : " min");
   }
 
   // 2^x as a decimal magnitude, for readers who do not think in exponents.
@@ -750,6 +802,51 @@
       : "Linear in work: full width is a collision at the expected cost.";
   }
 
+  // ETA to the expected 2^60.9 cost at the last-hour DP rate. The amount of
+  // points in that hour interval, times the campaign's iterations-per-DP
+  // interval, is the operation rate; when the DP amount changes, this ETA
+  // moves with it.
+  function drawEta(status) {
+    var value = el("eta-value");
+    var sub = el("eta-sub");
+    if (!status || status.campaign_id !== CAMPAIGN) {
+      value.textContent = "—";
+      sub.textContent = "Derived for " + CAMPAIGN + " only.";
+      return;
+    }
+    if ((Number(status.collisions) || 0) > 0) {
+      value.textContent = "collision recorded";
+      sub.textContent = "A collision is on the board — not independently verified here.";
+      return;
+    }
+    var log2ops = iterationsLog2(status);
+    var rate = opsPerSecond(status);
+    var seconds = etaSeconds(status);
+    if (log2ops === null) {
+      value.textContent = "—";
+      sub.textContent = "No distinguished points yet, so there is no rate to project.";
+      return;
+    }
+    if (rate === null || seconds === null) {
+      value.textContent = "—";
+      sub.textContent = "No points in the last hour, so there is no current rate for an ETA.";
+      return;
+    }
+    var dpsLastHour = Number(status.dps_last_hour);
+    var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+    if (seconds < 0) {
+      value.textContent = "past expected cost";
+      sub.textContent = "Walked 2^" + log2ops.toFixed(1) + " of 2^" + EXPECTED_ITERATIONS_LOG2 +
+        " at 2^" + opsHourLog2.toFixed(1) + " ops/h from " + num(dpsLastHour) +
+        " DP/h — collision not yet recorded (birthday variance).";
+      return;
+    }
+    value.textContent = formatDuration(seconds);
+    sub.textContent = "At " + num(dpsLastHour) + " DP/h (= 2^" + opsHourLog2.toFixed(1) +
+      " ops/h with interval 2^" + ITERATIONS_PER_DP_LOG2 + "), wall-clock time to the expected 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " cost. An expectation, not a deadline.";
+  }
+
   function setBanner(state, extra) {
     var banner = el("banner");
     var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
@@ -813,6 +910,7 @@
 
     el("dps").textContent = num(status.dps);
     drawOperations(status);
+    drawEta(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
     el("workers").textContent = num(status.workers);
@@ -821,7 +919,18 @@
     var firstAt = parseTime(status.first_dp_at);
     el("dps-foot").textContent = firstAt ? "since " + utc(firstAt) : " ";
     var lastAt = parseTime(status.last_dp_at);
-    el("rate-foot").textContent = lastAt ? "latest point " + ago(lastAt) : " ";
+    // The last-hour card is the DP amount in that interval; spell out the
+    // operation rate it implies so a change in the amount is visible as a
+    // change in ops/h, not only as a change in the point count.
+    var rate = opsPerSecond(status);
+    var rateBits = [];
+    if (rate !== null) {
+      var dpsLastHour = Number(status.dps_last_hour);
+      var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+      rateBits.push("2^" + opsHourLog2.toFixed(1) + " ops/h at interval 2^" + ITERATIONS_PER_DP_LOG2);
+    }
+    if (lastAt) rateBits.push("latest point " + ago(lastAt));
+    el("rate-foot").textContent = rateBits.length ? rateBits.join(" · ") : " ";
 
     var collisions = Number(status.collisions) || 0;
     el("collision-card").className = "card" + (collisions > 0 ? " alert" : "");

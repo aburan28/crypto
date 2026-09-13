@@ -120,6 +120,29 @@ class BuildTests(unittest.TestCase):
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
 
+    def test_dashboard_eta_uses_last_hour_dp_amount_at_the_campaign_interval(self):
+        # The ETA is the remaining expected work divided by the last-hour
+        # operation rate. The rate is the DP amount in that hour interval
+        # times 2^25.27, so when the hourly amount changes the ETA must move
+        # with it — pin the formula, not a rendered duration.
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn('id="eta-value"', page)
+        self.assertIn("function opsPerSecond", page)
+        self.assertIn("function etaSeconds", page)
+        self.assertIn("function drawEta", page)
+        self.assertIn(
+            "dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600",
+            page,
+        )
+        self.assertIn(
+            "Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops)",
+            page,
+        )
+        self.assertIn("drawEta(status)", page)
+        # The last-hour card foot must surface the ops/h implied by the DP
+        # amount, so a change in the interval's count is visible as ops/h.
+        self.assertIn("ops/h at interval 2^", page)
+
     def test_dashboard_progress_bar_is_linear_in_work(self):
         # The share of 2^60.9 walked so far is around 2^-21, so a bar drawn
         # from the ratio of the EXPONENTS would read about two thirds full

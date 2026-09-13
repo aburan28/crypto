@@ -12,7 +12,7 @@ The first is **linear in work** — the share of the `2^60.9` expected cost
 of a collision — so early in a campaign it is empty and its caption says
 so; nothing pads the fill to a visible sliver. The second is the exponent
 on a **log scale**, legible but labelled on the page as not being
-progress, because each bit of it is a doubling of the work. See
+progress, because each bit of it is a doubling of the work. Beneath the bars, an **ETA** projects the wall-clock time to the expected `2^60.9` cost from the last-hour distinguished-point amount at the same `2^25.27` interval — when that hourly amount changes, the operation rate and the ETA both move with it. See
 `scripts/rho_status/README.md` for why none of this is a published field.
 
 Open `index.html` from the working tree next to the two JSON files and it
