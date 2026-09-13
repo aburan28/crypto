@@ -259,6 +259,13 @@ retain their original command paths and source hashes; those describe the
 historical run. Current runners load the relocated contract. Run the commands
 above from the repository root.
 
+GitHub publication preserves the snapshot trees while assigning new commit
+identifiers. The published source/results snapshot is
+[`6834d5c`](https://github.com/aburan28/crypto/commit/6834d5c7e44c639b423cb6bdf879933c939528a8).
+The [publication record](publication.json) maps the original local IDs to their
+published equivalents and retains the original commit objects for reproducing
+the identifiers recorded by the historical runs.
+
 The current priority is to compile the exact H-divides-L_V condition and compare
 it against the norm backend. Direct incidence remains available as a control
 and for alternative solvers; its 24 timeouts apply only to this encoding,
