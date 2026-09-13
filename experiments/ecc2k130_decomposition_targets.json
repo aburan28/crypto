@@ -328,7 +328,13 @@
         "l_star": 43.15,
         "log2_floor": 89.45,
         "log2_targets": 88.85,
-        "log2_linear_algebra": 87.3
+        "log2_linear_algebra": 87.3,
+        "witness_split": [
+          1,
+          1
+        ],
+        "log2_witness_table_entries": 43.15,
+        "log2_witness_probes": 86.3
       },
       {
         "m": 2,
@@ -337,7 +343,13 @@
         "l_star": 43.65,
         "log2_floor": 81.89,
         "log2_targets": 81.32,
-        "log2_linear_algebra": 74.23
+        "log2_linear_algebra": 74.23,
+        "witness_split": [
+          1,
+          1
+        ],
+        "log2_witness_table_entries": 43.65,
+        "log2_witness_probes": 80.27
       },
       {
         "m": 3,
@@ -361,19 +373,31 @@
         "m": 3,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 26.8,
-        "log2_floor": 80.72,
-        "log2_targets": 79.98,
-        "log2_linear_algebra": 55.18
+        "l_star": 32.85,
+        "log2_floor": 68.88,
+        "log2_targets": 67.88,
+        "log2_linear_algebra": 67.28,
+        "witness_split": [
+          2,
+          1
+        ],
+        "log2_witness_table_entries": 64.7,
+        "log2_witness_probes": 65.7
       },
       {
         "m": 3,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 26.8,
-        "log2_floor": 73.69,
-        "log2_targets": 72.95,
-        "log2_linear_algebra": 41.12
+        "l_star": 31.9,
+        "log2_floor": 63.79,
+        "log2_targets": 62.75,
+        "log2_linear_algebra": 51.32,
+        "witness_split": [
+          2,
+          1
+        ],
+        "log2_witness_table_entries": 62.8,
+        "log2_witness_probes": 56.77
       },
       {
         "m": 4,
@@ -397,19 +421,31 @@
         "m": 4,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 19.7,
-        "log2_floor": 77.36,
-        "log2_targets": 76.48,
-        "log2_linear_algebra": 41.4
+        "l_star": 22.75,
+        "log2_floor": 68.29,
+        "log2_targets": 67.33,
+        "log2_linear_algebra": 47.5,
+        "witness_split": [
+          2,
+          2
+        ],
+        "log2_witness_table_entries": 44.5,
+        "log2_witness_probes": 67.25
       },
       {
         "m": 4,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 19.7,
-        "log2_floor": 70.32,
-        "log2_targets": 69.45,
-        "log2_linear_algebra": 27.33
+        "l_star": 22.75,
+        "log2_floor": 61.26,
+        "log2_targets": 60.3,
+        "log2_linear_algebra": 33.43,
+        "witness_split": [
+          2,
+          2
+        ],
+        "log2_witness_table_entries": 44.5,
+        "log2_witness_probes": 60.22
       },
       {
         "m": 5,
@@ -433,19 +469,31 @@
         "m": 5,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 15.8,
-        "log2_floor": 75.57,
-        "log2_targets": 74.71,
-        "log2_linear_algebra": 33.92
+        "l_star": 19.85,
+        "log2_floor": 59.75,
+        "log2_targets": 58.51,
+        "log2_linear_algebra": 42.02,
+        "witness_split": [
+          3,
+          2
+        ],
+        "log2_witness_table_entries": 56.97,
+        "log2_witness_probes": 58.55
       },
       {
         "m": 5,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 15.8,
-        "log2_floor": 68.53,
-        "log2_targets": 67.67,
-        "log2_linear_algebra": 19.86
+        "l_star": 19.1,
+        "log2_floor": 55.62,
+        "log2_targets": 54.47,
+        "log2_linear_algebra": 26.46,
+        "witness_split": [
+          3,
+          2
+        ],
+        "log2_witness_table_entries": 54.72,
+        "log2_witness_probes": 49.27
       },
       {
         "m": 6,
@@ -469,19 +517,31 @@
         "m": 6,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 13.4,
-        "log2_floor": 74.49,
-        "log2_targets": 73.49,
-        "log2_linear_algebra": 29.38
+        "l_star": 15.95,
+        "log2_floor": 62.0,
+        "log2_targets": 60.74,
+        "log2_linear_algebra": 34.48,
+        "witness_split": [
+          3,
+          3
+        ],
+        "log2_witness_table_entries": 45.27,
+        "log2_witness_probes": 61.22
       },
       {
         "m": 6,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 13.4,
-        "log2_floor": 67.46,
-        "log2_targets": 66.46,
-        "log2_linear_algebra": 15.32
+        "l_star": 15.95,
+        "log2_floor": 54.97,
+        "log2_targets": 53.71,
+        "log2_linear_algebra": 20.42,
+        "witness_split": [
+          3,
+          3
+        ],
+        "log2_witness_table_entries": 45.27,
+        "log2_witness_probes": 54.18
       },
       {
         "m": 7,
@@ -505,19 +565,31 @@
         "m": 7,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 11.75,
-        "log2_floor": 73.78,
-        "log2_targets": 72.8,
-        "log2_linear_algebra": 26.31
+        "l_star": 14.6,
+        "log2_floor": 56.93,
+        "log2_targets": 55.7,
+        "log2_linear_algebra": 32.01,
+        "witness_split": [
+          4,
+          3
+        ],
+        "log2_witness_table_entries": 53.82,
+        "log2_witness_probes": 55.82
       },
       {
         "m": 7,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 11.75,
-        "log2_floor": 66.75,
-        "log2_targets": 65.77,
-        "log2_linear_algebra": 12.24
+        "l_star": 14.15,
+        "log2_floor": 52.75,
+        "log2_targets": 51.37,
+        "log2_linear_algebra": 17.04,
+        "witness_split": [
+          4,
+          3
+        ],
+        "log2_witness_table_entries": 52.02,
+        "log2_witness_probes": 46.98
       },
       {
         "m": 8,
@@ -541,19 +613,31 @@
         "m": 8,
         "localising": false,
         "frobenius_stable": false,
-        "l_star": 10.55,
-        "log2_floor": 73.29,
-        "log2_targets": 72.45,
-        "log2_linear_algebra": 24.1
+        "l_star": 12.6,
+        "log2_floor": 59.27,
+        "log2_targets": 58.1,
+        "log2_linear_algebra": 28.2,
+        "witness_split": [
+          4,
+          4
+        ],
+        "log2_witness_table_entries": 45.82,
+        "log2_witness_probes": 58.42
       },
       {
         "m": 8,
         "localising": false,
         "frobenius_stable": true,
-        "l_star": 10.55,
-        "log2_floor": 66.25,
-        "log2_targets": 65.42,
-        "log2_linear_algebra": 10.03
+        "l_star": 12.6,
+        "log2_floor": 52.25,
+        "log2_targets": 51.07,
+        "log2_linear_algebra": 14.13,
+        "witness_split": [
+          4,
+          4
+        ],
+        "log2_witness_table_entries": 45.82,
+        "log2_witness_probes": 51.38
       }
     ],
     "gaps": [
@@ -563,59 +647,86 @@
         "log2_detector_only_floor": 89.45,
         "log2_gap": 0.2,
         "detector_only_beats_rho": false,
-        "localising_beats_rho": false
+        "localising_beats_rho": false,
+        "log2_detector_only_witness_table": 43.15,
+        "log2_localising_memory": 43.35
       },
       {
         "m": 3,
         "log2_localising_floor": 68.58,
-        "log2_detector_only_floor": 80.72,
-        "log2_gap": 12.14,
+        "log2_detector_only_floor": 68.88,
+        "log2_gap": 0.3,
         "detector_only_beats_rho": false,
-        "localising_beats_rho": false
+        "localising_beats_rho": false,
+        "log2_detector_only_witness_table": 64.7,
+        "log2_localising_memory": 33.0
       },
       {
         "m": 4,
         "log2_localising_floor": 56.41,
-        "log2_detector_only_floor": 77.36,
-        "log2_gap": 20.95,
+        "log2_detector_only_floor": 68.29,
+        "log2_gap": 11.88,
         "detector_only_beats_rho": false,
-        "localising_beats_rho": true
+        "localising_beats_rho": true,
+        "log2_detector_only_witness_table": 44.5,
+        "log2_localising_memory": 26.85
       },
       {
         "m": 5,
         "log2_localising_floor": 48.44,
-        "log2_detector_only_floor": 75.57,
-        "log2_gap": 27.13,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": true
+        "log2_detector_only_floor": 59.75,
+        "log2_gap": 11.31,
+        "detector_only_beats_rho": true,
+        "localising_beats_rho": true,
+        "log2_detector_only_witness_table": 56.97,
+        "log2_localising_memory": 22.75
       },
       {
         "m": 6,
         "log2_localising_floor": 42.85,
-        "log2_detector_only_floor": 74.49,
-        "log2_gap": 31.64,
+        "log2_detector_only_floor": 62.0,
+        "log2_gap": 19.15,
         "detector_only_beats_rho": false,
-        "localising_beats_rho": true
+        "localising_beats_rho": true,
+        "log2_detector_only_witness_table": 45.27,
+        "log2_localising_memory": 19.9
       },
       {
         "m": 7,
         "log2_localising_floor": 38.74,
-        "log2_detector_only_floor": 73.78,
-        "log2_gap": 35.04,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": true
+        "log2_detector_only_floor": 56.93,
+        "log2_gap": 18.19,
+        "detector_only_beats_rho": true,
+        "localising_beats_rho": true,
+        "log2_detector_only_witness_table": 53.82,
+        "log2_localising_memory": 17.75
       },
       {
         "m": 8,
         "log2_localising_floor": 35.61,
-        "log2_detector_only_floor": 73.29,
-        "log2_gap": 37.68,
-        "detector_only_beats_rho": false,
-        "localising_beats_rho": true
+        "log2_detector_only_floor": 59.27,
+        "log2_gap": 23.66,
+        "detector_only_beats_rho": true,
+        "localising_beats_rho": true,
+        "log2_detector_only_witness_table": 45.82,
+        "log2_localising_memory": 16.1
       }
     ],
-    "min_detector_only_floor": 73.29,
+    "min_detector_only_floor": 56.93,
     "min_localising_floor": 35.61,
+    "detector_only_rho_crossings": [
+      5,
+      7,
+      8
+    ],
+    "localising_rho_crossings": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "note": "the detector-only floor is not monotone in m: odd m splits its meet-in-the-middle witness more evenly than the next even m, so it dips below rho at 5 and 7 and back above at 6.  Both floors are derived, not measured, and both are floors -- no algorithm attains them.",
     "falsifier": "a real oracle whose sub-base query costs less than the same query on the full base by more than the sub-base ratio"
   },
   "E4_large_primes": {

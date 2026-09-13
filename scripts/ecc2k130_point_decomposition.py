@@ -387,9 +387,28 @@ def subspace(field: GF2m, l: int):
     return list(range(1 << l))
 
 
-def factor_base(curve: Koblitz, l: int):
+def trace_zero_subspace(field: GF2m, l: int):
+    """The span of the first `l` powers `z^i` with `Tr(z^i) = 0`.
+
+    A subspace of `ker Tr`, so every abscissa in it carries a point of `2E`
+    (§3): the class of `P` is even exactly when `Tr(x(P)) = 0`.
+    """
+    basis = [1 << i for i in range(field.deg) if field.trace(1 << i) == 0][:l]
+    assert len(basis) == l, f"ker Tr has no {l}-dimensional span of monomials"
+    out = []
+    for mask in range(1 << l):
+        v = 0
+        for i, b in enumerate(basis):
+            if mask >> i & 1:
+                v ^= b
+        out.append(v)
+    return out
+
+
+def factor_base(curve: Koblitz, l: int, trace_zero: bool = False):
+    gen = trace_zero_subspace if trace_zero else subspace
     pts = []
-    for x in subspace(curve.F, l):
+    for x in gen(curve.F, l):
         pts.extend(curve.points_over(x))
     return pts
 
@@ -404,6 +423,57 @@ def yield_law(base_size: int, m: int, group_order: int) -> float:
     `|F| = 2^l` is `2^(m l) / (m! 2^n)` to leading order.
     """
     return math.comb(base_size, m) / group_order
+
+
+def trace_zero_bonus(n: int, l: int):
+    """Measure where the sums of a base pair land, for both kinds of base.
+
+    A base drawn from `ker Tr` lies in `2E`, an index-2 subgroup, so every sum of
+    its points lies in `2E` too -- and so does the target subgroup `<G>`.  The
+    sums are therefore spread over `#E/2`, not `#E`, and a fixed target in `<G>`
+    is hit *twice* as often as `C(|F|, m)/#E` says.
+
+    Counted exhaustively rather than sampled: every unordered pair of base points
+    is formed once and tested for membership in `<G>`, so the mean over targets
+    is `pairs landing in <G> / r` exactly, with no sampling error and no Poisson
+    step.  Dividing `C(|F|, 2)` by that mean recovers the spread -- the generic
+    base should read `1.00 x #E`, the trace-zero base `0.50 x #E`.
+    """
+    curve, order, cofactor, all_pts = toy_instance(n)
+    r = order // cofactor
+    G = next(Q for Q in (curve.mul(P, cofactor) for P in all_pts) if Q is not None)
+    subgroup, acc = {None}, None
+    while True:
+        acc = curve.add(acc, G)
+        if acc is None:
+            break
+        subgroup.add(acc)
+    assert len(subgroup) == r, "the order-r subgroup did not close up"
+
+    out = {"n": n, "m": 2, "l": l, "curve_order": order, "subgroup_order": r,
+           "targets": r, "sampling": "exhaustive over <G>"}
+    for kind, tz in (("generic", False), ("trace_zero", True)):
+        base = factor_base(curve, l, tz)
+        if tz:
+            assert all(curve.F.trace(P[0]) == 0 for P in base), "base must be in ker Tr"
+        landing = 0
+        for i in range(len(base)):
+            for j in range(i + 1, len(base)):
+                if curve.add(base[i], base[j]) in subgroup:
+                    landing += 1
+        mean = landing / r
+        assert mean > 0.0, "no decompositions: l is too small to measure anything"
+        out[kind] = {
+            "factor_base_size": len(base),
+            "pairs_landing_in_subgroup": landing,
+            "mean_decompositions_per_target": round(mean, 4),
+            "implied_spread_over_curve_order":
+                round(math.comb(len(base), 2) / mean / order, 3),
+        }
+    out["measured_yield_factor"] = round(
+        out["generic"]["implied_spread_over_curve_order"]
+        / out["trace_zero"]["implied_spread_over_curve_order"], 3)
+    return out
 
 
 _TOY_CACHE: dict = {}
@@ -426,11 +496,21 @@ def toy_instance(n: int):
     return _TOY_CACHE[n]
 
 
-def measure_toy_yield(n: int, m: int, l: int, targets: int, rng: random.Random):
-    """Measure the fraction of targets in `<G>` that decompose, against the law."""
+def measure_toy_yield(n: int, m: int, l: int, targets: int, rng: random.Random,
+                      trace_zero: bool = False):
+    """Measure the fraction of targets in `<G>` that decompose, against the law.
+
+    With `trace_zero`, the base is drawn from a subspace of `ker Tr`, so every
+    base point lies in the index-2 subgroup `2E` and so does every sum of them.
+    The sums are then spread over `#E/2`, not `#E`, and the law has to be told
+    so -- the yield is exactly twice the generic one at the same `|F|`.
+    """
     curve, order, cofactor, all_pts = toy_instance(n)
-    base = factor_base(curve, l)
+    base = factor_base(curve, l, trace_zero)
     assert all(curve.on_curve(P) for P in base)
+    if trace_zero:
+        assert all(curve.F.trace(P[0]) == 0 for P in base)
+    reach = order // 2 if trace_zero else order
 
     pool = [curve.mul(P, cofactor) for P in rng.sample(all_pts, min(len(all_pts), targets))]
     pool = [P for P in pool if P is not None]
@@ -476,9 +556,10 @@ def measure_toy_yield(n: int, m: int, l: int, targets: int, rng: random.Random):
                 assert acc == R, "witness does not sum to the target"
                 witness = [hex(P[0]) for P in found]
 
-    lam = yield_law(len(base), m, order)
+    lam = yield_law(len(base), m, reach)
     return {
-        "n": n, "m": m, "l": l,
+        "n": n, "m": m, "l": l, "trace_zero_base": trace_zero,
+        "sums_spread_over": reach,
         "two_is_primitive_mod_n": n % 2 == 1 and is_prime(n) and mult_order(2, n) == n - 1,
         "curve_order": order, "cofactor": cofactor,
         "factor_base_size": len(base),
@@ -822,6 +903,16 @@ def main() -> None:
         })
         print(f"  classes  {name:42s} {hist}  admissible m = {adm}", flush=True)
 
+    # ---- the trace-zero base is not merely admissible, it yields twice ----
+    # `l` chosen so the mean count sits near one: far below it the ratio is a
+    # ratio of small integers, far above it every target decomposes regardless.
+    bonus = [trace_zero_bonus(n, l) for n, l in ((13, 7), (17, 8), (19, 9))]
+    for b in bonus:
+        print(f"  ker Tr   n={b['n']:3d} m={b['m']} l={b['l']:2d}  sums spread over "
+              f"{b['generic']['implied_spread_over_curve_order']:.2f} x #E generic, "
+              f"{b['trace_zero']['implied_spread_over_curve_order']:.2f} x #E trace-zero "
+              f"-> yield factor {b['measured_yield_factor']:.2f}", flush=True)
+
     # ---- the existence witness, on the challenge curve ---------------------
     witnesses = [w for w in (witness_at_131(curve, r, 45, m, rng) for m in (2, 3, 4))
                  if w is not None]
@@ -939,6 +1030,13 @@ def main() -> None:
         "target": target,
         "existence": existence,
         "admissibility_at_131": admissibility,
+        "trace_zero_yield_bonus": {
+            "claim": "a base inside ker Tr lies in the index-2 subgroup 2E, so its "
+                     "m-subset sums are spread over #E/2 and a fixed target in <G> "
+                     "is hit twice as often as C(|F|, m)/#E predicts",
+            "class": "engineering: one bit, a constant, not a change of exponent",
+            "rungs": bonus,
+        },
         "witnesses_at_131": witnesses,
         "cost": cost,
         "frobenius_unavailable": frobenius,

@@ -62,17 +62,40 @@ class DetectorTests(unittest.TestCase):
     def test_the_gap_widens_with_the_summand_count(self) -> None:
         gaps = [T.detector_floor(m, 131, False)["log2_floor"]
                 - T.detector_floor(m, 131, True)["log2_floor"] for m in range(2, 9)]
-        self.assertEqual(gaps, sorted(gaps))
         self.assertLess(gaps[0], 1.0)        # at m = 2 the two coincide
-        self.assertGreater(gaps[-1], 30.0)   # by m = 8 they are far apart
+        self.assertGreater(gaps[-1], 20.0)   # by m = 8 they are far apart
+        # Not monotone in m: the witness meet-in-the-middle splits `ceil(m/2)` /
+        # `floor(m/2)`, so odd m is better balanced than the even m above it and
+        # the detector-only floor -- hence the gap -- saws.  Compare like parities.
+        self.assertEqual(gaps[0::2], sorted(gaps[0::2]))
+        self.assertEqual(gaps[1::2], sorted(gaps[1::2]))
 
-    def test_a_free_non_localising_detector_still_loses_to_rho(self) -> None:
-        """The headline of E3: deciding for free is not enough, localising is."""
+    def test_the_witness_is_priced_by_meet_in_the_middle_not_by_search(self) -> None:
+        """Charging a naive `C(|F|, m-1)` witness search inflates the floor by
+        tens of bits; the table is built once and shared across every target."""
         for m in range(2, 9):
-            self.assertGreater(T.detector_floor(m, 131, False)["log2_floor"], RHO)
-        beats = [m for m in range(2, 9)
-                 if T.detector_floor(m, 131, True)["log2_floor"] < RHO]
-        self.assertEqual(beats, [4, 5, 6, 7, 8])
+            d = T.detector_floor(m, 131, False)
+            self.assertEqual(d["witness_split"], [(m + 1) // 2, m // 2])
+            l = d["l_star"]
+            naive = l + DEC.log2_comb(l, m - 1)
+            self.assertLessEqual(d["log2_witness_probes"], naive + 1e-9, f"m={m}")
+            self.assertLessEqual(d["log2_witness_table_entries"],
+                                 DEC.log2_comb(l, m) + 1e-9, f"m={m}")
+
+    def test_deciding_for_free_reaches_rho_but_only_localising_reaches_it_early(self) -> None:
+        """The corrected headline of E3.  A free detector alone does dip under
+        rho -- from m = 5, and only at some m -- but it needs a witness table of
+        2^45 to 2^57 entries to do it.  Localising crosses one summand earlier,
+        never comes back up, and needs no table at all."""
+        detector = [m for m in range(2, 9)
+                    if T.detector_floor(m, 131, False)["log2_floor"] < RHO]
+        localising = [m for m in range(2, 9)
+                      if T.detector_floor(m, 131, True)["log2_floor"] < RHO]
+        self.assertEqual(detector, [5, 7, 8])
+        self.assertEqual(localising, [4, 5, 6, 7, 8])
+        for m in detector:                       # the price of not localising
+            d = T.detector_floor(m, 131, False)
+            self.assertGreater(d["log2_witness_table_entries"], 40.0, f"m={m}")
 
     def test_the_frobenius_collapse_lowers_both_floors(self) -> None:
         for m in range(2, 9):

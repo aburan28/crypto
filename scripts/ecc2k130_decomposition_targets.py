@@ -109,26 +109,45 @@ def detector_floor(m: int, n: int, localising: bool, frobenius: bool = False):
     *Localising* means the oracle answers "is there a decomposition with every
     summand drawn from `W`?" for any sub-base `W`, so a witness falls out of
     `O(m log |F|)` free queries and only the targets and the linear algebra are
-    charged.  *Non-localising* means it answers only for the whole base, so every
-    target the detector passes still costs a full `C(|F|, m-1)` search to turn
-    into a relation.  Nothing below either line is reachable however good the
-    algebra gets; the distance between them is the value of localisation.
+    charged.  *Non-localising* means it answers only for the whole base: the
+    detector filters the targets for free, but each target it passes still has
+    to be turned into an explicit `m`-subset.
+
+    Extracting that witness is *not* a `C(|F|, m-1)` search.  It is a
+    meet-in-the-middle: tabulate every `ceil(m/2)`-subset sum of the base once,
+    then for each *successful* target enumerate its `floor(m/2)`-subset
+    complements and probe.  The table is built one time and shared across every
+    target; only the probes recur, and they recur once per relation, not once
+    per target tried.  Charging the naive search instead inflates this line by
+    tens of bits and is what an earlier revision of this file did.
+
+    Nothing below either line is reachable however good the algebra gets; the
+    distance between them is the value of localisation.
     """
     collapse = math.log2(n) if frobenius else 0.0
+    half_hi, half_lo = (m + 1) // 2, m // 2
 
     def f(l):
         targets = (l - collapse) + max(0.0, n - lc(l, m))
         linalg = math.log2(m) + 2 * (l - collapse)
         parts = [targets, linalg]
+        table = witness = -math.inf
         if not localising:
-            parts.append((l - collapse) + lc(l, m - 1))     # witness by search
-        return (la(*parts), targets, linalg)
+            table = lc(l, half_hi)                     # built once, shared
+            witness = (l - collapse) + lc(l, half_lo)  # probes, per relation
+            parts += [table, witness]
+        return (la(*parts), targets, linalg, table, witness)
 
-    tot, targets, linalg, l = sweep(f)
-    return {"m": m, "localising": localising, "frobenius_stable": frobenius,
-            "l_star": l, "log2_floor": round(tot, 2),
-            "log2_targets": round(targets, 2),
-            "log2_linear_algebra": round(linalg, 2)}
+    tot, targets, linalg, table, witness, l = sweep(f)
+    out = {"m": m, "localising": localising, "frobenius_stable": frobenius,
+           "l_star": l, "log2_floor": round(tot, 2),
+           "log2_targets": round(targets, 2),
+           "log2_linear_algebra": round(linalg, 2)}
+    if not localising:
+        out["witness_split"] = [half_hi, half_lo]
+        out["log2_witness_table_entries"] = round(table, 2)
+        out["log2_witness_probes"] = round(witness, 2)
+    return out
 
 
 # ── E4: a single large prime, guarded so the oracle still filters ────────
@@ -234,13 +253,25 @@ def main() -> None:
                      "log2_detector_only_floor": b["log2_floor"],
                      "log2_gap": round(b["log2_floor"] - a["log2_floor"], 2),
                      "detector_only_beats_rho": b["log2_floor"] < log2_rho,
-                     "localising_beats_rho": a["log2_floor"] < log2_rho})
+                     "localising_beats_rho": a["log2_floor"] < log2_rho,
+                     "log2_detector_only_witness_table": b[
+                         "log2_witness_table_entries"],
+                     "log2_localising_memory": a["l_star"]})
     e3 = {
         "question": "how much of the difficulty is deciding, and how much is "
                     "localising the witness?",
         "floors": floors, "gaps": gaps,
         "min_detector_only_floor": min(g["log2_detector_only_floor"] for g in gaps),
         "min_localising_floor": min(g["log2_localising_floor"] for g in gaps),
+        "detector_only_rho_crossings": [g["m"] for g in gaps
+                                        if g["detector_only_beats_rho"]],
+        "localising_rho_crossings": [g["m"] for g in gaps
+                                     if g["localising_beats_rho"]],
+        "note": "the detector-only floor is not monotone in m: odd m splits its "
+                "meet-in-the-middle witness more evenly than the next even m, so "
+                "it dips below rho at 5 and 7 and back above at 6.  Both floors "
+                "are derived, not measured, and both are floors -- no algorithm "
+                "attains them.",
         "falsifier": "a real oracle whose sub-base query costs less than the same "
                      "query on the full base by more than the sub-base ratio",
     }

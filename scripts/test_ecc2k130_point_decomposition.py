@@ -116,6 +116,27 @@ class ToyTests(unittest.TestCase):
         self.assertAlmostEqual(cell["ratio_measured_over_predicted"], 1.0, delta=0.35)
         self.assertIsNotNone(cell["witness_abscissae"])
 
+    def test_a_trace_zero_base_spreads_its_sums_over_half_the_curve(self) -> None:
+        """§3.1: `ker Tr` lies in the index-2 subgroup `2E`, so pair sums cannot
+        leave it and a target in `<G>` is hit twice as often as `C(|F|,2)/#E`."""
+        for n, l in ((13, 7), (17, 8)):
+            b = mod.trace_zero_bonus(n, l)
+            self.assertEqual(b["targets"], b["subgroup_order"])   # exhaustive
+            self.assertAlmostEqual(b["generic"]["implied_spread_over_curve_order"],
+                                   1.0, delta=0.05, msg=f"n={n}")
+            self.assertAlmostEqual(b["trace_zero"]["implied_spread_over_curve_order"],
+                                   0.5, delta=0.03, msg=f"n={n}")
+            self.assertAlmostEqual(b["measured_yield_factor"], 2.0, delta=0.1,
+                                   msg=f"n={n}")
+
+    def test_the_trace_zero_span_really_lies_in_the_kernel_of_the_trace(self) -> None:
+        for n, l in ((13, 7), (17, 9), (19, 10)):
+            field = mod.GF2m(n, mod.find_irreducible(n))
+            span = mod.trace_zero_subspace(field, l)
+            self.assertEqual(len(span), 1 << l)
+            self.assertEqual(len(set(span)), 1 << l)      # an honest subspace
+            self.assertTrue(all(field.trace(x) == 0 for x in span))
+
 
 class CostTests(unittest.TestCase):
     """The derived cost surface: the identities it rests on, checked directly."""

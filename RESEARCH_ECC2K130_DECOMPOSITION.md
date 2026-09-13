@@ -133,6 +133,11 @@ times on average, and decomposes with probability `1 − e^{−λ}`.  That is th
 entire content of "can we decompose": it is a counting statement, and it has
 nothing to do with how hard the search is.
 
+The form above assumes the sums really do spread over the whole group, which is
+true of a generic subspace and **false** of one inside `ker Tr` — there `#E`
+becomes `#E/2` and `λ` doubles.  §3.1 measures that; every rung in the table
+below uses a generic subspace, so the law as written is the right one for it.
+
 Measured on toy Koblitz curves, 512 targets per cell, every target drawn from
 `⟨G⟩` as `[h]P` and every reported witness re-summed and checked against its
 target:
@@ -205,6 +210,41 @@ present every `m ≥ 2` works; with only `{0, 2}` present, `2 + 2 ≡ 0`, so eve
 base whose classes generate a proper subgroup *avoiding* zero, and no
 subspace of `F_2^131` produced one.
 
+### 3.1 The trace-zero base is not merely admissible — it yields twice
+
+The `ker Tr` row above is the better of the two, and the yield law in §2 as
+written understates it by a factor of two.  A base inside `ker Tr` lies in `2E`,
+which is a *subgroup* of index 2, so every sum of its points lies in `2E` as
+well — and the target subgroup `⟨G⟩`, of odd order `r`, is inside `2E`.  The
+sums are therefore spread over `#E/2`, not `#E`, and a fixed target is hit twice
+as often as `C(|F|, m)/#E` says.  Equivalently in the class language: the class
+sum is `2·(number of class-2 summands) mod 4`, which vanishes for half the
+subsets rather than a quarter of them.
+
+Measured exhaustively — every unordered pair of base points formed once and
+tested for membership in `⟨G⟩`, so the statistic is a mean over *all* `r`
+targets with no sampling and no Poisson step.  Dividing `C(|F|, 2)` by that mean
+recovers the spread the sums actually occupy:
+
+| `n` | `dim V` | generic base | inside `ker Tr` | yield factor |
+|---:|---:|---:|---:|---:|
+| 13 | 7 | `1.00 × #E` | `0.49 × #E` | `2.04` |
+| 17 | 8 | `0.99 × #E` | `0.50 × #E` | `1.98` |
+| 19 | 9 | `0.98 × #E` | `0.50 × #E` | `1.97` |
+
+**Class: engineering.**  Halving the targets per relation halves the whole
+collection term: the product law of §5.1 reads `m·2^(n−1)` for a trace-zero base
+instead of `m·2^n`, still independent of `l`.  That is exactly **one bit**, and
+`ker Tr` has dimension 130, so every `l` this note uses (`l ≤ 66`) fits inside it
+and the bit is always available — as is the Frobenius collapse of §6, since
+`Tr(x²) = Tr(x)` makes `ker Tr` shift-invariant.
+
+The §5 table does **not** take it: it prices a generic subspace, and says so.
+Carried through, its headline would read `2^131.58` instead of `2^132.58`, and
+the orbit-union row `2^123.99` instead of `2^124.99`.  Against a gap to rho of
+`2^71.77` that changes nothing, which is the point of recording it here as a
+constant rather than re-cutting the table around it.
+
 ## 4. A witness at full size
 
 Existence arguments are cheap; here are the points.  Random abscissae drawn
@@ -260,8 +300,10 @@ and no search over `F` at all.  It is `926×` faster than enumeration at
 
 **independent of `l`** — because `C(|F|,m−1)/C(|F|,m) ≈ m/|F|`, and the `|F|`
 cancels the factor base.  A Frobenius-stable base collapses the leading `2^l`
-to `2^l/n` and makes it `m·2^n/n`; nothing else in the product moves.  Measured
-as flatness across the usable range, at `m = 3`:
+to `2^l/n` and makes it `m·2^n/n`; nothing else in the product moves.  The law
+**evaluated** across the usable range at `m = 3` — these are `cost_cell`
+evaluations of the formula above, not runs, and nothing in this table was
+timed:
 
 | `dim V` | 12 | 20 | 28 | 36 | 44 | 52 |
 |---|---:|---:|---:|---:|---:|---:|
