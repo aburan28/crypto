@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Private, TLS-protected Redis OSS cache for reusable index-calculus
+  Gröbner/Macaulay results.
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC containing the workers that run index-calculus jobs.
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: At least two private subnets in different Availability Zones.
+  ApplicationSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group attached to the index-calculus worker instances.
+  CacheNodeType:
+    Type: String
+    Default: cache.t4g.small
+    AllowedPattern: '^cache\.[A-Za-z0-9.-]+$'
+  NumCacheClusters:
+    Type: Number
+    Default: 2
+    MinValue: 2
+    MaxValue: 6
+  CacheTtlDays:
+    Type: Number
+    Default: 7
+    MinValue: 1
+    MaxValue: 30
+
+Resources:
+  CacheSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow index-calculus workers to reach the private Redis cache
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-redis'
+
+  CacheIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref CacheSecurityGroup
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId: !Ref ApplicationSecurityGroupId
+
+  CacheSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Private subnets for the index-calculus Redis cache
+      SubnetIds: !Ref SubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-subnets'
+
+  CacheAuthSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub 'Redis auth token for ${AWS::StackName}'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username":"ic-cache"}'
+        GenerateStringKey: password
+        PasswordLength: 64
+        ExcludePunctuation: true
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-auth'
+
+  Cache:
+    Type: AWS::ElastiCache::ReplicationGroup
+    UpdateReplacePolicy: Snapshot
+    DeletionPolicy: Snapshot
+    Properties:
+      ReplicationGroupDescription: !Sub '${AWS::StackName} index-calculus Gröbner cache'
+      Engine: redis
+      EngineVersion: '7.2'
+      CacheNodeType: !Ref CacheNodeType
+      NumCacheClusters: !Ref NumCacheClusters
+      AutomaticFailoverEnabled: true
+      MultiAZEnabled: true
+      AtRestEncryptionEnabled: true
+      TransitEncryptionEnabled: true
+      AuthToken: !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:password}}'
+        - SecretArn: !Ref CacheAuthSecret
+      CacheSubnetGroupName: !Ref CacheSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref CacheSecurityGroup
+      AutoMinorVersionUpgrade: true
+      CacheParameterGroupName: default.redis7
+      SnapshotRetentionLimit: 1
+      PreferredMaintenanceWindow: sun:05:00-sun:06:00
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-redis'
+        - Key: Purpose
+          Value: index-calculus-groebner-cache
+
+Outputs:
+  PrimaryEndpointAddress:
+    Description: Private TLS endpoint address for IC_GROEBNER_CACHE_URL.
+    Value: !GetAtt Cache.PrimaryEndPoint.Address
+  PrimaryEndpointPort:
+    Description: Redis TLS port.
+    Value: !GetAtt Cache.PrimaryEndPoint.Port
+  AuthSecretArn:
+    Description: Retrieve SecretString.password at runtime; do not put it in source control.
+    Value: !Ref CacheAuthSecret
+  CacheTtlSeconds:
+    Description: Suggested IC_GROEBNER_CACHE_TTL_SECS value for this stack.
+    Value: !Sub '${CacheTtlDays} days'

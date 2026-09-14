@@ -48,3 +48,4 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
+redis = { version = "1.7.0", features = ["tls-native-tls"] }

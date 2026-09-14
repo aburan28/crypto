@@ -494,6 +494,16 @@ const MAX_F4_COLS: usize = 40_000;
 ///
 /// Returns `None` if the matrix would exceed the size limits.
 pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    crate::cryptanalysis::groebner_cache::get_or_compute(polys, n_vars, degree, || {
+        matrix_f4_f2_uncached(polys, n_vars, degree)
+    })
+}
+
+fn matrix_f4_f2_uncached(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<Vec<F2BoolPoly>> {
     if polys.is_empty() {
         return Some(Vec::new());
     }
