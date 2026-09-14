@@ -1,0 +1,43 @@
+name: Install yioo key on G7
+
+on:
+  push:
+    branches: [infra/durable-g7e-devhost]
+    paths: ['.github/workflows/switch-g7-yioo.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install-key:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/durable-g7e-devhost
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install durable login key
+        env:
+          INSTANCE_ID: i-04b1d89ecccfcc808
+          INSTANCE_AZ: us-west-2b
+          HOST: 184.34.70.106
+          PUB_B64: c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUlHSU5VWHdLRWk0c1oyVktmaGVYemF2S3R1ck9BcDNVKys1cHpRaVJCUUwgeWlvbw==
+        run: |
+          set -euo pipefail
+          key="$RUNNER_TEMP/bootstrap_ed25519"
+          ssh-keygen -t ed25519 -N '' -f "$key" -q
+          aws ec2-instance-connect send-ssh-public-key \
+            --instance-id "$INSTANCE_ID" \
+            --availability-zone "$INSTANCE_AZ" \
+            --instance-os-user ubuntu \
+            --ssh-public-key "file://$key.pub" >/dev/null
+          pub=$(printf '%s' "$PUB_B64" | base64 -d)
+          ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -i "$key" ubuntu@"$HOST" \
+            "umask 077; mkdir -p ~/.ssh; printf '%s\n' '$pub' > ~/.ssh/authorized_keys; chmod 700 ~/.ssh; chmod 600 ~/.ssh/authorized_keys; grep -q 'AAAAC3NzaC1lZDI1NTE5AAAAIIGINUXwKEi4sZ2VKfheXzavKturOAp3U++5pzQiRBQL' ~/.ssh/authorized_keys"
+          echo 'yioo public key installed as the sole durable SSH authorization'
