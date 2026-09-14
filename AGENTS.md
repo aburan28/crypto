@@ -211,6 +211,24 @@ complete an iteration. The equivalent-suite exception below still applies.
   Update the research note and canonical scoreboard in the same PR, retaining
   the prior baseline and classifying the change by §3.
 
+### 9. AWS GPU hosts use the `meow34` key pair
+
+For AWS EC2 benchmark and validation hosts, including G7/G7e instances, use the
+existing EC2 key-pair name **`meow34`** when launching the instance.
+
+- Launch with `--key-name meow34` (or the equivalent SDK/IaC setting).
+- For local SSH, use the private key file `meow34.pem`, e.g.
+  `ssh -i meow34.pem <user>@<host>`.
+- Never commit, print, upload, copy into artifacts, or otherwise expose the
+  contents of `meow34.pem`. The repository should contain only the key-pair
+  name and usage instructions, never the private key material.
+- Ensure the local private key is mode `0600` (for example,
+  `chmod 600 meow34.pem`) before SSH use.
+- Agents must not create a replacement EC2 key pair merely because the private
+  key is unavailable in their environment. If `meow34.pem` is not mounted or
+  accessible, report that access blocker and continue with non-SSH work where
+  possible.
+
 ## Worked example
 
 `RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
