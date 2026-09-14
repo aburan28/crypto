@@ -44,6 +44,20 @@ BASE_URL = "https://aburan28.github.io/crypto"
 # (source relative to repo root, destination relative to the site root).
 PAGES = (
     ("docs/site/index.html", "index.html"),
+    ("research/polynomial_reuse_20260914/RESULTS.md", "research/polynomial_reuse_20260914/RESULTS.md"),
+    ("research/polynomial_reuse_20260914/results/run-001/summary.json", "research/polynomial_reuse_20260914/results/run-001/summary.json"),
+    ("research/polynomial_reuse_20260914/contract.json", "research/polynomial_reuse_20260914/contract.json"),
+    ("docs/algorithm-lab.html", "scoreboard/algorithm-lab.html"),
+    ("docs/algorithm-lab/core.js", "scoreboard/algorithm-lab/core.js"),
+    ("docs/algorithm-lab/ui.js", "scoreboard/algorithm-lab/ui.js"),
+    ("docs/algorithm-lab/style.css", "scoreboard/algorithm-lab/style.css"),
+    ("docs/algorithm-lab/README.md", "scoreboard/algorithm-lab/README.md"),
+    ("docs/performance-gains.html", "scoreboard/performance-gains.html"),
+    ("docs/performance-gains/summary.png", "scoreboard/performance-gains/summary.png"),
+    ("docs/performance-gains/summary.pdf", "scoreboard/performance-gains/summary.pdf"),
+    ("docs/performance-gains/summary.svg", "scoreboard/performance-gains/summary.svg"),
+    ("docs/performance-gains/data.json", "scoreboard/performance-gains/data.json"),
+    ("docs/performance-gains/comparisons.csv", "scoreboard/performance-gains/comparisons.csv"),
     ("docs/site/404.html", "404.html"),
     ("docs/site/favicon.svg", "favicon.svg"),
     ("docs/site/assets/site.css", "assets/site.css"),
@@ -71,7 +85,7 @@ DATA = (
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.
-SITEMAP = ("/", "/scoreboard/", "/status/")
+SITEMAP = ("/", "/scoreboard/", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/")
 
 
 def copy(src_rel: str, dest_rel: str, out_dir: str, root: str = ROOT) -> str:
