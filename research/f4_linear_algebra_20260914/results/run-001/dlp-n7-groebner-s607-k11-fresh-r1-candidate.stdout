@@ -1,0 +1,214 @@
+{
+  "arguments": {
+    "batch": 1,
+    "control": false,
+    "curve_a": 0,
+    "curve_b": 1,
+    "degree": 7,
+    "factor_base": null,
+    "factor_index": 0,
+    "known_log": 11,
+    "max_trials": 500,
+    "random_target": false,
+    "seed": 607,
+    "solver": "groebner",
+    "subfield": 1,
+    "summands": 2
+  },
+  "counts": {
+    "algebra_cache_current_thread": [
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      },
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      },
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      }
+    ],
+    "batches": 500,
+    "cofactor_admissible": true,
+    "columns": 0,
+    "dependent_relations": 0,
+    "f4_reductions": 482,
+    "factor_base_points": 1,
+    "inconsistent_relations": 0,
+    "independent_relations": 0,
+    "linear_solve_attempts": 1,
+    "pair_table_entries": 0,
+    "relations": 0,
+    "sat_calls": 0,
+    "sat_conflicts": 0,
+    "sat_invalid_models": 0,
+    "sat_unknowns": 0,
+    "trials": 500,
+    "verification_failures": 0
+  },
+  "elapsed_seconds": 0.036177726,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 8,
+    "columns": 0,
+    "dimension": 3,
+    "domain": "linear_subspace",
+    "family": "factor",
+    "points": 1,
+    "signed_orbits": 1,
+    "spec": {
+      "index": 0,
+      "kind": "factor"
+    }
+  },
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "mode": {
+    "batch": 1,
+    "collapse_negation": true,
+    "collapse_projected_orbits": true,
+    "control": false,
+    "early_solve": true
+  },
+  "operation": "run",
+  "parameters": {
+    "a": "0",
+    "b": "1",
+    "cofactor": "4",
+    "field": {
+      "degree": 7,
+      "kind": "binary",
+      "polynomial_terms": [
+        0,
+        1,
+        7
+      ]
+    },
+    "fixture": {
+      "known_log": "11",
+      "seed": 607
+    },
+    "generator": {
+      "x": "0x26",
+      "y": "0x5"
+    },
+    "name": "synthetic-k0-n7",
+    "point": {
+      "x": "0x7c",
+      "y": "0x38"
+    },
+    "schema_version": 1,
+    "subgroup_order": "29"
+  },
+  "resources": {
+    "cpu_seconds": 0.038015999999999994,
+    "peak_rss_bytes": 15343616,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "result": {
+    "expected": "11",
+    "recovered": null,
+    "verified": false
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "921ea2b9bd1b4fb43f9d74cda8e33c7cd503c6ddcee3a557d78b08a7a9257515",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "stages": [
+    {
+      "details": {},
+      "elapsed_seconds": 3e-8,
+      "stage": "factor_base",
+      "status": "started"
+    },
+    {
+      "details": {
+        "columns": 0,
+        "points": 1
+      },
+      "elapsed_seconds": 0.000154824,
+      "stage": "factor_base",
+      "status": "complete"
+    },
+    {
+      "details": {
+        "wanted": 4
+      },
+      "elapsed_seconds": 2e-8,
+      "stage": "relation_collection",
+      "status": "started"
+    },
+    {
+      "details": {
+        "collected": 0,
+        "trials": 500
+      },
+      "elapsed_seconds": 0.035830152,
+      "stage": "relation_collection",
+      "status": "stopped"
+    },
+    {
+      "details": {
+        "columns": 1,
+        "rows": 0
+      },
+      "elapsed_seconds": 2e-8,
+      "stage": "linear_algebra",
+      "status": "started"
+    },
+    {
+      "details": {
+        "candidate_produced": false,
+        "columns": 1,
+        "rank": 0,
+        "rows": 0
+      },
+      "elapsed_seconds": 1.533e-6,
+      "stage": "linear_algebra",
+      "status": "rank"
+    },
+    {
+      "details": {},
+      "elapsed_seconds": 2.594e-6,
+      "stage": "linear_algebra",
+      "status": "incomplete"
+    }
+  ],
+  "status": "incomplete",
+  "timing_seconds": {
+    "linear_algebra": 3.395e-6,
+    "pair_table": 0.0,
+    "relation_collection": 0.03582899
+  }
+}

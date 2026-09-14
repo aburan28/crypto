@@ -893,12 +893,18 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
             None => continue,
         };
         matrix.swap(pivot_row, piv);
-        for r in 0..matrix.len() {
-            if r != pivot_row && matrix[r][w] & bit != 0 {
-                for k in 0..words {
-                    matrix[r][k] ^= matrix[pivot_row][k];
+        // Earlier columns of this pivot row are zero: previous pivots
+        // eliminated them, and skipped columns were zero in all remaining
+        // rows. Whole words before w therefore need no XOR. Separating the
+        // pivot borrow also lets LLVM vectorize the contiguous suffix.
+        let (before, rest) = matrix.split_at_mut(pivot_row);
+        let (pivot, after) = rest.split_first_mut().unwrap();
+        for row in before.iter_mut().chain(after.iter_mut()) {
+            if row[w] & bit != 0 {
+                for (dst, &src) in row[w..words].iter_mut().zip(&pivot[w..words]) {
+                    *dst ^= src;
                 }
-                *word_ops += words as u64;
+                *word_ops += (words - w) as u64;
             }
         }
         pivot_row += 1;
@@ -908,6 +914,10 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
     }
     pivot_row
 }
+
+#[cfg(test)]
+#[path = "f4_rref_tests.rs"]
+mod rref_tests;
 
 // ── Macaulay profile / first fall degree ───────────────────────────
 

@@ -6,6 +6,8 @@ on:
       - 'src/cryptanalysis/algebra_cache.rs'
       - 'src/cryptanalysis/polynomial_reuse.rs'
       - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'src/cryptanalysis/f4_rref_tests.rs'
+      - 'research/f4_linear_algebra_20260914/contract.json'
       - 'src/cryptanalysis/pq_groebner_f2.rs'
       - '.github/workflows/polynomial-reuse.yml'
 jobs:
@@ -30,7 +32,7 @@ jobs:
       - run: cargo check --no-default-features --lib --bin ic
       - run: cargo test --release --features redis-cache --lib polynomial_reuse
       - run: cargo test --release --features redis-cache --lib algebra_cache
-      - run: cargo test --release --features redis-cache --lib koblitz_groebner::tests
+      - run: cargo test --release --features redis-cache --lib koblitz_groebner::
       - run: cargo test --release --features redis-cache --lib redis_cross_client -- --ignored
         env:
           IC_TEST_REDIS_URL: redis://127.0.0.1:6379/0
