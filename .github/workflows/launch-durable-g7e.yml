@@ -14,7 +14,7 @@ permissions:
 jobs:
   launch:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Launch durable G7e with Elastic IP
+      - name: Launch unpinned-AZ g7e.2xlarge and attach Elastic IP
         working-directory: ecc2k130/aws/devhost
         env:
           NAME: crypto-g7e-dev
@@ -38,37 +38,24 @@ jobs:
         run: |
           set -u -o pipefail
           chmod +x bootstrap.sh
-
-          chosen_region=''
           id=''
+          chosen_region=''
 
-          for region in us-west-2 us-east-1 us-east-2; do
-            echo "=== Region $region ==="
-
+          for region in us-west-2 us-east-1; do
+            echo "=== $region ==="
             if ! aws ec2 describe-key-pairs --region "$region" --key-names "$KEY_NAME" >/dev/null 2>&1; then
-              echo "Skipping $region: key pair $KEY_NAME not present"
+              echo "Skipping: $KEY_NAME absent"
               continue
             fi
 
             existing=$(aws ec2 describe-instances --region "$region" \
               --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
               --query 'Reservations[].Instances[] | sort_by(@,&LaunchTime)[-1].InstanceId' --output text)
-            if [ "$existing" != "None" ] && [ -n "$existing" ]; then
-              state=$(aws ec2 describe-instances --region "$region" --instance-ids "$existing" --query 'Reservations[0].Instances[0].State.Name' --output text)
-              if [ "$state" = stopped ]; then aws ec2 start-instances --region "$region" --instance-ids "$existing" >/dev/null; fi
-              if [ "$state" = stopping ]; then aws ec2 wait instance-stopped --region "$region" --instance-ids "$existing"; aws ec2 start-instances --region "$region" --instance-ids "$existing" >/dev/null; fi
-              aws ec2 wait instance-running --region "$region" --instance-ids "$existing"
-              id="$existing"
-              chosen_region="$region"
-              break
+            if [ "$existing" != None ] && [ -n "$existing" ]; then
+              id="$existing"; chosen_region="$region"; break
             fi
 
             vpc=$(aws ec2 describe-vpcs --region "$region" --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
-            if [ -z "$vpc" ] || [ "$vpc" = None ]; then
-              echo "Skipping $region: no default VPC"
-              continue
-            fi
-
             sg=$(aws ec2 describe-security-groups --region "$region" --filters Name=group-name,Values=crypto-g7e-dev-ssh Name=vpc-id,Values="$vpc" --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
             if [ -z "$sg" ] || [ "$sg" = None ]; then
               sg=$(aws ec2 create-security-group --region "$region" --group-name crypto-g7e-dev-ssh --description 'SSH for durable G7e developer host' --vpc-id "$vpc" --query GroupId --output text)
@@ -78,45 +65,34 @@ jobs:
             ami=$(aws ec2 describe-images --region "$region" --owners amazon \
               --filters 'Name=name,Values=Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 24.04)*' 'Name=state,Values=available' 'Name=architecture,Values=x86_64' \
               --query 'reverse(sort_by(Images,&CreationDate))[0].ImageId' --output text)
-            if [ -z "$ami" ] || [ "$ami" = None ]; then
-              echo "Skipping $region: no matching DLAMI"
-              continue
-            fi
             root_dev=$(aws ec2 describe-images --region "$region" --image-ids "$ami" --query 'Images[0].RootDeviceName' --output text)
 
-            mapfile -t subnets < <(aws ec2 describe-subnets --region "$region" --filters Name=vpc-id,Values="$vpc" Name=default-for-az,Values=true --query 'Subnets[].SubnetId' --output text | tr '\t' '\n')
-            for subnet in "${subnets[@]}"; do
-              az=$(aws ec2 describe-subnets --region "$region" --subnet-ids "$subnet" --query 'Subnets[0].AvailabilityZone' --output text)
-              for type in g7e.2xlarge g7e.4xlarge g7e.8xlarge g7e.12xlarge; do
-                echo "Trying $type in $az ..."
-                set +e
-                candidate=$(aws ec2 run-instances --region "$region" \
-                  --image-id "$ami" --instance-type "$type" --key-name "$KEY_NAME" \
-                  --subnet-id "$subnet" --security-group-ids "$sg" \
-                  --user-data file://bootstrap.sh \
-                  --instance-initiated-shutdown-behavior stop \
-                  --block-device-mappings "DeviceName=$root_dev,Ebs={VolumeSize=$ROOT_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=false}" \
-                  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand}]" \
-                  --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
-                  --query 'Instances[0].InstanceId' --output text 2>/tmp/ec2err)
-                rc=$?
-                set -e
-                if [ $rc -eq 0 ] && [ -n "$candidate" ] && [ "$candidate" != None ]; then
-                  id="$candidate"
-                  chosen_region="$region"
-                  echo "Launched $id ($type) in $az"
-                  break 3
-                fi
-                tail -n 2 /tmp/ec2err || true
-              done
-            done
+            echo "Trying unpinned-AZ g7e.2xlarge in $region ..."
+            set +e
+            candidate=$(aws ec2 run-instances --region "$region" \
+              --image-id "$ami" --instance-type g7e.2xlarge --key-name "$KEY_NAME" \
+              --security-group-ids "$sg" --user-data file://bootstrap.sh \
+              --instance-initiated-shutdown-behavior stop \
+              --block-device-mappings "DeviceName=$root_dev,Ebs={VolumeSize=$ROOT_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=false}" \
+              --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand}]" \
+              --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
+              --query 'Instances[0].InstanceId' --output text 2>/tmp/ec2err)
+            rc=$?
+            set -e
+            if [ $rc -eq 0 ] && [ -n "$candidate" ] && [ "$candidate" != None ]; then
+              id="$candidate"; chosen_region="$region"; break
+            fi
+            cat /tmp/ec2err || true
           done
 
           if [ -z "$id" ]; then
-            echo 'No G7e capacity found in regions where meow34 exists.' >&2
+            echo 'No g7e.2xlarge capacity available in us-west-2 or us-east-1.' >&2
             exit 1
           fi
 
+          state=$(aws ec2 describe-instances --region "$chosen_region" --instance-ids "$id" --query 'Reservations[0].Instances[0].State.Name' --output text)
+          if [ "$state" = stopped ]; then aws ec2 start-instances --region "$chosen_region" --instance-ids "$id" >/dev/null; fi
+          if [ "$state" = stopping ]; then aws ec2 wait instance-stopped --region "$chosen_region" --instance-ids "$id"; aws ec2 start-instances --region "$chosen_region" --instance-ids "$id" >/dev/null; fi
           aws ec2 modify-instance-attribute --region "$chosen_region" --instance-id "$id" --disable-api-termination >/dev/null
           aws ec2 wait instance-running --region "$chosen_region" --instance-ids "$id"
 
@@ -125,20 +101,12 @@ jobs:
             alloc=$(aws ec2 allocate-address --region "$chosen_region" --domain vpc --query AllocationId --output text)
             aws ec2 create-tags --region "$chosen_region" --resources "$alloc" --tags "Key=Name,Value=$EIP_NAME"
           fi
-
-          assoc=$(aws ec2 describe-addresses --region "$chosen_region" --allocation-ids "$alloc" --query 'Addresses[0].AssociationId' --output text)
-          bound=$(aws ec2 describe-addresses --region "$chosen_region" --allocation-ids "$alloc" --query 'Addresses[0].InstanceId' --output text)
-          if [ "$bound" != "$id" ]; then
-            if [ "$assoc" != None ] && [ -n "$assoc" ]; then aws ec2 disassociate-address --region "$chosen_region" --association-id "$assoc" >/dev/null; fi
-            aws ec2 associate-address --region "$chosen_region" --instance-id "$id" --allocation-id "$alloc" >/dev/null
-          fi
+          aws ec2 associate-address --region "$chosen_region" --instance-id "$id" --allocation-id "$alloc" --allow-reassociation >/dev/null
 
           ip=$(aws ec2 describe-addresses --region "$chosen_region" --allocation-ids "$alloc" --query 'Addresses[0].PublicIp' --output text)
-          type=$(aws ec2 describe-instances --region "$chosen_region" --instance-ids "$id" --query 'Reservations[0].Instances[0].InstanceType' --output text)
           az=$(aws ec2 describe-instances --region "$chosen_region" --instance-ids "$id" --query 'Reservations[0].Instances[0].Placement.AvailabilityZone' --output text)
           echo "Region: $chosen_region"
           echo "AZ: $az"
-          echo "Type: $type"
           echo "Instance: $id"
           echo "Elastic IP: $ip"
           echo "SSH: ssh -i meow34.pem ubuntu@$ip"
