@@ -18,7 +18,7 @@ import uuid
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def bootstrap(bucket,prefix,region,source_sha,transfer_urls=None,profile=False,counters_only=False,occupancy=False):
+def bootstrap(bucket,prefix,region,source_sha,transfer_urls=None,profile=False,counters_only=False,occupancy=False,range_only=False):
     # All substitutions are generated identifiers or validated AWS names.
     script = f'''#!/bin/bash
 set -euo pipefail
@@ -57,6 +57,8 @@ timeout 2700 docker run --rm --gpus all \\
                               'bash codegen/install_profile_tools.sh; python3 codegen/profile_goal28.py')
     if counters_only:
         script=script.replace('profile_goal28.py --out','profile_goal28.py --counters-only --out')
+    if range_only:
+        script=script.replace('profile_goal28.py --out','profile_goal28.py --range-only --out')
     if occupancy:
         script=script.replace('codegen/native_candidate_bench.py','codegen/occupancy_goal28.py')
     if transfer_urls is not None:
@@ -117,7 +119,7 @@ def source_archive(path):
         for name in ('Makefile','src','include','codegen'):
             archive.add(ROOT/name,arcname=name,
                         filter=lambda info: None if '__pycache__' in info.name else info)
-        for name in ('contract.json','occupancy-contract.json'):
+        for name in ('contract.json','occupancy-contract.json','range-contract.json'):
             contract=ROOT/'benchmarks/goal28'/name
             if contract.exists():archive.add(contract,arcname='benchmarks/goal28/'+name)
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -134,6 +136,7 @@ def main():
     parser.add_argument('--instance-type',choices=('g7e.2xlarge','g7e.4xlarge','g7.4xlarge'),default='g7e.2xlarge')
     experiments=parser.add_mutually_exclusive_group()
     experiments.add_argument('--profile-counters-only',action='store_true')
+    experiments.add_argument('--profile-range-only',action='store_true')
     experiments.add_argument('--profile',action='store_true',help='collect nsys/ncu diagnostics and an unprofiled geometry screen')
     experiments.add_argument('--occupancy',action='store_true',help='five paired timings per workload for MINBLOCKS=2 versus 3')
     parser.add_argument('--automatic-placement',action='store_true',
@@ -141,7 +144,7 @@ def main():
     parser.add_argument('--presigned-transfer',action='store_true',
                         help='use expiring object URLs instead of an instance IAM profile')
     args=parser.parse_args()
-    if args.profile_counters_only: args.profile=True
+    if args.profile_counters_only or args.profile_range_only: args.profile=True
     if args.automatic_placement and args.availability_zone:
         parser.error('automatic placement and an explicit availability zone are mutually exclusive')
     if not re.fullmatch(r'[a-z]{2}-[a-z]+-\d',args.region): parser.error('invalid region')
@@ -177,7 +180,7 @@ def main():
                     key=lambda s:s['SubnetId'])
     if not eligible: raise RuntimeError('no existing default subnet offers '+args.instance_type+' in '+args.region)
     source_sha=source_archive(out/'source.tgz')
-    user_data=bootstrap(bucket,prefix,args.region,source_sha,profile=args.profile,counters_only=args.profile_counters_only,occupancy=args.occupancy)
+    user_data=bootstrap(bucket,prefix,args.region,source_sha,profile=args.profile,counters_only=args.profile_counters_only,occupancy=args.occupancy,range_only=args.profile_range_only)
     request=launch_request(data,eligible[0]['SubnetId'],user_data,token,
                            require_profile=not args.presigned_transfer,instance_type=args.instance_type)
     if args.automatic_placement:
@@ -200,12 +203,12 @@ def main():
                                     ('results','put_object','results.tgz'),('done','put_object','done')]}
     if (args.profile or args.occupancy) and transfer_urls is not None:
         transfer_urls['progress']=s3.generate_presigned_url('put_object',Params={'Bucket':bucket,'Key':prefix+'/progress.json'},ExpiresIn=7200)
-    request['UserData']=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls,profile=args.profile,counters_only=args.profile_counters_only,occupancy=args.occupancy)
+    request['UserData']=bootstrap(bucket,prefix,args.region,source_sha,transfer_urls,profile=args.profile,counters_only=args.profile_counters_only,occupancy=args.occupancy,range_only=args.profile_range_only)
     receipt=dict(valid=False,region=args.region,instanceType=args.instance_type,token=token,
                  availabilityZone=None if args.automatic_placement else eligible[0]['AvailabilityZone'],
                  automaticPlacement=args.automatic_placement,
                  templateName=None if args.launch_config else args.launch_template,presignedTransfer=args.presigned_transfer,
-                 s3Region=args.s3_region or args.region,profile=args.profile,countersOnly=args.profile_counters_only,occupancy=args.occupancy,
+                 s3Region=args.s3_region or args.region,profile=args.profile,countersOnly=args.profile_counters_only,occupancy=args.occupancy,rangeOnly=args.profile_range_only,
                  templateVersion=template['VersionNumber'],sourceSha256=source_sha,
                  resultPrefix=prefix,instanceId=None)
     def save(): (out/'launch.json').write_text(json.dumps(receipt,indent=2)+'\n')

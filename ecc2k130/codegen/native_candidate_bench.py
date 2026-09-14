@@ -54,6 +54,8 @@ def require(row):
 
 
 def markers(raw, mode, arithmetic=False):
+    if not arithmetic and re.search(r'^packed profile ranges: [1-9]',raw,re.M):
+        raise RuntimeError('range-instrumented diagnostic is not a throughput sample')
     square,karat = MODES[mode]
     expected = {'direct reduction':1, 'generated product':1, 'native carryless multiply':1,
                 'native carryless square':square, 'three-limb Karatsuba':karat, 'weighted prefix':2}
@@ -77,12 +79,13 @@ def sass_counts(text):
                 opcodes=dict(counts), scope='static walk text section, including each out-of-line helper once')
 
 
-def compile_mode(mode, nvcc, out, minblocks=None):
+def compile_mode(mode, nvcc, out, minblocks=None, profile_range=False):
     square,karat=MODES[mode]
     flags=dict(FLAGS,ECC_PACKED_CLMAD_SQUARE=square,ECC_PACKED_KARAT3=karat)
     if minblocks is not None:
         if minblocks not in (2,3): raise ValueError('unsupported launch-bound experiment')
         flags['ECC_MINBLOCKS']=minblocks
+    if profile_range: flags['ECC_PROFILE_RANGE']=1
     common=[nvcc,'-O3','-std=c++17','-gencode','arch=compute_120,code=sm_120',
             '-Xptxas','-v','-lineinfo','-Xcompiler','-O3','-Xcompiler','-fopenmp']
     common+=['-D'+key+'='+str(value) for key,value in flags.items()]

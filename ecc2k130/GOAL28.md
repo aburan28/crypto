@@ -46,13 +46,16 @@ smaller grids were slower. The timeline shows tiny kernel-launch API time
 relative to walk execution. Counter collection failed, so neither a memory
 limit nor an issue/stall limit is established.
 
-The next [frozen experiment](benchmarks/goal28/occupancy-contract.json) compares
+The separate [frozen experiment](benchmarks/goal28/occupancy-contract.json) compares
 `ECC_MINBLOCKS=2` with `3` while leaving all arithmetic flags and workload sizes
 identical. It measures CUDA's actual resident-block limit, abandons the change
 if it fails to increase residency or spills, and otherwise runs five alternating
 pairs per workload after excluded warmups. Cross-binary checkpoints and every
 DP34 multiset must agree. Its 95% paired log-ratio t interval assumes independent,
 approximately normal log ratios; five pairs remain exploratory evidence.
+The completed G7 run passed correctness, increased residency without spills,
+and was slower on all ten pairs: -2.11% benchmark and -1.95% DP34 by median
+rates. The candidate was rejected; `ECC_MINBLOCKS=2` remains the default.
 
 ## Run
 
@@ -67,6 +70,18 @@ python3 aws/native_benchmark.py --profile --presigned-transfer \
 Use `--profile-counters-only` in place of `--profile` for the reduced-section
 application-replay retry without a repeated grid screen. Use `--occupancy` for
 the unprofiled register-budget comparison; it does not grant SYS_ADMIN.
+`--profile-range-only` selects a separate diagnostic build and an independent
+CUDA smoke workload. The [range contract](benchmarks/goal28/range-contract.json)
+freezes this experiment. `ECC_PROFILE_RANGE=1` brackets each synchronized walk
+launch with CUDA profiler start/stop calls. Nsight Compute selects the second
+range with application range replay; this is distinct from per-kernel
+application replay. Timing parsers reject the instrumented client's marker.
+The flag defaults off, and no range-profile duration may supply a speedup.
+The measured range retry remains unsuccessful: the independent smoke workload
+fails profiler preparation in both kernel and application-range modes, while
+the ECC second-range selection returns no captured ranges. Exit code zero
+without a report is rejected. The exact failed attempts remain available for
+profiler troubleshooting; no usable hardware counters are claimed.
 
 The existing template supplies the AMI, security group and disposable root
 volume. `g7.4xlarge` can collect a separate RTX PRO 4500 diagnostic when G7e
@@ -86,3 +101,5 @@ Sources for profiler commands and their semantics:
 [Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/),
 [Nsight Systems installation](https://docs.nvidia.com/nsight-systems/InstallationGuide/index.html),
 [Nsight Compute CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html).
+Range semantics follow the
+[Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#application-range-replay).
