@@ -1099,6 +1099,70 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="nagao-coefficient-pullback">
+    <div class="panel-head">
+      <h2>Nagao coefficient pullback: exact support restriction</h2>
+      <p>Engineering candidate; classification awaits calibrated total cost.
+        The new binary a=0 solver intersects the coefficient equation with the
+        quadratic-support image before generating candidates. All 43 toy targets
+        preserve valid coefficient sets; candidate occurrences fall from 2,798 to 444.
+        The conditioned branch count remains O(2<sup>2d</sup>).
+        No new exponent, crossover or end-to-end speedup is established.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Common axis: total calibrated operations / sqrt(subgroup order).
+        Frozen sources: <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/coefficient_pullback/comparison.json">comparison and full-pipeline audit</a>,
+        <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/coefficient_pullback/results/summary.json">stage results</a>.</caption>
+      <thead><tr><th scope="col">Variant / reference</th><th scope="col">Full-DLP S</th>
+        <th scope="col">Cost / rho</th><th scope="col">Cost / floor</th>
+        <th scope="col">Correctness</th><th scope="col">Class / status</th></tr></thead>
+      <tbody>
+        <tr><td>Quadratic image baseline</td><td>Uncalibrated</td><td>Uncalibrated</td><td>Uncalibrated</td><td>6/6 tiny full-DLP recoveries</td><td>Reference</td></tr>
+        <tr><td>Coefficient pullback</td><td>Uncalibrated</td><td>Uncalibrated</td><td>Uncalibrated</td><td>6/6 tiny recoveries; exhaustive coefficient check</td><td>Engineering candidate; pending calibration</td></tr>
+        <tr><td>Symmetric S4</td><td>Unmeasured</td><td>Unmeasured</td><td>Unmeasured</td><td>43 exhaustive toy targets; 24 campaign cells</td><td>Stage control</td></tr>
+        <tr><td>Chained S3</td><td>Unmeasured</td><td>Unmeasured</td><td>Unmeasured</td><td>43 exhaustive toy targets; 24 campaign cells</td><td>Stage control</td></tr>
+        <tr><td>Matched rho</td><td>Uncalibrated</td><td>Uncalibrated</td><td>Uncalibrated</td><td>6/6 tiny full-DLP recoveries</td><td>Reference</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Supplementary field-API diagnostics: four complete eleven-bit enumerations,
+        seven relations per variant. Components are not a calibrated common unit.</caption>
+      <thead><tr><th scope="col">Variant</th><th scope="col">Additions</th><th scope="col">Multiplications</th><th scope="col">Squarings</th><th scope="col">API sum</th></tr></thead>
+      <tbody>
+        <tr><td>Quadratic image</td><td>142,960</td><td>86,086</td><td>72,461</td><td>301,507</td></tr>
+        <tr><td>Coefficient pullback</td><td>97,804</td><td>90,822</td><td>11,545</td><td>200,171</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Tiny cold full-DLP diagnostics, three runs per row. Scalar modular counts
+        are separate in the source; these field components are not full normalized cost.</caption>
+      <thead><tr><th scope="col">Field bits / subgroup order</th><th scope="col">Variant</th><th scope="col">Field additions</th><th scope="col">Field multiplications</th><th scope="col">Field squarings</th><th scope="col">Cold seconds (secondary)</th></tr></thead>
+      <tbody>
+        <tr><td>5 / 11</td><td>Quadratic image</td><td>27,206</td><td>27,606</td><td>9,539</td><td>0.068100</td></tr>
+        <tr><td>5 / 11</td><td>Pullback</td><td>16,066</td><td>22,476</td><td>4,595</td><td>0.052301</td></tr>
+        <tr><td>5 / 11</td><td>Rho</td><td>2,037</td><td>3,996</td><td>717</td><td>0.008804</td></tr>
+        <tr><td>9 / 127</td><td>Quadratic image</td><td>226,874</td><td>199,396</td><td>105,191</td><td>0.765548</td></tr>
+        <tr><td>9 / 127</td><td>Pullback</td><td>115,830</td><td>153,397</td><td>39,495</td><td>0.507000</td></tr>
+        <tr><td>9 / 127</td><td>Rho</td><td>25,866</td><td>45,389</td><td>19,869</td><td>0.159190</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>The stage API sum falls 33.61%, while multiplications rise 5.50%.
+        Of eight cells per variant at each larger size, pullback resolves two
+        at (23,7) and one at (29,8); every comparison cell there times out.
+        These are supported first-relation cases. All large uniform cases and
+        complete enumerations remain unresolved at the cooperative three-second limit.
+        Partial work is excluded from equal-output ratios.</p>
+      <p>All 18 tiny cold runs verify the scalar. The independent post-run audit
+        checks all 126 index-calculus oracle calls, including empty answers.
+        Rho remains cheaper in each recorded field-operation component.
+        One stage repetition gives descriptive timing only. Counting bounds and
+        prior attack verdicts are unchanged. Prime-field and F4 engines are outside this round.</p>
+      <p><a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/coefficient_pullback/README.md">Derivation, limits and rerun commands</a>;
+        <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/coefficient_pullback/e2e_results/summary.json">cold phase costs and scalar-operation vectors</a>.</p>
+    </div>
+  </div>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
