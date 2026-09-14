@@ -332,3 +332,17 @@ exact image-space support and matched S3/S4 controls at 11, 23 and 29 bits.
 The image solver completes every target/mode slot under five seconds.
 The larger bases have dimension six; increasing base dimension and
 calibrating total solver work remain necessary before an attack-cost claim.
+
+## Subfield and dimension extension (2026-09-14)
+
+[Subfield dimension results](subfield_dimension_results.md) extend the hybrid
+to non-F2 coefficients in F4 over GF(2^18) and GF(2^30), with factor-base
+dimensions 6, 7 and 8. The 144 matched five-second trials resolve 35/48 hybrid
+slots and 0/48 for each Semaev SAT control. Eight separate 60-second hybrid
+enumerations at d8 all complete; the maximum is 20.723362 seconds. Exact-set
+validation and certificate replay report no failures. This is a functionality
+extension and engineering diagnostic; the calibrated all-cost goal remains open.
+
+Frozen implementation, proof, contract, raw trials and source-publication
+mapping are in [subfield_01](subfield_01/README.md). Replay evidence with
+`python research/nagao_relations/check_subfield_evidence.py`.

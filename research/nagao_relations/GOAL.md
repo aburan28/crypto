@@ -66,3 +66,20 @@ matched S3/S4 controls and field-operation reductions are recorded in
 scaling_23_29.md. This establishes a finite-panel field-degree improvement.
 The overall goal remains open: larger factor bases, fresh post-development
 seeds, and calibrated costs against the Semaev controls are still required.
+
+## Subfield and larger-base checkpoint — 2026-09-14
+
+The [subfield extension](subfield_dimension_results.md) supports non-F2 F4
+coefficients and even ambient degrees 18 and 30. Dimensions now increase
+through 6, 7 and 8, retaining the exact targets across dimensions. All eight
+d8 supplemental enumerations complete in 11.28–20.73 seconds. Five-second
+matched coverage is 35/48 for the hybrid and 0/48 for each of chained S3 and
+symmetric S4. No correctness failures were found in exhaustive tiny-field
+checks or the larger independent oracle/certificate replay.
+
+The five-second full-enumeration gate fails at d8 for both fields. The
+quadratic dependence on base size remains. The goal is **still unmet**:
+these are stage diagnostics, with no calibrated SAT/field conversion,
+required broad regression, complete ECDLP pipeline, or measured rho ratio.
+Growing support changes the counting boundary and is not an advance against
+a fixed boundary. See the frozen contract for the explicit scope and holdouts.
