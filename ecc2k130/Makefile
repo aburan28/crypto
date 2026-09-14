@@ -104,7 +104,7 @@ ARCH    ?= -gencode arch=compute_80,code=sm_80 \
 CLANGARCH ?= sm_90
 SMARCH  ?= sm_90
 
-HDRS = include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
+HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
        include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
@@ -212,6 +212,17 @@ test-decomp:
 # halves.  Those are the parts a long run only reaches at the very end.
 rehearse: ecc2k130-cpu
 	./rehearse.sh
+
+build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
+
+test-production: ecc2k130-cpu build/test-production
+	./build/test-production
+	python3 -m unittest discover -s aws -p test_certification.py -v
+
+certify-local: ecc2k130-cpu build/test-production
+	python3 aws/certify.py --output build/certification-local.json
 
 # Offline search over the build space against ptxas output, which needs no GPU.
 # It ranks nothing it can measure the speed of -- it produces the few
@@ -385,4 +396,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean

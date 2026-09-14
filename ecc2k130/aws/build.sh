@@ -85,6 +85,7 @@ EOF
 )
 short=${sha:0:16}
 binSha=$(sha256sum "$work/src/ecc2k130" | cut -d' ' -f1)
+hostSha=$(sha256sum "$work/src/ecc2k130-cpu" | cut -d' ' -f1)
 python3 - "$work/src" "$sha" "$binSha" "$ARCHES" "$SRC" "$knobs" <<'EOF' > "$work/manifest.json"
 import json, sys, time
 src, sha, binSha, arches, origin, knobs = sys.argv[1:]
@@ -103,13 +104,15 @@ aws s3 cp "$work/manifest.json" "s3://$BUCKET/$prefix/manifest.json" --only-show
 # Point the campaign at this build.  Geometry in campaign.json must match the
 # knobs above; they are the audited preset, so only binaryKey moves.
 aws s3 cp "s3://$BUCKET/campaign.json" "$work/campaign.json" --only-show-errors
-python3 - "$work/campaign.json" "$prefix" "$sha" "$knobs" <<'EOF'
+python3 - "$work/campaign.json" "$prefix" "$sha" "$knobs" "$binSha" "$hostSha" <<'EOF'
 import json, sys
-path, prefix, sha, knobs = sys.argv[1:]
+path, prefix, sha, knobs, binSha, hostSha = sys.argv[1:]
 c = json.load(open(path))
 c["binaryKey"] = prefix + "/ecc2k130"
 c["hostBinaryKey"] = prefix + "/ecc2k130-cpu"
 c["sourceSha256"] = sha
+c["binarySha256"] = binSha
+c["hostBinarySha256"] = hostSha
 built = dict(kv.split("=", 1) for kv in knobs.split())
 geometry = (int(built["BATCH"]), int(built["THREADS"]), int(built["MINBLOCKS"]))
 assert (c["batch"], c["blockThreads"], c["minBlocks"]) == geometry, \

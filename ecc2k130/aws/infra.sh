@@ -43,6 +43,7 @@ cmd=${1:-create}
 
 sync() {
     aws s3 cp worker.py "s3://$BUCKET/aws/worker.py" --only-show-errors
+    aws s3 cp protocol.py "s3://$BUCKET/aws/protocol.py" --only-show-errors
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
         aws s3 cp campaign.json "s3://$BUCKET/campaign.json" --only-show-errors
