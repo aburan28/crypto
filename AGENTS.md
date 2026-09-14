@@ -164,6 +164,48 @@ The update rides in the commit or pull request that lands the
 measurement.  It is not a follow-up task, and "the page is out of date"
 is not a state this repository has.
 
+### 8. Use the frozen benchmark to establish end-to-end speedups
+
+Every index-calculus performance iteration must use the
+[frozen regression suite](research/index_calculus_baseline_20260914/regression/README.md)
+before claiming a gain. The accepted target is
+`research/index_calculus_baseline_20260914/regression/results/baseline_v2/`.
+
+- **Run the reference and candidate.** Follow the suite's `run.py` and
+  `compare.py` commands with the full 60 inputs, both configurations and all
+  three repetitions. Preserve the contract, input hashes, counter definitions
+  and algebraic-only rejection control. Save each iteration in a new directory;
+  never overwrite the baseline. For other encodings or field families, freeze
+  an equivalent matched suite under the
+  [parent accounting contract](research/index_calculus_baseline_20260914/ec_index_calculus_contract.json)
+  and document why the WDSat protocol is inapplicable.
+- **Measure the complete ECDLP pipeline.** In addition to that solver regression,
+  run matched baseline/candidate full-DLP experiments on identical curves,
+  subgroups, factor bases, targets and seeds, including independent holdouts.
+  Charge setup/precomputation, target generation, encoding, failed attempts,
+  solving, extraction/lifting, verification, filtering, relation-matrix work
+  and final scalar recovery, using exclusive accounting. Verify `[k]P = Q`
+  for every completed test; retain failures, timeouts and OOMs. Compare equal
+  verified workloads; missing completions block an unqualified end-to-end claim.
+  Report cold cost first and name the target count for any warm amortization.
+- **Require a measured total-cost improvement.** Define
+  `speedup = baseline_total_operations / candidate_total_operations`.
+  An end-to-end claim requires this ratio greater than one in the same
+  calibrated operation unit, with all phases priced and correctness preserved.
+  Report `S` and ratios to the matched rho reference and applicable floor.
+  Runtime claims additionally require paired baseline/candidate reruns on
+  matched hardware/resources and a 95% paired confidence interval excluding
+  no improvement; wall time remains secondary.
+- **Keep solver gains in scope.** Passing `compare.py`, meeting its optional
+  20% conflict target, or reducing Gröbner/F4 time alone does not establish
+  an end-to-end speedup. The current corpus measures a solver stage.
+  If full-pipeline costs or conversions are missing, leave them null and
+  report a stage diagnostic; do not infer a full-DLP result.
+- **Commit the evidence with the claim.** Preserve raw runs, source/configuration
+  hashes, certificates, phase costs and comparison output, including regressions.
+  Update the research note and canonical scoreboard in the same PR, retaining
+  the prior baseline and classifying the change by §3.
+
 ## Worked example
 
 `RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
