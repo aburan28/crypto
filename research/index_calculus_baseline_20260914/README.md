@@ -5,6 +5,11 @@ An accounting baseline for Koblitz, other binary, and generic prime-field resear
 [budget calculator](ec_index_calculus_budget.py), and a certified six-instance WDSat pilot.
 The solver is unchanged. No full-DLP speedup or complexity improvement is claimed.
 
+For the fixed target used by subsequent iterations, use the
+[full-corpus regression suite](regression/README.md). It expands the pilot to
+60 inputs, two configurations and three repetitions, with saved raw results,
+an explicit algebraic-only rejection control, and a comparison command.
+
 The repository already has the [corpus audit](../../RESEARCH_TRIMOSKA_BENCHMARKS.md),
 [F4 notes](../../RESEARCH_GROEBNER_F4.md), [Koblitz experiments](../../RESEARCH_KOBLITZ_SCALING_TARGET.md),
 and [Nagao comparison](../nagao_relations/solver_09/README.md). Use those runners for

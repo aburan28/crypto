@@ -1048,6 +1048,57 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="ec-regression-v2">
+    <div class="panel-head">
+      <h2>Frozen WDSat regression target</h2>
+      <p>Class <span class="chip">accounting</span>. Full pinned S4 corpus,
+        60 inputs, two symmetry configurations, three repetitions: 360 processes.
+        Every outcome is certified; algebraic-only solutions contribute no point relations.
+        Common-operation conversion and matched rho remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Frozen source:
+        <a href="../research/index_calculus_baseline_20260914/regression/frozen_targets.json">regression targets</a>.
+        Operation unit remains total common operations divided by the square root of subgroup order.</caption>
+      <thead><tr><th scope="col">Variant / reference</th><th scope="col">Full-DLP S</th>
+        <th scope="col">Cost / rho</th><th scope="col">Cost / floor</th>
+        <th scope="col">Correctness per sweep</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Symmetry on</td><td>Unmeasured</td><td>Unmeasured</td><td>Unmeasured</td>
+          <td>30 relations, 29 UNSAT, 1 algebraic-only rejection</td><td><span class="chip">accounting</span></td></tr>
+        <tr><td>Symmetry off</td><td>Unmeasured</td><td>Unmeasured</td><td>Unmeasured</td>
+          <td>30 relations, 29 UNSAT, 1 algebraic-only rejection</td><td><span class="chip">accounting</span></td></tr>
+        <tr><td>Matched rho reference</td><td>Not run</td><td>Unmeasured</td><td>Unmeasured</td>
+          <td>No full-DLP recovery in this suite</td><td>Reference required</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Supplementary diagnostics: sum of per-input medians, three repetitions per input.</caption>
+      <thead><tr><th scope="col">Configuration</th><th scope="col">n / l</th>
+        <th scope="col" class="n">Inputs</th><th scope="col" class="n">Conflicts</th>
+        <th scope="col" class="n">Process seconds (secondary)</th></tr></thead>
+      <tbody>
+        <tr><td>symmetry_on</td><td>15 / 5</td><td class="n">20</td><td class="n">80,314</td><td class="n">0.589849</td></tr>
+        <tr><td>symmetry_on</td><td>17 / 6</td><td class="n">20</td><td class="n">614,275</td><td class="n">5.545287</td></tr>
+        <tr><td>symmetry_on</td><td>19 / 6</td><td class="n">20</td><td class="n">585,692</td><td class="n">5.362547</td></tr>
+        <tr><td>symmetry_off</td><td>15 / 5</td><td class="n">20</td><td class="n">386,438</td><td class="n">2.600279</td></tr>
+        <tr><td>symmetry_off</td><td>17 / 6</td><td class="n">20</td><td class="n">3,036,969</td><td class="n">28.848458</td></tr>
+        <tr><td>symmetry_off</td><td>19 / 6</td><td class="n">20</td><td class="n">2,823,074</td><td class="n">27.480456</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>The initial strict point-only batch retained 354 passing results out of 360.
+        Its six rejected runs concerned a satisfiable polynomial input whose target
+        does not lift to the curve. The complete failed batch is preserved. The revised
+        contract explicitly froze that rejection control before rerunning every process.
+        The accepted batch has 180 point-relation results, 174 UNSAT results, and six
+        algebraic-only rejections; exhaustive checks covered 929,280 support triples.</p>
+      <p><a href="../research/index_calculus_baseline_20260914/regression/RESULTS.md">Results and limits</a>;
+        <a href="../research/index_calculus_baseline_20260914/regression/README.md">rerun and comparison commands</a>.
+        The prior six-case pilot stays above. Existing attack verdicts and exponents are unchanged.</p>
+    </div>
+  </div>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,

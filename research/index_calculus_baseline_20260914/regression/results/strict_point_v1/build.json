@@ -1,0 +1,21 @@
+{
+  "exit_code": 0,
+  "compiler_command": [
+    "gcc",
+    "-O3",
+    "-Wall",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/cnf.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/dimacs.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/main.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/wdsat.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/wdsat_utils.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/xorgauss.c",
+    "/workspace/scratch/5ef6d6b590d6/baseline_bundle/pilot/vendor/WDSat/src/xorset.c",
+    "-lm",
+    "-o",
+    "/workspace/scratch/5ef6d6b590d6/pr-baseline-build/wdsat_solver"
+  ],
+  "compiler": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+  "source_manifest_sha256": "80d73d2869d45376d3bc45b835544d7513d8c11ced7838a5e85efdea600453e6",
+  "binary_sha256": "d42ee64bf6cd961514bf2fd13d8ed7d9abe95d0778a43917aa5c0df501407e52"
+}
