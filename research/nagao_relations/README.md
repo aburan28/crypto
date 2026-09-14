@@ -363,3 +363,17 @@ targets are reported separately. Quadratic setup, the small sample, lack
 of timing repetitions and uncalibrated costs preclude an asymptotic or
 full-ECDLP claim. Frozen source, raw results, counter comparisons, proof
 checks and certificate replay are in [structured_01](structured_01/README.md).
+
+## Exact bounds and coefficient-block proposal (2026-09-14)
+
+The [bound audit](bounds_01/RESULTS.md) derives exact signed-triple exclusions,
+group-trace fiber ceilings, and implementation-specific multiplication floors.
+The existing hybrid's branch-only floor exceeds the measured direct S3 total
+on all ten identical eight-target complete-enumeration batches. The trace
+quotient into E(F64) adds no whole-target rejection on these bases.
+
+The [next experiment](bounds_01/NEXT.md) targets entire coefficient blocks
+before branch solving. Its general-coefficient normalization has passed
+exact residual checks; block elimination and any resulting gain are still
+proposed. These are accounting and conditional architecture bounds, with
+no new solver performance claim or full-DLP ratio.

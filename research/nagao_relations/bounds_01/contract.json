@@ -1,0 +1,25 @@
+{
+  "version": "2026-09-14.bounds-1",
+  "scope": "Exact counting and architecture bounds, not a solver performance iteration. Historical solvers and measured records remain unchanged.",
+  "input": "research/nagao_relations/structured_01/raw.jsonl",
+  "input_sha256": "55e77809a6ba6856a98f414a6575fee5585e34349e1a9816da9fabc08ab274fc",
+  "spaces": "All ten frozen n18/n30 prefix and F4-stable spaces",
+  "small_validation": "All 53 finite GF64 targets, the two frozen d4 spaces and three fresh random independent d4 spaces; exact signed triples, projected oracle sets, trace-fiber counts, and instrumented original hybrid branch counts",
+  "seed": 2026091427,
+  "fresh_targets_per_space": 6,
+  "larger_target_checks": "All 24 saved cold inputs, all 80 saved batch targets, and 60 new uniform targets; compare hypothetical complete hybrid multiplication floors to the measured S3 work on the exact same eight-target batches",
+  "trace_quotient_degree": 6,
+  "claims_to_test": [
+    "Exact signed admissible triple mass equals 8*C(K,3) minus infinity triples and target-abscissa collisions.",
+    "The trace-fiber support ceiling never exceeds the corrected global first-moment ceiling.",
+    "Trace fibers may expose concentration or certify empty target classes; a gain is not assumed.",
+    "The original hybrid's completed enumeration performs the predicted number of conditioned-root branches, unaffected by its later parity rejection.",
+    "Saved complete S3 batches exceed the derived field-multiplication lower bound and have exactly K*(K-1) pair-table entries."
+  ],
+  "falsification": "Any exact small-field disagreement, source/input hash change, negative corrected fiber mass, or violation of a work bound invalidates that claim. Retain negative results. Probability ceilings are not observed success rates or guarantees of successful solving.",
+  "limits": "Uniform affine full-group targets only. Signed multiplicity is distinguished from projected x-tuples. Actual curve orders are composite; no prime-subgroup or full-DLP rho ratio follows. Trace analysis and independent oracle work are charged as research-harness work, not hidden in a solver speedup.",
+  "classification": "accounting and conditional architecture bounds",
+  "common_operation_speedup": null,
+  "full_dlp_S": null,
+  "rho_ratio": null
+}

@@ -1,0 +1,109 @@
+{
+  "scope": "algebraic residual identities, not a solver speedup",
+  "seed": 2026091431,
+  "identity_checks": 2048,
+  "exhaustive_nonzero_GF64_target_checks": 756,
+  "cases": [
+    {
+      "n": 6,
+      "a2": 0,
+      "a6": 63,
+      "identity_checks": 128,
+      "zero_residual_cases": 3
+    },
+    {
+      "n": 6,
+      "a2": 0,
+      "a6": 13,
+      "identity_checks": 128,
+      "zero_residual_cases": 2
+    },
+    {
+      "n": 6,
+      "a2": 0,
+      "a6": 50,
+      "identity_checks": 128,
+      "zero_residual_cases": 1
+    },
+    {
+      "n": 6,
+      "a2": 63,
+      "a6": 63,
+      "identity_checks": 128,
+      "zero_residual_cases": 1
+    },
+    {
+      "n": 6,
+      "a2": 63,
+      "a6": 13,
+      "identity_checks": 128,
+      "zero_residual_cases": 5
+    },
+    {
+      "n": 6,
+      "a2": 63,
+      "a6": 50,
+      "identity_checks": 128,
+      "zero_residual_cases": 2
+    },
+    {
+      "n": 6,
+      "a2": 13,
+      "a6": 63,
+      "identity_checks": 128,
+      "zero_residual_cases": 4
+    },
+    {
+      "n": 6,
+      "a2": 13,
+      "a6": 13,
+      "identity_checks": 128,
+      "zero_residual_cases": 1
+    },
+    {
+      "n": 6,
+      "a2": 13,
+      "a6": 50,
+      "identity_checks": 128,
+      "zero_residual_cases": 3
+    },
+    {
+      "n": 6,
+      "a2": 50,
+      "a6": 63,
+      "identity_checks": 128,
+      "zero_residual_cases": 2
+    },
+    {
+      "n": 6,
+      "a2": 50,
+      "a6": 13,
+      "identity_checks": 128,
+      "zero_residual_cases": 0
+    },
+    {
+      "n": 6,
+      "a2": 50,
+      "a6": 50,
+      "identity_checks": 128,
+      "zero_residual_cases": 3
+    },
+    {
+      "n": 18,
+      "a2": 36685,
+      "a6": 36685,
+      "identity_checks": 256,
+      "zero_residual_cases": 0
+    },
+    {
+      "n": 30,
+      "a2": 86833437,
+      "a6": 86833437,
+      "identity_checks": 256,
+      "zero_residual_cases": 0
+    }
+  ],
+  "failures": 0,
+  "source_sha256": "42b20e35270f0de3c435cb3f2bfd8c4493f08c36272a4494f34d493a1e124899",
+  "source_commit": "e70ab88c22b27d5d22cc7591538ce569d10b73b4"
+}

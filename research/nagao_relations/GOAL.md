@@ -113,3 +113,28 @@ not be used to estimate random-target yield. The pair table retains
 quadratic setup and is itself a summation-polynomial algorithm. Its success
 does not meet the function-first goal. The 20% calibrated total-cost gate,
 broader regression and full-DLP gates remain **unmet**.
+
+## Bound checkpoint and next candidate — 2026-09-14
+
+The [exact bound audit](bounds_01/RESULTS.md) now separates signed-triple mass,
+target support, and the current solvers' mandatory branch work. It verifies
+265 exhaustive tiny target/space cases, all 104 prior larger inputs, and 60
+fresh uniform inputs. Chart exclusions are counted exactly. A group-trace
+quotient into E(F64) produces no additional global ceiling improvement and
+no empty target class on any of the ten larger bases.
+
+For complete enumeration of the exact same eight-target batches, the hybrid's
+branch-only field-multiplication floor exceeds the measured total S3-table
+multiplications by 15.73–53.03 times. At 30 bits and prefix d10 the numbers
+are at least 58,605,624 versus 1,391,380. This is a component bound on
+complete enumeration; it is not a runtime ratio or a first-hit result.
+
+The [next proposal](bounds_01/NEXT.md) is to reject entire coefficient blocks
+before conditioned-root solving. A general-coefficient normalized pullback
+identity is proved and checked in 2,048 residual tests plus 756 exhaustive
+GF64 target checks. Block pruning itself remains unimplemented and unproved.
+With the current per-branch multiplication floor and zero pruning overhead,
+the 30-bit prefix d10 batch would require at least 98.1007% branch removal
+to reach 20% fewer multiplications than the measured S3 table. A new
+per-branch formula requires re-deriving this threshold. Full-cost comparison
+and the original three-size acceptance gate remain open.
