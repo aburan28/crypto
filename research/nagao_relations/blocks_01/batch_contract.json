@@ -1,0 +1,21 @@
+{
+  "version": "2026-09-14.block-batch-1",
+  "parent": "research/nagao_relations/blocks_01/contract.json",
+  "condition": "Execute only after the predeclared cold batch_gate passes. This selects a follow-up stratum, not an unbiased general performance claim.",
+  "scope": "Named eight-target complete-enumeration batch at the 30-bit d8 stratum with complete pruned/control cold pairs. Single repetition, exploratory solver-stage diagnostic. S3/S4 SAT comparisons remain in the six-variant cold panel; no new SAT amortization claim.",
+  "n": 30,
+  "d": 8,
+  "base_kind": "prefix",
+  "seed": 2026091459,
+  "targets_per_stratum": 4,
+  "target_rule": "Four fresh uniform affine targets followed by four fresh supported targets, frozen before timing, disjoint from the cold inputs. Supported targets are not a random-yield estimator.",
+  "variants": ["bilinear-reference", "bilinear-blocks", "hybrid-filtered", "pair-invariants-s3"],
+  "batch_budget_seconds": 60,
+  "shared_setup": "Charge field, curve and basis once for each cold batch. S3 pair table and predecessor hybrid support images are reusable across the eight declared targets and charged once. Bilinear coefficient circuits depend on target and are rebuilt and charged per query. No target-specific work is imported from another variant.",
+  "accounting": "All setup, unsuccessful queries, solving, extraction and signed verification included. Exclusive setup/query/orchestration timing and field/binary counter vectors. Independent replay occurs after each complete solver batch, outside its budget. Timeouts and unattempted targets retained; no ratio for incomplete unequal workloads.",
+  "correctness": "Every returned relation and rejection certificate independently checked. Every complete query agrees with the independent exhaustive pair oracle. Saved targets include exact curve, support and target coordinates.",
+  "success": "No engineering gain against the strongest Semaev baseline unless complete equal-output batch cost improves after setup and failed-target costs. API components alone cannot establish calibrated total cost. Cold-screen success is not the original three-size goal.",
+  "common_operation_speedup": null,
+  "full_dlp_S": null,
+  "rho_ratio": null
+}
