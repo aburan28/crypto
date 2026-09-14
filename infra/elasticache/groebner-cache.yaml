@@ -110,6 +110,6 @@ Outputs:
   AuthSecretArn:
     Description: Retrieve SecretString.password at runtime; do not put it in source control.
     Value: !Ref CacheAuthSecret
-  CacheTtlSeconds:
-    Description: Suggested IC_GROEBNER_CACHE_TTL_SECS value for this stack.
-    Value: !Sub '${CacheTtlDays} days'
+  CacheTtlDays:
+    Description: Retention hint for IC_GROEBNER_CACHE_TTL_SECS.
+    Value: !Ref CacheTtlDays
