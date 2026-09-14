@@ -1861,10 +1861,13 @@ move the abscissa at all — `−(x, y) = (x, x + y)` — so the sign half of
 the fold is free, and `π` acts on the abscissa as a squaring. The key is
 
 ```
-canon(P) = 1 + min_k x^{2^k}
+canon(P) = 1 + (one member of the orbit {x^{2^k}}, chosen the same way every time)
 ```
 
-`n − 1` squarings and a running minimum, no memory touched. That the
+which was `1 + min_k x^{2^k}` — `n − 1` squarings and a running minimum,
+no memory touched — and is now the least rotation of the abscissa's
+coordinate word in a normal basis, for the reasons under *What was
+binding* below. That the
 packed point already encoded the sign in its low bit is why the negation
 costs nothing: the two halves of a `±` pair differ in exactly that bit
 and in nothing else.
@@ -1914,7 +1917,8 @@ A base 11.0 times wider, and 122 times fewer probes a target. The
 temptation is to call that a 61-fold speedup. It is not, and the run says
 so plainly. Two things eat it:
 
-- **A probe got 3.1 times dearer** — 111 ns to 340 ns. That is with the
+- **A probe got 3.1 times dearer** — 111 ns to 340 ns, one target at a
+  time, which is not how the descent probes (below). That is with the
   canonicalisation done as a rotation (below); computed as `n − 1`
   squarings it was 1125 ns and 9.8 times, and the squaring chain is what
   most of the gap was.
@@ -1922,6 +1926,70 @@ so plainly. Two things eat it:
   summands; it recovers them by an `|F|`-long scan on a hit. That was
   0.96 ms at `|F| = 16592` and is 12.61 ms at `|F| = 177632`, and a scan
   pays it once per witness it *finds*, not once per witness it keeps.
+
+The first of those two is measured on a probe shape the descent does not
+use, and the factor is much smaller where it is actually paid. `340 ns`
+is `contains_pair` called on one target at a time. The `m = 3` scan
+computes its keys a block of `BLOCK = 1024` at a time and then probes
+them, and at `n = 61` on the equal-memory pair above the three shapes
+are far apart — median of three runs on one host, spread in brackets:
+
+| | compact | folded | the fold costs |
+|---|---|---|---|
+| one probe at a time | 95 ns [84–103] | 265 ns [258–273] | **2.8x** |
+| blocked 1024, prefetched | 71 [60–77] | 145 [143–148] | **2.0x** |
+| the descent's own loop, a base point | 148 [148–150] | 222 [222–232] | **1.51x** [1.50–1.55] |
+
+The last row is `witnesses_fast` with `m = 3` and a sink that never
+stops, so it walks the whole base and is a true per-base-point figure.
+It carries the batched inversion `add_many` does, and the recovery an
+admitted key pays: 77.6 ns a base point over the blocked row, on both
+tables to within a tenth, which is why it is the largest of the three
+and still the smallest ratio. It is also the steadiest number here,
+because it averages over the whole base rather than 200 000 sampled
+probes. What separates its two columns is a different quantity, **74 ns**
+a base point, and the canonicalisation measured alone is **76**. **The fold's cost in the descent is the canon
+and nothing else.** The 144 ns that earlier looked like an unexplained
+remainder is not in the pipeline; it is what a lone probe pays and the
+block does not.
+
+Read the table down the columns rather than across, because the
+cross-table ratios move with the noisiest figure in them. What blocking
+buys each table on its own is the cleaner statement: the folded table
+**1.83x**, and the compact table — the control — **1.35x**.
+
+Why a block helps this much is worth stating, because the reason is not
+the one the code's comment gave. The key is some 76 ns of dependent work
+before the address it will load is even known, which is long enough that
+consecutive probes' memory round trips do not overlap when the two are
+fused; split, the lookups are adjacent and independent and do overlap. A
+compact table is the control: its key is a `pack`, nine nanoseconds, its
+probes already overlap, and that is why blocking buys it a third where
+it buys the folded table four fifths. Chunk 1 is measured too and comes
+back at 1.00x on the folded table, so the figure is the blocking and not
+the buffer the chunked loop uses.
+
+Which *microarchitectural* resource the long key exhausts is not settled
+here. Reorder-buffer capacity fits, and so would the data-dependent
+branch in the rotation's `x < best`, and a 128 MiB filter walked at
+random misses the TLB on most probes; nothing measured separates them,
+and the compact control speaks only to the key's length being the cause,
+not to the mechanism by which length costs. What it does settle is that
+the block must stay.
+
+This is a different thing from interleaving lanes, which is measured
+elsewhere in this note and buys the rotation nothing: interleaving fills
+one *dependency* chain's latency with another chain's work, and a
+rotation has no chain to fill. Blocking separates the key from the
+lookup so the *memory* accesses can overlap. The rotation being short is
+what makes interleaving pointless; the rotation being 76 ns is what
+makes blocking pay.
+
+One arm still probes one at a time: `m = 4` walks every second half
+`R − (P_k + P_l)` and calls `pairs_for` on each, so it pays the 265
+rather than the 145. It is quadratic in the base and the least used,
+which is presumably why it was never blocked; blocking it is the same
+change the `m = 3` arm already carries.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
@@ -1947,8 +2015,10 @@ whole row — `|F|` subtractions, and on a folded table `|F|`
 canonicalisations — before probing any of it, which is linear work paid
 in full however early the stop comes. On a base wide enough to decompose
 most targets that setup *is* the cost. Both now run a block at a time:
-long enough to amortise one field inversion and keep the squaring chains
-interleaved, short enough that an early exit throws away at most a block.
+long enough to amortise one field inversion, short enough that an early
+exit throws away at most a block. (The block also kept the squaring
+chains interleaved, which was the second reason for it and is no longer
+one — see *What was binding* below.)
 
 ### The squaring chain was not the only way to name an orbit
 
@@ -1969,7 +2039,11 @@ is a different function of the point. That does not matter. A key has
 only to be constant on orbits and distinct across them, which a bijective
 linear map followed by a rotation-invariant minimum is — and a table is
 built and queried with the same one. Both properties are tested directly
-at degrees 13 through 61, against the squaring chain it replaces.
+at degrees 13 through 61, against the squaring chain it replaces, and by
+full enumeration of the field at 8, 12, 16 and 20 — composite degrees,
+where an orbit is shorter than `n` and its coordinate word is a repeating
+pattern that its own rotation fixes, which is the case a least-rotation
+key has to get right and a sampled prime-degree test cannot reach.
 
 | | squaring chain | rotation |
 |---|---|---|
@@ -1979,6 +2053,26 @@ at degrees 13 through 61, against the squaring chain it replaces.
 
 The build gained the same factor as the probe, which it should: it
 canonicalises every pair it stores.
+
+`examples/koblitz_fold_cost.rs` prices the canonicalisation on its own,
+away from the table, on a separate host — 200 000 abscissae at `n = 61`:
+
+| canonicalisation | ns |
+|---|---|
+| squaring chain, serial | 846.8 |
+| squaring chain, 8 points in flight | 733.7 |
+| squaring by shifts (sparse irreducible), 8 in flight | 1299.3 |
+| **normal basis, one at a time** | **85.5** |
+
+Three things that table settles. The rotation is **8.6 times** the best
+of the squaring variants, measured against this repository's own reducer
+— a bit-spread and eight table lookups — rather than against a slow one.
+Interleaving buys the rotation nothing, because the `n − 1` rotations are
+formed from the coordinate word directly and share no dependency chain,
+which is why the lookup path stopped keeping eight canonicalisations in
+flight. And reducing the squaring by shifts instead of by table, which
+the trinomial at this degree permits, is *worse* than the table it
+replaces — an idea worth having and not worth keeping.
 
 ### The recovery, and the search that threw it away
 
@@ -2064,6 +2158,30 @@ degenerate key took seconds.
 Folded tables now bucket on the hash the filter and the rest are already
 made of, which is flat. Probe 374 → 285 ns, and far more than that on
 hits.
+
+How far below the middle, instrumented on the real table at `n = 61`,
+258 632 192 entries over `2²⁴` buckets:
+
+| bucket index | mean run a key lands in | buckets used | design |
+|---|---|---|---|
+| the raw key | **584.0** | 739 718 of 16 777 216 | 15.4 |
+| a mixed key | 17.4 | 16 769 521 | 15.4 |
+
+The second row is a multiply-xorshift mixer, not `pair_filter_hash`
+itself; it stands in for what any avalanching hash does to this key,
+and the number to read off it is 17.4 against 584.0, not 17.4 exactly.
+
+Thirty-four times the run the sizing law intends, out of 4.4% of the
+buckets. And a measurement of the *miss* path alone — 200 000 probes of
+which 20 hit — moves by 2.9 ns out of 362.7 when the index is fixed (a
+different host from the 374 → 285 above, so the absolute figures are not
+comparable; the 2.9 is a same-host before/after), which is how completely
+the filter
+hides it: seven probes in eight never reach a bucket, and the one that
+does reads a contiguous run of `u32`
+that the prefetcher handles, about four cache lines a probe amortised
+whatever its length. A benchmark of misses would have certified this bug
+as absent.
 
 The degenerate key is worth naming: `O` is the sum of every `±` pair, so
 every orbit representative stores an entry under its key, and a lookup

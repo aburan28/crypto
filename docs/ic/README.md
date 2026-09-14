@@ -714,15 +714,48 @@ normal basis, where the Frobenius *is* a rotation — `FrobeniusCanon` in
 probe costs 1125 ns rather than 340 and the fold is worth 2.0× rather
 than 2.8×.
 
+The naming is done in a **normal basis**, where `π` is a one-bit
+rotation of the coordinate word and the orbit is that word's `n`
+rotations: the key is the least of them. In a polynomial basis the same
+key is `1 + min_k x^{2^k}`, `n − 1` squarings, and that cost the fold
+most of what it was worth — 733 ns against 85, and 2.0× end to end
+against 3.3×.
+
+- `koblitz_fast::NormalBasis` builds the basis and is the key; the two
+  keys pick different representatives of the same orbit, so a folded
+  table is not portable across the change.
 - `PairSumTable::build_within` reaches for the fold as its last tier, when
-  neither the full nor the compact table fits the budget.
+  neither the full nor the compact table fits the budget. That is still
+  right after the cheaper key: what the fold buys is a *wider* base, and
+  the base is fixed by the time the tier is chosen.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
-  `O(|F|)` summand recovery a hit would otherwise charge to it.
+  `O(|F|)` summand recovery a hit would otherwise charge to it — one
+  target at a time, which is *not* how the `m = 3` scan probes and costs
+  roughly twice as much on a folded table; see the probe-shape bullet
+  below before quoting it.
 - `docs/ic/params/k0n61-subgroup-folded.json` asks for a 300000-point
   base, which only the folded tier can hold.
 - `examples/koblitz_orbit_fold_width.rs` is the measurement;
   `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
+- `examples/koblitz_fold_cost.rs` prices the canonicalisation on its own,
+  four ways: the squaring chain serially and eight points in flight, a
+  shift reduction for a sparse irreducible, and the normal-basis
+  rotation.  At `n = 61` that is 846.8 / 733.7 / 1299.3 ns against
+  **85.5**.
+- `examples/koblitz_orbit_fold_width.rs` also prices a probe in the three
+  shapes the code probes in, because they are far enough apart that "a
+  probe" has to say which.  Median of three runs at `n = 61`: one target
+  at a time the fold costs **2.8×**, blocked at the descent's own
+  `BLOCK = 1024` and prefetched **2.0×**, and inside the `m = 3` scan
+  itself **1.51×**.  What separates the columns of that last one is
+  **74 ns** a base point, and the canonicalisation measured alone is
+  **76** — so the fold's cost in the descent is the canon and nothing
+  else.  Read it down the columns: blocking buys the folded table
+  **1.83×** and the compact table, the control, **1.35×**, which is what
+  says the cause is the key's length.
+  `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, and what
+  it does not claim.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over
