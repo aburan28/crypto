@@ -692,8 +692,10 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
-Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node can
-post the same search as a `piecework` objective, where each distinguished
+Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node
+([download](https://github.com/aburan28/cairn/releases/latest), or
+`curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)
+can post the same search as a `piecework` objective, where each distinguished
 point is a verified artifact paid from a pool
 ([design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md),
 built in [aburan28/cairn#144](https://github.com/aburan28/cairn/pull/144)).
@@ -820,6 +822,16 @@ problems generally.
 the live [ECC2K-130 campaign status](https://aburan28.github.io/crypto/status/).
 Assembled from this repository by `scripts/site/build.py`; see
 [`scripts/site/README.md`](./scripts/site/README.md).
+
+**Contributing compute to ECC2K-130:** the walk is a Pollard rho over disjoint
+seed spaces, so any machine walking its own `--run-id` adds points to the same
+search. Run the client in [`ecc2k130/`](./ecc2k130/README.md#contribute-compute),
+or **[download cairn](https://github.com/aburan28/cairn/releases/latest)**
+(`curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)
+for the paid path, where a node is paid per verified distinguished point
+instead of per claimed hour. cairn's shipped rho objectives are prime-field
+today — an ECC2K-130 one needs a `GF(2^131)` checker cairn does not carry yet,
+so points on this curve are not payable through it until that lands.
 
 - [`SECURITY.md`](./SECURITY.md) — structural limitations + recommended alternatives.
 - [`AGENTS.md`](./AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
