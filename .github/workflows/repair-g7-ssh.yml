@@ -22,25 +22,46 @@ jobs:
           aws-region: us-west-2
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: Attach SSM profile
+      - name: Attach an existing SSM-capable profile
         env:
           INSTANCE_ID: i-04b1d89ecccfcc808
         run: |
           set -euo pipefail
-          assoc=$(aws ec2 describe-iam-instance-profile-associations --filters "Name=instance-id,Values=$INSTANCE_ID" --query 'IamInstanceProfileAssociations[0].AssociationId' --output text)
+          assoc=$(aws ec2 describe-iam-instance-profile-associations \
+            --filters "Name=instance-id,Values=$INSTANCE_ID" \
+            --query 'IamInstanceProfileAssociations[0].AssociationId' --output text)
           if [ -z "$assoc" ] || [ "$assoc" = None ]; then
-            aws ec2 associate-iam-instance-profile --instance-id "$INSTANCE_ID" --iam-instance-profile Name=ecc2k130-worker >/dev/null
+            profile_arn=$(aws ec2 describe-instances \
+              --filters 'Name=tag:Project,Values=ecc2k130' \
+              --query 'Reservations[].Instances[?IamInstanceProfile.Arn!=`null`].IamInstanceProfile.Arn | [0]' \
+              --output text)
+            if [ -z "$profile_arn" ] || [ "$profile_arn" = None ]; then
+              profile_arn=$(aws ec2 describe-instances \
+                --query 'Reservations[].Instances[?IamInstanceProfile.Arn!=`null`].IamInstanceProfile.Arn | [0]' \
+                --output text)
+            fi
+            [ -n "$profile_arn" ] && [ "$profile_arn" != None ] || { echo 'No existing EC2 instance profile ARN found' >&2; exit 1; }
+            echo "using profile ARN: $profile_arn"
+            aws ec2 associate-iam-instance-profile \
+              --instance-id "$INSTANCE_ID" \
+              --iam-instance-profile Arn="$profile_arn" >/dev/null
           fi
       - name: Enable SSH with SSM
         env:
           INSTANCE_ID: i-04b1d89ecccfcc808
         run: |
           set -euo pipefail
-          for i in $(seq 1 24); do
+          online=''
+          for i in $(seq 1 30); do
             status=$(aws ssm describe-instance-information --filters "Key=InstanceIds,Values=$INSTANCE_ID" --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null || true)
-            if [ "$status" = Online ]; then break; fi
+            echo "SSM status: ${status:-not-registered}"
+            if [ "$status" = Online ]; then online=1; break; fi
             sleep 10
           done
-          cmd=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name AWS-RunShellScript --parameters 'commands=["systemctl enable --now ssh || systemctl enable --now sshd","ss -ltn | grep ":22 "]' --query 'Command.CommandId' --output text)
+          [ -n "$online" ] || { echo 'G7 did not register with SSM' >&2; exit 1; }
+          cmd=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name AWS-RunShellScript \
+            --parameters 'commands=["systemctl enable --now ssh || systemctl enable --now sshd","ss -ltn | grep \":22 \"]' \
+            --query 'Command.CommandId' --output text)
           aws ssm wait command-executed --command-id "$cmd" --instance-id "$INSTANCE_ID"
-          aws ssm get-command-invocation --command-id "$cmd" --instance-id "$INSTANCE_ID" --query '{Status:Status,Stdout:StandardOutputContent,Stderr:StandardErrorContent}' --output json
+          aws ssm get-command-invocation --command-id "$cmd" --instance-id "$INSTANCE_ID" \
+            --query '{Status:Status,Stdout:StandardOutputContent,Stderr:StandardErrorContent}' --output json
