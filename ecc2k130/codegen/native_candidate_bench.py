@@ -77,9 +77,12 @@ def sass_counts(text):
                 opcodes=dict(counts), scope='static walk text section, including each out-of-line helper once')
 
 
-def compile_mode(mode, nvcc, out):
+def compile_mode(mode, nvcc, out, minblocks=None):
     square,karat=MODES[mode]
     flags=dict(FLAGS,ECC_PACKED_CLMAD_SQUARE=square,ECC_PACKED_KARAT3=karat)
+    if minblocks is not None:
+        if minblocks not in (2,3): raise ValueError('unsupported launch-bound experiment')
+        flags['ECC_MINBLOCKS']=minblocks
     common=[nvcc,'-O3','-std=c++17','-gencode','arch=compute_120,code=sm_120',
             '-Xptxas','-v','-lineinfo','-Xcompiler','-O3','-Xcompiler','-fopenmp']
     common+=['-D'+key+'='+str(value) for key,value in flags.items()]

@@ -766,6 +766,30 @@
     window.addEventListener('scroll', hide, { passive: true });
   })();
 </script>
+  <section aria-labelledby="goal28-profile-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-profile-result">ECC2K-130 Goal28: profiling and grid screen</h2>
+    <p><strong>28 B/s remains unmet.</strong> These measurements use one G7 RTX PRO 4500;
+      the historical 14.637530 B/s benchmark and 14.106673 B/s DP34 reference used an RTX PRO 6000.
+      G7e capacity was unavailable. No cross-GPU speedup or full-DLP speedup is inferred.</p>
+    <p><span class="chip">engineering</span> The generic-group boundary remains
+      &Omega;(&radic;(n / 262)). Every screened variant still costs 5.3125 field products per scalar update,
+      ratio 1.0 to control. The kernel experiment does not measure a new ECDLP exponent.</p>
+    <table><thead><tr><th scope="col">Workers</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">Correctness / status</th></tr></thead>
+      <tbody><tr><td>385,024 control</td><td>4.649429</td><td>1.000000</td><td>4.602291</td><td>1.000000</td><td>passed / screen</td></tr>
+      <tr><td>192,512</td><td>4.534123</td><td>0.975200</td><td>4.483364</td><td>0.974159</td><td>passed / slower</td></tr>
+      <tr><td>96,256</td><td>4.537225</td><td>0.975867</td><td>4.473096</td><td>0.971928</td><td>passed / slower</td></tr></tbody></table>
+    <p>Three repetitions per grid/workload, each completing 201,863,462,912 updates with zero drops.
+      Distinct seed panels across grids make this a tuning screen. First rows are retained without a
+      thermal-steady-state claim. Sorted DP multisets agree across repeats within each grid.</p>
+    <p>Nsight Systems: four walk kernels totaled 628.592 ms; five kernel-launch API calls totaled
+      0.113 ms in the short diagnostic trace. Synchronization waits overlap GPU execution.
+      Nsight Compute failed at kernel preparation in both full-set kernel replay and reduced-section
+      application replay. No hardware-counter bottleneck is claimed; profiler durations are excluded from timings.</p>
+    <p>Raw runner failures remain recorded. An offline archive audit revalidated the completed screen
+      after its postrun bookkeeping failure. Source:
+      <a href="../ecc2k130/benchmarks/goal28/profiling-summary.json">frozen measurement receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and raw evidence</a>.
+      No default or production preset is promoted.</p>
+  </section>
 </body>
 </html>
-
