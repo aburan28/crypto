@@ -41,3 +41,16 @@ Two constraints are worth knowing before moving anything:
 The dashboard's own JSON is published twice on purpose: the copies under
 `/status/` let the page use relative fetches, so it renders the same way when
 opened straight from the working tree.
+
+## Linking research evidence
+
+Research files are not included in the site artifact. Link to them with an
+absolute repository URL such as
+`https://github.com/aburan28/crypto/blob/main/research/<path>`.
+A relative `../research/<path>` link works from the source scoreboard in
+`docs/`, but points to a missing file after publication under `/scoreboard/`.
+
+Run both `python3 scripts/site/test_build.py` and
+`python3 scripts/rho_status/test_rho_status.py` before merging site changes.
+The pages share one publishing workflow: a broken link on the scoreboard
+fails the site checks and blocks new dashboard snapshots as well.
