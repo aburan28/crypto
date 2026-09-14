@@ -1,0 +1,12 @@
+{
+  "version": "2026-09-14.reuse-runner-1",
+  "reason": "The original runner stopped recording after 198 completed cold trials and remained busy for over 154 seconds without recording the next cell. The next scheduled cell was direct S3 enumeration on the identified fresh input; whether the stall was in the solver or harness was not localized. An isolated diagnostic of that cell completed correctly in 0.558 seconds, including an independent oracle check afterward.",
+  "affected_instance_sha256": "05704d888e88c63b2fd47165df468fe301c489053261418c8526ec0e760aa3e6",
+  "affected_variant": "pair-invariants-s3",
+  "affected_mode": "enumerate",
+  "interrupted_attempt": "Unresolved runner interruption; no result or operation counters were recovered. Do not fabricate zeros or attribute the entire stall to a solver phase.",
+  "continuation": "Preserve original raw.jsonl exactly. Execute only the remaining 90 scheduled cells, in their original frozen order and with unchanged solver source, support and three-second algorithm budgets. Isolate each cell in a fresh process with a ten-second outer watchdog. Retain worker startup/transfer overhead separately as harness work, like imports and serialization in the original runner.",
+  "analysis_rule": "Combine unique scheduled records for correctness and coverage. The affected original S3 cell remains unresolved in conservative completion counts and is excluded from all cost-ratio pairs even if its recovery run succeeds. Preserve the recovery record. The mixed runner configuration and single repetition prohibit a runtime claim; operation vectors remain scoped diagnostics. Any hard watchdog timeout has unknown primitive counters, never zero cost.",
+  "hard_watchdog_seconds": 10,
+  "batch": "Run the separately specified eight-target batch after continuation; retain algorithm source hashes and the new runner revision. No expansion of targets, dimensions or solver budgets."
+}
