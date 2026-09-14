@@ -963,6 +963,62 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="ec-baseline-20260914">
+    <div class="panel-head">
+      <h2>Imported EC index-calculus baseline</h2>
+      <p>Class <span class="chip">accounting</span>. Unmodified WDSat on selected
+        symmetrized S4 inputs. This import supplies certified solver controls and a
+        phase-accounting contract. It adds no full-DLP result or fitted exponent.
+        Primary unit remains total common operations divided by the square root
+        of subgroup order; unpriced costs remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Frozen source:
+        <a href="../research/index_calculus_baseline_20260914/summary.json">baseline summary</a>;
+        <a href="../research/index_calculus_baseline_20260914/pilot/results/pilot_results.json">raw measurements</a>.
+        The matched rho control is required before full-attack admission.</caption>
+      <thead><tr><th scope="col">Variant / reference</th><th scope="col">Full-DLP S</th>
+        <th scope="col">Cost / rho</th><th scope="col">Cost / floor</th>
+        <th scope="col">Correctness</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Unmodified WDSat, selected S4 corpus</td><td>Unmeasured</td>
+          <td>Unmeasured</td><td>Unmeasured</td><td>3 SAT relations; 3 exhaustive UNSAT checks; no DLP</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Matched automorphism-aware rho</td><td>Not run in this pilot</td>
+          <td>Unmeasured</td><td>Unmeasured</td><td>No scalar recovery in this pilot</td>
+          <td>Reference required</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Supplementary process observations below exclude verification and other
+        attack phases. Conflicts have no measured conversion to the common operation
+        unit. These selected inputs cannot estimate random-target yield or scaling.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Selected inputs, 3 process repetitions each. UNSAT checks exhaust
+        97,504 support triples in total; SAT relations are checked using group arithmetic.</caption>
+      <thead><tr><th scope="col">Input</th><th scope="col">Status</th>
+        <th scope="col" class="n">Conflicts</th><th scope="col" class="n">Median process seconds (secondary)</th></tr></thead>
+      <tbody>
+        <tr><td>n15l5-1-S</td><td>SAT, verified</td><td class="n">22</td><td class="n">0.00195</td></tr>
+        <tr><td>n15l5-11-U</td><td>UNSAT, verified</td><td class="n">5,593</td><td class="n">0.03530</td></tr>
+        <tr><td>n17l6-1-S</td><td>SAT, verified</td><td class="n">35,231</td><td class="n">0.30308</td></tr>
+        <tr><td>n17l6-11-U</td><td>UNSAT, verified</td><td class="n">43,976</td><td class="n">0.38809</td></tr>
+        <tr><td>n19l6-1-S</td><td>SAT, verified</td><td class="n">2,793</td><td class="n">0.01709</td></tr>
+        <tr><td>n19l6-11-U</td><td>UNSAT, verified</td><td class="n">44,050</td><td class="n">0.41052</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>The derived support-counting floor applies to attempts on independent
+        uniform targets with at most one fresh row per attempt. Converting it to an
+        operation floor requires an applicable per-attempt lower bound. It is not
+        a lower bound on all coordinate algorithms. See the
+        <a href="../research/index_calculus_baseline_20260914/EC_Index_Calculus_Performance_Baseline.md">report</a>
+        and <a href="../research/index_calculus_baseline_20260914/ec_index_calculus_contract.json">contract</a>.
+        Existing attack verdicts and exponents are unchanged.</p>
+    </div>
+  </div>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
