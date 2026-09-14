@@ -1323,6 +1323,51 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
 <div id="tip" role="status" aria-live="polite"></div>
 
+<section id="polynomial-reuse-20260914" style="margin:2rem 0;overflow-x:auto">
+<h2>Polynomial preprocessing and exact cache — engineering experiment</h2>
+<p>159 recorded processes; all 96 DLP outcomes match the reference (48 verified executions, 48 incomplete). Direct template reuse helps several solver-stage timings, but no end-to-end speedup is established. Full parameterized bases timed out in nine runs. All cache modes remain opt-in.</p>
+<p>Primary metric: total calibrated operations / sqrt(N), rho ratio, and floor ratio are unmeasured (null) for every row. No exponent or asymptotic improvement is claimed. Timings below are shared-host diagnostics; setup is charged.</p>
+<h3>Setup + encoding + F4 solving (milliseconds)</h3><table>
+<tr><th>n</th><th>ell</th><th>m</th><th>Variant</th><th>F4 stage ms</th><th>Candidate/reference</th><th>Template bytes</th><th>Parameter basis bytes</th><th>Correct/complete</th></tr>
+<tr><td>3</td><td>1</td><td>2</td><td>baseline</td><td>0.1013</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>1</td><td>2</td><td>template</td><td>0.0647</td><td>0.639</td><td>505</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>1</td><td>2</td><td>parameterized</td><td>0.1071</td><td>1.058</td><td>505</td><td>148</td><td>yes</td></tr>
+<tr><td>3</td><td>2</td><td>2</td><td>baseline</td><td>0.2646</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>2</td><td>2</td><td>template</td><td>0.2233</td><td>0.844</td><td>803</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>2</td><td>2</td><td>parameterized</td><td>32.9658</td><td>124.602</td><td>803</td><td>1360</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>2</td><td>baseline</td><td>0.8004</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>2</td><td>template</td><td>0.6717</td><td>0.839</td><td>1481</td><td>0</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>2</td><td>parameterized</td><td>3838.1820</td><td>4795.114</td><td>1481</td><td>3397</td><td>yes</td></tr>
+<tr><td>7</td><td>3</td><td>2</td><td>baseline</td><td>2.2725</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>7</td><td>3</td><td>2</td><td>template</td><td>2.0717</td><td>0.912</td><td>3226</td><td>0</td><td>yes</td></tr>
+<tr><td>7</td><td>3</td><td>2</td><td>parameterized</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3 × 30 s timeout</td></tr>
+<tr><td>9</td><td>3</td><td>2</td><td>baseline</td><td>1.5643</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>9</td><td>3</td><td>2</td><td>template</td><td>1.0716</td><td>0.685</td><td>4431</td><td>0</td><td>yes</td></tr>
+<tr><td>9</td><td>3</td><td>2</td><td>parameterized</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3 × 30 s timeout</td></tr>
+<tr><td>3</td><td>1</td><td>3</td><td>baseline</td><td>0.3671</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>1</td><td>3</td><td>template</td><td>0.3667</td><td>0.999</td><td>988</td><td>0</td><td>yes</td></tr>
+<tr><td>3</td><td>1</td><td>3</td><td>parameterized</td><td>1.1009</td><td>2.999</td><td>988</td><td>584</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>3</td><td>baseline</td><td>66.1723</td><td>1.000</td><td>0</td><td>0</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>3</td><td>template</td><td>65.3199</td><td>0.987</td><td>3982</td><td>0</td><td>yes</td></tr>
+<tr><td>5</td><td>2</td><td>3</td><td>parameterized</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3 × 30 s timeout</td></tr>
+</table>
+<h3>Full n=9 DLP workload (milliseconds across four seeds)</h3><table>
+<tr><th>Solver</th><th>Mode</th><th>Total elapsed ms</th><th>Candidate/reference</th><th>Verified</th></tr>
+<tr><td>groebner</td><td>reference</td><td>24.614</td><td>1.000</td><td>4/4</td></tr>
+<tr><td>groebner</td><td>off</td><td>24.232</td><td>0.984</td><td>4/4</td></tr>
+<tr><td>groebner</td><td>preprocess-local</td><td>25.723</td><td>1.045</td><td>4/4</td></tr>
+<tr><td>groebner</td><td>both-local</td><td>32.901</td><td>1.337</td><td>4/4</td></tr>
+<tr><td>groebner</td><td>both-redis-cold</td><td>46.544</td><td>1.891</td><td>4/4</td></tr>
+<tr><td>groebner</td><td>both-redis-warm</td><td>37.134</td><td>1.509</td><td>4/4</td></tr>
+<tr><td>sat</td><td>reference</td><td>10.612</td><td>1.000</td><td>4/4</td></tr>
+<tr><td>sat</td><td>off</td><td>12.564</td><td>1.184</td><td>4/4</td></tr>
+<tr><td>sat</td><td>preprocess-local</td><td>12.516</td><td>1.179</td><td>4/4</td></tr>
+<tr><td>sat</td><td>both-local</td><td>11.840</td><td>1.116</td><td>4/4</td></tr>
+<tr><td>sat</td><td>both-redis-cold</td><td>13.477</td><td>1.270</td><td>4/4</td></tr>
+<tr><td>sat</td><td>both-redis-warm</td><td>12.608</td><td>1.188</td><td>4/4</td></tr>
+</table>
+<p>Redis replay: 175 hits, zero cache errors. The 7-bit factor base has zero usable columns and its incomplete runs remain in the evidence. Parameterized-basis failures apply to this encoding and engine, not every possible reuse method.</p>
+<p>Source: <a href="../research/polynomial_reuse_20260914/RESULTS.md">measured results</a>, <a href="../research/polynomial_reuse_20260914/results/run-001/summary.json">comparison data</a>, and <a href="../research/polynomial_reuse_20260914/contract.json">frozen contract</a>.</p></section>
 <script>
   (function () {
     var tip = document.getElementById('tip');

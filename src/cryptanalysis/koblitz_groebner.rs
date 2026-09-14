@@ -124,6 +124,7 @@ pub const MAX_VARS: usize = 64;
 /// product are `F_2`-bilinear in the coordinates of the operands, with
 /// these structure constants.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct FieldStructure {
     /// Extension degree.
     pub n: u32,
@@ -157,6 +158,7 @@ impl FieldStructure {
 /// An element of `F_{2^n}` whose coordinates are Boolean polynomials —
 /// i.e. a symbolic field element in the Weil restriction.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct SymElement {
     /// `coords[k]` multiplies `z^k`.  Length `n`.
     pub coords: Vec<F2BoolPoly>,
@@ -413,6 +415,7 @@ pub fn sym_semaev_s4(
 /// The Boolean system whose roots are the `m`-point decompositions of a
 /// target with abscissa `x_r` over the subspace spanned by `basis`.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct DecompositionSystem {
     /// The equations, `n` per `S₃` link.
     pub equations: Vec<F2BoolPoly>,
@@ -1188,6 +1191,33 @@ fn reduce_system(
     n_vars: usize,
     engine: SolverEngine,
     stats: &mut SolveStats,
+) -> Option<Vec<F2BoolPoly>> {
+    use crate::cryptanalysis::algebra_cache::{self, Layer};
+    if !algebra_cache::enabled(Layer::ExactReduction) {
+        return reduce_system_uncached(system, n_vars, engine, stats);
+    }
+    let key = serde_json::to_vec(&(n_vars, format!("{engine:?}"), system)).unwrap();
+    let mut miss_oversize = 0;
+    let value: Option<(Vec<F2BoolPoly>, u32, usize)> = algebra_cache::memoize(
+        Layer::ExactReduction, &key, || {
+            let mut measured = SolveStats::default();
+            let rows = reduce_system_uncached(system, n_vars, engine, &mut measured);
+            // Preserve the metadata even when no reduction could be computed.
+            stats.max_degree_built = stats.max_degree_built.max(measured.max_degree_built);
+            miss_oversize = measured.oversize;
+            rows.map(|r| (r, measured.max_degree_built, measured.oversize))
+        });
+    stats.reductions += 1;
+    if value.is_none() { stats.oversize += miss_oversize; }
+    value.map(|(rows, degree, oversize)| {
+        stats.oversize += oversize;
+        stats.max_degree_built = stats.max_degree_built.max(degree);
+        rows
+    })
+}
+
+fn reduce_system_uncached(
+    system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine, stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     match engine {

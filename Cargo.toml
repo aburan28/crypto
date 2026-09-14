@@ -17,7 +17,11 @@ path = "src/bin/ic.rs"
 name = "crypto_lib"
 path = "src/lib.rs"
 
+[features]
+redis-cache = ["dep:redis"]
+
 [dependencies]
+redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }
 # Portable CPU-time and peak-RSS measurements for ic research reports.
 libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }
