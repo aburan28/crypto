@@ -12,17 +12,17 @@ permissions:
 jobs:
   add-key:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 22
     env:
       INSTANCE_ID: i-04b1d89ecccfcc808
       SUBNET_ID: subnet-0ffc4f0562edc244f
       SG_ID: sg-057bb9457c2b7173e
       YIOO_PUB_B64: c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUlHSU5VWHdLRWk0c1oyVktmaGVYemF2S3R1ck9BcDNVKys1cHpRaVJCUUwgeWlvbw==
+      YIOO_BLOB: AAAAC3NzaC1lZDI1NTE5AAAAIIGINUXwKEi4sZ2VKfheXzavKturOAp3U++5pzQiRBQL
     steps:
       - uses: actions/checkout@v4
         with:
           ref: infra/durable-g7e-devhost
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -47,7 +47,7 @@ jobs:
           aws ec2 detach-volume --volume-id "$ROOT_VOLUME" >/dev/null
           aws ec2 wait volume-available --volume-ids "$ROOT_VOLUME"
 
-      - name: Launch disposable helper
+      - name: Launch verifier helper
         run: |
           set -euo pipefail
           ami=$(aws ec2 describe-images --owners amazon \
@@ -56,64 +56,81 @@ jobs:
           test -n "$ami" && test "$ami" != None
           cat > /tmp/helper-userdata.sh <<EOF
           #!/bin/bash
-          exec > >(tee /var/log/yioo-helper.log | logger -t yioo-helper -s 2>/dev/console) 2>&1
+          exec >/dev/console 2>&1
           set +e
           TARGET_VOL="$ROOT_VOLUME"
           PUB_B64="$YIOO_PUB_B64"
+          EXPECTED_BLOB="$YIOO_BLOB"
           compact="\${TARGET_VOL//-/}"
+          echo "YIOO_HELPER_START target=\$TARGET_VOL"
           dev=''
           for i in \$(seq 1 120); do
+            for d in /dev/nvme*n1; do
+              [ -b "\$d" ] || continue
+              serial=\$(cat "/sys/block/\$(basename "\$d")/device/serial" 2>/dev/null | tr -d ' ' || true)
+              if [ "\$serial" = "\$compact" ]; then dev="\$d"; break 2; fi
+            done
             link="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_\${compact}"
             if [ -e "\$link" ]; then dev=\$(readlink -f "\$link"); break; fi
             sleep 2
           done
-          if [ -z "\$dev" ]; then echo YIOO_HELPER_NO_DEVICE >/dev/console; shutdown -h now; exit 2; fi
-          part=\$(lsblk -nrpo NAME,TYPE "\$dev" | awk '\$2=="part"{print \$1; exit}')
+          if [ -z "\$dev" ]; then echo YIOO_HELPER_NO_DEVICE; sleep 300; exit 2; fi
+          echo "YIOO_HELPER_DEVICE \$dev"
+          part=\$(lsblk -nrpo NAME,FSTYPE "\$dev" | awk '\$2=="ext4" || \$2=="xfs" {print \$1; exit}')
+          if [ -z "\$part" ]; then part=\$(lsblk -nrpo NAME,TYPE "\$dev" | awk '\$2=="part"{print \$1; exit}'); fi
           [ -n "\$part" ] || part="\$dev"
+          echo "YIOO_HELPER_FS \$part"
           mkdir -p /mnt/g7
-          if ! mount "\$part" /mnt/g7; then echo YIOO_HELPER_MOUNT_FAILED >/dev/console; shutdown -h now; exit 3; fi
+          if ! mount "\$part" /mnt/g7; then echo YIOO_HELPER_MOUNT_FAILED; sleep 300; exit 3; fi
           target=/mnt/g7/home/ubuntu/.ssh/authorized_keys
+          if [ ! -d /mnt/g7/home/ubuntu ]; then echo YIOO_HELPER_NO_UBUNTU_HOME; umount /mnt/g7; sleep 300; exit 4; fi
           mkdir -p /mnt/g7/home/ubuntu/.ssh
           [ -f "\$target" ] && cp -a "\$target" "\${target}.pre-yioo" || true
           pub=\$(printf '%s' "\$PUB_B64" | base64 -d)
-          blob=\$(printf '%s' "\$pub" | awk '{print \$2}')
           touch "\$target"
-          grep -F "\$blob" "\$target" >/dev/null || printf '%s\n' "\$pub" >> "\$target"
+          grep -F "\$EXPECTED_BLOB" "\$target" >/dev/null || printf '%s\n' "\$pub" >> "\$target"
           chmod 700 /mnt/g7/home/ubuntu/.ssh
           chmod 600 "\$target"
           owner=\$(stat -c '%u:%g' /mnt/g7/home/ubuntu)
           chown -R "\$owner" /mnt/g7/home/ubuntu/.ssh
-          grep -F "\$blob" "\$target" >/dev/null
+          if grep -F "\$EXPECTED_BLOB" "\$target" >/dev/null; then
+            echo "YIOO_KEY_INSTALLED \$EXPECTED_BLOB"
+          else
+            echo YIOO_KEY_VERIFY_FAILED
+          fi
           sync
           umount /mnt/g7
-          echo YIOO_KEY_INSTALLED >/dev/console
-          shutdown -h now
+          echo YIOO_HELPER_READY_FOR_DETACH
+          sleep 300
           EOF
           helper=$(aws ec2 run-instances \
             --image-id "$ami" --instance-type t3.micro \
             --subnet-id "$SUBNET_ID" --security-group-ids "$SG_ID" \
             --user-data file:///tmp/helper-userdata.sh \
-            --instance-initiated-shutdown-behavior stop \
-            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=yioo-key-helper},{Key=Purpose,Value=temporary-key-migration}]' \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=yioo-key-verifier},{Key=Purpose,Value=temporary-key-migration}]' \
             --query 'Instances[0].InstanceId' --output text)
           echo "HELPER_ID=$helper" >> "$GITHUB_ENV"
           aws ec2 wait instance-running --instance-ids "$helper"
           echo "helper=$helper"
 
-      - name: Attach G7 root to helper and wait for edit
+      - name: Attach root and prove yioo key is present
         run: |
           set -euo pipefail
           aws ec2 attach-volume --volume-id "$ROOT_VOLUME" --instance-id "$HELPER_ID" --device /dev/sdf >/dev/null
           aws ec2 wait volume-in-use --volume-ids "$ROOT_VOLUME"
-          stopped=''
-          for i in $(seq 1 90); do
-            state=$(aws ec2 describe-instances --instance-ids "$HELPER_ID" --query 'Reservations[0].Instances[0].State.Name' --output text)
-            if [ "$state" = stopped ]; then stopped=1; break; fi
+          ok=''
+          for i in $(seq 1 60); do
+            aws ec2 get-console-output --instance-id "$HELPER_ID" --latest --output text > /tmp/helper-console.txt 2>/dev/null || true
+            if grep -F "YIOO_KEY_INSTALLED $YIOO_BLOB" /tmp/helper-console.txt >/dev/null; then ok=1; break; fi
+            if grep -E 'YIOO_HELPER_(NO_DEVICE|MOUNT_FAILED|NO_UBUNTU_HOME)|YIOO_KEY_VERIFY_FAILED' /tmp/helper-console.txt; then
+              cat /tmp/helper-console.txt | tail -n 100
+              exit 1
+            fi
             sleep 5
           done
-          aws ec2 get-console-output --instance-id "$HELPER_ID" --latest --output text | tail -n 120 | tee /tmp/helper-console.txt || true
-          test -n "$stopped"
-          grep -F 'YIOO_KEY_INSTALLED' /tmp/helper-console.txt
+          cat /tmp/helper-console.txt | tail -n 100
+          test -n "$ok"
+          echo 'Verified yioo public key on G7 root filesystem'
 
       - name: Restore root volume and restart G7
         if: always()
@@ -132,9 +149,7 @@ jobs:
               aws ec2 wait volume-in-use --volume-ids "$ROOT_VOLUME"
             fi
           fi
-          if [ -n "${HELPER_ID:-}" ]; then
-            aws ec2 terminate-instances --instance-ids "$HELPER_ID" >/dev/null 2>&1 || true
-          fi
+          if [ -n "${HELPER_ID:-}" ]; then aws ec2 terminate-instances --instance-ids "$HELPER_ID" >/dev/null 2>&1 || true; fi
           aws ec2 start-instances --instance-ids "$INSTANCE_ID" >/dev/null
           aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
           aws ec2 wait instance-status-ok --instance-ids "$INSTANCE_ID"
