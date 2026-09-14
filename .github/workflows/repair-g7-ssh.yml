@@ -1,0 +1,46 @@
+name: Repair G7 SSH
+
+on:
+  push:
+    branches: [infra/durable-g7e-devhost]
+    paths: ['.github/workflows/repair-g7-ssh.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/durable-g7e-devhost
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Attach SSM profile
+        env:
+          INSTANCE_ID: i-04b1d89ecccfcc808
+        run: |
+          set -euo pipefail
+          assoc=$(aws ec2 describe-iam-instance-profile-associations --filters "Name=instance-id,Values=$INSTANCE_ID" --query 'IamInstanceProfileAssociations[0].AssociationId' --output text)
+          if [ -z "$assoc" ] || [ "$assoc" = None ]; then
+            aws ec2 associate-iam-instance-profile --instance-id "$INSTANCE_ID" --iam-instance-profile Name=ecc2k130-worker >/dev/null
+          fi
+      - name: Enable SSH with SSM
+        env:
+          INSTANCE_ID: i-04b1d89ecccfcc808
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            status=$(aws ssm describe-instance-information --filters "Key=InstanceIds,Values=$INSTANCE_ID" --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null || true)
+            if [ "$status" = Online ]; then break; fi
+            sleep 10
+          done
+          cmd=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name AWS-RunShellScript --parameters 'commands=["systemctl enable --now ssh || systemctl enable --now sshd","ss -ltn | grep ":22 "]' --query 'Command.CommandId' --output text)
+          aws ssm wait command-executed --command-id "$cmd" --instance-id "$INSTANCE_ID"
+          aws ssm get-command-invocation --command-id "$cmd" --instance-id "$INSTANCE_ID" --query '{Status:Status,Stdout:StandardOutputContent,Stderr:StandardErrorContent}' --output json
