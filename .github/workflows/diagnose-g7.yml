@@ -1,0 +1,47 @@
+name: Diagnose G7
+
+on:
+  push:
+    branches: [infra/durable-g7e-devhost]
+    paths: ['.github/workflows/diagnose-g7.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/durable-g7e-devhost
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: EC2 diagnostics
+        env:
+          INSTANCE_ID: i-04b1d89ecccfcc808
+          EXPECTED_IP: 184.34.70.106
+        run: |
+          set -euo pipefail
+          echo '--- instance ---'
+          aws ec2 describe-instances --instance-ids "$INSTANCE_ID" \
+            --query 'Reservations[0].Instances[0].{State:State.Name,Type:InstanceType,AZ:Placement.AvailabilityZone,PublicIp:PublicIpAddress,PrivateIp:PrivateIpAddress,Subnet:SubnetId,Vpc:VpcId,SGs:SecurityGroups,Profile:IamInstanceProfile}' --output json
+          echo '--- status checks ---'
+          aws ec2 describe-instance-status --instance-ids "$INSTANCE_ID" --include-all-instances \
+            --query 'InstanceStatuses[0].{State:InstanceState.Name,System:SystemStatus.Status,Instance:InstanceStatus.Status,Events:Events}' --output json
+          echo '--- elastic ip ---'
+          aws ec2 describe-addresses --public-ips "$EXPECTED_IP" \
+            --query 'Addresses[0].{PublicIp:PublicIp,InstanceId:InstanceId,AllocationId:AllocationId,AssociationId:AssociationId,PrivateIpAddress:PrivateIpAddress}' --output json
+          echo '--- security groups ---'
+          sg=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].SecurityGroups[0].GroupId' --output text)
+          aws ec2 describe-security-groups --group-ids "$sg" \
+            --query 'SecurityGroups[0].{GroupId:GroupId,IpPermissions:IpPermissions,IpPermissionsEgress:IpPermissionsEgress}' --output json
+          echo '--- tcp 22 from runner ---'
+          (nc -vz -w 5 "$EXPECTED_IP" 22 || true) 2>&1
+          echo '--- console output tail ---'
+          aws ec2 get-console-output --instance-id "$INSTANCE_ID" --latest --output text | tail -n 120 || true
