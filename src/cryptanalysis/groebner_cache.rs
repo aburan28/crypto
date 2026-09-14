@@ -42,13 +42,14 @@ impl GroebnerCache {
         let client = match redis::Client::open(url) {
             Ok(client) => client,
             Err(error) => {
-                warn_once(format!("invalid IC_GROEBNER_CACHE_URL; cache disabled: {error}"));
+                warn_once(format!(
+                    "invalid IC_GROEBNER_CACHE_URL; cache disabled: {error}"
+                ));
                 return None;
             }
         };
         let ttl_secs = parse_env_u64("IC_GROEBNER_CACHE_TTL_SECS", DEFAULT_TTL_SECS).max(1);
-        let max_bytes =
-            parse_env_usize("IC_GROEBNER_CACHE_MAX_BYTES", DEFAULT_MAX_BYTES).max(1);
+        let max_bytes = parse_env_usize("IC_GROEBNER_CACHE_MAX_BYTES", DEFAULT_MAX_BYTES).max(1);
         let namespace = std::env::var("IC_GROEBNER_CACHE_NAMESPACE")
             .ok()
             .filter(|value| !value.trim().is_empty())
@@ -84,17 +85,14 @@ impl GroebnerCache {
         format!("{}:f4:{}", self.namespace, hex::encode(digest.as_bytes()))
     }
 
-    fn get(
-        &self,
-        equations: &[F2BoolPoly],
-        n_vars: usize,
-        degree: u32,
-    ) -> Option<Vec<F2BoolPoly>> {
+    fn get(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
         let key = self.key(equations, n_vars, degree);
         let mut connection = match self.client.get_connection() {
             Ok(connection) => connection,
             Err(error) => {
-                warn_once(format!("ElastiCache read connection failed; bypassing cache: {error}"));
+                warn_once(format!(
+                    "ElastiCache read connection failed; bypassing cache: {error}"
+                ));
                 return None;
             }
         };
@@ -133,13 +131,7 @@ impl GroebnerCache {
         }
     }
 
-    fn put(
-        &self,
-        equations: &[F2BoolPoly],
-        n_vars: usize,
-        degree: u32,
-        rows: &[F2BoolPoly],
-    ) {
+    fn put(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32, rows: &[F2BoolPoly]) {
         let payload = CachedRows {
             version: CACHE_VERSION,
             n_vars,
@@ -159,7 +151,9 @@ impl GroebnerCache {
             return;
         };
         if let Err(error) = connection.set_ex::<_, _, ()>(&key, bytes, self.ttl_secs) {
-            warn_once(format!("ElastiCache write failed; continuing without cache: {error}"));
+            warn_once(format!(
+                "ElastiCache write failed; continuing without cache: {error}"
+            ));
         }
     }
 }
