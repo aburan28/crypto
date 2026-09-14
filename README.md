@@ -80,6 +80,10 @@ See [the ic guide](docs/ic/README.md) for the parameter schema, capabilities,
 limits, resource accounting, and report semantics. The original crypto
 command remains the default for cargo run.
 
+The [EC index-calculus baseline](research/index_calculus_baseline_20260914/README.md)
+adds counting bounds, an operation-accounting contract, and a certified WDSat control
+with frozen measurements and reproducible commands.
+
 ## Algorithm coverage
 
 ### Symmetric primitives
