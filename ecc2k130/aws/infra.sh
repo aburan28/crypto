@@ -18,7 +18,10 @@
 #           the bucket as S3 objects with conditional writes
 #   KEY_NAME  EC2 key pair for ssh (none = SSM only)
 #   SSH_CIDR  open port 22 from this CIDR (none = no ingress at all)
-#   ROOT_GB   root volume size, >= the AMI's 75 GB (default 100)
+#   ROOT_GB   root volume size, >= the AMI's 75 GB (default 150: the AMI takes
+#             75, and each GPU holds up to restartHours of points (~1 GB/day
+#             at 14 B iterations/s) plus a ~370 MB checkpoint and its copies,
+#             which is ~22 GB on the eight-GPU sizes)
 #   AMI       override the automatic Deep Learning Base AMI lookup
 
 set -euo pipefail
@@ -34,7 +37,7 @@ PROFILE=$STACK-worker
 SG=$STACK-worker
 LT=$STACK-worker
 KEY_NAME=${KEY_NAME:-}
-ROOT_GB=${ROOT_GB:-100}
+ROOT_GB=${ROOT_GB:-150}
 
 cmd=${1:-create}
 

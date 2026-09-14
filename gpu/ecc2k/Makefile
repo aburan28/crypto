@@ -31,9 +31,11 @@ vec_%.h: ecref2k.py
 	$(PY) ecref2k.py vectors --curve $* > $@
 
 define TEST_RULE
+# F2M_COUNT_OPS turns on the field-operation counters, so the per-step cost
+# table in README.md is counted by the harness rather than derived by hand.
 test_$(1): test_cpu2k.cpp $$(HDRS) curve_$(1).h vec_$(1).h
 	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' \
-	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -o $$@ $$<
+	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -DF2M_COUNT_OPS=1 -o $$@ $$<
 
 # The |F|^2 pair table: batched row sums against unbatched addition.
 test_pt_$(1): test_pairtable.cpp $$(HDRS) curve_$(1).h vec_$(1).h

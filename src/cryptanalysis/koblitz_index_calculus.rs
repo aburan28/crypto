@@ -138,7 +138,7 @@ use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
-use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
+use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, split_rule_default,
     FieldStructure, SolveOptions, SolveStats, SolverEngine,
@@ -2150,6 +2150,69 @@ fn pair_filter_hash(key: u64) -> u64 {
 /// `|F|²` lookups of `R − (P_k + P_l)` walked off the table itself.
 /// The factor-base search uses the same table to count *every*
 /// witness of a target, which is what exact yield needs.
+/// **Packed base point to its index**, open-addressed.
+///
+/// [`PairSumTable::recover_pair`] asks this `|F|` times for every witness
+/// a search finds, so on a wide base it is one of the two things the
+/// recovery scan is made of.  A `std::collections::HashMap` answers it
+/// through SipHash, which is tens of nanoseconds on a `u64` key before
+/// any memory is touched — a strong hash bought for keys that are
+/// already the output of a packing, and paid `|F|` times over.
+///
+/// This uses the hash the presence filter already computes and probes
+/// linearly.  A packed affine point is `2(x + 1) + s ≥ 2`, so zero is
+/// free to mean *empty* and no separate occupancy word is needed.
+#[derive(Clone, Debug, Default)]
+struct PointIndex {
+    /// `(packed point, index)`, zero key for an empty slot.
+    slots: Vec<(u64, u32)>,
+    mask: usize,
+}
+
+impl PointIndex {
+    /// Load factor one half, rounded to a power of two.
+    fn build(points: &[FastPoint]) -> Self {
+        let capacity = (points.len() * 2).next_power_of_two().max(2);
+        let mut index = Self {
+            slots: vec![(0, 0); capacity],
+            mask: capacity - 1,
+        };
+        for (i, p) in points.iter().enumerate() {
+            let key = p.pack();
+            if key == 0 {
+                continue;
+            }
+            let mut at = (pair_filter_hash(key) as usize) & index.mask;
+            while index.slots[at].0 != 0 {
+                if index.slots[at].0 == key {
+                    break;
+                }
+                at = (at + 1) & index.mask;
+            }
+            index.slots[at] = (key, i as u32);
+        }
+        index
+    }
+
+    #[inline]
+    fn get(&self, key: u64) -> Option<u32> {
+        if key == 0 || self.slots.is_empty() {
+            return None;
+        }
+        let mut at = (pair_filter_hash(key) as usize) & self.mask;
+        loop {
+            let (k, i) = self.slots[at];
+            if k == 0 {
+                return None;
+            }
+            if k == key {
+                return Some(i);
+            }
+            at = (at + 1) & self.mask;
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
@@ -2180,7 +2243,7 @@ pub struct PairSumTable {
     rests: Vec<u32>,
     /// `pack()` of each base point to its index, for recovering the
     /// summands of a compact hit.  `|F|` entries, not `|F|²`.
-    index_of_point: HashMap<u64, u32>,
+    index_of_point: PointIndex,
     /// Single-word arithmetic on the curve, for the table build and the
     /// `|F|` subtractions of a three-summand search.
     curve: FastCurve,
@@ -2202,6 +2265,36 @@ pub struct PairSumTable {
     /// few.  No false negatives, so the answer is unchanged.
     present: Vec<u64>,
     present_mask: u64,
+    /// Whether the stored keys are folded by the signed Frobenius group
+    /// `G = ⟨π, −1⟩`.
+    ///
+    /// The factor base is closed under `π` and under negation, so the
+    /// set of pair sums is closed under both too — `π(P_i + P_j) =
+    /// π(P_i) + π(P_j)` and `−(P_i + P_j) = (−P_i) + (−P_j)` are again
+    /// sums of base points.  A table answering `rest ∈ S?` therefore
+    /// needs one key per `G`-orbit rather than one per pair, which is
+    /// `2n` times fewer, and at a fixed budget that is a base `√(2n)`
+    /// times wider and a descent dividing `2r/|F|²` by `2n`.
+    ///
+    /// What it costs is that a lookup must canonicalise first
+    /// ([`Self::canon_key`]), which is `n − 1` squarings — so the fold
+    /// is taken only when the unfolded table would not fit at all, and
+    /// the tiers in [`Self::build_within`] reach for it last.
+    fold: bool,
+    /// The basis change that makes a canonical key a rotation rather
+    /// than a chain of squarings.  `None` on an unfolded table, and on a
+    /// folded one only if no normal element was found — in which case
+    /// the squaring chain stands, giving the same answers more slowly.
+    canon: Option<FrobeniusCanon>,
+    /// The signed Frobenius orbits of the base, as a flat CSR: orbit `o`
+    /// is `orbit_members[orbit_start[o]..orbit_start[o + 1]]`, holding
+    /// indices into `points`.  `|F|` entries in all.  Empty unless the
+    /// table is folded and carries orbit tags.
+    orbit_start: Vec<u32>,
+    orbit_members: Vec<u32>,
+    /// Whether a stored word is `(orbit << 16) | rest16` rather than a
+    /// full 32-bit rest.  See [`Self::compact_rest`].
+    tagged: bool,
 }
 
 impl PairSumTable {
@@ -2234,6 +2327,43 @@ impl PairSumTable {
     pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
         let pairs = Self::pair_count(points);
         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
+        pairs * 4 + buckets * 4 + pairs / 2
+    }
+
+    /// Stored keys for a folded table: one per `(orbit representative,
+    /// base point)` pair.
+    ///
+    /// Every `G`-orbit of ordered pairs is reached: given `(P, Q)`, let
+    /// `g ∈ G` carry `P` to the representative `R` of its own signed
+    /// orbit; then `(R, gQ)` lies in the same orbit of pairs and is
+    /// enumerated.  That holds whatever the stabilisers are, so the
+    /// enumeration is onto the orbits and the table has no false
+    /// negatives — it is only redundant, by the factor two that the
+    /// unordered `i ≤ j` symmetry would otherwise remove.
+    fn folded_pair_count(orbits: usize, points: usize) -> u128 {
+        // Row `α` walks only the points in orbits `≥ α`, which over all
+        // rows is half the rectangle: each sum orbit is stored once
+        // rather than once from each of its two summands.
+        orbits as u128 * points as u128 / 2 + points as u128
+    }
+
+    /// Bits of a canonical key: `1 + min_k x^{2^k}` is at most `2^n`.
+    fn folded_key_bits(degree: u32) -> u32 {
+        degree + 1
+    }
+
+    /// [`Self::compact_bucket_bits`] for a canonical key, which is one
+    /// bit narrower than a packed point rather than one wider — so the
+    /// bucket index has to be clamped to it, or the shift underflows at
+    /// the small degrees where run length would ask for everything.
+    fn folded_bucket_bits(pairs: u128, degree: u32) -> u32 {
+        Self::compact_bucket_bits(pairs, degree).min(Self::folded_key_bits(degree))
+    }
+
+    /// [`Self::compact_byte_size`] for the folded table.
+    pub fn folded_byte_size(orbits: usize, points: usize, degree: u32) -> u128 {
+        let pairs = Self::folded_pair_count(orbits, points);
+        let buckets = 1u128 << Self::folded_bucket_bits(pairs, degree);
         pairs * 4 + buckets * 4 + pairs / 2
     }
 
@@ -2310,7 +2440,7 @@ impl PairSumTable {
         Some(Self {
             entries,
             rests: Vec::new(),
-            index_of_point: HashMap::new(),
+            index_of_point: PointIndex::default(),
             curve,
             points,
             negated,
@@ -2318,6 +2448,11 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            fold: false,
+            canon: None,
+            orbit_start: Vec::new(),
+            orbit_members: Vec::new(),
+            tagged: false,
         })
     }
 
@@ -2339,7 +2474,12 @@ impl PairSumTable {
             return None;
         }
         if Self::compact_byte_size(n_points, kc.n) > byte_budget {
-            return None;
+            // Folding by the signed Frobenius group stores `2n` times
+            // fewer keys, so a base too wide even for the compact table
+            // may still fit — at the cost of canonicalising every
+            // lookup.  It is the last tier because for a base that fits
+            // without it the fold only spends squarings.
+            return Self::build_folded_within(kc, fb, byte_budget);
         }
         let pairs = Self::pair_count(n_points);
         if pairs > u32::MAX as u128 {
@@ -2408,11 +2548,7 @@ impl PairSumTable {
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
             .collect();
-        let index_of_point = points
-            .iter()
-            .enumerate()
-            .map(|(i, p)| (p.pack(), i as u32))
-            .collect();
+        let index_of_point = PointIndex::build(&points);
         Some(Self {
             entries: Vec::new(),
             rests,
@@ -2424,6 +2560,180 @@ impl PairSumTable {
             bucket_shift,
             present,
             present_mask,
+            fold: false,
+            canon: None,
+            orbit_start: Vec::new(),
+            orbit_members: Vec::new(),
+            tagged: false,
+        })
+    }
+
+    /// **The folded table**: one key per orbit of the signed Frobenius
+    /// group, built by walking `i` over one representative of each
+    /// signed orbit and `j` over the whole base.
+    ///
+    /// That enumerates `|F|²/2n` pairs rather than `|F|²/2`, so nothing
+    /// quadratic is canonicalised that need not be, and the keys it
+    /// produces cover every orbit the full enumeration would reach.
+    /// Duplicate `(bucket, rest)` pairs are left in place: two keys that
+    /// agree there are indistinguishable to a lookup anyway, so storing
+    /// one twice costs four bytes and can never lose an answer.
+    fn build_folded_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        let n_points = fb.points.len();
+        if n_points > u32::MAX as usize {
+            return None;
+        }
+        // One representative per signed Frobenius orbit.
+        // `(orbit index, representative point)`, keeping the orbit's own
+        // index rather than a position among the non-empty ones: the
+        // stored tag names an orbit of `signed_orbits`, and the two
+        // would drift apart if any orbit were empty.
+        let reps: Vec<(u32, usize)> = fb
+            .signed_orbits
+            .iter()
+            .enumerate()
+            .filter_map(|(o, orbit)| orbit.first().map(|&i| (o as u32, i)))
+            .collect();
+        if reps.is_empty() {
+            return None;
+        }
+        if Self::folded_byte_size(reps.len(), n_points, kc.n) > byte_budget {
+            return None;
+        }
+        let pairs = Self::folded_pair_count(reps.len(), n_points);
+        if pairs > u32::MAX as u128 {
+            return None;
+        }
+        let curve = FastCurve::new(&kc.curve)?;
+        // The normal basis, once, for the whole table: the build
+        // canonicalises every stored pair and every lookup canonicalises
+        // its target, and the two must name orbits the same way.
+        let canon = FrobeniusCanon::new(&curve.field, curve.n);
+        // A canonical key is one bit wider than an abscissa and two
+        // narrower than a packed point.
+        let bucket_bits = Self::folded_bucket_bits(pairs, curve.n);
+        // Buckets come off the top of the key's hash, not the key: see
+        // [`Self::bucket_of`] for why a canonical key cannot be bucketed
+        // on its own high bits.
+        let bucket_shift = 64 - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+
+        // The orbit of one summand survives the fold, because `G` maps
+        // orbits to themselves — so tagging each stored word with it
+        // turns recovery from a walk of the base into a walk of `2n`
+        // points.  It fits in the rest's high half and costs no memory;
+        // only a base with more orbits than a tag can name goes without.
+        let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
+        // **Half the rows again.**  A sum orbit is enumerated twice, once
+        // from each of its two summands' orbits, and one of the two is
+        // enough: keeping the entry whose row is the *smaller* of the two
+        // orbits stores each sum orbit once and still tags it with an
+        // orbit a summand really lies in.
+        //
+        // The rule is "row `α` keeps `j` only when `orbit(j) ≥ α`", and
+        // covering survives it: given `rest = P_a + P_b` with
+        // `orbit(a) = α ≤ β = orbit(b)`, the `g` carrying `P_a` to
+        // `rep(α)` puts `g · rest` in row `α` with its second summand in
+        // orbit `β ≥ α`, so `canon(rest)` is still produced.  Row `β`
+        // skips the mirror image, and nothing else does.
+        //
+        // Ordering the base by orbit makes "orbit at least `α`" a
+        // suffix, so a row is a slice and no addend list is ever built.
+        let orbit_of_point: Vec<u32> = fb.signed_orbit_of.iter().map(|&(o, _, _)| o as u32).collect();
+        let mut order: Vec<u32> = (0..n_points as u32).collect();
+        order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
+        let by_orbit: Vec<FastPoint> = order.iter().map(|&i| points[i as usize]).collect();
+        // `suffix[o]` is where the points of orbit `o` begin.
+        let mut suffix = vec![0u32; fb.signed_orbits.len() + 1];
+        for (position, &i) in order.iter().enumerate() {
+            suffix[orbit_of_point[i as usize] as usize + 1] = position as u32 + 1;
+        }
+        for o in 0..fb.signed_orbits.len() {
+            suffix[o + 1] = suffix[o + 1].max(suffix[o]);
+        }
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
+            let mut sums = Vec::with_capacity(n_points);
+            let mut scratch = BatchScratch::default();
+            let (orbit, rep) = reps[r];
+            let from = suffix[orbit as usize] as usize;
+            curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
+            for &p in &sums {
+                f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
+            }
+        };
+        (0..reps.len()).into_par_iter().for_each(|r| {
+            each_row(r, &mut |key, _| {
+                let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
+            });
+        });
+        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        let total = bucket_start[buckets] as usize;
+        let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+        let mut rests = vec![0u32; total];
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let words = (1usize << filter_bits) / 64;
+        let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+        let slots = rests.as_mut_ptr() as usize;
+        (0..reps.len()).into_par_iter().for_each(|r| {
+            each_row(r, &mut |key, orbit| {
+                let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+                // SAFETY: `slot` is this pair's own index, handed out
+                // once by the bucket's cursor and inside the run the
+                // counting pass measured for that bucket.
+                unsafe {
+                    *(slots as *mut u32).add(slot) = if tagged {
+                        Self::tagged_rest(key, orbit)
+                    } else {
+                        Self::compact_rest(key)
+                    };
+                }
+                let h = (pair_filter_hash(key) & present_mask) as usize;
+                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+            });
+        });
+        let present: Vec<u64> = present_atomic
+            .iter()
+            .map(|w| w.load(Ordering::Relaxed))
+            .collect();
+        let index_of_point = PointIndex::build(&points);
+        // The orbits flat, in the order `reps` indexes them, so a tag is
+        // a slice of `orbit_members` and nothing is allocated per hit.
+        let mut orbit_start = Vec::with_capacity(fb.signed_orbits.len() + 1);
+        let mut orbit_members: Vec<u32> = Vec::with_capacity(n_points);
+        orbit_start.push(0u32);
+        for orbit in &fb.signed_orbits {
+            orbit_members.extend(orbit.iter().map(|&i| i as u32));
+            orbit_start.push(orbit_members.len() as u32);
+        }
+        Some(Self {
+            entries: Vec::new(),
+            rests,
+            index_of_point,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+            fold: true,
+            canon,
+            orbit_start,
+            orbit_members,
+            tagged,
         })
     }
 
@@ -2446,6 +2756,163 @@ impl PairSumTable {
     /// Only one of them fits.
     fn compact_rest(key: u64) -> u32 {
         pair_filter_hash(key) as u32
+    }
+
+    /// **The stored word of a folded, tagged table**: the orbit of one
+    /// summand in the high half, sixteen bits of the key's hash in the
+    /// low half.
+    ///
+    /// This is the whole of the recovery fix, and it costs no memory at
+    /// all — it spends half the rest rather than adding a field.
+    ///
+    /// A folded entry was built as `canon(P_{rep(r)} + P_j)`, so a
+    /// target whose key matches it satisfies `g · target = P_{rep(r)} +
+    /// P_j` for some `g ∈ G`, and therefore `target = g⁻¹P_{rep(r)} +
+    /// g⁻¹P_j` with the first summand somewhere in the *same signed
+    /// orbit* `r` — orbits being what `G` preserves.  So recovery need
+    /// not walk the base at all: it walks the `2n` points of orbit `r`.
+    /// That is `O(n)` where it was `O(|F|)`, 122 points against 177632.
+    ///
+    /// The price is a shorter rest.  A bucket holds about sixteen, so a
+    /// sixteen-bit rest lets a probe through wrongly about one time in
+    /// four thousand rather than one in `2²⁸` — and a wrong admission
+    /// now costs an orbit walk of a few microseconds instead of a scan
+    /// of the base.  Over the seventeen thousand probes a decomposition
+    /// spends that is some four false positives and tens of
+    /// microseconds, against the milliseconds the shortened scan saves.
+    /// Still no false negatives: the hash is computed the same way on
+    /// both sides, and the group has the last word either way.
+    #[inline]
+    fn tagged_rest(key: u64, orbit: u32) -> u32 {
+        (orbit << 16) | (pair_filter_hash(key) as u32 & 0xffff)
+    }
+
+    /// Largest orbit count a tag can name.
+    const MAX_TAGGED_ORBITS: usize = 1 << 16;
+
+    /// **The canonical key of a point under `⟨π, −1⟩`**: the least
+    /// abscissa in its Frobenius orbit, plus one so that `O` can be `0`.
+    ///
+    /// Negation never moves the abscissa — `−(x, y) = (x, x + y)` — so
+    /// the sign half of the fold costs nothing at all, and `π` acts on
+    /// the abscissa as a squaring.  The key is therefore
+    /// `1 + min_k x^{2^k}`, which takes `n − 1` squarings and a running
+    /// minimum and no memory at all.
+    ///
+    /// It is a key, not a point: it identifies the orbit and nothing
+    /// else.  Recovering which base points actually sum to a target is
+    /// done in the group, by [`Self::recover_pair`], and is unaffected.
+    #[inline]
+    fn canon_key(curve: &FastCurve, p: FastPoint) -> u64 {
+        Self::canon_key_with(curve, None, p)
+    }
+
+    /// [`Self::canon_key`] using a normal basis when one is in hand.
+    ///
+    /// The two disagree on what an orbit is *called* — one takes the
+    /// least element of the Frobenius orbit, the other the least
+    /// rotation of the normal coordinates — and agree exactly on which
+    /// points share a name, which is all a key has to do.  A table is of
+    /// course built and queried with the same one.
+    #[inline]
+    fn canon_key_with(curve: &FastCurve, canon: Option<&FrobeniusCanon>, p: FastPoint) -> u64 {
+        if p.infinity {
+            return 0;
+        }
+        if let Some(canon) = canon {
+            return canon.canon(p.x) + 1;
+        }
+        let mut x = p.x;
+        let mut best = x;
+        for _ in 1..curve.n {
+            x = curve.field.sqr(x);
+            if x < best {
+                best = x;
+            }
+        }
+        best + 1
+    }
+
+    /// The key this table stores a point under: the packed point, or its
+    /// orbit's canonical key when the table is folded.
+    #[inline]
+    fn key_of(&self, p: FastPoint) -> u64 {
+        if self.fold {
+            Self::canon_key_with(&self.curve, self.canon.as_ref(), p)
+        } else {
+            p.pack()
+        }
+    }
+
+    /// [`Self::key_of`] over a slice, keeping `LANES` canonicalisations
+    /// in flight.
+    ///
+    /// A squaring chain is a dependency chain, so one point at a time
+    /// runs at the latency of `n − 1` squarings; a decomposition scan
+    /// has a whole row of rests in hand at once and none of them depend
+    /// on each other.  Interleaving them turns the chain from
+    /// latency-bound into throughput-bound.  `out` is cleared first.
+    fn keys_of(&self, points: &[FastPoint], out: &mut Vec<u64>) {
+        out.clear();
+        if !self.fold {
+            out.extend(points.iter().map(|p| p.pack()));
+            return;
+        }
+        if let Some(canon) = self.canon.as_ref() {
+            // A rotation has no dependency chain worth interleaving.
+            out.extend(points.iter().map(|p| {
+                if p.infinity {
+                    0
+                } else {
+                    canon.canon(p.x) + 1
+                }
+            }));
+            return;
+        }
+        const LANES: usize = 8;
+        let n = self.curve.n;
+        let field = &self.curve.field;
+        out.resize(points.len(), 0);
+        for (chunk, keys) in points.chunks(LANES).zip(out.chunks_mut(LANES)) {
+            let mut x = [0u64; LANES];
+            let mut best = [0u64; LANES];
+            for (l, &p) in chunk.iter().enumerate() {
+                x[l] = p.x;
+                best[l] = p.x;
+            }
+            for _ in 1..n {
+                for l in 0..chunk.len() {
+                    x[l] = field.sqr(x[l]);
+                    if x[l] < best[l] {
+                        best[l] = x[l];
+                    }
+                }
+            }
+            for (l, &p) in chunk.iter().enumerate() {
+                keys[l] = if p.infinity { 0 } else { best[l] + 1 };
+            }
+        }
+    }
+
+    /// Which representation this table is, for a run to record.
+    ///
+    /// The tiers differ by an order of magnitude in build cost and in
+    /// resident memory, and a run that selected a different one than its
+    /// author believed looks exactly like a run that did not.  A report
+    /// that does not name the tier cannot be compared with another.
+    pub fn tier(&self) -> &'static str {
+        if self.fold {
+            "folded"
+        } else if self.is_compact() {
+            "compact"
+        } else {
+            "full"
+        }
+    }
+
+    /// Whether this table folds its keys by the signed Frobenius group.
+    pub fn is_folded(&self) -> bool {
+        self.fold
     }
 
     /// Whether this table keeps the summands of each pair.
@@ -2471,6 +2938,26 @@ impl PairSumTable {
         &self.curve
     }
 
+    /// The bucket a key's run lives in.
+    ///
+    /// An unfolded table keys on the packed point, whose abscissa is
+    /// spread evenly over the field, so its high bits are a fair bucket.
+    /// A *canonical* key is not: it is a minimum over the `n` rotations
+    /// of a word, and a minimum of `n` draws sits far below the middle
+    /// of the range.  Bucketing on those high bits piles the whole table
+    /// into the first few buckets — the presence filter hides it,
+    /// because a probe that misses never reaches a run, but every hit
+    /// then walks an enormous one.  The hash the filter and the rest are
+    /// already made of is flat, so a folded table buckets on that.
+    #[inline]
+    fn bucket_of(&self, key: u64) -> usize {
+        if self.fold {
+            (pair_filter_hash(key) >> self.bucket_shift) as usize
+        } else {
+            (key >> self.bucket_shift) as usize
+        }
+    }
+
     /// Index of the filter word holding this key's bit.
     #[inline]
     fn filter_word(&self, key: u64) -> usize {
@@ -2492,7 +2979,7 @@ impl PairSumTable {
     /// representation.
     #[inline]
     pub fn lookup(&self, key: u64) -> &[(u64, u32, u32)] {
-        if self.is_compact() || !self.admitted(key) {
+        if self.is_compact() || self.fold || !self.admitted(key) {
             return &[];
         }
         self.lookup_admitted(key)
@@ -2504,15 +2991,45 @@ impl PairSumTable {
     /// negative, and a false positive about one time in `2²⁸`, which
     /// costs a recovery scan that comes back empty.
     fn compact_contains(&self, key: u64) -> bool {
-        let bucket = (key >> self.bucket_shift) as usize;
+        let bucket = self.bucket_of(key);
         let Some(&lo) = self.bucket_start.get(bucket) else {
             return false;
         };
         let hi = self.bucket_start[bucket + 1];
-        let rest = Self::compact_rest(key);
+        let run = &self.rests[lo as usize..hi as usize];
         // A run holds about sixteen rests, which is one cache line: a
         // scan beats a search and spares the build any ordering.
-        self.rests[lo as usize..hi as usize].contains(&rest)
+        if self.tagged {
+            let rest = (pair_filter_hash(key) as u32) & 0xffff;
+            return run.iter().any(|&w| w & 0xffff == rest);
+        }
+        run.contains(&Self::compact_rest(key))
+    }
+
+    /// The orbits a tagged table offers for this key, as the high halves
+    /// of the run's matching words.  `out` is cleared first.
+    fn candidate_orbits(&self, key: u64, out: &mut Vec<u32>) {
+        out.clear();
+        let bucket = self.bucket_of(key);
+        let Some(&lo) = self.bucket_start.get(bucket) else {
+            return;
+        };
+        let hi = self.bucket_start[bucket + 1];
+        let rest = (pair_filter_hash(key) as u32) & 0xffff;
+        for &word in &self.rests[lo as usize..hi as usize] {
+            if word & 0xffff == rest {
+                out.push(word >> 16);
+            }
+        }
+        // Sorted rather than checked on the way in.  A run normally
+        // yields one orbit and either would do, but a degenerate key can
+        // yield thousands — `O` is the sum of every `±` pair, so every
+        // orbit representative stores one — and a linear membership test
+        // per push makes that quadratic.
+        if out.len() > 1 {
+            out.sort_unstable();
+            out.dedup();
+        }
     }
 
     /// The summands of a pair the compact table holds, recovered by one
@@ -2520,27 +3037,135 @@ impl PairSumTable {
     /// `i` is a summand.  Paid on a hit, which is rare — that is the
     /// trade the compact table makes.
     fn recover_pair(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
-        let mut rests = Vec::with_capacity(self.points.len());
+        // A block at a time rather than the whole base at once: the
+        // differences are written and then read back exactly once, and
+        // at `|F| = 177632` a buffer for all of them is four megabytes
+        // that leaves the cache before it is used.  One batched
+        // inversion per block is still one per thousand additions.
+        const BLOCK: usize = 4096;
+        let mut rests = Vec::with_capacity(BLOCK);
         let mut scratch = BatchScratch::default();
-        self.curve
-            .add_many(target, &self.negated, &mut rests, &mut scratch);
-        for (i, rest) in rests.iter().enumerate() {
-            if rest.infinity {
-                continue;
-            }
-            if let Some(&j) = self.index_of_point.get(&rest.pack()) {
-                if i as u32 <= j {
-                    out.push((i as u32, j));
+        if self.tagged {
+            self.recover_pair_tagged(target, out);
+            return;
+        }
+        for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
+            rests.clear();
+            self.curve.add_many(target, addends, &mut rests, &mut scratch);
+            for (offset, rest) in rests.iter().enumerate() {
+                if rest.infinity {
+                    continue;
+                }
+                if let Some(j) = self.index_of_point.get(rest.pack()) {
+                    let i = (b * BLOCK + offset) as u32;
+                    if i <= j {
+                        out.push((i, j));
+                    }
                 }
             }
+        }
+    }
+
+    /// **Whether `target` is a sum of two base points**, without
+    /// recovering which two.
+    ///
+    /// This is the probe the descent actually spends: a decomposition
+    /// search asks this `2r/|F|²` times and recovers summands only on
+    /// the rare hit.  Separating it matters for measurement as well as
+    /// for callers — on a wide base the recovery scan is `O(|F|)` and
+    /// would otherwise be charged to the probes it sits among.
+    ///
+    /// A `false` is certain.  A `true` may be a false positive of the
+    /// stored rest, about one time in `2²⁸`, which [`Self::pairs_for`]
+    /// then resolves in the group.
+    pub fn contains_pair(&self, target: FastPoint) -> bool {
+        self.contains_key(self.probe_key(target))
+    }
+
+    /// The key half of [`Self::contains_pair`], exposed so a benchmark
+    /// can time the two halves apart.
+    #[doc(hidden)]
+    pub fn probe_key(&self, target: FastPoint) -> u64 {
+        self.key_of(target)
+    }
+
+    /// The prefetch the blocked descent loop issues ahead of a key,
+    /// exposed so a benchmark can model that loop exactly.
+    #[doc(hidden)]
+    pub fn prefetch_key(&self, key: u64) {
+        prefetch(&self.present[self.filter_word(key)]);
+    }
+
+    /// The lookup half of [`Self::contains_pair`].
+    #[doc(hidden)]
+    pub fn contains_key(&self, key: u64) -> bool {
+        if !self.admitted(key) {
+            return false;
+        }
+        if self.is_compact() {
+            return self.compact_contains(key);
+        }
+        !self.lookup_admitted(key).is_empty()
+    }
+
+    /// [`Self::recover_pair`] on a tagged folded table: the `2n` points
+    /// of each candidate orbit rather than the whole base.
+    ///
+    /// The stored word names the signed orbit one summand lies in
+    /// ([`Self::tagged_rest`]), so the search is over that orbit alone.
+    /// It is still the group that decides: `target − P` is a base point
+    /// or it is not, so a tag that came from a sixteen-bit collision
+    /// costs this walk and yields nothing.
+    fn recover_pair_tagged(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+        let key = self.key_of(target);
+        let mut orbits = Vec::new();
+        self.candidate_orbits(key, &mut orbits);
+        let mut rests = Vec::new();
+        let mut scratch = BatchScratch::default();
+        let mut addends = Vec::new();
+        for orbit in orbits {
+            let (lo, hi) = (orbit as usize, orbit as usize + 1);
+            let (Some(&start), Some(&end)) =
+                (self.orbit_start.get(lo), self.orbit_start.get(hi))
+            else {
+                continue;
+            };
+            let members = &self.orbit_members[start as usize..end as usize];
+            addends.clear();
+            addends.extend(members.iter().map(|&i| self.negated[i as usize]));
+            rests.clear();
+            self.curve
+                .add_many(target, &addends, &mut rests, &mut scratch);
+            for (slot, rest) in rests.iter().enumerate() {
+                if rest.infinity {
+                    continue;
+                }
+                let i = members[slot];
+                if let Some(j) = self.index_of_point.get(rest.pack()) {
+                    out.push(if i <= j { (i, j) } else { (j, i) });
+                }
+            }
+        }
+        // A pair whose two summands lie in different candidate orbits is
+        // found once from each, so the answer is deduplicated — by
+        // sorting, for the same reason as above.
+        if out.len() > 1 {
+            out.sort_unstable();
+            out.dedup();
         }
     }
 
     /// The summand pairs of `target`, however the table stores them.
     /// `out` is cleared first.
     pub fn pairs_for(&self, target: FastPoint, out: &mut Vec<(u32, u32)>) {
+        let key = self.key_of(target);
+        self.pairs_for_key(target, key, out)
+    }
+
+    /// [`Self::pairs_for`] for a target whose key is already in hand, so
+    /// that a scan canonicalising a row at a time does not do it twice.
+    fn pairs_for_key(&self, target: FastPoint, key: u64, out: &mut Vec<(u32, u32)>) {
         out.clear();
-        let key = target.pack();
         if !self.admitted(key) {
             return;
         }
@@ -2591,11 +3216,16 @@ impl PairSumTable {
     /// single-word arithmetic.
     pub fn decompose_fast(&self, target: FastPoint, m: usize) -> Option<Vec<usize>> {
         let mut found: Option<Vec<usize>> = None;
-        self.witnesses_fast(target, m, &mut |witness| {
+        // Any witness, not the sorted one: one decomposition is wanted,
+        // and insisting on `j ≤ k` here throws away two recoveries in
+        // three to get the same answer later.  Sorted on the way out, so
+        // what a caller sees is unchanged.
+        self.witnesses_fast_inner(target, m, false, &mut |witness| {
             found = Some(witness.to_vec());
             false
         });
-        let idxs = found?;
+        let mut idxs = found?;
+        idxs.sort_unstable();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -2675,27 +3305,40 @@ impl PairSumTable {
                 &mut scratch,
             );
         }
+        // Keys a block at a time: enough to keep `LANES`
+        // canonicalisations interleaved — and, with a
+        // [`FrobeniusCanon`], enough to let consecutive lookups overlap
+        // their memory round trips, which the key's own latency
+        // prevents when the two are fused; see the `m = 3` arm of
+        // [`Self::witnesses_fast_inner`].  Little enough that a search
+        // stopping at its first witness has not paid for the rest.
+        const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
-        for rest in rests.iter().take(LOOKAHEAD) {
-            prefetch(&self.present[self.filter_word(rest.pack())]);
-        }
+        let mut keys = Vec::with_capacity(BLOCK);
         let mut pairs = Vec::new();
-        for (offset, rest) in rests.iter().enumerate() {
-            if let Some(ahead) = rests.get(offset + LOOKAHEAD) {
-                prefetch(&self.present[self.filter_word(ahead.pack())]);
+        for (b, block) in rests.chunks(BLOCK).enumerate() {
+            self.keys_of(block, &mut keys);
+            for &key in keys.iter().take(LOOKAHEAD) {
+                prefetch(&self.present[self.filter_word(key)]);
             }
-            if !self.admitted(rest.pack()) {
-                continue;
-            }
-            let k = if offset < tail {
-                start + offset
-            } else {
-                offset - tail
-            };
-            self.pairs_for(*rest, &mut pairs);
-            for &(i, j) in &pairs {
-                if !sink(&[i as usize, j as usize, k]) {
-                    return;
+            for (within, rest) in block.iter().enumerate() {
+                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+                    prefetch(&self.present[self.filter_word(ahead)]);
+                }
+                if !self.admitted(keys[within]) {
+                    continue;
+                }
+                let offset = b * BLOCK + within;
+                let k = if offset < tail {
+                    start + offset
+                } else {
+                    offset - tail
+                };
+                self.pairs_for_key(*rest, keys[within], &mut pairs);
+                for &(i, j) in &pairs {
+                    if !sink(&[i as usize, j as usize, k]) {
+                        return;
+                    }
                 }
             }
         }
@@ -2722,6 +3365,28 @@ impl PairSumTable {
         m: usize,
         sink: &mut dyn FnMut(&[usize]) -> bool,
     ) {
+        self.witnesses_fast_inner(target, m, true, sink)
+    }
+
+    /// [`Self::witnesses_fast`], optionally without the sorted-witness
+    /// condition.
+    ///
+    /// Enumerating every *sorted* witness is what exact yield needs, and
+    /// the condition `j ≤ k` is how a triple found three times over —
+    /// once for each of its indices playing the role of `k` — is counted
+    /// once.  A search that wants a single decomposition needs none of
+    /// that: it rejects two witnesses in three *after* paying the
+    /// `O(|F|)` recovery scan that produced them, which on a wide base
+    /// is the dominant cost of the whole search.  With `sorted` false
+    /// the same triples come back unordered and possibly repeated, and
+    /// a witness arrives about three times sooner.
+    fn witnesses_fast_inner(
+        &self,
+        target: FastPoint,
+        m: usize,
+        sorted: bool,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
         match m {
             2 => {
                 let mut pairs = Vec::new();
@@ -2733,30 +3398,70 @@ impl PairSumTable {
                 }
             }
             3 => {
-                // R − P_k for every k with one field inversion.
-                let mut rests = Vec::with_capacity(self.points.len());
-                let mut scratch = BatchScratch::default();
-                self.curve
-                    .add_many(target, &self.negated, &mut rests, &mut scratch);
-                // The filter probes are random addresses in a table far
-                // larger than the cache, and every key is known before
-                // any is read: run a block ahead, prefetching.
+                // `R − P_k` for every `k`, a block at a time.
+                //
+                // Everything this loop does before it probes —
+                // subtracting a base point, and on a folded table
+                // canonicalising the difference — is linear in the base,
+                // and the search stops at its first witness.  Done a row
+                // at a time that setup is paid in full however early the
+                // stop comes, and on a base wide enough to decompose
+                // most targets it is then the whole cost: at `|F| =
+                // 177632` the scan finds its witness in about three
+                // thousand probes and would have prepared a hundred and
+                // seventy-seven thousand.  A block is long enough to
+                // amortise one field inversion and to keep `LANES`
+                // squaring chains interleaved, and short enough that an
+                // early exit throws away at most a block.
+                //
+                // The block earns its keep on a folded table even where
+                // there is nothing to interleave.  With a
+                // [`FrobeniusCanon`] the key is a rotation and
+                // [`Self::keys_of`] runs it one point at a time, but it
+                // is still some seventy-six nanoseconds of dependent
+                // work before the address it will load is known — long
+                // enough that consecutive probes' memory round trips do
+                // not overlap when the two are fused.  Split, the
+                // lookups are adjacent and independent and do overlap.
+                // A compact table, whose key is a `pack`, gains a third
+                // where this gains four fifths, which is what says the
+                // cause is the length of the key; which resource the
+                // length exhausts is not established.
+                // `examples/koblitz_orbit_fold_width.rs` measures the
+                // sweep, `docs/ic/runs/koblitz-probe-shape-20260913.json`
+                // records it.  Do not unroll this back into a single
+                // loop.
+                const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
-                for rest in rests.iter().take(LOOKAHEAD) {
-                    prefetch(&self.present[self.filter_word(rest.pack())]);
-                }
+                let mut rests = Vec::with_capacity(BLOCK);
+                let mut scratch = BatchScratch::default();
+                let mut keys = Vec::with_capacity(BLOCK);
                 let mut pairs = Vec::new();
-                for (k, rest) in rests.iter().enumerate() {
-                    if let Some(ahead) = rests.get(k + LOOKAHEAD) {
-                        prefetch(&self.present[self.filter_word(ahead.pack())]);
+                for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
+                    // `add_many` appends, so the block starts empty.
+                    rests.clear();
+                    self.curve
+                        .add_many(target, addends, &mut rests, &mut scratch);
+                    let block = &rests[..];
+                    self.keys_of(block, &mut keys);
+                    for &key in keys.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(key)]);
                     }
-                    if !self.admitted(rest.pack()) {
-                        continue;
-                    }
-                    self.pairs_for(*rest, &mut pairs);
-                    for &(i, j) in &pairs {
-                        if j as usize <= k && !sink(&[i as usize, j as usize, k]) {
-                            return;
+                    for (offset, rest) in block.iter().enumerate() {
+                        if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word(ahead)]);
+                        }
+                        if !self.admitted(keys[offset]) {
+                            continue;
+                        }
+                        let k = b * BLOCK + offset;
+                        self.pairs_for_key(*rest, keys[offset], &mut pairs);
+                        for &(i, j) in &pairs {
+                            if (!sorted || j as usize <= k)
+                                && !sink(&[i as usize, j as usize, k])
+                            {
+                                return;
+                            }
                         }
                     }
                 }
@@ -2784,7 +3489,9 @@ impl PairSumTable {
                         let rest = self.curve.add(target, self.curve.neg(pair));
                         self.pairs_for(rest, &mut pairs);
                         for &(i, j) in &pairs {
-                            if j as usize <= k && !sink(&[i as usize, j as usize, k, l]) {
+                            if (!sorted || j as usize <= k)
+                                && !sink(&[i as usize, j as usize, k, l])
+                            {
                                 return;
                             }
                         }
@@ -6926,9 +7633,17 @@ mod tests {
         let narrow = PairSumTable::build_within(&kc, &fb, full - 1).expect("fits compactly");
         assert!(narrow.is_compact());
         assert_eq!(wide.len(), narrow.len());
-        // Below even that, it refuses with a number rather than an
+        // Below even that, the fold is the last tier: `2n` times fewer
+        // keys, bought with a canonicalisation on every lookup.
+        let folded_bytes =
+            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n);
+        assert!(folded_bytes < compact, "the folded table is narrower still");
+        let folded = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
+        assert!(folded.is_folded() && folded.is_compact());
+        assert!(folded.len() < narrow.len(), "the fold stored no less");
+        // And below that it refuses with a number rather than an
         // allocation the machine cannot meet.
-        assert!(PairSumTable::build_within(&kc, &fb, compact - 1).is_none());
+        assert!(PairSumTable::build_within(&kc, &fb, folded_bytes - 1).is_none());
         // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
         assert!(PairSumTable::build(&kc, &fb).is_some());
@@ -8368,6 +9083,357 @@ mod tests {
             })
             .collect();
         (orbit_of, representatives)
+    }
+
+    #[test]
+    fn the_signed_frobenius_orbit_closes_the_pair_sums() {
+        // The fold is only sound because the set of pair sums is closed
+        // under `π` and negation.  That is one line of algebra —
+        // `π(P + Q) = π(P) + π(Q)` — and this is the line being checked
+        // against the actual base the pipeline builds.
+        for degree in [13u32, 19, 23] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 1, 60).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let points: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+            let base: HashSet<u64> = points.iter().map(|p| p.pack()).collect();
+            for &p in &points {
+                assert!(base.contains(&fc.neg(p).pack()), "base not negation-closed");
+                assert!(
+                    base.contains(&fc.frobenius_k(p, 1).pack()),
+                    "base not Frobenius-closed"
+                );
+            }
+            let mut sums = HashSet::new();
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    sums.insert(fc.add(points[i], points[j]).pack());
+                }
+            }
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    let s = fc.add(points[i], points[j]);
+                    assert!(sums.contains(&fc.neg(s).pack()), "sums not negation-closed");
+                    assert!(
+                        sums.contains(&fc.frobenius_k(s, 1).pack()),
+                        "sums not Frobenius-closed"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn the_fold_is_exactly_two_n_and_reaches_every_orbit() {
+        // Two claims the memory law rests on: the fold is worth `2n`,
+        // not some smaller factor, and walking one representative per
+        // signed orbit against the whole base reaches every orbit — so
+        // the folded table has no false negatives.
+        for degree in [13u32, 19, 23] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 1, 60).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let points: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+
+            let mut keys = HashSet::new();
+            let mut orbits = HashSet::new();
+            for i in 0..points.len() {
+                for j in i..points.len() {
+                    let s = fc.add(points[i], points[j]);
+                    keys.insert(s.pack());
+                    orbits.insert(PairSumTable::canon_key(&fc, s));
+                }
+            }
+            let fold = keys.len() as f64 / orbits.len() as f64;
+            let want = 2.0 * degree as f64;
+            assert!(
+                (fold - want).abs() < 0.15 * want,
+                "degree {degree}: fold {fold:.1}, expected about {want}"
+            );
+
+            let reached: HashSet<u64> = fb
+                .signed_orbits
+                .iter()
+                .filter_map(|o| o.first().copied())
+                .flat_map(|r| {
+                    points
+                        .iter()
+                        .map(|&q| PairSumTable::canon_key(&fc, fc.add(points[r], q)))
+                        .collect::<Vec<_>>()
+                })
+                .collect();
+            assert_eq!(
+                reached, orbits,
+                "degree {degree}: reps x base missed a sum orbit"
+            );
+        }
+    }
+
+    #[test]
+    fn the_rotation_names_the_same_orbits_as_the_squaring_chain() {
+        // The normal basis renames every orbit — the least rotation of
+        // the coordinates is not the least element of the orbit — and
+        // must partition the field exactly as the squaring chain does,
+        // since that partition is what the folded table indexes by.
+        for degree in [13u32, 19, 23, 31, 53, 61] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let canon = FrobeniusCanon::new(&fc.field, fc.n)
+                .unwrap_or_else(|| panic!("degree {degree}: no normal element found"));
+            assert_eq!(canon.degree(), degree);
+            let mask = (1u64 << degree) - 1;
+            // A rotation is constant on a Frobenius orbit.
+            let mut x = 1u64;
+            let mut sample = Vec::new();
+            for _ in 0..2000 {
+                x = x.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (x >> 31);
+                sample.push(x & mask);
+            }
+            for &v in &sample {
+                let mut w = v;
+                for _ in 0..degree {
+                    w = fc.field.sqr(w);
+                    assert_eq!(
+                        canon.canon(v),
+                        canon.canon(w),
+                        "degree {degree}: the rotation moved within an orbit"
+                    );
+                }
+            }
+            // And it separates points the squaring chain separates: the
+            // two induce the same equivalence relation.
+            let chain = |v: u64| {
+                let mut x = v;
+                let mut best = v;
+                for _ in 1..degree {
+                    x = fc.field.sqr(x);
+                    best = best.min(x);
+                }
+                best
+            };
+            let mut by_chain: HashMap<u64, u64> = HashMap::new();
+            for &v in &sample {
+                let c = chain(v);
+                let r = canon.canon(v);
+                match by_chain.entry(c) {
+                    std::collections::hash_map::Entry::Occupied(e) => assert_eq!(
+                        *e.get(),
+                        r,
+                        "degree {degree}: one orbit got two rotation names"
+                    ),
+                    std::collections::hash_map::Entry::Vacant(e) => {
+                        e.insert(r);
+                    }
+                }
+            }
+            let names: HashSet<u64> = by_chain.values().copied().collect();
+            assert_eq!(
+                names.len(),
+                by_chain.len(),
+                "degree {degree}: two orbits shared a rotation name"
+            );
+        }
+    }
+
+    #[test]
+    fn the_folded_table_answers_exactly_as_the_full_one() {
+        for (degree, points) in [(19u32, 300usize), (31, 400), (61, 400)] {
+            the_folded_table_agrees_at(degree, points);
+        }
+    }
+
+    fn the_folded_table_agrees_at(degree: u32, points: usize) {
+        let kc = KoblitzCurve::new(0, degree).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let orbits = fb.signed_orbits.len();
+        // A budget under the compact table's width but over the folded
+        // one's is exactly the tier that reaches for the fold.
+        let folded = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::folded_byte_size(orbits, fb.points.len(), kc.n),
+        )
+        .expect("the folded table fits its own budget");
+        assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
+        assert!(
+            folded.len() < full.len(),
+            "degree {degree}: the fold stored no less"
+        );
+        // A folded table keeps no summands, so `lookup` must say so
+        // rather than slice an empty `entries`.
+        assert!(folded.lookup(1_000_001).is_empty());
+
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        let mut hits = 0usize;
+        let mut misses = 0usize;
+        for t in 1u64..900 {
+            let target = fc.mul_u64(g, t);
+            if target.infinity {
+                continue;
+            }
+            let mut a = Vec::new();
+            let mut b = Vec::new();
+            full.pairs_for(target, &mut a);
+            folded.pairs_for(target, &mut b);
+            a.sort_unstable();
+            b.sort_unstable();
+            assert_eq!(a, b, "degree {degree}: disagreed on [{t}]G");
+            if a.is_empty() {
+                misses += 1;
+            } else {
+                hits += 1;
+            }
+        }
+        for i in 0..fb.points.len().min(64) {
+            for j in i..fb.points.len().min(64) {
+                let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
+                if sum.infinity {
+                    continue;
+                }
+                let mut a = Vec::new();
+                let mut b = Vec::new();
+                full.pairs_for(sum, &mut a);
+                folded.pairs_for(sum, &mut b);
+                a.sort_unstable();
+                b.sort_unstable();
+                assert!(a.contains(&(i as u32, j as u32)));
+                assert_eq!(a, b, "degree {degree}: disagreed on a stored pair sum");
+                hits += 1;
+            }
+        }
+        assert!(
+            hits > 0 && misses > 0,
+            "degree {degree}: the test checked only one side"
+        );
+    }
+
+    #[test]
+    fn the_folded_table_answers_the_degenerate_key_too() {
+        // `O` is the sum of every `±` pair, so every orbit
+        // representative stores an entry under its key: the one target
+        // whose lookup offers every orbit at once.  It is the worst case
+        // the orbit tag has, and it has to give the same answer as the
+        // full table and take a sane amount of time doing it.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let folded = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+        )
+        .unwrap();
+        assert!(folded.is_folded());
+        let mut a = Vec::new();
+        let mut b = Vec::new();
+        full.pairs_for(FastPoint::INFINITY, &mut a);
+        folded.pairs_for(FastPoint::INFINITY, &mut b);
+        a.sort_unstable();
+        a.dedup();
+        b.sort_unstable();
+        b.dedup();
+        assert_eq!(a, b, "the two disagreed on the point at infinity");
+        // And every pair it names really does sum to `O`.
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        for &(i, j) in &b {
+            let sum = fc.add(
+                fc.lift(&fb.points[i as usize]),
+                fc.lift(&fb.points[j as usize]),
+            );
+            assert!(sum.infinity, "({i}, {j}) does not sum to O");
+        }
+    }
+
+    #[test]
+    fn the_orbit_tag_really_names_a_summand_of_the_key() {
+        // The claim the tag rests on: a folded entry was built as
+        // `canon(P_rep(r) + P_j)`, so any target with that key satisfies
+        // `g·target = P_rep(r) + P_j` for some `g ∈ G` and therefore has
+        // a summand in signed orbit `r`, orbits being what `G` preserves.
+        // Recovery walks only that orbit, so if the claim were false the
+        // table would report no witness for a target that has one.
+        for (degree, points) in [(19u32, 300usize), (31, 400)] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+            let folded = PairSumTable::build_within(
+                &kc,
+                &fb,
+                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+            )
+            .unwrap();
+            assert!(folded.is_folded());
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let mut checked = 0usize;
+            let mut out = Vec::new();
+            for i in 0..fb.points.len().min(48) {
+                for j in i..fb.points.len().min(48) {
+                    let sum = fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j]));
+                    if sum.infinity {
+                        continue;
+                    }
+                    folded.pairs_for(sum, &mut out);
+                    assert!(
+                        out.contains(&(i as u32, j as u32)),
+                        "degree {degree}: the orbit tag lost the pair ({i}, {j})"
+                    );
+                    // Every pair the tag leads to is a real one.
+                    for &(a, b) in &out {
+                        let s = fc.add(
+                            fc.lift(&fb.points[a as usize]),
+                            fc.lift(&fb.points[b as usize]),
+                        );
+                        assert_eq!(s, sum, "degree {degree}: ({a}, {b}) is not a summand pair");
+                    }
+                    checked += 1;
+                }
+            }
+            assert!(checked > 0, "degree {degree}: nothing was checked");
+        }
+    }
+
+    #[test]
+    fn the_folded_table_decomposes_at_every_summand_count() {
+        // The trap the compact table fell into once: a search path that
+        // walks `entries` reports no witness for a target that has one.
+        // Every `m` has to go through the folded lookup.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
+        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let folded = PairSumTable::build_within(
+            &kc,
+            &fb,
+            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+        )
+        .unwrap();
+        assert!(folded.is_folded());
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        for m in [2usize, 3, 4] {
+            let mut agreed = 0usize;
+            let mut found = 0usize;
+            for t in 1u64..120 {
+                let target = fc.mul_u64(g, t);
+                if target.infinity {
+                    continue;
+                }
+                let a = full.decompose_fast(target, m).is_some();
+                let b = folded.decompose_fast(target, m).is_some();
+                assert_eq!(a, b, "m = {m}: disagreed on whether [{t}]G decomposes");
+                agreed += 1;
+                if b {
+                    found += 1;
+                    // And the witness the folded table returns really sums.
+                    let w = folded.decompose_fast(target, m).unwrap();
+                    let sum = w
+                        .iter()
+                        .fold(FastPoint::INFINITY, |s, &i| fc.add(s, fc.lift(&fb.points[i])));
+                    assert_eq!(sum, target, "m = {m}: witness did not sum to its target");
+                }
+            }
+            assert!(agreed > 0 && found > 0, "m = {m}: nothing was decomposed");
+        }
     }
 
     #[test]

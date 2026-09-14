@@ -329,6 +329,7 @@ struct CompactPairTable {
     x_filter_insert_hash_reuse: bool,
     x_filter_direct_bits: bool,
     x_filter_blocked: bool,
+    x_filter_three_window: bool,
     x_filter_window_shift: u32,
     mask: usize,
     len: usize,
@@ -380,6 +381,7 @@ impl CompactPairTable {
             x_filter_insert_hash_reuse: false,
             x_filter_direct_bits: false,
             x_filter_blocked: false,
+            x_filter_three_window: false,
             x_filter_window_shift: 0,
             mask: 0,
             len: 0,
@@ -435,6 +437,8 @@ impl CompactPairTable {
             x_filter_direct_bits: std::env::var("KIC_DISABLE_DIRECT_X_FILTER_BITS").as_deref()
                 != Ok("1"),
             x_filter_blocked: std::env::var("KIC_ENABLE_BLOCKED_X_FILTER").as_deref() == Ok("1"),
+            x_filter_three_window: std::env::var("KIC_ENABLE_THREE_WINDOW_X_FILTER").as_deref()
+                == Ok("1"),
             x_filter_window_shift: if filter_bits == 0 || x_filter_exact {
                 0
             } else {
@@ -682,6 +686,7 @@ impl CompactPairTable {
         assert!(!self.shards.is_empty());
         assert!(self.x_only);
         let shard_count = self.shards.len();
+        let three_window_x_filter = self.shards.iter().all(|shard| shard.x_filter_three_window);
         let slots_per_shard = self.shards[0].slots();
         assert!(shard_count.is_power_of_two() && slots_per_shard.is_power_of_two());
         assert!(self
@@ -784,6 +789,7 @@ impl CompactPairTable {
         self.x_filter_insert_hash_reuse = false;
         self.x_filter_direct_bits = true;
         self.x_filter_blocked = false;
+        self.x_filter_three_window = three_window_x_filter;
         self.x_filter_window_shift = (x_domain - 1).trailing_zeros() - filter_bits.trailing_zeros();
         self.mask = 0;
         self.len = dense_len;
@@ -908,9 +914,19 @@ impl CompactPairTable {
             return self.x_filter[word] & mask == mask;
         }
         let (first, second) = self.x_filter_indices(x);
-        self.x_filter[first / u64::BITS as usize] & (1u64 << (first % u64::BITS as usize)) != 0
-            && self.x_filter[second / u64::BITS as usize] & (1u64 << (second % u64::BITS as usize))
-                != 0
+        if self.x_filter[first / u64::BITS as usize] & (1u64 << (first % u64::BITS as usize)) == 0
+            || self.x_filter[second / u64::BITS as usize] & (1u64 << (second % u64::BITS as usize))
+                == 0
+        {
+            return false;
+        }
+        if self.x_filter_direct_bits && self.x_filter_three_window && !self.x_filter_exact {
+            let third = self.x_filter_third_direct_index(x);
+            return self.x_filter[third / u64::BITS as usize]
+                & (1u64 << (third % u64::BITS as usize))
+                != 0;
+        }
+        true
     }
 
     fn insert_x_filter(&mut self, x: u64) {
@@ -922,6 +938,10 @@ impl CompactPairTable {
         let (first, second) = self.x_filter_direct_indices(x);
         self.x_filter[first / u64::BITS as usize] |= 1u64 << (first % u64::BITS as usize);
         self.x_filter[second / u64::BITS as usize] |= 1u64 << (second % u64::BITS as usize);
+        if self.x_filter_three_window {
+            let third = self.x_filter_third_direct_index(x);
+            self.x_filter[third / u64::BITS as usize] |= 1u64 << (third % u64::BITS as usize);
+        }
     }
 
     fn insert_x_filter_blocked(&mut self, x: u64) {
@@ -969,6 +989,12 @@ impl CompactPairTable {
         let first = x as usize & self.x_filter_mask;
         let second = (x >> self.x_filter_window_shift) as usize & self.x_filter_mask;
         (first, second)
+    }
+
+    #[inline(always)]
+    fn x_filter_third_direct_index(&self, x: u64) -> usize {
+        debug_assert!(self.x_filter_direct_bits && !self.x_filter_exact);
+        (x >> (self.x_filter_window_shift / 2)) as usize & self.x_filter_mask
     }
 
     #[inline(always)]
@@ -1068,11 +1094,19 @@ impl CompactPairTable {
 
     fn x_filter_hash_strategy(&self) -> &'static str {
         if self.is_dense() {
-            return "dense_direct_low_and_high_x_bit_windows";
+            return if self.x_filter_three_window {
+                "dense_direct_low_middle_and_high_x_bit_windows"
+            } else {
+                "dense_direct_low_and_high_x_bit_windows"
+            };
         }
         if !self.shards.is_empty() {
             return if self.shards[0].x_filter_direct_bits() {
-                "four_shard_direct_low_and_high_x_bit_windows"
+                if self.shards[0].x_filter_three_window {
+                    "four_shard_direct_low_middle_and_high_x_bit_windows"
+                } else {
+                    "four_shard_direct_low_and_high_x_bit_windows"
+                }
             } else {
                 "four_shard_mixed_x_filter"
             };
@@ -1082,7 +1116,11 @@ impl CompactPairTable {
         } else if self.x_filter_blocked {
             "blocked_one_word_four_bit_x_fingerprint"
         } else if self.x_filter_direct_bits {
-            "direct_low_and_high_x_bit_windows"
+            if self.x_filter_three_window {
+                "direct_low_middle_and_high_x_bit_windows"
+            } else {
+                "direct_low_and_high_x_bit_windows"
+            }
         } else if self.x_filter_split_hash {
             "single_mix_split_29_bit_indices"
         } else {
@@ -1111,6 +1149,14 @@ impl CompactPairTable {
             self.x_filter_blocked && !self.x_filter_exact
         } else {
             self.shards.iter().all(Self::x_filter_blocked)
+        }
+    }
+
+    fn x_filter_three_window(&self) -> bool {
+        if self.shards.is_empty() {
+            self.x_filter_direct_bits && self.x_filter_three_window && !self.x_filter_exact
+        } else {
+            self.shards.iter().all(Self::x_filter_three_window)
         }
     }
 
@@ -2336,6 +2382,12 @@ fn dense_scan_fast_path_enabled() -> bool {
     *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_DENSE_SCAN_FAST_PATH").as_deref() == Ok("1"))
 }
 
+fn dense_derived_slots_enabled() -> bool {
+    use std::sync::OnceLock;
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_ENABLE_DENSE_DERIVED_SLOTS").as_deref() == Ok("1"))
+}
+
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn inverse_n53_selected_unchecked(value: u64) -> u64 {
@@ -2824,11 +2876,14 @@ fn pair_pair_cursor_chunk(
     } else {
         scratch.points.reserve((cursor_end - cursor_start) / step);
     }
-    scratch
-        .signed_slots
-        .reserve((cursor_end - cursor_start) / step);
     let dense_scan_fast_path =
         dense_scan_fast_path_enabled() && quotient_pairs.is_dense() && compact_scratch && dual_sign;
+    let dense_derived_slots = dense_scan_fast_path && dense_derived_slots_enabled();
+    if !dense_derived_slots {
+        scratch
+            .signed_slots
+            .reserve((cursor_end - cursor_start) / step);
+    }
     if dense_scan_fast_path {
         for cursor in (cursor_start..cursor_end).step_by(step) {
             let slot = if let Some(order) = slot_order {
@@ -2844,7 +2899,9 @@ fn pair_pair_cursor_chunk(
             scratch
                 .compact_points
                 .push(quotient_pairs.dense_compact_point_at_slot(slot));
-            scratch.signed_slots.push(slot << 1);
+            if !dense_derived_slots {
+                scratch.signed_slots.push(slot << 1);
+            }
         }
     } else {
         for cursor in (cursor_start..cursor_end).step_by(step) {
@@ -2963,7 +3020,22 @@ fn pair_pair_cursor_chunk(
             result.exact_table_misses += 1;
             return false;
         };
-        let signed_slot = scratch.signed_slots[position];
+        let signed_slot = if dense_derived_slots {
+            let cursor = cursor_start + position * step;
+            let slot = if let Some(order) = slot_order {
+                let ordered = start_slot + cursor / 2;
+                order[if ordered >= order.len() {
+                    ordered - order.len()
+                } else {
+                    ordered
+                }] as usize
+            } else {
+                quotient_pairs.wrap_scan_slot(start_slot + cursor / 2)
+            };
+            slot << 1
+        } else {
+            scratch.signed_slots[position]
+        };
         let negative = negative ^ (signed_slot & 1 == 1);
         let (left_indices, left_labels) = quotient_pairs.signed_labels_at_slot(
             signed_slot >> 1,
@@ -3952,6 +4024,7 @@ fn main() {
             "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
             "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
             "support_x_prefilter_blocked":quotient_pairs.x_filter_blocked(),
+            "support_x_prefilter_three_window":quotient_pairs.x_filter_three_window(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
@@ -4752,6 +4825,8 @@ fn main() {
                 "query_dual_sign_denominator_sharing":query_mode.pair_pair_parallel() && dual_sign_pair_scan,
                 "query_compact_pair_scratch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch,
                 "query_dense_scan_fast_path":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled(),
+                "query_dense_derived_slots":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled(),
+                "query_signed_slot_scratch_bytes_per_entry":if query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && quotient_pairs.is_dense() && dense_scan_fast_path_enabled() && dense_derived_slots_enabled() {0} else {std::mem::size_of::<usize>()},
                 "query_specialized_n53_pair_batch":query_mode.pair_pair_parallel() && dual_sign_pair_scan && compact_pair_scratch && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled(),
                 "query_itoh_n53_inverse":query_mode.pair_pair_parallel() && specialized_n53_pair_batch && n==53 && combined_n53_fast_path_enabled() && itoh_n53_inverse_enabled(),
                 "query_prefiltered_exact_lookup":query_mode.pair_pair_width().is_some() && prefiltered_exact_lookup_enabled(),
@@ -4841,6 +4916,7 @@ fn main() {
                 "support_x_prefilter_insert_hash_reuse":quotient_pairs.x_filter_insert_hash_reuse(),
                 "support_x_prefilter_direct_bits":quotient_pairs.x_filter_direct_bits(),
                 "support_x_prefilter_blocked":quotient_pairs.x_filter_blocked(),
+                "support_x_prefilter_three_window":quotient_pairs.x_filter_three_window(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
@@ -5215,28 +5291,35 @@ mod packed_tests {
     fn bloom_hash_strategies_retain_every_inserted_x() {
         for blocked in [false, true] {
             for direct_bits in [false, true] {
-                for split_hash in [false, true] {
-                    for reuse_insert_hash in [false, true] {
-                        for degree in [23, 37] {
-                            let mut table =
-                                CompactPairTable::with_capacity(512, true, (1usize << degree) + 1);
-                            table.x_filter_split_hash = split_hash;
-                            table.x_filter_insert_hash_reuse = reuse_insert_hash;
-                            table.x_filter_direct_bits = direct_bits;
-                            table.x_filter_blocked = blocked;
-                            let keys: Vec<_> = (0..512u64)
-                                .map(|index| {
-                                    let x = CompactPairTable::hash((index, index.rotate_left(17)))
-                                        & ((1u64 << degree) - 1);
-                                    (x + 1, index)
-                                })
-                                .collect();
-                            for &key in &keys {
-                                table.insert(key, QuotientPairWitness::default());
-                            }
-                            for &key in &keys {
-                                assert!(table.might_contain_x(key.0));
-                                assert!(table.get(key).is_some());
+                for three_window in [false, true] {
+                    for split_hash in [false, true] {
+                        for reuse_insert_hash in [false, true] {
+                            for degree in [23, 37] {
+                                let mut table = CompactPairTable::with_capacity(
+                                    512,
+                                    true,
+                                    (1usize << degree) + 1,
+                                );
+                                table.x_filter_split_hash = split_hash;
+                                table.x_filter_insert_hash_reuse = reuse_insert_hash;
+                                table.x_filter_direct_bits = direct_bits;
+                                table.x_filter_blocked = blocked;
+                                table.x_filter_three_window = three_window;
+                                let keys: Vec<_> = (0..512u64)
+                                    .map(|index| {
+                                        let x =
+                                            CompactPairTable::hash((index, index.rotate_left(17)))
+                                                & ((1u64 << degree) - 1);
+                                        (x + 1, index)
+                                    })
+                                    .collect();
+                                for &key in &keys {
+                                    table.insert(key, QuotientPairWitness::default());
+                                }
+                                for &key in &keys {
+                                    assert!(table.might_contain_x(key.0));
+                                    assert!(table.get(key).is_some());
+                                }
                             }
                         }
                     }

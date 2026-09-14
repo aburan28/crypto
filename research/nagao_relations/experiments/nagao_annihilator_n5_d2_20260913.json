@@ -1,0 +1,720 @@
+{
+  "allAffineTargets": true,
+  "allSolutionSetsEqual": true,
+  "annihilatorCoefficients": [
+    28,
+    15,
+    31
+  ],
+  "coordinateEncoding": "type-II ONB coordinate bits",
+  "curve": "y^2+xy=x^3+1",
+  "decompositionSize": 3,
+  "factorBasePoints": 4,
+  "fieldDegree": 5,
+  "nagaoOperations": {
+    "phases": {
+      "candidateConstruction": {
+        "additions": 591976,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 1269264,
+        "inversionCalls": 0,
+        "multiplications": 506664,
+        "squarings": 170624
+      },
+      "membership": {
+        "additions": 556330,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 1313120,
+        "inversionCalls": 0,
+        "multiplications": 556330,
+        "squarings": 200460
+      },
+      "setup": {
+        "additions": 342,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 1094,
+        "inversionCalls": 31,
+        "multiplications": 509,
+        "squarings": 243
+      }
+    },
+    "totals": {
+      "additions": 1148648,
+      "curveAdditionCalls": 0,
+      "curveDoublingCalls": 0,
+      "fieldOperations": 2583478,
+      "inversionCalls": 31,
+      "multiplications": 1063503,
+      "squarings": 371327
+    }
+  },
+  "operationAccounting": {
+    "curveCalls": "expanded into field primitives; curve call counts are diagnostic",
+    "excludes": "coordinate conversion, comparisons, allocations and Python overhead",
+    "factorBaseEnumeration": "charged to oracle setup once",
+    "inversions": "expanded into counted multiplications; inversionCalls is diagnostic",
+    "targetEnumeration": "charged to RR setup once",
+    "total": "additions+multiplications+squarings",
+    "unit": "field API primitives; additive mul/sqr counts are separate categories"
+  },
+  "oracleOperations": {
+    "phases": {
+      "setup": {
+        "additions": 32,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 103,
+        "inversionCalls": 3,
+        "multiplications": 48,
+        "squarings": 23
+      }
+    },
+    "totals": {
+      "additions": 32,
+      "curveAdditionCalls": 0,
+      "curveDoublingCalls": 0,
+      "fieldOperations": 103,
+      "inversionCalls": 3,
+      "multiplications": 48,
+      "squarings": 23
+    }
+  },
+  "provenance": {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "ecc2k130/codegen/nagaoannihilator.py",
+      "--field-degree",
+      "5",
+      "--subspace-dimension",
+      "2",
+      "--out",
+      "experiments/nagao_annihilator_n5_d2_20260913.json"
+    ],
+    "contract_sha256": "640139ec939c8cc6df5eb44e215b8a5ef949cc45975f775ca30f69c6219bcdbb",
+    "git_commit": "93a09e57ea6b5ccd47223da1531d716dda805246",
+    "git_status": "?? RESEARCH_NAGAO_RELATIONS.md\n?? ecc2k130/codegen/nagaoannihilator.py\n?? ecc2k130/codegen/nagaocompare.py\n?? ecc2k130/codegen/nagaodecomp.py\n?? ecc2k130/codegen/testnagaoannihilator.py\n?? ecc2k130/codegen/testnagaodecomp.py\n",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "source_sha256": {
+      "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "nagaoannihilator.py": "668b222b31bfb51298da232054055bdfb77d3c2893c64cc50e24a29d7b1026e7"
+    }
+  },
+  "reference": "complete group-law enumeration of the identical restricted domain",
+  "schema": "nagao-annihilator-toy-v1",
+  "scope": "distinct nonzero factor x, all different from finite target x",
+  "search": "exhaustive RR a,b coefficients; no Semaev; no SAT or Groebner",
+  "status": "correctness prototype; no performance or novelty claim",
+  "subspaceDimension": 2,
+  "targetCount": 43,
+  "targetHits": 0,
+  "targets": [
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        0,
+        31
+      ],
+      "targetRootRejected": 0,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 0
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        1,
+        4
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        1,
+        5
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        2,
+        16
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        2,
+        18
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        4,
+        2
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        4,
+        6
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        5,
+        17
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        5,
+        20
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        6,
+        10
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        6,
+        12
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        8,
+        1
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        8,
+        9
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        9,
+        3
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        9,
+        10
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        11,
+        19
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        11,
+        24
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        14,
+        5
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        14,
+        11
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        15,
+        5
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        15,
+        10
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        16,
+        8
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        16,
+        24
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        18,
+        3
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        18,
+        17
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        19,
+        6
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        19,
+        21
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        21,
+        9
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        21,
+        28
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        23,
+        6
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        23,
+        17
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        24,
+        12
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        24,
+        20
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        27,
+        3
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        27,
+        24
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        28,
+        14
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        28,
+        18
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        29,
+        9
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        29,
+        20
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        30,
+        12
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        30,
+        18
+      ],
+      "targetRootRejected": 30,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        31,
+        0
+      ],
+      "targetRootRejected": 31,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    },
+    {
+      "admitted": 0,
+      "candidates": 992,
+      "equalToOracle": true,
+      "oracleTriples": 0,
+      "solutionCertificates": [],
+      "target": [
+        31,
+        31
+      ],
+      "targetRootRejected": 31,
+      "verifiedSolutions": 0,
+      "zeroRootRejected": 31
+    }
+  ],
+  "verifiedSolutions": 0
+}

@@ -304,6 +304,153 @@ impl FastCurve {
     }
 }
 
+/// **Canonical names for Frobenius orbits of abscissae**, in a normal
+/// basis where the Frobenius is a rotation.
+///
+/// The folded pair table needs one key per orbit of `x` under `x ↦ x²`,
+/// and the obvious one — the least element of the orbit — costs `n − 1`
+/// squarings, a dependency chain of spreads and reduction-table lookups.
+/// In a normal basis `{β, β², β⁴, …}` the same map is a one-bit cyclic
+/// rotation of the coordinate word, because `(Σ c_k β^{2^k})² =
+/// Σ c_k β^{2^{k+1}}`.  So the orbit of `x` is the set of rotations of
+/// its coordinate word, and the least rotation names it.
+///
+/// The change of basis is one `F_2`-linear map, applied as eight
+/// byte-table lookups; the minimum is `n` rotations of a word.  Nothing
+/// is squared and nothing is reduced.
+///
+/// The key it produces is *not* the least element of the orbit in the
+/// polynomial basis — it is a different function of the point.  What
+/// matters is only that it is constant on orbits and distinct across
+/// them, which a bijective linear map followed by a rotation-invariant
+/// minimum is.
+#[derive(Clone, Debug)]
+pub struct FrobeniusCanon {
+    n: u32,
+    mask: u64,
+    /// `tables[i][b]`: the normal coordinates of the field element whose
+    /// `i`-th byte is `b` and whose other bytes are zero.
+    tables: Vec<[u64; 256]>,
+}
+
+impl FrobeniusCanon {
+    /// Build the basis change, or `None` if no normal element turns up —
+    /// which the normal basis theorem says will not happen, but the
+    /// search is randomised and bounded rather than trusted.
+    pub fn new(field: &Gf2, n: u32) -> Option<Self> {
+        if n == 0 || n > 63 {
+            return None;
+        }
+        let mask = (1u64 << n) - 1;
+        // A normal element: one whose Frobenius orbit is a basis.
+        let mut inverse = None;
+        let mut candidate = 2u64;
+        for _ in 0..4096 {
+            candidate = candidate.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (candidate >> 29);
+            let gamma = candidate & mask;
+            if gamma == 0 {
+                continue;
+            }
+            // Columns of the map "normal coordinates -> field element".
+            let mut column = gamma;
+            let columns: Vec<u64> = (0..n)
+                .map(|_| {
+                    let c = column;
+                    column = field.sqr(column);
+                    c
+                })
+                .collect();
+            if let Some(inv) = invert_f2(&columns, n) {
+                inverse = Some(inv);
+                break;
+            }
+        }
+        let inverse = inverse?;
+        // Column `j` of the inverse, so a set bit of `x` contributes one
+        // XOR rather than one parity.
+        let by_bit: Vec<u64> = (0..n)
+            .map(|j| {
+                (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i))
+            })
+            .collect();
+        let bytes = ((n + 7) / 8) as usize;
+        let tables = (0..bytes)
+            .map(|bi| {
+                let mut table = [0u64; 256];
+                for (b, slot) in table.iter_mut().enumerate() {
+                    let mut acc = 0u64;
+                    for t in 0..8 {
+                        let j = bi * 8 + t;
+                        if (b >> t) & 1 == 1 && j < n as usize {
+                            acc ^= by_bit[j];
+                        }
+                    }
+                    *slot = acc;
+                }
+                table
+            })
+            .collect();
+        Some(Self { n, mask, tables })
+    }
+
+    /// The normal coordinates of a field element.
+    #[inline]
+    pub fn coords(&self, x: u64) -> u64 {
+        let mut acc = 0u64;
+        for (i, table) in self.tables.iter().enumerate() {
+            acc ^= table[((x >> (8 * i)) & 0xff) as usize];
+        }
+        acc
+    }
+
+    /// The least rotation of the normal coordinates: a name for the
+    /// Frobenius orbit of `x`, equal for every element of it and for no
+    /// element outside it.
+    #[inline]
+    pub fn canon(&self, x: u64) -> u64 {
+        let c = self.coords(x);
+        let n = self.n;
+        let mut best = c;
+        let mut v = c;
+        for _ in 1..n {
+            v = ((v << 1) | (v >> (n - 1))) & self.mask;
+            if v < best {
+                best = v;
+            }
+        }
+        best
+    }
+
+    /// The extension degree this was built for.
+    pub fn degree(&self) -> u32 {
+        self.n
+    }
+}
+
+/// Invert an `n × n` matrix over `F_2` given as its columns, returning
+/// the rows of the inverse; `None` when the columns are dependent.
+fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+    // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
+    let mut a: Vec<u64> = (0..n)
+        .map(|i| {
+            (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k))
+        })
+        .collect();
+    let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
+    for c in 0..n as usize {
+        let pivot = (c..n as usize).find(|&r| (a[r] >> c) & 1 == 1)?;
+        a.swap(c, pivot);
+        inv.swap(c, pivot);
+        for r in 0..n as usize {
+            if r != c && (a[r] >> c) & 1 == 1 {
+                a[r] ^= a[c];
+                inv[r] ^= inv[c];
+            }
+        }
+    }
+    Some(inv)
+}
+
 /// Reusable buffers for [`FastCurve::add_many`].
 #[derive(Clone, Debug, Default)]
 pub struct BatchScratch {
@@ -339,6 +486,153 @@ mod tests {
         }
         points.push(BinaryPoint::Infinity);
         points
+    }
+
+    /// Degrees the [`FrobeniusCanon`] tests sweep.
+    ///
+    /// `koblitz_index_calculus` already checks the key on the degrees the
+    /// pipeline runs at — 13, 19, 23, 31, 53, 61 — and those are all
+    /// prime, so no element there ever lies in a proper subfield.  These
+    /// include composites, where an orbit is *shorter* than `n` and its
+    /// coordinate word is a repeating pattern that its own rotation
+    /// fixes.  That is the case a least-rotation key has to get right and
+    /// a sampled prime-degree test cannot reach.
+    const NB_DEGREES: [u32; 8] = [8, 12, 16, 20, 23, 31, 53, 61];
+
+    fn nb_field(n: u32) -> Gf2 {
+        Gf2::new(&crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n).unwrap())
+    }
+
+    #[test]
+    fn the_change_of_basis_is_a_bijection_and_turns_squaring_into_a_rotation() {
+        // The property everything else rests on, checked directly rather
+        // than through the key: `coords` is one-to-one, and squaring in
+        // the field is a one-bit rotation of the coordinate word.  If
+        // either half failed, the key would still be *constant* on orbits
+        // and would silently merge some of them.
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n)
+                .unwrap_or_else(|| panic!("degree {n}: no normal element"));
+            assert_eq!(canon.degree(), n);
+            let mask = (1u64 << n) - 1;
+            let rot1 = |c: u64| ((c << 1) | (c >> (n - 1))) & mask;
+
+            let mut rng = StdRng::seed_from_u64(0xA110_0000 + n as u64);
+            let mut seen: std::collections::HashMap<u64, u64> = Default::default();
+            for _ in 0..2000 {
+                let x = rng.gen::<u64>() & mask;
+                let c = canon.coords(x);
+                assert_eq!(
+                    *seen.entry(c).or_insert(x),
+                    x,
+                    "degree {n}: coords sent two elements to {c:#x}"
+                );
+                assert_eq!(
+                    canon.coords(f.sqr(x)),
+                    rot1(c),
+                    "degree {n}: coords(x²) is not a rotation of coords(x), x = {x:#x}"
+                );
+            }
+            assert_eq!(canon.coords(0), 0, "degree {n}: coords is not linear at 0");
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_is_constant_on_a_frobenius_orbit() {
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0xB1A5_0000 + n as u64);
+            for _ in 0..300 {
+                let x = rng.gen::<u64>() & mask;
+                let want = canon.canon(x);
+                let mut v = x;
+                for k in 0..n {
+                    assert_eq!(
+                        canon.canon(v),
+                        want,
+                        "degree {n}: image {k} of {x:#x} keys apart"
+                    );
+                    v = f.sqr(v);
+                }
+                assert_eq!(v, x, "degree {n}: the orbit did not close");
+            }
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_partitions_exactly_as_the_squaring_chain() {
+        // The two keys pick different representatives; the claim is
+        // that they cut the field into the *same* orbits.  These degrees
+        // are small enough to enumerate whole rather than sample, and
+        // composite, so the short orbits are all present.
+        for n in [8u32, 12, 16, 20] {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mut poly_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut nb_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut mismatch = 0usize;
+            for x in 0..(1u64 << n) {
+                // The polynomial-basis key: least element of the orbit.
+                let mut v = x;
+                let mut best = x;
+                for _ in 1..n {
+                    v = f.sqr(v);
+                    best = best.min(v);
+                }
+                let (pk, nk) = (best, canon.canon(x));
+                let a = *poly_of.entry(pk).or_insert(nk);
+                let b = *nb_of.entry(nk).or_insert(pk);
+                if a != nk || b != pk {
+                    mismatch += 1;
+                }
+            }
+            assert_eq!(
+                mismatch, 0,
+                "degree {n}: the two keys disagree on {mismatch} elements"
+            );
+            assert_eq!(
+                poly_of.len(),
+                nb_of.len(),
+                "degree {n}: different orbit counts"
+            );
+        }
+    }
+
+    #[test]
+    fn every_degree_the_pipeline_reaches_has_a_normal_element() {
+        // `PairSumTable` keeps a squaring-chain fallback for the `None`
+        // this can in principle return, and that fallback names orbits
+        // *differently* from the rotation.  A build that quietly fell
+        // back and a probe that did not would agree on nothing, so the
+        // search failing is not a slow path, it is a wrong one — and the
+        // bound on it is a random search over 4096 candidates.  Sweeping
+        // every degree the pipeline can be given is what says the bound
+        // is enough in practice.
+        let mut checked = 0usize;
+        for n in 8u32..=FastCurve::MAX_DEGREE {
+            for a in [0u8, 1] {
+                let Some(kc) = KoblitzCurve::new(a, n) else {
+                    continue;
+                };
+                let fc = FastCurve::new(&kc.curve).unwrap();
+                assert!(
+                    FrobeniusCanon::new(&fc.field, fc.n).is_some(),
+                    "degree {n}, a = {a}: no normal element found"
+                );
+                checked += 1;
+            }
+        }
+        // Both curve shapes at every degree `KoblitzCurve` will build:
+        // fewer than `MAX_DEGREE - 8` of them, since not every degree
+        // gives a usable subgroup.  The bound is only here to say the
+        // loop is not vacuous — pinning the exact count would turn a
+        // change in which degrees `KoblitzCurve::new` accepts into a
+        // failure of the normal-element search, which is not what this
+        // test is about.
+        assert!(checked >= 10, "the sweep only reached {checked} curves");
     }
 
     #[test]

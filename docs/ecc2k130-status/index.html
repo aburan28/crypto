@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ECC2K-130 campaign status · aburan28/crypto</title>
-<meta name="description" content="Hourly aggregates from the Certicom ECC2K-130 distinguished-point collection: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
-<meta property="og:description" content="Hourly distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign. Counts only: no walk coefficients, no point keys.">
+<meta property="og:description" content="Distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="./style.css">
@@ -32,8 +32,9 @@
   <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
   <h1>Campaign status</h1>
   <p class="sub">
-    Hourly read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table. The page publishes counts only &mdash; walk
+    Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
+    distinguished-point table, refreshed every 15 minutes. The page publishes
+    counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
@@ -53,6 +54,65 @@
     <span id="freshness-text">&mdash;</span>
     <button type="button" id="refresh">Refresh now</button>
   </div>
+
+  <section class="ops" aria-labelledby="h-ops">
+    <h2 id="h-ops">Group operations walked</h2>
+    <p class="ops-value mono" id="ops-value">&mdash;</p>
+    <p class="ops-sub" id="ops-sub">&nbsp;</p>
+
+    <div class="meter">
+      <div class="meter-head">
+        <span id="ops-bar-label">Share of the expected <span class="mono">2^60.9</span></span>
+        <span class="mono" id="ops-percent">&mdash;</span>
+      </div>
+      <div class="bar">
+        <div class="bar-fill" id="ops-fill"
+             role="progressbar"
+             aria-labelledby="ops-bar-label"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+             aria-valuetext="no operations derived yet"></div>
+      </div>
+      <p class="meter-foot" id="ops-bar-foot">&nbsp;</p>
+    </div>
+
+    <div class="meter">
+      <div class="meter-head">
+        <span id="ops-bits-label">Exponent reached, <strong>log scale</strong> &mdash; each bit is a
+          doubling of the work, so this bar is not progress</span>
+        <span class="mono" id="ops-bits">&mdash;</span>
+      </div>
+      <div class="bar log">
+        <div class="bar-fill" id="ops-bits-fill"
+             role="progressbar"
+             aria-labelledby="ops-bits-label"
+             aria-valuemin="0" aria-valuemax="60.9" aria-valuenow="0"
+             aria-valuetext="no operations derived yet"></div>
+      </div>
+      <p class="meter-foot">Full width is <span class="mono">2^60.9</span>, the same
+        boundary the bar above measures against.</p>
+    </div>
+
+    <div class="eta" id="eta-block" aria-live="polite">
+      <div class="eta-label">ETA to the expected collision cost</div>
+      <p class="eta-value mono" id="eta-value">&mdash;</p>
+      <p class="eta-sub" id="eta-sub">&nbsp;</p>
+    </div>
+
+    <p class="note" id="iterations-note">
+      Derived, not reported: a walk on this campaign reports one distinguished
+      point per <span class="mono">2^25.27</span> iterations at
+      <span class="mono">HW(x) &le; 34</span>, so the operation total behind
+      the point count is that count times the same factor &mdash; when the
+      number of points in an hour changes, the operation rate and the ETA
+      both move with that amount at the same interval. A collision is
+      expected after <span class="mono">2^60.9</span> operations (Bailey et
+      al., <em>Breaking ECC2K-130</em>); the ETA is the wall-clock time to
+      that expected cost at the last-hour rate, not a deadline. No worker
+      publishes an operation counter, and the exponent belongs to one
+      campaign's distinguishing rule, so the figure is only shown for
+      <span class="mono">ecc2k-130</span>.
+    </p>
+  </section>
 
   <h2 class="sr-only">Headline counts</h2>
   <div class="row">
@@ -152,8 +212,8 @@
   <section aria-labelledby="h-history">
     <h2 id="h-history">Snapshot history</h2>
     <p class="note">
-      The last 168 snapshots published by the hourly GitHub Action, newest
-      first.
+      Every snapshot the publishing Action has posted in the last seven
+      days, newest first. It runs every 15 minutes.
     </p>
     <details class="alt">
       <summary id="history-summary">Snapshot table</summary>
@@ -194,9 +254,27 @@
 
   var HOUR_MS = 3600 * 1000;
   var REFRESH_MS = 60 * 1000;
-  // The publishing Action runs hourly; two missed runs is a real problem.
-  var STALE_AFTER_MS = 2 * HOUR_MS;
-  var HISTORY_LIMIT = 168;
+  // The publishing Action runs every 15 minutes, so an hour is four missed
+  // runs: late enough that GitHub's scheduler jitter does not trip it, early
+  // enough to say so before the counts are badly out of date.
+  var STALE_AFTER_MS = HOUR_MS;
+  // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
+  // the interval the snapshot query buckets over — a window in the data, not
+  // in the publish cadence, so it does not move when the cron does.
+  var HOURLY_BUCKET_LIMIT = 168;
+
+  // A walk on ECC2K-130 reports a point when HW(x) <= 34, which happens once
+  // per 2^25.27 iterations (ecc2k130/aws/README.md), so the walk total behind
+  // the published point count is that count times the same factor. Deriving
+  // it here rather than publishing it keeps the snapshot aggregates-only; it
+  // is a parameter of one campaign's distinguishing rule, so it is only
+  // applied to the campaign it was measured on. The landing page carries the
+  // same two constants, and scripts/site/test_build.py pins all three copies
+  // to each other.
+  var CAMPAIGN = "ecc2k-130";
+  var ITERATIONS_PER_DP_LOG2 = 25.27;
+  // Expected iterations to a collision: Bailey et al., Breaking ECC2K-130.
+  var EXPECTED_ITERATIONS_LOG2 = 60.9;
 
   var STATE_TEXT = {
     COLLECTING: "Collecting. New distinguished points arrived in the last hour.",
@@ -214,6 +292,83 @@
     if (value === null || value === undefined || value === "") return "—";
     var n = Number(value);
     return isFinite(n) ? n.toLocaleString("en-US") : "—";
+  }
+
+  // Iterations walked so far, as an exponent: log2(dps) + the report rate.
+  // Null rather than zero when the figure would not mean anything — another
+  // campaign, or no points yet to derive it from — so the card can say which.
+  function iterationsLog2(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var dps = Number(status.dps);
+    if (!isFinite(dps) || dps <= 0) return null;
+    return Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+  }
+
+  // Operation rate from the last-hour DP amount at this campaign's interval:
+  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null when the hour
+  // interval reported no points, so the ETA can say "no recent rate" rather
+  // than inventing one.
+  function opsPerSecond(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var dpsLastHour = Number(status.dps_last_hour);
+    if (!isFinite(dpsLastHour) || dpsLastHour <= 0) return null;
+    return (dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600;
+  }
+
+  // Seconds to the expected 2^60.9 cost at the last-hour rate. Null when the
+  // rate or the walked total is unknown; 0 when a collision is already on
+  // the board; negative when the walked total has passed the expected cost
+  // without a recorded collision (birthday variance — say so in the UI).
+  function etaSeconds(status) {
+    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    if ((Number(status.collisions) || 0) > 0) return 0;
+    var log2ops = iterationsLog2(status);
+    var rate = opsPerSecond(status);
+    if (log2ops === null || rate === null) return null;
+    var remaining = Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops);
+    return remaining / rate;
+  }
+
+  function formatDuration(seconds) {
+    if (!isFinite(seconds)) return null;
+    var abs = Math.abs(seconds);
+    var years = abs / (365.25 * 86400);
+    if (years >= 1.5) return years.toFixed(1) + " years";
+    if (years >= 0.95) return "about 1 year";
+    var days = abs / 86400;
+    if (days >= 1.5) return days.toFixed(1) + " days";
+    if (days >= 0.95) return "about 1 day";
+    var hours = abs / 3600;
+    if (hours >= 1.5) return hours.toFixed(1) + " hours";
+    if (hours >= 0.95) return "about 1 hour";
+    var mins = Math.max(1, Math.round(abs / 60));
+    return mins + (mins === 1 ? " min" : " min");
+  }
+
+  // 2^x as a decimal magnitude, for readers who do not think in exponents.
+  // Beyond 2^53 the exact integer is not representable, and it would be a
+  // false precision anyway: the exponent is a rate estimate, so one digit of
+  // mantissa is all it supports.
+  function magnitude(log2value) {
+    var log10 = log2value * Math.LOG10E * Math.LN2;
+    var exponent = Math.floor(log10);
+    var mantissa = Math.pow(10, log10 - exponent);
+    if (mantissa >= 9.95) { mantissa /= 10; exponent += 1; }
+    return mantissa.toFixed(1) + " × 10^" + exponent;
+  }
+
+  // A share this small has no readable fixed-point form, so fall back to a
+  // mantissa and a power of ten rather than printing "0.00%".
+  function percentText(fraction) {
+    var percent = fraction * 100;
+    if (!isFinite(percent) || percent <= 0) return "0%";
+    if (percent >= 1) return percent.toFixed(1) + "%";
+    if (percent >= 0.01) return percent.toFixed(2) + "%";
+    var log10 = Math.log(percent) / Math.LN10;
+    var exponent = Math.floor(log10);
+    var mantissa = Math.pow(10, log10 - exponent);
+    if (mantissa >= 9.95) { mantissa /= 10; exponent += 1; }
+    return mantissa.toFixed(1) + " × 10^" + exponent + "%";
   }
 
   function parseTime(value) {
@@ -332,7 +487,7 @@
     var start = floorHour(rows[0].at);
     var end = floorHour(rows[rows.length - 1].at);
     if (endReference) end = Math.max(end, floorHour(endReference));
-    var count = Math.min(Math.round((end - start) / HOUR_MS) + 1, HISTORY_LIMIT);
+    var count = Math.min(Math.round((end - start) / HOUR_MS) + 1, HOURLY_BUCKET_LIMIT);
     var first = end - (count - 1) * HOUR_MS;
 
     var series = [];
@@ -592,6 +747,106 @@
     }
   }
 
+  // The operations panel. The first bar is linear in work, so at 2^-21.5 of
+  // the expected total it has no visible width — that is the honest picture
+  // and the foot says so rather than padding the fill to something you can
+  // see. The second bar is the exponent on a log scale: legible, but each
+  // bit is a doubling, so it is labelled as not being progress.
+  function drawOperations(status) {
+    var log2ops = iterationsLog2(status);
+    var fill = el("ops-fill");
+    var bitsFill = el("ops-bits-fill");
+
+    if (log2ops === null) {
+      var why = !status || status.campaign_id !== CAMPAIGN
+        ? "Derived for " + CAMPAIGN + " only."
+        : "No distinguished points yet, so there is nothing to derive it from.";
+      el("ops-value").textContent = "—";
+      el("ops-sub").textContent = why;
+      el("ops-percent").textContent = "—";
+      el("ops-bits").textContent = "—";
+      el("ops-bar-foot").textContent = " ";
+      fill.style.width = "0%";
+      bitsFill.style.width = "0%";
+      fill.setAttribute("aria-valuenow", "0");
+      bitsFill.setAttribute("aria-valuenow", "0");
+      fill.setAttribute("aria-valuetext", why);
+      bitsFill.setAttribute("aria-valuetext", why);
+      return;
+    }
+
+    var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);
+    var percent = Math.min(100, share * 100);
+    var bits = Math.min(100, (log2ops / EXPECTED_ITERATIONS_LOG2) * 100);
+
+    el("ops-value").textContent = "2^" + log2ops.toFixed(1);
+    el("ops-sub").textContent = "≈ " + magnitude(log2ops) + " group operations, from " +
+      num(status.dps) + " distinguished points at 2^" + ITERATIONS_PER_DP_LOG2 + " each";
+    el("ops-percent").textContent = percentText(share);
+    el("ops-bits").textContent = log2ops.toFixed(1) + " of " + EXPECTED_ITERATIONS_LOG2 + " bits";
+
+    fill.style.width = percent + "%";
+    fill.setAttribute("aria-valuenow", percent.toFixed(6));
+    fill.setAttribute("aria-valuetext", percentText(share) + " of the expected 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " operations");
+    bitsFill.style.width = bits + "%";
+    bitsFill.setAttribute("aria-valuenow", log2ops.toFixed(1));
+    bitsFill.setAttribute("aria-valuetext", "2^" + log2ops.toFixed(1) + " of 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " operations, on a log scale");
+
+    // 2^-x of the expected work is thinner than a pixel on any screen the
+    // page is read on; say it in words instead of drawing a lie.
+    el("ops-bar-foot").textContent = share < 0.001
+      ? "2^" + (log2ops - EXPECTED_ITERATIONS_LOG2).toFixed(1) +
+        " of the expected work: the fill is far below one pixel wide, which is the result."
+      : "Linear in work: full width is a collision at the expected cost.";
+  }
+
+  // ETA to the expected 2^60.9 cost at the last-hour DP rate. The amount of
+  // points in that hour interval, times the campaign's iterations-per-DP
+  // interval, is the operation rate; when the DP amount changes, this ETA
+  // moves with it.
+  function drawEta(status) {
+    var value = el("eta-value");
+    var sub = el("eta-sub");
+    if (!status || status.campaign_id !== CAMPAIGN) {
+      value.textContent = "—";
+      sub.textContent = "Derived for " + CAMPAIGN + " only.";
+      return;
+    }
+    if ((Number(status.collisions) || 0) > 0) {
+      value.textContent = "collision recorded";
+      sub.textContent = "A collision is on the board — not independently verified here.";
+      return;
+    }
+    var log2ops = iterationsLog2(status);
+    var rate = opsPerSecond(status);
+    var seconds = etaSeconds(status);
+    if (log2ops === null) {
+      value.textContent = "—";
+      sub.textContent = "No distinguished points yet, so there is no rate to project.";
+      return;
+    }
+    if (rate === null || seconds === null) {
+      value.textContent = "—";
+      sub.textContent = "No points in the last hour, so there is no current rate for an ETA.";
+      return;
+    }
+    var dpsLastHour = Number(status.dps_last_hour);
+    var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+    if (seconds < 0) {
+      value.textContent = "past expected cost";
+      sub.textContent = "Walked 2^" + log2ops.toFixed(1) + " of 2^" + EXPECTED_ITERATIONS_LOG2 +
+        " at 2^" + opsHourLog2.toFixed(1) + " ops/h from " + num(dpsLastHour) +
+        " DP/h — collision not yet recorded (birthday variance).";
+      return;
+    }
+    value.textContent = formatDuration(seconds);
+    sub.textContent = "At " + num(dpsLastHour) + " DP/h (= 2^" + opsHourLog2.toFixed(1) +
+      " ops/h with interval 2^" + ITERATIONS_PER_DP_LOG2 + "), wall-clock time to the expected 2^" +
+      EXPECTED_ITERATIONS_LOG2 + " cost. An expectation, not a deadline.";
+  }
+
   function setBanner(state, extra) {
     var banner = el("banner");
     var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
@@ -629,7 +884,7 @@
     } catch (err) {
       setBanner("UNREACHABLE", "Could not read status.json (" + err.message + ").");
       tickFreshness(lastStatus, "status.json unavailable · last try " + utc(new Date(), true));
-      placeholderTables("No data \u2014 the snapshot could not be read.");
+      placeholderTables("No data — the snapshot could not be read.");
       return;
     }
     lastStatus = status;
@@ -654,6 +909,8 @@
       : "");
 
     el("dps").textContent = num(status.dps);
+    drawOperations(status);
+    drawEta(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
     el("workers").textContent = num(status.workers);
@@ -662,7 +919,18 @@
     var firstAt = parseTime(status.first_dp_at);
     el("dps-foot").textContent = firstAt ? "since " + utc(firstAt) : " ";
     var lastAt = parseTime(status.last_dp_at);
-    el("rate-foot").textContent = lastAt ? "latest point " + ago(lastAt) : " ";
+    // The last-hour card is the DP amount in that interval; spell out the
+    // operation rate it implies so a change in the amount is visible as a
+    // change in ops/h, not only as a change in the point count.
+    var rate = opsPerSecond(status);
+    var rateBits = [];
+    if (rate !== null) {
+      var dpsLastHour = Number(status.dps_last_hour);
+      var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+      rateBits.push("2^" + opsHourLog2.toFixed(1) + " ops/h at interval 2^" + ITERATIONS_PER_DP_LOG2);
+    }
+    if (lastAt) rateBits.push("latest point " + ago(lastAt));
+    el("rate-foot").textContent = rateBits.length ? rateBits.join(" · ") : " ";
 
     var collisions = Number(status.collisions) || 0;
     el("collision-card").className = "card" + (collisions > 0 ? " alert" : "");

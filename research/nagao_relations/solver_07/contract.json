@@ -1,0 +1,15 @@
+{
+  "hypothesis": "Per-instance subspace-polynomial caching, batch inversion, and fixed-b norm hoisting reduce hybrid work and permit verified decomposition beyond eleven bits.",
+  "panels": [{"n":11,"d":5},{"n":23,"d":6},{"n":29,"d":6}],
+  "variants": ["quadratic-original","quadratic-optimized","s4-symmetric"],
+  "targets_per_stratum": 4,
+  "seed": 2026091407,
+  "seconds_per_instance": 5,
+  "domain": "Odd-degree binary curve y²+xy=x³+1, three nonzero distinct summand x in the first-d-coordinate ONB subspace, different from target x; exact signed target and projected unique tuples.",
+  "sampling": "Uniform affine targets sampled exactly via uniform x and sign rejection, including x=0 with half acceptance; separate planted-from-random-distinct-factor-triples stratum, not uniform over supported targets. Exclude solver_02/04 targets; solver_03/05/06 reuse those older targets. No duplicates within each stratum; cross-stratum overlap allowed.",
+  "comparison": "Identical targets, bases, arity and five-second all-phase soft budgets. First relation and complete enumeration separate. Deterministically shuffle variant order per mode/target. No cross-instance cache for any variant.",
+  "validation": "All 43 five-bit affine targets: optimized candidate sequence equals original, complete projected oracle equality, and new pair oracle equals previous signed-triple enumeration. Larger target truth uses independent group-law pair tables, never function coefficients.",
+  "metrics": "All-phase seconds, first relation, completion, actual budget compliance, unique verified relations, duplicates, expanded field API counts for both hybrids. SAT operation counts are unavailable.",
+  "falsification": "Any oracle/model mismatch invalidates correctness. Scaling success requires all eight target slots at each larger field resolved within budget in both modes. Engineering improvement requires at least 20% fewer field API operations against the original on matched completed work. Overall research goal still requires 20% lower all-cost per verified relation at three sizes against strongest Semaev controls with calibrated accounting.",
+  "limits": "Fixed d=6 at n=23/29 separates field-degree growth from base dimension. These bases become sparse relative to group size; uniform yield can be zero. Supported targets are a biased solver diagnostic, never natural relation yield. No attack exponent or rho ratio. Source API operation sums are not calibrated bit costs. All setup and failed work charged; oracle cost is separate validation infrastructure. Frozen earlier files unchanged."
+}

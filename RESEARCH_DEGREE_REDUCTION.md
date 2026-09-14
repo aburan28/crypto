@@ -206,9 +206,13 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
 | **R1** | **Hybrid slicing (L3) has an interior cost optimum that beats `2^N` enumeration**, at every operating point, with the collapse fraction not rising in `N` | **`killed`** | EXP-R1, iteration 1. At every one of 9 cells (`N ∈ {10,12,14}` × 3 guess patterns) and both `ω`, the optimum sits at the largest `k` scanned — the model is choosing exhaustive search. The margins it reports (−0.29 → +0.19 bits at `ω`=2.807) are artifacts of where the scan was truncated. And the collapse fraction *rises* with `N` for 2 of 3 patterns. |
 | **R1′** | Among guess patterns, **one-sided** guessing (all `k` bits from the `X₁` half) reaches the `D* = 2` floor at the fewest guessed bits, at `c = k₂/N = 1/2` independent of `N` | **`supported`** | EXP-R1: `c(one-side) = 0.500` at `N = 10, 12, 14` — exactly `k₂ = n'` every time — vs balanced 0.800/0.667/0.786 and spread —/0.750/0.714. Flat where the others drift, and identical across seeds 7/11/23 (9 cells, no exceptions). |
 | **R2** | **Symmetrisation (L2) lowers `D*`** at matched shape | **`blocked`** (structurally, not incidentally) | EXP-R2, iteration 5. The two presentations are never simultaneously measurable: at `ℓ = 2` the eliminated system has degree-6 generators in 6 variables, so its multilinear Macaulay tower has **zero multiplier budget** and cannot refute at all; at `ℓ ≥ 3` the symmetrised system's `9ℓ−3` variables exceed the elimination budget before it refutes. Raising the budget does not help — see R2′. |
-| **R2′** | Symmetrisation's Macaulay width crosses below elimination's only at **`ℓ = 6`** | **`supported`** (exact, no solver) | EXP-R2: `cols(9ℓ−3, 3)` vs `cols(3ℓ, 6)` — 576 vs 64 at `ℓ=2`, 12384 vs 9949 at `ℓ=5`, 22152 vs 31180 at `ℓ=6`, and the gap widens to 7× by `ℓ=10`. Below `ℓ=6` symmetrisation trades 3× the variables for ½ the degree and **loses**. |
+| **R2′** | Symmetrisation's Macaulay width crosses below elimination's only at **`ℓ = 6`** | **`supported` as arithmetic; `killed` as a decision criterion (iteration 9)** | EXP-R2: `cols(9ℓ−3, 3)` vs `cols(3ℓ, 6)` — 576 vs 64 at `ℓ=2`, 22152 vs 31180 at `ℓ=6`. Those column counts are correct. **But they are the widths at each presentation's *generator* degree, and neither presentation solves there** — so "crossover at `ℓ = 6`" does not license the conclusion it was used for. EXP-R7 measures `D*(sym) = 4` at `ℓ=2` and **`5` at `ℓ=3`**, and compares at the solving degree against an exact ceiling: see R7. |
 | **R3** | **Adding degree falls (L4) as explicit generators lowers `D*`** at matched targets | **`supported`** | EXP-R3, iteration 2. All three families, 3 operating points each, 8 matched targets per cell: `D*` strictly lower wherever there was headroom. Generic (Random) family **4.00 → 2.00** on 8/8 targets at `N = 12, 14`. `worsened = 0` everywhere, as the ideal-membership invariant requires. |
 | **R3′** | The `D*` drop **survives its own cost** — extraction must climb to degree 3, so the net saving must still be positive | **regime-dependent** | EXP-R3: net `+1.44` bits mean on Random (positive at every `N`, seeds 7/11/23 give +1.44/+1.45/+1.49); `−0.60` on Coordinate (sign varies); `−6.36` on Subfield (**killed** — the system already solved at `D* ≈ 2.1`, so the climb to 3 is pure overhead). L4 pays where the system is hard and costs where it is easy. |
+| **R6** | The within-family sign inversion (R4e) is a **cutoff artifact** and is repaired by measuring at a degree every system passes through | **`killed`** | EXP-R6, iteration 9. Six readings — `δ(2), δ(3), δ(4)` and cumulative `Δ_low` at cutoffs 2, 3, 4 — over 3 families × 4 sizes × 3 seeds. **Not one cell of 36 reaches `ρ_s ≤ −0.6` on any reading.** Cutoff 2, the degree every system must pass through, is the *worst*: mean `+0.923`, positive in 25 of 25 decidable cells. `δ(4)` is the only non-positive reading (mean `−0.182`) and it is not a repair — 9 decidable cells, none reaching the bar, because within a family it has almost no variance to correlate. |
+| **R6′** | `Δ_low` **decomposes** into a structural component that lives between families and an instance component that lives within them, and the **cutoff sets the mix** | **`supported`** | EXP-R6 variance decomposition: `δ(2)` is **10% between / 90% within**; `δ(3)` **87% / 13%**; `δ(4)` **99.7% / 0.3%**. The between-family law tracks that mix exactly — blocked rank `−0.737` at cutoff 2, `−0.990` at cutoffs 3 and 4. So the two facts about the screen are one fact: raising the cutoff purifies the structural component, and the instance component (which carries the opposite sign) is what a low cutoff picks up. |
+| **R7** | R2′'s `ℓ = 6` crossover is the **decision criterion** for whether to build the L2 solver | **`killed`** | EXP-R7, iteration 9. The eliminated presentation lives in `3ℓ` Boolean variables, so its Macaulay width can never exceed `2^{3ℓ}` — **an exact ceiling at any degree**, needing no measurement of that side at all. Symmetrisation is worth building only if it is narrower than that ceiling *at the degree it actually solves*. On the measured trend (`D* = 4, 5` at `ℓ = 2, 3`) it is **never** narrower in range `ℓ ≤ 8`; even pinned at the favourable `D* = 4` — contradicted by the `ℓ=2→3` step — the crossover moves to `ℓ = 7`, not 6. |
+| **R7′** | `D*(symmetrised)` is **flat** in `ℓ`, so the generator-degree width is a fair proxy for cost | **`killed`** | EXP-R7: `D*(sym) = 4` at `ℓ = 2`, **`5` at `ℓ = 3`** — measured, not censored. EXP-R2 reported `ℓ = 3` as censored at `D ≥ 5`; that scan prices at `≈ 2.1·10¹²` word-ops under the module's own model against the `6·10¹⁰` it was given, so it was **25× under budget, not out of reach**. Raising the budget measures it in 80 s. |
 | **R3b** | L4's **net saving against the raw Gröbner solve keeps growing** at `N = 16, 18, 20` | **`supported`** (Random, seed-robust); **`unstable`** (Coordinate); **`killed`** (Subfield) | EXP-R3b, iteration 7. Random mean `1.44 → 4.44` bits (seed 7), `1.45 → 4.44` (11), `1.49 → 4.16` (23); the reach cells are `+5.11/+3.87/+4.34`, `+5.10/+3.87/+4.34`, `+4.28/+3.87/+4.34` — **`N = 18` and `N = 20` identical to 2 d.p. on all three seeds**. Coordinate's verdict *flips* KILLED/SUPPORTED/KILLED on `N = 18` values `−0.18/+0.89/−0.12`, so it sits on the gate boundary and the seed picks the answer; recorded as unstable rather than resolved. Subfield `−5.3…−9.1` everywhere. |
 | **R3c** | The mutant cascade drives the augmented system to the **`D* = 2` floor at every `N`** | **`killed`** | EXP-R3b. At `N ≤ 16` saturation runs several productive rounds (Random: `sat.eqs = 137` at `N = 16` from 32 falls) and reaches `D* = 2`. At `N ≥ 18` it **stops after one round** — `sat.eqs = 54 = 18 + 36` at `N = 18`, `60 = 20 + 40` at `N = 20` — and the augmented system lands at `D* = 4`. L4's degree saving **halves**: `2.25` at `N = 16` → `1.00` at `N = 18, 20`. Identical on all three seeds. The cascade, not the first batch of falls, is what reached the floor, and the cascade dies. |
 | **R3d** | L4 **narrows the gap to the `2^N` enumeration boundary** (§3, baseline 2) | **`killed`** | EXP-R3b. **0 of 54 cells beat `2^N`** (3 seeds × 3 families × 6 sizes). On Random — the one family where L4 pays — the augmented margin runs `−10.20, −9.96, −10.12, −9.51, −12.69, −12.09` over `N = 10…20`: 9.5–12.7 bits *behind* brute force, losing **3.18 bits across the `N = 16 → 18` break** alone and `−0.378` bits per size step overall. The pre-registered G-R3b passes on this same data because it scores the saving against the *raw Gröbner solve*: a race between two routes that both lose. **Scope:** the widening is Random-specific. Subfield's augmented margin *narrows* monotonically (`−10.49 → −7.53`) and Coordinate's is non-monotone, so R3d is killed by "no cell beats the boundary", not by a universal widening — see R3e for what the Subfield trend actually is. |
@@ -303,6 +307,28 @@ Status ∈ {`open`, `supported`, `killed`, `blocked`}. "Supported" means
   averaged in as 0. A gate that passes only because the degenerate cells
   were dropped is not a pass, so the count of degenerate cells is reported
   next to the verdict.
+- **G-R6** *(registered iteration 9)*. R4e explained the within-family sign
+  inversion by **censoring at the cutoff**: a target refuting at `D* = 2`
+  never exercises degree 3, so its cutoff-3 defect is ~0. That explanation
+  predicts a repair — measure at a cutoff every system must pass through —
+  and the screen's usefulness to the defensive program turns on whether the
+  repair works.
+  **Disclosure: a 6-cell single-seed probe was run before this gate was
+  written, and it showed cutoff 2 behaving like cutoff 3 (worse, in fact).**
+  So this gate is not blind on cutoffs 2 and 3, and its value is breadth
+  rather than surprise: 3 families × 4 sizes × 3 seeds, per-degree readings
+  `δ(2), δ(3), δ(4)` **and** cumulative `Δ_low` at cutoffs 2, 3, 4 — six
+  readings, of which the probe saw two, at a twelfth of the cells.
+  *Repairable* if **any** of the six readings reaches within-family
+  `ρ_s ≤ −0.6` on a majority of decidable cells. *Structurally
+  unrepairable* if **every** reading is positive on a majority of decidable
+  cells — which would mean no choice of cutoff fixes the sign, and the
+  defect's instance-level component is not a measurement artifact to be
+  tuned away but a restatement of `D*`. *Partial* otherwise.
+  Reported alongside: the **variance decomposition** of each reading into
+  between-family and within-family components, since the claim being tested
+  is that the screen carries a real between-family signal riding on an
+  instance-level component of the opposite sign.
 - **G-R4.** *Supported* at pooled `ρ_s ≤ −0.6` over ≥ 30 lever-generated
   cells. *Killed* at `|ρ_s| < 0.2` or a sign flip. **(Retired, iteration 4:
   a pooled `ρ_s` over mixed sizes is not evidence here — see G-R4″.)**
@@ -414,6 +440,102 @@ chosen, `2^{+1.13}` above baseline where it was not.
 C at `m ≥ 4`: if `a₆` reaches the leading form of `S₅`, `d_reg` becomes
 curve-dependent at the first `m` where index calculus is asymptotically
 interesting. That is a symbolic computation, not a search.
+### 2026-09-13 — iteration 9 (EXP-R6 + EXP-R7 — the screen is between-family by construction, and L2 should not be built)
+
+Two tasks, both taken at the user's direction after iteration 8 recommended
+stopping: scope the L2 solver (A) and work the defensive side (B).
+
+#### B — EXP-R6: is the sign inversion repairable?
+
+- **Why it mattered.** R4e explained the within-family inversion by
+  *censoring at the cutoff*: a target refuting at `D* = 2` never exercises
+  degree 3. That explanation **predicts a repair** — measure at a degree
+  every system passes through — and the FFD screen's usefulness inside a
+  construction turns on it.
+- **Disclosed before the gate:** a 6-cell single-seed probe had already
+  shown cutoff 2 behaving like cutoff 3. G-R6 was written knowing that, so
+  its value is breadth (6 readings × 36 cells × 3 seeds), not surprise.
+- **Killed.** **Not one cell of 36 reaches `ρ_s ≤ −0.6` on any of the six
+  readings.** Cutoff 2 — the degree every system passes through, the exact
+  repair R4e predicted — is the *worst*: mean `+0.923`, positive in 25 of
+  25 decidable cells.
+- **And the decomposition is the real result:**
+
+  | reading | between-family | within-family | between-family `ρ_s` |
+  |---|---:|---:|---:|
+  | `δ(2)` | 10.0% | **90.0%** | −0.737 |
+  | `δ(3)` | 86.9% | 13.1% | **−0.990** |
+  | `δ(4)` | **99.7%** | 0.3% | **−0.990** |
+
+  The two facts about the screen are one fact. `Δ_low` is a **mixture**: a
+  structural component that lives between families and carries the negative
+  law, and an instance component that lives within them and is a restatement
+  of `D*`, positively. **The cutoff sets the mix.** A low cutoff picks up
+  mostly the instance component (90% within at `δ(2)`) and the law degrades
+  to `−0.737`; a high cutoff purifies the structural one (99.7% between at
+  `δ(4)`) and the law reaches `−0.990`.
+- **What this gives the defensive program**, which is why it was worth
+  doing: the FFD screen's cutoff-3 choice is **vindicated and explained**,
+  not merely observed. Cutoff 2 would be materially worse on both counts —
+  weaker law *and* more instance contamination. Cutoff 4 is the purest
+  structural reading, at the cost of having almost no within-family variance
+  left, which is the honest way to say it cannot be used inside a
+  construction *at all* rather than that it is merely weak there.
+- **Gate verdict.** G-R6: **partial** by its own letter — no reading
+  repairs, but `δ(4)` is not positive either, so the "all positive" branch
+  does not fire. The substantive reading is that the repair is dead: `δ(4)`
+  fails to repair for want of variance, not for want of sign.
+
+#### A — EXP-R7: what would the L2 solver actually take?
+
+- **The scoping found a problem with its own premise.** Iteration 5's
+  "51 variables at degree 3" comes from R2′, which compares
+  `cols(9ℓ−3, 3)` against `cols(3ℓ, 6)` — the widths at each presentation's
+  **generator** degree. Neither presentation solves there.
+- **A measurement EXP-R2 could have had.** It reported `ℓ = 3` symmetrised
+  as *censored at `D ≥ 5`*. That scan prices at `≈ 2.1·10¹²` word-ops under
+  the module's own `rows·min(rows,cols)·cols/64` model, against the
+  `6·10¹⁰` budget it was given — **25× under, not out of reach.** Raising
+  the budget measures it in **80 seconds**: `D*(sym, ℓ=3) = 5`, against
+  `4` at `ℓ = 2`. The solving degree is *rising*, and the generator-degree
+  width understates the real width by 3× at `ℓ=2` and **24× at `ℓ=3`**.
+- **An exact bound removes the need to measure the other side.** The
+  eliminated presentation lives in `3ℓ` Boolean variables, so its Macaulay
+  matrix can never be wider than the entire multilinear space `2^{3ℓ}` — at
+  any degree, whatever its `D*`. Symmetrisation is worth building only if it
+  is narrower than *that ceiling* at the degree it actually solves:
+
+  | `ℓ` | elim ceiling `2^{3ℓ}` | sym @ `D*=4` | sym @ `D*=5` | sym @ trend `D*=ℓ+2` |
+  |---:|---:|---:|---:|---:|
+  | 6 | 262 144 | 272 052 | 2 621 112 | 773 168 722 |
+  | 7 | 2 097 152 | 523 686 | 5 985 198 | 17 784 019 483 |
+  | 8 | 16 777 216 | 919 311 | 12 157 824 | 406 276 910 432 |
+
+  Pinned at `D* = 4`, symmetrisation first wins at `ℓ = 7`; pinned at `5`,
+  at `ℓ = 8`; **on the measured trend, never in range.** Both pinned columns
+  are contradicted by the `ℓ=2 → ℓ=3` step. The `ℓ+2` column is an
+  extrapolation from two points and is labelled as one throughout, per
+  AGENTS.md §6.
+- **No gate, and that is deliberate.** EXP-R7 is a scoping exercise, not a
+  prediction: it produced one new measurement and one arithmetic bound.
+  Retrofitting a gate onto either would be decoration.
+- **Recommendation: do not build it.** Not because it is expensive — the
+  sparse model makes `ℓ = 6` at `D* = 5` look like `1.1T` ops and `3.5 MB`,
+  which is buildable — but because the lever it would measure has already
+  been decided against by a comparison the original table got wrong. The
+  inventory (what `groebner_f4.rs`, `ffd_harness.rs`, `pq_sparse_la.rs` and
+  `pq_wiedemann.rs` do and do not provide) is in the experiment output for
+  whoever revisits this, but the delta is new code in both halves and there
+  is nothing at the end of it.
+- **Ledger delta.** R6 registered→killed; R6′ registered→supported; R7
+  registered→killed; R7′ registered→killed. **R2′ split**: `supported` as
+  arithmetic about generator-degree widths, `killed` as the decision
+  criterion it was being used as.
+- **Class (AGENTS.md §3): `accounting` (B) and `accounting` (A).** No ratio
+  to the `2^N` boundary moved. B explains and vindicates someone else's
+  screen; A withdraws a project estimate this thread had proposed. Neither
+  is attack progress and neither is presented as any.
+
 ### 2026-09-12 — iteration 8 (EXP-R4d — the defect changes sign with the grouping)
 
 - **Task picked.** The last cheap item: R4 asked whether levers act
@@ -1114,14 +1236,22 @@ tested — but that an inference from the *shape* of someone else's
 aggregation is a hypothesis, and this thread's own ledger discipline exists
 to stop hypotheses being filed as findings.
 
-**Queue, if the thread continues.** It should be said plainly that the
-queue is thin and that none of it is likely to change the boundary verdict:
+**The queue is empty.** Iteration 9 closed the last item, and closed it by
+scoping rather than by building:
 
-1. **EXP-R2b — reach for L2.** The only lever that is bounded rather than
-   killed. Needs a sparse F4/F5 reaching ~51 variables at degree 3
-   (`ℓ = 6`). This is an engineering project, not an experiment, and should
-   not be started without deciding that L2 is worth that much — a decision
-   that should weigh §6's boundary verdict, not just L2's open status.
+- **EXP-R2b — reach for L2. Withdrawn (EXP-R7, iteration 9).** The project
+  was scoped before being started, and the scoping killed it. The
+  requirement was never "51 variables at degree 3": that is the width at the
+  *generator* degree, and the symmetrised system solves at `D* = 4` for
+  `ℓ = 2` and **5** for `ℓ = 3`, rising. Measured against the exact ceiling
+  `2^{3ℓ}` on the eliminated presentation's width, symmetrisation is never
+  the narrower presentation in range on the trend the data supports. Nothing
+  is at the end of the build.
+
+So every lever in the taxonomy is now either measured or shown not to be
+worth measuring, and the answer in each case is the same one: **no route
+tested comes within 9 bits of the `2^N` boundary, and the best-measured one
+is losing ground.**
 
 *(EXP-R3b was run in iteration 7: the L4 trend continues on its own metric
 and reverses against the boundary. EXP-R4d — queued as "EXP-R4c" — was run

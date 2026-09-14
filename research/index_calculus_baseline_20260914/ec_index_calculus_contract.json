@@ -1,0 +1,262 @@
+{
+  "version": "2026-09-14.2",
+  "status": "initial_baseline_contract_with_six_instance_local_pilot",
+  "primary_metrics": [
+    "total_common_operations_over_sqrt_subgroup_order",
+    "total_common_operations_over_matched_rho_operations",
+    "total_common_operations_over_applicable_floor",
+    "common_operations_per_fresh_verified_relation"
+  ],
+  "families": [
+    {
+      "id": "koblitz_binary",
+      "definition": "E over F2, evaluated over F(2^n)",
+      "rho": "negation and eligible Frobenius quotient"
+    },
+    {
+      "id": "binary_non_subfield",
+      "definition": "ordinary E over F(2^n), excluding curves defined over a proper subfield up to the chosen equivalence test",
+      "rho": "negation; test additional curve automorphisms separately"
+    },
+    {
+      "id": "generic_prime",
+      "definition": "ordinary E over Fp with a large prime-order subgroup; record exclusions",
+      "rho": "negation and any actual additional eligible automorphisms"
+    },
+    {
+      "id": "small_extension_positive_control",
+      "definition": "fixed extension degree d=3 or 4 over growing q",
+      "rho": "same actual curve and subgroup"
+    }
+  ],
+  "encodings": [
+    "direct_S3",
+    "chained_S3",
+    "symmetrized_S4",
+    "unsymmetrized_S4_control",
+    "nagao_function_coefficient",
+    "function_support_modular_squaring_experimental"
+  ],
+  "solver_candidates": [
+    "Magma_F4",
+    "explicitly_identified_open_source_Groebner_engine",
+    "F5_or_signature_engine_optional",
+    "WDSat",
+    "CryptoMiniSat_XOR_GE_on_off",
+    "hybrid_guess_and_F4",
+    "hybrid_guess_and_XOR",
+    "exhaustive_and_MITM_oracle"
+  ],
+  "workloads": [
+    "planted_SAT_sanity_only",
+    "uniform_random_group_target",
+    "certified_UNSAT",
+    "first_verified_relation",
+    "complete_enumeration",
+    "fixed_group_precomputation",
+    "cold_complete_ECDLP"
+  ],
+  "instance_fields": [
+    "curve_coefficients",
+    "field_characteristic",
+    "field_degree",
+    "field_modulus",
+    "field_basis",
+    "group_order",
+    "subgroup_order",
+    "cofactor",
+    "generator",
+    "target",
+    "target_sampling_rule",
+    "factor_base_rule",
+    "signed_base_size",
+    "independent_column_count",
+    "orbit_histogram",
+    "m",
+    "seed",
+    "sha256"
+  ],
+  "run_fields": [
+    "source_commit",
+    "solver_version",
+    "config_hash",
+    "compiler_flags",
+    "hardware",
+    "worker_threads",
+    "memory_limit_bytes",
+    "timeout_s",
+    "status",
+    "evidence_type",
+    "timers",
+    "counters",
+    "peak_rss_bytes",
+    "certificate_path",
+    "certificate_hash"
+  ],
+  "timers_exclusive_seconds": [
+    "factor_base_setup",
+    "target_generation",
+    "encoding",
+    "preprocessing",
+    "solver",
+    "root_extraction",
+    "point_lifting",
+    "point_verification",
+    "canonicalization",
+    "relation_filtering",
+    "relation_matrix",
+    "individual_log",
+    "orchestration"
+  ],
+  "solver_subtimers_exclusive_seconds": [
+    "symbolic_preprocessing",
+    "macaulay_build",
+    "macaulay_elimination",
+    "pair_selection",
+    "search_propagation",
+    "search_branching",
+    "other_solver_work"
+  ],
+  "operation_counters": [
+    "ec_add",
+    "ec_double",
+    "ec_frobenius",
+    "field_multiply",
+    "field_square",
+    "field_invert",
+    "gf2_word_xor",
+    "mod_r_multiply_add",
+    "sat_decisions",
+    "sat_conflicts",
+    "sat_propagations",
+    "sat_xor_row_operations",
+    "f4_matrix_rows",
+    "f4_matrix_columns",
+    "f4_matrix_nonzeros",
+    "f4_matrix_rank",
+    "max_processed_degree",
+    "root_tests",
+    "raw_solutions",
+    "verified_relations",
+    "fresh_rows",
+    "matrix_rank"
+  ],
+  "statuses": [
+    "VERIFIED_RELATION",
+    "SAT_NOT_YET_POINT_VERIFIED",
+    "CERTIFIED_UNSAT",
+    "SOLVER_REPORTED_UNSAT",
+    "TIMEOUT",
+    "OOM",
+    "ERROR",
+    "NOT_RUN"
+  ],
+  "evidence_types": [
+    "measured_local",
+    "published",
+    "derived_exact",
+    "heuristic_model",
+    "proposed"
+  ],
+  "initial_sweep": {
+    "binary_field_degrees": [
+      9,
+      11,
+      13,
+      15,
+      17,
+      19,
+      23,
+      29,
+      31,
+      37,
+      41
+    ],
+    "prime_field_bits": [
+      11,
+      13,
+      17,
+      19,
+      23,
+      29,
+      31
+    ],
+    "m": [
+      2,
+      3,
+      4
+    ],
+    "factor_base_dimensions": "floor(log2(subgroup_order)/m) plus offsets -2,-1,0,1,2 where valid; freeze exact resulting sizes",
+    "independent_curves_per_size": 3,
+    "targets_per_curve_per_cell": 30,
+    "confirmatory_targets_per_curve_per_cell": 100,
+    "pilot_timeout_s": 60,
+    "confirmatory_timeout_s": 600,
+    "pilot_ram_GiB": 16,
+    "confirmatory_ram_GiB": 64
+  },
+  "invariants": [
+    "No planted scalar or point witness is given to a solver.",
+    "All comparisons use identical targets and permitted decompositions.",
+    "Timeout and OOM are never UNSAT or silently dropped.",
+    "All counters identify their unit; missing counters are null, never zero.",
+    "Do not add a solver sub-timer to its enclosing solver timer.",
+    "A Boolean-system root is not yet a group relation.",
+    "Negation and Frobenius compression are recorded separately from raw base support.",
+    "Frobenius images are not automatically independent relation rows.",
+    "The relation matrix is over the subgroup scalar field, even for characteristic-two curves.",
+    "First-solution and enumeration results have separate leaderboards.",
+    "Fixed setup is charged once; warm amortization always names the target count.",
+    "Full-rank recovery and final scalar verification are required for full-ECDLP claims.",
+    "Repeated summands and exceptional partial sums must have matching coverage across encodings.",
+    "A degree-of-regularity estimate is not inferred from first fall degree."
+  ],
+  "promotion_gate": {
+    "criterion": "At least 20 percent reduction in paired common operations per fresh verified relation at fixed support and m, with calibrated conversions and all failed-attempt costs; this is an engineering gate, not evidence of an advance.",
+    "additional_requirements": [
+      "at least three independent curves and two adjacent parameter cells",
+      "95 percent paired bootstrap interval excludes no improvement",
+      "random-target success and correctness preserved",
+      "all failed-attempt costs included",
+      "memory tradeoff explicitly reported",
+      "holdout targets and at least one holdout curve",
+      "rho comparison uses the same resource envelope",
+      "full-attack operation estimate decreases with all phases priced",
+      "report ratios to both the applicable derived floor and measured matched reference",
+      "all final scalar recoveries verify before a complete ECDLP claim"
+    ],
+    "note": "This is an engineering acceptance threshold, not a complexity theorem.",
+    "abandon_or_reclassify": [
+      "No gate improvement on holdout cells: stop expanding this variant.",
+      "Total cost rises despite a smaller solver counter: classify as relabelling.",
+      "Missing phase costs or conversions: retain accounting status; do not promote.",
+      "A verified counterexample invalidates the run regardless of speed."
+    ]
+  },
+  "classification": "accounting",
+  "secondary_metrics": [
+    "core_seconds_per_fresh_verified_relation",
+    "rank_gain_per_core_second",
+    "cold_full_dlp_seconds",
+    "warm_individual_log_seconds",
+    "peak_rss_bytes"
+  ],
+  "comparison_contract": {
+    "normalization": "S = total common operations / sqrt(N), where N is the subgroup order, not the field degree n",
+    "conversion": "Measure common-unit conversion on the same field, representation and implementation; never convert SAT conflicts with a guessed factor or reuse the F_p^3 conversion for binary fields.",
+    "unknown": "Unpriced phases, conversions, subgroup orders and ratios are null, never zero.",
+    "count_floor": "For independent uniform targets with at most one row per attempt, expected attempts >= R_req / min(1, binom(M+m-1,m)/N). This bounds attempt counts, not the runtime of every coordinate algorithm.",
+    "rho": "Measure the eligible automorphism-aware rho reference on the same subgroup and operation unit before reporting a full-attack ratio.",
+    "admission": "All phases must be priced and final scalar verified before admitting a full-DLP S. Polynomial-instance timing alone is not admitted.",
+    "exponents": "At least four sizes and the whole method; no exponent fit to this selected three-size pilot."
+  },
+  "existing_repo_paths": [
+    "RESEARCH_TRIMOSKA_BENCHMARKS.md",
+    "RESEARCH_GROEBNER_F4.md",
+    "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+    "research/nagao_relations/solver_09/README.md",
+    "scripts/run_koblitz_pdp_matrix.py",
+    "scripts/run_koblitz_external_magma.py",
+    "docs/index-calculus-scoreboard.html"
+  ]
+}

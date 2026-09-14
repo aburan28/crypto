@@ -291,6 +291,41 @@ Two consequences for how the screen may be used:
 Neither touches the between-family law in the table above, which is what §9
 proposes `Δ_low` for. They bound where it may be applied.
 
+**Why the cutoff-3 choice is right, and what it is trading (EXP-R6,
+`RESEARCH_DEGREE_REDUCTION.md` R6/R6′).** The obvious repair for the sign
+flip — measure at a degree every system passes through, so nothing is
+censored — **does not work**, and testing it explains the statistic. Over
+3 families × 4 sizes × 3 seeds, not one cell of 36 reaches `ρ_s ≤ −0.6`
+within a family on any of six readings. Cutoff 2, the repair itself, is the
+worst (mean `+0.923`, positive in 25 of 25 decidable cells).
+
+What the six readings show instead is that `Δ_low` is a **mixture**, and the
+cutoff sets the mix:
+
+| reading | variance between families | variance within | between-family `ρ_s` |
+|---|---:|---:|---:|
+| `δ(2)` | 10.0% | 90.0% | −0.737 |
+| `δ(3)` — **as fitted** | 86.9% | 13.1% | **−0.990** |
+| `δ(4)` | 99.7% | 0.3% | **−0.990** |
+
+The structural component lives between families and carries the law; the
+instance component lives within them and is a restatement of `D*` with the
+opposite sign. Raising the cutoff purifies the first and drains the second.
+
+Three consequences:
+
+1. **Cutoff 3 is a good choice and can now be defended as one**, not merely
+   reported. Dropping to cutoff 2 would cost both accuracy (`−0.990 →
+   −0.737`) and purity (13% → 90% instance variance).
+2. **Cutoff 4 is the purest structural reading** (99.7% between) at the same
+   `−0.990`. If the screen is ever used somewhere instance contamination
+   could leak in, that is the safer cutoff.
+3. The within-family prohibition above is **structural, not a tuning
+   problem**. `δ(4)` is the one reading that is not positive within families
+   — and it fails to repair anything because at that cutoff there is almost
+   no within-family variance left (0.3%). The statistic either carries
+   instance information with the wrong sign, or carries none at all.
+
 This **reconciles the dispute** instead of picking a side:
 
 - The HKY counterexamples and the Galbraith–Gebregiyorgis "nice" cases

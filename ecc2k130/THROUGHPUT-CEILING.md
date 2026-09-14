@@ -1,5 +1,11 @@
 # Historical software-arithmetic throughput model
 
+**Superseded for the current path by [THROUGHPUT-30B.md](THROUGHPUT-30B.md)**,
+which prices the objective against the native-carryless kernel that runs today.
+The instruction and memory probes below are still the measured hardware
+ceilings and that document uses them; the performance model built on them is
+not, because it describes a multiplier that was replaced.
+
 This document retains the CUDA 13.0 software-arithmetic probes and model.
 The later [native carryless implementation](NATIVE-CARRYLESS.md) changes the
 instruction mix, and [batch tuning](BATCH-TUNING.md) measured 13.206088 B
@@ -140,9 +146,10 @@ of 5.16. Streaming x/y from DRAM instead costs about 100 bytes per update,
   `pipe_alu`/`pipe_fma` utilisation this document infers.
 * The walk itself is at the known minimum of five multiplications plus one
   batched inversion per step; x-only and other schedules screened here cost
-  more. Twenty billion updates per second on this curve therefore needs
-  about three of these GPUs, as [aws/README.md](aws/README.md) already
-  budgets.
+  more. Twenty billion updates per second on this curve therefore needs more
+  than one of these GPUs — two at the rate the current kernel measures
+  ([THROUGHPUT-30B.md](THROUGHPUT-30B.md)), three at the rate this document
+  was written against — as [aws/README.md](aws/README.md) budgets.
 * Changing platform does not escape this bound either. An FPGA has no shared
   integer pipe — the walk's bit operations occupy fabric instead of issue
   slots — but [FPGA-CEILING.md](FPGA-CEILING.md) estimates one VU47P at 5–12 B

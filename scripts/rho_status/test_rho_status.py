@@ -5,10 +5,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 import unittest
 
-from render import merge_history
+from render import HISTORY_LIMIT, merge_history
 from snapshot import CLAIM_BOUNDARY, FORBIDDEN_PUBLIC_KEYS, assert_public, campaign_state, normalize
 
 
@@ -67,6 +68,46 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}", text)
         self.assertIn("secrets.RHO_WALKER_SSH_KEY", text)
         self.assertNotIn("role-to-assume", text)
+
+    def test_history_window_matches_the_publish_cadence(self):
+        # history.json is trimmed to a snapshot COUNT, so the window it covers
+        # is that count divided by the cron rate. The two live in different
+        # files, and speeding the cron up without raising the count silently
+        # shortens the published series instead of failing, so pin both to the
+        # same seven days here.
+        path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        crons = re.findall(r'- cron: "([^"]+)"', text)
+        self.assertEqual(len(crons), 1, "expected one schedule, got %s" % (crons,))
+        minute, rest = crons[0].split(" ", 1)
+        self.assertEqual(rest, "* * * *", "not an every-N-minutes cron: %s" % crons[0])
+        step = int(minute[2:]) if minute.startswith("*/") else 60
+        self.assertEqual(
+            HISTORY_LIMIT,
+            7 * (24 * 60 // step),
+            "cron runs every %d min, so seven days is %d snapshots, but "
+            "render.HISTORY_LIMIT is %d" % (step, 7 * (24 * 60 // step), HISTORY_LIMIT),
+        )
+
+    def test_dashboard_stale_banner_allows_for_scheduler_jitter(self):
+        # The banner must not cry stale on one late run: GitHub delays
+        # scheduled workflows under load. Keep the threshold at several
+        # missed runs, and never below two.
+        workflow = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(workflow, encoding="utf-8") as fh:
+            crons = re.findall(r'- cron: "([^"]+)"', fh.read())
+        minute = crons[0].split(" ", 1)[0]
+        step = int(minute[2:]) if minute.startswith("*/") else 60
+        page = os.path.join(ROOT, "docs", "ecc2k130-status", "index.html")
+        with open(page, encoding="utf-8") as fh:
+            text = fh.read()
+        match = re.search(r"var STALE_AFTER_MS = ([^;]+);", text)
+        self.assertIsNotNone(match, "STALE_AFTER_MS not found on the dashboard")
+        expression = match.group(1).replace("HOUR_MS", str(3600 * 1000)).strip()
+        self.assertRegex(expression, r"^[\d\s*]+$", "unexpected STALE_AFTER_MS: %s" % expression)
+        stale_minutes = eval(expression) / 1000 / 60  # noqa: S307 - digits and * only
+        self.assertGreaterEqual(stale_minutes, 2 * step, "stale banner will flap on a late run")
 
     def test_fetch_script_punches_runner_ip_not_launch_key(self):
         path = os.path.join(HERE, "fetch_via_walker.sh")

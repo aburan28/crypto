@@ -1,6 +1,6 @@
 # ECC2K-130 public status snapshot
 
-Hourly GitHub Action that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 15 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
@@ -90,3 +90,26 @@ per-worker counts, and 7-day hourly buckets. `state` is one of
 
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.
+
+The operations total on the dashboard and the matching figure on the
+landing page are **not** in `status.json`: no worker reports an iteration
+counter. Both pages derive them from the point count, one point per
+`2^25.27` iterations at `HW(x) <= 34` (`ecc2k130/aws/README.md`), and show
+the result against the `2^60.9` expected cost of a collision. The exponent
+is a parameter of this campaign's distinguishing rule, so the pages apply
+it to `ecc2k-130` only, and `scripts/site/test_build.py` pins both copies
+of it to the campaign document.
+
+The dashboard's progress bar is filled from the ratio of the **work**,
+`2^(n - 60.9)`, never from the ratio of the exponents: `n = 39` is two
+thirds of the way along the exponent and about a millionth of a millionth
+of the way through the work. A test pins that, because it is the kind of
+bar that gets "fixed" into a lie by anyone trying to make it look fuller.
+
+The dashboard also derives an ETA to that same `2^60.9` expected cost
+from the last-hour distinguished-point amount: operations per second
+are `(dps_last_hour × 2^25.27) / 3600`, and the ETA is the remaining
+work divided by that rate. When the hourly DP amount changes, the
+operation rate and the ETA both move with it at the fixed interval.
+The ETA is an expectation, not a deadline; `scripts/site/test_build.py`
+pins the formula.

@@ -2,8 +2,9 @@
 #
 # Scale the campaign with one EC2 Fleet, measured in GPUs.
 #
-#   ./fleet.sh up 8                  8 GPUs, all spot, any g7e size that is cheapest
-#   ./fleet.sh up 64 --on-demand 8   64 GPUs of which 8 are on-demand
+#   ./fleet.sh up 8                  8 GPUs: prefer g7e spot, on-demand only for shortfall
+#   ./fleet.sh up 64 --on-demand 8   8 GPUs guaranteed on-demand; rest prefer spot
+#   ./fleet.sh up 64 --no-fallback   spot (plus any --on-demand base); never add on-demand
 #   ./fleet.sh scale 128             change the target
 #   ./fleet.sh status                instances, their types and spot/on-demand
 #   ./fleet.sh down                  delete the fleet and terminate its instances
@@ -14,8 +15,14 @@
 # price-capacity-optimized allocation over every default subnet, which is what
 # keeps a large fleet running when one pool empties.
 #
+# Default purchasing: all capacity is requested as g7e Spot. After
+# FALLBACK_WAIT_SECONDS (default 120), any still-unfilled GPUs are switched to
+# On-Demand — only then, and only for the shortfall. Use --no-fallback to keep
+# a pure Spot (plus optional --on-demand base) request.
+#
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
-# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none).
+# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
+# FALLBACK_WAIT_SECONDS (default 120).
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -24,6 +31,7 @@ STACK=${STACK:-ecc2k130}
 LT=$STACK-worker
 TYPES=${TYPES:-g7e.2xlarge,g7e.4xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge}
 FLEET_FILE=.fleet-id-$AWS_DEFAULT_REGION
+FALLBACK_WAIT_SECONDS=${FALLBACK_WAIT_SECONDS:-120}
 
 gpusOf() {
     case "$1" in
@@ -41,18 +49,75 @@ fleetId() {
         --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text
 }
 
+# Print an integer capacity field (None/empty/float → int).
+capacityInt() {
+    case "$1" in
+        None|'') echo 0 ;;
+        *) echo "${1%.*}" ;;
+    esac
+}
+
+# Echo "fulfilled on_demand" for the fleet (Spot = fulfilled - on_demand).
+fleetFulfilled() {
+    local row fulfilled ondemand
+    row=$(aws ec2 describe-fleets --fleet-ids "$1" \
+        --query 'Fleets[0].[FulfilledCapacity,FulfilledOnDemandCapacity]' --output text)
+    fulfilled=$(capacityInt "${row%%$'\t'*}")
+    ondemand=$(capacityInt "${row#*$'\t'}")
+    if [ "$ondemand" -gt "$fulfilled" ]; then ondemand=$fulfilled; fi
+    echo "$fulfilled $ondemand"
+}
+
+# Fulfill unmet Spot with On-Demand after a short wait. Spot stays the default
+# purchase type; On-Demand covers only capacity Spot has not already filled
+# (FulfilledCapacity includes On-Demand, so do not add the --on-demand base again).
+fallbackOnDemand() {
+    local id=$1 total=$2
+    local waited=0 fulfilled ondemand_fulfilled spot_fulfilled ondemand
+    echo "waiting up to ${FALLBACK_WAIT_SECONDS}s for g7e Spot before On-Demand fallback"
+    while [ "$waited" -lt "$FALLBACK_WAIT_SECONDS" ]; do
+        read -r fulfilled ondemand_fulfilled < <(fleetFulfilled "$id")
+        if [ "$fulfilled" -ge "$total" ]; then
+            echo "fleet $id: Spot filled $fulfilled/$total GPU(s); no On-Demand fallback"
+            return 0
+        fi
+        sleep 15
+        waited=$((waited + 15))
+    done
+    read -r fulfilled ondemand_fulfilled < <(fleetFulfilled "$id")
+    if [ "$fulfilled" -ge "$total" ]; then
+        echo "fleet $id: Spot filled $fulfilled/$total GPU(s); no On-Demand fallback"
+        return 0
+    fi
+    spot_fulfilled=$((fulfilled - ondemand_fulfilled))
+    # Keep every Spot GPU already running; cover the remainder with On-Demand.
+    ondemand=$((total - spot_fulfilled))
+    if [ "$ondemand" -lt 0 ]; then ondemand=0; fi
+    if [ "$ondemand" -gt "$total" ]; then ondemand=$total; fi
+    aws ec2 modify-fleet --fleet-id "$id" --target-capacity-specification \
+        "TotalTargetCapacity=$total,OnDemandTargetCapacity=$ondemand,DefaultTargetCapacityType=spot" >/dev/null
+    echo "fleet $id: Spot holds $spot_fulfilled/$total; falling back to $ondemand On-Demand GPU(s) for the shortfall"
+}
+
 cmd=${1:-status}
 case "$cmd" in
 up)
     total=${2:?number of GPUs}
     shift 2
     ondemand=0
+    fallback=1
     while [ $# -gt 0 ]; do
         case "$1" in
             --on-demand) ondemand=$2; shift 2 ;;
+            --no-fallback) fallback=0; shift ;;
+            --fallback-on-demand) fallback=1; shift ;;
             *) echo "unknown option $1" >&2; exit 1 ;;
         esac
     done
+    if [ "$ondemand" -gt "$total" ]; then
+        echo "On-Demand base $ondemand exceeds total $total" >&2
+        exit 1
+    fi
     existing=$(fleetId)
     if [ -n "$existing" ] && [ "$existing" != None ]; then
         echo "fleet $existing already active; use scale" >&2
@@ -90,7 +155,12 @@ up)
 EOF
     id=$(aws ec2 create-fleet --cli-input-json "file://${TMPDIR:-/tmp}/ecc-fleet.json" --query FleetId --output text)
     echo "$id" > "$FLEET_FILE"
-    echo "fleet $id: target $total GPU(s), $ondemand on-demand, types $TYPES"
+    echo "fleet $id: target $total GPU(s), $ondemand On-Demand base, prefer Spot for g7e types $TYPES"
+    if [ "$fallback" -eq 1 ]; then
+        fallbackOnDemand "$id" "$total" "$ondemand"
+    else
+        echo "fleet $id: On-Demand fallback disabled (--no-fallback)"
+    fi
     ;;
 scale)
     total=${2:?number of GPUs}
@@ -118,5 +188,5 @@ down)
     echo "fleet $id deleted; instances terminating (workers checkpoint on the way down)"
     ;;
 *)
-    sed -n '3,12p' "$0"; exit 1 ;;
+    sed -n '3,18p' "$0"; exit 1 ;;
 esac

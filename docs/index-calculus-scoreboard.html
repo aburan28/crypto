@@ -648,8 +648,179 @@
         (T = 8/16/32)</span>
       <span>n = 10: 230 &rarr; 73 &rarr; 14 &rarr; 7 &rarr; 1 &rarr; <strong>0</strong> at T = 128
         &middot; last survivor <code>a&#8326; = 13</code>, the thread&rsquo;s own caveat curve</span>
+      <span>what a lever would have to buy at ECC2K-130: 2^&minus;72 on the oracle</span>
     </div>
   </div>
+
+  <!-- ============ NAGAO IMPLEMENTATION STATUS ============ -->
+  <div class="panel" id="nagao-relations">
+    <div class="panel-head">
+      <h2>Nagao relation encodings: correctness before cost</h2>
+      <p>Three-point decomposition on <code>y&sup2;+xy=x&sup3;+1</code>, with distinct
+        nonzero factor abscissas, all different from the target abscissa. The two Riemann&ndash;Roch
+        frontends construct no summation polynomial. The reference is exhaustive group arithmetic
+        on the identical domain. These are engineering candidates; full-attack <code>S</code>,
+        rho ratios and runtime-floor ratios are unmeasured.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Frozen source: <code>research/nagao_relations/experiments/nagao_relation_comparison_20260913.json</code>.
+          Complete projected x-solution sets, across 86 five-bit and 24 nine-bit target cases.
+          The aggregate artifact is incomplete because 24 incidence cases hit their watchdog.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">Complete / attempted</th>
+          <th scope="col" class="n">Watchdogs</th><th scope="col">Correctness</th>
+          <th scope="col">S / rho ratio</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Chained S3 + verified lifts</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">reference</span></td></tr>
+          <tr><td>RR incidence</td><td class="n">86 / 110</td><td class="n">24</td>
+            <td>Completed sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+          <tr><td>RR norm</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p><strong>Function-first support test:</strong> the residual norm <code>H</code> divides
+        the subspace polynomial <code>L_V</code>. Searching function coefficients before extracting
+        roots matched all 43 affine targets in each of two five-bit subspace panels: dimension two
+        yielded zero signed triples; dimension three yielded 72 verified signed triples across
+        33 targets. These signed counts differ from the projected x-tuples above. Sources:
+        <code>research/nagao_relations/experiments/nagao_annihilator_n5_d{2,3}_20260913.json</code> and
+        <code>research/nagao_relations/README.md</code>.</p>
+      <p>The next experiment compiles the support test into a search solver. Exhaustive coefficient
+        enumeration is a correctness instrument. No speedup, exponent improvement or rho crossover
+        has been established; the existing attack-cost ledger is unchanged.</p>
+    </div>
+  </div>
+
+  <!-- ============ NAGAO IMPLEMENTATION STATUS ============ -->
+  <div class="panel" id="nagao-relations">
+    <div class="panel-head">
+      <h2>Nagao relation encodings: correctness before cost</h2>
+      <p>Three-point decomposition on <code>y&sup2;+xy=x&sup3;+1</code>, with distinct
+        nonzero factor abscissas, all different from the target abscissa. The two Riemann&ndash;Roch
+        frontends construct no summation polynomial. The reference is exhaustive group arithmetic
+        on the identical domain. These are engineering candidates; full-attack <code>S</code>,
+        rho ratios and runtime-floor ratios are unmeasured.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Frozen source: <code>research/nagao_relations/experiments/nagao_relation_comparison_20260913.json</code>.
+          Complete projected x-solution sets, across 86 five-bit and 24 nine-bit target cases.
+          The aggregate artifact is incomplete because 24 incidence cases hit their watchdog.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">Complete / attempted</th>
+          <th scope="col" class="n">Watchdogs</th><th scope="col">Correctness</th>
+          <th scope="col">S / rho ratio</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Chained S3 + verified lifts</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">reference</span></td></tr>
+          <tr><td>RR incidence</td><td class="n">86 / 110</td><td class="n">24</td>
+            <td>Completed sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+          <tr><td>RR norm</td><td class="n">110 / 110</td><td class="n">0</td>
+            <td>All sets match</td><td>Unmeasured</td><td><span class="chip">engineering candidate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p><strong>Function-first support test:</strong> the residual norm <code>H</code> divides
+        the subspace polynomial <code>L_V</code>. Searching function coefficients before extracting
+        roots matched all 43 affine targets in each of two five-bit subspace panels: dimension two
+        yielded zero signed triples; dimension three yielded 72 verified signed triples across
+        33 targets. These signed counts differ from the projected x-tuples above. Sources:
+        <code>research/nagao_relations/experiments/nagao_annihilator_n5_d{2,3}_20260913.json</code> and
+        <code>research/nagao_relations/README.md</code>.</p>
+      <p>The next experiment compiles the support test into a search solver. Exhaustive coefficient
+        enumeration is a correctness instrument. No speedup, exponent improvement or rho crossover
+        has been established; the existing attack-cost ledger is unchanged.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="nagao-followup-01">
+    <div class="panel-head">
+      <h2>Nagao follow-up: denser bases and larger instances</h2>
+      <p>Source: <code>research/nagao_relations/followup_01/summary.json</code> and
+        <code>raw.jsonl</code> in that folder. Eight uniform targets per field, weight two,
+        three summands, five seconds per instance. No incorrect admitted relation was recorded.
+        These are engineering observations; full-DLP S and rho ratios remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <thead><tr><th scope="col">Field degree</th><th scope="col">Variant</th>
+        <th scope="col">Complete / attempted</th><th scope="col">Complete verified x-tuples</th>
+        <th scope="col">Partial verified x-tuples</th><th scope="col">S / rho</th></tr></thead>
+      <tbody>
+        <tr><td>9</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>128</td><td>Unmeasured</td></tr>
+        <tr><td>9</td><td>RR norm</td><td>8 / 8</td><td>363</td><td>&mdash;</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>Chained S3</td><td>0 / 8</td><td>&mdash;</td><td>4</td><td>Unmeasured</td></tr>
+        <tr><td>11</td><td>RR norm</td><td>0 / 8</td><td>&mdash;</td><td>9</td><td>Unmeasured</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>Function-coefficient search matched the complete signed-point oracle:
+      864 triples over all 43 five-bit targets for dim(V)=4; 1,780 over eight sampled targets
+      for dim(V)=5. Under a unit-cost field-API model its ratios to brute point enumeration
+      were 3.188 and 0.540, respectively. The latter uses the entire field as the x-domain;
+      neither ratio compares with the best Semaev solver or establishes an attack speedup.
+      Incomplete SAT cases are watchdog outcomes, never UNSAT evidence. The next tests target
+      support-divisibility circuits and coefficient conditioning.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-solver-02">
+    <div class="panel-head"><h2>Compiled support: exact formulation, negative solver result</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_02/summary.json</code>;
+    proof and hypothesis ledger in that folder's README. 992 coefficient checks
+    passed; 96 matched trials had no validation errors. Both root-free variants
+    timed out in all larger-field cases. Two-bit conditioning exhausted its first
+    branch. Norm remains the promising control; no attack improvement is established.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts;
+    first verified relation or oracle-confirmed restricted UNSAT. Three-second search
+    budget, matched subspace bases. U = uniform; D = known decomposable.
+    Strata may overlap and are not a natural-yield estimate.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th>
+    <th>n9 d4 D</th><th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead>
+    <tbody><tr><td>chained-s3</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>2 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>3 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-conditioned</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>0 / 4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Timeouts remain unknown. The n11 norm uniform decisions
+    include two SAT and one UNSAT. Exact encodings preserve genuine target support;
+    the counting boundary does not move. Symmetrized S4 and calibrated all-phase costs
+    are still missing, so the 20% improvement goal remains unestablished.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-solver-03">
+    <div class="panel-head"><h2>Hybrid support and fair scheduling: bounded negative results</h2>
+    <p>Frozen source: <code>research/nagao_relations/solver_03/summary.json</code>.
+    96 trials with no validation errors; 7,936 hybrid and 992 cubic vector checks passed.
+    Hybrid resolves two nine-bit instance slots but fails to outperform norm.
+    Fair scheduling reached all four branches on every larger case with no completions.
+    Both hypotheses fail their panel-specific improvement criterion.</p></div>
+    <div class="table-scroll"><table><caption>Verified decisions / attempts; three-second search budget.
+    U: uniform; D: known decomposable. Strata may overlap. Timeouts are unknown.</caption>
+    <thead><tr><th>Variant</th><th>n5 d3 U</th><th>n5 d3 D</th><th>n9 d4 U</th><th>n9 d4 D</th>
+    <th>n11 d5 U</th><th>n11 d5 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>support-fair</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>hybrid</td><td>4/4</td><td>4/4</td><td>1/4</td><td>1/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div>
+    <div class="panel-head"><p>Fixed support gives no counting-yield gain.
+    Strongest Semaev comparison and calibrated all-phase costs remain missing.
+    The new coefficient-conditioned linear-membership proof in the research note
+    is a candidate for a future solver experiment, not a measured improvement.</p></div>
+  </div>
+
+  <div class="panel" id="nagao-goal-round-20260913"><div class="panel-head">
+<h2>Function-first goal: eleven-bit panel cleared; cost goal remains open</h2>
+<p>Frozen sources: <code>research/nagao_relations/solver_04/summary.json</code>,
+<code>solver_05/summary.json</code>, <code>solver_06/summary.json</code>;
+combined ledger <code>research/nagao_relations/goal_round_20260913.json</code>.
+288 trials, zero validation errors. The hybrid quadratic solver completed all
+first and enumeration slots; exact same-base elementary S4 wins at smaller sizes.
+No three-size 20% all-cost improvement is established.</p></div><div class="table-scroll"><table><caption>first: verified resolutions / attempts; U uniform, D known decomposable.</caption><thead><tr><th>Variant</th><th>n5 U</th><th>n5 D</th><th>n9 U</th><th>n9 D</th><th>n11 U</th><th>n11 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>fixed-u</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>1/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-function</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-transformed</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="table-scroll"><table><caption>enumerate: verified resolutions / attempts; U uniform, D known decomposable.</caption><thead><tr><th>Variant</th><th>n5 U</th><th>n5 D</th><th>n9 U</th><th>n9 D</th><th>n11 U</th><th>n11 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>chained-s3</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>rr-norm</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>fixed-u</td><td>4/4</td><td>4/4</td><td>2/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-function</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-transformed</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="panel-head"><p>Three-second all-phase soft budget.
+Target strata may overlap and are not pooled as natural yield. Timeouts remain unknown.
+The direct solver's slowest cell was 1.092205 seconds. Its field API counts lack
+comparable SAT operation counts; S and rho ratios remain unmeasured. Fixed support
+preserves the counting boundary. These are engineering observations.</p></div></div>
+
+  <div class="panel" id="nagao-scaling-23-29"><div class="panel-head"><h2>Hybrid support reaches 23 and 29 bits with a small fixed base</h2>
+<p>Frozen source: <code>research/nagao_relations/scaling_23_29.json</code>, derived from solver_07/08/09 raw records.
+240 trials, zero validation errors. Image-space support resolved all target/mode slots; maximum 3.391237 seconds.
+Larger fields use dimension-six bases. Uniform targets there all lack restricted relations; supported targets are diagnostic samples.
+This is engineering progress, not a counting-yield or ECDLP advance.</p></div><div class="table-scroll"><table><caption>first: verified resolutions within five seconds / attempts; U uniform, D from factor triples.</caption><thead><tr><th>Variant</th><th>n11 d5 U</th><th>n11 d5 D</th><th>n23 d6 U</th><th>n23 d6 D</th><th>n29 d6 U</th><th>n29 d6 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>quadratic-original</td><td>4/4</td><td>4/4</td><td>0/4</td><td>2/4</td><td>0/4</td><td>2/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-optimized</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>0/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-image</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>chained-s3</td><td>0/4</td><td>1/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="table-scroll"><table><caption>enumerate: verified resolutions within five seconds / attempts; U uniform, D from factor triples.</caption><thead><tr><th>Variant</th><th>n11 d5 U</th><th>n11 d5 D</th><th>n23 d6 U</th><th>n23 d6 D</th><th>n29 d6 U</th><th>n29 d6 D</th><th>Class</th><th>S / rho</th></tr></thead><tbody><tr><td>quadratic-original</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-optimized</td><td>4/4</td><td>4/4</td><td>4/4</td><td>3/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>quadratic-image</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>4/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>s4-symmetric</td><td>4/4</td><td>4/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>0/4</td><td>Engineering</td><td>Unmeasured</td></tr></tbody></table></div><div class="panel-head"><p>Counted field API operations on completed eleven-bit enumeration fall by about 71% versus the original hybrid.
+SAT work lacks a calibrated matching unit. No full-DLP S or rho ratio is measured.
+Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <!-- ============ NOTES ============ -->
   <div class="notes">
@@ -684,6 +855,127 @@
       <p><strong>One loose end.</strong> Row weight doubles across the measured range, which pushes
         the large-prime linear algebra to n<sup>0.56</sup>. Capping the merge level is the missing
         piece.</p>
+      <p><strong>A bigger field is not a lever.</strong> Base-changing ECC2K-130 to
+        F<sub>2</sub><sup>131e</sup> leaves the target group and its 262 automorphisms untouched, so
+        the reference stays 2<sup>60.81</sup> at every e. Because 131 is prime, every subfield and
+        every Frobenius-stable subspace of that field is either of dimension &ge; 130 &mdash; a
+        2<sup>131</sup> factor base, 2<sup>70.19</sup>&times; rho at the cheapest e and rising with e
+        &mdash; or contained in F<sub>2</sub><sup>e</sup>, where the factor base lies inside the
+        subgroup E(F<sub>2</sub><sup>e</sup>) and no relation exists at any cost. Checked for
+        e = 1&hellip;16; embedding degree &gt; 10<sup>7</sup> closes the transfer route
+        (<code>experiments/ecc2k130_extension_field_boundary.json</code>).</p>
+      <p><strong>A bigger genus is not a lever either.</strong> A cover over F<sub>2</sub><sup>131</sup>
+        is priced by that field, so the cheapest one, genus 2, costs 2<sup>131</sup> &mdash;
+        2<sup>70.19</sup>&times; rho, the same row as the bigger field. Over F<sub>2</sub>, the only
+        proper subfield, index calculus would be cheap: genus 130 would cost 2<sup>37.17</sup>,
+        2<sup>23.64</sup>&times; <em>below</em> the reference. But because 2 is a primitive root
+        mod 131, the GHS genus available to <em>every</em> curve over F<sub>2</sub><sup>131</sup> is
+        1, 2<sup>129</sup> or 2<sup>130</sup>, and at genus 1 the transfer is exactly the zero map on
+        the target subgroup. The window that would pay is genus 130 to between 290 and 300; the gap to the
+        nearest available genus is 2<sup>120.77</sup>
+        (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>).</p>
+      <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
+        At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
+        &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
+        it needs only dim&thinsp;V&thinsp;&ge;&thinsp;45 at m&thinsp;=&thinsp;3, the cofactor-4 class
+        admits every m&thinsp;&ge;&thinsp;2 measured on the curve itself, and certified
+        m&thinsp;=&thinsp;2,&thinsp;3,&thinsp;4 witnesses with S<sub>4</sub>&thinsp;=&thinsp;0 are in
+        the artefact. Finding one is what costs: relations &times; targets &times; oracle
+        = m&thinsp;&middot;&thinsp;2<sup>131</sup> <em>independently of the factor-base dimension</em>,
+        so the best implicit-base variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
+        table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries plain BSGS on the
+        same memory is cheaper than the best decomposition cell, and rho is cheaper than both while
+        storing nothing. Stated as a demand on the oracle: it would have to beat exhaustive search
+        over its own candidate set by 2<sup>70.19&thinsp;+&thinsp;log&#8322;&thinsp;m</sup>, a number
+        that does not move with m or with l because it <em>is</em> the product law
+        (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
+      <p><strong>A trace-zero factor base yields twice, and that is worth exactly one bit.</strong>
+        A base whose abscissae lie in ker&thinsp;Tr sits inside 2E, an index-2 <em>subgroup</em>, so
+        every sum of its points stays there &mdash; and the target subgroup is inside it too. The
+        sums are spread over #E/2, not #E, so a target is hit twice as often as
+        C(|F|,&thinsp;m)/#E says. Measured exhaustively over every target of the order-r subgroup at
+        n&thinsp;=&thinsp;13,&thinsp;17,&thinsp;19: the generic base occupies 0.98&ndash;1.00&thinsp;&times;&thinsp;#E
+        and the trace-zero base 0.49&ndash;0.50&thinsp;&times;&thinsp;#E, a yield factor of
+        1.97&ndash;2.04. The product law reads m&thinsp;&middot;&thinsp;2<sup>n&minus;1</sup>
+        for such a base, still flat in the dimension; the table above prices a generic subspace and
+        would move from 2<sup>132.58</sup> to 2<sup>131.58</sup>. One bit against a gap of
+        seventy-two; class <span class="chip">engineering</span>
+        (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
+      <p><strong>Accounting correction: the Frobenius collapse does not need a subspace.</strong>
+        The classification that leaves only dimensions 0,&thinsp;1,&thinsp;130,&thinsp;131 at n = 131
+        classifies invariant <em>subspaces</em>; GGMP's collapse asks only for &pi;(F) = F, and since
+        131 is prime every abscissa outside F<sub>2</sub> has an orbit of exactly 131, so a union of
+        orbits is Frobenius-stable at any size. The product law becomes m&thinsp;&middot;&thinsp;2<sup>n</sup>/n
+        and the bottom of the family moves from 2<sup>132.58</sup> to 2<sup>124.99</sup>,
+        2<sup>+64.18</sup>&times; rho &mdash; paid for by materialising the base (2<sup>44.5</sup>
+        points at m = 3, 2<sup>23.4</sup> at m = 6), because an orbit union has no low-degree
+        membership polynomial. What 131 being prime forbids is having the collapse <em>and</em> the
+        implicit base, not the collapse itself. Seven bits against a gap of sixty-four; class
+        <span class="chip">accounting</span>, not a gain
+        (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+      <p><strong>Deciding is localising, for any detector that takes its target as input.</strong>
+        A hypothetical decomposition oracle that answers only yes/no for the <em>whole</em> factor
+        base looks far weaker than one that hands over the summands. It is not. Let R decompose;
+        for each candidate P in the base draw a base point Q of the same cofactor class and ask the
+        detector about R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; a class match keeps the query inside
+        the target subgroup, so even a subgroup-only detector suffices. If P is a summand the query
+        point is <em>literally</em> an m-sum of base points and the answer is yes by construction; if
+        it is not, the point is generic and the answer is yes with probability &lambda;. Two
+        independent Q per candidate and the summands fall out of 2|F| whole-base queries, with no
+        sub-base query anywhere. The group operations that build them cost k&thinsp;&middot;&thinsp;2<sup>2l</sup>
+        against the m&thinsp;&middot;&thinsp;2<sup>2l</sup> the linear algebra already pays, so they
+        are absorbed.</p>
+      <p>Measured at n&thinsp;=&thinsp;13,&thinsp;17,&thinsp;19 over eight rungs, 64 built targets each,
+        zero sub-base queries on every one. The two ways it misfires are collisions of Q with a
+        summand or its negative &mdash; a miss at rate &Theta;(m/|F|) per draw, a false positive at
+        &Theta;(m/|F|)&thinsp;+&thinsp;&lambda; &mdash; and the measured rates stay inside
+        0.22&ndash;0.87 of those predictions across a sixteenfold range of m/|F| <em>and</em> of
+        &lambda;, with no third error term. Read off at the free-oracle optimum for m&thinsp;=&thinsp;4
+        (l&thinsp;=&thinsp;26.70, m/|F|&thinsp;=&thinsp;2<sup>&minus;24.70</sup>): localisation fails on
+        one target in 2<sup>20.66</sup>, losing 2<sup>6.04</sup> of the 2<sup>26.70</sup> relations
+        needed.</p>
+      <p>So there is <strong>one</strong> free-oracle floor, not two: 2<sup>56.76</sup> at
+        m&thinsp;=&thinsp;4, under the 2<sup>60.81</sup> reference from m&thinsp;=&thinsp;4 onward,
+        monotonically, with no table. The only detector this fails against is one restricted to a
+        fixed family of targets that refuses R&nbsp;&minus;&nbsp;P&nbsp;+&nbsp;Q &mdash; it would have
+        to extract witnesses by meet-in-the-middle, bottoming at 2<sup>56.93</sup> with a
+        2<sup>53.82</sup>-entry table &mdash; and no proposed detector has that shape: a
+        resultant-vanishing test, a trace condition, a fixed-degree Gr&ouml;bner refutation and the
+        Nagao/Riemann&ndash;Roch coefficient search are all algorithms on the target's coordinates.
+        Two earlier revisions of this panel priced that distinction as the curve's protective margin,
+        first at 2<sup>37.68</sup> and then at 2<sup>11</sup>&ndash;2<sup>24</sup>. The margin is not
+        there; class <span class="chip">accounting</span> both times
+        (<code>experiments/ecc2k130_point_decomposition.json</code>,
+        <code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+    </div>
+      <p><strong>The six pre-registered experiments have been run, and no falsifier fired.</strong>
+        The product law is now evidence at n&thinsp;=&thinsp;13 and n&thinsp;=&thinsp;19 rather than
+        arithmetic: every end-to-end rung recovered its planted logarithm, every relation was re-added
+        in the group before entering the matrix, and the slope of log&#8322;(total) against n is 1.037
+        against a falsifier of 0.95. Two rungs, not the four the design asked for &mdash;
+        n&thinsp;=&thinsp;11 is <em>excluded</em> because its 23-torsion has rank two, so no cyclic
+        subgroup of order p exists to pose the logarithm in, and n&thinsp;&ge;&thinsp;29 needs field
+        tables that do not fit in memory. The slope is a two-point fit and cannot fire its own
+        falsifier in either direction; it is reported as such.</p>
+      <p>Sweeping the factor-base dimension at n&thinsp;=&thinsp;19 moves the yield &lambda; by a
+        factor of <strong>6,600</strong> and moves &Lambda;&thinsp;=&thinsp;ops/2<sup>n</sup> by 2.4:
+        the dimension is measured not to be a lever, which is the whole content of the product law.
+        The model's predicted rise above the saturating dimension does not occur &mdash; it is an
+        artefact of charging one relation per target &mdash; so the model is conservative there, not
+        wrong. The Frobenius orbit collapse delivers <strong>exactly n</strong> (13.0/13, 19.0/19)
+        with relations that reach full rank and solve, which confirms the unchecked half of the
+        seven-bit correction above. And the yield is Poisson to 0.90&ndash;1.10 across eight cells
+        counted exhaustively over the whole odd subgroup, once the subsets containing a point and its
+        negative are removed; those degeneracies, not the tail, are the entire source of the raw
+        1.44&ndash;2.98 over-dispersion.</p>
+      <p><strong>Two constants the law prices at one are measured optimistic.</strong> Reaching full
+        rank took 2.0&times; the |F| relations the law budgets at n&thinsp;=&thinsp;19, because
+        decompositions harvested from one target are correlated; and large-prime pairing, whose guard
+        does hold, produces relations that are 5&ndash;11&times; redundant &mdash; at
+        m&thinsp;=&thinsp;2 they are <em>differences</em> P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub>
+        and so cannot span the base at all. Exponents untouched, verdict at n&thinsp;=&thinsp;131
+        untouched; class <span class="chip">accounting</span>
+        (<code>experiments/ecc2k130_decomposition_runs.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>
@@ -700,6 +992,62 @@
         of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="ec-baseline-20260914">
+    <div class="panel-head">
+      <h2>Imported EC index-calculus baseline</h2>
+      <p>Class <span class="chip">accounting</span>. Unmodified WDSat on selected
+        symmetrized S4 inputs. This import supplies certified solver controls and a
+        phase-accounting contract. It adds no full-DLP result or fitted exponent.
+        Primary unit remains total common operations divided by the square root
+        of subgroup order; unpriced costs remain unmeasured.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Frozen source:
+        <a href="../research/index_calculus_baseline_20260914/summary.json">baseline summary</a>;
+        <a href="../research/index_calculus_baseline_20260914/pilot/results/pilot_results.json">raw measurements</a>.
+        The matched rho control is required before full-attack admission.</caption>
+      <thead><tr><th scope="col">Variant / reference</th><th scope="col">Full-DLP S</th>
+        <th scope="col">Cost / rho</th><th scope="col">Cost / floor</th>
+        <th scope="col">Correctness</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Unmodified WDSat, selected S4 corpus</td><td>Unmeasured</td>
+          <td>Unmeasured</td><td>Unmeasured</td><td>3 SAT relations; 3 exhaustive UNSAT checks; no DLP</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Matched automorphism-aware rho</td><td>Not run in this pilot</td>
+          <td>Unmeasured</td><td>Unmeasured</td><td>No scalar recovery in this pilot</td>
+          <td>Reference required</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Supplementary process observations below exclude verification and other
+        attack phases. Conflicts have no measured conversion to the common operation
+        unit. These selected inputs cannot estimate random-target yield or scaling.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Selected inputs, 3 process repetitions each. UNSAT checks exhaust
+        97,504 support triples in total; SAT relations are checked using group arithmetic.</caption>
+      <thead><tr><th scope="col">Input</th><th scope="col">Status</th>
+        <th scope="col" class="n">Conflicts</th><th scope="col" class="n">Median process seconds (secondary)</th></tr></thead>
+      <tbody>
+        <tr><td>n15l5-1-S</td><td>SAT, verified</td><td class="n">22</td><td class="n">0.00195</td></tr>
+        <tr><td>n15l5-11-U</td><td>UNSAT, verified</td><td class="n">5,593</td><td class="n">0.03530</td></tr>
+        <tr><td>n17l6-1-S</td><td>SAT, verified</td><td class="n">35,231</td><td class="n">0.30308</td></tr>
+        <tr><td>n17l6-11-U</td><td>UNSAT, verified</td><td class="n">43,976</td><td class="n">0.38809</td></tr>
+        <tr><td>n19l6-1-S</td><td>SAT, verified</td><td class="n">2,793</td><td class="n">0.01709</td></tr>
+        <tr><td>n19l6-11-U</td><td>UNSAT, verified</td><td class="n">44,050</td><td class="n">0.41052</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>The derived support-counting floor applies to attempts on independent
+        uniform targets with at most one fresh row per attempt. Converting it to an
+        operation floor requires an applicable per-attempt lower bound. It is not
+        a lower bound on all coordinate algorithms. See the
+        <a href="../research/index_calculus_baseline_20260914/EC_Index_Calculus_Performance_Baseline.md">report</a>
+        and <a href="../research/index_calculus_baseline_20260914/ec_index_calculus_contract.json">contract</a>.
+        Existing attack verdicts and exponents are unchanged.</p>
     </div>
   </div>
 
