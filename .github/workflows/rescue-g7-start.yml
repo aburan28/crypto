@@ -1,0 +1,47 @@
+name: Rescue G7 start
+
+on:
+  push:
+    branches: [infra/durable-g7e-devhost]
+    paths: ['.github/workflows/rescue-g7-start.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Start G7 as soon as stop completes
+        env:
+          INSTANCE_ID: i-04b1d89ecccfcc808
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 720); do
+            state=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].State.Name' --output text)
+            echo "state=$state"
+            if [ "$state" = running ]; then
+              echo 'already running'; exit 0
+            fi
+            if [ "$state" = stopped ]; then
+              if aws ec2 start-instances --instance-ids "$INSTANCE_ID" >/dev/null 2>&1; then
+                echo 'start accepted'; break
+              fi
+            fi
+            sleep 1
+          done
+          aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+          aws ec2 wait instance-status-ok --instance-ids "$INSTANCE_ID"
+          echo 'G7 healthy again'
+          for i in $(seq 1 60); do
+            if nc -vz -w 3 184.34.70.106 22; then exit 0; fi
+            sleep 2
+          done
+          exit 1
