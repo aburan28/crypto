@@ -1,0 +1,144 @@
+{
+  "rows": [
+    {
+      "variant": "bilinear-blocks",
+      "status": "complete",
+      "within_budget": true,
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 10315694,
+        "multiplications": 655536,
+        "squarings": 8798,
+        "inversionCalls": 2104,
+        "curveAdditionCalls": 72,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 10980028
+      },
+      "selected_binary_words": 486006,
+      "all_phase_seconds": 11.590534105998813,
+      "setup_seconds": 0.0003876940027112141,
+      "query_seconds": 11.590092790007475,
+      "orchestration_seconds": 5.36219886271283e-05,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 18.908588059033217,
+      "field_api_per_verified_relation": 2745007.0,
+      "common_operation_speedup": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "hybrid-filtered",
+      "status": "complete",
+      "within_budget": true,
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 19837230,
+        "multiplications": 5515666,
+        "squarings": 585578,
+        "inversionCalls": 2064,
+        "curveAdditionCalls": 12,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 25938474
+      },
+      "selected_binary_words": 1153470,
+      "all_phase_seconds": 54.31126453400066,
+      "setup_seconds": 0.05288496700086398,
+      "query_seconds": 54.25830696799676,
+      "orchestration_seconds": 7.259900303324685e-05,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 44.66836694277497,
+      "field_api_per_verified_relation": 6484618.5,
+      "common_operation_speedup": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "pair-invariants-s3",
+      "status": "complete",
+      "within_budget": true,
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 341254,
+        "multiplications": 207401,
+        "squarings": 32035,
+        "inversionCalls": 2257,
+        "curveAdditionCalls": 2260,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 580690
+      },
+      "selected_binary_words": 0,
+      "all_phase_seconds": 2.3898338559956755,
+      "setup_seconds": 0.9640138899994781,
+      "query_seconds": 1.425722339998174,
+      "orchestration_seconds": 9.762599802343175e-05,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 1.0,
+      "field_api_per_verified_relation": 145172.5,
+      "common_operation_speedup": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "bilinear-reference",
+      "status": "complete",
+      "within_budget": true,
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 13974348,
+        "multiplications": 655536,
+        "squarings": 8798,
+        "inversionCalls": 2104,
+        "curveAdditionCalls": 72,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 14638682
+      },
+      "selected_binary_words": 8851713,
+      "all_phase_seconds": 17.52647527500085,
+      "setup_seconds": 0.0006085069981054403,
+      "query_seconds": 17.525825877004536,
+      "orchestration_seconds": 4.089099820703268e-05,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 25.20911674042949,
+      "field_api_per_verified_relation": 3659670.5,
+      "common_operation_speedup": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    }
+  ],
+  "audit": {
+    "batches": 4,
+    "matched_queries": 32,
+    "fresh_targets": 8,
+    "relation_certificates_replayed": 16,
+    "rejection_certificates_replayed": 12902,
+    "correctness_failures": 0,
+    "hashes_match": true,
+    "raw_sha256": "ecf204561f45ba87c16cb5354beb10fe145423a6f37c14ae2a469d9e33826027"
+  },
+  "constructor_bound": {
+    "scope": "Frozen bilinear Circuit constructor only, complete matched batch; not a universal bound.",
+    "per_b_multiplications_formula": "3*d^2+8*d+3",
+    "per_b_multiplications": 259,
+    "coefficient_values": 2048,
+    "constructor_multiplication_floor": 530432,
+    "measured_s3_total_multiplications": 207401,
+    "floor_over_s3_multiplications": 2.557519009069387,
+    "necessary_constructor_saving_for_20pct_fewer_muls": 0.6871968508687258,
+    "constructor_counter_check_passed": true
+  },
+  "strata": {
+    "uniform": {
+      "targets": 4,
+      "targets_with_relations": 0
+    },
+    "known_decomposable": {
+      "targets": 4,
+      "targets_with_relations": 4
+    }
+  },
+  "classification": "engineering diagnostic; common total cost uncalibrated"
+}
