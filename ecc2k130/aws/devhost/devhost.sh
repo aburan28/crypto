@@ -13,10 +13,16 @@ SSH_USER=${SSH_USER:-ubuntu}
 aws_ec2() { aws --region "$REGION" ec2 "$@"; }
 
 instance_id() {
-  aws_ec2 describe-instances \
-    --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
-    --query 'Reservations[].Instances[] | sort_by(@,&LaunchTime)[-1].InstanceId' \
-    --output text 2>/dev/null | grep -v '^None$' || true
+  local id
+  if ! id=$(aws_ec2 describe-instances \
+      --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+      --query 'Reservations[].Instances[] | sort_by(@,&LaunchTime)[-1].InstanceId' \
+      --output text); then
+    return 1
+  fi
+  if [ "$id" != "None" ]; then
+    printf '%s\n' "$id"
+  fi
 }
 
 public_ip() {
@@ -28,12 +34,15 @@ public_ip() {
 
 ensure_sg() {
   local vpc_id sg_id ssh_cidr
-  vpc_id=$(aws_ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
-  [ "$vpc_id" != "None" ] || { echo "No default VPC; set SG_ID to an existing security group." >&2; exit 2; }
+  sg_id=${1:-}
+  if [ -z "$sg_id" ]; then
+    vpc_id=$(aws_ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
+    [ "$vpc_id" != "None" ] || { echo "No default VPC; set SG_ID to an existing security group." >&2; exit 2; }
 
-  sg_id=$(aws_ec2 describe-security-groups --filters "Name=group-name,Values=$SECURITY_GROUP_NAME" "Name=vpc-id,Values=$vpc_id" --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
-  if [ -z "$sg_id" ] || [ "$sg_id" = "None" ]; then
-    sg_id=$(aws_ec2 create-security-group --group-name "$SECURITY_GROUP_NAME" --description "SSH for durable G7e developer host" --vpc-id "$vpc_id" --query GroupId --output text)
+    sg_id=$(aws_ec2 describe-security-groups --filters "Name=group-name,Values=$SECURITY_GROUP_NAME" "Name=vpc-id,Values=$vpc_id" --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
+    if [ -z "$sg_id" ] || [ "$sg_id" = "None" ]; then
+      sg_id=$(aws_ec2 create-security-group --group-name "$SECURITY_GROUP_NAME" --description "SSH for durable G7e developer host" --vpc-id "$vpc_id" --query GroupId --output text)
+    fi
   fi
 
   ssh_cidr=${SSH_CIDR:-}
@@ -51,16 +60,28 @@ latest_dlami() {
 }
 
 cmd_up() {
-  local id state ami root_dev sg_id
+  local id state ami root_dev sg_id instance_sg_id
   id=$(instance_id)
   if [ -n "$id" ]; then
     state=$(aws_ec2 describe-instances --instance-ids "$id" --query 'Reservations[0].Instances[0].State.Name' --output text)
-    if [ "$state" = stopped ]; then
-      echo "Starting existing durable host $id ..."
-      aws_ec2 start-instances --instance-ids "$id" >/dev/null
-    else
-      echo "Existing host: $id ($state)"
-    fi
+    instance_sg_id=$(aws_ec2 describe-instances --instance-ids "$id" \
+      --query 'Reservations[0].Instances[0].SecurityGroups[0].GroupId' --output text)
+    ensure_sg "$instance_sg_id" >/dev/null
+    case "$state" in
+      stopped)
+        echo "Starting existing durable host $id ..."
+        aws_ec2 start-instances --instance-ids "$id" >/dev/null
+        ;;
+      stopping)
+        echo "Waiting for existing durable host $id to stop ..."
+        aws_ec2 wait instance-stopped --instance-ids "$id"
+        echo "Starting existing durable host $id ..."
+        aws_ec2 start-instances --instance-ids "$id" >/dev/null
+        ;;
+      *)
+        echo "Existing host: $id ($state)"
+        ;;
+    esac
     aws_ec2 wait instance-running --instance-ids "$id"
     echo "Instance: $id"
     echo "Public IP: $(public_ip "$id")"

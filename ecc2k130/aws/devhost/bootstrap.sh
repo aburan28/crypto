@@ -8,7 +8,7 @@ log() { printf '[g7e-devhost] %s\n' "$*"; }
 
 log "installing base packages"
 apt-get update -y
-apt-get install -y ca-certificates curl git jq build-essential tmux htop unzip ripgrep fd-find python3 python3-pip python3-venv awscli
+apt-get install -y ca-certificates curl git jq build-essential tmux htop unzip ripgrep fd-find python3 python3-pip python3-venv
 
 # Node 22 is used for the coding CLIs. Re-running this script upgrades in place.
 if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'Number(process.versions.node.split(`.`)[0])' 2>/dev/null || echo 0)" -lt 22 ]; then
