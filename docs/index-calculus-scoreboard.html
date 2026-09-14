@@ -160,6 +160,8 @@
     letter-spacing: -.008em; margin: 0;
   }
   .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }
+  #joint-dimension-length .panel-body { padding: 16px 20px 20px; }
+  #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }
 
   .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }
   .chart-scroll svg { display: block; width: 100%; min-width: 840px; height: auto; }
@@ -303,10 +305,11 @@
   <header>
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
-    <p class="verdict">Every index-calculus variant built for the elliptic-curve discrete logarithm
-      in this repository, scored in one unit against two boundaries: a generic-group floor that no
-      amount of engineering can cross, and Pollard rho measured on the same curves. Nothing built
-      here comes within 500× of rho at any size the experiments reach.</p>
+    <p class="verdict">The calibrated index-calculus families below are scored against
+      their generic-group floor and matched Pollard rho reference; their existing
+      500×-or-worse rho verdict is unchanged. The newer binary-field solver and
+      parameter-sweep pilots are explicitly uncalibrated: their component counts
+      do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
     <dl class="facts">
       <div class="fact">
@@ -823,6 +826,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <div class="panel" id="nagao-structured-scaling"><div class="panel-head"><h2>Structured bases and a stronger direct S3 comparator</h2><p>Frozen evidence: <code>research/nagao_relations/structured_01/summary.json</code> and <code>raw.jsonl</code>. 240 matched cold trials and 80 complete batched queries; 11985 certificates replayed, zero correctness failures. The pair-invariant table is a Semaev solver. Its gains cannot be relabelled as a function-first advantage. All rows are engineering diagnostics; common-cost speedup, S, rho and floor ratios remain unmeasured.</p></div><div class="table-scroll"><table><caption>18 bits, first: resolved within three seconds / attempts.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>4/4</td><td>2/2</td><td>2/2</td><td>1/2</td><td>2/2</td></tr><tr><td>hybrid-filtered</td><td>4/4</td><td>2/2</td><td>2/2</td><td>1/2</td><td>2/2</td></tr><tr><td>pair-invariants-s3</td><td>4/4</td><td>2/2</td><td>0/2</td><td>2/2</td><td>0/2</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>s4-symmetric</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr></tbody></table></div><div class="table-scroll"><table><caption>18 bits, enumerate: resolved within three seconds / attempts.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>hybrid-filtered</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>pair-invariants-s3</td><td>4/4</td><td>2/2</td><td>0/2</td><td>2/2</td><td>0/2</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>s4-symmetric</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr></tbody></table></div><div class="table-scroll"><table><caption>30 bits, first: resolved within three seconds / attempts.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>2/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>hybrid-filtered</td><td>2/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>pair-invariants-s3</td><td>4/4</td><td>0/2</td><td>0/2</td><td>2/2</td><td>0/2</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>s4-symmetric</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr></tbody></table></div><div class="table-scroll"><table><caption>30 bits, enumerate: resolved within three seconds / attempts.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>hybrid-filtered</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>pair-invariants-s3</td><td>4/4</td><td>0/2</td><td>0/2</td><td>2/2</td><td>0/2</td></tr><tr><td>chained-s3</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr><tr><td>s4-symmetric</td><td>0/4</td><td>0/2</td><td>0/2</td><td>0/2</td><td>0/2</td></tr></tbody></table></div><div class="panel-head"><p>Structured d9 is impossible over F4. Ordinary prior setup was under 0.25% of wall time. The direct S3 table amortizes quadratic setup over eight named targets; those batches are unmatched capacity checks. No subquadratic cold scaling or full-DLP improvement is established. Prior panels remain historical measurements.</p></div></div>
 
+  <!-- NAGAO BOUNDS BEGIN -->
+  <div class="panel" id="nagao-bound-audit"><div class="panel-head"><h2>Bounds require skipping coefficient branches</h2><p>Source: <code>research/nagao_relations/bounds_01/summary.json</code>. On all ten matched eight-target batches, the hybrid branch-only multiplication floor exceeds the measured direct S3 total by 15.73–53.03 times. These are complete-enumeration component bounds, not timed completions or first-hit claims. Classification: accounting and conditional architecture bound. Common-cost speedup, S, rho and full-DLP floor ratios remain unmeasured.</p></div><div class="table-scroll"><table><caption>18 bits: field-multiplication calls for the same eight-target complete enumeration. Hybrid values are lower bounds; S3 values are measured.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>&ge; 3,641,372</td><td>&ge; 14,622,790</td><td>&ge; 58,605,596</td><td>&ge; 3,641,372</td><td>&ge; 58,605,582</td></tr><tr><td>hybrid-filtered</td><td>&ge; 3,641,372</td><td>&ge; 14,622,790</td><td>&ge; 58,605,596</td><td>&ge; 3,641,372</td><td>&ge; 58,605,582</td></tr><tr><td>pair-invariants-s3</td><td>146,240</td><td>501,290</td><td>2,365,916</td><td>68,666</td><td>1,951,583</td></tr><tr><td>chained-s3 SAT</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr><tr><td>symmetric-S4 SAT</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr></tbody></table></div><div class="table-scroll"><table><caption>30 bits: field-multiplication calls for the same eight-target complete enumeration. Hybrid values are lower bounds; S3 values are measured.</caption><thead><tr><th>Variant</th><th>prefix d8</th><th>prefix d9</th><th>prefix d10</th><th>f4-stable d8</th><th>f4-stable d10</th></tr></thead><tbody><tr><td>hybrid-reference</td><td>&ge; 3,641,372</td><td>&ge; 14,622,748</td><td>&ge; 58,605,624</td><td>&ge; 3,641,414</td><td>&ge; 58,605,610</td></tr><tr><td>hybrid-filtered</td><td>&ge; 3,641,372</td><td>&ge; 14,622,748</td><td>&ge; 58,605,624</td><td>&ge; 3,641,414</td><td>&ge; 58,605,610</td></tr><tr><td>pair-invariants-s3</td><td>207,523</td><td>501,965</td><td>1,391,380</td><td>231,566</td><td>1,395,529</td></tr><tr><td>chained-s3 SAT</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr><tr><td>symmetric-S4 SAT</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td></tr></tbody></table></div><div class="panel-head"><p>All 54 trace fibers have positive mass in every larger base: no whole-target rejection from this quotient. At 30 bits, the prefix d10 success ceiling is 15.896911%, not a measured success rate. Under uniform targets, full base scans and a linear number of required relation rows, explicit pair setup plus queries has the conditional lower bound Omega(M^2 + N/M). The next hypothesis is rejecting coefficient blocks before solving individual branches. Old timing and completion panels remain historical evidence.</p></div></div>
+  <!-- NAGAO BOUNDS END -->
+
   <!-- ============ NOTES ============ -->
   <div class="notes">
     <div class="note">
@@ -1247,6 +1254,62 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/pullback_incremental/README.md">Derivation, contract and rerun commands</a>;
         <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/pullback_incremental/RESULTS.md">complete results</a>.
         Existing exponents and attack verdicts are unchanged.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="joint-dimension-length">
+    <div class="panel-head">
+      <h2>Joint factor-base dimension and decomposition-length sweep</h2>
+      <p>Accounting / coverage pilot · component-wise engineering candidates only.</p>
+    </div>
+    <div class="panel-body">
+      <p>The previous 240-stage / 48-DLP suite was replayed with exact completed-baseline
+        counter checks. The new frozen sweep spans 33 parameter cells: 1,584 generic
+        stage calls, 504 algebraic controls, 132 cold IC runs and eight matched rho runs.
+        All 2,088 stage/control calls finished and matched the exact oracle; 86 IC
+        scalars verified. All 46 incomplete IC cases remain in the evidence.</p>
+      <div class="table-scroll"><table>
+        <caption>Variant coverage. Every normalized cost and boundary ratio remains
+          uncalibrated. Frozen source:
+          <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/parameter_sweep/comparison.json">joint comparison</a>.
+          Algebraic controls are only q=2,k=3; generic controls span k=2,3,4 and q=2,8.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col">S</th><th scope="col">/rho</th><th scope="col">/floor</th><th scope="col">Correctness</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Enumerate-last</td><td>N/A</td><td>N/A</td><td>N/A</td><td>792 stage calls; 43/66 DLPs</td><td>Reference; incomplete cases retained</td></tr>
+          <tr><td>Pair-MITM</td><td>N/A</td><td>N/A</td><td>N/A</td><td>792 stage calls; 43/66 DLPs</td><td>Engineering candidate; pending calibration</td></tr>
+          <tr><td>Cached pullback</td><td>N/A</td><td>N/A</td><td>N/A</td><td>168 stage calls</td><td>Stage control</td></tr>
+          <tr><td>Symmetric S4</td><td>N/A</td><td>N/A</td><td>N/A</td><td>168 stage calls</td><td>Stage control</td></tr>
+          <tr><td>Chained S3</td><td>N/A</td><td>N/A</td><td>N/A</td><td>168 stage calls</td><td>Stage control</td></tr>
+          <tr><td>Matched rho</td><td>N/A</td><td>N/A</td><td>N/A</td><td>8/8 DLPs</td><td>Reference</td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-scroll"><table>
+        <caption>Cold full-DLP diagnostic, binary9 / N=127 / ell=4 / k=3; sums of the
+          same two verified seeds. All phases included. Separate field and scalar units;
+          wall time descriptive, not a statistically established runtime speedup.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col">Field add</th><th scope="col">Field mul</th><th scope="col">Field square</th><th scope="col">Scalar A/M/I</th><th scope="col">Cold seconds</th></tr></thead>
+        <tbody>
+          <tr><td>Enumerate-last</td><td>39,995</td><td>94,192</td><td>13,708</td><td>745 / 893 / 22</td><td>0.267920</td></tr>
+          <tr><td>Pair-MITM</td><td>21,184</td><td>44,407</td><td>13,708</td><td>745 / 893 / 22</td><td>0.143760</td></tr>
+          <tr><td>Matched rho</td><td>15,552</td><td>27,342</td><td>13,262</td><td>138 / 58 / 2</td><td>0.100603</td></tr>
+        </tbody>
+      </table></div>
+      <p>The pair table costs more for individual cold stage queries but is reused
+        within each full DLP. It is not universally better: binary5 / ell=4 / k=3
+        increases field multiplications from 5,695 to 9,018. At binary9 / k=3,
+        increasing ell from four to five raises exact coverage from 440/507 to
+        507/507, yet pair-MITM field multiplications rise from 44,407 to 62,288
+        and scalar multiplications from 893 to 3,674.</p>
+      <p>Both dimension-one GF(8) supports project to zero usable subgroup columns.
+        Higher k is not automatically better: binary5 / ell=3 coverage is 28/43,
+        33/43 and 29/43 for k=2,3,4. The exact support-count ceiling, all 33 census
+        cells, 4,195 independent full-run oracle checks and all retained failures
+        are in the frozen evidence. No new asymptotic exponent is fitted.</p>
+      <p><a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/parameter_sweep/README.md">Derivation, limitations and rerun commands</a> ·
+        <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/parameter_sweep/RESULTS.md">Every parameter/variant result</a> ·
+        <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/parameter_sweep/regression_comparison.json">Previous benchmark replay</a>.
+        General-k Nagao, GF(8) polynomial adapters, F4 extensions and large-prime
+        variants are not newly implemented by this round.</p>
     </div>
   </div>
 

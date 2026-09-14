@@ -1,0 +1,890 @@
+{
+  "contract": {
+    "id": "ic-joint-dimension-length-20260914-v1",
+    "scope": "First joint factor-base dimension/decomposition-length pilot, with binary and embedded GF(8) supports; exact toy coverage, solver costs and cold ECDLP costs. Not a Diem asymptotic or generic-prime result.",
+    "baseline_commit": "6bffc6e",
+    "profiles": [
+      {
+        "name": "binary5",
+        "bits": 5,
+        "q_bits": 1,
+        "curve_b_coords": 31,
+        "dimensions": [
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "name": "binary9",
+        "bits": 9,
+        "q_bits": 1,
+        "curve_b_coords": 511,
+        "dimensions": [
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "name": "subfield8-k0",
+        "bits": 9,
+        "q_bits": 3,
+        "curve_b_coords": 511,
+        "dimensions": [
+          1,
+          2
+        ]
+      },
+      {
+        "name": "subfield8-b22",
+        "bits": 9,
+        "q_bits": 3,
+        "curve_b_coords": 22,
+        "dimensions": [
+          1,
+          2
+        ]
+      }
+    ],
+    "curve": "y^2+xy=x^3+b; b=1 on binary and subfield8-k0 profiles, b=22 in ONB coordinates is in GF(8) but not GF(2) on the fourth profile.",
+    "summands": [
+      2,
+      3,
+      4
+    ],
+    "support": "GF(2): span of the first ell normal-basis vectors, matching the prior Nagao domain. GF(8): first ell elements of a deterministic GF(8)-basis of GF(512), starting with 1. Verify scalar closure and size q^ell. Raw x=0 excluded.",
+    "decomposition_domain": "Exactly k distinct nonzero abscissae in V; each differs from target x; both actual curve signs allowed. Verify exact signed point sum. No repeated-x or infinity decompositions.",
+    "stage_variants": [
+      "enumerate-last",
+      "pair-mitm"
+    ],
+    "stage_targets_per_profile": 24,
+    "stage_development_targets": 12,
+    "stage_holdout_targets": 12,
+    "target_seed": 2026091404,
+    "target_sampling": "Uniform without replacement from all affine curve points, same targets across ell and k, exclude prior timed Nagao targets for the same field and b=1. Development and holdout target sets are disjoint. Freeze before timing.",
+    "stage_seconds": 2,
+    "stage_accounting": "Cold per-target stage timer: field/curve construction, support and rational-factor construction, optional pair table, search and independent point verification. Excludes external exact ground-truth census, which is separately recorded. Includes failed searches; cooperative deadline, retain overrun.",
+    "algebraic_controls": "For binary profiles with k=3 only, replay cached pullback, symmetric S4 and chained S3 on the same 24 targets and support, using their existing all-phase adapters and same deadline. Other k/q encodings are explicitly unimplemented, not relabelled as tested.",
+    "exact_census": "Use a separately constructed, exhaustively verified tiny group coordinate map only in validation. Dynamic programming over signed distinct abscissae counts representations and reachable affine targets, removing the target abscissa where needed. No group-log map is accessible to timed solvers.",
+    "models": [
+      "lambda_paper=q^(k*ell-n)/k!, n=bits/q_bits; this is sparse-regime heuristic intensity, not a probability above one",
+      "support_count_bound=min(1,2^k*C(M,k)/(#E-1)), M=raw rational abscissa count",
+      "poisson_prediction=1-exp(-domain-aware exact mean representation count), only a random-sum heuristic"
+    ],
+    "hypotheses": [
+      "Increasing ell improves coverage but can increase setup/column/matrix costs enough to worsen the cold pipeline.",
+      "Increasing k improves coverage but can move work into decomposition; compare k independently at fixed ell.",
+      "Dimension-one GF(8) bases on curves defined over GF(8) may project entirely to the identity and cannot supply the target prime-subgroup logs."
+    ],
+    "decision_gate": "Report a parameter change as a promising engineering candidate only if both frozen seeds recover correct scalars and all measured field-API components do not increase while at least one falls, relative to a paired neighboring parameter setting. Retain failed/zero-column/rank-deficient cells. No calibrated speedup claim without full common-unit conversion.",
+    "e2e": {
+      "seeds": [
+        607,
+        809
+      ],
+      "variants": [
+        "enumerate-last",
+        "pair-mitm"
+      ],
+      "target_attempt_cap": 128,
+      "run_seconds": 8,
+      "rho_seconds": 8,
+      "setup": "Cold exhaustive curve/order check and full-order generator validation, prime-subgroup projection, support/table setup, relation generation/failed attempts, exact verification, modular matrix, individual descent and final scalar verification. Share immutable support/table only within one cold DLP run.",
+      "relation_rule": "R=s*A, project whole relation by h=#E/N, RHS=s relative G=h*A. Individual R=Q+s*A gives projected log h*k+s. Require gcd(h,N)=1; retain unsupported groups rather than assuming projection works."
+    },
+    "reference": "Run rho on the same tiny subgroup/target and identical cold group setup; separate field and scalar operation vectors. Also rerun the entire prior 240-stage/48-cold pullback benchmark and compare with its frozen evidence.",
+    "boundary": "Generic support-count ceiling unchanged. Pair-table setup O(M^2); k=3 query O(M), k=4 O(M^2) table probes plus collision-bucket filtering; enumerate-last query O(M^(k-1)). Scalar matrix cost measured, not omitted. No exponent fit over these toy fields.",
+    "normalization": "Field add/mul/square, scalar modular add/mul/inversion calls, and lookup counters remain separate. No measured field/scalar/control conversion; S and boundary ratios stay null. Wall time descriptive; one stage repetition.",
+    "full_dlp_S": null,
+    "rho_ratio": null,
+    "cost_over_floor": null
+  },
+  "targets": {
+    "contract_sha256": "6bc79767971a5b368ceac024a82837e5ea9e6bd14de76d3daac9b36fb4a8b6e5",
+    "profiles": [
+      {
+        "profile": "binary5",
+        "curve_order": 44,
+        "subgroup_order": 11,
+        "targets": [
+          {
+            "target": [
+              2,
+              18
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              11,
+              24
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              15,
+              5
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              24,
+              20
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              11,
+              19
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              8,
+              1
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              9,
+              3
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              28,
+              14
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              29,
+              9
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              31,
+              0
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              6,
+              10
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              21,
+              9
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              18,
+              3
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              27,
+              3
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              4,
+              6
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              2,
+              16
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              16,
+              8
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              1,
+              4
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              14,
+              5
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              29,
+              20
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              27,
+              24
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              4,
+              2
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              5,
+              17
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              23,
+              6
+            ],
+            "stratum": "holdout"
+          }
+        ]
+      },
+      {
+        "profile": "binary9",
+        "curve_order": 508,
+        "subgroup_order": 127,
+        "targets": [
+          {
+            "target": [
+              19,
+              348
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              84,
+              422
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              250,
+              193
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              116,
+              306
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              118,
+              259
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              483,
+              12
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              81,
+              195
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              183,
+              320
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              230,
+              327
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              82,
+              145
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              155,
+              242
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              293,
+              475
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              376,
+              11
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              367,
+              34
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              343,
+              99
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              488,
+              129
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              490,
+              121
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              480,
+              465
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              180,
+              44
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              395,
+              468
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              224,
+              157
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              198,
+              176
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              137,
+              327
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              434,
+              167
+            ],
+            "stratum": "holdout"
+          }
+        ]
+      },
+      {
+        "profile": "subfield8-k0",
+        "curve_order": 508,
+        "subgroup_order": 127,
+        "targets": [
+          {
+            "target": [
+              19,
+              348
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              84,
+              422
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              250,
+              193
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              116,
+              306
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              118,
+              259
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              483,
+              12
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              81,
+              195
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              183,
+              320
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              230,
+              327
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              82,
+              145
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              155,
+              242
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              293,
+              475
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              376,
+              11
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              367,
+              34
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              343,
+              99
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              488,
+              129
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              490,
+              121
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              480,
+              465
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              180,
+              44
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              395,
+              468
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              224,
+              157
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              198,
+              176
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              137,
+              327
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              434,
+              167
+            ],
+            "stratum": "holdout"
+          }
+        ]
+      },
+      {
+        "profile": "subfield8-b22",
+        "curve_order": 468,
+        "subgroup_order": 13,
+        "targets": [
+          {
+            "target": [
+              153,
+              113
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              379,
+              145
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              208,
+              220
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              238,
+              325
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              164,
+              412
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              98,
+              333
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              10,
+              397
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              204,
+              507
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              440,
+              77
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              113,
+              495
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              489,
+              489
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              109,
+              219
+            ],
+            "stratum": "development"
+          },
+          {
+            "target": [
+              169,
+              318
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              342,
+              245
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              164,
+              312
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              305,
+              228
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              193,
+              489
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              432,
+              356
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              20,
+              491
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              386,
+              349
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              511,
+              296
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              54,
+              451
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              152,
+              482
+            ],
+            "stratum": "holdout"
+          },
+          {
+            "target": [
+              268,
+              173
+            ],
+            "stratum": "holdout"
+          }
+        ]
+      }
+    ]
+  },
+  "commit": "6bffc6ec05ab327b52914e653a94ead39d03e0b9",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "pycryptosat": "5.14.7",
+  "source_sha256": {
+    "research/nagao_relations/parameter_sweep/run.py": "0e7a52caf4cb5a48539f6df8e1e49355a0fa4fa1377165aaaf4abaaf76de33d8",
+    "research/nagao_relations/parameter_sweep/core.py": "86080fc659ffafcb4c4e760c36a8e7a41d5e2fea1505c316eaaea856c8854a7a",
+    "research/nagao_relations/parameter_sweep/contract.json": "6bc79767971a5b368ceac024a82837e5ea9e6bd14de76d3daac9b36fb4a8b6e5",
+    "research/nagao_relations/parameter_sweep/targets.json": "73d0b239d3d9a7209cfda40696bc5d080fb807973287cd1a228cb49de4561fce",
+    "ecc2k130/codegen/nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+    "ecc2k130/codegen/genverilog.py": "5f955d9dfebd411bd1c540bf1ea94b3a66475743bafae55d808e1fb9a80f9f15",
+    "ecc2k130/codegen/testgeneratedproduct.py": "c435b96acade224e6c0fe641ad74eeef68af1d17e41436cce80f37e0282be85c",
+    "ecc2k130/codegen/cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879",
+    "ecc2k130/codegen/testdirectbuild.py": "379e5342591cae5c0fd17f9657bf6e5d9f73cc3e27ec064ab55276a41d131e3a",
+    "ecc2k130/codegen/testverilog.py": "2c9d52491fe8662a09d177b3cb7958adce397857f023c3471780f65b31c39ae4",
+    "ecc2k130/codegen/testprofilereport.py": "c4bd1bec9a2800aab37769b69ef77792dfee4f26e5a8a2e08a8c9116b5bd0607",
+    "ecc2k130/codegen/testpolystate.py": "99e73c203520faa4e8c161f2fb595a13878324b7624baa57a96f119fc2b31e59",
+    "ecc2k130/codegen/testbenchreport.py": "e3683fc37628344dc0a3d1e08bab75df1d25daf4f3d3b44d7ab006b7bdc17ae4",
+    "ecc2k130/codegen/testpolystateaudit.py": "2c07531f14c9d1cc37322eda003e678d091910056781fe5a7d88b2b7c6231864",
+    "ecc2k130/codegen/testprobereport.py": "829528f1d2614ed6b77a4a6b54b27ae2d2be4746d9079d2f6deeefbc70b53a80",
+    "ecc2k130/codegen/gen.py": "cb5c82187ea771204c505213ff6f02e639ffb450125974608d9de122890941d0",
+    "ecc2k130/codegen/testpackedclient.py": "f728e53148da7282bdc1b4ea4c5754eb7d95fccb028fb1feb3602ebe840da653",
+    "ecc2k130/codegen/perfmodel.py": "b06f33a2d84d96c5aadc31a11e5970a9042bd76eb0d96e444de35b574f7ea5e4",
+    "ecc2k130/codegen/testclmad.py": "4eb7a541c7b1dd5a789573c3bf91253c44eaf72059e4808d58893f2d15155d89",
+    "ecc2k130/codegen/testautotuneconfigs.py": "1d47957840da8f0543ba244f3ac76453a1cb9189cdee2980740b7030c2e42a5b",
+    "ecc2k130/codegen/testdecomp.py": "3f892c2e260cc59515193d57a612a348cdad5c8e3ec4eee3cf99f23833465b3e",
+    "ecc2k130/codegen/genpolyreduce.py": "c8fb7793009203c2769cd9ddee9bc54587063138d0a4926d0a885e370bbef998",
+    "ecc2k130/codegen/decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+    "ecc2k130/codegen/nagaoannihilator.py": "7cf9d7f9fc6f2d7f9154e32a8dacd16429a50d9e2a745a84aa2335fb513b1b73",
+    "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+    "ecc2k130/codegen/testwalkvariants.py": "8a050d66001348a7ec12d6540069452022f6c97d67eb288f2b15714358e30b39",
+    "ecc2k130/codegen/testnagaoreview.py": "76840372bc80ba9068cb88c4c3727a61b3f047a04b0a04953d59d63079012e57",
+    "ecc2k130/codegen/profilereport.py": "c33f68f18f1e20a52a7ed5a488d5316db79883f1339ad4f426ce29eb4d225ea9",
+    "ecc2k130/codegen/genpacked.py": "9ea560927f9efa15fba5fd035245f3dc883fb96e89e63658bbff1dbaceda0516",
+    "ecc2k130/codegen/gendirectreduce.py": "8da4febbad7f8d5892552377a0f8dd93c922557a0f905ec5a5c628dd3247c130",
+    "ecc2k130/codegen/genpackedproduct.py": "490760f7345e742b360bbbd3676a61cb9910ce43817c227365ec71e746fe8602",
+    "ecc2k130/codegen/cycles.py": "95b87c81fd3c4ad468da46f95b250604894c57e8a232407d4db42c8e49c5d44f",
+    "ecc2k130/codegen/testpackedauditreport.py": "a852a564de5393a158018c1479dbcdfc1e9e01d35e4a68681d53508c4bda62a4",
+    "ecc2k130/codegen/build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5",
+    "ecc2k130/codegen/autolab.py": "f9ffeed42a93da2631f4fa033fb7f92542e3cdcbe28352b07998cd50731d6eef",
+    "ecc2k130/codegen/ir.py": "48fce7b23c6603eda336645ff9c6c04226be9d2488bb2ca1679d32b3859f9343",
+    "ecc2k130/codegen/benchreport.py": "987c68e73c8257d5ed1f0779dc7937862ae9eba89354e4f785a83fa0c6a659c2",
+    "ecc2k130/codegen/indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7",
+    "ecc2k130/codegen/checkcli.py": "d4a967ba382ad2498cfdb8991fd6965f75eee7360147a9f2d9f8478ce5f3cdae",
+    "ecc2k130/codegen/testnagaoannihilator.py": "50a99ca4d0c87b282fd29f583ca2a1d7dcf87b63aa8b3b7834171abd6bdeebd7",
+    "ecc2k130/codegen/testnagaodecomp.py": "ecf7fc17385d46e62c2aded58aa7cbd1f3842745c4e7ac03ec285ddc07f9a8e1",
+    "ecc2k130/codegen/nagaocompare.py": "57b27ec7098196d07734568c2b2bc76a7532fd2ac753a835c2f8cd3104a7fa5a",
+    "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+    "ecc2k130/codegen/gensigma.py": "6360039e5ff0b2c31ff092c4eb2c1e006e5e681eb19cae88f35c6c1be5f3e0a7",
+    "research/nagao_relations/coefficient_pullback/test_pullback.py": "05f573aa136af1c131580f5fb5b23e31626c7e1d658458de07c7e78855b370aa",
+    "research/nagao_relations/coefficient_pullback/e2e.py": "9915fcc29e6a013f6ecf95b4a84a15f30221301a8343c0dd6627f15da35dfaf2",
+    "research/nagao_relations/coefficient_pullback/experiment.py": "545e76476c634dc8489efdf6afd9437e538772d1b7980e20fd3ba5c2824964e9",
+    "research/nagao_relations/coefficient_pullback/pullback.py": "b4f5fcd32312ae215093beac4d9d03508cb54a7a263632da4126f6eadf99dcbc",
+    "research/nagao_relations/coefficient_pullback/compare.py": "033c3a145e9cd608ade4ea19086c04ce4e55553fe6eed7ce1123a52d201b1b86",
+    "research/nagao_relations/pullback_incremental/run.py": "6c50e73be81f7330da554da5f0e2bfe19ede5fbd7d4584e472c40036fcf36743",
+    "research/nagao_relations/pullback_incremental/render_results.py": "6dbec2148b4712035aa91418c817cf8b75308de996235981029d74c4f5e3168a",
+    "research/nagao_relations/pullback_incremental/optimized.py": "46f8728ea3d3d09cabcd938ccafb5f3e3da0f9eb0440b268fd66c210acb791ff",
+    "research/nagao_relations/pullback_incremental/compare.py": "1041b4859c5907591dbb54c817c5f6f16fb5e4d3a4fb47e72f449d06b75a23be",
+    "research/nagao_relations/solver_02/support.py": "34936db804fde876e7ad170c47a14da2e9705bcd15835c7c3aff105e31dfcb0c",
+    "research/nagao_relations/solver_02/run.py": "9ff8a57e8ff901ec9592a9ea10591e2e3a876e063dc0d471e9c36ded9c3e90d3",
+    "research/nagao_relations/solver_04/run.py": "73c33352268aa885da184888605fec7d8cb20ea5ac396731fb23af73244aab40",
+    "research/nagao_relations/solver_04/fixedu.py": "55df0330fd4f983dc49e326ba8e40d089e0bf73d06b06478e6acba28e7472b3c",
+    "research/nagao_relations/solver_05/quadratic.py": "a4fdbd4e9d6fb7fef7196b3af27437bc7e6c235701c1c5408d8abfb99841c47f",
+    "research/nagao_relations/solver_05/run.py": "4f74d3d1cf37f69fc199dcccb98b3c279ab0eb61beece32ec07a6444c4498764",
+    "research/nagao_relations/solver_06/run.py": "f03b70a92f3fc77bf745cfd34e5ea596c49d03422d7472212b79e7ecd9161ec6",
+    "research/nagao_relations/solver_06/s4.py": "f85a4ec9779e91e65dc61281aa7b3b1ec50911b5382cac23e34caf101be59ce3",
+    "research/nagao_relations/solver_07/run.py": "d0f2a470d3da9e7172202b4d0a9ee8dc4b75ef324660e40d0e4d71f16e7f1fc9",
+    "research/nagao_relations/solver_07/optimized.py": "6ba3550399d995a7aff53e2defcba77982739a6855ed1d3361481abfdc8f09e0",
+    "research/nagao_relations/solver_08/run.py": "575beb4574ef83498d21115b6758f83a3391a8d3b98a99fdb19cdb3f04170ffb",
+    "research/nagao_relations/solver_08/image_solver.py": "c7b832c0912d93bcc7d03db6c3cd426906a06fe9c0ed6ee3f10d0bf7f76a81c2"
+  },
+  "command": [
+    "/workspace/scratch/5ef6d6b590d6/novel-venv/bin/python",
+    "research/nagao_relations/parameter_sweep/run.py",
+    "--targets",
+    "research/nagao_relations/parameter_sweep/targets.json",
+    "--validate-only",
+    "--output",
+    "research/nagao_relations/parameter_sweep/validation_run"
+  ]
+}
