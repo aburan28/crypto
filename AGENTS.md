@@ -171,6 +171,11 @@ Every index-calculus performance iteration must use the
 before claiming a gain. The accepted target is
 `research/index_calculus_baseline_20260914/regression/results/baseline_v2/`.
 
+Every incremental performance change must include a saved baseline/candidate
+benchmark comparison, even when it regresses or no gain is claimed. Rerun
+the frozen inputs and include fresh holdouts; a candidate-only run does not
+complete an iteration. The equivalent-suite exception below still applies.
+
 - **Run the reference and candidate.** Follow the suite's `run.py` and
   `compare.py` commands with the full 60 inputs, both configurations and all
   three repetitions. Preserve the contract, input hashes, counter definitions
@@ -205,6 +210,24 @@ before claiming a gain. The accepted target is
   hashes, certificates, phase costs and comparison output, including regressions.
   Update the research note and canonical scoreboard in the same PR, retaining
   the prior baseline and classifying the change by §3.
+
+### 9. AWS GPU hosts use the `meow34` key pair
+
+For AWS EC2 benchmark and validation hosts, including G7/G7e instances, use the
+existing EC2 key-pair name **`meow34`** when launching the instance.
+
+- Launch with `--key-name meow34` (or the equivalent SDK/IaC setting).
+- For local SSH, use the private key file `meow34.pem`, e.g.
+  `ssh -i meow34.pem <user>@<host>`.
+- Never commit, print, upload, copy into artifacts, or otherwise expose the
+  contents of `meow34.pem`. The repository should contain only the key-pair
+  name and usage instructions, never the private key material.
+- Ensure the local private key is mode `0600` (for example,
+  `chmod 600 meow34.pem`) before SSH use.
+- Agents must not create a replacement EC2 key pair merely because the private
+  key is unavailable in their environment. If `meow34.pem` is not mounted or
+  accessible, report that access blocker and continue with non-SSH work where
+  possible.
 
 ## Worked example
 

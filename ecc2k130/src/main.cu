@@ -19,6 +19,7 @@
 #include "../include/curveparams.h"
 #include "../include/kernel.h"
 #include "../include/solver.h"
+#include "../include/durable.h"
 
 #ifndef ECC_NO_CUDA
 #include <cuda_runtime.h>
@@ -53,6 +54,7 @@ struct DpFileRecord {
     unsigned long long seed;
     unsigned long long canon[3];
 };
+static_assert(sizeof(DpFileRecord) == 32, "corpus records must remain 32 bytes");
 
 static double nowSeconds() {
     struct timespec ts;
@@ -146,7 +148,8 @@ struct HostEngine {
 #endif
     }
     std::vector<DpRecord> dp;
-    unsigned dpCount = 0;
+    unsigned dpCount[3] = {0, 0, 0};
+    bool restartPending = false;
     WalkParams<W> P;
     std::vector<u64> px, py, qx, qy;
 
@@ -177,7 +180,7 @@ struct HostEngine {
         P.startIter = startIter.data();
         P.dead = dead.data();
         P.dp = dp.data();
-        P.dpCount = &dpCount;
+        P.dpCount = dpCount;
         P.dpCap = o.dpCap;
         P.consts.px = px.data();
         P.consts.py = py.data();
@@ -212,11 +215,13 @@ struct HostEngine {
     void synchronize() const {}
 
     unsigned fetch(std::vector<DpRecord> &out) {
-        const unsigned n = dpCount;
+        const unsigned n = dpCount[0];
+        const bool exhausted = dpCount[2] != 0;
+        restartPending = dpCount[1] != 0;
         const unsigned m = n < P.dpCap ? n : P.dpCap;
         out.assign(dp.begin(), dp.begin() + m);
-        dpCount = 0;
-        return n;
+        dpCount[0] = dpCount[1] = dpCount[2] = 0;
+        return exhausted ? ECC_SEED_EXHAUSTED : n;
     }
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
@@ -238,12 +243,12 @@ struct HostEngine {
         ok = ok && fwrite(dead.data(), sizeof(W), dead.size(), f) == dead.size();
         ok = ok && fwrite(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
         ok = ok && fwrite(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
-        ok = ok && fflush(f) == 0;
-        fclose(f);
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
         if (!ok) { remove(tmp.c_str()); return false; }
         // rename last so a checkpoint is either the old one or the new one,
         // never a half-written file
-        return rename(tmp.c_str(), path) == 0;
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
     }
 
     bool restore(const char *path, u64 *iterBase, unsigned runId) {
@@ -266,7 +271,7 @@ struct HostEngine {
     }
 
     const char *name() const { return "cpu"; }
-    bool needsReseed() const { return false; }
+    bool needsReseed() const { return restartPending; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
 
@@ -282,6 +287,7 @@ struct CudaEngine {
     static const int BATCH = ECC_BATCH;
     WalkParams<W> P;
     std::vector<DpRecord> staging;
+    bool restartPending = false;
 
     // Bytes of device memory one walk thread needs: x, y and pchain are a field
     // element per slot, plus the per-lane bookkeeping.
@@ -344,8 +350,8 @@ struct CudaEngine {
         CUDA_CHECK(cudaMalloc(&P.seed, lw));
         CUDA_CHECK(cudaMalloc(&P.startIter, lw));
         CUDA_CHECK(cudaMalloc(&P.dp, (size_t)o.dpCap * sizeof(DpRecord)));
-        CUDA_CHECK(cudaMalloc(&P.dpCount, sizeof(unsigned)));
-        CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
+        CUDA_CHECK(cudaMalloc(&P.dpCount, 3 * sizeof(unsigned)));
+        CUDA_CHECK(cudaMemset(P.dpCount, 0, 3 * sizeof(unsigned)));
         cudaFuncAttributes attrs;
         CUDA_CHECK(cudaFuncGetAttributes(&attrs, eccWalkKernel<Cfg, W>));
         cudaDeviceProp prop;
@@ -398,13 +404,15 @@ struct CudaEngine {
 
     unsigned fetch(std::vector<DpRecord> &out) {
         CUDA_CHECK(cudaDeviceSynchronize());
-        unsigned n = 0;
-        CUDA_CHECK(cudaMemcpy(&n, P.dpCount, sizeof n, cudaMemcpyDeviceToHost));
+        unsigned counts[3] = {0, 0, 0};
+        CUDA_CHECK(cudaMemcpy(counts, P.dpCount, sizeof counts, cudaMemcpyDeviceToHost));
+        const unsigned n = counts[0];
+        restartPending = counts[1] != 0;
         const unsigned m = n < P.dpCap ? n : P.dpCap;
         out.resize(m);
         if (m) CUDA_CHECK(cudaMemcpy(out.data(), P.dp, (size_t)m * sizeof(DpRecord), cudaMemcpyDeviceToHost));
-        if (n) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
-        return n;
+        if (n || restartPending || counts[2]) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof counts));
+        return counts[2] ? ECC_SEED_EXHAUSTED : n;
     }
 
     virtual ~CudaEngine() = default;
@@ -459,10 +467,10 @@ struct CudaEngine {
             CUDA_CHECK(cudaMemcpy(lbuf.data(), lanes[i], lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
             ok = fwrite(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
         }
-        ok = ok && fflush(f) == 0;
-        fclose(f);
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
         if (!ok) { remove(tmp.c_str()); return false; }
-        return rename(tmp.c_str(), path) == 0;
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
     }
 
     bool restore(const char *path, u64 *iterBase, unsigned runId) {
@@ -504,7 +512,7 @@ struct CudaEngine {
     }
 
     const char *name() const { return "cuda"; }
-    bool needsReseed() const { return false; }
+    bool needsReseed() const { return restartPending; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
 #include "../include/packedengine.cuh"
@@ -737,7 +745,15 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     std::vector<DpRecord> recs;
     u64 iterBase = 0;
     u64 totalDp = 0, lost = 0, verified = 0, verifyBudget = (u64)(o.verify < 0 ? 0 : o.verify);
-    bool warnedLost = false;
+    CorpusOutput output;
+    if (eng.walksPerLaunch() >= ECC_SEED_EXHAUSTED) {
+        fprintf(stderr, "too many walks for the report counter or seed namespace\n");
+        return 1;
+    }
+    if (!o.dpFile.empty() && !output.openFile(o.dpFile, sizeof(DpFileRecord))) {
+        fprintf(stderr, "persistence failure: cannot lock/open aligned regular corpus %s\n", o.dpFile.c_str());
+        return 8;
+    }
 
     // Reload every corpus file first, so a collision against work done by an
     // earlier run or another worker is found the moment it happens rather than
@@ -776,7 +792,13 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     for (size_t ci = 0; ci < corpus.size(); ++ci) {
         if (o.loadMax && reloaded >= o.loadMax) { skippedFiles = corpus.size() - ci; break; }
         FILE *in = fopen(corpus[ci].c_str(), "rb");
-        if (!in) continue;
+        struct stat inputStat;
+        if (!in || fstat(fileno(in), &inputStat) != 0 || !S_ISREG(inputStat.st_mode) ||
+            inputStat.st_size % sizeof(DpFileRecord) != 0) {
+            if (in) fclose(in);
+            fprintf(stderr, "persistence failure: missing, non-regular or truncated corpus %s\n", corpus[ci].c_str());
+            return 8;
+        }
         // A single --dp-file is append-only across passes, so the newest
         // records sit at the end.  When the remaining cap is smaller than
         // the file, start there rather than keeping the oldest prefix.
@@ -816,7 +838,9 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             }
             printf("  unusable (%s)\n", why.c_str());
         }
+        const bool readFailed = ferror(in) != 0;
         fclose(in);
+        if (readFailed) return 8;
     }
     if (reloaded) {
         printf("reloaded %zu points from %zu file(s), %zu distinct orbits\n",
@@ -847,13 +871,20 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     const double t0 = nowSeconds();
     double lastPrint = t0;
     double lastCkpt = t0;
-    FILE *dpOut = o.dpFile.empty() ? NULL : fopen(o.dpFile.c_str(), "ab");
+    FILE *dpOut = output.file;
     for (long launch = 0; o.launches == 0 || launch < o.launches; ++launch) {
         eng.launch(iterBase);
         const unsigned n = eng.fetch(recs);
         iterBase += (u64)o.steps;
+        if (n == ECC_SEED_EXHAUSTED) {
+            fprintf(stderr, "SEED EXHAUSTED: refusing counter wrap into another walk; retire this run-id\n");
+            return 9;
+        }
+        if (n > recs.size()) {
+            fprintf(stderr, "DP OVERFLOW: %u reports, capacity %zu; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.\n", n, recs.size());
+            return 7;
+        }
         if (n || eng.needsReseed()) eng.reseed(iterBase);
-        if (n > recs.size()) lost += n - recs.size();
         totalDp += recs.size();
         for (size_t i = 0; i < recs.size(); ++i) {
             const DpRecord &rec = recs[i];
@@ -877,7 +908,10 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                 fr.canon[0] = cx.v[0];
                 fr.canon[1] = cx.v[1];
                 fr.canon[2] = cx.v[2];
-                fwrite(&fr, sizeof fr, 1, dpOut);
+                if (fwrite(&fr, sizeof fr, 1, dpOut) != 1) {
+                    fprintf(stderr, "persistence failure: corpus write; checkpoint NOT advanced\n");
+                    return 8;
+                }
             }
             typename Solver<Cfg>::Entry other;
             if (!sol.insert(rec, &other)) continue;
@@ -902,8 +936,8 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             printf("  solved after %llu iterations of %llu walks in %.2f s (%llu distinguished points)\n",
                    (unsigned long long)iterBase, (unsigned long long)eng.walksPerLaunch(), el,
                    (unsigned long long)totalDp);
-            if (dpOut) { fflush(dpOut); fclose(dpOut); }
-            if (!o.ckptFile.empty()) eng.save(o.ckptFile.c_str(), iterBase, o.runId);
+            if (!output.closeFile()) return 8;
+            if (!o.ckptFile.empty() && !eng.save(o.ckptFile.c_str(), iterBase, o.runId)) return 8;
             return (knownK && !u192_eq(k, *knownK)) ? 4 : 0;
         }
         const double now = nowSeconds();
@@ -911,10 +945,15 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         // so a container stopped by its deadline loses seconds of work rather
         // than hours of it.
         const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
-        if (dpOut && (leaving || now - lastCkpt > o.ckptSeconds)) fflush(dpOut);
+        if (dpOut && (leaving || now - lastCkpt > o.ckptSeconds) && !durableFlush(dpOut)) {
+            fprintf(stderr, "persistence failure: corpus flush; checkpoint NOT advanced\n");
+            return 8;
+        }
         if (!o.ckptFile.empty() && (leaving || now - lastCkpt > o.ckptSeconds)) {
-            if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId))
-                printf("warning: could not write checkpoint %s\n", o.ckptFile.c_str());
+            if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId)) {
+                fprintf(stderr, "persistence failure: checkpoint %s\n", o.ckptFile.c_str());
+                return 8;
+            }
             lastCkpt = now;
         }
         if (gStop) {
@@ -930,17 +969,6 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                    "  %8llu dropped\n",
                    el, it / el / 1e6, (unsigned long long)it, (unsigned long long)totalDp,
                    (unsigned long long)sol.inserted, (unsigned long long)lost);
-            // A drop is a distinguished point the device found and the host
-            // never saw: real work, computed and thrown away.  It means the
-            // report buffer is too small for the cutoff, which is a setting,
-            // not bad luck -- so say so once rather than leaving it to the
-            // summary line hours later, by which time the run is already lost.
-            if (lost && !warnedLost && lost * 10 > totalDp + lost) {
-                printf("  warning: dropping %.1f%% of reports; --dp-cap %u is too small "
-                       "for this dp weight, raise it or raise --dp-weight\n",
-                       100.0 * (double)lost / (double)(totalDp + lost), o.dpCap);
-                warnedLost = true;
-            }
             fflush(stdout);
             lastPrint = now;
         }
@@ -951,7 +979,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     const double it = (double)(iterBase - timedIterBase) * (double)eng.walksPerLaunch();
     printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",
            it / el / 1e6, (unsigned long long)totalDp, (unsigned long long)verified, (unsigned long long)lost);
-    if (dpOut) fclose(dpOut);
+    if (!output.closeFile()) return 8;
     return 0;
 }
 
@@ -964,7 +992,10 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     if (o.dpWeight < 0) o.dpWeight = defaultW;
     Solver<Cfg> sol;
     sol.setup(px, py, qx, qy, ellDec, sDec, o.dpWeight,
-              o.maxIters ? o.maxIters : (u64)1 << 40);
+              // Guards are checked on global ECC_GUARD_PERIOD boundaries.
+              // A valid first DP may occur in the bounded overshoot window
+              // after maxIters, so reference replay must include that window.
+              o.maxIters ? o.maxIters + ECC_GUARD_PERIOD - 1 : (u64)1 << 40);
     std::string why;
     if (!sol.checkSetup(&why)) {
         printf("parameter check failed: %s\n", why.c_str());
@@ -1085,6 +1116,12 @@ int main(int argc, char **argv) {
     }
     if (o.packed && (o.curve != 131 || o.polyBasis || o.test)) {
         fprintf(stderr, "--packed selects the GF(2^131) CUDA walk; use --verify for device report validation and make test-packed for host arithmetic\n");
+        return 1;
+    }
+    if (o.runId > 65535 || o.steps <= 0 || o.launches < 0 || o.dpCap == 0 ||
+        o.dpWeight < -1 || o.dpWeight > o.curve || !(o.ckptSeconds > 0) ||
+        o.maxIters > ~u64(0) - (ECC_GUARD_PERIOD - 1)) {
+        fprintf(stderr, "invalid run-id, launch, DP or checkpoint parameters\n");
         return 1;
     }
     // The device thread count is left at 0 here on purpose: it depends on the

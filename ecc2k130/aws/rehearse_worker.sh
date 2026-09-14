@@ -30,7 +30,7 @@ EOF
 }
 
 runWorker() {  # seconds-before-SIGTERM (0 = wait for exit) logfile
-    ECC_LOCAL_STORE="$STORE" ECC_ROOT="$ROOT" ECC_CLIENT="$CLIENT" ECC_GPU=0 \
+    ECC_ALLOW_LEGACY_STORAGE=1 ECC_LOCAL_STORE="$STORE" ECC_ROOT="$ROOT" ECC_CLIENT="$CLIENT" ECC_GPU=0 \
         python3 worker.py > "$2" 2>&1 &
     local pid=$!
     if [ "$1" -gt 0 ]; then

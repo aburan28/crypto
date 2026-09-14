@@ -149,8 +149,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaMalloc(&P.startIter, laneCount() * sizeof(u64)));
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));
         // Second counter signals overdue restarts without emitting false DPs.
-        CUDA_CHECK(cudaMalloc(&P.dpCount, 2 * sizeof(unsigned)));
-        CUDA_CHECK(cudaMemset(P.dpCount, 0, 2 * sizeof(unsigned)));
+        CUDA_CHECK(cudaMalloc(&P.dpCount, 3 * sizeof(unsigned)));
+        CUDA_CHECK(cudaMemset(P.dpCount, 0, 3 * sizeof(unsigned)));
         using R = Ref<CfgF131>;
         auto basis = R::make(R::fromLimbs(px), R::fromLimbs(py));
         eccPacked131::P131 ox[128], oy[128];
@@ -208,13 +208,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
     unsigned fetch(std::vector<DpRecord> &out) {
         CUDA_CHECK(cudaDeviceSynchronize());
-        unsigned counts[2];
+        unsigned counts[3];
         CUDA_CHECK(cudaMemcpy(counts, P.dpCount, sizeof(counts), cudaMemcpyDeviceToHost));
         const unsigned n = counts[0] < P.dpCap ? counts[0] : P.dpCap;
         out.resize(n);
         if (n) CUDA_CHECK(cudaMemcpy(out.data(), P.dp, size_t(n) * sizeof(DpRecord), cudaMemcpyDeviceToHost));
         restartPending = counts[1] != 0;
-        if (counts[0] || counts[1]) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(counts)));
-        return counts[0];
+        if (counts[0] || counts[1] || counts[2]) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(counts)));
+        return counts[2] ? ECC_SEED_EXHAUSTED : counts[0];
     }
 };

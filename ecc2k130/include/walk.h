@@ -29,6 +29,8 @@ struct DpRecord {
     unsigned long long x[3];
     unsigned long long y[3];
 };
+// Reserved host fetch result. No valid launch may report this many points.
+static constexpr unsigned ECC_SEED_EXHAUSTED = ~0u;
 
 ECC_HD unsigned long long eccPrf(unsigned long long seed, int idx) {
     unsigned long long z = seed + 0x9E3779B97F4A7C15ull * (unsigned long long)(idx + 1);
