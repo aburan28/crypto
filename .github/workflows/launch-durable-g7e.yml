@@ -14,7 +14,7 @@ permissions:
 jobs:
   launch:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,27 +27,105 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Launch or start durable G7e host
+      - name: Launch durable G7e across AZs with Elastic IP
         working-directory: ecc2k130/aws/devhost
+        env:
+          AWS_REGION: us-west-2
+          NAME: crypto-g7e-dev
+          KEY_NAME: meow34
+          ROOT_GB: '500'
+          SSH_CIDR: 0.0.0.0/0
+          EIP_NAME: crypto-g7e-dev-eip
         run: |
           set -u -o pipefail
           chmod +x devhost.sh bootstrap.sh
 
-          # Try progressively larger single-host G7e shapes in the same region.
-          # devhost.sh is idempotent by Name tag, so once one launch succeeds,
-          # later attempts simply find that host rather than creating another.
-          for type in g7e.2xlarge g7e.4xlarge g7e.8xlarge g7e.12xlarge; do
-            echo "Trying $type ..."
-            if INSTANCE_TYPE="$type" ./devhost.sh up; then
-              echo "Launched/started durable host with $type"
-              exit 0
-            fi
-            echo "$type unavailable; trying next size"
-          done
+          existing=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query 'Reservations[].Instances[] | sort_by(@,&LaunchTime)[-1].InstanceId' \
+            --output text)
 
-          echo "No requested G7e size had capacity in us-west-2" >&2
-          exit 1
+          if [ "$existing" != "None" ] && [ -n "$existing" ]; then
+            state=$(aws ec2 describe-instances --instance-ids "$existing" --query 'Reservations[0].Instances[0].State.Name' --output text)
+            if [ "$state" = "stopped" ]; then aws ec2 start-instances --instance-ids "$existing" >/dev/null; fi
+            if [ "$state" = "stopping" ]; then aws ec2 wait instance-stopped --instance-ids "$existing"; aws ec2 start-instances --instance-ids "$existing" >/dev/null; fi
+            aws ec2 wait instance-running --instance-ids "$existing"
+            id="$existing"
+          else
+            vpc=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
+            sg=$(aws ec2 describe-security-groups --filters Name=group-name,Values=crypto-g7e-dev-ssh Name=vpc-id,Values="$vpc" --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
+            if [ -z "$sg" ] || [ "$sg" = "None" ]; then
+              sg=$(aws ec2 create-security-group --group-name crypto-g7e-dev-ssh --description 'SSH for durable G7e developer host' --vpc-id "$vpc" --query GroupId --output text)
+            fi
+            aws ec2 authorize-security-group-ingress --group-id "$sg" --protocol tcp --port 22 --cidr "$SSH_CIDR" >/dev/null 2>&1 || true
+
+            ami=$(aws ec2 describe-images --owners amazon \
+              --filters 'Name=name,Values=Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 24.04)*' 'Name=state,Values=available' 'Name=architecture,Values=x86_64' \
+              --query 'reverse(sort_by(Images,&CreationDate))[0].ImageId' --output text)
+            root_dev=$(aws ec2 describe-images --image-ids "$ami" --query 'Images[0].RootDeviceName' --output text)
+
+            mapfile -t subnets < <(aws ec2 describe-subnets --filters Name=vpc-id,Values="$vpc" Name=default-for-az,Values=true --query 'Subnets[].SubnetId' --output text | tr '\t' '\n')
+            id=''
+            for subnet in "${subnets[@]}"; do
+              az=$(aws ec2 describe-subnets --subnet-ids "$subnet" --query 'Subnets[0].AvailabilityZone' --output text)
+              for type in g7e.2xlarge g7e.4xlarge g7e.8xlarge g7e.12xlarge; do
+                echo "Trying $type in $az ($subnet) ..."
+                set +e
+                candidate=$(aws ec2 run-instances \
+                  --image-id "$ami" \
+                  --instance-type "$type" \
+                  --key-name "$KEY_NAME" \
+                  --subnet-id "$subnet" \
+                  --security-group-ids "$sg" \
+                  --user-data file://bootstrap.sh \
+                  --instance-initiated-shutdown-behavior stop \
+                  --block-device-mappings "DeviceName=$root_dev,Ebs={VolumeSize=$ROOT_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=false}" \
+                  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand}]" \
+                  --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
+                  --query 'Instances[0].InstanceId' --output text 2>/tmp/ec2err)
+                rc=$?
+                set -e
+                if [ $rc -eq 0 ] && [ -n "$candidate" ] && [ "$candidate" != "None" ]; then
+                  id="$candidate"
+                  echo "Launched $id ($type) in $az"
+                  break 2
+                fi
+                cat /tmp/ec2err || true
+              done
+            done
+
+            if [ -z "$id" ]; then
+              echo 'No G7e capacity found in any default us-west-2 subnet/AZ.' >&2
+              exit 1
+            fi
+
+            aws ec2 modify-instance-attribute --instance-id "$id" --disable-api-termination >/dev/null
+            aws ec2 wait instance-running --instance-ids "$id"
+          fi
+
+          alloc=$(aws ec2 describe-addresses --filters "Name=tag:Name,Values=$EIP_NAME" --query 'Addresses[0].AllocationId' --output text 2>/dev/null || true)
+          if [ -z "$alloc" ] || [ "$alloc" = "None" ]; then
+            alloc=$(aws ec2 allocate-address --domain vpc --query AllocationId --output text)
+            aws ec2 create-tags --resources "$alloc" --tags "Key=Name,Value=$EIP_NAME"
+          fi
+
+          current_assoc=$(aws ec2 describe-addresses --allocation-ids "$alloc" --query 'Addresses[0].AssociationId' --output text)
+          current_instance=$(aws ec2 describe-addresses --allocation-ids "$alloc" --query 'Addresses[0].InstanceId' --output text)
+          if [ "$current_instance" != "$id" ]; then
+            if [ "$current_assoc" != "None" ] && [ -n "$current_assoc" ]; then
+              aws ec2 disassociate-address --association-id "$current_assoc" >/dev/null
+            fi
+            aws ec2 associate-address --instance-id "$id" --allocation-id "$alloc" >/dev/null
+          fi
+
+          ip=$(aws ec2 describe-addresses --allocation-ids "$alloc" --query 'Addresses[0].PublicIp' --output text)
+          echo "Instance: $id"
+          echo "Elastic IP: $ip"
+          echo "SSH: ssh -i meow34.pem ubuntu@$ip"
 
       - name: Print host status
-        working-directory: ecc2k130/aws/devhost
-        run: ./devhost.sh status
+        run: |
+          aws ec2 describe-instances \
+            --filters 'Name=tag:Name,Values=crypto-g7e-dev' 'Name=instance-state-name,Values=pending,running,stopping,stopped' \
+            --query 'Reservations[].Instances[].{InstanceId:InstanceId,State:State.Name,Type:InstanceType,AZ:Placement.AvailabilityZone,PublicIp:PublicIpAddress}' \
+            --output table
