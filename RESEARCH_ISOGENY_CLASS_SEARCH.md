@@ -26,7 +26,7 @@ reach:
   kernel polynomial has degree `2^56` (**B**);
 - the curve coefficient `a₆ = 1/j` enters the descended Semaev system
   **strictly below the leading form** (as a constant at `m = 2`; in Boolean
-  degree `≤ 5` of `6` at `m = 3`), so the degree of regularity is *constant
+  degree `4` of `6` at `m = 3`), so the degree of regularity is *constant
   on the whole class* (**C**);
 - and the one mechanism that does lower `D*` — an L1 subfield factor base,
   mean `D*` 2.04 against 3.53 — is a property of the *field and subspace*,
@@ -512,7 +512,7 @@ Four numbers come out, and the last one decides.
 | **R6′** | The residual `D*` variation is a **curve** effect an attacker can move to | **`killed`** | EXP-R6. The exact criterion of §3.1 makes it a `(curve, target)` property; zero disagreements with the solver over every curve at four targets; holdout margin negative at the largest size. |
 | **R6″** | The exhaustive search over the class is *feasible* | **`killed`** | Boundary A (`2^65.06` vertices vs `2^60.81` ρ, or `2^64.83` plain ρ) and B (263 reachable). The search that does terminate covers `2^{−57}` of the class. |
 | **R6‴** | `D* = 2` density over curves is `1 − 2^{−dim S}` per target | **`supported`** (exact) | `dim S = 1` at `n ∈ {8, 10}`, escape count `128/255` and `512/1023`, matching `(2^n − 2^{n−1})/(2^n − 1)`; mismatches `0`. |
-| **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** (exhaustively) | EXP-R6: survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10`. **EXP-R6c settles it without extrapolation, at both sizes: over *all* 240 targets at `n = 8`, `0` of 255 curves avoid above-floor targets entirely, and over all 992 targets at `n = 10`, `0` of 1023.** Mean above-floor count is `39.1` per curve (min 26, max 56) — such targets are common, and the `T = 64` zeroes were small-sample. |
+| **R6⁗** | Some curve is on the `D* = 2` floor for **every** target — the uniformly-easy curve an isogeny walk would need | **`killed`** (exhaustively) | EXP-R6: survivor count `68 → 34 → 0` at `n = 8` over `T = 8/16/32`, and `230 → 73 → 14 → 7 → 1` at `n = 10`. **EXP-R6c settles it without extrapolation, at both sizes: over *all* 240 targets at `n = 8`, `0` of 255 curves avoid above-floor targets entirely, and over all 992 targets at `n = 10`, `0` of 1023.** Mean above-floor count is `39.1` per curve (min 26, max 56) — such targets are common, and the `T = 64` zeroes were small-sample. **EXP-R6e (iteration 5) closes it in the sweep's own statistic too: the `n = 10` row continues `128 → 0`, `256 → 0`, and the last survivor is `a₆ = 13` itself.** |
 | **R6b** | `a₆` reaches the **leading form** at some `m ≥ 4`, making `d_reg` curve-dependent where index calculus is asymptotically interesting | **`killed`** | EXP-R6b, iteration 2. Computed symbolically for `m ∈ {2,3,4,5}`: the top Boolean degree is `m(m−1)`, always `a₆`-free, with `a₆` exactly **2** degrees below at every `m`. Constant gap, not a narrowing one. `S₄` validated against the repo's own implementation; `S₅` against 1146 genuine decompositions. |
 | **R6d** | `a₆` reaches the leading form at some `m` **beyond** the computable range, so Boundary C is an artefact of small `m` | **`killed` — and now a theorem** | EXP-R6d, iteration 4 (§2C′). The ceiling shape is forced for `m ≥ 3`, reducing the boundary to one coefficient; reversal at infinity plus an induction on the resultant recursion evaluates it as `X_{m+1}`, `a₆`-free, for **all** `m`. Corroborated at `m = 6, 7`, beyond the full expansion's reach. |
 | **R6c** | The residual per-curve variation in `D*` statistics is a *solving-degree* property of the curve | **`killed`** | EXP-R6c, iteration 3. It is **decomposition yield**: `ρ_s(decomposable targets, above-floor targets) = −0.9801` over all 255 curves × 240 targets at `n = 8`, and `−0.9648` against the above-floor *rate*, so it is not the mechanical "fewer refutable targets means fewer bad ones". A curve that decomposes more targets has fewer left that can refute above the floor — a relation-yield property, not a `d_reg` one. |
@@ -548,7 +548,7 @@ Four numbers come out, and the last one decides.
 | `…::syzygy_mechanism` / `leading_part_left_nullspace` | `dim S`, and the exact `D* = 2 ⟺ c ∉ S^⊥` criterion checked against the solver on every curve |
 | `…::exhaustive_a6_sweep` | every curve over `F_{2^n}`, with `D*` and first-fall histograms |
 | `…::curve_effect_test` | variance decomposition plus the disjoint-holdout winner's-curse control |
-| `…::uniform_floor_survivors` | the decisive statistic: curves on the `D* = 2` floor for *every* target, swept over the whole curve space |
+| `…::uniform_floor_survivors` | the decisive statistic: curves on the `D* = 2` floor for *every* target, swept over the whole curve space.  `Θ(curves · T)` refutations, which is why `T ∈ {128, 256}` at `n = 10` sit behind an `#[ignore]`d test (`the_last_n10_floor_survivor_falls_by_128_targets`) as well as in the runner |
 | `…::yield_explanation` / `spearman` | the three-way target partition behind the residual variation, and its correlation with decomposition yield |
 | `…::all_traces` | exact point counting, for the class-size cross-validation |
 | `cryptanalysis::semaev_leading_form` | symbolic `S_{m+1}` over `F_2[a₆]` by the resultant recursion, the Boolean-degree profile that decides Boundary C at each `m`, and the reversal-at-infinity route that proves it for all `m` and reaches `m = 7` (10 tests) |
@@ -563,6 +563,70 @@ Run: `cargo run --release --example isogeny_class_search`.
 ---
 
 ## 5. Iteration log
+
+### 2026-09-13 — iteration 5 (EXP-R6e — the last survivor falls, and it is the caveat curve)
+
+**Task.** Close the one number in this note that a reader could misread as a
+live curve effect.  The survivor sweep stopped at `T = 64`, where `n = 10`
+still shows **1** curve on the `D* = 2` floor.  Iteration 3 retired that
+caveat, but it did so with a *different* statistic — the yield partition over
+all 992 targets — so the sweep's own column ended on a non-zero count.  A
+decay table whose last entry is `1` invites exactly the reading the thread
+spent three iterations refuting.
+
+**Experiment.** Extend `uniform_floor_survivors` at `n = 10`, `l = 5` past the
+runner's grid to `T ∈ {128, 256}`, 1023 curves at each, and **name** the
+survivors rather than counting them — the identity is the part that decides
+whether this is the known caveat or a new one.
+
+**Result.**
+
+```
+  n = 10, l = 5, 1023 curves
+    T =  64  →  1 survivor,  a₆ = [13],  Koblitz mean 2.550
+    T = 128  →  0 survivors,             Koblitz mean 2.519
+    T = 256  →  0 survivors,             Koblitz mean 2.451
+```
+
+- **The survivor is `a₆ = 13`** — the curve iteration 1's caveat was about,
+  recovered independently by the sweep rather than assumed.
+- **It falls at `T = 128`**, one step of the grid below where iteration 3
+  looked.  That iteration's `T = 256` figure was an upper bound and stays
+  true; this narrows it.
+- The full decay now reads, at both sizes, with nothing left over:
+
+  | `n` | curves | `T=8` | `T=16` | `T=32` | `T=48` | `T=64` | `T=128` | `T=256` |
+  |---|---:|---:|---:|---:|---:|---:|---:|---:|
+  | 8 | 255 | 68 | 34 | **0** | 0 | 0 | — | — |
+  | 10 | 1023 | 230 | 73 | 14 | 7 | 1 | **0** | 0 |
+
+  A curve property would be flat in `T`; a `(curve, target)` property decays
+  to zero.  It decays to zero at both sizes.
+
+**Gate verdict.** G-R6's kill condition — "the uniform-floor survivor count
+reaches zero" — now holds **from the sweep itself at both measured sizes**,
+not only at `n = 8` with `n = 10` carried by a second statistic.
+
+**Ledger delta.** None.  R6/R6′/R6″/R6c were already `killed`; R6⁗'s evidence
+column gains the two rows, and limitation 4's bound tightens from `T = 256`
+to `T = 128`.
+
+**Class of the change.** **Accounting** — a caveat's bound narrowed and a
+table completed.  No attack quantity moved, and no ratio to any boundary
+changed.  Reported here because `AGENTS.md` §3 asks for all four classes to
+be logged, not because it is a result.
+
+**Cost note.** The two extra rows dominate the runner: `uniform_floor_survivors`
+is `Θ(curves · T)` Macaulay refutations, so `T = 128` and `256` over 1023
+curves take the runner from 333 s to 856 s.  The matching test,
+`the_last_n10_floor_survivor_falls_by_128_targets`, covers the `T = 64` and
+`T = 128` rows in 294 s and is `#[ignore]`d for the same reason; run it with
+`cargo test --release --lib the_last_n10_floor_survivor -- --ignored`.
+
+**Next.** Nothing on this item.  The thread's open questions are unchanged:
+the exact size of Boundary C's gap (§8), and the basis sweep of limitation 5.
+
+---
 
 ### 2026-09-12 — iteration 3 (EXP-R6c — the residual effect is decomposition yield)
 
@@ -633,7 +697,9 @@ that generated iteration 1's caveat, `a₆ = 13`, **breaks by `T = 256`** — 17
 refutable targets, 137 at the floor, 34 above it — against a clean 35-of-35 on
 the first 64.  So the caveat was a small-sample artifact of the target count,
 not of the decomposability filter (hypothesis 1) and not of target correlation
-(hypothesis 2).
+(hypothesis 2).  *(Iteration 5 narrows the bound: `T = 256` is where this
+iteration looked, and the uniform-floor sweep itself puts `a₆ = 13` off the
+floor already at `T = 128`.)*
 
 **Next.** Nothing on this item.  The one open question in the thread is the
 induction for Boundary C at all `m` (§8).
@@ -742,6 +808,9 @@ selection and holdout target sets.
   | 8 | 255 | 68 | 34 | **0** | 0 | 0 |
   | 10 | 1023 | 230 | 73 | 14 | 7 | **1** |
 
+  *Extended in iteration 5: the `n = 10` row continues `128 → **0**`,
+  `256 → 0`, so the sweep reaches zero at both sizes.*
+
   Monotone in `T` and reaching zero.  At `n = 8` **no curve over the field**
   is on the floor for 32 targets; at `n = 10` one (`a₆ = 13`) survives 64.
   The decay is slower than independent targets would give — which is why the
@@ -847,9 +916,11 @@ earlier lessons:
    attacker for reasons unrelated to the solving degree.  Over the *full*
    target set no curve is uniformly easy at all: `0` of 255 at `n = 8`, and
    **`0` of 1023 over all 992 targets at `n = 10`**.  The curve that prompted
-   this caveat, `a₆ = 13`, breaks by `T = 256`: 171 refutable targets, 137 at
-   the floor and **34 above it**.  Its clean run over the first 64 was
-   small-sample, and the caveat it generated is retired.
+   this caveat, `a₆ = 13`, is off the floor by **`T = 128`** (iteration 5,
+   from the uniform-floor sweep itself); at `T = 256` the yield partition
+   shows it with 171 refutable targets, 137 at the floor and **34 above
+   it**.  Its clean run over the first 64 was small-sample, and the caveat it
+   generated is retired.
 5. **Single field representation.** The sweeps use the first irreducible
    polynomial of each degree, and ECC2K-130's own field is a permuted
    type-II ONB, not a polynomial basis.  The class structure is

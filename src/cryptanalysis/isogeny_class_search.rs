@@ -1976,6 +1976,35 @@ mod tests {
         );
     }
 
+    /// The same statement at `n = 10`, where the decay is slower: one curve
+    /// (`a₆ = 13`) is still on the floor at `T = 64`, and it is the curve
+    /// this thread's own iteration-1 caveat was about.  It falls at
+    /// `T = 128`, so the survivor is an artifact of the target count and not
+    /// a curve property.
+    ///
+    /// Ignored by default: `uniform_floor_survivors` is `Θ(curves · T)`
+    /// Gröbner refutations, so `T = 128` over 1023 curves runs for minutes
+    /// rather than seconds.  Run it with
+    /// `cargo test --release --lib the_last_n10_floor_survivor -- --ignored`.
+    #[test]
+    #[ignore = "minutes: 1023 curves × 128 targets of Macaulay refutation"]
+    fn the_last_n10_floor_survivor_falls_by_128_targets() {
+        let (n, l) = (10u32, 5u32);
+        let irr = first_irreducible(n);
+        let at64 = uniform_floor_survivors(n, l, 7, 64, &irr);
+        assert_eq!(
+            at64.survivors,
+            vec![13],
+            "the T=64 survivor set should be exactly the caveat curve a₆ = 13"
+        );
+        let at128 = uniform_floor_survivors(n, l, 7, 128, &irr);
+        assert!(
+            at128.survivors.is_empty(),
+            "a curve survived 128 targets on the floor at n = 10: {:?}",
+            at128.survivors
+        );
+    }
+
     /// The residual per-curve variation is decomposition yield, not a
     /// solving-degree property: a curve whose factor base decomposes more
     /// targets has fewer targets left that can refute above the floor.
