@@ -3512,7 +3512,7 @@ impl PairSumTable {
 /// `≤ 2^m` sign choices and returns the first that closes the group
 /// identity, so a spurious root of the polynomial system can never
 /// become a relation.
-fn lift_candidate(
+pub(crate) fn lift_candidate(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     index_of: &HashMap<(BigUint, BigUint), usize>,
@@ -4410,6 +4410,10 @@ pub struct KoblitzIcOptions {
     /// Which algebraic engine reduces the Semaev system.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub engine: SolverEngine,
+    /// Experimental exact S3 decomposition on a validated Frobenius chart
+    /// cover. Applies only to two-summand Groebner collection/descent. Plan
+    /// construction is caller-owned precomputation and must be charged.
+    pub weil_charts: Option<std::sync::Arc<super::weil_charts::WeilChartPlan>>,
     /// Splitting nodes (Gröbner-basis computations) one decomposition
     /// may spend before it gives up.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
@@ -4474,6 +4478,7 @@ impl Default for KoblitzIcOptions {
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
+            weil_charts: None,
             node_budget: 4096,
             max_models: 64,
             sat_macaulay_degree: Some(2),
@@ -4772,6 +4777,15 @@ fn koblitz_index_calculus_dlp_observed(
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(KoblitzIcEvent),
 ) -> Option<KoblitzIcReport> {
+    if let Some(plan) = &opts.weil_charts {
+        if opts.strategy != DecompositionStrategy::Groebner
+            || opts.m != 2
+            || opts.descent_m.is_some_and(|m| m != 2)
+            || !plan.matches(kc, fb)
+        {
+            return None;
+        }
+    }
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
     let projection_start = std::time::Instant::now();
@@ -4995,6 +5009,17 @@ fn koblitz_index_calculus_dlp_observed(
                         .and_then(|table| table.decompose(kc, fb, target, opts.m)),
                 ),
                 DecompositionStrategy::Groebner => {
+                    if let Some(plan) = &opts.weil_charts {
+                        let options = SolveOptions {
+                            engine: opts.engine,
+                            node_budget: opts.node_budget,
+                            split_rule: split_rule_default(),
+                            ..Default::default()
+                        };
+                        let (idxs, stats) = plan.decompose(kc, fb, &index_of, target, &options)
+                            .expect("chart cover validated at pipeline entry");
+                        return RelationAttemptOutcome::Groebner(idxs, stats.solver);
+                    }
                     let (idxs, stats) = groebner_decompose(
                         kc,
                         fb,
@@ -6467,12 +6492,31 @@ fn decompose_once(
     opts: &KoblitzIcOptions,
     target: &BinaryPoint,
 ) -> Option<Vec<usize>> {
+    if let Some(plan) = &opts.weil_charts {
+        if opts.strategy != DecompositionStrategy::Groebner
+            || opts.m != 2
+            || !plan.matches(kc, fb)
+        {
+            return None;
+        }
+    }
     match opts.strategy {
         DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
         DecompositionStrategy::PairTable => pair
             .expect("pair table required")
             .decompose(kc, fb, target, opts.m),
         DecompositionStrategy::Groebner => {
+            if let Some(plan) = &opts.weil_charts {
+                let options = SolveOptions {
+                    engine: opts.engine,
+                    node_budget: opts.node_budget,
+                    split_rule: split_rule_default(),
+                    ..Default::default()
+                };
+                return plan
+                    .decompose(kc, fb, index_of, target, &options)
+                    .and_then(|(ids, _)| ids);
+            }
             groebner_decompose(
                 kc,
                 fb,
