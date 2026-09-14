@@ -57,8 +57,9 @@ class Rung:
     """`K_0 : y^2 + xy = x^3 + 1` over `F_2^n`, posed in its largest prime
     subgroup so the relation matrix lives over a field.
 
-    `E(F_2^n)` is not cyclic at every rung -- at `n = 11` it is `Z/46 x Z/46`,
-    so `#E/p` annihilates the whole group and cannot be the projection.  The
+    `E(F_2^n)` is not cyclic at every rung -- at `n = 11` it is `Z/23 x Z/92`
+    (measured: order 2116, exponent 92), so `#E/p = 92` is the exponent itself
+    and annihilates the whole group, and cannot be the projection.  The
     scalar that works is `exponent/p`: it kills everything of order coprime to
     `p` and lands every point in the order-`p` subgroup, cyclic or not.
     """
