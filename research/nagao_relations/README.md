@@ -190,6 +190,10 @@ hashes, and failures. Outputs are written to new paths.
 
 ## Observations from the frozen correctness panel
 
+The subsequent [follow-up experiment](followup_01/README.md) tests denser bases,
+nine- and eleven-bit SAT instances, and larger subspace supports. Its results
+are additive; the original observations below remain unchanged.
+
 The raw SAT artifact is
 [`nagao_relation_comparison_20260913.json`](experiments/nagao_relation_comparison_20260913.json).
 Its aggregate `valid: false` means the full panel did not complete: all 24
@@ -289,3 +293,42 @@ solver and watchdog. No general mathematical avenue is closed.
    <https://api.lib.kyushu-u.ac.jp/opac_download_md/19584/JMI2011A-9.pdf>.
 
 All three sources were retrieved and read during this implementation session.
+
+## Compiled support experiment (solver_02)
+
+The [new proof and hypothesis ledger](solver_02/README.md) records 96 matched
+first-relation trials and 992 coefficient checks. The support formulation
+passed validation but both root-free variants resolved none of the eight
+cases at each of n=9 and n=11. Norm resolved eight and six respectively.
+Two-bit conditioning stalled in its first branch on every larger case.
+This supersedes the priority above: next test hybrid root retention and a
+fair conditioning schedule, while preparing a symmetrized-S4 cost comparison.
+The historical experiments remain unchanged; no attack improvement is claimed.
+
+## Hybrid support and fair scheduling (solver_03)
+
+The [follow-up proof and results](solver_03/README.md) add 96 matched trials
+and 7,936 hybrid vector checks. Hybrid resolved 2/8 nine-bit slots and 0/8
+eleven-bit slots; norm remained at 8/8 and 6/8. Fair scheduling reached
+all four branches but resolved none of the larger cases. Both hypotheses
+failed their completion-improvement criterion against the relevant control.
+A new proof reduces quadratic support to linear image-space membership
+when its linear coefficient is fixed; the resulting branching solver is
+a proposed next experiment, not a measured result.
+
+## Function-first goal and fresh-target campaign
+
+The [goal](GOAL.md) sets a 20% all-cost improvement criterion at three sizes.
+The [288-trial follow-through](goal_round_20260913.md) records conditioned
+SAT, a direct quadratic function solver, and matched elementary/transformed
+S4 controls. The direct solver clears the finite eleven-bit panel in both
+first and complete-enumeration modes; S4 wins at smaller sizes. The goal
+remains open, with all-cost accounting and broader held-out scaling next.
+
+## Beyond eleven bits
+
+The [240-trial scaling campaign](scaling_23_29.md) adds cached arithmetic,
+exact image-space support and matched S3/S4 controls at 11, 23 and 29 bits.
+The image solver completes every target/mode slot under five seconds.
+The larger bases have dimension six; increasing base dimension and
+calibrating total solver work remain necessary before an attack-cost claim.
