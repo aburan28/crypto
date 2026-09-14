@@ -167,6 +167,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const size_t id = size_t(slot) * p.threads + tid;
             if (!p.dead[id]) {
                 if (hw <= p.dpWeight) {
+                    if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
                     const unsigned dest = atomicAdd(p.dpCount, 1u);
                     if (dest < p.dpCap) {
                         DpRecord rec;
@@ -182,6 +183,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                     }
                     p.dead[id] = 1;
                 } else if (guard && now - p.startIter[id] >= p.maxIters) {
+                    if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
                     // Overdue walks need a restart, not a false DP report.
                     p.dead[id] = 1;
                     atomicAdd(p.dpCount + 1, 1u);

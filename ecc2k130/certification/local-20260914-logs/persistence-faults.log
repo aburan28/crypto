@@ -1,0 +1,10 @@
+DP OVERFLOW: 2 reports, capacity 1; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.
+persistence failure: corpus write; checkpoint NOT advanced
+persistence failure: corpus flush; checkpoint NOT advanced
+resumed from /tmp/ecc-production-TyDwyN/fake.ck at iteration 0
+resumed from /tmp/ecc-production-TyDwyN/fake.ck at iteration 0
+resumed from /tmp/ecc-production-TyDwyN/fake.ck at iteration 0
+resumed from /tmp/ecc-production-TyDwyN/fake.ck at iteration 0
+       0.0 s       0.165 M it/s           1 iterations         1 dp         1 stored         0 dropped
+  finished: 0.042 M it/s, 1 distinguished points (0 verified against the reference, 0 dropped)
+PASS: deterministic collision fixture, overflow/write/fsync fault isolation, cycle guard

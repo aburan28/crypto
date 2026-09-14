@@ -66,6 +66,7 @@ done
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
 chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib
 cat manifest.json 2>/dev/null

@@ -50,6 +50,10 @@ import sys
 import threading
 import time
 import urllib.request
+import uuid
+
+from protocol import (atomicJson, bindDirectory, campaignContract, envelope,
+                      sha256File, verifyEnvelope)
 
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
@@ -82,10 +86,7 @@ def readJson(path, default=None):
 
 
 def writeJson(path, obj):
-    tmp = path + ".tmp"
-    with open(tmp, "w") as fh:
-        json.dump(obj, fh, indent=1, sort_keys=True)
-    os.replace(tmp, path)
+    atomicJson(path, obj)
 
 
 def checkpointIter(path):
@@ -131,7 +132,11 @@ class S3Store:
     def exists(self, key):
         r = subprocess.run(["aws", "s3api", "head-object", "--bucket", self.bucket, "--key", key],
                            capture_output=True, text=True)
-        return r.returncode == 0
+        if r.returncode == 0:
+            return True
+        if "404" in r.stderr or "NoSuchKey" in r.stderr or "Not Found" in r.stderr:
+            return False
+        raise RuntimeError("object lookup failed; refusing to treat an access error as absence")
 
     def get(self, key, dest):
         if not self.exists(key):
@@ -263,7 +268,8 @@ class DynamoSlots:
             names["#f%d" % i] = k
             values[":v%d" % i] = dv(v)
             expr.append("#f%d = :v%d" % (i, i))
-        return self._update(slot, "SET " + ", ".join(expr), names, values, "#o = :me")
+        return self._update(slot, "SET " + ", ".join(expr), names, values,
+                            "#o = :me AND leaseUntil >= :now")
 
     def release(self, slot, owner, state="idle", extra=None):
         names = {"#o": "owner", "#st": "state"}
@@ -344,10 +350,10 @@ class S3Slots:
         for it in sorted(items, key=lambda x: x["slot"]):
             if it.get("state") not in (None, "active", "idle") or int(it.get("leaseUntil") or 0) >= now:
                 continue
-            etag = it.pop("_etag")
-            slot = it.pop("slot")
-            it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
-            if self._put(slot, it, ifMatch=etag):
+            etag, slot = it["_etag"], it["slot"]
+            candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
+            candidate.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
+            if self._put(slot, candidate, ifMatch=etag):
                 return slot
         nextSlot = max((it["slot"] for it in items), default=-1) + 1
         for _ in range(64):
@@ -362,7 +368,7 @@ class S3Slots:
 
     def _modify(self, slot, owner, fn):
         item, etag = self._get(slot)
-        if item is None or item.get("owner") != owner:
+        if item is None or item.get("owner") != owner or item.get("leaseUntil", 0) < int(time.time()):
             return False
         fn(item)
         return self._put(slot, item, ifMatch=etag)
@@ -410,7 +416,7 @@ class LocalSlots:
     def heartbeat(self, slot, owner, fields):
         def fn(items):
             it = items.get(str(slot))
-            if not it or it.get("owner") != owner:
+            if not it or it.get("owner") != owner or it.get("leaseUntil", 0) < int(time.time()):
                 return False
             it.update(fields, leaseUntil=int(time.time()) + LEASE_SECONDS, updatedAt=int(time.time()))
             return True
@@ -444,7 +450,7 @@ class Worker:
             table = os.environ.get("ECC_TABLE", "")
             self.slots = DynamoSlots(table) if table else S3Slots(os.environ["ECC_BUCKET"])
         self.instance = instanceId()
-        self.owner = "%s:gpu%d" % (self.instance, self.gpu)
+        self.owner = "%s:gpu%d:%s" % (self.instance, self.gpu, uuid.uuid4().hex)
         self.work = os.path.join(self.root, "gpu%d" % self.gpu)
         os.makedirs(self.work, exist_ok=True)
         self.statePath = os.path.join(self.work, "state.json")
@@ -452,6 +458,13 @@ class Worker:
         self.stopping = False
         self.proc = None
         self.cfg = None
+        self.contract = None
+        self.leaseLost = False
+        self.lastBeatSuccess = None
+        self.streamId = uuid.uuid4().hex
+        # Prevent two local supervisors sharing offsets, checkpoint paths or a GPU.
+        self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
+        fcntl.flock(self.workLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         self.gpuName = gpuName(self.gpu)
         signal.signal(signal.SIGTERM, self.onStop)
         signal.signal(signal.SIGINT, self.onStop)
@@ -478,6 +491,13 @@ class Worker:
         for key in ("curve", "steps", "checkpointEvery"):
             if key not in self.cfg:
                 raise RuntimeError("campaign.json lacks %r" % key)
+        if self.cfg.get("storageProtocol"):
+            self.contract = campaignContract(self.cfg)
+            if sha256File(self.client) != self.cfg["binarySha256"]:
+                raise RuntimeError("client binary hash differs from campaign")
+            bindDirectory(self.work, self.contract)
+        elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
+            raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
 
     def clientCommand(self, slot):
         c = self.cfg
@@ -514,6 +534,16 @@ class Worker:
     def claimSlot(self):
         info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
         slot = self.slots.claim(self.owner, info)
+        self.lastBeatSuccess = time.monotonic()
+        if self.contract:
+            records = [r for r in self.slots.scan() if r["slot"] == slot]
+            record = records[0]
+            if record.get("campaignId") not in (None, self.contract["id"]):
+                raise RuntimeError("slot belongs to a different campaign")
+            if record.get("campaignId") is None and (record.get("ckptIter", -1) >= 0 or self.store.exists(self.ckptKey(slot))):
+                raise RuntimeError("legacy slot checkpoint requires audited migration")
+            if not self.slots.heartbeat(slot, self.owner, {"campaignId": self.contract["id"]}):
+                raise RuntimeError("lease lost during campaign binding")
         log("claimed slot %d (run id %d)" % (slot, slot + 1))
         if self.state.get("slot") != slot:
             # A different slot than this work dir last held: nothing local applies.
@@ -526,7 +556,21 @@ class Worker:
         # Resume from whichever checkpoint is further along: the one left here by
         # a previous run on this instance, or the one another instance uploaded.
         remote = self.ckptPath + ".remote"
-        if self.store.get(self.ckptKey(slot), remote):
+        if self.contract:
+            # The registry's conditional write is the checkpoint commit point.
+            # A stale writer may leave immutable blobs but cannot change this pointer.
+            key = record.get("checkpointKey")
+            if key:
+                meta = remote + ".json"
+                if not self.store.get(key, remote) or not self.store.get(key + ".json", meta):
+                    raise RuntimeError("committed checkpoint or manifest is missing")
+                verifyEnvelope(remote, readJson(meta), self.contract, "checkpoint")
+                os.replace(remote, self.ckptPath)
+                log("downloaded checkpoint at iteration %d" % checkpointIter(self.ckptPath))
+            # Do not trust an uncommitted local checkpoint after process restart.
+            elif os.path.exists(self.ckptPath):
+                raise RuntimeError("uncommitted local checkpoint requires recovery review")
+        elif self.store.get(self.ckptKey(slot), remote):
             if checkpointIter(remote) > checkpointIter(self.ckptPath):
                 os.replace(remote, self.ckptPath)
                 log("downloaded checkpoint at iteration %d" % checkpointIter(self.ckptPath))
@@ -553,6 +597,13 @@ class Worker:
         checkpoint was written (the client flushes the dp file, then saves).
         If this process dies between the two uploads the store holds extra
         points and an older checkpoint, which a resume merely re-reports."""
+        if self.leaseLost:
+            raise RuntimeError("lease lost: refusing to publish")
+        if not self.slots.heartbeat(slot, self.owner, {}):
+            self.leaseLost = True
+            self.stopping = True
+            raise RuntimeError("lease lost before upload")
+        self.lastBeatSuccess = time.monotonic()
         snap = self.ckptPath + ".snap"
         if os.path.exists(snap):
             os.remove(snap)
@@ -568,8 +619,12 @@ class Worker:
             with open(self.dpPath, "rb") as src, open(delta, "wb") as out:
                 src.seek(offset)
                 out.write(src.read(whole - offset))
-            key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
+            key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
             self.store.put(delta, key)
+            if self.contract:
+                meta = envelope(delta, self.contract, "dp", owner=self.owner, offset=offset)
+                writeJson(delta + ".json", meta)
+                self.store.put(delta + ".json", key + ".json")
             os.remove(delta)
             self.state["dpOffset"] = whole
             # Cumulative across dp file rotations, so the dashboard's count
@@ -579,7 +634,18 @@ class Worker:
         if haveSnap:
             it = checkpointIter(snap)
             if it >= 0 and it != self.state.get("ckptIter", -1):
-                self.store.put(snap, self.ckptKey(slot))
+                if self.contract:
+                    key = "ckpt/slot-%05d/%s.ck" % (slot, sha256File(snap))
+                    self.store.put(snap, key)
+                    writeJson(snap + ".json", envelope(snap, self.contract, "checkpoint", iteration=it))
+                    self.store.put(snap + ".json", key + ".json")
+                    if not self.slots.heartbeat(slot, self.owner, {"checkpointKey": key, "ckptIter": it}):
+                        self.leaseLost = True
+                        self.stopping = True
+                        raise RuntimeError("lease lost: checkpoint pointer not committed")
+                    self.lastBeatSuccess = time.monotonic()
+                else:
+                    self.store.put(snap, self.ckptKey(slot))
                 self.state["ckptIter"] = it
                 self.saveState()
             os.remove(snap)
@@ -613,6 +679,7 @@ class Worker:
         restartDue = False
         last = None
         solved = None
+        verifiedSolution = False
         tail = []
         eof = False
         while not eof or self.proc.poll() is None:
@@ -628,8 +695,11 @@ class Worker:
                                 "dp": int(prog.group(4)), "stored": int(prog.group(5)),
                                 "dropped": int(prog.group(6) or 0)}
                     else:
-                        if "k = " in line:
+                        if re.fullmatch(r"\s*k = [0-9]+\s*", line):
                             solved = line.strip()
+                            verifiedSolution = False
+                        if line.strip() == "verified [k]P == Q" and solved:
+                            verifiedSolution = True
                         log("client: " + line)
             except queue.Empty:
                 pass
@@ -645,8 +715,14 @@ class Worker:
                     if not self.slots.heartbeat(slot, self.owner, fields):
                         log("lost the lease on slot %d; stopping the client" % slot)
                         self.stopping = True
+                        self.leaseLost = True
+                    else:
+                        self.lastBeatSuccess = time.monotonic()
                 except Exception as e:
                     log("heartbeat failed (will retry): %s" % e)
+                if self.lastBeatSuccess is None or time.monotonic() - self.lastBeatSuccess >= LEASE_SECONDS:
+                    self.leaseLost = True
+                    self.stopping = True
                 if last:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],
@@ -676,7 +752,7 @@ class Worker:
             self.uploadCycle(slot)
         except Exception as e:
             log("final upload failed: %s" % e)
-        return rc, solved, restartDue
+        return rc, solved if rc == 0 and verifiedSolution and not self.leaseLost else None, restartDue
 
     def rotateDpFile(self):
         """After the client has exited and every record is uploaded, start a
@@ -686,9 +762,12 @@ class Worker:
         if os.path.exists(self.dpPath):
             size = os.path.getsize(self.dpPath)
             if size - size % RECORD_BYTES <= int(self.state.get("dpOffset", 0)):
-                os.remove(self.dpPath)
+                # Reset BEFORE unlink: a crash can re-upload duplicates but
+                # cannot skip the prefix of the next file.
                 self.state["dpOffset"] = 0
                 self.saveState()
+                os.remove(self.dpPath)
+                self.streamId = uuid.uuid4().hex
 
     # ---- main loop --------------------------------------------------------
     def run(self):
@@ -713,12 +792,15 @@ class Worker:
                 log("SOLVED on slot %d: %s" % (slot, solved))
                 return 0
             if rc == 6:
+                if self.contract:
+                    self.slots.release(slot, self.owner, state="error", extra={"reason": "checkpoint rejected; preserve for recovery"})
+                    return 1
                 self.retireSlot(slot, "checkpoint refused by the client")
                 slot = None
                 continue
-            if rc == 3:
-                self.slots.release(slot, self.owner, state="error", extra={"reason": "reference mismatch"})
-                log("the GPU walk disagrees with the reference; refusing to continue")
+            if rc in (3, 7, 8, 9):
+                self.slots.release(slot, self.owner, state="error", extra={"reason": "integrity failure, exit %d" % rc})
+                log("reference, report-loss or persistence failure; refusing automatic retries")
                 return 1
             if self.stopping:
                 break

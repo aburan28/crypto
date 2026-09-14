@@ -1,5 +1,11 @@
 # Running the ECC2K-130 walk across many GPUs on EC2
 
+**Production readiness:** see [CERTIFICATION.md](../CERTIFICATION.md) before
+starting or upgrading a campaign. The new strict storage protocol uses
+checksummed manifests, pinned worker/replay binaries and lease-fenced
+checkpoint pointers. It is not a transparent migration of old raw corpora.
+The commands below do not establish live production certification.
+
 The single-GPU client already does everything a distributed Pollard rho needs:
 every walk seed is derived from a 16-bit `--run-id`, distinguished points are
 appended as fixed 32-byte records, the walk state checkpoints on a timer and
@@ -61,7 +67,8 @@ wall-clock. Two corrections to keep in mind:
   per GPU at weight 34 (6.16 M walks × 2^25.27 steps). The faster GPU walks
   that state out proportionally faster, so this is still 1.5% of the work at
   128 GPUs and 12% at 1,024; above a few hundred GPUs lower the cutoff
-  (`dpWeight` 33 halves the waste and doubles the corpus) **before** the
+  (raising `dpWeight` from 34 to 36 increases the estimated DP rate about
+  7.55×, reducing delay but increasing storage) **before** the
   campaign starts, never during it.
 
 One GPU is now past the 15 B/s a single card was once thought unable to reach
@@ -216,7 +223,7 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 #    ./fleet.sh down && ./fleet.sh up 64 --no-fallback
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
-python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
+python3 merge.py --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campaign campaign.json --client ../ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
 
 # 6. done
