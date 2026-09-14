@@ -83,3 +83,33 @@ these are stage diagnostics, with no calibrated SAT/field conversion,
 required broad regression, complete ECDLP pipeline, or measured rho ratio.
 Growing support changes the counting boundary and is not an advance against
 a fixed boundary. See the frozen contract for the explicit scope and holdouts.
+
+## Structured-base and stronger-baseline checkpoint — 2026-09-14
+
+The [structured scaling campaign](structured_01/RESULTS.md) extends prefix
+bases through d10 and tests genuine F4-linear, Frobenius4-stable d8/d10
+bases at 18 and 30 bits. Its 240 matched cold trials compare the original
+hybrid, an early support filter, a direct S3 pair-invariant table, chained
+S3 SAT and symmetric S4 SAT. Frozen d8 targets and fresh holdouts are kept
+separate. Ten additional eight-target batches charge pair-table setup once.
+
+The stronger Semaev baseline changes the conclusion: in three-second cold
+enumeration trials the direct S3 table completes 14/24, while both hybrid
+variants complete 0/24. First-relation resolutions are 14/24 for the table
+and 13/24 for each hybrid; those counts include proved empty targets. At
+18 bits specifically, the hybrids resolve more first-relation trials than
+the table, so the enumeration finding is not a universal first-hit result.
+Both SAT controls remain at 0/24 in each mode.
+
+The parity filter reduces rejected-function work but does not improve this
+panel's completion counts. The hybrid still visits quadratically many
+coefficient branches. Ordinary setup caching cannot deliver a 20% saving:
+previous setup was below 0.25% of total time. Frobenius-stable support cannot
+be quotiented for a fixed arbitrary target without also transforming it.
+
+All ten S3 batches complete, including d10 at 30 bits, but 19 of their 20
+uniform 30-bit targets have no admissible relation. Supported targets must
+not be used to estimate random-target yield. The pair table retains
+quadratic setup and is itself a summation-polynomial algorithm. Its success
+does not meet the function-first goal. The 20% calibrated total-cost gate,
+broader regression and full-DLP gates remain **unmet**.

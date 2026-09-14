@@ -346,3 +346,20 @@ extension and engineering diagnostic; the calibrated all-cost goal remains open.
 Frozen implementation, proof, contract, raw trials and source-publication
 mapping are in [subfield_01](subfield_01/README.md). Replay evidence with
 `python research/nagao_relations/check_subfield_evidence.py`.
+
+## Structured support and the direct S3 table (2026-09-14)
+
+The [structured scaling results](structured_01/RESULTS.md) test prefix
+dimensions 8–10 and F4-linear, Frobenius4-stable dimensions 8 and 10 at
+18 and 30 bits. All 240 cold trials use matched targets, bases and budgets.
+The new early support filter preserves the hybrid's accepted functions,
+but does not increase its completion count. A direct S3 pair-invariant
+table completes 14/24 cold enumerations; neither hybrid completes any.
+This is a stronger Semaev comparator, not a function-first success.
+
+Ten separately charged eight-target batches all complete, including d10
+at 30 bits. Uniform-target yield remains sparse at 30 bits, and supported
+targets are reported separately. Quadratic setup, the small sample, lack
+of timing repetitions and uncalibrated costs preclude an asymptotic or
+full-ECDLP claim. Frozen source, raw results, counter comparisons, proof
+checks and certificate replay are in [structured_01](structured_01/README.md).
