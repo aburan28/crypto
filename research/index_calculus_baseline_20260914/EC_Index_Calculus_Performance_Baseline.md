@@ -17,6 +17,12 @@ has a [Trimoska corpus audit](../../RESEARCH_TRIMOSKA_BENCHMARKS.md),
 about unmeasured work describe this pilot only. In particular, the existing audit
 identifies `n19l6-19-U` as SAT; this six-case pilot does not include that instance.
 
+The subsequent [full-corpus regression batch](regression/RESULTS.md) is the frozen
+target for future solver iterations. It retains this initial pilot and adds both
+symmetry configurations on all 60 inputs. It also certifies that `n19l6-19-U` is
+algebraically SAT but its target does not lift to the curve; it cannot supply a
+point relation on this curve over the stated base field.
+
 The primary comparison follows `AGENTS.md`: **S = total common operations / sqrt(N)**,
 with all phases included, plus ratios to a derived floor and a measured reference.
 Here N is the subgroup order; n below is the binary field degree. Wall time and
