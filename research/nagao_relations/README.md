@@ -11,6 +11,13 @@ The target repository is `aburan28/crypto`; the existing Semaev frontend remains
 the comparator. The frozen scope is
 [`experiments/nagao_relation_contract.json`](experiments/nagao_relation_contract.json).
 
+Latest checkpoint: [certified coefficient blocks](blocks_01/RESULTS.md) implement
+the proposed block rejection, with 192 matched cold trials and an eight-target
+shared-setup follow-up. The bilinear circuit improves the old hybrid, but the
+direct S3 table remains the stronger enumeration baseline. Pruning helps n30,d8
+and regresses n18. [The new constructor bound](blocks_01/BOUNDS_AND_NEXT.md)
+identifies coefficient-table reuse as the next cost question.
+
 ## Which axis changes?
 
 | Approach | What it changes | Treatment here |

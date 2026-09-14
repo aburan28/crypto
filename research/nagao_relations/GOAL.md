@@ -138,3 +138,34 @@ the 30-bit prefix d10 batch would require at least 98.1007% branch removal
 to reach 20% fewer multiplications than the measured S3 table. A new
 per-branch formula requires re-deriving this threshold. Full-cost comparison
 and the original three-size acceptance gate remain open.
+
+## Certified block experiment — 2026-09-14
+
+The [coefficient-block experiment](blocks_01/RESULTS.md) now implements a sound
+binary-linear relaxation of the bilinear support equation at fixed b. Every
+rejected block carries an independently checked dual separator. Exhaustive
+GF64 validation and 192 matched cold trials find no correctness failures.
+This is a coefficient/support hybrid with an auxiliary w witness, not a pure
+root-free solver.
+
+The new unpruned bilinear circuit completes 12/16 cold enumerations, versus
+0/16 for the old filtered hybrid and 14/16 for the direct S3 table. Pruning
+completes 6/16: it helps n30,d8 but loses all six n18,d8 completions. Both SAT
+controls remain at zero. First-mode coverage is 15/16 unpruned, 14/16 pruned,
+11/16 old hybrid and 14/16 direct S3; these counts include proved empty targets.
+
+The predeclared pruning screen passes on six complete n30,d8 pairs, with
+22.6% fewer field API calls and fewer selected binary operations. A fresh
+eight-target batch confirms a 25.0% API-call reduction against the unpruned
+circuit, but the pruned solver still uses 10,980,028 field API calls against
+580,690 for S3. All four arithmetic variants complete the same batch with
+four verified relations; the four uniform targets are empty. These API sums
+are uncalibrated component diagnostics, not total-operation speedups.
+
+The [new bound](blocks_01/BOUNDS_AND_NEXT.md) applies to circuit construction:
+530,432 mandatory multiplications in the pruned batch, versus 207,401 total
+S3 multiplications. Perfect free pruning cannot remove that setup floor.
+Symmetry alone is insufficient; the next hypothesis is reusing coefficient
+maps and elimination work across b values, charging all table/XOR costs.
+The original three-size cost goal, broad regression and full-DLP gates
+remain **unmet**.

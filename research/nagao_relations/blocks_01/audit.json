@@ -1,0 +1,21 @@
+{
+  "matched_trials": 192,
+  "frozen_inputs": 8,
+  "fresh_inputs": 8,
+  "relation_certificates_replayed": 512,
+  "rejection_certificates_replayed": 193763,
+  "correctness_failures": 0,
+  "source_hashes_match": true,
+  "raw_sha256": "c0d1a3cc79a0d12fd569248dcd1a99ca256ffcd4d243770a68268969cb285a5f",
+  "source_commit": "dbe8422e916c425c71951e2f0218f6d8e1d154a7",
+  "validation": {
+    "kind": "validation",
+    "exhaustive_target_space_pairs": 159,
+    "new_solver_trials": 318,
+    "rejection_certificates": 7018,
+    "circuit_identity_evaluations": 7168,
+    "relation_certificates": 178,
+    "failures": 0,
+    "seconds": 3.7275821110015386
+  }
+}
