@@ -65,6 +65,60 @@ routine it emits against an independent model of the field. The same source
 compiles for CUDA (32-bit lanes) and for the CPU (64-bit lanes), so the exact
 code that would run on a GPU is what the test suite exercises.
 
+## Contribute compute
+
+The campaign is a Pollard rho over disjoint seed spaces, so a machine that
+walks its own seeds adds points to the same search without coordinating with
+anyone. Live counts are at
+<https://aburan28.github.io/crypto/status/>.
+
+**Run this client.** Every walk seed comes from a 16-bit `--run-id`, so two
+contributors who pick different ids never repeat each other's trail, and their
+corpora merge by reload. On a local card:
+
+```sh
+make test                                    # 52 checks, GF(2^23) … GF(2^131)
+make gpu
+./ecc2k130 --curve 41 --instance 3           # recover a planted log first
+./ecc2k130 --curve 131 --run-id N \
+           --dp-file dps.bin --checkpoint state.ck
+```
+
+On rented hardware, `./run.sh` drives the same binary through Modal — `./run.sh
+validate` recovers planted logarithms on the GPU itself before anything is
+spent, then `CURVE=131 RUNID=N ./run.sh search` collects and `./run.sh merge`
+scans every corpus for the colliding pair and rewalks it. `CURVE=131` does not
+finish: `2^60.9` iterations is decades of GPU time, so it is collection, not a
+solve.
+
+**Or run a [cairn](https://github.com/aburan28/cairn) node**, which pays for
+verified outputs rather than for claimed effort. Its
+[rho piecework design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md)
+makes one distinguished point `(x, y, a, b)` the paid artifact: `2^d` group
+operations to find, two scalar multiplications to check, so the proof of work
+is the work. Download it from
+**<https://github.com/aburan28/cairn/releases/latest>**, or install the
+published release in one line:
+
+```sh
+curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh
+cairn run
+```
+
+Linux amd64/arm64 and macOS Intel/Apple Silicon; no Windows build, because the
+verifier sandbox is seatbelt and bubblewrap. The installer checks the tarball
+against a `.sha256` served from the same host, which detects a corrupted
+download and nothing else — there is no signing key.
+
+What that does **not** buy yet: cairn's shipped rho objectives are
+prime-field — a 50-bit rung and Certicom's ECCp-131, contributed to with
+`crypto cryptanalysis rho-collab work --cairn` ([design
+note](../docs/POLLARD_COLLAB_DESIGN.md)) — and an ECC2K-130 objective needs a
+`GF(2^131)` checker that
+[cairn does not carry](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md).
+Until it does, points on *this* curve are not payable through cairn; the
+client above is the path that is live today.
+
 ## Status
 
 | | |

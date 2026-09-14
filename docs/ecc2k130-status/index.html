@@ -38,6 +38,11 @@
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
+  <p class="sub">
+    Adding hardware to the walk: <a href="#h-contribute">contribute compute</a>
+    &mdash; <a href="https://github.com/aburan28/cairn/releases/latest">download
+    cairn</a> for the paid piecework path, or run the client itself.
+  </p>
 
   <noscript>
     <p class="banner UNREACHABLE">
@@ -196,6 +201,95 @@
         </thead>
         <tbody id="workers-body"></tbody>
       </table>
+    </div>
+  </section>
+
+  <section class="contribute" aria-labelledby="h-contribute">
+    <h2 id="h-contribute">Contribute compute</h2>
+    <p class="note">
+      The table above is not a closed fleet: the walk is a Pollard rho over
+      independent seed spaces, so any machine that walks its own seeds adds
+      points to the same search. Two ways in — one that pays for the points,
+      one that does not.
+    </p>
+
+    <div class="join">
+
+      <article class="join-card">
+        <p class="join-kicker">Paid piecework</p>
+        <h3>Run a cairn node</h3>
+        <p>
+          <a href="https://github.com/aburan28/cairn">cairn</a> pays for
+          verified outputs and never for claimed effort. Under its
+          <a href="https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md">rho
+          piecework design</a> the paid artifact is one distinguished point
+          <span class="mono">(x, y, a, b)</span> with
+          <span class="mono">a&middot;P + b&middot;Q = (x, y)</span>: it costs
+          <span class="mono">2^d</span> group operations to find and two scalar
+          multiplications to check, so the proof of work <em>is</em> the work.
+        </p>
+        <p class="dl-row">
+          <a class="dl" href="https://github.com/aburan28/cairn/releases/latest">Download cairn</a>
+          <span class="dl-sub">Linux amd64 &middot; arm64 &middot; macOS Intel &amp; Apple Silicon</span>
+        </p>
+        <pre class="cmd"><code>curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh
+cairn run</code></pre>
+        <p class="note">
+          The installer detects the platform, checks the tarball against the
+          published <span class="mono">.sha256</span> and puts one binary in
+          <span class="mono">~/.local/bin</span>. That checksum comes from the
+          same server as the tarball, so it catches a corrupted download and
+          nothing else &mdash; there is no signing key yet. No Windows build:
+          the verifier sandbox is seatbelt and bubblewrap.
+        </p>
+        <p class="note">
+          <strong>What is and is not posted.</strong> The rho objectives that
+          ship today are prime-field &mdash; a 50-bit rung anyone can finish,
+          and Certicom's ECCp-131 &mdash; and the contributor for them is
+          <span class="mono">crypto cryptanalysis rho-collab work --cairn</span>.
+          An ECC2K-130 objective needs a
+          <span class="mono">GF(2^131)</span> checker, which
+          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md">cairn
+          does not carry yet</a>, so points on <em>this</em> campaign are not
+          payable through cairn until it does. Install the node now to have it
+          ready, and to work the rungs that are live.
+        </p>
+      </article>
+
+      <article class="join-card">
+        <p class="join-kicker">Unpaid, and live today</p>
+        <h3>Run the ECC2K-130 client</h3>
+        <p>
+          The client that produced every point on this page is in the
+          repository: bitsliced Pollard rho on the Frobenius classes
+          <span class="mono">{&plusmn;&tau;^i P}</span>, with the field
+          arithmetic emitted and self-checked by a code generator. One RTX PRO
+          6000 walks <span class="mono">14.1</span> billion iterations/s while
+          collecting at <span class="mono">HW(x) &le; 34</span>.
+        </p>
+        <pre class="cmd"><code>git clone https://github.com/aburan28/crypto
+cd crypto/ecc2k130
+make test      # 52 checks, GF(2^23) … GF(2^131)
+make gpu
+./ecc2k130 --curve 131 --run-id N \
+           --dp-file dps.bin --checkpoint state.ck</code></pre>
+        <p class="note">
+          Every walk seed is derived from that 16-bit
+          <span class="mono">--run-id</span>, so two contributors who pick
+          different ids never repeat each other's trail and their corpora merge
+          by reload. On rented hardware
+          <span class="mono">./run.sh</span> drives the same binary through
+          Modal. A <span class="mono">--curve 131</span> run does not finish —
+          <span class="mono">2^60.9</span> iterations is decades of GPU time, so
+          it is collection, not a solve. Read
+          <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/README.md">ecc2k130/README.md</a>
+          for the client and
+          <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/aws/README.md">ecc2k130/aws/README.md</a>
+          for the fleet, the slot registry and what the expected
+          <span class="mono">2^60.9</span> costs.
+        </p>
+      </article>
+
     </div>
   </section>
 

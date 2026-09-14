@@ -15,6 +15,17 @@ on a **log scale**, legible but labelled on the page as not being
 progress, because each bit of it is a doubling of the work. Beneath the bars, an **ETA** projects the wall-clock time to the expected `2^60.9` cost from the last-hour distinguished-point amount at the same `2^25.27` interval — when that hourly amount changes, the operation rate and the ETA both move with it. See
 `scripts/rho_status/README.md` for why none of this is a published field.
 
+The **Contribute compute** section under the worker table is static: it
+carries the [cairn](https://github.com/aburan28/cairn) download link
+(`releases/latest`, plus the one-line installer the cairn README
+documents) for the paid piecework path, and the `ecc2k130/` client
+commands for the unpaid one. It states plainly that no ECC2K-130
+objective is posted on cairn yet — the binary-field checker
+`GF(2^131)` needs is not in cairn's `examples/certicom-ecdlp/` — so the
+download is an invitation to be ready and to work the live rungs, not a
+claim that points on this campaign are payable today. If that changes,
+this section is what has to change with it.
+
 Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely
 on the published site.
