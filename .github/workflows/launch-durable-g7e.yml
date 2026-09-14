@@ -14,7 +14,7 @@ permissions:
 jobs:
   launch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,9 +30,23 @@ jobs:
       - name: Launch or start durable G7e host
         working-directory: ecc2k130/aws/devhost
         run: |
-          set -euo pipefail
+          set -u -o pipefail
           chmod +x devhost.sh bootstrap.sh
-          ./devhost.sh up
+
+          # Try progressively larger single-host G7e shapes in the same region.
+          # devhost.sh is idempotent by Name tag, so once one launch succeeds,
+          # later attempts simply find that host rather than creating another.
+          for type in g7e.2xlarge g7e.4xlarge g7e.8xlarge g7e.12xlarge; do
+            echo "Trying $type ..."
+            if INSTANCE_TYPE="$type" ./devhost.sh up; then
+              echo "Launched/started durable host with $type"
+              exit 0
+            fi
+            echo "$type unavailable; trying next size"
+          done
+
+          echo "No requested G7e size had capacity in us-west-2" >&2
+          exit 1
 
       - name: Print host status
         working-directory: ecc2k130/aws/devhost
