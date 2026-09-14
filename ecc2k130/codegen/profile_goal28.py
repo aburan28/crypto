@@ -45,11 +45,13 @@ def timing(raw, workers, steps, launches, weight):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--counters-only',action='store_true',help='retry hardware sections with application replay, without repeating the grid screen')
+    modes=parser.add_mutually_exclusive_group()
+    modes.add_argument('--counters-only',action='store_true',help='retry hardware sections with application replay, without repeating the grid screen')
+    modes.add_argument('--range-only',action='store_true',help='diagnostic marked-range replay and independent profiler smoke checks; no throughput screen')
     args=parser.parse_args();out=args.out.resolve();out.mkdir(parents=True,exist_ok=False)
     result=dict(valid=False,compileOnly=False,goalBPerSecond=28,profileOnly=True,
                 fieldProductsPerScalarUpdate=5+5/16,fieldProductRatioToControl=1.0,
-                countersOnly=args.counters_only)
+                countersOnly=args.counters_only,rangeOnly=args.range_only)
     start=time.monotonic()
     def save(): (out/'result.json').write_text(json.dumps(result,indent=2)+'\n')
     def stage(name):
@@ -75,11 +77,18 @@ def main():
         if 'V13.3.73' not in result['commands']['nvcc-version']['raw']:raise RuntimeError('nvcc must be 13.3.73')
         stage('compile control and correctness probes')
         (bench.ROOT/'generated').mkdir(exist_ok=True);command('generate',['make','generate'],180)
-        _,result['build']=bench.compile_mode('control',nvcc,out);save()
+        _,result['build']=bench.compile_mode('control',nvcc,out,profile_range=args.range_only);save()
         binary=out/'control/client'
         stage('device correctness and checkpoint integration')
         for probe in ('arithmetic','storage','sigma'):command(probe,[out/'control'/probe])
         command('integration',[sys.executable,'codegen/testpackedclient.py',binary],900)
+        if args.range_only:
+            stage('independent profiler smoke workload')
+            smoke=out/'profiler-smoke'
+            command('smoke-build',[nvcc,'-O3','-gencode','arch=compute_120,code=sm_120','src/testprofilersmoke.cu','-o',smoke])
+            command('smoke-correctness',[smoke])
+            for replay in ('kernel','app-range'):
+                command('smoke-ncu-'+replay,[ncu,'--metrics','gpu__time_duration.sum','--replay-mode',replay,'--launch-count','1','--clock-control','none','--force-overwrite','--export',out/('smoke-'+replay),smoke],300,required=False)
         stage('Nsight Systems timeline')
         argv=[binary,'--packed','--curve','131','--threads',385024,'--steps',128,'--launches',4,'--bench','--verify',0]
         command('nsys-profile',[nsys,'profile','--trace=cuda,nvtx,osrt','--sample=none','--cpuctxsw=none','--force-overwrite=true','-o',out/'timeline',*argv],600)
@@ -93,13 +102,17 @@ def main():
             argv=[binary,'--packed','--curve','131','--threads',workers,'--steps',32,'--launches',2,'--bench','--verify',0]
             sections=([flag for name in ['SpeedOfLight','Occupancy','SchedulerStats','WarpStateStats','MemoryWorkloadAnalysis','ComputeWorkloadAnalysis'] for flag in ('--section',name)] if args.counters_only else ['--set','full'])
             replay='application' if args.counters_only else 'kernel'
-            row=command('ncu-'+str(workers),[ncu,'--kernel-name-base','demangled','--kernel-name','regex:eccPacked131::walk','--launch-skip','1','--launch-count','1',*sections,'--replay-mode',replay,'--cache-control','all','--clock-control','none','--force-overwrite','--export',report,*argv],900,required=False)
+            selection=['--kernel-name-base','demangled','--kernel-name','regex:eccPacked131::walk','--launch-skip','1','--launch-count','1']
+            if args.range_only:
+                replay='app-range';selection=['--range-filter',':2:','--launch-count','1']
+                sections=[flag for name in ('SpeedOfLight','MemoryWorkloadAnalysis','ComputeWorkloadAnalysis') for flag in ('--section',name)]
+            row=command('ncu-'+str(workers),[ncu,*selection,*sections,'--replay-mode',replay,'--cache-control','all','--clock-control','none','--force-overwrite','--export',report,*argv],900,required=False)
             result['ncuProfiles'][str(workers)]={'returncode':row['returncode']}
             if row['returncode']==0 and report.with_suffix('.ncu-rep').exists():
                 command('ncu-raw-'+str(workers),[ncu,'--import',report.with_suffix('.ncu-rep'),'--page','raw','--csv'],300)
                 command('ncu-details-'+str(workers),[ncu,'--import',report.with_suffix('.ncu-rep'),'--page','details'],300)
             else:result['ncuProfiles'][str(workers)]['error']=row['raw'][-3000:]
-        if not args.counters_only:
+        if not (args.counters_only or args.range_only):
             stage('unprofiled geometry screen')
             # Each row completes the SAME 201,863,462,912 scalar updates. Smaller
             # grids run more launches. Different grids are distinct seed panels;

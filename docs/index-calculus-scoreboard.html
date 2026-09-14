@@ -785,11 +785,33 @@
       0.113 ms in the short diagnostic trace. Synchronization waits overlap GPU execution.
       Nsight Compute failed at kernel preparation in both full-set kernel replay and reduced-section
       application replay. No hardware-counter bottleneck is claimed; profiler durations are excluded from timings.</p>
+    <p>A further independent CUDA smoke workload passed CPU comparison but failed profiler preparation
+      in both kernel and application-range replay. After correcting a rejected CLI option, the ECC
+      range command returned zero with &ldquo;No ranges were profiled&rdquo;; the missing-report gate rejected it.
+      No usable hardware counters were obtained. Both attempts and two additional instrumented timelines are
+      retained in the <a href="../ecc2k130/benchmarks/goal28/range-summary.json">range diagnostic receipt</a>.</p>
     <p>Raw runner failures remain recorded. An offline archive audit revalidated the completed screen
       after its postrun bookkeeping failure. Source:
       <a href="../ecc2k130/benchmarks/goal28/profiling-summary.json">frozen measurement receipt</a>;
       <a href="../ecc2k130/GOAL28-RESULTS.md">report and raw evidence</a>.
       No default or production preset is promoted.</p>
+  </section>
+  <section aria-labelledby="goal28-occupancy-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-occupancy-result">Goal28: more resident warps did not improve throughput</h2>
+    <p><span class="chip">engineering</span> One G7 RTX PRO 4500, five alternating pairs per
+      workload after four excluded warmups. Each sample completes 201,863,462,912 scalar updates.
+      Field products stay at 5.3125/update, ratio 1.0; the generic-group boundary and exponent are unchanged.</p>
+    <table><thead><tr><th scope="col">Launch bound</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead>
+      <tbody><tr><td>MINBLOCKS=2 control</td><td>4.692014</td><td>1.000000</td><td>4.632696</td><td>1.000000</td><td>passed / control</td></tr>
+      <tr><td>MINBLOCKS=3</td><td>4.593011</td><td>0.978900</td><td>4.542281</td><td>0.980483</td><td>passed / rejected</td></tr></tbody></table>
+    <p>Registers decreased from 104 to 80 without spills; CUDA confirmed residency rose from two to three
+      blocks per SM. All ten timing pairs nevertheless favored the control. Cross-binary checkpoints
+      matched, and every DP34 multiset contained the same 5,149 records with zero drops.</p>
+    <p>Paired geometric speed ratios: 0.982453 benchmark, 0.980758 DP34. Exploratory 95% paired log-t
+      intervals: [0.974553, 0.990417] and [0.973004, 0.988573], assuming independent approximately normal
+      log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
+    <p>Source: <a href="../ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
   </section>
 </body>
 </html>
