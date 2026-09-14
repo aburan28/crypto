@@ -1,0 +1,20 @@
+{
+  "cold": {
+    "trials": 288,
+    "targets": 24,
+    "relation_certificates": 810,
+    "rejection_certificates": 890556,
+    "correctness_failures": 0,
+    "incident_excluded_cells": 1
+  },
+  "batch_queries": 32,
+  "all_relation_certificates": 826,
+  "all_rejection_certificates": 929262,
+  "correctness_failures": 0,
+  "source_and_input_hashes_match": true,
+  "raw_sha256": {
+    "raw.jsonl": "951420143943179b5a736e73767bfeb648503c69268df363e9211926135b11ac",
+    "continuation_raw.jsonl": "6df3fcf3df4cbc2213819e023d6e2c513109d6308b368e4dc617602f1c42089b",
+    "batch_raw.jsonl": "430a7d96403fdf4d99eecce0ed93f1398adf23d66d5229531abd5e4ec5991a02"
+  }
+}

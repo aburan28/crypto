@@ -1,0 +1,317 @@
+{
+  "rows": [
+    {
+      "variant": "bilinear-blocks",
+      "status": "complete",
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 10315694,
+        "multiplications": 655536,
+        "squarings": 8798,
+        "inversionCalls": 2104,
+        "curveAdditionCalls": 72,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 10980028
+      },
+      "selected_binary_words": 486006,
+      "field_api_phases": {
+        "setup": {
+          "additions": 351,
+          "multiplications": 480,
+          "squarings": 222,
+          "inversionCalls": 8,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 1053
+        },
+        "coefficient_setup": {
+          "additions": 420864,
+          "multiplications": 651264,
+          "squarings": 8192,
+          "inversionCalls": 2048,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 1080320
+        },
+        "block_rejection": {
+          "additions": 9794908,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 9794908
+        },
+        "partition_updates": {
+          "additions": 97902,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 97902
+        },
+        "leaf_solve": {
+          "additions": 397,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 397
+        },
+        "extraction_verification": {
+          "additions": 1272,
+          "multiplications": 3792,
+          "squarings": 384,
+          "inversionCalls": 48,
+          "curveAdditionCalls": 72,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 5448
+        }
+      },
+      "peak_cached_field_slots": 0,
+      "seconds": 10.752915800003393,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 18.908588059033217,
+      "mul_ratio_to_s3": 3.1607176435986326,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "reuse-batch-inverse",
+      "status": "complete",
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 10405574,
+        "multiplications": 87552,
+        "squarings": 2086,
+        "inversionCalls": 64,
+        "curveAdditionCalls": 72,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 10495212
+      },
+      "selected_binary_words": 486006,
+      "field_api_phases": {
+        "setup": {
+          "additions": 351,
+          "multiplications": 480,
+          "squarings": 222,
+          "inversionCalls": 8,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 1053
+        },
+        "coefficient_table_setup": {
+          "additions": 510744,
+          "multiplications": 76664,
+          "squarings": 1480,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 588888
+        },
+        "coefficient_batch_inverse": {
+          "additions": 0,
+          "multiplications": 6616,
+          "squarings": 0,
+          "inversionCalls": 8,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 6616
+        },
+        "block_rejection": {
+          "additions": 9794908,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 9794908
+        },
+        "partition_updates": {
+          "additions": 97902,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 97902
+        },
+        "leaf_solve": {
+          "additions": 397,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 397
+        },
+        "extraction_verification": {
+          "additions": 1272,
+          "multiplications": 3792,
+          "squarings": 384,
+          "inversionCalls": 48,
+          "curveAdditionCalls": 72,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 5448
+        }
+      },
+      "peak_cached_field_slots": 20736,
+      "seconds": 7.050304809999943,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 18.073691642700926,
+      "mul_ratio_to_s3": 0.422138755357978,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "reuse-circuit",
+      "status": "complete",
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 10405574,
+        "multiplications": 201768,
+        "squarings": 2086,
+        "inversionCalls": 2104,
+        "curveAdditionCalls": 72,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 10609428
+      },
+      "selected_binary_words": 486006,
+      "field_api_phases": {
+        "setup": {
+          "additions": 351,
+          "multiplications": 480,
+          "squarings": 222,
+          "inversionCalls": 8,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 1053
+        },
+        "coefficient_table_setup": {
+          "additions": 510744,
+          "multiplications": 76664,
+          "squarings": 1480,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 588888
+        },
+        "coefficient_lookup": {
+          "additions": 0,
+          "multiplications": 120832,
+          "squarings": 0,
+          "inversionCalls": 2048,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 120832
+        },
+        "block_rejection": {
+          "additions": 9794908,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 9794908
+        },
+        "partition_updates": {
+          "additions": 97902,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 97902
+        },
+        "leaf_solve": {
+          "additions": 397,
+          "multiplications": 0,
+          "squarings": 0,
+          "inversionCalls": 0,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 397
+        },
+        "extraction_verification": {
+          "additions": 1272,
+          "multiplications": 3792,
+          "squarings": 384,
+          "inversionCalls": 48,
+          "curveAdditionCalls": 72,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 5448
+        }
+      },
+      "peak_cached_field_slots": 20736,
+      "seconds": 8.26672962000157,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 18.270381787184213,
+      "mul_ratio_to_s3": 0.9728400538088051,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    {
+      "variant": "pair-invariants-s3",
+      "status": "complete",
+      "complete_queries": 8,
+      "verified_relations": 4,
+      "field_primitives": {
+        "additions": 341254,
+        "multiplications": 207401,
+        "squarings": 32035,
+        "inversionCalls": 2257,
+        "curveAdditionCalls": 2260,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 580690
+      },
+      "selected_binary_words": 0,
+      "field_api_phases": {
+        "setup": {
+          "additions": 319801,
+          "multiplications": 69749,
+          "squarings": 29755,
+          "inversionCalls": 1,
+          "curveAdditionCalls": 0,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 419305
+        },
+        "queries_and_verification": {
+          "additions": 21453,
+          "multiplications": 137652,
+          "squarings": 2280,
+          "inversionCalls": 2256,
+          "curveAdditionCalls": 2260,
+          "curveDoublingCalls": 0,
+          "fieldOperations": 161385
+        }
+      },
+      "peak_cached_field_slots": 0,
+      "seconds": 2.2577217020007083,
+      "equal_complete_work_to_s3": true,
+      "field_api_ratio_to_s3": 1.0,
+      "mul_ratio_to_s3": 1.0,
+      "common_operation_speedup": null,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    }
+  ],
+  "bound": {
+    "scope": "Complete frozen eight-target batch, changes only to coefficient preparation with identical rejection traversal.",
+    "unchanged_rejection_field_api_floor": 9794908,
+    "s3_total_field_api_calls": 580690,
+    "floor_over_s3_field_api_calls": 16.867705660507326,
+    "not_a_calibrated_cost_bound": true
+  }
+}

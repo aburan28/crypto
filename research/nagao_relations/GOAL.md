@@ -169,3 +169,27 @@ Symmetry alone is insufficient; the next hypothesis is reusing coefficient
 maps and elimination work across b values, charging all table/XOR costs.
 The original three-size cost goal, broad regression and full-DLP gates
 remain **unmet**.
+
+## Coefficient reuse — 2026-09-14
+
+The [complete reuse audit](reuse_01/RESULTS.md) verifies the quadratic
+interpolation identity, 288 matched cold cells and the frozen eight-target
+n30 d8 batch. All available relation and rejection certificates pass.
+An unresolved original runner stall is preserved and the affected S3 cell
+is excluded from conservative completion counts and cost ratios; lost
+post-maintenance records were rerun and separately identified.
+
+Batch inversion plus reuse lowers multiplications from 655,536 to 87,552,
+but field API calls only fall from 10,980,028 to 10,495,212. The strongest
+S3 baseline remains at 580,690 API calls. All four variants complete the
+same eight targets and four relations. These are uncalibrated components,
+not an end-to-end operation gain.
+
+The unchanged rejection traversal alone costs 9,794,908 field additions,
+16.8677 times the whole S3 API count. Coefficient-only tuning cannot cross
+that architecture-specific floor. The next frozen candidate caches nested,
+prefix-independent column spans while preserving the exact relaxation;
+its proof and falsification conditions are in [rank_01](rank_01/README.md).
+Coefficient preparation must also get cheaper before a 20% API saving
+against S3 is possible. The original calibrated three-size goal remains
+unmet.

@@ -11,7 +11,15 @@ The target repository is `aburan28/crypto`; the existing Semaev frontend remains
 the comparator. The frozen scope is
 [`experiments/nagao_relation_contract.json`](experiments/nagao_relation_contract.json).
 
-Latest checkpoint: [certified coefficient blocks](blocks_01/RESULTS.md) implement
+Latest audited checkpoint: [coefficient reuse](reuse_01/RESULTS.md) cuts the
+complete eight-target batch to 87,552 multiplications, but its 10,495,212 field
+API calls remain 18.0737 times the direct S3 total. The 288-cell cold audit
+preserves the interrupted-run incident and first-hit regressions. The
+[remaining rejection-work bound](reuse_01/BOUNDS_AND_NEXT.md) motivates the
+frozen [cached-span experiment](rank_01/README.md). No calibrated crossover
+has been established.
+
+Previous checkpoint: [certified coefficient blocks](blocks_01/RESULTS.md) implement
 the proposed block rejection, with 192 matched cold trials and an eight-target
 shared-setup follow-up. The bilinear circuit improves the old hybrid, but the
 direct S3 table remains the stronger enumeration baseline. Pruning helps n30,d8

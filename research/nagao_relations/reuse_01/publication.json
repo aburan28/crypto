@@ -8,5 +8,7 @@
   "original_continuation_local_source_commit": "b6a26b0a8702dc904c801cad78f77a3576e49cba",
   "original_continuation_published_source_commit": "3a717271ac95c8698f52d4bfdfa3dcc1a6fbd39f",
   "original_continuation_identical_source_tree": "5144cd09d396694ee12915451247f8afe7ce136e",
+  "recovered_run_source_commit": "833a7009299e4c4f9138934e8ca66989cf1e2827",
+  "recovered_run_source_tree": "05a9e130351b888496a9a731e81ed5d864311bf4",
   "note": "Workspace maintenance removed the checkout after the original continuation finished and the batch started. The original 198 cold records survive in the verified Git blob; lost continuation and batch evidence must be rerun and separately identified. No unavailable output is counted."
 }
