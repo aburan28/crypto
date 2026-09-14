@@ -3587,7 +3587,7 @@ pub fn groebner_decompose(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, SolveStats::default()),
     };
-    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
         Some(sys) => sys,
         None => return (None, SolveStats::default()),
     };
@@ -3834,7 +3834,7 @@ pub fn sat_decompose_with(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, stats),
     };
-    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
         Some(sys) => sys,
         None => return (None, stats),
     };

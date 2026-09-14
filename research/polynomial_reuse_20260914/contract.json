@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "classification": "engineering experiment; no advance claimed",
+  "base_revision": "01fa842",
+  "reference": "unchanged target-specific S3 encoding and existing solver",
+  "parent_contract": "../index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "equivalent_suite_reason": "Native Boolean S3-chain encoding changes do not affect the external WDSat S4 executable/corpus. Run matched native systems, exhaustive truth, SAT and F4, plus complete toy DLP attempts.",
+  "floor": "With reusable fraction f and avoided fraction h, ideal speedup <= 1/(1-f*h), before cache costs. Exact target replay produces no new independent relation.",
+  "success": "Every assignment set and verified DLP outcome matches baseline; preprocessing template reused on fresh targets. Parameterized route promoted only if setup plus specialization plus complete solving improves total calibrated cost on holdouts.",
+  "abandon": "Any root loss, spurious relation, unbounded basis growth, or absent amortized benefit blocks promotion; retain timeouts and regressions.",
+  "stages": {"cases": [[3,1,2],[3,2,2],[5,2,2],[7,3,2],[9,3,2],[3,1,3],[5,2,3]], "targets": "all field values for n<=5; 32 fixed unique values otherwise; even sequence positions development, odd positions holdout", "repetitions": 3, "variants": ["baseline", "template", "parameterized"], "per_process_timeout_seconds": 30, "address_space_mib": 2048},
+  "dlp": {"degrees": [7,9], "solvers": ["groebner","sat"], "seeds": [101,202,307,409], "known_log": 5, "batch": 1, "variants": ["off","preprocess-local","both-local","both-redis-cold","both-redis-warm"], "per_process_timeout_seconds": 30},
+  "metrics": ["template_setup_ns", "parameter_basis_setup_ns", "serialized_bytes", "instantiate_ns", "solve_ns", "f4_root_elimination_word_xors", "sat_conflicts", "verification_ns", "cache_counts", "full_dlp_elapsed_seconds"],
+  "counter_limitations": "XOR and conflict counters are partial and not interchangeable. Setup cost included in cold timing. Total calibrated operations, S, rho ratio, floor ratio and exponent are null; no end-to-end speedup claim without calibration and matched verified completions.",
+  "redis": "Local dedicated Redis for validation; AWS ElastiCache unprovisioned. TTL 86400 seconds, 4 MiB max serialized value, local 32 MiB per thread. Benchmarks use fresh namespaces and cold/new-process replay.",
+  "parameter_method": "Boolean target bits, never a rational-function parameter field. Compute Boolean Buchberger output once, specialize every target, solve again; check complete root sets against original equations. No claim the specialized output is already a Groebner basis. No lookup table of pre-solved target answers. Experimental only, not enabled in production path."
+}
