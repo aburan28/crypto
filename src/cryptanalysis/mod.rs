@@ -131,6 +131,7 @@ pub mod fght_snfs;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
 pub mod groebner_f4;
+pub mod groebner_cache;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
