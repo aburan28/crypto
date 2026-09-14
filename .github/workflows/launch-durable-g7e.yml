@@ -1,0 +1,39 @@
+name: Launch durable G7e devhost
+
+on:
+  push:
+    branches:
+      - infra/durable-g7e-devhost
+    paths:
+      - '.github/workflows/launch-durable-g7e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: infra/durable-g7e-devhost
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Launch or start durable G7e host
+        working-directory: ecc2k130/aws/devhost
+        run: |
+          set -euo pipefail
+          chmod +x devhost.sh bootstrap.sh
+          ./devhost.sh up
+
+      - name: Print host status
+        working-directory: ecc2k130/aws/devhost
+        run: ./devhost.sh status
