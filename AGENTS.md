@@ -171,6 +171,11 @@ Every index-calculus performance iteration must use the
 before claiming a gain. The accepted target is
 `research/index_calculus_baseline_20260914/regression/results/baseline_v2/`.
 
+Every incremental performance change must include a saved baseline/candidate
+benchmark comparison, even when it regresses or no gain is claimed. Rerun
+the frozen inputs and include fresh holdouts; a candidate-only run does not
+complete an iteration. The equivalent-suite exception below still applies.
+
 - **Run the reference and candidate.** Follow the suite's `run.py` and
   `compare.py` commands with the full 60 inputs, both configurations and all
   three repetitions. Preserve the contract, input hashes, counter definitions
