@@ -10,6 +10,7 @@ fake, and the two real tiers are tested against injected clients.
 import json
 import logging
 from pathlib import Path
+import subprocess
 import sys
 import unittest
 
@@ -644,6 +645,51 @@ class FromEnvTests(unittest.TestCase):
 
 
 # -- accessors ------------------------------------------------------------
+
+class LazyImportTests(unittest.TestCase):
+    """`redis` and `boto3` must stay optional, whatever the machine ships.
+
+    Asserting they are *absent* is not a check this can own -- the GitHub
+    runner image ships boto3, and what is installed will drift.  The property
+    that actually matters is that importing this package, and building a
+    store from configuration that names both tiers, pulls in neither module.
+    A clean subprocess is the only place that can be observed honestly, since
+    by the time a test runs some other import may already have loaded them.
+    """
+
+    # Note what is and is not asserted.  Importing the package and building
+    # both network tiers from configuration must not load either module.
+    # *Using* one legitimately does -- that is where the lazy import lives --
+    # so the round trip below runs against an L1-only store instead.
+    PROBE = """
+import sys
+sys.path.insert(0, {repo!r})
+import cache
+
+store = cache.TieredStore.from_env({{
+    "INDEXCALC_REDIS_URL": "rediss://primary:6379",
+    "INDEXCALC_S3_BUCKET": "artifacts",
+}})
+assert store.tier("l2") is not None and store.tier("l3") is not None
+eager = [name for name in ("redis", "boto3") if name in sys.modules]
+assert not eager, f"eagerly imported: {{eager}}"
+
+local = cache.TieredStore.from_env({{}})
+key = cache.CacheKey.build("sumpoly", cache.curve_fingerprint(
+    {{"field": {{"kind": "binary", "degree": 9, "polynomial_terms": [0, 1, 9]}},
+      "a": "0", "b": "1"}}), n=5)
+assert local.get_or_compute(key, lambda: "v", cache.json_codec()) == "v"
+assert local.get_or_compute(key, lambda: "w", cache.json_codec()) == "v"
+print("clean")
+"""
+
+    def test_importing_the_package_imports_neither_optional_dependency(self):
+        probe = self.PROBE.format(repo=str(REPO))
+        done = subprocess.run([sys.executable, "-c", probe],
+                              capture_output=True, text=True)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual(done.stdout.strip(), "clean")
+
 
 class AccessorTests(unittest.TestCase):
     def setUp(self):

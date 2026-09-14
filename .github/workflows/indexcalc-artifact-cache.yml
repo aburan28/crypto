@@ -20,14 +20,10 @@ jobs:
       - uses: actions/checkout@v4
       # No dependency install step on purpose: `redis` and `boto3` are
       # imported lazily inside the tier that needs them, so the package and
-      # its tests must run on a machine that has neither.  If this job ever
+      # its tests must run on a machine that has neither.  The runner image
+      # happens to ship boto3, so that property is asserted where it can be
+      # asserted honestly -- in the suite, which checks in a clean subprocess
+      # that importing `cache` pulls in neither module.  If this job ever
       # needs a pip install, a lazy import has become an eager one.
-      - name: Confirm the optional dependencies really are absent
-        run: |
-          python3 - <<'PY'
-          import importlib.util
-          for name in ("redis", "boto3"):
-              assert importlib.util.find_spec(name) is None, f"{name} is installed; this job no longer tests the lazy-import path"
-          PY
       - name: Run the cache tests
         run: python3 cache/test_cache.py
