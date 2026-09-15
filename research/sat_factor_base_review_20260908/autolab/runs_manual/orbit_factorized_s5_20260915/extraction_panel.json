@@ -24,7 +24,11 @@
     "n53_parallel_nogoods": "rayon scan+expand; planted n53 SAT with 39856 nogoods, pair_table=0, install~52s (was sequential hang >6min)",
     "lazy_roots_n53": "lazy_pair_roots+nogoods planted n53 still search-heavy; aborted >13min \u2014 keep full S3 for CDCL",
     "phase_restart_shots": "KIC_PHASE_RESTART_SHOTS multi-shot scramble of saved phases; planted n13 SAT; unrestricted n13 finds models; n19 still 0 models across seeds{1,7,11} under 80k\u2013120k",
-    "binary_l8_pairs_baseline": "prior claim draft claim-check PASS (schema only); not ledger promotion; not remeasured this tick"
+    "binary_l8_pairs_baseline": "prior claim draft claim-check PASS (schema only); not ledger promotion; not remeasured this tick",
+    "smaller_eta_n19": "eta 1/16 shrinks to 1 orbit col / 38 pts; planted SAT; unrestricted still 0 models @80k phase4",
+    "shift_then_reps": "KIC_ORBIT_BRANCH_ORDER=shift_then_reps: n13 finds models; n19 still 0 @80k (eta 1/2 and 1/16)",
+    "n23_rung": "planted n23 SAT pair_table=0; unrestricted UNKNOWN 0 models @60k phase4",
+    "n17_note": "n=17 admitted in CLI assert but KoblitzCurve::new(a=0,17) fails \u2014 not a usable rung here"
   },
   "rungs": [
     {
@@ -516,8 +520,161 @@
       "phase_restart_shots_used": 4,
       "seed": 11,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "planted_eta1_16_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "models_examined": 1,
+      "conflicts": 25,
+      "solve_ms": 8.75475,
+      "eta": {
+        "denominator": 16,
+        "numerator": 1
+      },
+      "orbit_columns": 1,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 1,
+      "evidence_class": null
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_eta1_4_pairthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 22774.81225,
+      "eta": {
+        "denominator": 4,
+        "numerator": 1
+      },
+      "orbit_columns": 2,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_eta1_8_pairthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 22642.260125,
+      "eta": {
+        "denominator": 8,
+        "numerator": 1
+      },
+      "orbit_columns": 2,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_eta1_16_pairthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 21651.051,
+      "eta": {
+        "denominator": 16,
+        "numerator": 1
+      },
+      "orbit_columns": 1,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_eta1_2_shiftthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 22561.895959,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "orbit_columns": 2,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_eta1_16_shiftthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 21514.02275,
+      "eta": {
+        "denominator": 16,
+        "numerator": 1
+      },
+      "orbit_columns": 1,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_shiftthen_nogoods_phase2_40k",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "models_examined": 1,
+      "conflicts": 20000,
+      "solve_ms": 1920.0627080000002,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "orbit_columns": 1,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 1,
+      "evidence_class": null
+    },
+    {
+      "n": 23,
+      "mode": "planted_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "models_examined": 1,
+      "conflicts": 61,
+      "solve_ms": 25.382666,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "orbit_columns": 5,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 1,
+      "evidence_class": null
+    },
+    {
+      "n": 23,
+      "mode": "unrestricted_pairthen_nogoods_phase4_60k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 60000,
+      "solve_ms": 23865.191209,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "orbit_columns": 5,
+      "pair_table_entries": 0,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "n19 cliff survives phase-restart multi-shot. Next: alternate decision heuristics / smaller-eta orbit bases for unrestricted search; keep pair_table=0. No ledger promotion.",
-  "updated_at": "2026-09-15T14:12:46Z"
+  "next": "Unrestricted cliff starts by n19 (n13 open, n23 also closed under tested budgets). Smaller eta and shift_then_reps do not unlock n19. Next: encoding/decision changes beyond branch polarity, or accept censored cliff and push other ledger beats without promotion.",
+  "updated_at": "2026-09-15T14:20:28Z"
 }

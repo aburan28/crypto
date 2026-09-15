@@ -2235,6 +2235,14 @@ fn encode_balanced_s5_frobenius_orbits(
                 (frobenius_offset + summand * frobenius_width + index + 1) as u32
             }));
         }
+    } else if branch_order == "shift_then_reps" {
+        // Decide Frobenius shifts before orbit representatives.
+        priorities.extend(
+            (0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32),
+        );
+        priorities.extend((0..representative_variables).map(|index| {
+            (representative_offset + index + 1) as u32
+        }));
     } else {
         priorities.extend((0..representative_variables).map(|index| {
             (representative_offset + index + 1) as u32

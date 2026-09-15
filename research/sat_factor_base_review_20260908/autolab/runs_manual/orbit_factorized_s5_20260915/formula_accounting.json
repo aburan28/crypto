@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T14:05:01Z",
+  "updated_at": "2026-09-15T14:20:28Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -55,6 +55,8 @@
     "All listed encodings keep pair_table_entries=0 and pair_selector_variables=0.",
     "n53+nogoods install fixed via rayon relative-state scan then clause expand: ~52s scan + ~3ms expand; 376 exceptional states \u2192 39856 nogood clauses.",
     "Planted n53 with pair_then_pair+parallel nogoods: SAT, valid_x_tuples=1, invalid_group_lifts=0, pair_table_entries=0.",
-    "Lazy-pair-roots+nogoods at n53 planted still CDCL-heavy under 200k conflicts (aborted after >13min); prefer full S3 over half-trace selectors."
+    "Lazy-pair-roots+nogoods at n53 planted still CDCL-heavy under 200k conflicts (aborted after >13min); prefer full S3 over half-trace selectors.",
+    "n19 eta=1/16 yields orbit_columns=1, factor_base_points=38 vs eta=1/2 columns=2 points=76; pair_table=0 either way.",
+    "n17 is not constructible for a=0 in this KoblitzCurve table despite CLI allow-list."
   ]
 }
