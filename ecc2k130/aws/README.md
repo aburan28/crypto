@@ -130,9 +130,31 @@ about 27 B/s.
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
    once with an administrator profile (`AWS_PROFILE=admin ./infra.sh`) or
    create the role by hand with the policy printed in the script.
+
+   Where neither is possible, `WORKER_KEY_ID`/`WORKER_KEY_SECRET` put an
+   access key in the worker user-data and skip IAM altogether:
+
+   ```bash
+   WORKER_KEY_ID=AKIA... WORKER_KEY_SECRET=... SYNC=0 ./infra.sh
+   ```
+
+   The key is then readable by anyone who can read the launch template or
+   call `ec2:DescribeInstanceAttribute`, so use one scoped to the campaign
+   bucket and rotate it when the campaign ends. `SYNC=0` leaves
+   `s3://bucket/aws/` untouched, which is what a live campaign wants: the
+   copies there are what the running workers were started from, and the
+   next instance to boot downloads them.
 3. **Region.** G7e is offered in us-west-2, us-east-1 and us-east-2 (not
    eu-west-1). Spot pools differ by AZ by 2–3×; the fleet spreads over every
-   default subnet and lets `price-capacity-optimized` choose.
+   default subnet and lets `price-capacity-optimized` choose. Prefer the
+   bucket's own region: a worker elsewhere pays cross-region transfer on
+   every point it uploads.
+
+   The vCPU quota, not the GPU count, is what binds, and `g7e.2xlarge` is
+   the only size that spends 8 vCPUs per GPU (the 24xlarge spends 24). With
+   a spot quota of *v* vCPUs, cap the fleet at `v/8` GPUs and restrict
+   `TYPES` to `g7e.2xlarge`, or a single larger instance will consume the
+   quota for a fraction of the GPUs.
 4. **Docker on the build host.** The Deep Learning Base OSS Nvidia Driver GPU
    AMI (Ubuntu 24.04, driver 580, G7e supported) ships Docker, the NVIDIA
    container toolkit, the AWS CLI and Python 3, which is all the fleet needs.
