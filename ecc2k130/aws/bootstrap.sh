@@ -74,6 +74,8 @@ if [ -x test-packed-cuda ]; then
 fi
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# WORKER_CRED_ENV is set by the user-data preamble infra.sh prepends when no
+# instance profile is available: without it the units have no credential.
 cat > /etc/ecc2k130.env <<EOF
 ECC_BUCKET=$BUCKET
 ECC_TABLE=$TABLE
@@ -81,6 +83,7 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+${WORKER_CRED_ENV:-}
 EOF
 
 cat > /etc/systemd/system/ecc2k130-worker@.service <<'EOF'
