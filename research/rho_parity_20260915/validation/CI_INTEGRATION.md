@@ -17,6 +17,10 @@ GitHub checks exposed these compatibility problems:
   verified, and smoke evidence remains ineligible for scientific promotion.
   Fetch the separately pinned Stage-24 helper dependencies before its offline
   build, since its archived `cc` version differs from the current root lock.
+- The compact-evidence synthetic fixture replaces the repository root and
+  archived lock. Also rebind its smoke lock to that same synthetic archive;
+  otherwise it accidentally refers to a file outside the fixture. This keeps
+  the original archive contract and both reviewed verifier source pins intact.
 - Two older examples explicitly initialized every index-calculus option but
   omitted `weil_charts`. Set it to `None` for their existing SAT strategy.
 - The copied Pages scoreboard has no adjacent research directory. Link its
@@ -26,7 +30,8 @@ GitHub checks exposed these compatibility problems:
 
 Local checks: all examples and tests type-check with the compatible lock;
 all 17 site-build tests, 13 Stage-21 custody tests and 12 Stage-23 custody
-tests pass. All eight Rust producer tests pass. New lock tests preserve the production pin and reject unbound
+tests pass. All 11 compact-evidence adversarial tests and all eight Rust
+producer tests pass. New lock tests preserve the production pin and reject unbound
 workspace locks. Build/check logs, including the initial failures, are kept
 in this directory. GitHub CI is rerun on the integration commit.
 
@@ -36,3 +41,5 @@ Initial failing runs: [site](https://github.com/aburan28/crypto/actions/runs/349
 [Stage 38](https://github.com/aburan28/crypto/actions/runs/34942858622),
 [SOTA reproduction](https://github.com/aburan28/crypto/actions/runs/34942859229),
 [workflow syntax](https://github.com/aburan28/crypto/actions/runs/34942845669).
+The follow-up fixture failure is retained in
+[Stage-23 run 34944284564](https://github.com/aburan28/crypto/actions/runs/34944284564).
