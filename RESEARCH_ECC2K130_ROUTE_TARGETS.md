@@ -204,9 +204,10 @@ above, pricing **every** phase: setup, target generation, encoding,
 failed attempts, solving, lifting, verification, relation-matrix work
 and final scalar recovery.
 
-**Primary metric.** The **ratio to the floor**, `Λ · n / m`, over the
-ladder — not a raw slope. §3 says progress is the ratio, and a raw
-slope does not measure it here: a method that tracks the `Λ = m/n` floor
+**Primary metric.** The **ratio to the floor**, `Λ · n / m`, fitted as
+the least-squares slope of `log₂(Λ · n / m)` against `n` — not a raw
+slope of `log₂(total)`. §3 says progress is the ratio, and a raw slope
+does not measure it here: a method that tracks the `Λ = m/n` floor
 *exactly* — a constant-factor oracle riding the known Frobenius saving,
 which is pure engineering — already produces a `log₂(total)`-versus-`n`
 slope of
@@ -219,12 +220,13 @@ slope of
 
 so any fixed slope threshold near `0.95` returns a different verdict
 depending on which rungs are used. `Λ · n / m` is `1` on the floor by
-construction, at every rung, on every subset.
+construction, at every rung and on every subset, so its slope has a
+threshold of zero rather than a judgement call.
 
-**Falsifier for "advance".** `Λ · n / m` flat in `n` — the 350× is a
-constant, the class is **engineering**, and it is labelled so on the
-scoreboard rather than reported as progress. An advance requires
-`Λ · n / m` *falling* with `n`, fitted over four or more rungs.
+**Falsifier for "advance".** A slope consistent with zero — the 350× is
+a constant, the class is **engineering**, and it is labelled so on the
+scoreboard rather than reported as progress. An **advance** requires the
+ratio to *decrease* with `n`, fitted over four or more rungs.
 
 **Inadmissible.** Leaving linear algebra unpriced. That is the mistake
 `AGENTS.md` §5 records from the residual-walk thread, where a `2^96`
