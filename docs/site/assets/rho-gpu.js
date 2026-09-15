@@ -123,7 +123,7 @@
       return;
     }
     if (m.type === "stopped") {
-      if (toggle.checked) return;   // a restart is already on its way
+      if (toggle.checked) { start(); return; }
       set("rho-rate", m.rate > 0 ? rate(m.rate) + " at the end" : "—");
       /* A solved instance stops too; "stopped" must not overwrite the answer. */
       if (!finished) set("rho-state", "stopped", "");
@@ -168,8 +168,6 @@
   document.addEventListener("visibilitychange", function () {
     if (worker && toggle.checked) worker.postMessage({ type: "pause", on: shouldPause() });
   });
-
-  window.addEventListener("pagehide", function () { if (worker) worker.postMessage({ type: "stop" }); });
 
   startWorker();
 })();
