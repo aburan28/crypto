@@ -13,6 +13,9 @@
 #
 # Variables (all optional):
 #   AWS_DEFAULT_REGION  us-west-2        STACK     ecc2k130
+#           The region provisioned, which need not be the bucket's: run this
+#           once per region to put a pool wherever quota or capacity is, and
+#           the workers are pointed at the bucket's region either way.
 #   BUCKET  $STACK-<account>
 #   TABLE   DynamoDB table for slot leases; empty (default) keeps slots in
 #           the bucket as S3 objects with conditional writes
@@ -34,7 +37,17 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+# The CLI reads AWS_REGION before AWS_DEFAULT_REGION, so the variable this
+# script documents is not necessarily the one it obeys: with AWS_REGION left
+# over in the environment, `AWS_DEFAULT_REGION=us-east-1 ./infra.sh` writes a
+# us-east-1 launch template into the region AWS_REGION names, over whatever
+# fleet is running there.  Pin both to one value and say so when they
+# disagreed, because the wrong answer here is silent and it is a live fleet.
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-${AWS_REGION:-us-west-2}}
+if [ -n "${AWS_REGION:-}" ] && [ "$AWS_REGION" != "$AWS_DEFAULT_REGION" ]; then
+    echo "AWS_REGION=$AWS_REGION ignored; AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION is what this run uses" >&2
+fi
+export AWS_REGION=$AWS_DEFAULT_REGION
 STACK=${STACK:-ecc2k130}
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 BUCKET=${BUCKET:-$STACK-$ACCOUNT}
@@ -96,8 +109,24 @@ else
     echo "created s3://$BUCKET"
 fi
 
+# Everything a worker asks AWS for is in the bucket, and the bucket has one
+# region wherever the instance runs.  A pool in a second region therefore
+# still points its workers at the bucket's region: sign for the region the
+# template happens to live in and the first GetObject fails.
+CAMPAIGN_REGION=$(aws s3api get-bucket-location --bucket "$BUCKET" --query LocationConstraint --output text 2>/dev/null || echo "$AWS_DEFAULT_REGION")
+case "$CAMPAIGN_REGION" in None|null|"") CAMPAIGN_REGION=us-east-1 ;; esac
+if [ "$CAMPAIGN_REGION" != "$AWS_DEFAULT_REGION" ]; then
+    echo "workers here will talk to $CAMPAIGN_REGION, where the bucket is, not $AWS_DEFAULT_REGION"
+fi
+
 # ---- slot registry -------------------------------------------------------
 if [ -n "$TABLE" ]; then
+    if [ "$CAMPAIGN_REGION" != "$AWS_DEFAULT_REGION" ]; then
+        # One region reaches the table, the other reaches the bucket, and a
+        # worker configures one region.  S3 slots have no such split.
+        echo "TABLE lives in $AWS_DEFAULT_REGION but the bucket is in $CAMPAIGN_REGION; use the S3 slot registry (TABLE empty) for a pool outside the bucket's region" >&2
+        exit 1
+    fi
     if aws dynamodb describe-table --table-name "$TABLE" >/dev/null 2>&1; then
         echo "table $TABLE exists"
     else
@@ -176,7 +205,7 @@ echo "AMI $AMI ($(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].
 
 # ---- launch template -----------------------------------------------------
 UD="${TMPDIR:-/tmp}/ecc-userdata.sh"
-sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" -e "s/__REGION__/$AWS_DEFAULT_REGION/g" \
+sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" -e "s/__REGION__/$CAMPAIGN_REGION/g" \
     bootstrap.sh > "$UD"
 # In credentials mode the key is written before bootstrap.sh runs, and the
 # paths are handed to bootstrap.sh so the systemd units, which read only
@@ -193,7 +222,7 @@ if [ -n "$WORKER_KEY_ID" ]; then
         echo 'chmod 600 /root/.aws/credentials'
         echo "cat > /root/.aws/config <<'CFG'"
         echo '[default]'
-        echo "region = $AWS_DEFAULT_REGION"
+        echo "region = $CAMPAIGN_REGION"
         echo 'CFG'
         echo 'export HOME=/root'
         echo 'export AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials'

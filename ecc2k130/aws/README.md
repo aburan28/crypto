@@ -15,7 +15,12 @@ Nothing in the C++/CUDA client changes. The binary is the audited RTX PRO
 2, 192,512 workers, every packed arithmetic option, CUDA 13.0), built for
 `sm_120`. EC2 **G7e** instances carry exactly that GPU, the RTX PRO 6000
 Blackwell Server Edition, so the measured 6.9 B iterations/s per GPU should
-carry over; the pilot below measures it rather than assuming it.
+carry over; the pilot below measures it rather than assuming it. **G7**
+carries the RTX PRO 4500 Blackwell, a smaller part of the same `sm_120`
+architecture: the published binary runs there unchanged — the whole GPU
+arithmetic fixture passes on it, including the planted discrete log — and
+walks at 4.9 B iterations/s against 14.5 on a G7e (measured 2026-09-15 at
+`workers` 385,024, batch 16).
 
 ## The numbers that decide the plan
 
@@ -141,6 +146,32 @@ about 27 B/s.
    group below is the response — it keeps asking and fills when a pool
    frees up — so check capacity with a single launch attempt before
    concluding that a fleet is misconfigured.
+
+   `ec2 get-spot-placement-scores` puts a number on that before a group is
+   sized. It scored g7e.2xlarge in us-west-2 at 1/10 and g7.2xlarge at 3/10
+   on 2026-09-15, which is why the g7 pool exists: the same spot vCPU buys a
+   GPU that can actually be launched.
+
+   Because the quota is per region and spot GPU quotas start at zero, the
+   spot budget is usually one region's number — 32 vCPUs, four 2xlarge
+   instances, in this account. Two groups sharing it need an explicit split,
+   since neither can see the other: give the faster GPU the larger target
+   and the slower one only what is left, or the cheap pool will take the
+   whole budget and lock the fast one out of every launch.
+
+   The way past one region's number is another region, and the campaign
+   does not care where a walker runs: a slot is claimed over S3, so a
+   second region is `infra.sh` once more and a group. us-east-1 went from
+   zero to 32 spot vCPUs on 2026-09-15 and took four g7.2xlarge spot
+   instances immediately, +19.5 B it/s on a 71.5 B it/s fleet, while
+   us-west-2 still had 16 spot vCPUs it could not spend on a g7e. Two
+   things differ from the first region. The workers' own region stays the
+   *bucket's* — every call they make is against the campaign bucket, and
+   `infra.sh` reads that off the bucket rather than assuming the region it
+   is provisioning. And a GPU type is sold in a subset of a region's zones
+   (g7e in two of Virginia's six, g7 in four), so a group spanning the
+   region fails most launches with `InvalidFleetConfiguration`; `fleet.sh`
+   derives the zones from `TYPES`.
 2. **IAM.** `infra.sh` creates a role and instance profile for the workers
    (S3 bucket read/write, SSM). The `adam` user could not list IAM or use
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
@@ -217,7 +248,35 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s p
 #    Keep every type in TYPES at one GPU and the per-GPU cap stays meaningful;
 #    a cap under the on-demand price is what stops a thin spot pool from
 #    costing more than on-demand for the same GPU.
-
+#
+# 4b. a second pool, its own group, same launch template (BACKEND=asg)
+#    ASG=ecc2k130-g7 BACKEND=asg TYPES=g7.2xlarge ./fleet.sh up 4 --on-demand 4
+#    Target above the on-demand base is spot, so `scale 6` on a base of 4
+#    asks for two spot GPUs and keeps four on-demand ones; that is how the
+#    g7 pool takes spot vCPUs the g7e pool cannot fill without ever taking
+#    more than its share.  `policy --on-demand 0` converts the whole pool to
+#    spot as its instances rotate, which is the move once spot quota grows.
+#    G7 and G7e share both G/VT quotas, so the two pools are how the quotas
+#    get spent where they are worth most: spot on G7e, which is the faster
+#    GPU per vCPU, and idle on-demand quota on G7.  An all-on-demand group
+#    (base = target) touches no spot quota, so the g7e group keeps all of it.
+#    Per iteration, at us-west-2 prices on 2026-09-15 and the rates above:
+#    g7e spot $0.09, g7e on-demand $0.23, g7 spot $0.16, g7 on-demand $0.51
+#    per B it/s-hour.  G7 earns its place on spot, or on on-demand quota that
+#    G7e capacity cannot absorb; it is the most expensive iteration otherwise.
+#
+# 4c. a pool in a second region, once one region's quota is spent
+#    AWS_DEFAULT_REGION=us-east-1 SYNC=0 KEY_NAME=... ./infra.sh
+#    AWS_DEFAULT_REGION=us-east-1 BACKEND=asg TYPES=g7e.2xlarge,g7.2xlarge \
+#        ./fleet.sh up 4
+#    SYNC=0 is what makes this safe against a running campaign: the region
+#    gets its own security group and launch template, and the bucket keeps
+#    the worker.py and campaign.json the live fleet is already on.  Slots are
+#    claimed over S3, so the new region's workers take released slots and
+#    resume their checkpoints like any other.  Ask for both GPUs unless one
+#    is known to have capacity: on 2026-09-15 g7e was unfulfillable on spot
+#    in both regions and the four launches came back g7.
+#
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
@@ -237,6 +296,12 @@ Change `restartHours`, `uploadEvery` or `verify` freely. Never change
 any slot exists: the first four make every existing checkpoint unloadable
 (each slot would be retired and its in-flight work lost), the last two break
 the collision guarantee. Start a new bucket for a different geometry.
+
+Holding the geometry fixed across GPU models is what makes a mixed fleet
+work. On 2026-09-15 a G7e spot worker took its interruption notice,
+checkpointed slot 5 and released it; a G7 worker claimed the free slot and
+resumed that RTX PRO 6000 checkpoint at iteration 16,830,464 on an RTX PRO
+4500. A geometry tuned per device would have cost that slot instead.
 
 `verify` is 0 for production: `--verify N` replays N reported points through
 the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk

@@ -9,6 +9,7 @@
 #   ./fleet.sh policy                re-apply TYPES to a running group (BACKEND=asg)
 #   ./fleet.sh policy --on-demand 1  ...and hold one GPU on-demand (BACKEND=asg)
 #   ./fleet.sh down                  delete the fleet and terminate its instances
+#   ASG=ecc2k130-g7 ./fleet.sh up 4  a second pool in its own group (BACKEND=asg)
 #
 # The fleet is `maintain`: an interrupted spot instance is replaced, the new
 # one claims the released slot and resumes its checkpoint from S3.  Instance
@@ -17,7 +18,7 @@
 # keeps a large fleet running when one pool empties.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
-# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none), BACKEND.
+# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none), BACKEND, ASG.
 #
 # BACKEND=fleet (default) uses one EC2 Fleet.  BACKEND=asg does the same job
 # with an Auto Scaling group, for accounts where EC2 Fleet is unavailable:
@@ -29,23 +30,38 @@
 # instance is still replaced.  The one difference that matters: the spend cap
 # is per instance rather than per fleet, so `asc` requires a single entry in
 # TYPES for MAX_SPOT_PER_GPU_HOUR to be meaningful.
+#
+# ASG names the group, so two pools can run side by side in one region on one
+# launch template: the campaign has two GPUs worth buying, and they compete for
+# different quotas.  A g7e pool on spot and a g7 pool on on-demand is the case
+# this exists for -- one group per purchase model and per GPU, each scaled and
+# retyped without touching the other.
 
 set -euo pipefail
 cd "$(dirname "$0")"
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+# AWS_REGION wins over AWS_DEFAULT_REGION in the CLI, so pin both: a group
+# created in the region a leftover variable names, rather than the one asked
+# for, spends the wrong quota and is invisible to the operator watching the
+# other region (see the same note in infra.sh).
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-${AWS_REGION:-us-west-2}}
+if [ -n "${AWS_REGION:-}" ] && [ "$AWS_REGION" != "$AWS_DEFAULT_REGION" ]; then
+    echo "AWS_REGION=$AWS_REGION ignored; AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION is what this run uses" >&2
+fi
+export AWS_REGION=$AWS_DEFAULT_REGION
 STACK=${STACK:-ecc2k130}
 LT=$STACK-worker
 TYPES=${TYPES:-g7e.2xlarge,g7e.4xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge}
 FLEET_FILE=.fleet-id-$AWS_DEFAULT_REGION
 BACKEND=${BACKEND:-fleet}
-ASG=$STACK-workers
+ASG=${ASG:-$STACK-workers}
 
 gpusOf() {
     case "$1" in
-        g7e.2xlarge|g7e.4xlarge|g7e.8xlarge) echo 1 ;;
-        g7e.12xlarge) echo 2 ;;
-        g7e.24xlarge) echo 4 ;;
-        g7e.48xlarge) echo 8 ;;
+        # g7 (RTX PRO 4500) and g7e (RTX PRO 6000 Server) share one size ladder.
+        g7.2xlarge|g7.4xlarge|g7.8xlarge|g7e.2xlarge|g7e.4xlarge|g7e.8xlarge) echo 1 ;;
+        g7.12xlarge|g7e.12xlarge) echo 2 ;;
+        g7.24xlarge|g7e.24xlarge) echo 4 ;;
+        g7.48xlarge|g7e.48xlarge) echo 8 ;;
         *) aws ec2 describe-instance-types --instance-types "$1" --query 'InstanceTypes[0].GpuInfo.Gpus[0].Count' --output text ;;
     esac
 }
@@ -58,8 +74,25 @@ fleetId() {
 
 defaultSubnets() {
     VPC=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
-    aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
-        --query 'Subnets[].SubnetId' --output text
+    all=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
+          --query 'Subnets[].SubnetId' --output text)
+    # A GPU type is often sold in a subset of a region's zones -- g7e is in two
+    # of Virginia's six -- and a group spanning the rest fails every launch it
+    # tries there with InvalidFleetConfiguration, which reads like a broken
+    # template rather than a zone that never had the instance.  Keep the zones
+    # that offer something in TYPES.  If the offerings cannot be read, span
+    # everything and let the launches say so, as they did before.
+    zones=$(aws ec2 describe-instance-type-offerings --location-type availability-zone \
+            --filters "Name=instance-type,Values=$TYPES" \
+            --query 'InstanceTypeOfferings[].Location' --output text 2>/dev/null | tr '[:space:]' ' ' || true)
+    [ -z "$zones" ] && { echo "$all"; return; }
+    keep=
+    for s in $all; do
+        az=$(aws ec2 describe-subnets --subnet-ids "$s" --query 'Subnets[0].AvailabilityZone' --output text)
+        case " $zones " in *" $az "*) keep="$keep $s" ;; esac
+    done
+    [ -z "$keep" ] && { echo "$all"; return; }
+    echo "${keep# }"
 }
 
 asgExists() {
@@ -142,7 +175,11 @@ if [ "$BACKEND" = asg ]; then
             ondemand=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
                        --query 'AutoScalingGroups[0].MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity' --output text)
         fi
+        # The zones follow TYPES, so retyping has to move the group as well:
+        # a g7-only group that keeps a g7e group's two zones gives up four
+        # fifths of the region's capacity for no reason.
         aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG" \
+            --vpc-zone-identifier "$(defaultSubnets | tr '[:space:]' ',' | sed 's/,$//')" \
             --mixed-instances-policy "$(asgPolicy "$ondemand")"
         echo "group $ASG now asks for types $TYPES, on-demand base $ondemand; running instances are left as they are"
         ;;
@@ -175,7 +212,7 @@ if [ "$BACKEND" = asg ]; then
         echo "group $ASG deleted; instances terminating (workers checkpoint on the way down)"
         ;;
     *)
-        sed -n '3,12p' "$0"; exit 1 ;;
+        sed -n '3,13p' "$0"; exit 1 ;;
     esac
     exit 0
 fi
@@ -254,5 +291,5 @@ down)
     echo "fleet $id deleted; instances terminating (workers checkpoint on the way down)"
     ;;
 *)
-    sed -n '3,12p' "$0"; exit 1 ;;
+    sed -n '3,13p' "$0"; exit 1 ;;
 esac
