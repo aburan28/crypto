@@ -35,7 +35,9 @@
     "natural_target_cliff": "natural target_class (no planted units): n13 0 models @40k and n19 0 @60k under schoolbook+pair_then_pair+nogoods+phase4 despite expected_decomposable=true \u2014 harder than planted-target unrestricted at n13. pair_table=0.",
     "n53_group_valid_edge_free_reconfirm": "Reconfirmed planted n53 schoolbook+pair_then_pair+parallel nogoods: valid_x_tuples=1, invalid_group_lifts=0, pair_table_entries=0, pair_selector_variables=0, conflicts=3631 \u2014 group-valid public-synthetic edge-free relation (planted units).",
     "cms_external_solver": "CryptoMiniSat5 on emit_xor orbit_factorized formulas (pair_table=0): planted n13 SAT immediately; unrestricted n13 SAT only by ~250k conflicts (weaker than internal pair_then_pair which finds models within 40k); unrestricted n19 still INDETERMINATE at 120k and 300k conflicts.",
-    "field_bits_then_pair_then_pair": "New KIC_ORBIT_BRANCH_ORDER=field_bits_then_pair_then_pair (+ optional KIC_PHASE_INIT): planted n13 SAT; unrestricted n13 finds models (~10k conflicts); unrestricted n19 still 0 models @80k with PHASE_INIT=0 and =1. pair_table=0."
+    "field_bits_then_pair_then_pair": "New KIC_ORBIT_BRANCH_ORDER=field_bits_then_pair_then_pair (+ optional KIC_PHASE_INIT): planted n13 SAT; unrestricted n13 finds models (~10k conflicts); unrestricted n19 still 0 models @80k with PHASE_INIT=0 and =1. pair_table=0.",
+    "binary_l8_pairs_iv": "Independent remeasure of binary pairs-and-solve baseline through l=8: MATCH_WITHIN_NOISE vs 2026-09-11 draft (l=8 pairs_s 0.068\u21920.066, speedup 8.9\u21929.0). claim-check PASS (schema). NOT sub-2^(2l), NOT ledger promotion. FFD still unmeasured for subspace oracle.",
+    "n53_planted_edge_free_witness_compact": "Compact planted n53 group-valid edge-free witness retained (valid=1, invalid_lifts=0, pair_table=0)."
   },
   "rungs": [
     {
@@ -937,8 +939,19 @@
       "branch_order": "field_bits_then_pair_then_pair",
       "phase_init": 1,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "beat": "binary.decomposition.l8_pairs_baseline",
+      "mode": "independent_remeasure_20260915",
+      "status": "MATCH_WITHIN_NOISE",
+      "l8_pairs_s": 0.066,
+      "l8_pairs_s_baseline": 0.068,
+      "l8_speedup": 9.0,
+      "claim_check": "PASS",
+      "ledger_promotion": false,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/independent_validation_20260915/replay_receipt.json"
     }
   ],
-  "next": "Planted edge-free group-valid n53 stands under full S3. CMS and field-bits/phase-init do not close n19 unrestricted cliff. Need a structural encoding change beyond search heuristics, or divert to other ledger beats without promotion.",
-  "updated_at": "2026-09-15T15:05:33Z"
+  "next": "n19 unrestricted cliff still needs a structural encoding change. Binary l8 pairs baseline independently remeasured (MATCH_WITHIN_NOISE) \u2014 no promotion. Keep full S3 for planted n53 edge-free relations.",
+  "updated_at": "2026-09-15T15:14:37Z"
 }

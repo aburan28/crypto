@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "kind": "independent_replay",
+  "beat_id": "binary.decomposition.l8_pairs_baseline",
+  "status": "MATCH_WITHIN_NOISE",
+  "created_at": "2026-09-15T15:14:14.623422+00:00",
+  "claim_boundary": "Public-synthetic binary Semaev pairs-and-solve baseline remeasure only. Not sub-2^(2l), not key recovery, not ledger promotion. FFD still unmeasured for subspace oracle.",
+  "host": {
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit"
+  },
+  "executable": "target/release/examples/semaev_decomp_bench",
+  "source_sha256": "44ba688031daad14e4d8fdfca5c699877fcdc764dafc4fe2fe26037a38a2b8f8",
+  "baseline_draft": "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/claim_draft_pairs_baseline.json",
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/independent_validation_20260915/decomp_bench_to_l8.stdout.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/independent_validation_20260915/decomp_bench_to_l8.time"
+  ],
+  "ladder_replay": [
+    {
+      "l": 5,
+      "n": 15,
+      "triples": 5984,
+      "triples_gen_s": 0.023,
+      "triples_1wd_s": 0.001,
+      "pairs_s": 0.0,
+      "speedup_vs_triples": 1.7
+    },
+    {
+      "l": 6,
+      "n": 18,
+      "triples": 45760,
+      "triples_gen_s": 0.183,
+      "triples_1wd_s": 0.007,
+      "pairs_s": 0.003,
+      "speedup_vs_triples": 2.7
+    },
+    {
+      "l": 7,
+      "n": 21,
+      "triples": 357760,
+      "triples_gen_s": 1.585,
+      "triples_1wd_s": 0.066,
+      "pairs_s": 0.013,
+      "speedup_vs_triples": 5.0
+    },
+    {
+      "l": 8,
+      "n": 24,
+      "triples": 2829056,
+      "triples_gen_s": 14.096,
+      "triples_1wd_s": 0.589,
+      "pairs_s": 0.066,
+      "speedup_vs_triples": 9.0
+    }
+  ],
+  "comparison": [
+    {
+      "l": 5,
+      "pairs_s_orig": 0.001,
+      "pairs_s_replay": 0.0,
+      "rel_abs_delta": 1.0,
+      "speedup_orig": 1.6,
+      "speedup_replay": 1.7
+    },
+    {
+      "l": 6,
+      "pairs_s_orig": 0.003,
+      "pairs_s_replay": 0.003,
+      "rel_abs_delta": 0.0,
+      "speedup_orig": 2.7,
+      "speedup_replay": 2.7
+    },
+    {
+      "l": 7,
+      "pairs_s_orig": 0.014,
+      "pairs_s_replay": 0.013,
+      "rel_abs_delta": 0.0714285714285715,
+      "speedup_orig": 5.0,
+      "speedup_replay": 5.0
+    },
+    {
+      "l": 8,
+      "pairs_s_orig": 0.068,
+      "pairs_s_replay": 0.066,
+      "rel_abs_delta": 0.029411764705882377,
+      "speedup_orig": 8.9,
+      "speedup_replay": 9.0
+    }
+  ],
+  "gates": {
+    "l8_pairs_wall_logged": true,
+    "not_sub_2_2l_claim": true,
+    "not_ledger_promotion": true
+  }
+}
