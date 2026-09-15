@@ -104,10 +104,12 @@ impl GroebnerCache {
             }
         };
         let Some(bytes) = bytes else {
+            trace_cache("miss");
             return None;
         };
         match serde_json::from_slice::<CachedRows>(&bytes) {
             Ok(payload) if payload.version == CACHE_VERSION && payload.n_vars == n_vars => {
+                trace_cache("hit");
                 let rows = payload
                     .rows
                     .into_iter()
@@ -154,6 +156,8 @@ impl GroebnerCache {
             warn_once(format!(
                 "ElastiCache write failed; continuing without cache: {error}"
             ));
+        } else {
+            trace_cache("store");
         }
     }
 }
@@ -194,6 +198,12 @@ fn parse_env_usize(name: &str, default: usize) -> usize {
 fn warn_once(message: String) {
     if CONFIG_WARNING_EMITTED.set(()).is_ok() {
         eprintln!("warning: {message}");
+    }
+}
+
+fn trace_cache(event: &str) {
+    if std::env::var_os("IC_GROEBNER_CACHE_TRACE").is_some() {
+        eprintln!("info: ElastiCache cache {event}");
     }
 }
 
