@@ -88,7 +88,7 @@ Resources:
         - '{{resolve:secretsmanager:${SecretArn}:SecretString:password}}'
         - SecretArn: !Ref CacheAuthSecret
       CacheSubnetGroupName: !Ref CacheSubnetGroup
-      VpcSecurityGroupIds:
+      SecurityGroupIds:
         - !Ref CacheSecurityGroup
       AutoMinorVersionUpgrade: true
       CacheParameterGroupName: default.redis7
