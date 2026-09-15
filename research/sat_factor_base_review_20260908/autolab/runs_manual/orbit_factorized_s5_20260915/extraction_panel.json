@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "kind": "orbit_factorized_s5_edge_free_extraction_panel",
+  "task_id": "TASK-KIC-S5-THREE-PAIRINGS-XOR-20260910",
+  "claim_boundary": "Public-synthetic Koblitz S5 only. Planted-unit runs certify that the edge-free orbit-factorized formula can recover a group-valid planted relation without materializing pair/edge tables; they are not unrestricted search, SAT advantage, vs_rho crossover, or ledger promotions. The n13 unrestricted arm is a censored observation (budget-limited UNKNOWN after finding valid models).",
+  "encodings": {
+    "algebra": "factorized_s5_over_frobenius_orbit_factor_base",
+    "domain": "trie / one_hot_representative_plus_binary_frobenius_shift",
+    "pair_table_entries": 0,
+    "pair_selector_variables": 0
+  },
+  "rungs": [
+    {
+      "n": 13,
+      "mode": "planted_x_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 1460,
+      "solve_ms": 489.95,
+      "variables": 2114
+    },
+    {
+      "n": 13,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 16,
+      "solve_ms": 6.79,
+      "variables": 2114
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_planted_target_1M_conflicts",
+      "verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 8,
+      "invalid_group_lifts": 0,
+      "conflicts": 638173,
+      "solve_ms": 276077.33,
+      "variables": 2114,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 14,
+      "solve_ms": 31.22,
+      "variables": 4750
+    },
+    {
+      "n": 23,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 55,
+      "solve_ms": 75.11,
+      "variables": 5522
+    },
+    {
+      "n": 37,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 88,
+      "solve_ms": 651.39,
+      "variables": 13582
+    },
+    {
+      "n": 41,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 261,
+      "solve_ms": 2569.77,
+      "variables": 15198
+    },
+    {
+      "n": 53,
+      "mode": "planted_x_chain_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 1053,
+      "solve_ms": 11109.52,
+      "base_ms": 55098.31,
+      "variables": 18598,
+      "ordinary_clauses": 21738,
+      "native_xor_rows": 11315,
+      "factor_base_points": 15900,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0
+    }
+  ],
+  "next": "Drop planted units at n19–n37 with higher budgets; wire relative-Frobenius pair-support pruning into search so unrestricted n53 stays edge-free."
+}
