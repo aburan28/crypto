@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "kind": "cms_relative_positive_eta1_16_n19_probe",
+  "updated_at": "2026-09-15T17:09:20Z",
+  "claim_boundary": "External CMS solver comparison on public-synthetic orbit-factorized S5 with relative-positive pair-support. Not unrestricted extraction win; not ledger promotion; not vs_rho.",
+  "encoding": {
+    "n": 19,
+    "eta": "1/16",
+    "algebra": "orbit_factorized",
+    "positive_mode": "relative",
+    "pair_table_entries": 0,
+    "variables": 5055,
+    "ordinary_clauses_natural": 19259,
+    "native_xor_rows": 1159
+  },
+  "natural": {
+    "cms_status": "INDETERMINATE",
+    "maxconfl": 300000,
+    "wall_s_approx": 7.43,
+    "evidence": "n19_natural_cms300k.out"
+  },
+  "planted_sanity": {
+    "cms_status": "SATISFIABLE",
+    "maxconfl": 50000,
+    "evidence": "n19_planted_cms.out"
+  },
+  "verdict": "CMS_MATCHES_INTERNAL_CLIFF",
+  "notes": [
+    "CMS5 also INDETERMINATE on natural eta1/16 relative-positive @300k conflicts (~7.4s).",
+    "Planted sanity under same encoding confirms formula soundness under external XOR-aware solver.",
+    "Cliff is not an internal-CDCL-only artifact at this budget."
+  ],
+  "ledger_promotion": false
+}

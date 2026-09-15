@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "kind": "relative_frobenius_pair_support_panel",
+  "task_id": "TASK-KIC-S5-THREE-PAIRINGS-XOR-20260910",
+  "claim_boundary": "Pair-support state compression and exact Frobenius-equivariance measurement only; no target join, relation extraction, SAT speedup, or sub-rho claim",
+  "rungs": [
+    {
+      "n": 13,
+      "orbit_representatives": 1,
+      "relative_shift_states": 13,
+      "state_compression_ratio": 13.0,
+      "root_entry_compression_ratio": 13,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 62.972291,
+      "canonical_payload_lower_bound_bytes": 480,
+      "expanded_payload_lower_bound_bytes": 4992,
+      "support_digest_blake3": "0f00ec8e4dbbdc556b2f33e53f0bc60b878f72e2c435ca1f5e55666211a2c592"
+    },
+    {
+      "n": 19,
+      "orbit_representatives": 2,
+      "relative_shift_states": 76,
+      "state_compression_ratio": 19.0,
+      "root_entry_compression_ratio": 19,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 107.359166,
+      "canonical_payload_lower_bound_bytes": 2960,
+      "expanded_payload_lower_bound_bytes": 44992,
+      "support_digest_blake3": "c4c8580955788d2249c59dab657786260a7f3ac7a80ab82d12bac412043652ca"
+    },
+    {
+      "n": 23,
+      "orbit_representatives": 4,
+      "relative_shift_states": 368,
+      "state_compression_ratio": 23.0,
+      "root_entry_compression_ratio": 23,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 144.41895799999998,
+      "canonical_payload_lower_bound_bytes": 14560,
+      "expanded_payload_lower_bound_bytes": 267904,
+      "support_digest_blake3": "cd80cced4b4c56b3907300c697a3cac871abd2387f3e2fac219ae44e69f70d94"
+    },
+    {
+      "n": 37,
+      "orbit_representatives": 8,
+      "relative_shift_states": 2368,
+      "state_compression_ratio": 37.0,
+      "root_entry_compression_ratio": 37,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 358.38525,
+      "canonical_payload_lower_bound_bytes": 94400,
+      "expanded_payload_lower_bound_bytes": 2794240,
+      "support_digest_blake3": "d9f4b33168cf46a69474f2314e1f3cd3d12252ff96be7886bd5905815edbed97"
+    },
+    {
+      "n": 41,
+      "orbit_representatives": 73,
+      "relative_shift_states": 218489,
+      "state_compression_ratio": 41.0,
+      "root_entry_compression_ratio": 41,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 1420.730458,
+      "canonical_payload_lower_bound_bytes": 8736640,
+      "expanded_payload_lower_bound_bytes": 286561792,
+      "support_digest_blake3": "20c40427d46b32703ffe280bc2f8ccd0bf430c3c97f4c2de1b4b640354b8a34e"
+    },
+    {
+      "n": 53,
+      "orbit_representatives": 150,
+      "relative_shift_states": 1192500,
+      "state_compression_ratio": 53.0,
+      "root_entry_compression_ratio": 53,
+      "equivariance_discrepancies": 0,
+      "construction_ms": 8585.042542,
+      "canonical_payload_lower_bound_bytes": 47694000,
+      "expanded_payload_lower_bound_bytes": 2022225600,
+      "support_digest_blake3": "c327e3da595d4cfd3b7e4ae62dfffba9e798aa9eceb78cd3e2d73c1f8f9d8903"
+    }
+  ]
+}

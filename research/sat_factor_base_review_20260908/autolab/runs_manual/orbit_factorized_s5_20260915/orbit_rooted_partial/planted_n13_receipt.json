@@ -1,0 +1,24 @@
+{
+  "kind": "orbit_rooted_partial_planted_n13_probe",
+  "claim_boundary": "Public-synthetic only. Not ledger promotion.",
+  "config": {
+    "KIC_ORBIT_ROOTED": 1,
+    "KIC_ALLOW_PARTIAL_PAIRING": 1,
+    "nogoods": 1,
+    "branch": "pair_then_pair"
+  },
+  "observed": {
+    "verdict": null,
+    "models_examined": 0,
+    "conflicts": 20000,
+    "valid_x_tuples": 0,
+    "invalid_group_lifts": 0,
+    "pair_table_entries": 0,
+    "variables": 4015,
+    "ordinary_clauses": 8527,
+    "partial_pairing_mode": true
+  },
+  "verdict": "PLANTED_UNKNOWN_AT_20K_ROOTED_HURTS",
+  "note": "Half-trace rooted selectors with partial pairing do not recover planted n13 within 20k; prefer full S3 over rooted/lazy for group-valid planted relations.",
+  "ledger_promotion": false
+}

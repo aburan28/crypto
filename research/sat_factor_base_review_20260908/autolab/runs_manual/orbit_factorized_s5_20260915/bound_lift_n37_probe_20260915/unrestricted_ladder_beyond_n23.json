@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "kind": "unrestricted_ladder_beyond_n23",
+  "updated_at": "2026-09-15T23:04:18Z",
+  "claim_boundary": "Public-synthetic unrestricted planted-target only. Planted+chain-units edge-free SAT stands at n37/41/53. NOT ledger promotion.",
+  "n53_intermediates_lean_100k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 100000,
+    "pair_table": 0,
+    "variables": 26825,
+    "solve_ms": 1259857.97075,
+    "note": "Branch order that broke n19 does not close n53 unrestricted at 100k; slower than pairthen."
+  },
+  "n41_pairthen_100k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 100000,
+    "pair_table": 0,
+    "variables": 16145,
+    "solve_ms": 273623.445333
+  },
+  "summary": "Unrestricted cliff remains open at n37/n41/n53 under tested stacks/budgets. Highest unrestricted SAT remains n23. Draft only.",
+  "ledger_promotion": false
+}

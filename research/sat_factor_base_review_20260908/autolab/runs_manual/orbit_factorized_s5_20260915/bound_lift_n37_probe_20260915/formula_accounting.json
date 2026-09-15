@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "kind": "n37_edge_free_formula_accounting",
+  "updated_at": "2026-09-15T19:13:10Z",
+  "claim_boundary": "Public-synthetic orbit_factorized S5 encoding accounting only. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "stack": {
+    "algebra": "orbit_factorized",
+    "domain": "one_hot",
+    "eta": "1/2",
+    "branch_order": "intermediates_then_pair_then_pair",
+    "intermediate_domain": "pair_sum_trie",
+    "positive_mode": "relative",
+    "nogoods": true,
+    "planted_x_root_units": true,
+    "pair_table_entries": 0
+  },
+  "sizes": {
+    "n": 37,
+    "variables": 428195,
+    "factor_base_points": 888,
+    "intermediate_domain_x_coordinates": 195693,
+    "pair_table_entries": 0,
+    "pair_selector_variables": 0,
+    "positive_clauses": 6894820,
+    "nogood_clauses": 888,
+    "exceptional_relative_states": 12,
+    "regular_relative_states": 5316,
+    "mux_xor_rows": 444
+  },
+  "timing_ms": {
+    "base": 1208.155125,
+    "encoding": 2065.3344589999997,
+    "intermediate_domain": 5593.932125,
+    "positive_expand": 704.5311250000001,
+    "positive_install": 727.4814590000001,
+    "solve_1k_conflicts": 93686.45904100001
+  },
+  "solve_1k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 1000,
+    "valid_x_tuples": 0,
+    "invalid_group_lifts": 0,
+    "approx_sec_per_1k_conflicts": 93.686459041,
+    "extrapolated_100k_hours": 2.602401640027778
+  },
+  "notes": [
+    "pair_table_entries=0 and pair_selector_variables=0 \u2014 edge-free accounting holds at n37 under bound lift.",
+    "Planted units do not trivially SAT at 1k; ~94s/1k conflicts implies ~2.6h for 100k \u2014 aborted 100k in favor of no-positive diagnostic.",
+    "DRAFT encoding observation only."
+  ],
+  "ledger_promotion": false
+}

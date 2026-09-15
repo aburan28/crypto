@@ -161,27 +161,10 @@ fn raw_square(curve: &KoblitzCurve, value: u64) -> u64 {
         wide = (wide | (wide << 1)) & 0x5555_5555_5555_5555;
         return raw_reduce(curve, wide as u128);
     }
-    let mut bits = value;
-    let mut wide = 0u128;
-    while bits != 0 {
-        let bit = bits.trailing_zeros();
-        wide ^= 1u128 << (2 * bit);
-        bits &= bits - 1;
-    }
-    raw_reduce(curve, wide)
+    raw_reduce(curve, carryless_product(value, value))
 }
 
-fn raw_mul_field(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
-    if curve.n <= 31 {
-        let mut product = 0u64;
-        let mut value = right;
-        while value != 0 {
-            let bit = value.trailing_zeros();
-            product ^= left << bit;
-            value &= value - 1;
-        }
-        return raw_reduce(curve, product as u128);
-    }
+fn carryless_product_software(left: u64, right: u64) -> u128 {
     let mut product = 0u128;
     let mut value = right;
     while value != 0 {
@@ -189,7 +172,26 @@ fn raw_mul_field(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
         product ^= (left as u128) << bit;
         value &= value - 1;
     }
-    raw_reduce(curve, product)
+    product
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn carryless_product_pmull(left: u64, right: u64) -> u128 {
+    std::arch::aarch64::vmull_p64(left, right)
+}
+
+fn carryless_product(left: u64, right: u64) -> u128 {
+    #[cfg(target_arch = "aarch64")]
+    if std::arch::is_aarch64_feature_detected!("aes") {
+        // SAFETY: the runtime feature check above proves PMULL availability.
+        return unsafe { carryless_product_pmull(left, right) };
+    }
+    carryless_product_software(left, right)
+}
+
+fn raw_mul_field(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+    raw_reduce(curve, carryless_product(left, right))
 }
 
 fn raw_inverse(curve: &KoblitzCurve, value: u64) -> u64 {
@@ -840,12 +842,30 @@ fn main() {
     let fixtures: u64 = args[4].parse().unwrap();
     let backend = args.get(5).map(String::as_str).unwrap_or("reference");
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
+    let shared_corpus = std::env::var("KIC_RHO_BATCH_CORPUS").ok();
+    let shared_fixture_offset: u64 = std::env::var("KIC_RHO_FIXTURE_OFFSET")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_RHO_FIXTURE_OFFSET must be an integer")
+        })
+        .unwrap_or(0);
+    assert!(
+        shared_corpus.is_none() || batch_seed.is_some(),
+        "KIC_RHO_BATCH_CORPUS requires the batch_seed argument"
+    );
     assert!(matches!(backend, "reference" | "packed"));
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     for fixture_index in 0..fixtures {
-        let material = if let Some(batch_seed) = batch_seed {
+        let material = if let (Some(corpus), Some(batch_seed)) = (&shared_corpus, batch_seed) {
+            format!(
+                "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{batch_seed}|{}",
+                shared_fixture_offset + fixture_index
+            )
+        } else if let Some(batch_seed) = batch_seed {
             format!(
                 "TASK-KIC-DIRECT-BATCH-20260910|rho|{n}|{a}|{}|{batch_seed}|{fixture_index}",
                 mode.name()

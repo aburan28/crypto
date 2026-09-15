@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "kind": "n37_chain_units_breakthrough",
+  "updated_at": "2026-09-15T20:08:04Z",
+  "claim_boundary": "Public-synthetic only. Prior n37 planted UNKNOWN runs lacked KIC_PLANTED_CHAIN_ROOT_UNITS=1. With chain units: n37 edge-free group-valid SAT. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "root_cause": "Missing KIC_PLANTED_CHAIN_ROOT_UNITS=1 (x-root units alone insufficient; prior n53 sanity used both).",
+  "controls": {
+    "n53_pairthen_chain": {
+      "verdict": "SAT",
+      "conflicts": 3631,
+      "valid_x": 1,
+      "invalid": 0,
+      "pair_table": 0
+    },
+    "n37_pairthen_chain": {
+      "verdict": "SAT",
+      "conflicts": 93,
+      "valid_x": 1,
+      "invalid": 0,
+      "pair_table": 0,
+      "variables": 12585
+    },
+    "n37_fullstack_chain_5k": {
+      "verdict": "SAT",
+      "conflicts": 92,
+      "valid_x": 1,
+      "invalid": 0,
+      "pair_table": 0,
+      "variables": 428195,
+      "solve_ms": 125461.902709
+    }
+  },
+  "prior_false_negatives": {
+    "eta1_16_50k_x_units_only": {
+      "verdict": "UNKNOWN",
+      "conflicts": 50000,
+      "note": "x-root units without chain units \u2014 UNKNOWN; superseded"
+    }
+  },
+  "unrestricted_n37_100k": "in_flight",
+  "ledger_promotion": false
+}

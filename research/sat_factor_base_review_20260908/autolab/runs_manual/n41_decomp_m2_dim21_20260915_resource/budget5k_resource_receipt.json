@@ -1,0 +1,42 @@
+{
+  "kind": "n41_m2_dim21_budget5k_probe",
+  "status": "exited",
+  "returncode": 0,
+  "wall_s": 348.9599280357361,
+  "node_budget": 5000,
+  "seed": 11,
+  "targets": 1,
+  "dim_V": 21,
+  "F_x": 2096989,
+  "F_u": 2096741,
+  "claim_boundary": "Higher-budget resource probe only. Still not a decomposition win; not ledger promotion.",
+  "observed": {
+    "dim_V": 21,
+    "F_x": 2096989,
+    "F_u": 2096741,
+    "x_chained_f4": {
+      "found": 0,
+      "refuted": 0,
+      "inconclusive": 1,
+      "effort": 2504,
+      "ffd": 3,
+      "gate": "ok"
+    },
+    "sym_f4": {
+      "found": 0,
+      "refuted": 0,
+      "inconclusive": 1,
+      "effort": 2504,
+      "ffd": null,
+      "gate": "ok"
+    },
+    "wall_s": 348.9
+  },
+  "verdict": "STILL_BUDGET_INCONCLUSIVE",
+  "comparison_to_budget2000": {
+    "effort_2000": 1005,
+    "effort_5000": 2504,
+    "note": "Effort scales with budget but both arms remain inconclusive; FB construct ~5min dominates wall."
+  },
+  "ledger_promotion": false
+}

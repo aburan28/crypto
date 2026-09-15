@@ -1,0 +1,123 @@
+{
+  "updated_at": "2026-09-15T15:30:14Z",
+  "claim_boundary": "Reusable pair-support certificates only; not edge table; not unrestricted extraction; not vs_rho; not ledger promotion.",
+  "rows": [
+    {
+      "n": 13,
+      "export": {
+        "loaded_from_certificate": false,
+        "scan_ms": 0.251834,
+        "install_ms": 0.39016700000000004,
+        "exceptional_relative_states": 1,
+        "nogood_clauses": 26,
+        "support_digest_blake3": "442aead7110dfdda8e2164c38f57a57863477334442787ae3410a0fab233053d",
+        "pair_table_entries": 0
+      },
+      "reload": {
+        "loaded_from_certificate": true,
+        "scan_ms": 0.0,
+        "install_ms": 0.041916999999999996,
+        "exceptional_relative_states": 1,
+        "nogood_clauses": 26,
+        "support_digest_blake3": "442aead7110dfdda8e2164c38f57a57863477334442787ae3410a0fab233053d",
+        "pair_table_entries": 0
+      },
+      "planted_export": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "planted_reload": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "cert": {
+        "n": 13,
+        "orbit_representatives": 1,
+        "exceptional_relative_state_count": 1,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "support_digest_blake3": "442aead7110dfdda8e2164c38f57a57863477334442787ae3410a0fab233053d"
+      }
+    },
+    {
+      "n": 19,
+      "export": {
+        "loaded_from_certificate": false,
+        "scan_ms": 1.017916,
+        "install_ms": 1.237208,
+        "exceptional_relative_states": 2,
+        "nogood_clauses": 76,
+        "support_digest_blake3": "46716a31a53dda150050a7abd12595628eb254993a6d0b88537788b6f59b8d77",
+        "pair_table_entries": 0
+      },
+      "reload": {
+        "loaded_from_certificate": true,
+        "scan_ms": 0.0,
+        "install_ms": 0.06125,
+        "exceptional_relative_states": 2,
+        "nogood_clauses": 76,
+        "support_digest_blake3": "46716a31a53dda150050a7abd12595628eb254993a6d0b88537788b6f59b8d77",
+        "pair_table_entries": 0
+      },
+      "planted_export": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "planted_reload": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "cert": {
+        "n": 19,
+        "orbit_representatives": 2,
+        "exceptional_relative_state_count": 2,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "support_digest_blake3": "46716a31a53dda150050a7abd12595628eb254993a6d0b88537788b6f59b8d77"
+      }
+    },
+    {
+      "n": 53,
+      "export": {
+        "loaded_from_certificate": false,
+        "scan_ms": 47994.122958,
+        "install_ms": 47997.681167,
+        "exceptional_relative_states": 376,
+        "nogood_clauses": 39856,
+        "support_digest_blake3": "fa521ce93f03232dfcebdb97d63fc4c1e9e6a37393e64d0e57629d6f46e04979",
+        "pair_table_entries": 0
+      },
+      "reload": {
+        "loaded_from_certificate": true,
+        "scan_ms": 0.0,
+        "install_ms": 3.0326250000000003,
+        "exceptional_relative_states": 376,
+        "nogood_clauses": 39856,
+        "support_digest_blake3": "fa521ce93f03232dfcebdb97d63fc4c1e9e6a37393e64d0e57629d6f46e04979",
+        "pair_table_entries": 0
+      },
+      "planted_export": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "planted_reload": {
+        "valid": 1,
+        "invalid": 0,
+        "verdict": "SAT"
+      },
+      "cert": {
+        "n": 53,
+        "orbit_representatives": 376,
+        "exceptional_relative_state_count": 376,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "support_digest_blake3": "fa521ce93f03232dfcebdb97d63fc4c1e9e6a37393e64d0e57629d6f46e04979"
+      }
+    }
+  ]
+}

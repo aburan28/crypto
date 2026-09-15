@@ -19,6 +19,11 @@ class LedgerContractTests(unittest.TestCase):
         self.assertTrue(ledger["measurement_schema"]["fail_closed"])
         self.assertIn("koblitz.vs_rho.n37_wall", protocol["beats"])
         self.assertIn("koblitz.vs_rho.n41_charged", protocol["beats"])
+        self.assertIn("koblitz.factor_base.n53", protocol["beats"])
+        self.assertNotIn("rho", protocol["beats"]["koblitz.factor_base.n53"])
+        self.assertEqual(
+            protocol["beats"]["koblitz.factor_base.n53"]["stage"], "factor_base"
+        )
 
     def test_plan_lists_priority_beats(self) -> None:
         protocol = lab.load_protocol()
@@ -84,6 +89,26 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertEqual(result["status"], "FAIL")
         self.assertIn("ffd_or_degree_of_regularity", result["missing_stage_fields"])
 
+    def test_factor_base_complete_passes(self) -> None:
+        report = {
+            "n_or_bits": 53,
+            "factor_base_size_F": 19928,
+            "orbit_count_K": 188,
+            "dimension_l_or_dim": 188,
+            "construction_method": "point_defined_signed_quotient_eta_1_16",
+            "materialized": True,
+            "construction_wall_ms": 9051.0,
+            "retained_bytes": 89887680,
+            "fixture_hash": "a",
+            "executable_or_source_hash": "b",
+            "host_id": "h",
+            "resource_caps": {"common_cap_bytes": 17179869184},
+            "seeds": {"direct": 1},
+            "claim_boundary_non_claims": ["not key recovery"],
+        }
+        result = lab.validate_claim(report, stage="factor_base", ledger=self.ledger)
+        self.assertEqual(result["status"], "PASS", result)
+
 
 class HelperTests(unittest.TestCase):
     def test_seed_is_deterministic(self) -> None:
@@ -95,6 +120,64 @@ class HelperTests(unittest.TestCase):
             lab.seed_for("koblitz.vs_rho.n37_wall", "direct", 0),
             lab.seed_for("koblitz.vs_rho.n37_wall", "rho", 0),
         )
+
+    def test_factor_base_producer_commands_omit_rho(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["koblitz.factor_base.n53"]
+        commands = lab.producer_commands(beat, "koblitz.factor_base.n53", 1, binaries=None)
+        self.assertIsNone(commands["rho"])
+        self.assertIsNone(commands["rho_argv"])
+        self.assertIn("koblitz_rank_fixture", commands["direct"])
+        self.assertEqual(commands["direct_argv"][1], "53")
+
+    def test_draft_factor_base_claim_from_stdout(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["koblitz.factor_base.n53"]
+        stdout = json.dumps(
+            {
+                "kind": "point_defined_factor_base",
+                "evidence_class": "measured_factor_base_construction",
+                "n": 53,
+                "factor_base_points": 19928,
+                "orbit_columns": 188,
+                "total_setup_ms": 9000.0,
+                "support_payload_lower_bound_bytes": 89887680,
+                "support_table_allocated_bytes": 100663296,
+                "frobenius_closed": True,
+                "negation_closed": True,
+                "subgroup_membership_verified": True,
+                "pair_index_mode": "signed_quotient",
+                "base_hash": "abc",
+                "eta": {"numerator": 1, "denominator": 16},
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            run = Path(tmp)
+            (run / "artifacts").mkdir()
+            fake_bin = run / "fake_direct"
+            fake_bin.write_text("x")
+            claim = lab.draft_factor_base_claim(
+                beat=beat,
+                beat_id="koblitz.factor_base.n53",
+                run=run,
+                direct_obs={
+                    "stdout": stdout,
+                    "stderr": "",
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 12000.0,
+                    "children_peak_rss_bytes": 666206208,
+                    "seed": 42,
+                },
+                binaries={"direct": str(fake_bin)},
+            )
+            self.assertEqual(claim["stage"], "factor_base")
+            self.assertEqual(claim["factor_base_size_F"], 19928)
+            self.assertEqual(claim["orbit_count_K"], 188)
+            self.assertEqual(claim["retained_bytes"], 89887680)
+            self.assertTrue(claim["resource_caps"]["under_cap"])
+            ledger = lab.load_ledger(protocol)
+            result = lab.validate_claim(claim, stage="factor_base", ledger=ledger)
+            self.assertEqual(result["status"], "PASS", result)
 
     def test_claim_check_cli_roundtrip(self) -> None:
         report = {
