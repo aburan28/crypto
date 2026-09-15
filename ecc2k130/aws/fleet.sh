@@ -74,8 +74,25 @@ fleetId() {
 
 defaultSubnets() {
     VPC=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
-    aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
-        --query 'Subnets[].SubnetId' --output text
+    all=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
+          --query 'Subnets[].SubnetId' --output text)
+    # A GPU type is often sold in a subset of a region's zones -- g7e is in two
+    # of Virginia's six -- and a group spanning the rest fails every launch it
+    # tries there with InvalidFleetConfiguration, which reads like a broken
+    # template rather than a zone that never had the instance.  Keep the zones
+    # that offer something in TYPES.  If the offerings cannot be read, span
+    # everything and let the launches say so, as they did before.
+    zones=$(aws ec2 describe-instance-type-offerings --location-type availability-zone \
+            --filters "Name=instance-type,Values=$TYPES" \
+            --query 'InstanceTypeOfferings[].Location' --output text 2>/dev/null | tr '[:space:]' ' ' || true)
+    [ -z "$zones" ] && { echo "$all"; return; }
+    keep=
+    for s in $all; do
+        az=$(aws ec2 describe-subnets --subnet-ids "$s" --query 'Subnets[0].AvailabilityZone' --output text)
+        case " $zones " in *" $az "*) keep="$keep $s" ;; esac
+    done
+    [ -z "$keep" ] && { echo "$all"; return; }
+    echo "${keep# }"
 }
 
 asgExists() {
@@ -158,7 +175,11 @@ if [ "$BACKEND" = asg ]; then
             ondemand=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
                        --query 'AutoScalingGroups[0].MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity' --output text)
         fi
+        # The zones follow TYPES, so retyping has to move the group as well:
+        # a g7-only group that keeps a g7e group's two zones gives up four
+        # fifths of the region's capacity for no reason.
         aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG" \
+            --vpc-zone-identifier "$(defaultSubnets | tr '[:space:]' ',' | sed 's/,$//')" \
             --mixed-instances-policy "$(asgPolicy "$ondemand")"
         echo "group $ASG now asks for types $TYPES, on-demand base $ondemand; running instances are left as they are"
         ;;
