@@ -16,8 +16,11 @@
     "factor_base_n53_control_plane": "claim_check PASS; CONSTRUCTION_INDEPENDENTLY_REPLAYED (same-seed F/K/hash/closures match); point-defined base seed-invariant; NO ledger promotion",
     "lazy_pair_roots_static_fix": "empty body replaced with constrain_s3_root; theory decoupled (opt-in via KIC_S3_ROOT_THEORY)",
     "lazy_static_unrestricted_n13": "UNKNOWN 0 models @150k \u2014 half-trace selectors hurt CDCL vs full S3",
-    "unrestricted_n19_cliff": "still open under nogoods / rooted / lazy-static / pair_then_pair variants",
-    "pair_then_pair_branch_order": "KIC_ORBIT_BRANCH_ORDER=pair_then_pair decides first Semaev pair before second; planted n13 SAT; unrestricted n13 finds models; does not close n19 cliff at 150k"
+    "unrestricted_n19_cliff": "still open under pairing\u2208{0,1,2}, seeds{1,2,3,5}, pair_then_pair(_reversed), nogoods, symmetry",
+    "pair_then_pair_branch_order": "KIC_ORBIT_BRANCH_ORDER=pair_then_pair decides first Semaev pair before second; planted n13 SAT; unrestricted n13 finds models; does not close n19 cliff at 150k",
+    "alternate_pairing_n19": "KIC_PAIRING=1,2 with pair_then_pair+nogoods @100k: still 0 models; seeds 2/3/5 @75k also 0",
+    "pair_then_pair_reversed": "n19 @75k: UNKNOWN 0 models; does not close cliff",
+    "formula_accounting": "n13/19/53 orbit encoding documented in formula_accounting.json; pair_table=0 throughout; n53 planted pair_then_pair SAT group-valid"
   },
   "rungs": [
     {
@@ -291,8 +294,114 @@
       "branch_order": "pair_then_pair",
       "symmetry_breaking": true,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_pairing1_pairthen_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 13,
+      "solve_ms": 3.238292,
+      "variables": 2009,
+      "pairing": 1,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairing1_pairthen_nogoods_100k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 100000,
+      "solve_ms": 25175.192124999998,
+      "variables": 3889,
+      "pairing": 1,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairing2_pairthen_nogoods_100k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 100000,
+      "solve_ms": 30116.672292,
+      "variables": 3889,
+      "pairing": 2,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_seed2_pairthen_nogoods_75k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 75000,
+      "solve_ms": 22235.961416,
+      "seed": 2,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_seed3_pairthen_nogoods_75k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 75000,
+      "solve_ms": 21350.392375,
+      "seed": 3,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_seed5_pairthen_nogoods_75k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 75000,
+      "solve_ms": 22386.114667,
+      "seed": 5,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairthen_reversed_nogoods_75k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 75000,
+      "solve_ms": 22238.711458,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair_reversed",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 53,
+      "mode": "planted_x_chain_units_pairthen",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 3631,
+      "solve_ms": 14769.945,
+      "variables": 26825,
+      "ordinary_clauses": 68907,
+      "native_xor_rows": 2915,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair"
     }
   ],
-  "next": "Unrestricted n19 cliff remains under pair_then_pair. Next: alternate pairing index, phase saving across pair blocks, or n31 decomp distribution ledger beat. factor_base n53 construction independently replayed \u2014 still no ledger promotion.",
-  "updated_at": "2026-09-15T13:13:22Z"
+  "next": "Unrestricted n19 remains closed under pairing/seed/branch-order sweeps. Next: optimize n53 nogood install or try phase-saving / restart heuristics; optional binary l=8 decomp baseline. No ledger promotion.",
+  "updated_at": "2026-09-15T13:32:43Z"
 }

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "kind": "orbit_factorized_s5_formula_memory_accounting",
+  "updated_at": "2026-09-15T13:32:43Z",
+  "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
+  "rows": [
+    {
+      "n": 13,
+      "config": "one_hot+nogoods",
+      "variables": 2009,
+      "ordinary_clauses": 4419,
+      "native_xor_rows": 611,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 26,
+      "orbit_columns": 1,
+      "selector_variables": 20,
+      "encoding_ms": 0.603709,
+      "base_ms": 6.089042
+    },
+    {
+      "n": 19,
+      "config": "one_hot+nogoods",
+      "variables": 3889,
+      "ordinary_clauses": 9201,
+      "native_xor_rows": 969,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 76,
+      "orbit_columns": 2,
+      "selector_variables": 28,
+      "encoding_ms": 2.4937090000000004,
+      "base_ms": 19.317375000000002
+    },
+    {
+      "n": 53,
+      "config": "one_hot; nogoods omitted (install CPU-bound >6min on this host)",
+      "variables": 26825,
+      "ordinary_clauses": 68589,
+      "native_xor_rows": 2915,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 39856,
+      "orbit_columns": 376,
+      "selector_variables": 1528,
+      "encoding_ms": 9.428374999999999,
+      "base_ms": 136191.58554200002
+    }
+  ],
+  "notes": [
+    "All listed encodings keep pair_table_entries=0 and pair_selector_variables=0.",
+    "n53+KIC_ORBIT_PAIR_SUPPORT_NOGOODS=1 encoding install remained CPU-bound >6 minutes; left as open engineering note, not a claim.",
+    "Planted n53 with pair_then_pair (no nogoods): SAT, valid_x_tuples=1, invalid_group_lifts=0, conflicts=3631, pair_table_entries=0."
+  ]
+}

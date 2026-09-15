@@ -2195,32 +2195,42 @@ fn encode_balanced_s5_frobenius_orbits(
     }
     // Default: all orbit representatives, then all Frobenius shifts, then optional
     // root selectors. `KIC_ORBIT_BRANCH_ORDER=pair_then_pair` decides the first
-    // Semaev pair (pairing indices 0/1) before the second pair (2/3), keeping
-    // pair_table_entries=0.
+    // Semaev pair (pairing indices 0/1) before the second pair (2/3).
+    // `pair_then_pair_reversed` flips that order. Both keep pair_table_entries=0.
     let branch_order = std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
     let mut priorities: Vec<u32> = Vec::new();
-    if branch_order == "pair_then_pair" {
+    if branch_order == "pair_then_pair" || branch_order == "pair_then_pair_reversed" {
         let rep_stride = if binary_representatives {
             representative_index_width
         } else {
             representatives
         };
-        for &summand in &pairing_indices[..2] {
+        let first = if branch_order == "pair_then_pair_reversed" {
+            &pairing_indices[2..]
+        } else {
+            &pairing_indices[..2]
+        };
+        let second = if branch_order == "pair_then_pair_reversed" {
+            &pairing_indices[..2]
+        } else {
+            &pairing_indices[2..]
+        };
+        for &summand in first {
             priorities.extend((0..rep_stride).map(|index| {
                 (representative_offset + summand * rep_stride + index + 1) as u32
             }));
         }
-        for &summand in &pairing_indices[..2] {
+        for &summand in first {
             priorities.extend((0..frobenius_width).map(|index| {
                 (frobenius_offset + summand * frobenius_width + index + 1) as u32
             }));
         }
-        for &summand in &pairing_indices[2..] {
+        for &summand in second {
             priorities.extend((0..rep_stride).map(|index| {
                 (representative_offset + summand * rep_stride + index + 1) as u32
             }));
         }
-        for &summand in &pairing_indices[2..] {
+        for &summand in second {
             priorities.extend((0..frobenius_width).map(|index| {
                 (frobenius_offset + summand * frobenius_width + index + 1) as u32
             }));
