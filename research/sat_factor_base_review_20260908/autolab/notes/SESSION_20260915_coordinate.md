@@ -30,6 +30,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | `vs_rho` n37_wall 1fx | `runs/20260915T110708Z-6bac5fa80e` | PASS draft; IC 638 vs ρ 194 wall (no 20% win) |
 | relative Frobenius pair support n13/19/23/37/41/53 | `runs_manual/relative_pair_stats_20260915/` | compression = n at every rung; n53: 150 reps, 53×, 47.7 MiB vs 1.88 GiB expanded LB, 0 discrepancies |
 | j0 16-bit e2e | `runs_manual/prime_j0_e2e_16bit_20260915/result.json` | ic_agrees_rho ✓, ic_matches_truth ✓ (~2.1 s IC / 6.7 ms ρ) |
+| orbit_factorized S5 n13 planted | `runs_manual/orbit_factorized_s5_20260915/` | 0 pair-table / 0 edge selectors; 100k conflicts → UNKNOWN |
 
 ## Priority #1 signal
 
