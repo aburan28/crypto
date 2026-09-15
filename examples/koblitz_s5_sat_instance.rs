@@ -2593,76 +2593,89 @@ fn install_relative_orbit_pair_support_nogoods(
         }
     }
 
-    let mut relative_states = 0usize;
-    let mut exceptional_relative_states = 0usize;
-    let mut nogood_clauses = 0usize;
-    for &[left_summand, right_summand] in &sides {
-        for left_rep in 0..representatives {
+    // Scan exceptional relative states once (rayon), then expand absolute
+    // alignments for each Semaev pair side. Avoids the prior sequential
+    // reps^2·n·#sides S3 walk that made n53+nogoods CPU-bound for minutes.
+    let scan_started = Instant::now();
+    let exceptional_states: Vec<(usize, usize, usize)> = (0..representatives)
+        .into_par_iter()
+        .flat_map_iter(|left_rep| {
+            let left = representative_x_codes[left_rep];
+            let mut local = Vec::new();
             for right_rep in 0..representatives {
                 for relative_shift in 0..width {
-                    relative_states += 1;
                     let right = shifted[right_rep][relative_shift];
-                    let left = representative_x_codes[left_rep];
-                    if regular_s3_x_roots(curve, left, right).is_some() {
-                        continue;
-                    }
-                    exceptional_relative_states += 1;
-                    for left_shift in 0..width {
-                        let right_shift = (left_shift + relative_shift) % width;
-                        let mut clause = Vec::with_capacity(
-                            2 + 2 * frobenius_width
-                                + if binary_representatives {
-                                    2 * representative_index_width
-                                } else {
-                                    2
-                                },
-                        );
-                        if binary_representatives {
-                            push_forbidden_binary_assignment(
-                                &mut clause,
-                                representative_offset + left_summand * representative_index_width,
-                                representative_index_width,
-                                left_rep,
-                            );
-                            push_forbidden_binary_assignment(
-                                &mut clause,
-                                representative_offset + right_summand * representative_index_width,
-                                representative_index_width,
-                                right_rep,
-                            );
-                        } else {
-                            clause.push(
-                                -((representative_offset
-                                    + left_summand * representatives
-                                    + left_rep
-                                    + 1) as Lit),
-                            );
-                            clause.push(
-                                -((representative_offset
-                                    + right_summand * representatives
-                                    + right_rep
-                                    + 1) as Lit),
-                            );
-                        }
-                        push_forbidden_binary_assignment(
-                            &mut clause,
-                            frobenius_offset + left_summand * frobenius_width,
-                            frobenius_width,
-                            left_shift,
-                        );
-                        push_forbidden_binary_assignment(
-                            &mut clause,
-                            frobenius_offset + right_summand * frobenius_width,
-                            frobenius_width,
-                            right_shift,
-                        );
-                        assert!(solver.add_clause(clause));
-                        nogood_clauses += 1;
+                    if regular_s3_x_roots(curve, left, right).is_none() {
+                        local.push((left_rep, right_rep, relative_shift));
                     }
                 }
             }
+            local
+        })
+        .collect();
+    let scan_ms = scan_started.elapsed().as_secs_f64() * 1000.0;
+    let relative_states = representatives * representatives * width;
+    let exceptional_relative_states = exceptional_states.len();
+
+    let expand_started = Instant::now();
+    let mut nogood_clauses = 0usize;
+    for &[left_summand, right_summand] in &sides {
+        for &(left_rep, right_rep, relative_shift) in &exceptional_states {
+            for left_shift in 0..width {
+                let right_shift = (left_shift + relative_shift) % width;
+                let mut clause = Vec::with_capacity(
+                    2 + 2 * frobenius_width
+                        + if binary_representatives {
+                            2 * representative_index_width
+                        } else {
+                            2
+                        },
+                );
+                if binary_representatives {
+                    push_forbidden_binary_assignment(
+                        &mut clause,
+                        representative_offset + left_summand * representative_index_width,
+                        representative_index_width,
+                        left_rep,
+                    );
+                    push_forbidden_binary_assignment(
+                        &mut clause,
+                        representative_offset + right_summand * representative_index_width,
+                        representative_index_width,
+                        right_rep,
+                    );
+                } else {
+                    clause.push(
+                        -((representative_offset
+                            + left_summand * representatives
+                            + left_rep
+                            + 1) as Lit),
+                    );
+                    clause.push(
+                        -((representative_offset
+                            + right_summand * representatives
+                            + right_rep
+                            + 1) as Lit),
+                    );
+                }
+                push_forbidden_binary_assignment(
+                    &mut clause,
+                    frobenius_offset + left_summand * frobenius_width,
+                    frobenius_width,
+                    left_shift,
+                );
+                push_forbidden_binary_assignment(
+                    &mut clause,
+                    frobenius_offset + right_summand * frobenius_width,
+                    frobenius_width,
+                    right_shift,
+                );
+                assert!(solver.add_clause(clause));
+                nogood_clauses += 1;
+            }
         }
     }
+    let expand_ms = expand_started.elapsed().as_secs_f64() * 1000.0;
 
     json!({
         "enabled": true,
@@ -2671,9 +2684,13 @@ fn install_relative_orbit_pair_support_nogoods(
         "relative_states_scanned": relative_states,
         "exceptional_relative_states": exceptional_relative_states,
         "nogood_clauses": nogood_clauses,
+        "pairing_sides": sides.len(),
         "representatives": representatives,
         "representative_encoding": representative_encoding,
+        "scan_ms": scan_ms,
+        "expand_ms": expand_ms,
         "install_ms": started.elapsed().as_secs_f64() * 1000.0,
+        "scan_parallel": true,
         "claim_boundary": "Compressed exceptional relative-Frobenius pair-support nogoods only; not unrestricted extraction, SAT advantage, or vs_rho"
     })
 }

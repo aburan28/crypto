@@ -20,7 +20,9 @@
     "pair_then_pair_branch_order": "KIC_ORBIT_BRANCH_ORDER=pair_then_pair decides first Semaev pair before second; planted n13 SAT; unrestricted n13 finds models; does not close n19 cliff at 150k",
     "alternate_pairing_n19": "KIC_PAIRING=1,2 with pair_then_pair+nogoods @100k: still 0 models; seeds 2/3/5 @75k also 0",
     "pair_then_pair_reversed": "n19 @75k: UNKNOWN 0 models; does not close cliff",
-    "formula_accounting": "n13/19/53 orbit encoding documented in formula_accounting.json; pair_table=0 throughout; n53 planted pair_then_pair SAT group-valid"
+    "formula_accounting": "n13/19/53 orbit sizes logged incl. n53+parallel_nogoods; pair_table=0 throughout",
+    "n53_parallel_nogoods": "rayon scan+expand; planted n53 SAT with 39856 nogoods, pair_table=0, install~52s (was sequential hang >6min)",
+    "lazy_roots_n53": "lazy_pair_roots+nogoods planted n53 still search-heavy; aborted >13min \u2014 keep full S3 for CDCL"
   },
   "rungs": [
     {
@@ -400,8 +402,50 @@
       "native_xor_rows": 2915,
       "pair_table_entries": 0,
       "branch_order": "pair_then_pair"
+    },
+    {
+      "n": 13,
+      "mode": "planted_nogoods_parallel",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 13,
+      "solve_ms": 2.94,
+      "pair_table_entries": 0,
+      "nogood_clauses": 26,
+      "scan_parallel": true
+    },
+    {
+      "n": 53,
+      "mode": "planted_pairthen_nogoods_parallel",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 3631,
+      "solve_ms": 15352.54,
+      "variables": 26825,
+      "ordinary_clauses": 108763,
+      "pair_table_entries": 0,
+      "nogood_clauses": 39856,
+      "exceptional_relative_states": 376,
+      "nogood_scan_ms": 52336.55,
+      "nogood_expand_ms": 3.23,
+      "branch_order": "pair_then_pair",
+      "scan_parallel": true
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairthen_nogoods_parallel_50k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 50000,
+      "solve_ms": 15763.579542000001,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Unrestricted n19 remains closed under pairing/seed/branch-order sweeps. Next: optimize n53 nogood install or try phase-saving / restart heuristics; optional binary l=8 decomp baseline. No ledger promotion.",
-  "updated_at": "2026-09-15T13:32:43Z"
+  "next": "Parallel nogoods unblock n53 edge-free planted+support constraints. Unrestricted n19 cliff remains. Next: phase-save/restart for n19, or avoid lazy half-trace at large n; no ledger promotion.",
+  "updated_at": "2026-09-15T14:05:01Z"
 }
