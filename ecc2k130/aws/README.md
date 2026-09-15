@@ -158,6 +158,20 @@ about 27 B/s.
    since neither can see the other: give the faster GPU the larger target
    and the slower one only what is left, or the cheap pool will take the
    whole budget and lock the fast one out of every launch.
+
+   The way past one region's number is another region, and the campaign
+   does not care where a walker runs: a slot is claimed over S3, so a
+   second region is `infra.sh` once more and a group. us-east-1 went from
+   zero to 32 spot vCPUs on 2026-09-15 and took four g7.2xlarge spot
+   instances immediately, +19.5 B it/s on a 71.5 B it/s fleet, while
+   us-west-2 still had 16 spot vCPUs it could not spend on a g7e. Two
+   things differ from the first region. The workers' own region stays the
+   *bucket's* — every call they make is against the campaign bucket, and
+   `infra.sh` reads that off the bucket rather than assuming the region it
+   is provisioning. And a GPU type is sold in a subset of a region's zones
+   (g7e in two of Virginia's six, g7 in four), so a group spanning the
+   region fails most launches with `InvalidFleetConfiguration`; `fleet.sh`
+   derives the zones from `TYPES`.
 2. **IAM.** `infra.sh` creates a role and instance profile for the workers
    (S3 bucket read/write, SSM). The `adam` user could not list IAM or use
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
@@ -250,7 +264,19 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s p
 #    g7e spot $0.09, g7e on-demand $0.23, g7 spot $0.16, g7 on-demand $0.51
 #    per B it/s-hour.  G7 earns its place on spot, or on on-demand quota that
 #    G7e capacity cannot absorb; it is the most expensive iteration otherwise.
-
+#
+# 4c. a pool in a second region, once one region's quota is spent
+#    AWS_DEFAULT_REGION=us-east-1 SYNC=0 KEY_NAME=... ./infra.sh
+#    AWS_DEFAULT_REGION=us-east-1 BACKEND=asg TYPES=g7e.2xlarge,g7.2xlarge \
+#        ./fleet.sh up 4
+#    SYNC=0 is what makes this safe against a running campaign: the region
+#    gets its own security group and launch template, and the bucket keeps
+#    the worker.py and campaign.json the live fleet is already on.  Slots are
+#    claimed over S3, so the new region's workers take released slots and
+#    resume their checkpoints like any other.  Ask for both GPUs unless one
+#    is known to have capacity: on 2026-09-15 g7e was unfulfillable on spot
+#    in both regions and the four launches came back g7.
+#
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
 #    prints collisions and, if one solves, writes solution.json locally and to the bucket
