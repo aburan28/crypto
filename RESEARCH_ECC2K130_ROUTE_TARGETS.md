@@ -195,12 +195,13 @@ above, pricing **every** phase: setup, target generation, encoding,
 failed attempts, solving, lifting, verification, relation-matrix work
 and final scalar recovery.
 
-**Primary metric.** `Λ` over the ladder, with the least-squares slope of
-`log₂(total)` against `n`.
+**Primary metric.** The ratio `Λ/(m/n)` over the ladder, with the
+least-squares slope of `log₂(Λ/(m/n))` against `n`.
 
-**Falsifier for "advance".** Slope `≥ 0.95` → the 350× is a constant,
-the class is **engineering**, and it should be labelled so on the
-scoreboard rather than reported as progress.
+**Falsifier for "advance".** A flat ratio (slope consistent with zero)
+means the 350× is a constant, the class is **engineering**, and it
+should be labelled so on the scoreboard rather than reported as
+progress. An **advance** requires the ratio to decrease with `n`.
 
 **Inadmissible.** Leaving linear algebra unpriced. That is the mistake
 `AGENTS.md` §5 records from the residual-walk thread, where a `2^96`
