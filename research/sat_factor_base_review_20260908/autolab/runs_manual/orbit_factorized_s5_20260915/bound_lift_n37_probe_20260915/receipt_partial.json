@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "kind": "bound_lift_n37_probe_partial",
-  "updated_at": "2026-09-15T19:08:56Z",
-  "claim_boundary": "Bound lift + n37 edge-free encoding smoke. NOT ledger promotion.",
+  "updated_at": "2026-09-15T19:25:23Z",
+  "claim_boundary": "Bound lift + n37 edge-free accounting. 100k aborted. No-positive@20k diagnostic in flight. NOT ledger promotion.",
   "cert": {
     "file": "n37_eta1_2_seed1.cert.json",
     "pair_table_entries": 0,
@@ -23,6 +23,8 @@
     "solve_ms": 93686.45904100001,
     "note": "Encoding constructs edge-free at n37 (pair_table=0). Planted units do NOT trivially SAT @1k (6.8M positive clauses; ~94s/1k conflicts). Stale JSON n_bound=23 in relative-positive report is metadata only \u2014 assert is 41."
   },
-  "planted_units_100k": "launching",
-  "ledger_promotion": false
+  "planted_units_100k": "aborted_after_smoke_extrapolation_~2.6h",
+  "ledger_promotion": false,
+  "formula_accounting": "formula_accounting.json",
+  "diag_planted_units_no_positive_20k": "in_flight"
 }

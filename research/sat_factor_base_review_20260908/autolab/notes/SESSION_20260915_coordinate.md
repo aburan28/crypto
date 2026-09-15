@@ -10,7 +10,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Rho challenge spot instances (`bc-01a0a48f…`) | G7e ASG / ECC2K-130 DP collection | RUNNING — leave AWS alone |
 | Experiment coordination (`bc-01a0a4b9…`) | IC boundary autolab + priority probes | this session |
 
-### Rho campaign snapshot (read-only, 2026-09-15T19:05:00Z)
+### Rho campaign snapshot (read-only, 2026-09-15T19:15:00Z)
 
 - ASG `ecc2k130-g7`: desired/InService **6/6**
 - ASG `ecc2k130-workers`: desired **4**, InService **0**, instances **0**
@@ -30,7 +30,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | **n23 @1M hit-rate** | planted seed2 **SAT @590623**; seeds 3/5 UNKNOWN; natural seed1 UNKNOWN; **natural seed2 SAT @846240** (first natural n23 @1M) |
 | **Bound lift 23→41** | `pair_sum_trie` + relative-positive relative mode; absolute positive still ≤23 |
 | **n37 cert export** | succeeded (`pair_table=0`, edge_selectors=0, 12 orbit reps) |
-| **n37 planted-units reload** | restarted clean-env via nohup (prior run polluted by `KIC_DIMACS_PATH`); in flight |
+| **n37 formula accounting** | edge-free: vars≈428k, +clauses≈6.89M, pair_table=0; planted units UNKNOWN@1k (~94s/1k); 100k aborted (~2.6h); no-positive@20k diag in flight |
 | CMS without branch heuristic | still INDETERMINATE @200k |
 
 ## Priority signals
