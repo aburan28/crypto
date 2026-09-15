@@ -40,6 +40,14 @@ fn main() {
     if let Some(t) = value("--targets") {
         opts.targets = t;
     }
+    if let Some(seed) = args
+        .iter()
+        .position(|a| a == "--seed")
+        .and_then(|i| args.get(i + 1))
+        .and_then(|v| v.parse::<u64>().ok())
+    {
+        opts.seed = seed;
+    }
     if flag("--no-sat") {
         opts.sat = false;
     }
@@ -67,8 +75,8 @@ fn main() {
 
     println!("=== Paired oracle benchmark: x-system vs symmetrised system ===");
     println!(
-        "targets = {}, node budget = {}, SAT conflict budget = {}, targets in <G> = {}",
-        opts.targets, opts.node_budget, opts.conflict_budget, opts.targets_in_subgroup
+        "targets = {}, seed = {}, node budget = {}, SAT conflict budget = {}, targets in <G> = {}",
+        opts.targets, opts.seed, opts.node_budget, opts.conflict_budget, opts.targets_in_subgroup
     );
     println!();
 
