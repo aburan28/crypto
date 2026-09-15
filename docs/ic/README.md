@@ -2,8 +2,10 @@
 
 The standalone ic executable inspects elliptic-curve parameters and runs
 bounded, reproducible index-calculus experiments on internally generated
-known-answer or public hash-derived Koblitz targets. Imported parameter-file
-points are used only for mathematical validation.
+known-answer or public hash-derived Koblitz targets. The `fixed` command also
+accepts explicit K_0 curve parameters and points through degree 131, with durable
+pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
+The older inspection command uses imported points for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
 [`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
@@ -778,3 +780,18 @@ assumed paid. The width curve says which width is cheapest for `T`
 targets at fixed `r`, where precompute is most of the bill. Memory sets
 the reach; the target count sets how much of that memory is worth using.
 
+## Persistent fixed parameters through degree 131
+
+`ic fixed --params docs/ic/params/ecc2k130-fixed.json --dir runs/ecc2k130-fixed --stage select`
+validates the actual fixed parameters and persists the factor base.
+[Fixed parameters](FIXED_PARAMETERS.md) documents bounded collection, resumable
+pair tables, precomputed logarithms, direct target equations and the complete
+small-curve example. This CPU Python workflow accepts full-width coordinates;
+the existing Rust symbolic engine remains limited to degree 63.
+
+### Learned solver and budget selector
+
+The fixed workflow accepts `--solver learned --selector-model MODEL.json`.
+[Solver selection](SOLVER_SELECTION.md) describes the matched natural-query
+benchmark, cost-sensitive tree, exact fallback and audited initial result.
+The initial portfolio selected a constant pair-table policy; no speedup is established.
