@@ -2826,8 +2826,8 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
     let started = Instant::now();
     let width = curve.n as usize;
     assert!(
-        width <= 41,
-        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE relative mode is bounded to n <= 41"
+        width <= 53,
+        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE relative mode is bounded to n <= 53"
     );
     let representatives = representative_x_codes.len();
     let binary_representatives = representative_encoding == "binary";
@@ -2992,7 +2992,7 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
         "scan_ms": scan_ms,
         "expand_ms": expand_ms,
         "install_ms": started.elapsed().as_secs_f64() * 1000.0,
-        "n_bound": 41,
+        "n_bound": 53,
         "claim_boundary": "Relative-frame positive regular pair-support (canonical intermediate + Frobenius mux); no edge/pair table; not unrestricted extraction; not vs_rho; not ledger promotion"
     })
 }
@@ -4894,9 +4894,9 @@ fn main() {
         intermediate_domain_encoding.as_str(),
         "none" | "pair_sum_trie"
     ));
-    // pair_sum_trie is compact enough through the admitted n=41 rung; absolute
+    // pair_sum_trie is compact enough through the admitted n=53 rung; absolute
     // positive expansion remains capped separately at n<=23.
-    assert!(intermediate_domain_encoding == "none" || n <= 41);
+    assert!(intermediate_domain_encoding == "none" || n <= 53);
     let intermediate_domain_started = Instant::now();
     let intermediate_domain = (intermediate_domain_encoding == "pair_sum_trie")
         .then(|| pair_sum_x_domain(&curve, &base.points));
