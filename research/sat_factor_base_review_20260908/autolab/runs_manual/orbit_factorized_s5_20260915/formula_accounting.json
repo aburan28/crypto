@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T15:52:53Z",
+  "updated_at": "2026-09-15T16:02:44Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -151,6 +151,28 @@
       "nogood_clauses": 76,
       "exceptional_relative_states": 2,
       "note": "~10x ordinary clauses vs nogoods-only (9315); planted SAT group-valid; unrestricted still UNKNOWN"
+    },
+    {
+      "n": 13,
+      "config": "one_hot+nogoods+positive_relative_frame",
+      "variables": 2603,
+      "ordinary_clauses": 8567,
+      "pair_table_entries": 0,
+      "positive_clauses": 4226,
+      "mux_xor_rows": 104,
+      "regular_relative_states": 12,
+      "note": "KIC_ORBIT_PAIR_SUPPORT_POSITIVE_MODE=relative; planted SAT"
+    },
+    {
+      "n": 19,
+      "config": "one_hot+nogoods+positive_relative_frame+cert",
+      "variables": 7415,
+      "ordinary_clauses": 53857,
+      "pair_table_entries": 0,
+      "positive_clauses": 43706,
+      "mux_xor_rows": 190,
+      "regular_relative_states": 74,
+      "note": "fewer ordinary clauses than absolute positive (90031) but still ~6x nogoods-only; unrestricted UNKNOWN @80k"
     }
   ],
   "notes": [
@@ -167,6 +189,7 @@
     "CMS emit_xor formula sizes match internal (n19: 3889 vars / 9201 clauses / pair_table=0).",
     "field_bits_then_pair_then_pair does not change formula size vs pair_then_pair; search-order only.",
     "Reusable pair-support cert: n53 exceptional=376 \u2192 39856 nogoods; scan avoided on reload (47994ms\u21920). pair_table_entries=0 throughout.",
-    "Positive regular pair-support (KIC_ORBIT_PAIR_SUPPORT_POSITIVE): expands regular relative-Frobenius states into guarded Semaev root clauses on u/v intermediates; n<=23; pair_table=0. Planted n13/n19 SAT+invalid_lifts=0; unrestricted n19 natural still 0 models @80k. Formula cost n19: vars 3889\u21926701, ordinary_clauses 9315\u219290031."
+    "Positive regular pair-support (KIC_ORBIT_PAIR_SUPPORT_POSITIVE): expands regular relative-Frobenius states into guarded Semaev root clauses on u/v intermediates; n<=23; pair_table=0. Planted n13/n19 SAT+invalid_lifts=0; unrestricted n19 natural still 0 models @80k. Formula cost n19: vars 3889\u21926701, ordinary_clauses 9315\u219290031.",
+    "Relative-frame positive (POSITIVE_MODE=relative): canonical u/v + Frobenius mux; planted n13/n19 SAT+invalid_lifts=0; n19 clauses 90031\u219253857 vs absolute; cliff still open. n37 symmetrised dim~19 cell blocked (Phi_37 irreducible over F2)."
   ]
 }

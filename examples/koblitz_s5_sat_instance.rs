@@ -2730,13 +2730,270 @@ fn scan_regular_relative_states(
     (regular_states, started.elapsed().as_secs_f64() * 1000.0)
 }
 
+fn frobenius_basis_images(curve: &KoblitzCurve, power: usize) -> Vec<u64> {
+    (0..curve.n as usize)
+        .map(|bit| frobenius_code(curve, 1u64 << bit, power))
+        .collect()
+}
+
+fn solver_new_var(solver: &mut Solver) -> u32 {
+    *solver.add_vars(1).start()
+}
+
+fn solver_xor_wire(solver: &mut Solver, inputs: &[u32]) -> u32 {
+    let out = solver_new_var(solver);
+    if inputs.is_empty() {
+        assert!(solver.add_clause(vec![-(out as Lit)]));
+        return out;
+    }
+    let mut vars = Vec::with_capacity(inputs.len() + 1);
+    vars.push(out);
+    vars.extend(inputs.iter().copied());
+    assert!(solver.add_xor(&vars, false));
+    out
+}
+
+fn solver_mux_bit(solver: &mut Solver, select: u32, when_false: u32, when_true: u32) -> u32 {
+    let out = solver_new_var(solver);
+    let s = select as Lit;
+    let c = when_false as Lit;
+    let t = when_true as Lit;
+    let o = out as Lit;
+    assert!(solver.add_clause(vec![-s, -t, o]));
+    assert!(solver.add_clause(vec![-s, t, -o]));
+    assert!(solver.add_clause(vec![s, -c, o]));
+    assert!(solver.add_clause(vec![s, c, -o]));
+    out
+}
+
+fn link_absolute_to_canonical_via_frobenius_mux(
+    solver: &mut Solver,
+    curve: &KoblitzCurve,
+    canonical: &[u32],
+    absolute_offset: usize,
+    frobenius_offset: usize,
+    frobenius_width: usize,
+) -> usize {
+    let width = canonical.len();
+    let mut current = canonical.to_vec();
+    let mut xor_rows = 0usize;
+    for bit in 0..frobenius_width {
+        let images = frobenius_basis_images(curve, 1usize << bit);
+        let twisted: Vec<u32> = (0..width)
+            .map(|output| {
+                let inputs: Vec<u32> = (0..width)
+                    .filter(|&input| ((images[input] >> output) & 1) == 1)
+                    .map(|input| current[input])
+                    .collect();
+                xor_rows += 1;
+                solver_xor_wire(solver, &inputs)
+            })
+            .collect();
+        let select = (frobenius_offset + bit + 1) as u32;
+        current = current
+            .iter()
+            .zip(&twisted)
+            .map(|(&when_false, &when_true)| solver_mux_bit(solver, select, when_false, when_true))
+            .collect();
+    }
+    for (bit, &wired) in current.iter().enumerate() {
+        let absolute = (absolute_offset + bit + 1) as Lit;
+        let w = wired as Lit;
+        assert!(solver.add_clause(vec![-w, absolute]));
+        assert!(solver.add_clause(vec![w, -absolute]));
+    }
+    xor_rows
+}
+
+/// Relative-frame positive support: one Frobenius mux per Semaev side plus
+/// per-state forcing of the canonical intermediate (no ×n absolute root expand).
+fn install_relative_orbit_pair_support_positive_relative_frame(
+    solver: &mut Solver,
+    curve: &KoblitzCurve,
+    representative_x_codes: &[u64],
+    pairing: usize,
+    representative_encoding: &str,
+) -> serde_json::Value {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    assert!(
+        width <= 23,
+        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE relative mode is bounded to n <= 23"
+    );
+    let representatives = representative_x_codes.len();
+    let binary_representatives = representative_encoding == "binary";
+    let representative_index_width =
+        ((usize::BITS - representatives.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let representative_variables = if binary_representatives {
+        4 * representative_index_width
+    } else {
+        4 * representatives
+    };
+    let cardinality_auxiliaries = if binary_representatives {
+        0
+    } else {
+        4 * representatives.saturating_sub(1)
+    };
+    let frobenius_width =
+        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let problem_variables = 6 * width;
+    let representative_offset = problem_variables;
+    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let pairing_indices = match pairing {
+        0 => [0, 1, 2, 3],
+        1 => [0, 2, 1, 3],
+        2 => [0, 3, 1, 2],
+        _ => panic!("pairing must be 0, 1, or 2"),
+    };
+    let sides = [
+        ([pairing_indices[0], pairing_indices[1]], 4 * width),
+        ([pairing_indices[2], pairing_indices[3]], 5 * width),
+    ];
+    let (regular_states, scan_ms) = scan_regular_relative_states(curve, representative_x_codes);
+    let expand_started = Instant::now();
+    let mut positive_clauses = 0usize;
+    let mut root_selectors = 0usize;
+    let mut relative_matches = 0usize;
+    let mut mux_xor_rows = 0usize;
+    for &([left_summand, right_summand], third_offset) in &sides {
+        let canonical: Vec<u32> = (0..width).map(|_| solver_new_var(solver)).collect();
+        mux_xor_rows += link_absolute_to_canonical_via_frobenius_mux(
+            solver,
+            curve,
+            &canonical,
+            third_offset,
+            frobenius_offset + left_summand * frobenius_width,
+            frobenius_width,
+        );
+        for &(left_rep, right_rep, relative_shift, roots_at_left0) in &regular_states {
+            let match_var = solver_new_var(solver);
+            relative_matches += 1;
+            let mut disjunct = vec![-(match_var as Lit)];
+            for left_shift in 0..width {
+                let right_shift = (left_shift + relative_shift) % width;
+                let witness = solver_new_var(solver);
+                let mut witness_guard = Vec::new();
+                if binary_representatives {
+                    push_forbidden_binary_assignment(
+                        &mut witness_guard,
+                        representative_offset + left_summand * representative_index_width,
+                        representative_index_width,
+                        left_rep,
+                    );
+                    push_forbidden_binary_assignment(
+                        &mut witness_guard,
+                        representative_offset + right_summand * representative_index_width,
+                        representative_index_width,
+                        right_rep,
+                    );
+                } else {
+                    witness_guard.push(
+                        -((representative_offset
+                            + left_summand * representatives
+                            + left_rep
+                            + 1) as Lit),
+                    );
+                    witness_guard.push(
+                        -((representative_offset
+                            + right_summand * representatives
+                            + right_rep
+                            + 1) as Lit),
+                    );
+                }
+                push_forbidden_binary_assignment(
+                    &mut witness_guard,
+                    frobenius_offset + left_summand * frobenius_width,
+                    frobenius_width,
+                    left_shift,
+                );
+                push_forbidden_binary_assignment(
+                    &mut witness_guard,
+                    frobenius_offset + right_summand * frobenius_width,
+                    frobenius_width,
+                    right_shift,
+                );
+                // alignment => witness
+                let mut imply = witness_guard.clone();
+                imply.push(witness as Lit);
+                assert!(solver.add_clause(imply));
+                positive_clauses += 1;
+                // witness => alignment (negate each forbidden guard lit)
+                for &literal in &witness_guard {
+                    assert!(solver.add_clause(vec![-(witness as Lit), -literal]));
+                    positive_clauses += 1;
+                }
+                // witness => match
+                assert!(solver.add_clause(vec![-(witness as Lit), match_var as Lit]));
+                positive_clauses += 1;
+                disjunct.push(witness as Lit);
+            }
+            assert!(solver.add_clause(disjunct));
+            positive_clauses += 1;
+            let selector = solver_new_var(solver);
+            root_selectors += 1;
+            let guard = vec![-(match_var as Lit)];
+            for bit in 0..width {
+                let output = canonical[bit] as Lit;
+                let first = ((roots_at_left0[0] >> bit) & 1) == 1;
+                let second = ((roots_at_left0[1] >> bit) & 1) == 1;
+                if first == second {
+                    let mut clause = guard.clone();
+                    clause.push(if first { output } else { -output });
+                    assert!(solver.add_clause(clause));
+                    positive_clauses += 1;
+                } else if !first && second {
+                    assert!(solver.add_clause({
+                        let mut c = guard.clone();
+                        c.extend([-output, selector as Lit]);
+                        c
+                    }));
+                    assert!(solver.add_clause({
+                        let mut c = guard.clone();
+                        c.extend([output, -(selector as Lit)]);
+                        c
+                    }));
+                    positive_clauses += 2;
+                } else {
+                    assert!(solver.add_clause({
+                        let mut c = guard.clone();
+                        c.extend([output, selector as Lit]);
+                        c
+                    }));
+                    assert!(solver.add_clause({
+                        let mut c = guard.clone();
+                        c.extend([-output, -(selector as Lit)]);
+                        c
+                    }));
+                    positive_clauses += 2;
+                }
+            }
+        }
+    }
+    let expand_ms = expand_started.elapsed().as_secs_f64() * 1000.0;
+    json!({
+        "enabled": true,
+        "mode": "relative_frame",
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "regular_relative_states": regular_states.len(),
+        "relative_matches": relative_matches,
+        "root_selectors": root_selectors,
+        "positive_clauses": positive_clauses,
+        "mux_xor_rows": mux_xor_rows,
+        "scan_ms": scan_ms,
+        "expand_ms": expand_ms,
+        "install_ms": started.elapsed().as_secs_f64() * 1000.0,
+        "n_bound": 23,
+        "claim_boundary": "Relative-frame positive regular pair-support (canonical intermediate + Frobenius mux); no edge/pair table; not unrestricted extraction; not vs_rho; not ledger promotion"
+    })
+}
+
 /// Install positive regular relative-Frobenius pair-support constraints.
 ///
-/// For each Semaev pair side and each regular relative state, when the orbit
-/// selectors realize that relative alignment, force the intermediate `u`/`v`
-/// bits onto the Frobenius-twisted Semaev roots (with a root-choice selector).
-/// Bounded to small `n` because absolute expansion is O(regular_states · n).
-/// Still `pair_table_entries = 0` / no edge selectors.
+/// Default mode expands absolute Frobenius alignments (O(regular_states · n)).
+/// `KIC_ORBIT_PAIR_SUPPORT_POSITIVE_MODE=relative` uses a canonical intermediate
+/// plus a Frobenius mux so root forcing is O(regular_states) rather than
+/// O(regular_states · n). Still `pair_table_entries = 0` / no edge selectors.
 fn install_relative_orbit_pair_support_positive(
     solver: &mut Solver,
     curve: &KoblitzCurve,
@@ -2744,6 +3001,15 @@ fn install_relative_orbit_pair_support_positive(
     pairing: usize,
     representative_encoding: &str,
 ) -> serde_json::Value {
+    if std::env::var("KIC_ORBIT_PAIR_SUPPORT_POSITIVE_MODE").as_deref() == Ok("relative") {
+        return install_relative_orbit_pair_support_positive_relative_frame(
+            solver,
+            curve,
+            representative_x_codes,
+            pairing,
+            representative_encoding,
+        );
+    }
     let started = Instant::now();
     let width = curve.n as usize;
     assert!(

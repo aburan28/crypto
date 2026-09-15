@@ -42,7 +42,9 @@
     "prime_j0_16bit_iv": "Independent 3-shot j0_known_answer_bits 16: PASS_KNOWN_ANSWER_AGREES_RHO. IC agrees rho and truth; IC wall >> rho (not vs_rho crossover). No ledger promotion.",
     "reusable_pair_support_certificate": "Added KIC_ORBIT_PAIR_SUPPORT_CERT / _CERT_OUT: reusable compressed exceptional relative-Frobenius pair-support certificates with blake3 digest check. pair_table_entries=0, edge_selectors=0. Planted n13/n19/n53 remain SAT+group-valid on reload. n53 install scan_ms 47994\u21920 (expand ~3ms). Not unrestricted n19 win, not vs_rho, not ledger promotion.",
     "multi_target_cert_harvest": "Reusable pair-support certs amortize across multi-seed planted harvests: n19 seeds1-5 all SAT group-valid edge-free with identical digest and scan_ms=0; n53 seeds1-3 likewise. n13 natural seeds1-5 stay edge-free+cert-loaded; hit-rate recorded without promotion.",
-    "positive_regular_pair_support": "KIC_ORBIT_PAIR_SUPPORT_POSITIVE=1 (n<=23): absolute expansion of regular relative-Frobenius states into guarded Semaev root clauses; no edge/pair table. Planted n13 SAT (20 conflicts, valid_x=1, invalid_lifts=0, pair_table=0, +6104 positive clauses). Planted n19+cert SAT (31 conflicts, valid_x=1, invalid_lifts=0, +80716 positive / 74 regular states). Unrestricted natural n19+positive+nogoods+cert still UNKNOWN 0 models @80k (~43s). Does not close cliff. Not vs_rho; not ledger promotion."
+    "positive_regular_pair_support": "KIC_ORBIT_PAIR_SUPPORT_POSITIVE=1 (n<=23): absolute expansion of regular relative-Frobenius states into guarded Semaev root clauses; no edge/pair table. Planted n13 SAT (20 conflicts, valid_x=1, invalid_lifts=0, pair_table=0, +6104 positive clauses). Planted n19+cert SAT (31 conflicts, valid_x=1, invalid_lifts=0, +80716 positive / 74 regular states). Unrestricted natural n19+positive+nogoods+cert still UNKNOWN 0 models @80k (~43s). Does not close cliff. Not vs_rho; not ledger promotion.",
+    "positive_relative_frame": "KIC_ORBIT_PAIR_SUPPORT_POSITIVE_MODE=relative: canonical intermediate + Frobenius mux; pair_table=0. Planted n13/n19 SAT invalid_lifts=0. n19 ordinary_clauses 53857 vs absolute-positive 90031 vs nogoods-only 9315. Natural n19 still UNKNOWN 0 models @80k. Does not close cliff.",
+    "n37_quadratic_cell_geometry": "symmetrised divisor_for_dimension(37,~19) blocked: over F2, Phi_37 is degree 36, so only dim=1 proper subspace containing x-1 is available. Not a decomposition win."
   },
   "rungs": [
     {
@@ -1100,8 +1102,43 @@
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation",
       "note": "positive regular support does not close unrestricted n19 cliff"
+    },
+    {
+      "n": 13,
+      "mode": "planted_positive_relative_frame_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "variables": 2603,
+      "ordinary_clauses": 8567,
+      "positive_clauses": 4226,
+      "pair_table_entries": 0
+    },
+    {
+      "n": 19,
+      "mode": "planted_positive_relative_frame_nogoods_cert",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 27,
+      "solve_ms": 39.636542,
+      "variables": 7415,
+      "ordinary_clauses": 53857,
+      "pair_table_entries": 0
+    },
+    {
+      "n": 19,
+      "mode": "natural_positive_relative_frame_nogoods_cert_80k",
+      "verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 36880.248333,
+      "variables": 7415,
+      "ordinary_clauses": 53743,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Positive regular pair-support lands edge-free planted n13/n19 but does not close unrestricted n19. Next: structural n19 rewrite beyond absolute regular expansion, or next ledger IV beat. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T15:52:53Z"
+  "next": "Relative-frame positive shrinks absolute expansion but does not close unrestricted n19. n37 symmetrised quadratic cell geometrically blocked. Next: other structural n19 rewrite or distributional n31 / non-blocked decomp n. No ledger promotion. No AWS mutations.",
+  "updated_at": "2026-09-15T16:02:44Z"
 }

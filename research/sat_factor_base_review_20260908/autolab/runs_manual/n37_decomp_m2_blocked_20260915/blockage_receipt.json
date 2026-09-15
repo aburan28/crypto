@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "kind": "n37_quadratic_cell_blockage",
+  "updated_at": "2026-09-15T16:02:44Z",
+  "claim_boundary": "Geometry observation only; not a decomposition win; not ledger promotion.",
+  "finding": "For prime n=37, x^37-1=(x-1)Phi_37 over F2 with deg(Phi_37)=36 (ord_37(2)=36). divisor_for_dimension(37,19) can only realize dim=1 (mask excluding Phi_37) or dim>=37 (excluded). Symmetrised paired-oracle quadratic cell at target_dim~(n+1)/2 is unavailable at n=37.",
+  "smoke": {
+    "command": "./target/release/examples/symmetrised_oracle_bench --only 0 37 2 --targets 2 --no-sat --node-budget 8000",
+    "observed_dim_V": 1,
+    "observed_Fx": 3,
+    "verdict": "runs but is not the dim~19 quadratic cell"
+  },
+  "implication": "Priority #3 advance quadratic cell to n=37 via symmetrised divisor subspaces is blocked by F2 factorization geometry; prefer distributional n=31 repeats or other n where 2 has smaller multiplicative order."
+}

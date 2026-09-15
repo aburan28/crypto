@@ -25,23 +25,22 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 |---|---|
 | planted orbit S5 n13→53 (full S3) | edge-free SAT; +parallel nogoods |
 | reusable pair-support certs | export/reload; n53 scan ~48s→0 |
-| multi-target cert harvest | n19 planted 5/5 group-valid; n53 planted 3/3; cert-shared digests; pair_table=0 |
-| n13 natural + cert | edge-free loaded; hits=0/5 (no promotion) |
-| **positive regular pair-support** | `KIC_ORBIT_PAIR_SUPPORT_POSITIVE` (n≤23); planted n13/n19 SAT + invalid_lifts=0, pair_table=0 |
-| unrestricted n19 + positive @80k | still UNKNOWN 0 models (~43s); cliff open |
-| formula cost (n19) | vars 3889→6701; ordinary_clauses 9315→90031 (~10×) |
+| multi-target cert harvest | n19 planted 5/5; n53 planted 3/3; pair_table=0 |
+| absolute positive regular support | planted SAT; unrestricted n19 still UNKNOWN; ~10× clauses |
+| **relative-frame positive** | mux+canonical; planted SAT; n19 clauses 90031→53857; cliff still open |
+| n37 quadratic cell | **geometrically blocked** (Phi_37 deg 36 over F2 → only dim=1) |
 
 ## Priority signals
 
 1. Edge-free planted extraction through n53 stands under full S3.
-2. Reusable pair-support certificates amortize across multi-target planted harvests without edge tables.
-3. Positive regular support is sound on planted arms but does **not** close unrestricted n19.
+2. Relative-frame positive is a real structural shrink vs absolute expansion but does not close unrestricted n19.
+3. n37 symmetrised dim~19 cell is unavailable; do not burn budget there.
 4. Unrestricted n19 cliff remains open.
 
 Claim boundary: drafts ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 
 ## Next ticks
 
-1. Structural n19 rewrite beyond absolute regular expansion (or next actionable ledger IV).
+1. Other structural n19 rewrite (or distributional n31 / usable-dim decomp n).
 2. Keep full S3 for planted n53 edge-free relations.
 3. Never mutate AWS from this agent.
