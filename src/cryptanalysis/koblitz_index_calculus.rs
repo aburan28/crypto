@@ -10864,6 +10864,7 @@ mod subfield_tests {
             saturate: false,
             projected_columns: true,
             seed: 1,
+            solve_cost_targets: None,
         };
         let sreport = search(&kc, &sopts);
         assert!(sreport.candidates.len() >= factors.len());

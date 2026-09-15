@@ -1,0 +1,24 @@
+{
+  "round": "groebner-stage-20260915",
+  "scope": "decomposition-oracle Gr\u00f6bner/matrix-F4 stage only; not an end-to-end ECDLP cost",
+  "git_head": "01fa8426d963fefcb8ac048783863f15d9352d91",
+  "working_tree": "dirty; this repository's tree carries unrelated in-flight work, so the hashes below identify the measured sources, not the commit",
+  "host": {
+    "cpu_cores": 8,
+    "note": "shared host, no CPU pinning; wall time is a practicality note, not the metric"
+  },
+  "candidate_sources": {
+    "src/cryptanalysis/koblitz_groebner.rs": "cbb707b8d536b6b2420af4d369eec7920da27a1a24146301c0c35a6a4f58c96a",
+    "src/cryptanalysis/ic_f2_dispatch.rs": "06dbf75e995f51d122815b09c125ed9713be6f818cd961bcf094734073106642",
+    "src/cryptanalysis/pq_groebner_f2.rs": "dfe6d4691cc2176f554e84d2193e702872e33a95a086f53eed8df443814f4c8a",
+    "examples/groebner_stage_bench.rs": "fc974c5a35f413529a57697dfea1c562d2c9a1c1becfedf25824c6bc3d6c6e75",
+    "gpu/koblitz_f2/reduce.cu": "1525d6d83432273b36f85bf1785e0f5655364f20b2a0365086462f1b2be3431f"
+  },
+  "baseline": "the same harness run against the pre-change working tree, frozen in baseline/rep{1,2,3}; no binary of it was retained, so the baseline is its recorded measurement",
+  "commands": [
+    "cargo build --release --example groebner_stage_bench",
+    "./target/release/examples/groebner_stage_bench --label <label> --out <dir>",
+    "F4_F2_RREF=ref ./target/release/examples/groebner_stage_bench --ladder holdout --out <dir>",
+    "python3 research/groebner_stage_20260915/compare.py <baseline-dir> <candidate-dir> --output summary.json"
+  ]
+}
