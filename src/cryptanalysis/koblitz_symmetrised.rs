@@ -76,9 +76,9 @@ use crate::cryptanalysis::koblitz_groebner::{
     MAX_VARS,
 };
 use crate::cryptanalysis::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, build_frobenius_factor_base_from_divisor, enumerate_decompose,
-    groebner_decompose, point_key, points_with_x, span_f2, subspace_basis_for_divisor,
-    KoblitzCurve,
+    all_factors_of_x_n_minus_1, build_explicit_frobenius_orbit_factor_base,
+    build_frobenius_factor_base_from_divisor, enumerate_decompose, groebner_decompose, point_key,
+    points_with_x, span_f2, subspace_basis_for_divisor, FrobeniusFactorBase, KoblitzCurve,
 };
 use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::sat::SolveResult;
@@ -237,6 +237,74 @@ pub fn build_symmetrised_factor_base(
         two_torsion,
         two_torsion_index,
     })
+}
+
+/// **The abscissae of `F_u`**, which are closed under the `2`-power
+/// Frobenius.
+///
+/// `u = 1/(x + 1)` is defined over `F_2`, so it commutes with squaring:
+/// `x_of_u(u²) = 1/u² + 1 = (1/u + 1)² = x_of_u(u)²`.  `V` is
+/// Frobenius-stable by construction, so the image abscissa set is too —
+/// which is what lets `F_u` carry the same `π`-orbit structure that the
+/// `x`-frame factor base carries, and hence the same `n`-fold saving in
+/// relation collection and `n²` in the matrix.
+pub fn symmetrised_abscissae(kc: &KoblitzCurve, fb: &SymmetrisedFactorBase) -> Vec<F2mElement> {
+    let mut out = Vec::with_capacity(1 << fb.ell);
+    for u in span_f2(&fb.v_basis, kc.n) {
+        if u.is_zero() {
+            continue; // x = ∞
+        }
+        if let Some(x) = x_of_u(&u, kc) {
+            out.push(x);
+        }
+    }
+    out
+}
+
+/// **`F_u` as a [`FrobeniusFactorBase`]**, so the end-to-end index
+/// calculus can collect relations over it.
+///
+/// [`SymmetrisedFactorBase`] carries the two bases the symmetrised
+/// *system* needs (`V` and `AS(V)`) but none of the orbit structure the
+/// *attack* needs: `π`-orbits, signed orbits, and the index maps that
+/// become the relation matrix's columns.  Because the abscissa set is
+/// Frobenius-closed ([`symmetrised_abscissae`]), the existing
+/// orbit-walking constructor builds all of that over exactly the same
+/// point set.
+///
+/// The two views therefore describe one factor base, and
+/// [`symmetrised_index_map`] translates between their point orderings.
+pub fn frobenius_view_of_symmetrised(
+    kc: &KoblitzCurve,
+    fb: &SymmetrisedFactorBase,
+) -> Option<FrobeniusFactorBase> {
+    build_explicit_frobenius_orbit_factor_base(kc, &symmetrised_abscissae(kc, fb))
+}
+
+/// Index translation from [`SymmetrisedFactorBase::points`] to
+/// [`FrobeniusFactorBase::points`].
+///
+/// The oracle reports summands in the symmetrised base's ordering; the
+/// relation rows are indexed by the Frobenius view's.  `None` if the two
+/// point sets differ at all, which is the check that they are the same
+/// factor base rather than two that merely look alike.
+pub fn symmetrised_index_map(
+    fb: &SymmetrisedFactorBase,
+    view: &FrobeniusFactorBase,
+) -> Option<Vec<usize>> {
+    if fb.points.len() != view.points.len() {
+        return None;
+    }
+    let where_in_view: HashMap<(BigUint, BigUint), usize> = view
+        .points
+        .iter()
+        .enumerate()
+        .map(|(i, p)| (point_key(p), i))
+        .collect();
+    fb.points
+        .iter()
+        .map(|p| where_in_view.get(&point_key(p)).copied())
+        .collect()
 }
 
 impl SymmetrisedFactorBase {
@@ -1500,6 +1568,76 @@ mod tests {
             .collect();
         terms.sort();
         terms
+    }
+
+    /// **The two views must be one factor base.**
+    ///
+    /// `F_u` is only useful to the end-to-end attack if it carries the
+    /// same `π`-orbit structure the `x`-frame base carries.  This
+    /// checks the bridge end to end: the point sets coincide, the
+    /// index map is a bijection, every orbit is a genuine `π`-cycle
+    /// inside the base, the orbits partition it, and each orbit's
+    /// length divides `n` — which is what makes the relation matrix
+    /// `n` times narrower.
+    #[test]
+    fn frobenius_view_of_symmetrised_is_the_same_factor_base() {
+        for (a, n, dim) in [(0u8, 9u32, 5u32), (1, 9, 5), (0, 15, 8), (1, 15, 5)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let Some(div) = divisor_for_dimension(n, dim) else {
+                continue;
+            };
+            let Some(fb) = build_symmetrised_factor_base(&kc, &div) else {
+                continue;
+            };
+            let view = frobenius_view_of_symmetrised(&kc, &fb)
+                .unwrap_or_else(|| panic!("a={a} n={n}: no Frobenius view"));
+
+            // Same points, and the translation is a bijection.
+            let map = symmetrised_index_map(&fb, &view)
+                .unwrap_or_else(|| panic!("a={a} n={n}: point sets differ"));
+            let mut seen = vec![false; view.points.len()];
+            for &j in &map {
+                assert!(!seen[j], "a={a} n={n}: index map is not injective");
+                seen[j] = true;
+            }
+            assert!(seen.iter().all(|&b| b), "a={a} n={n}: index map misses a point");
+
+            // Every abscissa really is in V, read back through u.
+            let v_span: std::collections::HashSet<u64> =
+                span_f2(&fb.v_basis, n).iter().map(bits_of).collect();
+            for p in &view.points {
+                let BinaryPoint::Affine { x, .. } = p else {
+                    panic!("a={a} n={n}: infinity in the factor base")
+                };
+                let u = u_of_x(x, &kc).expect("x = 1 is not an abscissa of F_u");
+                assert!(v_span.contains(&bits_of(&u)), "a={a} n={n}: u(P) ∉ V");
+            }
+
+            // The orbits partition the base into genuine π-cycles.
+            let mut covered = vec![false; view.points.len()];
+            for orbit in &view.orbits {
+                assert!(
+                    n as usize % orbit.len() == 0,
+                    "a={a} n={n}: orbit of length {} does not divide n",
+                    orbit.len()
+                );
+                for (k, &i) in orbit.iter().enumerate() {
+                    assert!(!covered[i], "a={a} n={n}: orbits overlap");
+                    covered[i] = true;
+                    // points[orbit[k+1]] must be π(points[orbit[k]]).
+                    let next = view.points[orbit[(k + 1) % orbit.len()]].clone();
+                    let img = match &view.points[i] {
+                        BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
+                            x: x.square(&kc.curve.irreducible),
+                            y: y.square(&kc.curve.irreducible),
+                        },
+                        BinaryPoint::Infinity => BinaryPoint::Infinity,
+                    };
+                    assert_eq!(img, next, "a={a} n={n}: orbit is not a π-cycle");
+                }
+            }
+            assert!(covered.iter().all(|&b| b), "a={a} n={n}: orbits miss a point");
+        }
     }
 
     #[test]
