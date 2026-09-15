@@ -91,6 +91,16 @@ jobs:
           scripts/rho_status/fetch_via_walker.sh
           python3 -c 'import json,sys; d=json.load(open("docs/ecc2k130-status/status.json")); assert d["campaign_id"]=="ecc2k-130"; assert "point_key" not in json.dumps(d)'
 
+      - name: Merge the campaign's iteration total
+        # The walkers count their own iterations; the snapshot above counts
+        # points. This copies the campaign's checkpoint sum into the snapshot
+        # so the pages can report a walk rate that was measured rather than
+        # inferred from a report interval the campaign no longer runs. It
+        # fails soft: no feed means no iteration total, not no publication.
+        env:
+          RHO_CAMPAIGN: ecc2k-130
+        run: python3 scripts/rho_status/work_feed.py --status docs/ecc2k130-status/status.json
+
       - name: Merge previous Pages history
         env:
           PAGES_HISTORY_URL: https://aburan28.github.io/crypto/history.json
@@ -106,10 +116,14 @@ jobs:
             echo "Failed to fetch live history.json (curl=$curl_exit HTTP=$http_code)" >&2
             exit 1
           fi
+          # --status-out writes the rate back into the snapshot: it is the
+          # difference between this snapshot's iteration total and an earlier
+          # one, so the history is what makes it measurable at all.
           python3 scripts/rho_status/render.py \
             --status docs/ecc2k130-status/status.json \
             --history-in /tmp/history-prev.json \
-            --history-out docs/ecc2k130-status/history.json
+            --history-out docs/ecc2k130-status/history.json \
+            --status-out docs/ecc2k130-status/status.json
 
       - uses: actions/configure-pages@v5
       - name: Assemble site

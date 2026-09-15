@@ -84,17 +84,21 @@
         store.
       </p>
       <dl class="live" id="live">
+        <div><dt>Iterations/s</dt><dd class="mono" id="live-rate">&mdash;</dd></div>
         <div><dt>Points</dt><dd class="mono" id="live-dps">&mdash;</dd></div>
         <div><dt>Operations</dt><dd class="mono" id="live-ops">&mdash;</dd></div>
         <div><dt>Workers</dt><dd class="mono" id="live-workers">&mdash;</dd></div>
         <div><dt>State</dt><dd class="mono state" id="live-state">&mdash;</dd></div>
       </dl>
       <p class="live-note">
-        Operations is the walk total behind that point count, as a power of
-        two: a walk reports once per <span class="mono">2^25.27</span>
-        iterations at <span class="mono">HW(x) &le; 34</span>, and a collision
-        is expected to cost <span class="mono">2^60.9</span> of them. It is
-        derived from the count above, not a counter the workers report.
+        Iterations per second is measured, not projected: the walkers
+        checkpoint their own iteration counts, and the rate is how much that
+        total moved between the last two snapshots. Operations is the same
+        total so far, as a power of two, against the
+        <span class="mono">2^60.9</span> a collision is expected to cost. A
+        snapshot without that counter falls back to the point count at
+        <span class="mono">2^25.27</span> iterations per point, the interval
+        for <span class="mono">HW(x) &le; 34</span>.
       </p>
       <p class="card-more">Open the dashboard</p>
     </a>
@@ -355,23 +359,61 @@
 <script>
 (function () {
   "use strict";
-  // A walk on ECC2K-130 reports a point when HW(x) <= 34, which happens once
-  // per 2^25.27 iterations (ecc2k130/aws/README.md), so the published point
-  // count and the campaign's group-operation total differ by that exponent.
-  // Applying it here rather than publishing it keeps the snapshot
-  // aggregates-only; it is a parameter of one campaign's distinguishing
-  // rule, so it is only applied to the campaign it was measured on.
+  // The fallback conversion, for a snapshot that carries no iteration total
+  // of its own: a walk reports a point once per 2^25.27 iterations at
+  // HW(x) <= 34 (ecc2k130/aws/README.md). It reads low for this campaign,
+  // which distinguishes at the sparser HW(x) <= 32, so a total the walkers
+  // counted is preferred whenever one is published. The constant belongs to
+  // one campaign's distinguishing rule, so it is only applied to that
+  // campaign; the dashboard carries the same two constants.
   var CAMPAIGN = "ecc2k-130";
   var ITERATIONS_PER_DP_LOG2 = 25.27;
 
-  // Progressive enhancement: the card reads fine without these four numbers.
+  // --- mirrored block: docs/site/index.html carries these three functions
+  // verbatim, and scripts/site/test_build.py fails if the two copies differ
+  // by a byte. Both pages read one snapshot, so both must read it the same.
+  // What the campaign counts for itself. work_feed.py puts the sum of the
+  // walkers' checkpointed iteration bases in every snapshot, and render.py
+  // measures the rate from the difference between two of them. Null when a
+  // snapshot carries neither, which is the state to render when the campaign
+  // feed is not answering: no figure beats a figure from a wrong constant.
+  function reportedIterations(status) {
+    if (!status || !status.work) return null;
+    var iterations = Number(status.work.iterations);
+    return isFinite(iterations) && iterations > 0 ? iterations : null;
+  }
+
+  function measuredRate(status) {
+    if (!status || !status.walk_rate) return null;
+    var rate = Number(status.walk_rate.iterations_per_second);
+    return isFinite(rate) && rate >= 0 ? rate : null;
+  }
+
+  // Billions of iterations per second is the campaign's own unit: it is what
+  // the workers log and what one GPU is quoted in, so the fleet reads as a
+  // multiple of a machine instead of as an exponent.
+  function formatRate(rate) {
+    if (rate === null || !isFinite(rate)) return "—";
+    if (rate >= 1e12) return (rate / 1e12).toFixed(2) + " T it/s";
+    if (rate >= 1e9) return (rate / 1e9).toFixed(1) + " B it/s";
+    if (rate >= 1e6) return (rate / 1e6).toFixed(1) + " M it/s";
+    return Math.round(rate).toLocaleString("en-US") + " it/s";
+  }
+  // --- end mirrored block ---
+
+  // Progressive enhancement: the card reads fine without these five numbers.
   var set = function (id, text) {
     var node = document.getElementById(id);
     if (node) node.textContent = text;
   };
-  // Operations run, as the exponent: log2(dps) + log2(iterations per point).
+  // Operations run, as the exponent: the walkers' checkpoint sum when the
+  // snapshot carries one, and log2(dps) + log2(iterations per point) when it
+  // does not.
   var operations = function (status, dps) {
-    if (status.campaign_id !== CAMPAIGN || !isFinite(dps) || dps <= 0) return "—";
+    if (status.campaign_id !== CAMPAIGN) return "—";
+    var reported = reportedIterations(status);
+    if (reported !== null) return "2^" + (Math.log(reported) / Math.LN2).toFixed(1);
+    if (!isFinite(dps) || dps <= 0) return "—";
     return "2^" + (Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2).toFixed(1);
   };
   fetch("./status.json", { cache: "no-store" })
@@ -382,6 +424,7 @@
     .then(function (status) {
       var dps = Number(status.dps);
       var workers = Number(status.workers);
+      set("live-rate", status.campaign_id === CAMPAIGN ? formatRate(measuredRate(status)) : "—");
       set("live-dps", isFinite(dps) ? dps.toLocaleString("en-US") : "—");
       set("live-ops", operations(status, dps));
       set("live-workers", isFinite(workers) ? workers.toLocaleString("en-US") : "—");

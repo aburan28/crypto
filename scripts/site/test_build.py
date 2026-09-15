@@ -167,27 +167,87 @@ class BuildTests(unittest.TestCase):
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
 
-    def test_dashboard_eta_uses_last_hour_dp_amount_at_the_campaign_interval(self):
-        # The ETA is the remaining expected work divided by the last-hour
-        # operation rate. The rate is the DP amount in that hour interval
-        # times 2^25.27, so when the hourly amount changes the ETA must move
-        # with it — pin the formula, not a rendered duration.
+    def test_both_pages_read_the_measured_rate_through_one_shared_block(self):
+        # Two pages render the same snapshot's rate, so a fix applied to one
+        # copy and not the other publishes two different walk rates for one
+        # campaign. The block is small enough to mirror and too important to
+        # let drift, so pin the copies byte for byte.
+        start = "  // --- mirrored block:"
+        end = "  // --- end mirrored block ---"
+
+        def mirrored(rel):
+            page = read(os.path.join(self.out, rel))
+            self.assertIn(start, page, rel)
+            self.assertIn(end, page, rel)
+            return page[page.index(start):page.index(end) + len(end)]
+
+        dashboard = mirrored("status/index.html")
+        landing = mirrored("index.html")
+        self.assertEqual(dashboard, landing)
+        for name in ("function reportedIterations", "function measuredRate", "function formatRate"):
+            self.assertIn(name, dashboard, name)
+        # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
+        self.assertIn('" B it/s"', dashboard)
+
+    def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
+        # The derived total is the point count times the interval for
+        # HW(x) <= 34, and this campaign distinguishes at HW(x) <= 32, so the
+        # derivation reads about 2^2.7 low. Both pages must take the walkers'
+        # own count when the snapshot carries one, and both must still be able
+        # to fall back for a snapshot that does not.
+        for rel in ("status/index.html", "index.html"):
+            page = read(os.path.join(self.out, rel))
+            self.assertIn("var reported = reportedIterations(status);", page, rel)
+            body = page[page.index("var reported = reportedIterations(status);"):]
+            body = body[:body.index("\n  }")]
+            self.assertLess(
+                body.index("return"),
+                body.index("ITERATIONS_PER_DP_LOG2"),
+                "%s applies the fallback interval before checking for a counted total" % rel,
+            )
+
+    def test_dashboard_publishes_the_rate_and_the_span_it_measured(self):
+        # A rate without its window is not checkable: 15 minutes of
+        # checkpoints and an hour of them are different measurements, and the
+        # short one swings by a third on this fleet. The value, the span and
+        # the iteration series behind them all have to be on the page.
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn('id="walk-rate"', page)
+        self.assertIn('id="walk-rate-sub"', page)
+        self.assertIn("function drawRate", page)
+        self.assertIn("drawRate(status)", page)
+        self.assertIn("status.walk_rate.window_seconds", page)
+        self.assertIn("mean over the last ", page)
+        # The history table carries the totals the rate is the difference of.
+        self.assertIn("num(point.iterations)", page)
+        self.assertIn('<th scope="col" class="num">iterations</th>', page)
+
+    def test_dashboard_eta_runs_on_the_measured_rate_and_falls_back_to_dps(self):
+        # The ETA is the remaining expected work divided by a rate, and which
+        # rate it is matters: the measured one when two snapshots carry an
+        # iteration total, and otherwise the last-hour DP amount at 2^25.27
+        # per point. Pin the formula and the order, not a rendered duration.
         page = read(os.path.join(self.out, "status", "index.html"))
         self.assertIn('id="eta-value"', page)
         self.assertIn("function opsPerSecond", page)
         self.assertIn("function etaSeconds", page)
         self.assertIn("function drawEta", page)
-        self.assertIn(
-            "dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600",
-            page,
+        ops = page[page.index("function opsPerSecond"):page.index("function etaSeconds")]
+        self.assertIn("var measured = measuredRate(status);", ops)
+        self.assertIn("dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600", ops)
+        self.assertLess(
+            ops.index("measuredRate(status)"),
+            ops.index("dps_last_hour"),
+            "the ETA prefers the DP derivation over the measured rate",
         )
         self.assertIn(
             "Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops)",
             page,
         )
         self.assertIn("drawEta(status)", page)
-        # The last-hour card foot must surface the ops/h implied by the DP
-        # amount, so a change in the interval's count is visible as ops/h.
+        # Without a measured rate the last-hour card foot still surfaces the
+        # ops/h that amount implies, so a change in the interval's count is
+        # visible as ops/h rather than only as a point count.
         self.assertIn("ops/h at interval 2^", page)
 
     def test_dashboard_progress_bar_is_linear_in_work(self):
