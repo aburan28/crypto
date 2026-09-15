@@ -2042,7 +2042,9 @@ fn encode_balanced_s5_frobenius_orbits(
     let representative_wire_offset = frobenius_offset + frobenius_variables;
     let representative_wire_variables = usize::from(binary_representatives) * 4 * width;
     let root_selector_offset = representative_wire_offset + representative_wire_variables;
-    let root_selector_variables = usize::from(rooted) * 2;
+    // Lazy pair-roots still need the two static half-trace root selectors; the
+    // theory layer only learns compressed support, it does not replace them.
+    let root_selector_variables = usize::from(rooted || lazy_pair_roots) * 2;
     let reserved_variables = root_selector_offset + root_selector_variables;
     let summands: [Vec<u32>; 4] = std::array::from_fn(|summand| {
         (0..width)
@@ -2102,10 +2104,10 @@ fn encode_balanced_s5_frobenius_orbits(
             builder.xors.push((vec![coordinate, derived], false));
         }
     }
-    if lazy_pair_roots {
-        // The internal lazy S3 theory installs the two exact regular roots as
-        // soon as the compact endpoint-pair coordinates are fixed.
-    } else if rooted {
+    if rooted || lazy_pair_roots {
+        // Selector-native half-trace roots for each paired side. Exceptional
+        // relative-Frobenius support is handled separately by compressed
+        // nogoods / theory; this static circuit must still pin u,v to a root.
         builder.constrain_s3_root(
             &summands[pairing_indices[0]],
             &summands[pairing_indices[1]],
@@ -4401,12 +4403,13 @@ fn main() {
         }
     }
     let pure_lazy_s3 = algebra_encoding == "lazy_s3";
+    // Orbit lazy-pair-roots now install static half-trace selectors in-circuit.
+    // The expensive root-theory layer is opt-in via KIC_S3_ROOT_THEORY so
+    // selector-native roots can be measured without flooding the clause DB.
     let s3_root_theory = pure_lazy_s3
-        || orbit_lazy_pair_roots
         || std::env::var("KIC_S3_ROOT_THEORY").as_deref() == Ok("1");
     let s3_root_theory_block_exceptional =
         pure_lazy_s3
-            || orbit_lazy_pair_roots
             || std::env::var("KIC_S3_ROOT_THEORY_BLOCK_EXCEPTIONAL").as_deref() == Ok("1");
     let s3_final_theory =
         pure_lazy_s3 || std::env::var("KIC_S3_FINAL_THEORY").as_deref() == Ok("1");

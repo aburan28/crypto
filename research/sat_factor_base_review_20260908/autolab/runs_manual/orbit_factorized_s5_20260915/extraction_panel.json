@@ -12,7 +12,11 @@
   "findings": {
     "planted_edge_free_through_n53": true,
     "unrestricted_cliff": "n13 finds models; n19+ unrestricted stays UNKNOWN under tested budgets",
-    "relative_pair_support_nogoods": "sound on one_hot (planted n13 SAT); do not close n19 unrestricted cliff at 200k conflicts (76 nogood clauses, 0 models)"
+    "relative_pair_support_nogoods": "sound on one_hot (planted n13 SAT); do not close n19 unrestricted cliff at 200k conflicts (76 nogood clauses, 0 models)",
+    "factor_base_n53_control_plane": "claim_check PASS; PENDING_INDEPENDENT_VALIDATION; F=19928 K=188 wall_ms\u22482238 retained\u224874.9MB",
+    "lazy_pair_roots_static_fix": "empty body replaced with constrain_s3_root; theory decoupled (opt-in via KIC_S3_ROOT_THEORY)",
+    "lazy_static_unrestricted_n13": "UNKNOWN 0 models @150k \u2014 half-trace selectors hurt CDCL vs full S3",
+    "unrestricted_n19_cliff": "still open under nogoods / rooted / lazy-static variants"
   },
   "rungs": [
     {
@@ -198,7 +202,40 @@
       "representatives": 2,
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_lazystatic_roots_plus_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "conflicts": 7227,
+      "solve_ms": 7111.75,
+      "s3_root_theory": false,
+      "pair_table_entries": 0
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_lazystatic_roots_plus_nogoods_150k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 150000,
+      "solve_ms": 119638.06,
+      "s3_root_theory": false,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_rooted_plus_nogoods_150k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 150000,
+      "solve_ms": 598930.75,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Nogoods alone insufficient for n19. Next: branch on relative-Frobenius support witnesses / lazy root attachment to selectors before four x-factors are fixed; harvest factor_base n53 control-plane run 20260915T122253Z-229f0ee245."
+  "next": "Unrestricted n19 remains open. Prefer full S3 + compressed nogoods over half-trace selectors for CDCL. Next search lever: orbit-rep / relative-shift decision heuristics or decomposed pair-then-pair solving. Independent-validate factor_base n53 draft."
 }
