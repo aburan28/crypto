@@ -3,6 +3,7 @@ name: Koblitz Stage 38 algebraic collection windows
 on:
   pull_request:
     paths:
+      - "research/weil_factor_composition_20260914/validation/dependencies.lock.txt"
       - "src/cryptanalysis/koblitz_index_calculus.rs"
       - "src/bin/ic/experiment.rs"
       - "src/bin/ic/workflow.rs"
@@ -36,7 +37,7 @@ jobs:
           python3 -m py_compile scripts/verify_koblitz_stage38_result.py
           python3 scripts/run_koblitz_stage38_collection_window.py self-test
           python3 scripts/verify_koblitz_stage38_result.py > /tmp/stage38-result-verification.json
-          cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+          cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
           RUSTFLAGS=-Awarnings cargo test --locked --lib window -- --test-threads=1
           RUSTFLAGS=-Awarnings cargo test --locked --lib \
             the_single_word_orbit_map_agrees_with_the_general_one -- --test-threads=1

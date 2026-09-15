@@ -93,6 +93,10 @@ def patched_stage23(source: Path) -> ExitStack:
         "DISCOVERY_SOURCE": source / "examples/koblitz_public_factor_base_discovery.rs",
         "PANEL_SOURCE": source / "examples/koblitz_unknown_scalar_panel.rs",
         "LOCK": source / core.FROZEN_LOCK_RELATIVE,
+        # This synthetic archive exercises the original Stage-23 source
+        # contract. Rebind both profiles inside its isolated source tree;
+        # the current-workspace smoke lock is not part of that archive.
+        "SMOKE_LOCK": source / core.FROZEN_LOCK_RELATIVE,
         "RUNNER_SOURCE": source / "scripts/run_koblitz_unknown_scalar_panel.py",
     }
     for name, value in replacements.items():
