@@ -29,6 +29,34 @@ CLAIM_BOUNDARY = (
 )
 
 SNAPSHOT_SQL = r"""
+-- One pass over distinguished_points, not three.
+--
+-- The previous form ran three independent LATERAL subqueries against this
+-- table -- totals, per-worker, hourly -- so the planner scanned it three
+-- times per snapshot. That was affordable at a few million rows and is not
+-- at 30.6M: the step took 41-72s through 2026-09-14T15:49Z, 129s at 16:18Z,
+-- broke the SSH hop at 262s, and ran 510s once keepalives let it finish --
+-- 30s under the remote timeout. The table only grows.
+--
+-- `grouped` aggregates once by (worker_id, hour); every figure below is
+-- derived from it. The rolling windows stay exact because they are counted
+-- as FILTER aggregates during that same pass rather than recovered from
+-- hour buckets, which would round `last hour` to a bucket boundary and pull
+-- rows older than the 7-day cutoff into the first hourly bucket.
+WITH grouped AS (
+  SELECT
+    worker_id,
+    date_trunc('hour', found_at) AS hour,
+    count(*)::bigint AS dps,
+    min(found_at) AS first_dp_at,
+    max(found_at) AS last_dp_at,
+    count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint AS dps_last_hour,
+    count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint AS dps_last_day,
+    count(*) FILTER (WHERE found_at > now() - interval '7 days')::bigint AS dps_last_week
+  FROM distinguished_points
+  WHERE campaign_id = %(campaign)s
+  GROUP BY 1, 2
+)
 SELECT json_build_object(
   'campaign_id', c.campaign_id,
   'curve_id', c.curve_id,
@@ -49,14 +77,13 @@ SELECT json_build_object(
 FROM rho_campaigns c
 LEFT JOIN LATERAL (
   SELECT
-    count(*)::bigint AS dps,
+    sum(dps)::bigint AS dps,
     count(DISTINCT worker_id)::bigint AS workers,
-    min(found_at) AS first_dp,
-    max(found_at) AS last_dp,
-    count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint AS dps_last_hour,
-    count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint AS dps_last_day
-  FROM distinguished_points d
-  WHERE d.campaign_id = c.campaign_id
+    min(first_dp_at) AS first_dp,
+    max(last_dp_at) AS last_dp,
+    sum(dps_last_hour)::bigint AS dps_last_hour,
+    sum(dps_last_day)::bigint AS dps_last_day
+  FROM grouped
 ) s ON true
 LEFT JOIN LATERAL (
   SELECT
@@ -70,13 +97,12 @@ LEFT JOIN LATERAL (
   FROM (
     SELECT
       worker_id,
-      count(*)::bigint AS dps,
-      min(found_at) AS first_dp_at,
-      max(found_at) AS last_dp_at
-    FROM distinguished_points d
-    WHERE d.campaign_id = c.campaign_id
+      sum(dps)::bigint AS dps,
+      min(first_dp_at) AS first_dp_at,
+      max(last_dp_at) AS last_dp_at
+    FROM grouped
     GROUP BY worker_id
-    ORDER BY count(*) DESC
+    ORDER BY sum(dps) DESC
     LIMIT 32
   ) x
 ) w ON true
@@ -84,13 +110,12 @@ LEFT JOIN LATERAL (
   SELECT json_agg(row_to_json(y) ORDER BY y.hour) AS hourly
   FROM (
     SELECT
-      date_trunc('hour', found_at) AS hour,
-      count(*)::bigint AS dps
-    FROM distinguished_points d
-    WHERE d.campaign_id = c.campaign_id
-      AND found_at > now() - interval '7 days'
-    GROUP BY 1
-    ORDER BY 1
+      hour,
+      sum(dps_last_week)::bigint AS dps
+    FROM grouped
+    GROUP BY hour
+    HAVING sum(dps_last_week) > 0
+    ORDER BY hour
   ) y
 ) h ON true
 WHERE c.campaign_id = %(campaign)s;
@@ -213,11 +238,13 @@ def psql_json(database_url, campaign):
 def psycopg_json(database_url, campaign):
     import psycopg
 
-    sql = SNAPSHOT_SQL.replace("%(campaign)s", "%s")
+    # Named parameter, bound once per occurrence: the query references the
+    # campaign in both the aggregate scan and the campaign row lookup, so
+    # positional binding would need the value passed twice.
     with psycopg.connect(database_url) as conn:
         with conn.cursor() as cur:
             cur.execute("SET default_transaction_read_only = on")
-            cur.execute(sql, (campaign,))
+            cur.execute(SNAPSHOT_SQL, {"campaign": campaign})
             row = cur.fetchone()
     if not row or row[0] is None:
         raise RuntimeError("campaign %s not found" % campaign)
