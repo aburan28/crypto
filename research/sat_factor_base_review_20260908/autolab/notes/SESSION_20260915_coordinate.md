@@ -10,12 +10,11 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Rho challenge spot instances (`bc-01a0a48f…`) | G7e ASG / ECC2K-130 DP collection | RUNNING — leave AWS alone |
 | Experiment coordination (`bc-01a0a4b9…`) | IC boundary autolab + priority probes | this session |
 
-### Rho campaign snapshot (read-only, 2026-09-15 ~11:15Z tick)
+### Rho campaign snapshot (read-only, 2026-09-15 ~11:45Z)
 
 - Bucket `s3://ecc2k130-590183823895`
 - Slots 8, alive **6**, retired 2, errors 0
-- Aggregate **87.073 B it/s**, checkpointed 7.159e15 iters ≈ 0.333% of 2^60.9
-- ETA ~285d at current rate
+- Aggregate **~86.9 B it/s**, checkpointed ~7.20e15 iters ≈ 0.335% of 2^60.9
 - Do **not** run `fleet.sh` / `infra.sh` from this agent
 
 ## Branch
@@ -27,32 +26,30 @@ sibling may flip the shared worktree — re-checkout this branch each tick).
 
 | Beat / probe | Path / run_id | Result |
 |---|---|---|
-| preflight | — | ok |
 | smoke `vs_rho` n13 | `runs/20260915T110615Z-cbfe798888` | PASS / PENDING_IV |
-| `vs_rho` n37_wall 1fx | `runs/20260915T110708Z-6bac5fa80e` | PASS draft; IC 638 vs ρ 194 wall (no 20% win) |
-| relative Frobenius pair support n13/19/23/37/41/53 | `runs_manual/relative_pair_stats_20260915/` | compression = n every rung; 0 equivariance misses |
-| j0 16-bit e2e | `runs_manual/prime_j0_e2e_16bit_20260915/result.json` | ic_agrees_rho ✓, ic_matches_truth ✓ |
-| orbit_factorized planted ladder n13→53 | `runs_manual/orbit_factorized_s5_20260915/extraction_panel.json` | **edge-free SAT** with planted x+chain units; n53: 1 valid tuple, 0 bad lifts, 0 pair table, 1053 conflicts / 11.1s solve |
-| orbit_factorized n13 unrestricted 1M | same dir | SAT with **8** valid tuples, 0 bad lifts, then UNKNOWN (censored) |
+| `vs_rho` n37_wall 1fx | `runs/20260915T110708Z-6bac5fa80e` | PASS draft; IC ≫ ρ wall |
+| relative Frobenius pair support n13→53 | `runs_manual/relative_pair_stats_20260915/` | compression = n; 0 equivariance misses |
+| j0 16-bit e2e | `runs_manual/prime_j0_e2e_16bit_20260915/result.json` | ic_agrees_rho ✓ |
+| orbit_factorized planted ladder n13→53 | `runs_manual/orbit_factorized_s5_20260915/` | **edge-free SAT** through n53 |
+| orbit_factorized n13 unrestricted 1M | same | SAT, **8** valid models, then UNKNOWN |
+| orbit_factorized n19 unrestricted 500k | same | **UNKNOWN**, 0 models (~710s) |
+| orbit_factorized n23 unrestricted 300k | same | **UNKNOWN**, 0 models (~595s) |
+| n13/n19 + lazy pair-root theory | same | UNKNOWN, 0 models (theory did not help) |
+| n19 symmetry+binary 100k | same | UNKNOWN, 0 models |
 
 ## Priority #1 signal
 
-1. `relative_pair_stats`: n-fold support compression through n=53 (accounting only).
-2. **Edge-free planted extraction**: `factorized_s5_over_frobenius_orbit_factor_base`
-   recovers group-valid planted relations at n=13,19,23,37,41,**53** with
-   `pair_table_entries=0` and `pair_selector_variables=0`.
-3. Unrestricted n13 (no planted units) already yields multiple group-valid
-   models under a 1M-conflict budget (censored UNKNOWN after 8 models).
+1. Edge-free **planted** extraction works through **n=53** (0 pair table).
+2. Unrestricted search cliff: **n13 works**, **n19+ does not** under tested budgets
+   (lazy theory / symmetry / binary reps still 0 models).
+3. Relative-pair support compression is measured; not yet wired into search pruning.
 
-Claim boundary: planted units certify formula soundness / planted recovery,
-not unrestricted n53 search, SAT advantage, or vs_rho crossover. No ledger
-promotion.
+Claim boundary: planted units ≠ unrestricted n53 search ≠ vs_rho ≠ ledger promotion.
 
 ## Next ticks
 
-1. Unrestricted (no planted units) budgets at n19–n37; then n53 if stable.
-2. Feed relative-Frobenius pair-support into branching / lazy roots so
-   unrestricted search prunes before four factors are fixed.
-3. Independent validation of prior PASS drafts before any ledger promotion.
-4. Re-checkout `cursor/ic-boundary-experiments-d111` if the shared worker
-   is back on the rho branch; never mutate AWS.
+1. Code: relative-Frobenius pair-support pruning before four factors are fixed.
+2. Re-test unrestricted n19 after pruning lands.
+3. Parallel ledger beat: `koblitz.factor_base.n53` control-plane.
+4. Independent validation of prior PASS drafts before any ledger promotion.
+5. Re-checkout IC branch if worker flipped to rho; never mutate AWS.
