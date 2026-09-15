@@ -59,7 +59,10 @@
     "pair_sum_trie_intermediate_domain": "Enabled KIC_INTERMEDIATE_DOMAIN=pair_sum_trie on orbit_factorized (u/v at 4n/5n field bits; no pair/edge table). Planted-unit n13 SAT (173 conflicts, valid=1, invalid_lifts=0, domain=130); planted-unit n19+nogoods SAT (596 conflicts, domain=1330); planted-unit n19+relative-positive SAT (14 conflicts). Unrestricted planted-target n13 SAT (~7.9k conflicts). Unrestricted planted-target n19 UNKNOWN 0 models @100k; natural n19 UNKNOWN @80k. Structural lever is sound but does not close the n19 cliff. Not vs_rho; not ledger promotion.",
     "n41_dim21_budget20k": "n41 m=2 dim21 F4 node_budget=20000 a=0 seed=11 targets=1: still both arms INCONCLUSIVE (effort 10005, wall~794s, x FFD=3, gate ok, F_x=2096989). Effort scaled vs budget5k (2504\u219210005) without closing; constructible but not claim-grade. Not ledger promotion.",
     "pair_sum_trie_plus_relative_positive_combo": "Combo KIC_INTERMEDIATE_DOMAIN=pair_sum_trie + relative-frame positive + nogoods: planted-unit n19 SAT (14 conflicts, valid=1, invalid_lifts=0, pair_table=0, domain=1330, clauses=74407). Unrestricted planted-target n19 UNKNOWN 0 models @80k; natural seed3 UNKNOWN @60k. Sound combo does not close cliff. Not vs_rho; not ledger promotion.",
-    "n31_third_seed_ffd_stability": "Third-seed n31 m=2 dim16 F4 panel (seed=424242, targets=4, --no-sat): FFD stable (x=3,sym=4), gate ok, 0 inconclusive. x-chained found 4/4 (effort 4409); sym found 1 / refuted 3 (effort 4095). Strengthens distributional FFD/gate stability vs seeds 0x5EED and 66142. Not ledger promotion."
+    "n31_third_seed_ffd_stability": "Third-seed n31 m=2 dim16 F4 panel (seed=424242, targets=4, --no-sat): FFD stable (x=3,sym=4), gate ok, 0 inconclusive. x-chained found 4/4 (effort 4409); sym found 1 / refuted 3 (effort 4095). Strengthens distributional FFD/gate stability vs seeds 0x5EED and 66142. Not ledger promotion.",
+    "cms_pair_sum_relative_positive_combo": "CryptoMiniSat5 on pair_sum_trie+relative-positive+nogoods n19 (pair_table=0, 7415 vars, 1159 native xors): unrestricted planted-target INDETERMINATE @150k conflicts (~16s). Planted-unit same encoding SATISFIABLE. Cliff is not an internal-solver-only artifact for this combo; not ledger promotion.",
+    "j0_16bit_iv_redraw": "Independent 3-shot redraw of j0_known_answer_bits 16: all PASS_KNOWN_ANSWER_AGREES_RHO (ic_ok/rho_ok/agrees/truth). IC wall >> rho (not vs_rho crossover). No ledger promotion.",
+    "relation_yield_n19_census_iv": "Independent koblitz factor_base yield census n=19 a=1 targets=128: 24 identities, coverage mean=0.340 max=1.000 min=0.000, 5 complete. Distributional probe only; not ledger promotion."
   },
   "rungs": [
     {
@@ -1361,8 +1364,29 @@
       "sym_ffd": 4,
       "inconclusive": 0,
       "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260915_distro/third_seed_424242_receipt.json"
+    },
+    {
+      "n": 19,
+      "mode": "cms_combo_unrestricted_150k",
+      "verdict": "INDETERMINATE",
+      "conflicts": 150002,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/cms_probe_pair_sum_relative_positive/cms_receipt.json"
+    },
+    {
+      "n": 16,
+      "mode": "j0_known_answer_3shot_redraw",
+      "verdict": "PASS_KNOWN_ANSWER_AGREES_RHO",
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915_redraw/replay_receipt.json"
+    },
+    {
+      "n": 19,
+      "mode": "relation_yield_factor_base_census_t128",
+      "verdict": "DISTRIBUTIONAL_COVERAGE_OBSERVED",
+      "coverage_mean": 0.3404947916666667,
+      "coverage_max": 1.0,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/relation_yield_koblitz_n19_20260915_iv/yield_iv_receipt.json"
     }
   ],
-  "next": "n19 cliff still open under pair_sum_trie+relative-positive combo @80k; n31 FFD/gate stable across 3 seeds. Next: deeper non-domain n19 rewrite, or factor_base/relation_yield / j0 IV beats. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
+  "next": "CMS confirms combo cliff @150k; j0-16 3-shot IV PASS; n19 yield census shows nontrivial coverage. Next: deeper non-domain n19 rewrite, or push factor_base/relation_yield CI gates / vs_rho wall beats. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
   "updated_at": "2026-09-15T17:09:46Z"
 }
