@@ -77,7 +77,7 @@ Resources:
     Properties:
       ReplicationGroupDescription: !Sub '${AWS::StackName} index-calculus Gröbner cache'
       Engine: redis
-      EngineVersion: '7.2'
+      EngineVersion: '7.1'
       CacheNodeType: !Ref CacheNodeType
       NumCacheClusters: !Ref NumCacheClusters
       AutomaticFailoverEnabled: true
