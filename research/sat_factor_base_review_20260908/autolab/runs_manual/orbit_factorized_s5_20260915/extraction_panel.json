@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_edge_free_extraction_panel",
   "task_id": "TASK-KIC-S5-THREE-PAIRINGS-XOR-20260910",
-  "claim_boundary": "Public-synthetic Koblitz S5 only. Planted-unit runs certify edge-free formula soundness / planted recovery. Unrestricted arms are censored operational observations under fixed conflict budgets — not SAT advantage, vs_rho crossover, or ledger promotions.",
+  "claim_boundary": "Public-synthetic Koblitz S5 only. Planted-unit runs certify edge-free formula soundness. Relative-Frobenius pair-support nogoods are compressed exceptional-state clauses with zero pair/edge table; they are not unrestricted n53 extraction, SAT advantage, vs_rho, or ledger promotions. Unrestricted UNKNOWN arms remain censored operational observations.",
   "encodings": {
     "algebra": "factorized_s5_over_frobenius_orbit_factor_base",
     "domain": "trie / one_hot_or_binary_representative_plus_binary_frobenius_shift",
@@ -11,7 +11,8 @@
   },
   "findings": {
     "planted_edge_free_through_n53": true,
-    "unrestricted_cliff": "n13 finds multiple group-valid models; n19+ unrestricted stays UNKNOWN with 0 models under tested budgets (incl. lazy pair-root theory, symmetry break, binary reps)"
+    "unrestricted_cliff": "n13 finds models; n19+ unrestricted stays UNKNOWN under tested budgets",
+    "relative_pair_support_nogoods": "sound on one_hot (planted n13 SAT); do not close n19 unrestricted cliff at 200k conflicts (76 nogood clauses, 0 models)"
   },
   "rungs": [
     {
@@ -75,7 +76,7 @@
       "valid_x_tuples": 0,
       "models_examined": 0,
       "conflicts": 500000,
-      "solve_ms": 709436.70,
+      "solve_ms": 709436.7,
       "variables": 4750,
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
@@ -160,7 +161,44 @@
       "factor_base_points": 15900,
       "pair_table_entries": 0,
       "pair_selector_variables": 0
+    },
+    {
+      "n": 13,
+      "mode": "planted_x_chain_units_plus_pair_support_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 19,
+      "solve_ms": 7.28,
+      "nogood_clauses": 26,
+      "pair_table_entries": 0
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_nogoods_200k",
+      "verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 3,
+      "conflicts": 200000,
+      "solve_ms": 67890.29,
+      "nogood_clauses": 26,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_nogoods_200k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 200000,
+      "solve_ms": 261211.14,
+      "nogood_clauses": 76,
+      "exceptional_relative_states": 4,
+      "representatives": 2,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Implement relative-Frobenius pair-support pruning that fires before four factors are fixed (static/lazy), re-test unrestricted n19; in parallel run ledger beat koblitz.factor_base.n53 control-plane."
+  "next": "Nogoods alone insufficient for n19. Next: branch on relative-Frobenius support witnesses / lazy root attachment to selectors before four x-factors are fixed; harvest factor_base n53 control-plane run 20260915T122253Z-229f0ee245."
 }

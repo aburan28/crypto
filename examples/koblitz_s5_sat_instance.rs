@@ -2482,6 +2482,156 @@ fn decode_partial_code(assignment: &[Option<bool>], offset: usize, width: usize)
     })
 }
 
+fn push_forbidden_binary_assignment(clause: &mut Vec<Lit>, offset: usize, width: usize, value: usize) {
+    for bit in 0..width {
+        let variable = (offset + bit + 1) as Lit;
+        if ((value >> bit) & 1) == 1 {
+            clause.push(-variable);
+        } else {
+            clause.push(variable);
+        }
+    }
+}
+
+/// Install compressed relative-Frobenius pair-support nogoods on orbit selectors.
+///
+/// For each paired summand side and each exceptional relative state
+/// `(left_rep, right_rep, relative_shift)`, forbid every absolute Frobenius
+/// alignment realizing that relative shift. Uses the representative-orbit
+/// compression measured by `relative_pair_stats` — never materializes an
+/// endpoint pair/edge table.
+fn install_relative_orbit_pair_support_nogoods(
+    solver: &mut Solver,
+    curve: &KoblitzCurve,
+    representative_x_codes: &[u64],
+    pairing: usize,
+    representative_encoding: &str,
+) -> serde_json::Value {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    let representatives = representative_x_codes.len();
+    let binary_representatives = representative_encoding == "binary";
+    let representative_index_width =
+        ((usize::BITS - representatives.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let representative_variables = if binary_representatives {
+        4 * representative_index_width
+    } else {
+        4 * representatives
+    };
+    let cardinality_auxiliaries = if binary_representatives {
+        0
+    } else {
+        4 * representatives.saturating_sub(1)
+    };
+    let frobenius_width =
+        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let problem_variables = 6 * width;
+    let representative_offset = problem_variables;
+    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let pairing_indices = match pairing {
+        0 => [0, 1, 2, 3],
+        1 => [0, 2, 1, 3],
+        2 => [0, 3, 1, 2],
+        _ => panic!("pairing must be 0, 1, or 2"),
+    };
+    let sides = [
+        [pairing_indices[0], pairing_indices[1]],
+        [pairing_indices[2], pairing_indices[3]],
+    ];
+
+    let mut shifted = vec![vec![0u64; width]; representatives];
+    for (index, &code) in representative_x_codes.iter().enumerate() {
+        shifted[index][0] = code;
+        for exponent in 1..width {
+            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
+        }
+    }
+
+    let mut relative_states = 0usize;
+    let mut exceptional_relative_states = 0usize;
+    let mut nogood_clauses = 0usize;
+    for &[left_summand, right_summand] in &sides {
+        for left_rep in 0..representatives {
+            for right_rep in 0..representatives {
+                for relative_shift in 0..width {
+                    relative_states += 1;
+                    let right = shifted[right_rep][relative_shift];
+                    let left = representative_x_codes[left_rep];
+                    if regular_s3_x_roots(curve, left, right).is_some() {
+                        continue;
+                    }
+                    exceptional_relative_states += 1;
+                    for left_shift in 0..width {
+                        let right_shift = (left_shift + relative_shift) % width;
+                        let mut clause = Vec::with_capacity(
+                            2 + 2 * frobenius_width
+                                + if binary_representatives {
+                                    2 * representative_index_width
+                                } else {
+                                    2
+                                },
+                        );
+                        if binary_representatives {
+                            push_forbidden_binary_assignment(
+                                &mut clause,
+                                representative_offset + left_summand * representative_index_width,
+                                representative_index_width,
+                                left_rep,
+                            );
+                            push_forbidden_binary_assignment(
+                                &mut clause,
+                                representative_offset + right_summand * representative_index_width,
+                                representative_index_width,
+                                right_rep,
+                            );
+                        } else {
+                            clause.push(
+                                -((representative_offset
+                                    + left_summand * representatives
+                                    + left_rep
+                                    + 1) as Lit),
+                            );
+                            clause.push(
+                                -((representative_offset
+                                    + right_summand * representatives
+                                    + right_rep
+                                    + 1) as Lit),
+                            );
+                        }
+                        push_forbidden_binary_assignment(
+                            &mut clause,
+                            frobenius_offset + left_summand * frobenius_width,
+                            frobenius_width,
+                            left_shift,
+                        );
+                        push_forbidden_binary_assignment(
+                            &mut clause,
+                            frobenius_offset + right_summand * frobenius_width,
+                            frobenius_width,
+                            right_shift,
+                        );
+                        assert!(solver.add_clause(clause));
+                        nogood_clauses += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    json!({
+        "enabled": true,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "relative_states_scanned": relative_states,
+        "exceptional_relative_states": exceptional_relative_states,
+        "nogood_clauses": nogood_clauses,
+        "representatives": representatives,
+        "representative_encoding": representative_encoding,
+        "install_ms": started.elapsed().as_secs_f64() * 1000.0,
+        "claim_boundary": "Compressed exceptional relative-Frobenius pair-support nogoods only; not unrestricted extraction, SAT advantage, or vs_rho"
+    })
+}
+
 fn regular_s3_x_roots(curve: &KoblitzCurve, left: u64, right: u64) -> Option<[u64; 2]> {
     let n = curve.n;
     let irr = &curve.curve.irreducible;
@@ -4166,6 +4316,32 @@ fn main() {
         add_coordinate_domain(&mut encoding.solver, 4 * width, width, codes);
         add_coordinate_domain(&mut encoding.solver, 5 * width, width, codes);
     }
+    let mut relative_pair_support_nogoods = json!({
+        "enabled": false,
+        "pair_table_entries": 0,
+        "edge_selectors": 0
+    });
+    if algebra_encoding == "orbit_factorized"
+        && std::env::var("KIC_ORBIT_PAIR_SUPPORT_NOGOODS").as_deref() == Ok("1")
+    {
+        let representative_x_codes: Vec<u64> = base
+            .representatives
+            .iter()
+            .map(|point| match point {
+                BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
+                BinaryPoint::Infinity => panic!("factor-base representative must be affine"),
+            })
+            .collect();
+        let representative_encoding =
+            std::env::var("KIC_ORBIT_REP_ENCODING").unwrap_or_else(|_| "one_hot".to_owned());
+        relative_pair_support_nogoods = install_relative_orbit_pair_support_nogoods(
+            &mut encoding.solver,
+            &curve,
+            &representative_x_codes,
+            pairing,
+            &representative_encoding,
+        );
+    }
     let planted_x_root_units =
         std::env::var("KIC_PLANTED_X_ROOT_UNITS").as_deref() == Ok("1");
     let planted_chain_root_units =
@@ -4953,6 +5129,7 @@ fn main() {
             "pair_table_entries":encoding.pair_table_entries,
             "pair_selector_variables":encoding.pair_selector_variables,
             "pair_table_propagation":encoding.pair_table_propagation,
+            "relative_pair_support_nogoods":relative_pair_support_nogoods,
             "final_support_clauses":encoding.final_support_clauses,
             "final_compatible_selector_pairs":encoding.final_compatible_selector_pairs,
             "final_s3_circuit_installed":encoding.final_s3_circuit_installed,
