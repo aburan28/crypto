@@ -44,6 +44,17 @@ sized for, so every number below moved with them.
 | GPU-hours at the expected work | 42,400 | 2.15e18 / 14.11e9 / 3600 |
 | Distinguished points at weight 34 | 2^35.6 records, ~1.7 TB | one report per 2^25.27 iterations |
 | Points per GPU | ~349/s, ~0.96 GB/day | same |
+| Distinguished points at weight 32, the cutoff actually running | one report per 2^27.9 iterations | measured 2026-09-15: 7.93e15 checkpointed iterations against 31.6 M points |
+
+`campaign.json` runs `dpWeight` 32, not the 34 the rows above are priced
+at, so every per-point figure here is a floor: points are about 2^2.6 rarer
+than that table says, and the corpus at the expected work is smaller by the
+same factor. Nothing about the walk changes — this is an accounting
+correction, per AGENTS.md §3 — but it is the reason the public dashboard
+reports the walkers' own checkpoint sum rather than converting the point
+count: at 2^25.27 per point the conversion read 2^50.3 operations walked
+where the checkpoints said 2^52.8, and an ETA six times too long with it.
+See `scripts/rho_status/README.md`.
 
 Wall-clock and cost at the *expected* work, using prices observed in
 us-west-2 on 2026-09-11 (spot g7e.2xlarge $1.31/h, on-demand $3.36/h;
@@ -256,13 +267,21 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
 * `status.py` sums live workers' rates, checkpointed iterations × walks per
   slot (survives restarts), uploaded points, and the fraction of 2^60.9.
+  Its `rateBps` is what the walkers say about themselves right now; the
+  public dashboard instead differences the checkpoint sum between two
+  snapshots, which ran 72.5 B it/s against this 86–101 B it/s on
+  2026-09-15. The gap is the tail each slot has walked but not checkpointed,
+  and it is the difference between a rate that survives a worker dying
+  mid-interval and one that does not.
 * Per instance: `journalctl -u 'ecc2k130-worker@*' -f`, or without ssh the
   copy in `s3://bucket/logs/<instance-id>/worker.log` (refreshed every five
   minutes). The supervisor logs a line a minute: rate, iterations this run,
   points, uploaded, checkpoint.
 * `fleet.sh status` shows which sizes and AZs the fleet actually got.
-* Points per GPU-day should be ~30 M (2^25.27 per report). Far fewer with a
-  normal rate means dropped reports (`dpCap` too small; the client warns).
+* Points per GPU-day should be ~5 M at the `dpWeight` 32 this campaign runs
+  (2^27.9 per report, measured), ~30 M if it is ever put back to 34 (2^25.27
+  per report). Far fewer with a normal rate means dropped reports (`dpCap`
+  too small; the client warns).
 
 ## Failure modes and what the design does about them
 

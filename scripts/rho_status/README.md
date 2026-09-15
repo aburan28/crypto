@@ -65,14 +65,25 @@ RHO_WALKER_SSH_KEY=$HOME/.ssh/gha_walker \
   scripts/rho_status/fetch_via_walker.sh
 ```
 
-After a snapshot:
+After a snapshot, attach the campaign's iteration total and measure the
+rate from it:
 
 ```bash
+# Reads the campaign work feed; the bucket is derived from the calling AWS
+# identity, or given outright with RHO_WORK_FEED_URL.
+python3 scripts/rho_status/work_feed.py --status /tmp/status.json
+
 python3 scripts/rho_status/render.py \
   --status /tmp/status.json \
   --history-in docs/ecc2k130-status/history.json \
-  --history-out docs/ecc2k130-status/history.json
+  --history-out docs/ecc2k130-status/history.json \
+  --status-out /tmp/status.json
 ```
+
+The order matters: the rate is a difference between two snapshots, so the
+total has to be in the snapshot before `render.py` records its history
+point. Run the other way round and every point publishes without a total,
+and no rate is ever measurable.
 
 Open `docs/ecc2k130-status/index.html` next to the JSON files, or assemble
 the whole site the way the Action publishes it:
@@ -85,20 +96,45 @@ python3 -m http.server --directory _site 8000   # dashboard at /status/
 ## Published fields
 
 `status.json` includes campaign id, curve id, DP counts, collision count,
-per-worker counts, and 7-day hourly buckets. `state` is one of
-`COLLECTING`, `IDLE_OR_STALE`, `EMPTY`, `COLLISION_RECORDED`.
+per-worker counts, 7-day hourly buckets, and — when the campaign's work
+feed is answering — the `work` and `walk_rate` blocks described below.
+`state` is one of `COLLECTING`, `IDLE_OR_STALE`, `EMPTY`,
+`COLLISION_RECORDED`.
 
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.
 
-The operations total on the dashboard and the matching figure on the
-landing page are **not** in `status.json`: no worker reports an iteration
-counter. Both pages derive them from the point count, one point per
-`2^25.27` iterations at `HW(x) <= 34` (`ecc2k130/aws/README.md`), and show
-the result against the `2^60.9` expected cost of a collision. The exponent
-is a parameter of this campaign's distinguishing rule, so the pages apply
-it to `ecc2k-130` only, and `scripts/site/test_build.py` pins both copies
-of it to the campaign document.
+## Iterations per second, and why it is not derived from points
+
+`work_feed.py` adds a `work` block to `status.json` — the iteration total
+the walkers checkpointed, how many slots are behind it, and how old the
+feed was — and `render.py` adds `walk_rate`: that total's increase since an
+earlier snapshot, the span it was measured over, and the two totals it
+differenced. Both pages render the rate with its span, because a rate
+without one is not checkable: on this fleet a 15-minute window swings by a
+third while an hour does not, so `render.py` prefers the oldest sample
+inside `RATE_WINDOW_S` (an hour) and reaches further back only when an
+outage left the window empty.
+
+It is a conservative figure by construction. A slot's iterations only count
+once it has checkpointed them, so the walked-but-not-yet-checkpointed tail
+is missing: measured against the live campaign on 2026-09-15 it read
+72.5 B it/s where `ecc2k130/aws/status.py`, summing what the walkers
+reported about themselves, read 86–101 B it/s over the same period. The
+published number is the one that survives a worker dying mid-interval.
+
+Neither field is guaranteed. `work_feed.py` refuses a feed that is stale,
+foreign or unparseable and exits 0, because a frozen total does not read as
+a dead ingest host, it reads as a dead campaign. With no total the pages
+fall back to the point count at one point per `2^25.27` iterations at
+`HW(x) <= 34` (`ecc2k130/aws/README.md`) and label the figure as such. That
+fallback **reads low**: this campaign distinguishes at the sparser
+`HW(x) <= 32`, about `2^27.9` iterations per point by its own two counters,
+so the derivation understates the walk by a factor near six and understated
+it on this page until the total was published. Both exponents are
+parameters of one campaign's distinguishing rule, so the pages apply them
+to `ecc2k-130` only, and `scripts/site/test_build.py` pins every copy of
+them to the campaign document.
 
 The dashboard's progress bar is filled from the ratio of the **work**,
 `2^(n - 60.9)`, never from the ratio of the exponents: `n = 39` is two
@@ -106,10 +142,10 @@ thirds of the way along the exponent and about a millionth of a millionth
 of the way through the work. A test pins that, because it is the kind of
 bar that gets "fixed" into a lie by anyone trying to make it look fuller.
 
-The dashboard also derives an ETA to that same `2^60.9` expected cost
-from the last-hour distinguished-point amount: operations per second
-are `(dps_last_hour × 2^25.27) / 3600`, and the ETA is the remaining
-work divided by that rate. When the hourly DP amount changes, the
-operation rate and the ETA both move with it at the fixed interval.
-The ETA is an expectation, not a deadline; `scripts/site/test_build.py`
-pins the formula.
+The dashboard's ETA to that same `2^60.9` expected cost is the remaining
+work divided by the measured rate above, so it moves with the fleet. With
+no measured rate it falls back to the last-hour distinguished-point amount,
+`(dps_last_hour × 2^25.27) / 3600` operations per second, and says which of
+the two it used — the fallback reads about six times too long for the
+reason above. The ETA is an expectation, not a deadline;
+`scripts/site/test_build.py` pins both formulas and their order.
