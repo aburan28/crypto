@@ -40,6 +40,10 @@ class BuildTests(unittest.TestCase):
             "index.html",
             "404.html",
             "assets/site.css",
+            "assets/rho-gpu.js",
+            "assets/rho-gpu-worker.js",
+            "assets/rho-gpu-host.js",
+            "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
             "status/index.html",
             "status/style.css",
@@ -82,6 +86,49 @@ class BuildTests(unittest.TestCase):
                 os.path.exists(os.path.join(self.out, "status", target)),
                 "dashboard fetches %s, which the build does not publish beside it" % target,
             )
+
+    def test_rho_engine_imports_and_fetches_resolve_beside_the_worker(self):
+        # The worker is a module that imports the host arithmetic and fetches
+        # the shader by relative URL, both resolved against its own location.
+        # Publishing it without one of them gives a page whose GPU control
+        # fails only when someone switches it on.
+        worker = read(os.path.join(self.out, "assets", "rho-gpu-worker.js"))
+        targets = re.findall(r'from "\./([^"]+)"', worker) + re.findall(r'fetch\("\./([^"]+)"', worker)
+        self.assertIn("rho-gpu-host.js", targets)
+        self.assertIn("rho-gpu.wgsl", targets)
+        for target in targets:
+            self.assertTrue(
+                os.path.exists(os.path.join(self.out, "assets", target)),
+                "the rho worker loads %s, which the build does not publish beside it" % target,
+            )
+
+    def test_rho_engine_is_off_until_the_visitor_switches_it_on(self):
+        # Spending a visitor's GPU without being asked is the one thing this
+        # feature must never do, and it is one attribute away at all times:
+        # a `checked` on the control, or a start that does not read the stored
+        # choice. Pin both, and the default-off of the background-tab option.
+        page = read(os.path.join(self.out, "index.html"))
+        controls = re.findall(r'<input type="checkbox" id="rho-(?:run|bg)"[^>]*>', page)
+        self.assertEqual(len(controls), 2, controls)
+        for control in controls:
+            self.assertNotIn("checked", control, control)
+        script = read(os.path.join(self.out, "assets", "rho-gpu.js"))
+        self.assertIn("toggle.checked = !!prefs.on;", script)
+        self.assertIn("bg.checked = !!prefs.bg;", script)
+        # Hidden tabs pause unless the visitor asked otherwise.
+        self.assertIn("return document.hidden && !bg.checked;", script)
+
+    def test_rho_engine_reports_no_rate_before_its_device_is_verified(self):
+        # A measurement from a device that does not agree with the host
+        # reference is not a measurement. The worker replays its first device
+        # steps in BigInt and throws before it posts a "ready".
+        worker = read(os.path.join(self.out, "assets", "rho-gpu-worker.js"))
+        self.assertIn("self-test failed: device and host disagree", worker)
+        self.assertLess(
+            worker.index("self-test failed: device and host disagree"),
+            worker.index('type: "ready"'),
+            "the self-test must run before the engine reports itself ready",
+        )
 
     def test_pages_do_not_render_fetched_data_through_innerhtml(self):
         # The dashboard builds rows with textContent because worker_id is

@@ -202,6 +202,56 @@
     </p>
   </section>
 
+  <section class="rule-section" aria-labelledby="h-rho" id="rho-gpu">
+    <h2 id="h-rho" class="section-head">Run a walk here, on your own GPU</h2>
+    <p class="lede narrow">
+      The same r-adding walk the campaign runs in CUDA, compiled to WGSL and
+      stepped on your GPU through WebGPU while this page is open. It is
+      pointed at the scale-down calibration curves this repository measures
+      attacks on &mdash; small enough that a browser finishes one, which is
+      the point: a step rate is only worth quoting if the solver it came from
+      actually solves something. Recovered logarithms are checked here with
+      <span class="mono">kG = Q</span> before they are shown.
+    </p>
+
+    <div class="rho-controls">
+      <label><input type="checkbox" id="rho-run"> Use my GPU while this page is open</label>
+      <label><input type="checkbox" id="rho-bg"> Keep going while the tab is hidden</label>
+      <label>Instance <select id="rho-job" aria-label="Instance"></select></label>
+      <span class="hint">Off until you switch it on, and remembered on this device only.</span>
+    </div>
+
+    <dl class="live rho-live" id="rho-readout">
+      <div><dt>Device</dt><dd class="mono" id="rho-device">&mdash;</dd></div>
+      <div><dt>Device vs. host self-test</dt><dd class="mono" id="rho-check">&mdash;</dd></div>
+      <div><dt>Instance</dt><dd class="mono" id="rho-target">&mdash;</dd></div>
+      <div><dt>Walks</dt><dd class="mono" id="rho-shape">&mdash;</dd></div>
+      <div><dt>Rate</dt><dd class="mono" id="rho-rate">&mdash;</dd></div>
+      <div><dt>Steps</dt><dd class="mono" id="rho-steps">&mdash;</dd></div>
+      <div><dt>Distinguished points</dt><dd class="mono" id="rho-dps">&mdash;</dd></div>
+      <div><dt>Expected time left</dt><dd class="mono" id="rho-eta">&mdash;</dd></div>
+      <div><dt>Elapsed</dt><dd class="mono" id="rho-elapsed">&mdash;</dd></div>
+      <div><dt>State</dt><dd class="mono" id="rho-state">off</dd></div>
+    </dl>
+    <p class="note" id="rho-note"></p>
+
+    <p class="note">
+      What it costs you: one GPU queue and one worker thread, paused by
+      default as soon as the tab is hidden, and stopped the moment the switch
+      goes off. What it establishes: nothing about a deployed curve. The
+      instances are generated toy curves whose orders are known, so the
+      measurement this produces is a throughput figure &mdash; steps per
+      second, and the expected walk length it has to be divided into &mdash;
+      not a ratio to any boundary. Before a rate is reported the engine
+      replays its first 32 device steps in BigInt on the host and refuses to
+      run if the device disagrees.
+      Source:
+      <a href="https://github.com/aburan28/crypto/blob/main/docs/site/assets/rho-gpu.wgsl">rho-gpu.wgsl</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/docs/site/assets/rho-gpu-host.js">rho-gpu-host.js</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/docs/BROWSER_GPU_RHO.md">the note</a>.
+    </p>
+  </section>
+
   <section aria-labelledby="h-notes">
     <h2 id="h-notes" class="section-head">Research notes</h2>
     <p class="lede narrow">
@@ -301,6 +351,7 @@
 
 </main>
 
+<script src="./assets/rho-gpu.js" defer></script>
 <script>
 (function () {
   "use strict";
