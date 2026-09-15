@@ -47,6 +47,9 @@ gpu/btcpuzzle/tune_kangaroo
 # Local convenience link to the index-calculus executable.
 /ic
 
+# Fleet id fleet.sh records per region for the running campaign
+ecc2k130/aws/.fleet-id-*
+
 # FPGA host program for the ECC2K-130 engine (built from hdl/ecc2k130/host)
 hdl/ecc2k130/host/ecc2k130-fpga
 
