@@ -1375,6 +1375,178 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 </table>
 <p>Redis replay: 175 hits, zero cache errors. The 7-bit factor base has zero usable columns and its incomplete runs remain in the evidence. Parameterized-basis failures apply to this encoding and engine, not every possible reuse method.</p>
 <p>Source: <a href="../research/polynomial_reuse_20260914/RESULTS.md">measured results</a>, <a href="../research/polynomial_reuse_20260914/results/run-001/summary.json">comparison data</a>, and <a href="../research/polynomial_reuse_20260914/contract.json">frozen contract</a>.</p></section>
+<section id="f4-linear-algebra-20260914" style="margin:2rem 0;overflow-x:auto">
+<h2>Native F4 linear algebra <span class="chip">engineering</span></h2>
+<p>Accepted matched run: kernel time ratio 0.717 across 18 matrix/seed cases (about 1.39× faster). All 1,824 solver checks and 144 DLP outcomes match. Full-DLP timings show no clear gain; 72 verified and 72 incomplete executions are retained. No exponent or attack-boundary claim.</p>
+<p>Total calibrated operations, S, matched rho ratio and floor ratio remain null for both variants. With elimination share f, even free elimination is bounded by 1/(1−f). Word XOR counts below cover elimination only.</p>
+<table><tr><th>Variant</th><th>Class</th><th>Total operations</th><th>S</th><th>Rho ratio</th><th>Floor ratio</th><th>Correctness</th></tr>
+<tr><td>Original full-width XOR</td><td>reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>Pass</td></tr>
+<tr><td>Suffix XOR, separate pivot borrow</td><td>engineering</td><td>null</td><td>null</td><td>null</td><td>null</td><td>Identical answers</td></tr></table>
+<h3>Fresh kernel holdouts (seed 937)</h3>
+<p>11 alternating pairs per matrix. XORs are exact counts; milliseconds are medians. The paired time ratio is a geometric mean. Input setup and checking are separately recorded.</p>
+<table><tr><th>Matrix</th><th>Variant</th><th>Word XORs</th><th>XOR C/R</th><th>Kernel ms</th><th>Paired time C/R</th></tr>
+<tr><td>deficient-1024x1024</td><td>reference</td><td>3,144,896</td><td>1.000</td><td>3.7134</td><td>1.000</td></tr>
+<tr><td>deficient-1024x1024</td><td>candidate</td><td>2,543,562</td><td>0.809</td><td>2.8809</td><td>0.790</td></tr>
+<tr><td>dense-1024x1024</td><td>reference</td><td>8,365,616</td><td>1.000</td><td>10.2157</td><td>1.000</td></tr>
+<tr><td>dense-1024x1024</td><td>candidate</td><td>4,448,083</td><td>0.532</td><td>6.5838</td><td>0.643</td></tr>
+<tr><td>dense-1024x4096</td><td>reference</td><td>33,438,272</td><td>1.000</td><td>25.3218</td><td>1.000</td></tr>
+<tr><td>dense-1024x4096</td><td>candidate</td><td>29,517,311</td><td>0.883</td><td>12.4689</td><td>0.496</td></tr>
+<tr><td>dense-256x256</td><td>reference</td><td>130,216</td><td>1.000</td><td>0.3808</td><td>1.000</td></tr>
+<tr><td>dense-256x256</td><td>candidate</td><td>81,586</td><td>0.627</td><td>0.3407</td><td>0.852</td></tr>
+<tr><td>dense-4096x512</td><td>reference</td><td>8,388,480</td><td>1.000</td><td>15.4025</td><td>1.000</td></tr>
+<tr><td>dense-4096x512</td><td>candidate</td><td>4,718,382</td><td>0.562</td><td>12.0250</td><td>0.775</td></tr>
+<tr><td>dense-512x1024</td><td>reference</td><td>2,090,192</td><td>1.000</td><td>2.6607</td><td>1.000</td></tr>
+<tr><td>dense-512x1024</td><td>candidate</td><td>1,633,199</td><td>0.781</td><td>1.7670</td><td>0.654</td></tr>
+<tr><td>macaulay-n5-l2-m3-d4</td><td>reference</td><td>47,192</td><td>1.000</td><td>0.2163</td><td>1.000</td></tr>
+<tr><td>macaulay-n5-l2-m3-d4</td><td>candidate</td><td>19,424</td><td>0.412</td><td>0.2109</td><td>0.980</td></tr>
+<tr><td>macaulay-n9-l6-m2-d4</td><td>reference</td><td>1,293,348</td><td>1.000</td><td>2.2668</td><td>1.000</td></tr>
+<tr><td>macaulay-n9-l6-m2-d4</td><td>candidate</td><td>468,017</td><td>0.362</td><td>1.7277</td><td>0.768</td></tr>
+<tr><td>sparse-1024x2048</td><td>reference</td><td>16,316,960</td><td>1.000</td><td>15.1631</td><td>1.000</td></tr>
+<tr><td>sparse-1024x2048</td><td>candidate</td><td>12,387,440</td><td>0.759</td><td>8.4572</td><td>0.556</td></tr>
+</table>
+<h3>Complete DLP diagnostics (elapsed milliseconds, summed)</h3>
+<table><tr><th>n</th><th>Solver</th><th>Split</th><th>Variant</th><th>Elapsed ms</th><th>Verified / attempts</th><th>Paired time C/R</th></tr>
+<tr><td>7</td><td>groebner</td><td>frozen</td><td>reference</td><td>435.725</td><td>0 / 12</td><td>1.000</td></tr>
+<tr><td>7</td><td>groebner</td><td>frozen</td><td>candidate</td><td>437.076</td><td>0 / 12</td><td>1.003</td></tr>
+<tr><td>7</td><td>groebner</td><td>fresh</td><td>reference</td><td>214.975</td><td>0 / 6</td><td>1.000</td></tr>
+<tr><td>7</td><td>groebner</td><td>fresh</td><td>candidate</td><td>214.638</td><td>0 / 6</td><td>0.998</td></tr>
+<tr><td>7</td><td>sat</td><td>frozen</td><td>reference</td><td>336.883</td><td>0 / 12</td><td>1.000</td></tr>
+<tr><td>7</td><td>sat</td><td>frozen</td><td>candidate</td><td>334.680</td><td>0 / 12</td><td>0.994</td></tr>
+<tr><td>7</td><td>sat</td><td>fresh</td><td>reference</td><td>168.000</td><td>0 / 6</td><td>1.000</td></tr>
+<tr><td>7</td><td>sat</td><td>fresh</td><td>candidate</td><td>166.591</td><td>0 / 6</td><td>0.991</td></tr>
+<tr><td>9</td><td>groebner</td><td>frozen</td><td>reference</td><td>66.308</td><td>12 / 12</td><td>1.000</td></tr>
+<tr><td>9</td><td>groebner</td><td>frozen</td><td>candidate</td><td>66.494</td><td>12 / 12</td><td>1.004</td></tr>
+<tr><td>9</td><td>groebner</td><td>fresh</td><td>reference</td><td>36.528</td><td>6 / 6</td><td>1.000</td></tr>
+<tr><td>9</td><td>groebner</td><td>fresh</td><td>candidate</td><td>37.730</td><td>6 / 6</td><td>1.024</td></tr>
+<tr><td>9</td><td>sat</td><td>frozen</td><td>reference</td><td>29.117</td><td>12 / 12</td><td>1.000</td></tr>
+<tr><td>9</td><td>sat</td><td>frozen</td><td>candidate</td><td>28.603</td><td>12 / 12</td><td>0.987</td></tr>
+<tr><td>9</td><td>sat</td><td>fresh</td><td>reference</td><td>12.467</td><td>6 / 6</td><td>1.000</td></tr>
+<tr><td>9</td><td>sat</td><td>fresh</td><td>candidate</td><td>12.525</td><td>6 / 6</td><td>1.004</td></tr>
+</table>
+<p>All full-DLP paired intervals include no change. The small real Macaulay case also has no clear kernel gain. Existing calibrated rows and exponents remain unchanged. Run 001 is retained as rejected because of identical solver binaries and artificially low-rank synthetic inputs.</p>
+<p>Source: <a href="../research/f4_linear_algebra_20260914/RESULTS.md">full results, including regressions and intervals</a>, <a href="../research/f4_linear_algebra_20260914/results/run-002/summary.json">accepted comparison</a>, <a href="../research/f4_linear_algebra_20260914/contract.json">contract</a>.</p>
+</section>
+<section id="weil-factor-composition-20260914" style="margin:2rem 0;overflow-x:auto">
+<h2>Weil-friendly factor-base composition <span class="chip">engineering diagnostic</span></h2>
+<p>Implemented an exact component-coordinate S3 solver with optional linear projection. The saved run contains 864 processes, 912 matched native root-set comparisons (1,824 reference/candidate target executions), 960 complete component root-set checks, and 21,888 full-DLP relation-attempt cross-checks. All completed checks pass. Four new unit tests and the no-default-features library/ic build also pass. Timeouts and incomplete attempts remain in the tables. No calibrated total-cost or exponent advance is established.</p>
+<p>The positive-yield cases with completed ambient controls meet the frozen stage gate. The stronger baseline gate fails: no fresh full-DLP interval establishes a win over pair tables, and projected-chart time is 3.19–17.33× matched rho across the eight useful-base cases. These are secondary runtime ratios, not calibrated attack-cost ratios.</p>
+<table><thead><tr><th>Variant</th><th>Class</th><th>Total operations</th><th>S</th><th>Rho ratio</th><th>Floor ratio</th><th>Verified workload</th></tr></thead><tbody>
+<tr><td>ambient_f4</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>33 verified DLPs / 120 attempts</td></tr>
+<tr><td>charts_f4</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>480 verified stage queries; 177 witnesses</td></tr>
+<tr><td>charts_linear</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>enumerate</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>pair_table</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>rho</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>60 verified DLPs / 60 attempts</td></tr>
+</tbody></table>
+<h3>Fresh solver workloads: cold milliseconds</h3><p>Eight targets per process, three repetitions; complete workloads only. Partial timeout counters remain in the report. Zero-yield controls do not establish a gain.</p>
+<table><thead><tr><th>Case</th><th>Variant</th><th>Complete processes</th><th>Witnesses observed</th><th>F4 reductions observed</th><th>Median cold ms / 8 targets</th></tr></thead><tbody>
+<tr><td>0</td><td>ambient_f4</td><td>3/3</td><td>24</td><td>1914</td><td>66.262</td></tr>
+<tr><td>0</td><td>charts_f4</td><td>3/3</td><td>24</td><td>228</td><td>1.081</td></tr>
+<tr><td>0</td><td>charts_linear</td><td>3/3</td><td>24</td><td>57</td><td>0.728</td></tr>
+<tr><td>0</td><td>enumerate</td><td>3/3</td><td>24</td><td>0</td><td>0.464</td></tr>
+<tr><td>1</td><td>ambient_f4</td><td>3/3</td><td>0</td><td>46368</td><td>4450.652</td></tr>
+<tr><td>1</td><td>charts_f4</td><td>3/3</td><td>0</td><td>1575</td><td>15.239</td></tr>
+<tr><td>1</td><td>charts_linear</td><td>3/3</td><td>0</td><td>813</td><td>4.302</td></tr>
+<tr><td>1</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>0.659</td></tr>
+<tr><td>2</td><td>ambient_f4</td><td>3/3</td><td>24</td><td>9957</td><td>958.730</td></tr>
+<tr><td>2</td><td>charts_f4</td><td>3/3</td><td>24</td><td>279</td><td>2.734</td></tr>
+<tr><td>2</td><td>charts_linear</td><td>3/3</td><td>24</td><td>42</td><td>1.167</td></tr>
+<tr><td>2</td><td>enumerate</td><td>3/3</td><td>24</td><td>0</td><td>0.896</td></tr>
+<tr><td>3</td><td>ambient_f4</td><td>3/3</td><td>0</td><td>46368</td><td>4562.311</td></tr>
+<tr><td>3</td><td>charts_f4</td><td>3/3</td><td>0</td><td>24</td><td>0.611</td></tr>
+<tr><td>3</td><td>charts_linear</td><td>3/3</td><td>0</td><td>0</td><td>0.483</td></tr>
+<tr><td>3</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>0.579</td></tr>
+<tr><td>4</td><td>ambient_f4</td><td>0/3</td><td>6</td><td>14553</td><td>—</td></tr>
+<tr><td>4</td><td>charts_f4</td><td>3/3</td><td>9</td><td>1761</td><td>18.959</td></tr>
+<tr><td>4</td><td>charts_linear</td><td>3/3</td><td>9</td><td>846</td><td>5.204</td></tr>
+<tr><td>4</td><td>enumerate</td><td>3/3</td><td>9</td><td>0</td><td>1.425</td></tr>
+<tr><td>5</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>22839</td><td>—</td></tr>
+<tr><td>5</td><td>charts_f4</td><td>3/3</td><td>3</td><td>1794</td><td>23.395</td></tr>
+<tr><td>5</td><td>charts_linear</td><td>3/3</td><td>3</td><td>1077</td><td>6.871</td></tr>
+<tr><td>5</td><td>enumerate</td><td>3/3</td><td>3</td><td>0</td><td>2.370</td></tr>
+<tr><td>6</td><td>ambient_f4</td><td>0/3</td><td>3</td><td>1125</td><td>—</td></tr>
+<tr><td>6</td><td>charts_f4</td><td>3/3</td><td>12</td><td>2457</td><td>16.240</td></tr>
+<tr><td>6</td><td>charts_linear</td><td>3/3</td><td>12</td><td>378</td><td>4.089</td></tr>
+<tr><td>6</td><td>enumerate</td><td>3/3</td><td>12</td><td>0</td><td>3.396</td></tr>
+<tr><td>7</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>7</td><td>charts_f4</td><td>3/3</td><td>6</td><td>324</td><td>3.195</td></tr>
+<tr><td>7</td><td>charts_linear</td><td>3/3</td><td>6</td><td>18</td><td>1.644</td></tr>
+<tr><td>7</td><td>enumerate</td><td>3/3</td><td>6</td><td>0</td><td>2.429</td></tr>
+<tr><td>8</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>8</td><td>charts_f4</td><td>3/3</td><td>6</td><td>297</td><td>4.037</td></tr>
+<tr><td>8</td><td>charts_linear</td><td>3/3</td><td>6</td><td>6</td><td>1.702</td></tr>
+<tr><td>8</td><td>enumerate</td><td>3/3</td><td>6</td><td>0</td><td>3.038</td></tr>
+<tr><td>9</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>9</td><td>charts_f4</td><td>3/3</td><td>0</td><td>24</td><td>1.843</td></tr>
+<tr><td>9</td><td>charts_linear</td><td>3/3</td><td>0</td><td>0</td><td>1.573</td></tr>
+<tr><td>9</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>2.790</td></tr>
+</tbody></table>
+<h3>Full DLP: verified completions and cold milliseconds</h3><p>12 attempts per row. Medians exclude incomplete attempts; their counts and all timeouts are retained. Rho shares the identical curve and target, without a factor base. Calibrated S and boundary ratios remain null.</p>
+<table><thead><tr><th>Case</th><th>Variant</th><th>Verified / attempts</th><th>Timeouts</th><th>Finished incomplete</th><th>Median cold ms, verified only</th></tr></thead><tbody>
+<tr><td>0</td><td>ambient_f4</td><td>12/12</td><td>0</td><td>0</td><td>14.126</td></tr>
+<tr><td>0</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>0.666</td></tr>
+<tr><td>0</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>0.539</td></tr>
+<tr><td>0</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>0.602</td></tr>
+<tr><td>1</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>1</td><td>charts_linear</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>1</td><td>enumerate</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>1</td><td>pair_table</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>2</td><td>ambient_f4</td><td>12/12</td><td>0</td><td>0</td><td>148.014</td></tr>
+<tr><td>2</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>1.211</td></tr>
+<tr><td>2</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>1.046</td></tr>
+<tr><td>2</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.169</td></tr>
+<tr><td>3</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>3</td><td>charts_linear</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>3</td><td>enumerate</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>3</td><td>pair_table</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>4</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>4</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>6.249</td></tr>
+<tr><td>4</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>2.556</td></tr>
+<tr><td>4</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.665</td></tr>
+<tr><td>5</td><td>ambient_f4</td><td>9/12</td><td>3</td><td>0</td><td>2582.867</td></tr>
+<tr><td>5</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>3.371</td></tr>
+<tr><td>5</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>2.129</td></tr>
+<tr><td>5</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.970</td></tr>
+<tr><td>6</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>6</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>4.605</td></tr>
+<tr><td>6</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>3.867</td></tr>
+<tr><td>6</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>2.776</td></tr>
+<tr><td>7</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>7</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>3.690</td></tr>
+<tr><td>7</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>5.188</td></tr>
+<tr><td>7</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>3.173</td></tr>
+<tr><td>8</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>8</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>4.529</td></tr>
+<tr><td>8</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>5.898</td></tr>
+<tr><td>8</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>3.843</td></tr>
+<tr><td>9</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>9</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>6.684</td></tr>
+<tr><td>9</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>12.466</td></tr>
+<tr><td>9</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>6.477</td></tr>
+<tr><td>0</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.215</td></tr>
+<tr><td>1</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.301</td></tr>
+<tr><td>4</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.414</td></tr>
+<tr><td>6</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.431</td></tr>
+<tr><td>7</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.597</td></tr>
+</tbody></table>
+<h3>Prime degree 131: exact product ranks</h3><p>Field algebra only. At dimension 44, a power seed has self-product rank 87 but pair-weighted rank 130.318 across the complete 8,646 component pairs. No nontrivial proper subfield exists. No degree-131 DLP or exponent inference is made.</p>
+<table><thead><tr><th>ell</th><th>Family</th><th>Self-product rank</th><th>Mixed minimum</th><th>Mixed maximum</th><th>Pair-weighted rank</th></tr></thead><tbody>
+<tr><td>8</td><td>power_span</td><td>15</td><td>22</td><td>64</td><td>62.197</td></tr>
+<tr><td>8</td><td>frobenius_span</td><td>36</td><td>43</td><td>64</td><td>62.727</td></tr>
+<tr><td>8</td><td>random</td><td>36</td><td>64</td><td>64</td><td>63.576</td></tr>
+<tr><td>16</td><td>power_span</td><td>31</td><td>46</td><td>131</td><td>127.364</td></tr>
+<tr><td>16</td><td>frobenius_span</td><td>129</td><td>131</td><td>131</td><td>130.970</td></tr>
+<tr><td>16</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>32</td><td>power_span</td><td>63</td><td>94</td><td>131</td><td>129.409</td></tr>
+<tr><td>32</td><td>frobenius_span</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>32</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>44</td><td>power_span</td><td>87</td><td>130</td><td>131</td><td>130.318</td></tr>
+<tr><td>44</td><td>frobenius_span</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>44</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+</tbody></table>
+<p>Common-subfield scalar components preserve small mixed products at composite degree. Every completed root set and point witness is checked; a small product rank alone does not establish a better attack. Earlier calibrated rows, exponents and attack verdicts remain unchanged.</p>
+<p>Sources: <a href="../research/weil_factor_composition_20260914/RESULTS.md">results and paired intervals</a>, <a href="../research/weil_factor_composition_20260914/results/run-001/comparison.json">comparison data</a>, <a href="../research/weil_factor_composition_20260914/results/run-001/structure.json">structural diagnostics</a>, <a href="../research/weil_factor_composition_20260914/contract.json">frozen contract</a>.</p>
+</section>
 <script>
   (function () {
     var tip = document.getElementById('tip');

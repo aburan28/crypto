@@ -1,0 +1,9 @@
+{
+  "cpu_for_benchmark": 0,
+  "cpu_for_concurrent_test_compilation": 1,
+  "shared_host": true,
+  "timing_scope": "secondary diagnostics only",
+  "source_hashes_match_at_review": true,
+  "tests": "4 chart tests pass; default-feature-free lib/ic compile passes",
+  "analysis_only_change": "Comparator extended after collection started to display paired timing versus the already frozen pair-table and rho references. Acceptance, targets, production source, and binaries unchanged; hashes preserve both analysis revisions."
+}
