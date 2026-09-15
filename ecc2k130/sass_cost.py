@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""What each field routine costs in real SASS, and which pipe it spends.
+
+path_cost.py answers this in clang PTX with every instruction counted as one.
+Two corrections make the difference between a useful budget and a misleading
+one:
+
+  * ptxas fuses logic into LOP3 at a ratio close to two, so PTX shares are not
+    what the machine issues.  This compiles with the shipping nvcc and counts
+    the SASS.
+
+  * clmad is a real sm_120 instruction but a narrow one.
+    benchmarks/clmad-price/probe.cu measures 0.333 T clmad/s against 12.563 T
+    LOP3/s on an RTX PRO 4500: one clmad occupies its unit for as long as
+    37.7 LOP3 occupy the integer pipe.  Counting it as one instruction, as
+    THROUGHPUT-30B.md's budget does, understates the multiplier ten-fold.
+
+The two pipes are reported apart, because they overlap: a kernel spends
+max(alu/LOP3 rate, clmad/clmad rate), not the sum.  At the audited preset the
+walk is near the integer pipe and about half way up the carryless unit, so
+removing logic pays and spending a clmad to remove a lot of logic can pay too.
+
+    ./sass_cost.py                       # per-routine SASS, shipping preset
+    ./sass_cost.py --update              # weighted into one scalar update
+    ./sass_cost.py --rate 5.022 --sms 82 # what that leaves of each pipe
+"""
+import argparse
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from collections import Counter
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+PRESET = {
+    "ECC_BATCH": 16, "ECC_THREADS": 256, "ECC_MINBLOCKS": 2,
+    "ECC_PACKED_SINGLE_PRODUCT": 1, "ECC_PACKED_CACHE_DENOM": 1,
+    "ECC_PACKED_BY_VALUE": 1, "ECC_PACKED_PERM_SIGMA": 3,
+    "ECC_PACKED_POLY_CHAIN": 1, "ECC_PACKED_UNROLL_INV": 1,
+    "ECC_PACKED_PAIR_PRODUCTS": 1, "ECC_PACKED_POLY_STATE": 1,
+    "ECC_PACKED_DIRECT_REDUCE": 1, "ECC_PACKED_GENERATED_PRODUCT": 1,
+    "ECC_PACKED_CLMAD": 1, "ECC_PACKED_WEIGHTED_PREFIX": 2,
+    "ECC_PACKED_COMPACT_STATE": 1, "ECC_PACKED_SHARED_SIGMA": 1,
+    "ECC_PACKED_STATE_TILE": 256,
+}
+
+# Measured by benchmarks/clmad-price/probe.cu on an RTX PRO 4500.
+LOP3_RATE = 12.563e12          # lane-ops/s, the integer pipe
+CLMAD_RATE = 0.333e12          # lane-ops/s, the carryless unit
+CLMAD_PRICE = LOP3_RATE / CLMAD_RATE
+IMAD_PRICE = 2.01
+
+# One kernel per routine: ptxas inlines device functions regardless of
+# __noinline__, so a separate entry point is the only way to see a routine's
+# own SASS.  k_nop calibrates the parameter load and store every kernel here
+# carries, and is subtracted from the rest.
+SPIKE = r"""
+#include "../include/curveparams.h"
+#include "../include/packedkernels.cuh"
+using namespace eccPacked131;
+#define KERNEL(name, expr) \
+  __global__ void name(P131 *o, const P131 *i, uint32_t *h, int *w, int k) { \
+      (void)h; (void)w; (void)k; *o = (expr); }
+KERNEL(k_nop, i[0])
+KERNEL(k_toPoly, toPolynomial131(i[0]))
+KERNEL(k_fromPoly, fromPolynomial131(i[0]))
+KERNEL(k_sqr, sqr131(i[0]))
+KERNEL(k_sqrPoly, squarePolynomial131(i[0]))
+KERNEL(k_add, add131(i[0], i[1]))
+KERNEL(k_mulPoly, mulPolynomial131(i[0], i[1]))
+KERNEL(k_mul, mul131(i[0], i[1]))
+KERNEL(k_inv, inv131(i[0]))
+KERNEL(k_sigmaWalk, sigma131(i[0], 3 + (k & 7)))
+KERNEL(k_reduce, reducePolynomial131(h))
+KERNEL(k_fromPolyProduct, fromPolynomialProduct131(h))
+__global__ void k_product(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)w; (void)k;
+    uint32_t c[9];
+    product131(i[0], i[1], c);
+#pragma unroll
+    for (int j = 0; j < 9; ++j) h[j] = c[j];
+    (void)o;
+}
+__global__ void k_weight(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)o; (void)h; (void)k;
+    *w = weight(i[0]);
+}
+__global__ void k_mulPair(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)h; (void)w; (void)k;
+    PolynomialPair p = mulPolynomialPair131(i[0], i[1], i[2]);
+    o[0] = p.first; o[1] = p.second;
+}
+"""
+
+ALU = ("LOP3", "LOP", "IADD3", "IADD", "SHF", "SHL", "SHR", "PRMT", "POPC", "FLO",
+       "BREV", "SEL", "ISETP", "IMNMX", "MOV", "PLOP3", "P2R", "R2P", "VOTE",
+       "IABS", "LEA", "XOR", "BFE", "BFI", "BMSK", "FSEL", "F2I", "I2F", "IADD32I")
+MEM = ("LDG", "STG", "LDS", "STS", "LDL", "STL", "LD", "ST", "LDC", "RED", "ATOM",
+       "ATOMG", "MEMBAR", "CCTL", "LDSM", "ULDC")
+CTRL = ("BRA", "BSYNC", "BSSY", "EXIT", "CALL", "RET", "NOP", "BAR", "SSY", "SYNC",
+        "JMP", "PBK", "BRK", "WARPSYNC", "YIELD", "S2R", "CS2R", "DEPBAR", "BMOV")
+
+
+def classify(op):
+    head = op.split(".")[0]
+    if head.startswith("CLMAD") or head.startswith("CLMUL"):
+        return "clmad"
+    # Blackwell issues register moves and some adds as IMAD forms; those are
+    # ordinary pipe ops, not multiplies.  Only a real multiply costs two.
+    if op.startswith(("IMAD.MOV", "IMAD.IADD", "IMAD.SHL")):
+        return "alu"
+    if head.startswith("IMAD") or head.startswith("IMUL"):
+        return "imad"
+    if head in MEM:
+        return "mem"
+    if head in CTRL:
+        return "ctrl"
+    return "alu"
+
+
+def build(defs, arch, nvcc, work):
+    src = os.path.join(work, "sass_cost_spike.cu")
+    open(src, "w").write(SPIKE)
+    # The spike sits in a temp dir; point the relative includes back at the tree.
+    cubin = os.path.join(work, "spike.cubin")
+    cmd = [nvcc, "-O3", "-std=c++17", "-arch=" + arch, "-cubin", "-I", HERE,
+           "-I", os.path.join(HERE, "include"), "-o", cubin, src]
+    cmd[1:1] = ["-D%s=%s" % (k, v) for k, v in defs.items()]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=os.path.join(HERE, "src"))
+    if r.returncode:
+        sys.exit("nvcc failed:\n" + r.stderr[:3000])
+    return cubin
+
+
+def functions(cubin, cuobjdump):
+    r = subprocess.run([cuobjdump, "-sass", cubin], capture_output=True, text=True)
+    if r.returncode:
+        sys.exit("cuobjdump failed:\n" + r.stderr[:2000])
+    out, name = {}, None
+    for line in r.stdout.splitlines():
+        m = re.match(r"\s*Function : (\S+)", line)
+        if m:
+            name = m.group(1)
+            out[name] = Counter()
+            continue
+        if name is None:
+            continue
+        m = re.match(r"\s*/\*[0-9a-f]{4,}\*/\s+(?:@!?U?P\d\s+)?([A-Z][A-Z0-9_.]*)", line)
+        if m:
+            out[name][m.group(1)] += 1
+    return out
+
+
+def cost(counter):
+    k = Counter()
+    for op, n in counter.items():
+        k[classify(op)] += n
+    k["aluSlots"] = k["alu"] + k["imad"] * IMAD_PRICE
+    k["clmadSlots"] = k["clmad"] * CLMAD_PRICE
+    return k
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--arch", default="sm_120")
+    ap.add_argument("--nvcc", default="nvcc")
+    ap.add_argument("--cuobjdump", default="cuobjdump")
+    ap.add_argument("--batch", type=int, default=PRESET["ECC_BATCH"])
+    ap.add_argument("--update", action="store_true", help="weight into one scalar update")
+    ap.add_argument("--rate", type=float, default=0.0, help="measured B updates/s")
+    ap.add_argument("--sms", type=int, default=82, help="SMs on the measured part")
+    ap.add_argument("--define", action="append", default=[], help="extra -D for the spike")
+    a = ap.parse_args()
+
+    defs = dict(PRESET, ECC_BATCH=a.batch)
+    for d in a.define:
+        k, _, v = d.partition("=")
+        defs[k] = v or 1
+    work = tempfile.mkdtemp()
+    fn = functions(build(defs, a.arch, a.nvcc, work), a.cuobjdump)
+
+    order = ["k_product", "k_reduce", "k_fromPolyProduct", "k_mulPoly", "k_mulPair", "k_mul",
+             "k_inv", "k_sigmaWalk", "k_toPoly", "k_fromPoly", "k_sqr", "k_sqrPoly", "k_add", "k_weight"]
+    named = {}
+    for key in fn:
+        for name in ["k_nop"] + order:
+            if name in key:
+                named[name] = fn[key]
+    overhead = cost(named["k_nop"])["aluSlots"] if "k_nop" in named else 0.0
+    print("SASS per routine, %s, batch %d  (less %.0f slots of kernel overhead)"
+          % (a.arch, a.batch, overhead))
+    print("%-22s %6s %6s %6s %6s %10s" % ("routine", "alu", "imad", "clmad", "mem", "aluSlots"))
+    got = {}
+    for name in order:
+        if name not in named:
+            continue
+        k = cost(named[name])
+        k["aluSlots"] = max(0.0, k["aluSlots"] - overhead)
+        got[name] = k
+        print("%-22s %6d %6d %6d %6d %10.0f"
+              % (name, k["alu"], k["imad"], k["clmad"], k["mem"], k["aluSlots"]))
+
+    if not a.update:
+        return
+    B = a.batch
+    rows = [("polynomial product, paired", "k_mulPair", (B - 1) / B),
+            ("polynomial product, single", "k_mulPoly", (B + 1) / B),
+            ("normal-basis product, inverse chain", "k_mul", 8.0 / B),
+            ("Frobenius network, walk (2 coords)", "k_sigmaWalk", 2.0),
+            ("basis conversion out (2 coords)", "k_fromPoly", 2.0),
+            ("basis conversion in (2 coords)", "k_toPoly", 2.0),
+            ("polynomial squaring", "k_sqrPoly", 1.0),
+            ("inversion chain", "k_inv", 1.0 / B),
+            ("class weight", "k_weight", 1.0),
+            ("additions", "k_add", 4.0)]
+    print("\nper scalar update, batch %d" % B)
+    print("%-38s %6s %10s %10s" % ("", "per", "aluSlots", "clmad"))
+    alu = clm = 0.0
+    parts = []
+    for label, name, mult in rows:
+        if name not in got:
+            continue
+        k = got[name]
+        alu += k["aluSlots"] * mult
+        clm += k["clmad"] * mult
+        parts.append((label, k["aluSlots"] * mult))
+        print("%-38s %6.2f %10.0f %10.1f" % (label, mult, k["aluSlots"] * mult, k["clmad"] * mult))
+    print("%-38s %6s %10.0f %10.1f" % ("TOTAL of the routines above", "", alu, clm))
+    print()
+    for label, v in sorted(parts, key=lambda p: -p[1]):
+        print("   %-44s %7.0f  %5.1f%%" % (label, v, 100 * v / alu))
+
+    if a.rate:
+        print("\n--- what that leaves of each pipe, at %.3f B updates/s on %d SMs ---"
+              % (a.rate, a.sms))
+        aluUse = a.rate * 1e9 * alu
+        clmUse = a.rate * 1e9 * clm
+        print("integer pipe : %7.2f T slots/s of %5.2f T  (%3.0f%%)"
+              % (aluUse / 1e12, LOP3_RATE / 1e12, 100 * aluUse / LOP3_RATE))
+        print("carryless    : %7.2f T clmad/s of %5.3f T  (%3.0f%%)"
+              % (clmUse / 1e12, CLMAD_RATE / 1e12, 100 * clmUse / CLMAD_RATE))
+        print("one clmad is worth %.0f logic ops; the walk can afford more of them"
+              " only while the carryless unit has headroom" % CLMAD_PRICE)
+
+
+if __name__ == "__main__":
+    main()
