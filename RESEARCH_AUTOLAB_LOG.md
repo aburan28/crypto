@@ -7859,3 +7859,60 @@ applied to structured problems.
 ### Commits made
 
 (see PR — `cryptanalysis::quasi_subfield`, two examples, research note)
+
+---
+
+## 2026-09-09 (autolab run, fifth session)
+
+### Task picked
+
+The step the last session put at #0: take n=31 with a divisor-tuned base
+at m=2, the first n the single-factor construction cannot serve.
+
+### Work done
+
+- Checked what actually blocked it.  MAX_N was already 63 (raised by
+  another thread), so nothing needed lifting.
+- Built divisor bases on K_0/F_2^31 at dims 10, 11, 15, 16 and ran the
+  DLP through `koblitz_index_calculus_dlp_with_factor_base`.
+- Added `FrobeniusFactorBase::n_vars_for_summands`, the milestone test,
+  and an n=31 section to the factor-base survey example.
+
+### Findings
+
+**Solved.**  K_0/F_2^31, r = 1 439 393, recovered log 123456 in 3.5 s
+with the dim-10 divisor base at m=2 -- 20 unknowns, quadratic, no
+chaining.  Three further targets (7, 999983, 424242) also recovered.
+
+**The single-factor base cannot reach this curve at all.**  dim 5, 63
+points: at m=2 those pair into ~2 000 of 1.4M group elements, so 60 000
+trials over 127 s found nothing; m=4 would need 4*5 + 2*31 = 82
+unknowns, past the 64-variable cap.  So this is not "the divisor base is
+faster" -- it is the difference between solvable and not.
+
+**A sizing assumption I had wrong.**  I had been sizing against
+2^n, but the prime-order subgroup is what matters and n=31 has a large
+smooth cofactor: r ~ 2^20.5 against #E ~ 2^31, h = 1492.  Dimension 10
+was enough where I had budgeted 16.  Worth checking r rather than n
+before choosing a dimension on any curve.
+
+**Verified as the real pipeline.**  direct_relation = false on every
+run, so not the degenerate [a]G + [b]Q = O path; the relation matrix
+reports 36 columns for 69 orbits, which is another thread's negation
+collapse, and d comes from a kernel combination and is checked as
+[d]G = Q before return.
+
+### Next step proposal
+
+The thread's open items are unchanged in order (F4's per-node cost
+curve, then decomposition probability), but the n=31 result suggests one
+addition: **sweep r rather than n when choosing the dimension.**  Curves
+with a large smooth cofactor are much cheaper targets than their field
+size suggests, and the ladder currently indexes on n alone.
+
+Materialising 2^dim points remains the wall past n ~ 40; dim 16 at n=31
+already takes 2.6 s and 68 327 points to build.
+
+### Commits made
+
+(see PR -- n=31 solved with a divisor base, milestone test, survey section)
