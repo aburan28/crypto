@@ -121,10 +121,26 @@ about 27 B/s.
 1. **Quotas.** G7e counts against the vCPU quotas *All G and VT Spot Instance
    Requests* (L-3819A6DF) and *Running On-Demand G and VT instances*
    (L-DB2E81BA). A GPU costs 8 vCPUs on g7e.2xlarge and 24 on g7e.48xlarge.
-   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota. The `adam` IAM user
-   cannot read quotas from the CLI (no `servicequotas:*`), so check and
-   request in the console: Service Quotas → Amazon EC2. New accounts start
-   near zero and increases take hours to days.
+   128 spot GPUs on 2xlarge need 1,024 vCPUs of spot quota.
+
+   ```bash
+   aws service-quotas get-service-quota --service-code ec2 --quota-code L-3819A6DF \
+       --query 'Quota.Value' --output text
+   ```
+
+   That is the *applied* value, and it is the one that binds: an approved
+   increase can read as the old value for a while after the support case
+   closes, and a fleet sized to the approved value fails every launch above
+   the applied one until it propagates. Quotas are per region, so a spot
+   quota in us-west-2 does nothing for us-east-1. New accounts start near
+   zero and increases take hours to days.
+
+   Capacity is a separate question from quota, and G7e runs out: a region
+   can refuse every g7e size, spot *and* on-demand, with
+   `InsufficientInstanceCapacity` while the quota sits unused. The standing
+   group below is the response — it keeps asking and fills when a pool
+   frees up — so check capacity with a single launch attempt before
+   concluding that a fleet is misconfigured.
 2. **IAM.** `infra.sh` creates a role and instance profile for the workers
    (S3 bucket read/write, SSM). The `adam` user could not list IAM or use
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
@@ -193,6 +209,14 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s p
 ./fleet.sh scale 64                 # spot only
 #    an on-demand base can only be set when the fleet is created:
 #    ./fleet.sh down && ./fleet.sh up 64 --on-demand 8
+#
+#    Where CreateFleet is refused because the account has no
+#    AWSServiceRoleForEC2Fleet and the user cannot create one, the same verbs
+#    drive an Auto Scaling group instead, still counted in GPUs:
+#    BACKEND=asg TYPES=g7e.2xlarge,g7e.4xlarge MAX_SPOT_PER_GPU_HOUR=3 ./fleet.sh up 8
+#    Keep every type in TYPES at one GPU and the per-GPU cap stays meaningful;
+#    a cap under the on-demand price is what stops a thin spot pool from
+#    costing more than on-demand for the same GPU.
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu

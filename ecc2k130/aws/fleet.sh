@@ -15,7 +15,18 @@
 # keeps a large fleet running when one pool empties.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
-# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none).
+# MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none), BACKEND.
+#
+# BACKEND=fleet (default) uses one EC2 Fleet.  BACKEND=asg does the same job
+# with an Auto Scaling group, for accounts where EC2 Fleet is unavailable:
+# creating a fleet needs the AWSServiceRoleForEC2Fleet service-linked role,
+# and an account whose user lacks iam:CreateServiceLinkedRole cannot get one
+# (CreateFleet then fails with AuthFailure.ServiceLinkedRoleCreationNotPermitted).
+# Capacity is still counted in GPUs, spot allocation is still
+# price-capacity-optimized over every default subnet, and an interrupted
+# instance is still replaced.  The one difference that matters: the spend cap
+# is per instance rather than per fleet, so `asc` requires a single entry in
+# TYPES for MAX_SPOT_PER_GPU_HOUR to be meaningful.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -24,6 +35,8 @@ STACK=${STACK:-ecc2k130}
 LT=$STACK-worker
 TYPES=${TYPES:-g7e.2xlarge,g7e.4xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge}
 FLEET_FILE=.fleet-id-$AWS_DEFAULT_REGION
+BACKEND=${BACKEND:-fleet}
+ASG=$STACK-workers
 
 gpusOf() {
     case "$1" in
@@ -41,7 +54,102 @@ fleetId() {
         --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text
 }
 
+defaultSubnets() {
+    VPC=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
+    aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
+        --query 'Subnets[].SubnetId' --output text
+}
+
+asgExists() {
+    [ "$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+         --query 'length(AutoScalingGroups)' --output text)" != 0 ]
+}
+
 cmd=${1:-status}
+
+if [ "$BACKEND" = asg ]; then
+    case "$cmd" in
+    up)
+        total=${2:?number of GPUs}
+        shift 2
+        ondemand=0
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --on-demand) ondemand=$2; shift 2 ;;
+                *) echo "unknown option $1" >&2; exit 1 ;;
+            esac
+        done
+        if asgExists; then
+            echo "group $ASG already exists; use scale" >&2
+            exit 1
+        fi
+        overrides="["
+        for t in ${TYPES//,/ }; do
+            overrides="$overrides{\"InstanceType\":\"$t\",\"WeightedCapacity\":\"$(gpusOf "$t")\"},"
+        done
+        overrides="${overrides%,}]"
+        dist="{\"OnDemandBaseCapacity\":$ondemand,\"OnDemandPercentageAboveBaseCapacity\":0,\"SpotAllocationStrategy\":\"price-capacity-optimized\""
+        if [ -n "${MAX_SPOT_PER_GPU_HOUR:-}" ]; then
+            # SpotMaxPrice is per instance, so a per-GPU cap is only well
+            # defined while every type in TYPES holds the same number of GPUs.
+            perInstance=
+            for t in ${TYPES//,/ }; do
+                g=$(gpusOf "$t")
+                if [ -n "$perInstance" ] && [ "$g" != "$perInstance" ]; then
+                    echo "MAX_SPOT_PER_GPU_HOUR needs every type in TYPES to have the same GPU count when BACKEND=asg" >&2
+                    exit 1
+                fi
+                perInstance=$g
+            done
+            dist="$dist,\"SpotMaxPrice\":\"$(python3 -c "print($MAX_SPOT_PER_GPU_HOUR*$perInstance)")\""
+        fi
+        dist="$dist}"
+        aws autoscaling create-auto-scaling-group \
+            --auto-scaling-group-name "$ASG" \
+            --min-size 0 --max-size "$total" --desired-capacity "$total" \
+            --health-check-type EC2 \
+            --vpc-zone-identifier "$(defaultSubnets | tr '[:space:]' ',' | sed 's/,$//')" \
+            --mixed-instances-policy "{\"LaunchTemplate\":{\"LaunchTemplateSpecification\":
+                {\"LaunchTemplateName\":\"$LT\",\"Version\":\"\$Latest\"},\"Overrides\":$overrides},
+                \"InstancesDistribution\":$dist}" \
+            --tags "Key=Project,Value=$STACK,PropagateAtLaunch=true" \
+                   "Key=Name,Value=$STACK-worker,PropagateAtLaunch=true"
+        echo "group $ASG: target $total GPU(s), $ondemand on-demand, types $TYPES"
+        ;;
+    scale)
+        total=${2:?number of GPUs}
+        max=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+              --query 'AutoScalingGroups[0].MaxSize' --output text)
+        if [ "$total" -gt "$max" ]; then
+            aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG" --max-size "$total"
+        fi
+        aws autoscaling set-desired-capacity --auto-scaling-group-name "$ASG" --desired-capacity "$total"
+        echo "group $ASG target now $total GPU(s)"
+        ;;
+    status)
+        if ! asgExists; then echo "no group $ASG"; exit 0; fi
+        aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+            --query 'AutoScalingGroups[0].{target:DesiredCapacity,min:MinSize,max:MaxSize,instances:length(Instances)}' \
+            --output table
+        aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+            --query 'AutoScalingGroups[0].Instances[].[InstanceId,InstanceType,LifecycleState,HealthStatus]' \
+            --output text | sort -k2 | while read -r iid type state health; do
+                life=$(aws ec2 describe-instances --instance-ids "$iid" \
+                       --query 'Reservations[0].Instances[0].[InstanceLifecycle,Placement.AvailabilityZone,PublicIpAddress,LaunchTime]' --output text)
+                echo "$iid $type $state $health $life"
+            done
+        ;;
+    down)
+        if ! asgExists; then echo "no group $ASG"; exit 0; fi
+        aws autoscaling delete-auto-scaling-group --auto-scaling-group-name "$ASG" --force-delete
+        echo "group $ASG deleted; instances terminating (workers checkpoint on the way down)"
+        ;;
+    *)
+        sed -n '3,12p' "$0"; exit 1 ;;
+    esac
+    exit 0
+fi
+
 case "$cmd" in
 up)
     total=${2:?number of GPUs}
@@ -58,9 +166,7 @@ up)
         echo "fleet $existing already active; use scale" >&2
         exit 1
     fi
-    VPC=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)
-    SUBNETS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" \
-              --query 'Subnets[].SubnetId' --output text)
+    SUBNETS=$(defaultSubnets)
     overrides="["
     for t in ${TYPES//,/ }; do
         w=$(gpusOf "$t")
