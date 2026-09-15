@@ -193,7 +193,12 @@ def main(argv=None):
     with open(args.history_out, "w", encoding="utf-8") as fh:
         json.dump(history, fh, indent=2, sort_keys=True)
         fh.write("\n")
-    rate = measure_rate(history["points"])
+    # A historical rate is only valid when this snapshot carries the total it
+    # was measured against; a missing feed must not publish one anyway.
+    rate = (
+        measure_rate(history["points"])
+        if snapshot_iterations(snapshot) is not None else None
+    )
     if args.status_out:
         apply_rate(snapshot, rate)
         with open(args.status_out, "w", encoding="utf-8") as fh:

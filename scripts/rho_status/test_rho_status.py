@@ -349,6 +349,35 @@ class WalkRateTests(unittest.TestCase):
                 published["walk_rate"]["iterations_per_second"] / 1e9, 72.528, places=2)
             assert_public(published)
 
+    def test_render_cli_does_not_publish_a_historical_rate_without_work(self):
+        import render
+
+        with tempfile.TemporaryDirectory() as tmp:
+            status = os.path.join(tmp, "status.json")
+            history_in = os.path.join(tmp, "history-prev.json")
+            history_out = os.path.join(tmp, "history.json")
+            with open(history_in, "w", encoding="utf-8") as fh:
+                json.dump({"points": rate_history(self.LIVE[:-1])}, fh)
+            with open(status, "w", encoding="utf-8") as fh:
+                json.dump({
+                    "generated_at": self.LIVE[-1][0],
+                    "campaign_id": "ecc2k-130",
+                    "dps": 31635015,
+                    "dps_last_hour": 1,
+                    "collisions": 0,
+                    "workers": 1,
+                    "state": "COLLECTING",
+                }, fh)
+            self.assertEqual(render.main([
+                "--status", status,
+                "--history-in", history_in,
+                "--history-out", history_out,
+                "--status-out", status,
+            ]), 0)
+            with open(status, encoding="utf-8") as fh:
+                published = json.load(fh)
+            self.assertNotIn("walk_rate", published)
+
 
 def work_feed(iterations=7817055361302528, generated_at=None, campaign="ecc2k-130"):
     generated_at = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
