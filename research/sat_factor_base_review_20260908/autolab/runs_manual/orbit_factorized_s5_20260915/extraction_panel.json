@@ -39,7 +39,8 @@
     "binary_l8_pairs_iv": "Independent remeasure of binary pairs-and-solve baseline through l=8: MATCH_WITHIN_NOISE vs 2026-09-11 draft (l=8 pairs_s 0.068\u21920.066, speedup 8.9\u21929.0). claim-check PASS (schema). NOT sub-2^(2l), NOT ledger promotion. FFD still unmeasured for subspace oracle.",
     "n53_planted_edge_free_witness_compact": "Compact planted n53 group-valid edge-free witness retained (valid=1, invalid_lifts=0, pair_table=0).",
     "binaryrep_plus_fieldbits_n19": "Structural combo KIC_ORBIT_REP_ENCODING=binary + field_bits_then_pair_then_pair: planted/unrestricted n13 SAT (pair_table=0); unrestricted n19 still 0 models @80k (vars 3881 vs one_hot 3889). Does not close cliff.",
-    "prime_j0_16bit_iv": "Independent 3-shot j0_known_answer_bits 16: PASS_KNOWN_ANSWER_AGREES_RHO. IC agrees rho and truth; IC wall >> rho (not vs_rho crossover). No ledger promotion."
+    "prime_j0_16bit_iv": "Independent 3-shot j0_known_answer_bits 16: PASS_KNOWN_ANSWER_AGREES_RHO. IC agrees rho and truth; IC wall >> rho (not vs_rho crossover). No ledger promotion.",
+    "reusable_pair_support_certificate": "Added KIC_ORBIT_PAIR_SUPPORT_CERT / _CERT_OUT: reusable compressed exceptional relative-Frobenius pair-support certificates with blake3 digest check. pair_table_entries=0, edge_selectors=0. Planted n13/n19/n53 remain SAT+group-valid on reload. n53 install scan_ms 47994\u21920 (expand ~3ms). Not unrestricted n19 win, not vs_rho, not ledger promotion."
   },
   "rungs": [
     {
@@ -995,8 +996,53 @@
       "status": "PASS_KNOWN_ANSWER_AGREES_RHO",
       "ledger_promotion": false,
       "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915/replay_receipt.json"
+    },
+    {
+      "n": 13,
+      "mode": "planted_pair_support_cert_export_reload",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "exceptional_relative_states": 1,
+      "nogood_clauses": 26,
+      "export_install_ms": 0.39,
+      "reload_install_ms": 0.042,
+      "reload_scan_ms": 0.0,
+      "evidence_class": null,
+      "note": "certificate reload preserves planted group-valid edge-free extraction"
+    },
+    {
+      "n": 19,
+      "mode": "planted_pair_support_cert_export_reload",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "exceptional_relative_states": 2,
+      "nogood_clauses": 76,
+      "export_install_ms": 1.24,
+      "reload_install_ms": 0.061,
+      "reload_scan_ms": 0.0,
+      "evidence_class": null,
+      "note": "certificate reload preserves planted group-valid edge-free extraction"
+    },
+    {
+      "n": 53,
+      "mode": "planted_pair_support_cert_export_reload",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "exceptional_relative_states": 376,
+      "nogood_clauses": 39856,
+      "export_install_ms": 47997.7,
+      "reload_install_ms": 3.03,
+      "reload_scan_ms": 0.0,
+      "evidence_class": null,
+      "note": "certificate reload preserves planted group-valid edge-free extraction"
     }
   ],
-  "next": "Heuristics + binary-rep combo exhausted for unrestricted n19. Need deeper structural rewrite (e.g. reusable pair-support without edge table) or further non-promotion ledger IVs. Planted edge-free n53 stands.",
-  "updated_at": "2026-09-15T15:19:03Z"
+  "next": "Reusable pair-support certificates land without edge tables. Unrestricted n19 cliff still open. Next: use certs across multi-target harvests / expose positive regular support without joins, or continue non-promotion IVs. Keep full S3 for planted n53.",
+  "updated_at": "2026-09-15T15:30:14Z"
 }

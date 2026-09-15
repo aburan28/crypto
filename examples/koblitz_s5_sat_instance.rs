@@ -2557,6 +2557,146 @@ fn push_forbidden_binary_assignment(clause: &mut Vec<Lit>, offset: usize, width:
     }
 }
 
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+struct RelativePairSupportCertificate {
+    n: u32,
+    representative_x_codes: Vec<u64>,
+    exceptional_relative_states: Vec<(usize, usize, usize)>,
+    support_digest_blake3: String,
+}
+
+fn digest_relative_pair_support(
+    representative_x_codes: &[u64],
+    exceptional_relative_states: &[(usize, usize, usize)],
+) -> String {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"relative-frobenius-pair-support-cert-v1");
+    hasher.update(&(representative_x_codes.len() as u32).to_le_bytes());
+    for &code in representative_x_codes {
+        hasher.update(&code.to_le_bytes());
+    }
+    hasher.update(&(exceptional_relative_states.len() as u32).to_le_bytes());
+    for &(left, right, shift) in exceptional_relative_states {
+        hasher.update(&(left as u32).to_le_bytes());
+        hasher.update(&(right as u32).to_le_bytes());
+        hasher.update(&(shift as u32).to_le_bytes());
+    }
+    hasher.finalize().to_hex().to_string()
+}
+
+fn scan_exceptional_relative_states(
+    curve: &KoblitzCurve,
+    representative_x_codes: &[u64],
+) -> (Vec<(usize, usize, usize)>, f64) {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    let representatives = representative_x_codes.len();
+    let mut shifted = vec![vec![0u64; width]; representatives];
+    for (index, &code) in representative_x_codes.iter().enumerate() {
+        shifted[index][0] = code;
+        for exponent in 1..width {
+            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
+        }
+    }
+    let exceptional_states: Vec<(usize, usize, usize)> = (0..representatives)
+        .into_par_iter()
+        .flat_map_iter(|left_rep| {
+            let left = representative_x_codes[left_rep];
+            let mut local = Vec::new();
+            for right_rep in 0..representatives {
+                for relative_shift in 0..width {
+                    let right = shifted[right_rep][relative_shift];
+                    if regular_s3_x_roots(curve, left, right).is_none() {
+                        local.push((left_rep, right_rep, relative_shift));
+                    }
+                }
+            }
+            local
+        })
+        .collect();
+    (exceptional_states, started.elapsed().as_secs_f64() * 1000.0)
+}
+
+fn load_relative_pair_support_certificate(
+    path: &str,
+    representative_x_codes: &[u64],
+    n: u32,
+) -> RelativePairSupportCertificate {
+    let value: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(path).expect("read pair-support certificate"))
+            .expect("parse pair-support certificate");
+    assert_eq!(value["kind"], "relative_frobenius_pair_support_certificate");
+    assert_eq!(value["schema_version"], "1.0");
+    assert_eq!(value["n"].as_u64().unwrap() as u32, n);
+    assert_eq!(value["pair_table_entries"].as_u64().unwrap_or(0), 0);
+    assert_eq!(value["edge_selectors"].as_u64().unwrap_or(0), 0);
+    let cert_reps: Vec<u64> = value["representative_x_codes"]
+        .as_array()
+        .expect("representative_x_codes")
+        .iter()
+        .map(|v| v.as_u64().expect("rep code"))
+        .collect();
+    assert_eq!(
+        cert_reps, representative_x_codes,
+        "pair-support certificate representatives must match the live orbit factor base"
+    );
+    let exceptional_relative_states: Vec<(usize, usize, usize)> = value["exceptional_relative_states"]
+        .as_array()
+        .expect("exceptional_relative_states")
+        .iter()
+        .map(|row| {
+            let arr = row.as_array().expect("exceptional triple");
+            (
+                arr[0].as_u64().unwrap() as usize,
+                arr[1].as_u64().unwrap() as usize,
+                arr[2].as_u64().unwrap() as usize,
+            )
+        })
+        .collect();
+    let support_digest_blake3 = value["support_digest_blake3"]
+        .as_str()
+        .expect("support_digest_blake3")
+        .to_owned();
+    let recomputed = digest_relative_pair_support(representative_x_codes, &exceptional_relative_states);
+    assert_eq!(
+        support_digest_blake3, recomputed,
+        "pair-support certificate digest mismatch"
+    );
+    RelativePairSupportCertificate {
+        n,
+        representative_x_codes: cert_reps,
+        exceptional_relative_states,
+        support_digest_blake3,
+    }
+}
+
+fn write_relative_pair_support_certificate(
+    path: &str,
+    n: u32,
+    representative_x_codes: &[u64],
+    exceptional_relative_states: &[(usize, usize, usize)],
+    support_digest_blake3: &str,
+) {
+    let payload = json!({
+        "schema_version": "1.0",
+        "kind": "relative_frobenius_pair_support_certificate",
+        "n": n,
+        "orbit_representatives": representative_x_codes.len(),
+        "representative_x_codes": representative_x_codes,
+        "exceptional_relative_states": exceptional_relative_states
+            .iter()
+            .map(|(a,b,c)| json!([a,b,c]))
+            .collect::<Vec<_>>(),
+        "exceptional_relative_state_count": exceptional_relative_states.len(),
+        "support_digest_blake3": support_digest_blake3,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "claim_boundary": "Reusable compressed exceptional relative-Frobenius pair-support certificate only. Not an edge/pair table, not unrestricted extraction, not vs_rho, not ledger promotion."
+    });
+    std::fs::write(path, serde_json::to_vec_pretty(&payload).unwrap()).expect("write pair-support certificate");
+}
+
 /// Install compressed relative-Frobenius pair-support nogoods on orbit selectors.
 ///
 /// For each paired summand side and each exceptional relative state
@@ -2603,35 +2743,29 @@ fn install_relative_orbit_pair_support_nogoods(
         [pairing_indices[2], pairing_indices[3]],
     ];
 
-    let mut shifted = vec![vec![0u64; width]; representatives];
-    for (index, &code) in representative_x_codes.iter().enumerate() {
-        shifted[index][0] = code;
-        for exponent in 1..width {
-            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
-        }
+    // Reusable certificate path: load exceptional relative states without
+    // rescanning, or scan once and optionally persist. Never materializes an
+    // endpoint pair/edge table either way.
+    let cert_in = std::env::var("KIC_ORBIT_PAIR_SUPPORT_CERT").ok();
+    let cert_out = std::env::var("KIC_ORBIT_PAIR_SUPPORT_CERT_OUT").ok();
+    let (exceptional_states, scan_ms, loaded_from_certificate) = if let Some(path) = &cert_in {
+        let loaded = load_relative_pair_support_certificate(path, representative_x_codes, curve.n);
+        (loaded.exceptional_relative_states, 0.0, true)
+    } else {
+        let (states, ms) = scan_exceptional_relative_states(curve, representative_x_codes);
+        (states, ms, false)
+    };
+    let support_digest_blake3 =
+        digest_relative_pair_support(representative_x_codes, &exceptional_states);
+    if let Some(path) = &cert_out {
+        write_relative_pair_support_certificate(
+            path,
+            curve.n,
+            representative_x_codes,
+            &exceptional_states,
+            &support_digest_blake3,
+        );
     }
-
-    // Scan exceptional relative states once (rayon), then expand absolute
-    // alignments for each Semaev pair side. Avoids the prior sequential
-    // reps^2·n·#sides S3 walk that made n53+nogoods CPU-bound for minutes.
-    let scan_started = Instant::now();
-    let exceptional_states: Vec<(usize, usize, usize)> = (0..representatives)
-        .into_par_iter()
-        .flat_map_iter(|left_rep| {
-            let left = representative_x_codes[left_rep];
-            let mut local = Vec::new();
-            for right_rep in 0..representatives {
-                for relative_shift in 0..width {
-                    let right = shifted[right_rep][relative_shift];
-                    if regular_s3_x_roots(curve, left, right).is_none() {
-                        local.push((left_rep, right_rep, relative_shift));
-                    }
-                }
-            }
-            local
-        })
-        .collect();
-    let scan_ms = scan_started.elapsed().as_secs_f64() * 1000.0;
     let relative_states = representatives * representatives * width;
     let exceptional_relative_states = exceptional_states.len();
 
@@ -2708,8 +2842,12 @@ fn install_relative_orbit_pair_support_nogoods(
         "scan_ms": scan_ms,
         "expand_ms": expand_ms,
         "install_ms": started.elapsed().as_secs_f64() * 1000.0,
-        "scan_parallel": true,
-        "claim_boundary": "Compressed exceptional relative-Frobenius pair-support nogoods only; not unrestricted extraction, SAT advantage, or vs_rho"
+        "scan_parallel": !loaded_from_certificate,
+        "loaded_from_certificate": loaded_from_certificate,
+        "support_digest_blake3": support_digest_blake3,
+        "certificate_in": cert_in,
+        "certificate_out": cert_out,
+        "claim_boundary": "Compressed exceptional relative-Frobenius pair-support nogoods only; reusable certificate optional; not an edge/pair table, not unrestricted extraction, not vs_rho, not ledger promotion"
     })
 }
 

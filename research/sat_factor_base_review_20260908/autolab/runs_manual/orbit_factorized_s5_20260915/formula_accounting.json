@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T15:05:33Z",
+  "updated_at": "2026-09-15T15:30:14Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -100,6 +100,19 @@
       "factor_base_points": 38,
       "orbit_columns": 1,
       "multiplication_encoding": "carryless_karatsuba"
+    },
+    {
+      "n": 53,
+      "config": "one_hot+nogoods+cert_reload",
+      "variables": 26825,
+      "ordinary_clauses": null,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "exceptional_relative_states": 376,
+      "nogood_clauses": 39856,
+      "scan_ms": 0.0,
+      "install_ms": 3.03,
+      "note": "loaded_from_certificate=true"
     }
   ],
   "notes": [
@@ -114,6 +127,7 @@
     "Karatsuba mul keeps pair_table=0; n19 unrestricted still 0 models @80k.",
     "Natural targets at n13/n19 remain 0 models under tested budgets despite expected_decomposable=true.",
     "CMS emit_xor formula sizes match internal (n19: 3889 vars / 9201 clauses / pair_table=0).",
-    "field_bits_then_pair_then_pair does not change formula size vs pair_then_pair; search-order only."
+    "field_bits_then_pair_then_pair does not change formula size vs pair_then_pair; search-order only.",
+    "Reusable pair-support cert: n53 exceptional=376 \u2192 39856 nogoods; scan avoided on reload (47994ms\u21920). pair_table_entries=0 throughout."
   ]
 }
