@@ -27,7 +27,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | intermediates_then_pair stack | n19 draft-SAT (multi-seed) |
 | **n19 IV @300k** | planted 1–5,7,11 + natural 1–3 all SAT group-valid |
 | **n23 seed1 @300k** | **SAT @168284** (replay identical) |
-| **n23 @1M hit-rate** | planted seed2 **SAT @590623**; seeds 3/5 UNKNOWN @1M; natural seed1 UNKNOWN @1M; natural seed2 running |
+| **n23 @1M hit-rate** | planted seed2 **SAT @590623**; seeds 3/5 UNKNOWN; natural seed1 UNKNOWN; **natural seed2 SAT @846240** (first natural n23 @1M) |
 | **Bound lift 23→41** | `pair_sum_trie` + relative-positive relative mode; absolute positive still ≤23 |
 | **n37 cert export** | succeeded (`pair_table=0`, edge_selectors=0, 12 orbit reps) |
 | **n37 planted-units reload** | restarted clean-env via nohup (prior run polluted by `KIC_DIMACS_PATH`); in flight |
@@ -37,7 +37,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 
 1. Edge-free planted n53 stands under full S3.
 2. n19 unrestricted cliff **draft-broken with budget-robust multi-seed IV**.
-3. n23 hit-rate incomplete: planted ~2/4 SAT (seed1@300k, seed2@1M); seeds 3/5 + natural1 UNKNOWN @1M.
+3. n23@1M draft hit-rate: planted 2/4 incl. prior seed1; natural 1/2 (seed2 SAT@846240). Seeds 3/5 + natural1 UNKNOWN.
 4. Admitted ladder to n37 unblocked; cert export proves encoding constructs edge-free.
 5. Keep full S3 for planted n≥19 / n53 (lazy unsuitable).
 6. Skip n37/n53 symmetrised mid-dim (blocked).
@@ -46,7 +46,7 @@ Claim boundary: drafts ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 
 ## Next ticks
 
-1. Collect natural seed2 @1M + n37 planted-units clean reload.
+1. Collect n37 planted-units @100k; if SAT push unrestricted n37/n41/n53.
 2. If n37 planted units SAT, push unrestricted n37 / n41 / n53 under same stack.
 3. Draft ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 4. Never mutate AWS from this agent.
