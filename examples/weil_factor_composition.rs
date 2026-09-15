@@ -42,6 +42,7 @@ fn stats(s: &WeilSolveStats) -> Value {
     "algebraic_pairs":s.algebraic_pairs,"projection_refutations":s.projection_refutations,
     "linear_constraints":s.linear_constraints,"projection_word_xors":s.projection_word_xors,
     "coefficient_field_muls":s.coefficient_field_muls,"coefficient_field_squares":s.coefficient_field_squares,
+    "residual_assignments":s.residual_assignments,
     "reductions":s.solver.reductions,"exhausted":s.solver.exhausted})
 }
 fn seed_basis(kc: &KoblitzCurve, c: &Value, seed: u64) -> Vec<F2mElement> {
@@ -248,6 +249,7 @@ fn main() {
                 "oracle_validation_ns":verify.elapsed().as_nanos(),"relations":r.relations,"independent_relations":r.independent_relations,
                 "dependent_relations":r.dependent_relations,"trials":r.trials,"reductions":r.reductions,"matrix_columns":r.matrix_columns,
                 "matrix_rank":r.terminal_matrix_rank,"relation_collection_ns":r.relation_collection_ns,"linear_algebra_ns":r.linear_algebra_ns,
+                "chart_residual_assignments":r.chart_residual_assignments,
                 "projected_orbit_construction_ns":r.projected_orbit_construction_ns,"cofactor_admission_ns":r.cofactor_admission_ns,
                 "pair_table_ns":r.pair_table_ns,"pair_table_entries":r.pair_table_entries,"direct_relations_skipped":r.direct_relations_skipped,
                 "attempts":checks})
@@ -289,6 +291,7 @@ fn main() {
     println!(
         "{}",
         json!({"phase":"census","component_count":diagnostic.component_count(),"tensor_bytes":diagnostic.tensor_bytes(),
+        "rational_support_dimensions":diagnostic.rational_support_dimensions(),
         "relative_product_ranks":diagnostic.relative_product_ranks(),"pair_weighted_product_rank":diagnostic.pair_weighted_product_rank(),
         "projected_columns":projected_signed_orbit_count(&kc,&fb),"exact_pair_coverage":subgroup_count(&truth),
         "same_component_coverage":subgroup_count(&same),"coverage_denominator":order-1,"validation_ns":validation.elapsed().as_nanos()})
