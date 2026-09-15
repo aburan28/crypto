@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ECC2K-130 campaign status · aburan28/crypto</title>
-<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: iterations per second, point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
-<meta property="og:description" content="Distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
+<meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="./style.css">
@@ -97,6 +97,12 @@
         boundary the bar above measures against.</p>
     </div>
 
+    <div class="rate" id="rate-block" aria-live="polite">
+      <div class="rate-label">Iterations per second, walking now</div>
+      <p class="rate-value mono" id="walk-rate">&mdash;</p>
+      <p class="rate-sub" id="walk-rate-sub">&nbsp;</p>
+    </div>
+
     <div class="eta" id="eta-block" aria-live="polite">
       <div class="eta-label">ETA to the expected collision cost</div>
       <p class="eta-value mono" id="eta-value">&mdash;</p>
@@ -104,18 +110,24 @@
     </div>
 
     <p class="note" id="iterations-note">
-      Derived, not reported: a walk on this campaign reports one distinguished
-      point per <span class="mono">2^25.27</span> iterations at
-      <span class="mono">HW(x) &le; 34</span>, so the operation total behind
-      the point count is that count times the same factor &mdash; when the
-      number of points in an hour changes, the operation rate and the ETA
-      both move with that amount at the same interval. A collision is
+      Where these three numbers come from. Every walker checkpoints its own
+      iteration count every 600 seconds; the campaign sums those checkpoints
+      and publishes the total, so the operation figure above is counted by
+      the workers rather than inferred from the points they reported. The
+      rate is that total's increase between two of these snapshots divided by
+      the time between them &mdash; a measurement of the fleet that was
+      running over the window named beside it, not a projection &mdash; and
+      the ETA is the work still expected at exactly that rate. A collision is
       expected after <span class="mono">2^60.9</span> operations (Bailey et
-      al., <em>Breaking ECC2K-130</em>); the ETA is the wall-clock time to
-      that expected cost at the last-hour rate, not a deadline. No worker
-      publishes an operation counter, and the exponent belongs to one
-      campaign's distinguishing rule, so the figure is only shown for
-      <span class="mono">ecc2k-130</span>.
+      al., <em>Breaking ECC2K-130</em>); it is an expectation, not a deadline.
+      When a snapshot carries no iteration total, the operation figure falls
+      back to the point count times <span class="mono">2^25.27</span>
+      iterations per point, the interval for <span class="mono">HW(x) &le;
+      34</span>, and says so: that fallback reads low, because the campaign
+      distinguishes at the sparser <span class="mono">HW(x) &le; 32</span>
+      and walks about <span class="mono">2^27.9</span> iterations per point.
+      Both figures belong to one campaign's distinguishing rule, so neither
+      is shown for anything but <span class="mono">ecc2k-130</span>.
     </p>
   </section>
 
@@ -307,7 +319,10 @@ make gpu
     <h2 id="h-history">Snapshot history</h2>
     <p class="note">
       Every snapshot the publishing Action has posted in the last seven
-      days, newest first. It runs every 15 minutes.
+      days, newest first. It runs every 15 minutes. The iterations column is
+      the walkers' checkpoint sum at each snapshot, so the rate at the top of
+      the page is the difference between two of these rows over the time
+      between them &mdash; the arithmetic is here to be redone.
     </p>
     <details class="alt">
       <summary id="history-summary">Snapshot table</summary>
@@ -320,6 +335,7 @@ make gpu
               <th scope="col">state</th>
               <th scope="col" class="num">DPs</th>
               <th scope="col" class="num">last hour</th>
+              <th scope="col" class="num">iterations</th>
               <th scope="col" class="num">workers</th>
               <th scope="col" class="num">collisions</th>
             </tr>
@@ -357,14 +373,17 @@ make gpu
   // in the publish cadence, so it does not move when the cron does.
   var HOURLY_BUCKET_LIMIT = 168;
 
-  // A walk on ECC2K-130 reports a point when HW(x) <= 34, which happens once
-  // per 2^25.27 iterations (ecc2k130/aws/README.md), so the walk total behind
-  // the published point count is that count times the same factor. Deriving
-  // it here rather than publishing it keeps the snapshot aggregates-only; it
-  // is a parameter of one campaign's distinguishing rule, so it is only
-  // applied to the campaign it was measured on. The landing page carries the
-  // same two constants, and scripts/site/test_build.py pins all three copies
-  // to each other.
+  // The fallback conversion, for a snapshot with no iteration total of its
+  // own: a walk reports a point once per 2^25.27 iterations at HW(x) <= 34
+  // (ecc2k130/aws/README.md), so the walk behind the point count is that
+  // count times the same factor. It is a floor rather than an estimate --
+  // this campaign distinguishes at the sparser HW(x) <= 32, about 2^27.9
+  // iterations per point by its own counters -- which is why a total the
+  // walkers counted is preferred wherever one is published, and why the page
+  // says which of the two it is showing. The constant is a parameter of one
+  // campaign's distinguishing rule, so it is only applied to the campaign it
+  // was measured on. The landing page carries the same two constants, and
+  // scripts/site/test_build.py pins all three copies to each other.
   var CAMPAIGN = "ecc2k-130";
   var ITERATIONS_PER_DP_LOG2 = 25.27;
   // Expected iterations to a collision: Bailey et al., Breaking ECC2K-130.
@@ -388,22 +407,66 @@ make gpu
     return isFinite(n) ? n.toLocaleString("en-US") : "—";
   }
 
-  // Iterations walked so far, as an exponent: log2(dps) + the report rate.
-  // Null rather than zero when the figure would not mean anything — another
-  // campaign, or no points yet to derive it from — so the card can say which.
+  // --- mirrored block: docs/site/index.html carries these three functions
+  // verbatim, and scripts/site/test_build.py fails if the two copies differ
+  // by a byte. Both pages read one snapshot, so both must read it the same.
+  // What the campaign counts for itself. work_feed.py puts the sum of the
+  // walkers' checkpointed iteration bases in every snapshot, and render.py
+  // measures the rate from the difference between two of them. Null when a
+  // snapshot carries neither, which is the state to render when the campaign
+  // feed is not answering: no figure beats a figure from a wrong constant.
+  function reportedIterations(status) {
+    if (!status || !status.work) return null;
+    var iterations = Number(status.work.iterations);
+    return isFinite(iterations) && iterations > 0 ? iterations : null;
+  }
+
+  function measuredRate(status) {
+    if (!status || !status.walk_rate) return null;
+    var rate = Number(status.walk_rate.iterations_per_second);
+    return isFinite(rate) && rate >= 0 ? rate : null;
+  }
+
+  // Billions of iterations per second is the campaign's own unit: it is what
+  // the workers log and what one GPU is quoted in, so the fleet reads as a
+  // multiple of a machine instead of as an exponent.
+  function formatRate(rate) {
+    if (rate === null || !isFinite(rate)) return "—";
+    if (rate >= 1e12) return (rate / 1e12).toFixed(2) + " T it/s";
+    if (rate >= 1e9) return (rate / 1e9).toFixed(1) + " B it/s";
+    if (rate >= 1e6) return (rate / 1e6).toFixed(1) + " M it/s";
+    return Math.round(rate).toLocaleString("en-US") + " it/s";
+  }
+  // --- end mirrored block ---
+
+  // Iterations walked so far, as an exponent: the campaign's checkpoint sum
+  // when the snapshot carries one, and log2(dps) + the report interval when
+  // it does not. Null rather than zero when neither would mean anything —
+  // another campaign, or no points yet — so the card can say which.
   function iterationsLog2(status) {
     if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var reported = reportedIterations(status);
+    if (reported !== null) return Math.log(reported) / Math.LN2;
     var dps = Number(status.dps);
     if (!isFinite(dps) || dps <= 0) return null;
     return Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
   }
 
-  // Operation rate from the last-hour DP amount at this campaign's interval:
-  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null when the hour
-  // interval reported no points, so the ETA can say "no recent rate" rather
-  // than inventing one.
+  // The rate the ETA runs on: the measured one when a snapshot carries it,
+  // otherwise the last-hour DP amount at this campaign's interval,
+  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null for a measured
+  // zero, so the ETA says "no recent rate" rather than projecting forever
+  // from a fleet that has stopped.
+  //
+  // The two accountings are never mixed. A counted total divided by a
+  // derived rate would publish an ETA about six times too long, because the
+  // interval the derivation uses belongs to a cutoff this campaign does not
+  // run: the derived rate goes with the derived total, or the ETA waits.
   function opsPerSecond(status) {
     if (!status || status.campaign_id !== CAMPAIGN) return null;
+    var measured = measuredRate(status);
+    if (measured !== null) return measured > 0 ? measured : null;
+    if (reportedIterations(status) !== null) return null;
     var dpsLastHour = Number(status.dps_last_hour);
     if (!isFinite(dpsLastHour) || dpsLastHour <= 0) return null;
     return (dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600;
@@ -531,7 +594,7 @@ make gpu
   // Only fills tables that are still empty, so a failed refresh never wipes
   // rows that loaded successfully a minute ago.
   function placeholderTables(text) {
-    var targets = [["workers-body", 5], ["hourly-body", 2], ["history-body", 6]];
+    var targets = [["workers-body", 5], ["hourly-body", 2], ["history-body", 7]];
     for (var i = 0; i < targets.length; i++) {
       var body = el(targets[i][0]);
       if (body && !body.children.length) emptyRow(body, targets[i][1], text);
@@ -823,7 +886,7 @@ make gpu
     var body = el("history-body");
     body.textContent = "";
     if (!points.length) {
-      emptyRow(body, 6, "No published history yet.");
+      emptyRow(body, 7, "No published history yet.");
       el("history-summary").textContent = "Snapshot table";
       return;
     }
@@ -835,6 +898,7 @@ make gpu
       cell(tr, point.state || "—", "mono");
       cell(tr, num(point.dps), "num mono");
       cell(tr, num(point.dps_last_hour), "num mono");
+      cell(tr, num(point.iterations), "num mono");
       cell(tr, num(point.workers), "num mono");
       cell(tr, num(point.collisions), "num mono");
       body.appendChild(tr);
@@ -874,8 +938,11 @@ make gpu
     var bits = Math.min(100, (log2ops / EXPECTED_ITERATIONS_LOG2) * 100);
 
     el("ops-value").textContent = "2^" + log2ops.toFixed(1);
-    el("ops-sub").textContent = "≈ " + magnitude(log2ops) + " group operations, from " +
-      num(status.dps) + " distinguished points at 2^" + ITERATIONS_PER_DP_LOG2 + " each";
+    el("ops-sub").textContent = reportedIterations(status) !== null
+      ? "≈ " + magnitude(log2ops) + " group operations, summed from the walkers' own checkpoints"
+      : "≈ " + magnitude(log2ops) + " group operations, from " + num(status.dps) +
+        " distinguished points at 2^" + ITERATIONS_PER_DP_LOG2 +
+        " each — this snapshot carries no iteration total";
     el("ops-percent").textContent = percentText(share);
     el("ops-bits").textContent = log2ops.toFixed(1) + " of " + EXPECTED_ITERATIONS_LOG2 + " bits";
 
@@ -896,10 +963,43 @@ make gpu
       : "Linear in work: full width is a collision at the expected cost.";
   }
 
-  // ETA to the expected 2^60.9 cost at the last-hour DP rate. The amount of
-  // points in that hour interval, times the campaign's iterations-per-DP
-  // interval, is the operation rate; when the DP amount changes, this ETA
-  // moves with it.
+  // The measured walk rate, and the span it was measured over. A reader who
+  // sees twelve minutes of window knows to trust it less than an hour of it,
+  // so the span is published beside the number rather than assumed.
+  function drawRate(status) {
+    var value = el("walk-rate");
+    var sub = el("walk-rate-sub");
+    if (!status || status.campaign_id !== CAMPAIGN) {
+      value.textContent = "—";
+      sub.textContent = "Measured for " + CAMPAIGN + " only.";
+      return;
+    }
+    var rate = measuredRate(status);
+    if (rate === null) {
+      value.textContent = "—";
+      sub.textContent = reportedIterations(status) === null
+        ? "This snapshot carries no iteration total, so there are no two totals to difference."
+        : "One snapshot with an iteration total so far — the rate appears when the next one publishes.";
+      return;
+    }
+    value.textContent = formatRate(rate);
+    var span = Number(status.walk_rate.window_seconds);
+    var slots = Number(status.work && status.work.walking_slots);
+    var parts = [];
+    if (isFinite(span) && span > 0) {
+      parts.push("mean over the last " + formatDuration(span) + " of published snapshots");
+    }
+    if (isFinite(slots) && slots > 0) {
+      parts.push(slots + (slots === 1 ? " slot" : " slots") + " still checkpointing");
+    }
+    parts.push("counted by the walkers, not derived from the point count");
+    sub.textContent = parts.join(" · ") + ".";
+  }
+
+  // ETA to the expected 2^60.9 cost at the rate above: the work still
+  // expected, divided by the iterations per second the last two snapshots
+  // measured. With no measured rate it falls back to the last-hour DP amount
+  // at this campaign's report interval, and says which one it used.
   function drawEta(status) {
     var value = el("eta-value");
     var sub = el("eta-sub");
@@ -923,21 +1023,36 @@ make gpu
     }
     if (rate === null || seconds === null) {
       value.textContent = "—";
-      sub.textContent = "No points in the last hour, so there is no current rate for an ETA.";
+      if (measuredRate(status) === 0) {
+        sub.textContent = "The walk rate measured zero over that window, so there is nothing to project.";
+      } else if (reportedIterations(status) !== null) {
+        sub.textContent = "Waiting on a second snapshot with an iteration total: the rate this " +
+          "projects from is measured, and the point count cannot stand in for it at this cutoff.";
+      } else {
+        sub.textContent = "No points in the last hour, so there is no current rate for an ETA.";
+      }
       return;
     }
-    var dpsLastHour = Number(status.dps_last_hour);
-    var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+    var measured = measuredRate(status);
+    var rateText;
+    if (measured !== null && measured > 0) {
+      var span = Number(status.walk_rate.window_seconds);
+      rateText = formatRate(measured);
+      if (isFinite(span) && span > 0) rateText += " measured over " + formatDuration(span);
+    } else {
+      var dpsLastHour = Number(status.dps_last_hour);
+      var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
+      rateText = num(dpsLastHour) + " DP/h (= 2^" + opsHourLog2.toFixed(1) +
+        " ops/h at interval 2^" + ITERATIONS_PER_DP_LOG2 + ")";
+    }
     if (seconds < 0) {
       value.textContent = "past expected cost";
       sub.textContent = "Walked 2^" + log2ops.toFixed(1) + " of 2^" + EXPECTED_ITERATIONS_LOG2 +
-        " at 2^" + opsHourLog2.toFixed(1) + " ops/h from " + num(dpsLastHour) +
-        " DP/h — collision not yet recorded (birthday variance).";
+        " at " + rateText + " — collision not yet recorded (birthday variance).";
       return;
     }
     value.textContent = formatDuration(seconds);
-    sub.textContent = "At " + num(dpsLastHour) + " DP/h (= 2^" + opsHourLog2.toFixed(1) +
-      " ops/h with interval 2^" + ITERATIONS_PER_DP_LOG2 + "), wall-clock time to the expected 2^" +
+    sub.textContent = "At " + rateText + ", wall-clock time to the expected 2^" +
       EXPECTED_ITERATIONS_LOG2 + " cost. An expectation, not a deadline.";
   }
 
@@ -1004,6 +1119,7 @@ make gpu
 
     el("dps").textContent = num(status.dps);
     drawOperations(status);
+    drawRate(status);
     drawEta(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
@@ -1013,12 +1129,13 @@ make gpu
     var firstAt = parseTime(status.first_dp_at);
     el("dps-foot").textContent = firstAt ? "since " + utc(firstAt) : " ";
     var lastAt = parseTime(status.last_dp_at);
-    // The last-hour card is the DP amount in that interval; spell out the
-    // operation rate it implies so a change in the amount is visible as a
-    // change in ops/h, not only as a change in the point count.
-    var rate = opsPerSecond(status);
+    // The last-hour card is the DP amount in that interval. When the walk
+    // rate above is measured, restating the interval arithmetic here would
+    // publish a second, lower operation rate for the same fleet; keep it for
+    // the snapshots that have nothing better, where a change in the hourly
+    // amount is the only thing that moves the ETA.
     var rateBits = [];
-    if (rate !== null) {
+    if (measuredRate(status) === null && opsPerSecond(status) !== null) {
       var dpsLastHour = Number(status.dps_last_hour);
       var opsHourLog2 = Math.log(dpsLastHour) / Math.LN2 + ITERATIONS_PER_DP_LOG2;
       rateBits.push("2^" + opsHourLog2.toFixed(1) + " ops/h at interval 2^" + ITERATIONS_PER_DP_LOG2);
@@ -1045,7 +1162,7 @@ make gpu
       var historyBody = el("history-body");
       if (historyBody) {
         historyBody.textContent = "";
-        emptyRow(historyBody, 6, "Could not read history.json (" + historyError + ").");
+        emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
     drawWorkers(status.per_worker || [], generated);

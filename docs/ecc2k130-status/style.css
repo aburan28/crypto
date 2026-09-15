@@ -206,20 +206,26 @@ button:disabled { opacity: 0.55; cursor: progress; }
 }
 .ops .note { margin-top: 14px; }
 
-.eta {
+/* The rate block and the ETA are the same shape on purpose: one is the walk
+   measured between two snapshots, the other is that rate divided into the
+   work still expected, so they read as a pair. */
+.eta,
+.rate {
   margin-top: 18px;
   padding: 14px 16px 12px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--panel);
 }
-.eta-label {
+.eta-label,
+.rate-label {
   color: var(--muted);
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.eta-value {
+.eta-value,
+.rate-value {
   margin: 4px 0 0;
   font-size: clamp(28px, 5vw, 44px);
   font-weight: 650;
@@ -227,7 +233,9 @@ button:disabled { opacity: 0.55; cursor: progress; }
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-.eta-sub {
+.rate-value { color: var(--good); }
+.eta-sub,
+.rate-sub {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 12.5px;

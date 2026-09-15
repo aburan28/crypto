@@ -8,9 +8,19 @@ import os
 import re
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 
-from render import HISTORY_LIMIT, merge_history
+from render import (
+    HISTORY_LIMIT,
+    MAX_RATE_SPAN_S,
+    MIN_RATE_SPAN_S,
+    RATE_WINDOW_S,
+    apply_rate,
+    measure_rate,
+    merge_history,
+)
 from snapshot import CLAIM_BOUNDARY, FORBIDDEN_PUBLIC_KEYS, assert_public, campaign_state, normalize
+from work_feed import MAX_FEED_AGE_S, feed_url, merge_work, work_block
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -189,6 +199,268 @@ class HistoryTests(unittest.TestCase):
             with open(history, encoding="utf-8") as fh:
                 blob = json.load(fh)
             self.assertEqual(blob["points"][0]["dps"], 1)
+
+    def test_history_point_carries_the_iteration_total(self):
+        snapshot = {
+            "generated_at": "2026-09-15T13:00:00Z",
+            "campaign_id": "ecc2k-130",
+            "dps": 1,
+            "dps_last_hour": 1,
+            "collisions": 0,
+            "workers": 1,
+            "state": "COLLECTING",
+            "work": {"iterations": 7817055361302528},
+        }
+        point = merge_history({}, snapshot)["points"][-1]
+        self.assertEqual(point["iterations"], 7817055361302528)
+        del snapshot["work"]
+        self.assertIsNone(merge_history({}, snapshot)["points"][-1]["iterations"])
+
+
+def rate_history(samples):
+    return [
+        {
+            "generated_at": at,
+            "dps": 0,
+            "dps_last_hour": 0,
+            "collisions": 0,
+            "workers": 1,
+            "iterations": iterations,
+            "state": "COLLECTING",
+        }
+        for at, iterations in samples
+    ]
+
+
+class WalkRateTests(unittest.TestCase):
+    # The measured rate is the point of the feature, so these are the numbers
+    # it was verified against: four consecutive samples of the live campaign
+    # feed on 2026-09-15, whose checkpoint totals differ by 109,081,968,771,072
+    # iterations over 1504 s = 72.5 B it/s. status.py's own sum of what the
+    # walkers reported themselves over the same period was 86-101 B it/s; the
+    # difference is each slot's walked-but-not-yet-checkpointed tail, which
+    # this figure deliberately does not count.
+    LIVE = (
+        ("2026-09-15T13:15:37Z", 7817055361302528),
+        ("2026-09-15T13:25:26Z", 7860096436535296),
+        ("2026-09-15T13:33:51Z", 7888628575371264),
+        ("2026-09-15T13:40:41Z", 7926137330073600),
+    )
+
+    def test_measures_the_live_campaign_samples(self):
+        rate = measure_rate(rate_history(self.LIVE))
+        self.assertEqual(rate["window_seconds"], 1504)
+        self.assertAlmostEqual(rate["iterations_per_second"] / 1e9, 72.528, places=2)
+        self.assertEqual(rate["measured_from"], "2026-09-15T13:15:37Z")
+        self.assertEqual(rate["measured_to"], "2026-09-15T13:40:41Z")
+        self.assertEqual(rate["iterations_to"] - rate["iterations_from"], 109081968771072)
+
+    def test_window_bounds_the_smoothing_not_the_reach(self):
+        # Inside the window the oldest sample wins, so the difference spans
+        # about an hour of checkpoints rather than one publish interval.
+        samples = [("2026-09-15T%02d:00:00Z" % hour, 1000 + hour) for hour in range(10, 15)]
+        rate = measure_rate(rate_history(samples), window_s=RATE_WINDOW_S)
+        self.assertEqual(rate["window_seconds"], RATE_WINDOW_S)
+        self.assertEqual(rate["measured_from"], "2026-09-15T13:00:00Z")
+
+    def test_reaches_past_the_window_after_an_outage(self):
+        # One sample inside the window and one three hours before it: the
+        # difference is still worth taking, and the span it used says so.
+        rate = measure_rate(rate_history([
+            ("2026-09-15T10:00:00Z", 1_000_000_000_000),
+            ("2026-09-15T13:00:00Z", 1_360_000_000_000),
+        ]))
+        self.assertEqual(rate["window_seconds"], 3 * 3600)
+        self.assertAlmostEqual(rate["iterations_per_second"], 360e9 / (3 * 3600))
+
+    def test_declines_to_guess(self):
+        first = self.LIVE[:1]
+        # One sample has nothing to difference against.
+        self.assertIsNone(measure_rate(rate_history(first)))
+        # Neither does a history whose points predate the iteration total.
+        pointless = rate_history(self.LIVE)
+        for point in pointless:
+            point.pop("iterations")
+        self.assertIsNone(measure_rate(pointless))
+        # Two samples inside the checkpoint granularity are not a measurement.
+        self.assertIsNone(measure_rate(rate_history([
+            ("2026-09-15T13:00:00Z", 1_000_000_000_000),
+            ("2026-09-15T13:05:00Z", 1_000_500_000_000),
+        ])))
+        self.assertLess(5 * 60, MIN_RATE_SPAN_S)
+        # A total that went backwards is a reset checkpoint, not a negative
+        # rate: a slot restarted from an earlier base contributes less than it
+        # did, and the page says it has no rate rather than showing that.
+        self.assertIsNone(measure_rate(rate_history([
+            ("2026-09-15T12:00:00Z", 2_000_000_000_000),
+            ("2026-09-15T13:00:00Z", 1_000_000_000_000),
+        ])))
+        # Nothing within reach of the newest sample at all.
+        self.assertIsNone(measure_rate(rate_history([
+            ("2026-09-14T13:00:00Z", 1_000_000_000_000),
+            ("2026-09-15T13:00:00Z", 2_000_000_000_000),
+        ]), max_span_s=MAX_RATE_SPAN_S))
+
+    def test_a_halted_fleet_measures_zero_and_says_so(self):
+        # Zero is a measurement: the totals stopped moving. It must not become
+        # None (which the page renders as "no rate yet") or an ETA.
+        rate = measure_rate(rate_history([
+            ("2026-09-15T12:00:00Z", 2_000_000_000_000),
+            ("2026-09-15T13:00:00Z", 2_000_000_000_000),
+        ]))
+        self.assertEqual(rate["iterations_per_second"], 0.0)
+
+    def test_apply_rate_sets_and_clears(self):
+        snapshot = {"campaign_id": "ecc2k-130"}
+        self.assertTrue(apply_rate(snapshot, {"iterations_per_second": 1.0}))
+        self.assertEqual(snapshot["walk_rate"]["iterations_per_second"], 1.0)
+        self.assertFalse(apply_rate(snapshot, None))
+        self.assertNotIn("walk_rate", snapshot)
+
+    def test_render_cli_publishes_the_rate_into_the_snapshot(self):
+        import render
+
+        with tempfile.TemporaryDirectory() as tmp:
+            status = os.path.join(tmp, "status.json")
+            history_in = os.path.join(tmp, "history-prev.json")
+            history_out = os.path.join(tmp, "history.json")
+            with open(history_in, "w", encoding="utf-8") as fh:
+                json.dump({"points": rate_history(self.LIVE[:-1])}, fh)
+            with open(status, "w", encoding="utf-8") as fh:
+                json.dump({
+                    "generated_at": self.LIVE[-1][0],
+                    "campaign_id": "ecc2k-130",
+                    "dps": 31635015,
+                    "dps_last_hour": 1,
+                    "collisions": 0,
+                    "workers": 1,
+                    "state": "COLLECTING",
+                    "work": {"iterations": self.LIVE[-1][1]},
+                }, fh)
+            self.assertEqual(render.main([
+                "--status", status,
+                "--history-in", history_in,
+                "--history-out", history_out,
+                "--status-out", status,
+            ]), 0)
+            with open(status, encoding="utf-8") as fh:
+                published = json.load(fh)
+            self.assertAlmostEqual(
+                published["walk_rate"]["iterations_per_second"] / 1e9, 72.528, places=2)
+            assert_public(published)
+
+    def test_render_cli_does_not_publish_a_historical_rate_without_work(self):
+        import render
+
+        with tempfile.TemporaryDirectory() as tmp:
+            status = os.path.join(tmp, "status.json")
+            history_in = os.path.join(tmp, "history-prev.json")
+            history_out = os.path.join(tmp, "history.json")
+            with open(history_in, "w", encoding="utf-8") as fh:
+                json.dump({"points": rate_history(self.LIVE[:-1])}, fh)
+            with open(status, "w", encoding="utf-8") as fh:
+                json.dump({
+                    "generated_at": self.LIVE[-1][0],
+                    "campaign_id": "ecc2k-130",
+                    "dps": 31635015,
+                    "dps_last_hour": 1,
+                    "collisions": 0,
+                    "workers": 1,
+                    "state": "COLLECTING",
+                }, fh)
+            self.assertEqual(render.main([
+                "--status", status,
+                "--history-in", history_in,
+                "--history-out", history_out,
+                "--status-out", status,
+            ]), 0)
+            with open(status, encoding="utf-8") as fh:
+                published = json.load(fh)
+            self.assertNotIn("walk_rate", published)
+
+
+def work_feed(iterations=7817055361302528, generated_at=None, campaign="ecc2k-130"):
+    generated_at = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {
+        "campaign_id": campaign,
+        "generated_at": generated_at,
+        "source": "dp_ingest.py (live, direct from rho-dp + slot checkpoints)",
+        "work": {
+            "iterations": iterations,
+            "method": "sum over slot checkpoints of iterBase * threads * batch",
+            "per_slot": [
+                {"slot": 2, "iterations": 100, "checkpoint_age_s": 206, "retired": False},
+                {"slot": 3, "iterations": 100, "checkpoint_age_s": 44, "retired": False},
+                {"slot": 4, "iterations": 100, "checkpoint_age_s": 90000, "retired": True},
+                {"slot": 5, "iterations": 100, "checkpoint_age_s": 9000, "retired": False},
+            ],
+        },
+    }
+
+
+class WorkFeedTests(unittest.TestCase):
+    def test_takes_the_iteration_total_and_counts_who_is_walking(self):
+        block = work_block(work_feed(), "ecc2k-130")
+        self.assertEqual(block["iterations"], 7817055361302528)
+        self.assertAlmostEqual(block["iterations_log2"], 52.796, places=2)
+        self.assertEqual(block["slots"], 4)
+        # Retired, and stale by three missed checkpoints, are both not walking.
+        self.assertEqual(block["walking_slots"], 2)
+
+    def test_merges_into_a_snapshot_without_publishing_anything_private(self):
+        snapshot = {"campaign_id": "ecc2k-130", "dps": 1}
+        self.assertTrue(merge_work(snapshot, work_feed(), "ecc2k-130"))
+        self.assertEqual(snapshot["work"]["iterations"], 7817055361302528)
+        assert_public(snapshot)
+        # No per-slot rows: the page needs the total and a count, and each row
+        # names a walker's slot and run.
+        self.assertNotIn("per_slot", snapshot["work"])
+
+    def test_refuses_a_stale_feed_rather_than_freezing_the_total(self):
+        # A frozen total does not read as a dead ingest host, it reads as a
+        # dead campaign, and it drags the measured rate to zero as the
+        # snapshots catch up with it.
+        old = datetime.now(timezone.utc) - timedelta(seconds=MAX_FEED_AGE_S + 60)
+        feed = work_feed(generated_at=old.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertIsNone(work_block(feed, "ecc2k-130"))
+        snapshot = {"campaign_id": "ecc2k-130"}
+        self.assertFalse(merge_work(snapshot, feed, "ecc2k-130"))
+        self.assertNotIn("work", snapshot)
+
+    def test_refuses_another_campaign_and_unusable_totals(self):
+        self.assertIsNone(work_block(work_feed(campaign="eccp-131"), "ecc2k-130"))
+        self.assertIsNone(work_block(work_feed(iterations=0), "ecc2k-130"))
+        self.assertIsNone(work_block({"campaign_id": "ecc2k-130"}, "ecc2k-130"))
+        self.assertIsNone(work_block({"campaign_id": "ecc2k-130", "work": {}}, "ecc2k-130"))
+        self.assertIsNone(work_block("not a feed", "ecc2k-130"))
+        no_time = work_feed()
+        del no_time["generated_at"]
+        self.assertIsNone(work_block(no_time, "ecc2k-130"))
+
+    def test_feed_url_is_derived_and_never_hardcoded(self):
+        # The bucket is named for the AWS account, which this public tree does
+        # not carry; the URL is built from the calling identity at run time.
+        url = feed_url("ecc2k130", "us-west-2", account="123456789012")
+        self.assertEqual(
+            url, "https://ecc2k130-status-123456789012.s3.us-west-2.amazonaws.com/status.json")
+        self.assertTrue(url.startswith("https://"))
+        with open(os.path.join(HERE, "work_feed.py"), encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertNotRegex(source, r"\b\d{12}\b", "an account number is hardcoded in work_feed.py")
+
+    def test_workflow_merges_the_feed_before_it_renders_history(self):
+        # The rate is a difference between snapshots, so the iteration total
+        # has to be in the snapshot before render.py records the point. In the
+        # other order every point publishes without a total and no rate is
+        # ever measured.
+        path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("--status-out docs/ecc2k130-status/status.json", text)
+        self.assertLess(
+            text.index("python3 scripts/rho_status/work_feed.py"),
+            text.index("python3 scripts/rho_status/render.py"),
+        )
 
 
 if __name__ == "__main__":

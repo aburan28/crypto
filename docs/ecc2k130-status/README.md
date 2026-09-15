@@ -5,15 +5,25 @@ published at <https://aburan28.github.io/crypto/status/>. The Action
 overwrites `status.json` and `history.json`; this HTML only renders those
 files, and `scripts/site/build.py` lays them out for publishing.
 
-The operations panel above the counts is derived in the browser rather
-than snapshotted: the walk total behind the point count, one point per
-`2^25.27` iterations at `HW(x) <= 34`, as `2^n`. Two bars sit under it.
-The first is **linear in work** — the share of the `2^60.9` expected cost
-of a collision — so early in a campaign it is empty and its caption says
-so; nothing pads the fill to a visible sliver. The second is the exponent
-on a **log scale**, legible but labelled on the page as not being
-progress, because each bit of it is a doubling of the work. Beneath the bars, an **ETA** projects the wall-clock time to the expected `2^60.9` cost from the last-hour distinguished-point amount at the same `2^25.27` interval — when that hourly amount changes, the operation rate and the ETA both move with it. See
-`scripts/rho_status/README.md` for why none of this is a published field.
+The operations panel above the counts is the walk total the walkers
+checkpointed, as `2^n`, taken from the snapshot's `work.iterations`. Two
+bars sit under it. The first is **linear in work** — the share of the
+`2^60.9` expected cost of a collision — so early in a campaign it is empty
+and its caption says so; nothing pads the fill to a visible sliver. The
+second is the exponent on a **log scale**, legible but labelled on the page
+as not being progress, because each bit of it is a doubling of the work.
+
+Beneath the bars are the two numbers that depend on time. **Iterations per
+second** is measured, not projected: that same total's increase between two
+published snapshots, divided by the time between them, with the span it
+used printed beside it. The **ETA** is the work still expected at exactly
+that rate. A snapshot carrying no iteration total falls back to the point
+count at one point per `2^25.27` iterations at `HW(x) <= 34`, which reads
+about six times low for this campaign and is labelled on the page as the
+fallback; a campaign with one total so far says the rate arrives with the
+next snapshot rather than showing a number it cannot measure yet. See
+`scripts/rho_status/README.md` for where the total comes from and why the
+derivation is only a fallback.
 
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
