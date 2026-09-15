@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-09-10",
+  "updated": "2026-09-12",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
@@ -128,43 +128,43 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Push past prior ceiling: construct+measure n=53 vs_rho probe; then wall at n=37 or charged at n=41 with >=20% margin"
+      "beat": "Expose reusable pair-level support in the exact Frobenius-orbit S5 formula, extract group-valid n=53 relations without pair edges, then repeat the log2-subgroup-order slope panel"
     },
     {
       "rank": 2,
       "regime": "koblitz",
       "stage": "factor_base",
-      "beat": "Balanced base at n=53 under resource gate (materialized or implicit+storage lower bound)"
+      "beat": "Use the exact representative-plus-Frobenius factor-base domain while avoiding both the 9.74 GB pair table and a target-specific feasibility join"
     },
     {
       "rank": 3,
       "regime": "koblitz",
       "stage": "decomposition",
-      "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged"
+      "beat": "Repeat n=31 dim-16 m=2 over a distribution or advance the quadratic cell to n=37"
     },
     {
       "rank": 4,
       "regime": "binary",
       "stage": "decomposition",
-      "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged"
+      "beat": "sub-2^(2l) oracle at l=8 with FFD logged"
     },
     {
       "rank": 5,
       "regime": "prime",
       "stage": "end_to_end_dlp",
-      "beat": "j=0 known-answer IC at 16 bits agreeing with rho"
+      "beat": "j=0 public known-answer IC at 16 bits agreeing with rho"
     },
     {
       "rank": 6,
       "regime": "binary_and_prime",
       "stage": "relation_yield",
-      "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs"
+      "beat": "publish distributional yield and rank curves with complete accounting"
     },
     {
       "rank": 7,
       "regime": "all",
       "stage": "decomposition",
-      "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts"
+      "beat": "backfill FFD/DoR where only wall-clock or conflicts are cited"
     }
   ],
   "regimes": {
@@ -359,209 +359,535 @@
         "factor_base": {
           "status": "record",
           "current": {
-            "summary": "Exact/optimized bases at n=19; curve+generator construction verified at n=53 (past prior MAX_N=41); minimum base feasible at n=41",
+            "summary": "n=53 explicit rank-guided base wins finite batches; its exact 220-orbit SAT domain reduces the complete implicit S5 formula to 22,887 clauses",
             "metrics": {
-              "exact_n": 19,
-              "feasible_n": 41,
+              "exact_n": 53,
               "construction_n_max": 53,
-              "construction_method": "frobenius_invariant_linearized_or_point_defined",
+              "construction_method": "point_defined_signed_frobenius_eta_1_10_signed_expanded_pair_support_plus_balanced_rank_guided_slot_index",
               "materialized": true,
-              "construction_wall_ms": null,
-              "retained_bytes": null
+              "construction_wall_ms": 23670.267792000002,
+              "retained_bytes": 9739346224,
+              "factor_base_points": 23320,
+              "frobenius_closed": true,
+              "guided_slot_index_allocated_bytes": 612540720,
+              "independent_replay_discrepancies": 0,
+              "negation_closed": true,
+              "orbit_columns": 220,
+              "peak_rss_bytes": 10638950400,
+              "support_index_entries": 135919826,
+              "support_table_allocated_bytes": 9126805504,
+              "witness_bytes": 24,
+              "implicit_formula": {
+                "base_ingestion_ms": 309.154459,
+                "formula_encoding_ms": 408.919917,
+                "formula_peak_rss_bytes": 438190080,
+                "variables": 14622,
+                "ordinary_clauses": 1815492,
+                "native_xor_rows": 9619,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0
+              },
+              "frobenius_orbit_formula": {
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "orbit_union_exact": true,
+                "orbit_representatives": 220,
+                "frobenius_shifts_per_orbit": 53,
+                "factor_base_x_coordinates": 11660,
+                "formula_encoding_ms": 24.343,
+                "variables": 19473,
+                "ordinary_clauses": 22887,
+                "native_xor_rows": 11474,
+                "coordinate_rom_clause_reduction": 79.32415781884913,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0,
+                "solver_verdict": "UNKNOWN"
+              }
             },
-            "verdict": "N53_CURVE_CONSTRUCTION_OK"
+            "verdict": "N53_RANK_GUIDED_FACTOR_BASE_RETAINED_EXACT_REPLAY_UNDER_16GIB"
           },
           "next_target": {
-            "summary": "Balanced base at n=53 under crossover-task resource gate (materialized or implicit+storage lower bound); publish construction RSS + retained bytes",
+            "summary": "Add reusable pair-sum support over representative and relative-Frobenius variables without constructing the explicit target feasibility join",
             "acceptance_gates": [
-              "Frobenius+negation closure verified",
-              "construction RSS and retained bytes logged"
+              "same independently replayed base hash",
+              "no pair or edge selector enumeration",
+              "group-validated extracted relations",
+              "formula, solver, memory, and UNKNOWN accounting retained"
             ]
           },
           "evidence": [
-            "research/sat_factor_base_review_20260908/"
+            "research/sat_factor_base_review_20260908/",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/independent_validation.json",
+            "research/sat_factor_base_review_20260908/autolab_implicit_s5_20260912/results.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Curve and generator construction verified at n=53 past prior MAX_N=41",
+              "verdict": "N53_CURVE_CONSTRUCTION_OK"
+            },
+            {
+              "metrics": {
+                "construction_method": "point_defined_signed_frobenius_eta_1_10_signed_expanded_pair_support",
+                "construction_n_max": 53,
+                "construction_wall_ms": 28551.732250023633,
+                "exact_n": 19,
+                "factor_base_points": 23320,
+                "feasible_n": 41,
+                "frobenius_closed": true,
+                "independent_replay_discrepancies": 0,
+                "materialized": true,
+                "negation_closed": true,
+                "orbit_columns": 220,
+                "peak_rss_bytes": 10101391360,
+                "retained_bytes": 9126805504,
+                "support_index_entries": 135919826,
+                "witness_bytes": 24
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "n=53 eta=1/10 signed-expanded base materialized under cap with packed witnesses and exact relation replay",
+              "verdict": "N53_FACTOR_BASE_MATERIALIZED_EXACT_REPLAY_UNDER_16GIB"
+            }
+          ]
         },
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13; FFD ladder measured",
+            "summary": "n=31 m=2 F4 cell completes; n=53 exact Frobenius-orbit S5 compression removes the coordinate ROM, but every unrestricted solver arm remains UNKNOWN",
             "metrics": {
-              "f4_unknowns": 46,
-              "f4_example": "n=31 m=3 ~145s",
-              "sat_comfortable_unknowns": 27,
-              "classical_demo_n_max": 13,
-              "unknowns_formula": "m*l + (m-2)*n",
-              "ffd": {
-                "ladder_source": "RESEARCH_KOBLITZ_SCALING_TARGET.md",
-                "draws_per_row": 16,
-                "headline": "No measured system falls later than D=3; chained m>=3 falls at FFD=3; m=2 often FFD 2-3 and overdetermined",
-                "examples": [
-                  {
-                    "n": 31,
-                    "l": 5,
-                    "m": 3,
-                    "vars": 46,
-                    "eqs": 62,
-                    "deg": 3,
-                    "ffd_min": 3,
-                    "ffd_max": 3
-                  },
-                  {
-                    "n": 31,
-                    "l": 5,
-                    "m": 2,
-                    "vars": 10,
-                    "eqs": 31,
-                    "deg": 2,
-                    "ffd_min": 2,
-                    "ffd_max": 2
-                  },
-                  {
-                    "n": 21,
-                    "l": 6,
-                    "m": 3,
-                    "vars": 39,
-                    "eqs": 42,
-                    "deg": 3,
-                    "ffd_min": 3,
-                    "ffd_max": 3
-                  }
-                ]
-              },
-              "f4_splits": "flat across 39\u219246 unknowns (scaling note)",
-              "oracle_classes": [
-                "enumerate",
-                "groebner",
-                "sat"
-              ]
-            }
-          },
-          "next_target": {
-            "summary": "n=31 dim=16 m=2 (32 unknowns, quadratic) median <=1h; FFD + eq/var + splits/conflicts required",
-            "metrics_template": {
               "n": 31,
               "dim": 16,
               "m": 2,
               "unknowns": 32,
-              "system_degree": "quadratic"
+              "equations": 31,
+              "system_degree": "quadratic",
+              "x_chained": {
+                "verdict": "found",
+                "wall_ms": 63246,
+                "ffd": 3,
+                "f4_splits": 7056
+              },
+              "symmetrised": {
+                "verdict": "refuted",
+                "wall_ms": 36228,
+                "ffd": 4,
+                "f4_splits": 4095
+              },
+              "complete_process_wall_ms": 127919.902542,
+              "targets": 1,
+              "gate_failures": 0,
+              "oracle_classes": [
+                "groebner_f4",
+                "symmetrised_groebner_f4"
+              ],
+              "implicit_n53": {
+                "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+                "base_ingestion_ms": 309.154459,
+                "encoding_ms": 408.919917,
+                "variables": 14622,
+                "ordinary_clauses": 1815492,
+                "native_xor_rows": 9619,
+                "pair_table_entries": 0,
+                "pair_selector_variables": 0,
+                "best_external_n41_100k_seconds": 4.4,
+                "best_external_n41_1m_seconds": 31.07,
+                "n53_100k_seconds": 31.72,
+                "solver_verdict": "UNKNOWN",
+                "root_fixed_circuit_validation": "one valid n=53 group lift; zero invalid lifts"
+              },
+              "frobenius_orbit_n53": {
+                "orbit_union_exact": true,
+                "variables": 19473,
+                "ordinary_clauses": 22887,
+                "native_xor_rows": 11474,
+                "encoding_ms": 24.343,
+                "best_external_100k_seconds": 0.82,
+                "best_external_1m_seconds": 8.96,
+                "solver_verdict": "UNKNOWN"
+              },
+              "lazy_index_n41": {
+                "variables": 117,
+                "ordinary_clauses": 155,
+                "native_xor_rows": 36,
+                "conflicts": 10000,
+                "infeasible_quadruples": 20430,
+                "solver_verdict": "UNKNOWN"
+              }
             },
+            "verdict": "N31_M2_F4_COMPLETE__N53_FROBENIUS_ORBIT_FORMULA_COMPACT_EXTRACTION_UNKNOWN"
+          },
+          "next_target": {
+            "summary": "Expose a reusable constraint between endpoint pairs over representative and relative-Frobenius variables before all four factors are fixed",
             "acceptance_gates": [
-              "disagreements=0",
-              "oracle agreement or F4+group check",
-              "ffd min/max/mean logged",
-              "median_ms_per_target logged"
+              "exhaustive small-field equivalence on the declared regular/exceptional partition",
+              "n=53 extracted witness group-validates",
+              "UNKNOWN remains censored",
+              "no enumerated pair-edge domain"
             ]
           },
           "evidence": [
             "RESEARCH_KOBLITZ_SCALING_TARGET.md",
-            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md"
+            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/n31_pmull_square_decomposition/receipt.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/independent_validation.json",
+            "research/sat_factor_base_review_20260908/autolab_implicit_s5_20260912/results.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "F4 refutation frontier past 46 unknowns; SAT ~27 unknowns; classical demos n<=13; FFD ladder measured",
+              "metrics": {
+                "f4_unknowns": 46,
+                "f4_example": "n=31 m=3 ~145s",
+                "sat_comfortable_unknowns": 27,
+                "classical_demo_n_max": 13,
+                "unknowns_formula": "m*l + (m-2)*n",
+                "ffd": {
+                  "ladder_source": "RESEARCH_KOBLITZ_SCALING_TARGET.md",
+                  "draws_per_row": 16,
+                  "headline": "No measured system falls later than D=3; chained m>=3 falls at FFD=3; m=2 often FFD 2-3 and overdetermined",
+                  "examples": [
+                    {
+                      "n": 31,
+                      "l": 5,
+                      "m": 3,
+                      "vars": 46,
+                      "eqs": 62,
+                      "deg": 3,
+                      "ffd_min": 3,
+                      "ffd_max": 3
+                    },
+                    {
+                      "n": 31,
+                      "l": 5,
+                      "m": 2,
+                      "vars": 10,
+                      "eqs": 31,
+                      "deg": 2,
+                      "ffd_min": 2,
+                      "ffd_max": 2
+                    },
+                    {
+                      "n": 21,
+                      "l": 6,
+                      "m": 3,
+                      "vars": 39,
+                      "eqs": 42,
+                      "deg": 3,
+                      "ffd_min": 3,
+                      "ffd_max": 3
+                    }
+                  ]
+                },
+                "f4_splits": "flat across 39\u219246 unknowns (scaling note)",
+                "oracle_classes": [
+                  "enumerate",
+                  "groebner",
+                  "sat"
+                ]
+              },
+              "recorded": "2026-09-12-pre-current-record"
+            }
+          ]
         },
         "relation_yield": {
           "status": "record",
           "current": {
-            "summary": "Exact coverage/yield controls at n=19; collectors at n=37 fixtures",
+            "summary": "n=53 rank-guided eta=1/10 yields one exact four-sum relation per requested public target; 1,244/1,244 in the 1,024-target batch",
             "metrics": {
-              "control_n": 19,
-              "fixture_collector_n": 37,
-              "trials_per_relation": null,
-              "target_mix_published": false
-            }
+              "n": 53,
+              "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+              "eta": "1/10",
+              "target_mix": {
+                "natural_public_synthetic": 1024,
+                "planted_sat": 0,
+                "proven_unsat": 0
+              },
+              "target_trials": 1244,
+              "relations": 1244,
+              "trials_per_relation": 1.0,
+              "post_precomputation_target_ms": {
+                "median": 7.493417,
+                "p95": 27.384583399999997,
+                "p99": 47.49335051999998,
+                "max": 90.416166
+              },
+              "all_group_verified": true
+            },
+            "verdict": "N53_GUIDED_EXACT_RELATION_PER_TARGET_DISTRIBUTION"
           },
           "next_target": {
-            "summary": "Distributional yield for frozen (n, eta, base) at n=23",
+            "summary": "Measure the same rank-guided policy at growing n with target/probe tails and support density",
             "acceptance_gates": [
-              "256 natural + 64 planted + 64 proven-UNSAT",
-              "preregistered covariates",
-              "trials_per_relation reported"
+              "public-natural fixture domain",
+              "exact group checks",
+              "trials, probes, timing distribution, and policy hash retained"
             ]
           },
           "evidence": [
-            "research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md"
+            "research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Exact coverage/yield controls at n=19; collectors at n=37 fixtures",
+              "metrics": {
+                "control_n": 19,
+                "fixture_collector_n": 37,
+                "trials_per_relation": null,
+                "target_mix_published": false
+              },
+              "recorded": "2026-09-12-pre-current-record"
+            }
+          ]
         },
         "rank": {
           "status": "record",
           "current": {
-            "summary": "Full rank on n=37 amortized fixtures; n=41 fixture reaches rank (relation-matrix LA, not GB FFD)",
+            "summary": "n=53 rank-guided collector reaches the theoretical minimum rank on every measured fixture and reuses one factor-log table across 1,024 targets",
             "metrics": {
-              "full_rank_n": 37,
-              "fixture_rank_n": 41,
+              "full_rank_n": 53,
               "amortized_targets": 1024,
-              "sparse_or_dense": null,
-              "la_charged_ms": null,
-              "note": "Do not report this stage as FFD"
-            }
+              "sparse_or_dense": "sparse_rows_independent_modular_replay",
+              "note": "Relation-matrix LA over subgroup order; not Semaev FFD",
+              "first_matrix_dims": {
+                "cols": 221,
+                "rows": 221
+              },
+              "first_relations_to_rank": 221,
+              "first_surplus_relations": 0,
+              "independent_replay_discrepancies": 0,
+              "orbit_columns": 220,
+              "rank_accumulation": "forward incremental echelon with exact minimum rank; independent full-transcript replay",
+              "rank_and_linear_solve_charged_ms": 11.159244,
+              "subsequent_matrix_dims": {
+                "cols": 221,
+                "rows": 1
+              },
+              "subsequent_relations_per_target": 1,
+              "total_relations": 1244
+            },
+            "verdict": "N53_SHARED_FACTOR_LOG_RANK_221_PLUS_1023_ONE_RELATION_TARGETS"
           },
           "next_target": {
-            "summary": "Single-process rank to K+1 at n=41 with replayable rows; publish dims, surplus, LA cost",
+            "summary": "Run a fixed-protocol growing-n rank/yield panel for shared factor logs and preserve minimum-rank accumulation",
             "acceptance_gates": [
               "independent matrix replay or preserved row transcript",
-              "matrix_dims and la_wall_ms_or_la_charged_ms logged"
+              "matrix dimensions and LA cost logged",
+              "same rank-guided policy frozen before holdout"
             ]
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/",
-            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/"
+            "research/sat_factor_base_review_20260908/autolab_n41_feasibility/",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/packed_eta_1_10_surplus0_full/independent_replay.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
           ],
-          "history": []
+          "history": [
+            {
+              "metrics": {
+                "amortized_targets": 1024,
+                "fixture_rank_n": 41,
+                "full_rank_n": 53,
+                "la_charged_ms": 382.182,
+                "n53_matrix_columns": 221,
+                "n53_relations_to_rank": 439,
+                "n53_surplus_relations": 0,
+                "note": "Do not report this stage as FFD",
+                "sparse_or_dense": "sparse_rows_independent_modular_replay"
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "Exact relation-matrix rank replay through n=53; n=37 amortized fixtures and n=53 rank-221 full-evidence fixture"
+            }
+          ]
         },
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps",
+            "summary": "1,024 public-synthetic known-answer n=53 targets recovered and checked with one retained factor-log table",
             "metrics": {
-              "demo_n_max": 13,
-              "ic_degree_doc_max": 23,
-              "claim_boundary": "synthetic_known_answer"
-            }
+              "claim_boundary": "public_synthetic_known_answer_multi_target",
+              "all_group_verified": true,
+              "all_recovered": true,
+              "factor_log_precomputation_fixtures": 1,
+              "independent_replay_discrepancies": 0,
+              "n": 53,
+              "one_relation_targets": 1023,
+              "stage_ms": {
+                "complete_online": 12980.085308999991,
+                "fully_charged": 36935.784684,
+                "support_setup": 23670.267792000002
+              },
+              "targets": 1024
+            },
+            "verdict": "N53_PUBLIC_SYNTHETIC_1024_TARGET_SHARED_LOG_RECOVERY_VERIFIED"
           },
           "next_target": {
-            "summary": "Known-answer full IC at n=23 with stage timers",
+            "summary": "Repeat the shared-log known-answer workflow at a second n>=53 rung or on a second independent host",
             "acceptance_gates": [
-              "progress events FB\u2192relations\u2192LA\u2192verify",
-              "[d]G = Q"
+              "all targets are public synthetic",
+              "[d]G = Q for every target",
+              "full stage timers and independent replay"
             ]
           },
           "evidence": [
             "docs/ic/README.md",
-            "tests/ic_progress.rs"
+            "tests/ic_progress.rs",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json"
           ],
-          "history": []
+          "history": [
+            {
+              "metrics": {
+                "claim_boundary": "synthetic_known_answer",
+                "demo_n_max": 13,
+                "ic_degree_doc_max": 23
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps"
+            }
+          ]
         },
         "vs_rho": {
           "status": "record",
           "current": {
-            "summary": "n=37 charged-time crossover (amortized exact-support V2); n=41 base feasible only",
+            "summary": "n=53 shared-log finite batch wall crossover retained; growing-n fixed-32 panel shows direct cost grows faster than rho",
             "metrics": {
-              "n": 37,
-              "timing_class": "algorithmic_charged",
-              "whole_process_wall_crossover": false,
+              "n": 53,
+              "timing_class": "whole_process_wall_and_fully_charged_algorithm_same_public_corpus",
+              "whole_process_wall_crossover": true,
               "amortized_targets": 1024,
-              "automorphism_discount": "sqrt(2n) / A=2*n family",
-              "n41_status": "N41_MINIMUM_BASE_FEASIBLE_only_not_crossover"
+              "automorphism_discount": "sqrt(2n) with A=2*n=106; rho producer uses signed_frobenius quotient",
+              "asymptotic_sub_rho": false,
+              "batch1024": {
+                "all_1024_verified": true,
+                "direct_fully_charged_ms": 36935.784684,
+                "direct_peak_rss_bytes": 10638950400,
+                "direct_process_wall_ms": 43450.638084,
+                "fully_charged_ratio": 0.0336568761192516,
+                "fully_charged_speedup": 29.711610681182737,
+                "process_wall_ratio": 0.0395810437414916,
+                "process_wall_speedup": 25.264619258934058,
+                "rho_algorithm_ms": 1097421.654735,
+                "rho_peak_rss_bytes": 254033920,
+                "rho_process_wall_ms": 1097763.82775,
+                "same_public_scalars_and_points": true
+              },
+              "batch32": {
+                "direct_fully_charged_ms": 28168.014705,
+                "direct_process_wall_ms": 29659.520792,
+                "fully_charged_ratio": 0.813555302743974,
+                "process_wall_ratio": 0.8489032375634704,
+                "rho_algorithm_ms": 34623.355794,
+                "rho_process_wall_ms": 34938.6355
+              },
+              "independent_replay_discrepancies": 0,
+              "single_target_crossover": false,
+              "growing_n_panel": {
+                "field_degrees": [
+                  37,
+                  41,
+                  53
+                ],
+                "subgroup_log2_orders": [
+                  27.78083708554834,
+                  39.00000151433405,
+                  44.258533022667656
+                ],
+                "wall_ratio_medians": [
+                  0.6540065199754175,
+                  0.47597992348637974,
+                  0.8152901634560032
+                ],
+                "direct_process_wall_slope": {
+                  "estimate": 0.4647299369192933,
+                  "lower_95": 0.4626693358523599,
+                  "upper_95": 0.470599964879437
+                },
+                "rho_process_wall_slope": {
+                  "estimate": 0.456253049834696,
+                  "lower_95": 0.43498287560184223,
+                  "upper_95": 0.4601498322443186
+                },
+                "direct_fully_charged_slope": {
+                  "estimate": 0.5704549445682197,
+                  "lower_95": 0.5665929396736489,
+                  "upper_95": 0.5785027151791216
+                },
+                "rho_algorithm_slope": {
+                  "estimate": 0.45866265955669466,
+                  "lower_95": 0.4398021195579382,
+                  "upper_95": 0.4626555117993512
+                },
+                "finite_ordering": "DIRECT_GROWS_FASTER",
+                "independent_replay_discrepancies": 0
+              }
             },
-            "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
-            "claim_boundary": "Not whole-process wall-clock, not Semaev-SAT, not single-instance, not asymptotic sub-rho, not key recovery."
+            "verdict": "N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER",
+            "claim_boundary": "Finite public-synthetic multi-target n=53 wall crossover remains valid. The growing-n security-axis panel orders direct growth above rho and does not support an asymptotic sub-rho claim. No single-target crossover, external/private targets, production key recovery, or deployed-curve security claim."
           },
           "next_target": {
-            "summary": "After n=53 construction+probe: win whole-process wall at n=37 OR charged at n=41 (>=20% margin); then charged/wall at n=53 with balanced eta",
+            "summary": "Produce group-valid n=53 relations from the exact orbit-factorized formula fast enough to replace explicit pair-table setup, then repeat the security-axis slope panel",
             "acceptance_gates": [
-              "all stages charged",
-              "independent validation",
-              "explicit verdict field for wall or next-rung",
-              "timing_class and automorphism_discount explicit"
+              "no pair/edge selector enumeration",
+              "all material stages charged",
+              "independent arithmetic replay",
+              "matched public fixtures and explicit automorphism discount",
+              "security axis is log2 subgroup order, not field degree alone"
             ],
-            "n53_probe_note": "IC producer RANK_PLUS_32 and rho recover at n=53 (draft vs_rho costs); not a ledger promotion"
+            "n53_probe_note": "The 1,024-target wall win remains finite amortization. The fixed-32 growing-n panel reports DIRECT_GROWS_FASTER for the explicit pair-table method."
           },
           "evidence": [
-            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json"
+            "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/frozen/n37_process_wall/verdict.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/batch1024_comparison.json",
+            "research/sat_factor_base_review_20260908/autolab_n53_eta_sweep_20260912/runs/shared_factor_logs_independent_replay.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/results.json",
+            "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/independent_validation.json",
+            "research/sat_factor_base_review_20260908/autolab_implicit_s5_20260912/results.json"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "n=37 charged-time crossover; whole-process wall crossover false",
+              "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER"
+            },
+            {
+              "claim_boundary": "n=37 is a finite public-synthetic 1,024-target process-wall result. n=53 is a non-paired boundary diagnostic. Neither is Semaev-SAT, single-instance asymptotic sub-rho, an external/private target result, or key recovery.",
+              "metrics": {
+                "amortized_targets": 1024,
+                "automorphism_discount": "sqrt(2n) / A=2*n family",
+                "n": 37,
+                "n37_process_wall_ratio_median": 0.5236039893067193,
+                "n37_process_wall_ratio_upper_95": 0.530870619095724,
+                "n41_status": "materialized_but_not_crossover",
+                "n53_comparison_same_fixture_domain": true,
+                "n53_current_single_fixture_process_wall_ms": 39394.637749996036,
+                "n53_factor_base_points": 23320,
+                "n53_matched_batch4_ic_online_ms": 24575.849833,
+                "n53_matched_batch4_ic_process_wall_ms": 57840.82216699608,
+                "n53_matched_batch4_process_wall_ratio": 3.8621911783612606,
+                "n53_matched_batch4_rho_algorithm_ms": 14681.78858,
+                "n53_matched_batch4_rho_process_wall_ms": 14976.16754216142,
+                "n53_online_ratio_to_matched_rho": 1.6739002676062238,
+                "n53_orbit_columns": 220,
+                "n53_status": "N53_DIRECT_STACK_IMPROVED_OVER_30X_BUT_REMAINS_ABOVE_RHO",
+                "n53_support_entries": 135919826,
+                "timing_class": "direct_child_process_wall_with_full_evidence_shadows",
+                "whole_process_wall_crossover": true
+              },
+              "recorded": "2026-09-12-pre-shared-log-record",
+              "summary": "n=37 process-wall crossover at 1,024 targets; n=53 direct stack improved over 30x but remains above fresh rho",
+              "verdict": "N37_DIRECT_1024_PROCESS_WALL_IC_OVER_RHO_WIN__N53_NO_CROSSOVER"
+            }
+          ]
         }
       }
     },

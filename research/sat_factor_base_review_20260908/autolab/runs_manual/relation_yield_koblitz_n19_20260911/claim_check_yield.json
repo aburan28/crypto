@@ -1,0 +1,24 @@
+{
+  "fail_closed": true,
+  "missing_global_provenance": [],
+  "missing_stage_fields": [],
+  "required_global_provenance": [
+    "fixture_hash",
+    "executable_or_source_hash",
+    "host_id",
+    "resource_caps",
+    "seeds",
+    "claim_boundary_non_claims"
+  ],
+  "required_stage_fields": [
+    "n_or_bits",
+    "base_id_or_hash",
+    "eta_or_coverage_policy",
+    "pr_decomposition_or_hit_rate_with_ci",
+    "trials_per_relation",
+    "target_mix"
+  ],
+  "schema_version": 2,
+  "stage": "relation_yield",
+  "status": "PASS"
+}

@@ -113,7 +113,8 @@ const MAX_DEG: usize = 6;
 ///
 /// The two things that make it fast:
 ///
-/// - **Carry-less multiply.**  `a·b` is one `pclmulqdq` producing the
+/// - **Carry-less multiply.**  `a·b` is one x86 `pclmulqdq` or ARM `pmull`
+///   instruction producing the
 ///   unreduced 128-bit product, where the textbook shift-and-xor loop
 ///   runs `n` iterations with two unpredictable branches in each.
 ///   A scalar carry-less loop stands in where the instruction is
@@ -161,6 +162,12 @@ unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
     ((hi as u128) << 64) | (lo as u128)
 }
 
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
+    std::arch::aarch64::vmull_p64(a, b)
+}
+
 impl Gf2 {
     pub fn new(irr: &IrreduciblePoly) -> Self {
         assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
@@ -194,7 +201,9 @@ impl Gf2 {
 
         #[cfg(target_arch = "x86_64")]
         let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(target_arch = "aarch64")]
+        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         let has_clmul = false;
 
         Self {
@@ -227,7 +236,7 @@ impl Gf2 {
 
     #[inline(always)]
     fn clmul(&self, a: u64, b: u64) -> u128 {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
         if self.has_clmul {
             // SAFETY: guarded by the runtime feature detection recorded
             // in `has_clmul` at construction.

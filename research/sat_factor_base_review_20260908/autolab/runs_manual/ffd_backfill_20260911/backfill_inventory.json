@@ -1,0 +1,52 @@
+{
+  "actions": [
+    {
+      "action": "ffd.status=inapplicable",
+      "claim": "binary l8 pairs",
+      "claim_check": "PASS"
+    },
+    {
+      "action": "already had FFD",
+      "claim": "koblitz n31 m2",
+      "status": "already_complete"
+    },
+    {
+      "action": "snapshot under ffd_backfill_20260911",
+      "claim": "koblitz_scaling_bench --json",
+      "status": "recorded"
+    },
+    {
+      "action": "gbrl Fp Macaulay FFD; m=3 ladder fb=3..6 FFD=6,8,10,12",
+      "claim": "prime.decomposition.m3_gbrl_ffd",
+      "claim_check": "PASS",
+      "evidence": [
+        "runs_manual/prime_m3_ffd_20260911/"
+      ],
+      "status": "fp_ffd_measured_toy_field"
+    },
+    {
+      "action": "planted m=3 on |E|~2^20 curve; FFD=8; witnesses_sum_in_group=true; recovered planted",
+      "claim": "prime.decomposition.m3_witness_ffd_ge14",
+      "claim_check": "PASS",
+      "evidence": [
+        "runs_manual/prime_m3_witness_ffd_20260911/m3_witness_ffd.json",
+        "runs_manual/prime_m3_witness_ffd_20260911/claim_draft.json",
+        "runs_manual/prime_m3_witness_ffd_20260911/claim_check.json",
+        "research/gbrl/src/bin/m3_witness_ffd.rs"
+      ],
+      "status": "ge14_bits_witness_ffd_measured_not_promotion"
+    },
+    {
+      "claim": "binary subspace SAT FFD",
+      "status": "still_open"
+    }
+  ],
+  "beat_id": "all.decomposition.ffd_backfill",
+  "claim_boundary_non_claims": [
+    "not ledger promotion"
+  ],
+  "created_at": "2026-09-11T06:40:54.776898+00:00",
+  "schema_version": "1.0",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "updated_at": "2026-09-11T16:00:00.000000+00:00"
+}
