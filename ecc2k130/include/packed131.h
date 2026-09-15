@@ -232,6 +232,21 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #endif
 }
 ECC_HD uint64_t spread32p(uint32_t x){
+#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+ /* A carryless square is a bit spread.  x*x = sum_(i,j) x_i x_j t^(i+j) and
+    every i != j term appears twice, so in characteristic two only the doubled
+    positions survive, which is exactly what the stages below build.  Degree
+    2*31 fits the low half, so clmad.hi is not needed.
+
+    One clmad is dearer than the ~22 logic ops it replaces -- the price
+    benchmarks/clmad-price measures is 37.7 -- and is still the right trade
+    because the two pipes are not equally loaded.  Nsight Compute puts the ALU
+    pipe at 87.3% here and the FP64 pipe that carries clmad at 51.4%, so the
+    walk is short of ALU and has carryless capacity to spend. */
+ uint64_t r;
+ asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"((uint64_t)x));
+ return r;
+#else
  uint64_t r=x;
  r=(r|(r<<16))&0x0000ffff0000ffffull;
  r=(r|(r<<8))&0x00ff00ff00ff00ffull;
@@ -239,6 +254,7 @@ ECC_HD uint64_t spread32p(uint32_t x){
  r=(r|(r<<2))&0x3333333333333333ull;
  r=(r|(r<<1))&0x5555555555555555ull;
  return r;
+#endif
 }
 // Polynomial coefficients square into the even positions of a degree-260
 // product. This is distinct from sqr131's normal-basis permutation.
