@@ -2826,8 +2826,8 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
     let started = Instant::now();
     let width = curve.n as usize;
     assert!(
-        width <= 23,
-        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE relative mode is bounded to n <= 23"
+        width <= 41,
+        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE relative mode is bounded to n <= 41"
     );
     let representatives = representative_x_codes.len();
     let binary_representatives = representative_encoding == "binary";
@@ -4894,7 +4894,9 @@ fn main() {
         intermediate_domain_encoding.as_str(),
         "none" | "pair_sum_trie"
     ));
-    assert!(intermediate_domain_encoding == "none" || n <= 23);
+    // pair_sum_trie is compact enough through the admitted n=41 rung; absolute
+    // positive expansion remains capped separately at n<=23.
+    assert!(intermediate_domain_encoding == "none" || n <= 41);
     let intermediate_domain_started = Instant::now();
     let intermediate_domain = (intermediate_domain_encoding == "pair_sum_trie")
         .then(|| pair_sum_x_domain(&curve, &base.points));

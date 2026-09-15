@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "kind": "bound_lift_n37_probe_partial",
+  "updated_at": "2026-09-15T18:56:43Z",
+  "claim_boundary": "Bound lift of pair_sum_trie + relative-positive to n<=41. Cert export at n=37 succeeded (pair_table_entries=0). Planted-units reload @100k still in flight under CPU contention with n23@1M. NOT ledger promotion.",
+  "code_change": "examples/koblitz_s5_sat_instance.rs: relative-positive relative mode and pair_sum_trie asserts 23->41; absolute positive remains <=23",
+  "cert": {
+    "file": "n37_eta1_2_seed1.cert.json",
+    "n": 37,
+    "kind": "relative_frobenius_pair_support_certificate",
+    "pair_table_entries": 0,
+    "edge_selectors": 0,
+    "orbit_representatives": 12,
+    "exceptional_relative_state_count": 12,
+    "support_digest_blake3": "16169bc1ce8e549dfde39a5eb1f019970e01e91dd008b0a7247b4e850ef92c41"
+  },
+  "planted_units_cert_reload": "in_flight",
+  "ledger_promotion": false
+}

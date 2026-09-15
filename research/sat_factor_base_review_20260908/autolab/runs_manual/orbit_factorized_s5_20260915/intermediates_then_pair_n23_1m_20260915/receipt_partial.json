@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "kind": "n23_1m_hitrate_partial",
+  "updated_at": "2026-09-15T18:56:43Z",
+  "claim_boundary": "Public-synthetic orbit_factorized S5 draft search only. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "encoding": {
+    "algebra": "orbit_factorized",
+    "domain": "one_hot",
+    "branch_order": "intermediates_then_pair_then_pair",
+    "intermediate_domain": "pair_sum_trie",
+    "positive_mode": "relative",
+    "nogoods": true,
+    "eta": "1/2",
+    "pair_table_entries": 0,
+    "budget": 1000000
+  },
+  "prior_context_seed1_300k": {
+    "kind": "planted",
+    "seed": 1,
+    "status": "prior_300k_sat",
+    "note": "SAT @168284 conflicts under same stack (intermediates_then_pair_iv); not re-run in this 1M panel",
+    "verdict": "SAT",
+    "conflicts": 168284,
+    "valid_x_tuples": 1,
+    "invalid_group_lifts": 0,
+    "pair_table_entries": 0
+  },
+  "arms": [
+    {
+      "kind": "natural",
+      "seed": 1,
+      "status": "running",
+      "file": "natural_seed1_1m.json"
+    },
+    {
+      "kind": "planted",
+      "seed": 2,
+      "status": "done",
+      "file": "planted_seed2_1m.json",
+      "verdict": "SAT",
+      "conflicts": 590623,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 298620.91379200004
+    },
+    {
+      "kind": "planted",
+      "seed": 3,
+      "status": "done",
+      "file": "planted_seed3_1m.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 1000000,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 530873.021917
+    },
+    {
+      "kind": "planted",
+      "seed": 5,
+      "status": "done",
+      "file": "planted_seed5_1m.json",
+      "verdict": "UNKNOWN",
+      "conflicts": 1000000,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 553491.375375
+    }
+  ],
+  "hit_rate_note": "Planted seeds 2 SAT @590623; 3 and 5 UNKNOWN @1M. Natural still running. Draft only.",
+  "ledger_promotion": false
+}
