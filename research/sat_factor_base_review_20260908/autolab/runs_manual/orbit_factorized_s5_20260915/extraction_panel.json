@@ -53,7 +53,8 @@
     "lazy_plus_relative_positive": "KIC_ORBIT_LAZY_PAIR_ROOTS=1 + relative-positive + nogoods: planted n13 SAT (pair_table=0, invalid_lifts=0) but planted n19 UNKNOWN @50k and natural n19 UNKNOWN @40k. Relative-positive does NOT rescue lazy roots at n19; keep full S3 for group-valid planted n>=19 / n53 edge-free relations.",
     "n41_dim21_budget5k": "n41 m=2 dim21 F4 node_budget=5000 seed=11 targets=1: still both arms INCONCLUSIVE (effort 2504, wall\u2248349s, x FFD=3). Effort rose vs budget2000 (1005\u21922504) without closing; constructible but not claim-grade.",
     "n53_planted_fulls3_cert_tick_sanity": "Reconfirmed planted n53 full-S3 + nogoods cert reload: SAT, pair_table=0, invalid_lifts=0, models=1, conflicts=1583, scan_ms=0. Edge-free group-valid public-synthetic relation stands.",
-    "relative_positive_eta1_16_n19": "eta=1/16 + relative-positive + nogoods: planted SAT (vars 5055 / clauses 19373, fb=38, orbit_cols=1). Natural @100k UNKNOWN 0 models; +SYMMETRY_BREAK @80k also UNKNOWN. Shrinks formula vs eta1/2 but does not close cliff."
+    "relative_positive_eta1_16_n19": "eta=1/16 + relative-positive + nogoods: planted SAT (vars 5055 / clauses 19373, fb=38, orbit_cols=1). Natural @100k UNKNOWN 0 models; +SYMMETRY_BREAK @80k also UNKNOWN. Shrinks formula vs eta1/2 but does not close cliff.",
+    "cms_relative_positive_eta1_16_n19": "CryptoMiniSat5 on eta=1/16 relative-positive natural n19 (pair_table=0, 5055 vars, 1159 native xors): INDETERMINATE @300k conflicts (~7.4s). Planted same encoding SATISFIABLE under CMS. Cliff is not an internal-solver-only artifact at this budget; not ledger promotion."
   },
   "rungs": [
     {
@@ -1276,8 +1277,22 @@
       "symmetry_breaking": true,
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "cms5_natural_relative_positive_eta1_16_300k",
+      "verdict": "INDETERMINATE",
+      "models_examined": 0,
+      "conflicts": 300002,
+      "wall_s": 7.43,
+      "variables": 5055,
+      "native_xor_rows": 1159,
+      "pair_table_entries": 0,
+      "planted_cms_sanity": "SATISFIABLE",
+      "evidence_class": "censored_operational_observation",
+      "ledger_promotion": false
     }
   ],
-  "next": "Planted n53 edge-free full-S3 reconfirmed. eta=1/16 relative-positive shrinks n19 but cliff remains. Next: non-eta structural n19 rewrite or much larger n41 F4 budget. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T17:05:27Z"
+  "next": "CMS agrees with internal CDCL on the n19 relative-positive eta1/16 cliff (INDETERMINATE @300k; planted SAT). Next: deeper structural n19 rewrite or much larger n41 F4 budget. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
+  "updated_at": "2026-09-15T17:09:46Z"
 }
