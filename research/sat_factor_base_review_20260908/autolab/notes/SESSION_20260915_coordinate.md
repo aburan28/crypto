@@ -10,7 +10,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Rho challenge spot instances (`bc-01a0a48f…`) | G7e ASG / ECC2K-130 DP collection | RUNNING — leave AWS alone |
 | Experiment coordination (`bc-01a0a4b9…`) | IC boundary autolab + priority probes | this session |
 
-### Rho campaign snapshot (read-only, 2026-09-15T21:20:00Z)
+### Rho campaign snapshot (read-only, 2026-09-15T22:32:00Z)
 
 - ASG `ecc2k130-g7`: desired/InService **6/6**
 - ASG `ecc2k130-workers`: desired **4**, InService **4**, instances **4** (RO only)
@@ -32,7 +32,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | **n37 cert export** | succeeded (`pair_table=0`, edge_selectors=0, 12 orbit reps) |
 | **n41 pairthen chain planted** | **SAT @389** group-valid pair_table=0 |
 | **unrestricted n37 eta1/16** | UNKNOWN @50k and @200k; n53 unrestricted pairthen@100k in flight; eta1/2@100k aborted |
-| **unrestricted n53 pairthen** | UNKNOWN @100k (pair_table=0); 500k in flight; planted+chain SAT stands |
+| **unrestricted n53 pairthen** | UNKNOWN @100k and **@500k** (pair_table=0); intermediates-branch lean@100k in flight; planted+chain SAT stands |
 | **bound lift →53** | pair_sum/relative-positive relative mode 41→53 |
 | **n37 chain units breakthrough** | Missing `KIC_PLANTED_CHAIN_ROOT_UNITS=1`. With it: n37 pairthen SAT@93; fullstack SAT@92 group-valid pair_table=0; n53 control SAT@3631. Unrestricted@100k in flight |
 | **n37 planted-units diagnostics** | n23 fullstack control SAT@115; n37 lean UNKNOWN@100k; eta1/2 UNKNOWN@1k; eta1/16 UNKNOWN@5k (50k in flight); pair_table=0 |
@@ -52,7 +52,7 @@ Claim boundary: drafts ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 
 ## Next ticks
 
-1. Collect unrestricted n37 @100k; if SAT push natural n37 + n41/n53 under winning stack with chain units for planted sanity.
+1. Collect n53 intermediates-branch lean unrestricted; if UNKNOWN try n41 unrestricted pairthen. Always use chain units for planted sanity.
 2. If n37 planted units SAT, push unrestricted n37 / n41 / n53 under same stack.
 3. Draft ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 4. Never mutate AWS from this agent.
