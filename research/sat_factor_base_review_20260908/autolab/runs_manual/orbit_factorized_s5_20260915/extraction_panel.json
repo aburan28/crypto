@@ -68,7 +68,9 @@
     "intermediates_then_pair_n23_1m_hitrate": "n23@1M intermediates_then_pair+pair_sum_trie+relative-positive+nogoods (pair_table=0): planted seed2 SAT@590623 group-valid; planted 3/5 UNKNOWN@1M; natural seed2 SAT@846240 group-valid (first natural n23 hit under this stack @1M); natural seed1 UNKNOWN@1M. Prior planted seed1 SAT@168284@300k. Hit-rate draft: planted 2/4 incl. prior; natural 1/2 @1M. DRAFT only; NOT vs_rho; NOT ledger promotion.",
     "bound_lift_n37_cert": "Assert lift pair_sum_trie+relative-positive relative mode 23\u219241. n37 edge-free cert export succeeded (pair_table=0, edge_selectors=0, 12 orbit reps). Planted-units cert reload restarted with clean env (prior attempt had polluted KIC_DIMACS_PATH). In flight. NOT ledger promotion.",
     "n37_formula_accounting": "Bound-lift n37 edge-free accounting (planted units + relative-positive + pair_sum_trie + nogoods): vars\u2248428k, FB=888, intermediate_domain_x\u2248195693, positive_clauses\u22486.89M, nogoods=888, pair_table=0, pair_selectors=0. Planted units UNKNOWN @1k (~94s/1k). Extrapolated 100k\u22482.6h \u2014 aborted. No-positive planted@20k diagnostic in flight. DRAFT only; NOT ledger promotion.",
-    "n37_planted_units_diagnostics": "n23 fullstack planted-units control SAT@115 (pair_table=0, n_bound=41). n37 lean (no pair_sum/positive) planted-units UNKNOWN@100k. n37 eta1/2 fullstack UNKNOWN@1k (~94s/1k, 6.89M +clauses). n37 eta1/16 fullstack UNKNOWN@5k (vars\u2248117k, +clauses\u22481.72M, pair_table=0); 50k in flight. DRAFT only; NOT ledger promotion."
+    "n37_planted_units_diagnostics": "n23 fullstack planted-units control SAT@115 (pair_table=0, n_bound=41). n37 lean (no pair_sum/positive) planted-units UNKNOWN@100k. n37 eta1/2 fullstack UNKNOWN@1k (~94s/1k, 6.89M +clauses). n37 eta1/16 fullstack UNKNOWN@5k (vars\u2248117k, +clauses\u22481.72M, pair_table=0); 50k in flight. DRAFT only; NOT ledger promotion.",
+    "n37_chain_units_breakthrough": "Root cause of n37 planted UNKNOWN: missing KIC_PLANTED_CHAIN_ROOT_UNITS=1. With x+chain units: n37 pairthen SAT@93 group-valid pair_table=0; n37 fullstack (pair_sum+relative-positive+intermediates_then_pair) SAT@92 (vars\u2248428k); n53 pairthen chain control SAT@3631. Prior eta1/16@50k x-units-only UNKNOWN superseded. Unrestricted n37 (no units) @100k in flight. DRAFT only; NOT ledger promotion.",
+    "n37_eta1_16_planted_units_50k": "UNKNOWN @50k without chain units \u2014 superseded by chain-units breakthrough."
   },
   "rungs": [
     {
@@ -1461,5 +1463,5 @@
     }
   ],
   "next": "n19 draft-SAT is budget-robust across \u22657 planted-target + 3 natural seeds by 300k; n23 seed1 draft-SAT reproducible but hit-rate incomplete. Next: raise n23 budgets / more seeds; attempt n53 path; keep fail-closed hygiene. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T19:40:18Z"
+  "updated_at": "2026-09-15T20:19:04Z"
 }
