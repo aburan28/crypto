@@ -17,8 +17,10 @@ Nothing in the C++/CUDA client changes. The binary is the audited RTX PRO
 Blackwell Server Edition, so the measured 6.9 B iterations/s per GPU should
 carry over; the pilot below measures it rather than assuming it. **G7**
 carries the RTX PRO 4500 Blackwell, a smaller part of the same `sm_120`
-architecture, so the published binary runs there unchanged and walks slower
-in proportion to the SMs it has — again measured, not assumed.
+architecture: the published binary runs there unchanged — the whole GPU
+arithmetic fixture passes on it, including the planted discrete log — and
+walks at 4.9 B iterations/s against 14.5 on a G7e (measured 2026-09-15 at
+`workers` 385,024, batch 16).
 
 ## The numbers that decide the plan
 
@@ -227,6 +229,10 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s p
 #    get spent where they are worth most: spot on G7e, which is the faster
 #    GPU per vCPU, and idle on-demand quota on G7.  An all-on-demand group
 #    (base = target) touches no spot quota, so the g7e group keeps all of it.
+#    Per iteration, at us-west-2 prices on 2026-09-15 and the rates above:
+#    g7e spot $0.09, g7e on-demand $0.23, g7 spot $0.16, g7 on-demand $0.51
+#    per B it/s-hour.  G7 earns its place on spot, or on on-demand quota that
+#    G7e capacity cannot absorb; it is the most expensive iteration otherwise.
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
