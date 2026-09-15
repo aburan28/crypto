@@ -10,7 +10,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Rho challenge spot instances (`bc-01a0a48f…`) | G7e ASG / ECC2K-130 DP collection | RUNNING — leave AWS alone |
 | Experiment coordination (`bc-01a0a4b9…`) | IC boundary autolab + priority probes | this session |
 
-### Rho campaign snapshot (read-only, 2026-09-15T15:14:37Z)
+### Rho campaign snapshot (read-only, 2026-09-15T15:19:03Z)
 
 - ASG `ecc2k130-g7`: desired/alive **6/6**; `ecc2k130-workers`: desired **4**, instances **2**
 - Do **not** run `fleet.sh` / `infra.sh` from this agent
@@ -25,22 +25,22 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 |---|---|
 | planted orbit S5 n13→53 (full S3) | edge-free SAT; +parallel nogoods at n53 |
 | factor_base n53 | independently replayed; **no ledger promotion** |
-| unrestricted n19 cliff | persists under eta/branch/phase/karatsuba/natural/cms/field-bits |
-| lazy pair roots planted | n13 SAT; **n23 UNKNOWN @100k**; n53 abort >8min |
-| karatsuba / natural / CMS / field_bits | do not close n19 |
-| **binary l8 pairs IV** | **MATCH_WITHIN_NOISE** (0.068→0.066s); claim-check PASS; **no promotion** |
-| n53 planted witness compact | valid=1, invalid_lifts=0, pair_table=0 |
+| unrestricted n19 cliff | persists under broad heuristic + binary-rep/field-bits combo |
+| lazy pair roots planted | n13 SAT; **n23 UNKNOWN @100k**; n53 abort |
+| binary l8 pairs IV | MATCH_WITHIN_NOISE; **no promotion** |
+| **binary-rep + field_bits** | n13 OK; **n19 still 0 @80k** (pair_table=0) |
+| **j0 16-bit IV (3-shot)** | **PASS_KNOWN_ANSWER_AGREES_RHO**; not vs_rho crossover; **no promotion** |
 
 ## Priority signals
 
-1. Edge-free **full-S3** planted extraction through n53 stands — group-valid public-synthetic relation under planted units.
-2. Lazy pair roots / search-heuristic levers do **not** currently unlock unrestricted n19 or group-valid n≥23 planted lazy paths under tested budgets.
-3. Binary l8 pairs baseline independently remeasured (MATCH_WITHIN_NOISE); still not a sub-2^(2l) claim and **not** ledger promotion.
+1. Edge-free **full-S3** planted extraction through n53 stands.
+2. Unrestricted n19 needs a deeper structural encoding rewrite; search/combo levers are exhausted under tested budgets.
+3. Prior PASS drafts continue to independently validate without promotion (binary l8, j0-16).
 
 Claim boundary: drafts ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 
 ## Next ticks
 
-1. Prefer a **structural** encoding change for unrestricted n19 (heuristics exhausted).
-2. Optional: other ledger beats without promotion (n37 wall smoke, prime j0 IV) if S5 blocked.
+1. Prototype reusable pair-support without materializing an edge/pair table (ledger priority #1/#2), or divert to another non-promotion IV.
+2. Keep full S3 for planted n53 edge-free relations.
 3. Never mutate AWS from this agent.

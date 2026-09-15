@@ -1,0 +1,97 @@
+{
+  "updated_at": "2026-09-15T15:19:03Z",
+  "claim_boundary": "Public-synthetic only; not ledger promotion; not vs_rho crossover; not key recovery.",
+  "binaryrep_fieldbits": [
+    {
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "valid_x_tuples": 1,
+      "conflicts": 19,
+      "variables": 2009,
+      "pair_table_entries": 0,
+      "domain_encoding": "binary_representative_plus_binary_frobenius_shift",
+      "file": "n13_planted_binaryrep_fieldbits_nogoods.json"
+    },
+    {
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "valid_x_tuples": 1,
+      "conflicts": 10000,
+      "variables": 2009,
+      "pair_table_entries": 0,
+      "domain_encoding": "binary_representative_plus_binary_frobenius_shift",
+      "file": "n13_unrestricted_binaryrep_fieldbits_nogoods_phase4_40k.json"
+    },
+    {
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "conflicts": 80000,
+      "variables": 3881,
+      "pair_table_entries": 0,
+      "domain_encoding": "binary_representative_plus_binary_frobenius_shift",
+      "file": "n19_unrestricted_binaryrep_fieldbits_nogoods_phase4_80k.json"
+    }
+  ],
+  "j0_16bit_iv": {
+    "schema_version": "1.0",
+    "kind": "independent_replay",
+    "beat_id": "prime.end_to_end_dlp.j0_16bit",
+    "status": "PASS_KNOWN_ANSWER_AGREES_RHO",
+    "created_at": "2026-09-15T15:19:03.804851+00:00",
+    "claim_boundary": "Public-synthetic j=0 known-answer IC vs rho agreement only. Not vs_rho crossover (IC wall >> rho here). Not ledger promotion. Not key recovery.",
+    "host": {
+      "node": "Adams-MacBook-Pro.local",
+      "platform": "macOS-26.6-arm64-arm-64bit"
+    },
+    "source_sha256": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333",
+    "prior_result": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/result.json",
+    "runs": [
+      {
+        "bits": 16,
+        "ic_ok": true,
+        "rho_ok": true,
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 2073.956542,
+        "rho_ms": 13.738584,
+        "ic_recovered": "54233",
+        "rho_recovered": "54233",
+        "x_truth": "54233",
+        "target_orbits": 40
+      },
+      {
+        "bits": 16,
+        "ic_ok": true,
+        "rho_ok": true,
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 1489.9977920000001,
+        "rho_ms": 46.990625,
+        "ic_recovered": "25740",
+        "rho_recovered": "25740",
+        "x_truth": "25740",
+        "target_orbits": 40
+      },
+      {
+        "bits": 16,
+        "ic_ok": true,
+        "rho_ok": true,
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 1556.053375,
+        "rho_ms": 1.0888339999999999,
+        "ic_recovered": "1439",
+        "rho_recovered": "1439",
+        "x_truth": "1439",
+        "target_orbits": 40
+      }
+    ],
+    "gates": {
+      "ic_recovers_truth": true,
+      "ic_agrees_rho": true,
+      "not_vs_rho_crossover": true,
+      "not_ledger_promotion": true
+    }
+  }
+}
