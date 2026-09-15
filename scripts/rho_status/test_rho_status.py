@@ -109,6 +109,20 @@ class WorkflowTests(unittest.TestCase):
         stale_minutes = eval(expression) / 1000 / 60  # noqa: S307 - digits and * only
         self.assertGreaterEqual(stale_minutes, 2 * step, "stale banner will flap on a late run")
 
+    def test_snapshot_query_scans_the_dp_table_once(self):
+        # Three separate LATERAL scans of a 30M-row table is what pushed the
+        # walker hop from 41s to 510s and broke publication; the aggregates
+        # are all derived from one grouped pass now. A second scan here is a
+        # performance regression that only shows up in production.
+        from snapshot import SNAPSHOT_SQL
+
+        self.assertEqual(SNAPSHOT_SQL.count("FROM distinguished_points"), 1)
+        # Both references must stay named: psycopg binds the campaign by key,
+        # so a positional rewrite would under-supply parameters.
+        self.assertEqual(SNAPSHOT_SQL.count("%(campaign)s"), 2)
+        self.assertNotIn('replace("%(campaign)s", "%s")', open(
+            os.path.join(HERE, "snapshot.py"), encoding="utf-8").read())
+
     def test_fetch_script_punches_runner_ip_not_launch_key(self):
         path = os.path.join(HERE, "fetch_via_walker.sh")
         with open(path, encoding="utf-8") as fh:
