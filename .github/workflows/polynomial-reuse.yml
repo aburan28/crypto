@@ -36,12 +36,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.90.0
+      - name: Install compatible frozen dependency lock
+        run: cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
       - run: cargo check --no-default-features --lib --bin ic
       - run: cargo test --release --features redis-cache --lib polynomial_reuse
       - run: cargo test --release --features redis-cache --lib algebra_cache
-      - run: cargo test --release --features redis-cache --lib koblitz_groebner::
-      - run: cargo test --release --features redis-cache --lib weil_charts::
-      - run: cargo test --release --features redis-cache --lib koblitz_fast::
+      - run: 'cargo test --release --features redis-cache --lib koblitz_groebner::'
+      - run: 'cargo test --release --features redis-cache --lib weil_charts::'
+      - run: 'cargo test --release --features redis-cache --lib koblitz_fast::'
       - run: cargo check --release --features redis-cache --example weil_factor_composition
       - run: cargo check --release --features redis-cache --example rho_parity_cost
       - run: cargo test --release --features redis-cache --lib redis_cross_client -- --ignored

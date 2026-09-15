@@ -13,6 +13,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 CASES = json.loads((HERE.parent/'weil_factor_composition_20260914/contract.json').read_text())['stage_cases']
 ORDERS = [71,127,127,127,991,991,2003,661,661,661]
+# Immutable commit containing the complete accepted evidence, before link/CI
+# integration fixes. Absolute sources survive the Pages /scoreboard/ layout.
+EVIDENCE_URL = 'https://github.com/aburan28/crypto/blob/7259f1f6593078bb5d44299b0169b2079b0c0758/'
 
 
 def table(head, rows, web=False):
@@ -196,7 +199,9 @@ def main():
         begin=content.index(marker);end=content.index('</section>',begin)+len('</section>\n')
         content=content[:begin]+content[end:]
     assert '<script>\n  (function ()' in content
-    page.write_text(content.replace('<script>\n  (function ()',section+'<script>\n  (function ()',1))
+    content = content.replace('<script>\n  (function ()',section+'<script>\n  (function ()',1)
+    content = content.replace('href="../research/', 'href="'+EVIDENCE_URL+'research/')
+    page.write_text(content)
     print(verdict)
 
 

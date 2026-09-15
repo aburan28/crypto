@@ -520,6 +520,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        weil_charts: None,
         node_budget: 0,
         max_models: 64,
         sat_macaulay_degree: None,
