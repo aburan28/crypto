@@ -1,0 +1,12 @@
+{
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu_affinity": [
+    0
+  ],
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "rust": "1.90.0 release; redis-cache feature; no RUSTFLAGS",
+  "caches": "off",
+  "threads": 1,
+  "address_space_mib": 2048,
+  "comparison": "ambient baseline and new charts in same experiment binary; unchanged default additionally compared to reference revision binary"
+}
