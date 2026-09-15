@@ -1,0 +1,31 @@
+{
+  "kind": "cms_probe_receipts",
+  "pair_table_entries": 0,
+  "rows": [
+    {
+      "file": "n13_planted.cms.out",
+      "status": "s SATISFIABLE",
+      "conflicts": null
+    },
+    {
+      "file": "n13_unrestricted.cms.out",
+      "status": "s INDETERMINATE",
+      "conflicts": 80002
+    },
+    {
+      "file": "n13_unrestricted_250k.cms.out",
+      "status": "s SATISFIABLE",
+      "conflicts": null
+    },
+    {
+      "file": "n19_unrestricted.cms.out",
+      "status": "s INDETERMINATE",
+      "conflicts": 120002
+    },
+    {
+      "file": "n19_unrestricted_300k.cms.out",
+      "status": "s INDETERMINATE",
+      "conflicts": 300002
+    }
+  ]
+}

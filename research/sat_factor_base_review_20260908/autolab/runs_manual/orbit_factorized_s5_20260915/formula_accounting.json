@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T14:56:07Z",
+  "updated_at": "2026-09-15T15:05:33Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -112,6 +112,8 @@
     "Lazy pair-root encoding roughly doubles vars/clauses vs full factorized S3 at same eta; pair_table stays 0.",
     "Planted lazy path fails to recover models by n23 under 100k conflicts; full S3 planted remains easy.",
     "Karatsuba mul keeps pair_table=0; n19 unrestricted still 0 models @80k.",
-    "Natural targets at n13/n19 remain 0 models under tested budgets despite expected_decomposable=true."
+    "Natural targets at n13/n19 remain 0 models under tested budgets despite expected_decomposable=true.",
+    "CMS emit_xor formula sizes match internal (n19: 3889 vars / 9201 clauses / pair_table=0).",
+    "field_bits_then_pair_then_pair does not change formula size vs pair_then_pair; search-order only."
   ]
 }

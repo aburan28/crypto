@@ -2197,20 +2197,30 @@ fn encode_balanced_s5_frobenius_orbits(
     // root selectors. `KIC_ORBIT_BRANCH_ORDER=pair_then_pair` decides the first
     // Semaev pair (pairing indices 0/1) before the second pair (2/3).
     // `pair_then_pair_reversed` flips that order. Both keep pair_table_entries=0.
+    // `field_bits_then_pair_then_pair` decides the 6·n Semaev field bits first,
+    // then the same pair-then-pair orbit schedule (still pair_table_entries=0).
     let branch_order = std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
     let mut priorities: Vec<u32> = Vec::new();
-    if branch_order == "pair_then_pair" || branch_order == "pair_then_pair_reversed" {
+    let pair_then_pair_family = matches!(
+        branch_order.as_str(),
+        "pair_then_pair" | "pair_then_pair_reversed" | "field_bits_then_pair_then_pair"
+    );
+    if branch_order == "field_bits_then_pair_then_pair" {
+        priorities.extend(1..=problem_variables as u32);
+    }
+    if pair_then_pair_family {
         let rep_stride = if binary_representatives {
             representative_index_width
         } else {
             representatives
         };
-        let first = if branch_order == "pair_then_pair_reversed" {
+        let reversed = branch_order == "pair_then_pair_reversed";
+        let first = if reversed {
             &pairing_indices[2..]
         } else {
             &pairing_indices[..2]
         };
-        let second = if branch_order == "pair_then_pair_reversed" {
+        let second = if reversed {
             &pairing_indices[..2]
         } else {
             &pairing_indices[2..]
@@ -4517,6 +4527,15 @@ fn main() {
         .and_then(|value| value.parse().ok())
         .unwrap_or(1)
         .max(1);
+    // Polarity lever: force initial saved phases before search (pair_table stays 0).
+    // KIC_PHASE_INIT=0|false → all false; 1|true → all true; unset keeps solver default.
+    if let Ok(phase_init) = std::env::var("KIC_PHASE_INIT") {
+        match phase_init.as_str() {
+            "0" | "false" | "False" | "FALSE" => encoding.solver.set_all_saved_phases(false),
+            "1" | "true" | "True" | "TRUE" => encoding.solver.set_all_saved_phases(true),
+            other => panic!("unsupported KIC_PHASE_INIT={other} (expected 0/1/true/false)"),
+        }
+    }
     let conflicts_per_phase_shot = (conflict_budget / phase_restart_shots).max(1);
     encoding.solver.conflict_budget = conflicts_per_phase_shot;
     let mut phase_restart_shots_used = 0u64;

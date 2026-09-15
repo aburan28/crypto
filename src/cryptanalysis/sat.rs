@@ -1663,6 +1663,13 @@ impl Solver {
         }
     }
 
+    /// Force every saved phase to a constant polarity (search-polarity lever).
+    pub fn set_all_saved_phases(&mut self, value: bool) {
+        for phase in &mut self.saved_phase {
+            *phase = value;
+        }
+    }
+
     /// Cumulative conflicts across all calls to [`Self::solve`].
     ///
     /// A machine-independent measure of search effort: unlike wall
