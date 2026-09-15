@@ -23,6 +23,7 @@ METER = REPO / "scripts/process_meter.py"
 DISCOVERY_SOURCE = REPO / "examples/koblitz_public_factor_base_discovery.rs"
 PANEL_SOURCE = REPO / "examples/koblitz_unknown_scalar_panel.rs"
 LOCK = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock"
+SMOKE_LOCK = custody.SMOKE_LOCK
 RUNNER_SOURCE = Path(__file__).resolve()
 RUN_SEAL_SCHEMA = "koblitz_unknown_scalar_run_seal.v1"
 RUN_SUMMARY_SCHEMA = "koblitz_unknown_scalar_run_summary.v1"
@@ -106,9 +107,22 @@ def environment() -> dict[str, str]:
     }
 
 
-def source_binding() -> dict[str, Any]:
-    paths = [REPO / relative for relative in SOURCE_RELATIVE_PATHS]
-    if custody.file_identity(REPO / "Cargo.lock")["sha256"] != custody.file_identity(LOCK)["sha256"]:
+def dependency_lock(profile: str) -> Path:
+    if profile not in {"production", "smoke"}:
+        raise Stage23Error("unknown dependency-lock profile")
+    return LOCK if profile == "production" else SMOKE_LOCK
+
+
+def source_relative_paths(profile: str) -> tuple[str, ...]:
+    if profile == "production":
+        return SOURCE_RELATIVE_PATHS
+    return (*SOURCE_RELATIVE_PATHS, str(dependency_lock(profile).relative_to(REPO)))
+
+
+def source_binding(profile: str = "production") -> dict[str, Any]:
+    lock = dependency_lock(profile)
+    paths = [REPO / relative for relative in source_relative_paths(profile)]
+    if custody.file_identity(REPO / "Cargo.lock")["sha256"] != custody.file_identity(lock)["sha256"]:
         raise Stage23Error("workspace Cargo.lock differs from the frozen lock")
     state = custody.git_state()
     return {
@@ -118,7 +132,7 @@ def source_binding() -> dict[str, Any]:
             str(path.relative_to(REPO)): custody.file_identity(path, str(path.relative_to(REPO)))
             for path in paths
         },
-        "dependency_lock": custody.file_identity(LOCK, "frozen Cargo.lock"),
+        "dependency_lock": custody.file_identity(lock, "frozen Cargo.lock"),
         "python": custody.tool_identity(Path(sys.executable), "Python"),
         "cargo": custody.tool_identity(Path(shutil.which("cargo") or ""), "Cargo"),
         "rustc": custody.tool_identity(Path(shutil.which("rustc") or ""), "rustc"),
@@ -161,7 +175,7 @@ def plan(args: argparse.Namespace) -> dict[str, Any]:
     frozen = protocol(args.profile)
     require_frozen_meter(args.meter)
     output = custody.safe_new_directory(args.output, "Stage-23 planned output")
-    source = source_binding()
+    source = source_binding(args.profile)
     if args.profile == "production" and (source["git"]["dirty"] or args.allow_dirty):
         raise Stage23Error("production requires a clean checkout without --allow-dirty")
     inner = expected_inner_command(args)
@@ -519,14 +533,15 @@ def validate_run_bindings(
         raise Stage23Error("source revision binding changed")
     if source["git"] != custody.git_state():
         raise Stage23Error("checkout state differs from the bound source state")
-    if set(source["direct_sources"]) != set(SOURCE_RELATIVE_PATHS):
+    relative_paths = source_relative_paths(summary["profile"])
+    if set(source["direct_sources"]) != set(relative_paths):
         raise Stage23Error("direct source inventory changed")
-    for relative in SOURCE_RELATIVE_PATHS:
+    for relative in relative_paths:
         expected_path = (REPO / relative).resolve()
         identity = custody.validate_file_identity(source["direct_sources"][relative], relative)
         if Path(identity["path"]).resolve() != expected_path:
             raise Stage23Error(f"source binding path changed for {relative}")
-    if source["dependency_lock"] != source["direct_sources"][str(LOCK.relative_to(REPO))]:
+    if source["dependency_lock"] != source["direct_sources"][str(dependency_lock(summary["profile"]).relative_to(REPO))]:
         raise Stage23Error("frozen dependency-lock binding changed")
     custody.validate_tool_identity(source["python"], "bound Python")
     custody.validate_tool_identity(source["cargo"], "bound Cargo")
@@ -1115,7 +1130,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     (output / "tasks").mkdir()
     (output / "binaries").mkdir()
     (output / "inputs").mkdir()
-    source = source_binding()
+    source = source_binding(args.profile)
     if args.profile == "production" and (source["git"]["dirty"] or args.allow_dirty):
         raise Stage23Error("production requires a clean checkout without --allow-dirty")
     host = host_binding()

@@ -289,12 +289,27 @@ Reordered 2026-09-08 after H2 was falsified. Widening the monomial type
 was #1; it is now struck out, because the instances it unlocks cannot be
 solved anyway.
 
-0. **Take `n = 31` at dim 16, `m = 2`** — the first instance where a
-   divisor base makes a useful `m` quadratic and small (32 unknowns).
-   Needs `MAX_N` raised past 24, which needs a generator search that does
-   not scan `2^n` abscissae; the point counting and factoring are already
-   cheap at that size.  This is the shortest path to a relation at an `n`
-   the single-factor construction cannot serve at all.
+0. ~~**Take `n = 31` at dim 16, `m = 2`.**~~ **Done, 2026-09-09.**
+   `MAX_N` was already 63, so no guard needed lifting, and `K_0/F_2^31`
+   has `r = 1 439 393` — a large smooth cofactor puts the prime subgroup
+   at `2^20.5`, far below the `2^31` the sizing bar was assumed to need.
+   Dimension 10 suffices:
+
+   | base | dim | \|F\| | orbits | m | vars | result |
+   |:-----|----:|------:|-------:|--:|-----:|:-------|
+   | single factor | 5 | 63 | 3 | 2 | 10 | **no log**, 60k trials, 127 s |
+   | single factor | 5 | 63 | 3 | 4 | 82 | over the 64-variable cap |
+   | divisor [1,2] | 10 | 1179 | 39 | 2 | 20 | **solved, 3.5 s** |
+   | divisor [0,1,2] | 11 | 2049 | 69 | 2 | 22 | **solved, 5.9 s** |
+
+   The single-factor construction cannot reach this curve at all: its 63
+   points pair into ~2 000 of 1.4M group elements, and the `m` that
+   would fix that costs 82 unknowns. Tuning the dimension solves it in
+   seconds with a quadratic 20-variable system and no chaining.
+
+   Verified as the real pipeline, not the degenerate `[a]G + [b]Q = O`
+   shortcut (`direct_relation == false`), with four independent targets
+   recovered and each checked as `[d]G = Q`.
 
 1. **Find F4's wall** (was: cut refutation cost). F4 refutes 46
    unknowns in 145 s and its split count is flat across 39 → 46, so what

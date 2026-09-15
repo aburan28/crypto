@@ -1073,6 +1073,14 @@ impl FrobeniusFactorBase {
             .collect()
     }
 
+    /// Boolean unknowns an `m`-point decomposition over this base costs:
+    /// `m·dim` subspace coordinates plus `(m − 2)·n` for the chained
+    /// intermediates.  Tuning `dim` up to reach `m = 2` zeroes the
+    /// second term, which is the whole point of the divisor bases.
+    pub fn n_vars_for_summands(&self, n: u32, m: usize) -> usize {
+        m * self.ell as usize + m.saturating_sub(2) * n as usize
+    }
+
     /// Lookup table from point identity to factor-base index, as both
     /// decomposition oracles need.
     pub fn index_map(&self) -> HashMap<(BigUint, BigUint), usize> {
@@ -2645,7 +2653,11 @@ impl PairSumTable {
         //
         // Ordering the base by orbit makes "orbit at least `α`" a
         // suffix, so a row is a slice and no addend list is ever built.
-        let orbit_of_point: Vec<u32> = fb.signed_orbit_of.iter().map(|&(o, _, _)| o as u32).collect();
+        let orbit_of_point: Vec<u32> = fb
+            .signed_orbit_of
+            .iter()
+            .map(|&(o, _, _)| o as u32)
+            .collect();
         let mut order: Vec<u32> = (0..n_points as u32).collect();
         order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
         let by_orbit: Vec<FastPoint> = order.iter().map(|&i| points[i as usize]).collect();
@@ -2860,13 +2872,11 @@ impl PairSumTable {
         }
         if let Some(canon) = self.canon.as_ref() {
             // A rotation has no dependency chain worth interleaving.
-            out.extend(points.iter().map(|p| {
-                if p.infinity {
-                    0
-                } else {
-                    canon.canon(p.x) + 1
-                }
-            }));
+            out.extend(
+                points
+                    .iter()
+                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
+            );
             return;
         }
         const LANES: usize = 8;
@@ -3051,7 +3061,8 @@ impl PairSumTable {
         }
         for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
             rests.clear();
-            self.curve.add_many(target, addends, &mut rests, &mut scratch);
+            self.curve
+                .add_many(target, addends, &mut rests, &mut scratch);
             for (offset, rest) in rests.iter().enumerate() {
                 if rest.infinity {
                     continue;
@@ -3125,8 +3136,7 @@ impl PairSumTable {
         let mut addends = Vec::new();
         for orbit in orbits {
             let (lo, hi) = (orbit as usize, orbit as usize + 1);
-            let (Some(&start), Some(&end)) =
-                (self.orbit_start.get(lo), self.orbit_start.get(hi))
+            let (Some(&start), Some(&end)) = (self.orbit_start.get(lo), self.orbit_start.get(hi))
             else {
                 continue;
             };
@@ -3457,9 +3467,7 @@ impl PairSumTable {
                         let k = b * BLOCK + offset;
                         self.pairs_for_key(*rest, keys[offset], &mut pairs);
                         for &(i, j) in &pairs {
-                            if (!sorted || j as usize <= k)
-                                && !sink(&[i as usize, j as usize, k])
-                            {
+                            if (!sorted || j as usize <= k) && !sink(&[i as usize, j as usize, k]) {
                                 return;
                             }
                         }
@@ -3587,7 +3595,13 @@ pub fn groebner_decompose(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, SolveStats::default()),
     };
-    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
         Some(sys) => sys,
         None => return (None, SolveStats::default()),
     };
@@ -3834,7 +3848,13 @@ pub fn sat_decompose_with(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, stats),
     };
-    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
         Some(sys) => sys,
         None => return (None, stats),
     };
@@ -7446,7 +7466,11 @@ impl<'a> IndividualLogSolver<'a> {
                 report.trials += 1;
                 if state.infinity {
                     // [a]G + [b]Q = O already yields d.
-                    if let Some(d) = solve_for_d(&BigUint::from(*a), &BigUint::from(*b), &self.kc.subgroup_order) {
+                    if let Some(d) = solve_for_d(
+                        &BigUint::from(*a),
+                        &BigUint::from(*b),
+                        &self.kc.subgroup_order,
+                    ) {
                         if self.kc.mul(self.kc.generator(), &d) == *q {
                             return Some(Some(d));
                         }
@@ -7571,7 +7595,11 @@ mod tests {
             for a in [0u8, 1] {
                 if let Some(kc) = KoblitzCurve::new(a, n) {
                     let r = kc.subgroup_order.to_string();
-                    eprintln!("RUNG n={n} a={a} r={r} h={} bits={}", kc.cofactor, kc.subgroup_order.bits());
+                    eprintln!(
+                        "RUNG n={n} a={a} r={r} h={} bits={}",
+                        kc.cofactor,
+                        kc.subgroup_order.bits()
+                    );
                 }
             }
         }
@@ -8172,6 +8200,56 @@ mod tests {
         assert_eq!(small.points.len(), 15);
         assert_eq!(large.points.len(), 71);
         assert!(large.orbits.len() > small.orbits.len());
+    }
+
+    #[test]
+    fn a_divisor_base_solves_a_curve_the_single_factor_base_cannot() {
+        // K_0 / F_2^31, r = 1 439 393.  One irreducible factor gives
+        // dim 5, |F| = 63: at m = 2 the pairs cover ~2 000 of 1.4M group
+        // elements so almost nothing decomposes, and m = 4 would need
+        // 4·5 + 2·31 = 82 unknowns, past the 64-variable cap.  The
+        // construction simply cannot reach this curve.
+        //
+        // A divisor of x^31 − 1 gives dim 10, |F| = 1179, and m = 2
+        // solves it — 20 unknowns, quadratic, no chaining.
+        let kc = KoblitzCurve::new(0, 31).unwrap();
+        let g = kc.generator().clone();
+        let d = BigUint::from(123_456u32);
+        let q = kc.mul(&g, &d);
+
+        let single = build_frobenius_factor_base_from_divisor(&kc, &[1]).unwrap();
+        assert_eq!((single.ell, single.points.len()), (5, 63));
+        assert_eq!(
+            single.n_vars_for_summands(31, 4),
+            82,
+            "m = 4 is over the cap"
+        );
+        // m = 2 over a 63-point base: sample targets, expect no hits.
+        let single_idx = single.index_map();
+        let hits = (1..40u32)
+            .filter(|k| {
+                let t = kc.mul(&g, &BigUint::from(*k));
+                enumerate_decompose(&kc, &single, &single_idx, &t, 2).is_some()
+            })
+            .count();
+        assert_eq!(
+            hits, 0,
+            "dim 5 is far too small for 2-point decompositions here"
+        );
+
+        let divisor = build_frobenius_factor_base_from_divisor(&kc, &[1, 2]).unwrap();
+        assert_eq!((divisor.ell, divisor.points.len()), (10, 1179));
+        assert_eq!(divisor.n_vars_for_summands(31, 2), 20);
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::Enumerate,
+            extra_relations: 8,
+            max_trials: 60_000,
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &divisor, &opts).unwrap();
+        assert_eq!(report.log, Some(d), "the divisor base must solve it");
+        assert!(!report.direct_relation, "not the degenerate shortcut");
     }
 
     #[test]
@@ -9255,7 +9333,10 @@ mod tests {
             PairSumTable::folded_byte_size(orbits, fb.points.len(), kc.n),
         )
         .expect("the folded table fits its own budget");
-        assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
+        assert!(
+            folded.is_folded(),
+            "degree {degree}: expected the fold tier"
+        );
         assert!(
             folded.len() < full.len(),
             "degree {degree}: the fold stored no less"
@@ -9426,9 +9507,9 @@ mod tests {
                     found += 1;
                     // And the witness the folded table returns really sums.
                     let w = folded.decompose_fast(target, m).unwrap();
-                    let sum = w
-                        .iter()
-                        .fold(FastPoint::INFINITY, |s, &i| fc.add(s, fc.lift(&fb.points[i])));
+                    let sum = w.iter().fold(FastPoint::INFINITY, |s, &i| {
+                        fc.add(s, fc.lift(&fb.points[i]))
+                    });
                     assert_eq!(sum, target, "m = {m}: witness did not sum to its target");
                 }
             }
@@ -9555,14 +9636,20 @@ mod tests {
                 );
                 if let Some(idxs) = b {
                     assert_eq!(idxs.len(), m);
-                    let sum = idxs
-                        .iter()
-                        .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, fc.lift(&fb.points[i])));
-                    assert_eq!(sum, target, "m = {m}: a compact witness did not sum to its target");
+                    let sum = idxs.iter().fold(FastPoint::INFINITY, |acc, &i| {
+                        fc.add(acc, fc.lift(&fb.points[i]))
+                    });
+                    assert_eq!(
+                        sum, target,
+                        "m = {m}: a compact witness did not sum to its target"
+                    );
                     found += 1;
                 }
             }
-            assert!(found > 0, "m = {m}: the compact table decomposed nothing at all");
+            assert!(
+                found > 0,
+                "m = {m}: the compact table decomposed nothing at all"
+            );
         }
     }
 
