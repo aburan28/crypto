@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "unrestricted_n53_pairthen_probe",
+  "updated_at": "2026-09-15T21:32:42Z",
+  "claim_boundary": "Public-synthetic unrestricted planted-target n53. Planted+chain-units edge-free SAT already stands. NOT ledger promotion.",
+  "planted_edge_free_stands": true,
+  "unrestricted_100k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 100000,
+    "pair_table_entries": 0,
+    "variables": 26825,
+    "valid_x_tuples": 0,
+    "invalid_group_lifts": 0,
+    "solve_ms": 654015.596875
+  },
+  "in_flight": "unrestricted_n53_pairthen_seed1_500k",
+  "ledger_promotion": false
+}
