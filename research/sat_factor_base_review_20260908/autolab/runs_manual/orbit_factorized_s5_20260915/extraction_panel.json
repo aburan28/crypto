@@ -74,7 +74,10 @@
     "n41_pairthen_chain_planted": "n41 pairthen+nogoods+x/chain units: SAT@389 group-valid pair_table=0. Bound-lift ladder rung. DRAFT only; NOT ledger promotion.",
     "unrestricted_n37_eta1_16": "Unrestricted planted-target n37 eta1/16 fullstack: UNKNOWN@50k and UNKNOWN@200k (pair_table=0, vars\u2248117k, ~8.4s/1k). Cliff open. n53 unrestricted pairthen@100k in flight. DRAFT only; NOT ledger promotion.",
     "bound_lift_to_n53": "pair_sum_trie + relative-positive relative mode asserts lifted 41\u219253. Absolute positive remains \u226423. n53 fullstack planted deferred (slow); pairthen+chain n53 stands.",
-    "unrestricted_n53_pairthen": "Unrestricted planted-target n53 pairthen+nogoods (no units): UNKNOWN@100k and UNKNOWN@500k (pair_table=0, vars=26825, ~57min@500k). Planted+chain-units edge-free SAT@3631 stands. intermediates_then_pair lean @100k in flight. DRAFT only; NOT ledger promotion."
+    "unrestricted_n53_pairthen": "Unrestricted planted-target n53 pairthen+nogoods (no units): UNKNOWN@100k and UNKNOWN@500k (pair_table=0, vars=26825, ~57min@500k). Planted+chain-units edge-free SAT@3631 stands. intermediates_then_pair lean @100k in flight. DRAFT only; NOT ledger promotion.",
+    "unrestricted_n53_intermediates_lean": "Unrestricted n53 intermediates_then_pair lean (no pair_sum): UNKNOWN@100k (pair_table=0, vars=26825, slower than pairthen). Does not close cliff. DRAFT only.",
+    "unrestricted_n41_pairthen": "Unrestricted n41 pairthen+nogoods: UNKNOWN@100k (pair_table=0, vars=16145). Planted+chain SAT@389 stands. DRAFT only; NOT ledger promotion.",
+    "unrestricted_cliff_beyond_n23": "Highest unrestricted group-valid SAT remains n23 (seed1@168k, seed2@590k planted; natural seed2@846k). n37/n41/n53 unrestricted UNKNOWN under tested budgets. Planted+chain edge-free SAT through n53. NOT ledger promotion."
   },
   "rungs": [
     {
@@ -1467,5 +1470,5 @@
     }
   ],
   "next": "n19 draft-SAT is budget-robust across \u22657 planted-target + 3 natural seeds by 300k; n23 seed1 draft-SAT reproducible but hit-rate incomplete. Next: raise n23 budgets / more seeds; attempt n53 path; keep fail-closed hygiene. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T22:33:16Z"
+  "updated_at": "2026-09-15T23:04:18Z"
 }
