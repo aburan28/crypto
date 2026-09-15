@@ -4504,7 +4504,14 @@ fn main() {
         priorities.extend(&theory_selectors);
         encoding.solver.set_branch_priority(&priorities);
     }
-    encoding.solver.conflict_budget = conflict_budget;
+    let phase_restart_shots: u64 = std::env::var("KIC_PHASE_RESTART_SHOTS")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(1)
+        .max(1);
+    let conflicts_per_phase_shot = (conflict_budget / phase_restart_shots).max(1);
+    encoding.solver.conflict_budget = conflicts_per_phase_shot;
+    let mut phase_restart_shots_used = 0u64;
     let encoding_ms = encoding_started.elapsed().as_secs_f64() * 1000.0;
     let variables = encoding.solver.n_vars();
     let clauses = encoding.solver.n_clauses();
@@ -5094,9 +5101,22 @@ fn main() {
                     break SolveResult::Unsat;
                 }
             }
+            SolveResult::Unknown
+                if phase_restart_shots_used + 1 < phase_restart_shots && models == 0 =>
+            {
+                phase_restart_shots_used += 1;
+                encoding.solver.reset_search();
+                encoding
+                    .solver
+                    .scramble_saved_phases(seed ^ (0x9E37_79B9_7F4A_7C15 ^ phase_restart_shots_used));
+                encoding.solver.conflict_budget =
+                    conflicts_per_phase_shot.saturating_mul(phase_restart_shots_used + 1);
+                continue;
+            }
             result => break result,
         }
     };
+    phase_restart_shots_used += 1;
     drop(theory);
     let solve_ms = solve_started.elapsed().as_secs_f64() * 1000.0;
     let exhaustive_match = direct_set
@@ -5216,6 +5236,9 @@ fn main() {
             "exhaustive_model_set_match":exhaustive_match,
             "sat_subset_of_direct":sat_subset_of_direct,
             "conflicts":encoding.solver.conflicts(),
+            "phase_restart_shots":phase_restart_shots,
+            "phase_restart_shots_used":phase_restart_shots_used,
+            "conflicts_per_phase_shot":conflicts_per_phase_shot,
                 "s3_root_theory":s3_root_theory,
                 "s3_root_theory_block_exceptional":s3_root_theory_block_exceptional,
                 "s3_final_theory":s3_final_theory,

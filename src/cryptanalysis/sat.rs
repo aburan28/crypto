@@ -1648,6 +1648,21 @@ impl Solver {
         self.backjump(0);
     }
 
+    /// Scramble phase-saving polarity with a deterministic xorshift seed.
+    ///
+    /// Intended for multi-shot search: after a conflict-budget timeout,
+    /// [`Self::reset_search`] then scramble phases so the next shot explores
+    /// a different decision polarity trajectory while keeping learnt clauses.
+    pub fn scramble_saved_phases(&mut self, seed: u64) {
+        let mut state = seed | 1;
+        for phase in &mut self.saved_phase {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            *phase = (state & 1) != 0;
+        }
+    }
+
     /// Cumulative conflicts across all calls to [`Self::solve`].
     ///
     /// A machine-independent measure of search effort: unlike wall
