@@ -7,6 +7,7 @@
 #   ./fleet.sh scale 128             change the target
 #   ./fleet.sh status                instances, their types and spot/on-demand
 #   ./fleet.sh policy                re-apply TYPES to a running group (BACKEND=asg)
+#   ./fleet.sh policy --on-demand 1  ...and hold one GPU on-demand (BACKEND=asg)
 #   ./fleet.sh down                  delete the fleet and terminate its instances
 #
 # The fleet is `maintain`: an interrupted spot instance is replaced, the new
@@ -125,11 +126,25 @@ if [ "$BACKEND" = asg ]; then
         echo "group $ASG: target $total GPU(s), $ondemand on-demand, types $TYPES"
         ;;
     policy)
-        ondemand=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
-                   --query 'AutoScalingGroups[0].MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity' --output text)
+        shift
+        ondemand=
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --on-demand) ondemand=$2; shift 2 ;;
+                *) echo "unknown option $1" >&2; exit 1 ;;
+            esac
+        done
+        # A group, unlike an EC2 Fleet, can change its on-demand base while it
+        # runs.  That is the way to hold a floor of GPUs through a spot pool
+        # with no capacity to give: the base launches on-demand and the rest
+        # of the target stays spot.
+        if [ -z "$ondemand" ]; then
+            ondemand=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+                       --query 'AutoScalingGroups[0].MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity' --output text)
+        fi
         aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG" \
             --mixed-instances-policy "$(asgPolicy "$ondemand")"
-        echo "group $ASG now asks for types $TYPES; running instances are left as they are"
+        echo "group $ASG now asks for types $TYPES, on-demand base $ondemand; running instances are left as they are"
         ;;
     scale)
         total=${2:?number of GPUs}
