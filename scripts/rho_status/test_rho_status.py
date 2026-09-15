@@ -120,6 +120,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("gha_walker.pub", text)
         self.assertIn("InvalidPermission.Duplicate", text)
         self.assertIn("ecc2k-dp-walker", text)
+        # The snapshot query runs silently and is getting slower as the DP
+        # table grows; without keepalives a slow query is indistinguishable
+        # from a dead connection and the hop dies on a broken pipe.
+        self.assertIn("ServerAliveInterval", text)
+        self.assertIn("ServerAliveCountMax", text)
         self.assertNotIn("meow34", text)
         pub = os.path.join(HERE, "gha_walker.pub")
         with open(pub, encoding="utf-8") as fh:

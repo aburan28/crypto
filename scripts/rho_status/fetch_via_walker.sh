@@ -90,10 +90,27 @@ else
     exit 1
 fi
 
-SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "$USER@$HOST")
-SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20)
+# The snapshot query produces no output while it runs, and it is getting
+# slower as distinguished_points grows: the step took 41-72s through
+# 2026-09-14T15:49Z, 129s at 16:18Z, and the next attempt died at 262s with
+# "client_loop: send disconnect: Broken pipe". A silent SSH channel is what
+# an idle timeout between the runner and the walker collects, so keep the
+# connection warm rather than letting a slow query look like a dead host.
+# 15s x 20 tolerates five minutes of silence before giving up.
+KEEPALIVE=(-o ServerAliveInterval=15 -o ServerAliveCountMax=20)
+SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}" "$USER@$HOST")
+SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}")
+
+# Bound the query remotely too, so a genuinely stuck snapshot fails with its
+# own message instead of hanging until the job timeout. REMOTE_TIMEOUT stays
+# under the publish job's 15 minutes, leaving room for the steps after this.
+REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-540}
 
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
-"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
+STARTED=$SECONDS
+"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
+ELAPSED=$((SECONDS - STARTED))
 "${SCP[@]}" "$USER@$HOST:/tmp/rho_status.json" "$OUT"
-echo "wrote $OUT from $USER@$HOST ($IID)"
+# Printed every run on purpose: this number is the early warning for the
+# growth above, and it is invisible unless the log carries it.
+echo "wrote $OUT from $USER@$HOST ($IID); snapshot query took ${ELAPSED}s"
