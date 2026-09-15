@@ -454,13 +454,19 @@ make gpu
 
   // The rate the ETA runs on: the measured one when a snapshot carries it,
   // otherwise the last-hour DP amount at this campaign's interval,
-  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null when neither is
-  // there, and null for a measured zero as well, so the ETA says "no recent
-  // rate" rather than projecting forever from a fleet that has stopped.
+  // (dps_last_hour × 2^ITERATIONS_PER_DP_LOG2) / 3600. Null for a measured
+  // zero, so the ETA says "no recent rate" rather than projecting forever
+  // from a fleet that has stopped.
+  //
+  // The two accountings are never mixed. A counted total divided by a
+  // derived rate would publish an ETA about six times too long, because the
+  // interval the derivation uses belongs to a cutoff this campaign does not
+  // run: the derived rate goes with the derived total, or the ETA waits.
   function opsPerSecond(status) {
     if (!status || status.campaign_id !== CAMPAIGN) return null;
     var measured = measuredRate(status);
     if (measured !== null) return measured > 0 ? measured : null;
+    if (reportedIterations(status) !== null) return null;
     var dpsLastHour = Number(status.dps_last_hour);
     if (!isFinite(dpsLastHour) || dpsLastHour <= 0) return null;
     return (dpsLastHour * Math.pow(2, ITERATIONS_PER_DP_LOG2)) / 3600;
@@ -1017,9 +1023,14 @@ make gpu
     }
     if (rate === null || seconds === null) {
       value.textContent = "—";
-      sub.textContent = measuredRate(status) === 0
-        ? "The measured rate is zero, so there is no current rate for an ETA."
-        : "No points in the last hour, so there is no current rate for an ETA.";
+      if (measuredRate(status) === 0) {
+        sub.textContent = "The walk rate measured zero over that window, so there is nothing to project.";
+      } else if (reportedIterations(status) !== null) {
+        sub.textContent = "Waiting on a second snapshot with an iteration total: the rate this " +
+          "projects from is measured, and the point count cannot stand in for it at this cutoff.";
+      } else {
+        sub.textContent = "No points in the last hour, so there is no current rate for an ETA.";
+      }
       return;
     }
     var measured = measuredRate(status);

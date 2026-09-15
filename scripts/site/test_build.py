@@ -247,6 +247,9 @@ class BuildTests(unittest.TestCase):
             ops.index("dps_last_hour"),
             "the ETA prefers the DP derivation over the measured rate",
         )
+        # And never mixes them: a counted total over a derived rate is an ETA
+        # six times too long, which is worse than no ETA.
+        self.assertIn("if (reportedIterations(status) !== null) return null;", ops)
         self.assertIn(
             "Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops)",
             page,

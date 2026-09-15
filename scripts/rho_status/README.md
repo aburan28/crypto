@@ -143,9 +143,12 @@ of the way through the work. A test pins that, because it is the kind of
 bar that gets "fixed" into a lie by anyone trying to make it look fuller.
 
 The dashboard's ETA to that same `2^60.9` expected cost is the remaining
-work divided by the measured rate above, so it moves with the fleet. With
-no measured rate it falls back to the last-hour distinguished-point amount,
-`(dps_last_hour × 2^25.27) / 3600` operations per second, and says which of
-the two it used — the fallback reads about six times too long for the
-reason above. The ETA is an expectation, not a deadline;
-`scripts/site/test_build.py` pins both formulas and their order.
+work divided by the measured rate above, so it moves with the fleet. A
+snapshot with **no** iteration total falls back to the last-hour
+distinguished-point amount, `(dps_last_hour × 2^25.27) / 3600` operations
+per second, and says which of the two it used. The two accountings are
+never mixed: a counted total divided by a derived rate would publish an ETA
+about six times too long, so a snapshot that has a total but not yet a
+second one to difference shows no ETA rather than that. The ETA is an
+expectation, not a deadline; `scripts/site/test_build.py` pins both
+formulas, their order, and the refusal to mix them.
