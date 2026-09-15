@@ -2697,6 +2697,183 @@ fn write_relative_pair_support_certificate(
     std::fs::write(path, serde_json::to_vec_pretty(&payload).unwrap()).expect("write pair-support certificate");
 }
 
+fn scan_regular_relative_states(
+    curve: &KoblitzCurve,
+    representative_x_codes: &[u64],
+) -> (Vec<(usize, usize, usize, [u64; 2])>, f64) {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    let representatives = representative_x_codes.len();
+    let mut shifted = vec![vec![0u64; width]; representatives];
+    for (index, &code) in representative_x_codes.iter().enumerate() {
+        shifted[index][0] = code;
+        for exponent in 1..width {
+            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
+        }
+    }
+    let regular_states: Vec<(usize, usize, usize, [u64; 2])> = (0..representatives)
+        .into_par_iter()
+        .flat_map_iter(|left_rep| {
+            let left = representative_x_codes[left_rep];
+            let mut local = Vec::new();
+            for right_rep in 0..representatives {
+                for relative_shift in 0..width {
+                    let right = shifted[right_rep][relative_shift];
+                    if let Some(roots) = regular_s3_x_roots(curve, left, right) {
+                        local.push((left_rep, right_rep, relative_shift, roots));
+                    }
+                }
+            }
+            local
+        })
+        .collect();
+    (regular_states, started.elapsed().as_secs_f64() * 1000.0)
+}
+
+/// Install positive regular relative-Frobenius pair-support constraints.
+///
+/// For each Semaev pair side and each regular relative state, when the orbit
+/// selectors realize that relative alignment, force the intermediate `u`/`v`
+/// bits onto the Frobenius-twisted Semaev roots (with a root-choice selector).
+/// Bounded to small `n` because absolute expansion is O(regular_states · n).
+/// Still `pair_table_entries = 0` / no edge selectors.
+fn install_relative_orbit_pair_support_positive(
+    solver: &mut Solver,
+    curve: &KoblitzCurve,
+    representative_x_codes: &[u64],
+    pairing: usize,
+    representative_encoding: &str,
+) -> serde_json::Value {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    assert!(
+        width <= 23,
+        "KIC_ORBIT_PAIR_SUPPORT_POSITIVE is bounded to n <= 23 (absolute expansion)"
+    );
+    let representatives = representative_x_codes.len();
+    let binary_representatives = representative_encoding == "binary";
+    let representative_index_width =
+        ((usize::BITS - representatives.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let representative_variables = if binary_representatives {
+        4 * representative_index_width
+    } else {
+        4 * representatives
+    };
+    let cardinality_auxiliaries = if binary_representatives {
+        0
+    } else {
+        4 * representatives.saturating_sub(1)
+    };
+    let frobenius_width =
+        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let problem_variables = 6 * width;
+    let representative_offset = problem_variables;
+    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let pairing_indices = match pairing {
+        0 => [0, 1, 2, 3],
+        1 => [0, 2, 1, 3],
+        2 => [0, 3, 1, 2],
+        _ => panic!("pairing must be 0, 1, or 2"),
+    };
+    let sides = [
+        ([pairing_indices[0], pairing_indices[1]], 4 * width),
+        ([pairing_indices[2], pairing_indices[3]], 5 * width),
+    ];
+
+    let (regular_states, scan_ms) =
+        scan_regular_relative_states(curve, representative_x_codes);
+    let expand_started = Instant::now();
+    let mut positive_clauses = 0usize;
+    let mut root_selectors = 0usize;
+    let mut absolute_alignments = 0usize;
+    for &( [left_summand, right_summand], third_offset) in &sides {
+        for &(left_rep, right_rep, relative_shift, roots_at_left0) in &regular_states {
+            for left_shift in 0..width {
+                absolute_alignments += 1;
+                let right_shift = (left_shift + relative_shift) % width;
+                let twisted = [
+                    frobenius_code(curve, roots_at_left0[0], left_shift),
+                    frobenius_code(curve, roots_at_left0[1], left_shift),
+                ];
+                let selector = solver.add_vars(1).next().unwrap();
+                root_selectors += 1;
+                let mut guard = Vec::with_capacity(
+                    2 + 2 * frobenius_width
+                        + if binary_representatives {
+                            2 * representative_index_width
+                        } else {
+                            2
+                        },
+                );
+                if binary_representatives {
+                    push_forbidden_binary_assignment(
+                        &mut guard,
+                        representative_offset + left_summand * representative_index_width,
+                        representative_index_width,
+                        left_rep,
+                    );
+                    push_forbidden_binary_assignment(
+                        &mut guard,
+                        representative_offset + right_summand * representative_index_width,
+                        representative_index_width,
+                        right_rep,
+                    );
+                } else {
+                    guard.push(
+                        -((representative_offset
+                            + left_summand * representatives
+                            + left_rep
+                            + 1) as Lit),
+                    );
+                    guard.push(
+                        -((representative_offset
+                            + right_summand * representatives
+                            + right_rep
+                            + 1) as Lit),
+                    );
+                }
+                push_forbidden_binary_assignment(
+                    &mut guard,
+                    frobenius_offset + left_summand * frobenius_width,
+                    frobenius_width,
+                    left_shift,
+                );
+                push_forbidden_binary_assignment(
+                    &mut guard,
+                    frobenius_offset + right_summand * frobenius_width,
+                    frobenius_width,
+                    right_shift,
+                );
+                for clause in guarded_s3_root_clauses(
+                    &guard,
+                    third_offset,
+                    selector,
+                    twisted,
+                    width,
+                ) {
+                    assert!(solver.add_clause(clause));
+                    positive_clauses += 1;
+                }
+            }
+        }
+    }
+    let expand_ms = expand_started.elapsed().as_secs_f64() * 1000.0;
+    json!({
+        "enabled": true,
+        "pair_table_entries": 0,
+        "edge_selectors": 0,
+        "regular_relative_states": regular_states.len(),
+        "absolute_alignments": absolute_alignments,
+        "root_selectors": root_selectors,
+        "positive_clauses": positive_clauses,
+        "scan_ms": scan_ms,
+        "expand_ms": expand_ms,
+        "install_ms": started.elapsed().as_secs_f64() * 1000.0,
+        "n_bound": 23,
+        "claim_boundary": "Static positive regular relative-Frobenius pair-support only; no edge/pair table; not unrestricted extraction claim by itself; not vs_rho; not ledger promotion"
+    })
+}
+
 /// Install compressed relative-Frobenius pair-support nogoods on orbit selectors.
 ///
 /// For each paired summand side and each exceptional relative state
@@ -4561,6 +4738,32 @@ fn main() {
             &representative_encoding,
         );
     }
+    let mut relative_pair_support_positive = json!({
+        "enabled": false,
+        "pair_table_entries": 0,
+        "edge_selectors": 0
+    });
+    if algebra_encoding == "orbit_factorized"
+        && std::env::var("KIC_ORBIT_PAIR_SUPPORT_POSITIVE").as_deref() == Ok("1")
+    {
+        let representative_x_codes: Vec<u64> = base
+            .representatives
+            .iter()
+            .map(|point| match point {
+                BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
+                BinaryPoint::Infinity => panic!("factor-base representative must be affine"),
+            })
+            .collect();
+        let representative_encoding =
+            std::env::var("KIC_ORBIT_REP_ENCODING").unwrap_or_else(|_| "one_hot".to_owned());
+        relative_pair_support_positive = install_relative_orbit_pair_support_positive(
+            &mut encoding.solver,
+            &curve,
+            &representative_x_codes,
+            pairing,
+            &representative_encoding,
+        );
+    }
     let planted_x_root_units =
         std::env::var("KIC_PLANTED_X_ROOT_UNITS").as_deref() == Ok("1");
     let planted_chain_root_units =
@@ -5379,6 +5582,7 @@ fn main() {
             "pair_selector_variables":encoding.pair_selector_variables,
             "pair_table_propagation":encoding.pair_table_propagation,
             "relative_pair_support_nogoods":relative_pair_support_nogoods,
+            "relative_pair_support_positive":relative_pair_support_positive,
             "final_support_clauses":encoding.final_support_clauses,
             "final_compatible_selector_pairs":encoding.final_compatible_selector_pairs,
             "final_s3_circuit_installed":encoding.final_s3_circuit_installed,
