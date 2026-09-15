@@ -738,6 +738,14 @@ impl KoblitzCurve {
 
     /// `[k]·P` on this curve.
     pub fn mul(&self, p: &BinaryPoint, k: &BigUint) -> BinaryPoint {
+        if let Some(fast) = FastCurve::new(&self.curve) {
+            let lifted = fast.lift(p);
+            // Preserve the general path for coordinates whose representation
+            // cannot be round-tripped through this curve's single-word field.
+            if fast.lower(lifted) == *p {
+                return fast.lower(fast.mul(lifted, k));
+            }
+        }
         scalar_mul(&self.curve, p, k)
     }
 
@@ -784,6 +792,36 @@ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
     } else {
         vec![p, np]
     }
+}
+
+/// Single-word version of `points_with_x` for an odd-degree field.
+/// Reuse the field reduction tables across all coordinates of a factor base.
+/// The same half-trace root is returned first, preserving sampling and indexing.
+fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+    debug_assert!(curve.n % 2 == 1);
+    let field = &curve.field;
+    let coordinate = field.from_element(x);
+    if coordinate == 0 {
+        return vec![curve.lower(FastPoint::affine(
+            0,
+            field.sqr_k(curve.b, curve.n - 1),
+        ))];
+    }
+    let inverse = field.inv(coordinate);
+    let rhs = coordinate ^ curve.a ^ field.mul(curve.b, field.sqr(inverse));
+    let mut root = rhs;
+    let mut power = rhs;
+    for _ in 0..(curve.n - 1) / 2 {
+        power = field.sqr(field.sqr(power));
+        root ^= power;
+    }
+    // H(rhs)^2 + H(rhs) = rhs + Tr(rhs) for odd degree. Testing the
+    // equation is the same trace-zero admission check as the general solver.
+    if field.sqr(root) ^ root != rhs {
+        return Vec::new();
+    }
+    let point = FastPoint::affine(coordinate, field.mul(coordinate, root));
+    vec![curve.lower(point), curve.lower(curve.neg(point))]
 }
 
 /// The scalar `λ` with `π(Q) = [λ]Q` for all `Q ∈ ⟨G⟩`.
@@ -1772,7 +1810,12 @@ pub fn build_subgroup_orbit_factor_base(
                 ));
             }
             let x = F2mElement::from_biguint(&BigUint::from(rng.gen_range(1..cap)), kc.n);
-            let Some(point) = points_with_x(&kc.curve, &x).into_iter().next() else {
+            let lifts = if curve.n % 2 == 1 {
+                points_with_x_fast(&curve, &x)
+            } else {
+                points_with_x(&kc.curve, &x)
+            };
+            let Some(point) = lifts.into_iter().next() else {
                 continue;
             };
             // Multiply by the cofactor rather than rejecting: [h]P has
@@ -1908,10 +1951,17 @@ fn finish_factor_base_domain(
     domain: FactorBaseDomain,
 ) -> Option<FrobeniusFactorBase> {
     let mut points: Vec<BinaryPoint> = Vec::new();
+    let fast = if kc.n % 2 == 1 {
+        FastCurve::new(&kc.curve)
+    } else {
+        None
+    };
     for x in &subspace {
-        for p in points_with_x(&kc.curve, x) {
-            points.push(p);
-        }
+        let lifts = match &fast {
+            Some(curve) => points_with_x_fast(curve, x),
+            None => points_with_x(&kc.curve, x),
+        };
+        points.extend(lifts);
     }
 
     // Index points for the orbit walk and for relation lookups.
@@ -7587,6 +7637,66 @@ enum Probe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn koblitz_mul_dispatch_matches_general_arithmetic() {
+        let mut checked = 0usize;
+        for (a, n) in [(0, 5), (0, 9), (1, 11), (0, 13), (1, 17),
+                       (0, 19), (1, 19), (0, 23), (0, 31), (0, 53), (0, 61)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+            let mut points = vec![BinaryPoint::Infinity, kc.generator().clone(),
+                                  point_neg(kc.generator())];
+            for x in 0..8u64 {
+                points.extend(points_with_x(&kc.curve,
+                    &F2mElement::from_biguint(&BigUint::from(x), n)));
+            }
+            let scalars = [BigUint::zero(), BigUint::one(), BigUint::from(2u32),
+                &kc.subgroup_order - BigUint::one(), kc.subgroup_order.clone(),
+                &kc.subgroup_order + BigUint::one(),
+                (BigUint::one() << 80usize) + BigUint::from(123u32)];
+            for point in &points {
+                for scalar in &scalars {
+                    assert_eq!(kc.mul(point, scalar), scalar_mul(&kc.curve, point, scalar),
+                               "scalar dispatch at n={n}, a={a}, k={scalar}");
+                    checked += 1;
+                }
+            }
+            // A different field-width encoding must use the generic fallback.
+            if let BinaryPoint::Affine { x, y } = kc.generator() {
+                let wider = BinaryPoint::Affine {
+                    x: F2mElement::from_biguint(&x.to_biguint(), n + 1),
+                    y: F2mElement::from_biguint(&y.to_biguint(), n + 1),
+                };
+                assert_eq!(kc.mul(&wider, &BigUint::one()),
+                           scalar_mul(&kc.curve, &wider, &BigUint::one()));
+            }
+        }
+        assert!(checked >= 200, "insufficient independent arithmetic cases: {checked}");
+    }
+
+    #[test]
+    fn fast_base_lifts_preserve_roots_and_order() {
+        for n in [5, 7, 9, 11, 13, 17, 19, 23, 31, 53, 61] {
+            let Some(kc) = KoblitzCurve::new(0, n) else { continue };
+            for (a, b) in [(0u64, 1u64), (1, 1), (3, 5)] {
+                let mut curve = kc.curve.clone();
+                curve.a = F2mElement::from_biguint(&BigUint::from(a), n);
+                curve.b = F2mElement::from_biguint(&BigUint::from(b), n);
+                let fast = FastCurve::new(&curve).unwrap();
+                let samples = if n <= 11 { 1u64 << n } else { 128 };
+                let mut rng = StdRng::seed_from_u64(73015 + u64::from(n));
+                for i in 0..samples {
+                    let bits = if n <= 11 || i == 0 { i } else { rng.gen_range(0..1u64 << n) };
+                    let x = F2mElement::from_biguint(&BigUint::from(bits), n);
+                    assert_eq!(
+                        points_with_x_fast(&fast, &x),
+                        points_with_x(&curve, &x),
+                        "ordered roots at n={n}, a={a}, b={b}, x={bits}",
+                    );
+                }
+            }
+        }
+    }
 
     #[test]
     #[ignore]

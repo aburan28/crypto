@@ -1,0 +1,49 @@
+{
+  "status": "finished",
+  "wall_seconds": 2808.174312353134,
+  "reported_inference_cost_usd": 0,
+  "tools_completed": 173,
+  "cycles": [
+    {
+      "cycle": 1,
+      "model": "mimo-v2.5-free",
+      "returncode": -15,
+      "timed_out": true,
+      "tool_events": 40,
+      "steps_with_cost": 23,
+      "reported_cost_usd": 0,
+      "errors": []
+    },
+    {
+      "cycle": 2,
+      "model": "big-pickle",
+      "returncode": 0,
+      "timed_out": false,
+      "tool_events": 57,
+      "steps_with_cost": 40,
+      "reported_cost_usd": 0,
+      "errors": []
+    },
+    {
+      "cycle": 3,
+      "model": "nemotron-3.5-lightning-free",
+      "returncode": -15,
+      "timed_out": true,
+      "tool_events": 42,
+      "steps_with_cost": 23,
+      "reported_cost_usd": 0,
+      "errors": []
+    },
+    {
+      "cycle": 4,
+      "model": "mimo-v2.5-free",
+      "returncode": 0,
+      "timed_out": false,
+      "tool_events": 34,
+      "steps_with_cost": 16,
+      "reported_cost_usd": 0,
+      "errors": []
+    }
+  ],
+  "cost_status": "provider zero-price catalog and completed event costs; unfinished requests not independently invoiced"
+}
