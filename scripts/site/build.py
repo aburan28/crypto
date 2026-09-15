@@ -11,6 +11,7 @@ Layout, and why each path is where it is:
 
     /                     landing page
     /assets/site.css      landing-page styles
+    /assets/rho-gpu*      the opt-in browser WebGPU Pollard rho engine
     /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
     /status/              the ECC2K-130 distinguished-point dashboard
     /status/status.json   snapshot, next to the page that reads it
@@ -44,6 +45,13 @@ PAGES = (
     ("docs/site/index.html", "index.html"),
     ("docs/site/404.html", "404.html"),
     ("docs/site/assets/site.css", "assets/site.css"),
+    # The browser rho engine: page controller, worker, host arithmetic, shader.
+    # The worker fetches the shader by a relative URL, so all four have to land
+    # in one directory together (test_build.py pins that).
+    ("docs/site/assets/rho-gpu.js", "assets/rho-gpu.js"),
+    ("docs/site/assets/rho-gpu-worker.js", "assets/rho-gpu-worker.js"),
+    ("docs/site/assets/rho-gpu-host.js", "assets/rho-gpu-host.js"),
+    ("docs/site/assets/rho-gpu.wgsl", "assets/rho-gpu.wgsl"),
     ("docs/index-calculus-scoreboard.html", "scoreboard/index.html"),
     ("docs/ecc2k130-status/index.html", "status/index.html"),
     ("docs/ecc2k130-status/style.css", "status/style.css"),

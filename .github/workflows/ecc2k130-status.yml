@@ -18,6 +18,7 @@ on:
       - "docs/ecc2k130-status/**"
       - "docs/site/**"
       - "docs/index-calculus-scoreboard.html"
+      - "scripts/rho_gpu_emulate.mjs"
   push:
     branches: [main]
     paths:
@@ -27,6 +28,7 @@ on:
       - "docs/ecc2k130-status/**"
       - "docs/site/**"
       - "docs/index-calculus-scoreboard.html"
+      - "scripts/rho_gpu_emulate.mjs"
 
 permissions:
   contents: read
@@ -47,6 +49,11 @@ jobs:
         run: python3 scripts/rho_status/test_rho_status.py
       - name: Site build tests
         run: python3 scripts/site/test_build.py
+      - name: Browser rho engine tests
+        # Checks the shader's arithmetic and walk against BigInt and solves a
+        # toy instance end to end through the engine's own replay path. It does
+        # not compile WGSL; the device is verified in the browser at runtime.
+        run: node scripts/rho_gpu_emulate.mjs
 
   publish:
     needs: test
