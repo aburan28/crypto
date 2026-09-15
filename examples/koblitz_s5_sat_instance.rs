@@ -2992,7 +2992,7 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
         "scan_ms": scan_ms,
         "expand_ms": expand_ms,
         "install_ms": started.elapsed().as_secs_f64() * 1000.0,
-        "n_bound": 23,
+        "n_bound": 41,
         "claim_boundary": "Relative-frame positive regular pair-support (canonical intermediate + Frobenius mux); no edge/pair table; not unrestricted extraction; not vs_rho; not ledger promotion"
     })
 }

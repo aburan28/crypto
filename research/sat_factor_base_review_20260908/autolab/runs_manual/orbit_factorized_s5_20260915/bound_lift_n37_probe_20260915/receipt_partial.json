@@ -1,15 +1,28 @@
 {
   "schema_version": "1.0",
   "kind": "bound_lift_n37_probe_partial",
-  "updated_at": "2026-09-15T19:05:40Z",
-  "claim_boundary": "Bound lift + n37 edge-free cert. Planted-units reload restarted clean-env (nohup). NOT ledger promotion.",
+  "updated_at": "2026-09-15T19:08:56Z",
+  "claim_boundary": "Bound lift + n37 edge-free encoding smoke. NOT ledger promotion.",
   "cert": {
     "file": "n37_eta1_2_seed1.cert.json",
     "pair_table_entries": 0,
     "edge_selectors": 0,
-    "orbit_representatives": 12
+    "exceptional_relative_states": 12
   },
-  "planted_units_cert_reload": "in_flight_clean_env_nohup",
-  "note": "Earlier reload had polluted KIC_DIMACS_PATH from parent shell; killed and restarted.",
+  "smoke_planted_units_1k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 1000,
+    "pair_table_entries": 0,
+    "valid_x_tuples": 0,
+    "invalid_group_lifts": 0,
+    "variables": 428195,
+    "factor_base_points": 888,
+    "intermediate_domain_x_coordinates": 195693,
+    "positive_clauses": 6894820,
+    "planted_x_root_units": true,
+    "solve_ms": 93686.45904100001,
+    "note": "Encoding constructs edge-free at n37 (pair_table=0). Planted units do NOT trivially SAT @1k (6.8M positive clauses; ~94s/1k conflicts). Stale JSON n_bound=23 in relative-positive report is metadata only \u2014 assert is 41."
+  },
+  "planted_units_100k": "launching",
   "ledger_promotion": false
 }
