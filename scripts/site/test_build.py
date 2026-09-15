@@ -186,6 +186,25 @@ class BuildTests(unittest.TestCase):
                     missing.append("%s -> %s" % (rel, href))
         self.assertEqual(missing, [], "unresolvable internal links: %s" % missing)
 
+    def test_research_evidence_is_linked_absolutely(self):
+        # research/ is not part of the site artifact, so a relative
+        # ../research/<path> link resolves in the working tree and 404s once
+        # published under /scoreboard/. It has broken publication twice; the
+        # generic link check above catches it, but only by filename, so this
+        # names the cause and the fix. See scripts/site/README.md.
+        relative = []
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+            page = read(os.path.join(self.out, rel))
+            for href in re.findall(r'(?:href|src)="([^"]+)"', page):
+                if re.match(r"(?:\.\./)*research/", href):
+                    relative.append("%s -> %s" % (rel, href))
+        self.assertEqual(
+            relative,
+            [],
+            "link research evidence as https://github.com/aburan28/crypto/blob/main/research/<path>, "
+            "not relatively: %s" % relative,
+        )
+
     def test_every_page_declares_title_viewport_and_description(self):
         for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
             page = read(os.path.join(self.out, rel))
