@@ -49,7 +49,9 @@
     "symmetrised_dim_geometry": "Prime-n F2 cyclotomic map: n37/n53 mid-dim blocked (only dim=1); n41 dim21 and n47 dim24 are geometric candidates but ~2^dim FB cost; n31 remains working mid-dim cell.",
     "relative_positive_shift_then_reps_n19": "Natural n19 + relative-positive + shift_then_reps @40k: still UNKNOWN 0 models, pair_table=0.",
     "n41_dim21_resource_probe": "Cautious n41 m=2 dim21 resource probe: constructible (F_x\u22482.097e6, F_u\u22482.097e6, divisor [0,1]). 1 target seed=7 F4-only node_budget=2000: both arms INCONCLUSIVE @effort 1005, wall\u2248314s, x FFD=3, gate ok. Not a decomp win; not ledger promotion. n37/n53 remain geometrically blocked.",
-    "relative_positive_binary_fieldbits_n19": "Natural n19 + relative-positive + binary reps + field_bits_then_pair_then_pair @60k: UNKNOWN 0 models, pair_table=0 (vars 7407 / clauses 53883). Planted n13 SAT invalid_lifts=0. Does not close cliff."
+    "relative_positive_binary_fieldbits_n19": "Natural n19 + relative-positive + binary reps + field_bits_then_pair_then_pair @60k: UNKNOWN 0 models, pair_table=0 (vars 7407 / clauses 53883). Planted n13 SAT invalid_lifts=0. Does not close cliff.",
+    "lazy_plus_relative_positive": "KIC_ORBIT_LAZY_PAIR_ROOTS=1 + relative-positive + nogoods: planted n13 SAT (pair_table=0, invalid_lifts=0) but planted n19 UNKNOWN @50k and natural n19 UNKNOWN @40k. Relative-positive does NOT rescue lazy roots at n19; keep full S3 for group-valid planted n>=19 / n53 edge-free relations.",
+    "n41_dim21_budget5k": "n41 m=2 dim21 F4 node_budget=5000 seed=11 targets=1: still both arms INCONCLUSIVE (effort 2504, wall\u2248349s, x FFD=3). Effort rose vs budget2000 (1005\u21922504) without closing; constructible but not claim-grade."
   },
   "rungs": [
     {
@@ -1180,8 +1182,53 @@
       "ordinary_clauses": 53883,
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_lazy_relative_positive_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 3899,
+      "variables": 4609,
+      "ordinary_clauses": 12675,
+      "pair_table_entries": 0,
+      "note": "lazy rescued at n13 only"
+    },
+    {
+      "n": 19,
+      "mode": "planted_lazy_relative_positive_nogoods_cert_50k",
+      "verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 50000,
+      "variables": 11599,
+      "ordinary_clauses": 62597,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation",
+      "note": "relative-positive does not rescue lazy at planted n19"
+    },
+    {
+      "n": 19,
+      "mode": "natural_lazy_relative_positive_nogoods_40k",
+      "verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 40000,
+      "variables": 11599,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 41,
+      "mode": "decomp_m2_dim21_f4_budget5000_targets1",
+      "verdict": "STILL_BUDGET_INCONCLUSIVE",
+      "dim_V": 21,
+      "F_x": 2096989,
+      "effort": 2504,
+      "ffd_x": 3,
+      "wall_s": 348.9,
+      "ledger_promotion": false
     }
   ],
-  "next": "n41 dim21 cell is constructible but needs much larger node budgets / multi-target panel before claim-grade FFD. n19 cliff still open under relative-positive\u00d7binary\u00d7fieldbits. Next: higher-budget n41 smoke or new n19 structure. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T16:29:32Z"
+  "next": "Lazy+relative fails planted n19 \u2014 retain full S3 for n53 edge-free. n41 still inconclusive at budget 5k; needs >>5k or multi-target before FFD claims. n19 unrestricted cliff open. No ledger promotion. No AWS mutations.",
+  "updated_at": "2026-09-15T16:57:17Z"
 }
