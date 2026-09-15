@@ -47,7 +47,9 @@
     "n37_quadratic_cell_geometry": "symmetrised divisor_for_dimension(37,~19) blocked: over F2, Phi_37 is degree 36, so only dim=1 proper subspace containing x-1 is available. Not a decomposition win.",
     "n31_distributional_redraw": "Second-seed n31 m=2 dim16 F4 panel (seed=66142, targets=4, --no-sat): FFD stable (x=3,sym=4), gate ok, 0 inconclusive. Verdict mix differs from 0x5EED baseline as expected. Not ledger promotion.",
     "symmetrised_dim_geometry": "Prime-n F2 cyclotomic map: n37/n53 mid-dim blocked (only dim=1); n41 dim21 and n47 dim24 are geometric candidates but ~2^dim FB cost; n31 remains working mid-dim cell.",
-    "relative_positive_shift_then_reps_n19": "Natural n19 + relative-positive + shift_then_reps @40k: still UNKNOWN 0 models, pair_table=0."
+    "relative_positive_shift_then_reps_n19": "Natural n19 + relative-positive + shift_then_reps @40k: still UNKNOWN 0 models, pair_table=0.",
+    "n41_dim21_resource_probe": "Cautious n41 m=2 dim21 resource probe: constructible (F_x\u22482.097e6, F_u\u22482.097e6, divisor [0,1]). 1 target seed=7 F4-only node_budget=2000: both arms INCONCLUSIVE @effort 1005, wall\u2248314s, x FFD=3, gate ok. Not a decomp win; not ledger promotion. n37/n53 remain geometrically blocked.",
+    "relative_positive_binary_fieldbits_n19": "Natural n19 + relative-positive + binary reps + field_bits_then_pair_then_pair @60k: UNKNOWN 0 models, pair_table=0 (vars 7407 / clauses 53883). Planted n13 SAT invalid_lifts=0. Does not close cliff."
   },
   "rungs": [
     {
@@ -1154,8 +1156,32 @@
       "refuted_sym": 4,
       "ledger_promotion": false,
       "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260915_distro/distributional_receipt.json"
+    },
+    {
+      "n": 41,
+      "mode": "decomp_m2_dim21_resource_probe_targets1_f4_budget2000",
+      "verdict": "CONSTRUCTIBLE_BUT_BUDGET_INCONCLUSIVE",
+      "dim_V": 21,
+      "F_x": 2096989,
+      "F_u": 2096741,
+      "inconclusive": 2,
+      "wall_s": 313.5,
+      "ledger_promotion": false,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/n41_decomp_m2_dim21_20260915_resource/resource_receipt.json"
+    },
+    {
+      "n": 19,
+      "mode": "natural_relative_positive_binary_fieldbits_60k",
+      "verdict": "UNKNOWN",
+      "models_examined": 0,
+      "conflicts": 60000,
+      "solve_ms": 8758.578125,
+      "variables": 7407,
+      "ordinary_clauses": 53883,
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "n31 FFD/gate stable under second-seed distributional redraw. n19 cliff still open under relative-positive. Next: structural n19 rewrite, or cautious n41 dim21 resource probe, or further n31 distribution. No ledger promotion. No AWS mutations.",
-  "updated_at": "2026-09-15T16:19:56Z"
+  "next": "n41 dim21 cell is constructible but needs much larger node budgets / multi-target panel before claim-grade FFD. n19 cliff still open under relative-positive\u00d7binary\u00d7fieldbits. Next: higher-budget n41 smoke or new n19 structure. No ledger promotion. No AWS mutations.",
+  "updated_at": "2026-09-15T16:29:32Z"
 }
