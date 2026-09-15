@@ -16,7 +16,7 @@
     "factor_base_n53_control_plane": "claim_check PASS; CONSTRUCTION_INDEPENDENTLY_REPLAYED (same-seed F/K/hash/closures match); point-defined base seed-invariant; NO ledger promotion",
     "lazy_pair_roots_static_fix": "empty body replaced with constrain_s3_root; theory decoupled (opt-in via KIC_S3_ROOT_THEORY)",
     "lazy_static_unrestricted_n13": "UNKNOWN 0 models @150k \u2014 half-trace selectors hurt CDCL vs full S3",
-    "unrestricted_n19_cliff": "still open under pairing/seed/branch/nogood/phase-restart sweeps",
+    "unrestricted_n19_cliff": "still open under pairing/seed/branch/nogood/phase-restart/eta/karatsuba/natural sweeps",
     "pair_then_pair_branch_order": "KIC_ORBIT_BRANCH_ORDER=pair_then_pair decides first Semaev pair before second; planted n13 SAT; unrestricted n13 finds models; does not close n19 cliff at 150k",
     "alternate_pairing_n19": "KIC_PAIRING=1,2 with pair_then_pair+nogoods @100k: still 0 models; seeds 2/3/5 @75k also 0",
     "pair_then_pair_reversed": "n19 @75k: UNKNOWN 0 models; does not close cliff",
@@ -30,7 +30,10 @@
     "n23_rung": "planted n23 SAT pair_table=0; unrestricted UNKNOWN 0 models @60k phase4",
     "n17_note": "n=17 admitted in CLI assert but KoblitzCurve::new(a=0,17) fails \u2014 not a usable rung here",
     "lazy_pair_roots_planted": "n13 planted lazy+nogoods SAT (1798 conflicts). n23 planted lazy+nogoods UNKNOWN 0 models @100k while full-S3 planted SAT @61 conflicts. n53 planted lazy search aborted >8min wall. Prefer full S3 for group-valid planted relations.",
-    "lazy_formula_accounting": "lazy roughly doubles formula size (n19: 3889\u21928073 vars; n53: ~26825\u219258311 vars) with pair_table=0"
+    "lazy_formula_accounting": "lazy roughly doubles formula size (n19: 3889\u21928073 vars; n53: ~26825\u219258311 vars) with pair_table=0",
+    "karatsuba_mul_n19": "KIC_MULTIPLICATION_ENCODING=karatsuba (carryless_karatsuba): planted n13 SAT edge-free; unrestricted n13 finds models; unrestricted n19 still 0 models @80k phase4 (vars 4750 / clauses 5694 vs schoolbook 3889/9201). eta 1/16 karatsuba also 0 @80k.",
+    "natural_target_cliff": "natural target_class (no planted units): n13 0 models @40k and n19 0 @60k under schoolbook+pair_then_pair+nogoods+phase4 despite expected_decomposable=true \u2014 harder than planted-target unrestricted at n13. pair_table=0.",
+    "n53_group_valid_edge_free_reconfirm": "Reconfirmed planted n53 schoolbook+pair_then_pair+parallel nogoods: valid_x_tuples=1, invalid_group_lifts=0, pair_table_entries=0, pair_selector_variables=0, conflicts=3631 \u2014 group-valid public-synthetic edge-free relation (planted units)."
   },
   "rungs": [
     {
@@ -748,8 +751,118 @@
       "note": "CDCL still running >8min after base; not completed under tested budget",
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_karatsuba_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 19,
+      "solve_ms": 7.102917,
+      "variables": 2114,
+      "ordinary_clauses": 2544,
+      "native_xor_rows": 1367,
+      "pair_table_entries": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "nogood_clauses": 26
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_karatsuba_pairthen_nogoods_phase4_40k",
+      "verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "models_examined": 1,
+      "conflicts": 40000,
+      "solve_ms": 12934.982667,
+      "variables": 2114,
+      "pair_table_entries": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_karatsuba_pairthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 115731.746291,
+      "variables": 4750,
+      "ordinary_clauses": 5694,
+      "native_xor_rows": 2999,
+      "pair_table_entries": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_karatsuba_eta1_16_pairthen_nogoods_phase4_80k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 104154.099209,
+      "variables": 4742,
+      "ordinary_clauses": 5648,
+      "pair_table_entries": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "eta": {
+        "numerator": 1,
+        "denominator": 16
+      },
+      "orbit_columns": 1,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "natural_schoolbook_pairthen_nogoods_phase4_40k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 40000,
+      "solve_ms": 4057.40425,
+      "variables": 2009,
+      "pair_table_entries": 0,
+      "expected_decomposable": true,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "natural_schoolbook_pairthen_nogoods_phase4_60k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 60000,
+      "solve_ms": 15435.231833,
+      "variables": 3889,
+      "pair_table_entries": 0,
+      "expected_decomposable": true,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 53,
+      "mode": "planted_schoolbook_pairthen_nogoods_reconfirm",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 3631,
+      "solve_ms": 14751.954583,
+      "variables": 26825,
+      "ordinary_clauses": 108763,
+      "native_xor_rows": 2915,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "nogood_clauses": 39856,
+      "exceptional_relative_states": 376,
+      "multiplication_encoding": "schoolbook",
+      "note": "group-valid public-synthetic edge-free relation under planted units"
     }
   ],
-  "next": "Lazy pair roots remain search-hostile by n23 even with planted units; keep full S3 for edge-free group-valid n53 relations. Unrestricted n19 cliff still open. No ledger promotion.",
-  "updated_at": "2026-09-15T14:44:57Z"
+  "next": "Planted edge-free group-valid n53 stands under full S3. Karatsuba and natural do not close n19 unrestricted cliff. Need a new encoding/decision lever beyond mul/branch/eta/phase/natural. No ledger promotion.",
+  "updated_at": "2026-09-15T14:56:07Z"
 }

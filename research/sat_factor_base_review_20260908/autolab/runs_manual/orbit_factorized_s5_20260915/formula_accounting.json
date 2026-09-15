@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T14:44:57Z",
+  "updated_at": "2026-09-15T14:56:07Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -75,6 +75,31 @@
       "orbit_columns": 376,
       "encoding_ms": 19.881667,
       "base_ms": 137648.43612499998
+    },
+    {
+      "n": 19,
+      "config": "one_hot+karatsuba+nogoods",
+      "variables": 4750,
+      "ordinary_clauses": 5694,
+      "native_xor_rows": 2999,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 76,
+      "orbit_columns": 2,
+      "multiplication_encoding": "carryless_karatsuba",
+      "note": "fewer ordinary clauses than schoolbook but more vars/xors; does not close cliff"
+    },
+    {
+      "n": 19,
+      "config": "one_hot+karatsuba+eta1/16+nogoods",
+      "variables": 4742,
+      "ordinary_clauses": 5648,
+      "native_xor_rows": 2999,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 38,
+      "orbit_columns": 1,
+      "multiplication_encoding": "carryless_karatsuba"
     }
   ],
   "notes": [
@@ -85,6 +110,8 @@
     "n19 eta=1/16 yields orbit_columns=1, factor_base_points=38 vs eta=1/2 columns=2 points=76; pair_table=0 either way.",
     "n17 is not constructible for a=0 in this KoblitzCurve table despite CLI allow-list.",
     "Lazy pair-root encoding roughly doubles vars/clauses vs full factorized S3 at same eta; pair_table stays 0.",
-    "Planted lazy path fails to recover models by n23 under 100k conflicts; full S3 planted remains easy."
+    "Planted lazy path fails to recover models by n23 under 100k conflicts; full S3 planted remains easy.",
+    "Karatsuba mul keeps pair_table=0; n19 unrestricted still 0 models @80k.",
+    "Natural targets at n13/n19 remain 0 models under tested budgets despite expected_decomposable=true."
   ]
 }
