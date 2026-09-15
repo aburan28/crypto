@@ -15,7 +15,10 @@ Nothing in the C++/CUDA client changes. The binary is the audited RTX PRO
 2, 192,512 workers, every packed arithmetic option, CUDA 13.0), built for
 `sm_120`. EC2 **G7e** instances carry exactly that GPU, the RTX PRO 6000
 Blackwell Server Edition, so the measured 6.9 B iterations/s per GPU should
-carry over; the pilot below measures it rather than assuming it.
+carry over; the pilot below measures it rather than assuming it. **G7**
+carries the RTX PRO 4500 Blackwell, a smaller part of the same `sm_120`
+architecture, so the published binary runs there unchanged and walks slower
+in proportion to the SMs it has — again measured, not assumed.
 
 ## The numbers that decide the plan
 
@@ -217,6 +220,13 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~6.7-6.9 B it/s p
 #    Keep every type in TYPES at one GPU and the per-GPU cap stays meaningful;
 #    a cap under the on-demand price is what stops a thin spot pool from
 #    costing more than on-demand for the same GPU.
+#
+# 4b. a second pool, its own group, same launch template (BACKEND=asg)
+#    ASG=ecc2k130-g7 BACKEND=asg TYPES=g7.2xlarge ./fleet.sh up 4 --on-demand 4
+#    G7 and G7e share both G/VT quotas, so the two pools are how the quotas
+#    get spent where they are worth most: spot on G7e, which is the faster
+#    GPU per vCPU, and idle on-demand quota on G7.  An all-on-demand group
+#    (base = target) touches no spot quota, so the g7e group keeps all of it.
 
 # 5. merge every few hours (a CPU box; the c8i/c7g instances you already run, or a laptop)
 python3 merge.py --work /data/merge --s3 s3://ecc2k130-<account>/dp/ --client ./ecc2k130-cpu
