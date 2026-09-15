@@ -22,7 +22,7 @@ aws cloudformation deploy \
   --template-file infra/elasticache/groebner-cache.yaml \
   --parameter-overrides \
     VpcId=vpc-0123456789abcdef0 \
-    SubnetIds='subnet-0123456789abcdef0 subnet-fedcba9876543210' \
+    SubnetIds='subnet-0123456789abcdef0,subnet-fedcba9876543210' \
     ApplicationSecurityGroupId=sg-0123456789abcdef0
 ```
 
