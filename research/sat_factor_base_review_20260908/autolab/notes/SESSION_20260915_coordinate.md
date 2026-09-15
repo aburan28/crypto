@@ -30,6 +30,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | **n23 @1M hit-rate** | planted seed2 **SAT @590623**; seeds 3/5 UNKNOWN; natural seed1 UNKNOWN; **natural seed2 SAT @846240** (first natural n23 @1M) |
 | **Bound lift 23→41** | `pair_sum_trie` + relative-positive relative mode; absolute positive still ≤23 |
 | **n37 cert export** | succeeded (`pair_table=0`, edge_selectors=0, 12 orbit reps) |
+| **n37 planted-units diagnostics** | n23 fullstack control SAT@115; n37 lean UNKNOWN@100k; eta1/2 UNKNOWN@1k; eta1/16 UNKNOWN@5k (50k in flight); pair_table=0 |
 | **n37 formula accounting** | edge-free: vars≈428k, +clauses≈6.89M, pair_table=0; planted units UNKNOWN@1k (~94s/1k); 100k aborted (~2.6h); no-positive@20k diag in flight |
 | CMS without branch heuristic | still INDETERMINATE @200k |
 
