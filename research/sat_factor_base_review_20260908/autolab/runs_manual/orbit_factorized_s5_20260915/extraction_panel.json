@@ -54,7 +54,10 @@
     "n41_dim21_budget5k": "n41 m=2 dim21 F4 node_budget=5000 seed=11 targets=1: still both arms INCONCLUSIVE (effort 2504, wall\u2248349s, x FFD=3). Effort rose vs budget2000 (1005\u21922504) without closing; constructible but not claim-grade.",
     "n53_planted_fulls3_cert_tick_sanity": "Reconfirmed planted n53 full-S3 + nogoods cert reload: SAT, pair_table=0, invalid_lifts=0, models=1, conflicts=1583, scan_ms=0. Edge-free group-valid public-synthetic relation stands.",
     "relative_positive_eta1_16_n19": "eta=1/16 + relative-positive + nogoods: planted SAT (vars 5055 / clauses 19373, fb=38, orbit_cols=1). Natural @100k UNKNOWN 0 models; +SYMMETRY_BREAK @80k also UNKNOWN. Shrinks formula vs eta1/2 but does not close cliff.",
-    "cms_relative_positive_eta1_16_n19": "CryptoMiniSat5 on eta=1/16 relative-positive natural n19 (pair_table=0, 5055 vars, 1159 native xors): INDETERMINATE @300k conflicts (~7.4s). Planted same encoding SATISFIABLE under CMS. Cliff is not an internal-solver-only artifact at this budget; not ledger promotion."
+    "cms_relative_positive_eta1_16_n19": "CryptoMiniSat5 on eta=1/16 relative-positive natural n19 (pair_table=0, 5055 vars, 1159 native xors): INDETERMINATE @300k conflicts (~7.4s). Planted same encoding SATISFIABLE under CMS. Cliff is not an internal-solver-only artifact at this budget; not ledger promotion.",
+    "orbit_rooted_partial": "KIC_ORBIT_ROOTED=1 + KIC_ALLOW_PARTIAL_PAIRING=1: planted n13 UNKNOWN 0 models @20k (vars 4015 / clauses 8527, pair_table=0). Half-trace rooted selectors hurt CDCL vs full S3; do not prefer rooted/lazy for group-valid planted relations.",
+    "pair_sum_trie_intermediate_domain": "Enabled KIC_INTERMEDIATE_DOMAIN=pair_sum_trie on orbit_factorized (u/v at 4n/5n field bits; no pair/edge table). Planted-unit n13 SAT (173 conflicts, valid=1, invalid_lifts=0, domain=130); planted-unit n19+nogoods SAT (596 conflicts, domain=1330); planted-unit n19+relative-positive SAT (14 conflicts). Unrestricted planted-target n13 SAT (~7.9k conflicts). Unrestricted planted-target n19 UNKNOWN 0 models @100k; natural n19 UNKNOWN @80k. Structural lever is sound but does not close the n19 cliff. Not vs_rho; not ledger promotion.",
+    "n41_dim21_budget20k": "n41 m=2 dim21 F4 node_budget=20000 a=0 seed=11 targets=1: still both arms INCONCLUSIVE (effort 10005, wall~794s, x FFD=3, gate ok, F_x=2096989). Effort scaled vs budget5k (2504\u219210005) without closing; constructible but not claim-grade. Not ledger promotion."
   },
   "rungs": [
     {
@@ -1291,8 +1294,43 @@
       "planted_cms_sanity": "SATISFIABLE",
       "evidence_class": "censored_operational_observation",
       "ledger_promotion": false
+    },
+    {
+      "n": 19,
+      "mode": "pair_sum_trie_intermediate_domain_planted_units",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 596,
+      "variables": 3889,
+      "ordinary_clauses": 29865,
+      "intermediate_domain_x_coordinates": 1330,
+      "pair_table_entries": 0,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediate_domain_pair_sum_trie/receipt.json"
+    },
+    {
+      "n": 19,
+      "mode": "pair_sum_trie_unrestricted_planted_target_100k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "conflicts": 100000,
+      "models": 0,
+      "pair_table_entries": 0,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediate_domain_pair_sum_trie/unrestricted_planted_target_n19_pair_sum_100k.json"
+    },
+    {
+      "n": 41,
+      "mode": "decomp_m2_dim21_f4_budget20000_targets1",
+      "verdict": "INCONCLUSIVE",
+      "effort": 10005,
+      "ffd_x": 3,
+      "wall_s": 793.7,
+      "F_x": 2096989,
+      "F_u": 2096741,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/n41_decomp_m2_dim21_20260915_resource/budget20k_resource_receipt.json"
     }
   ],
-  "next": "CMS agrees with internal CDCL on the n19 relative-positive eta1/16 cliff (INDETERMINATE @300k; planted SAT). Next: deeper structural n19 rewrite or much larger n41 F4 budget. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
+  "next": "pair_sum_trie intermediate domain is sound on planted units but leaves n19 unrestricted UNKNOWN @100k; n41 dim21 still inconclusive at budget20k (effort 10005). Next: alternate structural n19 rewrite (not domain-only) or n31 IV / other ledger beats. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
   "updated_at": "2026-09-15T17:09:46Z"
 }

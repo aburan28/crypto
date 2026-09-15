@@ -4914,7 +4914,8 @@ fn main() {
             pair_table_drop_final_s3,
         )
     } else if algebra_encoding == "orbit_factorized" {
-        assert_eq!(intermediate_domain_encoding, "none");
+        // Intermediate u/v live at field-bit offsets 4n/5n (same as expanded
+        // S5); pair_sum_trie may constrain those wires without a pair/edge table.
         let representative_x_codes: Vec<u64> = base
             .representatives
             .iter()
