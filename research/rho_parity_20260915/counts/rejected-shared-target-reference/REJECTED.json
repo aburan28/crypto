@@ -1,0 +1,6 @@
+{
+  "reason": "Shared Cargo target reused newer package artifacts for the original source tree.",
+  "evidence": "Case 0 seed 101 original native reference performs 7 F4 reductions; this profiling binary performed 0 and matched iteration 4 instruction counts.",
+  "status": "invalid benchmark, retained for audit and excluded from all results",
+  "remedy": "New isolated target directories with cargo clean -p crypto before rebuilding; dependency artifacts only may be copied."
+}

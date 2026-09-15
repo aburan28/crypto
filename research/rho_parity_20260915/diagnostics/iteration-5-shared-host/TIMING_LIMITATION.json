@@ -1,0 +1,4 @@
+{
+  "status": "correctness checks passed; secondary timing not selected for claims",
+  "reason": "This run overlapped reference Callgrind profiling on CPU 0 and test compilation. Retained for audit; repeat the unchanged binary pair without that overlap."
+}
