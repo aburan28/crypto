@@ -1,0 +1,34 @@
+{
+  "source_jsonl": "replay_same_seed.jsonl",
+  "factor_base": {
+    "kind": "point_defined_factor_base",
+    "n": 53,
+    "eta": {
+      "denominator": 16,
+      "numerator": 1
+    },
+    "factor_base_points": 19928,
+    "orbit_columns": 188,
+    "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+    "factor_base_seed": 15111065706836454659,
+    "frobenius_closed": true,
+    "negation_closed": true,
+    "subgroup_membership_verified": true,
+    "total_setup_ms": 2279.747833,
+    "support_table_allocated_bytes": 83886080,
+    "point_selection": "small-cofactor projections of the first affine curve points in coordinate order"
+  },
+  "relation_rank_summary": {
+    "kind": "relation_rank_summary",
+    "fixture_seed": 2353860850721137779,
+    "admitted_relations": 273,
+    "full_rank_at_relation": 241,
+    "linear_solution_verified": true,
+    "all_relations_group_verified": true,
+    "recovered_fixture_scalar": 15386236969683,
+    "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+    "factor_base_points": 19928,
+    "orbit_columns": 188
+  },
+  "wall": "real 175.91\nuser 175.48\nsys 0.38"
+}

@@ -13,10 +13,11 @@
     "planted_edge_free_through_n53": true,
     "unrestricted_cliff": "n13 finds models; n19+ unrestricted stays UNKNOWN under tested budgets",
     "relative_pair_support_nogoods": "sound on one_hot (planted n13 SAT); do not close n19 unrestricted cliff at 200k conflicts (76 nogood clauses, 0 models)",
-    "factor_base_n53_control_plane": "claim_check PASS; PENDING_INDEPENDENT_VALIDATION; F=19928 K=188 wall_ms\u22482238 retained\u224874.9MB",
+    "factor_base_n53_control_plane": "claim_check PASS; CONSTRUCTION_INDEPENDENTLY_REPLAYED (same-seed F/K/hash/closures match); point-defined base seed-invariant; NO ledger promotion",
     "lazy_pair_roots_static_fix": "empty body replaced with constrain_s3_root; theory decoupled (opt-in via KIC_S3_ROOT_THEORY)",
     "lazy_static_unrestricted_n13": "UNKNOWN 0 models @150k \u2014 half-trace selectors hurt CDCL vs full S3",
-    "unrestricted_n19_cliff": "still open under nogoods / rooted / lazy-static variants"
+    "unrestricted_n19_cliff": "still open under nogoods / rooted / lazy-static / pair_then_pair variants",
+    "pair_then_pair_branch_order": "KIC_ORBIT_BRANCH_ORDER=pair_then_pair decides first Semaev pair before second; planted n13 SAT; unrestricted n13 finds models; does not close n19 cliff at 150k"
   },
   "rungs": [
     {
@@ -235,7 +236,63 @@
       "solve_ms": 598930.75,
       "pair_table_entries": 0,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_x_chain_units_pairthen_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "conflicts": 13,
+      "solve_ms": 2.93,
+      "variables": 2009,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair"
+    },
+    {
+      "n": 13,
+      "mode": "unrestricted_pairthen_nogoods_100k",
+      "verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "models_examined": 1,
+      "conflicts": 100000,
+      "solve_ms": 10447.0,
+      "variables": 2009,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairthen_nogoods_150k",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 150000,
+      "solve_ms": 46402.25,
+      "variables": 3889,
+      "nogood_clauses": 76,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 19,
+      "mode": "unrestricted_pairthen_nogoods_sym_100k",
+      "verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "models_examined": 0,
+      "conflicts": 100000,
+      "solve_ms": 29212.158291,
+      "variables": 4000,
+      "pair_table_entries": 0,
+      "branch_order": "pair_then_pair",
+      "symmetry_breaking": true,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Unrestricted n19 remains open. Prefer full S3 + compressed nogoods over half-trace selectors for CDCL. Next search lever: orbit-rep / relative-shift decision heuristics or decomposed pair-then-pair solving. Independent-validate factor_base n53 draft."
+  "next": "Unrestricted n19 cliff remains under pair_then_pair. Next: alternate pairing index, phase saving across pair blocks, or n31 decomp distribution ledger beat. factor_base n53 construction independently replayed \u2014 still no ledger promotion.",
+  "updated_at": "2026-09-15T13:13:22Z"
 }

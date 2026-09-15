@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "kind": "factor_base_n53_control_plane_harvest",
   "run_id": "20260915T122253Z-229f0ee245",
-  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "status": "INDEPENDENTLY_VALIDATED_CONSTRUCTION",
   "claim_check": "PASS",
   "n": 53,
   "factor_base_size_F": 19928,
@@ -24,5 +24,11 @@
     "not imported/external points",
     "not ledger promotion until independent validation"
   ],
-  "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+  "verdict": "DRAFT_INDEPENDENTLY_VALIDATED_CONSTRUCTION_NO_LEDGER_PROMOTION",
+  "independent_validation": {
+    "receipt": "independent_validation/validation_receipt.json",
+    "verdict": "CONSTRUCTION_INDEPENDENTLY_REPLAYED",
+    "same_seed_match_F_K_hash": true,
+    "ledger_promotion": false
+  }
 }

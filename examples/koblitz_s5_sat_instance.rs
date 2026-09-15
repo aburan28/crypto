@@ -2193,12 +2193,46 @@ fn encode_balanced_s5_frobenius_orbits(
             &(0..width as u64).collect::<Vec<_>>(),
         );
     }
-    let mut priorities: Vec<u32> = (0..representative_variables)
-        .map(|index| (representative_offset + index + 1) as u32)
-        .collect();
-    priorities.extend(
-        (0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32),
-    );
+    // Default: all orbit representatives, then all Frobenius shifts, then optional
+    // root selectors. `KIC_ORBIT_BRANCH_ORDER=pair_then_pair` decides the first
+    // Semaev pair (pairing indices 0/1) before the second pair (2/3), keeping
+    // pair_table_entries=0.
+    let branch_order = std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
+    let mut priorities: Vec<u32> = Vec::new();
+    if branch_order == "pair_then_pair" {
+        let rep_stride = if binary_representatives {
+            representative_index_width
+        } else {
+            representatives
+        };
+        for &summand in &pairing_indices[..2] {
+            priorities.extend((0..rep_stride).map(|index| {
+                (representative_offset + summand * rep_stride + index + 1) as u32
+            }));
+        }
+        for &summand in &pairing_indices[..2] {
+            priorities.extend((0..frobenius_width).map(|index| {
+                (frobenius_offset + summand * frobenius_width + index + 1) as u32
+            }));
+        }
+        for &summand in &pairing_indices[2..] {
+            priorities.extend((0..rep_stride).map(|index| {
+                (representative_offset + summand * rep_stride + index + 1) as u32
+            }));
+        }
+        for &summand in &pairing_indices[2..] {
+            priorities.extend((0..frobenius_width).map(|index| {
+                (frobenius_offset + summand * frobenius_width + index + 1) as u32
+            }));
+        }
+    } else {
+        priorities.extend((0..representative_variables).map(|index| {
+            (representative_offset + index + 1) as u32
+        }));
+        priorities.extend(
+            (0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32),
+        );
+    }
     priorities.extend((0..root_selector_variables).map(|index| {
         (root_selector_offset + index + 1) as u32
     }));
