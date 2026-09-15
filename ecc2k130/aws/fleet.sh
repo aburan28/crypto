@@ -6,6 +6,7 @@
 #   ./fleet.sh up 64 --on-demand 8   64 GPUs of which 8 are on-demand
 #   ./fleet.sh scale 128             change the target
 #   ./fleet.sh status                instances, their types and spot/on-demand
+#   ./fleet.sh policy                re-apply TYPES to a running group (BACKEND=asg)
 #   ./fleet.sh down                  delete the fleet and terminate its instances
 #
 # The fleet is `maintain`: an interrupted spot instance is replaced, the new
@@ -65,6 +66,36 @@ asgExists() {
          --query 'length(AutoScalingGroups)' --output text)" != 0 ]
 }
 
+# The instance types and the spend cap, as one mixed-instances policy.  Which
+# sizes are worth asking for is a function of the spot quota, and that changes
+# under a campaign, so `policy` re-applies this to a running group: instances
+# already up are left alone and the next launch uses the new set.
+asgPolicy() {
+    ondemand=$1
+    overrides="["
+    perInstance=
+    for t in ${TYPES//,/ }; do
+        g=$(gpusOf "$t")
+        if [ -n "${MAX_SPOT_PER_GPU_HOUR:-}" ] && [ -n "$perInstance" ] && [ "$g" != "$perInstance" ]; then
+            echo "MAX_SPOT_PER_GPU_HOUR needs every type in TYPES to have the same GPU count when BACKEND=asg" >&2
+            exit 1
+        fi
+        perInstance=$g
+        overrides="$overrides{\"InstanceType\":\"$t\",\"WeightedCapacity\":\"$g\"},"
+    done
+    overrides="${overrides%,}]"
+    dist="{\"OnDemandBaseCapacity\":$ondemand,\"OnDemandPercentageAboveBaseCapacity\":0,\"SpotAllocationStrategy\":\"price-capacity-optimized\""
+    if [ -n "${MAX_SPOT_PER_GPU_HOUR:-}" ]; then
+        # SpotMaxPrice is per instance, so a per-GPU cap is only well defined
+        # while every type in TYPES holds the same number of GPUs.
+        dist="$dist,\"SpotMaxPrice\":\"$(python3 -c "print($MAX_SPOT_PER_GPU_HOUR*$perInstance)")\""
+    fi
+    dist="$dist}"
+    echo "{\"LaunchTemplate\":{\"LaunchTemplateSpecification\":
+        {\"LaunchTemplateName\":\"$LT\",\"Version\":\"\$Latest\"},\"Overrides\":$overrides},
+        \"InstancesDistribution\":$dist}"
+}
+
 cmd=${1:-status}
 
 if [ "$BACKEND" = asg ]; then
@@ -83,38 +114,22 @@ if [ "$BACKEND" = asg ]; then
             echo "group $ASG already exists; use scale" >&2
             exit 1
         fi
-        overrides="["
-        for t in ${TYPES//,/ }; do
-            overrides="$overrides{\"InstanceType\":\"$t\",\"WeightedCapacity\":\"$(gpusOf "$t")\"},"
-        done
-        overrides="${overrides%,}]"
-        dist="{\"OnDemandBaseCapacity\":$ondemand,\"OnDemandPercentageAboveBaseCapacity\":0,\"SpotAllocationStrategy\":\"price-capacity-optimized\""
-        if [ -n "${MAX_SPOT_PER_GPU_HOUR:-}" ]; then
-            # SpotMaxPrice is per instance, so a per-GPU cap is only well
-            # defined while every type in TYPES holds the same number of GPUs.
-            perInstance=
-            for t in ${TYPES//,/ }; do
-                g=$(gpusOf "$t")
-                if [ -n "$perInstance" ] && [ "$g" != "$perInstance" ]; then
-                    echo "MAX_SPOT_PER_GPU_HOUR needs every type in TYPES to have the same GPU count when BACKEND=asg" >&2
-                    exit 1
-                fi
-                perInstance=$g
-            done
-            dist="$dist,\"SpotMaxPrice\":\"$(python3 -c "print($MAX_SPOT_PER_GPU_HOUR*$perInstance)")\""
-        fi
-        dist="$dist}"
         aws autoscaling create-auto-scaling-group \
             --auto-scaling-group-name "$ASG" \
             --min-size 0 --max-size "$total" --desired-capacity "$total" \
             --health-check-type EC2 \
             --vpc-zone-identifier "$(defaultSubnets | tr '[:space:]' ',' | sed 's/,$//')" \
-            --mixed-instances-policy "{\"LaunchTemplate\":{\"LaunchTemplateSpecification\":
-                {\"LaunchTemplateName\":\"$LT\",\"Version\":\"\$Latest\"},\"Overrides\":$overrides},
-                \"InstancesDistribution\":$dist}" \
+            --mixed-instances-policy "$(asgPolicy "$ondemand")" \
             --tags "Key=Project,Value=$STACK,PropagateAtLaunch=true" \
                    "Key=Name,Value=$STACK-worker,PropagateAtLaunch=true"
         echo "group $ASG: target $total GPU(s), $ondemand on-demand, types $TYPES"
+        ;;
+    policy)
+        ondemand=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
+                   --query 'AutoScalingGroups[0].MixedInstancesPolicy.InstancesDistribution.OnDemandBaseCapacity' --output text)
+        aws autoscaling update-auto-scaling-group --auto-scaling-group-name "$ASG" \
+            --mixed-instances-policy "$(asgPolicy "$ondemand")"
+        echo "group $ASG now asks for types $TYPES; running instances are left as they are"
         ;;
     scale)
         total=${2:?number of GPUs}
