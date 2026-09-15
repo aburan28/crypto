@@ -40,7 +40,8 @@
     "n53_planted_edge_free_witness_compact": "Compact planted n53 group-valid edge-free witness retained (valid=1, invalid_lifts=0, pair_table=0).",
     "binaryrep_plus_fieldbits_n19": "Structural combo KIC_ORBIT_REP_ENCODING=binary + field_bits_then_pair_then_pair: planted/unrestricted n13 SAT (pair_table=0); unrestricted n19 still 0 models @80k (vars 3881 vs one_hot 3889). Does not close cliff.",
     "prime_j0_16bit_iv": "Independent 3-shot j0_known_answer_bits 16: PASS_KNOWN_ANSWER_AGREES_RHO. IC agrees rho and truth; IC wall >> rho (not vs_rho crossover). No ledger promotion.",
-    "reusable_pair_support_certificate": "Added KIC_ORBIT_PAIR_SUPPORT_CERT / _CERT_OUT: reusable compressed exceptional relative-Frobenius pair-support certificates with blake3 digest check. pair_table_entries=0, edge_selectors=0. Planted n13/n19/n53 remain SAT+group-valid on reload. n53 install scan_ms 47994\u21920 (expand ~3ms). Not unrestricted n19 win, not vs_rho, not ledger promotion."
+    "reusable_pair_support_certificate": "Added KIC_ORBIT_PAIR_SUPPORT_CERT / _CERT_OUT: reusable compressed exceptional relative-Frobenius pair-support certificates with blake3 digest check. pair_table_entries=0, edge_selectors=0. Planted n13/n19/n53 remain SAT+group-valid on reload. n53 install scan_ms 47994\u21920 (expand ~3ms). Not unrestricted n19 win, not vs_rho, not ledger promotion.",
+    "multi_target_cert_harvest": "Reusable pair-support certs amortize across multi-seed planted harvests: n19 seeds1-5 all SAT group-valid edge-free with identical digest and scan_ms=0; n53 seeds1-3 likewise. n13 natural seeds1-5 stay edge-free+cert-loaded; hit-rate recorded without promotion."
   },
   "rungs": [
     {
@@ -1041,8 +1042,19 @@
       "reload_scan_ms": 0.0,
       "evidence_class": null,
       "note": "certificate reload preserves planted group-valid edge-free extraction"
+    },
+    {
+      "mode": "multi_target_cert_harvest",
+      "n19_planted_seeds": 5,
+      "n19_group_valid": 5,
+      "n53_planted_seeds": 3,
+      "n53_group_valid": 3,
+      "n13_natural_seeds": 5,
+      "n13_natural_hits": 0,
+      "pair_table_entries": 0,
+      "ledger_promotion": false
     }
   ],
-  "next": "Reusable pair-support certificates land without edge tables. Unrestricted n19 cliff still open. Next: use certs across multi-target harvests / expose positive regular support without joins, or continue non-promotion IVs. Keep full S3 for planted n53.",
-  "updated_at": "2026-09-15T15:30:14Z"
+  "next": "Cert-backed multi-target planted harvests work edge-free through n53. Still need unrestricted n19 structural breakthrough or positive regular-support without joins. No ledger promotion.",
+  "updated_at": "2026-09-15T15:44:28Z"
 }
