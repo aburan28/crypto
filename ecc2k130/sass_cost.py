@@ -15,14 +15,23 @@ one:
     37.7 LOP3 occupy the integer pipe.  Counting it as one instruction, as
     THROUGHPUT-30B.md's budget does, understates the multiplier ten-fold.
 
-The two pipes are reported apart, because they overlap: a kernel spends
-max(alu/LOP3 rate, clmad/clmad rate), not the sum.  At the audited preset the
-walk is near the integer pipe and about half way up the carryless unit, so
-removing logic pays and spending a clmad to remove a lot of logic can pay too.
+The two pipes are reported apart because they overlap: a kernel spends
+max(alu, clmad) on them, not the sum.  Which one binds is not this script's
+to decide, and the pure-stream rates above must not be used to decide it --
+an independent LOP3 stream reaches issue rates a walk full of dependencies
+cannot, so dividing by 12.563 T flatters the kernel.  Nsight Compute is the
+authority: at the audited preset it reports the ALU pipe at 87.3% and the
+FP64 pipe that carries clmad at 51.4%, so the walk is ALU-bound with
+carryless headroom.
+
+Read the pipe lines below as marginal exchange rates, not as headroom.  What
+they support is the trade: removing a percent of the ALU column is worth
+about a percent of throughput while the ALU pipe binds, and a clmad bought
+with 38 logic ops pays until the carryless unit catches up.
 
     ./sass_cost.py                       # per-routine SASS, shipping preset
     ./sass_cost.py --update              # weighted into one scalar update
-    ./sass_cost.py --rate 5.022 --sms 82 # what that leaves of each pipe
+    ./sass_cost.py --rate 5.022 --sms 82 # what each pipe then costs per update
 """
 import argparse
 import os
@@ -234,16 +243,18 @@ def main():
         print("   %-44s %7.0f  %5.1f%%" % (label, v, 100 * v / alu))
 
     if a.rate:
-        print("\n--- what that leaves of each pipe, at %.3f B updates/s on %d SMs ---"
-              % (a.rate, a.sms))
+        print("\n--- each pipe at %.3f B updates/s on %d SMs ---" % (a.rate, a.sms))
         aluUse = a.rate * 1e9 * alu
         clmUse = a.rate * 1e9 * clm
-        print("integer pipe : %7.2f T slots/s of %5.2f T  (%3.0f%%)"
-              % (aluUse / 1e12, LOP3_RATE / 1e12, 100 * aluUse / LOP3_RATE))
-        print("carryless    : %7.2f T clmad/s of %5.3f T  (%3.0f%%)"
-              % (clmUse / 1e12, CLMAD_RATE / 1e12, 100 * clmUse / CLMAD_RATE))
-        print("one clmad is worth %.0f logic ops; the walk can afford more of them"
-              " only while the carryless unit has headroom" % CLMAD_PRICE)
+        print("integer pipe : %7.2f T slots/s, %5.1f%% of an independent LOP3 stream"
+              % (aluUse / 1e12, 100 * aluUse / LOP3_RATE))
+        print("carryless    : %7.2f T clmad/s, %5.1f%% of an independent clmad stream"
+              % (clmUse / 1e12, 100 * clmUse / CLMAD_RATE))
+        print("\nThese fractions are not headroom: an independent stream issues at a rate"
+              "\na dependent walk does not reach.  Nsight Compute measures the pipes"
+              "\nthemselves -- ALU 87.3%, FP64 (clmad) 51.4% at this preset -- so the ALU"
+              "\ncolumn is what binds, and one clmad is worth %.0f logic ops until the"
+              "\ncarryless unit closes that gap." % CLMAD_PRICE)
 
 
 if __name__ == "__main__":
