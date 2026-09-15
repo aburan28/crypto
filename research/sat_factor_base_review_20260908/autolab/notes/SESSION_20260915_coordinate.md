@@ -10,7 +10,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Rho challenge spot instances (`bc-01a0a48f…`) | G7e ASG / ECC2K-130 DP collection | RUNNING — leave AWS alone |
 | Experiment coordination (`bc-01a0a4b9…`) | IC boundary autolab + priority probes | this session |
 
-### Rho campaign snapshot (read-only, 2026-09-15T17:49:23Z)
+### Rho campaign snapshot (read-only, 2026-09-15T18:00:18Z)
 
 - ASG `ecc2k130-g7`: desired/InService **6/6**
 - ASG `ecc2k130-workers`: desired **4**, InService **0**, instances **0**
@@ -25,16 +25,16 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | Beat / probe | Result |
 |---|---|
 | planted n53 full-S3 + cert | SAT, pair_table=0 |
-| pair_sum_trie + relative-positive combo | planted-unit SAT; unrestricted UNKNOWN |
-| **CMS5 on combo** | unrestricted INDETERMINATE @150k; planted SATISFIABLE |
-| **j0-16 3-shot IV redraw** | PASS_KNOWN_ANSWER_AGREES_RHO (3/3) |
-| **relation_yield n19 census t128** | coverage mean≈0.34 max=1.0 (24 identities) |
-| n31 third-seed FFD | stable; x found 4/4 |
+| **intermediates_then_pair + pair_sum + relative-positive** | **n19 unrestricted/natural SAT group-valid (draft)** |
+| ablations (drop either lever) | UNKNOWN @80k |
+| n23 unrestricted same stack | UNKNOWN @100k |
+| CMS5 on prior combo (pair_then_pair) | INDETERMINATE @150k |
+| j0-16 3-shot IV | PASS |
 
 ## Priority signals
 
 1. Edge-free planted n53 stands under full S3.
-2. n19 unrestricted cliff persists under internal CDCL and external CMS at tested budgets.
+2. n19 unrestricted cliff **draft-broken** under intermediates_then_pair+pair_sum+relative-positive (needs external replay); n23 still open.
 3. Keep full S3 for planted n≥19 / n53 (lazy unsuitable).
 4. Skip n37/n53 symmetrised mid-dim (blocked).
 
@@ -42,6 +42,6 @@ Claim boundary: drafts ≠ ledger promotion ≠ vs_rho ≠ key recovery.
 
 ## Next ticks
 
-1. Deeper non-domain n19 rewrite, or push factor_base/relation_yield CI gates / vs_rho wall beats.
-2. Keep full S3 for planted n53 edge-free relations.
+1. Independent CMS/external replay of the n19 intermediates_then_pair win; push n23/n53 budgets.
+2. Keep claim hygiene fail-closed — draft ≠ ledger promotion ≠ vs_rho.
 3. Never mutate AWS from this agent.

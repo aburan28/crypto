@@ -2199,14 +2199,23 @@ fn encode_balanced_s5_frobenius_orbits(
     // `pair_then_pair_reversed` flips that order. Both keep pair_table_entries=0.
     // `field_bits_then_pair_then_pair` decides the 6·n Semaev field bits first,
     // then the same pair-then-pair orbit schedule (still pair_table_entries=0).
+    // `intermediates_then_pair_then_pair` decides only the Semaev intermediate
+    // wires u/v (offsets 4n/5n — the pair_sum_trie domain) before the pair schedule.
     let branch_order = std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
     let mut priorities: Vec<u32> = Vec::new();
     let pair_then_pair_family = matches!(
         branch_order.as_str(),
-        "pair_then_pair" | "pair_then_pair_reversed" | "field_bits_then_pair_then_pair"
+        "pair_then_pair"
+            | "pair_then_pair_reversed"
+            | "field_bits_then_pair_then_pair"
+            | "intermediates_then_pair_then_pair"
     );
     if branch_order == "field_bits_then_pair_then_pair" {
         priorities.extend(1..=problem_variables as u32);
+    } else if branch_order == "intermediates_then_pair_then_pair" {
+        // u = vars [4n+1 .. 5n], v = vars [5n+1 .. 6n]
+        priorities.extend(u.iter().copied());
+        priorities.extend(v.iter().copied());
     }
     if pair_then_pair_family {
         let rep_stride = if binary_representatives {

@@ -62,7 +62,8 @@
     "n31_third_seed_ffd_stability": "Third-seed n31 m=2 dim16 F4 panel (seed=424242, targets=4, --no-sat): FFD stable (x=3,sym=4), gate ok, 0 inconclusive. x-chained found 4/4 (effort 4409); sym found 1 / refuted 3 (effort 4095). Strengthens distributional FFD/gate stability vs seeds 0x5EED and 66142. Not ledger promotion.",
     "cms_pair_sum_relative_positive_combo": "CryptoMiniSat5 on pair_sum_trie+relative-positive+nogoods n19 (pair_table=0, 7415 vars, 1159 native xors): unrestricted planted-target INDETERMINATE @150k conflicts (~16s). Planted-unit same encoding SATISFIABLE. Cliff is not an internal-solver-only artifact for this combo; not ledger promotion.",
     "j0_16bit_iv_redraw": "Independent 3-shot redraw of j0_known_answer_bits 16: all PASS_KNOWN_ANSWER_AGREES_RHO (ic_ok/rho_ok/agrees/truth). IC wall >> rho (not vs_rho crossover). No ledger promotion.",
-    "relation_yield_n19_census_iv": "Independent koblitz factor_base yield census n=19 a=1 targets=128: 24 identities, coverage mean=0.340 max=1.000 min=0.000, 5 complete. Distributional probe only; not ledger promotion."
+    "relation_yield_n19_census_iv": "Independent koblitz factor_base yield census n=19 a=1 targets=128: 24 identities, coverage mean=0.340 max=1.000 min=0.000, 5 complete. Distributional probe only; not ledger promotion.",
+    "intermediates_then_pair_n19_cliff_break": "NEW KIC_ORBIT_BRANCH_ORDER=intermediates_then_pair_then_pair + pair_sum_trie + relative-positive + nogoods: internal CDCL finds unrestricted planted-target n19 SAT group-valid on seeds 1/2/3 (conflicts 44260/74896/17323; seed1 replay identical) and natural n19 seed1 SAT @47160. pair_table=0; valid_x=1; invalid_lifts=0. Ablations: drop positive OR drop intermediates-branch \u2192 UNKNOWN @80k. n23 unrestricted UNKNOWN @100k. CMS5 on seed1 CNF (no branch heuristic in DIMACS) INDETERMINATE @200k \u2014 cliff break is search-heuristic+encoding, not a short external proof. DRAFT only; NOT vs_rho; NOT ledger promotion."
   },
   "rungs": [
     {
@@ -1385,8 +1386,35 @@
       "coverage_mean": 0.3404947916666667,
       "coverage_max": 1.0,
       "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/relation_yield_koblitz_n19_20260915_iv/yield_iv_receipt.json"
+    },
+    {
+      "n": 19,
+      "mode": "intermediates_then_pair_unrestricted_seed1",
+      "verdict": "SAT",
+      "conflicts": 44260,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/unrestricted_n19_80k.json"
+    },
+    {
+      "n": 19,
+      "mode": "intermediates_then_pair_natural_seed1",
+      "verdict": "SAT",
+      "conflicts": 47160,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/natural_n19_seed1_100k.json"
+    },
+    {
+      "n": 23,
+      "mode": "intermediates_then_pair_unrestricted_100k",
+      "verdict": "UNKNOWN",
+      "conflicts": 100000,
+      "evidence": "research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/intermediates_then_pair_branch/unrestricted_n23_100k.json"
     }
   ],
-  "next": "CMS confirms combo cliff @150k; j0-16 3-shot IV PASS; n19 yield census shows nontrivial coverage. Next: deeper non-domain n19 rewrite, or push factor_base/relation_yield CI gates / vs_rho wall beats. Keep full S3 for planted n53. No ledger promotion. No AWS mutations.",
+  "next": "n19 unrestricted draft-SAT under intermediates_then_pair+pair_sum+relative-positive (internal CDCL); CMS still INDETERMINATE @200k. Next: strengthen external witness / push n23; keep fail-closed hygiene. No ledger promotion. No AWS mutations.",
   "updated_at": "2026-09-15T17:09:46Z"
 }
