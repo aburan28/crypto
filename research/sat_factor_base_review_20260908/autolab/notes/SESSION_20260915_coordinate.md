@@ -26,7 +26,7 @@ Public synthetic / known-answer only. No ledger promotion. No AWS mutations
 | planted orbit S5 n13→53 (full S3) | edge-free SAT; +parallel nogoods at n53 |
 | factor_base n53 | independently replayed; **no ledger promotion** |
 | unrestricted n19 cliff | persists under eta/branch/phase/karatsuba/natural |
-| lazy pair roots planted | n13 SAT; **n23 UNKNOWN @100k**; n53 abort >8min |
+| lazy pair roots planted | n13 SAT; **n23 UNKNOWN @100k** (full-S3 SAT @61); n53 abort >8min |
 | **karatsuba mul** | planted/unrestricted n13 OK; **n19 still 0 @80k** (pair_table=0) |
 | **natural targets** | n13 0@40k / n19 0@60k despite expected_decomposable |
 | **n53 planted reconfirm** | valid=1, invalid_lifts=0, pair_table=0, conflicts=3631 |
