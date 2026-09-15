@@ -39,7 +39,15 @@
 
 set -euo pipefail
 cd "$(dirname "$0")"
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+# AWS_REGION wins over AWS_DEFAULT_REGION in the CLI, so pin both: a group
+# created in the region a leftover variable names, rather than the one asked
+# for, spends the wrong quota and is invisible to the operator watching the
+# other region (see the same note in infra.sh).
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-${AWS_REGION:-us-west-2}}
+if [ -n "${AWS_REGION:-}" ] && [ "$AWS_REGION" != "$AWS_DEFAULT_REGION" ]; then
+    echo "AWS_REGION=$AWS_REGION ignored; AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION is what this run uses" >&2
+fi
+export AWS_REGION=$AWS_DEFAULT_REGION
 STACK=${STACK:-ecc2k130}
 LT=$STACK-worker
 TYPES=${TYPES:-g7e.2xlarge,g7e.4xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge}
