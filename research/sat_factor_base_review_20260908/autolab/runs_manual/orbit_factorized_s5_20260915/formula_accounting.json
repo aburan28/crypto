@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "kind": "orbit_factorized_s5_formula_memory_accounting",
-  "updated_at": "2026-09-15T14:20:28Z",
+  "updated_at": "2026-09-15T14:44:57Z",
   "claim_boundary": "Public-synthetic orbit-factorized S5 encoding size/accounting only. pair_table_entries=0. Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery. S5 planted eta=1/2 factor-base sizes are not the factor_base n53 control-plane F=19928 construction.",
   "rows": [
     {
@@ -49,6 +49,32 @@
       "exceptional_relative_states": 376,
       "nogood_scan_ms": 52336.546083,
       "nogood_expand_ms": 3.227416
+    },
+    {
+      "n": 19,
+      "config": "one_hot+lazy_pair_roots",
+      "variables": 8073,
+      "ordinary_clauses": 17865,
+      "native_xor_rows": 2225,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 76,
+      "orbit_columns": 2,
+      "encoding_ms": 1.208459,
+      "base_ms": 19.684459
+    },
+    {
+      "n": 53,
+      "config": "one_hot+lazy_pair_roots",
+      "variables": 58311,
+      "ordinary_clauses": 136217,
+      "native_xor_rows": 11821,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "factor_base_points": 39856,
+      "orbit_columns": 376,
+      "encoding_ms": 19.881667,
+      "base_ms": 137648.43612499998
     }
   ],
   "notes": [
@@ -57,6 +83,8 @@
     "Planted n53 with pair_then_pair+parallel nogoods: SAT, valid_x_tuples=1, invalid_group_lifts=0, pair_table_entries=0.",
     "Lazy-pair-roots+nogoods at n53 planted still CDCL-heavy under 200k conflicts (aborted after >13min); prefer full S3 over half-trace selectors.",
     "n19 eta=1/16 yields orbit_columns=1, factor_base_points=38 vs eta=1/2 columns=2 points=76; pair_table=0 either way.",
-    "n17 is not constructible for a=0 in this KoblitzCurve table despite CLI allow-list."
+    "n17 is not constructible for a=0 in this KoblitzCurve table despite CLI allow-list.",
+    "Lazy pair-root encoding roughly doubles vars/clauses vs full factorized S3 at same eta; pair_table stays 0.",
+    "Planted lazy path fails to recover models by n23 under 100k conflicts; full S3 planted remains easy."
   ]
 }

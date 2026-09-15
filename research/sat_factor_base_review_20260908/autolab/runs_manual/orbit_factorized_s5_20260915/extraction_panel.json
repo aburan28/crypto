@@ -28,7 +28,9 @@
     "smaller_eta_n19": "eta 1/16 shrinks to 1 orbit col / 38 pts; planted SAT; unrestricted still 0 models @80k phase4",
     "shift_then_reps": "KIC_ORBIT_BRANCH_ORDER=shift_then_reps: n13 finds models; n19 still 0 @80k (eta 1/2 and 1/16)",
     "n23_rung": "planted n23 SAT pair_table=0; unrestricted UNKNOWN 0 models @60k phase4",
-    "n17_note": "n=17 admitted in CLI assert but KoblitzCurve::new(a=0,17) fails \u2014 not a usable rung here"
+    "n17_note": "n=17 admitted in CLI assert but KoblitzCurve::new(a=0,17) fails \u2014 not a usable rung here",
+    "lazy_pair_roots_planted": "n13 planted lazy+nogoods SAT (1798 conflicts). n23 planted lazy+nogoods UNKNOWN 0 models @100k while full-S3 planted SAT @61 conflicts. n53 planted lazy search aborted >8min wall. Prefer full S3 for group-valid planted relations.",
+    "lazy_formula_accounting": "lazy roughly doubles formula size (n19: 3889\u21928073 vars; n53: ~26825\u219258311 vars) with pair_table=0"
   },
   "rungs": [
     {
@@ -673,8 +675,81 @@
       "pair_table_entries": 0,
       "phase_restart_shots_used": 4,
       "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 13,
+      "mode": "planted_lazy_nogoods",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "conflicts": 1798,
+      "variables": 4015,
+      "ordinary_clauses": 8605,
+      "pair_table_entries": 0,
+      "algebra_encoding": "lazy_pair_roots_plus_factorized_final_s3_over_frobenius_orbits",
+      "solve_ms": 447.883708,
+      "evidence_class": null
+    },
+    {
+      "n": 23,
+      "mode": "planted_lazy_nogoods",
+      "verdict": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "conflicts": 100000,
+      "variables": 11445,
+      "ordinary_clauses": 26161,
+      "pair_table_entries": 0,
+      "algebra_encoding": "lazy_pair_roots_plus_factorized_final_s3_over_frobenius_orbits",
+      "solve_ms": 129728.37887500001,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "n": 23,
+      "mode": "planted_fulls3_nogoods_control",
+      "verdict": "SAT",
+      "valid_x_tuples": 1,
+      "conflicts": 61,
+      "variables": 5369,
+      "ordinary_clauses": 13373,
+      "pair_table_entries": 0,
+      "algebra_encoding": "factorized_s5_over_frobenius_orbit_factor_base",
+      "solve_ms": 26.596125,
+      "evidence_class": null
+    },
+    {
+      "n": 19,
+      "mode": "stats_lazy_roots",
+      "verdict": "STATS",
+      "valid_x_tuples": null,
+      "conflicts": null,
+      "variables": 8073,
+      "ordinary_clauses": 17865,
+      "pair_table_entries": 0,
+      "algebra_encoding": "lazy_pair_roots_plus_factorized_final_s3_over_frobenius_orbits",
+      "solve_ms": null,
+      "evidence_class": null
+    },
+    {
+      "n": 53,
+      "mode": "stats_lazy_roots",
+      "verdict": "STATS",
+      "valid_x_tuples": null,
+      "conflicts": null,
+      "variables": 58311,
+      "ordinary_clauses": 136217,
+      "pair_table_entries": 0,
+      "algebra_encoding": "lazy_pair_roots_plus_factorized_final_s3_over_frobenius_orbits",
+      "solve_ms": null,
+      "evidence_class": null
+    },
+    {
+      "n": 53,
+      "mode": "planted_lazy_search_abort",
+      "verdict": "ABORTED",
+      "note": "CDCL still running >8min after base; not completed under tested budget",
+      "pair_table_entries": 0,
+      "evidence_class": "censored_operational_observation"
     }
   ],
-  "next": "Unrestricted cliff starts by n19 (n13 open, n23 also closed under tested budgets). Smaller eta and shift_then_reps do not unlock n19. Next: encoding/decision changes beyond branch polarity, or accept censored cliff and push other ledger beats without promotion.",
-  "updated_at": "2026-09-15T14:20:28Z"
+  "next": "Lazy pair roots remain search-hostile by n23 even with planted units; keep full S3 for edge-free group-valid n53 relations. Unrestricted n19 cliff still open. No ledger promotion.",
+  "updated_at": "2026-09-15T14:44:57Z"
 }
