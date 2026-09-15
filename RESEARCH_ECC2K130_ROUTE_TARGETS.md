@@ -60,7 +60,7 @@ flat and is **engineering** by §3, not an advance.
 **The scale, pre-registered.** At `n = 131`, `m = 3`,
 `l = ⌈(n + log₂ m!)/m⌉ = 45`:
 
-| oracle per-call `Q` | `α = q/l` | `log₂ Λ` | `log₂` total | × rho |
+| oracle per-call `Q` | `q/l` at `l = 45` | `log₂ Λ` | `log₂` total | × rho |
 |---|---:|---:|---:|---:|
 | `C(\|F\|,2) ≈ 2^89` — enumeration | 1.98 | 1.58 | 132.58 | **2^71.78** |
 | …with the Frobenius collapse | 1.98 | −5.45 | 125.55 | 2^64.74 |
@@ -69,8 +69,14 @@ flat and is **engineering** by §3, not an advance.
 | `2^{0.5 l}` | 0.50 | −64.92 | 66.08 | 2^5.28 |
 | `2^{17.2}` | **0.38** | −70.20 | 60.80 | **1** |
 
+The middle column is the **point ratio** `q/l` evaluated at `l = 45`,
+not the fitted exponent: `log₂ C(|F|,2)` has point ratio `1.978` at
+`l = 45` but asymptotic slope exactly `2`. X1 fits the slope, so its
+thresholds are quoted against `2`, and the two numbers must not be read
+as the same quantity.
+
 Two things to take from this table before running anything. The
-`α = 1.98` row reproduces the background note's published `2^132.58`
+enumeration row reproduces the background note's published `2^132.58`
 exactly, which is the check that this frame is the same one. And **even
 an oracle linear in the factor-base size — already a major theoretical
 result — leaves `2^27.78 ×` rho.** Nothing measured below can be
@@ -115,16 +121,19 @@ where a crossbred space exists (see X2), at `m = 3`, recording total
 `word_ops + transform_word_ops + filter_word_ops + solve_row_ops` per
 decomposition call, for the best `(D, k)` at each rung.
 
-**Primary metric.** The least-squares slope `α` of `log₂ Q` against `l`
-over four or more rungs.
+**Primary metric.** The **ratio to the boundary**,
+`Q / C(|F|, m−1)`, fitted as a least-squares slope of
+`log₂(Q / C(|F|, m−1))` against `l` over four or more rungs. That slope
+is `α − 2` and its threshold is zero, which is what makes it a falsifier
+rather than a judgement call.
 
-**Falsifier.** `α ≥ 1.9` over four or more rungs → Crossbred cannot move
+**Falsifier.** Slope `≥ −0.1` (i.e. `α ≥ 1.9`) → Crossbred cannot move
 `Λ`, and Route 1 closes with a number rather than an impression.
 
-**Success condition.** `α ≤ 1.5` with every call's answer cross-checked
-against matrix-F4 on the same system, which by the table above would be
-an **advance** by §3 — the first thing in this repository to bend the
-oracle exponent.
+**Success condition.** Slope `≤ −0.5` (`α ≤ 1.5`) with every call's
+answer cross-checked against matrix-F4 on the same system, which by the
+table above would be an **advance** by §3 — the first thing in this
+repository to bend the oracle exponent.
 
 **Inadmissible.**
 - Choosing `(D, k)` per instance with hindsight. Fix the selection rule
@@ -195,12 +204,27 @@ above, pricing **every** phase: setup, target generation, encoding,
 failed attempts, solving, lifting, verification, relation-matrix work
 and final scalar recovery.
 
-**Primary metric.** `Λ` over the ladder, with the least-squares slope of
-`log₂(total)` against `n`.
+**Primary metric.** The **ratio to the floor**, `Λ · n / m`, over the
+ladder — not a raw slope. §3 says progress is the ratio, and a raw
+slope does not measure it here: a method that tracks the `Λ = m/n` floor
+*exactly* — a constant-factor oracle riding the known Frobenius saving,
+which is pure engineering — already produces a `log₂(total)`-versus-`n`
+slope of
 
-**Falsifier for "advance".** Slope `≥ 0.95` → the 350× is a constant,
-the class is **engineering**, and it should be labelled so on the
-scoreboard rather than reported as progress.
+| ladder | slope when `Λ = m/n` exactly |
+|---|---:|
+| end-to-end, `n = 11 … 37` | 0.9333 |
+| full E1 ladder | 0.9553 |
+| faithful rungs (13, 19, 59) | 0.9549 |
+
+so any fixed slope threshold near `0.95` returns a different verdict
+depending on which rungs are used. `Λ · n / m` is `1` on the floor by
+construction, at every rung, on every subset.
+
+**Falsifier for "advance".** `Λ · n / m` flat in `n` — the 350× is a
+constant, the class is **engineering**, and it is labelled so on the
+scoreboard rather than reported as progress. An advance requires
+`Λ · n / m` *falling* with `n`, fitted over four or more rungs.
 
 **Inadmissible.** Leaving linear algebra unpriced. That is the mistake
 `AGENTS.md` §5 records from the residual-walk thread, where a `2^96`
