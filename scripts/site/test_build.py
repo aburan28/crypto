@@ -282,42 +282,65 @@ class BuildTests(unittest.TestCase):
         self.assertNotIn("min-width", match.group(1))
 
     # ---- the walk-forest figure ------------------------------------------
-    # docs/ecc2k130-status/walk-forest.svg is generated from the trails and
-    # corpus committed beside it.  These hold the published figure, the page's
-    # caption and the client's own records to one another.
+    # docs/ecc2k130-status/walk-forest.svg is generated from the sampled,
+    # hashed trails committed beside it: real ECC2K-130 walks the client
+    # made, replayed with its own kernel.  These hold the published figure,
+    # the page's caption, the endpoints the trails must land on and the
+    # scalar reference's replay to one another.
 
     def _forest(self):
         import walk_forest
         forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
-        corpus = walk_forest.read_corpus(os.path.join(FOREST_DIR, "forest.bin"))
+        corpus = walk_forest.read_corpus(os.path.join(FOREST_DIR, "forest.hashes"))
         return walk_forest, forest, corpus
 
-    def test_walk_forest_trails_end_on_their_corpus_records(self):
+    def test_walk_forest_is_sampled_from_the_challenge_curve(self):
+        walk_forest, forest, corpus = self._forest()
+        p = forest.params
+        self.assertEqual(p["curve"], "131")
+        self.assertEqual(p["mode"], "sample")
+        self.assertEqual(p["source"], "corpus")
+        self.assertEqual(p["hash"], "sha256-16")
+        # Every seed the sampler was given came from a client record, and
+        # every trail it kept ended on the orbit its record names.
+        self.assertEqual(int(p["checked"]), int(p["drawn"]))
+        self.assertEqual(int(p["drawn"]), len(forest.walks))
+        self.assertLessEqual(int(p["drawn"]), int(p["tried"]))
+        for steps in forest.steps:
+            self.assertLessEqual(steps, int(p["cap"]))
+        # Orbits are named, never shown: a 16-hex-digit name per node.
+        for seed, orbits in forest.walks:
+            for orbit in orbits:
+                self.assertRegex(orbit, r"^[0-9a-f]{16}$")
+
+    def test_walk_forest_trails_end_on_their_recorded_endpoints(self):
         walk_forest, forest, corpus = self._forest()
         self.assertEqual(walk_forest.bind_to_corpus(forest, corpus), len(forest.walks))
         self.assertEqual(len(corpus), len(forest.walks))
 
-    def test_walk_forest_agrees_with_the_clients_own_records(self):
-        # client-run1.bin is what ecc2k130-cpu itself wrote for the same
-        # run-id before its search solved the instance.  Every record of it
-        # for a lane the figure draws must name the orbit the drawn trail
-        # ends on; the header records how many the generator checked.
+    def test_walk_forest_kernel_replay_agrees_with_the_scalar_reference(self):
+        # reference-check.txt is the scalar reference's replay of the first
+        # records, hashed and sampled the same way (walk_forest.py
+        # --hash-trails).  The kernel's trails for those walks must match it
+        # orbit for orbit.
         walk_forest, forest, corpus = self._forest()
-        client = walk_forest.read_corpus(os.path.join(FOREST_DIR, "client-run1.bin"))
-        overlap = {seed: key for seed, key in client.items() if seed in corpus}
-        self.assertGreater(len(overlap), 0, "no client record falls among the drawn lanes")
-        for seed, key in overlap.items():
-            self.assertEqual(walk_forest.canon_hex(key), walk_forest.canon_hex(corpus[seed]), seed)
-        self.assertEqual(int(forest.params["checked"]), len(overlap))
-        self.assertEqual(forest.params["mode"], "generate")
+        reference = walk_forest.read_trails(os.path.join(FOREST_DIR, "reference-check.txt"))
+        self.assertGreater(len(reference.walks), 0)
+        self.assertEqual(reference.every, forest.every)
+        for (rseed, rorbits), (seed, orbits), rsteps, steps in zip(
+                reference.walks, forest.walks, reference.steps, forest.steps):
+            self.assertEqual(rseed, seed)
+            self.assertEqual(rsteps, steps, seed)
+            self.assertEqual(rorbits, orbits, seed)
 
     def test_walk_forest_figure_is_what_the_trails_render_to(self):
         walk_forest, forest, corpus = self._forest()
-        svg, _ = walk_forest.build(os.path.join(FOREST_DIR, "trails.txt"), os.path.join(FOREST_DIR, "forest.bin"))
+        svg, _ = walk_forest.build(os.path.join(FOREST_DIR, "trails.txt"), os.path.join(FOREST_DIR, "forest.hashes"))
         published = read(os.path.join(self.out, "status", "walk-forest.svg"))
         self.assertEqual(published, svg, "walk-forest.svg is stale: regenerate it (see walk-forest/README.md)")
-        # And the drawing carries exactly the forest: one circle per orbit,
-        # one filled circle per distinguished point, one edge per iteration.
+        # And the drawing carries exactly the forest: one circle per drawn
+        # orbit, one filled circle per distinguished point, one edge per
+        # stride.
         self.assertEqual(published.count("<circle "), len(forest.order))
         self.assertEqual(published.count('class="dp"'), len(forest.roots))
         plain = published.split('<g class="e">', 1)[1].split("</g>", 1)[0]
@@ -330,7 +353,12 @@ class BuildTests(unittest.TestCase):
         meetings = sum(1 for preds in forest.pred.values() if len(preds) > 1)
         expected = {
             "wf-walks": len(forest.walks),
+            "wf-tried": int(forest.params["tried"]),
+            "wf-cap": int(forest.params["cap"]),
+            "wf-every": forest.every,
             "wf-orbits": len(forest.order),
+            "wf-steps": walk_forest.total_steps(forest),
+            "wf-longest": max(forest.steps),
             "wf-dps": len(forest.roots),
             "wf-meetings": meetings,
             "wf-weight": int(forest.params["dp-weight"]),
@@ -338,8 +366,40 @@ class BuildTests(unittest.TestCase):
         for ident, value in expected.items():
             match = re.search(r'id="%s">([^<]+)<' % ident, page)
             self.assertIsNotNone(match, ident)
-            self.assertEqual(int(match.group(1)), value, ident)
+            self.assertEqual(int(match.group(1).replace(",", "")), value, ident)
         self.assertIn('src="./walk-forest.svg"', page)
+
+    # ---- the tool itself, on a curve small enough to check in the clear ---
+    # walk-forest/gf2-23/ is the GF(2^23) set: the client's own records for a
+    # run, the reference walk of that run's seed schedule, and its endpoints.
+    # It exercises the replay and generate modes where orbits can be
+    # committed in the clear.
+
+    def test_gf2_23_trails_end_on_their_corpus_records(self):
+        import walk_forest
+        small = os.path.join(FOREST_DIR, "gf2-23")
+        forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(small, "forest.bin"))
+        self.assertEqual(forest.params["mode"], "generate")
+        self.assertEqual(walk_forest.bind_to_corpus(forest, corpus), len(forest.walks))
+        self.assertEqual(len(corpus), len(forest.walks))
+
+    def test_gf2_23_trails_agree_with_the_clients_own_records(self):
+        # client-run1.bin is what ecc2k130-cpu itself wrote for the same
+        # run-id on this instance before its search solved the instance.
+        # Every record of it for a lane the trails cover must name the orbit
+        # the trail ends on; the header records how many the generator
+        # checked.
+        import walk_forest
+        small = os.path.join(FOREST_DIR, "gf2-23")
+        forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(small, "forest.bin"))
+        client = walk_forest.read_corpus(os.path.join(small, "client-run1.bin"))
+        overlap = {seed: key for seed, key in client.items() if seed in corpus}
+        self.assertGreater(len(overlap), 0, "no client record falls among the covered lanes")
+        for seed, key in overlap.items():
+            self.assertEqual(walk_forest.canon_hex(key), walk_forest.canon_hex(corpus[seed]), seed)
+        self.assertEqual(int(forest.params["checked"]), len(overlap))
 
     def test_internal_links_resolve(self):
         missing = []
