@@ -84,6 +84,15 @@ scalar iteration: B−1 forward multiplications, eight for inversion, and 4B−2
 reverse multiplications. Moving batch 32 to 64 saves only 1.52% of multiplication
 work. Larger effects reflect storage, cache, scheduling, or overhead.
 
+## Other parts
+
+Every figure above is `sm_120`. For the Ada parts behind EC2 g6 (L4) and g6e
+(L40S), `make bench-ada` measures on the instance and `make bench-ada-modal`
+through Modal; both carry the RTX PRO 6000 preset with `PACKED_CLMAD` as the
+one moved knob and workers left automatic, and both arms of that knob are
+measured rather than assumed. See [ADA-L4-L40S.md](ADA-L4-L40S.md), and
+[RTX-PRO4500.md](RTX-PRO4500.md) for the g7 part.
+
 ## Compiler and cache experiments
 
 Compile without renting a GPU:

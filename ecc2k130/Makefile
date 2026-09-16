@@ -396,6 +396,44 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
+# It is the RTX PRO 6000 preset with ONE knob moved: PACKED_CLMAD.  Every other
+# option here is a field-arithmetic or storage choice and transfers across GPU
+# models, which is why benchmarks/rtx-pro4500/run.sh reuses them verbatim.
+# CLMAD does not transfer: it is bought with a pipe balance measured only on
+# sm_120 (87.3% ALU against 51.4% on the carryless pipe), at a price of ~37.7
+# ALU ops per carryless op.  Ada divides its units differently and no
+# measurement in this tree covers it, so the default is the software path and
+# ADA_CLMAD=1 is the A/B arm benchmarks/ada/run.sh measures.  See ADA-L4-L40S.md.
+ADA_GPU ?= L40S
+ADA_CUDA ?= 13.3.1
+ADA_CLMAD ?= 0
+ADA_COMPACT_STATE ?= 1
+ADA_SHARED_SIGMA ?= 1
+ADA_ENV = ECC_GPU=$(ADA_GPU) ECC_CUDA_VERSION=$(ADA_CUDA) \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=$(ADA_CLMAD) ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(ADA_COMPACT_STATE) \
+                 ECC_PACKED_SHARED_SIGMA=$(ADA_SHARED_SIGMA) \
+                 ECC_PACKED_TOP_CLMAD=0
+
+# Workers stay automatic.  The RTX PRO 6000 preset's 385,024 is four waves on a
+# 188-SM part and has no claim on a 142-SM (L40S) or 58-SM (L4) one; automatic
+# scales with multiProcessorCount and the occupancy the build actually admits
+# (autoThreads in include/packedengine.cuh).
+bench-ada-modal:
+	$(ADA_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+# On the g6/g6e instance itself, where the part actually is.  Measures both
+# arms of the CLMAD question rather than assuming either.
+bench-ada:
+	bash benchmarks/ada/run.sh
+
 # The g7 fleet runs the RTX PRO 4500, for which this tree records no rate at
 # all; see RTX-PRO4500.md for the purchasing decision that waits on one. Unlike
 # the RTX PRO 6000 targets this does not go through Modal -- it runs on the EC2
@@ -418,4 +456,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean

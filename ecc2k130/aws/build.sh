@@ -17,6 +17,17 @@
 # 13.0; the toolkit and knobs here are the ones ../RTX-PRO6000.md measured at
 # 14.1 B iterations/s collecting.
 #
+# CLMAD is the one preset knob that does NOT travel with ARCHES.  NVIDIA
+# documents `clmad` for sm_80 and later, but the only reason this campaign pays
+# for it is a pipe balance measured on sm_120 alone: the walk sat at 87.3% ALU
+# and 51.4% on the pipe that carries clmad, so a carryless op that costs ~37.7
+# ALU ops was still the cheaper side (../include/packed131.h, ../TOP-CLMAD.md).
+# An Ada part (sm_89, EC2 g6/g6e) has a different mix of units, and nothing in
+# this tree has measured clmad there.  So CLMAD defaults to 1 only for a
+# Blackwell-only build and to 0 the moment a pre-Blackwell architecture is in
+# ARCHES; set CLMAD=1 explicitly to override, and measure before you do
+# (../ADA-L4-L40S.md, benchmarks/ada/run.sh).
+#
 # Typical use: run on the pilot g7e instance over ssh/SSM, where Docker and
 # the AWS CLI are present and the instance role can write to the bucket.
 
@@ -28,6 +39,15 @@ if [ -z "${BUCKET:-}" ]; then
     BUCKET=$STACK-$ACCOUNT
 fi
 ARCHES=${ARCHES:-120}                 # "120" or "89 90 120"
+# Default off as soon as anything older than Blackwell is requested; see above.
+case " $ARCHES " in
+    *" 80 "*|*" 86 "*|*" 89 "*|*" 90 "*) clmadDefault=0 ;;
+    *) clmadDefault=1 ;;
+esac
+CLMAD=${CLMAD:-$clmadDefault}
+if [ "$CLMAD" != 0 ] && [ "$CLMAD" != 1 ]; then
+    echo "CLMAD must be 0 or 1" >&2; exit 2
+fi
 CUDA_IMAGE=${CUDA_IMAGE:-nvidia/cuda:13.3.1-devel-ubuntu24.04}
 SRC=${1:?source: s3 key of a push_source.sh tarball, or a local ecc2k130 directory}
 
@@ -45,7 +65,7 @@ gencode=""
 for a in $ARCHES; do gencode="$gencode -gencode arch=compute_$a,code=sm_$a"; done
 knobs="BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
-PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=$CLMAD PACKED_STATE_TILE=256 \
 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1"
 # The fixtures must be built with the arithmetic they are meant to check, so
 # take their -D flags from the knobs above rather than from a second list.
@@ -83,13 +103,20 @@ for p in paths:
 print(h.hexdigest())
 EOF
 )
-short=${sha:0:16}
+# The source sha alone no longer identifies a build: ARCHES and CLMAD now vary
+# independently of it, and two builds that differ only in those would publish to
+# the same key and silently overwrite each other -- leaving campaign.json
+# pointing at a binary whose manifest describes the other one.  Bind the key to
+# everything that reaches the compiler.
+buildSha=$(printf '%s\n%s\n%s\n' "$sha" "$ARCHES" "$(echo $knobs)" | sha256sum | cut -d' ' -f1)
+short=${buildSha:0:16}
 binSha=$(sha256sum "$work/src/ecc2k130" | cut -d' ' -f1)
 hostSha=$(sha256sum "$work/src/ecc2k130-cpu" | cut -d' ' -f1)
-python3 - "$work/src" "$sha" "$binSha" "$ARCHES" "$SRC" "$knobs" <<'EOF' > "$work/manifest.json"
+python3 - "$work/src" "$sha" "$binSha" "$ARCHES" "$SRC" "$knobs" "$buildSha" <<'EOF' > "$work/manifest.json"
 import json, sys, time
-src, sha, binSha, arches, origin, knobs = sys.argv[1:]
-print(json.dumps({"sourceSha256": sha, "binarySha256": binSha, "arches": arches.split(),
+src, sha, binSha, arches, origin, knobs, buildSha = sys.argv[1:]
+print(json.dumps({"sourceSha256": sha, "buildSha256": buildSha,
+                  "binarySha256": binSha, "arches": arches.split(),
                   "origin": origin, "nvcc": open(src + "/build/nvcc.txt").read().strip(),
                   "knobs": " ".join(knobs.split()),
                   "builtAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
@@ -121,6 +148,6 @@ assert (c["batch"], c["blockThreads"], c["minBlocks"]) == geometry, \
 json.dump(c, open(path, "w"), indent=1, sort_keys=True)
 EOF
 aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors
-echo "published s3://$BUCKET/$prefix/ (source $sha)"
+echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
 echo "campaign.json now selects $prefix/ecc2k130"
 rm -rf "$work"
