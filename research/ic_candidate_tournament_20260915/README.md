@@ -91,7 +91,9 @@ Freeze:
 - The actual incumbent source tree, executable, dependencies and compiler flags.
   The workspace currently contains extensive uncommitted work; a commit hash alone
   is insufficient. Snapshot relevant tracked and untracked source into an isolated
-  build and hash it. Each candidate receives its own derivative snapshot.
+  build and hash it. Each candidate receives its own derivative snapshot. A
+  `.cargo/config.toml` in the source root (link mode, target features) is part
+  of the snapshot and its seal.
 - Curves, field representations, subgroup orders, generators, public targets,
   algorithm seeds, budgets and target counts. Store expected scalars separately.
 - The incumbent IC algorithm and a healthy Pollard-rho reference using the same
