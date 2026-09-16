@@ -47,6 +47,7 @@ PACKED_CLMAD ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
+PACKED_TOP_CLMAD ?= 0
 PACKED_STATE_TILE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
@@ -122,6 +123,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
+       -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
 
 all: cpu
@@ -271,7 +273,9 @@ test-clmad:
 	python3 -m unittest discover -s codegen -p testclmad.py
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
 	./build/test-packed-clmad-host
+	./build/test-packed-topclmad-host
 
 test-packed-cuda:
 	mkdir -p build
@@ -367,6 +371,7 @@ modal:
 RTX_PRO6000_WORKERS ?= 385024
 RTX_PRO6000_COMPACT_STATE ?= 1
 RTX_PRO6000_SHARED_SIGMA ?= 1
+RTX_PRO6000_TOP_CLMAD ?= 0
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
@@ -374,7 +379,8 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
                  ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
                  ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE) \
-                 ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA)
+                 ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA) \
+                 ECC_PACKED_TOP_CLMAD=$(RTX_PRO6000_TOP_CLMAD)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -391,7 +397,7 @@ clean:
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
-	rm -f build/test-packed-clmad-host
+	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic

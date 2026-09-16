@@ -189,6 +189,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
+        printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);

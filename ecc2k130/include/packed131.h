@@ -29,6 +29,15 @@
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
 #error "ECC_PACKED_CLMAD requires sm_80 or newer"
 #endif
+#ifndef ECC_PACKED_TOP_CLMAD
+#define ECC_PACKED_TOP_CLMAD 0
+#endif
+#if ECC_PACKED_TOP_CLMAD != 0 && ECC_PACKED_TOP_CLMAD != 1
+#error "ECC_PACKED_TOP_CLMAD must be 0 or 1"
+#endif
+#if ECC_PACKED_TOP_CLMAD && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_TOP_CLMAD requires ECC_PACKED_CLMAD"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
@@ -99,6 +108,68 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
 }
 
 struct P131 { uint32_t v[5]; };
+
+#if ECC_PACKED_TOP_CLMAD
+/* The low 64 bits of x*y, plus an addend.  On the device this is one clmad
+   whose third operand is free; the host emulates it through the software
+   clmul64 so that testpacked.cpp checks the device formulation bit for bit. */
+ECC_HD uint64_t clmadLo64(uint64_t x, uint64_t y, uint64_t add) {
+#if defined(__CUDA_ARCH__)
+    uint64_t r;
+    asm("clmad.lo.u64 %0, %1, %2, %3;" : "=l"(r) : "l"(x), "l"(y), "l"(add));
+    return r;
+#else
+    uint32_t r[4], a[2] = {uint32_t(x), uint32_t(x >> 32)}, b[2] = {uint32_t(y), uint32_t(y >> 32)};
+    clmul64(r, a, b);
+    return (r[0] | (uint64_t(r[1]) << 32)) ^ add;
+#endif
+}
+/* x*y for x and y both below 8: three masked shifts, no multiply.  Used for
+   the two bits a 3x64 product pushes past its limb (y is then below 4) and
+   for a4*b4 itself. */
+ECC_HD uint32_t clmulTiny(uint32_t x, uint32_t y) {
+    return (x & (0u - (y & 1u))) ^ ((x << 1) & (0u - ((y >> 1) & 1u))) ^ ((x << 2) & (0u - ((y >> 2) & 1u)));
+}
+/* c[4..8] ^= a4*B_lo + A_lo*b4 + a4*b4*x^256, the terms the 3-bit top word
+   adds to the 128x128 clmul128 product.
+
+   Measured in SASS at the shipping preset, this correction is 65 of
+   product131's 77 instructions; the whole four-word clmad product is 12.
+   Written as masked shifts it is 6 masks, 12 masked ANDs and 10 funnel-shift
+   accumulations per product, and ptxas already has it near that floor.
+
+   So spend the other pipe.  a4*B_lo is two 3x64-bit products whose low 64
+   bits each fit one clmad.lo, and clmad's addend is free, so the accumulate
+   into c costs nothing: c[4..5] = a4*B0 + b4*A0 + c[4..5] is two instructions
+   on the carryless unit and zero on the ALU.  What does not fit is the 2 bits
+   each 3x64 product pushes past bit 63; those are (a4 * (B0 >> 62)) >> 2, a
+   3x2-bit product.  Measured with the same compiler: product131 goes from 77
+   ALU and 6 clmads to 52 and 10, so the residue is 40 against the 65 it
+   replaces, and mulPolynomial131 from 164 to 128 because ptxas then fuses more
+   of the reducer.  Per update at batch 16 the routines sass_cost.py weights
+   fall 1621 -> 1534 ALU slots (-5.4%) for 29.1 -> 41.2 clmads (+41%).
+
+   The price is paid on a unit the profile puts at 51.4%: scaled by 41.2/29.1
+   that is 73% at today's rate and about 76% if the ALU cut converts, both
+   under the 87% the ALU pipe already sustains, so the pipe model predicts the
+   whole saving, about +4%.  What it cannot see is a product issuing its ten
+   clmads back to back into a unit at 76% average.  A knob until a card
+   decides, off by default; TOP-CLMAD.md has the tables. */
+ECC_HD void topCrossClmad131(const P131 &a, const P131 &b, uint32_t *c) {
+    const uint64_t A0 = a.v[0] | (uint64_t(a.v[1]) << 32), A1 = a.v[2] | (uint64_t(a.v[3]) << 32);
+    const uint64_t B0 = b.v[0] | (uint64_t(b.v[1]) << 32), B1 = b.v[2] | (uint64_t(b.v[3]) << 32);
+    const uint32_t a4 = a.v[4] & 7u, b4 = b.v[4] & 7u;
+    // bits 64 and 65 of each 3x64 product, from the limb's top two bits
+    const uint32_t h0 = (clmulTiny(a4, uint32_t(B0 >> 62)) ^ clmulTiny(b4, uint32_t(A0 >> 62))) >> 2;
+    const uint32_t h1 = (clmulTiny(a4, uint32_t(B1 >> 62)) ^ clmulTiny(b4, uint32_t(A1 >> 62))) >> 2;
+    uint64_t C2 = c[4] | (uint64_t(c[5]) << 32), C3 = c[6] | (uint64_t(c[7]) << 32);
+    C2 = clmadLo64(a4, B0, clmadLo64(b4, A0, C2));
+    C3 = clmadLo64(a4, B1, clmadLo64(b4, A1, C3 ^ h0));
+    c[4] = uint32_t(C2); c[5] = uint32_t(C2 >> 32);
+    c[6] = uint32_t(C3); c[7] = uint32_t(C3 >> 32);
+    c[8] ^= h1 ^ clmulTiny(a4, b4);
+}
+#endif
 ECC_HD uint32_t reverse32(uint32_t x) {
 #ifdef __CUDA_ARCH__
     return __brev(x);
@@ -118,6 +189,9 @@ ECC_HD P131 reverse131(const P131 &a) {
 }
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
     clmul128(c,a.v,b.v); c[8]=0;
+#if ECC_PACKED_TOP_CLMAD
+    topCrossClmad131(a,b,c);
+#else
 #pragma unroll
     for(int k=0;k<3;k++) {
         uint32_t ma=0u-((a.v[4]>>k)&1u), mb=0u-((b.v[4]>>k)&1u);
@@ -129,6 +203,7 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         }
         c[8]^=(b.v[4]&ma)<<k;
     }
+#endif
 }
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;

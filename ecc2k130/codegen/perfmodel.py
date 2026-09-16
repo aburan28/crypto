@@ -59,6 +59,27 @@ the tool exists because three earlier predictions did exactly that.
 What the model can do is rank leaves, which is what it was asked and where it
 was right to 1.1% on a 15% gap.  What it cannot do is rank batches.
 
+It then failed on a third axis, and badly.  The stream-Karatsuba schedule cuts
+the multiplier from 1918 local operations to 384 and the fitted work per
+iteration from 4046 to 1951; the model's mechanism says that halves the cost.
+The card ran it at 747.9 against a same-day control of 857.2 -- 12.7% slower.
+The static count sees fewer local instructions and cannot see that the
+streaming schedule serialises what the original could overlap; a build with
+less traffic is not a build with less latency.
+
+That entry is in the table below, and adding it did not merely add a residual:
+it broke the fit.  With nine points the least-squares weight on a local
+operation goes to 0.0, the worst residual is 29.6%, and the model now ranks
+leaf 33 FASTER than leaf 0 -- the one call it had previously got right.  A
+one-parameter model cannot hold "fewer local ops was worth +40%" (the unroll
+caps) and "fewer local ops was worth -13%" (stream Karatsuba) at the same
+time, because the quantity it counts is not the quantity that costs.
+
+So this file is no longer a predictor and does not claim to be.  It is kept
+as the record of what was measured and what was predicted, because the gap
+between those two columns is the most useful thing it ever produced.  Do not
+use its "this build" line to choose a build.
+
 The cost model itself is deliberately small: a walk iteration costs some
 arithmetic and some local traffic, and the two are weighted against each other
 by one constant.  That constant is fitted, so the tool cannot claim to predict a
@@ -93,6 +114,12 @@ MEASURED = (
     ("leaf 33 at batch 16", 16, 33, 719.2),
     ("leaf 33 at batch 32", 32, 33, 748.1),
     ("leaf 33 at batch 64", 64, 33, 772.8),
+    # TUNING.md: three runs at 747.721/748.012/747.949 against a same-day
+    # control at 857.2.  The model predicted the fitted work would halve
+    # (4046 -> 1951) and the card ran 12.7% SLOWER.  Different GPU allocation
+    # and source digest from the control, so not a single-variable experiment,
+    # but the direction is not in doubt.
+    ("stream Karatsuba at batch 32", 32, 0, 747.9),
 )
 
 
