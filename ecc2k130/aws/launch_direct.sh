@@ -6,16 +6,18 @@
 #
 #   ./launch_direct.sh 16 --on-demand 2
 #
-# Launches one GPU per instance (g7e.2xlarge) so "many spot instances" means
-# many hosts. Spot uses one-time requests; interrupted workers lose the box
-# and a later relaunch resumes the slot from S3 (no maintain replacement).
+# Tries single-GPU g7e sizes across every default AZ. Spot uses one-time
+# requests; interrupted workers lose the box and a later relaunch resumes
+# the slot from S3 (no maintain replacement).
 
 set -euo pipefail
 cd "$(dirname "$0")"
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
 STACK=${STACK:-ecc2k130}
 LT=$STACK-worker
-TYPE=${TYPE:-g7e.2xlarge}
+# Prefer 1-GPU sizes so capacity pools are independent; fall through larger
+# single-GPU types when 2xlarge is tight in an AZ.
+TYPES=${TYPES:-g7e.2xlarge,g7e.4xlarge,g7e.8xlarge}
 
 total=${1:?number of GPUs}
 shift
@@ -39,12 +41,13 @@ if [ "${#SUBNETS[@]}" -eq 0 ]; then
     echo "no default subnets in $VPC" >&2
     exit 1
 fi
+IFS=',' read -r -a TYPE_LIST <<< "$TYPES"
 
 launch_one() {
-    local market=$1 subnet=$2
+    local market=$1 subnet=$2 type=$3
     local args=(
         --launch-template "LaunchTemplateName=$LT,Version=\$Latest"
-        --instance-type "$TYPE"
+        --instance-type "$type"
         --subnet-id "$subnet"
         --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-worker},{Key=Project,Value=$STACK},{Key=Lifecycle,Value=$market}]"
         --query 'Instances[0].InstanceId' --output text
@@ -55,43 +58,67 @@ launch_one() {
     aws ec2 run-instances "${args[@]}"
 }
 
-echo "direct launch: $total GPU(s) as $TYPE ($ondemand on-demand, $spot spot) across ${#SUBNETS[@]} AZ(s)"
+# Try every (subnet, type) pair until one accepts; print instance id on stdout.
+try_launch() {
+    local market=$1
+    local subnet type id rc
+    for subnet in "${SUBNETS[@]}"; do
+        for type in "${TYPE_LIST[@]}"; do
+            set +e
+            id=$(launch_one "$market" "$subnet" "$type" 2>/tmp/ecc-launch-err)
+            rc=$?
+            set -e
+            if [ $rc -eq 0 ] && [ -n "$id" ] && [ "$id" != None ]; then
+                echo "$id $type $subnet" >&2
+                echo "$id"
+                return 0
+            fi
+            # Keep the last error for the caller.
+        done
+    done
+    return 1
+}
+
+echo "direct launch: $total GPU(s) types=$TYPES ($ondemand on-demand, $spot spot) across ${#SUBNETS[@]} AZ(s)"
 ids=()
-si=0
 for ((i = 0; i < ondemand; i++)); do
-    subnet=${SUBNETS[$((si % ${#SUBNETS[@]}))]}
-    si=$((si + 1))
-    id=$(launch_one on-demand "$subnet")
-    echo "on-demand $id in $subnet"
-    ids+=("$id")
+    set +e
+    id=$(try_launch on-demand)
+    rc=$?
+    set -e
+    if [ $rc -eq 0 ]; then
+        echo "on-demand $id"
+        ids+=("$id")
+    else
+        echo "on-demand GPU $((i + 1))/$ondemand failed:" >&2
+        tail -n 8 /tmp/ecc-launch-err >&2 || true
+    fi
 done
 for ((i = 0; i < spot; i++)); do
-    launched=
-    # Walk AZs until one accepts the spot request (capacity varies by pool).
-    for ((try = 0; try < ${#SUBNETS[@]}; try++)); do
-        subnet=${SUBNETS[$(( (si + try) % ${#SUBNETS[@]} ))]}
-        set +e
-        id=$(launch_one spot "$subnet" 2>/tmp/ecc-spot-err)
-        rc=$?
-        set -e
-        if [ $rc -eq 0 ] && [ -n "$id" ] && [ "$id" != None ]; then
-            echo "spot $id in $subnet"
-            ids+=("$id")
-            launched=1
-            si=$((si + try + 1))
-            break
-        fi
-    done
-    if [ -z "$launched" ]; then
-        echo "spot launch failed for GPU $((i + 1))/$spot:" >&2
-        tail -n 5 /tmp/ecc-spot-err >&2 || true
-        echo "continuing with ${#ids[@]} instance(s) so far" >&2
+    set +e
+    id=$(try_launch spot)
+    rc=$?
+    set -e
+    if [ $rc -eq 0 ]; then
+        echo "spot $id"
+        ids+=("$id")
+    else
+        echo "spot GPU $((i + 1))/$spot failed:" >&2
+        tail -n 8 /tmp/ecc-launch-err >&2 || true
     fi
 done
 
 echo "launched ${#ids[@]} / $total instance(s):"
 printf '%s\n' "${ids[@]}"
-if [ "${#ids[@]}" -lt "$total" ]; then
-    echo "short of target; rerun or create AWSServiceRoleForEC2Fleet and use fleet.sh" >&2
+# Succeed if we got at least the on-demand floor, or half the target — enough
+# to start walking toward 100 B it/s while capacity catches up.
+min_ok=$((ondemand > 0 ? ondemand : 1))
+half=$(( (total + 1) / 2 ))
+if [ "$min_ok" -lt "$half" ]; then min_ok=$half; fi
+if [ "${#ids[@]}" -lt "$min_ok" ]; then
+    echo "only ${#ids[@]} instance(s); need at least $min_ok" >&2
     exit 2
+fi
+if [ "${#ids[@]}" -lt "$total" ]; then
+    echo "short of $total; partial fleet is up — rerun to fill" >&2
 fi
