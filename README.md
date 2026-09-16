@@ -811,7 +811,9 @@ count and at 0.21× a negation-only walk.
 in a range — with Pollard kangaroo, which costs about 2√W for a range of
 width W instead of the 2^128 a full-group search would. That is the shape of
 the Bitcoin puzzle challenges, and of biased-nonce and small-range key
-problems generally.
+problems generally. It runs across several GPUs the way the deployed
+kangaroo solvers do: one process, one host thread per device, disjoint herds,
+one distinguished-point table (`--gpu 0,1,2`).
 
 ---
 
