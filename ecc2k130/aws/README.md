@@ -193,7 +193,17 @@ resident blocks per SM (minBlocks 4) cost 34%
    `clmad` is what the 14 B/s arithmetic is made of. The AMI's 580 driver
    runs it under CUDA 13.x minor-version compatibility because `build.sh`
    emits native `sm_120` code and the client never needs the PTX JIT;
-   `ARCHES="89 90 120"` if a non-Blackwell instance type joins later.
+   `ARCHES="89 90 120"` if a non-Blackwell instance type joins later -- and
+   note that `build.sh` then drops `PACKED_CLMAD` to 0 by default, because
+   `clmad` is bought with a pipe balance measured only on `sm_120` and is a
+   tuning choice rather than a portability one. `CLMAD=1` overrides it; get a
+   receipt first (`../ADA-L4-L40S.md`, `../benchmarks/ada/run.sh`). The
+   published binary key covers the arches and knobs as well as the source, so
+   builds that differ only in those no longer overwrite each other, and
+   `bootstrap.sh` takes the carryless marker it gates on from the published
+   `manifest.json` rather than hardcoding 1 -- otherwise a deliberately
+   CLMAD-free Ada client would be rejected and the fleet would never start.
+   The gate still fails a binary that disagrees with its own manifest.
 
 ## Runbook
 
