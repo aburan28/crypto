@@ -416,6 +416,91 @@ consistent with `1/3! = 0.167` being the target rather than genus 2's
 `1/2` — the cost the extra genus buys, and the reason genus 3 is where
 the crossover is supposed to live.
 
-The genus-2-vs-genus-3 table against the same DP rho is measuring now
-and lands in a follow-up commit. Nothing is claimed about genus 3 until
-it does.
+The genus-2-vs-genus-3 table is below.
+
+
+## The reference needed two more fixes first
+
+Measuring genus 3 exposed two ways the DP walk spent operations it did
+not need to. Both inflated `S_rho` — the wrong direction for a
+reference to be wrong in, since it flatters the algorithm under study.
+
+1. **A degenerate collision** (same point, same coefficients) rebuilt a
+   starting point for `2⌈log₂ N⌉` operations. It now jumps by a
+   randomly chosen precomputed step for **one**, the same escape the
+   relation walk already used.
+2. **A cycle can contain no distinguished point at all**, in which case
+   the walk detects nothing however long it runs. The first version hit
+   an outer cap at 64× the expected cost — which is also how the
+   benchmark came to look hung rather than slow, and cost an hour of
+   looking at the wrong stage. The walk now tracks its distance since
+   the last distinguished point and jumps once it is well past the
+   expected gap.
+
+After both, `S_walk` sits at **1.05 – 1.48** across every row, against
+the `sqrt(π/2) = 1.2533` ideal. Rho samples per row went from 25 to 40,
+since the measured gap is now under 2× and rho's step count has a long
+tail.
+
+## Genus 2 vs genus 3, same unit, same reference
+
+`m` is the factor-base size; `S_walk` is rho's walk without its
+precomputation. Every run of both sides returned the verified `k`.
+
+**Genus 2** (`C : y² = x⁵ + 3x³ + 2x² + x + c`):
+
+| `p` | `N` | `m` | `S_ic` base | `S_ic` | `S_rho` | **`S_ic/S_rho`** | `S_walk` | `S_ic`/floor |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 41 | 1321 | 15 | 45.9 | 9.66 | 9.09 | **1.06** | 1.39 | 10.9 |
+| 61 | 1399 | 22 | 58.3 | 9.85 | 8.76 | **1.12** | 1.27 | 8.0 |
+| 101 | 4663 | 46 | 48.1 | 5.90 | 5.45 | **1.08** | 1.29 | 4.2 |
+| 151 | 7949 | 78 | 58.1 | 5.07 | 4.61 | **1.10** | 1.42 | 2.8 |
+| 211 | 11813 | 112 | 67.3 | 4.66 | 3.96 | **1.18** | 1.33 | 2.2 |
+| 251 | 61667 | 123 | 40.8 | 2.28 | 2.41 | **0.94** | 1.25 | 2.2 |
+
+**Genus 3** (`C : y² = x⁷ + x³ + c x + 1`):
+
+| `p` | `N` | `m` | `S_ic` base | `S_ic` | `S_rho` | **`S_ic/S_rho`** | `S_walk` | `S_ic`/floor |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 23 | 6299 | 12 | 35.4 | 5.02 | 4.74 | **1.06** | 1.16 | 5.1 |
+| 31 | 7333 | 16 | 47.9 | 5.22 | 4.36 | **1.20** | 1.05 | 4.4 |
+| 41 | 6679 | 27 | 44.6 | 5.39 | 4.79 | **1.13** | 1.31 | 2.6 |
+| 61 | 124459 | 33 | 21.2 | 1.52 | 2.30 | **0.66** | 1.48 | 2.6 |
+| 101 | 364747 | 53 | 21.6 | 1.16 | 1.90 | **0.61** | 1.41 | 2.1 |
+
+## Reading it
+
+1. **Genus 3 is the first place the ratio moves.** At genus 2 it is
+   flat: 1.06, 1.12, 1.08, 1.10, 1.18, 0.94 — no trend across a 47×
+   range of `N`, which is what the asymptotics say (relation stage
+   `≈ (m+1)·g! ≈ p` against rho's `sqrt(N) ≈ p`, both linear in `p`).
+   At genus 3 the same column runs 1.06, 1.20, 1.13, **0.66, 0.61** —
+   it breaks below 1 exactly where `N` gets large, because rho now
+   costs `sqrt(N) ≈ p^{1.5}` against a relation stage still linear in
+   `p`. That is the crossover this whole thread was built to look for,
+   and the shape is right.
+2. **It is two data points.** `p = 61` and `p = 101` at genus 3 are the
+   only rows below 0.7, and they are also the only genus-3 rows with
+   `N > 10^5`. The three small-`N` genus-3 rows sit at 1.06 – 1.20,
+   indistinguishable from genus 2. The honest statement is that the
+   trend has the predicted sign and the predicted place, on a sample
+   too small to fit an exponent to.
+3. **Smoothness tracks `1/g!` loosely.** Genus 3 measures 0.18 – 0.27
+   against `1/3! = 0.167`, genus 2 measures 0.49 – 0.56 against
+   `1/2! = 0.5`. The genus-3 excess is consistent at every `p`, so H1
+   is a slight under-estimate at these sizes rather than wrong.
+4. **What costs what now.** At genus 3, `p = 101`: 645 relation-stage
+   operations of which 301 are precomputation, an oracle costing 53
+   group-op equivalents (114,283 mul-mods — the largest single term
+   after precomputation, because a cubic `u` needs Cantor–Zassenhaus
+   rather than a Legendre symbol), and a linear algebra term that
+   rounds to zero. The implementation is 2.1× from its own floor.
+
+## Scope, unchanged in kind
+
+Genus 2 and 3, odd characteristic, `p ≤ 251`, full degree-1 factor
+base, one machine. Two genus-3 rows below 1 against a toy-sized rho are
+not a statement about genus-3 curves at cryptographic size, where the
+factor-base build alone is `O(p)` and everything here would have to be
+rebuilt. What the rows do support is narrower and was the point: the
+crossover moves in the direction and at the genus the theory names.
