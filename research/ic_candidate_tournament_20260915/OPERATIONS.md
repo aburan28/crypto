@@ -58,8 +58,14 @@ on replay, every cell below one in both metrics, 1,488 verified trials.
 re-measured that winner with the per-target descent certificate under the
 merged checker: 0.7379 (0.7144–0.7572) instructions and 0.9355 (0.9124–0.9610)
 native on confirmation, 0.9414 (0.9267–0.9545) on replay, retained with
-`beats_rho_strict`, 1,356 verified trials, every receipt certified. Keep the
-two workloads separate when extending the operation;
+`beats_rho_strict`, 1,356 verified trials, every receipt certified.
+[Round-0009](runs/round-0009/REPORT.md) ([pre-registration](campaign_20260916/ROUND9-single-target.md))
+ran the same pipeline with the shared curve construction and target lift in
+tested single-word arithmetic for both arms: 0.5511 (0.5279–0.5881) of rho's
+instructions and 0.9406 (0.9131–0.9811) of its native time, retained, with one
+cell's native ratio at 1.017 on confirmation, so it does not replace round-0008
+as the strict-win record. Keep the two workloads separate when extending the
+operation;
 [WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
 and [next-proposal-single-target.json](campaign_20260916/next-proposal-single-target.json)
 carry the single-target line.

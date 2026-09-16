@@ -9,7 +9,8 @@
   "patches": [
     "campaign_20260916/round6-tiny.patch",
     "campaign_20260916/round7-tiny2.patch",
-    "campaign_20260916/round8-tiny2_cert.patch"
+    "campaign_20260916/round8-tiny2_cert.patch",
+    "campaign_20260916/round9-fastcurve.patch (shared-phase baseline, both arms)"
   ],
   "config": {
     "batch_trials": 1,
@@ -102,6 +103,71 @@
       "n19a0": 0.9358348268649307,
       "n19a1": 0.9391988935236824,
       "n23a0": 0.946793065046991
+    }
+  },
+  "round_0009": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009",
+    "status": "retained",
+    "what_changed": "shared curve construction and target lift in tested single-word arithmetic for both arms (baseline source); IC pipeline unchanged from round-0008",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/source",
+    "patch_from_round_0008_source": "campaign_20260916/round9-fastcurve.patch",
+    "source_manifest_sha256": "8a7f4b5f087687a91fe2b1d7a35513bbd23beddb5d5db0d1e11683f7ab6c9c1c",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": false,
+    "note": "beats_rho_strict is false only because the n13a0 native cell ratio was 1.017 on confirmation (0.960 on replay); the instruction result and the aggregate native intervals are below one on both stages. Round-0008 remains the strict-win record.",
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.5511340753946584,
+      "ci95": [
+        0.5279422621731197,
+        0.5880928655396426
+      ],
+      "native_wall_candidate_over_baseline": 0.9406340813167371,
+      "native_wall_ci95": [
+        0.9131071744076471,
+        0.9811067742684935
+      ],
+      "per_cell": {
+        "n13a0": 0.625084560085864,
+        "n17a1": 0.5373629964168879,
+        "n19a0": 0.5376957559880087,
+        "n19a1": 0.5281304846399776,
+        "n23a0": 0.533091726966566
+      },
+      "native_wall_per_cell": {
+        "n13a0": 1.0166933121048904,
+        "n17a1": 0.9343557813751293,
+        "n19a0": 0.9203316888982354,
+        "n19a1": 0.9213891995382123,
+        "n23a0": 0.914142317684615
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.5511342758310446,
+      "ci95": [
+        0.5279408400938557,
+        0.5880942826604277
+      ],
+      "native_wall_candidate_over_baseline": 0.932298684693216,
+      "native_wall_ci95": [
+        0.9041124782345309,
+        0.9580971485046996
+      ],
+      "per_cell": {
+        "n13a0": 0.6250857271678759,
+        "n17a1": 0.5373607768088041,
+        "n19a0": 0.537698758857707,
+        "n19a1": 0.52813013183802,
+        "n23a0": 0.5330912819540148
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.9600221595183,
+        "n17a1": 0.9572287882538876,
+        "n19a0": 0.9335593986606175,
+        "n19a1": 0.922797716075961,
+        "n23a0": 0.8896719168381959
+      }
     }
   }
 }

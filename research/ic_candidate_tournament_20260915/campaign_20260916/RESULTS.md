@@ -3,7 +3,7 @@
 Batch (16-target) parity verdict: **True**; selected implementation **combined_descent**.
 Single-target verdict: **strictly below rho in both metrics**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), after **tiny_batch1** reached parity in round-0006.
 
-Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006, 0007 and 0008 (1,584, 1,488 and 1,356 profiled trials: parity, a strict win over rho, and that win re-measured with the descent certificate). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
+Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006–0009 (1,584, 1,488, 1,356 and 1,356 profiled trials: parity, a strict win over rho, that win re-measured with the descent certificate, and the same pipeline on a leaner shared job). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
 
 ## Profiled instruction cost relative to matched rho
 
@@ -17,6 +17,7 @@ Completed three new tournaments with **4,704 profiled trials**, each paired with
 | [round-0006](../runs/round-0006/REPORT.md) | 1 | tiny_batch1 | 0.8264 | [0.8032467836918035, 0.8488166193357406] |
 | [round-0007](../runs/round-0007/REPORT.md) | 1 | tiny2 | 0.7376 | [0.7065693377992373, 0.7643545073767521] |
 | [round-0008](../runs/round-0008/REPORT.md) | 1 | incumbent retained (tiny2 + descent certificate) | 0.7379 | [0.7144, 0.7572] |
+| [round-0009](../runs/round-0009/REPORT.md) | 1 | incumbent retained (same pipeline; shared construction in single-word arithmetic for both arms) | 0.5511 | [0.5279, 0.5881] |
 
 ## Native process time relative to matched rho
 
@@ -85,6 +86,7 @@ parameter-neighbour registry is in [round6-next-candidates.json](round6-next-can
 | round-0006 | 1 | tiny_batch1 | 0.9766 | [0.957057247571661, 0.9946203513598987] |
 | round-0007 | 1 | tiny2 | 0.9461 | [0.9292926395602298, 0.9639483494225052] |
 | round-0008 | 1 | incumbent retained (tiny2 + descent certificate) | 0.9355 | [0.9124, 0.9610] |
+| round-0009 | 1 | incumbent retained (same pipeline; shared construction in single-word arithmetic for both arms) | 0.9406 | [0.9131, 0.9811] |
 
 ## Single-target parity (round-0006)
 
@@ -127,6 +129,17 @@ Rounds 0006 and 0007 were frozen with the evaluator of their day, before the ind
 
 Per-cell winner/rho: instructions 0.695–0.764, native 0.902–0.967 (n13a0 0.967 confirmation, 0.949 replay). This is the single-target result the operation now stands on; the round-0007 figures agree with it within their intervals.
 
+## Round 0009: the same pipeline on a leaner shared job
+
+Every job pays, before either algorithm starts, for the curve construction and the public target, and at the end for the general-arithmetic final check; through round 0008 the construction ran in general big-integer arithmetic (3–11 million instructions, 0.5–1.8 ms per job for both arms). Round 0009 ([pre-registration](ROUND9-single-target.md), [report](../runs/round-0009/REPORT.md), `--objective rho`, seed 2026091609) puts that shared work on the tested single-word paths — the same abscissa sequence, lifts, tests and eigenvalue candidates, equal to the general arithmetic in a test on every cell and reproducing all 184 frozen fixtures of rounds 0007 and 0008 byte for byte ([patch](round9-fastcurve.patch)) — in the baseline executable that rho, the incumbent and the batch-4 control all run. The IC pipeline itself is unchanged from round 0008; the rho solve is the shipped implementation, untouched. All 1,356 trials verified with certificates; retained (control 1.005).
+
+| Comparison | Instructions | Paired 95% interval | Native time | Paired 95% interval |
+|---|---:|---|---:|---|
+| winner / rho (confirmation) | 0.5511 | [0.5279, 0.5881] | 0.9406 | [0.9131, 0.9811] |
+| winner / rho (replay) | 0.5511 | [0.5279, 0.5881] | 0.9323 | [0.9041, 0.9581] |
+
+Median complete job: 4.33 million instructions and 6.1 ms for the winner against 8.1 million and 6.5 ms for rho (round 0008: 7.3 and 7.7 ms). Per-cell winner/rho instructions 0.528–0.625. The strict per-cell native gate was **not** met in this round: n13a0 came out at 1.017 on confirmation (0.960 on replay; the other cells 0.89–0.96 on both stages). On that cell the two arms differ by about 0.2 ms of their own work inside a 6 ms process, which is within the noise of twelve cases, so `beats_rho_strict` is false here while the aggregate native intervals are below one on both stages and `rho_parity` holds. Round 0008 remains the strict-win record; round 0009 shows what the instruction margin is once the shared job stops hiding it, and that cheaper shared work helps rho's wall time as much as the winner's.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.
@@ -141,9 +154,10 @@ The successful mechanisms are exact arithmetic substitutions, folded pair-table 
 
 - [16-target winner source/configuration](WINNER.json) and [cumulative source patch](WINNER.patch).
 - [Single-target winner record](WINNER-single-target.json) (round-0008: the round-0007 `tiny2` plus the descent certificate, [patch](round8-tiny2_cert.patch), [round8_candidates.py](round8_candidates.py)).
+- Round-0009: the [shared-construction patch](round9-fastcurve.patch) applied to the round-0008 source for both arms, and [round9_candidates.py](round9_candidates.py).
 - Round-0007: the [patch against the round-0006 winner source](round7-tiny2.patch), the [row-rule](round7-tiny2_rows.patch) and [arithmetic](round7-tiny2_arith.patch) ablations, and [round7_candidates.py](round7_candidates.py) to rebuild the trees.
 - Round-0006: the [parity patch against the round-0005 winner source](round6-tiny.patch), the [serialisation-only](round6-fast_report.patch) and [full-table](round6-tiny_fulltable.patch) controls, and [round6_candidates.py](round6_candidates.py).
-- [Operation plan](PLAN.md), [single-target successor plan](ROUND4.md), [batch plan](ROUND5.md), [single-target parity pre-registration](ROUND6-single-target.md), [beat-rho pre-registration](ROUND7-single-target.md) and [certificate re-measurement pre-registration](ROUND8-single-target.md).
+- [Operation plan](PLAN.md), [single-target successor plan](ROUND4.md), [batch plan](ROUND5.md), [single-target parity pre-registration](ROUND6-single-target.md), [beat-rho pre-registration](ROUND7-single-target.md), [certificate re-measurement pre-registration](ROUND8-single-target.md) and [leaner shared job pre-registration](ROUND9-single-target.md).
 - [Operating guide](../OPERATIONS.md) and [controller tests](controller-tests.json).
 - [Arithmetic/table equivalence tests](preflight-next-tests.log) and [installed skill validation](skill-validation.json).
 - [Retained failed build attempt](../runs/round-0003/prepare_failure.json); no measurements came from it.
