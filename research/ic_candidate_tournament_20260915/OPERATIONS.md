@@ -53,7 +53,12 @@ the earlier 3.04 / 1.52 figures on that panel. [Round-0007](runs/round-0007/REPO
 ([pre-registration](campaign_20260916/ROUND7-single-target.md), `--objective rho`) then went
 strictly below rho: `tiny2` at 0.7376 of rho's instructions (0.7066–0.7644) and
 0.9461 of its native time (0.9293–0.9639) on confirmation, 0.9414 (0.9215–0.9611)
-on replay, every cell below one in both metrics, 1,488 verified trials. Keep the
+on replay, every cell below one in both metrics, 1,488 verified trials.
+[Round-0008](runs/round-0008/REPORT.md) ([pre-registration](campaign_20260916/ROUND8-single-target.md))
+re-measured that winner with the per-target descent certificate under the
+merged checker: 0.7379 (0.7144–0.7572) instructions and 0.9355 (0.9124–0.9610)
+native on confirmation, 0.9414 (0.9267–0.9545) on replay, retained with
+`beats_rho_strict`, 1,356 verified trials, every receipt certified. Keep the
 two workloads separate when extending the operation;
 [WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
 and [next-proposal-single-target.json](campaign_20260916/next-proposal-single-target.json)
@@ -115,7 +120,8 @@ algebra or the collection window. These are configuration/engineering experiment
 
 The round-0006 and round-0007 candidate sources add a single-word pipeline
 (`src/cryptanalysis/koblitz_tiny_ic.rs`, applied by
-`campaign_20260916/round6-tiny.patch` and then `round7-tiny2.patch`) that the
+`campaign_20260916/round6-tiny.patch`, `round7-tiny2.patch` and
+`round8-tiny2_cert.patch`) that the
 worker runs for `pair_table`, three-summand, prime-degree jobs with the
 `SubgroupOrbits` recipe: the same base point set, relation meaning, column
 certification and final verification, with a Euclidean field inverse, a
@@ -123,7 +129,8 @@ normal-basis orbit key for the folded pair table, a work-minimising table-row
 rule, walked probes, López–Dahab projective and fixed-base batched scalar
 multiplication, its own field tables and a bit-exact scalar copy of the seeded
 ChaCha12 sampler, and no thread pool. Its worker writes the same report fields
-directly instead of through a value tree. On that path `linear_algebra` and
+directly instead of through a value tree, including the per-target descent
+relation the merged checker requires. On that path `linear_algebra` and
 `sparse` have no effect; the registry records the configuration a candidate ran
 under. Jobs outside its scope take the general path unchanged.
 

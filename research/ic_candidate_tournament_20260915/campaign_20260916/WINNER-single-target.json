@@ -1,10 +1,16 @@
 {
   "panel": "single-target (one public target per cold job)",
-  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0007",
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008",
   "objective": "rho",
-  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0007/source_candidates/tiny2/source",
-  "worker": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0007/source_candidates/tiny2/worker",
-  "patch_from_round_0006_winner": "campaign_20260916/round7-tiny2.patch",
+  "status": "retained",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/source",
+  "worker": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/worker",
+  "lineage": "round-0006 tiny (parity) -> round-0007 tiny2 (strict win) -> round-0008 tiny2 + per-target descent certificate (re-measured under the merged checker)",
+  "patches": [
+    "campaign_20260916/round6-tiny.patch",
+    "campaign_20260916/round7-tiny2.patch",
+    "campaign_20260916/round8-tiny2_cert.patch"
+  ],
   "config": {
     "batch_trials": 1,
     "linear_algebra": "sparse",
@@ -13,13 +19,66 @@
     "summands": 3
   },
   "target_count": 1,
-  "source_manifest_sha256": "bc924789b8997c9e6a0fd4cba01af4dc3432b0d1d51e209d32cc73e5d30f3ace",
-  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0007/decision.json",
+  "source_manifest_sha256": "179ca7b82433aa4e334e9f37b1d63cd60b8e02174ee70c3c9bbcc0f4aa7e1229",
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/decision.json",
+  "certified_descents_per_job": 1,
   "rho_parity": true,
   "beats_rho_instructions_point": true,
   "beats_rho_strict": true,
   "beats_rho_strict_definition": "Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.",
   "winner_over_rho_confirmation": {
+    "candidate_over_baseline": 0.7379328801398639,
+    "ci95": [
+      0.7144337379505753,
+      0.7571723061927793
+    ],
+    "native_wall_candidate_over_baseline": 0.9355169234914339,
+    "native_wall_ci95": [
+      0.9124104876677653,
+      0.9609791776155655
+    ],
+    "per_cell": {
+      "n13a0": 0.7641457210540794,
+      "n17a1": 0.6952862034221112,
+      "n19a0": 0.7544193214959648,
+      "n19a1": 0.7351888473725469,
+      "n23a0": 0.7425621322363283
+    },
+    "native_wall_per_cell": {
+      "n13a0": 0.9671464607379644,
+      "n17a1": 0.9024184124721857,
+      "n19a0": 0.9479810741091628,
+      "n19a1": 0.9397058515338313,
+      "n23a0": 0.9216508936992227
+    }
+  },
+  "winner_over_rho_replay": {
+    "candidate_over_baseline": 0.7379318706154145,
+    "ci95": [
+      0.7144328577963271,
+      0.7571684930212431
+    ],
+    "native_wall_candidate_over_baseline": 0.9413978774377383,
+    "native_wall_ci95": [
+      0.9266864038465168,
+      0.9545396471783393
+    ],
+    "per_cell": {
+      "n13a0": 0.764143910004793,
+      "n17a1": 0.6952844745859409,
+      "n19a0": 0.7544153524909061,
+      "n19a1": 0.7351890621972519,
+      "n23a0": 0.7425643488923614
+    },
+    "native_wall_per_cell": {
+      "n13a0": 0.9486139168609361,
+      "n17a1": 0.9500954897544966,
+      "n19a0": 0.9437923850841066,
+      "n19a1": 0.9417154641879998,
+      "n23a0": 0.9230243423034147
+    }
+  },
+  "round_0007_winner_over_rho_confirmation": {
     "candidate_over_baseline": 0.7375680581311627,
     "ci95": [
       0.7065693377992373,
@@ -43,58 +102,6 @@
       "n19a0": 0.9358348268649307,
       "n19a1": 0.9391988935236824,
       "n23a0": 0.946793065046991
-    }
-  },
-  "winner_over_rho_replay": {
-    "candidate_over_baseline": 0.7375677154083355,
-    "ci95": [
-      0.7065691551095401,
-      0.7643536706925478
-    ],
-    "native_wall_candidate_over_baseline": 0.9413809693522414,
-    "native_wall_ci95": [
-      0.9215169986215078,
-      0.9610581271933554
-    ],
-    "per_cell": {
-      "n13a0": 0.7820065838617186,
-      "n17a1": 0.6834450268651968,
-      "n19a0": 0.7525514894063514,
-      "n19a1": 0.7344726861581017,
-      "n23a0": 0.7388965295499552
-    },
-    "native_wall_per_cell": {
-      "n13a0": 0.9619083881213882,
-      "n17a1": 0.9475066986909356,
-      "n19a0": 0.9408750626280872,
-      "n19a1": 0.9389410755512481,
-      "n23a0": 0.918207371884407
-    }
-  },
-  "winner_over_incumbent_confirmation": {
-    "candidate_over_baseline": 0.8872202656499313,
-    "ci95": [
-      0.8493396285853244,
-      0.9241554327628069
-    ],
-    "native_wall_candidate_over_baseline": 0.971233987079317,
-    "native_wall_ci95": [
-      0.953144016903486,
-      0.9862431127520643
-    ],
-    "per_cell": {
-      "n13a0": 0.9494718118437676,
-      "n17a1": 0.8190355449101656,
-      "n19a0": 0.8743572004801641,
-      "n19a1": 0.8768209887420775,
-      "n23a0": 0.9220885150571985
-    },
-    "native_wall_per_cell": {
-      "n13a0": 0.9759542416231859,
-      "n17a1": 0.9724226497335938,
-      "n19a0": 0.9423103739941063,
-      "n19a1": 0.9833826256477863,
-      "n23a0": 0.9826940642016594
     }
   }
 }

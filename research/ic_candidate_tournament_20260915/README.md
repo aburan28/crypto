@@ -1,19 +1,21 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; six further tournaments finished and audited
+Status: implementation complete; seven further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
 process time, with confirmation and replay passing the predeclared parity rule.
 The single-target panel reached parity in round-0006 and, in round-0007, went
-strictly below rho in both metrics: the selected single-word implementation
-costs 0.7376 times rho's instructions (paired 95% interval 0.7066–0.7644) and
-0.9461 times its native process time (0.9293–0.9639) on complete cold one-target
-jobs, replay agreeing (0.9414, 0.9215–0.9611), every cell below one, on the
-tested small Koblitz panel. The native margin is small because process creation
-and shared curve construction dominate that metric.
+strictly below rho in both metrics; round-0008 re-measured that winner with the
+per-target descent certificate under the merged checker: 0.7379 times rho's
+instructions (paired 95% interval 0.7144–0.7572) and 0.9355 times its native
+process time (0.9124–0.9610) on complete cold one-target jobs, replay agreeing
+(0.9414, 0.9267–0.9545), every cell below one, every job's logarithm certified
+by its descent relation, on the tested small Koblitz panel. The native margin
+is small because process creation and shared curve construction dominate that
+metric.
 
-All 7,776 new profiled trials and their paired native runs verified. The
+All 9,132 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
 (1,680 further verified trials on another host) enforced the index-calculus
