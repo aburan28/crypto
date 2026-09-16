@@ -1,0 +1,152 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -789,13 +789,24 @@
+ 
+ /// Exact odd-degree point lifting for factor-base construction. General callers,
+ /// target generation and rho retain the independent general implementation.
++/// The single-word curve the factor-base lift uses, when it applies.
++fn factor_base_fast_curve(curve: &BinaryCurve) -> Option<FastCurve> {
++    if curve.m % 2 == 0 {
++        return None;
++    }
++    FastCurve::new(curve)
++}
++
+ fn factor_base_points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+-    if curve.m % 2 == 0 {
+-        return points_with_x(curve, x);
+-    }
+-    let Some(fc) = FastCurve::new(curve) else {
+-        return points_with_x(curve, x);
+-    };
++    match factor_base_fast_curve(curve) {
++        Some(fc) => factor_base_points_with_fast(&fc, curve, x),
++        None => points_with_x(curve, x),
++    }
++}
++
++/// [`factor_base_points_with_x`] with the single-word curve built once by
++/// the caller instead of once per abscissa.
++fn factor_base_points_with_fast(fc: &FastCurve, curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+     let f = &fc.field;
+     let xw = f.from_element(x);
+     if xw == 0 {
+@@ -1828,7 +1839,12 @@
+                 ));
+             }
+             let x = F2mElement::from_biguint(&BigUint::from(rng.gen_range(1..cap)), kc.n);
+-            let Some(point) = factor_base_points_with_x(&kc.curve, &x).into_iter().next() else {
++            let lifts = if kc.curve.m % 2 == 0 {
++                points_with_x(&kc.curve, &x)
++            } else {
++                factor_base_points_with_fast(&curve, &kc.curve, &x)
++            };
++            let Some(point) = lifts.into_iter().next() else {
+                 continue;
+             };
+             // Multiply by the cofactor rather than rejecting: [h]P has
+@@ -1964,8 +1980,13 @@
+     domain: FactorBaseDomain,
+ ) -> Option<FrobeniusFactorBase> {
+     let mut points: Vec<BinaryPoint> = Vec::new();
++    let lift_curve = factor_base_fast_curve(&kc.curve);
+     for x in &subspace {
+-        for p in factor_base_points_with_x(&kc.curve, x) {
++        let lifts = match &lift_curve {
++            Some(fc) => factor_base_points_with_fast(fc, &kc.curve, x),
++            None => points_with_x(&kc.curve, x),
++        };
++        for p in lifts {
+             points.push(p);
+         }
+     }
+@@ -6956,6 +6977,18 @@
+     m: usize,
+     rel: &CollectedRelation,
+ ) -> bool {
++    verify_collected_relation_with(FastCurve::new(&kc.curve).as_ref(), kc, fb, m, rel)
++}
++
++/// [`verify_collected_relation`] with the single-word curve built once by
++/// the caller for a whole batch instead of once per relation.
++pub fn verify_collected_relation_with(
++    fast: Option<&FastCurve>,
++    kc: &KoblitzCurve,
++    fb: &FrobeniusFactorBase,
++    m: usize,
++    rel: &CollectedRelation,
++) -> bool {
+     let r_u64 = kc
+         .subgroup_order
+         .to_u64_digits()
+@@ -6968,7 +7001,7 @@
+     if rel.points.iter().any(|&i| i >= fb.points.len()) {
+         return false;
+     }
+-    if let Some(fc) = FastCurve::new(&kc.curve) {
++    if let Some(fc) = fast {
+         let sum = rel.points.iter().fold(FastPoint::INFINITY,
+             |sum, &i| fc.add(sum, fc.lift(&fb.points[i])));
+         return !sum.infinity && sum == fc.mul_u64(fc.lift(kc.generator()), rel.a);
+@@ -7234,9 +7267,10 @@
+     /// remote worker cannot enter anything into the linear algebra.
+     pub fn push(&mut self, relations: &[CollectedRelation]) {
+         let begin = std::time::Instant::now();
++        let fast = FastCurve::new(&self.kc.curve);
+         let verdicts: Vec<bool> = relations
+             .par_iter()
+-            .map(|rel| verify_collected_relation(self.kc, self.fb, self.opts.m, rel))
++            .map(|rel| verify_collected_relation_with(fast.as_ref(), self.kc, self.fb, self.opts.m, rel))
+             .collect();
+         for (rel, ok) in relations.iter().zip(verdicts) {
+             if !ok {
+@@ -10922,3 +10956,49 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod tournament_fast_curve_once_equivalence {
++    use super::*;
++
++    #[test]
++    fn shared_curve_lift_and_verification_match_per_call_construction() {
++        let mut checked = 0usize;
++        for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let mask = (1u64 << n) - 1;
++            for i in 0..2048u64 {
++                let raw = i.wrapping_mul(0x9e37_79b9_7f4a_7c15) & mask;
++                let x = F2mElement::from_biguint(&BigUint::from(raw), n);
++                assert_eq!(factor_base_points_with_fast(&fc, &kc.curve, &x), points_with_x(&kc.curve, &x));
++                checked += 1;
++            }
++            let fb = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize).unwrap();
++            let r = kc.subgroup_order.to_u64_digits()[0];
++            let g = fc.lift(kc.generator());
++            for i in 0..64usize {
++                let points = vec![i % fb.points.len(), (7 * i + 1) % fb.points.len(), (13 * i + 2) % fb.points.len()];
++                let sum = points.iter().fold(FastPoint::INFINITY, |s, &j| fc.add(s, fc.lift(&fb.points[j])));
++                // A true relation, when the sum is a generator multiple, and a forged coefficient.
++                let mut candidates = vec![CollectedRelation { trial: i as u64, a: 1 + (i as u64 % (r - 1)), points: points.clone() }];
++                if !sum.infinity {
++                    let mut acc = g;
++                    for coefficient in 1..2048u64 {
++                        if acc == sum {
++                            candidates.push(CollectedRelation { trial: i as u64, a: coefficient, points: points.clone() });
++                            break;
++                        }
++                        acc = fc.add(acc, g);
++                    }
++                }
++                for rel in &candidates {
++                    assert_eq!(verify_collected_relation_with(Some(&fc), &kc, &fb, 3, rel),
++                               verify_collected_relation(&kc, &fb, 3, rel));
++                    checked += 1;
++                }
++            }
++        }
++        assert!(checked > 16_000);
++    }
++}

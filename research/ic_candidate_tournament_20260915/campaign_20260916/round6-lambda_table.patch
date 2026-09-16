@@ -1,0 +1,79 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4254,7 +4254,12 @@
+             // relation is projected into the prime-order subgroup.
+             continue;
+         };
+-        let mut coeff = kc.lambda.modpow(&BigUint::from(k), r);
++        let mut coeff = match projected_orbits {
++            Some(projected) if (k as usize) < projected.lambda_powers.len() => {
++                projected.lambda_powers[k as usize].clone()
++            }
++            _ => kc.lambda.modpow(&BigUint::from(k), r),
++        };
+         if negated && !coeff.is_zero() {
+             coeff = r - coeff;
+         }
+@@ -4279,6 +4284,22 @@
+     /// [h]P. `None` means [h]P = O and therefore contributes no column.
+     orbit_of: Vec<Option<(usize, u32, bool)>>,
+     representatives: Vec<BinaryPoint>,
++    /// `λ^k mod r` for `k < n`: the coefficient of a summand `π^k(rep)`,
++    /// computed once here rather than by a modular exponentiation per summand.
++    lambda_powers: Vec<BigUint>,
++}
++
++/// `λ^0, …, λ^(n−1) mod r` by repeated multiplication; equal to
++/// `λ.modpow(k, r)` for every `k < n`.
++fn lambda_powers(kc: &KoblitzCurve) -> Vec<BigUint> {
++    let r = &kc.subgroup_order;
++    let mut powers = Vec::with_capacity(kc.n as usize);
++    let mut current = BigUint::one() % r;
++    for _ in 0..kc.n {
++        powers.push(current.clone());
++        current = (&current * &kc.lambda) % r;
++    }
++    powers
+ }
+ 
+ /// Build the quotient factor-base columns after public cofactor projection.
+@@ -4356,6 +4377,7 @@
+     ProjectedSignedOrbitMap {
+         orbit_of,
+         representatives,
++        lambda_powers: lambda_powers(kc),
+     }
+ }
+ 
+@@ -4439,6 +4461,7 @@
+     Some(ProjectedSignedOrbitMap {
+         orbit_of,
+         representatives: representatives.into_iter().map(|p| fc.lower(p)).collect(),
++        lambda_powers: lambda_powers(kc),
+     })
+ }
+ 
+@@ -10922,3 +10945,23 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod tournament_lambda_table_equivalence {
++    use super::*;
++
++    #[test]
++    fn lambda_powers_match_modular_exponentiation() {
++        let mut checked = 0usize;
++        for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let powers = lambda_powers(&kc);
++            assert_eq!(powers.len(), n as usize);
++            for (k, power) in powers.iter().enumerate() {
++                assert_eq!(*power, kc.lambda.modpow(&BigUint::from(k), &kc.subgroup_order), "degree {n}, k={k}");
++                checked += 1;
++            }
++        }
++        assert!(checked > 100);
++    }
++}

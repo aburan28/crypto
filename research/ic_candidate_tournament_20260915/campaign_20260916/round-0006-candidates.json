@@ -1,0 +1,113 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "combined_descent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16",
+    "hypothesis": "Round-0005 winner, freshly measured on the same complete cold 16-target jobs."
+  },
+  {
+    "id": "it_inv",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/it_inv",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Field inversion by the Itoh\u2013Tsujii chain: the same power as Fermat with 6 instead of 21 multiplications at degree 23; inversion is 41% of descent and 18% of setup instructions.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "euclid_inv",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/euclid_inv",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Field inversion by binary extended Euclid over F_2[z]: fewer instructions than Fermat, at the price of data-dependent branches.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "fast_curve_once",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/fast_curve_once",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Build the single-word curve (and its 256-entry reduction tables) once per factor-base build and once per verified relation batch instead of once per abscissa and per relation.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "lazy_field",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/lazy_field",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Do not build the symbolic FieldStructure the pair-table path never reads; it is constructed twice per job at 1.6M instructions each.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "lambda_table",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/lambda_table",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Compute the n Frobenius eigenvalue powers once per projected orbit map instead of one BigUint modular exponentiation per relation summand.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "fast_orbits",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/fast_orbits",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Walk the Frobenius and signed-Frobenius orbits of the factor base in single-word arithmetic with packed keys, replacing big-integer squarings and hash keys.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  },
+  {
+    "id": "combined",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round6-sources/combined",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Measure it_inv, fast_curve_once, lazy_field, lambda_table and fast_orbits together, every check retained.",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately."
+  }
+]

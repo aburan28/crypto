@@ -1,0 +1,93 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6695,7 +6695,7 @@
+     fb: &'a FrobeniusFactorBase,
+     opts: &'a KoblitzIcOptions,
+     index_of: HashMap<(BigUint, BigUint), usize>,
+-    field: FieldStructure,
++    field: std::sync::OnceLock<FieldStructure>,
+     pair: PairSource<'a>,
+     /// Single-word curve and lifted generator when the field fits.
+     fast: Option<(FastCurve, FastPoint)>,
+@@ -6707,6 +6707,13 @@
+ pub const PRECOMPUTE_BATCH_TRIALS: usize = 64;
+ 
+ impl<'a> RelationCollector<'a> {
++    /// The symbolic field structure, built on first use: only the general
++    /// (non-pair-table) decomposition path needs it.
++    fn field_structure(&self) -> &FieldStructure {
++        self.field
++            .get_or_init(|| FieldStructure::new(self.kc.n, &self.kc.curve.irreducible))
++    }
++
+     /// `None` when the base cannot decompose with `opts.m` summands or
+     /// the field is too wide for the pair table.
+     pub fn new(
+@@ -6764,7 +6771,7 @@
+             fb,
+             opts,
+             index_of: fb.index_map(),
+-            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
++            field: std::sync::OnceLock::new(),
+             pair,
+             fast,
+             r_u64,
+@@ -6837,7 +6844,7 @@
+                         self.kc,
+                         self.fb,
+                         &self.index_of,
+-                        &self.field,
++                        self.field_structure(),
+                         self.pair_table(),
+                         self.opts,
+                         &target,
+@@ -7369,7 +7376,7 @@
+     projected: ProjectedSignedOrbitMap,
+     column_log: Vec<BigUint>,
+     index_of: HashMap<(BigUint, BigUint), usize>,
+-    field: FieldStructure,
++    field: std::sync::OnceLock<FieldStructure>,
+     /// Single-word curve and lifted generator when the field fits.
+     fast: Option<(FastCurve, FastPoint)>,
+     h: BigUint,
+@@ -7377,6 +7384,13 @@
+ }
+ 
+ impl<'a> IndividualLogSolver<'a> {
++    /// The symbolic field structure, built on first use: only the general
++    /// (non-pair-table) decomposition path needs it.
++    fn field_structure(&self) -> &FieldStructure {
++        self.field
++            .get_or_init(|| FieldStructure::new(self.kc.n, &self.kc.curve.irreducible))
++    }
++
+     fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
+         if d >= &self.kc.subgroup_order { return false; }
+         if let Some((fc, g)) = &self.fast {
+@@ -7422,7 +7436,7 @@
+             projected,
+             column_log,
+             index_of: fb.index_map(),
+-            field: FieldStructure::new(kc.n, &kc.curve.irreducible),
++            field: std::sync::OnceLock::new(),
+             fast,
+             h: &kc.cofactor % r,
+             r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+@@ -7445,7 +7459,7 @@
+                     self.kc,
+                     self.fb,
+                     &self.index_of,
+-                    &self.field,
++                    self.field_structure(),
+                     self.pair,
+                     self.opts,
+                     &fc.lower(target),
+@@ -7465,7 +7479,7 @@
+             self.kc,
+             self.fb,
+             &self.index_of,
+-            &self.field,
++            self.field_structure(),
+             self.pair,
+             self.opts,
+             &target,
