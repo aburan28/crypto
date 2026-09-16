@@ -483,6 +483,62 @@ pub fn stable_min_j(n: u32, n0: u32) -> Option<(u32, bool)> {
     Some((best.j, qsf))
 }
 
+/// Dimensions of the Frobenius-stable `F_2`-subspaces of `F_{2^n}`.
+///
+/// A subspace is Frobenius-stable exactly when it is the kernel of a
+/// linearised polynomial with coefficients in `F_2`, i.e. of an element
+/// of `F_2[σ]`; under the isomorphism `F_2[t] ≅ F_2[σ]` sending
+/// `t^n − 1 ↦ X^{2^n} − X`, those kernels correspond to the divisors of
+/// `t^n − 1`, and the kernel dimension is the divisor's degree.  So the
+/// achievable dimensions are the subset sums of the degrees of the
+/// irreducible factors of `t^n − 1` — equivalently, of the cyclotomic
+/// coset sizes of `2` mod `n`.
+///
+/// This is what decides whether a field admits a usable invariant
+/// factor base at all, and it is decided by arithmetic of `n` alone,
+/// before any curve is chosen.
+pub fn stable_subspace_dimensions(n: u32) -> Option<Vec<u32>> {
+    let cosets = cyclotomic_cosets(n)?;
+    let mut reachable = vec![false; n as usize + 1];
+    reachable[0] = true;
+    for c in &cosets {
+        let d = c.len();
+        // Descending, so each factor is used at most once.
+        for target in (d..=n as usize).rev() {
+            if reachable[target - d] {
+                reachable[target] = true;
+            }
+        }
+    }
+    Some(
+        (0..=n)
+            .filter(|&d| reachable[d as usize])
+            .collect(),
+    )
+}
+
+/// Whether `F_{2^n}` admits **no** usable Frobenius-stable factor base:
+/// the only stable subspaces are the trivial ones — dimension `0`, the
+/// prime field `F_2` (dimension 1), the trace hyperplane (dimension
+/// `n − 1`), and the whole field.
+///
+/// This happens exactly when `2` is a primitive root mod `n`, so
+/// `t^n − 1 = (t + 1) · f` with `f` irreducible of degree `n − 1`.
+///
+/// `n = 131` — the ECC2K-130 field — is such an `n`.  Every construction
+/// whose factor base is the kernel of an `F_2`-coefficient linearised
+/// polynomial degenerates there: the quasi-subfield factor bases of
+/// Huang–Kosters–Petit–Yeo–Yun, and the Frobenius-invariant factor
+/// bases that
+/// [`crate::cryptanalysis::koblitz_index_calculus`] builds for subfield
+/// curves alike.  A dimension-1 base is the prime field and a
+/// dimension-130 base cannot be materialised, so neither is a factor
+/// base in any useful sense.
+pub fn stable_dimensions_are_trivial(n: u32) -> Option<bool> {
+    let dims = stable_subspace_dimensions(n)?;
+    Some(dims == vec![0, 1, n - 1, n])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -699,6 +755,79 @@ mod tests {
                     "t^{n0}+1 divides t^{n}+1 iff {n0} divides {n}"
                 );
             }
+        }
+    }
+
+    /// ECC2K-130 lives in `F_{2^131}`, and `2` is a primitive root mod
+    /// `131`: `t^131 − 1` factors as `(t + 1)` times an irreducible of
+    /// degree `130`, so there is no divisor of intermediate degree and
+    /// no non-trivial Frobenius-stable subspace to use as a factor
+    /// base.
+    ///
+    /// This is unconditional for the `F_2[σ]` class.  It does not by
+    /// itself rule out a quasi-subfield polynomial with coefficients in
+    /// `F_{2^131}`, whose kernel need not be Frobenius-stable; what
+    /// stands behind that wider claim is the census agreement recorded
+    /// in `RESEARCH_QUASI_SUBFIELD.md`, which is evidence at reachable
+    /// `n`, not a proof.
+    #[test]
+    fn f2_131_admits_no_non_trivial_stable_subspace() {
+        assert_eq!(
+            stable_subspace_dimensions(131).unwrap(),
+            vec![0, 1, 130, 131],
+            "t^131 - 1 = (t+1) * (irreducible of degree 130)"
+        );
+        assert_eq!(stable_dimensions_are_trivial(131), Some(true));
+        // And the criterion agrees with the coset structure it is
+        // derived from, computed independently here.
+        let sizes: Vec<usize> = cyclotomic_cosets(131)
+            .unwrap()
+            .iter()
+            .map(|c| c.len())
+            .collect();
+        let mut sorted = sizes.clone();
+        sorted.sort_unstable();
+        assert_eq!(sorted, vec![1, 130]);
+    }
+
+    /// The contrast case.  `n = 73` is the one prime cell the reach
+    /// sweep flagged as interesting, and it is interesting precisely
+    /// because `2` has small order mod `73`, so intermediate divisor
+    /// degrees — dimension 9 among them — exist.
+    #[test]
+    fn f2_73_does_admit_intermediate_stable_subspaces() {
+        let dims = stable_subspace_dimensions(73).unwrap();
+        assert!(dims.contains(&9), "the n = 73, n0 = 9 cell needs dim 9");
+        assert_eq!(stable_dimensions_are_trivial(73), Some(false));
+    }
+
+    /// Every field in the binary-curve range where `2` is a primitive
+    /// root is equally barren.  These are the NIST/SECG binary field
+    /// degrees; the ones that are not barren are named explicitly so a
+    /// regression shows up as a changed classification, not a silent
+    /// pass.
+    #[test]
+    fn primitive_root_fields_are_barren_and_the_others_are_not() {
+        for n in [131u32, 163, 283, 653] {
+            if let Some(true) = stable_dimensions_are_trivial(n) {
+                continue;
+            }
+            // Not barren: then it must genuinely have an intermediate
+            // dimension, which is a fact about n we can restate.
+            let dims = stable_subspace_dimensions(n).unwrap();
+            assert!(
+                dims.iter().any(|&d| d > 1 && d < n - 1),
+                "n = {n} classified as non-barren but has no intermediate dimension: {dims:?}"
+            );
+        }
+        // 233 and 409 are composite-order cases with real intermediate
+        // dimensions available.
+        for n in [233u32, 409] {
+            let dims = stable_subspace_dimensions(n).unwrap();
+            assert!(
+                dims.iter().any(|&d| d > 1 && d < n - 1),
+                "n = {n}: {dims:?}"
+            );
         }
     }
 }

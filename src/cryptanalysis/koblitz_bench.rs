@@ -63,8 +63,10 @@ use rand::{Rng, SeedableRng};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, first_fall_degree, FieldStructure, MacaulayProfile, SolverEngine,
+    build_decomposition_system, first_fall_degree, solving_degree, system_degree, FieldStructure,
+    MacaulayProfile, SolverEngine,
 };
+use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, enumerate_decompose, groebner_decompose, invariant_subspace_basis,
     order_of_2_mod_n, sat_decompose, KoblitzCurve,
@@ -655,6 +657,258 @@ pub fn subspace_ladder(n_max: u32, max_ell: u32) -> Vec<(u32, u32)> {
         .filter_map(|n| order_of_2_mod_n(n).map(|l| (n, l)))
         .filter(|(n, l)| *l <= max_ell && *l < *n)
         .collect()
+}
+
+// ── Solving degree vs first fall degree ────────────────────────────
+
+/// One `(n, m)` cell of the solving-degree sweep.
+///
+/// The first fall degree is what the Petit–Quisquater complexity
+/// argument is stated in; the solving degree is what the linear algebra
+/// actually costs.  `RESEARCH_DREG_MEASUREMENT.md` says why the gap
+/// between them is the measurement worth having, and
+/// `control_solve_mean` is the null object that says whether any of it
+/// is structure rather than shape.
+#[derive(Clone, Debug)]
+pub struct DregSummary {
+    /// Extension degree.
+    pub n: u32,
+    /// Subspace dimension.
+    pub ell: u32,
+    /// Summands.
+    pub m: usize,
+    /// Boolean unknowns.
+    pub n_vars: usize,
+    /// Boolean equations.
+    pub n_eqs: usize,
+    /// System total degree.
+    pub degree: u32,
+    /// Target draws taken.
+    pub trials: usize,
+    /// Mean first fall degree over the draws that fell.
+    pub fall_mean: Option<f64>,
+    /// Mean degree at which a **non-decomposable** target was refuted.
+    ///
+    /// This is the number that sets the attack's cost.  The
+    /// decomposition probability is tiny, so almost every call in
+    /// relation collection is a refutation, and the Macaulay matrix at
+    /// this degree is what each of those calls has to build.
+    pub refute_mean: Option<f64>,
+    /// Largest refutation degree seen.
+    pub refute_max: Option<u32>,
+    /// Draws refuted at or below `d_max`.
+    pub refuted: usize,
+    /// Mean degree at which a decomposable target had every variable
+    /// pinned.  Reported separately because it is a different event: a
+    /// target with two or more decompositions can never be pinned, and
+    /// that is a property of the target, not a failure of the algebra.
+    pub pin_mean: Option<f64>,
+    /// Draws resolved by pinning.
+    pub pinned: usize,
+    /// Draws that neither refuted nor pinned at or below `d_max`, or
+    /// whose Macaulay matrix exceeded the size caps first.
+    pub unresolved: usize,
+    /// Highest Macaulay degree actually built on any draw.
+    ///
+    /// The difference between "measured, and the degree is high" and
+    /// "could not be measured" lives here.  When this is below `d_max`
+    /// on an unresolved cell, the sweep ran out of *matrix*, not out of
+    /// degree: [`crate::cryptanalysis::koblitz_groebner::solving_profile`]
+    /// returned `None` because the Macaulay matrix exceeded the size
+    /// caps, and nothing about the system's solving degree has been
+    /// established.
+    pub max_degree_built: Option<u32>,
+    /// Mean refutation degree of the random null-object control:
+    /// systems with the same variable count, equation count, total
+    /// degree and term density, drawn without any Semaev structure.
+    pub control_solve_mean: Option<f64>,
+    /// Control draws that did not resolve.
+    pub control_unresolved: usize,
+}
+
+impl DregSummary {
+    /// `solve_mean − fall_mean`: how far the degree that costs
+    /// anything sits above the degree the complexity claim is stated
+    /// in.  The first-fall-degree assumption is the assertion that this
+    /// stays bounded as `n` grows.
+    pub fn gap(&self) -> Option<f64> {
+        Some(self.refute_mean? - self.fall_mean?)
+    }
+}
+
+/// A random boolean system with a prescribed shape: `n_eqs` equations
+/// over `n_vars` variables, each a sum of `terms_per_eq` monomials of
+/// degree at most `degree`.
+///
+/// This is the null object for the sweep.  If the Semaev systems
+/// resolve at the same degree as these, then their algebraic structure
+/// is buying nothing and the measurement is of the shape alone.
+pub fn random_control_system(
+    n_vars: usize,
+    n_eqs: usize,
+    degree: u32,
+    terms_per_eq: usize,
+    seed: u64,
+) -> Vec<F2BoolPoly> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    (0..n_eqs)
+        .map(|_| {
+            let monos: Vec<F2BoolMono> = (0..terms_per_eq.max(1))
+                .map(|_| {
+                    let d = 1 + rng.gen::<u32>() % degree.max(1);
+                    let mut mask = 0u64;
+                    while mask.count_ones() < d {
+                        mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                    }
+                    F2BoolMono::from_mask(mask)
+                })
+                .collect();
+            F2BoolPoly::from_monos(monos, n_vars)
+        })
+        .collect()
+}
+
+/// Measure first fall degree and solving degree on the same systems,
+/// over `trials` independent target draws, against the matched random
+/// control.
+/// `with_control` runs the matched random null object as well.  It is
+/// the expensive half of the sweep by a wide margin — a random system
+/// of this shape does not refute until a high degree, so it pays the
+/// full `binom(n_vars, d_max)` Macaulay cost on every draw, while the
+/// Semaev systems resolve early and stop.  Turn it off to extend the
+/// `n` ladder, on to interpret any single cell.
+pub fn dreg_summary(
+    n: u32,
+    factor_index: usize,
+    m: usize,
+    d_max: u32,
+    trials: usize,
+    seed: u64,
+    with_control: bool,
+) -> Option<DregSummary> {
+    let (irr, basis) = invariant_subspace_basis(n, factor_index)?;
+    let st = FieldStructure::new(n, &irr);
+    let b = F2mElement::one(n);
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    let mut falls: Vec<u32> = Vec::new();
+    let mut refutes: Vec<u32> = Vec::new();
+    let mut pins: Vec<u32> = Vec::new();
+    let mut unresolved = 0usize;
+    let mut max_degree_built: Option<u32> = None;
+    let mut shape: Option<(usize, usize, u32, usize)> = None;
+
+    for _ in 0..trials {
+        let x_r = F2mElement::from_biguint(&BigUint::from(rng.gen::<u64>()), n);
+        let sys = match build_decomposition_system(&basis, &x_r, &b, m, &st) {
+            Some(s) => s,
+            None => continue,
+        };
+        let deg = system_degree(&sys.equations);
+        let terms: usize = sys.equations.iter().map(|e| e.terms.len()).sum::<usize>()
+            / sys.equations.len().max(1);
+        shape = Some((sys.n_vars, sys.equations.len(), deg, terms));
+
+        let (fall, _) = first_fall_degree(&sys.equations, sys.n_vars, d_max);
+        if let Some(f) = fall {
+            falls.push(f);
+        }
+        let (d, profs) = solving_degree(&sys.equations, sys.n_vars, d_max);
+        if let Some(top) = profs.last().map(|p| p.degree) {
+            max_degree_built = Some(max_degree_built.map_or(top, |x: u32| x.max(top)));
+        }
+        match d {
+            Some(d) => {
+                // `solving_degree` stops at the first resolving degree,
+                // so the last profile is the one that resolved.
+                if profs.last().map(|p| p.refuted).unwrap_or(false) {
+                    refutes.push(d);
+                } else {
+                    pins.push(d);
+                }
+            }
+            None => unresolved += 1,
+        }
+    }
+
+    let (n_vars, n_eqs, degree, terms_per_eq) = shape?;
+
+    // Matched control, same number of draws.  A random system of this
+    // shape is overwhelmingly infeasible, so its resolving event is a
+    // refutation too, and the two numbers compare like for like.
+    let mut control: Vec<u32> = Vec::new();
+    let mut control_unresolved = 0usize;
+    for t in 0..(if with_control { trials } else { 0 }) {
+        // A fresh control per draw, deterministically derived from the
+        // sweep seed so the whole table replays.
+        let control_seed = seed
+            .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+            .wrapping_add(t as u64);
+        let polys = random_control_system(n_vars, n_eqs, degree, terms_per_eq, control_seed);
+        match solving_degree(&polys, n_vars, d_max).0 {
+            Some(d) => control.push(d),
+            None => control_unresolved += 1,
+        }
+    }
+
+    let mean = |v: &[u32]| {
+        if v.is_empty() {
+            None
+        } else {
+            Some(v.iter().map(|&x| x as f64).sum::<f64>() / v.len() as f64)
+        }
+    };
+
+    Some(DregSummary {
+        n,
+        ell: basis.len() as u32,
+        m,
+        n_vars,
+        n_eqs,
+        degree,
+        trials,
+        fall_mean: mean(&falls),
+        refute_mean: mean(&refutes),
+        refute_max: refutes.iter().copied().max(),
+        refuted: refutes.len(),
+        pin_mean: mean(&pins),
+        pinned: pins.len(),
+        unresolved,
+        max_degree_built,
+        control_solve_mean: mean(&control),
+        control_unresolved,
+    })
+}
+
+/// Render [`DregSummary`] rows as a markdown table.
+pub fn format_dreg_table(rows: &[DregSummary]) -> String {
+    let mut out = String::from(
+        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl | refuted | pinned | unres | D_built |\n\
+         |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|-----:|--------:|-------:|------:|--------:|\n",
+    );
+    let f = |v: Option<f64>| v.map_or("—".to_string(), |x| format!("{x:.2}"));
+    for r in rows {
+        out.push_str(&format!(
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}/{} | {} |\n",
+            r.n,
+            r.ell,
+            r.m,
+            r.n_vars,
+            r.n_eqs,
+            r.degree,
+            f(r.fall_mean),
+            f(r.refute_mean),
+            f(r.gap()),
+            f(r.control_solve_mean),
+            r.refuted,
+            r.pinned,
+            r.unresolved,
+            r.trials,
+            r.max_degree_built
+                .map_or("—".to_string(), |d| d.to_string()),
+        ));
+    }
+    out
 }
 
 #[cfg(test)]
