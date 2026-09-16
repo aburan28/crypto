@@ -9,6 +9,8 @@
 //! cargo run --release --example hyperelliptic_ic_vs_rho
 //! ```
 
+use std::io::{self, Write};
+
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
@@ -156,6 +158,10 @@ fn main() {
     for (genus, primes) in [(2u32, &primes2[..]), (3u32, &primes3[..])] {
         println!("\n--- genus {genus} ---");
         for &p in primes {
+            // Flushed per line: this example is long-running and its
+            // output is usually redirected, where block buffering makes
+            // a slow stage look like a hung one.
+            io::stdout().flush().ok();
             let (curve, d1, n, c) = match pick_instance(p, genus) {
                 Some(v) => v,
                 None => {
@@ -228,6 +234,7 @@ fn main() {
                     row.ratio_to_floor(),
                     mark
                 );
+                io::stdout().flush().ok();
                 println!(
                     "        c = {}, relation stage {:.0} ops ({:.0} precompute, {:.2} ops/trial) \
                      + oracle {:.0} mul-mods ({:.0} equiv) + linear algebra {:.0} mul-mods \
