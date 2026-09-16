@@ -237,9 +237,13 @@ class Certification(unittest.TestCase):
     def test_contract_binds_every_semantic_field(self):
         for key, value in (("dpWeight", 14), ("curve", 83), ("maxIters", 99),
                            ("binarySha256", "b" * 64), ("sourceSha256", "b" * 64),
-                           ("workers", 2), ("batch", 16)):
+                           ("workers", 2), ("batch", 16), ("walk", "table")):
             with self.subTest(field=key):
                 self.assertNotEqual(protocol.campaignContract(dict(self.config, **{key: value}))["id"], self.campaign["id"])
+        # The default is the walk every existing corpus was collected with.
+        self.assertEqual(protocol.campaignContract(dict(self.config, walk="sigma"))["id"], self.campaign["id"])
+        with self.assertRaises(ValueError):
+            protocol.campaignContract(dict(self.config, walk="random"))
 
     def test_legacy_directory_cannot_be_silently_certified(self):
         (self.work / "dp.bin").write_bytes(b"")

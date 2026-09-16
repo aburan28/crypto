@@ -51,6 +51,8 @@ PACKED_STATE_TILE ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
+# Polynomial squaring on the logic pipe instead of the carryless one.
+PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -126,7 +128,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
-       -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES)
+       -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
+       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
 

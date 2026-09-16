@@ -1,0 +1,68 @@
+kernel 4walk: 3632 SASS instructions, regs 102, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  clmad    mem   called from
+5250  -5d60       178    159      1      6      0   0x4a30 0x5160
+5d70  -6d10       251    242      8      0      0   0x3f40
+6d20  -7dc0       267    257      9      0      0   0x3bb0
+7dd0  -8ec0       272    262      9      0      0   0x3b00
+8ed0  -a150       297    230      9      0     57   0x3a40
+a160  -b3e0       297    230      9      0     57   0x3980
+b3f0  -ca60       360    307      2     12      0   0x2c10 0x4920
+ca70  -e120       364    345      0      6      0   0x3410 0x3960 0x3a20 0x3ae0 0x3b90 0x3c50 0x3f20 0x3fe0
+e130  -e250        19     18      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  clmad    mem
+170        1f0             9      4      2      0      2
+270        3c0            22      6      7      0      8
+570        5230         1229    995     29     25     64
+600        2da0          635    524     24      0     50
+2900       2980            9      8      0      0      0
+4780       5220          171    132      5      5     14
+
+step loop 570-5230; slot loops: ['600-2da0', '4780-5220']
+
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad    clmad      mem
+slot loop 0                             995      831       26       12       50
+slot loop 1                             887      757        9       29       14
+inversion + step overhead, /B         294.9    270.0      2.8     4.25      7.1
+TOTAL per update                     2176.9   1858.0     37.8    45.25     71.1
+ALU slots/update (alu + 2.01 imad) = 1933.9 ; clmad/update = 45.25 ; instr/update = 2176.9
+
+opcode histogram, slot loops + their callees (static):
+  LOP3           670
+  SHF            331
+  IMAD           129
+  NOP            101
+  MOV             74
+  POPC            55
+  SEL             52
+  IADD            39
+  CLMAD           35
+  LDCU            25
+  LDG             23
+  ISETP           23
+  STG             21
+  IADD3           20
+  LDS             16
+  BRA             15
+  LEA             12
+  HFMA2            8
+  BREV             7
+  S2R              7
+  FLO              6
+  BSSY             5
+  BSYNC            5
+  VOTEU            4
+  CALL             4
+  LDC              3
+  UFLO             3
+  REDG             3
+  RET              3
+  ATOMG            1
+  SHFL             1
+  UMOV             1
+  UIMAD            1
+  UIADD3           1

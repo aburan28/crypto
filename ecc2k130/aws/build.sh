@@ -43,10 +43,20 @@ rm -rf "$work/src/build" "$work/src/ecc2k130" "$work/src/ecc2k130-cpu"
 
 gencode=""
 for a in $ARCHES; do gencode="$gencode -gencode arch=compute_$a,code=sm_$a"; done
+# The iteration function comes from campaign.json ("walk": "sigma" or "table",
+# see protocol.WALKS) so the binary and the contract that names it cannot
+# disagree; the file is fetched again below to point it at the build.
+aws s3 cp "s3://$BUCKET/campaign.json" "$work/campaign.json" --only-show-errors
+walk=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("walk", "sigma"))' "$work/campaign.json")
+case "$walk" in
+    sigma) walkTable=0 ;;
+    table) walkTable=1 ;;
+    *) echo "campaign.json names an unknown walk: $walk" >&2; exit 1 ;;
+esac
 knobs="BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
-PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1"
+PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=$walkTable TABLE_BRANCHES=8"
 # The fixtures must be built with the arithmetic they are meant to check, so
 # take their -D flags from the knobs above rather than from a second list.
 defs="-DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0"
@@ -62,6 +72,9 @@ docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c 
     nvcc -O3 -std=c++17 $gencode $defs src/testpackedcuda.cu -o build/test-packed-cuda 2>&1 | tail -n 5
     nvcc -O3 -std=c++17 $gencode $defs src/testpackedstatecuda.cu -o build/test-packed-storage-cuda 2>&1 | tail -n 5
     nvcc -O3 -std=c++17 $gencode $defs src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda 2>&1 | tail -n 5
+    if [ $walkTable = 1 ]; then
+        nvcc -O3 -std=c++17 $gencode $defs -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp 2>&1 | tail -n 5
+    fi
     nvcc --version | tail -n 2 > build/nvcc.txt
     # The client links libgomp dynamically; ship the container's copy so the
     # instance needs no compiler packages.
@@ -99,6 +112,9 @@ for f in ecc2k130 ecc2k130-cpu build/test-packed-cuda build/test-packed-storage-
          build/test-shared-sigma-cuda build/libgomp.so.1; do
     aws s3 cp "$work/src/$f" "s3://$BUCKET/$prefix/$(basename "$f")" --only-show-errors
 done
+if [ $walkTable = 1 ]; then
+    aws s3 cp "$work/src/build/test-table-walk-cuda" "s3://$BUCKET/$prefix/test-table-walk-cuda" --only-show-errors
+fi
 aws s3 cp "$work/manifest.json" "s3://$BUCKET/$prefix/manifest.json" --only-show-errors
 
 # Point the campaign at this build.  Geometry in campaign.json must match the
@@ -118,6 +134,8 @@ geometry = (int(built["BATCH"]), int(built["THREADS"]), int(built["MINBLOCKS"]))
 assert (c["batch"], c["blockThreads"], c["minBlocks"]) == geometry, \
     "campaign.json geometry %r differs from the build knobs %r" % (
         (c["batch"], c["blockThreads"], c["minBlocks"]), geometry)
+assert {"sigma": "0", "table": "1"}[c.get("walk", "sigma")] == built["WALK_TABLE"], \
+    "campaign.json walk %r differs from the build's WALK_TABLE=%s" % (c.get("walk", "sigma"), built["WALK_TABLE"])
 json.dump(c, open(path, "w"), indent=1, sort_keys=True)
 EOF
 aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors

@@ -172,11 +172,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         if (!sol || !sol->walk.ready) { fprintf(stderr, "packed table walk: no resolver table\n"); exit(1); }
         {
             std::vector<uint32_t> consts(eccPacked131::TW_WORDS);
-            uint32_t planes[8][5];
-            eccPacked131::twFillConsts(sol->walk, consts.data(), planes);
+            eccPacked131::twFillConsts(sol->walk, consts.data());
             CUDA_CHECK(cudaMalloc(&twConsts, consts.size() * sizeof(uint32_t)));
             CUDA_CHECK(cudaMemcpy(twConsts, consts.data(), consts.size() * sizeof(uint32_t), cudaMemcpyHostToDevice));
-            CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::twPlane, planes, sizeof(planes)));
             P.twConsts = twConsts;
         }
         CUDA_CHECK(cudaMalloc(&P.hist, laneCount() * sizeof(u64)));

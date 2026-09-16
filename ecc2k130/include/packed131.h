@@ -231,6 +231,25 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
     return r;
 #endif
 }
+#ifndef ECC_PACKED_ALU_SQUARE
+#define ECC_PACKED_ALU_SQUARE 0
+#endif
+#if ECC_PACKED_ALU_SQUARE != 0 && ECC_PACKED_ALU_SQUARE != 1
+#error "ECC_PACKED_ALU_SQUARE must be 0 or 1"
+#endif
+// The logic-op spread, kept callable beside the clmad one: with the table walk
+// the ALU pipe is no longer the only saturated one (ITERATION-FUNCTION.md
+// section 6), so the per-update polynomial squaring can be moved back here
+// with ECC_PACKED_ALU_SQUARE=1, trading five clmad for about sixty logic ops.
+ECC_HD uint64_t spread32alu(uint32_t x){
+ uint64_t r=x;
+ r=(r|(r<<16))&0x0000ffff0000ffffull;
+ r=(r|(r<<8))&0x00ff00ff00ff00ffull;
+ r=(r|(r<<4))&0x0f0f0f0f0f0f0f0full;
+ r=(r|(r<<2))&0x3333333333333333ull;
+ r=(r|(r<<1))&0x5555555555555555ull;
+ return r;
+}
 ECC_HD uint64_t spread32p(uint32_t x){
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
  /* A carryless square is a bit spread.  x*x = sum_(i,j) x_i x_j t^(i+j) and
@@ -262,11 +281,11 @@ ECC_HD P131 squarePolynomial131(P131 a) {
     uint32_t h[9];
 #pragma unroll
     for (int i = 0; i < 4; ++i) {
-        const uint64_t w = spread32p(a.v[i]);
+        const uint64_t w = ECC_PACKED_ALU_SQUARE ? spread32alu(a.v[i]) : spread32p(a.v[i]);
         h[2 * i] = uint32_t(w);
         h[2 * i + 1] = uint32_t(w >> 32);
     }
-    h[8] = uint32_t(spread32p(a.v[4]));
+    h[8] = uint32_t(ECC_PACKED_ALU_SQUARE ? spread32alu(a.v[4]) : spread32p(a.v[4]));
     return reducePolynomial131(h);
 }
 ECC_HD P131 sqr131(const P131 &a){

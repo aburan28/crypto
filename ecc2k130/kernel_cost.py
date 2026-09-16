@@ -19,6 +19,13 @@ Static counts include both arms of predicated branches, so they are an upper
 bound on the dynamic count; the measured rate bounds the dynamic count from
 the other side (ITERATION-FUNCTION.md section 1).
 
+Slot weights come from benchmarks/clmad-price/probe.cu on sm_120: LOP3, SHF,
+PRMT and IMNMX issue at the logic rate (1 slot), IMAD at 2.01, and POPC, FLO
+and BREV at 3.97 -- a quarter of the rate.  The "quarter" column is the
+count of those; the ALU-slot total prices them at 3.97, which is where the
+first table-walk selection (eight bit-plane popcounts) lost a third of its
+predicted gain.
+
 Needs nvcc and cuobjdump (CUDA 13.3+ for clmad) on PATH:
   ./kernel_cost.py                 # audited preset
   ./kernel_cost.py --ops           # plus an opcode histogram of the slot loops
@@ -52,11 +59,16 @@ CTRL = ("BRA","BSYNC","BSSY","EXIT","CALL","RET","NOP","BAR","SSY","SYNC","JMP",
         "WARPSYNC","YIELD","S2R","CS2R","DEPBAR","BMOV","BPT","ERRBAR","USETP","UISETP",
         "UMOV","UIADD3","ULOP3","USHF","R2UR","UPRMT","ULEA","UBMSK")
 
+QUARTER = ("POPC","FLO","BREV")
+QUARTER_SLOTS = 3.97
+IMAD_SLOTS = 2.01
+
 def classify(op):
     head = op.split(".")[0]
     if head.startswith("CLMAD") or head.startswith("CLMUL"): return "clmad"
     if op.startswith(("IMAD.MOV","IMAD.IADD","IMAD.SHL")): return "alu"
     if head.startswith("IMAD") or head.startswith("IMUL"): return "imad"
+    if head in QUARTER: return "quarter"
     if head in MEM: return "mem"
     if head in CTRL: return "ctrl"
     return "alu"
@@ -149,23 +161,23 @@ def main():
         for t, n in calls_in(lo, hi).items():
             if subs[t][0] == lo: continue
             sc = full(*subs[t], depth+1)
-            for k in ("n","alu","imad","clmad","mem"): c[k] += n * sc[k]
+            for k in ("n","alu","imad","quarter","clmad","mem"): c[k] += n * sc[k]
         memo[key] = c
         return c
     print("\nsubroutines (own SASS, then with nested calls):")
-    print("%-14s %6s %6s %6s %6s %6s   %s" % ("range","n","alu","imad","clmad","mem","called from"))
+    print("%-14s %6s %6s %6s %6s %6s %6s   %s" % ("range","n","alu","imad","quart","clmad","mem","called from"))
     for t,(lo,hi) in sorted(subs.items()):
         c = count(insts, lo, hi)
         callers = [hex(addr) for addr, op, rest, pred in insts if op.startswith("CALL") and int(re.search(r"0x([0-9a-f]+)", rest).group(1),16)==t]
-        print("%-6x-%-7x %6d %6d %6d %6d %6d   %s" % (lo, hi, c["n"], c["alu"], c["imad"], c["clmad"], c["mem"], " ".join(callers)))
+        print("%-6x-%-7x %6d %6d %6d %6d %6d %6d   %s" % (lo, hi, c["n"], c["alu"], c["imad"], c["quarter"], c["clmad"], c["mem"], " ".join(callers)))
 
     L = [l for l in loops(insts) if l[1] < kernel_end]
     L.sort(key=lambda x: (x[0], -x[1]))
     print("\nloops in the kernel body (own SASS):")
-    print("%-10s %-10s %6s %6s %6s %6s %6s" % ("start","end","n","alu","imad","clmad","mem"))
+    print("%-10s %-10s %6s %6s %6s %6s %6s %6s" % ("start","end","n","alu","imad","quart","clmad","mem"))
     for lo, hi in L:
         c = count(insts, lo, hi)
-        print("%-10x %-10x %6d %6d %6d %6d %6d" % (lo, hi, c["n"], c["alu"], c["imad"], c["clmad"], c["mem"]))
+        print("%-10x %-10x %6d %6d %6d %6d %6d %6d" % (lo, hi, c["n"], c["alu"], c["imad"], c["quarter"], c["clmad"], c["mem"]))
     step = max(L, key=lambda x: x[1]-x[0])
     inner = [l for l in L if l != step and step[0] < l[0] and l[1] < step[1]]
     inner = [l for l in inner if not any(o != l and o[0] <= l[0] and l[1] <= o[1] for o in inner)]
@@ -177,16 +189,17 @@ def main():
     print("\nstep loop %x-%x; slot loops: %s" % (step[0], step[1], ["%x-%x"%l for l in inner]))
     per = Counter()
     for c in cin:
-        for k in ("alu","imad","clmad","mem","n"): per[k] += c[k]
+        for k in ("alu","imad","quarter","clmad","mem","n"): per[k] += c[k]
     print("\nper scalar update, batch %d (callees attributed to their call sites):" % B)
-    print("%-34s %8s %8s %8s %8s %8s" % ("", "n", "alu", "imad", "clmad", "mem"))
+    print("%-34s %8s %8s %8s %8s %8s %8s" % ("", "n", "alu", "imad", "quarter", "clmad", "mem"))
     for name, c in zip(["slot loop %d"%i for i in range(len(cin))], cin):
-        print("%-34s %8d %8d %8d %8d %8d" % (name, c["n"], c["alu"], c["imad"], c["clmad"], c["mem"]))
-    print("%-34s %8.1f %8.1f %8.1f %8.2f %8.1f" % ("inversion + step overhead, /B", rest["n"]/B, rest["alu"]/B, rest["imad"]/B, rest["clmad"]/B, rest["mem"]/B))
-    tot = {k: per[k] + rest[k]/B for k in ("n","alu","imad","clmad","mem")}
-    print("%-34s %8.1f %8.1f %8.1f %8.2f %8.1f" % ("TOTAL per update", tot["n"], tot["alu"], tot["imad"], tot["clmad"], tot["mem"]))
-    print("ALU slots/update (alu + 2.01 imad) = %.1f ; clmad/update = %.2f ; instr/update = %.1f"
-          % (tot["alu"]+2.01*tot["imad"], tot["clmad"], tot["n"]))
+        print("%-34s %8d %8d %8d %8d %8d %8d" % (name, c["n"], c["alu"], c["imad"], c["quarter"], c["clmad"], c["mem"]))
+    print("%-34s %8.1f %8.1f %8.1f %8.1f %8.2f %8.1f" % ("inversion + step overhead, /B", rest["n"]/B, rest["alu"]/B, rest["imad"]/B, rest["quarter"]/B, rest["clmad"]/B, rest["mem"]/B))
+    tot = {k: per[k] + rest[k]/B for k in ("n","alu","imad","quarter","clmad","mem")}
+    print("%-34s %8.1f %8.1f %8.1f %8.1f %8.2f %8.1f" % ("TOTAL per update", tot["n"], tot["alu"], tot["imad"], tot["quarter"], tot["clmad"], tot["mem"]))
+    slots = tot["alu"] + IMAD_SLOTS * tot["imad"] + QUARTER_SLOTS * tot["quarter"]
+    print("ALU slots/update (alu + %.2f imad + %.2f quarter-rate) = %.1f ; clmad/update = %.2f ; instr/update = %.1f"
+          % (IMAD_SLOTS, QUARTER_SLOTS, slots, tot["clmad"], tot["n"]))
     if a.ops:
         h = Counter()
         ranges = list(inner) + [subs[t] for l in inner for t in calls_in(*l)]

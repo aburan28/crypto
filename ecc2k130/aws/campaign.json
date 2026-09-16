@@ -1,6 +1,7 @@
 {
-  "_comment": "Single source of truth for every worker. Geometry (batch, blockThreads, minBlocks, workers) must match the binary named by binaryKey and must never change while checkpoints exist: a checkpoint is only loadable into the same worker/batch shape. 16 slots over 385,024 workers is the audited RTX PRO 6000 preset and the 6,160,384 logical walks it measured at 14.1 B iterations/s. dpWeight must be identical campaign-wide or cross-worker collisions can be missed. build.sh fills in binaryKey/hostBinaryKey/sourceSha256.",
+  "_comment": "Single source of truth for every worker. Geometry (batch, blockThreads, minBlocks, workers) must match the binary named by binaryKey and must never change while checkpoints exist: a checkpoint is only loadable into the same worker/batch shape. 16 slots over 385,024 workers is the audited RTX PRO 6000 preset and the 6,160,384 logical walks it measured at 14.1 B iterations/s. dpWeight must be identical campaign-wide or cross-worker collisions can be missed. walk names the iteration function (protocol.WALKS: sigma, or table for ITERATION-FUNCTION.md's table walk); distinguished points from different walks never collide, so changing it starts a new corpus. build.sh fills in binaryKey/hostBinaryKey/sourceSha256 and builds the walk named here.",
   "curve": 131,
+  "walk": "sigma",
   "storageProtocol": "ecc2k-seed-orbit-v1",
   "binarySha256": "",
   "hostBinarySha256": "",

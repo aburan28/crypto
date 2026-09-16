@@ -35,8 +35,9 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     if (i >= n) return;
     In a = in[i];
     Out o;
-    o.k = twPhase(a.xn, a.hw, shared + TW_INV_OFF);
-    o.pivot = twPivot(a.xn, o.k, shared + TW_MASK_OFF);
+    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
+    o.k = twPhase(a.xn, a.hw, bytes + 4 * TW_PHASE_OFF, shared + TW_INV_OFF);
+    o.pivot = twPivot(a.xn, o.k, shared + TW_MASK_OFF, bytes + 4 * TW_MAX_OFF, bytes + 4 * TW_LINV_OFF);
     o.eps = twCoordinate(a.yp, o.pivot, shared + TW_ROW_OFF);
     unsigned long long hist = a.hist;
     o.tag = twSelect(a.xn, a.yp, a.hw, &hist, shared);
@@ -52,12 +53,10 @@ int main() {
     if (!tw.consts.consistent()) { std::fprintf(stderr, "FAIL: L table\n"); return 1; }
 
     std::vector<uint32_t> consts(TW_WORDS);
-    uint32_t planes[8][5];
-    twFillConsts(tw, consts.data(), planes);
+    twFillConsts(tw, consts.data());
     uint32_t *dConsts;
     checked(cudaMalloc(&dConsts, consts.size() * 4));
     checked(cudaMemcpy(dConsts, consts.data(), consts.size() * 4, cudaMemcpyHostToDevice));
-    checked(cudaMemcpyToSymbol(twPlane, planes, sizeof planes));
 
     auto pack = [](const unsigned long long *v) {
         P131 w;
