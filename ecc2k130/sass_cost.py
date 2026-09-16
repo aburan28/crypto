@@ -196,7 +196,7 @@ def main():
     named = {}
     for key in fn:
         for name in ["k_nop"] + order:
-            if name in key:
+            if key == name or key.startswith(name + "(") or key.startswith("_Z%d%s" % (len(name), name)):
                 named[name] = fn[key]
     overhead = cost(named["k_nop"])["aluSlots"] if "k_nop" in named else 0.0
     print("SASS per routine, %s, batch %d  (less %.0f slots of kernel overhead)"
