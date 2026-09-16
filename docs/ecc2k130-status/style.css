@@ -277,6 +277,14 @@ button:disabled { opacity: 0.55; cursor: progress; }
   max-width: 80ch;
 }
 .odds-chart { margin-top: 12px; }
+/* Odds chart is drawn to be read at phone width: no forced min-width, so the
+   dates under the curve stay in view instead of living off-screen to the right. */
+.odds-chart.chart { overflow: visible; }
+.odds-chart svg {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
 .chart .line.alt { stroke: var(--data); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.85; }
 .chart .guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
 .odds-tiles {
@@ -370,17 +378,22 @@ button:disabled { opacity: 0.55; cursor: progress; }
 /* ---- figure ---- */
 
 /* The walk-forest drawing is generated in the page's own palette on a
-   transparent ground, so it sits straight on the panel. */
+   transparent ground, so it sits straight on the panel. On a phone the
+   natural 1000×900 figure collapses to ~336px and the trails vanish; keep a
+   readable floor and let the panel scroll sideways instead. */
 .figure {
   margin: 14px 0 0;
   padding: 12px 12px 10px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .figure img {
   display: block;
   width: 100%;
+  min-width: 640px;
   max-width: 1000px;
   height: auto;
   margin: 0 auto;
@@ -547,6 +560,18 @@ footer h2 { color: var(--ink); font-size: 14px; }
   body { padding: 0 14px 40px; }
   th, td { padding: 8px 10px; }
   thead th { position: static; }
+  .odds { padding: 12px 12px 10px; }
+  .odds-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figure { padding: 8px; }
+  .figure::after {
+    content: "Swipe to pan the forest";
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
