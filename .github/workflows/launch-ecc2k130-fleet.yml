@@ -70,8 +70,10 @@ jobs:
             exit 1
           fi
 
-          echo "=== infra.sh (idempotent) ==="
-          KEY_NAME="$KEY_NAME" ./infra.sh
+          echo "=== infra.sh (idempotent, SKIP_IAM — adam cannot iam:CreateRole) ==="
+          # Role/profile must already exist from a one-time admin run of
+          # iam_role.sh. adam can refresh the launch template, SG, and S3 sync.
+          KEY_NAME="$KEY_NAME" SKIP_IAM=1 ./infra.sh
 
           echo "=== push_source.sh ==="
           ./push_source.sh

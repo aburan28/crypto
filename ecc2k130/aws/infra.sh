@@ -23,6 +23,10 @@
 #             at 14 B iterations/s) plus a ~370 MB checkpoint and its copies,
 #             which is ~22 GB on the eight-GPU sizes)
 #   AMI       override the automatic Deep Learning Base AMI lookup
+#   SKIP_IAM  if set to 1, do not create or update the worker role / instance
+#             profile (for callers like `adam` that lack iam:CreateRole). The
+#             role must already exist — run `AWS_PROFILE=admin ./iam_role.sh`
+#             once beforehand.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -104,30 +108,40 @@ else
 fi
 
 # ---- IAM role for the instances ------------------------------------------
-if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
-    echo "role $ROLE exists"
+if [ "${SKIP_IAM:-0}" = 1 ]; then
+    echo "SKIP_IAM=1: leaving role $ROLE / profile $PROFILE untouched"
+    if ! aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1 \
+       && ! aws ec2 describe-launch-templates --launch-template-names "$LT" >/dev/null 2>&1; then
+        echo "neither instance profile $PROFILE nor launch template $LT is visible;" >&2
+        echo "run: AWS_PROFILE=admin ./iam_role.sh adam" >&2
+        exit 1
+    fi
 else
-    aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
-      "Version": "2012-10-17",
-      "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
-    }' >/dev/null
-    echo "created role $ROLE"
-fi
-aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
-  \"Version\": \"2012-10-17\",
-  \"Statement\": [
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
-  ]
-}"
-aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
-    echo "instance profile $PROFILE exists"
-else
-    aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null
-    aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE"
-    echo "created instance profile $PROFILE; waiting for IAM to propagate"
-    sleep 15
+    if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
+        echo "role $ROLE exists"
+    else
+        aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
+          "Version": "2012-10-17",
+          "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
+        }' >/dev/null
+        echo "created role $ROLE"
+    fi
+    aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
+      \"Version\": \"2012-10-17\",
+      \"Statement\": [
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
+      ]
+    }"
+    aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+        echo "instance profile $PROFILE exists"
+    else
+        aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null
+        aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE"
+        echo "created instance profile $PROFILE; waiting for IAM to propagate"
+        sleep 15
+    fi
 fi
 
 # ---- security group (egress only) ----------------------------------------
