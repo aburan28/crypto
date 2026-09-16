@@ -14,8 +14,11 @@
 //! `F = {F_1, …, F_m}`; `m ≤ #C(F_p) ≈ p` after the `±` identification
 //! `[(x, −y)] = −[(x, y)]`.
 //!
-//! 1. **Relation search.**  Draw `a, b` uniformly mod `N` and reduce
-//!    `R = a·D_1 + b·D_2` with Cantor.  The reduced representative is
+//! 1. **Relation search.**  Produce candidates `R = a·D_1 + b·D_2` and
+//!    reduce with Cantor — either by drawing `a, b` afresh
+//!    (`RelationSearch::Random`, `2⌈log₂ N⌉` group operations each) or
+//!    by stepping an `r`-adding walk (`RelationSearch::Walk`, one group
+//!    operation each; the default).  The reduced representative is
 //!    `(u, v)` with `deg u ≤ g`, and the class is
 //!    `Σ_i m_i ([P_i] − [∞])` exactly when `u` splits into linear
 //!    factors over `F_p`, `u = Π (x − x_i)^{m_i}`, with
@@ -27,33 +30,44 @@
 //! 2. **Linear algebra.**  Each smooth `R` yields
 //!    `Σ_i c_i · log_{D_1} F_i − b · log_{D_1} D_2 ≡ a (mod N)`.
 //!    Collect `m + extra` such rows and solve mod the prime order `N`
-//!    of `D_1` ([`gaussian_eliminate_mod_n`]).
+//!    of `D_1`.  Each row has at most `g + 1` non-zeros whatever `m`
+//!    is, so the default solve is sparse (`LinearAlgebra::Sparse`);
+//!    dense elimination ([`gaussian_eliminate_mod_n`]) is kept as the
+//!    reference it has to beat.
 //! 3. **Read off** `log_{D_1} D_2` and verify `D_2 = k·D_1` before
 //!    returning it.  An unverified `k` is never returned.
 //!
 //! ## Cost, and what this module is for
 //!
-//! With the full degree-1 factor base the expected work is
-//! `O(p² · polylog)` group operations for the relation stage plus a
-//! dense `O(m³)` solve here, against `O(p^{g/2})` for Pollard rho on a
-//! group of size `≈ p^g`.  So the crossover is at `g = 4`
-//! asymptotically, and Gaudry's variant — a *reduced* factor base of
-//! size `p^{2/(g+1)}`, which this module supports through
-//! `fb_size` — moves it to `g = 3` with an `O(p^{2 − 2/g})` relation
-//! stage.  Nothing here is competitive at cryptographic sizes: the
-//! implementation is dense, the root finding is `O(p)` per candidate
-//! by evaluation, and the whole pipeline is meant to be *read* and to
-//! be *checked against rho on the same instances*, in the unit
-//! `S = total group operations / sqrt(N)` that `AGENTS.md` fixes.
-//! [`HecIndexCalculusReport`] carries the operation counts needed to
-//! fill that column; it measures, it does not claim.
+//! With the full degree-1 factor base and the walk, the relation stage
+//! costs `≈ (m+1)·g!` group operations — `O(p)` at fixed `g` — against
+//! `O(p^{g/2})` for Pollard rho on a group of size `≈ p^g`.  So the
+//! asymptotic crossover is at `g = 4`, and Gaudry's variant — a
+//! *reduced* factor base of size `p^{2/(g+1)}`, which this module
+//! supports through `fb_size` — moves it to `g = 3`.
+//!
+//! What dominates in practice here is neither: the smoothness oracle
+//! finds roots by evaluating at every `x ∈ F_p`, `O(p)` field
+//! multiplications per candidate, which is why `p` stays small.  That
+//! cost is counted ([`HecIndexCalculusReport::smoothness_field_ops`])
+//! rather than assumed away — `AGENTS.md` puts an oracle's per-call
+//! work inside the cost unit, and once the walk made the group
+//! operation cheap, leaving it out would have overstated the attack
+//! more than either optimisation improved it.
+//!
+//! The measured comparison against rho on the same instances, in the
+//! unit `S = total group operations / sqrt(N)`, lives in
+//! [`crate::cryptanalysis::hyperelliptic_ic_bench`] and
+//! `RESEARCH_HYPERELLIPTIC_IC_RHO.md`.  This module *measures*; it does
+//! not claim.
 //!
 //! ## Scope
 //!
 //! - Odd characteristic, `deg f = 2g+1`, `f` squarefree — the
 //!   "imaginary" model, one place at infinity.
 //! - `p` small enough to enumerate (`p` must fit in a `u64`; the
-//!   factor-base build and the root finding are both `O(p)`).
+//!   factor-base build and the root finding are both `O(p)`, and the
+//!   root finding is the binding constraint).
 //! - `N` = order of `D_1` must be **prime**: the solver inverts
 //!   pivots mod `N`.  [`prime_order_of`] computes it for toy
 //!   Jacobians and refuses a composite answer.
@@ -67,6 +81,7 @@ use rand::{RngCore, SeedableRng};
 
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::prime_hyperelliptic::{FpPoly, HyperellipticCurveP, MumfordDivisorP};
+use crate::utils::mod_inverse;
 
 // ── Factor base ────────────────────────────────────────────────────────
 
@@ -172,6 +187,24 @@ fn mumford_of_place(curve: &HyperellipticCurveP, x0: &BigUint, y0: &BigUint) -> 
 /// `O(p · deg u)`; the point of the module is the relation structure,
 /// not a Cantor–Zassenhaus.
 pub fn split_into_linear_factors(u: &FpPoly, p: &BigUint) -> Option<Vec<(BigUint, usize)>> {
+    let mut ops = 0usize;
+    split_into_linear_factors_counted(u, p, &mut ops)
+}
+
+/// As [`split_into_linear_factors`], adding to `ops` the `F_p`
+/// multiplications it performs.
+///
+/// This is the smoothness oracle, and `AGENTS.md` puts "any work an
+/// oracle does per call" inside the cost unit.  It is not a detail: at
+/// `p = 251` the root finding costs more field multiplications per trial
+/// than the walk step it follows, so a count that omitted it would
+/// report a relation stage roughly half its true price — the exact shape
+/// of a relabelling.
+pub fn split_into_linear_factors_counted(
+    u: &FpPoly,
+    p: &BigUint,
+    ops: &mut usize,
+) -> Option<Vec<(BigUint, usize)>> {
     let deg = u.degree()?;
     if deg == 0 {
         return Some(Vec::new());
@@ -189,6 +222,8 @@ pub fn split_into_linear_factors(u: &FpPoly, p: &BigUint) -> Option<Vec<(BigUint
             break;
         }
         let x = BigUint::from(xi);
+        // Horner: one multiplication per coefficient.
+        *ops += rest.degree().unwrap_or(0);
         if !rest.eval(&x).is_zero() {
             continue;
         }
@@ -196,6 +231,9 @@ pub fn split_into_linear_factors(u: &FpPoly, p: &BigUint) -> Option<Vec<(BigUint
         let lin = FpPoly::from_coeffs(vec![(p - &x) % p, BigUint::one()], p.clone());
         let mut mult = 0usize;
         loop {
+            // Dividing by a monic linear factor is synthetic division:
+            // one multiplication per remaining coefficient.
+            *ops += rest.degree().unwrap_or(0);
             let (q, r) = rest.divrem(&lin);
             if !r.is_zero() {
                 break;
@@ -224,12 +262,25 @@ pub fn decompose_over_factor_base(
     d: &MumfordDivisorP,
     fb: &HecFactorBase,
 ) -> Option<Vec<(usize, i64)>> {
+    let mut ops = 0usize;
+    decompose_over_factor_base_counted(curve, d, fb, &mut ops)
+}
+
+/// As [`decompose_over_factor_base`], adding its `F_p` multiplications
+/// to `ops`.
+pub fn decompose_over_factor_base_counted(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    fb: &HecFactorBase,
+    ops: &mut usize,
+) -> Option<Vec<(usize, i64)>> {
     let p = &curve.p;
     let half = (p - BigUint::one()) >> 1;
-    let roots = split_into_linear_factors(&d.u, p)?;
+    let roots = split_into_linear_factors_counted(&d.u, p, ops)?;
 
     let mut acc: HashMap<usize, i64> = HashMap::new();
     for (x, mult) in roots {
+        *ops += d.v.degree().unwrap_or(0);
         let y = d.v.eval(&x);
         // `u | v² − f` guarantees this, but the attack is only as
         // sound as the representation it reads.
@@ -256,6 +307,19 @@ pub struct HecRelation {
     pub entries: Vec<(usize, i64)>,
 }
 
+impl HecIndexCalculusReport {
+    /// Group operations per trial, excluding precomputation — the
+    /// quantity the relation-search mode actually changes.  `Random`
+    /// sits at `2⌈log₂ N⌉`; `Walk` sits at 1.
+    pub fn ops_per_trial(&self) -> f64 {
+        if self.trials == 0 {
+            0.0
+        } else {
+            (self.jacobian_ops - self.precompute_ops) as f64 / self.trials as f64
+        }
+    }
+}
+
 /// Counters for the `S = operations / sqrt(N)` accounting `AGENTS.md`
 /// requires of any comparison against Pollard rho.
 ///
@@ -273,6 +337,16 @@ pub struct HecIndexCalculusReport {
     pub discarded_off_base: usize,
     pub relations: usize,
     pub jacobian_ops: usize,
+    /// Of those, the walk's step precomputation — a fixed cost that
+    /// amortises over trials and so dominates at toy `N`, exactly as
+    /// rho's branch precomputation does.  Split out for the same
+    /// reason: the per-trial price is the thing the walk changed.
+    pub precompute_ops: usize,
+    /// `F_p` multiplications spent in the smoothness oracle (root
+    /// finding and the decomposition's evaluations).  Reported in field
+    /// operations, not group operations — the caller converts, because
+    /// only a measurement can say what the ratio is on a given machine.
+    pub smoothness_field_ops: usize,
     pub solve_row_ops: usize,
     pub solved: bool,
 }
@@ -289,6 +363,68 @@ impl HecIndexCalculusReport {
     }
 }
 
+/// How relations are drawn.
+///
+/// The cost difference is the whole point: `Random` pays a fresh pair of
+/// scalar multiplications, `2⌈log₂ N⌉` group operations, for every
+/// candidate divisor; `Walk` pays **one** group operation per candidate
+/// by stepping an existing `R = a·D₁ + b·D₂` to `R + S_j` and adding the
+/// step's known `(a_j, b_j)` to its coefficients — the same trick that
+/// makes an `r`-adding rho walk cheap.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum RelationSearch {
+    /// Independent `(a, b)` per trial.  Simple, and the reference the
+    /// walk has to beat.
+    Random,
+    /// `r`-adding walk, restarted from a fresh random point every
+    /// `restart_interval` trials.
+    ///
+    /// The restart is not optional bookkeeping.  A deterministic walk
+    /// enters a cycle after `O(sqrt(N))` steps, and this attack needs
+    /// `m + 1 ≈ p/2` relations out of a group of size `N ≈ p²` — the
+    /// same order — so an unrestarted walk would start re-deriving
+    /// relations it already has, exactly when it still needs new ones.
+    /// Restarting costs `2⌈log₂ N⌉` once per interval, so the amortised
+    /// price stays near one operation per trial.
+    Walk {
+        branches: usize,
+        restart_interval: usize,
+    },
+}
+
+impl RelationSearch {
+    /// The walk this module uses unless told otherwise.
+    pub fn walk() -> Self {
+        // 16 branches, matching the rho reference: Teske's analysis says
+        // an r-adding walk is within a few percent of the random-map
+        // ideal from r = 16, and every extra branch is a scalar-mult
+        // pair of precomputation that has to amortise over the trials.
+        Self::Walk {
+            branches: 16,
+            restart_interval: 64,
+        }
+    }
+}
+
+/// How the relation system is solved.
+///
+/// The matrix is extremely sparse by construction: a genus-`g` relation
+/// touches at most `g` factor-base columns, plus the `k` column, so each
+/// row carries `≤ g + 1` non-zeros regardless of `m`.  A dense `O(m³)`
+/// elimination ignores that and, once the relation stage is walked
+/// rather than re-drawn, becomes the dominant cost.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum LinearAlgebra {
+    /// Dense Gaussian elimination mod `N`.  Simple, and the reference
+    /// the sparse solve has to beat.
+    Dense,
+    /// Sparse elimination mod `N` with Markowitz-style pivoting: at each
+    /// step take the factor-base column with fewest remaining rows, and
+    /// within it the shortest row.  Only `k` is read off, so columns
+    /// that never become pivots are simply never formed.
+    Sparse,
+}
+
 /// Parameters of the relation search and solve.
 #[derive(Clone, Debug)]
 pub struct HecIndexCalculusParams {
@@ -296,9 +432,13 @@ pub struct HecIndexCalculusParams {
     pub fb_size: usize,
     /// Rows collected beyond `fb_size + 1` unknowns.
     pub extra_relations: usize,
-    /// Give up after this many `(a, b)` draws in total.
+    /// Give up after this many candidate divisors in total.
     pub max_trials: usize,
     pub seed: u64,
+    /// How candidates are produced; see [`RelationSearch`].
+    pub search: RelationSearch,
+    /// How the relation system is solved; see [`LinearAlgebra`].
+    pub linear_algebra: LinearAlgebra,
 }
 
 impl Default for HecIndexCalculusParams {
@@ -308,8 +448,23 @@ impl Default for HecIndexCalculusParams {
             extra_relations: 8,
             max_trials: 200_000,
             seed: 0,
+            search: RelationSearch::walk(),
+            linear_algebra: LinearAlgebra::Sparse,
         }
     }
+}
+
+/// Branch selector for the adding walk: a hash of the Mumford
+/// representation, so equal classes take equal steps.
+fn walk_branch(d: &MumfordDivisorP, branches: usize) -> usize {
+    let mut acc: u64 = 0;
+    for poly in [&d.u, &d.v] {
+        for limb in poly.coeffs.iter().flat_map(|c| c.to_u64_digits()) {
+            acc = acc.wrapping_mul(0x9e37_79b9_7f4a_7c15).wrapping_add(limb);
+        }
+        acc = acc.wrapping_mul(0x9e37_79b9_7f4a_7c15).wrapping_add(1);
+    }
+    (acc >> 32) as usize % branches.max(1)
 }
 
 /// Uniform-ish `BigUint` in `[0, n)`.
@@ -344,16 +499,74 @@ pub fn collect_relations(
     let mut rng = StdRng::seed_from_u64(params.seed);
     let mut relations = Vec::with_capacity(wanted);
 
-    while relations.len() < wanted && report.trials < params.max_trials {
-        report.trials += 1;
+    // One scalar multiplication pair, in group operations.  Both modes
+    // are charged this whenever they build a divisor from scratch.
+    let scalar_pair_ops = 2 * (n.bits() as usize + 1);
+
+    // Precomputed steps S_j = a_j·D₁ + b_j·D₂ for the walk.  Charged up
+    // front, like rho's branches: a precomputation left out of the
+    // accounting is a cost moved, not removed.
+    let (branches, restart_interval) = match params.search {
+        RelationSearch::Random => (0usize, usize::MAX),
+        RelationSearch::Walk {
+            branches,
+            restart_interval,
+        } => (branches.max(1), restart_interval.max(1)),
+    };
+    let mut steps: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::with_capacity(branches);
+    for _ in 0..branches {
         let a = rand_below(&mut rng, n);
         let b = rand_below(&mut rng, n);
-        // Charged as ~2·log₂ N doublings/additions: the cost the
-        // rho comparison has to see.
-        report.jacobian_ops += 2 * (n.bits() as usize + 1);
-        let r = d1
+        let s = d1
             .scalar_mul(&a, curve)
             .add(&d2.scalar_mul(&b, curve), curve);
+        report.jacobian_ops += scalar_pair_ops;
+        report.precompute_ops += scalar_pair_ops;
+        steps.push((a, b, s));
+    }
+
+    // Current walk position; `None` forces a fresh start.
+    let mut current: Option<(BigUint, BigUint, MumfordDivisorP)> = None;
+    let mut since_restart = 0usize;
+
+    while relations.len() < wanted && report.trials < params.max_trials {
+        report.trials += 1;
+
+        let (a, b, r) = match (&params.search, current.take()) {
+            // Fresh independent draw: two scalar multiplications.
+            (RelationSearch::Random, _) | (_, None) => {
+                let a = rand_below(&mut rng, n);
+                let b = rand_below(&mut rng, n);
+                let r = d1
+                    .scalar_mul(&a, curve)
+                    .add(&d2.scalar_mul(&b, curve), curve);
+                report.jacobian_ops += scalar_pair_ops;
+                if matches!(params.search, RelationSearch::Walk { .. }) {
+                    // A restart is precomputation too: it buys position,
+                    // not a candidate the cheap step could not reach.
+                    report.precompute_ops += scalar_pair_ops;
+                }
+                since_restart = 0;
+                (a, b, r)
+            }
+            // One step of the walk: one group operation.
+            (RelationSearch::Walk { .. }, Some((a, b, r))) => {
+                let (aj, bj, sj) = &steps[walk_branch(&r, steps.len())];
+                let next = r.add(sj, curve);
+                report.jacobian_ops += 1;
+                ((a + aj) % n, (b + bj) % n, next)
+            }
+        };
+
+        if let RelationSearch::Walk { .. } = params.search {
+            since_restart += 1;
+            // Keep walking unless the interval is up; `None` makes the
+            // next iteration draw a fresh point.
+            if since_restart < restart_interval {
+                current = Some((a.clone(), b.clone(), r.clone()));
+            }
+        }
+
         if r.is_identity() {
             // a·D₁ + b·D₂ = 0 is a relation with no factor-base part;
             // it is still a valid row and pins the logarithm directly.
@@ -365,7 +578,10 @@ pub fn collect_relations(
             report.smooth_trials += 1;
             continue;
         }
-        match decompose_over_factor_base(curve, &r, fb) {
+        let mut field_ops = 0usize;
+        let decomposed = decompose_over_factor_base_counted(curve, &r, fb, &mut field_ops);
+        report.smoothness_field_ops += field_ops;
+        match decomposed {
             Some(entries) => {
                 report.smooth_trials += 1;
                 relations.push(HecRelation {
@@ -377,7 +593,12 @@ pub fn collect_relations(
             None => {
                 // Distinguish "not smooth" from "smooth off base" so a
                 // truncated base can be tuned on evidence.
-                if split_into_linear_factors(&r.u, &curve.p).is_some() {
+                let mut probe_ops = 0usize;
+                let smooth =
+                    split_into_linear_factors_counted(&r.u, &curve.p, &mut probe_ops).is_some();
+                // The probe re-runs the oracle, so it is charged too.
+                report.smoothness_field_ops += probe_ops;
+                if smooth {
                     report.smooth_trials += 1;
                     report.discarded_off_base += 1;
                 }
@@ -420,30 +641,169 @@ pub fn hec_index_calculus_dlp(
 
     // Unknowns: (y_1, …, y_m, k), where y_i = log_{D₁} F_i.
     // Row: Σ c_i y_i − b k ≡ a  (mod n).
-    let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(relations.len());
+    let mut rows: Vec<Vec<(usize, BigUint)>> = Vec::with_capacity(relations.len());
     let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
     for rel in &relations {
-        let mut row = vec![BigUint::zero(); m + 1];
+        let mut row: HashMap<usize, BigUint> = HashMap::new();
         for &(j, c) in &rel.entries {
-            row[j] = (&row[j] + signed_mod(c, n)) % n;
+            let e = row.entry(j).or_insert_with(BigUint::zero);
+            *e = (&*e + signed_mod(c, n)) % n;
         }
-        row[m] = (n - &(&rel.coef_b % n)) % n;
-        matrix.push(row);
+        row.insert(m, (n - &(&rel.coef_b % n)) % n);
+        let mut sparse: Vec<(usize, BigUint)> =
+            row.into_iter().filter(|(_, v)| !v.is_zero()).collect();
+        sparse.sort_unstable_by_key(|&(j, _)| j);
+        rows.push(sparse);
         rhs.push(&rel.coef_a % n);
     }
-    report.solve_row_ops = relations.len() * (m + 1) * (m + 1);
 
-    let solution = match gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n) {
-        Some(s) => s,
-        None => return (None, report),
+    let k = match params.linear_algebra {
+        LinearAlgebra::Sparse => {
+            let (k, ops) = match sparse_solve_for_k(rows, rhs, m, n) {
+                Some(v) => v,
+                None => return (None, report),
+            };
+            report.solve_row_ops = ops;
+            k
+        }
+        LinearAlgebra::Dense => {
+            let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(rows.len());
+            for row in &rows {
+                let mut dense = vec![BigUint::zero(); m + 1];
+                for (j, v) in row {
+                    dense[*j] = v.clone();
+                }
+                matrix.push(dense);
+            }
+            report.solve_row_ops = rows.len() * (m + 1) * (m + 1);
+            let solution = match gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n) {
+                Some(s) => s,
+                None => return (None, report),
+            };
+            solution[m].clone()
+        }
     };
-    let k = solution[m].clone();
+
     if &d1.scalar_mul(&k, curve) == d2 {
         report.solved = true;
         (Some(k), report)
     } else {
         (None, report)
     }
+}
+
+/// Eliminate every factor-base unknown from the sparse system and read
+/// off `k` (column index `m`).
+///
+/// Returns `(k, mul_mods)` — the multiplication count is **measured**,
+/// not estimated, because the whole point of the sparse path is that its
+/// cost no longer follows `rows·m²`, so an estimate would not track it.
+/// `None` when the system does not determine `k`.
+fn sparse_solve_for_k(
+    mut rows: Vec<Vec<(usize, BigUint)>>,
+    mut rhs: Vec<BigUint>,
+    m: usize,
+    n: &BigUint,
+) -> Option<(BigUint, usize)> {
+    let mut ops = 0usize;
+    // column -> rows still carrying it (may contain stale entries; they
+    // are filtered on use, which is cheaper than eager deletion).
+    let mut col_rows: HashMap<usize, Vec<usize>> = HashMap::new();
+    for (i, row) in rows.iter().enumerate() {
+        for (j, _) in row {
+            col_rows.entry(*j).or_default().push(i);
+        }
+    }
+    let mut eliminated = vec![false; rows.len()];
+
+    loop {
+        // Markowitz-lite: the factor-base column with the fewest live
+        // rows, and within it the shortest row — this is what keeps
+        // fill-in from turning the sparse solve back into a dense one.
+        let mut best: Option<(usize, usize, usize)> = None; // (count, col, row)
+        for (&col, holders) in col_rows.iter() {
+            if col == m {
+                continue;
+            }
+            let live: Vec<usize> = holders
+                .iter()
+                .copied()
+                .filter(|&i| !eliminated[i] && rows[i].iter().any(|(j, _)| *j == col))
+                .collect();
+            if live.is_empty() {
+                continue;
+            }
+            let count = live.len();
+            let row = *live
+                .iter()
+                .min_by_key(|&&i| rows[i].len())
+                .expect("live is non-empty");
+            if best.map(|(c, _, _)| count < c).unwrap_or(true) {
+                best = Some((count, col, row));
+            }
+        }
+        let (_, col, pivot) = match best {
+            Some(v) => v,
+            None => break, // nothing left but the k column
+        };
+
+        // Normalise the pivot row.
+        let pivot_val = rows[pivot]
+            .iter()
+            .find(|(j, _)| *j == col)
+            .map(|(_, v)| v.clone())?;
+        let inv = mod_inverse(&pivot_val, n)?;
+        for (_, v) in rows[pivot].iter_mut() {
+            *v = (&*v * &inv) % n;
+            ops += 1;
+        }
+        rhs[pivot] = (&rhs[pivot] * &inv) % n;
+        ops += 1;
+        let pivot_row = rows[pivot].clone();
+        let pivot_rhs = rhs[pivot].clone();
+        eliminated[pivot] = true;
+
+        // Eliminate `col` from every other live row carrying it.
+        let holders = col_rows.get(&col).cloned().unwrap_or_default();
+        for i in holders {
+            if i == pivot || eliminated[i] {
+                continue;
+            }
+            let factor = match rows[i].iter().find(|(j, _)| *j == col) {
+                Some((_, v)) => v.clone(),
+                None => continue,
+            };
+            let mut merged: HashMap<usize, BigUint> = rows[i].iter().cloned().collect();
+            for (j, v) in &pivot_row {
+                let term = (&factor * v) % n;
+                ops += 1;
+                let e = merged.entry(*j).or_insert_with(BigUint::zero);
+                *e = (&*e + n - &term) % n;
+            }
+            rhs[i] = (&rhs[i] + n - &((&factor * &pivot_rhs) % n)) % n;
+            ops += 1;
+            let mut sparse: Vec<(usize, BigUint)> =
+                merged.into_iter().filter(|(_, v)| !v.is_zero()).collect();
+            sparse.sort_unstable_by_key(|&(j, _)| j);
+            for (j, _) in &sparse {
+                col_rows.entry(*j).or_default().push(i);
+            }
+            rows[i] = sparse;
+        }
+    }
+
+    // A surviving row is `coef·k ≡ rhs`; any of them gives `k`.
+    for (i, row) in rows.iter().enumerate() {
+        if eliminated[i] {
+            continue;
+        }
+        if row.len() == 1 && row[0].0 == m {
+            let inv = mod_inverse(&row[0].1, n)?;
+            ops += 1;
+            return Some(((&rhs[i] * &inv) % n, ops));
+        }
+    }
+    None
 }
 
 fn signed_mod(v: i64, n: &BigUint) -> BigUint {
@@ -568,7 +928,10 @@ mod tests {
         let p = BigUint::from(41u32);
         // (x − 3)²(x − 7)
         let lin = |c: u32| {
-            FpPoly::from_coeffs(vec![(&p - BigUint::from(c)) % &p, BigUint::one()], p.clone())
+            FpPoly::from_coeffs(
+                vec![(&p - BigUint::from(c)) % &p, BigUint::one()],
+                p.clone(),
+            )
         };
         let u = lin(3).mul(&lin(3)).mul(&lin(7));
         let roots = split_into_linear_factors(&u, &p).expect("splits");
@@ -588,7 +951,11 @@ mod tests {
         }
         let r = non_residue.expect("a non-residue exists");
         let irred = FpPoly::from_coeffs(
-            vec![(&p - BigUint::from(r)) % &p, BigUint::zero(), BigUint::one()],
+            vec![
+                (&p - BigUint::from(r)) % &p,
+                BigUint::zero(),
+                BigUint::one(),
+            ],
             p.clone(),
         );
         assert!(split_into_linear_factors(&irred, &p).is_none());
@@ -644,11 +1011,130 @@ mod tests {
             extra_relations: 5,
             max_trials: 50_000,
             seed: 20260915,
+            search: RelationSearch::Random,
+            linear_algebra: LinearAlgebra::Dense,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         assert_eq!(found, Some(k), "report: {report:?}");
         assert!(report.solved);
         assert!(report.smoothness_rate() > 0.0);
+    }
+
+    /// Build a solvable instance on the toy curve: `(D₁, D₂, N, k)`.
+    fn toy_instance(
+        p: u64,
+    ) -> (
+        HyperellipticCurveP,
+        MumfordDivisorP,
+        MumfordDivisorP,
+        BigUint,
+        BigUint,
+    ) {
+        let curve = toy_curve(p);
+        let jac = brute_force_jac_order_via_lpoly(&curve);
+        let fb = build_factor_base(&curve, usize::MAX);
+        let l = factorise_small(jac.clone())
+            .into_iter()
+            .map(|(q, _)| q)
+            .max()
+            .expect("non-trivial Jacobian");
+        let d1 = subgroup_generator(&curve, &fb, &jac, &l).expect("generator exists");
+        let k = &l / BigUint::from(3u32) + BigUint::from(7u32);
+        let d2 = d1.scalar_mul(&k, &curve);
+        (curve, d1, d2, l, k)
+    }
+
+    #[test]
+    fn walk_solves_and_costs_far_less_than_redrawing() {
+        let (curve, d1, d2, l, k) = toy_instance(41);
+        let base = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 5,
+            max_trials: 50_000,
+            seed: 20260916,
+            search: RelationSearch::Random,
+            linear_algebra: LinearAlgebra::Sparse,
+        };
+        let (rnd_k, rnd) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &base);
+        let walked = HecIndexCalculusParams {
+            search: RelationSearch::walk(),
+            ..base
+        };
+        let (walk_k, walk) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &walked);
+
+        assert_eq!(rnd_k.as_ref(), Some(&k));
+        assert_eq!(walk_k.as_ref(), Some(&k), "walk report: {walk:?}");
+        // The walk pays one group operation per trial where the random
+        // draw pays 2⌈log₂ N⌉, so on comparable trial counts it must
+        // come out well ahead.  This is the whole claim of the walk; if
+        // it ever stops holding, the walk has stopped being a walk.
+        // Per trial, excluding precomputation: the walk pays one group
+        // operation, the random draw pays 2⌈log₂ N⌉.  Total ops are the
+        // wrong comparison at this toy `N`, where the walk's 32-branch
+        // precomputation has barely amortised — which is itself the
+        // reason the report separates the two.
+        assert!(walk.ops_per_trial() < 1.5, "walk {:?}", walk);
+        assert!(
+            rnd.ops_per_trial() > 4.0 * walk.ops_per_trial(),
+            "random {:.1} vs walk {:.1} ops/trial",
+            rnd.ops_per_trial(),
+            walk.ops_per_trial()
+        );
+    }
+
+    #[test]
+    fn sparse_solve_agrees_with_dense_and_is_cheaper() {
+        let (curve, d1, d2, l, k) = toy_instance(41);
+        let dense = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 5,
+            max_trials: 50_000,
+            seed: 7,
+            search: RelationSearch::walk(),
+            linear_algebra: LinearAlgebra::Dense,
+        };
+        let sparse = HecIndexCalculusParams {
+            linear_algebra: LinearAlgebra::Sparse,
+            ..dense.clone()
+        };
+        let (dense_k, dense_rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &dense);
+        let (sparse_k, sparse_rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &sparse);
+
+        // Same seed, same relations, so the two solvers see the same
+        // system and must agree on its answer.
+        assert_eq!(dense_k.as_ref(), Some(&k));
+        assert_eq!(sparse_k, dense_k, "sparse report: {sparse_rep:?}");
+        assert!(
+            sparse_rep.solve_row_ops < dense_rep.solve_row_ops,
+            "sparse {} vs dense {} mul-mods",
+            sparse_rep.solve_row_ops,
+            dense_rep.solve_row_ops
+        );
+    }
+
+    #[test]
+    fn the_smoothness_oracle_is_charged() {
+        let (curve, d1, d2, l, _k) = toy_instance(41);
+        let params = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 5,
+            max_trials: 50_000,
+            seed: 3,
+            search: RelationSearch::walk(),
+            linear_algebra: LinearAlgebra::Sparse,
+        };
+        let (_k, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
+        // Every trial runs the oracle, so its field-operation count can
+        // never be zero while trials were taken — a zero here would mean
+        // the cost had gone missing from the accounting, not that it
+        // was not paid.
+        assert!(report.trials > 0);
+        assert!(
+            report.smoothness_field_ops >= report.trials,
+            "oracle charged {} mul-mods over {} trials",
+            report.smoothness_field_ops,
+            report.trials
+        );
     }
 
     #[test]
@@ -670,6 +1156,8 @@ mod tests {
             extra_relations: 5,
             max_trials: 200_000,
             seed: 7,
+            search: RelationSearch::Random,
+            linear_algebra: LinearAlgebra::Dense,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // A reduced base trades trials for solve size; either it got

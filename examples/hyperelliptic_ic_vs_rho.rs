@@ -14,7 +14,8 @@ use num_traits::{One, Zero};
 
 use crypto_lib::cryptanalysis::hyperelliptic_ic_bench::{head_to_head, HeadToHeadTrials};
 use crypto_lib::cryptanalysis::hyperelliptic_index_calculus::{
-    build_factor_base, prime_order_of, subgroup_generator, HecIndexCalculusParams,
+    build_factor_base, prime_order_of, subgroup_generator, HecIndexCalculusParams, LinearAlgebra,
+    RelationSearch,
 };
 use crypto_lib::prime_hyperelliptic::{
     brute_force_jac_order_via_lpoly, FpPoly, HyperellipticCurveP, MumfordDivisorP,
@@ -117,8 +118,9 @@ fn main() {
     );
 
     println!(
-        "{:>5} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7} {:>6}",
+        "{:>5} {:>7} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7}",
         "p",
+        "search",
         "N",
         "m",
         "IC ops",
@@ -127,8 +129,7 @@ fn main() {
         "S_rho",
         "S_ic/S_rho",
         "S_walk",
-        "IC/flr",
-        "conv"
+        "IC/flr"
     );
 
     for &p in &primes {
@@ -156,54 +157,70 @@ fn main() {
         let k = &n / BigUint::from(3u32) + BigUint::from(7u32);
         let d2 = d1.scalar_mul(&k, &curve);
 
-        let params = HecIndexCalculusParams {
-            fb_size: usize::MAX,
-            extra_relations: 8,
-            max_trials: 2_000_000,
-            seed: 20260916,
-        };
-        let row = head_to_head(
-            &curve, &d1, &d2, &n, &params, 0xC0FFEE, 50_000_000, &k, &trials,
-        );
+        for (label, search, la) in [
+            ("rnd+dns", RelationSearch::Random, LinearAlgebra::Dense),
+            ("wlk+dns", RelationSearch::walk(), LinearAlgebra::Dense),
+            ("rnd+spr", RelationSearch::Random, LinearAlgebra::Sparse),
+            ("wlk+spr", RelationSearch::walk(), LinearAlgebra::Sparse),
+        ] {
+            let params = HecIndexCalculusParams {
+                fb_size: usize::MAX,
+                extra_relations: 8,
+                max_trials: 2_000_000,
+                seed: 20260916,
+                search,
+                linear_algebra: la,
+            };
+            let row = head_to_head(
+                &curve, &d1, &d2, &n, &params, 0xC0FFEE, 50_000_000, &k, &trials,
+            );
 
-        // A row without a verified answer on both sides is not a result.
-        let mark = match (row.ic_correct, row.rho_correct) {
-            (true, true) => "",
-            (false, true) => "  [IC UNSOLVED - not a result]",
-            (true, false) => "  [rho UNSOLVED - not a result]",
-            (false, false) => "  [both UNSOLVED - not a result]",
-        };
+            // A row without a verified answer on both sides is not a result.
+            let mark = match (row.ic_correct, row.rho_correct) {
+                (true, true) => "",
+                (false, true) => "  [IC UNSOLVED - not a result]",
+                (true, false) => "  [rho UNSOLVED - not a result]",
+                (false, false) => "  [both UNSOLVED - not a result]",
+            };
 
-        println!(
-            "{:>5} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2} {:>6.1}{}",
-            p,
-            row.n,
-            row.factor_base_size,
-            row.ic_total_group_ops,
-            row.rho_group_ops,
-            row.ic_s,
-            row.rho_s,
-            row.ratio_to_reference(),
-            row.rho_walk_s,
-            row.ratio_to_floor(),
-            row.modmuls_per_group_op,
-            mark
-        );
-        println!(
-            "        c = {}, #Jac = {} = {} x {}; rho precompute {:.0} of {:.0} ops; \
-             IC floor S = {:.2}",
-            c, jac, cofactor, n, row.rho_precompute_ops, row.rho_group_ops, row.ic_floor_s
-        );
-        println!(
-            "        relation stage {:.0} ops, smoothness {:.3}, linear algebra {:.0} mul-mods \
-             = {:.0} group-op equiv; wall {:.0} ms IC vs {:.0} ms rho",
-            row.ic_relation_ops,
-            row.ic_smoothness_rate,
-            row.ic_la_modmuls,
-            row.ic_la_group_equiv,
-            row.ic_wall_ms,
-            row.rho_wall_ms,
-        );
+            println!(
+                "{:>5} {:>7} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
+                p,
+                label,
+                row.n,
+                row.factor_base_size,
+                row.ic_total_group_ops,
+                row.rho_group_ops,
+                row.ic_s,
+                row.rho_s,
+                row.ratio_to_reference(),
+                row.rho_walk_s,
+                row.ratio_to_floor(),
+                mark
+            );
+            println!(
+                "        c = {}, #Jac = {} = {} x {}; relation stage {:.0} ops \
+                 ({:.0} precompute, {:.2} ops/trial) + oracle {:.0} mul-mods \
+                 ({:.0} equiv) + linear algebra {:.0} mul-mods ({:.0} equiv), conv {:.0}; \
+                 smoothness {:.3}; IC floor S = {:.2}; wall {:.0} ms IC vs {:.0} ms rho",
+                c,
+                jac,
+                cofactor,
+                n,
+                row.ic_relation_ops,
+                row.ic_precompute_ops,
+                row.ic_ops_per_trial,
+                row.ic_oracle_modmuls,
+                row.ic_oracle_group_equiv,
+                row.ic_la_modmuls,
+                row.ic_la_group_equiv,
+                row.modmuls_per_group_op,
+                row.ic_smoothness_rate,
+                row.ic_floor_s,
+                row.ic_wall_ms,
+                row.rho_wall_ms,
+            );
+        }
     }
 
     println!(
