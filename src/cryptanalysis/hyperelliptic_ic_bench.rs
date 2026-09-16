@@ -63,6 +63,7 @@
 //! at toy `p` say nothing about cryptographic sizes, where the relation
 //! stage's `O(p)` root finding alone would dominate.
 
+use std::collections::HashMap;
 use std::time::Instant;
 
 use num_bigint::BigUint;
@@ -94,6 +95,27 @@ const RHO_BRANCHES: usize = 16;
 /// and not the other's would be a rigged comparison, and the rigging
 /// would favour the side under study.
 const RHO_STEP_BITS: u32 = 8;
+
+/// Which rho to run as the reference.
+///
+/// The distinction is worth 3× and nothing else: both walks take the
+/// same expected number of *steps* to a collision, `≈ sqrt(π N / 2)`,
+/// but Floyd runs three group operations per iteration (one tortoise,
+/// two hare) while a distinguished-point walk runs one and detects the
+/// collision through a table.
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
+pub enum RhoVariant {
+    /// Floyd cycle finding.  Constant memory, 3 operations per
+    /// iteration.
+    Floyd,
+    /// Distinguished points: store the walk positions whose hash ends
+    /// in `theta_bits` zero bits, and stop when one repeats.  One
+    /// operation per step, at the price of a table — this is the rho
+    /// anyone attacking a real curve would run, so it is the default
+    /// reference.
+    #[default]
+    DistinguishedPoints,
+}
 
 /// Outcome of one rho run.
 #[derive(Clone, Debug)]
@@ -145,6 +167,243 @@ fn rand_below(rng: &mut StdRng, n: &BigUint) -> BigUint {
 /// fresh seed; `max_steps` bounds the total.  The returned `k` is
 /// verified before it is returned.
 pub fn pollard_rho_jacobian(
+    curve: &HyperellipticCurveP,
+    d1: &MumfordDivisorP,
+    d2: &MumfordDivisorP,
+    n: &BigUint,
+    seed: u64,
+    max_steps: usize,
+) -> RhoResult {
+    pollard_rho_jacobian_with(curve, d1, d2, n, seed, max_steps, &RhoVariant::Floyd)
+}
+
+/// Build the `r`-adding walk's branches, charging their construction.
+fn build_branches(
+    curve: &HyperellipticCurveP,
+    d1: &MumfordDivisorP,
+    d2: &MumfordDivisorP,
+    n: &BigUint,
+    rng: &mut StdRng,
+    ops: &mut usize,
+) -> Vec<(BigUint, BigUint, MumfordDivisorP)> {
+    let _ = n;
+    let step_bound = BigUint::one() << RHO_STEP_BITS;
+    let mut branch = Vec::with_capacity(RHO_BRANCHES);
+    for _ in 0..RHO_BRANCHES {
+        let a = rand_below(rng, &step_bound) + BigUint::one();
+        let b = rand_below(rng, &step_bound) + BigUint::one();
+        let r = d1
+            .scalar_mul(&a, curve)
+            .add(&d2.scalar_mul(&b, curve), curve);
+        *ops += 2 * RHO_STEP_BITS as usize;
+        branch.push((a, b, r));
+    }
+    branch
+}
+
+/// Full hash of a divisor, used both for branch selection and for the
+/// distinguished-point predicate.
+fn divisor_hash(d: &MumfordDivisorP) -> u64 {
+    let mut acc: u64 = 0;
+    for poly in [&d.u, &d.v] {
+        for limb in poly.coeffs.iter().flat_map(|c| c.to_u64_digits()) {
+            acc = acc.wrapping_mul(0x9e37_79b9_7f4a_7c15).wrapping_add(limb);
+        }
+        acc = acc.wrapping_mul(0x9e37_79b9_7f4a_7c15).wrapping_add(1);
+    }
+    acc
+}
+
+/// Recover `k` from a collision `a₁ + b₁k ≡ a₂ + b₂k`, or `None` when
+/// the collision is degenerate (`b₁ ≡ b₂`, which carries no
+/// information).
+fn solve_collision(
+    a1: &BigUint,
+    b1: &BigUint,
+    a2: &BigUint,
+    b2: &BigUint,
+    n: &BigUint,
+) -> Option<BigUint> {
+    let db = (b2 + n - b1) % n;
+    if db.is_zero() {
+        return None;
+    }
+    let da = (a1 + n - a2) % n;
+    let inv = mod_inverse(&db, n)?;
+    Some((da * inv) % n)
+}
+
+/// **Solve `D₂ = k·D₁`** by Pollard rho, choosing the variant.
+pub fn pollard_rho_jacobian_with(
+    curve: &HyperellipticCurveP,
+    d1: &MumfordDivisorP,
+    d2: &MumfordDivisorP,
+    n: &BigUint,
+    seed: u64,
+    max_steps: usize,
+    variant: &RhoVariant,
+) -> RhoResult {
+    match variant {
+        RhoVariant::Floyd => rho_floyd(curve, d1, d2, n, seed, max_steps),
+        RhoVariant::DistinguishedPoints => rho_dp(curve, d1, d2, n, seed, max_steps),
+    }
+}
+
+/// Distinguished-point rho: one group operation per step.
+///
+/// `theta_bits` is chosen so that about 32 distinguished points are
+/// expected before the collision — few enough that the table is
+/// negligible, many enough that the walk is not dominated by the
+/// distance to the first one.
+fn rho_dp(
+    curve: &HyperellipticCurveP,
+    d1: &MumfordDivisorP,
+    d2: &MumfordDivisorP,
+    n: &BigUint,
+    seed: u64,
+    max_steps: usize,
+) -> RhoResult {
+    let started = Instant::now();
+    let mut group_ops = 0usize;
+    let mut precompute_ops = 0usize;
+    let mut restarts = 0usize;
+    let mut steps_left = max_steps;
+    let mut rng = StdRng::seed_from_u64(seed);
+
+    let mut branch_ops = 0usize;
+    let branch = build_branches(curve, d1, d2, n, &mut rng, &mut branch_ops);
+    group_ops += branch_ops;
+    precompute_ops += branch_ops;
+
+    // Expected steps to a collision ≈ 1.25·sqrt(N); aim for ~32
+    // distinguished points along the way.
+    let root_n = sqrt_big(n).max(2.0);
+    let theta_bits = ((root_n / 32.0).log2().round() as i64).clamp(0, 24) as u32;
+    let mask: u64 = if theta_bits == 0 {
+        0
+    } else {
+        (1u64 << theta_bits) - 1
+    };
+
+    // divisor hash → (a, b) that reached it.
+    let mut seen: HashMap<u64, (BigUint, BigUint)> = HashMap::new();
+
+    // A deterministic walk can enter a cycle that contains **no**
+    // distinguished point, and then runs forever detecting nothing.
+    // Bound each attempt at a generous multiple of the expected
+    // distance to a collision and restart instead.  Without this the
+    // walk silently burns the entire step budget — not a slow run but a
+    // hung one, and from outside the two look identical.
+    let expected = 1.25 * root_n + (1u64 << theta_bits) as f64;
+    let attempt_cap = (64.0 * expected).min(1e9) as usize + 64;
+
+    for _attempt in 0..64u64 {
+        let a0 = rand_below(&mut rng, n);
+        let b0 = rand_below(&mut rng, n);
+        let mut x = d1
+            .scalar_mul(&a0, curve)
+            .add(&d2.scalar_mul(&b0, curve), curve);
+        group_ops += 2 * (n.bits() as usize + 1);
+        precompute_ops += 2 * (n.bits() as usize + 1);
+        let (mut a, mut b) = (a0, b0);
+        let mut this_attempt = 0usize;
+        let mut since_dp = 0usize;
+        // A cycle can contain no distinguished point at all, in which
+        // case the walk detects nothing however long it runs.  Expected
+        // distance to the next one is `2^theta_bits`; well past that,
+        // jump rather than keep going.  This is what the outer cap was
+        // silently absorbing, at 64x the cost.
+        let dp_gap_limit = 32usize << theta_bits;
+
+        while steps_left > 0 {
+            if since_dp >= dp_gap_limit {
+                restarts += 1;
+                since_dp = 0;
+                let j = (rng.next_u64() as usize) % branch.len();
+                let (aj, bj, rj) = &branch[j];
+                a = (&a + aj) % n;
+                b = (&b + bj) % n;
+                x = x.add(rj, curve);
+                group_ops += 1;
+                steps_left -= 1;
+                this_attempt += 1;
+                continue;
+            }
+            if this_attempt >= attempt_cap {
+                // A cycle with no distinguished point in it, or simply
+                // an unlucky start: begin somewhere else.
+                restarts += 1;
+                break;
+            }
+            this_attempt += 1;
+            let h = divisor_hash(&x);
+            since_dp += 1;
+            if (h & mask) == 0 {
+                since_dp = 0;
+                match seen.get(&h) {
+                    Some((pa, pb)) => {
+                        if let Some(k) = solve_collision(&a, &b, pa, pb, n) {
+                            if &d1.scalar_mul(&k, curve) == d2 {
+                                return RhoResult {
+                                    k: Some(k),
+                                    group_ops,
+                                    precompute_ops,
+                                    walk_ops: group_ops - precompute_ops,
+                                    restarts,
+                                    wall_ms: started.elapsed().as_secs_f64() * 1e3,
+                                };
+                            }
+                        }
+                        // Degenerate collision: the walk re-entered a
+                        // trail with the same coefficients, so it would
+                        // loop forever.  Jump by a randomly chosen step
+                        // — one group operation — instead of building a
+                        // fresh starting point for `2⌈log₂ N⌉`.  At
+                        // small `N` these collisions are common enough
+                        // that the difference showed up in `S_walk` as
+                        // a 3× inflation of the reference, which is the
+                        // wrong direction for a reference to be wrong
+                        // in.
+                        restarts += 1;
+                        let j = (rng.next_u64() as usize) % branch.len();
+                        let (aj, bj, rj) = &branch[j];
+                        a = (&a + aj) % n;
+                        b = (&b + bj) % n;
+                        x = x.add(rj, curve);
+                        group_ops += 1;
+                        steps_left -= 1;
+                        this_attempt += 1;
+                        continue;
+                    }
+                    None => {
+                        seen.insert(h, (a.clone(), b.clone()));
+                    }
+                }
+            }
+            let j = (h >> 32) as usize % branch.len();
+            let (aj, bj, rj) = &branch[j];
+            a = (&a + aj) % n;
+            b = (&b + bj) % n;
+            x = x.add(rj, curve);
+            group_ops += 1;
+            steps_left -= 1;
+        }
+        if steps_left == 0 {
+            break;
+        }
+    }
+
+    RhoResult {
+        k: None,
+        group_ops,
+        precompute_ops,
+        walk_ops: group_ops - precompute_ops,
+        restarts,
+        wall_ms: started.elapsed().as_secs_f64() * 1e3,
+    }
+}
+
+fn rho_floyd(
     curve: &HyperellipticCurveP,
     d1: &MumfordDivisorP,
     d2: &MumfordDivisorP,
@@ -388,7 +647,7 @@ impl Default for HeadToHeadTrials {
         // large enough that the gap is not the sampling noise.  25 runs
         // put the standard error of the mean near 20% of one run's
         // spread; 9 did not.
-        Self { ic: 5, rho: 25 }
+        Self { ic: 5, rho: 40 }
     }
 }
 
@@ -410,6 +669,7 @@ pub fn head_to_head(
     rho_max_steps: usize,
     expected_k: &BigUint,
     trials: &HeadToHeadTrials,
+    rho_variant: &RhoVariant,
 ) -> HeadToHeadRow {
     let p_u = curve.p.to_u64_digits().first().copied().unwrap_or(0);
     let conv = calibrate_modmuls_per_group_op(curve, d1, n, 2_000);
@@ -456,13 +716,14 @@ pub fn head_to_head(
     let mut rho_wall_ms = 0f64;
     let mut rho_correct = true;
     for t in 0..rho_runs {
-        let r = pollard_rho_jacobian(
+        let r = pollard_rho_jacobian_with(
             curve,
             d1,
             d2,
             n,
             rho_seed.wrapping_add(t as u64),
             rho_max_steps,
+            rho_variant,
         );
         rho_ops += r.group_ops as f64;
         rho_pre += r.precompute_ops as f64;
@@ -600,6 +861,72 @@ mod tests {
     }
 
     #[test]
+    fn distinguished_points_cost_about_a_third_of_floyd() {
+        let (curve, d1, d2, n, k) = instance(251);
+        let mut floyd = 0usize;
+        let mut dp = 0usize;
+        for seed in 0..12u64 {
+            let f = pollard_rho_jacobian_with(
+                &curve,
+                &d1,
+                &d2,
+                &n,
+                seed,
+                5_000_000,
+                &RhoVariant::Floyd,
+            );
+            let d = pollard_rho_jacobian_with(
+                &curve,
+                &d1,
+                &d2,
+                &n,
+                seed,
+                5_000_000,
+                &RhoVariant::DistinguishedPoints,
+            );
+            assert_eq!(f.k.as_ref(), Some(&k), "floyd seed {seed}");
+            assert_eq!(d.k.as_ref(), Some(&k), "dp seed {seed}");
+            floyd += f.walk_ops;
+            dp += d.walk_ops;
+        }
+        // Same expected step count, a third of the operations per step.
+        // Averaged over 12 seeds because one run of either is a wide
+        // random variable; the claim is the ratio, not any single run.
+        assert!(
+            (dp as f64) < 0.55 * floyd as f64,
+            "dp {dp} vs floyd {floyd} walk ops"
+        );
+    }
+
+    #[test]
+    fn dp_rho_terminates_on_every_seed_it_is_given() {
+        // Regression: a deterministic walk can enter a cycle holding no
+        // distinguished point, and the first implementation then ran to
+        // `max_steps` — 200 million operations for one unlucky seed,
+        // which presented as a hung benchmark rather than a slow one.
+        // Every seed must finish well inside a budget that a healthy
+        // run never approaches.
+        let (curve, d1, d2, n, k) = instance(251);
+        for seed in 0..40u64 {
+            let r = pollard_rho_jacobian_with(
+                &curve,
+                &d1,
+                &d2,
+                &n,
+                seed,
+                200_000,
+                &RhoVariant::DistinguishedPoints,
+            );
+            assert_eq!(r.k.as_ref(), Some(&k), "seed {seed} failed to solve");
+            assert!(
+                r.group_ops < 100_000,
+                "seed {seed} spent {} ops — the walk is not bounded",
+                r.group_ops
+            );
+        }
+    }
+
+    #[test]
     fn head_to_head_scores_both_sides() {
         let (curve, d1, d2, n, k) = instance(41);
         let params = HecIndexCalculusParams {
@@ -621,6 +948,7 @@ mod tests {
             1_000_000,
             &k,
             &HeadToHeadTrials { ic: 2, rho: 3 },
+            &RhoVariant::DistinguishedPoints,
         );
         assert!(
             row.ic_correct,

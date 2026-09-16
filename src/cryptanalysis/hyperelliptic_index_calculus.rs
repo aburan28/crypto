@@ -287,14 +287,18 @@ fn derivative(f: &FpPoly, p: &BigUint) -> FpPoly {
     FpPoly::from_coeffs(coeffs, p.clone())
 }
 
-/// Roots of a **squarefree, completely split** `d` of degree `≤ 2`.
+/// Roots of a **squarefree, completely split** monic `d`.
 ///
-/// `None` for higher degree: equal-degree splitting is not implemented,
-/// and the caller falls back to the scan rather than guess.  Genus 2 —
-/// the scope this module is measured at — never reaches that branch,
-/// since `deg u ≤ g`.
+/// Degrees 1 and 2 close in form.  Above that it is Cantor–Zassenhaus
+/// equal-degree splitting: for a random `b`, `gcd(d, (x+b)^((p−1)/2) −
+/// 1)` is a non-trivial factor with probability about `1/2`, because
+/// the shifted roots split into residues and non-residues.  Genus 3
+/// reaches this branch — `deg u ≤ g` — and without it the oracle would
+/// fall back to the `O(p)` scan exactly where the interesting
+/// measurement is.
 fn roots_of_split_poly(d: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<BigUint>> {
-    match d.degree()? {
+    let deg = d.degree()?;
+    match deg {
         0 => Some(Vec::new()),
         1 => {
             // d = x + c  ⟹  root −c (d is monic here).
@@ -317,8 +321,53 @@ fn roots_of_split_poly(d: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<B
             *ops += 2;
             Some(vec![r1, r2])
         }
-        _ => None,
+        _ => {
+            // Cantor–Zassenhaus.  Deterministic seed: the caller is a
+            // measurement harness, and a root finder that returns
+            // different work for the same input would make the field-op
+            // column unreproducible.
+            let mut rng = StdRng::seed_from_u64(0x5ca1_ab1e ^ deg as u64);
+            let exp = (p - BigUint::one()) >> 1;
+            for _ in 0..64 {
+                let b = rand_below(&mut rng, p);
+                let shifted = FpPoly::from_coeffs(vec![b, BigUint::one()], p.clone());
+                let powered = poly_powmod(&shifted, &exp, d, ops);
+                let h = powered.sub(&FpPoly::one(p.clone()));
+                if h.is_zero() {
+                    continue;
+                }
+                let factor = d.gcd(&h).monic();
+                *ops += (deg + 1) * (deg + 1);
+                let fdeg = factor.degree().unwrap_or(0);
+                if fdeg == 0 || fdeg == deg {
+                    continue; // trivial split; try another b
+                }
+                let other = d.divrem(&factor).0.monic();
+                let mut roots = roots_of_split_poly(&factor, p, ops)?;
+                roots.extend(roots_of_split_poly(&other, p, ops)?);
+                roots.sort_unstable();
+                return Some(roots);
+            }
+            None
+        }
     }
+}
+
+/// `base^e mod m`, by square-and-multiply, charging its coefficient
+/// multiplications.
+fn poly_powmod(base: &FpPoly, e: &BigUint, m: &FpPoly, ops: &mut usize) -> FpPoly {
+    let p = &m.p;
+    let mut result = FpPoly::one(p.clone()).rem(m);
+    let mut acc = base.rem(m);
+    for i in 0..e.bits() {
+        if e.bit(i) {
+            result = poly_mul_mod(&result, &acc, m, ops);
+        }
+        if i + 1 < e.bits() {
+            acc = poly_mul_mod(&acc, &acc, m, ops);
+        }
+    }
+    result
 }
 
 /// Smoothness by `gcd(u, x^p − x)`, with the roots read off in closed
@@ -1104,7 +1153,7 @@ fn signed_mod(v: i64, n: &BigUint) -> BigUint {
 // ── Order of a divisor class ───────────────────────────────────────────
 
 /// Trial-division factorisation of a toy Jacobian order.
-fn factorise_small(mut n: BigUint) -> Vec<(BigUint, u32)> {
+pub fn factorise_small(mut n: BigUint) -> Vec<(BigUint, u32)> {
     let mut out = Vec::new();
     let mut d = BigUint::from(2u32);
     while &d * &d <= n {
@@ -1152,6 +1201,119 @@ pub fn prime_order_of(
     } else {
         None
     }
+}
+
+/// Order of `d` in `Jac(C)(F_p)` **without** knowing the group order,
+/// by Baby-step Giant-step over the Hasse–Weil interval.
+///
+/// `#Jac(C)(F_p) ∈ [(sqrt(p) − 1)^{2g}, (sqrt(p) + 1)^{2g}]`, so some
+/// multiple of `ord(d)` lies there; BSGS finds one in `O(sqrt(W))`
+/// group operations, `W` being the interval width (`≈ 4g·p^{g−1/2}`).
+/// Factoring that multiple and dividing out gives the exact order.
+///
+/// This exists because the genus-2 route to the group order goes
+/// through an `L`-polynomial that is genus-2 only.  Counting the
+/// Jacobian is not the point of this module; having a prime-order
+/// subgroup to work in is, and that does not require the group order.
+/// The Hasse–Weil interval `[(sqrt(p) − 1)^{2g}, (sqrt(p) + 1)^{2g}]`
+/// containing `#Jac(C)(F_p)`.
+///
+/// Useful without any point counting: it says how large a subgroup has
+/// to be to carry most of the group, which is the condition that makes
+/// an index-calculus-vs-rho comparison meaningful — rho searches the
+/// subgroup, index calculus pays for a factor base sized by the whole
+/// curve, so a tiny subgroup in a large Jacobian flatters rho for a
+/// reason that has nothing to do with either algorithm.
+pub fn hasse_interval(curve: &HyperellipticCurveP) -> Option<(u128, u128)> {
+    let g = curve.genus as i32;
+    let p_f = curve.p.to_u64_digits().first().copied()? as f64;
+    let root = p_f.sqrt();
+    let lo = (root - 1.0).powi(2 * g).floor().max(1.0) as u128;
+    let hi = (root + 1.0).powi(2 * g).ceil() as u128;
+    Some((lo, hi))
+}
+
+pub fn divisor_order_bsgs(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    max_baby_steps: usize,
+) -> Option<BigUint> {
+    let (lo, hi) = hasse_interval(curve)?;
+    let width = hi.saturating_sub(lo).max(1);
+
+    let steps = (width as f64).sqrt().ceil() as usize + 1;
+    if steps > max_baby_steps {
+        return None; // would cost more than the caller allowed
+    }
+
+    // Baby steps: −j·D for j ∈ [0, steps), keyed by Mumford rep.
+    let neg_d = d.neg(curve);
+    let mut table: HashMap<DivisorKey, usize> = HashMap::new();
+    let mut acc = MumfordDivisorP::identity(curve.p.clone());
+    for j in 0..steps {
+        table.entry(divisor_key(&acc)).or_insert(j);
+        acc = acc.add(&neg_d, curve);
+    }
+
+    // Giant steps: (lo + i·steps)·D.
+    let stride = d.scalar_mul(&BigUint::from(steps as u64), curve);
+    let mut cur = d.scalar_mul(&BigUint::from(lo), curve);
+    let giant_max = (width as usize) / steps + 2;
+    for i in 0..=giant_max {
+        if let Some(&j) = table.get(&divisor_key(&cur)) {
+            // (lo + i·steps)·D = −j·D  ⟹  (lo + i·steps + j)·D = 0.
+            let m = BigUint::from(lo) + BigUint::from((i * steps + j) as u64);
+            if m.is_zero() {
+                continue;
+            }
+            if !d.scalar_mul(&m, curve).is_identity() {
+                continue; // f64 interval arithmetic slipped; keep going
+            }
+            return Some(exact_order_from_multiple(curve, d, &m));
+        }
+        cur = cur.add(&stride, curve);
+    }
+    None
+}
+
+/// A hashable stand-in for a reduced divisor: its Mumford coefficients.
+type DivisorKey = (Vec<Vec<u32>>, Vec<Vec<u32>>);
+
+fn divisor_key(d: &MumfordDivisorP) -> DivisorKey {
+    (
+        d.u.coeffs.iter().map(|c| c.to_u32_digits()).collect(),
+        d.v.coeffs.iter().map(|c| c.to_u32_digits()).collect(),
+    )
+}
+
+/// Given `m` with `m·d = 0`, divide out prime factors while the result
+/// still annihilates `d`.
+fn exact_order_from_multiple(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    m: &BigUint,
+) -> BigUint {
+    let mut order = m.clone();
+    for (q, e) in factorise_small(m.clone()) {
+        for _ in 0..e {
+            let candidate = &order / &q;
+            if candidate > BigUint::zero() && d.scalar_mul(&candidate, curve).is_identity() {
+                order = candidate;
+            } else {
+                break;
+            }
+        }
+    }
+    order
+}
+
+/// Largest prime factor of `n`, by trial division.  Toy sizes only.
+pub fn largest_prime_factor(n: &BigUint) -> BigUint {
+    factorise_small(n.clone())
+        .into_iter()
+        .map(|(q, _)| q)
+        .max()
+        .unwrap_or_else(BigUint::one)
 }
 
 /// Pick a generator of the (unique) subgroup of prime order `l`:
@@ -1330,6 +1492,140 @@ mod tests {
         let k = &l / BigUint::from(3u32) + BigUint::from(7u32);
         let d2 = d1.scalar_mul(&k, &curve);
         (curve, d1, d2, l, k)
+    }
+
+    /// `C : y² = x⁷ + x³ + c x + 1` over `F_p`, genus 3.
+    fn genus3_curve(p: u64, c: u64) -> HyperellipticCurveP {
+        let p = BigUint::from(p);
+        let f = FpPoly::from_coeffs(
+            vec![
+                BigUint::one(),
+                BigUint::from(c) % &p,
+                BigUint::zero(),
+                BigUint::one(),
+                BigUint::zero(),
+                BigUint::zero(),
+                BigUint::zero(),
+                BigUint::one(),
+            ],
+            p.clone(),
+        );
+        HyperellipticCurveP::new(p, f, 3)
+    }
+
+    #[test]
+    fn bsgs_order_agrees_with_the_l_polynomial_at_genus_two() {
+        // Two independent routes to the same number: BSGS over the
+        // Hasse-Weil interval, which knows nothing about the curve, and
+        // the genus-2 L-polynomial, which counts points.  They are
+        // wrong in different ways, so agreement is worth more than
+        // either alone — and BSGS is the only one available at genus 3,
+        // where the measurement actually goes.
+        for p_u in [23u64, 41, 61] {
+            let curve = toy_curve(p_u);
+            let jac = brute_force_jac_order_via_lpoly(&curve);
+            let fb = build_factor_base(&curve, usize::MAX);
+            for e in fb.entries.iter().take(3) {
+                let via_bsgs = divisor_order_bsgs(&curve, &e.divisor, 50_000)
+                    .expect("BSGS should find an order at this size");
+                // The L-polynomial route: the order divides #Jac, and
+                // dividing out prime factors gives the same answer.
+                let via_lpoly = exact_order_from_multiple(&curve, &e.divisor, &jac);
+                assert_eq!(
+                    via_bsgs, via_lpoly,
+                    "p={p_u}: BSGS {via_bsgs} vs L-polynomial {via_lpoly}"
+                );
+                assert!((&jac % &via_bsgs).is_zero(), "order must divide #Jac");
+            }
+        }
+    }
+
+    #[test]
+    fn solves_a_genus_three_dlp() {
+        // Genus 3 is where the asymptotic crossover against rho is
+        // supposed to live, so the pipeline has to work there before
+        // any measurement of it means anything.  No L-polynomial is
+        // available at this genus, so the order comes from BSGS over
+        // the Hasse–Weil interval.
+        let mut solved = false;
+        // Scan `c` for a curve with a usable prime-order subgroup:
+        // most genus-3 Jacobians here factor into small primes, and a
+        // 37-element subgroup measures nothing.
+        'outer: for c in 1..6u64 {
+            let curve = genus3_curve(41, c);
+            let fb = build_factor_base(&curve, usize::MAX);
+            for e in fb.entries.iter().take(4) {
+                let order = match divisor_order_bsgs(&curve, &e.divisor, 20_000) {
+                    Some(o) => o,
+                    None => continue,
+                };
+                assert!(e.divisor.scalar_mul(&order, &curve).is_identity());
+                let l = largest_prime_factor(&order);
+                if l < BigUint::from(500u32) {
+                    continue;
+                }
+                let d1 = e.divisor.scalar_mul(&(&order / &l), &curve);
+                assert_eq!(
+                    divisor_order_bsgs(&curve, &d1, 20_000).as_ref(),
+                    Some(&l),
+                    "cofactor multiple should have exactly order l"
+                );
+                let k = &l / BigUint::from(3u32) + BigUint::from(4u32);
+                let d2 = d1.scalar_mul(&k, &curve);
+                let params = HecIndexCalculusParams {
+                    fb_size: usize::MAX,
+                    extra_relations: 8,
+                    max_trials: 500_000,
+                    seed: 4,
+                    search: RelationSearch::walk(),
+                    linear_algebra: LinearAlgebra::Sparse,
+                    smoothness: SmoothnessTest::Gcd,
+                };
+                let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
+                assert_eq!(found, Some(k), "genus-3 report: {report:?}");
+                // Smoothness at genus 3 should be near 1/3! = 0.167, well
+                // below genus 2's 0.5 — the cost the extra genus buys.
+                assert!(
+                    report.smoothness_rate() < 0.45,
+                    "genus-3 smoothness {} looks like genus 2",
+                    report.smoothness_rate()
+                );
+                solved = true;
+                break 'outer;
+            }
+        }
+        assert!(solved, "no usable genus-3 subgroup found");
+    }
+
+    #[test]
+    fn cantor_zassenhaus_roots_agree_with_the_scan_at_degree_three() {
+        // deg u = 3 is what genus 3 produces and what the closed forms
+        // do not cover, so the CZ path is the one carrying the fast
+        // oracle there.  Exhaustive over monic cubics for two primes.
+        for p_u in [11u64, 23] {
+            let p = BigUint::from(p_u);
+            for a2 in 0..p_u {
+                for a1 in 0..p_u {
+                    for a0 in 0..p_u {
+                        let u = FpPoly::from_coeffs(
+                            vec![
+                                BigUint::from(a0),
+                                BigUint::from(a1),
+                                BigUint::from(a2),
+                                BigUint::one(),
+                            ],
+                            p.clone(),
+                        );
+                        let (mut o1, mut o2) = (0usize, 0usize);
+                        assert_eq!(
+                            split_by_scan(&u, &p, &mut o1),
+                            split_by_gcd(&u, &p, &mut o2),
+                            "p={p_u} u=x^3+{a2}x^2+{a1}x+{a0}"
+                        );
+                    }
+                }
+            }
+        }
     }
 
     #[test]
