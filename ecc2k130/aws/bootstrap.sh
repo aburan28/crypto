@@ -109,6 +109,11 @@ ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
 EOF
+# Optional static keys when the instance profile is missing (SKIP_IAM launch).
+# Written by infra.sh into /var/lib/ecc2k130/aws-creds.env before this runs.
+if [ -f /var/lib/ecc2k130/aws-creds.env ]; then
+    cat /var/lib/ecc2k130/aws-creds.env >> /etc/ecc2k130.env
+fi
 
 cat > /etc/systemd/system/ecc2k130-worker@.service <<'EOF'
 [Unit]

@@ -58,6 +58,9 @@ jobs:
           # many 2xlarge/4xlarge/8xlarge spots; larger multi-GPU types stay
           # available as overrides for leftover capacity.
           TYPES: g7e.2xlarge,g7e.4xlarge,g7e.8xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge
+          # Temporary until admin runs: AWS_PROFILE=admin ./iam_role.sh adam
+          WORKER_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          WORKER_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           set -euo pipefail
           chmod +x infra.sh push_source.sh fleet.sh
