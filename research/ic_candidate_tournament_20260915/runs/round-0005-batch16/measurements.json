@@ -1,0 +1,497 @@
+{
+  "audit": {
+    "source_files": 450,
+    "status": "VERIFIED",
+    "trial_receipts": 1488
+  },
+  "decision": {
+    "arithmetic_operation_speedup": null,
+    "beats_rho": true,
+    "classification": "engineering",
+    "confirmation": {
+      "candidate": "combined_descent",
+      "candidate_over_baseline": 0.7192588993759098,
+      "ci95": [
+        0.7076301072093063,
+        0.7348375101951858
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.768426926573797,
+      "native_wall_ci95": [
+        0.7395664798895893,
+        0.8054849476620568
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8403443473889561,
+        "n17a1": 0.7726571631366896,
+        "n19a0": 0.7594797370279389,
+        "n19a1": 0.7484316214674018,
+        "n23a0": 0.7259395121293167
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.7489217532421447,
+        "n17a1": 0.7125358450334371,
+        "n19a0": 0.7229978724626152,
+        "n19a1": 0.7069672825023547,
+        "n23a0": 0.7057432340362563
+      },
+      "speedup": 1.39031995414681
+    },
+    "family_wide_or_complexity_claim": false,
+    "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+    "instruction_speedup": 1.39031995414681,
+    "parity_definition": "Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.",
+    "provisional_challenger": "combined_descent",
+    "reasons": [],
+    "replay": {
+      "candidate": "combined_descent",
+      "candidate_over_baseline": 0.7192561734566932,
+      "ci95": [
+        0.7076292905711455,
+        0.7348330148196759
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7709428514204208,
+      "native_wall_ci95": [
+        0.7427714253524114,
+        0.8053474247492254
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8383998304851422,
+        "n17a1": 0.7784785144752967,
+        "n19a0": 0.7657899556886991,
+        "n19a1": 0.7466988660965171,
+        "n23a0": 0.7297228720442474
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.7489171418859579,
+        "n17a1": 0.7125306757473583,
+        "n19a0": 0.7229960045788432,
+        "n19a1": 0.7069668907452992,
+        "n23a0": 0.705741540450247
+      },
+      "speedup": 1.3903252233402075
+    },
+    "rho_comparison": {
+      "candidate": "rho",
+      "candidate_over_baseline": 0.9996749978544182,
+      "ci95": [
+        0.8935151752875068,
+        1.1131606218870835
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.9856564743500876,
+      "native_wall_ci95": [
+        0.9223484220807296,
+        1.0578556252825475
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8780359069529708,
+        "n17a1": 0.9583841151987941,
+        "n19a0": 0.9789859346882752,
+        "n19a1": 1.0174185711272952,
+        "n23a0": 1.1099410111888413
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.8168152234103604,
+        "n17a1": 0.9688802055318787,
+        "n19a0": 1.0022918720053695,
+        "n19a1": 1.0576447778650642,
+        "n23a0": 1.1900527372992042
+      },
+      "speedup": 1.0003251078063164
+    },
+    "rho_over_winner": 1.389868097178667,
+    "rho_parity": true,
+    "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+    "scope": "bounded public-hash ECDLP configuration tournament",
+    "status": "promoted",
+    "unit": "valgrind-3.22-amd64-Ir",
+    "winner": "combined_descent",
+    "winner_over_rho": {
+      "confirmation": {
+        "candidate": "combined_descent",
+        "candidate_over_baseline": 0.7194927360588594,
+        "ci95": [
+          0.6374471292425982,
+          0.8219836239443673
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 0.7796092721660197,
+        "native_wall_ci95": [
+          0.6991620583548833,
+          0.8736653449888768
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.9570728722304593,
+          "n17a1": 0.8062082320473564,
+          "n19a0": 0.7757820721599739,
+          "n19a1": 0.7356182034677654,
+          "n23a0": 0.6540343178704369
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 0.9168802585672345,
+          "n17a1": 0.7354220273726015,
+          "n19a0": 0.7213446428693996,
+          "n19a1": 0.6684354684087993,
+          "n23a0": 0.5930352596288493
+        },
+        "speedup": 1.3898680971786672
+      },
+      "replay": {
+        "candidate": "combined_descent",
+        "candidate_over_baseline": 0.7194933826202862,
+        "ci95": [
+          0.6374460644319612,
+          0.8219757894629396
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 0.7822110819055289,
+        "native_wall_ci95": [
+          0.7024882235140708,
+          0.8739996568686551
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.9552088264672784,
+          "n17a1": 0.8099784460998386,
+          "n19a0": 0.7813581253737077,
+          "n19a1": 0.7359951191774531,
+          "n23a0": 0.6581470913713491
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 0.9168904352917073,
+          "n17a1": 0.7354202902167571,
+          "n19a0": 0.721342658088762,
+          "n19a1": 0.6684342688223559,
+          "n23a0": 0.5930354388374074
+        },
+        "speedup": 1.3898668481955332
+      }
+    }
+  },
+  "limits": [
+    "Fixed compiler/ISA user-space instructions; kernel/device/external audit work excluded.",
+    "Bounded Koblitz configuration result; no arithmetic exponent or family-wide claim.",
+    "Native cold-process time is secondary, with paired curve/target confidence intervals; profiler time is excluded."
+  ],
+  "matched_base_audit": {
+    "complete_ic_profiles_checked": 1044,
+    "status": "VERIFIED"
+  },
+  "native_tables": {
+    "confirmation": [
+      {
+        "ci95_over_incumbent": null,
+        "native_seconds": 0.013006472629875448,
+        "over_incumbent": 1,
+        "over_rho": 1.0145522563115816,
+        "scheduled": 180,
+        "variant": "incumbent",
+        "verified": 180
+      },
+      {
+        "ci95_over_incumbent": [
+          0.7395664798895893,
+          0.8054849476620568
+        ],
+        "native_seconds": 0.009994523788541406,
+        "over_incumbent": 0.768426926573797,
+        "over_rho": 0.7796092721660198,
+        "scheduled": 180,
+        "variant": "combined_descent",
+        "verified": 180
+      },
+      {
+        "ci95_over_incumbent": [
+          0.9223484220807296,
+          1.0578556252825475
+        ],
+        "native_seconds": 0.012819913956093956,
+        "over_incumbent": 0.9856564743500876,
+        "over_rho": 1.0,
+        "scheduled": 180,
+        "variant": "rho",
+        "verified": 180
+      }
+    ],
+    "development": [
+      {
+        "ci95_over_incumbent": null,
+        "native_seconds": 0.01257971717116456,
+        "over_incumbent": 1,
+        "over_rho": 1.0154305135374309,
+        "scheduled": 36,
+        "variant": "incumbent",
+        "verified": 36
+      },
+      {
+        "ci95_over_incumbent": [
+          0.7400179681299157,
+          0.8207628130537689
+        ],
+        "native_seconds": 0.009740931594169389,
+        "over_incumbent": 0.7743362956122507,
+        "over_rho": 0.7862847023042197,
+        "scheduled": 36,
+        "variant": "combined_descent",
+        "verified": 36
+      },
+      {
+        "ci95_over_incumbent": [
+          0.76763293161331,
+          0.8461919310895059
+        ],
+        "native_seconds": 0.010086554627390823,
+        "over_incumbent": 0.8018109223084438,
+        "over_rho": 0.8141832765995842,
+        "scheduled": 36,
+        "variant": "fast_descent_check",
+        "verified": 36
+      },
+      {
+        "ci95_over_incumbent": [
+          0.9665940426961178,
+          0.9802773238517503
+        ],
+        "native_seconds": 0.0122579729387576,
+        "over_incumbent": 0.9744235718475085,
+        "over_rho": 0.9894594279640933,
+        "scheduled": 36,
+        "variant": "lazy_descent",
+        "verified": 36
+      },
+      {
+        "ci95_over_incumbent": [
+          0.9094869973097749,
+          1.0695101252791654
+        ],
+        "native_seconds": 0.012388555399365432,
+        "over_incumbent": 0.9848039690242555,
+        "over_rho": 1.0,
+        "scheduled": 36,
+        "variant": "rho",
+        "verified": 36
+      }
+    ],
+    "replay": [
+      {
+        "ci95_over_incumbent": null,
+        "native_seconds": 0.013153117325053679,
+        "over_incumbent": 1,
+        "over_rho": 1.01461616832473,
+        "scheduled": 180,
+        "variant": "incumbent",
+        "verified": 180
+      },
+      {
+        "ci95_over_incumbent": [
+          0.7427714253524114,
+          0.8053474247492254
+        ],
+        "native_seconds": 0.010140301775644216,
+        "over_incumbent": 0.7709428514204208,
+        "over_rho": 0.7822110819055289,
+        "scheduled": 180,
+        "variant": "combined_descent",
+        "verified": 180
+      },
+      {
+        "ci95_over_incumbent": [
+          0.9217838625223173,
+          1.057614107084187
+        ],
+        "native_seconds": 0.012963638601158178,
+        "over_incumbent": 0.98559438654633,
+        "over_rho": 1.0,
+        "scheduled": 180,
+        "variant": "rho",
+        "verified": 180
+      }
+    ]
+  },
+  "rho_health": {
+    "n13a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.9999515225065466,
+      "median_walk_additions_over_model": 0.9090468386423152,
+      "verified_runs": 576
+    },
+    "n17a1": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.9355734006377743,
+      "median_walk_additions_over_model": 0.9174069268389825,
+      "verified_runs": 576
+    },
+    "n19a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.9245187928724851,
+      "median_walk_additions_over_model": 0.9109229282714192,
+      "verified_runs": 576
+    },
+    "n19a1": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.9887098543883893,
+      "median_walk_additions_over_model": 0.9887098543883893,
+      "verified_runs": 576
+    },
+    "n23a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.8765595285714757,
+      "median_walk_additions_over_model": 0.8672145442583469,
+      "verified_runs": 576
+    }
+  },
+  "round": "round-0005-batch16",
+  "schema_version": 1,
+  "tables": {
+    "confirmation": [
+      {
+        "S_Ir": 339796.9107270108,
+        "candidate_over_floor": 13718885.521910856,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 1.0003251078063164,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "incumbent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 244401.95202084433,
+        "candidate_over_floor": 9867430.501153734,
+        "candidate_over_incumbent": 0.7192588993759098,
+        "candidate_over_rho": 0.7194927360588594,
+        "class": "engineering experiment",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "combined_descent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 339686.4760019627,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.9996749978544182,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "rho",
+        "verified_runs": 180
+      }
+    ],
+    "development": [
+      {
+        "S_Ir": 371471.3666835741,
+        "candidate_over_floor": 13363556.137798635,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 1.0082053384067675,
+        "class": "reference",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "incumbent",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 267896.59108900966,
+        "candidate_over_floor": 9637488.795179244,
+        "candidate_over_incumbent": 0.7211769603690852,
+        "candidate_over_rho": 0.7270944613800775,
+        "class": "engineering experiment",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "combined_descent",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 280291.53187170596,
+        "candidate_over_floor": 10083392.576278334,
+        "candidate_over_incumbent": 0.7545441102879492,
+        "candidate_over_rho": 0.7607354000556952,
+        "class": "engineering experiment",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "fast_descent_check",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 359029.0281314761,
+        "candidate_over_floor": 12915947.238057826,
+        "candidate_over_incumbent": 0.9665052554031797,
+        "candidate_over_rho": 0.9744357580956821,
+        "class": "engineering experiment",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "lazy_descent",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 368448.12513153075,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.9918614412221481,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "rho",
+        "verified_runs": 36
+      }
+    ],
+    "replay": [
+      {
+        "S_Ir": 339798.5926186423,
+        "candidate_over_floor": 13718953.4262326,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 1.0003297978833507,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "incumbent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 244402.23547285426,
+        "candidate_over_floor": 9867441.945182644,
+        "candidate_over_incumbent": 0.7192561734566932,
+        "candidate_over_rho": 0.7194933826202863,
+        "class": "engineering experiment",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "combined_descent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 339686.5647085986,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.9996703108474339,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "rho",
+        "verified_runs": 180
+      }
+    ]
+  },
+  "target_count": 16,
+  "unit": "valgrind-3.22-amd64-Ir"
+}
