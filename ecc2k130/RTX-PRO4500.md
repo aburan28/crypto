@@ -21,6 +21,15 @@ bash benchmarks/rtx-pro4500/run.sh
 Writes `benchmarks/rtx-pro4500/result.json` with each command's verbatim output,
 following [benchmarks/hardware-limits/result.json](benchmarks/hardware-limits/result.json).
 
+It reads the rate with the tree's own `codegen.benchreport` — `parseRate`, which
+accepts only the single synchronised `finished:` line and rejects a run without
+one, and `summarizeSamples`, which takes the median across repeats. That is the
+method behind the RTX PRO 6000 figures, so the two are comparable by
+construction rather than by intention. The periodic progress lines also carry
+`M it/s` and read high during boost-clock warmup; a maximum over those would
+have sat the 4500 above a same-method comparison by enough to cross both
+break-evens below.
+
 The script **refuses to run while another process holds the GPU**. A benchmark
 sharing a device with a collecting worker steals SMs from it and has them stolen
 back; both figures come out low and neither measures anything. Stop the worker
@@ -29,7 +38,12 @@ produces a number that is *not* comparable to the RTX PRO 6000 figure.
 
 It reuses the arithmetic and layout options of the RTX PRO 6000 preset
 (`RTX_PRO6000_ENV` in the [Makefile](Makefile)), which are field-arithmetic and
-storage choices rather than GPU-model choices. It deliberately does **not**
+storage choices rather than GPU-model choices — passed in the names a local
+`make` consumes (`BATCH`, `THREADS`, `MINBLOCKS`, `PACKED_*`), not the
+`ECC_PACKED_*` spelling, which is the Modal image interface and would leave
+every option at its Makefile default. `result.json` records the resulting
+`-DECC_*` defines so a reader can confirm the preset reached the build instead
+of trusting that it did. It deliberately does **not**
 reuse that preset's 385,024 workers: that count is four times automatic on a
 188-SM part and has no claim to be right on a smaller one. Automatic scales with
 `multiProcessorCount` (`src/main.cu`), so the script starts there.

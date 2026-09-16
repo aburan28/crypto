@@ -11,7 +11,7 @@
 #   bash benchmarks/rtx-pro4500/run.sh
 #
 # It writes benchmarks/rtx-pro4500/result.json with every command's verbatim
-# output, matching the convention of benchmarks/hardware-limits/result.json.
+# output, matching benchmarks/hardware-limits/result.json.
 set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 1
 OUT="benchmarks/rtx-pro4500/result.json"
@@ -34,33 +34,55 @@ if [ "$ALLOW_CONTENTION" != "1" ]; then
   fi
 fi
 
-# Same arithmetic/layout options as the RTX PRO 6000 preset (Makefile
-# RTX_PRO6000_ENV). These are field-arithmetic and storage choices, not
-# GPU-model choices, so they transfer; the WORKER COUNT deliberately does not
-# -- 385,024 was tuned as 4x automatic on a 188-SM part and has no claim to be
-# right on a smaller one. Hence the sweep below.
-export ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
-       ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
-       ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
-       ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 \
-       ECC_PACKED_DIRECT_REDUCE=1 ECC_PACKED_GENERATED_PRODUCT=1 \
-       ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
-       ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
-       ECC_PACKED_SHARED_SIGMA=1 ECC_PACKED_TOP_CLMAD=0 \
-       ECC_BATCH=16 ECC_THREADS=256
+# The RTX PRO 6000 preset's arithmetic and layout options, in the names the
+# MAKEFILE consumes. These are NOT the ECC_PACKED_* names: those are the Modal
+# image interface (modal_app.py reads them from the environment), while a local
+# `make` build reads BATCH/THREADS/MINBLOCKS/PACKED_* and turns them into the
+# -DECC_PACKED_* defines itself. Using the Modal spelling here would leave every
+# option at its Makefile default -- batch 32, all PACKED_* zero -- and quietly
+# measure a different kernel than the 14.6/14.1 B/s figures this compares to.
+#
+# These options are field-arithmetic and storage choices, so they transfer
+# across GPU models. The 6000 preset's 385,024 WORKERS deliberately do not:
+# that is 4x automatic on a 188-SM part and has no claim on a smaller one.
+# Automatic scales with multiProcessorCount (src/main.cu), so start there.
+export BATCH=16 THREADS=256 MINBLOCKS=2 \
+       PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 \
+       PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+       PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+       PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+       PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 \
+       PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+       PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 \
+       PACKED_SHARED_SIGMA=1 PACKED_TOP_CLMAD=0
 
-python3 - "$OUT" <<'PY'
-import json, subprocess, sys, os, re
+REPEATS="${REPEATS:-3}"
 
-out_path = sys.argv[1]
+python3 - "$OUT" "$REPEATS" <<'PY'
+import json, subprocess, sys
+
+# The tree's own rate reader and summariser, not a local reimplementation.
+# parseRate accepts ONLY the single `finished:` line -- which is printed after
+# the pending GPU work is synchronised -- and rejects a run with none. The
+# periodic progress lines also carry "M it/s" and read high during boost-clock
+# warmup, so scraping them and taking a maximum would sit the 4500 above a
+# same-method comparison and could flip a break-even only a few percent wide.
+# summarizeSamples takes the MEDIAN across repeats, as the 6000 figure does.
+sys.path.insert(0, ".")
+from codegen.benchreport import benchResult, summarizeSamples
+
+out_path, repeats = sys.argv[1], int(sys.argv[2])
 rec = {"kind": "RTX PRO 4500 (EC2 g7) complete-scalar-iteration throughput",
-       "note": "Rates are from --bench (no distinguished-point handling); the "
-               "collecting rate is lower. The RTX PRO 6000 comparison figures "
-               "are 14.637530 B/s benchmarking and 14.1 B/s collecting."}
+       "method": "codegen.benchreport parseRate/summarizeSamples, identical to "
+                 "the RTX PRO 6000 figures; median of finished rates",
+       "comparison": {"rtx_pro_6000_bench_B_per_s": 14.637530,
+                      "rtx_pro_6000_collecting_B_per_s": 14.1},
+       "note": "--bench excludes distinguished-point handling; the collecting "
+               "rate is lower."}
 
-def run(key, cmd, **kw):
+def run(key, cmd):
     print(f"--- {key}: {cmd}", flush=True)
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True, **kw)
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     rec[key] = {"command": cmd, "returncode": p.returncode,
                 "stdout": p.stdout, "stderr": p.stderr[-4000:]}
     print(p.stdout[-2000:], flush=True)
@@ -68,39 +90,32 @@ def run(key, cmd, **kw):
 
 run("nvidiaSmi", "nvidia-smi --query-gpu=name,uuid,driver_version,"
                  "clocks.max.sm,clocks.max.memory,power.limit --format=csv")
-run("smCount", "nvidia-smi --query-gpu=name,count --format=csv,noheader")
 run("nvcc", "nvcc --version")
-build = run("build", "make gpu -j4")
-if build.returncode != 0:
+# Record the defines actually compiled in, so a future reader can confirm the
+# preset reached the build rather than trusting this comment.
+run("buildDefines", "make -n gpu | tr ' ' '\\n' | grep -E '^-DECC_' | sort -u")
+if run("build", "make gpu -j4").returncode != 0:
     rec["fatal"] = "build failed; no rate recorded"
     json.dump(rec, open(out_path, "w"), indent=1)
     sys.exit(1)
 
-# Automatic workers first (scales with multiProcessorCount), then multiples of
-# it, because the 6000's 4x may or may not be this part's optimum.
-rec["runs"] = []
-for workers in (0, 0, 0):        # three repeats at automatic
-    p = run(f"bench_auto_{len(rec['runs'])}",
-            "./ecc2k130 --curve 131 --packed --bench --steps 1024 "
-            "--launches 32 --verify 0")
-    m = re.findall(r"([0-9.]+)\s*M it/s", p.stdout)
-    rec["runs"].append({"workers": "automatic",
-                        "m_it_per_s": [float(x) for x in m] or None,
-                        "returncode": p.returncode})
+BENCH = ("./ecc2k130 --curve 131 --packed --bench --steps 1024 "
+         "--launches 32 --verify 0")
+samples = []
+for i in range(repeats):
+    p = run(f"bench_{i}", BENCH)
+    samples.append(benchResult(BENCH, p.returncode, p.stdout))
 
-rates = [r for run_ in rec["runs"] for r in (run_["m_it_per_s"] or [])]
-if rates:
-    best = max(rates)
-    rec["summary"] = {
-        "best_M_it_per_s": best,
-        "best_B_it_per_s": best / 1000.0,
-        "all_M_it_per_s": rates,
-        "median_M_it_per_s": sorted(rates)[len(rates) // 2],
-    }
+summary = summarizeSamples(samples)
+rec["workers"] = "automatic (multiProcessorCount-scaled)"
+rec["summary"] = summary
+if summary["valid"]:
+    rec["summary"]["B_it_per_s"] = summary["rate"] / 1000.0
 else:
-    rec["summary"] = {"error": "no rate parsed from output; nothing recorded"}
+    rec["summary"]["B_it_per_s"] = None   # never a number from an invalid run
 
 json.dump(rec, open(out_path, "w"), indent=1)
 print(f"\nwrote {out_path}")
-print(json.dumps(rec.get("summary"), indent=1))
+print(json.dumps({k: v for k, v in rec["summary"].items() if k != "samples"},
+                 indent=1))
 PY
