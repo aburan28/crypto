@@ -24,9 +24,10 @@
 //!
 //! - **rho** — the `r` precomputed walk steps `R_j = a_j D₁ + b_j D₂`
 //!   plus every tortoise/hare step.
-//! - **index calculus** — the relation-stage scalar multiplications,
-//!   *and* the linear algebra, converted into group-operation
-//!   equivalents by a **measured** factor
+//! - **index calculus** — the relation-stage group operations, *and* the
+//!   smoothness oracle's field work, *and* the linear algebra, the last
+//!   two converted into group-operation equivalents by a **measured**
+//!   factor
 //!   ([`calibrate_modmuls_per_group_op`]), not an assumed one.  Leaving
 //!   the solve out is exactly the relabelling failure mode: the work
 //!   does not disappear, it moves somewhere the headline does not look.
@@ -43,13 +44,17 @@
 //!   operation.  So
 //!
 //!   ```text
-//!     floor_ops = (m + 1)·g!  +  m²/c
+//!     T = (m + 1)·g!                        (trials)
+//!     floor_ops = T  +  (T·g + m²)/c
 //!   ```
 //!
-//!   the second term because any dense solve must at least read its own
-//!   `m × m` matrix once — `m²` mul-mods, divided by the measured
-//!   mul-mods-per-group-op factor `c` so that both terms are in the same
-//!   unit as the measurement.  It moves only with `m` and `g`, so it cannot
+//!   one group operation per trial, plus the field work no
+//!   implementation can skip: the smoothness oracle must read each
+//!   candidate's `u`, whose `g` coefficients cost `g` multiplications,
+//!   and any dense solve must read its own `m × m` matrix once.  Those
+//!   `T·g + m²` mul-mods are divided by the measured
+//!   mul-mods-per-group-op factor `c` so every term is in the same unit
+//!   as the measurement.  It moves only with `m` and `g`, so it cannot
 //!   be tuned away; it is a floor on *this* algorithm, not on the DLP.
 //! - **Reference.**  Pollard rho, measured, on the same instances.
 //!
@@ -79,6 +84,16 @@ use super::hyperelliptic_index_calculus::{
 /// random-map ideal once `r ≥ 16`, so a smaller `r` would flatter the
 /// index calculus by handicapping its reference.
 const RHO_BRANCHES: usize = 16;
+
+/// Bit length of the rho branch coefficients `a_j, b_j`.
+///
+/// The index-calculus walk builds its steps from short coefficients
+/// because precomputation is its largest term once a trial costs one
+/// operation.  The same trick is available to rho and costs it nothing,
+/// so the reference gets it too: optimising one side's precomputation
+/// and not the other's would be a rigged comparison, and the rigging
+/// would favour the side under study.
+const RHO_STEP_BITS: u32 = 8;
 
 /// Outcome of one rho run.
 #[derive(Clone, Debug)]
@@ -148,14 +163,15 @@ pub fn pollard_rho_jacobian(
 
         // Precomputed branches R_j = a_j·D₁ + b_j·D₂.  Charged.
         let mut branch: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::with_capacity(RHO_BRANCHES);
+        let step_bound = BigUint::one() << RHO_STEP_BITS;
         for _ in 0..RHO_BRANCHES {
-            let a = rand_below(&mut rng, n);
-            let b = rand_below(&mut rng, n);
+            let a = rand_below(&mut rng, &step_bound) + BigUint::one();
+            let b = rand_below(&mut rng, &step_bound) + BigUint::one();
             let r = d1
                 .scalar_mul(&a, curve)
                 .add(&d2.scalar_mul(&b, curve), curve);
-            group_ops += 2 * (n.bits() as usize + 1);
-            precompute_ops += 2 * (n.bits() as usize + 1);
+            group_ops += 2 * RHO_STEP_BITS as usize;
+            precompute_ops += 2 * RHO_STEP_BITS as usize;
             branch.push((a, b, r));
         }
 
@@ -289,8 +305,16 @@ pub struct HeadToHeadRow {
 
     /// Means over `HeadToHeadTrials::ic` runs.
     pub ic_relation_ops: f64,
+    /// Of those, walk-step precomputation and restarts.
+    pub ic_precompute_ops: f64,
+    /// Group operations per trial, precomputation excluded.
+    pub ic_ops_per_trial: f64,
     /// Linear algebra, in mul-mods.
     pub ic_la_modmuls: f64,
+    /// Smoothness oracle (root finding + decomposition), in mul-mods.
+    pub ic_oracle_modmuls: f64,
+    /// The same, converted to group-operation equivalents.
+    pub ic_oracle_group_equiv: f64,
     /// The same, converted to group-operation equivalents.
     pub ic_la_group_equiv: f64,
     pub ic_total_group_ops: f64,
@@ -359,7 +383,12 @@ pub struct HeadToHeadTrials {
 
 impl Default for HeadToHeadTrials {
     fn default() -> Self {
-        Self { ic: 3, rho: 9 }
+        // Rho's step count is a wide random variable and the measured
+        // gap is now a factor of ~2, not ~10, so the sample has to be
+        // large enough that the gap is not the sampling noise.  25 runs
+        // put the standard error of the mean near 20% of one run's
+        // spread; 9 did not.
+        Self { ic: 5, rho: 25 }
     }
 }
 
@@ -388,6 +417,9 @@ pub fn head_to_head(
     let ic_runs = trials.ic.max(1);
     let mut ic_relation_ops = 0f64;
     let mut ic_la_modmuls = 0f64;
+    let mut ic_oracle_modmuls = 0f64;
+    let mut ic_precompute_ops = 0f64;
+    let mut ic_ops_per_trial = 0f64;
     let mut ic_wall_ms = 0f64;
     let mut ic_smooth = 0f64;
     let mut ic_fb = 0usize;
@@ -400,14 +432,19 @@ pub fn head_to_head(
         ic_wall_ms += ic_start.elapsed().as_secs_f64() * 1e3;
         ic_relation_ops += rep.jacobian_ops as f64;
         ic_la_modmuls += rep.solve_row_ops as f64;
+        ic_oracle_modmuls += rep.smoothness_field_ops as f64;
+        ic_precompute_ops += rep.precompute_ops as f64;
+        ic_ops_per_trial += rep.ops_per_trial();
         ic_smooth += rep.smoothness_rate();
         ic_fb = rep.factor_base_size;
         ic_correct &= ic_k.as_ref() == Some(expected_k);
     }
     let f = ic_runs as f64;
-    let (ic_relation_ops, ic_la_modmuls, ic_wall_ms, ic_smooth) = (
+    let (ic_precompute_ops, ic_ops_per_trial) = (ic_precompute_ops / f, ic_ops_per_trial / f);
+    let (ic_relation_ops, ic_la_modmuls, ic_oracle_modmuls, ic_wall_ms, ic_smooth) = (
         ic_relation_ops / f,
         ic_la_modmuls / f,
+        ic_oracle_modmuls / f,
         ic_wall_ms / f,
         ic_smooth / f,
     );
@@ -439,7 +476,8 @@ pub fn head_to_head(
 
     let root_n = sqrt_big(n);
     let la_group_equiv = ic_la_modmuls / conv.max(f64::MIN_POSITIVE);
-    let ic_total = ic_relation_ops + la_group_equiv;
+    let oracle_group_equiv = ic_oracle_modmuls / conv.max(f64::MIN_POSITIVE);
+    let ic_total = ic_relation_ops + la_group_equiv + oracle_group_equiv;
 
     let m = ic_fb as f64;
     // Both terms in group-operation equivalents: the solve's `m²`
@@ -447,7 +485,13 @@ pub fn head_to_head(
     // floor stated in a different unit from the measurement is not a
     // floor — it was one of these that first read as "below the
     // floor", which is impossible and meant the unit, not the run.
-    let floor_ops = (m + 1.0) * factorial(curve.genus) + (m * m) / conv.max(f64::MIN_POSITIVE);
+    // The oracle is not optional either: every trial must be tested for
+    // smoothness, and the cheapest test that reads `u` at all touches
+    // its `g` coefficients.  Charging zero for it would put the floor
+    // below what any implementation can reach.
+    let trials_floor = (m + 1.0) * factorial(curve.genus);
+    let floor_ops =
+        trials_floor + (trials_floor * curve.genus as f64 + m * m) / conv.max(f64::MIN_POSITIVE);
 
     HeadToHeadRow {
         p: p_u,
@@ -457,8 +501,12 @@ pub fn head_to_head(
         factor_base_size: ic_fb,
 
         ic_relation_ops,
+        ic_precompute_ops,
+        ic_ops_per_trial,
         ic_la_modmuls,
         ic_la_group_equiv: la_group_equiv,
+        ic_oracle_modmuls,
+        ic_oracle_group_equiv: oracle_group_equiv,
         ic_total_group_ops: ic_total,
         ic_s: ic_total / root_n,
         ic_wall_ms,
@@ -487,7 +535,9 @@ pub fn full_factor_base_size(curve: &HyperellipticCurveP) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::hyperelliptic_index_calculus::{prime_order_of, subgroup_generator};
+    use crate::cryptanalysis::hyperelliptic_index_calculus::{
+        prime_order_of, subgroup_generator, LinearAlgebra, RelationSearch, SmoothnessTest,
+    };
     use crate::prime_hyperelliptic::{brute_force_jac_order_via_lpoly, FpPoly};
 
     fn toy_curve(p: u64) -> HyperellipticCurveP {
@@ -557,6 +607,9 @@ mod tests {
             extra_relations: 5,
             max_trials: 50_000,
             seed: 20260916,
+            search: RelationSearch::Random,
+            linear_algebra: LinearAlgebra::Dense,
+            smoothness: SmoothnessTest::Scan,
         };
         let row = head_to_head(
             &curve,
