@@ -155,7 +155,7 @@ if sw and cl:
     rec["preset"] = "clmad" if cl > sw else "software"
 else:
     rec["clmadGain"] = None
-    rec["preset"] = "software" if sw else None
+    rec["preset"] = "software" if sw else ("clmad" if cl else None)
 
 json.dump(rec, open(out_path, "w"), indent=1)
 print(f"\nwrote {out_path}")

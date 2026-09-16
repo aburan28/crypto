@@ -78,7 +78,13 @@ cat manifest.json 2>/dev/null
 # masks against independent routing.  Each also prints which arithmetic it was
 # compiled with, and a binary built without the native carryless products or
 # the compact storage walks at half the audited rate while looking healthy, so
-# the markers are checked too.
+# the markers are checked too.  CLMAD is the one preset knob build.sh varies
+# (off by default once a pre-Blackwell architecture is in ARCHES), so its
+# expected value comes from the knobs the manifest says the build compiled with;
+# the fixed value 1 would reject every such build and stop the whole fleet.
+CLMAD=$(python3 -c 'import json
+knobs = dict(kv.split("=", 1) for kv in json.load(open("manifest.json"))["knobs"].split())
+print(knobs.get("PACKED_CLMAD", "1"))' 2>/dev/null || echo 1)
 LOGS=""
 for f in $FIXTURES; do
     LOGS="$LOGS $f.log"
@@ -88,7 +94,7 @@ for f in $FIXTURES; do
         echo "$f FAILED; not starting workers"; tail -n 30 "$f.log"; exit 1
     fi
 done
-for marker in "packed arithmetic native carryless multiply: 1" \
+for marker in "packed arithmetic native carryless multiply: $CLMAD" \
               "packed arithmetic weighted prefix: 2" \
               "packed storage compact state: 1" \
               "packed storage batch: $(field batch)" \
