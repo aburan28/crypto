@@ -23,13 +23,14 @@ python3 research/ic_candidate_tournament_20260915/runs/round-0005-batch16/evalua
   verify --round research/ic_candidate_tournament_20260915/runs/round-0005-batch16
 ```
 
-Use `--archive round-0006` to restore only the single-target parity round,
+Use `--archive round-0007` to restore only the single-target beat-rho round
+(`--archive round-0006` for the parity round it built on),
 `--archive round-0005-batch16` for the 16-target round, or
 `--out /absolute/path/to/evidence` to restore elsewhere. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004` and `round-0006` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006` and `round-0007` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -42,7 +43,7 @@ restored files are needed for the complete record, in addition to the archives.
 round directory and records it in [manifest.json](manifest.json). It refuses a
 profile whose gzip stream zlib cannot reproduce exactly, excludes build caches
 and the operation lock, and normalises member order, modes and timestamps.
-Round 0006 was packed with it; the earlier archives predate the script.
+Rounds 0006 and 0007 were packed with it; the earlier archives predate the script.
 
 ## Lossless profile packing
 
@@ -75,7 +76,9 @@ is in [winner-config.json](../runs/round-0005-batch16/winner-config.json). The
 single-target round-0006 candidates derive from that source through the
 committed `campaign_20260916/round6-*.patch` files, which
 `campaign_20260916/round6_candidates.py` reapplies onto the restored snapshot;
-the frozen copies the measurements bind are inside `round-0006.tar.zst`.
+the frozen copies the measurements bind are inside `round-0006.tar.zst`. Round-0007's
+candidates derive from round-0006's winner source the same way
+(`round7-*.patch`, `round7_candidates.py`, `round-0007.tar.zst`).
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 

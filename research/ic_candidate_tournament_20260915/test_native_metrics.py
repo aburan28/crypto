@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-from tournament import comparison, execute, gate
+from tournament import comparison, execute, gate, rho_gate
 from test_tournament import rows
 
 
@@ -26,6 +26,28 @@ class NativeMetricsTests(unittest.TestCase):
             if row['arm'] == 'candidate' and row['cell'] == '0':
                 row['native_process']['process_wall_seconds'] = .12
         self.assertFalse(gate(comparison(data, 'candidate', draws=200), c))
+
+    def test_rho_objective_blocks_aa_and_requires_strict_rho_win(self):
+        c = {'confirmation_ratio': .8, 'max_cell_ratio': 1.1, 'require_native_progress': True,
+             'objective': 'rho', 'no_regression_ratio': .98}
+        # An A/A control has ratio one: never a promotion under either objective.
+        self.assertFalse(gate(comparison(rows(), 'candidate', draws=200), c))
+        # A small but measurable gain over the incumbent passes the no-regression gate
+        # under the rho objective and fails the default 20% gate.
+        data = rows(.9)
+        for row in data:
+            if row['arm'] == 'candidate':
+                row['native_process']['process_wall_seconds'] = .095
+        result = comparison(data, 'candidate', draws=200)
+        self.assertTrue(gate(result, c))
+        self.assertFalse(gate(result, dict(c, objective='incumbent')))
+        # The rho gate needs every upper limit and every cell strictly below one.
+        self.assertTrue(rho_gate(result))
+        for row in data:
+            if row['arm'] == 'candidate' and row['cell'] == '0':
+                row['total_operations'] = 1000
+        self.assertFalse(rho_gate(comparison(data, 'candidate', draws=200)))
+        self.assertFalse(rho_gate({'eligible': False}))
 
     def test_watchdog_still_retains_timeout(self):
         with tempfile.TemporaryDirectory() as tmp:

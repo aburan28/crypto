@@ -49,8 +49,13 @@ The separate single-target panel reached parity in [round-0006](runs/round-0006/
 costs 0.8264 times rho's instructions (95% interval 0.8032–0.8488) and 0.9766
 times its native time (0.9571–0.9946) on confirmation, 0.9854 (0.9641–1.0062)
 on replay, every cell within the 1.10 margin, 1,584 verified trials. It replaces
-the earlier 3.04 / 1.52 figures on that panel. Keep the two workloads separate
-when extending the operation; [WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
+the earlier 3.04 / 1.52 figures on that panel. [Round-0007](runs/round-0007/REPORT.md)
+([pre-registration](campaign_20260916/ROUND7.md), `--objective rho`) then went
+strictly below rho: `tiny2` at 0.7376 of rho's instructions (0.7066–0.7644) and
+0.9461 of its native time (0.9293–0.9639) on confirmation, 0.9414 (0.9215–0.9611)
+on replay, every cell below one in both metrics, 1,488 verified trials. Keep the
+two workloads separate when extending the operation;
+[WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
 and [next-proposal-single-target.json](campaign_20260916/next-proposal-single-target.json)
 carry the single-target line.
 
@@ -71,6 +76,16 @@ confirmation and replay rule applies. Every completed decision separately report
 `winner_over_rho` and `rho_parity`: both metric upper confidence limits and every
 cell ratio must be at most 1.10 on both final stages for parity.
 
+`prepare --objective rho` declares a round whose aim is to beat matched rho
+rather than to improve on the incumbent by a margin. Under it the incumbent
+gate only guards against regression (instruction ratio at most 0.98 with the
+paired upper limit below one, native upper limit below one, no cell more than
+10% worse), and promotion additionally requires the strict rho gate on both
+confirmation and replay: candidate/rho upper paired 95% limits and every cell
+ratio below one in both instructions and native process wall. The decision
+records `beats_rho_strict` with that definition for any winner, alongside the
+older point-estimate `beats_rho` and the 1.10-margin `rho_parity`.
+
 New native measurements use blocking process reap with an independent timeout
 watchdog. Previous subprocess timeout polling quantized short native lifetimes;
 those old timings remain diagnostics and are not mixed into new runtime claims.
@@ -84,17 +99,19 @@ through 31, with pair-table or enumeration decomposition and dense/sparse scalar
 linear algebra. Initial candidates change batch size, surplus filtering, linear
 algebra or the collection window. These are configuration/engineering experiments.
 
-The round-0006 candidate sources add a single-word pipeline
+The round-0006 and round-0007 candidate sources add a single-word pipeline
 (`src/cryptanalysis/koblitz_tiny_ic.rs`, applied by
-`campaign_20260916/round6-tiny.patch`) that the worker runs for `pair_table`,
-three-summand, prime-degree jobs with the `SubgroupOrbits` recipe: the same
-base point set, relation meaning, column certification and final verification,
-with a Euclidean field inverse, a normal-basis orbit key for the folded pair
-table, density-sized table rows, walked probes and no thread pool. Its worker
-writes the same report fields directly instead of through a value tree. On
-that path `linear_algebra` and `sparse` have no effect; the registry records the
-configuration a candidate ran under. Jobs outside its scope take the general
-path unchanged.
+`campaign_20260916/round6-tiny.patch` and then `round7-tiny2.patch`) that the
+worker runs for `pair_table`, three-summand, prime-degree jobs with the
+`SubgroupOrbits` recipe: the same base point set, relation meaning, column
+certification and final verification, with a Euclidean field inverse, a
+normal-basis orbit key for the folded pair table, a work-minimising table-row
+rule, walked probes, López–Dahab projective and fixed-base batched scalar
+multiplication, its own field tables and a bit-exact scalar copy of the seeded
+ChaCha12 sampler, and no thread pool. Its worker writes the same report fields
+directly instead of through a value tree. On that path `linear_algebra` and
+`sparse` have no effect; the registry records the configuration a candidate ran
+under. Jobs outside its scope take the general path unchanged.
 
 The primary implementation metric is **Valgrind amd64 instruction reads (`Ir`)**.
 All user-space instructions from startup to termination are charged, including
