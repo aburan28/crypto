@@ -15,7 +15,7 @@ use num_traits::{One, Zero};
 use crypto_lib::cryptanalysis::hyperelliptic_ic_bench::{head_to_head, HeadToHeadTrials};
 use crypto_lib::cryptanalysis::hyperelliptic_index_calculus::{
     build_factor_base, prime_order_of, subgroup_generator, HecIndexCalculusParams, LinearAlgebra,
-    RelationSearch,
+    RelationSearch, SmoothnessTest,
 };
 use crypto_lib::prime_hyperelliptic::{
     brute_force_jac_order_via_lpoly, FpPoly, HyperellipticCurveP, MumfordDivisorP,
@@ -118,7 +118,7 @@ fn main() {
     );
 
     println!(
-        "{:>5} {:>7} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7}",
+        "{:>5} {:>9} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7}",
         "p",
         "search",
         "N",
@@ -157,11 +157,31 @@ fn main() {
         let k = &n / BigUint::from(3u32) + BigUint::from(7u32);
         let d2 = d1.scalar_mul(&k, &curve);
 
-        for (label, search, la) in [
-            ("rnd+dns", RelationSearch::Random, LinearAlgebra::Dense),
-            ("wlk+dns", RelationSearch::walk(), LinearAlgebra::Dense),
-            ("rnd+spr", RelationSearch::Random, LinearAlgebra::Sparse),
-            ("wlk+spr", RelationSearch::walk(), LinearAlgebra::Sparse),
+        for (label, search, la, oracle) in [
+            (
+                "baseline",
+                RelationSearch::Random,
+                LinearAlgebra::Dense,
+                SmoothnessTest::Scan,
+            ),
+            (
+                "walk",
+                RelationSearch::walk(),
+                LinearAlgebra::Dense,
+                SmoothnessTest::Scan,
+            ),
+            (
+                "walk+spr",
+                RelationSearch::walk(),
+                LinearAlgebra::Sparse,
+                SmoothnessTest::Scan,
+            ),
+            (
+                "all three",
+                RelationSearch::walk(),
+                LinearAlgebra::Sparse,
+                SmoothnessTest::Gcd,
+            ),
         ] {
             let params = HecIndexCalculusParams {
                 fb_size: usize::MAX,
@@ -170,6 +190,7 @@ fn main() {
                 seed: 20260916,
                 search,
                 linear_algebra: la,
+                smoothness: oracle,
             };
             let row = head_to_head(
                 &curve, &d1, &d2, &n, &params, 0xC0FFEE, 50_000_000, &k, &trials,
@@ -184,7 +205,7 @@ fn main() {
             };
 
             println!(
-                "{:>5} {:>7} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
+                "{:>5} {:>9} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
                 p,
                 label,
                 row.n,

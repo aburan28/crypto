@@ -46,14 +46,16 @@
 //! *reduced* factor base of size `p^{2/(g+1)}`, which this module
 //! supports through `fb_size` — moves it to `g = 3`.
 //!
-//! What dominates in practice here is neither: the smoothness oracle
-//! finds roots by evaluating at every `x ∈ F_p`, `O(p)` field
-//! multiplications per candidate, which is why `p` stays small.  That
-//! cost is counted ([`HecIndexCalculusReport::smoothness_field_ops`])
-//! rather than assumed away — `AGENTS.md` puts an oracle's per-call
-//! work inside the cost unit, and once the walk made the group
-//! operation cheap, leaving it out would have overstated the attack
-//! more than either optimisation improved it.
+//! The smoothness oracle runs on every candidate, so its per-call cost
+//! sits directly on that stage; it is counted
+//! ([`HecIndexCalculusReport::smoothness_field_ops`]) rather than
+//! assumed away, since `AGENTS.md` puts an oracle's per-call work
+//! inside the cost unit.  At `deg u ≤ 2` the default oracle decides
+//! smoothness with one Legendre symbol instead of `O(p)` evaluations.
+//!
+//! What remains largest is the walk's own precomputation: the branch
+//! divisors, roughly half the relation stage at `p = 251` even with
+//! short step coefficients.
 //!
 //! The measured comparison against rho on the same instances, in the
 //! unit `S = total group operations / sqrt(N)`, lives in
@@ -65,9 +67,10 @@
 //!
 //! - Odd characteristic, `deg f = 2g+1`, `f` squarefree — the
 //!   "imaginary" model, one place at infinity.
-//! - `p` small enough to enumerate (`p` must fit in a `u64`; the
-//!   factor-base build and the root finding are both `O(p)`, and the
-//!   root finding is the binding constraint).
+//! - `p` small enough to enumerate: `p` must fit in a `u64`, and the
+//!   factor-base build is `O(p)`.  The root finding no longer is —
+//!   `SmoothnessTest::Gcd` is `O(log p)` per candidate at genus 2 —
+//!   so the factor-base build is now the binding `O(p)` step.
 //! - `N` = order of `D_1` must be **prime**: the solver inverts
 //!   pivots mod `N`.  [`prime_order_of`] computes it for toy
 //!   Jacobians and refuses a composite answer.
@@ -205,6 +208,247 @@ pub fn split_into_linear_factors_counted(
     p: &BigUint,
     ops: &mut usize,
 ) -> Option<Vec<(BigUint, usize)>> {
+    split_counted_with(u, p, ops, &SmoothnessTest::default())
+}
+
+/// How smoothness is decided.
+///
+/// The oracle runs on **every** candidate, so its per-call cost sits
+/// directly on the relation stage.  Once the walk brought a candidate
+/// down to one group operation, this became the dominant field cost —
+/// at `p = 251` the scan spent ~600 multiplications per trial against
+/// the walk's single Jacobian operation.
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
+pub enum SmoothnessTest {
+    /// Evaluate `u` at every `x ∈ F_p`.  `O(p)` multiplications per
+    /// call, and the reference the fast test has to match answer-for-
+    /// answer.
+    Scan,
+    /// `u` splits into linear factors iff its radical equals
+    /// `gcd(u, x^p − x)`, and `x^p mod u` costs `O(log p)`
+    /// multiplications of degree-`< g` polynomials by square-and-
+    /// multiply.  Roots then come from the quadratic formula at
+    /// `deg ≤ 2`; higher degrees fall back to the scan (see below).
+    #[default]
+    Gcd,
+}
+
+/// As [`split_into_linear_factors_counted`], choosing the oracle.
+pub fn split_counted_with(
+    u: &FpPoly,
+    p: &BigUint,
+    ops: &mut usize,
+    test: &SmoothnessTest,
+) -> Option<Vec<(BigUint, usize)>> {
+    match test {
+        SmoothnessTest::Scan => split_by_scan(u, p, ops),
+        SmoothnessTest::Gcd => split_by_gcd(u, p, ops),
+    }
+}
+
+/// Multiply two polynomials mod `m`, charging the coefficient
+/// multiplications both the product and the reduction perform.
+fn poly_mul_mod(a: &FpPoly, b: &FpPoly, m: &FpPoly, ops: &mut usize) -> FpPoly {
+    let (la, lb) = (a.coeffs.len().max(1), b.coeffs.len().max(1));
+    *ops += la * lb;
+    let prod = a.mul(b);
+    let (dp, dm) = (prod.degree().unwrap_or(0), m.degree().unwrap_or(1));
+    if dp >= dm {
+        *ops += (dp - dm + 1) * (dm + 1);
+    }
+    prod.rem(m)
+}
+
+/// `x^p mod u`, by square-and-multiply on the exponent.
+fn x_pow_p_mod(u: &FpPoly, p: &BigUint, ops: &mut usize) -> FpPoly {
+    let x = FpPoly::x(p.clone());
+    let mut result = FpPoly::one(p.clone()).rem(u);
+    let mut base = x.rem(u);
+    for i in 0..p.bits() {
+        if p.bit(i) {
+            result = poly_mul_mod(&result, &base, u, ops);
+        }
+        if i + 1 < p.bits() {
+            base = poly_mul_mod(&base, &base, u, ops);
+        }
+    }
+    result
+}
+
+/// Derivative of `f` over `F_p`.
+fn derivative(f: &FpPoly, p: &BigUint) -> FpPoly {
+    let coeffs: Vec<BigUint> = f
+        .coeffs
+        .iter()
+        .enumerate()
+        .skip(1)
+        .map(|(i, c)| (c * BigUint::from(i as u64)) % p)
+        .collect();
+    FpPoly::from_coeffs(coeffs, p.clone())
+}
+
+/// Roots of a **squarefree, completely split** `d` of degree `≤ 2`.
+///
+/// `None` for higher degree: equal-degree splitting is not implemented,
+/// and the caller falls back to the scan rather than guess.  Genus 2 —
+/// the scope this module is measured at — never reaches that branch,
+/// since `deg u ≤ g`.
+fn roots_of_split_poly(d: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<BigUint>> {
+    match d.degree()? {
+        0 => Some(Vec::new()),
+        1 => {
+            // d = x + c  ⟹  root −c (d is monic here).
+            Some(vec![(p - &d.coeff(0)) % p])
+        }
+        2 => {
+            // Monic x² + a₁x + a₀: roots (−a₁ ± sqrt(a₁² − 4a₀))/2.
+            let a1 = d.coeff(1);
+            let a0 = d.coeff(0);
+            let disc = (&a1 * &a1 + p * p - (BigUint::from(4u32) * &a0) % p) % p;
+            *ops += 2;
+            // Tonelli–Shanks is a modular exponentiation: ~1.5·log₂ p
+            // multiplications, the same order as the x^p step above.
+            *ops += (p.bits() as usize * 3) / 2;
+            let root = sqrt_mod_p(&disc, p)?;
+            let two_inv = mod_inverse(&BigUint::from(2u32), p)?;
+            let neg_a1 = (p - &a1) % p;
+            let r1 = ((&neg_a1 + &root) % p * &two_inv) % p;
+            let r2 = ((&neg_a1 + p - &root) % p * &two_inv) % p;
+            *ops += 2;
+            Some(vec![r1, r2])
+        }
+        _ => None,
+    }
+}
+
+/// Smoothness by `gcd(u, x^p − x)`, with the roots read off in closed
+/// form.
+///
+/// `u` splits into linear factors over `F_p` exactly when its radical
+/// `u/gcd(u, u')` — the product of its distinct irreducible factors —
+/// equals `gcd(u, x^p − x)`, which is the product of its distinct
+/// *linear* factors.  Comparing degrees is enough, both being monic
+/// divisors of `u` and one dividing the other.
+fn split_by_gcd(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint, usize)>> {
+    let deg = u.degree()?;
+    if deg == 0 {
+        return Some(Vec::new());
+    }
+
+    // Degrees 1 and 2 — the only ones genus 2 ever produces — need no
+    // `x^p` at all: a monic quadratic splits over `F_p` exactly when its
+    // discriminant is a square, which is one Legendre symbol.  Going
+    // through the general machinery here would cost `log₂ p` polynomial
+    // squarings to learn what one exponentiation already says.
+    if deg <= 2 {
+        return split_low_degree(u, p, ops);
+    }
+
+    let du = derivative(u, p);
+    let radical = if du.is_zero() {
+        // Only possible when p | every exponent; fall back rather than
+        // reason about it, since it cannot occur for deg u ≤ g < p.
+        return split_by_scan(u, p, ops);
+    } else {
+        let g = u.gcd(&du);
+        *ops += (deg + 1) * (deg + 1);
+        u.divrem(&g).0.monic()
+    };
+
+    let xp = x_pow_p_mod(u, p, ops);
+    let xp_minus_x = xp.sub(&FpPoly::x(p.clone()));
+    let linear_part = u.gcd(&xp_minus_x).monic();
+    *ops += (deg + 1) * (deg + 1);
+
+    if linear_part.degree() != radical.degree() {
+        // Some irreducible factor has degree ≥ 2: not smooth.
+        return None;
+    }
+
+    let roots = match roots_of_split_poly(&linear_part, p, ops) {
+        Some(r) => r,
+        // Degree ≥ 3 radical: no closed form here, so use the scan
+        // rather than return a wrong answer.
+        None => return split_by_scan(u, p, ops),
+    };
+
+    // Multiplicities, by dividing each root out of `u` while it goes.
+    let mut out = Vec::with_capacity(roots.len());
+    let mut rest = u.clone();
+    let mut total = 0usize;
+    for x in roots {
+        let lin = FpPoly::from_coeffs(vec![(p - &x) % p, BigUint::one()], p.clone());
+        let mut mult = 0usize;
+        loop {
+            *ops += rest.degree().unwrap_or(0);
+            let (q, r) = rest.divrem(&lin);
+            if !r.is_zero() {
+                break;
+            }
+            rest = q;
+            mult += 1;
+        }
+        if mult > 0 {
+            total += mult;
+            out.push((x, mult));
+        }
+    }
+    // The degree check above says this holds; assert it rather than
+    // trust it, since a wrong "smooth" would poison the relation matrix
+    // with a row that is not a relation.
+    if total != deg {
+        return None;
+    }
+    out.sort_unstable_by(|a, b| a.0.cmp(&b.0));
+    Some(out)
+}
+
+/// Closed-form split for `deg u ∈ {1, 2}`.
+///
+/// `deg 1` always splits.  For monic `x² + a₁x + a₀` the discriminant
+/// `a₁² − 4a₀` decides it: a non-residue means an irreducible quadratic
+/// (not smooth), zero means a double root, and a square gives the two
+/// roots by the usual formula.
+fn split_low_degree(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint, usize)>> {
+    match u.degree()? {
+        1 => {
+            // Monic x + c has the single root −c.
+            let inv_lead = mod_inverse(&u.coeff(1), p)?;
+            *ops += 1;
+            let c = (&u.coeff(0) * &inv_lead) % p;
+            Some(vec![((p - c) % p, 1)])
+        }
+        2 => {
+            let lead_inv = mod_inverse(&u.coeff(2), p)?;
+            *ops += 2;
+            let a1 = (&u.coeff(1) * &lead_inv) % p;
+            let a0 = (&u.coeff(0) * &lead_inv) % p;
+            let four_a0 = (BigUint::from(4u32) * &a0) % p;
+            let disc = (&a1 * &a1 % p + p - four_a0) % p;
+            *ops += 2;
+            let neg_a1 = (p - &a1) % p;
+            let two_inv = mod_inverse(&BigUint::from(2u32), p)?;
+
+            if disc.is_zero() {
+                // Double root −a₁/2.
+                *ops += 1;
+                let r = (&neg_a1 * &two_inv) % p;
+                return Some(vec![(r, 2)]);
+            }
+            // One Euler/Tonelli exponentiation: ~1.5·log₂ p mul-mods.
+            *ops += (p.bits() as usize * 3) / 2;
+            let root = sqrt_mod_p(&disc, p)?; // None ⟹ irreducible ⟹ not smooth
+            let r1 = ((&neg_a1 + &root) % p * &two_inv) % p;
+            let r2 = ((&neg_a1 + p - &root) % p * &two_inv) % p;
+            *ops += 2;
+            let (lo, hi) = if r1 <= r2 { (r1, r2) } else { (r2, r1) };
+            Some(vec![(lo, 1), (hi, 1)])
+        }
+        _ => None,
+    }
+}
+
+fn split_by_scan(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint, usize)>> {
     let deg = u.degree()?;
     if deg == 0 {
         return Some(Vec::new());
@@ -274,9 +518,20 @@ pub fn decompose_over_factor_base_counted(
     fb: &HecFactorBase,
     ops: &mut usize,
 ) -> Option<Vec<(usize, i64)>> {
+    decompose_counted_with(curve, d, fb, ops, &SmoothnessTest::default())
+}
+
+/// As [`decompose_over_factor_base_counted`], choosing the oracle.
+pub fn decompose_counted_with(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    fb: &HecFactorBase,
+    ops: &mut usize,
+    test: &SmoothnessTest,
+) -> Option<Vec<(usize, i64)>> {
     let p = &curve.p;
     let half = (p - BigUint::one()) >> 1;
-    let roots = split_into_linear_factors_counted(&d.u, p, ops)?;
+    let roots = split_counted_with(&d.u, p, ops, test)?;
 
     let mut acc: HashMap<usize, i64> = HashMap::new();
     for (x, mult) in roots {
@@ -376,19 +631,30 @@ pub enum RelationSearch {
     /// Independent `(a, b)` per trial.  Simple, and the reference the
     /// walk has to beat.
     Random,
-    /// `r`-adding walk, restarted from a fresh random point every
-    /// `restart_interval` trials.
+    /// `r`-adding walk, perturbed every `restart_interval` trials.
     ///
-    /// The restart is not optional bookkeeping.  A deterministic walk
-    /// enters a cycle after `O(sqrt(N))` steps, and this attack needs
-    /// `m + 1 ≈ p/2` relations out of a group of size `N ≈ p²` — the
-    /// same order — so an unrestarted walk would start re-deriving
+    /// The perturbation is not optional bookkeeping.  A deterministic
+    /// walk enters a cycle after `O(sqrt(N))` steps, and this attack
+    /// needs `m + 1 ≈ p/2` relations out of a group of size `N ≈ p²` —
+    /// the same order — so an undisturbed walk would start re-deriving
     /// relations it already has, exactly when it still needs new ones.
-    /// Restarting costs `2⌈log₂ N⌉` once per interval, so the amortised
-    /// price stays near one operation per trial.
+    /// It escapes by adding a **randomly chosen** step rather than by
+    /// building a fresh point: the choice comes from the RNG instead of
+    /// the position hash, so the trajectory leaves its orbit for one
+    /// group operation instead of `2⌈log₂ N⌉`.
     Walk {
         branches: usize,
         restart_interval: usize,
+        /// Bit length of the step coefficients `a_j, b_j`.
+        ///
+        /// Each branch costs `2·step_bits` group operations to build,
+        /// and precomputation is the relation stage's largest term once
+        /// the per-trial cost is one operation.  Short coefficients do
+        /// not weaken anything: a relation is an algebraic identity
+        /// verified as it is recorded, so the distribution of the steps
+        /// affects only how fast smooth divisors turn up, which the
+        /// trial count measures directly.
+        step_bits: u32,
     },
 }
 
@@ -402,6 +668,7 @@ impl RelationSearch {
         Self::Walk {
             branches: 16,
             restart_interval: 64,
+            step_bits: 8,
         }
     }
 }
@@ -439,6 +706,8 @@ pub struct HecIndexCalculusParams {
     pub search: RelationSearch,
     /// How the relation system is solved; see [`LinearAlgebra`].
     pub linear_algebra: LinearAlgebra,
+    /// How smoothness is decided; see [`SmoothnessTest`].
+    pub smoothness: SmoothnessTest,
 }
 
 impl Default for HecIndexCalculusParams {
@@ -450,6 +719,7 @@ impl Default for HecIndexCalculusParams {
             seed: 0,
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Gcd,
         }
     }
 }
@@ -506,22 +776,27 @@ pub fn collect_relations(
     // Precomputed steps S_j = a_j·D₁ + b_j·D₂ for the walk.  Charged up
     // front, like rho's branches: a precomputation left out of the
     // accounting is a cost moved, not removed.
-    let (branches, restart_interval) = match params.search {
-        RelationSearch::Random => (0usize, usize::MAX),
+    let (branches, restart_interval, step_bits) = match params.search {
+        RelationSearch::Random => (0usize, usize::MAX, 0),
         RelationSearch::Walk {
             branches,
             restart_interval,
-        } => (branches.max(1), restart_interval.max(1)),
+            step_bits,
+        } => (branches.max(1), restart_interval.max(1), step_bits.max(1)),
     };
+    // Steps with `step_bits`-bit coefficients cost `2·step_bits`
+    // operations each instead of `2⌈log₂ N⌉`.
+    let step_bound = BigUint::one() << step_bits;
+    let step_build_ops = 2 * step_bits as usize;
     let mut steps: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::with_capacity(branches);
     for _ in 0..branches {
-        let a = rand_below(&mut rng, n);
-        let b = rand_below(&mut rng, n);
+        let a = rand_below(&mut rng, &step_bound) + BigUint::one();
+        let b = rand_below(&mut rng, &step_bound) + BigUint::one();
         let s = d1
             .scalar_mul(&a, curve)
             .add(&d2.scalar_mul(&b, curve), curve);
-        report.jacobian_ops += scalar_pair_ops;
-        report.precompute_ops += scalar_pair_ops;
+        report.jacobian_ops += step_build_ops;
+        report.precompute_ops += step_build_ops;
         steps.push((a, b, s));
     }
 
@@ -560,9 +835,21 @@ pub fn collect_relations(
 
         if let RelationSearch::Walk { .. } = params.search {
             since_restart += 1;
-            // Keep walking unless the interval is up; `None` makes the
-            // next iteration draw a fresh point.
-            if since_restart < restart_interval {
+            if since_restart >= restart_interval {
+                // Escape the orbit with one randomly chosen step.  The
+                // index comes from the RNG, not from the position, so
+                // the next point is off the deterministic trajectory —
+                // which is the whole job of a restart, at one group
+                // operation instead of a fresh pair of scalar
+                // multiplications.
+                let j = (rng.next_u64() as usize) % steps.len();
+                let (aj, bj, sj) = &steps[j];
+                let jumped = r.add(sj, curve);
+                report.jacobian_ops += 1;
+                report.precompute_ops += 1;
+                current = Some(((&a + aj) % n, (&b + bj) % n, jumped));
+                since_restart = 0;
+            } else {
                 current = Some((a.clone(), b.clone(), r.clone()));
             }
         }
@@ -579,7 +866,7 @@ pub fn collect_relations(
             continue;
         }
         let mut field_ops = 0usize;
-        let decomposed = decompose_over_factor_base_counted(curve, &r, fb, &mut field_ops);
+        let decomposed = decompose_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
         report.smoothness_field_ops += field_ops;
         match decomposed {
             Some(entries) => {
@@ -594,8 +881,8 @@ pub fn collect_relations(
                 // Distinguish "not smooth" from "smooth off base" so a
                 // truncated base can be tuned on evidence.
                 let mut probe_ops = 0usize;
-                let smooth =
-                    split_into_linear_factors_counted(&r.u, &curve.p, &mut probe_ops).is_some();
+                let smooth = split_counted_with(&r.u, &curve.p, &mut probe_ops, &params.smoothness)
+                    .is_some();
                 // The probe re-runs the oracle, so it is charged too.
                 report.smoothness_field_ops += probe_ops;
                 if smooth {
@@ -1013,6 +1300,7 @@ mod tests {
             seed: 20260915,
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
+            smoothness: SmoothnessTest::Scan,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         assert_eq!(found, Some(k), "report: {report:?}");
@@ -1045,6 +1333,72 @@ mod tests {
     }
 
     #[test]
+    fn gcd_oracle_agrees_with_the_scan_on_every_monic_quadratic() {
+        // Exhaustive over all monic u of degree ≤ 2 for several p: the
+        // fast oracle is only worth having if it is the *same* oracle.
+        // A disagreement in the "smooth" direction would put a row in
+        // the relation matrix that is not a relation.
+        for p_u in [11u64, 13, 41, 61] {
+            let p = BigUint::from(p_u);
+            for a1 in 0..p_u {
+                for a0 in 0..p_u {
+                    for deg in [1usize, 2] {
+                        let u = if deg == 1 {
+                            FpPoly::from_coeffs(vec![BigUint::from(a0), BigUint::one()], p.clone())
+                        } else {
+                            FpPoly::from_coeffs(
+                                vec![BigUint::from(a0), BigUint::from(a1), BigUint::one()],
+                                p.clone(),
+                            )
+                        };
+                        let (mut o1, mut o2) = (0usize, 0usize);
+                        let scan = split_by_scan(&u, &p, &mut o1);
+                        let gcd = split_by_gcd(&u, &p, &mut o2);
+                        assert_eq!(
+                            scan, gcd,
+                            "p={p_u} u={:?}: scan {scan:?} vs gcd {gcd:?}",
+                            u.coeffs
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn gcd_oracle_is_cheaper_than_the_scan_and_gets_the_same_answer() {
+        let (curve, d1, d2, l, k) = toy_instance(251);
+        let scan = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 8,
+            max_trials: 200_000,
+            seed: 11,
+            search: RelationSearch::walk(),
+            linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Scan,
+        };
+        let fast = HecIndexCalculusParams {
+            smoothness: SmoothnessTest::Gcd,
+            ..scan.clone()
+        };
+        let (scan_k, scan_rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &scan);
+        let (fast_k, fast_rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &fast);
+
+        assert_eq!(scan_k.as_ref(), Some(&k));
+        assert_eq!(fast_k.as_ref(), Some(&k), "fast report: {fast_rep:?}");
+        // Same seed and the same oracle answers mean the same walk and
+        // the same relations, so the trial counts must match exactly —
+        // this is what makes the field-op comparison a like-for-like.
+        assert_eq!(scan_rep.trials, fast_rep.trials);
+        assert!(
+            fast_rep.smoothness_field_ops * 4 < scan_rep.smoothness_field_ops,
+            "gcd {} vs scan {} field ops",
+            fast_rep.smoothness_field_ops,
+            scan_rep.smoothness_field_ops
+        );
+    }
+
+    #[test]
     fn walk_solves_and_costs_far_less_than_redrawing() {
         let (curve, d1, d2, l, k) = toy_instance(41);
         let base = HecIndexCalculusParams {
@@ -1054,6 +1408,7 @@ mod tests {
             seed: 20260916,
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Gcd,
         };
         let (rnd_k, rnd) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &base);
         let walked = HecIndexCalculusParams {
@@ -1092,6 +1447,7 @@ mod tests {
             seed: 7,
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Dense,
+            smoothness: SmoothnessTest::Scan,
         };
         let sparse = HecIndexCalculusParams {
             linear_algebra: LinearAlgebra::Sparse,
@@ -1122,6 +1478,7 @@ mod tests {
             seed: 3,
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Gcd,
         };
         let (_k, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // Every trial runs the oracle, so its field-operation count can
@@ -1158,6 +1515,7 @@ mod tests {
             seed: 7,
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
+            smoothness: SmoothnessTest::Scan,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // A reduced base trades trials for solve size; either it got

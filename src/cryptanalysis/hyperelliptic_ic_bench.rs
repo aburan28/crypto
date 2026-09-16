@@ -85,6 +85,16 @@ use super::hyperelliptic_index_calculus::{
 /// index calculus by handicapping its reference.
 const RHO_BRANCHES: usize = 16;
 
+/// Bit length of the rho branch coefficients `a_j, b_j`.
+///
+/// The index-calculus walk builds its steps from short coefficients
+/// because precomputation is its largest term once a trial costs one
+/// operation.  The same trick is available to rho and costs it nothing,
+/// so the reference gets it too: optimising one side's precomputation
+/// and not the other's would be a rigged comparison, and the rigging
+/// would favour the side under study.
+const RHO_STEP_BITS: u32 = 8;
+
 /// Outcome of one rho run.
 #[derive(Clone, Debug)]
 pub struct RhoResult {
@@ -153,14 +163,15 @@ pub fn pollard_rho_jacobian(
 
         // Precomputed branches R_j = a_j·D₁ + b_j·D₂.  Charged.
         let mut branch: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::with_capacity(RHO_BRANCHES);
+        let step_bound = BigUint::one() << RHO_STEP_BITS;
         for _ in 0..RHO_BRANCHES {
-            let a = rand_below(&mut rng, n);
-            let b = rand_below(&mut rng, n);
+            let a = rand_below(&mut rng, &step_bound) + BigUint::one();
+            let b = rand_below(&mut rng, &step_bound) + BigUint::one();
             let r = d1
                 .scalar_mul(&a, curve)
                 .add(&d2.scalar_mul(&b, curve), curve);
-            group_ops += 2 * (n.bits() as usize + 1);
-            precompute_ops += 2 * (n.bits() as usize + 1);
+            group_ops += 2 * RHO_STEP_BITS as usize;
+            precompute_ops += 2 * RHO_STEP_BITS as usize;
             branch.push((a, b, r));
         }
 
@@ -372,7 +383,12 @@ pub struct HeadToHeadTrials {
 
 impl Default for HeadToHeadTrials {
     fn default() -> Self {
-        Self { ic: 3, rho: 9 }
+        // Rho's step count is a wide random variable and the measured
+        // gap is now a factor of ~2, not ~10, so the sample has to be
+        // large enough that the gap is not the sampling noise.  25 runs
+        // put the standard error of the mean near 20% of one run's
+        // spread; 9 did not.
+        Self { ic: 5, rho: 25 }
     }
 }
 
@@ -520,7 +536,7 @@ pub fn full_factor_base_size(curve: &HyperellipticCurveP) -> usize {
 mod tests {
     use super::*;
     use crate::cryptanalysis::hyperelliptic_index_calculus::{
-        prime_order_of, subgroup_generator, LinearAlgebra, RelationSearch,
+        prime_order_of, subgroup_generator, LinearAlgebra, RelationSearch, SmoothnessTest,
     };
     use crate::prime_hyperelliptic::{brute_force_jac_order_via_lpoly, FpPoly};
 
@@ -593,6 +609,7 @@ mod tests {
             seed: 20260916,
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
+            smoothness: SmoothnessTest::Scan,
         };
         let row = head_to_head(
             &curve,

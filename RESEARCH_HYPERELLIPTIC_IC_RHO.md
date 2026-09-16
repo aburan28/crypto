@@ -169,6 +169,12 @@ per row, every run verified). `rnd+dns` is the merged baseline;
 | 211 | 11813 | 112 | 69.1 | 8.0 | 8.81 → **1.02** | 32.5 → 3.8 |
 | 251 | 61667 | 123 | 41.0 | 4.2 | 8.45 → **0.87** | 40.0 → 4.1 |
 
+> Superseded by the round below, which fixes an unfairness in these
+> numbers: the index-calculus walk was given cheap step coefficients
+> and rho's branch precomputation was not. The rho column here is
+> therefore too expensive, and every `S_ic/S_rho` above too kind to
+> index calculus. The corrected figures are in the final table.
+
 `cargo run --release --example hyperelliptic_ic_vs_rho` prints all four
 combinations (`rnd`/`wlk` × `dns`/`spr`) with the per-stage breakdown.
 Wall clock tracks the unit: at `p = 251`, 49 ms for index calculus
@@ -215,3 +221,105 @@ Nor does anything here transfer upward. Scope is unchanged: genus 2,
 genus 3 and 4, where the asymptotic crossover lives — needs the
 `O(log p)` smoothness test from point 3 before it can be measured at
 all.
+
+
+---
+
+# Round three: the oracle, the precomputation, and a fairness fix
+
+Round two left two things on the table and introduced one problem.
+
+Class: **engineering**. Same reasoning as before — this is distance to
+the method's own floor, closed with standard techniques.
+
+## What changed
+
+1. **`SmoothnessTest::Gcd`** (default). `u` splits into linear factors
+   iff its radical equals `gcd(u, x^p − x)`, and `x^p mod u` costs
+   `O(log p)` polynomial multiplications by square-and-multiply. At
+   `deg u ≤ 2` — everything genus 2 produces — even that is
+   unnecessary: a monic quadratic splits exactly when its discriminant
+   is a square, so the oracle is **one Legendre symbol**, and the roots
+   come from the quadratic formula. Measured at `p = 251`: 168,933
+   mul-mods per run became 7,249, a factor of 23.
+2. **Cheap walk steps and jump restarts.** Precomputation was 73% of
+   the relation stage after round two. Two changes: branch steps are
+   built from 8-bit coefficients (`2·8` operations each instead of
+   `2⌈log₂ N⌉`), and a restart now adds a *randomly chosen* existing
+   step — the index comes from the RNG rather than the position hash,
+   so the trajectory leaves its orbit for **one** operation instead of
+   a fresh scalar-multiplication pair. Relation stage at `p = 251`:
+   976 operations → 566.
+3. **The fairness fix.** Cheap step coefficients are not an
+   index-calculus trick — rho can use them too, and its branch
+   precomputation was still being charged at full price. The reference
+   now gets the same treatment. This makes rho cheaper and the
+   comparison worse for index calculus, which is why it belongs in the
+   same round rather than a later one: optimising one side's
+   precomputation and not the other's is a rigged table, and the
+   rigging favours the side under study.
+
+Short step coefficients weaken nothing. A relation is an algebraic
+identity, verified as it is recorded; the step distribution affects only
+how fast smooth divisors turn up, which the trial count measures
+directly. The measured smoothness rate (0.48 – 0.55) did not move.
+
+## Final table
+
+Same curves, same `N`, same rho, both sides with cheap precomputation.
+Samples raised to 5 index-calculus runs and 25 rho runs per row,
+because the gap is now a factor of ~2 rather than ~10 and had to be
+separated from rho's own spread. Every run of both sides returned the
+verified `k`.
+
+| `p` | `N` | `m` | `S_ic` base | `S_ic` final | `S_rho` | **`S_ic/S_rho`** | `S_walk` | `S_ic`/floor |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 41 | 1321 | 15 | 45.9 | 9.65 | 11.00 | **0.88** | 3.30 | 10.9 |
+| 61 | 1399 | 22 | 58.2 | 9.85 | 10.85 | **0.91** | 3.36 | 8.0 |
+| 101 | 4663 | 46 | 48.1 | 5.90 | 7.23 | **0.82** | 3.07 | 4.2 |
+| 151 | 7949 | 78 | 57.7 | 5.06 | 6.80 | **0.75** | 3.61 | 2.8 |
+| 211 | 11813 | 112 | 67.9 | 4.76 | 5.56 | **0.86** | 2.93 | 2.2 |
+| 251 | 61667 | 123 | 41.3 | 2.28 | 4.17 | **0.55** | 3.00 | 2.2 |
+
+Cumulative: `S_ic` down 5 – 18×, `S_ic/S_rho` from 4.2 – 12.2 (growing
+with `p`) to 0.55 – 0.91 (flat, drifting down), and the distance to the
+method's own floor from 32 – 52× to 2.2 – 10.9×. Wall clock agrees: at
+`p = 251`, 27 ms against rho's 52 ms, where the baseline was 424 ms.
+
+## Where the cost is now
+
+At `p = 251`, per run: 566 group operations for the relation stage (of
+which **294 is precomputation** — 16 branch divisors and the starting
+point), 7,249 mul-mods for the oracle (3 group-op equivalents), 981 for
+the linear algebra (0 equivalents). The walked trials themselves cost
+272 operations at 1.00 each.
+
+So two thirds of what is left is precomputation and the floor is only
+2.2× away. There is no third optimisation of this size available: the
+remaining levers are fewer branches or shorter coefficients, both of
+which trade walk quality for setup cost and neither of which can win
+more than the ~50% precomputation share.
+
+## What this is still not
+
+**Index calculus now beats this repository's rho at genus 2 and toy
+sizes, and that is a narrower claim than it sounds.**
+
+- The reference is Floyd rho at 3 group operations per iteration.
+  `S_walk` — rho's walk alone, without precomputation — sits at
+  2.9 – 3.6, consistent with `3 × 1.25`. A distinguished-point rho
+  would pay closer to `1.25`, so the honest extrapolation is
+  `S_rho(DP) ≈ 1.0 – 1.5` once its own (now cheap) precomputation is
+  added. Against *that* rho, index calculus at `S_ic = 2.28` is still
+  roughly 2× behind at `p = 251`, and 6 – 9× behind at `p ≤ 101`.
+  Implementing a DP rho is the honest next step before any claim that
+  this crosses over.
+- `S_ic/S_rho` is flat in `p`, not falling, which is what genus 2
+  predicts: `(m+1)·g! ≈ p` relation operations against rho's
+  `sqrt(N) ≈ p`. Both sides are linear in `p`, so no amount of constant
+  factor changes the asymptotics. The crossover that matters lives at
+  `g = 3` (Gaudry, reduced factor base) and `g = 4`, neither of which
+  this measures.
+- Scope is unchanged: genus 2, `p ≤ 251`, full factor base, one
+  machine, and a factor-base build that is still `O(p)` — now the
+  binding `O(p)` step, since the oracle no longer is.
