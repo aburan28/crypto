@@ -14,6 +14,7 @@ Layout, and why each path is where it is:
     /assets/rho-gpu*      the opt-in browser WebGPU Pollard rho engine
     /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
     /status/              the ECC2K-130 distinguished-point dashboard
+    /status/walk-forest.jpg  the walk-forest figure the dashboard shows
     /status/status.json   snapshot, next to the page that reads it
     /status/history.json  published history, likewise
     /status.json          same bytes at the root
@@ -55,6 +56,9 @@ PAGES = (
     ("docs/index-calculus-scoreboard.html", "scoreboard/index.html"),
     ("docs/ecc2k130-status/index.html", "status/index.html"),
     ("docs/ecc2k130-status/style.css", "status/style.css"),
+    # The walk-forest figure the dashboard shows; beside the page so the
+    # relative src resolves in the working tree as well as when published.
+    ("docs/ecc2k130-status/walk-forest.jpg", "status/walk-forest.jpg"),
 )
 
 # Snapshot data, published twice: beside the dashboard and at the root.

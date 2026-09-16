@@ -343,6 +343,36 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .chart .grid { stroke: var(--line-soft); stroke-width: 1; }
 .chart .tick { fill: var(--muted); font-size: 10.5px; }
 
+/* ---- figure ---- */
+
+/* The walk-forest drawing is black ink on white. It keeps its own ground
+   inside a light frame rather than being inverted into the palette, so the
+   coloured segments that mark where trails meet stay the colours they are. */
+.figure {
+  margin: 14px 0 0;
+  padding: 12px 12px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  margin: 0 auto;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 8px;
+}
+.figure figcaption {
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 72ch;
+  text-align: center;
+}
+
 /* ---- tables ---- */
 
 .scroll {

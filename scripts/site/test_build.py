@@ -47,6 +47,7 @@ class BuildTests(unittest.TestCase):
             "scoreboard/index.html",
             "status/index.html",
             "status/style.css",
+            "status/walk-forest.jpg",
             "status/status.json",
             "status/history.json",
             "status.json",

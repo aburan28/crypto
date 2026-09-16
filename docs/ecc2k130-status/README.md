@@ -25,6 +25,15 @@ next snapshot rather than showing a number it cannot measure yet. See
 `scripts/rho_status/README.md` for where the total comes from and why the
 derivation is only a fallback.
 
+**What the walk builds**, between the cumulative chart and the worker
+table, is a static figure: `walk-forest.jpg`, a drawing of the forest that
+deterministic walks grow when their trails merge, with a few of the meetings
+picked out in colour. It is an illustration of the mechanism, and the page
+says so beside it; it is not rendered from this campaign's table, whose walks
+never leave the private store. `scripts/site/build.py` copies it next to the
+page so the relative `src` resolves both in the working tree and once
+published.
+
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README
