@@ -43,6 +43,10 @@ struct WalkParams {
     unsigned *dpCount;                // report count, restart count, exhausted seed flag
     unsigned dpCap;
     CurveConsts consts;
+    // Table walk only (tablewalk.h): the last four step tags of every lane,
+    // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
+    unsigned long long *hist;
+    const unsigned *twConsts;
 };
 
 ECC_HD unsigned eccAtomicInc(unsigned *p) {

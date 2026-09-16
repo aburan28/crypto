@@ -26,18 +26,27 @@
 #define CUDA_CHECK(x) do { cudaError_t e = (x); if (e != cudaSuccess) { \
     printf("CUDA error %s at line %d\n", cudaGetErrorString(e), __LINE__); exit(1); } } while (0)
 
-enum Op { OP_LOP3 = 0, OP_CLMAD_LO, OP_CLMAD_PRODUCT, OP_CLMAD_LOP3, OP_IMADWIDE, OP_COUNT };
+enum Op { OP_LOP3 = 0, OP_CLMAD_LO, OP_CLMAD_PRODUCT, OP_CLMAD_LOP3, OP_IMADWIDE,
+          OP_POPC, OP_FLO, OP_SHF, OP_SEL, OP_PRMT, OP_IMNMX, OP_LDS_RANDOM, OP_COUNT };
 static const char *opName[OP_COUNT] = {"LOP3", "CLMAD.lo", "CLMAD product (lo+hi)",
-                                       "CLMAD.lo + LOP3 mix", "IMAD.WIDE"};
+                                       "CLMAD.lo + LOP3 mix", "IMAD.WIDE",
+                                       "POPC", "FLO", "SHF", "ISETP + SEL", "PRMT", "IMNMX", "LDS.U8 random"};
 // Instructions of the measured kind issued per chain per round. The product
 // stream issues two (lo and hi of one 64x64 carryless product); the mix issues
-// one clmad and one lop3, and is counted as two instructions.
-static const int opIssues[OP_COUNT] = {1, 1, 2, 2, 1};
+// one clmad and one lop3, and is counted as two instructions, as is the
+// compare-and-select pair.  POPC, FLO, SHF and SEL are what the table walk's
+// selection (packedtablewalk.cuh) is made of; kernel_cost.py prices them at
+// one slot each, which is only right if they issue at the LOP3 rate.
+static const int opIssues[OP_COUNT] = {1, 1, 2, 2, 1, 1, 1, 1, 2, 1, 1, 1};
 
 static const int CHAINS = 16;
 
 template <int OP>
 __global__ void __launch_bounds__(256) chains(uint64_t *out, uint32_t rounds) {
+    __shared__ uint8_t table[1024];
+    for (int i = threadIdx.x; i < 1024; i += blockDim.x) table[i] = uint8_t(i * 7);
+    __syncthreads();
+    const uint32_t tableBase = uint32_t(__cvta_generic_to_shared(table));
     uint64_t a[CHAINS], b[CHAINS];
     uint32_t c[CHAINS];
 #pragma unroll
@@ -63,6 +72,31 @@ __global__ void __launch_bounds__(256) chains(uint64_t *out, uint32_t rounds) {
             if (OP == OP_IMADWIDE)
                 asm volatile("mad.wide.u32 %0, %1, %2, %0;" : "+l"(a[j])
                              : "r"(uint32_t(a[j])), "r"(uint32_t(b[j])));
+            // Self-chained so nothing else issues in the stream; the value
+            // collapses after a few rounds but the instruction still executes.
+            if (OP == OP_POPC)
+                asm volatile("popc.b32 %0, %0;" : "+r"(c[j]));
+            if (OP == OP_FLO)
+                asm volatile("bfind.u32 %0, %0;" : "+r"(c[j]));
+            if (OP == OP_SHF)
+                asm volatile("shf.l.wrap.b32 %0, %0, %1, %2;" : "+r"(c[j])
+                             : "r"(uint32_t(a[j])), "r"(uint32_t(b[j])));
+            if (OP == OP_SEL)
+                asm volatile("{.reg .pred p; setp.ne.u32 p, %0, %1; selp.b32 %0, %1, %2, p;}" : "+r"(c[j])
+                             : "r"(uint32_t(a[j])), "r"(uint32_t(b[j])));
+            if (OP == OP_PRMT)
+                asm volatile("prmt.b32 %0, %0, %1, 0x4441;" : "+r"(c[j]) : "r"(uint32_t(a[j])));
+            if (OP == OP_IMNMX)
+                asm volatile("max.u32 %0, %0, %1;" : "+r"(c[j]) : "r"(uint32_t(a[j]) ^ c[j]));
+            // Table walk lookups: a byte table read at a lane-random index,
+            // so bank conflicts are part of the price.  The index chains on
+            // the loaded value so the loads cannot be reordered away.
+            if (OP == OP_LDS_RANDOM) {
+                uint32_t v;
+                asm volatile("ld.shared.u8 %0, [%1];" : "=r"(v)
+                             : "r"(tableBase + (uint32_t(c[j] * 2654435761u) >> 22)));
+                c[j] += v + 1;
+            }
         }
     }
     uint64_t acc = 0;
@@ -142,6 +176,13 @@ int main(int argc, char **argv) {
         r[OP_CLMAD_PRODUCT] = measure<OP_CLMAD_PRODUCT>(out, blocks, threads, rounds, prop.multiProcessorCount);
         r[OP_CLMAD_LOP3] = measure<OP_CLMAD_LOP3>(out, blocks, threads, rounds, prop.multiProcessorCount);
         r[OP_IMADWIDE] = measure<OP_IMADWIDE>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_POPC] = measure<OP_POPC>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_FLO] = measure<OP_FLO>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_SHF] = measure<OP_SHF>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_SEL] = measure<OP_SEL>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_PRMT] = measure<OP_PRMT>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_IMNMX] = measure<OP_IMNMX>(out, blocks, threads, rounds, prop.multiProcessorCount);
+        r[OP_LDS_RANDOM] = measure<OP_LDS_RANDOM>(out, blocks, threads, rounds, prop.multiProcessorCount);
         for (int op = 0; op < OP_COUNT; ++op) best[op] = std::max(best[op], r[op]);
     }
     for (int op = 0; op < OP_COUNT; ++op)
