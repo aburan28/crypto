@@ -386,6 +386,7 @@ and is **engineering** against the same floor. Shared memory per block:
 | 6000: 300 device reports re-walked, `dpWeight = 48`, `dpCap = 262,144`, 1,540,096 walks × 96 steps | 300 / 300, 0 dropped | 300 / 300, 0 dropped | 300 / 300, 0 dropped |
 | 6000: distinguished points produced | 264,606 | 264,288 (−0.12%) | 264,288 |
 | planted logs on `GF(2^41)`, 16 instances × 4 seed salts, scalar reference engine | 64 / 64 | 64 / 64 | — |
+| campaign certification suite (`make test-production`: fault isolation, resume on a replacement host, cross-corpus collision, merge idempotence; 34 tests on the CPU binary) | 34 / 34 | 34 / 34 (needed a checkpoint format for the reference engine and a table-walk collision fixture, `src/testproduction.cpp`) | — |
 | mean iterations to solve on `GF(2^41)`, `ℓ = 549,756,390,943`, 128 walks, `dpWeight = 13`, 64 samples each | 164,200 ± 9,900 | 157,800 ± 7,500 | — |
 
 The class-count prediction for `GF(2^41)` is `√(πℓ/2) / √82 = 102,600`

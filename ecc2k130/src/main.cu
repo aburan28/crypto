@@ -286,7 +286,8 @@ struct HostEngine {
 // resolver agree and the iteration count can be compared between walks on
 // identical seeds.  Under ECC_WALK_TABLE it is the only non-packed engine, the
 // bitsliced kernels implementing sigma^j + 1 only; otherwise --ref selects it.
-// It is slow and does not checkpoint.
+// It is slow; it checkpoints so that the campaign's certification suite can
+// exercise resume on it.
 template <class Cfg>
 struct RefEngine {
     typedef Ref<Cfg> R;
@@ -384,8 +385,66 @@ struct RefEngine {
         dpCount[0] = dpCount[1] = dpCount[2] = 0;
         return exhausted ? ECC_SEED_EXHAUSTED : n;
     }
-    bool save(const char *, u64, unsigned) const { return false; }
-    bool restore(const char *, u64 *, unsigned) { return false; }
+    // One fixed-width record per lane: both coordinates as three words each,
+    // the seed, the start iteration, the cycle history and the dead flag.  The
+    // header's lane width is 1 and its version 2, so a bitsliced checkpoint of
+    // the same curve and thread count is refused rather than misread.
+    static const size_t LANE_WORDS = 3 + 3 + 1 + 1 + 1 + 1;
+    static const unsigned CKPT_VERSION = 2u;
+    void pack(std::vector<u64> &buf) const {
+        buf.resize(lanes.size() * LANE_WORDS);
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            const Lane &l = lanes[id];
+            u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { w[i] = l.p.x.v[i]; w[3 + i] = l.p.y.v[i]; }
+            w[6] = l.seed; w[7] = l.startIter; w[8] = l.hist; w[9] = l.dead;
+        }
+    }
+    void unpack(const std::vector<u64> &buf) {
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            Lane &l = lanes[id];
+            const u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { l.p.x.v[i] = w[i]; l.p.y.v[i] = w[3 + i]; }
+            l.seed = w[6]; l.startIter = w[7]; l.hist = w[8]; l.dead = (unsigned)w[9];
+        }
+    }
+    bool save(const char *path, u64 iterBase, unsigned runId) const {
+        const std::string tmp = std::string(path) + ".tmp";
+        FILE *f = fopen(tmp.c_str(), "wb");
+        if (!f) return false;
+        CkptHeader h;
+        memcpy(h.magic, "ECC2K130", 8);
+        h.version = CKPT_VERSION;
+        h.m = (unsigned)M;
+        h.threads = (unsigned)threads;
+        h.batch = (unsigned)BATCH;
+        h.lanes = 1u;
+        h.runId = runId;
+        h.iterBase = iterBase;
+        std::vector<u64> buf;
+        pack(buf);
+        bool ok = fwrite(&h, sizeof h, 1, f) == 1;
+        ok = ok && fwrite(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
+        if (!ok) { remove(tmp.c_str()); return false; }
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
+    }
+    bool restore(const char *path, u64 *iterBase, unsigned runId) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return false;
+        CkptHeader h;
+        std::vector<u64> buf(lanes.size() * LANE_WORDS);
+        bool ok = fread(&h, sizeof h, 1, f) == 1 &&
+                  ckptHeaderMatches(h, M, threads, BATCH, 1, runId, CKPT_VERSION) &&
+                  ckptPayloadIsWhole(f, buf.size() * sizeof(u64));
+        ok = ok && fread(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        fclose(f);
+        if (!ok) return false;
+        unpack(buf);
+        *iterBase = h.iterBase;
+        return true;
+    }
     const char *name() const { return ECC_WALK_TABLE ? "reference-table-walk" : "reference"; }
     bool needsReseed() const { return restartPending; }
     u64 walksPerLaunch() const { return (u64)lanes.size(); }

@@ -222,7 +222,9 @@ rehearse: ecc2k130-cpu
 
 build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
+	$(CXX) -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 \
+	    -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
+	    -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
 
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
