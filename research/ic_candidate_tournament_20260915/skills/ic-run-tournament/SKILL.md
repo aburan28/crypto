@@ -63,3 +63,16 @@ The current score is complete **user-space guest instructions**, including all
 worker phases. It excludes kernel/device work and the external audit. Do not
 rename this as curve additions, use profiled wall time as native performance, or
 claim a new ECDLP exponent. Cold and amortized workloads need separate contracts.
+
+### Factor-base policy panels
+
+The default `--comparison-kind fixed-support` rejects different paired supports.
+Use `--comparison-kind factor-base-policy` only for a predeclared policy comparison
+on identical public ECDLP targets. This permits support differences across arms
+while still rejecting unstable support within an arm/case. Record actual B and
+rank per arm and retain all setup costs. See the policy section of `OPERATIONS.md`.
+
+Keep rejected smoke candidates in the admission table, report and scoreboard.
+`report.py` writes `admission.json` separately from frozen final measurements.
+A successful evidence audit includes faithfully retained rejected receipts; it
+does not mean every candidate solve was admitted.

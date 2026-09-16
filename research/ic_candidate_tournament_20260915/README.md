@@ -1,14 +1,12 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; three further tournaments finished and audited
-on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
+Status: seven tournaments completed and audited by 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
 process time, with confirmation and replay passing the predeclared parity rule.
-The latest measured single-target candidate remains at 3.04 times rho's
-instructions and 1.52 times its native time on the tested small Koblitz panel.
+The [single-target continuation](single_target_20260916/RESULTS.md) adds three audited rounds. Its two-orbit policy cut instructions by 62.5% and native time by 29.1% versus the prior single-target baseline. Strict single-target rho beating remains unestablished. The final fixed-support round and retained failures are reported there.
 
-All 4,704 new profiled trials and their paired native runs verified. The
+The earlier three-round continuation verified all 4,704 profiled trials and paired native runs. The single-target continuation adds 4,680 receipts: 4,662 verified solves and 18 retained smoke rejections. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. See [OPERATIONS.md](OPERATIONS.md)
 for commands, measurement limits, source candidates and installed operating skills.

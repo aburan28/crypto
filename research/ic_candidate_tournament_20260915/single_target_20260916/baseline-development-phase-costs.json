@@ -1,0 +1,82 @@
+{
+  "unit": "valgrind-3.22-amd64-Ir",
+  "source": "round-0004/development",
+  "median_cost_by_cell": {
+    "folded_lift_batch4": {
+      "n17a1": {
+        "collection_and_decomposition": 2752741,
+        "curve_and_targets": 3965255,
+        "factor_base_and_tables": 12972329,
+        "final_verification": 1734723,
+        "individual_log": 4843631,
+        "log_certification": 1308674,
+        "reporting_and_cleanup": 1448409,
+        "startup_and_input": 386234,
+        "verify_filter_and_linear_algebra": 3114385
+      },
+      "n23a0": {
+        "collection_and_decomposition": 6077126,
+        "curve_and_targets": 11198939,
+        "factor_base_and_tables": 22165017,
+        "final_verification": 3176231,
+        "individual_log": 9592500,
+        "log_certification": 2103491,
+        "reporting_and_cleanup": 1912115,
+        "startup_and_input": 386223,
+        "verify_filter_and_linear_algebra": 5520649
+      },
+      "n19a0": {
+        "collection_and_decomposition": 2343379,
+        "curve_and_targets": 8573171,
+        "factor_base_and_tables": 17424658,
+        "final_verification": 1979640,
+        "individual_log": 6708307,
+        "log_certification": 1571371,
+        "reporting_and_cleanup": 1554270,
+        "startup_and_input": 386223,
+        "verify_filter_and_linear_algebra": 2545810
+      },
+      "n13a0": {
+        "collection_and_decomposition": 1491046,
+        "curve_and_targets": 2922541,
+        "factor_base_and_tables": 8956317,
+        "final_verification": 801584,
+        "individual_log": 3133779,
+        "log_certification": 798751,
+        "reporting_and_cleanup": 1020854,
+        "startup_and_input": 386203,
+        "verify_filter_and_linear_algebra": 1826370
+      }
+    },
+    "rho": {
+      "n17a1": {
+        "curve_and_targets": 3964038,
+        "final_verification": 1683213,
+        "reporting_and_cleanup": 76691,
+        "rho_solve": 3576400,
+        "startup_and_input": 390903
+      },
+      "n23a0": {
+        "curve_and_targets": 11196604,
+        "final_verification": 3086827,
+        "reporting_and_cleanup": 76510,
+        "rho_solve": 8538988,
+        "startup_and_input": 390892
+      },
+      "n19a0": {
+        "curve_and_targets": 8571178,
+        "final_verification": 1924064,
+        "reporting_and_cleanup": 77561,
+        "rho_solve": 4482580,
+        "startup_and_input": 390892
+      },
+      "n13a0": {
+        "curve_and_targets": 2921622,
+        "final_verification": 776533,
+        "reporting_and_cleanup": 77080,
+        "rho_solve": 1769984,
+        "startup_and_input": 390872
+      }
+    }
+  }
+}

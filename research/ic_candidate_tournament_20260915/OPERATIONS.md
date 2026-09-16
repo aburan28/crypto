@@ -44,8 +44,7 @@ time (0.6992–0.8737). Replay passed again. Every curve cell met the per-cell r
 All setup and all target solves are included; rho uses the existing per-target
 solver API. This result applies to the tested five small Koblitz curve cells.
 
-The separate single-target result is 3.04 times rho's instructions and 1.52 times
-its time. Keep these workloads separate when extending the operation.
+The earlier single-target result was 3.04 times rho's instructions and 1.52 times its time. The [single-target continuation](single_target_20260916/RESULTS.md) records three further audited rounds and their stricter rho verdicts. Keep single-target and batch workloads separate.
 
 Review [WINNER.json](campaign_20260916/WINNER.json) for the complete source and
 configuration, and [WINNER.patch](campaign_20260916/WINNER.patch) for the cumulative
@@ -248,3 +247,34 @@ Canonical skill sources are under [skills](skills/). Installed names:
 
 The skills use the actual runner and preserve its measurement limits. They do not
 start indefinite services or send external messages as part of a local experiment.
+
+## Separately declared factor-base policy experiments
+
+Use `prepare --comparison-kind factor-base-policy` when the research variable is
+the base recipe. The default `fixed-support` mode retains exact paired-support
+checks. Policy mode still requires identical public ECDLP cases, complete verified
+workloads and stable support within every arm/case. It changes neither the cold
+cost boundary nor the instruction/native promotion thresholds.
+
+The worker supports optional `factor_base_orbits` (1–8) or
+`factor_base_cube_root: true`, exclusively, for subgroup-orbit recipes. These
+request point counts of `2*n*orbits` or at least `max(2*n, ceil(cuberoot(r/2)))`.
+A sampler's batch size can overshoot the request; report actual signed-base size
+B from the certificate. The predeclared [single-target policy plan](single_target_20260916/POLICY_PLAN.md)
+uses a source candidate sampling one orbit per batch.
+
+For each arm, the m=3 coverage bound is at most `binomial(B+2,3)` target images,
+and the rank floor changes with the number of columns. Reports list per-arm B and
+retain per-arm floor ratios. A change in those ratios against a changed floor is
+not an algorithmic advance. Complete instruction cost / sqrt(r) and the matched
+rho reference still compare the same public ECDLP problem.
+
+The checker currently requires at least two logarithm columns. One-column policy
+rejections remain visible in `admission.json` and the report's smoke table; they
+are not silently admitted by changing a frozen checker.
+
+For strict rho beating, run `single_target_20260916/strict_rho.py --round PATH`
+after audit. It requires both metric upper 95% limits and every cell ratio below
+one in confirmation and replay, and reports the locked challenger separately
+from the promotion winner. The legacy `beats_rho` field is only an instruction
+point estimate; the `rho_parity` field allows a 10% margin.
