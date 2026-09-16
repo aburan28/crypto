@@ -263,23 +263,50 @@ class BuildTests(unittest.TestCase):
         # visible as ops/h rather than only as a point count.
         self.assertIn("ops/h at interval 2^", page)
 
-    def test_dashboard_progress_bar_is_linear_in_work(self):
-        # The share of 2^60.9 walked so far is around 2^-21, so a bar drawn
-        # from the ratio of the EXPONENTS would read about two thirds full
-        # while the campaign has done a millionth of a millionth of the work.
-        # The visible progress bar must therefore be filled from the ratio of
-        # the work itself, and the log-scale bar beside it must say in the
-        # page that it is not progress. Both are easy to "fix" into a lie by
-        # someone making the bar look better, so pin them here.
+    def test_dashboard_shows_the_work_share_as_a_number_not_a_bar(self):
+        # The share of 2^60.9 walked was 2^-21 when the page was first
+        # published: a bar filled from it is empty, and a bar filled from the
+        # ratio of the exponents reads two thirds full. Both are lies waiting
+        # to be drawn, so the share is a number and the page has no progress
+        # bar to make look better.
         page = read(os.path.join(self.out, "status", "index.html"))
         self.assertIn("var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);", page)
-        self.assertIn("var percent = Math.min(100, share * 100);", page)
-        self.assertIn('fill.style.width = percent + "%";', page)
-        self.assertIn("this bar is not progress", page)
-        # A minimum width on the fill would draw a share that is not there.
-        match = re.search(r"\.bar-fill \{(.*?)\}", read(os.path.join(self.out, "status", "style.css")), re.S)
-        self.assertIsNotNone(match, "no .bar-fill rule in the dashboard stylesheet")
-        self.assertNotIn("min-width", match.group(1))
+        self.assertIn('el("ops-percent").textContent = percentText(share);', page)
+        self.assertNotIn('role="progressbar"', page)
+        self.assertNotIn("ops-fill", page)
+
+    def test_dashboard_odds_panel_is_the_birthday_bound_with_the_quoted_mean(self):
+        # What rho accumulates is the chance a collision has already happened.
+        # The page draws P(W) = 1 - exp(-pi W^2 / 4 E^2): the birthday bound
+        # parameterised so its MEAN is E = 2^60.9, the expectation the page
+        # already quotes, so the curve and the ETA cannot disagree. Pin the
+        # formula, its inverse, the conditional month tile, the doubled-fleet
+        # curve and the "not a deadline" wording; a rounder-looking curve is
+        # one edit away.
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("function collisionOdds", page)
+        self.assertIn("return -Math.expm1(-Math.PI / 4 * ratio * ratio);", page)
+        self.assertIn("function workForOdds", page)
+        self.assertIn("Math.sqrt(-4 * Math.log(1 - p) / Math.PI)", page)
+        self.assertIn("function drawOdds", page)
+        self.assertIn("drawOdds(status)", page)
+        self.assertIn("(oddsMonth - odds0) / (1 - odds0)", page)
+        self.assertIn('shape("path", { d: curve(2), "class": "line alt" })', page)
+        self.assertIn("The median is not a deadline", page)
+        for ident in ("odds-now", "odds-month", "odds-median", "odds-ninety", "odds-chart"):
+            self.assertIn('id="%s"' % ident, page, ident)
+        # The same law in Python: mean E, median 0.94 E, ninety at 1.71 E.
+        import math
+        odds = lambda ratio: -math.expm1(-math.pi / 4 * ratio * ratio)
+        work_for = lambda p: math.sqrt(-4 * math.log(1 - p) / math.pi)
+        self.assertAlmostEqual(odds(work_for(0.5)), 0.5)
+        self.assertAlmostEqual(work_for(0.5), 0.939, places=3)
+        self.assertAlmostEqual(work_for(0.9), 1.712, places=3)
+        mean = sum((1 - odds(k / 1000.0)) * 0.001 for k in range(6000))
+        self.assertAlmostEqual(mean, 1.0, places=2)
+        # The page's copy of the two quantiles agrees.
+        self.assertIn("0.94 E", page)
+        self.assertIn("1.71 E", page)
 
     # ---- the walk-forest figure ------------------------------------------
     # docs/ecc2k130-status/walk-forest.svg is generated from the sampled,
