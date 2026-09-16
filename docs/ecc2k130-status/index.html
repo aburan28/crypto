@@ -65,36 +65,32 @@
     <p class="ops-value mono" id="ops-value">&mdash;</p>
     <p class="ops-sub" id="ops-sub">&nbsp;</p>
 
-    <div class="meter">
-      <div class="meter-head">
-        <span id="ops-bar-label">Share of the expected <span class="mono">2^60.9</span></span>
-        <span class="mono" id="ops-percent">&mdash;</span>
+    <div class="odds" id="odds-block" aria-live="polite">
+      <div class="odds-head">
+        <span id="odds-label">Chance a collision has already happened</span>
+        <span class="mono odds-now" id="odds-now">&mdash;</span>
       </div>
-      <div class="bar">
-        <div class="bar-fill" id="ops-fill"
-             role="progressbar"
-             aria-labelledby="ops-bar-label"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-             aria-valuetext="no operations derived yet"></div>
-      </div>
-      <p class="meter-foot" id="ops-bar-foot">&nbsp;</p>
-    </div>
-
-    <div class="meter">
-      <div class="meter-head">
-        <span id="ops-bits-label">Exponent reached, <strong>log scale</strong> &mdash; each bit is a
-          doubling of the work, so this bar is not progress</span>
-        <span class="mono" id="ops-bits">&mdash;</span>
-      </div>
-      <div class="bar log">
-        <div class="bar-fill" id="ops-bits-fill"
-             role="progressbar"
-             aria-labelledby="ops-bits-label"
-             aria-valuemin="0" aria-valuemax="60.9" aria-valuenow="0"
-             aria-valuetext="no operations derived yet"></div>
-      </div>
-      <p class="meter-foot">Full width is <span class="mono">2^60.9</span>, the same
-        boundary the bar above measures against.</p>
+      <p class="odds-sub" id="odds-sub">&nbsp;</p>
+      <div id="odds-chart" class="chart odds-chart"></div>
+      <dl class="odds-tiles">
+        <div><dt>In the next 30 days</dt><dd class="mono" id="odds-month">&mdash;</dd></div>
+        <div><dt>Even odds by</dt><dd class="mono" id="odds-median">&mdash;</dd></div>
+        <div><dt>Nine in ten by</dt><dd class="mono" id="odds-ninety">&mdash;</dd></div>
+        <div><dt>Share of the expected work</dt><dd class="mono" id="ops-percent">&mdash;</dd></div>
+      </dl>
+      <p class="meter-foot" id="odds-foot">
+        Rho has no progress to draw: a walk collides or it does not, and what
+        accumulates is the chance that it already has. After
+        <span class="mono">W</span> iterations that chance is
+        <span class="mono">1 &minus; exp(&minus;&pi;W&sup2;/4E&sup2;)</span>, the birthday
+        bound with its mean set to the expected cost
+        <span class="mono">E = 2^60.9</span> (Bailey et al.), so the curve's
+        mean is the expectation the ETA below counts to. It assumes the walk
+        behaves as a random map, which is the heuristic behind that figure.
+        The solid curve is the fleet at the measured rate; the dashed one is
+        the same fleet doubled. The median is not a deadline: half of all
+        campaigns like this one finish after it.
+      </p>
     </div>
 
     <div class="rate" id="rate-block" aria-live="polite">
@@ -955,8 +951,6 @@ make gpu
   // bit is a doubling, so it is labelled as not being progress.
   function drawOperations(status) {
     var log2ops = iterationsLog2(status);
-    var fill = el("ops-fill");
-    var bitsFill = el("ops-bits-fill");
 
     if (log2ops === null) {
       var why = !status || status.campaign_id !== CAMPAIGN
@@ -965,20 +959,14 @@ make gpu
       el("ops-value").textContent = "—";
       el("ops-sub").textContent = why;
       el("ops-percent").textContent = "—";
-      el("ops-bits").textContent = "—";
-      el("ops-bar-foot").textContent = " ";
-      fill.style.width = "0%";
-      bitsFill.style.width = "0%";
-      fill.setAttribute("aria-valuenow", "0");
-      bitsFill.setAttribute("aria-valuenow", "0");
-      fill.setAttribute("aria-valuetext", why);
-      bitsFill.setAttribute("aria-valuetext", why);
       return;
     }
 
+    // The share of the expected work is around 2^-8 at the time of writing
+    // and was 2^-21 when the page was first published: a bar filled from it
+    // is empty, and a bar filled from the ratio of the exponents would read
+    // two thirds full. Neither is progress, so it is a number and not a bar.
     var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);
-    var percent = Math.min(100, share * 100);
-    var bits = Math.min(100, (log2ops / EXPECTED_ITERATIONS_LOG2) * 100);
 
     el("ops-value").textContent = "2^" + log2ops.toFixed(1);
     el("ops-sub").textContent = reportedIterations(status) !== null
@@ -987,23 +975,144 @@ make gpu
         " distinguished points at 2^" + ITERATIONS_PER_DP_LOG2 +
         " each — this snapshot carries no iteration total";
     el("ops-percent").textContent = percentText(share);
-    el("ops-bits").textContent = log2ops.toFixed(1) + " of " + EXPECTED_ITERATIONS_LOG2 + " bits";
+  }
 
-    fill.style.width = percent + "%";
-    fill.setAttribute("aria-valuenow", percent.toFixed(6));
-    fill.setAttribute("aria-valuetext", percentText(share) + " of the expected 2^" +
-      EXPECTED_ITERATIONS_LOG2 + " operations");
-    bitsFill.style.width = bits + "%";
-    bitsFill.setAttribute("aria-valuenow", log2ops.toFixed(1));
-    bitsFill.setAttribute("aria-valuetext", "2^" + log2ops.toFixed(1) + " of 2^" +
-      EXPECTED_ITERATIONS_LOG2 + " operations, on a log scale");
+  // --- collision odds --------------------------------------------------
+  // Rho has no intermediate progress: what accumulates is the probability
+  // that a collision has already occurred. For a random map that is the
+  // birthday bound, and parameterising it by its mean E, the expected cost
+  // the page already quotes, gives
+  //
+  //     P(W) = 1 - exp(-pi W^2 / 4 E^2),   E = 2^EXPECTED_ITERATIONS_LOG2
+  //
+  // (a Rayleigh law with mean E). Its median is 0.94 E and its 90% point
+  // 1.71 E, which is why an "ETA" to E is not a deadline. Conditional on the
+  // walk behaving as a random map, which is the heuristic behind E.
+  function collisionOdds(log2ops) {
+    if (log2ops === null || !isFinite(log2ops)) return null;
+    var ratio = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);
+    // expm1 keeps the answer exact where 1 - exp(-x) would round to zero.
+    return -Math.expm1(-Math.PI / 4 * ratio * ratio);
+  }
 
-    // 2^-x of the expected work is thinner than a pixel on any screen the
-    // page is read on; say it in words instead of drawing a lie.
-    el("ops-bar-foot").textContent = share < 0.001
-      ? "2^" + (log2ops - EXPECTED_ITERATIONS_LOG2).toFixed(1) +
-        " of the expected work: the fill is far below one pixel wide, which is the result."
-      : "Linear in work: full width is a collision at the expected cost.";
+  // The work at which the odds reach p: the inverse of collisionOdds.
+  function workForOdds(p) {
+    return Math.pow(2, EXPECTED_ITERATIONS_LOG2) * Math.sqrt(-4 * Math.log(1 - p) / Math.PI);
+  }
+
+  function dateText(date) {
+    return date.getUTCFullYear() + "-" + pad(date.getUTCMonth() + 1) + "-" + pad(date.getUTCDate());
+  }
+
+  // The odds so far, the odds over the next month, the dates the odds pass
+  // one half and nine tenths at the measured rate, and the curve between.
+  // With no rate the curve is drawn against work instead of dates, and the
+  // dates say why they are missing; with no walked total nothing is drawn.
+  function drawOdds(status) {
+    var host = el("odds-chart");
+    host.textContent = "";
+    var now = el("odds-now");
+    var sub = el("odds-sub");
+    var tiles = { month: el("odds-month"), median: el("odds-median"), ninety: el("odds-ninety") };
+    var clear = function (text) {
+      now.textContent = "—";
+      sub.textContent = text;
+      tiles.month.textContent = "—";
+      tiles.median.textContent = "—";
+      tiles.ninety.textContent = "—";
+    };
+    if (!status || status.campaign_id !== CAMPAIGN) return clear("Derived for " + CAMPAIGN + " only.");
+    if ((Number(status.collisions) || 0) > 0) {
+      return clear("A collision is on the board — not independently verified here — so the odds are no longer a forecast.");
+    }
+    var log2ops = iterationsLog2(status);
+    if (log2ops === null) return clear("No walked total yet, so there are no odds to derive.");
+
+    var work0 = Math.pow(2, log2ops);
+    var odds0 = collisionOdds(log2ops);
+    var rate = opsPerSecond(status);
+    var at0 = parseTime(status.generated_at) || new Date();
+    now.textContent = percentText(odds0);
+    sub.textContent = "After 2^" + log2ops.toFixed(1) + " of an expected 2^" + EXPECTED_ITERATIONS_LOG2 +
+      " iterations. One chance in " + Math.round(1 / Math.max(odds0, 1e-300)).toLocaleString("en-US") +
+      " that two trails have already met and are walking to the distinguished point that will show it; " +
+      "otherwise the meeting is still ahead.";
+
+    // Dates from work: at the measured rate, W iterations from now land on
+    // at0 + (W - work0) / rate.
+    var dateFor = function (work) {
+      if (rate === null) return null;
+      return new Date(at0.getTime() + ((work - work0) / rate) * 1000);
+    };
+    var whenOdds = function (p) {
+      var work = workForOdds(p);
+      if (work <= work0) return "passed";
+      if (rate === null) return "—";
+      return dateText(dateFor(work));
+    };
+    if (rate === null) {
+      tiles.month.textContent = "—";
+    } else {
+      var oddsMonth = collisionOdds(Math.log(work0 + rate * 30 * 86400) / Math.LN2);
+      // Conditional on not having collided yet: the odds a reader who sees
+      // an empty collision card today should expect over the coming month.
+      tiles.month.textContent = percentText((oddsMonth - odds0) / (1 - odds0));
+    }
+    tiles.median.textContent = whenOdds(0.5);
+    tiles.ninety.textContent = whenOdds(0.9);
+
+    // The curve, from now to the point the odds reach 99%.
+    var W = 960, H = 230, PAD_L = 52, PAD_R = 14, PAD_T = 14, PAD_B = 40;
+    var plotW = W - PAD_L - PAD_R;
+    var plotH = H - PAD_T - PAD_B;
+    var work99 = Math.max(workForOdds(0.99), work0 * 1.0001);
+    var x = function (work) { return PAD_L + ((work - work0) / (work99 - work0)) * plotW; };
+    var y = function (p) { return PAD_T + plotH - p * plotH; };
+    var describe = rate === null
+      ? "Chance of a collision against work walked, from 2^" + log2ops.toFixed(1) + " now to 2^" +
+        (Math.log(work99) / Math.LN2).toFixed(1) + " at 99%; no measured rate, so no dates"
+      : "Chance of a collision by date at the measured rate: " + percentText(odds0) + " now, even odds by " +
+        whenOdds(0.5) + ", nine in ten by " + whenOdds(0.9) + ", 99% by " + whenOdds(0.99) +
+        "; the dashed curve is the fleet doubled";
+    var chart = svg(W, H, describe);
+
+    var i;
+    for (i = 0; i <= 4; i++) {
+      var p = i / 4;
+      chart.appendChild(shape("line", { x1: PAD_L, y1: y(p).toFixed(1), x2: W - PAD_R, y2: y(p).toFixed(1), "class": i === 0 ? "axis" : "grid" }));
+      chart.appendChild(label(PAD_L - 8, y(p) + 4, (p * 100) + "%", "end", "tick"));
+    }
+    var curve = function (multiplier) {
+      var d = [];
+      for (i = 0; i <= 200; i++) {
+        var work = work0 + (work99 - work0) * (i / 200);
+        // At `multiplier` times the rate the same calendar x reaches
+        // multiplier times the work beyond now.
+        var reached = work0 + (work - work0) * multiplier;
+        var pr = collisionOdds(Math.log(reached) / Math.LN2);
+        d.push((i === 0 ? "M" : "L") + x(work).toFixed(1) + " " + y(Math.min(pr, 1)).toFixed(1));
+      }
+      return d.join(" ");
+    };
+    if (rate !== null) chart.appendChild(shape("path", { d: curve(2), "class": "line alt" }));
+    chart.appendChild(shape("path", { d: curve(1), "class": "line" }));
+
+    var guide = function (p, text) {
+      var work = workForOdds(p);
+      if (work <= work0 || work > work99) return;
+      chart.appendChild(shape("line", { x1: x(work).toFixed(1), y1: y(p).toFixed(1), x2: x(work).toFixed(1), y2: PAD_T + plotH, "class": "guide" }));
+      chart.appendChild(label(x(work) + 4, PAD_T + plotH + 14, text, "start", "tick"));
+    };
+    var xLabel = function (work, fallback) {
+      if (rate === null) return fallback;
+      return dateText(dateFor(work));
+    };
+    guide(0.5, "50% · " + xLabel(workForOdds(0.5), "0.94 E"));
+    guide(0.9, "90% · " + xLabel(workForOdds(0.9), "1.71 E"));
+    chart.appendChild(label(PAD_L, H - 8, rate === null ? "now, 2^" + log2ops.toFixed(1) : "now, " + dateText(at0), "start", "tick"));
+    chart.appendChild(label(W - PAD_R, H - 8, rate === null ? "2^" + (Math.log(work99) / Math.LN2).toFixed(1) + " (99%)" : xLabel(work99, "") + " (99%)", "end", "tick"));
+    chart.appendChild(shape("circle", { cx: x(work0).toFixed(1), cy: y(odds0).toFixed(1), r: 4, "class": "dot" }));
+    host.appendChild(chart);
   }
 
   // The measured walk rate, and the span it was measured over. A reader who
@@ -1162,6 +1271,7 @@ make gpu
 
     el("dps").textContent = num(status.dps);
     drawOperations(status);
+    drawOdds(status);
     drawRate(status);
     drawEta(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);

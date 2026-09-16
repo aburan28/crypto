@@ -243,45 +243,69 @@ button:disabled { opacity: 0.55; cursor: progress; }
 }
 
 
-.meter { margin-top: 16px; }
-.meter-head {
+/* The collision-odds panel: the chance a collision has already happened,
+   which is the only thing rho accumulates, drawn against the calendar. */
+.odds {
+  margin-top: 18px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.odds-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 4px 14px;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.meter-head .mono { color: var(--ink); font-size: 13px; }
-.meter-head strong { color: var(--warn); font-weight: 600; }
+.odds-now {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 650;
+  color: var(--good);
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+.odds-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+.odds-chart { margin-top: 12px; }
+.chart .line.alt { stroke: var(--data); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.85; }
+.chart .guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.odds-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 14px;
+  margin: 12px 0 0;
+}
+.odds-tiles div { min-width: 0; }
+.odds-tiles dt {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.odds-tiles dd {
+  margin: 4px 0 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 650;
+  color: var(--ink);
+}
+.odds .meter-foot { margin-top: 12px; max-width: 86ch; }
+
 .meter-foot {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 12px;
   min-height: 1em;
 }
-
-.bar {
-  margin-top: 6px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  overflow: hidden;
-}
-/* No minimum width: a share too small to see must render as nothing, and
-   the text under the bar is what reports it. */
-.bar-fill {
-  height: 100%;
-  width: 0;
-  border-radius: 999px;
-  background: var(--good);
-  transition: width 400ms ease;
-}
-/* The log-scale bar is legible where the linear one is empty, so it is
-   drawn in the warning colour and never in the colour of a real result. */
-.bar.log .bar-fill { background: var(--warn); opacity: 0.75; }
 
 /* ---- cards ---- */
 
