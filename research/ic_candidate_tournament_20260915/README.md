@@ -29,6 +29,8 @@ every cell below one in both metrics on both stages: the strict-win record.
 The native margin is bounded by the process creation both arms pay.
 
 All 13,368 new profiled trials and their paired native runs verified. The
+earlier [single-target continuation](single_target_20260916/RESULTS.md) adds three audited precursor rounds
+(4,680 receipts: 4,662 verified solves and 18 retained smoke rejections). The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
 (1,680 further verified trials on another host) enforced the index-calculus

@@ -55,6 +55,8 @@ struct Config {
     summands: usize,
     collection_window: Option<usize>,
     sparse: SparseSolveOptions,
+    factor_base_orbits: Option<usize>,
+    factor_base_cube_root: bool,
 }
 impl Default for Config {
     fn default() -> Self {
@@ -62,6 +64,7 @@ impl Default for Config {
             solver: "pair_table".into(), linear_algebra: "sparse".into(),
             batch_trials: 64, max_trials: 4096, summands: 3,
             collection_window: None, sparse: SparseSolveOptions::default(),
+            factor_base_orbits: None, factor_base_cube_root: false,
         }
     }
 }
@@ -158,7 +161,25 @@ fn run(job: &Job) -> Result<Value, String> {
         max_trials: cfg.max_trials as usize, strategy, linear_algebra: la,
         collection_window: cfg.collection_window, allow_direct_relation: false,
         ..KoblitzIcOptions::default() };
-    let fb = job.factor_base.materialize(&c)?;
+    if cfg.factor_base_orbits.is_some_and(|n| !(1..=8).contains(&n))
+        || (cfg.factor_base_orbits.is_some() && cfg.factor_base_cube_root) {
+        return Err("invalid factor-base policy".into());
+    }
+    let effective_base = if cfg.factor_base_orbits.is_some() || cfg.factor_base_cube_root {
+        let FactorBaseSpec::SubgroupOrbits { seed, .. } = &job.factor_base else {
+            return Err("orbit policy requires a subgroup-orbit base recipe".into());
+        };
+        let points = if let Some(orbits) = cfg.factor_base_orbits {
+            2 * c.n as usize * orbits
+        } else {
+            let r = c.subgroup_order.to_u64_digits()[0];
+            let mut b = 1u64;
+            while b * b * b < r / 2 { b += 1; }
+            (b as usize).max(2 * c.n as usize)
+        };
+        FactorBaseSpec::SubgroupOrbits { seed: *seed, points }
+    } else { job.factor_base.clone() };
+    let fb = effective_base.materialize(&c)?;
     let pair = if strategy == DecompositionStrategy::PairTable {
         Some(PairSumTable::build(&c, &fb).ok_or("pair table unavailable")?)
     } else { None };
@@ -212,6 +233,7 @@ fn run(job: &Job) -> Result<Value, String> {
         "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solve_attempts,
         "accepted_relations":solved.relations,"duplicate_relations":solved.duplicate_relations,
         "rejected_relations":solved.rejected_relations,"summands":cfg.summands,
+        "effective_factor_base":effective_base,
         "sparse_report":solved.sparse_report,"elapsed_seconds":start.elapsed().as_secs_f64()}))
 }
 

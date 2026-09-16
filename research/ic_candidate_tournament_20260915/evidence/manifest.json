@@ -2,7 +2,7 @@
   "format": "ic-evidence-v1 (zstd tar with lossless expanded gzip profiles)",
   "extraction_root": "research/ic_candidate_tournament_20260915",
   "excluded": [
-    "Cargo build caches (build and preflight-next-build)",
+    "Cargo build caches (build, preflight-next-build and preflight-build)",
     "Python bytecode caches",
     "operation.lock"
   ],
@@ -90,6 +90,34 @@
       "bytes": 6652836,
       "uncompressed_file_bytes": 95143885,
       "files": 35576
+    },
+    {
+      "file": "round-0006b-single.tar.zst",
+      "sha256": "f6feb0273a2cd3a1ac4b875f260370a85a0cdd3e71a3f3cc195dfc7192a86596",
+      "bytes": 22425730,
+      "uncompressed_file_bytes": 283581208,
+      "files": 35055
+    },
+    {
+      "file": "round-0007-single-policy.tar.zst",
+      "sha256": "e8442542e5d4062a60672180a27ddf418fbe7ace57c4a0aac980e93e88344434",
+      "bytes": 21010280,
+      "uncompressed_file_bytes": 258717170,
+      "files": 42978
+    },
+    {
+      "file": "round-0008-single-implementation.tar.zst",
+      "sha256": "65919afe8cb4d4b3ee51488fc431525306c5eeb8720a617162c1e1afbc04b73f",
+      "bytes": 18559633,
+      "uncompressed_file_bytes": 253917884,
+      "files": 45387
+    },
+    {
+      "file": "single-target-development.tar.zst",
+      "sha256": "96128edebbabb6567161791a2965cb4b1efc1ef1407f91f58047387429db3229",
+      "bytes": 4830330,
+      "uncompressed_file_bytes": 144132213,
+      "files": 6830
     }
   ],
   "profile_encoder": {

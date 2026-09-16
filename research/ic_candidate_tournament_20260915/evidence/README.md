@@ -44,7 +44,7 @@ It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
-identical files are retained, so restoration is repeatable. About 1.1 GB of
+identical files are retained, so restoration is repeatable. About 2.0 GB of
 restored files are needed for the complete record, in addition to the archives.
 
 ## Packing a new round
@@ -107,3 +107,18 @@ The top-level worker in this PR emits field metadata explicitly so it compiles
 against current `main` without unrelated serialization derives. Frozen worker
 copies and all measured results remain unchanged; a newly built worker requires
 its own matched measurements before any performance claim.
+
+## Single-target continuation
+
+Additional complete archives: `round-0006b-single`, `round-0007-single-policy`,
+and `round-0008-single-implementation`. Restore each with `--archive NAME` and
+run its own frozen evaluator as above. `single-target-development` preserves
+the failed round-0006 preparation, all candidate snapshots, plans, patches,
+controllers and equivalence-test logs. Build caches are excluded.
+
+[Continuation results](../single_target_20260916/RESULTS.md) include retained
+smoke rejections and distinguish promotion from parity and strict beating.
+[Archive validation](../single_target_20260916/archive-validation.json) records
+successful fresh-directory restoration and full audits of all three rounds.
+[The single-target winner](../single_target_20260916/WINNER.json) identifies its
+source/configuration; its cumulative patch is relative to round-0002's source.
