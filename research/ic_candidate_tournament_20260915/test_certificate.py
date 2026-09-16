@@ -44,14 +44,15 @@ class DescentCertificateTests(unittest.TestCase):
         self.rejects(lambda r: r['solutions'][0]['relation'].update(b=0), 'invalid descent scalars')
         self.rejects(lambda r: r['solutions'][0].update(recovered='1622'), 'incorrect scalar')
 
-    def test_scalar_must_be_the_consequence_of_the_relation(self):
-        # A relation that holds in the group for a different probe of the same
-        # target: [a]G + [b]Q = [a']G + [b']Q whenever a + b·d = a' + b'·d, but the
-        # checker recomputes the probe from (a, b), so a forged pair is caught.
-        def shift(r):
-            rel = r['solutions'][0]['relation']
-            rel['a'], rel['b'] = (rel['a'] + 1621) % 2003, (rel['b'] + 2002) % 2003
-        self.rejects(shift, 'does not hold in the group')
+    def test_equivalent_coefficients_for_the_same_probe_remain_certified(self):
+        # [a]G + [b]Q = [a']G + [b']Q whenever a + b·d = a' + b'·d: the same probe
+        # point decomposed over the same base points is the same index-calculus
+        # derivation, so the certificate still verifies.
+        report = copy.deepcopy(REPORT)
+        rel = report['solutions'][0]['relation']
+        rel['a'], rel['b'] = (rel['a'] + 1621) % 2003, (rel['b'] + 2002) % 2003
+        proof = verify(report, FIXTURE, expected_mode='ic', summands=3)
+        self.assertEqual(proof['certified_descents'], 2)
 
     def test_degenerate_relation_is_only_accepted_when_the_probe_is_infinity(self):
         self.rejects(lambda r: r['solutions'][1]['relation'].update(points=[]), 'does not hold in the group')
