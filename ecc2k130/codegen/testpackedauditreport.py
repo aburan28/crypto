@@ -19,7 +19,8 @@ class PackedAuditCountTests(unittest.TestCase):
                           if isinstance(node, ast.FunctionDef) and node.name == 'checkPackedReduction')
         modeNamespace = dict(re=re, PACKED_DIRECT_REDUCE='0', PACKED_GENERATED_PRODUCT='0',
                              PACKED_STATE_TILE='0', PACKED_CLMAD='0', PACKED_WEIGHTED_PREFIX='0',
-                             PACKED_COMPACT_STATE='0', PACKED_SHARED_SIGMA='0')
+                             PACKED_COMPACT_STATE='0', PACKED_SHARED_SIGMA='0',
+                             PACKED_TOP_CLMAD='0')
         exec(compile(ast.Module(body=[modeHelper], type_ignores=[]), str(modePath), 'exec'), modeNamespace)
         namespace = dict(re=re, client=SimpleNamespace(benchResult=benchResult,
                          checkPackedReduction=modeNamespace['checkPackedReduction']))
@@ -37,6 +38,7 @@ class PackedAuditCountTests(unittest.TestCase):
                 'packed weighted prefix: 0\n'
                 'packed compact state: 0\n'
                 'packed shared sigma: 0\n'
+                'packed top clmad: 0\n'
                 'packed state tile: 0\n'
                 f'1.0 s 6000.000 M it/s {expected // 2} iterations 0 dp 0 stored 0 dropped\n'
                 f'2.0 s 6000.000 M it/s {expected} iterations 0 dp 0 stored 0 dropped\n'
@@ -52,6 +54,24 @@ class PackedAuditCountTests(unittest.TestCase):
             self.assertEqual(sample['actualWorkers'], 192512)
             self.assertEqual(sample['expectedIterations'], 201863462912)
             self.assertEqual(sample['reportedIterations'], 201863462912)
+
+    def test_top_clmad_identity_is_required_and_exact(self):
+        # A rate is only comparable to the build it was requested from.  The
+        # top-word clmad knob changes the arithmetic a product executes, so a
+        # sample whose printed identity is missing, doubled or different from
+        # the requested build must not rank -- exactly the rule every other
+        # packed knob is held to.
+        raw = self.raw()
+        self.assertTrue(self.check(self.sample(raw), 0, 0))
+        marker = 'packed top clmad: 0\n'
+        self.assertIn(marker, raw)
+        for bad in (raw.replace(marker, ''), raw.replace(marker, marker * 2),
+                    raw.replace(marker, 'packed top clmad: 1\n'),
+                    raw.replace(marker, 'packed top clmad: true\n')):
+            sample = self.sample(bad)
+            self.assertFalse(self.check(sample, 0, 0))
+            self.assertFalse(sample['valid'])
+            self.assertIn('top clmad', sample.get('error', ''))
 
     def test_invalid_work_cannot_keep_a_positive_summary(self):
         raw = self.raw()

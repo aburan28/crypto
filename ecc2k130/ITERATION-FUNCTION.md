@@ -480,6 +480,24 @@ both pipes; the table kernel is ALU-limited with the carry-less unit at
 88%**, so the next slot to buy is ALU again, not clmad, and the ceiling for
 this kernel at 100% of the ALU pipe is ≈ 17.5 B/s.
 
+*Interaction with `PACKED_TOP_CLMAD`* ([TOP-CLMAD.md](TOP-CLMAD.md), landed
+in parallel): that knob moves the top-word correction of every product from
+the ALU onto the carry-less unit on the premise that the unit has headroom.
+Costed with `kernel_cost.py` on the merged tree, static per update:
+
+| knobs | ALU slots | clmad | clmad SM-clocks at 1.67 lanes/SM-clock |
+|---|---:|---:|---:|
+| shipping walk | 2,324 | 45.25 | 27.1 |
+| shipping walk + `TOP_CLMAD` | 2,115 | 71.25 | 42.7 |
+| table walk | 1,831 | 45.25 | 27.1 |
+| table walk + `TOP_CLMAD` | 1,616 | 71.25 | 42.7 |
+
+Under the table walk the update costs 27.2 SM-clocks, so 71 static clmads
+(≈ 63 dynamic, 38 SM-clocks) would make the carry-less unit the binding pipe
+by a wide margin: the two knobs do not compose, and `TOP_CLMAD` should be
+measured against the shipping walk only, which is how TOP-CLMAD.md frames it.
+Not measured on a GPU here; the table above is static costing and says so.
+
 ### 6.4 Classification and verdict
 
 | change | class | evidence |

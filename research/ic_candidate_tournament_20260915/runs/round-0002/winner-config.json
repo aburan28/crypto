@@ -1,0 +1,18 @@
+{
+  "changed_parameters": {
+    "batch_trials": 16
+  },
+  "config": {
+    "batch_trials": 16,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+  "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+  "hypothesis": "Reduce surplus collection and verification before a rank check.",
+  "id": "batch16",
+  "parent": "incumbent",
+  "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+}

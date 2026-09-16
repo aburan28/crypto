@@ -32,6 +32,19 @@ with 38 logic ops pays until the carryless unit catches up.
     ./sass_cost.py                       # per-routine SASS, shipping preset
     ./sass_cost.py --update              # weighted into one scalar update
     ./sass_cost.py --rate 5.022 --sms 82 # what each pipe then costs per update
+
+It needs nvcc 13.3 or newer, for clmad.  No pip wheel carries one; NVIDIA's apt
+repository serves the .deb files and a .deb is an ar archive, so about 40 MB of
+cuda-nvcc, libnvvm, cuda-crt, cuda-cudart-dev, cuda-cuobjdump and cuda-nvdisasm
+unpack without root -- TOP-CLMAD.md has the six lines.  Then --nvcc and
+--cuobjdump point at them.
+
+Two things this counted wrong until it was run that way.  It matched routine
+names as substrings, so "k_mul" also matched k_mulPair and k_mulPoly and the
+inverse-chain row carried a 164-instruction routine that costs 347.  And it
+costed the walk's Frobenius network as the single-coordinate form twice, 506,
+where the pair the walk actually calls shares its mask stream and is 469.
+Both are what happens to a tool nobody can run: it is trusted instead.
 """
 import argparse
 import os
@@ -100,6 +113,25 @@ __global__ void k_mulPair(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
     (void)h; (void)w; (void)k;
     PolynomialPair p = mulPolynomialPair131(i[0], i[1], i[2]);
     o[0] = p.first; o[1] = p.second;
+}
+#if ECC_PACKED_WEIGHTED_PREFIX == 2
+// The walk applies the network to both coordinates through one mask stream;
+// costing the single-coordinate form twice overstates it (506 against 469).
+__global__ void k_sigmaPair(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)h; (void)w;
+    SigmaWalkPair131 p = sigmaWalkNetworkPair131(i[0], i[1], k & 7);
+    o[0] = p.first; o[1] = p.second;
+}
+#endif
+// The 4x4-word product alone, without the three-bit top-word correction.
+// Wrong as arithmetic; it isolates what that correction costs, which at the
+// shipping preset is 65 of product131's 77 instructions.  See TOP-CLMAD.md.
+__global__ void k_productNoTop(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)w; (void)k; (void)o;
+    uint32_t c[9];
+    clmul128(c, i[0].v, i[1].v); c[8] = 0;
+#pragma unroll
+    for (int j = 0; j < 9; ++j) h[j] = c[j];
 }
 """
 
@@ -191,12 +223,18 @@ def main():
     work = tempfile.mkdtemp()
     fn = functions(build(defs, a.arch, a.nvcc, work), a.cuobjdump)
 
-    order = ["k_product", "k_reduce", "k_fromPolyProduct", "k_mulPoly", "k_mulPair", "k_mul",
-             "k_inv", "k_sigmaWalk", "k_toPoly", "k_fromPoly", "k_sqr", "k_sqrPoly", "k_add", "k_weight"]
+    order = ["k_product", "k_productNoTop", "k_reduce", "k_fromPolyProduct", "k_mulPoly", "k_mulPair",
+             "k_mul", "k_inv", "k_sigmaWalk", "k_sigmaPair", "k_toPoly", "k_fromPoly", "k_sqr",
+             "k_sqrPoly", "k_add", "k_weight"]
     named = {}
+    # Itanium mangling puts the name's length directly before it: _Z5k_mulP...
+    # against _Z9k_mulPolyP...  A substring test had "k_mul" matching k_mulPair
+    # and k_mulPoly as well, so the inverse-chain row reported whichever of the
+    # three cuobjdump listed last; and "k_mulP" as a prefix does the same, since
+    # Poly and Pair both start with P.  The length is what makes it exact.
     for key in fn:
         for name in ["k_nop"] + order:
-            if name in key:
+            if re.search(r"_Z%d%sP" % (len(name), re.escape(name)), key):
                 named[name] = fn[key]
     overhead = cost(named["k_nop"])["aluSlots"] if "k_nop" in named else 0.0
     print("SASS per routine, %s, batch %d  (less %.0f slots of kernel overhead)"
@@ -215,10 +253,12 @@ def main():
     if not a.update:
         return
     B = a.batch
+    pair = "k_sigmaPair" in got
     rows = [("polynomial product, paired", "k_mulPair", (B - 1) / B),
             ("polynomial product, single", "k_mulPoly", (B + 1) / B),
             ("normal-basis product, inverse chain", "k_mul", 8.0 / B),
-            ("Frobenius network, walk (2 coords)", "k_sigmaWalk", 2.0),
+            ("Frobenius network, walk (pair)" if pair else "Frobenius network, walk (2 coords)",
+             "k_sigmaPair" if pair else "k_sigmaWalk", 1.0 if pair else 2.0),
             ("basis conversion out (2 coords)", "k_fromPoly", 2.0),
             ("basis conversion in (2 coords)", "k_toPoly", 2.0),
             ("polynomial squaring", "k_sqrPoly", 1.0),
@@ -250,9 +290,12 @@ def main():
               % (aluUse / 1e12, 100 * aluUse / LOP3_RATE))
         print("carryless    : %7.2f T clmad/s, %5.1f%% of an independent clmad stream"
               % (clmUse / 1e12, 100 * clmUse / CLMAD_RATE))
+        # The literal percentages are escaped: this string is a format string,
+        # and "87.3%," was being read as a conversion, which made --rate crash
+        # at the last line after printing everything above it.
         print("\nThese fractions are not headroom: an independent stream issues at a rate"
               "\na dependent walk does not reach.  Nsight Compute measures the pipes"
-              "\nthemselves -- ALU 87.3%, FP64 (clmad) 51.4% at this preset -- so the ALU"
+              "\nthemselves -- ALU 87.3%%, FP64 (clmad) 51.4%% at this preset -- so the ALU"
               "\ncolumn is what binds, and one clmad is worth %.0f logic ops until the"
               "\ncarryless unit closes that gap." % CLMAD_PRICE)
 

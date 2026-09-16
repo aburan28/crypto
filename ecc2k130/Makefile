@@ -47,6 +47,7 @@ PACKED_CLMAD ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
+PACKED_TOP_CLMAD ?= 0
 PACKED_STATE_TILE ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
@@ -127,6 +128,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
+       -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
@@ -226,6 +228,15 @@ build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 	    -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
 	    -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
 
+# The walks behind a corpus, orbit by orbit, for the status page's forest
+# figure (docs/ecc2k130-status/walk-forest/README.md).  Host only.
+build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
+
+trailforest: build/trailforest
+
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
@@ -280,7 +291,9 @@ test-clmad:
 	python3 -m unittest discover -s codegen -p testclmad.py
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
 	./build/test-packed-clmad-host
+	./build/test-packed-topclmad-host
 
 test-packed-cuda:
 	mkdir -p build
@@ -383,6 +396,7 @@ modal:
 RTX_PRO6000_WORKERS ?= 385024
 RTX_PRO6000_COMPACT_STATE ?= 1
 RTX_PRO6000_SHARED_SIGMA ?= 1
+RTX_PRO6000_TOP_CLMAD ?= 0
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
@@ -390,12 +404,20 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
                  ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
                  ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE) \
-                 ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA)
+                 ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA) \
+                 ECC_PACKED_TOP_CLMAD=$(RTX_PRO6000_TOP_CLMAD)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
+
+# The g7 fleet runs the RTX PRO 4500, for which this tree records no rate at
+# all; see RTX-PRO4500.md for the purchasing decision that waits on one. Unlike
+# the RTX PRO 6000 targets this does not go through Modal -- it runs on the EC2
+# instance itself, where the part actually is.
+bench-rtx-pro4500:
+	bash benchmarks/rtx-pro4500/run.sh
 
 audit-rtx-pro6000:
 	mkdir -p build
@@ -407,9 +429,9 @@ clean:
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
-	rm -f build/test-packed-clmad-host
+	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 audit-rtx-pro6000 clean

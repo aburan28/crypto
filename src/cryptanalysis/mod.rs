@@ -141,6 +141,7 @@ pub mod groebner_f4;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
 pub mod hnp_ecdsa;
+pub mod hyperelliptic_ic_bench;
 pub mod hyperelliptic_index_calculus;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;

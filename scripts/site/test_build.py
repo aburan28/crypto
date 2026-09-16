@@ -17,6 +17,8 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 # served for arbitrary depths and cannot use relative links) hardcodes it.
 PROJECT_PREFIX = "/crypto/"
 
+FOREST_DIR = os.path.join(ROOT, "docs", "ecc2k130-status", "walk-forest")
+
 
 def read(path, mode="r"):
     kwargs = {"encoding": "utf-8"} if mode == "r" else {}
@@ -47,6 +49,7 @@ class BuildTests(unittest.TestCase):
             "scoreboard/index.html",
             "status/index.html",
             "status/style.css",
+            "status/walk-forest.svg",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -260,23 +263,170 @@ class BuildTests(unittest.TestCase):
         # visible as ops/h rather than only as a point count.
         self.assertIn("ops/h at interval 2^", page)
 
-    def test_dashboard_progress_bar_is_linear_in_work(self):
-        # The share of 2^60.9 walked so far is around 2^-21, so a bar drawn
-        # from the ratio of the EXPONENTS would read about two thirds full
-        # while the campaign has done a millionth of a millionth of the work.
-        # The visible progress bar must therefore be filled from the ratio of
-        # the work itself, and the log-scale bar beside it must say in the
-        # page that it is not progress. Both are easy to "fix" into a lie by
-        # someone making the bar look better, so pin them here.
+    def test_dashboard_shows_the_work_share_as_a_number_not_a_bar(self):
+        # The share of 2^60.9 walked was 2^-21 when the page was first
+        # published: a bar filled from it is empty, and a bar filled from the
+        # ratio of the exponents reads two thirds full. Both are lies waiting
+        # to be drawn, so the share is a number and the page has no progress
+        # bar to make look better.
         page = read(os.path.join(self.out, "status", "index.html"))
         self.assertIn("var share = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);", page)
-        self.assertIn("var percent = Math.min(100, share * 100);", page)
-        self.assertIn('fill.style.width = percent + "%";', page)
-        self.assertIn("this bar is not progress", page)
-        # A minimum width on the fill would draw a share that is not there.
-        match = re.search(r"\.bar-fill \{(.*?)\}", read(os.path.join(self.out, "status", "style.css")), re.S)
-        self.assertIsNotNone(match, "no .bar-fill rule in the dashboard stylesheet")
-        self.assertNotIn("min-width", match.group(1))
+        self.assertIn('el("ops-percent").textContent = percentText(share);', page)
+        self.assertNotIn('role="progressbar"', page)
+        self.assertNotIn("ops-fill", page)
+
+    def test_dashboard_odds_panel_is_the_birthday_bound_with_the_quoted_mean(self):
+        # What rho accumulates is the chance a collision has already happened.
+        # The page draws P(W) = 1 - exp(-pi W^2 / 4 E^2): the birthday bound
+        # parameterised so its MEAN is E = 2^60.9, the expectation the page
+        # already quotes, so the curve and the ETA cannot disagree. Pin the
+        # formula, its inverse, the conditional month tile, the doubled-fleet
+        # curve and the "not a deadline" wording; a rounder-looking curve is
+        # one edit away.
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("function collisionOdds", page)
+        self.assertIn("return -Math.expm1(-Math.PI / 4 * ratio * ratio);", page)
+        self.assertIn("function workForOdds", page)
+        self.assertIn("Math.sqrt(-4 * Math.log(1 - p) / Math.PI)", page)
+        self.assertIn("function drawOdds", page)
+        self.assertIn("drawOdds(status)", page)
+        self.assertIn("(oddsMonth - odds0) / (1 - odds0)", page)
+        self.assertIn('shape("path", { d: curve(2), "class": "line alt" })', page)
+        self.assertIn("The median is not a deadline", page)
+        for ident in ("odds-now", "odds-month", "odds-median", "odds-ninety", "odds-chart"):
+            self.assertIn('id="%s"' % ident, page, ident)
+        # The same law in Python: mean E, median 0.94 E, ninety at 1.71 E.
+        import math
+        odds = lambda ratio: -math.expm1(-math.pi / 4 * ratio * ratio)
+        work_for = lambda p: math.sqrt(-4 * math.log(1 - p) / math.pi)
+        self.assertAlmostEqual(odds(work_for(0.5)), 0.5)
+        self.assertAlmostEqual(work_for(0.5), 0.939, places=3)
+        self.assertAlmostEqual(work_for(0.9), 1.712, places=3)
+        mean = sum((1 - odds(k / 1000.0)) * 0.001 for k in range(6000))
+        self.assertAlmostEqual(mean, 1.0, places=2)
+        # The page's copy of the two quantiles agrees.
+        self.assertIn("0.94 E", page)
+        self.assertIn("1.71 E", page)
+
+    # ---- the walk-forest figure ------------------------------------------
+    # docs/ecc2k130-status/walk-forest.svg is generated from the sampled,
+    # hashed trails committed beside it: real ECC2K-130 walks the client
+    # made, replayed with its own kernel.  These hold the published figure,
+    # the page's caption, the endpoints the trails must land on and the
+    # scalar reference's replay to one another.
+
+    def _forest(self):
+        import walk_forest
+        forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(FOREST_DIR, "forest.hashes"))
+        return walk_forest, forest, corpus
+
+    def test_walk_forest_is_sampled_from_the_challenge_curve(self):
+        walk_forest, forest, corpus = self._forest()
+        p = forest.params
+        self.assertEqual(p["curve"], "131")
+        self.assertEqual(p["mode"], "sample")
+        self.assertEqual(p["source"], "corpus")
+        self.assertEqual(p["hash"], "sha256-16")
+        # Every seed the sampler was given came from a client record, and
+        # every trail it kept ended on the orbit its record names.
+        self.assertEqual(int(p["checked"]), int(p["drawn"]))
+        self.assertEqual(int(p["drawn"]), len(forest.walks))
+        self.assertLessEqual(int(p["drawn"]), int(p["tried"]))
+        for steps in forest.steps:
+            self.assertLessEqual(steps, int(p["cap"]))
+        # Orbits are named, never shown: a 16-hex-digit name per node.
+        for seed, orbits in forest.walks:
+            for orbit in orbits:
+                self.assertRegex(orbit, r"^[0-9a-f]{16}$")
+
+    def test_walk_forest_trails_end_on_their_recorded_endpoints(self):
+        walk_forest, forest, corpus = self._forest()
+        self.assertEqual(walk_forest.bind_to_corpus(forest, corpus), len(forest.walks))
+        self.assertEqual(len(corpus), len(forest.walks))
+
+    def test_walk_forest_kernel_replay_agrees_with_the_scalar_reference(self):
+        # reference-check.txt is the scalar reference's replay of the first
+        # records, hashed and sampled the same way (walk_forest.py
+        # --hash-trails).  The kernel's trails for those walks must match it
+        # orbit for orbit.
+        walk_forest, forest, corpus = self._forest()
+        reference = walk_forest.read_trails(os.path.join(FOREST_DIR, "reference-check.txt"))
+        self.assertGreater(len(reference.walks), 0)
+        self.assertEqual(reference.every, forest.every)
+        for (rseed, rorbits), (seed, orbits), rsteps, steps in zip(
+                reference.walks, forest.walks, reference.steps, forest.steps):
+            self.assertEqual(rseed, seed)
+            self.assertEqual(rsteps, steps, seed)
+            self.assertEqual(rorbits, orbits, seed)
+
+    def test_walk_forest_figure_is_what_the_trails_render_to(self):
+        walk_forest, forest, corpus = self._forest()
+        svg, _ = walk_forest.build(os.path.join(FOREST_DIR, "trails.txt"), os.path.join(FOREST_DIR, "forest.hashes"))
+        published = read(os.path.join(self.out, "status", "walk-forest.svg"))
+        self.assertEqual(published, svg, "walk-forest.svg is stale: regenerate it (see walk-forest/README.md)")
+        # And the drawing carries exactly the forest: one circle per drawn
+        # orbit, one filled circle per distinguished point, one edge per
+        # stride.
+        self.assertEqual(published.count("<circle "), len(forest.order))
+        self.assertEqual(published.count('class="dp"'), len(forest.roots))
+        plain = published.split('<g class="e">', 1)[1].split("</g>", 1)[0]
+        self.assertEqual(plain.count("M"), len(forest.succ))
+        self.assertIn(forest.header, published)
+
+    def test_walk_forest_caption_states_the_counts_it_draws(self):
+        walk_forest, forest, corpus = self._forest()
+        page = read(os.path.join(self.out, "status", "index.html"))
+        meetings = sum(1 for preds in forest.pred.values() if len(preds) > 1)
+        expected = {
+            "wf-walks": len(forest.walks),
+            "wf-tried": int(forest.params["tried"]),
+            "wf-cap": int(forest.params["cap"]),
+            "wf-every": forest.every,
+            "wf-orbits": len(forest.order),
+            "wf-steps": walk_forest.total_steps(forest),
+            "wf-longest": max(forest.steps),
+            "wf-dps": len(forest.roots),
+            "wf-meetings": meetings,
+            "wf-weight": int(forest.params["dp-weight"]),
+        }
+        for ident, value in expected.items():
+            match = re.search(r'id="%s">([^<]+)<' % ident, page)
+            self.assertIsNotNone(match, ident)
+            self.assertEqual(int(match.group(1).replace(",", "")), value, ident)
+        self.assertIn('src="./walk-forest.svg"', page)
+
+    # ---- the tool itself, on a curve small enough to check in the clear ---
+    # walk-forest/gf2-23/ is the GF(2^23) set: the client's own records for a
+    # run, the reference walk of that run's seed schedule, and its endpoints.
+    # It exercises the replay and generate modes where orbits can be
+    # committed in the clear.
+
+    def test_gf2_23_trails_end_on_their_corpus_records(self):
+        import walk_forest
+        small = os.path.join(FOREST_DIR, "gf2-23")
+        forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(small, "forest.bin"))
+        self.assertEqual(forest.params["mode"], "generate")
+        self.assertEqual(walk_forest.bind_to_corpus(forest, corpus), len(forest.walks))
+        self.assertEqual(len(corpus), len(forest.walks))
+
+    def test_gf2_23_trails_agree_with_the_clients_own_records(self):
+        # client-run1.bin is what ecc2k130-cpu itself wrote for the same
+        # run-id on this instance before its search solved the instance.
+        # Every record of it for a lane the trails cover must name the orbit
+        # the trail ends on; the header records how many the generator
+        # checked.
+        import walk_forest
+        small = os.path.join(FOREST_DIR, "gf2-23")
+        forest = walk_forest.read_trails(os.path.join(small, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(small, "forest.bin"))
+        client = walk_forest.read_corpus(os.path.join(small, "client-run1.bin"))
+        overlap = {seed: key for seed, key in client.items() if seed in corpus}
+        self.assertGreater(len(overlap), 0, "no client record falls among the covered lanes")
+        for seed, key in overlap.items():
+            self.assertEqual(walk_forest.canon_hex(key), walk_forest.canon_hex(corpus[seed]), seed)
+        self.assertEqual(int(forest.params["checked"]), len(overlap))
 
     def test_internal_links_resolve(self):
         missing = []
