@@ -249,6 +249,18 @@ unstated universal score.
 
 1. Admit only candidates that complete the exact required workload correctly,
    meet resource caps, have fully priced phases and pass independent verification.
+   **Every candidate must be an index-calculus algorithm.** A candidate competes
+   with rho only if it recovers each target through a declared factor base:
+   relations collected by decomposition over that base, factor-base logarithms
+   from scalar-field linear algebra, and an individual descent that derives the
+   target's logarithm from one relation `[a]G + [b]Q = Σ P_i` over base points.
+   The worker emits that relation for every target and the independent checker
+   verifies it in the group and checks that the returned scalar is its
+   consequence under the verified column logs (`certified_descents` in the
+   receipt). A logarithm without that certificate — from a generic collision
+   walk, a baby-step giant-step, or any hybrid that recovers targets outside
+   the factor-base logs — is not a candidate result, whatever it costs. Rho is
+   the reference arm only and is never a candidate.
 2. For each candidate, compute paired cost ratios to the incumbent. Aggregate
    repetitions within an instance first; use a geometric mean with predeclared
    equal weights across the selected size/curve cells.

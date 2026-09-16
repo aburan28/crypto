@@ -24,6 +24,12 @@ Inspect the evidence behind the result:
 
 - Same curves, public targets, base support, decomposition size and required
   completions across arms; no supplied secret scalar or witness.
+- Every IC arm is index calculus end to end: each target's receipt carries the
+  descent relation `[a]G + [b]Q = Σ P_i` it was derived from, the checker
+  confirmed it in the group and confirmed the scalar as its consequence under
+  the column logs, and `certified_descents` equals the target count. A run
+  whose logarithms lack that certificate is not an index-calculus result and
+  cannot beat rho, whatever its cost.
 - Full instruction intervals, including startup and reporting, sum exactly to the
   profiler's process total. Missing costs remain null and cannot win.
 - Repetitions do not masquerade as independent curves. The interval groups by

@@ -508,7 +508,7 @@
              .collect();
          for (rel, ok) in relations.iter().zip(verdicts) {
              if !ok {
-@@ -7369,7 +7541,7 @@
+@@ -7382,7 +7554,7 @@
      projected: ProjectedSignedOrbitMap,
      column_log: Vec<BigUint>,
      index_of: HashMap<(BigUint, BigUint), usize>,
@@ -517,7 +517,7 @@
      /// Single-word curve and lifted generator when the field fits.
      fast: Option<(FastCurve, FastPoint)>,
      h: BigUint,
-@@ -7377,6 +7549,13 @@
+@@ -7390,6 +7562,13 @@
  }
  
  impl<'a> IndividualLogSolver<'a> {
@@ -531,7 +531,7 @@
      fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
          if d >= &self.kc.subgroup_order { return false; }
          if let Some((fc, g)) = &self.fast {
-@@ -7422,7 +7601,7 @@
+@@ -7435,7 +7614,7 @@
              projected,
              column_log,
              index_of: fb.index_map(),
@@ -540,7 +540,7 @@
              fast,
              h: &kc.cofactor % r,
              r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
-@@ -7445,7 +7624,7 @@
+@@ -7458,7 +7637,7 @@
                      self.kc,
                      self.fb,
                      &self.index_of,
@@ -549,7 +549,7 @@
                      self.pair,
                      self.opts,
                      &fc.lower(target),
-@@ -7465,7 +7644,7 @@
+@@ -7478,7 +7657,7 @@
              self.kc,
              self.fb,
              &self.index_of,
@@ -558,7 +558,7 @@
              self.pair,
              self.opts,
              &target,
-@@ -10922,3 +11101,69 @@
+@@ -10946,3 +11125,71 @@
          }
      }
  }
@@ -570,6 +570,7 @@
 +    #[test]
 +    fn shared_curve_lift_and_verification_match_per_call_construction() {
 +        let mut checked = 0usize;
++        let mut relations = 0usize;
 +        for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
 +            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
 +            let fc = FastCurve::new(&kc.curve).unwrap();
@@ -580,7 +581,8 @@
 +                assert_eq!(factor_base_points_with_fast(&fc, &kc.curve, &x), points_with_x(&kc.curve, &x));
 +                checked += 1;
 +            }
-+            let fb = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize).unwrap();
++            // The smallest cells cannot reach 6n subgroup points; the lift check above still ran.
++            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize) else { continue };
 +            let r = kc.subgroup_order.to_u64_digits()[0];
 +            let g = fc.lift(kc.generator());
 +            for i in 0..64usize {
@@ -601,11 +603,11 @@
 +                for rel in &candidates {
 +                    assert_eq!(verify_collected_relation_with(Some(&fc), &kc, &fb, 3, rel),
 +                               verify_collected_relation(&kc, &fb, 3, rel));
-+                    checked += 1;
++                    relations += 1;
 +                }
 +            }
 +        }
-+        assert!(checked > 16_000);
++        assert!(checked > 10_000 && relations > 200, "{checked} lifts, {relations} relations");
 +    }
 +}
 +

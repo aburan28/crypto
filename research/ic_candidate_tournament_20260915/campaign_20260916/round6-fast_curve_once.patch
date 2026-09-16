@@ -100,7 +100,7 @@
              .collect();
          for (rel, ok) in relations.iter().zip(verdicts) {
              if !ok {
-@@ -10922,3 +10956,49 @@
+@@ -10946,3 +10980,51 @@
          }
      }
  }
@@ -112,6 +112,7 @@
 +    #[test]
 +    fn shared_curve_lift_and_verification_match_per_call_construction() {
 +        let mut checked = 0usize;
++        let mut relations = 0usize;
 +        for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
 +            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
 +            let fc = FastCurve::new(&kc.curve).unwrap();
@@ -122,7 +123,8 @@
 +                assert_eq!(factor_base_points_with_fast(&fc, &kc.curve, &x), points_with_x(&kc.curve, &x));
 +                checked += 1;
 +            }
-+            let fb = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize).unwrap();
++            // The smallest cells cannot reach 6n subgroup points; the lift check above still ran.
++            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize) else { continue };
 +            let r = kc.subgroup_order.to_u64_digits()[0];
 +            let g = fc.lift(kc.generator());
 +            for i in 0..64usize {
@@ -143,10 +145,10 @@
 +                for rel in &candidates {
 +                    assert_eq!(verify_collected_relation_with(Some(&fc), &kc, &fb, 3, rel),
 +                               verify_collected_relation(&kc, &fb, 3, rel));
-+                    checked += 1;
++                    relations += 1;
 +                }
 +            }
 +        }
-+        assert!(checked > 16_000);
++        assert!(checked > 10_000 && relations > 200, "{checked} lifts, {relations} relations");
 +    }
 +}

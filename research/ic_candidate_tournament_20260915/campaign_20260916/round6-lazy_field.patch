@@ -41,7 +41,7 @@
                          self.pair_table(),
                          self.opts,
                          &target,
-@@ -7369,7 +7376,7 @@
+@@ -7382,7 +7389,7 @@
      projected: ProjectedSignedOrbitMap,
      column_log: Vec<BigUint>,
      index_of: HashMap<(BigUint, BigUint), usize>,
@@ -50,7 +50,7 @@
      /// Single-word curve and lifted generator when the field fits.
      fast: Option<(FastCurve, FastPoint)>,
      h: BigUint,
-@@ -7377,6 +7384,13 @@
+@@ -7390,6 +7397,13 @@
  }
  
  impl<'a> IndividualLogSolver<'a> {
@@ -64,7 +64,7 @@
      fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
          if d >= &self.kc.subgroup_order { return false; }
          if let Some((fc, g)) = &self.fast {
-@@ -7422,7 +7436,7 @@
+@@ -7435,7 +7449,7 @@
              projected,
              column_log,
              index_of: fb.index_map(),
@@ -73,7 +73,7 @@
              fast,
              h: &kc.cofactor % r,
              r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
-@@ -7445,7 +7459,7 @@
+@@ -7458,7 +7472,7 @@
                      self.kc,
                      self.fb,
                      &self.index_of,
@@ -82,7 +82,7 @@
                      self.pair,
                      self.opts,
                      &fc.lower(target),
-@@ -7465,7 +7479,7 @@
+@@ -7478,7 +7492,7 @@
              self.kc,
              self.fb,
              &self.index_of,

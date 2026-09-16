@@ -190,6 +190,14 @@ weighted curve-cell geometric means of paired candidate/incumbent cost ratios.
 Its paired bootstrap resamples curve blocks and targets within blocks. The selected
 challenger must pass on both confirmation and replay:
 
+- Be an index-calculus algorithm. From round 0006 the worker reports, for
+  every target, the relation `[a]G + [b]Q = Σ P_i` over factor-base points that
+  its logarithm was derived from, and the checker rejects a run unless that
+  relation holds in the group and the scalar is its consequence under the
+  verified column logs (`certified_descents` equals the target count). A
+  candidate that recovers targets by any generic method is inadmissible; rho is
+  the reference only. Rounds 0002–0005 ran the same library descent but did
+  not carry this per-target certificate.
 - Complete and independently verify every scheduled workload.
 - At least 20% lower total instruction cost: ratio at most 0.80.
 - Paired 95% interval's upper endpoint below 1.

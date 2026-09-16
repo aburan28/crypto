@@ -243,6 +243,7 @@ mod tournament_fast_curve_once_equivalence {
     #[test]
     fn shared_curve_lift_and_verification_match_per_call_construction() {
         let mut checked = 0usize;
+        let mut relations = 0usize;
         for (n, a) in [(5, 0), (7, 1), (13, 0), (17, 1), (19, 0), (19, 1), (23, 0), (31, 1)] {
             let Some(kc) = KoblitzCurve::new(a, n) else { continue };
             let fc = FastCurve::new(&kc.curve).unwrap();
@@ -253,7 +254,8 @@ mod tournament_fast_curve_once_equivalence {
                 assert_eq!(factor_base_points_with_fast(&fc, &kc.curve, &x), points_with_x(&kc.curve, &x));
                 checked += 1;
             }
-            let fb = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize).unwrap();
+            // The smallest cells cannot reach 6n subgroup points; the lift check above still ran.
+            let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 43, 6 * n as usize) else { continue };
             let r = kc.subgroup_order.to_u64_digits()[0];
             let g = fc.lift(kc.generator());
             for i in 0..64usize {
@@ -274,11 +276,11 @@ mod tournament_fast_curve_once_equivalence {
                 for rel in &candidates {
                     assert_eq!(verify_collected_relation_with(Some(&fc), &kc, &fb, 3, rel),
                                verify_collected_relation(&kc, &fb, 3, rel));
-                    checked += 1;
+                    relations += 1;
                 }
             }
         }
-        assert!(checked > 16_000);
+        assert!(checked > 10_000 && relations > 200, "{checked} lifts, {relations} relations");
     }
 }
 '''
@@ -521,6 +523,133 @@ pub fn point_key(''', helpers + '''
 /// [`FrobeniusFactorBase::index_map`].
 pub fn point_key(''')
 
+
+# ── Descent certificate: the index-calculus admission requirement ─────
+#
+# Applied to the baseline and therefore to every candidate. Each recovered
+# logarithm reports the one relation `[a]G + [b]Q = Σ P_i` it was derived from,
+# so the independent checker can confirm that every target's scalar is an
+# index-calculus consequence of the factor-base logs, not a generic collision.
+
+WORKER = 'examples/ic_tournament_worker.rs'
+
+
+def descent_certificate(text):
+    text = _replace_once(text, """pub struct IndividualLogReport {
+    /// `[a]G + [b]Q` probes drawn before one descended.
+    pub trials: usize,
+    /// The recovered logarithm, if the descent succeeded and verified.
+    pub log: Option<BigUint>,
+}
+""", """pub struct IndividualLogReport {
+    /// `[a]G + [b]Q` probes drawn before one descended.
+    pub trials: usize,
+    /// The recovered logarithm, if the descent succeeded and verified.
+    pub log: Option<BigUint>,
+    /// The relation the logarithm was derived from: the certificate that it
+    /// is an index-calculus consequence of the factor-base logs.
+    pub relation: Option<DescentRelation>,
+}
+
+/// The single relation `[a]G + [b]Q = Σ_i P_i` over factor-base points
+/// `P_i` (by index) that an individual-logarithm descent recovered its
+/// answer from. An empty summand list is the degenerate `[a]G + [b]Q = O`.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct DescentRelation {
+    pub a: u64,
+    pub b: u64,
+    pub points: Vec<usize>,
+}
+""")
+    text = _replace_once(text, """                if self.kc.mul(self.kc.generator(), &d) == *q { return Some(Some(d)); }
+            }
+        } else if let Some(idxs) = pair.decompose_fast(initial, m) {
+            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) { return Some(Some(d)); }
+        }
+""", """                if self.kc.mul(self.kc.generator(), &d) == *q {
+                    report.relation = Some(DescentRelation { a: a0, b, points: Vec::new() });
+                    return Some(Some(d));
+                }
+            }
+        } else if let Some(idxs) = pair.decompose_fast(initial, m) {
+            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) {
+                report.relation = Some(DescentRelation { a: a0, b, points: idxs });
+                return Some(Some(d));
+            }
+        }
+""")
+    text = _replace_once(text, """                        if self.kc.mul(self.kc.generator(), &d) == *q {
+                            return Some(Some(d));
+                        }
+""", """                        if self.kc.mul(self.kc.generator(), &d) == *q {
+                            report.relation = Some(DescentRelation { a: *a, b: *b, points: Vec::new() });
+                            return Some(Some(d));
+                        }
+""")
+    text = _replace_once(text, """                if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                    return Some(Some(d));
+                }
+""", """                if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                    report.relation = Some(DescentRelation { a: *a, b: *b, points: idxs });
+                    return Some(Some(d));
+                }
+""")
+    text = _replace_once(text, """                    if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                        if self.verify_log(q, &d) {
+                            report.log = Some(d.clone());
+                            return Some((d, report));
+                        }
+                    }
+                    continue;
+""", """                    if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                        if self.verify_log(q, &d) {
+                            report.log = Some(d.clone());
+                            report.relation = Some(DescentRelation { a, b, points: Vec::new() });
+                            return Some((d, report));
+                        }
+                    }
+                    continue;
+""")
+    text = _replace_once(text, """            let a = BigUint::from(a);
+            let b = BigUint::from(b);
+            let relation = relation_from_decomposition_with_mode(
+                kc,
+                self.fb,
+                &idxs,
+""", """            let (probe_a, probe_b) = (a, b);
+            let a = BigUint::from(a);
+            let b = BigUint::from(b);
+            let relation = relation_from_decomposition_with_mode(
+                kc,
+                self.fb,
+                &idxs,
+""")
+    text = _replace_once(text, """            let d = (numerator * hb_inv) % r;
+            if self.verify_log(q, &d) {
+                report.log = Some(d.clone());
+                return Some((d, report));
+            }
+""", """            let d = (numerator * hb_inv) % r;
+            if self.verify_log(q, &d) {
+                report.log = Some(d.clone());
+                report.relation = Some(DescentRelation { a: probe_a, b: probe_b, points: idxs.clone() });
+                return Some((d, report));
+            }
+""")
+    return text
+
+
+def worker_certificate(text):
+    return _replace_once(text, """        solutions.push(json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
+            "trials":answer.as_ref().map(|(_,r)|r.trials)}));
+""", """        solutions.push(json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
+            "trials":answer.as_ref().map(|(_,r)|r.trials),
+            "relation":answer.as_ref().and_then(|(_,r)|r.relation.as_ref())
+                .map(|rel|json!({"a":rel.a,"b":rel.b,"points":rel.points}))}));
+""")
+
+
+BASELINE = {IC: [descent_certificate], WORKER: [worker_certificate]}
 
 CANDIDATES = {
     'it_inv': {GF: [it_inv]},

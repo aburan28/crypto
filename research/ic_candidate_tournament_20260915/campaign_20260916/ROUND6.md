@@ -69,6 +69,22 @@ therefore borderline by construction: the shared 58% dilutes every IC-side
 gain. A retained incumbent with a measured 10–19% improvement is a plausible
 and fully reported outcome, not a failure of the mechanisms.
 
+## Index-calculus admission (new in this round)
+
+Only index-calculus algorithms may compete with rho. Every arm's worker now
+reports, for each target, the single relation `[a]G + [b]Q = Σ P_i` over
+factor-base points from which the descent derived the logarithm, and the
+independent checker verifies that relation in the group and that the returned
+scalar is its consequence under the verified column logs. A run whose
+logarithms lack that certificate is rejected outright, whatever its cost. The
+certificate is emitted by the library descent (`IndividualLogReport.relation`)
+and the worker; it is applied to the round's baseline
+(`round6-baseline-descent-certificate.patch`) and inherited by every candidate,
+so the incumbent is the round-0005 winner plus this reporting. Rounds
+0002–0005 ran the same library descent without the per-target certificate. A
+first preparation of this round without the certificate was stopped before
+any measurement and discarded.
+
 ## Reference fairness
 
 `it_inv` and `euclid_inv` change field arithmetic that the shipped rho also
