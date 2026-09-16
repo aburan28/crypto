@@ -414,6 +414,61 @@ button:disabled { opacity: 0.55; cursor: progress; }
 }
 .figure figcaption .mono { color: var(--ink); }
 
+/* The explorable version of the same forest: a canvas that replaces the
+   image once the graph has loaded, a control row above it and a readout
+   under it. The tip follows the pointer inside the canvas. */
+.forest { position: relative; }
+.forest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.forest-controls select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+.forest-canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: grab;
+  touch-action: none;
+}
+.forest-canvas:active { cursor: grabbing; }
+.forest-readout {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1.2em;
+  overflow-wrap: anywhere;
+}
+.forest-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 320px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}
+
 /* ---- tables ---- */
 
 .scroll {
