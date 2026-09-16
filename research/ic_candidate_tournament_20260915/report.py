@@ -219,7 +219,10 @@ def main():
     (root/'REPORT.md').write_text('\n'.join(text)+'\n')
     if args.scoreboard:
         board=args.scoreboard.resolve()
-        relative=Path(__import__('os').path.relpath(root,board.parent)).as_posix()
+        # research/ is not part of the published site, so evidence is linked
+        # absolutely (scripts/site/test_build.py enforces this), never as ../research.
+        repo_root=Path(__file__).resolve().parents[2]
+        relative='https://github.com/aburan28/crypto/blob/main/'+root.relative_to(repo_root).as_posix()
         marker='ic-tournament-'+root.name
         parts=[f'<!-- BEGIN {marker} -->',f'<section class="panel" id="{marker}">',
                '<div class="panel-head"><h2>Complete IC candidate tournament</h2>',
