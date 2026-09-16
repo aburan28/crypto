@@ -13,6 +13,18 @@ import tempfile
 PROTOCOL = "ecc2k-seed-orbit-v1"
 RECORD_BYTES = 32
 
+# The iteration function is part of the campaign's identity: distinguished
+# points from two different walks never collide usefully, so a corpus is
+# bound to exactly one.  "sigma" is the equivariant sigma^j + 1 walk every
+# corpus so far was collected with; "table" is the additive walk of
+# ITERATION-FUNCTION.md §4 (include/tablewalk.h), built with WALK_TABLE=1.
+WALKS = {
+    "sigma": "sigma^(3+((normal-weight(x)>>1)&7))(R)+R",
+    "table": "R+(-1)^eps(R)*sigma^k(R)(T[(normal-weight(x)>>1)&7]);"
+             "k=frobenius-phase(x);eps=pivot-coordinate(y);"
+             "cycle-rule=advance-h-on-2-or-4-cycle-from-last-four-tags",
+}
+
 
 def sha256File(path):
     h = hashlib.sha256()
@@ -66,9 +78,12 @@ def campaignContract(config):
     for key in ("binarySha256", "hostBinarySha256", "sourceSha256"):
         if not isinstance(c[key], str) or not re.fullmatch("[0-9a-f]{64}", c[key]):
             raise ValueError("strict campaigns require a pinned " + key)
+    walk = config.get("walk", "sigma")
+    if walk not in WALKS:
+        raise ValueError("unknown walk %r; one of %s" % (walk, sorted(WALKS)))
     c.update(protocol=PROTOCOL, recordBytes=32,
              key="min-normal-basis-x-over-frobenius;negation-quotient",
-             walk="sigma^(3+((normal-weight(x)>>1)&7))(R)+R",
+             walk=WALKS[walk],
              seed="run16-walk32-counter16;splitmix64;128-frobenius-terms",
              coefficients="absent;recover-by-seed-replay;verify-kP-equals-Q")
     raw = json.dumps(c, sort_keys=True, separators=(",", ":")).encode()

@@ -78,6 +78,7 @@ struct Options {
     bool test = false;
     bool polyBasis = false;
     bool selfCheck = false;
+    bool refEngine = false;
     unsigned dpCap = 1u << 16;
     int device = 0;
     int verify = 8;
@@ -275,6 +276,180 @@ struct HostEngine {
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
 
+// ---------------------------------------------------------------------------
+// reference backend
+// ---------------------------------------------------------------------------
+// A scalar engine on the reference arithmetic, walking with whichever
+// iteration the build selects.  It exists to run the whole pipeline -- seeds,
+// distinguished points, collision, resolution -- on the toy curves with a
+// handful of walks, where the planted logarithm says whether the walk and its
+// resolver agree and the iteration count can be compared between walks on
+// identical seeds.  Under ECC_WALK_TABLE it is the only non-packed engine, the
+// bitsliced kernels implementing sigma^j + 1 only; otherwise --ref selects it.
+// It is slow; it checkpoints so that the campaign's certification suite can
+// exercise resume on it.
+template <class Cfg>
+struct RefEngine {
+    typedef Ref<Cfg> R;
+    typedef typename R::Point Point;
+    static const int M = Cfg::M;
+    static const int BATCH = ECC_BATCH;
+    struct Lane { Point p; u64 seed, startIter, hist; unsigned dead; };
+
+    std::vector<Lane> lanes;
+    std::vector<DpRecord> dp;
+    unsigned dpCount[3] = {0, 0, 0};
+    bool restartPending = false;
+    const Solver<Cfg> *sol = nullptr;
+    int threads = 0, steps = 0, dpWeight = 0;
+    unsigned runId = 0, dpCap = 0;
+    u64 maxIters = 0;
+
+    static int autoThreads(int) {
+#ifdef _OPENMP
+        return omp_get_max_threads();
+#else
+        return 1;
+#endif
+    }
+    void start(size_t id, u64 seed, u64 iterBase) {
+        Lane &l = lanes[id];
+        l.seed = seed;
+        l.p = R::startPoint(seed, sol->basis, sol->target, 0, sol->ell, sol->spow);
+        l.startIter = iterBase;
+        l.hist = ECC_HIST_EMPTY;
+        l.dead = 0;
+    }
+    void setup(const Options &o, const unsigned long long *, const unsigned long long *,
+               const unsigned long long *, const unsigned long long *) {
+        threads = o.threads; steps = o.steps; dpWeight = o.dpWeight; runId = o.runId;
+        maxIters = o.maxIters; dpCap = o.dpCap;
+        lanes.resize(size_t(threads) * BATCH);
+        dp.assign(o.dpCap, DpRecord());
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id) start(id, eccSeedFor(runId, id), 0);
+    }
+    void launch(u64 iterBase) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic, 16)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id) {
+            Lane &l = lanes[id];
+            for (int step = 0; step < steps && !l.dead; ++step) {
+                const u64 now = iterBase + step;
+                const int hw = R::weight(l.p.x);
+                if (hw <= dpWeight) {
+                    if ((l.seed & 0xffffull) == 0xffffull) eccAtomicInc(dpCount + 2);
+                    const unsigned dest = eccAtomicInc(dpCount);
+                    if (dest < dpCap) {
+                        DpRecord rec;
+                        rec.seed = l.seed;
+                        rec.iters = now - l.startIter;
+                        for (int i = 0; i < 3; ++i) { rec.x[i] = l.p.x.v[i]; rec.y[i] = l.p.y.v[i]; }
+                        dp[dest] = rec;
+                    }
+                    l.dead = 1;
+                    break;
+                }
+                if (maxIters && now % ECC_GUARD_PERIOD == 0 && now - l.startIter >= maxIters) {
+                    if ((l.seed & 0xffffull) == 0xffffull) eccAtomicInc(dpCount + 2);
+                    l.dead = 1;
+                    eccAtomicInc(dpCount + 1);
+                    break;
+                }
+#if ECC_WALK_TABLE
+                l.p = sol->walk.step(l.p, hw, &l.hist, 0, 0, sol->ell, sol->spow);
+#else
+                l.p = R::step(l.p, hw);
+#endif
+            }
+        }
+    }
+    void reseed(u64 iterBase) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id)
+            if (lanes[id].dead) start(id, lanes[id].seed + 1, iterBase);
+        restartPending = false;
+    }
+    void synchronize() const {}
+    unsigned fetch(std::vector<DpRecord> &out) {
+        const unsigned n = dpCount[0];
+        const bool exhausted = dpCount[2] != 0;
+        restartPending = dpCount[1] != 0;
+        const unsigned m = n < dpCap ? n : dpCap;
+        out.assign(dp.begin(), dp.begin() + m);
+        dpCount[0] = dpCount[1] = dpCount[2] = 0;
+        return exhausted ? ECC_SEED_EXHAUSTED : n;
+    }
+    // One fixed-width record per lane: both coordinates as three words each,
+    // the seed, the start iteration, the cycle history and the dead flag.  The
+    // header's lane width is 1 and its version 2, so a bitsliced checkpoint of
+    // the same curve and thread count is refused rather than misread.
+    static const size_t LANE_WORDS = 3 + 3 + 1 + 1 + 1 + 1;
+    static const unsigned CKPT_VERSION = 2u;
+    void pack(std::vector<u64> &buf) const {
+        buf.resize(lanes.size() * LANE_WORDS);
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            const Lane &l = lanes[id];
+            u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { w[i] = l.p.x.v[i]; w[3 + i] = l.p.y.v[i]; }
+            w[6] = l.seed; w[7] = l.startIter; w[8] = l.hist; w[9] = l.dead;
+        }
+    }
+    void unpack(const std::vector<u64> &buf) {
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            Lane &l = lanes[id];
+            const u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { l.p.x.v[i] = w[i]; l.p.y.v[i] = w[3 + i]; }
+            l.seed = w[6]; l.startIter = w[7]; l.hist = w[8]; l.dead = (unsigned)w[9];
+        }
+    }
+    bool save(const char *path, u64 iterBase, unsigned runId) const {
+        const std::string tmp = std::string(path) + ".tmp";
+        FILE *f = fopen(tmp.c_str(), "wb");
+        if (!f) return false;
+        CkptHeader h;
+        memcpy(h.magic, "ECC2K130", 8);
+        h.version = CKPT_VERSION;
+        h.m = (unsigned)M;
+        h.threads = (unsigned)threads;
+        h.batch = (unsigned)BATCH;
+        h.lanes = 1u;
+        h.runId = runId;
+        h.iterBase = iterBase;
+        std::vector<u64> buf;
+        pack(buf);
+        bool ok = fwrite(&h, sizeof h, 1, f) == 1;
+        ok = ok && fwrite(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
+        if (!ok) { remove(tmp.c_str()); return false; }
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
+    }
+    bool restore(const char *path, u64 *iterBase, unsigned runId) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return false;
+        CkptHeader h;
+        std::vector<u64> buf(lanes.size() * LANE_WORDS);
+        bool ok = fread(&h, sizeof h, 1, f) == 1 &&
+                  ckptHeaderMatches(h, M, threads, BATCH, 1, runId, CKPT_VERSION) &&
+                  ckptPayloadIsWhole(f, buf.size() * sizeof(u64));
+        ok = ok && fread(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        fclose(f);
+        if (!ok) return false;
+        unpack(buf);
+        *iterBase = h.iterBase;
+        return true;
+    }
+    const char *name() const { return ECC_WALK_TABLE ? "reference-table-walk" : "reference"; }
+    bool needsReseed() const { return restartPending; }
+    u64 walksPerLaunch() const { return (u64)lanes.size(); }
+};
+
 #ifndef ECC_NO_CUDA
 // ---------------------------------------------------------------------------
 // device backend
@@ -429,6 +604,10 @@ struct CudaEngine {
     // live device state; the default backend already stores checkpoint words.
     virtual void exportCheckpointField(std::vector<W> &) const {}
     virtual void importCheckpointField(std::vector<W> &) const {}
+    // Per-lane 64-bit arrays in the checkpoint, in order: seed, startIter,
+    // and whatever a backend adds (the table walk's step history).
+    virtual int laneArrayCount() const { return 2; }
+    virtual u64 *laneArray(int i) const { return i ? P.startIter : P.seed; }
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
         CUDA_CHECK(cudaDeviceSynchronize());
@@ -462,9 +641,8 @@ struct CudaEngine {
             CUDA_CHECK(cudaMemcpy(sbuf.data(), P.dead, sbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
             ok = fwrite(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
         }
-        const u64 *lanes[2] = {P.seed, P.startIter};
-        for (int i = 0; i < 2 && ok; ++i) {
-            CUDA_CHECK(cudaMemcpy(lbuf.data(), lanes[i], lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
+        for (int i = 0; i < laneArrayCount() && ok; ++i) {
+            CUDA_CHECK(cudaMemcpy(lbuf.data(), laneArray(i), lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
             ok = fwrite(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
         }
         ok = ok && durableFlush(f);
@@ -478,7 +656,7 @@ struct CudaEngine {
         if (!f) return false;
         CkptHeader h;
         const size_t payload = (2 * fieldCount() + slotCount()) * sizeof(W) +
-                               2 * laneCount() * sizeof(u64);
+                               size_t(laneArrayCount()) * laneCount() * sizeof(u64);
         bool ok = fread(&h, sizeof h, 1, f) == 1 &&
                   ckptHeaderMatches(h, M, P.threads, BATCH, checkpointLanes(), runId, checkpointVersion()) &&
                   ckptPayloadIsWhole(f, payload);
@@ -501,10 +679,9 @@ struct CudaEngine {
             ok = fread(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
             if (ok) CUDA_CHECK(cudaMemcpy(P.dead, sbuf.data(), sbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
         }
-        u64 *lanes[2] = {P.seed, P.startIter};
-        for (int i = 0; i < 2 && ok; ++i) {
+        for (int i = 0; i < laneArrayCount() && ok; ++i) {
             ok = ok && fread(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
-            if (ok) CUDA_CHECK(cudaMemcpy(lanes[i], lbuf.data(), lbuf.size() * sizeof(u64), cudaMemcpyHostToDevice));
+            if (ok) CUDA_CHECK(cudaMemcpy(laneArray(i), lbuf.data(), lbuf.size() * sizeof(u64), cudaMemcpyHostToDevice));
         }
         fclose(f);
         if (ok) *iterBase = h.iterBase;
@@ -620,9 +797,53 @@ static void testField(Rng &rng) {
 }
 
 template <class Cfg>
-static void testOrbit(Rng &rng, const U192 &ell) {
+static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
     typedef Ref<Cfg> R;
+    const U192 &ell = sol.ell;
     bool okFrob = true, okNeg = true, okWeight = true, okTrace = true;
+#if ECC_WALK_TABLE
+    if (!TableWalk<Cfg>::applicable()) {
+        printf("  %-46s (table walk needs a type-II normal basis)\n", "  ... not applicable for GF(2^m) in a polynomial basis");
+        return;
+    }
+    // The table walk's class covariance rests on three identities of the
+    // coordinate functions (tablewalk.h); check them, then the step itself
+    // with an empty history and with a history that trips the cycle rule.
+    bool okPhase = true, okEpsFrob = true, okEpsNeg = true, okTables = sol.walk.consts.consistent();
+    for (int t = 0; t < 64; ++t) {
+        const typename R::Point p = randomPoint<Cfg>(rng, ell);
+        const int hw = R::weight(p.x);
+        const int c = 1 + (int)(rng.next() % (Cfg::M - 1));
+        const typename R::Point pc = R::frob(p, c), pn = R::neg(p);
+        const typename R::Elem xn = R::nbCoords(p.x), yn = R::nbCoords(p.y);
+        const typename R::Elem xc = R::nbCoords(pc.x), yc = R::nbCoords(pc.y), ynn = R::nbCoords(pn.y);
+        const int k = sol.walk.phase(xn, hw), kc = sol.walk.phase(xc, hw);
+        if (kc != (k + c) % Cfg::M) okPhase = false;
+        if (sol.walk.negationBit(xc, yc, kc) != sol.walk.negationBit(xn, yn, k)) okEpsFrob = false;
+        if (sol.walk.negationBit(xn, ynn, k) != 1 - sol.walk.negationBit(xn, yn, k)) okEpsNeg = false;
+        u64 h0 = ECC_HIST_EMPTY, h1 = h0, h2 = h0;
+        const typename R::Point f = sol.walk.step(p, hw, &h0, 0, 0, ell, sol.spow);
+        if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &h1, 0, 0, ell, sol.spow), R::frob(f, c))) okFrob = false;
+        if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &h2, 0, 0, ell, sol.spow), R::neg(f))) okNeg = false;
+        // Trails meeting as R and sigma^c(-R) carry conjugate histories; the
+        // cycle rule must fire for both or neither.
+        const unsigned tag = unsigned(h0 & 0xFFFF);
+        const u64 undo = eccHistPush(ECC_HIST_EMPTY, tag ^ ECC_TAG_EPS);
+        const u64 undoC = eccHistPush(ECC_HIST_EMPTY, unsigned(h1 & 0xFFFF) ^ ECC_TAG_EPS);
+        const u64 undoN = eccHistPush(ECC_HIST_EMPTY, unsigned(h2 & 0xFFFF) ^ ECC_TAG_EPS);
+        u64 g0 = undo, g1 = undoC, g2 = undoN;
+        const typename R::Point fa = sol.walk.step(p, hw, &g0, 0, 0, ell, sol.spow);
+        if (R::eq(fa, f)) okFrob = false;   // the rule did not fire
+        if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &g1, 0, 0, ell, sol.spow), R::frob(fa, c))) okFrob = false;
+        if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &g2, 0, 0, ell, sol.spow), R::neg(fa))) okNeg = false;
+        if (R::weight(pc.x) != hw) okWeight = false;
+        if (R::trace(p.x) != 0) okTrace = false;
+    }
+    report("coordinate logarithm table is a bijection", okTables);
+    report("Frobenius phase advances by one under sigma", okPhase);
+    report("negation bit is sigma-invariant", okEpsFrob);
+    report("negation bit flips under negation", okEpsNeg);
+#else
     for (int t = 0; t < 8; ++t) {
         const typename R::Point p = randomPoint<Cfg>(rng, ell);
         const int hw = R::weight(p.x);
@@ -635,6 +856,7 @@ static void testOrbit(Rng &rng, const U192 &ell) {
         if (R::weight(pc.x) != hw) okWeight = false;
         if (R::trace(p.x) != 0) okTrace = false;
     }
+#endif
     report("iteration commutes with Frobenius", okFrob);
     report("iteration commutes with negation", okNeg);
     report("weight is constant on an orbit", okWeight);
@@ -702,29 +924,38 @@ static void testSolveAlgebra(Rng &rng, const Solver<Cfg> &base) {
     if (u192_is_zero(knownK)) knownK = u192_from(7);
     sol.target = R::scalarMul(sol.basis, knownK);
     bool ok = true;
+    auto randomScalar = [&]() {
+        U192 r = u192_zero();
+        r.v[0] = rng.next();
+        r.v[1] = rng.next() & 0xFFFF;
+        return mod_reduce(r, sol.ell);
+    };
     for (int t = 0; t < 4 && ok; ++t) {
         typename Solver<Cfg>::WalkResult A, B;
         A.ok = B.ok = true;
+        // Endpoints are a P + b Q.  The sigma^j + 1 walk has b = mu, a product
+        // of (1 + s^j); the table walk's b is an arbitrary residue.
+#if ECC_WALK_TABLE
+        A.b = randomScalar();
+        B.b = randomScalar();
+#else
         for (int j = 0; j < 8; ++j) {
             A.counts[j] = rng.next() % 7;
             B.counts[j] = rng.next() % 7;
         }
-        const U192 muA = sol.multiplier(A.counts), muB = sol.multiplier(B.counts);
-        U192 beta = u192_zero();
-        beta.v[0] = rng.next();
-        beta.v[1] = rng.next() & 0xFFFF;
-        beta = mod_reduce(beta, sol.ell);
+        A.b = sol.multiplier(A.counts);
+        B.b = sol.multiplier(B.counts);
+#endif
+        B.a = randomScalar();
         const int c = (int)(rng.next() % Cfg::M);
         const int eps = (rng.next() & 1) ? 1 : -1;
         U192 sc = sol.spow[c];
         if (eps < 0) sc = mod_neg(sc, sol.ell);
-        // choose alpha so that  mu_A (alpha + k) = eps s^c mu_B (beta + k)
-        const U192 rhs = mod_mul(mod_mul(sc, muB, sol.ell), mod_add(beta, knownK, sol.ell), sol.ell);
-        const U192 alpha = mod_sub(mod_mul(rhs, mod_inv(muA, sol.ell), sol.ell), knownK, sol.ell);
-        A.alpha0 = alpha;
-        B.alpha0 = beta;
-        A.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, alpha), sol.target), muA);
-        B.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, beta), sol.target), muB);
+        // choose a_A so that  a_A + b_A k = eps s^c (a_B + b_B k)
+        const U192 rhs = mod_mul(sc, mod_add(B.a, mod_mul(B.b, knownK, sol.ell), sol.ell), sol.ell);
+        A.a = mod_sub(rhs, mod_mul(A.b, knownK, sol.ell), sol.ell);
+        A.endPoint = R::addPt(R::scalarMul(sol.basis, A.a), R::scalarMul(sol.target, A.b));
+        B.endPoint = R::addPt(R::scalarMul(sol.basis, B.a), R::scalarMul(sol.target, B.b));
         if (!R::eq(A.endPoint, eps > 0 ? R::frob(B.endPoint, c) : R::neg(R::frob(B.endPoint, c)))) {
             ok = false;
             break;
@@ -1018,7 +1249,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
         }
         Rng rng(0x1234567 + Cfg::M);
         testField<Cfg>(rng);
-        testOrbit<Cfg>(rng, sol.ell);
+        testOrbit<Cfg>(rng, sol);
         testStartPoint<Cfg>(rng, sol);
         testSolveAlgebra<Cfg>(rng, sol);
         return 0;
@@ -1028,6 +1259,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     if (o.packed) {
         if constexpr (Cfg::M == 131) {
             PackedCudaEngine eng;
+            eng.sol = &sol;
             if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
             eng.setup(o, px, py, qx, qy);
             printf("backend %s: %d threads x %d slots x 1 lanes = %llu walks, dp weight %d, %d steps per launch\n",
@@ -1038,6 +1270,23 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
             return 1;
         }
     }
+#endif
+    if (ECC_WALK_TABLE || o.refEngine) {
+        // The bitsliced kernels walk with sigma^j + 1; only the packed
+        // GF(2^131) kernel and the reference implement the table walk.
+        if (ECC_WALK_TABLE && !TableWalk<Cfg>::applicable()) {
+            fprintf(stderr, "the table walk is defined on type-II normal-basis fields only\n");
+            return 1;
+        }
+        RefEngine<Cfg> eng;
+        eng.sol = &sol;
+        if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
+        eng.setup(o, px, py, qx, qy);
+        printf("backend %s: %d threads x %d slots x 1 lanes = %llu walks, dp weight %d, %d steps per launch\n",
+               eng.name(), o.threads, (int)ECC_BATCH, (unsigned long long)eng.walksPerLaunch(), o.dpWeight, o.steps);
+        return runSearch<Cfg>(o, eng, sol, haveK ? &knownK : NULL);
+    }
+#ifndef ECC_NO_CUDA
     CudaEngine<Cfg> eng;
     if (o.preferL1)
         CUDA_CHECK(cudaFuncSetCacheConfig(eccWalkKernel<Cfg, DeviceWord>, cudaFuncCachePreferL1));
@@ -1067,6 +1316,7 @@ static void usage() {
         "  --max-iters N    restart a walk that has run N steps without a report\n"
         "  --run-id R       16-bit salt making seeds unique across processes\n"
         "  --verify N       recompute the first N reported points with the reference\n"
+        "  --ref            walk on the scalar reference arithmetic (toy curves; slow)\n"
         "  --dp-file F      append distinguished points to F (binary, 32 bytes each)\n"
         "  --load F         preload a corpus file so collisions with earlier runs count\n"
         "  --load-max N     stop reloading after N points (0 = no limit), newest file first\n"
@@ -1099,6 +1349,7 @@ int main(int argc, char **argv) {
         else if (a == "--max-iters" && nx) o.maxIters = strtoull(argv[++i], NULL, 10);
         else if (a == "--run-id" && nx) o.runId = (unsigned)atoi(argv[++i]);
         else if (a == "--verify" && nx) o.verify = atoi(argv[++i]);
+        else if (a == "--ref") o.refEngine = true;
         else if (a == "--dp-cap" && nx) o.dpCap = (unsigned)atoi(argv[++i]);
         else if (a == "--dp-file" && nx) o.dpFile = argv[++i];
         else if (a == "--load" && nx) o.loadFiles.push_back(argv[++i]);

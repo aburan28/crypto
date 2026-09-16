@@ -11,6 +11,9 @@
 #if ECC_PACKED_COMPACT_STATE
 #include "packedcompactstate.cuh"
 #endif
+#if ECC_WALK_TABLE
+#include "packedtablewalk.cuh"
+#endif
 
 namespace eccPacked131 {
 #ifndef ECC_PACKED_CACHE_DENOM
@@ -46,8 +49,11 @@ namespace eccPacked131 {
 #if ECC_PACKED_WEIGHTED_PREFIX && (!ECC_PACKED_POLY_STATE || !ECC_PACKED_POLY_CHAIN || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_PAIR_PRODUCTS)
 #error "ECC_PACKED_WEIGHTED_PREFIX requires polynomial state, polynomial chains, denominator cache and paired products"
 #endif
-#if ECC_PACKED_WEIGHTED_PREFIX == 2 && !(ECC_PACKED_PERM_SIGMA & 1)
+#if ECC_PACKED_WEIGHTED_PREFIX == 2 && !(ECC_PACKED_PERM_SIGMA & 1) && !ECC_WALK_TABLE
 #error "ECC_PACKED_WEIGHTED_PREFIX=2 requires the walk permutation network"
+#endif
+#if ECC_WALK_TABLE && !ECC_PACKED_WEIGHTED_PREFIX
+#error "ECC_WALK_TABLE is implemented on the weighted-prefix path only"
 #endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
@@ -137,12 +143,18 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     p.seed[id] = seed;
     p.startIter[id] = p.iterBase;
     p.dead[id] = 0;
+#if ECC_WALK_TABLE
+    p.hist[id] = ECC_HIST_EMPTY;
+#endif
 }
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-#if ECC_PACKED_SHARED_SIGMA
+#if ECC_WALK_TABLE
     // All block threads participate, including inactive partial-tile workers.
+    extern __shared__ uint32_t twShared[];
+    twLoadShared(twShared, p.twConsts);
+#elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
     if (tid >= p.threads) return;
@@ -160,6 +172,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #pragma unroll 1
         for (int slot = 0; slot < ECC_BATCH; ++slot) {
             P131 x = load(p.x, slot, tid, p.threads);
+#if ECC_WALK_TABLE
+            const P131 xp = x;
+#endif
 #if ECC_PACKED_POLY_STATE
             x = fromPolynomial131(x);
 #endif
@@ -189,6 +204,25 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                     atomicAdd(p.dpCount + 1, 1u);
                 }
             }
+#if ECC_WALK_TABLE
+            // Table walk: the branch, phase and sign come from the normal-basis
+            // x and one coordinate of y; the addend is read from the table in
+            // the polynomial basis, so nothing is converted and no Frobenius
+            // network runs.  The second pass only needs dp and the chain.
+            const P131 yp = load(p.y, slot, tid, p.threads);
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twShared);
+            P131 dp, ep;
+            twAddend(tag, xp, yp, twShared, &dp, &ep);
+            if (slot) {
+                PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
+                store(p.pchain, slot, tid, p.threads, pair.first);
+                prod = pair.second;
+            } else {
+                prod = dp;
+                store(p.pchain, slot, tid, p.threads, ep);
+            }
+            store(denominators, slot, tid, p.threads, dp);
+#else
             const int j = 3 + ((hw >> 1) & 7);
 #if !ECC_PACKED_CACHE_DENOM
             js[slot] = j;
@@ -241,6 +275,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             store(denominators, slot, tid, p.threads, d);
 #endif
 #endif
+#endif  // ECC_WALK_TABLE
         }
 #if ECC_PACKED_POLY_CHAIN
         inv = toPolynomial131(inv131(fromPolynomial131(prod)));

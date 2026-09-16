@@ -1,14 +1,21 @@
-# RTX PRO 4500 (EC2 g7) — rate pending, and the decision that waits on it
+# RTX PRO 4500 (EC2 g7) — the rate, and the decision it settles
 
-Every throughput figure in this tree is for the **RTX PRO 6000**: 14.637530 B/s
-benchmarking and 14.1 B/s collecting ([THROUGHPUT-30B.md](THROUGHPUT-30B.md),
-[aws/README.md](aws/README.md)). The fleet currently running the campaign is on
-**g7.2xlarge**, which carries the **RTX PRO 4500** — and this tree records no
-rate for that part at all.
+Every audited throughput figure in this tree is for the **RTX PRO 6000**:
+14.637530 B/s benchmarking and 14.1 B/s collecting
+([THROUGHPUT-30B.md](THROUGHPUT-30B.md), [aws/README.md](aws/README.md)). The
+fleet currently running the campaign is on **g7.2xlarge**, which carries the
+**RTX PRO 4500**. One `--bench` figure for that part now exists, taken as the
+control arm of the iteration-function comparison
+([ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6,
+[`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json)):
+**5.107 B/s** median of three, shipping walk, automatic workers, and it is
+below every break-even in the table below. The `run.sh` receipt described next
+is still owed: the figure above was not taken through it, and the collecting
+row is still empty.
 
-That gap is not cosmetic. It decides which instance type the campaign should
-buy, and the recollected figure sits within a few percent of the break-even,
-on the wrong side of it.
+That gap was not cosmetic. It decides which instance type the campaign should
+buy, and the recollected figure sat within a few percent of the break-even,
+on the wrong side of it; the measured one sits 20–25% below it.
 
 ## Measure it
 
@@ -72,15 +79,23 @@ its region only above a threshold:
 | us-east-1 | **6.17 B/s** | 14.1 × 0.6858 / 1.5671 |
 | us-east-2 | **8.83 B/s** | 14.1 × 1.1847 / 1.8920 |
 
-**The measured rate is not yet recorded.** A figure of roughly 6 B/s has been
-stated from recollection; it appears in no receipt in this tree and is not
-treated as evidence here. If it is right, g7e is marginally the better buy in
-every region. If the part reaches 6.7 B/s, g7 wins in us-west-2. The margin is
-small enough in both directions that only a receipt settles it.
+A figure of roughly 6 B/s had been stated from recollection; it appears in no
+receipt in this tree and is not treated as evidence here. The measured
+`--bench` rate is **5.107 B/s** (5.151 / 5.107 / 5.069 over three alternating
+repetitions, `--bench --steps 1024 --launches 32`, automatic worker count,
+`RTX_PRO6000_ENV` arithmetic and layout, CUDA 13.3.1 in the
+`nvidia/cuda:13.3.1-devel` container on an otherwise idle `g7.2xlarge`;
+[raw log](benchmarks/table-walk/raw/rtx4500-lut-build-verify-bench.log)).
+The card sat at its 165 W limit at 1.92–1.97 GHz throughout. That is below
+the break-even in every region: per dollar, g7e beats g7 by 6.63 / 5.107 =
+**1.30×** in us-west-2 and 6.17 / 5.107 = **1.21×** in us-east-1. The
+collecting figure and the `run.sh` receipt are still to be taken; neither can
+move the verdict unless collecting on the 4500 loses less to DP handling than
+it does on the 6000 (14.64 → 14.1, 3.7%).
 
 | | value |
 |---|---|
-| RTX PRO 4500, `--bench` | *pending — fill from `benchmarks/rtx-pro4500/result.json`* |
+| RTX PRO 4500, `--bench` | **5.107 B/s** (median of 3; `benchmarks/table-walk/comparison.json`, not yet re-taken through `run.sh`) |
 | RTX PRO 4500, collecting | *pending* |
 | RTX PRO 6000, `--bench` | 14.637530 B/s |
 | RTX PRO 6000, collecting | 14.1 B/s |
@@ -110,3 +125,10 @@ interesting outcome — it would mean something other than issue rate binds on
 the smaller part, and the tuning that reached 74.1 lanes/SM-clock does not
 transfer. A measurement at or above it means there is no missing performance to
 chase on g7, and the choice is purely the price arithmetic above.
+
+It landed on the scaling: 14.64 × (82 / 188) × (1.95 / 2.44 GHz) = 5.10 B/s
+against 5.107 measured, so the kernel is issue-bound on the 4500 exactly as on
+the 6000 and the part's only handicap is its 165 W power limit, which holds
+the clock at 1.95 GHz where the 6000 sustains 2.42. There is no g7-specific
+performance to chase; the decision is the price arithmetic, and it favours
+g7e.

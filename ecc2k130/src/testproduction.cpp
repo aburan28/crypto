@@ -53,7 +53,13 @@ struct FaultEngine {
 int main(int argc, char **argv) {
     using R = Ref<CfgF41>;
     auto sol = fixtureSolver();
+    // A known cross-run collision on the fixture instance.  The seeds depend
+    // on the iteration function, the discrete log they resolve to does not.
+#if ECC_WALK_TABLE
+    const u64 a = 0x0002000001c30000ull, b = 0x0001000002740000ull;
+#else
     const u64 a = 0x0002000048880000ull, b = 0x000100004cf60000ull;
+#endif
     const auto A = sol.rewalk(a), B = sol.rewalk(b);
     require(A.ok && B.ok, "fixture endpoints reachable");
     const auto key = R::canonical(A.endPoint.x);

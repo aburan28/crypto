@@ -6,13 +6,26 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     static const int LANES = 1;
     bool restartPending = false;
     unsigned *denominators = nullptr;
+    unsigned *twConsts = nullptr;
+    // The table walk's addends and coefficients come from the resolver's
+    // TableWalk so device and re-walk share one table by construction.
+    const Solver<CfgF131> *sol = nullptr;
 
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
         cudaFree(P.x); cudaFree(P.y); cudaFree(P.pchain); cudaFree(P.dead);
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
-        cudaFree(denominators);
+        cudaFree(denominators); cudaFree(P.hist); cudaFree(twConsts);
     }
+#if ECC_WALK_TABLE
+    static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
+    unsigned checkpointVersion() const override { return 3u; }
+    int laneArrayCount() const override { return 3; }
+    u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
+#else
+    static size_t dynamicSharedBytes() { return 0; }
+    unsigned checkpointVersion() const override { return 2u; }
+#endif
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
 #if ECC_PACKED_STATE_TILE
     size_t physicalFieldCount() const override {
@@ -25,7 +38,6 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
-    unsigned checkpointVersion() const override { return 2u; }
     int checkpointLanes() const override { return 1; }
 #if ECC_PACKED_POLY_STATE
     // Packed checkpoint v2 always stores normal-basis coordinates, including
@@ -104,8 +116,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaDeviceProp prop;
         CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
         int blocks;
+        prepareKernel();
         CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
-            &blocks, eccPacked131::walk, ECC_THREADS, 0));
+            &blocks, eccPacked131::walk, ECC_THREADS, dynamicSharedBytes()));
         size_t freeBytes, totalBytes;
         CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
 #if ECC_PACKED_COMPACT_STATE
@@ -133,7 +146,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         return result;
     }
 
+    // Tables above the 48 KB static limit need the opt-in before any query.
+    static void prepareKernel() {
+        if (dynamicSharedBytes() > 48 * 1024)
+            CUDA_CHECK(cudaFuncSetAttribute(eccPacked131::walk,
+                cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
+    }
+
     void setup(const Options &o, const u64 *px, const u64 *py, const u64 *qx, const u64 *qy) {
+        prepareKernel();
         if (o.preferL1)
             CUDA_CHECK(cudaFuncSetCacheConfig(eccPacked131::walk, cudaFuncCachePreferL1));
         P.threads = o.threads; P.steps = o.steps; P.dpWeight = o.dpWeight;
@@ -147,6 +168,17 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
         CUDA_CHECK(cudaMalloc(&P.seed, laneCount() * sizeof(u64)));
         CUDA_CHECK(cudaMalloc(&P.startIter, laneCount() * sizeof(u64)));
+#if ECC_WALK_TABLE
+        if (!sol || !sol->walk.ready) { fprintf(stderr, "packed table walk: no resolver table\n"); exit(1); }
+        {
+            std::vector<uint32_t> consts(eccPacked131::TW_WORDS);
+            eccPacked131::twFillConsts(sol->walk, consts.data());
+            CUDA_CHECK(cudaMalloc(&twConsts, consts.size() * sizeof(uint32_t)));
+            CUDA_CHECK(cudaMemcpy(twConsts, consts.data(), consts.size() * sizeof(uint32_t), cudaMemcpyHostToDevice));
+            P.twConsts = twConsts;
+        }
+        CUDA_CHECK(cudaMalloc(&P.hist, laneCount() * sizeof(u64)));
+#endif
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));
         // Second counter signals overdue restarts without emitting false DPs.
         CUDA_CHECK(cudaMalloc(&P.dpCount, 3 * sizeof(unsigned)));
@@ -191,6 +223,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+        printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
+               ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
@@ -198,7 +232,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void launch(u64 iterBase) {
         P.iterBase = iterBase;
-        eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(P, denominators);
+        eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS,
+                             dynamicSharedBytes()>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
     }
     void reseed(u64 iterBase) {
