@@ -48,6 +48,9 @@ PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
 PACKED_STATE_TILE ?= 0
+# The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
+WALK_TABLE ?= 0
+TABLE_BRANCHES ?= 8
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -105,7 +108,7 @@ CLANGARCH ?= sm_90
 SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
-       include/kernel.h include/ref.h include/solver.h include/bigmod.h \
+       include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
        include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
@@ -122,7 +125,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
-       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
+       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
+       -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES)
 
 all: cpu
 
@@ -288,6 +292,13 @@ test-shared-sigma-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
 
+# Device primitives of the table walk against the host reference; needs a GPU.
+test-table-walk-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
+	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
+	./build/test-table-walk-cuda
+
 test-timing:
 	mkdir -p build
 	$(CXX) -O1 -std=c++17 -Wno-unknown-pragmas src/testtiming.cpp -o build/test-timing
@@ -396,4 +407,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
