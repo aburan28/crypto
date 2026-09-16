@@ -378,6 +378,7 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
             "smoke": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat smoke.koblitz.vs_rho.n13",
             "n37_wall": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall",
             "n41_charged": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n41_charged",
+            "n53_factor_base": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.factor_base.n53",
             "n37_full": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall --fixtures 1024",
             "claim_check": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check --report PATH --stage vs_rho",
         },
@@ -427,12 +428,16 @@ def run_timed(command: list[str], *, env: dict[str, str], cwd: Path) -> dict[str
     # Children CPU deltas (seconds -> ms). Wall is the outer process wait.
     cpu_user_ms = (usage_after.ru_utime - usage_before.ru_utime) * 1000.0
     cpu_system_ms = (usage_after.ru_stime - usage_before.ru_stime) * 1000.0
+    # Peak RSS after wait is cumulative for this process's children; treat as
+    # an observed upper bound for single-producer launches.
+    peak_rss = children_rss_bytes(int(usage_after.ru_maxrss))
     return {
         "command": command,
         "exit_code": completed.returncode,
         "whole_process_wall_ms": elapsed_ms,
         "children_cpu_user_ms": cpu_user_ms,
         "children_cpu_system_ms": cpu_system_ms,
+        "children_peak_rss_bytes": peak_rss,
         "stdout": completed.stdout,
         "stderr": completed.stderr,
     }
@@ -451,6 +456,36 @@ def parse_json_lines(text: str) -> list[dict[str, Any]]:
         if isinstance(value, dict):
             rows.append(value)
     return rows
+
+
+def parse_json_objects(text: str) -> list[dict[str, Any]]:
+    """Parse concatenated / pretty-printed JSON objects from producer stdout."""
+    rows = parse_json_lines(text)
+    if rows:
+        return rows
+    rows = []
+    decoder = json.JSONDecoder()
+    index = 0
+    while index < len(text):
+        while index < len(text) and text[index].isspace():
+            index += 1
+        if index >= len(text):
+            break
+        try:
+            value, end = decoder.raw_decode(text, index)
+        except json.JSONDecodeError:
+            break
+        if isinstance(value, dict):
+            rows.append(value)
+        index = end
+    return rows
+
+
+def children_rss_bytes(ru_maxrss: int) -> int:
+    # Darwin reports bytes; Linux reports kilobytes.
+    if sys.platform == "darwin":
+        return int(ru_maxrss)
+    return int(ru_maxrss) * 1024
 
 
 def seed_for(beat_id: str, arm: str, repetition: int) -> int:
@@ -515,8 +550,8 @@ def draft_vs_rho_claim(
     binaries: dict[str, str],
 ) -> dict[str, Any]:
     timing_class = beat["timing_class_goal"]
-    direct_rows = parse_json_lines(direct_obs["stdout"])
-    rho_rows = parse_json_lines(rho_obs["stdout"])
+    direct_rows = parse_json_objects(direct_obs["stdout"])
+    rho_rows = parse_json_objects(rho_obs["stdout"])
     producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
     ic_cost = (
         float(direct_obs["whole_process_wall_ms"])
@@ -587,6 +622,134 @@ def draft_vs_rho_claim(
     return claim
 
 
+def select_factor_base_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    for row in rows:
+        if row.get("kind") == "point_defined_factor_base":
+            return row
+        if row.get("evidence_class") == "measured_factor_base_construction":
+            return row
+    for row in rows:
+        if "factor_base_points" in row or "orbit_columns" in row:
+            return row
+    return rows[0] if rows else None
+
+
+def draft_factor_base_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    rows = parse_json_objects(direct_obs["stdout"])
+    base = select_factor_base_row(rows) or {}
+    producers_ok = direct_obs["exit_code"] == 0
+    factor_base_size = base.get("factor_base_points")
+    if isinstance(factor_base_size, list):
+        factor_base_size = len(factor_base_size)
+    orbit_count = base.get("orbit_columns")
+    retained = base.get("support_payload_lower_bound_bytes")
+    construction_wall = base.get("total_setup_ms")
+    if construction_wall is None:
+        construction_wall = direct_obs.get("whole_process_wall_ms")
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+    )
+    pair_mode = beat.get("direct", {}).get("pair_mode", "unknown")
+    eta = beat.get("eta")
+    eta_label = (
+        f"eta_{eta[0]}_{eta[1]}"
+        if isinstance(eta, list) and len(eta) == 2
+        else "eta_unknown"
+    )
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "factor_base",
+        "n": beat["n"],
+        "n_or_bits": beat["n"],
+        "factor_base_size_F": factor_base_size,
+        "orbit_count_K": orbit_count,
+        "dimension_l_or_dim": orbit_count,
+        "construction_method": (
+            f"point_defined_{pair_mode}_{eta_label}"
+            + ("_summary_only" if (beat.get("env") or {}).get("KIC_SUMMARY_ONLY") == "1" else "")
+        ),
+        "materialized": True,
+        "construction_wall_ms": construction_wall,
+        "retained_bytes": retained,
+        "frobenius_closed": base.get("frobenius_closed"),
+        "negation_closed": base.get("negation_closed"),
+        "subgroup_membership_verified": base.get("subgroup_membership_verified"),
+        "pair_index_mode": base.get("pair_index_mode", pair_mode),
+        "eta": base.get("eta")
+        or (
+            {"numerator": eta[0], "denominator": eta[1]}
+            if isinstance(eta, list) and len(eta) == 2
+            else eta
+        ),
+        "base_hash": base.get("base_hash"),
+        "support_table_allocated_bytes": base.get("support_table_allocated_bytes"),
+        "producer_timings_ms": {
+            "curve_setup_ms": base.get("curve_setup_ms"),
+            "base_construction_ms": base.get("base_construction_ms"),
+            "support_index_ms": base.get("support_index_ms"),
+            "independent_base_validation_ms": base.get(
+                "independent_base_validation_ms"
+            ),
+            "total_setup_ms": base.get("total_setup_ms"),
+            "whole_process_wall_ms": direct_obs.get("whole_process_wall_ms"),
+        },
+        "verdict": (
+            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok and under_cap
+            else (
+                "PRODUCER_FAILURE"
+                if not producers_ok
+                else "DRAFT_RESOURCE_CAP_EXCEEDED_OR_INCOMPLETE"
+            )
+        ),
+        "claim_boundary": (
+            "Public synthetic Koblitz factor-base construction measure only. "
+            "Not key recovery, not asymptotic sub-rho, not an imported-point "
+            "attack, and not a ledger promotion until independent validation "
+            "and schema PASS."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not asymptotic sub-sqrt",
+            "not imported/external points",
+            "not ledger promotion until independent validation",
+        ],
+        "independent_replay_pointer": str(
+            (run / "artifacts/claim_draft.json").relative_to(REPO)
+            if REPO in (run / "artifacts/claim_draft.json").parents
+            else (run / "artifacts/claim_draft.json")
+        ),
+        "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
+        "executable_or_source_hash": {
+            "direct": sha256(binaries["direct"]),
+            "rank_fixture_source": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"direct": direct_obs.get("seed")},
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+        "whole_process_wall_ms": direct_obs["whole_process_wall_ms"],
+        "direct_rows": len(rows),
+    }
+    return claim
+
+
 def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     protocol = load_protocol()
     ledger = load_ledger(protocol)
@@ -653,34 +816,13 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         env.setdefault("KIC_INCREMENTAL_RANK_CROSSCHECK", "1")
         for key, value in (beat.get("env") or {}).items():
             env[str(key)] = str(value)
-        direct_seed = seed_for(beat_id, "direct", 0)
-        rho_seed = seed_for(beat_id, "rho", 0)
-        direct_cmd = [
-            binaries["direct"],
-            str(beat["n"]),
-            str(beat["a"]),
-            str(beat["eta"][0]),
-            str(beat["eta"][1]),
-            str(direct_seed),
-            beat["direct"]["pair_mode"],
-            beat["direct"]["target_mode"],
-            beat["direct"]["query_mode"],
-            str(fixtures),
-        ]
-        rho_cmd = [
-            binaries["rho"],
-            str(beat["n"]),
-            str(beat["a"]),
-            beat["rho"]["quotient_mode"],
-            str(fixtures),
-            beat["rho"]["backend"],
-            str(rho_seed),
-        ]
-        write_json(
-            run / "artifacts/commands.json",
-            {"direct": direct_cmd, "rho": rho_cmd, "fixtures": fixtures},
-        )
 
+        stage = str(beat.get("stage") or "vs_rho")
+        commands = producer_commands(beat, beat_id, fixtures, binaries=binaries)
+        write_json(run / "artifacts/commands.json", commands)
+
+        direct_seed = seed_for(beat_id, "direct", 0)
+        direct_cmd = commands["direct_argv"]
         direct_obs = run_timed(direct_cmd, env=env, cwd=REPO)
         direct_obs["seed"] = direct_seed
         (run / "logs/direct.stdout.jsonl").write_text(direct_obs["stdout"])
@@ -694,55 +836,93 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
                     "whole_process_wall_ms",
                     "children_cpu_user_ms",
                     "children_cpu_system_ms",
+                    "children_peak_rss_bytes",
                     "command",
                     "seed",
                 )
             },
         )
 
-        rho_obs = run_timed(rho_cmd, env=env, cwd=REPO)
-        rho_obs["seed"] = rho_seed
-        (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
-        (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
-        write_json(
-            run / "receipts/rho.resource.json",
-            {
-                k: rho_obs[k]
-                for k in (
-                    "exit_code",
-                    "whole_process_wall_ms",
-                    "children_cpu_user_ms",
-                    "children_cpu_system_ms",
-                    "command",
-                    "seed",
-                )
-            },
-        )
+        if stage == "factor_base":
+            claim = draft_factor_base_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="factor_base", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = direct_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        elif stage == "vs_rho":
+            require(
+                isinstance(beat.get("rho"), dict),
+                f"beat {beat_id} stage vs_rho requires a rho config object",
+            )
+            rho_seed = seed_for(beat_id, "rho", 0)
+            rho_cmd = commands["rho_argv"]
+            rho_obs = run_timed(rho_cmd, env=env, cwd=REPO)
+            rho_obs["seed"] = rho_seed
+            (run / "logs/rho.stdout.jsonl").write_text(rho_obs["stdout"])
+            (run / "logs/rho.stderr.txt").write_text(rho_obs["stderr"])
+            write_json(
+                run / "receipts/rho.resource.json",
+                {
+                    k: rho_obs[k]
+                    for k in (
+                        "exit_code",
+                        "whole_process_wall_ms",
+                        "children_cpu_user_ms",
+                        "children_cpu_system_ms",
+                        "children_peak_rss_bytes",
+                        "command",
+                        "seed",
+                    )
+                },
+            )
 
-        claim = draft_vs_rho_claim(
-            beat=beat,
-            beat_id=beat_id,
-            run=run,
-            direct_obs=direct_obs,
-            rho_obs=rho_obs,
-            binaries=binaries,
-        )
-        write_json(run / "artifacts/claim_draft.json", claim)
-        validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
-        write_json(run / "artifacts/claim_check.json", validation)
+            claim = draft_vs_rho_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                rho_obs=rho_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="vs_rho", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
 
-        producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
-        status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
-        if validation["status"] != "PASS":
-            status = "SCHEMA_INCOMPLETE"
-        state.update(
-            status=status,
-            phase="analysis",
-            updated_at=now(),
-            direct_exit_code=direct_obs["exit_code"],
-            rho_exit_code=rho_obs["exit_code"],
-            claim_check=validation["status"],
-        )
+            producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                rho_exit_code=rho_obs["exit_code"],
+                claim_check=validation["status"],
+            )
+        else:
+            raise AutolabError(f"unsupported launch stage: {stage}")
+
         write_json(run / "state.json", state)
         write_json(
             run / "artifacts/candidate.json",
@@ -789,38 +969,47 @@ def producer_commands(
         binaries["rho"] if binaries else "target/release/examples/koblitz_rho_fixture"
     )
     direct_seed = seed_for(beat_id, "direct", 0)
-    rho_seed = seed_for(beat_id, "rho", 0)
-    return {
+    direct_argv = [
+        direct_bin,
+        str(beat["n"]),
+        str(beat["a"]),
+        str(beat["eta"][0]),
+        str(beat["eta"][1]),
+        str(direct_seed),
+        beat["direct"]["pair_mode"],
+        beat["direct"]["target_mode"],
+        beat["direct"]["query_mode"],
+        str(fixtures),
+    ]
+    result: dict[str, Any] = {
         "build": (
             "cargo build --release --example koblitz_rank_fixture "
             "--example koblitz_rho_fixture"
         ),
-        "direct": " ".join(
-            [
-                direct_bin,
-                str(beat["n"]),
-                str(beat["a"]),
-                str(beat["eta"][0]),
-                str(beat["eta"][1]),
-                str(direct_seed),
-                beat["direct"]["pair_mode"],
-                beat["direct"]["target_mode"],
-                beat["direct"]["query_mode"],
-                str(fixtures),
-            ]
-        ),
-        "rho": " ".join(
-            [
-                rho_bin,
-                str(beat["n"]),
-                str(beat["a"]),
-                beat["rho"]["quotient_mode"],
-                str(fixtures),
-                beat["rho"]["backend"],
-                str(rho_seed),
-            ]
-        ),
+        "stage": beat.get("stage"),
+        "direct": " ".join(direct_argv),
+        "direct_argv": direct_argv,
+        "fixtures": fixtures,
+        "env": beat.get("env") or {},
     }
+    rho_cfg = beat.get("rho")
+    if isinstance(rho_cfg, dict):
+        rho_seed = seed_for(beat_id, "rho", 0)
+        rho_argv = [
+            rho_bin,
+            str(beat["n"]),
+            str(beat["a"]),
+            rho_cfg["quotient_mode"],
+            str(fixtures),
+            rho_cfg["backend"],
+            str(rho_seed),
+        ]
+        result["rho"] = " ".join(rho_argv)
+        result["rho_argv"] = rho_argv
+    else:
+        result["rho"] = None
+        result["rho_argv"] = None
+    return result
 
 
 def status(arguments: argparse.Namespace) -> None:

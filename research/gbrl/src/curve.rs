@@ -124,3 +124,25 @@ pub fn filter_decomp_signed(curve: &Curve, fb1: Point, fb2: Point, r: Point) -> 
     }
     None
 }
+
+/// Spurious-root filter for Semaev S₄ 3-decompositions.
+///
+/// A common zero `(x1,x2,x3)` of the 3-decomp system is a real decomposition
+/// iff some sign choice yields `±P1 ± P2 ± P3 ∈ {R, −R}`.
+pub fn filter_decomp_3(curve: &Curve, x1: Fp, x2: Fp, x3: Fp, r: Point) -> Option<(Point, Point, Point)> {
+    let p1 = point_at_x(curve, x1)?;
+    let p2 = point_at_x(curve, x2)?;
+    let p3 = point_at_x(curve, x3)?;
+    let nr = neg(r);
+    for &s1 in &[p1, neg(p1)] {
+        for &s2 in &[p2, neg(p2)] {
+            for &s3 in &[p3, neg(p3)] {
+                let sum = add(curve, add(curve, s1, s2), s3);
+                if sum == r || sum == nr {
+                    return Some((s1, s2, s3));
+                }
+            }
+        }
+    }
+    None
+}

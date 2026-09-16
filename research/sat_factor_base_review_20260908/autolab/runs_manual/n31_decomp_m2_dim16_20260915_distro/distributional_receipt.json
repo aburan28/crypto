@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "kind": "n31_m2_dim16_distributional_redraw",
+  "beat_id": "koblitz.decomposition.n31_m2_dim16",
+  "updated_at": "2026-09-15T16:19:56Z",
+  "claim_boundary": "Public-synthetic Koblitz Semaev decomposition oracle distributional redraw only. Not key recovery, not asymptotic sub-rho, not ledger promotion.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported points",
+    "not ledger promotion"
+  ],
+  "baseline_panel": {
+    "path": "research/sat_factor_base_review_20260908/autolab/runs_manual/n31_decomp_m2_dim16_20260911/claim_draft_panel8.json",
+    "seed": "0x5EED (default)",
+    "targets": 8,
+    "x_chained_f4": {
+      "found": 5,
+      "refuted": 3,
+      "ffd": 3,
+      "gate": "ok"
+    },
+    "sym_f4": {
+      "found": 4,
+      "refuted": 4,
+      "ffd": 4,
+      "gate": "ok"
+    },
+    "independent_replay": "MATCH_WITHIN_NOISE"
+  },
+  "redraw": {
+    "seed": 66142,
+    "targets": 4,
+    "sat": false,
+    "node_budget": 50000,
+    "wall_s": 269.7,
+    "dim_V": 16,
+    "Fb_x": 68327,
+    "Fb_u": 69441,
+    "x_chained_f4": {
+      "found": 3,
+      "refuted": 1,
+      "inconclusive": 0,
+      "ffd": 3,
+      "gate": "ok",
+      "found_ms_median": 735,
+      "refuted_ms_median": 71624,
+      "effort_median": 2446
+    },
+    "sym_f4": {
+      "found": 0,
+      "refuted": 4,
+      "inconclusive": 0,
+      "ffd": 4,
+      "gate": "ok",
+      "refuted_ms_median": 35580,
+      "effort_median": 4095
+    },
+    "evidence": "panel_targets4_seed_66142.stdout.txt"
+  },
+  "fragment_targets2": {
+    "seed": 66142,
+    "targets": 2,
+    "wall_s": 101.8,
+    "x_chained_f4": {
+      "found": 2,
+      "refuted": 0,
+      "ffd": 3,
+      "gate": "ok"
+    },
+    "sym_f4": {
+      "found": 0,
+      "refuted": 2,
+      "ffd": 4,
+      "gate": "ok"
+    },
+    "evidence": "panel_targets2_seed_66142.stdout.txt"
+  },
+  "verdict": "DISTRIBUTIONAL_FFD_AND_GATE_STABLE",
+  "notes": [
+    "Second-seed redraw keeps FFD (x=3, sym=4) and enumeration gate ok with 0 disagreements/inconclusives.",
+    "Verdict mix differs from baseline (expected under new target draws); not a regression signal.",
+    "F4-only (--no-sat) to bound wall time; SAT arm not remeasured this tick.",
+    "CLI --seed added to symmetrised_oracle_bench for distributional redraws."
+  ],
+  "ledger_promotion": false
+}

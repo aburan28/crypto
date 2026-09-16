@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "kind": "j0_16bit_known_answer_3shot_independent_redraw",
+  "updated_at": "2026-09-15T17:49:23Z",
+  "claim_boundary": "Public-synthetic j=0 known-answer IC vs Pollard rho at 16 bits. Independent 3-shot redraw. IC agrees rho and truth; IC wall >> rho (not vs_rho crossover). Not ledger promotion.",
+  "bits": 16,
+  "shots": [
+    {
+      "shot": 1,
+      "rc": 0,
+      "wall_s": 1.7650868892669678,
+      "ic_ok": true,
+      "rho_ok": true,
+      "ic_agrees_rho": true,
+      "ic_matches_truth": true,
+      "ic_ms": 1753.052958,
+      "rho_ms": 2.2749580000000003
+    },
+    {
+      "shot": 2,
+      "rc": 0,
+      "wall_s": 1.567302942276001,
+      "ic_ok": true,
+      "rho_ok": true,
+      "ic_agrees_rho": true,
+      "ic_matches_truth": true,
+      "ic_ms": 1551.0449159999998,
+      "rho_ms": 11.795375
+    },
+    {
+      "shot": 3,
+      "rc": 0,
+      "wall_s": 1.988123893737793,
+      "ic_ok": true,
+      "rho_ok": true,
+      "ic_agrees_rho": true,
+      "ic_matches_truth": true,
+      "ic_ms": 1972.1465839999998,
+      "rho_ms": 11.744875
+    }
+  ],
+  "verdict": "PASS_KNOWN_ANSWER_AGREES_RHO",
+  "ledger_promotion": false
+}

@@ -123,16 +123,21 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Exact / optimized bases at `n = 19`; curve+generator **construction at `n = 53`** (past prior `MAX_N=41`); minimum base feasible at `n = 41`; Frobenius+negation orbits | Balanced base at `n = 53` under crossover-task resource gate with RSS + retained bytes; then vs_rho costs at that base | Orbit closure verified; construction RSS + retained bytes logged | `constructs_past_prior_ceiling_n53`; n53 autolab probe |
-| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `RESEARCH_KOBLITZ_SCALING_TARGET.md`; `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` |
-| `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
-| `rank` | Full rank on `n = 37` fixtures (1024-target amortized series); `n = 41` fixture reaches rank; relation-matrix LA (not GB FFD) | Single-process rank to `K+1` at `n = 41` without summary-only elision; report dims, surplus, LA charged/wall | Independent matrix replay **or** preserved row transcript | n37 / n41 autolab artifacts |
-| `end_to_end_dlp` | Known-answer recovery on small toys (`n ≈ 7–13`); `ic` runner degrees ≤ 23 with library caps; synthetic claim | Known-answer full IC at **`n = 23`** with stage timers | Progress events cover FB → relations → LA → verify; `[d]G = Q` | `docs/ic/README.md`; `tests/ic_progress.rs` |
-| `vs_rho` | **`n = 37` charged-time crossover** (`N37_DIRECT_1024_CHARGED_CROSSOVER`) — amortized exact-support V2; automorphism discount vs ρ is the Koblitz `√(2n)` / `A = 2n` family; **`whole_process_wall_crossover = false`**; `n = 41` = base feasible only, **not** a crossover | (a) whole-process wall-clock crossover at `n = 37`, or (b) charged crossover at **`n = 41`** with same gates + ≥20% margin | All stages charged; independent validation; timing class + automorphism discount explicit; verdict field set | `autolab_n37_direct_retry` verdict.json |
+| `factor_base` | **n=53 finite batch winner plus exact Frobenius-orbit SAT domain**: the certified 23,320-point/220-column base is exactly 220 Frobenius x-orbits. Representative-plus-shift encoding reduces the complete n=53 S5 formula from 1,815,492 to 22,887 clauses (79.32x), with 24.34 ms encoding and no pair/edge domain | Expose reusable pair-sum support over representative/relative-Frobenius variables without constructing the explicit feasibility join | Same replayed base hash; generated orbit union equals all 11,660 x-values; no pair/edge selectors; group-valid extraction; full formula/solver/memory accounting | shared-log scaling and `autolab_implicit_s5_20260912/results.json` |
+| `decomposition` | **n=31 dim-16 m=2 F₄ completes** with zero disagreements. At **n=53**, the complete orbit-factorized S5 formula has 19,473 variables, 22,887 clauses, and 11,474 native XOR rows. CryptoMiniSat reaches 100k conflicts in 0.82 s and 1m in 8.96 s but remains **UNKNOWN**. The exact regular index-only theory passes n=7, then rejects 20,430 n=41 quadruples without extraction | Propagate a constraint between endpoint pairs before all four factors are fixed; isolated four-index nogoods are ruled out | Exhaustive n=7 SAT subset and group lift; exact orbit-union certification; n=41/n=53 UNKNOWN stays censored | n31 receipt; `autolab_implicit_s5_20260912/results.json` |
+| `relation_yield` | At n=53, rank-guided eta 1/10 produced one verified four-sum relation for every requested public target; 1,244 target trials yielded 1,244 relations in the 1,024-target batch. Post-precomputation cost: 7.49 ms median, 27.38 ms p95 | Freeze and measure the same policy at growing n with target/probe tails and support density | Public-natural fixture domain; exact group checks; trials, probes, timing distribution, and policy hash retained | `autolab_n53_eta_sweep_20260912/results.json` |
+| `rank` | **n=53 minimum-rank accumulation**: guided eta 1/10 reached rank 221 in exactly 221 rows on every measured selection/holdout fixture; one factor-log table then served 1,023 targets with one row each; full transcript independently replayed | Growing-n shared-log rank/yield panel with the same guidance policy | Preserved rows or independent replay; matrix dimensions and LA time explicit; relation LA kept distinct from FFD | `runs/shared_factor_logs_n53_eta_1_10_full_batch4/`; `runs/shared_factor_logs_independent_replay.json` |
+| `end_to_end_dlp` | **1,024 public-synthetic n=53 known-answer targets** recovered with one retained factor-log table; all `[d]G = Q`, relation equations, and factor logs verified with zero replay discrepancies | Repeat at a second n≥53 rung or independent host under the same staged accounting | Public synthetic only; every target group-verified; support → rank → recover → verify timers present | `runs/shared_factor_logs_n53_eta_1_10_batch1024/`; independent replay |
+| `vs_rho` | **n=53 finite multi-target wall crossover retained**: 1,024-target wall ratio 0.03958. A four-block fixed-32 growing-n panel crosses at n=37/41/53 but orders explicit-table direct growth above rho on log2 subgroup order: direct wall slope 0.4647 [0.4627,0.4706], rho 0.4563 [0.4350,0.4601]; fully charged direct 0.5705 vs rho 0.4587 | Extract with the edge-free formula fast enough to replace pair-table setup, then repeat the security-axis slope panel | All stages charged; independent replay; matched public fixtures; security axis is log2 subgroup order; automorphism discount explicit | `autolab_shared_log_scaling_20260912/results.json`; independent validation; implicit S5 results |
 
-**Explicit non-claims for the current `vs_rho` record:** not Semaev-SAT, not
-single-instance, not asymptotic sub-ρ, not key recovery, not deployed-curve
-security impact, not whole-process wall-clock.
+Ledger verdict: **`N53_PUBLIC_SYNTHETIC_SHARED_LOG_1024_PROCESS_WALL_CROSSOVER`**.
+
+**Explicit non-claims for the current `vs_rho` record:** the n=53 result is a
+finite public-synthetic multi-target amortized crossover. The fixed-32 growing-n
+panel finds `DIRECT_GROWS_FASTER` for the explicit pair-table method. It does not
+establish a single-target crossover, an asymptotic exponent below Pollard rho, a
+SAT extraction win, an external/private target capability, production key
+recovery, or deployed-curve security impact.
 
 ---
 
@@ -159,14 +164,12 @@ security impact, not whole-process wall-clock.
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz `vs_rho` → whole-process wall-clock at `n = 37`, or charged `n = 41`.**
-2. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
-3. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
-4. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
-5. Fill missing `relation_yield` / `rank` publications (binary + prime) so later
-   `vs_rho` attempts have honest stage costs.
-6. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
-   cites only wall-clock or conflict counts.
+1. **Koblitz orbit-factorized S5 → add reusable pair-level support over representative and relative-Frobenius variables, extract a group-valid n=53 relation without enumerating pair edges, then repeat the security-axis slope panel.**
+2. **Koblitz factor base → replace the explicit pair table while preserving 309 ms certified-base ingestion and exact replay.**
+3. **Koblitz decomposition → repeat n=31 dim-16 m=2 over a distribution or advance the quadratic cell to n=37.**
+4. **Binary decomposition → first sub-`2^{2ℓ}` oracle at `ℓ = 8` with FFD logged.**
+5. **Prime end-to-end DLP → 16-bit j=0 public known-answer IC.**
+6. Fill missing binary/prime yield and rank distributions and backfill FFD/DoR where only wall or conflicts are cited.
 
 ---
 

@@ -20,6 +20,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::time::Instant;
 
 const TASK_ID: &str = "TASK-KIC-SAT-RHO-CROSSOVER-20260909";
+const DEFAULT_FACTOR_BASE_SEED: u64 = 0xD1B5_4A32_D192_ED03;
 
 #[derive(Clone)]
 struct Base {
@@ -64,6 +65,10 @@ enum QueryMode {
     PairPair64,
     PairPair128,
     PairPair256,
+    PairPairDual64,
+    PairPairDual128,
+    PairPairDual256,
+    PairPairGuided256,
 }
 
 impl QueryMode {
@@ -86,6 +91,10 @@ impl QueryMode {
             "pair_pair_64" => Self::PairPair64,
             "pair_pair_128" => Self::PairPair128,
             "pair_pair_256" => Self::PairPair256,
+            "pair_pair_dual_64" => Self::PairPairDual64,
+            "pair_pair_dual_128" => Self::PairPairDual128,
+            "pair_pair_dual_256" => Self::PairPairDual256,
+            "pair_pair_guided_256" => Self::PairPairGuided256,
             _ => panic!("unknown query mode {value}"),
         }
     }
@@ -109,6 +118,10 @@ impl QueryMode {
             Self::PairPair64 => "pair_pair_64",
             Self::PairPair128 => "pair_pair_128",
             Self::PairPair256 => "pair_pair_256",
+            Self::PairPairDual64 => "pair_pair_dual_64",
+            Self::PairPairDual128 => "pair_pair_dual_128",
+            Self::PairPairDual256 => "pair_pair_dual_256",
+            Self::PairPairGuided256 => "pair_pair_guided_256",
         }
     }
 
@@ -130,7 +143,11 @@ impl QueryMode {
             | Self::PairPair32
             | Self::PairPair64
             | Self::PairPair128
-            | Self::PairPair256 => None,
+            | Self::PairPair256
+            | Self::PairPairDual64
+            | Self::PairPairDual128
+            | Self::PairPairDual256
+            | Self::PairPairGuided256 => None,
         }
     }
 
@@ -153,12 +170,35 @@ impl QueryMode {
             _ => None,
         }
     }
+
+    fn pair_pair_dual_width(self) -> Option<usize> {
+        match self {
+            Self::PairPairDual64 => Some(64),
+            Self::PairPairDual128 => Some(128),
+            Self::PairPairDual256 => Some(256),
+            _ => None,
+        }
+    }
+
+    fn pair_pair_guided_width(self) -> Option<usize> {
+        match self {
+            Self::PairPairGuided256 => Some(256),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]
 struct RawFiber {
     x: u64,
     members: Vec<(usize, u64)>,
+}
+
+#[derive(Default)]
+struct BatchInverseScratch {
+    denominators: Vec<u64>,
+    prefixes: Vec<u64>,
+    inverses: Vec<u64>,
 }
 
 impl TargetMode {
@@ -201,25 +241,35 @@ impl PairMode {
 
 #[derive(Clone, Copy, Default)]
 struct QuotientPairWitness {
-    columns: [u16; 2],
-    coefficients: [u64; 2],
+    packed_labels: [u64; 2],
     image_y: u64,
 }
 
 impl QuotientPairWitness {
     fn new(labels: [(usize, u64); 2], image_y: u64) -> Self {
+        const COEFFICIENT_BITS: u32 = 48;
+        const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
+        assert!(labels.iter().all(|&(column, coefficient)| {
+            column <= u16::MAX as usize && coefficient <= COEFFICIENT_MASK
+        }));
         Self {
-            columns: [labels[0].0 as u16, labels[1].0 as u16],
-            coefficients: [labels[0].1, labels[1].1],
+            packed_labels: labels.map(|(column, coefficient)| {
+                ((column as u64) << COEFFICIENT_BITS) | coefficient
+            }),
             image_y,
         }
     }
 
     fn labels(self) -> [(usize, u64); 2] {
-        [
-            (self.columns[0] as usize, self.coefficients[0]),
-            (self.columns[1] as usize, self.coefficients[1]),
-        ]
+        const COEFFICIENT_BITS: u32 = 48;
+        const COEFFICIENT_MASK: u64 = (1u64 << COEFFICIENT_BITS) - 1;
+        self.packed_labels.map(|packed| {
+            ((packed >> COEFFICIENT_BITS) as usize, packed & COEFFICIENT_MASK)
+        })
+    }
+
+    fn image_y(self) -> u64 {
+        self.image_y
     }
 }
 
@@ -230,6 +280,7 @@ struct CompactPairTable {
     x_filter: Vec<u64>,
     x_filter_mask: usize,
     x_filter_exact: bool,
+    x_filter_hashes: usize,
     mask: usize,
     len: usize,
     x_only: bool,
@@ -237,6 +288,18 @@ struct CompactPairTable {
 
 impl CompactPairTable {
     fn with_capacity(expected: usize, x_only: bool, x_domain: usize) -> Self {
+        Self::with_capacity_config(expected, x_only, x_domain, 16, 2)
+    }
+
+    fn with_capacity_config(
+        expected: usize,
+        x_only: bool,
+        x_domain: usize,
+        filter_bits_per_expected: usize,
+        filter_hashes: usize,
+    ) -> Self {
+        assert!(filter_bits_per_expected > 0);
+        assert!((1..=16).contains(&filter_hashes));
         let capacity = expected.max(2).next_power_of_two();
         let x_filter_exact = x_only && x_domain <= (1usize << 29);
         let filter_bits = if !x_only {
@@ -244,7 +307,7 @@ impl CompactPairTable {
         } else if x_filter_exact {
             x_domain
         } else {
-            (expected.max(4) * 16).next_power_of_two()
+            (expected.max(4) * filter_bits_per_expected).next_power_of_two()
         };
         Self {
             keys_x: vec![u64::MAX; capacity],
@@ -257,6 +320,7 @@ impl CompactPairTable {
             },
             x_filter_mask: filter_bits.saturating_sub(1),
             x_filter_exact,
+            x_filter_hashes: if x_filter_exact { 1 } else { filter_hashes },
             mask: capacity - 1,
             len: 0,
             x_only,
@@ -320,32 +384,34 @@ impl CompactPairTable {
         if !self.x_only {
             return true;
         }
-        let (first, second) = self.x_filter_indices(x);
-        self.x_filter[first / u64::BITS as usize]
-            & (1u64 << (first % u64::BITS as usize))
-            != 0
-            && self.x_filter[second / u64::BITS as usize]
-                & (1u64 << (second % u64::BITS as usize))
+        (0..self.x_filter_hashes).all(|ordinal| {
+            let index = self.x_filter_index(x, ordinal);
+            self.x_filter[index / u64::BITS as usize]
+                & (1u64 << (index % u64::BITS as usize))
                 != 0
+        })
     }
 
     fn insert_x_filter(&mut self, x: u64) {
-        let (first, second) = self.x_filter_indices(x);
-        self.x_filter[first / u64::BITS as usize] |=
-            1u64 << (first % u64::BITS as usize);
-        self.x_filter[second / u64::BITS as usize] |=
-            1u64 << (second % u64::BITS as usize);
+        for ordinal in 0..self.x_filter_hashes {
+            let index = self.x_filter_index(x, ordinal);
+            self.x_filter[index / u64::BITS as usize] |=
+                1u64 << (index % u64::BITS as usize);
+        }
     }
 
-    fn x_filter_indices(&self, x: u64) -> (usize, usize) {
+    fn x_filter_index(&self, x: u64, ordinal: usize) -> usize {
         if self.x_filter_exact {
-            let index = x as usize;
-            return (index, index);
+            return x as usize;
         }
         let first = Self::hash((x, 0)) as usize & self.x_filter_mask;
         let second = Self::hash((x ^ 0xd6e8_feb8_6659_fd93, x.rotate_left(17))) as usize
             & self.x_filter_mask;
-        (first, second)
+        match ordinal {
+            0 => first,
+            1 => second,
+            _ => first.wrapping_add(ordinal.wrapping_mul(second | 1)) & self.x_filter_mask,
+        }
     }
 
     fn allocated_bytes(&self) -> usize {
@@ -369,6 +435,10 @@ impl CompactPairTable {
         self.x_filter.len() * u64::BITS as usize
     }
 
+    fn x_filter_hashes(&self) -> usize {
+        self.x_filter_hashes
+    }
+
     fn slots(&self) -> usize {
         self.keys_x.len()
     }
@@ -389,7 +459,7 @@ impl CompactPairTable {
             None
         } else {
             let x = key_x - 1;
-            let mut y = witness.image_y;
+            let mut y = witness.image_y();
             if negative {
                 y ^= x;
                 labels = labels.map(|(column, coefficient)| {
@@ -422,14 +492,7 @@ fn square_raw(curve: &KoblitzCurve, value: u64) -> u64 {
         wide = (wide | (wide << 1)) & 0x5555_5555_5555_5555;
         return reduce_raw(curve, wide as u128);
     }
-    let mut bits = value;
-    let mut wide = 0u128;
-    while bits != 0 {
-        let bit = bits.trailing_zeros();
-        wide ^= 1u128 << (2 * bit);
-        bits &= bits - 1;
-    }
-    reduce_raw(curve, wide)
+    reduce_raw(curve, carryless_product(value, value))
 }
 
 fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
@@ -456,17 +519,7 @@ fn reduce_raw(curve: &KoblitzCurve, mut wide: u128) -> u64 {
     wide as u64
 }
 
-fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
-    if curve.n <= 31 {
-        let mut product = 0u64;
-        let mut value = right;
-        while value != 0 {
-            let bit = value.trailing_zeros();
-            product ^= left << bit;
-            value &= value - 1;
-        }
-        return reduce_raw(curve, product as u128);
-    }
+fn carryless_product_software(left: u64, right: u64) -> u128 {
     let mut product = 0u128;
     let mut value = right;
     while value != 0 {
@@ -474,7 +527,26 @@ fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
         product ^= (left as u128) << bit;
         value &= value - 1;
     }
-    reduce_raw(curve, product)
+    product
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn carryless_product_pmull(left: u64, right: u64) -> u128 {
+    std::arch::aarch64::vmull_p64(left, right)
+}
+
+fn carryless_product(left: u64, right: u64) -> u128 {
+    #[cfg(target_arch = "aarch64")]
+    if std::arch::is_aarch64_feature_detected!("aes") {
+        // SAFETY: the runtime feature check above proves PMULL availability.
+        return unsafe { carryless_product_pmull(left, right) };
+    }
+    carryless_product_software(left, right)
+}
+
+fn mul_raw(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
+    reduce_raw(curve, carryless_product(left, right))
 }
 
 fn inverse_raw(curve: &KoblitzCurve, value: u64) -> u64 {
@@ -871,6 +943,7 @@ fn batch_raw_target_minus_points_x_filtered(
     points: &[RawPoint],
     table: &CompactPairTable,
     output: &mut Vec<(usize, (u64, u64))>,
+    scratch: &mut BatchInverseScratch,
 ) -> usize {
     assert!(table.x_only);
     output.clear();
@@ -883,8 +956,13 @@ fn batch_raw_target_minus_points_x_filtered(
         }
         return points.len();
     };
-    let mut denominators = vec![0u64; points.len()];
-    let mut prefixes = vec![0u64; points.len()];
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes.resize(points.len(), 0);
+    scratch.inverses.resize(points.len(), 0);
+    scratch.inverses.fill(0);
+    let denominators = &mut scratch.denominators[..points.len()];
+    let prefixes = &mut scratch.prefixes[..points.len()];
+    let inverses = &mut scratch.inverses[..points.len()];
     let mut product = 1u64;
     for (index, point) in points.iter().enumerate() {
         let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
@@ -895,7 +973,6 @@ fn batch_raw_target_minus_points_x_filtered(
         }
     }
     let mut inverse_product = inverse_raw(curve, product);
-    let mut inverses = vec![0u64; points.len()];
     for index in (0..points.len()).rev() {
         let denominator = denominators[index];
         if denominator == 0 {
@@ -929,6 +1006,101 @@ fn batch_raw_target_minus_points_x_filtered(
         output.push((index, (key_x, y3)));
     }
     points.len()
+}
+
+/// Compute `target - point` and `target - (-point)` with one shared batch
+/// inversion per affine x-coordinate.  The returned boolean identifies a
+/// negated left operand.  Infinity has only one sign.
+fn batch_raw_target_minus_signed_points_x_filtered(
+    curve: &KoblitzCurve,
+    target: RawPoint,
+    points: &[RawPoint],
+    table: &CompactPairTable,
+    output: &mut Vec<(usize, bool, (u64, u64))>,
+    scratch: &mut BatchInverseScratch,
+) -> usize {
+    assert!(table.x_only);
+    output.clear();
+    let Some((target_x, target_y)) = target else {
+        let mut attempted = 0usize;
+        for (index, &point) in points.iter().enumerate() {
+            let positive_key = raw_compact_key(raw_neg_point(point));
+            attempted += 1;
+            if table.might_contain_x(positive_key.0) {
+                output.push((index, false, positive_key));
+            }
+            if point.is_some() {
+                let negative_key = raw_compact_key(point);
+                attempted += 1;
+                if table.might_contain_x(negative_key.0) {
+                    output.push((index, true, negative_key));
+                }
+            }
+        }
+        return attempted;
+    };
+
+    scratch.denominators.resize(points.len(), 0);
+    scratch.prefixes.resize(points.len(), 0);
+    scratch.inverses.resize(points.len(), 0);
+    scratch.inverses.fill(0);
+    let denominators = &mut scratch.denominators[..points.len()];
+    let prefixes = &mut scratch.prefixes[..points.len()];
+    let inverses = &mut scratch.inverses[..points.len()];
+    let mut product = 1u64;
+    for (index, point) in points.iter().enumerate() {
+        let denominator = point.map(|(x, _)| target_x ^ x).unwrap_or(0);
+        denominators[index] = denominator;
+        if denominator != 0 {
+            prefixes[index] = product;
+            product = mul_raw(curve, product, denominator);
+        }
+    }
+    let mut inverse_product = inverse_raw(curve, product);
+    for index in (0..points.len()).rev() {
+        let denominator = denominators[index];
+        if denominator == 0 {
+            continue;
+        }
+        inverses[index] = mul_raw(curve, inverse_product, prefixes[index]);
+        inverse_product = mul_raw(curve, inverse_product, denominator);
+    }
+
+    let mut attempted = 0usize;
+    for (index, &point) in points.iter().enumerate() {
+        let Some((x, y)) = point else {
+            let key = raw_compact_key(target);
+            attempted += 1;
+            if table.might_contain_x(key.0) {
+                output.push((index, false, key));
+            }
+            continue;
+        };
+        if denominators[index] == 0 {
+            for (negative, left) in [(false, point), (true, raw_neg_point(point))] {
+                let key = raw_compact_key(raw_add_point(curve, target, raw_neg_point(left)));
+                attempted += 1;
+                if table.might_contain_x(key.0) {
+                    output.push((index, negative, key));
+                }
+            }
+            continue;
+        }
+
+        let inverse = inverses[index];
+        for (negative, numerator) in [(false, target_y ^ y ^ x), (true, target_y ^ y)] {
+            let lambda = mul_raw(curve, numerator, inverse);
+            let x3 = square_raw(curve, lambda) ^ lambda ^ target_x ^ x ^ curve.a as u64;
+            let key_x = x3 + 1;
+            attempted += 1;
+            if !table.might_contain_x(key_x) {
+                continue;
+            }
+            let y3 = mul_raw(curve, lambda, target_x ^ x3) ^ x3 ^ target_y;
+            output.push((index, negative, (key_x, y3)));
+        }
+    }
+    attempted
 }
 
 fn batch_raw_add_keys(
@@ -1161,7 +1333,7 @@ fn lookup_signed_expanded_pair(
 ) -> Option<([usize; 2], [(usize, u64); 2])> {
     quotient_pairs.get(rest_key).map(|pair| {
         let stored = pair.labels();
-        let image_y = pair.image_y;
+        let image_y = pair.image_y();
         let labels = if rest_key.1 == image_y {
             stored
         } else {
@@ -1286,7 +1458,11 @@ fn binary_from_raw(curve: &KoblitzCurve, point: RawPoint) -> BinaryPoint {
     }
 }
 
-fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
+fn point_defined_base_with_seed(
+    curve: &KoblitzCurve,
+    wanted: usize,
+    factor_base_seed: u64,
+) -> Base {
     let modulus = curve.subgroup_order.to_u64().unwrap();
     let lambda = curve.lambda.to_u64().unwrap();
     let signed_size = signed_scalars(lambda, modulus, curve.n).len();
@@ -1308,7 +1484,7 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     } else {
         1u64 << 24
     };
-    let mut state = 0xD1B54A32D192ED03u64 ^ (curve.n as u64) ^ ((wanted as u64) << 17);
+    let mut state = factor_base_seed ^ (curve.n as u64) ^ ((wanted as u64) << 17);
     for i in 0..budget {
         let x = if exhaustive {
             i
@@ -1388,6 +1564,10 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
             "small-cofactor projections of the first affine curve points in coordinate order"
         },
     }
+}
+
+fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
+    point_defined_base_with_seed(curve, wanted, DEFAULT_FACTOR_BASE_SEED)
 }
 
 fn reference_point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
@@ -1651,10 +1831,62 @@ fn main() {
     let batch_fixtures: u64 = arguments.get(9).map(String::as_str).unwrap_or("1").parse().unwrap();
     let summary_only = std::env::var("KIC_SUMMARY_ONLY").as_deref() == Ok("1");
     let batch_corpus = std::env::var("KIC_BATCH_CORPUS").ok();
+    let shared_public_fixture_domain =
+        std::env::var("KIC_SHARED_PUBLIC_FIXTURE_DOMAIN").as_deref() == Ok("1");
+    let shared_public_fixture_offset: u64 = std::env::var("KIC_SHARED_PUBLIC_FIXTURE_OFFSET")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_SHARED_PUBLIC_FIXTURE_OFFSET must be an integer")
+        })
+        .unwrap_or(0);
+    assert!(
+        !shared_public_fixture_domain || batch_corpus.is_some(),
+        "KIC_SHARED_PUBLIC_FIXTURE_DOMAIN requires KIC_BATCH_CORPUS"
+    );
     let relation_cap_extra: usize = std::env::var("KIC_RELATION_CAP_EXTRA")
         .ok()
         .map(|value| value.parse().unwrap())
         .unwrap_or(0);
+    let required_surplus_relations: usize = std::env::var("KIC_REQUIRED_SURPLUS_RELATIONS")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_REQUIRED_SURPLUS_RELATIONS must be an integer")
+        })
+        .unwrap_or(32);
+    let factor_base_seed: u64 = std::env::var("KIC_FACTOR_BASE_SEED")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_FACTOR_BASE_SEED must be an integer")
+        })
+        .unwrap_or(DEFAULT_FACTOR_BASE_SEED);
+    let x_filter_bits_per_expected: usize = std::env::var("KIC_X_FILTER_BITS_PER_EXPECTED")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_X_FILTER_BITS_PER_EXPECTED must be an integer")
+        })
+        .unwrap_or(16);
+    let x_filter_hashes: usize = std::env::var("KIC_X_FILTER_HASHES")
+        .ok()
+        .map(|value| {
+            value
+                .parse()
+                .expect("KIC_X_FILTER_HASHES must be an integer")
+        })
+        .unwrap_or(2);
+    let shared_factor_log_precomputation =
+        std::env::var("KIC_SHARED_FACTOR_LOG_PRECOMPUTATION").as_deref() == Ok("1");
+    assert!(
+        !shared_factor_log_precomputation || batch_fixtures > 1,
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION requires at least two fixtures"
+    );
     let incremental_rank_crosscheck =
         std::env::var("KIC_INCREMENTAL_RANK_CROSSCHECK").as_deref() == Ok("1");
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
@@ -1666,7 +1898,9 @@ fn main() {
     let curve_setup_ms = curve_setup_started.elapsed().as_secs_f64() * 1000.0;
     let setup_started = Instant::now();
     let modulus = curve.subgroup_order.to_u64().unwrap();
-    let signed_size = signed_scalars(curve.lambda.to_u64().unwrap(), modulus, n).len();
+    let lambda = curve.lambda.to_u64().unwrap();
+    let automorphisms: Vec<_> = signed_scalars(lambda, modulus, n).into_iter().collect();
+    let signed_size = automorphisms.len();
     let columns = balanced_orbits(
         &curve.subgroup_order,
         signed_size,
@@ -1674,7 +1908,7 @@ fn main() {
         eta_denominator,
     );
     let base_started = Instant::now();
-    let base = point_defined_base(&curve, columns);
+    let base = point_defined_base_with_seed(&curve, columns, factor_base_seed);
     let base_ms = base_started.elapsed().as_secs_f64() * 1000.0;
     let raw_base_points: Vec<_> = base.points.iter().map(to_raw_point).collect();
     let base_fibers = raw_fibers(&raw_base_points);
@@ -1687,15 +1921,16 @@ fn main() {
         PairMode::SignedQuotient => pair_types * base.signed_size,
         PairMode::SignedExpanded => pair_types * base.signed_size * (base.signed_size / 2),
     };
-    let mut quotient_pairs = CompactPairTable::with_capacity(
+    let mut quotient_pairs = CompactPairTable::with_capacity_config(
         quotient_capacity,
         pair_mode == PairMode::SignedExpanded,
         (1usize << n) + 1,
+        x_filter_bits_per_expected,
+        x_filter_hashes,
     );
     let mut pair_additions = 0usize;
     let mut pair_canonicalization_maps = 0usize;
     let mut pair_batch_inversions = 0usize;
-    let lambda = curve.lambda.to_u64().unwrap();
     let label_to_index: HashMap<_, _> = base
         .point_labels
         .iter()
@@ -1717,7 +1952,6 @@ fn main() {
             }
         }
         PairMode::SignedQuotient | PairMode::SignedExpanded => {
-            let automorphisms: Vec<_> = signed_scalars(lambda, modulus, n).into_iter().collect();
             assert_eq!(automorphisms.len(), base.signed_size);
             let diagonal_relatives: Vec<_> = automorphisms
                 .iter()
@@ -1753,9 +1987,23 @@ fn main() {
                     let (canonical, multiplier, maps) =
                         canonical_signed_key(&curve, key, modulus, lambda);
                     pair_canonicalization_maps += maps;
-                    quotient_pairs.insert(
-                        canonical,
-                        QuotientPairWitness::new(
+                    let witness = QuotientPairWitness::new(
+                        [
+                            (left_column, multiplier),
+                            (
+                                right_column,
+                                ((relative as u128 * multiplier as u128) % modulus as u128)
+                                    as u64,
+                            ),
+                        ],
+                        canonical.1,
+                    );
+                    quotient_pairs.insert(canonical, witness);
+                } else {
+                    let mut image_key = key;
+                    let mut multiplier = 1u64;
+                    for exponent in 0..curve.n {
+                        let witness = QuotientPairWitness::new(
                             [
                                 (left_column, multiplier),
                                 (
@@ -1764,27 +2012,9 @@ fn main() {
                                         as u64,
                                 ),
                             ],
-                            canonical.1,
-                        ),
-                    );
-                } else {
-                    let mut image_key = key;
-                    let mut multiplier = 1u64;
-                    for exponent in 0..curve.n {
-                        quotient_pairs.insert(
-                            image_key,
-                            QuotientPairWitness::new(
-                                [
-                                    (left_column, multiplier),
-                                    (
-                                        right_column,
-                                        ((relative as u128 * multiplier as u128) % modulus as u128)
-                                            as u64,
-                                    ),
-                                ],
-                                image_key.1,
-                            ),
+                            image_key.1,
                         );
+                        quotient_pairs.insert(image_key, witness);
                         if exponent + 1 < curve.n && image_key.0 != 0 {
                             let x = square_raw(&curve, image_key.0 - 1);
                             let y = square_raw(&curve, image_key.1);
@@ -1802,6 +2032,50 @@ fn main() {
     let support_index_entries = match pair_mode {
         PairMode::Full => full_pairs.len(),
         PairMode::SignedQuotient | PairMode::SignedExpanded => quotient_pairs.len(),
+    };
+    let guided_slot_index_started = Instant::now();
+    let mut guided_slot_bins: Vec<Vec<u32>> = Vec::new();
+    if query_mode.pair_pair_guided_width().is_some() {
+        assert!(pair_mode == PairMode::SignedExpanded);
+        let mean_bin = support_index_entries.div_ceil(columns);
+        guided_slot_bins = (0..columns)
+            .map(|_| Vec::with_capacity(mean_bin + mean_bin / 8 + 1024))
+            .collect();
+        for slot in 0..quotient_pairs.slots() {
+            if quotient_pairs.keys_x[slot] == u64::MAX {
+                continue;
+            }
+            let labels = quotient_pairs.values[slot].labels();
+            let left = labels[0].0;
+            let right = labels[1].0;
+            let bin = if left == right
+                || CompactPairTable::hash((slot as u64, quotient_pairs.keys_x[slot])) & 1 == 0
+            {
+                left
+            } else {
+                right
+            };
+            guided_slot_bins[bin].push(slot as u32);
+        }
+        assert_eq!(
+            guided_slot_bins.iter().map(Vec::len).sum::<usize>(),
+            support_index_entries
+        );
+    }
+    let guided_slot_index_entries = guided_slot_bins.iter().map(Vec::len).sum::<usize>();
+    let guided_slot_index_allocated_bytes = guided_slot_bins
+        .iter()
+        .map(|bin| bin.capacity() * std::mem::size_of::<u32>())
+        .sum::<usize>();
+    let guided_slot_index_ms = guided_slot_index_started.elapsed().as_secs_f64() * 1000.0;
+    let support_occupied_slot_payload_bytes = match pair_mode {
+        PairMode::Full => support_index_entries
+            * (2 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
+        PairMode::SignedQuotient => support_index_entries
+            * (2 * std::mem::size_of::<u64>()
+                + std::mem::size_of::<QuotientPairWitness>()),
+        PairMode::SignedExpanded => support_index_entries
+            * (std::mem::size_of::<u64>() + std::mem::size_of::<QuotientPairWitness>()),
     };
     let pair_ms = pair_started.elapsed().as_secs_f64() * 1000.0;
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
@@ -1845,6 +2119,7 @@ fn main() {
             "orbit_columns":columns,
             "signed_automorphism_size":base.signed_size,
             "factor_base_points":base.points.len(),
+            "factor_base_seed":factor_base_seed,
             "base_hash":&base_hash,
             "field_modulus_low_terms":curve.curve.irreducible.low_terms,
             "generator":to_raw_point(curve.generator()).map(|(x,y)| [x,y]),
@@ -1866,16 +2141,26 @@ fn main() {
             "pair_canonicalization_maps":pair_canonicalization_maps,
             "pair_batch_inversions":pair_batch_inversions,
             "support_index_entries":support_index_entries,
-            "support_payload_lower_bound_bytes":support_index_entries * (4 * std::mem::size_of::<u64>() + 2 * std::mem::size_of::<usize>()),
+            "support_payload_lower_bound_bytes":support_occupied_slot_payload_bytes,
+            "support_occupied_slot_payload_bytes":support_occupied_slot_payload_bytes,
+            "support_witness_bytes":std::mem::size_of::<QuotientPairWitness>(),
+            "guided_slot_index_entries":guided_slot_index_entries,
+            "guided_slot_index_allocated_bytes":guided_slot_index_allocated_bytes,
+            "guided_slot_index_ms":guided_slot_index_ms,
             "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
             "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
             "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+            "support_x_prefilter_hashes":quotient_pairs.x_filter_hashes(),
             "frobenius_closed":true,
             "negation_closed":true,
             "subgroup_membership_verified":true,
             "selection_uses_scalar_labels":false
         })
     );
+
+    if std::env::var("KIC_CONSTRUCTION_ONLY").as_deref() == Ok("1") {
+        return;
+    }
 
     let batch_started = Instant::now();
     let mut batch_online_charged_ms = 0.0f64;
@@ -1885,8 +2170,18 @@ fn main() {
     let mut batch_admitted_relations = 0usize;
     let mut batch_support_queries = 0usize;
     let mut batch_rank_plus_32 = 0u64;
+    let mut batch_shared_log_one_relation = 0u64;
+    let mut retained_factor_base_logs: Option<Vec<u64>> = None;
     for fixture_index in 0..batch_fixtures {
-    let fixture_material = if batch_fixtures == 1 {
+    let uses_retained_factor_logs = shared_factor_log_precomputation
+        && retained_factor_base_logs.is_some();
+    let fixture_material = if shared_public_fixture_domain {
+        format!(
+            "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{}|{seed}|{}",
+            batch_corpus.as_deref().unwrap(),
+            shared_public_fixture_offset + fixture_index
+        )
+    } else if batch_fixtures == 1 {
         format!("{TASK_ID}|rank|{n}|{a}|{eta_numerator}/{eta_denominator}|{seed}")
     } else if let Some(corpus) = &batch_corpus {
         format!(
@@ -1968,9 +2263,15 @@ fn main() {
         TargetMode::PartitionWalk => 2,
     };
     let mut fiber_rest_scratch = Vec::with_capacity(128);
-    let mut pair_point_scratch = Vec::with_capacity(64);
-    let mut pair_label_scratch = Vec::with_capacity(64);
-    let mut pair_rest_scratch = Vec::with_capacity(64);
+    let mut pair_point_scratch = Vec::with_capacity(256);
+    let mut pair_label_scratch = Vec::with_capacity(256);
+    let mut pair_rest_scratch = Vec::with_capacity(256);
+    let mut pair_signed_rest_scratch = Vec::with_capacity(512);
+    let mut pair_inverse_scratch = BatchInverseScratch::default();
+    let mut guided_bin_order = Vec::with_capacity(columns);
+    let mut column_relation_counts = vec![0usize; columns];
+    let mut guided_bins_visited = 0usize;
+    let mut guided_priority_hits = 0usize;
     let mut dense_rank_recomputations = 0usize;
     let mut dimension_bound_rank_crosschecks = 0usize;
     let mut reverse_incremental_rank_crosschecks = 0usize;
@@ -1985,8 +2286,10 @@ fn main() {
     let target_cap = 100_000usize;
 
     while trials < target_cap {
-        if let Some(full_at) = rank_full_at {
-            if accepted >= full_at + 32 {
+        if uses_retained_factor_logs && accepted >= 1 {
+            break;
+        } else if let Some(full_at) = rank_full_at {
+            if accepted >= full_at + required_surplus_relations {
                 break;
             }
         } else if accepted >= relation_cap {
@@ -2056,7 +2359,180 @@ fn main() {
         target_generation_ns += target_generation_started.elapsed().as_nanos();
         let query_started = Instant::now();
         let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
-        if let Some(width) = query_mode.pair_pair_width() {
+        if let Some(width) = query_mode.pair_pair_guided_width() {
+            assert!(pair_mode == PairMode::SignedExpanded);
+            let target_key = raw_compact_key(target);
+            guided_bin_order.clear();
+            guided_bin_order.extend(0..columns);
+            guided_bin_order.sort_unstable_by_key(|&column| {
+                (
+                    usize::from(echelon.pivots[column].is_some()),
+                    column_relation_counts[column],
+                    CompactPairTable::hash((
+                        target_key.0 ^ column as u64,
+                        target_key.1 ^ (column as u64).rotate_left(19),
+                    )),
+                )
+            });
+            for (priority, &column) in guided_bin_order.iter().enumerate() {
+                let bin = &guided_slot_bins[column];
+                if bin.is_empty() {
+                    continue;
+                }
+                guided_bins_visited += 1;
+                let start = CompactPairTable::hash((
+                    target_key.0 ^ (column as u64).rotate_left(11),
+                    target_key.1,
+                )) as usize
+                    % bin.len();
+                let mut cursor = 0usize;
+                while cursor < bin.len() && witness.is_none() {
+                    pair_point_scratch.clear();
+                    pair_label_scratch.clear();
+                    while cursor < bin.len() && pair_point_scratch.len() < width {
+                        let slot = bin[(start + cursor) % bin.len()] as usize;
+                        cursor += 1;
+                        if let Some((point, labels)) =
+                            quotient_pairs.signed_pair_at_slot(slot, false, modulus)
+                        {
+                            pair_point_scratch.push(point);
+                            pair_label_scratch.push(labels);
+                        }
+                    }
+                    let attempted = batch_raw_target_minus_signed_points_x_filtered(
+                        &curve,
+                        target,
+                        &pair_point_scratch,
+                        &quotient_pairs,
+                        &mut pair_signed_rest_scratch,
+                        &mut pair_inverse_scratch,
+                    );
+                    query_additions += attempted;
+                    decomposition_queries += attempted;
+                    query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
+                    query_batch_inversions += usize::from(target.is_some());
+                    for &(position, negative, rest_key) in &pair_signed_rest_scratch {
+                        let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                            rest_key,
+                            modulus,
+                            &quotient_pairs,
+                            &label_to_index,
+                        ) else {
+                            query_exact_table_misses += 1;
+                            continue;
+                        };
+                        let mut left_labels = pair_label_scratch[position];
+                        if negative {
+                            left_labels = left_labels.map(|(column, coefficient)| {
+                                (
+                                    column,
+                                    if coefficient == 0 {
+                                        0
+                                    } else {
+                                        modulus - coefficient
+                                    },
+                                )
+                            });
+                        }
+                        let left_indices = left_labels.map(|label| label_to_index[&label]);
+                        witness = Some((
+                            vec![
+                                left_indices[0],
+                                left_indices[1],
+                                right_indices[0],
+                                right_indices[1],
+                            ],
+                            vec![
+                                left_labels[0],
+                                left_labels[1],
+                                right_labels[0],
+                                right_labels[1],
+                            ],
+                        ));
+                        guided_priority_hits += usize::from(priority < columns / 4);
+                        break;
+                    }
+                }
+                if witness.is_some() {
+                    break;
+                }
+            }
+        } else if let Some(width) = query_mode.pair_pair_dual_width() {
+            assert!(pair_mode == PairMode::SignedExpanded);
+            let slots = quotient_pairs.slots();
+            let start_slot = CompactPairTable::hash(raw_compact_key(target)) as usize
+                & (slots - 1);
+            let mut cursor = 0usize;
+            while cursor < slots && witness.is_none() {
+                pair_point_scratch.clear();
+                pair_label_scratch.clear();
+                while cursor < slots && pair_point_scratch.len() < width {
+                    let slot = (start_slot + cursor) & (slots - 1);
+                    cursor += 1;
+                    if let Some((point, labels)) =
+                        quotient_pairs.signed_pair_at_slot(slot, false, modulus)
+                    {
+                        pair_point_scratch.push(point);
+                        pair_label_scratch.push(labels);
+                    }
+                }
+                if pair_point_scratch.is_empty() {
+                    continue;
+                }
+                let attempted = batch_raw_target_minus_signed_points_x_filtered(
+                    &curve,
+                    target,
+                    &pair_point_scratch,
+                    &quotient_pairs,
+                    &mut pair_signed_rest_scratch,
+                    &mut pair_inverse_scratch,
+                );
+                query_additions += attempted;
+                decomposition_queries += attempted;
+                query_x_filter_rejections += attempted - pair_signed_rest_scratch.len();
+                query_batch_inversions += usize::from(target.is_some());
+                for &(position, negative, rest_key) in &pair_signed_rest_scratch {
+                    let Some((right_indices, right_labels)) = lookup_signed_expanded_pair(
+                        rest_key,
+                        modulus,
+                        &quotient_pairs,
+                        &label_to_index,
+                    ) else {
+                        query_exact_table_misses += 1;
+                        continue;
+                    };
+                    let mut left_labels = pair_label_scratch[position];
+                    if negative {
+                        left_labels = left_labels.map(|(column, coefficient)| {
+                            (
+                                column,
+                                if coefficient == 0 {
+                                    0
+                                } else {
+                                    modulus - coefficient
+                                },
+                            )
+                        });
+                    }
+                    let left_indices = left_labels.map(|label| label_to_index[&label]);
+                    witness = Some((
+                        vec![
+                            left_indices[0],
+                            left_indices[1],
+                            right_indices[0],
+                            right_indices[1],
+                        ],
+                        vec![
+                            left_labels[0],
+                            left_labels[1],
+                            right_labels[0],
+                            right_labels[1],
+                        ],
+                    ));
+                    break;
+                }
+            }
+        } else if let Some(width) = query_mode.pair_pair_width() {
             assert!(pair_mode == PairMode::SignedExpanded);
             let slots = quotient_pairs.slots();
             let start_slot = CompactPairTable::hash(raw_compact_key(target)) as usize
@@ -2085,6 +2561,7 @@ fn main() {
                     &pair_point_scratch,
                     &quotient_pairs,
                     &mut pair_rest_scratch,
+                    &mut pair_inverse_scratch,
                 );
                 query_additions += attempted;
                 decomposition_queries += attempted;
@@ -2228,6 +2705,14 @@ fn main() {
         let Some((indices, witness_labels)) = witness else {
             continue;
         };
+        for (position, &(column, _)) in witness_labels.iter().enumerate() {
+            if !witness_labels[..position]
+                .iter()
+                .any(|&(earlier_column, _)| earlier_column == column)
+            {
+                column_relation_counts[column] += 1;
+            }
+        }
         let packed_verification_started = Instant::now();
         let sum = indices.iter().fold(None, |accumulator, &index| {
             raw_add_point(&curve, accumulator, raw_base_points[index])
@@ -2364,18 +2849,58 @@ fn main() {
         terminal_dense_rank_crosschecks += 1;
     }
     let linear_solve_started = Instant::now();
-    let solution = (echelon.rank == columns + 1).then(|| {
-        solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus).unwrap()
-    });
+    let solution = if let Some(factor_logs) = retained_factor_base_logs.as_ref() {
+        assert!(uses_retained_factor_logs);
+        assert_eq!(factor_logs.len(), columns);
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        let factor_sum = row[..columns]
+            .iter()
+            .zip(factor_logs)
+            .fold(0u64, |sum, (&coefficient, &logarithm)| {
+                (sum
+                    + ((coefficient as u128 * logarithm as u128) % modulus as u128) as u64)
+                    % modulus
+            });
+        let negative_target_coefficient = row[columns];
+        let target_coefficient = if negative_target_coefficient == 0 {
+            0
+        } else {
+            modulus - negative_target_coefficient
+        };
+        assert_ne!(target_coefficient, 0);
+        let numerator = if factor_sum >= right_hand_sides[0] {
+            factor_sum - right_hand_sides[0]
+        } else {
+            modulus - (right_hand_sides[0] - factor_sum)
+        };
+        let recovered = ((numerator as u128
+            * modpow(target_coefficient, modulus - 2, modulus) as u128)
+            % modulus as u128) as u64;
+        let mut values = factor_logs.clone();
+        values.push(recovered);
+        Some(values)
+    } else {
+        (echelon.rank == columns + 1).then(|| {
+            solve_full_column_rank_system(&rows, &right_hand_sides, columns + 1, modulus)
+                .unwrap()
+        })
+    };
     let linear_solve_ms = linear_solve_started.elapsed().as_secs_f64() * 1000.0;
     let solution_validation_started = Instant::now();
     if let Some(solution) = &solution {
         assert_eq!(solution[columns], d0);
-        for (column, representative) in base.representatives.iter().enumerate() {
-            assert_eq!(
-                curve.mul(curve.generator(), &BigUint::from(solution[column])),
-                *representative
-            );
+        assert_eq!(
+            curve.mul(curve.generator(), &BigUint::from(solution[columns])),
+            q
+        );
+        if !uses_retained_factor_logs {
+            for (column, representative) in base.representatives.iter().enumerate() {
+                assert_eq!(
+                    curve.mul(curve.generator(), &BigUint::from(solution[column])),
+                    *representative
+                );
+            }
         }
         for (row, &rhs) in rows.iter().zip(&right_hand_sides) {
             let value = row.iter().zip(solution).fold(0u64, |sum, (&left, &right)| {
@@ -2383,6 +2908,12 @@ fn main() {
             });
             assert_eq!(value, rhs);
         }
+    }
+    if shared_factor_log_precomputation && retained_factor_base_logs.is_none() {
+        let solution = solution
+            .as_ref()
+            .expect("first fixture must establish the reusable factor-log table");
+        retained_factor_base_logs = Some(solution[..columns].to_vec());
     }
     let solution_validation_ms =
         solution_validation_started.elapsed().as_secs_f64() * 1000.0;
@@ -2401,11 +2932,17 @@ fn main() {
     let reference_validation_ms = reference_validation_started.elapsed().as_secs_f64() * 1000.0;
     let q_key = point_key(&q);
     let generator_key = point_key(curve.generator());
-    let status = if rank_full_at
-        .map(|full_at| accepted >= full_at + 32)
+    let status = if uses_retained_factor_logs && accepted == 1 && solution.is_some() {
+        "SHARED_FACTOR_LOG_ONE_RELATION"
+    } else if rank_full_at
+        .map(|full_at| accepted >= full_at + required_surplus_relations)
         .unwrap_or(false)
     {
-        "RANK_PLUS_32"
+        if required_surplus_relations == 32 {
+            "RANK_PLUS_32"
+        } else {
+            "RANK_PLUS_SURPLUS"
+        }
     } else if accepted >= relation_cap {
         "RANK_DEFICIENT"
     } else {
@@ -2417,7 +2954,8 @@ fn main() {
     batch_target_trials += trials;
     batch_admitted_relations += accepted;
     batch_support_queries += decomposition_queries;
-    batch_rank_plus_32 += u64::from(status == "RANK_PLUS_32");
+    batch_rank_plus_32 += u64::from(matches!(status, "RANK_PLUS_32" | "RANK_PLUS_SURPLUS"));
+    batch_shared_log_one_relation += u64::from(status == "SHARED_FACTOR_LOG_ONE_RELATION");
     println!(
         "{}",
         json!({
@@ -2438,9 +2976,14 @@ fn main() {
             "a":a,
             "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
             "status":status,
+            "required_surplus_relations":required_surplus_relations,
+            "uses_retained_factor_logs":uses_retained_factor_logs,
+            "shared_factor_log_precomputation":shared_factor_log_precomputation,
+            "surplus_relations":rank_full_at.map(|at| accepted-at).unwrap_or(0),
             "orbit_columns":columns,
             "matrix_columns":columns+1,
             "factor_base_points":base.points.len(),
+            "factor_base_seed":factor_base_seed,
             "base_hash":&base_hash,
             "target_trials":trials,
             "admitted_relations":accepted,
@@ -2467,8 +3010,10 @@ fn main() {
             "query_canonicalization_maps":query_canonicalization_maps,
             "query_x_filter_rejections":query_x_filter_rejections,
             "query_exact_table_misses":query_exact_table_misses,
+            "guided_bins_visited":guided_bins_visited,
+            "guided_priority_quartile_hits":guided_priority_hits,
             "query_mode":query_mode.name(),
-            "decomposition_arity":if query_mode.pair_pair_width().is_some() {4} else {3},
+            "decomposition_arity":if query_mode.pair_pair_width().is_some() || query_mode.pair_pair_dual_width().is_some() || query_mode.pair_pair_guided_width().is_some() {4} else {3},
             "query_batch_inversions":query_batch_inversions,
             "target_mode":target_mode.name(),
             "target_walk_additions":target_walk_additions,
@@ -2521,23 +3066,37 @@ fn main() {
                 "batch_seed":seed,
                 "batch_fixtures":batch_fixtures,
                 "batch_corpus":&batch_corpus,
+                "shared_public_fixture_domain":shared_public_fixture_domain,
+                "shared_public_fixture_offset":shared_public_fixture_offset,
                 "independent_fixture_seed_domain":if batch_corpus.is_some() {
                     "BLAKE3(TASK-KIC-DIRECT-BATCH-20260910 || rank || curve || corpus || batch_seed || fixture_index)"
                 } else {
                     "BLAKE3(TASK-KIC-DIRECT-BATCH-20260910 || rank || curve || eta || batch_seed || fixture_index)"
                 },
                 "support_table_builds":1,
+                "factor_base_seed":factor_base_seed,
                 "support_table_instance_reused":true,
                 "support_index_entries":support_index_entries,
+                "guided_slot_index_entries":guided_slot_index_entries,
+                "guided_slot_index_allocated_bytes":guided_slot_index_allocated_bytes,
+                "guided_slot_index_ms":guided_slot_index_ms,
+                "support_occupied_slot_payload_bytes":support_occupied_slot_payload_bytes,
+                "support_witness_bytes":std::mem::size_of::<QuotientPairWitness>(),
                 "support_table_allocated_bytes":if pair_mode==PairMode::Full {0} else {quotient_pairs.allocated_bytes()},
                 "support_x_prefilter_kind":quotient_pairs.x_filter_kind(),
                 "support_x_prefilter_bits":quotient_pairs.x_filter_bits(),
+                "support_x_prefilter_hashes":quotient_pairs.x_filter_hashes(),
                 "base_hash":&base_hash,
                 "pair_index_mode":pair_mode.name(),
                 "query_mode":query_mode.name(),
                 "target_mode":target_mode.name(),
                 "rank_plus_32_fixtures":batch_rank_plus_32,
+                "shared_factor_log_one_relation_fixtures":batch_shared_log_one_relation,
+                "shared_factor_log_precomputation":shared_factor_log_precomputation,
+                "all_fixtures_solved":batch_rank_plus_32+batch_shared_log_one_relation==batch_fixtures,
                 "all_fixtures_rank_plus_32":batch_rank_plus_32==batch_fixtures,
+                "required_surplus_relations":required_surplus_relations,
+                "all_fixtures_rank_plus_surplus":batch_rank_plus_32==batch_fixtures,
                 "all_relations_group_verified":true,
                 "all_relations_reference_validated":true,
                 "total_target_trials":batch_target_trials,
@@ -2560,6 +3119,18 @@ fn main() {
 #[cfg(test)]
 mod packed_tests {
     use super::*;
+
+    #[test]
+    fn quotient_pair_witness_packs_48_bit_coefficients_losslessly() {
+        let labels = [
+            (511usize, (1u64 << 48) - 1),
+            (376usize, 21_044_858_204_112u64),
+        ];
+        let witness = QuotientPairWitness::new(labels, 0x1234_5678_9abc);
+        assert_eq!(witness.labels(), labels);
+        assert_eq!(witness.image_y(), 0x1234_5678_9abc);
+        assert_eq!(std::mem::size_of::<QuotientPairWitness>(), 24);
+    }
 
     #[test]
     fn packed_field_and_group_operations_match_reference() {
@@ -2701,12 +3272,14 @@ mod packed_tests {
                 .filter(|(_, key)| table.might_contain_x(key.0))
                 .collect();
             let mut pointwise_filtered = Vec::new();
+            let mut pointwise_scratch = BatchInverseScratch::default();
             let pointwise_attempted = batch_raw_target_minus_points_x_filtered(
                 &curve,
                 target,
                 &raw_points,
                 &table,
                 &mut pointwise_filtered,
+                &mut pointwise_scratch,
             );
             assert_eq!(pointwise_attempted, raw_points.len());
             assert_eq!(pointwise_filtered, pointwise_expected);
@@ -2715,6 +3288,60 @@ mod packed_tests {
                 assert!(table.get(*key).is_some());
             }
         }
+    }
+
+    #[test]
+    fn dual_sign_batch_matches_separate_signed_inputs() {
+        let curve = KoblitzCurve::new(1, 23).unwrap();
+        let points: Vec<_> = (1..=96u64)
+            .map(|scalar| {
+                to_raw_point(&curve.mul(curve.generator(), &BigUint::from(scalar)))
+            })
+            .collect();
+        let target = to_raw_point(&curve.mul(curve.generator(), &BigUint::from(197u64)));
+        let signed_points: Vec<_> = points
+            .iter()
+            .flat_map(|&point| [point, raw_neg_point(point)])
+            .collect();
+        let candidate_keys: Vec<_> = signed_points
+            .iter()
+            .map(|&left| raw_compact_key(raw_add_point(&curve, target, raw_neg_point(left))))
+            .collect();
+        let mut table = CompactPairTable::with_capacity(64, true, (1usize << 23) + 1);
+        for (position, &key) in candidate_keys.iter().enumerate() {
+            if position % 3 == 0 {
+                table.insert(key, QuotientPairWitness::default());
+            }
+        }
+
+        let mut separate = Vec::new();
+        let mut separate_scratch = BatchInverseScratch::default();
+        let separate_attempted = batch_raw_target_minus_points_x_filtered(
+            &curve,
+            target,
+            &signed_points,
+            &table,
+            &mut separate,
+            &mut separate_scratch,
+        );
+        let separate_normalized: Vec<_> = separate
+            .into_iter()
+            .map(|(position, key)| (position / 2, position % 2 == 1, key))
+            .collect();
+
+        let mut dual = Vec::new();
+        let mut dual_scratch = BatchInverseScratch::default();
+        let dual_attempted = batch_raw_target_minus_signed_points_x_filtered(
+            &curve,
+            target,
+            &points,
+            &table,
+            &mut dual,
+            &mut dual_scratch,
+        );
+        assert_eq!(dual_attempted, separate_attempted);
+        assert_eq!(dual, separate_normalized);
+        assert_eq!(dual_scratch.denominators.len() * 2, separate_scratch.denominators.len());
     }
 
     #[test]

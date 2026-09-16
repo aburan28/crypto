@@ -34,7 +34,10 @@
       "priority": 0,
       "n": 13,
       "a": 0,
-      "eta": [1, 2],
+      "eta": [
+        1,
+        2
+      ],
       "timing_class_goal": "whole_process_wall",
       "fixtures": 1,
       "direct": {
@@ -56,7 +59,10 @@
       "priority": 1,
       "n": 37,
       "a": 0,
-      "eta": [1, 2],
+      "eta": [
+        1,
+        2
+      ],
       "timing_class_goal": "whole_process_wall",
       "fixtures_default": 1,
       "fixtures_full": 1024,
@@ -87,7 +93,10 @@
       "priority": 1,
       "n": 41,
       "a": 0,
-      "eta": [1, 2],
+      "eta": [
+        1,
+        2
+      ],
       "timing_class_goal": "algorithmic_charged",
       "fixtures_default": 1,
       "fixtures_full": 1024,
@@ -118,7 +127,10 @@
       "priority": 1,
       "n": 53,
       "a": 0,
-      "eta": [1, 16],
+      "eta": [
+        1,
+        16
+      ],
       "timing_class_goal": "whole_process_wall",
       "fixtures_default": 1,
       "fixtures_full": 32,
@@ -143,6 +155,111 @@
       ],
       "ledger_next_target": "regimes.koblitz.stages.factor_base.next_target",
       "note": "Past construction ceiling MAX_N=41. eta=1/16 + signed_quotient + pointwise + no incremental rank crosscheck. Avoid eta=1/2 signed_expanded (~4e8) and eta=1/1024 (too few hits)."
+    },
+    "koblitz.factor_base.n53": {
+      "label": "Priority #2: balanced/materialized factor base at n=53 under 16GiB resource gate",
+      "regime": "koblitz",
+      "stage": "factor_base",
+      "priority": 2,
+      "n": 53,
+      "a": 0,
+      "eta": [
+        1,
+        16
+      ],
+      "timing_class_goal": "construction_wall",
+      "fixtures_default": 1,
+      "fixtures_full": 1,
+      "direct": {
+        "pair_mode": "signed_quotient",
+        "target_mode": "independent",
+        "query_mode": "pointwise"
+      },
+      "resource_cap_bytes": 17179869184,
+      "env": {
+        "KIC_INCREMENTAL_RANK_CROSSCHECK": "0",
+        "KIC_SUMMARY_ONLY": "1"
+      },
+      "acceptance_gates": [
+        "KoblitzCurve::new(0,53) succeeds",
+        "Frobenius+negation closure verified",
+        "construction RSS and retained bytes logged",
+        "peak RSS under resource_cap_bytes",
+        "measurement_schema.factor_base required fields present",
+        "not a ledger promotion until independent validation"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.factor_base.next_target",
+      "note": "Direct-only beat (no rho). Manual PASS drafts already exist under runs_manual/n53_factor_base_*_20260911; control-plane launch reproduces the construction measure under SUMMARY_ONLY."
+    },
+    "koblitz.decomposition.n31_m2_dim16": {
+      "label": "Priority #3: n=31 dim~16 m=2 quadratic decomposition (FFD + median <=1h, disagreements=0)",
+      "regime": "koblitz",
+      "stage": "decomposition",
+      "priority": 3,
+      "n": 31,
+      "a": 0,
+      "m": 2,
+      "dim_goal": 16,
+      "unknowns_goal": 32,
+      "system_degree": "quadratic",
+      "timing_class_goal": "median_ms_per_target",
+      "fixtures_default": 1,
+      "fixtures_full": 8,
+      "producer": {
+        "example": "symmetrised_oracle_bench",
+        "args_template": "--only {a} {n} {m} --targets {fixtures} --no-sat --node-budget 50000"
+      },
+      "resource_cap_bytes": 17179869184,
+      "acceptance_gates": [
+        "KoblitzCurve::new(a,31) succeeds",
+        "target_dim ~16 via divisor_for_dimension",
+        "unknowns = m*ell (+ chaining) near 32 for m=2",
+        "FFD min/max/mean logged",
+        "median_ms_per_target logged",
+        "disagreements=0 vs enumeration gate",
+        "measurement_schema.decomposition required fields present",
+        "not a ledger promotion until independent validation"
+      ],
+      "ledger_next_target": "regimes.koblitz.stages.decomposition.next_target",
+      "note": "Manual/driver via examples/symmetrised_oracle_bench (paired_bench picks target_dim=ceil((n+1)/m)=16). Control-plane launch for decomposition not yet wired; claim drafts under runs_manual/n31_decomp_m2_dim16_*."
+    },
+    "binary.decomposition.l8_pairs_baseline": {
+      "label": "Priority #4 probe: pairs-and-solve baseline at l=8 (not a sub-2^(2l) win)",
+      "regime": "binary",
+      "stage": "decomposition",
+      "priority": 4,
+      "l": 8,
+      "n": 24,
+      "producer": {
+        "example": "semaev_decomp_bench",
+        "args": "8"
+      },
+      "acceptance_gates": [
+        "pairs wall at l=8 logged",
+        "FFD required for ledger beat \u2014 currently unmeasured",
+        "sub-2^(2l) requires oracle faster than pairs \u2014 not this baseline",
+        "not a ledger promotion"
+      ],
+      "ledger_next_target": "regimes.binary.stages.decomposition.next_target",
+      "note": "Manual PASS-or-FAIL drafts under runs_manual/binary_decomp_l8_20260911. Research note: SAT historically slower than pairs at l=8."
+    },
+    "prime.end_to_end_dlp.j0_16bit": {
+      "label": "Priority #5: j=0 known-answer IC at 16 bits agreeing with rho",
+      "regime": "prime",
+      "stage": "end_to_end_dlp",
+      "priority": 5,
+      "bits": 16,
+      "producer": {
+        "example": "j0_known_answer_bits",
+        "args": "16"
+      },
+      "acceptance_gates": [
+        "ic recovers d with [d]G=Q",
+        "agrees with rho on same instance",
+        "wall times logged",
+        "not ledger promotion until independent validation"
+      ],
+      "note": "Manual draft under runs_manual/prime_j0_e2e_16bit_20260911"
     }
   },
   "lock": {

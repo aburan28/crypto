@@ -11,3 +11,4 @@ pub mod semaev;
 pub mod curve;
 pub mod resultant;
 pub mod f4;
+pub mod ffd;

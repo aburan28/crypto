@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "kind": "n23_1m_hitrate",
+  "updated_at": "2026-09-15T19:09:38Z",
+  "claim_boundary": "Public-synthetic orbit_factorized S5 draft search only. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "encoding": {
+    "algebra": "orbit_factorized",
+    "domain": "one_hot",
+    "branch_order": "intermediates_then_pair_then_pair",
+    "intermediate_domain": "pair_sum_trie",
+    "positive_mode": "relative",
+    "nogoods": true,
+    "eta": "1/2",
+    "pair_table_entries": 0,
+    "budget": 1000000
+  },
+  "prior_context_seed1_300k": {
+    "kind": "planted",
+    "seed": 1,
+    "verdict": "SAT",
+    "conflicts": 168284,
+    "valid_x_tuples": 1,
+    "invalid_group_lifts": 0,
+    "pair_table_entries": 0
+  },
+  "arms": [
+    {
+      "kind": "natural",
+      "seed": 1,
+      "verdict": "UNKNOWN",
+      "conflicts": 1000000,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 540592.8222500001
+    },
+    {
+      "kind": "natural",
+      "seed": 2,
+      "verdict": "SAT",
+      "conflicts": 846240,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 459413.045291
+    },
+    {
+      "kind": "planted",
+      "seed": 2,
+      "verdict": "SAT",
+      "conflicts": 590623,
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 298620.91379200004
+    },
+    {
+      "kind": "planted",
+      "seed": 3,
+      "verdict": "UNKNOWN",
+      "conflicts": 1000000,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 530873.021917
+    },
+    {
+      "kind": "planted",
+      "seed": 5,
+      "verdict": "UNKNOWN",
+      "conflicts": 1000000,
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "pair_table_entries": 0,
+      "solve_ms": 553491.375375
+    }
+  ],
+  "hit_rate": {
+    "planted_1m": "1/3",
+    "natural_1m": "1/2",
+    "planted_incl_prior_seed1": "2/4"
+  },
+  "summary": "Planted 1/3 SAT@1M (seed2); seeds3/5 UNKNOWN. Natural 0/2 SAT@1M. Prior seed1 SAT@300k. Draft only.",
+  "ledger_promotion": false
+}

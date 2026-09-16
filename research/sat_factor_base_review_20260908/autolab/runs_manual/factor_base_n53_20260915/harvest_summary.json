@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "kind": "factor_base_n53_control_plane_harvest",
+  "run_id": "20260915T122253Z-229f0ee245",
+  "status": "INDEPENDENTLY_VALIDATED_CONSTRUCTION",
+  "claim_check": "PASS",
+  "n": 53,
+  "factor_base_size_F": 19928,
+  "orbit_count_K": 188,
+  "construction_wall_ms": 2238.314125,
+  "retained_bytes": 74906400,
+  "materialized": true,
+  "construction_method": "point_defined_signed_quotient_eta_1_16_summary_only",
+  "eta": {
+    "denominator": 16,
+    "numerator": 1
+  },
+  "frobenius_closed": true,
+  "negation_closed": true,
+  "claim_boundary": "Public synthetic Koblitz factor-base construction measure only. Not key recovery, not asymptotic sub-rho, not an imported-point attack, and not a ledger promotion until independent validation and schema PASS.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion until independent validation"
+  ],
+  "verdict": "DRAFT_INDEPENDENTLY_VALIDATED_CONSTRUCTION_NO_LEDGER_PROMOTION",
+  "independent_validation": {
+    "receipt": "independent_validation/validation_receipt.json",
+    "verdict": "CONSTRUCTION_INDEPENDENTLY_REPLAYED",
+    "same_seed_match_F_K_hash": true,
+    "ledger_promotion": false
+  }
+}

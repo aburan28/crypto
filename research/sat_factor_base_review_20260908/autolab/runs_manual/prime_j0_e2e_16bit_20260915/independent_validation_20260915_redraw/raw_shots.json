@@ -1,0 +1,75 @@
+{
+  "kind": "j0_16bit_known_answer_3shot_redraw",
+  "shots": [
+    {
+      "shot": 1,
+      "rc": 0,
+      "wall_s": 1.7650868892669678,
+      "parsed": {
+        "bits": 16,
+        "claim_boundary": "synthetic known-answer j=0 IC vs rho",
+        "curve": "j0-bench-16bit",
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 1753.052958,
+        "ic_ok": true,
+        "ic_recovered": "40135",
+        "max_trials": 200000,
+        "rho_ms": 2.2749580000000003,
+        "rho_ok": true,
+        "rho_recovered": "40135",
+        "rho_steps": 65536,
+        "target_orbits": 40,
+        "x_truth": "40135"
+      },
+      "stdout_tail": "curve=j0-bench-16bit p_bits\u224816 n=65521 orbits=40 trials=200000 rho_steps=65536\n{\"bits\":16,\"claim_boundary\":\"synthetic known-answer j=0 IC vs rho\",\"curve\":\"j0-bench-16bit\",\"ic_agrees_rho\":true,\"ic_matches_truth\":true,\"ic_ms\":1753.052958,\"ic_ok\":true,\"ic_recovered\":\"40135\",\"max_trials\":200000,\"rho_ms\":2.2749580000000003,\"rho_ok\":true,\"rho_recovered\":\"40135\",\"rho_steps\":65536,\"target_orbits\":40,\"x_truth\":\"40135\"}\n"
+    },
+    {
+      "shot": 2,
+      "rc": 0,
+      "wall_s": 1.567302942276001,
+      "parsed": {
+        "bits": 16,
+        "claim_boundary": "synthetic known-answer j=0 IC vs rho",
+        "curve": "j0-bench-16bit",
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 1551.0449159999998,
+        "ic_ok": true,
+        "ic_recovered": "43376",
+        "max_trials": 200000,
+        "rho_ms": 11.795375,
+        "rho_ok": true,
+        "rho_recovered": "43376",
+        "rho_steps": 65536,
+        "target_orbits": 40,
+        "x_truth": "43376"
+      },
+      "stdout_tail": "curve=j0-bench-16bit p_bits\u224816 n=65521 orbits=40 trials=200000 rho_steps=65536\n{\"bits\":16,\"claim_boundary\":\"synthetic known-answer j=0 IC vs rho\",\"curve\":\"j0-bench-16bit\",\"ic_agrees_rho\":true,\"ic_matches_truth\":true,\"ic_ms\":1551.0449159999998,\"ic_ok\":true,\"ic_recovered\":\"43376\",\"max_trials\":200000,\"rho_ms\":11.795375,\"rho_ok\":true,\"rho_recovered\":\"43376\",\"rho_steps\":65536,\"target_orbits\":40,\"x_truth\":\"43376\"}\n"
+    },
+    {
+      "shot": 3,
+      "rc": 0,
+      "wall_s": 1.988123893737793,
+      "parsed": {
+        "bits": 16,
+        "claim_boundary": "synthetic known-answer j=0 IC vs rho",
+        "curve": "j0-bench-16bit",
+        "ic_agrees_rho": true,
+        "ic_matches_truth": true,
+        "ic_ms": 1972.1465839999998,
+        "ic_ok": true,
+        "ic_recovered": "1716",
+        "max_trials": 200000,
+        "rho_ms": 11.744875,
+        "rho_ok": true,
+        "rho_recovered": "1716",
+        "rho_steps": 65536,
+        "target_orbits": 40,
+        "x_truth": "1716"
+      },
+      "stdout_tail": "curve=j0-bench-16bit p_bits\u224816 n=65521 orbits=40 trials=200000 rho_steps=65536\n{\"bits\":16,\"claim_boundary\":\"synthetic known-answer j=0 IC vs rho\",\"curve\":\"j0-bench-16bit\",\"ic_agrees_rho\":true,\"ic_matches_truth\":true,\"ic_ms\":1972.1465839999998,\"ic_ok\":true,\"ic_recovered\":\"1716\",\"max_trials\":200000,\"rho_ms\":11.744875,\"rho_ok\":true,\"rho_recovered\":\"1716\",\"rho_steps\":65536,\"target_orbits\":40,\"x_truth\":\"1716\"}\n"
+    }
+  ],
+  "ledger_promotion": false
+}

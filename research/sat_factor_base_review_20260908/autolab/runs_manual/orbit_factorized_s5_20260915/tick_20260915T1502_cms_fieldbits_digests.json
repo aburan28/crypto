@@ -1,0 +1,86 @@
+{
+  "updated_at": "2026-09-15T15:05:33Z",
+  "claim_boundary": "Public-synthetic only; not ledger promotion; not vs_rho; not key recovery. pair_table_entries=0.",
+  "cms": {
+    "planted_n13": "SAT (exit 10, immediate)",
+    "unrestricted_n13_80k": "INDETERMINATE",
+    "unrestricted_n13_250k": "SAT",
+    "unrestricted_n19_120k": "INDETERMINATE",
+    "unrestricted_n19_300k": "INDETERMINATE conflicts=300002",
+    "pair_table_entries": 0
+  },
+  "field_bits_phase_init": [
+    {
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "models_examined": 1,
+      "conflicts": 19,
+      "solve_ms": 3.416125,
+      "variables": 2009,
+      "ordinary_clauses": 4497,
+      "pair_table_entries": 0,
+      "orbit_columns": 1,
+      "phase_restart_shots_used": 1,
+      "evidence_class": "censored_operational_observation",
+      "file": "n13_planted_fieldbits_nogoods.json"
+    },
+    {
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "models_examined": 1,
+      "conflicts": 10000,
+      "solve_ms": 1057.438334,
+      "variables": 2009,
+      "ordinary_clauses": 4419,
+      "pair_table_entries": 0,
+      "orbit_columns": 1,
+      "phase_restart_shots_used": 1,
+      "evidence_class": "censored_operational_observation",
+      "file": "n13_unrestricted_fieldbits_nogoods_phase4_40k.json"
+    },
+    {
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 12004.445,
+      "variables": 3889,
+      "ordinary_clauses": 9201,
+      "pair_table_entries": 0,
+      "orbit_columns": 2,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation",
+      "file": "n19_unrestricted_fieldbits_phase0_nogoods_phase4_80k.json"
+    },
+    {
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 13972.954208000001,
+      "variables": 3889,
+      "ordinary_clauses": 9201,
+      "pair_table_entries": 0,
+      "orbit_columns": 2,
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation",
+      "file": "n19_unrestricted_fieldbits_phase1_nogoods_phase4_80k.json"
+    }
+  ],
+  "code_levers_added": [
+    "KIC_ORBIT_BRANCH_ORDER=field_bits_then_pair_then_pair",
+    "KIC_PHASE_INIT=0|1 via Solver::set_all_saved_phases"
+  ]
+}
