@@ -66,6 +66,20 @@ and [continuation metadata](campaign_20260916/next-proposal.json) preserve the
 16-target workload and native-time gate. Choose a new seed before another round.
 Production library defaults remain unchanged.
 
+## Round 0006: index-calculus admission, incumbent retained
+
+[Round 0006](campaign_20260916/ROUND6.md) ran on a different host and compiler
+(rustc 1.94.1), so only its within-round ratios are comparable with earlier
+rounds. It enforced the index-calculus admission rule for the first time: every
+arm's worker reports the descent relation each logarithm came from and the
+frozen checker verifies it (all 1,680 receipts certified). Seven exact source
+candidates from function-level profiling were measured; the combination reached
+0.8018 of the incumbent's instructions (95% interval 0.7874–0.8146) and 0.9237 of
+its native time, missing the 0.80 gate on both metrics, so the incumbent was
+retained. The retained incumbent reproduced batch parity on this host:
+0.7259 of rho's instructions (0.6410–0.8372) and 0.7853 of its native time
+(0.7040–0.8771), parity `true`. See [RESULTS.md](campaign_20260916/RESULTS.md).
+
 ## Continuing toward rho parity
 
 The [2026-09-16 operation](campaign_20260916/PLAN.md) tests isolated source changes
@@ -226,6 +240,14 @@ weighted curve-cell geometric means of paired candidate/incumbent cost ratios.
 Its paired bootstrap resamples curve blocks and targets within blocks. The selected
 challenger must pass on both confirmation and replay:
 
+- Be an index-calculus algorithm. From round 0006 the worker reports, for
+  every target, the relation `[a]G + [b]Q = Σ P_i` over factor-base points that
+  its logarithm was derived from, and the checker rejects a run unless that
+  relation holds in the group and the scalar is its consequence under the
+  verified column logs (`certified_descents` equals the target count). A
+  candidate that recovers targets by any generic method is inadmissible; rho is
+  the reference only. Rounds 0002–0005 ran the same library descent but did
+  not carry this per-target certificate.
 - Complete and independently verify every scheduled workload.
 - At least 20% lower total instruction cost: ratio at most 0.80.
 - Paired 95% interval's upper endpoint below 1.

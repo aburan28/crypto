@@ -1,6 +1,6 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; five further tournaments finished and audited
+Status: implementation complete; six further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
@@ -15,7 +15,11 @@ and shared curve construction dominate that metric.
 
 All 7,776 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
-unsuccessful build attempts remain recorded. See [OPERATIONS.md](OPERATIONS.md)
+unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
+(1,680 further verified trials on another host) enforced the index-calculus
+admission rule for the first time — every logarithm certified by its descent
+relation — and retained the incumbent: its combined challenger reached 0.8018
+of the incumbent's instructions against a 0.80 gate and 0.92 of its native time. See [OPERATIONS.md](OPERATIONS.md)
 for commands, measurement limits, source candidates and installed operating skills.
 The [committed evidence guide](evidence/README.md) explains archive restoration,
 independent audit, and the distinction between frozen candidate sources and current
@@ -254,6 +258,18 @@ unstated universal score.
 
 1. Admit only candidates that complete the exact required workload correctly,
    meet resource caps, have fully priced phases and pass independent verification.
+   **Every candidate must be an index-calculus algorithm.** A candidate competes
+   with rho only if it recovers each target through a declared factor base:
+   relations collected by decomposition over that base, factor-base logarithms
+   from scalar-field linear algebra, and an individual descent that derives the
+   target's logarithm from one relation `[a]G + [b]Q = Σ P_i` over base points.
+   The worker emits that relation for every target and the independent checker
+   verifies it in the group and checks that the returned scalar is its
+   consequence under the verified column logs (`certified_descents` in the
+   receipt). A logarithm without that certificate — from a generic collision
+   walk, a baby-step giant-step, or any hybrid that recovers targets outside
+   the factor-base logs — is not a candidate result, whatever it costs. Rho is
+   the reference arm only and is never a candidate.
 2. For each candidate, compute paired cost ratios to the incumbent. Aggregate
    repetitions within an instance first; use a geometric mean with predeclared
    equal weights across the selected size/curve cells.

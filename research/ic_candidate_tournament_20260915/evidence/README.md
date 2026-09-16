@@ -24,9 +24,15 @@ python3 research/ic_candidate_tournament_20260915/runs/round-0005-batch16/evalua
 ```
 
 Use `--archive round-0007` to restore only the single-target beat-rho round
-(`--archive round-0006` for the parity round it built on),
-`--archive round-0005-batch16` for the 16-target round, or
-`--out /absolute/path/to/evidence` to restore elsewhere. Verification uses the
+(`--archive round-0006` for the single-target parity round it built on),
+`--archive round-0005-batch16` or `--archive round-0006-batch16` for the
+16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
+`round-0006-batch16` (incumbent retained; index-calculus admission enforced by
+per-target descent certificates) verifies with its own frozen evaluator under
+`runs/round-0006-batch16/evaluator/`. New rounds are packed with
+`pack.py --name ROUND runs/ROUND`, the inverse of `restore.py`, which checks
+every profile's gzip reconstruction before writing it and appends the archive
+to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
@@ -39,11 +45,12 @@ restored files are needed for the complete record, in addition to the archives.
 
 ## Packing a new round
 
-`pack.py --round NAME` writes `NAME.tar.zst` in this format from a finished
-round directory and records it in [manifest.json](manifest.json). It refuses a
-profile whose gzip stream zlib cannot reproduce exactly, excludes build caches
-and the operation lock, and normalises member order, modes and timestamps.
-Rounds 0006 and 0007 were packed with it; the earlier archives predate the script.
+`pack.py --name ROUND runs/ROUND` writes `ROUND.tar.zst` in this format and
+appends it to [manifest.json](manifest.json). It refuses a profile whose gzip
+stream zlib cannot reproduce exactly, excludes build caches and the operation
+lock, and refuses to overwrite an existing archive or manifest entry. Rounds
+0006-batch16, 0006 and 0007 were packed with it; the earlier archives predate
+the script.
 
 ## Lossless profile packing
 

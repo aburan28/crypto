@@ -192,7 +192,31 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
     require(achieved_rank == len(logs), 'rank-deficient log recovery')
     require(report.get('accepted_relations') == len(seen), 'accepted-row accounting mismatch')
     require(report.get('duplicate_relations') == len(rows)-len(seen), 'duplicate-row accounting mismatch')
+    # Index-calculus admission: every target's logarithm must be derived from one
+    # relation [a]G + [b]Q = sum of factor-base points, verified in the group, with
+    # the scalar the consequence of that relation under the verified column logs.
+    degenerate = 0
+    for s in solutions:
+        rel = s.get('relation')
+        require(isinstance(rel, dict), 'missing descent relation: logarithm not certified as index calculus')
+        a, b, ids = rel.get('a'), rel.get('b'), rel.get('points')
+        require(type(a) is int and type(b) is int and 0 <= a < c.r and 0 < b < c.r, 'invalid descent scalars')
+        require(isinstance(ids, list) and len(ids) in (0, summands)
+                and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad descent relation indices')
+        q = targets[s['index']]
+        probe = c.add(c.mul(c.g, a), c.mul(q, b))
+        total = None
+        logsum = 0
+        for i in ids:
+            total = c.add(total, base[i])
+            if projected[i] is not None:
+                j, k = projected[i]
+                logsum = (logsum + k*int(logs[j]['log'])) % c.r
+        require(total == probe, 'descent relation does not hold in the group')
+        require(c.h*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
+        degenerate += not ids
     return {'verified_targets':len(targets), 'verified_relations':len(rows), 'fresh_rows':len(seen),
+            'certified_descents':len(solutions), 'degenerate_descents':degenerate,
             'rank':achieved_rank, 'signed_base_size':len(base),
             'factor_base_sha256':hashlib.sha256(json.dumps(sorted(base),separators=(',',':')).encode()).hexdigest(),
             'solutions':[s['recovered'] for s in sorted(solutions,key=lambda s:s['index'])]}

@@ -11,6 +11,13 @@ previous round's `decision.json`, stage summaries and exclusive phase costs.
 
 ## Candidate work
 
+- Propose index-calculus algorithms only. A candidate must recover every
+  target through a declared factor base: decomposition relations, scalar-field
+  linear algebra for the column logs, and a descent that derives each
+  logarithm from one relation `[a]G + [b]Q = Σ P_i` over base points, which the
+  worker reports and the checker verifies per target. A generic collision walk,
+  a baby-step giant-step, or a hybrid that recovers targets outside the
+  factor-base logs is not a candidate; rho is the reference arm only.
 - Identify which complete-solve phase dominates, and distinguish a mathematical
   mechanism from a configuration or implementation improvement.
 - State the applicable boundary before measuring. For a fixed signed base of B

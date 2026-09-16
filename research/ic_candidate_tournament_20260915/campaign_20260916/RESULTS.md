@@ -3,7 +3,7 @@
 Batch (16-target) parity verdict: **True**; selected implementation **combined_descent**.
 Single-target verdict: **strictly below rho in both metrics**; selected implementation **tiny2** (round-0007), after **tiny_batch1** reached parity in round-0006.
 
-Completed five new tournaments with **7,776 profiled trials**, each paired with a fresh native run. Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
+Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006 and 0007 (1,584 and 1,488 profiled trials, parity and then a strict win over rho). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
 
 ## Profiled instruction cost relative to matched rho
 
@@ -13,6 +13,7 @@ Completed five new tournaments with **7,776 profiled trials**, each paired with 
 | [round-0003b](../runs/round-0003b/REPORT.md) | 1 | combined_batch8 | 7.1494 | [6.563380843095217, 7.844932268218591] |
 | [round-0004](../runs/round-0004/REPORT.md) | 1 | folded_lift_batch4 | 3.0429 | [2.688274518239304, 3.4833783647230367] |
 | [round-0005-batch16](../runs/round-0005-batch16/REPORT.md) | 16 | combined_descent | 0.7195 | [0.6374471292425982, 0.8219836239443673] |
+| [round-0006-batch16](../runs/round-0006-batch16/REPORT.md) | 16 | incumbent retained (combined_descent + descent certificate) | 0.7259 | [0.6410, 0.8372] |
 | [round-0006](../runs/round-0006/REPORT.md) | 1 | tiny_batch1 | 0.8264 | [0.8032467836918035, 0.8488166193357406] |
 | [round-0007](../runs/round-0007/REPORT.md) | 1 | tiny2 | 0.7376 | [0.7065693377992373, 0.7643545073767521] |
 
@@ -24,6 +25,62 @@ Completed five new tournaments with **7,776 profiled trials**, each paired with 
 | round-0003b | 1 | combined_batch8 | 2.7579 | [2.408587066800431, 3.0866033786867497] |
 | round-0004 | 1 | folded_lift_batch4 | 1.5213 | [1.4825577742485183, 1.5518235985269213] |
 | round-0005-batch16 | 16 | combined_descent | 0.7796 | [0.6991620583548833, 0.8736653449888768] |
+| round-0006-batch16 | 16 | incumbent retained (combined_descent + descent certificate) | 0.7853 | [0.7040, 0.8771] |
+
+## Round 0006: index-calculus admission enforced, incumbent retained
+
+Round 0006 ([pre-registration](ROUND6.md), [report](../runs/round-0006-batch16/REPORT.md))
+ran on a different host and compiler (4 vCPU, rustc 1.94.1) from rounds
+0002–0005, so only its within-round ratios are comparable. Two things changed
+before measurement:
+
+- **Only index-calculus algorithms compete with rho.** Every IC arm now
+  reports, per target, the relation `[a]G + [b]Q = Σ P_i` its logarithm was
+  derived from, and the frozen checker verifies it in the group and checks the
+  scalar as its consequence under the verified column logs. All 1,680 receipts
+  carry `certified_descents` equal to the target count. The incumbent is the
+  round-0005 winner plus this certificate.
+- **Seven profiled-bottleneck candidates**, each an exact source change with a
+  preflight equivalence test: Itoh–Tsujii and binary-Euclid field inversion,
+  one single-word curve per build and per verified batch, a lazily built
+  `FieldStructure`, precomputed `λ^k`, single-word orbit tables, and their
+  combination.
+
+Development (four cells, three targets each, three repetitions; 324/324
+verified), candidate/incumbent instruction ratios: combined 0.8026, euclid_inv
+0.9142, lambda_table 0.9452, fast_orbits 0.9513, fast_curve_once 0.9603,
+it_inv 0.9722, lazy_field 0.9732. Native-time ratios were much closer to one
+(combined 0.93; the single mechanisms 0.96–1.01). Selection locked `combined`.
+
+Confirmation and replay (60 fresh 16-target fixtures, five cells, three
+repetitions; 1,080/1,080 verified): combined/incumbent **0.8018** instructions
+(95% paired interval 0.7874–0.8146) and **0.9237** native time (0.9102–0.9365)
+on confirmation; 0.8018 and 0.9136 on replay. Every cell was below 0.83 in
+instructions and below 0.94 in native time. The pre-registered promotion gate
+requires at most 0.80 on both metrics, so the challenger missed the
+instruction threshold by 0.0018 and the native threshold by a wide margin:
+**incumbent retained**. This is the outcome the pre-registration named as
+plausible: 58% of the incumbent's instructions are shared with the rho arm
+(target construction, general final verification, startup, reporting), and
+native process time is dominated by fixed per-process cost the mechanisms do
+not touch.
+
+The retained incumbent reproduced the batch parity result on this host:
+incumbent/rho **0.7259** instructions (0.6410–0.8372) and **0.7853** native
+time (0.7040–0.8771) on confirmation, 0.7259 and 0.7942 on replay, every cell
+at most 0.94 and 0.98 respectively; `rho_parity` true, `beats_rho` true.
+
+Round 0006 is the first round without a promotion (one of the three the
+protocol allows before an unsuccessful line stops). Evidence-based successor,
+not yet run: the Euclid inversion dominated Itoh–Tsujii in every stage (0.914
+versus 0.972), so a combination built on `euclid_inv` would be expected near
+0.75 instructions against the incumbent; its native-time ratio would still be
+expected near 0.89, so it could pass the instruction gate but not the native
+gate as currently frozen. Whether the native-progress gate should stay on a
+panel whose native time is dominated by fixed process cost is a protocol
+decision to make before the next round, not during it. The mechanical
+parameter-neighbour registry is in [round6-next-candidates.json](round6-next-candidates.json).
+
 | round-0006 | 1 | tiny_batch1 | 0.9766 | [0.957057247571661, 0.9946203513598987] |
 | round-0007 | 1 | tiny2 | 0.9461 | [0.9292926395602298, 0.9639483494225052] |
 
