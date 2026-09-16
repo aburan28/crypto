@@ -58,10 +58,6 @@ class NativeMetricsTests(unittest.TestCase):
             self.assertNotEqual(result['exit_code'], 0)
             self.assertLess(result['process_wall_seconds'], 3)
 
-
-if __name__ == '__main__':
-    unittest.main()
-
     def test_execute_caps_and_pins_the_child_without_a_preexec_fork(self):
         from tournament import SPAWN
         probe = ('import json,os,resource,sys; sys.stdin.read(); '
@@ -80,10 +76,11 @@ if __name__ == '__main__':
         self.assertEqual(os.sched_getaffinity(0), before)
 
     def test_built_worker_accepts_host_or_triple_layout(self):
+        from oracle import InvalidEvidence
         from tournament import built_worker
         with tempfile.TemporaryDirectory() as tmp:
             build = Path(tmp)
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(InvalidEvidence):
                 built_worker(build)
             triple = build / 'x86_64-unknown-linux-gnu/release/examples'
             triple.mkdir(parents=True)
@@ -92,5 +89,7 @@ if __name__ == '__main__':
             host = build / 'release/examples'
             host.mkdir(parents=True)
             (host / 'ic_tournament_worker').write_bytes(b'2')
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(InvalidEvidence):
                 built_worker(build)
+if __name__ == '__main__':
+    unittest.main()
