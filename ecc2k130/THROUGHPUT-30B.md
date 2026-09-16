@@ -11,6 +11,12 @@ overtaken by the measured 14.637530 B/s.
 
 This prices the objective against the path that actually runs.
 
+> **Superseded in part by [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md).**
+> The instruction counts below are PTX-derived shares; the SASS counts and the
+> carry-less pipe's own budget are in that note, which also prices the floor of
+> any one-addition-per-step walk (≈ 25 B/s per GPU) and specifies the walk that
+> removes the Frobenius and conversion share priced here.
+
 ## The boundary
 
 The probe in [benchmarks/hardware-limits](benchmarks/hardware-limits/probe.cu)
