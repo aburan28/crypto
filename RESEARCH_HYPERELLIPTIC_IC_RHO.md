@@ -314,6 +314,16 @@ sizes, and that is a narrower claim than it sounds.**
   roughly 2× behind at `p = 251`, and 6 – 9× behind at `p ≤ 101`.
   Implementing a DP rho is the honest next step before any claim that
   this crosses over.
+
+  > **This extrapolation was wrong, and round four measured it.** A
+  > distinguished-point rho was implemented and comes in at
+  > `S_rho = 2.41 – 9.08`, not `1.0 – 1.5`. The error was in the phrase
+  > "once its own precomputation is added": at these sizes rho's branch
+  > precomputation is roughly *half* its total, so scaling only the walk
+  > term understated it several-fold. Measured, index calculus is at
+  > `0.95 – 1.26` of DP rho rather than 2 – 9× behind it. An
+  > extrapolation across the one term that dominates at the sizes being
+  > measured is not an extrapolation.
 - `S_ic/S_rho` is flat in `p`, not falling, which is what genus 2
   predicts: `(m+1)·g! ≈ p` relation operations against rho's
   `sqrt(N) ≈ p`. Both sides are linear in `p`, so no amount of constant
@@ -323,3 +333,89 @@ sizes, and that is a narrower claim than it sounds.**
 - Scope is unchanged: genus 2, `p ≤ 251`, full factor base, one
   machine, and a factor-base build that is still `O(p)` — now the
   binding `O(p)` step, since the oracle no longer is.
+
+
+---
+
+# Round four: a real rho, and genus 3
+
+Round three ended with two named next steps. Both are now in the code;
+one is measured here, the other's table is still running and lands in a
+follow-up commit on the same branch.
+
+Class: **accounting** for the rho change (the reference got fairer, no
+algorithm moved) and **infrastructure** for genus 3.
+
+## The reference is now a distinguished-point rho
+
+`RhoVariant::DistinguishedPoints`: store the walk positions whose hash
+ends in `theta_bits` zeros, stop when one repeats. One group operation
+per step against Floyd's three, for the same expected number of steps.
+`theta_bits` is set so about 32 distinguished points are expected before
+the collision.
+
+It behaves as theory says: `S_walk`, rho's walk alone, drops from
+2.9 – 3.6 to **1.14 – 1.48**, straddling the `sqrt(π/2) = 1.2533` ideal.
+That is the check that the implementation is right, not a result.
+
+| `p` | `N` | `S_ic` | `S_rho` (DP) | **`S_ic/S_rho`** | `S_walk` | `S_ic`/floor |
+|--:|--:|--:|--:|--:|--:|--:|
+| 41 | 1321 | 9.65 | 9.08 | **1.06** | 1.37 | 10.9 |
+| 61 | 1399 | 9.85 | 8.82 | **1.12** | 1.33 | 8.0 |
+| 101 | 4663 | 5.90 | 5.45 | **1.08** | 1.29 | 4.2 |
+| 151 | 7949 | 5.07 | 4.67 | **1.09** | 1.48 | 2.8 |
+| 211 | 11813 | 4.66 | 3.96 | **1.18** | 1.33 | 2.2 |
+| 251 | 61667 | 2.28 | 2.41 | **0.95** | 1.24 | 2.2 |
+
+**The round-three claim does not survive, and that is the point of
+having done it.** Against Floyd rho, index calculus measured
+`0.55 – 0.91` — a win. Against a real rho it measures `0.95 – 1.18`:
+parity, with the single `p = 251` row below 1 and no trend. The earlier
+"beats this repository's rho" was true and is now uninteresting; the
+repository's rho was 3× more expensive than it needed to be.
+
+Round three also *predicted* this, and predicted it wrong. It
+extrapolated `S_rho(DP) ≈ 1.0 – 1.5` and concluded index calculus would
+be 2 – 9× behind. The measured `S_rho(DP)` is 2.41 – 9.08, because at
+these sizes rho's branch precomputation is about half its total and the
+extrapolation scaled only the walk term. An extrapolation across the one
+term that dominates at the size being measured is not an extrapolation.
+The note above is corrected in place rather than rewritten.
+
+## Genus 3 now runs
+
+Two pieces were missing and are now present, each with its own test:
+
+1. **Root finding above degree 2.** The fast oracle closed in form at
+   `deg u ≤ 2`, which is all genus 2 produces; genus 3 produces cubics,
+   and without a root finder for them the oracle fell back to the
+   `O(p)` scan exactly where the interesting measurement is. Now
+   Cantor–Zassenhaus equal-degree splitting: `gcd(d, (x+b)^((p−1)/2) −
+   1)` for random `b`. Held to the scan's answers exhaustively over
+   every monic cubic for two primes.
+2. **Group order without an L-polynomial.** The genus-2 route to
+   `#Jac` goes through an `L`-polynomial that is genus-2 only.
+   `divisor_order_bsgs` instead finds a multiple of `ord(D)` by
+   Baby-step Giant-step over the Hasse–Weil interval
+   `[(sqrt(p) − 1)^{2g}, (sqrt(p) + 1)^{2g}]` and divides it down — no
+   point counting, any genus. Cross-checked against the L-polynomial
+   route at genus 2, where both are available: they agree on every
+   divisor tested.
+
+The same interval fixes an instance-selection bug this work introduced:
+a subgroup must carry most of the Jacobian (`l ≥ lo/4`) or the
+comparison measures the instance rather than the algorithms — rho
+searches the subgroup while index calculus pays for a factor base sized
+by the whole curve. Without that constraint `p = 211` picked `N = 1103`
+and reported `S_ic = 14.7`, four times the correct row.
+
+`solves_a_genus_three_dlp` takes a genus-3 curve end to end: BSGS for
+the order, a prime-order subgroup, the walk, the fast oracle, the sparse
+solve, and a verified `k`. Measured smoothness there is below 0.45,
+consistent with `1/3! = 0.167` being the target rather than genus 2's
+`1/2` — the cost the extra genus buys, and the reason genus 3 is where
+the crossover is supposed to live.
+
+The genus-2-vs-genus-3 table against the same DP rho is measuring now
+and lands in a follow-up commit. Nothing is claimed about genus 3 until
+it does.

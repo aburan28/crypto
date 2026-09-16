@@ -12,19 +12,20 @@
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
-use crypto_lib::cryptanalysis::hyperelliptic_ic_bench::{head_to_head, HeadToHeadTrials};
+use crypto_lib::cryptanalysis::hyperelliptic_ic_bench::{
+    head_to_head, HeadToHeadTrials, RhoVariant,
+};
 use crypto_lib::cryptanalysis::hyperelliptic_index_calculus::{
-    build_factor_base, prime_order_of, subgroup_generator, HecIndexCalculusParams, LinearAlgebra,
-    RelationSearch, SmoothnessTest,
+    build_factor_base, divisor_order_bsgs, hasse_interval, largest_prime_factor,
+    HecIndexCalculusParams, LinearAlgebra, RelationSearch, SmoothnessTest,
 };
-use crypto_lib::prime_hyperelliptic::{
-    brute_force_jac_order_via_lpoly, FpPoly, HyperellipticCurveP, MumfordDivisorP,
-};
+use crypto_lib::prime_hyperelliptic::{FpPoly, HyperellipticCurveP, MumfordDivisorP};
 
-/// `C : y² = x⁵ + 3x³ + 2x² + x + c` over `F_p`, genus 2.
-fn curve_over(p: u64, c: u64) -> HyperellipticCurveP {
+/// Genus 2: `C : y² = x⁵ + 3x³ + 2x² + x + c`.
+/// Genus 3: `C : y² = x⁷ + x³ + c x + 1`.
+fn curve_over(p: u64, c: u64, genus: u32) -> HyperellipticCurveP {
     let p = BigUint::from(p);
-    let f = FpPoly::from_coeffs(
+    let coeffs = if genus == 2 {
         vec![
             BigUint::from(c) % &p,
             BigUint::from(1u32),
@@ -32,10 +33,21 @@ fn curve_over(p: u64, c: u64) -> HyperellipticCurveP {
             BigUint::from(3u32),
             BigUint::zero(),
             BigUint::from(1u32),
-        ],
-        p.clone(),
-    );
-    HyperellipticCurveP::new(p, f, 2)
+        ]
+    } else {
+        vec![
+            BigUint::one(),
+            BigUint::from(c) % &p,
+            BigUint::zero(),
+            BigUint::one(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::one(),
+        ]
+    };
+    let f = FpPoly::from_coeffs(coeffs, p.clone());
+    HyperellipticCurveP::new(p, f, genus)
 }
 
 /// `f` squarefree ⟺ `gcd(f, f') = 1`.  A singular curve would run
@@ -64,49 +76,58 @@ fn is_squarefree(curve: &HyperellipticCurveP) -> bool {
 /// group.  Scanning `c` rather than fixing it is a choice about the
 /// *instance*, made before either algorithm runs and reported in the
 /// table.
-fn pick_instance(p: u64) -> Option<(HyperellipticCurveP, BigUint, BigUint, u64)> {
+fn pick_instance(
+    p: u64,
+    genus: u32,
+) -> Option<(HyperellipticCurveP, MumfordDivisorP, BigUint, u64)> {
     for c in 1..p.min(60) {
-        let curve = curve_over(p, c);
+        let curve = curve_over(p, c, genus);
         if !is_squarefree(&curve) {
             continue;
         }
-        let jac = brute_force_jac_order_via_lpoly(&curve);
-        let n = largest_prime_factor(&jac);
-        if &n * BigUint::from(4u32) >= jac && n > BigUint::from(1000u32) {
-            return Some((curve, jac, n, c));
+        let fb = build_factor_base(&curve, usize::MAX);
+        for e in fb.entries.iter().take(8) {
+            // The order comes from BSGS over the Hasse-Weil interval,
+            // not from an L-polynomial: that route is genus-2 only, and
+            // the comparison has to run at genus 3 too.
+            let order = match divisor_order_bsgs(&curve, &e.divisor, 200_000) {
+                Some(o) => o,
+                None => continue,
+            };
+            let l = largest_prime_factor(&order);
+            // The subgroup must carry most of the Jacobian, or the
+            // comparison measures the instance rather than the
+            // algorithms: rho searches the subgroup while index
+            // calculus pays for a factor base sized by the whole curve.
+            // No point count is needed for this — the Hasse-Weil lower
+            // bound is enough.
+            let (lo, _hi) = hasse_interval(&curve)?;
+            if l < BigUint::from(1000u32) || &l * BigUint::from(4u32) < BigUint::from(lo) {
+                continue;
+            }
+            let d1 = e.divisor.scalar_mul(&(&order / &l), &curve);
+            if divisor_order_bsgs(&curve, &d1, 200_000).as_ref() != Some(&l) {
+                continue;
+            }
+            return Some((curve, d1, l, c));
         }
     }
     None
 }
 
-fn largest_prime_factor(n: &BigUint) -> BigUint {
-    let mut rest = n.clone();
-    let mut best = BigUint::one();
-    let mut d = BigUint::from(2u32);
-    while &d * &d <= rest {
-        while (&rest % &d).is_zero() {
-            rest /= &d;
-            if d > best {
-                best = d.clone();
-            }
-        }
-        d += 1u32;
-    }
-    if rest > best {
-        best = rest;
-    }
-    best
-}
-
 fn main() {
     // Squarefree f is required; a p where f has a repeated root is
     // skipped rather than silently mis-measured.
-    let primes = [41u64, 61, 101, 151, 211, 251];
+    let primes2 = [41u64, 61, 101, 151, 211, 251];
+    // Genus 3 reaches the same group size at a much smaller p, since
+    // #Jac ~ p^3.
+    let primes3 = [23u64, 31, 41, 61, 101];
 
     println!(
-        "C : y^2 = x^5 + 3x^3 + 2x^2 + x + c over F_p, genus 2; c is the first\n\
-         value giving a near-prime Jacobian order (N >= #Jac/4), chosen before\n\
-         either algorithm runs.\n\
+        "Genus 2: C : y^2 = x^5 + 3x^3 + 2x^2 + x + c.  Genus 3: y^2 = x^7 + x^3 + cx + 1;\n\
+         c the first value yielding a prime-order subgroup above 1000,\n\
+         chosen before either algorithm runs; the order comes from BSGS over\n\
+         the Hasse-Weil interval, not from a genus-2 L-polynomial.\n\
          Unit: S = total group operations / sqrt(N), N = prime order of D1.\n\
          Index calculus carries its linear algebra, converted at the measured\n\
          mul-mods-per-group-op factor shown in the last column.\n"
@@ -132,115 +153,101 @@ fn main() {
         "IC/flr"
     );
 
-    for &p in &primes {
-        let (curve, jac, n, c) = match pick_instance(p) {
-            Some(v) => v,
-            None => {
-                println!("{p:>5}   skipped: no c gives a near-prime Jacobian order");
-                continue;
-            }
-        };
-        let cofactor = &jac / &n;
-        let fb = build_factor_base(&curve, usize::MAX);
-        let d1: MumfordDivisorP = match subgroup_generator(&curve, &fb, &jac, &n) {
-            Some(d) => d,
-            None => {
-                println!("{p:>5}   skipped: no generator of the order-{n} subgroup");
-                continue;
-            }
-        };
-        if prime_order_of(&curve, &d1, &jac).as_ref() != Some(&n) {
-            println!("{p:>5}   skipped: D1 does not have prime order {n}");
-            continue;
-        }
-
-        let k = &n / BigUint::from(3u32) + BigUint::from(7u32);
-        let d2 = d1.scalar_mul(&k, &curve);
-
-        for (label, search, la, oracle) in [
-            (
-                "baseline",
-                RelationSearch::Random,
-                LinearAlgebra::Dense,
-                SmoothnessTest::Scan,
-            ),
-            (
-                "walk",
-                RelationSearch::walk(),
-                LinearAlgebra::Dense,
-                SmoothnessTest::Scan,
-            ),
-            (
-                "walk+spr",
-                RelationSearch::walk(),
-                LinearAlgebra::Sparse,
-                SmoothnessTest::Scan,
-            ),
-            (
-                "all three",
-                RelationSearch::walk(),
-                LinearAlgebra::Sparse,
-                SmoothnessTest::Gcd,
-            ),
-        ] {
-            let params = HecIndexCalculusParams {
-                fb_size: usize::MAX,
-                extra_relations: 8,
-                max_trials: 2_000_000,
-                seed: 20260916,
-                search,
-                linear_algebra: la,
-                smoothness: oracle,
+    for (genus, primes) in [(2u32, &primes2[..]), (3u32, &primes3[..])] {
+        println!("\n--- genus {genus} ---");
+        for &p in primes {
+            let (curve, d1, n, c) = match pick_instance(p, genus) {
+                Some(v) => v,
+                None => {
+                    println!("{p:>5}   skipped: no usable prime-order subgroup found");
+                    continue;
+                }
             };
-            let row = head_to_head(
-                &curve, &d1, &d2, &n, &params, 0xC0FFEE, 50_000_000, &k, &trials,
-            );
+            let m = build_factor_base(&curve, usize::MAX).len();
 
-            // A row without a verified answer on both sides is not a result.
-            let mark = match (row.ic_correct, row.rho_correct) {
-                (true, true) => "",
-                (false, true) => "  [IC UNSOLVED - not a result]",
-                (true, false) => "  [rho UNSOLVED - not a result]",
-                (false, false) => "  [both UNSOLVED - not a result]",
-            };
+            let k = &n / BigUint::from(3u32) + BigUint::from(7u32);
+            let d2 = d1.scalar_mul(&k, &curve);
 
-            println!(
-                "{:>5} {:>9} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
-                p,
-                label,
-                row.n,
-                row.factor_base_size,
-                row.ic_total_group_ops,
-                row.rho_group_ops,
-                row.ic_s,
-                row.rho_s,
-                row.ratio_to_reference(),
-                row.rho_walk_s,
-                row.ratio_to_floor(),
-                mark
-            );
-            println!(
-                "        c = {}, #Jac = {} = {} x {}; relation stage {:.0} ops \
-                 ({:.0} precompute, {:.2} ops/trial) + oracle {:.0} mul-mods \
-                 ({:.0} equiv) + linear algebra {:.0} mul-mods ({:.0} equiv), conv {:.0}; \
-                 smoothness {:.3}; IC floor S = {:.2}; wall {:.0} ms IC vs {:.0} ms rho",
-                c,
-                jac,
-                cofactor,
-                n,
-                row.ic_relation_ops,
-                row.ic_precompute_ops,
-                row.ic_ops_per_trial,
-                row.ic_oracle_modmuls,
-                row.ic_oracle_group_equiv,
-                row.ic_la_modmuls,
-                row.ic_la_group_equiv,
-                row.modmuls_per_group_op,
-                row.ic_smoothness_rate,
-                row.ic_floor_s,
-                row.ic_wall_ms,
-                row.rho_wall_ms,
-            );
+            for (label, search, la, oracle) in [
+                (
+                    "baseline",
+                    RelationSearch::Random,
+                    LinearAlgebra::Dense,
+                    SmoothnessTest::Scan,
+                ),
+                (
+                    "optimised",
+                    RelationSearch::walk(),
+                    LinearAlgebra::Sparse,
+                    SmoothnessTest::Gcd,
+                ),
+            ] {
+                let params = HecIndexCalculusParams {
+                    fb_size: usize::MAX,
+                    extra_relations: 8,
+                    max_trials: 5_000_000,
+                    seed: 20260916,
+                    search,
+                    linear_algebra: la,
+                    smoothness: oracle,
+                };
+                let row = head_to_head(
+                    &curve,
+                    &d1,
+                    &d2,
+                    &n,
+                    &params,
+                    0xC0FFEE,
+                    200_000_000,
+                    &k,
+                    &trials,
+                    &RhoVariant::DistinguishedPoints,
+                );
+
+                // A row without a verified answer on both sides is not
+                // a result.
+                let mark = match (row.ic_correct, row.rho_correct) {
+                    (true, true) => "",
+                    (false, true) => "  [IC UNSOLVED - not a result]",
+                    (true, false) => "  [rho UNSOLVED - not a result]",
+                    (false, false) => "  [both UNSOLVED - not a result]",
+                };
+
+                println!(
+                    "{:>5} {:>9} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
+                    p,
+                    label,
+                    row.n,
+                    m,
+                    row.ic_total_group_ops,
+                    row.rho_group_ops,
+                    row.ic_s,
+                    row.rho_s,
+                    row.ratio_to_reference(),
+                    row.rho_walk_s,
+                    row.ratio_to_floor(),
+                    mark
+                );
+                println!(
+                    "        c = {}, relation stage {:.0} ops ({:.0} precompute, {:.2} ops/trial) \
+                     + oracle {:.0} mul-mods ({:.0} equiv) + linear algebra {:.0} mul-mods \
+                     ({:.0} equiv), conv {:.0}; smoothness {:.3}; IC floor S = {:.2}; \
+                     wall {:.0} ms IC vs {:.0} ms rho",
+                    c,
+                    row.ic_relation_ops,
+                    row.ic_precompute_ops,
+                    row.ic_ops_per_trial,
+                    row.ic_oracle_modmuls,
+                    row.ic_oracle_group_equiv,
+                    row.ic_la_modmuls,
+                    row.ic_la_group_equiv,
+                    row.modmuls_per_group_op,
+                    row.ic_smoothness_rate,
+                    row.ic_floor_s,
+                    row.ic_wall_ms,
+                    row.rho_wall_ms,
+                );
+            }
         }
     }
 
