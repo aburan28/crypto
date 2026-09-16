@@ -199,7 +199,11 @@ resident blocks per SM (minBlocks 4) cost 34%
    tuning choice rather than a portability one. `CLMAD=1` overrides it; get a
    receipt first (`../ADA-L4-L40S.md`, `../benchmarks/ada/run.sh`). The
    published binary key covers the arches and knobs as well as the source, so
-   builds that differ only in those no longer overwrite each other.
+   builds that differ only in those no longer overwrite each other, and
+   `bootstrap.sh` takes the carryless marker it gates on from the published
+   `manifest.json` rather than hardcoding 1 -- otherwise a deliberately
+   CLMAD-free Ada client would be rejected and the fleet would never start.
+   The gate still fails a binary that disagrees with its own manifest.
 
 ## Runbook
 

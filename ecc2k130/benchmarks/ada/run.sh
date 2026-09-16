@@ -154,8 +154,12 @@ if sw and cl:
     rec["clmadGain"] = cl / sw - 1.0
     rec["preset"] = "clmad" if cl > sw else "software"
 else:
+    # A gain needs both arms, so it stays None. The preset does not: one arm
+    # that produced a rate is still the only arm that produced a rate, whichever
+    # one it was, and a receipt that names no preset when it has exactly one
+    # candidate is just a receipt nobody can act on. Both arms invalid -> None.
     rec["clmadGain"] = None
-    rec["preset"] = "software" if sw else None
+    rec["preset"] = "software" if sw else ("clmad" if cl else None)
 
 json.dump(rec, open(out_path, "w"), indent=1)
 print(f"\nwrote {out_path}")

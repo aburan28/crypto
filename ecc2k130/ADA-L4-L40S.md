@@ -176,7 +176,10 @@ BUCKET=... ARCHES="89" CLMAD=1 ./aws/build.sh /path/...      # only with a recei
 ```
 
 The binary key now includes the knobs, so an Ada client and a Blackwell client
-coexist in the bucket instead of overwriting one another. `campaign.json` still
+coexist in the bucket instead of overwriting one another. `bootstrap.sh` reads
+the expected carryless marker off that build's `manifest.json` instead of
+requiring 1, so a CLMAD-free Ada client boots; a binary that disagrees with its
+own manifest is still refused, and a missing manifest still demands 1. `campaign.json` still
 carries one `binaryKey` and one geometry, so a **mixed-architecture** fleet is a
 further change and not merely a further build — the batch/threads/minBlocks
 assertion in `build.sh` is what would catch an attempt to serve both from one
