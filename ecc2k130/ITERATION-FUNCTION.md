@@ -333,6 +333,9 @@ assumed `1/37.7` stands.
 
 ## 5. What 28 B/s costs
 
+> **20 B/s** is priced separately in [THROUGHPUT-20B.md](THROUGHPUT-20B.md),
+> with a per-routine static profile of the table walk (`kernel_attribution.py`).
+
 Per GPU the floor is ~25 B/s at 100% of the carry-less unit and ~23 B/s at
 90%. The route to 28 B/s of ECC2K-130 updates is therefore two RTX PRO 6000s at
 ≥ 14 B/s each — which the shipping kernel already does — or a `g7e.12xlarge`'s
