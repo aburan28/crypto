@@ -27,10 +27,22 @@
 //                     generated endpoints in the client's 32-byte record
 //                     format, so the client can --load them.
 //
+//   --sample          the challenge curve.  The reference walks a few thousand
+//                     steps a second, so this mode drives the client's own
+//                     bitsliced kernel instead, walks every seed at most --cap
+//                     steps, keeps the trails that reach their distinguished
+//                     point inside that, samples each every --every steps plus
+//                     its endpoint, and names every orbit by a hash prefix, so
+//                     the output can be published where the orbits themselves
+//                     cannot.  Seeds come from --corpus (each endpoint must be
+//                     the orbit its record names) or --run-id/--walks.
+//
 // Build:  make trailforest            (plain C++, no GPU)
 // Usage:  build/trailforest --curve 23 --instance 0 --corpus dps.bin [--max N] > trails.txt
 //         build/trailforest --curve 23 --instance 0 --generate --run-id 1 --walks 40 \
 //                           --check-corpus dps.bin --corpus-out forest.bin > trails.txt
+//         build/trailforest --curve 131 --dp-weight 34 --sample --corpus dps.bin \
+//                           --cap 65536 --every 512 --hashes-out forest.hashes > trails.txt
 //
 // Output, one record per line:
 //
@@ -50,7 +62,10 @@
 #include <vector>
 
 #include "../include/curveparams.h"
+#include "../include/kernel.h"
 #include "../include/solver.h"
+
+#include <unordered_map>
 
 struct DpFileRecord {
     unsigned long long seed;
@@ -64,15 +79,87 @@ struct Options {
     int dpWeight = -1;
     bool polyBasis = false;
     bool generate = false;
+    bool sample = false;
     unsigned runId = 1;
     unsigned long long walks = 40;
     unsigned long long max = 0;
     unsigned long long skip = 0;
     unsigned long long maxIters = 1ull << 32;
+    unsigned long long every = 1024;
+    unsigned long long cap = 1ull << 20;
     std::string corpus;
     std::string checkCorpus;
     std::string corpusOut;
+    std::string hashesOut;
 };
+
+// ---------------------------------------------------------------------------
+// SHA-256, for naming orbits on the challenge curve without publishing them.
+// ---------------------------------------------------------------------------
+struct Sha256 {
+    static inline unsigned rotr(unsigned x, int n) { return (x >> n) | (x << (32 - n)); }
+    static void digest(const unsigned char *msg, size_t len, unsigned char out[32]) {
+        static const unsigned K[64] = {
+            0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+            0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+            0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+            0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+            0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+            0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
+        unsigned h[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                         0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+        std::vector<unsigned char> m(msg, msg + len);
+        m.push_back(0x80);
+        while (m.size() % 64 != 56) m.push_back(0);
+        const unsigned long long bits = (unsigned long long)len * 8;
+        for (int i = 7; i >= 0; --i) m.push_back((unsigned char)(bits >> (8 * i)));
+        for (size_t off = 0; off < m.size(); off += 64) {
+            unsigned w[64];
+            for (int i = 0; i < 16; ++i)
+                w[i] = ((unsigned)m[off + 4 * i] << 24) | ((unsigned)m[off + 4 * i + 1] << 16) |
+                       ((unsigned)m[off + 4 * i + 2] << 8) | (unsigned)m[off + 4 * i + 3];
+            for (int i = 16; i < 64; ++i) {
+                const unsigned s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >> 3);
+                const unsigned s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >> 10);
+                w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+            }
+            unsigned a = h[0], b = h[1], c = h[2], d = h[3], e = h[4], f = h[5], g = h[6], hh = h[7];
+            for (int i = 0; i < 64; ++i) {
+                const unsigned S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+                const unsigned ch = (e & f) ^ (~e & g);
+                const unsigned t1 = hh + S1 + ch + K[i] + w[i];
+                const unsigned S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+                const unsigned maj = (a & b) ^ (a & c) ^ (b & c);
+                const unsigned t2 = S0 + maj;
+                hh = g; g = f; f = e; e = d + t1; d = c; c = b; b = a; a = t1 + t2;
+            }
+            h[0] += a; h[1] += b; h[2] += c; h[3] += d; h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
+        }
+        for (int i = 0; i < 8; ++i) {
+            out[4 * i] = (unsigned char)(h[i] >> 24);
+            out[4 * i + 1] = (unsigned char)(h[i] >> 16);
+            out[4 * i + 2] = (unsigned char)(h[i] >> 8);
+            out[4 * i + 3] = (unsigned char)h[i];
+        }
+    }
+};
+
+// An orbit's public name: the first 16 hex digits of SHA-256 over the canonical
+// representative's 24 little-endian bytes.  On the challenge curve the orbit
+// itself is a distinguished-point key, which the campaign never publishes; a
+// 64-bit prefix of a hash of a 131-bit value names it without revealing it.
+static std::string orbitName(const unsigned long long *canon3) {
+    unsigned char bytes[24];
+    for (int l = 0; l < 3; ++l)
+        for (int i = 0; i < 8; ++i) bytes[8 * l + i] = (unsigned char)(canon3[l] >> (8 * i));
+    unsigned char d[32];
+    Sha256::digest(bytes, sizeof bytes, d);
+    char hex[17];
+    for (int i = 0; i < 8; ++i) snprintf(hex + 2 * i, 3, "%02x", d[i]);
+    return std::string(hex, 16);
+}
 
 // The client's seed for lane `walkIndex` of run `runId` (walk.h, eccSeedFor):
 // a finished lane continues at seed + 1, so the low 16 bits count restarts.
@@ -107,11 +194,16 @@ static void printHex(const unsigned long long *v) {
 }
 
 template <class Cfg>
+static int sampleWalks(const Options &o, const unsigned long long *px, const unsigned long long *py,
+                       const unsigned long long *qx, const unsigned long long *qy, int w);
+
+template <class Cfg>
 static int run(const Options &o, const unsigned long long *px, const unsigned long long *py,
                const unsigned long long *qx, const unsigned long long *qy, const char *ellDec,
                const char *sDec, int defaultW) {
     typedef Ref<Cfg> R;
     const int w = o.dpWeight < 0 ? defaultW : o.dpWeight;
+    if (o.sample) return sampleWalks<Cfg>(o, px, py, qx, qy, w);
     Solver<Cfg> sol;
     sol.setup(px, py, qx, qy, ellDec, sDec, w, o.maxIters);
     std::string why;
@@ -224,6 +316,210 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+// --sample: the client's own bitsliced walk, on the challenge curve
+// ---------------------------------------------------------------------------
+// The scalar reference walks a few thousand steps a second, which is fine on
+// a test curve and hopeless against a 2^25 step trail.  This mode drives the
+// same Kernel the client runs -- every lane of every slot at once -- so a
+// batch of seeds is walked at the client's own rate.  Every seed gets --cap
+// steps at most; the trails that reach their distinguished point inside the
+// cap are kept, sampled once every --every steps plus their endpoint, and
+// named by hash.  With --corpus the seeds are the client's records and each
+// endpoint must be the orbit its record names; with --run-id/--walks they
+// are the seed schedule.
+template <class Cfg>
+static int sampleWalks(const Options &o, const unsigned long long *px, const unsigned long long *py,
+                       const unsigned long long *qx, const unsigned long long *qy, int w) {
+    typedef ECC_HOST_WORD W;
+    typedef Kernel<Cfg, W> K;
+    typedef Walk<Cfg, W> WK;
+    typedef typename Cfg::template Field<W> F;
+    typedef Ref<Cfg> R;
+    const int M = Cfg::M;
+    const int LANES = WordTraits<W>::LANES;
+    const int BATCH = ECC_BATCH;
+    const size_t perThread = (size_t)BATCH * LANES;
+
+    std::vector<unsigned long long> seeds;
+    std::vector<DpFileRecord> recs;
+    if (!o.corpus.empty()) {
+        if (!readCorpus(o.corpus, &recs)) return 8;
+        const size_t first = (size_t)(o.skip < recs.size() ? o.skip : recs.size());
+        size_t last = recs.size();
+        if (o.max && first + o.max < last) last = first + (size_t)o.max;
+        recs.assign(recs.begin() + first, recs.begin() + last);
+        for (size_t i = 0; i < recs.size(); ++i) seeds.push_back(recs[i].seed);
+    } else {
+        for (unsigned long long i = 0; i < o.walks; ++i) seeds.push_back(seedFor(o.runId, i));
+    }
+    if (seeds.empty()) { fprintf(stderr, "nothing to walk\n"); return 1; }
+    if (o.every == 0 || o.cap == 0 || o.cap % o.every != 0 || o.every > 0x7fffffffull) {
+        fprintf(stderr, "--cap must be a positive multiple of --every\n");
+        return 1;
+    }
+    const int threads = (int)((seeds.size() + perThread - 1) / perThread);
+    std::unordered_map<unsigned long long, size_t> indexOf;
+    for (size_t i = 0; i < seeds.size(); ++i) {
+        if (!indexOf.emplace(seeds[i], i).second) {
+            fprintf(stderr, "seed %016llx appears twice\n", seeds[i]);
+            return 1;
+        }
+    }
+
+    // State, laid out exactly as HostEngine lays it out.
+    std::vector<W> x((size_t)threads * BATCH * M, ECC_ZERO), y(x.size(), ECC_ZERO), pchain(x.size(), ECC_ZERO);
+    std::vector<W> dead((size_t)threads * BATCH, ECC_ZERO);
+    std::vector<unsigned long long> seedTab((size_t)threads * perThread, 0), startIter(seedTab.size(), 0);
+    std::vector<DpRecord> dp(seeds.size() + 1);
+    unsigned dpCount[3] = {0, 0, 0};
+    std::vector<unsigned long long> cpx(px, px + 3), cpy(py, py + 3), cqx(qx, qx + 3), cqy(qy, qy + 3);
+    WalkParams<W> P;
+    P.threads = threads;
+    P.steps = (int)o.every;
+    P.dpWeight = w;
+    P.runId = 0;
+    P.maxIters = 0;
+    P.iterBase = 0;
+    P.x = x.data();
+    P.y = y.data();
+    P.pchain = pchain.data();
+    P.seed = seedTab.data();
+    P.startIter = startIter.data();
+    P.dead = dead.data();
+    P.dp = dp.data();
+    P.dpCount = dpCount;
+    P.dpCap = (unsigned)dp.size();
+    P.consts.px = cpx.data();
+    P.consts.py = cpy.data();
+    P.consts.qx = cqx.data();
+    P.consts.qy = cqy.data();
+
+    // Kernel::init, but seeded from the list.  Lanes past the end of the list
+    // walk a filler seed with their reports suppressed, which is what the
+    // kernel's dead mask is for.
+    for (int tid = 0; tid < threads; ++tid) {
+        W xs[Cfg::M], ys[Cfg::M];
+        unsigned long long laneSeeds[WordTraits<W>::LANES];
+        for (int slot = 0; slot < BATCH; ++slot) {
+            W filler = ECC_ZERO;
+            for (int lane = 0; lane < LANES; ++lane) {
+                const size_t index = ((size_t)tid * BATCH + slot) * LANES + lane;
+                const bool real = index < seeds.size();
+                laneSeeds[lane] = real ? seeds[index] : seedFor(0xFFFFu, index);
+                P.seed[K::laneIndex(slot, lane, tid, threads)] = laneSeeds[lane];
+                P.startIter[K::laneIndex(slot, lane, tid, threads)] = 0;
+                if (!real) filler = filler | laneMask<W>(lane);
+            }
+            WK::startPoint(laneSeeds, P.consts, xs, ys);
+            K::store(P.x, slot, tid, threads, xs);
+            K::store(P.y, slot, tid, threads, ys);
+            P.dead[(size_t)slot * threads + tid] = filler;
+        }
+    }
+
+    struct Trail {
+        bool finished = false;
+        unsigned long long steps = 0;
+        std::vector<typename R::Elem> samples;   // raw x every `every` steps, from step 0
+        typename R::Elem end;
+    };
+    std::vector<Trail> trails(seeds.size());
+    auto sampleAll = [&]() {
+        W xs[Cfg::M];
+        unsigned long long limbs[3];
+        for (int tid = 0; tid < threads; ++tid) {
+            for (int slot = 0; slot < BATCH; ++slot) {
+                const size_t base = ((size_t)tid * BATCH + slot) * LANES;
+                if (base >= seeds.size()) break;
+                K::load(P.x, slot, tid, threads, xs);
+                for (int lane = 0; lane < LANES && base + lane < seeds.size(); ++lane) {
+                    Trail &t = trails[base + lane];
+                    if (t.finished) continue;
+                    F::getLane(xs, lane, limbs);
+                    t.samples.push_back(R::fromLimbs(limbs));
+                }
+            }
+        }
+    };
+    auto collect = [&]() {
+        const unsigned n = dpCount[0] < P.dpCap ? dpCount[0] : P.dpCap;
+        for (unsigned i = 0; i < n; ++i) {
+            const DpRecord &rec = dp[i];
+            auto it = indexOf.find(rec.seed);
+            if (it == indexOf.end()) continue;   // a filler lane can never report, but be safe
+            Trail &t = trails[it->second];
+            if (t.finished) continue;
+            t.finished = true;
+            t.steps = rec.iters;
+            t.end = R::fromLimbs(rec.x);
+        }
+        dpCount[0] = dpCount[1] = dpCount[2] = 0;
+    };
+
+    sampleAll();
+    size_t finished = 0;
+    unsigned long long now = 0;
+    while (now < o.cap) {
+        P.iterBase = now;
+        for (int tid = 0; tid < threads; ++tid) K::run(tid, P);
+        now += o.every;
+        collect();
+        finished = 0;
+        for (size_t i = 0; i < trails.size(); ++i) finished += trails[i].finished ? 1 : 0;
+        if (finished == trails.size()) break;
+        sampleAll();
+        fprintf(stderr, "\r%llu steps, %zu of %zu finished", now, finished, trails.size());
+    }
+    fprintf(stderr, "\n");
+
+    // Every finished trail's samples run from step 0 in strides of `every`;
+    // the ones taken after its distinguished point are dropped, and the
+    // endpoint is appended unless it fell exactly on a stride.
+    size_t checked = 0;
+    std::vector<size_t> drawn;
+    for (size_t i = 0; i < trails.size(); ++i) {
+        Trail &t = trails[i];
+        if (!t.finished) continue;
+        const size_t keep = (size_t)(t.steps / o.every) + 1;
+        if (t.samples.size() > keep) t.samples.resize(keep);
+        if (t.steps % o.every != 0) t.samples.push_back(t.end);
+        else t.samples.back() = t.end;
+        if (!recs.empty()) {
+            const typename R::Elem c = R::canonical(t.end);
+            if (c.v[0] != recs[i].canon[0] || c.v[1] != recs[i].canon[1] || c.v[2] != recs[i].canon[2]) {
+                fprintf(stderr, "seed %016llx: the replayed walk ends on an orbit the record does not name\n", seeds[i]);
+                return 3;
+            }
+            ++checked;
+        }
+        drawn.push_back(i);
+    }
+
+    FILE *hashes = 0;
+    if (!o.hashesOut.empty()) {
+        hashes = fopen(o.hashesOut.c_str(), "w");
+        if (!hashes) { fprintf(stderr, "cannot write %s\n", o.hashesOut.c_str()); return 8; }
+    }
+    printf("# curve %d instance %d dp-weight %d mode sample source %s every %llu cap %llu tried %zu drawn %zu checked %zu hash sha256-16\n",
+           o.curve, o.instance, w, recs.empty() ? "schedule" : "corpus", o.every, o.cap,
+           trails.size(), drawn.size(), checked);
+    for (size_t k = 0; k < drawn.size(); ++k) {
+        const Trail &t = trails[drawn[k]];
+        printf("walk %zu %llu", drawn[k], t.steps);
+        std::string last;
+        for (size_t s = 0; s < t.samples.size(); ++s) {
+            const typename R::Elem c = R::canonical(t.samples[s]);
+            last = orbitName(c.v);
+            printf(" %s", last.c_str());
+        }
+        putchar('\n');
+        if (hashes) fprintf(hashes, "%zu %s\n", drawn[k], last.c_str());
+    }
+    if (hashes) fclose(hashes);
+    return 0;
+}
+
 static void usage() {
     fprintf(stderr,
             "trailforest - replay the walks behind a corpus file, orbit by orbit\n"
@@ -240,7 +536,14 @@ static void usage() {
             "  --walks N        lanes 0 .. N-1 of that run, first walk each (default 40)\n"
             "  --check-corpus F hold generated trails to the client's records in F\n"
             "  --corpus-out F   write the generated endpoints as a corpus file\n"
-            "  --max-iters N    give up on a walk after N steps (default 2^32)\n");
+            "  --max-iters N    give up on a walk after N steps (default 2^32)\n"
+            "  --sample         walk with the client's bitsliced kernel instead of the\n"
+            "                   reference, keep the walks that finish within --cap steps,\n"
+            "                   sample them every --every steps and name orbits by hash;\n"
+            "                   seeds from --corpus (checked) or --run-id/--walks\n"
+            "  --every N        sample stride in --sample mode (default 1024)\n"
+            "  --cap N          most steps a sampled walk may take (default 2^20)\n"
+            "  --hashes-out F   write each drawn walk's endpoint name in --sample mode\n");
 }
 
 int main(int argc, char **argv) {
@@ -261,9 +564,15 @@ int main(int argc, char **argv) {
         else if (a == "--walks" && nx) o.walks = strtoull(argv[++i], 0, 10);
         else if (a == "--check-corpus" && nx) o.checkCorpus = argv[++i];
         else if (a == "--corpus-out" && nx) o.corpusOut = argv[++i];
+        else if (a == "--sample") o.sample = true;
+        else if (a == "--every" && nx) o.every = strtoull(argv[++i], 0, 10);
+        else if (a == "--cap" && nx) o.cap = strtoull(argv[++i], 0, 10);
+        else if (a == "--hashes-out" && nx) o.hashesOut = argv[++i];
         else { usage(); return 1; }
     }
-    if (o.corpus.empty() == !o.generate) { usage(); return 1; }
+    if (o.sample) {
+        if (o.generate) { usage(); return 1; }
+    } else if (o.corpus.empty() == !o.generate) { usage(); return 1; }
 
 #define TF_DISPATCH(NS, CFG)                                                                  \
     do {                                                                                      \
