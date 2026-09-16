@@ -288,6 +288,15 @@ fn rho_dp(
     // divisor hash → (a, b) that reached it.
     let mut seen: HashMap<u64, (BigUint, BigUint)> = HashMap::new();
 
+    // A deterministic walk can enter a cycle that contains **no**
+    // distinguished point, and then runs forever detecting nothing.
+    // Bound each attempt at a generous multiple of the expected
+    // distance to a collision and restart instead.  Without this the
+    // walk silently burns the entire step budget — not a slow run but a
+    // hung one, and from outside the two look identical.
+    let expected = 1.25 * root_n + (1u64 << theta_bits) as f64;
+    let attempt_cap = (64.0 * expected).min(1e9) as usize + 64;
+
     for _attempt in 0..64u64 {
         let a0 = rand_below(&mut rng, n);
         let b0 = rand_below(&mut rng, n);
@@ -297,8 +306,16 @@ fn rho_dp(
         group_ops += 2 * (n.bits() as usize + 1);
         precompute_ops += 2 * (n.bits() as usize + 1);
         let (mut a, mut b) = (a0, b0);
+        let mut this_attempt = 0usize;
 
         while steps_left > 0 {
+            if this_attempt >= attempt_cap {
+                // A cycle with no distinguished point in it, or simply
+                // an unlucky start: begin somewhere else.
+                restarts += 1;
+                break;
+            }
+            this_attempt += 1;
             let h = divisor_hash(&x);
             if (h & mask) == 0 {
                 match seen.get(&h) {
@@ -842,6 +859,34 @@ mod tests {
             (dp as f64) < 0.55 * floyd as f64,
             "dp {dp} vs floyd {floyd} walk ops"
         );
+    }
+
+    #[test]
+    fn dp_rho_terminates_on_every_seed_it_is_given() {
+        // Regression: a deterministic walk can enter a cycle holding no
+        // distinguished point, and the first implementation then ran to
+        // `max_steps` — 200 million operations for one unlucky seed,
+        // which presented as a hung benchmark rather than a slow one.
+        // Every seed must finish well inside a budget that a healthy
+        // run never approaches.
+        let (curve, d1, d2, n, k) = instance(251);
+        for seed in 0..40u64 {
+            let r = pollard_rho_jacobian_with(
+                &curve,
+                &d1,
+                &d2,
+                &n,
+                seed,
+                200_000,
+                &RhoVariant::DistinguishedPoints,
+            );
+            assert_eq!(r.k.as_ref(), Some(&k), "seed {seed} failed to solve");
+            assert!(
+                r.group_ops < 100_000,
+                "seed {seed} spent {} ops — the walk is not bounded",
+                r.group_ops
+            );
+        }
     }
 
     #[test]
