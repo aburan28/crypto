@@ -44,8 +44,31 @@ time (0.6992–0.8737). Replay passed again. Every curve cell met the per-cell r
 All setup and all target solves are included; rho uses the existing per-target
 solver API. This result applies to the tested five small Koblitz curve cells.
 
-The separate single-target result is 3.04 times rho's instructions and 1.52 times
-its time. Keep these workloads separate when extending the operation.
+The separate single-target panel reached parity in [round-0006](runs/round-0006/REPORT.md)
+([pre-registration](campaign_20260916/ROUND6-single-target.md)): the selected `tiny_batch1`
+costs 0.8264 times rho's instructions (95% interval 0.8032–0.8488) and 0.9766
+times its native time (0.9571–0.9946) on confirmation, 0.9854 (0.9641–1.0062)
+on replay, every cell within the 1.10 margin, 1,584 verified trials. It replaces
+the earlier 3.04 / 1.52 figures on that panel. [Round-0007](runs/round-0007/REPORT.md)
+([pre-registration](campaign_20260916/ROUND7-single-target.md), `--objective rho`) then went
+strictly below rho: `tiny2` at 0.7376 of rho's instructions (0.7066–0.7644) and
+0.9461 of its native time (0.9293–0.9639) on confirmation, 0.9414 (0.9215–0.9611)
+on replay, every cell below one in both metrics, 1,488 verified trials.
+[Round-0008](runs/round-0008/REPORT.md) ([pre-registration](campaign_20260916/ROUND8-single-target.md))
+re-measured that winner with the per-target descent certificate under the
+merged checker: 0.7379 (0.7144–0.7572) instructions and 0.9355 (0.9124–0.9610)
+native on confirmation, 0.9414 (0.9267–0.9545) on replay, retained with
+`beats_rho_strict`, 1,356 verified trials, every receipt certified.
+[Round-0009](runs/round-0009/REPORT.md) ([pre-registration](campaign_20260916/ROUND9-single-target.md))
+ran the same pipeline with the shared curve construction and target lift in
+tested single-word arithmetic for both arms: 0.5511 (0.5279–0.5881) of rho's
+instructions and 0.9406 (0.9131–0.9811) of its native time, retained, with one
+cell's native ratio at 1.017 on confirmation, so it does not replace round-0008
+as the strict-win record. Keep the two workloads separate when extending the
+operation;
+[WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
+and [next-proposal-single-target.json](campaign_20260916/next-proposal-single-target.json)
+carry the single-target line.
 
 Review [WINNER.json](campaign_20260916/WINNER.json) for the complete source and
 configuration, and [WINNER.patch](campaign_20260916/WINNER.patch) for the cumulative
@@ -78,6 +101,16 @@ confirmation and replay rule applies. Every completed decision separately report
 `winner_over_rho` and `rho_parity`: both metric upper confidence limits and every
 cell ratio must be at most 1.10 on both final stages for parity.
 
+`prepare --objective rho` declares a round whose aim is to beat matched rho
+rather than to improve on the incumbent by a margin. Under it the incumbent
+gate only guards against regression (instruction ratio at most 0.98 with the
+paired upper limit below one, native upper limit below one, no cell more than
+10% worse), and promotion additionally requires the strict rho gate on both
+confirmation and replay: candidate/rho upper paired 95% limits and every cell
+ratio below one in both instructions and native process wall. The decision
+records `beats_rho_strict` with that definition for any winner, alongside the
+older point-estimate `beats_rho` and the 1.10-margin `rho_parity`.
+
 New native measurements use blocking process reap with an independent timeout
 watchdog. Previous subprocess timeout polling quantized short native lifetimes;
 those old timings remain diagnostics and are not mixed into new runtime claims.
@@ -90,6 +123,22 @@ The executable currently supports CPU-only, odd-degree Koblitz fixtures from 5
 through 31, with pair-table or enumeration decomposition and dense/sparse scalar
 linear algebra. Initial candidates change batch size, surplus filtering, linear
 algebra or the collection window. These are configuration/engineering experiments.
+
+The round-0006 and round-0007 candidate sources add a single-word pipeline
+(`src/cryptanalysis/koblitz_tiny_ic.rs`, applied by
+`campaign_20260916/round6-tiny.patch`, `round7-tiny2.patch` and
+`round8-tiny2_cert.patch`) that the
+worker runs for `pair_table`, three-summand, prime-degree jobs with the
+`SubgroupOrbits` recipe: the same base point set, relation meaning, column
+certification and final verification, with a Euclidean field inverse, a
+normal-basis orbit key for the folded pair table, a work-minimising table-row
+rule, walked probes, López–Dahab projective and fixed-base batched scalar
+multiplication, its own field tables and a bit-exact scalar copy of the seeded
+ChaCha12 sampler, and no thread pool. Its worker writes the same report fields
+directly instead of through a value tree, including the per-target descent
+relation the merged checker requires. On that path `linear_algebra` and
+`sparse` have no effect; the registry records the configuration a candidate ran
+under. Jobs outside its scope take the general path unchanged.
 
 The primary implementation metric is **Valgrind amd64 instruction reads (`Ir`)**.
 All user-space instructions from startup to termination are charged, including

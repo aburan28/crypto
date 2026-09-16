@@ -23,23 +23,36 @@ python3 research/ic_candidate_tournament_20260915/runs/round-0005-batch16/evalua
   verify --round research/ic_candidate_tournament_20260915/runs/round-0005-batch16
 ```
 
-Use `--archive round-0005-batch16` to restore only that round, or
-`--out /absolute/path/to/evidence` to restore elsewhere. `round-0006-batch16`
-(incumbent retained; index-calculus admission enforced by per-target descent
-certificates) is packed the same way and verifies with its own frozen
-evaluator under `runs/round-0006-batch16/evaluator/`. New rounds are packed
-with `pack.py --name ROUND runs/ROUND`, the inverse of `restore.py`, which
-checks every profile's gzip reconstruction before writing it and appends the
-archive to `manifest.json`. Verification uses the
+Use `--archive round-0008` to restore only the certified single-target round
+(`--archive round-0009` for the same pipeline on the leaner shared job,
+`--archive round-0007` and `--archive round-0006` for the strict-win and
+parity rounds it built on),
+`--archive round-0005-batch16` or `--archive round-0006-batch16` for the
+16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
+`round-0006-batch16` (incumbent retained; index-calculus admission enforced by
+per-target descent certificates) verifies with its own frozen evaluator under
+`runs/round-0006-batch16/evaluator/`. New rounds are packed with
+`pack.py --name ROUND runs/ROUND`, the inverse of `restore.py`, which checks
+every profile's gzip reconstruction before writing it and appends the archive
+to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b` and `round-0004` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008` and `round-0009` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
 identical files are retained, so restoration is repeatable. About 1.1 GB of
 restored files are needed for the complete record, in addition to the archives.
+
+## Packing a new round
+
+`pack.py --name ROUND runs/ROUND` writes `ROUND.tar.zst` in this format and
+appends it to [manifest.json](manifest.json). It refuses a profile whose gzip
+stream zlib cannot reproduce exactly, excludes build caches and the operation
+lock, and refuses to overwrite an existing archive or manifest entry. Rounds
+0006-batch16 and 0006 through 0009 were packed with it; the earlier archives
+predate the script.
 
 ## Lossless profile packing
 
@@ -66,9 +79,19 @@ not changes to the library's current defaults. The cumulative candidate change i
 
 Historical JSON and logs retain original absolute `/home/ubuntu/crypto/...` paths
 as provenance. After relocating, use the same suffix below this research directory.
-The final winner source is
+The 16-target winner source is
 `runs/round-0005-batch16/source_candidates/combined_descent/source`; its configuration
-is in [winner-config.json](../runs/round-0005-batch16/winner-config.json).
+is in [winner-config.json](../runs/round-0005-batch16/winner-config.json). The
+single-target round-0006 candidates derive from that source through the
+committed `campaign_20260916/round6-*.patch` files, which
+`campaign_20260916/round6_candidates.py` reapplies onto the restored snapshot;
+the frozen copies the measurements bind are inside `round-0006.tar.zst`. Round-0007's
+candidates derive from round-0006's winner source the same way
+(`round7-*.patch`, `round7_candidates.py`, `round-0007.tar.zst`), and round-0008's
+certified incumbent from round-0007's winner source (`round8-tiny2_cert.patch`,
+`round8_candidates.py`, `round-0008.tar.zst`), and round-0009's baseline from
+round-0008's source (`round9-fastcurve.patch`, `round9_candidates.py`,
+`round-0009.tar.zst`).
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 

@@ -335,6 +335,7 @@ def prepare(args):
         'curve_diversity_limit':'One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.',
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
+        'objective':args.objective,'no_regression_ratio':0.98,
         'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall',
         'ci_level':0.95,'bootstrap_draws':2000,'host':platform.uname()._asdict(),
         'profiler_version':version,'compiler':subprocess.check_output(['rustc','--version'],text=True).strip(),
@@ -496,11 +497,39 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000):
 
 
 def gate(result,c):
-    return bool(result.get('eligible') and result['candidate_over_baseline']<=c['confirmation_ratio']
-        and result['ci95'][1]<1 and max(result['per_cell'].values())<=c['max_cell_ratio']
+    """Promotion over the incumbent.
+
+    Objective `incumbent` (default): at least `1 - confirmation_ratio` lower
+    cost with the paired interval below one and no cell worse than
+    `max_cell_ratio`, in instructions and, when required, native wall.
+
+    Objective `rho`: the incumbent gate only guards against regression — the
+    candidate must be measurably cheaper than the incumbent (instruction
+    ratio at most `no_regression_ratio` with the interval below one, native
+    interval below one, no cell worse than `max_cell_ratio` in either
+    metric) — and the decision additionally requires `rho_gate` on both final
+    stages.  The margin keeps an A/A control from passing on noise.
+    """
+    if not result.get('eligible'):
+        return False
+    cells_ok = max(result['per_cell'].values())<=c['max_cell_ratio']
+    if c.get('objective','incumbent')=='rho':
+        return bool(result['candidate_over_baseline']<=c.get('no_regression_ratio',0.98)
+            and result['ci95'][1]<1 and cells_ok
+            and result['native_wall_ci95'][1]<1
+            and max(result['native_wall_per_cell'].values())<=c['max_cell_ratio'])
+    return bool(result['candidate_over_baseline']<=c['confirmation_ratio']
+        and result['ci95'][1]<1 and cells_ok
         and (not c.get('require_native_progress') or (result['native_wall_ci95'][1]<1
              and result['native_wall_candidate_over_baseline']<=c['confirmation_ratio']
              and max(result['native_wall_per_cell'].values())<=c['max_cell_ratio'])))
+
+
+def rho_gate(paired):
+    """Strictly below matched rho: both metrics' paired upper 95% limits and
+    every curve cell below one.  A point estimate below one is not enough."""
+    return bool(paired.get('eligible') and paired['ci95'][1]<1 and paired['native_wall_ci95'][1]<1
+        and max(paired['per_cell'].values())<1 and max(paired['native_wall_per_cell'].values())<1)
 
 
 def stage_arms(root, stage, arms):
@@ -550,6 +579,13 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     conf=next((r for r in confirm['comparisons'] if r['candidate']==challenger),{})
     rep=next((r for r in replay['comparisons'] if r['candidate']==challenger),{})
     passed=gate(conf,c) and gate(rep,c)
+    challenger_over_rho={}
+    if challenger and c.get('objective','incumbent')=='rho':
+        for stage in ('confirmation','replay'):
+            active=stage_arms(root,stage,all_arms)
+            rows=load_stage(root,stage,fixtures[stage],active,c['repetitions'])
+            challenger_over_rho[stage]=comparison(rows,challenger,baseline='rho',draws=c['bootstrap_draws'])
+        passed=passed and all(rho_gate(p) for p in challenger_over_rho.values())
     qualified=bool(conf.get('eligible') and rep.get('eligible'))
     base_complete=True
     for stage in ('confirmation','replay'):
@@ -561,6 +597,8 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     reasons=[]
     if not passed:
         reasons.append('No challenger passed every confirmation and replay threshold.')
+        if challenger_over_rho and not all(rho_gate(p) for p in challenger_over_rho.values()):
+            reasons.append('The provisional challenger did not beat matched rho on both metrics with every upper 95% limit and every cell below one.')
     result={'status':'promoted' if passed else ('retained' if choice else 'inconclusive'),
         'winner':choice,'provisional_challenger':challenger,'confirmation':conf,'replay':rep,
         'unit':c['unit'],'classification':'engineering' if passed else 'accounting',
@@ -589,6 +627,11 @@ def decision(root,c,fixtures,all_arms,*,save=True):
             and max(p['per_cell'].values())<=c['parity_margin']
             and max(p['native_wall_per_cell'].values())<=c['parity_margin'] for p in parity)
         result['parity_definition']='Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.'
+        result['beats_rho_strict']=all(rho_gate(p) for p in parity)
+        result['beats_rho_strict_definition']='Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.'
+    if challenger_over_rho:
+        result['challenger_over_rho']=challenger_over_rho
+    result['objective']=c.get('objective','incumbent')
     if save:
         write(root/'decision.json',result,exclusive=True)
     return result
@@ -673,6 +716,8 @@ def main():
     p.add_argument('--max-processes',type=int,default=1800)
     p.add_argument('--require-native-progress',action='store_true')
     p.add_argument('--targets',type=int,default=1)
+    p.add_argument('--objective',choices=['incumbent','rho'],default='incumbent',
+                   help='rho: promote only a challenger that is measurably cheaper than the incumbent AND strictly below matched rho in both metrics (see gate/rho_gate)')
     p=commands.add_parser('propose')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--from-round',type=Path)
