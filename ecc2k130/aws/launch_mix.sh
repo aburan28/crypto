@@ -89,12 +89,14 @@ launch_n() {
             fi
             err=$(grep -oE '\([A-Za-z0-9.]+\)' /tmp/mix-err | head -1 || true)
             echo "  fail $i/$n $subnet $err"
+            # Quota errors are regional; anything else (InsufficientInstanceCapacity,
+            # Unsupported for a type not offered in that AZ, ...) is per AZ, so
+            # count the subnet as dry and keep walking.
             case "$err" in
                 *MaxSpotInstanceCountExceeded*|*VcpuLimitExceeded*)
                     echo "  stopping $market $type pool in $region"
                     return ;;
-                *InsufficientInstanceCapacity*) dry=$((dry + 1)) ;;
-                *) break ;;
+                *) dry=$((dry + 1)) ;;
             esac
         done
         if [ "$ok" -eq 0 ] && [ "$dry" -eq "${#subnets[@]}" ]; then
