@@ -760,6 +760,14 @@ impl KoblitzCurve {
 /// iff the right-hand side has absolute trace `0`.  For `x = 0` the
 /// equation degenerates to `y² = b`, whose unique solution is `y = √b`.
 pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+    if let Some(fc) = FastCurve::new(curve) {
+        return fc.points_with_x(fc.field.from_element(x)).into_iter()
+            .map(|p| fc.lower(p)).collect();
+    }
+    points_with_x_general(curve, x)
+}
+
+pub(crate) fn points_with_x_general(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
     let irr = &curve.irreducible;
     let m = curve.m;
     if x.is_zero() {
@@ -987,6 +995,11 @@ impl FrobeniusFactorBase {
     pub fn m_can_decompose(&self, kc: &KoblitzCurve, m: usize) -> bool {
         if self.points.is_empty() || m == 0 {
             return m == 0;
+        }
+        // Factor bases are negation closed and repeated summands are allowed:
+        // P + (-P) supplies an exact cofactor cancellation for every even m.
+        if m % 2 == 0 {
+            return true;
         }
         let classes = self.distinct_cofactor_classes(kc);
         if m == 1 {
@@ -1642,10 +1655,24 @@ pub fn build_frobenius_union_factor_base(
         return None;
     }
     let mut xs = std::collections::BTreeMap::new();
-    for mut x in seed {
-        for _ in 0..kc.extension_degree() {
-            xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
-            x = kc.frobenius_x(&x);
+    if let Some(fc) = FastCurve::new(&kc.curve) {
+        let mut packed = std::collections::BTreeSet::new();
+        for x in seed {
+            let mut x = fc.field.from_element(&x);
+            for _ in 0..kc.extension_degree() {
+                packed.insert(x);
+                x = fc.field.sqr_k(x, kc.k);
+            }
+        }
+        for x in packed {
+            xs.insert(BigUint::from(x), fc.field.to_element(x));
+        }
+    } else {
+        for mut x in seed {
+            for _ in 0..kc.extension_degree() {
+                xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+                x = kc.frobenius_x(&x);
+            }
         }
     }
     let ambient: Vec<_> = (0..kc.n)
@@ -1900,10 +1927,66 @@ fn finish_factor_base_domain(
     domain: FactorBaseDomain,
 ) -> Option<FrobeniusFactorBase> {
     let mut points: Vec<BinaryPoint> = Vec::new();
+    let fast = FastCurve::new(&kc.curve);
     for x in &subspace {
-        for p in points_with_x(&kc.curve, x) {
-            points.push(p);
+        if let Some(fc) = &fast {
+            points.extend(fc.points_with_x(fc.field.from_element(x)).into_iter().map(|p| fc.lower(p)));
+        } else {
+            points.extend(points_with_x(&kc.curve, x));
         }
+    }
+
+    // Build the exact same index/orbit arrays without general field arithmetic
+    // or allocating coordinates at every Frobenius step.
+    if let Some(fc) = &fast {
+        let packed: Vec<_> = points.iter().map(|p| fc.lift(p)).collect();
+        let index: HashMap<_, _> = packed.iter().enumerate().map(|(i, &p)| (p, i)).collect();
+        let mut orbit_of = vec![(usize::MAX, 0); points.len()];
+        let mut orbits = Vec::new();
+        for start in 0..packed.len() {
+            if orbit_of[start].0 != usize::MAX { continue; }
+            let orbit = orbits.len();
+            let mut cycle = Vec::new();
+            let mut current = packed[start];
+            let mut k = 0;
+            loop {
+                let i = *index.get(&current)?;
+                if orbit_of[i].0 != usize::MAX { break; }
+                orbit_of[i] = (orbit, k);
+                cycle.push(i);
+                current = fc.frobenius_k(current, kc.k);
+                k += 1;
+            }
+            orbits.push(cycle);
+        }
+        let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+        let mut signed_orbits = Vec::new();
+        for start in 0..packed.len() {
+            if signed_orbit_of[start].0 != usize::MAX { continue; }
+            let orbit = signed_orbits.len();
+            let mut members = Vec::new();
+            let mut current = packed[start];
+            for k in 0..kc.n {
+                for (negated, p) in [(false, current), (true, fc.neg(current))] {
+                    let i = *index.get(&p)?;
+                    if signed_orbit_of[i].0 == usize::MAX {
+                        signed_orbit_of[i] = (orbit, k, negated);
+                        members.push(i);
+                    } else if signed_orbit_of[i].0 != orbit {
+                        return None;
+                    }
+                }
+                current = fc.frobenius_k(current, kc.k);
+                if current == packed[start] { break; }
+            }
+            if current != packed[start] { return None; }
+            signed_orbits.push(members);
+        }
+        if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() { return None; }
+        return Some(FrobeniusFactorBase {
+            domain, ell, f_j, linearised_exponents: exps, subspace, subspace_basis,
+            points, orbits, orbit_of, signed_orbits, signed_orbit_of,
+        });
     }
 
     // Index points for the orbit walk and for relation lookups.
@@ -4136,6 +4219,19 @@ fn relation_from_decomposition_with_mode(
     collapse_negation: bool,
     projected_orbits: Option<&ProjectedSignedOrbitMap>,
 ) -> KoblitzRelation {
+    relation_from_decomposition_with_powers(kc, fb, idxs, coef_a, coef_b, collapse_negation, projected_orbits, None)
+}
+
+fn relation_from_decomposition_with_powers(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    idxs: &[usize],
+    coef_a: &BigUint,
+    coef_b: &BigUint,
+    collapse_negation: bool,
+    projected_orbits: Option<&ProjectedSignedOrbitMap>,
+    powers: Option<&[BigUint]>,
+) -> KoblitzRelation {
     let r = &kc.subgroup_order;
     let unknowns = projected_orbits.map_or_else(
         || {
@@ -4164,7 +4260,8 @@ fn relation_from_decomposition_with_mode(
             // relation is projected into the prime-order subgroup.
             continue;
         };
-        let mut coeff = kc.lambda.modpow(&BigUint::from(k), r);
+        let mut coeff = powers.and_then(|p| p.get(k as usize)).cloned()
+            .unwrap_or_else(|| kc.lambda.modpow(&BigUint::from(k), r));
         if negated && !coeff.is_zero() {
             coeff = r - coeff;
         }
@@ -4290,11 +4387,12 @@ fn projected_signed_orbit_map_fast(
     fb: &FrobeniusFactorBase,
 ) -> Option<ProjectedSignedOrbitMap> {
     let fc = FastCurve::new(&kc.curve)?;
-    let projected: Vec<FastPoint> = fb
-        .points
-        .par_iter()
-        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
-        .collect();
+    let project = |point: &BinaryPoint| fc.mul(fc.lift(point), &kc.cofactor);
+    let projected: Vec<FastPoint> = if fb.points.len() < 256 {
+        fb.points.iter().map(project).collect()
+    } else {
+        fb.points.par_iter().map(project).collect()
+    };
     let mut representatives: Vec<FastPoint> = Vec::new();
     let mut seen: HashSet<u64> = HashSet::new();
     for &point in &projected {
@@ -4415,7 +4513,8 @@ pub struct KoblitzIcOptions {
     /// construction is caller-owned precomputation and must be charged.
     pub weil_charts: Option<std::sync::Arc<super::weil_charts::WeilChartPlan>>,
     /// Splitting nodes (Gröbner-basis computations) one decomposition
-    /// may spend before it gives up.  Ignored by
+    /// may spend before it gives up. Chart plans additionally charge each
+    /// packed residual assignment against this whole-cover budget. Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub node_budget: usize,
     /// Models one [`DecompositionStrategy::Sat`] decomposition may
@@ -4568,6 +4667,9 @@ pub struct KoblitzIcReport {
     pub pair_table_entries: usize,
     /// Time spent building that table.
     pub pair_table_ns: u128,
+    /// Assignments checked by the projected chart solver, separate from F4
+    /// reductions. Neither counter alone measures total attack cost.
+    pub chart_residual_assignments: usize,
     /// One exact record for every generated relation candidate, including
     /// refutations, capped Unknown outcomes, invalid models, and skipped direct
     /// relations. This is public synthetic replay material, not a log label.
@@ -4661,6 +4763,7 @@ enum RelationAttemptOutcome {
     Direct,
     Enumerated(Option<Vec<usize>>),
     Groebner(Option<Vec<usize>>, SolveStats),
+    Charts(Option<Vec<usize>>, super::weil_charts::WeilSolveStats),
     Sat(Option<Vec<usize>>, SatDecompositionStats),
 }
 
@@ -4788,6 +4891,7 @@ fn koblitz_index_calculus_dlp_observed(
     }
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
+    let fast = FastCurve::new(&kc.curve);
     let projection_start = std::time::Instant::now();
     let projected_orbits = opts
         .collapse_projected_orbits
@@ -4846,6 +4950,7 @@ fn koblitz_index_calculus_dlp_observed(
         cofactor_admission_ns,
         pair_table_entries: 0,
         pair_table_ns: 0,
+        chart_residual_assignments: 0,
         attempt_records: Vec::new(),
         relation_matrix: Vec::new(),
         matrix_rows: 0,
@@ -4904,13 +5009,26 @@ fn koblitz_index_calculus_dlp_observed(
         None
     };
 
-    let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+    let field = (opts.strategy == DecompositionStrategy::Sat
+        || (opts.strategy == DecompositionStrategy::Groebner && opts.weil_charts.is_none()))
+        .then(|| FieldStructure::new(kc.n, &kc.curve.irreducible));
+    let mut powers = Vec::with_capacity(kc.n as usize);
+    let mut power = BigUint::one();
+    for _ in 0..kc.n {
+        powers.push(power.clone());
+        power = (power * &kc.lambda) % r;
+    }
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
     // Incremental reduced echelon form over Z/rZ; the dense big-integer
     // solver is the fallback for a modulus wider than 64 bits.
     let mut echelon = IncrementalRelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+    let fixed_pair = fast.as_ref().map(|fc| super::koblitz_fast::FixedBasePair::new(
+        fc, fc.lift(&g), fc.lift(q), 64 - (r_u64 - 1).leading_zeros()));
+    let verify_log = |d: &BigUint| fast.as_ref().map_or_else(
+        || kc.mul(&g, d) == *q,
+        |fc| fc.mul(fc.lift(&g), d) == fc.lift(q));
     let relation_start = std::time::Instant::now();
 
     // Record the exact incremental rank and, when allowed and pinned,
@@ -4963,7 +5081,7 @@ fn koblitz_index_calculus_dlp_observed(
         };
         progress(KoblitzIcEvent::LinearAlgebraFinished);
         progress(KoblitzIcEvent::VerificationStarted);
-        let verified = kc.mul(&g, &d) == *q;
+        let verified = verify_log(&d);
         progress(KoblitzIcEvent::VerificationFinished { verified });
         if verified {
             report.log = Some(d);
@@ -4986,9 +5104,16 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let a = BigUint::from(rng.gen_range(1..r_u64));
-                let b = BigUint::from(rng.gen_range(1..r_u64));
-                let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
+                let scalar_a = rng.gen_range(1..r_u64);
+                let scalar_b = rng.gen_range(1..r_u64);
+                let a = BigUint::from(scalar_a);
+                let b = BigUint::from(scalar_b);
+                let target = if let Some(fc) = &fast {
+                    fc.lower(fixed_pair.as_ref().expect("prepared with the fast curve")
+                        .evaluate(fc, scalar_a, scalar_b))
+                } else {
+                    kc.add(&kc.mul(&g, &a), &kc.mul(q, &b))
+                };
                 (a, b, target)
             })
             .collect();
@@ -5016,15 +5141,14 @@ fn koblitz_index_calculus_dlp_observed(
                             split_rule: split_rule_default(),
                             ..Default::default()
                         };
-                        let (idxs, stats) = plan.decompose(kc, fb, &index_of, target, &options)
-                            .expect("chart cover validated at pipeline entry");
-                        return RelationAttemptOutcome::Groebner(idxs, stats.solver);
+                        let (idxs, stats) = plan.decompose_validated(kc, fb, &index_of, target, &options);
+                        return RelationAttemptOutcome::Charts(idxs, stats);
                     }
                     let (idxs, stats) = groebner_decompose(
                         kc,
                         fb,
                         &index_of,
-                        &field,
+                        field.as_ref().expect("ambient Groebner field"),
                         target,
                         opts.m,
                         opts.engine,
@@ -5037,7 +5161,7 @@ fn koblitz_index_calculus_dlp_observed(
                         kc,
                         fb,
                         &index_of,
-                        &field,
+                        field.as_ref().expect("SAT field"),
                         target,
                         opts.m,
                         opts.max_models,
@@ -5076,7 +5200,7 @@ fn koblitz_index_calculus_dlp_observed(
                         });
                         progress(KoblitzIcEvent::LinearAlgebraSkipped);
                         progress(KoblitzIcEvent::VerificationStarted);
-                        let verified = kc.mul(&g, &d) == *q;
+                        let verified = verify_log(&d);
                         progress(KoblitzIcEvent::VerificationFinished { verified });
                         report.attempt_records.push(KoblitzRelationAttemptRecord {
                             trial,
@@ -5135,6 +5259,19 @@ fn koblitz_index_calculus_dlp_observed(
                     };
                     (idxs, disposition)
                 }
+                RelationAttemptOutcome::Charts(idxs, stats) => {
+                    report.chart_residual_assignments += stats.residual_assignments;
+                    report.reductions += stats.solver.reductions;
+                    report.infeasible_branches += stats.solver.infeasible_branches;
+                    let disposition = if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.solver.exhausted {
+                        KoblitzRelationAttemptDisposition::Unknown
+                    } else {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    };
+                    (idxs, disposition)
+                }
                 RelationAttemptOutcome::Sat(idxs, stats) => {
                     solver_calls = stats.solver_calls;
                     models = stats.models;
@@ -5166,7 +5303,7 @@ fn koblitz_index_calculus_dlp_observed(
             };
             let decomposition_indices = found.clone();
             if let Some(idxs) = found {
-                let relation = relation_from_decomposition_with_mode(
+                let relation = relation_from_decomposition_with_powers(
                     kc,
                     fb,
                     &idxs,
@@ -5174,6 +5311,7 @@ fn koblitz_index_calculus_dlp_observed(
                     &b,
                     opts.collapse_negation,
                     projected_orbits.as_ref(),
+                    Some(&powers),
                 );
                 if let Some(echelon) = echelon.as_mut() {
                     let linear_start = std::time::Instant::now();
@@ -5276,7 +5414,7 @@ fn koblitz_index_calculus_dlp_observed(
                 let candidate = if let Some(d) = solved.candidate {
                     progress(KoblitzIcEvent::LinearAlgebraFinished);
                     progress(KoblitzIcEvent::VerificationStarted);
-                    candidate_verified = kc.mul(&g, &d) == *q;
+                    candidate_verified = verify_log(&d);
                     progress(KoblitzIcEvent::VerificationFinished {
                         verified: candidate_verified,
                     });

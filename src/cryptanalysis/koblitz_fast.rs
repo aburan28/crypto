@@ -72,6 +72,41 @@ pub struct FastCurve {
     pub b: u64,
 }
 
+/// Binary powers for repeated independent `aG+bQ` draws on one curve. Setup
+/// uses at most twice the scalar bit length in doublings and must be charged.
+pub(crate) struct FixedBasePair {
+    powers: Vec<(FastPoint, FastPoint)>,
+}
+
+impl FixedBasePair {
+    pub(crate) fn new(fc: &FastCurve, mut g: FastPoint, mut q: FastPoint, bits: u32) -> Self {
+        assert!(bits <= 64);
+        let mut powers = Vec::with_capacity(bits as usize);
+        for i in 0..bits {
+            powers.push((g, q));
+            if i + 1 < bits {
+                g = fc.double(g);
+                q = fc.double(q);
+            }
+        }
+        Self { powers }
+    }
+
+    pub(crate) fn evaluate(&self, fc: &FastCurve, a: u64, b: u64) -> FastPoint {
+        assert!(self.powers.len() == 64 || (a | b) >> self.powers.len() == 0);
+        let mut sum = FastPoint::INFINITY;
+        let mut occupied = a | b;
+        while occupied != 0 {
+            let i = occupied.trailing_zeros() as usize;
+            let (g, q) = self.powers[i];
+            if a >> i & 1 != 0 { sum = fc.add(sum, g); }
+            if b >> i & 1 != 0 { sum = fc.add(sum, q); }
+            occupied &= occupied - 1;
+        }
+        sum
+    }
+}
+
 impl FastCurve {
     /// Largest extension degree handled: the packed identity needs
     /// `2(x + 1)` to fit in a word.
@@ -117,6 +152,60 @@ impl FastCurve {
 
     fn element(&self, v: u64) -> F2mElement {
         F2mElement::from_biguint(&BigUint::from(v), self.n)
+    }
+
+    /// All points with abscissa `x`, in the same root/sign order as the
+    /// general Artin–Schreier implementation. No discrete logarithm is used.
+    pub fn points_with_x(&self, x: u64) -> Vec<FastPoint> {
+        assert!(x >> self.n == 0, "abscissa exceeds field width");
+        let f = &self.field;
+        if x == 0 {
+            return vec![FastPoint::affine(0, f.sqr_k(self.b, self.n - 1))];
+        }
+        let rhs = x ^ self.a ^ f.mul(self.b, f.sqr(f.inv(x)));
+        let u = if self.n % 2 == 1 {
+            let mut acc = rhs;
+            let mut half_trace = rhs;
+            for _ in 0..(self.n - 1) / 2 {
+                acc = f.sqr(f.sqr(acc));
+                half_trace ^= acc;
+            }
+            if f.sqr(half_trace) ^ half_trace != rhs {
+                return Vec::new();
+            }
+            half_trace
+        } else {
+            // Same descending image-pivot convention as solve_artin_schreier.
+            let mut pivots: Vec<(u64, u64)> = Vec::new();
+            for i in 0..self.n {
+                let mut img = f.sqr(1 << i) ^ (1 << i);
+                let mut pre = 1 << i;
+                for &(pimg, ppre) in &pivots {
+                    if img & (1 << (63 - pimg.leading_zeros())) != 0 {
+                        img ^= pimg;
+                        pre ^= ppre;
+                    }
+                }
+                if img != 0 {
+                    pivots.push((img, pre));
+                    pivots.sort_by(|x, y| y.0.cmp(&x.0));
+                }
+            }
+            let mut target = rhs;
+            let mut solution = 0;
+            for (pimg, ppre) in pivots {
+                if target & (1 << (63 - pimg.leading_zeros())) != 0 {
+                    target ^= pimg;
+                    solution ^= ppre;
+                }
+            }
+            if target != 0 {
+                return Vec::new();
+            }
+            solution
+        };
+        let p = FastPoint::affine(x, f.mul(x, u));
+        vec![p, self.neg(p)]
     }
 
     /// Whether `p` satisfies the curve equation.
@@ -465,6 +554,49 @@ mod tests {
     use crate::cryptanalysis::koblitz_index_calculus::{pack_point, KoblitzCurve};
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
+
+    #[test]
+    fn packed_lifts_preserve_general_roots_and_sign_order() {
+        use crate::cryptanalysis::koblitz_index_calculus::{
+            find_irreducible_sparse, points_with_x_general,
+        };
+        for n in 3..=10 {
+            let irr = find_irreducible_sparse(n).unwrap();
+            for (a, b) in [(0, 1), (1, 1), (3, 5)] {
+                let curve = BinaryCurve {
+                    m: n, irreducible: irr.clone(),
+                    a: F2mElement::from_biguint(&BigUint::from(a as u64), n),
+                    b: F2mElement::from_biguint(&BigUint::from(b as u64), n),
+                    generator: BinaryPoint::Infinity,
+                    order: BigUint::from(1u64), cofactor: BigUint::from(1u64),
+                };
+                let fc = FastCurve::new(&curve).unwrap();
+                for x in 0..1u64 << n {
+                    let expected = points_with_x_general(&curve, &fc.element(x));
+                    let actual: Vec<_> = fc.points_with_x(x).into_iter().map(|p| fc.lower(p)).collect();
+                    assert_eq!(actual, expected, "n={n} a={a} b={b} x={x}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn prepared_pair_matches_independent_general_scalar_arithmetic() {
+        for (n, k, a, b) in [(7, 1, 1, 1), (15, 3, 1, 2)] {
+            let kc = KoblitzCurve::subfield(k, n, a, b).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let g = fc.lift(kc.generator());
+            let q_general = kc.mul(kc.generator(), &BigUint::from(17u64));
+            let q = fc.lift(&q_general);
+            let table = FixedBasePair::new(&fc, g, q, 63);
+            let mut pairs: Vec<_> = (0..32).flat_map(|a| (0..32).map(move |b| (a,b))).collect();
+            pairs.extend([(1u64 << 62, 0), (0, 1u64 << 62), ((1u64 << 63)-1, (1u64 << 63)-1)]);
+            for (a, b) in pairs {
+                let expected = kc.add(&kc.mul(kc.generator(), &BigUint::from(a)), &kc.mul(&q_general, &BigUint::from(b)));
+                assert_eq!(fc.lower(table.evaluate(&fc, a, b)), expected, "n={n} a={a} b={b}");
+            }
+        }
+    }
 
     fn random_points(kc: &KoblitzCurve, count: usize, seed: u64) -> Vec<BinaryPoint> {
         let mut rng = StdRng::seed_from_u64(seed);

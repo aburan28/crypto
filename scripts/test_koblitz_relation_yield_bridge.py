@@ -11,6 +11,7 @@ import sys
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 import run_koblitz_relation_yield_bridge as bridge
 
@@ -215,6 +216,23 @@ def metrics(command: list[str], *, wall: float, core: float, rss: int, watchdog:
 
 
 class Stage21ControlPlaneTests(unittest.TestCase):
+    def test_smoke_lock_cannot_replace_the_frozen_production_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            old, current, workspace = (root / name for name in ("old", "current", "workspace"))
+            old.write_bytes(b"archived production dependencies\n")
+            current.write_bytes(b"current smoke dependencies\n")
+            workspace.write_bytes(current.read_bytes())
+            with mock.patch.multiple(bridge, FROZEN_LOCK=old, SMOKE_LOCK=current, WORKSPACE_LOCK=workspace):
+                with self.assertRaisesRegex(bridge.Stage21Error, "differs"):
+                    bridge.install_frozen_lock(production=True)
+                bound = bridge.install_frozen_lock(production=False)
+                self.assertEqual(bound["frozen"]["sha256"], bound["workspace"]["sha256"])
+                self.assertEqual(bound["frozen"]["path"], str(current.resolve()))
+                workspace.write_bytes(b"unbound dependencies\n")
+                with self.assertRaisesRegex(bridge.Stage21Error, "differs"):
+                    bridge.install_frozen_lock(production=False)
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.protocol, _ = bridge.read_json(bridge.DEFAULT_PROTOCOL, "test protocol")
