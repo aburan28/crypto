@@ -8,11 +8,16 @@ affine point addition per iteration, which is every walk that keeps the rho
 collision structure. The floor is set by the carry-less unit, not by the
 Frobenius work the iteration function controls. The redesigned function of §4
 removes the Frobenius and basis-conversion work; built and measured (§6) it
-cuts the static ALU cost per update by 21% and runs **16.4% more updates per
-SM-clock** than the shipping walk on an RTX PRO 4500 (8.7% more at that card's
-165 W power limit), with every device report re-walked correctly. Carried to
-the 6000 that is 15.9–17.0 B/s, an extrapolation that straddles the 17.0 B/s
-target of §4.4 and stays undecided until a 6000 is available. The rest of the
+cuts the static ALU cost per update by 21% and runs the RTX PRO 6000 at
+**16.56 B/s against 14.41 for the shipping walk on the same host and
+geometry, +14.9%** (six alternating repetitions each, every paired ratio
+between 1.146 and 1.169); in the audited 385k-worker geometry the pair is
+16.35 against 14.98, **+9.2%**. 300 of 300 device reports re-walk correctly
+on both GPUs and 64 of 64 planted logs are recovered on `GF(2^41)`. Both
+medians are **short of the 17.0 B/s the note set as its own target in §4.4
+before the build** (by 2.6% and 3.8%), so by the rule declared there it is
+engineering that did not pay: the shipping walk stays the campaign default
+and the table walk stays available behind `WALK_TABLE=1`. The rest of the
 distance to 28 is field products, and products do not move with the walk.
 
 This note states the boundary before anything is optimised (`AGENTS.md` §1),
@@ -97,19 +102,19 @@ What would move the floor, and why each is out of reach here:
 One unit, every variant a row, the floors as the last rows. Columns are static
 SASS lane-instructions per update from `kernel_cost.py` (§3), with quarter-rate
 `POPC`/`FLO` priced at 3.97 slots and `IMAD` at 2.01 (§3, measured). Measured
-rates are RTX PRO 4500 medians from
-[`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json),
-reported both at the card's power limit and per SM-clock; the 6000 column is
-an **extrapolation** by the per-SM-clock ratio (§6.3) and is marked as such.
-Superseded figures stay as "before" marks.
+rates are medians from
+[`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json):
+six alternating repetitions per binary on one RTX PRO 6000 (automatic worker
+count, §6.3), three on the power-limited RTX PRO 4500. Superseded figures
+stay as "before" marks; the one extrapolation on the page is marked.
 
-| variant | ALU slots / update (static) | clmad / update (static) | 4500 B/s (median of 3) | updates / SM-clock | 6000 B/s | ALU / floor | correct | class |
+| variant | ALU slots / update (static) | clmad / update (static) | 6000 B/s | 6000 updates / SM-clock | 4500 B/s | ALU / floor | correct | class |
 |---|---:|---:|---:|---:|---:|---:|---|---|
-| shipping walk `R ← σʲ(R) + R`, batch 16, audited preset | 2,271 → **2,324** (quarter-rate priced) | 45.25 | **5.107** @ 1.95 GHz | 0.0319 | **14.64** measured | 2.1 | 300/300 | baseline |
-| table walk, bit-plane selection (first build, superseded) | 2,147 | 45.25 | 5.493 | — (clock not sampled) | — | 2.0 | 300/300 | engineering |
-| **table walk of §4, byte/nibble LUT selection** `R ← R + ε·σᵏ(T_h)` | **1,831** | 45.25 | **5.552** @ 1.82 GHz (+8.7%) | **0.0372** (+16.4%) | *15.9 – 17.0 (extrapolated)* | **1.7** | 300/300, 64/64 planted logs | **engineering** |
-| table walk, LUT selection + squarings on ALU | 1,938 | 40.25 | 5.522 (+8.1%) | 0.0368 | — | 1.8 | 300/300 | engineering (neutral: ALU is the binding pipe) |
-| arithmetic floor, one affine addition per step | ≈ 1,090 | 28.9 | | | 22.2 – 23.4 (90% of either pipe) | 1.0 | | floor |
+| shipping walk `R ← σʲ(R) + R`, batch 16, audited preset | 2,271 → **2,324** (quarter-rate priced) | 45.25 | **14.41** @ 2.42 GHz; 14.98 @ 2.39 GHz with 385k workers (audited run: 14.64) | 0.0317; 0.0334 with 385k | 5.107 @ 1.95 GHz | 2.1 | 300/300 | baseline |
+| table walk, bit-plane selection (first build, superseded) | 2,147 | 45.25 | — | — | 5.493 (+7.6%) | 2.0 | 300/300 | relabelling → engineering |
+| **table walk of §4, byte/nibble LUT selection** `R ← R + ε·σᵏ(T_h)` | **1,831** | 45.25 | *15.9 – 17.0 (extrapolated from the 4500, before)* → **16.56** @ 2.40 GHz **(+14.9%)**; 16.35 @ 2.30 GHz with 385k workers (+9.2%) | **0.0368** (+16.1%); 0.0378 with 385k (+13.1%) | 5.552 @ 1.82 GHz (+8.7%; +16.4% per clock) | **1.7** | 300/300 on both GPUs, 64/64 planted logs | **engineering, target 17.0 not met** |
+| table walk, LUT selection + squarings on ALU | 1,938 | 40.25 | 16.44 (+14.1%) | 0.0365 | 5.522 (+8.1%) | 1.8 | 300/300 | engineering (did not pay: ALU is the binding pipe) |
+| arithmetic floor, one affine addition per step | ≈ 1,090 | 28.9 | 22.2 – 23.4 (90% of either pipe) | | | 1.0 | | floor |
 | **28 B/s budget** | 959 – 1,013 | 25.4 – 26.9 | | | | 0.88 | | below floor |
 
 Reading the table: the ratio column is ALU per update over the arithmetic
@@ -119,7 +124,9 @@ it to 1.7×; the predicted 1.3× (previous revision of this table:
 costs ~175 slots and the arithmetic's share was under-priced before quarter-rate
 instructions were measured (§3). 28 B/s is at 0.88× — a ratio that no
 iteration function can produce because the floor is not made of
-iteration-function work.
+iteration-function work. The rate column moved by the ALU column's ratio
+(2,324 / 1,831 = 1.27 static; 1.16 per SM-clock, the dynamic fraction being
+smaller), and no further: the walk change bought exactly the ALU it removed.
 
 Per `AGENTS.md` §3, every measured walk row is **engineering**: the ALU/floor
 column fell from 2.1 to 1.7, but the floor here is the cost of one affine
@@ -302,10 +309,14 @@ negation to save the `ε` computation costs `√2` in expected iterations, more
 than the ~15% it would gain in rate), counting an ALU/clmad estimate as a
 measurement, or quoting the rate without the correctness rows.
 
-*Status (§6):* rows two and three met on the 4500 (300/300 device reports
-re-walked per binary, 64/64 planted logs on `GF(2^41)`, DP rate within 0.12%);
-row one is not decided: the 6000 could not be allocated, and the extrapolated
-15.9 – 17.0 B/s straddles 17.0.
+*Status (§6):* rows two and three met (300/300 device reports re-walked per
+binary on both GPUs, 64/64 planted logs on `GF(2^41)` with the iteration ratio
+0.96 ± 0.07 against the shipping walk, DP rate within 0.12%); row one **not
+met**: 16.56 B/s median on the 6000 against 17.0 required. The shipping
+function stays the default. The target was set at "the point where the fork's
+cost is clearly repaid"; with `history.json` still empty the fork costs
+nothing today, so the number is a policy the campaign owner may revisit, but
+this note does not move it after the measurement.
 
 ### 4.5 First measurement before any code
 
@@ -315,8 +326,10 @@ top of the achievable range by the same 20% and does not move the answer to
 the 28 B/s question, but it decides whether the `R + ε·σᵏ(T_h)` walk is worth
 17 or 20.
 
-*Done on the 4500 only* (§3.1): `1/37.9` per `CLMAD.lo`, 63.9 slots per
-64×64 product. The 6000 re-measurement is still owed.
+*Done* (§3.1 for the 4500, §6.3 for the 6000): `1/37.9` and `1/38.0` per
+`CLMAD.lo`, 63.9 and 64.1 slots per 64×64 product. The two parts agree within
+1% on every stream, so the 4500 is a valid proxy for per-clock costs, and the
+assumed `1/37.7` stands.
 
 ## 5. What 28 B/s costs
 
@@ -333,19 +346,26 @@ The walk of §4 is built behind `WALK_TABLE=1` (`include/tablewalk.h`,
 `aws/campaign.json` field `walk`, which enters the campaign identity so the
 two functions can never share a corpus). Everything below is from
 [`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json)
-and the raw logs beside it. Host: one **RTX PRO 4500 Blackwell Server Edition**
-(82 SMs, 2.415 GHz maximum, **165 W limit**) on a `g7.2xlarge`, CUDA 13.3.1,
-`sm_120`, the audited preset knobs. The 6000 was not available: every `g7e`
-launch in `us-east-1` and `us-west-2` returned `VcpuLimitExceeded` against the
-quota the running worker fleet occupies, so **no number in this section is a
-6000 measurement**; §6.3 extrapolates and says so.
+and the raw logs beside it. Two hosts, both CUDA 13.3.1 in the
+`nvidia/cuda:13.3.1-devel` container, `sm_120`, the audited preset knobs,
+binaries rebuilt on the host by
+[`gpujob.sh`](benchmarks/table-walk/gpujob.sh):
+
+- the design rounds ran on an **RTX PRO 4500 Blackwell Server Edition**
+  (82 SMs, 2.415 GHz maximum, **165 W limit**) on a `g7.2xlarge`, the only
+  Blackwell part the account's vCPU quota allowed while the worker fleet ran;
+- the decision ran on an **RTX PRO 6000 Blackwell Server Edition** (188 SMs,
+  2.43 GHz, 600 W) on a `g7e.2xlarge` in `us-east-1b`, obtained after 85
+  minutes of `VcpuLimitExceeded`. Its instruction rates match the 4500's
+  within 1% on every stream (§4.5), which is why the per-clock gain carried
+  over exactly.
 
 ### 6.1 Two design rounds
 
-| round | selection of `h, k, ε` | static ALU slots | 4500 B/s | vs shipping |
-|---|---|---:|---:|---:|
-| 1 | eight `L`-bit-plane masked popcounts (§4.3 as written) | 2,147 | 5.493 | +7.6% |
-| 2 | byte LUT for the phase sum (17 × 256 B), nibble LUT for the pivot (33 × 16 B), inverse-log LUT; one `LDS.U8` per byte or nibble of `x` | **1,831** | **5.552** | **+8.7%** at fixed power, **+16.4%** per SM-clock |
+| round | selection of `h, k, ε` | static ALU slots | 4500 B/s | vs shipping | 6000 B/s |
+|---|---|---:|---:|---:|---:|
+| 1 | eight `L`-bit-plane masked popcounts (§4.3 as written) | 2,147 | 5.493 | +7.6% | not run |
+| 2 | byte LUT for the phase sum (17 × 256 B), nibble LUT for the pivot (33 × 16 B), inverse-log LUT; one `LDS.U8` per byte or nibble of `x` | **1,831** | **5.552** | **+8.7%** at fixed power, **+16.4%** per SM-clock | **16.56**, +14.9% |
 
 Round 1 was a **relabelling** in part: it moved the walk's work from the
 Frobenius network into 72 quarter-rate popcounts per update, and the count it
@@ -360,9 +380,11 @@ and is **engineering** against the same floor. Shared memory per block:
 
 | check | shipping | table (LUT) | table + ALU squaring |
 |---|---|---|---|
-| device selection primitives vs host reference, 4,096 points (`test-table-walk-cuda`) | n/a | phase 0, pivot 0, sign 0, tag 0, addend 0 mismatches; cycle rule fired on 1,536 | same binary |
-| 300 device reports re-walked by the host reference, `dpWeight = 50`, 6 × 16 steps | 300 / 300, 0 dropped | 300 / 300, 0 dropped | 300 / 300, 0 dropped |
-| distinguished points produced, identical iteration count | 331,611 | 331,227 (−0.12%) | 331,227 |
+| device selection primitives vs host reference, 4,096 points (`test-table-walk-cuda`), both GPUs | n/a | phase 0, pivot 0, sign 0, tag 0, addend 0 mismatches; cycle rule fired on 1,536 | same binary |
+| 4500: 300 device reports re-walked by the host reference, `dpWeight = 50`, 6 × 16 steps | 300 / 300, 0 dropped | 300 / 300, 0 dropped | 300 / 300, 0 dropped |
+| 4500: distinguished points produced, identical iteration count | 331,611 | 331,227 (−0.12%) | 331,227 |
+| 6000: 300 device reports re-walked, `dpWeight = 48`, `dpCap = 262,144`, 1,540,096 walks × 96 steps | 300 / 300, 0 dropped | 300 / 300, 0 dropped | 300 / 300, 0 dropped |
+| 6000: distinguished points produced | 264,606 | 264,288 (−0.12%) | 264,288 |
 | planted logs on `GF(2^41)`, 16 instances × 4 seed salts, scalar reference engine | 64 / 64 | 64 / 64 | — |
 | mean iterations to solve on `GF(2^41)`, `ℓ = 549,756,390,943`, 128 walks, `dpWeight = 13`, 64 samples each | 164,200 ± 9,900 | 157,800 ± 7,500 | — |
 
@@ -378,12 +400,59 @@ above 1.10 at two standard errors. Raw runs in
 
 `GF(2^83)` planted logs, the second curve §4.4 asks for, need ≈ 2^37 steps of
 the scalar reference and were not run; the device path is exercised on the
-full curve by the 300-report re-walk instead.
+full curve by the 300-report re-walks instead.
+
+The first 6000 verification attempt used the 4500's `dpWeight = 50` with the
+default 65,536-record report buffer; on 1.54 M walks that overflowed
+(125,865 reports) and the binary refused to advance, exit 7, before verifying
+anything ([log](benchmarks/table-walk/raw/rtx6000-verify-dp50-overflow.log)).
+The row above is the `dpWeight = 48`, `dpCap = 262,144` rerun. The overflow is
+the intended guard firing, not a walk fault, and it fired identically for both
+walks.
 
 ### 6.3 Rate
 
-Three alternating repetitions per binary, `--bench --steps 1024 --launches 32`,
-SM clock and power sampled after each:
+`--bench --steps 1024 --launches 32 --verify 0`, alternating binaries, SM
+clock and power sampled after each repetition.
+
+**RTX PRO 6000, six repetitions per binary, automatic worker count (96,256
+threads × 16 slots):**
+
+| binary | B/s, reps 1 – 6 | median | SM clock (MHz) | power (W) |
+|---|---|---:|---|---|
+| shipping | 14.211 / 14.426 / 14.417 / 14.347 / 14.434 / 14.408 | **14.41** | 2415 – 2422 | 516 – 528 |
+| table, LUT | 16.611 / 16.570 / 16.516 / 16.629 / 16.550 / 16.516 | **16.56** | 2385 – 2407 | 545 – 561 |
+| table, LUT + ALU squaring | 16.514 / 16.456 / 16.393 / 16.482 / 16.419 / 16.408 | 16.44 | 2377 – 2407 | 549 – 555 |
+
+Paired ratio table / shipping per repetition: 1.169, 1.149, 1.146, 1.159,
+1.147, 1.146 — every repetition inside `[1.146, 1.169]`, median **1.149**.
+Per SM-clock: shipping 0.0317 updates (31.6 SM-clocks per update), table
+0.0368 (27.2), ratio **1.161**, the same per-clock ratio the 4500 gave
+(1.164). The 6000 stays 40 – 55 W under its 600 W limit in both kernels and
+gives up only 1.1% of clock to the fuller kernel, so here fixed-power and
+per-clock gains nearly coincide.
+
+**RTX PRO 6000, the audited geometry (`--threads 385024`, four times the
+automatic count), three repetitions per binary, run after the six above with
+the card already warm:**
+
+| binary | B/s, rep 1 / 2 / 3 | median | SM clock (MHz) | power (W) | GPU °C |
+|---|---|---:|---|---|---|
+| shipping | 15.079 / 14.975 / 14.880 | **14.98** | 2400 / 2377 / 2385 | 549 / 551 / 547 | 46 / 57 / 59 |
+| table, LUT | 16.489 / 16.352 / 16.292 | **16.35** | 2310 / 2287 / 2302 | 555 / 547 / 549 | 56 / 63 / 58 |
+
+Paired ratios 1.094, 1.092, 1.095; median **1.092**. Oversubscribing four
+times lifts the shipping kernel 4% (14.41 → 14.98; the audited 14.64 sits
+between the two geometries, on another day's card) and lowers the table
+kernel 1.3% (16.56 → 16.35): per SM-clock the table kernel *gains* 2.8%
+(0.0368 → 0.0378) but the card runs it 3.9% slower. The power samples, taken
+after each run, read 547 – 555 W; the run itself is most likely at the 600 W
+limit, as the 4500 was at 165 W. **The gain is therefore geometry-dependent:
++14.9% at the automatic worker count, +9.2% at the audited 4×.** Best table
+configuration against best shipping configuration is 16.56 / 14.98 =
+**+10.5%**. Neither reaches 17.0.
+
+**RTX PRO 4500, three repetitions per binary (design round):**
 
 | binary | B/s, rep 1 / 2 / 3 | median | SM clock (MHz) | power (W) |
 |---|---|---:|---|---|
@@ -395,36 +464,48 @@ Both kernels run the 4500 into its 165 W limit, and the table kernel draws
 more per clock (its issue slots are fuller), so the card clocks it 6.6% lower.
 The fixed-power gain is therefore **+8.7%**; per SM-clock the shipping walk
 does 0.0319 updates (31.3 SM-clocks per update) and the table walk 0.0372
-(26.9), a **+16.4%** gain. The per-clock figure is the one that transfers to
-a part with power headroom; the 6000 has 3.2 W per SM against the 4500's
-2.0.
+(26.9), **+16.4%**. Before the 6000 was available this note carried the
+per-clock ratio to it as *15.9 – 17.0 B/s, extrapolated*; the measurement
+landed at 16.56, inside that range, and the extrapolation is kept in
+`comparison.json` as the before mark.
 
-Pipe utilisation at 26.9 SM-clocks per update: the static ALU figure of
-1,831 slots is 28.6 SM-clocks at 64 lanes/SM-clock, so the dynamic count is at
-most 1,722 and the ALU pipe is at its limit; clmad at ≈ 40 dynamic (the slot-0
-arm's six are executed once per batch) is 23.5 SM-clocks, 87%. Moving the
-squaring to the ALU (−5 clmad, +107 slots) measured −0.5%, which is what an
-ALU-bound kernel does. **The shipping kernel was co-limited by both pipes; the
-table kernel is ALU-limited with the carry-less unit at 87%**, so the next
-slot to buy is ALU again, not clmad.
+Pipe utilisation at 27.2 SM-clocks per update on the 6000: the static ALU
+figure of 1,831 slots is 28.8 SM-clocks at 63.5 lanes/SM-clock, so the dynamic
+count is at most ≈ 1,730 and the ALU pipe is at its limit; clmad at ≈ 40
+dynamic (the slot-0 arm's six are executed once per batch) is 23.9 SM-clocks,
+88%. Moving the squaring to the ALU (−5 clmad, +107 slots) measured −0.7%,
+which is what an ALU-bound kernel does. **The shipping kernel was co-limited by
+both pipes; the table kernel is ALU-limited with the carry-less unit at
+88%**, so the next slot to buy is ALU again, not clmad, and the ceiling for
+this kernel at 100% of the ALU pipe is ≈ 17.5 B/s.
 
-**Extrapolation to the RTX PRO 6000 (not a measurement).** The audited 14.64
-B/s at 0.0319 updates per SM-clock implies the 6000 sustained 2.44 GHz in that
-run. If the table kernel holds that clock, 188 × 2.44 GHz × 0.0372 =
-**17.0 B/s**; if it loses 6.6% of clock as it did on the 4500, **15.9 B/s**.
-The §4.4 target of 17.0 sits at the top of that range: **undecided.** The
-measurement that settles it is the same three-way job
-([`benchmarks/table-walk/gpujob.sh`](benchmarks/table-walk/gpujob.sh)) on a
-`g7e`, and until it runs, the
-shipping function stays the campaign default (`aws/campaign.json`:
-`"walk": "sigma"`).
-
-### 6.4 Classification
+### 6.4 Classification and verdict
 
 | change | class | evidence |
 |---|---|---|
 | quarter-rate pricing in `kernel_cost.py` | accounting | §3.1; no kernel changed |
-| table walk, bit-plane selection | relabelling → engineering | nominal ALU −15%, priced −7.6%, measured +7.6% |
-| table walk, LUT selection | **engineering** | priced −21%, measured +8.7% at fixed power / +16.4% per clock, correctness rows all green, ratio to floor 1.7 (bounded below by 1) |
-| ALU squaring | engineering, did not pay | −0.5% |
+| table walk, bit-plane selection | relabelling → engineering | nominal ALU −15%, priced −7.6%, measured +7.6% on the 4500 |
+| table walk, LUT selection | **engineering** | priced −21%; measured **+14.9%** on the 6000 at the automatic worker count (16.56 vs 14.41, six paired reps all ≥ +14.6%), **+9.2%** in the audited 385k geometry (16.35 vs 14.98), +8.7% at fixed power / +16.4% per clock on the 4500; correctness rows all green on both GPUs; ratio to floor 1.7, bounded below by 1 |
+| ALU squaring | engineering, did not pay | −0.7% |
 | 28 B/s on one GPU | unchanged: **no** | floor rows of §2 |
+
+**Against the falsification target.** §4.4 required a benchmark median
+**≥ 17.0 B/s** on the 6000 in the audited geometry and said that anything
+below is "engineering that did not pay; keep the shipping function".
+Measured: **16.35 B/s** in that geometry (3.8% short) and **16.56** at the
+automatic worker count (2.6% short). The rule is applied as written: `aws/campaign.json` keeps
+`"walk": "sigma"`, and the table walk stays in the tree behind
+`WALK_TABLE=1` / `"walk": "table"` with its own campaign identity, so that
+choosing it later is a configuration change and not a code change. The three
+facts a reader needs to revisit that policy are on this page: the gain is
+real and reproducible (nine of nine paired repetitions across both
+geometries), it is worth +9% to +15% depending on worker count and never
+17.0, and the fork cost the target was priced against is currently zero
+because no distinguished point has been collected under either function.
+
+What would be needed to reach 17.0 is also on the page: the table kernel is
+at the ALU pipe's limit with ≈ 1,730 dynamic slots per update, so 17.0 needs
+≈ 3% fewer, about 50 slots, from the ≈ 175 the selection still costs or the
+≈ 75 of `fromPolynomial131(x)` that the weight and the distinguished-point
+test require; and in the audited geometry it additionally needs the clock the
+card takes back, which no instruction count controls.

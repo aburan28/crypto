@@ -89,6 +89,36 @@ on another allocation and does not estimate an additional code-change gain.
 The active 26 B/s single-GPU target remains unachieved, and
 [THROUGHPUT-30B.md](THROUGHPUT-30B.md) prices what it would take.
 
+## Table-walk comparison (iteration function, off by default)
+
+[ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6 and
+[`benchmarks/table-walk/comparison.json`](benchmarks/table-walk/comparison.json)
+compare the shipping `R ← σʲ(R) + R` walk with the table walk
+`R ← R + ε·σᵏ(T_h)` (`WALK_TABLE=1`, `TABLE_BRANCHES=8`) on one RTX PRO 6000
+Blackwell Server Edition (`g7e.2xlarge`, CUDA 13.3.1, `sm_120`, the preset
+knobs above, binaries rebuilt on the host). It is a different iteration
+function, so its distinguished points cannot collide with the shipping walk's;
+`aws/campaign.json` carries the choice as `"walk"` and it enters the campaign
+identity.
+
+| Workload | Variant | Median B/s | Throughput / control | Correctness |
+|---|---|---:|---:|---|
+| Benchmark, automatic workers (96,256 threads), 6 alternating reps | Shipping walk | 14.412634 | 1.000000 | 300/300 reports re-walked |
+| Benchmark, automatic workers, 6 alternating reps | Table walk | **16.560337** | **1.149015** | 300/300 reports re-walked |
+| Benchmark, audited 385,024 workers, 3 alternating reps | Shipping walk | 14.975448 | 1.000000 | — |
+| Benchmark, audited 385,024 workers, 3 alternating reps | Table walk | **16.351936** | **1.091916** | — |
+
+Every paired repetition favoured the table walk (1.146 – 1.169 at automatic
+workers, 1.092 – 1.095 at 385k). The table kernel runs 1 – 4% lower SM clock
+on the same card. This is an **engineering** change to the iteration function
+with the class structure, distinguished-point predicate and work accounting
+unchanged; the expected iteration count moves only by the r-adding constant,
+measured at 0.96 ± 0.07 of the shipping walk's on `GF(2^41)` (64 planted logs
+each). It stays off by default because its pre-declared target of 17.0 B/s in
+the audited geometry was not met. The same job re-measured the instruction
+rates on the 6000: one `CLMAD.lo` costs 38.0 `LOP3` slots, `POPC`/`FLO`
+4.0, random `LDS.U8` 6.9, all within 1% of the RTX PRO 4500.
+
 ## Historical compact-state preset comparison
 
 The [controlled comparison](benchmarks/compact-state/comparison.json) keeps

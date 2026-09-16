@@ -35,6 +35,13 @@ walk measurements.  The single-GPU objective is priced in
 from a kernel already issuing at 95% of the best rate measured on the part, so
 halving every instruction in it still lands at 29.3 B/s.  Two GPUs cross 30 B/s
 on a 2.5% per-GPU gain, and three cross it today.
+[ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) asks whether a different
+iteration function reaches 28 B/s on one GPU and answers no from the
+one-addition-per-step floor; it then builds the table walk
+`R ← R + ε·σᵏ(T_h)` behind `WALK_TABLE=1`, which measures 16.56 B/s against
+14.41 for the shipping walk on one RTX PRO 6000 (+14.9%; +9.2% in the audited
+385k-worker geometry) with every device report re-walked, and stays off by
+default because it misses the 17.0 B/s target the note set in advance.
 [FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
