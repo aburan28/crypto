@@ -83,16 +83,32 @@ jobs:
           if [ -n "$existing" ] && [ "$existing" != None ]; then
             echo "=== active fleet $existing — scaling to $GPUS GPUs ==="
             echo "$existing" > ".fleet-id-$AWS_DEFAULT_REGION"
-            # Preserve mix: raise total; keep an on-demand floor of ON_DEMAND.
             aws ec2 modify-fleet --fleet-id "$existing" --target-capacity-specification \
               "TotalTargetCapacity=$GPUS,OnDemandTargetCapacity=$ON_DEMAND,DefaultTargetCapacityType=spot"
+            echo "=== fleet status ==="
+            ./fleet.sh status || true
           else
             echo "=== fleet.sh up $GPUS --on-demand $ON_DEMAND ==="
+            set +e
             ./fleet.sh up "$GPUS" --on-demand "$ON_DEMAND"
+            fleet_rc=$?
+            set -e
+            if [ "$fleet_rc" -ne 0 ]; then
+              echo "=== CreateFleet failed (rc=$fleet_rc); falling back to direct run-instances ==="
+              chmod +x launch_direct.sh
+              ./launch_direct.sh "$GPUS" --on-demand "$ON_DEMAND"
+            else
+              echo "=== fleet status ==="
+              ./fleet.sh status || true
+            fi
           fi
 
-          echo "=== fleet status ==="
-          ./fleet.sh status || true
+          echo "=== tagged worker instances ==="
+          aws ec2 describe-instances \
+            --filters "Name=tag:Project,Values=ecc2k130" \
+                      "Name=instance-state-name,Values=pending,running" \
+            --query 'Reservations[].Instances[].[InstanceId,InstanceType,InstanceLifecycle,Placement.AvailabilityZone,State.Name]' \
+            --output table || true
 
           account=$(aws sts get-caller-identity --query Account --output text)
           echo "bucket: s3://ecc2k130-$account"
