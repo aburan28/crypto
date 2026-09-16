@@ -1,0 +1,48 @@
+{
+  "bootstrap_draws": 2000,
+  "ci_level": 0.95,
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789465972.492962,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; final suite has 60 inputs in pilot.",
+  "evaluator_sha256": {
+    "oracle.py": "d40388b526c81f0c9d4eb586e0ffa2cf9ed3f7fc3eb54428be4e84b9292454ab",
+    "tournament.py": "1abcd3735e06d8e8ff0422c20ee2fd913cff4c0b9f8f0706199b6368c44ac3af"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "host": {
+    "machine": "x86_64",
+    "node": "ip-172-31-37-103",
+    "processor": "x86_64",
+    "release": "6.17.0-1020-aws",
+    "system": "Linux",
+    "version": "#20~24.04.1-Ubuntu SMP Mon Jul 13 20:40:21 UTC 2026"
+  },
+  "limits": {
+    "cpu": 7,
+    "max_profiled_jobs": 1800,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "e90c817165f30cba00be09214f789cda8289ce54a620607c1e6214a22bb0b8e9",
+    "fixtures.json": "f9253ed37c3f6d2629f4ba69be7aef0032f4f5f0a108e2bc527b1fd6dbc29fd4",
+    "source-manifest.json": "7ed4f9183b083c48798efb91d0a1809f888b53b3adc77fa0c72c3862de14ad50",
+    "worker": "832f80feb5daf724665bf00aa254638629e38ebc18ec82dbf3a66eb934207e5e"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "schema_version": 1,
+  "seed": 20260915,
+  "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir"
+}

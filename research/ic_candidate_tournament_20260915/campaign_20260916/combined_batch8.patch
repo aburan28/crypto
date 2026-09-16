@@ -1,0 +1,67 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -957,12 +957,17 @@
+     /// operations. Multiplicity is irrelevant to exact-summand reachability
+     /// because decomposition permits repeated factor-base points.
+     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
++        let fast = FastCurve::new(&kc.curve);
+         let mut classes = HashMap::new();
+         for orbit in &self.signed_orbits {
+             let Some(&representative) = orbit.first() else {
+                 continue;
+             };
+-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
++            let mut current = if let Some(fc) = &fast {
++                fc.lower(fc.mul(fc.lift(&self.points[representative]), &kc.subgroup_order))
++            } else {
++                kc.mul(&self.points[representative], &kc.subgroup_order)
++            };
+             for _ in 0..kc.n {
+                 for candidate in [current.clone(), point_neg(&current)] {
+                     classes.entry(point_key(&candidate)).or_insert(candidate);
+@@ -2408,8 +2413,8 @@
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+         let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
+-            .into_par_iter()
+-            .flat_map_iter(|i| {
++            .into_iter()
++            .flat_map(|i| {
+                 let mut sums = Vec::with_capacity(points.len() - i);
+                 let mut scratch = BatchScratch::default();
+                 curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+@@ -2418,7 +2423,7 @@
+                     .map(move |(offset, sum)| (sum.pack(), i as u32, (i + offset) as u32))
+             })
+             .collect();
+-        entries.par_sort_unstable();
++        entries.sort_unstable();
+         if entries.len() > u32::MAX as usize {
+             return None;
+         }
+@@ -6445,6 +6450,13 @@
+     /// nothing but the curve and the table itself.
+     pub fn verify(&self, kc: &KoblitzCurve) -> bool {
+         let g = kc.generator();
++        if let Some(fc) = FastCurve::new(&kc.curve) {
++            let g = fc.lift(g);
++            return self.columns.iter().all(|(point, log)| {
++                *point != BinaryPoint::Infinity && log < &kc.subgroup_order
++                    && fc.mul(g, log) == fc.lift(point)
++            });
++        }
+         self.columns.iter().all(|(point, log)| {
+             *point != BinaryPoint::Infinity && log < &kc.subgroup_order && &kc.mul(g, log) == point
+         })
+@@ -6904,6 +6916,11 @@
+     }
+     if rel.points.iter().any(|&i| i >= fb.points.len()) {
+         return false;
++    }
++    if let Some(fc) = FastCurve::new(&kc.curve) {
++        let sum = rel.points.iter().fold(FastPoint::INFINITY,
++            |sum, &i| fc.add(sum, fc.lift(&fb.points[i])));
++        return !sum.infinity && sum == fc.mul_u64(fc.lift(kc.generator()), rel.a);
+     }
+     let mut sum = BinaryPoint::Infinity;
+     for &i in &rel.points {

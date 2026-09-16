@@ -1,0 +1,110 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "hypothesis": "Previous selected implementation, admitted only after parent promotion.",
+    "id": "incumbent",
+    "parent": "combined_batch8",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0003b",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+  },
+  {
+    "binary_relative": "source_candidates/fast_lift/worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Preserve exact factor-base points while avoiding allocating half-trace arithmetic.",
+    "id": "fast_lift",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_lift/source",
+    "source_manifest_relative": "source_candidates/fast_lift/source-manifest.json",
+    "source_manifest_sha256": "77deec02c22ed4efc4f7c3ec0648737131a81714ac4371caaa8b17b67e3c1344"
+  },
+  {
+    "binary_relative": "source_candidates/folded/worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Build the same pair-sum coverage from signed Frobenius orbit representatives.",
+    "id": "folded",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/folded/source",
+    "source_manifest_relative": "source_candidates/folded/source-manifest.json",
+    "source_manifest_sha256": "ff5940603d2654b92227dcf716b0c0e9b281361fadf21a04dd3f54036827d57b"
+  },
+  {
+    "binary_relative": "source_candidates/folded_lift/worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Measure both independently validated mechanisms together.",
+    "id": "folded_lift",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/folded_lift/source",
+    "source_manifest_relative": "source_candidates/folded_lift/source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  },
+  {
+    "binary_relative": "source_candidates/folded_lift/worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "d7be499afba0874f2bfec4f6f1ec828fdaba9331d6144614f488f5b3e58f4102",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Test one residual scheduling/linear-algebra cost on the combined source.",
+    "id": "folded_lift_dense",
+    "parent": "folded_lift",
+    "source_directory": "source_candidates/folded_lift/source",
+    "source_manifest_relative": "source_candidates/folded_lift/source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  },
+  {
+    "binary_relative": "source_candidates/folded_lift/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Test one residual scheduling/linear-algebra cost on the combined source.",
+    "id": "folded_lift_batch4",
+    "parent": "folded_lift",
+    "source_directory": "source_candidates/folded_lift/source",
+    "source_manifest_relative": "source_candidates/folded_lift/source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  }
+]

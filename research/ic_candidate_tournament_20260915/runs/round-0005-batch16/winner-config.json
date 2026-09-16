@@ -1,0 +1,18 @@
+{
+  "binary_relative": "source_candidates/combined_descent/worker",
+  "config": {
+    "batch_trials": 4,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+  "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay.",
+  "hypothesis": "Measure lazy walk initialization and the faster internal scalar check together.",
+  "id": "combined_descent",
+  "parent": "incumbent",
+  "source_directory": "source_candidates/combined_descent/source",
+  "source_manifest_relative": "source_candidates/combined_descent/source-manifest.json",
+  "source_manifest_sha256": "1690462c36efebd8325b9afaeab7f7650cf56b1ab2373d39c9637c446cdee7bb"
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "command": [
+      "python3",
+      "/home/ubuntu/crypto-ic-tournament-pr/research/ic_candidate_tournament_20260915/evidence/restore.py",
+      "--archive",
+      "round-0005-batch16",
+      "--out",
+      "/tmp/ic-pr-final-restored-20260916"
+    ],
+    "returncode": 0,
+    "stdout": "{\"archive\": \"round-0005-batch16.tar.zst\", \"status\": \"RESTORED\", \"files\": 26164, \"bytes\": 239175236}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "/tmp/ic-pr-final-restored-20260916/runs/round-0005-batch16/evaluator/tournament.py",
+      "verify",
+      "--round",
+      "/tmp/ic-pr-final-restored-20260916/runs/round-0005-batch16"
+    ],
+    "returncode": 0,
+    "stdout": "{\"status\": \"VERIFIED\", \"trial_receipts\": 1488, \"source_files\": 450}\n",
+    "stderr": ""
+  }
+]

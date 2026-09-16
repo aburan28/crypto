@@ -1,0 +1,16 @@
+# Frozen evidence is committed in hash-checked archives; restore.py recreates it.
+**/build/
+**/worker
+**/source/
+**/source_candidates/
+**/evaluator/
+**/operation.lock
+**/__pycache__/
+runs/*/runs/
+campaign_20260916/sources/
+campaign_20260916/round4-sources/
+campaign_20260916/round5-sources/
+campaign_20260916/preflight-next-source/
+campaign_20260916/preflight-next-build/
+campaign_20260916/batch16-development-screen/runs/
+validation/source-adapter-v2/runs/
