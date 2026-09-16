@@ -79,6 +79,31 @@ cat manifest.json 2>/dev/null
 # compiled with, and a binary built without the native carryless products or
 # the compact storage walks at half the audited rate while looking healthy, so
 # the markers are checked too.
+#
+# The carryless marker is the one that cannot be a constant.  On sm_120 a
+# CLMAD=0 build is the accident this gate exists to catch; on an Ada part
+# (sm_89, EC2 g6/g6e) it may be the CORRECT build, because clmad is bought with
+# a pipe balance measured only on Blackwell, and build.sh therefore defaults it
+# off for any pre-Blackwell ARCHES (../ADA-L4-L40S.md).  Hardcoding 1 here would
+# reject that binary and the fleet would never come up.  So take the expected
+# value from the manifest the build published: the gate still fails a binary
+# that disagrees with its own contract, which is what it is for, without also
+# deciding the tuning question.  A missing manifest keeps the old strict 1.
+expectedClmad=1
+if [ -s manifest.json ]; then
+    expectedClmad=$(python3 - <<'EOF'
+import json
+knobs = dict(kv.split("=", 1) for kv in json.load(open("manifest.json")).get("knobs", "").split() if "=" in kv)
+print(knobs.get("PACKED_CLMAD", "1"))
+EOF
+)
+fi
+case "$expectedClmad" in
+    0|1) ;;
+    *) echo "manifest.json names an unusable PACKED_CLMAD: '$expectedClmad'; not starting workers"; exit 1 ;;
+esac
+echo "expecting native carryless multiply: $expectedClmad"
+
 LOGS=""
 for f in $FIXTURES; do
     LOGS="$LOGS $f.log"
@@ -88,7 +113,7 @@ for f in $FIXTURES; do
         echo "$f FAILED; not starting workers"; tail -n 30 "$f.log"; exit 1
     fi
 done
-for marker in "packed arithmetic native carryless multiply: 1" \
+for marker in "packed arithmetic native carryless multiply: $expectedClmad" \
               "packed arithmetic weighted prefix: 2" \
               "packed storage compact state: 1" \
               "packed storage batch: $(field batch)" \

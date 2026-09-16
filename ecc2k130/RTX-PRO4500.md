@@ -102,6 +102,13 @@ it does on the 6000 (14.64 → 14.1, 3.7%).
 
 ## What is already settled
 
+**The Ada types are a separate, open question.** EC2 g6 (L4) and g6e (L40S)
+are `sm_89` and have no rate here either; [ADA-L4-L40S.md](ADA-L4-L40S.md)
+carries that decision, the harness that measures it, and the one preset knob
+(`PACKED_CLMAD`) that does not transfer off Blackwell. Take g6/g6e and g7/g7e
+quotes in the same `benchmarks/ada/prices.sh` run: quotes from different days
+are not a comparison at a break-even this narrow.
+
 **Region dominates instance type.** us-west-2 is about 25% cheaper than
 us-east-1 for both parts, and that gap is larger than the g7-vs-g7e gap in
 either region. At the recollected rate the fleet's present configuration
