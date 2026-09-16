@@ -1,0 +1,1540 @@
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	1970-01-01 00:00:00.000000000 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 10:53:36.066527574 +0000
+@@ -0,0 +1,1246 @@
++//! **Complete Koblitz index calculus for one small curve, in single words.**
++//!
++//! The tournament worker's cold single-target jobs on odd prime degrees
++//! `n ≤ 31` spend most of their instructions outside the arithmetic the
++//! algorithm needs: general `BigUint` point operations while sampling the
++//! base, Fermat inversions, thread pools, and hash maps keyed by big
++//! integers.  This module runs the same algorithm — the same
++//! [`FactorBaseSpec::SubgroupOrbits`] base, a folded pair-sum table,
++//! three-summand decomposition of `[a]G` probes, a full-rank scalar-field
++//! solve certified by `[ℓ]G = C`, and a `[a]G + [b]Q` descent — with every
++//! operation on `u64` words and no allocation in a hot loop.
++//!
++//! What is preserved exactly, and checked by tests against the general
++//! implementation:
++//!
++//! - the factor-base **point set** of `SubgroupOrbits { seed, points }` on
++//!   the same curve (the same random abscissa draws, the same lift test,
++//!   the same cofactor projection and orbit closure);
++//! - the meaning of a relation: exactly `m = 3` base-point indices with
++//!   `Σ P_i = [a]G`, repetition allowed, no direct relations;
++//! - one column per signed Frobenius orbit after cofactor projection, each
++//!   logarithm verified in the group before it is reported;
++//! - every returned scalar verified as `[d]G = Q` before it is returned.
++//!
++//! What differs is only how the work is done: probes are walked
++//! (`R_{t+1} = R_t + S`) rather than drawn with a scalar multiplication
++//! each, the pair table stores one witness per Frobenius orbit of a sum
++//! under a normal-basis rotation key, and decomposition stops at the first
++//! witness it meets.  None of that changes what is claimed: this is an
++//! implementation of the same bounded algorithm, not a new one.
++
++use std::collections::HashSet;
++
++use num_bigint::BigUint;
++use num_traits::ToPrimitive;
++use rand::{rngs::StdRng, Rng, SeedableRng};
++
++use crate::binary_ecc::BinaryPoint;
++use crate::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
++use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
++use crate::cryptanalysis::koblitz_index_calculus::{CollectedRelation, KoblitzCurve};
++
++/// Largest degree handled: keys and packed identities must fit a word.
++pub const MAX_DEGREE: u32 = 31;
++
++/// Expected pair-sum witnesses per rest that the folded table is sized
++/// for: rows are added until a random rest has at least this many, or
++/// every row is built.
++// Control: every row is built (the rule never stops early).
++pub const TABLE_WITNESSES: f64 = f64::INFINITY;
++
++fn is_prime(n: u32) -> bool {
++    n >= 2 && (2..n).take_while(|d| d * d <= n).all(|d| n % d != 0)
++}
++
++/// Whether the fast pipeline applies to this job.  It handles prime
++/// degrees up to [`MAX_DEGREE`], the `SubgroupOrbits` base recipe and
++/// three summands; everything else keeps the general implementation.
++pub fn supports(kc: &KoblitzCurve, spec: &FactorBaseSpec, summands: usize) -> bool {
++    kc.k == 1
++        && kc.n <= MAX_DEGREE
++        && is_prime(kc.n)
++        && summands == 3
++        && matches!(spec, FactorBaseSpec::SubgroupOrbits { .. })
++        && kc.subgroup_order.to_u64().is_some_and(|r| r > 2 && r < 1 << 62)
++        && kc.cofactor.to_u64().is_some()
++}
++
++// ── Field and curve arithmetic ──────────────────────────────────────
++
++/// The curve with a Euclidean inverse beside the carry-less multiply.
++struct Arith {
++    fc: FastCurve,
++    irr: u64,
++}
++
++impl Arith {
++    #[inline]
++    fn mul(&self, a: u64, b: u64) -> u64 {
++        self.fc.field.mul(a, b)
++    }
++
++    #[inline]
++    fn sqr(&self, a: u64) -> u64 {
++        self.fc.field.sqr(a)
++    }
++
++    /// `a^{-1}` by the extended Euclidean algorithm on `F_2[z]`: about
++    /// `2n` shift-and-xor steps, against the `n` squarings and `n`
++    /// multiplications of the Fermat inverse.
++    fn inv(&self, a: u64) -> u64 {
++        debug_assert!(a != 0);
++        let (mut u, mut v) = (a, self.irr);
++        let (mut g1, mut g2) = (1u64, 0u64);
++        while u != 1 {
++            let mut j = (63 - u.leading_zeros()) as i32 - (63 - v.leading_zeros()) as i32;
++            if j < 0 {
++                std::mem::swap(&mut u, &mut v);
++                std::mem::swap(&mut g1, &mut g2);
++                j = -j;
++            }
++            u ^= v << j;
++            g1 ^= g2 << j;
++        }
++        g1
++    }
++
++    /// Montgomery's trick: one inversion for the whole slice.  Zeros stay
++    /// zero.
++    fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
++        scratch.clear();
++        let mut acc = 1u64;
++        for &x in xs.iter() {
++            scratch.push(acc);
++            if x != 0 {
++                acc = self.mul(acc, x);
++            }
++        }
++        let mut inv_acc = self.inv(acc);
++        for i in (0..xs.len()).rev() {
++            if xs[i] != 0 {
++                let xi = xs[i];
++                xs[i] = self.mul(inv_acc, scratch[i]);
++                inv_acc = self.mul(inv_acc, xi);
++            }
++        }
++    }
++
++    #[inline]
++    fn neg(&self, p: FastPoint) -> FastPoint {
++        if p.infinity {
++            p
++        } else {
++            FastPoint::affine(p.x, p.x ^ p.y)
++        }
++    }
++
++    fn double(&self, p: FastPoint) -> FastPoint {
++        if p.infinity || p.x == 0 {
++            return FastPoint::INFINITY;
++        }
++        let lambda = p.x ^ self.mul(p.y, self.inv(p.x));
++        let x3 = self.sqr(lambda) ^ lambda ^ self.fc.a;
++        let y3 = self.sqr(p.x) ^ self.mul(lambda ^ 1, x3);
++        FastPoint::affine(x3, y3)
++    }
++
++    #[inline]
++    fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
++        let x3 = self.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.fc.a;
++        let y3 = self.mul(lambda, p.x ^ x3) ^ x3 ^ p.y;
++        FastPoint::affine(x3, y3)
++    }
++
++    fn add(&self, p: FastPoint, q: FastPoint) -> FastPoint {
++        if p.infinity {
++            return q;
++        }
++        if q.infinity {
++            return p;
++        }
++        if p.x == q.x {
++            if p.y ^ q.y == p.x {
++                return FastPoint::INFINITY;
++            }
++            return self.double(p);
++        }
++        let lambda = self.mul(p.y ^ q.y, self.inv(p.x ^ q.x));
++        self.add_with_lambda(p, q, lambda)
++    }
++
++    /// `[k]P` by double-and-add.
++    fn mul_point(&self, p: FastPoint, k: u64) -> FastPoint {
++        if k == 0 || p.infinity {
++            return FastPoint::INFINITY;
++        }
++        let mut result = FastPoint::INFINITY;
++        for i in (0..64 - k.leading_zeros()).rev() {
++            result = self.double(result);
++            if (k >> i) & 1 == 1 {
++                result = self.add(result, p);
++            }
++        }
++        result
++    }
++
++    /// `(x^{2^k}, y^{2^k})`.
++    fn frobenius_k(&self, p: FastPoint, k: u32) -> FastPoint {
++        if p.infinity {
++            return p;
++        }
++        FastPoint::affine(self.fc.field.sqr_k(p.x, k), self.fc.field.sqr_k(p.y, k))
++    }
++
++    /// The first point the general `factor_base_points_with_x` returns
++    /// for `x ≠ 0`, `(x, x·u)` with `u` the half-trace of
++    /// `x + a + b/x²`, or `None` when the trace is one.
++    fn lift_x(&self, x: u64) -> Option<FastPoint> {
++        if x == 0 {
++            return None;
++        }
++        let n = self.fc.n;
++        let inverse = self.inv(x);
++        let rhs = x ^ self.fc.a ^ self.mul(self.fc.b, self.sqr(inverse));
++        let mut acc = rhs;
++        let mut u = rhs;
++        for _ in 0..(n - 1) / 2 {
++            acc = self.sqr(self.sqr(acc));
++            u ^= acc;
++        }
++        if self.sqr(u) ^ u != rhs {
++            return None;
++        }
++        Some(FastPoint::affine(x, self.mul(x, u)))
++    }
++}
++
++// ── Normal-basis orbit names ────────────────────────────────────────
++
++/// Frobenius as a rotation: in a normal basis `{γ, γ², γ⁴, …}` squaring
++/// rotates the coordinate word by one bit, so the least rotation names
++/// the orbit of an abscissa and the rotation count locates a point in it.
++struct NormalBasis {
++    n: u32,
++    mask: u64,
++    tables: Vec<[u64; 256]>,
++}
++
++fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
++    let mut a: Vec<u64> = (0..n)
++        .map(|i| (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k)))
++        .collect();
++    let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
++    for c in 0..n as usize {
++        let pivot = (c..n as usize).find(|&r| (a[r] >> c) & 1 == 1)?;
++        a.swap(c, pivot);
++        inv.swap(c, pivot);
++        for r in 0..n as usize {
++            if r != c && (a[r] >> c) & 1 == 1 {
++                a[r] ^= a[c];
++                inv[r] ^= inv[c];
++            }
++        }
++    }
++    Some(inv)
++}
++
++impl NormalBasis {
++    fn new(arith: &Arith) -> Option<Self> {
++        let n = arith.fc.n;
++        let mask = (1u64 << n) - 1;
++        let mut inverse = None;
++        let mut candidate = 2u64;
++        for _ in 0..4096 {
++            candidate = candidate.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (candidate >> 29);
++            let gamma = candidate & mask;
++            if gamma == 0 {
++                continue;
++            }
++            let mut column = gamma;
++            let columns: Vec<u64> = (0..n)
++                .map(|_| {
++                    let c = column;
++                    column = arith.sqr(column);
++                    c
++                })
++                .collect();
++            if let Some(inv) = invert_f2(&columns, n) {
++                inverse = Some(inv);
++                break;
++            }
++        }
++        let inverse = inverse?;
++        let by_bit: Vec<u64> = (0..n)
++            .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
++            .collect();
++        let bytes = ((n + 7) / 8) as usize;
++        let tables = (0..bytes)
++            .map(|bi| {
++                let mut table = [0u64; 256];
++                for (b, slot) in table.iter_mut().enumerate() {
++                    let mut acc = 0u64;
++                    for t in 0..8 {
++                        let j = bi * 8 + t;
++                        if (b >> t) & 1 == 1 && j < n as usize {
++                            acc ^= by_bit[j];
++                        }
++                    }
++                    *slot = acc;
++                }
++                table
++            })
++            .collect();
++        Some(Self { n, mask, tables })
++    }
++
++    #[inline]
++    fn coords(&self, x: u64) -> u64 {
++        let mut acc = 0u64;
++        for (i, table) in self.tables.iter().enumerate() {
++            acc ^= table[((x >> (8 * i)) & 0xff) as usize];
++        }
++        acc
++    }
++
++    /// `(least rotation, rotations applied)`: the orbit name of `x` and
++    /// the `k` with `canon = coords(x^{2^k})`.
++    #[inline]
++    fn canon(&self, x: u64) -> (u64, u32) {
++        let c = self.coords(x);
++        let n = self.n;
++        let mut best = c;
++        let mut best_k = 0u32;
++        let mut v = c;
++        for k in 1..n {
++            v = ((v << 1) | (v >> (n - 1))) & self.mask;
++            if v < best {
++                best = v;
++                best_k = k;
++            }
++        }
++        (best, best_k)
++    }
++}
++
++// ── The folded pair-sum table ───────────────────────────────────────
++
++/// A stored sum `C_orbit + P_other` and the rotation that names its
++/// orbit; twelve bytes, since every coordinate fits 31 bits.
++#[derive(Clone, Copy)]
++struct PairEntry {
++    sum_x: u32,
++    sum_y: u32,
++    other: u16,
++    orbit: u8,
++    rotation: u8,
++}
++
++impl PairEntry {
++    #[inline]
++    fn sum(&self) -> FastPoint {
++        FastPoint::affine(u64::from(self.sum_x), u64::from(self.sum_y))
++    }
++}
++
++/// Open addressing on the orbit name; one witness per orbit of a sum.
++/// Slots hold a dense index so only the small index array is zeroed.
++struct PairTable {
++    keys: Vec<u64>,
++    slots: Vec<u32>,
++    entries: Vec<PairEntry>,
++    shift: u32,
++}
++
++impl PairTable {
++    fn with_capacity(count: usize) -> Self {
++        let bits = (usize::BITS - (2 * count.max(1)).leading_zeros()).max(4);
++        let slots = 1usize << bits;
++        Self {
++            keys: Vec::with_capacity(count),
++            slots: vec![0; slots],
++            entries: Vec::with_capacity(count),
++            shift: 64 - bits,
++        }
++    }
++
++    #[inline]
++    fn slot(&self, key: u64) -> usize {
++        (key.wrapping_mul(0x9e37_79b9_7f4a_7c15) >> self.shift) as usize
++    }
++
++    fn insert(&mut self, key: u64, entry: PairEntry) {
++        let mask = self.slots.len() - 1;
++        let mut i = self.slot(key);
++        loop {
++            let s = self.slots[i];
++            if s == 0 {
++                self.keys.push(key);
++                self.entries.push(entry);
++                self.slots[i] = self.entries.len() as u32;
++                return;
++            }
++            if self.keys[s as usize - 1] == key {
++                return;
++            }
++            i = (i + 1) & mask;
++        }
++    }
++
++    #[inline]
++    fn get(&self, key: u64) -> Option<&PairEntry> {
++        let mask = self.slots.len() - 1;
++        let mut i = self.slot(key);
++        loop {
++            let s = self.slots[i];
++            if s == 0 {
++                return None;
++            }
++            if self.keys[s as usize - 1] == key {
++                return Some(&self.entries[s as usize - 1]);
++            }
++            i = (i + 1) & mask;
++        }
++    }
++
++    /// Stored sum orbits.
++    fn len(&self) -> usize {
++        self.entries.len()
++    }
++}
++
++// ── Scalar-field rows ───────────────────────────────────────────────
++
++#[inline]
++fn mulmod(a: u64, b: u64, r: u64) -> u64 {
++    ((a as u128 * b as u128) % r as u128) as u64
++}
++
++fn invmod(a: u64, r: u64) -> Option<u64> {
++    let (mut old_r, mut rr) = (a as i128, r as i128);
++    let (mut old_s, mut s) = (1i128, 0i128);
++    while rr != 0 {
++        let q = old_r / rr;
++        (old_r, rr) = (rr, old_r - q * rr);
++        (old_s, s) = (s, old_s - q * s);
++    }
++    if old_r != 1 {
++        return None;
++    }
++    Some(old_s.rem_euclid(r as i128) as u64)
++}
++
++/// Incremental row echelon form over `Z/rZ`.
++struct Echelon {
++    columns: usize,
++    r: u64,
++    pivots: Vec<Option<Vec<u64>>>,
++    rank: usize,
++}
++
++impl Echelon {
++    fn new(columns: usize, r: u64) -> Self {
++        Self {
++            columns,
++            r,
++            pivots: vec![None; columns],
++            rank: 0,
++        }
++    }
++
++    /// Reduce and keep `row` (`columns + 1` entries, the last the right
++    /// hand side); `true` when it raised the rank.
++    fn push(&mut self, mut row: Vec<u64>) -> bool {
++        let r = self.r;
++        for c in 0..self.columns {
++            if row[c] == 0 {
++                continue;
++            }
++            match &self.pivots[c] {
++                Some(p) => {
++                    let f = row[c];
++                    for (x, &y) in row.iter_mut().zip(p.iter()) {
++                        *x = (*x + r - mulmod(f, y, r)) % r;
++                    }
++                }
++                None => {
++                    let Some(inv) = invmod(row[c], r) else {
++                        return false;
++                    };
++                    for x in row.iter_mut() {
++                        *x = mulmod(*x, inv, r);
++                    }
++                    self.pivots[c] = Some(row);
++                    self.rank += 1;
++                    return true;
++                }
++            }
++        }
++        false
++    }
++
++    fn solve(&self) -> Option<Vec<u64>> {
++        if self.rank != self.columns {
++            return None;
++        }
++        let r = self.r;
++        let mut x = vec![0u64; self.columns];
++        for c in (0..self.columns).rev() {
++            let p = self.pivots[c].as_ref()?;
++            let mut v = p[self.columns];
++            for c2 in c + 1..self.columns {
++                v = (v + r - mulmod(p[c2], x[c2], r)) % r;
++            }
++            x[c] = v;
++        }
++        Some(x)
++    }
++}
++
++// ── The pipeline ────────────────────────────────────────────────────
++
++struct SplitMix(u64);
++
++impl SplitMix {
++    fn next(&mut self) -> u64 {
++        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
++        let mut z = self.0;
++        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
++        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
++        z ^ (z >> 31)
++    }
++
++    /// Uniform enough in `[1, r)` for probe scalars.
++    fn scalar(&mut self, r: u64) -> u64 {
++        1 + self.next() % (r - 1)
++    }
++}
++
++/// One complete cold job's state: base, table, relations, logs.
++pub struct TinyIc {
++    arith: Arith,
++    canon: NormalBasis,
++    n: u32,
++    r: u64,
++    h: u64,
++    lambda_pow: Vec<u64>,
++    g: FastPoint,
++    /// Base points, orbit-major: index `o·2n + 2k + s` is `(−1)^s π^k(C_o)`.
++    points: Vec<FastPoint>,
++    negated: Vec<FastPoint>,
++    orbits: usize,
++    /// `[h]C_o`, the column points.
++    columns: Vec<FastPoint>,
++    table: PairTable,
++    table_rows: usize,
++    chunk: usize,
++    max_trials: u64,
++    // walk state for relation probes
++    rng: SplitMix,
++    stride: FastPoint,
++    stride_scalar: u64,
++    probe: FastPoint,
++    probe_scalar: u64,
++    trials: u64,
++    // rows and solution
++    echelon: Echelon,
++    seen: HashSet<(u64, [u32; 3])>,
++    accepted: usize,
++    duplicates: usize,
++    solve_attempts: usize,
++    logs: Option<Vec<u64>>,
++    // scratch
++    dens: Vec<u64>,
++    scratch: Vec<u64>,
++}
++
++impl TinyIc {
++    /// Build the base, its columns and the pair table.  `Err` describes
++    /// an unsupported job; callers should check [`supports`] first.
++    pub fn new(
++        kc: &KoblitzCurve,
++        spec: &FactorBaseSpec,
++        algorithm_seed: u64,
++        max_trials: u64,
++    ) -> Result<Self, String> {
++        let FactorBaseSpec::SubgroupOrbits { seed, points } = spec else {
++            return Err("fast pipeline needs a SubgroupOrbits base".into());
++        };
++        if !supports(kc, spec, 3) {
++            return Err("fast pipeline does not support this curve".into());
++        }
++        let fc = FastCurve::new(&kc.curve).ok_or("field too wide")?;
++        let irr = kc
++            .curve
++            .irreducible
++            .low_terms
++            .iter()
++            .fold(1u64 << kc.n, |acc, &t| acc | (1u64 << t));
++        let arith = Arith { fc, irr };
++        let n = kc.n;
++        let r = kc.subgroup_order.to_u64().ok_or("order too wide")?;
++        let h = kc.cofactor.to_u64().ok_or("cofactor too wide")?;
++        let lambda = kc.lambda.to_u64().ok_or("lambda too wide")? % r;
++        let g = arith.fc.lift(kc.generator());
++
++        // ── The base: the same draws as `build_subgroup_orbit_factor_base`.
++        // Sets are small vectors: a few dozen abscissae do not need a
++        // hashed container, and the hashing was a third of the setup.
++        let mut rng = StdRng::seed_from_u64(*seed);
++        let cap = 1u64 << n;
++        let target = *points;
++        if target == 0 {
++            return Err("a factor base needs at least one point".into());
++        }
++        let budget = 1024u64 * target as u64;
++        let mut drawn = 0u64;
++        let mut seen_x: Vec<u64> = Vec::new();
++        // Frobenius closure of the accepted representatives, sorted.
++        let mut closure: Vec<u64> = Vec::new();
++        let mut xs: Vec<u64> = Vec::new();
++        loop {
++            let mut added = 0usize;
++            while added < 8 {
++                drawn += 1;
++                if drawn > budget {
++                    return Err(format!(
++                        "drew {drawn} abscissae without reaching {target} subgroup points"
++                    ));
++                }
++                let x = rng.gen_range(1..cap);
++                let Some(point) = arith.lift_x(x) else {
++                    continue;
++                };
++                let projected = arith.mul_point(point, h);
++                if projected.infinity || seen_x.contains(&projected.x) {
++                    continue;
++                }
++                seen_x.push(projected.x);
++                let mut orbit = projected.x;
++                for _ in 0..n {
++                    closure.push(orbit);
++                    orbit = arith.sqr(orbit);
++                }
++                added += 1;
++            }
++            closure.sort_unstable();
++            closure.dedup();
++            // The general loop skips a rebuild while the abscissae cannot
++            // reach the target; here the closure is the rebuild.
++            if 2 * closure.len() < target {
++                continue;
++            }
++            xs = closure.clone();
++            break;
++        }
++
++        // ── Orbits, in ascending order of their least abscissa.
++        let mut assigned = vec![false; xs.len()];
++        let mut points_vec: Vec<FastPoint> = Vec::with_capacity(2 * xs.len());
++        let mut columns: Vec<FastPoint> = Vec::new();
++        for (start, &x) in xs.iter().enumerate() {
++            if assigned[start] {
++                continue;
++            }
++            let rep = arith.lift_x(x).ok_or("base abscissa does not lift")?;
++            let mut current = rep;
++            for _ in 0..n {
++                let slot = xs.binary_search(&current.x).map_err(|_| "orbit leaves the base")?;
++                if std::mem::replace(&mut assigned[slot], true) {
++                    return Err("degenerate Frobenius orbit in base".into());
++                }
++                points_vec.push(current);
++                points_vec.push(arith.neg(current));
++                current = arith.frobenius_k(current, 1);
++            }
++            if current != rep {
++                return Err("orbit does not close".into());
++            }
++            columns.push(arith.mul_point(rep, h));
++        }
++        if points_vec.len() != 2 * xs.len() {
++            return Err("orbit closure does not cover the base".into());
++        }
++        let orbits = columns.len();
++        if orbits < 2 || columns.iter().any(|c| c.infinity) {
++            return Err("base has fewer than two projected columns".into());
++        }
++        if orbits > usize::from(u8::MAX) || points_vec.len() > usize::from(u16::MAX) {
++            return Err("base too large for the packed pair table".into());
++        }
++        let negated: Vec<FastPoint> = points_vec.iter().map(|&p| arith.neg(p)).collect();
++        let mut lambda_pow = vec![1u64; n as usize];
++        for k in 1..n as usize {
++            lambda_pow[k] = mulmod(lambda_pow[k - 1], lambda, r);
++        }
++
++        // ── The folded pair table.
++        //
++        // Row `o` of the folded table holds `C_o + P_j` for every `j`, so a
++        // pair `(P_i, P_j)` is represented once either summand's orbit has a
++        // row.  On a cell where pair sums are dense — the expected number of
++        // pair sums equal to one rest, `λ = |F|(|F|+1)/(2r)`, is large — a
++        // prefix of `t` rows already leaves a rest a decomposition with
++        // probability `1 − exp(−λ·(1 − ((K−t)/K)²))`, and the rows not built
++        // are the bulk of the setup.  `t` is the least row count with that
++        // expected witness count at least `TABLE_WITNESSES`; on the sparse
++        // cells that is every row, as before.  A deterministic function of
++        // the public base and order, fixed before any probe is drawn.
++        let canon = NormalBasis::new(&arith).ok_or("no normal basis found")?;
++        let size = points_vec.len();
++        let lambda_pairs = (size as f64) * (size as f64 + 1.0) / 2.0 / r as f64;
++        let coverage = |rows: usize| 1.0 - ((orbits - rows) as f64 / orbits as f64).powi(2);
++        let table_rows = (1..=orbits)
++            .find(|&t| lambda_pairs * coverage(t) >= TABLE_WITNESSES)
++            .unwrap_or(orbits);
++        let mut table = PairTable::with_capacity(table_rows * size);
++        let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
++        let mut dens = Vec::with_capacity(size);
++        let mut scratch = Vec::with_capacity(size);
++        for o in 0..table_rows {
++            let rep = points_vec[o * 2 * n as usize];
++            Self::add_many(&arith, rep, &points_vec, &mut sums, &mut dens, &mut scratch);
++            for (j, &sum) in sums.iter().enumerate() {
++                if sum.infinity {
++                    continue;
++                }
++                let (key, rotation) = canon.canon(sum.x);
++                table.insert(
++                    key,
++                    PairEntry {
++                        sum_x: sum.x as u32,
++                        sum_y: sum.y as u32,
++                        other: j as u16,
++                        orbit: o as u8,
++                        rotation: rotation as u8,
++                    },
++                );
++            }
++        }
++        // A scan block pays one inversion and is thrown away on an early
++        // exit; size it to about one expected witness per block.
++        let hit = 1.0 - (-(lambda_pairs * coverage(table_rows))).exp();
++        let chunk = ((0.5 / hit.max(1e-9)).ceil() as usize).clamp(8, 64).min(size);
++
++        let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
++        let probe_scalar = prng.scalar(r);
++        let stride_scalar = prng.scalar(r);
++        let probe = arith.mul_point(g, probe_scalar);
++        let stride = arith.mul_point(g, stride_scalar);
++        Ok(Self {
++            arith,
++            canon,
++            n,
++            r,
++            h,
++            lambda_pow,
++            g,
++            points: points_vec,
++            negated,
++            orbits,
++            columns,
++            table,
++            table_rows,
++            chunk,
++            max_trials,
++            rng: prng,
++            stride,
++            stride_scalar,
++            probe,
++            probe_scalar,
++            trials: 0,
++            echelon: Echelon::new(orbits, r),
++            seen: HashSet::new(),
++            accepted: 0,
++            duplicates: 0,
++            solve_attempts: 0,
++            logs: None,
++            dens: Vec::with_capacity(size),
++            scratch: Vec::with_capacity(size),
++        })
++    }
++
++    fn add_many(
++        arith: &Arith,
++        p: FastPoint,
++        qs: &[FastPoint],
++        out: &mut Vec<FastPoint>,
++        dens: &mut Vec<u64>,
++        scratch: &mut Vec<u64>,
++    ) {
++        dens.clear();
++        dens.extend(qs.iter().map(|q| if p.infinity || q.infinity || q.x == p.x { 0 } else { p.x ^ q.x }));
++        arith.batch_inv(dens, scratch);
++        out.clear();
++        for (q, &inv) in qs.iter().zip(dens.iter()) {
++            if inv == 0 {
++                out.push(arith.add(p, *q));
++            } else {
++                let lambda = arith.mul(p.y ^ q.y, inv);
++                out.push(arith.add_with_lambda(p, *q, lambda));
++            }
++        }
++    }
++
++    /// `(rows built, rows possible, stored sum orbits, scan block)` of the
++    /// folded pair table, for reports.
++    pub fn table_shape(&self) -> (usize, usize, usize, usize) {
++        (self.table_rows, self.orbits, self.table.len(), self.chunk)
++    }
++
++    /// Relation columns (signed Frobenius orbits of the base).
++    pub fn columns(&self) -> usize {
++        self.orbits
++    }
++
++    /// The base, in the index order relations refer to.
++    pub fn base_points(&self) -> Vec<BinaryPoint> {
++        self.points.iter().map(|&p| self.arith.fc.lower(p)).collect()
++    }
++
++    /// The base as single-word coordinates, in the same order.
++    pub fn base_words(&self) -> Vec<(u64, u64)> {
++        self.points.iter().map(|p| (p.x, p.y)).collect()
++    }
++
++    #[inline]
++    fn index(&self, orbit: u32, k: u32, negated: bool) -> usize {
++        (orbit as usize) * 2 * self.n as usize + 2 * k as usize + usize::from(negated)
++    }
++
++    #[inline]
++    fn location(&self, index: usize) -> (u32, u32, bool) {
++        let per = 2 * self.n as usize;
++        ((index / per) as u32, ((index % per) / 2) as u32, index % 2 == 1)
++    }
++
++    /// `(−1)^s λ^k mod r` for a base point.
++    #[inline]
++    fn coefficient(&self, index: usize) -> u64 {
++        let (_, k, negated) = self.location(index);
++        let c = self.lambda_pow[k as usize];
++        if negated && c != 0 {
++            self.r - c
++        } else {
++            c
++        }
++    }
++
++    /// Exactly three base indices summing to `target`, scanning the base
++    /// from `start` and stopping at the first witness.  The witness is
++    /// re-added in the group before it is returned.
++    fn decompose(&mut self, target: FastPoint, start: usize) -> Option<[usize; 3]> {
++        if target.infinity {
++            return None;
++        }
++        let size = self.points.len();
++        let n = self.n;
++        let mut rests: Vec<FastPoint> = Vec::with_capacity(self.chunk);
++        let mut offset = start % size;
++        let mut scanned = 0usize;
++        while scanned < size {
++            let len = self.chunk.min(size - scanned);
++            let end = offset + len;
++            // The block, wrapping around the end of the base.
++            self.dens.clear();
++            for t in 0..len {
++                let i = (offset + t) % size;
++                let q = self.negated[i];
++                self.dens.push(if q.x == target.x { 0 } else { target.x ^ q.x });
++            }
++            self.arith.batch_inv(&mut self.dens, &mut self.scratch);
++            rests.clear();
++            for t in 0..len {
++                let i = (offset + t) % size;
++                let q = self.negated[i];
++                let inv = self.dens[t];
++                rests.push(if inv == 0 {
++                    self.arith.add(target, q)
++                } else {
++                    let lambda = self.arith.mul(target.y ^ q.y, inv);
++                    self.arith.add_with_lambda(target, q, lambda)
++                });
++            }
++            for (t, &rest) in rests.iter().enumerate() {
++                if rest.infinity {
++                    continue;
++                }
++                let i = (offset + t) % size;
++                let (key, rot_t) = self.canon.canon(rest.x);
++                let Some(entry) = self.table.get(key) else {
++                    continue;
++                };
++                let k = (u32::from(entry.rotation) + n - rot_t) % n;
++                let image = self.arith.frobenius_k(entry.sum(), k);
++                if image.x != rest.x {
++                    continue;
++                }
++                let negated = image.y != rest.y;
++                let first = self.index(u32::from(entry.orbit), k, negated);
++                let (o2, k2, s2) = self.location(entry.other as usize);
++                let second = self.index(o2, (k2 + k) % n, s2 ^ negated);
++                let mut witness = [i, first, second];
++                witness.sort_unstable();
++                let sum = witness.iter().fold(FastPoint::INFINITY, |s, &w| {
++                    self.arith.add(s, self.points[w])
++                });
++                if sum == target {
++                    return Some(witness);
++                }
++            }
++            scanned += len;
++            offset = end % size;
++        }
++        None
++    }
++
++    /// Walk `count` probes `R_t = [a_t]G` and return the relations found.
++    pub fn collect(&mut self, count: u64) -> Vec<CollectedRelation> {
++        let mut rows = Vec::new();
++        let size = self.points.len();
++        for _ in 0..count {
++            if self.trials >= self.max_trials {
++                break;
++            }
++            let trial = self.trials;
++            self.trials += 1;
++            let a = self.probe_scalar;
++            let target = self.probe;
++            // advance the walk before any early return
++            self.probe_scalar = (self.probe_scalar + self.stride_scalar) % self.r;
++            self.probe = self.arith.add(self.probe, self.stride);
++            if a == 0 || target.infinity {
++                continue;
++            }
++            let start = (trial as usize * (2 * self.n as usize + 1)) % size;
++            if let Some(w) = self.decompose(target, start) {
++                rows.push(CollectedRelation {
++                    trial,
++                    a,
++                    points: w.to_vec(),
++                });
++            }
++        }
++        rows
++    }
++
++    /// Probes drawn so far.
++    pub fn trials(&self) -> u64 {
++        self.trials
++    }
++
++    /// Add rows over the projected columns.
++    pub fn push(&mut self, rows: &[CollectedRelation]) {
++        for rel in rows {
++            let mut ids = [0u32; 3];
++            for (slot, &i) in ids.iter_mut().zip(rel.points.iter()) {
++                *slot = i as u32;
++            }
++            ids.sort_unstable();
++            if !self.seen.insert((rel.a, ids)) {
++                self.duplicates += 1;
++                continue;
++            }
++            self.accepted += 1;
++            let mut row = vec![0u64; self.orbits + 1];
++            for &i in &rel.points {
++                let (o, _, _) = self.location(i);
++                row[o as usize] = (row[o as usize] + self.coefficient(i)) % self.r;
++            }
++            row[self.orbits] = mulmod(self.h % self.r, rel.a % self.r, self.r);
++            self.echelon.push(row);
++        }
++    }
++
++    /// Solve when the rows determine every column; each logarithm is
++    /// certified by `[ℓ]G = [h]C` before the table is accepted.
++    pub fn try_solve(&mut self) -> bool {
++        self.solve_attempts += 1;
++        let Some(logs) = self.echelon.solve() else {
++            return false;
++        };
++        let ok = logs
++            .iter()
++            .zip(&self.columns)
++            .all(|(&l, &c)| l < self.r && self.arith.mul_point(self.g, l) == c);
++        if ok {
++            self.logs = Some(logs);
++        }
++        ok
++    }
++
++    /// Re-certify every column logarithm in the group.
++    pub fn verify_columns(&self) -> bool {
++        match &self.logs {
++            Some(logs) => logs
++                .iter()
++                .zip(&self.columns)
++                .all(|(&l, &c)| l < self.r && self.arith.mul_point(self.g, l) == c),
++            None => false,
++        }
++    }
++
++    /// `(column point, logarithm)` per column.
++    pub fn column_logs(&self) -> Option<Vec<(BinaryPoint, BigUint)>> {
++        let logs = self.logs.as_ref()?;
++        Some(
++            self.columns
++                .iter()
++                .zip(logs)
++                .map(|(&c, &l)| (self.arith.fc.lower(c), BigUint::from(l)))
++                .collect(),
++        )
++    }
++
++    /// The same as [`Self::column_logs`] in single words.
++    pub fn column_words(&self) -> Option<Vec<((u64, u64), u64)>> {
++        let logs = self.logs.as_ref()?;
++        Some(self.columns.iter().zip(logs).map(|(c, &l)| ((c.x, c.y), l)).collect())
++    }
++
++    /// `(accepted, duplicates, solve attempts)`.
++    pub fn accounting(&self) -> (usize, usize, usize) {
++        (self.accepted, self.duplicates, self.solve_attempts)
++    }
++
++    /// The logarithm of `q`, verified as `[d]G = Q` in the group, with
++    /// the number of descent probes it took.
++    pub fn solve_target(&mut self, q: &BinaryPoint) -> Option<(BigUint, u64)> {
++        let logs = self.logs.clone()?;
++        let q_fast = self.arith.fc.lift(q);
++        if q_fast.infinity {
++            return None;
++        }
++        let r = self.r;
++        let h = self.h % r;
++        let mut a = self.rng.scalar(r);
++        let b = self.rng.scalar(r);
++        let stride_scalar = self.rng.scalar(r);
++        let stride = self.arith.mul_point(self.g, stride_scalar);
++        let mut probe = self.arith.add(
++            self.arith.mul_point(self.g, a),
++            self.arith.mul_point(q_fast, b),
++        );
++        let hb_inv = invmod(mulmod(h, b, r), r)?;
++        let size = self.points.len();
++        let mut trials = 0u64;
++        while trials < self.max_trials {
++            trials += 1;
++            let mut candidate = None;
++            if probe.infinity {
++                // [a]G + [b]Q = O
++                candidate = Some(mulmod((r - a % r) % r, invmod(b, r)?, r));
++            } else {
++                let start = (trials as usize * (2 * self.n as usize + 1)) % size;
++                if let Some(w) = self.decompose(probe, start) {
++                    let mut sum = 0u64;
++                    for &i in &w {
++                        let (o, _, _) = self.location(i);
++                        sum = (sum + mulmod(self.coefficient(i), logs[o as usize], r)) % r;
++                    }
++                    let numerator = (sum + r - mulmod(h, a % r, r)) % r;
++                    candidate = Some(mulmod(numerator, hb_inv, r));
++                }
++            }
++            if let Some(d) = candidate {
++                if d < r && self.arith.mul_point(self.g, d) == q_fast {
++                    return Some((BigUint::from(d), trials));
++                }
++            }
++            a = (a + stride_scalar) % r;
++            probe = self.arith.add(probe, stride);
++        }
++        None
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::binary_ecc::F2mElement;
++    use crate::cryptanalysis::koblitz_index_calculus::point_key;
++
++    const CELLS: [(u32, u8); 9] = [
++        (5, 0),
++        (7, 1),
++        (13, 0),
++        (17, 1),
++        (19, 0),
++        (19, 1),
++        (23, 0),
++        (31, 0),
++        (31, 1),
++    ];
++
++    #[test]
++    fn euclid_inverse_matches_fermat() {
++        for (n, a) in CELLS {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
++            let arith = Arith { fc, irr };
++            let mask = (1u64 << n) - 1;
++            let mut state = 0x1234_5678_9abc_def0u64 ^ u64::from(n);
++            for _ in 0..2000 {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                let x = (state >> 11) & mask;
++                if x == 0 {
++                    continue;
++                }
++                assert_eq!(arith.inv(x), arith.fc.field.inv(x), "n={n} x={x}");
++                assert_eq!(arith.mul(x, arith.inv(x)), 1);
++            }
++        }
++    }
++
++    #[test]
++    fn arithmetic_matches_fast_curve() {
++        for (n, a) in CELLS {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
++            let arith = Arith { fc: fc.clone(), irr };
++            let g = fc.lift(kc.generator());
++            let r = kc.subgroup_order.to_u64().unwrap();
++            for k in [1u64, 2, 3, 5, 17, 1000, r - 1, r / 3 + 1] {
++                let k = k % r;
++                if k == 0 {
++                    continue;
++                }
++                assert_eq!(arith.mul_point(g, k), fc.mul_u64(g, k), "n={n} k={k}");
++            }
++            let p = fc.mul_u64(g, 12345 % r);
++            let q = fc.mul_u64(g, 777 % r);
++            assert_eq!(arith.add(p, q), fc.add(p, q));
++            assert_eq!(arith.double(p), fc.double(p));
++            assert_eq!(arith.add(p, arith.neg(p)), FastPoint::INFINITY);
++            assert_eq!(arith.frobenius_k(p, 3), fc.frobenius_k(p, 3));
++        }
++    }
++
++    #[test]
++    fn normal_basis_rotation_locates_frobenius_images() {
++        for (n, a) in CELLS {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
++            let arith = Arith { fc, irr };
++            let canon = NormalBasis::new(&arith).unwrap();
++            let mask = (1u64 << n) - 1;
++            let mut state = 0xdead_beef_u64 ^ u64::from(n);
++            for _ in 0..500 {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                let x = (state >> 7) & mask;
++                if x <= 1 {
++                    continue;
++                }
++                let (key, rot_x) = canon.canon(x);
++                for k in 0..n {
++                    let y = arith.fc.field.sqr_k(x, k);
++                    let (key_y, rot_y) = canon.canon(y);
++                    assert_eq!(key, key_y);
++                    assert_eq!((rot_x + n - rot_y) % n, k, "n={n} x={x} k={k}");
++                }
++                assert_eq!(arith.fc.field.sqr_k(x, rot_x) , {
++                    // the element whose coords are the least rotation
++                    let mut best = x; let mut bx = x;
++                    for _ in 1..n { bx = arith.sqr(bx); if canon.coords(bx) < canon.coords(best) { best = bx; } }
++                    best
++                });
++            }
++        }
++    }
++
++    #[test]
++    fn base_matches_general_construction() {
++        let mut checked = 0;
++        for (n, a) in CELLS {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let spec = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 6 * n as usize };
++            let Ok(general) = spec.materialize(&kc) else {
++                // A toy group too small for the recipe: both must decline.
++                assert!(TinyIc::new(&kc, &spec, 7, 4096).is_err(), "n={n} a={a}");
++                continue;
++            };
++            let tiny = TinyIc::new(&kc, &spec, 7, 4096).unwrap();
++            let mut expected: Vec<(BigUint, BigUint)> = general.points.iter().map(point_key).collect();
++            let mut actual: Vec<(BigUint, BigUint)> = tiny.base_points().iter().map(point_key).collect();
++            expected.sort();
++            actual.sort();
++            assert_eq!(expected, actual, "base differs on n={n} a={a}");
++            assert_eq!(tiny.columns(), general.signed_orbits.len(), "columns on n={n} a={a}");
++            // every base point is in the subgroup and the index layout is consistent
++            for (i, p) in tiny.base_points().iter().enumerate() {
++                let (o, k, s) = tiny.location(i);
++                let rep = tiny.base_points()[tiny.index(o, 0, false)].clone();
++                let mut expected = rep;
++                for _ in 0..k { expected = kc.frobenius(&expected); }
++                if s {
++                    if let BinaryPoint::Affine { x, y } = &expected {
++                        expected = BinaryPoint::Affine { x: x.clone(), y: x.add(y) };
++                    }
++                }
++                assert_eq!(*p, expected);
++                assert_eq!(kc.mul(p, &kc.subgroup_order), BinaryPoint::Infinity);
++            }
++            checked += 1;
++        }
++        assert!(checked >= 7);
++    }
++
++    #[test]
++    fn complete_solve_verifies_in_general_arithmetic() {
++        for (n, a) in CELLS {
++            if n < 13 { continue; }
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let spec = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 6 * n as usize };
++            for seed in [1u64, 2, 3] {
++                let mut tiny = TinyIc::new(&kc, &spec, seed, 4096).unwrap();
++                let mut all = Vec::new();
++                let mut solved = false;
++                while tiny.trials() < 4096 && !solved {
++                    let rows = tiny.collect(4);
++                    tiny.push(&rows);
++                    all.extend(rows);
++                    solved = tiny.try_solve();
++                }
++                assert!(solved, "n={n} a={a} seed={seed}");
++                let base = tiny.base_points();
++                let g = kc.generator();
++                for rel in &all {
++                    let sum = rel.points.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &base[i]));
++                    assert_eq!(sum, kc.mul(g, &BigUint::from(rel.a)));
++                    assert_eq!(rel.points.len(), 3);
++                }
++                let logs = tiny.column_logs().unwrap();
++                assert_eq!(logs.len(), tiny.columns());
++                for (c, l) in &logs {
++                    assert_eq!(kc.mul(g, l), *c);
++                }
++                assert!(tiny.verify_columns());
++                let r = kc.subgroup_order.to_u64().unwrap();
++                for d in [5u64, 99, r - 2, r / 2] {
++                    let q = kc.mul(g, &BigUint::from(d));
++                    let (found, trials) = tiny.solve_target(&q).expect("descent");
++                    assert_eq!(found, BigUint::from(d), "n={n} a={a} d={d}");
++                    assert!(trials >= 1);
++                }
++                let (accepted, duplicates, attempts) = tiny.accounting();
++                assert_eq!(accepted + duplicates, all.len());
++                assert!(attempts >= 1);
++            }
++        }
++    }
++
++    #[test]
++    fn unsupported_recipes_are_declined() {
++        let kc = KoblitzCurve::new(0, 13).unwrap();
++        assert!(!supports(&kc, &FactorBaseSpec::Factor { index: 0 }, 3));
++        assert!(!supports(&kc, &FactorBaseSpec::SubgroupOrbits { seed: 1, points: 8 }, 2));
++        let composite = KoblitzCurve::new(0, 15);
++        if let Some(kc) = composite {
++            assert!(!supports(&kc, &FactorBaseSpec::SubgroupOrbits { seed: 1, points: 8 }, 3));
++        }
++        let _ = F2mElement::zero(13);
++    }
++}
+diff -ruN a/src/cryptanalysis/mod.rs b/src/cryptanalysis/mod.rs
+--- a/src/cryptanalysis/mod.rs	2026-09-16 10:20:36.840153062 +0000
++++ b/src/cryptanalysis/mod.rs	2026-09-16 10:53:35.993762631 +0000
+@@ -156,6 +156,7 @@
+ pub mod koblitz_relation_solver;
+ pub mod koblitz_sparse_la;
+ pub mod koblitz_symmetrised;
++pub mod koblitz_tiny_ic;
+ pub mod lattice;
+ pub mod legacy_curve_attacks;
+ pub mod mazur_tate_sigma;
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 10:20:36.794481385 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 10:53:36.039213382 +0000
+@@ -9,6 +9,7 @@
+     RelationCollector, RelationWorkUnit,
+ };
+ use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
++use crypto_lib::cryptanalysis::koblitz_tiny_ic::{self, TinyIc};
+ use num_bigint::BigUint;
+ use serde::Deserialize;
+ use serde_json::{json, Value};
+@@ -69,7 +70,11 @@
+ fn point(p: &BinaryPoint) -> Value {
+     match p {
+         BinaryPoint::Infinity => Value::Null,
+-        BinaryPoint::Affine { x, y } => json!([x.to_biguint().to_string(), y.to_biguint().to_string()]),
++        BinaryPoint::Affine { x, y } => match (x.raw_bits(), y.raw_bits()) {
++            // Same decimal text as the general conversion, without a BigUint.
++            ([xw], [yw]) => json!([xw.to_string(), yw.to_string()]),
++            _ => json!([x.to_biguint().to_string(), y.to_biguint().to_string()]),
++        },
+     }
+ }
+ 
+@@ -93,7 +98,14 @@
+     Err("hash-to-curve exhausted".into())
+ }
+ 
+-fn run(job: &Job) -> Result<Value, String> {
++/// A finished report: a value tree, or text already serialised by the
++/// fast pipeline (the same JSON document, written directly).
++enum Report {
++    Tree(Value),
++    Text(String, bool),
++}
++
++fn run(job: &Job) -> Result<Report, String> {
+     if !(5..=31).contains(&job.degree) || job.degree % 2 == 0 || job.curve_a > 1 {
+         return Err("worker accepts bounded odd-degree Koblitz fixtures (5..31)".into());
+     }
+@@ -118,7 +130,7 @@
+     });
+     dump(b"curve_and_targets\0");
+     if job.mode == "fixture" {
+-        return Ok(json!({"schema_version":1,"status":"fixture","fixture":metadata}));
++        return Ok(Report::Tree(json!({"schema_version":1,"status":"fixture","fixture":metadata})));
+     }
+     if job.mode == "rho" {
+         let mut solutions = Vec::new();
+@@ -139,11 +151,15 @@
+                 .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
+         });
+         dump(b"final_verification\0");
+-        return Ok(json!({"schema_version":1,"mode":"rho","status":if verified{"complete"}else{"incomplete"},
++        return Ok(Report::Tree(json!({"schema_version":1,"mode":"rho","status":if verified{"complete"}else{"incomplete"},
+             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
+-            "elapsed_seconds":start.elapsed().as_secs_f64()}));
++            "elapsed_seconds":start.elapsed().as_secs_f64()})));
+     }
+     if job.mode != "ic" { return Err("unknown mode".into()); }
++    if cfg.solver == "pair_table" && cfg.collection_window.is_none()
++        && koblitz_tiny_ic::supports(&c, &job.factor_base, cfg.summands) {
++        return run_tiny(job, &c, &targets, metadata, start);
++    }
+     let strategy = match cfg.solver.as_str() {
+         "pair_table" => DecompositionStrategy::PairTable,
+         "enumerate" => DecompositionStrategy::Enumerate,
+@@ -185,9 +201,9 @@
+     let base = fb.points.iter().map(point).collect::<Vec<_>>();
+     let report = system.report();
+     let Some((table, solved)) = outcome else {
+-        return Ok(json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
++        return Ok(Report::Tree(json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
+             "trials":trials,"columns":expected_columns,"relations":relations,
+-            "factor_base":base,"rejected_relations":report.rejected_relations}));
++            "factor_base":base,"rejected_relations":report.rejected_relations})));
+     };
+     if solved.rejected_relations != 0 || !table.verify(&c) {
+         return Err("invalid relation or factor-base log certificate".into());
+@@ -207,12 +223,171 @@
+             .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
+     });
+     dump(b"final_verification\0");
+-    Ok(json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
++    Ok(Report::Tree(json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
+         "fixture":metadata,"solutions":solutions,"factor_base":base,"relations":relations,
+         "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solve_attempts,
+         "accepted_relations":solved.relations,"duplicate_relations":solved.duplicate_relations,
+         "rejected_relations":solved.rejected_relations,"summands":cfg.summands,
+-        "sparse_report":solved.sparse_report,"elapsed_seconds":start.elapsed().as_secs_f64()}))
++        "sparse_report":solved.sparse_report,"elapsed_seconds":start.elapsed().as_secs_f64()})))
++}
++
++/// Decimal text of a word, appended.
++fn push_u64(out: &mut String, mut v: u64) {
++    let mut buf = [0u8; 20];
++    let mut i = buf.len();
++    loop {
++        i -= 1;
++        buf[i] = b'0' + (v % 10) as u8;
++        v /= 10;
++        if v == 0 { break; }
++    }
++    out.push_str(std::str::from_utf8(&buf[i..]).expect("ascii digits"));
++}
++
++/// `["x","y"]`, the same text as `point` produces for a single-word point.
++fn push_point(out: &mut String, (x, y): (u64, u64)) {
++    out.push_str("[\"");
++    push_u64(out, x);
++    out.push_str("\",\"");
++    push_u64(out, y);
++    out.push_str("\"]");
++}
++
++/// The same job on the single-word pipeline: identical phase boundaries,
++/// identical certificate content, identical general final verification.
++/// The report is written directly rather than through a value tree; every
++/// field and its JSON type match the general path.
++fn run_tiny(job: &Job, c: &KoblitzCurve, targets: &[BinaryPoint], metadata: Value, start: Instant) -> Result<Report, String> {
++    let cfg = &job.config;
++    let mut ic = TinyIc::new(c, &job.factor_base, job.algorithm_seed, cfg.max_trials)?;
++    let expected_columns = ic.columns();
++    dump(b"factor_base_and_tables\0");
++    let mut relations: Vec<crypto_lib::cryptanalysis::koblitz_index_calculus::CollectedRelation> = Vec::new();
++    let mut solved = false;
++    while ic.trials() < cfg.max_trials && !solved {
++        let rows = ic.collect(cfg.batch_trials);
++        dump(b"collection_and_decomposition\0");
++        ic.push(&rows);
++        solved = ic.try_solve();
++        relations.extend(rows);
++        dump(b"verify_filter_and_linear_algebra\0");
++    }
++    let (accepted, duplicates, solve_attempts) = ic.accounting();
++    let trials = ic.trials();
++    let (table_rows, table_rows_possible, table_entries, scan_block) = ic.table_shape();
++    let mut out = String::with_capacity(16 * 1024 + 24 * ic.base_words().len());
++    let mut base = String::with_capacity(24 * ic.base_words().len());
++    base.push('[');
++    for (i, &p) in ic.base_words().iter().enumerate() {
++        if i > 0 { base.push(','); }
++        push_point(&mut base, p);
++    }
++    base.push(']');
++    let mut rels = String::with_capacity(48 * relations.len());
++    rels.push('[');
++    for (i, rel) in relations.iter().enumerate() {
++        if i > 0 { rels.push(','); }
++        rels.push_str("{\"trial\":");
++        push_u64(&mut rels, rel.trial);
++        rels.push_str(",\"a\":");
++        push_u64(&mut rels, rel.a);
++        rels.push_str(",\"points\":[");
++        for (k, &idx) in rel.points.iter().enumerate() {
++            if k > 0 { rels.push(','); }
++            push_u64(&mut rels, idx as u64);
++        }
++        rels.push_str("]}");
++    }
++    rels.push(']');
++    let fixture = serde_json::to_string(&metadata).map_err(|e| e.to_string())?;
++    if !solved {
++        out.push_str("{\"schema_version\":1,\"mode\":\"ic\",\"status\":\"incomplete\",\"fixture\":");
++        out.push_str(&fixture);
++        out.push_str(",\"trials\":");
++        push_u64(&mut out, trials);
++        out.push_str(",\"columns\":");
++        push_u64(&mut out, expected_columns as u64);
++        out.push_str(",\"relations\":");
++        out.push_str(&rels);
++        out.push_str(",\"factor_base\":");
++        out.push_str(&base);
++        out.push_str(",\"rejected_relations\":0}");
++        return Ok(Report::Text(out, false));
++    }
++    if !ic.verify_columns() {
++        return Err("invalid relation or factor-base log certificate".into());
++    }
++    let mut columns = String::new();
++    columns.push('[');
++    for (i, &(p, l)) in ic.column_words().ok_or("missing logs")?.iter().enumerate() {
++        if i > 0 { columns.push(','); }
++        columns.push_str("{\"point\":");
++        push_point(&mut columns, p);
++        columns.push_str(",\"log\":\"");
++        push_u64(&mut columns, l);
++        columns.push_str("\"}");
++    }
++    columns.push(']');
++    dump(b"log_certification\0");
++    let mut answers = Vec::with_capacity(targets.len());
++    for q in targets {
++        answers.push(ic.solve_target(q));
++    }
++    dump(b"individual_log\0");
++    let verified = answers.iter().zip(targets).all(|(s, q)| {
++        s.as_ref().is_some_and(|(d, _)| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
++    });
++    dump(b"final_verification\0");
++    out.push_str("{\"schema_version\":1,\"mode\":\"ic\",\"status\":\"");
++    out.push_str(if verified { "complete" } else { "incomplete" });
++    out.push_str("\",\"fixture\":");
++    out.push_str(&fixture);
++    out.push_str(",\"solutions\":[");
++    for (i, answer) in answers.iter().enumerate() {
++        if i > 0 { out.push(','); }
++        out.push_str("{\"index\":");
++        push_u64(&mut out, i as u64);
++        match answer {
++            Some((d, t)) => {
++                out.push_str(",\"recovered\":\"");
++                out.push_str(&d.to_string());
++                out.push_str("\",\"trials\":");
++                push_u64(&mut out, *t);
++            }
++            None => out.push_str(",\"recovered\":null,\"trials\":null"),
++        }
++        out.push('}');
++    }
++    out.push_str("],\"factor_base\":");
++    out.push_str(&base);
++    out.push_str(",\"relations\":");
++    out.push_str(&rels);
++    out.push_str(",\"column_logs\":");
++    out.push_str(&columns);
++    out.push_str(",\"columns\":");
++    push_u64(&mut out, expected_columns as u64);
++    out.push_str(",\"trials\":");
++    push_u64(&mut out, trials);
++    out.push_str(",\"solve_attempts\":");
++    push_u64(&mut out, solve_attempts as u64);
++    out.push_str(",\"accepted_relations\":");
++    push_u64(&mut out, accepted as u64);
++    out.push_str(",\"duplicate_relations\":");
++    push_u64(&mut out, duplicates as u64);
++    out.push_str(",\"rejected_relations\":0,\"summands\":");
++    push_u64(&mut out, cfg.summands as u64);
++    out.push_str(",\"sparse_report\":null,\"pair_table\":{\"rows\":");
++    push_u64(&mut out, table_rows as u64);
++    out.push_str(",\"rows_possible\":");
++    push_u64(&mut out, table_rows_possible as u64);
++    out.push_str(",\"sum_orbits\":");
++    push_u64(&mut out, table_entries as u64);
++    out.push_str(",\"scan_block\":");
++    push_u64(&mut out, scan_block as u64);
++    out.push_str("},\"elapsed_seconds\":");
++    out.push_str(&format!("{}", start.elapsed().as_secs_f64()));
++    out.push('}');
++    Ok(Report::Text(out, verified))
+ }
+ 
+ fn main() {
+@@ -223,8 +398,22 @@
+             dump(b"startup_and_input\0"); run(&job)
+         })
+     };
+-    let report = result.unwrap_or_else(|reason|json!({"schema_version":1,"status":"error","reason":reason}));
+-    let success = matches!(report["status"].as_str(),Some("complete"|"fixture"));
+-    println!("{}", report);
++    let (mut text, success) = match result {
++        Ok(Report::Text(text, success)) => (text.into_bytes(), success),
++        Ok(Report::Tree(report)) => {
++            let success = matches!(report["status"].as_str(),Some("complete"|"fixture"));
++            (serde_json::to_vec(&report).expect("serialize report"), success)
++        }
++        Err(reason) => (serde_json::to_vec(&json!({"schema_version":1,"status":"error","reason":reason})).expect("serialize report"), false),
++    };
++    // One buffered write of the same bytes `println!("{}", report)` produced.
++    text.push(b'\n');
++    {
++        use std::io::Write;
++        let stdout = std::io::stdout();
++        let mut lock = stdout.lock();
++        lock.write_all(&text).expect("stdout");
++        lock.flush().expect("stdout");
++    }
+     if !success { std::process::exit(2); }
+ }

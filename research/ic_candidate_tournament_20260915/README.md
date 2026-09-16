@@ -1,14 +1,17 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; three further tournaments finished and audited
+Status: implementation complete; four further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
 process time, with confirmation and replay passing the predeclared parity rule.
-The latest measured single-target candidate remains at 3.04 times rho's
-instructions and 1.52 times its native time on the tested small Koblitz panel.
+The single-target panel reached the same parity rule in round-0006: the selected
+single-word implementation costs 0.8264 times rho's instructions (paired 95%
+interval 0.8032–0.8488) and 0.9766 times its native process time (0.9571–0.9946)
+on complete cold one-target jobs, replay agreeing, on the tested small Koblitz
+panel. The native result is parity, not a demonstrated speed advantage.
 
-All 4,704 new profiled trials and their paired native runs verified. The
+All 6,288 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. See [OPERATIONS.md](OPERATIONS.md)
 for commands, measurement limits, source candidates and installed operating skills.

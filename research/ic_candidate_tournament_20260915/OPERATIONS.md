@@ -44,8 +44,15 @@ time (0.6992–0.8737). Replay passed again. Every curve cell met the per-cell r
 All setup and all target solves are included; rho uses the existing per-target
 solver API. This result applies to the tested five small Koblitz curve cells.
 
-The separate single-target result is 3.04 times rho's instructions and 1.52 times
-its time. Keep these workloads separate when extending the operation.
+The separate single-target panel reached parity in [round-0006](runs/round-0006/REPORT.md)
+([pre-registration](campaign_20260916/ROUND6.md)): the selected `tiny_batch1`
+costs 0.8264 times rho's instructions (95% interval 0.8032–0.8488) and 0.9766
+times its native time (0.9571–0.9946) on confirmation, 0.9854 (0.9641–1.0062)
+on replay, every cell within the 1.10 margin, 1,584 verified trials. It replaces
+the earlier 3.04 / 1.52 figures on that panel. Keep the two workloads separate
+when extending the operation; [WINNER-single-target.json](campaign_20260916/WINNER-single-target.json)
+and [next-proposal-single-target.json](campaign_20260916/next-proposal-single-target.json)
+carry the single-target line.
 
 Review [WINNER.json](campaign_20260916/WINNER.json) for the complete source and
 configuration, and [WINNER.patch](campaign_20260916/WINNER.patch) for the cumulative
@@ -76,6 +83,18 @@ The executable currently supports CPU-only, odd-degree Koblitz fixtures from 5
 through 31, with pair-table or enumeration decomposition and dense/sparse scalar
 linear algebra. Initial candidates change batch size, surplus filtering, linear
 algebra or the collection window. These are configuration/engineering experiments.
+
+The round-0006 candidate sources add a single-word pipeline
+(`src/cryptanalysis/koblitz_tiny_ic.rs`, applied by
+`campaign_20260916/round6-tiny.patch`) that the worker runs for `pair_table`,
+three-summand, prime-degree jobs with the `SubgroupOrbits` recipe: the same
+base point set, relation meaning, column certification and final verification,
+with a Euclidean field inverse, a normal-basis orbit key for the folded pair
+table, density-sized table rows, walked probes and no thread pool. Its worker
+writes the same report fields directly instead of through a value tree. On
+that path `linear_algebra` and `sparse` have no effect; the registry records the
+configuration a candidate ran under. Jobs outside its scope take the general
+path unchanged.
 
 The primary implementation metric is **Valgrind amd64 instruction reads (`Ir`)**.
 All user-space instructions from startup to termination are charged, including
