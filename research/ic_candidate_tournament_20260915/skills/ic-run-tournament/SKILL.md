@@ -49,7 +49,11 @@ trial directory without a receipt is retained and rejected. Investigate it and
 start a new campaign rather than deleting it to obtain a lucky completion.
 
 The A/A control must pass before comparisons. An incomplete baseline, timeout,
-invalid relation, missing phase or unmatched target cannot produce a win. Keep
+invalid relation, missing phase or unmatched target cannot produce a win.
+Neither can a target recovered without its descent certificate: every IC arm
+must report the relation `[a]G + [b]Q = Σ P_i` each logarithm came from, and
+the checker verifies it. Only index-calculus algorithms are candidates; rho is
+the reference. Keep
 all such outcomes visible. Do not raise limits midway through a sealed campaign.
 
 ## Finish

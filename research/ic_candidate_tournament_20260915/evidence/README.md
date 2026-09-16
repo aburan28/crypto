@@ -23,8 +23,14 @@ python3 research/ic_candidate_tournament_20260915/runs/round-0005-batch16/evalua
   verify --round research/ic_candidate_tournament_20260915/runs/round-0005-batch16
 ```
 
-Use `--archive round-0005-batch16` to restore only the final round, or
-`--out /absolute/path/to/evidence` to restore elsewhere. Verification uses the
+Use `--archive round-0005-batch16` to restore only that round, or
+`--out /absolute/path/to/evidence` to restore elsewhere. `round-0006-batch16`
+(incumbent retained; index-calculus admission enforced by per-target descent
+certificates) is packed the same way and verifies with its own frozen
+evaluator under `runs/round-0006-batch16/evaluator/`. New rounds are packed
+with `pack.py --name ROUND runs/ROUND`, the inverse of `restore.py`, which
+checks every profile's gzip reconstruction before writing it and appends the
+archive to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
