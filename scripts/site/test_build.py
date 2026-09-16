@@ -17,6 +17,8 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 # served for arbitrary depths and cannot use relative links) hardcodes it.
 PROJECT_PREFIX = "/crypto/"
 
+FOREST_DIR = os.path.join(ROOT, "docs", "ecc2k130-status", "walk-forest")
+
 
 def read(path, mode="r"):
     kwargs = {"encoding": "utf-8"} if mode == "r" else {}
@@ -47,7 +49,7 @@ class BuildTests(unittest.TestCase):
             "scoreboard/index.html",
             "status/index.html",
             "status/style.css",
-            "status/walk-forest.jpg",
+            "status/walk-forest.svg",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -278,6 +280,66 @@ class BuildTests(unittest.TestCase):
         match = re.search(r"\.bar-fill \{(.*?)\}", read(os.path.join(self.out, "status", "style.css")), re.S)
         self.assertIsNotNone(match, "no .bar-fill rule in the dashboard stylesheet")
         self.assertNotIn("min-width", match.group(1))
+
+    # ---- the walk-forest figure ------------------------------------------
+    # docs/ecc2k130-status/walk-forest.svg is generated from the trails and
+    # corpus committed beside it.  These hold the published figure, the page's
+    # caption and the client's own records to one another.
+
+    def _forest(self):
+        import walk_forest
+        forest = walk_forest.read_trails(os.path.join(FOREST_DIR, "trails.txt"))
+        corpus = walk_forest.read_corpus(os.path.join(FOREST_DIR, "forest.bin"))
+        return walk_forest, forest, corpus
+
+    def test_walk_forest_trails_end_on_their_corpus_records(self):
+        walk_forest, forest, corpus = self._forest()
+        self.assertEqual(walk_forest.bind_to_corpus(forest, corpus), len(forest.walks))
+        self.assertEqual(len(corpus), len(forest.walks))
+
+    def test_walk_forest_agrees_with_the_clients_own_records(self):
+        # client-run1.bin is what ecc2k130-cpu itself wrote for the same
+        # run-id before its search solved the instance.  Every record of it
+        # for a lane the figure draws must name the orbit the drawn trail
+        # ends on; the header records how many the generator checked.
+        walk_forest, forest, corpus = self._forest()
+        client = walk_forest.read_corpus(os.path.join(FOREST_DIR, "client-run1.bin"))
+        overlap = {seed: key for seed, key in client.items() if seed in corpus}
+        self.assertGreater(len(overlap), 0, "no client record falls among the drawn lanes")
+        for seed, key in overlap.items():
+            self.assertEqual(walk_forest.canon_hex(key), walk_forest.canon_hex(corpus[seed]), seed)
+        self.assertEqual(int(forest.params["checked"]), len(overlap))
+        self.assertEqual(forest.params["mode"], "generate")
+
+    def test_walk_forest_figure_is_what_the_trails_render_to(self):
+        walk_forest, forest, corpus = self._forest()
+        svg, _ = walk_forest.build(os.path.join(FOREST_DIR, "trails.txt"), os.path.join(FOREST_DIR, "forest.bin"))
+        published = read(os.path.join(self.out, "status", "walk-forest.svg"))
+        self.assertEqual(published, svg, "walk-forest.svg is stale: regenerate it (see walk-forest/README.md)")
+        # And the drawing carries exactly the forest: one circle per orbit,
+        # one filled circle per distinguished point, one edge per iteration.
+        self.assertEqual(published.count("<circle "), len(forest.order))
+        self.assertEqual(published.count('class="dp"'), len(forest.roots))
+        plain = published.split('<g class="e">', 1)[1].split("</g>", 1)[0]
+        self.assertEqual(plain.count("M"), len(forest.succ))
+        self.assertIn(forest.header, published)
+
+    def test_walk_forest_caption_states_the_counts_it_draws(self):
+        walk_forest, forest, corpus = self._forest()
+        page = read(os.path.join(self.out, "status", "index.html"))
+        meetings = sum(1 for preds in forest.pred.values() if len(preds) > 1)
+        expected = {
+            "wf-walks": len(forest.walks),
+            "wf-orbits": len(forest.order),
+            "wf-dps": len(forest.roots),
+            "wf-meetings": meetings,
+            "wf-weight": int(forest.params["dp-weight"]),
+        }
+        for ident, value in expected.items():
+            match = re.search(r'id="%s">([^<]+)<' % ident, page)
+            self.assertIsNotNone(match, ident)
+            self.assertEqual(int(match.group(1)), value, ident)
+        self.assertIn('src="./walk-forest.svg"', page)
 
     def test_internal_links_resolve(self):
         missing = []

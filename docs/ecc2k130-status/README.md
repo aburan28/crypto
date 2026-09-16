@@ -26,13 +26,18 @@ next snapshot rather than showing a number it cannot measure yet. See
 derivation is only a fallback.
 
 **What the walk builds**, between the cumulative chart and the worker
-table, is a static figure: `walk-forest.jpg`, a drawing of the forest that
-deterministic walks grow when their trails merge, with a few of the meetings
-picked out in colour. It is an illustration of the mechanism, and the page
-says so beside it; it is not rendered from this campaign's table, whose walks
-never leave the private store. `scripts/site/build.py` copies it next to the
-page so the relative `src` resolves both in the working tree and once
-published.
+table, is `walk-forest.svg`: the forest that the client's own walks grow
+when their trails merge, generated from the trails and corpus records in
+`walk-forest/` by `scripts/site/walk_forest.py`, with the first few meetings
+between walks picked out in colour. It is drawn on the `GF(2^23)` test curve
+with the client's seed schedule, iteration function and distinguishing test,
+because on the challenge curve a trail is `2^27.9` steps long and only its
+endpoint is ever recorded; the caption says so, and states the counts it
+draws. `walk-forest/README.md` has the exact commands, and
+`scripts/site/test_build.py` fails if the SVG, the trails, the client's own
+records and the caption disagree. `scripts/site/build.py` copies the SVG
+next to the page so the relative `src` resolves both in the working tree and
+once published.
 
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link

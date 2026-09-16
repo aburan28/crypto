@@ -196,25 +196,38 @@
   <section aria-labelledby="h-forest">
     <h2 id="h-forest">What the walk builds</h2>
     <p class="note">
-      The structure every count on this page is a slice of. Each walk steps
-      from point to point by a rule that depends only on the point it is
-      standing on, so two walks that ever land on the same point take every
-      step after it together. Their trails merge, the merged trails merge
-      again, and the search grows a forest: each hollow node is a point a walk
-      passed through, each edge one iteration, and each tree is drained to the
-      distinguished point at its root, which is what a walker reports and the
-      table above counts. A collision is two walks arriving at the same
-      distinguished point from different starts.
+      The structure every count on this page is a slice of, drawn from the
+      campaign's own walk. Each walk steps from point to point by a rule that
+      depends only on the point it is standing on, so two walks that ever land
+      on the same orbit take every step after it together. Their trails merge,
+      the merged trails merge again, and the search grows a forest: each
+      hollow node is an orbit a walk passed through, each edge one iteration,
+      and each tree ends at the filled node at its root, a distinguished
+      point, which is what a walker reports and the table above counts. A
+      collision is two walks arriving at the same distinguished point from
+      different starts.
     </p>
     <figure class="figure">
-      <img src="./walk-forest.jpg" width="557" height="595" loading="lazy"
-           alt="A forest of walk trails drawn as hollow nodes joined by edges into branching trees, with a few filled nodes and short coloured segments in orange, blue, green and red marking where separate trails have met.">
+      <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
+           alt="Sixty-four walk trails drawn as chains of hollow nodes that bend and merge into trees, each ending at a filled green node. Four meetings between trails are picked out, the two arriving walks in amber and blue and the tail they share in green.">
       <figcaption>
-        The filled nodes and the coloured segments pick out a handful of
-        meetings between trails. This is a picture of the mechanism, not a
-        rendering of this campaign's table: the points behind the counts above
-        stay in the private store, and the page never publishes the walks
-        themselves.
+        <span class="mono" id="wf-walks">64</span> walks of the ECC2K-130
+        client's own iteration on the <span class="mono">GF(2^23)</span> test
+        curve, run-id 1, lanes 0 to 63, distinguished at weight
+        <span class="mono" id="wf-weight">7</span>:
+        <span class="mono" id="wf-orbits">1469</span> orbits,
+        <span class="mono" id="wf-dps">47</span> distinguished points and
+        <span class="mono" id="wf-meetings">13</span> places where walks from
+        different starts met. The first four meetings are in colour, amber and
+        blue for the two arriving walks and green for the tail they then share
+        to their distinguished point. On the challenge curve a single trail is
+        about <span class="mono">2^27.9</span> steps long, so the forest is
+        drawn on the smallest curve the client walks with the same seed
+        schedule, iteration function and distinguishing test; where the
+        client's own records from this run overlap the trails drawn, the two
+        are checked against each other, and the figure regenerates from the
+        committed trails with
+        <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
       </figcaption>
     </figure>
   </section>
