@@ -10,7 +10,11 @@ instructions and 1.52 times its native time on the tested small Koblitz panel.
 
 All 4,704 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
-unsuccessful build attempts remain recorded. See [OPERATIONS.md](OPERATIONS.md)
+unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
+(1,680 further verified trials on another host) enforced the index-calculus
+admission rule for the first time — every logarithm certified by its descent
+relation — and retained the incumbent: its combined challenger reached 0.8018
+of the incumbent's instructions against a 0.80 gate and 0.92 of its native time. See [OPERATIONS.md](OPERATIONS.md)
 for commands, measurement limits, source candidates and installed operating skills.
 The [committed evidence guide](evidence/README.md) explains archive restoration,
 independent audit, and the distinction between frozen candidate sources and current

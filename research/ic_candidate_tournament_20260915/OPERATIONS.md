@@ -54,6 +54,20 @@ and [continuation metadata](campaign_20260916/next-proposal.json) preserve the
 16-target workload and native-time gate. Choose a new seed before another round.
 Production library defaults remain unchanged.
 
+## Round 0006: index-calculus admission, incumbent retained
+
+[Round 0006](campaign_20260916/ROUND6.md) ran on a different host and compiler
+(rustc 1.94.1), so only its within-round ratios are comparable with earlier
+rounds. It enforced the index-calculus admission rule for the first time: every
+arm's worker reports the descent relation each logarithm came from and the
+frozen checker verifies it (all 1,680 receipts certified). Seven exact source
+candidates from function-level profiling were measured; the combination reached
+0.8018 of the incumbent's instructions (95% interval 0.7874–0.8146) and 0.9237 of
+its native time, missing the 0.80 gate on both metrics, so the incumbent was
+retained. The retained incumbent reproduced batch parity on this host:
+0.7259 of rho's instructions (0.6410–0.8372) and 0.7853 of its native time
+(0.7040–0.8771), parity `true`. See [RESULTS.md](campaign_20260916/RESULTS.md).
+
 ## Continuing toward rho parity
 
 The [2026-09-16 operation](campaign_20260916/PLAN.md) tests isolated source changes
