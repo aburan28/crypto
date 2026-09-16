@@ -307,8 +307,28 @@ fn rho_dp(
         precompute_ops += 2 * (n.bits() as usize + 1);
         let (mut a, mut b) = (a0, b0);
         let mut this_attempt = 0usize;
+        let mut since_dp = 0usize;
+        // A cycle can contain no distinguished point at all, in which
+        // case the walk detects nothing however long it runs.  Expected
+        // distance to the next one is `2^theta_bits`; well past that,
+        // jump rather than keep going.  This is what the outer cap was
+        // silently absorbing, at 64x the cost.
+        let dp_gap_limit = 32usize << theta_bits;
 
         while steps_left > 0 {
+            if since_dp >= dp_gap_limit {
+                restarts += 1;
+                since_dp = 0;
+                let j = (rng.next_u64() as usize) % branch.len();
+                let (aj, bj, rj) = &branch[j];
+                a = (&a + aj) % n;
+                b = (&b + bj) % n;
+                x = x.add(rj, curve);
+                group_ops += 1;
+                steps_left -= 1;
+                this_attempt += 1;
+                continue;
+            }
             if this_attempt >= attempt_cap {
                 // A cycle with no distinguished point in it, or simply
                 // an unlucky start: begin somewhere else.
@@ -317,7 +337,9 @@ fn rho_dp(
             }
             this_attempt += 1;
             let h = divisor_hash(&x);
+            since_dp += 1;
             if (h & mask) == 0 {
+                since_dp = 0;
                 match seen.get(&h) {
                     Some((pa, pb)) => {
                         if let Some(k) = solve_collision(&a, &b, pa, pb, n) {
@@ -332,11 +354,26 @@ fn rho_dp(
                                 };
                             }
                         }
-                        // Degenerate collision: the walk has re-entered
-                        // its own trail with the same coefficients, so
-                        // restart it rather than loop forever.
+                        // Degenerate collision: the walk re-entered a
+                        // trail with the same coefficients, so it would
+                        // loop forever.  Jump by a randomly chosen step
+                        // — one group operation — instead of building a
+                        // fresh starting point for `2⌈log₂ N⌉`.  At
+                        // small `N` these collisions are common enough
+                        // that the difference showed up in `S_walk` as
+                        // a 3× inflation of the reference, which is the
+                        // wrong direction for a reference to be wrong
+                        // in.
                         restarts += 1;
-                        break;
+                        let j = (rng.next_u64() as usize) % branch.len();
+                        let (aj, bj, rj) = &branch[j];
+                        a = (&a + aj) % n;
+                        b = (&b + bj) % n;
+                        x = x.add(rj, curve);
+                        group_ops += 1;
+                        steps_left -= 1;
+                        this_attempt += 1;
+                        continue;
                     }
                     None => {
                         seen.insert(h, (a.clone(), b.clone()));
@@ -610,7 +647,7 @@ impl Default for HeadToHeadTrials {
         // large enough that the gap is not the sampling noise.  25 runs
         // put the standard error of the mean near 20% of one run's
         // spread; 9 did not.
-        Self { ic: 5, rho: 25 }
+        Self { ic: 5, rho: 40 }
     }
 }
 
