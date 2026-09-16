@@ -97,9 +97,20 @@ jobs:
             fleet_rc=$?
             set -e
             if [ "$fleet_rc" -ne 0 ]; then
-              echo "=== CreateFleet failed (rc=$fleet_rc); falling back to direct run-instances ==="
-              chmod +x launch_direct.sh
-              ./launch_direct.sh "$GPUS" --on-demand "$ON_DEMAND"
+              # fleet.sh can also fail after CreateFleet succeeded (fallback
+              # wait / modify-fleet); only launch unmanaged instances when no
+              # fleet exists, or the run would double the capacity.
+              created=$(aws ec2 describe-fleets --filters "Name=tag:Project,Values=ecc2k130" \
+                --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text)
+              if [ -n "$created" ] && [ "$created" != None ]; then
+                echo "=== fleet.sh up failed (rc=$fleet_rc) but fleet $created is active; not launching direct instances ==="
+                echo "$created" > ".fleet-id-$AWS_DEFAULT_REGION"
+                ./fleet.sh status || true
+              else
+                echo "=== CreateFleet failed (rc=$fleet_rc); falling back to direct run-instances ==="
+                chmod +x launch_direct.sh
+                ./launch_direct.sh "$GPUS" --on-demand "$ON_DEMAND"
+              fi
             else
               echo "=== fleet status ==="
               ./fleet.sh status || true
