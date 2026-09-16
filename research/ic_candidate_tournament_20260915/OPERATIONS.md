@@ -45,12 +45,12 @@ All setup and all target solves are included; rho uses the existing per-target
 solver API. This result applies to the tested five small Koblitz curve cells.
 
 The separate single-target panel reached parity in [round-0006](runs/round-0006/REPORT.md)
-([pre-registration](campaign_20260916/ROUND6.md)): the selected `tiny_batch1`
+([pre-registration](campaign_20260916/ROUND6-single-target.md)): the selected `tiny_batch1`
 costs 0.8264 times rho's instructions (95% interval 0.8032–0.8488) and 0.9766
 times its native time (0.9571–0.9946) on confirmation, 0.9854 (0.9641–1.0062)
 on replay, every cell within the 1.10 margin, 1,584 verified trials. It replaces
 the earlier 3.04 / 1.52 figures on that panel. [Round-0007](runs/round-0007/REPORT.md)
-([pre-registration](campaign_20260916/ROUND7.md), `--objective rho`) then went
+([pre-registration](campaign_20260916/ROUND7-single-target.md), `--objective rho`) then went
 strictly below rho: `tiny2` at 0.7376 of rho's instructions (0.7066–0.7644) and
 0.9461 of its native time (0.9293–0.9639) on confirmation, 0.9414 (0.9215–0.9611)
 on replay, every cell below one in both metrics, 1,488 verified trials. Keep the

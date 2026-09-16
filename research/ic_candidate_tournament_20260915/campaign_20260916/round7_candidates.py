@@ -6,7 +6,7 @@ winner source and the committed patches, then print the registry to freeze.
 
 Requires the restored evidence (`evidence/restore.py --archive round-0006`), because the baseline sources are archived, not
 committed. Trees land in `campaign_20260916/round7-sources/<id>` (ignored by
-git); `round-0007-candidates.json` names them by absolute path.
+git); `round-0007-single-candidates.json` names them by absolute path.
 """
 import json
 import shutil
@@ -35,11 +35,11 @@ def main():
             shutil.copytree(BASE / folder, tree / folder)
         subprocess.run(['patch', '-p1', '-s', '-i', str(WORK / patch)], cwd=tree, check=True)
         print(json.dumps({'candidate': name, 'source_root': str(tree)}))
-    registry = json.loads((WORK / 'round-0007-candidates.json').read_text())
+    registry = json.loads((WORK / 'round-0007-single-candidates.json').read_text())
     for arm in registry:
         if 'source_root' in arm:
             assert Path(arm['source_root']).is_dir(), arm['source_root']
-    print(json.dumps({'registry': str(WORK / 'round-0007-candidates.json'), 'arms': len(registry)}))
+    print(json.dumps({'registry': str(WORK / 'round-0007-single-candidates.json'), 'arms': len(registry)}))
 
 
 if __name__ == '__main__':
