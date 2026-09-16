@@ -219,6 +219,15 @@ build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
 
+# The walks behind a corpus, orbit by orbit, for the status page's forest
+# figure (docs/ecc2k130-status/walk-forest/README.md).  Host only.
+build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
+
+trailforest: build/trailforest
+
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
