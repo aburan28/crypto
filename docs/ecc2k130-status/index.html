@@ -193,6 +193,49 @@
     <p class="note" id="total-note"></p>
   </section>
 
+  <section aria-labelledby="h-forest">
+    <h2 id="h-forest">What the walk builds</h2>
+    <p class="note">
+      Real walks on the challenge curve. Each walk steps from point to point
+      by a rule that depends only on the point it is standing on, so two
+      walks that ever land on the same orbit take every step after it
+      together, and the search grows a forest whose roots are the
+      distinguished points the walkers report and the table above counts. A
+      collision is two walks arriving at the same distinguished point from
+      different starts. On ECC2K-130 that has not happened: every trail below
+      is on its own, and the day two of them join is the day the campaign
+      ends.
+    </p>
+    <figure class="figure">
+      <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
+           alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+      <figcaption>
+        <span class="mono" id="wf-walks">106</span> walks of the ECC2K-130
+        client on the Certicom ECC2K-130 curve, distinguished at weight
+        <span class="mono" id="wf-weight">34</span> as the campaign is: the
+        seeds of its first <span class="mono" id="wf-tried">256</span> reported
+        points replayed with the client's own kernel, keeping every walk that
+        reached its point within <span class="mono" id="wf-cap">65,536</span>
+        iterations. Each hollow node is the orbit the walk stood on every
+        <span class="mono" id="wf-every">2,048</span> iterations,
+        <span class="mono" id="wf-orbits">1,817</span> nodes over
+        <span class="mono" id="wf-steps">3,400,768</span> iterations in all, the
+        longest trail <span class="mono" id="wf-longest">64,596</span>; each filled
+        node one of the <span class="mono" id="wf-dps">106</span> distinguished
+        points reached, and <span class="mono" id="wf-meetings">0</span>
+        meetings between trails. A walk on this curve is expected to take
+        <span class="mono">2^25.27</span> iterations to reach a point, so what
+        is drawn is the short end of the distribution, the only end short
+        enough to draw. Every trail is checked against the record the client
+        wrote for it, the first few against the scalar reference as well, and
+        the orbits are named by hash on the page because a distinguished
+        point's orbit is its key. The figure regenerates from the committed
+        trails with
+        <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
+      </figcaption>
+    </figure>
+  </section>
+
   <section aria-labelledby="h-workers">
     <h2 id="h-workers">Workers</h2>
     <p class="note">

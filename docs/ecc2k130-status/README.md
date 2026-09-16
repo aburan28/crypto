@@ -25,6 +25,20 @@ next snapshot rather than showing a number it cannot measure yet. See
 `scripts/rho_status/README.md` for where the total comes from and why the
 derivation is only a fallback.
 
+**What the walk builds**, between the cumulative chart and the worker
+table, is `walk-forest.svg`: real ECC2K-130 walks the campaign client made
+on the challenge curve, replayed with the client's own kernel, sampled along
+their length and drawn, generated from the hashed trails in `walk-forest/`
+by `scripts/site/walk_forest.py`. Only walks short enough to draw are shown,
+the caption says so and states the counts, and the orbits are named by hash
+because a distinguished point's orbit is its key and the page publishes
+counts only. `walk-forest/README.md` has the exact commands, including how
+to point the same pipeline at the fleet's corpus, and
+`scripts/site/test_build.py` fails if the SVG, the trails, their recorded
+endpoints, the scalar reference's replay and the caption disagree.
+`scripts/site/build.py` copies the SVG next to the page so the relative
+`src` resolves both in the working tree and once published.
+
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README

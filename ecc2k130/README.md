@@ -781,6 +781,18 @@ Resuming needs the same shape it saved, so pass the same curve, run id, worker
 count, backend and build-time batch size; a mismatched existing checkpoint is
 an error. Use a new checkpoint path or run ID to start a different configuration.
 
+**The walks behind a corpus.** `make trailforest` builds a host-only tool that
+walks the seeds in a corpus again and prints every orbit each walk passed
+through, failing on any record whose replay does not end where the record
+says. By default it walks with the scalar reference, a few thousand steps a
+second; `--sample` walks with the client's own bitsliced kernel instead, keeps
+the walks that finish within a step cap, samples them at a stride and names
+orbits by hash, which is how the status page's walk-forest figure is drawn
+from real walks on the challenge curve
+(`docs/ecc2k130-status/walk-forest/README.md`). `--generate` walks a run id's
+seed schedule without stopping at the first collision, for curves small enough
+that a search solves inside its first launch.
+
 ## Build
 
 ```

@@ -343,6 +343,32 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .chart .grid { stroke: var(--line-soft); stroke-width: 1; }
 .chart .tick { fill: var(--muted); font-size: 10.5px; }
 
+/* ---- figure ---- */
+
+/* The walk-forest drawing is generated in the page's own palette on a
+   transparent ground, so it sits straight on the panel. */
+.figure {
+  margin: 14px 0 0;
+  padding: 12px 12px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  margin: 0 auto;
+}
+.figure figcaption {
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+.figure figcaption .mono { color: var(--ink); }
+
 /* ---- tables ---- */
 
 .scroll {
