@@ -81,7 +81,7 @@ ensure_region() {
     AWS_DEFAULT_REGION=$region KEY_NAME="$key" SKIP_IAM=1 \
       WORKER_AWS_ACCESS_KEY_ID="${WORKER_AWS_ACCESS_KEY_ID:-}" \
       WORKER_AWS_SECRET_ACCESS_KEY="${WORKER_AWS_SECRET_ACCESS_KEY:-}" \
-      BUCKET="$BUCKET" ./infra.sh
+      BUCKET="$BUCKET" bash ./infra.sh
 }
 
 subnets_of() {
@@ -187,9 +187,9 @@ fi
 AWS_DEFAULT_REGION=us-west-2 KEY_NAME=$(key_for us-west-2) SKIP_IAM=1 \
   WORKER_AWS_ACCESS_KEY_ID="${WORKER_AWS_ACCESS_KEY_ID:-}" \
   WORKER_AWS_SECRET_ACCESS_KEY="${WORKER_AWS_SECRET_ACCESS_KEY:-}" \
-  BUCKET="$BUCKET" ./infra.sh >/tmp/infra-g6-west.log
+  BUCKET="$BUCKET" bash ./infra.sh >/tmp/infra-g6-west.log
 grep -E 'updated launch|created launch|error|denied|AccessDenied|failed' /tmp/infra-g6-west.log || true
-AWS_DEFAULT_REGION=us-west-2 ./push_source.sh | tee /tmp/push_source_g6.out
+AWS_DEFAULT_REGION=us-west-2 bash ./push_source.sh | tee /tmp/push_source_g6.out
 
 IFS=',' read -r -a REGION_LIST <<< "$REGIONS"
 for region in "${REGION_LIST[@]}"; do

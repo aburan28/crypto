@@ -65,6 +65,8 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn('MarketType":"spot"', script)
         self.assertNotIn("g7e.2xlarge", script)
         self.assertNotIn("on-demand", script)
+        self.assertIn("bash ./infra.sh", script)
+        self.assertIn("bash ./push_source.sh", script)
         subprocess.run(["bash", "-n", str(HERE / "launch_g6.sh")], check=True)
 
 
