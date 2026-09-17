@@ -11,7 +11,7 @@ static void checked(cudaError_t status) {
 template<bool PairZero>
 __global__ __launch_bounds__(256,2)
 void probe(const P131 *input,P131 *output,int n,int pitch,int guard) {
-    __shared__ uint32_t tree[eccPacked131::blockInverseWords131 + (PairZero ? 256 : 0)];
+    __shared__ uint32_t tree[eccPacked131::blockInverseWords131 + (PairZero ? eccPacked131::blockInverseFlagWords131 : 0)];
     const int tid=blockIdx.x*blockDim.x+threadIdx.x;
     P131 a=tid<n?input[tid]:P131{{1,0,0,0,0}};
     P131 inverse=eccPacked131::blockInverse131<PairZero>(a,tree);

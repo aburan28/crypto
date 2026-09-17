@@ -1,5 +1,6 @@
 // Selected walk body, renamed only.
 #pragma once
+#include "packedblockinversereference131.cuh"
 namespace eccPacked131 {
 static __global__ void ECC_BOUNDS walkSharedXReference131(WalkParams<unsigned> p, unsigned *denominators) {
 #if ECC_PACKED_BATCH_SPLIT == 2
@@ -19,7 +20,7 @@ static __global__ void ECC_BOUNDS walkSharedXReference131(WalkParams<unsigned> p
 #endif
 #if ECC_PACKED_BLOCK_INVERSE
     const bool active = tid < p.threads;
-    __shared__ uint32_t inverseTree[blockInverseWords131 + (ECC_PACKED_BATCH_SPLIT == 2 ? ECC_THREADS : 0)];
+    __shared__ uint32_t inverseTree[blockInverseReferenceWords131 + (ECC_PACKED_BATCH_SPLIT == 2 ? ECC_THREADS : 0)];
 #else
     if (tid >= p.threads) return;
 #endif
@@ -148,7 +149,7 @@ static __global__ void ECC_BOUNDS walkSharedXReference131(WalkParams<unsigned> p
         }
 #if ECC_PACKED_BLOCK_INVERSE
         } // active forward state access
-        inv = blockInverse131<(ECC_PACKED_BATCH_SPLIT == 2)>(prod, inverseTree);
+        inv = blockInverseReference131<(ECC_PACKED_BATCH_SPLIT == 2)>(prod, inverseTree);
 #elif ECC_PACKED_POLY_CHAIN
         inv = toPolynomial131(inv131(fromPolynomial131(prod)));
 #else

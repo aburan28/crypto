@@ -8,6 +8,9 @@
 #if ECC_PACKED_BLOCK_INVERSE != 0 && ECC_PACKED_BLOCK_INVERSE != 1
 #error "ECC_PACKED_BLOCK_INVERSE must be 0 or 1"
 #endif
+#if ECC_PACKED_LOGICAL_PAIR_INVERSE && !ECC_PACKED_BLOCK_INVERSE
+#error "LOGICAL_PAIR_INVERSE requires BLOCK_INVERSE"
+#endif
 #if ECC_PACKED_BLOCK_INVERSE
 #include "packedblockinverse131.cuh"
 #endif
@@ -85,8 +88,8 @@ namespace eccPacked131 {
 #if ECC_PACKED_BATCH_SPLIT != 1 && ECC_PACKED_BATCH_SPLIT != 2
 #error "ECC_PACKED_BATCH_SPLIT must be 1 or 2"
 #endif
-#if ECC_PACKED_BATCH_SPLIT == 2 && (ECC_BATCH != 16 || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
-#error "Split batches require batch16, threads256, block inversion and weighted-prefix mode2"
+#if ECC_PACKED_BATCH_SPLIT == 2 && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Split batches require an even batch16..32, threads256, block inversion and weighted-prefix mode2"
 #endif
 #ifndef ECC_PACKED_LAST_SLOT_CACHE
 #define ECC_PACKED_LAST_SLOT_CACHE 0
@@ -94,8 +97,8 @@ namespace eccPacked131 {
 #if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
 #error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
 #endif
-#if ECC_PACKED_LAST_SLOT_CACHE && (ECC_BATCH != 16 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
-#error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
+#if ECC_PACKED_LAST_SLOT_CACHE && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Last-slot cache requires an even batch16..32, split2, block inversion and weighted-prefix mode2"
 #endif
 #if ECC_PACKED_LAST_SLOT_CACHE
 static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
@@ -106,8 +109,8 @@ static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
 #if ECC_PACKED_SHARED_X_SLOTS != 0 && ECC_PACKED_SHARED_X_SLOTS != 2 && ECC_PACKED_SHARED_X_SLOTS != 4
 #error "SHARED_X_SLOTS must be 0, 2 or 4"
 #endif
-#if ECC_PACKED_SHARED_X_SLOTS && (ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
-#error "SHARED_X_SLOTS requires the selected B16 split2 compact polynomial block-inverse layout"
+#if ECC_PACKED_SHARED_X_SLOTS && ((ECC_BATCH < 16 || ECC_BATCH > 32 || (ECC_BATCH & 1)) || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "SHARED_X_SLOTS requires an even B16..32 split2 compact polynomial block-inverse layout"
 #endif
 #if ECC_PACKED_SHARED_X_SLOTS
 static constexpr int firstSharedXLocalSlot131=ECC_BATCH/ECC_PACKED_BATCH_SPLIT-ECC_PACKED_SHARED_X_SLOTS;
@@ -195,6 +198,7 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
     p.dead[id] = 0;
 }
 
+#if !ECC_PACKED_XONLY_23
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
 #if ECC_PACKED_BATCH_SPLIT == 2
     // Paired physical threads own alternating slots of one logical worker.
@@ -213,7 +217,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #if ECC_PACKED_BLOCK_INVERSE
     const bool active = tid < p.threads;
-    __shared__ uint32_t inverseTree[blockInverseWords131 + (ECC_PACKED_BATCH_SPLIT == 2 ? ECC_THREADS : 0)];
+    __shared__ uint32_t inverseTree[blockInverseWords131 + (ECC_PACKED_BATCH_SPLIT == 2 ? blockInverseFlagWords131 : 0)];
 #else
     if (tid >= p.threads) return;
 #endif
@@ -489,4 +493,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     }
 #endif
 }
+#else
+#include "packedxonly23.cuh"
+#endif
 } // namespace eccPacked131

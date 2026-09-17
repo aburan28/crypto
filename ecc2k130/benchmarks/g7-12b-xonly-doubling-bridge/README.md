@@ -402,3 +402,52 @@ checkpoint remain identical.
 Require zero spills, the full built-in suite, and the independent version-5
 checkpoint. If exact, compare three interleaved equal-work pairs with the
 retained pipeline and require a paired 95% interval above one.
+
+
+## Preregistered modulus-72 sparse bridge selector
+
+The factored rational introduced 8-byte spill stores and loads and is rejected
+before timing. The retained pipeline still spends a warp on sigma-3 for almost
+every block-step: under the even-weight model, `weight mod 32 == 14` has exact
+probability 0.0132582241 and 27.15 expected events among 2,048 states.
+
+Change only the sparse selector to `weight mod 72 == 14`. For GF(2^23), every
+weight is at most 23, so this predicate is exactly identical to the predicate in
+the passed 2,000-trial collision study; its raw output and 1.006696 work ratio
+remain unchanged. For GF(2^131), eligible weights are 14 and 86, giving exact
+conditional-even probability 0.000214759214, 0.440 expected events per block,
+and 0.644 probability of no rare event. A target rho walk of order
+`sqrt(ell/262)` still takes about 3.4e14 sigma-3 bridges, so scalar-coset mixing
+is not starved.
+
+Add an explicit selector flag, bump checkpoint version to 6, and use a distinct
+backend name. Keep the pipeline, formulas, common map, scalar multipliers,
+queue capacity, and geometry unchanged. Require full-group order proof, zero
+spills, the full built-in suite, and an independent 2,048-point seven-step
+version-6 checkpoint. Then compare three interleaved equal-work pairs against
+the modulus-32 pipeline and require a paired 95% interval above one. The direct
+complete-map median must reach 12 B/s.
+
+## Modulus-72 result
+
+The candidate passes every promotion gate. The scalar multipliers `1+s` and
+`1+s^3` have order indices 12 and 109; their least common multiple is
+`ell-1`, so the two transitions generate the full scalar multiplicative group.
+The CUDA kernel uses 80 registers, zero local bytes and 32,400 shared bytes per
+block, retaining three blocks per SM. The built-in suite passes, and the
+independent version-6 affine oracle reports zero mismatches for 2,048 points
+after seven complete steps.
+
+Each sample below accounts for 34,359,738,368 complete scalar updates:
+
+| variant | rates (B/s) | median (B/s) |
+|---|---|---:|
+| retained modulus-32 pipeline | 11.264418, 11.218437, 11.089799 | 11.218437 |
+| modulus-72 pipeline | 12.686870, 12.499203, 12.451914 | **12.499203** |
+
+The paired geometric-mean ratio is 1.121079 with a 95% confidence interval of
+[1.105668, 1.136704]. A fresh run ID and twice the work produced 12.567029,
+12.457221 and 12.366415 B/s. The production `make gpu-local-packed` binary then
+measured 12.632704 B/s over 68,719,476,736 updates, with no external GPU process
+observed. Promote the modulus-72 two-bridge map: the verified complete-map
+median exceeds 12 B/s and the confirmation remains above 12 B/s.

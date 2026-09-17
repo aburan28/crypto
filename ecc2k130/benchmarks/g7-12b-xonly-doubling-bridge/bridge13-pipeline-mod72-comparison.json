@@ -1,0 +1,38 @@
+{
+  "status": "complete-map-modulus-72-sparse-bridge-screen",
+  "checkpoint_mismatches": {
+    "mod72": 0
+  },
+  "collision_work_ratio_vs_selected": 1.0066958832826605,
+  "rows": [
+    {
+      "variant": "pipeline",
+      "rates_billion_per_second": [
+        11.264418,
+        11.218437,
+        11.089799000000001
+      ],
+      "median_billion_per_second": 11.218437,
+      "paired_geomean_vs_pipeline": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "mod72",
+      "rates_billion_per_second": [
+        12.68687,
+        12.499203,
+        12.451914
+      ],
+      "median_billion_per_second": 12.499203,
+      "paired_geomean_vs_pipeline": 1.121078557199223,
+      "paired_95_ci": [
+        1.1056681586877546,
+        1.1367037402103772
+      ]
+    }
+  ],
+  "decision": "promote modulus-72 pipeline; verified direct complete-map median exceeds 12 B/s"
+}

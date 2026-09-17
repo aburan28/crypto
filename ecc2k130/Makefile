@@ -61,6 +61,11 @@ PACKED_BATCH_SPLIT ?= 1
 PACKED_LAST_SLOT_CACHE ?= 0
 PACKED_TAIL_LAYOUT ?= 0
 PACKED_SHARED_X_SLOTS ?= 0
+PACKED_XONLY_23 ?= 0
+PACKED_XONLY_DOUBLE_ONLY ?= 0
+PACKED_XONLY_BRIDGE3 ?= 0
+PACKED_XONLY_BRIDGE1_COMMON ?= 0
+PACKED_XONLY_BRIDGE_MOD72 ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -119,7 +124,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packednative131.h include/packedfusedsigma131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedblockinverse131.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packednative131.h include/packedfusedsigma131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -148,7 +153,12 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_BATCH_SPLIT=$(PACKED_BATCH_SPLIT) \
        -DECC_PACKED_LAST_SLOT_CACHE=$(PACKED_LAST_SLOT_CACHE) \
        -DECC_PACKED_TAIL_LAYOUT=$(PACKED_TAIL_LAYOUT) \
-       -DECC_PACKED_SHARED_X_SLOTS=$(PACKED_SHARED_X_SLOTS)
+       -DECC_PACKED_SHARED_X_SLOTS=$(PACKED_SHARED_X_SLOTS) \
+       -DECC_PACKED_XONLY_23=$(PACKED_XONLY_23) \
+       -DECC_PACKED_XONLY_DOUBLE_ONLY=$(PACKED_XONLY_DOUBLE_ONLY) \
+       -DECC_PACKED_XONLY_BRIDGE3=$(PACKED_XONLY_BRIDGE3) \
+       -DECC_PACKED_XONLY_BRIDGE1_COMMON=$(PACKED_XONLY_BRIDGE1_COMMON) \
+       -DECC_PACKED_XONLY_BRIDGE_MOD72=$(PACKED_XONLY_BRIDGE_MOD72)
 
 all: cpu
 
@@ -470,7 +480,9 @@ LOCAL_PACKED_FLAGS = NVCC="$(LOCAL_PACKED_NVCC)" ARCH="$(LOCAL_GPU_ARCH)" \
     PACKED_SIGMA_ORDER=$(LOCAL_PACKED_SIGMA_ORDER) PACKED_BYTE_SIGMA=$(LOCAL_PACKED_BYTE_SIGMA) \
     PACKED_FAST_CONVERT=$(LOCAL_PACKED_FAST_CONVERT) \
     PACKED_LAST_SLOT_CACHE=$(LOCAL_PACKED_LAST_SLOT_CACHE) PACKED_TAIL_LAYOUT=$(LOCAL_PACKED_TAIL_LAYOUT) \
-    PACKED_SHARED_X_SLOTS=$(LOCAL_PACKED_SHARED_X_SLOTS)
+    PACKED_SHARED_X_SLOTS=$(LOCAL_PACKED_SHARED_X_SLOTS) \
+    PACKED_XONLY_23=1 PACKED_XONLY_DOUBLE_ONLY=1 PACKED_XONLY_BRIDGE3=1 \
+    PACKED_XONLY_BRIDGE1_COMMON=1 PACKED_XONLY_BRIDGE_MOD72=1
 LOCAL_PACKED_WORKERS ?= 524288
 LOCAL_PACKED_STEPS ?= 1024
 LOCAL_PACKED_LAUNCHES ?= 16

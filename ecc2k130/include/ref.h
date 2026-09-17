@@ -13,6 +13,45 @@
 #include <string>
 #include "bigmod.h"
 
+#ifndef ECC_PACKED_XONLY_23
+#define ECC_PACKED_XONLY_23 0
+#endif
+#if ECC_PACKED_XONLY_23 != 0 && ECC_PACKED_XONLY_23 != 1
+#error "ECC_PACKED_XONLY_23 must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE3
+#define ECC_PACKED_XONLY_BRIDGE3 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 != 0 && ECC_PACKED_XONLY_BRIDGE3 != 1
+#error "ECC_PACKED_XONLY_BRIDGE3 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 && !ECC_PACKED_XONLY_23
+#error "ECC_PACKED_XONLY_BRIDGE3 requires ECC_PACKED_XONLY_23"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE1_COMMON
+#define ECC_PACKED_XONLY_BRIDGE1_COMMON 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON != 0 && ECC_PACKED_XONLY_BRIDGE1_COMMON != 1
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON && (!ECC_PACKED_XONLY_BRIDGE3 || !ECC_PACKED_XONLY_DOUBLE_ONLY)
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires the sparse bridge-3 doubling core"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_BRIDGE_MOD72 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 != 0 && ECC_PACKED_XONLY_BRIDGE_MOD72 != 1
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 && !ECC_PACKED_XONLY_BRIDGE1_COMMON
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 requires the complete two-bridge map"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) % 72) == 14)
+#else
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) & 31) == 14)
+#endif
+
 typedef unsigned long long u64;
 
 // Scalar field in the permuted type-II optimal normal basis: an element is the
@@ -392,7 +431,23 @@ struct RefT {
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
-    static Point step(const Point &p, int hw) { return addPt(p, frob(p, jOf(hw))); }
+    static Point step(const Point &p, int hw) {
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_BRIDGE3
+        if (ECC_PACKED_XONLY_IS_BRIDGE3(hw)) return addPt(p, frob(p, 3));
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON
+        return addPt(p, frob(p, 1));
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+        return dbl(p);
+#else
+        const Point twice = dbl(p);
+        return ((hw >> 1) & 1) ? addPt(twice, p) : twice;
+#endif
+#else
+        return addPt(p, frob(p, jOf(hw)));
+#endif
+    }
 
     // canonical representative of the orbit under sigma (negation leaves x fixed)
     static Elem canonical(const Elem &x) {

@@ -1,0 +1,97 @@
+diff -ruN '--exclude=__pycache__' build/g7-xonly-sparse-bridge13-pipeline-src/include/packedengine.cuh build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/packedengine.cuh
+--- build/g7-xonly-sparse-bridge13-pipeline-src/include/packedengine.cuh	2026-09-17 22:44:44.372320275 +0000
++++ build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/packedengine.cuh	2026-09-17 23:09:45.051068132 +0000
+@@ -26,8 +26,9 @@
+ #endif
+     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
+     unsigned checkpointVersion() const override {
+-        return ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
+-            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u));
++        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? 6u :
++            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
++            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)));
+     }
+     int checkpointLanes() const override { return 1; }
+ #if ECC_PACKED_POLY_STATE
+@@ -100,9 +101,10 @@
+     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
+         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+     const char *name() const {
+-        return ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
++        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? "cuda-packed131-xonly-bridge1-bridge3-mod72" :
++            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
+             (ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
+-            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131"));
++            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131")));
+     }
+     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
+     bool needsReseed() const { return restartPending; }
+@@ -219,6 +221,7 @@
+         printf("packed x-only 2/3 walk: %d\n", ECC_PACKED_XONLY_23);
+         printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
+         printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
++        printf("packed sparse bridge modulus 72: %d\n", ECC_PACKED_XONLY_BRIDGE_MOD72);
+         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
+         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);
+diff -ruN '--exclude=__pycache__' build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/packedxonly23.cuh
+--- build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh	2026-09-17 22:51:27.267085804 +0000
++++ build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/packedxonly23.cuh	2026-09-17 23:09:45.049438543 +0000
+@@ -103,7 +103,7 @@
+                         atomicAdd(p.dpCount + 1, 1u);
+                     }
+                 }
+-                if (ECC_PACKED_XONLY_BRIDGE3 && (hw & 31) == 14) {
++                if (ECC_PACKED_XONLY_BRIDGE3 && (hw % 72) == 14) {
+                     localBridgeMask |= 1u << localSlot;
+                     const unsigned event = atomicAdd(&bridgeCount131, 1u);
+                     bridgeQueue131[event] =
+@@ -336,7 +336,7 @@
+                             atomicAdd(p.dpCount + 1, 1u);
+                         }
+                     }
+-                    if (ECC_PACKED_XONLY_BRIDGE3 && (hw & 31) == 14) {
++                    if (ECC_PACKED_XONLY_BRIDGE3 && (hw % 72) == 14) {
+                         nextBridgeMask |= 1u << localSlot;
+                         const unsigned event = atomicAdd(&bridgeCount131, 1u);
+                         bridgeQueue131[event] = static_cast<unsigned short>(
+diff -ruN '--exclude=__pycache__' build/g7-xonly-sparse-bridge13-pipeline-src/include/ref.h build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/ref.h
+--- build/g7-xonly-sparse-bridge13-pipeline-src/include/ref.h	2026-09-17 22:44:44.372209643 +0000
++++ build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/ref.h	2026-09-17 23:09:45.050995927 +0000
+@@ -37,6 +37,15 @@
+ #if ECC_PACKED_XONLY_BRIDGE1_COMMON && (!ECC_PACKED_XONLY_BRIDGE3 || !ECC_PACKED_XONLY_DOUBLE_ONLY)
+ #error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires the sparse bridge-3 doubling core"
+ #endif
++#ifndef ECC_PACKED_XONLY_BRIDGE_MOD72
++#define ECC_PACKED_XONLY_BRIDGE_MOD72 0
++#endif
++#if ECC_PACKED_XONLY_BRIDGE_MOD72 != 0 && ECC_PACKED_XONLY_BRIDGE_MOD72 != 1
++#error "ECC_PACKED_XONLY_BRIDGE_MOD72 must be 0 or 1"
++#endif
++#if ECC_PACKED_XONLY_BRIDGE_MOD72 && !ECC_PACKED_XONLY_BRIDGE1_COMMON
++#error "ECC_PACKED_XONLY_BRIDGE_MOD72 requires the complete two-bridge map"
++#endif
+
+ typedef unsigned long long u64;
+
+@@ -420,7 +429,7 @@
+     static Point step(const Point &p, int hw) {
+ #if ECC_PACKED_XONLY_23
+ #if ECC_PACKED_XONLY_BRIDGE3
+-        if ((hw & 31) == 14) return addPt(p, frob(p, 3));
++        if ((hw % 72) == 14) return addPt(p, frob(p, 3));
+ #endif
+ #if ECC_PACKED_XONLY_BRIDGE1_COMMON
+         return addPt(p, frob(p, 1));
+diff -ruN '--exclude=__pycache__' build/g7-xonly-sparse-bridge13-pipeline-src/include/solver.h build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/solver.h
+--- build/g7-xonly-sparse-bridge13-pipeline-src/include/solver.h	2026-09-17 22:44:44.372262089 +0000
++++ build/g7-xonly-sparse-bridge13-pipeline-mod72-src/include/solver.h	2026-09-17 23:09:45.049617395 +0000
+@@ -88,7 +88,7 @@
+             if (it >= maxIters) return out;
+ #if ECC_PACKED_XONLY_23
+ #if ECC_PACKED_XONLY_BRIDGE3
+-            if ((hw & 31) == 14) out.counts[2]++;
++            if ((hw % 72) == 14) out.counts[2]++;
+             else
+ #endif
+ #if ECC_PACKED_XONLY_DOUBLE_ONLY

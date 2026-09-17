@@ -25,7 +25,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
-    unsigned checkpointVersion() const override { return 2u; }
+    unsigned checkpointVersion() const override {
+        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? 6u :
+            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
+            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)));
+    }
     int checkpointLanes() const override { return 1; }
 #if ECC_PACKED_POLY_STATE
     // Packed checkpoint v2 always stores normal-basis coordinates, including
@@ -96,7 +100,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
-    const char *name() const { return "cuda-packed131"; }
+    const char *name() const {
+        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? "cuda-packed131-xonly-bridge1-bridge3-mod72" :
+            (ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
+            (ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
+            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131")));
+    }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
 
@@ -209,6 +218,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
+        printf("packed x-only 2/3 walk: %d\n", ECC_PACKED_XONLY_23);
+        printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
+        printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
+        printf("packed sparse bridge modulus 72: %d\n", ECC_PACKED_XONLY_BRIDGE_MOD72);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);

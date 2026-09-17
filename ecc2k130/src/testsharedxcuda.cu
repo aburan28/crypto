@@ -108,6 +108,13 @@ static std::vector<unsigned char> run(int workers,int steps,int pattern,unsigned
     return normalized;
 }
 int main() {
+    int device=0,blocks=0,reserved=0;cudaDeviceProp properties{};cudaFuncAttributes attributes{};
+    checked(cudaGetDevice(&device));checked(cudaGetDeviceProperties(&properties,device));
+    checked(cudaFuncGetAttributes(&attributes,eccPacked131::walk));
+    checked(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks,eccPacked131::walk,256,0));
+    checked(cudaDeviceGetAttribute(&reserved,cudaDevAttrReservedSharedMemoryPerBlock,device));
+    std::printf("LOGICAL_PAIR_INVERSE_RESOURCES mode=%d minblocks=%d registers=%d local=%zu shared=%zu reserved=%d active_blocks=%d max_threads_sm=%d shared_sm=%zu\n",ECC_PACKED_LOGICAL_PAIR_INVERSE,ECC_MINBLOCKS,attributes.numRegs,attributes.localSizeBytes,attributes.sharedSizeBytes,reserved,blocks,properties.maxThreadsPerMultiProcessor,properties.sharedMemPerMultiprocessor);
+
     int scenarios=0;
     for(int workers:{0,1,31,127,128,129,255,256,257,383,384,385,511,512,513,1025,2049})
         for(int steps:{0,1,2,7})for(int pattern=0;pattern<2;++pattern) {

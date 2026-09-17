@@ -1,19 +1,20 @@
 # ECC2K-130 and ECC2K-95
 
 On the measured **AWS g7.2xlarge (RTX PRO 4500)**, use `make bench-local-packed`.
-The assembler preset measured **6.114725 billion complete scalar updates/s**
-and **5.953929 B/s** with DP34 collection. Five fresh pairs per workload
-establish **1.58%** and **1.61%** gains over matched controls, with both 95%
-confidence intervals above no improvement. All ten DP34 outputs match with
-zero drops. This build retains the CUDA 13.3.73 front end and replaces only
-its GPU assembler with pinned ptxas 13.4.59; field arithmetic, walk state
-and persistence formats are unchanged.
-Evidence: [independent assembler confirmation](benchmarks/g7-2xlarge-assembler-confirmation/README.md).
-The preceding [seven-stage conversion](benchmarks/g7e-30b-seven-stage/README.md)
-remains recorded at 6.019344 B/s benchmark and 5.830594 B/s DP34.
-Set `LOCAL_PACKED_FAST_CONVERT=0` for the earlier conversion circuit.
-**The current target is 12 billion complete iterations/s. It remains open;
-G7e throughput is unmeasured.**
+The promoted complete two-bridge map measured **12.499203 billion complete
+scalar updates/s** median versus 11.218437 B/s for its matched modulus-32
+control. Its paired geometric-mean ratio is 1.121079 with a 95% confidence
+interval of [1.105668, 1.136704]. A fresh three-run confirmation measured
+12.567029, 12.457221 and 12.366415 B/s, and the production build separately
+measured 12.632704 B/s over 68,719,476,736 updates. The kernel uses the common
+`P + sigma(P)` transition and a sparse `P + sigma^3(P)` bridge selected by
+`weight mod 72 == 14`; their scalar multipliers generate the full group.
+All built-in checks and an independent 2,048-point affine checkpoint pass.
+The frozen 2,000-trial collision study transfers exactly from modulus 32 on
+GF(2^23), where both predicates select only weight 14, and gives a 1.006696
+mean-work ratio. Evidence: [G7 x-only doubling and bridge campaign](benchmarks/g7-12b-xonly-doubling-bridge/README.md).
+**The 12 B/s G7 milestone is reached. DP34 collection throughput for this map
+and G7e throughput remain unmeasured.**
 
 The [full-generator x-only bridge experiment](benchmarks/g7-12b-xonly-23-bridge/RESULTS.md)
 repaired the scalar subgroup defect of the [2]/[3] map with a sparse
@@ -342,7 +343,7 @@ client above is the path that is live today.
 | Field arithmetic, iteration function, solver | implemented and tested |
 | End-to-end discrete logarithms | recovered on `GF(2^23)` and `GF(2^41)` |
 | CPU client | measured, 12.6 M iterations/s per AVX-512 core, 15.7 M per M4 Pro core |
-| CUDA — AWS g7.2xlarge / RTX PRO 4500 | 6.114725 B/s benchmark; 5.953929 B/s DP34 collection |
+| CUDA — AWS g7.2xlarge / RTX PRO 4500 | 12.499203 B/s paired benchmark median; 12.457221 B/s fresh confirmation; promoted-map DP34 unmeasured |
 | CUDA — Modal RTX PRO 6000 | 14.637530 B/s benchmark; 14.106673 B/s DP34 collection |
 | Other AWS G7/G7e sizes | separate entries; unmeasured |
 | Modal integration | validate, benchmark, autotune, search, fan out |
@@ -1124,5 +1125,5 @@ what the instrument is for: finding where the curve bends, if it does.
 The [larger-batch shared-X cache experiment](benchmarks/g7-12b-larger-batch-xcache/RESULTS.md)
 confirms that eight cached X slots improve B32 by 1.47--1.75%, but the best B32
 candidate remains slower than selected B16: 6.050341 versus 6.208908 B/s in the
-fresh follow-up. The selected runtime is unchanged and the 12 B/s G7 goal remains
-unmet.
+fresh follow-up. That candidate remained isolated. The later complete two-bridge
+map described at the top supersedes it and reaches the 12 B/s G7 milestone.
