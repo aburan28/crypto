@@ -119,8 +119,8 @@ class FleetRollContract(unittest.TestCase):
         # relying on inherited errexit.
         start = FLEET.index("activeGpuCapacity()")
         helper = FLEET[start:FLEET.index("\ncapacityInt")]
-        self.assertIn("if ! types=$(aws", helper)
-        self.assertIn("return 1", helper)
+        self.assertIn("types=$(aws", helper)
+        self.assertIn("|| return 1", helper)
 
     def test_roll_normalizes_the_tab_separated_id_list_before_matching(self):
         # aws --output text separates list entries with tabs, not spaces;

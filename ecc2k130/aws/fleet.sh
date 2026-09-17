@@ -94,17 +94,13 @@ activeInstanceIds() {
 # types and restore the count while most of the lost GPUs are still missing.
 activeGpuCapacity() {
     local total=0 type types
-    # Explicit `if ! ... ; then return 1; fi`, not a bare assignment: this
-    # function itself runs inside its callers' `$(activeGpuCapacity ...)`,
-    # and bash does not inherit `set -e` into a command substitution by
-    # default, so a bare `types=$(aws ...)` failing here would be invisible
-    # to errexit one level up too -- the for loop would just see nothing,
-    # this would echo 0, and the recovery wait would read that as "already
-    # back to full capacity" instead of failing loudly.
-    if ! types=$(aws ec2 describe-fleet-instances --fleet-id "$1" --query 'ActiveInstances[].InstanceType' --output text); then
-        echo "describe-fleet-instances failed for fleet $1" >&2
-        return 1
-    fi
+    # Assign then || return: a failing $(aws ...) in a for-list does not
+    # trip set -e, and this helper is itself called from $(), where an
+    # assignment of a failed command also does not abort. Empty stdout
+    # would leave total=0, which roll treats as "already restored".
+    types=$(aws ec2 describe-fleet-instances --fleet-id "$1" \
+        --query 'ActiveInstances[].InstanceType' --output text) || return 1
+    # shellcheck disable=SC2086 -- word-split on purpose, instance types only
     for type in $types; do
         total=$((total + $(gpusOf "$type")))
     done
