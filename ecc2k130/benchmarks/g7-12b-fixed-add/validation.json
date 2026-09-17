@@ -1,0 +1,33 @@
+[
+  {
+    "label": "dp-client",
+    "returncode": 0,
+    "elapsed_seconds": 2.0876331069994194,
+    "log_sha256": "2bfbd35be727cdc6e0bd91a40de5797ecfd38904e5b0e186e527e7d305b2426f",
+    "passed": true,
+    "dp_records": 8406,
+    "checkpoint_sha256": "819fcc1618f54fb2449ab72d1ffa1243d889bd4f9f5f29acf00d643ecfdc48c7",
+    "dp_multiset_sha256": "4ff27edceb02dc6d39c90dc954fd0b6cccc6dd95eb787a0fe090b2bd011a65fd"
+  },
+  {
+    "label": "memcheck",
+    "returncode": 0,
+    "elapsed_seconds": 0.7647522959996422,
+    "log_sha256": "494525a7450b00fd376747656d06fea7bf680a108ea7fd22a4828c4e5ae82495",
+    "passed": true
+  },
+  {
+    "label": "initcheck",
+    "returncode": 0,
+    "elapsed_seconds": 0.764890533999278,
+    "log_sha256": "c8c60c9f4ac77389a4f30b27afecba197aacf6439a7776d6ba26041af63418d1",
+    "passed": true
+  },
+  {
+    "label": "synccheck",
+    "returncode": 0,
+    "elapsed_seconds": 0.7154226460006612,
+    "log_sha256": "358d049c4a6191279a4c00bc02fa757932c5536f01d07b49a12ae43e06c45474",
+    "passed": true
+  }
+]

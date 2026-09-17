@@ -1,0 +1,172 @@
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' ecc2k130/build/g7-batch32-split-src/include/packedengine.cuh ecc2k130/build/g7-fixed-add-src/include/packedengine.cuh
+--- ecc2k130/build/g7-batch32-split-src/include/packedengine.cuh	2026-09-15 21:05:19.795906952 +0000
++++ ecc2k130/build/g7-fixed-add-src/include/packedengine.cuh	2026-09-17 19:52:10.202170830 +0000
+@@ -163,6 +163,15 @@
+         CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::orbitY, oy, sizeof(oy)));
+         CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::targetX, &xq, sizeof(xq)));
+         CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::targetY, &yq, sizeof(yq)));
++#if ECC_PACKED_FIXED_ADD
++        eccPacked131::P131 fx[8], fy[8];
++        for (int i = 0; i < 8; ++i) {
++            fx[i] = eccPacked131::toPolynomial131(ox[i + 3]);
++            fy[i] = eccPacked131::toPolynomial131(oy[i + 3]);
++        }
++        CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::fixedAddX, fx, sizeof(fx)));
++        CUDA_CHECK(cudaMemcpyToSymbol(eccPacked131::fixedAddY, fy, sizeof(fy)));
++#endif
+         cudaFuncAttributes attrs;
+         CUDA_CHECK(cudaFuncGetAttributes(&attrs, eccPacked131::walk));
+         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
+@@ -205,6 +214,7 @@
+         printf("packed native full product: %d\n", ECC_PACKED_NATIVE_PRODUCT);
+         printf("packed native reduction: %d\n", ECC_PACKED_NATIVE_REDUCE);
+         printf("packed fused sigma: %d\n", ECC_PACKED_FUSED_SIGMA);
++        printf("packed fixed-point addition: %d\n", ECC_PACKED_FIXED_ADD);
+         printf("packed inline mask: %d\n", ECC_PACKED_INLINE);
+         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
+         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' ecc2k130/build/g7-batch32-split-src/include/packedkernels.cuh ecc2k130/build/g7-fixed-add-src/include/packedkernels.cuh
+--- ecc2k130/build/g7-batch32-split-src/include/packedkernels.cuh	2026-09-17 18:56:26.430533910 +0000
++++ ecc2k130/build/g7-fixed-add-src/include/packedkernels.cuh	2026-09-17 19:52:10.202065237 +0000
+@@ -82,6 +82,15 @@
+ #if ECC_PACKED_FUSED_SIGMA && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+ #error "ECC_PACKED_FUSED_SIGMA requires polynomial state and weighted-prefix mode 2"
+ #endif
++#ifndef ECC_PACKED_FIXED_ADD
++#define ECC_PACKED_FIXED_ADD 0
++#endif
++#if ECC_PACKED_FIXED_ADD != 0 && ECC_PACKED_FIXED_ADD != 1
++#error "ECC_PACKED_FIXED_ADD must be 0 or 1"
++#endif
++#if ECC_PACKED_FIXED_ADD && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_PACKED_FUSED_SIGMA)
++#error "Fixed-add requires polynomial state, weighted-prefix mode 2 and fused sigma disabled"
++#endif
+ #ifndef ECC_PACKED_BATCH_SPLIT
+ #define ECC_PACKED_BATCH_SPLIT 1
+ #endif
+@@ -133,6 +142,9 @@
+ }
+ #endif
+ static __constant__ P131 orbitX[128], orbitY[128], targetX, targetY;
++#if ECC_PACKED_FIXED_ADD
++static __constant__ P131 fixedAddX[8], fixedAddY[8];
++#endif
+ 
+ __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int threads) {
+ #if ECC_PACKED_COMPACT_STATE
+@@ -207,7 +219,7 @@
+     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+     const int firstSlot = 0;
+ #endif
+-#if ECC_PACKED_SHARED_SIGMA && !ECC_PACKED_FUSED_SIGMA
++#if ECC_PACKED_SHARED_SIGMA && !ECC_PACKED_FUSED_SIGMA && !ECC_PACKED_FIXED_ADD
+     // All block threads participate, including inactive partial-tile workers.
+     initSigmaWalkShared131();
+ #endif
+@@ -264,7 +276,7 @@
+ #else
+             P131 x = load(p.x, slot, tid, p.threads);
+ #endif
+-#if ECC_PACKED_FUSED_SIGMA
++#if ECC_PACKED_FUSED_SIGMA || ECC_PACKED_FIXED_ADD
+             const P131 polyX=x;
+ #endif
+ #if ECC_PACKED_POLY_STATE
+@@ -301,7 +313,10 @@
+             js[slot] = j;
+ #endif
+ #if ECC_PACKED_WEIGHTED_PREFIX
+-#if ECC_PACKED_FUSED_SIGMA
++#if ECC_PACKED_FIXED_ADD
++            P131 dp=add131(polyX,fixedAddX[j-3]);
++            P131 ep=add131(load(p.y,slot,tid,p.threads),fixedAddY[j-3]);
++#elif ECC_PACKED_FUSED_SIGMA
+             const auto deltas=fusedDeltaPair131(polyX,load(p.y,slot,tid,p.threads),j-3);
+             P131 dp=deltas.first, ep=deltas.second;
+ #else
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' ecc2k130/build/g7-batch32-split-src/include/solver.h ecc2k130/build/g7-fixed-add-src/include/solver.h
+--- ecc2k130/build/g7-batch32-split-src/include/solver.h	2026-09-14 14:13:53.769650903 +0000
++++ ecc2k130/build/g7-fixed-add-src/include/solver.h	2026-09-17 19:52:10.202229103 +0000
+@@ -87,7 +87,11 @@
+             }
+             if (it >= maxIters) return out;
+             out.counts[R::jOf(hw) - 3]++;
++#if ECC_PACKED_FIXED_ADD
++            p = R::addPtRaw(p, R::frob(basis, R::jOf(hw)));
++#else
+             p = R::step(p, hw);
++#endif
+         }
+     }
+ 
+@@ -106,9 +110,20 @@
+ 
+     bool solve(const WalkResult &A, const WalkResult &B, U192 *kOut, std::string *why) const {
+         if (!A.ok || !B.ok) { *why = "a walk did not reach a distinguished point"; return false; }
++#if ECC_PACKED_FIXED_ADD
++        U192 aA=A.alpha0, aB=B.alpha0;
++        for (int j=0;j<8;++j) {
++            U192 ca=u192_zero(), cb=u192_zero();
++            ca.v[0]=A.counts[j]; cb.v[0]=B.counts[j];
++            aA=mod_add(aA,mod_mul(ca,spow[j+3],ell),ell);
++            aB=mod_add(aB,mod_mul(cb,spow[j+3],ell),ell);
++        }
++        const U192 bA=u192_from(1), bB=u192_from(1);
++#else
+         const U192 muA = multiplier(A.counts), muB = multiplier(B.counts);
+         const U192 aA = mod_mul(muA, A.alpha0, ell), bA = muA;
+         const U192 aB = mod_mul(muB, B.alpha0, ell), bB = muB;
++#endif
+         for (int c = 0; c < M; ++c) {
+             const Point rot = R::frob(B.endPoint, c);
+             int eps = 0;
+diff -ruN '--exclude=__pycache__' '--exclude=*.pyc' ecc2k130/build/g7-batch32-split-src/src/main.cu ecc2k130/build/g7-fixed-add-src/src/main.cu
+--- ecc2k130/build/g7-batch32-split-src/src/main.cu	2026-09-14 14:13:53.769956201 +0000
++++ ecc2k130/build/g7-fixed-add-src/src/main.cu	2026-09-17 19:59:05.402257401 +0000
+@@ -709,22 +709,44 @@
+             A.counts[j] = rng.next() % 7;
+             B.counts[j] = rng.next() % 7;
+         }
++#if ECC_PACKED_FIXED_ADD
++        U192 addA=u192_zero(), addB=u192_zero();
++        for (int j=0;j<8;++j) {
++            U192 ca=u192_zero(), cb=u192_zero();
++            ca.v[0]=A.counts[j]; cb.v[0]=B.counts[j];
++            addA=mod_add(addA,mod_mul(ca,sol.spow[j+3],sol.ell),sol.ell);
++            addB=mod_add(addB,mod_mul(cb,sol.spow[j+3],sol.ell),sol.ell);
++        }
++#else
+         const U192 muA = sol.multiplier(A.counts), muB = sol.multiplier(B.counts);
++#endif
+         U192 beta = u192_zero();
+         beta.v[0] = rng.next();
+         beta.v[1] = rng.next() & 0xFFFF;
+         beta = mod_reduce(beta, sol.ell);
++#if ECC_PACKED_FIXED_ADD
++        // c=0, eps=1 leaves both Q coefficients equal and is unsolvable.
++        const int c = 1 + (int)(rng.next() % (Cfg::M - 1));
++#else
+         const int c = (int)(rng.next() % Cfg::M);
++#endif
+         const int eps = (rng.next() & 1) ? 1 : -1;
+         U192 sc = sol.spow[c];
+         if (eps < 0) sc = mod_neg(sc, sol.ell);
++#if ECC_PACKED_FIXED_ADD
++        // (alpha+addA+k) = eps*s^c*(beta+addB+k)
++        U192 alpha=mod_sub(mod_sub(mod_mul(sc,mod_add(mod_add(beta,addB,sol.ell),knownK,sol.ell),sol.ell),addA,sol.ell),knownK,sol.ell);
++        A.endPoint=R::scalarMul(sol.basis,mod_add(mod_add(alpha,addA,sol.ell),knownK,sol.ell));
++        B.endPoint=R::scalarMul(sol.basis,mod_add(mod_add(beta,addB,sol.ell),knownK,sol.ell));
++#else
+         // choose alpha so that  mu_A (alpha + k) = eps s^c mu_B (beta + k)
+         const U192 rhs = mod_mul(mod_mul(sc, muB, sol.ell), mod_add(beta, knownK, sol.ell), sol.ell);
+         const U192 alpha = mod_sub(mod_mul(rhs, mod_inv(muA, sol.ell), sol.ell), knownK, sol.ell);
+-        A.alpha0 = alpha;
+-        B.alpha0 = beta;
+         A.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, alpha), sol.target), muA);
+         B.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, beta), sol.target), muB);
++#endif
++        A.alpha0 = alpha;
++        B.alpha0 = beta;
+         if (!R::eq(A.endPoint, eps > 0 ? R::frob(B.endPoint, c) : R::neg(R::frob(B.endPoint, c)))) {
+             ok = false;
+             break;
