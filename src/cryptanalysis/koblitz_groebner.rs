@@ -802,7 +802,7 @@ pub fn matrix_f4_f2_counted(
 ///
 /// Returns the column monomials (DegRevLex descending) and the rows.
 /// `None` if the matrix would exceed the size limits.
-fn build_macaulay(
+pub(crate) fn build_macaulay(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
@@ -875,7 +875,7 @@ fn build_macaulay(
 
 /// Reduced row echelon form over `F_2`; returns the rank, with the
 /// pivot rows moved to the front of `matrix`.
-fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+pub(crate) fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let mut ignored = 0u64;
     rref_f2_counted(matrix, n_cols, &mut ignored)
 }
@@ -985,6 +985,185 @@ pub fn first_fall_degree(
         profiles.push(prof);
     }
     (fall, profiles)
+}
+
+// ── Solving degree ─────────────────────────────────────────────────
+
+/// What the reduced Macaulay rows at one degree actually *determine*.
+///
+/// [`MacaulayProfile`] records rank; this records whether that rank is
+/// enough to finish.  The distinction is the whole point: the first
+/// fall degree is where the rank first drops below generic, and the
+/// solving degree is where linear algebra alone pins every unknown.
+/// Complexity claims for Semaev systems are stated in terms of the
+/// first and assume it tracks the second, which is precisely the
+/// assumption Kosters–Yeo (arXiv:1503.08001) show can fail.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SolvingProfile {
+    /// Degree the matrix was built at.
+    pub degree: u32,
+    /// Rows constructed.
+    pub rows: usize,
+    /// Distinct monomials occurring, i.e. columns.
+    pub cols: usize,
+    /// Rank over `F_2`.
+    pub rank: usize,
+    /// Variables pinned outright by a reduced row of the form `v` or
+    /// `v + 1`.
+    pub vars_determined: usize,
+    /// Variables actually occurring in the input system.  A variable
+    /// that never occurs is free and can never be pinned, so it is
+    /// excluded from the target rather than counted as a failure.
+    pub vars_occurring: usize,
+    /// A reduced row is the constant `1`: the system is refuted at this
+    /// degree, which resolves it just as decisively as pinning every
+    /// variable.
+    pub refuted: bool,
+}
+
+impl SolvingProfile {
+    /// Whether degree-`degree` linear algebra resolves the system with
+    /// no splitting: either a refutation, or every occurring variable
+    /// pinned.
+    pub fn resolves(&self) -> bool {
+        self.refuted || (self.vars_occurring > 0 && self.vars_determined == self.vars_occurring)
+    }
+}
+
+/// Variables occurring in `polys`, as a bitmask.
+fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
+    polys
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0u64, |acc, t| acc | t.mask)
+}
+
+/// Total degree of a boolean system.
+pub fn system_degree(polys: &[F2BoolPoly]) -> u32 {
+    polys
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
+}
+
+/// Build the Macaulay matrix of `polys` at `degree`, reduce it, and
+/// report what the reduced rows determine.
+///
+/// `None` means the matrix exceeded the size caps (exactly as for
+/// [`macaulay_profile`]), **or** that `degree` is below the system's own
+/// total degree.
+///
+/// That second guard is not a convenience.  [`build_macaulay`] skips
+/// input polynomials whose degree exceeds the degree requested, so at
+/// `degree < system_degree(polys)` the rows describe a strict
+/// *subsystem* — the cubic equations of a chained `m ≥ 3` system simply
+/// vanish.  Pinning every variable of a subsystem says nothing about
+/// the system, and the brute-force gate in this module's tests catches
+/// it as "every variable pinned but 2 solutions exist".  It is the same
+/// trap `macaulay_rows_may_be_added_but_never_substituted` pins for the
+/// solver: implied rows may be added, never substituted.
+///
+/// A refutation below the system degree would in fact be sound — fewer
+/// equations admit more solutions, so an infeasible subsystem forces an
+/// infeasible system — but reporting one would make the returned degree
+/// mean two different things, so the guard applies to both.
+pub fn solving_profile(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<SolvingProfile> {
+    if degree < system_degree(polys) {
+        return None;
+    }
+    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    let rows = matrix.len();
+    let n_cols = cols.len();
+    let rank = if matrix.is_empty() {
+        0
+    } else {
+        rref_f2(&mut matrix, n_cols)
+    };
+
+    let occurring = occurring_vars(polys);
+    let mut determined = 0u64;
+    let mut refuted = false;
+
+    // `rref_f2` moves the pivot rows to the front, so only the first
+    // `rank` rows carry information.
+    for row in matrix.iter().take(rank) {
+        let mut support: Vec<u64> = Vec::new();
+        for (c, mono) in cols.iter().enumerate().take(n_cols) {
+            if row[c / 64] >> (c % 64) & 1 == 1 {
+                support.push(*mono);
+            }
+            if support.len() > 2 {
+                break;
+            }
+        }
+        match support.len() {
+            // The constant `1` alone: `1 = 0`, a refutation.
+            1 if support[0] == 0 => refuted = true,
+            // A bare variable `v = 0`.
+            1 if support[0].count_ones() == 1 => determined |= support[0],
+            // `v + 1 = 0`, i.e. `v = 1`.
+            2 if support.contains(&0) => {
+                let v = support[0] | support[1];
+                if v.count_ones() == 1 {
+                    determined |= v;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Some(SolvingProfile {
+        degree,
+        rows,
+        cols: n_cols,
+        rank,
+        vars_determined: (determined & occurring).count_ones() as usize,
+        vars_occurring: occurring.count_ones() as usize,
+        refuted,
+    })
+}
+
+/// **Solving degree** of `polys`: the smallest `D ≥ 1` at which the
+/// reduced Macaulay matrix resolves the system outright — a refutation,
+/// or every occurring variable pinned by a linear row.
+///
+/// This is the degree that governs cost: the Macaulay matrix at `D` has
+/// `Θ(binom(n_vars, D))` columns, so an attack's exponent is set by the
+/// solving degree, not by the first fall degree.  Compare against
+/// [`first_fall_degree`] on the same system — the gap between them is
+/// the quantity the first-fall-degree assumption asserts is small.
+///
+/// Returns the solving degree (if reached at or below `d_max`) and the
+/// per-degree profiles.
+pub fn solving_degree(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_max: u32,
+) -> (Option<u32>, Vec<SolvingProfile>) {
+    let mut solved = None;
+    let mut profiles = Vec::new();
+    // Below the system's own degree the Macaulay matrix drops equations
+    // rather than relaxing them; see [`solving_profile`].
+    for d in system_degree(polys).max(1)..=d_max {
+        let prof = match solving_profile(polys, n_vars, d) {
+            Some(p) => p,
+            None => break,
+        };
+        if solved.is_none() && prof.resolves() {
+            solved = Some(d);
+        }
+        profiles.push(prof);
+        if solved.is_some() {
+            break;
+        }
+    }
+    (solved, profiles)
 }
 
 // ── Gröbner solve with splitting ───────────────────────────────────
@@ -1892,5 +2071,141 @@ mod tests {
                 );
             }
         }
+    }
+
+    // ── Solving degree ─────────────────────────────────────────────
+
+    /// Evaluate a boolean polynomial at the assignment packed in `a`.
+    use rand::{rngs::StdRng, Rng, SeedableRng};
+
+    fn eval_f2(p: &F2BoolPoly, a: u64) -> bool {
+        p.terms.iter().fold(false, |acc, t| acc ^ (t.mask & a == t.mask))
+    }
+
+    /// Brute-force solution count over the cube — deliberately
+    /// independent of every Macaulay code path.
+    fn brute_force_solutions(polys: &[F2BoolPoly], n_vars: usize) -> usize {
+        (0u64..1 << n_vars)
+            .filter(|&a| polys.iter().all(|p| !eval_f2(p, a)))
+            .count()
+    }
+
+    #[test]
+    fn solving_degree_pins_a_linear_system() {
+        let n = 3;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(1)], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(2), F2BoolMono::one()], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 4);
+        assert_eq!(d, Some(1), "a linear system resolves at degree 1");
+        let last = profs.last().unwrap();
+        assert_eq!(last.vars_determined, 3);
+        assert!(!last.refuted);
+    }
+
+    #[test]
+    fn solving_degree_detects_refutation() {
+        let n = 2;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0)], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 3);
+        assert_eq!(d, Some(1));
+        assert!(profs.last().unwrap().refuted, "x0 = 0 and x0 = 1 is 1 = 0");
+        assert_eq!(brute_force_solutions(&polys, n), 0);
+    }
+
+    /// The soundness gate: whatever `solving_degree` claims has to
+    /// agree with an exhaustive count over the cube.
+    ///
+    /// Two directions, both checkable without trusting the Macaulay
+    /// path: a reported refutation means zero solutions; a reported
+    /// resolution-by-pinning means at most one; and a system with two
+    /// or more solutions must never be reported as resolved at any
+    /// degree.
+    #[test]
+    fn solving_degree_agrees_with_brute_force() {
+        let mut rng = StdRng::seed_from_u64(0xD_E6_5EED);
+        let n_vars = 8usize;
+        let mut resolved = 0usize;
+        let mut multi = 0usize;
+        for _ in 0..200 {
+            let n_eqs = 2 + (rng.gen::<usize>() % 8);
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            // degree ≤ 3 monomial over `n_vars`
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+
+            let truth = brute_force_solutions(&polys, n_vars);
+            // A variable that never occurs is free, so it doubles the
+            // cube count without making the system any less resolved.
+            let free = n_vars - occurring_vars(&polys).count_ones() as usize;
+            let unique = 1usize << free;
+            let deg = system_degree(&polys);
+            let (d, profs) = solving_degree(&polys, n_vars, n_vars as u32);
+            assert!(
+                profs.iter().all(|p| p.degree >= deg),
+                "no profile may be built below the system degree"
+            );
+
+            match d {
+                Some(_) => {
+                    resolved += 1;
+                    let p = profs.last().unwrap();
+                    if p.refuted {
+                        assert_eq!(truth, 0, "refutation claimed but {truth} solutions exist");
+                    } else {
+                        assert!(
+                            truth <= unique,
+                            "every occurring variable pinned, so at most \
+                             {unique} solutions may exist, but {truth} do"
+                        );
+                    }
+                }
+                None => {
+                    multi += 1;
+                }
+            }
+            if truth > unique {
+                assert!(
+                    d.is_none(),
+                    "{truth} solutions over {free} free variables must not \
+                     be reported as resolved"
+                );
+            }
+        }
+        assert!(resolved > 0, "the sample must contain resolved systems");
+        assert!(multi > 0, "and unresolved ones, or it proves nothing");
+    }
+
+    /// A variable that never occurs is free, not unsolvable: it must be
+    /// excluded from the pinning target rather than blocking it.
+    #[test]
+    fn solving_degree_ignores_variables_that_never_occur() {
+        let n = 5;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(1)], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 3);
+        assert_eq!(d, Some(1));
+        let p = profs.last().unwrap();
+        assert_eq!(p.vars_occurring, 2, "only x0 and x1 appear");
+        assert_eq!(p.vars_determined, 2);
     }
 }

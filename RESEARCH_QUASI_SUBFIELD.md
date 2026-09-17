@@ -149,6 +149,45 @@ made small enough; the arithmetic says `deg λ` is not the binding
 constraint.  §4 adds that the supply of candidates is thin anyway: one
 useful cell below `n = 600` at prime `n`.
 
+## 5b. `F_{2^131}` is barren: the ECC2K-130 field admits no stable base
+
+**Function:** `stable_subspace_dimensions`, `stable_dimensions_are_trivial`
+**Test:** `f2_131_admits_no_non_trivial_stable_subspace`
+
+§3 found existence to be governed by the factorisation of `t^n − 1`
+rather than by counting, and the cells with no solutions to be exactly
+those where `2` is a primitive root.  Applied to the field of the
+Certicom ECC2K-130 challenge, that is decisive.
+
+`ord_131(2) = 130`, the full group order, so
+
+```
+t^131 − 1 = (t + 1) · (irreducible of degree 130)
+```
+
+and the achievable divisor degrees are `{0, 1, 130, 131}` — nothing in
+between.  The Frobenius-stable `F_2`-subspaces of `F_{2^131}` are
+therefore only the trivial ones: the zero space, the prime field `F_2`,
+the trace hyperplane, and the whole field.  A dimension-1 factor base is
+the prime field and a dimension-130 one cannot be materialised, so
+neither is a factor base in any useful sense.
+
+This is one obstruction hitting two constructions at once.  It applies
+to the quasi-subfield factor bases of HKPY, and equally to the
+Frobenius-invariant factor bases that
+`RESEARCH_KOBLITZ_INDEX_CALCULUS.md` builds for subfield curves from
+linearised polynomials — both take the factor base to be the kernel of
+an `F_2`-coefficient linearised polynomial, and at `n = 131` there is no
+such kernel to take.  Contrast `n = 73`, the one prime cell §4 flagged
+as interesting, where `2` has small order and dimension 9 is available.
+
+**Scope.**  This is unconditional for the `F_2[σ]` class — kernels that
+are Frobenius-stable.  A general quasi-subfield polynomial has
+coefficients in `F_{2^n}` and its kernel need not be stable, so the
+wider claim rests on §3's census agreement, which is evidence at
+reachable `n` and not a proof.  §6 already records that limitation and
+it is not weakened here.
+
 ## 6. What this does not settle
 
 - Characteristic 2 only, and `n0 < 64`, which is where the `u128`
