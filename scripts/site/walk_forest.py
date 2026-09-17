@@ -455,6 +455,10 @@ def render(forest, positions, meetings, width, height, checked):
                      len(positions), forest.every, total_steps(forest), len(forest.roots),
                      count_meetings(forest), forest.header))
     lines.append("<!-- %s; corpus records checked: %d -->" % (forest.header, checked))
+    # An <img> evaluates the SVG's own media queries against the box it is
+    # drawn in, not the page. At phone width the 1000-unit viewBox is ~360px
+    # and a 0.8-unit stroke is a third of a pixel; thicken so the trails
+    # stay visible without forcing the page to scroll sideways.
     lines.append("<style>"
                  ".e{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round}"
                  ".n{fill:%s;stroke:%s;stroke-width:%s}"
@@ -464,6 +468,13 @@ def render(forest, positions, meetings, width, height, checked):
                  ".s{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
                  ".na{fill:%s;stroke:%s;stroke-width:%s}"
                  ".nb{fill:%s;stroke:%s;stroke-width:%s}"
+                 "@media(max-width:720px){"
+                 ".e{stroke-width:2.8}"
+                 ".n,.dp,.na,.nb{stroke-width:2.2}"
+                 ".a,.b,.s{stroke-width:4.2}"
+                 "circle{r:3.4px}"
+                 "circle.dp{r:5px}"
+                 "}"
                  "</style>" % (
                      COLORS["edge"], fmt(STROKE * scale),
                      COLORS["node_fill"], COLORS["node_stroke"], fmt(STROKE * scale),
