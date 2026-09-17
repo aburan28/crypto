@@ -84,7 +84,14 @@ defs="-DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0"
 for kv in $knobs; do defs="$defs -DECC_${kv%%=*}=${kv#*=}"; done
 
 echo "building in $CUDA_IMAGE for sm_{$ARCHES} (ptxas takes several minutes per architecture)"
-docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c "
+# The Deep Learning AMI's docker can reset mid-pull on a fresh box (the first
+# g6 fleet died on "connection reset by peer" / "client connection is closing").
+# Three attempts; the published prefix is only pointed at after a successful
+# compile.
+docker_ok=0
+for attempt in 1 2 3; do
+    echo "docker compile attempt $attempt/3"
+    if docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c "
     apt-get update -q >/dev/null && apt-get install -y -q build-essential python3 >/dev/null
     cd codegen && python3 gen.py --out ../generated --leaf 0 && cd ..
     make gpu ARCH='$gencode' $knobs 2>&1 | tail -n 40
@@ -102,6 +109,17 @@ docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c 
     cp /usr/lib/x86_64-linux-gnu/libgomp.so.1 build/libgomp.so.1
     chown -R $(id -u):$(id -g) . 2>/dev/null || true
 "
+    then
+        docker_ok=1
+        break
+    fi
+    echo "docker compile attempt $attempt failed; waiting 20s"
+    sleep 20
+done
+if [ "$docker_ok" != 1 ]; then
+    echo "docker compile failed after 3 attempts" >&2
+    exit 1
+fi
 
 # Source identity: the same recipe as modal_app.benchmarkIdentity, so a number
 # measured on Modal and a number measured here can be tied to the same code.

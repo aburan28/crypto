@@ -200,25 +200,33 @@ visible: CLMAD L4 is 42.9 M it/s per SM against L40S CLMAD's 62.2.
 
 Collecting rates (`--bench` off) are unmeasured. Iterations-per-dollar
 still needs a matched `prices.sh` run; this note does not pick g6/g6e
-over g7/g7e on `--bench` alone. No mixed-architecture campaign fleet:
-`campaign.json` still has one `binaryKey`.
+over g7/g7e on `--bench` alone.
+
+A mixed g6/g6e + g7e **spot** fleet is now the leftover-quota path
+(`aws/launch_g6.sh`). It still uses one `binaryKey`: bootstrap rebuilds a
+fat `ARCHES="89 120"` client when the published prefix is sm_120-only.
+Geometry (batch / block / minBlocks) stays the 6000 preset. What does
+not stay is the worker count — Ada omits `--threads` so `autoThreads`
+sizes the grid (29,696 on the L4, 72,704 on the L40S) — and slots are
+pinned by `gpuFamily` so an Ada box cannot resume a 385,024-worker
+Blackwell checkpoint and retire that run id. g6 and g6e do not share
+slots with each other either.
 
 ## If the receipt selects g6/g6e
 
 Build and publish an Ada client with:
 
 ```bash
-BUCKET=... ARCHES="89" ./aws/build.sh /path/to/ecc2k130      # CLMAD defaults to 1
+BUCKET=... ARCHES="89 120" ./aws/build.sh /path/to/ecc2k130  # fat; CLMAD defaults to 1
+BUCKET=... ARCHES="89" ./aws/build.sh /path/to/ecc2k130      # thin Ada only; do not point the live campaign at this
 BUCKET=... ARCHES="89" CLMAD=0 ./aws/build.sh /path/...      # software-product before-arm
 ```
 
-The binary key now includes the knobs, so an Ada client and a Blackwell client
-coexist in the bucket instead of overwriting one another. `bootstrap.sh` reads
-the expected carryless marker off that build's `manifest.json` instead of
-requiring 1, so a CLMAD-free Ada client boots; a binary that disagrees with its
-own manifest is still refused, and a missing manifest still demands 1. `campaign.json` still
-carries one `binaryKey` and one geometry, so a **mixed-architecture** fleet is a
-further change and not merely a further build — the batch/threads/minBlocks
-assertion in `build.sh` is what would catch an attempt to serve both from one
-entry, and it should keep catching it until the campaign record grows a
-per-architecture binary map.
+The binary key now includes the knobs, so an Ada-only client and a Blackwell
+client coexist in the bucket instead of overwriting one another. Do **not**
+point the live `campaign.json` at a thin `ARCHES="89"` build: running g7e
+workers cannot load it. `bootstrap.sh` reads the expected carryless marker
+off that build's `manifest.json` instead of requiring 1, so a CLMAD-free Ada
+client boots; a binary that disagrees with its own manifest is still refused,
+and a missing manifest still demands 1. `launch_g6.sh` fills leftover G/VT
+Spot quota with g6e then g6 and does not stop existing g7/g7e instances.

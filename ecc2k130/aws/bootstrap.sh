@@ -70,20 +70,47 @@ prefix_complete() {
     return 0
 }
 
+# This GPU's compute capability as the nvcc sm_ number (8.9 -> 89, 12.0 -> 120).
+local_cc() {
+    nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | awk -F. '{printf "%s%s\n", $1, $2}'
+}
+
+# The published client is a native-only fat binary (no PTX). An sm_120-only
+# prefix is complete for g7e and unloadable on g6/g6e; rebuild rather than
+# start a worker that will die at the first CUDA launch.
+prefix_usable() {
+    local bin=$1 prefix cc
+    prefix_complete "$bin" || return 1
+    prefix=$(dirname "$bin")
+    cc=$(local_cc)
+    [ -n "$cc" ] || return 1
+    aws s3 cp "s3://$BUCKET/$prefix/manifest.json" manifest.json --only-show-errors || return 1
+    python3 -c '
+import json, sys
+cc = sys.argv[1]
+arches = [str(a) for a in json.load(open("manifest.json")).get("arches", [])]
+raise SystemExit(0 if cc in arches else 1)
+' "$cc"
+}
+
 build_from_source() {
     local SRC
     SRC=$(field sourceKey)
     [ -n "$SRC" ] || { echo "published prefix incomplete and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
-    echo "published prefix incomplete; building from $SRC"
+    # Fat client so g6/g6e (sm_89) and g7e (sm_120) share one binaryKey.
+    # A thin Ada rebuild would point the live campaign at a binary Blackwell
+    # cannot load. CLMAD stays 1: both arches have a receipt.
+    export ARCHES="${ARCHES:-89 120}"
+    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
-    BUCKET=$BUCKET ./build.sh "$SRC" || { echo "build failed"; exit 1; }
+    BUCKET=$BUCKET ARCHES="$ARCHES" ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
 }
 
 BIN=$(field binaryKey)
-if ! prefix_complete "$BIN"; then
+if ! prefix_usable "$BIN"; then
     claim_out=$(aws s3api put-object --bucket "$BUCKET" --key "bin/.building" --body /dev/null --if-none-match "*" 2>&1)
     claim_rc=$?
     if [ "$claim_rc" -eq 0 ]; then
@@ -93,15 +120,15 @@ if ! prefix_complete "$BIN"; then
         CLAIMED_BUILD=0
         aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
     elif echo "$claim_out" | grep -qE 'PreconditionFailed|412'; then
-        echo "another instance is publishing the prefix; waiting for client+fixtures"
+        echo "another instance is publishing the prefix; waiting for a client this GPU can load"
         for i in $(seq 1 40); do
             aws s3 cp "s3://$BUCKET/campaign.json" campaign.json --only-show-errors || true
             BIN=$(field binaryKey)
-            prefix_complete "$BIN" && break
+            prefix_usable "$BIN" && break
             sleep 30
         done
-        if ! prefix_complete "$BIN"; then
-            echo "waited 20 minutes; prefix still incomplete; building anyway"
+        if ! prefix_usable "$BIN"; then
+            echo "waited 20 minutes; prefix still unusable on this GPU; building anyway"
             build_from_source
         fi
     else
@@ -110,7 +137,7 @@ if ! prefix_complete "$BIN"; then
         build_from_source
     fi
     BIN=$(field binaryKey)
-    prefix_complete "$BIN" || { echo "build did not publish client and all GPU fixtures; not starting workers"; exit 1; }
+    prefix_usable "$BIN" || { echo "build did not publish a client this GPU can load; not starting workers"; exit 1; }
 fi
 PREFIX=$(dirname "$BIN")
 aws s3 cp "s3://$BUCKET/$BIN" ecc2k130 --only-show-errors || { echo "client binary $BIN missing"; exit 1; }
@@ -136,14 +163,12 @@ cat manifest.json 2>/dev/null
 # the markers are checked too.
 #
 # The carryless marker is the one that cannot be a constant.  On sm_120 a
-# CLMAD=0 build is the accident this gate exists to catch; on an Ada part
-# (sm_89, EC2 g6/g6e) it may be the CORRECT build, because clmad is bought with
-# a pipe balance measured only on Blackwell, and build.sh therefore defaults it
-# off for any pre-Blackwell ARCHES (../ADA-L4-L40S.md).  Hardcoding 1 here would
-# reject that binary and the fleet would never come up.  So take the expected
-# value from the manifest the build published: the gate still fails a binary
-# that disagrees with its own contract, which is what it is for, without also
-# deciding the tuning question.  A missing manifest keeps the old strict 1.
+# CLMAD=0 build is the accident this gate exists to catch. Ada (sm_89, EC2
+# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="89 120"
+# rebuild uses that default; a software-product Ada client is still legal if
+# its manifest says 0. Hardcoding 1 here would reject that binary. Take the
+# expected value from the published manifest. A missing manifest keeps the
+# old strict 1.
 expectedClmad=1
 if [ -s manifest.json ]; then
     expectedClmad=$(python3 - <<'EOF'
@@ -181,6 +206,10 @@ done
 echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# Pin family from the instance, not from a later IMDS/PATH miss inside systemd.
+ECC_INSTANCE_TYPE=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" \
+    http://169.254.169.254/latest/meta-data/instance-type || true)
+ECC_DEVICE_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1 || true)
 cat > /etc/ecc2k130.env <<EOF
 ECC_BUCKET=$BUCKET
 ECC_TABLE=$TABLE
@@ -188,6 +217,8 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+ECC_INSTANCE_TYPE=$ECC_INSTANCE_TYPE
+ECC_DEVICE_NAME=$ECC_DEVICE_NAME
 EOF
 # The live campaign.json predates storageProtocol. worker.py refuses that
 # store unless this is set; CERTIFICATION.md forbids writing the strict
