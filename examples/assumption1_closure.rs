@@ -123,7 +123,16 @@ fn signature(polys: &[crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly]) ->
 }
 
 /// Degree-`d` closure: feed degree falls back until the reduced set is stable.
-/// Returns (closure generators, rounds used, hit_cap).
+/// Why a degree-`d` closure stopped. A degree verdict may only be drawn from
+/// `Converged`; a set still changing when the round budget ran out supports no
+/// claim about degree.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum Closure {
+    Converged,
+    SizeCap,
+    RoundsExhausted,
+}
+
 fn degree_closure(
     polys: &[crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly],
     n_vars: usize,
@@ -132,26 +141,25 @@ fn degree_closure(
 ) -> (
     Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>,
     usize,
-    bool,
+    Closure,
 ) {
     let mut gens = polys.to_vec();
     let mut prev = signature(&gens);
     for round in 1..=max_rounds {
         let reduced = match matrix_f4_f2(&gens, n_vars, d) {
             Some(r) => r,
-            None => return (gens, round - 1, true), // exceeded the size cap
+            None => return (gens, round - 1, Closure::SizeCap),
         };
-        // keep the reduced rows; they span the degree-<=d part reached so far
         let mut next: Vec<_> = reduced.into_iter().filter(|p| !p.terms.is_empty()).collect();
         next.sort_by_key(|p| system_degree(std::slice::from_ref(p)));
         let sig = signature(&next);
         if sig == prev {
-            return (next, round, false);
+            return (next, round, Closure::Converged);
         }
         prev = sig;
         gens = next;
     }
-    (gens, max_rounds, false)
+    (gens, max_rounds, Closure::RoundsExhausted)
 }
 
 fn main() {
@@ -203,9 +211,11 @@ fn main() {
                 Some(s) => s,
                 None => break,
             };
-            let (closure, used, capped) = degree_closure(&sys.equations, sys.n_vars, d, rounds);
-            let (resolved, verdict) = if capped {
-                ("—".to_string(), "CAP".to_string())
+            let (closure, used, outcome) = degree_closure(&sys.equations, sys.n_vars, d, rounds);
+            let (resolved, verdict) = if outcome == Closure::SizeCap {
+                ("—".to_string(), "SIZE CAP (no verdict)".to_string())
+            } else if outcome == Closure::RoundsExhausted {
+                ("—".to_string(), "NOT CONVERGED (no verdict)".to_string())
             } else {
                 match solving_profile(&closure, sys.n_vars, d) {
                     Some(p) => {

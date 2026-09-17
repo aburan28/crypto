@@ -226,24 +226,43 @@ fn signature(polys: &[F2BoolPoly]) -> Vec<Vec<u64>> {
     s
 }
 
+/// Why a degree-`d` closure stopped. A `d_F4 >= d+1` verdict requires the FULL
+/// degree-`d` part of the ideal, so it may only be drawn from `Converged`: a
+/// generating set still changing when the round budget ran out supports no
+/// claim about degree at all.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum Closure {
+    /// Fixed point reached: the set is the full degree-`d` part.
+    Converged,
+    /// Macaulay matrix exceeded `F4_F2_MAX_ROWS`/`COLS`.
+    SizeCap,
+    /// `max_rounds` exhausted while still changing. NOT a degree result.
+    RoundsExhausted,
+}
+
 /// Degree-`d` closure: feed degree falls back to a fixed point.
-fn degree_closure(polys: &[F2BoolPoly], n_vars: usize, d: u32, max_rounds: usize) -> (Vec<F2BoolPoly>, usize, bool) {
+fn degree_closure(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d: u32,
+    max_rounds: usize,
+) -> (Vec<F2BoolPoly>, usize, Closure) {
     let mut gens = polys.to_vec();
     let mut prev = signature(&gens);
     for round in 1..=max_rounds {
         let reduced = match matrix_f4_f2(&gens, n_vars, d) {
             Some(r) => r,
-            None => return (gens, round - 1, true),
+            None => return (gens, round - 1, Closure::SizeCap),
         };
         let next: Vec<_> = reduced.into_iter().filter(|p| !p.terms.is_empty()).collect();
         let sig = signature(&next);
         if sig == prev {
-            return (next, round, false);
+            return (next, round, Closure::Converged);
         }
         prev = sig;
         gens = next;
     }
-    (gens, max_rounds, false)
+    (gens, max_rounds, Closure::RoundsExhausted)
 }
 
 fn main() {
@@ -272,8 +291,8 @@ fn main() {
     println!("  REFUTES     => degree {d} decides this instance");
     println!("  NO REFUTE   => no degree-<= {d} computation can decide it => d_F4 >= {}", d + 1);
     println!();
-    println!("| n | k | vars | field | decomposable | non-dec | rounds | refuted | verdict |");
-    println!("|--:|--:|-----:|------:|-------------:|--------:|-------:|:-------:|:--------|");
+    println!("| n | k | vars | field | decomposable | non-dec | rounds | converged | refuted | verdict |");
+    println!("|--:|--:|-----:|------:|-------------:|--------:|-------:|:---------:|:-------:|:--------|");
 
     let mut rng = StdRng::seed_from_u64(seed);
     for n in (n_min..=n_max).step_by(2) {
@@ -321,25 +340,40 @@ fn main() {
                 Some(s) => s,
                 None => continue,
             };
-            let (closure, used, capped) = degree_closure(&sys.equations, sys.n_vars, d, rounds);
-            let (refuted, verdict) = if capped {
-                ("—".to_string(), "CAP (no verdict)".to_string())
-            } else {
-                match solving_profile(&closure, sys.n_vars, d) {
-                    Some(p) => (
-                        if p.refuted { "yes" } else { "no" }.to_string(),
-                        if p.refuted {
-                            format!("REFUTES: degree {d} decides")
-                        } else {
-                            format!("NO REFUTE => d_F4 >= {}", d + 1)
-                        },
+            let (closure, used, outcome) = degree_closure(&sys.equations, sys.n_vars, d, rounds);
+            let (refuted, verdict) = match solving_profile(&closure, sys.n_vars, d) {
+                None => ("—".to_string(), "SIZE CAP (no verdict)".to_string()),
+                Some(p) if p.refuted => (
+                    // A refutation found is a refutation, whether or not the
+                    // closure had converged: it exhibits 1 in the degree-d part.
+                    "yes".to_string(),
+                    format!("REFUTES: degree {d} decides"),
+                ),
+                Some(_) => match outcome {
+                    // The d_F4 >= d+1 verdict needs the FULL degree-d part.
+                    Closure::Converged => (
+                        "no".to_string(),
+                        format!("NO REFUTE at converged closure => d_F4 >= {}", d + 1),
                     ),
-                    None => ("—".to_string(), "CAP (no verdict)".to_string()),
-                }
+                    Closure::SizeCap => ("no".to_string(), "SIZE CAP (no verdict)".to_string()),
+                    Closure::RoundsExhausted => (
+                        "no".to_string(),
+                        "NOT CONVERGED in round budget (no degree verdict)".to_string(),
+                    ),
+                },
             };
             println!(
-                "| {} | {} | {} | {} | {} | {} | {} | {} | {} |",
-                n, k, sys.n_vars, field_sz, dec.len(), non_dec.len(), used, refuted, verdict
+                "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                n,
+                k,
+                sys.n_vars,
+                field_sz,
+                dec.len(),
+                non_dec.len(),
+                used,
+                if outcome == Closure::Converged { "yes" } else { "NO" },
+                refuted,
+                verdict
             );
         }
     }
