@@ -1,0 +1,50 @@
+[package]
+name = "crypto"
+version = "0.1.0"
+edition = "2021"
+default-run = "crypto"
+description = "Educational comprehensive cryptography library: ECC, RSA, AES, ChaCha20, SHA, KDF, PQC"
+
+[[bin]]
+name = "crypto"
+path = "src/main.rs"
+
+[[bin]]
+name = "ic"
+path = "src/bin/ic.rs"
+
+[lib]
+name = "crypto_lib"
+path = "src/lib.rs"
+
+[dependencies]
+# Portable CPU-time and peak-RSS measurements for ic research reports.
+libc = "0.2"
+num-bigint = { version = "0.4", features = ["rand"] }
+num-traits = "0.2"
+num-integer = "0.1"
+rand = { version = "0.8", features = ["small_rng"] }
+# OS-backed CSPRNG (getrandom(2) on Linux, BCryptGenRandom on Windows, etc.).
+getrandom = "0.2"
+# Constant-time equality for MAC/tag verification. Public-domain.
+subtle = "2.5"
+# Zeroize secret material on drop. Best-effort: cannot zeroize internal
+# heap allocations of num-bigint, but covers byte buffers and re-assigns
+# BigUint fields to zero on drop.
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
+hex = "0.4"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Data-parallel sweeps for the isogeny experimental harness.
+rayon = "1.10"
+# BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
+# reimplement educationally without obscuring the learning goal.
+blake3 = "1.5"
+# DEFLATE compression. Used only by the cryptopals Set-7 CRIME demo
+# (challenge 51): the attack treats compressed-output length as a
+# side channel, so we need a real LZ77-style compressor for the
+# attack to be faithful. Pure-Rust, no_std-compatible.
+flate2 = "1.0"
+# Base64 codec for cryptopals fixtures (challenge 56 cookie).
+base64 = "0.21"

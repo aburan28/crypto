@@ -48,6 +48,17 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/algorithm-lab.html",
+            "scoreboard/algorithm-lab/core.js",
+            "scoreboard/algorithm-lab/ui.js",
+            "scoreboard/algorithm-lab/style.css",
+            "scoreboard/algorithm-lab/README.md",
+            "scoreboard/performance-gains.html",
+            "scoreboard/performance-gains/summary.png",
+            "scoreboard/performance-gains/summary.pdf",
+            "scoreboard/performance-gains/summary.svg",
+            "scoreboard/performance-gains/data.json",
+            "scoreboard/performance-gains/comparisons.csv",
             "status/index.html",
             "status/style.css",
             "status/walk-forest.svg",
@@ -475,7 +486,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -518,7 +529,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)
