@@ -32,15 +32,16 @@
 # replacement that re-bootstraps from S3 and resumes the checkpoint just
 # uploaded. Before starting the next batch it confirms this batch's own
 # instance ids have actually left the fleet's membership, then waits for
-# the active-instance count to climb back to what it was right before this
-# batch's terminate (or ROLL_TIMEOUT_SECONDS, default 1800, shared across
-# both waits) — the count this batch actually removed, not the campaign's
-# static target, so an already-short spot fleet gets rolled rather than
-# drained, and a stuck launch stalls at most one batch rather than the
-# whole campaign. It checks real membership rather than the aggregate
-# FulfilledCapacity field on purpose: that field lags terminate-instances
-# and unrelated fleet churn can move it, so it can look "recovered" while
-# this batch's own instances are still up.
+# active GPU weight (gpusOf summed over the fleet's real membership, not an
+# instance count: TYPES mixes 1- through 8-GPU sizes) to climb back to what
+# it was right before this batch's terminate (or ROLL_TIMEOUT_SECONDS,
+# default 1800, shared across both waits) — the capacity this batch
+# actually removed, not the campaign's static target, so an already-short
+# spot fleet gets rolled rather than drained, and a stuck launch stalls at
+# most one batch rather than the whole campaign. It checks real membership
+# rather than the aggregate FulfilledCapacity field on purpose: that field
+# lags terminate-instances and unrelated fleet churn can move it, so it can
+# look "recovered" while this batch's own instances are still up.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
@@ -84,6 +85,19 @@ fleetId() {
 # lags terminate-instances and can be moved by unrelated churn elsewhere.
 activeInstanceIds() {
     aws ec2 describe-fleet-instances --fleet-id "$1" --query 'ActiveInstances[].InstanceId' --output text
+}
+
+# GPU weight (gpusOf) summed over the fleet's real membership. An instance
+# *count* is not GPU capacity on this campaign: TYPES mixes g7e.2xlarge
+# through .48xlarge, weighted 1 through 8 GPUs by gpusOf, so a terminated
+# weight-8 instance would read as "replaced" by a single weight-1 one if
+# recovery were judged by count instead of by weight.
+activeWeightedCapacity() {
+    local total=0 t
+    for t in $(aws ec2 describe-fleet-instances --fleet-id "$1" --query 'ActiveInstances[].InstanceType' --output text); do
+        total=$((total + $(gpusOf "$t")))
+    done
+    echo "$total"
 }
 
 # Print an integer capacity field (None/empty/float → int).
@@ -253,12 +267,12 @@ roll)
             shift
             n=$((n + 1))
         done
-        # The count to recover to is the count right before this batch's
-        # terminate, not the campaign's static target: an already-short spot
-        # fleet never reaches its target, so waiting for that would time out
-        # and terminate the next batch anyway, every batch, draining the
-        # fleet instead of rolling it.
-        countBefore=$(activeInstanceIds "$id" | wc -w)
+        # The GPU capacity to recover to is the capacity right before this
+        # batch's terminate, not the campaign's static target: an
+        # already-short spot fleet never reaches its target, so waiting for
+        # that would time out and terminate the next batch anyway, every
+        # batch, draining the fleet instead of rolling it.
+        capBefore=$(activeWeightedCapacity "$id")
         echo "terminating:$group"
         # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
         aws ec2 terminate-instances --instance-ids $group >/dev/null
@@ -290,10 +304,10 @@ roll)
         done
         if [ "$gone" -eq 1 ]; then
             while :; do
-                count=$(activeInstanceIds "$id" | wc -w)
-                if [ "$count" -ge "$countBefore" ]; then break; fi
+                cap=$(activeWeightedCapacity "$id")
+                if [ "$cap" -ge "$capBefore" ]; then break; fi
                 if [ "$waited" -ge "$timeout" ]; then
-                    echo "fleet $id: only $count/$countBefore instance(s) active after ${timeout}s; moving on to the next batch" >&2
+                    echo "fleet $id: only $cap/$capBefore GPU(s) active after ${timeout}s; moving on to the next batch" >&2
                     break
                 fi
                 sleep 15
