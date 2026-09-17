@@ -320,12 +320,15 @@
   // --- events ---------------------------------------------------------
   var dragging = null;
   canvas.addEventListener("pointerdown", function (e) {
-    dragging = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
+    // A second pointer is a pinch, not a drag.
+    if (dragging) { dragging = null; return; }
+    dragging = { id: e.pointerId, x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener("pointermove", function (e) {
     var rect = canvas.getBoundingClientRect();
     if (dragging) {
+      if (e.pointerId !== dragging.id) return;
       var dx = e.clientX - dragging.x, dy = e.clientY - dragging.y;
       if (Math.abs(dx) + Math.abs(dy) > 3) dragging.moved = true;
       view.x = dragging.vx + dx;
@@ -345,18 +348,22 @@
       }
     }
     if (i >= 0) {
-      tip.style.left = (e.clientX - rect.left + 12) + "px";
-      tip.style.top = (e.clientY - rect.top + 12) + "px";
+      // The tip is positioned against the host, which also holds the control row.
+      var hostRect = host.getBoundingClientRect();
+      tip.style.left = (e.clientX - hostRect.left + 12) + "px";
+      tip.style.top = (e.clientY - hostRect.top + 12) + "px";
     }
   });
   canvas.addEventListener("pointerup", function (e) {
-    if (dragging && !dragging.moved) {
+    if (!dragging || e.pointerId !== dragging.id) return;
+    if (!dragging.moved) {
       var rect = canvas.getBoundingClientRect();
       var i = nearest(e.clientX - rect.left, e.clientY - rect.top);
       select_(i === selected ? -1 : i);
     }
     dragging = null;
   });
+  canvas.addEventListener("pointercancel", function () { dragging = null; });
   canvas.addEventListener("pointerleave", function () { hover = -1; tip.hidden = true; needsDraw = true; });
   canvas.addEventListener("wheel", function (e) {
     e.preventDefault();
@@ -398,7 +405,10 @@
   if (resetButton) resetButton.addEventListener("click", function () { select_(-1); stop(); fit(); });
   window.addEventListener("resize", function () { size(); fit(); });
 
+  var loads = 0;       // only the latest request may touch the page
+  var shown = null;    // the dataset on the canvas
   function load(dataset) {
+    var id = ++loads;
     setReadout("Loading " + dataset.label + "…");
     return fetch(dataset.file, { cache: "no-store" })
       .then(function (response) {
@@ -406,7 +416,9 @@
         return response.json();
       })
       .then(function (g) {
+        if (id !== loads) return;
         graph = g;
+        shown = dataset;
         index(g);
         stop();
         select_(-1);
@@ -420,7 +432,14 @@
         setReadout(summary());
       })
       .catch(function (err) {
-        setReadout("The explorer could not load " + dataset.file + " (" + err.message + "); the figure above is the same forest.");
+        if (id !== loads) return;
+        var why = "The explorer could not load " + dataset.file + " (" + err.message + "); ";
+        if (shown) {
+          if (select) select.value = shown.key;
+          setReadout(why + "still showing " + shown.label + ".");
+        } else {
+          setReadout(why + "the figure above is the same forest.");
+        }
       });
   }
 
