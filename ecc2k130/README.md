@@ -55,6 +55,12 @@ default because it misses the 17.0 B/s target the note set in advance.
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
 and about 5–10x better per watt.
+[THROUGHPUT-20B.md](THROUGHPUT-20B.md) asks the same of 20 B/s with a per-function
+static profile of the table walk, made with the measurement compiler and no GPU:
+both pipes are within a few percent of full at 16.56 B/s, the reduction and the
+products are 60% of the ALU, and no lever in the tree closes the 26% ALU cut
+20 B/s needs.  `TABLE_PIVOT_BYTES=1` is the one it adds, priced at −45 slots
+and unmeasured on a card.
 
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).

@@ -41,6 +41,7 @@ class BuildTests(unittest.TestCase):
         for path in (
             "index.html",
             "404.html",
+            "favicon.svg",
             "assets/site.css",
             "assets/rho-gpu.js",
             "assets/rho-gpu-worker.js",
@@ -293,6 +294,18 @@ class BuildTests(unittest.TestCase):
         self.assertIn("(oddsMonth - odds0) / (1 - odds0)", page)
         self.assertIn('shape("path", { d: curve(2), "class": "line alt" })', page)
         self.assertIn("The median is not a deadline", page)
+        # Axis dates and guide marks no longer share one strip under the plot —
+        # that stacking is what clipped the labels on a phone-width viewport.
+        self.assertIn("PAD_B = 52", page)
+        self.assertIn('label(gx, H - 22, xLabel(work, mark), "middle", "tick")', page)
+        self.assertIn('label(gx + 4, y(p) - 6, mark, "start", "tick")', page)
+        css = read(os.path.join(self.out, "status", "style.css"))
+        self.assertIn(".odds-chart svg", css)
+        self.assertIn("min-width: 0", css)
+        # Walk forest stays readable on a phone by scrolling, not by shrinking
+        # the trails into a ~300px scribble.
+        self.assertIn(".figure img", css)
+        self.assertIn("min-width: 640px", css)
         for ident in ("odds-now", "odds-month", "odds-median", "odds-ninety", "odds-chart"):
             self.assertIn('id="%s"' % ident, page, ident)
         # The same law in Python: mean E, median 0.94 E, ninety at 1.71 E.

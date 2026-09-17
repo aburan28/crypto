@@ -52,6 +52,7 @@ PACKED_STATE_TILE ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
+TABLE_PIVOT_BYTES ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -131,6 +132,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
+       -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
@@ -225,7 +227,7 @@ rehearse: ecc2k130-cpu
 build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 \
-	    -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
+	    -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
 	    -Wno-unknown-pragmas -Wno-unused-function src/testproduction.cpp -o $@
 
 # The walks behind a corpus, orbit by orbit, for the status page's forest
@@ -311,6 +313,15 @@ test-shared-sigma-cuda:
 	./build/test-shared-sigma-cuda
 
 # Device primitives of the table walk against the host reference; needs a GPU.
+# The same probe on the host, for both selection layouts, so a layout change
+# is held to the reference before any GPU sees it.
+test-table-walk-host:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	./build/test-table-walk-host-nibble
+	./build/test-table-walk-host-bytes
+
 test-table-walk-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
@@ -330,7 +341,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing test-logic check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -470,6 +481,6 @@ clean:
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
-	rm -f build/test-timing build/test-logic
+	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean

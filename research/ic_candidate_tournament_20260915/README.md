@@ -1,6 +1,6 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; eight further tournaments finished and audited
+Status: implementation complete; nine further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
@@ -15,10 +15,16 @@ by its descent relation, on the tested small Koblitz panel. Round-0009 then
 moved the shared curve construction to single-word arithmetic for both arms:
 0.5511 (0.5279–0.5881) of rho's instructions and 0.9406 (0.9131–0.9811) of its
 native time, with the smallest cell's native ratio at 1.017 on confirmation, so
-the strict per-cell native gate holds for round-0008 and not for that round. The
-native margin is small because process creation dominates that metric.
+the strict per-cell native gate held for round-0008 and not for that round. That
+cell was decided by the evaluator's own `fork()`, which every native wall had
+charged; round-0010 spawns without it, builds the shared executable static with
+the C entry point, and measures the same pipeline at 0.5347 (0.5106–0.5645) of
+rho's instructions and 0.8445 (0.8123–0.8814) of its native time, replay
+agreeing (0.8665, 0.8307–0.9078), every cell below one in both metrics on both
+stages: the strict-win record. The native margin is bounded by the process
+creation both arms pay.
 
-All 10,488 new profiled trials and their paired native runs verified. The
+All 11,928 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
 (1,680 further verified trials on another host) enforced the index-calculus
@@ -91,7 +97,9 @@ Freeze:
 - The actual incumbent source tree, executable, dependencies and compiler flags.
   The workspace currently contains extensive uncommitted work; a commit hash alone
   is insufficient. Snapshot relevant tracked and untracked source into an isolated
-  build and hash it. Each candidate receives its own derivative snapshot.
+  build and hash it. Each candidate receives its own derivative snapshot. A
+  `.cargo/config.toml` in the source root (link mode, target features) is part
+  of the snapshot and its seal.
 - Curves, field representations, subgroup orders, generators, public targets,
   algorithm seeds, budgets and target counts. Store expected scalars separately.
 - The incumbent IC algorithm and a healthy Pollard-rho reference using the same

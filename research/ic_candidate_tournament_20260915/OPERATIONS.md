@@ -117,6 +117,23 @@ those old timings remain diagnostics and are not mixed into new runtime claims.
 Both baseline and challengers are freshly measured under the new timing protocol.
 Reports preserve a separate native-time table and its paired confidence intervals.
 
+From round 0010 the evaluator spawns each child without forking itself: no
+`preexec_fn`, so CPython takes the `vfork`/`posix_spawn` path; the calling
+thread is pinned to the measured CPU before the spawn so the child inherits
+it; the memory and core caps are applied with `prlimit` while the child is
+still blocked on `stdin`, before the job is delivered; the watchdog thread is
+started before the timing window opens. Through round 0009 every native wall
+included a `fork()` of the evaluator, a cost that grew with the evaluator's
+heap and dominated the smallest cells (about 5.4 of 5.8 ms on `n13a0` in
+round 0009). The contract records the spawn under `native_timing_protocol`
+and every receipt under `native_process.spawn`. Native walls and instruction
+counts are not comparable across that boundary; within-round ratios are.
+
+A `.cargo/config.toml` in the source root is snapshotted, sealed in the source
+manifest and honoured by the build; it is how a source tree selects link mode
+or target features, which Cargo.toml cannot express. With `[build] target`
+set, the worker is taken from the target-triple layout of the build directory.
+
 ## Measurement scope
 
 The executable currently supports CPU-only, odd-degree Koblitz fixtures from 5

@@ -28,9 +28,40 @@
 #include "tablewalk.h"
 #include "packed131.h"
 
+// ECC_TABLE_PIVOT_BYTES=1 looks the pivot up per BYTE of x instead of per
+// nibble: 17 lookups and 16 maxes in place of 33 and 32.  THROUGHPUT-20B.md
+// prices the nibble scan at ~110 ALU slots per update, a third of the whole
+// selection, mostly because IMNMX issues at 1.81 slots and PRMT at one, 33
+// times over.  The byte table is 4,352 bytes against the nibble table's 528,
+// which does not fit under the 48 KB two-blocks-per-SM line beside the other
+// tables -- so this layout also packs the 3-bit top words: the table's x|y
+// tops as one byte per entry (two words per k at H = 8 instead of one word per
+// entry), and fromRow's top as a nibble (17 words instead of 131).  Net 48,732
+// bytes.  Off by default; unmeasured on a card.  The selection primitives
+// compile for the host too (TW_FN) so src/testtablewalkhost.cpp can hold both
+// layouts to the reference without a GPU.
+#ifndef ECC_TABLE_PIVOT_BYTES
+#define ECC_TABLE_PIVOT_BYTES 0
+#endif
+#if ECC_TABLE_PIVOT_BYTES != 0 && ECC_TABLE_PIVOT_BYTES != 1
+#error "ECC_TABLE_PIVOT_BYTES must be 0 or 1"
+#endif
+
 namespace eccPacked131 {
 
 static const int TW_H = ECC_TABLE_BRANCHES;
+#if ECC_TABLE_PIVOT_BYTES
+static const int TW_ENTRY = 8;                            // x words 0-3, y words 0-3
+static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4;  // + tops, 8 bits per entry
+static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
+static const int TW_MASK_OFF = TW_TABLE_WORDS;
+static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
+static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
+static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
+static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
+static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
+static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
+#else
 static const int TW_ENTRY = 9;
 static const int TW_TABLE_WORDS = 131 * TW_H * TW_ENTRY;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
@@ -39,21 +70,30 @@ static const int TW_INV_OFF = TW_ROW_OFF + 131 * 5;
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;        // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
+#endif
 static const int TW_WORDS = TW_LINV_OFF + 33;
 static const size_t TW_SHARED_BYTES = size_t(TW_WORDS) * sizeof(uint32_t);
 static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
 
 #ifdef __CUDACC__
+#define TW_FN __device__ __forceinline__
 __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *global) {
     for (int i = threadIdx.x; i < TW_WORDS; i += blockDim.x) shared[i] = global[i];
     __syncthreads();
 }
-
 // Byte t of a word into the low byte, zeros above: one PRMT.
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
+__device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
+__device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+#else
+#define TW_FN static inline
+static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
+static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
+static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+#endif
 
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
-__device__ __forceinline__ int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
+TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
     unsigned s = 0;
 #pragma unroll
     for (int w = 0; w < 4; ++w)
@@ -65,9 +105,9 @@ __device__ __forceinline__ int twPhase(const P131 &x, int hw, const uint8_t *pha
 
 // Index of the support element whose L is last before k in cyclic order:
 // among set bits with L < k if any, else among all set bits, the largest L.
-// x is never zero for a subgroup point, so some nibble lookup is non-zero.
-__device__ __forceinline__ int twPivot(const P131 &x, int k, const uint32_t *maskLt,
-                                       const uint8_t *maxL, const uint8_t *linv) {
+// x is never zero for a subgroup point, so some lookup is non-zero.
+TW_FN int twPivot(const P131 &x, int k, const uint32_t *maskLt,
+                  const uint8_t *maxL, const uint8_t *linv) {
     const uint32_t *m = maskLt + k * 5;
     uint32_t s[5];
 #pragma unroll
@@ -76,29 +116,45 @@ __device__ __forceinline__ int twPivot(const P131 &x, int k, const uint32_t *mas
 #pragma unroll
     for (int i = 0; i < 5; ++i) s[i] = any ? s[i] : x.v[i];
     unsigned best = 0;
+#if ECC_TABLE_PIVOT_BYTES
+    // 1 + the largest L over the set bits of byte i of x, 17 bytes of x.
+#pragma unroll
+    for (int w = 0; w < 4; ++w)
+#pragma unroll
+        for (int t = 0; t < 4; ++t)
+            best = twMax(best, unsigned(maxL[(4 * w + t) * 256 + twByte(s[w], t)]));
+    best = twMax(best, unsigned(maxL[16 * 256 + (s[4] & 7u)]));
+#else
 #pragma unroll
     for (int w = 0; w < 4; ++w) {
         const uint32_t lo = s[w] & 0x0F0F0F0Fu, hi = (s[w] >> 4) & 0x0F0F0F0Fu;
 #pragma unroll
         for (int t = 0; t < 4; ++t) {
-            best = max(best, unsigned(maxL[(8 * w + 2 * t) * 16 + twByte(lo, t)]));
-            best = max(best, unsigned(maxL[(8 * w + 2 * t + 1) * 16 + twByte(hi, t)]));
+            best = twMax(best, unsigned(maxL[(8 * w + 2 * t) * 16 + twByte(lo, t)]));
+            best = twMax(best, unsigned(maxL[(8 * w + 2 * t + 1) * 16 + twByte(hi, t)]));
         }
     }
-    best = max(best, unsigned(maxL[32 * 16 + (s[4] & 7u)]));
+    best = twMax(best, unsigned(maxL[32 * 16 + (s[4] & 7u)]));
+#endif
     return linv[best - 1];
 }
 
 // Coordinate p of the normal-basis image of a polynomial-basis y.
-__device__ __forceinline__ int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
+TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
+#if ECC_TABLE_PIVOT_BYTES
+    const uint32_t *r = fromRow + p * 4;
+    const uint32_t top = (fromRow[(TW_ROWTOP_OFF - TW_ROW_OFF) + (p >> 3)] >> ((p & 7) * 4)) & 7u;
+    const uint32_t t = (yp.v[0] & r[0]) ^ (yp.v[1] & r[1]) ^ (yp.v[2] & r[2]) ^ (yp.v[3] & r[3]) ^ (yp.v[4] & top);
+#else
     const uint32_t *r = fromRow + p * 5;
     const uint32_t t = (yp.v[0] & r[0]) ^ (yp.v[1] & r[1]) ^ (yp.v[2] & r[2]) ^ (yp.v[3] & r[3]) ^ (yp.v[4] & r[4]);
-    return int(__popc(t) & 1u);
+#endif
+    return twParity(t);
 }
 
 // The whole selection for one point: (h, k, eps) after the cycle rule, with
 // the history advanced.  x is in the normal basis, yp in the polynomial basis.
-__device__ __forceinline__ unsigned twSelect(const P131 &x, const P131 &yp, int hw,
+TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
                                              unsigned long long *hist, const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
     const int k = twPhase(x, hw, bytes + 4 * TW_PHASE_OFF, shared + TW_INV_OFF);
@@ -117,11 +173,18 @@ __device__ __forceinline__ unsigned twSelect(const P131 &x, const P131 &yp, int 
 
 // d = x + x_T and e = y + y_T (+ x_T when the table point is negated), in the
 // polynomial basis, for the selected tag.
-__device__ __forceinline__ void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
-                                         const uint32_t *shared, P131 *d, P131 *e) {
+TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
+                    const uint32_t *shared, P131 *d, P131 *e) {
+#if ECC_TABLE_PIVOT_BYTES
+    const int h = eccTagH(tag);
+    const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
+    const uint32_t *t = kbase + h * TW_ENTRY;
+    const uint32_t top = (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 63u;
+#else
     const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
-    const uint32_t negMask = 0u - unsigned(eccTagEps(tag));
     const uint32_t top = t[8];
+#endif
+    const uint32_t negMask = 0u - unsigned(eccTagEps(tag));
 #pragma unroll
     for (int i = 0; i < 4; ++i) {
         const uint32_t tx = t[i];
@@ -132,7 +195,6 @@ __device__ __forceinline__ void twAddend(unsigned tag, const P131 &xp, const P13
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
 }
-#endif  // __CUDACC__
 
 // Host: fill the flat constant buffer from the reference walk.
 template <class TW>
@@ -148,9 +210,15 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
             pack(walk.table[h][k].y.v, y.v);
             x = toPolynomial131(x);
             y = toPolynomial131(y);
+#if ECC_TABLE_PIVOT_BYTES
+            uint32_t *t = out + k * TW_KWORDS + h * TW_ENTRY;
+            for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }
+            out[k * TW_KWORDS + TW_H * TW_ENTRY + (h >> 2)] |= ((x.v[4] & 7u) | ((y.v[4] & 7u) << 3)) << ((h & 3) * 8);
+#else
             uint32_t *t = out + (k * TW_H + h) * TW_ENTRY;
             for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }
             t[8] = (x.v[4] & 7u) | ((y.v[4] & 7u) << 3);
+#endif
         }
     for (int k = 0; k < 131; ++k) pack(walk.consts.maskLt[k], out + TW_MASK_OFF + k * 5);
     for (int j = 0; j < 131; ++j) {
@@ -158,7 +226,14 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         e.v[j >> 5] = 1u << (j & 31);
         const P131 n = fromPolynomial131(e);
         for (int p = 0; p < 131; ++p)
-            if ((n.v[p >> 5] >> (p & 31)) & 1u) out[TW_ROW_OFF + p * 5 + (j >> 5)] |= 1u << (j & 31);
+            if ((n.v[p >> 5] >> (p & 31)) & 1u) {
+#if ECC_TABLE_PIVOT_BYTES
+                if (j < 128) out[TW_ROW_OFF + p * 4 + (j >> 5)] |= 1u << (j & 31);
+                else out[TW_ROWTOP_OFF + (p >> 3)] |= 1u << ((j - 128) + (p & 7) * 4);
+#else
+                out[TW_ROW_OFF + p * 5 + (j >> 5)] |= 1u << (j & 31);
+#endif
+            }
     }
     for (int w = 0; w < 132; ++w) out[TW_INV_OFF + w] = uint32_t(walk.consts.inv[w]);
     // Coordinate i (1-based in the reference) sits at bit i - 1.
@@ -172,6 +247,15 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
             phase[i * 256 + v] = uint8_t(s % 131u);
         }
+#if ECC_TABLE_PIVOT_BYTES
+    for (int i = 0; i < 17; ++i)
+        for (int v = 0; v < 256; ++v) {
+            int best = -1;
+            for (int t = 0; t < 8; ++t)
+                if ((v >> t) & 1) best = L(8 * i + t) > best ? L(8 * i + t) : best;
+            maxL[i * 256 + v] = uint8_t(best + 1);
+        }
+#else
     for (int i = 0; i < 33; ++i)
         for (int v = 0; v < 16; ++v) {
             int best = -1;
@@ -179,6 +263,7 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) best = L(4 * i + t) > best ? L(4 * i + t) : best;
             maxL[i * 16 + v] = uint8_t(best + 1);
         }
+#endif
     for (int bit = 0; bit < 131; ++bit) linv[L(bit)] = uint8_t(bit);
 }
 

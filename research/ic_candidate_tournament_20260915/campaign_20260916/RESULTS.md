@@ -1,9 +1,9 @@
 # Continued IC tournament results
 
 Batch (16-target) parity verdict: **True**; selected implementation **combined_descent**.
-Single-target verdict: **strictly below rho in both metrics**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), after **tiny_batch1** reached parity in round-0006.
+Single-target verdict: **strictly below rho in both metrics on every cell**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), and in round-0010 on a lean static executable under an evaluator that no longer forks itself: 0.5347 of rho's instructions and 0.8445 of its native time, `beats_rho_strict` on every cell (the strict-win record), after **tiny_batch1** reached parity in round-0006.
 
-Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006–0009 (1,584, 1,488, 1,356 and 1,356 profiled trials: parity, a strict win over rho, that win re-measured with the descent certificate, and the same pipeline on a leaner shared job). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
+Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006–0010 (1,584, 1,488, 1,356, 1,356 and 1,440 profiled trials: parity, a strict win over rho, that win re-measured with the descent certificate, the same pipeline on a leaner shared job, and the strict win on every cell on a lean static executable under an evaluator that no longer forks itself). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
 
 ## Profiled instruction cost relative to matched rho
 
@@ -18,6 +18,7 @@ Completed three new tournaments with **4,704 profiled trials**, each paired with
 | [round-0007](../runs/round-0007/REPORT.md) | 1 | tiny2 | 0.7376 | [0.7065693377992373, 0.7643545073767521] |
 | [round-0008](../runs/round-0008/REPORT.md) | 1 | incumbent retained (tiny2 + descent certificate) | 0.7379 | [0.7144, 0.7572] |
 | [round-0009](../runs/round-0009/REPORT.md) | 1 | incumbent retained (same pipeline; shared construction in single-word arithmetic for both arms) | 0.5511 | [0.5279, 0.5881] |
+| [round-0010](../runs/round-0010/REPORT.md) | 1 | incumbent retained (same pipeline; static executable, C entry point, one CPUID; evaluator spawns without forking itself) | 0.5347 | [0.5106, 0.5645] |
 
 ## Native process time relative to matched rho
 
@@ -87,6 +88,7 @@ parameter-neighbour registry is in [round6-next-candidates.json](round6-next-can
 | round-0007 | 1 | tiny2 | 0.9461 | [0.9292926395602298, 0.9639483494225052] |
 | round-0008 | 1 | incumbent retained (tiny2 + descent certificate) | 0.9355 | [0.9124, 0.9610] |
 | round-0009 | 1 | incumbent retained (same pipeline; shared construction in single-word arithmetic for both arms) | 0.9406 | [0.9131, 0.9811] |
+| round-0010 | 1 | incumbent retained (same pipeline; static executable, C entry point, one CPUID; evaluator spawns without forking itself) | 0.8445 | [0.8123, 0.8814] |
 
 ## Single-target parity (round-0006)
 
@@ -140,6 +142,17 @@ Every job pays, before either algorithm starts, for the curve construction and t
 
 Median complete job: 4.33 million instructions and 6.1 ms for the winner against 8.1 million and 6.5 ms for rho (round 0008: 7.3 and 7.7 ms). Per-cell winner/rho instructions 0.528–0.625. The strict per-cell native gate was **not** met in this round: n13a0 came out at 1.017 on confirmation (0.960 on replay; the other cells 0.89–0.96 on both stages). On that cell the two arms differ by about 0.2 ms of their own work inside a 6 ms process, which is within the noise of twelve cases, so `beats_rho_strict` is false here while the aggregate native intervals are below one on both stages and `rho_parity` holds. Round 0008 remains the strict-win record; round 0009 shows what the instruction margin is once the shared job stops hiding it, and that cheaper shared work helps rho's wall time as much as the winner's.
 
+## Round 0010: a lean job and a faithful clock — the strict win on every cell
+
+Round 0009's one failing cell was decided by noise that neither arm produces: on `n13a0` the arms differ by 0.2 ms inside a 5.8 ms cold process whose spread (4.9–9.2 ms) came from the evaluator, which created every child with a `preexec_fn` and so made CPython `fork()` itself, charging a copy of its page tables to every native wall (re-creating `execute` with a 400 MiB parent: 23.7 ms per job against 2.9 ms without the fork). Round 0010 ([pre-registration](ROUND10-single-target.md), [report](../runs/round-0010/REPORT.md), `--objective rho`, seed 2026091610) changes the instrument and the job. The evaluator spawns without forking itself: the calling thread is pinned before the spawn so the child inherits the CPU, the memory and core caps are applied with `prlimit` while the child is still blocked on `stdin`, and the watchdog is armed before the timing window; the contract and every receipt record the spawn. The baseline executable, shared by every arm including rho ([patch](round10-lean.patch) on the round-0009 source), is statically linked through a sealed `.cargo/config.toml`, uses the C entry point instead of the standard runtime's start-up, and — the only IC-only change — issues one `CPUID` instead of the standard library's feature cache. It reproduces all 304 frozen round-0009 fixture outputs byte for byte; the shared `startup_and_input` phase fell from 385K to 84K instructions for both arms. Nothing about the algorithms changed. All 1,440 trials verified, every IC job's logarithm certified by its descent relation; retained (batch-4 control eliminated at selection; the ablation control `lean_stdprobe`, which restores the standard feature cache, measured 1.0002 of the incumbent's instructions and 0.999 [0.989, 1.010] of its native time on confirmation, 0.989 [0.974, 1.002] on replay: the probe's cost is not resolvable at this noise).
+
+| Comparison | Instructions | Paired 95% interval | Native time | Paired 95% interval |
+|---|---:|---|---:|---|
+| winner / rho (confirmation) | 0.5347 | [0.5106, 0.5645] | 0.8445 | [0.8123, 0.8814] |
+| winner / rho (replay) | 0.5347 | [0.5106, 0.5645] | 0.8665 | [0.8307, 0.9078] |
+
+Per-cell winner/rho: instructions 0.503–0.594, native time 0.796–0.911 on confirmation and 0.812–0.941 on replay; `n13a0`, the cell that failed in round 0009, is 0.911 and 0.941. **`beats_rho_strict` holds**: every upper limit and every cell below one in both metrics on both stages, so round 0010 replaces round 0008 as the strict-win record with the same pipeline. Median complete job on confirmation: 4.03 million instructions and 2.41 ms for the winner against 7.68 million and 2.86 ms for rho (round 0009 under the old clock: 4.33 million and 6.1 ms against 8.1 million and 6.5 ms). Absolute times and instruction counts are not comparable with earlier rounds, whose native walls included the evaluator's fork and whose instruction counts included the dynamic loader; only within-round ratios are claimed, as before. The native ratio is still bounded below by the process creation both arms pay.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.
@@ -154,10 +167,11 @@ The successful mechanisms are exact arithmetic substitutions, folded pair-table 
 
 - [16-target winner source/configuration](WINNER.json) and [cumulative source patch](WINNER.patch).
 - [Single-target winner record](WINNER-single-target.json) (round-0008: the round-0007 `tiny2` plus the descent certificate, [patch](round8-tiny2_cert.patch), [round8_candidates.py](round8_candidates.py)).
+- Round-0010: the [lean-job patch](round10-lean.patch) applied to the round-0009 source for both arms (static link via `.cargo/config.toml`, C entry point, one CPUID), the [feature-cache ablation](round10-lean_stdprobe.patch), and [round10_candidates.py](round10_candidates.py).
 - Round-0009: the [shared-construction patch](round9-fastcurve.patch) applied to the round-0008 source for both arms, and [round9_candidates.py](round9_candidates.py).
 - Round-0007: the [patch against the round-0006 winner source](round7-tiny2.patch), the [row-rule](round7-tiny2_rows.patch) and [arithmetic](round7-tiny2_arith.patch) ablations, and [round7_candidates.py](round7_candidates.py) to rebuild the trees.
 - Round-0006: the [parity patch against the round-0005 winner source](round6-tiny.patch), the [serialisation-only](round6-fast_report.patch) and [full-table](round6-tiny_fulltable.patch) controls, and [round6_candidates.py](round6_candidates.py).
-- [Operation plan](PLAN.md), [single-target successor plan](ROUND4.md), [batch plan](ROUND5.md), [single-target parity pre-registration](ROUND6-single-target.md), [beat-rho pre-registration](ROUND7-single-target.md), [certificate re-measurement pre-registration](ROUND8-single-target.md) and [leaner shared job pre-registration](ROUND9-single-target.md).
+- [Operation plan](PLAN.md), [single-target successor plan](ROUND4.md), [batch plan](ROUND5.md), [single-target parity pre-registration](ROUND6-single-target.md), [beat-rho pre-registration](ROUND7-single-target.md), [certificate re-measurement pre-registration](ROUND8-single-target.md), [leaner shared job pre-registration](ROUND9-single-target.md) and [lean job and faithful clock pre-registration](ROUND10-single-target.md).
 - [Operating guide](../OPERATIONS.md) and [controller tests](controller-tests.json).
 - [Arithmetic/table equivalence tests](preflight-next-tests.log) and [installed skill validation](skill-validation.json).
 - [Retained failed build attempt](../runs/round-0003/prepare_failure.json); no measurements came from it.

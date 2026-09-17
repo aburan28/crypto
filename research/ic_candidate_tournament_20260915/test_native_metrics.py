@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 import os
@@ -57,6 +58,38 @@ class NativeMetricsTests(unittest.TestCase):
             self.assertNotEqual(result['exit_code'], 0)
             self.assertLess(result['process_wall_seconds'], 3)
 
+    def test_execute_caps_and_pins_the_child_without_a_preexec_fork(self):
+        from tournament import SPAWN
+        probe = ('import json,os,resource,sys; sys.stdin.read(); '
+                 'print(json.dumps({"as":resource.getrlimit(resource.RLIMIT_AS)[0],'
+                 '"core":resource.getrlimit(resource.RLIMIT_CORE)[0],'
+                 '"cpus":sorted(os.sched_getaffinity(0)),"sid":os.getsid(0)==os.getpid()}))')
+        cpu = min(os.sched_getaffinity(0))
+        before = os.sched_getaffinity(0)
+        with tempfile.TemporaryDirectory() as tmp:
+            result = execute([sys.executable, '-c', probe], {'k': 1}, Path(tmp), 30, 4 * 1024**3, cpu)
+            seen = json.loads(Path(tmp, 'stdout.json').read_text())
+        self.assertEqual(result['process_status'], 'EXITED')
+        self.assertEqual(result['exit_code'], 0)
+        self.assertEqual(result['spawn'], SPAWN)
+        self.assertEqual(seen, {'as': 4 * 1024**3, 'core': 0, 'cpus': [cpu], 'sid': True})
+        self.assertEqual(os.sched_getaffinity(0), before)
 
+    def test_built_worker_accepts_host_or_triple_layout(self):
+        from oracle import InvalidEvidence
+        from tournament import built_worker
+        with tempfile.TemporaryDirectory() as tmp:
+            build = Path(tmp)
+            with self.assertRaises(InvalidEvidence):
+                built_worker(build)
+            triple = build / 'x86_64-unknown-linux-gnu/release/examples'
+            triple.mkdir(parents=True)
+            (triple / 'ic_tournament_worker').write_bytes(b'1')
+            self.assertEqual(built_worker(build), triple / 'ic_tournament_worker')
+            host = build / 'release/examples'
+            host.mkdir(parents=True)
+            (host / 'ic_tournament_worker').write_bytes(b'2')
+            with self.assertRaises(InvalidEvidence):
+                built_worker(build)
 if __name__ == '__main__':
     unittest.main()
