@@ -57,39 +57,24 @@ MONTHLY_BUDGET_USD=5000 ./costguard/costguard.sh status
 | GPU-hours at the expected work | 42,400 | 2.15e18 / 14.11e9 / 3600 |
 | Distinguished points at weight 34 | 2^35.6 records, ~1.7 TB | one report per 2^25.27 iterations |
 | Points per GPU | ~349/s, ~0.96 GB/day | same |
-| Distinguished points at weight 32, the cutoff measured running on 2026-09-15 | one report per 2^27.9 iterations† | measured 2026-09-15: 7.93e15 checkpointed iterations against 31.6 M points |
+| Distinguished points at weight 32, the cutoff actually running | one report per 2^28.41 iterations | measured 2026-09-17 from 132 workers' own counters, every GPU family agreeing to 0.04 in the exponent: [`../benchmarks/dp-interval/`](../benchmarks/dp-interval/README.md) |
+| Points per GPU at weight 32 | ~40/s, ~3.4 M/day, ~0.11 GB/day | 14.11e9 / 2^28.41 |
+| Corpus at the expected work, weight 32 | 2^32.5 records, ~0.19 TB | 2^60.9 / 2^28.41 |
 
-† Unverified. 7.93e15 is a checkpoint-sum figure — the same kind of
-quantity `status.py` got wrong until the fix described under Monitoring,
-below: multiplying every
-slot's checkpoint by one campaign-wide walk count instead of each slot's
-own, an over-count of tens of times on any non-Blackwell slot in the fleet.
-Whether *this* number is affected turns on code this repo doesn't carry
-(the ingest host that computed it — see `scripts/rho_status/README.md`)
-and on which GPU families were in the fleet that day, neither of which this
-repo can confirm. Treat 2^27.9 as unverified until it's re-derived from
-that day's per-slot data with each slot's own walk count.
-
-As of this measurement the live campaign's `dpWeight` was 32, not the 34
-the rows above are priced at, so every per-point figure here was a floor:
-points were about 2^2.6 rarer than that table says, and the corpus at the
-expected work was smaller by the same factor (before the † caveat above is
-even accounted for). **This file's checked-in `campaign.json` currently
-says `dpWeight` 34** — the pricing table's value, not the 32 this paragraph
-describes. That isn't necessarily a contradiction: `infra.sh sync` only
-writes this file to the bucket when the bucket has no `campaign.json` yet
-("campaign.json already in the bucket; edit it there deliberately," in
-`infra.sh`'s own sync step) — so the live copy is edited directly in S3 and
-can drift from what git tracks in either direction. This checked-in value
-is the seed for a *new* campaign, not a live reading of a running one;
-confirm the actual cutoff with `aws s3 cp s3://$BUCKET/campaign.json -`
-before trusting either number. Nothing about the walk itself changes with
-`dpWeight` — this is an accounting correction, per AGENTS.md §3 — but it is
-the reason the public dashboard reports the walkers' own checkpoint sum
-rather than converting the point count: at 2^25.27 per point the
-conversion read 2^50.3 operations walked where the checkpoints said
-2^52.8, and an ETA six times too long with it. See
-`scripts/rho_status/README.md`.
+`campaign.json` runs `dpWeight` 32, not the 34 the weight-34 rows are priced
+at, so those per-point figures are a floor: points are 2^3.14 = 8.8× rarer
+than the weight-34 rows say, and the corpus at the expected work is smaller
+by the same factor. Nothing about the walk changes — this is an accounting
+correction, per AGENTS.md §3 — but it is the reason the public dashboard
+reports the walkers' own iteration count rather than converting the point
+count. The interval was first quoted as 2^27.9, from the 2026-09-15 ratio of
+two fleet-wide counters (7.93e15 checkpointed iterations against 31.6 M
+points). That figure is retired: the checkpoint sum counted every slot at the
+Blackwell grid (see monitoring, below) and the point count included the
+campaign's first two slots, which walked at weight 34 under the CUDA 13.0
+build. The 2^28.41 above comes from each client's own iteration and point
+counters over the same process, which no grid assumption or cross-slot sum
+can distort. See `scripts/rho_status/README.md`.
 
 Wall-clock and cost at the *expected* work, using prices observed in
 us-west-2 on 2026-09-11 (spot g7e.2xlarge $1.31/h, on-demand $3.36/h;
@@ -112,10 +97,12 @@ wall-clock. Two corrections to keep in mind:
 * Every walk in flight when the collision lands is wasted, about 4.9 GPU-hours
   per GPU at weight 34 (6.16 M walks × 2^25.27 steps). The faster GPU walks
   that state out proportionally faster, so this is still 1.5% of the work at
-  128 GPUs and 12% at 1,024; above a few hundred GPUs lower the cutoff
-  (raising `dpWeight` from 34 to 36 increases the estimated DP rate about
-  7.55×, reducing delay but increasing storage) **before** the
-  campaign starts, never during it.
+  128 GPUs and 12% at 1,024. At the weight 32 actually running the tail is
+  2^3.14 longer, 43 GPU-hours per GPU (6.16 M walks × 2^28.41 measured steps):
+  13% of the expected work at 128 GPUs and more than the expected work itself
+  at 1,024. Above a few hundred GPUs lower the cutoff (raising `dpWeight`
+  from 34 to 36 increases the estimated DP rate about 7.55×, reducing delay
+  but increasing storage) **before** the campaign starts, never during it.
 
 One GPU is now past the 15 B/s a single card was once thought unable to reach
 (14.6 B/s benchmarking, 14.1 B/s collecting), and two clear the 26 B/s target:
@@ -319,9 +306,16 @@ its in-flight work lost), the last two break the collision guarantee.
 Start a new bucket for a different geometry. Moving to this preset *is*
 such a change — 16 slots over 385,024 workers where the first sizing had
 32 over 192,512 — so a bucket that already holds checkpoints from the
-CUDA 13.0 build needs a new one rather than a rebuild. `dpWeight` is
-unchanged, so a corpus collected under the old geometry still merges
-against the new one.
+CUDA 13.0 build needs a new one rather than a rebuild. Had `dpWeight` stayed
+the same, a corpus collected under the old geometry would still merge
+against the new one. In the live bucket it did not: slots 0 and 1, the CUDA
+13.0 pair retired on 2026-09-13, hold 8.45 M records at 2^25.2 iterations
+per point, the weight-34 interval, and every slot since walks at weight 32
+(`../benchmarks/dp-interval/`). Weight 34 is the looser cutoff, so a
+weight-32 walk that merges into one of those early trails stops later than
+the early walk did and the collision is seen only if the early stopping
+point also has `HW(x) <= 32`. Those 8.45 M records are a partial corpus,
+not a merged one; count on them for nothing.
 
 ### Rolling out a kernel change
 
@@ -408,10 +402,11 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   report `walks` per slot and the dashboard uses it; a slot that does not
   report one is counted at `--walks` and listed as assumed, with the guessed
   share printed. Any checkpoint-sum figure taken before that fix is an
-  over-count for exactly as long as a non-Blackwell slot was in the fleet —
-  see the † caveat on the 2^27.9 iterations-per-point row, above, which is
-  exactly that kind of figure and is unverified for the same reason. The
-  corrected `walks` field is code inside
+  over-count for exactly as long as a non-Blackwell slot was in the fleet.
+  The 2^27.9 iterations-per-point figure of 2026-09-15 was one such ratio
+  and has been retired for the measurement in the table above, taken from
+  each client's own counters and therefore independent of the grid:
+  `../benchmarks/dp-interval/`. The corrected `walks` field is code inside
   worker.py, and worker.py has no self-update path: bootstrap.sh fetches it
   once at instance launch, so a running instance keeps reporting the way it
   did when it booted no matter how long ago `infra.sh sync` published a fix.
@@ -432,13 +427,12 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   minutes). The supervisor logs a line a minute: rate, iterations this run,
   points, uploaded, checkpoint.
 * `fleet.sh status` shows which sizes and AZs the fleet actually got.
-* Points per GPU-day should be ~5 M at `dpWeight` 32 (2^27.9 per report,
-  measured 2026-09-15 — unverified, see the † caveat above), ~30 M at 34
-  (2^25.27 per report) — which is what this file's checked-in
-  `campaign.json` currently specifies. Check the live bucket's copy, not
-  either number here, for what the fleet is actually running (see above).
-  Far fewer than the live cutoff's rate means dropped reports (`dpCap` too
-  small; the client warns).
+* Points per GPU-day should be ~3.4 M on an RTX PRO 6000 at the `dpWeight`
+  32 this campaign runs (2^28.41 per report, measured; ~5 M was the figure
+  before the interval was corrected), ~30 M if it is ever put back to 34
+  (2^25.27 per report). Per worker, the last supervisor line's iterations
+  divided by its points should read 2^28.4 on any GPU. Far fewer points with
+  a normal rate means dropped reports (`dpCap` too small; the client warns).
 
 ## Failure modes and what the design does about them
 

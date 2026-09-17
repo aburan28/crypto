@@ -237,16 +237,18 @@ class BuildTests(unittest.TestCase):
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
         # HW(x) <= 34, and this campaign distinguishes at HW(x) <= 32, so the
-        # derivation reads about 2^2.7 low. Both pages must take the walkers'
+        # derivation reads about 2^3.1 low. Both pages must take the walkers'
         # own count when the snapshot carries one, and both must still be able
         # to fall back for a snapshot that does not.
         # The dashboard names the interval the running cutoff measures at, so
         # that figure has to exist in the campaign document it comes from.
         campaign = read(os.path.join(ROOT, "ecc2k130", "aws", "README.md"))
         dashboard = read(os.path.join(self.out, "status", "index.html"))
-        for cited in ("HW(x) &le; 32", "2^27.9"):
+        for cited in ("HW(x) &le; 32", "2^28.4"):
             self.assertIn(cited, dashboard, cited)
-        self.assertIn("2^27.9", campaign)
+        self.assertIn("2^28.4", campaign)
+        # The retired 2026-09-15 ratio must not come back as the live figure.
+        self.assertNotIn("2^27.9</span> iterations per point", dashboard)
         for rel in ("status/index.html", "index.html"):
             page = read(os.path.join(self.out, rel))
             self.assertIn("var reported = reportedIterations(status);", page, rel)
@@ -293,7 +295,7 @@ class BuildTests(unittest.TestCase):
             "the ETA prefers the DP derivation over the measured rate",
         )
         # And never mixes them: a counted total over a derived rate is an ETA
-        # six times too long, which is worse than no ETA.
+        # nine times too long, which is worse than no ETA.
         self.assertIn("if (reportedIterations(status) !== null) return null;", ops)
         self.assertIn(
             "Math.pow(2, EXPECTED_ITERATIONS_LOG2) - Math.pow(2, log2ops)",
