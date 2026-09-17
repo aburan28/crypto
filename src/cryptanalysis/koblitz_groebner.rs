@@ -1014,6 +1014,66 @@ pub fn macaulay_profile(
     })
 }
 
+/// [`macaulay_profile`] via structured sparse elimination.
+///
+/// Same rank, different representation.  This matters more than the
+/// solving-degree path does: the first fall degree is swept to `d_max`
+/// whatever the system does, so it pays for the *highest* degree
+/// requested rather than stopping at the one that resolves.  On the
+/// `n = 5, m = 3` cell at `d_max = 7` that is 32 140 × 41 226 against
+/// the 8 340 × 21 778 the solving degree stops at — about fourteen times
+/// the dense work, and enough to dominate a sweep whose other half has
+/// already been made fast.
+pub fn macaulay_profile_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<MacaulayProfile> {
+    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+    let (cols, rows) = build_macaulay_sparse(polys, n_vars, degree)?;
+    let n_cols = cols.len();
+    let n_rows = rows.len();
+    if n_cols == 0 {
+        return Some(MacaulayProfile {
+            degree,
+            rows: 0,
+            cols: 0,
+            rank: 0,
+        });
+    }
+
+    let low_start = low_column_start(&cols);
+    let elim = eliminate_high_columns(rows, n_cols, low_start);
+
+    let low_width = n_cols - low_start;
+    let words = low_width.div_ceil(64).max(1);
+    let mut low: Vec<Vec<u64>> = elim
+        .linear_rows
+        .iter()
+        .map(|r| {
+            let mut row = vec![0u64; words];
+            for &c in r {
+                let k = c as usize - low_start;
+                row[k / 64] |= 1 << (k % 64);
+            }
+            row
+        })
+        .collect();
+    let low_rank = if low.is_empty() {
+        0
+    } else {
+        rref_f2(&mut low, low_width)
+    };
+
+    Some(MacaulayProfile {
+        degree,
+        rows: n_rows,
+        cols: n_cols,
+        rank: elim.high_rank + low_rank,
+    })
+}
+
 /// **First fall degree** of `polys`: the smallest `D ≥ 2` whose Macaulay
 /// matrix has `rank < rows` *and* `rank < cols` — a non-trivial syzygy
 /// appears and the system has not saturated.
@@ -1036,7 +1096,7 @@ pub fn first_fall_degree(
     let mut fall = None;
     let mut profiles = Vec::new();
     for d in 2..=d_max {
-        let prof = match macaulay_profile(polys, n_vars, d) {
+        let prof = match macaulay_profile_sparse(polys, n_vars, d) {
             Some(p) => p,
             None => break,
         };
@@ -2476,5 +2536,52 @@ mod tests {
                 assert!(m.count_ones() <= 1, "column {i} after the boundary is high");
             }
         }
+    }
+
+
+    /// The sparse rank must equal the dense rank, degree by degree.
+    ///
+    /// `first_fall_degree` is decided by comparing rank against rows and
+    /// cols, so a rank that is off by one moves the reported fall degree
+    /// and silently changes a headline number.
+    #[test]
+    fn macaulay_profile_agrees_with_sparse() {
+        let mut rng = StdRng::seed_from_u64(0xFA11_5EED);
+        let n_vars = 9usize;
+        let mut compared = 0usize;
+        for _ in 0..120 {
+            let n_eqs = 2 + rng.gen::<usize>() % 8;
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+            for d in 2..=5u32 {
+                match (
+                    macaulay_profile(&polys, n_vars, d),
+                    macaulay_profile_sparse(&polys, n_vars, d),
+                ) {
+                    (Some(a), Some(b)) => {
+                        assert_eq!(a.rows, b.rows, "rows at degree {d}");
+                        assert_eq!(a.cols, b.cols, "cols at degree {d}");
+                        assert_eq!(a.rank, b.rank, "rank at degree {d}");
+                        compared += 1;
+                    }
+                    (None, None) => {}
+                    (a, b) => panic!("availability differs at degree {d}: {a:?} / {b:?}"),
+                }
+            }
+        }
+        assert!(compared > 100, "the comparison must actually run");
     }
 }
