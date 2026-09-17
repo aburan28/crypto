@@ -191,3 +191,80 @@ these are construction rows. Structure can beat the counting floor, and what
 it produces carries no information — the same accounting as a base
 deliberately built from `P` and `Q`, arriving this time from the curve itself
 rather than from how anyone chose the base.
+
+## 6. The accounting result, measured
+
+The small-coefficient constructed base is the positive control for §3, and it
+is emphatic. Points `[u]P + [v]Q` with `u, v` drawn from a small range, base
+size 4000:
+
+| quantity | value |
+|:--|--:|
+| relations found (complete sweep, 8,002,000 pairs) | **2,045,254** |
+| predicted by random counting | 2^−95.69 |
+| verified on the curve (uniform random sample) | 20,000 of 20,000 |
+| construction rows, `sum(u) = sum(v) = 0` | **20,000** |
+| rows determining `log_P(Q)` | **0** |
+| useful rank | **0** |
+
+Two million relations. Every sampled one holds whatever `log_P(Q)` is. A
+relation matrix built from this base would have enormous rank and would
+determine nothing.
+
+Set beside the two controls, the picture is complete:
+
+| base | relations | useful rank |
+|:--|--:|--:|
+| constructed, small `u,v` | 2,045,254 | 0 |
+| constructed, random `u,v` | 0 | 0 |
+| weight-two, σ-stable (four-point) | 88, all Frobenius identities | 0 |
+
+**Relation count is not evidence, and relation rank is not evidence.** Both
+can be driven as high as one likes by choosing the support, and neither moves
+`log_P(Q)` at all. The only quantity that means anything is the number of rows
+whose `sum(v)` is a unit mod `r`, and across every experiment in this note
+that number is zero.
+
+This is why the `useful_rank` split exists rather than a rank count, and why
+the thread's earlier framing — relation rank from `P,Q`-constructed bases —
+needed the construction span quotiented out before any of it could be read as
+progress.
+
+## 7. Verdict
+
+**Index calculus built on homogeneous point relations does not beat optimised
+parallel Pollard rho on ECC2K-130, and the margin is not close.**
+
+The reason is the counting floor of §1, not a failure to optimise. Against the
+frozen reference of `2^60.809`:
+
+- priced at a single relation, ignoring the `B` relations a logarithm needs,
+  the best `m` is 4 at `2^65.79` — a factor `2^4.98` above rho, and asking
+  `2^70.79` bytes of storage, about two zettabytes;
+- priced honestly at `B` relations, the best `m` is 8 at `2^85.60`, a factor
+  `2^24.79` above rho.
+
+Class: **accounting**, by the §3 test. No `S` fell; a cost that earlier
+framings of this thread had left in a column the headline did not look at has
+been priced.
+
+The falsification target of §1 was not met and its abandonment condition was.
+Measured yields matched the counting prediction on every support where the
+independence assumption holds, and the one family of supports that breaks the
+assumption — σ-stable ones, via the Frobenius characteristic equation — breaks
+it only into free relations.
+
+**What this does and does not establish.** It closes homogeneous-relation
+index calculus at `m ≤ 8` on this curve, including every support tried here:
+low-weight, Frobenius-stable, random, and deliberately constructed from the
+public `P` and `Q`. It says nothing about decomposition-based index calculus,
+where the target is a known combination `[a]P + [b]Q` and the work is a
+Semaev/Gröbner solve rather than a collision search; that family is priced
+separately in `RESEARCH_ECC2K130_DECOMPOSITION.md` and on the scoreboard, and
+it is not addressed by anything here. Nor does it threaten any deployed curve.
+
+**What would reopen it.** A support whose relations are *not* consequences of
+the endomorphism ring and *not* consequences of how the base was built, at a
+rate above `B^m/(m! r)`. The `is_frobenius_identity` test in
+`run_four_point.py` and the `useful_rank` split in `relations.py` are the two
+screens any such claim has to pass, and both are cheap to apply.

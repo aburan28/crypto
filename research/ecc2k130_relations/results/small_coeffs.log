@@ -5,3 +5,37 @@
 [constructed_small_coeffs]   1,640,000/8,002,000 (20.49%) hits=586689 elapsed=    92s eta=   357s
 [constructed_small_coeffs]   2,160,000/8,002,000 (26.99%) hits=761191 elapsed=   123s eta=   332s
 [constructed_small_coeffs]   2,680,000/8,002,000 (33.49%) hits=934952 elapsed=   154s eta=   305s
+[constructed_small_coeffs]   3,220,000/8,002,000 (40.24%) hits=1106547 elapsed=   184s eta=   274s
+[constructed_small_coeffs]   3,720,000/8,002,000 (46.49%) hits=1245222 elapsed=   215s eta=   247s
+[constructed_small_coeffs]   4,200,000/8,002,000 (52.49%) hits=1370289 elapsed=   245s eta=   222s
+[constructed_small_coeffs]   4,700,000/8,002,000 (58.74%) hits=1497719 elapsed=   275s eta=   193s
+[constructed_small_coeffs]   5,180,000/8,002,000 (64.73%) hits=1612310 elapsed=   306s eta=   166s
+[constructed_small_coeffs]   5,660,000/8,002,000 (70.73%) hits=1721701 elapsed=   336s eta=   139s
+[constructed_small_coeffs]   6,160,000/8,002,000 (76.98%) hits=1819189 elapsed=   366s eta=   109s
+[constructed_small_coeffs]   6,680,000/8,002,000 (83.48%) hits=1908463 elapsed=   397s eta=    79s
+[constructed_small_coeffs]   7,180,000/8,002,000 (89.73%) hits=1977121 elapsed=   427s eta=    49s
+[constructed_small_coeffs]   7,660,000/8,002,000 (95.73%) hits=2026689 elapsed=   458s eta=    20s
+[constructed_small_coeffs] done: 2045254 relations, 480s, complete=True
+[
+  {
+    "name": "constructed_small_coeffs",
+    "base_size": 4000,
+    "pairs_total": 8002000,
+    "complete": true,
+    "elapsed_seconds": 480.059,
+    "relations_found": 2045254,
+    "verification_sampled": true,
+    "relations_submitted_for_verification": 20000,
+    "relations_verified_on_curve": 20000,
+    "log2_expected_by_yield_law": -95.6876096467349,
+    "rank_accounting": {
+      "rows": 20000,
+      "construction_rows": 20000,
+      "determining_rows": 0,
+      "useful_rank": 0,
+      "log": null,
+      "consistent": true,
+      "rows_are_a_sample_of": 2045254
+    }
+  }
+]
