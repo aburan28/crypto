@@ -15,6 +15,7 @@ Layout, and why each path is where it is:
     /scoreboard/          docs/index-calculus-scoreboard.html, the cost ledger
     /status/              the ECC2K-130 distinguished-point dashboard
     /status/walk-forest.svg  the walk-forest figure the dashboard shows
+    /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
     /status/status.json   snapshot, next to the page that reads it
     /status/history.json  published history, likewise
     /status.json          same bytes at the root
@@ -76,6 +77,11 @@ PAGES = (
     # src resolves in the working tree as well as when published.  The trails
     # and corpus it is drawn from stay in the repository, linked absolutely.
     ("docs/ecc2k130-status/walk-forest.svg", "status/walk-forest.svg"),
+    # The same forests as graphs, for the page's explorer, with the script
+    # that draws them; all beside the page so its relative fetches resolve.
+    ("docs/ecc2k130-status/walk-forest.json", "status/walk-forest.json"),
+    ("docs/ecc2k130-status/walk-forest-gf2-23.json", "status/walk-forest-gf2-23.json"),
+    ("docs/ecc2k130-status/walk-forest.js", "status/walk-forest.js"),
 )
 
 # Snapshot data, published twice: beside the dashboard and at the root.

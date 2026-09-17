@@ -203,9 +203,15 @@
       ends.
     </p>
     <figure class="figure">
-      <div class="figure-frame">
+      <div class="figure-frame forest" id="forest">
+        <div class="forest-controls" hidden>
+          <label>Forest <select id="forest-dataset" aria-label="Which forest to explore"></select></label>
+          <button type="button" id="forest-play">Play the walks</button>
+          <button type="button" id="forest-reset">Reset view</button>
+        </div>
         <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
              alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+        <p class="forest-readout mono" id="forest-readout"></p>
       </div>
       <figcaption>
         <span class="mono" id="wf-walks">106</span> walks of the ECC2K-130
@@ -230,6 +236,13 @@
         point's orbit is its key. The figure regenerates from the committed
         trails with
         <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
+        With JavaScript the figure is a graph: drag to pan, wheel or pinch to
+        zoom, hover a node for the walk it is on and how far along, click one
+        to light every path through it to its distinguished point, and play
+        the walks to watch them set off for theirs. The second forest in the
+        menu is the <span class="mono">GF(2^23)</span> test curve, small
+        enough that trails meet, with the same iteration function and
+        distinguishing test.
       </figcaption>
     </figure>
   </section>
@@ -404,6 +417,7 @@ make gpu
   </footer>
 </main>
 
+<script src="./walk-forest.js" defer></script>
 <script>
 (function () {
   "use strict";
