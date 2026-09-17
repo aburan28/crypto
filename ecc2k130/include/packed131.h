@@ -241,7 +241,23 @@ ECC_HD P131 fromPolynomial131(const P131 &a) {
     const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
     return fromPolynomialProduct131(h);
 }
-static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+#ifndef ECC_PACKED_INLINE_PRODUCTS
+#define ECC_PACKED_INLINE_PRODUCTS 0
+#endif
+#if ECC_PACKED_INLINE_PRODUCTS != 0 && ECC_PACKED_INLINE_PRODUCTS != 1
+#error "ECC_PACKED_INLINE_PRODUCTS must be 0 or 1"
+#endif
+/* The polynomial products are out of line by default (bitslice.h, ECC_BIG):
+   in the packed kernel each call site spends about ten moves on the device
+   ABI and ptxas cannot schedule across the call.  With the slot loops kept
+   rolled the kernel has four product call sites, so inlining costs a few
+   thousand instructions of code and no register pressure worth the name. */
+#if ECC_PACKED_INLINE_PRODUCTS
+#define ECC_PRODUCT ECC_HD
+#else
+#define ECC_PRODUCT ECC_BIG
+#endif
+static ECC_PRODUCT P131 mulPolynomial131(P131 a, P131 b) {
 // Native carryless products supersede the generated software multiplier.
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     return generatedProduct131(a,b);
@@ -251,7 +267,7 @@ static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
 #endif
 }
 struct PolynomialPair { P131 first,second; };
-static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+static ECC_PRODUCT PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     P131 first=generatedProduct131(a,b);
     return PolynomialPair{first,generatedProduct131(a,c)};

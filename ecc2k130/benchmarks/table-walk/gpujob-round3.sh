@@ -26,7 +26,11 @@ echo "=== build table24pind   (E: D at batch 24)";                       build t
 echo "=== build table24pi2nd  (E2: E with POLY_INV=2)";                  build table24pi2nd "BATCH=24 WALK_TABLE=1 PACKED_POLY_INV=2 TABLE_DENOM_STORE=0"
 echo "=== build table32pind   (F: D at batch 32)";                       build table32pind "BATCH=32 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0"
 echo "=== build table24pi     (G: B at batch 24, denominators stored)";  build table24pi   "BATCH=24 WALK_TABLE=1 PACKED_POLY_INV=1"
-ALL="legacy16 legacy16pi table16 table16pi table16pi2 table16pind table24pind table24pi2nd table32pind table24pi"
+echo "=== build table16pi-inl (I: B with the products inlined)";         build table16piI  "BATCH=16 WALK_TABLE=1 PACKED_POLY_INV=1 PACKED_INLINE_PRODUCTS=1"
+echo "=== build table24pind-inl (J: E with the products inlined)";       build table24pindI "BATCH=24 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1"
+echo "=== build table32pind-inl (K: F with the products inlined)";       build table32pindI "BATCH=32 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1"
+echo "=== build legacy16-inl  (L: shipping walk with the products inlined)"; build legacy16I "BATCH=16 WALK_TABLE=0 PACKED_INLINE_PRODUCTS=1"
+ALL="legacy16 legacy16pi legacy16I table16 table16pi table16pi2 table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI"
 for b in $ALL; do
   echo "=== verify $b: 300 device reports re-walked by the host reference"
   timeout 1500 ./ecc2k130-$b --curve 131 --packed --dp-weight 48 --dp-cap 1048576 --steps 16 --launches 6 --verify 300 2>&1 | grep -E "MISMATCH|OVERFLOW|finished|table walk|inversion|backend"
@@ -38,7 +42,7 @@ for rep in 1 2 3; do for b in $ALL; do
   nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu --format=csv,noheader
 done; done
 echo "=== audited geometry: --threads 385024, 1024 steps x 32 launches"
-for rep in 1 2 3; do for b in legacy16 table16 table16pi table16pind table24pind table24pi2nd table32pind table24pi; do
+for rep in 1 2 3; do for b in legacy16 legacy16I table16 table16pi table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI; do
   echo "=== bench385k $b rep $rep"
   ./ecc2k130-$b --curve 131 --packed --bench --threads 385024 --steps 1024 --launches 32 --verify 0 2>&1 | grep -E "finished|resident"
   nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu --format=csv,noheader

@@ -60,6 +60,8 @@ PACKED_POLY_INV ?= 0
 # Table walk: 0 rebuilds each denominator from the step tag in the second
 # pass instead of storing it in the first.
 TABLE_DENOM_STORE ?= 1
+# Inline the polynomial products into the kernel instead of calling them.
+PACKED_INLINE_PRODUCTS ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -138,7 +140,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) -DECC_PACKED_POLY_INV=$(PACKED_POLY_INV) \
-       -DECC_TABLE_DENOM_STORE=$(TABLE_DENOM_STORE)
+       -DECC_TABLE_DENOM_STORE=$(TABLE_DENOM_STORE) \
+       -DECC_PACKED_INLINE_PRODUCTS=$(PACKED_INLINE_PRODUCTS)
 
 all: cpu
 
