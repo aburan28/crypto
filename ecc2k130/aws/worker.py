@@ -128,11 +128,14 @@ def idleSlotClaimable(item, info, newOnly):
     CPU and GPU share one registry. Mixing a host-shaped checkpoint with the
     packed client (or the reverse) is exit 6, and on the unversioned store
     retireSlot then drops that run id. CPU checkpoints also require an exact
-    thread match: cpu/4 must not resume cpu/2.
+    thread match: cpu/4 must not resume cpu/2. An optional @host suffix on
+    gpuName is ignored when comparing.
     """
     cpuSlot = isCpuSlotRecord(item)
     if newOnly:
-        return cpuSlot and str(item.get("gpuName") or "") == str(info.get("gpuName") or "")
+        have = str(item.get("gpuName") or "").split("@", 1)[0]
+        want = str(info.get("gpuName") or "").split("@", 1)[0]
+        return cpuSlot and bool(want) and have == want
     return not cpuSlot
 
 
