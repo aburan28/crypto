@@ -104,6 +104,7 @@ build_from_source() {
     echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
+    aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
     BUCKET=$BUCKET ARCHES="$ARCHES" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)

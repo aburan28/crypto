@@ -57,10 +57,12 @@ from protocol import (atomicJson, bindDirectory, campaignContract, envelope,
 
 # Frozen campaign fields a kernel rollout must not move. Duplicated from
 # rollout.py so an already-booted box can pick up a new worker.py without
-# also fetching that helper.
+# also fetching that helper. kernelProtocol versions the client pointer
+# and is not storageProtocol.
 FROZEN_CAMPAIGN = (
     "curve", "dpWeight", "workers", "batch", "blockThreads", "minBlocks", "walk",
 )
+KERNEL_PROTOCOL = "ecc2k-kernel-v1"
 
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
@@ -214,6 +216,12 @@ def campaignPointerMoved(current, nxt):
     if newKey and newKey != liveKey:
         return True
     if newSha and newSha != liveSha:
+        return True
+    liveVer = int(current.get("kernelVersion") or 0)
+    newVer = int(nxt.get("kernelVersion") or 0)
+    if newVer and newVer != liveVer:
+        return True
+    if (nxt.get("kernelProtocol") or "") and (nxt.get("kernelProtocol") != (current.get("kernelProtocol") or "")):
         return True
     return False
 
@@ -604,6 +612,29 @@ class Worker:
             bindDirectory(self.work, self.contract)
         elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
             raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
+        self.verifyKernelPin(verifyBinary)
+
+    def verifyKernelPin(self, verifyBinary=True):
+        """When kernelProtocol is live, the client must match the pinned hash.
+
+        Independent of storageProtocol: the live corpus can adopt v1 without
+        migrating points. Version 0 is an empty pointer (no binary yet).
+        """
+        proto = self.cfg.get("kernelProtocol")
+        if not proto:
+            return
+        if proto != KERNEL_PROTOCOL:
+            raise RuntimeError("unknown kernelProtocol %r" % proto)
+        if int(self.cfg.get("kernelVersion") or 0) < 1 or not verifyBinary:
+            return
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            want = self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256")
+        else:
+            want = self.cfg.get("binarySha256")
+        if not want:
+            raise RuntimeError("kernelVersion %s has no pinned client hash" % self.cfg.get("kernelVersion"))
+        if sha256File(self.client) != want:
+            raise RuntimeError("client binary hash differs from kernelVersion %s" % self.cfg.get("kernelVersion"))
 
     def clientStoreKey(self):
         """S3 key of the executable this worker should run.
@@ -652,7 +683,8 @@ class Worker:
             log("refusing campaign.json: frozen field %s moved; keep walking the current client" % moved)
             return False
         if campaignPointerMoved(self.cfg, nxt):
-            log("campaign client moved to %s" % (nxt.get("binaryKey") or nxt.get("binarySha256")))
+            log("campaign client moved to %s (kernelVersion %s)"
+                % (nxt.get("binaryKey") or nxt.get("binarySha256"), nxt.get("kernelVersion")))
             return True
         return False
 
@@ -888,7 +920,8 @@ class Worker:
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
                           "binary": self.cfg.get("binaryKey", ""),
-                          "binarySha256": self.cfg.get("binarySha256", "")}
+                          "binarySha256": self.cfg.get("binarySha256", ""),
+                          "kernelVersion": int(self.cfg.get("kernelVersion") or 0)}
                 if last:
                     fields.update(rate=last["rate"], iters=last["iters"], dp=last["dp"], dropped=last["dropped"])
                 try:

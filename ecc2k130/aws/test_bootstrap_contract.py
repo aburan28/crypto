@@ -52,6 +52,13 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("POINT_CAMPAIGN=1", BOOTSTRAP)
         self.assertNotIn("--stage", BOOTSTRAP)
 
+    def test_kernel_versions_are_immutable(self):
+        self.assertIn("ecc2k-kernel-v1", BUILD)
+        self.assertIn("kernels/$kver.json", BUILD)
+        self.assertIn("--if-none-match", BUILD)
+        # Must not stamp storageProtocol onto the live corpus.
+        self.assertNotIn("storageProtocol=", BUILD)
+
     def test_infra_syncs_build_script(self):
         self.assertIn('aws s3 cp build.sh "s3://$BUCKET/aws/build.sh"', INFRA)
         self.assertIn('aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh"', INFRA)
