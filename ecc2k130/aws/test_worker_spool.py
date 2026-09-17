@@ -232,6 +232,33 @@ class FailedUpload(SpoolCase):
                          sorted(record(i) for i in range(4)))
         self.assertEqual(int(w.state["dpOffset"]), 4 * RECORD_BYTES)
 
+    def test_a_restart_on_the_same_slot_credits_the_spooled_offset(self):
+        """claim() prefers the slot just released; the leftover is that slot's.
+
+        streamId is a new UUID in the new process, so crediting by streamId
+        would leave dpOffset unmoved and the next cycle would recut [0, now)
+        under a new key.
+        """
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        w.slots.release(slot, w.owner)
+        w.workLock.close()
+        nxt = self.makeWorker()
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertEqual(int(nxt.state["slot"]), slot)
+        self.assertNotEqual(nxt.streamId, w.streamId)
+        self.assertFalse(nxt.spoolPending())
+        self.assertEqual(int(nxt.state["dpOffset"]), 5 * RECORD_BYTES)
+        self.appendDp(nxt, 3)
+        out, err = quiet(nxt.uploadCycle, slot)
+        self.assertIsNone(err, out)
+        got = storedRecords(self.storeRoot)
+        self.assertEqual(len(got), 8)
+        self.assertEqual(sorted(got), sorted(record(i) for i in range(8)))
+        self.assertEqual(len([k for k in storedKeys(self.storeRoot) if k.endswith(".bin")]), 2)
+
     def test_a_new_process_sends_what_the_old_one_left_under_the_old_slot(self):
         w, slot = self.claimed()
         self.appendDp(w, 6)

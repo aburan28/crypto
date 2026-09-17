@@ -936,13 +936,17 @@ class Worker:
     def creditSpoolEntry(self, entry, slot):
         """Move dpOffset past a delta the store has, and only then.
 
-        The offset indexes one dp file, so only an entry this process cut
-        from the one it is reading now may move it: an entry left by another
-        process or another slot is published on its own key and the offset
-        stays where it is, because skipping the prefix of a file these
-        records are not in would lose the points at the front of it.
+        The offset indexes one dp file, so only an entry for this slot whose
+        offset is where this process is reading may move it.  streamId is not
+        the test: it is a fresh UUID each process start and is not in
+        state.json, so a same-slot restart would upload the leftover and then
+        recut that prefix.  Rotation will not drop dp.bin while the spool
+        holds anything, so a matching slot and offset are the file still here.
+        An entry for another slot is published on its own key and the offset
+        stays where it is, because skipping the prefix of a file those records
+        are not in would lose the points at the front of it.
         """
-        if slot is None or entry.get("slot") != slot or entry.get("streamId") != self.streamId:
+        if slot is None or entry.get("slot") != slot:
             return
         if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
             return

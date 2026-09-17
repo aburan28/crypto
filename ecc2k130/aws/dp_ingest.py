@@ -334,7 +334,14 @@ def verify(conn, s3, bucket, sample=64):
 
 CKPT_MAGIC = b"ECC2K130"
 CKPT_HEADER = 40  # magic[8] + 6x u32 + u64 iterBase
-CKPT_RE = re.compile(r"^ckpt/(retired/)?slot-(\d+)\.ck$")
+# Two live key shapes, the same split as dp/:
+#   ckpt/slot-00002.ck and ckpt/retired/slot-00002.ck -- the original worker's
+#   mutable pointer, overwritten in place.
+#   ckpt/slot-00002/<64-hex>.ck -- ecc2k-seed-orbit-v1; the worker never
+#   updates the old pointer, it writes a new immutable blob and keeps the
+#   live name on the slot record.  Matching only the first shape is how a
+#   walking fleet becomes zero walkers on the public feed.
+CKPT_RE = re.compile(r"^ckpt/(retired/)?slot-(\d+)(?:/([0-9a-f]{64}))?\.ck$")
 
 
 def checkpointWork(s3, bucket, staleAfter=1800.0):
@@ -352,8 +359,12 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     factor comes out of the checkpoint header, so a slot is self-describing and
     a geometry change needs no bookkeeping here.  Retired slots are included --
     their work is part of the campaign whether or not they still run.
+
+    The contract path leaves every earlier blob in place, so a slot may have
+    many `.ck` objects.  Only the newest one is the walk; summing the rest
+    would count the same slot once per checkpoint.
     """
-    slots, token = [], None
+    latest, token = {}, None
     while True:
         kw = {"Bucket": bucket, "Prefix": "ckpt/"}
         if token:
@@ -363,33 +374,40 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
             m = CKPT_RE.match(item["Key"])
             if not m:
                 continue
-            head = s3.get_object(Bucket=bucket, Key=item["Key"],
-                                 Range="bytes=0-%d" % (CKPT_HEADER - 1))["Body"].read()
-            if len(head) < CKPT_HEADER or head[:8] != CKPT_MAGIC:
-                log("checkpoint %s: not a checkpoint header, skipped" % item["Key"])
-                continue
-            version, m131, threads, batch, lanes, runId = struct.unpack_from("<6I", head, 8)
-            iterBase, = struct.unpack_from("<Q", head, 32)
-            walks = threads * batch
-            age = time.time() - item["LastModified"].timestamp()
-            slots.append({
-                "slot": int(m.group(2)),
-                "run_id": runId,
-                # Whether a slot is still walking is decided by how recently its
-                # checkpoint moved, not by the ckpt/retired/ prefix.  That prefix
-                # is written by an orderly retirement, and a worker that was
-                # stopped abruptly never writes it -- slots 0 and 1 sat under the
-                # live prefix for hours after their instances were gone.  Asking
-                # the artifact when it last changed cannot be fooled that way.
-                "retired": bool(m.group(1)) or age > staleAfter,
-                "checkpoint_age_s": int(age),
-                "walks": walks,
-                "per_walk_steps": iterBase,
-                "iterations": iterBase * walks,
-            })
+            slot = int(m.group(2))
+            modified = item["LastModified"].timestamp()
+            prev = latest.get(slot)
+            if prev is None or modified > prev[0]:
+                latest[slot] = (modified, m, item)
         if not page.get("IsTruncated"):
             break
         token = page["NextContinuationToken"]
+    slots = []
+    for modified, m, item in latest.values():
+        head = s3.get_object(Bucket=bucket, Key=item["Key"],
+                             Range="bytes=0-%d" % (CKPT_HEADER - 1))["Body"].read()
+        if len(head) < CKPT_HEADER or head[:8] != CKPT_MAGIC:
+            log("checkpoint %s: not a checkpoint header, skipped" % item["Key"])
+            continue
+        version, m131, threads, batch, lanes, runId = struct.unpack_from("<6I", head, 8)
+        iterBase, = struct.unpack_from("<Q", head, 32)
+        walks = threads * batch
+        age = time.time() - modified
+        slots.append({
+            "slot": int(m.group(2)),
+            "run_id": runId,
+            # Whether a slot is still walking is decided by how recently its
+            # checkpoint moved, not by the ckpt/retired/ prefix.  That prefix
+            # is written by an orderly retirement, and a worker that was
+            # stopped abruptly never writes it -- slots 0 and 1 sat under the
+            # live prefix for hours after their instances were gone.  Asking
+            # the artifact when it last changed cannot be fooled that way.
+            "retired": bool(m.group(1)) or age > staleAfter,
+            "checkpoint_age_s": int(age),
+            "walks": walks,
+            "per_walk_steps": iterBase,
+            "iterations": iterBase * walks,
+        })
     slots.sort(key=lambda s: (s["retired"], s["slot"]))
     total = sum(s["iterations"] for s in slots)
     return total, slots
@@ -719,8 +737,8 @@ def main(argv=None):
                            len(unrecognised)))
                     return 0
             while True:
-                _, _, ingest = onePass(connect, s3, args.bucket, args.threads,
-                                       args.prefix, args.pass_objects)
+                _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
+                                             args.prefix, args.pass_objects)
                 if args.metric_namespace:
                     publishMetrics(args.metric_namespace, ingest)
                 if args.status_bucket:
@@ -734,8 +752,11 @@ def main(argv=None):
                     return 0
                 # A backlog is drained as fast as the database allows rather
                 # than one pass per interval: the interval exists to keep an
-                # idle ingest cheap, not to rate-limit catching up.
-                time.sleep(0.0 if ingest.get("outstanding") else args.interval)
+                # idle ingest cheap, not to rate-limit catching up.  A pass
+                # that added nothing is not a backlog -- it is a retry -- and
+                # sleeping 0 while a poison object stays outstanding is how
+                # one failed row busy-loops the host.
+                time.sleep(0.0 if objects else args.interval)
         except KeyboardInterrupt:
             return 0
         except Exception as exc:  # a failover is a retry, never an outage

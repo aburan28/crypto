@@ -13,7 +13,9 @@ both key shapes are points, and anything unreadable is counted out loud.
 """
 
 import datetime
+import io
 import os
+import struct
 import sys
 import unittest
 
@@ -126,6 +128,7 @@ class FakeConn:
     def __init__(self, pool):
         self.pool = pool
         self.closed = False
+        self.rollbacks = 0
         pool.append(self)
 
     def __enter__(self):
@@ -138,6 +141,7 @@ class FakeConn:
     def rollback(self):
         if self.closed:
             raise RuntimeError("the connection is closed")
+        self.rollbacks += 1
 
     def close(self):
         self.closed = True
@@ -217,6 +221,9 @@ class Passes(unittest.TestCase):
         _, objects, state = self.run_pass()
         self.assertEqual(objects, 2)
         self.assertEqual(state["outstanding"], 1)
+        # The failed object must leave a usable transaction behind; without
+        # rollback the rest of this thread's objects fail as well.
+        self.assertGreaterEqual(sum(c.rollbacks for c in self.conns), 1)
 
 
 class StatusState(unittest.TestCase):
@@ -240,6 +247,112 @@ class StatusState(unittest.TestCase):
 
     def test_points_in_the_last_hour_win(self):
         self.assertEqual(self.state(60053195, 142035, 0, {"outstanding": 3795}), "COLLECTING")
+
+
+def ckpt(iterBase=10, threads=2, batch=4, runId=1):
+    return struct.pack("<8s6IQ", dp_ingest.CKPT_MAGIC, 1, 131, threads, batch, 64, runId, iterBase)
+
+
+class FakeWorkS3:
+    """list_objects_v2 plus ranged get_object, enough to drive checkpointWork."""
+
+    def __init__(self, objects, pageSize=2):
+        self.objects = list(objects)
+        self.pageSize = pageSize
+
+    def list_objects_v2(self, **kw):
+        start = int(kw.get("ContinuationToken") or 0)
+        page = self.objects[start:start + self.pageSize]
+        nxt = start + self.pageSize
+        return {"Contents": [{"Key": k, "Size": len(b), "LastModified": t}
+                             for k, t, b in page],
+                "IsTruncated": nxt < len(self.objects),
+                "NextContinuationToken": str(nxt)}
+
+    def get_object(self, **kw):
+        body = next(b for k, t, b in self.objects if k == kw["Key"])
+        rng = kw.get("Range")
+        if rng:
+            lo, hi = rng.split("=", 1)[1].split("-")
+            body = body[int(lo):int(hi) + 1]
+        return {"Body": io.BytesIO(body)}
+
+
+class CheckpointWork(unittest.TestCase):
+    """The public work feed has to see the keys the live fleet actually writes."""
+
+    def setUp(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        self.recent = now - datetime.timedelta(seconds=30)
+        self.old = now - datetime.timedelta(seconds=4000)
+        self.hash = "ab" * 32
+
+    def work(self, items):
+        return dp_ingest.checkpointWork(FakeWorkS3(items), "bucket")
+
+    def test_legacy_pointer_still_counts(self):
+        total, slots = self.work([
+            ("ckpt/slot-00002.ck", self.recent, ckpt(10, 2, 4)),
+        ])
+        self.assertEqual(total, 80)
+        self.assertEqual(len(slots), 1)
+        self.assertFalse(slots[0]["retired"])
+
+    def test_contract_checkpoint_counts_as_work(self):
+        # The regression: this key was skipped with no log, so a 133-slot
+        # fleet published zero walkers while every slot was walking.
+        key = "ckpt/slot-00140/%s.ck" % self.hash
+        total, slots = self.work([(key, self.recent, ckpt(100, 2, 4))])
+        self.assertEqual(total, 800)
+        self.assertEqual(slots[0]["slot"], 140)
+        self.assertFalse(slots[0]["retired"])
+        self.assertEqual(slots[0]["iterations"], 800)
+
+    def test_retired_prefix_still_counts(self):
+        total, slots = self.work([
+            ("ckpt/retired/slot-00002.ck", self.recent, ckpt(5, 1, 1)),
+        ])
+        self.assertEqual(total, 5)
+        self.assertTrue(slots[0]["retired"])
+
+    def test_envelopes_are_not_checkpoints(self):
+        key = "ckpt/slot-00140/%s.ck" % self.hash
+        total, slots = self.work([
+            (key, self.recent, ckpt(100, 2, 4)),
+            (key + ".json", self.recent, b"{}"),
+        ])
+        self.assertEqual((total, len(slots)), (800, 1))
+
+    def test_older_blobs_of_the_same_slot_are_not_summed(self):
+        live = "ckpt/slot-00002/%s.ck" % self.hash
+        older = "ckpt/slot-00002/%s.ck" % ("cd" * 32)
+        total, slots = self.work([
+            (older, self.old, ckpt(10, 2, 4)),
+            (live, self.recent, ckpt(50, 2, 4)),
+        ])
+        self.assertEqual(total, 400)
+        self.assertEqual(len(slots), 1)
+        self.assertFalse(slots[0]["retired"])
+
+    def test_a_live_hash_beats_a_stale_legacy_pointer(self):
+        live = "ckpt/slot-00002/%s.ck" % self.hash
+        total, slots = self.work([
+            ("ckpt/slot-00002.ck", self.old, ckpt(1, 1, 1)),
+            (live, self.recent, ckpt(50, 2, 4)),
+        ])
+        self.assertEqual(total, 400)
+        self.assertEqual(len(slots), 1)
+        self.assertFalse(slots[0]["retired"])
+
+    def test_a_live_hash_beats_a_retired_leftover(self):
+        live = "ckpt/slot-00002/%s.ck" % self.hash
+        total, slots = self.work([
+            ("ckpt/retired/slot-00002.ck", self.old, ckpt(10, 1, 1)),
+            (live, self.recent, ckpt(80, 3, 4)),
+        ])
+        self.assertEqual(total, 960)
+        self.assertEqual(len(slots), 1)
+        self.assertFalse(slots[0]["retired"])
 
 
 if __name__ == "__main__":
