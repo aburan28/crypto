@@ -1,0 +1,30 @@
+$ python3 kernel_cost.py --define ECC_WALK_TABLE=1 --define ECC_PACKED_POLY_INV=1 --define ECC_PACKED_INLINE_PRODUCTS=1 --define ECC_TABLE_BYTE_PIVOT=1
+kernel 4walk: 5552 SASS instructions, regs 91, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+6d80  -118b0     2740   2478     17      0     93      0   0x3990
+118c0 -12860      251    242      8      0      0      0   0x10350
+12870 -13910      267    257      9      0      0      0   0xe050
+13920 -14a10      272    262      9      0      0      0   0xcda0
+14a20 -15920      241    231      9      0      0      0   0xbaf0
+15930 -15a50       19     18      0      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+170        1f0             9      4      2      0      0      2
+270        3c0            22      6      7      0      0      8
+570        6d60         1664   1345     27     14     41    103
+600        3930          820    618     18     14     12     89
+1f60       1fe0            9      8      0      0      0      0
+39d0       6d50          825    716      9      0     29     14
+
+step loop 570-6d60; slot loops: ['600-3930', '39d0-6d50']
+
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             820      618       18       14       12       89
+slot loop 1                             825      716        9        0       29       14
+inversion + step overhead, /B         236.9    217.6      3.2      0.0     5.81      0.0
+TOTAL per update                     1881.9   1551.6     30.2     14.0    46.81    103.0
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1667.9 ; clmad/update = 46.81 ; instr/update = 1881.9

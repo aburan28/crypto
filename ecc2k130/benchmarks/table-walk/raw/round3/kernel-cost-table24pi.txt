@@ -1,0 +1,32 @@
+$ python3 kernel_cost.py --define ECC_WALK_TABLE=1 --define ECC_PACKED_POLY_INV=1 --define ECC_BATCH=24
+kernel 4walk: 3928 SASS instructions, regs 100, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+3490  -9130      1483   1341      9      4     45      0   0x28a0
+9140  -9c60       179    159      1      0      6      0   0x2c70 0x33a0 0x3b20 0x4740 0x5f20 0x6880 0x71e0 0x7b40 0x81b0 0x8b10
+9c70  -ac00       250    241      8      0      0      0   0x85b0
+ac10  -bcb0       267    257      9      0      0      0   0x75e0
+bcc0  -cdb0       272    262      9      0      0      0   0x6c80
+cdc0  -dcc0       241    231      9      0      0      0   0x6320
+dcd0  -f380       364    309      2      0     12      0   0x26e0 0x2b50
+f390  -f4b0        19     18      0      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+170        1f0             9      4      2      0      0      2
+270        3c0            22      6      7      0      0      8
+570        3470          753    525     20     14      5    120
+5f0        2880          554    378     15     14      0    106
+2330       23b0            9      8      0      0      0      0
+28f0       3460          184    141      5      0      5     14
+
+step loop 570-3470; slot loops: ['5f0-2880', '28f0-3460']
+
+per scalar update, batch 24 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             918      687       17       14       12      106
+slot loop 1                             906      768        9        0       29       14
+inversion + step overhead, /B         165.0    150.4      2.2      0.2     3.88      0.0
+TOTAL per update                     1989.0   1605.4     28.2     14.2    44.88    120.0
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1718.3 ; clmad/update = 44.88 ; instr/update = 1989.0

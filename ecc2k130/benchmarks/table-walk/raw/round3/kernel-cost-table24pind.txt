@@ -1,0 +1,32 @@
+$ python3 kernel_cost.py --define ECC_WALK_TABLE=1 --define ECC_PACKED_POLY_INV=1 --define ECC_TABLE_DENOM_STORE=0 --define ECC_BATCH=24
+kernel 4walk: 3944 SASS instructions, regs 100, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+35f0  -9230      1477   1333      9      4     45      0   0x2840
+9240  -9d50       178    159      1      0      6      0   0x2d80 0x3500 0x3c90 0x48a0 0x6080 0x69d0 0x7320 0x7c70 0x82d0 0x8c20
+9d60  -acf0       250    241      8      0      0      0   0x86d0
+ad00  -bda0       267    257      9      0      0      0   0x7720
+bdb0  -cea0       272    262      9      0      0      0   0x6dd0
+ceb0  -ddb0       241    231      9      0      0      0   0x6480
+ddc0  -f450       362    308      2      0     12      0   0x26d0 0x2c50
+f460  -f580        19     18      0      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+170        1f0             9      4      2      0      0      2
+270        3c0            22      6      7      0      0      8
+570        35d0          775    541     22     14      5    123
+5f0        2820          548    374     15     14      0    104
+2330       23b0            9      8      0      0      0      0
+28a0       35c0          211    161      7      0      5     18
+
+step loop 570-35d0; slot loops: ['5f0-2820', '28a0-35c0']
+
+per scalar update, batch 24 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             910      682       17       14       12      104
+slot loop 1                             929      787       11        0       29       18
+inversion + step overhead, /B         164.5    150.1      2.2      0.2     3.88      0.0
+TOTAL per update                     2003.5   1619.1     30.2     14.2    44.88    122.0
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1736.0 ; clmad/update = 44.88 ; instr/update = 2003.5

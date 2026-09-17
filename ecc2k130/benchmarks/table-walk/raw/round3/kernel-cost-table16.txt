@@ -1,0 +1,33 @@
+$ python3 kernel_cost.py --define ECC_WALK_TABLE=1
+kernel 4walk: 3544 SASS instructions, regs 102, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+4c90  -57a0       178    159      1      0      6      0   0x4470 0x4ba0
+57b0  -6750       251    242      8      0      0      0   0x3980
+6760  -7800       267    257      9      0      0      0   0x35f0
+7810  -8900       272    262      9      0      0      0   0x3540
+8910  -9b90       297    230      9      0      0     57   0x3480
+9ba0  -ae20       297    230      9      0      0     57   0x33c0
+ae30  -c4a0       360    307      2      0     12      0   0x2650 0x4360
+c4b0  -db60       364    340      0      5      6      0   0x2e50 0x33a0 0x3460 0x3520 0x35d0 0x3690 0x3960 0x3a20
+db70  -dc90        19     18      0      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+170        1f0             9      4      2      0      0      2
+270        3c0            22      6      7      0      0      8
+570        4c70         1137    820     21     35     25    119
+600        27e0          543    370     16     14      0    105
+22a0       2320            9      8      0      0      0      0
+41c0       4c60          171    132      5      0      5     14
+
+step loop 570-4c70; slot loops: ['600-27e0', '41c0-4c60']
+
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             903      677       18       14       12      105
+slot loop 1                             887      757        9        0       29       14
+inversion + step overhead, /B         294.9    266.2      2.8      3.8     4.25      7.1
+TOTAL per update                     2084.9   1700.2     29.8     17.8    45.25    126.1
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1830.7 ; clmad/update = 45.25 ; instr/update = 2084.9

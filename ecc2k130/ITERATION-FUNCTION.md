@@ -607,7 +607,11 @@ carries 24 × 51 = 1,224 bytes of field state per worker against today's
 ### 7.4 The variants, priced before they run
 
 Static slots and clmads per update at the audited preset, table walk,
-byte/nibble LUT selection. The rate column is **an extrapolation**: it
+byte/nibble LUT selection, every row from `kernel_cost.py` and frozen in
+[`raw/round3/static.json`](benchmarks/table-walk/raw/round3/static.json)
+(an earlier revision of this table had estimated rows E – G by scaling the
+inversion alone and understated them by ≈ 100 slots; the frozen values
+replace the estimates). The rate column is **an extrapolation**: it
 scales the measured 16.56 B/s of §6.3 by the static ALU ratio, assumes the
 static-to-dynamic ratio of the §6 kernel, and assumes the ALU pipe stays
 the binding one. The clmad column is the check on that last assumption:
@@ -622,17 +626,17 @@ extrapolated rate.
 | B. + `POLY_INV=1` | 16 | 1,784 | 46.8 / 41.2 | 44 | 1,088 | 17.0 |
 | C. + `POLY_INV=2` | 16 | 1,787 | 45.6 / 39.9 | 44 | 1,088 | 17.0 |
 | D. B + `DENOM_STORE=0` | 16 | 1,800 | 46.8 / 41.2 | 44 | 816 | 16.8 |
-| E. D at batch 24 | 24 | 1,616 | 44.9 / 39.1 | 40 | 1,224 | 18.8 if the state fits; the clmad column says ≈ 18.2 |
-| F. D at batch 32 | 32 | 1,574 | 43.9 / 38.1 | 39 | 1,632 | 19.3 if the state fits; BATCH-TUNING.md says it will not at 385k |
-| G. B at batch 24 (denominators stored) | 24 | 1,605 | 44.9 / 39.1 | 40 | 1,632 | 18.9 if the state fits |
+| E. D at batch 24 | 24 | 1,736 | 44.9 / 39.1 | 42 | 1,224 | 17.5 if the state fits |
+| F. D at batch 32 | 32 | 1,683 | 43.9 / 38.1 | 41 | 1,632 | 18.0 if the state fits; BATCH-TUNING.md says it will not at 385k |
+| G. B at batch 24 (denominators stored) | 24 | 1,718 | 44.9 / 39.1 | 42 | 1,632 | 17.6 if the state fits |
 | H. shipping walk + `POLY_INV=1` | 16 | 2,269 (from 2,324) | 46.8 | 56 | 1,088 | 14.41 × 1.024 = 14.8 |
 | I. B + `INLINE_PRODUCTS=1` | 16 | 1,712 | 46.8 / 41.2 | 42 | 1,088 | 17.7 |
 | J. E + `INLINE_PRODUCTS=1` | 24 | 1,672 | 44.9 / 39.1 | 41 | 1,224 | 18.1 if the state fits |
 | K. F + `INLINE_PRODUCTS=1` | 32 | 1,628 | 43.9 / 38.1 | 40 | 1,632 | 18.6 if the state fits |
 | L. shipping walk + `INLINE_PRODUCTS=1` | 16 | 2,267 | 45.3 | 56 | 1,088 | 14.8 |
 | M. I + `BYTE_PIVOT=1` | 16 | 1,668 | 46.8 / 41.2 | 41 | 1,088 | 18.2 |
-| N. J + `BYTE_PIVOT=1` | 24 | 1,628 | 44.9 / 39.1 | 40 | 1,224 | 18.6 if the state fits |
-| O. K + `BYTE_PIVOT=1` | 32 | 1,584 | 43.9 / 38.1 | 39 | 1,632 | 19.1 if the state fits |
+| N. J + `BYTE_PIVOT=1` | 24 | 1,625 | 44.9 / 39.1 | 40 | 1,224 | 18.7 if the state fits |
+| O. K + `BYTE_PIVOT=1` | 32 | 1,585 | 43.9 / 38.1 | 39 | 1,632 | 19.1 if the state fits |
 
 Rows I – L are the fourth lever, found while costing the others: the
 polynomial products are `__noinline__` (`ECC_BIG`, bitslice.h) because a

@@ -1,0 +1,32 @@
+$ python3 kernel_cost.py --define ECC_WALK_TABLE=0
+kernel 4walk: 4048 SASS instructions, regs 104, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+4dd0  -58f0       179    160      1      0      6      0   0x45a0 0x4ce0
+5900  -68a0       251    242      8      0      0      0   0x3af0
+68b0  -7950       267    257      9      0      0      0   0x3760
+7960  -8a50       272    262      9      0      0      0   0x36b0
+8a60  -9ce0       297    230      9      0      0     57   0x35f0
+9cf0  -af70       297    230      9      0      0     57   0x3530
+af80  -c5f0       360    307      2      0     12      0   0x27c0 0x44a0
+c600  -e550       502    425     18      0      0     56   0x1c30
+e560  -fc10       364    340      0      5      6      0   0x2fc0 0x3510 0x35d0 0x3690 0x3740 0x3800 0x3ad0 0x3b90
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+2d0        3a0            14      9      2      0      0      2
+420        6f0            46     29      8      0      0      8
+8a0        4db0         1106    876     13     35     25     46
+a00        2950          502    418      8     14      0     30
+4330       4da0          168    129      5      0      5     14
+
+step loop 8a0-4db0; slot loops: ['a00-2950', '4330-4da0']
+
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                            1364     1150       28       14       12       86
+slot loop 1                             886      756        9        0       29       14
+inversion + step overhead, /B         295.8    266.9      2.8      3.8     4.25      7.2
+TOTAL per update                     2545.8   2172.9     39.8     17.8    45.25    107.2
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 2323.5 ; clmad/update = 45.25 ; instr/update = 2545.8

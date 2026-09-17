@@ -1,0 +1,212 @@
+{
+ "legacy16": {
+  "defines": [
+   "ECC_WALK_TABLE=0"
+  ],
+  "aluSlotsPerUpdateStatic": 2323.5,
+  "clmadPerUpdateStatic": 45.25,
+  "instrPerUpdateStatic": 2545.8,
+  "registers": 104,
+  "kernelInstructions": 4048
+ },
+ "legacy16pi": {
+  "defines": [
+   "ECC_WALK_TABLE=0",
+   "ECC_PACKED_POLY_INV=1"
+  ],
+  "aluSlotsPerUpdateStatic": 2269.3,
+  "clmadPerUpdateStatic": 46.81,
+  "instrPerUpdateStatic": 2497.4,
+  "registers": 104,
+  "kernelInstructions": 4400
+ },
+ "legacy16I": {
+  "defines": [
+   "ECC_WALK_TABLE=0",
+   "ECC_PACKED_INLINE_PRODUCTS=1"
+  ],
+  "aluSlotsPerUpdateStatic": 2266.7,
+  "clmadPerUpdateStatic": 45.25,
+  "instrPerUpdateStatic": 2462.8,
+  "registers": 91,
+  "kernelInstructions": 4480
+ },
+ "table16": {
+  "defines": [
+   "ECC_WALK_TABLE=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1830.7,
+  "clmadPerUpdateStatic": 45.25,
+  "instrPerUpdateStatic": 2084.9,
+  "registers": 102,
+  "kernelInstructions": 3544
+ },
+ "table16pi": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1783.5,
+  "clmadPerUpdateStatic": 46.81,
+  "instrPerUpdateStatic": 2046.0,
+  "registers": 102,
+  "kernelInstructions": 3904
+ },
+ "table16pi2": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=2"
+  ],
+  "aluSlotsPerUpdateStatic": 1786.8,
+  "clmadPerUpdateStatic": 45.56,
+  "instrPerUpdateStatic": 2045.6,
+  "registers": 102,
+  "kernelInstructions": 3896
+ },
+ "table16pind": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0"
+  ],
+  "aluSlotsPerUpdateStatic": 1800.0,
+  "clmadPerUpdateStatic": 46.81,
+  "instrPerUpdateStatic": 2063.9,
+  "registers": 100,
+  "kernelInstructions": 3920
+ },
+ "table24pind": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=24"
+  ],
+  "aluSlotsPerUpdateStatic": 1736.0,
+  "clmadPerUpdateStatic": 44.88,
+  "instrPerUpdateStatic": 2003.5,
+  "registers": 100,
+  "kernelInstructions": 3944
+ },
+ "table24pi2nd": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=2",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=24"
+  ],
+  "aluSlotsPerUpdateStatic": 1735.2,
+  "clmadPerUpdateStatic": 44.04,
+  "instrPerUpdateStatic": 1999.9,
+  "registers": 102,
+  "kernelInstructions": 3944
+ },
+ "table32pind": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=32"
+  ],
+  "aluSlotsPerUpdateStatic": 1683.4,
+  "clmadPerUpdateStatic": 43.91,
+  "instrPerUpdateStatic": 1940.5,
+  "registers": 100,
+  "kernelInstructions": 3920
+ },
+ "table24pi": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_BATCH=24"
+  ],
+  "aluSlotsPerUpdateStatic": 1718.3,
+  "clmadPerUpdateStatic": 44.88,
+  "instrPerUpdateStatic": 1989.0,
+  "registers": 100,
+  "kernelInstructions": 3928
+ },
+ "table16piI": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_PACKED_INLINE_PRODUCTS=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1711.9,
+  "clmadPerUpdateStatic": 46.81,
+  "instrPerUpdateStatic": 1941.9,
+  "registers": 91,
+  "kernelInstructions": 5616
+ },
+ "table24pindI": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=24",
+   "ECC_PACKED_INLINE_PRODUCTS=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1672.3,
+  "clmadPerUpdateStatic": 44.88,
+  "instrPerUpdateStatic": 1904.2,
+  "registers": 96,
+  "kernelInstructions": 5664
+ },
+ "table32pindI": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=32",
+   "ECC_PACKED_INLINE_PRODUCTS=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1628.0,
+  "clmadPerUpdateStatic": 43.91,
+  "instrPerUpdateStatic": 1848.5,
+  "registers": 92,
+  "kernelInstructions": 5640
+ },
+ "table16piIB": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_PACKED_INLINE_PRODUCTS=1",
+   "ECC_TABLE_BYTE_PIVOT=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1667.9,
+  "clmadPerUpdateStatic": 46.81,
+  "instrPerUpdateStatic": 1881.9,
+  "registers": 91,
+  "kernelInstructions": 5552
+ },
+ "table24pindIB": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=24",
+   "ECC_PACKED_INLINE_PRODUCTS=1",
+   "ECC_TABLE_BYTE_PIVOT=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1625.4,
+  "clmadPerUpdateStatic": 44.88,
+  "instrPerUpdateStatic": 1842.2,
+  "registers": 92,
+  "kernelInstructions": 5600
+ },
+ "table32pindIB": {
+  "defines": [
+   "ECC_WALK_TABLE=1",
+   "ECC_PACKED_POLY_INV=1",
+   "ECC_TABLE_DENOM_STORE=0",
+   "ECC_BATCH=32",
+   "ECC_PACKED_INLINE_PRODUCTS=1",
+   "ECC_TABLE_BYTE_PIVOT=1"
+  ],
+  "aluSlotsPerUpdateStatic": 1585.0,
+  "clmadPerUpdateStatic": 43.91,
+  "instrPerUpdateStatic": 1789.5,
+  "registers": 92,
+  "kernelInstructions": 5584
+ }
+}
