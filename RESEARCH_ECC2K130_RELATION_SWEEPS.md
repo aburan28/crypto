@@ -39,23 +39,36 @@ combinations `[a]P + [b]Q`, so the relation cost is paid `B` times over.
 
 | `m` | `log2 B_m` | split | `log2` memory (bytes) | `log2` cost, one relation | vs rho | `log2` total | vs rho |
 |---:|---:|:--:|---:|---:|---:|---:|---:|
-| 3 | 43.86 | 1+2 | 48.86 | 86.72 | +25.82 | 130.58 | +69.68 |
-| 4 | 33.40 | 2+2 | 70.79 | 65.79 | **+4.89** | 99.19 | +38.29 |
-| 5 | 27.18 | 2+3 | 58.36 | 78.96 | +18.06 | 106.14 | +45.24 |
-| 6 | 23.08 | 3+3 | 71.66 | 66.66 | +5.76 | 89.74 | +28.84 |
-| 7 | 20.19 | 3+4 | 62.97 | 76.16 | +15.26 | 96.34 | +35.44 |
-| 8 | 18.04 | 4+4 | 72.56 | 67.56 | +6.66 | **85.60** | **+24.70** |
+| 3 | 43.86 | 1+2 | 48.86 | 86.72 | +25.91 | 130.58 | +69.78 |
+| 4 | 33.40 | 2+2 | 70.79 | 65.79 | **+4.98** | 99.19 | +38.38 |
+| 5 | 27.18 | 2+3 | 58.36 | 78.96 | +18.15 | 106.14 | +45.33 |
+| 6 | 23.08 | 3+3 | 71.66 | 66.66 | +5.85 | 89.74 | +28.93 |
+| 7 | 20.19 | 3+4 | 62.97 | 76.16 | +15.35 | 96.34 | +35.53 |
+| 8 | 18.04 | 4+4 | 72.56 | 67.56 | +6.76 | **85.60** | **+24.79** |
 
 No `m` reaches the reference. The friendliest accounting imaginable — price
 a single relation and ignore the `B` relations a logarithm actually needs —
-still puts the best case, `m = 4`, at `2^65.79` against rho's `2^60.9`, a
-factor `2^4.89`, while asking for `2^70.79` bytes of storage. That is about
+still puts the best case, `m = 4`, at `2^65.79` against rho's `2^60.809`, a
+factor `2^4.98`, while asking for `2^70.79` bytes of storage. That is about
 two zettabytes, and it is not a constant that engineering moves. Priced
-honestly at `B` relations the smallest gap is `2^24.7`, at `m = 8`.
+honestly at `B` relations the smallest gap is `2^24.79`, at `m = 8`.
+
+(The ratios above are against the repository's frozen reference `2^60.809`,
+as `results/boundary.json` computes them. An earlier printing of this table
+quoted them against a rounded `2^60.9` and so ran `0.09` low in every "vs
+rho" column.)
 
 Quoting the single-relation row as the method's cost is exactly the §3
 **relabelling** error: the work has not gone away, it has moved to a column
 the headline does not look at.
+
+**This table has since been superseded, in margin but not in verdict.** It
+takes no Frobenius quotient, and it measures cost at a support size whose
+expected yield is one relation while charging for `B` of them. §4.8 redoes
+it with the quotient applied at every `m` and on a support that actually
+yields what it is charged for: `m = 8` is still cheapest, and the best row
+moves from `2^+24.79` to `2^+13.59` over the reference. Read the numbers
+above as this thread's starting accounting, not its final one.
 
 **Falsification target, stated in advance.** This thread would be a success
 if some support of size `B` produced homogeneous relations at a rate above
@@ -305,37 +318,84 @@ the search cheaper and makes the endomorphism's own identities appear as
 hits. A pipeline that counted collisions rather than certifying them would
 report a yield here that rises linearly with support size and means nothing.
 
-### 4.8 What the Frobenius quotient is worth against `m = 4`
+### 4.8 What the Frobenius quotient is worth, at every `m`
 
-Section 1 prices `m = 4` at `2^65.79` for one relation and `2^99.19` for a
-logarithm. That accounting predates the quotient, which changes three of its
-inputs: the floor moves, because the search space is `8 C(B,4)` and the
-cofactor is worth 2; storage and streaming divide by 131, with an 8-byte
-class key in place of a 32-byte point; and the relations needed divide by 131
-as well, because the unknowns are orbits. Keeping §1's convention throughout
-so the rows can be read against each other
-(`results/four_point_orbit_boundary.json`):
+Section 1 prices `m = 3..8` with no quotient and finds `m = 8` cheapest at
+`2^+24.79` over the reference. The orbit-grouped search changes three of
+that accounting's inputs, and they apply at every `m`, not only at `m = 4`:
 
-| accounting | `log2 B` | `log2` one relation | vs rho | memory (EB) | `log2` total | vs rho |
-|:--|---:|---:|---:|---:|---:|---:|
-| section 1, as published | 33.40 | 65.79 | **+4.98** | 2,044.8 | 99.19 | **+38.38** |
-| corrected floor | 32.65 | 64.29 | **+3.48** | 723.0 | 96.94 | **+36.13** |
-| + orbit-grouped pair sums | 32.65 | 57.26 | **-3.55** | 1.4 | 89.91 | **+29.10** |
-| + one unknown per orbit | 32.65 | 57.26 | **-3.55** | 1.4 | 82.87 | **+22.06** |
+* the **floor** moves. A search enumerates `m` distinct abscissae with a
+  sign each, modulo a global negation — `2^(m-1) C(B,m)` — and by §4.4 the
+  sums reach only the two elements of `E[4] ∩ H`. Expected usable relations
+  are `2^(m-1) C(B,m) / r`, so `B_m = (m! r / 2^(m-1))^(1/m)` rather than
+  §1's `(m! r)^(1/m)`;
+* **storage and streaming** divide by 131, both sides of the
+  meet-in-the-middle coming in `sigma`-orbits, with an 8-byte class key in
+  place of a 32-byte point;
+* the **relations needed** divide by 131, the support carrying one unknown
+  per orbit.
 
-Two things to read off this.
+Keeping §1's convention — cost measured at the floor — so the rows read
+against each other (`results/four_point_orbit_boundary.json`):
 
-The single-relation row goes **below** the reference — `2^57.26` against
-rho's `2^60.81`. That row is precisely the one §1 warns about. The work has
+| `m` | `log2 B` | split | `log2` one relation | vs rho | memory (EB) | `log2` total | vs rho |
+|---:|---:|:--:|---:|---:|---:|---:|---:|
+| 3 | 43.19 | 1+2 | 78.36 | +17.55 | 0.0 | 114.52 | **+53.71** |
+| 4 | 32.65 | 2+2 | 57.26 | -3.55 | 1.4 | 82.87 | **+22.06** |
+| 5 | 26.38 | 2+3 | 69.53 | +8.72 | 0.0 | 88.87 | **+28.06** |
+| 6 | 22.25 | 3+3 | 57.13 | -3.68 | 1.3 | 72.34 | **+11.53** |
+| 7 | 19.33 | 3+4 | 65.70 | +4.89 | 0.0 | 77.99 | **+17.18** |
+| 8 | 17.16 | 4+4 | 57.03 | -3.78 | 1.2 | 67.16 | **+6.35** |
+
+**A correction.** An earlier reading of the `m = 4` row called
+orbit-grouped `m = 4` the best accounting in this study, "ahead of the
+`2^+24.79` that `m = 8` holds in §1". That compares a quotiented row
+against an unquotiented one, and it is wrong. Applied uniformly the
+quotient helps *larger* `m` more — `2^16.07` at `m = 3` rising to
+`2^18.44` at `m = 8` — because the storage saving of `131` is a larger
+fraction of a smaller stored side. So `m = 8` remains cheapest, §1's
+ranking is unchanged, and what the quotient moves is the margin, not the
+order.
+
+The `m = 4`, `m = 6` and `m = 8` single-relation rows all fall **below** the
+reference. Those are precisely the rows §1 declines to quote. The work has
 not gone away; it has moved into the count of relations a logarithm needs,
-and the honest row is the last column.
+and the honest column is the last one.
 
-Priced there, the quotient is worth `2^14` — a factor of `131^2`, `131` from
-the storage and `131` from the unknowns — and it makes orbit-grouped `m = 4`
-the best accounting anywhere in this study, at `2^+22.06` over rho, ahead of
-the `2^+24.70` that `m = 8` holds in §1. It is still `2^22` short. The
-Frobenius quotient is a real and quantified saving, and it is about a quarter
-of the way, in the exponent, to a result.
+### 4.8.1 Section 1's convention is generous, and it now matters
+
+§1 measures cost at `B_m`, where the expected yield is **one** relation,
+while charging for `B` relations. That is internally inconsistent, in the
+method's favour. At the margins §1 was quoting — `2^+24.79` at best — the
+slack did not change any conclusion. With the quotient applied it does, so
+the honest floor is the support size at which the yield actually reaches
+the number of relations needed:
+
+    2^(m-1) C(B,m) / r = B / 131   =>   B = (m! r / (131 · 2^(m-1)))^(1/(m-1))
+
+| `m` | `log2 B` | split | `log2` one relation | vs rho | memory (EB) | `log2` total | vs rho |
+|---:|---:|:--:|---:|---:|---:|---:|---:|
+| 3 | 61.28 | 1+2 | 114.52 | +53.71 | 0.2 | 168.76 | **+107.95** |
+| 4 | 41.18 | 2+2 | 74.33 | +13.53 | 190,500.0 | 108.48 | **+47.68** |
+| 5 | 31.22 | 2+3 | 84.04 | +23.23 | 0.2 | 108.22 | **+47.41** |
+| 6 | 25.29 | 3+3 | 66.26 | +5.45 | 705.2 | 84.51 | **+23.71** |
+| 7 | 21.38 | 3+4 | 73.89 | +13.08 | 0.2 | 88.24 | **+27.43** |
+| 8 | 18.61 | 4+4 | 62.82 | +2.01 | 65.1 | 74.40 | **+13.59** |
+
+**The result.** `m = 8` at `2^+13.59` over rho, needing
+`65` exabytes of
+class keys. No `m` reaches the reference, so §1's answer stands — but the
+gap at the best row is `2^11.20` smaller than §1 records, and that is a
+material narrowing rather than a rounding.
+
+Two things keep it a negative. The margin is still a factor of about 12,000
+in operations, and it is bought with `65` exabytes of storage that no
+engineering removes — the same wall §1 identified, moved but not breached.
+And the quotient is not a free lever: it requires the support to be a union
+of `sigma`-orbits, which is what §4.7 shows makes the endomorphism ring's
+own identities appear as hits. A search that took the `2^18.4` saving and
+counted collisions without certifying them would be measuring its own
+symmetry.
 
 ### 4.9 Six defects, each of which produced plausible output
 
