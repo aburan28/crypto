@@ -32,3 +32,16 @@ later `git stash` of this directory replaced that file's inode, which left the
 running process writing to an unlinked file. The stream was recovered through
 `/proc/<pid>/fd/1` before the process exited and preserved here. No JSON
 evidence was affected: each result file is opened fresh on write.
+
+Section 5 (the cost of a logarithm, as against a homogeneous relation):
+
+* `target_boundary.json` — derived, from `target_boundary.py`. Prices T + 1
+  relations against known targets, optimising over support size, relation
+  length and meet-in-the-middle split, with memory charged at zero. Carries
+  the homogeneous extension past m = 8 alongside, because that is the
+  accounting that crosses below the reference and the contrast is the point.
+* `target_decomposition.json` — measured, from `validate_target_model.py`.
+  The decomposition rate the above depends on, against exhaustive enumeration
+  on small analogues, and the direct check that the reachable sum set is
+  sigma-closed.
+

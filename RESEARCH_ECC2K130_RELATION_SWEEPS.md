@@ -431,3 +431,146 @@ is to catch the other kind.
 Defects 2, 3 and 5 were in validation code. That is the pattern worth
 carrying forward: on this thread the instrument has been more reliable than
 the things built to check it.
+
+## 5. Pushing it: what a logarithm costs, and where the table was flattering
+
+§4.8 stopped at `m = 8` because §1 did. That was an arbitrary stopping point,
+and the obvious thing to try is more of what was working. The result is worth
+recording in full, including the part that looked like a win.
+
+### 5.1 Extended past `m = 8`, the homogeneous accounting goes below rho
+
+Continuing §4.8.1's self-consistent, quotiented table to larger `m`, with the
+support constrained to be a union of `sigma`-orbits (so `B >= 131`):
+
+| `m` | `log2 B` | `log2` total | vs rho |
+|---:|---:|---:|---:|
+| 4 | 41.18 | 108.48 | **+47.68** |
+| 6 | 25.29 | 84.52 | **+23.71** |
+| 8 | 18.61 | 74.39 | **+13.59** |
+| 10 | 14.97 | 68.86 | **+8.06** |
+| 12 | 12.71 | 65.41 | **+4.60** |
+| 14 | 11.18 | 63.05 | **+2.25** |
+| 16 | 10.08 | 61.36 | **+0.56** |
+| 18 | 9.26 | 60.10 | **-0.71** |
+| 20 | 8.63 | 59.12 | **-1.69** |
+| 22 | 8.14 | 58.34 | **-2.47** |
+| 24 | 7.74 | 57.71 | **-3.10** |
+| 26 | 7.41 | 57.19 | **-3.62** |
+| 28 | 7.14 | 56.76 | **-4.05** |
+
+It crosses at **`m = 18`** and reaches `2^-4.05` at `m = 28`. Taken at face
+value that is index calculus beating optimised rho on ECC2K-130.
+
+It is not. It is §3, in the strongest form this thread has produced.
+
+### 5.2 Those are homogeneous relations, and they determine nothing
+
+Every row above prices relations *among base points only*. §3 says what such
+a relation is worth:
+
+> Writing each base point as `R_i = [u_i] P + [v_i] Q`, a relation gives
+> `sum(u_i) + log_P(Q) * sum(v_i) = 0 (mod r)`, which determines `log_P(Q)`
+> only when `sum(v_i)` is invertible mod `r`.
+
+The base points here are not built from `P` and `Q` — they are whatever the
+normal basis produces — so their logarithms are unknown and a homogeneous
+relation is one linear equation among unknowns. Collecting `T + 1` of them
+gives a consistent homogeneous system whose solution space contains the truth
+and says nothing about which point of it is true. The cost falls below rho
+because the thing being bought has been quietly swapped for something
+cheaper. §1 warned about exactly this and the warning still bites at `m = 18`.
+
+A logarithm needs relations against **known targets** `[a]P + [b]Q`.
+
+### 5.3 The cost of a logarithm
+
+Unknowns are the `T` orbit logarithms plus `d`, so `T + 1` relations are
+needed. Each requires decomposing a random known target into `n` signed base
+points, at one meet-in-the-middle per attempt divided by the chance a target
+decomposes at all. Optimising over support size, relation length and split
+(`results/target_boundary.json`):
+
+    support         10 orbits, B = 1310
+    relations       15 points each, split 8+7
+    per attempt     2^68.479
+    relations needed 11
+    total           2^71.939      vs rho  +11.13
+
+**Memory is charged at zero.** The totals assume storage is free and
+instantaneous. This matters: the storage wall is the objection an engineer
+can always call a budget question, and the negative no longer rests on it.
+Granting unlimited free memory, the method is still `2^11.13`
+short — a factor of about 2,241 in operations.
+
+### 5.4 The measured input, and a seventh defect
+
+The model has one free parameter, the decomposition rate, so it is measured
+rather than asserted — the same discipline that caught the `2x`–`43x` miss in
+§4.5.
+
+An earlier form of this model gave `sigma` a factor of 131 in that rate, on
+the reasoning that a decomposition of `sigma^k(target)` is as useful as one
+of `target`, so there are 131 acceptable right-hand sides. Measured on small
+analogues, that model is optimistic by about **7x**:
+
+| `m` | `T` | `B` | `n` | measured | `2^n C(B,n)/r` | ratio | with `sigma` factor | ratio |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 19 | 2 | 38 | 2 | 0.0117 | 0.0215 | 0.54 | 0.4082 | 0.03 |
+| 19 | 3 | 57 | 2 | 0.0433 | 0.0488 | 0.89 | 0.9268 | 0.05 |
+| 17 | 2 | 34 | 2 | 0.0650 | 0.0685 | 0.95 | 1.0000 | 0.07 |
+| 17 | 3 | 51 | 2 | 0.1200 | 0.1558 | 0.77 | 1.0000 | 0.12 |
+| 19 | 4 | 76 | 2 | 0.1033 | 0.0871 | 1.19 | 1.0000 | 0.10 |
+| 17 | 4 | 68 | 2 | 0.2417 | 0.2783 | 0.87 | 1.0000 | 0.24 |
+| 19 | 2 | 38 | 3 | 0.3633 | 0.5157 | 0.70 | 1.0000 | 0.36 |
+| 17 | 2 | 34 | 3 | 0.7817 | 1.0000 | 0.78 | 1.0000 | 0.78 |
+
+The reason is structural, and checked directly: **the set of `n`-subset sums
+is itself `sigma`-closed** — true in every cell above. The support is
+`sigma`-stable, so if a sum is reachable then so is every rotation of it.
+Accepting `sigma^k(target)` is therefore one chance taken 131 times, not 131
+independent chances.
+
+So the Frobenius quotient buys memory (one canonical class per orbit) and
+unknowns (`B/131` rather than `B`) — the latter is the large saving — and it
+does **not** buy hit rate. That is the seventh defect in this thread's
+running list, and like three of the first six it was in a model rather than
+in code, and it was caught by measuring an assumption rather than by a test
+failing.
+
+The plain rate `2^n C(B,n)/r` holds to a mean of
+`0.844` over 7 unsaturated cells —
+slightly below 1, because subset sums collide — and that factor is carried
+into the cost so the total is not quoted optimistically.
+
+### 5.5 Why the meet-in-the-middle cannot be replaced
+
+The remaining lever would be a better `k`-sum algorithm. Wagner's
+generalised birthday would find an `n`-sum hitting a target in about
+`k · 2^(129/(1+log2 k))` — `2^25.80` at `k = 16`, far below the reference.
+
+It does not apply. Wagner needs partial matching: the low `t` bits of a sum
+must depend only on the low `t` bits of the summands, so partial collisions
+can be merged level by level. That holds for XOR and for addition mod `2^m`.
+It fails for elliptic-curve addition, where `x(P+Q)` is not determined by any
+truncation of `x(P)` and `x(Q)` — there is no prefix structure on curve
+points to recurse on. The scalar domain would support it and the scalars are
+exactly the unknowns; the abscissa domain supports it only through summation
+polynomials, which is a Gröbner solve this repository has already measured
+and closed (`RESEARCH_ECC2K130_DECOMPOSITION.md`).
+
+So two lists are what is available, and a two-list meet-in-the-middle costs
+the square root of the space it must cover. That square root, against a group
+whose rho already takes its own `sqrt` with the same 262 automorphisms, is
+the whole of the remaining gap.
+
+### 5.6 Where this leaves the thread
+
+`2^11.13` over the reference, with memory free, every
+input either measured or derived, and the two directions that looked open
+— larger `m`, and a `k`-tree in place of the meet-in-the-middle — closed for
+stated reasons rather than left untried.
+
+That is a better negative than §1's. It is also a *tighter* one: §1 recorded
+`2^+24.79` and leaned on a storage wall. What is left is an operation count
+that no amount of memory, structure or Frobenius moves.
