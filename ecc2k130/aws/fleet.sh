@@ -93,10 +93,15 @@ activeInstanceIds() {
 # count is not this number: price-capacity-optimized can refill with smaller
 # types and restore the count while most of the lost GPUs are still missing.
 activeGpuCapacity() {
-    local total=0 type
-    # shellcheck disable=SC2046 -- word-split on purpose, instance types only
-    for type in $(aws ec2 describe-fleet-instances --fleet-id "$1" \
-        --query 'ActiveInstances[].InstanceType' --output text); do
+    local total=0 type types
+    # Assign then || return: a failing $(aws ...) in a for-list does not
+    # trip set -e, and this helper is itself called from $(), where an
+    # assignment of a failed command also does not abort. Empty stdout
+    # would leave total=0, which roll treats as "already restored".
+    types=$(aws ec2 describe-fleet-instances --fleet-id "$1" \
+        --query 'ActiveInstances[].InstanceType' --output text) || return 1
+    # shellcheck disable=SC2086 -- word-split on purpose, instance types only
+    for type in $types; do
         total=$((total + $(gpusOf "$type")))
     done
     echo "$total"
