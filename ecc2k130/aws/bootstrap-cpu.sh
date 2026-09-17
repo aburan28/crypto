@@ -22,19 +22,18 @@ cd "$ROOT"
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 
-# Plain Ubuntu AMIs lack the aws CLI and sometimes a fresh-enough python3.
-if ! command -v aws >/dev/null 2>&1; then
+# Plain Ubuntu AMIs lack the aws CLI. Install unzip first, then awscliv2 —
+# Ubuntu 24.04 has no `awscli` apt package (the v1 package was dropped).
+if ! command -v aws >/dev/null 2>&1 || ! aws --version 2>&1 | grep -q 'aws-cli/2'; then
     apt-get update -y
-    apt-get install -y awscli python3 ca-certificates curl unzip
-fi
-# Prefer awscliv2 when apt only shipped v1 without s3api conditionals we rely on.
-if ! aws --version 2>&1 | grep -q 'aws-cli/2'; then
+    apt-get install -y python3 ca-certificates curl unzip
     curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
-    unzip -q /tmp/awscliv2.zip -d /tmp
+    unzip -qo /tmp/awscliv2.zip -d /tmp
     /tmp/aws/install -u
     rm -rf /tmp/aws /tmp/awscliv2.zip
     hash -r
 fi
+command -v aws >/dev/null || { echo "aws cli still missing after install"; exit 1; }
 command -v python3 >/dev/null || apt-get install -y python3
 
 TOKEN=$(curl -s -m 2 -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 300")
