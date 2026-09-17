@@ -126,37 +126,67 @@ def child_env():
     return env
 
 
+SPAWN = 'posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery'
+
+
 def execute(command, job, directory, timeout, memory, cpu):
+    # Through round 0009 the child was created with a preexec_fn, which makes
+    # CPython fork() the evaluator: the wall then charged a copy of the evaluator's
+    # page tables to every job, a cost that grows with the evaluator's heap and
+    # dominated the smallest cells' native times with a noise unrelated to either
+    # arm. Without preexec_fn CPython uses vfork/posix_spawn. The child inherits
+    # the calling thread's affinity, so it is pinned before the spawn; the memory
+    # and core caps are applied with prlimit while the child is still blocked on
+    # stdin, i.e. before it can allocate anything for the job; the watchdog thread
+    # is started before the timing window opens.
     directory.mkdir(parents=True,exist_ok=True)
-    def limits():
-        resource.setrlimit(resource.RLIMIT_AS,(memory,memory))
-        resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-        os.sched_setaffinity(0,{cpu})
-    start = time.monotonic()
+    payload = json.dumps(job,sort_keys=True).encode()
+    lock = threading.Lock()
+    holder = {'process':None,'fired':False}
+    expired = threading.Event()
+    def kill(process):
+        try:
+            os.killpg(process.pid,signal.SIGKILL)
+            expired.set()
+        except ProcessLookupError:
+            pass
+    def watchdog():
+        with lock:
+            holder['fired'] = True
+            process = holder['process']
+        if process is not None:
+            kill(process)
+    timer = threading.Timer(timeout,watchdog)
+    timer.daemon = True
     status = 'EXITED'
     with (directory/'stdout.json').open('w') as stdout, (directory/'stderr.txt').open('w') as stderr:
-        process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=stdout,stderr=stderr,
-            env=child_env(),start_new_session=True,preexec_fn=limits)
-        expired = threading.Event()
-        def watchdog():
-            try:
-                os.killpg(process.pid,signal.SIGKILL)
-                expired.set()
-            except ProcessLookupError:
-                pass
-        timer = threading.Timer(timeout,watchdog)
-        timer.daemon = True
         timer.start()
+        inherited = os.sched_getaffinity(0)
+        os.sched_setaffinity(0,{cpu})
+        start = time.monotonic()
+        try:
+            process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=stdout,stderr=stderr,
+                env=child_env(),start_new_session=True)
+        finally:
+            os.sched_setaffinity(0,inherited)
+        with lock:
+            holder['process'] = process
+            fired = holder['fired']
+        if fired:
+            kill(process)
+        resource.prlimit(process.pid,resource.RLIMIT_AS,(memory,memory))
+        resource.prlimit(process.pid,resource.RLIMIT_CORE,(0,0))
         try:
             # Blocking reap avoids communicate(timeout)'s exponential wait polling,
             # which quantized previous short native timings. Charge full process wall.
-            process.communicate(json.dumps(job,sort_keys=True).encode())
+            process.communicate(payload)
         finally:
+            wall = time.monotonic()-start
             timer.cancel()
             timer.join()
         if expired.is_set(): status = 'TIMEOUT'
-    return {'exit_code':process.returncode,'process_wall_seconds':time.monotonic()-start,
-            'process_status':status,'command':command,'memory_cap_bytes':memory,'cpu':cpu}
+    return {'exit_code':process.returncode,'process_wall_seconds':wall,
+            'process_status':status,'command':command,'memory_cap_bytes':memory,'cpu':cpu,'spawn':SPAWN}
 
 
 def parse_profiles(directory, *, compressed=False):
@@ -207,11 +237,24 @@ def frozen_inputs(round_dir):
     return c, read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
 
 
+def built_worker(build_dir):
+    # `[build] target` in a snapshot's cargo config moves the artifact under the
+    # target triple; either way exactly one worker must have been produced.
+    found = [p for p in [build_dir/'release/examples/ic_tournament_worker']
+             +sorted(build_dir.glob('*/release/examples/ic_tournament_worker')) if p.is_file()]
+    require(len(found)==1,'expected exactly one built worker, found %d'%len(found))
+    return found[0]
+
+
 def snapshot_build(source,destination):
     snap = destination/'source'
     snap.mkdir()
-    for name in ('Cargo.toml','Cargo.lock','build.rs'):
+    # A cargo config inside the source root is part of the snapshot and its seal:
+    # it is how a source tree selects link mode or target features, which rustc
+    # cannot take from Cargo.toml.
+    for name in ('Cargo.toml','Cargo.lock','build.rs','.cargo/config.toml'):
         if (source/name).exists():
+            (snap/name).parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(source/name,snap/name)
     shutil.copytree(source/'src',snap/'src')
     # Cache identities include native sources even in CPU-only builds.
@@ -232,7 +275,7 @@ def snapshot_build(source,destination):
             '--example','ic_tournament_worker','--target-dir',str(destination/'build')],
             cwd=snap,env=child_env(),stdout=log,stderr=subprocess.STDOUT,check=True)
     binary = destination/'worker'
-    shutil.copy2(destination/'build/release/examples/ic_tournament_worker',binary)
+    shutil.copy2(built_worker(destination/'build'),binary)
     return binary, manifest
 
 
@@ -336,7 +379,7 @@ def prepare(args):
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
         'objective':args.objective,'no_regression_ratio':0.98,
-        'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall',
+        'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall; '+SPAWN,
         'ci_level':0.95,'bootstrap_draws':2000,'host':platform.uname()._asdict(),
         'profiler_version':version,'compiler':subprocess.check_output(['rustc','--version'],text=True).strip(),
         'evaluator_sha256':{n:digest(evaluator/n) for n in ('tournament.py','oracle.py')},
