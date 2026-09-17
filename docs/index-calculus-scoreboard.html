@@ -1316,6 +1316,68 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <section class="panel" id="fixed-parameter-ic">
+    <div class="panel-head"><h2>Fixed parameters and persistent index calculus</h2>
+      <p>The CPU <code>ic fixed</code> workflow accepts full-width K_0 parameters through degree 131,
+      stores pair tables and verified relations, and resumes both precomputation and target equations.
+      The actual ECC2K-130 polynomial-basis profile passes its mathematical checks.</p>
+      <p>Frozen evidence: 72 matched cases, 216 complete small-curve computations and 432 target
+      verifications, including repetitions. Ephemeral, durable and resumed transcripts agree in every
+      case. All 72 completed-result replays build zero new pairs and issue zero new probes.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Primary unit: calibrated common operations, unmeasured. No full-cost speedup claim.</caption>
+      <thead><tr><th>Variant</th><th>Common operations</th><th>S</th><th>Ratio to rho</th><th>Ratio to floor</th><th>Verified targets</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Ephemeral reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering reference</td></tr>
+        <tr><td>Durable cold</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering capability</td></tr>
+        <tr><td>Staged resume</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering capability</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>The degree-131 profile retains 14 orbit columns and 3,668 signed points.
+      Its three-summand uniform-target coverage ceiling remains 1.2095460623606999e-29.
+      Bounded construction resumes after 24 committed pair candidates; the natural-target SAT
+      attempt yields zero relations and remains incomplete. Practical degree-131 completion and
+      calibrated S/rho/floor ratios are unmeasured. The previous mathematical boundaries are unchanged.</p>
+      <p><a href="../research/fixed_parameters_20260915/run-01/summary.json">Frozen comparison</a> ·
+      <a href="../research/fixed_parameters_20260915/README.md">Contract, accounting and tests</a> ·
+      <a href="ic/FIXED_PARAMETERS.md">Run and resume</a></p>
+    </div>
+  </section>
+
+  <section class="panel" id="learned-fixed-ic-selector">
+    <div class="panel-head"><h2>Learned solver selection: initial portfolio has no routing gain</h2>
+      <p>The opt-in fixed-workflow selector trains on matched natural queries, using verified
+      independent relations and their cost. Across 288 natural queries on degree-9 and degree-23
+      curves, the prepared pair policy was cheapest on every query and matched both SAT policies'
+      rank gain. The fitted model therefore retains a constant pair policy; no default is promoted.</p>
+      <p>Whole signed Frobenius orbits and matrix histories stay within one data split.
+      Sixteen planted controls are excluded from training. The independent audit verifies all
+      304 accepted query records and 603 successful policy witnesses. It rejected the first
+      rank-label dataset; that evidence and the corrected matched rerun are both retained.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Primary unit: calibrated common operations, unmeasured. Native timings are diagnostics.</caption>
+      <thead><tr><th>Variant</th><th>Common operations</th><th>S</th><th>Ratio to rho</th><th>Ratio to floor</th><th>Verified targets</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Matched rho reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>unmeasured</td><td>Not run in this adapter</td></tr>
+        <tr><td>Preserved pair baseline</td><td>null</td><td>null</td><td>null</td><td>null</td><td>72/72</td><td>Reference</td></tr>
+        <tr><td>Opt-in learned selector</td><td>null</td><td>null</td><td>null</td><td>null</td><td>72/72</td><td>Engineering capability; no gain established</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>All 72 matched cold processes completed over three repetitions,
+      including fresh confirmation fixtures. The independent audit checks 420 relations and
+      every full-workload rank label. Startup, precomputation, model loading/inference, failed
+      queries, verification, matrix work, commits and reporting remain in the cost scope.
+      The degree-131 profile selects the unseen-domain pair fallback; it supplies no learned
+      full-size yield estimate. The existing Rust instruction tournament is unchanged.</p>
+      <p><a href="../research/ic_solver_selection_20260915/README.md">Research report and retained evidence</a> ·
+      <a href="../research/ic_solver_selection_20260915/full-comparison/summary.json">Frozen comparison</a> ·
+      <a href="../research/ic_solver_selection_20260915/final-audit.json">Independent final audit</a> ·
+      <a href="ic/SOLVER_SELECTION.md">Run and train</a></p>
+    </div>
+  </section>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,

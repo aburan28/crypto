@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "curve": {
+    "family": "koblitz-a0",
+    "degree": 23,
+    "basis": "type-ii-onb",
+    "subgroup_order": "2095853",
+    "cofactor": 4
+  },
+  "generator": {
+    "x": "0x53fd8c",
+    "y": "0x1f022c"
+  },
+  "factor_base": {
+    "kind": "hamming-weight",
+    "weight": 2
+  },
+  "summands": 2,
+  "targets": [
+    {
+      "id": "target-0",
+      "x": "0xedaca",
+      "y": "0x249bf4"
+    },
+    {
+      "id": "target-1",
+      "x": "0x16f793",
+      "y": "0x64a9c6"
+    }
+  ]
+}
