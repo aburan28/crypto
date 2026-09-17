@@ -329,10 +329,15 @@ class BuildTests(unittest.TestCase):
         css = read(os.path.join(self.out, "status", "style.css"))
         self.assertIn(".odds-chart svg", css)
         self.assertIn("min-width: 0", css)
-        # Walk forest stays readable on a phone by scrolling, not by shrinking
-        # the trails into a ~300px scribble.
+        # Walk forest fits the column on a phone. A 640px min-width made the
+        # caption lay out at that width, so every line clipped; the SVG
+        # thickens its own strokes below 720px instead.
         self.assertIn(".figure img", css)
-        self.assertIn("min-width: 640px", css)
+        self.assertIn("min-width: 0", css)
+        self.assertNotIn("min-width: 640px", css)
+        self.assertNotIn("Swipe to pan the forest", css)
+        self.assertIn("figure-frame", page)
+        self.assertIn("@media(max-width:720px)", read(os.path.join(self.out, "status", "walk-forest.svg")))
         for ident in ("odds-now", "odds-month", "odds-median", "odds-ninety", "odds-chart"):
             self.assertIn('id="%s"' % ident, page, ident)
         # The same law in Python: mean E, median 0.94 E, ninety at 1.71 E.
