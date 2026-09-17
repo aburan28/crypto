@@ -1,0 +1,71 @@
+{
+  "probes": [
+    {
+      "comparison": {
+        "candidate": "candidate",
+        "candidate_over_baseline": 0.8436527060749484,
+        "ci95": [
+          0.835778388997037,
+          0.8532053535333673
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 4,
+        "native_wall_candidate_over_baseline": 0.7866826802175326,
+        "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+        "paired_cases": 8,
+        "per_cell": {
+          "n13a0": 0.8330171859195141,
+          "n17a1": 0.8526981412546292,
+          "n19a0": 0.8463473602843516,
+          "n23a0": 0.8426687601639634
+        },
+        "speedup": 1.1853218662125196
+      },
+      "config": {
+        "batch_trials": 16,
+        "linear_algebra": "sparse",
+        "max_trials": 4096,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "independently_verified_pairs": 72,
+      "probe": "20260915T204411-3c25af",
+      "source_manifest_sha256": "28bec3455867ad5598779e9a91cf6bd7692d9029690941886f34faed3224dc1c"
+    },
+    {
+      "comparison": {
+        "candidate": "candidate",
+        "candidate_over_baseline": 0.7153369379635572,
+        "ci95": [
+          0.6666831401677658,
+          0.7496174351095658
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 4,
+        "native_wall_candidate_over_baseline": 0.6676280230848267,
+        "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+        "paired_cases": 8,
+        "per_cell": {
+          "n13a0": 0.708066064765984,
+          "n17a1": 0.6616845996854896,
+          "n19a0": 0.7409765243721005,
+          "n23a0": 0.7542465791369788
+        },
+        "speedup": 1.3979426294507176
+      },
+      "config": {
+        "batch_trials": 1,
+        "collection_window": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 4096,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "independently_verified_pairs": 72,
+      "probe": "20260915T204905-e3902e",
+      "source_manifest_sha256": "28bec3455867ad5598779e9a91cf6bd7692d9029690941886f34faed3224dc1c"
+    }
+  ],
+  "status": "VERIFIED",
+  "total_pairs": 144
+}

@@ -1495,7 +1495,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <tr><td>dense</td><td>9.221e+05</td><td>0.999</td><td>22.13</td><td>3.317e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>excess8</td><td>9.217e+05</td><td>0.9986</td><td>22.12</td><td>3.316e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>window8</td><td>7.858e+05</td><td>0.8514</td><td>18.86</td><td>2.827e+07</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1869,6 +1869,136 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
     <p>Source: <a href="../ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
       <a href="../ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
-  </section>
+  </section>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+<!-- BEGIN ic-tournament-round-autolab-20260915 -->
+<section class="panel" id="ic-tournament-round-autolab-20260915">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/REPORT.md">full result</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.529e+05</td><td>1</td><td>13.41</td><td>1.989e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.929e+05</td><td>0.8915</td><td>11.95</td><td>1.773e+07</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.124e+04</td><td>0.07459</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.183e+05</td><td>1</td><td>13.14</td><td>2.093e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.582e+05</td><td>0.8841</td><td>11.62</td><td>1.85e+07</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.944e+04</td><td>0.07609</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-autolab-20260915 -->
+<!-- BEGIN ic-autolab-configuration-development-20260915 -->
+<section class="panel" id="ic-autolab-configuration-development-20260915">
+<div class="panel-head"><h2>AutoLab configuration development history</h2>
+<p>Development evidence only; promotion is determined by the separate fresh confirmation and replay. <a href="../research/ic_autolab_harness_20260915/search-history/README.md">Research report</a> · <a href="../research/ic_autolab_harness_20260915/search-history/measurements.json">Frozen measurements</a>.</p></div>
+<div class="table-scroll"><table><caption>Complete cold user-space instruction costs; fixed compiler and amd64 ISA.</caption>
+<thead><tr><th>Experiment</th><th>Arm</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>pair_table, batch 24</td><td>incumbent</td><td>568507</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 24</td><td>candidate</td><td>615485</td><td>1.08263</td><td>14.0793</td><td>2.21419e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 24</td><td>rho</td><td>43715.5</td><td>0.0768953</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 8</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 8</td><td>candidate</td><td>529151</td><td>0.930772</td><td>12.1044</td><td>1.9036e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 8</td><td>rho</td><td>43715.5</td><td>0.0768952</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 4</td><td>incumbent</td><td>568509</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 4</td><td>candidate</td><td>525596</td><td>0.924516</td><td>12.0231</td><td>1.89081e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 4</td><td>rho</td><td>43715.5</td><td>0.076895</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 2</td><td>incumbent</td><td>568511</td><td>1</td><td>13.0048</td><td>2.0452e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 2</td><td>candidate</td><td>520445</td><td>0.915453</td><td>11.9053</td><td>1.87228e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 2</td><td>rho</td><td>43715.4</td><td>0.0768946</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1</td><td>candidate</td><td>516610</td><td>0.908711</td><td>11.8175</td><td>1.85849e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1</td><td>rho</td><td>43715.7</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>incumbent</td><td>568511</td><td>1</td><td>13.0047</td><td>2.0452e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>candidate</td><td>495388</td><td>0.871378</td><td>11.332</td><td>1.78214e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>rho</td><td>43715.7</td><td>0.076895</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>candidate</td><td>500771</td><td>0.880851</td><td>11.4552</td><td>1.80151e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>rho</td><td>43715.6</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>enumerate, batch 1</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>enumerate, batch 1</td><td>candidate</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>21/24</td><td>engineering experiment</td></tr>
+<tr><td>enumerate, batch 1</td><td>rho</td><td>43715.7</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
+</section>
+<!-- END ic-autolab-configuration-development-20260915 -->
+<!-- BEGIN ic-autolab-source-development-20260915 -->
+<section class="panel" id="ic-autolab-source-development-20260915">
+<div class="panel-head"><h2>AutoLab source-development experiments</h2>
+<p>Development evidence only; promotion is determined by the separate fresh confirmation and replay. <a href="../research/ic_autolab_harness_20260915/source-improvement/README.md">Research report</a> · <a href="../research/ic_autolab_harness_20260915/source-improvement/development-table.json">Frozen measurements</a>.</p></div>
+<div class="table-scroll"><table><caption>Complete cold user-space instruction costs; fixed compiler and amd64 ISA.</caption>
+<thead><tr><th>Experiment</th><th>Arm</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Source only</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source only</td><td>candidate</td><td>479624</td><td>0.843653</td><td>10.9715</td><td>1.72543e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>Source only</td><td>rho</td><td>43715.6</td><td>0.0768952</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source + tuning</td><td>incumbent</td><td>568507</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source + tuning</td><td>candidate</td><td>406674</td><td>0.715337</td><td>9.30272</td><td>1.463e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>Source + tuning</td><td>rho</td><td>43715.6</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
+</section>
+<!-- END ic-autolab-source-development-20260915 -->
+<!-- BEGIN ic-tournament-round-20260915t205319z -->
+<section class="panel" id="ic-tournament-round-20260915t205319z">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: autolab</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/REPORT.md">full result</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.722e+05</td><td>1</td><td>13.22</td><td>2.058e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.047e+05</td><td>0.7073</td><td>9.349</td><td>1.456e+07</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.329e+04</td><td>0.07566</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.154e+05</td><td>1</td><td>13.05</td><td>2.081e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>3.769e+05</td><td>0.7313</td><td>9.544</td><td>1.522e+07</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.949e+04</td><td>0.07662</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-20260915t205319z -->
+<!-- BEGIN ic-autolab-next30-source-development-20260915 -->
+<section class="panel" id="ic-autolab-next30-source-development-20260915">
+<div class="panel-head"><h2>AutoLab · another 30% · scalar multiplication development</h2>
+<p>Development only: 47.2% fewer complete cold-worker instructions against the previous verified fast-lifting batch1/window8 winner. Eight fresh targets across four curve cells, three repetitions. Final confirmation and replay have their own result panel.</p></div>
+<div class="table-scroll"><table><caption>Unit: Valgrind 3.22 amd64 Ir. All variants use matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / previous winner</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified pairs</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>408237</td><td>1</td><td>9.53489</td><td>1.46862e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>candidate</td><td>215688</td><td>0.528341</td><td>5.03767</td><td>7.75931e+06</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>42815.1</td><td>0.104878</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>The fixed signed-base coverage and decomposition size are unchanged. The weak K-instruction floor is specific to this full-rank collector. Rho uses less work. This is implementation engineering; no asymptotic, native-runtime or rho-crossover claim.</p>
+<p><a href="../research/ic_autolab_next30_20260915/README.md">Research report</a> · <a href="../research/ic_autolab_next30_20260915/development-measurements.json">Frozen measurements</a> · <a href="../research/ic_autolab_next30_20260915/development-audit.json">Independent audit</a>.</p>
+</section>
+<!-- END ic-autolab-next30-source-development-20260915 -->
+<!-- BEGIN ic-tournament-round-20260915t224645z -->
+<section class="panel" id="ic-tournament-round-20260915t224645z">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: autolab</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/REPORT.md">full result</a> · <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.079e+05</td><td>1</td><td>9.524</td><td>1.467e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>2.152e+05</td><td>0.5275</td><td>5.024</td><td>7.741e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.283e+04</td><td>0.105</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3.797e+05</td><td>1</td><td>9.527</td><td>1.533e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>1.985e+05</td><td>0.5228</td><td>4.981</td><td>8.014e+06</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.985e+04</td><td>0.105</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-20260915t224645z -->
 </body>
 </html>
