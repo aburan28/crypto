@@ -1,0 +1,14 @@
+# Toolchain behind every static figure in this directory: no GPU, no system
+# CUDA; the NVIDIA PyPI wheels, pinned to the compiler the tree's measured
+# receipts used (nvcc 13.3.73, ITERATION-FUNCTION.md section 6).
+#   pip install --target <dir> --no-deps nvidia-cuda-nvcc==13.3.73 nvidia-nvvm==13.3.73 \
+#       'nvidia-cuda-crt==13.3.*' nvidia-cuda-cuobjdump==13.3.73 nvidia-cuda-nvdisasm==13.3.73 \
+#       'nvidia-cuda-runtime==13.3.*' 'nvidia-cuda-cccl==13.3.*'
+#   PATH=<dir>/nvidia/cu13/bin:$PATH
+# Mixed 13.3/13.4 wheels emit PTX 9.4 that the 13.3 ptxas rejects; pin all seven.
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+Build cuda_13.3.r13.3/compiler.38244171_0
+Build cuda_13.3.r13.3/compiler.38244171_0
+Build cuda_13.3.r13.3/compiler.38244171_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0

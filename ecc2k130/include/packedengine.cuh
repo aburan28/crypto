@@ -223,6 +223,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+#if ECC_WALK_TABLE
+        printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
+#endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
