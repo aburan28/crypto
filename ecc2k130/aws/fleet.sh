@@ -38,9 +38,11 @@
 # TotalTargetCapacity — a short Spot fleet may never reach the requested
 # size, and waiting for it would drain whatever is still running. The
 # wait also refuses a still-full reading until the terminated IDs are
-# gone (and it has seen a dip or a new instance): terminate-instances
-# does not update fleet accounting, so the first describe-fleets would
-# otherwise look like a refill and roll every batch at once.
+# gone (and it has seen a batch-sized dip or this many new instances):
+# terminate-instances does not update fleet accounting, so the first
+# describe-fleets would otherwise look like a refill and roll every
+# batch at once. One unrelated launch or a 1-GPU blip is not this
+# batch's refill — a short Spot maintain fleet is always launching.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
@@ -256,7 +258,10 @@ roll)
         while :; do
             fulfilled=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
             active=$(aws ec2 describe-fleet-instances --fleet-id "$id" --query 'ActiveInstances[].InstanceId' --output text | tr '\t\n' ' ')
-            if [ "$fulfilled" -lt "$restore" ]; then dropped=1; fi
+            # A dip counts only if it is at least this batch's instance
+            # count (each instance is >= 1 GPU). Any 1-GPU blip from an
+            # unrelated interruption is not proof this terminate landed.
+            if [ "$fulfilled" -le $((restore - n)) ]; then dropped=1; fi
             still=0
             new=0
             # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
@@ -269,15 +274,16 @@ roll)
             for iid in $active; do
                 case " $pre_ids " in
                     *" $iid "*) ;;
-                    *) new=1; break ;;
+                    *) new=$((new + 1)) ;;
                 esac
             done
             # Terminated IDs must leave ActiveInstances before a still-full
             # FulfilledCapacity counts as a refill (the fleet view lags
             # terminate-instances). Restore the pre-batch fulfilled level,
-            # not TotalTargetCapacity, and require an observed dip or a new
-            # instance so a stale full reading cannot skip the wait.
-            if [ "$still" -eq 0 ] && [ "$fulfilled" -ge "$restore" ] && { [ "$dropped" -eq 1 ] || [ "$new" -eq 1 ]; }; then
+            # not TotalTargetCapacity, and require a batch-sized dip or at
+            # least this many new instances so a stale full reading — or
+            # one unrelated launch — cannot skip the wait.
+            if [ "$still" -eq 0 ] && [ "$fulfilled" -ge "$restore" ] && { [ "$dropped" -eq 1 ] || [ "$new" -ge "$n" ]; }; then
                 break
             fi
             if [ "$waited" -ge "$timeout" ]; then

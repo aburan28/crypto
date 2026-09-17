@@ -55,13 +55,19 @@ def applyPending():
     gone = set(pending)
     state["instances"] = [i for i in state["instances"] if i not in gone]
     n = len(pending)
-    state["fulfilled"] = max(0, int(state["fulfilled"]) - n)
+    # staleCapacity: terminate-instances has not yet moved FulfilledCapacity.
+    if not state.get("staleCapacity"):
+        state["fulfilled"] = max(0, int(state["fulfilled"]) - n)
+    for extra in state.get("extras") or []:
+        if extra not in state["instances"]:
+            state["instances"].append(extra)
     if state.get("replace", True):
         nxt = int(state.get("nextId", 1))
         for _ in pending:
             state["instances"].append("i-new%03d" % nxt)
             nxt += 1
-            state["fulfilled"] = int(state["fulfilled"]) + 1
+            if not state.get("staleCapacity"):
+                state["fulfilled"] = int(state["fulfilled"]) + 1
         state["nextId"] = nxt
     state["pending"] = []
 
@@ -155,6 +161,12 @@ class FleetRollContract(unittest.TestCase):
         # Stale FulfilledCapacity still equals the pre-terminate reading;
         # refill requires the terminated IDs to have left ActiveInstances.
         self.assertIn("ActiveInstances[].InstanceId", wait)
+        # One unrelated new ID is not this batch's refill.
+        self.assertIn('"$new" -ge "$n"', wait)
+        self.assertNotIn('"$new" -eq 1', wait)
+        # Nor is any 1-GPU capacity blip.
+        self.assertIn("restore - n", wait)
+        self.assertNotIn('"$fulfilled" -lt "$restore"', wait)
         self.assertIn("${timeout}", wait)
 
     def test_roll_refuses_without_an_active_fleet(self):
@@ -233,6 +245,28 @@ class FleetRollWait(unittest.TestCase):
         self.assertNotIn("TotalTargetCapacity", log)
         self.assertLess(len(sleeps.split()), 20)
         self.assertGreaterEqual(len(sleeps.split()), 2)
+
+    def test_unrelated_new_instance_does_not_end_the_batch_wait(self):
+        # Terminated IDs have left ActiveInstances, FulfilledCapacity is
+        # still the stale pre-batch reading, and one unrelated instance
+        # appeared (shortfall fill, ReplaceUnhealthyInstances, or a
+        # non-group interruption). That is not this batch's refill;
+        # starting the next terminate now would overlap batches.
+        proc, state, sleeps, _log = self.runRoll({
+            "instances": ["i-1", "i-2", "i-3", "i-4", "i-5", "i-6"],
+            "fulfilled": 6,
+            "target": 6,
+            "stalePolls": 1,
+            "staleCapacity": True,
+            "replace": False,
+            "extras": ["i-extra"],
+            "terminates": [],
+        }, batch=4, timeout=30)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(len(state["terminates"]), 2)
+        self.assertEqual(proc.stderr.count("moving on to the next batch"), 2)
+        # timeout 30s / 15s poll: two sleeps per batch before the escape hatch.
+        self.assertGreaterEqual(len(sleeps.split()), 4)
 
 
 if __name__ == "__main__":
