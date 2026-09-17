@@ -143,7 +143,7 @@ up)
             --key-name "$KEY_NAME"
             --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$ROOT_GB,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]"
             --metadata-options "HttpTokens=required,HttpPutResponseHopLimit=2,InstanceMetadataTags=enabled"
-            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-cpu},{Key=Project,Value=$STACK},{Key=Role,Value=$ROLE_TAG},{Key=Lifecycle,Value=$market},{Key=CostGuardManaged,Value=true}]"
+            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-cpu},{Key=Project,Value=$STACK},{Key=Role,Value=$ROLE_TAG},{Key=Lifecycle,Value=$market},{Key=CostGuardManaged,Value=true},{Key=CostGuardExempt,Value=true},{Key=Purpose,Value=cpu-rho}]"
             --instance-initiated-shutdown-behavior terminate
             --query 'Instances[0].InstanceId' --output text
         )
