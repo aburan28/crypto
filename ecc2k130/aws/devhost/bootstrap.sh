@@ -77,4 +77,23 @@ codex --version || true
 opencode --version || true
 nvidia-smi || true
 
+# Runaway cost controls: optional host timer (idle/age default OFF).
+# Monthly $5k enforcement lives in costguard/costguard.sh on a control host.
+log "installing costguard host timer (idle/age disabled by default)"
+install -d -m 755 /var/lib/costguard /usr/local/lib/costguard
+if [[ -x /home/ubuntu/crypto/ecc2k130/aws/costguard/install-host.sh ]]; then
+  COSTGUARD_MAX_AGE_HOURS=${COSTGUARD_MAX_AGE_HOURS:-0} \
+  COSTGUARD_IDLE_HOURS=${COSTGUARD_IDLE_HOURS:-0} \
+    bash /home/ubuntu/crypto/ecc2k130/aws/costguard/install-host.sh
+elif [[ -x /workspace/crypto/ecc2k130/aws/costguard/install-host.sh ]]; then
+  COSTGUARD_MAX_AGE_HOURS=${COSTGUARD_MAX_AGE_HOURS:-0} \
+  COSTGUARD_IDLE_HOURS=${COSTGUARD_IDLE_HOURS:-0} \
+    bash /workspace/crypto/ecc2k130/aws/costguard/install-host.sh
+else
+  curl -fsSL "https://raw.githubusercontent.com/aburan28/crypto/main/ecc2k130/aws/costguard/install-host.sh" \
+    -o /tmp/costguard-install-host.sh \
+    && COSTGUARD_MAX_AGE_HOURS=0 COSTGUARD_IDLE_HOURS=0 bash /tmp/costguard-install-host.sh \
+    || log "costguard install deferred (scripts not yet on main / no checkout)"
+fi
+
 log "bootstrap complete; authenticate interactively with: gh auth login, claude, codex, and opencode"
