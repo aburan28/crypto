@@ -30,13 +30,17 @@
 # normal OS shutdown, which stops ecc2k130-worker@* (SIGTERM, checkpoint,
 # upload, per bootstrap.sh's TimeoutStopSec), and `maintain` launches a
 # replacement that re-bootstraps from S3 and resumes the checkpoint just
-# uploaded. Before starting the next batch it waits for FulfilledCapacity to
-# drop below, then climb back to, what it was right before this batch's
-# terminate (or ROLL_TIMEOUT_SECONDS, default 1800, shared across both
-# waits) — the capacity this batch actually removed, not the campaign's
-# static target, so an already-short spot fleet gets rolled rather than
-# drained, and a stuck launch stalls at most one batch rather than the
-# whole campaign.
+# uploaded. It waits until the terminated instances have left the fleet
+# and FulfilledCapacity has recovered to the pre-batch level (or
+# ROLL_TIMEOUT_SECONDS, default 1800, per batch) before starting the next
+# one, so a stuck launch stalls at most one batch rather than the whole
+# campaign. Recovery is the pre-batch fulfilled count, not
+# TotalTargetCapacity — a short Spot fleet may never reach the requested
+# size, and waiting for it would drain whatever is still running. The
+# wait also refuses a still-full reading until the terminated IDs are
+# gone (and it has seen a dip or a new instance): terminate-instances
+# does not update fleet accounting, so the first describe-fleets would
+# otherwise look like a refill and roll every batch at once.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
@@ -242,41 +246,47 @@ roll)
             shift
             n=$((n + 1))
         done
-        # Wait for the capacity this batch is about to remove, not the
-        # campaign's static target: an already-short spot fleet never
-        # reaches its target, so waiting for that would time out and
-        # terminate the next batch anyway, every batch, draining the fleet
-        # instead of rolling it.
-        before=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
+        restore=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
+        pre_ids=$(aws ec2 describe-fleet-instances --fleet-id "$id" --query 'ActiveInstances[].InstanceId' --output text | tr '\t\n' ' ')
         echo "terminating:$group"
         # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
         aws ec2 terminate-instances --instance-ids $group >/dev/null
-        # terminate-instances is async, so FulfilledCapacity can still read
-        # the pre-terminate value for a while — checking it against $before
-        # right away would find it "already back", every time, and start
-        # the next batch with this one not actually gone yet. Wait for a
-        # real drop below $before first (confirmation AWS processed this
-        # termination) before waiting for the climb back to $before; the two
-        # waits share one $timeout budget rather than doubling it.
         waited=0
+        dropped=0
         while :; do
             fulfilled=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
-            if [ "$fulfilled" -lt "$before" ]; then break; fi
+            active=$(aws ec2 describe-fleet-instances --fleet-id "$id" --query 'ActiveInstances[].InstanceId' --output text | tr '\t\n' ' ')
+            if [ "$fulfilled" -lt "$restore" ]; then dropped=1; fi
+            still=0
+            new=0
+            # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+            for iid in $group; do
+                case " $active " in
+                    *" $iid "*) still=1; break ;;
+                esac
+            done
+            # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+            for iid in $active; do
+                case " $pre_ids " in
+                    *" $iid "*) ;;
+                    *) new=1; break ;;
+                esac
+            done
+            # Terminated IDs must leave ActiveInstances before a still-full
+            # FulfilledCapacity counts as a refill (the fleet view lags
+            # terminate-instances). Restore the pre-batch fulfilled level,
+            # not TotalTargetCapacity, and require an observed dip or a new
+            # instance so a stale full reading cannot skip the wait.
+            if [ "$still" -eq 0 ] && [ "$fulfilled" -ge "$restore" ] && { [ "$dropped" -eq 1 ] || [ "$new" -eq 1 ]; }; then
+                break
+            fi
             if [ "$waited" -ge "$timeout" ]; then
-                echo "fleet $id: FulfilledCapacity never dropped below $before after terminating $n instance(s); moving on to the next batch" >&2
+                echo "fleet $id: still $fulfilled/$restore GPU(s) after ${timeout}s; moving on to the next batch" >&2
                 break
             fi
             sleep 15
             waited=$((waited + 15))
         done
-        while [ "$fulfilled" -lt "$before" ] && [ "$waited" -lt "$timeout" ]; do
-            sleep 15
-            waited=$((waited + 15))
-            fulfilled=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
-        done
-        if [ "$fulfilled" -lt "$before" ]; then
-            echo "fleet $id: still $fulfilled/$before GPU(s) after ${timeout}s; moving on to the next batch" >&2
-        fi
         rolled=$((rolled + n))
         echo "fleet $id: rolled $rolled/$total"
     done
