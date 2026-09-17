@@ -151,10 +151,34 @@ It establishes that the gap is **non-zero and large at `n = 5`**.  It
 says nothing about how the gap *scales*, and that distinction carries
 the whole extrapolation: a gap that stays at a constant 3 and a gap that
 grows with `n` have entirely different consequences at `n = 131`.  One
-draw at one cell cannot tell them apart.  Extending the ladder needs the
-sparse elimination noted under "Next" — at these caps a single `n = 5`
-draw costs about eight minutes of dense `F_2` elimination, and `n = 7`
-did not complete in twenty-five.
+draw at one cell cannot tell them apart.
+
+**Correction.**  An earlier revision said `n = 7` "did not complete in
+twenty-five minutes", offered as evidence that the ladder was blocked.
+That was wrong, and wrong in the direction that discourages the obvious
+next experiment.  The twenty-five-minute run it referred to was at the
+*lower* caps and never got past `n = 5`, so `n = 7` was never attempted.
+It is in fact the **cheapest** cell on the ladder:
+
+| n | ℓ | unknowns `3ℓ + n` |
+|--:|--:|------------------:|
+| 7 | 3 | **16** |
+| 5 | 4 | 17 |
+| 9 | 6 | 27 |
+| 15 | 4 | 27 |
+| 21 | 6 | 39 |
+
+Cost is set by the unknown count, not by `n`, and `n = 7` has *fewer*
+unknowns than the cell already measured.  The ladder is therefore not
+blocked at two cells; sparse elimination is what is needed to push past
+`n ≈ 21`, not past `n = 5`.
+
+That table also contains a comparison worth running deliberately.
+`n = 9` and `n = 15` have **identical** unknown counts and very
+different field degrees, so reading them against each other separates
+"the gap grows with `n`" from "the gap grows with the matrix" — two
+readings a naive ladder confounds, and which imply different things at
+`n = 131`.
 
 ## The controls, and why the first one could not answer the question
 
