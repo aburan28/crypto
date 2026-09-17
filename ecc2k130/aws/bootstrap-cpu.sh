@@ -24,14 +24,18 @@ export NEEDRESTART_MODE=a
 
 # Plain Ubuntu AMIs lack the aws CLI. Install unzip first, then awscliv2 —
 # Ubuntu 24.04 has no `awscli` apt package (the v1 package was dropped).
+# libgomp1 is required by the OpenMP host binary.
 if ! command -v aws >/dev/null 2>&1 || ! aws --version 2>&1 | grep -q 'aws-cli/2'; then
     apt-get update -y
-    apt-get install -y python3 ca-certificates curl unzip
+    apt-get install -y python3 ca-certificates curl unzip libgomp1
     curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
     unzip -qo /tmp/awscliv2.zip -d /tmp
     /tmp/aws/install -u
     rm -rf /tmp/aws /tmp/awscliv2.zip
     hash -r
+else
+    apt-get update -y
+    apt-get install -y python3 libgomp1
 fi
 command -v aws >/dev/null || { echo "aws cli still missing after install"; exit 1; }
 command -v python3 >/dev/null || apt-get install -y python3
@@ -60,6 +64,13 @@ if [ "$got" != "$HOST_SHA" ]; then
     echo "host binary hash $got != campaign hostBinarySha256 $HOST_SHA"
     exit 1
 fi
+# Prefer the libgomp the build published next to the binary; fall back to the
+# distro package installed above.
+PREFIX=$(dirname "$HOST_BIN")
+mkdir -p lib
+if aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors; then
+    export LD_LIBRARY_PATH=$ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
 
@@ -81,6 +92,7 @@ ECC_CLAIM_NEW=1
 ECC_THREADS=$NCPU
 ECC_CLIENT=$ROOT/ecc2k130-cpu
 ECC_GPU=0
+LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
 EOF
 if [ -z "$(field storageProtocol)" ]; then
