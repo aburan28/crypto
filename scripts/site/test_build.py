@@ -188,10 +188,37 @@ class BuildTests(unittest.TestCase):
         dashboard = mirrored("status/index.html")
         landing = mirrored("index.html")
         self.assertEqual(dashboard, landing)
-        for name in ("function reportedIterations", "function measuredRate", "function formatRate"):
+        for name in (
+            "function reportedIterations",
+            "function measuredRate",
+            "function walkingSlots",
+            "function formatRate",
+        ):
             self.assertIn(name, dashboard, name)
         # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
         self.assertIn('" B it/s"', dashboard)
+        self.assertIn("status.work.walking_slots", dashboard)
+
+    def test_pages_show_walking_slots_as_gpus_running(self):
+        # status.workers is lifetime DISTINCT worker_id from the DP table;
+        # GPUs that are actually walking are work.walking_slots from the
+        # checkpoint feed. Publishing the lifetime count in the headline made
+        # a three-GPU fleet read as three thousand.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        self.assertIn('id="gpus"', dashboard)
+        self.assertIn('id="gpus-foot"', dashboard)
+        self.assertIn(">GPUs running<", dashboard)
+        self.assertIn("function drawGpus", dashboard)
+        self.assertIn("drawGpus(status)", dashboard)
+        self.assertNotIn('el("gpus").textContent = num(status.workers)', dashboard)
+        self.assertIn('id="live-gpus"', landing)
+        self.assertIn(">GPUs running<", landing)
+        self.assertIn("walkingSlots(status)", landing)
+        self.assertNotIn("live-workers", landing)
+        # Lifetime contributors stay in the workers table, not the GPU card.
+        self.assertIn('id="workers-note"', dashboard)
+        self.assertIn("Lifetime distinguished-point contributors", dashboard)
 
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
