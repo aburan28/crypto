@@ -18,7 +18,7 @@ The honest one-line summary per front:
 | 1 | Structured factor base → subexponential? | **Conditional no-go is provable** (Hilbert-function invariance); a *fully general* impossibility is not, and we say exactly what is missing. |
 | 2 | Weil-descent analogue over `F_p`? | **Structurally hopeless** for the three concrete candidates; we show *why* each collapses to the original DLP. |
 | 3 | Last-fall-degree for prime-characteristic PDP | **The HKYY machinery does not port** — the obstruction is identified precisely (no low-degree field equations over `F_p`). |
-| 4 | Mahalanobis–Abdullah–Mallick "initial minors" | **New experiment:** the natural minor search is `Θ(n)` (measured, 0.98–1.07·n over a 245× range); `2^50` is inside the regime where sub-exp and `√n` are numerically indistinguishable. The conjecture is neither refuted nor supported by the published `2^50` data. |
+| 4 | Mahalanobis–Abdullah–Mallick "initial minors" | **New experiment:** the natural minor search is `Θ(n)` (measured, 0.79–1.10·n over a 273× range); `2^50` is inside the regime where sub-exp and `√n` are numerically indistinguishable. The conjecture is neither refuted nor supported by the published `2^50` data. |
 
 ---
 
@@ -286,28 +286,35 @@ subset already sums to `O`, making the larger minor singular too). It then plant
 nothing and *recovers the true discrete log* from a genuinely-found vanishing
 minor — end-to-end the method works.
 
-`experiments/initial_minors/scaling.py` measures the **cost to the first
-vanishing minor** (= first relation), `k = 4`, across prime-order curves:
+`experiments/initial_minors/scaling.py` measures the **number of initial
+(leading principal) minors examined before one vanishes** (= first relation),
+across prime-order curves: it draws random `16`-row matrices
+`M[i][j] = φ_j(R_i)` over distinct points, reads the initial minors off one
+pivoting-free Gaussian elimination (`ecmin.leading_minor_zero_pivots`),
+cross-checks every zero pivot against the group law, and checks every recovered
+log against the planted secret (`ok` column):
 
 ```
- bits          n  reps   E[subsets]  E[subsets]/n
-    8        419   300        417.9         0.997
-   10       1427   300       1401.6         0.982
-   12       4943   300       4970.6         1.006
-   14      31847    62      32608.4         1.024
-   16     102763    19     109677.2         1.067
-   18     333911     5     545087.0         1.632   (5-rep noise)
-   20    1408111     2    3730946.0         2.650   (2-rep noise)
+ bits          n  reps    ok    E[minors]   E[minors]/n
+    8        419   300   300        462.6         1.104
+   10       1777   300   300       1761.8         0.991
+   12       4783   300   300       4810.8         1.006
+   14      27073    73    73      25655.1         0.948
+   16     114593    17    17      90879.2         0.793
+   18     349357     5     5     582658.0         1.668   (5-rep noise)
+   20    1344053     2     2     427292.5         0.318   (2-rep noise)
 ```
 
-Across the well-sampled range (8–16 bits, a **245× span** of `n`, 19–300 reps),
-`E[subsets]/n = 0.98–1.07` — i.e. the number of minors one must examine before a
-vanishing one appears is `(1.00 ± 0.05)·n`. The 18/20-bit rows have only 2–5
-reps; the count-to-first-success is a geometric random variable with coefficient
-of variation ≈ 1, so a 2-sample mean of `2.65·n` is fully consistent with the
-underlying `1·n` law (it is one standard error out). **The relation density is
-exactly `1/n`, as the heuristic "sum of `k≥2` random points is uniform"
-predicts.**
+Across the well-sampled range (8–16 bits, a **273× span** of `n`, 17–300 reps),
+`E[minors]/n = 0.79–1.10` (mean `0.97`) — i.e. the number of initial minors one
+must examine before a vanishing one appears is `≈ 1·n`; the 16-bit row has 17
+reps, so its standard error (`≈ 0.19`) covers `1`. The 18/20-bit rows have only
+2–5 reps; the count-to-first-success is a geometric random variable with
+coefficient of variation ≈ 1, so a 5-sample mean of `1.67·n` or a 2-sample mean
+of `0.32·n` is fully consistent with the underlying `1·n` law (each is about one
+standard error out). Every recovered discrete log was correct, and no zero pivot
+ever disagreed with the group law. **The relation density is exactly `1/n`, as
+the heuristic "sum of `k≥2` random points is uniform" predicts.**
 
 **Consequence.** The *naive* minor search costs `Θ(n)` — which is **worse than
 Pollard rho's `Θ(√n)`**. For the method to even *match* rho, the initial-minor

@@ -12,8 +12,8 @@ vanishes **iff** the `k` rows (points) sum to `O`, which yields a relation
 | file | what it does |
 |------|--------------|
 | `ecmin.py` | toy EC arithmetic, RR basis, mod-`p` determinant / LU, leading-minor pivot scan |
-| `verify_correspondence.py` | confirms `sum==O ⇔ minor singular` (299/300) and recovers a real discrete log |
-| `scaling.py` | measures cost-to-first-relation vs `n`: **`Θ(n)`** (0.98–1.07·n over a 245× range) |
+| `verify_correspondence.py` | confirms `sum==O ⇔ minor singular` (299/300) and recovers a real discrete log from a found vanishing minor |
+| `scaling.py` | measures initial-minors-examined-to-first-relation vs `n` via the leading-minor pivot scan: **`Θ(n)`** (0.79–1.10·n over a 273× range) |
 | `crossover.py` | shows `√n`, `L[1/2]`, `L[1/3]` are numerically indistinguishable at `n ≤ 2^50` |
 
 ```bash

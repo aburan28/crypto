@@ -8426,18 +8426,20 @@ Semaev Macaulay ranks over F_p) is specified but blocked by lack of Sage/msolve.
 
 **(4) Initial minors.** Confirmed the core fact `sum==O ⇔ k×k minor singular`
 (299/300; the miss is a sub-relation) and recovered a real discrete log from a
-found vanishing minor. Measured cost-to-first-relation across prime-order toy
-curves:
+found vanishing minor. Measured initial-minors-examined-to-first-relation
+(leading-minor pivot scan on random 16-row matrices, every zero pivot
+cross-checked against the group law, every recovered log correct) across
+prime-order toy curves:
 
-| bits |        n | reps | E[subsets]/n |
-|-----:|---------:|-----:|-------------:|
-| 8    |      419 | 300  | 0.997 |
-| 10   |     1427 | 300  | 0.982 |
-| 12   |     4943 | 300  | 1.006 |
-| 14   |    31847 |  62  | 1.024 |
-| 16   |   102763 |  19  | 1.067 |
-| 18   |   333911 |   5  | 1.632 (5-rep noise) |
-| 20   |  1408111 |   2  | 2.650 (2-rep noise) |
+| bits |        n | reps | E[minors]/n |
+|-----:|---------:|-----:|------------:|
+| 8    |      419 | 300  | 1.104 |
+| 10   |     1777 | 300  | 0.991 |
+| 12   |     4783 | 300  | 1.006 |
+| 14   |    27073 |  73  | 0.948 |
+| 16   |   114593 |  17  | 0.793 |
+| 18   |   349357 |   5  | 1.668 (5-rep noise) |
+| 20   |  1344053 |   2  | 0.318 (2-rep noise) |
 
 Relation density is exactly 1/n → natural minor search is **Θ(n)**, *worse* than
 rho's Θ(√n). Crossover analysis: at 2^50 (their ceiling) rho is 2^25 and L[1/2],

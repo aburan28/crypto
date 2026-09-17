@@ -133,17 +133,26 @@ def sum_points(C, pts):
 
 
 def recover_via_relation(C, P, Q, n, p, k, max_subsets):
-    """Brute search small k-subsets of random points for sum==O, then solve."""
+    """Brute search k x k minors of [phi_j(R_i)] over N distinct random points
+    for a vanishing one, cross-check it against the group law, then solve."""
     N = 40
-    coeffs = [(random.randrange(n), random.randrange(n)) for _ in range(N)]
-    pts = [C.add(C.mul(aa, P), C.mul(bb, Q)) for (aa, bb) in coeffs]
+    coeffs, pts = [], []
+    while len(pts) < N:
+        aa, bb = random.randrange(n), random.randrange(n)
+        R = C.add(C.mul(aa, P), C.mul(bb, Q))
+        if R is not None and R not in pts:
+            coeffs.append((aa, bb))
+            pts.append(R)
+    M = build_matrix(pts, p, ncols=k)
     import itertools
     cnt = 0
     for S in itertools.combinations(range(N), k):
         cnt += 1
         if cnt > max_subsets:
             return None
-        if sum_points(C, [pts[i] for i in S]) is None:
+        if submatrix_singular(M, S, range(k), p):
+            if sum_points(C, [pts[i] for i in S]) is not None:
+                raise AssertionError("vanishing minor but subset does not sum to O")
             A = sum(coeffs[i][0] for i in S) % n
             B = sum(coeffs[i][1] for i in S) % n
             if B % n != 0:
