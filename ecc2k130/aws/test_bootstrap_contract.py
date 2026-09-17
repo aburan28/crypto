@@ -44,6 +44,12 @@ class BootstrapContract(unittest.TestCase):
     def test_infra_syncs_build_script(self):
         self.assertIn('aws s3 cp build.sh "s3://$BUCKET/aws/build.sh"', INFRA)
 
+    def test_unversioned_campaign_allows_legacy_storage(self):
+        self.assertIn("ECC_ALLOW_LEGACY_STORAGE=1", BOOTSTRAP)
+        self.assertIn("field storageProtocol", BOOTSTRAP)
+        # Must not stamp the strict protocol onto the live corpus.
+        self.assertNotIn("storageProtocol=", BOOTSTRAP)
+
 
 if __name__ == "__main__":
     unittest.main()

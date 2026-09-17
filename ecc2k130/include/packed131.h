@@ -292,6 +292,7 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         c[8]^=(b.v[4]&ma)<<k;
     }
 #endif
+#endif
 }
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;
