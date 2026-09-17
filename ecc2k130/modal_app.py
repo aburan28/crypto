@@ -124,6 +124,16 @@ if PACKED_TOP_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_TOP_CLMAD must be 0 or 1")
 if PACKED_TOP_CLMAD == "1" and PACKED_CLMAD != "1":
     raise ValueError("ECC_PACKED_TOP_CLMAD=1 requires ECC_PACKED_CLMAD=1")
+WALK_TABLE = os.environ.get("ECC_WALK_TABLE", "0")
+if WALK_TABLE not in ("0", "1"):
+    raise ValueError("ECC_WALK_TABLE must be 0 or 1")
+if WALK_TABLE == "1" and PACKED_WEIGHTED_PREFIX == "0":
+    raise ValueError("ECC_WALK_TABLE=1 requires ECC_PACKED_WEIGHTED_PREFIX")
+TABLE_PIVOT_BYTES = os.environ.get("ECC_TABLE_PIVOT_BYTES", "0")
+if TABLE_PIVOT_BYTES not in ("0", "1"):
+    raise ValueError("ECC_TABLE_PIVOT_BYTES must be 0 or 1")
+if TABLE_PIVOT_BYTES == "1" and WALK_TABLE != "1":
+    raise ValueError("ECC_TABLE_PIVOT_BYTES=1 requires ECC_WALK_TABLE=1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
@@ -184,6 +194,8 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "packedCompactState": PACKED_COMPACT_STATE == "1",
          "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
          "packedTopClmad": PACKED_TOP_CLMAD == "1",
+         "walkTable": WALK_TABLE == "1",
+         "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
          "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
          "packedStateTile": int(PACKED_STATE_TILE)}
 
@@ -219,6 +231,8 @@ image = (
           "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
           "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
           "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
+          "ECC_WALK_TABLE": WALK_TABLE,
+          "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
           "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
           "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
     .apt_install("build-essential")
@@ -243,7 +257,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
     )
 )
 
@@ -343,6 +357,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "packedCompactState": PACKED_COMPACT_STATE == "1",
             "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
             "packedTopClmad": PACKED_TOP_CLMAD == "1",
+            "walkTable": WALK_TABLE == "1",
+            "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
             "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
             "packedStateTile": int(PACKED_STATE_TILE)}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
@@ -370,7 +386,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -412,6 +428,8 @@ def benchmarkIdentity(packed=False):
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                 packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                walkTable=(WALK_TABLE == '1') if packed else None,
+                tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
@@ -577,6 +595,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                 packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                walkTable=(WALK_TABLE == '1') if packed else None,
+                tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
@@ -589,6 +609,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
                 packedTopClmad=PACKED_TOP_CLMAD == '1',
+                walkTable=WALK_TABLE == '1',
+                tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE))
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
@@ -682,6 +704,8 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                    packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                    packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                   walkTable=(WALK_TABLE == '1') if packed else None,
+                   tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                    packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                    packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
@@ -1213,6 +1237,8 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
                 packedTopClmad=PACKED_TOP_CLMAD == '1',
+                walkTable=WALK_TABLE == '1',
+                tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE),
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
