@@ -1,0 +1,27 @@
+{
+  "unit": "B scalar updates / s",
+  "class": "engineering",
+  "targetB": 18.0,
+  "floorB": [23.0, 25.0],
+  "shippingReferenceB": 15.115792,
+  "anyOver18": false,
+  "table": {
+    "medianB": 16.600541,
+    "ratesB": [16.540239, 16.621479, 16.600541],
+    "ratioTo18": 0.922252,
+    "ratioToShipping": 1.098225,
+    "ratioToFloor23": 0.721762
+  },
+  "pivot": {
+    "medianB": 16.666638,
+    "ratesB": [16.666638, 16.674912, 16.631552],
+    "ratioTo18": 0.925924,
+    "ratioToShipping": 1.102597,
+    "ratioToFloor23": 0.724636,
+    "ratioToTable": 1.003982
+  },
+  "receipts": {
+    "tableLogSha256": "55cdf99754e9f03c86bc79fe2c11db018ba1189c5989069a7a0e78c408f7f0cb",
+    "pivotLogSha256": "85eb942156b02b16545cce930f05e8e8057babaf1604e203bc4e069d46763397"
+  }
+}

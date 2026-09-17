@@ -1419,6 +1419,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/TOP-CLMAD.md">experiment report</a>.</p>
   </section>
 
+  <section aria-labelledby="eighteen-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="eighteen-result">ECC2K-130 GPU engineering: 18 B/s on one RTX PRO 6000</h2>
+    <p>The last priced leftovers — table walk and byte-pivot — were timed on
+    two successive Modal RTX PRO 6000 allocations (driver 580.95.05, automatic
+    96,256 workers). The one-add floor is 23–25 B/s, so 18 is not forbidden.
+    Neither arm cleared it. The campaign default stays the shipping walk.
+    Field-product count is unchanged at 5.3125 per update.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 18 B target</th><th scope="col">/ shipping 15.116</th><th scope="col">/ 23 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Shipping product</td><td>15.116</td><td>0.840</td><td>1.000</td><td>0.657</td><td>top clmad 0 / reference</td></tr><tr><td>Table walk</td><td>16.601</td><td>0.922</td><td>1.098</td><td>0.722</td><td>walk 1, pivot 0 / not accepted</td></tr><tr><td>Table walk + byte pivot</td><td>16.667</td><td>0.926</td><td>1.103</td><td>0.725</td><td>walk 1, pivot 1 / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample completed
+    50,465,865,728 updates. The byte pivot was priced at +2.4% and measured +0.4%.
+    This thread stops: the leftover that could still be priced has been measured.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/summary.json">18 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/README.md">experiment report</a>.</p>
+  </section>
+
   <section aria-labelledby="preblackwell-result" style="margin:3rem 0;overflow-x:auto">
     <h2 id="preblackwell-result">ECC2K-130 GPU engineering: g6 / g6e / g4dn packed clients</h2>
     <p>Completed on successive Modal allocations (driver 580.95.05, CUDA 13.3.1):
