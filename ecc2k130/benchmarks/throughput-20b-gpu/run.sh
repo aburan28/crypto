@@ -102,7 +102,13 @@ run("clockLock", "cat /tmp/ecc2k130-lgc.txt /tmp/ecc2k130-pl.txt")
 run("nvcc", "nvcc --version")
 
 host = run("hostTests",
-           "make test-clmad test-table-walk-host")
+           "mkdir -p build && "
+           "g++ -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 "
+           "-DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 "
+           "-DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 "
+           "-DECC_PACKED_PAIR_ILP=1 -Wno-unknown-pragmas src/testpacked.cpp "
+           "-o build/test-packed-pair-ilp-host && ./build/test-packed-pair-ilp-host && "
+           "make test-table-walk-host")
 if host.returncode != 0:
     rec["fatal"] = "host tests failed; no rate recorded"
     json.dump(rec, open(out_path, "w"), indent=1)
