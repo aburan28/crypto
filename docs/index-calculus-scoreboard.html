@@ -893,22 +893,33 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the target subgroup. The window that would pay is genus 130 to between 290 and 300; the gap to the
         nearest available genus is 2<sup>120.77</sup>
         (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>).</p>
+      <p><strong>Homogeneous relations do not exist to be found.</strong> Complete three-point
+        sweeps over the weight-two support and its variants, every pair of every base, found
+        <strong>0</strong> relations on the 4,262-point weight-two support (2<sup>&minus;95.4</sup>
+        predicted) and <strong>0</strong> on its 1,090-point &sigma;-stable subset
+        (2<sup>&minus;101.3</sup>). The one hit, on the 4,336-point weight-at-most-two support, is
+        degenerate. Four-point, orbit-grouped: eight normal bases swept to completion, 1,020,114
+        pair-orbits (2<sup>27.0</sup> signed pairs), 490 candidates, <strong>0</strong> certified
+        against an expectation of 2<sup>&minus;79.4</sup>. All 490 candidates are instances of
+        &sigma;<sup>2</sup> + &sigma; + 2 = 0 &mdash; exactly 2 per lifting orbit &mdash; so the
+        search recovers the endomorphism ring&rsquo;s own identity and nothing else. Every yield
+        matches the counting prediction; no support evades the floor
+        (<code>research/ecc2k130_relations/results/summary.json</code>,
+        <code>four_point_orbit_summary.json</code>).</p>
       <p><strong>Frobenius is a real saving and not a lever.</strong> On a normal basis the
-        weight-two support is closed under &sigma;, so pair sums group into &sigma;-orbits of 131 and
-        the support&rsquo;s 131&thinsp;&times;&thinsp;T points carry only T unknowns. That is worth
-        2<sup>14</sup> &mdash; 131 from storage, 131 from the unknowns &mdash; and it makes
-        orbit-grouped m&thinsp;=&thinsp;4 the best accounting in the study at 2<sup>+22.06</sup> over
-        rho, ahead of the 2<sup>+24.70</sup> that m&thinsp;=&thinsp;8 holds. Still 2<sup>22</sup>
-        short. Its single-relation row does fall <em>below</em> the reference, at 2<sup>57.26</sup>
-        against 2<sup>60.81</sup>, which is exactly the row this ledger declines to quote: the work
-        moved into the relations a logarithm needs, not out of the method. Measured alongside: eight
-        normal bases swept to completion, 1,020,114 pair-orbits (2<sup>27.0</sup> signed pairs), 490
-        candidates, <strong>0</strong> certified relations against an expectation of
-        2<sup>&minus;79.4</sup>. All 490 candidates are instances of &sigma;<sup>2</sup> +
-        &sigma; + 2 = 0 &mdash; the search recovers the endomorphism ring&rsquo;s own identity and
-        nothing else, exactly 2 per lifting orbit
-        (<code>research/ecc2k130_relations/results/four_point_orbit_summary.json</code>,
-        <code>four_point_orbit_boundary.json</code>).</p>
+        weight-two support is closed under &sigma;, so both sides of the meet-in-the-middle group
+        into &sigma;-orbits of 131 and a 131&thinsp;&times;&thinsp;T-point support carries only T
+        unknowns. Applied at every m &mdash; not just m&thinsp;=&thinsp;4 &mdash; it is worth
+        2<sup>16.1</sup> to 2<sup>18.4</sup>, more at larger m, so it does <em>not</em> change which
+        m is cheapest: m&thinsp;=&thinsp;8 before and after. It changes the margin. Priced on a
+        support that actually yields the relations it is charged for &mdash; section 1 charges for B
+        relations at a support expected to yield one &mdash; the best row is m&thinsp;=&thinsp;8 at
+        <strong>2<sup>+13.59</sup></strong> over rho, against the 2<sup>+24.79</sup> previously
+        recorded, needing 65 exabytes of class keys. Still short, and still behind a storage wall
+        that no engineering removes. Its single-relation rows at m&thinsp;=&thinsp;4, 6 and 8 fall
+        <em>below</em> the reference, which is exactly the row this ledger declines to quote: the
+        work moved into the relations a logarithm needs, not out of the method
+        (<code>research/ecc2k130_relations/results/four_point_orbit_boundary.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
