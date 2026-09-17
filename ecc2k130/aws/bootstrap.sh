@@ -134,6 +134,14 @@ ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
 EOF
+# systemd reads this as root; keep it unreadable to other local users since
+# it may carry the static keys below.
+chmod 600 /etc/ecc2k130.env
+# Optional static keys when the instance profile is missing (SKIP_IAM launch).
+# Written by infra.sh into /var/lib/ecc2k130/aws-creds.env before this runs.
+if [ -f /var/lib/ecc2k130/aws-creds.env ]; then
+    cat /var/lib/ecc2k130/aws-creds.env >> /etc/ecc2k130.env
+fi
 
 cat > /etc/systemd/system/ecc2k130-worker@.service <<'EOF'
 [Unit]

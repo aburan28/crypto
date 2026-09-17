@@ -45,6 +45,7 @@ BASE_URL = "https://aburan28.github.io/crypto"
 PAGES = (
     ("docs/site/index.html", "index.html"),
     ("docs/site/404.html", "404.html"),
+    ("docs/site/favicon.svg", "favicon.svg"),
     ("docs/site/assets/site.css", "assets/site.css"),
     # The browser rho engine: page controller, worker, host arithmetic, shader.
     # The worker fetches the shader by a relative URL, so all four have to land
