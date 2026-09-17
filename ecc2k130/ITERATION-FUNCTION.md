@@ -499,7 +499,8 @@ Under the table walk the update costs 27.2 SM-clocks, so 71 static clmads
 (≈ 63 dynamic, 38 SM-clocks) would make the carry-less unit the binding pipe
 by a wide margin: the two knobs do not compose, and `TOP_CLMAD` should be
 measured against the shipping walk only, which is how TOP-CLMAD.md frames it.
-Not measured on a GPU here; the table above is static costing and says so.
+That shipping-walk pair has now been timed: 12.859 B/s against a 15.116 B/s
+matched control. The table above is still only static costing.
 
 ### 6.4 Classification and verdict
 
