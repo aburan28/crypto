@@ -1000,6 +1000,112 @@ pub fn format_dreg_table(rows: &[DregSummary]) -> String {
     out
 }
 
+// ── Dense vs sparse elimination ────────────────────────────────────
+
+/// Head-to-head measurement of the two elimination paths on one
+/// Macaulay matrix.
+///
+/// The sparse path is an optimisation, so the only question about it is
+/// whether it is actually faster — and the honest way to answer that is
+/// to time both on the same matrix rather than to argue from the
+/// representation.  `max_weight` is reported alongside because fill-in
+/// is the failure mode: if elimination densifies the rows, sparse
+/// storage buys the early columns and then degrades toward dense
+/// behaviour, which shows up as the weight climbing toward `cols`.
+#[derive(Clone, Debug)]
+pub struct EliminationComparison {
+    pub n: u32,
+    pub m: usize,
+    pub degree: u32,
+    pub n_vars: usize,
+    pub rows: usize,
+    pub cols: usize,
+    /// Columns carrying degree-≥2 monomials — the part eliminated
+    /// sparsely.
+    pub high_cols: usize,
+    pub dense_ms: f64,
+    pub sparse_ms: f64,
+    /// Heaviest row reached during sparse elimination.  Compare against
+    /// `cols`: equality means fill-in has won and the rows are dense.
+    pub max_weight: usize,
+    /// Nonzeros before elimination, as a baseline for `max_weight`.
+    pub start_max_weight: usize,
+    /// Whether both paths returned the same profile.
+    pub agree: bool,
+}
+
+impl EliminationComparison {
+    /// Sparse time as a fraction of dense; below 1 is a win.
+    pub fn ratio(&self) -> f64 {
+        if self.sparse_ms == 0.0 {
+            f64::INFINITY
+        } else {
+            self.dense_ms / self.sparse_ms
+        }
+    }
+}
+
+/// Time both elimination paths on the decomposition system for
+/// `(n, m)` at one Macaulay degree.
+pub fn elimination_comparison(
+    n: u32,
+    factor_index: usize,
+    m: usize,
+    degree: u32,
+    seed: u64,
+) -> Option<EliminationComparison> {
+    use crate::cryptanalysis::koblitz_groebner::{
+        build_macaulay_sparse, solving_profile, solving_profile_sparse,
+    };
+    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+    let (irr, basis) = invariant_subspace_basis(n, factor_index)?;
+    let st = FieldStructure::new(n, &irr);
+    let b = F2mElement::one(n);
+    let mut rng = StdRng::seed_from_u64(seed);
+    let x_r = F2mElement::from_biguint(&BigUint::from(rng.gen::<u64>()), n);
+    let sys = build_decomposition_system(&basis, &x_r, &b, m, &st)?;
+
+    let (cols, rows) = build_macaulay_sparse(&sys.equations, sys.n_vars, degree)?;
+    let high_cols = low_column_start(&cols);
+    let start_max_weight = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+    let elim = eliminate_high_columns(rows, cols.len(), high_cols);
+
+    let t0 = Instant::now();
+    let dense = solving_profile(&sys.equations, sys.n_vars, degree);
+    let dense_ms = t0.elapsed().as_secs_f64() * 1e3;
+
+    let t1 = Instant::now();
+    let sparse = solving_profile_sparse(&sys.equations, sys.n_vars, degree);
+    let sparse_ms = t1.elapsed().as_secs_f64() * 1e3;
+
+    let agree = match (&dense, &sparse) {
+        (Some(a), Some(b)) => {
+            a.rank == b.rank
+                && a.refuted == b.refuted
+                && a.vars_determined == b.vars_determined
+                && a.resolves() == b.resolves()
+        }
+        (None, None) => true,
+        _ => false,
+    };
+
+    Some(EliminationComparison {
+        n,
+        m,
+        degree,
+        n_vars: sys.n_vars,
+        rows: dense.as_ref().map(|p| p.rows).unwrap_or(0),
+        cols: cols.len(),
+        high_cols,
+        dense_ms,
+        sparse_ms,
+        max_weight: elim.max_weight,
+        start_max_weight,
+        agree,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
