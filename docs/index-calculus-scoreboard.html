@@ -2606,5 +2606,43 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0014 -->
+<!-- BEGIN ic-tournament-round-0015 -->
+<section class="panel" id="ic-tournament-round-0015">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,468</td><td>1</td><td>0.7217</td><td>1.607e+05</td><td>12/12</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,294</td><td>0.961</td><td>0.6935</td><td>1.545e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,053</td><td>0.9071</td><td>0.6547</td><td>1.458e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>6,191</td><td>1.386</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,444</td><td>1</td><td>0.7452</td><td>1.599e+05</td><td>36/36</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,269</td><td>0.9606</td><td>0.7158</td><td>1.536e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,028</td><td>0.9064</td><td>0.6754</td><td>1.449e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,964</td><td>1.342</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,050</td><td>1</td><td>0.7372</td><td>1.635e+05</td><td>180/180</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,669</td><td>0.9059</td><td>0.6679</td><td>1.481e+05</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,493</td><td>1.356</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.102</td><td>1</td><td>reference</td><td>0.9246</td><td>180/180</td></tr>
+<tr><td>scan_io</td><td>1.094</td><td>0.9925</td><td>[0.9785179757065511, 1.0072720504423012]</td><td>0.9176</td><td>180/180</td></tr>
+<tr><td>rho</td><td>1.192</td><td>1.082</td><td>[1.0523319128877338, 1.1070035958217628]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0015 -->
 </body>
 </html>
