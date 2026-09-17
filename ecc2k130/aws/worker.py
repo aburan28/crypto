@@ -122,6 +122,20 @@ def isCpuSlotRecord(item):
     return name.startswith("cpu") or name == "cpu" or "/cpu" in name
 
 
+def idleSlotClaimable(item, info, newOnly):
+    """Whether this claimant may resume an expired/idle slot.
+
+    CPU and GPU share one registry. Mixing a host-shaped checkpoint with the
+    packed client (or the reverse) is exit 6, and on the unversioned store
+    retireSlot then drops that run id. CPU checkpoints also require an exact
+    thread match: cpu/4 must not resume cpu/2.
+    """
+    cpuSlot = isCpuSlotRecord(item)
+    if newOnly:
+        return cpuSlot and str(item.get("gpuName") or "") == str(info.get("gpuName") or "")
+    return not cpuSlot
+
+
 def claimNewOnly():
     # CPU (and FPGA host) walks must never resume a GPU checkpoint: loading a
     # packed-shape walk.ck into ecc2k130-cpu exits 6 and the supervisor would
@@ -234,7 +248,7 @@ class DynamoSlots:
 
     def scan(self):
         r = self._run("scan", "--table-name", self.table,
-                      "--projection-expression", "#s, leaseUntil, #st, #o",
+                      "--projection-expression", "#s, leaseUntil, #st, #o, gpuName",
                       "--expression-attribute-names", json.dumps({"#s": "slot", "#st": "state", "#o": "owner"}))
         if r.returncode != 0:
             raise RuntimeError("dynamodb scan failed: " + r.stderr.strip())
@@ -260,7 +274,7 @@ class DynamoSlots:
         free = sorted(it["slot"] for it in items
                       if it.get("state") not in ("retired", "solved", "error")
                       and int(it.get("leaseUntil") or 0) < now
-                      and (not newOnly or isCpuSlotRecord(it)))
+                      and idleSlotClaimable(it, info, newOnly))
         names = {"#o": "owner", "#st": "state"}
         for slot in free:
             values = {":me": dv(owner), ":t": dv(now + LEASE_SECONDS), ":now": dv(now), ":active": dv("active"),
@@ -382,7 +396,7 @@ class S3Slots:
         for it in sorted(items, key=lambda x: x["slot"]):
             if it.get("state") not in (None, "active", "idle") or int(it.get("leaseUntil") or 0) >= now:
                 continue
-            if newOnly and not isCpuSlotRecord(it):
+            if not idleSlotClaimable(it, info, newOnly):
                 continue
             etag, slot = it["_etag"], it["slot"]
             candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
@@ -439,7 +453,7 @@ class LocalSlots:
                 it = items[k]
                 if it.get("state") in ("retired", "solved", "error") or int(it.get("leaseUntil") or 0) >= now:
                     continue
-                if newOnly and not isCpuSlotRecord(it):
+                if not idleSlotClaimable(it, info, newOnly):
                     continue
                 it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
                 return int(k)
@@ -585,7 +599,7 @@ class Worker:
         info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
         newOnly = claimNewOnly()
         if newOnly:
-            log("CPU-safe claim: resume idle cpu/* slots only; otherwise allocate a new slot")
+            log("CPU-safe claim: resume idle %s slots only; otherwise allocate a new slot" % self.gpuName)
         slot = self.slots.claim(self.owner, info, newOnly=newOnly)
         self.lastBeatSuccess = time.monotonic()
         if self.contract:
