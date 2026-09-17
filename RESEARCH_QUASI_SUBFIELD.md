@@ -188,6 +188,63 @@ wider claim rests on §3's census agreement, which is evidence at
 reachable `n` and not a proof.  §6 already records that limitation and
 it is not weakened here.
 
+## 5c. Euler–Petit, read from the source: the threshold is one result, not two
+
+**Source:** M. Euler, C. Petit, *New results on quasi-subfield
+polynomials*, Finite Fields Appl. 75:101881 (2021), arXiv:1909.11326v2.
+
+§5 observed from HKPY's own Remark 3.1 that `deg λ` is not the binding
+constraint, the solving-exponent constant `κ ≈ 4.876` is, and that the
+optimum sits at `α* = 1/(2κ) = 0.1025`.  Euler–Petit state the same
+landscape in their own parameter, and reading their text settles two
+things this repository had recorded with a caveat.
+
+Their quality parameter is
+
+```
+β := ℓn / n'²        where ℓ = log_p(deg λ)
+```
+
+for `L(X) = X^{p^{n'}} − λ(X)`, and the algorithm beats the generic
+`O(p^{n/2})` only when `α_β := 1/(2κβ) > 1`, i.e. when
+
+```
+β < 1/(2κ) = 1/(2 · 4.876) = 0.1025…      (they state β < 0.103)
+```
+
+**Their Theorem 1.**  For a linearized
+`L(X) = X^{p^{n'}} − (a_ℓ X^{p^ℓ} + … + a_0 X)` over `F_{p^n}` with
+`ℓ ≥ 1`, if `L` splits completely over `F_{p^n}` then **`β ≥ 3/4`** —
+with equality attained, e.g. `X^{p²} + X^p + X` over `F_{p³}`.  And of
+their own constructions: "all the quasi-subfield polynomials exhibited
+in this article have `β > 0.7` and thus `α_β < 1`."  Their conclusion is
+explicit: "Our results do not allow to derive any speedup for the new
+ECDLP algorithm compared to previous approaches."
+
+So the target is `β < 0.103`, the proven floor for the linearized class
+is `β ≥ 0.75`, and every known family sits above 0.7.  The gap is a
+factor of roughly seven, and for linearized polynomials it is *proved*
+shut rather than merely unattained.
+
+### Two corrections to earlier notes
+
+**The apparent contradiction was a misreading, not a tension.**  An
+earlier note here flagged that "best family `β = 0.7`" sat *below* a
+claimed floor of `3/4 = 0.75`, and asked for the source to be checked.
+The source says `β > 0.7` — a lower bound on their families, not an
+achieved value beneath the floor.  There was never an inconsistency;
+the tension came from a secondary summary, which is why the note asked
+for the primary.
+
+**`α*` and the `β` threshold are the same number, and must not be cited
+as independent.**  §5's `α* = 1/(2κ) = 0.1025` and Euler–Petit's
+`β < 1/(2κ) = 0.103` agree to three digits because they *are* the same
+quantity, both falling out of the same `κ ≈ 4.876` from HKPY's Remark
+3.1.  Treating the agreement as two independent lines of evidence would
+be one result counted twice.  It is a single constraint, seen from two
+directions, and the honest statement is that the barrier has one source:
+the solving exponent, not the factor base.
+
 ## 6. What this does not settle
 
 - Characteristic 2 only, and `n0 < 64`, which is where the `u128`
