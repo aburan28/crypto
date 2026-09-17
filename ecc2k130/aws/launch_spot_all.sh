@@ -169,7 +169,7 @@ fill_spot() {
         fi
     done
     if [ "$left" -ge 2 ]; then
-        for type in g7e.4xlarge g7.4xlarge g6e.4xlarge g6.4xlarge; do
+        for type in g7e.4xlarge g7.4xlarge g6e.4xlarge g6.4xlarge g4dn.4xlarge; do
             [ "$left" -ge 2 ] || break
             launch_n "$region" "$type" $((left / 2))
             left=$((left - LAUNCHED_N * 2))
@@ -177,6 +177,10 @@ fill_spot() {
                 return 0
             fi
         done
+    fi
+    # Turing leftover: xlarge is 4 vCPU / 1 T4, so two fit in one 2xlarge slot.
+    if [ "$left" -gt 0 ]; then
+        launch_n "$region" "g4dn.xlarge" $((left * 2))
     fi
 }
 
