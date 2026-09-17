@@ -206,6 +206,10 @@ done
 echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# Pin family from the instance, not from a later IMDS/PATH miss inside systemd.
+ECC_INSTANCE_TYPE=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" \
+    http://169.254.169.254/latest/meta-data/instance-type || true)
+ECC_DEVICE_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1 || true)
 cat > /etc/ecc2k130.env <<EOF
 ECC_BUCKET=$BUCKET
 ECC_TABLE=$TABLE
@@ -213,6 +217,8 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+ECC_INSTANCE_TYPE=$ECC_INSTANCE_TYPE
+ECC_DEVICE_NAME=$ECC_DEVICE_NAME
 EOF
 # The live campaign.json predates storageProtocol. worker.py refuses that
 # store unless this is set; CERTIFICATION.md forbids writing the strict

@@ -58,6 +58,8 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("manifest.json", BOOTSTRAP)
         # A thin sm_89 publish must not become the live binaryKey.
         self.assertIn("g6/g6e (sm_89) and g7e (sm_120) share one binaryKey", BOOTSTRAP)
+        self.assertIn("ECC_INSTANCE_TYPE", BOOTSTRAP)
+        self.assertIn("ECC_DEVICE_NAME", BOOTSTRAP)
 
     def test_launch_g6_is_spot_ada_only(self):
         script = (HERE / "launch_g6.sh").read_text()
