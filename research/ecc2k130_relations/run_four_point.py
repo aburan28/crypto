@@ -179,9 +179,29 @@ def find_collisions(keys):
     return groups
 
 
+def canonical_quad(E, quad):
+    """A four-point relation up to ordering and global negation.
+
+    `A + B + C + D = O` makes all three pairings `(A,B)|(C,D)`, `(A,C)|(B,D)`
+    and `(A,D)|(B,C)` collide on the abscissa of their pair sums, so the same
+    relation arrives from three digest groups and must be counted once.
+    """
+    pos = tuple(sorted(tuple(p) for p in quad))
+    neg = tuple(sorted(tuple(E.neg(p)) for p in quad))
+    return min(pos, neg)
+
+
 def verify_quadruples(E, reps, n, groups):
     """Recompute every candidate in full; keep only genuine, non-degenerate hits."""
     real, false_positives, degenerate = [], 0, 0
+    seen = set()
+
+    def record(q):
+        key = canonical_quad(E, q)
+        if key not in seen:
+            seen.add(key)
+            real.append([[hex(p[0]), hex(p[1])] for p in q])
+
     for grp in groups:
         decoded = [decode_pair(g, n) for g in grp]
         for a in range(len(decoded)):
@@ -194,13 +214,13 @@ def verify_quadruples(E, reps, n, groups):
                 quad = [reps[i], reps[j] if si > 0 else E.neg(reps[j]),
                         reps[k], reps[l] if sk > 0 else E.neg(reps[l])]
                 if E.sum_points(quad) is None:
-                    real.append([[hex(p[0]), hex(p[1])] for p in quad])
+                    record(quad)
                     continue
                 # the other sign of the second pair is the partner that a
                 # shared abscissa actually predicts
                 quad2 = quad[:2] + [E.neg(p) for p in quad[2:]]
                 if E.sum_points(quad2) is None:
-                    real.append([[hex(p[0]), hex(p[1])] for p in quad2])
+                    record(quad2)
                 else:
                     false_positives += 1
     return real, false_positives, degenerate
@@ -247,8 +267,10 @@ def run(name, description, E, abscissae, r, *, budget_seconds, log=print):
             round(log2_pred_digest, 3) if log2_pred_digest is not None else None),
         "log2_predicted_genuine_collisions": (
             round(log2_pred_real, 3) if log2_pred_real is not None else None),
+        # B^4 / (24 r) with B the abscissa count, the same convention as
+        # boundary.py's sweep_yield and the three-point runner
         "log2_expected_relations_by_counting": round(
-            4 * math.log2(2 * n) - math.log2(24) - math.log2(r), 3),
+            4 * math.log2(n) - math.log2(24) - math.log2(r), 3),
     }
 
 

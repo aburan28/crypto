@@ -76,6 +76,9 @@ def test_sweep_finds_every_four_point_relation_on_a_small_base():
         return min(q, neg)
     assert {canon(q) for q in got} == {canon(q) for q in brute}, (
         len(got), len(brute))
+    # each relation reaches the sweep through three pairings; count it once
+    assert len(found) == len({canon(q) for q in got}), (
+        len(found), len(got))
 
 
 def test_every_reported_relation_actually_sums_to_the_identity():
