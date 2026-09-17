@@ -216,11 +216,15 @@ for extra in ("g7e.4xlarge", "g7.4xlarge", "g6e.4xlarge", "g6.4xlarge",
               "g4dn.4xlarge", "g4dn.xlarge"):
     if extra not in types:
         types.append(extra)
-weight = {".xlarge": 0.5, ".2xlarge": 1, ".4xlarge": 2, ".8xlarge": 4}
+# Longest suffix first so ".xlarge" does not also match ".2xlarge".
+weight = (
+    (".48xlarge", 24), (".24xlarge", 12), (".16xlarge", 8), (".12xlarge", 6),
+    (".8xlarge", 4), (".4xlarge", 2), (".2xlarge", 1), (".xlarge", 0.5),
+)
 overrides = []
 for typ in types:
     w = 1
-    for suf, val in weight.items():
+    for suf, val in weight:
         if typ.endswith(suf):
             w = val
             break

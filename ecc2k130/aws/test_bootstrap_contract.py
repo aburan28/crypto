@@ -111,6 +111,12 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("--type", script)
         self.assertIn("instant", script)
         self.assertNotIn("create-fleet --type maintain", script)
+        # WeightedCapacity suffixes must be longest-first; ".xlarge" matches
+        # ".2xlarge" if it is tried first and would double the fleet target.
+        self.assertRegex(
+            script,
+            r'\("\.4xlarge", 2\).*\("\.2xlarge", 1\).*\("\.xlarge", 0\.5\)',
+        )
         subprocess.run(["bash", "-n", str(HERE / "launch_spot_all.sh")], check=True)
 
 
