@@ -20,11 +20,11 @@ def samples(obj: dict) -> list[float]:
             raise SystemExit("receipt contains an invalid sample")
         rate = float(row["rate"])
         if rate > 1000:
-            rate /= 1000.0
-        rates.append(rate)
+            rate = rate / 1000.0
+        rates.append(round(rate, 6))
     if not rates and obj.get("rate"):
         rate = float(obj["rate"])
-        rates.append(rate / 1000.0 if rate > 1000 else rate)
+        rates.append(round(rate / 1000.0 if rate > 1000 else rate, 6))
     if not rates:
         raise SystemExit("receipt has no rates")
     return rates

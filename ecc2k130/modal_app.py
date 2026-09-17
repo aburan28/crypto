@@ -117,7 +117,8 @@ if PACKED_SHARED_SIGMA == "1" and (PACKED_WEIGHTED_PREFIX != "2" or not (int(PAC
     raise ValueError("ECC_PACKED_SHARED_SIGMA=1 requires weighted-prefix mode 2 and the walk permutation network")
 # The 3-bit top-word cross terms of every product on the carryless unit
 # instead of as masked shifts: four more clmads per product, 25 fewer ALU
-# instructions in SASS (77 -> 52).  Unmeasured on a card; see TOP-CLMAD.md.
+# instructions in SASS (77 -> 52).  Measured slower on an RTX PRO 6000
+# (12.859 vs 15.116 B/s); leave off.  See TOP-CLMAD.md.
 PACKED_TOP_CLMAD = os.environ.get("ECC_PACKED_TOP_CLMAD", "0")
 if PACKED_TOP_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_TOP_CLMAD must be 0 or 1")

@@ -46,3 +46,12 @@ The runner writes scratch logs under `/tmp/top-clmad-receipts` so Modal's
 source snapshot does not see the tree change mid-build, then copies the
 JSON receipts here. `summarize.py` cites those files and does not
 recompute rates from a model.
+
+## Result (2026-09-17)
+
+| variant | median B/s | / control | / 23 B floor | correctness | class |
+|---|---:|---:|---:|---|---|
+| shipping product | 15.115792 | 1.000 | 0.657 | top clmad 0 | reference |
+| `PACKED_TOP_CLMAD=1` | 12.859376 | 0.851 | 0.559 | top clmad 1 | engineering |
+
+Acceptance failed. The default stays 0. Numbers from [summary.json](summary.json).
