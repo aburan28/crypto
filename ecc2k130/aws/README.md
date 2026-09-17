@@ -539,6 +539,14 @@ all-visible, and a bulk-loaded table has almost none marked, so it was still
 reading the 42 GB. `VACUUM (ANALYZE)` is what sets that map; it runs once,
 recorded in `dp_ingest_meta`, because a replacement host is the deployment
 mechanism here and a vacuum per deploy is not a cost this table can carry.
+With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
+vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
+snapshot from over six minutes to **142.8 s** (`published status.json in
+142.8s`, which is why that line carries a duration). It is still O(corpus):
+the durable answer when it next hurts is a maintained total and hourly table
+updated inside the ingest transaction, since `found_at` is constant per
+object, and that would make the snapshot O(1). Not done — the 30-minute
+spacing buys the room.
 
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
