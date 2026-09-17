@@ -52,33 +52,20 @@ class FleetRollContract(unittest.TestCase):
     def test_roll_waits_for_the_fleet_to_refill_between_batches(self):
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
         self.assertIn("activeInstanceIds", roll)
-        self.assertIn("activeWeightedCapacity", roll)
         self.assertIn("${timeout}", roll)
 
     def test_roll_waits_against_a_per_batch_baseline_not_the_static_target(self):
         # Bugbot bc7697e0 (High): waiting for TargetCapacitySpecification
-        # instead of the capacity this batch actually removed means an
+        # instead of the count this batch actually removed means an
         # already-short spot fleet -- one that never reaches that target --
         # times out on every batch and just keeps terminating instances,
         # draining the fleet instead of rolling it.
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
         self.assertNotIn("TargetCapacitySpecification", roll)
-        self.assertIn("capBefore=$(activeWeightedCapacity", roll)
-        self.assertIn('"$cap" -ge "$capBefore"', roll)
+        self.assertIn("capacityBefore=$(activeGpuCapacity", roll)
+        self.assertIn('"$capacity" -ge "$capacityBefore"', roll)
         # The baseline must be read before terminate-instances runs.
-        self.assertLess(roll.index("capBefore=$(activeWeightedCapacity"), roll.index("terminate-instances"))
-
-    def test_roll_recovery_is_weighted_by_gpu_not_by_instance_count(self):
-        # Bugbot 36e4c416 (High): TYPES mixes g7e.2xlarge through .48xlarge,
-        # weighted 1 through 8 GPUs by gpusOf. A terminated weight-8
-        # instance replaced by a single weight-1 instance would satisfy an
-        # instance-count comparison while 7 of the 8 GPUs it removed are
-        # still missing, so the next batch would proceed and could drain
-        # the campaign's real capacity while looking like it was rolling.
-        roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
-        self.assertNotIn("activeInstanceIds \"$id\" | wc -w", roll)
-        activeWeightedCapacity = FLEET.split("activeWeightedCapacity() {", 1)[1].split("\n}", 1)[0]
-        self.assertIn("gpusOf", activeWeightedCapacity)
+        self.assertLess(roll.index("capacityBefore=$(activeGpuCapacity"), roll.index("terminate-instances"))
 
     def test_roll_confirms_this_batchs_own_ids_are_gone_not_an_aggregate_number(self):
         # Bugbot e7a26c6d (High, first fix) and 2db76048 (High, on the fix
@@ -94,13 +81,30 @@ class FleetRollContract(unittest.TestCase):
         # not just a count, before declaring the batch gone.
         self.assertIn("for member in $group", roll)
         self.assertIn('case "$active" in *" $member "*) gone=0 ;; esac', roll)
-        # Only after confirming departure does it wait for GPU capacity (not
-        # FulfilledCapacity, not an instance count) to climb back to the
-        # per-batch baseline.
+        # Only after confirming departure does it wait for GPU-weighted
+        # membership (not FulfilledCapacity, not instance count) to climb
+        # back to the per-batch baseline.
         drop_then_recover = roll.split('if [ "$gone" -eq 1 ]; then break; fi', 1)
         self.assertEqual(len(drop_then_recover), 2)
         self.assertIn('if [ "$gone" -eq 1 ]; then', drop_then_recover[1])
-        self.assertIn('"$cap" -ge "$capBefore"', drop_then_recover[1])
+        self.assertIn('"$capacity" -ge "$capacityBefore"', drop_then_recover[1])
+        self.assertNotIn("wc -w", drop_then_recover[1])
+
+    def test_roll_recovery_weights_by_gpu_not_instance_count(self):
+        # Bugbot 36e4c416 (High): waiting for the active-instance count to
+        # recover treats refill as instance-count, but the fleet's maintain
+        # target and WeightedCapacity are GPUs. After terminating large
+        # instances, a handful of smaller replacements restore the count
+        # while most of the lost GPU capacity is still missing, and the
+        # next batch then drains the campaign.
+        start = FLEET.index("activeGpuCapacity()")
+        helper = FLEET[start:FLEET.index("\ncapacityInt")]
+        self.assertIn("gpusOf", helper)
+        self.assertIn("ActiveInstances[].InstanceType", helper)
+        roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
+        self.assertNotIn("wc -w", roll)
+        self.assertIn("capacityBefore=$(activeGpuCapacity", roll)
+        self.assertIn('"$capacity" -ge "$capacityBefore"', roll)
 
     def test_roll_normalizes_the_tab_separated_id_list_before_matching(self):
         # aws --output text separates list entries with tabs, not spaces;
