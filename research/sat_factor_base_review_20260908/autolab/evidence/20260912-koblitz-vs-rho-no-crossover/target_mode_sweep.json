@@ -1,0 +1,93 @@
+{
+  "a": 0,
+  "best_target_mode": "partition_walk",
+  "charged_definition": "direct: full_algorithm_charged_total_ms from the producer batch summary (curve setup + support-table setup charged once, plus per-target fixture setup and relation collection). rho: sum of per-target total_ms (setup + walk + validation).",
+  "claim_boundary": "Public synthetic Koblitz fixtures only. Not key recovery, not asymptotic sub-rho, not imported points. A negative result for this implementation at this rung, not a proof that no crossover exists.",
+  "cost_decomposition": {
+    "direct_ms_per_target": {
+      "coefficient_walk": {
+        "batch_setup_amortized": 0.01665275,
+        "collection": 15.051098331054687,
+        "fixture_setup": 0.26220386035156285,
+        "of_which_linear_solve": 0.015371478515625007,
+        "of_which_solution_validation": 8.030179813476567
+      },
+      "independent": {
+        "batch_setup_amortized": 0.015119587890625001,
+        "collection": 20.254964242187476,
+        "fixture_setup": 0.00018081542968749907,
+        "of_which_linear_solve": 0.016132633789062514,
+        "of_which_solution_validation": 7.739482756835936
+      },
+      "partition_walk": {
+        "batch_setup_amortized": 0.0153571767578125,
+        "collection": 14.634175467773453,
+        "fixture_setup": 0.12814257324218736,
+        "of_which_linear_solve": 0.015584684570312497,
+        "of_which_solution_validation": 7.780448307617188
+      }
+    },
+    "direct_solution_validation_is_a_correctness_assertion": "solution_validation_ms re-derives the discrete log of every factor-base representative with a scalar multiplication and replays every collected relation against the solved vector, under assert_eq!. It confirms an answer the linear solve already produced rather than producing it. It is the largest single component of the direct arm's charged cost and is the obvious place to look next; it is not subtracted from any ratio quoted here.",
+    "note": "Diagnostic only. The headline ratios above charge each arm its own full cost as the producers define it; nothing here is subtracted from a quoted ratio.",
+    "rho_ms_per_target": {
+      "setup": 3.975871222656252,
+      "total": 12.821725665039061,
+      "validation": 1.2814695703124988,
+      "walk": 7.56438487207032
+    },
+    "rho_setup_includes_target_construction": "rho charges setup_ms for building the target point Q = d0*G and the jump table. Constructing Q is instance generation, which the direct arm reports separately as fixture_generation_ms and does not charge. This asymmetry runs against rho.",
+    "setup_amortization_is_not_the_lever": "Curve plus support-table setup is a few tens of milliseconds for the whole batch, so it is well under 0.1 ms per target at 1024 targets. Amortizing the base across more targets cannot close the remaining gap; the cost is per-target relation collection."
+  },
+  "direct_by_target_mode": {
+    "coefficient_walk": {
+      "all_fixtures_rank_plus_32": true,
+      "charged_ms_per_target": 15.329954941406234,
+      "ic_times_behind_rho": 1.1956233772187428,
+      "rho_over_ic": 0.83638378025545,
+      "whole_process_wall_ms": 83378.772375
+    },
+    "independent": {
+      "all_fixtures_rank_plus_32": true,
+      "charged_ms_per_target": 20.27026464550782,
+      "ic_times_behind_rho": 1.580931083307971,
+      "rho_over_ic": 0.6325386416639873,
+      "whole_process_wall_ms": 85658.772166
+    },
+    "partition_walk": {
+      "all_fixtures_rank_plus_32": true,
+      "charged_ms_per_target": 14.77767521777345,
+      "ic_times_behind_rho": 1.152549633632208,
+      "rho_over_ic": 0.8676415928818139,
+      "whole_process_wall_ms": 77637.57558399999
+    }
+  },
+  "eta": {
+    "denominator": 2,
+    "numerator": 1
+  },
+  "executable_sha256": {
+    "direct": "80542f6e5b403552e7b769f6d89bb09e90966d3c4985c6073b866d4f6b087b4c",
+    "rho": "b9fe7b93e64a6b3820c3f2667095dded18dea500ec1bb2ecc8e75f0be7cc4193"
+  },
+  "fixtures": 1024,
+  "host_id": {
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "n": 37,
+  "ratio_note": "rho_over_ic above 1.0 would be an index-calculus win. Every mode measured here is below 1.0.",
+  "rho": {
+    "all_targets_verified": true,
+    "charged_ms_per_target": 12.821725665039061,
+    "targets_verified": 1024,
+    "whole_process_wall_ms": 13160.28237499998
+  },
+  "seeds": {
+    "direct": 8866588946129576708,
+    "rho": 14412094330580221154
+  },
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "algorithmic_charged",
+  "verdict": "NO_CHARGED_CROSSOVER_N37"
+}
