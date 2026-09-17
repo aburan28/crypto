@@ -389,7 +389,9 @@ ECC_HD P131 sigma131(P131 a,int k){
  if(k>=3 && k<=10) return sigmaWalkNetwork131(a,k-3);
 #endif
 #if ECC_PACKED_PERM_SIGMA & 2
- if(k==16 || k==32 || k==65) return sigmaInvNetwork131(a,k==16?0:k==32?1:2);
+ // Columns 0 and 1 (sigma^4, sigma^8) serve invPolynomial131 only; the
+ // normal-basis chain keeps its squarings there so that it stays the control.
+ if(k==16 || k==32 || k==65) return sigmaInvNetwork131(a,k==16?2:k==32?3:4);
 #endif
 #pragma unroll 1
  for(int i=0;i<k;i++)a=sqr131(a);
@@ -420,5 +422,54 @@ ECC_HD P131 inv131(P131 a){
  return sqr131(acc);
 #endif
 }
+
+#ifndef ECC_PACKED_POLY_INV
+#define ECC_PACKED_POLY_INV 0
+#endif
+#if ECC_PACKED_POLY_INV < 0 || ECC_PACKED_POLY_INV > 2
+#error "ECC_PACKED_POLY_INV must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_POLY_INV && !(ECC_PACKED_PERM_SIGMA & 2)
+#error "ECC_PACKED_POLY_INV needs the inversion permutation networks (ECC_PACKED_PERM_SIGMA & 2)"
+#endif
+#if ECC_PACKED_POLY_INV
+/* sigma^k of a polynomial-basis element through the normal basis, where it is
+   a permutation: index selects the sigmaInvNetwork131 column, 4/8/16/32/65. */
+ECC_HD P131 sigmaPolynomial131(const P131 &a, int index) {
+    return toPolynomial131(sigmaInvNetwork131(fromPolynomial131(a), index));
+}
+/* Itoh-Tsujii in the polynomial basis.  inv131 runs the same chain in the
+   normal basis, where every one of its eight products converts both operands
+   in and the result out (about 310 logic slots against 122 for a polynomial
+   product) so that the multi-squarings can be coordinate permutations.  Here
+   the products stay polynomial and only the four large jumps cross bases,
+   once each way; the small jumps are polynomial squarings.  Per inversion,
+   statically: 8 products 976 slots + 48 clmad, 9 squarings 405 + 45 clmad,
+   4 round trips 4 x (75 + 224 + 72), against about 4,000 slots + 68 clmad
+   for the normal-basis chain including its own conversions in and out.
+   ECC_PACKED_POLY_INV=2 takes the sigma^4 jump through the network as well
+   (20 fewer clmads, about 190 more slots) for a kernel that is short of the
+   carry-less unit rather than the logic pipe. */
+static ECC_BIG P131 invPolynomial131(P131 a) {
+    P131 acc = mulPolynomial131(squarePolynomial131(a), a);                          // 2^2 - 1
+    acc = mulPolynomial131(squarePolynomial131(squarePolynomial131(acc)), acc);      // 2^4 - 1
+#if ECC_PACKED_POLY_INV == 2
+    acc = mulPolynomial131(sigmaPolynomial131(acc, 0), acc);                         // 2^8 - 1
+#else
+    {
+        P131 s = acc;
+#pragma unroll
+        for (int i = 0; i < 4; ++i) s = squarePolynomial131(s);
+        acc = mulPolynomial131(s, acc);                                              // 2^8 - 1
+    }
+#endif
+    acc = mulPolynomial131(sigmaPolynomial131(acc, 1), acc);                         // 2^16 - 1
+    acc = mulPolynomial131(sigmaPolynomial131(acc, 2), acc);                         // 2^32 - 1
+    acc = mulPolynomial131(sigmaPolynomial131(acc, 3), acc);                         // 2^64 - 1
+    acc = mulPolynomial131(squarePolynomial131(acc), a);                             // 2^65 - 1
+    acc = mulPolynomial131(sigmaPolynomial131(acc, 4), acc);                         // 2^130 - 1
+    return squarePolynomial131(acc);                                                 // 2^131 - 2
+}
+#endif
 
 } // namespace eccPacked131

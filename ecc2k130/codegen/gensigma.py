@@ -191,7 +191,10 @@ def generate():
              '#define ECC_SIGMA_WALK_STORAGE alignas(32) static const',
              '#define ECC_SIGMA_INV_STORAGE alignas(32) static const', '#endif']
     walk, nw = emitGroup(nets, 'sigmaWalkNetwork131', list(range(3,11)), 8)
-    inv, ni = emitGroup(nets, 'sigmaInvNetwork131', [16,32,65], 4)
+    # The Itoh-Tsujii jumps; the normal-basis chain (inv131) takes 16, 32 and
+    # 65 through the network, the polynomial-basis one (invPolynomial131)
+    # also 8 and optionally 4.
+    inv, ni = emitGroup(nets, 'sigmaInvNetwork131', [4,8,16,32,65], 5)
     lines += walk + inv + emitWalkPair(nets) + emitSharedWalkPair(nets) + ['#undef ECC_SIGMA_WALK_STORAGE', '#undef ECC_SIGMA_INV_STORAGE']
     return '\n'.join(lines)+'\n', (nw,ni)
 

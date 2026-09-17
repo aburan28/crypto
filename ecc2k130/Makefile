@@ -54,6 +54,12 @@ WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# Batch inversion in the polynomial basis (1), also taking sigma^4 through the
+# permutation network (2); 0 is the normal-basis chain.
+PACKED_POLY_INV ?= 0
+# Table walk: 0 rebuilds each denominator from the step tag in the second
+# pass instead of storing it in the first.
+TABLE_DENOM_STORE ?= 1
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -131,7 +137,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
-       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
+       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) -DECC_PACKED_POLY_INV=$(PACKED_POLY_INV) \
+       -DECC_TABLE_DENOM_STORE=$(TABLE_DENOM_STORE)
 
 all: cpu
 
@@ -292,8 +299,12 @@ test-clmad:
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_POLY_INV=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-polyinv-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_POLY_INV=2 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-polyinv2-host
 	./build/test-packed-clmad-host
 	./build/test-packed-topclmad-host
+	./build/test-packed-polyinv-host
+	./build/test-packed-polyinv2-host
 
 test-packed-cuda:
 	mkdir -p build
@@ -430,6 +441,7 @@ clean:
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host
+	rm -f build/test-packed-polyinv-host build/test-packed-polyinv2-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic

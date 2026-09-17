@@ -162,7 +162,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         const size_t bytes = physicalFieldCount() * sizeof(unsigned);
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
-#if ECC_PACKED_CACHE_DENOM
+#if ECC_PACKED_CACHE_DENOM && !(ECC_WALK_TABLE && !ECC_TABLE_DENOM_STORE)
         CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
 #endif
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
@@ -223,8 +223,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
-        printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
-               ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());
+        printf("packed polynomial inversion: %d\n", ECC_PACKED_POLY_INV);
+        printf("packed table walk: %d (%d branches, %zu shared bytes, denominators %s)\n", ECC_WALK_TABLE,
+               ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes(),
+               ECC_WALK_TABLE && !ECC_TABLE_DENOM_STORE ? "rebuilt from the tag" : "stored");
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());

@@ -14,6 +14,9 @@
 #if ECC_WALK_TABLE
 #include "packedtablewalk.cuh"
 #endif
+#ifndef ECC_TABLE_DENOM_STORE
+#define ECC_TABLE_DENOM_STORE 1
+#endif
 
 namespace eccPacked131 {
 #ifndef ECC_PACKED_CACHE_DENOM
@@ -221,7 +224,14 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 prod = dp;
                 store(p.pchain, slot, tid, p.threads, ep);
             }
+#if ECC_TABLE_DENOM_STORE
             store(denominators, slot, tid, p.threads, dp);
+#else
+            // The tag just pushed is the low half-word of the history; the
+            // second pass rebuilds dp from it and the shared table, which is
+            // five shared loads against a 17-byte store and load per slot.
+            (void)denominators;
+#endif
 #else
             const int j = 3 + ((hw >> 1) & 7);
 #if !ECC_PACKED_CACHE_DENOM
@@ -277,7 +287,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #endif  // ECC_WALK_TABLE
         }
-#if ECC_PACKED_POLY_CHAIN
+#if ECC_PACKED_POLY_CHAIN && ECC_PACKED_POLY_INV
+        inv = invPolynomial131(prod);
+#elif ECC_PACKED_POLY_CHAIN
         inv = toPolynomial131(inv131(fromPolynomial131(prod)));
 #else
         inv = inv131(prod);
@@ -286,8 +298,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
+#if ECC_WALK_TABLE && !ECC_TABLE_DENOM_STORE
+            P131 dp = twDenominator(unsigned(p.hist[size_t(slot) * p.threads + tid] & 0xFFFFu), x, twShared);
+#else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
+#endif
             P131 lambdaPoly;
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(inv,

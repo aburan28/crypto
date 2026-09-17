@@ -28,6 +28,13 @@
 #include "tablewalk.h"
 #include "packed131.h"
 
+#ifndef ECC_TABLE_DENOM_STORE
+#define ECC_TABLE_DENOM_STORE 1
+#endif
+#if ECC_TABLE_DENOM_STORE != 0 && ECC_TABLE_DENOM_STORE != 1
+#error "ECC_TABLE_DENOM_STORE must be 0 or 1"
+#endif
+
 namespace eccPacked131 {
 
 static const int TW_H = ECC_TABLE_BRANCHES;
@@ -131,6 +138,16 @@ __device__ __forceinline__ void twAddend(unsigned tag, const P131 &xp, const P13
     const uint32_t tx = top & 7u;
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
+}
+
+// d = x + x_T alone, for the second pass when the first did not store it.
+__device__ __forceinline__ P131 twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared) {
+    const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
+    P131 d;
+#pragma unroll
+    for (int i = 0; i < 4; ++i) d.v[i] = xp.v[i] ^ t[i];
+    d.v[4] = xp.v[4] ^ (t[8] & 7u);
+    return d;
 }
 #endif  // __CUDACC__
 

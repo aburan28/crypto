@@ -94,6 +94,16 @@ int main() {
         for (int j:powers) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) {
             printf("packed Frobenius mismatch at case %d, power %d\n",test,j);return 1;
         }
+#if ECC_PACKED_POLY_INV
+        const int jumps[]={4,8,16,32,65};
+        for (int c=0;c<5;++c) if (unpack(eccPacked131::fromPolynomial131(eccPacked131::sigmaPolynomial131(ap,c)))!=R::sigma(a,jumps[c])) {
+            printf("polynomial Frobenius jump mismatch at case %d, power %d\n",test,jumps[c]);return 1;
+        }
+        const auto polynomialInverse=eccPacked131::invPolynomial131(ap);
+        if (!canonical(polynomialInverse) || unpack(eccPacked131::fromPolynomial131(polynomialInverse))!=R::inv(a)) {
+            printf("polynomial inversion mismatch at case %d\n",test);return 1;
+        }
+#endif
     }
     P zero{};auto one=pack(R::one());
     if (unpack(eccPacked131::mul131(zero,one))!=R::zero() ||

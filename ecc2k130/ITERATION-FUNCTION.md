@@ -528,3 +528,124 @@ at the ALU pipe's limit with ≈ 1,730 dynamic slots per update, so 17.0 needs
 ≈ 75 of `fromPolynomial131(x)` that the weight and the distinguished-point
 test require; and in the audited geometry it additionally needs the clock the
 card takes back, which no instruction count controls.
+
+## 7. Round 3: the inversion, the denominators, the batch
+
+§6.4 left the table kernel at the ALU pipe's limit with the carry-less unit
+at 88%, and said 17.0 needs ≈ 50 slots. The static profile of §3 puts the
+batch inversion at **266 ALU slots per update** (4,260 per batch of 16,
+16% of the kernel), more than the whole selection logic, so it is the
+place to look. Everything in this section is a change to the arithmetic
+behind the walk, not to the walk: the iteration function of §4, its tags,
+its corpus and its campaign identity are untouched, and every variant is
+checked against the same reference re-walk.
+
+### 7.1 What the inversion costs and why
+
+`inv131` runs Itoh–Tsujii in the normal basis: eight products and 130
+squarings arranged as jumps of 1, 2, 4, 8, 16, 32, 1, 65. The chain lives
+in the normal basis so that the large jumps can be coordinate permutations
+(Beneš networks, `sigmaInvNetwork131`, 250 slots each), but it pays for that
+in every product: `mul131` converts both operands in and the result out,
+**310 slots against 160 for a polynomial-basis product**. Eight of them are
+1,200 slots that buy nothing but the basis the permutations want.
+
+`invPolynomial131` (`PACKED_POLY_INV=1`) keeps the chain in the polynomial
+basis, which is where its input `prod` and its output `inv` already are, so
+the conversions at the ends disappear too. The eight products are
+polynomial. The small jumps (1, 2, 4, and the two single squarings) are
+polynomial squarings, 5 clmad and ≈ 65 slots each. The four large jumps
+(8, 16, 32, 65) cross into the normal basis, permute, and cross back: 75 +
+250 + 72 slots, once each way. `sigma^8` is a new column of the generated
+network table; the normal-basis chain does not use it, so the control
+kernel is unchanged. `PACKED_POLY_INV=2` takes the jump of 4 through the
+network as well, trading 20 clmads per inversion for ≈ 190 slots, for a
+kernel that is short of the carry-less unit rather than the logic pipe.
+
+Static, per inversion (`kernel_cost.py`, sm_120, the audited preset):
+
+| chain | products | squarings | permutations | conversions | ALU slots | clmad |
+|---|---:|---:|---:|---:|---:|---:|
+| `inv131`, normal basis (§6) | 8 × 310 | 17 × ≈ 40 | 3 × 250 | in + out, 147 | **4,259** | 68 |
+| `invPolynomial131`, `POLY_INV=1` | 8 × 160 | 9 × ≈ 65 | 4 × 250 | 4 × 147 | **3,617** | 93 |
+| `invPolynomial131`, `POLY_INV=2` | 8 × 160 | 5 × ≈ 65 | 5 × 250 | 5 × 147 | **3,659** | 73 |
+
+The saving is smaller than the product arithmetic suggests (8 × 150 =
+1,200) because the polynomial chain needs a fourth network and four round
+trips where the normal-basis chain needed none: 1,000 slots of permutation
+and 588 of conversion are the price of doing the products cheaply. A
+byte-table permutation (17 loads of 20 bytes, ≈ 100 slots) would take
+another 600 slots per inversion off, but its tables do not fit beside the
+walk's in shared memory, and from L2 they would add ≈ 85 bytes of traffic
+per update to a kernel whose batch-size history (BATCH-TUNING.md) says it
+is cache-sensitive. Not built.
+
+### 7.2 The denominators
+
+The second pass reads back each slot's denominator `dp = x + x_T`, which the
+first pass stored: 17 bytes written and read per slot, a quarter of the
+per-slot state. Under the table walk the denominator is a function of the
+step's tag, and the tag is the low half-word of the lane's history, which
+the first pass just wrote and the second pass can read for 8 bytes.
+`TABLE_DENOM_STORE=0` drops the store and rebuilds `dp` from the tag and the
+shared table: five shared loads and five XORs, **+17 static slots per
+update** and **−26 bytes of state traffic per slot** (the load of the
+history replaces the store and load of the denominator). Per-slot state
+falls from 68 to 51 bytes. On the pipe model alone this is a small loss;
+it is here because the kernel's batch history says state traffic is not
+free, and because it is what makes the next lever affordable.
+
+### 7.3 The batch
+
+The inversion is paid once per batch. BATCH-TUNING.md measured 32 → 16 as
+**+52%** at 385,024 workers, with the hot state falling from 245 to 122
+MiB, so the batch is bounded by cache and not by arithmetic, and a batch
+is only affordable if its state fits. With the denominators gone, batch 24
+carries 24 × 51 = 1,224 bytes of field state per worker against today's
+16 × 68 = 1,088, i.e. **+12.5%**, and batch 32 carries 1,632 (+50%).
+
+### 7.4 The variants, priced before they run
+
+Static slots and clmads per update at the audited preset, table walk,
+byte/nibble LUT selection. The rate column is **an extrapolation**: it
+scales the measured 16.56 B/s of §6.3 by the static ALU ratio, assumes the
+static-to-dynamic ratio of the §6 kernel, and assumes the ALU pipe stays
+the binding one. The clmad column is the check on that last assumption:
+the unit issues 1.67 per SM-clock, so at 27 SM-clocks per update it has
+room for ≈ 45, and a variant whose *dynamic* clmad count (static minus the
+slot-0 arm's six, plus 6/B) approaches its own budget will not reach the
+extrapolated rate.
+
+| variant | batch | ALU slots (static) | clmad (static / dynamic) | clmad budget at the extrapolated rate | state bytes / worker | rate, extrapolated (B/s) |
+|---|---:|---:|---:|---:|---:|---:|
+| A. §6 table kernel (control) | 16 | 1,831 | 45.3 / 39.6 | 45 | 1,088 | 16.56 measured |
+| B. + `POLY_INV=1` | 16 | 1,784 | 46.8 / 41.2 | 44 | 1,088 | 17.0 |
+| C. + `POLY_INV=2` | 16 | 1,787 | 45.6 / 39.9 | 44 | 1,088 | 17.0 |
+| D. B + `DENOM_STORE=0` | 16 | 1,800 | 46.8 / 41.2 | 44 | 816 | 16.8 |
+| E. D at batch 24 | 24 | 1,616 | 44.9 / 39.1 | 40 | 1,224 | 18.8 if the state fits; the clmad column says ≈ 18.2 |
+| F. D at batch 32 | 32 | 1,574 | 43.9 / 38.1 | 39 | 1,632 | 19.3 if the state fits; BATCH-TUNING.md says it will not at 385k |
+| G. B at batch 24 (denominators stored) | 24 | 1,605 | 44.9 / 39.1 | 40 | 1,632 | 18.9 if the state fits |
+| H. shipping walk + `POLY_INV=1` | 16 | 2,269 (from 2,324) | 46.8 | 56 | 1,088 | 14.41 × 1.024 = 14.8 |
+
+The unit and the floor are those of §2: the arithmetic floor stays at
+≈ 1,090 slots, so every row here is **engineering** by construction, and
+the ratio-to-floor column of §2 moves from 1.7 to at best 1.44 (row F).
+
+### 7.5 Falsification target
+
+The target is the one §4.4 set and §6.4 missed, unchanged: a benchmark
+median **≥ 17.0 B/s on the RTX PRO 6000 in the audited 385,024-worker
+geometry** (`--bench --steps 1024 --launches 32`, three or more
+repetitions alternating with the control), with the same correctness rows
+as §6.2 on the winning binary: `test-table-walk-cuda` and
+`test-packed-cuda` clean, 300 of 300 device reports re-walked by the host
+reference with zero dropped, and the certification suite green under
+`WALK_TABLE=1`. The automatic-geometry rate is reported beside it but does
+not decide.
+
+Inadmissible: changing the walk, its branch count, the DP weight, the
+operation accounting, or the reference re-walk; comparing across days or
+cards; a batch that passes only in one geometry being reported without the
+other. Abandon if no variant beats row A by more than 1.5% paired in both
+geometries: that would say the inversion and state levers are inside the
+noise and the note's §6.4 verdict stands.

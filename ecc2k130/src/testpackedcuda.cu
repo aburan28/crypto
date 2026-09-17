@@ -82,6 +82,18 @@ void pairedProbe(const P131 *a,const P131 *b,const P131 *c,P131 *first,P131 *sec
     }
 }
 
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void inversionProbe(const P131 *input, P131 *output, int n) {
+    int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if (i<n) {
+#if ECC_PACKED_POLY_INV
+        output[i]=eccPacked131::invPolynomial131(input[i]);
+#else
+        output[i]=eccPacked131::toPolynomial131(eccPacked131::inv131(eccPacked131::fromPolynomial131(input[i])));
+#endif
+    }
+}
+
 static bool same(P131 a, P131 b) {
     // Compare all five words so noncanonical output bits cannot be hidden by
     // the basis conversions used elsewhere in the arithmetic tests.
@@ -208,6 +220,48 @@ static bool squareChecks() {
     return true;
 }
 
+static bool inversionChecks() {
+    // The kernel's batch inversion, in whichever basis the build selects:
+    // a * inv(a) must be one under the independent multiplication, and the
+    // device result must equal the host's run of the same chain.
+    std::vector<P131> input;
+    for (int bit=0;bit<131;bit++) {
+        P131 a{};a.v[bit/32]=1u<<(bit%32);input.push_back(a);
+    }
+    input.push_back(P131{{~0u,~0u,~0u,~0u,7u}});
+    uint32_t state=0x1a7c2e9bu;
+    for (int i=0;i<2048;i++) {
+        P131 a;
+        for (int word=0;word<5;word++) {
+            state^=state<<13;state^=state>>17;state^=state<<5;
+            a.v[word]=state;
+        }
+        a.v[4]&=7u;input.push_back(a);
+    }
+    const int n=int(input.size());std::vector<P131> output(n);
+    P131 *deviceInput,*deviceOutput;
+    checked(cudaMalloc(&deviceInput,n*sizeof(P131)));
+    checked(cudaMalloc(&deviceOutput,n*sizeof(P131)));
+    checked(cudaMemcpy(deviceInput,input.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    inversionProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(deviceInput,deviceOutput,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(output.data(),deviceOutput,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(deviceInput));checked(cudaFree(deviceOutput));
+    const P131 one{{1u,0,0,0,0}};
+    for (int i=0;i<n;i++) {
+#if ECC_PACKED_POLY_INV
+        const P131 host=eccPacked131::invPolynomial131(input[i]);
+#else
+        const P131 host=eccPacked131::toPolynomial131(eccPacked131::inv131(eccPacked131::fromPolynomial131(input[i])));
+#endif
+        if (!same(output[i],host) || !same(multiplyReference(input[i],output[i]),one)) {
+            fprintf(stderr,"GPU polynomial inversion mismatch at %d\n",i);return false;
+        }
+    }
+    printf("PASS: %d GPU field inversions (polynomial-basis chain: %d) against the host chain and a * inv(a) = 1\n",n,ECC_PACKED_POLY_INV);
+    return true;
+}
+
 static bool polynomialChecks() {
     uint32_t state=0x261131u;
     auto random=[&]() { state^=state<<13;state^=state>>17;state^=state<<5;return state; };
@@ -331,5 +385,5 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks()?0:1;
+    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks() && inversionChecks()?0:1;
 }
