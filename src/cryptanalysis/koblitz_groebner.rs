@@ -797,12 +797,11 @@ pub fn matrix_f4_f2_counted(
     Some((out, word_ops))
 }
 
-/// Build the Macaulay matrix: every product `p · m` with
-/// `deg(p·m) ≤ degree`, as bit-rows over the monomials that occur.
-///
-/// Returns the column monomials (DegRevLex descending) and the rows.
-/// `None` if the matrix would exceed the size limits.
-/// The Macaulay rows of `polys` at `degree`, as monomial masks.
+/// The Macaulay rows of `polys` at `degree`, as monomial masks: every
+/// product `p · m` with `deg(p·m) ≤ degree`, each row the set of
+/// monomials occurring in it.  Columns are not assigned here — see
+/// [`macaulay_columns`].  `None` if the row count would exceed the size
+/// limits.
 ///
 /// Shared by the dense [`build_macaulay`] and the sparse
 /// [`build_macaulay_sparse`] so the two cannot drift: any difference
@@ -905,6 +904,12 @@ pub(crate) fn build_macaulay_sparse(
     Some((cols, rows))
 }
 
+/// Build the dense Macaulay matrix: every product `p · m` with
+/// `deg(p·m) ≤ degree`, as bit-rows over the monomials that occur.
+///
+/// Returns the column monomials (DegRevLex descending) and the rows.
+/// `None` if the matrix would exceed the size limits.  For the sparse
+/// form of the same matrix see [`build_macaulay_sparse`].
 pub(crate) fn build_macaulay(
     polys: &[F2BoolPoly],
     n_vars: usize,
