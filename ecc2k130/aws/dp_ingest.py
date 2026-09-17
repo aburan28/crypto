@@ -690,6 +690,11 @@ def main(argv=None):
                     help="objects per pass; status and metrics are published "
                          "between passes, so this bounds how long the page can "
                          "stay stale while a backlog drains (0 = unbounded)")
+    ap.add_argument("--status-every", type=float, default=120.0,
+                    help="seconds between status.json writes; the snapshot "
+                         "counts the whole table, which is not free on a "
+                         "hundred-million-row store, so short passes during a "
+                         "drain must not turn into a count per pass")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -736,15 +741,23 @@ def main(argv=None):
                            if newest else "none",
                            len(unrecognised)))
                     return 0
+            published, wasBehind = 0.0, False
             while True:
                 _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
                                              args.prefix, args.pass_objects)
                 if args.metric_namespace:
                     publishMetrics(args.metric_namespace, ingest)
-                if args.status_bucket:
+                behind = bool(ingest.get("outstanding"))
+                # Rate-limited, except for the pass that finishes a drain:
+                # "caught up" is the one transition a reader is waiting for.
+                due = (time.time() - published >= args.status_every
+                       or (wasBehind and not behind))
+                wasBehind = behind
+                if args.status_bucket and (due or args.once):
                     try:
                         with connect() as conn:
                             publishStatus(conn, s3, args.bucket, args.status_bucket, ingest)
+                        published = time.time()
                     except Exception as exc:
                         # Publishing is a view; never let it stop the ingest.
                         log("status publish failed: %s: %s" % (type(exc).__name__, exc))
