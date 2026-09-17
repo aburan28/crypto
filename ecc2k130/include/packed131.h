@@ -29,7 +29,63 @@
 #if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
 #error "ECC_PACKED_CLMAD requires sm_80 or newer"
 #endif
+#ifndef ECC_PACKED_NATIVE_PRODUCT
+#define ECC_PACKED_NATIVE_PRODUCT 0
+#endif
+#ifndef ECC_PACKED_NATIVE_REDUCE
+#define ECC_PACKED_NATIVE_REDUCE 0
+#endif
+#if (ECC_PACKED_NATIVE_PRODUCT < 0 || ECC_PACKED_NATIVE_PRODUCT > 2) || (ECC_PACKED_NATIVE_REDUCE < 0 || ECC_PACKED_NATIVE_REDUCE > 1)
+#error "Native product must be 0, 1 (full native), or 2 (balanced); reduction must be 0 or 1"
+#endif
+#if (ECC_PACKED_NATIVE_PRODUCT || ECC_PACKED_NATIVE_REDUCE) && !ECC_PACKED_CLMAD
+#error "Native product/reduction require ECC_PACKED_CLMAD"
+#endif
+#ifndef ECC_PACKED_TAIL_LAYOUT
+#define ECC_PACKED_TAIL_LAYOUT 0
+#endif
+#if ECC_PACKED_TAIL_LAYOUT < 0 || ECC_PACKED_TAIL_LAYOUT > 2
+#error "ECC_PACKED_TAIL_LAYOUT must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_TAIL_LAYOUT && (!ECC_PACKED_CLMAD || ECC_PACKED_NATIVE_PRODUCT)
+#error "Tail layout requires CLMAD and the original low128 product"
+#endif
+#ifndef ECC_PACKED_FUSED_SIGMA
+#define ECC_PACKED_FUSED_SIGMA 0
+#endif
+#if ECC_PACKED_FUSED_SIGMA < 0 || ECC_PACKED_FUSED_SIGMA > 3
+#error "ECC_PACKED_FUSED_SIGMA must be 0, 1 (nibbles), 2 (bytes), or 3 (shared three-bit groups)"
+#endif
+#ifndef ECC_PACKED_INLINE
+#define ECC_PACKED_INLINE 0
+#endif
+#if ECC_PACKED_INLINE < 0 || ECC_PACKED_INLINE > 7
+#error "ECC_PACKED_INLINE must be a bit mask from 0 to 7"
+#endif
+#ifndef ECC_PACKED_FAST_CONVERT
+#define ECC_PACKED_FAST_CONVERT 0
+#endif
+#if ECC_PACKED_FAST_CONVERT != 0 && ECC_PACKED_FAST_CONVERT != 1
+#error "ECC_PACKED_FAST_CONVERT must be 0 or 1"
+#endif
 #include "bitslice.h"
+// The native carryless core is small enough to test selected call boundaries.
+// Bits select polynomial single (1), polynomial pair (2), and normal (4).
+#if ECC_PACKED_INLINE & 1
+#define ECC_PACKED_POLY_ATTR ECC_HD
+#else
+#define ECC_PACKED_POLY_ATTR ECC_BIG
+#endif
+#if ECC_PACKED_INLINE & 2
+#define ECC_PACKED_PAIR_ATTR ECC_HD
+#else
+#define ECC_PACKED_PAIR_ATTR ECC_BIG
+#endif
+#if ECC_PACKED_INLINE & 4
+#define ECC_PACKED_NORMAL_ATTR ECC_HD
+#else
+#define ECC_PACKED_NORMAL_ATTR ECC_BIG
+#endif
 namespace eccPacked131 {
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
 ECC_HD uint32_t clmul32(uint32_t x, uint32_t y, uint32_t *hi) {
@@ -99,6 +155,7 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
 }
 
 struct P131 { uint32_t v[5]; };
+#include "packednative131.h"
 ECC_HD uint32_t reverse32(uint32_t x) {
 #ifdef __CUDA_ARCH__
     return __brev(x);
@@ -117,7 +174,32 @@ ECC_HD P131 reverse131(const P131 &a) {
     return r;
 }
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
+#if ECC_PACKED_NATIVE_PRODUCT && defined(__CUDA_ARCH__)
+    nativeProduct131(a,b,c);
+#else
     clmul128(c,a.v,b.v); c[8]=0;
+#if ECC_PACKED_TAIL_LAYOUT && defined(__CUDA_ARCH__)
+    const uint32_t ma0=0u-(a.v[4]&1u), mb0=0u-(b.v[4]&1u);
+    const uint32_t ma1=0u-((a.v[4]>>1)&1u), mb1=0u-((b.v[4]>>1)&1u);
+    const uint32_t ma2=0u-((a.v[4]>>2)&1u), mb2=0u-((b.v[4]>>2)&1u);
+    uint32_t previous1=0,previous2=0;
+#pragma unroll
+    for(int i=0;i<4;i++) {
+        const uint32_t t0=(a.v[i]&mb0)^(b.v[i]&ma0);
+        const uint32_t t1=(a.v[i]&mb1)^(b.v[i]&ma1);
+        const uint32_t t2=(a.v[i]&mb2)^(b.v[i]&ma2);
+#if ECC_PACKED_TAIL_LAYOUT == 1
+        const uint32_t shifted1=__funnelshift_l(previous1,t1,1);
+        const uint32_t shifted2=__funnelshift_l(previous2,t2,2);
+#else
+        const uint32_t shifted1=(t1<<1)|(previous1>>31);
+        const uint32_t shifted2=(t2<<2)|(previous2>>30);
+#endif
+        c[4+i]^=t0^shifted1^shifted2;
+        previous1=t1;previous2=t2;
+    }
+    c[8]^=(previous1>>31)^(previous2>>30)^(b.v[4]&ma0)^((b.v[4]&ma1)<<1)^((b.v[4]&ma2)<<2);
+#else
 #pragma unroll
     for(int k=0;k<3;k++) {
         uint32_t ma=0u-((a.v[4]>>k)&1u), mb=0u-((b.v[4]>>k)&1u);
@@ -129,6 +211,8 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
         }
         c[8]^=(b.v[4]&ma)<<k;
     }
+#endif
+#endif
 }
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;
@@ -145,7 +229,9 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #if ECC_PACKED_DIRECT_REDUCE != 0 && ECC_PACKED_DIRECT_REDUCE != 1
 #error "ECC_PACKED_DIRECT_REDUCE must be 0 or 1"
 #endif
-#if ECC_PACKED_DIRECT_REDUCE
+#if ECC_PACKED_NATIVE_REDUCE && defined(__CUDA_ARCH__)
+ECC_HD P131 reducePolynomial131(const uint32_t *h) { return nativeReduce131(h); }
+#elif ECC_PACKED_DIRECT_REDUCE
 #include "packeddirectreduce131.h"
 #else
 #include "packedpolyreduce131.h"
@@ -166,7 +252,7 @@ ECC_HD P131 fromPolynomial131(const P131 &a) {
     const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
     return fromPolynomialProduct131(h);
 }
-static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+static ECC_PACKED_POLY_ATTR P131 mulPolynomial131(P131 a, P131 b) {
 // Native carryless products supersede the generated software multiplier.
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     return generatedProduct131(a,b);
@@ -176,7 +262,7 @@ static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
 #endif
 }
 struct PolynomialPair { P131 first,second; };
-static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+static ECC_PACKED_PAIR_ATTR PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     P131 first=generatedProduct131(a,b);
     return PolynomialPair{first,generatedProduct131(a,c)};
@@ -207,7 +293,7 @@ using MulArg = P131;
 #else
 using MulArg = const P131 &;
 #endif
-static ECC_BIG P131 mul131(MulArg a, MulArg b) {
+static ECC_PACKED_NORMAL_ATTR P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
@@ -271,6 +357,33 @@ ECC_HD P131 sqr131(const P131 &a){
 #if ECC_PACKED_SHARED_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
 #error "ECC_PACKED_SHARED_SIGMA requires the walk permutation network"
 #endif
+#ifndef ECC_PACKED_PARTIAL_SIGMA
+#define ECC_PACKED_PARTIAL_SIGMA 0
+#endif
+#if ECC_PACKED_PARTIAL_SIGMA < 0 || ECC_PACKED_PARTIAL_SIGMA > 3
+#error "ECC_PACKED_PARTIAL_SIGMA must be a mask from 0 to 3"
+#endif
+#if ((ECC_PACKED_PARTIAL_SIGMA & 1) && !(ECC_PACKED_PERM_SIGMA & 1)) || ((ECC_PACKED_PARTIAL_SIGMA & 2) && !(ECC_PACKED_PERM_SIGMA & 2))
+#error "Partial routing requires the corresponding Frobenius network"
+#endif
+#ifndef ECC_PACKED_BYTE_SIGMA
+#define ECC_PACKED_BYTE_SIGMA 0
+#endif
+#if ECC_PACKED_BYTE_SIGMA < 0 || ECC_PACKED_BYTE_SIGMA > 1
+#error "ECC_PACKED_BYTE_SIGMA must be 0 or 1"
+#endif
+#if ECC_PACKED_BYTE_SIGMA && !(ECC_PACKED_PERM_SIGMA & 1)
+#error "Byte-select Frobenius requires the walk permutation network"
+#endif
+#ifndef ECC_PACKED_SIGMA_ORDER
+#define ECC_PACKED_SIGMA_ORDER 0
+#endif
+#if ECC_PACKED_SIGMA_ORDER < 0 || ECC_PACKED_SIGMA_ORDER > 1
+#error "ECC_PACKED_SIGMA_ORDER must be 0 or 1"
+#endif
+#if ECC_PACKED_SIGMA_ORDER && !(ECC_PACKED_PARTIAL_SIGMA & 1)
+#error "Reordered Frobenius routing requires the partial walk network"
+#endif
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"
 #endif
@@ -311,4 +424,9 @@ ECC_HD P131 inv131(P131 a){
 #endif
 }
 
+#include "packedfusedsigma131.h"
+
 } // namespace eccPacked131
+#undef ECC_PACKED_POLY_ATTR
+#undef ECC_PACKED_PAIR_ATTR
+#undef ECC_PACKED_NORMAL_ATTR

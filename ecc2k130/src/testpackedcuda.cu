@@ -89,6 +89,64 @@ static bool same(P131 a, P131 b) {
     return (a.v[4]&~7u)==0;
 }
 
+// Independent type-II normal-basis multiplication: gamma_i gamma_j is
+// gamma_(i+j) + gamma_(i-j), with gamma_0=0 and gamma_i=gamma_(263-i).
+static P131 normalMultiplyReference(P131 a, P131 b) {
+    P131 out{};
+    for (int i=1;i<=131;i++) if ((a.v[(i-1)/32]>>((i-1)%32))&1u)
+        for (int j=1;j<=131;j++) if ((b.v[(j-1)/32]>>((j-1)%32))&1u) {
+            int sum=i+j, difference=i>j?i-j:j-i;
+            if (sum>131) sum=263-sum;
+            out.v[(sum-1)/32]^=1u<<((sum-1)%32);
+            if (difference) out.v[(difference-1)/32]^=1u<<((difference-1)%32);
+        }
+    return out;
+}
+
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
+void normalProductProbe(const P131 *a,const P131 *b,P131 *single,int n) {
+    const int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if (i<n) {
+        single[i]=eccPacked131::mul131(a[i],b[i]);
+    }
+}
+
+static bool normalProductChecks() {
+    std::vector<P131> a,b;
+    for (int i=0;i<131;i++) for (int j=0;j<131;j++) {
+        P131 x{},y{};x.v[i/32]=1u<<(i%32);y.v[j/32]=1u<<(j%32);
+        a.push_back(x);b.push_back(y);
+    }
+    uint32_t state=0x13126a5u;
+    auto random=[&]() { state^=state<<13;state^=state>>17;state^=state<<5;return state; };
+    for (int i=0;i<1024;i++) {
+        P131 x,y;
+        for (int w=0;w<5;w++) { x.v[w]=random();y.v[w]=random(); }
+        x.v[4]&=7u;y.v[4]&=7u;a.push_back(x);b.push_back(y);
+    }
+    const P131 edges[]={P131{},P131{{1,0,0,0,0}},P131{{~0u,~0u,~0u,~0u,7u}}};
+    for (P131 x:edges) for (P131 y:edges) { a.push_back(x);b.push_back(y); }
+    const int n=int(a.size());
+    std::vector<P131> single(n);
+    P131 *da,*db,*ds;
+    const size_t bytes=size_t(n)*sizeof(P131);
+    checked(cudaMalloc(&da,bytes));checked(cudaMalloc(&db,bytes));checked(cudaMalloc(&ds,bytes));
+    checked(cudaMemcpy(da,a.data(),bytes,cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(db,b.data(),bytes,cudaMemcpyHostToDevice));
+    normalProductProbe<<<(n+ECC_THREADS-1)/ECC_THREADS,ECC_THREADS>>>(da,db,ds,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(single.data(),ds,bytes,cudaMemcpyDeviceToHost));
+    checked(cudaFree(da));checked(cudaFree(db));checked(cudaFree(ds));
+    for (int i=0;i<n;i++) {
+        const P131 want=normalMultiplyReference(a[i],b[i]);
+        if (!same(single[i],want)) {
+            fprintf(stderr,"GPU normal-basis multiplication mismatch at %d\n",i);return false;
+        }
+    }
+    printf("PASS: %d GPU normal products, including all 17161 basis pairs, against independent gamma products\n",n);
+    return true;
+}
+
 __global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void pairedFrobeniusProbe(const P131 *a, const P131 *b, const int *powers,
                           P131 *first, P131 *second, int n) {
@@ -288,6 +346,58 @@ static bool polynomialChecks() {
     return true;
 }
 
+
+#if ECC_PACKED_FUSED_SIGMA
+__global__ void fusedDeltaProbe(const P131 *a,const P131 *b,const int *powers,P131 *x,P131 *y,int n) {
+    eccPacked131::initFusedDelta131();
+    const int i=blockIdx.x*blockDim.x+threadIdx.x;
+    if(i<n) { auto pair=eccPacked131::fusedDeltaPair131(a[i],b[i],powers[i]-3);x[i]=pair.first;y[i]=pair.second; }
+}
+static P131 deltaReference(P131 a,int power) {
+    P131 b=a;
+    for(int i=0;i<power;i++) b=multiplyReference(b,b);
+    for(int w=0;w<5;w++) b.v[w]^=a.v[w];
+    return b;
+}
+static bool fusedDeltaChecks() {
+    std::vector<P131> a,b;std::vector<int> powers;
+    unsigned state=0x10b131u;
+    auto random=[&]() { state^=state<<13;state^=state>>17;state^=state<<5;return state; };
+    for(int power=3;power<=10;power++) {
+        for(int bit=0;bit<131;bit++) {
+            P131 x{},y{};x.v[bit/32]=1u<<(bit%32);
+            const int other=(bit*37+19)%131;y.v[other/32]=1u<<(other%32);
+            a.push_back(x);b.push_back(y);powers.push_back(power);
+        }
+        for(int i=0;i<128;i++) {
+            P131 x{},y{};
+            for(int w=0;w<5;w++){x.v[w]=random();y.v[w]=random();}
+            x.v[4]&=7;y.v[4]&=7;
+            if(i==0) x=y=P131{};
+            if(i==1) x=y=P131{{~0u,~0u,~0u,~0u,7u}};
+            a.push_back(x);b.push_back(y);powers.push_back(power);
+        }
+    }
+    const int n=int(a.size());std::vector<P131>x(n),y(n);
+    P131 *da,*db,*dx,*dy;int *dp;
+    checked(cudaMalloc(&da,n*sizeof(P131)));checked(cudaMalloc(&db,n*sizeof(P131)));
+    checked(cudaMalloc(&dx,n*sizeof(P131)));checked(cudaMalloc(&dy,n*sizeof(P131)));checked(cudaMalloc(&dp,n*sizeof(int)));
+    checked(cudaMemcpy(da,a.data(),n*sizeof(P131),cudaMemcpyHostToDevice));checked(cudaMemcpy(db,b.data(),n*sizeof(P131),cudaMemcpyHostToDevice));
+    checked(cudaMemcpy(dp,powers.data(),n*sizeof(int),cudaMemcpyHostToDevice));
+    fusedDeltaProbe<<<(n+255)/256,256>>>(da,db,dp,dx,dy,n);
+    checked(cudaGetLastError());checked(cudaDeviceSynchronize());
+    checked(cudaMemcpy(x.data(),dx,n*sizeof(P131),cudaMemcpyDeviceToHost));checked(cudaMemcpy(y.data(),dy,n*sizeof(P131),cudaMemcpyDeviceToHost));
+    checked(cudaFree(da));checked(cudaFree(db));checked(cudaFree(dx));checked(cudaFree(dy));checked(cudaFree(dp));
+    for(int i=0;i<n;i++) if(!same(x[i],deltaReference(a[i],powers[i])) || !same(y[i],deltaReference(b[i],powers[i]))) {
+        fprintf(stderr,"GPU fused Frobenius delta mismatch at %d\n",i);return false;
+    }
+    printf("PASS: %d GPU fused Frobenius pairs against repeated independent polynomial squaring\n",n);
+    return true;
+}
+#else
+static bool fusedDeltaChecks(){return true;}
+#endif
+
 int main() {
     printf("packed arithmetic direct reduction: %d\n",ECC_PACKED_DIRECT_REDUCE);
     printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
@@ -330,5 +440,5 @@ int main() {
         }
     }
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
-    return polynomialChecks() && squareChecks() && pairedFrobeniusChecks()?0:1;
+    return polynomialChecks() && normalProductChecks() && squareChecks() && pairedFrobeniusChecks() && fusedDeltaChecks()?0:1;
 }

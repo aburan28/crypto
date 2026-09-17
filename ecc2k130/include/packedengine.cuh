@@ -117,7 +117,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         const size_t perThread = size_t(BATCH) *
             ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
 #endif
-        size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
+        size_t threads = size_t(prop.multiProcessorCount) * eccPacked131::walkWorkersPerBlock131 * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
         if (threads > fits) threads = fits;
         threads -= threads % ECC_THREADS;
@@ -168,6 +168,17 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed kernel: %d registers/thread, %zu local bytes/thread, %zu shared bytes/block, %s multiplier\n",
                attrs.numRegs, attrs.localSizeBytes, attrs.sharedSizeBytes,
                ECC_PACKED_SINGLE_PRODUCT ? "single-product" : "two-product");
+        // Occupancy is a resource limit, not a measured instruction-issue rate.
+        int activeDevice = -1, residentBlocks = 0;
+        cudaDeviceProp deviceProps;
+        CUDA_CHECK(cudaGetDevice(&activeDevice));
+        CUDA_CHECK(cudaGetDeviceProperties(&deviceProps, activeDevice));
+        CUDA_CHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+            &residentBlocks, eccPacked131::walk, ECC_THREADS, 0));
+        const int gridBlocks = (P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131;
+        printf("packed theoretical occupancy: %.1f%% (%d blocks/SM, %d threads/block, %d SMs); grid %d blocks\n",
+               100.0 * residentBlocks * ECC_THREADS / deviceProps.maxThreadsPerMultiProcessor,
+               residentBlocks, ECC_THREADS, deviceProps.multiProcessorCount, gridBlocks);
 #if ECC_PACKED_SHARED_SIGMA
         int diagnosticDevice = -1, driverReservedShared = -1;
         CUDA_CHECK(cudaGetDevice(&diagnosticDevice));
@@ -177,8 +188,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                driverReservedShared, diagnosticDevice);
 #endif
         printf("packed denominator cache: %d\n", ECC_PACKED_CACHE_DENOM);
+        printf("packed last-slot cache mode: %d\n", ECC_PACKED_LAST_SLOT_CACHE);
         printf("packed multiply by value: %d\n", ECC_PACKED_BY_VALUE);
         printf("packed Frobenius network: %d\n", ECC_PACKED_PERM_SIGMA);
+        printf("packed partial Frobenius routing mask: %d\n", ECC_PACKED_PARTIAL_SIGMA);
+        printf("packed Frobenius stage order: %d\n", ECC_PACKED_SIGMA_ORDER);
+        printf("packed byte-select Frobenius: %d\n", ECC_PACKED_BYTE_SIGMA);
+        printf("packed seven-stage conversion: %d\n", ECC_PACKED_FAST_CONVERT);
         printf("packed polynomial chain: %d\n", ECC_PACKED_POLY_CHAIN);
         printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
@@ -186,10 +202,16 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
+        printf("packed native full product: %d\n", ECC_PACKED_NATIVE_PRODUCT);
+        printf("packed native reduction: %d\n", ECC_PACKED_NATIVE_REDUCE);
+        printf("packed fused sigma: %d\n", ECC_PACKED_FUSED_SIGMA);
+        printf("packed inline mask: %d\n", ECC_PACKED_INLINE);
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+        printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
+        printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);
         const int blocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
         eccPacked131::init<<<blocks, ECC_THREADS>>>(P, false);
         CUDA_CHECK(cudaGetLastError()); CUDA_CHECK(cudaDeviceSynchronize());
@@ -197,7 +219,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void launch(u64 iterBase) {
         P.iterBase = iterBase;
-        eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(P, denominators);
+        eccPacked131::walk<<<(P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131, ECC_THREADS>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
     }
     void reseed(u64 iterBase) {

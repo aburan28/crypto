@@ -363,7 +363,8 @@ def benchmarkIdentity(packed=False):
     gpuRc, gpu = sh('nvidia-smi --query-gpu=name,uuid,driver_version,pstate,clocks.current.sm,'
                    'clocks.current.memory,power.limit,temperature.gpu --format=csv')
     leaf = re.search(r'LEAF = (\d+)', (root / 'generated/eccF131.h').read_text())
-    return dict(sourceSha256=source.hexdigest(),
+    return dict(provider="modal", instanceType=None, instanceTypeKnown=False,
+                sourceSha256=source.hexdigest(),
                 binarySha256=hashlib.sha256((root / 'ecc2k130').read_bytes()).hexdigest(),
                 actualLeaf=None if packed else int(leaf.group(1)), generatedLeaf=int(leaf.group(1)),
                 activeBackend=('packed-poly131' if PACKED_POLY_STATE == '1' else 'packed-onb131') if packed else 'bitsliced',

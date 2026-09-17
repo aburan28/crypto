@@ -37,6 +37,10 @@ PACKED_SINGLE_PRODUCT ?= 0
 PACKED_CACHE_DENOM ?= 0
 PACKED_BY_VALUE ?= 0
 PACKED_PERM_SIGMA ?= 0
+PACKED_PARTIAL_SIGMA ?= 0
+PACKED_SIGMA_ORDER ?= 0
+PACKED_BYTE_SIGMA ?= 0
+PACKED_FAST_CONVERT ?= 0
 PACKED_POLY_CHAIN ?= 0
 PACKED_UNROLL_INV ?= 0
 PACKED_PAIR_PRODUCTS ?= 0
@@ -44,10 +48,19 @@ PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 PACKED_CLMAD ?= 0
+PACKED_NATIVE_PRODUCT ?= 0
+PACKED_NATIVE_REDUCE ?= 0
+PACKED_FUSED_SIGMA ?= 0
+PACKED_INLINE ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
 PACKED_STATE_TILE ?= 0
+PACKED_BLOCK_INVERSE ?= 0
+PACKED_BATCH_SPLIT ?= 1
+PACKED_LAST_SLOT_CACHE ?= 0
+PACKED_TAIL_LAYOUT ?= 0
+PACKED_SHARED_X_SLOTS ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -106,7 +119,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packednative131.h include/packedfusedsigma131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedblockinverse131.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -114,15 +127,28 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_STREAM_KARAT=$(STREAM_KARAT) -DECC_SMEM_SPILL=$(SMEM_SPILL) \
        -DECC_PACKED_SINGLE_PRODUCT=$(PACKED_SINGLE_PRODUCT) -DECC_PACKED_CACHE_DENOM=$(PACKED_CACHE_DENOM) \
        -DECC_PACKED_BY_VALUE=$(PACKED_BY_VALUE) -DECC_PACKED_PERM_SIGMA=$(PACKED_PERM_SIGMA) \
+       -DECC_PACKED_PARTIAL_SIGMA=$(PACKED_PARTIAL_SIGMA) \
+       -DECC_PACKED_SIGMA_ORDER=$(PACKED_SIGMA_ORDER) \
+       -DECC_PACKED_BYTE_SIGMA=$(PACKED_BYTE_SIGMA) \
+       -DECC_PACKED_FAST_CONVERT=$(PACKED_FAST_CONVERT) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
+       -DECC_PACKED_NATIVE_PRODUCT=$(PACKED_NATIVE_PRODUCT) \
+       -DECC_PACKED_NATIVE_REDUCE=$(PACKED_NATIVE_REDUCE) \
+       -DECC_PACKED_FUSED_SIGMA=$(PACKED_FUSED_SIGMA) \
+       -DECC_PACKED_INLINE=$(PACKED_INLINE) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
-       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
+       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
+       -DECC_PACKED_BLOCK_INVERSE=$(PACKED_BLOCK_INVERSE) \
+       -DECC_PACKED_BATCH_SPLIT=$(PACKED_BATCH_SPLIT) \
+       -DECC_PACKED_LAST_SLOT_CACHE=$(PACKED_LAST_SLOT_CACHE) \
+       -DECC_PACKED_TAIL_LAYOUT=$(PACKED_TAIL_LAYOUT) \
+       -DECC_PACKED_SHARED_X_SLOTS=$(PACKED_SHARED_X_SLOTS)
 
 all: cpu
 
@@ -150,6 +176,7 @@ generate:
 	cd codegen && python3 genpolyreduce.py
 	cd codegen && python3 gendirectreduce.py
 	python3 codegen/genpackedproduct.py
+	python3 codegen/genfusedsigma.py
 
 # FPGA datapath: the same IR emitted as pipelined Verilog instead of C.
 # See ../FPGA-CEILING.md; needs python3 only, no FPGA toolchain.
@@ -177,6 +204,8 @@ ecc2k130: src/main.cu $(HDRS) $(GEN)
 # codegen/checkcli.py.  Cheap, needs nothing installed, and the failure it
 # catches is otherwise invisible until someone runs that entry point.
 check-cli:
+	python3 -m unittest discover -s codegen -p testbenchmarkhardware.py
+	python3 codegen/genfusedsigma.py --check
 	python3 codegen/genpacked.py --check --out include/packedtransform131.h
 	python3 codegen/gensigma.py --check --out include/packedsigma131.h
 	python3 codegen/genpolyreduce.py --check --out include/packedpolyreduce131.h
@@ -277,6 +306,11 @@ test-packed-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testpackedcuda.cu -o build/test-packed-cuda
 	./build/test-packed-cuda
+
+test-packed-block-inverse-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testblockinversecuda.cu -o build/test-packed-block-inverse-cuda
+	./build/test-packed-block-inverse-cuda
 
 test-packed-storage-cuda:
 	mkdir -p build
@@ -392,8 +426,102 @@ clean:
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
 	rm -f build/test-packed-clmad-host
-	rm -f build/test-packed-cuda build/test-packed-storage-cuda
-	rm -f build/test-shared-sigma-cuda
+	rm -f build/test-packed-cuda build/test-packed-storage-cuda build/test-packed-block-inverse-cuda
+	rm -f build/test-shared-sigma-cuda build/test-last-slot-cache-cuda build/test-tail-product-cuda build/test-shared-x-cache-cuda
 	rm -f build/test-timing build/test-logic
 
 .PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 audit-rtx-pro6000 clean
+
+# Local packed preset. Prefer the measured optional assembler-only prefix,
+# then pinned CUDA 13.3, then NVCC. Native CLMAD needs CUDA 13.3 or newer.
+# Separate output and forced rebuild prevent stale binaries when knobs change.
+LOCAL_GPU_ARCH ?= -gencode arch=compute_120,code=sm_120
+LOCAL_PACKED_NVCC ?= $(if $(wildcard build/assembler134-toolchain/bin/nvcc),build/assembler134-toolchain/bin/nvcc,$(if $(wildcard build/cuda133/nvidia/cu13/bin/nvcc),build/cuda133/nvidia/cu13/bin/nvcc,$(NVCC)))
+LOCAL_PACKED_CLMAD ?= $(shell $(LOCAL_PACKED_NVCC) --version 2>/dev/null | awk '/release / { split($$5,v,"."); print (v[1]+0>13 || (v[1]+0==13 && v[2]+0>=3)); found=1 } END { if (!found) print 0 }')
+LOCAL_PACKED_INLINE ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),3,0)
+# Exact seven-stage basis conversion, confirmed on the native G7 preset.
+LOCAL_PACKED_FAST_CONVERT ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),1,0)
+# Native normal products avoid basis conversions inside inversion. The
+# software fallback keeps its established single-product implementation.
+LOCAL_PACKED_SINGLE_PRODUCT ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),0,1)
+# Share inversion across eight full warps in the validated native preset.
+LOCAL_PACKED_BLOCK_INVERSE ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),1,0)
+LOCAL_PACKED_BATCH ?= 16
+# Exact 131-port walk routing is measured on the native RTX PRO 4500 preset.
+LOCAL_PACKED_PARTIAL_SIGMA ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),1,0)
+# Measured Frobenius instruction reductions in the native G7 preset.
+LOCAL_PACKED_SIGMA_ORDER ?= $(if $(and $(filter 1,$(LOCAL_PACKED_CLMAD)),$(filter 1 3,$(LOCAL_PACKED_PARTIAL_SIGMA))),1,0)
+LOCAL_PACKED_BYTE_SIGMA ?= $(if $(and $(filter 1,$(LOCAL_PACKED_CLMAD)),$(filter 1 3,$(LOCAL_PACKED_PARTIAL_SIGMA))),1,0)
+# The measured RTX PRO 4500 native preset uses two physical workers per batch.
+LOCAL_PACKED_BATCH_SPLIT ?= $(if $(and $(filter 1,$(LOCAL_PACKED_CLMAD)),$(filter 1,$(LOCAL_PACKED_BLOCK_INVERSE)),$(filter 16,$(LOCAL_PACKED_BATCH))),2,1)
+LOCAL_PACKED_MINBLOCKS ?= $(if $(filter 2,$(LOCAL_PACKED_BATCH_SPLIT)),3,2)
+LOCAL_PACKED_LAST_SLOT_CACHE ?= $(if $(and $(filter 1,$(LOCAL_PACKED_CLMAD)),$(filter 1,$(LOCAL_PACKED_BLOCK_INVERSE)),$(filter 16,$(LOCAL_PACKED_BATCH)),$(filter 2,$(LOCAL_PACKED_BATCH_SPLIT))),1,0)
+# Regroup the high three product bits using measured native funnel shifts.
+LOCAL_PACKED_TAIL_LAYOUT ?= $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),1,0)
+LOCAL_PACKED_SHARED_X_SLOTS ?= $(if $(and $(filter 1,$(LOCAL_PACKED_CLMAD)),$(filter 1,$(LOCAL_PACKED_BLOCK_INVERSE)),$(filter 16,$(LOCAL_PACKED_BATCH)),$(filter 2,$(LOCAL_PACKED_BATCH_SPLIT))),4,0)
+LOCAL_PACKED_FLAGS = NVCC="$(LOCAL_PACKED_NVCC)" ARCH="$(LOCAL_GPU_ARCH)" \
+    BATCH=$(LOCAL_PACKED_BATCH) THREADS=256 MINBLOCKS=$(LOCAL_PACKED_MINBLOCKS) \
+    PACKED_SINGLE_PRODUCT=$(LOCAL_PACKED_SINGLE_PRODUCT) PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
+    PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+    PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
+    PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=$(LOCAL_PACKED_CLMAD) PACKED_INLINE=$(LOCAL_PACKED_INLINE) PACKED_WEIGHTED_PREFIX=2 \
+    PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 PACKED_STATE_TILE=256 \
+    PACKED_BLOCK_INVERSE=$(LOCAL_PACKED_BLOCK_INVERSE) PACKED_BATCH_SPLIT=$(LOCAL_PACKED_BATCH_SPLIT) PACKED_PARTIAL_SIGMA=$(LOCAL_PACKED_PARTIAL_SIGMA) \
+    PACKED_SIGMA_ORDER=$(LOCAL_PACKED_SIGMA_ORDER) PACKED_BYTE_SIGMA=$(LOCAL_PACKED_BYTE_SIGMA) \
+    PACKED_FAST_CONVERT=$(LOCAL_PACKED_FAST_CONVERT) \
+    PACKED_LAST_SLOT_CACHE=$(LOCAL_PACKED_LAST_SLOT_CACHE) PACKED_TAIL_LAYOUT=$(LOCAL_PACKED_TAIL_LAYOUT) \
+    PACKED_SHARED_X_SLOTS=$(LOCAL_PACKED_SHARED_X_SLOTS)
+LOCAL_PACKED_WORKERS ?= 524288
+LOCAL_PACKED_STEPS ?= 1024
+LOCAL_PACKED_LAUNCHES ?= 16
+
+# Explicit opt-in install; the regular build never downloads a compiler.
+setup-local-cuda133:
+	python3 -m pip install --no-deps --upgrade --target build/cuda133 \
+	    nvidia-cuda-nvcc==13.3.73 nvidia-cuda-runtime==13.3.29 \
+	    nvidia-nvvm==13.3.73 nvidia-cuda-crt==13.3.73
+
+# Explicit opt-in: retain the 13.3 front end and replace only ptxas.
+setup-local-assembler134: setup-local-cuda133
+	python3 setup_cuda_assembler.py
+
+.PHONY: setup-local-cuda133 setup-local-assembler134 gpu-local-packed bench-local-packed
+
+gpu-local-packed:
+	$(MAKE) -B build/ecc2k130-local-packed $(LOCAL_PACKED_FLAGS)
+
+build/ecc2k130-local-packed: src/main.cu $(HDRS) $(GEN)
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo \
+	    -Xcompiler -O3 -Xcompiler -fopenmp src/main.cu -o $@ -lgomp
+
+bench-local-packed: gpu-local-packed
+	python3 benchmark_hardware.py
+	./build/ecc2k130-local-packed --packed --bench --curve 131 \
+	    --threads $(LOCAL_PACKED_WORKERS) --steps $(LOCAL_PACKED_STEPS) \
+	    --launches $(LOCAL_PACKED_LAUNCHES) --verify 0
+
+test-last-slot-cache-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo \
+	    -Xcompiler -O3 -Xcompiler -fopenmp src/testlastslotcuda.cu -o build/test-last-slot-cache-cuda -lgomp
+	./build/test-last-slot-cache-cuda
+
+test-tail-product-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo \
+	    -Xcompiler -O3 -Xcompiler -fopenmp src/testtailproductcuda.cu -o build/test-tail-product-cuda -lgomp
+	./build/test-tail-product-cuda
+
+test-shared-x-cache-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) $(GPUFLAGS) -lineinfo \
+	    -Xcompiler -O3 -Xcompiler -fopenmp src/testsharedxcuda.cu -o build/test-shared-x-cache-cuda -lgomp
+	./build/test-shared-x-cache-cuda
+
+test-local-packed:
+	$(MAKE) test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda $(if $(filter 1,$(LOCAL_PACKED_BLOCK_INVERSE)),test-packed-block-inverse-cuda) $(if $(filter 1 2,$(LOCAL_PACKED_LAST_SLOT_CACHE)),test-last-slot-cache-cuda) $(if $(filter 1,$(LOCAL_PACKED_CLMAD)),test-tail-product-cuda) $(if $(filter 2 4,$(LOCAL_PACKED_SHARED_X_SLOTS)),test-shared-x-cache-cuda) $(LOCAL_PACKED_FLAGS)
+
+.PHONY: setup-local-cuda133 gpu-local-packed bench-local-packed test-local-packed test-packed-block-inverse-cuda test-last-slot-cache-cuda test-tail-product-cuda
+
+.PHONY: test-shared-x-cache-cuda

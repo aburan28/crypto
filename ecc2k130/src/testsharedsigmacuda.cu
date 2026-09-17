@@ -11,6 +11,8 @@
 #error "Shared-sigma probe requires weighted2 and the walk network"
 #endif
 using eccPacked131::P131;
+static constexpr unsigned maskWords = sizeof(eccPacked131::sigmaWalkNetwork131Masks) / sizeof(unsigned);
+static_assert(sizeof(eccPacked131::sigmaWalkNetwork131Masks[0]) == 8 * sizeof(unsigned), "Eight walk-jump columns required");
 struct Outputs { P131 globalFirst, globalSecond, selectedFirst, selectedSecond; };
 static_assert(sizeof(Outputs) == 80, "Four unpadded five-word outputs required");
 
@@ -44,20 +46,20 @@ __global__ void sigmaStorageProbe(const P131 *a, const P131 *b, const int *power
     using namespace eccPacked131;
 #if ECC_PACKED_SHARED_SIGMA
     // A prior shared allocation must not accidentally satisfy the copy test.
-    for (unsigned word = threadIdx.x; word < 448; word += blockDim.x)
+    for (unsigned word = threadIdx.x; word < maskWords; word += blockDim.x)
         sigmaWalkShared131Masks[word / 8][word % 8] =
             ~__ldg(&sigmaWalkNetwork131Masks[word / 8][word % 8]);
     __syncthreads();
     initSigmaWalkShared131();
 #endif
     // Include entirely inactive blocks: table setup precedes every return.
-    for (unsigned word = threadIdx.x; word < 448; word += blockDim.x) {
+    for (unsigned word = threadIdx.x; word < maskWords; word += blockDim.x) {
 #if ECC_PACKED_SHARED_SIGMA
         const unsigned value = sigmaWalkShared131Masks[word / 8][word % 8];
 #else
         const unsigned value = __ldg(&sigmaWalkNetwork131Masks[word / 8][word % 8]);
 #endif
-        tables[size_t(blockIdx.x) * 448 + word] = value;
+        tables[size_t(blockIdx.x) * maskWords + word] = value;
     }
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
@@ -112,8 +114,7 @@ int main() {
     checked(cudaMemcpy(da, a.data(), a.size() * sizeof(P131), cudaMemcpyHostToDevice));
     checked(cudaMemcpy(db, b.data(), b.size() * sizeof(P131), cudaMemcpyHostToDevice));
     checked(cudaMemcpy(dp, powers.data(), powers.size() * sizeof(int), cudaMemcpyHostToDevice));
-    unsigned expectedTable[56][8];
-    static_assert(sizeof(eccPacked131::sigmaWalkNetwork131Masks) == sizeof(expectedTable), "56x8 mask table required");
+    unsigned expectedTable[maskWords / 8][8];
     checked(cudaMemcpyFromSymbol(expectedTable, eccPacked131::sigmaWalkNetwork131Masks, sizeof(expectedTable)));
     unsigned scenarios = 0, pairs = 0, blocksChecked = 0;
     const int sizes[] = {0, 1, 3, 255, 256, 257, 6240};
@@ -122,7 +123,7 @@ int main() {
         Outputs *deviceOut;
         unsigned *deviceTables;
         const size_t outBytes = size_t(padded + 2) * sizeof(Outputs);
-        const size_t tableWords = size_t(blocks) * 448 + 2;
+        const size_t tableWords = size_t(blocks) * maskWords + 2;
         checked(cudaMalloc(&deviceOut, outBytes)); checked(cudaMalloc(&deviceTables, tableWords * sizeof(unsigned)));
         std::vector<Outputs> hostOut(padded + 2);
         std::vector<unsigned> hostTables(tableWords);
@@ -139,7 +140,7 @@ int main() {
             checked(cudaMemcpy(hostTables.data(), deviceTables, tableWords * sizeof(unsigned), cudaMemcpyDeviceToHost));
             need(hostTables.front() == 0xa5a5a5a5u && hostTables.back() == 0xa5a5a5a5u, "table output guards");
             for (int block = 0; block < blocks; ++block)
-                need(!std::memcmp(hostTables.data() + 1 + size_t(block) * 448, expectedTable, sizeof expectedTable), "every block's complete mask snapshot");
+                need(!std::memcmp(hostTables.data() + 1 + size_t(block) * maskWords, expectedTable, sizeof expectedTable), "every block's complete mask snapshot");
             for (int i = 0; i < n; ++i) {
                 const auto &v = hostOut[i + 1];
                 const size_t source = mixed ? (size_t(i) % 8) * 780 + size_t(i) / 8 : size_t(i);
@@ -158,6 +159,6 @@ int main() {
     need(scenarios == 21 && pairs == 21036 && blocksChecked == 114, "scenario/pair/block counters");
     std::printf("packed shared sigma probe: %d\n", ECC_PACKED_SHARED_SIGMA);
     std::printf("PASS: 21 GPU sigma scenarios, 21036 input pairs, global and selected helpers against independent routing\n");
-    std::printf("PASS: 114 complete block mask snapshots, 51072 words, output guards and inactive blocks\n");
+    std::printf("PASS: 114 complete block mask snapshots, %u words, output guards and inactive blocks\n", blocksChecked * maskWords);
     return 0;
 }

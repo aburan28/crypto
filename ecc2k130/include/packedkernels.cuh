@@ -2,6 +2,15 @@
 #pragma once
 #include "kernel.h"
 #include "packed131.h"
+#ifndef ECC_PACKED_BLOCK_INVERSE
+#define ECC_PACKED_BLOCK_INVERSE 0
+#endif
+#if ECC_PACKED_BLOCK_INVERSE != 0 && ECC_PACKED_BLOCK_INVERSE != 1
+#error "ECC_PACKED_BLOCK_INVERSE must be 0 or 1"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE
+#include "packedblockinverse131.cuh"
+#endif
 #ifndef ECC_PACKED_COMPACT_STATE
 #define ECC_PACKED_COMPACT_STATE 0
 #endif
@@ -30,6 +39,9 @@ namespace eccPacked131 {
 #endif
 #if ECC_PACKED_POLY_CHAIN != 0 && ECC_PACKED_POLY_CHAIN != 1
 #error "ECC_PACKED_POLY_CHAIN must be 0 or 1"
+#endif
+#if ECC_PACKED_BLOCK_INVERSE && !ECC_PACKED_POLY_CHAIN
+#error "ECC_PACKED_BLOCK_INVERSE requires polynomial chains"
 #endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_CACHE_DENOM
 #error "ECC_PACKED_POLY_CHAIN requires the denominator cache"
@@ -64,6 +76,50 @@ namespace eccPacked131 {
 #if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
 #endif
+#if ECC_PACKED_FUSED_SIGMA && (!ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "ECC_PACKED_FUSED_SIGMA requires polynomial state and weighted-prefix mode 2"
+#endif
+#ifndef ECC_PACKED_BATCH_SPLIT
+#define ECC_PACKED_BATCH_SPLIT 1
+#endif
+#if ECC_PACKED_BATCH_SPLIT != 1 && ECC_PACKED_BATCH_SPLIT != 2
+#error "ECC_PACKED_BATCH_SPLIT must be 1 or 2"
+#endif
+#if ECC_PACKED_BATCH_SPLIT == 2 && (ECC_BATCH != 16 || ECC_THREADS != 256 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Split batches require batch16, threads256, block inversion and weighted-prefix mode2"
+#endif
+#ifndef ECC_PACKED_LAST_SLOT_CACHE
+#define ECC_PACKED_LAST_SLOT_CACHE 0
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
+#error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE && (ECC_BATCH != 16 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
+#endif
+#if ECC_PACKED_LAST_SLOT_CACHE
+static constexpr int lastLocalSlot131 = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1;
+#endif
+#ifndef ECC_PACKED_SHARED_X_SLOTS
+#define ECC_PACKED_SHARED_X_SLOTS 0
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS != 0 && ECC_PACKED_SHARED_X_SLOTS != 2 && ECC_PACKED_SHARED_X_SLOTS != 4
+#error "SHARED_X_SLOTS must be 0, 2 or 4"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS && (ECC_BATCH != 16 || ECC_THREADS != 256 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_COMPACT_STATE || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+#error "SHARED_X_SLOTS requires the selected B16 split2 compact polynomial block-inverse layout"
+#endif
+#if ECC_PACKED_SHARED_X_SLOTS
+static constexpr int firstSharedXLocalSlot131=ECC_BATCH/ECC_PACKED_BATCH_SPLIT-ECC_PACKED_SHARED_X_SLOTS;
+__device__ __forceinline__ P131 loadSharedX131(const uint4*low,const unsigned char*tail,int index) {
+    const uint4 v=low[index];return P131{{v.x,v.y,v.z,v.w,unsigned(tail[index])}};
+}
+__device__ __forceinline__ void storeSharedX131(uint4*low,unsigned char*tail,int index,P131 value) {
+    low[index]=uint4{value.v[0],value.v[1],value.v[2],value.v[3]};
+    tail[index]=static_cast<unsigned char>(value.v[4]);
+}
+#endif
+static constexpr int walkWorkersPerBlock131 = ECC_THREADS / ECC_PACKED_BATCH_SPLIT;
 #if ECC_PACKED_STATE_TILE
 ECC_HD size_t physicalStateThreads(size_t threads) {
     return ((threads + 255) / 256) * 256;
@@ -140,26 +196,74 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 }
 
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
+#if ECC_PACKED_BATCH_SPLIT == 2
+    // Paired physical threads own alternating slots of one logical worker.
+    const int tid = blockIdx.x * walkWorkersPerBlock131 + threadIdx.x % walkWorkersPerBlock131;
+    const int firstSlot = threadIdx.x / walkWorkersPerBlock131;
+#else
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-#if ECC_PACKED_SHARED_SIGMA
+    const int firstSlot = 0;
+#endif
+#if ECC_PACKED_SHARED_SIGMA && !ECC_PACKED_FUSED_SIGMA
     // All block threads participate, including inactive partial-tile workers.
     initSigmaWalkShared131();
 #endif
+#if ECC_PACKED_FUSED_SIGMA
+    initFusedDelta131();
+#endif
+#if ECC_PACKED_BLOCK_INVERSE
+    const bool active = tid < p.threads;
+    __shared__ uint32_t inverseTree[blockInverseWords131 + (ECC_PACKED_BATCH_SPLIT == 2 ? ECC_THREADS : 0)];
+#else
     if (tid >= p.threads) return;
+#endif
 #if ECC_PACKED_POLY_CHAIN && !ECC_PACKED_POLY_STATE
     unsigned *polyDenominators=denominators+size_t(p.threads)*ECC_BATCH*5;
 #endif
 #if !ECC_PACKED_CACHE_DENOM
     unsigned char js[ECC_BATCH];
 #endif
+#if ECC_PACKED_SHARED_X_SLOTS
+    __shared__ uint4 sharedXLow[ECC_PACKED_SHARED_X_SLOTS*ECC_THREADS];
+    __shared__ unsigned char sharedXTail[ECC_PACKED_SHARED_X_SLOTS*ECC_THREADS];
+    if (active && p.steps > 0) {
+#pragma unroll
+        for (int cacheSlot=0;cacheSlot<ECC_PACKED_SHARED_X_SLOTS;++cacheSlot) {
+            const int slot=(firstSharedXLocalSlot131+cacheSlot)*ECC_PACKED_BATCH_SPLIT+firstSlot;
+            const int index=cacheSlot*ECC_THREADS+threadIdx.x;
+            storeSharedX131(sharedXLow,sharedXTail,index,load(p.x,slot,tid,p.threads));
+        }
+    }
+#endif
     P131 prod, inv;
 #pragma unroll 1
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#if ECC_PACKED_LAST_SLOT_CACHE
+        P131 lastDenominator{};
+#if ECC_PACKED_LAST_SLOT_CACHE == 2
+        P131 lastWeightedPrefix{};
+#endif
+#endif
+#if ECC_PACKED_BLOCK_INVERSE
+        prod = P131{{1,0,0,0,0}};
+        if (active) {
+#endif
 #pragma unroll 1
-        for (int slot = 0; slot < ECC_BATCH; ++slot) {
+        for (int localSlot = 0; localSlot < ECC_BATCH / ECC_PACKED_BATCH_SPLIT; ++localSlot) {
+            const int slot = localSlot * ECC_PACKED_BATCH_SPLIT + firstSlot;
+#if ECC_PACKED_SHARED_X_SLOTS
+            P131 x;
+            if (localSlot >= firstSharedXLocalSlot131)
+                x=loadSharedX131(sharedXLow,sharedXTail,(localSlot-firstSharedXLocalSlot131)*ECC_THREADS+threadIdx.x);
+            else x=load(p.x,slot,tid,p.threads);
+#else
             P131 x = load(p.x, slot, tid, p.threads);
+#endif
+#if ECC_PACKED_FUSED_SIGMA
+            const P131 polyX=x;
+#endif
 #if ECC_PACKED_POLY_STATE
             x = fromPolynomial131(x);
 #endif
@@ -194,6 +298,10 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             js[slot] = j;
 #endif
 #if ECC_PACKED_WEIGHTED_PREFIX
+#if ECC_PACKED_FUSED_SIGMA
+            const auto deltas=fusedDeltaPair131(polyX,load(p.y,slot,tid,p.threads),j-3);
+            P131 dp=deltas.first, ep=deltas.second;
+#else
             const P131 normalY = fromPolynomial131(load(p.y, slot, tid, p.threads));
 #if ECC_PACKED_WEIGHTED_PREFIX == 2
 #if ECC_PACKED_SHARED_SIGMA
@@ -208,9 +316,14 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 ep = toPolynomial131(add131(normalY, sigma131(normalY, j)));
 #endif
             P131 dp = toPolynomial131(d);
+#endif
             // W_i = E_i * product_{k<i}(D_k). Every prefix slot is used.
-            if (slot) {
+            if (localSlot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
+#if ECC_PACKED_LAST_SLOT_CACHE == 2
+                if (localSlot == lastLocalSlot131) lastWeightedPrefix = pair.first;
+                else
+#endif
                 store(p.pchain, slot, tid, p.threads, pair.first);
                 prod = pair.second;
             } else {
@@ -235,6 +348,10 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             // beside the denominator, eliminating the separate local array.
 #if ECC_PACKED_POLY_STATE
             dp.v[4] |= unsigned(j - 3) << 3;
+#if ECC_PACKED_LAST_SLOT_CACHE
+            if (localSlot == lastLocalSlot131) lastDenominator = dp;
+            else
+#endif
             store(denominators, slot, tid, p.threads, dp);
 #else
             d.v[4] |= unsigned(j - 3) << 3;
@@ -242,25 +359,48 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #endif
         }
-#if ECC_PACKED_POLY_CHAIN
+#if ECC_PACKED_BLOCK_INVERSE
+        } // active forward state access
+        inv = blockInverse131<(ECC_PACKED_BATCH_SPLIT == 2)>(prod, inverseTree);
+#elif ECC_PACKED_POLY_CHAIN
         inv = toPolynomial131(inv131(fromPolynomial131(prod)));
 #else
         inv = inv131(prod);
 #endif
+#if ECC_PACKED_BLOCK_INVERSE
+        if (active) {
+#endif
 #pragma unroll 1
-        for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
+        for (int localSlot = ECC_BATCH / ECC_PACKED_BATCH_SPLIT - 1; localSlot >= 0; --localSlot) {
+            const int slot = localSlot * ECC_PACKED_BATCH_SPLIT + firstSlot;
+#if ECC_PACKED_SHARED_X_SLOTS
+            P131 x;
+            if (localSlot >= firstSharedXLocalSlot131)
+                x=loadSharedX131(sharedXLow,sharedXTail,(localSlot-firstSharedXLocalSlot131)*ECC_THREADS+threadIdx.x);
+            else x=load(p.x,slot,tid,p.threads);
+            P131 y=load(p.y,slot,tid,p.threads);
+#else
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
+#endif
 #if ECC_PACKED_WEIGHTED_PREFIX
+#if ECC_PACKED_LAST_SLOT_CACHE
+            P131 dp = localSlot == lastLocalSlot131 ? lastDenominator : load(denominators, slot, tid, p.threads);
+#else
             P131 dp = load(denominators, slot, tid, p.threads);
+#endif
             dp.v[4] &= 7;
             P131 lambdaPoly;
-            if (slot) {
+            if (localSlot) {
                 PolynomialPair pair = mulPolynomialPair131(inv,
+#if ECC_PACKED_LAST_SLOT_CACHE == 2
+                    localSlot == lastLocalSlot131 ? lastWeightedPrefix : load(p.pchain, slot, tid, p.threads), dp);
+#else
                     load(p.pchain, slot, tid, p.threads), dp);
+#endif
                 lambdaPoly = pair.first;
                 inv = pair.second;
             } else {
-                lambdaPoly = mulPolynomial131(inv, load(p.pchain, 0, tid, p.threads));
+                lambdaPoly = mulPolynomial131(inv, load(p.pchain, firstSlot, tid, p.threads));
             }
 #else
 #if ECC_PACKED_POLY_STATE
@@ -278,7 +418,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const int j = js[slot];
             P131 d = add131(x, sigma131(x, j)), e = add131(y, sigma131(y, j)), ii;
 #endif
-            if (slot) {
+            if (localSlot) {
 #if ECC_PACKED_POLY_CHAIN
 #if ECC_PACKED_PAIR_PRODUCTS
                 PolynomialPair pair=mulPolynomialPair131(inv,
@@ -325,9 +465,28 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 ny = add131(add131(mul131(lambda, add131(x, nx)), nx), y);
 #endif
 #endif
+#if ECC_PACKED_SHARED_X_SLOTS
+            if (localSlot >= firstSharedXLocalSlot131)
+                storeSharedX131(sharedXLow,sharedXTail,(localSlot-firstSharedXLocalSlot131)*ECC_THREADS+threadIdx.x,nx);
+            else store(p.x,slot,tid,p.threads,nx);
+#else
             store(p.x, slot, tid, p.threads, nx);
+#endif
             store(p.y, slot, tid, p.threads, ny);
         }
+#if ECC_PACKED_BLOCK_INVERSE
+        } // active backward state access
+#endif
     }
+#if ECC_PACKED_SHARED_X_SLOTS
+    if (active && p.steps > 0) {
+#pragma unroll
+        for (int cacheSlot=0;cacheSlot<ECC_PACKED_SHARED_X_SLOTS;++cacheSlot) {
+            const int slot=(firstSharedXLocalSlot131+cacheSlot)*ECC_PACKED_BATCH_SPLIT+firstSlot;
+            const int index=cacheSlot*ECC_THREADS+threadIdx.x;
+            store(p.x,slot,tid,p.threads,loadSharedX131(sharedXLow,sharedXTail,index));
+        }
+    }
+#endif
 }
 } // namespace eccPacked131
