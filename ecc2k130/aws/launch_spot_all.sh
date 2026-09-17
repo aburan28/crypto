@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Fill leftover G/VT Spot quota in every opted-in commercial region.
-# Prefers g7e (RTX PRO 6000), then g7 (4500), then g6e (L40S), then g6 (L4).
+# Prefers g7e (RTX PRO 6000), then g7 (4500), then g6e (L40S), then g6 (L4),
+# then g4dn (T4) in regions that have leftover quota and no Ada/Blackwell SKU.
 # 2xlarge first (8 vCPU = 1 GPU); 4xlarge only if 2xlarge is dry and at
 # least 16 vCPU remain. Spot only. Does not stop existing boxes and does
 # not rewrite campaign.json.
@@ -19,7 +20,7 @@ BUCKET=${BUCKET:-ecc2k130-$ACCOUNT}
 export AWS_MAX_ATTEMPTS=${AWS_MAX_ATTEMPTS:-1}
 STACK=ecc2k130
 UNIT_VCPU=8
-TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge}
+TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge}
 
 opted_regions() {
     aws ec2 describe-regions --all-regions --output json \

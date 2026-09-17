@@ -57,6 +57,8 @@ class CampaignWorkers(unittest.TestCase):
     def test_ada_uses_autothreads(self):
         self.assertFalse(usesCampaignWorkers("g6"))
         self.assertFalse(usesCampaignWorkers("g6e"))
+        self.assertFalse(usesCampaignWorkers("g4dn"))
+        self.assertFalse(usesCampaignWorkers("g5"))
 
     def test_blackwell_keeps_preset(self):
         self.assertTrue(usesCampaignWorkers("g7"))

@@ -97,15 +97,18 @@ build_from_source() {
     local SRC
     SRC=$(field sourceKey)
     [ -n "$SRC" ] || { echo "published prefix incomplete and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
-    # Fat client so g6/g6e (sm_89) and g7e (sm_120) share one binaryKey.
-    # A thin Ada rebuild would point the live campaign at a binary Blackwell
-    # cannot load. CLMAD stays 1: both arches have a receipt.
-    export ARCHES="${ARCHES:-89 120}"
-    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES from $SRC"
+    # Fat client so g4dn (sm_75), g6/g6e (sm_89) and g7e (sm_120) share one
+    # binaryKey. A thin Ada/T4 rebuild would point the live campaign at a
+    # binary Blackwell cannot load. CLMAD stays 1 even with 75 in ARCHES:
+    # Turing uses the software product in that slice; Ada/Blackwell keep
+    # the receipt. build.sh would otherwise default CLMAD=0 and slow the fleet.
+    export ARCHES="${ARCHES:-75 89 120}"
+    export CLMAD="${CLMAD:-1}"
+    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES CLMAD=$CLMAD from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
     aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
-    BUCKET=$BUCKET ARCHES="$ARCHES" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
+    BUCKET=$BUCKET ARCHES="$ARCHES" CLMAD="$CLMAD" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
 }
@@ -166,11 +169,11 @@ cat manifest.json 2>/dev/null
 #
 # The carryless marker is the one that cannot be a constant.  On sm_120 a
 # CLMAD=0 build is the accident this gate exists to catch. Ada (sm_89, EC2
-# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="89 120"
-# rebuild uses that default; a software-product Ada client is still legal if
-# its manifest says 0. Hardcoding 1 here would reject that binary. Take the
-# expected value from the published manifest. A missing manifest keeps the
-# old strict 1.
+# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="75 89 120"
+# rebuild keeps CLMAD=1 (Turing uses the software product in its slice).
+# A software-product Ada client is still legal if its manifest says 0.
+# Hardcoding 1 here would reject that binary. Take the expected value from
+# the published manifest. A missing manifest keeps the old strict 1.
 expectedClmad=1
 if [ -s manifest.json ]; then
     expectedClmad=$(python3 - <<'EOF'

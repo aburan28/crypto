@@ -72,10 +72,12 @@ class BootstrapContract(unittest.TestCase):
 
     def test_fat_client_covers_ada_and_blackwell(self):
         self.assertIn("local_cc", BOOTSTRAP)
-        self.assertIn('ARCHES="${ARCHES:-89 120}"', BOOTSTRAP)
+        self.assertIn('ARCHES="${ARCHES:-75 89 120}"', BOOTSTRAP)
+        self.assertIn('CLMAD="${CLMAD:-1}"', BOOTSTRAP)
         self.assertIn("manifest.json", BOOTSTRAP)
-        # A thin sm_89 publish must not become the live binaryKey.
-        self.assertIn("g6/g6e (sm_89) and g7e (sm_120) share one binaryKey", BOOTSTRAP)
+        # A thin sm_89/sm_75 publish must not become the live binaryKey.
+        self.assertIn("g4dn (sm_75), g6/g6e (sm_89) and g7e (sm_120) share one", BOOTSTRAP)
+        self.assertIn("binaryKey. A thin Ada/T4 rebuild", BOOTSTRAP)
         self.assertIn("ECC_INSTANCE_TYPE", BOOTSTRAP)
         self.assertIn("ECC_DEVICE_NAME", BOOTSTRAP)
 
@@ -91,7 +93,7 @@ class BootstrapContract(unittest.TestCase):
 
     def test_launch_spot_all_is_discovered_spot_only(self):
         script = (HERE / "launch_spot_all.sh").read_text()
-        self.assertIn("g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge", script)
+        self.assertIn("g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge", script)
         self.assertIn('MarketType":"spot"', script)
         self.assertIn("describe-regions --all-regions", script)
         self.assertIn("opted-in", script)
