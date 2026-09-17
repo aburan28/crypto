@@ -89,6 +89,19 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("bash ./push_source.sh", script)
         subprocess.run(["bash", "-n", str(HERE / "launch_g6.sh")], check=True)
 
+    def test_launch_spot_all_is_discovered_spot_only(self):
+        script = (HERE / "launch_spot_all.sh").read_text()
+        self.assertIn("g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge", script)
+        self.assertIn('MarketType":"spot"', script)
+        self.assertIn("describe-regions --all-regions", script)
+        self.assertIn("opted-in", script)
+        self.assertNotIn("on-demand", script)
+        self.assertNotIn("TerminateInstances", script)
+        self.assertIn("bash ./infra.sh", script)
+        self.assertIn("bash ./push_source.sh", script)
+        self.assertIn("meow34", script)
+        subprocess.run(["bash", "-n", str(HERE / "launch_spot_all.sh")], check=True)
+
 
 if __name__ == "__main__":
     unittest.main()
