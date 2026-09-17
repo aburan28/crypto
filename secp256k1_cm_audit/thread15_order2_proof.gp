@@ -202,7 +202,8 @@ print("  i.e., for all odd primes q|disc(K), kronecker(D_q, p) = (p/q) where D_q
 print("  Equivalently: the quadratic characters chi_q(p) agree with the genus character of P.");
 print();
 print("Check: for each case, verify p lies in the principal genus.");
-print("Principal genus condition: product of all genus characters at p equals +1.");
+print("Principal genus condition: EVERY genus character at p equals +1.");
+print("(Their product is kr(disc,p)=+1 for any split p, so the product alone proves nothing.)");
 print();
 
 \\ For each non-CM-73 case: check genus theory prediction
@@ -272,7 +273,7 @@ print();
 \\ which genus the prime p belongs to.
 print("Detailed genus check for key cases:");
 {
-  my(sf, p, k, D, fac, genus_prod);
+  my(sf, p, k, D, fac, genus_prod, all_plus);
   my(test_cases = [[-939, 349, 21], [-1731, 8287, 105], [-3819, 487, 25], [-5619, 937, 35]]);
   for(i = 1, #test_cases,
     sf = test_cases[i][1];
@@ -282,8 +283,10 @@ print("Detailed genus check for key cases:");
     D = if(sf % 4 == 1, sf, 4*sf);
     fac = factor(abs(D));
 
-    \\ Genus characters: product of (p|q) for each prime q dividing disc
+    \\ Genus characters (q*/p) for each prime q dividing disc; principal genus
+    \\ requires each one to be +1 (the product is kr(disc,p)=+1 automatically).
     genus_prod = 1;
+    all_plus = 1;
     my(chars = "");
     for(j = 1, #fac[,1],
       my(q = fac[j,1], e = fac[j,2]);
@@ -298,14 +301,15 @@ print("Detailed genus check for key cases:");
         chi = kronecker(qstar, p)
       );
       genus_prod = genus_prod * chi;
+      if(chi != 1, all_plus = 0);
       chars = Str(chars, " kr(", if(q==2,"-4","q*=",if((q-1)%4==0,"","−"),q), ",p)=", chi)
     );
 
-    printf("sf=%-8d disc=%d  genus_chars:%s  product=%d\n", sf, D, chars, genus_prod)
+    printf("sf=%-8d disc=%d  genus_chars:%s  product=%d  all_+1=%d\n", sf, D, chars, genus_prod, all_plus)
   )
 }
 print();
-print("Observation: if genus_product=1 for all split primes p, then [P] is in the");
+print("Observation: if EVERY genus char is +1 for all split primes p, then [P] is in the");
 print("principal genus, hence 2-torsion in Cl(K). This holds for ALL our norm-form");
 print("primes because the norm-form condition 4p=73+3k^2 forces specific congruence");
 print("conditions on p relative to the prime divisors of disc(Q(sqrt(sf))).");

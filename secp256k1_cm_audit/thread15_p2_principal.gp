@@ -15,10 +15,9 @@ print();
 \\ -------------------------------------------------------
 
 check_case(sf, p, k) = {
-  my(K, h, cyc, kr, fac, P, P2, r, clexp, is_p2_principal, clexp_P, tag);
+  my(K, h, kr, fac, P, P2, r, clexp, is_p2_principal, clexp_P, is_p_principal, ord_P, pass, tag);
   K  = bnfinit(x^2 - sf, 1);
   h  = K.clgp.no;
-  cyc = K.clgp.cyc;
   kr = kronecker(sf, p);
   if(kr == 0,
     printf("sf=%-8d p=%-6d k=%-4d h=%d RAMIFIED\n", sf,p,k,h);
@@ -31,15 +30,21 @@ check_case(sf, p, k) = {
   fac = idealprimedec(K, p);
   P   = fac[1];
   clexp_P = bnfisprincipal(K,P)[1];
+  is_p_principal = 1;
+  for(j=1,#clexp_P, if(clexp_P[j]!=0, is_p_principal=0));
   P2  = idealpow(K, P, 2);
   r   = bnfisprincipal(K, P2);
   clexp = r[1];
   is_p2_principal = 1;
   for(j=1,#clexp, if(clexp[j]!=0, is_p2_principal=0));
+  \\ ord([P]) in Cl(K): 1 if P principal, 2 if only P^2 is, else >2 (reported as -1)
+  ord_P = if(is_p_principal, 1, if(is_p2_principal, 2, -1));
+  \\ Exact order 2 is the claim; order 1 is admissible only when Cl(K) is trivial.
+  pass = (ord_P == 2) || (ord_P == 1 && h == 1);
   tag = if(sf==-219," [CM73]", if(sf==-3," [h=1]",""));
   printf("sf=%-8d p=%-6d k=%-4d h=%-4d ord([P])=%d P^2_princ=%d%s\n",
-    sf, p, k, h, clexp_P[1], is_p2_principal, tag);
-  [sf,p,k,h,is_p2_principal]
+    sf, p, k, h, ord_P, is_p2_principal, tag);
+  [sf,p,k,h,pass]
 };
 
 print("--- Part A: P^2 principal for all Thread 14 norm-form primes ---");
@@ -69,10 +74,12 @@ r = check_case(-87267,7669,101); res=concat(res,[r]);
 
 for(i=1,#res, if(res[i][5]==0, all_pass=0));
 print();
+{
 if(all_pass,
-  print("RESULT A: ALL 19 cases verified — P^2 principal. Universal order-2 CONFIRMED."),
+  print("RESULT A: ALL 19 cases verified — [P] has exact order 2 (order 1 only for h=1). Universal order-2 CONFIRMED."),
   print("RESULT A: SOME cases failed.")
 );
+}
 
 \\ -------------------------------------------------------
 \\ Part B: Explicit generators of P^2
@@ -135,18 +142,21 @@ print("  Norm: Nm(a+b*omega) = a^2+a*b+b^2");
 \\ -------------------------------------------------------
 
 print();
-print("--- Part D: Genus product (principal genus condition) for split primes ---");
-print("  p is in principal genus of Q(sqrt(sf)) iff product of all genus chars at p = +1.");
+print("--- Part D: Genus characters (principal genus condition) for split primes ---");
+print("  p is in principal genus of Q(sqrt(sf)) iff EVERY genus char at p = +1.");
 print("  Genus chars: for each odd prime q|disc, chi_q*(p) where q*=(-1)^{(q-1)/2}*q.");
+print("  Note: the product of all chars equals kr(disc,p)=+1 for any split p, so the");
+print("  product alone is uninformative; the individual chars are the test.");
 print();
 
 genus_prod(sf, p) = {
-  my(D, absD, fac, q, qstar, prod, chars);
+  my(D, absD, fac, q, qstar, prod, chars, all_plus);
   \\ Discriminant of Q(sqrt(sf)):
   D = if(sf%4==1, sf, 4*sf);
   absD = abs(D);
   fac = factor(absD);
   prod = 1;
+  all_plus = 1;
   chars = "";
   for(j=1,#fac[,1],
     q = fac[j,1];
@@ -158,13 +168,15 @@ genus_prod(sf, p) = {
       qstar = if((q-1)%4==0, q, -q);
       my(chi = kronecker(qstar, p));
       prod = prod * chi;
+      if(chi != 1, all_plus = 0);
       chars = Str(chars," kr(",qstar,",p)=",chi)
     )
   );
-  [prod, chars]
+  [prod, chars, all_plus]
 };
 
-printf("%-8s %-6s %-4s  genus_chars                    product\n","sf","p","k");
+printf("%-8s %-6s %-4s  genus_chars                    product all_+1\n","sf","p","k");
+{
 gp_cases = [[-219,19,1],[-219,37,5],[-219,79,9],[-219,109,11],
             [-939,349,21],[-1731,8287,105],[-3819,487,25],
             [-5619,937,35],[-8643,739,31],[-14619,1279,41],
@@ -176,15 +188,16 @@ for(i=1,#gp_cases,
   sf = gp_cases[i][1]; p = gp_cases[i][2]; k = gp_cases[i][3];
   if(kronecker(sf,p)!=1, next()); \\ skip inert/ramified
   gv = genus_prod(sf, p);
-  gpr = gv[1]; gch = gv[2];
-  printf("%-8d %-6d %-4d  %-30s  %d\n", sf, p, k, gch, gpr);
-  if(gpr != 1, all_genus_pass = 0)
+  gpr = gv[1]; gch = gv[2]; gall = gv[3];
+  printf("%-8d %-6d %-4d  %-30s  %d       %d\n", sf, p, k, gch, gpr, gall);
+  if(gall != 1, all_genus_pass = 0)
 );
 print();
 if(all_genus_pass,
-  print("RESULT D: ALL cases have genus product=+1 (p in principal genus). Confirmed."),
-  print("RESULT D: Some cases NOT in principal genus. Check needed.")
+  print("RESULT D: ALL cases have every genus char=+1 (p in principal genus). Confirmed."),
+  print("RESULT D: Some cases have a genus char=-1 (p NOT in principal genus). Check needed.")
 );
+}
 
 print();
 print("=== DONE ===");
