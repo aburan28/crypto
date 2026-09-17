@@ -109,9 +109,10 @@ being refuted because it has no solutions for counting reasons, and
 refuting an overdetermined system at its own degree is unsurprising.
 The attack needs `m ≈ n/ℓ`.
 
-## Result 2: at `m = 3` the solving degree is not measurable at all
+## Result 2: at `m = 3` the gap is real — FFD 3, solving degree 6
 
-`--d-max 8 --trials 4 --m 3 --no-control`:
+At the harness's default Macaulay size caps, `--d-max 8 --trials 4 --m 3
+--no-control`:
 
 | n | ℓ | vars | eqs | deg | FFD | D_refute | unres | D_built |
 |--:|--:|-----:|----:|----:|----:|---------:|------:|--------:|
@@ -119,26 +120,74 @@ The attack needs `m ≈ n/ℓ`.
 | 7 | 3 | 16 | 14 | 3 | 3.00 | — | 4/4 | 5 |
 | 9 | 6 | 27 | 18 | 3 | 3.00 | — | 4/4 | 4 |
 
-`D_built` is the highest Macaulay degree actually constructed.  It is
-**below `d_max`** on every row: the sweep ran out of *matrix*, not out
-of degree.  The Macaulay matrix exceeded the size caps
-(`MAX_F4_ROWS`, `MAX_F4_COLS` — overridable via `F4_F2_MAX_ROWS` /
-`F4_F2_MAX_COLS`) at degree 5 or 6, before the system resolved.
+`D_built` is the highest Macaulay degree actually constructed, and it is
+**below `d_max`** on every row: these runs ran out of *matrix*, not out
+of degree, so they establish nothing about the solving degree.  That is
+a resource limit of this harness, never negative mathematical evidence.
 
-So at the smallest instances that exist — `n = 5`, 17 unknowns — the
-cheap statistic is available and flat, and the statistic that governs
-cost is unavailable.
+Raising the caps settles it.  `F4_F2_MAX_ROWS=2000000
+F4_F2_MAX_COLS=200000`, `--d-max 7 --trials 1 --n-max 5 --m 3`:
 
-**What this is and is not.**  The size caps are a resource limit of this
-harness, not a fact about the mathematics.  This row says *the solving
-degree was not measured*, not that it is large; a run that exhausts a
-budget is never negative mathematical evidence.  What is established is
-narrower and still worth having: **the quantity Petit–Quisquater's
-complexity claim depends on cannot be observed at any `n` this harness
-reaches, while the quantity it is stated in can.**  Extrapolating the
-first fall degree to `n = 131` is extrapolating the number that is
-computable rather than the number the argument needs, and the gap
-between them is unmeasured rather than small.
+| n | ℓ | vars | eqs | deg | FFD | D_refute | gap | refuted | D_built | time |
+|--:|--:|-----:|----:|----:|----:|---------:|----:|--------:|--------:|-----:|
+| 5 | 4 | 17 | 10 | 3 | 3.00 | **6.00** | **3.00** | 1/1 | 6 | 494 s |
+
+**The first fall degree is 3 and the solving degree is 6**, at the
+smallest instance that exists.  This is the decoupling Kosters–Yeo show
+is possible for these systems and the first-fall-degree assumption
+denies: the cheap statistic is not tracking the expensive one, and it is
+low by a factor of two where both can be seen at once.
+
+The cost is set by the expensive one.  The Macaulay matrix at degree `D`
+over `N` unknowns has `Θ(binom(N, D))` columns, so at the summand count
+and factor-base dimension an attack on a cryptographic field would need
+— `N ≈ 132` — degree 6 against degree 3 is `binom(132, 6) ≈ 1.7 · 10^9`
+columns against `374 · 10^3`, a factor of `4.6 · 10^3` in width and its
+square in the elimination.
+
+### What this single cell does and does not support
+
+It establishes that the gap is **non-zero and large at `n = 5`**.  It
+says nothing about how the gap *scales*, and that distinction carries
+the whole extrapolation: a gap that stays at a constant 3 and a gap that
+grows with `n` have entirely different consequences at `n = 131`.  One
+draw at one cell cannot tell them apart.  Extending the ladder needs the
+sparse elimination noted under "Next" — at these caps a single `n = 5`
+draw costs about eight minutes of dense `F_2` elimination, and `n = 7`
+did not complete in twenty-five.
+
+## The controls, and why the first one could not answer the question
+
+`random_control_system` draws systems with the same variable count,
+equation count, total degree and term density as the real one, and no
+Semaev structure.  Run against the `n = 5, m = 3` cell it reported no
+resolving degree at all — and that result is **uninformative, not a
+confirmation**, for a reason worth recording.
+
+Ten random equations in seventeen `F_2` unknowns has `2^(17 − 10) = 128`
+expected solutions.  It is satisfiable by construction, so it can never
+produce a refutation, and with many solutions it can never pin every
+variable either.  The shape-matched control is structurally incapable of
+producing the event being measured, and reading its silence as "the
+Semaev structure is doing the work" would be reading a missing
+measurement as a finding.
+
+Shape and feasibility cannot both be matched: matching the equation
+count is exactly what leaves the control satisfiable.  So there are two
+controls, bracketing the question rather than pretending to settle it:
+
+- **shape-matched** — same `n_eqs`; `control_expected_solutions` records
+  `2^(n_vars − n_eqs)` so the limitation is visible in the output, and
+  the table prints `n/a(sat)` rather than a blank when it exceeds 1;
+- **infeasible** — same variables, degree and term density, with
+  `n_vars + 4` equations, so it has no solution with high probability,
+  refutes, and is comparable like for like with the real systems'
+  refutation degree.
+
+Until the infeasible control is read on the same cell, **whether the
+measured gap is Semaev structure or generic to systems of this shape is
+open.**  The gap itself is measured either way; only its attribution is
+pending.
 
 ## Reproducing
 
@@ -146,14 +195,19 @@ between them is unmeasured rather than small.
 cargo test --release --lib cryptanalysis::koblitz_groebner
 cargo run  --release --example dreg_sweep -- --d-max 4 --trials 8 --m 2 --no-control
 cargo run  --release --example dreg_sweep -- --d-max 8 --trials 4 --n-max 9 --m 3 --no-control
+
+# the measured gap (about eight minutes)
+F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
+  cargo run --release --example dreg_sweep -- --d-max 7 --trials 1 --n-max 5 --m 3
 ```
 
 ## Next
 
-- Raise `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS` and find the `n`, if any,
-  at which an `m = 3` cell resolves.  That single number is what turns
-  Result 2 from "unmeasured" into a measured gap.
-- Re-run any interpreted cell **with** the control.
+- Read the infeasible control on the `n = 5, m = 3` cell and settle
+  whether the gap is structure or shape.
+- Extend the `m = 3` ladder past `n = 5` to turn a single gap into a
+  scaling claim.  This is the one that matters and the one that is
+  blocked on elimination cost, not on degree.
 - Sparse elimination (Wiedemann/Lanczos) in place of dense `rref_f2` is
   what would move the frontier; the dense pass is the binding cost, and
   `RESEARCH_GROEBNER_F4.md` already lists it as missing.
