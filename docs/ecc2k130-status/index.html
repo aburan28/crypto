@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1020'/%3E%3Ctext x='16' y='24' font-size='21' text-anchor='middle' fill='%233ee0a2' font-family='monospace'%3E%CF%81%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
 <meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
@@ -1062,7 +1062,10 @@ make gpu
     tiles.ninety.textContent = whenOdds(0.9);
 
     // The curve, from now to the point the odds reach 99%.
-    var W = 960, H = 230, PAD_L = 52, PAD_R = 14, PAD_T = 14, PAD_B = 40;
+    // Tall enough that guide and axis labels never share a strip: guides sit
+    // inside the plot, dates sit in PAD_B. No min-width on this chart (see
+    // style.css), so a phone does not have to scroll sideways to read them.
+    var W = 960, H = 268, PAD_L = 44, PAD_R = 16, PAD_T = 18, PAD_B = 52;
     var plotW = W - PAD_L - PAD_R;
     var plotH = H - PAD_T - PAD_B;
     var work99 = Math.max(workForOdds(0.99), work0 * 1.0001);
@@ -1097,20 +1100,24 @@ make gpu
     if (rate !== null) chart.appendChild(shape("path", { d: curve(2), "class": "line alt" }));
     chart.appendChild(shape("path", { d: curve(1), "class": "line" }));
 
-    var guide = function (p, text) {
-      var work = workForOdds(p);
-      if (work <= work0 || work > work99) return;
-      chart.appendChild(shape("line", { x1: x(work).toFixed(1), y1: y(p).toFixed(1), x2: x(work).toFixed(1), y2: PAD_T + plotH, "class": "guide" }));
-      chart.appendChild(label(x(work) + 4, PAD_T + plotH + 14, text, "start", "tick"));
-    };
+    // Guide marks: short label inside the plot above the curve, date on the
+    // axis only — stacking both under the plot is what clipped on phones.
     var xLabel = function (work, fallback) {
       if (rate === null) return fallback;
       return dateText(dateFor(work));
     };
-    guide(0.5, "50% · " + xLabel(workForOdds(0.5), "0.94 E"));
-    guide(0.9, "90% · " + xLabel(workForOdds(0.9), "1.71 E"));
-    chart.appendChild(label(PAD_L, H - 8, rate === null ? "now, 2^" + log2ops.toFixed(1) : "now, " + dateText(at0), "start", "tick"));
-    chart.appendChild(label(W - PAD_R, H - 8, rate === null ? "2^" + (Math.log(work99) / Math.LN2).toFixed(1) + " (99%)" : xLabel(work99, "") + " (99%)", "end", "tick"));
+    var guide = function (p, mark) {
+      var work = workForOdds(p);
+      if (work <= work0 || work > work99) return;
+      var gx = x(work);
+      chart.appendChild(shape("line", { x1: gx.toFixed(1), y1: y(p).toFixed(1), x2: gx.toFixed(1), y2: PAD_T + plotH, "class": "guide" }));
+      chart.appendChild(label(gx + 4, y(p) - 6, mark, "start", "tick"));
+      chart.appendChild(label(gx, H - 22, xLabel(work, mark), "middle", "tick"));
+    };
+    guide(0.5, "50%");
+    guide(0.9, "90%");
+    chart.appendChild(label(PAD_L, H - 8, rate === null ? "now · 2^" + log2ops.toFixed(1) : "now · " + dateText(at0), "start", "tick"));
+    chart.appendChild(label(W - PAD_R, H - 8, rate === null ? "2^" + (Math.log(work99) / Math.LN2).toFixed(1) + " · 99%" : xLabel(work99, "") + " · 99%", "end", "tick"));
     chart.appendChild(shape("circle", { cx: x(work0).toFixed(1), cy: y(odds0).toFixed(1), r: 4, "class": "dot" }));
     host.appendChild(chart);
   }
