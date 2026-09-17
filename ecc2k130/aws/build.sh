@@ -135,14 +135,23 @@ print(json.dumps({"sourceSha256": sha, "buildSha256": buildSha,
                   "builtAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
 EOF
 prefix="bin/$short"
+published="ecc2k130 ecc2k130-cpu test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda libgomp.so.1"
 for f in ecc2k130 ecc2k130-cpu build/test-packed-cuda build/test-packed-storage-cuda \
          build/test-shared-sigma-cuda build/libgomp.so.1; do
+    [ -s "$work/src/$f" ] || { echo "build did not produce $f; not pointing campaign.json at $prefix" >&2; exit 1; }
     aws s3 cp "$work/src/$f" "s3://$BUCKET/$prefix/$(basename "$f")" --only-show-errors
 done
 if [ $walkTable = 1 ]; then
+    [ -s "$work/src/build/test-table-walk-cuda" ] || { echo "build did not produce test-table-walk-cuda" >&2; exit 1; }
     aws s3 cp "$work/src/build/test-table-walk-cuda" "s3://$BUCKET/$prefix/test-table-walk-cuda" --only-show-errors
+    published="$published test-table-walk-cuda"
 fi
 aws s3 cp "$work/manifest.json" "s3://$BUCKET/$prefix/manifest.json" --only-show-errors
+published="$published manifest.json"
+for f in $published; do
+    aws s3api head-object --bucket "$BUCKET" --key "$prefix/$f" >/dev/null \
+        || { echo "refusing to point campaign.json at $prefix: $f missing after upload" >&2; exit 1; }
+done
 
 # Point the campaign at this build.  Geometry in campaign.json must match the
 # knobs above; they are the audited preset, so only binaryKey moves.

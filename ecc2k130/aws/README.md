@@ -220,10 +220,12 @@ All commands from this directory, with the default region set (`us-west-2`).
 
 # 2. source to S3 (also recorded as campaign.json sourceKey)
 ./push_source.sh
-#    The first instance that finds no published binary builds one itself in
-#    Docker from that tarball (~10 min), publishes bin/<sha>/..., and points
-#    campaign.json at it; later instances just download.  To build elsewhere:
-#    BUCKET=ecc2k130-<account> ./build.sh <sourceKey>   (any Linux host with Docker)
+#    The first instance that finds no published binary, or a binary whose
+#    prefix is missing a GPU fixture, builds from that tarball in Docker
+#    (~10 min), publishes bin/<sha>/{client,fixtures}, and points
+#    campaign.json at it; later instances just download.  build.sh refuses
+#    to rewrite campaign.json until every fixture is on S3.  To build
+#    elsewhere: BUCKET=ecc2k130-<account> ./build.sh <sourceKey>
 
 # 3. pilot: one GPU (sizes with one GPU only, so "1" cannot over-fill)
 #    Prefer g7e Spot; after FALLBACK_WAIT_SECONDS (default 120) any shortfall
