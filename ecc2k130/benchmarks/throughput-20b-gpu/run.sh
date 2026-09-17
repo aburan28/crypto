@@ -67,10 +67,11 @@ preset = (
     "PACKED_TOP_CLMAD=0 PACKED_L2_PERSIST=0 UNROLL_SLOTS=1 PACKED_SLOT_PREFETCH=0"
 )
 modes = [
-    ("shipping", "WALK_TABLE=0 TABLE_PIVOT_BYTES=0 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0"),
-    ("table_pivot", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0"),
-    ("table_pivot_ilp", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=0"),
-    ("table_pivot_persist", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1"),
+    ("shipping", "WALK_TABLE=0 TABLE_PIVOT_BYTES=0 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0 UNROLL_SLOTS=1"),
+    ("table_pivot", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0 UNROLL_SLOTS=1"),
+    ("table_pivot_ilp", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=0 UNROLL_SLOTS=1"),
+    ("table_pivot_persist", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 UNROLL_SLOTS=1"),
+    ("table_pivot_unroll", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 UNROLL_SLOTS=2"),
 ]
 rec = {
     "kind": "RTX PRO 6000 20 B/s attempt: complete scalar updates/s",
@@ -139,7 +140,7 @@ if dev.returncode != 0:
     sys.exit(1)
 
 verify_cmd = ("{bin} --curve 131 --packed --dp-weight 50 --steps 16 "
-              "--launches 6 --verify 300")
+              "--launches 6 --dp-cap 262144 --verify 300")
 for name, binp in binaries.items():
     p = run(f"verify_{name}", verify_cmd.format(bin=binp))
     rec[f"verify_{name}"]["reportsOk"] = reportsVerified(
@@ -154,7 +155,7 @@ BENCH = ("{bin} --curve 131 --packed --bench --steps " + steps +
 order = []
 for rep in range(repeats):
     # Alternate so thermal drift cannot favour the last binary.
-    seq = ["shipping", "table_pivot", "table_pivot_ilp", "table_pivot_persist"]
+    seq = ["shipping", "table_pivot", "table_pivot_ilp", "table_pivot_persist", "table_pivot_unroll"]
     if rep % 2:
         seq = list(reversed(seq))
     order.extend((rep, n) for n in seq)

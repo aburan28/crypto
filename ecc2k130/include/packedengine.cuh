@@ -42,8 +42,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
         cudaFree(P.hist); cudaFree(twConsts);
     }
-#if ECC_WALK_TABLE
+#if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
+    unsigned checkpointVersion() const override { return 3u; }
+    int laneArrayCount() const override { return 3; }
+    u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
+#elif ECC_WALK_TABLE
+    static size_t dynamicSharedBytes() { return 0; }
     unsigned checkpointVersion() const override { return 3u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
@@ -304,6 +309,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
+        printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

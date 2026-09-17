@@ -46,6 +46,15 @@
 #if ECC_TABLE_PIVOT_BYTES != 0 && ECC_TABLE_PIVOT_BYTES != 1
 #error "ECC_TABLE_PIVOT_BYTES must be 0 or 1"
 #endif
+#ifndef ECC_TABLE_GLOBAL
+#define ECC_TABLE_GLOBAL 0
+#endif
+#if ECC_TABLE_GLOBAL != 0 && ECC_TABLE_GLOBAL != 1
+#error "ECC_TABLE_GLOBAL must be 0 or 1"
+#endif
+#if ECC_TABLE_GLOBAL && !ECC_WALK_TABLE
+#error "ECC_TABLE_GLOBAL requires ECC_WALK_TABLE"
+#endif
 
 namespace eccPacked131 {
 

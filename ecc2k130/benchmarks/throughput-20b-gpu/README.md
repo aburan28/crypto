@@ -68,6 +68,8 @@ bash benchmarks/throughput-20b-gpu/run.sh
 ```
 
 Automatic workers: that is the geometry that produced 16.56 / 16.67 B/s.
-Four binaries, three alternating repetitions, 50,465,865,728 updates per
-sample. Clocks locked at 2430 MHz when the driver allows it. The fourth
-binary is table-walk + byte pivot + pair-ILP + the L2 persist window.
+Four binaries plus the two DRAM/scheduling arms that Nsight reopened:
+shipping, table+pivot, pair-ILP, L2 persist, and slot-unroll-2 on persist.
+Three alternating repetitions, 50,465,865,728 updates per sample. Clocks
+locked at 2430 MHz when the driver allows it. Verify uses `--dp-cap 262144`
+so automatic occupancy cannot overflow the default 65,536-report buffer.

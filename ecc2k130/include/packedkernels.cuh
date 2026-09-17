@@ -174,8 +174,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_WALK_TABLE
     // All block threads participate, including inactive partial-tile workers.
+#if ECC_TABLE_GLOBAL
+    const uint32_t *twShared = p.twConsts;
+#else
     extern __shared__ uint32_t twShared[];
     twLoadShared(twShared, p.twConsts);
+#endif
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
@@ -191,7 +195,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
-#if ECC_UNROLL_SLOTS > 1
+#if ECC_UNROLL_SLOTS >= 4
+#pragma unroll 4
+#elif ECC_UNROLL_SLOTS > 1
 #pragma unroll 2
 #else
 #pragma unroll 1
@@ -314,7 +320,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
         inv = inv131(prod);
 #endif
-#if ECC_UNROLL_SLOTS > 1
+#if ECC_UNROLL_SLOTS >= 4
+#pragma unroll 4
+#elif ECC_UNROLL_SLOTS > 1
 #pragma unroll 2
 #else
 #pragma unroll 1

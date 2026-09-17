@@ -63,6 +63,10 @@ PACKED_L2_PERSIST ?= 0
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
+# Read the table from global memory instead of a per-block shared copy.
+# Drops the 48 KB smem tax so 80-register builds can resident 3 blocks on
+# this SKU's 100 KB/SM; random table lookups then miss the LDS pipe.
+TABLE_GLOBAL ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -148,6 +152,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
