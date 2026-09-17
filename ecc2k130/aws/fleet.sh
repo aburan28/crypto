@@ -8,6 +8,7 @@
 #   ./fleet.sh scale 128             change the target
 #   ./fleet.sh status                instances, their types and spot/on-demand
 #   ./fleet.sh down                  delete the fleet and terminate its instances
+#   ./fleet.sh roll                  replace every running instance, --batch at a time
 #
 # The fleet is `maintain`: an interrupted spot instance is replaced, the new
 # one claims the released slot and resumes its checkpoint from S3.  Instance
@@ -20,9 +21,33 @@
 # On-Demand — only then, and only for the shortfall. Use --no-fallback to keep
 # a pure Spot (plus optional --on-demand base) request.
 #
+# `roll` is what actually deploys an `infra.sh sync`.  Rollout.sh's kernel
+# rollout works without touching instances because workers poll campaign.json
+# for a new binaryKey; worker.py itself has no such poll (bootstrap.sh fetches
+# it once, at launch) and a running instance keeps executing whatever
+# supervisor code it booted with, however long the fleet has been up.
+# `roll` terminates ROLL_BATCH (default 4) instances at a time; each gets a
+# normal OS shutdown, which stops ecc2k130-worker@* (SIGTERM, checkpoint,
+# upload, per bootstrap.sh's TimeoutStopSec), and `maintain` launches a
+# replacement that re-bootstraps from S3 and resumes the checkpoint just
+# uploaded. Before starting the next batch it confirms this batch's own
+# instance ids have actually left the fleet's membership, then waits for
+# the GPU-weighted membership to climb back to what it was right before this
+# batch's terminate (or ROLL_TIMEOUT_SECONDS, default 1800, shared across
+# both waits) — the GPU capacity this batch actually removed, not the
+# campaign's static target and not the instance count, so an already-short
+# spot fleet gets rolled rather than drained, a handful of smaller
+# replacements cannot unblock the next batch while most of the lost GPUs
+# are still missing, and a stuck launch stalls at most one batch rather
+# than the whole campaign. It checks real membership rather than the
+# aggregate FulfilledCapacity field on purpose: that field lags
+# terminate-instances and unrelated fleet churn can move it, so it can
+# look "recovered" while this batch's own instances are still up.
+#
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
-# FALLBACK_WAIT_SECONDS (default 120).
+# FALLBACK_WAIT_SECONDS (default 120), ROLL_BATCH (default 4),
+# ROLL_TIMEOUT_SECONDS (default 1800).
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -54,6 +79,32 @@ fleetId() {
     if [ -f "$FLEET_FILE" ]; then cat "$FLEET_FILE"; return; fi
     aws ec2 describe-fleets --filters "Name=tag:Project,Values=$STACK" \
         --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text
+}
+
+# Tab-separated instance ids the fleet currently considers active. The
+# fleet's real membership, not the aggregate FulfilledCapacity field, which
+# lags terminate-instances and can be moved by unrelated churn elsewhere.
+activeInstanceIds() {
+    aws ec2 describe-fleet-instances --fleet-id "$1" --query 'ActiveInstances[].InstanceId' --output text
+}
+
+# GPU-weighted capacity of that same membership, matching the WeightedCapacity
+# the fleet was created with (g7e.2xlarge is 1, g7e.48xlarge is 8). Instance
+# count is not this number: price-capacity-optimized can refill with smaller
+# types and restore the count while most of the lost GPUs are still missing.
+activeGpuCapacity() {
+    local total=0 type types
+    # Assign then || return: a failing $(aws ...) in a for-list does not
+    # trip set -e, and this helper is itself called from $(), where an
+    # assignment of a failed command also does not abort. Empty stdout
+    # would leave total=0, which roll treats as "already restored".
+    types=$(aws ec2 describe-fleet-instances --fleet-id "$1" \
+        --query 'ActiveInstances[].InstanceType' --output text) || return 1
+    # shellcheck disable=SC2086 -- word-split on purpose, instance types only
+    for type in $types; do
+        total=$((total + $(gpusOf "$type")))
+    done
+    echo "$total"
 }
 
 # Print an integer capacity field (None/empty/float → int).
@@ -194,6 +245,91 @@ down)
     rm -f "$FLEET_FILE"
     echo "fleet $id deleted; instances terminating (workers checkpoint on the way down)"
     ;;
+roll)
+    id=$(fleetId)
+    if [ -z "$id" ] || [ "$id" = None ]; then echo "no active fleet" >&2; exit 1; fi
+    shift
+    batch=${ROLL_BATCH:-4}
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --batch) batch=$2; shift 2 ;;
+            *) echo "unknown option $1" >&2; exit 1 ;;
+        esac
+    done
+    if [ "$batch" -lt 1 ]; then echo "--batch must be >= 1" >&2; exit 1; fi
+    timeout=${ROLL_TIMEOUT_SECONDS:-1800}
+    instances=$(activeInstanceIds "$id")
+    # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+    set -- $instances
+    total=$#
+    if [ "$total" -eq 0 ]; then echo "fleet $id has no active instances"; exit 0; fi
+    echo "fleet $id: rolling $total instance(s), $batch at a time, so each re-bootstraps onto" \
+         "whatever aws/*.py this campaign's infra.sh sync last published"
+    rolled=0
+    while [ $# -gt 0 ]; do
+        group=""
+        n=0
+        while [ $# -gt 0 ] && [ "$n" -lt "$batch" ]; do
+            group="$group $1"
+            shift
+            n=$((n + 1))
+        done
+        # The GPU capacity to recover to is the weighted membership right
+        # before this batch's terminate, not the campaign's static target:
+        # an already-short spot fleet never reaches its target, so waiting
+        # for that would time out and terminate the next batch anyway,
+        # every batch, draining the fleet instead of rolling it. Instance
+        # count is not enough: WeightedCapacity is GPUs, and a handful of
+        # smaller replacements can restore the count while most of the
+        # lost GPU capacity is still missing.
+        capacityBefore=$(activeGpuCapacity "$id")
+        echo "terminating:$group"
+        # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+        aws ec2 terminate-instances --instance-ids $group >/dev/null
+        # FulfilledCapacity is an aggregate: it lags terminate-instances, and
+        # unrelated fleet churn (an interruption elsewhere, a concurrent
+        # `scale`) can move it back up while this batch's own instances are
+        # still active, which would end the wait before this batch is
+        # actually gone. describe-fleet-instances names the fleet's real
+        # membership, so confirm these specific ids have left it -- not an
+        # aggregate number -- before waiting for GPU-weighted membership to
+        # recover; the two waits share one $timeout budget rather than
+        # doubling it.
+        waited=0
+        while :; do
+            # tr normalizes --output text's tab-separated ids to spaces so
+            # the substring check below can't false-match a middle id that
+            # has no literal space, only tabs, on either side of it.
+            active=" $(activeInstanceIds "$id" | tr '\t' ' ') "
+            gone=1
+            for member in $group; do
+                case "$active" in *" $member "*) gone=0 ;; esac
+            done
+            if [ "$gone" -eq 1 ]; then break; fi
+            if [ "$waited" -ge "$timeout" ]; then
+                echo "fleet $id: this batch's instance(s) still active after ${timeout}s; moving on to the next batch" >&2
+                break
+            fi
+            sleep 15
+            waited=$((waited + 15))
+        done
+        if [ "$gone" -eq 1 ]; then
+            while :; do
+                capacity=$(activeGpuCapacity "$id")
+                if [ "$capacity" -ge "$capacityBefore" ]; then break; fi
+                if [ "$waited" -ge "$timeout" ]; then
+                    echo "fleet $id: only $capacity/$capacityBefore GPU(s) active after ${timeout}s; moving on to the next batch" >&2
+                    break
+                fi
+                sleep 15
+                waited=$((waited + 15))
+            done
+        fi
+        rolled=$((rolled + n))
+        echo "fleet $id: rolled $rolled/$total"
+    done
+    echo "fleet $id: roll complete, $total instance(s) replaced"
+    ;;
 *)
-    sed -n '3,18p' "$0"; exit 1 ;;
+    sed -n '3,20p' "$0"; exit 1 ;;
 esac

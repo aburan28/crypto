@@ -406,7 +406,16 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   The 2^27.9 iterations-per-point figure of 2026-09-15 was one such ratio
   and has been retired for the measurement in the table above, taken from
   each client's own counters and therefore independent of the grid:
-  `../benchmarks/dp-interval/`.
+  `../benchmarks/dp-interval/`. The corrected `walks` field is code inside
+  worker.py, and worker.py has no self-update path: bootstrap.sh fetches it
+  once at instance launch, so a running instance keeps reporting the way it
+  did when it booted no matter how long ago `infra.sh sync` published a fix.
+  Getting the fix onto an already-running fleet needs both: `./infra.sh
+  sync` to publish the corrected worker.py, then `./fleet.sh roll` to
+  replace every running instance (`ROLL_BATCH` at a time, default 4) so each
+  re-bootstraps onto it. This is unlike a CUDA-client fix, which needs only
+  `rollout.sh activate` — workers poll campaign.json for a new `binaryKey`
+  and restart the client in place, no instance replacement required.
   Its `rateBps` is what the walkers say about themselves right now; the
   public dashboard instead differences the checkpoint sum between two
   snapshots, which ran 72.5 B it/s against this 86–101 B it/s on
