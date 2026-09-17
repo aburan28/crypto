@@ -8523,7 +8523,7 @@ across the whole GS index range, not concentrated in the tail:
   q2         20  (18.2%)
   q3         28  (25.5%)
   q4 (tail)  36  (32.7%)
-  argmax in the last THREE indices: 15/110 (13.6%)
+  argmax in the last THREE indices: 23/110 (20.9%)
 ```
 
 A mild tail bias exists (32.7% vs 25% uniform) and is slightly stronger

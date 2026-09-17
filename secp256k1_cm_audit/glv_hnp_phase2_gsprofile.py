@@ -53,6 +53,7 @@ import math
 import os
 import random
 import sys
+from fractions import Fraction
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -126,6 +127,117 @@ def bucket(arg, dim, nb=4):
     return min(nb - 1, (arg * nb) // dim)
 
 
+# ---------------------------------------------------------------------------
+# Public helpers used by glv_hnp_phase2_gsprofile_strat.py (Thread 24b) and
+# glv_hnp_phase2_thread25.py (Thread 25): exact Gram-Schmidt over the integer
+# Gram matrix, the full per-instance anatomy, AUC and Spearman.
+# ---------------------------------------------------------------------------
+
+def exact_gs(B, e):
+    """B: integer rows (LLL-reduced).  e: integer vector.
+
+    Returns (Bst, ge_star, nus) where
+        Bst[i]     = ||b*_i||^2                  (Fraction, exact)
+        ge_star[i] = <e, b*_i>                   (Fraction, exact)
+        nus[i]     = 2|<e,b*_i>| / ||b*_i||^2    (float)
+
+    Uses the Cholesky recursion on the Gram matrix, so the vector dimension
+    never enters the O(k^3) inner loop.
+    """
+    k = len(B)
+    G = [[sum(a * b for a, b in zip(B[i], B[j])) for j in range(k)]
+         for i in range(k)]
+    ge = [sum(a * b for a, b in zip(e, B[i])) for i in range(k)]
+
+    mu = [[Fraction(0)] * k for _ in range(k)]
+    Bst = [Fraction(0)] * k
+    for i in range(k):
+        for j in range(i):
+            s = Fraction(G[i][j])
+            for t in range(j):
+                s -= mu[i][t] * mu[j][t] * Bst[t]
+            mu[i][j] = s / Bst[j] if Bst[j] != 0 else Fraction(0)
+        s = Fraction(G[i][i])
+        for t in range(i):
+            s -= mu[i][t] * mu[i][t] * Bst[t]
+        Bst[i] = s
+
+    ge_star = [Fraction(0)] * k
+    for i in range(k):
+        s = Fraction(ge[i])
+        for j in range(i):
+            s -= mu[i][j] * ge_star[j]
+        ge_star[i] = s
+
+    nus = [(2.0 * abs(float(ge_star[i])) / float(Bst[i])) if Bst[i] != 0 else 0.0
+           for i in range(k)]
+    return Bst, ge_star, nus
+
+
+def instance(curve, m, d_secret, k1_bound, seed, exact=True):
+    """Build one L0 instance and return its full GS/nu anatomy."""
+    p, b, n, lam, G = curve
+    k2_bound = math.isqrt(n) + 1
+    sigs = gen_signatures(G, d_secret, m, n, lam, p, k1_bound, k2_bound, seed)
+    if len(sigs) < m:
+        return None
+    S_K1, _S_D, S_K2, _S_KAN = scales(n, k1_bound, k2_bound)
+    B = lll_rows(build_L0(sigs, n, lam, k1_bound, k2_bound), 2 * m)
+    _tau, e = target_and_error(sigs, n, k1_bound, k2_bound)
+    if exact:
+        Bst, _gs, nus = exact_gs(B, e)
+        prof = [math.sqrt(float(x)) if x > 0 else 0.0 for x in Bst]
+    else:
+        Bs, _ = gram_schmidt(B)
+        prof = [math.sqrt(sum(x * x for x in r)) for r in Bs]
+        nus = []
+        for r in Bs:
+            ni = sum(x * x for x in r)
+            nus.append(2.0 * abs(sum(a * c for a, c in zip(e, r))) / ni
+                       if ni else 0.0)
+    NU = max(nus)
+    arg = max(range(len(nus)), key=lambda i: nus[i])
+    l1, l2, det2 = l2_minima(n, lam, S_K1, S_K2)
+    return {
+        'k': len(B), 'prof': prof, 'nus': nus, 'NU': NU, 'argmax': arg,
+        'enorm': math.sqrt(sum(x * x for x in e)),
+        'mu': l1, 'l2': l2, 'det2': det2, 'nuhat': l1 / math.sqrt(det2),
+        'S_K1': S_K1, 'S_K2': S_K2, 'K2': k2_bound,
+    }
+
+
+def auc(pos, neg):
+    """AUC of the score -x for separating pos (recovery) from neg."""
+    if not pos or not neg:
+        return float('nan')
+    conc = sum((1.0 if a < b else 0.5 if a == b else 0.0)
+               for a in pos for b in neg)
+    return conc / (len(pos) * len(neg))
+
+
+def spearman(xs, ys):
+    """Spearman rank correlation (ties get the average rank)."""
+    def rank(a):
+        order = sorted(range(len(a)), key=lambda i: a[i])
+        r = [0.0] * len(a)
+        i = 0
+        while i < len(order):
+            j = i
+            while j + 1 < len(order) and a[order[j + 1]] == a[order[i]]:
+                j += 1
+            avg = (i + j) / 2.0 + 1.0
+            for t in range(i, j + 1):
+                r[order[t]] = avg
+            i = j + 1
+        return r
+    rx, ry = rank(xs), rank(ys)
+    mx = sum(rx) / len(rx); my = sum(ry) / len(ry)
+    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    den = math.sqrt(sum((a - mx) ** 2 for a in rx)
+                    * sum((b - my) ** 2 for b in ry))
+    return num / den if den else float('nan')
+
+
 if __name__ == "__main__":
     print("=" * 78)
     print("Thread 24 — is NU decided by the tail of the GS profile, and is the")
@@ -187,7 +299,7 @@ if __name__ == "__main__":
     tail_frac_num = 0
     for (_l, _k, _s, pr, _r, _mu, _l2, _d, _m) in ALL:
         qh[bucket(pr['arg'], pr['dim'])] += 1
-        if pr['arg'] >= pr['dim'] - 2:      # last three indices
+        if pr['arg'] >= pr['dim'] - 3:      # last three indices (0-based)
             tail_frac_num += 1
     tot = len(ALL)
     print(f"N = {tot} instances")
@@ -282,27 +394,6 @@ if __name__ == "__main__":
               f"{n2:>7.3f} {str(r2)+'/'+str(t2):>4}")
 
     # rank correlations over all cells (Spearman via ranks, ties averaged)
-    def spearman(xs, ys):
-        def rank(a):
-            order = sorted(range(len(a)), key=lambda i: a[i])
-            r = [0.0] * len(a)
-            i = 0
-            while i < len(order):
-                j = i
-                while j + 1 < len(order) and a[order[j + 1]] == a[order[i]]:
-                    j += 1
-                avg = (i + j) / 2.0 + 1.0
-                for t in range(i, j + 1):
-                    r[order[t]] = avg
-                i = j + 1
-            return r
-        rx, ry = rank(xs), rank(ys)
-        mx = sum(rx) / len(rx); my = sum(ry) / len(ry)
-        num = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
-        den = math.sqrt(sum((a - mx) ** 2 for a in rx)
-                        * sum((b - my) ** 2 for b in ry))
-        return num / den if den else float('nan')
-
     mus = [x[5] for x in ALL]
     lams = [x[6] for x in ALL]
     lasts = [x[3]['gs'][-1] for x in ALL]
