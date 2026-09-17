@@ -152,7 +152,7 @@ launch_n() {
 
 fill_market() {
     local region=$1 market=$2 left=$3
-    local type
+    local type cost
     IFS=',' read -r -a types <<< "$TYPES_PREF"
     STOP_REGION=0
     for type in "${types[@]}"; do
@@ -163,6 +163,18 @@ fill_market() {
             return 0
         fi
     done
+    # 2xlarge capacity is often dry while 4xlarge (still 1 GPU, 16 vCPU) is not.
+    # Spend leftover quota rather than leave it idle.
+    if [ "$left" -ge 2 ]; then
+        for type in g7e.4xlarge g7.4xlarge; do
+            [ "$left" -ge 2 ] || break
+            launch_n "$region" "$market" "$type" $((left / 2))
+            left=$((left - LAUNCHED_N * 2))
+            if [ "${STOP_REGION:-0}" -eq 1 ]; then
+                return 0
+            fi
+        done
+    fi
 }
 
 # Embed static worker keys for userdata when the instance profile is missing.
