@@ -383,6 +383,29 @@ the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk
 during which the GPU idles. Set it to 1 on the pilot to prove the build once;
 the merge's solve step verifies `[k]P == Q` independently anyway.
 
+### Rolling out a supervisor (`worker.py`) change
+
+`worker.py` is not versioned by `campaign.json` and has no hash gate: every
+instance copies `s3://$BUCKET/aws/worker.py` once, in `bootstrap.sh`, at boot.
+So publishing it (`infra.sh sync`, or a single `aws s3 cp` when only the
+supervisor moved) changes what *new* boots run and nothing else. Running
+instances keep the supervisor they booted with until their unit restarts,
+which on a spot fleet happens on its own as capacity churns.
+
+That makes a forced roll a choice rather than a step. A supervisor change that
+protects points already collected (the local spool) is worth adopting
+promptly; one that only changes reporting can wait for churn. To force it,
+restart the unit — `systemctl restart ecc2k130@<slot>` — which SIGTERMs the
+client, checkpoints, uploads, and resumes the same slot; the cost is the walk
+since the last checkpoint on that slot, not the slot.
+
+Because there is no gate, the gate is here: run `python3 -m unittest
+test_worker_spool test_worker_family test_certification` and
+`./rehearse_worker.sh`, which runs the real supervisor against a directory
+standing in for S3 and requires a resume, byte-identical deltas and an actual
+solve on curve 41. A `worker.py` that fails that and reaches the bucket breaks
+every boot after it.
+
 ## Monitoring
 
 * Public hourly DP counts (GitHub Pages): [`docs/ecc2k130-status/`](../../docs/ecc2k130-status/)
@@ -473,7 +496,26 @@ fleet's production.
 `found_at` is the object's upload time — the epoch in a legacy key, the
 object's `LastModified` for an orbit key — never the clock at insert, so a
 catch-up cannot stack a backlog into the hour it ran and leave an hourly spike
-no GPU produced.
+no GPU produced. It also means the store's `last_dp_at` climbs *through* the
+backlog from the moment ingest stopped, so during a catch-up the page is
+honest and slow rather than instantly correct: the hour the drain finishes is
+the hour `dps_last_hour` becomes non-zero again.
+
+**A pass is bounded, because status is published between passes.** The first
+recovery pass on 2026-09-17 took the whole 4,164-object backlog as one unit of
+work and published nothing until it finished, so for the half hour it ran the
+page still read `IDLE_OR_STALE` — the ingest was recovering and looked
+identical to the ingest that was broken. `--pass-objects` (default 256) caps
+the slice; `ingest.outstanding_objects` still reports the whole backlog, not
+the slice, so a reader sees the real number every couple of minutes.
+
+**A thread whose connection dies opens another.** `rho-dp` was resized under
+that same pass, and each worker thread went on using its closed connection:
+2,533 objects failed with `OperationalError: the connection is closed` in a
+few seconds, one after another. Nothing was lost — the pass is idempotent and
+they were retried — but a failover or a resize should cost one object, not a
+pass, so a thread now reconnects and retries the object once before counting
+it failed.
 
 The host runs under the `ecc2k130-ingest` instance profile: read `dp/`, write
 `logs/` and the status bucket's `status.json`, read the `rho/dp-rds` secret,
