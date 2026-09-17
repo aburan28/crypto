@@ -48,7 +48,7 @@ for name in ("table", "pivot"):
         (out / f"{name}.log").write_bytes(data[-200_000:] if len(data) > 200_000 else data)
 summary = dict(unit="B scalar updates / s", targetB=18.0,
                floorB=(23.0, 25.0), shippingReferenceB=15.115792,
-               class="engineering", arms=rows,
+               kind="engineering", arms=rows,
                anyOver18=any(r["over18"] for r in rows))
 (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 print(json.dumps(summary, indent=2))

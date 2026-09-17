@@ -98,7 +98,7 @@ ceiling below the current rate is listed because it keeps being proposed.
 
 | lever | ALU | clmad | verdict |
 |---|---:|---:|---|
-| **`TABLE_PIVOT_BYTES=1`** (this note; §5) — pivot per byte of x, 17 lookups and 16 maxes for 33 and 32 | **−45** (−32 at `IMNMX` = 1) | 0 | 22 fewer `LDS`, same 102 registers, 0 spills; shared 48,732 B. If the ALU binds it is worth ~2.4%, i.e. **16.56 → ~16.96 B/s, within noise of the 17.0 line of §4.4**. Unmeasured on a card. |
+| **`TABLE_PIVOT_BYTES=1`** (this note; §5) — pivot per byte of x, 17 lookups and 16 maxes for 33 and 32 | **−45** (−32 at `IMNMX` = 1) | 0 | 22 fewer `LDS`, same 102 registers, 0 spills; shared 48,732 B. Priced ~2.4% if the ALU binds (**16.56 → ~16.96 B/s**). Measured 16.667 B/s against a 16.601 B/s table-walk control on an RTX PRO 6000, **+0.4%**, still short of 18. See [benchmarks/eighteen](benchmarks/eighteen/summary.json). |
 | `ALU_SQUARE=1` | +100 | −5 | required for 20 B/s (clmad at 99% otherwise); neutral at 16.56 (§6.3) |
 | `TOP_CLMAD=1` (TOP-CLMAD.md) | −313 | **+19.2** | 64.5 clmad → carry-less ceiling **11.8 B/s** at 100%. Never above 11.8 B/s. |
 | one cross term on clmad (half of TOP_CLMAD) | −155 | +9.6 | 47.4 clmad → ceiling 16.1 B/s: below the current rate |

@@ -312,8 +312,10 @@ measurement, or quoting the rate without the correctness rows.
 *Status (§6):* rows two and three met (300/300 device reports re-walked per
 binary on both GPUs, 64/64 planted logs on `GF(2^41)` with the iteration ratio
 0.96 ± 0.07 against the shipping walk, DP rate within 0.12%); row one **not
-met**: 16.56 B/s median on the 6000 against 17.0 required. The shipping
-function stays the default. The target was set at "the point where the fork's
+met**: 16.56 B/s median on the 6000 against 17.0 required. A later Modal
+pair aimed at 18 B/s remeasured 16.601 B/s for the table walk and 16.667
+with `TABLE_PIVOT_BYTES=1` ([benchmarks/eighteen](benchmarks/eighteen/summary.json)).
+The shipping function stays the default. The target was set at "the point where the fork's
 cost is clearly repaid"; with `history.json` still empty the fork costs
 nothing today, so the number is a policy the campaign owner may revisit, but
 this note does not move it after the measurement.

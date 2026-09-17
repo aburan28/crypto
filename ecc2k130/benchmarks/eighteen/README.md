@@ -33,6 +33,23 @@ rate.
 If every priced leftover stays ≤ 18.0, this thread stops. The remaining
 distance is the product and the reduction, which are the floor.
 
+## Result (2026-09-17)
+
+Two successive Modal RTX PRO 6000 allocations, driver 580.95.05, automatic
+workers (96,256 threads), 50,465,865,728 updates per sample, identity
+matched (`packed table walk: 1`, pivot 0 then 1, shared 48,508 / 48,732
+bytes).
+
+| variant | median B/s | / 18 | / shipping 15.116 | / 23 B floor | correctness | class |
+|---|---:|---:|---:|---:|---|---|
+| shipping product | 15.116 | 0.840 | 1.000 | 0.657 | top clmad 0 | reference |
+| table walk | 16.601 | 0.922 | 1.098 | 0.722 | walk 1, pivot 0 | engineering |
+| table walk + byte pivot | 16.667 | 0.926 | 1.103 | 0.725 | walk 1, pivot 1 | engineering |
+
+Neither arm clears 18. The byte pivot is +0.4% on the table walk, not the
+priced +2.4%. The campaign default stays the shipping walk. This thread
+stops: the leftover that could still be priced has been measured.
+
 ## Recipe
 
 Automatic workers: that is the geometry that produced 16.56 B/s.
