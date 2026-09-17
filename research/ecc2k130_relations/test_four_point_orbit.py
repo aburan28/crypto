@@ -23,6 +23,9 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
                          find_normal_elements, is_normal)
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
+from target_boundary import cost as logarithm_cost            # noqa: E402
+from validate_target_model import (_signed_subset_sums,       # noqa: E402
+                                   _support)
 
 SEED = 20260917
 
@@ -272,6 +275,45 @@ def test_planted_logarithm_is_recovered_end_to_end():
         assert out["recovered"], out
         assert out["recovered_d"] == out["planted_d"]
         assert out["unknowns"] == out["orbits"] + 1
+
+
+def test_subset_sum_set_is_sigma_closed():
+    """Why sigma buys no hit rate: the reachable sums are already sigma-closed."""
+    for mdeg, orbits, n in ((17, 2, 2), (19, 2, 2)):
+        F, E, _ = SC.small_curve(mdeg)
+        rng = random.Random(5)
+        sup = _support(F, E, orbits, rng)
+        assert sup is not None
+        sums = _signed_subset_sums(E, sup.orbit_points(E), n)
+        assert all(E.frobenius(S) in sums for S in sums if S is not None)
+
+
+def test_homogeneous_relations_are_not_priced_as_a_logarithm():
+    """The m-sweep crosses rho only when relations carry no information.
+
+    Guards the section 5 conclusion: whatever the homogeneous table says, the
+    cost of a logarithm must stay above the rho reference.
+    """
+    import json
+    from pathlib import Path
+    data = json.loads((HERE / "results" / "target_boundary.json").read_text())
+    homog = data["homogeneous_extension_past_m8"]
+    assert any(r["log2_total_vs_rho"] < 0 for r in homog), (
+        "the homogeneous accounting is supposed to cross; section 5 exists to "
+        "explain why that is not a result")
+    best = data["best_logarithm_cost"]
+    assert best["log2_total_vs_rho"] > 0, (
+        "a logarithm priced against known targets must not beat rho here")
+    assert data["memory_charged"] is False
+
+
+def test_logarithm_cost_is_monotone_in_the_obvious_places():
+    a = logarithm_cost(10, 15, 8)
+    assert a is not None
+    # more unknowns cannot be cheaper at fixed relation shape
+    assert logarithm_cost(200, 15, 8)["log2_total_cost"] > a["log2_total_cost"]
+    # an impossible split returns nothing rather than a number
+    assert logarithm_cost(1, 500, 250) is None
 
 
 if __name__ == "__main__":
