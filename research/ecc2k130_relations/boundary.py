@@ -42,7 +42,14 @@ import math
 from pathlib import Path
 
 LOG2_R = 129.0
-LOG2_RHO = 60.9
+# The frozen reference, cited not recomputed:
+# experiments/ecc2k130_extension_field_boundary.json -> target.log2_rho_reference
+# (rho with the <-1> x <pi> speed-up, automorphism order 262, S = 0.07743).
+# The brief for this thread quoted it as "roughly 2^60.9"; the repository's
+# frozen value is 2^60.809 and that is what is used here.
+LOG2_RHO = 60.809
+S_RHO = 0.07743
+LOG2_SQRT_R = LOG2_R / 2             # the scoreboard unit: S = operations / sqrt(r)
 BYTES_PER_STORED_POINT = 32          # generous: a compressed 131-bit abscissa
 
 
@@ -78,6 +85,9 @@ def boundary_row(m: int):
         "log2_total_cost": round(log2_total, 2),
         "log2_ratio_one_relation_to_rho": round(log2_relation_cost - LOG2_RHO, 2),
         "log2_ratio_total_to_rho": round(log2_total - LOG2_RHO, 2),
+        "S_one_relation": float(f"{2 ** (log2_relation_cost - LOG2_SQRT_R):.4g}"),
+        "S_total": float(f"{2 ** (log2_total - LOG2_SQRT_R):.4g}"),
+        "ratio_total_to_rho": float(f"{2 ** (log2_total - LOG2_RHO):.4g}"),
     }
 
 
@@ -115,6 +125,11 @@ def main():
         "instance": "ECC2K-130",
         "log2_r": LOG2_R,
         "rho_reference_log2": LOG2_RHO,
+        "rho_reference_S": S_RHO,
+        "rho_reference_source":
+            "experiments/ecc2k130_extension_field_boundary.json"
+            " -> target.log2_rho_reference",
+        "unit": "S = total operations / sqrt(r), sqrt(r) = 2^64.5",
         "bytes_per_stored_point": BYTES_PER_STORED_POINT,
         "rows": rows,
         "measured_base_yields": yields,
@@ -142,7 +157,8 @@ def main():
     path.write_text(json.dumps(out, indent=2))
 
     hdr = (f"{'m':>2} {'log2 B':>7} {'split':>6} {'log2 mem B':>11} "
-           f"{'log2 1-rel':>11} {'vs rho':>8} {'log2 total':>11} {'vs rho':>8}")
+           f"{'log2 1-rel':>11} {'vs rho':>8} {'log2 total':>11} {'vs rho':>8} "
+           f"{'S total':>12}")
     print(hdr)
     print("-" * len(hdr))
     for d in rows:
@@ -151,7 +167,8 @@ def main():
               f"{d['log2_cost_one_relation']:>11} "
               f"{d['log2_ratio_one_relation_to_rho']:>+8} "
               f"{d['log2_total_cost']:>11} "
-              f"{d['log2_ratio_total_to_rho']:>+8}")
+              f"{d['log2_ratio_total_to_rho']:>+8} "
+              f"{d['S_total']:>12,.0f}")
     print()
     print(out["verdict"])
     print()
