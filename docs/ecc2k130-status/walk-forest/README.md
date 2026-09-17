@@ -109,7 +109,8 @@ campaign bucket (`ecc2k130/aws/README.md`). From a host with access to it,
 concatenate any set of delta files into one corpus and run steps 2 to 4 on
 it; nothing else changes, and `trailforest` checks every drawn trail against
 its record the same way. At the fleet's live cutoff of weight 32 a walk is
-expected to take `2^27.9` iterations, so `--cap` selects the drawable ones
+expected to take `2^28.4` iterations
+(`ecc2k130/benchmarks/dp-interval/`), so `--cap` selects the drawable ones
 just as it does here.
 
 ## The `GF(2^23)` set
