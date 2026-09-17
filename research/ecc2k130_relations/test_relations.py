@@ -160,6 +160,38 @@ def test_every_reported_relation_realises_on_the_curve():
             assert E.on_curve(p)
 
 
+# ── batched group operations ─────────────────────────────────────
+
+def test_batch_add_matches_scalar_add_including_degenerate_cases():
+    F, E, order, r = small_curve(17)
+    rng = random.Random(21)
+    G = subgroup_generator(E, order, r, rng)
+    As = [E.mul(G, rng.randrange(1, r)) for _ in range(60)]
+    Bs = [E.mul(G, rng.randrange(1, r)) for _ in range(60)]
+    # plant every degenerate case the batch path branches on
+    As[0], Bs[0] = None, Bs[0]
+    As[1], Bs[1] = As[1], None
+    As[2], Bs[2] = As[2], E.neg(As[2])          # sums to the identity
+    As[3], Bs[3] = As[3], As[3]                 # doubling
+    got = R.batch_add(E, As, Bs)
+    for A, B, g in zip(As, Bs, got):
+        assert g == E.add(A, B), (A, B, g, E.add(A, B))
+        assert E.on_curve(g)
+
+
+def test_batch_combos_matches_one_at_a_time():
+    F, E, order, r = small_curve(17)
+    rng = random.Random(22)
+    G = subgroup_generator(E, order, r, rng)
+    k = rng.randrange(2, r)
+    Q = E.mul(G, k)
+    pairs = [(rng.randrange(1, r), rng.randrange(1, r)) for _ in range(40)]
+    pairs += [(1, 0), (0, 1), (1, 1), (2, 3)]
+    got = R.batch_combos(E, G, Q, pairs)
+    for (u, v), g in zip(pairs, got):
+        assert g == E.add(E.mul(G, u), E.mul(Q, v)), (u, v)
+
+
 # ── useful rank ──────────────────────────────────────────────────────────
 
 def test_construction_rows_are_recognised_as_carrying_nothing():

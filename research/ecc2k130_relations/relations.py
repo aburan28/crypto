@@ -330,7 +330,6 @@ def constructed_base(E: Koblitz, P, Q, r: int, size: int, rng: random.Random,
     is what manufactures construction relations: `R_{1,0} + R_{0,1} = R_{1,1}`
     holds for free and contributes rank that means nothing.
     """
-    pts, coeffs = [], {}
     combos = []
     if small:
         for u in range(small + 1):
@@ -339,12 +338,14 @@ def constructed_base(E: Koblitz, P, Q, r: int, size: int, rng: random.Random,
                     combos.append((u, v))
     while len(combos) < size:
         combos.append((rng.randrange(1, r), rng.randrange(1, r)))
-    for u, v in combos[:size]:
-        R = E.add(E.mul(P, u), E.mul(Q, v))
-        if R is None or R[0] in coeffs:
+    combos = combos[:size]
+
+    pts, coeffs = [], {}
+    for (u, v), Rpt in zip(combos, batch_combos(E, P, Q, combos)):
+        if Rpt is None or Rpt[0] in coeffs:
             continue
-        coeffs[R[0]] = (u % r, v % r, R)
-        pts.append(R[0])
+        coeffs[Rpt[0]] = (u % r, v % r, Rpt)
+        pts.append(Rpt[0])
     return pts, coeffs
 
 
@@ -432,3 +433,91 @@ def useful_rank(rows, r: int):
 
 def verify_log(E: Koblitz, P, Q, k: int) -> bool:
     return k is not None and E.mul(P, k) == Q
+
+
+# ── batched group operations ──────────────────────────────────────────────
+
+def batch_add(E: Koblitz, Ps, Qs):
+    """Elementwise `Ps[i] + Qs[i]`, with one field inversion for the batch.
+
+    Building a base of points `[u]P + [v]Q` one at a time costs an inversion
+    per group addition, and a 4k-point base over a 129-bit scalar needs on
+    the order of a million of them -- about an hour on this container, to
+    produce the *input* to a sweep.  Doing the additions in lockstep pays one
+    inversion per round instead.
+
+    Identity, doubling and `Q = -P` are handled per element after the batch
+    inversion, because they need a different denominator or none at all.
+    """
+    F = E.F
+    n = len(Ps)
+    dens = [0] * n
+    kinds = [None] * n
+    for i in range(n):
+        A, B = Ps[i], Qs[i]
+        if A is None or B is None:
+            kinds[i] = "id"
+            continue
+        if A[0] == B[0]:
+            if B[1] == (A[1] ^ A[0]) or A[0] == 0:
+                kinds[i] = "zero"                 # B = -A, or the 2-torsion
+                continue
+            kinds[i] = "dbl"
+            dens[i] = A[0]
+        else:
+            kinds[i] = "add"
+            dens[i] = A[0] ^ B[0]
+    inv = F.batch_inv(dens)
+
+    out = [None] * n
+    for i in range(n):
+        k = kinds[i]
+        if k == "zero":
+            out[i] = None
+        elif k == "id":
+            out[i] = Ps[i] if Qs[i] is None else Qs[i]
+        elif k == "dbl":
+            x1, y1 = Ps[i]
+            lam = x1 ^ F.mul(y1, inv[i])
+            x3 = F.sqr(lam) ^ lam ^ E.a
+            out[i] = (x3, F.sqr(x1) ^ F.mul(lam ^ 1, x3))
+        else:
+            x1, y1 = Ps[i]
+            x2, y2 = Qs[i]
+            lam = F.mul(y1 ^ y2, inv[i])
+            x3 = F.sqr(lam) ^ lam ^ x1 ^ x2 ^ E.a
+            out[i] = (x3, F.mul(lam, x1 ^ x3) ^ x3 ^ y1)
+    return out
+
+
+def batch_combos(E: Koblitz, P, Q, pairs):
+    """`[u]P + [v]Q` for every `(u, v)`, in lockstep over the whole list.
+
+    One pass of doublings builds the `[2^k]P` and `[2^k]Q` ladders, then each
+    bit position contributes one batched addition, so the cost is a couple of
+    hundred batched inversions rather than one per group addition.
+    """
+    if not pairs:
+        return []
+    width = max(max(u.bit_length(), v.bit_length()) for u, v in pairs)
+    ladder_p, ladder_q = [], []
+    dp, dq = P, Q
+    for _ in range(width):
+        ladder_p.append(dp)
+        ladder_q.append(dq)
+        dp = E.add(dp, dp)
+        dq = E.add(dq, dq)
+
+    acc = [None] * len(pairs)
+    for k in range(width):
+        idx = [i for i, (u, _) in enumerate(pairs) if (u >> k) & 1]
+        if idx:
+            res = batch_add(E, [acc[i] for i in idx], [ladder_p[k]] * len(idx))
+            for i, r in zip(idx, res):
+                acc[i] = r
+        idx = [i for i, (_, v) in enumerate(pairs) if (v >> k) & 1]
+        if idx:
+            res = batch_add(E, [acc[i] for i in idx], [ladder_q[k]] * len(idx))
+            for i, r in zip(idx, res):
+                acc[i] = r
+    return acc

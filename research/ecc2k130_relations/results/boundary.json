@@ -1,0 +1,96 @@
+{
+  "instance": "ECC2K-130",
+  "log2_r": 129.0,
+  "rho_reference_log2": 60.9,
+  "bytes_per_stored_point": 32,
+  "rows": [
+    {
+      "m": 3,
+      "log2_base_size_needed": 43.86,
+      "mitm_split": "1+2",
+      "log2_stored_side": 43.86,
+      "log2_streamed_side": 86.72,
+      "log2_cost_one_relation": 86.72,
+      "log2_memory_bytes": 48.86,
+      "log2_total_cost": 130.58,
+      "log2_ratio_one_relation_to_rho": 25.82,
+      "log2_ratio_total_to_rho": 69.68
+    },
+    {
+      "m": 4,
+      "log2_base_size_needed": 33.4,
+      "mitm_split": "2+2",
+      "log2_stored_side": 65.79,
+      "log2_streamed_side": 65.79,
+      "log2_cost_one_relation": 65.79,
+      "log2_memory_bytes": 70.79,
+      "log2_total_cost": 99.19,
+      "log2_ratio_one_relation_to_rho": 4.89,
+      "log2_ratio_total_to_rho": 38.29
+    },
+    {
+      "m": 5,
+      "log2_base_size_needed": 27.18,
+      "mitm_split": "2+3",
+      "log2_stored_side": 53.36,
+      "log2_streamed_side": 78.96,
+      "log2_cost_one_relation": 78.96,
+      "log2_memory_bytes": 58.36,
+      "log2_total_cost": 106.14,
+      "log2_ratio_one_relation_to_rho": 18.06,
+      "log2_ratio_total_to_rho": 45.24
+    },
+    {
+      "m": 6,
+      "log2_base_size_needed": 23.08,
+      "mitm_split": "3+3",
+      "log2_stored_side": 66.66,
+      "log2_streamed_side": 66.66,
+      "log2_cost_one_relation": 66.66,
+      "log2_memory_bytes": 71.66,
+      "log2_total_cost": 89.74,
+      "log2_ratio_one_relation_to_rho": 5.76,
+      "log2_ratio_total_to_rho": 28.84
+    },
+    {
+      "m": 7,
+      "log2_base_size_needed": 20.19,
+      "mitm_split": "3+4",
+      "log2_stored_side": 57.97,
+      "log2_streamed_side": 76.16,
+      "log2_cost_one_relation": 76.16,
+      "log2_memory_bytes": 62.97,
+      "log2_total_cost": 96.34,
+      "log2_ratio_one_relation_to_rho": 15.26,
+      "log2_ratio_total_to_rho": 35.44
+    },
+    {
+      "m": 8,
+      "log2_base_size_needed": 18.04,
+      "mitm_split": "4+4",
+      "log2_stored_side": 67.56,
+      "log2_streamed_side": 67.56,
+      "log2_cost_one_relation": 67.56,
+      "log2_memory_bytes": 72.56,
+      "log2_total_cost": 85.6,
+      "log2_ratio_one_relation_to_rho": 6.66,
+      "log2_ratio_total_to_rho": 24.7
+    }
+  ],
+  "measured_base_yields": {
+    "weight_two_complete": {
+      "base_size": 4262,
+      "log2_base_size": 12.06,
+      "log2_expected_3_point_relations": -95.41,
+      "log2_expected_4_point_relations": -85.36,
+      "log2_shortfall_in_base_size_for_m3": 31.8
+    }
+  },
+  "best_m_by_total_cost": 8,
+  "log2_best_total_cost": 85.6,
+  "log2_best_total_ratio_to_rho": 24.7,
+  "best_m_by_single_relation_cost": 4,
+  "log2_best_single_relation_cost": 65.79,
+  "log2_best_single_relation_ratio_to_rho": 4.89,
+  "verdict": "Homogeneous-relation index calculus does not reach the rho reference at any m. Even priced at one relation and ignoring the B relations a logarithm needs, the cheapest m costs 2^65.79 against rho's 2^60.9, a factor 2^4.89, and needs 2^70.79 bytes of storage. Priced honestly at B relations the gap is 2^24.7."
+}
