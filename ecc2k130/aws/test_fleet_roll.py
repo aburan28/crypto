@@ -106,6 +106,22 @@ class FleetRollContract(unittest.TestCase):
         self.assertIn("capacityBefore=$(activeGpuCapacity", roll)
         self.assertIn('"$capacity" -ge "$capacityBefore"', roll)
 
+    def test_roll_propagates_a_failed_capacity_query_instead_of_reading_it_as_zero(self):
+        # Bugbot 9ab64fed (High): a bare `types=$(aws ...)` inside a
+        # function is not enough -- bash does not inherit `set -e` into a
+        # command substitution by default, so activeGpuCapacity's own
+        # internal errexit does nothing when it is itself invoked as
+        # $(activeGpuCapacity ...) one level up. A failing describe-fleet-
+        # instances call would silently produce total=0, and 0 always
+        # satisfies "capacity has recovered", so the next batch would
+        # proceed without the previous one's replacements ever landing.
+        # The fix must check the inner command explicitly instead of
+        # relying on inherited errexit.
+        start = FLEET.index("activeGpuCapacity()")
+        helper = FLEET[start:FLEET.index("\ncapacityInt")]
+        self.assertIn("if ! types=$(aws", helper)
+        self.assertIn("return 1", helper)
+
     def test_roll_normalizes_the_tab_separated_id_list_before_matching(self):
         # aws --output text separates list entries with tabs, not spaces;
         # a bare `*" $member "*` substring check against that raw text only
