@@ -100,6 +100,8 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("bash ./infra.sh", script)
         self.assertIn("bash ./push_source.sh", script)
         self.assertIn("meow34", script)
+        self.assertIn('REGIONS:-', script)
+        self.assertIn("describe-instance-type-offerings", script)
         subprocess.run(["bash", "-n", str(HERE / "launch_spot_all.sh")], check=True)
 
 

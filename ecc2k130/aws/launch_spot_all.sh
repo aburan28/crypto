@@ -90,6 +90,15 @@ subnets_of() {
         --query 'Subnets[].SubnetId' --output text | tr '\t' '\n'
 }
 
+# True if any preferred 2xlarge is offered in the region.
+has_gpu_offering() {
+    local region=$1
+    aws ec2 describe-instance-type-offerings --region "$region" \
+        --location-type availability-zone \
+        --filters "Name=instance-type,Values=${TYPES_PREF}" \
+        --query 'length(InstanceTypeOfferings)' --output text 2>/dev/null | grep -qx '[1-9][0-9]*'
+}
+
 # Launch up to n instances of type as spot. Sets LAUNCHED_N and STOP_REGION.
 launch_n() {
     local region=$1 type=$2 n=$3
@@ -182,7 +191,11 @@ print("export WORKER_AWS_SECRET_ACCESS_KEY=" + shlex.quote(c["SecretAccessKey"])
     eval "$creds"
 fi
 
-mapfile -t REGION_LIST < <(opted_regions)
+if [ -n "${REGIONS:-}" ]; then
+    IFS=',' read -r -a REGION_LIST <<< "$REGIONS"
+else
+    mapfile -t REGION_LIST < <(opted_regions)
+fi
 echo "opted-in regions: ${REGION_LIST[*]}"
 
 # Campaign bucket + helpers stay in us-west-2.
@@ -194,13 +207,6 @@ grep -E 'updated launch|created launch|error|denied|AccessDenied|failed' /tmp/in
 AWS_DEFAULT_REGION=us-west-2 bash ./push_source.sh | tee /tmp/push_source_spot_all.out
 
 for region in "${REGION_LIST[@]}"; do
-    if [ "$region" != us-west-2 ]; then
-        ensure_region "$region" >/tmp/infra-spot-all-$region.log || {
-            echo "=== $region: infra failed; skipping ==="
-            continue
-        }
-        grep -E 'updated launch|created launch|error|denied|AccessDenied|failed' /tmp/infra-spot-all-$region.log || true
-    fi
     sp_q=$(quota_vcpu "$region")
     sp_u=$(used_spot_vcpu "$region")
     sp_left=$(slots_left "$sp_u" "$sp_q")
@@ -208,6 +214,17 @@ for region in "${REGION_LIST[@]}"; do
     if [ "$sp_left" -le 0 ]; then
         echo "  no leftover G/VT spot in $region"
         continue
+    fi
+    if ! has_gpu_offering "$region"; then
+        echo "  leftover $sp_left but no ${TYPES_PREF} offering in $region; skipping"
+        continue
+    fi
+    if [ "$region" != us-west-2 ]; then
+        ensure_region "$region" >/tmp/infra-spot-all-$region.log || {
+            echo "=== $region: infra failed; skipping ==="
+            continue
+        }
+        grep -E 'updated launch|created launch|error|denied|AccessDenied|failed' /tmp/infra-spot-all-$region.log || true
     fi
     fill_spot "$region" "$sp_left"
 done
