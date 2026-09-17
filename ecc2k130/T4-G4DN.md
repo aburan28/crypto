@@ -52,3 +52,20 @@ make gpu-g4dn
 # or, for the campaign bucket:
 # ARCHES=75 CLMAD=0 ./aws/build.sh /path/to/ecc2k130
 ```
+
+## Result
+
+Modal Tesla T4, driver 580.95.05, CUDA 13.3.1, automatic workers
+(20,480 = 40 SMs × 2 × 256), shipping packed preset, `PACKED_CLMAD=0`.
+Median of three complete-scalar benches. Frozen in
+[benchmarks/preblackwell](benchmarks/preblackwell/g4dn-software.json).
+
+| variant | median B/s | / "under 2" prior | / 6000 15.116 | class | correctness |
+|---|---:|---:|---:|---|---|
+| RTX PRO 6000 shipping | 15.115792 | — | 1.000 | reference | top-clmad control |
+| T4 software (g4dn) | 0.533211 | 0.267 vs 2.0 upper | 0.035 | engineering | 3/3, 128 regs, 64 local bytes, CLMAD 0 |
+
+Rates 0.540110 / 0.533211 / 0.529717 B/s. Per SM: 13.3 M it/s against
+the 6000's 80.4. This is the fastest client this tree emits for
+`sm_75`. `clmad` is not a T4 instruction. No g4dn campaign fleet:
+`campaign.json` still has one `binaryKey`.

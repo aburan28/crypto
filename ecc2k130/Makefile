@@ -450,17 +450,12 @@ bench-rtx-pro6000:
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
-# It is the RTX PRO 6000 preset with ONE knob moved: PACKED_CLMAD.  Every other
-# option here is a field-arithmetic or storage choice and transfers across GPU
-# models, which is why benchmarks/rtx-pro4500/run.sh reuses them verbatim.
-# CLMAD does not transfer: it is bought with a pipe balance measured only on
-# sm_120 (87.3% ALU against 51.4% on the carryless pipe), at a price of ~37.7
-# ALU ops per carryless op.  Ada divides its units differently and no
-# measurement in this tree covers it, so the default is the software path and
-# ADA_CLMAD=1 is the A/B arm benchmarks/ada/run.sh measures.  See ADA-L4-L40S.md.
+# It is the RTX PRO 6000 arithmetic/storage preset. CLMAD is on: the
+# preblackwell receipt measured 1.811× on L40S and 1.881× on L4 against the
+# software product. ADA_CLMAD=0 is the superseded before-arm.
 ADA_GPU ?= L40S
 ADA_CUDA ?= 13.3.1
-ADA_CLMAD ?= 0
+ADA_CLMAD ?= 1
 ADA_COMPACT_STATE ?= 1
 ADA_SHARED_SIGMA ?= 1
 ADA_ENV = ECC_GPU=$(ADA_GPU) ECC_CUDA_VERSION=$(ADA_CUDA) \
@@ -483,7 +478,7 @@ bench-ada-modal:
 	    --steps 1024 --launches 32 --repeats 3
 
 # Instance-type aliases. g6 is L4, g6e is L40S, both sm_89. Workers stay
-# automatic. CLMAD defaults off; ADA_CLMAD=1 is the measured A/B arm.
+# automatic. CLMAD defaults on after the preblackwell receipt.
 bench-g6-modal:
 	$(MAKE) bench-ada-modal ADA_GPU=L4
 
@@ -508,8 +503,15 @@ bench-g4dn-modal:
 
 # Thin native clients for one architecture. Need nvcc. These are the
 # binaries a g6 / g6e / g4dn worker should run; the campaign fat default
-# is still sm_120.
-PREBLACKWELL_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
+# is still sm_120. Ada (g6/g6e) ships CLMAD=1; Turing (g4dn) cannot.
+ADA_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
+	PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+	PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
+	PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_TOP_CLMAD=0
+T4_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
 	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
 	PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
 	PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
@@ -518,10 +520,10 @@ PREBLACKWELL_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
 	PACKED_TOP_CLMAD=0
 
 gpu-g6 gpu-g6e:
-	$(MAKE) gpu ARCH="-gencode arch=compute_89,code=sm_89" $(PREBLACKWELL_PACKED)
+	$(MAKE) gpu ARCH="-gencode arch=compute_89,code=sm_89" $(ADA_PACKED)
 
 gpu-g4dn:
-	$(MAKE) gpu ARCH="-gencode arch=compute_75,code=sm_75" $(PREBLACKWELL_PACKED)
+	$(MAKE) gpu ARCH="-gencode arch=compute_75,code=sm_75" $(T4_PACKED)
 
 # On the g6/g6e instance itself, where the part actually is.  Measures both
 # arms of the CLMAD question rather than assuming either.

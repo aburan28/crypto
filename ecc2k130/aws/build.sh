@@ -17,16 +17,15 @@
 # 13.0; the toolkit and knobs here are the ones ../RTX-PRO6000.md measured at
 # 14.1 B iterations/s collecting.
 #
-# CLMAD is the one preset knob that does NOT travel with ARCHES.  NVIDIA
-# documents `clmad` for sm_80 and later, but the only reason this campaign pays
-# for it is a pipe balance measured on sm_120 alone: the walk sat at 87.3% ALU
-# and 51.4% on the pipe that carries clmad, so a carryless op that costs ~37.7
-# ALU ops was still the cheaper side (../include/packed131.h, ../TOP-CLMAD.md).
-# An Ada part (sm_89, EC2 g6/g6e) has a different mix of units, and nothing in
-# this tree has measured clmad there.  So CLMAD defaults to 1 only for a
-# Blackwell-only build and to 0 the moment a pre-Blackwell architecture is in
-# ARCHES; set CLMAD=1 explicitly to override, and measure before you do
-# (../ADA-L4-L40S.md, benchmarks/ada/run.sh).
+# CLMAD is the one preset knob that does NOT travel with every ARCHES value.
+# NVIDIA documents `clmad` for sm_80 and later. Blackwell pays for it on a
+# measured pipe balance (87.3% ALU / 51.4% carryless on sm_120). Ada (sm_89,
+# EC2 g6/g6e) now has its own receipt: CLMAD=1 is 1.811× the software product
+# on an L40S and 1.881× on an L4 (../benchmarks/preblackwell/summary.json).
+# Turing (sm_75, g4dn) cannot issue the instruction. Ampere (80/86) and
+# Hopper (90) remain unmeasured, so they still default off. CLMAD defaults
+# to 1 for Blackwell and/or Ada and to 0 the moment 75, 80, 86 or 90 is in
+# ARCHES; set CLMAD=1 explicitly to override after a receipt.
 #
 # Typical use: run on the pilot g7e instance over ssh/SSM, where Docker and
 # the AWS CLI are present and the instance role can write to the bucket.
@@ -39,10 +38,11 @@ if [ -z "${BUCKET:-}" ]; then
     BUCKET=$STACK-$ACCOUNT
 fi
 ARCHES=${ARCHES:-120}                 # "120", "89", "75", or "75 89 120"
-# Default off as soon as anything older than Blackwell is requested; see above.
-# sm_75 is the EC2 g4dn (T4) client; clmad is not a T4 instruction we pay for.
+# Default on for Blackwell (120) and Ada (89). Off if Turing or an
+# unmeasured pre-Blackwell arch is in the set; see the header comment.
+# sm_75 is the EC2 g4dn (T4) client; clmad is not a T4 instruction.
 case " $ARCHES " in
-    *" 75 "*|*" 80 "*|*" 86 "*|*" 89 "*|*" 90 "*) clmadDefault=0 ;;
+    *" 75 "*|*" 80 "*|*" 86 "*|*" 90 "*) clmadDefault=0 ;;
     *) clmadDefault=1 ;;
 esac
 CLMAD=${CLMAD:-$clmadDefault}
