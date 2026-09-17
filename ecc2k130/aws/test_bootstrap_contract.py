@@ -106,6 +106,11 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("describe-instance-type-offerings", script)
         self.assertIn("g4dn.xlarge", script)
         self.assertIn("g4dn.4xlarge", script)
+        self.assertIn("create-fleet", script)
+        self.assertIn("capacity-optimized", script)
+        self.assertIn("--type", script)
+        self.assertIn("instant", script)
+        self.assertNotIn("create-fleet --type maintain", script)
         subprocess.run(["bash", "-n", str(HERE / "launch_spot_all.sh")], check=True)
 
 

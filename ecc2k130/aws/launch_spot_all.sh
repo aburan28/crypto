@@ -181,7 +181,96 @@ fill_spot() {
     # Turing leftover: xlarge is 4 vCPU / 1 T4, so two fit in one 2xlarge slot.
     if [ "$left" -gt 0 ]; then
         launch_n "$region" "g4dn.xlarge" $((left * 2))
+        left=$((left - (LAUNCHED_N + 1) / 2))
+        if [ "${STOP_REGION:-0}" -eq 1 ]; then
+            return 0
+        fi
     fi
+    if [ "$left" -gt 0 ]; then
+        fleet_fill "$region" "$left"
+    fi
+}
+
+# Last resort when sequential run-instances is dry: one instant fleet
+# (capacity-optimized, one-shot, does not linger) across the leftover
+# types and default AZs. Weighted in 2xlarge units.
+fleet_fill() {
+    local region=$1 n=$2
+    local out rc fulfilled
+    [ "$n" -gt 0 ] || return 0
+    echo "=== $region: capacity-optimized instant fleet for $n × 2xlarge-equivalent ==="
+    set +e
+    out=$(python3 - "$region" "$n" "$STACK" "$TYPES_PREF" <<'PY'
+import json, subprocess, sys
+region, n, stack, pref = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
+subs = json.loads(subprocess.check_output([
+    "aws", "ec2", "describe-subnets", "--region", region,
+    "--filters", "Name=default-for-az,Values=true",
+    "--query", "Subnets[].SubnetId", "--output", "json",
+], text=True) or "[]")
+if not subs:
+    print("no default subnets", file=sys.stderr)
+    sys.exit(2)
+types = [t.strip() for t in pref.split(",") if t.strip()]
+for extra in ("g7e.4xlarge", "g7.4xlarge", "g6e.4xlarge", "g6.4xlarge",
+              "g4dn.4xlarge", "g4dn.xlarge"):
+    if extra not in types:
+        types.append(extra)
+weight = {".xlarge": 0.5, ".2xlarge": 1, ".4xlarge": 2, ".8xlarge": 4}
+overrides = []
+for typ in types:
+    w = 1
+    for suf, val in weight.items():
+        if typ.endswith(suf):
+            w = val
+            break
+    for subnet in subs:
+        overrides.append({"InstanceType": typ, "SubnetId": subnet, "WeightedCapacity": w})
+cfg = [{
+    "LaunchTemplateSpecification": {"LaunchTemplateName": stack + "-worker", "Version": "$Latest"},
+    "Overrides": overrides,
+}]
+p = subprocess.run([
+    "aws", "ec2", "create-fleet", "--region", region, "--type", "instant",
+    "--launch-template-configs", json.dumps(cfg),
+    "--target-capacity-specification", json.dumps({
+        "TotalTargetCapacity": n,
+        "DefaultTargetCapacityType": "spot",
+    }),
+    "--spot-options", json.dumps({
+        "AllocationStrategy": "capacity-optimized",
+        "SingleInstanceType": False,
+        "SingleAvailabilityZone": False,
+    }),
+    "--tag-specifications",
+    "ResourceType=instance,Tags=[{Key=Name,Value=%s-worker},{Key=Project,Value=%s},{Key=Lifecycle,Value=spot}]" % (stack, stack),
+    "--output", "json",
+], capture_output=True, text=True)
+sys.stderr.write(p.stderr)
+if p.returncode != 0:
+    sys.stderr.write(p.stdout)
+    sys.exit(p.returncode)
+doc = json.loads(p.stdout)
+ids = []
+for inst in doc.get("Instances") or []:
+    ids.extend(inst.get("InstanceIds") or [])
+    for iid in inst.get("InstanceIds") or []:
+        print("  ok", iid, inst.get("InstanceType", ""), inst.get("Lifecycle", "spot"))
+errs = {(e.get("ErrorCode"), e.get("ErrorMessage")) for e in (doc.get("Errors") or [])}
+for code, msg in sorted(errs):
+    print("  fleet %s: %s" % (code, msg))
+print("FLEET_LAUNCHED %d" % len(ids))
+PY
+    )
+    rc=$?
+    set -e
+    echo "$out"
+    if [ $rc -ne 0 ]; then
+        echo "  instant fleet failed in $region (rc=$rc)"
+        return 0
+    fi
+    fulfilled=$(echo "$out" | awk '/^FLEET_LAUNCHED / {print $2; exit}')
+    LAUNCHED_N=${fulfilled:-0}
 }
 
 if [ -z "${WORKER_AWS_ACCESS_KEY_ID:-}" ]; then
