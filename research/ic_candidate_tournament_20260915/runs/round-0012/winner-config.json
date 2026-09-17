@@ -1,0 +1,18 @@
+{
+  "binary_relative": "worker",
+  "config": {
+    "batch_trials": 1,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+  "hypothesis": "The round-0011 incumbent on a baseline whose executable is linked statically against musl without relocations (the C runtime's start-up is a few thousand instructions instead of the relocation, tunables and cache probing of the static-pie glibc image) and whose worker serves every heap request from a bump-pointer arena in zero pages of the executable (the whole job allocates under 330 KB); both arms share both changes. Every report byte is unchanged.",
+  "id": "incumbent",
+  "parent": "tiny2 + certificate, general arithmetic in words (round-0011)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
+  "source_directory": "source",
+  "source_manifest_relative": "source-manifest.json",
+  "source_manifest_sha256": "1ba4b4c1aba04e85aa48318c9b8794e3335db853d391f0b0ec0a1df72a92efba"
+}

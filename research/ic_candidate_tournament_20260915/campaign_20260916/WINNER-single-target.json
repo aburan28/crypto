@@ -290,7 +290,7 @@
       }
     }
   },
-  "strict_win_record": "round-0011",
+  "strict_win_record": "round-0012",
   "round_0011": {
     "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
     "status": "retained",
@@ -407,6 +407,129 @@
       "rho": {
         "instructions": 4706035.0,
         "native_ms": 2.297,
+        "receipts": 180
+      }
+    }
+  },
+  "round_0012": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012",
+    "status": "retained",
+    "what_changed": "shared: the executable linked statically against musl without relocations (round12-musl.patch, cargo config only) and the worker serving every heap request from a bump-pointer arena in zero pages of the executable (round12-arena.patch); library source identical to round-0011; challenger arena_fastio (IC-only serialisation) not promoted again: 0.9541 of the incumbent instructions but native upper limit 1.0271 on confirmation; ablation controls arena_glibc (link only) 1.0589 instructions and 1.7657 native of the incumbent at selection, musl_sysalloc (allocator only) 1.4157 instructions and 1.2278 native at development",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/source",
+    "patches_from_round_0011_source": [
+      "campaign_20260916/round12-musl.patch",
+      "campaign_20260916/round12-arena.patch"
+    ],
+    "challenger_patch": "campaign_20260916/round12-fastio.patch",
+    "source_manifest_sha256": "1ba4b4c1aba04e85aa48318c9b8794e3335db853d391f0b0ec0a1df72a92efba",
+    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": true,
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.436926797163521,
+      "ci95": [
+        0.4069034566370304,
+        0.48145735501622794
+      ],
+      "native_wall_candidate_over_baseline": 0.798770598737747,
+      "native_wall_ci95": [
+        0.7667779157944749,
+        0.8318517878456885
+      ],
+      "per_cell": {
+        "n13a0": 0.5295425329496932,
+        "n17a1": 0.4036921612691539,
+        "n19a0": 0.41370930256069954,
+        "n19a1": 0.4222089982202027,
+        "n23a0": 0.42645132679651465
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.8573882431474522,
+        "n17a1": 0.8065158843545619,
+        "n19a0": 0.7966106435652626,
+        "n19a1": 0.781424811073584,
+        "n23a0": 0.7554167393685867
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.4369275867744142,
+      "ci95": [
+        0.40690298023525534,
+        0.4814550806508336
+      ],
+      "native_wall_candidate_over_baseline": 0.7914360476384587,
+      "native_wall_ci95": [
+        0.7557909440653447,
+        0.8270206925674652
+      ],
+      "per_cell": {
+        "n13a0": 0.5295411841390774,
+        "n17a1": 0.40369031416720363,
+        "n19a0": 0.4137114514808026,
+        "n19a1": 0.42220884262737524,
+        "n23a0": 0.42645615974257134
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.8569783877896574,
+        "n17a1": 0.7927965440932707,
+        "n19a0": 0.7907892475669126,
+        "n19a1": 0.7801485245842248,
+        "n23a0": 0.7408144950325363
+      }
+    },
+    "controls_over_incumbent": {
+      "arena_fastio": {
+        "confirmation": {
+          "candidate_over_baseline": 0.954132046741485,
+          "ci95": [
+            0.9487283946328573,
+            0.960167020225172
+          ],
+          "native_wall_candidate_over_baseline": 1.007766853173474,
+          "native_wall_ci95": [
+            0.9903726365238592,
+            1.0270724892190246
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 1.0017143645500697,
+            "n17a1": 1.0012987409495349,
+            "n19a0": 1.0018986432671655,
+            "n19a1": 1.035404768152843,
+            "n23a0": 0.9989846792449357
+          }
+        },
+        "replay": {
+          "candidate_over_baseline": 0.9541320997030339,
+          "ci95": [
+            0.9487269800971505,
+            0.9601673397462499
+          ],
+          "native_wall_candidate_over_baseline": 0.9999963245473455,
+          "native_wall_ci95": [
+            0.9882338965796592,
+            1.0144058421329114
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9932441920816648,
+            "n17a1": 0.9993535421706898,
+            "n19a0": 1.019039650310495,
+            "n19a1": 0.9971739021066758,
+            "n23a0": 0.991413531738102
+          }
+        }
+      }
+    },
+    "median_complete_job_confirmation": {
+      "incumbent": {
+        "instructions": 1670482.0,
+        "native_ms": 1.155,
+        "receipts": 180
+      },
+      "rho": {
+        "instructions": 3944991.0,
+        "native_ms": 1.448,
         "receipts": 180
       }
     }

@@ -1,6 +1,6 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; ten further tournaments finished and audited
+Status: implementation complete; eleven further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
@@ -25,10 +25,15 @@ stages. Round-0011 then put the general binary-field arithmetic that both arms
 run in their final check into words, bit-exact with the bit-serial code it
 replaced: 0.4796 (0.4498–0.5217) of rho's instructions and 0.8653
 (0.8396–0.8919) of its native time, replay agreeing (0.8654, 0.8454–0.8883),
-every cell below one in both metrics on both stages: the strict-win record.
-The native margin is bounded by the process creation both arms pay.
+every cell below one in both metrics on both stages. Round-0012 took the C
+runtime's start-up and the heap out of the way for both arms (a musl static
+executable without relocations, a bump-pointer arena in the worker): 0.4369
+(0.4069–0.4815) of rho's instructions and 0.7988 (0.7668–0.8319) of its native
+time, replay agreeing (0.7914, 0.7558–0.8270), every cell below one in both
+metrics on both stages: the strict-win record. The median complete one-target
+job is 1.16 ms against rho's 1.45 ms.
 
-All 13,368 new profiled trials and their paired native runs verified. The
+All 14,856 new profiled trials and their paired native runs verified. The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
 unsuccessful build attempts remain recorded. [Round 0006](campaign_20260916/ROUND6.md)
 (1,680 further verified trials on another host) enforced the index-calculus
