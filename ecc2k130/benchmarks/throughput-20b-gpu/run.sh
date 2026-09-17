@@ -34,7 +34,9 @@ export BATCH=16 THREADS=256 MINBLOCKS=2 \
        PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
        PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 \
        PACKED_SHARED_SIGMA=1 PACKED_TOP_CLMAD=0 \
-       PACKED_PAIR_ILP=0 WALK_TABLE=0 TABLE_PIVOT_BYTES=0
+       PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0 \
+       UNROLL_SLOTS=1 PACKED_SLOT_PREFETCH=0 \
+       WALK_TABLE=0 TABLE_PIVOT_BYTES=0
 
 REPEATS="${REPEATS:-3}"
 STEPS="${STEPS:-1024}"
@@ -62,12 +64,13 @@ preset = (
     "PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 "
     "PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 "
     "PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 "
-    "PACKED_TOP_CLMAD=0"
+    "PACKED_TOP_CLMAD=0 PACKED_L2_PERSIST=0 UNROLL_SLOTS=1 PACKED_SLOT_PREFETCH=0"
 )
 modes = [
-    ("shipping", "WALK_TABLE=0 TABLE_PIVOT_BYTES=0 PACKED_PAIR_ILP=0"),
-    ("table_pivot", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=0"),
-    ("table_pivot_ilp", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1"),
+    ("shipping", "WALK_TABLE=0 TABLE_PIVOT_BYTES=0 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0"),
+    ("table_pivot", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=0 PACKED_L2_PERSIST=0"),
+    ("table_pivot_ilp", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=0"),
+    ("table_pivot_persist", "WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1"),
 ]
 rec = {
     "kind": "RTX PRO 6000 20 B/s attempt: complete scalar updates/s",
@@ -151,7 +154,7 @@ BENCH = ("{bin} --curve 131 --packed --bench --steps " + steps +
 order = []
 for rep in range(repeats):
     # Alternate so thermal drift cannot favour the last binary.
-    seq = ["shipping", "table_pivot", "table_pivot_ilp"]
+    seq = ["shipping", "table_pivot", "table_pivot_ilp", "table_pivot_persist"]
     if rep % 2:
         seq = list(reversed(seq))
     order.extend((rep, n) for n in seq)

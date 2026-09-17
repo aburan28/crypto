@@ -55,6 +55,21 @@ namespace eccPacked131 {
 #if ECC_WALK_TABLE && !ECC_PACKED_WEIGHTED_PREFIX
 #error "ECC_WALK_TABLE is implemented on the weighted-prefix path only"
 #endif
+#ifndef ECC_UNROLL_SLOTS
+#define ECC_UNROLL_SLOTS 1
+#endif
+#if ECC_UNROLL_SLOTS < 1 || ECC_UNROLL_SLOTS > ECC_BATCH
+#error "ECC_UNROLL_SLOTS must be between 1 and ECC_BATCH"
+#endif
+#ifndef ECC_PACKED_SLOT_PREFETCH
+#define ECC_PACKED_SLOT_PREFETCH 0
+#endif
+#if ECC_PACKED_SLOT_PREFETCH != 0 && ECC_PACKED_SLOT_PREFETCH != 1
+#error "ECC_PACKED_SLOT_PREFETCH must be 0 or 1"
+#endif
+#if ECC_PACKED_SLOT_PREFETCH && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_SLOT_PREFETCH requires compact state"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -93,6 +108,13 @@ __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int t
     for (int i = 0; i < 5; ++i) a.v[i] = p[(size_t(slot) * 5 + i) * threads + tid];
 #endif
     return a;
+#endif
+}
+__device__ __forceinline__ void prefetch(const unsigned *p, int slot, int tid, int threads) {
+#if ECC_PACKED_SLOT_PREFETCH
+    compactPrefetch131(p, slot, tid);
+#else
+    (void)p; (void)slot; (void)tid; (void)threads;
 #endif
 }
 __device__ __forceinline__ void store(unsigned *p, int slot, int tid, int threads, P131 a) {
@@ -169,8 +191,18 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#if ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
 #pragma unroll 1
+#endif
         for (int slot = 0; slot < ECC_BATCH; ++slot) {
+#if ECC_PACKED_SLOT_PREFETCH
+            if (slot + 1 < ECC_BATCH) {
+                prefetch(p.x, slot + 1, tid, p.threads);
+                prefetch(p.y, slot + 1, tid, p.threads);
+            }
+#endif
             P131 x = load(p.x, slot, tid, p.threads);
 #if ECC_WALK_TABLE
             const P131 xp = x;
@@ -282,8 +314,20 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
         inv = inv131(prod);
 #endif
+#if ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
 #pragma unroll 1
+#endif
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
+#if ECC_PACKED_SLOT_PREFETCH
+            if (slot > 0) {
+                prefetch(p.x, slot - 1, tid, p.threads);
+                prefetch(p.y, slot - 1, tid, p.threads);
+                prefetch(p.pchain, slot - 1, tid, p.threads);
+                prefetch(denominators, slot - 1, tid, p.threads);
+            }
+#endif
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
             P131 dp = load(denominators, slot, tid, p.threads);

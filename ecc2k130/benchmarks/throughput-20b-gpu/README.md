@@ -30,11 +30,18 @@ CUDA 13.3.73, Nsight Compute, and one unmeasured scheduling lever, clear
 | SM clocks locked at 2430 MHz | 2430/2400 ≈ +1.25% → ~16.88 B/s | Modal samples ran 2385–2407 MHz |
 | Driver 595.91.07 / CUDA 13.3.73 | unknown | eighteen used 580.95.05 |
 | `PACKED_PAIR_ILP=1` | ~9% *if* ptxas dual-issues the second product's `clmad` with the first reduction | static SASS is unchanged; a count is not a rate |
-| Nsight Compute | diagnose ALU vs CLMAD vs stall | previous G7 counter collection failed |
+| Nsight Compute | diagnose ALU vs CLMAD vs DRAM stall | previous G7 counter collection failed |
+| `PACKED_L2_PERSIST=1` | hide compact-field traffic in the 80 MiB persisting L2 window | Nsight on this card showed DRAM ~65% / ALU ~35% at a 16-step diagnostic; eighteen priced the ALU and never asked L2 |
 
-None of those is a 20% instruction cut. The honest prior is **~18.4 B/s**
-if pair-ILP pays its full priced overlap *and* the clock lock converts;
-20 still needs the pipes to issue more than the 16.67 run did.
+Pair-ILP is not a 20% instruction cut. The honest ALU prior is still **~18.4 B/s**
+if dual-issue pays *and* the clock lock converts. Persist is a different
+question: if the walk is DRAM-bound, 20 B/s is under the DRAM ceiling this
+card can post (~26 B/s if the DRAM share of the 16.7 B/s run went to zero).
+If Nsight's ALU pipe is not the logic pipe the static count uses, persist
+is a no-op. The receipt decides.
+
+Slot prefetch (`PACKED_SLOT_PREFETCH`) and slot unroll (`UNROLL_SLOTS=2`)
+are knobs, default off. They do not change the product count.
 
 ## Acceptance, written before the run
 
@@ -61,5 +68,6 @@ bash benchmarks/throughput-20b-gpu/run.sh
 ```
 
 Automatic workers: that is the geometry that produced 16.56 / 16.67 B/s.
-Three binaries, three alternating repetitions, 50,465,865,728 updates per
-sample. Clocks locked at 2430 MHz when the driver allows it.
+Four binaries, three alternating repetitions, 50,465,865,728 updates per
+sample. Clocks locked at 2430 MHz when the driver allows it. The fourth
+binary is table-walk + byte pivot + pair-ILP + the L2 persist window.

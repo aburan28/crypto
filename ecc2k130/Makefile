@@ -16,6 +16,7 @@
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
 #   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   PACKED_PAIR_ILP  independent buffers for the two paired products (default 0)
+#   PACKED_L2_PERSIST  one field blob + stream L2 persist window (default 0)
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
@@ -55,6 +56,9 @@ PACKED_TOP_CLMAD ?= 0
 PACKED_STATE_TILE ?= 0
 PACKED_ADD_COMBINE ?= 0
 PACKED_PAIR_ILP ?= 0
+UNROLL_SLOTS ?= 1
+PACKED_SLOT_PREFETCH ?= 0
+PACKED_L2_PERSIST ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
@@ -139,6 +143,9 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
        -DECC_PACKED_PAIR_ILP=$(PACKED_PAIR_ILP) \
+       -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
+       -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
+       -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
