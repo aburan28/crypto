@@ -553,6 +553,7 @@ def publishMetrics(namespace, ingest):
 
 def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     """Write the snapshot where a browser can read it, no workflow involved."""
+    started = time.time()
     payload = statusPayload(conn, s3, bucket, ingest)
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
@@ -561,9 +562,14 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    log("published status.json: dps=%d state=%s work=2^%.3f walkers=%d "
+    # The elapsed time is in the line because the snapshot counts the whole
+    # table: it is the one part of this program whose cost grows with the
+    # corpus rather than with the backlog, and it shares a database with the
+    # ingest it must not slow down. If it approaches --status-every, that is
+    # the number to act on.
+    log("published status.json in %.1fs: dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d"
-        % (payload["dps"], payload["state"],
+        % (time.time() - started, payload["dps"], payload["state"],
            payload["work"]["iterations_log2"] or 0, payload["walkers"],
            payload["ingest"]["outstanding_objects"],
            payload["ingest"]["unrecognised_objects"]))
