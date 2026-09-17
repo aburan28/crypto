@@ -42,5 +42,7 @@ From `ecc2k130/`:
 bash benchmarks/top-clmad/run.sh
 ```
 
-Receipts land in this directory. `summarize.py` cites them and does not
+The runner writes scratch logs under `/tmp/top-clmad-receipts` so Modal's
+source snapshot does not see the tree change mid-build, then copies the
+JSON receipts here. `summarize.py` cites those files and does not
 recompute rates from a model.

@@ -4,6 +4,10 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="$(cd "$(dirname "$0")" && pwd)"
+# Modal add_local_dir snapshots ecc2k130/. Writing receipts there during the
+# image build aborts the run ("modified during build process").
+TMP="${TOP_CLMAD_RECEIPT_DIR:-/tmp/top-clmad-receipts}"
+mkdir -p "$TMP"
 export PATH="${HOME}/.local/bin:${PATH}"
 MODAL="${MODAL:-modal}"
 cd "$ROOT"
@@ -35,11 +39,21 @@ PY
 }
 
 echo "control: make bench-rtx-pro6000" >&2
-make bench-rtx-pro6000 2>&1 | tee "$OUT/control.log"
-extract_json "$OUT/control.log" "$OUT/control.json"
+make bench-rtx-pro6000 2>&1 | tee "$TMP/control.log"
+extract_json "$TMP/control.log" "$TMP/control.json"
 
 echo "candidate: make bench-rtx-pro6000 RTX_PRO6000_TOP_CLMAD=1" >&2
-make bench-rtx-pro6000 RTX_PRO6000_TOP_CLMAD=1 2>&1 | tee "$OUT/candidate.log"
-extract_json "$OUT/candidate.log" "$OUT/candidate.json"
+make bench-rtx-pro6000 RTX_PRO6000_TOP_CLMAD=1 2>&1 | tee "$TMP/candidate.log"
+extract_json "$TMP/candidate.log" "$TMP/candidate.json"
 
+cp -f "$TMP/control.json" "$TMP/candidate.json" "$OUT/"
+# Logs are large; keep the last 200 KiB in-tree as the frozen transcript.
+python3 - "$TMP" "$OUT" <<'PY'
+from pathlib import Path
+import sys
+tmp, out = Path(sys.argv[1]), Path(sys.argv[2])
+for name in ("control.log", "candidate.log"):
+    data = (tmp / name).read_bytes()
+    (out / name).write_bytes(data[-200_000:] if len(data) > 200_000 else data)
+PY
 python3 "$OUT/summarize.py"
