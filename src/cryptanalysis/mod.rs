@@ -157,6 +157,7 @@ pub mod koblitz_index_calculus;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_sparse_la;
+pub mod sparse_macaulay;
 pub mod koblitz_symmetrised;
 pub mod lattice;
 pub mod legacy_curve_attacks;

@@ -802,11 +802,17 @@ pub fn matrix_f4_f2_counted(
 ///
 /// Returns the column monomials (DegRevLex descending) and the rows.
 /// `None` if the matrix would exceed the size limits.
-pub(crate) fn build_macaulay(
+/// The Macaulay rows of `polys` at `degree`, as monomial masks.
+///
+/// Shared by the dense [`build_macaulay`] and the sparse
+/// [`build_macaulay_sparse`] so the two cannot drift: any difference
+/// between the dense and sparse solving-degree paths would otherwise be
+/// indistinguishable from a difference in the matrix they were handed.
+pub(crate) fn macaulay_rows_monos(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
-) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+) -> Option<Vec<Vec<u64>>> {
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
     for p in polys {
         let pdeg = p
@@ -844,10 +850,18 @@ pub(crate) fn build_macaulay(
             }
         }
     }
-    if rows_monos.is_empty() {
-        return Some((Vec::new(), Vec::new()));
-    }
+    Some(rows_monos)
+}
 
+/// Column masks of the Macaulay matrix at `degree`, in descending
+/// monomial order.
+///
+/// Because [`cmp_mono`] orders by total degree first, descending order
+/// puts the **highest-degree monomials in the leading columns** and the
+/// constant monomial last.  Both elimination paths depend on that: it is
+/// what makes "leading column index ≥ the degree-≤1 boundary" equivalent
+/// to "this row is a linear consequence".
+pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
     let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
     cols.sort_unstable();
     cols.dedup();
@@ -855,6 +869,53 @@ pub(crate) fn build_macaulay(
         return None;
     }
     cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+    Some(cols)
+}
+
+/// Sparse Macaulay matrix: column masks, plus one ascending list of
+/// column indices per row.
+///
+/// A row is one polynomial times one monomial, so it carries exactly as
+/// many nonzeros as that polynomial has terms — a handful, against tens
+/// of thousands of columns.  The dense form spends a kilobyte per row
+/// representing twenty bits.
+pub(crate) fn build_macaulay_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u32>>)> {
+    let rows_monos = macaulay_rows_monos(polys, n_vars, degree)?;
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+    let cols = macaulay_columns(&rows_monos)?;
+    let index: std::collections::HashMap<u64, u32> = cols
+        .iter()
+        .enumerate()
+        .map(|(i, m)| (*m, i as u32))
+        .collect();
+    let rows: Vec<Vec<u32>> = rows_monos
+        .iter()
+        .map(|monos| {
+            let mut r: Vec<u32> = monos.iter().map(|m| index[m]).collect();
+            r.sort_unstable();
+            r
+        })
+        .collect();
+    Some((cols, rows))
+}
+
+pub(crate) fn build_macaulay(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    let rows_monos = macaulay_rows_monos(polys, n_vars, degree)?;
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+
+    let cols: Vec<u64> = macaulay_columns(&rows_monos)?;
     let index: std::collections::HashMap<u64, usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
 
@@ -1129,6 +1190,106 @@ pub fn solving_profile(
     })
 }
 
+/// [`solving_profile`] via structured sparse elimination.
+///
+/// Identical semantics, different representation: the high-degree
+/// columns are eliminated sparsely and only the resulting linear block —
+/// at most `n_vars + 1` columns wide — is reduced densely.  See
+/// [`crate::cryptanalysis::sparse_macaulay`] for why that is equivalent
+/// and why a Krylov method is the wrong tool for this particular
+/// question.
+///
+/// `solving_profile_agrees_with_sparse` holds the two paths to the same
+/// answers, so this is an optimisation rather than a second opinion.
+pub fn solving_profile_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<SolvingProfile> {
+    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+    if degree < system_degree(polys) {
+        return None;
+    }
+    let (cols, rows) = build_macaulay_sparse(polys, n_vars, degree)?;
+    let n_cols = cols.len();
+    let n_rows = rows.len();
+    if n_cols == 0 {
+        return Some(SolvingProfile {
+            degree,
+            rows: 0,
+            cols: 0,
+            rank: 0,
+            vars_determined: 0,
+            vars_occurring: occurring_vars(polys).count_ones() as usize,
+            refuted: false,
+        });
+    }
+
+    let low_start = low_column_start(&cols);
+    let elim = eliminate_high_columns(rows, n_cols, low_start);
+
+    // The surviving linear consequences span `cols[low_start..]` only.
+    // Echelon form is not enough to read off a pinned variable — `{v+w,
+    // w}` must reduce to `{v, w}` first — so reduce this block densely.
+    // It is at most `n_vars + 1` columns wide.
+    let low_width = n_cols - low_start;
+    let words = low_width.div_ceil(64).max(1);
+    let mut low: Vec<Vec<u64>> = elim
+        .linear_rows
+        .iter()
+        .map(|r| {
+            let mut row = vec![0u64; words];
+            for &c in r {
+                let k = c as usize - low_start;
+                row[k / 64] |= 1 << (k % 64);
+            }
+            row
+        })
+        .collect();
+    let low_rank = if low.is_empty() {
+        0
+    } else {
+        rref_f2(&mut low, low_width)
+    };
+
+    let occurring = occurring_vars(polys);
+    let mut determined = 0u64;
+    let mut refuted = false;
+    for row in low.iter().take(low_rank) {
+        let mut support: Vec<u64> = Vec::new();
+        for k in 0..low_width {
+            if row[k / 64] >> (k % 64) & 1 == 1 {
+                support.push(cols[low_start + k]);
+            }
+            if support.len() > 2 {
+                break;
+            }
+        }
+        match support.len() {
+            1 if support[0] == 0 => refuted = true,
+            1 if support[0].count_ones() == 1 => determined |= support[0],
+            2 if support.contains(&0) => {
+                let v = support[0] | support[1];
+                if v.count_ones() == 1 {
+                    determined |= v;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Some(SolvingProfile {
+        degree,
+        rows: n_rows,
+        cols: n_cols,
+        rank: elim.high_rank + low_rank,
+        vars_determined: (determined & occurring).count_ones() as usize,
+        vars_occurring: occurring.count_ones() as usize,
+        refuted,
+    })
+}
+
 /// **Solving degree** of `polys`: the smallest `D ≥ 1` at which the
 /// reduced Macaulay matrix resolves the system outright — a refutation,
 /// or every occurring variable pinned by a linear row.
@@ -1151,7 +1312,7 @@ pub fn solving_degree(
     // Below the system's own degree the Macaulay matrix drops equations
     // rather than relaxing them; see [`solving_profile`].
     for d in system_degree(polys).max(1)..=d_max {
-        let prof = match solving_profile(polys, n_vars, d) {
+        let prof = match solving_profile_sparse(polys, n_vars, d) {
             Some(p) => p,
             None => break,
         };
@@ -2207,5 +2368,113 @@ mod tests {
         let p = profs.last().unwrap();
         assert_eq!(p.vars_occurring, 2, "only x0 and x1 appear");
         assert_eq!(p.vars_determined, 2);
+    }
+
+
+    /// The sparse path must answer **exactly** what the dense path
+    /// answers.
+    ///
+    /// This is the entire safety argument for
+    /// [`solving_profile_sparse`]: it is an optimisation, not a second
+    /// opinion, so any disagreement is a bug rather than a data point.
+    /// Rank, refutation, pinned-variable count and the resolve verdict
+    /// are all compared, over systems drawn to span every interesting
+    /// case — refuted, uniquely solved, and underdetermined.
+    #[test]
+    fn solving_profile_agrees_with_sparse() {
+        let mut rng = StdRng::seed_from_u64(0x5A11_0C17);
+        let n_vars = 9usize;
+        let mut compared = 0usize;
+        let mut refutations = 0usize;
+        let mut pinnings = 0usize;
+
+        for _ in 0..150 {
+            let n_eqs = 2 + rng.gen::<usize>() % 10;
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+
+            for d in system_degree(&polys).max(1)..=5 {
+                let dense = solving_profile(&polys, n_vars, d);
+                let sparse = solving_profile_sparse(&polys, n_vars, d);
+                match (dense, sparse) {
+                    (Some(a), Some(b)) => {
+                        assert_eq!(a.rank, b.rank, "rank at degree {d}");
+                        assert_eq!(a.refuted, b.refuted, "refutation at degree {d}");
+                        assert_eq!(
+                            a.vars_determined, b.vars_determined,
+                            "pinned variables at degree {d}"
+                        );
+                        assert_eq!(a.vars_occurring, b.vars_occurring);
+                        assert_eq!(a.resolves(), b.resolves(), "verdict at degree {d}");
+                        compared += 1;
+                        refutations += usize::from(a.refuted);
+                        pinnings += usize::from(!a.refuted && a.vars_determined > 0);
+                    }
+                    (None, None) => {}
+                    (a, b) => panic!("paths disagree on availability at degree {d}: {a:?} / {b:?}"),
+                }
+            }
+        }
+
+        assert!(compared > 100, "the comparison must actually run");
+        assert!(refutations > 0, "and must cover refuted systems");
+        assert!(pinnings > 0, "and systems that pin variables");
+    }
+
+    /// `xor_sorted` is addition over `F_2`: shared indices cancel.
+    #[test]
+    fn sparse_row_addition_cancels_shared_indices() {
+        use crate::cryptanalysis::sparse_macaulay::xor_sorted;
+        assert_eq!(xor_sorted(&[1, 3, 5], &[3, 4]), vec![1, 4, 5]);
+        assert_eq!(xor_sorted(&[2, 7], &[2, 7]), Vec::<u32>::new());
+        assert_eq!(xor_sorted(&[], &[9]), vec![9]);
+    }
+
+    /// The boundary the elimination targets really does separate the
+    /// degree-≤1 monomials into a suffix.  If monomial order ever stops
+    /// being degree-first, the sparse path's central equivalence —
+    /// leading index past the boundary implies a linear consequence —
+    /// silently breaks, and it would break in the direction of reporting
+    /// spurious resolutions.
+    #[test]
+    fn low_columns_are_a_suffix_in_monomial_order() {
+        use crate::cryptanalysis::sparse_macaulay::low_column_start;
+        let n = 6;
+        let polys = vec![
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b000111),
+                    F2BoolMono::var(2),
+                    F2BoolMono::one(),
+                ],
+                n,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b011000), F2BoolMono::var(0)],
+                n,
+            ),
+        ];
+        let (cols, _) = build_macaulay_sparse(&polys, n, 4).unwrap();
+        let start = low_column_start(&cols);
+        for (i, m) in cols.iter().enumerate() {
+            if i < start {
+                assert!(m.count_ones() >= 2, "column {i} before the boundary is low");
+            } else {
+                assert!(m.count_ones() <= 1, "column {i} after the boundary is high");
+            }
+        }
     }
 }
