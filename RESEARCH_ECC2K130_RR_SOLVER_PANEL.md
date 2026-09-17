@@ -5,7 +5,8 @@
 ceiling), `solver_14`/`solver_15` (subspace-structure oracle)
 **Frozen contracts:** one per round, each committed before its execution
 **Evidence:** `solver_10/raw.jsonl` (128 trials), `solver_11/`, `solver_12/`
-(plus `solver_12/CORRECTION.md`), `solver_13/`
+(plus `solver_12/CORRECTION.md`), `solver_13/`, `solver_14/` (plus
+`solver_14/DEFECT.md`), `solver_15/`
 **Background:** [`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
 (existence, admissibility, and the `m·2^131` oracle bound),
 [`research/nagao_relations/README.md`](research/nagao_relations/README.md)
