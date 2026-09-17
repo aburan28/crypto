@@ -206,17 +206,23 @@ resident blocks per SM (minBlocks 4) cost 34%
    `clmad` is what the 14 B/s arithmetic is made of. The AMI's 580 driver
    runs it under CUDA 13.x minor-version compatibility because `build.sh`
    emits native `sm_120` code and the client never needs the PTX JIT;
-   `ARCHES="89"` for g6/g6e and `ARCHES="75"` for g4dn. `build.sh` defaults
-   `CLMAD=1` for Blackwell and Ada (the preblackwell receipt selected it:
-   1.811× on L40S, 1.881× on L4) and drops it to 0 if Turing (`75`) or an
-   unmeasured Ampere/Hopper arch is in the set. `CLMAD=1` still overrides;
-   Turing cannot issue the instruction. The
+   `ARCHES="89"` for a thin Ada client, `ARCHES="75"` for g4dn, and
+   `ARCHES="89 120"` for the mixed g6/g6e + g7e fleet (`./launch_g6.sh`).
+   `build.sh` defaults `CLMAD=1` for Blackwell and Ada (the preblackwell
+   receipt selected it: 1.811× on L40S, 1.881× on L4) and drops it to 0 if
+   Turing (`75`) or an unmeasured Ampere/Hopper arch is in the set.
+   `CLMAD=1` still overrides; Turing cannot issue the instruction. The
    published binary key covers the arches and knobs as well as the source, so
    builds that differ only in those no longer overwrite each other, and
    `bootstrap.sh` takes the carryless marker it gates on from the published
    `manifest.json` rather than hardcoding 1 -- otherwise a deliberately
    CLMAD-free Ada client would be rejected and the fleet would never start.
    The gate still fails a binary that disagrees with its own manifest.
+   A published prefix whose manifest does not list this GPU's compute
+   capability is treated as incomplete: the first g6/g6e rebuilds a fat
+   `sm_89+sm_120` client rather than launching CUDA against an sm_120-only
+   cubin. Ada workers omit `--threads` (auto occupancy) and pin slots by
+   `gpuFamily` so they do not resume a 385,024-worker Blackwell checkpoint.
 
 ## Runbook
 
@@ -239,12 +245,20 @@ All commands from this directory, with the default region set (`us-west-2`).
 #    campaign.json at it; later instances just download.  build.sh refuses
 #    to rewrite campaign.json until every fixture is on S3.  To build
 #    elsewhere: BUCKET=ecc2k130-<account> ./build.sh <sourceKey>
+#    A kernel optimisation must not flip the live pointer. Stage, then
+#    activate after the frozen-geometry gate:
+#    BUCKET=... ARCHES="89 120" ./build.sh --stage <sourceKey>
+#    ./rollout.sh status
+#    ./rollout.sh activate bin/<sha>
+#    ./rollout.sh wait
 
 # 3. pilot: one GPU (sizes with one GPU only, so "1" cannot over-fill)
 #    Prefer g7e Spot; after FALLBACK_WAIT_SECONDS (default 120) any shortfall
 #    is switched to On-Demand. Pass --no-fallback to stay Spot-only.
 TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
+#    leftover G/VT Spot quota on Ada (does not stop g7/g7e):
+#    ./launch_g6.sh
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
@@ -274,17 +288,79 @@ builds an F2 image of the VHDL engine and runs an F2 fleet whose workers are
 this `worker.py` with `ECC_CLIENT` pointing at the FPGA host program. Same
 bucket, same slots, same `dp/`; step 5 does not change.
 
-`campaign.json` lives in the bucket and is read by every worker at start.
-Change `restartHours`, `uploadEvery` or `verify` freely. Never change
-`workers`, `batch`, `blockThreads`, `minBlocks`, `curve` or `dpWeight` once
-any slot exists: the first four make every existing checkpoint unloadable
-(each slot would be retired and its in-flight work lost), the last two break
-the collision guarantee. Start a new bucket for a different geometry. Moving
-to this preset *is* such a change — 16 slots over 385,024 workers where the
-first sizing had 32 over 192,512 — so a bucket that already holds checkpoints
-from the CUDA 13.0 build needs a new one rather than a rebuild. `dpWeight` is
-unchanged, so a corpus collected under the old geometry still merges against
-the new one.
+`campaign.json` lives in the bucket and is read by every worker at start
+and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
+`verify` freely. Never change `workers`, `batch`, `blockThreads`,
+`minBlocks`, `curve` or `dpWeight` once any slot exists: the first four
+make every existing checkpoint unloadable (each slot would be retired and
+its in-flight work lost), the last two break the collision guarantee.
+Start a new bucket for a different geometry. Moving to this preset *is*
+such a change — 16 slots over 385,024 workers where the first sizing had
+32 over 192,512 — so a bucket that already holds checkpoints from the
+CUDA 13.0 build needs a new one rather than a rebuild. `dpWeight` is
+unchanged, so a corpus collected under the old geometry still merges
+against the new one.
+
+### Rolling out a kernel change
+
+A compile is not a fleet flip. `build.sh` still points `campaign.json`
+when `POINT_CAMPAIGN=1` (the default), because an incomplete-prefix
+bootstrap rebuild has to publish the first fat `sm_89+sm_120` client.
+Kernel work uses the other path:
+
+```bash
+BUCKET=ecc2k130-<account> ARCHES="89 120" ./build.sh --stage src/<tar>
+./rollout.sh status
+./rollout.sh activate bin/<16-hex>
+./rollout.sh wait
+```
+
+`--stage` (or `POINT_CAMPAIGN=0`) publishes `bin/<sha>/` and
+`rollouts/<sha>.json` and leaves the live pointer alone. `activate`
+assigns the next `kernelVersion`, writes an immutable
+`kernels/<n>.json` (`If-None-Match: *`, never overwritten), and
+rewrites only the pointer fields (`binaryKey` / `hostBinaryKey` / the
+three sha fields / `kernelProtocol` / `kernelVersion`). It does that
+only after `rollout.py` agrees the staged prefix keeps the checkpoint
+shape and the collision contract.
+
+`kernelProtocol` is `ecc2k-kernel-v1`. It versions the **client
+pointer**, not the DP corpus, and it is not `storageProtocol`. The
+live unversioned store can adopt v1 without migrating points. A
+campaign that already has `storageProtocol` is refused: those binary
+hashes sit in the campaign id, so a kernel flip would orphan every
+slot. That path needs a new campaign namespace (or
+`KERNEL_ALLOW_STRICT=1` after that review). `./rollout.sh versions`
+lists the log; `./rollout.sh activate --from-version N` re-activates
+that record as a **new** version (history stays append-only).
+
+Frozen, activate refuses: campaign `curve`, `dpWeight`, `workers`,
+`batch`, `blockThreads`, `minBlocks`, `walk`, and knobs `BATCH`,
+`THREADS`, `MINBLOCKS`, `WALK_TABLE`, `PACKED_COMPACT_STATE`,
+`PACKED_STATE_TILE`. It also refuses a staged prefix whose `arches` drop
+an architecture the live manifest already ships — the mixed g6/g6e+g7e
+fleet stays on one fat `89 120` binary. `PACKED_CLMAD` and the other ALU
+/ product-pipe knobs may move.
+
+There is no SSM bounce and no `TerminateInstances`. Workers poll
+`campaign.json` on the heartbeat; when `binaryKey`, `binarySha256` or
+`kernelVersion` moves they SIGTERM, checkpoint, re-download the client,
+and resume the same slot. A versioned pointer (`kernelVersion >= 1`)
+also pins the executable hash, even without `storageProtocol`. A hand-edit that moves a frozen field is ignored: they keep
+walking the current client. `rollout.sh wait` watches those heartbeats
+until every walking lease reports the new key. `infra.sh sync` ships
+`rollout.sh` / `rollout.py` next to `build.sh`. Boxes that booted before
+this watcher landed still run the old supervisor and will not
+self-recycle until they next start (spot replacement, or a systemd
+restart after copying the new `worker.py` onto the instance — SIGTERM
+checkpoints; the slot is reclaimed). Kernel activates after that are
+pointer-only.
+
+Rollback is `activate --from-version N` (or activate of that prefix).
+The previous prefix is still in the bucket — build keys include the
+knobs, so a CLMAD flip does not overwrite the last binary — and the
+new activation is `N+1` (or whatever the next free integer is), not
+an overwrite of `kernels/N.json`.
 
 `verify` is 0 for production: `--verify N` replays N reported points through
 the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk
@@ -328,6 +404,8 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
 | Two workers on one slot | impossible while leases hold; if a worker's heartbeat is refused it stops itself | duplicate work only, never wrong answers |
 | Disk/memory growth (dp file, client's in-process store) | ~1 GB/day/GPU each | `restartHours` graceful restart rotates the dp file and clears the store, resuming the checkpoint; the launch template's root volume is 150 GB so the eight-GPU sizes have headroom |
 | Merge never run | collision sits in the corpus | run `merge.py` on a schedule (cron/`--watch`); it is incremental |
+| Kernel compile | used to flip `binaryKey` instantly | `build.sh --stage` publishes only; `rollout.sh activate` is the pointer rewrite, workers self-recycle |
+| Frozen geometry in a staged prefix | activate would retire slots or hide collisions | `rollout.py` refuses; workers ignore a hand-edit of those fields |
 
 ## What is verified and what is not
 

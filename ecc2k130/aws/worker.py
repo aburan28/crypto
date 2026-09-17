@@ -55,6 +55,15 @@ import uuid
 from protocol import (atomicJson, bindDirectory, campaignContract, envelope,
                       sha256File, verifyEnvelope)
 
+# Frozen campaign fields a kernel rollout must not move. Duplicated from
+# rollout.py so an already-booted box can pick up a new worker.py without
+# also fetching that helper. kernelProtocol versions the client pointer
+# and is not storageProtocol.
+FROZEN_CAMPAIGN = (
+    "curve", "dpWeight", "workers", "batch", "blockThreads", "minBlocks", "walk",
+)
+KERNEL_PROTOCOL = "ecc2k-kernel-v1"
+
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
@@ -170,6 +179,97 @@ def gpuName(gpu):
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
 
 
+# campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
+# g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
+# count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
+ADA_FAMILIES = frozenset({"g6", "g6e"})
+LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
+
+
+def instanceType():
+    if os.environ.get("ECC_INSTANCE_TYPE"):
+        return os.environ["ECC_INSTANCE_TYPE"]
+    try:
+        req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
+                                     headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+        token = urllib.request.urlopen(req, timeout=1).read().decode()
+        req = urllib.request.Request("http://169.254.169.254/latest/meta-data/instance-type",
+                                     headers={"X-aws-ec2-metadata-token": token})
+        return urllib.request.urlopen(req, timeout=1).read().decode()
+    except Exception:
+        return ""
+
+
+def gpuFamily(name="", instance_type=""):
+    """EC2 family used to pin slots and decide --threads vs autoThreads."""
+    it = (instance_type or "").split(".")[0].lower()
+    if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
+        return it
+    n = (name or "").lower()
+    if "l40s" in n:
+        return "g6e"
+    if "rtx pro 6000" in n or "rtx 6000" in n:
+        return "g7e"
+    if "rtx pro 4500" in n or "rtx 4500" in n:
+        return "g7"
+    if "tesla t4" in n or n.endswith(" t4") or n == "t4":
+        return "g4dn"
+    if "l4" in n:
+        return "g6"
+    if n in ("cpu", "local") or n.startswith("cpu/") or n.startswith("cpu@"):
+        return "cpu"
+    return ""
+
+
+def slotFamilyCompatible(slot_family, worker_family):
+    """True if this worker may resume (or first-claim) the slot.
+
+    Untagged slots are the live Blackwell corpus. Ada auto-sizes and would
+    refuse those checkpoints (exit 6), retiring the run id, so Ada creates
+    new slots instead. Rehearsal families stay compatible with anything.
+    """
+    if worker_family in LOCAL_FAMILIES:
+        return True
+    if not slot_family:
+        return worker_family in BLACKWELL_FAMILIES
+    return slot_family == worker_family
+
+
+def usesCampaignWorkers(family):
+    """Ada omits --threads so packedengine.autoThreads sizes the grid."""
+    return family not in ADA_FAMILIES
+
+
+def frozenCampaignMoved(current, nxt):
+    """First frozen campaign field that changed, or None."""
+    for key in FROZEN_CAMPAIGN:
+        if key in current and key in nxt and current[key] != nxt[key]:
+            return key
+    return None
+
+
+def campaignPointerMoved(current, nxt):
+    """True when the bucket names a different client. Geometry moves are not a pointer move."""
+    if frozenCampaignMoved(current, nxt):
+        return False
+    liveKey = current.get("binaryKey") or ""
+    liveSha = current.get("binarySha256") or ""
+    newKey = nxt.get("binaryKey") or ""
+    newSha = nxt.get("binarySha256") or ""
+    if newKey and newKey != liveKey:
+        return True
+    if newSha and newSha != liveSha:
+        return True
+    liveVer = int(current.get("kernelVersion") or 0)
+    newVer = int(nxt.get("kernelVersion") or 0)
+    if newVer and newVer != liveVer:
+        return True
+    if (nxt.get("kernelProtocol") or "") and (nxt.get("kernelProtocol") != (current.get("kernelProtocol") or "")):
+        return True
+    return False
+
+
 # ---------------------------------------------------------------------------
 # object store: S3, or a directory for rehearsals
 # ---------------------------------------------------------------------------
@@ -280,14 +380,17 @@ class DynamoSlots:
                       and idleSlotClaimable(it, info, newOnly))
         names = {"#o": "owner", "#st": "state"}
         for slot in free:
+            it = next((x for x in items if x.get("slot") == slot), {})
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
             values = {":me": dv(owner), ":t": dv(now + LEASE_SECONDS), ":now": dv(now), ":active": dv("active"),
                       ":idle": dv("idle"), ":inst": dv(info["instance"]), ":gpu": dv(info["gpu"]),
-                      ":gpuName": dv(info["gpuName"])}
+                      ":gpuName": dv(info["gpuName"]), ":gpuFamily": dv(info.get("gpuFamily") or "")}
             # Only an expired or released lease may be taken, and only from a
             # slot that is still walking: retired, solved and error slots keep
             # their run id forever so its seeds are never walked twice.
             ok = self._update(slot, "SET #o = :me, leaseUntil = :t, claimedAt = :now, #st = :active, "
-                              "instance = :inst, gpu = :gpu, gpuName = :gpuName", names, values,
+                              "instance = :inst, gpu = :gpu, gpuName = :gpuName, gpuFamily = :gpuFamily", names, values,
                               "(attribute_not_exists(leaseUntil) OR leaseUntil < :now) AND "
                               "(attribute_not_exists(#st) OR #st = :active OR #st = :idle)")
             if ok:
@@ -298,7 +401,8 @@ class DynamoSlots:
                 raise RuntimeError("run ids exhausted")
             item = {"slot": dv(nextSlot), "owner": dv(owner), "leaseUntil": dv(now + LEASE_SECONDS),
                     "claimedAt": dv(now), "createdAt": dv(now), "state": dv("active"),
-                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]), "gpuName": dv(info["gpuName"])}
+                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]),
+                    "gpuName": dv(info["gpuName"]), "gpuFamily": dv(info.get("gpuFamily") or "")}
             r = self._run("put-item", "--table-name", self.table, "--item", json.dumps(item),
                           "--condition-expression", "attribute_not_exists(slot)")
             if r.returncode == 0:
@@ -401,6 +505,8 @@ class S3Slots:
                 continue
             if not idleSlotClaimable(it, info, newOnly):
                 continue
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
             etag, slot = it["_etag"], it["slot"]
             candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
             candidate.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
@@ -457,6 +563,8 @@ class LocalSlots:
                 if it.get("state") in ("retired", "solved", "error") or int(it.get("leaseUntil") or 0) >= now:
                     continue
                 if not idleSlotClaimable(it, info, newOnly):
+                    continue
+                if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
                     continue
                 it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
                 return int(k)
@@ -522,6 +630,8 @@ class Worker:
         self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
         fcntl.flock(self.workLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         self.gpuName = gpuName(self.gpu)
+        self.instanceType = instanceType()
+        self.gpuFamily = "cpu" if self.cpu else gpuFamily(self.gpuName, self.instanceType)
         signal.signal(signal.SIGTERM, self.onStop)
         signal.signal(signal.SIGINT, self.onStop)
 
@@ -544,7 +654,7 @@ class Worker:
         return self.cfg.get("binarySha256")
 
     # ---- campaign configuration ------------------------------------------
-    def loadConfig(self):
+    def loadConfig(self, verifyBinary=True):
         path = os.path.join(self.work, "campaign.json")
         if not self.store.get("campaign.json", path):
             raise RuntimeError("campaign.json missing from the store")
@@ -552,14 +662,117 @@ class Worker:
         for key in ("curve", "steps", "checkpointEvery"):
             if key not in self.cfg:
                 raise RuntimeError("campaign.json lacks %r" % key)
-        expected = self.expectedClientSha()
-        if expected and sha256File(self.client) != expected:
-            raise RuntimeError("client binary hash differs from campaign")
         if self.cfg.get("storageProtocol"):
             self.contract = campaignContract(self.cfg)
+            if verifyBinary:
+                expected = self.expectedClientSha()
+                if expected and sha256File(self.client) != expected:
+                    raise RuntimeError("client binary hash differs from campaign")
             bindDirectory(self.work, self.contract)
         elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
             raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
+        elif verifyBinary and self.cpu:
+            # Legacy store: still pin the host binary so a GPU client is never
+            # started as ECC_DEVICE=cpu by accident.
+            want = self.cfg.get("hostBinarySha256")
+            if want and sha256File(self.client) != want:
+                raise RuntimeError("host binary hash differs from campaign")
+        self.verifyKernelPin(verifyBinary)
+
+    def verifyKernelPin(self, verifyBinary=True):
+        """When kernelProtocol is live, the client must match the pinned hash.
+
+        Independent of storageProtocol: the live corpus can adopt v1 without
+        migrating points. Version 0 is an empty pointer (no binary yet).
+        """
+        proto = self.cfg.get("kernelProtocol")
+        if not proto:
+            return
+        if proto != KERNEL_PROTOCOL:
+            raise RuntimeError("unknown kernelProtocol %r" % proto)
+        if int(self.cfg.get("kernelVersion") or 0) < 1 or not verifyBinary:
+            return
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            want = self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256")
+        else:
+            want = self.cfg.get("binarySha256")
+        if not want:
+            raise RuntimeError("kernelVersion %s has no pinned client hash" % self.cfg.get("kernelVersion"))
+        if sha256File(self.client) != want:
+            raise RuntimeError("client binary hash differs from kernelVersion %s" % self.cfg.get("kernelVersion"))
+
+    def clientStoreKey(self):
+        """S3 key of the executable this worker should run.
+
+        GPU walkers take binaryKey. CPU walkers take hostBinaryKey so a
+        kernel rollout does not hand them the CUDA client. Rehearsals use
+        binaryKey=local and ECC_CLIENT; those do not re-fetch.
+        """
+        key = self.cfg.get("binaryKey") or ""
+        if key in ("", "local"):
+            return ""
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            return self.cfg.get("hostBinaryKey") or key
+        return key
+
+    def fetchClient(self):
+        key = self.clientStoreKey()
+        if not key:
+            return False
+        tmp = self.client + ".next"
+        if not self.store.get(key, tmp):
+            raise RuntimeError("failed to download %s" % key)
+        if key == (self.cfg.get("hostBinaryKey") or ""):
+            want = self.cfg.get("hostBinarySha256") or ""
+        else:
+            want = self.cfg.get("binarySha256") or ""
+        if want and sha256File(tmp) != want:
+            os.remove(tmp)
+            raise RuntimeError("downloaded client hash differs from campaign")
+        os.chmod(tmp, 0o755)
+        os.replace(tmp, self.client)
+        return True
+
+    def campaignPointerChanged(self):
+        """True when campaign.json names a new client we are allowed to load."""
+        remote = os.path.join(self.work, "campaign.json.next")
+        try:
+            if not self.store.get("campaign.json", remote):
+                return False
+            nxt = readJson(remote)
+        except Exception as e:
+            log("campaign pointer poll failed: %s" % e)
+            return False
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            log("refusing campaign.json: frozen field %s moved; keep walking the current client" % moved)
+            return False
+        if campaignPointerMoved(self.cfg, nxt):
+            log("campaign client moved to %s (kernelVersion %s)"
+                % (nxt.get("binaryKey") or nxt.get("binarySha256"), nxt.get("kernelVersion")))
+            return True
+        return False
+
+    def reloadClient(self):
+        """Re-fetch campaign.json and the client it names. Slot is kept."""
+        log("reloading campaign.json and client")
+        remote = os.path.join(self.work, "campaign.json.next")
+        if not self.store.get("campaign.json", remote):
+            raise RuntimeError("campaign.json missing during reload")
+        nxt = readJson(remote)
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            raise RuntimeError("frozen field %s moved; refusing reload" % moved)
+        prev = self.cfg
+        self.cfg = nxt
+        try:
+            self.fetchClient()
+        except Exception:
+            self.cfg = prev
+            raise
+        path = os.path.join(self.work, "campaign.json")
+        os.replace(remote, path)
+        self.loadConfig(verifyBinary=True)
 
     def clientCommand(self, slot):
         c = self.cfg
@@ -573,7 +786,7 @@ class Worker:
         else:
             if c.get("packed", False):
                 cmd += ["--packed", "--device", "0"]
-            if c.get("workers"):
+            if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
                 cmd += ["--threads", str(int(c["workers"]))]
         if c.get("dpWeight", -1) >= 0:
             cmd += ["--dp-weight", str(int(c["dpWeight"]))]
@@ -599,7 +812,8 @@ class Worker:
         return "ckpt/slot-%05d.ck" % slot
 
     def claimSlot(self):
-        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
+        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName,
+                "gpuFamily": self.gpuFamily}
         newOnly = claimNewOnly()
         if newOnly:
             log("CPU-safe claim: resume idle %s slots only; otherwise allocate a new slot" % self.gpuName)
@@ -778,7 +992,9 @@ class Worker:
                 lastBeat = now
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
-                          "binary": self.cfg.get("binaryKey", "")}
+                          "binary": self.cfg.get("binaryKey", ""),
+                          "binarySha256": self.cfg.get("binarySha256", ""),
+                          "kernelVersion": int(self.cfg.get("kernelVersion") or 0)}
                 if last:
                     fields.update(rate=last["rate"], iters=last["iters"], dp=last["dp"], dropped=last["dropped"])
                 try:
@@ -797,6 +1013,9 @@ class Worker:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],
                            int(self.state.get("dpUploaded", 0)), int(self.state.get("ckptIter", -1))))
+                if not restartDue and self.campaignPointerChanged():
+                    restartDue = True
+                    log("campaign binary moved; checkpointing to pick up the new client")
             if now - lastUpload >= uploadEvery:
                 lastUpload = now
                 try:
@@ -876,6 +1095,15 @@ class Worker:
                 break
             if restartDue and rc == 0:
                 self.rotateDpFile()
+                try:
+                    self.reloadClient()
+                except Exception as e:
+                    log("reload after rollout failed: %s" % e)
+                    failures += 1
+                    if failures > 5:
+                        self.slots.release(slot, self.owner, state="error",
+                                           extra={"reason": "rollout reload failed"})
+                        return 1
                 continue
             failures += 1
             if failures > 5:

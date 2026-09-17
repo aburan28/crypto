@@ -35,6 +35,13 @@ FALLBACK_WAIT_SECONDS=${FALLBACK_WAIT_SECONDS:-120}
 
 gpusOf() {
     case "$1" in
+        g6.xlarge|g6.2xlarge|g6.4xlarge|g6.8xlarge|g6.16xlarge) echo 1 ;;
+        g6.12xlarge|g6.24xlarge) echo 4 ;;
+        g6.48xlarge) echo 8 ;;
+        g6e.2xlarge|g6e.4xlarge|g6e.8xlarge|g6e.16xlarge) echo 1 ;;
+        g6e.12xlarge|g6e.24xlarge) echo 4 ;;
+        g6e.48xlarge) echo 8 ;;
+        g7.2xlarge|g7.4xlarge|g7.8xlarge) echo 1 ;;
         g7e.2xlarge|g7e.4xlarge|g7e.8xlarge) echo 1 ;;
         g7e.12xlarge) echo 2 ;;
         g7e.24xlarge) echo 4 ;;

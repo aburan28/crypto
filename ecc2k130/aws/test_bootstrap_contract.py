@@ -6,6 +6,7 @@ bootstrap.sh treated that as fatal instead of rebuilding from sourceKey.
 These checks pin the scripts so that path cannot return.
 """
 from pathlib import Path
+import subprocess
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -28,7 +29,8 @@ class BootstrapContract(unittest.TestCase):
 
     def test_incomplete_prefix_rebuilds(self):
         self.assertIn("prefix_complete", BOOTSTRAP)
-        self.assertIn("published prefix incomplete; building from", BOOTSTRAP)
+        self.assertIn("published prefix incomplete or missing sm_", BOOTSTRAP)
+        self.assertIn("prefix_usable", BOOTSTRAP)
         self.assertNotIn("fixture $f missing from $PREFIX; not starting workers", BOOTSTRAP)
 
     def test_rebuild_requires_source_key(self):
@@ -38,17 +40,54 @@ class BootstrapContract(unittest.TestCase):
     def test_build_refuses_incomplete_publish(self):
         self.assertIn("refusing to point campaign.json at", BUILD)
         self.assertIn("build did not produce", BUILD)
-        gate = BUILD.split("Point the campaign at this build")[0]
+        gate = BUILD.split("Geometry in campaign.json must match")[0]
         self.assertIn("head-object", gate)
+
+    def test_stage_does_not_point_campaign(self):
+        self.assertIn("POINT_CAMPAIGN", BUILD)
+        self.assertIn("--stage", BUILD)
+        self.assertIn('if [ "$POINT_CAMPAIGN" = 1 ]', BUILD)
+        self.assertIn("campaign.json unchanged", BUILD)
+        # Bootstrap rebuilds still point: first Ada fat publish.
+        self.assertIn("POINT_CAMPAIGN=1", BOOTSTRAP)
+        self.assertNotIn("--stage", BOOTSTRAP)
+
+    def test_kernel_versions_are_immutable(self):
+        self.assertIn("ecc2k-kernel-v1", BUILD)
+        self.assertIn("kernels/$kver.json", BUILD)
+        self.assertIn("--if-none-match", BUILD)
+        # Must not stamp storageProtocol onto the live corpus.
+        self.assertNotIn("storageProtocol=", BUILD)
 
     def test_infra_syncs_build_script(self):
         self.assertIn('aws s3 cp build.sh "s3://$BUCKET/aws/build.sh"', INFRA)
+        self.assertIn('aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh"', INFRA)
+        self.assertIn('aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py"', INFRA)
 
     def test_unversioned_campaign_allows_legacy_storage(self):
         self.assertIn("ECC_ALLOW_LEGACY_STORAGE=1", BOOTSTRAP)
         self.assertIn("field storageProtocol", BOOTSTRAP)
         # Must not stamp the strict protocol onto the live corpus.
         self.assertNotIn("storageProtocol=", BOOTSTRAP)
+
+    def test_fat_client_covers_ada_and_blackwell(self):
+        self.assertIn("local_cc", BOOTSTRAP)
+        self.assertIn('ARCHES="${ARCHES:-89 120}"', BOOTSTRAP)
+        self.assertIn("manifest.json", BOOTSTRAP)
+        # A thin sm_89 publish must not become the live binaryKey.
+        self.assertIn("g6/g6e (sm_89) and g7e (sm_120) share one binaryKey", BOOTSTRAP)
+        self.assertIn("ECC_INSTANCE_TYPE", BOOTSTRAP)
+        self.assertIn("ECC_DEVICE_NAME", BOOTSTRAP)
+
+    def test_launch_g6_is_spot_ada_only(self):
+        script = (HERE / "launch_g6.sh").read_text()
+        self.assertIn("g6e.2xlarge,g6.2xlarge", script)
+        self.assertIn('MarketType":"spot"', script)
+        self.assertNotIn("g7e.2xlarge", script)
+        self.assertNotIn("on-demand", script)
+        self.assertIn("bash ./infra.sh", script)
+        self.assertIn("bash ./push_source.sh", script)
+        subprocess.run(["bash", "-n", str(HERE / "launch_g6.sh")], check=True)
 
 
 if __name__ == "__main__":
