@@ -9,7 +9,10 @@
 [`RESEARCH_ECC2K130_EXTENSION.md`](RESEARCH_ECC2K130_EXTENSION.md)
 (the same barrier reached by enlarging the field),
 [`RESEARCH_QUASI_SUBFIELD.md`](RESEARCH_QUASI_SUBFIELD.md)
-(the same barrier reached from the factor-base side).
+(the same barrier reached from the factor-base side),
+[`RESEARCH_ECC2K130_RR_SOLVER_PANEL.md`](RESEARCH_ECC2K130_RR_SOLVER_PANEL.md)
+(a better oracle, measured on this curve, and why the bound below is untouched
+by it).
 
 **The question.**  Index calculus on an elliptic curve needs one thing that
 Pollard rho does not: a way to write a target point as a sum of several
