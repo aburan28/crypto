@@ -530,7 +530,19 @@ over five minutes, on the instance the ingest was writing to, and
 creates `distinguished_points_campaign_found_at` on `(campaign_id, found_at)`
 at startup, `CONCURRENTLY` so the build does not block it, dropping and
 rebuilding rather than trusting an invalid index from a failed build; `dps`
-becomes an index-only count. `--no-index` opts out. The corpus-wide per-object
+becomes an index-only count. `--no-index` opts out.
+
+The index is only half of it, which the live store demonstrated: built in 405 s
+at 20:47Z, and the next snapshot still took over six minutes. An index-only
+scan reads the heap for every page the visibility map does not mark
+all-visible, and a bulk-loaded table has almost none marked, so it was still
+reading the 42 GB. `VACUUM (ANALYZE)` is what sets that map; it runs once,
+recorded in `dp_ingest_meta`, because a replacement host is the deployment
+mechanism here and a vacuum per deploy is not a cost this table can carry.
+
+While a snapshot runs, this program is not ingesting — the loop is
+pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
+is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.

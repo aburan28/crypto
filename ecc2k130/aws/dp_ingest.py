@@ -214,6 +214,13 @@ def ensureProgress(conn):
 
 
 FOUND_AT_INDEX = "distinguished_points_campaign_found_at"
+META_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_meta (
+    key   text PRIMARY KEY,
+    at    timestamptz NOT NULL DEFAULT now()
+)
+"""
+VACUUM_MARK = "found_at_index_vacuum"
 
 
 def ensureFoundAtIndex(conn):
@@ -233,8 +240,10 @@ def ensureFoundAtIndex(conn):
     """
     previous = conn.autocommit
     conn.autocommit = True
+    built = False
     try:
         with conn.cursor() as cur:
+            cur.execute(META_DDL)
             cur.execute(
                 "SELECT c.relname, i.indisvalid FROM pg_class c "
                 "JOIN pg_index i ON i.indexrelid = c.oid WHERE c.relname = %s",
@@ -245,16 +254,34 @@ def ensureFoundAtIndex(conn):
                     "dropping it" % FOUND_AT_INDEX)
                 cur.execute("DROP INDEX CONCURRENTLY IF EXISTS %s" % FOUND_AT_INDEX)
                 row = None
-            if row:
-                return False
-            log("building index %s; the ingest keeps running while it does"
-                % FOUND_AT_INDEX)
-            started = time.time()
-            cur.execute(
-                "CREATE INDEX CONCURRENTLY IF NOT EXISTS %s "
-                "ON distinguished_points (campaign_id, found_at)" % FOUND_AT_INDEX)
-            log("built index %s in %.0fs" % (FOUND_AT_INDEX, time.time() - started))
-            return True
+            if not row:
+                log("building index %s; the ingest keeps running while it does"
+                    % FOUND_AT_INDEX)
+                started = time.time()
+                cur.execute(
+                    "CREATE INDEX CONCURRENTLY IF NOT EXISTS %s "
+                    "ON distinguished_points (campaign_id, found_at)" % FOUND_AT_INDEX)
+                log("built index %s in %.0fs" % (FOUND_AT_INDEX, time.time() - started))
+                built = True
+            # An index-only scan reads the heap for every page the visibility
+            # map does not mark all-visible, and a bulk-loaded table has
+            # almost none marked: measured after the index was built, the
+            # snapshot still took over six minutes, because it was still
+            # reading 42 GB of heap. VACUUM is what sets that map, so the
+            # index is only half the fix and this is the other half. Once
+            # ever, recorded in dp_ingest_meta, because a replacement host is
+            # the deployment mechanism here and a vacuum per deploy is not a
+            # cost this table can carry.
+            cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (VACUUM_MARK,))
+            if cur.fetchone() is None:
+                started = time.time()
+                cur.execute("VACUUM (ANALYZE) distinguished_points")
+                cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                            "ON CONFLICT (key) DO NOTHING", (VACUUM_MARK,))
+                log("vacuumed distinguished_points in %.0fs; index-only scans "
+                    "are available from here" % (time.time() - started))
+                return True
+            return built
     finally:
         conn.autocommit = previous
 
@@ -762,11 +789,12 @@ def main(argv=None):
                          "stay stale while a backlog drains (0 = unbounded)")
     ap.add_argument("--no-index", dest="index", action="store_false",
                     help="do not create the found_at index at startup")
-    ap.add_argument("--status-every", type=float, default=300.0,
-                    help="seconds between status.json writes; the snapshot "
-                         "counts the whole table, which is not free on a "
-                         "hundred-million-row store, so short passes during a "
-                         "drain must not turn into a count per pass")
+    ap.add_argument("--status-every", type=float, default=1800.0,
+                    help="seconds between status.json writes. The snapshot "
+                         "counts the whole campaign, and while it runs this "
+                         "program is not ingesting, so it is spaced well apart: "
+                         "the page's own refresh is the 15-minute Actions job, "
+                         "and this copy is the second one")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",

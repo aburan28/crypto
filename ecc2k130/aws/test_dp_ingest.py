@@ -221,14 +221,17 @@ class IndexCursor:
         self.conn.statements.append(" ".join(sql.split()))
         if "pg_index" in sql:
             self.row = self.conn.existing
+        elif "dp_ingest_meta WHERE key" in sql:
+            self.row = (1,) if self.conn.vacuumed else None
 
     def fetchone(self):
         return self.row
 
 
 class IndexConn:
-    def __init__(self, existing=None):
+    def __init__(self, existing=None, vacuumed=True):
         self.existing = existing
+        self.vacuumed = vacuumed
         self.statements = []
         self.autocommit = False
 
@@ -246,6 +249,25 @@ class FoundAtIndex(unittest.TestCase):
         conn = IndexConn(existing=None)
         self.assertTrue(dp_ingest.ensureFoundAtIndex(conn))
         self.assertEqual(len(self.statements(conn, "CREATE INDEX CONCURRENTLY")), 1)
+
+    def test_the_table_is_vacuumed_so_the_index_can_be_scanned_alone(self):
+        # Without it the index is built and the snapshot still reads the heap.
+        conn = IndexConn(existing=None, vacuumed=False)
+        dp_ingest.ensureFoundAtIndex(conn)
+        self.assertEqual(len(self.statements(conn, "VACUUM (ANALYZE)")), 1)
+
+    def test_a_replacement_host_does_not_vacuum_the_table_again(self):
+        conn = IndexConn(existing=(dp_ingest.FOUND_AT_INDEX, True), vacuumed=True)
+        self.assertFalse(dp_ingest.ensureFoundAtIndex(conn))
+        self.assertEqual(self.statements(conn, "VACUUM"), [])
+
+    def test_an_index_that_already_exists_unvacuumed_is_still_vacuumed(self):
+        # The state the live store was left in: index built at 20:47Z, heap
+        # still unmarked, snapshots still six minutes.
+        conn = IndexConn(existing=(dp_ingest.FOUND_AT_INDEX, True), vacuumed=False)
+        self.assertTrue(dp_ingest.ensureFoundAtIndex(conn))
+        self.assertEqual(self.statements(conn, "CREATE INDEX CONCURRENTLY"), [])
+        self.assertEqual(len(self.statements(conn, "VACUUM (ANALYZE)")), 1)
 
     def test_it_is_not_rebuilt_when_it_is_already_valid(self):
         conn = IndexConn(existing=(dp_ingest.FOUND_AT_INDEX, True))
