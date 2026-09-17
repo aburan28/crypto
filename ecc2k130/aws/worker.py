@@ -67,6 +67,11 @@ KERNEL_PROTOCOL = "ecc2k-kernel-v1"
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
+# The client's opening line names the grid it actually built.  Ada slots omit
+# --threads and let autoThreads size it (usesCampaignWorkers), so a slot's walk
+# count is not always campaign.json's workers x batch; the dashboard needs this
+# number per slot to turn a checkpointed iteration base into group operations.
+BANNER_RE = re.compile(r"=\s*(\d+)\s+walks,\s*dp weight")
 RECORD_BYTES = 32
 CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)
@@ -762,7 +767,7 @@ class Worker:
                 p = os.path.join(self.work, name)
                 if os.path.exists(p):
                     os.remove(p)
-            self.state = {"slot": slot, "dpOffset": 0, "ckptIter": -1, "dpUploaded": 0}
+            self.state = {"slot": slot, "dpOffset": 0, "ckptIter": -1, "dpUploaded": 0, "walks": 0}
             self.saveState()
         # Resume from whichever checkpoint is further along: the one left here by
         # a previous run on this instance, or the one another instance uploaded.
@@ -900,12 +905,19 @@ class Worker:
                     eof = True
                 else:
                     tail = (tail + [line])[-30:]
+                    banner = BANNER_RE.search(line)
+                    if banner:
+                        walks = int(banner.group(1))
+                        if walks != int(self.state.get("walks", 0)):
+                            self.state["walks"] = walks
+                            self.saveState()
+                        log("client: " + line)
                     prog = PROGRESS_RE.search(line)
                     if prog:
                         last = {"rate": float(prog.group(2)) * 1e6, "iters": int(prog.group(3)),
                                 "dp": int(prog.group(4)), "stored": int(prog.group(5)),
                                 "dropped": int(prog.group(6) or 0)}
-                    else:
+                    elif not banner:
                         if re.fullmatch(r"\s*k = [0-9]+\s*", line):
                             solved = line.strip()
                             verifiedSolution = False
@@ -919,6 +931,7 @@ class Worker:
                 lastBeat = now
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
+                          "walks": int(self.state.get("walks", 0)),
                           "binary": self.cfg.get("binaryKey", ""),
                           "binarySha256": self.cfg.get("binarySha256", ""),
                           "kernelVersion": int(self.cfg.get("kernelVersion") or 0)}
