@@ -113,11 +113,38 @@ def instanceId():
         return socket.gethostname()
 
 
+def isCpuDevice():
+    return os.environ.get("ECC_DEVICE", "").lower() == "cpu"
+
+
+def isCpuSlotRecord(item):
+    name = str(item.get("gpuName") or "")
+    return name.startswith("cpu") or name == "cpu" or "/cpu" in name
+
+
+def claimNewOnly():
+    # CPU (and FPGA host) walks must never resume a GPU checkpoint: loading a
+    # packed-shape walk.ck into ecc2k130-cpu exits 6 and the supervisor would
+    # retire the slot. Prefer an explicit ECC_CLAIM_NEW=1; CPU mode implies it.
+    if os.environ.get("ECC_CLAIM_NEW", "").strip() in ("1", "true", "yes"):
+        return True
+    return isCpuDevice()
+
+
+def cpuThreadCount():
+    raw = os.environ.get("ECC_THREADS", "").strip()
+    if raw:
+        return max(1, int(raw))
+    return max(1, int(os.cpu_count() or 1))
+
+
 def gpuName(gpu):
-    # Non-GPU clients (the FPGA host program) have no nvidia-smi; the
-    # bootstrap tells us what the device is instead.
+    # Non-GPU clients (CPU / FPGA host) have no nvidia-smi; the bootstrap
+    # tells us what the device is instead.
     if os.environ.get("ECC_DEVICE_NAME"):
         return os.environ["ECC_DEVICE_NAME"]
+    if isCpuDevice():
+        return "cpu/%d" % cpuThreadCount()
     try:
         r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
                            capture_output=True, text=True)
@@ -227,12 +254,13 @@ class DynamoSlots:
             return False
         raise RuntimeError("dynamodb update failed: " + r.stderr.strip())
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         now = int(time.time())
         items = self.scan()
         free = sorted(it["slot"] for it in items
                       if it.get("state") not in ("retired", "solved", "error")
-                      and int(it.get("leaseUntil") or 0) < now)
+                      and int(it.get("leaseUntil") or 0) < now
+                      and (not newOnly or isCpuSlotRecord(it)))
         names = {"#o": "owner", "#st": "state"}
         for slot in free:
             values = {":me": dv(owner), ":t": dv(now + LEASE_SECONDS), ":now": dv(now), ":active": dv("active"),
@@ -348,11 +376,13 @@ class S3Slots:
                 items.append(item)
         return items
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         now = int(time.time())
         items = self.scan()
         for it in sorted(items, key=lambda x: x["slot"]):
             if it.get("state") not in (None, "active", "idle") or int(it.get("leaseUntil") or 0) >= now:
+                continue
+            if newOnly and not isCpuSlotRecord(it):
                 continue
             etag, slot = it["_etag"], it["slot"]
             candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
@@ -402,12 +432,14 @@ class LocalSlots:
     def scan(self):
         return [dict(it, slot=int(k)) for k, it in readJson(self.path, {}).items()]
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         def fn(items):
             now = int(time.time())
             for k in sorted(items, key=int):
                 it = items[k]
                 if it.get("state") in ("retired", "solved", "error") or int(it.get("leaseUntil") or 0) >= now:
+                    continue
+                if newOnly and not isCpuSlotRecord(it):
                     continue
                 it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
                 return int(k)
@@ -441,7 +473,9 @@ class Worker:
     def __init__(self):
         self.root = os.environ.get("ECC_ROOT", os.getcwd())
         self.gpu = int(os.environ.get("ECC_GPU", "0"))
-        self.client = os.environ.get("ECC_CLIENT", os.path.join(self.root, "ecc2k130"))
+        self.cpu = isCpuDevice()
+        defaultClient = "ecc2k130-cpu" if self.cpu else "ecc2k130"
+        self.client = os.environ.get("ECC_CLIENT", os.path.join(self.root, defaultClient))
         local = os.environ.get("ECC_LOCAL_STORE")
         if local:
             os.makedirs(local, exist_ok=True)
@@ -454,8 +488,9 @@ class Worker:
             table = os.environ.get("ECC_TABLE", "")
             self.slots = DynamoSlots(table) if table else S3Slots(os.environ["ECC_BUCKET"])
         self.instance = instanceId()
-        self.owner = "%s:gpu%d:%s" % (self.instance, self.gpu, uuid.uuid4().hex)
-        self.work = os.path.join(self.root, "gpu%d" % self.gpu)
+        deviceTag = "cpu%d" % self.gpu if self.cpu else "gpu%d" % self.gpu
+        self.owner = "%s:%s:%s" % (self.instance, deviceTag, uuid.uuid4().hex)
+        self.work = os.path.join(self.root, deviceTag)
         os.makedirs(self.work, exist_ok=True)
         self.statePath = os.path.join(self.work, "state.json")
         self.state = readJson(self.statePath, {})
@@ -486,6 +521,11 @@ class Worker:
     def saveState(self):
         writeJson(self.statePath, self.state)
 
+    def expectedClientSha(self):
+        if self.cpu:
+            return self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256")
+        return self.cfg.get("binarySha256")
+
     # ---- campaign configuration ------------------------------------------
     def loadConfig(self):
         path = os.path.join(self.work, "campaign.json")
@@ -495,10 +535,11 @@ class Worker:
         for key in ("curve", "steps", "checkpointEvery"):
             if key not in self.cfg:
                 raise RuntimeError("campaign.json lacks %r" % key)
+        expected = self.expectedClientSha()
+        if expected and sha256File(self.client) != expected:
+            raise RuntimeError("client binary hash differs from campaign")
         if self.cfg.get("storageProtocol"):
             self.contract = campaignContract(self.cfg)
-            if sha256File(self.client) != self.cfg["binarySha256"]:
-                raise RuntimeError("client binary hash differs from campaign")
             bindDirectory(self.work, self.contract)
         elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
             raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
@@ -508,10 +549,15 @@ class Worker:
         cmd = [self.client, "--curve", str(c["curve"]), "--steps", str(c["steps"]), "--launches", "0",
                "--run-id", str(slot + 1), "--dp-file", self.dpPath, "--checkpoint", self.ckptPath,
                "--checkpoint-every", str(int(c["checkpointEvery"])), "--verify", str(int(c.get("verify", 0)))]
-        if c.get("packed", False):
-            cmd += ["--packed", "--device", "0"]
-        if c.get("workers"):
-            cmd += ["--threads", str(int(c["workers"]))]
+        if self.cpu:
+            # Host binary: never --packed. Thread count is the box, not the
+            # GPU preset (campaign workers=385024 would OOM a c7i).
+            cmd += ["--threads", str(cpuThreadCount())]
+        else:
+            if c.get("packed", False):
+                cmd += ["--packed", "--device", "0"]
+            if c.get("workers"):
+                cmd += ["--threads", str(int(c["workers"]))]
         if c.get("dpWeight", -1) >= 0:
             cmd += ["--dp-weight", str(int(c["dpWeight"]))]
         if c.get("maxIters"):
@@ -537,7 +583,10 @@ class Worker:
 
     def claimSlot(self):
         info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
-        slot = self.slots.claim(self.owner, info)
+        newOnly = claimNewOnly()
+        if newOnly:
+            log("CPU-safe claim: resume idle cpu/* slots only; otherwise allocate a new slot")
+        slot = self.slots.claim(self.owner, info, newOnly=newOnly)
         self.lastBeatSuccess = time.monotonic()
         if self.contract:
             records = [r for r in self.slots.scan() if r["slot"] == slot]
@@ -661,7 +710,7 @@ class Worker:
         Returns (returncode, solvedLine)."""
         cmd = self.clientCommand(slot)
         env = dict(os.environ)
-        if self.cfg.get("packed", False):
+        if (not self.cpu) and self.cfg.get("packed", False):
             env["CUDA_VISIBLE_DEVICES"] = str(self.gpu)
         log("starting: " + " ".join(cmd))
         self.proc = subprocess.Popen(cmd, cwd=self.work, env=env, stdout=subprocess.PIPE,

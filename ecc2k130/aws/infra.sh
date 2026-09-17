@@ -51,6 +51,7 @@ sync() {
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
     aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
     aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
+    aws s3 cp bootstrap-cpu.sh "s3://$BUCKET/aws/bootstrap-cpu.sh" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
         aws s3 cp campaign.json "s3://$BUCKET/campaign.json" --only-show-errors
         echo "uploaded the initial campaign.json (binaryKey empty until build.sh runs)"
