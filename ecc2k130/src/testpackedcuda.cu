@@ -293,6 +293,8 @@ int main() {
     printf("packed arithmetic generated product: %d\n",ECC_PACKED_GENERATED_PRODUCT);
     printf("packed arithmetic native carryless multiply: %d\n",ECC_PACKED_CLMAD);
     printf("packed arithmetic top clmad: %d\n",ECC_PACKED_TOP_CLMAD);
+    printf("packed arithmetic native carryless square: %d\n",ECC_PACKED_CLMAD_SQUARE);
+    printf("packed arithmetic three-limb Karatsuba: %d\n",ECC_PACKED_KARAT3);
     printf("packed arithmetic weighted prefix: %d\n",ECC_PACKED_WEIGHTED_PREFIX);
     const int selected[] = {0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
     std::vector<P131> input;
@@ -333,3 +335,4 @@ int main() {
     printf("PASS: %d GPU Frobenius vectors, every field basis vector for all selected powers plus dense cases\n",n);
     return polynomialChecks() && squareChecks() && pairedFrobeniusChecks()?0:1;
 }
+

@@ -1376,6 +1376,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <a href="../research/ic_solver_selection_20260915/final-audit.json">Independent final audit</a> ·
       <a href="ic/SOLVER_SELECTION.md">Run and train</a></p>
     </div>
+  </div>
+
+  <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
+    <p>Completed on one RTX PRO 4500 Blackwell Server Edition. All device and integration
+    checks passed; no candidate met the acceptance rule. Every variant retains 5.3125
+    field products per scalar update (ratio 1.0 to control). The generic-group boundary
+    and exponent are unchanged; these throughput figures are practicality measurements.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Benchmark candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">DP34 candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Native square</td><td>4.688480 / 4.756701</td><td>0.985658</td><td>4.632716 / 4.547623</td><td>1.018712</td><td>pass / not accepted</td></tr><tr><td>Three-limb Karatsuba</td><td>4.188512 / 4.629912</td><td>0.904663</td><td>4.148491 / 4.547263</td><td>0.912305</td><td>pass / not accepted</td></tr><tr><td>Both</td><td>4.040647 / 4.579588</td><td>0.882317</td><td>4.007592 / 4.550207</td><td>0.880749</td><td>pass / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three runs, in billions of scalar updates/s, with a
+    separately interleaved matched control. Each sample completed 201,863,462,912 updates.
+    Acceptance requires at least 1% improvement in both workloads and every pair faster.
+    The historical 14.637530 B/s RTX PRO 6000 result is a different GPU, not a matched control.</p>
+    <p>Frozen source: <a href="../ecc2k130/benchmarks/native-candidates/g7/summary.json">G7 measurement receipt</a>;
+    <a href="../ecc2k130/G7-NATIVE-RESULTS.md">experiment report and raw output</a>.</p>
   </section>
 
   <footer>
@@ -1807,5 +1822,53 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0011 -->
+
+  <section aria-labelledby="goal28-profile-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-profile-result">ECC2K-130 Goal28: profiling and grid screen</h2>
+    <p><strong>28 B/s remains unmet.</strong> These measurements use one G7 RTX PRO 4500;
+      the historical 14.637530 B/s benchmark and 14.106673 B/s DP34 reference used an RTX PRO 6000.
+      G7e capacity was unavailable. No cross-GPU speedup or full-DLP speedup is inferred.</p>
+    <p><span class="chip">engineering</span> The generic-group boundary remains
+      &Omega;(&radic;(n / 262)). Every screened variant still costs 5.3125 field products per scalar update,
+      ratio 1.0 to control. The kernel experiment does not measure a new ECDLP exponent.</p>
+    <table><thead><tr><th scope="col">Workers</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">Correctness / status</th></tr></thead>
+      <tbody><tr><td>385,024 control</td><td>4.649429</td><td>1.000000</td><td>4.602291</td><td>1.000000</td><td>passed / screen</td></tr>
+      <tr><td>192,512</td><td>4.534123</td><td>0.975200</td><td>4.483364</td><td>0.974159</td><td>passed / slower</td></tr>
+      <tr><td>96,256</td><td>4.537225</td><td>0.975867</td><td>4.473096</td><td>0.971928</td><td>passed / slower</td></tr></tbody></table>
+    <p>Three repetitions per grid/workload, each completing 201,863,462,912 updates with zero drops.
+      Distinct seed panels across grids make this a tuning screen. First rows are retained without a
+      thermal-steady-state claim. Sorted DP multisets agree across repeats within each grid.</p>
+    <p>Nsight Systems: four walk kernels totaled 628.592 ms; five kernel-launch API calls totaled
+      0.113 ms in the short diagnostic trace. Synchronization waits overlap GPU execution.
+      Nsight Compute failed at kernel preparation in both full-set kernel replay and reduced-section
+      application replay. No hardware-counter bottleneck is claimed; profiler durations are excluded from timings.</p>
+    <p>A further independent CUDA smoke workload passed CPU comparison but failed profiler preparation
+      in both kernel and application-range replay. After correcting a rejected CLI option, the ECC
+      range command returned zero with &ldquo;No ranges were profiled&rdquo;; the missing-report gate rejected it.
+      No usable hardware counters were obtained. Both attempts and two additional instrumented timelines are
+      retained in the <a href="../ecc2k130/benchmarks/goal28/range-summary.json">range diagnostic receipt</a>.</p>
+    <p>Raw runner failures remain recorded. An offline archive audit revalidated the completed screen
+      after its postrun bookkeeping failure. Source:
+      <a href="../ecc2k130/benchmarks/goal28/profiling-summary.json">frozen measurement receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and raw evidence</a>.
+      No default or production preset is promoted.</p>
+  </section>
+  <section aria-labelledby="goal28-occupancy-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-occupancy-result">Goal28: more resident warps did not improve throughput</h2>
+    <p><span class="chip">engineering</span> One G7 RTX PRO 4500, five alternating pairs per
+      workload after four excluded warmups. Each sample completes 201,863,462,912 scalar updates.
+      Field products stay at 5.3125/update, ratio 1.0; the generic-group boundary and exponent are unchanged.</p>
+    <table><thead><tr><th scope="col">Launch bound</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead>
+      <tbody><tr><td>MINBLOCKS=2 control</td><td>4.692014</td><td>1.000000</td><td>4.632696</td><td>1.000000</td><td>passed / control</td></tr>
+      <tr><td>MINBLOCKS=3</td><td>4.593011</td><td>0.978900</td><td>4.542281</td><td>0.980483</td><td>passed / rejected</td></tr></tbody></table>
+    <p>Registers decreased from 104 to 80 without spills; CUDA confirmed residency rose from two to three
+      blocks per SM. All ten timing pairs nevertheless favored the control. Cross-binary checkpoints
+      matched, and every DP34 multiset contained the same 5,149 records with zero drops.</p>
+    <p>Paired geometric speed ratios: 0.982453 benchmark, 0.980758 DP34. Exploratory 95% paired log-t
+      intervals: [0.974553, 0.990417] and [0.973004, 0.988573], assuming independent approximately normal
+      log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
+    <p>Source: <a href="../ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
+  </section>
 </body>
 </html>

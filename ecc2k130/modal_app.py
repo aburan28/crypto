@@ -92,6 +92,16 @@ if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
 PACKED_CLMAD = os.environ.get("ECC_PACKED_CLMAD", "0")
 if PACKED_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_CLMAD must be 0 or 1")
+PACKED_CLMAD_SQUARE = os.environ.get("ECC_PACKED_CLMAD_SQUARE", "0")
+if PACKED_CLMAD_SQUARE not in ("0", "1"):
+    raise ValueError("ECC_PACKED_CLMAD_SQUARE must be 0 or 1")
+if PACKED_CLMAD_SQUARE == "1" and PACKED_CLMAD != "1":
+    raise ValueError("ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD")
+PACKED_KARAT3 = os.environ.get("ECC_PACKED_KARAT3", "0")
+if PACKED_KARAT3 not in ("0", "1"):
+    raise ValueError("ECC_PACKED_KARAT3 must be 0 or 1")
+if PACKED_KARAT3 == "1" and PACKED_CLMAD != "1":
+    raise ValueError("ECC_PACKED_KARAT3 requires ECC_PACKED_CLMAD")
 PACKED_WEIGHTED_PREFIX = os.environ.get("ECC_PACKED_WEIGHTED_PREFIX", "0")
 if PACKED_WEIGHTED_PREFIX not in ("0", "1", "2"):
     raise ValueError("ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2")
@@ -168,6 +178,8 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
          "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
          "packedClmad": PACKED_CLMAD == "1",
+         "packedClmadSquare": PACKED_CLMAD_SQUARE == "1",
+         "packedKarat3": PACKED_KARAT3 == "1",
          "packedCompactState": PACKED_COMPACT_STATE == "1",
          "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
          "packedTopClmad": PACKED_TOP_CLMAD == "1",
@@ -201,6 +213,8 @@ image = (
           "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
           "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
           "ECC_PACKED_CLMAD": PACKED_CLMAD,
+          "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
+          "ECC_PACKED_KARAT3": PACKED_KARAT3,
           "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
           "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
           "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
@@ -228,7 +242,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}',
     )
 )
 
@@ -323,6 +337,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
             "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
             "packedClmad": PACKED_CLMAD == "1",
+            "packedClmadSquare": PACKED_CLMAD_SQUARE == "1",
+            "packedKarat3": PACKED_KARAT3 == "1",
             "packedCompactState": PACKED_COMPACT_STATE == "1",
             "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
             "packedTopClmad": PACKED_TOP_CLMAD == "1",
@@ -353,7 +369,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -390,6 +406,8 @@ def benchmarkIdentity(packed=False):
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                 packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
@@ -404,6 +422,8 @@ def checkPackedReduction(sample):
         ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
         ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
         ('native carryless multiply', 'packedClmad', 'expectedPackedClmad', PACKED_CLMAD),
+        ('native carryless square', 'packedClmadSquare', 'expectedPackedClmadSquare', PACKED_CLMAD_SQUARE),
+        ('three-limb Karatsuba', 'packedKarat3', 'expectedPackedKarat3', PACKED_KARAT3),
         ('compact state', 'packedCompactState', 'expectedPackedCompactState', PACKED_COMPACT_STATE),
         ('shared sigma', 'packedSharedSigma', 'expectedPackedSharedSigma', PACKED_SHARED_SIGMA),
         ('top clmad', 'packedTopClmad', 'expectedPackedTopClmad', PACKED_TOP_CLMAD),
@@ -551,6 +571,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                 packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
@@ -561,6 +583,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedClmadSquare=PACKED_CLMAD_SQUARE == '1',
+                packedKarat3=PACKED_KARAT3 == '1',
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
                 packedTopClmad=PACKED_TOP_CLMAD == '1',
@@ -652,6 +676,8 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                    packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                    packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                   packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                   packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                    packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                    packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
                    packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
@@ -1181,6 +1207,8 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedClmadSquare=PACKED_CLMAD_SQUARE == '1',
+                packedKarat3=PACKED_KARAT3 == '1',
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
                 packedTopClmad=PACKED_TOP_CLMAD == '1',
@@ -1329,3 +1357,4 @@ def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
         print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
+
