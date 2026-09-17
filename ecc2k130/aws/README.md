@@ -425,10 +425,97 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   divided by its points should read 2^28.4 on any GPU. Far fewer points with
   a normal rate means dropped reports (`dpCap` too small; the client warns).
 
+### The store's ingest path (`dp_ingest.py`)
+
+The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
+copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does, on its own instance
+(`Name=rho-dp-ingest`), as a systemd unit with `Restart=always`, publishing
+`status.json` to the status bucket and its journal to
+`s3://$BUCKET/logs/rho-ingest-<instance>/ingest.log` every two minutes.
+
+**The store is a derived view.** `dp/` is the corpus, `merge.py` is what
+searches it for collisions, and `distinguished_points` can be dropped and
+rebuilt from S3 without losing anything. That is what makes the deployment
+mechanism acceptable: the ingest host has no key pair, no instance profile
+and no SSM agent, so the way to change its code is
+`./ingest_host.sh up` — launch a replacement, watch it drain, then
+`./ingest_host.sh retire <old-id>`. Two ingesters at once are safe; every
+insert is `ON CONFLICT DO NOTHING` on `(campaign_id, point_key)` and progress
+is committed in the same transaction as the points.
+
+**Two object-key shapes are points, and reading only one is how the store
+stopped for five hours on 2026-09-17:**
+
+```
+dp/slot-00002/1789311001-0000000000000000.bin                 legacy: <epoch>-<offset>
+dp/slot-00140/<32-hex stream>-<offset>-<64-hex sha256>.bin    ecc2k-seed-orbit-v1
+```
+
+The fleet crossed to the second shape at 10:06Z, the last worker on the first
+uploaded at 13:50Z, and the store's newest point stayed at 13:50:58 while
+3,795 objects and 56.2 M records landed in S3. Nothing was logged: an object
+whose key does not match was not an error, it was invisible, and the page read
+`IDLE_OR_STALE` — "store has points, but none in the last hour" — which is
+also what a dead fleet looks like. The ingest now reports what it cannot read
+(`ingest.unrecognised_objects`), what it has not yet read
+(`ingest.outstanding_objects`), and publishes state `INGEST_BEHIND` so the two
+cases are never again the same sentence. `dp_ingest.py --pending` answers
+"how far behind is the store" without writing anything.
+
+**It must also be able to keep up, which is a separate question and was also
+failing.** One object at a time sustained ~2,450 records/s; at 133 workers the
+fleet produces ~2,607 points/s, so even with every object recognised the
+backlog would have grown. `--threads` (default 6) ingests several objects at
+once, each on its own connection, and a backlog is drained without waiting out
+the poll interval: measured 137,753 rows/s over both key shapes, 50× the
+fleet's production.
+
+`found_at` is the object's upload time — the epoch in a legacy key, the
+object's `LastModified` for an orbit key — never the clock at insert, so a
+catch-up cannot stack a backlog into the hour it ran and leave an hourly spike
+no GPU produced.
+
+The host runs under the `ecc2k130-ingest` instance profile: read `dp/`, write
+`logs/` and the status bucket's `status.json`, read the `rho/dp-rds` secret,
+put metrics in one namespace, nothing else. `ingest_host.sh` falls back to
+static keys in user-data if that profile is missing, which is worse — anything
+on the box and any principal that can describe the instance can read them —
+so keep the profile.
+
+**The database is the ingest's speed limit, not the client.** At
+`db.t4g.large` (2 vCPU, 8 GB) the drain ran at 1,793 records/s with the client
+at 0.8% CPU and RDS serving ~4,000 random read IOPS: 2.2 reads per row
+inserted, because `point_key` is a hash and the index of a 60 M-row table does
+not fit in 8 GB. It is `db.r7g.xlarge` (4 vCPU, 32 GB) since 2026-09-17 for
+that reason, and the ingest sorts each object by `point_key` before inserting
+so a batch touches a smaller set of leaf pages. If the drain rate is ever
+below the fleet's production (`points/s` ≈ GPUs × rate ÷ 2^28.41), look at
+`FreeableMemory` and `ReadIOPS` before looking at the ingest.
+
+Storage: `rho-dp` has autoscaling to **4,000 GiB** (`MaxAllocatedStorage`,
+raised from 500 GiB on 2026-09-17 when it was 400 GiB allocated and RDS was
+warning it would exhaust the ceiling in days). The corpus at the expected work
+is ~2 TB in Postgres at the measured 326 bytes/point, which is what that
+ceiling is sized for.
+
+Four CloudWatch alarms watch the two halves, in `ECC2K130/Ingest` and
+`AWS/RDS`, all notifying the `ecc2k130-alerts` SNS topic:
+`ecc2k130-ingest-backlog`, `ecc2k130-ingest-unreadable-keys`,
+`ecc2k130-no-uploads-from-fleet`, `ecc2k130-rds-free-storage-low`. A topic
+subscription is confirmed by the subscriber, so check
+`aws sns list-subscriptions-by-topic` shows no `PendingConfirmation` before
+relying on them; also
+`aws cloudwatch describe-alarms --alarm-name-prefix ecc2k130-`.
+
 ## Failure modes and what the design does about them
 
 | Event | Effect | Handling |
 |---|---|---|
+| Worker's S3 upload fails | points would be lost with the instance | the delta stays in the worker's local spool and every later cycle retries it; `dpOffset` does not advance until the store has it |
+| Ingest cannot parse an object key | store silently stops (2026-09-17, five hours) | unreadable keys are counted, logged and published; `INGEST_BEHIND`; `ecc2k130-ingest-unreadable-keys` alarm |
+| Ingest slower than the fleet | backlog grows unbounded | parallel ingest, measured 50× production; `ecc2k130-ingest-backlog` alarm |
+| Ingest host dies or is replaced | store lags, corpus unaffected | `dp/` is authoritative; `ingest_host.sh up` starts a replacement that resumes from `dp_ingest_progress` |
+| RDS runs out of storage | ingest stalls, corpus unaffected | autoscaling to 4,000 GiB; `ecc2k130-rds-free-storage-low` alarm |
 | Spot interruption | 2-minute notice | watcher → SIGTERM → checkpoint + upload; fleet replaces; slot resumes from S3 |
 | Instance dies without notice | ≤ `uploadEvery` of one GPU's work lost | lease expires in 3 min; next worker resumes the last uploaded checkpoint, re-reports a few points |
 | Worker resumes an older checkpoint | duplicate points | merge dedupes on (key, seed) |

@@ -249,15 +249,23 @@ def ingestObject(conn, s3, bucket, key, found_at):
         cur.execute("CREATE TEMP TABLE IF NOT EXISTS dp_in "
                     "(point_key bytea, a bytea, b bytea, walk_seed bytea) ON COMMIT DROP")
         cur.execute("TRUNCATE dp_in")
+        # Sorted by the key the target is indexed on. point_key is a hash, so
+        # an object's records arrive in random index order and each insert
+        # walks to a different leaf page: on the 60 M-row table that measured
+        # ~2.2 random reads per row inserted. Sorting costs nothing here and
+        # turns a batch into a smaller set of pages touched repeatedly.
+        rows = sorted((decode(body[off:off + RECORD_BYTES])
+                       for off in range(0, whole, RECORD_BYTES)),
+                      key=lambda r: r["point_key"])
         with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
             cp.set_types(["bytea", "bytea", "bytea", "bytea"])
-            for off in range(0, whole, RECORD_BYTES):
-                r = decode(body[off:off + RECORD_BYTES])
+            for r in rows:
                 cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
         cur.execute(
             "INSERT INTO distinguished_points "
             "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
             "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
+            "ORDER BY point_key "
             "ON CONFLICT (campaign_id, point_key) DO NOTHING",
             (CAMPAIGN, wid, found_at))
         added = cur.rowcount

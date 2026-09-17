@@ -12,11 +12,13 @@
 #
 # It needs to reach RDS, which is private to the VPC and admits only a handful
 # of security groups, so the instance joins the same security group as the
-# walker. It has no instance profile -- this account's IAM does not allow one
-# to be created -- so credentials are written by user-data exactly as infra.sh
-# does for the GPU fleet. They are therefore visible to anything on the box and
-# to any principal in this account that can read instance attributes; use a key
-# scoped to this campaign's buckets and secret, and rotate it with the fleet's.
+# walker. Credentials come from the `ecc2k130-ingest` instance profile: read
+# `dp/`, write `logs/` and the status bucket's status.json, read the rho-dp
+# secret, put metrics in one namespace, and nothing else. If that profile does
+# not exist the script falls back to static keys in user-data, the way infra.sh
+# does for the GPU fleet -- which is worse, because user-data is readable by
+# anything on the box and by any principal that can describe the instance, so
+# prefer creating the profile (see INGEST_PROFILE below).
 #
 # Usage:
 #   WORKER_AWS_ACCESS_KEY_ID=... WORKER_AWS_SECRET_ACCESS_KEY=... \
@@ -70,9 +72,17 @@ up) ;;
 *) echo "usage: $0 [up|status|retire <instance-id>]" >&2; exit 1 ;;
 esac
 
+PROFILE=${INGEST_PROFILE:-ecc2k130-ingest}
+if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+    echo "using instance profile $PROFILE"
+else
+    echo "no instance profile $PROFILE; falling back to static keys in user-data" >&2
+    PROFILE=""
+fi
+
 KEY=${WORKER_AWS_ACCESS_KEY_ID:-}
 SECRET=${WORKER_AWS_SECRET_ACCESS_KEY:-}
-if [ -z "$KEY" ]; then
+if [ -z "$PROFILE" ] && [ -z "$KEY" ]; then
     read -r KEY SECRET < <(python3 - <<'PY'
 import configparser, os, pathlib
 c = configparser.ConfigParser()
@@ -85,7 +95,10 @@ print(c[p]["aws_access_key_id"], c[p]["aws_secret_access_key"])
 PY
 )
 fi
-[ -n "$KEY" ] && [ -n "$SECRET" ] || { echo "no static credentials for the host" >&2; exit 1; }
+if [ -z "$PROFILE" ] && { [ -z "$KEY" ] || [ -z "$SECRET" ]; }; then
+    echo "no instance profile and no static credentials for the host" >&2
+    exit 1
+fi
 
 AMI=${INGEST_AMI:-$(aws ec2 describe-images --owners 099720109477 \
     --filters "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-arm64-server-*" \
@@ -98,6 +111,19 @@ SHA=$(sha256sum dp_ingest.py | cut -c1-16)
 aws s3 cp dp_ingest.py "s3://$BUCKET/ingest/$SHA/dp_ingest.py" --only-show-errors
 echo "published ingest $SHA"
 
+CREDS=""
+if [ -z "$PROFILE" ]; then
+    CREDS=$(cat <<EOF
+cat > /root/.aws/credentials <<'AWSCREDS'
+[default]
+aws_access_key_id=$KEY
+aws_secret_access_key=$SECRET
+AWSCREDS
+chmod 600 /root/.aws/credentials
+EOF
+)
+fi
+
 USERDATA=$(mktemp)
 trap 'rm -f "$USERDATA"' EXIT
 cat > "$USERDATA" <<EOF
@@ -106,12 +132,7 @@ set -uo pipefail
 exec > >(tee -a /var/log/rho-ingest-boot.log) 2>&1
 export AWS_DEFAULT_REGION=$REGION
 install -d -m 700 /root/.aws
-cat > /root/.aws/credentials <<'AWSCREDS'
-[default]
-aws_access_key_id=$KEY
-aws_secret_access_key=$SECRET
-AWSCREDS
-chmod 600 /root/.aws/credentials
+$CREDS
 printf '[default]\nregion=$REGION\n' > /root/.aws/config
 
 apt-get update -q
@@ -179,8 +200,11 @@ systemctl enable --now rho-ingest-logship.timer
 echo "ingest $SHA started \$(date -u)"
 EOF
 
+PROFILE_ARG=()
+[ -n "$PROFILE" ] && PROFILE_ARG=(--iam-instance-profile "Name=$PROFILE")
+
 IID=$(aws ec2 run-instances --image-id "$AMI" --instance-type "$TYPE" \
-    --subnet-id "$SUBNET" --security-group-ids "$SG" \
+    --subnet-id "$SUBNET" --security-group-ids "$SG" "${PROFILE_ARG[@]}" \
     --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=30,VolumeType=gp3,DeleteOnTermination=true}' \
     --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
     --user-data "file://$USERDATA" \
