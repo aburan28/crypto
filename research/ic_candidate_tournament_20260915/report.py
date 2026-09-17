@@ -97,20 +97,36 @@ def native_markdown(rows):
 
 
 def matched_base_audit(root):
+    policy=read(root/'contract.json').get('comparison_kind')=='factor-base-policy'
+    support_rows={}
     count=0
     for stage in ('aa','smoke','development','selection','confirmation','replay'):
         for case in (root/'runs'/stage).iterdir():
             hashes=set()
+            by_arm={}
             for path in case.glob('*/rep-*/profile/stdout.json'):
                 report=read(path)
                 if report.get('mode')!='ic' or report.get('status')!='complete':
                     continue
                 points=sorted(tuple(map(int,p)) for p in report['factor_base'])
-                hashes.add(hashlib.sha256(json.dumps(points,separators=(',',':')).encode()).hexdigest())
+                fingerprint=hashlib.sha256(json.dumps(points,separators=(',',':')).encode()).hexdigest()
+                hashes.add(fingerprint)
+                arm=path.relative_to(case).parts[0]
+                by_arm.setdefault(arm,set()).add(fingerprint)
+                if policy:
+                    key=(stage,arm,case.name.split('-')[0])
+                    support_rows.setdefault(key,set()).add(len(points))
                 count+=1
-            if len(hashes)>1:
+            if any(len(values)>1 for values in by_arm.values()):
+                raise ValueError('changed support within policy arm in '+str(case))
+            if not policy and len(hashes)>1:
                 raise ValueError('changed paired factor-base support in '+str(case))
-    return {'status':'VERIFIED','complete_ic_profiles_checked':count}
+    result={'status':'VERIFIED','complete_ic_profiles_checked':count}
+    if policy:
+        result.update(comparison_kind='factor-base-policy', support_sizes=[
+            {'stage':stage,'arm':arm,'cell':cell,'signed_base_sizes':sorted(sizes)}
+            for (stage,arm,cell),sizes in sorted(support_rows.items())])
+    return result
 
 
 def rho_health(root):
@@ -174,7 +190,12 @@ def main():
     if contract.get('native_timing_protocol'):
         data['native_tables']={stage:native_table(root,stage) for stage in rows}
         data['limits'][-1]='Native cold-process time is secondary, with paired curve/target confidence intervals; profiler time is excluded.'
+    if contract.get('comparison_kind')=='factor-base-policy':
+        data['limits'].append('Factor-base policies differ across arms; coverage and rank floors are per-arm, not an unchanged common floor.')
     frozen_write(root/'measurements.json',data)
+    admission=stage_table(root,'smoke')
+    frozen_write(root/'admission.json', {'stage':'smoke', 'tables':admission,
+        'rule':'A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.'})
     winner=result['winner'] or 'none (inconclusive)'
     text=[f'# IC candidate tournament: {root.name}', '',f"Decision: **{result['status']} — {winner}**.",'',
           'This round compares complete cold Koblitz ECDLP recovery in fixed-compiler amd64 user-space instruction reads (Ir).',
@@ -191,6 +212,8 @@ def main():
              'The ordinary WDSat corpus is inapplicable to this point-base API. This campaign uses matched complete-DLP fixtures and an independent point/rank checker; the pilot confirmation includes 60 fresh inputs, both IC arms, rho and three repetitions.', '',
              f"Observed rho/winner instruction ratio: **{fmt(result.get('rho_over_winner'))}**. "
              'A value below one means rho costs less. This is not an extrapolated crossover.', '']
+    text += ['## Smoke admission (all candidates)', '', markdown_table(admission), '',
+             'Rejected arms remain in the frozen smoke receipts and are excluded from development. Missing verified workloads have no cost claim.', '']
     for stage,rs in rows.items():
         text += [f'## {stage.title()}','',markdown_table(rs),'']
     if 'native_tables' in data:
@@ -203,6 +226,14 @@ def main():
         for stage,pair in parity.items():
             if pair.get('eligible'):
                 text += [f"{stage.title()} winner/rho: instructions {pair['candidate_over_baseline']:.4f}, CI {pair['ci95']}; native time {pair['native_wall_candidate_over_baseline']:.4f}, CI {pair['native_wall_ci95']}.", '']
+    if contract.get('comparison_kind')=='factor-base-policy':
+        text += ['## Factor-base policy boundary', '',
+                 'This separately declared panel compares different base policies on identical public ECDLP targets. Support is stable within each arm/case. For each arm, m=3 and B signed points give at most binomial(B+2,3) target images; the rank floor also changes with the column count. Ratios to changed floors are not evidence of an algorithmic advance.', '',
+                 '| Stage | Arm | Cell | Signed base size B |', '|---|---|---|---:|']
+        for item in data['matched_base_audit']['support_sizes']:
+            if item['stage'] in ('development','confirmation'):
+                text.append(f"| {item['stage']} | {item['arm']} | {item['cell']} | {item['signed_base_sizes']} |")
+        text.append('')
     text += ['## Rho health','',
              'All reference outputs were independently verified. The following measured walk counts are compared with the signed-Frobenius model `sqrt(pi*r/(2*A))`, with `A=2*n`. This model is an expectation, not a bound on an individual randomized run.','',
              '| Cell | Median iterations / model | Median walk additions / model | Maximum restarts | Verified |',
@@ -232,10 +263,11 @@ def main():
                f'<p>Evidence: <a href="{relative}/REPORT.md">full result</a> · '
                f'<a href="{relative}/measurements.json">frozen reporting data</a> · '
                f'<a href="{relative}/audit.json">independent audit</a>.</p></div>']
-        for stage in ('development','confirmation'):
+        display_rows={'smoke':admission, **rows}
+        for stage in ('smoke','development','confirmation'):
             parts += ['<div class="table-scroll"><table>',f'<caption>{stage.title()} — instruction unit Ir; all variants on matched fixtures.</caption>',
                       '<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>']
-            for r in rows[stage]:
+            for r in display_rows[stage]:
                 values=[r['variant'],fmt(r['S_Ir']),fmt(r['candidate_over_incumbent']),fmt(r['candidate_over_rho']),
                         fmt(r['candidate_over_floor']),f"{r['verified_runs']}/{r['scheduled_runs']}",r['class']]
                 parts.append('<tr>'+''.join('<td>'+html.escape(v)+'</td>' for v in values)+'</tr>')
@@ -254,6 +286,8 @@ def main():
 
                   'The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>',
                   '</section>',f'<!-- END {marker} -->']
+        if contract.get('comparison_kind')=='factor-base-policy':
+            parts.insert(2, '<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>')
         chunk='\n'.join(parts)+'\n'
         page=board.read_text()
         if f'<!-- BEGIN {marker} -->' in page:

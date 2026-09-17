@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/run_operation.py", line 49, in <module>
+    main()
+  File "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/run_operation.py", line 38, in main
+    run('prepare', [sys.executable, str(ROOT/'tournament.py'), 'prepare',
+  File "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/run_operation.py", line 22, in run
+    subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/python3', '/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/tournament.py', 'prepare', '--out', '/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0006-single', '--source-root', '/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004/source_candidates/folded_lift/source', '--candidates', '/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/candidates.json', '--seed', '2026091606', '--cpu', '7', '--targets', '1', '--require-native-progress']' returned non-zero exit status 1.
