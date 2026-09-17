@@ -490,8 +490,19 @@ failing.** One object at a time sustained ~2,450 records/s; at 133 workers the
 fleet produces ~2,607 points/s, so even with every object recognised the
 backlog would have grown. `--threads` (default 6) ingests several objects at
 once, each on its own connection, and a backlog is drained without waiting out
-the poll interval: measured 137,753 rows/s over both key shapes, 50× the
-fleet's production.
+the poll interval: measured 137,753 rows/s over both key shapes.
+
+The recovery itself is the end-to-end figure to quote, because it is the whole
+path under a real backlog rather than a decoder benchmark. Six threads on one
+`c7g.large` against `db.r7g.xlarge`, 2026-09-17 19:38–20:01Z:
+
+```
+4,321 objects, 63,351,803 rows, 0 failed, 0 outstanding, 44,987 rows/s
+```
+
+That is 17× the fleet's ~2,607 points/s, so five and a half hours of stopped
+ingest took twenty-three minutes to clear and the store went from 67.6 M
+points to 124.3 M.
 
 `found_at` is the object's upload time — the epoch in a legacy key, the
 object's `LastModified` for an orbit key — never the clock at insert, so a
