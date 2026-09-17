@@ -269,7 +269,7 @@ class DynamoSlots:
 
     def scan(self):
         r = self._run("scan", "--table-name", self.table,
-                      "--projection-expression", "#s, leaseUntil, #st, #o",
+                      "--projection-expression", "#s, leaseUntil, #st, #o, gpuFamily",
                       "--expression-attribute-names", json.dumps({"#s": "slot", "#st": "state", "#o": "owner"}))
         if r.returncode != 0:
             raise RuntimeError("dynamodb scan failed: " + r.stderr.strip())
