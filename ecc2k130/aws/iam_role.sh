@@ -11,7 +11,9 @@
 #
 # The role can do exactly this and nothing else:
 #   s3:ListBucket on the campaign bucket, s3:GetObject/PutObject on its objects
-#   (corpus, checkpoints, binaries, slot leases, logs), and SSM Session Manager.
+#   (corpus, checkpoints, binaries, slot leases, logs), s3:DeleteObject on the
+#   single bin/.building build-lock key bootstrap.sh releases, and SSM Session
+#   Manager.
 
 set -euo pipefail
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
@@ -36,7 +38,8 @@ aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-docu
   \"Version\": \"2012-10-17\",
   \"Statement\": [
     {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}
+    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
+    {\"Effect\": \"Allow\", \"Action\": [\"s3:DeleteObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/bin/.building\"}
   ]
 }"
 aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore

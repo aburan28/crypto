@@ -36,9 +36,17 @@ IID=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/
 IID=${IID:-unknown}
 CLAIMED_BUILD=0
 shipLog() { aws s3 cp /var/log/ecc2k130-bootstrap.log "s3://$BUCKET/logs/$IID/bootstrap.log" --only-show-errors; }
+# The role's only s3:DeleteObject grant is this one key (iam_role.sh); a lock
+# left behind makes every later incomplete-prefix launch wait 20 minutes for a
+# builder that does not exist, so a failed release must be visible in the log.
+releaseBuildLock() {
+    CLAIMED_BUILD=0
+    aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors \
+        || echo "WARNING: could not delete bin/.building; later launches will wait on a stale lock"
+}
 onExit() {
     if [ "$CLAIMED_BUILD" = 1 ]; then
-        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
+        releaseBuildLock
     fi
     shipLog
 }
@@ -90,9 +98,10 @@ if ! prefix_complete "$BIN"; then
         CLAIMED_BUILD=1
         echo "claimed the build lock; compiling from sourceKey"
         build_from_source
-        CLAIMED_BUILD=0
-        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
-    elif echo "$claim_out" | grep -qE 'PreconditionFailed|412'; then
+        releaseBuildLock
+    # A simultaneous If-None-Match race can also come back as 409
+    # ConditionalRequestConflict; that is a lost claim too, not a lock failure.
+    elif echo "$claim_out" | grep -qE 'PreconditionFailed|412|ConditionalRequestConflict'; then
         echo "another instance is publishing the prefix; waiting for client+fixtures"
         for i in $(seq 1 40); do
             aws s3 cp "s3://$BUCKET/campaign.json" campaign.json --only-show-errors || true
