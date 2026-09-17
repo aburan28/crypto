@@ -213,7 +213,11 @@ def ensureProgress(conn):
     conn.commit()
 
 
-def ingestedCounts(conn):
+COUNTS_TTL = 1800.0
+_counts = {"at": 0.0, "map": {}}
+
+
+def ingestedCounts(conn, ttl=COUNTS_TTL):
     """Rows already present per worker_id, and objects recorded as complete.
 
     Two sources because the corpus has two eras.  Objects this program ingested
@@ -228,18 +232,32 @@ def ingestedCounts(conn):
     object's own worker_id never reaches its record count and the object would
     be re-ingested on every pass forever.  Harmless for correctness, but it
     means the backlog never converges.
+
+    The progress table is read every pass and is small.  The per-worker counts
+    are not: `worker_id` is one value per *object*, so that aggregate groups
+    the whole corpus -- 124 M rows into 113 k groups on 2026-09-17, three
+    minutes before the first object of a pass could be read, and growing with
+    the corpus.  It is also answering a question about an era that stopped
+    growing when this table appeared, so it is cached for `ttl` seconds.  A
+    stale entry costs a re-ingest of one already-stored object, which
+    `ON CONFLICT DO NOTHING` makes a no-op.
     """
+    now = time.time()
     with conn.cursor() as cur:
-        cur.execute(
-            "SELECT worker_id, count(*) FROM distinguished_points "
-            "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
-            (CAMPAIGN,))
-        counts = {row[0]: int(row[1]) for row in cur.fetchall()}
+        if not _counts["map"] or now - _counts["at"] >= ttl:
+            cur.execute(
+                "SELECT worker_id, count(*) FROM distinguished_points "
+                "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
+                (CAMPAIGN,))
+            _counts["map"] = {row[0]: int(row[1]) for row in cur.fetchall()}
+            _counts["at"] = now
+            log("refreshed per-object row counts: %d objects known to the store"
+                % len(_counts["map"]))
         cur.execute(
             "SELECT object_key, records FROM dp_ingest_progress WHERE campaign_id = %s",
             (CAMPAIGN,))
         done = {row[0]: int(row[1]) for row in cur.fetchall()}
-    return counts, done
+    return _counts["map"], done
 
 
 def ingestObject(conn, s3, bucket, key, found_at):

@@ -147,6 +147,65 @@ class FakeConn:
         self.closed = True
 
 
+class FakeCursor:
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        self.conn.queries.append(sql)
+        self.rows = ([("dp-slot-00002-old.bin", 24000)] if "GROUP BY worker_id" in sql
+                     else [])
+
+    def fetchall(self):
+        return self.rows
+
+
+class CountingConn:
+    def __init__(self):
+        self.queries = []
+
+    def cursor(self):
+        return FakeCursor(self)
+
+
+class LegacyCounts(unittest.TestCase):
+    """The aggregate that reads the whole corpus must not run every pass."""
+
+    def setUp(self):
+        dp_ingest._counts.update({"at": 0.0, "map": {}})
+        self.addCleanup(dp_ingest._counts.update, {"at": 0.0, "map": {}})
+
+    def aggregates(self, conn):
+        return sum("GROUP BY worker_id" in q for q in conn.queries)
+
+    def test_the_corpus_wide_aggregate_is_not_repeated_within_the_ttl(self):
+        conn = CountingConn()
+        for _ in range(4):
+            counts, _ = dp_ingest.ingestedCounts(conn)
+        self.assertEqual(self.aggregates(conn), 1)
+        self.assertEqual(counts, {"dp-slot-00002-old.bin": 24000})
+
+    def test_progress_is_still_read_every_time(self):
+        conn = CountingConn()
+        for _ in range(4):
+            dp_ingest.ingestedCounts(conn)
+        self.assertEqual(sum("dp_ingest_progress" in q for q in conn.queries), 4)
+
+    def test_it_refreshes_once_the_ttl_has_passed(self):
+        conn = CountingConn()
+        dp_ingest.ingestedCounts(conn)
+        dp_ingest._counts["at"] -= 3600.0
+        dp_ingest.ingestedCounts(conn)
+        self.assertEqual(self.aggregates(conn), 2)
+
+
 class Passes(unittest.TestCase):
     """What a pass does with a backlog, and with a database that goes away.
 
