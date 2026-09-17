@@ -1,0 +1,37 @@
+{
+  "status": "complete-map-deferred-reset-barrier-screen",
+  "checkpoint_mismatches": {
+    "reset": 0
+  },
+  "rows": [
+    {
+      "variant": "pipeline",
+      "rates_billion_per_second": [
+        11.256095,
+        11.211636,
+        11.064125
+      ],
+      "median_billion_per_second": 11.211636,
+      "paired_geomean_vs_pipeline": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "reset",
+      "rates_billion_per_second": [
+        11.332799000000001,
+        11.150718000000001,
+        11.115636
+      ],
+      "median_billion_per_second": 11.150718000000001,
+      "paired_geomean_vs_pipeline": 1.0019979681172633,
+      "paired_95_ci": [
+        0.9858614668624393,
+        1.018398590327718
+      ]
+    }
+  ],
+  "decision": "reject unconfirmed barrier removal; retain synchronized pipeline"
+}

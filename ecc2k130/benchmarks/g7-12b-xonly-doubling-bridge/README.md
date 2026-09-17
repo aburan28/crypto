@@ -274,3 +274,131 @@ checkpoint against independent affine `P+sigma(P)` arithmetic. Then run three
 interleaved equal-work pairs against doubling-only. Continue to a separately
 preregistered complete-map collision study only if the cheap branch provides
 enough measured headroom to offset the current sparse sigma-3 bridge overhead.
+
+
+## Preregistered complete bridge-1/bridge-3 collision gate
+
+The sigma bridge-1 diagnostic is exact and measures 13.089917 B/s median versus
+11.629054 B/s for doubling, paired ratio 1.132398 with 95% CI
+[1.117231, 1.147771]. Exact factorization of ell-1 gives order index 12 for
+`1+s`, index 109 for `1+s^3`, and least-common-multiple order ell-1; together
+they generate the full scalar multiplicative group.
+
+Freeze the existing collision harness, seeds, canonical orbit key, DP threshold,
+restart charge, coefficient tracking, endpoint verification, and scalar recovery.
+Change only the candidate ordinary transition from `[2]P` to `P+sigma(P)` and
+its coefficient multiplier from 2 to `1+s`; retain the weight-14 sparse
+`P+sigma^3(P)` transition. Run 100 matched GF(2^23) trials first. Continue to
+2,000 only if candidate mean charged work is at most 1.10 times selected and
+there are no bad points, invariant failures, overdue walks, or unsolved trials.
+A passing collision gate permits an isolated CUDA complete-map candidate but is
+not itself throughput evidence.
+
+
+## Preregistered complete bridge-1/bridge-3 CUDA candidate
+
+The 2,000-trial gate solved every selected and candidate DLP with zero bad
+points, invariant failures, or overdue walks. Selected mean charged work was
+169.880500; bridge-1/bridge-3 was 171.018000, ratio 1.006696. Medians were 160
+and 159. The aggregate matches the earlier doubling/bridge-3 study because the
+ordinary outputs differ by Frobenius squaring and the collision key is the
+canonical Frobenius orbit.
+
+Create an isolated copy of the exact 9.851270 B/s block-local candidate. Add an
+explicit `XONLY_BRIDGE1_COMMON` build flag. Rare weight-14 states retain the
+same queued sigma-3 rational and scalar `1+s^3`; ordinary states retain the
+same denominator tree but finish with `x+1/x` and replay scalar `1+s`. Bump the
+checkpoint version from 4 to 5 and give the backend a distinct name so states
+cannot cross map semantics. Keep B16, split2, cache1, shared-X4, the selector,
+queue, launch geometry, and all other flags fixed.
+
+Require at most 80 registers, zero walk-kernel spills, three blocks per SM, the
+full built-in solver suite, and an independent 2,048-point seven-step affine-x
+checkpoint with version-5 parsing. Then compare three interleaved equal-work
+pairs against the block-local doubling/bridge-3 complete map. Preserve the
+1.006696 collision-work ratio; the goal requires a direct raw complete-map
+median of at least 12 B/s.
+
+
+## Preregistered pipelined classification candidate
+
+The complete bridge-1/bridge-3 map measures 10.862493 B/s median versus
+9.852204 B/s for doubling/bridge-3, paired ratio 1.109105 with 95% CI
+[1.094457, 1.123949]. It is the fastest verified complete map but remains
+1.137507 B/s below the target.
+
+The current kernel classifies every state in a full prepass, then reloads every
+x value for the denominator product. Pipeline that classification across
+logical steps. Classify the initial state once before the loop. During each
+backward finish, while the new x is still in registers, compute its normal-basis
+weight, DP/restart decision, next bridge mask, and next queue entry, except after
+the final requested step. The following step consumes that prepared mask and
+queue before its unchanged product and inversion. Keep the same number of map
+applications and state classifications per launch, with `iterBase+step+1` for
+pipelined reports; preserve start/final launch boundaries and skip final-output
+classification so the next launch observes it exactly as before.
+
+Do not change the map, bridge formula, scalar accounting, checkpoint version,
+batch geometry, or collision ratio. Require zero spills, three blocks per SM,
+the full built-in suite, exact partial-step and replay behavior, and a
+zero-mismatch 2,048-point seven-step version-5 checkpoint. Then compare three
+interleaved equal-work pairs against bridge-1/bridge-3. The direct complete-map
+median must reach 12 B/s.
+
+
+## Preregistered deferred counter-reset barrier
+
+Pipelined classification measures 11.159678 B/s median versus 10.918452 B/s
+for the prepass two-bridge map, paired ratio 1.028608 with 95% CI
+[1.014625, 1.042784]. Retain the exact zero-spill pipeline.
+
+After warp 0 finishes current rare values, the pipeline resets the shared event
+counter and immediately executes a block barrier. That barrier is redundant:
+all threads next perform the denominator product and enter the block-wide
+inverse barriers before any backward-finish thread can append a next-step event.
+Remove only the immediate post-reset barrier. The first inverse-tree barrier
+must order and expose thread 0 counter reset before all next-step atomics, while
+the existing post-classification barrier still protects the following rare
+consumer.
+
+Keep every arithmetic, map, iteration boundary, queue, mask, resource flag, and
+version-5 contract fixed. Require zero spills, the full built-in suite, and the
+independent seven-step checkpoint before three interleaved equal-work pairs
+against the retained pipeline.
+
+
+## Preregistered register-resident bridge mask
+
+Deferring the counter-reset barrier is exact but flat: paired ratio 1.001998
+with 95% CI [0.985861, 1.018399]. Retain the synchronized pipeline.
+
+The event queue already identifies rare owners, so only each owner thread reads
+its own bridge mask during the forward and backward loops. Keep that 8-bit mask
+in a scalar register across pipeline iterations instead of writing a 256-byte
+shared array and reloading it for every local slot. Initial classification sets
+the current mask; backward classification sets a next mask; after the existing
+queue barrier assign next to current. Remove the shared mask array, with no
+change to queue contents, barriers, arithmetic, or state semantics.
+
+Reject on any spill or occupancy regression. Otherwise require the full suite
+and independent version-5 checkpoint, then run three interleaved equal-work
+pairs against the retained synchronized pipeline.
+
+
+## Preregistered factored sigma-3 rational
+
+The register-resident mask increased the walk kernel to 20-byte spill stores
+and 16-byte spill loads per thread, so reject it before correctness or timing.
+
+In the retained pipeline, replace only the rare sigma-3 power construction with
+its exact factorization `A=(x+1)(x^6+x^3+1)` and
+`B=(x^3+x+1)(x^3+x^2+1)`. Compute `x2=square(x)`, `x3=x*x2`, and
+`x6=square(x3)`, then return `A^2/(x*B^2)` through the unchanged batch
+inversion. Relative to the original rational this removes one general product;
+relative to the previously flat x6-square form it removes one additional
+square. The selector, pipeline, queue, common map, scalar accounting, and
+checkpoint remain identical.
+
+Require zero spills, the full built-in suite, and the independent version-5
+checkpoint. If exact, compare three interleaved equal-work pairs with the
+retained pipeline and require a paired 95% interval above one.

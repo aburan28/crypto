@@ -1,0 +1,38 @@
+{
+  "status": "complete-map-bridge1-sparse-bridge3-screen",
+  "checkpoint_mismatches": {
+    "bridge13": 0
+  },
+  "collision_work_ratio_vs_selected": 1.0066958832826605,
+  "rows": [
+    {
+      "variant": "block",
+      "rates_billion_per_second": [
+        9.897525,
+        9.852204,
+        9.743526
+      ],
+      "median_billion_per_second": 9.852204,
+      "paired_geomean_vs_block": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "bridge13",
+      "rates_billion_per_second": [
+        11.026522000000002,
+        10.862493,
+        10.822462999999999
+      ],
+      "median_billion_per_second": 10.862493,
+      "paired_geomean_vs_block": 1.1091050226276924,
+      "paired_95_ci": [
+        1.0944566731654242,
+        1.1239494274909916
+      ]
+    }
+  ],
+  "decision": "retain bridge-1/bridge-3 as the fastest verified complete map; continue toward 12 B/s"
+}
