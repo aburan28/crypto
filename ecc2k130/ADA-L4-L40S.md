@@ -217,15 +217,18 @@ slots with each other either.
 Build and publish an Ada client with:
 
 ```bash
-BUCKET=... ARCHES="89 120" ./aws/build.sh /path/to/ecc2k130  # fat; CLMAD defaults to 1
-BUCKET=... ARCHES="89" ./aws/build.sh /path/to/ecc2k130      # thin Ada only; do not point the live campaign at this
-BUCKET=... ARCHES="89" CLMAD=0 ./aws/build.sh /path/...      # software-product before-arm
+BUCKET=... ARCHES="89 120" ./aws/build.sh --stage /path/to/ecc2k130  # fat; CLMAD defaults to 1
+./aws/rollout.sh activate bin/<sha>   # refuses if arches drop 89 or 120
+BUCKET=... ARCHES="89" ./aws/build.sh --stage /path/to/ecc2k130      # thin Ada only; activate will refuse
+BUCKET=... ARCHES="89" CLMAD=0 ./aws/build.sh --stage /path/...      # software-product before-arm
 ```
 
 The binary key now includes the knobs, so an Ada-only client and a Blackwell
 client coexist in the bucket instead of overwriting one another. Do **not**
 point the live `campaign.json` at a thin `ARCHES="89"` build: running g7e
-workers cannot load it. `bootstrap.sh` reads the expected carryless marker
+workers cannot load it. `build.sh --stage` plus `rollout.sh activate` is
+the path that enforces that; a bootstrap rebuild still points so the first
+Ada box can publish a fat client when the live prefix is sm_120-only. `bootstrap.sh` reads the expected carryless marker
 off that build's `manifest.json` instead of requiring 1, so a CLMAD-free Ada
 client boots; a binary that disagrees with its own manifest is still refused,
 and a missing manifest still demands 1. `launch_g6.sh` fills leftover G/VT
