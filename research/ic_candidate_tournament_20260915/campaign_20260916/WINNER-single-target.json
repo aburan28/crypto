@@ -658,5 +658,131 @@
         "receipts": 180
       }
     }
+  },
+  "round_0014": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014",
+    "status": "retained",
+    "what_changed": "shared: the worker built as one optimisation unit (fat LTO, one codegen unit, dead sections dropped at link time), which removes a quarter of the executable text without changing a line of source or a byte of any report, plus a tests-only fix to the arena tests. Both arms got faster and rho slightly more so, as pre-registered, so the winner/rho ratios are slightly worse than round-0013's while beats_rho_strict still holds on every cell; the strict-win record stays with round-0013. Challenger lto_ic (orbit naming from the longest zero run plus the serialisation change) not promoted a fourth time: 0.9226 of the incumbent instructions but native upper limit 1.0163 on confirmation; lto_canon alone 0.9772 at selection with native upper limit 1.08.",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/source",
+    "patches_from_round_0013_source": [
+      "campaign_20260916/round14-lto.patch",
+      "campaign_20260916/round14-arena-tests.patch"
+    ],
+    "challenger_patches": [
+      "campaign_20260916/round14-canon.patch",
+      "campaign_20260916/round14-fastio.patch"
+    ],
+    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": true,
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.7817766252204564,
+      "ci95": [
+        0.7199868031943767,
+        0.8600593236734697
+      ],
+      "native_wall_candidate_over_baseline": 0.9424118300650626,
+      "native_wall_ci95": [
+        0.912629257744672,
+        0.9715184462908083
+      ],
+      "per_cell": {
+        "n13a0": 0.8020211560462687,
+        "n17a1": 0.7118282360822756,
+        "n19a0": 0.7126809934052354,
+        "n19a1": 0.7858927783433217,
+        "n23a0": 0.9132588618012915
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.895166998788727,
+        "n17a1": 0.9463219399306364,
+        "n19a0": 0.9293438545369769,
+        "n19a1": 0.9712408978237551,
+        "n23a0": 0.972203724300982
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.781779549842553,
+      "ci95": [
+        0.7199903911091349,
+        0.8600633389135146
+      ],
+      "native_wall_candidate_over_baseline": 0.9284422715079564,
+      "native_wall_ci95": [
+        0.9049721702559972,
+        0.9623543289813028
+      ],
+      "per_cell": {
+        "n13a0": 0.8020158697161288,
+        "n17a1": 0.7118239063378277,
+        "n19a0": 0.7126880935538176,
+        "n19a1": 0.7858981111867614,
+        "n23a0": 0.9132722234023708
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.9113019485464247,
+        "n17a1": 0.9203394283350191,
+        "n19a0": 0.9167061395339992,
+        "n19a1": 0.9074457664535301,
+        "n23a0": 0.9888112102516553
+      }
+    },
+    "controls_over_incumbent": {
+      "lto_ic": {
+        "confirmation": {
+          "candidate_over_baseline": 0.9225562258060885,
+          "ci95": [
+            0.9107643639553631,
+            0.9347381523917084
+          ],
+          "native_wall_candidate_over_baseline": 0.9947099546809592,
+          "native_wall_ci95": [
+            0.9724278145334377,
+            1.0163456747616106
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9997634299094936,
+            "n17a1": 0.9689235466018998,
+            "n19a0": 1.0123372972491862,
+            "n19a1": 0.988655664764905,
+            "n23a0": 1.004442932507873
+          }
+        },
+        "replay": {
+          "candidate_over_baseline": 0.9225560541513951,
+          "ci95": [
+            0.9107638679764328,
+            0.9347376630798303
+          ],
+          "native_wall_candidate_over_baseline": 1.0021728352941925,
+          "native_wall_ci95": [
+            0.9824597644938334,
+            1.0256454230034049
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 1.035482475973274,
+            "n17a1": 0.990551237955292,
+            "n19a0": 0.9792565352256115,
+            "n19a1": 1.003226109035785,
+            "n23a0": 1.003224500842044
+          }
+        }
+      }
+    },
+    "median_complete_job_confirmation": {
+      "incumbent": {
+        "instructions": 1270805.0,
+        "native_ms": 1.143,
+        "receipts": 180
+      },
+      "rho": {
+        "instructions": 1635293.0,
+        "native_ms": 1.222,
+        "receipts": 180
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; twelve further tournaments finished and audited
+Status: implementation complete; thirteen further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
@@ -36,10 +36,15 @@ that rho's setup was mostly such products: rho's job halved, the IC arm's
 shared phases shrank, and the honest ratios are 0.7697 (0.7148–0.8370) of
 rho's instructions and 0.9098 (0.8894–0.9313) of its native time, replay
 agreeing (0.9206, 0.8983–0.9480), every cell below one in both metrics on
-both stages: the strict-win record under the corrected baseline. The median
-complete one-target job is 1.16 ms against rho's 1.27 ms.
+both stages: the strict-win record under the corrected baseline. Round-0014
+then built the worker as one optimisation unit, which made both arms faster
+again and rho slightly more so, as its pre-registration said it would: 0.7818
+(0.7200–0.8601) of rho's instructions and 0.9424 (0.9126–0.9715) of its native
+time, every cell still below one in both metrics, but at worse ratios than
+round-0013, which therefore keeps the record. The median complete one-target
+job is 1.14 ms against rho's 1.22 ms.
 
-All 16,296 new profiled trials and their paired native runs verified. The
+All 17,736 new profiled trials and their paired native runs verified. The
 earlier [single-target continuation](single_target_20260916/RESULTS.md) adds three audited precursor rounds
 (4,680 receipts: 4,662 verified solves and 18 retained smoke rejections). The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and
