@@ -57,6 +57,24 @@
       "relations_found": 0,
       "relations_verified_on_curve": 0,
       "log2_expected_by_yield_law": -95.41301786737304
+    },
+    {
+      "name": "constructed_random_coeffs",
+      "base_size": 4000,
+      "pairs_total": 8002000,
+      "complete": true,
+      "elapsed_seconds": 444.9,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -95.6876096467349,
+      "rank_accounting": {
+        "rows": 0,
+        "construction_rows": 0,
+        "determining_rows": 0,
+        "useful_rank": 0,
+        "log": null,
+        "consistent": true
+      }
     }
   ]
 }
