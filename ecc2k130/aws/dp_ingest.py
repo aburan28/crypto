@@ -37,12 +37,32 @@ maps to `point_key = k0||k1||k2` as stored — literally bytes 8..32 of the reco
 `walk_seed` the seed big-endian. `--verify` checks that against points the old
 ingester already wrote before this program is trusted to add any.
 
-`found_at` is taken from the upload epoch in the object's name rather than the
-wall clock at insert. The old watcher used insert time, which is the same thing
-while it keeps pace and a lie when it does not: catching up on a backlog would
-stack a million points into the hour the catch-up ran and leave a spike in the
-published hourly chart that no GPU ever produced. The object epoch is also
+`found_at` is taken from the object's upload time rather than the wall clock at
+insert. The old watcher used insert time, which is the same thing while it
+keeps pace and a lie when it does not: catching up on a backlog would stack a
+million points into the hour the catch-up ran and leave a spike in the
+published hourly chart that no GPU ever produced. The upload time is also
 stable across re-ingest, so a repeated object cannot move a bucket.
+
+Two object-key shapes live under `dp/`, and both must be read:
+
+    dp/slot-00002/1789311001-0000000000000000.bin
+    dp/slot-00140/a8b4133d5c5f414ebd1337f15603588d-0000000000791392-9c6a7dae...e914.bin
+
+The first is the original worker's `<upload epoch>-<offset>`. The second is
+`ecc2k-seed-orbit-v1` (worker.py since #338): `<stream id>-<offset>-<sha256>`,
+with no clock in the name, so its upload time is the object's `LastModified`.
+The ingester matched only the first shape until 2026-09-17: the fleet moved to
+the second at 10:06Z that day, the last old-shape slot uploaded at 13:50Z, and
+the store then took nothing for five hours while 56 M records landed in `dp/`
+-- with no error logged, because an object that fails the key pattern is not
+an error, it is invisible.
+
+Objects are ingested by several threads at once. One object at a time was
+enough for the 15-slot fleet this was written for and is not enough for 133:
+serialised, a pass sustained about 2,450 records/s against a fleet producing
+2,600 points/s, so the store could not have kept pace even with every object
+recognised.
 
 Usage:
     dp_ingest.py --verify                 # check encodings, write nothing
@@ -56,18 +76,27 @@ import argparse
 import json
 import math
 import os
+import queue
 import re
 import struct
 import sys
+import threading
 import time
 import urllib.request
 
 RECORD_BYTES = 32
 CAMPAIGN = os.environ.get("RHO_CAMPAIGN", "ecc2k-130")
 COEFF_BYTES = 17  # 17-byte big-endian mod 2^131, per rho_campaigns.meta
-# dp/slot-00002/1789311001-0000000000000000.bin -> the leading integer is the
-# uploading worker's clock at upload, which is where found_at comes from.
-KEY_RE = re.compile(r"^dp/(slot-\d+)/(\d+)-(\d+)\.bin$")
+# dp/slot-00002/1789311001-0000000000000000.bin -- the original worker's
+# <upload epoch>-<offset>.  The leading integer is the uploading worker's
+# clock, which is where found_at comes from.
+LEGACY_KEY_RE = re.compile(r"^dp/(slot-\d+)/(\d+)-(\d+)\.bin$")
+# dp/slot-00140/<32-hex stream id>-<offset>-<64-hex sha256>.bin -- worker.py's
+# ecc2k-seed-orbit-v1 naming.  It carries a content hash instead of a clock, so
+# found_at is the object's own LastModified.
+ORBIT_KEY_RE = re.compile(r"^dp/(slot-\d+)/([0-9a-f]{32})-(\d+)-([0-9a-f]{64})\.bin$")
+# Written beside a record object by the contract path; metadata, not points.
+ENVELOPE_SUFFIX = ".bin.json"
 
 
 def log(msg):
@@ -80,9 +109,21 @@ def workerId(key):
     return "dp-" + key[len("dp/"):].replace("/", "-")
 
 
-def uploadEpoch(key):
-    m = KEY_RE.match(key)
-    return int(m.group(2)) if m else None
+def foundAt(key, lastModified=None):
+    """Upload time of one dp object, or None if the key is not a dp object.
+
+    The two key shapes carry it differently and the difference is the whole
+    reason this function exists: the legacy name has the uploader's clock in
+    it, the orbit name has a content hash instead, and reading only the first
+    shape is how five hours of a 133-worker fleet went into `dp/` without a
+    single row reaching the store and without one line in the log.
+    """
+    m = LEGACY_KEY_RE.match(key)
+    if m:
+        return int(m.group(2))
+    if ORBIT_KEY_RE.match(key) and lastModified is not None:
+        return int(lastModified.timestamp())
+    return None
 
 
 def decode(record):
@@ -118,8 +159,15 @@ def databaseUrl():
 
 
 def s3Objects(s3, bucket, prefix="dp/"):
-    """Every dp object and its whole-record count, oldest upload first."""
-    out = []
+    """Every dp object with its record count and upload time, oldest first.
+
+    Returns `(objects, unrecognised)`. An object under `dp/` that matches
+    neither key shape and is not an envelope is *not* skipped quietly: it is
+    returned so the caller can say so. Silence about an unreadable key is the
+    exact failure this ingest had, and a skip that logs nothing is
+    indistinguishable from a fleet that has stopped.
+    """
+    out, unrecognised = [], []
     token = None
     while True:
         kw = {"Bucket": bucket, "Prefix": prefix}
@@ -128,16 +176,19 @@ def s3Objects(s3, bucket, prefix="dp/"):
         page = s3.list_objects_v2(**kw)
         for item in page.get("Contents", []):
             key = item["Key"]
-            if not KEY_RE.match(key):
+            when = foundAt(key, item.get("LastModified"))
+            if when is None:
+                if not key.endswith(ENVELOPE_SUFFIX):
+                    unrecognised.append(key)
                 continue
             records = item["Size"] // RECORD_BYTES
             if records:
-                out.append((key, records))
+                out.append((key, records, when))
         if not page.get("IsTruncated"):
             break
         token = page["NextContinuationToken"]
-    out.sort(key=lambda kv: uploadEpoch(kv[0]) or 0)
-    return out
+    out.sort(key=lambda kv: kv[2])
+    return out, unrecognised
 
 
 PROGRESS_DDL = """
@@ -230,7 +281,8 @@ def verify(conn, s3, bucket, sample=64):
     property collision detection depends on.
     """
     counts, _ = ingestedCounts(conn)
-    complete = [(k, n) for k, n in s3Objects(s3, bucket) if counts.get(workerId(k), 0) == n]
+    objects, _ = s3Objects(s3, bucket)
+    complete = [(k, n) for k, n, _ in objects if counts.get(workerId(k), 0) == n]
     if not complete:
         log("verify: no fully-ingested object to compare against")
         return False
@@ -330,8 +382,14 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     return total, slots
 
 
-def statusPayload(conn, s3, bucket):
-    """The dashboard snapshot, computed here so the page can read it directly."""
+def statusPayload(conn, s3, bucket, ingest=None):
+    """The dashboard snapshot, computed here so the page can read it directly.
+
+    `ingest` is what the last pass knew about itself. It is published because
+    `state` alone cannot tell the difference between a fleet that stopped and
+    an ingest that stopped: on 2026-09-17 the page read IDLE_OR_STALE for five
+    hours while 133 workers were walking and 56 M records were landing in S3.
+    """
     with conn.cursor() as cur:
         cur.execute("""
             SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
@@ -358,8 +416,14 @@ def statusPayload(conn, s3, bucket):
     dps = int(row[4] or 0) if row else 0
     dps_last_hour = int(row[5] or 0) if row else 0
     collisions = int(collisions or 0)
+    ingest = dict(ingest or {})
+    # An ingest that is behind makes every recency figure below a statement
+    # about this program, not about the fleet, so it is named as one rather
+    # than left to be read as a quiet campaign.
+    behind = int(ingest.get("outstanding", 0)) or int(ingest.get("unrecognised", 0))
     state = ("COLLISION_RECORDED" if collisions else
              "COLLECTING" if dps_last_hour else
+             "INGEST_BEHIND" if behind else
              "IDLE_OR_STALE" if dps else "EMPTY")
     iterations, per_slot = checkpointWork(s3, bucket)
     payload = {
@@ -392,6 +456,17 @@ def statusPayload(conn, s3, bucket):
             "per_slot": per_slot,
         },
         "walkers": sum(1 for s in per_slot if not s["retired"]),
+        # What this program knows about its own health, so that a reader of
+        # the page can tell a stopped fleet from a stopped ingest.
+        "ingest": {
+            "outstanding_objects": int(ingest.get("outstanding", 0)),
+            "unrecognised_objects": int(ingest.get("unrecognised", 0)),
+            "newest_object_at": (
+                time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ingest["newest"]))
+                if ingest.get("newest") else None),
+            "lag_seconds": (int(time.time() - ingest["newest"])
+                            if ingest.get("newest") else None),
+        },
         "claim_boundary": (
             "Public research campaign aggregates for Certicom ECC2K-130 "
             "distinguished-point collection. Not a discrete-log recovery, not a "
@@ -405,9 +480,31 @@ def statusPayload(conn, s3, bucket):
     return payload
 
 
-def publishStatus(conn, s3, bucket, statusBucket):
+def publishMetrics(namespace, ingest):
+    """Put the ingest's own health where an alarm can see it.
+
+    Best effort by design: a metric this program cannot publish is not a
+    reason to stop ingesting, and the same numbers are in the log and in
+    status.json.
+    """
+    try:
+        import boto3
+
+        data = [{"MetricName": "OutstandingObjects",
+                 "Value": float(ingest.get("outstanding", 0)), "Unit": "Count"},
+                {"MetricName": "UnrecognisedObjects",
+                 "Value": float(ingest.get("unrecognised", 0)), "Unit": "Count"}]
+        if ingest.get("newest"):
+            data.append({"MetricName": "NewestObjectAgeSeconds",
+                         "Value": float(time.time() - ingest["newest"]), "Unit": "Seconds"})
+        boto3.client("cloudwatch").put_metric_data(Namespace=namespace, MetricData=data)
+    except Exception as exc:
+        log("metric publish failed: %s: %s" % (type(exc).__name__, exc))
+
+
+def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     """Write the snapshot where a browser can read it, no workflow involved."""
-    payload = statusPayload(conn, s3, bucket)
+    payload = statusPayload(conn, s3, bucket, ingest)
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
         Body=(json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),
@@ -415,42 +512,119 @@ def publishStatus(conn, s3, bucket, statusBucket):
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    log("published status.json: dps=%d state=%s work=2^%.3f walkers=%d"
+    log("published status.json: dps=%d state=%s work=2^%.3f walkers=%d "
+        "outstanding=%d unreadable=%d"
         % (payload["dps"], payload["state"],
-           payload["work"]["iterations_log2"] or 0, payload["walkers"]))
+           payload["work"]["iterations_log2"] or 0, payload["walkers"],
+           payload["ingest"]["outstanding_objects"],
+           payload["ingest"]["unrecognised_objects"]))
     return payload
 
 
-def onePass(conn, s3, bucket):
+def pending(conn, s3, bucket, prefix="dp/"):
+    """Objects in the bucket that the store does not have, oldest first.
+
+    Also returns the newest upload time seen and any key it could not read, so
+    that being behind and being unable to read are two different, reported
+    numbers rather than one silence.
+    """
     counts, done = ingestedCounts(conn)
-    added = total = 0
-    for key, records in s3Objects(s3, bucket):
-        if done.get(key, -1) >= records:
-            continue
+    objects, unrecognised = s3Objects(s3, bucket, prefix)
+    todo, newest = [], 0
+    for key, records, when in objects:
+        newest = max(newest, when)
         have = counts.get(workerId(key), 0)
-        if have >= records:
+        if done.get(key, -1) >= records or have >= records:
             continue
-        epoch = uploadEpoch(key)
-        n, seen = ingestObject(conn, s3, bucket, key,
-                               time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(epoch)))
-        added += n
-        total += 1
-        log("ingested %s: %d records, %d new (store had %d)" % (key, seen, n, have))
-    if total:
-        log("pass complete: %d objects touched, %d rows added" % (total, added))
-    return added
+        todo.append((key, records, when, have))
+    if unrecognised:
+        log("WARNING: %d object(s) under dp/ match no known key shape and are "
+            "NOT being ingested, for example: %s"
+            % (len(unrecognised), ", ".join(unrecognised[:3])))
+    return todo, newest, unrecognised
+
+
+def onePass(connect, s3, bucket, threads=6, prefix="dp/"):
+    """Ingest everything outstanding, several objects at a time.
+
+    Each thread owns a connection: psycopg connections are not shared, and the
+    temp table the COPY lands in is per-session anyway. Order does not matter
+    because every insert is idempotent, so a failed object is simply retried
+    on the next pass instead of stopping the ones behind it.
+    """
+    with connect() as probe:
+        todo, newest, unrecognised = pending(probe, s3, bucket, prefix)
+    state = {"newest": newest, "unrecognised": len(unrecognised), "outstanding": len(todo)}
+    if not todo:
+        return 0, 0, state
+    work = queue.Queue()
+    for item in todo:
+        work.put(item)
+    tally = {"rows": 0, "objects": 0, "failed": 0}
+    lock = threading.Lock()
+
+    def drain():
+        try:
+            with connect() as conn:
+                while True:
+                    try:
+                        key, records, when, have = work.get_nowait()
+                    except queue.Empty:
+                        return
+                    try:
+                        n, seen = ingestObject(
+                            conn, s3, bucket, key,
+                            time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(when)))
+                    except Exception as exc:
+                        # One bad object must not take the pass down with it;
+                        # it keeps its place in the backlog and is retried.
+                        with lock:
+                            tally["failed"] += 1
+                        log("object %s failed (will retry): %s: %s"
+                            % (key, type(exc).__name__, exc))
+                        continue
+                    with lock:
+                        tally["rows"] += n
+                        tally["objects"] += 1
+                    log("ingested %s: %d records, %d new (store had %d)"
+                        % (key, seen, n, have))
+        except Exception as exc:  # a connection that will not open at all
+            log("ingest thread stopped: %s: %s" % (type(exc).__name__, exc))
+
+    pool = [threading.Thread(target=drain, daemon=True) for _ in range(max(1, threads))]
+    started = time.time()
+    for t in pool:
+        t.start()
+    for t in pool:
+        t.join()
+    elapsed = max(time.time() - started, 1e-9)
+    state["outstanding"] = len(todo) - tally["objects"]
+    log("pass complete: %d objects touched, %d rows added, %d failed, %d still "
+        "outstanding, %.0f rows/s"
+        % (tally["objects"], tally["rows"], tally["failed"],
+           state["outstanding"], tally["rows"] / elapsed))
+    return tally["rows"], tally["objects"], state
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bucket", default=os.environ.get("RHO_BUCKET"))
+    ap.add_argument("--prefix", default="dp/",
+                    help="restrict to one slot ('dp/slot-00140/') to re-ingest or rehearse")
     ap.add_argument("--status-bucket", default=os.environ.get("RHO_STATUS_BUCKET"),
                     help="publish status.json here for the page to poll directly")
     ap.add_argument("--interval", type=float, default=120.0)
+    ap.add_argument("--threads", type=int,
+                    default=int(os.environ.get("RHO_INGEST_THREADS", "6")),
+                    help="objects ingested concurrently, each on its own connection")
+    ap.add_argument("--metric-namespace", default=os.environ.get("RHO_METRIC_NAMESPACE"),
+                    help="publish outstanding/lag/unrecognised here as CloudWatch metrics")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
                     help="print exact iterations from the checkpoints and exit")
+    ap.add_argument("--pending", action="store_true",
+                    help="report what the store is missing and exit, writing nothing")
     args = ap.parse_args(argv)
     if not args.bucket:
         raise SystemExit("--bucket or RHO_BUCKET is required")
@@ -472,28 +646,47 @@ def main(argv=None):
     import psycopg
 
     url = databaseUrl()
+
+    def connect():
+        return psycopg.connect(url, connect_timeout=30)
+
     while True:
         try:
-            with psycopg.connect(url, connect_timeout=30) as conn:
+            with connect() as conn:
                 ensureProgress(conn)
                 if args.verify:
                     return 0 if verify(conn, s3, args.bucket) else 1
-                while True:
-                    onePass(conn, s3, args.bucket)
-                    if args.status_bucket:
-                        try:
-                            publishStatus(conn, s3, args.bucket, args.status_bucket)
-                        except Exception as exc:
-                            # Publishing is a view; never let it stop the ingest.
-                            log("status publish failed: %s: %s" % (type(exc).__name__, exc))
-                    if args.once:
-                        return 0
-                    time.sleep(args.interval)
+                if args.pending:
+                    todo, newest, unrecognised = pending(conn, s3, args.bucket, args.prefix)
+                    log("outstanding: %d objects, %d records; newest object %s; "
+                        "%d unreadable keys"
+                        % (len(todo), sum(n for _, n, _, _ in todo),
+                           time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(newest))
+                           if newest else "none",
+                           len(unrecognised)))
+                    return 0
+            while True:
+                _, _, ingest = onePass(connect, s3, args.bucket, args.threads, args.prefix)
+                if args.metric_namespace:
+                    publishMetrics(args.metric_namespace, ingest)
+                if args.status_bucket:
+                    try:
+                        with connect() as conn:
+                            publishStatus(conn, s3, args.bucket, args.status_bucket, ingest)
+                    except Exception as exc:
+                        # Publishing is a view; never let it stop the ingest.
+                        log("status publish failed: %s: %s" % (type(exc).__name__, exc))
+                if args.once:
+                    return 0
+                # A backlog is drained as fast as the database allows rather
+                # than one pass per interval: the interval exists to keep an
+                # idle ingest cheap, not to rate-limit catching up.
+                time.sleep(0.0 if ingest.get("outstanding") else args.interval)
         except KeyboardInterrupt:
             return 0
         except Exception as exc:  # a failover is a retry, never an outage
             log("error: %s: %s" % (type(exc).__name__, exc))
-            if args.once or args.verify:
+            if args.once or args.verify or args.pending:
                 return 1
             time.sleep(15.0)
 
