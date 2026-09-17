@@ -126,6 +126,68 @@ def gpuName(gpu):
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
 
 
+# campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
+# g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
+# count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
+ADA_FAMILIES = frozenset({"g6", "g6e"})
+LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
+
+
+def instanceType():
+    if os.environ.get("ECC_INSTANCE_TYPE"):
+        return os.environ["ECC_INSTANCE_TYPE"]
+    try:
+        req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
+                                     headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+        token = urllib.request.urlopen(req, timeout=1).read().decode()
+        req = urllib.request.Request("http://169.254.169.254/latest/meta-data/instance-type",
+                                     headers={"X-aws-ec2-metadata-token": token})
+        return urllib.request.urlopen(req, timeout=1).read().decode()
+    except Exception:
+        return ""
+
+
+def gpuFamily(name="", instance_type=""):
+    """EC2 family used to pin slots and decide --threads vs autoThreads."""
+    it = (instance_type or "").split(".")[0].lower()
+    if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
+        return it
+    n = (name or "").lower()
+    if "l40s" in n:
+        return "g6e"
+    if "rtx pro 6000" in n or "rtx 6000" in n:
+        return "g7e"
+    if "rtx pro 4500" in n or "rtx 4500" in n:
+        return "g7"
+    if "tesla t4" in n or n.endswith(" t4") or n == "t4":
+        return "g4dn"
+    if "l4" in n:
+        return "g6"
+    if n in ("cpu", "local"):
+        return n
+    return ""
+
+
+def slotFamilyCompatible(slot_family, worker_family):
+    """True if this worker may resume (or first-claim) the slot.
+
+    Untagged slots are the live Blackwell corpus. Ada auto-sizes and would
+    refuse those checkpoints (exit 6), retiring the run id, so Ada creates
+    new slots instead. Rehearsal families stay compatible with anything.
+    """
+    if worker_family in LOCAL_FAMILIES:
+        return True
+    if not slot_family:
+        return worker_family in BLACKWELL_FAMILIES
+    return slot_family == worker_family
+
+
+def usesCampaignWorkers(family):
+    """Ada omits --threads so packedengine.autoThreads sizes the grid."""
+    return family not in ADA_FAMILIES
+
+
 # ---------------------------------------------------------------------------
 # object store: S3, or a directory for rehearsals
 # ---------------------------------------------------------------------------
@@ -235,14 +297,17 @@ class DynamoSlots:
                       and int(it.get("leaseUntil") or 0) < now)
         names = {"#o": "owner", "#st": "state"}
         for slot in free:
+            it = next((x for x in items if x.get("slot") == slot), {})
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
             values = {":me": dv(owner), ":t": dv(now + LEASE_SECONDS), ":now": dv(now), ":active": dv("active"),
                       ":idle": dv("idle"), ":inst": dv(info["instance"]), ":gpu": dv(info["gpu"]),
-                      ":gpuName": dv(info["gpuName"])}
+                      ":gpuName": dv(info["gpuName"]), ":gpuFamily": dv(info.get("gpuFamily") or "")}
             # Only an expired or released lease may be taken, and only from a
             # slot that is still walking: retired, solved and error slots keep
             # their run id forever so its seeds are never walked twice.
             ok = self._update(slot, "SET #o = :me, leaseUntil = :t, claimedAt = :now, #st = :active, "
-                              "instance = :inst, gpu = :gpu, gpuName = :gpuName", names, values,
+                              "instance = :inst, gpu = :gpu, gpuName = :gpuName, gpuFamily = :gpuFamily", names, values,
                               "(attribute_not_exists(leaseUntil) OR leaseUntil < :now) AND "
                               "(attribute_not_exists(#st) OR #st = :active OR #st = :idle)")
             if ok:
@@ -253,7 +318,8 @@ class DynamoSlots:
                 raise RuntimeError("run ids exhausted")
             item = {"slot": dv(nextSlot), "owner": dv(owner), "leaseUntil": dv(now + LEASE_SECONDS),
                     "claimedAt": dv(now), "createdAt": dv(now), "state": dv("active"),
-                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]), "gpuName": dv(info["gpuName"])}
+                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]),
+                    "gpuName": dv(info["gpuName"]), "gpuFamily": dv(info.get("gpuFamily") or "")}
             r = self._run("put-item", "--table-name", self.table, "--item", json.dumps(item),
                           "--condition-expression", "attribute_not_exists(slot)")
             if r.returncode == 0:
@@ -354,6 +420,8 @@ class S3Slots:
         for it in sorted(items, key=lambda x: x["slot"]):
             if it.get("state") not in (None, "active", "idle") or int(it.get("leaseUntil") or 0) >= now:
                 continue
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
             etag, slot = it["_etag"], it["slot"]
             candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
             candidate.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
@@ -408,6 +476,8 @@ class LocalSlots:
             for k in sorted(items, key=int):
                 it = items[k]
                 if it.get("state") in ("retired", "solved", "error") or int(it.get("leaseUntil") or 0) >= now:
+                    continue
+                if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
                     continue
                 it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
                 return int(k)
@@ -470,6 +540,8 @@ class Worker:
         self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
         fcntl.flock(self.workLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         self.gpuName = gpuName(self.gpu)
+        self.instanceType = instanceType()
+        self.gpuFamily = gpuFamily(self.gpuName, self.instanceType)
         signal.signal(signal.SIGTERM, self.onStop)
         signal.signal(signal.SIGINT, self.onStop)
 
@@ -510,7 +582,7 @@ class Worker:
                "--checkpoint-every", str(int(c["checkpointEvery"])), "--verify", str(int(c.get("verify", 0)))]
         if c.get("packed", False):
             cmd += ["--packed", "--device", "0"]
-        if c.get("workers"):
+        if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
             cmd += ["--threads", str(int(c["workers"]))]
         if c.get("dpWeight", -1) >= 0:
             cmd += ["--dp-weight", str(int(c["dpWeight"]))]
@@ -536,7 +608,8 @@ class Worker:
         return "ckpt/slot-%05d.ck" % slot
 
     def claimSlot(self):
-        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
+        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName,
+                "gpuFamily": self.gpuFamily}
         slot = self.slots.claim(self.owner, info)
         self.lastBeatSuccess = time.monotonic()
         if self.contract:

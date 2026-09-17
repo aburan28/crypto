@@ -206,17 +206,23 @@ resident blocks per SM (minBlocks 4) cost 34%
    `clmad` is what the 14 B/s arithmetic is made of. The AMI's 580 driver
    runs it under CUDA 13.x minor-version compatibility because `build.sh`
    emits native `sm_120` code and the client never needs the PTX JIT;
-   `ARCHES="89"` for g6/g6e and `ARCHES="75"` for g4dn. `build.sh` defaults
-   `CLMAD=1` for Blackwell and Ada (the preblackwell receipt selected it:
-   1.811× on L40S, 1.881× on L4) and drops it to 0 if Turing (`75`) or an
-   unmeasured Ampere/Hopper arch is in the set. `CLMAD=1` still overrides;
-   Turing cannot issue the instruction. The
+   `ARCHES="89"` for a thin Ada client, `ARCHES="75"` for g4dn, and
+   `ARCHES="89 120"` for the mixed g6/g6e + g7e fleet (`./launch_g6.sh`).
+   `build.sh` defaults `CLMAD=1` for Blackwell and Ada (the preblackwell
+   receipt selected it: 1.811× on L40S, 1.881× on L4) and drops it to 0 if
+   Turing (`75`) or an unmeasured Ampere/Hopper arch is in the set.
+   `CLMAD=1` still overrides; Turing cannot issue the instruction. The
    published binary key covers the arches and knobs as well as the source, so
    builds that differ only in those no longer overwrite each other, and
    `bootstrap.sh` takes the carryless marker it gates on from the published
    `manifest.json` rather than hardcoding 1 -- otherwise a deliberately
    CLMAD-free Ada client would be rejected and the fleet would never start.
    The gate still fails a binary that disagrees with its own manifest.
+   A published prefix whose manifest does not list this GPU's compute
+   capability is treated as incomplete: the first g6/g6e rebuilds a fat
+   `sm_89+sm_120` client rather than launching CUDA against an sm_120-only
+   cubin. Ada workers omit `--threads` (auto occupancy) and pin slots by
+   `gpuFamily` so they do not resume a 385,024-worker Blackwell checkpoint.
 
 ## Runbook
 
@@ -245,6 +251,8 @@ All commands from this directory, with the default region set (`us-west-2`).
 #    is switched to On-Demand. Pass --no-fallback to stay Spot-only.
 TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
+#    leftover G/VT Spot quota on Ada (does not stop g7/g7e):
+#    ./launch_g6.sh
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
