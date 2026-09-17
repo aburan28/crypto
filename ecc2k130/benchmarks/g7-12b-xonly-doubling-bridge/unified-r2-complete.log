@@ -1,0 +1,34 @@
+packed kernel: 80 registers/thread, 128 local bytes/thread, 28032 shared bytes/block, two-product multiplier
+packed theoretical occupancy: 50.0% (3 blocks/SM, 256 threads/block, 82 SMs); grid 4096 blocks
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed last-slot cache mode: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed partial Frobenius routing mask: 1
+packed Frobenius stage order: 1
+packed byte-select Frobenius: 1
+packed seven-stage conversion: 1
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native full product: 0
+packed native reduction: 0
+packed fused sigma: 0
+packed inline mask: 3
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed x-only 2/3 walk: 1
+packed sparse sigma^3 bridge: 1
+packed state tile: 256
+packed block inverse: 1
+packed physical slots/thread: 8; logical workers/block: 128
+backend cuda-packed131-xonly23-bridge3: 524288 threads x 16 slots x 1 lanes = 8388608 walks, dp weight 0, 1024 steps per launch
+       2.5 s    6979.288 M it/s  17179869184 iterations         0 dp         0 stored         0 dropped
+       4.9 s    6953.197 M it/s  34359738368 iterations         0 dp         0 stored         0 dropped
+  finished: 6953.172 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

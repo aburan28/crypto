@@ -1,0 +1,27 @@
+{
+  "status": "nonpromotable-common-kernel-diagnostic",
+  "selected_rates_million_per_second": [
+    6383.936,
+    6333.496,
+    6317.363
+  ],
+  "doubling_rates_million_per_second": [
+    11656.498,
+    11622.244,
+    11442.368
+  ],
+  "selected_median_billion_per_second": 6.333496,
+  "doubling_median_billion_per_second": 11.622244,
+  "paired_ratio": 1.8240442871189262,
+  "ci95": [
+    1.794455655046534,
+    1.8541208037180013
+  ],
+  "doubling_fraction_of_12b": 0.9685203333333334,
+  "state_oracle": {
+    "points": 2048,
+    "steps": 7,
+    "mismatches": 0
+  },
+  "decision": "continue full sparse-bridge implementation; doubling-only cannot promote"
+}
