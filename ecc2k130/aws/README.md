@@ -241,6 +241,9 @@ ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GP
 
 # 4. scale (GPUs, not instances)
 ./fleet.sh scale 64                 # keeps the Spot / On-Demand mix from `up`
+#    or fill remaining G/VT vCPU quota with 1-GPU g7e, then g7:
+#    ./launch_quota.sh
+
 #    recreate to change the On-Demand base or disable fallback:
 #    ./fleet.sh down && ./fleet.sh up 64 --on-demand 8
 #    ./fleet.sh down && ./fleet.sh up 64 --no-fallback
