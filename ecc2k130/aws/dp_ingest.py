@@ -213,6 +213,52 @@ def ensureProgress(conn):
     conn.commit()
 
 
+FOUND_AT_INDEX = "distinguished_points_campaign_found_at"
+
+
+def ensureFoundAtIndex(conn):
+    """Give the snapshot an index to read instead of the whole table.
+
+    Every figure on the dashboard except `dps` is a question about `found_at`
+    -- the newest point, the first point, the last 48 hours by hour -- and
+    with no index on it each one reads all 42 GB of the table. Measured on
+    2026-09-17 at 130 M rows: one `publishStatus` held ~12,000 read IOPS for
+    over five minutes, on the same instance the ingest writes to, and
+    `--status-every` would have started the next one straight after. `dps`
+    itself becomes an index-only count of this index rather than a heap scan.
+
+    CONCURRENTLY so the build does not block the ingest, which means it cannot
+    run inside a transaction and can leave an invalid index behind if it
+    fails; an invalid one is dropped and rebuilt rather than silently used.
+    """
+    previous = conn.autocommit
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT c.relname, i.indisvalid FROM pg_class c "
+                "JOIN pg_index i ON i.indexrelid = c.oid WHERE c.relname = %s",
+                (FOUND_AT_INDEX,))
+            row = cur.fetchone()
+            if row and not row[1]:
+                log("index %s exists but is invalid (a previous build failed); "
+                    "dropping it" % FOUND_AT_INDEX)
+                cur.execute("DROP INDEX CONCURRENTLY IF EXISTS %s" % FOUND_AT_INDEX)
+                row = None
+            if row:
+                return False
+            log("building index %s; the ingest keeps running while it does"
+                % FOUND_AT_INDEX)
+            started = time.time()
+            cur.execute(
+                "CREATE INDEX CONCURRENTLY IF NOT EXISTS %s "
+                "ON distinguished_points (campaign_id, found_at)" % FOUND_AT_INDEX)
+            log("built index %s in %.0fs" % (FOUND_AT_INDEX, time.time() - started))
+            return True
+    finally:
+        conn.autocommit = previous
+
+
 COUNTS_TTL = 1800.0
 _counts = {"at": 0.0, "map": {}}
 
@@ -714,7 +760,9 @@ def main(argv=None):
                     help="objects per pass; status and metrics are published "
                          "between passes, so this bounds how long the page can "
                          "stay stale while a backlog drains (0 = unbounded)")
-    ap.add_argument("--status-every", type=float, default=120.0,
+    ap.add_argument("--no-index", dest="index", action="store_false",
+                    help="do not create the found_at index at startup")
+    ap.add_argument("--status-every", type=float, default=300.0,
                     help="seconds between status.json writes; the snapshot "
                          "counts the whole table, which is not free on a "
                          "hundred-million-row store, so short passes during a "
@@ -754,6 +802,13 @@ def main(argv=None):
         try:
             with connect() as conn:
                 ensureProgress(conn)
+                if args.index and not (args.verify or args.pending):
+                    try:
+                        ensureFoundAtIndex(conn)
+                    except Exception as exc:
+                        # A missing index is slow, not wrong: say so and walk on.
+                        log("index build failed (snapshots stay slow): %s: %s"
+                            % (type(exc).__name__, exc))
                 if args.verify:
                     return 0 if verify(conn, s3, args.bucket) else 1
                 if args.pending:

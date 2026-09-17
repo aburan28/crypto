@@ -206,6 +206,64 @@ class LegacyCounts(unittest.TestCase):
         self.assertEqual(self.aggregates(conn), 2)
 
 
+class IndexCursor:
+    def __init__(self, conn):
+        self.conn = conn
+        self.row = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        self.conn.statements.append(" ".join(sql.split()))
+        if "pg_index" in sql:
+            self.row = self.conn.existing
+
+    def fetchone(self):
+        return self.row
+
+
+class IndexConn:
+    def __init__(self, existing=None):
+        self.existing = existing
+        self.statements = []
+        self.autocommit = False
+
+    def cursor(self):
+        return IndexCursor(self)
+
+
+class FoundAtIndex(unittest.TestCase):
+    """The snapshot's cost is an index, and a half-built one is not one."""
+
+    def statements(self, conn, needle):
+        return [s for s in conn.statements if needle in s]
+
+    def test_it_is_built_when_it_is_missing(self):
+        conn = IndexConn(existing=None)
+        self.assertTrue(dp_ingest.ensureFoundAtIndex(conn))
+        self.assertEqual(len(self.statements(conn, "CREATE INDEX CONCURRENTLY")), 1)
+
+    def test_it_is_not_rebuilt_when_it_is_already_valid(self):
+        conn = IndexConn(existing=(dp_ingest.FOUND_AT_INDEX, True))
+        self.assertFalse(dp_ingest.ensureFoundAtIndex(conn))
+        self.assertEqual(self.statements(conn, "CREATE INDEX CONCURRENTLY"), [])
+
+    def test_an_invalid_index_is_dropped_and_rebuilt(self):
+        conn = IndexConn(existing=(dp_ingest.FOUND_AT_INDEX, False))
+        self.assertTrue(dp_ingest.ensureFoundAtIndex(conn))
+        self.assertEqual(len(self.statements(conn, "DROP INDEX CONCURRENTLY")), 1)
+        self.assertEqual(len(self.statements(conn, "CREATE INDEX CONCURRENTLY")), 1)
+
+    def test_the_build_runs_outside_a_transaction_and_restores_the_mode(self):
+        conn = IndexConn(existing=None)
+        dp_ingest.ensureFoundAtIndex(conn)
+        self.assertFalse(conn.autocommit)
+
+
 class Passes(unittest.TestCase):
     """What a pass does with a backlog, and with a database that goes away.
 

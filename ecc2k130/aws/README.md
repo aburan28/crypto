@@ -520,6 +520,21 @@ identical to the ingest that was broken. `--pass-objects` (default 256) caps
 the slice; `ingest.outstanding_objects` still reports the whole backlog, not
 the slice, so a reader sees the real number every couple of minutes.
 
+**The snapshot is the one cost that grows with the corpus, so it gets an
+index.** Every figure on the page except `dps` is a question about `found_at`
+— newest point, first point, the last 48 hours by hour — and with no index on
+that column each one reads the whole 42 GB table. Measured at 130 M rows on
+2026-09-17: a single `publishStatus` held ~12,000 read IOPS on `rho-dp` for
+over five minutes, on the instance the ingest was writing to, and
+`--status-every` would have started the next one immediately after. The ingest
+creates `distinguished_points_campaign_found_at` on `(campaign_id, found_at)`
+at startup, `CONCURRENTLY` so the build does not block it, dropping and
+rebuilding rather than trusting an invalid index from a failed build; `dps`
+becomes an index-only count. `--no-index` opts out. The corpus-wide per-object
+aggregate in `pending()` is the other scan, and it is cached for half an hour
+(`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
+era, which stopped growing when that table appeared.
+
 **A thread whose connection dies opens another.** `rho-dp` was resized under
 that same pass, and each worker thread went on using its closed connection:
 2,533 objects failed with `OperationalError: the connection is closed` in a
