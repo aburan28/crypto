@@ -121,7 +121,7 @@
       iterations per point, the interval for <span class="mono">HW(x) &le;
       34</span>, and says so: that fallback reads low, because the campaign
       distinguishes at the sparser <span class="mono">HW(x) &le; 32</span>
-      and walks about <span class="mono">2^27.9</span> iterations per point.
+      and walks about <span class="mono">2^28.4</span> iterations per point.
       Both figures belong to one campaign's distinguishing rule, so neither
       is shown for anything but <span class="mono">ecc2k-130</span>.
     </p>
@@ -437,7 +437,7 @@ make gpu
   // own: a walk reports a point once per 2^25.27 iterations at HW(x) <= 34
   // (ecc2k130/aws/README.md), so the walk behind the point count is that
   // count times the same factor. It is a floor rather than an estimate --
-  // this campaign distinguishes at the sparser HW(x) <= 32, about 2^27.9
+  // this campaign distinguishes at the sparser HW(x) <= 32, about 2^28.4
   // iterations per point by its own counters -- which is why a total the
   // walkers counted is preferred wherever one is published, and why the page
   // says which of the two it is showing. The constant is a parameter of one
@@ -527,7 +527,7 @@ make gpu
   // from a fleet that has stopped.
   //
   // The two accountings are never mixed. A counted total divided by a
-  // derived rate would publish an ETA about six times too long, because the
+  // derived rate would publish an ETA about nine times too long, because the
   // interval the derivation uses belongs to a cutoff this campaign does not
   // run: the derived rate goes with the derived total, or the ETA waits.
   function opsPerSecond(status) {
