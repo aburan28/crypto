@@ -8,6 +8,7 @@
 #   ./fleet.sh scale 128             change the target
 #   ./fleet.sh status                instances, their types and spot/on-demand
 #   ./fleet.sh down                  delete the fleet and terminate its instances
+#   ./fleet.sh roll                  replace every running instance, --batch at a time
 #
 # The fleet is `maintain`: an interrupted spot instance is replaced, the new
 # one claims the released slot and resumes its checkpoint from S3.  Instance
@@ -20,9 +21,23 @@
 # On-Demand — only then, and only for the shortfall. Use --no-fallback to keep
 # a pure Spot (plus optional --on-demand base) request.
 #
+# `roll` is what actually deploys an `infra.sh sync`.  Rollout.sh's kernel
+# rollout works without touching instances because workers poll campaign.json
+# for a new binaryKey; worker.py itself has no such poll (bootstrap.sh fetches
+# it once, at launch) and a running instance keeps executing whatever
+# supervisor code it booted with, however long the fleet has been up.
+# `roll` terminates ROLL_BATCH (default 4) instances at a time; each gets a
+# normal OS shutdown, which stops ecc2k130-worker@* (SIGTERM, checkpoint,
+# upload, per bootstrap.sh's TimeoutStopSec), and `maintain` launches a
+# replacement that re-bootstraps from S3 and resumes the checkpoint just
+# uploaded. It waits for the fleet to refill (or ROLL_TIMEOUT_SECONDS,
+# default 1800, per batch) before starting the next one, so a stuck launch
+# stalls at most one batch rather than the whole campaign.
+#
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
-# FALLBACK_WAIT_SECONDS (default 120).
+# FALLBACK_WAIT_SECONDS (default 120), ROLL_BATCH (default 4),
+# ROLL_TIMEOUT_SECONDS (default 1800).
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -194,6 +209,55 @@ down)
     rm -f "$FLEET_FILE"
     echo "fleet $id deleted; instances terminating (workers checkpoint on the way down)"
     ;;
+roll)
+    id=$(fleetId)
+    if [ -z "$id" ] || [ "$id" = None ]; then echo "no active fleet" >&2; exit 1; fi
+    shift
+    batch=${ROLL_BATCH:-4}
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --batch) batch=$2; shift 2 ;;
+            *) echo "unknown option $1" >&2; exit 1 ;;
+        esac
+    done
+    if [ "$batch" -lt 1 ]; then echo "--batch must be >= 1" >&2; exit 1; fi
+    timeout=${ROLL_TIMEOUT_SECONDS:-1800}
+    instances=$(aws ec2 describe-fleet-instances --fleet-id "$id" --query 'ActiveInstances[].InstanceId' --output text)
+    # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+    set -- $instances
+    total=$#
+    if [ "$total" -eq 0 ]; then echo "fleet $id has no active instances"; exit 0; fi
+    target=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].TargetCapacitySpecification.TotalTargetCapacity' --output text)")
+    echo "fleet $id: rolling $total instance(s), $batch at a time, so each re-bootstraps onto" \
+         "whatever aws/*.py this campaign's infra.sh sync last published"
+    rolled=0
+    while [ $# -gt 0 ]; do
+        group=""
+        n=0
+        while [ $# -gt 0 ] && [ "$n" -lt "$batch" ]; do
+            group="$group $1"
+            shift
+            n=$((n + 1))
+        done
+        echo "terminating:$group"
+        # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+        aws ec2 terminate-instances --instance-ids $group >/dev/null
+        waited=0
+        while :; do
+            fulfilled=$(capacityInt "$(aws ec2 describe-fleets --fleet-ids "$id" --query 'Fleets[0].FulfilledCapacity' --output text)")
+            if [ "$fulfilled" -ge "$target" ]; then break; fi
+            if [ "$waited" -ge "$timeout" ]; then
+                echo "fleet $id: still $fulfilled/$target GPU(s) after ${timeout}s; moving on to the next batch" >&2
+                break
+            fi
+            sleep 15
+            waited=$((waited + 15))
+        done
+        rolled=$((rolled + n))
+        echo "fleet $id: rolled $rolled/$total"
+    done
+    echo "fleet $id: roll complete, $total instance(s) replaced"
+    ;;
 *)
-    sed -n '3,18p' "$0"; exit 1 ;;
+    sed -n '3,20p' "$0"; exit 1 ;;
 esac
