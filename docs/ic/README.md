@@ -183,6 +183,49 @@ expected trial count, which is an exact recount over the witness list
 rather than a re-search. The pruned base stays Frobenius- and
 negation-closed, so every relation identity survives.
 
+### Ranking by what the solver pays, not by trials alone
+
+Expected trials is half the collection cost. A trial is paid whether or not
+it succeeds, so collection spends `trials × (cost per trial)`, and the
+second factor is the one that varies: coverage saturates at 100% as the
+subspace grows while the Weil-restricted summation system keeps `m·ℓ`
+Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
+twelve verified logarithms — see
+[`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../RESEARCH_FACTOR_BASE_SOLVE_COST.md).
+
+    ./target/release/ic search --degree 15 --curve-a 1 --summands 2 --family divisor \
+        --min-dimension 3 --max-dimension 8 --no-prune --no-saturate \
+        --solver groebner --solve-cost-targets 8
+
+`--solve-cost-targets N` runs the Gröbner oracle on `N` census targets per
+candidate, charging refutations as well as successes, and ranks by
+`expected_stage_ops = expected trials × measured word XORs per target`. The
+report's `scoring_objective` says which of the two ranked it, and each
+candidate carries `measured_ops_per_target`, `expected_stage_ops` and
+`trace_zero`. Omitted, nothing changes: the ranking is the trial count as
+before.
+
+Three restrictions, each refused loudly rather than silently worked around,
+because a number that does not describe the run is worse than no number:
+
+- it prices the **Gröbner** oracle, so `--solver` must be `groebner` —
+  scoring one oracle and running another selects for the wrong thing;
+- only a **linear-subspace** candidate is described by its own system. The
+  restriction is written over the subspace basis, so a pruned, saturated,
+  union or orbit base — a proper subset of that span, carried by the SAT
+  domain trie instead — would be priced on the span rather than on itself,
+  at a cost in time of several orders of magnitude. Such candidates are
+  left unpriced with the reason in `solve_cost_skipped`, and ranked below
+  every priced one, since trials and word XORs are not comparable numbers;
+- nothing is measured while `IC_REDUCTION_CACHE` is set, where a memoised
+  reduction returns without running F4 and the counter diff would report
+  replayed work as free. (A preprocessing hit is harmless: F4 still runs,
+  so it is still counted.)
+
+Free and unmeasured, reported for every candidate: `trace_zero`, true when
+the abscissae lie in `ker Tr`, which doubles the yield and is decided by the
+divisibility `(x+1) ∤ g` rather than by solving anything.
+
 The best `--validate-top` candidates are then validated by real child runs
 on `--holdout` fresh known-answer fixtures with `--solver` (default
 pair-table); the selected candidate is the fastest one that verified every
@@ -381,6 +424,13 @@ A parameter file (schema_version 1):
      "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
                     "max_dimension":11,"targets":256,"saturate":false},
      "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
+
+The `search` mode also takes `solve_cost_targets`, the workflow form of
+`--solve-cost-targets` above: with it the select stage ranks candidates by
+measured solving cost instead of by expected trials. It requires
+`solver: "groebner"`, `prune: false`, `saturate: false` and a `factor` or
+`divisor` family, for the reasons given there, and the run is refused if
+they disagree.
 
 `factor_base.mode` is `spec` (with a recipe as written by `ic search`)
 or `search` (the census search's knobs; the best candidate is taken

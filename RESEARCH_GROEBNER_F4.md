@@ -47,7 +47,14 @@ All 6 pass:
 - Sparse linear algebra (Lanczos / Wiedemann).
 - Hilbert-driven D selection (currently we just iterate until
   Buchberger condition holds).
-- Field-specific specialisations (e.g. F_2 with XOR-only arithmetic).
+- ~~Field-specific specialisations (e.g. `F_2` with XOR-only
+  arithmetic).~~  **Done, for the binary decomposition systems.**  The
+  `F_2` path in `koblitz_groebner` is a bit-packed Macaulay matrix
+  reduced by a Method-of-Four-Russians elimination; the round that built
+  it, with its frozen before/after table and its rejected variants, is
+  [`RESEARCH_GROEBNER_STAGE.md`](RESEARCH_GROEBNER_STAGE.md).  Still
+  missing here: the same specialisation for the generic `MPoly` engine
+  above, which remains the textbook Buchberger loop.
 
 ## References
 

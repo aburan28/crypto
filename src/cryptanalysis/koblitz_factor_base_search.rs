@@ -42,6 +42,27 @@
 //! trial is a separate axis that depends on the oracle, and the report
 //! carries the standard proxies (`|F|^{m−1}` enumeration work, SAT
 //! variable count) alongside so a caller can trade them off.
+//!
+//! **That separation costs an order of magnitude when it is left to the
+//! caller.**  A trial is paid whether or not it succeeds, so collection
+//! spends `(U + 1)/p_m · E[solver cost per target]`, and the second
+//! factor is the one that varies: coverage saturates at 100% as the
+//! subspace grows while the Gröbner oracle's system has `m·ℓ` unknowns
+//! and does not.  Measured on `K_1/2^15`, `m = 2`, over 72 complete and
+//! verified discrete logarithms: the base this module's `T` selects costs
+//! `22.41×` the one [`SearchOptions::solve_cost_targets`] selects, and the
+//! rank correlation between `T` and measured cost across the six bases is
+//! `ρ = −0.83`.  See `RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6, and
+//! `examples/groebner_base_sweep.rs` for the sweep that scores the second
+//! factor directly.
+//!
+//! Only a linear-subspace candidate can be scored that way — the Weil
+//! restriction is written over the subspace basis, so a base that is a
+//! *subset* of its span is carried by the SAT domain trie instead and is
+//! left unmeasured rather than priced on the span.  Free and unmeasured:
+//! `ker g(σ) ⊆ ker Tr` exactly when `(x+1) ∤ g`, which doubles the yield
+//! (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1) for the price of a
+//! divisibility test.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
@@ -52,8 +73,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
+use super::koblitz_groebner::{f4_profile, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
-    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor, groebner_decompose,
     build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, invariant_factors,
     projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
     span_f2, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
@@ -541,6 +563,25 @@ pub struct SearchOptions {
     pub projected_columns: bool,
     /// Seed for target sampling and union seeds.
     pub seed: u64,
+    /// Measure the algebraic solver on this many of the census targets
+    /// per candidate, and rank by the resulting
+    /// [`Candidate::expected_stage_ops`] instead of by expected trials.
+    ///
+    /// `None` keeps the historical trials-only ranking, so every earlier
+    /// measurement means what it did.  A trial is paid whether or not it
+    /// succeeds and the Gröbner system carries `m·ℓ` unknowns, so the
+    /// two orders can differ by an order of magnitude — see
+    /// `RESEARCH_FACTOR_BASE_SOLVE_COST.md`.
+    ///
+    /// Only linear-subspace candidates can be priced: the summation
+    /// polynomial is Weil-restricted over the subspace basis, so a base
+    /// that is a subset of that span (pruned, saturated, union, orbit)
+    /// is left unmeasured and ranked below the measured ones.  Pair it
+    /// with `prune: false`, `saturate: false` and the divisor or factor
+    /// family to score every candidate the same way.  Nothing is measured
+    /// at all while `IC_REDUCTION_CACHE` is set, since a replayed
+    /// reduction returns without running F4 and so reports as free.
+    pub solve_cost_targets: Option<usize>,
 }
 
 impl Default for SearchOptions {
@@ -565,6 +606,7 @@ impl Default for SearchOptions {
             saturate: true,
             projected_columns: true,
             seed: 0x4641_4354_4f52_4241, // "FACTORBA"
+            solve_cost_targets: None,
         }
     }
 }
@@ -591,6 +633,24 @@ pub struct Candidate {
     pub pair_table_lookups_per_trial: f64,
     /// `m·dim + (m − 2)·n` — Boolean unknowns of the algebraic system.
     pub sat_variables: usize,
+    /// Whether the abscissa subspace lies inside `ker Tr`, which doubles
+    /// the yield (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1).  Decided
+    /// by a divisibility, not by solving: `ker g(σ) ⊆ ker Tr` exactly
+    /// when `(x+1) ∤ g`, and equivalently every abscissa has trace zero.
+    pub trace_zero: bool,
+    /// Mean 64-bit word XORs the Gröbner oracle spent per target, over
+    /// `solve_cost_targets` targets, decomposing and refuted alike.
+    /// `None` when the measurement was not asked for.
+    pub measured_ops_per_target: Option<f64>,
+    /// `expected_trials × measured_ops_per_target` — the word XORs the
+    /// decomposition stage is expected to spend collecting one
+    /// determining system over this base.
+    pub expected_stage_ops: Option<f64>,
+    /// Why the solve cost was not measured, when it was asked for.
+    /// A base whose points are a *subset* of the space its Weil
+    /// restriction is written over cannot be priced this way — see
+    /// [`measure_solve_cost`].
+    pub solve_cost_skipped: Option<String>,
     pub build_ms: f64,
     pub prune_steps: Vec<PruneStep>,
     /// Why the candidate was not scored, if it was not.
@@ -603,6 +663,12 @@ impl Candidate {
         self.census
             .as_ref()
             .map_or(f64::INFINITY, |c| c.expected_trials)
+    }
+
+    /// The quantity to minimise: measured stage cost where it was
+    /// measured, expected trials otherwise.
+    pub fn score(&self) -> f64 {
+        self.expected_stage_ops.unwrap_or_else(|| self.expected_trials())
     }
 }
 
@@ -621,19 +687,39 @@ pub struct SearchReport {
 }
 
 impl SearchReport {
-    /// Best scored candidate, if any decomposes anything.
+    /// Best candidate in rank order, if any decomposes anything.
+    ///
+    /// Scored by whichever objective [`SearchOptions::solve_cost_targets`]
+    /// selected, so this is the measured-cheapest base when the solve
+    /// cost was measured and the fewest-trials base when it was not.
     pub fn best(&self) -> Option<&Candidate> {
-        self.candidates
-            .iter()
-            .find(|c| c.expected_trials().is_finite())
+        self.candidates.iter().find(|c| c.score().is_finite())
     }
 }
 
-/// Rank: finite expected trials first (ascending), then fewer points.
+/// Rank measured candidates first, each group ascending by
+/// [`Candidate::score`], then by the free tie-breaks.
+///
+/// The two scores are in different units — word XORs against trials — so
+/// they are never compared to each other.  When `solve_cost_targets` was
+/// not asked for, nothing is measured, every candidate is in the second
+/// group and the order is exactly the historical one.  When it was, the
+/// candidates the Gröbner oracle could actually be priced on
+/// ([`measure_solve_cost`] declines the rest) rank above the ones it
+/// could not, which would otherwise win on a trials count of `8` against
+/// a word-XOR count of `10^6`.
+///
+/// A trace-zero base breaks a tie because it yields twice for nothing
+/// (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1); the remaining ties go to
+/// the smaller base, which is the cheaper one to materialise and to
+/// solve over.
 pub fn rank_candidates(candidates: &mut [Candidate]) {
     candidates.sort_by(|x, y| {
-        x.expected_trials()
-            .total_cmp(&y.expected_trials())
+        x.expected_stage_ops
+            .is_none()
+            .cmp(&y.expected_stage_ops.is_none())
+            .then_with(|| x.score().total_cmp(&y.score()))
+            .then(y.trace_zero.cmp(&x.trace_zero))
             .then(x.points.cmp(&y.points))
             .then(x.unknowns.cmp(&y.unknowns))
     });
@@ -655,6 +741,10 @@ fn unscored(spec: FactorBaseSpec, reason: String, m: usize, n: u32) -> Candidate
         enumeration_ops_per_trial: 0.0,
         pair_table_lookups_per_trial: 0.0,
         sat_variables: m.saturating_sub(2) * n as usize,
+        trace_zero: false,
+        measured_ops_per_target: None,
+        expected_stage_ops: None,
+        solve_cost_skipped: None,
         build_ms: 0.0,
         prune_steps: Vec::new(),
         skipped: Some(reason),
@@ -749,6 +839,10 @@ fn score_base(
         enumeration_ops_per_trial: points.powi(opts.m as i32 - 1),
         pair_table_lookups_per_trial: points.powi(opts.m as i32 - 2),
         sat_variables: opts.m * fb.ell as usize + opts.m.saturating_sub(2) * kc.n as usize,
+        trace_zero: subspace_is_trace_zero(kc, fb),
+        measured_ops_per_target: None,
+        expected_stage_ops: None,
+        solve_cost_skipped: None,
         build_ms,
         prune_steps,
         skipped: None,
@@ -780,7 +874,116 @@ fn score_base(
         opts.extra_relations,
         census_ms,
     ));
+    if let Some(sample) = opts.solve_cost_targets {
+        measure_solve_cost(kc, fb, targets, opts, sample, &mut candidate);
+    }
     (candidate, witnesses)
+}
+
+/// Does every abscissa of the base have trace zero?
+///
+/// For an invariant subspace this is the divisibility test `(x+1) ∤ g`,
+/// but the base may be a union or a pruned set, so it is computed
+/// directly on the abscissae and holds for every family.
+fn subspace_is_trace_zero(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> bool {
+    fb.subspace.iter().all(|x| {
+        let mut acc = x.clone();
+        let mut cur = x.clone();
+        for _ in 1..kc.n {
+            cur = cur.square(&kc.curve.irreducible);
+            acc = acc.add(&cur);
+        }
+        acc.is_zero()
+    })
+}
+
+/// Run the algebraic oracle on the first `sample` census targets and
+/// record what it cost.
+///
+/// This is the second factor of the collection cost, the one the census
+/// does not see: coverage saturates as the subspace grows, while the
+/// Weil-restricted system carries `m·ℓ` unknowns and does not.  Both
+/// outcomes are charged — a refuted target costs a full search and is
+/// the common case — so the mean is over every target tried, not over
+/// the ones that decomposed.
+///
+/// **Only a [`FactorBaseDomain::LinearSubspace`] base can be priced this
+/// way.**  The summation polynomial is Weil-restricted over
+/// `fb.subspace_basis`, so the system's solutions are the whole space
+/// that basis spans.  For every other domain — a pruned
+/// `SubspaceSubset`, a `TwoTorsionSaturation`, a `FrobeniusUnion`, an
+/// `ExplicitFrobeniusOrbits` set — the base is a *subset* of that span,
+/// carried by the SAT domain trie rather than by the linear algebra, and
+/// [`groebner_decompose`] falls back to enumerating the whole span and
+/// rejecting non-members.  The number that comes back is then the span's
+/// solving cost and not the base's, and it costs orders of magnitude
+/// more to obtain: at `K_1/2^15`, `m = 2` a divisor-only sweep of the
+/// linear candidates takes `0.3 s` where the same sweep with pruning and
+/// saturation on does not finish in ten minutes.  Those candidates are
+/// left unmeasured, with the reason recorded in
+/// [`Candidate::solve_cost_skipped`], and [`rank_candidates`] sorts them
+/// below every measured one rather than letting their trials count
+/// compete with a word-XOR count.
+fn measure_solve_cost(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    targets: &TargetSet,
+    opts: &SearchOptions,
+    sample: usize,
+    candidate: &mut Candidate,
+) {
+    if fb.domain != FactorBaseDomain::LinearSubspace {
+        candidate.solve_cost_skipped = Some(format!(
+            "{} is a subset of the space its Weil restriction is written over; \
+             the Gröbner oracle prices the span, not the base",
+            domain_label(&fb.domain)
+        ));
+        return;
+    }
+    // A memo hit returns a reduction without computing it, so the counter
+    // diff below would report replayed work as free.
+    if super::algebra_cache::enabled(super::algebra_cache::Layer::ExactReduction) {
+        candidate.solve_cost_skipped = Some(
+            "IC_REDUCTION_CACHE replays reductions, so nothing here can be timed".into(),
+        );
+        return;
+    }
+    let trials = sample.min(targets.points.len());
+    if trials == 0 {
+        candidate.solve_cost_skipped = Some("no census targets".into());
+        return;
+    }
+    if !candidate.cofactor_admissible {
+        candidate.solve_cost_skipped = Some("cofactor classes cannot cancel".into());
+        return;
+    }
+    let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+    let index_of = fb.index_map();
+    let before = f4_profile().word_ops;
+    for target in targets.points.iter().take(trials) {
+        let _ = groebner_decompose(
+            kc,
+            fb,
+            &index_of,
+            &st,
+            target,
+            opts.m,
+            SolverEngine::default(),
+            20_000,
+        );
+    }
+    let ops = f4_profile().word_ops.saturating_sub(before) as f64 / trials as f64;
+    candidate.measured_ops_per_target = Some(ops);
+    // Cost per target is only half of it: without a trial count there is
+    // nothing to multiply, and a base that decomposes nothing is not made
+    // attractive by being cheap to fail on.
+    let expected = candidate.expected_trials();
+    if expected.is_finite() {
+        candidate.expected_stage_ops = Some(expected * ops);
+    } else {
+        candidate.solve_cost_skipped =
+            Some("no census target decomposes, so there is no trial count to price".into());
+    }
 }
 
 /// Enumerate the specs a search would try, without scoring them.
@@ -964,6 +1167,122 @@ mod tests {
             .count()
     }
 
+    /// The divisor-only search options the solve-cost objective needs:
+    /// every candidate is a linear subspace, so every one can be priced.
+    fn linear_only(m: usize, solve_cost_targets: Option<usize>) -> SearchOptions {
+        SearchOptions {
+            m,
+            min_dimension: 3,
+            max_dimension: 8,
+            families: vec![Family::Divisor],
+            prune: false,
+            saturate: false,
+            seed: 1,
+            solve_cost_targets,
+            ..SearchOptions::default()
+        }
+    }
+
+    /// Coverage alone ranks the bases of `K_1/2^15` backwards.
+    ///
+    /// The point of `RESEARCH_FACTOR_BASE_SOLVE_COST.md`: expected trials
+    /// sees the relation columns and the coverage and not the `m·ℓ`
+    /// unknowns of the Weil-restricted summation system, so it climbs the
+    /// dimension ladder collecting yield while paying an order of
+    /// magnitude in solving.  Scoring the solver instead must pick a
+    /// different, smaller base — and the one it picks must really be the
+    /// cheaper of the two when both are measured.
+    #[test]
+    fn solve_cost_scoring_picks_a_cheaper_base_than_expected_trials() {
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+
+        let by_trials = search(&kc, &linear_only(2, None));
+        let trials_pick = by_trials.best().expect("some base decomposes");
+        assert!(
+            trials_pick.expected_stage_ops.is_none(),
+            "no measurement was asked for"
+        );
+
+        let by_cost = search(&kc, &linear_only(2, Some(8)));
+        let cost_pick = by_cost.best().expect("some base decomposes");
+        assert_ne!(
+            cost_pick.spec, trials_pick.spec,
+            "the two objectives must disagree on this curve"
+        );
+
+        // The disagreement is the documented one: the trials pick buys
+        // coverage with dimension, and dimension is what the solver pays.
+        assert!(cost_pick.dimension < trials_pick.dimension);
+        assert!(cost_pick.expected_trials() > trials_pick.expected_trials());
+
+        // And the pick is really cheaper, measured the same way on both.
+        let measured = |spec: &FactorBaseSpec| {
+            by_cost
+                .candidates
+                .iter()
+                .find(|c| &c.spec == spec)
+                .and_then(|c| c.expected_stage_ops)
+                .expect("every linear-subspace candidate is priced")
+        };
+        assert!(
+            measured(&cost_pick.spec) * 4.0 < measured(&trials_pick.spec),
+            "cost pick {:?} at {:e} word XORs must beat trials pick {:?} at {:e}",
+            cost_pick.spec,
+            measured(&cost_pick.spec),
+            trials_pick.spec,
+            measured(&trials_pick.spec)
+        );
+    }
+
+    /// A base that is a subset of the span its summation polynomial is
+    /// restricted over cannot be priced on that span, and must not then
+    /// win on a trials count while the priced candidates carry word XORs.
+    #[test]
+    fn only_linear_subspace_candidates_are_priced_and_they_rank_first() {
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        let opts = SearchOptions {
+            m: 2,
+            min_dimension: 3,
+            max_dimension: 6,
+            families: vec![Family::Divisor],
+            prune: true,
+            saturate: true,
+            seed: 1,
+            solve_cost_targets: Some(4),
+            ..SearchOptions::default()
+        };
+        let report = search(&kc, &opts);
+        let mut priced = 0;
+        let mut seen_unpriced = false;
+        for c in &report.candidates {
+            match c.expected_stage_ops {
+                Some(_) => {
+                    priced += 1;
+                    assert_eq!(
+                        c.domain,
+                        domain_label(&FactorBaseDomain::LinearSubspace),
+                        "priced a base that is a subset of its own span: {:?}",
+                        c.spec
+                    );
+                    assert!(c.solve_cost_skipped.is_none());
+                    assert!(
+                        !seen_unpriced,
+                        "an unpriced candidate ranked above a priced one"
+                    );
+                }
+                None => {
+                    seen_unpriced = true;
+                    assert!(
+                        c.solve_cost_skipped.is_some() || c.skipped.is_some(),
+                        "a candidate went unpriced without saying why: {:?}",
+                        c.spec
+                    );
+                }
+            }
+        }
+        assert!(priced > 0 && seen_unpriced, "the test needs both kinds");
+    }
+
     #[test]
     fn census_coverage_matches_exhaustive_search_for_two_and_three_summands() {
         let kc = KoblitzCurve::new(1, 15).unwrap();
@@ -1115,6 +1434,115 @@ mod tests {
             );
             assert_eq!(census.covered, last.covered_after);
             assert_eq!(pruned.signed_orbits.len(), last.unknowns_after);
+        }
+    }
+
+    #[test]
+    fn solve_cost_ranking_prefers_the_base_the_oracle_is_cheapest_over() {
+        // At K_1/2^15 the two objectives disagree: coverage saturates as
+        // the subspace grows while the Weil-restricted system carries
+        // m·ℓ unknowns and does not, so the trials-optimal base is one
+        // the oracle is an order of magnitude slower on
+        // (RESEARCH_FACTOR_BASE_SOLVE_COST.md).  Ranking by measured
+        // stage cost must put a six-dimensional base first; ranking by
+        // trials alone must not.
+        let kc = KoblitzCurve::new(1, 15).unwrap();
+        let base = SearchOptions {
+            m: 2,
+            min_dimension: 6,
+            max_dimension: 8,
+            families: vec![Family::Divisor],
+            prune: false,
+            saturate: false,
+            union_samples: 0,
+            ..SearchOptions::default()
+        };
+        let by_trials = search(&kc, &base);
+        let by_cost = search(
+            &kc,
+            &SearchOptions {
+                solve_cost_targets: Some(24),
+                ..base.clone()
+            },
+        );
+
+        let dimension_of = |report: &SearchReport| -> u32 {
+            report.best().expect("some base decomposes").dimension
+        };
+        assert_eq!(
+            dimension_of(&by_trials),
+            8,
+            "the trials objective is expected to prefer the larger subspace here"
+        );
+        assert_eq!(
+            dimension_of(&by_cost),
+            6,
+            "measured stage cost must prefer the smaller system"
+        );
+
+        let best = by_cost.best().unwrap();
+        assert!(
+            best.measured_ops_per_target.unwrap_or(0.0) > 0.0,
+            "the oracle must actually have been run"
+        );
+        assert!(best.expected_stage_ops.unwrap_or(f64::INFINITY).is_finite());
+        // Every scored candidate carries the same kind of score, and the
+        // report is sorted by it.
+        let scores: Vec<f64> = by_cost.candidates.iter().map(Candidate::score).collect();
+        assert!(scores.windows(2).all(|w| w[0] <= w[1]));
+        // The ranking must be a real reordering, not a relabelling of
+        // the same order.
+        let trials_first = by_trials.best().unwrap().expected_stage_ops;
+        assert!(trials_first.is_none());
+        let cheapest = best.expected_stage_ops.unwrap();
+        let trials_choice = by_cost
+            .candidates
+            .iter()
+            .filter(|c| c.expected_trials().is_finite())
+            .min_by(|x, y| x.expected_trials().total_cmp(&y.expected_trials()))
+            .unwrap();
+        assert!(
+            trials_choice.expected_stage_ops.unwrap() > 2.0 * cheapest,
+            "the disagreement should be large, not marginal: {:?} against {cheapest}",
+            trials_choice.expected_stage_ops
+        );
+    }
+
+    #[test]
+    fn trace_zero_is_the_divisibility_test_on_every_candidate() {
+        // ker g(σ) ⊆ ker Tr exactly when (x+1) ∤ g, because
+        // Tr = h(σ) with h = (t^n + 1)/(t + 1).  The search computes the
+        // trace directly, so this pins the two against each other.
+        for (a, n) in [(0u8, 9u32), (1, 15), (1, 17)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let opts = SearchOptions {
+                m: 2,
+                min_dimension: 2,
+                max_dimension: 9,
+                families: vec![Family::Divisor],
+                prune: false,
+                saturate: false,
+                union_samples: 0,
+                ..SearchOptions::default()
+            };
+            let report = search(&kc, &opts);
+            let mut checked = 0;
+            for c in &report.candidates {
+                let FactorBaseSpec::Divisor { indices } = &c.spec else {
+                    continue;
+                };
+                if c.skipped.is_some() {
+                    continue;
+                }
+                // Index 0 is `x + 1` in `all_factors_of_x_n_minus_1`.
+                assert_eq!(
+                    c.trace_zero,
+                    !indices.contains(&0),
+                    "K_{a}/2^{n} divisor {indices:?}"
+                );
+                checked += 1;
+            }
+            assert!(checked > 2, "K_{a}/2^{n} scored too few divisors to test");
         }
     }
 
