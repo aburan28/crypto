@@ -1,0 +1,1172 @@
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 19:41:26.459189063 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-17 05:45:54.755582424 +0000
+@@ -1,11 +1,12 @@
+-#![no_main]
++// Under `cargo test` the harness supplies the entry point instead.
++#![cfg_attr(not(test), no_main)]
+ //! Complete, public-synthetic IC/rho jobs for the candidate tournament.
+ //! Uses the production research library; JSON stdin contains no known scalar.
+ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+ use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
+ use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+-    factor_base_points_with_x, koblitz_signed_frobenius_rho_with_progress, point_key,
++    lift_points_with_x, koblitz_signed_frobenius_rho_with_progress, point_key,
+     DecompositionStrategy, FactorBaseLogSolver, IndividualLogSolver, KoblitzCurve,
+     KoblitzIcOptions, KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable,
+     RelationCollector, RelationWorkUnit,
+@@ -82,6 +83,8 @@
+ 
+ // Same public hash-to-curve domain as ic workflow. No target scalar is created.
+ fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
++    // One set of single-word tables for every lift and cofactor multiple.
++    let fast = FastCurve::new(&c.curve);
+     for counter in 0u64..1_000_000 {
+         let mut h = blake3::Hasher::new();
+         h.update(b"ic-workflow-public-target-v1\0");
+@@ -93,11 +96,11 @@
+         let x = F2mElement::from_biguint(&BigUint::from(x), c.n);
+         // The exact single-word lift (tested equal to `points_with_x`, order
+         // included) and cofactor multiple; the general path where it does not fit.
+-        let mut lifts = factor_base_points_with_x(&c.curve, &x);
++        let mut lifts = lift_points_with_x(&c.curve, fast.as_ref(), &x);
+         lifts.sort_by_key(point_key);
+         if lifts.is_empty() { continue; }
+         let chosen = &lifts[usize::from(digest.as_bytes()[8] & 1) % lifts.len()];
+-        let q = match FastCurve::new(&c.curve) {
++        let q = match &fast {
+             Some(fc) => fc.lower(fc.mul(fc.lift(chosen), &c.cofactor)),
+             None => c.mul(chosen, &c.cofactor),
+         };
+@@ -413,6 +416,7 @@
+ /// installs no signal handlers, allocates no alternate signal stack and does not
+ /// read `/proc/self/maps`, work that served no purpose for a job that reads one
+ /// JSON document and writes one. Shared by every arm, rho included.
++#[cfg(not(test))]
+ #[no_mangle]
+ pub extern "C" fn main(_argc: i32, _argv: *const *const u8) -> i32 {
+     let mut input = String::new();
+diff -ruN a/src/binary_ecc/f2m.rs b/src/binary_ecc/f2m.rs
+--- a/src/binary_ecc/f2m.rs	2026-09-16 14:35:55.499991038 +0000
++++ b/src/binary_ecc/f2m.rs	2026-09-17 05:33:01.030449714 +0000
+@@ -248,119 +248,39 @@
+         self.add(other)
+     }
+ 
+-    /// `self · other (mod m(z))` using schoolbook multiplication.
+-    /// Used as the base case in Karatsuba.
++    /// `self · other (mod m(z))`: the carry-less product word by word
++    /// (`pclmulqdq` where the processor has it, a word loop otherwise),
++    /// then one word-level reduction.  The name is historical — it was
++    /// the bit-serial base case of a Karatsuba split — and it is now the
++    /// one multiplication every caller uses.  Bit-exact with the previous
++    /// implementation (a test compares them on every width in use).
+     pub fn schoolbook_mul(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
+-        let m = self.m;
+-        // Unreduced product has up to 2m bits.
+-        let n_words = ((2 * m + 63) / 64) as usize;
+-        let mut prod = vec![0u64; n_words.max(2)];
+-        // For each set bit of self, XOR a shifted copy of `other`.
+-        for i in 0..self.m {
+-            let w_i = (i / 64) as usize;
+-            let b_i = (i % 64) as u32;
+-            if w_i >= self.bits.len() {
+-                break;
+-            }
+-            if (self.bits[w_i] >> b_i) & 1 == 1 {
+-                add_shifted(&mut prod, &other.bits, i);
+-            }
+-        }
++        let mut prod = clmul_words(&self.bits, &other.bits);
+         reduce(&mut prod, irreducible);
+-        let mut out = Self::zero(m);
+-        for (i, w) in prod.iter().enumerate().take(out.bits.len()) {
+-            out.bits[i] = *w;
+-        }
+-        out.mask_in_place();
+-        out
++        Self::from_words(&prod, self.m)
+     }
+ 
+-    /// **Improved Karatsuba multiplication** (Putranto et al. §3.1).
+-    ///
+-    /// Split each operand into low/high halves of `k = m/2` bits:
+-    /// `A = A_L + z^k · A_H`, `B = B_L + z^k · B_H`.
+-    /// Compute three products: `P_L = A_L · B_L`, `P_H = A_H · B_H`,
+-    /// `P_M = (A_L + A_H) · (B_L + B_H)`.
+-    /// Combine: `A · B = P_L + z^k · (P_M − P_L − P_H) + z^{2k} · P_H`.
+-    ///
+-    /// For binary fields, subtraction is XOR, so the "middle" term
+-    /// simplifies to `P_M ⊕ P_L ⊕ P_H`.  Reduction happens once at
+-    /// the end via [`reduce`].
++    /// Kept for its callers: the word-level product is a single pass,
++    /// so the Karatsuba split no longer buys anything.
+     pub fn karatsuba_mul(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
+-        let m = self.m;
+-        // Threshold below which schoolbook is faster.
+-        if m <= 64 {
+-            return self.schoolbook_mul(other, irreducible);
+-        }
+-        let k = m / 2;
+-        let (a_lo, a_hi) = split_at(&self.bits, k);
+-        let (b_lo, b_hi) = split_at(&other.bits, k);
+-
+-        let a_l = F2mElement::from_words(&a_lo, k);
+-        let a_h = F2mElement::from_words(&a_hi, m - k);
+-        let b_l = F2mElement::from_words(&b_lo, k);
+-        let b_h = F2mElement::from_words(&b_hi, m - k);
+-
+-        // Recursive products (without reduction yet — work in 2m-bit space).
+-        let p_lo_bits = unreduced_mul(&a_l.bits, &b_l.bits);
+-        let p_hi_bits = unreduced_mul(&a_h.bits, &b_h.bits);
+-        let a_sum_bits = xor_bits(&a_l.bits, &a_h.bits);
+-        let b_sum_bits = xor_bits(&b_l.bits, &b_h.bits);
+-        let p_mid_bits = unreduced_mul(&a_sum_bits, &b_sum_bits);
+-
+-        // Middle = p_mid ⊕ p_lo ⊕ p_hi
+-        let mid = xor_bits(&xor_bits(&p_mid_bits, &p_lo_bits), &p_hi_bits);
+-
+-        // Combined product: p_lo ⊕ (mid << k) ⊕ (p_hi << 2k).
+-        let mut combined = vec![0u64; ((2 * m + 63) / 64) as usize + 2];
+-        for (i, w) in p_lo_bits.iter().enumerate() {
+-            if i < combined.len() {
+-                combined[i] ^= *w;
+-            }
+-        }
+-        add_shifted(&mut combined, &mid, k);
+-        add_shifted(&mut combined, &p_hi_bits, 2 * k);
+-
+-        reduce(&mut combined, irreducible);
+-        let mut out = Self::zero(m);
+-        for (i, w) in combined.iter().enumerate().take(out.bits.len()) {
+-            out.bits[i] = *w;
+-        }
+-        out.mask_in_place();
+-        out
++        self.schoolbook_mul(other, irreducible)
+     }
+ 
+-    /// Convenience wrapper picking schoolbook or Karatsuba based on `m`.
++    /// `self · other (mod m(z))`.
+     pub fn mul(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
+-        self.karatsuba_mul(other, irreducible)
++        self.schoolbook_mul(other, irreducible)
+     }
+ 
+-    /// `self²`.  In `F_{2^m}` squaring is linear: bit `i` of `self`
+-    /// goes to bit `2i` of the result, other bits zero.  Then
+-    /// reduce mod `m(z)`.
++    /// `self²`.  Squaring is linear in characteristic 2: bit `i` goes to
++    /// bit `2i`, done a half-word at a time by bit spreading, then reduce.
+     pub fn square(&self, irreducible: &IrreduciblePoly) -> Self {
+-        let m = self.m;
+-        let n_words = ((2 * m + 63) / 64) as usize + 1;
+-        let mut sq = vec![0u64; n_words];
+-        for i in 0..m {
+-            let w_i = (i / 64) as usize;
+-            let b_i = i % 64;
+-            if w_i < self.bits.len() && (self.bits[w_i] >> b_i) & 1 == 1 {
+-                let pos = 2 * i;
+-                let w_o = (pos / 64) as usize;
+-                let b_o = pos % 64;
+-                if w_o < sq.len() {
+-                    sq[w_o] ^= 1u64 << b_o;
+-                }
+-            }
++        let mut sq = Vec::with_capacity(2 * self.bits.len() + 1);
++        for &w in &self.bits {
++            sq.push(spread32(w));
++            sq.push(spread32(w >> 32));
+         }
+         reduce(&mut sq, irreducible);
+-        let mut out = Self::zero(m);
+-        for (i, w) in sq.iter().enumerate().take(out.bits.len()) {
+-            out.bits[i] = *w;
+-        }
+-        out.mask_in_place();
+-        out
++        Self::from_words(&sq, self.m)
+     }
+ 
+     /// `self^(2^k)` — `k` repeated squarings.
+@@ -441,152 +361,496 @@
+ 
+ // ── Internal helpers (unreduced bit-vector arithmetic) ────────────
+ 
+-/// XOR two bit-vectors (different lengths allowed; result is
+-/// length = max).
+-fn xor_bits(a: &[u64], b: &[u64]) -> Vec<u64> {
+-    let n = a.len().max(b.len());
+-    let mut out = vec![0u64; n];
+-    for (i, w) in a.iter().enumerate() {
+-        out[i] ^= *w;
++/// Spread the low 32 bits of `x` so that bit `i` lands at bit `2i`.
++#[inline(always)]
++fn spread32(x: u64) -> u64 {
++    let mut x = x & 0xFFFF_FFFF;
++    x = (x | (x << 16)) & 0x0000_FFFF_0000_FFFF;
++    x = (x | (x << 8)) & 0x00FF_00FF_00FF_00FF;
++    x = (x | (x << 4)) & 0x0F0F_0F0F_0F0F_0F0F;
++    x = (x | (x << 2)) & 0x3333_3333_3333_3333;
++    x = (x | (x << 1)) & 0x5555_5555_5555_5555;
++    x
++}
++
++/// Whether the processor has carry-less multiplication, decided once per
++/// process by a single `CPUID` (leaf 1, ECX bit 1).  The standard
++/// library's feature cache asks several leaves on first use, and on a
++/// virtual machine every `CPUID` traps to the hypervisor; every field
++/// implementation in the crate shares this one answer.
++pub fn pclmul_available() -> bool {
++    #[cfg(target_arch = "x86_64")]
++    {
++        use std::sync::atomic::{AtomicU8, Ordering};
++        static PROBE: AtomicU8 = AtomicU8::new(0);
++        match PROBE.load(Ordering::Relaxed) {
++            1 => false,
++            2 => true,
++            _ => {
++                // SAFETY: CPUID is available on every x86_64 processor.
++                let leaf = unsafe { std::arch::x86_64::__cpuid(1) };
++                let ok = (leaf.ecx >> 1) & 1 == 1;
++                PROBE.store(if ok { 2 } else { 1 }, Ordering::Relaxed);
++                ok
++            }
++        }
+     }
+-    for (i, w) in b.iter().enumerate() {
+-        out[i] ^= *w;
++    #[cfg(not(target_arch = "x86_64"))]
++    {
++        false
+     }
+-    out
+ }
+ 
+-/// Unreduced schoolbook multiplication of two bit-vectors.  Returns
+-/// a bit-vector of length `len(a) + len(b)` words.
+-fn unreduced_mul(a: &[u64], b: &[u64]) -> Vec<u64> {
+-    let n = a.len() + b.len();
+-    let mut out = vec![0u64; n];
+-    for (i, a_w) in a.iter().enumerate() {
+-        for bit in 0..64u32 {
+-            if (a_w >> bit) & 1 == 1 {
+-                add_shifted(&mut out, b, (i as u32) * 64 + bit);
++#[cfg(target_arch = "x86_64")]
++#[target_feature(enable = "pclmulqdq")]
++unsafe fn clmul64_pclmul(a: u64, b: u64) -> (u64, u64) {
++    use std::arch::x86_64::*;
++    let x = _mm_set_epi64x(0, a as i64);
++    let y = _mm_set_epi64x(0, b as i64);
++    let z = _mm_clmulepi64_si128::<0x00>(x, y);
++    let lo = _mm_cvtsi128_si64(z) as u64;
++    let hi = _mm_cvtsi128_si64(_mm_srli_si128::<8>(z)) as u64;
++    (lo, hi)
++}
++
++/// Carry-less `a · b` of two words as `(low, high)`, without hardware help.
++fn clmul64_soft(a: u64, b: u64) -> (u64, u64) {
++    let mut lo = 0u64;
++    let mut hi = 0u64;
++    for i in 0..64u32 {
++        if (b >> i) & 1 == 1 {
++            lo ^= a << i;
++            if i > 0 {
++                hi ^= a >> (64 - i);
+             }
+         }
+     }
++    (lo, hi)
++}
++
++/// Carry-less product of two words, on whichever path the processor offers.
++#[inline]
++fn clmul64(a: u64, b: u64, fast: bool) -> (u64, u64) {
++    #[cfg(target_arch = "x86_64")]
++    if fast {
++        // SAFETY: `pclmul_available` checked the instruction is present.
++        return unsafe { clmul64_pclmul(a, b) };
++    }
++    let _ = fast;
++    clmul64_soft(a, b)
++}
++
++/// Unreduced carry-less product of two word vectors, `len(a) + len(b) + 1`
++/// words long (the spare word is what `reduce` folds into).
++fn clmul_words(a: &[u64], b: &[u64]) -> Vec<u64> {
++    let mut out = vec![0u64; a.len() + b.len() + 1];
++    let fast = pclmul_available();
++    for (i, &x) in a.iter().enumerate() {
++        if x == 0 {
++            continue;
++        }
++        for (j, &y) in b.iter().enumerate() {
++            if y == 0 {
++                continue;
++            }
++            let (lo, hi) = clmul64(x, y, fast);
++            out[i + j] ^= lo;
++            out[i + j + 1] ^= hi;
++        }
++    }
+     out
+ }
+ 
+-/// `out ^= b << shift`  (treating both as bit-vectors of unspecified
+-/// length, packing word-major).
+-fn add_shifted(out: &mut Vec<u64>, b: &[u64], shift: u32) {
+-    let word_shift = (shift / 64) as usize;
+-    let bit_shift = shift % 64;
+-    if bit_shift == 0 {
+-        for (i, w) in b.iter().enumerate() {
+-            let target = i + word_shift;
+-            if target < out.len() {
+-                out[target] ^= *w;
++/// Reduce a polynomial (bit-vector) modulo `m(z)`, in place, a word of
++/// high bits at a time: the chunk `h · z^p` with `p ≥ m` is replaced by
++/// `h · z^(p−m) · Σ z^t` over the low terms, from the top down, until no
++/// bit at or above `m` remains.  Every fold lowers the degree by at
++/// least `m − max(t)`, so it terminates, and each fold spills at most
++/// one word past the chunk it replaces, which the spare word absorbs.
++fn reduce(value: &mut Vec<u64>, irreducible: &IrreduciblePoly) {
++    let m = irreducible.degree;
++    let mw = (m / 64) as usize;
++    let mb = m % 64;
++    while value.len() < mw + 2 {
++        value.push(0);
++    }
++    loop {
++        let mut i = value.len();
++        let mut chunk = None;
++        while i > mw {
++            i -= 1;
++            let h = if i == mw {
++                if mb == 0 { value[i] } else { value[i] >> mb }
+             } else {
+-                // Auto-grow if needed.
+-                while out.len() <= target {
+-                    out.push(0);
++                value[i]
++            };
++            if h != 0 {
++                chunk = Some((i, h));
++                break;
++            }
++        }
++        let Some((i, h)) = chunk else { break };
++        let base = if i == mw {
++            value[i] &= if mb == 0 { 0 } else { (1u64 << mb) - 1 };
++            0
++        } else {
++            value[i] = 0;
++            64 * i as u32 - m
++        };
++        for &t in &irreducible.low_terms {
++            let s = base + t;
++            let w = (s / 64) as usize;
++            let b = s % 64;
++            value[w] ^= h << b;
++            if b != 0 {
++                value[w + 1] ^= h >> (64 - b);
++            }
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    /// The bit-serial implementation this module shipped with, kept as
++    /// the reference the word-level arithmetic is compared against.
++    mod reference {
++        use super::super::*;
++
++        /// XOR two bit-vectors (different lengths allowed; result is
++        /// length = max).
++        fn xor_bits(a: &[u64], b: &[u64]) -> Vec<u64> {
++            let n = a.len().max(b.len());
++            let mut out = vec![0u64; n];
++            for (i, w) in a.iter().enumerate() {
++                out[i] ^= *w;
++            }
++            for (i, w) in b.iter().enumerate() {
++                out[i] ^= *w;
++            }
++            out
++        }
++
++        /// Unreduced schoolbook multiplication of two bit-vectors.  Returns
++        /// a bit-vector of length `len(a) + len(b)` words.
++        fn unreduced_mul(a: &[u64], b: &[u64]) -> Vec<u64> {
++            let n = a.len() + b.len();
++            let mut out = vec![0u64; n];
++            for (i, a_w) in a.iter().enumerate() {
++                for bit in 0..64u32 {
++                    if (a_w >> bit) & 1 == 1 {
++                        add_shifted(&mut out, b, (i as u32) * 64 + bit);
++                    }
+                 }
+-                out[target] ^= *w;
+             }
++            out
+         }
+-    } else {
+-        for (i, w) in b.iter().enumerate() {
+-            let target = i + word_shift;
+-            if target < out.len() {
+-                out[target] ^= *w << bit_shift;
++
++        /// `out ^= b << shift`  (treating both as bit-vectors of unspecified
++        /// length, packing word-major).
++        fn add_shifted(out: &mut Vec<u64>, b: &[u64], shift: u32) {
++            let word_shift = (shift / 64) as usize;
++            let bit_shift = shift % 64;
++            if bit_shift == 0 {
++                for (i, w) in b.iter().enumerate() {
++                    let target = i + word_shift;
++                    if target < out.len() {
++                        out[target] ^= *w;
++                    } else {
++                        // Auto-grow if needed.
++                        while out.len() <= target {
++                            out.push(0);
++                        }
++                        out[target] ^= *w;
++                    }
++                }
+             } else {
+-                while out.len() <= target {
+-                    out.push(0);
++                for (i, w) in b.iter().enumerate() {
++                    let target = i + word_shift;
++                    if target < out.len() {
++                        out[target] ^= *w << bit_shift;
++                    } else {
++                        while out.len() <= target {
++                            out.push(0);
++                        }
++                        out[target] ^= *w << bit_shift;
++                    }
++                    if target + 1 < out.len() {
++                        out[target + 1] ^= *w >> (64 - bit_shift);
++                    } else {
++                        while out.len() <= target + 1 {
++                            out.push(0);
++                        }
++                        out[target + 1] ^= *w >> (64 - bit_shift);
++                    }
+                 }
+-                out[target] ^= *w << bit_shift;
+             }
+-            if target + 1 < out.len() {
+-                out[target + 1] ^= *w >> (64 - bit_shift);
+-            } else {
+-                while out.len() <= target + 1 {
+-                    out.push(0);
++        }
++
++        /// Split a bit-vector at bit position `at`, returning `(low, high)`.
++        /// `low` has bits 0..at, `high` has bits at..bit_length.
++        fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
++            let n_words = bits.len();
++            let word_at = (at / 64) as usize;
++            let bit_at = at % 64;
++            let mut low = Vec::with_capacity(word_at + 1);
++            let mut high = Vec::new();
++            for i in 0..n_words {
++                if i < word_at {
++                    low.push(bits[i]);
++                } else if i == word_at {
++                    if bit_at == 0 {
++                        high.push(bits[i]);
++                    } else {
++                        let mask = (1u64 << bit_at) - 1;
++                        low.push(bits[i] & mask);
++                        high.push(bits[i] >> bit_at);
++                    }
++                } else {
++                    if bit_at == 0 {
++                        high.push(bits[i]);
++                    } else {
++                        // bits[i] contributes to high at offset (i - word_at).
++                        if let Some(last) = high.last_mut() {
++                            *last ^= bits[i] << (64 - bit_at);
++                        }
++                        high.push(bits[i] >> bit_at);
++                    }
+                 }
+-                out[target + 1] ^= *w >> (64 - bit_shift);
+             }
++            if low.is_empty() {
++                low.push(0);
++            }
++            if high.is_empty() {
++                high.push(0);
++            }
++            (low, high)
+         }
+-    }
+-}
+ 
+-/// Split a bit-vector at bit position `at`, returning `(low, high)`.
+-/// `low` has bits 0..at, `high` has bits at..bit_length.
+-fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
+-    let n_words = bits.len();
+-    let word_at = (at / 64) as usize;
+-    let bit_at = at % 64;
+-    let mut low = Vec::with_capacity(word_at + 1);
+-    let mut high = Vec::new();
+-    for i in 0..n_words {
+-        if i < word_at {
+-            low.push(bits[i]);
+-        } else if i == word_at {
+-            if bit_at == 0 {
+-                high.push(bits[i]);
+-            } else {
+-                let mask = (1u64 << bit_at) - 1;
+-                low.push(bits[i] & mask);
+-                high.push(bits[i] >> bit_at);
++        /// Reduce a polynomial (bit-vector) modulo the irreducible
++        /// polynomial `m(z)`.  In place: high bits get folded down into
++        /// positions `< m`.
++        fn reduce(value: &mut Vec<u64>, irreducible: &IrreduciblePoly) {
++            let m = irreducible.degree;
++            // Total bit length of `value`.
++            let total_bits = (value.len() as u32) * 64;
++            // For each bit position from highest down to `m`, if it's set,
++            // XOR `m(z)` shifted to that position into `value` and clear
++            // the bit.
++            for pos in (m..total_bits).rev() {
++                let w = (pos / 64) as usize;
++                let b = pos % 64;
++                if w >= value.len() {
++                    continue;
++                }
++                if (value[w] >> b) & 1 == 1 {
++                    // Clear bit (pos).
++                    value[w] ^= 1u64 << b;
++                    // XOR `z^k · low_terms` for k = pos − m.
++                    let shift = pos - m;
++                    for &t in &irreducible.low_terms {
++                        let target_pos = t + shift;
++                        let tw = (target_pos / 64) as usize;
++                        let tb = target_pos % 64;
++                        if tw < value.len() {
++                            value[tw] ^= 1u64 << tb;
++                        }
++                    }
++                }
+             }
+-        } else {
+-            if bit_at == 0 {
+-                high.push(bits[i]);
+-            } else {
+-                // bits[i] contributes to high at offset (i - word_at).
+-                if let Some(last) = high.last_mut() {
+-                    *last ^= bits[i] << (64 - bit_at);
++        }
++
++
++        impl F2mElement {
++        /// `self · other (mod m(z))` using schoolbook multiplication.
++        /// Used as the base case in Karatsuba.
++        pub fn schoolbook_mul_reference(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
++            let m = self.m;
++            // Unreduced product has up to 2m bits.
++            let n_words = ((2 * m + 63) / 64) as usize;
++            let mut prod = vec![0u64; n_words.max(2)];
++            // For each set bit of self, XOR a shifted copy of `other`.
++            for i in 0..self.m {
++                let w_i = (i / 64) as usize;
++                let b_i = (i % 64) as u32;
++                if w_i >= self.bits.len() {
++                    break;
++                }
++                if (self.bits[w_i] >> b_i) & 1 == 1 {
++                    add_shifted(&mut prod, &other.bits, i);
++                }
++            }
++            reduce(&mut prod, irreducible);
++            let mut out = Self::zero(m);
++            for (i, w) in prod.iter().enumerate().take(out.bits.len()) {
++                out.bits[i] = *w;
++            }
++            out.mask_in_place();
++            out
++        }
++
++        /// **Improved Karatsuba multiplication** (Putranto et al. §3.1).
++        ///
++        /// Split each operand into low/high halves of `k = m/2` bits:
++        /// `A = A_L + z^k · A_H`, `B = B_L + z^k · B_H`.
++        /// Compute three products: `P_L = A_L · B_L`, `P_H = A_H · B_H`,
++        /// `P_M = (A_L + A_H) · (B_L + B_H)`.
++        /// Combine: `A · B = P_L + z^k · (P_M − P_L − P_H) + z^{2k} · P_H`.
++        ///
++        /// For binary fields, subtraction is XOR, so the "middle" term
++        /// simplifies to `P_M ⊕ P_L ⊕ P_H`.  Reduction happens once at
++        /// the end via [`reduce`].
++        pub fn karatsuba_mul_reference(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
++            let m = self.m;
++            // Threshold below which schoolbook is faster.
++            if m <= 64 {
++                return self.schoolbook_mul_reference(other, irreducible);
++            }
++            let k = m / 2;
++            let (a_lo, a_hi) = split_at(&self.bits, k);
++            let (b_lo, b_hi) = split_at(&other.bits, k);
++
++            let a_l = F2mElement::from_words(&a_lo, k);
++            let a_h = F2mElement::from_words(&a_hi, m - k);
++            let b_l = F2mElement::from_words(&b_lo, k);
++            let b_h = F2mElement::from_words(&b_hi, m - k);
++
++            // Recursive products (without reduction yet — work in 2m-bit space).
++            let p_lo_bits = unreduced_mul(&a_l.bits, &b_l.bits);
++            let p_hi_bits = unreduced_mul(&a_h.bits, &b_h.bits);
++            let a_sum_bits = xor_bits(&a_l.bits, &a_h.bits);
++            let b_sum_bits = xor_bits(&b_l.bits, &b_h.bits);
++            let p_mid_bits = unreduced_mul(&a_sum_bits, &b_sum_bits);
++
++            // Middle = p_mid ⊕ p_lo ⊕ p_hi
++            let mid = xor_bits(&xor_bits(&p_mid_bits, &p_lo_bits), &p_hi_bits);
++
++            // Combined product: p_lo ⊕ (mid << k) ⊕ (p_hi << 2k).
++            let mut combined = vec![0u64; ((2 * m + 63) / 64) as usize + 2];
++            for (i, w) in p_lo_bits.iter().enumerate() {
++                if i < combined.len() {
++                    combined[i] ^= *w;
++                }
++            }
++            add_shifted(&mut combined, &mid, k);
++            add_shifted(&mut combined, &p_hi_bits, 2 * k);
++
++            reduce(&mut combined, irreducible);
++            let mut out = Self::zero(m);
++            for (i, w) in combined.iter().enumerate().take(out.bits.len()) {
++                out.bits[i] = *w;
++            }
++            out.mask_in_place();
++            out
++        }
++
++        /// Convenience wrapper picking schoolbook or Karatsuba based on `m`.
++        pub fn mul_reference(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
++            self.karatsuba_mul_reference(other, irreducible)
++        }
++
++        /// `self²`.  In `F_{2^m}` squaring is linear: bit `i` of `self`
++        /// goes to bit `2i` of the result, other bits zero.  Then
++        /// reduce mod `m(z)`.
++        pub fn square_reference(&self, irreducible: &IrreduciblePoly) -> Self {
++            let m = self.m;
++            let n_words = ((2 * m + 63) / 64) as usize + 1;
++            let mut sq = vec![0u64; n_words];
++            for i in 0..m {
++                let w_i = (i / 64) as usize;
++                let b_i = i % 64;
++                if w_i < self.bits.len() && (self.bits[w_i] >> b_i) & 1 == 1 {
++                    let pos = 2 * i;
++                    let w_o = (pos / 64) as usize;
++                    let b_o = pos % 64;
++                    if w_o < sq.len() {
++                        sq[w_o] ^= 1u64 << b_o;
++                    }
+                 }
+-                high.push(bits[i] >> bit_at);
+             }
++            reduce(&mut sq, irreducible);
++            let mut out = Self::zero(m);
++            for (i, w) in sq.iter().enumerate().take(out.bits.len()) {
++                out.bits[i] = *w;
++            }
++            out.mask_in_place();
++            out
++        }
++
+         }
+     }
+-    if low.is_empty() {
+-        low.push(0);
+-    }
+-    if high.is_empty() {
+-        high.push(0);
++
++    fn words(seed: &mut u64, n: usize) -> Vec<u64> {
++        (0..n).map(|_| { *seed ^= *seed << 13; *seed ^= *seed >> 7; *seed ^= *seed << 17; *seed }).collect()
+     }
+-    (low, high)
+-}
+ 
+-/// Reduce a polynomial (bit-vector) modulo the irreducible
+-/// polynomial `m(z)`.  In place: high bits get folded down into
+-/// positions `< m`.
+-fn reduce(value: &mut Vec<u64>, irreducible: &IrreduciblePoly) {
+-    let m = irreducible.degree;
+-    // Total bit length of `value`.
+-    let total_bits = (value.len() as u32) * 64;
+-    // For each bit position from highest down to `m`, if it's set,
+-    // XOR `m(z)` shifted to that position into `value` and clear
+-    // the bit.
+-    for pos in (m..total_bits).rev() {
+-        let w = (pos / 64) as usize;
+-        let b = pos % 64;
+-        if w >= value.len() {
+-            continue;
++    fn modulus(seed: &mut u64, m: u32) -> IrreduciblePoly {
++        // Any polynomial of degree m is a modulus for the arithmetic
++        // identity; irreducibility is not needed to compare reductions.
++        let mut low: Vec<u32> = vec![0];
++        let count = (*seed % 5) as usize;
++        for _ in 0..count {
++            *seed ^= *seed << 13; *seed ^= *seed >> 7; *seed ^= *seed << 17;
++            let t = (*seed % u64::from(m)) as u32;
++            if !low.contains(&t) { low.push(t); }
+         }
+-        if (value[w] >> b) & 1 == 1 {
+-            // Clear bit (pos).
+-            value[w] ^= 1u64 << b;
+-            // XOR `z^k · low_terms` for k = pos − m.
+-            let shift = pos - m;
+-            for &t in &irreducible.low_terms {
+-                let target_pos = t + shift;
+-                let tw = (target_pos / 64) as usize;
+-                let tb = target_pos % 64;
+-                if tw < value.len() {
+-                    value[tw] ^= 1u64 << tb;
+-                }
+-            }
++        low.sort_unstable();
++        IrreduciblePoly { degree: m, low_terms: low }
++    }
++
++    /// The word-level square and product equal the bit-serial reference on
++    /// every width the crate uses (single word, word boundaries, NIST and
++    /// SECG degrees), for random elements and random moduli, on both the
++    /// hardware and the software carry-less path.
++    #[test]
++    fn word_level_arithmetic_matches_bit_serial_reference() {
++        let mut seed = 0x9E37_79B9_7F4A_7C15u64;
++        let widths = [1u32, 2, 3, 5, 7, 8, 13, 16, 17, 19, 23, 31, 32, 33, 61, 63, 64, 65, 113, 127, 128, 131, 155, 163, 191, 192, 193, 233, 283, 409, 571];
++        let mut checked = 0usize;
++        for &m in &widths {
++            for _ in 0..12 {
++                let irr = modulus(&mut seed, m);
++                let n = ((m + 63) / 64) as usize;
++                let a = F2mElement::from_words(&words(&mut seed, n), m);
++                let b = F2mElement::from_words(&words(&mut seed, n), m);
++                assert_eq!(a.square(&irr), a.square_reference(&irr), "square m={m}");
++                assert_eq!(a.mul(&b, &irr), a.mul_reference(&b, &irr), "mul m={m}");
++                assert_eq!(a.mul(&b, &irr), b.mul(&a, &irr), "commutes m={m}");
++                assert_eq!(a.schoolbook_mul(&b, &irr), a.schoolbook_mul_reference(&b, &irr), "schoolbook m={m}");
++                let thrice = a.square_reference(&irr).square_reference(&irr).square_reference(&irr);
++                assert_eq!(a.square_k_times(3, &irr), thrice, "square_k m={m}");
++                checked += 1;
++            }
++        }
++        assert!(checked >= 300);
++        for _ in 0..200 {
++            let w = words(&mut seed, 2);
++            assert_eq!(clmul64(w[0], w[1], false), clmul64_soft(w[0], w[1]));
++            if pclmul_available() {
++                assert_eq!(clmul64(w[0], w[1], true), clmul64_soft(w[0], w[1]));
++            }
++            assert_eq!(clmul64_soft(w[0], 1), (w[0], 0));
++            assert_eq!(clmul64_soft(w[0], 0), (0, 0));
+         }
+     }
+-}
+ 
+-#[cfg(test)]
+-mod tests {
+-    use super::*;
++    /// The reduction handles high bits that fold back above `m` (small
++    /// widths with high low terms), full words at a word boundary, and
++    /// inputs shorter than a product.
++    #[test]
++    fn reduction_folds_repeatedly_and_tolerates_short_vectors() {
++        let irr = IrreduciblePoly { degree: 5, low_terms: vec![0, 4] };
++        let a = F2mElement::from_bit_positions(&[4], 5);
++        assert_eq!(a.square(&irr), a.square_reference(&irr));
++        let irr64 = IrreduciblePoly { degree: 64, low_terms: vec![0, 1, 3, 4] };
++        let x = F2mElement::from_words(&[u64::MAX], 64);
++        assert_eq!(x.square(&irr64), x.square_reference(&irr64));
++        assert_eq!(x.mul(&x, &irr64), x.mul_reference(&x, &irr64));
++        let mut short = vec![0u64];
++        reduce(&mut short, &irr64);
++        assert!(short.iter().all(|w| *w == 0));
++    }
+ 
+     /// Addition in `F_2^m` is XOR; verify on a small concrete case.
+     #[test]
+diff -ruN a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+--- a/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-16 14:43:59.581859170 +0000
++++ b/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-17 05:38:09.227509851 +0000
+@@ -312,6 +312,31 @@
+             low_terms: vec![0],
+         });
+     }
++    // The search's answer for every degree in range, tabulated; a test
++    // re-runs the search for each degree and pins the table to it.
++    if let Some(low) = SPARSE_IRREDUCIBLE_LOW_TERMS.get(n as usize).filter(|l| !l.is_empty()) {
++        return Some(IrreduciblePoly {
++            degree: n,
++            low_terms: low.to_vec(),
++        });
++    }
++    find_irreducible_sparse_search(n)
++}
++
++/// The low terms of [`find_irreducible_sparse`]'s answer, indexed by degree.
++const SPARSE_IRREDUCIBLE_LOW_TERMS: [&[u32]; 64] = [
++    &[], &[], &[0, 1], &[0, 1], &[0, 1], &[0, 2], &[0, 1], &[0, 1], &[0, 1, 3, 4], &[0, 1],
++    &[0, 3], &[0, 2], &[0, 3], &[0, 1, 3, 4], &[0, 5], &[0, 1], &[0, 1, 3, 5], &[0, 3], &[0, 3], &[0, 1, 2, 5],
++    &[0, 3], &[0, 2], &[0, 1], &[0, 5], &[0, 1, 3, 4], &[0, 3], &[0, 1, 3, 4], &[0, 1, 2, 5], &[0, 1], &[0, 2],
++    &[0, 1], &[0, 3], &[0, 2, 3, 7], &[0, 1, 3, 6], &[0, 1, 3, 4], &[0, 2], &[0, 2, 4, 5], &[0, 1, 4, 6], &[0, 1, 5, 6], &[0, 4],
++    &[0, 3, 4, 5], &[0, 3], &[0, 1, 2, 5], &[0, 3, 4, 6], &[0, 5], &[0, 1, 3, 4], &[0, 1], &[0, 5], &[0, 2, 3, 5], &[0, 4, 5, 6],
++    &[0, 2, 3, 4], &[0, 1, 3, 6], &[0, 3], &[0, 1, 2, 6], &[0, 3, 6, 8], &[0, 1, 2, 6], &[0, 2, 4, 7], &[0, 4], &[0, 1, 5, 6], &[0, 2, 4, 7],
++    &[0, 1], &[0, 1, 2, 5], &[0, 3, 5, 6], &[0, 1],
++];
++
++/// The search itself: the smallest-mask irreducible among the candidates
++/// with at most four terms below `z^n`, in ascending mask order.
++fn find_irreducible_sparse_search(n: u32) -> Option<IrreduciblePoly> {
+     // An irreducible polynomial of degree ≥ 1 has a non-zero constant
+     // term, so bit 0 is always set; try 0, 1, 2 further bits below n.
+     let mut candidates: Vec<u64> = Vec::new();
+@@ -494,12 +519,12 @@
+ /// `#E(F_q)` for a curve whose coefficients lie in the subfield spanned
+ /// by `basis`, by enumerating the `q` abscissae and keeping the points
+ /// whose ordinate is also in `F_q`.
+-fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u64 {
++fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32, fast: Option<&FastCurve>) -> u64 {
+     let n = curve.m;
+     let irr = &curve.irreducible;
+     let mut count = 1u64; // O
+     for x in span_f2(basis, n) {
+-        for p in factor_base_points_with_x(curve, &x) {
++        for p in lift_points_with_x(curve, fast, &x) {
+             if let BinaryPoint::Affine { y, .. } = &p {
+                 if y.square_k_times(k, irr) == *y {
+                     count += 1;
+@@ -603,15 +628,15 @@
+ /// tests, so the same generator.  `None` when the field is too wide or
+ /// the search fails, and the general search then decides.
+ fn find_generator_fast(
++    fc: &FastCurve,
+     curve: &BinaryCurve,
+     cofactor: &BigUint,
+     r: &BigUint,
+     search: &GeneratorSearch,
+ ) -> Option<BinaryPoint> {
+-    let fc = FastCurve::new(curve)?;
+     for raw in search.abscissae() {
+         let x = F2mElement::from_biguint(&BigUint::from(raw), search.n);
+-        for p in factor_base_points_with_x(curve, &x) {
++        for p in factor_base_points_with_x_on(fc, curve, &x) {
+             let cand = fc.mul(fc.lift(&p), cofactor);
+             if !cand.infinity && fc.mul(cand, r).infinity {
+                 return Some(fc.lower(cand));
+@@ -693,7 +718,10 @@
+             cofactor: BigUint::one(),
+         };
+ 
+-        let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k) as i128;
++        // One set of single-word tables for the whole construction: the
++        // point count, the generator search, the eigenvalue check.
++        let fast = FastCurve::new(&curve);
++        let trace = q as i128 + 1 - subfield_point_count(&curve, &subfield_basis, k, fast.as_ref()) as i128;
+         let group_order = subfield_group_order(trace, q, ext);
+         let factors = factorise(group_order.clone());
+         let (r, e) = factors.last()?.clone();
+@@ -726,7 +754,7 @@
+             state ^= (u64::from(k) << 40) ^ (b_index << 48);
+         }
+         let search = GeneratorSearch { exhaustive, budget, mask, state, n };
+-        if let Some(found) = find_generator_fast(&curve, &cofactor, &r, &search)
++        if let Some(found) = fast.as_ref().and_then(|fc| find_generator_fast(fc, &curve, &cofactor, &r, &search))
+             .or_else(|| find_generator_general(&curve, &cofactor, &r, &search))
+         {
+             generator = found;
+@@ -739,7 +767,7 @@
+         curve.cofactor = cofactor.clone();
+ 
+         let trace = i64::try_from(trace).ok()?;
+-        let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
++        let lambda = frobenius_eigenvalue_q_on(&curve, trace, q, k, &r, fast.as_ref())?;
+ 
+         Some(Self {
+             a,
+@@ -866,6 +894,23 @@
+     let Some(fc) = FastCurve::new(curve) else {
+         return points_with_x(curve, x);
+     };
++    factor_base_points_with_x_on(&fc, curve, x)
++}
++
++/// [`factor_base_points_with_x`] on a fast curve the caller already built
++/// (the same tables serve every lift of a job), or the general lift where
++/// the field does not fit or the degree is even.
++pub fn lift_points_with_x(curve: &BinaryCurve, fast: Option<&FastCurve>, x: &F2mElement) -> Vec<BinaryPoint> {
++    match fast {
++        Some(fc) if curve.m % 2 == 1 => factor_base_points_with_x_on(fc, curve, x),
++        _ => factor_base_points_with_x(curve, x),
++    }
++}
++
++/// The single-word lift itself, on a fast curve built for `curve`
++/// (odd `m` only: even degrees keep the general lift).
++pub fn factor_base_points_with_x_on(fc: &FastCurve, curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
++    debug_assert!(curve.m % 2 == 1 && fc.n == curve.m);
+     let f = &fc.field;
+     let xw = f.from_element(x);
+     if xw == 0 {
+@@ -889,6 +934,58 @@
+ mod tournament_construction_equivalence {
+     use super::*;
+ 
++    /// The tabulated sparse irreducible polynomial is the search's answer
++    /// for every degree the table covers.
++    #[test]
++    fn sparse_irreducible_table_matches_search() {
++        for n in 2..64u32 {
++            let searched = find_irreducible_sparse_search(n).expect("a sparse irreducible exists");
++            let tabulated = find_irreducible_sparse(n).expect("table entry");
++            assert_eq!((tabulated.degree, tabulated.low_terms), (searched.degree, searched.low_terms), "n={n}");
++            assert!(!SPARSE_IRREDUCIBLE_LOW_TERMS[n as usize].is_empty());
++        }
++        assert!(find_irreducible_sparse(0).is_none() && find_irreducible_sparse(64).is_none());
++    }
++
++    /// The one-word square root returns the general routine's root (not
++    /// merely a root) on every residue modulo every subgroup order the
++    /// worker's cells use and on assorted small primes of both residue
++    /// classes; the candidate pair therefore agrees too.
++    #[test]
++    fn single_word_square_root_and_candidates_match_general() {
++        let mut primes: Vec<u64> = vec![3, 5, 7, 11, 13, 17, 41, 97, 193, 257, 641, 769, 12289, 40961, 65537, 786433];
++        for n in (5..=31).step_by(2) {
++            for a in 0u8..=1 {
++                if let Some(c) = KoblitzCurve::new(a, n) {
++                    let r = c.subgroup_order.to_u64_digits()[0];
++                    if !primes.contains(&r) { primes.push(r); }
++                    let general = frobenius_eigenvalue_q(&c.curve, c.trace, c.q, c.k, &c.subgroup_order);
++                    assert_eq!(general, Some(c.lambda.clone()), "eigenvalue a={a} n={n}");
++                }
++            }
++        }
++        let mut seed = 0x2545_F491_4F6C_DD1Du64;
++        for &p in &primes {
++            for _ in 0..40 {
++                seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
++                let v = seed % p;
++                let general = sqrt_mod_p(&BigUint::from(v), &BigUint::from(p)).map(|s| s.to_u64_digits().first().copied().unwrap_or(0));
++                assert_eq!(sqrt_mod_p_u64(v, p), general, "sqrt of {v} mod {p}");
++            }
++            for trace in [-1i64, 1, -3, 5] {
++                let big = BigUint::from(p);
++                let one = eigenvalue_candidates(trace, 2, &big);
++                let t = if trace >= 0 { BigUint::from(trace as u64) % &big } else { &big - (BigUint::from((-trace) as u64) % &big) };
++                let disc = ((&t * &t) % &big + &big - (BigUint::from(8u32) % &big)) % &big;
++                let general = sqrt_mod_p(&disc, &big).map(|s| {
++                    let inv2 = mod_inverse(&BigUint::from(2u32), &big).unwrap();
++                    [((&t + &s) % &big * &inv2) % &big, ((&t + &big - &s) % &big * &inv2) % &big]
++                });
++                assert_eq!(one, general, "candidates trace={trace} p={p}");
++            }
++        }
++    }
++
+     /// The single-word generator search and eigenvalue check return
+     /// exactly what the general arithmetic returns, on every cell the
+     /// worker accepts and on a subfield curve.
+@@ -914,7 +1011,7 @@
+                 n: kc.n,
+             };
+             let general = find_generator_general(&kc.curve, &kc.cofactor, &kc.subgroup_order, &search);
+-            let fast = find_generator_fast(&kc.curve, &kc.cofactor, &kc.subgroup_order, &search);
++            let fast = find_generator_fast(&FastCurve::new(&kc.curve).unwrap(), &kc.curve, &kc.cofactor, &kc.subgroup_order, &search);
+             assert_eq!(general, fast, "generator on {}", kc.label());
+             assert_eq!(general.as_ref(), Some(kc.generator()), "constructed generator on {}", kc.label());
+             // both eigenvalue candidates, checked in both arithmetics
+@@ -983,16 +1080,115 @@
+     k: u32,
+     r: &BigUint,
+ ) -> Option<BigUint> {
++    frobenius_eigenvalue_q_on(curve, trace, q, k, r, FastCurve::new(curve).as_ref())
++}
++
++fn powmod_u64(mut base: u64, mut exp: u64, m: u64) -> u64 {
++    let mut acc = 1u64 % m;
++    base %= m;
++    while exp > 0 {
++        if exp & 1 == 1 {
++            acc = mulmod_u64(acc, base, m);
++        }
++        base = mulmod_u64(base, base, m);
++        exp >>= 1;
++    }
++    acc
++}
++
++/// [`sqrt_mod_p`] in one word, step for step (the same Euler test, the
++/// same `p ≡ 3 (mod 4)` shortcut, the same non-residue search and
++/// Tonelli–Shanks loop), so it returns the same root; a test pins the two
++/// to each other.
++fn sqrt_mod_p_u64(n: u64, p: u64) -> Option<u64> {
++    let n_mod = n % p;
++    if n_mod == 0 {
++        return Some(0);
++    }
++    let p_minus_one = p - 1;
++    if powmod_u64(n_mod, p_minus_one >> 1, p) != 1 {
++        return None;
++    }
++    if p % 4 == 3 {
++        return Some(powmod_u64(n_mod, (p + 1) >> 2, p));
++    }
++    let mut q = p_minus_one;
++    let mut s = 0u32;
++    while q & 1 == 0 {
++        q >>= 1;
++        s += 1;
++    }
++    let mut z = 2u64;
++    while powmod_u64(z, p_minus_one >> 1, p) != p_minus_one {
++        z += 1;
++    }
++    let mut m = s;
++    let mut c = powmod_u64(z, q, p);
++    let mut t = powmod_u64(n_mod, q, p);
++    let mut r = powmod_u64(n_mod, (q + 1) >> 1, p);
++    loop {
++        if t == 1 {
++            return Some(r);
++        }
++        let mut i = 0u32;
++        let mut tmp = t;
++        while tmp != 1 {
++            tmp = mulmod_u64(tmp, tmp, p);
++            i += 1;
++            if i >= m {
++                return None;
++            }
++        }
++        let b = powmod_u64(c, 1u64 << (m - i - 1), p);
++        m = i;
++        c = mulmod_u64(b, b, p);
++        t = mulmod_u64(t, c, p);
++        r = mulmod_u64(r, b, p);
++    }
++}
++
++/// The eigenvalue's two candidates `(t ± √(t² − 4q)) / 2 mod r`, in the
++/// order the check tries them: in one word when `r` fits, otherwise in
++/// the general integers (the same formulas; a test pins them equal).
++fn eigenvalue_candidates(trace: i64, q: u64, r: &BigUint) -> Option<[BigUint; 2]> {
++    let digits = r.to_u64_digits();
++    if let [p] = digits.as_slice() {
++        if *p < (1u64 << 62) {
++            let p = *p;
++            let t = if trace >= 0 { (trace as u64) % p } else { p - ((-trace) as u64 % p) } % p;
++            let t_sq = mulmod_u64(t, t, p);
++            let disc = (t_sq + p - (4 * q) % p) % p;
++            let s = sqrt_mod_p_u64(disc, p)?;
++            let inv2 = (p + 1) / 2; // 2 · (p+1)/2 = p + 1 ≡ 1 (mod p), p odd
++            let plus = mulmod_u64((t + s) % p, inv2, p);
++            let minus = mulmod_u64((t + p - s) % p, inv2, p);
++            return Some([BigUint::from(plus), BigUint::from(minus)]);
++        }
++    }
+     let t = if trace >= 0 {
+         BigUint::from(trace as u64) % r
+     } else {
+         r - (BigUint::from((-trace) as u64) % r)
+     };
+-    // disc = t² − 4q
+     let t_sq = (&t * &t) % r;
+     let disc = (&t_sq + r - (BigUint::from(4 * q) % r)) % r;
+     let s = sqrt_mod_p(&disc, r)?;
+     let inv2 = mod_inverse(&BigUint::from(2u32), r)?;
++    let plus = ((&t + &s) % r * &inv2) % r;
++    let minus = ((&t + r - &s) % r * &inv2) % r;
++    Some([plus, minus])
++}
++
++/// [`frobenius_eigenvalue_q`] on a fast curve the caller already built.
++pub fn frobenius_eigenvalue_q_on(
++    curve: &BinaryCurve,
++    trace: i64,
++    q: u64,
++    k: u32,
++    r: &BigUint,
++    fast: Option<&FastCurve>,
++) -> Option<BigUint> {
++    let candidates = eigenvalue_candidates(trace, q, r)?;
+ 
+     let g = &curve.generator;
+     let pi_g = match g {
+@@ -1005,18 +1201,12 @@
+     // The same two candidates in the same order; the check runs in
+     // single-word arithmetic where the field fits (tested equal to the
+     // general check), otherwise in the general arithmetic.
+-    let fast = FastCurve::new(curve).map(|fc| {
++    let fast = fast.map(|fc| {
+         let g_fast = fc.lift(g);
+         let pi_fast = fc.lift(&pi_g);
+         (fc, g_fast, pi_fast)
+     });
+-    for sign in [true, false] {
+-        let num = if sign {
+-            (&t + &s) % r
+-        } else {
+-            (&t + r - &s) % r
+-        };
+-        let lambda = (num * &inv2) % r;
++    for lambda in candidates {
+         let matches = match &fast {
+             Some((fc, g_fast, pi_fast)) => fc.mul(*g_fast, &lambda) == *pi_fast,
+             None => scalar_mul(curve, g, &lambda) == pi_g,
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 19:41:26.459622236 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-17 05:33:01.060613940 +0000
+@@ -95,19 +95,8 @@
+ }
+ 
+ fn has_pclmul() -> bool {
+-    // One CPUID (leaf 1, ECX bit 1) instead of the standard library's feature
+-    // cache, whose first use queries several leaves; on a virtual machine every
+-    // CPUID traps to the hypervisor.
+-    #[cfg(target_arch = "x86_64")]
+-    {
+-        // SAFETY: CPUID is available on every x86_64 processor.
+-        let leaf = unsafe { std::arch::x86_64::__cpuid(1) };
+-        (leaf.ecx >> 1) & 1 == 1
+-    }
+-    #[cfg(not(target_arch = "x86_64"))]
+-    {
+-        false
+-    }
++    // The crate's one cached CPUID probe (`binary_ecc::f2m::pclmul_available`).
++    crate::binary_ecc::f2m::pclmul_available()
+ }
+ 
+ impl Field {
+diff -ruN a/src/cryptanalysis/semaev_decomp.rs b/src/cryptanalysis/semaev_decomp.rs
+--- a/src/cryptanalysis/semaev_decomp.rs	2026-09-16 14:35:55.362165142 +0000
++++ b/src/cryptanalysis/semaev_decomp.rs	2026-09-17 05:33:01.060054558 +0000
+@@ -192,10 +192,8 @@
+             }
+         }
+ 
+-        #[cfg(target_arch = "x86_64")]
+-        let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
+-        #[cfg(not(target_arch = "x86_64"))]
+-        let has_clmul = false;
++        // One cached CPUID for the whole process (see `pclmul_available`).
++        let has_clmul = crate::binary_ecc::f2m::pclmul_available();
+ 
+         Self {
+             n,

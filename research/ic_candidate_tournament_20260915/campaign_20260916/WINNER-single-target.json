@@ -290,5 +290,125 @@
       }
     }
   },
-  "strict_win_record": "round-0010"
+  "strict_win_record": "round-0011",
+  "round_0011": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
+    "status": "retained",
+    "what_changed": "shared: the general binary-field arithmetic word-level and bit-exact (square by bit spreading, carry-less products, word-level reduction; the old code kept as the test reference), one fast curve per job for point count, generator search, eigenvalue check and target lift, the sparse irreducible tabulated, the eigenvalue root in one word, one cached CPUID probe for every field; challenger wordfield_fastio (IC-only serialisation) not promoted: 0.9651 of the incumbent instructions but native upper limit 1.0086 on confirmation",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/source",
+    "patch_from_round_0010_source": "campaign_20260916/round11-wordfield.patch",
+    "challenger_patch": "campaign_20260916/round11-fastio.patch",
+    "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd",
+    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": true,
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.47964826003077676,
+      "ci95": [
+        0.449811117682557,
+        0.5216987948093519
+      ],
+      "native_wall_candidate_over_baseline": 0.8653413883939344,
+      "native_wall_ci95": [
+        0.8396219005399979,
+        0.8919422901900026
+      ],
+      "per_cell": {
+        "n13a0": 0.566144102078552,
+        "n17a1": 0.4472916978165497,
+        "n19a0": 0.4462154198104479,
+        "n19a1": 0.474221624976117,
+        "n23a0": 0.4737733347215376
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.9122935574572911,
+        "n17a1": 0.866480058695467,
+        "n19a0": 0.8628252294018971,
+        "n19a1": 0.8642410969970695,
+        "n23a0": 0.8231641542900774
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.479647463803581,
+      "ci95": [
+        0.4498091000263744,
+        0.5216984655363398
+      ],
+      "native_wall_candidate_over_baseline": 0.8653898507179522,
+      "native_wall_ci95": [
+        0.8454206772431005,
+        0.8883025400214984
+      ],
+      "per_cell": {
+        "n13a0": 0.5661422085604447,
+        "n17a1": 0.44729263683508697,
+        "n19a0": 0.44621332603494446,
+        "n19a1": 0.47422155246633696,
+        "n23a0": 0.4737722878450881
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.9067623135363625,
+        "n17a1": 0.8525074575210183,
+        "n19a0": 0.854529271189148,
+        "n19a1": 0.8739939891660131,
+        "n23a0": 0.8406823881783385
+      }
+    },
+    "controls_over_incumbent": {
+      "wordfield_fastio": {
+        "confirmation": {
+          "candidate_over_baseline": 0.9651319464152477,
+          "ci95": [
+            0.961419111236677,
+            0.9692427079756427
+          ],
+          "native_wall_candidate_over_baseline": 0.9982264448261488,
+          "native_wall_ci95": [
+            0.9879807450130413,
+            1.0085522527464297
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9934260994561228,
+            "n17a1": 0.9916022703128715,
+            "n19a0": 0.9972034538383813,
+            "n19a1": 1.0032745019422462,
+            "n23a0": 1.0057006426927024
+          }
+        },
+        "replay": {
+          "candidate_over_baseline": 0.9651318225289642,
+          "ci95": [
+            0.9614186694052944,
+            0.9692429653906838
+          ],
+          "native_wall_candidate_over_baseline": 0.9885354548345516,
+          "native_wall_ci95": [
+            0.97814333641208,
+            0.9987623995398056
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9841485915238027,
+            "n17a1": 0.9794844805774194,
+            "n19a0": 0.9967412984335072,
+            "n19a1": 0.9960886443494988,
+            "n23a0": 0.986330755121268
+          }
+        }
+      }
+    },
+    "median_complete_job_confirmation": {
+      "incumbent": {
+        "instructions": 2140198.5,
+        "native_ms": 1.982,
+        "receipts": 180
+      },
+      "rho": {
+        "instructions": 4706035.0,
+        "native_ms": 2.297,
+        "receipts": 180
+      }
+    }
+  }
 }
