@@ -189,6 +189,15 @@ ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
 EOF
+# The live campaign.json predates storageProtocol. worker.py refuses that
+# store unless this is set; CERTIFICATION.md forbids writing the strict
+# protocol onto an existing corpus. The 2026-09-17 afternoon fleet
+# bootstrapped, then crash-looped on exactly that gate, so the status
+# page stayed at the three g7s that still run the pre-gate worker.
+if [ -z "$(field storageProtocol)" ]; then
+    echo "ECC_ALLOW_LEGACY_STORAGE=1" >> /etc/ecc2k130.env
+    echo "campaign.json has no storageProtocol; allowing the live unversioned store"
+fi
 # systemd reads this as root; keep it unreadable to other local users since
 # it may carry the static keys below.
 chmod 600 /etc/ecc2k130.env
