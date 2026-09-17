@@ -104,7 +104,7 @@ build_from_source() {
     echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
-    BUCKET=$BUCKET ARCHES="$ARCHES" ./build.sh "$SRC" || { echo "build failed"; exit 1; }
+    BUCKET=$BUCKET ARCHES="$ARCHES" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
 }
@@ -149,6 +149,7 @@ aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-error
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
 chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib
 cat manifest.json 2>/dev/null

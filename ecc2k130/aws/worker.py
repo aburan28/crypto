@@ -55,6 +55,13 @@ import uuid
 from protocol import (atomicJson, bindDirectory, campaignContract, envelope,
                       sha256File, verifyEnvelope)
 
+# Frozen campaign fields a kernel rollout must not move. Duplicated from
+# rollout.py so an already-booted box can pick up a new worker.py without
+# also fetching that helper.
+FROZEN_CAMPAIGN = (
+    "curve", "dpWeight", "workers", "batch", "blockThreads", "minBlocks", "walk",
+)
+
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
@@ -186,6 +193,29 @@ def slotFamilyCompatible(slot_family, worker_family):
 def usesCampaignWorkers(family):
     """Ada omits --threads so packedengine.autoThreads sizes the grid."""
     return family not in ADA_FAMILIES
+
+
+def frozenCampaignMoved(current, nxt):
+    """First frozen campaign field that changed, or None."""
+    for key in FROZEN_CAMPAIGN:
+        if key in current and key in nxt and current[key] != nxt[key]:
+            return key
+    return None
+
+
+def campaignPointerMoved(current, nxt):
+    """True when the bucket names a different client. Geometry moves are not a pointer move."""
+    if frozenCampaignMoved(current, nxt):
+        return False
+    liveKey = current.get("binaryKey") or ""
+    liveSha = current.get("binarySha256") or ""
+    newKey = nxt.get("binaryKey") or ""
+    newSha = nxt.get("binarySha256") or ""
+    if newKey and newKey != liveKey:
+        return True
+    if newSha and newSha != liveSha:
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -559,7 +589,7 @@ class Worker:
         writeJson(self.statePath, self.state)
 
     # ---- campaign configuration ------------------------------------------
-    def loadConfig(self):
+    def loadConfig(self, verifyBinary=True):
         path = os.path.join(self.work, "campaign.json")
         if not self.store.get("campaign.json", path):
             raise RuntimeError("campaign.json missing from the store")
@@ -569,11 +599,83 @@ class Worker:
                 raise RuntimeError("campaign.json lacks %r" % key)
         if self.cfg.get("storageProtocol"):
             self.contract = campaignContract(self.cfg)
-            if sha256File(self.client) != self.cfg["binarySha256"]:
+            if verifyBinary and sha256File(self.client) != self.cfg["binarySha256"]:
                 raise RuntimeError("client binary hash differs from campaign")
             bindDirectory(self.work, self.contract)
         elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
             raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
+
+    def clientStoreKey(self):
+        """S3 key of the executable this worker should run.
+
+        GPU walkers take binaryKey. CPU walkers take hostBinaryKey so a
+        kernel rollout does not hand them the CUDA client. Rehearsals use
+        binaryKey=local and ECC_CLIENT; those do not re-fetch.
+        """
+        key = self.cfg.get("binaryKey") or ""
+        if key in ("", "local"):
+            return ""
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            return self.cfg.get("hostBinaryKey") or key
+        return key
+
+    def fetchClient(self):
+        key = self.clientStoreKey()
+        if not key:
+            return False
+        tmp = self.client + ".next"
+        if not self.store.get(key, tmp):
+            raise RuntimeError("failed to download %s" % key)
+        if key == (self.cfg.get("hostBinaryKey") or ""):
+            want = self.cfg.get("hostBinarySha256") or ""
+        else:
+            want = self.cfg.get("binarySha256") or ""
+        if want and sha256File(tmp) != want:
+            os.remove(tmp)
+            raise RuntimeError("downloaded client hash differs from campaign")
+        os.chmod(tmp, 0o755)
+        os.replace(tmp, self.client)
+        return True
+
+    def campaignPointerChanged(self):
+        """True when campaign.json names a new client we are allowed to load."""
+        remote = os.path.join(self.work, "campaign.json.next")
+        try:
+            if not self.store.get("campaign.json", remote):
+                return False
+            nxt = readJson(remote)
+        except Exception as e:
+            log("campaign pointer poll failed: %s" % e)
+            return False
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            log("refusing campaign.json: frozen field %s moved; keep walking the current client" % moved)
+            return False
+        if campaignPointerMoved(self.cfg, nxt):
+            log("campaign client moved to %s" % (nxt.get("binaryKey") or nxt.get("binarySha256")))
+            return True
+        return False
+
+    def reloadClient(self):
+        """Re-fetch campaign.json and the client it names. Slot is kept."""
+        log("reloading campaign.json and client")
+        remote = os.path.join(self.work, "campaign.json.next")
+        if not self.store.get("campaign.json", remote):
+            raise RuntimeError("campaign.json missing during reload")
+        nxt = readJson(remote)
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            raise RuntimeError("frozen field %s moved; refusing reload" % moved)
+        prev = self.cfg
+        self.cfg = nxt
+        try:
+            self.fetchClient()
+        except Exception:
+            self.cfg = prev
+            raise
+        path = os.path.join(self.work, "campaign.json")
+        os.replace(remote, path)
+        self.loadConfig(verifyBinary=True)
 
     def clientCommand(self, slot):
         c = self.cfg
@@ -785,7 +887,8 @@ class Worker:
                 lastBeat = now
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
-                          "binary": self.cfg.get("binaryKey", "")}
+                          "binary": self.cfg.get("binaryKey", ""),
+                          "binarySha256": self.cfg.get("binarySha256", "")}
                 if last:
                     fields.update(rate=last["rate"], iters=last["iters"], dp=last["dp"], dropped=last["dropped"])
                 try:
@@ -804,6 +907,9 @@ class Worker:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],
                            int(self.state.get("dpUploaded", 0)), int(self.state.get("ckptIter", -1))))
+                if not restartDue and self.campaignPointerChanged():
+                    restartDue = True
+                    log("campaign binary moved; checkpointing to pick up the new client")
             if now - lastUpload >= uploadEvery:
                 lastUpload = now
                 try:
@@ -883,6 +989,15 @@ class Worker:
                 break
             if restartDue and rc == 0:
                 self.rotateDpFile()
+                try:
+                    self.reloadClient()
+                except Exception as e:
+                    log("reload after rollout failed: %s" % e)
+                    failures += 1
+                    if failures > 5:
+                        self.slots.release(slot, self.owner, state="error",
+                                           extra={"reason": "rollout reload failed"})
+                        return 1
                 continue
             failures += 1
             if failures > 5:

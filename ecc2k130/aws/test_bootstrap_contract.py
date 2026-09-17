@@ -40,11 +40,22 @@ class BootstrapContract(unittest.TestCase):
     def test_build_refuses_incomplete_publish(self):
         self.assertIn("refusing to point campaign.json at", BUILD)
         self.assertIn("build did not produce", BUILD)
-        gate = BUILD.split("Point the campaign at this build")[0]
+        gate = BUILD.split("Geometry in campaign.json must match")[0]
         self.assertIn("head-object", gate)
+
+    def test_stage_does_not_point_campaign(self):
+        self.assertIn("POINT_CAMPAIGN", BUILD)
+        self.assertIn("--stage", BUILD)
+        self.assertIn('if [ "$POINT_CAMPAIGN" = 1 ]', BUILD)
+        self.assertIn("campaign.json unchanged", BUILD)
+        # Bootstrap rebuilds still point: first Ada fat publish.
+        self.assertIn("POINT_CAMPAIGN=1", BOOTSTRAP)
+        self.assertNotIn("--stage", BOOTSTRAP)
 
     def test_infra_syncs_build_script(self):
         self.assertIn('aws s3 cp build.sh "s3://$BUCKET/aws/build.sh"', INFRA)
+        self.assertIn('aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh"', INFRA)
+        self.assertIn('aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py"', INFRA)
 
     def test_unversioned_campaign_allows_legacy_storage(self):
         self.assertIn("ECC_ALLOW_LEGACY_STORAGE=1", BOOTSTRAP)
