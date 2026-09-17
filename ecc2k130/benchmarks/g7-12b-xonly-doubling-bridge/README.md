@@ -134,3 +134,143 @@ interleaved equal-work pairs against doubling-only. Account every launch and
 all rare-kernel work as complete-map wall time; preserve the frozen 1.006696
 collision-work ratio and require a direct raw median of at least 12 B/s for the
 goal.
+
+## Preregistered block-local bridge prepass
+
+The zero-spill split kernels are exact but measure only 3.691592 B/s median
+versus 11.490686 B/s for doubling-only (paired ratio 0.319087, 95% CI
+[0.308390, 0.330155]). Flushing shared X and scanning every state in a second
+global kernel each step dominates; reject the split launch architecture.
+
+Next keep one persistent walk kernel and isolate bridge arithmetic by phase
+inside each block. Add a 2,048-entry shared `uint16_t` event queue plus a
+256-byte per-thread bridge mask. At each logical step, all threads perform the
+existing DP/restart classification and append only bridge events, then synchronize.
+Warp 0 consumes queued events in chunks of 32, computes the sigma^3 rational
+numerator and denominator, and stores those rare values. After another block
+barrier, all threads execute the existing denominator tree: ordinary states use
+x and the doubling finish; queued states use the stored denominator and
+numerator. This shares the one batch inversion across both maps and keeps the
+last four X slots resident across steps.
+
+The combined 32,388-byte shared allocation must retain three blocks per SM, and
+the common kernel must compile without local spills. Require version-4 replay,
+built-in solver success, and an independent affine checkpoint before timing.
+Then run three interleaved equal-work pairs against doubling-only. Preserve all
+complete work and the frozen 1.006696 collision-work ratio; the direct raw
+median must reach 12 B/s for the goal.
+
+## Preregistered bridge power-chain follow-up
+
+The validated block-local candidate reaches 9.851270 B/s median, materially
+better than both complete-map alternatives but still below 12 B/s. Before
+changing its selector or queue, remove one algebraically redundant rare-path
+product: after computing `x3=x*x2`, form `x6=square(x3)` instead of
+`x6=x2*x4`. Squaring is the existing linear polynomial operation and produces
+the identical bridge numerator and denominator. Keep every flag, geometry,
+queue rule, and map unchanged. Require zero spills, the full built-in suite,
+and the independent checkpoint, then compare three interleaved equal-work
+samples against the current block-local binary.
+
+## Preregistered compressed-square screen
+
+Replacing `x6=x2*x4` with `square(x3)` is exact but flat: paired ratio
+0.999502 with 95% CI [0.985338, 1.013869]. Retain the original block-local
+source.
+
+The doubling-specialized map applies a polynomial square to every ordinary
+output, so retest the independently proved compressed square reduction from
+the earlier G7 square study in this new workload. Port only its
+`ECC_PACKED_SQUARE` implementation into isolated copies of the doubling-only
+source. Build mask 1 (compressed even/odd reduction with software spreading)
+and mask 3 (the same reduction with native CLMAD interleaving); all map,
+batch, cache, launch, and compiler flags remain fixed. Require the existing
+2,048-point seven-step doubling oracle and zero spills. Screen three
+interleaved equal-work repetitions against the current doubling binary. Only a
+qualified variant may then be combined with the complete block-local bridge
+source and subjected to its version-4 correctness gates.
+
+
+## Preregistered shared-mask scan follow-up
+
+Both compressed-square variants are exact and retain 80 registers, 8 local
+bytes, 28,032 shared bytes, and three blocks per SM. Mask 1 measured a paired
+ratio of 0.997607 (95% CI [0.986259, 1.009085]); mask 3 measured 1.003232
+([0.978718, 1.028360]). Neither interval qualifies, so retain the original
+multiplication-based square.
+
+The block-local complete map currently uses a shared event queue and one atomic
+append for each bridge state. Remove that queue and its counter. Keep only the
+per-thread 8-bit bridge masks; after classification, warp 0 scans masks in
+lane-strided owner order and computes the same rare rational values for set
+bits. This preserves the selector, arithmetic, one block-wide inversion, DP
+semantics, state evolution, and scalar accounting while removing atomics and
+4,096 bytes of shared queue traffic per block.
+
+Require 80 or fewer registers, unchanged three-block occupancy, the full
+built-in suite, and a zero-mismatch 2,048-point seven-step version-4 checkpoint.
+If exact, compare three interleaved equal-work repetitions against the current
+block-local binary. Retain only a paired improvement whose 95% interval exceeds
+one; the direct complete-map median must still reach 12 B/s.
+
+
+## Preregistered complete-map worker-count screen
+
+The queue-free shared-mask scan compiled with 56-byte stores and 100-byte loads
+per thread, versus zero spills for the event-queue reference. It fails the
+resource gate and is rejected before correctness or timing.
+
+The 9.851270 B/s complete-map result used 524,288 logical workers. Test whether
+the working set and block scheduling leave throughput on the table by running
+the unchanged, exact block-local binary at 131,072, 262,144, 524,288, and
+1,048,576 logical workers. Use respectively 16, 8, 4, and 2 launches of 1,024
+steps so every arm executes exactly 34,359,738,368 complete scalar updates.
+Preserve three interleaved repetitions with alternating order on the same GPU
+and run ID. No code, map, batch geometry, scalar accounting, or collision ratio
+changes. Adopt a worker count only if its paired 95% interval against 524,288
+exceeds one and a fresh confirmation agrees; the raw median must reach 12 B/s.
+
+
+## Preregistered owner-local rare phase
+
+The unchanged complete map was flat across the worker-count range. Relative to
+524,288 workers, paired ratios and 95% intervals were 0.979083
+([0.958473, 1.000137]) at 131,072, 0.998076 ([0.986017, 1.010283]) at
+262,144, and 0.999288 ([0.988336, 1.010361]) at 1,048,576. Retain 524,288.
+
+The failed mask scan assigned eight owner threads to each lane of warp 0, which
+extended rare-path loop state and caused spills. Test a simpler phased layout:
+classification keeps each thread own 8-bit bridge mask, then after the existing
+barrier every active thread computes rare rational data only for its own set
+bits. This removes the event counter, all queue atomics, the 4,096-byte queue,
+and indirect owner addressing. The rare work remains separated from common
+product live ranges by block barriers; bridge masks remain shared for the
+backward finish.
+
+Keep the selector, formulas, batch inversion, state format, version-4 scalar
+accounting, and all compile flags fixed. Reject on any increase over the
+zero-spill reference, occupancy loss, built-in failure, or mismatch in the
+2,048-point seven-step affine checkpoint. If exact, measure three interleaved
+equal-work pairs against the block-local event-queue reference and require a
+paired 95% interval above one.
+
+
+## Preregistered sigma bridge-1 common-path diagnostic
+
+The exact zero-spill owner-local phase regressed to 8.897410 B/s median versus
+9.833647 B/s for the event queue, a paired ratio of 0.910059 (95% CI
+[0.898419, 0.921849]). Retain the event queue. Nsight Compute could not collect
+hardware counters because this instance denies unprivileged GPU counter access;
+the failed read-only attempt is preserved.
+
+Before changing the validated complete map, measure the ceiling of the cheap
+identity `x(P+sigma(P)) = x + 1/x`. Create an isolated copy of the exact
+x-only doubling source and replace only the final ordinary square with the
+unsquared sum. This diagnostic applies scalar multiplier `1+s`, whose generated
+subgroup with 2 has index 12, so it cannot be promoted or reported as a complete
+rho rate. Build with identical B16/split2/cache/shared-X geometry, require no
+resource regression, and validate a deterministic 2,048-point seven-step
+checkpoint against independent affine `P+sigma(P)` arithmetic. Then run three
+interleaved equal-work pairs against doubling-only. Continue to a separately
+preregistered complete-map collision study only if the cheap branch provides
+enough measured headroom to offset the current sparse sigma-3 bridge overhead.

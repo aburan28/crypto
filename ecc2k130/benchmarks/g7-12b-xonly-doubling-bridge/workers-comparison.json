@@ -1,0 +1,63 @@
+{
+  "status": "complete-map-worker-count-screen",
+  "equal_scalar_updates_per_sample": 34359738368,
+  "rows": [
+    {
+      "variant": "w131",
+      "rates_billion_per_second": [
+        9.744105,
+        9.482832,
+        9.451371
+      ],
+      "median_billion_per_second": 9.482832,
+      "paired_geomean_vs_w524": 0.9790830414027958,
+      "paired_95_ci": [
+        0.9584726209723797,
+        1.000136655953757
+      ]
+    },
+    {
+      "variant": "w262",
+      "rates_billion_per_second": [
+        9.892046,
+        9.70034,
+        9.641261
+      ],
+      "median_billion_per_second": 9.70034,
+      "paired_geomean_vs_w524": 0.9980758836390928,
+      "paired_95_ci": [
+        0.9860165143313684,
+        1.01028274377074
+      ]
+    },
+    {
+      "variant": "w524",
+      "rates_billion_per_second": [
+        9.855311,
+        9.744704,
+        9.688962
+      ],
+      "median_billion_per_second": 9.744704,
+      "paired_geomean_vs_w524": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "w1048",
+      "rates_billion_per_second": [
+        9.80059,
+        9.775236000000001,
+        9.691895
+      ],
+      "median_billion_per_second": 9.775236000000001,
+      "paired_geomean_vs_w524": 0.9992879372724407,
+      "paired_95_ci": [
+        0.9883364536579976,
+        1.0103607712558937
+      ]
+    }
+  ],
+  "decision": "retain 524288 workers; no alternative has a paired 95% interval above one"
+}

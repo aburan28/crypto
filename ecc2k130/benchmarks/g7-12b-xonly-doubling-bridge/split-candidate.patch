@@ -1,0 +1,239 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedengine.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/packedengine.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedengine.cuh	2026-09-17 16:03:02.010795812 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/packedengine.cuh	2026-09-17 21:41:08.484997964 +0000
+@@ -25,7 +25,9 @@
+     }
+ #endif
+     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
+-    unsigned checkpointVersion() const override { return ECC_PACKED_XONLY_23 ? 3u : 2u; }
++    unsigned checkpointVersion() const override {
++        return ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u);
++    }
+     int checkpointLanes() const override { return 1; }
+ #if ECC_PACKED_POLY_STATE
+     // Packed checkpoint v2 always stores normal-basis coordinates, including
+@@ -96,7 +98,10 @@
+ #endif
+     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
+         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+-    const char *name() const { return ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131"; }
++    const char *name() const {
++        return ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
++            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131");
++    }
+     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
+     bool needsReseed() const { return restartPending; }
+ 
+@@ -210,6 +215,7 @@
+         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
+         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
+         printf("packed x-only 2/3 walk: %d\n", ECC_PACKED_XONLY_23);
++        printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
+         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
+         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);
+@@ -219,8 +225,18 @@
+     }
+ 
+     void launch(u64 iterBase) {
+-        P.iterBase = iterBase;
+-        eccPacked131::walk<<<(P.threads + eccPacked131::walkWorkersPerBlock131 - 1) / eccPacked131::walkWorkersPerBlock131, ECC_THREADS>>>(P, denominators);
++        auto oneStep = P;
++        oneStep.steps = 1;
++        const int commonBlocks =
++            (P.threads + eccPacked131::walkWorkersPerBlock131 - 1) /
++            eccPacked131::walkWorkersPerBlock131;
++        const int rareBlocks = int((laneCount() + ECC_THREADS - 1) / ECC_THREADS);
++        for (int step = 0; step < P.steps; ++step) {
++            oneStep.iterBase = iterBase + step;
++            eccPacked131::walk<<<commonBlocks, ECC_THREADS>>>(oneStep, denominators);
++            eccPacked131::sparseBridgeStep<<<rareBlocks, ECC_THREADS>>>(
++                oneStep, denominators);
++        }
+         CUDA_CHECK(cudaGetLastError());
+     }
+     void reseed(u64 iterBase) {
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/packedxonly23.cuh	2026-09-17 21:04:24.229562987 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/packedxonly23.cuh	2026-09-17 21:40:41.653471775 +0000
+@@ -14,6 +14,20 @@
+ #error "The x-only 2/3 walk requires polynomial state, cached denominators, weighted prefixes, and block inversion"
+ #endif
+ 
++static __device__ __forceinline__ PolynomialPair sparseBridge3Rational131(P131 x) {
++    const P131 x2 = squarePolynomial131(x);
++    const P131 x4 = squarePolynomial131(x2);
++    const P131 x3 = mulPolynomial131(x, x2);
++    const P131 x5 = mulPolynomial131(x, x4);
++    const P131 x6 = mulPolynomial131(x2, x4);
++    const P131 x7 = mulPolynomial131(x, x6);
++    const P131 one{{1, 0, 0, 0, 0}};
++    const P131 a = add131(add131(add131(add131(add131(x7, x6), x4), x3), x), one);
++    const P131 b = add131(add131(add131(add131(add131(add131(x6, x5), x4), x3), x2), x), one);
++    return PolynomialPair{squarePolynomial131(a),
++        mulPolynomial131(x, squarePolynomial131(b))};
++}
++
+ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
+ #if ECC_PACKED_BATCH_SPLIT == 2
+     const int tid = blockIdx.x * walkWorkersPerBlock131 + threadIdx.x % walkWorkersPerBlock131;
+@@ -84,20 +98,26 @@
+                 }
+ 
+ #if ECC_PACKED_XONLY_DOUBLE_ONLY
+-                // [2]P: x'=(x+1/x)^2. Store each denominator and the
+-                // product before it; backward recovery needs no numerator.
+-                const P131 denominator = x;
++                // Leave sparse bridge states unchanged for the ordered
++                // rare kernel; denominator one excludes them from this batch.
++                const bool sparseBridge = ECC_PACKED_XONLY_BRIDGE3 &&
++                    (hw & 31) == 14;
++                const P131 denominator = sparseBridge
++                    ? P131{{1, 0, 0, 0, 0}} : x;
+                 if (localSlot) {
+                     store(p.pchain, slot, tid, p.threads, prod);
+                     prod = mulPolynomial131(prod, denominator);
+                 } else {
+                     prod = denominator;
+                 }
++                P131 storedDenominator = denominator;
++                if (sparseBridge) storedDenominator.v[4] |= 8u;
+ #if ECC_PACKED_LAST_SLOT_CACHE
+-                if (localSlot == lastLocalSlot131) lastDenominator = denominator;
++                if (localSlot == lastLocalSlot131)
++                    lastDenominator = storedDenominator;
+                 else
+ #endif
+-                store(denominators, slot, tid, p.threads, denominator);
++                store(denominators, slot, tid, p.threads, storedDenominator);
+ #else
+                 // Polynomial-basis forms of:
+                 // [2]: (x^4 + 1) / x^2
+@@ -147,12 +167,14 @@
+                  localSlot >= 0; --localSlot) {
+                 const int slot = localSlot * ECC_PACKED_BATCH_SPLIT + firstSlot;
+ #if ECC_PACKED_LAST_SLOT_CACHE
+-                const P131 denominator = localSlot == lastLocalSlot131
++                P131 denominator = localSlot == lastLocalSlot131
+                     ? lastDenominator : load(denominators, slot, tid, p.threads);
+ #else
+-                const P131 denominator = load(denominators, slot, tid, p.threads);
++                P131 denominator = load(denominators, slot, tid, p.threads);
+ #endif
+ #if ECC_PACKED_XONLY_DOUBLE_ONLY
++                const bool sparseBridge = (denominator.v[4] & 8u) != 0;
++                denominator.v[4] &= 7u;
+ #if ECC_PACKED_SHARED_X_SLOTS
+                 const P131 x = localSlot >= firstSharedXLocalSlot131
+                     ? loadSharedX131(sharedXLow, sharedXTail,
+@@ -170,7 +192,15 @@
+                 } else {
+                     inverseX = inv;
+                 }
+-                const P131 nx = squarePolynomial131(add131(x, inverseX));
++                const P131 nx = sparseBridge ? x :
++                    squarePolynomial131(add131(x, inverseX));
++#if ECC_PACKED_LAST_SLOT_CACHE
++                if (sparseBridge && localSlot == lastLocalSlot131) {
++                    P131 tag = denominator;
++                    tag.v[4] |= 8u;
++                    store(denominators, slot, tid, p.threads, tag);
++                }
++#endif
+ #else
+                 P131 nx;
+                 if (localSlot) {
+@@ -215,3 +245,24 @@
+     }
+ #endif
+ }
++
++#if ECC_PACKED_XONLY_DOUBLE_ONLY
++// Ordered after each one-step common kernel on the same CUDA stream.
++static __global__ void sparseBridgeStep(WalkParams<unsigned> p,
++                                        unsigned *denominators) {
++    const size_t id = size_t(blockIdx.x) * blockDim.x + threadIdx.x;
++    if (id >= size_t(p.threads) * ECC_BATCH) return;
++    const int slot = int(id / p.threads);
++    const int tid = int(id - size_t(slot) * p.threads);
++    P131 tag = load(denominators, slot, tid, p.threads);
++    if ((tag.v[4] & 8u) == 0) return;
++    tag.v[4] &= 7u;
++    store(denominators, slot, tid, p.threads, tag);
++    const P131 x = load(p.x, slot, tid, p.threads);
++    const PolynomialPair rational = sparseBridge3Rational131(x);
++    const P131 inverseDenominator =
++        toPolynomial131(inv131(fromPolynomial131(rational.second)));
++    store(p.x, slot, tid, p.threads,
++        mulPolynomial131(rational.first, inverseDenominator));
++}
++#endif
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/ref.h /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/ref.h
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/ref.h	2026-09-17 16:03:02.008795798 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/ref.h	2026-09-17 21:39:56.679993109 +0000
+@@ -19,6 +19,15 @@
+ #if ECC_PACKED_XONLY_23 != 0 && ECC_PACKED_XONLY_23 != 1
+ #error "ECC_PACKED_XONLY_23 must be 0 or 1"
+ #endif
++#ifndef ECC_PACKED_XONLY_BRIDGE3
++#define ECC_PACKED_XONLY_BRIDGE3 0
++#endif
++#if ECC_PACKED_XONLY_BRIDGE3 != 0 && ECC_PACKED_XONLY_BRIDGE3 != 1
++#error "ECC_PACKED_XONLY_BRIDGE3 must be 0 or 1"
++#endif
++#if ECC_PACKED_XONLY_BRIDGE3 && !ECC_PACKED_XONLY_23
++#error "ECC_PACKED_XONLY_BRIDGE3 requires ECC_PACKED_XONLY_23"
++#endif
+ 
+ typedef unsigned long long u64;
+ 
+@@ -401,8 +410,15 @@
+     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
+     static Point step(const Point &p, int hw) {
+ #if ECC_PACKED_XONLY_23
++#if ECC_PACKED_XONLY_BRIDGE3
++        if ((hw & 31) == 14) return addPt(p, frob(p, 3));
++#endif
++#if ECC_PACKED_XONLY_DOUBLE_ONLY
++        return dbl(p);
++#else
+         const Point twice = dbl(p);
+         return ((hw >> 1) & 1) ? addPt(twice, p) : twice;
++#endif
+ #else
+         return addPt(p, frob(p, jOf(hw)));
+ #endif
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/solver.h /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/solver.h
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-doubling-src/include/solver.h	2026-09-17 16:03:02.009795805 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge-split-src/include/solver.h	2026-09-17 21:39:56.680083663 +0000
+@@ -87,7 +87,15 @@
+             }
+             if (it >= maxIters) return out;
+ #if ECC_PACKED_XONLY_23
++#if ECC_PACKED_XONLY_BRIDGE3
++            if ((hw & 31) == 14) out.counts[2]++;
++            else
++#endif
++#if ECC_PACKED_XONLY_DOUBLE_ONLY
++            out.counts[0]++;
++#else
+             out.counts[(hw >> 1) & 1]++;
++#endif
+ #else
+             out.counts[R::jOf(hw) - 3]++;
+ #endif
+@@ -105,6 +113,14 @@
+             e.v[0] = counts[j];
+             mu = mod_mul(mu, mod_pow(u192_from(j + 2), e, ell), ell);
+         }
++#if ECC_PACKED_XONLY_BRIDGE3
++        if (counts[2]) {
++            U192 e = u192_zero();
++            e.v[0] = counts[2];
++            const U192 bridge = mod_add(u192_from(1), spow[3], ell);
++            mu = mod_mul(mu, mod_pow(bridge, e, ell), ell);
++        }
++#endif
+ #else
+         for (int j = 0; j < 8; ++j) {
+             if (!counts[j]) continue;
