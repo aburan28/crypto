@@ -1120,3 +1120,9 @@ what the instrument is for: finding where the curve bends, if it does.
 * The start-point PRF is a mixing function rather than AES. Any client that
   wants to interoperate with a different implementation must agree on it.
 * Multi-GPU is not implemented: one process drives one device.
+
+The [larger-batch shared-X cache experiment](benchmarks/g7-12b-larger-batch-xcache/RESULTS.md)
+confirms that eight cached X slots improve B32 by 1.47--1.75%, but the best B32
+candidate remains slower than selected B16: 6.050341 versus 6.208908 B/s in the
+fresh follow-up. The selected runtime is unchanged and the 12 B/s G7 goal remains
+unmet.

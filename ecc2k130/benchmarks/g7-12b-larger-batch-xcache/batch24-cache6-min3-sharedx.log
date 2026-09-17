@@ -1,0 +1,4 @@
+LOGICAL_PAIR_INVERSE_RESOURCES mode=0 minblocks=3 registers=80 local=8 shared=38272 reserved=1024 active_blocks=2 max_threads_sm=1536 shared_sm=102400
+PASS: 136 shared-x-cache storage scenarios, 1088 walk launches, two scratch poisons and two successive launches
+PASS: 1253376 guard bytes, 11335872 retained scratch bytes, 16003584 canonical coordinate fields, 15336768 written scratch fields, 133196496 compared output bytes
+PASS: original/candidate equality, zero-step retention, dense/zero coordinates, ragged/fully inactive blocks, canonical tails, unchanged metadata and all padding
