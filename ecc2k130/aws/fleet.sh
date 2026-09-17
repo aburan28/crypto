@@ -32,15 +32,17 @@
 # replacement that re-bootstraps from S3 and resumes the checkpoint just
 # uploaded. Before starting the next batch it confirms this batch's own
 # instance ids have actually left the fleet's membership, then waits for
-# the active-instance count to climb back to what it was right before this
+# the GPU-weighted membership to climb back to what it was right before this
 # batch's terminate (or ROLL_TIMEOUT_SECONDS, default 1800, shared across
-# both waits) — the count this batch actually removed, not the campaign's
-# static target, so an already-short spot fleet gets rolled rather than
-# drained, and a stuck launch stalls at most one batch rather than the
-# whole campaign. It checks real membership rather than the aggregate
-# FulfilledCapacity field on purpose: that field lags terminate-instances
-# and unrelated fleet churn can move it, so it can look "recovered" while
-# this batch's own instances are still up.
+# both waits) — the GPU capacity this batch actually removed, not the
+# campaign's static target and not the instance count, so an already-short
+# spot fleet gets rolled rather than drained, a handful of smaller
+# replacements cannot unblock the next batch while most of the lost GPUs
+# are still missing, and a stuck launch stalls at most one batch rather
+# than the whole campaign. It checks real membership rather than the
+# aggregate FulfilledCapacity field on purpose: that field lags
+# terminate-instances and unrelated fleet churn can move it, so it can
+# look "recovered" while this batch's own instances are still up.
 #
 # Variables: AWS_DEFAULT_REGION, STACK, TYPES (default all g7e sizes),
 # MAX_SPOT_PER_GPU_HOUR (cap spot spend; default none),
@@ -84,6 +86,20 @@ fleetId() {
 # lags terminate-instances and can be moved by unrelated churn elsewhere.
 activeInstanceIds() {
     aws ec2 describe-fleet-instances --fleet-id "$1" --query 'ActiveInstances[].InstanceId' --output text
+}
+
+# GPU-weighted capacity of that same membership, matching the WeightedCapacity
+# the fleet was created with (g7e.2xlarge is 1, g7e.48xlarge is 8). Instance
+# count is not this number: price-capacity-optimized can refill with smaller
+# types and restore the count while most of the lost GPUs are still missing.
+activeGpuCapacity() {
+    local total=0 type
+    # shellcheck disable=SC2046 -- word-split on purpose, instance types only
+    for type in $(aws ec2 describe-fleet-instances --fleet-id "$1" \
+        --query 'ActiveInstances[].InstanceType' --output text); do
+        total=$((total + $(gpusOf "$type")))
+    done
+    echo "$total"
 }
 
 # Print an integer capacity field (None/empty/float → int).
@@ -253,12 +269,15 @@ roll)
             shift
             n=$((n + 1))
         done
-        # The count to recover to is the count right before this batch's
-        # terminate, not the campaign's static target: an already-short spot
-        # fleet never reaches its target, so waiting for that would time out
-        # and terminate the next batch anyway, every batch, draining the
-        # fleet instead of rolling it.
-        countBefore=$(activeInstanceIds "$id" | wc -w)
+        # The GPU capacity to recover to is the weighted membership right
+        # before this batch's terminate, not the campaign's static target:
+        # an already-short spot fleet never reaches its target, so waiting
+        # for that would time out and terminate the next batch anyway,
+        # every batch, draining the fleet instead of rolling it. Instance
+        # count is not enough: WeightedCapacity is GPUs, and a handful of
+        # smaller replacements can restore the count while most of the
+        # lost GPU capacity is still missing.
+        capacityBefore=$(activeGpuCapacity "$id")
         echo "terminating:$group"
         # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
         aws ec2 terminate-instances --instance-ids $group >/dev/null
@@ -268,8 +287,9 @@ roll)
         # still active, which would end the wait before this batch is
         # actually gone. describe-fleet-instances names the fleet's real
         # membership, so confirm these specific ids have left it -- not an
-        # aggregate number -- before waiting for the count to recover; the
-        # two waits share one $timeout budget rather than doubling it.
+        # aggregate number -- before waiting for GPU-weighted membership to
+        # recover; the two waits share one $timeout budget rather than
+        # doubling it.
         waited=0
         while :; do
             # tr normalizes --output text's tab-separated ids to spaces so
@@ -290,10 +310,10 @@ roll)
         done
         if [ "$gone" -eq 1 ]; then
             while :; do
-                count=$(activeInstanceIds "$id" | wc -w)
-                if [ "$count" -ge "$countBefore" ]; then break; fi
+                capacity=$(activeGpuCapacity "$id")
+                if [ "$capacity" -ge "$capacityBefore" ]; then break; fi
                 if [ "$waited" -ge "$timeout" ]; then
-                    echo "fleet $id: only $count/$countBefore instance(s) active after ${timeout}s; moving on to the next batch" >&2
+                    echo "fleet $id: only $capacity/$capacityBefore GPU(s) active after ${timeout}s; moving on to the next batch" >&2
                     break
                 fi
                 sleep 15
