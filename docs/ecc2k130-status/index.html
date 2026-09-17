@@ -237,10 +237,10 @@
     <p class="note">
       Lifetime distinguished-point contributors, not the GPUs still walking.
       The headline card above is the live checkpoint count
-      (<span class="mono">walking_slots</span>); this table is every
-      <span class="mono">worker_id</span> that has ever reported a point. A
-      row is marked active when its most recent point is inside the last hour
-      of the snapshot.
+      (<span class="mono">walking_slots</span>); this table is the top
+      <span class="mono">worker_id</span>s by points reported, out of every
+      worker that has ever reported one. A row is marked active when its most
+      recent point is inside the last hour of the snapshot.
     </p>
     <div class="scroll" tabindex="0">
       <table>
@@ -885,7 +885,9 @@ make gpu
     el("gpus-foot").textContent = parts.join(" · ");
   }
 
-  function drawWorkers(workers, snapshotAt) {
+  // per_worker is capped at the top rows by point count, so the lifetime
+  // figure comes from status.workers (DISTINCT worker_id over the whole table).
+  function drawWorkers(workers, snapshotAt, lifetimeWorkers) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
@@ -894,6 +896,8 @@ make gpu
       note.textContent = "";
       return;
     }
+    var lifetime = Number(lifetimeWorkers);
+    if (!isFinite(lifetime) || lifetime < workers.length) lifetime = workers.length;
     var totalDps = 0;
     var i;
     for (i = 0; i < workers.length; i++) totalDps += Number(workers[i].dps) || 0;
@@ -926,9 +930,12 @@ make gpu
       cell(tr, timeCell(worker.last_dp_at));
       body.appendChild(tr);
     }
+    var shown = lifetime > workers.length
+      ? "top " + num(workers.length) + " of " + num(lifetime) + " lifetime shown"
+      : num(lifetime) + " lifetime";
     note.textContent = active
-      ? num(active) + " of " + num(workers.length) + " with a point in the last hour"
-      : "none with a point in the last hour · " + num(workers.length) + " lifetime";
+      ? num(active) + " with a point in the last hour · " + shown
+      : "none with a point in the last hour · " + shown;
   }
 
   function drawCampaign(status) {
@@ -1361,7 +1368,7 @@ make gpu
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated);
+    drawWorkers(status.per_worker || [], generated, status.workers);
     drawCampaign(status);
 
     if (historyError) {
