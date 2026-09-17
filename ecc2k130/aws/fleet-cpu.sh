@@ -28,6 +28,10 @@ KEY_NAME=${KEY_NAME:-meow34}
 ROOT_GB=${ROOT_GB:-30}
 SG=$STACK-worker
 ROLE_TAG=cpu
+# Separate Project tag from the GPU fleet: the live account trimmer kills any
+# Project=ecc2k130 instance that is not g7/g7e (see budget.json enforcement).
+# CPU workers still write the same campaign bucket via user-data.
+PROJECT_TAG=${PROJECT_TAG:-$STACK-cpu}
 
 cmd=${1:-status}
 
@@ -76,7 +80,7 @@ sync_helpers() {
 
 count_cpu() {
     aws ec2 describe-instances \
-        --filters "Name=tag:Project,Values=$STACK" "Name=tag:Role,Values=$ROLE_TAG" \
+        --filters "Name=tag:Project,Values=$PROJECT_TAG" "Name=tag:Role,Values=$ROLE_TAG" \
                   "Name=instance-state-name,Values=pending,running" \
         --query 'length(Reservations[].Instances[])' --output text
 }
@@ -143,7 +147,7 @@ up)
             --key-name "$KEY_NAME"
             --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$ROOT_GB,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]"
             --metadata-options "HttpTokens=required,HttpPutResponseHopLimit=2,InstanceMetadataTags=enabled"
-            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-cpu},{Key=Project,Value=$STACK},{Key=Role,Value=$ROLE_TAG},{Key=Lifecycle,Value=$market},{Key=CostGuardManaged,Value=true},{Key=CostGuardExempt,Value=true},{Key=Purpose,Value=cpu-rho}]"
+            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-cpu},{Key=Project,Value=$PROJECT_TAG},{Key=CampaignBucket,Value=$BUCKET},{Key=Role,Value=$ROLE_TAG},{Key=Lifecycle,Value=$market},{Key=CostGuardManaged,Value=true},{Key=CostGuardExempt,Value=true},{Key=Purpose,Value=cpu-rho}]"
             --instance-initiated-shutdown-behavior terminate
             --query 'Instances[0].InstanceId' --output text
         )
@@ -195,20 +199,46 @@ up)
         fi
     done
     echo "launched $launched / $need CPU instance(s): ${ids[*]:-}"
+    if [ "$launched" -ge 1 ]; then
+        # Register with the live budget.json keep-list so account trimmers
+        # that still honour the old hourly ledger do not kill the pilot.
+        if aws s3 cp "s3://$BUCKET/budget.json" /tmp/ecc-budget.json --only-show-errors; then
+            python3 - /tmp/ecc-budget.json "${ids[@]}" <<'PY'
+import json, sys
+from datetime import datetime, timezone
+path, ids = sys.argv[1], sys.argv[2:]
+b = json.load(open(path))
+kept = list(b.get("kept_workers") or [])
+cpu = list(b.get("kept_cpu") or [])
+for i in ids:
+    if i not in kept:
+        kept.append(i)
+    if i not in cpu:
+        cpu.append(i)
+b["kept_workers"] = kept
+b["kept_cpu"] = cpu
+b["allow_cpu_workers"] = True
+b["set_at"] = datetime.now(timezone.utc).isoformat()
+json.dump(b, open(path, "w"), indent=2)
+print("budget keep-list now includes:", ", ".join(ids))
+PY
+            aws s3 cp /tmp/ecc-budget.json "s3://$BUCKET/budget.json" --only-show-errors || true
+        fi
+    fi
     [ "$launched" -ge 1 ] || exit 2
     ;;
 status)
     n=$(count_cpu)
-    echo "$n CPU instance(s) tagged Role=$ROLE_TAG"
+    echo "$n CPU instance(s) tagged Project=$PROJECT_TAG Role=$ROLE_TAG"
     aws ec2 describe-instances \
-        --filters "Name=tag:Project,Values=$STACK" "Name=tag:Role,Values=$ROLE_TAG" \
+        --filters "Name=tag:Project,Values=$PROJECT_TAG" "Name=tag:Role,Values=$ROLE_TAG" \
                   "Name=instance-state-name,Values=pending,running,stopping,stopped" \
         --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,InstanceLifecycle,PublicIpAddress,LaunchTime]' \
         --output text | sort -k6
     ;;
 down)
     ids=$(aws ec2 describe-instances \
-        --filters "Name=tag:Project,Values=$STACK" "Name=tag:Role,Values=$ROLE_TAG" \
+        --filters "Name=tag:Project,Values=$PROJECT_TAG" "Name=tag:Role,Values=$ROLE_TAG" \
                   "Name=instance-state-name,Values=pending,running,stopping,stopped" \
         --query 'Reservations[].Instances[].InstanceId' --output text)
     if [ -z "$ids" ]; then
