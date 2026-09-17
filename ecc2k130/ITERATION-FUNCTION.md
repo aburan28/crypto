@@ -626,10 +626,26 @@ extrapolated rate.
 | F. D at batch 32 | 32 | 1,574 | 43.9 / 38.1 | 39 | 1,632 | 19.3 if the state fits; BATCH-TUNING.md says it will not at 385k |
 | G. B at batch 24 (denominators stored) | 24 | 1,605 | 44.9 / 39.1 | 40 | 1,632 | 18.9 if the state fits |
 | H. shipping walk + `POLY_INV=1` | 16 | 2,269 (from 2,324) | 46.8 | 56 | 1,088 | 14.41 × 1.024 = 14.8 |
+| I. B + `INLINE_PRODUCTS=1` | 16 | 1,712 | 46.8 / 41.2 | 42 | 1,088 | 17.7 |
+| J. E + `INLINE_PRODUCTS=1` | 24 | 1,672 | 44.9 / 39.1 | 41 | 1,224 | 18.1 if the state fits |
+| K. F + `INLINE_PRODUCTS=1` | 32 | 1,628 | 43.9 / 38.1 | 40 | 1,632 | 18.6 if the state fits |
+| L. shipping walk + `INLINE_PRODUCTS=1` | 16 | 2,267 | 45.3 | 56 | 1,088 | 14.8 |
+
+Rows I – L are the fourth lever, found while costing the others: the
+polynomial products are `__noinline__` (`ECC_BIG`, bitslice.h) because a
+fully inlined *bit-sliced* batch expands to ≈ 285,000 instructions, but the
+packed kernel keeps its slot loops rolled and has four product call sites,
+so inlining costs ≈ 1,700 SASS instructions of code (3,900 → 5,600) and
+removes the device-ABI moves at every call: **−72 static slots per update**
+at batch 16, and the register count falls from 102 to 91 because ptxas can
+schedule across what used to be a call. The step loop's body grows to
+≈ 27 KB (1,700 instructions), so the risk is instruction-cache misses, which
+static costing cannot see; row I against row B measures that directly.
+`PACKED_INLINE_PRODUCTS=1` selects it.
 
 The unit and the floor are those of §2: the arithmetic floor stays at
 ≈ 1,090 slots, so every row here is **engineering** by construction, and
-the ratio-to-floor column of §2 moves from 1.7 to at best 1.44 (row F).
+the ratio-to-floor column of §2 moves from 1.7 to at best 1.49 (row K).
 
 ### 7.5 Falsification target
 
