@@ -1,0 +1,52 @@
+--- ecc2k130/build/g7-two-jump-src/include/packedkernels.cuh	2026-09-17 15:14:57.284998504 +0000
++++ ecc2k130/build/g7-direct-delta34-src/include/packedkernels.cuh	2026-09-17 18:38:17.269502951 +0000
+@@ -28,8 +28,8 @@
+ #ifndef ECC_PACKED_TWO_JUMP_MODE
+ #define ECC_PACKED_TWO_JUMP_MODE 0
+ #endif
+-#if ECC_PACKED_TWO_JUMP_MODE < 0 || ECC_PACKED_TWO_JUMP_MODE > 2
+-#error "ECC_PACKED_TWO_JUMP_MODE must be 0, 1 or 2"
++#if ECC_PACKED_TWO_JUMP_MODE < 0 || ECC_PACKED_TWO_JUMP_MODE > 3
++#error "ECC_PACKED_TWO_JUMP_MODE must be 0, 1, 2 or 3"
+ #endif
+ #if ECC_PACKED_TWO_JUMP_MODE == 2
+ #include "packedtwosigma131.h"
+@@ -104,7 +104,7 @@
+ #define ECC_PACKED_LAST_SLOT_CACHE 0
+ #endif
+ #if ECC_PACKED_LAST_SLOT_CACHE < 0 || ECC_PACKED_LAST_SLOT_CACHE > 2
+-#error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1 or 2"
++#error "ECC_PACKED_LAST_SLOT_CACHE must be 0, 1, 2 or 3"
+ #endif
+ #if ECC_PACKED_LAST_SLOT_CACHE && (ECC_BATCH != 16 || ECC_PACKED_BATCH_SPLIT != 2 || !ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_WEIGHTED_PREFIX != 2)
+ #error "Last-slot cache requires batch16, split2, block inversion and weighted-prefix mode2"
+@@ -273,7 +273,7 @@
+ #else
+             P131 x = load(p.x, slot, tid, p.threads);
+ #endif
+-#if ECC_PACKED_FUSED_SIGMA
++#if ECC_PACKED_FUSED_SIGMA || ECC_PACKED_TWO_JUMP_MODE == 3
+             const P131 polyX=x;
+ #endif
+ #if ECC_PACKED_POLY_STATE
+@@ -310,7 +310,19 @@
+             js[slot] = j;
+ #endif
+ #if ECC_PACKED_WEIGHTED_PREFIX
+-#if ECC_PACKED_FUSED_SIGMA
++#if ECC_PACKED_TWO_JUMP_MODE == 3
++            const P131 polyY = load(p.y, slot, tid, p.threads);
++            P131 sx = squarePolynomial131(polyX);
++            P131 sy = squarePolynomial131(polyY);
++            sx = squarePolynomial131(sx); sy = squarePolynomial131(sy);
++            sx = squarePolynomial131(sx); sy = squarePolynomial131(sy);
++            if (j == 4) {
++                sx = squarePolynomial131(sx);
++                sy = squarePolynomial131(sy);
++            }
++            P131 dp = add131(polyX, sx);
++            P131 ep = add131(polyY, sy);
++#elif ECC_PACKED_FUSED_SIGMA
+             const auto deltas=fusedDeltaPair131(polyX,load(p.y,slot,tid,p.threads),j-3);
+             P131 dp=deltas.first, ep=deltas.second;
+ #else

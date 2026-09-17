@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-two-jump-immediate",
+    "--packed",
+    "--threads",
+    "512",
+    "--steps",
+    "64",
+    "--launches",
+    "2",
+    "--run-id",
+    "142",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/two-jump-equivalence-resume-reference.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.569471679000344,
+  "log": "two-jump-equivalence-resume-reference-end.log",
+  "log_sha256": "b21a653761ee446167d320c8eb31f20c21ea2fa97463acd14d908d60442ed973",
+  "binary_sha256": "0fcf8adb49d48966eb9fab1372c0743f26733b23a9cacb114448c0327af3d49c"
+}

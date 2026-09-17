@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "updates_per_sample": 34359738368,
+  "timing_samples": 6,
+  "rows": [
+    {
+      "variant": "selected",
+      "median_billion_updates_per_second": 6.311324,
+      "rate_over_12b": 0.5259436666666667,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rates": [
+        6.385408,
+        6.311324,
+        6.288971999999999
+      ],
+      "decision": "reference"
+    },
+    {
+      "variant": "xonly-bridge3",
+      "median_billion_updates_per_second": 5.248564999999999,
+      "rate_over_12b": 0.4373804166666666,
+      "paired_geomean_speedup": 0.8273838617301914,
+      "paired_speedup_95_ci": [
+        0.8147354225080076,
+        0.8402286628759366
+      ],
+      "rates": [
+        5.29275,
+        5.248564999999999,
+        5.1675889999999995
+      ],
+      "decision": "unconfirmed or regression"
+    }
+  ],
+  "raw_labels": [
+    "timing-r0-selected",
+    "timing-r0-xonly-bridge3",
+    "timing-r1-xonly-bridge3",
+    "timing-r1-selected",
+    "timing-r2-selected",
+    "timing-r2-xonly-bridge3"
+  ],
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "generic_work_boundary": "sqrt(n/262)",
+  "full_dlp_S": null
+}

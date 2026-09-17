@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-5",
+    "--packed",
+    "--threads",
+    "512",
+    "--steps",
+    "64",
+    "--launches",
+    "2",
+    "--run-id",
+    "142",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/xcache-five-resume-candidate.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.5185396749993743,
+  "log": "xcache-five-resume-candidate-start.log",
+  "log_sha256": "89d0b3da9fd66f7370aebc914c5cad3eada1b81a1bf440a0e671fdf846d697a0",
+  "binary_sha256": "83d157562d33fcdd5f486c4555f480808478ad0845b20e98ed92d7378d7c5c3b"
+}

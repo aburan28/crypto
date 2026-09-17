@@ -1,0 +1,139 @@
+{
+  "passed": true,
+  "candidate_binary": {
+    "path": "build/g7-direct-delta34",
+    "sha256": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+  },
+  "semantic_reference_binary": {
+    "path": "build/g7-two-jump-indexed",
+    "sha256": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245"
+  },
+  "source": {
+    "patch_sha256": "c2762048b407a91336a43b7c253aa2ad32349e27bd1967ec6dde0b4b270414e5",
+    "packedkernels_sha256": "28a18f9be8f2c6130ce9ca69e6789a9abfe35bbe2c8ced8ef7e1dc8b60caaad7",
+    "oracle_source_sha256": "d4b8124cbecfefd99d102f41920526b0f2cf7b61ec28f59a7ae92d8f047f85a2"
+  },
+  "timing_kernel_resources": {
+    "registers_per_thread": 80,
+    "local_bytes_per_thread": 16,
+    "shared_bytes_per_block": 28032,
+    "theoretical_occupancy_percent": 50,
+    "blocks_per_sm": 3
+  },
+  "built_in_checks": {
+    "passed": true,
+    "log_sha256": "811064af92c24991bddfd3450130b8b4ea1dff2fd5918b8b6439b0babf9141d0",
+    "terminal": "all checks passed (0 failures)"
+  },
+  "independent_delta_oracle": {
+    "passed": true,
+    "polynomial_delta_pairs": 16652,
+    "coverage": "all 131 basis vectors, three edge inputs and 8192 dense inputs for each coordinate and j in {3,4}",
+    "log_sha256": "d1cb30bff5ee4c91135fcf71e1765ddcf45c9ceb2a490584a34b8bac7726c052",
+    "binary_sha256": "ceb889d6b18a661b169b40ebc176b1a03a9331460132f972ebdd564782fa711f"
+  },
+  "complete_state_probe": {
+    "checkpoint_sha256": "22021f7d78a27414e694288b27b4fb762e1abb273eefdfc0482c4ed0491a9828",
+    "dp_records": 19339,
+    "dp_record_multiset_sha256": "0e9dd9e2165d5224146d6d9c5f9430507c722a94b7297acd33499ab41f312247",
+    "reference_log_sha256": "c81f8558eb811e27788fc8784997372273c9aec012fb7ca98bfb64121d68e78e",
+    "candidate_log_sha256": "0b6a1c0ff5d42b9190aeddba5516dee484718e0e9f81b7ffceec12b768383457",
+    "zero_drops": true
+  },
+  "gpu_cpu_replay_and_resume": [
+    {
+      "file": "direct-delta34-validation.json",
+      "sha256": "2d71ea2f79214dff25017dbebb41176fd93231a4e06171e6a331794048889d57",
+      "logical_walks": 8192,
+      "run_ids": [
+        0,
+        139
+      ],
+      "matching_dp_records": [
+        19554,
+        19331
+      ],
+      "reference_replays_per_binary": [
+        16,
+        16
+      ],
+      "bidirectional_resume": true,
+      "binary_sha256": {
+        "reference": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245",
+        "candidate": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+      }
+    },
+    {
+      "file": "direct-delta34-partial-31-validation.json",
+      "sha256": "ab846606efd4dec89ca4d7a9ac90859c60f358a9a25d9d5972ad8ea3ea5a70ad",
+      "logical_walks": 496,
+      "run_ids": [
+        27131
+      ],
+      "matching_dp_records": [
+        1182
+      ],
+      "reference_replays_per_binary": [
+        16
+      ],
+      "bidirectional_resume": true,
+      "binary_sha256": {
+        "reference": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245",
+        "candidate": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+      }
+    },
+    {
+      "file": "direct-delta34-partial-129-validation.json",
+      "sha256": "c70c627ff21e172685d006ed96ce69c483c49043250e8bf27d945cbf07c8b621",
+      "logical_walks": 2064,
+      "run_ids": [
+        27133
+      ],
+      "matching_dp_records": [
+        4967
+      ],
+      "reference_replays_per_binary": [
+        16
+      ],
+      "bidirectional_resume": true,
+      "binary_sha256": {
+        "reference": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245",
+        "candidate": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+      }
+    },
+    {
+      "file": "direct-delta34-partial-1025-validation.json",
+      "sha256": "8d5b3f149469d9f863fa7541ed5a3f9d2b8b96121a326224840ddb150641c24f",
+      "logical_walks": 16400,
+      "run_ids": [
+        27135
+      ],
+      "matching_dp_records": [
+        38939
+      ],
+      "reference_replays_per_binary": [
+        16
+      ],
+      "bidirectional_resume": true,
+      "binary_sha256": {
+        "reference": "6e50c7464b863633c28a5eaecefa74623b2b692813bb70a3bc701f394c691245",
+        "candidate": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+      }
+    }
+  ],
+  "compute_sanitizer": {
+    "memcheck.log": {
+      "sha256": "620c0f65b133412cf9da612d2a158f832e5dfb8a7eba5955c15d89ce5cfb6586",
+      "error_summary": 0
+    },
+    "initcheck.log": {
+      "sha256": "78c4f9db1780a7fec76fc490a306d8c357ce265250af00cf11b403f1258b2164",
+      "error_summary": 0
+    },
+    "synccheck.log": {
+      "sha256": "17a20ff65d4523470f46da9eac09e108d5a1601adfe63568d7f5ac1e61303a32",
+      "error_summary": 0
+    }
+  },
+  "screen_allowed": true
+}

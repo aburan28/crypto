@@ -1309,6 +1309,46 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <!-- BEGIN ECC2K130 XONLY BRIDGE -->
+  <div class="panel" id="ecc2k130-xonly-bridge">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge full-generator x-only bridge</h2><p>The sparse bridge repairs scalar generation but decisively regresses; retain the selected packed runtime. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-workload repetitions per valid candidate on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>B complete updates/s</th><th>Paired speedup</th><th>95% CI</th><th>Rate / 12 B/s</th><th>Generic work ratio</th><th>Correctness</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected packed runtime, initial screen</td><td>6.311324</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.525944</td><td>1</td><td>passed</td><td>reference</td></tr>
+<tr><td>Sparse bridge, initial</td><td>5.248565</td><td>0.827384</td><td>[0.814735, 0.840229]</td><td>0.437380</td><td>1</td><td>passed</td><td>engineering regression</td></tr>
+<tr><td>Selected packed runtime, recompute screen</td><td>6.310157</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.525846</td><td>1</td><td>passed</td><td>reference</td></tr>
+<tr><td>Sparse bridge, low-live recompute</td><td>5.264523</td><td>0.829866</td><td>[0.816504, 0.843447]</td><td>0.438710</td><td>1</td><td>passed</td><td>engineering regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>The full transition set has scalar order <code>ell-1</code>. Both timed builds pass all 117 built-in checks, complete-state and CPU endpoint replay with zero drops, bidirectional checkpoint-version rejection, bit-identical version-4 resume, and memory/init/synchronization checks. The low-live rewrite reduced walk spills from 72/60 to 64/40 bytes but did not recover throughput. Every timing sample performs 34,359,738,368 complete updates. The separate zero-spill [2]/[3] diagnostic measured 0.993150 times selected but cannot be promoted because it generates only an index-two scalar subgroup. Generic <code>sqrt(n/262)</code> work stays fixed and full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison.json">Initial frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-xonly-23-bridge/comparison-recompute.json">Recompute frozen comparison</a></p></div>
+  </div>
+  <!-- END ECC2K130 XONLY BRIDGE -->
+
+  <!-- BEGIN ECC2K130 DIRECT DELTA34 -->
+  <div class="panel" id="ecc2k130-direct-delta34">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge direct polynomial delta-3/4</h2><p>Repeated polynomial squaring decisively regresses; retain the selected eight-jump runtime. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-workload repetitions on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>B complete updates/s</th><th>Raw paired speedup</th><th>Raw 95% CI</th><th>Collision-adjusted speedup</th><th>Adjusted 95% CI</th><th>Rate / 12 B/s</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected eight-jump</td><td>6.272357</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.522696</td><td>reference</td></tr>
+<tr><td>Indexed two-jump</td><td>6.289420</td><td>1.001295</td><td>[0.992584, 1.010083]</td><td>0.988367</td><td>[0.979768, 0.997041]</td><td>0.524118</td><td>algorithmic regression</td></tr>
+<tr><td>Direct polynomial delta-3/4</td><td>4.363499</td><td>0.689846</td><td>[0.676097, 0.703874]</td><td>0.680939</td><td>[0.667367, 0.694786]</td><td>0.363625</td><td>engineering regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>Each of nine retained samples performs 34,359,738,368 complete updates with zero drops and no observed foreign GPU process. The two-jump rates are divided by the frozen 1.0130803718 collision-work ratio. The candidate passes 16,652 independent delta comparisons, exact full and ragged GPU state/DP comparison, CPU replay, bidirectional resume and three CUDA sanitizers. Its timing kernel uses 80 registers, 16 local bytes per thread and 28,032 shared bytes per block. Generic <code>sqrt(n/262)</code> work remains fixed and full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-direct-delta34/validation-audit.json">Validation audit</a></p></div>
+  </div>
+  <!-- END ECC2K130 DIRECT DELTA34 -->
+
+  <!-- BEGIN ECC2K130 LARGER SPLIT BATCH -->
+  <div class="panel" id="ecc2k130-larger-split-batch">
+    <div class="panel-head"><h2>ECC2K-130 · g7.2xlarge larger split batches</h2><p>B24 and B32 increase coordinate pressure and regress; retain selected B16. The 12 B/s goal remains unmet.</p></div>
+    <div class="table-scroll"><table><caption>Billions of complete scalar updates/s; three paired equal-work repetitions on the same 165 W g7.2xlarge.</caption>
+<thead><tr><th>Variant</th><th>Physical slots/thread</th><th>B complete updates/s</th><th>Paired speedup</th><th>95% CI</th><th>Rate / 12 B/s</th><th>Generic work ratio</th><th>Decision</th></tr></thead><tbody>
+<tr><td>Selected B16</td><td>8</td><td>6.274186</td><td>1.000000</td><td>[1.000000, 1.000000]</td><td>0.522849</td><td>1</td><td>reference</td></tr>
+<tr><td>Split B24</td><td>12</td><td>6.121832</td><td>0.971864</td><td>[0.961912, 0.981919]</td><td>0.510153</td><td>1</td><td>regression</td></tr>
+<tr><td>Split B32</td><td>16</td><td>5.994967</td><td>0.948253</td><td>[0.930625, 0.966215]</td><td>0.499581</td><td>1</td><td>regression</td></tr>
+</tbody></table></div>
+    <div class="panel-head"><p>Each sample performs 34,359,607,296 complete updates with zero drops and no observed foreign GPU process. All variants retain 80 registers, an 8-byte spill frame, 29,568 shared bytes and three blocks per SM. Median memory activity rises from about 12% to 36%/50%, while sustained clocks fall under the fixed power cap. Built-ins, native identity, exact normalized state/DP comparison, 96 CPU replays, same-format resume, cross-format rejection, six unit suites and six sanitizer runs pass. Generic <code>sqrt(n/262)</code> work and ratio 1 remain fixed; full-DLP S is null.</p><p><a href="../ecc2k130/benchmarks/g7-12b-batch32-split/RESULTS.md">Protocol and result</a> · <a href="../ecc2k130/benchmarks/g7-12b-batch32-split/comparison.json">Frozen comparison</a> · <a href="../ecc2k130/benchmarks/g7-12b-batch32-split/validation-audit.json">Validation audit</a></p></div>
+  </div>
+  <!-- END ECC2K130 LARGER SPLIT BATCH -->
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,

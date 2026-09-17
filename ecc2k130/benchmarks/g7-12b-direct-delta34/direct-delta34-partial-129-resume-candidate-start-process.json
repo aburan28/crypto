@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-direct-delta34",
+    "--packed",
+    "--threads",
+    "129",
+    "--steps",
+    "64",
+    "--launches",
+    "2",
+    "--run-id",
+    "27233",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/direct-delta34-partial-129-resume-candidate.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.617037842002901,
+  "log": "direct-delta34-partial-129-resume-candidate-start.log",
+  "log_sha256": "29bc6f1c5b352e7ae038061678d4127668fe2b56c557b9bc54aba0641d0ba58f",
+  "binary_sha256": "8d0f6e677272667f1fde968f7c42562a79f3469d1c43c14599073a9137aaef48"
+}

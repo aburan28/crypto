@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "label": "xcache-5-memcheck",
+      "command": [
+        "/usr/local/cuda-13.2/bin/compute-sanitizer",
+        "--tool",
+        "memcheck",
+        "--error-exitcode",
+        "99",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-5-raw"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 4.827527585999633,
+      "passed": true,
+      "log": "xcache-5-memcheck.log",
+      "log_sha256": "ca083d9ac4589afd861c956b31243764fe5a102192881fd0096a8fc107f8b9c1"
+    },
+    {
+      "label": "xcache-5-initcheck-shared",
+      "command": [
+        "/usr/local/cuda-13.2/bin/compute-sanitizer",
+        "--tool",
+        "initcheck",
+        "--error-exitcode",
+        "99",
+        "--initcheck-address-space",
+        "shared",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-5-raw"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 4.234197364000465,
+      "passed": true,
+      "log": "xcache-5-initcheck-shared.log",
+      "log_sha256": "ca083d9ac4589afd861c956b31243764fe5a102192881fd0096a8fc107f8b9c1"
+    },
+    {
+      "label": "xcache-6-memcheck",
+      "command": [
+        "/usr/local/cuda-13.2/bin/compute-sanitizer",
+        "--tool",
+        "memcheck",
+        "--error-exitcode",
+        "99",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-6-raw"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 4.481423000999712,
+      "passed": true,
+      "log": "xcache-6-memcheck.log",
+      "log_sha256": "4e465ecfc89eab2d6c8292697343f05d99c19eae764dfe5e38d35985a39f5e40"
+    },
+    {
+      "label": "xcache-6-initcheck-shared",
+      "command": [
+        "/usr/local/cuda-13.2/bin/compute-sanitizer",
+        "--tool",
+        "initcheck",
+        "--error-exitcode",
+        "99",
+        "--initcheck-address-space",
+        "shared",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-6-raw"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 4.249181759999374,
+      "passed": true,
+      "log": "xcache-6-initcheck-shared.log",
+      "log_sha256": "4e465ecfc89eab2d6c8292697343f05d99c19eae764dfe5e38d35985a39f5e40"
+    }
+  ]
+}

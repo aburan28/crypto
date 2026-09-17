@@ -1,0 +1,22 @@
+{
+  "trials_per_variant": 2000,
+  "matched_run_ids": true,
+  "all_dlp_solutions_verified": true,
+  "bad_points": 0,
+  "mean_iterations": {
+    "two_jump": 172.637,
+    "four_jump": 174.424,
+    "eight_jump": 170.408
+  },
+  "two_jump_over_eight_jump_mean_iterations": 1.01308037181353,
+  "median_iterations": {
+    "two_jump": 162,
+    "four_jump": 166,
+    "eight_jump": 159
+  },
+  "p90_iterations": {
+    "two_jump": 292,
+    "four_jump": 292,
+    "eight_jump": 297
+  }
+}

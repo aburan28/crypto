@@ -12,8 +12,53 @@ Evidence: [independent assembler confirmation](benchmarks/g7-2xlarge-assembler-c
 The preceding [seven-stage conversion](benchmarks/g7e-30b-seven-stage/README.md)
 remains recorded at 6.019344 B/s benchmark and 5.830594 B/s DP34.
 Set `LOCAL_PACKED_FAST_CONVERT=0` for the earlier conversion circuit.
-**The current target is 40 billion complete iterations/s. It remains open;
+**The current target is 12 billion complete iterations/s. It remains open;
 G7e throughput is unmeasured.**
+
+The [full-generator x-only bridge experiment](benchmarks/g7-12b-xonly-23-bridge/RESULTS.md)
+repaired the scalar subgroup defect of the [2]/[3] map with a sparse
+`P + sigma^3(P)` transition. The initial implementation measured 5.248565 B/s
+versus 6.311324 B/s selected, ratio 0.827384 with 95% interval
+[0.814735, 0.840229]. A low-live rewrite reduced spills from 72/60 to 64/40
+bytes but still measured 5.264523 B/s, ratio 0.829866
+[0.816504, 0.843447]. Both passed arithmetic, full-state, endpoint replay,
+resume and sanitizer gates. A non-promotable zero-spill [2]/[3] diagnostic ran
+at 0.993150 times selected, closing this bridge family without changing the
+selected runtime.
+
+The [two-jump rho experiment](benchmarks/g7-12b-two-jump/RESULTS.md)
+verified that jumps 3 and 4 span the full scalar group, then recovered 6,000
+matched planted DLPs. Two jumps needed 1.013080 times the mean collision work.
+The indexed GPU map measured 6.273318 B/s, statistically flat against 6.279988
+B/s selected, and 6.192320 B/s after collision adjustment. Fixed immediate
+sigma paths regressed to 5.418604 B/s. Both candidates passed full state, DP,
+replay, resume and sanitizer checks; the selected eight-jump runtime remains.
+
+The [direct polynomial delta-3/4 experiment](benchmarks/g7-12b-direct-delta34/RESULTS.md)
+kept that validated two-jump map but replaced its normal-basis delta routing
+with three or four polynomial squarings per coordinate. It decisively
+regressed to 4.363499 B/s versus 6.272357 B/s selected, with a raw paired ratio
+of 0.689846 and 95% interval [0.676097, 0.703874]. After the frozen collision
+penalty, its effective ratio is 0.680939 [0.667367, 0.694786]. Independent
+delta oracles, complete state, replay, resume and sanitizers pass; the slower
+candidate remains isolated.
+
+The [larger split-batch experiment](benchmarks/g7-12b-batch32-split/RESULTS.md)
+kept the selected two-thread block inverse while increasing the logical batch
+to 24 or 32. B24 regressed to 6.121832 B/s, ratio 0.971864 with 95% interval
+[0.961912, 0.981919]; B32 reached 5.994967 B/s, ratio 0.948253
+[0.930625, 0.966215], versus 6.274186 B/s selected. Exact normalized states,
+DPs, replay, resume, units and sanitizers pass. The four-slot X cache covers
+too little of the larger batches, raising memory activity and reducing clocks
+at the fixed power cap; B16 remains selected.
+
+The [seven-node shared-X cache experiment](benchmarks/g7-12b-seven-node-xcache/RESULTS.md)
+used the smaller inverse scratch area to retain five or six X slots while
+keeping three blocks per SM. Six slots measured 6.374050 B/s versus a 6.262430
+B/s selected median, but the paired ratio 1.009801 had a 95% interval of
+[0.991428, 1.028515]. Five slots and the four-slot control were also
+unconfirmed. Correctness, replay, resume and sanitizer checks passed; no
+candidate met the adoption gate, so the selected runtime is unchanged.
 
 The new [hybrid-reduction experiment](benchmarks/g7-40b-hybrid-reduce/README.md)
 reduced static instruction count but ran **14.76% slower** in a fresh paired

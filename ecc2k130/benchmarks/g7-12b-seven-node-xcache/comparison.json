@@ -1,0 +1,91 @@
+{
+  "passed": true,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "updates_per_sample": 34359738368,
+  "timing_samples": 12,
+  "rows": [
+    {
+      "variant": "selected",
+      "median_billion_updates_per_second": 6.26243,
+      "rate_over_12b": 0.5218691666666667,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rates": [
+        6.379309,
+        6.26243,
+        6.235024999999999
+      ],
+      "decision": "reference"
+    },
+    {
+      "variant": "xcache-4",
+      "median_billion_updates_per_second": 6.243798,
+      "rate_over_12b": 0.5203165,
+      "paired_geomean_speedup": 0.9956992217290567,
+      "paired_speedup_95_ci": [
+        0.9870722464468114,
+        1.0044015964593043
+      ],
+      "rates": [
+        6.326685,
+        6.243798,
+        6.224639
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "xcache-5",
+      "median_billion_updates_per_second": 6.295065999999999,
+      "rate_over_12b": 0.5245888333333333,
+      "paired_geomean_speedup": 1.0002498972766771,
+      "paired_speedup_95_ci": [
+        0.989534866336322,
+        1.0110809543339065
+      ],
+      "rates": [
+        6.360939,
+        6.295065999999999,
+        6.225278
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "xcache-6",
+      "median_billion_updates_per_second": 6.37405,
+      "rate_over_12b": 0.5311708333333334,
+      "paired_geomean_speedup": 1.009801189579386,
+      "paired_speedup_95_ci": [
+        0.9914279341523308,
+        1.0285149402692424
+      ],
+      "rates": [
+        6.398645,
+        6.37405,
+        6.288671
+      ],
+      "decision": "unconfirmed or regression"
+    }
+  ],
+  "raw_labels": [
+    "timing-r0-selected",
+    "timing-r0-xcache-4",
+    "timing-r0-xcache-5",
+    "timing-r0-xcache-6",
+    "timing-r1-xcache-6",
+    "timing-r1-xcache-5",
+    "timing-r1-xcache-4",
+    "timing-r1-selected",
+    "timing-r2-xcache-4",
+    "timing-r2-selected",
+    "timing-r2-xcache-6",
+    "timing-r2-xcache-5"
+  ],
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "generic_work_boundary": "sqrt(n/262)",
+  "generic_work_ratio": 1,
+  "full_dlp_S": null
+}

@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "updates_per_sample": 34359738368,
+  "timing_samples": 6,
+  "rows": [
+    {
+      "variant": "selected",
+      "median_billion_updates_per_second": 6.310157,
+      "rate_over_12b": 0.5258464166666666,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rates": [
+        6.384428,
+        6.310157,
+        6.2904979999999995
+      ],
+      "decision": "reference"
+    },
+    {
+      "variant": "bridge-recompute",
+      "median_billion_updates_per_second": 5.2645230000000005,
+      "rate_over_12b": 0.43871025,
+      "paired_geomean_speedup": 0.8298662860153552,
+      "paired_speedup_95_ci": [
+        0.8165041612897648,
+        0.8434470824705547
+      ],
+      "rates": [
+        5.3086850000000005,
+        5.2645230000000005,
+        5.182336
+      ],
+      "decision": "unconfirmed or regression"
+    }
+  ],
+  "raw_labels": [
+    "recompute-r0-selected",
+    "recompute-r0-bridge-recompute",
+    "recompute-r1-bridge-recompute",
+    "recompute-r1-selected",
+    "recompute-r2-selected",
+    "recompute-r2-bridge-recompute"
+  ],
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "generic_work_boundary": "sqrt(n/262)",
+  "full_dlp_S": null
+}
