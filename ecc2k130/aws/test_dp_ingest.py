@@ -120,6 +120,105 @@ class Decoding(unittest.TestCase):
         self.assertEqual(r["b"], bytes(17))
 
 
+class FakeConn:
+    """A connection that can be killed the way a failover kills one."""
+
+    def __init__(self, pool):
+        self.pool = pool
+        self.closed = False
+        pool.append(self)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+    def rollback(self):
+        if self.closed:
+            raise RuntimeError("the connection is closed")
+
+    def close(self):
+        self.closed = True
+
+
+class Passes(unittest.TestCase):
+    """What a pass does with a backlog, and with a database that goes away.
+
+    Both are from the same 2026-09-17 recovery: rho-dp was resized while a
+    four-thousand-object drain was running, 2,533 objects failed against the
+    closed connection their thread kept using, and the pass -- being
+    unbounded -- published neither status nor a metric for the half hour it
+    took to get through the rest.
+    """
+
+    def setUp(self):
+        self.conns = []
+        self.realPending = dp_ingest.pending
+        self.realIngest = dp_ingest.ingestObject
+        self.addCleanup(setattr, dp_ingest, "pending", self.realPending)
+        self.addCleanup(setattr, dp_ingest, "ingestObject", self.realIngest)
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest.log = lambda msg: None
+
+    def backlog(self, n):
+        items = [("dp/slot-%05d/x-%016d.bin" % (i, i), 100, 1789000000 + i, 0)
+                 for i in range(n)]
+        dp_ingest.pending = lambda *a, **k: (items, 1789000000 + n, [])
+        return items
+
+    def run_pass(self, threads=1, limit=dp_ingest.PASS_OBJECTS):
+        return dp_ingest.onePass(lambda: FakeConn(self.conns), None, "bucket",
+                                 threads=threads, limit=limit)
+
+    def test_a_pass_stops_at_its_bound_and_still_reports_the_whole_backlog(self):
+        self.backlog(5)
+        done = []
+        dp_ingest.ingestObject = lambda conn, s3, bucket, key, found_at: (
+            done.append(key) or (100, 100))
+        rows, objects, state = self.run_pass(limit=2)
+        self.assertEqual((objects, rows), (2, 200))
+        # The slice is this pass's work; the number published is the backlog.
+        self.assertEqual(state["outstanding"], 3)
+
+    def test_an_unbounded_pass_is_still_available(self):
+        self.backlog(5)
+        dp_ingest.ingestObject = lambda *a, **k: (100, 100)
+        _, objects, state = self.run_pass(limit=0)
+        self.assertEqual((objects, state["outstanding"]), (5, 0))
+
+    def test_a_database_that_goes_away_costs_one_object_not_the_pass(self):
+        self.backlog(4)
+        seen = []
+
+        def ingest(conn, s3, bucket, key, found_at):
+            seen.append(key)
+            if len(seen) == 1:  # the resize lands here
+                conn.close()
+                raise RuntimeError("the connection is closed")
+            return 100, 100
+
+        dp_ingest.ingestObject = ingest
+        _, objects, state = self.run_pass()
+        self.assertEqual(objects, 4)  # the killed object retried, rest unharmed
+        self.assertEqual(state["outstanding"], 0)
+        self.assertGreaterEqual(len(self.conns), 2)  # it reconnected
+
+    def test_an_object_that_is_simply_bad_is_counted_and_left_behind(self):
+        self.backlog(3)
+
+        def ingest(conn, s3, bucket, key, found_at):
+            if key.endswith("%016d.bin" % 1):
+                raise ValueError("record size is not a multiple of 32")
+            return 100, 100
+
+        dp_ingest.ingestObject = ingest
+        _, objects, state = self.run_pass()
+        self.assertEqual(objects, 2)
+        self.assertEqual(state["outstanding"], 1)
+
+
 class StatusState(unittest.TestCase):
     """The page must not read a stalled ingest as a quiet campaign."""
 

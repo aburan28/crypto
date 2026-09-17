@@ -97,6 +97,11 @@ LEGACY_KEY_RE = re.compile(r"^dp/(slot-\d+)/(\d+)-(\d+)\.bin$")
 ORBIT_KEY_RE = re.compile(r"^dp/(slot-\d+)/([0-9a-f]{32})-(\d+)-([0-9a-f]{64})\.bin$")
 # Written beside a record object by the contract path; metadata, not points.
 ENVELOPE_SUFFIX = ".bin.json"
+# Objects one pass will take before it stops to publish what it knows. Sized
+# so that a pass is a couple of minutes at the measured rate (~3 objects/s),
+# which is the cadence the dashboard and the alarms want; the backlog itself
+# is unbounded and the next pass simply takes the next slice.
+PASS_OBJECTS = 256
 
 
 def log(msg):
@@ -552,52 +557,87 @@ def pending(conn, s3, bucket, prefix="dp/"):
     return todo, newest, unrecognised
 
 
-def onePass(connect, s3, bucket, threads=6, prefix="dp/"):
-    """Ingest everything outstanding, several objects at a time.
+def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
+    """Ingest the oldest outstanding objects, several at a time.
 
     Each thread owns a connection: psycopg connections are not shared, and the
     temp table the COPY lands in is per-session anyway. Order does not matter
     because every insert is idempotent, so a failed object is simply retried
     on the next pass instead of stopping the ones behind it.
+
+    A pass is *bounded* rather than "everything outstanding". Status and
+    metrics are published between passes, so an unbounded pass publishes
+    nothing for as long as the drain takes: on 2026-09-17 that was a
+    four-thousand-object backlog and a page frozen on IDLE_OR_STALE for the
+    half hour it took to clear, which is indistinguishable from the outage it
+    was recovering from. `outstanding` stays the whole backlog, not this
+    slice, so the number a reader sees is the one that matters.
     """
     with connect() as probe:
         todo, newest, unrecognised = pending(probe, s3, bucket, prefix)
     state = {"newest": newest, "unrecognised": len(unrecognised), "outstanding": len(todo)}
     if not todo:
         return 0, 0, state
+    slice_ = todo[:limit] if limit and limit > 0 else todo
     work = queue.Queue()
-    for item in todo:
+    for item in slice_:
         work.put(item)
     tally = {"rows": 0, "objects": 0, "failed": 0}
     lock = threading.Lock()
 
     def drain():
+        conn = None
         try:
-            with connect() as conn:
-                while True:
+            while True:
+                try:
+                    key, records, when, have = work.get_nowait()
+                except queue.Empty:
+                    return
+                # Two attempts, because the failure worth surviving is the
+                # database going away mid-pass -- a failover or an instance
+                # resize -- after which this thread's connection is closed and
+                # every remaining object would fail against the corpse of it.
+                # 2,533 objects failed that way on 2026-09-17 when rho-dp was
+                # resized under a running drain.
+                for attempt in (0, 1):
                     try:
-                        key, records, when, have = work.get_nowait()
-                    except queue.Empty:
-                        return
-                    try:
+                        if conn is None or conn.closed:
+                            conn = connect()
                         n, seen = ingestObject(
                             conn, s3, bucket, key,
                             time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(when)))
                     except Exception as exc:
+                        broken = conn is None or conn.closed
+                        if not broken:
+                            try:
+                                conn.rollback()
+                            except Exception:
+                                conn, broken = None, True
+                        else:
+                            conn = None
+                        if broken and attempt == 0:
+                            log("reconnecting after %s on %s"
+                                % (type(exc).__name__, key))
+                            time.sleep(2.0)
+                            continue
                         # One bad object must not take the pass down with it;
                         # it keeps its place in the backlog and is retried.
                         with lock:
                             tally["failed"] += 1
                         log("object %s failed (will retry): %s: %s"
                             % (key, type(exc).__name__, exc))
-                        continue
-                    with lock:
-                        tally["rows"] += n
-                        tally["objects"] += 1
-                    log("ingested %s: %d records, %d new (store had %d)"
-                        % (key, seen, n, have))
+                    else:
+                        with lock:
+                            tally["rows"] += n
+                            tally["objects"] += 1
+                        log("ingested %s: %d records, %d new (store had %d)"
+                            % (key, seen, n, have))
+                    break
         except Exception as exc:  # a connection that will not open at all
             log("ingest thread stopped: %s: %s" % (type(exc).__name__, exc))
+        finally:
+            if conn is not None and not conn.closed:
+                conn.close()
 
     pool = [threading.Thread(target=drain, daemon=True) for _ in range(max(1, threads))]
     started = time.time()
@@ -607,9 +647,9 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/"):
         t.join()
     elapsed = max(time.time() - started, 1e-9)
     state["outstanding"] = len(todo) - tally["objects"]
-    log("pass complete: %d objects touched, %d rows added, %d failed, %d still "
-        "outstanding, %.0f rows/s"
-        % (tally["objects"], tally["rows"], tally["failed"],
+    log("pass complete: %d of %d outstanding objects touched, %d rows added, "
+        "%d failed, %d still outstanding, %.0f rows/s"
+        % (tally["objects"], len(todo), tally["rows"], tally["failed"],
            state["outstanding"], tally["rows"] / elapsed))
     return tally["rows"], tally["objects"], state
 
@@ -627,6 +667,11 @@ def main(argv=None):
                     help="objects ingested concurrently, each on its own connection")
     ap.add_argument("--metric-namespace", default=os.environ.get("RHO_METRIC_NAMESPACE"),
                     help="publish outstanding/lag/unrecognised here as CloudWatch metrics")
+    ap.add_argument("--pass-objects", type=int,
+                    default=int(os.environ.get("RHO_PASS_OBJECTS", PASS_OBJECTS)),
+                    help="objects per pass; status and metrics are published "
+                         "between passes, so this bounds how long the page can "
+                         "stay stale while a backlog drains (0 = unbounded)")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -674,7 +719,8 @@ def main(argv=None):
                            len(unrecognised)))
                     return 0
             while True:
-                _, _, ingest = onePass(connect, s3, args.bucket, args.threads, args.prefix)
+                _, _, ingest = onePass(connect, s3, args.bucket, args.threads,
+                                       args.prefix, args.pass_objects)
                 if args.metric_namespace:
                     publishMetrics(args.metric_namespace, ingest)
                 if args.status_bucket:
