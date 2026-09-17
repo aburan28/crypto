@@ -718,12 +718,42 @@ pub struct DregSummary {
     /// caps, and nothing about the system's solving degree has been
     /// established.
     pub max_degree_built: Option<u32>,
-    /// Mean refutation degree of the random null-object control:
-    /// systems with the same variable count, equation count, total
-    /// degree and term density, drawn without any Semaev structure.
+    /// Mean refutation degree of the **shape-matched** control: same
+    /// variable count, equation count, total degree and term density,
+    /// no Semaev structure.
+    ///
+    /// Read this together with [`Self::control_is_satisfiable`].  With
+    /// `n_eqs < n_vars` a random system has `2^(n_vars − n_eqs)`
+    /// expected solutions, so it is satisfiable by construction and can
+    /// neither refute nor pin — it cannot produce the event being
+    /// measured, and a `None` here is uninformative rather than a
+    /// finding.  That is why the second control exists.
     pub control_solve_mean: Option<f64>,
-    /// Control draws that did not resolve.
+    /// Shape-matched control draws that did not resolve.
     pub control_unresolved: usize,
+    /// `2^(n_vars − n_eqs)` expected solutions of the shape-matched
+    /// control: when this exceeds 1 the control cannot refute.
+    pub control_expected_solutions: f64,
+    /// Mean refutation degree of the **infeasible** control: same
+    /// variables, degree and term density, but enough equations
+    /// (`n_vars + 4`) that it has no solution with high probability, so
+    /// it refutes and is comparable like for like with the real
+    /// systems' refutation degree.
+    ///
+    /// Shape and feasibility cannot both be matched at once — matching
+    /// the equation count is what makes the first control satisfiable.
+    /// The two controls bracket the question instead.
+    pub control_unsat_mean: Option<f64>,
+    /// Infeasible-control draws that did not resolve.
+    pub control_unsat_unresolved: usize,
+    /// Highest Macaulay degree built on any control draw.
+    ///
+    /// The controls need this for the same reason the real systems do:
+    /// without it, "did not resolve by `d_max`" and "exceeded the size
+    /// caps" are the same output, and only the first of those says
+    /// anything.  Omitting it here once forced the `n = 5, m = 3`
+    /// attribution to be settled by hand-computing the matrix size.
+    pub control_max_degree_built: Option<u32>,
 }
 
 impl DregSummary {
@@ -838,6 +868,15 @@ pub fn dreg_summary(
     // refutation too, and the two numbers compare like for like.
     let mut control: Vec<u32> = Vec::new();
     let mut control_unresolved = 0usize;
+    let mut control_unsat: Vec<u32> = Vec::new();
+    let mut control_unsat_unresolved = 0usize;
+    let mut control_max_degree_built: Option<u32> = None;
+    let mut note_ctrl = |profs: &[crate::cryptanalysis::koblitz_groebner::SolvingProfile],
+                         acc: &mut Option<u32>| {
+        if let Some(top) = profs.last().map(|p| p.degree) {
+            *acc = Some(acc.map_or(top, |x: u32| x.max(top)));
+        }
+    };
     for t in 0..(if with_control { trials } else { 0 }) {
         // A fresh control per draw, deterministically derived from the
         // sweep seed so the whole table replays.
@@ -845,9 +884,27 @@ pub fn dreg_summary(
             .wrapping_mul(0x9E37_79B9_7F4A_7C15)
             .wrapping_add(t as u64);
         let polys = random_control_system(n_vars, n_eqs, degree, terms_per_eq, control_seed);
-        match solving_degree(&polys, n_vars, d_max).0 {
+        let (cd, cprofs) = solving_degree(&polys, n_vars, d_max);
+        note_ctrl(&cprofs, &mut control_max_degree_built);
+        match cd {
             Some(d) => control.push(d),
             None => control_unresolved += 1,
+        }
+
+        // Second control: overdetermined, so infeasible with high
+        // probability, so it can actually refute.
+        let unsat = random_control_system(
+            n_vars,
+            n_vars + 4,
+            degree,
+            terms_per_eq,
+            control_seed.wrapping_mul(0xA24B_AED4_963E_E407),
+        );
+        let (ud, uprofs) = solving_degree(&unsat, n_vars, d_max);
+        note_ctrl(&uprofs, &mut control_max_degree_built);
+        match ud {
+            Some(d) => control_unsat.push(d),
+            None => control_unsat_unresolved += 1,
         }
     }
 
@@ -877,19 +934,32 @@ pub fn dreg_summary(
         max_degree_built,
         control_solve_mean: mean(&control),
         control_unresolved,
+        control_expected_solutions: 2f64.powi(n_vars as i32 - n_eqs as i32),
+        control_unsat_mean: mean(&control_unsat),
+        control_unsat_unresolved,
+        control_max_degree_built,
     })
 }
 
 /// Render [`DregSummary`] rows as a markdown table.
 pub fn format_dreg_table(rows: &[DregSummary]) -> String {
     let mut out = String::from(
-        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl | refuted | pinned | unres | D_built |\n\
-         |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|-----:|--------:|-------:|------:|--------:|\n",
+        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl(shape) | ctrl(unsat) | refuted | pinned | unres | D_built |\n\
+         |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|------------:|------------:|--------:|-------:|------:|--------:|\n",
     );
     let f = |v: Option<f64>| v.map_or("—".to_string(), |x| format!("{x:.2}"));
+    // A control that reported no degree is either one that never
+    // resolved or one that *could not* resolve because it is
+    // satisfiable by construction. Saying which is the whole point.
+    let ctrl = |v: Option<f64>, unresolved: usize, satisfiable: bool| match v {
+        Some(x) => format!("{x:.2}"),
+        None if satisfiable => "n/a(sat)".to_string(),
+        None if unresolved > 0 => "unres".to_string(),
+        None => "—".to_string(),
+    };
     for r in rows {
         out.push_str(&format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}/{} | {} |\n",
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}/{} | {} |\n",
             r.n,
             r.ell,
             r.m,
@@ -899,7 +969,8 @@ pub fn format_dreg_table(rows: &[DregSummary]) -> String {
             f(r.fall_mean),
             f(r.refute_mean),
             f(r.gap()),
-            f(r.control_solve_mean),
+            ctrl(r.control_solve_mean, r.control_unresolved, r.control_expected_solutions > 1.5),
+            ctrl(r.control_unsat_mean, r.control_unsat_unresolved, false),
             r.refuted,
             r.pinned,
             r.unresolved,
