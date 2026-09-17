@@ -214,7 +214,7 @@ fn main() {
                         (
                             if done { "yes" } else { "no" }.to_string(),
                             if done {
-                                "REFUTED-at-degree-4".to_string()
+                                format!("REFUTED-at-degree-{d}")
                             } else {
                                 "not-refuted (target likely decomposable; NOT a degree verdict)".to_string()
                             },
