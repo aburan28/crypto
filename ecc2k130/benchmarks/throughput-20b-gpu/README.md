@@ -59,6 +59,45 @@ device distinguished points is required before timing each binary.
 If every arm stays ≤ 20.0, this thread stops. The remaining distance is
 the product and the reduction, which are the floor.
 
+## Result (2026-09-17)
+
+This RTX PRO 6000 Blackwell Server Edition, driver 595.91.07, CUDA 13.3.73,
+automatic 96,256 workers, 50,465,865,728 updates per sample, clocks locked
+at 2430 MHz (SM still 2340–2422 under load). Every binary replayed 300
+device reports with 0 dropped. Product count 5.3125. Walk-rate engineering,
+not an ECDLP exponent claim.
+
+| variant | median B/s | / 20 | / this shipping 14.436 | / 22 B floor | / eighteen 16.667 | class |
+|---|---:|---:|---:|---:|---:|---|
+| shipping product | 14.436 | 0.722 | 1.000 | 0.656 | 0.866 | reference |
+| table walk + byte pivot | 16.474 | 0.824 | 1.141 | 0.749 | 0.988 | engineering |
+| + `PACKED_PAIR_ILP=1` | 16.617 | 0.831 | 1.151 | 0.755 | 0.997 | engineering |
+| + `PACKED_L2_PERSIST=1` | 17.081 | 0.854 | 1.183 | 0.776 | 1.025 | engineering |
+| + `UNROLL_SLOTS=2` | 17.298 | 0.865 | 1.198 | 0.786 | 1.038 | engineering |
+
+No arm clears 20. Pair-ILP was priced at ~9% if ptxas dual-issued and
+measured **+0.9%**. Persist was the DRAM lever Nsight reopened and
+measured **+2.8%** on the ILP control (SM held 2422 MHz at ~530 W; the
+ILP control fell to 2340–2370 MHz at ~555 W). Slot unroll 2 added
+**+1.3%** at the same 2422 MHz. The best median is 17.298 B/s, 0.865 of
+the target.
+
+This instance's shipping walk is 14.436 against eighteen's 15.116 on a
+Modal card of the same SKU; the table+pivot control here is 16.474
+against eighteen's 16.667. The clock lock does not hold 2430 under load.
+
+Rejected scouts, not in the table (no 300-report replay): slot prefetch
+regressed; a global table at 80 registers resident 3 blocks/SM at ~15.5
+B/s (1.5× working set, SM ~2280 MHz); the same global table at 104
+registers / 2 blocks was 16.08 B/s, so the LDS copy still wins; unroll 4
+matched unroll 2's register count and was slightly slower.
+
+The campaign default stays the shipping walk. This thread stops: every
+arm is ≤ 20.0, and the leftover distance is the product and the
+reduction.
+
+Frozen source: [summary.json](summary.json), [result.json](result.json).
+
 ## Recipe
 
 From `ecc2k130/`, GPU idle, CUDA 13.3.73 on `PATH`:
