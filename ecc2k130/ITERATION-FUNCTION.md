@@ -630,6 +630,9 @@ extrapolated rate.
 | J. E + `INLINE_PRODUCTS=1` | 24 | 1,672 | 44.9 / 39.1 | 41 | 1,224 | 18.1 if the state fits |
 | K. F + `INLINE_PRODUCTS=1` | 32 | 1,628 | 43.9 / 38.1 | 40 | 1,632 | 18.6 if the state fits |
 | L. shipping walk + `INLINE_PRODUCTS=1` | 16 | 2,267 | 45.3 | 56 | 1,088 | 14.8 |
+| M. I + `BYTE_PIVOT=1` | 16 | 1,668 | 46.8 / 41.2 | 41 | 1,088 | 18.2 |
+| N. J + `BYTE_PIVOT=1` | 24 | 1,628 | 44.9 / 39.1 | 40 | 1,224 | 18.6 if the state fits |
+| O. K + `BYTE_PIVOT=1` | 32 | 1,584 | 43.9 / 38.1 | 39 | 1,632 | 19.1 if the state fits |
 
 Rows I – L are the fourth lever, found while costing the others: the
 polynomial products are `__noinline__` (`ECC_BIG`, bitslice.h) because a
@@ -643,9 +646,18 @@ schedule across what used to be a call. The step loop's body grows to
 static costing cannot see; row I against row B measures that directly.
 `PACKED_INLINE_PRODUCTS=1` selects it.
 
+Rows M – O index the pivot's `maxL` table by byte instead of by nibble
+(`TABLE_BYTE_PIVOT=1`): 17 lookups instead of 33, each a `PRMT`, an
+`LDS.U8` and a `VIMNMX`, **−44 static slots per update**, for 3.8 KB more
+shared memory (52.3 KB per block, past the 48 KB default and into the
+opt-in range that `prepareKernel` already handles; two blocks still fit the
+128 KB of an sm_120 SM, leaving ≈ 21 KB of L1 instead of ≈ 29 KB). The L1
+that the state loads lose is the risk, and again only the measurement sees
+it.
+
 The unit and the floor are those of §2: the arithmetic floor stays at
 ≈ 1,090 slots, so every row here is **engineering** by construction, and
-the ratio-to-floor column of §2 moves from 1.7 to at best 1.49 (row K).
+the ratio-to-floor column of §2 moves from 1.7 to at best 1.45 (row O).
 
 ### 7.5 Falsification target
 

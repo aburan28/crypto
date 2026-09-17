@@ -12,7 +12,8 @@
 //   phase[i][v]  bytes: sum of L over the set bits of byte i of x when that
 //                byte is v, mod 131   (17 x 256)
 //   maxL[i][v]   bytes: 1 + the largest L over the set bits of nibble i of x
-//                when that nibble is v, 0 when v = 0   (33 x 16)
+//                when that nibble is v, 0 when v = 0   (33 x 16; or by byte,
+//                17 x 256, with ECC_TABLE_BYTE_PIVOT)
 //   linv[l]      bytes: the coordinate (bit index) whose L is l   (131)
 //
 // The selection is table lookups on purpose.  Its first form was eight
@@ -34,6 +35,15 @@
 #if ECC_TABLE_DENOM_STORE != 0 && ECC_TABLE_DENOM_STORE != 1
 #error "ECC_TABLE_DENOM_STORE must be 0 or 1"
 #endif
+// 1: the pivot's maxL table is indexed by byte (17 lookups, 17 x 256 B) instead
+// of by nibble (33 lookups, 33 x 16 B).  Costs 3.8 KB of shared memory, which
+// takes the block past 48 KB into the opt-in range; two blocks still fit an SM.
+#ifndef ECC_TABLE_BYTE_PIVOT
+#define ECC_TABLE_BYTE_PIVOT 0
+#endif
+#if ECC_TABLE_BYTE_PIVOT != 0 && ECC_TABLE_BYTE_PIVOT != 1
+#error "ECC_TABLE_BYTE_PIVOT must be 0 or 1"
+#endif
 
 namespace eccPacked131 {
 
@@ -44,11 +54,14 @@ static const int TW_MASK_OFF = TW_TABLE_WORDS;
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
 static const int TW_INV_OFF = TW_ROW_OFF + 131 * 5;
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;        // 17 * 256 bytes
-static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes
-static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
+static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes, or 17 * 256
+static const int TW_MAX_WORDS = ECC_TABLE_BYTE_PIVOT ? 17 * 64 : 33 * 4;
+static const int TW_LINV_OFF = TW_MAX_OFF + TW_MAX_WORDS; // 131 bytes, padded
 static const int TW_WORDS = TW_LINV_OFF + 33;
 static const size_t TW_SHARED_BYTES = size_t(TW_WORDS) * sizeof(uint32_t);
-static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
+// Two blocks per SM: sm_120 has 128 KB of shared memory per SM and 1 KB of it
+// is reserved per block.
+static_assert(TW_SHARED_BYTES <= 63 * 1024, "table walk tables must leave room for two blocks per SM");
 
 #ifdef __CUDACC__
 __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *global) {
@@ -83,6 +96,13 @@ __device__ __forceinline__ int twPivot(const P131 &x, int k, const uint32_t *mas
 #pragma unroll
     for (int i = 0; i < 5; ++i) s[i] = any ? s[i] : x.v[i];
     unsigned best = 0;
+#if ECC_TABLE_BYTE_PIVOT
+#pragma unroll
+    for (int w = 0; w < 4; ++w)
+#pragma unroll
+        for (int t = 0; t < 4; ++t) best = max(best, unsigned(maxL[(4 * w + t) * 256 + twByte(s[w], t)]));
+    best = max(best, unsigned(maxL[16 * 256 + (s[4] & 7u)]));
+#else
 #pragma unroll
     for (int w = 0; w < 4; ++w) {
         const uint32_t lo = s[w] & 0x0F0F0F0Fu, hi = (s[w] >> 4) & 0x0F0F0F0Fu;
@@ -93,6 +113,7 @@ __device__ __forceinline__ int twPivot(const P131 &x, int k, const uint32_t *mas
         }
     }
     best = max(best, unsigned(maxL[32 * 16 + (s[4] & 7u)]));
+#endif
     return linv[best - 1];
 }
 
@@ -189,6 +210,15 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
             phase[i * 256 + v] = uint8_t(s % 131u);
         }
+#if ECC_TABLE_BYTE_PIVOT
+    for (int i = 0; i < 17; ++i)
+        for (int v = 0; v < 256; ++v) {
+            int best = -1;
+            for (int t = 0; t < 8; ++t)
+                if ((v >> t) & 1) best = L(8 * i + t) > best ? L(8 * i + t) : best;
+            maxL[i * 256 + v] = uint8_t(best + 1);
+        }
+#else
     for (int i = 0; i < 33; ++i)
         for (int v = 0; v < 16; ++v) {
             int best = -1;
@@ -196,6 +226,7 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) best = L(4 * i + t) > best ? L(4 * i + t) : best;
             maxL[i * 16 + v] = uint8_t(best + 1);
         }
+#endif
     for (int bit = 0; bit < 131; ++bit) linv[L(bit)] = uint8_t(bit);
 }
 

@@ -14,7 +14,9 @@ make test-packed-cuda "$F" $K BATCH=16 PACKED_POLY_INV=1 2>&1 | grep -E "PASS|FA
 echo "=== unit test: device arithmetic, normal-basis inversion (control)"
 make test-packed-cuda "$F" $K BATCH=16 PACKED_POLY_INV=0 2>&1 | grep -E "inversion|FAIL|mismatch|error" | head -4
 echo "=== unit test: device table-walk primitives"
-make test-table-walk-cuda "$F" $K BATCH=16 2>&1 | grep -E "PASS|FAIL|mismatch|error" | head -4
+make test-table-walk-cuda "$F" $K BATCH=16 2>&1 | grep -E "PASS|FAIL|mismatch|error|shared bytes" | head -4
+echo "=== unit test: device table-walk primitives, byte pivot"
+make test-table-walk-cuda "$F" $K BATCH=16 TABLE_BYTE_PIVOT=1 2>&1 | grep -E "PASS|FAIL|mismatch|error|shared bytes" | head -4
 build() { make -B ecc2k130 "$F" $K $2 2>&1 | grep -E "error|Used [0-9]+ registers|spill" | grep -A1 -B1 "eccPacked131.*walk" | grep -E "registers|spill" | head -2; mv ecc2k130 ecc2k130-$1 || exit 1; }
 echo "=== build legacy16      (shipping walk, control)";                 build legacy16    "BATCH=16 WALK_TABLE=0"
 echo "=== build legacy16pi    (H: shipping walk + POLY_INV=1)";          build legacy16pi  "BATCH=16 WALK_TABLE=0 PACKED_POLY_INV=1"
@@ -30,7 +32,10 @@ echo "=== build table16pi-inl (I: B with the products inlined)";         build t
 echo "=== build table24pind-inl (J: E with the products inlined)";       build table24pindI "BATCH=24 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1"
 echo "=== build table32pind-inl (K: F with the products inlined)";       build table32pindI "BATCH=32 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1"
 echo "=== build legacy16-inl  (L: shipping walk with the products inlined)"; build legacy16I "BATCH=16 WALK_TABLE=0 PACKED_INLINE_PRODUCTS=1"
-ALL="legacy16 legacy16pi legacy16I table16 table16pi table16pi2 table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI"
+echo "=== build table16piIB   (M: I + byte pivot)";                       build table16piIB "BATCH=16 WALK_TABLE=1 PACKED_POLY_INV=1 PACKED_INLINE_PRODUCTS=1 TABLE_BYTE_PIVOT=1"
+echo "=== build table24pindIB (N: J + byte pivot)";                       build table24pindIB "BATCH=24 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1 TABLE_BYTE_PIVOT=1"
+echo "=== build table32pindIB (O: K + byte pivot)";                       build table32pindIB "BATCH=32 WALK_TABLE=1 PACKED_POLY_INV=1 TABLE_DENOM_STORE=0 PACKED_INLINE_PRODUCTS=1 TABLE_BYTE_PIVOT=1"
+ALL="legacy16 legacy16pi legacy16I table16 table16pi table16pi2 table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI table16piIB table24pindIB table32pindIB"
 for b in $ALL; do
   echo "=== verify $b: 300 device reports re-walked by the host reference"
   timeout 1500 ./ecc2k130-$b --curve 131 --packed --dp-weight 48 --dp-cap 1048576 --steps 16 --launches 6 --verify 300 2>&1 | grep -E "MISMATCH|OVERFLOW|finished|table walk|inversion|backend"
@@ -42,7 +47,7 @@ for rep in 1 2 3; do for b in $ALL; do
   nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu --format=csv,noheader
 done; done
 echo "=== audited geometry: --threads 385024, 1024 steps x 32 launches"
-for rep in 1 2 3; do for b in legacy16 legacy16I table16 table16pi table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI; do
+for rep in 1 2 3; do for b in legacy16 legacy16I table16 table16pi table16pind table24pind table24pi2nd table32pind table24pi table16piI table24pindI table32pindI table16piIB table24pindIB table32pindIB; do
   echo "=== bench385k $b rep $rep"
   ./ecc2k130-$b --curve 131 --packed --bench --threads 385024 --steps 1024 --launches 32 --verify 0 2>&1 | grep -E "finished|resident"
   nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu --format=csv,noheader
