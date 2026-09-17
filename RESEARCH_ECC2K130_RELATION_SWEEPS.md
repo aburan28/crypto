@@ -109,3 +109,131 @@ evidence until the construction span has been quotiented out. A base
 manufactured from `P` and `Q` can be made to produce as many equations as one
 likes, of as high a rank as one likes, none of which say anything about
 `log_P(Q)`.
+
+## 4. The four-point experiment, and a superseded premise
+
+The merged form of this study (#404) recorded a four-point sweep whose design
+rested on a claim that is true but was applied too widely:
+
+> The weight-two set is **not** Frobenius-stable in the polynomial basis.
+> [...] This rules out normalising a relation by Frobenius so that one
+> summand sits at an orbit representative *of the base*, because the base is
+> not a union of orbits.
+
+The first sentence is correct. The second does not follow, and the word doing
+the damage is *the*. Weight-two is a property **of a basis**, not of the
+field. In the challenge's polynomial basis `z^i + z^j` squares out of weight
+two as soon as `2i >= 131`, and the merged note is right that only the
+`i < j <= 65` part survives. In a **normal** basis it cannot happen at all,
+because squaring is a cyclic shift of coordinates. Writing `alpha` for a
+normal element and taking the support
+
+    x_{i,j} = alpha^(2^i) + alpha^(2^j),     0 <= i < j < 131
+
+Frobenius sends `x_{i,j}` to `x_{i+1, j+1}` with indices read mod 131, so the
+support is closed under `sigma` by construction. The orbit-representative
+normalisation the merged note ruled out is available after all; it was ruled
+out for the polynomial basis and the conclusion was carried to a support that
+does not have to be built in one.
+
+Measured here over six random normal elements of `F_2^131`: the weight-two
+normal support is `sigma`-stable in all six, with no exceptions and no
+boundary cases.
+
+### 4.1 The support is a union of orbits, and the orbits are all of size 131
+
+`sigma` acts on index pairs by `(i, j) -> (i+1, j+1) mod 131`, so an orbit is
+determined by the difference `d = j - i` read up to sign, and `131` is prime,
+so every orbit has exactly `131` members. There are
+
+    C(131, 2) / 131 = 8515 / 131 = 65
+
+orbits, one per `d` in `1..65`. **Not 66** — an earlier count of this said 66
+and was wrong by one; there is no `d = 0` class, since `i < j`.
+
+An abscissa lifts to a curve point when the relevant trace condition holds,
+and `sigma` preserves the curve, so lifting is constant on an orbit: an orbit
+lifts entirely or not at all. Measured over the same six bases, with zero
+mixed orbits in any of them. A normal-basis weight-two support is therefore
+always `131 * (number of lifting orbits)` points.
+
+### 4.2 Support size is basis-dependent, over a wider range than previously recorded
+
+An earlier note put the lifting-orbit count at `28` of `66`, giving the
+`B = 3668` support this study has been quoting, and said the count "runs
+28–36 across normal elements". Both the denominator and the range are wrong.
+Six random normal elements, measured:
+
+| `alpha` (leading bits) | lifting orbits (of 65) | `B` |
+|:--|---:|---:|
+| `0x2de8f4e94249b03fd0…` | 25 | 3275 |
+| `0x4dea6516dc1ed48bd5…` | 29 | 3799 |
+| `0x1a652f4bb357676c68…` | 31 | 4061 |
+| `0x4d44a5aac26a00c420…` | 42 | 5502 |
+| `0x57eea059506531b2fd…` | 26 | 3406 |
+| `0x4f7aaf673fb46bcf47…` | 23 | 3013 |
+
+The spread is `23–42` orbits, `B = 3013–5502`, not `28–36`. `B = 3668` is one
+draw from this distribution and carries no special status. Nothing in the
+conclusion turns on which draw is used — every one of them is astronomically
+below the `B_4 = 2^33.4` of §1 — but a quoted support size should not be
+mistaken for a property of the curve.
+
+### 4.3 Frobenius acts as a scalar, so the support carries 28 unknowns, not 3668
+
+`E` is a Koblitz curve, `#E(F_2) = 4`, so the base-field trace is `t = -1` and
+`sigma` satisfies `sigma^2 + sigma + 2 = 0`. On the order-`r` subgroup this
+has the root
+
+    s = 196511074115861092422032515080945363956
+
+verified here directly: `sigma(P) = [s]P` and `sigma(Q) = [s]Q` for the
+challenge points, and `s^131 = 1 mod r`.
+
+So for a support point `R` and its orbit, `log(sigma^k R) = s^k log(R)`. The
+131 points of an orbit share **one** unknown. A support of 28 lifting orbits
+presents 3668 points to a sweep and 28 unknowns to the linear algebra.
+
+**This is what gives the negative its force.** The usual reason an index
+calculus attempt fails inconclusively is that the linear algebra was never
+reached — not enough relations to fill a `B`-column matrix. Here `B` is
+effectively 28. About 29 relations would close the system, and the solve is
+free at that size. The method still produces none, so the failure cannot be
+attributed to an unaffordable second stage. It is a supply failure, and
+supply is what §1 counts.
+
+### 4.4 Five defects, each of which produced plausible output
+
+Recorded because each one returned numbers that looked like results, and two
+of them were in validation code rather than in the search — the code whose job
+is to catch the other kind.
+
+1. **Double-counted pairs.** Every unordered pair was enumerated twice, once
+   anchored at each element's orbit, and the first orbit-grouped run reported
+   125,953 "relations". Caught by the count itself being implausible, not by a
+   test.
+2. **Supply model never validated.** The expected-relation model was asserted,
+   not checked. Its first test missed measured yields by `2x`–`43x`.
+3. **Cancelling multisets counted as relations** — the cause of (2). The
+   validation counter admitted formally cancelling multisets such as
+   `R + (-R) + T + (-T)`. This is the construction-rank error of §3 reappearing
+   *inside the code written to validate against it*.
+4. **Detector too strict.** The search required the sum to be exactly `O` in
+   the full group, when the attack only needs the sum to land in `E[4]`: the
+   cofactor is 4, and a sum in `E[4]` still yields a usable equation on the
+   order-`r` subgroup. At `m = 13`, 455 usable relations against 195 exact —
+   57% of the supply was being discarded.
+5. **Coset factor guessed.** The correction to (4) was first priced at `4x` by
+   assuming the four cosets are hit uniformly. Measured, it is `2.33x`.
+
+### 4.5 Status of the quantitative results
+
+The corrected implementation and its run are being rebuilt in this branch.
+The claims of §4.1–§4.3 are measured above and stand on their own. The
+run-dependent figures — the measured expected-usable-relation rate, the
+collision counts, the `m = 4` cost exclusion and the `2.33x` coset factor —
+are restated from a prior session whose container was reclaimed before its
+outputs were committed, and are **not** reproduced by anything in `results/`.
+They are recorded here as prior observations pending re-measurement, and this
+section is updated with measured values and frozen evidence files when the
+rebuilt run lands.
