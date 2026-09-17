@@ -455,6 +455,10 @@ def render(forest, positions, meetings, width, height, checked):
                      len(positions), forest.every, total_steps(forest), len(forest.roots),
                      count_meetings(forest), forest.header))
     lines.append("<!-- %s; corpus records checked: %d -->" % (forest.header, checked))
+    # An <img> evaluates the SVG's own media queries against the box it is
+    # drawn in, not the page. At phone width the 1000-unit viewBox is ~360px
+    # and a 0.8-unit stroke is a third of a pixel; thicken so the trails
+    # stay visible without forcing the page to scroll sideways.
     lines.append("<style>"
                  ".e{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round}"
                  ".n{fill:%s;stroke:%s;stroke-width:%s}"
@@ -464,6 +468,13 @@ def render(forest, positions, meetings, width, height, checked):
                  ".s{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
                  ".na{fill:%s;stroke:%s;stroke-width:%s}"
                  ".nb{fill:%s;stroke:%s;stroke-width:%s}"
+                 "@media(max-width:720px){"
+                 ".e{stroke-width:2.8}"
+                 ".n,.dp,.na,.nb{stroke-width:2.2}"
+                 ".a,.b,.s{stroke-width:4.2}"
+                 "circle{r:3.4px}"
+                 "circle.dp{r:5px}"
+                 "}"
                  "</style>" % (
                      COLORS["edge"], fmt(STROKE * scale),
                      COLORS["node_fill"], COLORS["node_stroke"], fmt(STROKE * scale),
@@ -533,6 +544,61 @@ def build(trails_path, corpus_path=None, width=1000, height=900, iterations=160)
     return render(forest, positions, meetings, width, height, checked), forest
 
 
+def export_graph(forest, positions, meetings, checked, title):
+    """The same forest as a graph the page can explore: every drawn orbit a
+    node with its layout position, every stride an edge, every walk the
+    ordered list of its nodes.  Node names are whatever the trails carry
+    (hash prefixes on the challenge curve), so nothing leaves the trails
+    file that was not already in it.  Positions are the static figure's, so
+    the two agree and the page needs no layout of its own."""
+    import json
+    index = {node: i for i, node in enumerate(forest.order)}
+    roots = set(forest.roots)
+    x0, y0, x1, y1 = bbox(list(positions.values()))
+    nodes = []
+    for node in forest.order:
+        x, y = positions[node]
+        nodes.append([node, round(x - x0, 1), round(y - y0, 1), 1 if node in roots else 0])
+    edges = [[index[a], index[b]] for a, b in forest.succ.items()]
+    walks = []
+    for w, ((seed, orbits), steps) in enumerate(zip(forest.walks, forest.steps)):
+        walks.append({"id": seed, "steps": steps, "nodes": [index[o] for o in orbits]})
+    highlights = [{"orbit": index[m["orbit"]], "a": [index[o] for o in m["a"]],
+                   "b": [index[o] for o in m["b"]], "shared": [index[o] for o in m["shared"]]}
+                  for m in meetings]
+    graph = {
+        "title": title,
+        "header": forest.header,
+        "params": forest.params,
+        "every": forest.every,
+        "checked": checked,
+        "counts": {
+            "walks": len(forest.walks),
+            "nodes": len(forest.order),
+            "edges": len(edges),
+            "distinguished": len(forest.roots),
+            "meetings": count_meetings(forest),
+            "iterations": total_steps(forest),
+            "longest": max(forest.steps),
+        },
+        "width": round(x1 - x0, 1),
+        "height": round(y1 - y0, 1),
+        "nodes": nodes,
+        "edges": edges,
+        "walks": walks,
+        "highlights": highlights,
+    }
+    return json.dumps(graph, separators=(",", ":"), sort_keys=True) + "\n"
+
+
+def build_graph(trails_path, corpus_path=None, iterations=160, title=""):
+    forest = read_trails(trails_path)
+    checked = bind_to_corpus(forest, read_corpus(corpus_path)) if corpus_path else 0
+    positions = layout(forest, iterations)
+    meetings = find_meetings(forest, HIGHLIGHTS)
+    return export_graph(forest, positions, meetings, checked, title), forest
+
+
 def hash_trails(forest, every):
     """Rewrite a raw (every step, orbits in the clear) trails file the way
     trailforest --sample writes one: sampled every `every` steps plus the
@@ -563,11 +629,27 @@ def main(argv=None):
     parser.add_argument("--check", action="store_true", help="fail if --out would change instead of writing it")
     parser.add_argument("--hash-trails", type=int, default=0, metavar="EVERY",
                         help="instead of drawing, write --trails re-sampled every EVERY steps with orbits hashed to --out")
+    parser.add_argument("--json", action="store_true",
+                        help="write the forest as a graph (nodes, edges, walks, layout) for the page's explorer instead of an SVG")
+    parser.add_argument("--title", default="", help="the graph's title, with --json")
     args = parser.parse_args(argv)
 
     if args.hash_trails:
         with open(args.out, "w", encoding="utf-8") as fh:
             fh.write(hash_trails(read_trails(args.trails), args.hash_trails))
+        return 0
+
+    if args.json:
+        text, forest = build_graph(args.trails, args.corpus, args.iterations, args.title)
+        if args.check:
+            with open(args.out, encoding="utf-8") as fh:
+                if fh.read() != text:
+                    raise SystemExit("%s is not what %s exports to; regenerate it" % (args.out, args.trails))
+            print("%s is up to date" % args.out)
+            return 0
+        with open(args.out, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        print("%s: %d walks, %d nodes -> %s" % (args.trails, len(forest.walks), len(forest.order), args.out), file=sys.stderr)
         return 0
 
     svg, forest = build(args.trails, args.corpus, args.width, args.height, args.iterations)

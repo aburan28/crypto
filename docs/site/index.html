@@ -23,6 +23,8 @@
   <nav aria-label="Site">
     <a href="./" aria-current="page">Overview</a>
     <a href="./scoreboard/">Scoreboard</a>
+    <a href="./scoreboard/performance-gains.html">Performance</a>
+    <a href="./scoreboard/algorithm-lab.html">Algorithm lab</a>
     <a href="./status/">Campaign status</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
@@ -42,6 +44,19 @@
     </p>
   </section>
 
+
+  <section class="performance-summary" aria-labelledby="performance-title">
+    <p class="kicker">Measured engineering improvements · 14 September 2026</p>
+    <h2 id="performance-title">Summation polynomials take less work.</h2>
+    <div class="performance-stats">
+      <div><strong>10.7%</strong><span>fewer field products</span><small>1,342 → 1,199 per specialization<br>p = 67, seed = 11</small></div>
+      <div><strong>55.4%</strong><span>less specialization time</span><small>Combined vs corrected reference<br>Paired 95% interval excludes no change</small></div>
+      <div><strong>1.2%</strong><span>less symbolic setup time</span><small>Once per curve<br>Paired 95% interval excludes no change</small></div>
+    </div>
+    <p>These are local improvements. Summation-polynomial full-DLP confirmation remains inconclusive; the asymptotic and Pollard rho verdicts are unchanged.</p>
+    <a class="performance-link" href="./scoreboard/performance-gains.html">Explore before/after charts and evidence →</a>
+  </section>
+
   <aside class="warn" role="note">
     <h2>Not for production use</h2>
     <p>
@@ -59,6 +74,8 @@
 
   <h2 class="section-head">What is published here</h2>
   <div class="cards">
+    <a class="card" href="./scoreboard/algorithm-lab.html"><p class="card-kicker">Interactive demonstrations</p><h3>Inside index calculus</h3><p>Choose a factor base, step through modular linear algebra, and follow SAT decisions and propagation. Small examples compute and verify their answers in your browser.</p><p class="card-more">Open the algorithm lab</p></a>
+
 
     <a class="card" href="./scoreboard/">
       <p class="card-kicker">Cost ledger</p>
@@ -87,14 +104,17 @@
         <div><dt>Iterations/s</dt><dd class="mono" id="live-rate">&mdash;</dd></div>
         <div><dt>Points</dt><dd class="mono" id="live-dps">&mdash;</dd></div>
         <div><dt>Operations</dt><dd class="mono" id="live-ops">&mdash;</dd></div>
-        <div><dt>Workers</dt><dd class="mono" id="live-workers">&mdash;</dd></div>
+        <div><dt>GPUs running</dt><dd class="mono" id="live-gpus">&mdash;</dd></div>
         <div><dt>State</dt><dd class="mono state" id="live-state">&mdash;</dd></div>
       </dl>
       <p class="live-note">
         Iterations per second is measured, not projected: the walkers
         checkpoint their own iteration counts, and the rate is how much that
-        total moved between the last two snapshots. Operations is the same
-        total so far, as a power of two, against the
+        total moved between the last two snapshots. GPUs running is
+        <span class="mono">walking_slots</span> &mdash; slots whose last
+        checkpoint is still fresh &mdash; not the lifetime worker count in
+        the distinguished-point table. Operations is the same total so far,
+        as a power of two, against the
         <span class="mono">2^60.9</span> a collision is expected to cost. A
         snapshot without that counter falls back to the point count at
         <span class="mono">2^25.27</span> iterations per point, the interval
@@ -369,7 +389,7 @@
   var CAMPAIGN = "ecc2k-130";
   var ITERATIONS_PER_DP_LOG2 = 25.27;
 
-  // --- mirrored block: docs/site/index.html carries these three functions
+  // --- mirrored block: docs/site/index.html carries these four functions
   // verbatim, and scripts/site/test_build.py fails if the two copies differ
   // by a byte. Both pages read one snapshot, so both must read it the same.
   // What the campaign counts for itself. work_feed.py puts the sum of the
@@ -387,6 +407,14 @@
     if (!status || !status.walk_rate) return null;
     var rate = Number(status.walk_rate.iterations_per_second);
     return isFinite(rate) && rate >= 0 ? rate : null;
+  }
+
+  // Live GPUs: slots whose last checkpoint is still fresh. Distinct from
+  // status.workers, which is every worker_id that has ever reported a point.
+  function walkingSlots(status) {
+    if (!status || !status.work) return null;
+    var slots = Number(status.work.walking_slots);
+    return isFinite(slots) && slots >= 0 ? slots : null;
   }
 
   // Billions of iterations per second is the campaign's own unit: it is what
@@ -423,11 +451,11 @@
     })
     .then(function (status) {
       var dps = Number(status.dps);
-      var workers = Number(status.workers);
+      var gpus = walkingSlots(status);
       set("live-rate", status.campaign_id === CAMPAIGN ? formatRate(measuredRate(status)) : "—");
       set("live-dps", isFinite(dps) ? dps.toLocaleString("en-US") : "—");
       set("live-ops", operations(status, dps));
-      set("live-workers", isFinite(workers) ? workers.toLocaleString("en-US") : "—");
+      set("live-gpus", gpus === null ? "—" : gpus.toLocaleString("en-US"));
       set("live-state", String(status.state || "—").toLowerCase().replace(/_/g, " "));
     })
     .catch(function () {

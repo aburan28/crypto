@@ -1,0 +1,16 @@
+{
+  "class": "diagnostic engineering",
+  "frozenBeforeLaunch": true,
+  "purpose": "Distinguish general profiler failure from packed-kernel profiling failure and attempt hardware counters with application range replay.",
+  "instrumentation": "ECC_PROFILE_RANGE=1 adds cudaProfilerStart/Stop around a synchronized packed walk launch. It defaults off. These builds never supply throughput samples.",
+  "arithmetic": "Unmodified native control arithmetic; MINBLOCKS=2, square=0, Karatsuba3=0, BATCH=16",
+  "fieldProductsPerScalarUpdate": 5.3125,
+  "fieldProductRatioToControl": 1.0,
+  "endToEndDlpSpeedup": null,
+  "smokeWorkload": "4096 independent 1024-step unsigned LCG results checked against CPU; one GPU-duration metric with kernel replay and application range replay",
+  "packedRange": "Second marked walk launch, 32 steps, at 385024 and 96256 workers. Three hardware sections: SpeedOfLight, MemoryWorkloadAnalysis, ComputeWorkloadAnalysis. Cache flush enabled; clocks unchanged.",
+  "correctness": "GPU arithmetic/storage/sigma probes plus checkpoint/restart and reference-report integration for the instrumented client",
+  "success": "Both packed ranges return success and produce usable ncu reports; inspect numeric counters before any bottleneck claim.",
+  "failure": "Retain exact errors and smoke results; do not infer counters or substitute profiler durations for throughput.",
+  "cloudLimit": "One benchmark GPU, 45-minute workload, 50-minute controller, independent 55-minute shutdown, exact-ID termination."
+}

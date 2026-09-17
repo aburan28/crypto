@@ -145,9 +145,9 @@
       <div class="foot">&nbsp;</div>
     </div>
     <div class="card">
-      <div class="label">Workers</div>
-      <div class="value mono" id="workers">&mdash;</div>
-      <div class="foot" id="workers-foot">&nbsp;</div>
+      <div class="label">GPUs running</div>
+      <div class="value mono" id="gpus">&mdash;</div>
+      <div class="foot" id="gpus-foot">&nbsp;</div>
     </div>
     <div class="card" id="collision-card">
       <div class="label">Collisions</div>
@@ -203,8 +203,16 @@
       ends.
     </p>
     <figure class="figure">
-      <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
-           alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+      <div class="figure-frame forest" id="forest">
+        <div class="forest-controls" hidden>
+          <label>Forest <select id="forest-dataset" aria-label="Which forest to explore"></select></label>
+          <button type="button" id="forest-play">Play the walks</button>
+          <button type="button" id="forest-reset">Reset view</button>
+        </div>
+        <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
+             alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+        <p class="forest-readout mono" id="forest-readout"></p>
+      </div>
       <figcaption>
         <span class="mono" id="wf-walks">106</span> walks of the ECC2K-130
         client on the Certicom ECC2K-130 curve, distinguished at weight
@@ -228,6 +236,13 @@
         point's orbit is its key. The figure regenerates from the committed
         trails with
         <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
+        With JavaScript the figure is a graph: drag to pan, wheel or pinch to
+        zoom, hover a node for the walk it is on and how far along, click one
+        to light every path through it to its distinguished point, and play
+        the walks to watch them set off for theirs. The second forest in the
+        menu is the <span class="mono">GF(2^23)</span> test curve, small
+        enough that trails meet, with the same iteration function and
+        distinguishing test.
       </figcaption>
     </figure>
   </section>
@@ -235,8 +250,12 @@
   <section aria-labelledby="h-workers">
     <h2 id="h-workers">Workers</h2>
     <p class="note">
-      Per-worker point counts. A worker is marked active when its most recent
-      point is inside the last hour of the snapshot.
+      Lifetime distinguished-point contributors, not the GPUs still walking.
+      The headline card above is the live checkpoint count
+      (<span class="mono">walking_slots</span>); this table is every
+      <span class="mono">worker_id</span> that has ever reported a point. A
+      row is marked active when its most recent point is inside the last hour
+      of the snapshot.
     </p>
     <div class="scroll" tabindex="0">
       <table>
@@ -253,6 +272,7 @@
         <tbody id="workers-body"></tbody>
       </table>
     </div>
+    <p class="note" id="workers-note"></p>
   </section>
 
   <section class="contribute" aria-labelledby="h-contribute">
@@ -397,6 +417,7 @@ make gpu
   </footer>
 </main>
 
+<script src="./walk-forest.js" defer></script>
 <script>
 (function () {
   "use strict";
@@ -446,7 +467,7 @@ make gpu
     return isFinite(n) ? n.toLocaleString("en-US") : "—";
   }
 
-  // --- mirrored block: docs/site/index.html carries these three functions
+  // --- mirrored block: docs/site/index.html carries these four functions
   // verbatim, and scripts/site/test_build.py fails if the two copies differ
   // by a byte. Both pages read one snapshot, so both must read it the same.
   // What the campaign counts for itself. work_feed.py puts the sum of the
@@ -464,6 +485,14 @@ make gpu
     if (!status || !status.walk_rate) return null;
     var rate = Number(status.walk_rate.iterations_per_second);
     return isFinite(rate) && rate >= 0 ? rate : null;
+  }
+
+  // Live GPUs: slots whose last checkpoint is still fresh. Distinct from
+  // status.workers, which is every worker_id that has ever reported a point.
+  function walkingSlots(status) {
+    if (!status || !status.work) return null;
+    var slots = Number(status.work.walking_slots);
+    return isFinite(slots) && slots >= 0 ? slots : null;
   }
 
   // Billions of iterations per second is the campaign's own unit: it is what
@@ -850,12 +879,35 @@ make gpu
       (perHour > 0 ? " · mean " + num(perHour) + " per hour across the feed" : "");
   }
 
+  // Headline card: GPUs still checkpointing, not the lifetime DP worker count.
+  function drawGpus(status) {
+    var slots = walkingSlots(status);
+    var total = status && status.work ? Number(status.work.slots) : NaN;
+    el("gpus").textContent = slots === null ? "—" : num(slots);
+    var parts = [];
+    if (slots === null) {
+      parts.push("no live checkpoint feed in this snapshot");
+    } else if (isFinite(total) && total > 0) {
+      parts.push(num(slots) + " of " + num(total) + " slots checkpointing");
+    } else if (slots === 0) {
+      parts.push("none checkpointing right now");
+    } else {
+      parts.push("slots still checkpointing");
+    }
+    var lifetime = Number(status && status.workers);
+    if (isFinite(lifetime) && lifetime > 0) {
+      parts.push(num(lifetime) + " lifetime workers reported points");
+    }
+    el("gpus-foot").textContent = parts.join(" · ");
+  }
+
   function drawWorkers(workers, snapshotAt) {
     var body = el("workers-body");
+    var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
       emptyRow(body, 5, "No workers have reported points.");
-      el("workers-foot").textContent = " ";
+      note.textContent = "";
       return;
     }
     var totalDps = 0;
@@ -890,9 +942,9 @@ make gpu
       cell(tr, timeCell(worker.last_dp_at));
       body.appendChild(tr);
     }
-    el("workers-foot").textContent = active
-      ? num(active) + " active in the last hour"
-      : "none active in the last hour";
+    note.textContent = active
+      ? num(active) + " of " + num(workers.length) + " with a point in the last hour"
+      : "none with a point in the last hour · " + num(workers.length) + " lifetime";
   }
 
   function drawCampaign(status) {
@@ -1283,7 +1335,7 @@ make gpu
     drawEta(status);
     el("dps_last_hour").textContent = num(status.dps_last_hour);
     el("dps_last_day").textContent = num(status.dps_last_day);
-    el("workers").textContent = num(status.workers);
+    drawGpus(status);
     el("collisions").textContent = num(status.collisions);
 
     var firstAt = parseTime(status.first_dp_at);

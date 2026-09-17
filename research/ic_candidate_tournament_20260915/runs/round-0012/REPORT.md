@@ -17,6 +17,18 @@ The ordinary WDSat corpus is inapplicable to this point-base API. This campaign 
 
 Observed rho/winner instruction ratio: **2.289**. A value below one means rho costs less. This is not an extrapolated crossover.
 
+## Smoke admission (all candidates)
+
+| Variant | S (Ir / sqrt(r)) | Cost / incumbent | Cost / rho | Cost / floor | Verified | Class |
+|---|---:|---:|---:|---:|---:|---|
+| incumbent | 5,658 | 1 | 0.4666 | 2.035e+05 | 12/12 | reference |
+| arena_fastio | 5,403 | 0.9548 | 0.4456 | 1.944e+05 | 12/12 | engineering experiment |
+| arena_glibc | 5,990 | 1.059 | 0.494 | 2.155e+05 | 12/12 | engineering experiment |
+| musl_sysalloc | 8,512 | 1.504 | 0.702 | 3.062e+05 | 12/12 | engineering experiment |
+| rho | 1.213e+04 | 2.143 | 1 | unmeasured | 12/12 | reference |
+
+Rejected arms remain in the frozen smoke receipts and are excluded from development. Missing verified workloads have no cost claim.
+
 ## Development
 
 | Variant | S (Ir / sqrt(r)) | Cost / incumbent | Cost / rho | Cost / floor | Verified | Class |

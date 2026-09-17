@@ -38,14 +38,60 @@
 #if ECC_PACKED_TOP_CLMAD && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_TOP_CLMAD requires ECC_PACKED_CLMAD"
 #endif
+#ifndef ECC_PACKED_CLMAD_SQUARE
+#define ECC_PACKED_CLMAD_SQUARE 0
+#endif
+#if ECC_PACKED_CLMAD_SQUARE != 0 && ECC_PACKED_CLMAD_SQUARE != 1
+#error "ECC_PACKED_CLMAD_SQUARE must be 0 or 1"
+#endif
+#if ECC_PACKED_CLMAD_SQUARE && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD"
+#endif
+#ifndef ECC_PACKED_KARAT3
+#define ECC_PACKED_KARAT3 0
+#endif
+#if ECC_PACKED_KARAT3 != 0 && ECC_PACKED_KARAT3 != 1
+#error "ECC_PACKED_KARAT3 must be 0 or 1"
+#endif
+#if ECC_PACKED_KARAT3 && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_KARAT3 requires ECC_PACKED_CLMAD"
+#endif
 #include "bitslice.h"
 namespace eccPacked131 {
+#ifndef ECC_PACKED_ADD_COMBINE
+#define ECC_PACKED_ADD_COMBINE 0
+#endif
+#if ECC_PACKED_ADD_COMBINE != 0 && ECC_PACKED_ADD_COMBINE != 1
+#error "ECC_PACKED_ADD_COMBINE must be 0 or 1"
+#endif
+#if ECC_PACKED_ADD_COMBINE
+// The four masked class products of clmul32 occupy disjoint bit positions, so
+// their union is also their integer sum. Spelling the union as PTX adds keeps
+// the compiler from folding it back into LOP3 ORs (nvvm canonicalises adds of
+// provably disjoint values to ors), so ptxas emits IADD3/IMAD.IADD instead:
+// benchmarks/hardware-limits measured that adds can co-issue with the logic
+// pipe that the rest of this multiplier saturates. Two combines per word, per
+// clmul32. The host path adds too, so a non-disjoint operand fails the tests.
+ECC_HD uint32_t disjointUnion4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
+#ifdef __CUDA_ARCH__
+    uint32_t ab, cd, r;
+    asm("add.u32 %0, %1, %2;" : "=r"(ab) : "r"(a), "r"(b));
+    asm("add.u32 %0, %1, %2;" : "=r"(cd) : "r"(c), "r"(d));
+    asm("add.u32 %0, %1, %2;" : "=r"(r) : "r"(ab), "r"(cd));
+    return r;
+#else
+    return a + b + c + d;
+#endif
+}
+#endif
 // Integer-mask carryless primitives adapted from gpu/ecc2k/f2m.cuh.
 ECC_HD uint32_t clmul32(uint32_t x, uint32_t y, uint32_t *hi) {
+#if !ECC_PACKED_ADD_COMBINE
     const uint64_t m0 = 0x1111111111111111ull;
     const uint64_t m1 = 0x2222222222222222ull;
     const uint64_t m2 = 0x4444444444444444ull;
     const uint64_t m3 = 0x8888888888888888ull;
+#endif
 
     uint64_t x0 = x & 0x11111111u, x1 = x & 0x22222222u;
     uint64_t x2 = x & 0x44444444u, x3 = x & 0x88888888u;
@@ -57,9 +103,16 @@ ECC_HD uint32_t clmul32(uint32_t x, uint32_t y, uint32_t *hi) {
     uint64_t z2 = (x0 * y2) ^ (x1 * y1) ^ (x2 * y0) ^ (x3 * y3);
     uint64_t z3 = (x0 * y3) ^ (x1 * y2) ^ (x2 * y1) ^ (x3 * y0);
 
+#if ECC_PACKED_ADD_COMBINE
+    *hi = disjointUnion4(uint32_t(z0 >> 32) & 0x11111111u, uint32_t(z1 >> 32) & 0x22222222u,
+                         uint32_t(z2 >> 32) & 0x44444444u, uint32_t(z3 >> 32) & 0x88888888u);
+    return disjointUnion4(uint32_t(z0) & 0x11111111u, uint32_t(z1) & 0x22222222u,
+                          uint32_t(z2) & 0x44444444u, uint32_t(z3) & 0x88888888u);
+#else
     uint64_t z = (z0 & m0) | (z1 & m1) | (z2 & m2) | (z3 & m3);
     *hi = (uint32_t)(z >> 32);
     return (uint32_t)z;
+#endif
 }
 
 /* 2 x 2 words -> 4 words. The software path uses three clmul32 leaves;
@@ -187,7 +240,42 @@ ECC_HD P131 reverse131(const P131 &a) {
     for(int i=0;i<5;i++) r.v[i]=(reverse32(a.v[4-i])>>29) | (i<4?reverse32(a.v[3-i])<<3:0);
     return r;
 }
+// Three limbs (64,64,3 bits): reuse the low diagonal products when
+// reconstructing the top cross terms. Five full 64-bit products replace
+// the old three products plus the bit-by-bit 128x3 tail.
+ECC_HD void product131Karat3(const P131 &a, const P131 &b, uint32_t *c) {
+    uint32_t lo[4], hi[4], mid[4], aa[2], bb[2];
+    clmul64(lo, a.v, b.v);
+    clmul64(hi, a.v + 2, b.v + 2);
+    const uint32_t a2 = a.v[4], b2 = b.v[4];
+    const uint32_t top = (b2 & (0u - (a2 & 1u)))
+        ^ ((b2 & (0u - ((a2 >> 1) & 1u))) << 1)
+        ^ ((b2 & (0u - ((a2 >> 2) & 1u))) << 2);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) { c[i] = lo[i]; c[i + 4] = hi[i]; }
+    c[8] = top;
+    aa[0] = a.v[0] ^ a.v[2]; aa[1] = a.v[1] ^ a.v[3];
+    bb[0] = b.v[0] ^ b.v[2]; bb[1] = b.v[1] ^ b.v[3];
+    clmul64(mid, aa, bb);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) c[i + 2] ^= mid[i] ^ lo[i] ^ hi[i];
+    aa[0] = a.v[0] ^ a2; aa[1] = a.v[1];
+    bb[0] = b.v[0] ^ b2; bb[1] = b.v[1];
+    clmul64(mid, aa, bb);
+#pragma unroll
+    for (int i = 0; i < 4; ++i) c[i + 4] ^= mid[i] ^ lo[i] ^ (i == 0 ? top : 0u);
+    aa[0] = a.v[2] ^ a2; aa[1] = a.v[3];
+    bb[0] = b.v[2] ^ b2; bb[1] = b.v[3];
+    clmul64(mid, aa, bb);
+    c[6] ^= mid[0] ^ hi[0] ^ top;
+    c[7] ^= mid[1] ^ hi[1];
+    c[8] ^= mid[2] ^ hi[2];
+    // The omitted tenth word is zero: a 64x3 cross term has degree <=65.
+}
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
+#if ECC_PACKED_KARAT3
+    product131Karat3(a, b, c);
+#else
     clmul128(c,a.v,b.v); c[8]=0;
 #if ECC_PACKED_TOP_CLMAD
     topCrossClmad131(a,b,c);

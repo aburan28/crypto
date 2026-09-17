@@ -1,5 +1,7 @@
 name: Koblitz SOTA-gate reproduction
 
+# Keep the complete degree-9/15/23 evidence packet reproducible from a fresh checkout.
+
 on:
   workflow_dispatch:
   pull_request:

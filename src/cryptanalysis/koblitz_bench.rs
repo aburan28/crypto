@@ -718,12 +718,54 @@ pub struct DregSummary {
     /// caps, and nothing about the system's solving degree has been
     /// established.
     pub max_degree_built: Option<u32>,
-    /// Mean refutation degree of the random null-object control:
-    /// systems with the same variable count, equation count, total
-    /// degree and term density, drawn without any Semaev structure.
+    /// Mean refutation degree of the **shape-matched** control: same
+    /// variable count, equation count, total degree and term density,
+    /// no Semaev structure.
+    ///
+    /// Read this together with [`Self::control_is_satisfiable`].  With
+    /// `n_eqs < n_vars` a random system has `2^(n_vars − n_eqs)`
+    /// expected solutions, so it is satisfiable by construction and can
+    /// neither refute nor pin — it cannot produce the event being
+    /// measured, and a `None` here is uninformative rather than a
+    /// finding.  That is why the second control exists.
     pub control_solve_mean: Option<f64>,
-    /// Control draws that did not resolve.
+    /// Shape-matched control draws that did not resolve.
     pub control_unresolved: usize,
+    /// `2^(n_vars − n_eqs)` expected solutions of the shape-matched
+    /// control: when this exceeds 1 the control cannot refute.
+    pub control_expected_solutions: f64,
+    /// Mean refutation degree of the **infeasible** control: same
+    /// variables, degree and term density, but enough equations
+    /// (`n_vars + 4`) that it has no solution with high probability, so
+    /// it refutes and is comparable like for like with the real
+    /// systems' refutation degree.
+    ///
+    /// Shape and feasibility cannot both be matched at once — matching
+    /// the equation count is what makes the first control satisfiable.
+    /// The two controls bracket the question instead.
+    pub control_unsat_mean: Option<f64>,
+    /// Infeasible-control draws that did not resolve.
+    pub control_unsat_unresolved: usize,
+    /// Highest Macaulay degree built on a **shape-matched** control draw.
+    ///
+    /// The controls need this for the same reason the real systems do:
+    /// without it, "did not resolve by `d_max`" and "exceeded the size
+    /// caps" are the same output, and only the first of those says
+    /// anything.  Omitting it once forced the `n = 5, m = 3` attribution
+    /// to be settled by hand-computing the matrix size.
+    pub control_shape_max_degree_built: Option<u32>,
+    /// Highest Macaulay degree built on an **infeasible** control draw.
+    ///
+    /// Kept separate from the shape-matched arm rather than folded into
+    /// one maximum, because the two arms have different row counts: the
+    /// infeasible arm carries `n_vars + 4` equations against the
+    /// shape-matched arm's `n_eqs`, so it reaches the row cap at a
+    /// *lower* degree.  A shared `max()` would report a degree the
+    /// infeasible arm never built — and that arm is precisely the one
+    /// whose non-resolution carries the attribution, so the field meant
+    /// to prove "not a cap artifact" would have been the field lying
+    /// about it.
+    pub control_unsat_max_degree_built: Option<u32>,
 }
 
 impl DregSummary {
@@ -838,6 +880,16 @@ pub fn dreg_summary(
     // refutation too, and the two numbers compare like for like.
     let mut control: Vec<u32> = Vec::new();
     let mut control_unresolved = 0usize;
+    let mut control_unsat: Vec<u32> = Vec::new();
+    let mut control_unsat_unresolved = 0usize;
+    let mut control_shape_max_degree_built: Option<u32> = None;
+    let mut control_unsat_max_degree_built: Option<u32> = None;
+    let note_ctrl = |profs: &[crate::cryptanalysis::koblitz_groebner::SolvingProfile],
+                     acc: &mut Option<u32>| {
+        if let Some(top) = profs.last().map(|p| p.degree) {
+            *acc = Some(acc.map_or(top, |x: u32| x.max(top)));
+        }
+    };
     for t in 0..(if with_control { trials } else { 0 }) {
         // A fresh control per draw, deterministically derived from the
         // sweep seed so the whole table replays.
@@ -845,9 +897,27 @@ pub fn dreg_summary(
             .wrapping_mul(0x9E37_79B9_7F4A_7C15)
             .wrapping_add(t as u64);
         let polys = random_control_system(n_vars, n_eqs, degree, terms_per_eq, control_seed);
-        match solving_degree(&polys, n_vars, d_max).0 {
+        let (cd, cprofs) = solving_degree(&polys, n_vars, d_max);
+        note_ctrl(&cprofs, &mut control_shape_max_degree_built);
+        match cd {
             Some(d) => control.push(d),
             None => control_unresolved += 1,
+        }
+
+        // Second control: overdetermined, so infeasible with high
+        // probability, so it can actually refute.
+        let unsat = random_control_system(
+            n_vars,
+            n_vars + 4,
+            degree,
+            terms_per_eq,
+            control_seed.wrapping_mul(0xA24B_AED4_963E_E407),
+        );
+        let (ud, uprofs) = solving_degree(&unsat, n_vars, d_max);
+        note_ctrl(&uprofs, &mut control_unsat_max_degree_built);
+        match ud {
+            Some(d) => control_unsat.push(d),
+            None => control_unsat_unresolved += 1,
         }
     }
 
@@ -877,19 +947,33 @@ pub fn dreg_summary(
         max_degree_built,
         control_solve_mean: mean(&control),
         control_unresolved,
+        control_expected_solutions: 2f64.powi(n_vars as i32 - n_eqs as i32),
+        control_unsat_mean: mean(&control_unsat),
+        control_unsat_unresolved,
+        control_shape_max_degree_built,
+        control_unsat_max_degree_built,
     })
 }
 
 /// Render [`DregSummary`] rows as a markdown table.
 pub fn format_dreg_table(rows: &[DregSummary]) -> String {
     let mut out = String::from(
-        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl | refuted | pinned | unres | D_built |\n\
-         |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|-----:|--------:|-------:|------:|--------:|\n",
+        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl(shape) | ctrl(unsat) | Dc(shape) | Dc(unsat) | refuted | pinned | unres | D_built |\n\
+         |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|------------:|------------:|----------:|----------:|--------:|-------:|------:|--------:|\n",
     );
     let f = |v: Option<f64>| v.map_or("—".to_string(), |x| format!("{x:.2}"));
+    // A control that reported no degree is either one that never
+    // resolved or one that *could not* resolve because it is
+    // satisfiable by construction. Saying which is the whole point.
+    let ctrl = |v: Option<f64>, unresolved: usize, satisfiable: bool| match v {
+        Some(x) => format!("{x:.2}"),
+        None if satisfiable => "n/a(sat)".to_string(),
+        None if unresolved > 0 => "unres".to_string(),
+        None => "—".to_string(),
+    };
     for r in rows {
         out.push_str(&format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}/{} | {} |\n",
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}/{} | {} |\n",
             r.n,
             r.ell,
             r.m,
@@ -899,7 +983,12 @@ pub fn format_dreg_table(rows: &[DregSummary]) -> String {
             f(r.fall_mean),
             f(r.refute_mean),
             f(r.gap()),
-            f(r.control_solve_mean),
+            ctrl(r.control_solve_mean, r.control_unresolved, r.control_expected_solutions > 1.5),
+            ctrl(r.control_unsat_mean, r.control_unsat_unresolved, false),
+            r.control_shape_max_degree_built
+                .map_or("—".to_string(), |d| d.to_string()),
+            r.control_unsat_max_degree_built
+                .map_or("—".to_string(), |d| d.to_string()),
             r.refuted,
             r.pinned,
             r.unresolved,
@@ -1062,5 +1151,47 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&text).unwrap();
         assert_eq!(parsed["systems"][0]["n_vars"], 12);
         assert_eq!(parsed["oracles"][0]["disagreements"], 0);
+    }
+
+
+    /// The control arms are tracked and reported **separately**.
+    ///
+    /// Two failures this pins, both found by review on #395 and both
+    /// the same class as the ones the module already guards against:
+    /// a `control_max_degree_built` that was computed and stored but
+    /// never printed, so the sweep still could not tell a control that
+    /// exhausted `d_max` from one that hit the size caps; and a single
+    /// shared `max()` across both arms, which can report a degree the
+    /// infeasible arm never built, because that arm carries
+    /// `n_vars + 4` equations and so reaches the row cap at a lower
+    /// degree.  The infeasible arm is the one whose non-resolution
+    /// carries the attribution, so a field that averages it away is
+    /// worse than no field at all.
+    #[test]
+    fn control_arms_are_reported_separately() {
+        // n = 7, m = 2 is six unknowns: cheap enough for a unit test.
+        let r = dreg_summary(7, 0, 2, 4, 2, 0x5EED, true).expect("cell builds");
+
+        assert!(
+            r.control_shape_max_degree_built.is_some(),
+            "the shape-matched arm must record the degree it reached"
+        );
+        assert!(
+            r.control_unsat_max_degree_built.is_some(),
+            "so must the infeasible arm, independently"
+        );
+        assert!(
+            r.control_expected_solutions > 0.0,
+            "the shape-matched arm's satisfiability must be visible"
+        );
+
+        let table = format_dreg_table(std::slice::from_ref(&r));
+        for col in ["ctrl(shape)", "ctrl(unsat)", "Dc(shape)", "Dc(unsat)"] {
+            assert!(
+                table.contains(col),
+                "a field that is stored but never printed cannot do its job; \
+                 missing {col} in:\n{table}"
+            );
+        }
     }
 }

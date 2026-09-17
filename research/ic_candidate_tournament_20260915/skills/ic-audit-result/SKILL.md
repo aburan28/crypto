@@ -58,3 +58,16 @@ An independent replay here means new processes plus the independent checker. Do
 not call it a second implementation of the solver, a second host, or independent
 authorship. Report audit failures with their artifact paths; do not edit raw runs
 to make a result pass. External publication or messages require their own scope.
+
+For a sealed `comparison_kind=factor-base-policy` panel, different supports across
+arms are intentional. Require stable support within each arm/case, identical
+public ECDLP targets and complete certificates. Check the report's per-arm base
+sizes and rank floors; do not interpret a ratio to a changed floor as an advance.
+The default fixed-support audit continues to reject differences across arms.
+
+For a request to beat rho, distinguish the legacy `beats_rho` point estimate and
+<=1.10 parity from strict beating: both metric upper paired 95% limits and every
+cell ratio must be <1 on confirmation and replay. The continuation helper
+`single_target_20260916/strict_rho.py --round PATH` evaluates the promoted winner
+and locked challenger separately using the frozen evaluator. It never changes
+the promotion decision.

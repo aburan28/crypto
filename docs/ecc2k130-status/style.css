@@ -378,33 +378,96 @@ button:disabled { opacity: 0.55; cursor: progress; }
 /* ---- figure ---- */
 
 /* The walk-forest drawing is generated in the page's own palette on a
-   transparent ground, so it sits straight on the panel. On a phone the
-   natural 1000×900 figure collapses to ~336px and the trails vanish; keep a
-   readable floor and let the panel scroll sideways instead. */
+   transparent ground, so it sits straight on the panel. Fit the 1000×900
+   figure to the column: a 640px min-width made the caption lay out at that
+   width too, so a phone clipped every line and the drawing ate the screen.
+   Trails stay visible at ~360px because the SVG thickens its own strokes
+   when its box is under 720px. */
 .figure {
   margin: 14px 0 0;
   padding: 12px 12px 10px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  min-width: 0;
+}
+.figure-frame {
+  overflow: hidden;
+  max-width: 100%;
 }
 .figure img {
   display: block;
   width: 100%;
-  min-width: 640px;
+  min-width: 0;
   max-width: 1000px;
   height: auto;
   margin: 0 auto;
 }
 .figure figcaption {
-  margin: 10px auto 0;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 12.5px;
-  max-width: 80ch;
+  line-height: 1.55;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 .figure figcaption .mono { color: var(--ink); }
+
+/* The explorable version of the same forest: a canvas that replaces the
+   image once the graph has loaded, a control row above it and a readout
+   under it. The tip follows the pointer inside the canvas. */
+.forest { position: relative; }
+.forest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.forest-controls select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+.forest-canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: grab;
+  touch-action: none;
+}
+.forest-canvas:active { cursor: grabbing; }
+.forest-readout {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1.2em;
+  overflow-wrap: anywhere;
+}
+.forest-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 320px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}
 
 /* ---- tables ---- */
 
@@ -456,8 +519,10 @@ time { border-bottom: 1px dotted var(--line); }
 .note {
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.55;
   max-width: 80ch;
   margin: 6px 0 0;
+  overflow-wrap: break-word;
 }
 details.alt { margin-top: 14px; }
 details.alt summary {
@@ -563,15 +628,7 @@ footer h2 { color: var(--ink); font-size: 14px; }
   .odds { padding: 12px 12px 10px; }
   .odds-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .figure { padding: 8px; }
-  .figure::after {
-    content: "Swipe to pan the forest";
-    display: block;
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 11.5px;
-    font-family: var(--mono);
-    letter-spacing: 0.04em;
-  }
+  .figure figcaption { font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

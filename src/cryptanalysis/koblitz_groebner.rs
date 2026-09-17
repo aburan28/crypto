@@ -774,16 +774,33 @@ pub fn matrix_f4_f2_counted(
     if polys.is_empty() {
         return Some((Vec::new(), 0));
     }
-    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    let t_build = std::time::Instant::now();
+    let built = build_macaulay(polys, n_vars, degree);
+    let build_ns = t_build.elapsed().as_nanos();
+    let (cols, mut matrix) = match built {
+        Some(b) => b,
+        None => {
+            f4_profile_add(|p| {
+                p.oversize += 1;
+                p.build_ns += build_ns;
+            });
+            return None;
+        }
+    };
     if matrix.is_empty() {
+        f4_profile_add(|p| {
+            p.calls += 1;
+            p.build_ns += build_ns;
+        });
         return Some((Vec::new(), 0));
     }
     let mut word_ops = 0u64;
+    let t_reduce = std::time::Instant::now();
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    let reduce_ns = t_reduce.elapsed().as_nanos();
 
     let n_vars_out = polys[0].n_vars;
-    let words = cols.len().div_ceil(64);
-    let _ = words;
+    let t_read = std::time::Instant::now();
     let mut out = Vec::with_capacity(rank);
     for row in matrix.iter().take(rank) {
         let monos: Vec<F2BoolMono> = (0..cols.len())
@@ -794,7 +811,113 @@ pub fn matrix_f4_f2_counted(
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
+    let readback_ns = t_read.elapsed().as_nanos();
+    f4_profile_add(|p| {
+        p.calls += 1;
+        p.build_ns += build_ns;
+        p.reduce_ns += reduce_ns;
+        p.readback_ns += readback_ns;
+        p.rows += matrix.len() as u64;
+        p.cols += cols.len() as u64;
+        p.word_ops += word_ops;
+    });
     Some((out, word_ops))
+}
+
+// ── F4 stage profile ───────────────────────────────────────────────
+
+/// Where the time and the work inside the F4 stage actually go.
+///
+/// Counters are process-wide and cumulative since the last
+/// [`f4_profile_reset`], so a profile covers a parallel run (`ic run
+/// --batch N` decomposes on several threads) and not just the thread
+/// that asks for it.  A caller that wants a scoped measurement resets
+/// first and reads after, with no solving in between.
+///
+/// The stage is three phases — building the Macaulay matrix, reducing
+/// it, and reading the reduced rows back as polynomials — and only the
+/// middle one is counted by `word_ops`.  Optimising the stage without
+/// knowing the split between them is how a round spends itself on the
+/// phase that was never the cost, so the split is measured rather than
+/// assumed.  The cost is one relaxed atomic add per nonzero counter per
+/// F4 call, plus three `Instant::now()` pairs, all far below the call.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct F4Profile {
+    /// Calls to [`matrix_f4_f2_counted`] that built a matrix.
+    pub calls: u64,
+    /// Calls that returned `None` because the matrix exceeded the caps.
+    pub oversize: u64,
+    /// Nanoseconds in [`build_macaulay`].
+    pub build_ns: u128,
+    /// Nanoseconds in the row reduction.
+    pub reduce_ns: u128,
+    /// Nanoseconds turning reduced rows back into polynomials.
+    pub readback_ns: u128,
+    /// Rows summed over all calls.
+    pub rows: u64,
+    /// Columns summed over all calls.
+    pub cols: u64,
+    /// 64-bit word XORs performed by the reductions.
+    pub word_ops: u64,
+}
+
+mod f4_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static OVERSIZE: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BUILD_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static REDUCE_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static READBACK_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
+    pub(super) const ALL: [&AtomicU64; 8] = [
+        &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
+    ];
+}
+
+/// The F4 stage profile since the last [`f4_profile_reset`].
+pub fn f4_profile() -> F4Profile {
+    use std::sync::atomic::Ordering::Relaxed;
+    F4Profile {
+        calls: f4_counters::CALLS.load(Relaxed),
+        oversize: f4_counters::OVERSIZE.load(Relaxed),
+        build_ns: f4_counters::BUILD_NS.load(Relaxed) as u128,
+        reduce_ns: f4_counters::REDUCE_NS.load(Relaxed) as u128,
+        readback_ns: f4_counters::READBACK_NS.load(Relaxed) as u128,
+        rows: f4_counters::ROWS.load(Relaxed),
+        cols: f4_counters::COLS.load(Relaxed),
+        word_ops: f4_counters::WORD_OPS.load(Relaxed),
+    }
+}
+
+/// Clear the F4 stage profile.  Not synchronised against concurrent
+/// solving: reset before the work, read after it.
+pub fn f4_profile_reset() {
+    for counter in f4_counters::ALL {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
+    use std::sync::atomic::Ordering::Relaxed;
+    let mut delta = F4Profile::default();
+    f(&mut delta);
+    let pairs: [(&std::sync::atomic::AtomicU64, u64); 8] = [
+        (&f4_counters::CALLS, delta.calls),
+        (&f4_counters::OVERSIZE, delta.oversize),
+        (&f4_counters::BUILD_NS, delta.build_ns as u64),
+        (&f4_counters::REDUCE_NS, delta.reduce_ns as u64),
+        (&f4_counters::READBACK_NS, delta.readback_ns as u64),
+        (&f4_counters::ROWS, delta.rows),
+        (&f4_counters::COLS, delta.cols),
+        (&f4_counters::WORD_OPS, delta.word_ops),
+    ];
+    for (counter, delta) in pairs {
+        if delta != 0 {
+            counter.fetch_add(delta, Relaxed);
+        }
+    }
 }
 
 /// Build the Macaulay matrix: every product `p · m` with
@@ -893,12 +1016,18 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
             None => continue,
         };
         matrix.swap(pivot_row, piv);
-        for r in 0..matrix.len() {
-            if r != pivot_row && matrix[r][w] & bit != 0 {
-                for k in 0..words {
-                    matrix[r][k] ^= matrix[pivot_row][k];
+        // Earlier columns of this pivot row are zero: previous pivots
+        // eliminated them, and skipped columns were zero in all remaining
+        // rows. Whole words before w therefore need no XOR. Separating the
+        // pivot borrow also lets LLVM vectorize the contiguous suffix.
+        let (before, rest) = matrix.split_at_mut(pivot_row);
+        let (pivot, after) = rest.split_first_mut().unwrap();
+        for row in before.iter_mut().chain(after.iter_mut()) {
+            if row[w] & bit != 0 {
+                for (dst, &src) in row[w..words].iter_mut().zip(&pivot[w..words]) {
+                    *dst ^= src;
                 }
-                *word_ops += words as u64;
+                *word_ops += (words - w) as u64;
             }
         }
         pivot_row += 1;
@@ -908,6 +1037,10 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
     }
     pivot_row
 }
+
+#[cfg(test)]
+#[path = "f4_rref_tests.rs"]
+mod rref_tests;
 
 // ── Macaulay profile / first fall degree ───────────────────────────
 

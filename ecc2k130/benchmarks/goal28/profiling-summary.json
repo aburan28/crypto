@@ -1,0 +1,334 @@
+{
+  "class": "engineering",
+  "fieldProductsPerScalarUpdate": 5.3125,
+  "fieldProductRatioToControl": 1.0,
+  "endToEndDlpSpeedup": null,
+  "meets28BGoal": false,
+  "ncuCounterCollectionSucceeded": false,
+  "runs": {
+    "parser-failure": {
+      "runnerValid": false,
+      "runnerError": "no completed iteration row",
+      "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-5332310f-93b1-5cef-dd80-3a63449eecb5, 595.91.07, 12.0",
+      "sourceSha256": "37afb901fdc9de5f5f25dd16834f0a43567c5a39acc0dcebe4ea6bc869f20bb7",
+      "binarySha256": "fb864ed5f47af22453350e92c6a37f88ee6647601a333874770c1952685a9517",
+      "walkResources": {
+        "registers": 104,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "instanceId": "i-045a96ec82e193dc0",
+      "s3ResultPrefix": "benchmarks/native/8d9c143e067f4b6eb3ad8b18f948727e",
+      "resultArchiveSha256": "efd43a3652b126711d41e5e2f920bb6911de7c3a0a26ca6083f8c1e96d0cd61d",
+      "archivedBinaryHashVerified": true,
+      "gpuCorrectnessGatesPassed": true
+    },
+    "timeline-and-screen": {
+      "runnerValid": false,
+      "runnerError": "tuple indices must be integers or slices, not str",
+      "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-ac08a04d-c2a2-1c1c-84b0-e2ee3abcdd84, 595.91.07, 12.0",
+      "sourceSha256": "bf61645eb996b3cd5bba7253b4122907bf0bb08e83ba884ab2667f560d13ef8f",
+      "binarySha256": "5ff40aa20e05f4d003a974d142a504d133d72df585fb2ee2eceb50551934309e",
+      "walkResources": {
+        "registers": 104,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "instanceId": "i-0e8b9704f5cc4b45f",
+      "s3ResultPrefix": "benchmarks/native/87382498ea18407fb3df98a900414821",
+      "resultArchiveSha256": "457df5b112f707d4570b19d63779aa4a7f0f25649f08c8e454f69056c0cb61b3",
+      "archivedBinaryHashVerified": true,
+      "gpuCorrectnessGatesPassed": true
+    },
+    "counter-retry": {
+      "runnerValid": false,
+      "runnerError": null,
+      "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-ccac635d-c454-bd44-e7cc-061578973c50, 595.91.07, 12.0",
+      "sourceSha256": "8968ee36e2c4c93318ad5ced1cc825bb091ebf46752e04bbba1486b3256d5f67",
+      "binarySha256": "da78f70a440716201d1addbb20cae2aaf6bd5cf05bc019919bd06a4d0fbf1abb",
+      "walkResources": {
+        "registers": 104,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "instanceId": "i-0e2397aa2a17c0652",
+      "s3ResultPrefix": "benchmarks/native/dad2b8d70cf54022ab3a1bc9c81316cf",
+      "resultArchiveSha256": "e74e0ffd227e3875f9ad57fcc98f87adfeccc15f32db8c4b48f80a30ac121993",
+      "archivedBinaryHashVerified": true,
+      "gpuCorrectnessGatesPassed": true
+    }
+  },
+  "screen": {
+    "evidenceValidAfterArchiveRecheck": true,
+    "runnerFinalStatus": "failed: postrun tuple/dict bookkeeping error; all raw rows retained and revalidated offline",
+    "scope": "same binary, equal completed work; distinct seed panels across grids, screen only; first rows retained without a thermal-steady-state claim",
+    "samples": [
+      {
+        "rateMPerSecond": 5002.014,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 0,
+        "commandLog": "screen-0-385024-0.log"
+      },
+      {
+        "rateMPerSecond": 4875.483,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 34,
+        "records": 5149,
+        "corpusSha256": "d14906f3d3d0e5d79da56edc947f78590dae467e91edbcae3902b36379c60996",
+        "repeat": 0,
+        "commandLog": "screen-0-385024-34.log"
+      },
+      {
+        "rateMPerSecond": 4699.238,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 0,
+        "commandLog": "screen-0-192512-0.log"
+      },
+      {
+        "rateMPerSecond": 4612.315,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 34,
+        "records": 5125,
+        "corpusSha256": "d8549fbfc5c075ae2ca15b678f16a7d33f24048559ba188b4bc05261b7cde5c2",
+        "repeat": 0,
+        "commandLog": "screen-0-192512-34.log"
+      },
+      {
+        "rateMPerSecond": 4595.712,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 0,
+        "commandLog": "screen-0-96256-0.log"
+      },
+      {
+        "rateMPerSecond": 4528.292,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 34,
+        "records": 5076,
+        "corpusSha256": "63874bb868e17e50b31ccf29b9c0f83cae5a846b0cb91673e76589cf15178ff9",
+        "repeat": 0,
+        "commandLog": "screen-0-96256-34.log"
+      },
+      {
+        "rateMPerSecond": 4537.225,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 1,
+        "commandLog": "screen-1-96256-0.log"
+      },
+      {
+        "rateMPerSecond": 4473.096,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 34,
+        "records": 5076,
+        "corpusSha256": "8d168a57e37d2b05e76f1d9b71bbd132e512284033a230a97446a543e61b1c24",
+        "repeat": 1,
+        "commandLog": "screen-1-96256-34.log"
+      },
+      {
+        "rateMPerSecond": 4534.123,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 1,
+        "commandLog": "screen-1-192512-0.log"
+      },
+      {
+        "rateMPerSecond": 4483.364,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 34,
+        "records": 5125,
+        "corpusSha256": "8a578edce6fd4bd7dca266cccd52039151ae70d5ad1d74ea7a6cd1354b2e8bd3",
+        "repeat": 1,
+        "commandLog": "screen-1-192512-34.log"
+      },
+      {
+        "rateMPerSecond": 4649.429,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 1,
+        "commandLog": "screen-1-385024-0.log"
+      },
+      {
+        "rateMPerSecond": 4602.291,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 34,
+        "records": 5149,
+        "corpusSha256": "b907c9e113e7947c789ea5054ae8d45d77017fa86bb8ff902dcb1611b44892f3",
+        "repeat": 1,
+        "commandLog": "screen-1-385024-34.log"
+      },
+      {
+        "rateMPerSecond": 4644.468,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 2,
+        "commandLog": "screen-2-385024-0.log"
+      },
+      {
+        "rateMPerSecond": 4599.351,
+        "iterations": 201863462912,
+        "workers": 385024,
+        "steps": 1024,
+        "launches": 32,
+        "dpWeight": 34,
+        "records": 5149,
+        "corpusSha256": "48853723e8779088419425acc8b5788899408b257628fa44ca8b3edd835817b5",
+        "repeat": 2,
+        "commandLog": "screen-2-385024-34.log"
+      },
+      {
+        "rateMPerSecond": 4498.057,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 2,
+        "commandLog": "screen-2-192512-0.log"
+      },
+      {
+        "rateMPerSecond": 4456.236,
+        "iterations": 201863462912,
+        "workers": 192512,
+        "steps": 1024,
+        "launches": 64,
+        "dpWeight": 34,
+        "records": 5125,
+        "corpusSha256": "b3de1e03006f61835459c121a05d54f772b4182b45cbf1ce6c1e9be44f365f80",
+        "repeat": 2,
+        "commandLog": "screen-2-192512-34.log"
+      },
+      {
+        "rateMPerSecond": 4422.411,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 0,
+        "records": 0,
+        "repeat": 2,
+        "commandLog": "screen-2-96256-0.log"
+      },
+      {
+        "rateMPerSecond": 4410.456,
+        "iterations": 201863462912,
+        "workers": 96256,
+        "steps": 1024,
+        "launches": 128,
+        "dpWeight": 34,
+        "records": 5076,
+        "corpusSha256": "db2f1c600b30110eaaf1c131f6dcab940a2bb2d582ddf46f5407105ea3a7ad73",
+        "repeat": 2,
+        "commandLog": "screen-2-96256-34.log"
+      }
+    ],
+    "medians": [
+      {
+        "workers": 385024,
+        "benchmarkBPerSecond": 4.6494290000000005,
+        "dp34BPerSecond": 4.602291,
+        "benchmarkRatio": 1.0,
+        "dp34Ratio": 1.0,
+        "fieldProductsPerScalarUpdate": 5.3125,
+        "fieldProductRatioToControl": 1.0
+      },
+      {
+        "workers": 192512,
+        "benchmarkBPerSecond": 4.534122999999999,
+        "dp34BPerSecond": 4.483364,
+        "benchmarkRatio": 0.9751999654151079,
+        "dp34Ratio": 0.9741591742025872,
+        "fieldProductsPerScalarUpdate": 5.3125,
+        "fieldProductRatioToControl": 1.0
+      },
+      {
+        "workers": 96256,
+        "benchmarkBPerSecond": 4.537225,
+        "dp34BPerSecond": 4.473096,
+        "benchmarkRatio": 0.9758671441159764,
+        "dp34Ratio": 0.9719281114557944,
+        "fieldProductsPerScalarUpdate": 5.3125,
+        "fieldProductRatioToControl": 1.0
+      }
+    ],
+    "sameGridRepeatedDpMultisetsAgree": true
+  },
+  "nsys": {
+    "source": "timeline-and-screen/nsys-stats.log",
+    "walkKernelCount": 4,
+    "walkKernelTotalNs": 628592152,
+    "initKernelTotalNs": 310022710,
+    "cudaLaunchKernelCalls": 5,
+    "cudaLaunchKernelTotalNs": 113305,
+    "cudaDeviceSynchronizeCalls": 6,
+    "cudaDeviceSynchronizeTotalNs": 938636205,
+    "interpretation": "Kernel-launch CPU API time is tiny relative to GPU walk time in this short trace. Synchronization waits overlap GPU execution and are not additive overhead. Initialization is included; do not read the 67% walk fraction as a steady-state workload fraction. Profile durations are not throughput samples."
+  },
+  "ncu": {
+    "version": "2026.3.0.0 build 38525999",
+    "driver": "595.91.07",
+    "fullSetKernelReplay": {
+      "385024": 9,
+      "96256": 9
+    },
+    "sixHardwareSectionsApplicationReplay": {
+      "385024": 9,
+      "96256": 9
+    },
+    "error": "Failed to prepare kernel for profiling; Unknown error on device 0.",
+    "cause": "unresolved; no hardware-counter bottleneck claim"
+  },
+  "evidenceArchiveSha256": "292bb1a5202ebeb9574a25c5f3fa358e42e5f857f61b8871706fab0c7185f16d"
+}

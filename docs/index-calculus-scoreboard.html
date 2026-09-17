@@ -15,6 +15,7 @@
   html { color-scheme: light dark; }
   img { max-width: 100%; }
   [hidden] { display: none !important; }
+.gain-overview{display:flex;gap:28px;justify-content:space-between;border:1px solid #486e68;border-radius:12px;padding:24px;margin:24px 0 32px}.gain-overview h2{font-size:23px;margin:12px 0}.gain-overview p{max-width:720px;line-height:1.65}.gain-overview nav{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:215px}.gain-overview a{display:block;padding:10px;border:1px solid #486e68;border-radius:6px;text-decoration:none}.gain-overview a:focus-visible{outline:3px solid #ae8739;outline-offset:3px}@media(max-width:740px){.gain-overview{flex-direction:column;padding:18px}.gain-overview nav{min-width:0}}
 </style>
 <title>Index Calculus Scoreboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -329,6 +330,13 @@
       </div>
     </dl>
   </header>
+
+  <aside class="gain-overview" aria-labelledby="gain-title">
+    <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
+    <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
+    <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p></div>
+    <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
+  </aside>
 
   <!-- ============ MAIN CHART ============ -->
   <div class="panel">
@@ -1316,6 +1324,83 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <section class="panel" id="fixed-parameter-ic">
+    <div class="panel-head"><h2>Fixed parameters and persistent index calculus</h2>
+      <p>The CPU <code>ic fixed</code> workflow accepts full-width K_0 parameters through degree 131,
+      stores pair tables and verified relations, and resumes both precomputation and target equations.
+      The actual ECC2K-130 polynomial-basis profile passes its mathematical checks.</p>
+      <p>Frozen evidence: 72 matched cases, 216 complete small-curve computations and 432 target
+      verifications, including repetitions. Ephemeral, durable and resumed transcripts agree in every
+      case. All 72 completed-result replays build zero new pairs and issue zero new probes.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Primary unit: calibrated common operations, unmeasured. No full-cost speedup claim.</caption>
+      <thead><tr><th>Variant</th><th>Common operations</th><th>S</th><th>Ratio to rho</th><th>Ratio to floor</th><th>Verified targets</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Ephemeral reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering reference</td></tr>
+        <tr><td>Durable cold</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering capability</td></tr>
+        <tr><td>Staged resume</td><td>null</td><td>null</td><td>null</td><td>null</td><td>144/144</td><td>Engineering capability</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>The degree-131 profile retains 14 orbit columns and 3,668 signed points.
+      Its three-summand uniform-target coverage ceiling remains 1.2095460623606999e-29.
+      Bounded construction resumes after 24 committed pair candidates; the natural-target SAT
+      attempt yields zero relations and remains incomplete. Practical degree-131 completion and
+      calibrated S/rho/floor ratios are unmeasured. The previous mathematical boundaries are unchanged.</p>
+      <p><a href="../research/fixed_parameters_20260915/run-01/summary.json">Frozen comparison</a> ·
+      <a href="../research/fixed_parameters_20260915/README.md">Contract, accounting and tests</a> ·
+      <a href="ic/FIXED_PARAMETERS.md">Run and resume</a></p>
+    </div>
+  </section>
+
+  <section class="panel" id="learned-fixed-ic-selector">
+    <div class="panel-head"><h2>Learned solver selection: initial portfolio has no routing gain</h2>
+      <p>The opt-in fixed-workflow selector trains on matched natural queries, using verified
+      independent relations and their cost. Across 288 natural queries on degree-9 and degree-23
+      curves, the prepared pair policy was cheapest on every query and matched both SAT policies'
+      rank gain. The fitted model therefore retains a constant pair policy; no default is promoted.</p>
+      <p>Whole signed Frobenius orbits and matrix histories stay within one data split.
+      Sixteen planted controls are excluded from training. The independent audit verifies all
+      304 accepted query records and 603 successful policy witnesses. It rejected the first
+      rank-label dataset; that evidence and the corrected matched rerun are both retained.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Primary unit: calibrated common operations, unmeasured. Native timings are diagnostics.</caption>
+      <thead><tr><th>Variant</th><th>Common operations</th><th>S</th><th>Ratio to rho</th><th>Ratio to floor</th><th>Verified targets</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Matched rho reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>unmeasured</td><td>Not run in this adapter</td></tr>
+        <tr><td>Preserved pair baseline</td><td>null</td><td>null</td><td>null</td><td>null</td><td>72/72</td><td>Reference</td></tr>
+        <tr><td>Opt-in learned selector</td><td>null</td><td>null</td><td>null</td><td>null</td><td>72/72</td><td>Engineering capability; no gain established</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>All 72 matched cold processes completed over three repetitions,
+      including fresh confirmation fixtures. The independent audit checks 420 relations and
+      every full-workload rank label. Startup, precomputation, model loading/inference, failed
+      queries, verification, matrix work, commits and reporting remain in the cost scope.
+      The degree-131 profile selects the unseen-domain pair fallback; it supplies no learned
+      full-size yield estimate. The existing Rust instruction tournament is unchanged.</p>
+      <p><a href="../research/ic_solver_selection_20260915/README.md">Research report and retained evidence</a> ·
+      <a href="../research/ic_solver_selection_20260915/full-comparison/summary.json">Frozen comparison</a> ·
+      <a href="../research/ic_solver_selection_20260915/final-audit.json">Independent final audit</a> ·
+      <a href="ic/SOLVER_SELECTION.md">Run and train</a></p>
+    </div>
+  </div>
+
+  <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
+    <p>Completed on one RTX PRO 4500 Blackwell Server Edition. All device and integration
+    checks passed; no candidate met the acceptance rule. Every variant retains 5.3125
+    field products per scalar update (ratio 1.0 to control). The generic-group boundary
+    and exponent are unchanged; these throughput figures are practicality measurements.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Benchmark candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">DP34 candidate / matched control (B/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Native square</td><td>4.688480 / 4.756701</td><td>0.985658</td><td>4.632716 / 4.547623</td><td>1.018712</td><td>pass / not accepted</td></tr><tr><td>Three-limb Karatsuba</td><td>4.188512 / 4.629912</td><td>0.904663</td><td>4.148491 / 4.547263</td><td>0.912305</td><td>pass / not accepted</td></tr><tr><td>Both</td><td>4.040647 / 4.579588</td><td>0.882317</td><td>4.007592 / 4.550207</td><td>0.880749</td><td>pass / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three runs, in billions of scalar updates/s, with a
+    separately interleaved matched control. Each sample completed 201,863,462,912 updates.
+    Acceptance requires at least 1% improvement in both workloads and every pair faster.
+    The historical 14.637530 B/s RTX PRO 6000 result is a different GPU, not a matched control.</p>
+    <p>Frozen source: <a href="../ecc2k130/benchmarks/native-candidates/g7/summary.json">G7 measurement receipt</a>;
+    <a href="../ecc2k130/G7-NATIVE-RESULTS.md">experiment report and raw output</a>.</p>
+  </section>>>>>>>> 882ac7c2 (Add ECC performance dashboard and interactive algorithm lab)
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
@@ -1375,6 +1460,178 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 </table>
 <p>Redis replay: 175 hits, zero cache errors. The 7-bit factor base has zero usable columns and its incomplete runs remain in the evidence. Parameterized-basis failures apply to this encoding and engine, not every possible reuse method.</p>
 <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/polynomial_reuse_20260914/RESULTS.md">measured results</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/polynomial_reuse_20260914/results/run-001/summary.json">comparison data</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/polynomial_reuse_20260914/contract.json">frozen contract</a>.</p></section>
+<section id="f4-linear-algebra-20260914" style="margin:2rem 0;overflow-x:auto">
+<h2>Native F4 linear algebra <span class="chip">engineering</span></h2>
+<p>Accepted matched run: kernel time ratio 0.717 across 18 matrix/seed cases (about 1.39× faster). All 1,824 solver checks and 144 DLP outcomes match. Full-DLP timings show no clear gain; 72 verified and 72 incomplete executions are retained. No exponent or attack-boundary claim.</p>
+<p>Total calibrated operations, S, matched rho ratio and floor ratio remain null for both variants. With elimination share f, even free elimination is bounded by 1/(1−f). Word XOR counts below cover elimination only.</p>
+<table><tr><th>Variant</th><th>Class</th><th>Total operations</th><th>S</th><th>Rho ratio</th><th>Floor ratio</th><th>Correctness</th></tr>
+<tr><td>Original full-width XOR</td><td>reference</td><td>null</td><td>null</td><td>null</td><td>null</td><td>Pass</td></tr>
+<tr><td>Suffix XOR, separate pivot borrow</td><td>engineering</td><td>null</td><td>null</td><td>null</td><td>null</td><td>Identical answers</td></tr></table>
+<h3>Fresh kernel holdouts (seed 937)</h3>
+<p>11 alternating pairs per matrix. XORs are exact counts; milliseconds are medians. The paired time ratio is a geometric mean. Input setup and checking are separately recorded.</p>
+<table><tr><th>Matrix</th><th>Variant</th><th>Word XORs</th><th>XOR C/R</th><th>Kernel ms</th><th>Paired time C/R</th></tr>
+<tr><td>deficient-1024x1024</td><td>reference</td><td>3,144,896</td><td>1.000</td><td>3.7134</td><td>1.000</td></tr>
+<tr><td>deficient-1024x1024</td><td>candidate</td><td>2,543,562</td><td>0.809</td><td>2.8809</td><td>0.790</td></tr>
+<tr><td>dense-1024x1024</td><td>reference</td><td>8,365,616</td><td>1.000</td><td>10.2157</td><td>1.000</td></tr>
+<tr><td>dense-1024x1024</td><td>candidate</td><td>4,448,083</td><td>0.532</td><td>6.5838</td><td>0.643</td></tr>
+<tr><td>dense-1024x4096</td><td>reference</td><td>33,438,272</td><td>1.000</td><td>25.3218</td><td>1.000</td></tr>
+<tr><td>dense-1024x4096</td><td>candidate</td><td>29,517,311</td><td>0.883</td><td>12.4689</td><td>0.496</td></tr>
+<tr><td>dense-256x256</td><td>reference</td><td>130,216</td><td>1.000</td><td>0.3808</td><td>1.000</td></tr>
+<tr><td>dense-256x256</td><td>candidate</td><td>81,586</td><td>0.627</td><td>0.3407</td><td>0.852</td></tr>
+<tr><td>dense-4096x512</td><td>reference</td><td>8,388,480</td><td>1.000</td><td>15.4025</td><td>1.000</td></tr>
+<tr><td>dense-4096x512</td><td>candidate</td><td>4,718,382</td><td>0.562</td><td>12.0250</td><td>0.775</td></tr>
+<tr><td>dense-512x1024</td><td>reference</td><td>2,090,192</td><td>1.000</td><td>2.6607</td><td>1.000</td></tr>
+<tr><td>dense-512x1024</td><td>candidate</td><td>1,633,199</td><td>0.781</td><td>1.7670</td><td>0.654</td></tr>
+<tr><td>macaulay-n5-l2-m3-d4</td><td>reference</td><td>47,192</td><td>1.000</td><td>0.2163</td><td>1.000</td></tr>
+<tr><td>macaulay-n5-l2-m3-d4</td><td>candidate</td><td>19,424</td><td>0.412</td><td>0.2109</td><td>0.980</td></tr>
+<tr><td>macaulay-n9-l6-m2-d4</td><td>reference</td><td>1,293,348</td><td>1.000</td><td>2.2668</td><td>1.000</td></tr>
+<tr><td>macaulay-n9-l6-m2-d4</td><td>candidate</td><td>468,017</td><td>0.362</td><td>1.7277</td><td>0.768</td></tr>
+<tr><td>sparse-1024x2048</td><td>reference</td><td>16,316,960</td><td>1.000</td><td>15.1631</td><td>1.000</td></tr>
+<tr><td>sparse-1024x2048</td><td>candidate</td><td>12,387,440</td><td>0.759</td><td>8.4572</td><td>0.556</td></tr>
+</table>
+<h3>Complete DLP diagnostics (elapsed milliseconds, summed)</h3>
+<table><tr><th>n</th><th>Solver</th><th>Split</th><th>Variant</th><th>Elapsed ms</th><th>Verified / attempts</th><th>Paired time C/R</th></tr>
+<tr><td>7</td><td>groebner</td><td>frozen</td><td>reference</td><td>435.725</td><td>0 / 12</td><td>1.000</td></tr>
+<tr><td>7</td><td>groebner</td><td>frozen</td><td>candidate</td><td>437.076</td><td>0 / 12</td><td>1.003</td></tr>
+<tr><td>7</td><td>groebner</td><td>fresh</td><td>reference</td><td>214.975</td><td>0 / 6</td><td>1.000</td></tr>
+<tr><td>7</td><td>groebner</td><td>fresh</td><td>candidate</td><td>214.638</td><td>0 / 6</td><td>0.998</td></tr>
+<tr><td>7</td><td>sat</td><td>frozen</td><td>reference</td><td>336.883</td><td>0 / 12</td><td>1.000</td></tr>
+<tr><td>7</td><td>sat</td><td>frozen</td><td>candidate</td><td>334.680</td><td>0 / 12</td><td>0.994</td></tr>
+<tr><td>7</td><td>sat</td><td>fresh</td><td>reference</td><td>168.000</td><td>0 / 6</td><td>1.000</td></tr>
+<tr><td>7</td><td>sat</td><td>fresh</td><td>candidate</td><td>166.591</td><td>0 / 6</td><td>0.991</td></tr>
+<tr><td>9</td><td>groebner</td><td>frozen</td><td>reference</td><td>66.308</td><td>12 / 12</td><td>1.000</td></tr>
+<tr><td>9</td><td>groebner</td><td>frozen</td><td>candidate</td><td>66.494</td><td>12 / 12</td><td>1.004</td></tr>
+<tr><td>9</td><td>groebner</td><td>fresh</td><td>reference</td><td>36.528</td><td>6 / 6</td><td>1.000</td></tr>
+<tr><td>9</td><td>groebner</td><td>fresh</td><td>candidate</td><td>37.730</td><td>6 / 6</td><td>1.024</td></tr>
+<tr><td>9</td><td>sat</td><td>frozen</td><td>reference</td><td>29.117</td><td>12 / 12</td><td>1.000</td></tr>
+<tr><td>9</td><td>sat</td><td>frozen</td><td>candidate</td><td>28.603</td><td>12 / 12</td><td>0.987</td></tr>
+<tr><td>9</td><td>sat</td><td>fresh</td><td>reference</td><td>12.467</td><td>6 / 6</td><td>1.000</td></tr>
+<tr><td>9</td><td>sat</td><td>fresh</td><td>candidate</td><td>12.525</td><td>6 / 6</td><td>1.004</td></tr>
+</table>
+<p>All full-DLP paired intervals include no change. The small real Macaulay case also has no clear kernel gain. Existing calibrated rows and exponents remain unchanged. Run 001 is retained as rejected because of identical solver binaries and artificially low-rank synthetic inputs.</p>
+<p>Source: <a href="../research/f4_linear_algebra_20260914/RESULTS.md">full results, including regressions and intervals</a>, <a href="../research/f4_linear_algebra_20260914/results/run-002/summary.json">accepted comparison</a>, <a href="../research/f4_linear_algebra_20260914/contract.json">contract</a>.</p>
+</section>
+<section id="weil-factor-composition-20260914" style="margin:2rem 0;overflow-x:auto">
+<h2>Weil-friendly factor-base composition <span class="chip">engineering diagnostic</span></h2>
+<p>Implemented an exact component-coordinate S3 solver with optional linear projection. The saved run contains 864 processes, 912 matched native root-set comparisons (1,824 reference/candidate target executions), 960 complete component root-set checks, and 21,888 full-DLP relation-attempt cross-checks. All completed checks pass. Four new unit tests and the no-default-features library/ic build also pass. Timeouts and incomplete attempts remain in the tables. No calibrated total-cost or exponent advance is established.</p>
+<p>The positive-yield cases with completed ambient controls meet the frozen stage gate. The stronger baseline gate fails: no fresh full-DLP interval establishes a win over pair tables, and projected-chart time is 3.19–17.33× matched rho across the eight useful-base cases. These are secondary runtime ratios, not calibrated attack-cost ratios.</p>
+<table><thead><tr><th>Variant</th><th>Class</th><th>Total operations</th><th>S</th><th>Rho ratio</th><th>Floor ratio</th><th>Verified workload</th></tr></thead><tbody>
+<tr><td>ambient_f4</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>33 verified DLPs / 120 attempts</td></tr>
+<tr><td>charts_f4</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>480 verified stage queries; 177 witnesses</td></tr>
+<tr><td>charts_linear</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>enumerate</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>pair_table</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>96 verified DLPs / 120 attempts</td></tr>
+<tr><td>rho</td><td>engineering diagnostic</td><td>null</td><td>null</td><td>null</td><td>null</td><td>60 verified DLPs / 60 attempts</td></tr>
+</tbody></table>
+<h3>Fresh solver workloads: cold milliseconds</h3><p>Eight targets per process, three repetitions; complete workloads only. Partial timeout counters remain in the report. Zero-yield controls do not establish a gain.</p>
+<table><thead><tr><th>Case</th><th>Variant</th><th>Complete processes</th><th>Witnesses observed</th><th>F4 reductions observed</th><th>Median cold ms / 8 targets</th></tr></thead><tbody>
+<tr><td>0</td><td>ambient_f4</td><td>3/3</td><td>24</td><td>1914</td><td>66.262</td></tr>
+<tr><td>0</td><td>charts_f4</td><td>3/3</td><td>24</td><td>228</td><td>1.081</td></tr>
+<tr><td>0</td><td>charts_linear</td><td>3/3</td><td>24</td><td>57</td><td>0.728</td></tr>
+<tr><td>0</td><td>enumerate</td><td>3/3</td><td>24</td><td>0</td><td>0.464</td></tr>
+<tr><td>1</td><td>ambient_f4</td><td>3/3</td><td>0</td><td>46368</td><td>4450.652</td></tr>
+<tr><td>1</td><td>charts_f4</td><td>3/3</td><td>0</td><td>1575</td><td>15.239</td></tr>
+<tr><td>1</td><td>charts_linear</td><td>3/3</td><td>0</td><td>813</td><td>4.302</td></tr>
+<tr><td>1</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>0.659</td></tr>
+<tr><td>2</td><td>ambient_f4</td><td>3/3</td><td>24</td><td>9957</td><td>958.730</td></tr>
+<tr><td>2</td><td>charts_f4</td><td>3/3</td><td>24</td><td>279</td><td>2.734</td></tr>
+<tr><td>2</td><td>charts_linear</td><td>3/3</td><td>24</td><td>42</td><td>1.167</td></tr>
+<tr><td>2</td><td>enumerate</td><td>3/3</td><td>24</td><td>0</td><td>0.896</td></tr>
+<tr><td>3</td><td>ambient_f4</td><td>3/3</td><td>0</td><td>46368</td><td>4562.311</td></tr>
+<tr><td>3</td><td>charts_f4</td><td>3/3</td><td>0</td><td>24</td><td>0.611</td></tr>
+<tr><td>3</td><td>charts_linear</td><td>3/3</td><td>0</td><td>0</td><td>0.483</td></tr>
+<tr><td>3</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>0.579</td></tr>
+<tr><td>4</td><td>ambient_f4</td><td>0/3</td><td>6</td><td>14553</td><td>—</td></tr>
+<tr><td>4</td><td>charts_f4</td><td>3/3</td><td>9</td><td>1761</td><td>18.959</td></tr>
+<tr><td>4</td><td>charts_linear</td><td>3/3</td><td>9</td><td>846</td><td>5.204</td></tr>
+<tr><td>4</td><td>enumerate</td><td>3/3</td><td>9</td><td>0</td><td>1.425</td></tr>
+<tr><td>5</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>22839</td><td>—</td></tr>
+<tr><td>5</td><td>charts_f4</td><td>3/3</td><td>3</td><td>1794</td><td>23.395</td></tr>
+<tr><td>5</td><td>charts_linear</td><td>3/3</td><td>3</td><td>1077</td><td>6.871</td></tr>
+<tr><td>5</td><td>enumerate</td><td>3/3</td><td>3</td><td>0</td><td>2.370</td></tr>
+<tr><td>6</td><td>ambient_f4</td><td>0/3</td><td>3</td><td>1125</td><td>—</td></tr>
+<tr><td>6</td><td>charts_f4</td><td>3/3</td><td>12</td><td>2457</td><td>16.240</td></tr>
+<tr><td>6</td><td>charts_linear</td><td>3/3</td><td>12</td><td>378</td><td>4.089</td></tr>
+<tr><td>6</td><td>enumerate</td><td>3/3</td><td>12</td><td>0</td><td>3.396</td></tr>
+<tr><td>7</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>7</td><td>charts_f4</td><td>3/3</td><td>6</td><td>324</td><td>3.195</td></tr>
+<tr><td>7</td><td>charts_linear</td><td>3/3</td><td>6</td><td>18</td><td>1.644</td></tr>
+<tr><td>7</td><td>enumerate</td><td>3/3</td><td>6</td><td>0</td><td>2.429</td></tr>
+<tr><td>8</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>8</td><td>charts_f4</td><td>3/3</td><td>6</td><td>297</td><td>4.037</td></tr>
+<tr><td>8</td><td>charts_linear</td><td>3/3</td><td>6</td><td>6</td><td>1.702</td></tr>
+<tr><td>8</td><td>enumerate</td><td>3/3</td><td>6</td><td>0</td><td>3.038</td></tr>
+<tr><td>9</td><td>ambient_f4</td><td>0/3</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td>9</td><td>charts_f4</td><td>3/3</td><td>0</td><td>24</td><td>1.843</td></tr>
+<tr><td>9</td><td>charts_linear</td><td>3/3</td><td>0</td><td>0</td><td>1.573</td></tr>
+<tr><td>9</td><td>enumerate</td><td>3/3</td><td>0</td><td>0</td><td>2.790</td></tr>
+</tbody></table>
+<h3>Full DLP: verified completions and cold milliseconds</h3><p>12 attempts per row. Medians exclude incomplete attempts; their counts and all timeouts are retained. Rho shares the identical curve and target, without a factor base. Calibrated S and boundary ratios remain null.</p>
+<table><thead><tr><th>Case</th><th>Variant</th><th>Verified / attempts</th><th>Timeouts</th><th>Finished incomplete</th><th>Median cold ms, verified only</th></tr></thead><tbody>
+<tr><td>0</td><td>ambient_f4</td><td>12/12</td><td>0</td><td>0</td><td>14.126</td></tr>
+<tr><td>0</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>0.666</td></tr>
+<tr><td>0</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>0.539</td></tr>
+<tr><td>0</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>0.602</td></tr>
+<tr><td>1</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>1</td><td>charts_linear</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>1</td><td>enumerate</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>1</td><td>pair_table</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>2</td><td>ambient_f4</td><td>12/12</td><td>0</td><td>0</td><td>148.014</td></tr>
+<tr><td>2</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>1.211</td></tr>
+<tr><td>2</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>1.046</td></tr>
+<tr><td>2</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.169</td></tr>
+<tr><td>3</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>3</td><td>charts_linear</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>3</td><td>enumerate</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>3</td><td>pair_table</td><td>0/12</td><td>0</td><td>12</td><td>—</td></tr>
+<tr><td>4</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>4</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>6.249</td></tr>
+<tr><td>4</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>2.556</td></tr>
+<tr><td>4</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.665</td></tr>
+<tr><td>5</td><td>ambient_f4</td><td>9/12</td><td>3</td><td>0</td><td>2582.867</td></tr>
+<tr><td>5</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>3.371</td></tr>
+<tr><td>5</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>2.129</td></tr>
+<tr><td>5</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>1.970</td></tr>
+<tr><td>6</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>6</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>4.605</td></tr>
+<tr><td>6</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>3.867</td></tr>
+<tr><td>6</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>2.776</td></tr>
+<tr><td>7</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>7</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>3.690</td></tr>
+<tr><td>7</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>5.188</td></tr>
+<tr><td>7</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>3.173</td></tr>
+<tr><td>8</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>8</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>4.529</td></tr>
+<tr><td>8</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>5.898</td></tr>
+<tr><td>8</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>3.843</td></tr>
+<tr><td>9</td><td>ambient_f4</td><td>0/12</td><td>12</td><td>0</td><td>—</td></tr>
+<tr><td>9</td><td>charts_linear</td><td>12/12</td><td>0</td><td>0</td><td>6.684</td></tr>
+<tr><td>9</td><td>enumerate</td><td>12/12</td><td>0</td><td>0</td><td>12.466</td></tr>
+<tr><td>9</td><td>pair_table</td><td>12/12</td><td>0</td><td>0</td><td>6.477</td></tr>
+<tr><td>0</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.215</td></tr>
+<tr><td>1</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.301</td></tr>
+<tr><td>4</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.414</td></tr>
+<tr><td>6</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.431</td></tr>
+<tr><td>7</td><td>rho</td><td>12/12</td><td>0</td><td>0</td><td>0.597</td></tr>
+</tbody></table>
+<h3>Prime degree 131: exact product ranks</h3><p>Field algebra only. At dimension 44, a power seed has self-product rank 87 but pair-weighted rank 130.318 across the complete 8,646 component pairs. No nontrivial proper subfield exists. No degree-131 DLP or exponent inference is made.</p>
+<table><thead><tr><th>ell</th><th>Family</th><th>Self-product rank</th><th>Mixed minimum</th><th>Mixed maximum</th><th>Pair-weighted rank</th></tr></thead><tbody>
+<tr><td>8</td><td>power_span</td><td>15</td><td>22</td><td>64</td><td>62.197</td></tr>
+<tr><td>8</td><td>frobenius_span</td><td>36</td><td>43</td><td>64</td><td>62.727</td></tr>
+<tr><td>8</td><td>random</td><td>36</td><td>64</td><td>64</td><td>63.576</td></tr>
+<tr><td>16</td><td>power_span</td><td>31</td><td>46</td><td>131</td><td>127.364</td></tr>
+<tr><td>16</td><td>frobenius_span</td><td>129</td><td>131</td><td>131</td><td>130.970</td></tr>
+<tr><td>16</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>32</td><td>power_span</td><td>63</td><td>94</td><td>131</td><td>129.409</td></tr>
+<tr><td>32</td><td>frobenius_span</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>32</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>44</td><td>power_span</td><td>87</td><td>130</td><td>131</td><td>130.318</td></tr>
+<tr><td>44</td><td>frobenius_span</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+<tr><td>44</td><td>random</td><td>131</td><td>131</td><td>131</td><td>131.000</td></tr>
+</tbody></table>
+<p>Common-subfield scalar components preserve small mixed products at composite degree. Every completed root set and point witness is checked; a small product rank alone does not establish a better attack. Earlier calibrated rows, exponents and attack verdicts remain unchanged.</p>
+<p>Sources: <a href="../research/weil_factor_composition_20260914/RESULTS.md">results and paired intervals</a>, <a href="../research/weil_factor_composition_20260914/results/run-001/comparison.json">comparison data</a>, <a href="../research/weil_factor_composition_20260914/results/run-001/structure.json">structural diagnostics</a>, <a href="../research/weil_factor_composition_20260914/contract.json">frozen contract</a>.</p>
+</section>
 <script>
   (function () {
     var tip = document.getElementById('tip');
@@ -1418,7 +1675,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <tr><td>dense</td><td>9.221e+05</td><td>0.999</td><td>22.13</td><td>3.317e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>excess8</td><td>9.217e+05</td><td>0.9986</td><td>22.12</td><td>3.316e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>window8</td><td>7.858e+05</td><td>0.8514</td><td>18.86</td><td>2.827e+07</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1637,7 +1894,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>3.171e+04</td><td>1</td><td>0.7422</td><td>1.141e+06</td><td>36/36</td><td>reference</td></tr>
 <tr><td>tiny2_cert_batch4</td><td>3.177e+04</td><td>1.002</td><td>0.7438</td><td>1.143e+06</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1666,7 +1923,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>1.425e+04</td><td>1</td><td>0.5598</td><td>5.128e+05</td><td>36/36</td><td>reference</td></tr>
 <tr><td>fastcurve_batch4</td><td>1.431e+04</td><td>1.004</td><td>0.5622</td><td>5.149e+05</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1745,11 +2002,410 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0011 -->
+
+  <section aria-labelledby="goal28-profile-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-profile-result">ECC2K-130 Goal28: profiling and grid screen</h2>
+    <p><strong>28 B/s remains unmet.</strong> These measurements use one G7 RTX PRO 4500;
+      the historical 14.637530 B/s benchmark and 14.106673 B/s DP34 reference used an RTX PRO 6000.
+      G7e capacity was unavailable. No cross-GPU speedup or full-DLP speedup is inferred.</p>
+    <p><span class="chip">engineering</span> The generic-group boundary remains
+      &Omega;(&radic;(n / 262)). Every screened variant still costs 5.3125 field products per scalar update,
+      ratio 1.0 to control. The kernel experiment does not measure a new ECDLP exponent.</p>
+    <table><thead><tr><th scope="col">Workers</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio to original grid</th><th scope="col">Correctness / status</th></tr></thead>
+      <tbody><tr><td>385,024 control</td><td>4.649429</td><td>1.000000</td><td>4.602291</td><td>1.000000</td><td>passed / screen</td></tr>
+      <tr><td>192,512</td><td>4.534123</td><td>0.975200</td><td>4.483364</td><td>0.974159</td><td>passed / slower</td></tr>
+      <tr><td>96,256</td><td>4.537225</td><td>0.975867</td><td>4.473096</td><td>0.971928</td><td>passed / slower</td></tr></tbody></table>
+    <p>Three repetitions per grid/workload, each completing 201,863,462,912 updates with zero drops.
+      Distinct seed panels across grids make this a tuning screen. First rows are retained without a
+      thermal-steady-state claim. Sorted DP multisets agree across repeats within each grid.</p>
+    <p>Nsight Systems: four walk kernels totaled 628.592 ms; five kernel-launch API calls totaled
+      0.113 ms in the short diagnostic trace. Synchronization waits overlap GPU execution.
+      Nsight Compute failed at kernel preparation in both full-set kernel replay and reduced-section
+      application replay. No hardware-counter bottleneck is claimed; profiler durations are excluded from timings.</p>
+    <p>A further independent CUDA smoke workload passed CPU comparison but failed profiler preparation
+      in both kernel and application-range replay. After correcting a rejected CLI option, the ECC
+      range command returned zero with &ldquo;No ranges were profiled&rdquo;; the missing-report gate rejected it.
+      No usable hardware counters were obtained. Both attempts and two additional instrumented timelines are
+      retained in the <a href="../ecc2k130/benchmarks/goal28/range-summary.json">range diagnostic receipt</a>.</p>
+    <p>Raw runner failures remain recorded. An offline archive audit revalidated the completed screen
+      after its postrun bookkeeping failure. Source:
+      <a href="../ecc2k130/benchmarks/goal28/profiling-summary.json">frozen measurement receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and raw evidence</a>.
+      No default or production preset is promoted.</p>
+  </section>
+  <section aria-labelledby="goal28-occupancy-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="goal28-occupancy-result">Goal28: more resident warps did not improve throughput</h2>
+    <p><span class="chip">engineering</span> One G7 RTX PRO 4500, five alternating pairs per
+      workload after four excluded warmups. Each sample completes 201,863,462,912 scalar updates.
+      Field products stay at 5.3125/update, ratio 1.0; the generic-group boundary and exponent are unchanged.</p>
+    <table><thead><tr><th scope="col">Launch bound</th><th scope="col">Benchmark (B updates/s)</th><th scope="col">Ratio</th><th scope="col">DP34 (B updates/s)</th><th scope="col">Ratio</th><th scope="col">Correctness / acceptance</th></tr></thead>
+      <tbody><tr><td>MINBLOCKS=2 control</td><td>4.692014</td><td>1.000000</td><td>4.632696</td><td>1.000000</td><td>passed / control</td></tr>
+      <tr><td>MINBLOCKS=3</td><td>4.593011</td><td>0.978900</td><td>4.542281</td><td>0.980483</td><td>passed / rejected</td></tr></tbody></table>
+    <p>Registers decreased from 104 to 80 without spills; CUDA confirmed residency rose from two to three
+      blocks per SM. All ten timing pairs nevertheless favored the control. Cross-binary checkpoints
+      matched, and every DP34 multiset contained the same 5,149 records with zero drops.</p>
+    <p>Paired geometric speed ratios: 0.982453 benchmark, 0.980758 DP34. Exploratory 95% paired log-t
+      intervals: [0.974553, 0.990417] and [0.973004, 0.988573], assuming independent approximately normal
+      log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
+    <p>Source: <a href="../ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
+      <a href="../ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
+  </section>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+<!-- BEGIN ic-tournament-round-autolab-20260915 -->
+<section class="panel" id="ic-tournament-round-autolab-20260915">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/REPORT.md">full result</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs/autolab-20260915T193057Z/task__7skVSKF/verifier/round-autolab-20260915/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.529e+05</td><td>1</td><td>13.41</td><td>1.989e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.929e+05</td><td>0.8915</td><td>11.95</td><td>1.773e+07</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.124e+04</td><td>0.07459</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.183e+05</td><td>1</td><td>13.14</td><td>2.093e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.582e+05</td><td>0.8841</td><td>11.62</td><td>1.85e+07</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.944e+04</td><td>0.07609</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-autolab-20260915 -->
+<!-- BEGIN ic-autolab-configuration-development-20260915 -->
+<section class="panel" id="ic-autolab-configuration-development-20260915">
+<div class="panel-head"><h2>AutoLab configuration development history</h2>
+<p>Development evidence only; promotion is determined by the separate fresh confirmation and replay. <a href="../research/ic_autolab_harness_20260915/search-history/README.md">Research report</a> · <a href="../research/ic_autolab_harness_20260915/search-history/measurements.json">Frozen measurements</a>.</p></div>
+<div class="table-scroll"><table><caption>Complete cold user-space instruction costs; fixed compiler and amd64 ISA.</caption>
+<thead><tr><th>Experiment</th><th>Arm</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>pair_table, batch 24</td><td>incumbent</td><td>568507</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 24</td><td>candidate</td><td>615485</td><td>1.08263</td><td>14.0793</td><td>2.21419e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 24</td><td>rho</td><td>43715.5</td><td>0.0768953</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 8</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 8</td><td>candidate</td><td>529151</td><td>0.930772</td><td>12.1044</td><td>1.9036e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 8</td><td>rho</td><td>43715.5</td><td>0.0768952</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 4</td><td>incumbent</td><td>568509</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 4</td><td>candidate</td><td>525596</td><td>0.924516</td><td>12.0231</td><td>1.89081e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 4</td><td>rho</td><td>43715.5</td><td>0.076895</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 2</td><td>incumbent</td><td>568511</td><td>1</td><td>13.0048</td><td>2.0452e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 2</td><td>candidate</td><td>520445</td><td>0.915453</td><td>11.9053</td><td>1.87228e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 2</td><td>rho</td><td>43715.4</td><td>0.0768946</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1</td><td>candidate</td><td>516610</td><td>0.908711</td><td>11.8175</td><td>1.85849e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1</td><td>rho</td><td>43715.7</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>incumbent</td><td>568511</td><td>1</td><td>13.0047</td><td>2.0452e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>candidate</td><td>495388</td><td>0.871378</td><td>11.332</td><td>1.78214e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1, window 8</td><td>rho</td><td>43715.7</td><td>0.076895</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>candidate</td><td>500771</td><td>0.880851</td><td>11.4552</td><td>1.80151e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>pair_table, batch 1, window 4</td><td>rho</td><td>43715.6</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>enumerate, batch 1</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>enumerate, batch 1</td><td>candidate</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>21/24</td><td>engineering experiment</td></tr>
+<tr><td>enumerate, batch 1</td><td>rho</td><td>43715.7</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
+</section>
+<!-- END ic-autolab-configuration-development-20260915 -->
+<!-- BEGIN ic-autolab-source-development-20260915 -->
+<section class="panel" id="ic-autolab-source-development-20260915">
+<div class="panel-head"><h2>AutoLab source-development experiments</h2>
+<p>Development evidence only; promotion is determined by the separate fresh confirmation and replay. <a href="../research/ic_autolab_harness_20260915/source-improvement/README.md">Research report</a> · <a href="../research/ic_autolab_harness_20260915/source-improvement/development-table.json">Frozen measurements</a>.</p></div>
+<div class="table-scroll"><table><caption>Complete cold user-space instruction costs; fixed compiler and amd64 ISA.</caption>
+<thead><tr><th>Experiment</th><th>Arm</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Source only</td><td>incumbent</td><td>568508</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source only</td><td>candidate</td><td>479624</td><td>0.843653</td><td>10.9715</td><td>1.72543e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>Source only</td><td>rho</td><td>43715.6</td><td>0.0768952</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source + tuning</td><td>incumbent</td><td>568507</td><td>1</td><td>13.0047</td><td>2.04519e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>Source + tuning</td><td>candidate</td><td>406674</td><td>0.715337</td><td>9.30272</td><td>1.463e+07</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>Source + tuning</td><td>rho</td><td>43715.6</td><td>0.0768954</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
+</section>
+<!-- END ic-autolab-source-development-20260915 -->
+<!-- BEGIN ic-tournament-round-20260915t205319z -->
+<section class="panel" id="ic-tournament-round-20260915t205319z">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: autolab</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/REPORT.md">full result</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.722e+05</td><td>1</td><td>13.22</td><td>2.058e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>4.047e+05</td><td>0.7073</td><td>9.349</td><td>1.456e+07</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.329e+04</td><td>0.07566</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5.154e+05</td><td>1</td><td>13.05</td><td>2.081e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>3.769e+05</td><td>0.7313</td><td>9.544</td><td>1.522e+07</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.949e+04</td><td>0.07662</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-20260915t205319z -->
+<!-- BEGIN ic-autolab-next30-source-development-20260915 -->
+<section class="panel" id="ic-autolab-next30-source-development-20260915">
+<div class="panel-head"><h2>AutoLab · another 30% · scalar multiplication development</h2>
+<p>Development only: 47.2% fewer complete cold-worker instructions against the previous verified fast-lifting batch1/window8 winner. Eight fresh targets across four curve cells, three repetitions. Final confirmation and replay have their own result panel.</p></div>
+<div class="table-scroll"><table><caption>Unit: Valgrind 3.22 amd64 Ir. All variants use matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / previous winner</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified pairs</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>408237</td><td>1</td><td>9.53489</td><td>1.46862e+07</td><td>24/24</td><td>reference</td></tr>
+<tr><td>candidate</td><td>215688</td><td>0.528341</td><td>5.03767</td><td>7.75931e+06</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>42815.1</td><td>0.104878</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<p>The fixed signed-base coverage and decomposition size are unchanged. The weak K-instruction floor is specific to this full-rank collector. Rho uses less work. This is implementation engineering; no asymptotic, native-runtime or rho-crossover claim.</p>
+<p><a href="../research/ic_autolab_next30_20260915/README.md">Research report</a> · <a href="../research/ic_autolab_next30_20260915/development-measurements.json">Frozen measurements</a> · <a href="../research/ic_autolab_next30_20260915/development-audit.json">Independent audit</a>.</p>
+</section>
+<!-- END ic-autolab-next30-source-development-20260915 -->
+<!-- BEGIN ic-tournament-round-20260915t224645z -->
+<section class="panel" id="ic-tournament-round-20260915t224645z">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: autolab</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/REPORT.md">full result</a> · <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/measurements.json">frozen reporting data</a> · <a href="../research/ic_autolab_next30_20260915/runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/round-20260915t224645z/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.079e+05</td><td>1</td><td>9.524</td><td>1.467e+07</td><td>36/36</td><td>reference</td></tr>
+<tr><td>autolab</td><td>2.152e+05</td><td>0.5275</td><td>5.024</td><td>7.741e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.283e+04</td><td>0.105</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3.797e+05</td><td>1</td><td>9.527</td><td>1.533e+07</td><td>180/180</td><td>reference</td></tr>
+<tr><td>autolab</td><td>1.985e+05</td><td>0.5228</td><td>4.981</td><td>8.014e+06</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.985e+04</td><td>0.105</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-20260915t224645z -->>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<!-- BEGIN ic-tournament-round-0006b-single -->
+<section class="panel" id="ic-tournament-round-0006b-single">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_candidate_tournament_20260915/runs/round-0006b-single/REPORT.md">full result</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0006b-single/measurements.json">frozen reporting data</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0006b-single/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.308e+05</td><td>1</td><td>3.026</td><td>4.706e+06</td><td>36/36</td><td>reference</td></tr>
+<tr><td>combined</td><td>1.044e+05</td><td>0.7982</td><td>2.415</td><td>3.756e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>combined_batch1</td><td>1.029e+05</td><td>0.7868</td><td>2.381</td><td>3.703e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>descent</td><td>1.243e+05</td><td>0.9501</td><td>2.875</td><td>4.471e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>fast_orbits</td><td>1.182e+05</td><td>0.9038</td><td>2.735</td><td>4.253e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>lazy_field</td><td>1.237e+05</td><td>0.9456</td><td>2.861</td><td>4.45e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.323e+04</td><td>0.3305</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.211e+05</td><td>1</td><td>3.053</td><td>4.89e+06</td><td>180/180</td><td>reference</td></tr>
+<tr><td>combined_batch1</td><td>9.512e+04</td><td>0.7854</td><td>2.398</td><td>3.84e+06</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.967e+04</td><td>0.3275</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>6.186</td><td>1</td><td>reference</td><td>1.56</td><td>180/180</td></tr>
+<tr><td>combined_batch1</td><td>5.472</td><td>0.8846</td><td>[0.873064358144668, 0.8995482205334346]</td><td>1.38</td><td>180/180</td></tr>
+<tr><td>rho</td><td>3.966</td><td>0.6411</td><td>[0.6282788274961344, 0.6546347935265434]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0006b-single -->
+<!-- BEGIN ic-tournament-round-0007-single-policy -->
+<section class="panel" id="ic-tournament-round-0007-single-policy">
+<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: orbits2</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_candidate_tournament_20260915/runs/round-0007-single-policy/REPORT.md">full result</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0007-single-policy/measurements.json">frozen reporting data</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0007-single-policy/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.339e+05</td><td>1</td><td>3.199</td><td>4.818e+06</td><td>12/12</td><td>reference</td></tr>
+<tr><td>cold_context</td><td>9.437e+04</td><td>0.7047</td><td>2.254</td><td>3.395e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>cube_root</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>6/12</td><td>engineering experiment</td></tr>
+<tr><td>orbits1</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>unmeasured</td><td>0/12</td><td>engineering experiment</td></tr>
+<tr><td>orbits2</td><td>4.761e+04</td><td>0.3555</td><td>1.137</td><td>6.626e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>orbits3</td><td>5.413e+04</td><td>0.4042</td><td>1.293</td><td>5.022e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>orbits4</td><td>6.044e+04</td><td>0.4513</td><td>1.443</td><td>4.206e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.187e+04</td><td>0.3126</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.315e+05</td><td>1</td><td>3.157</td><td>4.729e+06</td><td>36/36</td><td>reference</td></tr>
+<tr><td>cold_context</td><td>9.364e+04</td><td>0.7123</td><td>2.249</td><td>3.369e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>orbits2</td><td>4.789e+04</td><td>0.3643</td><td>1.15</td><td>6.666e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>orbits3</td><td>5.268e+04</td><td>0.4007</td><td>1.265</td><td>4.888e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>orbits4</td><td>6.067e+04</td><td>0.4615</td><td>1.457</td><td>4.222e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.164e+04</td><td>0.3168</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.213e+05</td><td>1</td><td>3.07</td><td>4.899e+06</td><td>180/180</td><td>reference</td></tr>
+<tr><td>orbits2</td><td>4.553e+04</td><td>0.3753</td><td>1.152</td><td>7.16e+06</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.953e+04</td><td>0.3258</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>6.186</td><td>1</td><td>reference</td><td>1.552</td><td>180/180</td></tr>
+<tr><td>orbits2</td><td>4.386</td><td>0.7091</td><td>[0.6853953419318904, 0.735404642949192]</td><td>1.101</td><td>180/180</td></tr>
+<tr><td>rho</td><td>3.985</td><td>0.6441</td><td>[0.630552164466047, 0.6579165641472405]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0007-single-policy -->
+<!-- BEGIN ic-tournament-round-0008-single-implementation -->
+<section class="panel" id="ic-tournament-round-0008-single-implementation">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="../research/ic_candidate_tournament_20260915/runs/round-0008-single-implementation/REPORT.md">full result</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0008-single-implementation/measurements.json">frozen reporting data</a> · <a href="../research/ic_candidate_tournament_20260915/runs/round-0008-single-implementation/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.789e+04</td><td>1</td><td>1.115</td><td>6.665e+06</td><td>12/12</td><td>reference</td></tr>
+<tr><td>combined</td><td>4.571e+04</td><td>0.9546</td><td>1.065</td><td>6.362e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>combined_dense</td><td>4.557e+04</td><td>0.9517</td><td>1.062</td><td>6.343e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>orbit_projection</td><td>4.573e+04</td><td>0.9549</td><td>1.065</td><td>6.364e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>serial_collection</td><td>4.788e+04</td><td>0.9998</td><td>1.115</td><td>6.663e+06</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.293e+04</td><td>0.8965</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.962e+04</td><td>1</td><td>1.166</td><td>6.905e+06</td><td>36/36</td><td>reference</td></tr>
+<tr><td>combined</td><td>4.742e+04</td><td>0.9558</td><td>1.114</td><td>6.6e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>combined_dense</td><td>4.728e+04</td><td>0.9528</td><td>1.111</td><td>6.58e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>orbit_projection</td><td>4.744e+04</td><td>0.9561</td><td>1.115</td><td>6.602e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>serial_collection</td><td>4.961e+04</td><td>0.9998</td><td>1.166</td><td>6.904e+06</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4.256e+04</td><td>0.8577</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.489e+04</td><td>1</td><td>1.127</td><td>7.059e+06</td><td>180/180</td><td>reference</td></tr>
+<tr><td>combined_dense</td><td>4.294e+04</td><td>0.9564</td><td>1.078</td><td>6.751e+06</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3.982e+04</td><td>0.887</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4.406</td><td>1</td><td>reference</td><td>1.082</td><td>180/180</td></tr>
+<tr><td>combined_dense</td><td>4.343</td><td>0.9858</td><td>[0.981444289834538, 0.990511305956245]</td><td>1.066</td><td>180/180</td></tr>
+<tr><td>rho</td><td>4.074</td><td>0.9246</td><td>[0.9085555386684016, 0.9370405993441078]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0008-single-implementation -->
+<div class="panel" id="summation-polynomials-20260914">
+    <div class="panel-head"><h2>Summation-polynomial setup and specialization</h2>
+      <p>Class <span class="chip">engineering</span>, with a separate accounting correction.
+        Six ablations preserve exact polynomials and solver outputs. Retained: borrowed
+        symbolic expansions and grouped Horner. Fixed-slot specialization remains a
+        validated experimental alternative. About 55% less specialization time;
+        no established full-DLP speedup or regression.</p>
+      <p><a href="performance-gains.html">Explore interactive performance charts</a> ·
+        <a href="performance-gains/summary.pdf">Download chart PDF</a></p></div>
+    <div class="table-scroll"><table>
+      <caption>Dimensionless time / corrected reference; input-cluster 95% intervals.
+        <a href="https://github.com/aburan28/crypto/blob/main/research/summation_polynomials_20260914/run-01/comparison.json">Frozen ablation</a>;
+        <a href="https://github.com/aburan28/crypto/blob/main/research/summation_polynomials_20260914/RESULTS.md">results and scope</a>.</caption>
+      <thead><tr><th>Variant</th><th>Symbolic setup</th><th>Specialization</th><th>Residual corpus</th><th>Cold full DLP</th></tr></thead><tbody>
+        <tr><td>Legacy accounting</td><td>0.999876 [0.997804, 1.001606]</td><td>1.001221 [0.994232, 1.007177]</td><td>0.996691 [0.990552, 1.000328]</td><td>0.962602 [0.928205, 0.993459]</td></tr>
+        <tr><td>Corrected reference</td><td>1.000000 [1.000000, 1.000000]</td><td>1.000000 [1.000000, 1.000000]</td><td>1.000000 [1.000000, 1.000000]</td><td>1.000000 [1.000000, 1.000000]</td></tr>
+        <tr><td>Borrowed setup</td><td>0.989942 [0.987686, 0.991640]</td><td>1.013252 [1.006896, 1.018728]</td><td>0.982021 [0.949233, 0.998981]</td><td>0.937438 [0.890032, 0.987369]</td></tr>
+        <tr><td>Fixed slots</td><td>1.003492 [1.001240, 1.005884]</td><td>0.506250 [0.504315, 0.508242]</td><td>1.037073 [0.997631, 1.085220]</td><td>0.935409 [0.890692, 0.982371]</td></tr>
+        <tr><td>Grouped Horner</td><td>1.002204 [0.999964, 1.004330]</td><td>0.446125 [0.442805, 0.449634]</td><td>1.021846 [0.999810, 1.066536]</td><td>0.936030 [0.889020, 0.985526]</td></tr>
+        <tr><td>Combined (retained)</td><td>0.988336 [0.986704, 0.990133]</td><td>0.446360 [0.443583, 0.448725]</td><td>0.998004 [0.997311, 0.998958]</td><td>0.963040 [0.924996, 0.998961]</td></tr>
+      </tbody></table></div>
+    <div class="panel-head"><p>The initial full-DLP timing is confounded by shared-host
+      outliers in the accounting-only control. A separate 140-run confirmation adds
+      two fresh curves and child CPU time. All scalar recoveries and exact cost deltas
+      pass; its intervals include 1. Original measurements remain preserved.</p></div>
+    <div class="table-scroll"><table><caption>Confirmation time / corrected reference,
+      input-cluster 95% intervals. <a href="https://github.com/aburan28/crypto/blob/main/research/summation_polynomials_20260914/confirmation-01/comparison.json">Frozen confirmation</a>.</caption>
+      <thead><tr><th>Variant</th><th>Whole-process wall time</th><th>Child CPU time</th></tr></thead><tbody>
+        <tr><td>Legacy accounting</td><td>0.985827 [0.936350, 1.048988]</td><td>0.999646 [0.997372, 1.002353]</td></tr>
+        <tr><td>Corrected reference</td><td>1.000000 [1.000000, 1.000000]</td><td>1.000000 [1.000000, 1.000000]</td></tr>
+        <tr><td>Grouped Horner</td><td>0.985358 [0.930106, 1.041011]</td><td>1.001691 [0.998953, 1.004212]</td></tr>
+        <tr><td>Combined (retained)</td><td>0.962640 [0.905238, 1.021824]</td><td>1.000787 [0.998405, 1.003021]</td></tr>
+      </tbody></table></div>
+    <div class="panel-head"><p>On the p=67 seed-11 example, specialization uses 1,342
+      counted Fp products in the corrected reference and 1,199 with Horner. The
+      historical 1,770 estimate is an accounting issue, not an optimization saving.
+      Full common-operation S, cost/rho and cost/floor remain unmeasured. Polynomial
+      degree, relation yield, asymptotic exponent and generic-group boundary are unchanged.</p></div>
+  </div>
+<div class="panel" id="gaudry-allocation-20260914">
+    <div class="panel-head">
+      <h2>Gaudry row and normal-form reuse</h2>
+      <p>Class <span class="chip">engineering</span>. Borrow pivot rows and memoized
+        normal forms; index dense columns directly. All field counters and complete
+        solver outputs are unchanged. 42 paired runs, including fresh holdouts:
+        1,440 stage residual checks, 18 recovered scalars and 3,234 full-run oracle checks.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Supplementary whole-process seconds, including cold setup and independent
+        MITM/rho auditing. Paired log time ratios, bootstrap clustered by input.
+        <a href="https://github.com/aburan28/crypto/blob/main/research/gaudry_allocation_20260914/run-01/comparison.json">Frozen comparison</a>;
+        <a href="https://github.com/aburan28/crypto/blob/main/research/gaudry_allocation_20260914/README.md">method and scope</a>.</caption>
+      <thead><tr><th>Variant</th><th>Workload</th><th>Sum seconds</th><th>Time / baseline</th>
+        <th>Paired 95% interval</th><th>Field counters / baseline</th><th>Correctness</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Unmodified</td><td>Residual corpus, 12 runs</td><td>3.178126</td><td>1.000000</td><td>Reference</td><td>1.0</td><td>720/720</td><td>Engineering reference</td></tr>
+        <tr><td>Borrowed rows/cache</td><td>Residual corpus, 12 runs</td><td>3.013655</td><td>0.945600</td><td>0.934631–0.956698</td><td>1.0</td><td>720/720</td><td>Engineering</td></tr>
+        <tr><td>Unmodified</td><td>Cold full DLP, 9 runs</td><td>5.500866</td><td>1.000000</td><td>Reference</td><td>1.0</td><td>9/9 scalars</td><td>Engineering reference</td></tr>
+        <tr><td>Borrowed rows/cache</td><td>Cold full DLP, 9 runs</td><td>5.113203</td><td>0.929583</td><td>0.928868–0.930822</td><td>1.0</td><td>9/9 scalars</td><td>Engineering</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>Intervals describe only four stage input clusters and three
+      full-DLP clusters. Complete common-operation S, cost/rho and cost/floor remain
+      unmeasured: existing solver counters do not fully price setup and bookkeeping.
+      This is a measured runtime improvement on the frozen corpus, with no new
+      operation-count advantage, asymptotic exponent or rho crossover.</p></div>
+  </div>
+<div class="panel" id="macaulay-cpu-gpu-pipeline">
+    <div class="panel-head">
+      <h2>Local CPU/GPU Macaulay pipeline — stage diagnostic</h2>
+      <p>Class <span class="chip">engineering</span>. CPU preparation and result handling
+        overlap GPU dense reduction through two bounded pinned-memory slots. No network RDMA
+        or full-DLP integration. Identical arithmetic and workload; 36 matched runs,
+        2,340 verified matrix results. The generic-group boundary is unchanged.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Secondary cold stage seconds, three repetitions per seed. Ratios are medians
+        of paired times. <a href="https://github.com/aburan28/crypto/blob/main/gpu/macaulay/benchmarks/pipeline-20260914/run-01/summary.json">Frozen summary</a>;
+        <a href="https://github.com/aburan28/crypto/blob/main/gpu/macaulay/benchmarks/pipeline-20260914/RESULTS.md">scope and evidence</a>.</caption>
+      <thead><tr><th>Variant</th><th>Split</th><th>Median seconds</th><th>Time / serialized</th>
+        <th>Common ops / rho</th><th>Common ops / floor</th><th>Correctness</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>Serialized, one slot</td><td>Training</td><td>0.323409</td><td>1.000000</td><td>Unmeasured</td><td>Unmeasured</td><td>585/585</td><td>Engineering reference</td></tr>
+        <tr><td>Overlap, two slots</td><td>Training</td><td>0.306742</td><td>0.940133</td><td>Unmeasured</td><td>Unmeasured</td><td>585/585</td><td>Engineering</td></tr>
+        <tr><td>Serialized, one slot</td><td>Holdout</td><td>0.321892</td><td>1.000000</td><td>Unmeasured</td><td>Unmeasured</td><td>585/585</td><td>Engineering reference</td></tr>
+        <tr><td>Overlap, two slots</td><td>Holdout</td><td>0.307124</td><td>0.949346</td><td>Unmeasured</td><td>Unmeasured</td><td>585/585</td><td>Engineering</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head"><p>Descriptive timings on a shared host, without a paired 95% confidence
+      interval. Cold setup dominates. Kernel arithmetic is unchanged; no operation-count,
+      whole-DLP, RDMA-network or crossover improvement is established.</p></div>
+  </div>
 <!-- BEGIN ic-tournament-round-0012 -->
 <section class="panel" id="ic-tournament-round-0012">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
 <p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
 <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0012/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0012/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0012/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>5,658</td><td>1</td><td>0.4666</td><td>2.035e+05</td><td>12/12</td><td>reference</td></tr>
+<tr><td>arena_fastio</td><td>5,403</td><td>0.9548</td><td>0.4456</td><td>1.944e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>arena_glibc</td><td>5,990</td><td>1.059</td><td>0.494</td><td>2.155e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>musl_sysalloc</td><td>8,512</td><td>1.504</td><td>0.702</td><td>3.062e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>1.213e+04</td><td>2.143</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>

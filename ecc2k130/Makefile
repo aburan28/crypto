@@ -14,6 +14,7 @@
 #   THREADS    CUDA block size (default 128)
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
+#   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
@@ -44,11 +45,14 @@ PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 PACKED_CLMAD ?= 0
+PACKED_CLMAD_SQUARE ?= 0
+PACKED_KARAT3 ?= 0
 PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
 PACKED_TOP_CLMAD ?= 0
 PACKED_STATE_TILE ?= 0
+PACKED_ADD_COMBINE ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
@@ -125,12 +129,13 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
-       -DECC_PACKED_CLMAD=$(PACKED_CLMAD) \
+       -DECC_PACKED_CLMAD=$(PACKED_CLMAD) -DECC_PACKED_CLMAD_SQUARE=$(PACKED_CLMAD_SQUARE) -DECC_PACKED_KARAT3=$(PACKED_KARAT3) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
        -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
+       -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
@@ -201,6 +206,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testautotune*.py'
 	python3 -m unittest discover -s codegen -p 'testpolystateaudit.py'
 	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
+	python3 -m unittest discover -s codegen -p 'testnativebench.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -281,9 +287,11 @@ test-packed-network:
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=0 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-direct
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-generated
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_ADD_COMBINE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-network-add
 	./build/test-packed-network
 	./build/test-packed-network-direct
 	./build/test-packed-network-generated
+	./build/test-packed-network-add
 
 test-generated-product:
 	python3 codegen/genpackedproduct.py --check
@@ -296,6 +304,19 @@ test-clmad:
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
 	./build/test-packed-clmad-host
 	./build/test-packed-topclmad-host
+
+test-clmad-square:
+	python3 -m unittest discover -s codegen -p testclmad.py
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_CLMAD_SQUARE=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-square-host
+	./build/test-packed-clmad-square-host
+
+test-karat3:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_KARAT3=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-karat3-host
+	./build/test-packed-karat3-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_CLMAD=1 -DECC_PACKED_KARAT3=1 -Wno-unknown-pragmas src/testkarat3.cpp -o build/test-karat3-product
+	./build/test-karat3-product
 
 test-packed-cuda:
 	mkdir -p build
@@ -341,7 +362,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -408,6 +429,8 @@ RTX_PRO6000_WORKERS ?= 385024
 RTX_PRO6000_COMPACT_STATE ?= 1
 RTX_PRO6000_SHARED_SIGMA ?= 1
 RTX_PRO6000_TOP_CLMAD ?= 0
+RTX_PRO6000_CLMAD_SQUARE ?= 0
+RTX_PRO6000_KARAT3 ?= 0
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
@@ -416,7 +439,9 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
                  ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=$(RTX_PRO6000_COMPACT_STATE) \
                  ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA) \
-                 ECC_PACKED_TOP_CLMAD=$(RTX_PRO6000_TOP_CLMAD)
+                 ECC_PACKED_TOP_CLMAD=$(RTX_PRO6000_TOP_CLMAD) \
+                 ECC_PACKED_CLMAD_SQUARE=$(RTX_PRO6000_CLMAD_SQUARE) \
+                 ECC_PACKED_KARAT3=$(RTX_PRO6000_KARAT3)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -477,10 +502,10 @@ clean:
 	rm -f ecc2k130 ecc2k130-cpu build/*.ptx build/*.cubin build/*.o build/cudashim.h
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
-	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated
-	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host
+	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
+	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-clmad-square-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean

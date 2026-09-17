@@ -1,0 +1,20 @@
+{
+  "binary_relative": "runs/round-0008-single-implementation/worker",
+  "binary_sha256": "7fa7367ec19d50975915fad939b9549d24f520ce74b153b43b33c09da9ffb5b0",
+  "classification": "engineering",
+  "configuration": {
+    "batch_trials": 1,
+    "factor_base_orbits": 2,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "last_policy_promotion": "round-0007-single-policy: orbits2",
+  "round": "round-0008-single-implementation",
+  "scope": "One complete cold target; five small Koblitz curve cells; fixed compiler/ISA; no family-wide or complexity claim.",
+  "source_directory": "runs/round-0008-single-implementation/source",
+  "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f",
+  "strict_beats_rho": false,
+  "winner": "incumbent"
+}

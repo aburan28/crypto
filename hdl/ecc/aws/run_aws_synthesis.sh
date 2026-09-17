@@ -47,7 +47,9 @@ PERIOD="3.333"          # 300 MHz, the cost model's estimate; sweep it
 DRY_RUN=0
 KEEP=0
 OUTDIR="$(cd "$(dirname "$0")" && pwd)/reports"
-HDLDIR="$(cd "$(dirname "$0")/.." && pwd)"
+# The RTL directory: this one by default; HDLDIR=... in the environment
+# points it at a sibling with the same layout (hdl/ecc2k130 has one).
+HDLDIR="${HDLDIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 INSTANCE_ID=""
 
 die() { echo "error: $*" >&2; exit 1; }

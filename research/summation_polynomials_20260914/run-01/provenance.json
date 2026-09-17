@@ -1,0 +1,55 @@
+{
+  "cpu_affinity": [
+    0
+  ],
+  "contract_sha256": "7e25ffc74161f233db7c2f434b1728d94787298de71c66f99a323ac1f1301614",
+  "runner_sha256": "c54f69b13d309f14826dca96fa0bd72365c65997309ebf1d06e5942843151485",
+  "source_sha256": {
+    "legacy": "e96919de439ef84615d462f774dfc10c8af0c848201aca5970254b23cbc057de",
+    "reference": "23c3ef1a8161e7fc6f15a81f0274d70d57b01ca661bf0189dfc36a5c7ac32cbf",
+    "setup": "1b77146a55012dc5031c3208d509876d8786558669a5445a92ca70e2f100d53a",
+    "fixed": "03eb0935bc46095b070c056109e433e1d2bf4001069c74cdab628d6cbb93986c",
+    "horner": "8342f0ba032c44fdb7f95be17fb61a4848c18b15414e91d0be8e0e18011e83c2",
+    "combined": "97fe2474b01e02beb1f38478b6abe4296a8082296d67501bc8b4a6f833a357e4"
+  },
+  "binaries": {
+    "legacy": {
+      "summation_polynomial_bench": "ca0206bd37e967d672aa3635604f266d02c684401cac078fb099e8cc69ed2f04",
+      "gaudry_allocation_stage": "40cc34e988bb8b072e68f41c398282a375c105e8d09329f9ee8ff6dffd2cb508",
+      "gaudry_cubic_bench": "e64b6feca97138f96cc0547a5493b55249b0543112000a8dd3ce4927e16d7c8f"
+    },
+    "reference": {
+      "summation_polynomial_bench": "9b843e6a7ab7c838ff4cace28468c1fc328227370970896d47749b489dd388a5",
+      "gaudry_allocation_stage": "6a4fd3c7b721f18e632e21127d8b719c8571143ab8244d6011b10226f451ca6b",
+      "gaudry_cubic_bench": "f9a4b289f11de6ff95f6cbe0ef0d7b50a99b13ea7200f3012e4f0748b2bc2201"
+    },
+    "setup": {
+      "summation_polynomial_bench": "ca65589c0114443093961944aae5626836f55ed6a19f9d1a571f5fa9da7e6c62",
+      "gaudry_allocation_stage": "809df70c016bd0009ddb4a884a21f0c7302cd7a4dda118dd9396899e23190b23",
+      "gaudry_cubic_bench": "b0a44863d5db4312252f01335bb532896c2e945df130f16b53e02581d891e923"
+    },
+    "fixed": {
+      "summation_polynomial_bench": "e6bff6b792819b37ccfc63531944fa9b02d2802ee81eba945ef1849eb0ba4c1b",
+      "gaudry_allocation_stage": "7a62887888bc395c5146ea57de4a02661189d8bf651de5e6dd58616597de10b3",
+      "gaudry_cubic_bench": "329334b6b4a822b667637f034111c77e677de78006cfe5f8c5e40d244c5a0cf5"
+    },
+    "horner": {
+      "summation_polynomial_bench": "ab259bbcb52d6e038e030a7e47b2d8b974650e88079585302dcf6f36e13e8a15",
+      "gaudry_allocation_stage": "c409dcc07c93b8bbad5fda5e5b3f21bfa604ba7a4a2b9e2a05d94ad8cadbb0a8",
+      "gaudry_cubic_bench": "a33893a5ea71a4447c3fd731c27a0d56cf832878ef08ca82cf0c58a4018b4c57"
+    },
+    "combined": {
+      "summation_polynomial_bench": "6fc838c5758420d8057232c1b9933653fddd07b768cfdb89eca614cb0d678d17",
+      "gaudry_allocation_stage": "096506f5cc2d3f703407d47a2729ed22c115c70d87f4fdaf73413dc5c90ea8c1",
+      "gaudry_cubic_bench": "983b0ce2fa8f8de863a3077519cca4f84158fdb376ee8ea2b76f63fc029ca0a2"
+    }
+  },
+  "harness_sha256": {
+    "summation_polynomial_bench": "c2c19c0874753681ceb7b584c274a2c7a7448d8f08f656ee2f4ca8d6aec9b61c",
+    "gaudry_allocation_stage": "6552190cc28e5c27621f665bd1370c4f367fc4e13b09e6bb7e696ff089b38a14",
+    "gaudry_cubic_bench": "71befe440db3cd5e537ecb7d66db31d458b2698728f73b44f35d3add53431be1"
+  },
+  "cargo_lock_sha256": "231c8cacf4818d64566cf61357480b6f0ca71408614b2d99a15e1e5afdbe9461",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  8\nOn-line CPU(s) list:                     0-7\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) 6975P-C\nCPU family:                              6\nModel:                                   173\nThread(s) per core:                      1\nCore(s) per socket:                      8\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5400.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               384 KiB (8 instances)\nL1i cache:                               512 KiB (8 instances)\nL2 cache:                                16 MiB (8 instances)\nL3 cache:                                480 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-7\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS Not affected; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n"
+}

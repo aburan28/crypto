@@ -48,9 +48,23 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/algorithm-lab.html",
+            "scoreboard/algorithm-lab/core.js",
+            "scoreboard/algorithm-lab/ui.js",
+            "scoreboard/algorithm-lab/style.css",
+            "scoreboard/algorithm-lab/README.md",
+            "scoreboard/performance-gains.html",
+            "scoreboard/performance-gains/summary.png",
+            "scoreboard/performance-gains/summary.pdf",
+            "scoreboard/performance-gains/summary.svg",
+            "scoreboard/performance-gains/data.json",
+            "scoreboard/performance-gains/comparisons.csv",
             "status/index.html",
             "status/style.css",
             "status/walk-forest.svg",
+            "status/walk-forest.json",
+            "status/walk-forest-gf2-23.json",
+            "status/walk-forest.js",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -188,10 +202,37 @@ class BuildTests(unittest.TestCase):
         dashboard = mirrored("status/index.html")
         landing = mirrored("index.html")
         self.assertEqual(dashboard, landing)
-        for name in ("function reportedIterations", "function measuredRate", "function formatRate"):
+        for name in (
+            "function reportedIterations",
+            "function measuredRate",
+            "function walkingSlots",
+            "function formatRate",
+        ):
             self.assertIn(name, dashboard, name)
         # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
         self.assertIn('" B it/s"', dashboard)
+        self.assertIn("status.work.walking_slots", dashboard)
+
+    def test_pages_show_walking_slots_as_gpus_running(self):
+        # status.workers is lifetime DISTINCT worker_id from the DP table;
+        # GPUs that are actually walking are work.walking_slots from the
+        # checkpoint feed. Publishing the lifetime count in the headline made
+        # a three-GPU fleet read as three thousand.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        self.assertIn('id="gpus"', dashboard)
+        self.assertIn('id="gpus-foot"', dashboard)
+        self.assertIn(">GPUs running<", dashboard)
+        self.assertIn("function drawGpus", dashboard)
+        self.assertIn("drawGpus(status)", dashboard)
+        self.assertNotIn('el("gpus").textContent = num(status.workers)', dashboard)
+        self.assertIn('id="live-gpus"', landing)
+        self.assertIn(">GPUs running<", landing)
+        self.assertIn("walkingSlots(status)", landing)
+        self.assertNotIn("live-workers", landing)
+        # Lifetime contributors stay in the workers table, not the GPU card.
+        self.assertIn('id="workers-note"', dashboard)
+        self.assertIn("Lifetime distinguished-point contributors", dashboard)
 
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
@@ -302,10 +343,15 @@ class BuildTests(unittest.TestCase):
         css = read(os.path.join(self.out, "status", "style.css"))
         self.assertIn(".odds-chart svg", css)
         self.assertIn("min-width: 0", css)
-        # Walk forest stays readable on a phone by scrolling, not by shrinking
-        # the trails into a ~300px scribble.
+        # Walk forest fits the column on a phone. A 640px min-width made the
+        # caption lay out at that width, so every line clipped; the SVG
+        # thickens its own strokes below 720px instead.
         self.assertIn(".figure img", css)
-        self.assertIn("min-width: 640px", css)
+        self.assertIn("min-width: 0", css)
+        self.assertNotIn("min-width: 640px", css)
+        self.assertNotIn("Swipe to pan the forest", css)
+        self.assertIn("figure-frame", page)
+        self.assertIn("@media(max-width:720px)", read(os.path.join(self.out, "status", "walk-forest.svg")))
         for ident in ("odds-now", "odds-month", "odds-median", "odds-ninety", "odds-chart"):
             self.assertIn('id="%s"' % ident, page, ident)
         # The same law in Python: mean E, median 0.94 E, ninety at 1.71 E.
@@ -409,6 +455,53 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(int(match.group(1).replace(",", "")), value, ident)
         self.assertIn('src="./walk-forest.svg"', page)
 
+    def test_walk_forest_graphs_are_what_the_trails_export_to(self):
+        # The explorer draws walk-forest.json (the real curve) and
+        # walk-forest-gf2-23.json (the test curve) with the static figure's
+        # own layout, so each must be byte-identical to what its trails
+        # export to, carry every node, edge and walk, and name nodes the way
+        # the trails do: hash prefixes on the challenge curve.
+        import json
+        import walk_forest
+        sets = (
+            ("walk-forest.json", "trails.txt", "forest.hashes", True),
+            ("walk-forest-gf2-23.json", os.path.join("gf2-23", "trails.txt"), os.path.join("gf2-23", "forest.bin"), False),
+        )
+        for published, trails, corpus, hashed in sets:
+            text, forest = walk_forest.build_graph(
+                os.path.join(FOREST_DIR, trails), os.path.join(FOREST_DIR, corpus),
+                title=json.loads(read(os.path.join(self.out, "status", published)))["title"])
+            self.assertEqual(read(os.path.join(self.out, "status", published)), text,
+                             "%s is stale: regenerate it (see walk-forest/README.md)" % published)
+            graph = json.loads(text)
+            self.assertEqual(len(graph["nodes"]), len(forest.order), published)
+            self.assertEqual(len(graph["edges"]), len(forest.succ), published)
+            self.assertEqual(len(graph["walks"]), len(forest.walks), published)
+            self.assertEqual(sum(1 for n in graph["nodes"] if n[3]), len(forest.roots), published)
+            self.assertEqual(graph["counts"]["meetings"], sum(1 for p in forest.pred.values() if len(p) > 1), published)
+            if hashed:
+                for node in graph["nodes"]:
+                    self.assertRegex(node[0], r"^[0-9a-f]{16}$")
+            for walk in graph["walks"]:
+                for a, b in zip(walk["nodes"], walk["nodes"][1:]):
+                    self.assertEqual(forest.succ[forest.order[a]], forest.order[b], published)
+
+    def test_walk_forest_explorer_is_wired_and_degrades_to_the_figure(self):
+        # The script fetches the two graphs by relative URL beside the page,
+        # replaces the image only once a graph has drawn, and never renders
+        # fetched data through innerHTML (node names are data, hashed or not).
+        page = read(os.path.join(self.out, "status", "index.html"))
+        script = read(os.path.join(self.out, "status", "walk-forest.js"))
+        self.assertIn('<script src="./walk-forest.js" defer></script>', page)
+        for ident in ("forest", "forest-dataset", "forest-play", "forest-reset", "forest-readout"):
+            self.assertIn('id="%s"' % ident, page, ident)
+        self.assertIn('<img src="./walk-forest.svg"', page)
+        for target in re.findall(r'file: "\./([^"]+)"', script):
+            self.assertTrue(os.path.exists(os.path.join(self.out, "status", target)), target)
+        self.assertIn("host.removeChild(image)", script)
+        self.assertLess(script.index("index(g);"), script.index("host.removeChild(image)"))
+        self.assertNotIn("innerHTML", script)
+
     # ---- the tool itself, on a curve small enough to check in the clear ---
     # walk-forest/gf2-23/ is the GF(2^23) set: the client's own records for a
     # run, the reference walk of that run's seed schedule, and its endpoints.
@@ -443,7 +536,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -486,7 +579,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)
