@@ -17,6 +17,11 @@ slot, and keeps the slot's state durable so any instance can pick it up later:
     the supervisor uploads each new stretch of whole records as one immutable
     S3 object.  Points are uploaded *before* the checkpoint that follows them,
     so a resume can only re-report a point, never lose one.
+  * a stretch that cannot be uploaded is kept in a local spool directory under
+    its final object key and retried every cycle, so a store or network outage
+    costs a delay rather than points.  The spool is a *process and transport*
+    safety net only: it lives on the instance's disk, so a Spot reclamation
+    takes anything still in it.  campaign.json's spoolMaxBytes caps it.
   * an exit code 6 (checkpoint refused) retires the slot rather than restarting
     it from scratch: re-walking a run id's seeds from their start points would
     repeat work already done and reported.
@@ -73,6 +78,9 @@ PROGRESS_RE = re.compile(
 # number per slot to turn a checkpointed iteration base into group operations.
 BANNER_RE = re.compile(r"=\s*(\d+)\s+walks,\s*dp weight")
 RECORD_BYTES = 32
+SPOOL_DIR = "spool"
+SPOOL_MANIFEST = ".spool.json"
+SPOOL_MAX_BYTES = 2 * 1024 * 1024 * 1024   # unsent points a worker may hold
 CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)
 LEASE_SECONDS = 180
@@ -101,6 +109,19 @@ def readJson(path, default=None):
 
 def writeJson(path, obj):
     atomicJson(path, obj)
+
+
+def copyFsync(src, dest):
+    """Copy, and do not return until the bytes are on the disk.
+
+    The spool's manifest is written with atomicJson, which fsyncs; without
+    this the manifest could reach the disk first and claim records that were
+    still only in the page cache.
+    """
+    with open(src, "rb") as fh, open(dest, "wb") as out:
+        shutil.copyfileobj(fh, out)
+        out.flush()
+        os.fsync(out.fileno())
 
 
 def checkpointIter(path):
@@ -794,6 +815,9 @@ class Worker:
                 os.remove(remote)
         if os.path.exists(self.ckptPath):
             log("local checkpoint at iteration %d" % checkpointIter(self.ckptPath))
+        # Points a previous process on this disk cut but never sent are still
+        # owed to the campaign, under the slot they were cut for.
+        self.drainSpool(slot)
         return slot
 
     def retireSlot(self, slot, reason):
@@ -804,6 +828,214 @@ class Worker:
         self.state = {}
         self.saveState()
 
+    # ---- local spool of unsent points -------------------------------------
+    @property
+    def spoolDir(self):
+        return os.path.join(self.work, SPOOL_DIR)
+
+    def spoolBudget(self):
+        return int((getattr(self, "cfg", None) or {}).get("spoolMaxBytes", SPOOL_MAX_BYTES))
+
+    def spoolEntries(self):
+        """Cut deltas the store has not acknowledged, oldest first.
+
+        Each entry keeps its own object key rather than deriving one: a spool
+        left behind by a previous process holds points cut for the slot that
+        process had, which is not necessarily the slot this one claimed, and
+        re-filing them under the wrong slot would misattribute the walk.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return []
+        out = []
+        for name in sorted(os.listdir(self.spoolDir)):
+            if not name.endswith(SPOOL_MANIFEST):
+                continue
+            entry = readJson(os.path.join(self.spoolDir, name))
+            if not entry or not entry.get("key") or not entry.get("name"):
+                continue
+            entry["manifest"] = os.path.join(self.spoolDir, name)
+            entry["payload"] = os.path.join(self.spoolDir, entry["name"])
+            out.append(entry)
+        out.sort(key=lambda e: (e.get("createdAt", 0), int(e.get("offset", 0)), e["name"]))
+        return out
+
+    def spoolBytes(self):
+        total = 0
+        if os.path.isdir(self.spoolDir):
+            for name in os.listdir(self.spoolDir):
+                path = os.path.join(self.spoolDir, name)
+                if os.path.isfile(path):
+                    total += os.path.getsize(path)
+        return total
+
+    def spoolPending(self):
+        """True while anything at all sits in the spool, manifest or not."""
+        return os.path.isdir(self.spoolDir) and bool(os.listdir(self.spoolDir))
+
+    def entrySize(self, entry):
+        total = 0
+        for path in (entry["payload"], entry["payload"] + ".json", entry["manifest"]):
+            if os.path.isfile(path):
+                total += os.path.getsize(path)
+        return total
+
+    def spoolDelta(self, src, key, slot, offset, metaPath=None):
+        """Hold a cut delta on disk under its final key until the store has it.
+
+        The five-hour stall of 2026-09-17 was an ingest fault rather than an
+        upload one, but it showed what an outage of the upload path would
+        have cost: the only copy of an unsent stretch was dp.bin, which
+        claimSlot deletes when the work dir changes slot and rotateDpFile
+        deletes on a rollout restart.  The manifest is written last, so a
+        payload without one is a fragment and never a record of work.
+        """
+        os.makedirs(self.spoolDir, exist_ok=True)
+        name = os.path.basename(key)
+        payload = os.path.join(self.spoolDir, name)
+        copyFsync(src, payload + ".part")
+        os.replace(payload + ".part", payload)
+        if metaPath:
+            copyFsync(metaPath, payload + ".json")
+        entry = {"name": name, "key": key, "slot": slot, "streamId": self.streamId,
+                 "offset": int(offset), "bytes": os.path.getsize(payload),
+                 "hasMeta": bool(metaPath), "createdAt": time.time()}
+        writeJson(payload + SPOOL_MANIFEST, entry)
+        entry["manifest"] = payload + SPOOL_MANIFEST
+        entry["payload"] = payload
+        return entry
+
+    def removeSpoolEntry(self, entry):
+        # Manifest last: a crash here leaves an entry that drains as a missing
+        # payload, never one that claims records the disk no longer holds.
+        for path in (entry["payload"] + ".json", entry["payload"], entry["manifest"]):
+            if os.path.exists(path):
+                os.remove(path)
+
+    def sweepSpool(self):
+        """Discard spool files that no manifest claims.
+
+        A payload is written before dpOffset moves, so an interrupted write
+        costs nothing: those records are still in dp.bin and the next cycle
+        cuts them again.  rotateDpFile refusing to run while the spool is
+        non-empty is what keeps that true.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return
+        known = set()
+        for entry in self.spoolEntries():
+            known.update((entry["name"], entry["name"] + ".json",
+                          entry["name"] + SPOOL_MANIFEST))
+        for name in sorted(os.listdir(self.spoolDir)):
+            path = os.path.join(self.spoolDir, name)
+            if name in known or not os.path.isfile(path):
+                continue
+            log("spool: discarding fragment %s (%d bytes); its records are still in dp.bin"
+                % (name, os.path.getsize(path)))
+            os.remove(path)
+
+    def creditSpoolEntry(self, entry, slot):
+        """Move dpOffset past a delta the store has, and only then.
+
+        The offset indexes one dp file, so only an entry this process cut
+        from the one it is reading now may move it: an entry left by another
+        process or another slot is published on its own key and the offset
+        stays where it is, because skipping the prefix of a file these
+        records are not in would lose the points at the front of it.
+        """
+        if slot is None or entry.get("slot") != slot or entry.get("streamId") != self.streamId:
+            return
+        if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
+            return
+        self.state["dpOffset"] = int(entry["offset"]) + int(entry["bytes"])
+        # Cumulative across dp file rotations, so the dashboard's count
+        # is this slot's whole contribution.
+        self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + int(entry["bytes"]) // RECORD_BYTES
+        self.saveState()
+
+    def uploadSpoolEntry(self, entry, slot=None, source=None, metaSource=None, check=True):
+        """Put one delta and unspool it only once the store holds it.
+
+        A key names the bytes it carries, so an attempt that failed after the
+        object landed leaves the same key in place; treating that as sent
+        keeps a retry from re-uploading a stretch the store already has.
+        """
+        payload = entry["payload"]
+        src = payload if os.path.exists(payload) else source
+        if src is None:
+            log("spool: %s claims records that are not on disk; dropping the manifest" % entry["name"])
+            if os.path.exists(entry["manifest"]):
+                os.remove(entry["manifest"])
+            return False
+        meta = payload + ".json"
+        metaSrc = meta if os.path.exists(meta) else (metaSource if entry.get("hasMeta") else None)
+        if check and self.store.exists(entry["key"]):
+            log("spool: %s is already in the store; dropping the local copy" % entry["name"])
+            if metaSrc and not self.store.exists(entry["key"] + ".json"):
+                self.store.put(metaSrc, entry["key"] + ".json")
+        else:
+            self.store.put(src, entry["key"])
+            if metaSrc:
+                self.store.put(metaSrc, entry["key"] + ".json")
+        self.removeSpoolEntry(entry)
+        self.creditSpoolEntry(entry, slot)
+        return True
+
+    def drainSpool(self, slot=None):
+        """Send what earlier cycles, or an earlier process, could not.
+
+        Never fatal: an unreachable store is the condition the spool exists
+        for, so a failure is a log line and another attempt next cycle.  The
+        first failure stops the drain because the cause is almost always the
+        store itself, and the rest of the queue would only hammer it.
+        """
+        self.sweepSpool()
+        entries = self.spoolEntries()
+        if not entries:
+            return 0
+        records = sum(int(e.get("bytes", 0)) for e in entries) // RECORD_BYTES
+        log("spool: draining %d unsent delta(s), %d records, %d bytes"
+            % (len(entries), records, self.spoolBytes()))
+        sent = 0
+        for entry in entries:
+            try:
+                if self.uploadSpoolEntry(entry, slot):
+                    sent += 1
+            except Exception as e:
+                log("spool: %s still unsent (will retry): %s" % (entry["name"], e))
+                break
+        return sent
+
+    def enforceSpoolBudget(self):
+        """Hold the spool to spoolMaxBytes by dropping the newest entries.
+
+        A worker that cannot reach the store must not fill the disk out from
+        under the client.  The oldest entries are the ones kept: they are the
+        ones whose dp.bin may already be gone, while the newest were cut from
+        the live file and the next cycle cuts them again.  What goes is said
+        out loud, with its record count, and counted into spoolDropped, which
+        the heartbeat publishes: a worker shedding points must not be a thing
+        only its own log knows.
+        """
+        budget = self.spoolBudget()
+        entries = self.spoolEntries()
+        total = self.spoolBytes()
+        dropped = 0
+        while total > budget and entries:
+            entry = entries.pop()
+            count = int(entry.get("bytes", 0)) // RECORD_BYTES
+            size = self.entrySize(entry)
+            self.removeSpoolEntry(entry)
+            log("spool over budget (%d > %d bytes): dropped %s, %d records no longer held locally"
+                % (total, budget, entry["name"], count))
+            total -= size
+            dropped += count
+        if dropped:
+            self.state["spoolDropped"] = int(self.state.get("spoolDropped", 0)) + dropped
+            self.saveState()
+            log("spool: %d records dropped from the spool on this worker so far"
+                % self.state["spoolDropped"])
+        return dropped
+
     # ---- durable copies ---------------------------------------------------
     def uploadCycle(self, slot):
         """Copy new points, then the checkpoint that follows them, to the store.
@@ -812,7 +1044,10 @@ class Worker:
         the points read afterwards include everything flushed before that
         checkpoint was written (the client flushes the dp file, then saves).
         If this process dies between the two uploads the store holds extra
-        points and an older checkpoint, which a resume merely re-reports."""
+        points and an older checkpoint, which a resume merely re-reports.
+
+        Anything an earlier cycle failed to send goes first, for the same
+        reason: points before the checkpoint that follows them."""
         if self.leaseLost:
             raise RuntimeError("lease lost: refusing to publish")
         if not self.slots.heartbeat(slot, self.owner, {}):
@@ -820,6 +1055,18 @@ class Worker:
             self.stopping = True
             raise RuntimeError("lease lost before upload")
         self.lastBeatSuccess = time.monotonic()
+        self.drainSpool(slot)
+        if self.spoolPending():
+            # Cutting a second delta now would spool [offset, more) beside the
+            # [offset, less) that just failed -- a superset under a different
+            # key, once per cycle, for as long as the outage lasts.  Stopping
+            # here keeps the spool one entry deep: those records are still in
+            # dp.bin, which rotateDpFile will not remove while the spool holds
+            # anything.  It also holds the publication order, since uploading
+            # the checkpoint that follows points the store does not have is
+            # the one reordering a resume cannot repair.
+            raise RuntimeError("store unreachable: %d bytes of points still spooled"
+                               % self.spoolBytes())
         snap = self.ckptPath + ".snap"
         if os.path.exists(snap):
             os.remove(snap)
@@ -836,17 +1083,20 @@ class Worker:
                 src.seek(offset)
                 out.write(src.read(whole - offset))
             key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
-            self.store.put(delta, key)
+            metaPath = None
             if self.contract:
-                meta = envelope(delta, self.contract, "dp", owner=self.owner, offset=offset)
-                writeJson(delta + ".json", meta)
-                self.store.put(delta + ".json", key + ".json")
-            os.remove(delta)
-            self.state["dpOffset"] = whole
-            # Cumulative across dp file rotations, so the dashboard's count
-            # is this slot's whole contribution.
-            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + (whole - offset) // RECORD_BYTES
-            self.saveState()
+                metaPath = delta + ".json"
+                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner, offset=offset))
+            entry = self.spoolDelta(delta, key, slot, offset, metaPath)
+            self.enforceSpoolBudget()
+            try:
+                # A raise here leaves the delta spooled and dpOffset where it
+                # was; the next cycle drains it before cutting again.
+                self.uploadSpoolEntry(entry, slot, source=delta, metaSource=metaPath, check=False)
+            finally:
+                for path in (delta, delta + ".json"):
+                    if os.path.exists(path):
+                        os.remove(path)
         if haveSnap:
             it = checkpointIter(snap)
             if it >= 0 and it != self.state.get("ckptIter", -1):
@@ -932,6 +1182,10 @@ class Worker:
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
                           "walks": int(self.state.get("walks", 0)),
+                          # Unsent and unsendable points, so a worker whose
+                          # uploads are failing is visible without its log.
+                          "spoolBytes": self.spoolBytes(),
+                          "spoolDropped": int(self.state.get("spoolDropped", 0)),
                           "binary": self.cfg.get("binaryKey", ""),
                           "binarySha256": self.cfg.get("binarySha256", ""),
                           "kernelVersion": int(self.cfg.get("kernelVersion") or 0)}
@@ -987,7 +1241,14 @@ class Worker:
         """After the client has exited and every record is uploaded, start a
         fresh dp file so a long-lived instance does not fill its disk.  The
         client reloads its own dp file at startup, which is only the points of
-        this stretch, and the campaign's collision detection is the merge's."""
+        this stretch, and the campaign's collision detection is the merge's.
+
+        Refused while the spool holds anything: dp.bin is the other local copy
+        of those records, and dropping it during an outage would turn a delay
+        into a loss."""
+        if self.spoolPending():
+            log("not rotating dp.bin: %d bytes of points are still unsent" % self.spoolBytes())
+            return
         if os.path.exists(self.dpPath):
             size = os.path.getsize(self.dpPath)
             if size - size % RECORD_BYTES <= int(self.state.get("dpOffset", 0)):
