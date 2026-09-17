@@ -35,6 +35,19 @@ out to prefer 16 slots per worker over 32. Those two changes and the storage
 work around them are worth 2.08x per GPU over the 6.77 B/s the fleet was first
 sized for, so every number below moved with them.
 
+## Runaway cost controls
+
+GPU on-demand boxes are easy to leave running. Default policy: **\$5k/month**
+ceiling, burn as fast as you want — see
+[`costguard/README.md`](costguard/README.md). `benchhost.sh` still terminates
+after `DEADLINE` (default 8h). Campaign workers are stopped only when the
+monthly estimate is exhausted (unless tagged `CostGuardExempt=true`).
+
+```bash
+MONTHLY_BUDGET_USD=5000 ./costguard/costguard.sh status
+./costguard/costguard.sh enforce --apply
+```
+
 ## The numbers that decide the plan
 
 | Quantity | Value | Source |
