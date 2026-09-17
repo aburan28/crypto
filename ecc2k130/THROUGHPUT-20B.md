@@ -109,9 +109,12 @@ ceiling below the current rate is listed because it keeps being proposed.
 | packed top words (part of `TABLE_PIVOT_BYTES`) | **+11** | 0 | `twCoordinate` 35 → 46 for the packed-`fromRow` address math; the price of the shared budget, already inside the −45 above |
 | byte table for the phase | 0 | 0 | already bytes |
 | `H = 4` (halves the table) | ~−10 | 0 | r-adding constant 1.125 vs 1.0625: +6% iterations for <1% rate |
+| **`PACKED_PAIR_ILP=1`** (this round) — two product buffers so the second `clmul` is not false-dependent on the first reduction | 0 static | 0 | Scheduling, not a cut. Priced as hiding one ALU-only reduction (~78 slots, ~1.2 SM-clocks) behind the next product's 6 `clmad` (~3.6 SM-clocks), twice per update: about **9%** if the ALU binds and ptxas actually dual-issues. Unmeasured until [benchmarks/throughput-20b-gpu](benchmarks/throughput-20b-gpu/README.md). Combined with a 2430 MHz lock (vs 2.40 GHz) that is still ~18.4 B/s on the 16.67 table+pivot, short of 20. |
 
 Sum of everything that does not lower a ceiling below 16.56: **−45 static
 ALU, 0 clmad**, against a need of −330 to −400 with the squaring moved.
+The pair-ILP lever does not change those static counts; it is a dual-issue
+question this tree had not asked of the paired product.
 
 ## 5. What this change adds
 

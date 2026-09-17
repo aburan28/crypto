@@ -340,10 +340,25 @@ static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
 #endif
 }
 struct PolynomialPair { P131 first,second; };
+#ifndef ECC_PACKED_PAIR_ILP
+#define ECC_PACKED_PAIR_ILP 0
+#endif
+#if ECC_PACKED_PAIR_ILP != 0 && ECC_PACKED_PAIR_ILP != 1
+#error "ECC_PACKED_PAIR_ILP must be 0 or 1"
+#endif
 static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     P131 first=generatedProduct131(a,b);
     return PolynomialPair{first,generatedProduct131(a,c)};
+#elif ECC_PACKED_PAIR_ILP
+    /* Two product buffers so the second clmul is not false-dependent on the
+       first reduction through a reused 9-word array.  The reduction is
+       ALU-only and the 128-bit product is CLMAD-bound; independent outputs
+       let ptxas dual-issue them.  The bits are the sequential form's. */
+    uint32_t hb[9], hc[9];
+    product131(a,b,hb);
+    product131(a,c,hc);
+    return PolynomialPair{reducePolynomial131(hb), reducePolynomial131(hc)};
 #else
     uint32_t h[9];
     product131(a,b,h);

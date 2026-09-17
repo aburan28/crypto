@@ -224,6 +224,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
+        printf("packed pair ilp: %d\n", ECC_PACKED_PAIR_ILP);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
