@@ -1,0 +1,12 @@
+{
+  "budget": "2 CPUs, 8 GiB, 2 hours total wall; <=4 allocated CPU-hours and <=16 GiB-hours",
+  "cgroup": {
+    "cpu.stat": "usage_usec 1451331760\nuser_usec 1392742300\nsystem_usec 58589459\nnice_usec 0\ncore_sched.force_idle_usec 0\nnr_periods 13345\nnr_throttled 769\nthrottled_usec 1263458\nnr_bursts 0\nburst_usec 0\n",
+    "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "memory.peak": "1809862656\n"
+  },
+  "compute_pricing": "Existing local machine; no cloud instances purchased; dollar CPU/electricity price unspecified",
+  "cost_unit": "valgrind-3.22-amd64-Ir",
+  "excluded_from_solver_Ir": "kernel/device, profiler execution, build and independent audit overhead; retained as research resource cost",
+  "wall_seconds_final_stage": 1334.0768954753876
+}

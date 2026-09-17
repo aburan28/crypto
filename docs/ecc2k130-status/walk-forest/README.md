@@ -65,12 +65,32 @@ ecc2k130/build/trailforest --curve 131 --dp-weight 34 \
 python3 scripts/site/walk_forest.py --trails /tmp/ref131.txt --hash-trails 512 \
     --out docs/ecc2k130-status/walk-forest/reference-check.txt
 
-# 4. the drawing
+# 4. the drawing, and the same forest as a graph for the page's explorer
 python3 scripts/site/walk_forest.py \
     --trails docs/ecc2k130-status/walk-forest/trails.txt \
     --corpus docs/ecc2k130-status/walk-forest/forest.hashes \
     --out docs/ecc2k130-status/walk-forest.svg
+python3 scripts/site/walk_forest.py \
+    --trails docs/ecc2k130-status/walk-forest/trails.txt \
+    --corpus docs/ecc2k130-status/walk-forest/forest.hashes \
+    --json --title "ECC2K-130, real walks" --out docs/ecc2k130-status/walk-forest.json
+python3 scripts/site/walk_forest.py \
+    --trails docs/ecc2k130-status/walk-forest/gf2-23/trails.txt \
+    --corpus docs/ecc2k130-status/walk-forest/gf2-23/forest.bin \
+    --json --title "GF(2^23) test curve" --out docs/ecc2k130-status/walk-forest-gf2-23.json
 ```
+
+## The explorer
+
+`../walk-forest.js` loads `../walk-forest.json` (the real curve) and
+`../walk-forest-gf2-23.json` (the test curve, where trails meet) and draws
+them on a canvas in place of the figure: drag to pan, wheel or pinch to
+zoom, hover a node for the walk it is on and how far along it sits, click a
+node to light every path through it to its distinguished point, and play the
+walks to watch each set off along its trail. The graphs carry the static
+figure's own layout, so the two agree and the page computes no layout; a
+graph is byte-identical to what its trails export to, and the tests check
+that. Without JavaScript, or if a graph fails to load, the figure stays.
 
 Steps 2 to 4 are deterministic given the records. The reference in step 3
 walks a few thousand steps a second, so it is only run over the first

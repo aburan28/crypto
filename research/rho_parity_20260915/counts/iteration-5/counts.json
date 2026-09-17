@@ -1,0 +1,3722 @@
+[
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107970,
+      "factor_base_plan_index": 370515,
+      "driver_and_final_verification": 341175
+    },
+    "total_instructions": 1753021,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5656056679999892
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107970,
+      "factor_base_plan_index": 205032,
+      "driver_and_final_verification": 737030
+    },
+    "total_instructions": 1983393,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5903673439997874
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107970,
+      "factor_base_plan_index": 370484,
+      "driver_and_final_verification": 330969
+    },
+    "total_instructions": 1742784,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5668480960002853
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107970,
+      "factor_base_plan_index": 204995,
+      "driver_and_final_verification": 737013
+    },
+    "total_instructions": 1983339,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5920354059999227
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 143837,
+      "factor_base_plan_index": 370239,
+      "driver_and_final_verification": 368883
+    },
+    "total_instructions": 1816320,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5755223730002399
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 143837,
+      "factor_base_plan_index": 204626,
+      "driver_and_final_verification": 774472
+    },
+    "total_instructions": 2056296,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5841373550001663
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180008,
+      "factor_base_plan_index": 370449,
+      "driver_and_final_verification": 453058
+    },
+    "total_instructions": 1936876,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5635428590003357
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180008,
+      "factor_base_plan_index": 204567,
+      "driver_and_final_verification": 867758
+    },
+    "total_instructions": 2185694,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6062267639999845
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 179210,
+      "factor_base_plan_index": 370590,
+      "driver_and_final_verification": 388090
+    },
+    "total_instructions": 1871251,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5563977900001191
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 179210,
+      "factor_base_plan_index": 204859,
+      "driver_and_final_verification": 814947
+    },
+    "total_instructions": 2132377,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5826163000001543
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180437,
+      "factor_base_plan_index": 370499,
+      "driver_and_final_verification": 425810
+    },
+    "total_instructions": 1910107,
+    "oracle_checks": 3,
+    "wall_seconds": 0.5565119439997943
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180437,
+      "factor_base_plan_index": 204851,
+      "driver_and_final_verification": 865110
+    },
+    "total_instructions": 2183759,
+    "oracle_checks": 4,
+    "wall_seconds": 0.5888246050008092
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 216506,
+      "factor_base_plan_index": 370670,
+      "driver_and_final_verification": 448862
+    },
+    "total_instructions": 1969399,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5563771749993975
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 216506,
+      "factor_base_plan_index": 205146,
+      "driver_and_final_verification": 850645
+    },
+    "total_instructions": 2205658,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5800216449997606
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 251685,
+      "factor_base_plan_index": 370644,
+      "driver_and_final_verification": 470699
+    },
+    "total_instructions": 2026389,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5500550090000615
+  },
+  {
+    "mode": "dlp",
+    "case": 0,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 251685,
+      "factor_base_plan_index": 205097,
+      "driver_and_final_verification": 892110
+    },
+    "total_instructions": 2282253,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5809911340002145
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 450008,
+      "driver_and_final_verification": 3693101
+    },
+    "total_instructions": 5800409,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5542931429999953
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 187753,
+      "driver_and_final_verification": 2497634
+    },
+    "total_instructions": 4342687,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5392738569998983
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 450092,
+      "driver_and_final_verification": 3661240
+    },
+    "total_instructions": 5768632,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5420043260000966
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 187823,
+      "driver_and_final_verification": 2471301
+    },
+    "total_instructions": 4316424,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5368316989997766
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 449806,
+      "driver_and_final_verification": 3680584
+    },
+    "total_instructions": 5829119,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5543193269995754
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 187551,
+      "driver_and_final_verification": 2486011
+    },
+    "total_instructions": 4372291,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5360993270005565
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 449775,
+      "driver_and_final_verification": 3642610
+    },
+    "total_instructions": 5833783,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5998661969997556
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 187496,
+      "driver_and_final_verification": 2447911
+    },
+    "total_instructions": 4376805,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5850698989997909
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 449659,
+      "driver_and_final_verification": 3603598
+    },
+    "total_instructions": 5795216,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5579671729992697
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 187380,
+      "driver_and_final_verification": 2408077
+    },
+    "total_instructions": 4337416,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5386262609999903
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 449625,
+      "driver_and_final_verification": 3672063
+    },
+    "total_instructions": 5865413,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5587741560002542
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 187370,
+      "driver_and_final_verification": 2476653
+    },
+    "total_instructions": 4407748,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5504350129995146
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 449945,
+      "driver_and_final_verification": 3625989
+    },
+    "total_instructions": 5859015,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5506288899996434
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 187690,
+      "driver_and_final_verification": 2408943
+    },
+    "total_instructions": 4379714,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5495235440002944
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 449518,
+      "driver_and_final_verification": 3651031
+    },
+    "total_instructions": 5926489,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5550384369998937
+  },
+  {
+    "mode": "dlp",
+    "case": 1,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 187263,
+      "driver_and_final_verification": 2460019
+    },
+    "total_instructions": 4473222,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5383118979998471
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 874499,
+      "driver_and_final_verification": 567380
+    },
+    "total_instructions": 3099179,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5878245580006478
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 589972,
+      "driver_and_final_verification": 1736210
+    },
+    "total_instructions": 3983482,
+    "oracle_checks": 2,
+    "wall_seconds": 0.6001153049992354
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 874523,
+      "driver_and_final_verification": 563908
+    },
+    "total_instructions": 3095731,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5940256220001174
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 589835,
+      "driver_and_final_verification": 1740682
+    },
+    "total_instructions": 3987817,
+    "oracle_checks": 2,
+    "wall_seconds": 0.6074251219997677
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 875487,
+      "driver_and_final_verification": 617065
+    },
+    "total_instructions": 3191281,
+    "oracle_checks": 3,
+    "wall_seconds": 0.5893271330005518
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 590285,
+      "driver_and_final_verification": 1843065
+    },
+    "total_instructions": 4132079,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6241437970002153
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 874807,
+      "driver_and_final_verification": 748551
+    },
+    "total_instructions": 3364756,
+    "oracle_checks": 3,
+    "wall_seconds": 0.5761373369996363
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 589732,
+      "driver_and_final_verification": 1823459
+    },
+    "total_instructions": 4154589,
+    "oracle_checks": 2,
+    "wall_seconds": 0.6145879369996692
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 874932,
+      "driver_and_final_verification": 728100
+    },
+    "total_instructions": 3344991,
+    "oracle_checks": 3,
+    "wall_seconds": 0.7004827680002563
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 590098,
+      "driver_and_final_verification": 1825585
+    },
+    "total_instructions": 4157642,
+    "oracle_checks": 2,
+    "wall_seconds": 0.6398254790001374
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 874884,
+      "driver_and_final_verification": 794356
+    },
+    "total_instructions": 3412965,
+    "oracle_checks": 3,
+    "wall_seconds": 0.5815323249998983
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 589743,
+      "driver_and_final_verification": 1884815
+    },
+    "total_instructions": 4218283,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6058219770002324
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 874621,
+      "driver_and_final_verification": 662027
+    },
+    "total_instructions": 3319729,
+    "oracle_checks": 2,
+    "wall_seconds": 0.5782338069993784
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 589952,
+      "driver_and_final_verification": 1932820
+    },
+    "total_instructions": 4305853,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6089881879997847
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 874584,
+      "driver_and_final_verification": 845484
+    },
+    "total_instructions": 3546008,
+    "oracle_checks": 3,
+    "wall_seconds": 0.5876739820005241
+  },
+  {
+    "mode": "dlp",
+    "case": 2,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 589788,
+      "driver_and_final_verification": 1972982
+    },
+    "total_instructions": 4388710,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6173376309998275
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 287306,
+      "driver_and_final_verification": 3687899
+    },
+    "total_instructions": 5632505,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5543495290003193
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 178813,
+      "driver_and_final_verification": 2497534
+    },
+    "total_instructions": 4333647,
+    "oracle_checks": 256,
+    "wall_seconds": 0.533875400999932
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 287325,
+      "driver_and_final_verification": 3656038
+    },
+    "total_instructions": 5600663,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5527455250003186
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126307,
+      "factor_base_plan_index": 178832,
+      "driver_and_final_verification": 2470685
+    },
+    "total_instructions": 4306817,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5850086479995298
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 287659,
+      "driver_and_final_verification": 3675398
+    },
+    "total_instructions": 5661786,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5372074879996944
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167736,
+      "factor_base_plan_index": 179335,
+      "driver_and_final_verification": 2481322
+    },
+    "total_instructions": 4359386,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5451784600008978
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 287296,
+      "driver_and_final_verification": 3637408
+    },
+    "total_instructions": 5666102,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5438094380006078
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210405,
+      "factor_base_plan_index": 178803,
+      "driver_and_final_verification": 2447585
+    },
+    "total_instructions": 4367786,
+    "oracle_checks": 256,
+    "wall_seconds": 0.546503675999702
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 286897,
+      "driver_and_final_verification": 3598281
+    },
+    "total_instructions": 5627137,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5795818990000043
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210966,
+      "factor_base_plan_index": 178729,
+      "driver_and_final_verification": 2395308
+    },
+    "total_instructions": 4315996,
+    "oracle_checks": 256,
+    "wall_seconds": 0.542167793999397
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 286887,
+      "driver_and_final_verification": 3666746
+    },
+    "total_instructions": 5697358,
+    "oracle_checks": 256,
+    "wall_seconds": 0.554529308000383
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212732,
+      "factor_base_plan_index": 178719,
+      "driver_and_final_verification": 2463359
+    },
+    "total_instructions": 4385803,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5319747330004247
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 287306,
+      "driver_and_final_verification": 3620979
+    },
+    "total_instructions": 5691366,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5875193940000827
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252088,
+      "factor_base_plan_index": 178813,
+      "driver_and_final_verification": 2408834
+    },
+    "total_instructions": 4370728,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5314991770001143
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 287270,
+      "driver_and_final_verification": 3645829
+    },
+    "total_instructions": 5759039,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5478663570002027
+  },
+  {
+    "mode": "dlp",
+    "case": 3,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294947,
+      "factor_base_plan_index": 178526,
+      "driver_and_final_verification": 2455194
+    },
+    "total_instructions": 4459660,
+    "oracle_checks": 256,
+    "wall_seconds": 0.5596377600004416
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 894156,
+      "driver_and_final_verification": 953194
+    },
+    "total_instructions": 3995315,
+    "oracle_checks": 7,
+    "wall_seconds": 0.5861708379998163
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 358564,
+      "driver_and_final_verification": 876989
+    },
+    "total_instructions": 3383518,
+    "oracle_checks": 7,
+    "wall_seconds": 0.6014490489997115
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 893760,
+      "driver_and_final_verification": 1299626
+    },
+    "total_instructions": 4341351,
+    "oracle_checks": 10,
+    "wall_seconds": 0.5832989629998337
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 358598,
+      "driver_and_final_verification": 925567
+    },
+    "total_instructions": 3432130,
+    "oracle_checks": 10,
+    "wall_seconds": 0.5922632350002459
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 203100,
+      "factor_base_plan_index": 894039,
+      "driver_and_final_verification": 2198002
+    },
+    "total_instructions": 5288834,
+    "oracle_checks": 18,
+    "wall_seconds": 0.602114229000108
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 203100,
+      "factor_base_plan_index": 358691,
+      "driver_and_final_verification": 1107985
+    },
+    "total_instructions": 3663469,
+    "oracle_checks": 18,
+    "wall_seconds": 0.8113763780002046
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 255889,
+      "factor_base_plan_index": 894212,
+      "driver_and_final_verification": 889988
+    },
+    "total_instructions": 4033782,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6081862199998795
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 255889,
+      "factor_base_plan_index": 358778,
+      "driver_and_final_verification": 965154
+    },
+    "total_instructions": 3573514,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6103082529998574
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 256395,
+      "factor_base_plan_index": 894025,
+      "driver_and_final_verification": 2983409
+    },
+    "total_instructions": 6127522,
+    "oracle_checks": 25,
+    "wall_seconds": 0.6144312610003908
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 256395,
+      "factor_base_plan_index": 358907,
+      "driver_and_final_verification": 1298470
+    },
+    "total_instructions": 3907465,
+    "oracle_checks": 25,
+    "wall_seconds": 0.5840658570004962
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 258472,
+      "factor_base_plan_index": 893835,
+      "driver_and_final_verification": 1625523
+    },
+    "total_instructions": 4771523,
+    "oracle_checks": 12,
+    "wall_seconds": 0.6157234339998467
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 258472,
+      "factor_base_plan_index": 358633,
+      "driver_and_final_verification": 1070717
+    },
+    "total_instructions": 3681515,
+    "oracle_checks": 12,
+    "wall_seconds": 0.5884549459997288
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 308863,
+      "factor_base_plan_index": 893990,
+      "driver_and_final_verification": 1200590
+    },
+    "total_instructions": 4397136,
+    "oracle_checks": 7,
+    "wall_seconds": 0.5948687999998583
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 308863,
+      "factor_base_plan_index": 358771,
+      "driver_and_final_verification": 1036706
+    },
+    "total_instructions": 3698033,
+    "oracle_checks": 7,
+    "wall_seconds": 0.7027753969996411
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 356644,
+      "factor_base_plan_index": 893827,
+      "driver_and_final_verification": 1996135
+    },
+    "total_instructions": 5240299,
+    "oracle_checks": 15,
+    "wall_seconds": 0.649965401999907
+  },
+  {
+    "mode": "dlp",
+    "case": 4,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 356644,
+      "factor_base_plan_index": 358684,
+      "driver_and_final_verification": 1221551
+    },
+    "total_instructions": 3930572,
+    "oracle_checks": 15,
+    "wall_seconds": 0.8951160770002389
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 1086334,
+      "driver_and_final_verification": 1355623
+    },
+    "total_instructions": 4589922,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6012929580001583
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 692885,
+      "driver_and_final_verification": 2760008
+    },
+    "total_instructions": 5600858,
+    "oracle_checks": 6,
+    "wall_seconds": 0.6371793369999068
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 1353151,
+      "driver_and_final_verification": 863621
+    },
+    "total_instructions": 4364737,
+    "oracle_checks": 4,
+    "wall_seconds": 0.5998546359996908
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154272,
+      "factor_base_plan_index": 604817,
+      "driver_and_final_verification": 1599427
+    },
+    "total_instructions": 4352209,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6138394889994743
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 203100,
+      "factor_base_plan_index": 1345180,
+      "driver_and_final_verification": 1299837
+    },
+    "total_instructions": 4841810,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6121007239999017
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 203100,
+      "factor_base_plan_index": 872502,
+      "driver_and_final_verification": 6101564
+    },
+    "total_instructions": 9170859,
+    "oracle_checks": 4,
+    "wall_seconds": 0.659403327000291
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 255889,
+      "factor_base_plan_index": 1093121,
+      "driver_and_final_verification": 1506389
+    },
+    "total_instructions": 4849092,
+    "oracle_checks": 4,
+    "wall_seconds": 0.5940827860003992
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 255889,
+      "factor_base_plan_index": 698371,
+      "driver_and_final_verification": 2768920
+    },
+    "total_instructions": 5716873,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6303586470003211
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 256395,
+      "factor_base_plan_index": 1091562,
+      "driver_and_final_verification": 2212394
+    },
+    "total_instructions": 5554044,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6117977720005001
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 256395,
+      "factor_base_plan_index": 694716,
+      "driver_and_final_verification": 2859522
+    },
+    "total_instructions": 5804326,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6235436830002072
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 258472,
+      "factor_base_plan_index": 1560737,
+      "driver_and_final_verification": 1643721
+    },
+    "total_instructions": 5456623,
+    "oracle_checks": 7,
+    "wall_seconds": 0.6381400340005712
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 258472,
+      "factor_base_plan_index": 696509,
+      "driver_and_final_verification": 2833905
+    },
+    "total_instructions": 5782579,
+    "oracle_checks": 7,
+    "wall_seconds": 0.6375864169995111
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 308863,
+      "factor_base_plan_index": 1088795,
+      "driver_and_final_verification": 1394352
+    },
+    "total_instructions": 4785703,
+    "oracle_checks": 3,
+    "wall_seconds": 0.6146136799998203
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 308863,
+      "factor_base_plan_index": 694846,
+      "driver_and_final_verification": 2891783
+    },
+    "total_instructions": 5889185,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6408110299998953
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 356644,
+      "factor_base_plan_index": 1084741,
+      "driver_and_final_verification": 1656307
+    },
+    "total_instructions": 5091385,
+    "oracle_checks": 11,
+    "wall_seconds": 0.6075843120006539
+  },
+  {
+    "mode": "dlp",
+    "case": 5,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 356644,
+      "factor_base_plan_index": 518540,
+      "driver_and_final_verification": 1158963
+    },
+    "total_instructions": 4027840,
+    "oracle_checks": 11,
+    "wall_seconds": 0.609791519999817
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181468,
+      "factor_base_plan_index": 1099555,
+      "driver_and_final_verification": 3181032
+    },
+    "total_instructions": 6573489,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6270766799998455
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181468,
+      "factor_base_plan_index": 660411,
+      "driver_and_final_verification": 3989226
+    },
+    "total_instructions": 6942539,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6624979830003213
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181468,
+      "factor_base_plan_index": 1099604,
+      "driver_and_final_verification": 1717507
+    },
+    "total_instructions": 5110013,
+    "oracle_checks": 4,
+    "wall_seconds": 0.5909561019998364
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181468,
+      "factor_base_plan_index": 660482,
+      "driver_and_final_verification": 3842334
+    },
+    "total_instructions": 6795718,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6385226990005322
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 238429,
+      "factor_base_plan_index": 1099763,
+      "driver_and_final_verification": 2799377
+    },
+    "total_instructions": 6249003,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6019816779999019
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 238429,
+      "factor_base_plan_index": 660367,
+      "driver_and_final_verification": 3930086
+    },
+    "total_instructions": 6940316,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6589305730003616
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301510,
+      "factor_base_plan_index": 1099597,
+      "driver_and_final_verification": 6303401
+    },
+    "total_instructions": 9815942,
+    "oracle_checks": 14,
+    "wall_seconds": 0.6532882020001125
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301510,
+      "factor_base_plan_index": 660300,
+      "driver_and_final_verification": 4234677
+    },
+    "total_instructions": 7307921,
+    "oracle_checks": 14,
+    "wall_seconds": 0.6408030040001904
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 297893,
+      "factor_base_plan_index": 1099453,
+      "driver_and_final_verification": 2303919
+    },
+    "total_instructions": 5812699,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6242183740005203
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 297893,
+      "factor_base_plan_index": 660145,
+      "driver_and_final_verification": 3879035
+    },
+    "total_instructions": 6948507,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6451057290005338
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301847,
+      "factor_base_plan_index": 1099770,
+      "driver_and_final_verification": 3377865
+    },
+    "total_instructions": 6890916,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6154654929996468
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301847,
+      "factor_base_plan_index": 660340,
+      "driver_and_final_verification": 4113460
+    },
+    "total_instructions": 7187081,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6556161190001148
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 360150,
+      "factor_base_plan_index": 1099580,
+      "driver_and_final_verification": 6782077
+    },
+    "total_instructions": 10353241,
+    "oracle_checks": 15,
+    "wall_seconds": 0.6606064950001382
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 360150,
+      "factor_base_plan_index": 660218,
+      "driver_and_final_verification": 4300692
+    },
+    "total_instructions": 7432494,
+    "oracle_checks": 15,
+    "wall_seconds": 0.6569300339997426
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 422025,
+      "factor_base_plan_index": 1099466,
+      "driver_and_final_verification": 4270610
+    },
+    "total_instructions": 7903535,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6491293340004631
+  },
+  {
+    "mode": "dlp",
+    "case": 6,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 422025,
+      "factor_base_plan_index": 660329,
+      "driver_and_final_verification": 4107863
+    },
+    "total_instructions": 7301651,
+    "oracle_checks": 8,
+    "wall_seconds": 0.8279812119999406
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 535880,
+      "driver_and_final_verification": 2919045
+    },
+    "total_instructions": 7954431,
+    "oracle_checks": 23,
+    "wall_seconds": 0.8184823350002262
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 337207,
+      "driver_and_final_verification": 2086829
+    },
+    "total_instructions": 6923542,
+    "oracle_checks": 23,
+    "wall_seconds": 0.6917464210000617
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 535712,
+      "driver_and_final_verification": 2629788
+    },
+    "total_instructions": 7665006,
+    "oracle_checks": 20,
+    "wall_seconds": 0.6848042230003557
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 337051,
+      "driver_and_final_verification": 2019700
+    },
+    "total_instructions": 6856257,
+    "oracle_checks": 20,
+    "wall_seconds": 0.9567698920000112
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 536242,
+      "driver_and_final_verification": 1595361
+    },
+    "total_instructions": 6693839,
+    "oracle_checks": 8,
+    "wall_seconds": 0.8018120449996786
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 337531,
+      "driver_and_final_verification": 1822297
+    },
+    "total_instructions": 6722064,
+    "oracle_checks": 8,
+    "wall_seconds": 0.8136274850003247
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 535899,
+      "driver_and_final_verification": 1639859
+    },
+    "total_instructions": 6806549,
+    "oracle_checks": 7,
+    "wall_seconds": 0.7052534900003593
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 337347,
+      "driver_and_final_verification": 1899230
+    },
+    "total_instructions": 6867368,
+    "oracle_checks": 7,
+    "wall_seconds": 0.65663750099975
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 535754,
+      "driver_and_final_verification": 3415036
+    },
+    "total_instructions": 8580223,
+    "oracle_checks": 28,
+    "wall_seconds": 0.6275452370000494
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 337100,
+      "driver_and_final_verification": 2323273
+    },
+    "total_instructions": 7289806,
+    "oracle_checks": 28,
+    "wall_seconds": 1.0288605249998
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 536036,
+      "driver_and_final_verification": 3255196
+    },
+    "total_instructions": 8423917,
+    "oracle_checks": 26,
+    "wall_seconds": 0.7200547430002189
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 337200,
+      "driver_and_final_verification": 2222404
+    },
+    "total_instructions": 7192289,
+    "oracle_checks": 26,
+    "wall_seconds": 0.6715705110000272
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 535901,
+      "driver_and_final_verification": 1664983
+    },
+    "total_instructions": 6899851,
+    "oracle_checks": 6,
+    "wall_seconds": 0.6184947189995
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 337290,
+      "driver_and_final_verification": 1947164
+    },
+    "total_instructions": 6983421,
+    "oracle_checks": 6,
+    "wall_seconds": 0.6132553239995104
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 535972,
+      "driver_and_final_verification": 1438299
+    },
+    "total_instructions": 6736109,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6094696910004131
+  },
+  {
+    "mode": "dlp",
+    "case": 7,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 337193,
+      "driver_and_final_verification": 1975723
+    },
+    "total_instructions": 7074754,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6264683630006402
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 804871,
+      "driver_and_final_verification": 2965218
+    },
+    "total_instructions": 8269595,
+    "oracle_checks": 23,
+    "wall_seconds": 0.6538778979993367
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 599081,
+      "driver_and_final_verification": 2503288
+    },
+    "total_instructions": 7601875,
+    "oracle_checks": 23,
+    "wall_seconds": 0.6445668940004907
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 804882,
+      "driver_and_final_verification": 2699027
+    },
+    "total_instructions": 8003415,
+    "oracle_checks": 20,
+    "wall_seconds": 0.6157967240005746
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 599100,
+      "driver_and_final_verification": 2435852
+    },
+    "total_instructions": 7534458,
+    "oracle_checks": 20,
+    "wall_seconds": 0.6333317270000407
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 805246,
+      "driver_and_final_verification": 1725837
+    },
+    "total_instructions": 7093319,
+    "oracle_checks": 8,
+    "wall_seconds": 0.620754527999452
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 599494,
+      "driver_and_final_verification": 2237908
+    },
+    "total_instructions": 7399638,
+    "oracle_checks": 8,
+    "wall_seconds": 0.6487817679999353
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 804870,
+      "driver_and_final_verification": 1762249
+    },
+    "total_instructions": 7197910,
+    "oracle_checks": 7,
+    "wall_seconds": 0.612771961999897
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 599339,
+      "driver_and_final_verification": 2315750
+    },
+    "total_instructions": 7545880,
+    "oracle_checks": 7,
+    "wall_seconds": 0.649037574000431
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 804570,
+      "driver_and_final_verification": 3469172
+    },
+    "total_instructions": 8903175,
+    "oracle_checks": 28,
+    "wall_seconds": 0.6517330829992716
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 599323,
+      "driver_and_final_verification": 2815264
+    },
+    "total_instructions": 8044020,
+    "oracle_checks": 28,
+    "wall_seconds": 0.6313566209992132
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 804864,
+      "driver_and_final_verification": 3297430
+    },
+    "total_instructions": 8734979,
+    "oracle_checks": 26,
+    "wall_seconds": 0.6438157319998936
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 599451,
+      "driver_and_final_verification": 2640321
+    },
+    "total_instructions": 7872457,
+    "oracle_checks": 26,
+    "wall_seconds": 0.6657910589992753
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 805100,
+      "driver_and_final_verification": 1785242
+    },
+    "total_instructions": 7289309,
+    "oracle_checks": 6,
+    "wall_seconds": 0.6171148069997798
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 599681,
+      "driver_and_final_verification": 2363690
+    },
+    "total_instructions": 7662338,
+    "oracle_checks": 6,
+    "wall_seconds": 0.6717932199999268
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 804971,
+      "driver_and_final_verification": 1604701
+    },
+    "total_instructions": 7171510,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6318017459998373
+  },
+  {
+    "mode": "dlp",
+    "case": 8,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 599451,
+      "driver_and_final_verification": 2390913
+    },
+    "total_instructions": 7752202,
+    "oracle_checks": 4,
+    "wall_seconds": 0.6350531779999073
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 850709,
+      "driver_and_final_verification": 1758391
+    },
+    "total_instructions": 7108606,
+    "oracle_checks": 26,
+    "wall_seconds": 0.6359359660000337
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 691917,
+      "driver_and_final_verification": 2206385
+    },
+    "total_instructions": 7397808,
+    "oracle_checks": 26,
+    "wall_seconds": 0.6557928940001148
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 850713,
+      "driver_and_final_verification": 1235123
+    },
+    "total_instructions": 6585342,
+    "oracle_checks": 9,
+    "wall_seconds": 0.6038447079999969
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 200770,
+      "factor_base_plan_index": 691915,
+      "driver_and_final_verification": 1803052
+    },
+    "total_instructions": 6994473,
+    "oracle_checks": 9,
+    "wall_seconds": 0.6476558109998223
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 851175,
+      "driver_and_final_verification": 3084591
+    },
+    "total_instructions": 8498002,
+    "oracle_checks": 72,
+    "wall_seconds": 0.6454052159997445
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 263500,
+      "factor_base_plan_index": 692369,
+      "driver_and_final_verification": 2973394
+    },
+    "total_instructions": 8227999,
+    "oracle_checks": 72,
+    "wall_seconds": 0.6243213860007018
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 851140,
+      "driver_and_final_verification": 2527732
+    },
+    "total_instructions": 8009663,
+    "oracle_checks": 48,
+    "wall_seconds": 0.6033101100001659
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 332055,
+      "factor_base_plan_index": 692445,
+      "driver_and_final_verification": 2711429
+    },
+    "total_instructions": 8034665,
+    "oracle_checks": 48,
+    "wall_seconds": 0.6470108430003165
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 850855,
+      "driver_and_final_verification": 2259439
+    },
+    "total_instructions": 7739727,
+    "oracle_checks": 39,
+    "wall_seconds": 0.7069020959997943
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 330697,
+      "factor_base_plan_index": 692174,
+      "driver_and_final_verification": 2525135
+    },
+    "total_instructions": 7846742,
+    "oracle_checks": 39,
+    "wall_seconds": 1.0015805110006113
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 850831,
+      "driver_and_final_verification": 5134818
+    },
+    "total_instructions": 10618334,
+    "oracle_checks": 136,
+    "wall_seconds": 0.653995648000091
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 333949,
+      "factor_base_plan_index": 692218,
+      "driver_and_final_verification": 4383380
+    },
+    "total_instructions": 9708283,
+    "oracle_checks": 136,
+    "wall_seconds": 0.7282102379995194
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 850875,
+      "driver_and_final_verification": 2924472
+    },
+    "total_instructions": 8474314,
+    "oracle_checks": 61,
+    "wall_seconds": 1.2656694699999207
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 400231,
+      "factor_base_plan_index": 692199,
+      "driver_and_final_verification": 2996901
+    },
+    "total_instructions": 8388067,
+    "oracle_checks": 61,
+    "wall_seconds": 0.6743524359999356
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "charts_linear",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 850945,
+      "driver_and_final_verification": 1364406
+    },
+    "total_instructions": 6977189,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6794520200000989
+  },
+  {
+    "mode": "dlp",
+    "case": 9,
+    "variant": "pair_table",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298736,
+      "target_generation": 463102,
+      "factor_base_plan_index": 692075,
+      "driver_and_final_verification": 1990068
+    },
+    "total_instructions": 7443981,
+    "oracle_checks": 5,
+    "wall_seconds": 0.6402059299998655
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107976,
+      "rho_and_final_verification": 479083
+    },
+    "total_instructions": 1520420,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3617139260004478
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 107976,
+      "rho_and_final_verification": 461122
+    },
+    "total_instructions": 1502459,
+    "oracle_checks": 0,
+    "wall_seconds": 0.39311206600086734
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 143843,
+      "rho_and_final_verification": 528155
+    },
+    "total_instructions": 1605359,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3719659730004423
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180014,
+      "rho_and_final_verification": 604056
+    },
+    "total_instructions": 1717431,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3646946910002953
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 179216,
+      "rho_and_final_verification": 612328
+    },
+    "total_instructions": 1724905,
+    "oracle_checks": 0,
+    "wall_seconds": 0.36364166800012754
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 180443,
+      "rho_and_final_verification": 599418
+    },
+    "total_instructions": 1713222,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3798314229998141
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 216512,
+      "rho_and_final_verification": 667358
+    },
+    "total_instructions": 1817231,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3677314890001071
+  },
+  {
+    "mode": "rho",
+    "case": 0,
+    "variant": "rho",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 933361,
+      "target_generation": 251691,
+      "rho_and_final_verification": 772076
+    },
+    "total_instructions": 1957128,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3853123710005093
+  },
+  {
+    "mode": "calibrate",
+    "case": 0,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 933361,
+      "calibration_loop": 3601796
+    },
+    "total_instructions": 4535157,
+    "oracle_checks": 0,
+    "wall_seconds": 0.37026580200017634
+  },
+  {
+    "mode": "calibrate_empty",
+    "case": 0,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 933361,
+      "calibration_loop": 53271
+    },
+    "total_instructions": 986632,
+    "oracle_checks": 0,
+    "wall_seconds": 0.2990538089998154
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126313,
+      "rho_and_final_verification": 625254
+    },
+    "total_instructions": 2282560,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3861004190002859
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 126313,
+      "rho_and_final_verification": 618381
+    },
+    "total_instructions": 2275687,
+    "oracle_checks": 0,
+    "wall_seconds": 0.38571807599964814
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 167742,
+      "rho_and_final_verification": 692215
+    },
+    "total_instructions": 2390950,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3956455450006615
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210411,
+      "rho_and_final_verification": 773341
+    },
+    "total_instructions": 2514745,
+    "oracle_checks": 0,
+    "wall_seconds": 0.37359927100078494
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 210972,
+      "rho_and_final_verification": 795825
+    },
+    "total_instructions": 2537790,
+    "oracle_checks": 0,
+    "wall_seconds": 0.38511123300031613
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 212738,
+      "rho_and_final_verification": 756301
+    },
+    "total_instructions": 2500032,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3842297150004015
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 252094,
+      "rho_and_final_verification": 826731
+    },
+    "total_instructions": 2609818,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3916945629998736
+  },
+  {
+    "mode": "rho",
+    "case": 1,
+    "variant": "rho",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1530993,
+      "target_generation": 294953,
+      "rho_and_final_verification": 928449
+    },
+    "total_instructions": 2754395,
+    "oracle_checks": 0,
+    "wall_seconds": 1.1704632730006779
+  },
+  {
+    "mode": "calibrate",
+    "case": 1,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "calibration_loop": 4516074
+    },
+    "total_instructions": 6047067,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3821488160001536
+  },
+  {
+    "mode": "calibrate_empty",
+    "case": 1,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1530993,
+      "calibration_loop": 53271
+    },
+    "total_instructions": 1584264,
+    "oracle_checks": 0,
+    "wall_seconds": 0.38455415699991136
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154278,
+      "rho_and_final_verification": 1036433
+    },
+    "total_instructions": 3184404,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4317257909997352
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 154278,
+      "rho_and_final_verification": 1061100
+    },
+    "total_instructions": 3209071,
+    "oracle_checks": 0,
+    "wall_seconds": 0.49394631299946923
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 203106,
+      "rho_and_final_verification": 1123681
+    },
+    "total_instructions": 3320480,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4124947380005324
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 255895,
+      "rho_and_final_verification": 1257413
+    },
+    "total_instructions": 3507001,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3920619499995155
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 256401,
+      "rho_and_final_verification": 1284134
+    },
+    "total_instructions": 3534228,
+    "oracle_checks": 0,
+    "wall_seconds": 0.38912351799990574
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 258478,
+      "rho_and_final_verification": 1243011
+    },
+    "total_instructions": 3495182,
+    "oracle_checks": 0,
+    "wall_seconds": 0.38284009900053206
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 308869,
+      "rho_and_final_verification": 1311016
+    },
+    "total_instructions": 3613578,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3868765569995958
+  },
+  {
+    "mode": "rho",
+    "case": 4,
+    "variant": "rho",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 1993693,
+      "target_generation": 356650,
+      "rho_and_final_verification": 1457169
+    },
+    "total_instructions": 3807512,
+    "oracle_checks": 0,
+    "wall_seconds": 0.39811841400023695
+  },
+  {
+    "mode": "calibrate",
+    "case": 4,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1993693,
+      "calibration_loop": 6234375
+    },
+    "total_instructions": 8228068,
+    "oracle_checks": 0,
+    "wall_seconds": 0.41746454299936886
+  },
+  {
+    "mode": "calibrate_empty",
+    "case": 4,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 1993693,
+      "calibration_loop": 53271
+    },
+    "total_instructions": 2046964,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3829022719992281
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181474,
+      "rho_and_final_verification": 1358169
+    },
+    "total_instructions": 3651077,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3803431090000231
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 181474,
+      "rho_and_final_verification": 1367395
+    },
+    "total_instructions": 3660303,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3836330640006054
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 238435,
+      "rho_and_final_verification": 1457579
+    },
+    "total_instructions": 3807448,
+    "oracle_checks": 0,
+    "wall_seconds": 0.41566510099983134
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301516,
+      "rho_and_final_verification": 1547072
+    },
+    "total_instructions": 3960022,
+    "oracle_checks": 0,
+    "wall_seconds": 0.424278485999821
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 297899,
+      "rho_and_final_verification": 1554250
+    },
+    "total_instructions": 3963583,
+    "oracle_checks": 0,
+    "wall_seconds": 0.44745862299987493
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 301853,
+      "rho_and_final_verification": 1494156
+    },
+    "total_instructions": 3907443,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3794366499996613
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 360156,
+      "rho_and_final_verification": 1616824
+    },
+    "total_instructions": 4088414,
+    "oracle_checks": 0,
+    "wall_seconds": 0.3977201600000626
+  },
+  {
+    "mode": "rho",
+    "case": 6,
+    "variant": "rho",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 2111434,
+      "target_generation": 422031,
+      "rho_and_final_verification": 1765225
+    },
+    "total_instructions": 4298690,
+    "oracle_checks": 0,
+    "wall_seconds": 0.44022131499968964
+  },
+  {
+    "mode": "calibrate",
+    "case": 6,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 2111434,
+      "calibration_loop": 7267146
+    },
+    "total_instructions": 9378580,
+    "oracle_checks": 0,
+    "wall_seconds": 0.5033617690005485
+  },
+  {
+    "mode": "calibrate_empty",
+    "case": 6,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 2111434,
+      "calibration_loop": 53271
+    },
+    "total_instructions": 2164705,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4234876950004036
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 101,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 200776,
+      "rho_and_final_verification": 1332453
+    },
+    "total_instructions": 5831961,
+    "oracle_checks": 0,
+    "wall_seconds": 0.40210598400062736
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 202,
+    "known_log": 5,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 200776,
+      "rho_and_final_verification": 1305171
+    },
+    "total_instructions": 5804679,
+    "oracle_checks": 0,
+    "wall_seconds": 0.41338277099930565
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 503,
+    "known_log": 7,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 263506,
+      "rho_and_final_verification": 1354524
+    },
+    "total_instructions": 5916762,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4068067879998125
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 607,
+    "known_log": 11,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 332061,
+      "rho_and_final_verification": 1533802
+    },
+    "total_instructions": 6164595,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4070715170000767
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 1201,
+    "known_log": 13,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 330703,
+      "rho_and_final_verification": 1671103
+    },
+    "total_instructions": 6300538,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4038183089996892
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 1429,
+    "known_log": 17,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 333955,
+      "rho_and_final_verification": 1485073
+    },
+    "total_instructions": 6117760,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4020334599999842
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 1601,
+    "known_log": 19,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 400237,
+      "rho_and_final_verification": 1776965
+    },
+    "total_instructions": 6475934,
+    "oracle_checks": 0,
+    "wall_seconds": 0.42075022899916803
+  },
+  {
+    "mode": "rho",
+    "case": 7,
+    "variant": "rho",
+    "seed": 1873,
+    "known_log": 23,
+    "status": "finished",
+    "verified": true,
+    "scopes": {
+      "curve_setup": 4298732,
+      "target_generation": 463108,
+      "rho_and_final_verification": 1913738
+    },
+    "total_instructions": 6675578,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4281802539999262
+  },
+  {
+    "mode": "calibrate",
+    "case": 7,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 4298736,
+      "calibration_loop": 8289970
+    },
+    "total_instructions": 12588706,
+    "oracle_checks": 0,
+    "wall_seconds": 0.5547454440002184
+  },
+  {
+    "mode": "calibrate_empty",
+    "case": 7,
+    "variant": "calibration",
+    "seed": 0,
+    "known_log": 5,
+    "status": "finished",
+    "verified": false,
+    "scopes": {
+      "curve_setup": 4298736,
+      "calibration_loop": 53271
+    },
+    "total_instructions": 4352007,
+    "oracle_checks": 0,
+    "wall_seconds": 0.4365567969998665
+  }
+]

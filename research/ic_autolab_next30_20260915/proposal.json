@@ -1,0 +1,53 @@
+{
+  "baseline_config": {
+    "batch_trials": 1,
+    "collection_window": 8,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "baseline_source": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z/source_candidates/autolab/source",
+  "baseline_source_manifest_sha256": "28bec3455867ad5598779e9a91cf6bd7692d9029690941886f34faed3224dc1c",
+  "boundaries": {
+    "coverage": "At most binomial(B+m-1,m) target images for fixed signed base B and summands m; no coverage improvement claimed.",
+    "implementation_floor": "K instructions for the required full-rank K-column collector",
+    "rho_reference": {
+      "S_Ir": 39492.546658910636,
+      "cost_over_parent_winner": 0.1047731479445769,
+      "scope": "Previous paired confirmation; new matched rho is required."
+    }
+  },
+  "budget": {
+    "development_probe_cap": 12,
+    "full_campaigns_without_promotion_cap": 3,
+    "memory_gib": 8,
+    "new_paid_model_or_cloud_resources": false,
+    "per_campaign_cpus": 2,
+    "wall_limit_seconds": 7200
+  },
+  "candidate_A": {
+    "affected_phases": [
+      "factor_base_and_tables",
+      "verify_filter_and_linear_algebra",
+      "log_certification",
+      "individual_log",
+      "final_verification"
+    ],
+    "change": "Use the existing single-word FastCurve scalar multiplication in KoblitzCurve.mul for exactly representable points; preserve generic fallback.",
+    "expected_memory": "Temporary Gf2 reduction tables per multiplication, approximately 2-16 KiB; no persistent global cache.",
+    "falsification": "Reject semantic mismatch, missing checks, any required incomplete solve or final ratio >0.70; no cell >1.1 and paired CI upper <1 on confirmation and replay.",
+    "hypothesis": "Generic scalar multiplication dominates cofactor-class validation, relation checking and log certification; accelerating the same group operations should reduce complete Ir by at least 30%."
+  },
+  "created_utc": "2026-09-15T22:34:18.896355+00:00",
+  "evaluator_change": "Only stricter 0.70 promotion threshold and its label; cost unit, aggregation, checker, fixed workload and source admission remain unchanged.",
+  "fixed_support": {
+    "kind": "subgroup_orbits",
+    "points": "6 * degree",
+    "seed": 43,
+    "summands": 3
+  },
+  "parent_round": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z",
+  "target_candidate_over_baseline": 0.7,
+  "unit": "valgrind-3.22-amd64-Ir"
+}

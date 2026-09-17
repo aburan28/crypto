@@ -1,0 +1,594 @@
+{
+  "class": "diagnostic engineering",
+  "profileDurationsUsedAsThroughput": false,
+  "fieldProductsPerScalarUpdate": 5.3125,
+  "fieldProductRatioToControl": 1.0,
+  "endToEndDlpSpeedup": null,
+  "runs": {
+    "goal28-g7-range-04": {
+      "valid": false,
+      "error": null,
+      "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-ccac635d-c454-bd44-e7cc-061578973c50, 595.91.07, 12.0",
+      "sourceSha256": "2983a3d8392dde6e086aa2bf24c47d12f5e9e13f34d6e3620afc1895cf49baa2",
+      "instanceId": "i-08e0c4f1583f72e9d",
+      "s3ResultPrefix": "benchmarks/native/26f32e87b63a4dfe8a6e3c72bbb01185",
+      "ncuProfiles": {
+        "385024": {
+          "returncode": 1,
+          "error": "==ERROR== Option profile-from-start is not supported during range replay.\n"
+        },
+        "96256": {
+          "returncode": 1,
+          "error": "==ERROR== Option profile-from-start is not supported during range replay.\n"
+        }
+      },
+      "commands": {
+        "gpu": {
+          "command": [
+            "nvidia-smi",
+            "--query-gpu=name,uuid,driver_version,compute_cap",
+            "--format=csv,noheader"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.01827448100002016
+        },
+        "gpu-before": {
+          "command": [
+            "nvidia-smi",
+            "-q"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.1357590769999888
+        },
+        "nvcc-version": {
+          "command": [
+            "/usr/local/cuda/bin/nvcc",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.002012199000006376
+        },
+        "nsys-version": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.04540935900001841
+        },
+        "ncu-version": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.015666954000010946
+        },
+        "generate": {
+          "command": [
+            "make",
+            "generate"
+          ],
+          "returncode": 0,
+          "wallSeconds": 17.094965075999994
+        },
+        "arithmetic": {
+          "command": [
+            "/results/bench/control/arithmetic"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.3880809949999957
+        },
+        "storage": {
+          "command": [
+            "/results/bench/control/storage"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.2277746089999937
+        },
+        "sigma": {
+          "command": [
+            "/results/bench/control/sigma"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.21823533600002065
+        },
+        "integration": {
+          "command": [
+            "/usr/bin/python3",
+            "codegen/testpackedclient.py",
+            "/results/bench/control/client"
+          ],
+          "returncode": 0,
+          "wallSeconds": 63.48969403000001
+        },
+        "smoke-build": {
+          "command": [
+            "/usr/local/cuda/bin/nvcc",
+            "-O3",
+            "-gencode",
+            "arch=compute_120,code=sm_120",
+            "src/testprofilersmoke.cu",
+            "-o",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.842813609000018
+        },
+        "smoke-correctness": {
+          "command": [
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.20942521000000625
+        },
+        "smoke-ncu-kernel": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--metrics",
+            "gpu__time_duration.sum",
+            "--replay-mode",
+            "kernel",
+            "--profile-from-start",
+            "off",
+            "--launch-count",
+            "1",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/smoke-kernel",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 9,
+          "wallSeconds": 3.4829799049999792
+        },
+        "smoke-ncu-app-range": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--metrics",
+            "gpu__time_duration.sum",
+            "--replay-mode",
+            "app-range",
+            "--profile-from-start",
+            "off",
+            "--launch-count",
+            "1",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/smoke-app-range",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 1,
+          "wallSeconds": 0.016134400999987975
+        },
+        "nsys-profile": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "profile",
+            "--trace=cuda,nvtx,osrt",
+            "--sample=none",
+            "--cpuctxsw=none",
+            "--force-overwrite=true",
+            "-o",
+            "/results/bench/timeline",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "385024",
+            "--steps",
+            "128",
+            "--launches",
+            "4",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 0,
+          "wallSeconds": 3.6965915970000083
+        },
+        "nsys-stats": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "stats",
+            "--report=cuda_gpu_kern_sum,cuda_api_sum,cuda_gpu_mem_time_sum",
+            "--format=csv",
+            "/results/bench/timeline.nsys-rep"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.07448633899997503
+        },
+        "ncu-385024": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--profile-from-start",
+            "off",
+            "--range-filter",
+            ":2:",
+            "--launch-count",
+            "1",
+            "--section",
+            "SpeedOfLight",
+            "--section",
+            "MemoryWorkloadAnalysis",
+            "--section",
+            "ComputeWorkloadAnalysis",
+            "--replay-mode",
+            "app-range",
+            "--cache-control",
+            "all",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/kernel-385024",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "385024",
+            "--steps",
+            "32",
+            "--launches",
+            "2",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 1,
+          "wallSeconds": 0.01673122400001148
+        },
+        "ncu-96256": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--profile-from-start",
+            "off",
+            "--range-filter",
+            ":2:",
+            "--launch-count",
+            "1",
+            "--section",
+            "SpeedOfLight",
+            "--section",
+            "MemoryWorkloadAnalysis",
+            "--section",
+            "ComputeWorkloadAnalysis",
+            "--replay-mode",
+            "app-range",
+            "--cache-control",
+            "all",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/kernel-96256",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "96256",
+            "--steps",
+            "32",
+            "--launches",
+            "2",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 1,
+          "wallSeconds": 0.015634933000001183
+        },
+        "gpu-after": {
+          "command": [
+            "nvidia-smi",
+            "-q"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.08655061199999636
+        }
+      },
+      "resultArchiveSha256": "695f60d1359aef09f3b2e87c5252b157306166b9be5b92d6b1c28811b16c845a",
+      "archivedBinaryHashVerified": true,
+      "binarySha256": "2117d263e9fa0cdd96c660e581454ce8a0322c811ba08119fe7f0e3ba6ac2c8f",
+      "numericCounters": {
+        "385024": [],
+        "96256": []
+      }
+    },
+    "goal28-g7-range-05": {
+      "valid": false,
+      "error": null,
+      "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-ac08a04d-c2a2-1c1c-84b0-e2ee3abcdd84, 595.91.07, 12.0",
+      "sourceSha256": "fb170c62ca72f53c7c51510056f7f6fb3ae83feee2df2ee800f91b48886b895f",
+      "instanceId": "i-0a9ae169f7e4dcef3",
+      "s3ResultPrefix": "benchmarks/native/c32676aca81b4c56b25d1f9985f128eb",
+      "ncuProfiles": {
+        "385024": {
+          "returncode": 0,
+          "error": "==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.\n==PROF== Connected to process 1995 (/results/bench/control/client)\npacked kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked state tile: 256\npacked profile ranges: 1\nbackend cuda-packed131: 385024 threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 32 steps per launch\n       0.1 s    5518.044 M it/s   394264576 iterations         0 dp         0 stored         0 dropped\n  finished: 5515.745 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n==PROF== Disconnected from process 1995\n==WARNING== No ranges were profiled.\n==WARNING== See https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#application-range-replay for range-based replay mode requirements and limitations.\n"
+        },
+        "96256": {
+          "returncode": 0,
+          "error": "==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.\n==PROF== Connected to process 2040 (/results/bench/control/client)\npacked kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 1024, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 1\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked state tile: 256\npacked profile ranges: 1\nbackend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 32 steps per launch\n       0.0 s    5125.125 M it/s    98566144 iterations         0 dp         0 stored         0 dropped\n  finished: 5118.389 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n==PROF== Disconnected from process 2040\n==WARNING== No ranges were profiled.\n==WARNING== See https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#application-range-replay for range-based replay mode requirements and limitations.\n"
+        }
+      },
+      "commands": {
+        "gpu": {
+          "command": [
+            "nvidia-smi",
+            "--query-gpu=name,uuid,driver_version,compute_cap",
+            "--format=csv,noheader"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.019782303999988926
+        },
+        "gpu-before": {
+          "command": [
+            "nvidia-smi",
+            "-q"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.13694564900001183
+        },
+        "nvcc-version": {
+          "command": [
+            "/usr/local/cuda/bin/nvcc",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.001902185999995254
+        },
+        "nsys-version": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.043989000999999917
+        },
+        "ncu-version": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--version"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.015012694999995801
+        },
+        "generate": {
+          "command": [
+            "make",
+            "generate"
+          ],
+          "returncode": 0,
+          "wallSeconds": 17.152954512999997
+        },
+        "arithmetic": {
+          "command": [
+            "/results/bench/control/arithmetic"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.4170389010000122
+        },
+        "storage": {
+          "command": [
+            "/results/bench/control/storage"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.22691042299999253
+        },
+        "sigma": {
+          "command": [
+            "/results/bench/control/sigma"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.21695079600004874
+        },
+        "integration": {
+          "command": [
+            "/usr/bin/python3",
+            "codegen/testpackedclient.py",
+            "/results/bench/control/client"
+          ],
+          "returncode": 0,
+          "wallSeconds": 63.52219314299998
+        },
+        "smoke-build": {
+          "command": [
+            "/usr/local/cuda/bin/nvcc",
+            "-O3",
+            "-gencode",
+            "arch=compute_120,code=sm_120",
+            "src/testprofilersmoke.cu",
+            "-o",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.8216674120000107
+        },
+        "smoke-correctness": {
+          "command": [
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.2140489999999886
+        },
+        "smoke-ncu-kernel": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--metrics",
+            "gpu__time_duration.sum",
+            "--replay-mode",
+            "kernel",
+            "--launch-count",
+            "1",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/smoke-kernel",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 9,
+          "wallSeconds": 3.4806807940000226
+        },
+        "smoke-ncu-app-range": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--metrics",
+            "gpu__time_duration.sum",
+            "--replay-mode",
+            "app-range",
+            "--launch-count",
+            "1",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/smoke-app-range",
+            "/results/bench/profiler-smoke"
+          ],
+          "returncode": 9,
+          "wallSeconds": 0.6749622549999685
+        },
+        "nsys-profile": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "profile",
+            "--trace=cuda,nvtx,osrt",
+            "--sample=none",
+            "--cpuctxsw=none",
+            "--force-overwrite=true",
+            "-o",
+            "/results/bench/timeline",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "385024",
+            "--steps",
+            "128",
+            "--launches",
+            "4",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 0,
+          "wallSeconds": 3.3518710389999455
+        },
+        "nsys-stats": {
+          "command": [
+            "/usr/local/bin/nsys",
+            "stats",
+            "--report=cuda_gpu_kern_sum,cuda_api_sum,cuda_gpu_mem_time_sum",
+            "--format=csv",
+            "/results/bench/timeline.nsys-rep"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.07436196299994435
+        },
+        "ncu-385024": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--range-filter",
+            ":2:",
+            "--launch-count",
+            "1",
+            "--section",
+            "SpeedOfLight",
+            "--section",
+            "MemoryWorkloadAnalysis",
+            "--section",
+            "ComputeWorkloadAnalysis",
+            "--replay-mode",
+            "app-range",
+            "--cache-control",
+            "all",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/kernel-385024",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "385024",
+            "--steps",
+            "32",
+            "--launches",
+            "2",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 0,
+          "wallSeconds": 1.4835778620000042
+        },
+        "ncu-96256": {
+          "command": [
+            "/usr/local/cuda/bin/ncu",
+            "--range-filter",
+            ":2:",
+            "--launch-count",
+            "1",
+            "--section",
+            "SpeedOfLight",
+            "--section",
+            "MemoryWorkloadAnalysis",
+            "--section",
+            "ComputeWorkloadAnalysis",
+            "--replay-mode",
+            "app-range",
+            "--cache-control",
+            "all",
+            "--clock-control",
+            "none",
+            "--force-overwrite",
+            "--export",
+            "/results/bench/kernel-96256",
+            "/results/bench/control/client",
+            "--packed",
+            "--curve",
+            "131",
+            "--threads",
+            "96256",
+            "--steps",
+            "32",
+            "--launches",
+            "2",
+            "--bench",
+            "--verify",
+            "0"
+          ],
+          "returncode": 0,
+          "wallSeconds": 1.090021830000012
+        },
+        "gpu-after": {
+          "command": [
+            "nvidia-smi",
+            "-q"
+          ],
+          "returncode": 0,
+          "wallSeconds": 0.08586840300000631
+        }
+      },
+      "resultArchiveSha256": "23b01f1e7d9aa21d532d1d39c1063fb9e46cd15d1d2712885dc014e014615636",
+      "archivedBinaryHashVerified": true,
+      "binarySha256": "1a47a7d77d44169d19988dcdc68a12478e407bc4f2410ee39f62273ce6404512",
+      "numericCounters": {
+        "385024": [],
+        "96256": []
+      }
+    }
+  },
+  "evidenceArchiveSha256": "b383421a217b050f70bef09408bfe18ad12028797270d7f6fa934a3331f17c59"
+}

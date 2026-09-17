@@ -1,10 +1,12 @@
 # A different decomposition solver, run on the real curve
 
 **Experiments:** `research/nagao_relations/solver_10` (matched panel), `solver_11`
-(batch amortisation), `solver_12` (null-object control), `solver_13` (method ceiling)
+(batch amortisation), `solver_12` (null-object control), `solver_13` (method
+ceiling), `solver_14`/`solver_15` (subspace-structure oracle)
 **Frozen contracts:** one per round, each committed before its execution
 **Evidence:** `solver_10/raw.jsonl` (128 trials), `solver_11/`, `solver_12/`
-(plus `solver_12/CORRECTION.md`), `solver_13/`
+(plus `solver_12/CORRECTION.md`), `solver_13/`, `solver_14/` (plus
+`solver_14/DEFECT.md`), `solver_15/`
 **Background:** [`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
 (existence, admissibility, and the `m·2^131` oracle bound),
 [`research/nagao_relations/README.md`](research/nagao_relations/README.md)
@@ -23,8 +25,10 @@ arity, targets, modes and budget held identical across every variant?
 object beats it.**  The advantage over Semaev is real and reproduces at full
 size (§2).  It is also worth nothing: brute-force pair enumeration is twice as
 cheap (§7), and the Riemann–Roch encoding is the same `Θ(|F|²)` order as that
-double loop (§8).  Those are separate results and conflating them is how this
-route gets over-sold:
+double loop (§8).  The one route that genuinely exploits the subspace structure
+rather than re-indexing a search does exist (§9) — and it expires at `d = 6`,
+thirty-nine dimensions before decompositions do.  These are separate results and
+conflating them is how this route gets over-sold:
 
 - **The solver comparison (§2).**  At `d = 6`, the two RR solvers resolved
   **32 of 32** matched slots; both Semaev controls resolved **0 of 32** under
@@ -48,6 +52,11 @@ route gets over-sold:
   where pair enumeration visits `|F|²/2`, measured to `d = 8`.  Same order,
   constant near two, in the wrong direction.  The falsification target needs a
   different *exponent*; nine rounds produced constants.
+- **The subspace-structure oracle (§9).**  Weil descent of `S₄` in the
+  `V`-basis gives a **linear `NO`-certificate** — poly(`d`), no search at all —
+  and it is available only for `d ≤ 6`.  The `S₄` value set saturates
+  `F_2^131` at `d = 7`; decompositions start at `d = 45`.  Measured at `d = 45`
+  itself, not extrapolated.
 - **Two structural limits (§6),** read off the construction rather than
   measured: the arity is fixed at three, and the factor base must be an
   `F_2`-subspace.  "More summands" and "a Hamming-weight base" are outside this
@@ -339,7 +348,85 @@ excluded by nothing measured here.  Exploiting that structure is what Semaev's
 polynomials were *for*.  What is now measured is that neither the summation
 polynomials under SAT nor the Riemann–Roch reformulation does it.
 
-## 9. What this does and does not license
+## 9. The subspace-structure oracle: real, and dead by `d = 7`
+
+§8 leaves exactly one opening.  Pair enumeration and the RR encoding are both
+*generic* searches over `F`; neither uses the fact that `V` is an `F_2`-subspace
+for anything but membership testing.  Exploiting that structure is what Weil
+descent is for, and it had **never been run at `n = 131`** — the repository's
+own Rust implementation caps at `n ≤ 64`, because `FieldStructure::new` reduces
+its structure constants through `F2mElement::raw_bits().first()`, a single
+`u64`, silently truncating above that.
+
+Descend `S₄(x₁, x₂, x₃, x(R))` with each `xᵢ = Σⱼ v_ij b_j` in the `V`-basis:
+**131 Boolean equations in `3d` unknowns**.  Measured ANF (`solver_14`):
+
+| `d` | vars | total degree | multidegree | monomials |
+|--:|--:|--:|---|--:|
+| 2 | 6 | 6 | (2,2,2) | 64 |
+| 3 | 9 | 6 | (2,2,2) | 466 |
+| 4 | 12 | 6 | (2,2,2) | 2,510 |
+| 5 | 15 | 6 | (2,2,2) | 9,949 |
+
+**The system refutes a non-decomposable target at degree 6 with multiplier set
+`{1}`** — the 131 equations alone, no Macaulay multipliers at any measured `d`.
+Unpacked, that says: there is an `F_2`-linear functional `λ` with
+
+```text
+    λ( S₄(x₁, x₂, x₃, x(R)) ) = 1   for every (x₁,x₂,x₃) ∈ V³
+```
+
+a **linear certificate that the target does not decompose** — no search, and
+computable in time polynomial in `d`.  That is a genuine exploitation of the
+subspace structure, and it is the only thing in this whole thread that is not a
+search.
+
+**And it dies immediately.**  Such a `λ` exists exactly when the `F_2`-affine
+span of the value set `{S₄(x₁,x₂,x₃,x(R)) : xᵢ ∈ V}` misses `0`, which requires
+that span to be a *proper* subspace of `F_2^131`.  Measured (`solver_15`, five
+uniform targets per row, 524 samples each):
+
+| `d` | 4 | 5 | 6 | **7** | 8 … 44 | **45** | 48 … 80 |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| span dimension | 71 | 97 | 123 | **131** | 131 | **131** | 131 |
+| certificate | ✓ | ✓ | ✓ | **✗** | ✗ | **✗** | ✗ |
+
+The span grows by 26 per dimension and **saturates `F_2^131` at `d = 7`**.
+Decompositions begin to exist at `d = 45`.
+
+> **The cheap regime ends at `d = 6`.  The useful regime begins at `d = 45`.
+> They do not overlap, and the gap is a factor of `2^38` in factor-base size.**
+
+Measured at `d = 45` itself, not extrapolated to it: the contract's falsifier
+asked whether the span stays proper at the existence threshold, and it does not.
+
+Two further honesties.  **The certificate is one-sided**: it proves *absence*
+and never produces a witness, so §3.2 of the background note — which converts a
+yes/no detector into a witness finder for `k|F|` further queries — does not
+apply, because that conversion needs a detector correct in both directions.
+And the **soundness gate passed**: no decomposable target admitted a
+certificate at any `d`, as required, since `0` is then in the value set by
+construction.
+
+This is the Kosters–Yeo failure mode in its natural habitat, and
+`RESEARCH_DREG_MEASUREMENT.md` names it in advance: the Weil descent of these
+systems is *massively overdetermined* — 131 equations in `3d ≤ 18` unknowns at
+the dimensions where the certificate lives — so it collapses at a degree far
+below any real solving degree, for reasons that have nothing to do with the
+ECDLP.  The collapse is an artefact of `3d ≪ 131`, and it necessarily
+disappears exactly when `d` grows enough for the problem to become interesting.
+
+**One round of this was killed by its own author.**  `solver_14` minted planted
+targets by enumerating all `2^d − 1` abscissas, which is instant at `d ≤ 12` and
+does not terminate at the `d = 32…64` its own contract demanded; it was stopped
+at `d = 12` rather than left to burn hours.  Its 14 records stand and are not
+re-run.  See
+[`solver_14/DEFECT.md`](research/nagao_relations/solver_14/DEFECT.md); the
+contract named the `d` values and the soundness gate but never the cost of
+building an instance at the largest of them, which is the gap that let it
+through.
+
+## 10. What this does and does not license
 
 Established:
 

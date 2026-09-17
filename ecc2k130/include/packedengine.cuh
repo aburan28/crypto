@@ -2,6 +2,15 @@
 #pragma once
 #include "packedkernels.cuh"
 
+// Diagnostic builds only: mark a completed walk launch for Nsight range replay.
+// Timed benchmark builds leave this undefined (zero).
+#ifndef ECC_PROFILE_RANGE
+#define ECC_PROFILE_RANGE 0
+#endif
+#if ECC_PROFILE_RANGE
+#include <cuda_profiler_api.h>
+#endif
+
 struct PackedCudaEngine : CudaEngine<CfgF131> {
     static const int LANES = 1;
     bool restartPending = false;
@@ -218,11 +227,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
+        printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
+        printf("packed three-limb Karatsuba: %d\n", ECC_PACKED_KARAT3);
         printf("packed weighted prefix: %d\n", ECC_PACKED_WEIGHTED_PREFIX);
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
+        printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
+        printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
 #endif
@@ -235,9 +248,16 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 
     void launch(u64 iterBase) {
         P.iterBase = iterBase;
+#if ECC_PROFILE_RANGE
+        CUDA_CHECK(cudaProfilerStart());
+#endif
         eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS,
                              dynamicSharedBytes()>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
+#if ECC_PROFILE_RANGE
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaProfilerStop());
+#endif
     }
     void reseed(u64 iterBase) {
         P.iterBase = iterBase;

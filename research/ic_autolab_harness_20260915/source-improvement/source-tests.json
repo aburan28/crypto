@@ -1,0 +1,44 @@
+{
+  "binary_sha256": "b2a256c89bd4cec3abbb931e70c2743d535fcde212f951caa381f22385126289",
+  "source_sha256": "1b109787b47868771489f8cbf6a5a3aa6302b76955270210b1ed31cf35a11e45",
+  "tests": [
+    {
+      "test": "fast_base_lifts_preserve_roots_and_order",
+      "returncode": 0,
+      "seconds": 0.36419224739074707,
+      "one_test_ran": true
+    },
+    {
+      "test": "factor_base_is_frobenius_invariant",
+      "returncode": 0,
+      "seconds": 0.0035643577575683594,
+      "one_test_ran": true
+    },
+    {
+      "test": "pair_table_agrees_with_enumeration_for_two_three_and_four_summands",
+      "returncode": 0,
+      "seconds": 0.031641483306884766,
+      "one_test_ran": true
+    },
+    {
+      "test": "factor_base_logs_precompute_and_descend_every_target",
+      "returncode": 0,
+      "seconds": 0.2653803825378418,
+      "one_test_ran": true
+    },
+    {
+      "test": "subfield_factor_bases_are_invariant_and_solve_the_dlp",
+      "returncode": 0,
+      "seconds": 0.0035753250122070312,
+      "one_test_ran": false
+    },
+    {
+      "test": "subfield_factor_bases_are_invariant_and_solve_the_dlp",
+      "module": "subfield_tests",
+      "returncode": 0,
+      "one_test_ran": true,
+      "seconds": 0.03719639778137207
+    }
+  ],
+  "verified_test_count": 5
+}

@@ -420,3 +420,7 @@ footer h2 { color: var(--ink); font-size: 14px; margin: 0 0 8px; }
 .s-warn { color: var(--warn); }
 .s-bad { color: var(--bad); }
 #rho-note:empty { display: none; }
+
+/* Frozen performance overview */
+.performance-summary{margin:28px 0;padding:clamp(20px,4vw,34px);border:1px solid var(--line);border-top:3px solid var(--good);border-radius:14px;background:rgba(79,232,174,.035)}
+.performance-summary h2{font-size:clamp(23px,3vw,32px);margin:8px 0 22px}.performance-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.performance-stats strong{display:block;font-size:clamp(32px,4vw,46px);color:var(--good);line-height:1.2}.performance-stats span{display:block;font-weight:600;margin:8px 0}.performance-stats small{color:var(--muted);line-height:1.6}.performance-summary>p:not(.kicker){color:var(--muted);max-width:85ch}.performance-link{display:inline-flex;align-items:center;min-height:44px;font-weight:600}a:focus-visible{outline:2px solid var(--good);outline-offset:4px}@media(max-width:580px){.performance-stats{grid-template-columns:1fr;gap:18px}.performance-stats>div{padding-bottom:16px;border-bottom:1px solid var(--line)}}

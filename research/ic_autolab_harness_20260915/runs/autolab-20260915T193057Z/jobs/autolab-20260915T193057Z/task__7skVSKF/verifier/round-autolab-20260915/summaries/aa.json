@@ -1,0 +1,31 @@
+{
+  "comparisons": [
+    {
+      "candidate": "aa_control",
+      "candidate_over_baseline": 0.9999928752879272,
+      "ci95": [
+        0.9999897558651921,
+        0.999996266797506
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.9988800446852648,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.9999883945683813,
+        "n17a1": 0.9999979001825906,
+        "n19a0": 0.9999913666582598,
+        "n23a0": 0.9999938397667436
+      },
+      "speedup": 1.0000071247628346
+    }
+  ],
+  "failures": [],
+  "passed": true,
+  "process_wall_seconds_including_profiling": 26.802275035937782,
+  "rho_over_incumbent": null,
+  "runs": 24,
+  "stage": "aa",
+  "verified_runs": 24
+}

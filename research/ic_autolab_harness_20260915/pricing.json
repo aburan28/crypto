@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-09-15T19:00:01.847609+00:00",
+  "allowed": [
+    "mimo-v2.5-free",
+    "big-pickle",
+    "nemotron-3.5-lightning-free"
+  ],
+  "selected": "mimo-v2.5-free",
+  "cost": {
+    "mimo-v2.5-free": {
+      "input": 0,
+      "output": 0,
+      "cache_read": 0
+    },
+    "big-pickle": {
+      "input": 0,
+      "output": 0,
+      "cache_read": 0,
+      "cache_write": 0
+    },
+    "nemotron-3.5-lightning-free": {
+      "input": 0,
+      "output": 0,
+      "cache_read": 0
+    }
+  },
+  "sources": [
+    "https://models.dev/api.json",
+    "https://opencode.ai/zen/v1/models"
+  ]
+}

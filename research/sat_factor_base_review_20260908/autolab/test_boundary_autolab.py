@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 
@@ -125,6 +128,103 @@ class HelperTests(unittest.TestCase):
             result = lab.claim_check(args)
             self.assertEqual(result["status"], "PASS")
             self.assertEqual(json.loads(out.read_text())["status"], "PASS")
+
+
+class TimingTests(unittest.TestCase):
+    """The wall metric must not charge a producer for its first execution.
+
+    A single cold run adds a roughly constant per-process term to both arms,
+    which pulls ratios toward parity and so flatters the slower arm.
+    """
+
+    def make_producer(self, directory: str, body: str) -> Path:
+        path = Path(directory) / "fake_producer"
+        path.write_text("#!/usr/bin/env python3\n" + textwrap.dedent(body))
+        path.chmod(path.stat().st_mode | stat.S_IXUSR)
+        return path
+
+    def test_timing_free_ignores_durations(self) -> None:
+        first = json.dumps({"base_hash": "abc", "rank": 3, "setup_ms": 1.5})
+        second = json.dumps({"base_hash": "abc", "rank": 3, "setup_ms": 9.9})
+        differing = json.dumps({"base_hash": "zzz", "rank": 3, "setup_ms": 1.5})
+        self.assertEqual(lab._timing_free(first), lab._timing_free(second))
+        self.assertNotEqual(lab._timing_free(first), lab._timing_free(differing))
+
+    def test_warmup_runs_and_is_not_timed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            counter = Path(tmp) / "calls"
+            producer = self.make_producer(
+                tmp,
+                f"""
+                import json, sys
+                with open({str(counter)!r}, 'a') as handle:
+                    handle.write(' '.join(sys.argv[1:]) + '\\n')
+                if len(sys.argv) < 2:
+                    sys.exit(2)
+                print(json.dumps({{'base_hash': 'abc', 'setup_ms': 1.0}}))
+                """,
+            )
+            observed = lab.run_timed(
+                [str(producer), "real-arg"],
+                env=dict(os.environ),
+                cwd=Path(tmp),
+                repeats=3,
+            )
+            calls = counter.read_text().splitlines()
+        # One warmup with no arguments, then exactly the timed repeats.
+        self.assertEqual(calls[0], "")
+        self.assertEqual(calls[1:], ["real-arg"] * 3)
+        self.assertEqual(observed["timed_repeats"], 3)
+        self.assertEqual(len(observed["whole_process_wall_samples_ms"]), 3)
+        self.assertEqual(observed["exit_code"], 0)
+        self.assertTrue(observed["stdout_stable"])
+        self.assertEqual(
+            observed["whole_process_wall_ms"],
+            sorted(observed["whole_process_wall_samples_ms"])[1],
+        )
+        # The warmup's cost is reported, not folded into the result.
+        self.assertNotIn(
+            observed["cold_start_wall_ms"], observed["whole_process_wall_samples_ms"]
+        )
+
+    def test_repeats_stop_once_a_run_exceeds_the_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            producer = self.make_producer(
+                tmp,
+                """
+                import json, sys, time
+                if len(sys.argv) < 2:
+                    sys.exit(2)
+                time.sleep(0.05)
+                print(json.dumps({'base_hash': 'abc'}))
+                """,
+            )
+            original = lab.REPEAT_BUDGET_MS
+            lab.REPEAT_BUDGET_MS = 1.0
+            try:
+                observed = lab.run_timed(
+                    [str(producer), "real-arg"],
+                    env=dict(os.environ),
+                    cwd=Path(tmp),
+                    repeats=5,
+                )
+            finally:
+                lab.REPEAT_BUDGET_MS = original
+
+        self.assertEqual(observed["timed_repeats"], 1)
+
+    def test_failing_producer_reports_its_exit_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            producer = self.make_producer(tmp, "import sys\nsys.exit(3)\n")
+            observed = lab.run_timed(
+                [str(producer), "real-arg"],
+                env=dict(os.environ),
+                cwd=Path(tmp),
+                repeats=3,
+            )
+
+        self.assertEqual(observed["exit_code"], 3)
+        self.assertEqual(observed["timed_repeats"], 1)
 
 
 if __name__ == "__main__":

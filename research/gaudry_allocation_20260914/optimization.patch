@@ -1,0 +1,176 @@
+--- a/src/cryptanalysis/gaudry_cubic.rs
++++ b/src/cryptanalysis/gaudry_cubic.rs
+@@ -1794,12 +1794,15 @@
+             }
+         }
+         *muls += nz.len() as u64;
+-        let pivot_row = m[r].clone();
+-        for i in (r + 1)..rows {
+-            if m[i][c] != 0 {
+-                let fct = m[i][c];
++        // Borrow the normalized pivot separately from the rows below it.
++        // The pivot stays immutable throughout elimination; no row copy is needed.
++        let (head, tail) = m.split_at_mut(r + 1);
++        let pivot_row = &head[r];
++        for row in tail {
++            if row[c] != 0 {
++                let fct = row[c];
+                 for &j in &nz {
+-                    m[i][j] = sm(m[i][j], mm(fct, pivot_row[j], p), p);
++                    row[j] = sm(row[j], mm(fct, pivot_row[j], p), p);
+                 }
+                 *muls += nz.len() as u64;
+             }
+@@ -1815,8 +1818,10 @@
+ /// never built, only the normal forms actually asked for.
+ struct NormalForms<'a> {
+     m: &'a [Vec<u64>],
+-    pivot_row: HashMap<usize, usize>,
+-    std_index: &'a HashMap<usize, usize>,
++    // Column IDs are dense in [0, cols), so direct indexing avoids hashing
++    // on every dependency edge of the memoized back-substitution.
++    pivot_row: Vec<Option<usize>>,
++    std_index: Vec<Option<usize>>,
+     dim: usize,
+     p: u64,
+     memo: Vec<Option<Vec<u64>>>,
+@@ -1826,45 +1831,60 @@
+     fn new(
+         m: &'a [Vec<u64>],
+         pivots: &[usize],
+-        std_index: &'a HashMap<usize, usize>,
++        std_index: &HashMap<usize, usize>,
+         dim: usize,
+         p: u64,
+     ) -> Self {
+         let cols = if m.is_empty() { 0 } else { m[0].len() };
++        let mut pivot_row = vec![None; cols];
++        for (r, &c) in pivots.iter().enumerate() {
++            pivot_row[c] = Some(r);
++        }
++        let mut standard = vec![None; cols];
++        for (&c, &i) in std_index {
++            standard[c] = Some(i);
++        }
+         NormalForms {
+             m,
+-            pivot_row: pivots.iter().enumerate().map(|(r, &c)| (c, r)).collect(),
+-            std_index,
++            pivot_row,
++            std_index: standard,
+             dim,
+             p,
+             memo: vec![None; cols],
+         }
+     }
+ 
+-    /// `None` when column `c` is neither standard nor a pivot (a
+-    /// monomial the matrix does not reduce at this degree).
+-    fn nf(&mut self, c: usize, muls: &mut u64) -> Option<Vec<u64>> {
+-        if let Some(v) = &self.memo[c] {
+-            return Some(v.clone());
++    /// Fill the cache first, then lend the completed result. Recursive calls
++    /// finish before borrowing a dependency, so cache hits never clone vectors.
++    /// Unavailable columns remain uncached, preserving failure/retry accounting.
++    fn nf(&mut self, c: usize, muls: &mut u64) -> Option<&[u64]> {
++        self.compute(c, muls)?;
++        self.memo[c].as_deref()
++    }
++
++    fn compute(&mut self, c: usize, muls: &mut u64) -> Option<()> {
++        if self.memo[c].is_some() {
++            return Some(());
+         }
+         let p = self.p;
+         let mut v = vec![0u64; self.dim];
+-        if let Some(&i) = self.std_index.get(&c) {
++        if let Some(i) = self.std_index[c] {
+             v[i] = 1;
+-            self.memo[c] = Some(v.clone());
+-            return Some(v);
+-        }
+-        let &r = self.pivot_row.get(&c)?;
++            self.memo[c] = Some(v);
++            return Some(());
++        }
++        let r = self.pivot_row[c]?;
+         let cols = self.m[r].len();
+         for j in (c + 1)..cols {
+             let a = self.m[r][j];
+             if a == 0 {
+                 continue;
+             }
+-            if let Some(&i) = self.std_index.get(&j) {
++            if let Some(i) = self.std_index[j] {
+                 v[i] = sm(v[i], a, p);
+             } else {
+-                let w = self.nf(j, muls)?;
++                self.compute(j, muls)?;
++                let w = self.memo[j].as_deref().expect("computed dependency");
+                 for (k, &wk) in w.iter().enumerate() {
+                     if wk != 0 {
+                         v[k] = sm(v[k], mm(a, wk, p), p);
+@@ -1873,8 +1893,8 @@
+                 }
+             }
+         }
+-        self.memo[c] = Some(v.clone());
+-        Some(v)
++        self.memo[c] = Some(v);
++        Some(())
+     }
+ }
+ 
+@@ -3421,6 +3441,52 @@
+     }
+ 
+     #[test]
++    fn normal_forms_preserve_relations_and_reuse_completed_dependencies() {
++        let p = 67;
++        let mut rng = StdRng::seed_from_u64(20260914);
++        for (rows, cols) in [(1, 4), (6, 9), (9, 6)] {
++            for _ in 0..12 {
++                let mut input: Vec<Vec<u64>> = (0..rows)
++                    .map(|_| (0..cols).map(|_| rng.gen_range(0..p)).collect())
++                    .collect();
++                // Include dependent rows and a free leading column.
++                if rows > 1 { input[rows - 1] = input[0].clone(); }
++                for row in &mut input { row[0] = 0; }
++                let mut echelon = input.clone();
++                let mut muls = 0;
++                let pivots = echelon_mod_p(&mut echelon, p, &mut muls);
++                let standard: HashMap<usize, usize> = (0..cols)
++                    .filter(|c| !pivots.contains(c)).enumerate()
++                    .map(|(i, c)| (c, i)).collect();
++                let dim = standard.len();
++                let mut nfs = NormalForms::new(&echelon, &pivots, &standard, dim, p);
++                let forms: Vec<Vec<u64>> = (0..cols)
++                    .map(|c| nfs.nf(c, &mut muls).unwrap().to_vec()).collect();
++                // Every original linear relation must vanish in the quotient.
++                for row in &input {
++                    for k in 0..dim {
++                        assert_eq!(row.iter().enumerate().fold(0, |acc, (c, &a)|
++                            am(acc, mm(a, forms[c][k], p), p)), 0);
++                    }
++                }
++                let before = muls;
++                for c in (0..cols).rev() {
++                    assert_eq!(nfs.nf(c, &mut muls).unwrap(), forms[c]);
++                }
++                assert_eq!(muls, before, "cache hits must perform no field products");
++            }
++        }
++        // An unavailable border column must remain a failed lookup, even if
++        // a previous call populated other dependencies.
++        let matrix = vec![vec![1, 1, 1], vec![0, 1, 0]];
++        let mut nfs = NormalForms::new(&matrix, &[0, 1], &HashMap::new(), 0, p);
++        let mut muls = 0;
++        assert!(nfs.nf(1, &mut muls).is_some());
++        assert!(nfs.nf(0, &mut muls).is_none());
++        assert!(nfs.nf(0, &mut muls).is_none());
++    }
++
++    #[test]
+     fn gaudry_and_rho_recover_the_planted_logarithm() {
+         let inst = generate_instance3(67, 11);
+         let mut rng = StdRng::seed_from_u64(2);

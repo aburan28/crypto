@@ -48,9 +48,23 @@ class BuildTests(unittest.TestCase):
             "assets/rho-gpu-host.js",
             "assets/rho-gpu.wgsl",
             "scoreboard/index.html",
+            "scoreboard/algorithm-lab.html",
+            "scoreboard/algorithm-lab/core.js",
+            "scoreboard/algorithm-lab/ui.js",
+            "scoreboard/algorithm-lab/style.css",
+            "scoreboard/algorithm-lab/README.md",
+            "scoreboard/performance-gains.html",
+            "scoreboard/performance-gains/summary.png",
+            "scoreboard/performance-gains/summary.pdf",
+            "scoreboard/performance-gains/summary.svg",
+            "scoreboard/performance-gains/data.json",
+            "scoreboard/performance-gains/comparisons.csv",
             "status/index.html",
             "status/style.css",
             "status/walk-forest.svg",
+            "status/walk-forest.json",
+            "status/walk-forest-gf2-23.json",
+            "status/walk-forest.js",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -441,6 +455,53 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(int(match.group(1).replace(",", "")), value, ident)
         self.assertIn('src="./walk-forest.svg"', page)
 
+    def test_walk_forest_graphs_are_what_the_trails_export_to(self):
+        # The explorer draws walk-forest.json (the real curve) and
+        # walk-forest-gf2-23.json (the test curve) with the static figure's
+        # own layout, so each must be byte-identical to what its trails
+        # export to, carry every node, edge and walk, and name nodes the way
+        # the trails do: hash prefixes on the challenge curve.
+        import json
+        import walk_forest
+        sets = (
+            ("walk-forest.json", "trails.txt", "forest.hashes", True),
+            ("walk-forest-gf2-23.json", os.path.join("gf2-23", "trails.txt"), os.path.join("gf2-23", "forest.bin"), False),
+        )
+        for published, trails, corpus, hashed in sets:
+            text, forest = walk_forest.build_graph(
+                os.path.join(FOREST_DIR, trails), os.path.join(FOREST_DIR, corpus),
+                title=json.loads(read(os.path.join(self.out, "status", published)))["title"])
+            self.assertEqual(read(os.path.join(self.out, "status", published)), text,
+                             "%s is stale: regenerate it (see walk-forest/README.md)" % published)
+            graph = json.loads(text)
+            self.assertEqual(len(graph["nodes"]), len(forest.order), published)
+            self.assertEqual(len(graph["edges"]), len(forest.succ), published)
+            self.assertEqual(len(graph["walks"]), len(forest.walks), published)
+            self.assertEqual(sum(1 for n in graph["nodes"] if n[3]), len(forest.roots), published)
+            self.assertEqual(graph["counts"]["meetings"], sum(1 for p in forest.pred.values() if len(p) > 1), published)
+            if hashed:
+                for node in graph["nodes"]:
+                    self.assertRegex(node[0], r"^[0-9a-f]{16}$")
+            for walk in graph["walks"]:
+                for a, b in zip(walk["nodes"], walk["nodes"][1:]):
+                    self.assertEqual(forest.succ[forest.order[a]], forest.order[b], published)
+
+    def test_walk_forest_explorer_is_wired_and_degrades_to_the_figure(self):
+        # The script fetches the two graphs by relative URL beside the page,
+        # replaces the image only once a graph has drawn, and never renders
+        # fetched data through innerHTML (node names are data, hashed or not).
+        page = read(os.path.join(self.out, "status", "index.html"))
+        script = read(os.path.join(self.out, "status", "walk-forest.js"))
+        self.assertIn('<script src="./walk-forest.js" defer></script>', page)
+        for ident in ("forest", "forest-dataset", "forest-play", "forest-reset", "forest-readout"):
+            self.assertIn('id="%s"' % ident, page, ident)
+        self.assertIn('<img src="./walk-forest.svg"', page)
+        for target in re.findall(r'file: "\./([^"]+)"', script):
+            self.assertTrue(os.path.exists(os.path.join(self.out, "status", target)), target)
+        self.assertIn("host.removeChild(image)", script)
+        self.assertLess(script.index("index(g);"), script.index("host.removeChild(image)"))
+        self.assertNotIn("innerHTML", script)
+
     # ---- the tool itself, on a curve small enough to check in the clear ---
     # walk-forest/gf2-23/ is the GF(2^23) set: the client's own records for a
     # run, the reference walk of that run's seed schedule, and its endpoints.
@@ -475,7 +536,7 @@ class BuildTests(unittest.TestCase):
 
     def test_internal_links_resolve(self):
         missing = []
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             base = os.path.dirname(rel)
             for href in re.findall(r'(?:href|src)="([^"]+)"', page):
@@ -518,7 +579,7 @@ class BuildTests(unittest.TestCase):
         )
 
     def test_every_page_declares_title_viewport_and_description(self):
-        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html"):
+        for rel in ("index.html", "404.html", "status/index.html", "scoreboard/index.html", "scoreboard/performance-gains.html", "scoreboard/algorithm-lab.html"):
             page = read(os.path.join(self.out, rel))
             self.assertRegex(page, r"<title>[^<]+</title>", rel)
             self.assertIn('name="viewport"', page, rel)

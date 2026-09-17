@@ -23,6 +23,8 @@
   <nav aria-label="Site">
     <a href="./" aria-current="page">Overview</a>
     <a href="./scoreboard/">Scoreboard</a>
+    <a href="./scoreboard/performance-gains.html">Performance</a>
+    <a href="./scoreboard/algorithm-lab.html">Algorithm lab</a>
     <a href="./status/">Campaign status</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
@@ -42,6 +44,19 @@
     </p>
   </section>
 
+
+  <section class="performance-summary" aria-labelledby="performance-title">
+    <p class="kicker">Measured engineering improvements · 14 September 2026</p>
+    <h2 id="performance-title">Summation polynomials take less work.</h2>
+    <div class="performance-stats">
+      <div><strong>10.7%</strong><span>fewer field products</span><small>1,342 → 1,199 per specialization<br>p = 67, seed = 11</small></div>
+      <div><strong>55.4%</strong><span>less specialization time</span><small>Combined vs corrected reference<br>Paired 95% interval excludes no change</small></div>
+      <div><strong>1.2%</strong><span>less symbolic setup time</span><small>Once per curve<br>Paired 95% interval excludes no change</small></div>
+    </div>
+    <p>These are local improvements. Summation-polynomial full-DLP confirmation remains inconclusive; the asymptotic and Pollard rho verdicts are unchanged.</p>
+    <a class="performance-link" href="./scoreboard/performance-gains.html">Explore before/after charts and evidence →</a>
+  </section>
+
   <aside class="warn" role="note">
     <h2>Not for production use</h2>
     <p>
@@ -59,6 +74,8 @@
 
   <h2 class="section-head">What is published here</h2>
   <div class="cards">
+    <a class="card" href="./scoreboard/algorithm-lab.html"><p class="card-kicker">Interactive demonstrations</p><h3>Inside index calculus</h3><p>Choose a factor base, step through modular linear algebra, and follow SAT decisions and propagation. Small examples compute and verify their answers in your browser.</p><p class="card-more">Open the algorithm lab</p></a>
+
 
     <a class="card" href="./scoreboard/">
       <p class="card-kicker">Cost ledger</p>

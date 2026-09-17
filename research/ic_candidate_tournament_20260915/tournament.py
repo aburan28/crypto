@@ -379,6 +379,9 @@ def prepare(args):
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
         'objective':args.objective,'no_regression_ratio':0.98,
+        'comparison_kind':args.comparison_kind,
+        'support_contract':('Stable support within each arm/case; base policy varies across arms; same public ECDLPs and per-arm floors.'
+                            if args.comparison_kind=='factor-base-policy' else 'Identical factor-base support across implementation arms.'),
         'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall; '+SPAWN,
         'ci_level':0.95,'bootstrap_draws':2000,'host':platform.uname()._asdict(),
         'profiler_version':version,'compiler':subprocess.check_output(['rustc','--version'],text=True).strip(),
@@ -488,7 +491,7 @@ def load_stage(root, stage, fixtures, arms, repetitions):
     return rows
 
 
-def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000):
+def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_support=True):
     selected=[r for r in rows if r['arm'] in (candidate_id,baseline)]
     cases={r['case'] for r in rows}
     grouped={}
@@ -504,7 +507,11 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000):
             return {'candidate':candidate_id,'eligible':False,'reason':'unverified or unpriced workload'}
         require(len({x['case_sha256'] for x in a+b})==1,'changed paired fixtures')
         if candidate_id!='rho' and baseline!='rho':
-            require(len({x['certificate']['factor_base_sha256'] for x in a+b})==1,'changed paired factor-base support')
+            if match_support:
+                require(len({x['certificate']['factor_base_sha256'] for x in a+b})==1,'changed paired factor-base support')
+            else:
+                require(all(len({x['certificate']['factor_base_sha256'] for x in arm})==1 for arm in (a,b)),
+                        'changed factor-base support within a policy arm')
         cell=a[0]['cell']
         ratio=statistics.median(x['total_operations'] for x in b)/statistics.median(x['total_operations'] for x in a)
         logs.setdefault(cell,[]).append(math.log(ratio))
@@ -597,7 +604,8 @@ def stage_arms(root, stage, arms):
 
 def summarize(root,c,stage,fixtures,arms,*,save=True):
     rows=load_stage(root,stage,fixtures,arms,c['repetitions'])
-    comps=[comparison(rows,a['id'],draws=c['bootstrap_draws']) for a in arms if a['id'] not in ('incumbent','rho')]
+    comps=[comparison(rows,a['id'],draws=c['bootstrap_draws'],
+                      match_support=c.get('comparison_kind','fixed-support')!='factor-base-policy') for a in arms if a['id'] not in ('incumbent','rho')]
     rho = comparison(rows,'rho',draws=c['bootstrap_draws']) if any(a['id']=='rho' for a in arms) else None
     result={'stage':stage,'runs':len(rows),'verified_runs':sum(r['status']=='VERIFIED' for r in rows),
             'comparisons':comps,'rho_over_incumbent':rho,
@@ -751,6 +759,7 @@ def main():
     p=commands.add_parser('prepare')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--source-root',type=Path,default=ROOT)
+    p.add_argument('--comparison-kind',choices=['fixed-support','factor-base-policy'],default='fixed-support')
     p.add_argument('--candidates',type=Path)
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
     p.add_argument('--seed',type=int,default=20260915)
@@ -780,8 +789,9 @@ def main():
                 parent_contract=read(args.from_round.resolve()/'contract.json')
                 print(json.dumps({'candidates':str(args.out),'baseline_source_root':str(source),
                       'target_count':parent_contract.get('target_count',1),
+                      'comparison_kind':parent_contract.get('comparison_kind','fixed-support'),
                       'require_native_progress':parent_contract.get('require_native_progress',False),
-                      'next_step':'Use this source, preserve target count and metric gates, and choose a new campaign seed. A different target count is a separate workload panel.'}))
+                      'next_step':'Use this source, preserve target count, comparison kind and metric gates, and choose a new campaign seed. A different target count is a separate workload panel.'}))
             else:
                 write(args.out,candidates(),exclusive=True)
                 print(args.out)

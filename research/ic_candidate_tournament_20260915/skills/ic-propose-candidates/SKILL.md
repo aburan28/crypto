@@ -75,3 +75,15 @@ those final cases must not be reused as fresh confirmation in later rounds.
 Deliver concrete runnable candidates or explicitly identified implementation work,
 their falsification targets, and the next bounded complete-DLP experiment. Never
 describe a proposed change as a measured gain.
+
+For factor-base policy research, predeclare a separate panel and use
+`--comparison-kind factor-base-policy`. Keep the public ECDLP targets and matched
+rho workload identical; report each arm's actual signed-base size B and rank
+floor. A changed floor cannot establish an algorithmic advance. The worker's
+`factor_base_orbits` and `factor_base_cube_root` controls request point counts;
+the source sampler may overshoot, so inspect the actual certificate.
+
+The current independent checker admits only logarithm matrices with at least two
+columns. One-orbit policies may be unsupported even if their final scalar is
+correct. Preserve these rejections; a broader checker needs its own validated
+protocol before a new round, never a change to a sealed campaign.
