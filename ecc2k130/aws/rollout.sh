@@ -6,12 +6,16 @@
 # rollout.py). Workers poll binaryKey on the heartbeat and SIGTERM /
 # checkpoint / reload themselves. No SSM, no TerminateInstances.
 #
-#   ./rollout.sh stage <prefix>     mark an already-published prefix staged
+#   ./rollout.sh stage <prefix>              mark an already-published prefix staged
 #   ./rollout.sh status
-#   ./rollout.sh activate <prefix>  geometry gate, then point campaign.json
-#   ./rollout.sh wait [prefix]      until walking slots heartbeat the new key
+#   ./rollout.sh versions                    list immutable kernels/<n>.json
+#   ./rollout.sh activate <prefix>           next kernelVersion, then point
+#   ./rollout.sh activate --from-version N   re-activate that record as a new version
+#   ./rollout.sh wait [prefix]               until walking slots heartbeat the new key
 #
 # Prefix is bin/<16-hex> (no trailing /ecc2k130).
+# kernelProtocol ecc2k-kernel-v1 is the client pointer. It does not
+# migrate the DP corpus and is not storageProtocol.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -82,8 +86,14 @@ cmd_status() {
     local work live live_key staged
     work=$(mktemp -d)
     s3get campaign.json "$work/campaign.json"
+    python3 - "$work/campaign.json" <<'EOF'
+import json, sys
+c = json.load(open(sys.argv[1]))
+print("live  %s  %s kernelVersion=%s" % (
+    c.get("binaryKey", ""), c.get("kernelProtocol") or "(unversioned)",
+    c.get("kernelVersion") if c.get("kernelVersion") not in (None, "") else 0))
+EOF
     live_key=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("binaryKey",""))' "$work/campaign.json")
-    echo "live  $live_key"
     if aws s3api head-object --bucket "$BUCKET" --key rollouts/current.json >/dev/null 2>&1; then
         s3get rollouts/current.json "$work/current.json"
         python3 - "$work/current.json" <<'EOF'
@@ -127,37 +137,82 @@ EOF
     rm -rf "$work"
 }
 
+cmd_versions() {
+    local work key name
+    work=$(mktemp -d)
+    aws s3api list-objects-v2 --bucket "$BUCKET" --prefix kernels/ \
+        --query 'Contents[].Key' --output json > "$work/keys.json" || echo '[]' > "$work/keys.json"
+    python3 - "$work/keys.json" "$BUCKET" <<'EOF'
+import json, os, subprocess, sys
+names = json.load(open(sys.argv[1])) or []
+bucket = sys.argv[2]
+rows = []
+for key in names:
+    name = os.path.basename(key)
+    if not name.endswith(".json") or name == "current.json":
+        continue
+    dest = os.path.join("/tmp", "ecc-k-" + name)
+    r = subprocess.run(["aws", "s3", "cp", "s3://%s/%s" % (bucket, key), dest, "--only-show-errors"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        continue
+    rec = json.load(open(dest))
+    rows.append(rec)
+    os.remove(dest)
+rows.sort(key=lambda r: int(r.get("kernelVersion") or 0))
+if not rows:
+    print("kernels (none)")
+for rec in rows:
+    print("v%-4s %s  %s  %s" % (
+        rec.get("kernelVersion"), rec.get("status", ""), rec.get("prefix", ""),
+        rec.get("binarySha256", "")[:16]))
+EOF
+    rm -rf "$work"
+}
+
 cmd_activate() {
-    local prefix work live_key live_prefix
-    prefix=$(need_prefix "${1:-}")
+    local prefix work live_key live_prefix from_ver extra allow
+    from_ver=""
+    if [ "${1:-}" = "--from-version" ]; then
+        from_ver=${2:?usage: $0 activate --from-version N}
+        shift 2 || true
+        work=$(mktemp -d)
+        s3get "kernels/$from_ver.json" "$work/from.json"
+        prefix=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["prefix"])' "$work/from.json")
+        rm -rf "$work"
+        echo "re-activating kernelVersion $from_ver prefix $prefix as a new version"
+    fi
+    prefix=$(need_prefix "${prefix:-${1:-}}")
     work=$(mktemp -d)
     prefix_complete "$prefix" "$work/staged.json" || { rm -rf "$work"; exit 1; }
     s3get campaign.json "$work/campaign.json"
     live_key=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("binaryKey",""))' "$work/campaign.json")
     live_prefix=${live_key%/ecc2k130}
     extra=()
+    if [ -n "${KERNEL_ALLOW_STRICT:-}" ]; then
+        extra+=(--allow-strict)
+    fi
     if [ -n "$live_prefix" ] && aws s3api head-object --bucket "$BUCKET" --key "$live_prefix/manifest.json" >/dev/null 2>&1; then
         s3get "$live_prefix/manifest.json" "$work/live-manifest.json"
-        extra=(--live-manifest "$work/live-manifest.json")
+        extra+=(--live-manifest "$work/live-manifest.json")
     fi
     python3 "$HERE/rollout.py" check --campaign "$work/campaign.json" --staged "$work/staged.json" "${extra[@]}" \
         || { echo "activate refused; campaign.json not rewritten" >&2; rm -rf "$work"; exit 2; }
+    kver=$(python3 "$HERE/rollout.py" next-version --campaign "$work/campaign.json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["nextKernelVersion"])')
     python3 "$HERE/rollout.py" apply --campaign "$work/campaign.json" --staged "$work/staged.json" \
-        --prefix "$prefix" "${extra[@]}"
+        --prefix "$prefix" --kernel-version "$kver" --record "$work/kernel.json" "${extra[@]}"
+    if ! aws s3api put-object --bucket "$BUCKET" --key "kernels/$kver.json" \
+            --body "$work/kernel.json" --content-type application/json \
+            --if-none-match "*" >/dev/null; then
+        echo "activate refused: kernels/$kver.json already exists; campaign.json not rewritten" >&2
+        rm -rf "$work"
+        exit 1
+    fi
+    aws s3 cp "$work/kernel.json" "s3://$BUCKET/kernels/current.json" --only-show-errors
+    aws s3 cp "$work/kernel.json" "s3://$BUCKET/rollouts/$(basename "$prefix").json" --only-show-errors
+    aws s3 cp "$work/kernel.json" "s3://$BUCKET/rollouts/current.json" --only-show-errors
     aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors
-    write_record "$prefix" "$work/staged.json" active >/dev/null
-    python3 - "$work/staged.json" "$live_key" <<'EOF'
-import json, sys
-path, prev = sys.argv[1:]
-r = json.load(open(path))
-r["replaced"] = prev
-r["status"] = "active"
-r["activatedAt"] = __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime())
-json.dump(r, open(path, "w"), indent=1)
-EOF
-    aws s3 cp "$work/staged.json" "s3://$BUCKET/rollouts/$(basename "$prefix").json" --only-show-errors
-    aws s3 cp "$work/staged.json" "s3://$BUCKET/rollouts/current.json" --only-show-errors
-    echo "campaign.json now selects $prefix/ecc2k130"
+    echo "campaign.json now selects $prefix/ecc2k130 (ecc2k-kernel-v1 kernelVersion=$kver)"
     echo "workers will SIGTERM, checkpoint and reload on the next heartbeat"
     echo "watch with: $0 wait $prefix"
     rm -rf "$work"
@@ -177,6 +232,13 @@ cmd_wait() {
     fi
     [ -n "$want_key" ] || { echo "no binaryKey to wait for" >&2; exit 2; }
     want_sha=""
+    want_ver=""
+    if aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
+        work=$(mktemp)
+        s3get campaign.json "$work"
+        want_ver=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("kernelVersion") or "")' "$work")
+        rm -f "$work"
+    fi
     if aws s3api head-object --bucket "$BUCKET" --key "$prefix/manifest.json" >/dev/null 2>&1; then
         work=$(mktemp)
         s3get "$prefix/manifest.json" "$work"
@@ -189,9 +251,9 @@ cmd_wait() {
         work=$(mktemp -d)
         aws s3api list-objects-v2 --bucket "$BUCKET" --prefix slots/ \
             --query 'Contents[].Key' --output json > "$work/keys.json" || echo '[]' > "$work/keys.json"
-        python3 - "$work/keys.json" "$BUCKET" "$want_key" "$want_sha" "$HERE/rollout.py" > "$work/rep.json" <<'EOF'
+        python3 - "$work/keys.json" "$BUCKET" "$want_key" "$want_sha" "$want_ver" "$HERE/rollout.py" > "$work/rep.json" <<'EOF'
 import json, os, subprocess, sys, tempfile, importlib.util
-keys, bucket, want, sha, rollout = sys.argv[1:6]
+keys, bucket, want, sha, ver, rollout = sys.argv[1:7]
 spec = importlib.util.spec_from_file_location("rollout", rollout)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
@@ -210,7 +272,7 @@ for key in names:
     it["slot"] = int(name[5:-5])
     slots.append(it)
     os.remove(dest)
-json.dump(mod.walkingAdoption(slots, want, sha), sys.stdout)
+json.dump(mod.walkingAdoption(slots, want, sha, ver or None), sys.stdout)
 sys.stdout.write("\n")
 EOF
         python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); print("walking %(walking)s  adopted %(adopted)s  stale %(stale)s  unknown %(unknown)s"%r); sys.exit(0 if r["done"] or r["walking"]==0 else 1)' "$work/rep.json" \
@@ -225,7 +287,8 @@ EOF
 case "$cmd" in
     stage) cmd_stage "${1:-}" ;;
     status) cmd_status ;;
-    activate) cmd_activate "${1:-}" ;;
+    versions) cmd_versions ;;
+    activate) cmd_activate "$@" ;;
     wait) cmd_wait "${1:-}" ;;
-    *) echo "usage: $0 {stage|status|activate|wait} [bin/<sha>]" >&2; exit 2 ;;
+    *) echo "usage: $0 {stage|status|versions|activate|wait} [bin/<sha>|--from-version N]" >&2; exit 2 ;;
 esac

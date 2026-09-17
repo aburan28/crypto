@@ -208,16 +208,21 @@ if point == "1":
     c["sourceSha256"] = sha
     c["binarySha256"] = binSha
     c["hostBinarySha256"] = hostSha
+    c["kernelProtocol"] = "ecc2k-kernel-v1"
+    c["kernelVersion"] = int(c.get("kernelVersion") or 0) + 1
     json.dump(c, open(path, "w"), indent=1, sort_keys=True)
 EOF
 
 # Always leave a rollout record so activate / status can find this prefix.
-python3 - "$work/manifest.json" "$prefix" "$POINT_CAMPAIGN" <<'EOF' > "$work/rollout.json"
+python3 - "$work/manifest.json" "$prefix" "$POINT_CAMPAIGN" "$work/campaign.json" <<'EOF' > "$work/rollout.json"
 import json, sys, time
 man = json.load(open(sys.argv[1]))
 prefix = sys.argv[2].rstrip("/")
-status = "active" if sys.argv[3] == "1" else "staged"
-print(json.dumps({
+point = sys.argv[3] == "1"
+camp = json.load(open(sys.argv[4]))
+now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+rec = {
+    "kernelProtocol": "ecc2k-kernel-v1",
     "prefix": prefix,
     "binaryKey": prefix + "/ecc2k130",
     "hostBinaryKey": prefix + "/ecc2k130-cpu",
@@ -227,17 +232,31 @@ print(json.dumps({
     "buildSha256": man.get("buildSha256", ""),
     "arches": list(man.get("arches", [])),
     "knobs": man.get("knobs", ""),
-    "status": status,
-    "stagedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-}, indent=1))
+    "status": "active" if point else "staged",
+    "stagedAt": now,
+}
+if point:
+    rec["kernelVersion"] = int(camp.get("kernelVersion") or 0)
+    rec["previousVersion"] = rec["kernelVersion"] - 1 if rec["kernelVersion"] > 1 else None
+    rec["activatedAt"] = now
+print(json.dumps(rec, indent=1))
 EOF
 aws s3 cp "$work/rollout.json" "s3://$BUCKET/rollouts/${short}.json" --only-show-errors
 aws s3 cp "$work/rollout.json" "s3://$BUCKET/rollouts/current.json" --only-show-errors
 
 if [ "$POINT_CAMPAIGN" = 1 ]; then
+    kver=$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1])).get("kernelVersion") or 0))' "$work/campaign.json")
+    # Immutable version slot: do not overwrite a kernels/<n> that already landed.
+    if ! aws s3api put-object --bucket "$BUCKET" --key "kernels/$kver.json" \
+            --body "$work/rollout.json" --content-type application/json \
+            --if-none-match "*" >/dev/null; then
+        echo "refusing to point campaign.json: kernels/$kver.json already exists" >&2
+        exit 1
+    fi
+    aws s3 cp "$work/rollout.json" "s3://$BUCKET/kernels/current.json" --only-show-errors
     aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors
     echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
-    echo "campaign.json now selects $prefix/ecc2k130"
+    echo "campaign.json now selects $prefix/ecc2k130 (ecc2k-kernel-v1 kernelVersion=$kver)"
 else
     echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
     echo "staged rollouts/$short.json; campaign.json unchanged"

@@ -104,12 +104,26 @@ class GeometryGate(unittest.TestCase):
         reasons = rollout.geometryReasons(campaign(), staged, None)
         self.assertTrue(any("must cover" in r for r in reasons))
 
-    def test_empty_pointer_refuses_activate(self):
-        reasons = rollout.geometryReasons(campaign(binaryKey=""), manifest(), None)
-        self.assertTrue(any("no binaryKey" in r for r in reasons))
+    def test_empty_pointer_becomes_v1(self):
+        live = campaign(binaryKey="")
+        staged = manifest()
+        self.assertEqual(rollout.geometryReasons(live, staged, None), [])
+        out = rollout.applyPointer(live, "bin/c68a7b6eb45dbbc3", staged)
+        self.assertEqual(out["kernelVersion"], 1)
+        self.assertEqual(out["kernelProtocol"], rollout.KERNEL_PROTOCOL)
+
+    def test_storage_protocol_blocked(self):
+        live = campaign(storageProtocol="ecc2k-seed-orbit-v1")
+        reasons = rollout.geometryReasons(live, manifest(), manifest())
+        self.assertTrue(any("storageProtocol" in r for r in reasons))
+        self.assertEqual(rollout.geometryReasons(live, manifest(), manifest(), allowStrict=True), [])
+
+    def test_unpinned_hash_blocked(self):
+        reasons = rollout.geometryReasons(campaign(), manifest(binarySha256="short"), manifest())
+        self.assertTrue(any("pinned binarySha256" in r for r in reasons))
 
     def test_apply_pointer_only(self):
-        live = campaign()
+        live = campaign(kernelProtocol=rollout.KERNEL_PROTOCOL, kernelVersion=2)
         staged = manifest()
         out = rollout.applyPointer(live, "bin/c68a7b6eb45dbbc3", staged)
         self.assertTrue(rollout.pointerOnly(live, out))
@@ -118,6 +132,8 @@ class GeometryGate(unittest.TestCase):
         self.assertEqual(out["walk"], "sigma")
         self.assertEqual(out["batch"], 16)
         self.assertEqual(out["binarySha256"], "d" * 64)
+        self.assertEqual(out["kernelProtocol"], rollout.KERNEL_PROTOCOL)
+        self.assertEqual(out["kernelVersion"], 3)
 
     def test_cli_check_and_apply(self):
         tmp = tempfile.mkdtemp()
@@ -164,6 +180,12 @@ class Adoption(unittest.TestCase):
         rep = rollout.walkingAdoption(slots, "bin/new/ecc2k130", "d" * 64)
         self.assertTrue(rep["done"])
 
+    def test_adopted_by_kernel_version(self):
+        now = int(time.time())
+        slots = [{"state": "active", "leaseUntil": now + 60, "kernelVersion": 4}]
+        rep = rollout.walkingAdoption(slots, "bin/new/ecc2k130", kernelVersion=4)
+        self.assertTrue(rep["done"])
+
 
 class PointerHelpers(unittest.TestCase):
     def test_worker_and_rollout_agree(self):
@@ -174,6 +196,9 @@ class PointerHelpers(unittest.TestCase):
         bad = campaign(workers=1)
         self.assertFalse(rollout.campaignPointerMoved(cur, bad))
         self.assertEqual(frozenCampaignMoved(cur, bad), "workers")
+        bumped = campaign(kernelProtocol=rollout.KERNEL_PROTOCOL, kernelVersion=2)
+        self.assertTrue(rollout.campaignPointerMoved(cur, bumped))
+        self.assertTrue(campaignPointerMoved(cur, bumped))
 
     def test_geometry_change_is_not_a_pointer_move(self):
         cur = campaign()
@@ -237,6 +262,22 @@ class WorkerReload(unittest.TestCase):
         self.assertEqual(open(self.client, "rb").read(), new)
         self.assertEqual(self.w.cfg["binaryKey"], "bin/newnewnewnewne/ecc2k130")
 
+    def test_versioned_pin_rejects_wrong_hash(self):
+        live = campaign(kernelProtocol=rollout.KERNEL_PROTOCOL, kernelVersion=1,
+                        binarySha256="a" * 64)
+        self._put("campaign.json", live)
+        with self.assertRaises(RuntimeError) as ctx:
+            self.w.loadConfig()
+        self.assertIn("kernelVersion", str(ctx.exception))
+
+    def test_versioned_pin_accepts_matching_hash(self):
+        digest = hashlib.sha256(b"old-client").hexdigest()
+        live = campaign(kernelProtocol=rollout.KERNEL_PROTOCOL, kernelVersion=1,
+                        binarySha256=digest)
+        self._put("campaign.json", live)
+        self.w.loadConfig()
+        self.assertEqual(self.w.cfg["kernelVersion"], 1)
+
     def test_frozen_geometry_keeps_old_client(self):
         self._put("campaign.json", campaign())
         self.w.loadConfig()
@@ -260,6 +301,19 @@ class Scripts(unittest.TestCase):
     def test_bootstrap_still_points(self):
         text = (HERE / "bootstrap.sh").read_text()
         self.assertIn("POINT_CAMPAIGN=1", text)
+
+    def test_kernel_protocol_name(self):
+        self.assertEqual(rollout.KERNEL_PROTOCOL, "ecc2k-kernel-v1")
+        build = (HERE / "build.sh").read_text()
+        self.assertIn("ecc2k-kernel-v1", build)
+        self.assertIn("kernels/$kver.json", build)
+        self.assertIn("--if-none-match", build)
+        sh = (HERE / "rollout.sh").read_text()
+        self.assertIn("kernels/$kver.json", sh)
+        self.assertIn("--from-version", sh)
+        camp = json.loads((HERE / "campaign.json").read_text())
+        self.assertEqual(camp["kernelProtocol"], "ecc2k-kernel-v1")
+        self.assertEqual(camp["kernelVersion"], 0)
 
 
 if __name__ == "__main__":

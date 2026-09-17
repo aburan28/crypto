@@ -317,9 +317,22 @@ BUCKET=ecc2k130-<account> ARCHES="89 120" ./build.sh --stage src/<tar>
 
 `--stage` (or `POINT_CAMPAIGN=0`) publishes `bin/<sha>/` and
 `rollouts/<sha>.json` and leaves the live pointer alone. `activate`
-rewrites only `binaryKey` / `hostBinaryKey` / the three sha fields, and
+assigns the next `kernelVersion`, writes an immutable
+`kernels/<n>.json` (`If-None-Match: *`, never overwritten), and
+rewrites only the pointer fields (`binaryKey` / `hostBinaryKey` / the
+three sha fields / `kernelProtocol` / `kernelVersion`). It does that
 only after `rollout.py` agrees the staged prefix keeps the checkpoint
 shape and the collision contract.
+
+`kernelProtocol` is `ecc2k-kernel-v1`. It versions the **client
+pointer**, not the DP corpus, and it is not `storageProtocol`. The
+live unversioned store can adopt v1 without migrating points. A
+campaign that already has `storageProtocol` is refused: those binary
+hashes sit in the campaign id, so a kernel flip would orphan every
+slot. That path needs a new campaign namespace (or
+`KERNEL_ALLOW_STRICT=1` after that review). `./rollout.sh versions`
+lists the log; `./rollout.sh activate --from-version N` re-activates
+that record as a **new** version (history stays append-only).
 
 Frozen, activate refuses: campaign `curve`, `dpWeight`, `workers`,
 `batch`, `blockThreads`, `minBlocks`, `walk`, and knobs `BATCH`,
@@ -330,9 +343,10 @@ fleet stays on one fat `89 120` binary. `PACKED_CLMAD` and the other ALU
 / product-pipe knobs may move.
 
 There is no SSM bounce and no `TerminateInstances`. Workers poll
-`campaign.json` on the heartbeat; when `binaryKey` or `binarySha256`
-moves they SIGTERM, checkpoint, re-download the client, and resume the
-same slot. A hand-edit that moves a frozen field is ignored: they keep
+`campaign.json` on the heartbeat; when `binaryKey`, `binarySha256` or
+`kernelVersion` moves they SIGTERM, checkpoint, re-download the client,
+and resume the same slot. A versioned pointer (`kernelVersion >= 1`)
+also pins the executable hash, even without `storageProtocol`. A hand-edit that moves a frozen field is ignored: they keep
 walking the current client. `rollout.sh wait` watches those heartbeats
 until every walking lease reports the new key. `infra.sh sync` ships
 `rollout.sh` / `rollout.py` next to `build.sh`. Boxes that booted before
@@ -342,9 +356,11 @@ restart after copying the new `worker.py` onto the instance — SIGTERM
 checkpoints; the slot is reclaimed). Kernel activates after that are
 pointer-only.
 
-Rollback is activate of the previous prefix, which is still in the
-bucket (build keys include the knobs, so a CLMAD flip does not
-overwrite the last binary).
+Rollback is `activate --from-version N` (or activate of that prefix).
+The previous prefix is still in the bucket — build keys include the
+knobs, so a CLMAD flip does not overwrite the last binary — and the
+new activation is `N+1` (or whatever the next free integer is), not
+an overwrite of `kernels/N.json`.
 
 `verify` is 0 for production: `--verify N` replays N reported points through
 the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk
