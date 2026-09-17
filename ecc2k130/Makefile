@@ -482,10 +482,54 @@ bench-ada-modal:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3
 
+# Instance-type aliases. g6 is L4, g6e is L40S, both sm_89. Workers stay
+# automatic. CLMAD defaults off; ADA_CLMAD=1 is the measured A/B arm.
+bench-g6-modal:
+	$(MAKE) bench-ada-modal ADA_GPU=L4
+
+bench-g6e-modal:
+	$(MAKE) bench-ada-modal ADA_GPU=L40S
+
+# Turing T4 (EC2 g4dn), sm_75. Software product only; see T4-G4DN.md.
+T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=0 ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-g4dn-modal:
+	$(T4_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+# Thin native clients for one architecture. Need nvcc. These are the
+# binaries a g6 / g6e / g4dn worker should run; the campaign fat default
+# is still sm_120.
+PREBLACKWELL_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
+	PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+	PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
+	PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=0 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_TOP_CLMAD=0
+
+gpu-g6 gpu-g6e:
+	$(MAKE) gpu ARCH="-gencode arch=compute_89,code=sm_89" $(PREBLACKWELL_PACKED)
+
+gpu-g4dn:
+	$(MAKE) gpu ARCH="-gencode arch=compute_75,code=sm_75" $(PREBLACKWELL_PACKED)
+
 # On the g6/g6e instance itself, where the part actually is.  Measures both
 # arms of the CLMAD question rather than assuming either.
 bench-ada:
 	bash benchmarks/ada/run.sh
+
+bench-g4dn:
+	bash benchmarks/t4/run.sh
 
 # The g7 fleet runs the RTX PRO 4500, for which this tree records no rate at
 # all; see RTX-PRO4500.md for the purchasing decision that waits on one. Unlike
@@ -509,4 +553,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

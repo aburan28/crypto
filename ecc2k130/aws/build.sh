@@ -38,10 +38,11 @@ if [ -z "${BUCKET:-}" ]; then
     ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
     BUCKET=$STACK-$ACCOUNT
 fi
-ARCHES=${ARCHES:-120}                 # "120" or "89 90 120"
+ARCHES=${ARCHES:-120}                 # "120", "89", "75", or "75 89 120"
 # Default off as soon as anything older than Blackwell is requested; see above.
+# sm_75 is the EC2 g4dn (T4) client; clmad is not a T4 instruction we pay for.
 case " $ARCHES " in
-    *" 80 "*|*" 86 "*|*" 89 "*|*" 90 "*) clmadDefault=0 ;;
+    *" 75 "*|*" 80 "*|*" 86 "*|*" 89 "*|*" 90 "*) clmadDefault=0 ;;
     *) clmadDefault=1 ;;
 esac
 CLMAD=${CLMAD:-$clmadDefault}

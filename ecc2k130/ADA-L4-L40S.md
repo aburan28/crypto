@@ -66,8 +66,11 @@ into a number. It builds `sm_89` only; the Makefile default is a
 five-architecture fat binary and ptxas takes minutes per architecture on this
 kernel.
 
-`make bench-ada-modal` runs the same preset through Modal (`ECC_GPU=L40S`, or
-`ADA_GPU=L4`) when no instance is to hand. Workers stay **automatic** in both:
+`make bench-g6-modal` and `make bench-g6e-modal` run the same preset through
+Modal (`ECC_GPU=L4` / `L40S`). `make gpu-g6` / `make gpu-g6e` emit the thin
+`sm_89` software-product client. The T4 / g4dn sibling is
+[T4-G4DN.md](T4-G4DN.md). `make bench-ada-modal` is the same L40S entry
+(`ADA_GPU=L4` selects the L4). Workers stay **automatic** in both:
 the RTX PRO 6000 preset's 385,024 is four waves on a 188-SM part and has no
 claim on a 142-SM (L40S) or 58-SM (L4) one, and `autoThreads`
 ([include/packedengine.cuh](include/packedengine.cuh)) scales with
