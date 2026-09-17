@@ -1,8 +1,10 @@
 # A different decomposition solver, run on the real curve
 
-**Experiments:** `research/nagao_relations/solver_10`, `research/nagao_relations/solver_11`
-**Frozen contracts:** `solver_10/contract.json`, `solver_11/contract.json` (both committed before execution)
-**Evidence:** `solver_10/raw.jsonl` (128 trials), `solver_11/raw.jsonl`
+**Experiments:** `research/nagao_relations/solver_10` (matched panel), `solver_11`
+(batch amortisation), `solver_12` (null-object control), `solver_13` (method ceiling)
+**Frozen contracts:** one per round, each committed before its execution
+**Evidence:** `solver_10/raw.jsonl` (128 trials), `solver_11/`, `solver_12/`
+(plus `solver_12/CORRECTION.md`), `solver_13/`
 **Background:** [`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
 (existence, admissibility, and the `m·2^131` oracle bound),
 [`research/nagao_relations/README.md`](research/nagao_relations/README.md)
@@ -17,9 +19,12 @@ wins are cheap.  Does the advantage survive on `K_0 : y² + xy = x³ + 1` over
 recurrence as `4r` with the published 129-bit prime — with the factor base,
 arity, targets, modes and budget held identical across every variant?
 
-**Bottom line.  Yes, it survives, and it is not close.  It also does not
-matter, and §4 says exactly why in the attack's own units.**  Those are two
-separate results and conflating them is how this route gets over-sold:
+**Bottom line.  Yes, it survives, and it is not close — and then the null
+object beats it.**  The advantage over Semaev is real and reproduces at full
+size (§2).  It is also worth nothing: brute-force pair enumeration is twice as
+cheap (§7), and the Riemann–Roch encoding is the same `Θ(|F|²)` order as that
+double loop (§8).  Those are separate results and conflating them is how this
+route gets over-sold:
 
 - **The solver comparison (§2).**  At `d = 6`, the two RR solvers resolved
   **32 of 32** matched slots; both Semaev controls resolved **0 of 32** under
@@ -35,6 +40,14 @@ separate results and conflating them is how this route gets over-sold:
   because rho amortises better.  The RR solver's target-independent share is
   measured at **0.12 %** (`d = 6`) and **0.07 %** (`d = 7`).  Batching 16
   targets buys the RR oracle 0.1 %; it buys rho 75 %.
+- **The null object wins (§7).**  Brute-force pair enumeration — no algebra, no
+  solver — exhausts the same `d = 6` instances in **0.494×** the counted field
+  operations, returning identical solution sets.  The control had never been
+  run in nine rounds of this thread.
+- **The method ceiling (§8).**  The RR solver visits about `|F|²` candidates
+  where pair enumeration visits `|F|²/2`, measured to `d = 8`.  Same order,
+  constant near two, in the wrong direction.  The falsification target needs a
+  different *exponent*; nine rounds produced constants.
 - **Two structural limits (§6),** read off the construction rather than
   measured: the arity is fixed at three, and the factor base must be an
   `F_2`-subspace.  "More summands" and "a Hamming-weight base" are outside this
@@ -235,7 +248,98 @@ neither is reachable from here.  Widening the base along a *different* axis —
 higher `d`, which stays inside the encoding — is what §2's `d = 7` rows price,
 and the cost grows about fourfold per dimension.
 
-## 7. What this does and does not license
+## 7. The control that was missing: brute force
+
+§2 compares two algebraic encodings under one SAT solver.  It is not evidence
+that either beats **the dumbest oracle that could possibly work**: for every
+unordered pair `{P₁, P₂}` of factor-base points, compute `Q = R − P₁ − P₂` and
+test whether `x(Q) ∈ V`.  No algebra, no polynomial system, no solver.
+`docs/inventor-protocol.md` asks for a null-object control before belief, and
+§5.3 of the background note states the falsification target against *exhaustive
+search over the oracle's own candidate set* — not against Semaev.  Through
+`solver_02`…`solver_10` this control had never been run.
+
+`solver_12` runs it on `solver_10`'s exact instances, in `solver_10`'s counted
+unit.  At `d = 6`, where both oracles exhausted the space:
+
+| oracle | candidates | field operations (8 instances) | relations |
+|---|--:|--:|--:|
+| pair enumeration | 1,404 pairs | 3,205,008 | 4 |
+| quadratic-image | ~3,400 functions | 6,483,976 | 4 |
+| **ratio** | | **0.494** | identical sets |
+
+**Brute force is about twice as cheap as the best solver this thread produced**,
+and returns the identical solution set on all eight instances.
+
+That last clause is the round's other result, and it cuts the other way: two
+*entirely independent* oracles — one algebraic, one a double loop — agree
+exactly on every complete solution set at `n = 131`.  Nothing else in this
+thread validates `solver_10`'s correctness as strongly.
+
+**One column of this round was withdrawn by its own author.**  The `d = 7`
+operation ratio divided a completed pair enumeration by `solver_10`'s `d = 7`
+`quadratic-image` runs, every one of which was a **timeout** — comparing a full
+run against a truncated one, the exact error `scaling_23_29.md` names.  See
+[`solver_12/CORRECTION.md`](research/nagao_relations/solver_12/CORRECTION.md):
+`raw.jsonl` is untouched, the derived column is nulled, and the cause is named
+(the contract conditioned its *correctness* check on `status == 'complete'` and
+its *cost* aggregation on nothing).
+
+## 8. The method ceiling: a constant, never an exponent
+
+Finding `P₁ + P₂ + P₃ = R` with every `Pᵢ` in a stored base is **3SUM over a
+group**, and pair enumeration realises the generic `Θ(|F|²)` bound.  So the
+question §7 raises is not "which constant" but whether the Riemann–Roch
+encoding does anything an *exponent* could notice.  `solver_13` measures that
+directly, running both oracles **to completion** at five dimensions:
+
+| `d` | `\|F\|` | RR candidates | pairs | `RR / (\|F\|²/2)` | RR ops / pair ops |
+|--:|--:|--:|--:|--:|--:|
+| 4 | 10 | 150 | 40 | 3.00 | 2.83 |
+| 5 | 20 | 624 | 180 | 3.12 | 3.15 |
+| 6 | 54 | 3,402 | 1,404 | 2.33 | 2.02 |
+| 7 | 132 | 16,764 | 8,580 | 1.92 | 1.46 |
+| 8 | 256 | 65,300 | 32,512 | **1.99** | **1.55** |
+
+Fitted exponents in `|F|`: pair enumeration `2.06` (it is `C(|F|,2)` by
+construction, so `2` is the right answer and `2.06` is the scatter), the RR
+solver `1.84` over the full range and `1.89` over the largest three.
+
+**The honest reading, including where the frozen prediction was wrong.**  The
+contract predicted the ratio would be "roughly flat and above one" and named a
+*fall* with `d` as its falsifier.  The ratio does fall — `3.00 → 1.99` — so the
+prediction was wrong as literally stated, and the fitted RR exponent sits below
+two.  But the fall is a small-`d` transient that has flattened by `d = 7`
+(`1.92, 1.99`), the gap between the two fitted exponents is smaller than the
+scatter the contract itself warned about (`"five dimensions … is a short lever
+arm"`), and the sub-two fit is dragged down by the `d = 4, 5` points.  What the
+data supports is the asymptotic statement, not the exponent gap:
+
+> The RR solver visits about `|F|²` candidates where pair enumeration visits
+> `|F|²/2`, and pays about `1.5×` the field operations.  **Same order, constant
+> above one, in the wrong direction.**
+
+A note on the regressor: `|F|` rather than `2^d` is used because the admissible
+abscissa count fluctuates (`|F| = 54` against `2^6 = 64`, but `132` against
+`2^7 = 128`), and pair enumeration is exactly `C(|F|,2)` in `|F|` and only
+approximately `4^d` in `d`.  Regressing on `2^d` gives noisier fits for both
+oracles, not a different conclusion.
+
+**Why this settles the thread's ambition.**  The falsification target demands a
+speedup *factor* of `2^{70.19 + log₂ m}` against `C(|F|, m−1)` — at `l = 45`,
+an oracle costing about `2^15` where exhaustive pairs cost `2^87`.  That is not
+a better constant; it is a different exponent.  Nine rounds of this thread
+produced constants, and the best of them is a factor of two **worse** than a
+double loop.
+
+The ceiling is not a proof of impossibility, and §5 of the contract says so:
+`F` is algebraically structured, 3SUM hardness is a conjecture about *generic*
+sets, and a genuinely sub-quadratic oracle exploiting the subspace structure is
+excluded by nothing measured here.  Exploiting that structure is what Semaev's
+polynomials were *for*.  What is now measured is that neither the summation
+polynomials under SAT nor the Riemann–Roch reformulation does it.
+
+## 9. What this does and does not license
 
 Established:
 
@@ -247,6 +351,15 @@ Established:
 - Three-summand decompositions of real ECC2K-130 points are findable in
   seconds *when the base is small enough to search and the target is known to
   decompose* — 28 of them, each independently verified.
+- **And that advantage is worth nothing as an oracle.**  Brute-force pair
+  enumeration beats the best RR solver by `2.02×` in counted operations at
+  `d = 6`, and the RR encoding is `Θ(|F|²)` with a constant near two — the same
+  order as the double loop it was meant to improve on (§7, §8).  The correct
+  reading of §2 is therefore: *of two algebraic encodings under one SAT solver,
+  Riemann–Roch is the better one*, and that is a much smaller claim than the
+  panel alone suggests.
+- Two independent oracles agree exactly on every complete solution set at
+  `n = 131`, across nine instances at `d = 6` and ten more at `d = 4`…`8`.
 
 Not established, and not claimed:
 
