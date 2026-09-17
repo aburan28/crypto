@@ -265,6 +265,19 @@ def is_frobenius_identity(E, points, trials=6, rng=None):
     return checked == trials
 
 
+def canonical_quad(E, quad):
+    """A four-point relation up to ordering and global negation.
+
+    `A + B + C + D = O` makes all three pairings `(A,B)|(C,D)`, `(A,C)|(B,D)`
+    and `(A,D)|(B,C)` collide on the abscissa of their pair sums, so the same
+    relation arrives from up to three digest groups and must be counted once.
+    A relation and its global negation are also the same relation.
+    """
+    pos = tuple(sorted(tuple(p) for p in quad))
+    neg = tuple(sorted(tuple(E.neg(p)) for p in quad))
+    return min(pos, neg)
+
+
 def verify_quadruples(E, reps, n, groups):
     """Recompute every candidate in full and classify what it actually is.
 
@@ -281,6 +294,7 @@ def verify_quadruples(E, reps, n, groups):
       * `false`      -- a digest collision that is not an abscissa collision.
     """
     out = {"distinct": [], "repeated": [], "frobenius": [], "false": 0}
+    seen = set()
     for grp in groups:
         decoded = [decode_pair(g, n) for g in grp]
         for a in range(len(decoded)):
@@ -299,6 +313,10 @@ def verify_quadruples(E, reps, n, groups):
                 if hit is None:
                     out["false"] += 1
                     continue
+                key = canonical_quad(E, hit)
+                if key in seen:
+                    continue
+                seen.add(key)
                 record = [[hex(p[0]), hex(p[1])] for p in hit]
                 if len({i, j, k, l}) == 4:
                     if is_frobenius_identity(E, hit):
@@ -365,8 +383,10 @@ def run(name, description, E, abscissae, r, *, budget_seconds, log=print):
             round(log2_pred_digest, 3) if log2_pred_digest is not None else None),
         "log2_predicted_genuine_collisions": (
             round(log2_pred_real, 3) if log2_pred_real is not None else None),
+        # B^4 / (24 r) with B the abscissa count, the same convention as
+        # boundary.py's sweep_yield and the three-point runner
         "log2_expected_relations_by_counting": round(
-            4 * math.log2(2 * n) - math.log2(24) - math.log2(r), 3),
+            4 * math.log2(n) - math.log2(24) - math.log2(r), 3),
     }
 
 

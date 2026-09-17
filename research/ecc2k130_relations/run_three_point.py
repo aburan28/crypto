@@ -69,14 +69,9 @@ def run_experiment(name, description, E, base_x, r, *, coeffs=None,
             log(f"[{name}]   {seen:,}/{total_pairs:,} ({frac:6.2%}) "
                 f"hits={hits} elapsed={el:6.0f}s eta={eta:6.0f}s")
 
-    budget_pairs = None
-    if budget_seconds:
-        # re-checked below; the sweep itself is bounded by pair count
-        budget_pairs = None
-
     found, seen_pairs, complete = R.three_point_relations(
         E, base_x, allow_repeats=True, chunk=20000, progress=progress,
-        budget_pairs=budget_pairs)
+        budget_seconds=budget_seconds)
     elapsed = time.time() - started
 
     # Realising a triple costs about thirty field inversions, so a support
