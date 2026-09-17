@@ -26,7 +26,8 @@ python3 research/ic_candidate_tournament_20260915/runs/round-0005-batch16/evalua
 Use `--archive round-0008` to restore only the certified single-target round
 (`--archive round-0009` for the same pipeline on the leaner shared job,
 `--archive round-0010` for the lean static executable measured under the
-evaluator that no longer forks itself, `--archive round-0007` and
+evaluator that no longer forks itself, `--archive round-0011` for the
+general arithmetic in words, `--archive round-0007` and
 `--archive round-0006` for the strict-win and parity rounds it built on),
 `--archive round-0005-batch16` or `--archive round-0006-batch16` for the
 16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
@@ -39,7 +40,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009` and `round-0010` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010` and `round-0011` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -95,7 +96,10 @@ round-0008's source (`round9-fastcurve.patch`, `round9_candidates.py`,
 `round-0009.tar.zst`), and round-0010's baseline and ablation control from
 round-0009's source (`round10-lean.patch`, `round10-lean_stdprobe.patch`,
 `round10_candidates.py`, `round-0010.tar.zst`; the snapshots carry the
-`.cargo/config.toml` that selects the static link).
+`.cargo/config.toml` that selects the static link), and round-0011's
+baseline and IC-only challenger from round-0010's source
+(`round11-wordfield.patch`, `round11-fastio.patch`, `round11_candidates.py`,
+`round-0011.tar.zst`).
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 
