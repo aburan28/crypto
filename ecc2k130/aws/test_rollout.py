@@ -14,6 +14,7 @@ import tempfile
 import time
 import unittest
 
+import protocol
 import rollout
 from worker import (Worker, campaignPointerMoved, frozenCampaignMoved)
 
@@ -248,6 +249,87 @@ class WorkerReload(unittest.TestCase):
         self.w.cfg = campaign(binaryKey="local")
         self.assertEqual(self.w.clientStoreKey(), "")
         self.assertFalse(self.w.fetchClient())
+
+    def test_storage_protocol_reload_keeps_campaign_id(self):
+        old = open(self.client, "rb").read()
+        new = b"new-client-bytes"
+        live = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                        binarySha256=hashlib.sha256(old).hexdigest())
+        nxt = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                       binaryKey="bin/newnewnewnewne/ecc2k130",
+                       hostBinaryKey="bin/newnewnewnewne/ecc2k130-cpu",
+                       binarySha256=hashlib.sha256(new).hexdigest(),
+                       hostBinarySha256="e" * 64, sourceSha256="f" * 64)
+        self._put("campaign.json", live)
+        os.environ.pop("ECC_ALLOW_LEGACY_STORAGE", None)
+        self.w.loadConfig()
+        before = self.w.contract["id"]
+        lock = os.path.join(self.w.work, "campaign.lock.json")
+        self.assertTrue(os.path.exists(lock))
+        self._put("campaign.json", nxt)
+        self.assertTrue(self.w.campaignPointerChanged())
+        self._put("bin/newnewnewnewne/ecc2k130", new)
+        self.w.reloadClient()
+        self.assertEqual(open(self.client, "rb").read(), new)
+        self.assertEqual(self.w.contract["id"], before)
+        self.assertEqual(json.load(open(lock))["id"], before)
+        self.assertEqual(protocol.campaignContract(self.w.cfg)["id"], before)
+
+    def test_fpga_does_not_fetch_cuda_client(self):
+        os.environ["ECC_DEVICE_NAME"] = "f2.6xlarge fpga 32x256 test"
+        os.environ["ECC_INSTANCE_TYPE"] = "f2.6xlarge"
+        os.environ["ECC_GPU"] = "1"
+        fpga = os.path.join(self.root, "ecc2k130-fpga")
+        open(fpga, "wb").write(b"fpga-host")
+        os.chmod(fpga, 0o755)
+        os.environ["ECC_CLIENT"] = fpga
+        os.environ.pop("ECC_ALLOW_LEGACY_STORAGE", None)
+        w = Worker()
+        old = b"old-cuda-client"
+        new = b"new-cuda-client"
+        live = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                        binarySha256=hashlib.sha256(old).hexdigest())
+        nxt = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                       binaryKey="bin/newnewnewnewne/ecc2k130",
+                       hostBinaryKey="bin/newnewnewnewne/ecc2k130-cpu",
+                       binarySha256=hashlib.sha256(new).hexdigest(),
+                       hostBinarySha256="e" * 64, sourceSha256="f" * 64)
+        self._put("campaign.json", live)
+        w.loadConfig()
+        self.assertEqual(w.gpuFamily, "")
+        self.assertEqual(w.clientStoreKey(), "")
+        self._put("campaign.json", nxt)
+        self._put("bin/newnewnewnewne/ecc2k130", new)
+        w.reloadClient()
+        self.assertEqual(open(fpga, "rb").read(), b"fpga-host")
+        self.assertEqual(w.cfg["binaryKey"], "bin/newnewnewnewne/ecc2k130")
+
+    def test_cpu_reload_fetches_host_binary(self):
+        os.environ["ECC_DEVICE_NAME"] = "cpu"
+        os.environ["ECC_INSTANCE_TYPE"] = "c8i.xlarge"
+        os.environ["ECC_GPU"] = "2"
+        os.environ.pop("ECC_ALLOW_LEGACY_STORAGE", None)
+        w = Worker()
+        old = open(self.client, "rb").read()
+        new = b"new-cpu-client"
+        live = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                        binarySha256="a" * 64,
+                        hostBinarySha256=hashlib.sha256(old).hexdigest())
+        nxt = campaign(storageProtocol=protocol.PROTOCOL, maxIters=1073741824,
+                       binaryKey="bin/newnewnewnewne/ecc2k130",
+                       hostBinaryKey="bin/newnewnewnewne/ecc2k130-cpu",
+                       binarySha256="d" * 64,
+                       hostBinarySha256=hashlib.sha256(new).hexdigest(),
+                       sourceSha256="f" * 64)
+        self._put("campaign.json", live)
+        w.loadConfig()
+        self.assertEqual(w.clientStoreKey(), "bin/oldoldoldoldol/ecc2k130-cpu")
+        self._put("campaign.json", nxt)
+        self._put("bin/newnewnewnewne/ecc2k130", b"cuda-must-not-be-fetched")
+        self._put("bin/newnewnewnewne/ecc2k130-cpu", new)
+        w.reloadClient()
+        self.assertEqual(open(self.client, "rb").read(), new)
+        self.assertEqual(w.clientStoreKey(), "bin/newnewnewnewne/ecc2k130-cpu")
 
 
 class Scripts(unittest.TestCase):

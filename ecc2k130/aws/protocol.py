@@ -63,8 +63,7 @@ def campaignContract(config):
         raise ValueError("strict storage requires storageProtocol=" + PROTOCOL)
     if config.get("extraArgs"):
         raise ValueError("strict campaigns forbid extraArgs overriding protocol parameters")
-    fields = ("curve", "dpWeight", "maxIters", "packed", "workers", "batch",
-              "binarySha256", "hostBinarySha256", "sourceSha256")
+    fields = ("curve", "dpWeight", "maxIters", "packed", "workers", "batch")
     c = {k: config[k] for k in fields}
     if type(c["curve"]) is not int or c["curve"] not in (23, 41, 83, 131):
         raise ValueError("strict storage currently supports normal-basis curves 23/41/83/131")
@@ -75,8 +74,13 @@ def campaignContract(config):
         raise ValueError("invalid cutoff or worker geometry")
     if type(c["packed"]) is not bool or (c["packed"] and c["curve"] != 131):
         raise ValueError("invalid packed backend")
+    # Pins are required and checked at load/merge time, but they are not
+    # campaign identity: kernel activate rewrites them while the walk,
+    # cutoff and checkpoint geometry stay put, and those distinguished
+    # points must still merge.
     for key in ("binarySha256", "hostBinarySha256", "sourceSha256"):
-        if not isinstance(c[key], str) or not re.fullmatch("[0-9a-f]{64}", c[key]):
+        pin = config.get(key)
+        if not isinstance(pin, str) or not re.fullmatch("[0-9a-f]{64}", pin):
             raise ValueError("strict campaigns require a pinned " + key)
     walk = config.get("walk", "sigma")
     if walk not in WALKS:

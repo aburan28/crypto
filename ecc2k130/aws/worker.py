@@ -136,6 +136,7 @@ def gpuName(gpu):
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
 # g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
 # count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+CUDA_FAMILIES = frozenset({"g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"})
 BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
 ADA_FAMILIES = frozenset({"g6", "g6e"})
 LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
@@ -158,7 +159,7 @@ def instanceType():
 def gpuFamily(name="", instance_type=""):
     """EC2 family used to pin slots and decide --threads vs autoThreads."""
     it = (instance_type or "").split(".")[0].lower()
-    if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
+    if it in CUDA_FAMILIES:
         return it
     n = (name or "").lower()
     if "l40s" in n:
@@ -599,7 +600,8 @@ class Worker:
                 raise RuntimeError("campaign.json lacks %r" % key)
         if self.cfg.get("storageProtocol"):
             self.contract = campaignContract(self.cfg)
-            if verifyBinary and sha256File(self.client) != self.cfg["binarySha256"]:
+            want = self.clientPinHash()
+            if verifyBinary and want and sha256File(self.client) != want:
                 raise RuntimeError("client binary hash differs from campaign")
             bindDirectory(self.work, self.contract)
         elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
@@ -609,15 +611,30 @@ class Worker:
         """S3 key of the executable this worker should run.
 
         GPU walkers take binaryKey. CPU walkers take hostBinaryKey so a
-        kernel rollout does not hand them the CUDA client. Rehearsals use
-        binaryKey=local and ECC_CLIENT; those do not re-fetch.
+        kernel rollout does not hand them the CUDA client. FPGA and other
+        non-CUDA families keep ECC_CLIENT. Rehearsals use binaryKey=local
+        and ECC_CLIENT; those do not re-fetch.
         """
         key = self.cfg.get("binaryKey") or ""
         if key in ("", "local"):
             return ""
         if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
             return self.cfg.get("hostBinaryKey") or key
-        return key
+        if self.gpuFamily in CUDA_FAMILIES:
+            return key
+        return ""
+
+    def clientPinHash(self):
+        """Campaign digest of the executable this walker runs, or '' if unpinned.
+
+        Packed CUDA families pin binarySha256. CPU and unpacked walkers pin
+        hostBinarySha256. FPGA host programs are not named by campaign.json.
+        """
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            return self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256") or ""
+        if self.gpuFamily in CUDA_FAMILIES:
+            return self.cfg.get("binarySha256") or ""
+        return ""
 
     def fetchClient(self):
         key = self.clientStoreKey()
