@@ -51,33 +51,51 @@ class FleetRollContract(unittest.TestCase):
 
     def test_roll_waits_for_the_fleet_to_refill_between_batches(self):
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
-        self.assertIn("FulfilledCapacity", roll)
+        self.assertIn("activeInstanceIds", roll)
         self.assertIn("${timeout}", roll)
 
     def test_roll_waits_against_a_per_batch_baseline_not_the_static_target(self):
         # Bugbot bc7697e0 (High): waiting for TargetCapacitySpecification
-        # instead of the capacity this batch actually removed means an
+        # instead of the count this batch actually removed means an
         # already-short spot fleet -- one that never reaches that target --
         # times out on every batch and just keeps terminating instances,
         # draining the fleet instead of rolling it.
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
         self.assertNotIn("TargetCapacitySpecification", roll)
-        self.assertIn("before=$(capacityInt", roll)
-        self.assertIn('"$fulfilled" -lt "$before"', roll)
+        self.assertIn("countBefore=$(activeInstanceIds", roll)
+        self.assertIn('"$count" -ge "$countBefore"', roll)
         # The baseline must be read before terminate-instances runs.
-        self.assertLess(roll.index("before=$(capacityInt"), roll.index("terminate-instances"))
+        self.assertLess(roll.index("countBefore=$(activeInstanceIds"), roll.index("terminate-instances"))
 
-    def test_roll_confirms_a_real_drop_before_trusting_a_recovered_reading(self):
-        # Bugbot e7a26c6d (High): terminate-instances is async, so an
-        # immediate FulfilledCapacity read can still show the pre-terminate
-        # value. Treating that stale "already at $before" reading as
-        # confirmation lets the next batch start before this one is
-        # actually gone.
+    def test_roll_confirms_this_batchs_own_ids_are_gone_not_an_aggregate_number(self):
+        # Bugbot e7a26c6d (High, first fix) and 2db76048 (High, on the fix
+        # itself): FulfilledCapacity lags terminate-instances and unrelated
+        # fleet churn can move it, so a still-full or "already recovered"
+        # aggregate reading doesn't prove THIS batch is gone. Membership
+        # (describe-fleet-instances) is the only thing that does.
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
-        drop_wait = roll.split('if [ "$fulfilled" -lt "$before" ]; then break; fi', 1)
-        self.assertEqual(len(drop_wait), 2, "no explicit wait for a drop below $before")
-        # And only then a second wait for the climb back up.
-        self.assertIn('while [ "$fulfilled" -lt "$before" ] && [ "$waited" -lt "$timeout" ]; do', roll)
+        # A comment may still explain why FulfilledCapacity is avoided; the
+        # query itself must not be.
+        self.assertNotIn("Fleets[0].FulfilledCapacity", roll)
+        # Checks each terminated id's presence in the current active set,
+        # not just a count, before declaring the batch gone.
+        self.assertIn("for member in $group", roll)
+        self.assertIn('case "$active" in *" $member "*) gone=0 ;; esac', roll)
+        # Only after confirming departure does it wait for the count (not
+        # FulfilledCapacity) to climb back to the per-batch baseline.
+        drop_then_recover = roll.split('if [ "$gone" -eq 1 ]; then break; fi', 1)
+        self.assertEqual(len(drop_then_recover), 2)
+        self.assertIn('if [ "$gone" -eq 1 ]; then', drop_then_recover[1])
+        self.assertIn('"$count" -ge "$countBefore"', drop_then_recover[1])
+
+    def test_roll_normalizes_the_tab_separated_id_list_before_matching(self):
+        # aws --output text separates list entries with tabs, not spaces;
+        # a bare `*" $member "*` substring check against that raw text only
+        # ever matches the first and last id (the ones next to the literal
+        # spaces this script adds), silently never matching any id in the
+        # middle of the list.
+        roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
+        self.assertIn("tr '\\t' ' '", roll)
 
     def test_roll_refuses_without_an_active_fleet(self):
         roll = FLEET.split("roll)", 1)[1].split("\n*)", 1)[0]
