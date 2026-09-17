@@ -129,9 +129,12 @@ a dead ingest host, it reads as a dead campaign. With no total the pages
 fall back to the point count at one point per `2^25.27` iterations at
 `HW(x) <= 34` (`ecc2k130/aws/README.md`) and label the figure as such. That
 fallback **reads low**: this campaign distinguishes at the sparser
-`HW(x) <= 32`, about `2^27.9` iterations per point by its own two counters,
-so the derivation understates the walk by a factor near six and understated
-it on this page until the total was published. Both exponents are
+`HW(x) <= 32`, about `2^28.4` iterations per point measured from each
+client's own iteration and point counters
+(`ecc2k130/benchmarks/dp-interval/`; the `2^27.9` first quoted was a ratio
+of fleet-wide sums and is retired), so the derivation understates the walk
+by a factor near nine and understated it on this page until the total was
+published. Both exponents are
 parameters of one campaign's distinguishing rule, so the pages apply them
 to `ecc2k-130` only, and `scripts/site/test_build.py` pins every copy of
 them to the campaign document.
@@ -148,7 +151,7 @@ snapshot with **no** iteration total falls back to the last-hour
 distinguished-point amount, `(dps_last_hour × 2^25.27) / 3600` operations
 per second, and says which of the two it used. The two accountings are
 never mixed: a counted total divided by a derived rate would publish an ETA
-about six times too long, so a snapshot that has a total but not yet a
+about nine times too long, so a snapshot that has a total but not yet a
 second one to difference shows no ETA rather than that. The ETA is an
 expectation, not a deadline; `scripts/site/test_build.py` pins both
 formulas, their order, and the refusal to mix them.

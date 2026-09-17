@@ -6,10 +6,11 @@ when they arrived. The walk behind those points was derived on the published
 pages from the point count times one report interval, and that interval is
 not the one the campaign runs: the pages carry the weight-34 figure of
 2^25.27 iterations per point (ecc2k130/aws/README.md) while campaign.json
-runs `dpWeight` 32, a strictly sparser cutoff. Measured against the
-campaign's own two counters the running interval is about 2^27.9, so the
-derivation understates the walk by a factor near six, and any rate taken
-from it is wrong by the same factor.
+runs `dpWeight` 32, a strictly sparser cutoff. Measured from each client's
+own iteration and point counters the running interval is about 2^28.4
+(ecc2k130/benchmarks/dp-interval), so the derivation understates the walk
+by a factor near nine, and any rate taken from it is wrong by the same
+factor.
 
 Nothing has to be asked of the workers to fix that. Every slot checkpoints
 its iteration base every 600 s, the campaign's ingest host sums those
