@@ -18,7 +18,11 @@ class PricesContract(unittest.TestCase):
         data = json.loads(PRICES.read_text())
         self.assertIn("on_demand_hourly", data)
         self.assertIn("gpu_count", data)
-        self.assertGreater(data["on_demand_hourly"]["us-west-2"]["g7e.2xlarge"], 0)
+        west = data["on_demand_hourly"]["us-west-2"]
+        # List on-demand, not spot (README: g7e.2xlarge $3.36/h, 48xlarge $33.14/h).
+        self.assertGreaterEqual(west["g7e.2xlarge"], 3.36)
+        self.assertGreaterEqual(west["g7e.48xlarge"], 33.14)
+        self.assertGreaterEqual(west["g7.2xlarge"], 2.52)
         self.assertEqual(data["gpu_count"]["g7e.48xlarge"], 8)
 
     def test_shell_syntax(self):
