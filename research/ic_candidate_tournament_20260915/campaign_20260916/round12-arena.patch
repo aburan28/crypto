@@ -1,6 +1,6 @@
 --- a/examples/ic_tournament_worker.rs
 +++ b/examples/ic_tournament_worker.rs
-@@ -19,6 +19,143 @@
+@@ -19,6 +19,136 @@
  use std::io::Read;
  use std::time::Instant;
  
@@ -82,30 +82,23 @@
 +mod arena_tests {
 +    use std::alloc::{GlobalAlloc, Layout};
 +
-+    /// The arena is the process allocator, so the harness and the other test
-+    /// threads allocate from it too and can move the top between two of these
-+    /// calls; the sequence is retried until it ran uninterrupted, which the
-+    /// in-place result itself witnesses.
 +    #[test]
 +    fn grows_the_last_block_in_place_and_gives_it_back() {
 +        let a = super::arena::Bump;
-+        let l = Layout::from_size_align(48, 8).unwrap();
-+        let l96 = Layout::from_size_align(96, 8).unwrap();
-+        for _ in 0..1000 {
-+            unsafe {
-+                let p = a.alloc(l);
-+                assert!(!p.is_null() && (p as usize) % 8 == 0);
-+                std::ptr::write_bytes(p, 0xA5, 48);
-+                let q = a.realloc(p, l, 96);
-+                assert!((0..48).all(|i| *q.add(i) == 0xA5));
-+                a.dealloc(q, l96);
-+                if q != p { continue; }
-+                let r = a.alloc(l);
-+                a.dealloc(r, l);
-+                if r == p { return; }
-+            }
++        unsafe {
++            let l = Layout::from_size_align(48, 8).unwrap();
++            let p = a.alloc(l);
++            assert!(!p.is_null() && (p as usize) % 8 == 0);
++            std::ptr::write_bytes(p, 0xA5, 48);
++            let q = a.realloc(p, l, 96);
++            assert_eq!(q, p, "the most recent block grows in place");
++            assert!((0..48).all(|i| *q.add(i) == 0xA5));
++            let l96 = Layout::from_size_align(96, 8).unwrap();
++            a.dealloc(q, l96);
++            let r = a.alloc(l);
++            assert_eq!(r, p, "a freed last block is reused");
++            a.dealloc(r, l);
 +        }
-+        panic!("the most recent block never grew in place and was reused once freed");
 +    }
 +
 +    #[test]
