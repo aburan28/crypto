@@ -277,14 +277,6 @@ button:disabled { opacity: 0.55; cursor: progress; }
   max-width: 80ch;
 }
 .odds-chart { margin-top: 12px; }
-/* Odds chart is drawn to be read at phone width: no forced min-width, so the
-   dates under the curve stay in view instead of living off-screen to the right. */
-.odds-chart.chart { overflow: visible; }
-.odds-chart svg {
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-}
 .chart .line.alt { stroke: var(--data); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.85; }
 .chart .guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
 .odds-tiles {
@@ -365,6 +357,15 @@ button:disabled { opacity: 0.55; cursor: progress; }
   min-width: 560px;
   height: auto;
   font-family: var(--mono);
+}
+/* Odds chart is drawn to be read at phone width: no forced min-width, so the
+   dates under the curve stay in view instead of living off-screen to the right.
+   Kept after `.chart svg`, which it ties on specificity, so this one wins. */
+.odds-chart.chart { overflow: visible; }
+.odds-chart svg {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 .chart .bar { fill: var(--data); }
 .chart .bar:hover { fill: #9cb4ff; }
