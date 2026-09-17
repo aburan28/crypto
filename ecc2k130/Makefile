@@ -248,6 +248,7 @@ trailforest: build/trailforest
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
+	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
 
 certify-local: ecc2k130-cpu build/test-production
 	python3 aws/certify.py --output build/certification-local.json

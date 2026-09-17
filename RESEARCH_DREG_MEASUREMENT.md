@@ -243,6 +243,65 @@ being exploited.
 The caveat on Result 2 is unchanged and is now the only thing standing
 between this and a scaling claim: one draw, one cell, `n = 5`.
 
+## Sparse elimination: 6× end to end, and what it unblocks
+
+**Module:** `src/cryptanalysis/sparse_macaulay.rs`
+**Bench:** `cargo run --release --example elimination_bench -- --n 5 --m 3 --d 6`
+
+Dense `F_2` row reduction was the binding cost.  It has been replaced by
+structured sparse elimination — not Wiedemann or Lanczos, which answer
+the wrong question here (a kernel vector, where this needs a reduced
+basis) and which in plain Lanczos' case are unsound over `F_2`, where a
+nonzero vector can be self-orthogonal.  `sparse_macaulay` documents the
+reasoning; the short version is that degree-first monomial order puts
+the high-degree monomials in the leading columns, so a row's leading
+index past the degree-≤1 boundary *proves* the row is a linear
+consequence, and only that small tail block needs dense treatment.
+
+Measured on `n = 5, m = 3` (17 unknowns):
+
+| degree | matrix | dense | sparse | speedup | row weight / cols |
+|-------:|--------|------:|-------:|--------:|------------------:|
+| 3 | 95 × 452 | 0.2 ms | 0.2 ms | 1.17× | 69 / 452 |
+| 4 | 860 × 2 466 | 5.7 ms | 2.5 ms | 2.29× | 270 / 2 466 |
+| 5 | 4 940 × 8 357 | 236.5 ms | 49.0 ms | 4.83× | 569 / 8 357 |
+| 6 | 20 240 × 20 686 | 27 375.7 ms | 2 864.5 ms | **9.56×** | 1 852 / 20 686 |
+
+End to end on the same cell: **493.8 s → 81.9 s, 6.03×**, with the
+result unchanged — FFD 3.00, solving degree 6.00, gap 3.00.
+
+Fill-in is the failure mode this design could have had, and it does not
+materialise: the heaviest row reaches 9 % of the column count at degree
+6, so min-weight pivoting holds and the rows stay sparse through
+elimination.
+
+**A profiling failure worth recording.**  The first conversion covered
+`solving_degree` only, and the end-to-end sweep did not move at all —
+493.8 s against 497.6 s.  The 9.56× was real the whole time and
+invisible, because `dreg_summary` does two independent things and only
+one had been converted: `solving_degree` walks to the degree that
+resolves and stops, at 6, while `first_fall_degree` sweeps to `d_max`
+whatever the system does, at 7.  Dense work goes as `rows · cols²`, so
+degree 7 (32 140 × 41 226, 54.6 · 10¹²) is fourteen times degree 6
+(8 340 × 21 778, 3.96 · 10¹²) — about 466 s of the 494 s total, in the
+half left untouched.  Measuring the path that was changed rather than
+the program is how a tenfold win reads as none.
+
+### What it unblocks
+
+The 27-unknown cells — `n = 9` and `n = 15`, which share an unknown
+count and differ sharply in field degree, and so separate "the gap grows
+with `n`" from "the gap grows with the matrix" — were 13.6 and 22.6 days
+per draw under dense elimination.  At the measured 6.03× they are **2.3
+and 3.7 days**.  That does not make them cheap; it makes them a decision
+about compute rather than an impossibility.  And 6.03× is a floor for
+them rather than an estimate: the per-degree speedup grows with matrix
+size across every degree measured, and those cells are larger than
+anything in the table above.
+
+The single-cell caveat on Result 2 is unchanged.  What has changed is
+that the experiment which would lift it is now schedulable.
+
 ## Reproducing
 
 ```sh

@@ -9,10 +9,14 @@
 # client is a static-cudart binary built by build.sh from CUDA 13.3, which the
 # 580 driver runs under CUDA 13.x minor-version compatibility because the build
 # carries native sm_120 code and never needs the PTX JIT.  If the campaign has
-# no published binary yet, this instance builds it (Docker, ~10 minutes) from
-# the source tarball push_source.sh uploaded, so a pilot needs no interactive
-# access.  The GPU fixtures must pass, and must report the preset's arithmetic,
-# before any worker starts.
+# no published binary yet, or the published prefix is missing a GPU fixture,
+# this instance builds it (Docker, ~10 minutes) from the source tarball
+# push_source.sh uploaded, so a pilot needs no interactive access.  A present
+# client with a 404 fixture is the same failure as a missing client: the
+# 2026-09-17 fleet died on exactly that (binaryKey existed, test-packed-
+# storage-cuda did not) because the old gate treated it as fatal.  The GPU
+# fixtures must pass, and must report the preset's arithmetic, before any
+# worker starts.
 # One systemd unit per GPU runs worker.py; logs are copied to S3 every
 # five minutes so the campaign can be watched without ssh.
 
@@ -30,8 +34,15 @@ cd "$ROOT"
 TOKEN=$(curl -s -m 2 -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 300")
 IID=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 IID=${IID:-unknown}
+CLAIMED_BUILD=0
 shipLog() { aws s3 cp /var/log/ecc2k130-bootstrap.log "s3://$BUCKET/logs/$IID/bootstrap.log" --only-show-errors; }
-trap shipLog EXIT
+onExit() {
+    if [ "$CLAIMED_BUILD" = 1 ]; then
+        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
+    fi
+    shipLog
+}
+trap onExit EXIT
 echo "instance $IID"
 
 # The driver can still be loading right after boot.
@@ -45,23 +56,67 @@ nvidia-smi --query-gpu=name,driver_version,clocks.max.sm,power.limit --format=cs
 
 aws s3 cp "s3://$BUCKET/campaign.json" campaign.json || { echo "no campaign.json in s3://$BUCKET"; exit 1; }
 field() { python3 -c 'import json,sys; print(json.load(open("campaign.json")).get(sys.argv[1], ""))' "$1"; }
-BIN=$(field binaryKey)
-if [ -z "$BIN" ] || ! aws s3api head-object --bucket "$BUCKET" --key "$BIN" >/dev/null 2>&1; then
+FIXTURES="test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda"
+
+s3_has() { aws s3api head-object --bucket "$BUCKET" --key "$1" >/dev/null 2>&1; }
+prefix_complete() {
+    local bin=$1 prefix f
+    [ -n "$bin" ] || return 1
+    s3_has "$bin" || return 1
+    prefix=$(dirname "$bin")
+    for f in $FIXTURES; do
+        s3_has "$prefix/$f" || return 1
+    done
+    return 0
+}
+
+build_from_source() {
+    local SRC
     SRC=$(field sourceKey)
-    [ -n "$SRC" ] || { echo "no published binary and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
-    echo "no published binary; building from $SRC"
+    [ -n "$SRC" ] || { echo "published prefix incomplete and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
+    echo "published prefix incomplete; building from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
     BUCKET=$BUCKET ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
+}
+
+BIN=$(field binaryKey)
+if ! prefix_complete "$BIN"; then
+    claim_out=$(aws s3api put-object --bucket "$BUCKET" --key "bin/.building" --body /dev/null --if-none-match "*" 2>&1)
+    claim_rc=$?
+    if [ "$claim_rc" -eq 0 ]; then
+        CLAIMED_BUILD=1
+        echo "claimed the build lock; compiling from sourceKey"
+        build_from_source
+        CLAIMED_BUILD=0
+        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
+    elif echo "$claim_out" | grep -qE 'PreconditionFailed|412'; then
+        echo "another instance is publishing the prefix; waiting for client+fixtures"
+        for i in $(seq 1 40); do
+            aws s3 cp "s3://$BUCKET/campaign.json" campaign.json --only-show-errors || true
+            BIN=$(field binaryKey)
+            prefix_complete "$BIN" && break
+            sleep 30
+        done
+        if ! prefix_complete "$BIN"; then
+            echo "waited 20 minutes; prefix still incomplete; building anyway"
+            build_from_source
+        fi
+    else
+        echo "build lock unavailable; building from sourceKey"
+        echo "$claim_out"
+        build_from_source
+    fi
+    BIN=$(field binaryKey)
+    prefix_complete "$BIN" || { echo "build did not publish client and all GPU fixtures; not starting workers"; exit 1; }
 fi
 PREFIX=$(dirname "$BIN")
-FIXTURES="test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda"
 aws s3 cp "s3://$BUCKET/$BIN" ecc2k130 --only-show-errors || { echo "client binary $BIN missing"; exit 1; }
 for f in $FIXTURES; do
     aws s3 cp "s3://$BUCKET/$PREFIX/$f" "$f" --only-show-errors \
-        || { echo "fixture $f missing from $PREFIX; not starting workers"; exit 1; }
+        || { echo "fixture $f missing from $PREFIX after rebuild; not starting workers"; exit 1; }
 done
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
