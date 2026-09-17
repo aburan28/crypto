@@ -84,11 +84,13 @@ def pair_sums(E, support: NormalSupport, reps, *, budget_seconds=None,
               log=print, name="run"):
     """Canonical `sigma`-orbit key for every canonical signed pair-orbit.
 
-    Returns `(keys, pairs, complete, elapsed)` where `keys[i]` is the key of
-    `pairs[i]`, and `pairs[i]` is `(ia, ib, eps)` into the support.
+    Returns `(keys, pairs, sums, complete, elapsed)` where `keys[i]` is the
+    key of `pairs[i]`, `pairs[i]` is `(ia, ib, eps)` into the support, and
+    `sums[i]` is the pair sum itself -- kept so the `E[4]` translate probe
+    does not recompute a hundred thousand group additions.
     """
     total = support.pair_orbit_count()
-    keys, pairs = [], []
+    keys, pairs, sums = [], [], []
     started = time.time()
     last = started
     complete = True
@@ -101,6 +103,7 @@ def pair_sums(E, support: NormalSupport, reps, *, budget_seconds=None,
             if S is not None:
                 keys.append(support.sigma_canonical_x(S[0]))
                 pairs.append(p)
+                sums.append(S)
         buf_a.clear(); buf_b.clear(); buf_p.clear()
 
     for ia, ib, eps in support.canonical_pair_orbits():
@@ -120,43 +123,100 @@ def pair_sums(E, support: NormalSupport, reps, *, budget_seconds=None,
                 complete = False
                 break
     flush()
-    return keys, pairs, complete, time.time() - started
+    return keys, pairs, sums, complete, time.time() - started
+
+
+def is_identity_relation(E, k1, k2, eps, probes=8, rng=None):
+    """True when `2A + eps sigma^k1 A + eps sigma^k2 A = O` for *every* `A`.
+
+    The Frobenius of a Koblitz curve satisfies `sigma^2 + sigma + 2 = 0`, so
+    patterns such as `(k1, k2, eps) = (1, 2, +1)` and `(1, 3, -1)` vanish
+    identically -- on every point of the curve, whatever its logarithm.  They
+    are construction equations in the sense of section 3 of the research
+    note: real relations, real rank, zero information.
+
+    Tested rather than derived, by evaluating the pattern at random curve
+    points that have nothing to do with the support.
+    """
+    rng = rng or random.Random(1)
+    F = E.F
+    for _ in range(probes):
+        A = None
+        while A is None:
+            pts = E.points_over(rng.getrandbits(F.deg) & F.mask)
+            if pts:
+                A = pts[0]
+        B = A
+        for _ in range(k1):
+            B = E.frobenius(B)
+        C = A
+        for _ in range(k2):
+            C = E.frobenius(C)
+        if eps < 0:
+            B, C = E.neg(B), E.neg(C)
+        if E.sum_points([A, A, B, C]) is not None:
+            return False
+    return True
 
 
 def certify(E, support, reps, pa, pb, e4):
-    """Recompute a candidate in full; return the relation or a rejection reason.
+    """Recompute a candidate in full and say what it is.
 
-    A candidate says two pair sums agree up to `sigma` and up to an `E[4]`
-    translate.  Which rotation, which sign and which translate is not
-    recorded -- recovering it costs `131 * 2 * 4` group additions and is
-    only ever done for a candidate, which is rare.
+    Returns `(kind, detail)` with `kind` one of:
+
+      * `"relation"` -- four distinct abscissae summing into `E[4]`;
+      * `"identity"` -- the relation holds for every point of the curve,
+        being a consequence of `sigma^2 + sigma + 2 = 0`.  This is what the
+        orbit-grouped search actually turns up, and it is worth naming
+        rather than discarding as noise: the search is rediscovering the
+        endomorphism ring, not the logarithm;
+      * `"repeated_point"` -- fewer than four distinct abscissae, and not an
+        identity;
+      * `None` -- a key collision that does not survive recomputation.
+
+    Which rotation, sign and `E[4]` translate produced the candidate is not
+    recorded, so all of them are retried here.  That costs `131 * 4` group
+    sums and is only ever paid for a candidate, which is rare.
     """
     ia, ib, ea = pa
     ic, idd, ec = pb
     A = reps[ia]
     B = reps[ib] if ea > 0 else E.neg(reps[ib])
+    tc, kc = divmod(ic, support.m)
+    td, kd = divmod(idd, support.m)
+    ta, ka = divmod(ia, support.m)
+    tb, kb = divmod(ib, support.m)
+    repeated = None
     for k in range(support.m):
-        C0 = reps[support.index(*divmod(ic, support.m))] if False else None
-        tc, kc = divmod(ic, support.m)
-        td, kd = divmod(idd, support.m)
-        C = reps[support.index(tc, kc + k)]
+        C0 = reps[support.index(tc, kc + k)]
         D0 = reps[support.index(td, kd + k)]
-        for sd in (1, -1):
-            D = D0 if (ec * sd) > 0 else E.neg(D0)
-            for sc in (1, -1):
-                Cs = C if sc > 0 else E.neg(C)
-                xs = {A[0], B[0], Cs[0], D[0]}
-                if len(xs) < 4:
+        for sc in (1, -1):
+            Cs = C0 if sc > 0 else E.neg(C0)
+            for sd in (1, -1):
+                Ds = D0 if (ec * sd) > 0 else E.neg(D0)
+                S = E.sum_points([A, B, Cs, Ds])
+                if S not in e4:
                     continue
-                S = E.sum_points([A, B, Cs, D])
-                if S in e4 or (S is None and None in e4):
-                    return {
+                xs = {A[0], B[0], Cs[0], Ds[0]}
+                if len(xs) == 4:
+                    return "relation", {
                         "points": [[hex(p[0]), hex(p[1])]
-                                   for p in (A, B, Cs, D)],
+                                   for p in (A, B, Cs, Ds)],
                         "sum": "O" if S is None else hex(S[0]),
                         "exact": S is None,
                     }
-    return None
+                if ta == tb == tc == td and A == Cs:
+                    k1 = (kb - ka) % support.m
+                    k2 = (kd + k - ka) % support.m
+                    if is_identity_relation(E, k1, k2, ea):
+                        return "identity", {
+                            "pattern": f"2A {'+' if ea > 0 else '-'} "
+                                       f"sigma^{k1} A {'+' if ea > 0 else '-'} "
+                                       f"sigma^{k2} A = O",
+                            "orbit": ta,
+                        }
+                repeated = ("repeated_point", {"distinct_abscissae": len(xs)})
+    return repeated if repeated else (None, None)
 
 
 def run_basis(E, r, alpha, e4, *, budget_seconds, log=print, name="basis"):
@@ -174,7 +234,7 @@ def run_basis(E, r, alpha, e4, *, budget_seconds, log=print, name="basis"):
     assert support.is_sigma_stable(), "support must be closed under sigma"
     assert not support.mixed_orbits, "lifting must be constant on an orbit"
 
-    keys, pairs, complete, elapsed = pair_sums(
+    keys, pairs, sums, complete, elapsed = pair_sums(
         E, support, reps, budget_seconds=budget_seconds, log=log, name=name)
 
     # Collision search: a shared canonical key, or a key matching an E[4]
@@ -192,10 +252,9 @@ def run_basis(E, r, alpha, e4, *, budget_seconds, log=print, name="basis"):
     translate_hits = 0
     nonzero_e4 = [T for T in e4 if T is not None]
     if nonzero_e4:
-        for i, (ia, ib, eps) in enumerate(pairs):
-            S = E.add(reps[ia], reps[ib] if eps > 0 else E.neg(reps[ib]))
-            for T in nonzero_e4:
-                ST = E.add(S, T)
+        for T in nonzero_e4:
+            # One batched inversion per translate, rather than one per pair.
+            for i, ST in enumerate(R.batch_add(E, sums, [T] * len(sums))):
                 if ST is None:
                     continue
                 for j in index.get(support.sigma_canonical_x(ST[0]), ()):
@@ -203,14 +262,18 @@ def run_basis(E, r, alpha, e4, *, budget_seconds, log=print, name="basis"):
                         candidates.append((i, j))
                         translate_hits += 1
 
-    certified, rejected = [], 0
+    certified, identities, repeated, unresolved = [], [], 0, 0
     e4set = set(e4)
     for i, j in candidates:
-        rel = certify(E, support, reps, pairs[i], pairs[j], e4set)
-        if rel is None:
-            rejected += 1
+        kind, detail = certify(E, support, reps, pairs[i], pairs[j], e4set)
+        if kind == "relation":
+            certified.append(detail)
+        elif kind == "identity":
+            identities.append(detail)
+        elif kind == "repeated_point":
+            repeated += 1
         else:
-            certified.append(rel)
+            unresolved += 1
 
     pred = supply_prediction(support.size, 4 * r, len(e4))
     return {
@@ -227,7 +290,11 @@ def run_basis(E, r, alpha, e4, *, budget_seconds, log=print, name="basis"):
         "pairs_per_second": round(len(pairs) / elapsed, 1) if elapsed else None,
         "raw_candidates": len(candidates),
         "translate_candidates": translate_hits,
-        "rejected_degenerate": rejected,
+        "characteristic_equation_hits": len(identities),
+        "characteristic_equation_patterns": sorted(
+            {d["pattern"] for d in identities}),
+        "repeated_point_hits": repeated,
+        "unresolved_key_collisions": unresolved,
         "certified_relations": len(certified),
         "relations": certified[:16],
         "log2_expected_usable": pred["log2_expected_usable"],

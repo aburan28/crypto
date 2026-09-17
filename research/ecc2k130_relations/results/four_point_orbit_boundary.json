@@ -1,0 +1,63 @@
+{
+  "instance": "ECC2K-130",
+  "m": 4,
+  "log2_r": 129.0,
+  "frobenius_order": 131,
+  "rho_reference_log2": 60.809,
+  "rho_reference_source": "experiments/ecc2k130_extension_field_boundary.json -> target.log2_rho_reference",
+  "convention": "cost measured at the floor B_4, as in section 1 of RESEARCH_ECC2K130_RELATION_SWEEPS.md; a logarithm priced at one relation per unknown",
+  "rows": [
+    {
+      "accounting": "section 1, as published",
+      "note": "multiset floor (4! r)^(1/4); B^2/2 pair sums stored as 32-byte points; B relations for a logarithm",
+      "log2_support_size": 33.396,
+      "log2_cost_one_relation": 65.792,
+      "bytes_per_stored_entry": 32,
+      "log2_memory_bytes": 70.792,
+      "memory_exabytes": 2044.8,
+      "log2_relations_needed": 33.396,
+      "log2_total_cost": 99.189,
+      "log2_one_relation_vs_rho": 4.983,
+      "log2_total_vs_rho": 38.38
+    },
+    {
+      "accounting": "corrected floor",
+      "note": "8 C(B,4)/r = 1 gives B_4 = (3r)^(1/4); search space and cofactor corrected, no Frobenius quotient yet",
+      "log2_support_size": 32.646,
+      "log2_cost_one_relation": 64.292,
+      "bytes_per_stored_entry": 32,
+      "log2_memory_bytes": 69.292,
+      "memory_exabytes": 723.0,
+      "log2_relations_needed": 32.646,
+      "log2_total_cost": 96.939,
+      "log2_one_relation_vs_rho": 3.483,
+      "log2_total_vs_rho": 36.13
+    },
+    {
+      "accounting": "+ orbit-grouped pair sums",
+      "note": "one canonical class key per sigma-orbit of pairs: 131x fewer entries, 8-byte keys; unknowns still counted per point",
+      "log2_support_size": 32.646,
+      "log2_cost_one_relation": 57.259,
+      "bytes_per_stored_entry": 8,
+      "log2_memory_bytes": 60.259,
+      "memory_exabytes": 1.4,
+      "log2_relations_needed": 32.646,
+      "log2_total_cost": 89.905,
+      "log2_one_relation_vs_rho": -3.55,
+      "log2_total_vs_rho": 29.096
+    },
+    {
+      "accounting": "+ one unknown per orbit",
+      "note": "log(sigma^k R) = s^k log(R), so a B-point support carries B/131 unknowns and needs B/131 relations",
+      "log2_support_size": 32.646,
+      "log2_cost_one_relation": 57.259,
+      "bytes_per_stored_entry": 8,
+      "log2_memory_bytes": 60.259,
+      "memory_exabytes": 1.4,
+      "log2_relations_needed": 25.613,
+      "log2_total_cost": 82.872,
+      "log2_one_relation_vs_rho": -3.55,
+      "log2_total_vs_rho": 22.063
+    }
+  ]
+}

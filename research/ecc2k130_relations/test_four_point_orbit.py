@@ -22,6 +22,7 @@ from fourpoint import (configurations, exhaustive_four_point,  # noqa: E402
 from normalbasis import (NormalSupport, conjugates,          # noqa: E402
                          find_normal_elements, is_normal)
 from planted import frobenius_scalar, recover_planted        # noqa: E402
+from run_four_point_orbit import is_identity_relation         # noqa: E402
 
 SEED = 20260917
 
@@ -246,6 +247,23 @@ def test_frobenius_scalar_is_found_without_a_logarithm():
     assert E.mul(Q, s) == E.frobenius(Q)
     assert pow(s, 131, r) == 1
     assert (s * s + s + 2) % r == 0
+
+
+def test_characteristic_equation_patterns_are_identities():
+    """The only collisions the ECC2K-130 run finds, identified rather than binned.
+
+    `sigma^2 + sigma + 2 = 0` makes `2A + sigma A + sigma^2 A` vanish on every
+    point of the curve, and `sigma^3 = 2 - sigma` makes `2A - sigma A -
+    sigma^3 A` do the same.  Both are construction equations: real relations
+    carrying no information at all.
+    """
+    _, E, _, _, _ = R.challenge_curve()
+    assert is_identity_relation(E, 1, 2, +1)
+    assert is_identity_relation(E, 1, 3, -1)
+    # neighbouring patterns must not be mistaken for identities
+    assert not is_identity_relation(E, 2, 3, +1)
+    assert not is_identity_relation(E, 1, 4, -1)
+    assert not is_identity_relation(E, 1, 2, -1)
 
 
 def test_planted_logarithm_is_recovered_end_to_end():

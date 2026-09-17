@@ -17,6 +17,15 @@ signed pairs, and `run_four_point.py` writes `four_point_summary.json` and
 written. An earlier version of this file listed those two names as though
 they were present. They were not, and the note cites no number from them.
 
+The orbit-grouped four-point sweep that replaces it is in
+
+* `four_point_orbit_summary.json`, `four_orbit_nb<N>.json` — one file per
+  normal basis, eight of them, every one complete;
+* `four_point_orbit.log` — progress log;
+* `four_point_orbit_boundary.json` — what the Frobenius quotient is worth
+  against the `m = 4` cost boundary, derived not measured, from
+  `orbit_boundary.py`. The rho reference is the same cited 2^60.809.
+
 `run.log.live` carries its name for an unglamorous reason. The first
 three-point run was launched with its output redirected to `run.log`, and a
 later `git stash` of this directory replaced that file's inode, which left the
