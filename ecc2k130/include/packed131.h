@@ -425,7 +425,9 @@ ECC_HD uint64_t spread32p(uint32_t x){
     benchmarks/clmad-price measures is 37.7 -- and is still the right trade
     because the two pipes are not equally loaded.  Nsight Compute puts the ALU
     pipe at 87.3% here and the FP64 pipe that carries clmad at 51.4%, so the
-    walk is short of ALU and has carryless capacity to spend. */
+    walk is short of ALU and has carryless capacity to spend.  The same
+    direction holds on Ada: benchmarks/preblackwell measured CLMAD=1 at
+    1.811× the software product on an L40S and 1.881× on an L4. */
  uint64_t r;
  asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"((uint64_t)x));
  return r;

@@ -1223,6 +1223,25 @@ class SharedSigmaBuildTests(unittest.TestCase):
                 self.assertIn('--workers 385024', result.stdout)
                 self.assertIn('--min-blocks 2', result.stdout)
 
+    def test_preblackwell_targets_bind_gpu_arch_and_fastest_product(self):
+        # Ada receipt selected CLMAD=1; Turing has no clmad. See
+        # benchmarks/preblackwell/summary.json.
+        cases = (
+            ('bench-g6-modal', 'ECC_GPU=L4', '1'),
+            ('bench-g6e-modal', 'ECC_GPU=L40S', '1'),
+            ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
+            ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
+            ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
+            ('gpu-g4dn', 'arch=compute_75,code=sm_75', '0'),
+        )
+        for target, needle, clmad in cases:
+            result = subprocess.run(['make', '-n', target], cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn(needle, result.stdout)
+            hay = result.stdout.replace('ECC_PACKED_CLMAD=', 'PACKED_CLMAD=')
+            self.assertIn('PACKED_CLMAD=' + clmad, hay)
+            self.assertIn('--batch 16' if target.startswith('bench-') else 'BATCH=16', result.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()

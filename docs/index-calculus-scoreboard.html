@@ -1434,6 +1434,36 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/README.md">experiment report</a>.</p>
   </section>
 
+  <section aria-labelledby="preblackwell-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="preblackwell-result">ECC2K-130 GPU engineering: g6 / g6e / g4dn packed clients</h2>
+    <p>Completed on successive Modal allocations (driver 580.95.05, CUDA 13.3.1):
+    L40S (g6e, 142 SMs), L4 (g6, 58 SMs, 72&nbsp;W), Tesla T4 (g4dn, 40 SMs).
+    The shipping packed walk is unchanged at 5.3125 field products per update.
+    The generic-group boundary and exponent are unchanged; these are
+    engineering practicality measurements. Ada <code>CLMAD=1</code> is now the
+    generated default for <code>sm_89</code>. Turing stays on the software
+    product. The live campaign binary remains the sm_120 Blackwell client.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ scaled prior</th><th scope="col">/ 6000 15.116</th><th scope="col">/ matched software</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody>
+      <tr><td>RTX PRO 6000 shipping (reference)</td><td>15.115792</td><td>&mdash;</td><td>1.000</td><td>&mdash;</td><td>top-clmad control</td></tr>
+      <tr><td>L40S software <code>CLMAD=0</code> (before)</td><td>4.879118</td><td>0.887 vs 5.5</td><td>0.323</td><td>1.000</td><td>3/3, 128 regs, 72,704 workers</td></tr>
+      <tr><td>L40S <code>CLMAD=1</code></td><td>8.838416</td><td>1.607 vs 5.5</td><td>0.585</td><td>1.811</td><td>3/3, 94 regs; Ada default</td></tr>
+      <tr><td>L4 software <code>CLMAD=0</code> (before)</td><td>1.323708</td><td>0.576 vs 2.3</td><td>0.088</td><td>1.000</td><td>3/3, 128 regs, 29,696 workers</td></tr>
+      <tr><td>L4 <code>CLMAD=1</code></td><td>2.490035</td><td>1.083 vs 2.3</td><td>0.165</td><td>1.881</td><td>3/3, 94 regs; Ada default</td></tr>
+      <tr><td>T4 software (g4dn)</td><td>0.533211</td><td>0.267 vs 2.0 upper</td><td>0.035</td><td>&mdash;</td><td>3/3, 128 regs, 20,480 workers; no clmad</td></tr>
+    </tbody></table>
+    <p>Each rate is a median of three complete-scalar benches with automatic
+    workers (2&nbsp;&times;&nbsp;256 &times; SM count). Priors are the H1+H2
+    SM-scaling predictions written before the run, not floors. Software on the
+    L40S matched the &ldquo;Ada SM is half of Blackwell&rdquo; story (34.4 vs
+    80.4&nbsp;M it/s per SM). Native carryless products moved the walk off that
+    pipe and beat the prior; that is why Ada defaults to <code>CLMAD=1</code>.
+    Collecting rates and iterations-per-dollar are unmeasured. No
+    mixed-architecture fleet: one <code>binaryKey</code>.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/preblackwell/summary.json">preblackwell measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/ADA-L4-L40S.md">Ada note</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/T4-G4DN.md">T4 note</a>.</p>
+  </section>
+
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
