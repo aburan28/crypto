@@ -17,6 +17,26 @@
       "relations_found": 0,
       "relations_verified_on_curve": 0,
       "log2_expected_by_yield_law": -95.41301786737304
+    },
+    {
+      "name": "weight_at_most_two",
+      "base_size": 4336,
+      "pairs_total": 9402616,
+      "complete": true,
+      "elapsed_seconds": 493.744,
+      "relations_found": 1,
+      "relations_verified_on_curve": 1,
+      "log2_expected_by_yield_law": -95.33851537665954
+    },
+    {
+      "name": "weight_two_frobenius_stable",
+      "base_size": 1090,
+      "pairs_total": 594595,
+      "complete": true,
+      "elapsed_seconds": 27.501,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -101.3146252417283
     }
   ]
 }
