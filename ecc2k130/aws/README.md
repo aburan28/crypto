@@ -374,8 +374,21 @@ the merge's solve step verifies `[k]P == Q` independently anyway.
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through
   the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
-* `status.py` sums live workers' rates, checkpointed iterations × walks per
-  slot (survives restarts), uploaded points, and the fraction of 2^60.9.
+* `status.py` sums live workers' rates, each slot's checkpointed iterations ×
+  **that slot's own** walk count (survives restarts), uploaded points, and the
+  fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
+  holds the per-walk iteration base, and Ada slots omit `--threads` so the
+  client sizes the grid (`usesCampaignWorkers`), which makes their base climb
+  by the ratio of the two grids — about 26× on an L4-sized grid — for the same
+  group operations walked. Counting every slot at the 385,024 × 16 Blackwell
+  preset therefore inflated the headline, the fraction and the ETA by that
+  ratio while the points those slots produced stayed the same. Workers now
+  report `walks` per slot and the dashboard uses it; a slot that does not
+  report one is counted at `--walks` and listed as assumed, with the guessed
+  share printed. Any checkpoint-sum figure taken before that fix is an
+  over-count for exactly as long as a non-Blackwell slot was in the fleet —
+  including the 2^27.9 iterations-per-point row above if the 2026-09-15
+  fleet was not Blackwell-only.
   Its `rateBps` is what the walkers say about themselves right now; the
   public dashboard instead differences the checkpoint sum between two
   snapshots, which ran 72.5 B it/s against this 86–101 B it/s on
