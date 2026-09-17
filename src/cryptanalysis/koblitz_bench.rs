@@ -746,6 +746,14 @@ pub struct DregSummary {
     pub control_unsat_mean: Option<f64>,
     /// Infeasible-control draws that did not resolve.
     pub control_unsat_unresolved: usize,
+    /// Highest Macaulay degree built on any control draw.
+    ///
+    /// The controls need this for the same reason the real systems do:
+    /// without it, "did not resolve by `d_max`" and "exceeded the size
+    /// caps" are the same output, and only the first of those says
+    /// anything.  Omitting it here once forced the `n = 5, m = 3`
+    /// attribution to be settled by hand-computing the matrix size.
+    pub control_max_degree_built: Option<u32>,
 }
 
 impl DregSummary {
@@ -862,6 +870,13 @@ pub fn dreg_summary(
     let mut control_unresolved = 0usize;
     let mut control_unsat: Vec<u32> = Vec::new();
     let mut control_unsat_unresolved = 0usize;
+    let mut control_max_degree_built: Option<u32> = None;
+    let mut note_ctrl = |profs: &[crate::cryptanalysis::koblitz_groebner::SolvingProfile],
+                         acc: &mut Option<u32>| {
+        if let Some(top) = profs.last().map(|p| p.degree) {
+            *acc = Some(acc.map_or(top, |x: u32| x.max(top)));
+        }
+    };
     for t in 0..(if with_control { trials } else { 0 }) {
         // A fresh control per draw, deterministically derived from the
         // sweep seed so the whole table replays.
@@ -869,7 +884,9 @@ pub fn dreg_summary(
             .wrapping_mul(0x9E37_79B9_7F4A_7C15)
             .wrapping_add(t as u64);
         let polys = random_control_system(n_vars, n_eqs, degree, terms_per_eq, control_seed);
-        match solving_degree(&polys, n_vars, d_max).0 {
+        let (cd, cprofs) = solving_degree(&polys, n_vars, d_max);
+        note_ctrl(&cprofs, &mut control_max_degree_built);
+        match cd {
             Some(d) => control.push(d),
             None => control_unresolved += 1,
         }
@@ -883,7 +900,9 @@ pub fn dreg_summary(
             terms_per_eq,
             control_seed.wrapping_mul(0xA24B_AED4_963E_E407),
         );
-        match solving_degree(&unsat, n_vars, d_max).0 {
+        let (ud, uprofs) = solving_degree(&unsat, n_vars, d_max);
+        note_ctrl(&uprofs, &mut control_max_degree_built);
+        match ud {
             Some(d) => control_unsat.push(d),
             None => control_unsat_unresolved += 1,
         }
@@ -918,6 +937,7 @@ pub fn dreg_summary(
         control_expected_solutions: 2f64.powi(n_vars as i32 - n_eqs as i32),
         control_unsat_mean: mean(&control_unsat),
         control_unsat_unresolved,
+        control_max_degree_built,
     })
 }
 

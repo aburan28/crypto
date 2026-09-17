@@ -184,10 +184,40 @@ controls, bracketing the question rather than pretending to settle it:
   refutes, and is comparable like for like with the real systems'
   refutation degree.
 
-Until the infeasible control is read on the same cell, **whether the
-measured gap is Semaev structure or generic to systems of this shape is
-open.**  The gap itself is measured either way; only its attribution is
-pending.
+### Read on the `n = 5, m = 3` cell: the gap is structure, not shape
+
+`--d-max 7 --trials 1 --n-max 5 --m 3` at the raised caps, both controls
+on:
+
+| system | eqs | resolves at |
+|---|---:|---|
+| Semaev, `n = 5`, `m = 3` | 10 | **degree 6** |
+| shape-matched control | 10 | `n/a(sat)` — 128 expected solutions |
+| infeasible control | 21 | **not by degree 7** |
+
+The infeasible control ran every degree from 3 to 7 without resolving.
+That is a real non-resolution and not a size-cap artifact: at degree 7 it
+builds `21 · monomials_up_to(17, 4) = 67 494` rows over at most
+`41 226` columns, against caps of `2 000 000` and `200 000`.
+
+**The comparison is conservative in the direction that matters.**  The
+infeasible control carries *more* equations than the real system — 21
+against 10 — which should make refutation **easier**, not harder.  It
+still does not refute by degree 7 where the Semaev system refutes at 6.
+So the Semaev structure is doing something real: it resolves at a
+*lower* degree than a comparable, more heavily constrained random
+system.
+
+That direction is worth stating precisely, because it is not simply bad
+news for the attack.  Algebraic structure genuinely helps here.  What it
+does not do is rescue the first-fall-degree assumption: the first fall
+degree of this system is 3 and its solving degree is 6, so the statistic
+the complexity claim is stated in still understates the degree that
+costs, by a factor of two, on a system whose structure is demonstrably
+being exploited.
+
+The caveat on Result 2 is unchanged and is now the only thing standing
+between this and a scaling claim: one draw, one cell, `n = 5`.
 
 ## Reproducing
 
@@ -203,8 +233,6 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 
 ## Next
 
-- Read the infeasible control on the `n = 5, m = 3` cell and settle
-  whether the gap is structure or shape.
 - Extend the `m = 3` ladder past `n = 5` to turn a single gap into a
   scaling claim.  This is the one that matters and the one that is
   blocked on elimination cost, not on degree.
