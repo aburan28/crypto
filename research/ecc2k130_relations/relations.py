@@ -221,6 +221,7 @@ def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
     n = len(xs)
     found = set()
     seen_pairs = 0
+    total_pairs = n * (n + 1) // 2 if allow_repeats else n * (n - 1) // 2
 
     def pair_stream():
         for i in range(n):
@@ -238,7 +239,7 @@ def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
             if progress:
                 progress(seen_pairs, len(found))
             if budget_pairs and seen_pairs >= budget_pairs:
-                return sorted(found), seen_pairs, False
+                return sorted(found), seen_pairs, seen_pairs >= total_pairs
     if buf:
         seen_pairs += len(buf)
         _drain(E, buf, member, found, allow_repeats)
