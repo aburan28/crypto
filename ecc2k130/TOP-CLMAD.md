@@ -2,8 +2,9 @@
 
 `PACKED_TOP_CLMAD=1` moves the 3-bit top-word cross terms of `product131`
 from masked shifts onto `clmad`. Off by default. It requires `PACKED_CLMAD=1`.
-It has been measured in SASS with the shipping compiler and **has not been
-measured on a GPU**.
+SASS counted −5.4% ALU / +41% clmad and the pipe model said about +4%. On
+one RTX PRO 6000 the documented Make pair ran **15% slower** than the
+matched shipping product. The knob stays off.
 
 ## Why this product term, measured
 
@@ -94,6 +95,44 @@ make bench-rtx-pro6000 RTX_PRO6000_TOP_CLMAD=1
 The benchmark prints `packed top clmad: N` and the runner rejects a rate
 whose printed identity differs from the requested build, as it does for
 every other packed knob.
+
+## Measured on a card
+
+Two successive Modal allocations, both NVIDIA RTX PRO 6000 Blackwell
+Server Edition, driver 580.95.05, CUDA 13.3.1 image, same shipping
+preset (batch 16, 256 threads, minBlocks 2, 385,024 workers, 1,024
+steps, 32 launches, 3 repeats). Each sample completed 201,863,462,912
+scalar updates with zero drops. Identity matched the requested build
+on every sample: control printed `packed top clmad: 0` at 104
+registers; candidate printed `packed top clmad: 1` at 94 registers,
+the SASS count. Different GPU UUIDs; this is not an interleaved pair
+on one allocation.
+
+Receipts: [benchmarks/top-clmad/summary.json](benchmarks/top-clmad/summary.json),
+[control.json](benchmarks/top-clmad/control.json),
+[candidate.json](benchmarks/top-clmad/candidate.json).
+
+| variant | median B/s | samples | / control | / 14.637530 | / 23 B floor | / 25 B floor | correctness | class |
+|---|---:|---|---:|---:|---:|---:|---|---|
+| shipping product (matched control) | **15.115792** | 15.205241, 15.115792, 15.026171 | 1.000 | 1.033 | 0.657 | 0.605 | top clmad 0 | reference |
+| `PACKED_TOP_CLMAD=1` | 12.859376 | 12.820670, 12.859376, 12.868661 | **0.851** | 0.879 | 0.559 | 0.514 | top clmad 1 | engineering |
+
+Unit is billions of completed scalar updates per second. The one-add
+floor is the 23–25 B/s bound from [THROUGHPUT-30B.md](THROUGHPUT-30B.md).
+The 14.637530 column is the public shipping audit
+([SHARED-SIGMA.md](SHARED-SIGMA.md)); the ratio that decides the knob
+is the matched control from this pair. Every pair was slower. The
+predeclared 1% acceptance rule fails. Default remains 0.
+
+The SASS ALU cut happened (104 → 94 registers, identity gate on). The
+pipe model's +4% did not. The note already named the two ways that
+prediction fails: ten `clmad`s issued close together can stall a unit
+that is only 76% on average, and the 30 ALU of residue scheduled
+between them can cost more than 30 slots. The card chose one of those.
+This is not an advance against the one-add floor; the ratio fell.
+
+DP34 collection was not run. The complete-scalar bench already
+falsifies promotion; a second workload cannot loosen that rule.
 
 ## What was ruled out on the way
 

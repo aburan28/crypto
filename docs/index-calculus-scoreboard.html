@@ -1399,7 +1399,40 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     The historical 14.637530 B/s RTX PRO 6000 result is a different GPU, not a matched control.</p>
     <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/native-candidates/g7/summary.json">G7 measurement receipt</a>;
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/G7-NATIVE-RESULTS.md">experiment report and raw output</a>.</p>
-  </section>>>>>>>> 882ac7c2 (Add ECC performance dashboard and interactive algorithm lab)
+  </section>
+
+  <section aria-labelledby="top-clmad-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="top-clmad-result">ECC2K-130 GPU engineering: RTX PRO 6000 top-word clmad</h2>
+    <p>Completed on two successive Modal RTX PRO 6000 Blackwell Server Edition
+    allocations (driver 580.95.05, CUDA 13.3.1). The SASS count was −5.4% ALU /
+    +41% clmad; the pipe model predicted about +4%. The card ran 15% slower.
+    Field-product count is unchanged at 5.3125 per update. The generic-group
+    boundary and exponent are unchanged; this is an engineering practicality
+    measurement. The knob stays off.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ matched control</th><th scope="col">/ 23 B one-add floor</th><th scope="col">/ 25 B one-add floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Shipping product (matched control)</td><td>15.115792</td><td>1.000</td><td>0.657</td><td>0.605</td><td>top clmad 0 / reference</td></tr><tr><td><code>PACKED_TOP_CLMAD=1</code></td><td>12.859376</td><td>0.851</td><td>0.559</td><td>0.514</td><td>top clmad 1 / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample completed
+    201,863,462,912 updates with zero drops. Identity matched the requested build
+    (104 registers control, 94 candidate). Acceptance required at least 1% above
+    the matched control and every pair faster. DP34 was not run: the bench already
+    falsifies promotion.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/top-clmad/summary.json">TOP_CLMAD measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/TOP-CLMAD.md">experiment report</a>.</p>
+  </section>
+
+  <section aria-labelledby="eighteen-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="eighteen-result">ECC2K-130 GPU engineering: 18 B/s on one RTX PRO 6000</h2>
+    <p>The last priced leftovers — table walk and byte-pivot — were timed on
+    two successive Modal RTX PRO 6000 allocations (driver 580.95.05, automatic
+    96,256 workers). The one-add floor is 23–25 B/s, so 18 is not forbidden.
+    Neither arm cleared it. The campaign default stays the shipping walk.
+    Field-product count is unchanged at 5.3125 per update.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 18 B target</th><th scope="col">/ shipping 15.116</th><th scope="col">/ 23 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Shipping product</td><td>15.116</td><td>0.840</td><td>1.000</td><td>0.657</td><td>top clmad 0 / reference</td></tr><tr><td>Table walk</td><td>16.601</td><td>0.922</td><td>1.098</td><td>0.722</td><td>walk 1, pivot 0 / not accepted</td></tr><tr><td>Table walk + byte pivot</td><td>16.667</td><td>0.926</td><td>1.103</td><td>0.725</td><td>walk 1, pivot 1 / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample completed
+    50,465,865,728 updates. The byte pivot was priced at +2.4% and measured +0.4%.
+    This thread stops: the leftover that could still be priced has been measured.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/summary.json">18 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/README.md">experiment report</a>.</p>
+  </section>
 
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
@@ -1675,7 +1708,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <tr><td>dense</td><td>9.221e+05</td><td>0.999</td><td>22.13</td><td>3.317e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>excess8</td><td>9.217e+05</td><td>0.9986</td><td>22.12</td><td>3.316e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>window8</td><td>7.858e+05</td><td>0.8514</td><td>18.86</td><td>2.827e+07</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1894,7 +1927,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>3.171e+04</td><td>1</td><td>0.7422</td><td>1.141e+06</td><td>36/36</td><td>reference</td></tr>
 <tr><td>tiny2_cert_batch4</td><td>3.177e+04</td><td>1.002</td><td>0.7438</td><td>1.143e+06</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1923,7 +1956,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>1.425e+04</td><td>1</td><td>0.5598</td><td>5.128e+05</td><td>36/36</td><td>reference</td></tr>
 <tr><td>fastcurve_batch4</td><td>1.431e+04</td><td>1.004</td><td>0.5622</td><td>5.149e+05</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -2049,7 +2082,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
     <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
       <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
-  </section>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+  </section>
 <!-- BEGIN ic-tournament-round-autolab-20260915 -->
 <section class="panel" id="ic-tournament-round-autolab-20260915">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -2179,7 +2212,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 </tbody></table></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
-<!-- END ic-tournament-round-20260915t224645z -->>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<!-- END ic-tournament-round-20260915t224645z -->
 <!-- BEGIN ic-tournament-round-0006b-single -->
 <section class="panel" id="ic-tournament-round-0006b-single">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>

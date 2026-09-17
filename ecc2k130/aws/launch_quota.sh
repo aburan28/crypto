@@ -18,7 +18,8 @@ STACK=ecc2k130
 # 2xlarge = 8 vCPU = 1 GPU. Larger sizes waste quota on fewer GPUs.
 UNIT_VCPU=8
 TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge}
-REGIONS=${REGIONS:-us-west-2,us-east-1,us-east-2,eu-central-1,ap-northeast-1}
+# Every opted-in region that currently offers g7 or g7e.
+REGIONS=${REGIONS:-us-west-2,us-east-1,us-east-2,eu-central-1,eu-north-1,eu-west-2,ap-northeast-1,ap-northeast-2,ap-south-1}
 
 vcpu_of() {
     case "$1" in
@@ -170,6 +171,16 @@ fill_market() {
             [ "$left" -ge 2 ] || break
             launch_n "$region" "$market" "$type" $((left / 2))
             left=$((left - LAUNCHED_N * 2))
+            if [ "${STOP_REGION:-0}" -eq 1 ]; then
+                return 0
+            fi
+        done
+    fi
+    if [ "$left" -ge 4 ]; then
+        for type in g7e.8xlarge g7.8xlarge; do
+            [ "$left" -ge 4 ] || break
+            launch_n "$region" "$market" "$type" $((left / 4))
+            left=$((left - LAUNCHED_N * 4))
             if [ "${STOP_REGION:-0}" -eq 1 ]; then
                 return 0
             fi
