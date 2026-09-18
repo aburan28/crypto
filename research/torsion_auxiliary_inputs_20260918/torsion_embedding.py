@@ -1,6 +1,6 @@
 """The torsion-point route: an elliptic curve E'/F_p as the auxiliary group.
 
-Kim–Cheon (Math. Comp. 2014; survey §5) replace the multiplicative group
+Cheon–Kim (LMS J. Comput. Math. 2016, ePrint 2012/609; survey §5) replace the multiplicative group
 F_p^* of Cheon's p − 1 case by an auxiliary elliptic curve E' over the
 *scalar* field F_p, with #E'(F_p) = d·δ.  A point P with x(P) = rα is
 mapped by the multiplication-by-d map into the subgroup H of order δ,
