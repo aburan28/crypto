@@ -168,9 +168,10 @@ static const int TW_SEL0 = (ECC_TABLE_ADDEND_GLOBAL || ECC_TABLE_SELECTION_GLOBA
 static const size_t TW_SHARED_BYTES =
     size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS :
            (ECC_TABLE_SELECTION_GLOBAL ? TW_TABLE_WORDS : TW_WORDS)) * sizeof(uint32_t);
-// 49,780 bytes with bank padding plus the driver's measured 1,024-byte
-// reservation still permits one 512-thread block on the 100 KiB SM.
-static_assert(TW_SHARED_BYTES <= 50 * 1024, "table walk tables exceed the measured shared-memory budget");
+// The fused 16-bit phase table raises the one-block experiment to 54,132
+// bytes. The runtime opts in above 48 KiB; keep every layout below the
+// device's 96 KiB portable dynamic-shared budget.
+static_assert(TW_SHARED_BYTES <= 96 * 1024, "table walk tables exceed the dynamic shared-memory budget");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
               "selection tables must fit three blocks in a 100 KB SM");
 
