@@ -8,8 +8,13 @@
 #   BUCKET=... ./build.sh /path/to/ecc2k130            (a checkout on this host)
 #
 # Produces s3://$BUCKET/bin/<sha>/{ecc2k130,ecc2k130-cpu,test-packed-cuda,
-# test-packed-storage-cuda,test-shared-sigma-cuda,manifest.json} and points
-# campaign.json at them.  The client is compiled with the RTX PRO 6000 preset
+# test-packed-storage-cuda,test-shared-sigma-cuda,manifest.json}.  By default
+# it also points campaign.json at them (the incomplete-prefix bootstrap
+# rebuild needs that).  A kernel optimisation must not flip the live pointer:
+#   POINT_CAMPAIGN=0 ./build.sh --stage <src>
+# publishes the prefix and rollouts/<sha>.json only; ./rollout.sh activate
+# is what rewrites campaign.json, and only after the frozen-geometry gate.
+# The client is compiled with the RTX PRO 6000 preset
 # knobs (batch 16, 256-thread blocks, minBlocks 2, native carryless products,
 # 256-worker tiles, compact storage, weighted prefixes and shared Frobenius
 # masks) for sm_120 only unless ARCHES says otherwise.  Native carryless
@@ -17,16 +22,15 @@
 # 13.0; the toolkit and knobs here are the ones ../RTX-PRO6000.md measured at
 # 14.1 B iterations/s collecting.
 #
-# CLMAD is the one preset knob that does NOT travel with ARCHES.  NVIDIA
-# documents `clmad` for sm_80 and later, but the only reason this campaign pays
-# for it is a pipe balance measured on sm_120 alone: the walk sat at 87.3% ALU
-# and 51.4% on the pipe that carries clmad, so a carryless op that costs ~37.7
-# ALU ops was still the cheaper side (../include/packed131.h, ../TOP-CLMAD.md).
-# An Ada part (sm_89, EC2 g6/g6e) has a different mix of units, and nothing in
-# this tree has measured clmad there.  So CLMAD defaults to 1 only for a
-# Blackwell-only build and to 0 the moment a pre-Blackwell architecture is in
-# ARCHES; set CLMAD=1 explicitly to override, and measure before you do
-# (../ADA-L4-L40S.md, benchmarks/ada/run.sh).
+# CLMAD is the one preset knob that does NOT travel with every ARCHES value.
+# NVIDIA documents `clmad` for sm_80 and later. Blackwell pays for it on a
+# measured pipe balance (87.3% ALU / 51.4% carryless on sm_120). Ada (sm_89,
+# EC2 g6/g6e) now has its own receipt: CLMAD=1 is 1.811× the software product
+# on an L40S and 1.881× on an L4 (../benchmarks/preblackwell/summary.json).
+# Turing (sm_75, g4dn) cannot issue the instruction. Ampere (80/86) and
+# Hopper (90) remain unmeasured, so they still default off. CLMAD defaults
+# to 1 for Blackwell and/or Ada and to 0 the moment 75, 80, 86 or 90 is in
+# ARCHES; set CLMAD=1 explicitly to override after a receipt.
 #
 # Typical use: run on the pilot g7e instance over ssh/SSM, where Docker and
 # the AWS CLI are present and the instance role can write to the bucket.
@@ -38,10 +42,22 @@ if [ -z "${BUCKET:-}" ]; then
     ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
     BUCKET=$STACK-$ACCOUNT
 fi
-ARCHES=${ARCHES:-120}                 # "120" or "89 90 120"
-# Default off as soon as anything older than Blackwell is requested; see above.
+POINT_CAMPAIGN=${POINT_CAMPAIGN:-1}
+srcArgs=()
+for a in "$@"; do
+    if [ "$a" = "--stage" ]; then
+        POINT_CAMPAIGN=0
+    else
+        srcArgs+=("$a")
+    fi
+done
+set -- "${srcArgs[@]}"
+ARCHES=${ARCHES:-120}                 # "120", "89", "75", or "75 89 120"
+# Default on for Blackwell (120) and Ada (89). Off if Turing or an
+# unmeasured pre-Blackwell arch is in the set; see the header comment.
+# sm_75 is the EC2 g4dn (T4) client; clmad is not a T4 instruction.
 case " $ARCHES " in
-    *" 80 "*|*" 86 "*|*" 89 "*|*" 90 "*) clmadDefault=0 ;;
+    *" 75 "*|*" 80 "*|*" 86 "*|*" 90 "*) clmadDefault=0 ;;
     *) clmadDefault=1 ;;
 esac
 CLMAD=${CLMAD:-$clmadDefault}
@@ -83,7 +99,14 @@ defs="-DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0"
 for kv in $knobs; do defs="$defs -DECC_${kv%%=*}=${kv#*=}"; done
 
 echo "building in $CUDA_IMAGE for sm_{$ARCHES} (ptxas takes several minutes per architecture)"
-docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c "
+# The Deep Learning AMI's docker can reset mid-pull on a fresh box (the first
+# g6 fleet died on "connection reset by peer" / "client connection is closing").
+# Three attempts; the published prefix is only pointed at after a successful
+# compile.
+docker_ok=0
+for attempt in 1 2 3; do
+    echo "docker compile attempt $attempt/3"
+    if docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c "
     apt-get update -q >/dev/null && apt-get install -y -q build-essential python3 >/dev/null
     cd codegen && python3 gen.py --out ../generated --leaf 0 && cd ..
     make gpu ARCH='$gencode' $knobs 2>&1 | tail -n 40
@@ -101,6 +124,17 @@ docker run --rm -v "$work/src:/src" -w /src "$CUDA_IMAGE" bash -euo pipefail -c 
     cp /usr/lib/x86_64-linux-gnu/libgomp.so.1 build/libgomp.so.1
     chown -R $(id -u):$(id -g) . 2>/dev/null || true
 "
+    then
+        docker_ok=1
+        break
+    fi
+    echo "docker compile attempt $attempt failed; waiting 20s"
+    sleep 20
+done
+if [ "$docker_ok" != 1 ]; then
+    echo "docker compile failed after 3 attempts" >&2
+    exit 1
+fi
 
 # Source identity: the same recipe as modal_app.benchmarkIdentity, so a number
 # measured on Modal and a number measured here can be tied to the same code.
@@ -125,11 +159,12 @@ buildSha=$(printf '%s\n%s\n%s\n' "$sha" "$ARCHES" "$(echo $knobs)" | sha256sum |
 short=${buildSha:0:16}
 binSha=$(sha256sum "$work/src/ecc2k130" | cut -d' ' -f1)
 hostSha=$(sha256sum "$work/src/ecc2k130-cpu" | cut -d' ' -f1)
-python3 - "$work/src" "$sha" "$binSha" "$ARCHES" "$SRC" "$knobs" "$buildSha" <<'EOF' > "$work/manifest.json"
+python3 - "$work/src" "$sha" "$binSha" "$hostSha" "$ARCHES" "$SRC" "$knobs" "$buildSha" <<'EOF' > "$work/manifest.json"
 import json, sys, time
-src, sha, binSha, arches, origin, knobs, buildSha = sys.argv[1:]
+src, sha, binSha, hostSha, arches, origin, knobs, buildSha = sys.argv[1:]
 print(json.dumps({"sourceSha256": sha, "buildSha256": buildSha,
-                  "binarySha256": binSha, "arches": arches.split(),
+                  "binarySha256": binSha, "hostBinarySha256": hostSha,
+                  "arches": arches.split(),
                   "origin": origin, "nvcc": open(src + "/build/nvcc.txt").read().strip(),
                   "knobs": " ".join(knobs.split()),
                   "builtAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
@@ -153,18 +188,13 @@ for f in $published; do
         || { echo "refusing to point campaign.json at $prefix: $f missing after upload" >&2; exit 1; }
 done
 
-# Point the campaign at this build.  Geometry in campaign.json must match the
-# knobs above; they are the audited preset, so only binaryKey moves.
+# Geometry in campaign.json must match the knobs above either way: a staged
+# prefix that would fail activate is not worth publishing as a candidate.
 aws s3 cp "s3://$BUCKET/campaign.json" "$work/campaign.json" --only-show-errors
-python3 - "$work/campaign.json" "$prefix" "$sha" "$knobs" "$binSha" "$hostSha" <<'EOF'
+python3 - "$work/campaign.json" "$prefix" "$sha" "$knobs" "$binSha" "$hostSha" "$POINT_CAMPAIGN" <<'EOF'
 import json, sys
-path, prefix, sha, knobs, binSha, hostSha = sys.argv[1:]
+path, prefix, sha, knobs, binSha, hostSha, point = sys.argv[1:]
 c = json.load(open(path))
-c["binaryKey"] = prefix + "/ecc2k130"
-c["hostBinaryKey"] = prefix + "/ecc2k130-cpu"
-c["sourceSha256"] = sha
-c["binarySha256"] = binSha
-c["hostBinarySha256"] = hostSha
 built = dict(kv.split("=", 1) for kv in knobs.split())
 geometry = (int(built["BATCH"]), int(built["THREADS"]), int(built["MINBLOCKS"]))
 assert (c["batch"], c["blockThreads"], c["minBlocks"]) == geometry, \
@@ -172,9 +202,64 @@ assert (c["batch"], c["blockThreads"], c["minBlocks"]) == geometry, \
         (c["batch"], c["blockThreads"], c["minBlocks"]), geometry)
 assert {"sigma": "0", "table": "1"}[c.get("walk", "sigma")] == built["WALK_TABLE"], \
     "campaign.json walk %r differs from the build's WALK_TABLE=%s" % (c.get("walk", "sigma"), built["WALK_TABLE"])
-json.dump(c, open(path, "w"), indent=1, sort_keys=True)
+if point == "1":
+    c["binaryKey"] = prefix + "/ecc2k130"
+    c["hostBinaryKey"] = prefix + "/ecc2k130-cpu"
+    c["sourceSha256"] = sha
+    c["binarySha256"] = binSha
+    c["hostBinarySha256"] = hostSha
+    c["kernelProtocol"] = "ecc2k-kernel-v1"
+    c["kernelVersion"] = int(c.get("kernelVersion") or 0) + 1
+    json.dump(c, open(path, "w"), indent=1, sort_keys=True)
 EOF
-aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors
-echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
-echo "campaign.json now selects $prefix/ecc2k130"
+
+# Always leave a rollout record so activate / status can find this prefix.
+python3 - "$work/manifest.json" "$prefix" "$POINT_CAMPAIGN" "$work/campaign.json" <<'EOF' > "$work/rollout.json"
+import json, sys, time
+man = json.load(open(sys.argv[1]))
+prefix = sys.argv[2].rstrip("/")
+point = sys.argv[3] == "1"
+camp = json.load(open(sys.argv[4]))
+now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+rec = {
+    "kernelProtocol": "ecc2k-kernel-v1",
+    "prefix": prefix,
+    "binaryKey": prefix + "/ecc2k130",
+    "hostBinaryKey": prefix + "/ecc2k130-cpu",
+    "sourceSha256": man.get("sourceSha256", ""),
+    "binarySha256": man.get("binarySha256", ""),
+    "hostBinarySha256": man.get("hostBinarySha256", ""),
+    "buildSha256": man.get("buildSha256", ""),
+    "arches": list(man.get("arches", [])),
+    "knobs": man.get("knobs", ""),
+    "status": "active" if point else "staged",
+    "stagedAt": now,
+}
+if point:
+    rec["kernelVersion"] = int(camp.get("kernelVersion") or 0)
+    rec["previousVersion"] = rec["kernelVersion"] - 1 if rec["kernelVersion"] > 1 else None
+    rec["activatedAt"] = now
+print(json.dumps(rec, indent=1))
+EOF
+aws s3 cp "$work/rollout.json" "s3://$BUCKET/rollouts/${short}.json" --only-show-errors
+aws s3 cp "$work/rollout.json" "s3://$BUCKET/rollouts/current.json" --only-show-errors
+
+if [ "$POINT_CAMPAIGN" = 1 ]; then
+    kver=$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1])).get("kernelVersion") or 0))' "$work/campaign.json")
+    # Immutable version slot: do not overwrite a kernels/<n> that already landed.
+    if ! aws s3api put-object --bucket "$BUCKET" --key "kernels/$kver.json" \
+            --body "$work/rollout.json" --content-type application/json \
+            --if-none-match "*" >/dev/null; then
+        echo "refusing to point campaign.json: kernels/$kver.json already exists" >&2
+        exit 1
+    fi
+    aws s3 cp "$work/rollout.json" "s3://$BUCKET/kernels/current.json" --only-show-errors
+    aws s3 cp "$work/campaign.json" "s3://$BUCKET/campaign.json" --only-show-errors
+    echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
+    echo "campaign.json now selects $prefix/ecc2k130 (ecc2k-kernel-v1 kernelVersion=$kver)"
+else
+    echo "published s3://$BUCKET/$prefix/ (source $sha, sm_{$ARCHES}, CLMAD=$CLMAD)"
+    echo "staged rollouts/$short.json; campaign.json unchanged"
+    echo "activate with: ./rollout.sh activate $prefix"
+fi
 rm -rf "$work"

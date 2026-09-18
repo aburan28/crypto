@@ -103,7 +103,7 @@ cmd_up() {
     --user-data "file://$BOOTSTRAP" \
     --instance-initiated-shutdown-behavior stop \
     --block-device-mappings "DeviceName=$root_dev,Ebs={VolumeSize=$ROOT_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=false}" \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand}]" \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand},{Key=CostGuardManaged,Value=true},{Key=CostGuardMonthlyBudget,Value=${MONTHLY_BUDGET_USD:-5000}}]" \
     --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
     --query 'Instances[0].InstanceId' --output text)
 

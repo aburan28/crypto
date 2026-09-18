@@ -348,7 +348,7 @@ class Certification(unittest.TestCase):
         config = dict(self.config, curve=83, dpWeight=24, steps=8)
         protocol.atomicJson(store / "campaign.json", config)
         program = ("import worker; worker.instanceId=lambda:'local-cert'; "
-                   "worker.gpuName=lambda g:'cpu'; raise SystemExit(worker.Worker().run())")
+                   "worker.gpuName=lambda g:'test-gpu'; raise SystemExit(worker.Worker().run())")
         lastIteration = -1
         for attempt in range(2):
             root = self.root / ("replacement-%d" % attempt); root.mkdir()
@@ -405,7 +405,7 @@ class Certification(unittest.TestCase):
         env.pop("ECC_ALLOW_LEGACY_STORAGE", None)
         # Avoid EC2 metadata and nvidia-smi lookups: the test is strictly offline.
         program = ("import worker; worker.instanceId=lambda:'local-cert'; "
-                   "worker.gpuName=lambda g:'cpu'; raise SystemExit(worker.Worker().run())")
+                   "worker.gpuName=lambda g:'test-gpu'; raise SystemExit(worker.Worker().run())")
         p = subprocess.run([sys.executable, "-c", program], cwd=ROOT / "aws", env=env,
                            text=True, capture_output=True, timeout=45)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)

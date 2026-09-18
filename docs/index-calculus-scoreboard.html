@@ -893,6 +893,41 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the target subgroup. The window that would pay is genus 130 to between 290 and 300; the gap to the
         nearest available genus is 2<sup>120.77</sup>
         (<code>experiments/ecc2k130_hyperelliptic_cover_boundary.json</code>).</p>
+      <p><strong>Homogeneous relations do not exist to be found.</strong> Complete three-point
+        sweeps over the weight-two support and its variants, every pair of every base, found
+        <strong>0</strong> relations on the 4,262-point weight-two support (2<sup>&minus;95.4</sup>
+        predicted) and <strong>0</strong> on its 1,090-point &sigma;-stable subset
+        (2<sup>&minus;101.3</sup>). The one hit, on the 4,336-point weight-at-most-two support, is
+        degenerate. Four-point, orbit-grouped: eight normal bases swept to completion, 1,020,114
+        pair-orbits (2<sup>27.0</sup> signed pairs), 490 candidates, <strong>0</strong> certified
+        against an expectation of 2<sup>&minus;79.4</sup>. All 490 candidates are instances of
+        &sigma;<sup>2</sup> + &sigma; + 2 = 0 &mdash; exactly 2 per lifting orbit &mdash; so the
+        search recovers the endomorphism ring&rsquo;s own identity and nothing else. Every yield
+        matches the counting prediction; no support evades the floor
+        (<code>research/ecc2k130_relations/results/summary.json</code>,
+        <code>four_point_orbit_summary.json</code>).</p>
+      <p><strong>Frobenius is a real saving and not a lever.</strong> On a normal basis the
+        weight-two support is closed under &sigma;, so the stored side of the meet-in-the-middle
+        holds one canonical class per orbit and a 131&thinsp;&times;&thinsp;T-point support carries
+        only T unknowns. Applied at every m it is worth 2<sup>16.1</sup>&ndash;2<sup>18.4</sup>,
+        more at larger m, so it does <em>not</em> change which m is cheapest &mdash; it changes the
+        margin (<code>four_point_orbit_boundary.json</code>).</p>
+      <p><strong>Extended past m = 8 the homogeneous table crosses rho, and that is the trap.</strong>
+        Continuing the quotiented self-consistent accounting, it goes sub-reference at
+        <strong>m = 18</strong> and reaches 2<sup>&minus;4.05</sup> at m = 28. Those rows price
+        relations among base points alone, which give one linear equation among <em>unknown</em>
+        logarithms and determine log<sub>P</sub>(Q) not at all. Priced as a logarithm instead
+        &mdash; T + 1 relations against known targets [a]P + [b]Q &mdash; the optimum is a
+        10-orbit support (B = 1,310) with 15-point
+        relations at <strong>2<sup>71.94</sup></strong>, short of the reference by
+        <strong>2<sup>+11.13</sup></strong> &mdash; <em>with memory charged at
+        zero</em>, so the negative no longer rests on the storage wall at all. The decomposition rate
+        the figure depends on is measured, not assumed; a model giving &sigma; a further factor of
+        131 there is optimistic by 7&times;, because the reachable sum set is itself &sigma;-closed
+        and accepting &sigma;<sup>k</sup>(target) is one chance taken 131 times. Wagner&rsquo;s
+        k-tree would beat the meet-in-the-middle but needs partial matching, which curve addition
+        does not admit (<code>research/ecc2k130_relations/results/target_boundary.json</code>,
+        <code>target_decomposition.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
@@ -1471,6 +1506,36 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     slower (best of those, unroll 4, 17.379). This thread has not reached 29.</p>
     <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-29b-gpu/summary.json">29 B/s measurement receipt</a>;
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/THROUGHPUT-29B.md">priced note</a>.</p>
+  </section>
+
+  <section aria-labelledby="preblackwell-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="preblackwell-result">ECC2K-130 GPU engineering: g6 / g6e / g4dn packed clients</h2>
+    <p>Completed on successive Modal allocations (driver 580.95.05, CUDA 13.3.1):
+    L40S (g6e, 142 SMs), L4 (g6, 58 SMs, 72&nbsp;W), Tesla T4 (g4dn, 40 SMs).
+    The shipping packed walk is unchanged at 5.3125 field products per update.
+    The generic-group boundary and exponent are unchanged; these are
+    engineering practicality measurements. Ada <code>CLMAD=1</code> is now the
+    generated default for <code>sm_89</code>. Turing stays on the software
+    product. The live campaign binary remains the sm_120 Blackwell client.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ scaled prior</th><th scope="col">/ 6000 15.116</th><th scope="col">/ matched software</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody>
+      <tr><td>RTX PRO 6000 shipping (reference)</td><td>15.115792</td><td>&mdash;</td><td>1.000</td><td>&mdash;</td><td>top-clmad control</td></tr>
+      <tr><td>L40S software <code>CLMAD=0</code> (before)</td><td>4.879118</td><td>0.887 vs 5.5</td><td>0.323</td><td>1.000</td><td>3/3, 128 regs, 72,704 workers</td></tr>
+      <tr><td>L40S <code>CLMAD=1</code></td><td>8.838416</td><td>1.607 vs 5.5</td><td>0.585</td><td>1.811</td><td>3/3, 94 regs; Ada default</td></tr>
+      <tr><td>L4 software <code>CLMAD=0</code> (before)</td><td>1.323708</td><td>0.576 vs 2.3</td><td>0.088</td><td>1.000</td><td>3/3, 128 regs, 29,696 workers</td></tr>
+      <tr><td>L4 <code>CLMAD=1</code></td><td>2.490035</td><td>1.083 vs 2.3</td><td>0.165</td><td>1.881</td><td>3/3, 94 regs; Ada default</td></tr>
+      <tr><td>T4 software (g4dn)</td><td>0.533211</td><td>0.267 vs 2.0 upper</td><td>0.035</td><td>&mdash;</td><td>3/3, 128 regs, 20,480 workers; no clmad</td></tr>
+    </tbody></table>
+    <p>Each rate is a median of three complete-scalar benches with automatic
+    workers (2&nbsp;&times;&nbsp;256 &times; SM count). Priors are the H1+H2
+    SM-scaling predictions written before the run, not floors. Software on the
+    L40S matched the &ldquo;Ada SM is half of Blackwell&rdquo; story (34.4 vs
+    80.4&nbsp;M it/s per SM). Native carryless products moved the walk off that
+    pipe and beat the prior; that is why Ada defaults to <code>CLMAD=1</code>.
+    Collecting rates and iterations-per-dollar are unmeasured. No
+    mixed-architecture fleet: one <code>binaryKey</code>.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/preblackwell/summary.json">preblackwell measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/ADA-L4-L40S.md">Ada note</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/T4-G4DN.md">T4 note</a>.</p>
   </section>
 
   <footer>
@@ -2542,5 +2607,81 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0013 -->
+<!-- BEGIN ic-tournament-round-0014 -->
+<section class="panel" id="ic-tournament-round-0014">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0014/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0014/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0014/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,411</td><td>1</td><td>0.8275</td><td>1.587e+05</td><td>12/12</td><td>reference</td></tr>
+<tr><td>lto_canon</td><td>4,310</td><td>0.9773</td><td>0.8087</td><td>1.551e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>lto_ic</td><td>4,071</td><td>0.9229</td><td>0.7637</td><td>1.464e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,330</td><td>1.208</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,291</td><td>1</td><td>0.731</td><td>1.544e+05</td><td>36/36</td><td>reference</td></tr>
+<tr><td>lto_canon</td><td>4,199</td><td>0.9785</td><td>0.7153</td><td>1.511e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>lto_ic</td><td>3,959</td><td>0.9226</td><td>0.6745</td><td>1.424e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,870</td><td>1.368</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,096</td><td>1</td><td>0.7818</td><td>1.654e+05</td><td>180/180</td><td>reference</td></tr>
+<tr><td>lto_ic</td><td>3,779</td><td>0.9226</td><td>0.7212</td><td>1.526e+05</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,240</td><td>1.279</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.152</td><td>1</td><td>reference</td><td>0.9424</td><td>180/180</td></tr>
+<tr><td>lto_ic</td><td>1.146</td><td>0.9947</td><td>[0.9724278145334377, 1.0163456747616106]</td><td>0.9374</td><td>180/180</td></tr>
+<tr><td>rho</td><td>1.222</td><td>1.061</td><td>[1.0294683386205887, 1.0964408072686906]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0014 -->
+<!-- BEGIN ic-tournament-round-0015 -->
+<section class="panel" id="ic-tournament-round-0015">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,468</td><td>1</td><td>0.7217</td><td>1.607e+05</td><td>12/12</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,294</td><td>0.961</td><td>0.6935</td><td>1.545e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,053</td><td>0.9071</td><td>0.6547</td><td>1.458e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>6,191</td><td>1.386</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,444</td><td>1</td><td>0.7452</td><td>1.599e+05</td><td>36/36</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,269</td><td>0.9606</td><td>0.7158</td><td>1.536e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,028</td><td>0.9064</td><td>0.6754</td><td>1.449e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,964</td><td>1.342</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,050</td><td>1</td><td>0.7372</td><td>1.635e+05</td><td>180/180</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,669</td><td>0.9059</td><td>0.6679</td><td>1.481e+05</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,493</td><td>1.356</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.102</td><td>1</td><td>reference</td><td>0.9246</td><td>180/180</td></tr>
+<tr><td>scan_io</td><td>1.094</td><td>0.9925</td><td>[0.9785179757065511, 1.0072720504423012]</td><td>0.9176</td><td>180/180</td></tr>
+<tr><td>rho</td><td>1.192</td><td>1.082</td><td>[1.0523319128877338, 1.1070035958217628]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0015 -->
 </body>
 </html>

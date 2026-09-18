@@ -1,0 +1,72 @@
+{
+  "kind": "preblackwell complete-scalar-iteration throughput",
+  "family": "g6e",
+  "gpu": "NVIDIA L40S",
+  "cc": "89",
+  "valid": true,
+  "packedClmad": true,
+  "batch": 16,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": "automatic",
+  "automaticThreads": 72704,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "sms": 142,
+  "sourceSha256": "7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19",
+  "binarySha256": "7c21df6f9eeeebebd0ae9a52e768529d7a7c782ea6c456fa6044c3696701f0aa",
+  "activeBackend": "packed-poly131",
+  "cudaImageVersion": "13.3.1",
+  "gpuUuid": "GPU-83fc27ff-fb4a-d3cf-e01e-8ede2f94b798",
+  "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu\nNVIDIA L40S, GPU-83fc27ff-fb4a-d3cf-e01e-8ede2f94b798, 580.95.05, P8, 210 MHz, 405 MHz, 350.00 W, 35",
+  "compiler": "nvcc 13.3.73",
+  "ratesM": [
+    8872.941,
+    8838.416,
+    8727.023
+  ],
+  "minRateM": 8727.023,
+  "maxRateM": 8872.941,
+  "medianM": 8838.416,
+  "medianB": 8.838415999999999,
+  "prior": {
+    "kind": "scaled-H1-H2",
+    "B": 5.5
+  },
+  "ratioToPrior": 1.6069847272727271,
+  "ratioTo6000": 0.5847140526940301,
+  "perSmM": 62.242366197183095,
+  "samples": [
+    {
+      "valid": true,
+      "rateM": 8872.941,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA L40S, 142 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 72704
+    },
+    {
+      "valid": true,
+      "rateM": 8838.416,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA L40S, 142 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 72704
+    },
+    {
+      "valid": true,
+      "rateM": 8727.023,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA L40S, 142 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 72704
+    }
+  ]
+}

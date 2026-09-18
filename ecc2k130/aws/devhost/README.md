@@ -76,6 +76,20 @@ The launch deliberately omits Spot market options, so EC2 creates an On-Demand i
 
 Do not terminate this instance as the normal idle path. Termination protection is enabled to make accidental termination harder. If you intentionally retire it, first decide whether to snapshot or delete the retained EBS volume; `DeleteOnTermination=false` is deliberate.
 
+## Runaway cost controls
+
+Account policy is a **\$5k/month** GPU burn ceiling (`../costguard/`): burn as
+fast as you like; when the estimated month-to-date total hits the budget,
+`costguard.sh enforce --apply` stops non-exempt GPUs. Host idle/age timers
+default **off**. Optional:
+
+```bash
+../costguard/costguard.sh status
+MONTHLY_BUDGET_USD=5000 ../costguard/costguard.sh enforce --apply
+```
+
+See [`../costguard/README.md`](../costguard/README.md).
+
 ## Storage semantics
 
 G7e includes local NVMe instance storage, but instance-store data does not survive a stop/start. Keep repositories, checkpoints, profiles and anything else durable under `/workspace` or another EBS volume. Treat local NVMe as scratch only.

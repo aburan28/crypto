@@ -1,0 +1,50 @@
+{
+  "_comment": "Static on-demand Linux list prices used when pricing:GetProducts is denied. Update from the EC2 pricing page; never treat as live quotes.",
+  "currency": "USD",
+  "updated": "2026-09-17",
+  "on_demand_hourly": {
+    "us-west-2": {
+      "g6.2xlarge": 0.9776,
+      "g6.4xlarge": 1.9552,
+      "g6e.2xlarge": 2.2420,
+      "g6e.4xlarge": 4.4840,
+      "g7.2xlarge": 0.5705,
+      "g7.4xlarge": 1.141,
+      "g7e.2xlarge": 1.2128,
+      "g7e.4xlarge": 2.4256,
+      "g7e.8xlarge": 4.8512,
+      "g7e.12xlarge": 7.2768,
+      "g7e.24xlarge": 14.5536,
+      "g7e.48xlarge": 33.14
+    },
+    "us-east-1": {
+      "g6.2xlarge": 0.9776,
+      "g6e.2xlarge": 2.2420,
+      "g7.2xlarge": 0.6858,
+      "g7e.2xlarge": 1.5671,
+      "g7e.4xlarge": 3.1342
+    },
+    "us-east-2": {
+      "g6.2xlarge": 0.9776,
+      "g6e.2xlarge": 2.2420,
+      "g7.2xlarge": 1.1847,
+      "g7e.2xlarge": 1.8920,
+      "g7e.4xlarge": 3.7840
+    }
+  },
+  "default_hourly_if_unknown": 2.0,
+  "gpu_count": {
+    "g6.2xlarge": 1,
+    "g6.4xlarge": 1,
+    "g6e.2xlarge": 1,
+    "g6e.4xlarge": 1,
+    "g7.2xlarge": 1,
+    "g7.4xlarge": 1,
+    "g7e.2xlarge": 1,
+    "g7e.4xlarge": 1,
+    "g7e.8xlarge": 1,
+    "g7e.12xlarge": 2,
+    "g7e.24xlarge": 4,
+    "g7e.48xlarge": 8
+  }
+}

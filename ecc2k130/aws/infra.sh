@@ -3,10 +3,10 @@
 # One-time campaign infrastructure, idempotent: S3 bucket (corpus,
 # checkpoints, binaries and the slot registry), IAM role + instance profile,
 # security group, and the launch template that fleet.sh scales.  Also uploads
-# worker.py, build.sh and campaign.json.
+# worker.py, build.sh, rollout.sh and campaign.json.
 #
 #   ./infra.sh                 create or update everything
-#   ./infra.sh sync            re-upload worker.py / build.sh / campaign.json only
+#   ./infra.sh sync            re-upload worker.py / build.sh / rollout.sh / campaign.json only
 #   ./infra.sh destroy         delete the launch template, SG, role (and the
 #                              DynamoDB table if one was used); the bucket
 #                              and its corpus are kept
@@ -51,6 +51,10 @@ sync() {
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
     aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
     aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
+    aws s3 cp bootstrap-cpu.sh "s3://$BUCKET/aws/bootstrap-cpu.sh" --only-show-errors
+    aws s3 cp enable-host-cpu.sh "s3://$BUCKET/aws/enable-host-cpu.sh" --only-show-errors
+    aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh" --only-show-errors
+    aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
         aws s3 cp campaign.json "s3://$BUCKET/campaign.json" --only-show-errors
         echo "uploaded the initial campaign.json (binaryKey empty until build.sh runs)"

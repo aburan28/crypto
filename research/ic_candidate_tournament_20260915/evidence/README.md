@@ -29,7 +29,9 @@ Use `--archive round-0008` to restore only the certified single-target round
 evaluator that no longer forks itself, `--archive round-0011` for the
 general arithmetic in words, `--archive round-0012` for the musl static
 executable with the arena allocator, `--archive round-0013` for the scalar
-products in projective coordinates, `--archive round-0007` and
+products in projective coordinates, `--archive round-0014` for the worker
+built as one optimisation unit, `--archive round-0015` for the scan and the
+resolution limit of the native gate, `--archive round-0007` and
 `--archive round-0006` for the strict-win and parity rounds it built on),
 `--archive round-0005-batch16` or `--archive round-0006-batch16` for the
 16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
@@ -42,7 +44,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012` and `round-0013` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014` and `round-0015` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -107,7 +109,12 @@ controls from round-0011's source (`round12-musl.patch`, `round12-arena.patch`,
 snapshots carry the `.cargo/config.toml` that selects the target and link),
 and round-0013's baseline and two IC-only challengers from round-0012's source
 (`round13-ld.patch`, `round13-canon.patch`, `round13-fastio.patch`,
-`round13_candidates.py`, `round-0013.tar.zst`).
+`round13_candidates.py`, `round-0013.tar.zst`), and round-0014's baseline and
+two IC-only challengers from round-0013's source (`round14-lto.patch`,
+`round14-arena-tests.patch`, `round14-canon.patch`, `round14-fastio.patch`,
+`round14_candidates.py`, `round-0014.tar.zst`), and round-0015's two IC-only
+challengers from the unchanged round-0014 source (`round15-scan.patch`,
+`round15-fastio.patch`, `round15_candidates.py`, `round-0015.tar.zst`).
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 
