@@ -25,6 +25,13 @@ This note does not rerun anything. Every number is cited from a frozen
 artefact or from a thread that already stated its boundary. The scoreboard
 panel is `#ecc2k130-ic-synthesis-20260918`.
 
+A separate toy-suite question — whether production pair-table IC on the
+five small Koblitz cells costs no more than matched signed-Frobenius rho
+in exclusive group operations — is frozen in
+[`RESEARCH_ECC2K130_RHO_PARITY.md`](RESEARCH_ECC2K130_RHO_PARITY.md)
+before measurement. That gate is not n=131 parity. The product-law floor
+at degree 131 is unchanged.
+
 Companion map: [`RESEARCH_ECC2K130_ROUTES.md`](RESEARCH_ECC2K130_ROUTES.md)
 and [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
 (what to try next, as X1–X6). Measured G7e oracles:

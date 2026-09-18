@@ -2436,6 +2436,52 @@ impl PairSumTable {
         pairs * 4 + buckets * 4 + pairs / 2
     }
 
+    /// Folded orbit-representative rows that minimise
+    /// `t·|F| + (K+3)/(λ·cov(t))` with `λ = |F|(|F|+1)/(2r)` and
+    /// `cov(t) = 1 − ((K−t)/K)²`.
+    ///
+    /// This is the round-0007 `tiny2` rule: a fixed function of the
+    /// public base size, column count and subgroup order. It does not
+    /// look at a target or a seed.
+    pub fn optimal_folded_rows(
+        orbit_count: usize,
+        point_count: usize,
+        subgroup_order: u64,
+    ) -> usize {
+        let k = orbit_count.max(1);
+        let f = point_count.max(1) as f64;
+        let r = subgroup_order.max(2) as f64;
+        let lambda = f * (f + 1.0) / (2.0 * r);
+        let k_f = k as f64;
+        let mut best_t = 1usize;
+        let mut best = f64::INFINITY;
+        for t in 1..=k {
+            let cov = 1.0 - ((k_f - t as f64) / k_f).powi(2);
+            if cov <= 0.0 || lambda <= 0.0 {
+                continue;
+            }
+            let cost = t as f64 * f + (k_f + 3.0) / (lambda * cov);
+            if cost < best {
+                best = cost;
+                best_t = t;
+            }
+        }
+        best_t
+    }
+
+    /// Folded pair table using only `rows` orbit-representative rows.
+    /// `rows == 0` means every nonempty signed orbit. Returns the table
+    /// and the number of point additions spent building stored sums
+    /// (both counting and fill passes).
+    pub fn build_folded_rows(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        rows: usize,
+    ) -> Option<(Self, u64)> {
+        let limit = (rows > 0).then_some(rows);
+        Self::build_folded_within(kc, fb, Self::DEFAULT_BYTE_BUDGET, limit)
+    }
+
     /// Bucket bits for the compact table: about one bucket per sixteen
     /// pairs, which keeps a bucket's run inside a cache line, capped so
     /// the index itself stays small.
@@ -2548,7 +2594,7 @@ impl PairSumTable {
             // may still fit — at the cost of canonicalising every
             // lookup.  It is the last tier because for a base that fits
             // without it the fold only spends squarings.
-            return Self::build_folded_within(kc, fb, byte_budget);
+            return Self::build_folded_within(kc, fb, byte_budget, None).map(|(table, _)| table);
         }
         let pairs = Self::pair_count(n_points);
         if pairs > u32::MAX as u128 {
@@ -2651,7 +2697,8 @@ impl PairSumTable {
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
-    ) -> Option<Self> {
+        row_limit: Option<usize>,
+    ) -> Option<(Self, u64)> {
         let n_points = fb.points.len();
         if n_points > u32::MAX as usize {
             return None;
@@ -2668,6 +2715,10 @@ impl PairSumTable {
             .filter_map(|(o, orbit)| orbit.first().map(|&i| (o as u32, i)))
             .collect();
         if reps.is_empty() {
+            return None;
+        }
+        let n_rows = row_limit.unwrap_or(reps.len()).min(reps.len());
+        if n_rows == 0 {
             return None;
         }
         if Self::folded_byte_size(reps.len(), n_points, kc.n) > byte_budget {
@@ -2730,6 +2781,14 @@ impl PairSumTable {
         for o in 0..fb.signed_orbits.len() {
             suffix[o + 1] = suffix[o + 1].max(suffix[o]);
         }
+        let mut stored = 0u64;
+        for r in 0..n_rows {
+            let (orbit, _) = reps[r];
+            let from = suffix[orbit as usize] as usize;
+            stored += (n_points - from) as u64;
+        }
+        // Both the occupancy pass and the fill pass recompute the sums.
+        let additions = stored.saturating_mul(2);
         let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
             let mut sums = Vec::with_capacity(n_points);
@@ -2741,7 +2800,7 @@ impl PairSumTable {
                 f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
             }
         };
-        (0..reps.len()).into_par_iter().for_each(|r| {
+        (0..n_rows).into_par_iter().for_each(|r| {
             each_row(r, &mut |key, _| {
                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
                 counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
@@ -2759,7 +2818,7 @@ impl PairSumTable {
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
         let slots = rests.as_mut_ptr() as usize;
-        (0..reps.len()).into_par_iter().for_each(|r| {
+        (0..n_rows).into_par_iter().for_each(|r| {
             each_row(r, &mut |key, orbit| {
                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
                 let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
@@ -2791,23 +2850,26 @@ impl PairSumTable {
             orbit_members.extend(orbit.iter().map(|&i| i as u32));
             orbit_start.push(orbit_members.len() as u32);
         }
-        Some(Self {
-            entries: Vec::new(),
-            rests,
-            index_of_point,
-            curve,
-            points,
-            negated,
-            bucket_start,
-            bucket_shift,
-            present,
-            present_mask,
-            fold: true,
-            canon,
-            orbit_start,
-            orbit_members,
-            tagged,
-        })
+        Some((
+            Self {
+                entries: Vec::new(),
+                rests,
+                index_of_point,
+                curve,
+                points,
+                negated,
+                bucket_start,
+                bucket_shift,
+                present,
+                present_mask,
+                fold: true,
+                canon,
+                orbit_start,
+                orbit_members,
+                tagged,
+            },
+            additions,
+        ))
     }
 
     /// The word a key is stored as: a hash, so the bucket width is free
@@ -5812,6 +5874,41 @@ pub fn rho_expected_steps(r: u64, n: u32) -> f64 {
     (std::f64::consts::PI * r as f64 / 2.0).sqrt() / f64::from(2 * n).sqrt()
 }
 
+/// Group additions of a left-to-right binary scalar multiplication of
+/// `scalar`: one doubling per bit after the leading 1, plus one add
+/// per remaining 1-bit. Doublings are charged as additions.
+pub fn binary_method_group_ops(scalar: u64) -> u64 {
+    if scalar <= 1 {
+        return 0;
+    }
+    let bits = u64::from(64 - scalar.leading_zeros());
+    let hw = u64::from(scalar.count_ones());
+    (bits - 1) + (hw - 1)
+}
+
+/// Expected binary-method group additions for a uniform `bits`-bit
+/// scalar (leading bit set). `1.5 · (bits − 1)` in integers.
+pub fn expected_binary_method_group_ops(bits: u32) -> u64 {
+    if bits <= 1 {
+        return 0;
+    }
+    (3 * u64::from(bits - 1)) / 2
+}
+
+/// Exclusive group-operation charge of one signed-Frobenius rho run:
+/// setup and walk additions, plus every recorded scalar multiplication
+/// converted by [`expected_binary_method_group_ops`] on the subgroup
+/// bit length. Canonicalisations, Frobenius maps and hashes are not
+/// group additions.
+pub fn rho_exclusive_group_ops(charges: &KoblitzSignedRhoCharges, r_bits: u32) -> u64 {
+    let mul = expected_binary_method_group_ops(r_bits);
+    charges
+        .setup_group_additions
+        .saturating_add(charges.walk_group_additions)
+        .saturating_add(mul.saturating_mul(charges.setup_scalar_multiplications))
+        .saturating_add(mul.saturating_mul(charges.candidate_verification_scalar_multiplications))
+}
+
 /// Slots in the direct-mapped cache of recently visited points every
 /// walk keeps beside its table of stored points.  It costs one indexed
 /// compare per step and catches both a fruitless cycle (the same state
@@ -7943,6 +8040,74 @@ mod tests {
         // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
         assert!(PairSumTable::build(&kc, &fb).is_some());
+    }
+
+    #[test]
+    fn binary_method_group_ops_matches_double_and_add() {
+        assert_eq!(binary_method_group_ops(0), 0);
+        assert_eq!(binary_method_group_ops(1), 0);
+        assert_eq!(binary_method_group_ops(2), 1);
+        assert_eq!(binary_method_group_ops(3), 2);
+        assert_eq!(expected_binary_method_group_ops(11), 15);
+        let charges = KoblitzSignedRhoCharges {
+            setup_group_additions: 48,
+            walk_group_additions: 11,
+            setup_scalar_multiplications: 96,
+            candidate_verification_scalar_multiplications: 1,
+            ..KoblitzSignedRhoCharges::default()
+        };
+        assert_eq!(rho_exclusive_group_ops(&charges, 11), 48 + 11 + 15 * 97);
+    }
+
+    #[test]
+    fn optimal_folded_rows_is_a_function_of_the_public_base() {
+        // High pair-sum density: one row wins.
+        assert_eq!(PairSumTable::optimal_folded_rows(8, 208, 2003), 1);
+        // Tournament n23-scale base: two rows win.
+        assert_eq!(PairSumTable::optimal_folded_rows(8, 368, 2_095_853), 2);
+    }
+
+    #[test]
+    fn folded_row_limit_still_solves_a_known_scalar() {
+        let kc = KoblitzCurve::new(0, 13).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 43, 6 * kc.n as usize).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let rows = PairSumTable::optimal_folded_rows(fb.unknowns(), fb.points.len(), r);
+        assert!(rows >= 1 && rows <= fb.unknowns());
+        let (pair, additions) = PairSumTable::build_folded_rows(&kc, &fb, rows).unwrap();
+        assert!(pair.is_folded());
+        assert!(additions > 0);
+        let opts = KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::PairTable,
+            max_trials: 4_096,
+            allow_direct_relation: false,
+            collection_window: Some(fb.points.len().saturating_sub(1).max(1)),
+            ..KoblitzIcOptions::default()
+        };
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let mut solver = FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap();
+        let mut trials = 0u64;
+        let mut outcome = None;
+        while trials < opts.max_trials as u64 && outcome.is_none() {
+            let count = 64u64.min(opts.max_trials as u64 - trials);
+            let (rows, report) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: trials,
+                count,
+            });
+            trials += report.trials as u64;
+            solver.push(&rows);
+            outcome = solver.try_solve();
+        }
+        let (table, _) = outcome.expect("log database");
+        assert!(table.verify(&kc));
+        let descent = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+        let d = BigUint::from(29u32);
+        let q = kc.mul(kc.generator(), &d);
+        let (found, _) = descent.solve(&q).expect("descends");
+        assert_eq!(found, d);
+        assert_eq!(kc.mul(kc.generator(), &found), q);
     }
 
     #[test]
