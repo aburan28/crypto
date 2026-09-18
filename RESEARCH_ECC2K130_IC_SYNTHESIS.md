@@ -7,13 +7,19 @@ Semaev, Crossbred — which *combinations* survive the counting, oracle, and
 linear-algebra constraints at once, and could any of them move the exponent
 rather than a constant?
 
-**Answer.** None of the measured combinations is an advance. GPU search,
-the weight-2 pair table, SAT, and Frobenius compose with each other and
-still sit on the product law. Homogeneous relations that determine nothing,
-Wagner on curve addition, Joux–Vitse at prime degree, and an extension-field
-base change are closed, not slow. Five experiments remain compatible with
-those identities and could still move the oracle exponent `α`; none of them
-has a fitted `α` yet, so none is a result.
+**Answer.** None of the measured combinations is an advance. The only
+coherent multi-structure stack on this curve is already the one G7e ran:
+type-II ONB × Hamming-weight-2 even-trace × Frobenius-orbit collapse ×
+pair enumeration or a stored pair table. GPU search, SAT, and the table
+compose with that stack and still sit on the product law. Invariant
+subspaces, quasi-subfield polynomials, polynomial-basis Hamming weight,
+GHS covers, and extension-field base change do not compose with it —
+they need divisor degrees of `t^{131} − 1` that are not in `{1, 130}`.
+Homogeneous relations that determine nothing, Wagner on curve addition,
+and Joux–Vitse at prime degree are closed, not slow. Five solver
+experiments remain compatible with those identities and could still move
+the oracle exponent `α`; none of them has a fitted `α` yet, so none is a
+result.
 
 This note does not rerun anything. Every number is cited from a frozen
 artefact or from a thread that already stated its boundary. The scoreboard
@@ -127,14 +133,51 @@ The hard arithmetic facts that pre-filter the closed families, and do **not**
 pre-filter Crossbred or CM-for-IC:
 
 - `131` is prime, so there is no intermediate field for a tower.
-- `2` is a primitive root mod `131`, so GHS genera are `1`, `2^{129}`, or
-  `2^{130}`, missing the window that would beat rho.
+- `2` is a primitive root mod `131`, so `t^{131} − 1 = (t+1)·Φ_{131}` has
+  divisor degrees `{0, 1, 130, 131}` only. Every Frobenius-stable
+  `F_2`-subspace, quasi-subfield kernel, and GHS magic number is one of
+  those four; there is no intermediate dimension.
 - Type-II ONB exists only when `2m+1` is prime and `ord_{2m+1}(2) ∈ {m, 2m}`;
   the SAT ladder is `5, 9, 11, 23`, not `13, 15, 17`.
 - The set of `n`-subset sums of a `σ`-stable support is itself `σ`-closed, so
   Frobenius does not multiply hit rate
   ([`RESEARCH_ECC2K130_RELATION_SWEEPS.md`](RESEARCH_ECC2K130_RELATION_SWEEPS.md)
   §5.4).
+- The 262 automorphisms `⟨−1⟩ × ⟨π⟩` are already inside the rho reference.
+  Quotienting the factor base by `σ` again does not buy a second `√262`.
+
+### The factor-base stack that actually exists
+
+A Frobenius-stable subspace of `F_2^{131}` is a binary cyclic code of
+length 131. The 2-cyclotomic cosets are `{1}` and `{130}`, so the
+achievable dimensions are `{0, 1, 130, 131}`: `E(F_2)` (4 points) or
+about `2^{130}` abscissae. Quasi-subfield polynomials reduce to the same
+divisor criterion; Euler–Petit put the linearized class at `β ≥ 3/4`
+against the `β < 0.103` needed to beat generic `O(2^{n/2})`
+([`RESEARCH_QUASI_SUBFIELD.md`](RESEARCH_QUASI_SUBFIELD.md)). Hamming
+weight in a type-II ONB is a different predicate: `{x : HW(x) ≤ w}` is
+`σ`-stable for every `w` because Frobenius is a coordinate shift, and it
+is **not** a low-degree polynomial, so Semaev descent cannot treat it as
+a subspace.
+
+That is why the G7e factor base is the live stack rather than a subspace
+one. Even trace is the odd-order filter `Tr(x) = 0`; on this curve every
+`m ≥ 2` is admissible, unlike `K_1/F_2^7` where odd `m` fails
+([`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md)
+§3). A `ker Tr` base lives in an index-2 subgroup and buys about `2×`
+yield — one bit, compatible with the orbit quotient, not an exponent.
+Four-point sums over that support land in `H` of index 2, so the usable
+translates are `E[4] ∩ H` of size 2, not 4
+([`RESEARCH_ECC2K130_RELATION_SWEEPS.md`](RESEARCH_ECC2K130_RELATION_SWEEPS.md)
+§4.4).
+
+Polynomial-basis Hamming weight is **not** in this stack. Squaring sends
+low weight out of the set, so a poly-basis weight-2 support cannot be
+orbit-quotiented (relation-sweeps §4). That incompatibility is easy to
+miss and is why the packed ONB is not an optional representation.
+
+C1–C6 below change the *oracle* on top of this stack. They do not reopen
+a subspace, a quasi-subfield, or a cover.
 
 ## 3. One table, one unit
 
@@ -195,10 +238,11 @@ these into `S` without a measured conversion is relabelling.
 ## 5. Combinations that survive the constraints
 
 These are the stacks whose pieces are compatible and whose obstruction is
-empirical rather than structural. They are the route-target experiments
-X1–X6, restated as combinations. Predicted class is engineering unless a
-fitted `α ≤ 1.5` is produced. None has been run as a combination in this
-note.
+empirical rather than structural. They change the *oracle* on top of the
+ONB Hamming-weight stack in §2; they do not reopen a subspace or a cover.
+They are the route-target experiments X1–X6, restated as combinations.
+Predicted class is engineering unless a fitted `α ≤ 1.5` is produced.
+None has been run as a combination in this note.
 
 ### C1 — Crossbred on the chained `m = 3` systems (X1 + X2)
 
@@ -339,6 +383,13 @@ Recorded so they are not rebuilt.
 | Weight-3 even-trace base as larger than weight-2 | Odd Hamming weight is skipped by the odd-order trace filter | accounting | G7e note |
 | Residual-walk `n^{4/9}` transplanted to ECC2K-130 | Different group; on its own curve it still bottoms ~200× rho | closed as a transplant | residual-walks §11.7 |
 | Relation-phase crossover quoted as the method | Residual-walk `2^{96}` was one phase; LA is `n^{0.68}` | accounting | `AGENTS.md` §5 |
+| Invariant subspace / cyclic code at `n = 131` | Dimensions `{0,1,130,131}` only | closed | quasi-subfield §5b, extension §2 |
+| Quasi-subfield polynomial + this curve | Same divisor gap; linearized `β ≥ 3/4` vs need `< 0.103` | closed | `RESEARCH_QUASI_SUBFIELD.md` |
+| Polynomial-basis HW-2 + `σ`-orbit quotient | Squaring leaves the weight class | closed | relation-sweeps §4 |
+| GHS isogeny walk to a cheaper magic number | Magic `{1,130,131}` is a property of the field, not the curve | closed | hyperelliptic note |
+| Construction equations `σ² + σ + 2 = 0` as DLP relations | Real rank, zero information about `log_P(Q)` | relabelling | relation-sweeps §4.7 |
+| Counting `⟨−1⟩ × ⟨π⟩` a second time on the IC side | Already inside `S_rho` | accounting | this §2 |
+| Hypothetical genus-130 Jacobian of `A/F_2` with `#A(F_2) = r` | Would be `≈ 2^{37}` vs rho, Torelli codimension 8128, no construction | open, not runnable | hyperelliptic §6 |
 
 ## 7. What would count as finishing
 
@@ -366,6 +417,10 @@ within `2^{27}` of it. The 500×-or-worse rho verdict on
 - Prime-field structured factor bases, Nagao function-first solvers, and
   the WDSat regression suite are out of scope: they are scored on their
   own panels and do not become ECC2K-130 rows by juxtaposition.
+- A simple abelian variety `A/F_2` of dimension 130 with `#A(F_2) = r`,
+  isogenous to a Jacobian, is the one cover that would undercut rho
+  (`≈ 2^{37}`). It is not a factor-base combination and has no
+  construction in this repository.
 
 ## Sources (the threads this map is of)
 
@@ -378,14 +433,16 @@ within `2^{27}` of it. The 500×-or-worse rho verdict on
 - [`RESEARCH_ECC2K130_EXTENSION.md`](RESEARCH_ECC2K130_EXTENSION.md),
   [`RESEARCH_ECC2K130_HYPERELLIPTIC.md`](RESEARCH_ECC2K130_HYPERELLIPTIC.md),
   [`RESEARCH_QUASI_SUBFIELD.md`](RESEARCH_QUASI_SUBFIELD.md)
-  — prime `n`, primitive `2`.
+  — prime `n`, primitive `2`, cyclic-code dimensions `{0,1,130,131}`.
 - [`RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md),
   [`RESEARCH_ECC2K130_ROUTES.md`](RESEARCH_ECC2K130_ROUTES.md),
   [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
   — FFD stalemate, Crossbred as open ground, X1–X6.
 - [`RESEARCH_EXOTIC_COORDINATES.md`](RESEARCH_EXOTIC_COORDINATES.md),
-  [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md)
-  — symmetrised frame, FFD = 3 on the measured chained ladder.
+  [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md),
+  [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
+  — symmetrised frame, FFD = 3 on the measured chained ladder, which
+  invariant bases exist.
 - [`RESEARCH_RESIDUAL_WALKS.md`](RESEARCH_RESIDUAL_WALKS.md) §11.7
   — price every phase.
 - Frozen receipts:
