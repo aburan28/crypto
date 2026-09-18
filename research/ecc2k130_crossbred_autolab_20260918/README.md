@@ -22,7 +22,7 @@ python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py \
 python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py \
   launch --beat fit.alpha
 python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py \
-  launch --beat x5.ffd_chained_m4
+  launch --beat x5.ffd_chained_sym_m4_smoke
 python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py promote --all
 ```
 
@@ -34,6 +34,9 @@ python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py promot
 | `replay.x3_k1_n7` | Replay symmetrised `K_1` `n=7` `m=3` | matches frozen `Q/C` |
 | `fit.alpha` | OLS **per frame** on frozen usable rungs | ≥4 rungs in one frame and `α ≤ 1.5` |
 | `x5.ffd_chained_m4` | Chained-`x` FFD at `m=3,4`, `n=9,15`, 4 draws | FFD that grows with `n` at `m=4` |
+| `x5.ffd_chained_m4_16` | Same, 16 draws | promotion of the smoke |
+| `x5.ffd_chained_sym_m4_smoke` | Chained symmetrised `S₃` at `m=4`, `n=7,9,15`, 4 draws, `d_max=4` | FFD that grows with `n` |
+| `x5.ffd_chained_sym_m4` | Same, 16 draws | H1 on the missing arm |
 
 A two-point sketch is not a fit. Changing T4, `Q_enum`, or the divisor
 after seeing a cell is inadmissible.

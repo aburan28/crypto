@@ -57,9 +57,12 @@
 //!
 //! ## Honest scope
 //!
-//! Toy `n ≤ 24` (the curve constructor's limit), `m ≤ 3`.  The
-//! Kosters–Yeo trace row the SAT path adds to the `x`-system has no
-//! linear analogue in `u`, so the SAT arms run without it on both sides.
+//! Toy `n ≤ 24` (the curve constructor's limit). Unchained systems are
+//! `m ≤ 3`. Chained symmetrised `S₃` (`build_chained_symmetrised_system`)
+//! extends `m` while the `m(ℓ−1)+(m−2)n+(m−1)` layout stays under 64
+//! unknowns. The Kosters–Yeo trace row the SAT path adds to the
+//! `x`-system has no linear analogue in `u`, so the SAT arms run
+//! without it on both sides.
 
 use std::collections::HashMap;
 use std::time::Instant;
@@ -573,6 +576,151 @@ pub fn build_symmetrised_system(
         n_vars,
         ell_w,
         m,
+        u_r,
+    })
+}
+
+/// Variable count for the chained symmetrised `S₃` system.
+///
+/// `m` factor-base summands (`ℓ − 1` bits each), `m − 2` free
+/// intermediates (`n` bits of `u` each), and `m − 1` link-parity bits.
+/// This is the production analog of [`build_decomposition_system`]:
+/// `m − 1` bilinear `S₃` links, not the unchained `S₄` of
+/// [`build_symmetrised_system`] at `m = 3`.
+///
+/// The route-target sketch `4(ℓ−1)+1+n` undercounted intermediates and
+/// parities. The derived count is the one used here.
+pub fn n_vars_chained_symmetrised(m: usize, ell: usize, n: u32) -> usize {
+    let ell_w = ell.saturating_sub(1);
+    m * ell_w + m.saturating_sub(2) * n as usize + m.saturating_sub(1)
+}
+
+/// One chain of symmetrised bilinear `S₃` links.
+#[derive(Clone, Debug)]
+pub struct ChainedSymmetrisedSystem {
+    pub equations: Vec<F2BoolPoly>,
+    pub n_vars: usize,
+    pub ell_w: usize,
+    pub m: usize,
+    pub n_inter: usize,
+    pub u_r: F2mElement,
+}
+
+fn add_parity_bit(s: &SymElement, bit: u32, n: u32, n_vars: usize) -> SymElement {
+    let mut eps_el = SymElement::zero(n, n_vars);
+    eps_el.coords[0] = F2BoolPoly::from_monos(vec![F2BoolMono::var(bit)], n_vars);
+    s.add(&eps_el)
+}
+
+/// Chain the symmetrised bilinear `S₃` for `m ≥ 2` summands.
+///
+/// ```text
+///   S₃(P₁, P₂, E₁) = S₃(E₁, P₃, E₂) = ⋯ = S₃(E_{m−2}, P_m, R) = 0
+/// ```
+///
+/// Factor-base points range over `F_u` (`ℓ − 1` bits of `w`). Intermediate
+/// `u(E_i)` range over the whole field (`n` bits); `w(E_i) = AS(u(E_i))`
+/// is `F₂`-linear. Each link has its own parity bit because each
+/// factor-base summand appears in exactly one link.
+///
+/// `None` if `m < 2`, `u(R)` is `0` or `∞`, or the layout exceeds
+/// [`MAX_VARS`]. `m = 2` is the same system as [`build_symmetrised_system`].
+pub fn build_chained_symmetrised_system(
+    kc: &KoblitzCurve,
+    fb: &SymmetrisedFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    st: &FieldStructure,
+) -> Option<ChainedSymmetrisedSystem> {
+    if m < 2 {
+        return None;
+    }
+    let terms = symmetrised_terms(2)?;
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x,
+        BinaryPoint::Infinity => return None,
+    };
+    let u_r = u_of_x(x_r, kc)?;
+    if u_r.is_zero() {
+        return None;
+    }
+    let n = kc.n;
+    let ell_w = fb.ell - 1;
+    let n_inter = m.saturating_sub(2);
+    let n_vars = n_vars_chained_symmetrised(m, fb.ell, n);
+    if n_vars > MAX_VARS {
+        return None;
+    }
+    let fb_off = 0usize;
+    let inter_off = m * ell_w;
+    let eps_off = inter_off + n_inter * n as usize;
+    let w_r = SymElement::constant(&artin_schreier(&u_r, kc), n, n_vars);
+    let u_r_el = SymElement::constant(&u_r, n, n_vars);
+
+    let w_fb = |i: usize| -> SymElement {
+        SymElement::from_subspace_vars(&fb.w_basis, fb_off + i * ell_w, n, n_vars)
+    };
+    let u_fb = |i: usize| -> SymElement {
+        SymElement::from_subspace_vars(&fb.v_basis[1..], fb_off + i * ell_w, n, n_vars)
+    };
+    let u_inter = |j: usize| -> SymElement {
+        SymElement::from_free_vars(inter_off + j * n as usize, n, n_vars)
+    };
+    let w_inter = |j: usize| -> SymElement {
+        let u = u_inter(j);
+        u.square(st).add(&u)
+    };
+
+    #[derive(Clone, Copy)]
+    enum Arg {
+        Fb(usize),
+        Inter(usize),
+        Target,
+    }
+    let w_of = |a: Arg| -> SymElement {
+        match a {
+            Arg::Fb(i) => w_fb(i),
+            Arg::Inter(j) => w_inter(j),
+            Arg::Target => w_r.clone(),
+        }
+    };
+    let u_of = |a: Arg| -> SymElement {
+        match a {
+            Arg::Fb(i) => u_fb(i),
+            Arg::Inter(j) => u_inter(j),
+            Arg::Target => u_r_el.clone(),
+        }
+    };
+    let args_for = |i: usize| -> (Arg, Arg, Arg) {
+        if m == 2 {
+            (Arg::Fb(0), Arg::Fb(1), Arg::Target)
+        } else if i == 0 {
+            (Arg::Fb(0), Arg::Fb(1), Arg::Inter(0))
+        } else if i == m - 2 {
+            (Arg::Inter(i - 1), Arg::Fb(m - 1), Arg::Target)
+        } else {
+            (Arg::Inter(i - 1), Arg::Fb(i + 1), Arg::Inter(i))
+        }
+    };
+
+    let mut equations = Vec::new();
+    for i in 0..(m - 1) {
+        let (a, b, c) = args_for(i);
+        let s = add_parity_bit(
+            &u_of(a).add(&u_of(b)).add(&u_of(c)),
+            (eps_off + i) as u32,
+            n,
+            n_vars,
+        );
+        let vars = vec![w_of(a), w_of(b), w_of(c), s];
+        equations.extend(sym_polynomial(&vars, &terms, st));
+    }
+    Some(ChainedSymmetrisedSystem {
+        equations,
+        n_vars,
+        ell_w,
+        m,
+        n_inter,
         u_r,
     })
 }
@@ -2238,5 +2386,157 @@ mod transport_tests {
             assert_eq!(sum, kc.add(&target, &kk));
         }
         assert!(tried >= 4 && lifted == tried, "{lifted}/{tried} lifted");
+    }
+
+    fn express_span(val: &F2mElement, basis: &[F2mElement], n: u32) -> Option<u64> {
+        let ell = basis.len();
+        if ell > 16 {
+            return None;
+        }
+        let want = bits_of(val);
+        for coords in 0..(1u64 << ell) {
+            let mut acc = F2mElement::zero(n);
+            for t in 0..ell {
+                if (coords >> t) & 1 == 1 {
+                    acc = acc.add(&basis[t]);
+                }
+            }
+            if bits_of(&acc) == want {
+                return Some(coords);
+            }
+        }
+        None
+    }
+
+    #[test]
+    fn chained_m2_matches_unchained_s3() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let div = divisor_for_dimension(9, 5).unwrap();
+        let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
+        let st = FieldStructure::new(9, &kc.curve.irreducible);
+        let target = kc.mul(kc.generator(), &BigUint::from(7u32));
+        let unchained = build_symmetrised_system(&kc, &fb, &target, 2, &st).unwrap();
+        let chained = build_chained_symmetrised_system(&kc, &fb, &target, 2, &st).unwrap();
+        assert_eq!(chained.n_vars, unchained.n_vars);
+        assert_eq!(chained.equations.len(), unchained.equations.len());
+        for root in 0..(1u64 << chained.n_vars.min(18)) {
+            for (p, q) in chained.equations.iter().zip(&unchained.equations) {
+                assert_eq!(p.eval(root), q.eval(root));
+            }
+        }
+    }
+
+    #[test]
+    fn chained_s3_is_bilinear_and_counts_links() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let div = divisor_for_dimension(9, (9 + 1).div_ceil(4)).unwrap();
+        let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
+        let st = FieldStructure::new(9, &kc.curve.irreducible);
+        let target = kc.mul(kc.generator(), &BigUint::from(7u32));
+        let sys = build_chained_symmetrised_system(&kc, &fb, &target, 4, &st).unwrap();
+        assert_eq!(
+            sys.n_vars,
+            n_vars_chained_symmetrised(4, fb.ell, 9)
+        );
+        assert_eq!(sys.n_inter, 2);
+        assert_eq!(sys.equations.len(), 9 * 3);
+        let deg = sys
+            .equations
+            .iter()
+            .flat_map(|e| e.terms.iter())
+            .map(|t| t.mask.count_ones())
+            .max()
+            .unwrap_or(0);
+        assert_eq!(deg, 2, "chained S3 must stay bilinear, got deg {deg}");
+        assert!(sys.n_vars <= 64);
+        assert!(sys.n_vars > n_vars_chained_symmetrised(2, fb.ell, 9));
+    }
+
+    #[test]
+    fn a_constructed_triple_is_a_root_of_chained_s3() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let div = divisor_for_dimension(9, 5).unwrap();
+        let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
+        let st = FieldStructure::new(9, &kc.curve.irreducible);
+        let pts: Vec<BinaryPoint> = fb
+            .points
+            .iter()
+            .filter(|p| matches!(p, BinaryPoint::Affine { .. }))
+            .cloned()
+            .collect();
+        assert!(pts.len() >= 6);
+        let mut found = false;
+        for i in 0..pts.len().min(8) {
+            for j in (i + 1)..pts.len().min(8) {
+                for k in (j + 1)..pts.len().min(10) {
+                    let p1 = &pts[i];
+                    let p2 = &pts[j];
+                    let p3 = &pts[k];
+                    let e = kc.add(p1, p2);
+                    let r = kc.add(&e, p3);
+                    let BinaryPoint::Affine { x: x1, .. } = p1 else {
+                        continue;
+                    };
+                    let BinaryPoint::Affine { x: x2, .. } = p2 else {
+                        continue;
+                    };
+                    let BinaryPoint::Affine { x: x3, .. } = p3 else {
+                        continue;
+                    };
+                    let BinaryPoint::Affine { x: xe, .. } = &e else {
+                        continue;
+                    };
+                    let BinaryPoint::Affine { x: xr, .. } = &r else {
+                        continue;
+                    };
+                    let (Some(u1), Some(u2), Some(u3), Some(ue), Some(ur)) = (
+                        u_of_x(x1, &kc),
+                        u_of_x(x2, &kc),
+                        u_of_x(x3, &kc),
+                        u_of_x(xe, &kc),
+                        u_of_x(xr, &kc),
+                    ) else {
+                        continue;
+                    };
+                    if ur.is_zero() {
+                        continue;
+                    }
+                    let sys = build_chained_symmetrised_system(&kc, &fb, &r, 3, &st).unwrap();
+                    let Some(c1) = express_span(&u1, &fb.v_basis, 9) else {
+                        continue;
+                    };
+                    let Some(c2) = express_span(&u2, &fb.v_basis, 9) else {
+                        continue;
+                    };
+                    let Some(c3) = express_span(&u3, &fb.v_basis, 9) else {
+                        continue;
+                    };
+                    let ell_w = fb.ell - 1;
+                    let mut root = 0u64;
+                    root |= (c1 >> 1) & ((1u64 << ell_w) - 1);
+                    root |= ((c2 >> 1) & ((1u64 << ell_w) - 1)) << ell_w;
+                    root |= ((c3 >> 1) & ((1u64 << ell_w) - 1)) << (2 * ell_w);
+                    let ue_bits = bits_of(&ue);
+                    root |= (ue_bits & ((1u64 << 9) - 1)) << (3 * ell_w);
+                    let eps0 = ((c1 & 1) ^ (c2 & 1)) as u64;
+                    let eps1 = c3 & 1;
+                    let eps_off = 3 * ell_w + 9;
+                    root |= eps0 << eps_off;
+                    root |= eps1 << (eps_off + 1);
+                    let ok = sys.equations.iter().all(|p| p.eval(root) == 0);
+                    if ok {
+                        found = true;
+                        break;
+                    }
+                }
+                if found {
+                    break;
+                }
+            }
+            if found {
+                break;
+            }
+        }
+        assert!(found, "no constructed (P1,P2,P3) vanished on chained S3");
     }
 }
