@@ -312,6 +312,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
+        printf("packed half top clmad: %d\n", ECC_PACKED_TOP_CLMAD_HALF);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
