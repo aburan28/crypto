@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -28,35 +29,150 @@ CLAIM_BOUNDARY = (
     "solver has checked [k]P = Q."
 )
 
-SNAPSHOT_SQL = r"""
--- One pass over distinguished_points, not three.
---
--- The previous form ran three independent LATERAL subqueries against this
--- table -- totals, per-worker, hourly -- so the planner scanned it three
--- times per snapshot. That was affordable at a few million rows and is not
--- at 30.6M: the step took 41-72s through 2026-09-14T15:49Z, 129s at 16:18Z,
--- broke the SSH hop at 262s, and ran 510s once keepalives let it finish --
--- 30s under the remote timeout. The table only grows.
---
--- `grouped` aggregates once by (worker_id, hour); every figure below is
--- derived from it. The rolling windows stay exact because they are counted
--- as FILTER aggregates during that same pass rather than recovered from
--- hour buckets, which would round `last hour` to a bucket boundary and pull
--- rows older than the 7-day cutoff into the first hourly bucket.
-WITH grouped AS (
-  SELECT
-    worker_id,
-    date_trunc('hour', found_at) AS hour,
-    count(*)::bigint AS dps,
-    min(found_at) AS first_dp_at,
-    max(found_at) AS last_dp_at,
-    count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint AS dps_last_hour,
-    count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint AS dps_last_day,
-    count(*) FILTER (WHERE found_at > now() - interval '7 days')::bigint AS dps_last_week
+# Lifetime aggregates used to come from one GROUP BY over distinguished_points.
+# That was affordable at a few million rows and is not at ~187 M: the walker
+# hop took 524 s on 2026-09-18T11:25Z and the next run died at the 540 s remote
+# timeout, so Pages froze on that snapshot and the dashboard's stale banner is
+# what a visitor sees. An index on (campaign_id, found_at) helps the ingest's
+# *count* query (#432) and does not help this one, because grouping by
+# worker_id still heap-fetches every row.
+#
+# The durable answer is the one #432 named and deferred: a rollup maintained
+# from INSERTs. snapshot.py creates it, backfills it once, and installs a
+# statement-level trigger so the ingest's INSERT ... SELECT keeps the buckets
+# current without a code deploy on that host. Later snapshots read the rollup.
+
+ENSURE_SQL = r"""
+CREATE TABLE IF NOT EXISTS rho_dp_hour (
+  campaign_id text NOT NULL,
+  hour        timestamptz NOT NULL,
+  worker_id   text NOT NULL,
+  dps         bigint NOT NULL,
+  first_at    timestamptz NOT NULL,
+  last_at     timestamptz NOT NULL,
+  PRIMARY KEY (campaign_id, hour, worker_id)
+);
+CREATE TABLE IF NOT EXISTS rho_dp_recent (
+  campaign_id text NOT NULL,
+  worker_id   text NOT NULL,
+  found_at    timestamptz NOT NULL,
+  dps         bigint NOT NULL,
+  PRIMARY KEY (campaign_id, worker_id, found_at)
+);
+CREATE TABLE IF NOT EXISTS rho_dp_meta (
+  campaign_id   text PRIMARY KEY,
+  ready         boolean NOT NULL DEFAULT false,
+  backfilled_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS rho_dp_hour_hour
+  ON rho_dp_hour (campaign_id, hour);
+CREATE INDEX IF NOT EXISTS rho_dp_recent_found_at
+  ON rho_dp_recent (campaign_id, found_at);
+
+CREATE OR REPLACE FUNCTION rho_dp_rollup_insert() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $fn$
+BEGIN
+  INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
+  SELECT campaign_id,
+         date_trunc('hour', found_at),
+         worker_id,
+         count(*)::bigint,
+         min(found_at),
+         max(found_at)
+  FROM new_rows
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
+    dps = rho_dp_hour.dps + EXCLUDED.dps,
+    first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
+    last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at);
+
+  INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
+  SELECT campaign_id, worker_id, found_at, count(*)::bigint
+  FROM new_rows
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
+    dps = rho_dp_recent.dps + EXCLUDED.dps;
+  RETURN NULL;
+END;
+$fn$;
+
+DO $tg$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger t
+    JOIN pg_class c ON c.oid = t.tgrelid
+    WHERE t.tgname = 'rho_dp_rollup_insert'
+      AND c.relname = 'distinguished_points'
+      AND NOT t.tgisinternal
+  ) THEN
+    EXECUTE $create$
+      CREATE TRIGGER rho_dp_rollup_insert
+      AFTER INSERT ON distinguished_points
+      REFERENCING NEW TABLE AS new_rows
+      FOR EACH STATEMENT
+      EXECUTE PROCEDURE rho_dp_rollup_insert()
+    $create$;
+  END IF;
+END
+$tg$;
+"""
+
+READY_SQL = r"""
+SELECT COALESCE(
+  (SELECT ready FROM rho_dp_meta WHERE campaign_id = '{{campaign}}'),
+  false
+);
+"""
+
+# One scan of distinguished_points, and only on a run that saw ready=false.
+# Grouping by (worker_id, found_at) is one row per ingested object; the hour
+# buckets and the rolling-window table are derived from that. Later snapshots
+# never reach this statement. The Python caller must not run it when ready.
+BACKFILL_SQL = r"""
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SET LOCAL statement_timeout = '800s';
+LOCK TABLE distinguished_points IN SHARE MODE;
+INSERT INTO rho_dp_meta (campaign_id, ready)
+VALUES ('{{campaign}}', false)
+ON CONFLICT (campaign_id) DO NOTHING;
+DELETE FROM rho_dp_hour WHERE campaign_id = '{{campaign}}';
+DELETE FROM rho_dp_recent WHERE campaign_id = '{{campaign}}';
+WITH objs AS MATERIALIZED (
+  SELECT campaign_id, worker_id, found_at, count(*)::bigint AS dps
   FROM distinguished_points
-  WHERE campaign_id = %(campaign)s
-  GROUP BY 1, 2
+  WHERE campaign_id = '{{campaign}}'
+  GROUP BY 1, 2, 3
+), ins_hour AS (
+  INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
+  SELECT campaign_id,
+         date_trunc('hour', found_at),
+         worker_id,
+         sum(dps),
+         min(found_at),
+         max(found_at)
+  FROM objs
+  GROUP BY 1, 2, 3
+), ins_recent AS (
+  INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
+  SELECT campaign_id, worker_id, found_at, dps
+  FROM objs
+  WHERE found_at > now() - interval '7 days'
 )
+UPDATE rho_dp_meta
+SET ready = true, backfilled_at = now()
+WHERE campaign_id = '{{campaign}}';
+COMMIT;
+"""
+
+PRUNE_SQL = r"""
+DELETE FROM rho_dp_recent
+WHERE found_at < now() - interval '8 days';
+"""
+
+READ_SQL = r"""
 SELECT json_build_object(
   'campaign_id', c.campaign_id,
   'curve_id', c.curve_id,
@@ -67,59 +183,73 @@ SELECT json_build_object(
   'workers', COALESCE(s.workers, 0),
   'first_dp_at', s.first_dp,
   'last_dp_at', s.last_dp,
-  'dps_last_hour', COALESCE(s.dps_last_hour, 0),
-  'dps_last_day', COALESCE(s.dps_last_day, 0),
+  'dps_last_hour', COALESCE(r.dps_last_hour, 0),
+  'dps_last_day', COALESCE(r.dps_last_day, 0),
   'collisions', COALESCE(k.collisions, 0),
   'latest_collision_at', k.latest_collision_at,
   'per_worker', COALESCE(w.per_worker, '[]'::json),
-  'hourly', COALESCE(h.hourly, '[]'::json)
+  'hourly', COALESCE(h.hourly, '[]'::json),
+  'rollup_ready', true
 )
 FROM rho_campaigns c
+JOIN rho_dp_meta m ON m.campaign_id = c.campaign_id AND m.ready
 LEFT JOIN LATERAL (
   SELECT
     sum(dps)::bigint AS dps,
     count(DISTINCT worker_id)::bigint AS workers,
-    min(first_dp_at) AS first_dp,
-    max(last_dp_at) AS last_dp,
-    sum(dps_last_hour)::bigint AS dps_last_hour,
-    sum(dps_last_day)::bigint AS dps_last_day
-  FROM grouped
+    min(first_at) AS first_dp,
+    max(last_at) AS last_dp
+  FROM rho_dp_hour
+  WHERE campaign_id = c.campaign_id
 ) s ON true
+LEFT JOIN LATERAL (
+  SELECT
+    COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '1 hour'), 0)::bigint AS dps_last_hour,
+    COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '24 hours'), 0)::bigint AS dps_last_day
+  FROM rho_dp_recent
+  WHERE campaign_id = c.campaign_id
+) r ON true
 LEFT JOIN LATERAL (
   SELECT
     count(*)::bigint AS collisions,
     max(detected_at) AS latest_collision_at
-  FROM rho_collisions r
-  WHERE r.campaign_id = c.campaign_id
+  FROM rho_collisions x
+  WHERE x.campaign_id = c.campaign_id
 ) k ON true
 LEFT JOIN LATERAL (
-  SELECT json_agg(row_to_json(x) ORDER BY x.dps DESC) AS per_worker
+  SELECT json_agg(row_to_json(p) ORDER BY p.dps DESC) AS per_worker
   FROM (
     SELECT
       worker_id,
       sum(dps)::bigint AS dps,
-      min(first_dp_at) AS first_dp_at,
-      max(last_dp_at) AS last_dp_at
-    FROM grouped
+      min(first_at) AS first_dp_at,
+      max(last_at) AS last_dp_at
+    FROM rho_dp_hour
+    WHERE campaign_id = c.campaign_id
     GROUP BY worker_id
     ORDER BY sum(dps) DESC
     LIMIT 32
-  ) x
+  ) p
 ) w ON true
 LEFT JOIN LATERAL (
   SELECT json_agg(row_to_json(y) ORDER BY y.hour) AS hourly
   FROM (
-    SELECT
-      hour,
-      sum(dps_last_week)::bigint AS dps
-    FROM grouped
+    SELECT hour, sum(dps)::bigint AS dps
+    FROM rho_dp_hour
+    WHERE campaign_id = c.campaign_id
+      AND hour > now() - interval '7 days'
     GROUP BY hour
-    HAVING sum(dps_last_week) > 0
+    HAVING sum(dps) > 0
     ORDER BY hour
   ) y
 ) h ON true
-WHERE c.campaign_id = %(campaign)s;
+WHERE c.campaign_id = '{{campaign}}';
 """
+
+# Kept only so a grep for the old one-pass scan still finds the backfill, which
+# is the one remaining full-table read, and so tests can pin that the published
+# document is assembled from the rollup.
+SNAPSHOT_SQL = BACKFILL_SQL
 
 
 FORBIDDEN_PUBLIC_KEYS = (
@@ -168,6 +298,10 @@ def campaign_state(row):
         return "COLLISION_RECORDED"
     if int(row.get("dps_last_hour") or 0) > 0:
         return "COLLECTING"
+    outstanding = int(row.get("ingest_outstanding") or 0)
+    unrecognised = int(row.get("ingest_unrecognised") or 0)
+    if outstanding > 0 or unrecognised > 0:
+        return "INGEST_BEHIND"
     if int(row.get("dps") or 0) > 0:
         return "IDLE_OR_STALE"
     return "EMPTY"
@@ -219,53 +353,75 @@ def normalize(row, campaign, source):
     return snapshot
 
 
-def psql_json(database_url, campaign):
-    sql = SNAPSHOT_SQL.replace("%(campaign)s", "'%s'" % campaign.replace("'", "''"))
+def sql_campaign(campaign):
+    if not campaign or any(ch in campaign for ch in "\n\r;"):
+        raise SystemExit("refusing campaign id %r" % campaign)
+    return campaign.replace("'", "''")
+
+
+def render_sql(template, campaign):
+    return template.replace("{{campaign}}", sql_campaign(campaign))
+
+
+def psql_script(database_url, sql, tuples_only=True):
+    cmd = ["psql", database_url, "-v", "ON_ERROR_STOP=1", "-q"]
+    if tuples_only:
+        cmd += ["-At"]
     proc = subprocess.run(
-        ["psql", database_url, "-v", "ON_ERROR_STOP=1", "-At", "-c", sql],
+        cmd + ["-f", "-"],
+        input=sql,
         capture_output=True,
         text=True,
         check=False,
     )
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+        if not proc.stderr.endswith("\n"):
+            sys.stderr.write("\n")
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "psql failed")
-    line = proc.stdout.strip().splitlines()
-    if not line:
-        raise RuntimeError("campaign %s not found" % campaign)
-    return json.loads(line[0])
+    return proc.stdout
 
 
-def psycopg_json(database_url, campaign):
-    import psycopg
+def rollup_ready_from_text(text):
+    token = (text or "").strip().splitlines()
+    if not token:
+        return False
+    return token[-1].lower() in ("t", "true", "1")
 
-    # Named parameter, bound once per occurrence: the query references the
-    # campaign in both the aggregate scan and the campaign row lookup, so
-    # positional binding would need the value passed twice.
-    with psycopg.connect(database_url) as conn:
-        with conn.cursor() as cur:
-            cur.execute("SET default_transaction_read_only = on")
-            cur.execute(SNAPSHOT_SQL, {"campaign": campaign})
-            row = cur.fetchone()
-    if not row or row[0] is None:
-        raise RuntimeError("campaign %s not found" % campaign)
-    return row[0]
+
+def psql_json(database_url, campaign):
+    sys.stderr.write("rho_status: ensuring rho_dp rollup tables and insert trigger\n")
+    psql_script(database_url, ENSURE_SQL, tuples_only=False)
+    ready_text = psql_script(database_url, render_sql(READY_SQL, campaign), tuples_only=True)
+    if rollup_ready_from_text(ready_text):
+        sys.stderr.write("rho_status: rollup ready, skipping distinguished_points scan\n")
+    else:
+        sys.stderr.write("rho_status: backfilling rho_dp rollup from distinguished_points\n")
+        psql_script(database_url, render_sql(BACKFILL_SQL, campaign), tuples_only=False)
+    psql_script(database_url, PRUNE_SQL, tuples_only=False)
+    text = psql_script(database_url, render_sql(READ_SQL, campaign), tuples_only=True)
+    lines = [line for line in text.strip().splitlines() if line.startswith("{")]
+    if not lines:
+        raise RuntimeError(
+            "campaign %s rollup not ready (backfill did not complete)" % campaign
+        )
+    return json.loads(lines[-1])
 
 
 def take_snapshot(database_url, campaign, source="direct"):
     if not database_url:
         raise SystemExit("DATABASE_URL is required")
-    try:
-        import psycopg  # noqa: F401
-
-        row = psycopg_json(database_url, campaign)
-        driver = "psycopg"
-    except ImportError:
-        row = psql_json(database_url, campaign)
-        driver = "psql"
+    # The walker hop has psql and often no psycopg. Prefer psql so the
+    # multi-statement ensure/backfill script is one session with COMMIT
+    # between the trigger becoming visible and the REPEATABLE READ backfill.
+    if not shutil.which("psql"):
+        raise SystemExit("psql is required to take a snapshot")
+    row = psql_json(database_url, campaign)
     if isinstance(row, str):
         row = json.loads(row)
     snapshot = normalize(row, campaign, source)
-    snapshot["query_driver"] = driver
+    snapshot["query_driver"] = "psql"
     return snapshot
 
 

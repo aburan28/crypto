@@ -19,8 +19,20 @@ from render import (
     measure_rate,
     merge_history,
 )
-from snapshot import CLAIM_BOUNDARY, FORBIDDEN_PUBLIC_KEYS, assert_public, campaign_state, normalize
-from work_feed import MAX_FEED_AGE_S, feed_url, merge_work, work_block
+from snapshot import (
+    BACKFILL_SQL,
+    CLAIM_BOUNDARY,
+    ENSURE_SQL,
+    FORBIDDEN_PUBLIC_KEYS,
+    READ_SQL,
+    assert_public,
+    campaign_state,
+    normalize,
+    render_sql,
+    rollup_ready_from_text,
+    sql_campaign,
+)
+from work_feed import MAX_FEED_AGE_S, feed_url, ingest_block, merge_work, work_block
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -61,6 +73,20 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(campaign_state({"collisions": 1, "dps": 10, "dps_last_hour": 0}), "COLLISION_RECORDED")
         self.assertEqual(campaign_state({"collisions": 0, "dps": 10, "dps_last_hour": 0}), "IDLE_OR_STALE")
         self.assertEqual(campaign_state({"collisions": 0, "dps": 0, "dps_last_hour": 0}), "EMPTY")
+        self.assertEqual(
+            campaign_state({
+                "collisions": 0, "dps": 10, "dps_last_hour": 0,
+                "ingest_outstanding": 12,
+            }),
+            "INGEST_BEHIND",
+        )
+        self.assertEqual(
+            campaign_state({
+                "collisions": 0, "dps": 10, "dps_last_hour": 5,
+                "ingest_outstanding": 12,
+            }),
+            "COLLECTING",
+        )
 
     def test_refuses_walk_secrets(self):
         with self.assertRaises(SystemExit):
@@ -118,20 +144,46 @@ class WorkflowTests(unittest.TestCase):
         self.assertRegex(expression, r"^[\d\s*]+$", "unexpected STALE_AFTER_MS: %s" % expression)
         stale_minutes = eval(expression) / 1000 / 60  # noqa: S307 - digits and * only
         self.assertGreaterEqual(stale_minutes, 2 * step, "stale banner will flap on a late run")
+        self.assertIn("INGEST_BEHIND", text)
+        self.assertIn(
+            "The fleet is walking, but the store is behind on ingest",
+            text,
+        )
 
-    def test_snapshot_query_scans_the_dp_table_once(self):
+    def test_snapshot_reads_the_rollup_and_scans_the_heap_only_to_backfill(self):
         # Three separate LATERAL scans of a 30M-row table is what pushed the
-        # walker hop from 41s to 510s and broke publication; the aggregates
-        # are all derived from one grouped pass now. A second scan here is a
-        # performance regression that only shows up in production.
-        from snapshot import SNAPSHOT_SQL
+        # walker hop from 41s to 510s and broke publication; grouping the heap
+        # once by worker and hour then pushed it to 524s at 187M rows, one
+        # timeout tick under 540s, and the next scheduled run died. The
+        # published document is assembled from rho_dp_hour / rho_dp_recent.
+        # distinguished_points is read only by the one-time backfill.
+        self.assertEqual(BACKFILL_SQL.count("FROM distinguished_points"), 1)
+        self.assertIn("LOCK TABLE distinguished_points IN SHARE MODE", BACKFILL_SQL)
+        self.assertNotIn("FROM distinguished_points", READ_SQL)
+        self.assertIn("FROM rho_dp_hour", READ_SQL)
+        self.assertIn("FROM rho_dp_recent", READ_SQL)
+        self.assertIn("CREATE TRIGGER", ENSURE_SQL)
+        self.assertIn("rho_dp_rollup_insert", ENSURE_SQL)
+        self.assertIn("ON distinguished_points", ENSURE_SQL)
+        self.assertGreaterEqual(BACKFILL_SQL.count("{{campaign}}"), 1)
+        self.assertIn("{{campaign}}", READ_SQL)
+        with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertNotIn('replace("%(campaign)s", "%s")', source)
+        self.assertIn("if rollup_ready_from_text", source)
 
-        self.assertEqual(SNAPSHOT_SQL.count("FROM distinguished_points"), 1)
-        # Both references must stay named: psycopg binds the campaign by key,
-        # so a positional rewrite would under-supply parameters.
-        self.assertEqual(SNAPSHOT_SQL.count("%(campaign)s"), 2)
-        self.assertNotIn('replace("%(campaign)s", "%s")', open(
-            os.path.join(HERE, "snapshot.py"), encoding="utf-8").read())
+    def test_campaign_id_is_a_literal_not_concatenated_sql(self):
+        self.assertEqual(sql_campaign("ecc2k-130"), "ecc2k-130")
+        self.assertEqual(sql_campaign("ecc2k-130'"), "ecc2k-130''")
+        with self.assertRaises(SystemExit):
+            sql_campaign("ecc2k-130;drop")
+        self.assertIn("'ecc2k-130'", render_sql("x = '{{campaign}}'", "ecc2k-130"))
+
+    def test_rollup_ready_parses_psql_boolean_output(self):
+        self.assertTrue(rollup_ready_from_text("t\n"))
+        self.assertTrue(rollup_ready_from_text("true"))
+        self.assertFalse(rollup_ready_from_text("f"))
+        self.assertFalse(rollup_ready_from_text(""))
 
     def test_fetch_script_punches_runner_ip_not_launch_key(self):
         path = os.path.join(HERE, "fetch_via_walker.sh")
@@ -149,6 +201,9 @@ class WorkflowTests(unittest.TestCase):
         # from a dead connection and the hop dies on a broken pipe.
         self.assertIn("ServerAliveInterval", text)
         self.assertIn("ServerAliveCountMax", text)
+        self.assertIn("RHO_REMOTE_TIMEOUT:-900", text)
+        self.assertIn("snapshot exceeded", text)
+        self.assertIn("exit 124", text)
         self.assertNotIn("meow34", text)
         pub = os.path.join(HERE, "gha_walker.pub")
         with open(pub, encoding="utf-8") as fh:
@@ -169,6 +224,17 @@ class WorkflowTests(unittest.TestCase):
             and '"Resource": "*"' in text.split("PunchWalkerSshOnly", 1)[1]
         )
         self.assertFalse(authorize_star)
+
+    def test_publish_job_timeout_covers_the_one_time_backfill(self):
+        path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("timeout-minutes: 25", text)
+        fetch = os.path.join(HERE, "fetch_via_walker.sh")
+        with open(fetch, encoding="utf-8") as fh:
+            script = fh.read()
+        self.assertIn("RHO_REMOTE_TIMEOUT:-900", script)
+        self.assertIn("SET LOCAL statement_timeout = '800s'", BACKFILL_SQL)
 
 
 class HistoryTests(unittest.TestCase):
@@ -429,6 +495,30 @@ class WorkFeedTests(unittest.TestCase):
         # No per-slot rows: the page needs the total and a count, and each row
         # names a walker's slot and run.
         self.assertNotIn("per_slot", snapshot["work"])
+
+    def test_ingest_health_overrides_a_quiet_store_when_the_feed_is_behind(self):
+        feed = work_feed()
+        feed["ingest"] = {
+            "outstanding_objects": 42,
+            "unrecognised_objects": 0,
+            "newest_object_at": "2026-09-18T11:00:00Z",
+            "lag_seconds": 90,
+        }
+        snapshot = {"campaign_id": "ecc2k-130", "dps": 10, "state": "IDLE_OR_STALE"}
+        self.assertTrue(merge_work(snapshot, feed, "ecc2k-130"))
+        self.assertEqual(snapshot["state"], "INGEST_BEHIND")
+        self.assertEqual(snapshot["ingest"]["outstanding_objects"], 42)
+        assert_public(snapshot)
+        self.assertIsNone(ingest_block("not a feed"))
+        self.assertIsNone(ingest_block({"campaign_id": "ecc2k-130"}))
+
+    def test_collecting_is_not_relabelled_as_ingest_behind(self):
+        feed = work_feed()
+        feed["ingest"] = {"outstanding_objects": 1, "unrecognised_objects": 0}
+        snapshot = {"campaign_id": "ecc2k-130", "state": "COLLECTING"}
+        self.assertTrue(merge_work(snapshot, feed, "ecc2k-130"))
+        self.assertEqual(snapshot["state"], "COLLECTING")
+        self.assertEqual(snapshot["ingest"]["outstanding_objects"], 1)
 
     def test_refuses_a_stale_feed_rather_than_freezing_the_total(self):
         # A frozen total does not read as a dead ingest host, it reads as a

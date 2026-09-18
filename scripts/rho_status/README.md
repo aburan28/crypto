@@ -15,6 +15,15 @@ instance tagged `Name=rho-ecc2k-walker` and run
 `scripts/rho_status/snapshot.py` there, using `/opt/rho-ecc2k/env.sh`
 already on that host.
 
+`snapshot.py` does not scan `distinguished_points` on every run. It
+creates `rho_dp_hour` / `rho_dp_recent`, backfills them once from the
+heap, and installs a statement-level insert trigger so the ingest's
+`INSERT ... SELECT` keeps the buckets current. Later snapshots read those
+tables. The one-time backfill is why the hop's remote timeout is 900 s
+rather than 540 s: the last heap scan published at 524 s on
+2026-09-18T11:25Z and the next run died at exit 124, which is the stale
+banner the page then shows.
+
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
 ## One-time GitHub + IAM setup
@@ -99,7 +108,10 @@ python3 -m http.server --directory _site 8000   # dashboard at /status/
 per-worker counts, 7-day hourly buckets, and — when the campaign's work
 feed is answering — the `work` and `walk_rate` blocks described below.
 `state` is one of `COLLECTING`, `IDLE_OR_STALE`, `EMPTY`,
-`COLLISION_RECORDED`.
+`COLLISION_RECORDED`, `INGEST_BEHIND`. `INGEST_BEHIND` is copied from the
+ingest host's work feed when the store's last-hour count is zero but the
+feed still has outstanding or unreadable objects — the 2026-09-17 outage
+looked like a dead walk on this page until that distinction existed.
 
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.

@@ -454,7 +454,8 @@ make gpu
     IDLE_OR_STALE: "Store has points, but none in the last hour.",
     EMPTY: "Campaign row exists; no distinguished points yet.",
     COLLISION_RECORDED: "Collision recorded in the DP table — not independently verified here.",
-    UNREACHABLE: "Snapshot missing or unreachable."
+    UNREACHABLE: "Snapshot missing or unreachable.",
+    INGEST_BEHIND: "The fleet is walking, but the store is behind on ingest. Last-hour counts are about the ingest, not the walk."
   };
 
   var el = function (id) { return document.getElementById(id); };
