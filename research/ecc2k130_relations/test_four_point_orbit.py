@@ -310,11 +310,33 @@ def test_homogeneous_relations_are_not_priced_as_a_logarithm():
 
 
 def test_amortising_the_table_is_a_real_saving_and_correctly_signed():
-    """Building once must be cheaper than rebuilding per attempt, never dearer."""
-    for T, n, s in ((1, 14, 13), (10, 15, 8), (3, 8, 4)):
-        once = logarithm_cost(T, n, s, amortise=True)
-        each = logarithm_cost(T, n, s, amortise=False)
-        assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+    """Building once must be cheaper than rebuilding per attempt, never dearer.
+
+    This caught the counterfactual charging `attempts * max(build, stream)`,
+    which drops the build entirely whenever streaming dominates and so made
+    rebuilding look *cheaper* than amortising at T=10, n=15. A faithful
+    rebuild pays both terms on every attempt.
+    """
+    for T, n, s in ((1, 14, 13), (10, 15, 8), (3, 8, 4), (2, 12, 11)):
+        for quot in (True, False):
+            once = logarithm_cost(T, n, s, amortise=True, quotient_table=quot)
+            each = logarithm_cost(T, n, s, amortise=False, quotient_table=quot)
+            assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+
+
+def test_probe_cost_and_e4_translates_are_priced():
+    """Regression: probes were counted but not costed, and E[4] was ignored."""
+    q = logarithm_cost(2, 12, 11, quotient_table=True)
+    f = logarithm_cost(2, 12, 11, quotient_table=False)
+    # a quotiented table must charge canonicalisation per probe
+    assert q["log2_probe_cost"] > 0
+    # a full table must not, and must pay 131x the build instead
+    assert f["log2_probe_cost"] == 0
+    assert f["log2_build_once"] > q["log2_build_once"]
+    # both E[4] translates are probed, so probes exceed the streamed count
+    from target_boundary import REACHABLE_E4
+    assert REACHABLE_E4 == 2
+    assert q["log2_probes_per_attempt"] > 1
 
 
 def test_a_skipped_or_failed_cell_cannot_be_reported_as_success():

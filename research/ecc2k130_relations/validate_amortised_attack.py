@@ -13,6 +13,12 @@ ECC2K-130 is lopsided in a way worth exercising rather than trusting:
   * each target streams the `2B` signed single points and looks up
     `T - R` in that table.
 
+Every probe is counted **and** its canonicalisation is counted, because a
+quotiented table cannot be probed without one: `canonicalisations` is
+reported alongside `stream_operations` rather than left out of the unit.
+This script probes all four `E[4]` elements where ECC2K-130 need probe only
+the two that lie in `H`; that is small-curve conservatism, not a saving.
+
 So this script builds the table once, streams targets against it until it
 has `T + 1` relations, solves, and checks `[d]P = Q`.  If the structure the
 cost model prices did not actually produce usable relations, or if two
@@ -89,7 +95,7 @@ def attack(mdeg: int, n: int, want_T: int, seed: int = 11,
             if S is not None:
                 table.setdefault(_canon(E, S, m), (comb, sg, S))
 
-    rows, rhs, attempts, stream_ops = [], [], 0, 0
+    rows, rhs, attempts, stream_ops, canon_ops = [], [], 0, 0, 0
     while len(rows) < T + 1 and attempts < max_targets:
         attempts += 1
         a_, b_ = rng.randrange(r), rng.randrange(1, r)
@@ -105,6 +111,7 @@ def attack(mdeg: int, n: int, want_T: int, seed: int = 11,
                     want = E.add(E.add(Tt, E.neg(tgt)), E.neg(Ri))
                     if want is None:
                         continue
+                    canon_ops += 1          # each probe is canonicalised
                     ent = table.get(_canon(E, want, m))
                     if ent is None:
                         continue
@@ -150,6 +157,8 @@ def attack(mdeg: int, n: int, want_T: int, seed: int = 11,
         "relation_length": n, "table_entries_built_once": len(table),
         "relations": len(rows), "target_attempts": attempts,
         "stream_operations": stream_ops,
+        "canonicalisations": canon_ops,
+        "e4_translates_probed": len(e4),
         "predicted_decomposition_rate": round(pred, 6),
         "measured_decomposition_rate": round(len(rows) / attempts, 6),
         "planted_d": d, "recovered_d": (sol[T] if sol else None),

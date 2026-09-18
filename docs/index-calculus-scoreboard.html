@@ -917,21 +917,52 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <strong>m = 18</strong> and reaches 2<sup>&minus;4.05</sup> at m = 28. Those rows price
         relations among base points alone, which give one linear equation among <em>unknown</em>
         logarithms and determine log<sub>P</sub>(Q) not at all.</p>
-      <p><strong>Priced as a logarithm, the gap is 2<sup>+3.83</sup> and it is all bookkeeping.</strong>
-        T + 1 relations against known targets [a]P + [b]Q, with the meet-in-the-middle table built
-        <em>once</em> and streamed against per target &mdash; charging it per attempt over-counted by
-        2<sup>7.30</sup>. The optimum is lopsided and needs nothing from the weight-two
-        construction: a <strong>single Frobenius orbit</strong> of 131 points, two unknowns, 14-point
-        relations split 13+1, total <strong>2<sup>64.64</sup></strong> against the reference
-        2<sup>60.81</sup>, <em>with memory charged at zero</em> (145 EB, free). The structure is run
-        end to end on small curves and recovers a planted logarithm in 6 of 6 cells. Caveats carried
-        openly: the build assumes constant-amortised necklace enumeration over Z/131 (naive costs
-        2<sup>3.3</sup> more), and the total is table construction, not search. The trajectory
-        2<sup>+24.79</sup> &rarr; 2<sup>+13.59</sup> &rarr; 2<sup>+11.13</sup> &rarr;
-        2<sup>+3.83</sup> is four corrections to this ledger&rsquo;s own accounting, every one in the
-        optimistic direction, and no new fact about the curve
-        (<code>research/ecc2k130_relations/results/target_boundary.json</code>,
-        <code>amortised_attack.json</code>).</p>
+      <p><strong>Priced as a logarithm, the gap is 2<sup>+6.48</sup> and every step of it is
+        bookkeeping.</strong> T + 1 relations against known targets [a]P + [b]Q, the
+        meet-in-the-middle table built <em>once</em>, probes and their canonicalisation priced in
+        rho&rsquo;s own unit, memory charged at zero. One table, one unit
+        (S = operations / &radic;r, &radic;r = 2<sup>64.5</sup>):</p>
+      <table>
+        <caption>ECC2K-130 homogeneous-relation index calculus, cost of a <em>logarithm</em>.
+          Reference cited from <code>experiments/ecc2k130_extension_field_boundary.json</code>;
+          variants from <code>research/ecc2k130_relations/results/target_boundary.json</code>.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">log&#8322; ops</th>
+          <th scope="col" class="n">S</th><th scope="col" class="n">Ratio to rho</th>
+          <th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Pollard rho, &lang;&minus;1&rang;&times;&lang;&pi;&rang; <em>(reference)</em></td>
+            <td class="n">60.81</td><td class="n">0.077</td><td class="n">2^+0.00</td>
+            <td><span class="chip">baseline</span></td></tr>
+          <tr><td>Section 1 as published, no quotient</td><td class="n">85.60</td>
+            <td class="n">2,199,000</td><td class="n">2^+24.79</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ Frobenius quotient at every m</td><td class="n">74.40</td>
+            <td class="n">954</td><td class="n">2^+13.59</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ priced as a logarithm, not a relation</td><td class="n">71.94</td>
+            <td class="n">173</td><td class="n">2^+11.13</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ stored table built once</td><td class="n">74.94</td>
+            <td class="n">1.39e+03</td><td class="n">2^+14.14</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td><strong>+ probes and E[4] translates priced</strong> <em>(current)</em></td>
+            <td class="n"><strong>67.29</strong></td><td class="n"><strong>6.9</strong></td>
+            <td class="n"><strong>2^+6.48</strong></td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>Homogeneous relations at m = 28</td><td class="n">56.76</td>
+            <td class="n">0.018</td><td class="n">2^&minus;4.05</td>
+            <td><span class="chip relabel">relabelling</span></td></tr>
+        </tbody>
+      </table>
+      <p>The last row sits <em>below</em> the reference and is the only one that is not an honest
+        accounting of a logarithm: it prices relations among unknown base logarithms, which
+        determine log<sub>P</sub>(Q) not at all. Every other row is a correction to this
+        ledger&rsquo;s own arithmetic &mdash; four made the attack look better, the fifth made it
+        look worse by 2<sup>2.65</sup> and came from an external review agent. None is a fact about
+        the curve. Current optimum: 2 Frobenius orbits (B = 262), 12-point relations split 11+1,
+        quotiented table, 1,011 EB charged at zero. The structure is run end to
+        end on small curves and recovers a planted logarithm in 6 of 6 cells
+        (<code>amortised_attack.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),

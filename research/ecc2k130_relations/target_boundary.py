@@ -79,6 +79,15 @@ M = 131
 LOG2_M = math.log2(M)
 KEY_BYTES = 8
 
+# One probe is a group addition plus, if the stored table is quotiented, a
+# canonicalisation of the probe point over its 131-element sigma-orbit.
+# Measured on this container against a batched group addition (the unit rho
+# iterates in): 29.20us per addition, 398.52us per canonicalisation.
+CANONICALISATION_GROUP_OPS = 13.6
+
+# |E[4] cap H| = 2, so each streamed point is probed against two translates.
+REACHABLE_E4 = 2
+
 # Measured shortfall of the decomposition model against exhaustive counts:
 # mean measured/predicted 0.84 over seven unsaturated small-curve cells
 # (results/target_decomposition.json). Subset sums collide, so the true rate
@@ -103,58 +112,84 @@ def _lse(a: float, b: float) -> float:
     return hi + math.log2(1 + 2 ** (lo - hi))
 
 
-def cost(T: int, n: int, s: int, amortise: bool = True):
+def cost(T: int, n: int, s: int, amortise: bool = True,
+         quotient_table: bool = True):
     """log2 cost of a logarithm from a `T`-orbit support and `n`-point relations.
 
-    With `amortise` (the default and the correct accounting) the stored side
-    is built once and the streamed side is paid per target attempt.  With
-    `amortise=False` the whole meet-in-the-middle is charged per attempt,
-    which is what this module did before and is 2^7.3 too expensive.
+    `amortise` (the default, and the correct accounting) builds the stored
+    side once and pays the streamed side per target attempt.  Its
+    counterfactual pays both on every attempt.
+
+    `quotient_table` chooses how the `sigma` quotient is spent on the stored
+    side, and the two are genuinely different attacks:
+
+      * **quotiented** -- store one canonical class per `sigma`-orbit, 131x
+        fewer entries to build, but every probe must be canonicalised over
+        its own orbit before it can be looked up.  That canonicalisation is
+        not free and is priced here at a measured
+        `CANONICALISATION_GROUP_OPS` group-operation equivalents;
+      * **full** -- store all 131 rotations, so a probe is a bare lookup,
+        at 131x the entries to build.
+
+    With memory charged at zero the choice is a pure build-versus-probe
+    trade, and which wins depends on the configuration, so both are searched.
+
+    An earlier form of this module counted probes but not their cost, and
+    ignored the `E[4]` translates each streamed point is tested against.
+    Together those omissions were worth 2^2.65.
     """
     B = M * T
     a, b = _lchoose(B, s), _lchoose(B, n - s)
     if a is None or b is None:
         return None
-    stored = s + a - LOG2_M           # canonical sigma-classes only
-    streamed = (n - s) + b
+    build = s + a - (LOG2_M if quotient_table else 0.0)
+    log_probes = math.log2(REACHABLE_E4) + (n - s) + b
+    log_probe_cost = (math.log2(1 + CANONICALISATION_GROUP_OPS)
+                      if quotient_table else 0.0)
     log_p = min(0.0, n + _lchoose(B, n) - LOG2_R
                 + math.log2(MEASURED_RATE_FACTOR))   # measured, no sigma bonus
     log_attempts = math.log2(T + 1) - log_p
+    streamed_total = log_attempts + log_probes + log_probe_cost
     if amortise:
-        per_attempt = streamed
-        total = _lse(stored, log_attempts + streamed)
+        total = _lse(build, streamed_total)
     else:
-        per_attempt = max(stored, streamed)
-        total = log_attempts + per_attempt
+        # A faithful rebuild-every-time: each attempt pays the build AND the
+        # stream. Charging max() of the two instead silently drops the build
+        # whenever streaming dominates, which made the counterfactual cheaper
+        # than the thing it is a counterfactual to.
+        total = log_attempts + _lse(build, log_probes + log_probe_cost)
     return {
         "orbits": T,
         "support_size": B,
         "relation_length": n,
         "mitm_split": f"{s}+{n - s}",
-        "log2_stored_classes": round(stored, 3),
-        "log2_streamed": round(streamed, 3),
-        "log2_build_once": round(stored, 3),
-        "log2_cost_per_attempt": round(per_attempt, 3),
+        "stored_table": "quotiented" if quotient_table else "full",
+        "log2_build_once": round(build, 3),
+        "log2_probes_per_attempt": round(log_probes, 3),
+        "log2_probe_cost": round(log_probe_cost, 3),
         "log2_decomposition_probability": round(log_p, 3),
         "log2_target_attempts": round(log_attempts, 3),
         "relations_needed": T + 1,
         "log2_total_cost": round(total, 3),
         "log2_total_vs_rho": round(total - RHO_LOG2, 3),
-        "log2_memory_bytes": round(stored + math.log2(KEY_BYTES), 3),
-        "memory_exabytes": float(f"{2 ** (stored + math.log2(KEY_BYTES)) / 1e18:.4g}"),
+        "S": float(f"{2 ** (total - LOG2_R / 2):.4g}"),
+        "log2_memory_bytes": round(build + math.log2(KEY_BYTES), 3),
+        "memory_exabytes": float(f"{2 ** (build + math.log2(KEY_BYTES)) / 1e18:.4g}"),
     }
 
 
 def optimise(max_orbits: int = 120000, max_n: int = 48, amortise: bool = True):
+    """Best over support size, relation length, split, and table layout."""
     best = None
     grid = list(range(1, 300)) + list(range(300, max_orbits + 1, 13))
     for T in grid:
         for n in range(2, max_n + 1):
             for s in range(1, n):
-                r = cost(T, n, s, amortise=amortise)
-                if r and (best is None or
-                          r["log2_total_cost"] < best["log2_total_cost"]):
-                    best = r
+                for quot in (True, False):
+                    r = cost(T, n, s, amortise=amortise, quotient_table=quot)
+                    if r and (best is None or
+                              r["log2_total_cost"] < best["log2_total_cost"]):
+                        best = r
     return best
 
 
@@ -210,6 +245,9 @@ def main():
         "best_if_table_rebuilt_per_attempt": unamortised,
         "amortisation_saving_log2": round(
             unamortised["log2_total_cost"] - best["log2_total_cost"], 3),
+        "amortisation_saving_is_between_separate_optima": True,
+        "canonicalisation_group_ops": CANONICALISATION_GROUP_OPS,
+        "reachable_four_torsion": REACHABLE_E4,
         "homogeneous_extension_past_m8": homog,
         "homogeneous_first_sub_rho_m": crossing["m"] if crossing else None,
         "verdict": (
@@ -223,9 +261,10 @@ def main():
             f"reference, at m = "
             f"{crossing['m'] if crossing else 'n/a'}, but it prices relations "
             f"that carry no information about log_P(Q), which is the section 3 "
-            f"error in its strongest form. Building the table once rather "
-            f"than per attempt is worth "
-            f"2^{unamortised['log2_total_cost'] - best['log2_total_cost']:.2f}."),
+            f"error in its strongest form. Amortising the stored table moves "
+            f"the optimum from 2^{unamortised['log2_total_cost']} to "
+            f"2^{best['log2_total_cost']}; those are two separately optimised "
+            f"configurations, not one attack repriced."),
     }
 
     out = Path(__file__).resolve().parent / "results" / "target_boundary.json"
