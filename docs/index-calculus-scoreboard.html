@@ -2644,5 +2644,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0015 -->
+<section id="ecc2k-inline-25b"><h2>ECC2K-130 selective inlining: 25 B/s target not reached</h2>
+<p>One RTX PRO 6000 Blackwell Server Edition, median of three paired runs on the archived tuning snapshot; not a throughput measurement of the main-branch port.
+Best measured throughput 17.946263 B complete scalar updates/s, up 3.760%.
+All variants retain 5.3125 products/update and the same generic-group bound;
+this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
+<table><thead><tr><th>Variant</th><th>Median B updates/s</th><th>/ paired baseline</th><th>/ 25 B target</th><th>Replay</th></tr></thead><tbody><tr><td>Baseline (engineering)</td><td>17.295877</td><td>1.000000</td><td>0.691835</td><td>600/600, zero dropped</td></tr><tr><td>Inline single (engineering)</td><td>17.296764</td><td>1.000051</td><td>0.691871</td><td>600/600, zero dropped</td></tr><tr><td>Inline paired (engineering)</td><td>17.940329</td><td>1.037260</td><td>0.717613</td><td>600/600, zero dropped</td></tr><tr><td>Inline both (engineering)</td><td>17.946263</td><td>1.037604</td><td>0.717851</td><td>600/600, zero dropped</td></tr></tbody></table>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/results.json">results</a>;
+<a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/README.md">report and reproduction</a>.</p></section>
 </body>
 </html>
