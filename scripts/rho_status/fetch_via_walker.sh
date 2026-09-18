@@ -109,19 +109,25 @@ SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecki
 # publish job's timeout must stay above this, plus the steps after.
 REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-1500}
 
+# Per-run path: /tmp/rho_status.json on the walker is leftover from the
+# 11:25Z hop. Copying it on a 124 that died before this run wrote a file
+# would republish that frozen document and still exit 0.
+REMOTE_JSON="/tmp/rho_status.${GITHUB_RUN_ID:-0}-${GITHUB_RUN_ATTEMPT:-0}-$$.json"
+
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS
 set +e
-"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
+"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out '$REMOTE_JSON'"
 SSH_RC=$?
 set -e
 ELAPSED=$((SECONDS - STARTED))
-# Copy even on 124: the fallback file is written first, and a SIGTERM during
-# a later hour still leaves a current generated_at for Pages. Without this
-# the live dashboard stays on the last successful hop (2026-09-18T11:25Z).
+# Copy even on 124: snapshot.py writes the fallback before hour chunks, so
+# a SIGTERM later still leaves a current generated_at for Pages — but only
+# this run's file, never a previous hop's.
 set +e
-"${SCP[@]}" "$USER@$HOST:/tmp/rho_status.json" "$OUT"
+"${SCP[@]}" "$USER@$HOST:$REMOTE_JSON" "$OUT"
 SCP_RC=$?
+"${SSH[@]}" "rm -f '$REMOTE_JSON'" >/dev/null 2>&1
 set -e
 if [ "$SCP_RC" -eq 0 ] && [ -s "$OUT" ]; then
     echo "wrote $OUT from $USER@$HOST ($IID); snapshot query took ${ELAPSED}s (remote rc=$SSH_RC)"
