@@ -14,6 +14,9 @@
 #if ECC_HALVING_POLY_STATE < 0 || ECC_HALVING_POLY_STATE > 2
 #error "ECC_HALVING_POLY_STATE must be 0 (affine ONB), 1 (affine polynomial), or 2 (lambda polynomial)"
 #endif
+#ifndef ECC_HALVING_BENCH_BLOCKS
+#define ECC_HALVING_BENCH_BLOCKS 0
+#endif
 
 using eccPacked131::P131;
 using R = Ref<CfgF131>;
@@ -141,6 +144,9 @@ int main() {
     int residentBlocks = 0;
     checked(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
         &residentBlocks, halveBench, ECC_THREADS, 0));
+#if ECC_HALVING_BENCH_BLOCKS
+    residentBlocks = ECC_HALVING_BENCH_BLOCKS;
+#endif
     const int benchN = prop.multiProcessorCount * ECC_THREADS * residentBlocks;
     const int steps = 4096;
     std::printf("  benchmark occupancy: %d SMs x %d blocks x %d threads\n",
