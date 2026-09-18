@@ -31,8 +31,8 @@
 #ifndef ECC_TABLE_BRANCHES
 #define ECC_TABLE_BRANCHES 8
 #endif
-#if ECC_TABLE_BRANCHES != 8 && ECC_TABLE_BRANCHES != 16
-#error "ECC_TABLE_BRANCHES must be 8 or 16"
+#if ECC_TABLE_BRANCHES != 4 && ECC_TABLE_BRANCHES != 8 && ECC_TABLE_BRANCHES != 16
+#error "ECC_TABLE_BRANCHES must be 4, 8 or 16"
 #endif
 #include "bitslice.h"
 
