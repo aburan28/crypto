@@ -145,7 +145,8 @@ section { margin: 34px 0; }
 }
 .banner.COLLECTING { color: var(--good); border-color: #24503f; }
 .banner.COLLISION_RECORDED { color: var(--bad); background: #2a1520; border-color: #5c2634; }
-.banner.IDLE_OR_STALE { color: var(--warn); border-color: #54452a; }
+.banner.IDLE_OR_STALE,
+.banner.INGEST_BEHIND { color: var(--warn); border-color: #54452a; }
 .banner.EMPTY,
 .banner.UNREACHABLE { color: var(--idle); }
 .banner a { color: inherit; }

@@ -564,11 +564,15 @@ mechanism here and a vacuum per deploy is not a cost this table can carry.
 With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
 vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
 snapshot from over six minutes to **142.8 s** (`published status.json in
-142.8s`, which is why that line carries a duration). It is still O(corpus):
-the durable answer when it next hurts is a maintained total and hourly table
-updated inside the ingest transaction, since `found_at` is constant per
-object, and that would make the snapshot O(1). Not done — the 30-minute
-spacing buys the room.
+142.8s`, which is why that line carries a duration). It is still O(corpus)
+for this program's own `publishStatus`. The Pages snapshot no longer is:
+`scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
+once and installs a statement-level insert trigger on
+`distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
+the buckets current without a code deploy on this host. Later Pages runs
+read the rollup. This program's 30-minute `--status-every` still buys room
+for the 142 s count query until an ingest-host deploy starts reading the
+same tables.
 
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh

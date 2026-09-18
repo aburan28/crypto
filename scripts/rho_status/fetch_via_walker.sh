@@ -102,14 +102,26 @@ SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecki
 SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}")
 
 # Bound the query remotely too, so a genuinely stuck snapshot fails with its
-# own message instead of hanging until the job timeout. REMOTE_TIMEOUT stays
-# under the publish job's 15 minutes, leaving room for the steps after this.
-REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-540}
+# own message instead of hanging until the job timeout. The first run after
+# this hop copies snapshot.py has to backfill rho_dp_hour from the heap
+# (524 s at 187 M rows on 2026-09-18); later runs read the rollup. 900 s
+# leaves room for that one scan. The publish job's timeout must stay above
+# this, plus the steps after.
+REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-900}
 
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS
+set +e
 "${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
+SSH_RC=$?
+set -e
 ELAPSED=$((SECONDS - STARTED))
+if [ "$SSH_RC" -eq 124 ]; then
+    echo "snapshot exceeded ${REMOTE_TIMEOUT}s after ${ELAPSED}s (rollup backfill or a stuck scan)" >&2
+    exit 124
+elif [ "$SSH_RC" -ne 0 ]; then
+    exit "$SSH_RC"
+fi
 "${SCP[@]}" "$USER@$HOST:/tmp/rho_status.json" "$OUT"
 # Printed every run on purpose: this number is the early warning for the
 # growth above, and it is invisible unless the log carries it.

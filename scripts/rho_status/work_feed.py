@@ -152,12 +152,53 @@ def work_block(feed, campaign, now=None):
     return block
 
 
+def ingest_block(feed):
+    """The publishable ingest-health fields, or None when the feed has none.
+
+    `outstanding_objects` and `unrecognised_objects` are how the page tells a
+    stopped fleet from a stopped ingest. On 2026-09-17 the store took nothing
+    for five hours while the fleet walked, and the dashboard's only sentence
+    for that was IDLE_OR_STALE — the same sentence as a dead walk. The feed
+    carries the distinction; copy it, never invent it.
+    """
+    if not isinstance(feed, dict):
+        return None
+    ingest = feed.get("ingest")
+    if not isinstance(ingest, dict):
+        return None
+    try:
+        outstanding = int(ingest.get("outstanding_objects") or 0)
+        unrecognised = int(ingest.get("unrecognised_objects") or 0)
+    except (TypeError, ValueError):
+        return None
+    lag = ingest.get("lag_seconds")
+    try:
+        lag = int(lag) if lag is not None else None
+    except (TypeError, ValueError):
+        lag = None
+    return {
+        "outstanding_objects": outstanding,
+        "unrecognised_objects": unrecognised,
+        "newest_object_at": ingest.get("newest_object_at"),
+        "lag_seconds": lag,
+    }
+
+
 def merge_work(status, feed, campaign, now=None):
     """Attach the feed's iteration total to the snapshot. True when it did."""
     block = work_block(feed, campaign, now=now)
     if block is None:
         return False
     status["work"] = block
+    ingest = ingest_block(feed)
+    if ingest is not None:
+        status["ingest"] = ingest
+        if (
+            status.get("state") == "IDLE_OR_STALE"
+            and (ingest["outstanding_objects"] or ingest["unrecognised_objects"])
+        ):
+            # The store's last-hour count is about the ingest, not the walk.
+            status["state"] = "INGEST_BEHIND"
     assert_public(status)
     return True
 
