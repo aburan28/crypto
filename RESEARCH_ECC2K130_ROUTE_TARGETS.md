@@ -167,9 +167,33 @@ strictly cheaper than enumerating the whole system.
 **Falsifier.** No crossbred space at `m = 3` beyond the toy rungs → X1
 is moot; record the `(D, k)` frontier and close Route 1.
 
-**Cost.** Minutes. `crossbred_bench` already sweeps this and prints
-`kernel` and `filters` columns; what is missing is that **nobody has
-written the output down**.
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_kernel_20260918/`. The falsifier is
+**not** met: a determining space exists at `m = 3` through `n = 9`
+(`ℓ = 6`, `v = 27`, `D = 3`, `k = 12`, `kernel = 23`, `agree = yes`) and
+at `m = 2` through `n = 13` (`ℓ = 12`, `v = 24`). Route 1 stays open.
+X1 is still unfitted: only three agreeing `m = 3` rungs (`n = 5, 7, 9`),
+and the bench's `xb/F4` column is not `Q / C(|F|, 2)`.
+
+Every printed cell has **`filters = 0`**, including the `(D, k)` sweep
+at `K_0/F_2^9`, `m = 2`. The GPU search phase advertised in the routes
+note has no bitwise filters to AND on these systems.
+
+| n | m | ℓ | v | D | k | kernel | filters | agree | xb/F4 | Class |
+|--:|--:|--:|--:|--:|--:|-------:|--------:|:-----:|------:|:--|
+| 5 | 2 | 4 | 8 | 2 | 4 | 4 | 0 | yes | 0.015 | measurement |
+| 5 | 3 | 4 | 17 | 3 | 8 | 52 | 0 | yes | 0.065 | measurement |
+| 7 | 3 | 3 | 16 | 3 | 6 | 15 | 0 | yes | 0.013 | measurement |
+| 9 | 2 | 6 | 12 | 2 | 6 | 9 | 0 | yes | 0.004 | measurement |
+| 9 | 3 | 6 | 27 | 3 | 12 | 23 | 0 | yes | 0.023 | measurement |
+| 13 | 2 | 12 | 24 | 2 | 12 | 13 | 0 | yes | 0.002 | measurement |
+| 13 | 3 | 12 | 49 | 4 | 2 | 25 | 0 | **NO** | 1150 | not a result |
+
+`n = 11, m = 3` and `n = 17, m = 2` produced no row (`KoblitzCurve::new`
+or the factor base returned `None`). The `n = 13, m = 3` row extracted a
+kernel but failed the correctness gate; the printed `k = 2` does not
+satisfy `kernel ≥ v − k` on the last target (`25 < 47`). It is not a
+rung for X1.
 
 **Depends on** nothing. Do this first.
 
@@ -282,8 +306,8 @@ rather than whether to read more.
 
 | # | task | gates | cost |
 |---|---|---|---|
-| T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | X2, X1 | minutes |
-| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | X1, X3 | short |
+| T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | **done** 2026-09-18, `experiments/ecc2k130_crossbred_kernel_20260918/` | minutes |
+| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | **done** (X2 above); X1 still needs a fourth agreeing `m = 3` rung | short |
 | T3 | Measure the word-op → group-op conversion factor and record it (`AGENTS.md` §2) | X1's absolute column | short |
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | X1 admissibility | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
@@ -303,7 +327,8 @@ a state this repository has.
 Any one of:
 
 - **`α` measured over ≥4 rungs**, whatever its value. A number closes
-  Route 1 either way; the current state is that nobody has one.
+  Route 1 either way. X2 is frozen: the space exists; what is missing is
+  a fourth agreeing `m = 3` rung and `Q / C(|F|, 2)`.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
   not by how the 350× felt.
 - **H1 falsified at `m = 4`** — a first fall degree that grows, which

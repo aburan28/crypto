@@ -1301,6 +1301,77 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       rho verdict above is unchanged. No full-DLP at n=131 is claimed.</p>
   </div>
 
+  <div class="panel" id="ecc2k130-crossbred-kernel-20260918">
+    <div class="panel-head">
+      <h2>Crossbred kernel frontier on K<sub>0</sub></h2>
+      <p><span class="chip">engineering</span>
+        X2 of the route-target note, frozen. A determining Crossbred space
+        exists past the toys at <code>m = 3</code> through <code>n = 9</code>
+        and at <code>m = 2</code> through <code>n = 13</code>. Route 1 stays
+        open. <code>α</code> is not fitted: only three agreeing
+        <code>m = 3</code> rungs, and the bench reports bit operations against
+        Boolean brute/F4, not <code>Q / C(|F|, 2)</code>. Every printed cell
+        has <code>filters = 0</code>. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_crossbred_kernel_20260918/summary.json"><code>experiments/ecc2k130_crossbred_kernel_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: bit operations (64-bit word XOR = 64 bit ops). Not the
+      field-product <code>S</code> of the panels above. A row with
+      <code>agree = NO</code> is not a result.</p>
+    <table>
+      <caption>Crossbred space on K<sub>0</sub> Frobenius-base Semaev systems.
+        Cited from
+        <code>experiments/ecc2k130_crossbred_kernel_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">n</th>
+        <th scope="col" class="n">m</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">v</th>
+        <th scope="col" class="n">D</th>
+        <th scope="col" class="n">k</th>
+        <th scope="col" class="n">kernel</th>
+        <th scope="col" class="n">filters</th>
+        <th scope="col">agree</th>
+        <th scope="col" class="n">xb/F4</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>5</td><td class="n">2</td><td class="n">4</td><td class="n">8</td>
+          <td class="n">2</td><td class="n">4</td><td class="n">4</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.015</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>5</td><td class="n">3</td><td class="n">4</td><td class="n">17</td>
+          <td class="n">3</td><td class="n">8</td><td class="n">52</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.065</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>7</td><td class="n">3</td><td class="n">3</td><td class="n">16</td>
+          <td class="n">3</td><td class="n">6</td><td class="n">15</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.013</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">2</td><td class="n">6</td><td class="n">12</td>
+          <td class="n">2</td><td class="n">6</td><td class="n">9</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.004</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">3</td><td class="n">6</td><td class="n">27</td>
+          <td class="n">3</td><td class="n">12</td><td class="n">23</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.023</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>13</td><td class="n">2</td><td class="n">12</td><td class="n">24</td>
+          <td class="n">2</td><td class="n">12</td><td class="n">13</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.002</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>13</td><td class="n">3</td><td class="n">12</td><td class="n">49</td>
+          <td class="n">4</td><td class="n">2</td><td class="n">25</td><td class="n">0</td>
+          <td>NO</td><td class="n">1150</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+      </tbody>
+    </table>
+    <p>Next is X1: fit <code>α</code> from <code>Q / C(|F|, 2)</code> over
+      four agreeing <code>m = 3</code> rungs after a <code>(D, k)</code> rule
+      that still determines the system at <code>n = 13</code>. Do not GPU the
+      search phase while <code>filters = 0</code>. The product-law floor and
+      the 500×-or-worse rho verdict are unchanged.</p>
+  </div>
+
   <div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>

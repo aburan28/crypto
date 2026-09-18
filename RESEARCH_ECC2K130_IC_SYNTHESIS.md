@@ -229,8 +229,9 @@ Reading the table:
 | SAT growth `m=5,9,11` and toy DLP `n=5,9` | Conflicts have no measured conversion to field products | Diagnostic; pair lookup 228× faster on 16 planted triples at `n=9` | engineering |
 | Conditional FFD formula at `n=131` (`2^{86}`) | Literature bit-complexity, gated on `D_reg = D_ff + o(1)` | Extrapolation, `2^{25}` short of rho even if granted | extrapolation |
 | Residual-walk `S ≈ 200×–265×` at `2^{50}` | Different curve `E(F_{p³})` | Phase-pricing lesson: LA can dominate | accounting |
-| Crossbred `word_ops` | Conversion factor to group ops is **unmeasured** (`AGENTS.md` §2) | X1/X2 of the route-target note | unmeasured |
+| Crossbred `word_ops` | Conversion factor to group ops is **unmeasured** (`AGENTS.md` §2) | X1 still unfitted; X2 frozen 2026-09-18 | unmeasured |
 | Symmetrised 350× SAT at `n=15` | Wall-clock on one size, not `Λ` | Size gain; predicted engineering | engineering |
+| Crossbred kernel frontier | Bit ops, not field products | Space exists through `n=9, m=3` and `n=13, m=2`; `filters=0`; `n=13, m=3` is not a result | measurement |
 
 SAT receipt: `ecc2k130/benchmarks/indexcalc-g7e/sat.json`. Putting any of
 these into `S` without a measured conversion is relabelling.
@@ -253,6 +254,16 @@ matrix-F4 at `m = 2` and `m = 3`. The literature survey found no
 publication combining Crossbred with binary ECDLP decomposition systems
 ([`RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md)
 §5).
+
+**X2, frozen.** A determining space exists on every `agree = yes` rung
+tried: `m = 3` through `n = 9` (`ℓ = 6`, `v = 27`) and `m = 2` through
+`n = 13` (`ℓ = 12`). The X2 falsifier is not met; Route 1 stays open.
+Every printed cell has `filters = 0`. The first larger `m = 3` rung,
+`n = 13`, `v = 49`, extracts a kernel but fails the correctness gate
+(`agree = NO`, `xb/F4 = 1150`). Receipt:
+`experiments/ecc2k130_crossbred_kernel_20260918/`. X1 is not fitted:
+only three agreeing `m = 3` rungs, and the bench does not report
+`Q / C(|F|, 2)`.
 
 **The combination.** Existing Semaev systems → Crossbred `(D, k)` →
 `DecompositionStrategy`, with the search phase (`2^k` independent points)
@@ -338,6 +349,10 @@ repository's CUDA stack is already shaped for. It does **not** survive as
 a substitute for C1: a faster inner loop at `α = 2` is the G7e pair-enum
 story again.
 
+**Blocked on the X2 freeze.** Every printed cell has `filters = 0`, so
+there is currently nothing for that AND to test. Revisit only if a later
+`(D, k)` rule produces `filters > 0` and C1 has an `α`.
+
 **The combination.** C1's fitted `(D, k)` rule → GPU search, conversion
 factor from word-ops to field products measured on the same SKU.
 
@@ -396,7 +411,8 @@ Recorded so they are not rebuilt.
 Any one of:
 
 - **`α` fitted over ≥4 rungs** on C1 or C2, whatever its value. A number
-  closes Crossbred either way; the current state is that nobody has one.
+  closes Crossbred either way; X2 is now frozen and the remaining gap is
+  a fourth agreeing `m = 3` rung plus `Q / C(|F|, 2)`.
 - **C3 classified** by the `Λ · n / m` slope, not by the 350×.
 - **H1 falsified at `m = 4`** — a first fall degree that grows.
 
