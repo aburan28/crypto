@@ -401,13 +401,19 @@ rather than whether to read more.
 | T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
-| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
+| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict; chained-`x` FFD smoke is AutoLab beat `x5.ffd_chained_m4` | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
 
 T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not
 a state this repository has.
+
+Replay of the X1/X3 freezes, the per-frame `α` refusal, and the chained-`x`
+FFD smoke live in
+[`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/).
+Harbor is not required. The chained *symmetrised* `S₃` at `m = 4` is still
+unbuilt; do not relabel the smoke as that arm.
 
 ## What would count as finishing this thread
 

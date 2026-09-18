@@ -356,6 +356,12 @@ small-`n` ladder currently holds at FFD = 3 for chained `m ≥ 3`.
 **Predicted class.** Measurement, not an attack. A growing FFD is a
 negative that still counts.
 
+**AutoLab.** Local control plane
+[`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/)
+replays the X1/X3 freezes, refuses an `α` claim without four rungs in
+one frame, and launches the chained-`x` FFD smoke. The chained
+symmetrised `S₃` at `m = 4` is still unbuilt.
+
 ### C5 — GPU search phase of Crossbred, only after C1 has an `α`
 
 **Why it survives.** Crossbred's search is `2^k` independent bitwise ANDs
