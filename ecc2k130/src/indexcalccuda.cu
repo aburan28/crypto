@@ -206,11 +206,19 @@ static SearchResult runSearch(const Base &b, P131 rx, P131 ry, int maxHits, bool
         checked(cudaMemcpy(dy, b.y.data(), b.y.size() * sizeof(P131), cudaMemcpyHostToDevice));
         checked(cudaMemset(dHits, 0, sizeof(unsigned long long)));
         checked(cudaMemset(dPairs, 0, sizeof(unsigned long long)));
+        cudaEvent_t start, stop;
+        checked(cudaEventCreate(&start));
+        checked(cudaEventCreate(&stop));
         checked(cudaDeviceSynchronize());
-        auto t0 = std::chrono::steady_clock::now();
+        checked(cudaEventRecord(start));
         searchRows<<<B, 128>>>(dx, dy, B, rx, ry, b.weight, dh, maxHits, dHits, dPairs);
-        checked(cudaDeviceSynchronize());
-        out.seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+        checked(cudaEventRecord(stop));
+        checked(cudaEventSynchronize(stop));
+        float ms = 0;
+        checked(cudaEventElapsedTime(&ms, start, stop));
+        out.seconds = ms / 1000.0;
+        cudaEventDestroy(start);
+        cudaEventDestroy(stop);
         checked(cudaMemcpy(&out.hits, dHits, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
         checked(cudaMemcpy(&out.pairs, dPairs, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
         int keep = (int)std::min(out.hits, (unsigned long long)maxHits);
@@ -416,24 +424,40 @@ int main(int argc, char **argv) {
         int blocks = (nBench + threads - 1) / threads;
         addBench<<<blocks, threads>>>(dx, dy, nBench, 1);
         checked(cudaDeviceSynchronize());
-        auto t0 = std::chrono::steady_clock::now();
+        cudaEvent_t start, stop;
+        checked(cudaEventCreate(&start));
+        checked(cudaEventCreate(&stop));
+        checked(cudaEventRecord(start));
         addBench<<<blocks, threads>>>(dx, dy, nBench, benchSteps);
-        checked(cudaDeviceSynchronize());
-        benchSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+        checked(cudaEventRecord(stop));
+        checked(cudaEventSynchronize(stop));
+        float ms = 0;
+        checked(cudaEventElapsedTime(&ms, start, stop));
+        benchSeconds = ms / 1000.0;
+        cudaEventDestroy(start);
+        cudaEventDestroy(stop);
         benchAdds = (double)(nBench - 1) * (double)benchSteps;
         std::printf("bench adds=%.0f seconds=%.6f rate=%.3e add/s\n",
                     benchAdds, benchSeconds, benchSeconds > 0 ? benchAdds / benchSeconds : 0);
         cudaFree(dx); cudaFree(dy);
     }
 
+    FILE *jsonOut = stdout;
+    if (jsonPath && std::strcmp(jsonPath, "-")) {
+        jsonOut = std::fopen(jsonPath, "w");
+        if (!jsonOut) {
+            std::perror(jsonPath);
+            jsonOut = stdout;
+        }
+    }
     if (jsonPath) {
-        FILE *f = std::fopen(jsonPath, "w");
-        if (!f) die("cannot write --json");
-        writeJson(f, prop.name, prop.major * 10 + prop.minor, b,
+        writeJson(jsonOut, prop.name, prop.major * 10 + prop.minor, b,
                   plantedN, plantedFound, plantedOk, genGpuPtr, genCpuPtr,
                   benchAdds, benchSeconds, benchSteps);
-        std::fclose(f);
-        std::printf("wrote %s\n", jsonPath);
+        if (jsonOut != stdout) {
+            std::fclose(jsonOut);
+            std::printf("wrote %s\n", jsonPath);
+        }
     }
     return plantedOk && plantedFound == plantedN ? 0 : 1;
 }

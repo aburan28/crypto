@@ -112,19 +112,27 @@ for the verdict: it enlarges `|F|` and does not change the leading
 
 Unit: **field products**. Conversion from rho iterations: 5.3125
 products/iteration, measured on this SKU. `S = products / √r` with
-`√r = 2^{64.5}`.
+`√r = 2^{64.5}`. Frozen receipt:
+`ecc2k130/benchmarks/indexcalc-g7e/summary.json`.
 
 | Variant | log2 products | S | vs rho | vs floor | Correctness | Class |
 |---|---:|---:|---:|---:|---|---|
-| Pollard rho `⟨−1⟩×⟨π⟩` *(reference)* | 63.21 | 0.411 | `2^+0.00` | — | shipping client | baseline |
-| Product-law floor, `m = 3`, any `\|F\|` | 136.91 | `2^{72.4}` | `2^+73.70` | `2^+0.00` | derived | floor |
-| + Frobenius collapse `\|F\|/131` | 129.87 | `2^{65.4}` | `2^+66.66` | `2^+0.00` | derived | accounting |
-| Streaming pair enum, G7e *(measured)* | see `summary.json` | see `summary.json` | ~floor | ~1 | planted + toy DLP | engineering |
+| Pollard rho `⟨−1⟩×⟨π⟩` *(reference)* | 63.22 | 0.411 | `2^+0.00` | — | shipping client | baseline |
+| Product-law floor, `m = 3`, any `\|F\|` | 136.91 | `2^{72.4}` | `2^+73.69` | `2^+0.00` | derived | floor |
+| + Frobenius collapse `\|F\|/131` | 129.87 | `4.78×10^{19}` | `2^+66.66` | `2^+0.00` | derived | accounting |
+| Streaming pair enum, G7e, `\|F\|=8384` | 129.87 | `4.78×10^{19}` | `2^+66.66` | `2^+0.00` | 8/8 planted; 0 hits on the generator, matching `3.6×10^{-29}` | engineering |
 
-The measured row is filled from
-`ecc2k130/benchmarks/indexcalc-g7e/summary.json` after the device run.
-Its ratio to the floor is the result. A faster kernel that still scans
-pairs is the same row with a different wall-clock footnote.
+The measured row is the Frobenius-accounting row, run. Its ratio to the
+floor is 1. The GPU does not appear in the product column.
+
+**Practicality, not the metric.** On this RTX PRO 6000 Blackwell
+(`sm_120`, 97,252 MiB) the occupied pair scan did `3.5141536×10^7`
+pairs in 12.73 ms (`2.76×10^9` pairs/s). The same scan on the eight
+host cores took 40.23 s, a **3161×** wall-clock speedup and an
+engineering constant. At that occupied rate a streaming logarithm is
+still `2^{94.2}` seconds. A 2048-point add microbench, too small to
+fill the device, measured only `2.52×10^8` affine adds/s and is not
+the rate used above.
 
 ## 4. How to run
 
@@ -138,8 +146,9 @@ python3 ecc2k130/benchmarks/indexcalc-g7e/run.py
 ```
 
 `--skip-gpu` on `run.py` still recovers the degree-5 and degree-9
-logs. The CUDA self-test is a packed-add differential against `Ref`
-and one planted triple at weight 2.
+logs. `--from-raw` rebuilds `summary.json` from a frozen
+`raw-gpu.json`. The CUDA self-test is a packed-add differential against
+`Ref` and one planted triple at weight 2.
 
 ## 5. Classification
 

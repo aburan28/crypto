@@ -15,6 +15,7 @@ import indexcalc_e2e as engine
 
 
 RHO_LOG2 = 60.809
+RHO_PRODUCTS_PER_ITER = 5.3125
 R_131 = 680564733841876926932320129493409985129
 ORDER_131 = 4 * R_131
 # Itoh–Tsujii inv131 is eight field products; affine addition uses two more.
@@ -191,22 +192,30 @@ def recoverLog(m, weight, seed, attempts=256):
     return report
 
 
+def rhoProducts(rhoLog2=RHO_LOG2, productsPerIter=RHO_PRODUCTS_PER_ITER):
+    return productsPerIter * (2 ** rhoLog2)
+
+
 def projectAttack(baseSize, relations, subgroupOrder, curveOrder, rhoLog2=RHO_LOG2):
-    products = streamingProducts(baseSize, relations, subgroupOrder)
+    products = streamingProducts(baseSize, relations, curveOrder)
+    rho = rhoProducts(rhoLog2)
     s = sScore(products, subgroupOrder)
-    sRho = sScore(2 ** rhoLog2, subgroupOrder)
+    sRho = sScore(rho, subgroupOrder)
     return {
         'base_size': baseSize,
         'relations_charged': relations,
         'group_order': str(curveOrder),
         'subgroup_order': str(subgroupOrder),
-        'expected_yield_per_target': expectedYield(baseSize, 3, subgroupOrder),
+        'expected_yield_per_target': expectedYield(baseSize, 3, curveOrder),
         'streaming_field_products': products,
         'log2_streaming_field_products': log2(products) if products < float('inf') else None,
         'S': s if products < float('inf') else None,
         'S_rho': sRho,
-        'ratio_to_rho': (products / (2 ** rhoLog2)) if products < float('inf') else None,
-        'log2_ratio_to_rho': (log2(products) - rhoLog2) if products < float('inf') else None,
+        'rho_field_products': rho,
+        'log2_rho_field_products': log2(rho),
+        'rho_products_per_iteration': RHO_PRODUCTS_PER_ITER,
+        'ratio_to_rho': (products / rho) if products < float('inf') else None,
+        'log2_ratio_to_rho': (log2(products) - log2(rho)) if products < float('inf') else None,
         'products_per_affine_add': PRODUCTS_PER_AFFINE_ADD,
         'products_per_pair': PRODUCTS_PER_PAIR,
         'class': 'engineering',

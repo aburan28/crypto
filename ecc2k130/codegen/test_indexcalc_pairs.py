@@ -22,6 +22,8 @@ class AccountingTests(unittest.TestCase):
         projection = pairs.projectAttack(4000, 4000 / 131.0, pairs.R_131, pairs.ORDER_131)
         self.assertEqual(projection['class'], 'engineering')
         self.assertGreater(projection['log2_ratio_to_rho'], 60)
+        self.assertAlmostEqual(projection['log2_rho_field_products'],
+                               pairs.log2(pairs.rhoProducts()), places=9)
 
     def test_expected_yield_matches_binomial(self):
         self.assertAlmostEqual(pairs.expectedYield(10, 3, 1000), 120 / 1000.0)

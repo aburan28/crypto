@@ -44,7 +44,7 @@ def runToyDlp():
 
 def runGpu(binary, rawPath):
     cmd = [binary, '--weight', '2', '--planted', '8', '--search-generator',
-           '--cpu', '--bench-points', '2048', '--bench-steps', '64',
+           '--cpu', '--bench-points', '2048', '--bench-steps', '4096',
            '--json', rawPath]
     print('+', ' '.join(cmd), flush=True)
     subprocess.check_call(cmd)
@@ -54,9 +54,12 @@ def runGpu(binary, rawPath):
 
 def merge(toy, gpu):
     base = gpu.get('factor_base_points', 0) if gpu else 0
-    relations = base / 131.0 if base else 0
-    projection = pairs.projectAttack(base if base else 4000, relations if relations else 4000 / 131.0,
-                                     pairs.R_131, pairs.ORDER_131)
+    relations = (base / 131.0) if base else 0
+    projection = pairs.projectAttack(
+        base if base else 4000,
+        relations if relations else 4000 / 131.0,
+        pairs.R_131, pairs.ORDER_131)
+    floorProducts = 3 * pairs.ORDER_131 * pairs.PRODUCTS_PER_PAIR
     host = {
         'hostname': platform.node(),
         'machine': platform.machine(),
@@ -71,10 +74,12 @@ def merge(toy, gpu):
         'class': 'engineering',
         'host': host,
         'boundaries': {
-            'rho_log2_operations': pairs.RHO_LOG2,
-            'rho_S': pairs.sScore(2 ** pairs.RHO_LOG2, pairs.R_131),
-            'product_law_floor_log2': pairs.log2(3 * pairs.ORDER_131),
-            'product_law_note': 'm·#E field-point candidates for m=3, independent of |F| at leading order',
+            'rho_log2_iterations': pairs.RHO_LOG2,
+            'rho_products_per_iteration': pairs.RHO_PRODUCTS_PER_ITER,
+            'rho_field_products': pairs.rhoProducts(),
+            'rho_S': pairs.sScore(pairs.rhoProducts(), pairs.R_131),
+            'product_law_floor_log2': pairs.log2(floorProducts),
+            'product_law_note': '60·#E field products for m=3 at leading order, independent of |F|',
             'falsification': 'an oracle whose streaming product count at some |F| falls a factor 2^70 below exhaustive pair search, with every hit verified on the curve',
         },
         'toy_dlp': toy,
@@ -86,23 +91,33 @@ def merge(toy, gpu):
         },
     }
     if gpu:
-        rate = gpu.get('bench_affine_adds_per_second') or gpu.get('generator_gpu_pairs_per_second')
+        pairRate = gpu.get('generator_gpu_pairs_per_second') or 0
+        addRate = gpu.get('bench_affine_adds_per_second') or 0
+        cpuRate = gpu.get('generator_cpu_pairs_per_second') or 0
+        # Full-grid pair scan occupies the device; the add microbench does not.
+        occupiedAdds = pairRate * 2
         products = projection['streaming_field_products']
-        if rate and products < float('inf'):
-            # Each pair is two affine adds.
-            seconds = (products / pairs.PRODUCTS_PER_AFFINE_ADD) / rate
-            out['practicality'] = {
-                'affine_adds_per_second': rate,
-                'projected_streaming_seconds': seconds,
-                'projected_streaming_log2_seconds': pairs.log2(seconds) if seconds > 0 else None,
-                'note': 'wall-clock at the measured add rate; not the metric',
-            }
+        seconds = None
+        if occupiedAdds and products < float('inf'):
+            seconds = (products / pairs.PRODUCTS_PER_AFFINE_ADD) / occupiedAdds
+        out['practicality'] = {
+            'gpu_pairs_per_second': pairRate,
+            'cpu_pairs_per_second': cpuRate,
+            'gpu_over_cpu_pair_scan': (pairRate / cpuRate) if cpuRate else None,
+            'occupied_affine_adds_per_second': occupiedAdds,
+            'microbench_affine_adds_per_second': addRate,
+            'projected_streaming_seconds': seconds,
+            'projected_streaming_log2_seconds': pairs.log2(seconds) if seconds else None,
+            'note': 'wall-clock at the occupied pair-scan rate; not the metric',
+        }
     return out
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--skip-gpu', action='store_true')
+    parser.add_argument('--from-raw', action='store_true',
+                        help='rebuild summary.json from an existing raw-gpu.json')
     parser.add_argument('--cuda', default=os.path.join(ROOT, 'ecc2k130', 'build', 'indexcalc-cuda'))
     args = parser.parse_args()
     t0 = time.time()
@@ -110,7 +125,10 @@ def main():
     toy = runToyDlp()
     gpu = None
     rawPath = os.path.join(HERE, 'raw-gpu.json')
-    if not args.skip_gpu:
+    if args.from_raw:
+        with open(rawPath) as f:
+            gpu = json.load(f)
+    elif not args.skip_gpu:
         if not os.path.isfile(args.cuda):
             raise SystemExit('missing CUDA binary %s; run make indexcalc-cuda' % args.cuda)
         gpu = runGpu(args.cuda, rawPath)
