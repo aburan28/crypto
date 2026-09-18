@@ -1504,6 +1504,45 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/README.md">experiment report</a>.</p>
   </section>
 
+  <section aria-labelledby="twenty-b-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="twenty-b-result">ECC2K-130 GPU engineering: 20 B/s on one RTX PRO 6000</h2>
+    <p>A later allocation of the same SKU (driver 595.91.07, CUDA 13.3.73,
+    automatic 96,256 workers, clocks locked at 2430 MHz) timed pair-ILP, an
+    L2 persist window, and slot unroll 2 on top of the table walk + byte
+    pivot. The one-add floor is 22–25 B/s, so 20 is not forbidden. No arm
+    cleared it. The campaign default stays the shipping walk. Field-product
+    count is unchanged at 5.3125 per update. Class: engineering.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 20 B target</th><th scope="col">/ this shipping 14.436</th><th scope="col">/ 22 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Shipping product</td><td>14.436</td><td>0.722</td><td>1.000</td><td>0.656</td><td>300 reports, 0 dropped / reference</td></tr><tr><td>Table walk + byte pivot</td><td>16.474</td><td>0.824</td><td>1.141</td><td>0.749</td><td>walk 1, pivot 1 / not accepted</td></tr><tr><td>+ pair-ILP</td><td>16.617</td><td>0.831</td><td>1.151</td><td>0.755</td><td>priced +9%, measured +0.9% / not accepted</td></tr><tr><td>+ L2 persist</td><td>17.081</td><td>0.854</td><td>1.183</td><td>0.776</td><td>80 MiB window / not accepted</td></tr><tr><td>+ slot unroll 2</td><td>17.298</td><td>0.865</td><td>1.198</td><td>0.786</td><td>110 registers, 0 spill / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample completed
+    50,465,865,728 updates. Pair-ILP was priced at +9% if ptxas dual-issued and
+    measured +0.9%. Persist was +2.8% on that control. Unroll 2 is the best
+    row and still 0.865 of 20. This thread stops.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-20b-gpu/summary.json">20 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-20b-gpu/README.md">experiment report</a>.</p>
+  </section>
+
+  <section aria-labelledby="twenty-nine-b-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="twenty-nine-b-result">ECC2K-130 GPU engineering: 29 B/s on one RTX PRO 6000</h2>
+    <p>The same SKU and 17.298 B/s control (driver 595.91.07, CUDA 13.3.73,
+    automatic 96,256 workers, clocks locked at 2430 MHz) timed a hoisted
+    3-bit product correction, an ONB multiply inside <code>inv131</code>, a
+    compact-state slot pipeline, a 5-word poly→ONB map, and — after Nsight
+    Compute put that control at 71% FP64/<code>clmad</code> and 36% ALU —
+    moving the polynomial square onto the logic pipe. The one-add floor is
+    22–25 B/s; 29 sits above both pipe budgets at 5.3125 products/update.
+    No arm cleared 29. The campaign default stays the shipping walk. Class:
+    engineering.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 29 B target</th><th scope="col">/ 17.298 control</th><th scope="col">/ 22 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Table + pivot + ILP + persist + unroll 2</td><td>17.298</td><td>0.596</td><td>1.000</td><td>0.786</td><td>300 reports, 0 dropped / reference</td></tr><tr><td>+ top hoist</td><td>17.270</td><td>0.596</td><td>0.998</td><td>0.785</td><td>116 registers / not accepted</td></tr><tr><td>+ ONB inv</td><td>16.460</td><td>0.568</td><td>0.952</td><td>0.748</td><td>+clmad on inv / not accepted</td></tr><tr><td>+ slot pipeline</td><td>16.463</td><td>0.568</td><td>0.952</td><td>0.748</td><td>scheduling / not accepted</td></tr><tr><td>+ ALU square</td><td>17.414</td><td>0.600</td><td>1.007</td><td>0.792</td><td>300 reports; FP64 71%→63% / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample
+    completed 50,465,865,728 updates. ALU square is the only arm that beat
+    the control. A later round tried twelve outstanding pair-clmads, a
+    flattened lo-then-hi 128-bit Karatsuba, ONB squares on the ALU, slot
+    unroll 4 and 8, and 192×3 occupancy: all verified 300/300 and all ran
+    slower (best of those, unroll 4, 17.379). This thread has not reached 29.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-29b-gpu/summary.json">29 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/THROUGHPUT-29B.md">priced note</a>.</p>
+  </section>
+
   <section aria-labelledby="preblackwell-result" style="margin:3rem 0;overflow-x:auto">
     <h2 id="preblackwell-result">ECC2K-130 GPU engineering: g6 / g6e / g4dn packed clients</h2>
     <p>Completed on successive Modal allocations (driver 580.95.05, CUDA 13.3.1):

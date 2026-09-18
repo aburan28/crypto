@@ -46,6 +46,27 @@
 #if ECC_TABLE_PIVOT_BYTES != 0 && ECC_TABLE_PIVOT_BYTES != 1
 #error "ECC_TABLE_PIVOT_BYTES must be 0 or 1"
 #endif
+#ifndef ECC_TABLE_GLOBAL
+#define ECC_TABLE_GLOBAL 0
+#endif
+#if ECC_TABLE_GLOBAL != 0 && ECC_TABLE_GLOBAL != 1
+#error "ECC_TABLE_GLOBAL must be 0 or 1"
+#endif
+#if ECC_TABLE_GLOBAL && !ECC_WALK_TABLE
+#error "ECC_TABLE_GLOBAL requires ECC_WALK_TABLE"
+#endif
+#ifndef ECC_TABLE_ADDEND_GLOBAL
+#define ECC_TABLE_ADDEND_GLOBAL 0
+#endif
+#if ECC_TABLE_ADDEND_GLOBAL != 0 && ECC_TABLE_ADDEND_GLOBAL != 1
+#error "ECC_TABLE_ADDEND_GLOBAL must be 0 or 1"
+#endif
+#if ECC_TABLE_ADDEND_GLOBAL && !ECC_WALK_TABLE
+#error "ECC_TABLE_ADDEND_GLOBAL requires ECC_WALK_TABLE"
+#endif
+#if ECC_TABLE_ADDEND_GLOBAL && ECC_TABLE_GLOBAL
+#error "ECC_TABLE_ADDEND_GLOBAL is the hybrid smem path; do not combine with ECC_TABLE_GLOBAL"
+#endif
 
 namespace eccPacked131 {
 
@@ -72,13 +93,21 @@ static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
 #endif
 static const int TW_WORDS = TW_LINV_OFF + 33;
-static const size_t TW_SHARED_BYTES = size_t(TW_WORDS) * sizeof(uint32_t);
+// Hybrid occupancy path: keep phase/pivot/sign tables in shared memory and
+// read the bulky addend table from global.  Selection is 14 148 bytes, which
+// fits three (and four) blocks in this SKU's 100 KB/SM; the full buffer does
+// not.  Offsets in the selection copy are relative to TW_MASK_OFF.
+static const int TW_SEL_WORDS = TW_WORDS - TW_MASK_OFF;
+static const int TW_SEL0 = ECC_TABLE_ADDEND_GLOBAL ? TW_MASK_OFF : 0;
+static const size_t TW_SHARED_BYTES = size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS : TW_WORDS) * sizeof(uint32_t);
 static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
+static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
+              "selection tables must fit three blocks in a 100 KB SM");
 
 #ifdef __CUDACC__
 #define TW_FN __device__ __forceinline__
-__device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *global) {
-    for (int i = threadIdx.x; i < TW_WORDS; i += blockDim.x) shared[i] = global[i];
+__device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *global, int words = TW_WORDS) {
+    for (int i = threadIdx.x; i < words; i += blockDim.x) shared[i] = global[i];
     __syncthreads();
 }
 // Byte t of a word into the low byte, zeros above: one PRMT.
@@ -157,9 +186,10 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
                                              unsigned long long *hist, const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
-    const int k = twPhase(x, hw, bytes + 4 * TW_PHASE_OFF, shared + TW_INV_OFF);
-    const int p = twPivot(x, k, shared + TW_MASK_OFF, bytes + 4 * TW_MAX_OFF, bytes + 4 * TW_LINV_OFF);
-    const int eps = twCoordinate(yp, p, shared + TW_ROW_OFF);
+    const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+    const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
+                          bytes + 4 * (TW_LINV_OFF - TW_SEL0));
+    const int eps = twCoordinate(yp, p, shared + (TW_ROW_OFF - TW_SEL0));
     int h = (hw >> 1) & (TW_H - 1);
     unsigned tag = eccTag(h, k, eps);
     const unsigned long long old = *hist;
