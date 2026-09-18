@@ -908,7 +908,7 @@
       }
     }
   },
-  "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw. Round 0016 widened the panel to eight cells and beats_rho_strict came back FALSE: the winner loses to rho outright at n23a1 (instructions 1.0656) and at n29a1 (native 1.0905), and the panel-wide native upper limit is 1.0288. The same receipts restricted to the legacy five cells still pass strictly (native 0.9341, upper 0.9653, every cell below one), so every strict-win record above -- round 0013 included -- is scoped to that five-cell panel and must not be restated at family level. The record pointer is left at round-0013 because it names the best five-cell measurement, not because the claim survives a wider panel.",
+  "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw. Round 0016 widened the panel to eight cells and beats_rho_strict came back FALSE: the winner loses to rho outright at n23a1 (instructions 1.0656) and at n29a1 (native 1.0905), and the panel-wide native upper limit is 1.0288. The same receipts restricted to the legacy five cells still pass strictly (native 0.9341, upper 0.9653, every cell below one), so every strict-win record above -- round 0013 included -- is scoped to that five-cell panel and must not be restated at family level. The record pointer is left at round-0013 because it names the best five-cell measurement, not because the claim survives a wider panel. Round 0017 is the first strict win on the eight-cell panel; strict_win_record (five cells) is left at round-0013 because five-cell and eight-cell ratios are not comparable, and strict_win_record_eight_cells names the eight-cell record separately.",
   "round_0016": {
     "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
     "status": "retained",
@@ -1171,5 +1171,379 @@
         "receipts": 288
       }
     }
-  }
+  },
+  "round_0017": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+    "status": "orbits",
+    "winner": "orbits",
+    "panel": {
+      "cells": [
+        "n13a0",
+        "n17a1",
+        "n19a0",
+        "n23a0",
+        "n23a1",
+        "n31a0"
+      ],
+      "holdout_cells": [
+        "n19a1",
+        "n29a1"
+      ],
+      "confirmation_cases": 96
+    },
+    "what_changed": "the certificate, not the algorithm: orbits is the round-0015 scan_io challenger with the factor base named by its orbit representatives (factor_base_orbits) and the checker regenerating the flat base with its own Frobenius and negation (round17-oracle-orbits.patch, additive). orbits_rows adds the pair-table row rule weighted at the measured 680/380 build/scan cost, which moves n23a1 from three rows to two. scan_io rides unchanged as a control. The incumbent is the round-0016 retained source unchanged.",
+    "headline": "beats_rho_strict=True; winner=orbits; cells where the winner is at or above rho: {'instructions': {}, 'native': {}}",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/source",
+    "challenger_patches": [
+      "campaign_20260916/round17-orbits.patch",
+      "campaign_20260916/round17-rows.patch",
+      "campaign_20260916/round17-oracle-orbits.patch"
+    ],
+    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": true,
+    "rho_over_winner": 1.4921981527433272,
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.6701522838381438,
+      "ci95": [
+        0.6050138439420483,
+        0.7442917796278755
+      ],
+      "native_wall_candidate_over_baseline": 0.8999213316900765,
+      "native_wall_ci95": [
+        0.8755174917468866,
+        0.9265554550177799
+      ],
+      "per_cell": {
+        "n13a0": 0.7146103817095697,
+        "n17a1": 0.5795572127946431,
+        "n19a0": 0.6016408723334783,
+        "n19a1": 0.5914149119278143,
+        "n23a0": 0.7422015744320458,
+        "n23a1": 0.7764647248519635,
+        "n29a1": 0.8349502607394383,
+        "n31a0": 0.5737049146048522
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.8869214373043575,
+        "n17a1": 0.8647967922436917,
+        "n19a0": 0.8814202823585174,
+        "n19a1": 0.8909197823505127,
+        "n23a0": 0.9177634469855377,
+        "n23a1": 0.9501903102169236,
+        "n29a1": 0.9472535364080005,
+        "n31a0": 0.8645854410915679
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.6701518017187397,
+      "ci95": [
+        0.6050133930998162,
+        0.7442945697451894
+      ],
+      "native_wall_candidate_over_baseline": 0.8917617829659437,
+      "native_wall_ci95": [
+        0.8704528927757559,
+        0.9165578402001413
+      ],
+      "per_cell": {
+        "n13a0": 0.7146169147948592,
+        "n17a1": 0.5795553304507837,
+        "n19a0": 0.6016351031422642,
+        "n19a1": 0.5914135452331818,
+        "n23a0": 0.7421999971045488,
+        "n23a1": 0.7764653283790162,
+        "n29a1": 0.8349485799613817,
+        "n31a0": 0.5737069865038368
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.8597784866307968,
+        "n17a1": 0.8850798045399932,
+        "n19a0": 0.8580305816278647,
+        "n19a1": 0.8800088626607423,
+        "n23a0": 0.8978012685129719,
+        "n23a1": 0.9330010666240753,
+        "n29a1": 0.9413796800621089,
+        "n31a0": 0.8826831953480134
+      }
+    },
+    "cells_where_the_winner_does_not_beat_rho": {
+      "instructions": {},
+      "native": {}
+    },
+    "legacy_five_cell_subset_of_these_receipts": {
+      "cells": [
+        "n13a0",
+        "n17a1",
+        "n19a0",
+        "n19a1",
+        "n23a0"
+      ],
+      "winner_over_rho": {
+        "candidate_over_baseline": 0.6423672959211109,
+        "ci95": [
+          0.5846353665039983,
+          0.7094425462471318
+        ],
+        "native_wall_candidate_over_baseline": 0.8881990905491595,
+        "native_wall_ci95": [
+          0.8680446598529111,
+          0.9094497481756659
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.8869214373043575,
+          "n17a1": 0.8647967922436917,
+          "n19a0": 0.8814202823585174,
+          "n19a1": 0.8909197823505127,
+          "n23a0": 0.9177634469855377
+        },
+        "per_cell": {
+          "n13a0": 0.7146103817095697,
+          "n17a1": 0.5795572127946431,
+          "n19a0": 0.6016408723334783,
+          "n19a1": 0.5914149119278143,
+          "n23a0": 0.7422015744320458
+        }
+      }
+    },
+    "challenger_over_rho": {
+      "confirmation": {
+        "candidate_over_baseline": 0.6701522838381438,
+        "ci95": [
+          0.6050138439420483,
+          0.7442917796278755
+        ],
+        "native_wall_candidate_over_baseline": 0.8999213316900765,
+        "native_wall_ci95": [
+          0.8755174917468866,
+          0.9265554550177799
+        ],
+        "per_cell": {
+          "n13a0": 0.7146103817095697,
+          "n17a1": 0.5795572127946431,
+          "n19a0": 0.6016408723334783,
+          "n19a1": 0.5914149119278143,
+          "n23a0": 0.7422015744320458,
+          "n23a1": 0.7764647248519635,
+          "n29a1": 0.8349502607394383,
+          "n31a0": 0.5737049146048522
+        },
+        "native_wall_per_cell": {
+          "n13a0": 0.8869214373043575,
+          "n17a1": 0.8647967922436917,
+          "n19a0": 0.8814202823585174,
+          "n19a1": 0.8909197823505127,
+          "n23a0": 0.9177634469855377,
+          "n23a1": 0.9501903102169236,
+          "n29a1": 0.9472535364080005,
+          "n31a0": 0.8645854410915679
+        }
+      },
+      "replay": {
+        "candidate_over_baseline": 0.6701518017187397,
+        "ci95": [
+          0.6050133930998162,
+          0.7442945697451894
+        ],
+        "native_wall_candidate_over_baseline": 0.8917617829659437,
+        "native_wall_ci95": [
+          0.8704528927757559,
+          0.9165578402001413
+        ],
+        "per_cell": {
+          "n13a0": 0.7146169147948592,
+          "n17a1": 0.5795553304507837,
+          "n19a0": 0.6016351031422642,
+          "n19a1": 0.5914135452331818,
+          "n23a0": 0.7421999971045488,
+          "n23a1": 0.7764653283790162,
+          "n29a1": 0.8349485799613817,
+          "n31a0": 0.5737069865038368
+        },
+        "native_wall_per_cell": {
+          "n13a0": 0.8597784866307968,
+          "n17a1": 0.8850798045399932,
+          "n19a0": 0.8580305816278647,
+          "n19a1": 0.8800088626607423,
+          "n23a0": 0.8978012685129719,
+          "n23a1": 0.9330010666240753,
+          "n29a1": 0.9413796800621089,
+          "n31a0": 0.8826831953480134
+        }
+      }
+    },
+    "controls_over_incumbent": {
+      "scan_io": {
+        "development": {
+          "candidate_over_baseline": 0.885920257324233,
+          "ci95": [
+            0.8579412615345378,
+            0.9174436864988459
+          ],
+          "native_wall_candidate_over_baseline": 0.9892402776443733,
+          "native_wall_ci95": [
+            0.9578599877150158,
+            1.0254813150618864
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9885955370376153,
+            "n17a1": 1.0316026815614974,
+            "n19a0": 0.9671230800458737,
+            "n23a0": 1.0020067457370074,
+            "n23a1": 0.9510756037508088,
+            "n31a0": 0.9970391263379709
+          }
+        }
+      },
+      "orbits": {
+        "development": {
+          "candidate_over_baseline": 0.8329507523416695,
+          "ci95": [
+            0.8093158183148812,
+            0.8577503041688865
+          ],
+          "native_wall_candidate_over_baseline": 0.9619940135395713,
+          "native_wall_ci95": [
+            0.9261666752294395,
+            0.9996488769053589
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9849390543084994,
+            "n17a1": 0.9691248013854836,
+            "n19a0": 0.9154127206823891,
+            "n23a0": 0.9624087326557157,
+            "n23a1": 0.9342722162148847,
+            "n31a0": 1.008777108449595
+          }
+        },
+        "selection": {
+          "candidate_over_baseline": 0.8340030168155106,
+          "ci95": [
+            0.8106714315006416,
+            0.8589104438638393
+          ],
+          "native_wall_candidate_over_baseline": 0.9525687640882387,
+          "native_wall_ci95": [
+            0.9312484939232455,
+            0.9775737776937312
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9754732188001086,
+            "n17a1": 0.9327087705236558,
+            "n19a0": 0.9676496496773959,
+            "n23a0": 0.9370050730273178,
+            "n23a1": 0.9781963583315766,
+            "n31a0": 0.9258283588293824
+          }
+        },
+        "confirmation": {
+          "candidate_over_baseline": 0.8318637727900098,
+          "ci95": [
+            0.8109124358379497,
+            0.8512556961461358
+          ],
+          "native_wall_candidate_over_baseline": 0.9417149107684725,
+          "native_wall_ci95": [
+            0.9172232193663789,
+            0.9640014454071378
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.98625539163118,
+            "n17a1": 0.9734721197968563,
+            "n19a0": 0.9300960597470063,
+            "n19a1": 0.958427696576417,
+            "n23a0": 0.9281100046369305,
+            "n23a1": 0.9635741426506138,
+            "n29a1": 0.9190069809897177,
+            "n31a0": 0.8793304356554104
+          }
+        },
+        "replay": {
+          "candidate_over_baseline": 0.8318631333867211,
+          "ci95": [
+            0.8109130057632855,
+            0.851253748873149
+          ],
+          "native_wall_candidate_over_baseline": 0.9286891199475101,
+          "native_wall_ci95": [
+            0.9090602217322241,
+            0.9458509142129178
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9632303669577954,
+            "n17a1": 0.9401887495478118,
+            "n19a0": 0.9399789616086022,
+            "n19a1": 0.9403839758685345,
+            "n23a0": 0.9161598435486604,
+            "n23a1": 0.9379346200493387,
+            "n29a1": 0.9066351037416159,
+            "n31a0": 0.8871926649124969
+          }
+        }
+      },
+      "orbits_rows": {
+        "development": {
+          "candidate_over_baseline": 0.8670735138198276,
+          "ci95": [
+            0.8124345362230612,
+            0.9731011996571056
+          ],
+          "native_wall_candidate_over_baseline": 0.9567207639416999,
+          "native_wall_ci95": [
+            0.9199587745469006,
+            0.9976173212402502
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.955400341451988,
+            "n17a1": 0.9674043632130813,
+            "n19a0": 0.9309357441537307,
+            "n23a0": 0.9346943483016436,
+            "n23a1": 0.9974663358388192,
+            "n31a0": 0.9559390309851619
+          }
+        },
+        "selection": {
+          "candidate_over_baseline": 0.8479586132443782,
+          "ci95": [
+            0.8155332081002954,
+            0.8852597250142603
+          ],
+          "native_wall_candidate_over_baseline": 0.9748447904347233,
+          "native_wall_ci95": [
+            0.9395731103592915,
+            1.00848268925069
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9574843309526629,
+            "n17a1": 0.9553609119620798,
+            "n19a0": 0.9795721826090882,
+            "n23a0": 0.9966054504256115,
+            "n23a1": 1.0337960757403704,
+            "n31a0": 0.9296492558593492
+          }
+        }
+      }
+    },
+    "median_complete_job_confirmation": {
+      "incumbent": {
+        "instructions": 1867436.5,
+        "native_ms": 1.231,
+        "receipts": 288
+      },
+      "orbits": {
+        "instructions": 1536482.0,
+        "native_ms": 1.139,
+        "receipts": 288
+      },
+      "rho": {
+        "instructions": 2123921.0,
+        "native_ms": 1.24,
+        "receipts": 288
+      }
+    }
+  },
+  "strict_win_record_eight_cells": "round-0017"
 }

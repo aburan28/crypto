@@ -68,6 +68,20 @@ rho's cost grows as its square root: n23a1 has twice n23a0's subgroup at the
 same degree and the same 138-point factor base, and that is exactly where the
 winner flips from 0.898 to 1.066.
 
+**Round-0017 restored the strict claim on all eight cells** — and the lever was
+the certificate, not the algorithm. The factor base, listed as decimal strings,
+was 9.7–15 KB of a 10–15.5 KB report and about 250,000 instructions of
+formatting at n29a1, 13% of the whole job there, for 464 points the checker
+can regenerate from eight. `orbits` names the base by its orbit representatives
+and `oracle.py` expands them with its own Frobenius and negation (both formats
+verify; the flat base it regenerates was checked byte for byte against 24
+round-0016 reports first). On eight cells: 0.6702 (0.6050–0.7443) of rho's
+instructions and 0.8999 (0.8755–0.9266) of its native time on confirmation,
+0.8918 (0.8705–0.9166) on replay, every cell below one in both metrics on
+both stages, the two cells that lost in round-0016 now at 0.950 and 0.947.
+The pre-registration predicted n23a1 would *not* flip; it did, and the record
+says so. The median complete one-target job is 1.14 ms against rho's 1.24 ms.
+
 All 19,176 new profiled trials and their paired native runs verified. The
 earlier [single-target continuation](single_target_20260916/RESULTS.md) adds three audited precursor rounds
 (4,680 receipts: 4,662 verified solves and 18 retained smoke rejections). The

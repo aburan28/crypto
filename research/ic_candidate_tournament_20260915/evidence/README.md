@@ -32,7 +32,8 @@ executable with the arena allocator, `--archive round-0013` for the scalar
 products in projective coordinates, `--archive round-0014` for the worker
 built as one optimisation unit, `--archive round-0015` for the scan and the
 resolution limit of the native gate, `--archive round-0016` for the widened
-eight-cell panel on which `beats_rho_strict` fails, `--archive round-0007` and
+eight-cell panel on which `beats_rho_strict` fails, `--archive round-0017` for the
+orbit-representative certificate that restores it on all eight, `--archive round-0007` and
 `--archive round-0006` for the strict-win and parity rounds it built on),
 `--archive round-0005-batch16` or `--archive round-0006-batch16` for the
 16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
@@ -45,7 +46,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015` and `round-0016` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016` and `round-0017` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -120,7 +121,11 @@ changed no source at all — both arms are the trees round-0015 sealed — so it
 its analysis instead: `round16_resolution.py`, `round16_cell_census.py`,
 `round16_floor_probe.py` with `round16-floor-probe.patch`, `round16_legacy_subset.py`
 and `round-0016.tar.zst`, whose 2,142 receipts carry both the eight-cell verdict and,
-through the legacy-subset script, the five-cell one computed from the same trials.
+through the legacy-subset script, the five-cell one computed from the same trials. Round-0017
+ships `round17-orbits.patch`, `round17-rows.patch`, `round17-oracle-orbits.patch` (the checker's
+second certificate format), `round17_candidates.py`, `round17_base_sweep.py`, `round17_measure.py`
+and `round-0017.tar.zst`, whose 2,340 receipts include both certificate formats side by side on
+the development and selection fixtures where `scan_io` and `orbits` both ran.
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 
