@@ -51,6 +51,8 @@ sync() {
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
     aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
     aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
+    aws s3 cp bootstrap-cpu.sh "s3://$BUCKET/aws/bootstrap-cpu.sh" --only-show-errors
+    aws s3 cp enable-host-cpu.sh "s3://$BUCKET/aws/enable-host-cpu.sh" --only-show-errors
     aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh" --only-show-errors
     aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
