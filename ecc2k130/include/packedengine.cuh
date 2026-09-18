@@ -222,6 +222,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed sparse sigma^3 bridge: %d\n", ECC_PACKED_XONLY_BRIDGE3);
         printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
         printf("packed sparse bridge modulus 72: %d\n", ECC_PACKED_XONLY_BRIDGE_MOD72);
+        printf("packed skip empty bridge phase: %d\n", ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);

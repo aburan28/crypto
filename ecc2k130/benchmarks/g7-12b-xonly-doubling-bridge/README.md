@@ -451,3 +451,28 @@ The paired geometric-mean ratio is 1.121079 with a 95% confidence interval of
 measured 12.632704 B/s over 68,719,476,736 updates, with no external GPU process
 observed. Promote the modulus-72 two-bridge map: the verified complete-map
 median exceeds 12 B/s and the confirmation remains above 12 B/s.
+
+## Preregistered empty-queue rare-phase skip
+
+The promoted complete map already exceeds the original 10 B/s G7 goal and the
+later 12 B/s milestone on the benchmark path. Distinguished-point collection
+at cutoff 34 is still unmeasured for this map.
+
+Under the even-weight model, `weight mod 72 == 14` has probability
+0.000214759214 and 0.644 probability of an empty 2,048-state block queue.
+The current kernel still launches warp 0's rare consumer and two block
+barriers on those empty steps. Skip that warp and both barriers when the
+shared event count is zero after the existing classification barrier. When
+the count is nonzero, keep the present consumer, store barrier, and
+counter-reset barrier. Do not change the selector, formulas, queue contents,
+scalar accounting, checkpoint version, batch geometry, or collision ratio.
+
+Build a fresh control with `SKIP_EMPTY_BRIDGE=0` and a candidate with
+`SKIP_EMPTY_BRIDGE=1` from this source. Reject on any increase over the
+zero-spill 80-register / 32,400-byte / three-block reference, builtin
+failure, affine-x mismatch, or a checkpoint that differs from the control
+on the same 2,048-point seven-step seed. If exact, run three interleaved
+equal-work benchmark pairs and three interleaved DP34 pairs against the
+control. Retain the candidate only if a paired 95% interval exceeds one.
+DP34 measurement of the control is required even if the skip is rejected:
+the 10 B/s G7 claim is incomplete without collection throughput.

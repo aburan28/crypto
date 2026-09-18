@@ -8,6 +8,12 @@
 #if ECC_PACKED_XONLY_DOUBLE_ONLY != 0 && ECC_PACKED_XONLY_DOUBLE_ONLY != 1
 #error "ECC_PACKED_XONLY_DOUBLE_ONLY must be 0 or 1"
 #endif
+#ifndef ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE
+#define ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE 0
+#endif
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 0 && ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 1
+#error "ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE must be 0 or 1"
+#endif
 
 #if !ECC_PACKED_BLOCK_INVERSE || !ECC_PACKED_POLY_STATE || \
     ECC_PACKED_WEIGHTED_PREFIX != 2 || !ECC_PACKED_CACHE_DENOM
@@ -121,6 +127,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const unsigned long long now = p.iterBase + step;
 
         // Rare arithmetic has a separate lifetime and is executed by one warp.
+        // With modulus 72 the queue is empty on most block-steps; skip that
+        // warp and the following barriers when no event is queued.
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE
+        const unsigned rareCount = bridgeCount131;
+        if (rareCount != 0) {
+#endif
         if (threadIdx.x < 32) {
             const int lane = threadIdx.x;
             for (unsigned base = 0; base < bridgeCount131; base += 32) {
@@ -155,6 +167,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             if (threadIdx.x == 0) bridgeCount131 = 0;
             __syncthreads();
         }
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE
+        }
+#endif
 #if ECC_PACKED_LAST_SLOT_CACHE
         P131 lastDenominator{};
 #if ECC_PACKED_LAST_SLOT_CACHE == 2
