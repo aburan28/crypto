@@ -24,6 +24,7 @@ boundary, but its effective collision work must also be priced.
 | fused 16-bit weight/phase LUT | 20.055 | 0.771 | 0.996 | 300/300; 4096/4096 selector points | engineering, rejected |
 | exact DP4A phase selector | 19.515 | 0.751 | 0.969 | 300/300; 4096/4096 selector points | engineering, rejected |
 | H=4, 256×3 occupancy | 18.160 raw / 17.151 effective | 0.698 raw | 0.902 raw | 300/300; 4096/4096 selector points | alternative iteration, rejected |
+| one-product λ-state halving | 23.904 primitive | 0.919 | 1.187 | 512/512 subgroup halves | cheaper primitive; permutation alone |
 | two-product point halving | 16.053 | 0.617 | 0.797 | 512/512 subgroup halves | alternative primitive; not a rho map alone |
 | one-addition practical boundary | 22--25 | 0.846--0.962 | 1.09--1.24 | derived | boundary |
 | **26 B/s target** | **26.000** | **1.000** | **1.291** | required | above boundary |
@@ -52,10 +53,12 @@ falls to 18.160 B/s. Its r-adding constant rises from 1.0625 to 1.125, so the
 rate normalized to the H=8 collision work is only 17.151 B/s. The raw count
 and effective count both reject the alternative.
 
-Point halving did change the product count, but its linear solves and subgroup
-selection measured only 16.053 B/s, and halving alone is a permutation rather
-than a rho iteration. Thus neither measured alternative moves effective
-throughput past the one-addition boundary.
+Lambda-affine polynomial state later reduces halving to one product and raises
+the primitive to 23.904 B/s. Halving alone is still a permutation rather than
+a rho iteration; an ideal free-dispatch 50/50 mixture with the 20.134 B/s
+addition path is only 21.858 B/s before representation conversion and
+collision-constant costs. The cheaper primitive therefore does not establish
+25 or 26 B/s effective rho throughput.
 
 Frozen build, correctness and benchmark logs are in
 [`benchmarks/throughput-26b-attempt`](benchmarks/throughput-26b-attempt/).

@@ -1,0 +1,29 @@
+{
+  "classification": "alternative primitive; one product; below 25 B/s",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "representation": "polynomial lambda-affine (x, lambda=x+y/x)",
+  "field_products_per_halving": 1,
+  "configuration": {
+    "threads_per_block": 768,
+    "blocks_per_sm": 1,
+    "registers_per_thread_at_512_thread_probe": 59,
+    "PACKED_TOP_CLMAD": 1,
+    "PACKED_CLMUL_FLAT": 1,
+    "PACKED_FROM_REDUCED": 1,
+    "PACKED_INLINE_POLY": 3
+  },
+  "samples": [23.840, 23.923, 23.904],
+  "median": 23.904,
+  "ratio_to_table_walk": 1.1872263,
+  "ratio_to_25b_target": 0.95616,
+  "correctness": {
+    "subgroup_points": 512,
+    "quadratic_root_failures": 0,
+    "square_root_failures": 0,
+    "host_subgroup_failures": 0,
+    "coordinate_word_mismatches": 0
+  },
+  "ideal_50_50_mixed_raw_harmonic_mean": 21.8578209,
+  "mixed_note": "Halving alone is a permutation; branch dispatch and collision-constant costs are not included in the ideal harmonic bound."
+}
