@@ -54,5 +54,17 @@
     "steps": 1024,
     "launches": 32,
     "PACKED_INLINE_POLY": 3
+  },
+  "rejected_followups": {
+    "PACKED_TOP_HOIST": {
+      "control_samples": [18.227677, 18.193285, 18.169778, 18.111584, 18.113952, 18.092142],
+      "candidate_samples": [18.202707, 18.188689, 18.142719, 18.122827, 18.094989, 18.081309],
+      "control_median": 18.141865,
+      "candidate_median": 18.132773,
+      "ratio_of_medians": 0.9994988,
+      "pairs_favoring_candidate": 1,
+      "pairs": 6,
+      "correctness": "300/300 reports replayed, zero dropped"
+    }
   }
 }

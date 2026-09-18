@@ -71,3 +71,9 @@ lookups, but moving selection LUTs to the read-only global/L2 path regressed to
 SM at 80 registers and regressed further to 15.432 B/s. Those opt-in layouts
 remain source-visible as negative engineering evidence; neither is part of the
 winning configuration.
+
+After the winning composition, `PACKED_TOP_HOIST=1` was also retested because
+inlining had lowered the old build's register pressure. It measured 18.132773
+B/s against an alternating 18.141865 B/s control, ratio 0.99950, and won only
+one of six pairs. Its 300-report replay passed, but it remains rejected.
+`rejected-top-hoist.log` preserves that follow-up.
