@@ -559,6 +559,23 @@ Six of six recover the planted logarithm. The `T = 1` rows close a
 two-unknown system from two relations, which is the shape the ECC2K-130
 optimum uses, so that shape is not an artefact of the cost model.
 
+**An eighth defect, in the script that produces that table.** Its first
+form filtered the cells down to those carrying a recovery and then reported
+"N of N" over the survivors. A support that could not be found, or a cell
+that ran out of targets, returns without a recovery and so vanished from
+the *denominator* — one real recovery beside one skipped support and one
+outright failure reported as `all_recovered: true`, verdict "1 of 1".
+Reproduced, then fixed: every cell is accounted for, the denominator is the
+number of cells asked for, and the script exits non-zero if any cell did not
+recover. Found by an external review agent on the pull request, not by this
+thread.
+
+That is four of eight defects now living in validation rather than in the
+thing being validated. The pattern is stable enough to state as a finding of
+its own: on this study, code written to check a result has been less reliable
+than the code producing it, and the failure mode is always the same — the
+check reports success over a subset it quietly chose.
+
 ### 5.4 The measured input, and a seventh defect
 
 The model has one free parameter, the decomposition rate, so it is measured

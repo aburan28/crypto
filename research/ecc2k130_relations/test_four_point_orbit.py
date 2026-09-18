@@ -24,7 +24,8 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
 from target_boundary import cost as logarithm_cost            # noqa: E402
-from validate_amortised_attack import attack as amortised_attack  # noqa: E402
+from validate_amortised_attack import (aggregate as amortised_aggregate,  # noqa: E402
+                                       attack as amortised_attack)
 from validate_target_model import (_signed_subset_sums,       # noqa: E402
                                    _support)
 
@@ -314,6 +315,28 @@ def test_amortising_the_table_is_a_real_saving_and_correctly_signed():
         once = logarithm_cost(T, n, s, amortise=True)
         each = logarithm_cost(T, n, s, amortise=False)
         assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+
+
+def test_a_skipped_or_failed_cell_cannot_be_reported_as_success():
+    """Regression for an eighth defect, again in validation code.
+
+    Filtering to cells that carry a recovery and then reporting "N of N"
+    over the survivors lets a skipped support or a cell that ran out of
+    targets vanish from the denominator, so the artifact claims success for
+    validation that never ran.
+    """
+    good = {"verified_by_point_identity": True, "recovered_d": 1, "planted_d": 1}
+    skipped = {"skipped": "no support of that size"}
+    failed = {"recovered": False, "reason": "ran out of targets"}
+
+    assert amortised_aggregate([good, good], 2)["all_recovered"]
+    for bad in (skipped, failed):
+        agg = amortised_aggregate([good, bad], 2)
+        assert not agg["all_recovered"], bad
+        assert agg["cells_recovered"] == 1
+        assert agg["cells_expected"] == 2
+    # a cell that never ran at all must not shrink the denominator either
+    assert not amortised_aggregate([good], 2)["all_recovered"]
 
 
 def test_amortised_attack_recovers_a_planted_logarithm():

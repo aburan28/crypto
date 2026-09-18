@@ -99,6 +99,10 @@
       "verified_by_point_identity": true
     }
   ],
+  "cells_expected": 6,
+  "cells_recovered": 6,
+  "cells_skipped": 0,
+  "cells_failed": 0,
   "all_recovered": true,
   "verdict": "The amortised structure recovers the planted logarithm in 6 of 6 cells, verified by the point identity [d]P = Q. The single-orbit cells (T = 1) close a two-unknown system from two relations, which is the shape the ECC2K-130 optimum uses."
 }

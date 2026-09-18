@@ -160,29 +160,68 @@ def attack(mdeg: int, n: int, want_T: int, seed: int = 11,
 CELLS = [(13, 3, 1), (13, 3, 2), (13, 4, 1), (19, 3, 1), (19, 3, 2), (19, 4, 1)]
 
 
+def aggregate(rows, expected):
+    """Summarise cells so that a missing or failed one cannot be hidden.
+
+    Filtering to cells that carry `recovered_d` and reporting "N of N" over
+    the survivors is how a validation script reports success while a cell
+    quietly did not run.  A skipped support and a cell that ran out of
+    targets both return without `recovered_d`, so both would vanish from the
+    denominator.  Every cell is accounted for here, and `all_recovered`
+    requires the full set.
+    """
+    recovered = [r for r in rows if r.get("verified_by_point_identity")]
+    skipped = [r for r in rows if "skipped" in r]
+    failed = [r for r in rows
+              if "skipped" not in r and not r.get("verified_by_point_identity")]
+    return {
+        "cells_expected": expected,
+        "cells_run": len(rows),
+        "cells_recovered": len(recovered),
+        "cells_skipped": len(skipped),
+        "cells_failed": len(failed),
+        "all_recovered": (len(rows) == expected
+                          and len(recovered) == expected
+                          and not skipped and not failed),
+        "recovered": recovered, "skipped": skipped, "failed": failed,
+    }
+
+
 def main():
     rows = [attack(*c) for c in CELLS]
-    live = [r for r in rows if "recovered_d" in r]
+    agg = aggregate(rows, len(CELLS))
     data = {
         "instance": "small analogues of ECC2K-130",
         "structure": ("table of canonical sigma-classes of signed (n-1)-subset "
                       "sums built ONCE; single signed points streamed per "
                       "target; reused across all targets"),
         "cells": rows,
-        "all_recovered": all(r.get("verified_by_point_identity") for r in live),
+        "cells_expected": agg["cells_expected"],
+        "cells_recovered": agg["cells_recovered"],
+        "cells_skipped": agg["cells_skipped"],
+        "cells_failed": agg["cells_failed"],
+        "all_recovered": agg["all_recovered"],
         "verdict": (
             f"The amortised structure recovers the planted logarithm in "
-            f"{sum(1 for r in live if r['verified_by_point_identity'])} of "
-            f"{len(live)} cells, verified by the point identity [d]P = Q. The "
-            f"single-orbit cells (T = 1) close a two-unknown system from two "
-            f"relations, which is the shape the ECC2K-130 optimum uses."),
+            f"{agg['cells_recovered']} of {agg['cells_expected']} cells, "
+            f"verified by the point identity [d]P = Q"
+            + (f" ({agg['cells_skipped']} skipped, {agg['cells_failed']} "
+               f"failed)" if agg["cells_skipped"] or agg["cells_failed"] else "")
+            + ". The single-orbit cells (T = 1) close a two-unknown system "
+              "from two relations, which is the shape the ECC2K-130 optimum "
+              "uses."),
     }
     (HERE / "results" / "amortised_attack.json").write_text(json.dumps(data, indent=2))
     hdr = (f"{'m':>3} {'B':>4} {'T':>2} {'n':>2} {'table':>7} {'rels':>5} "
            f"{'attempts':>9} {'pred p':>9} {'meas p':>9} {'[d]P==Q':>8}")
     print(hdr)
     print("-" * len(hdr))
-    for r in live:
+    for r in rows:
+        if "recovered_d" not in r:
+            why = r.get("skipped") or r.get("reason") or "no result"
+            print(f"{r.get('m','?'):>3} {'-':>4} {r.get('orbits','?'):>2} "
+                  f"{r.get('relation_length','-'):>2}   {why}")
+            continue
         print(f"{r['m']:>3} {r['support_size']:>4} {r['orbits']:>2} "
               f"{r['relation_length']:>2} {r['table_entries_built_once']:>7} "
               f"{r['relations']:>5} {r['target_attempts']:>9} "
@@ -191,6 +230,8 @@ def main():
               f"{str(r['verified_by_point_identity']):>8}")
     print()
     print(data["verdict"])
+    if not data["all_recovered"]:
+        raise SystemExit("not every cell recovered; see the table above")
 
 
 if __name__ == "__main__":
