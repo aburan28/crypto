@@ -5,6 +5,12 @@
 #ifndef ECC_WALK_HALVING
 #define ECC_WALK_HALVING 0
 #endif
+#ifndef ECC_HALVING_BMMA
+#define ECC_HALVING_BMMA 0
+#endif
+#if ECC_HALVING_BMMA && defined(__CUDACC__)
+#include <mma.h>
+#endif
 #if ECC_WALK_HALVING != 0 && ECC_WALK_HALVING != 1
 #error "ECC_WALK_HALVING must be 0 or 1"
 #endif
@@ -844,6 +850,9 @@ ECC_HD P131 sqr131(const P131 &a){
 #if ECC_WALK_HALVING
 #include "packedhalving131.h"
 #endif
+#if ECC_HALVING_BMMA
+#include "packedhalvingbmma131.cuh"
+#endif
 ECC_HD P131 sigma131(P131 a,int k){
 #if ECC_PACKED_PERM_SIGMA & 1
  if(k>=3 && k<=10) return sigmaWalkNetwork131(a,k-3);
@@ -958,7 +967,8 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
  P131 lambdaPoly=toPolynomial131(lambda);
  P131 term=add131(add131(lqp,xp),lambdaPoly);
  term.v[0]^=1u;
- P131 t=fromPolynomial131(mulPolynomial131(xp,term));
+ P131 tPoly=mulPolynomial131(xp,term);
+ P131 t=fromPolynomial131(tPoly);
 #ifdef __CUDA_ARCH__
 #define ECC_HALF_LAMBDA_POPC __popc
 #else
@@ -972,10 +982,16 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
 #undef ECC_HALF_LAMBDA_POPC
  const uint32_t mask=0u-(outside&1u);
 #pragma unroll
- for(int i=0;i<4;i++){lambda.v[i]^=mask;t.v[i]^=x.v[i]&mask;}
- lambda.v[4]^=mask&7u;t.v[4]^=x.v[4]&mask;
+ for(int i=0;i<4;i++){
+  lambda.v[i]^=mask;t.v[i]^=x.v[i]&mask;tPoly.v[i]^=xp.v[i]&mask;
+ }
+ lambda.v[4]^=mask&7u;t.v[4]^=x.v[4]&mask;tPoly.v[4]^=xp.v[4]&mask;
  lambdaPoly.v[0]^=mask&1u;
+#if ECC_HALVING_BMMA
+ *hxp=halvingSqrtPolynomialBmma131(tPoly);
+#else
  *hxp=toPolynomial131(halvingSqrt131(t));
+#endif
  *hlp=lambdaPoly;
 }
 

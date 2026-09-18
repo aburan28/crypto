@@ -90,6 +90,7 @@ HALVING_POLY_STATE ?= 0
 HALVING_BENCH_BLOCKS ?= 0
 HALVING_CLMAD_PREFIX ?= 0
 HALVING_ILP ?= 1
+HALVING_BMMA ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
 # Read the table from global memory instead of a per-block shared copy.
@@ -166,7 +167,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedhalving131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedhalving131.h include/packedhalvingbmma131.cuh include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -206,6 +207,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_HALVING_BENCH_BLOCKS=$(HALVING_BENCH_BLOCKS) \
        -DECC_HALVING_CLMAD_PREFIX=$(HALVING_CLMAD_PREFIX) \
        -DECC_HALVING_ILP=$(HALVING_ILP) \
+       -DECC_HALVING_BMMA=$(HALVING_BMMA) \
        -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
@@ -242,6 +244,7 @@ generate:
 	cd codegen && python3 genpacked.py
 	cd codegen && python3 gensigma.py
 	cd codegen && python3 genhalving.py
+	cd codegen && python3 genhalvingbmma.py
 	cd codegen && python3 genpolyreduce.py
 	cd codegen && python3 gendirectreduce.py
 	python3 codegen/genpackedproduct.py
