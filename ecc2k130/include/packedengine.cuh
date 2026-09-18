@@ -325,6 +325,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
         printf("packed table recompute denominator: %d\n", ECC_TABLE_RECOMPUTE_DENOM);
         printf("packed table bank pad: %d\n", ECC_TABLE_BANK_PAD);
+        printf("packed table warp LUT: %d\n", ECC_TABLE_WARP_LUT);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

@@ -94,6 +94,15 @@
 #if ECC_TABLE_BANK_PAD && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_SELECTION_GLOBAL)
 #error "ECC_TABLE_BANK_PAD requires the byte-pivot shared-table layout"
 #endif
+#ifndef ECC_TABLE_WARP_LUT
+#define ECC_TABLE_WARP_LUT 0
+#endif
+#if ECC_TABLE_WARP_LUT != 0 && ECC_TABLE_WARP_LUT != 1
+#error "ECC_TABLE_WARP_LUT must be 0 or 1"
+#endif
+#if ECC_TABLE_WARP_LUT && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_GLOBAL || ECC_TABLE_SELECTION_GLOBAL)
+#error "ECC_TABLE_WARP_LUT requires byte-pivot LUTs in shared memory"
+#endif
 
 namespace eccPacked131 {
 
@@ -155,11 +164,26 @@ __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *g
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
 __device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
 __device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+#if ECC_TABLE_WARP_LUT
+__device__ __forceinline__ unsigned twWarpLookup(const uint8_t *row, unsigned value) {
+    const uint32_t *words = reinterpret_cast<const uint32_t *>(row);
+    const int lane = int(threadIdx.x & 31);
+    const int source = int((value >> 2) & 31u);
+    uint32_t lo = __shfl_sync(0xFFFFFFFFu, words[lane], source);
+    uint32_t hi = __shfl_sync(0xFFFFFFFFu, words[32 + lane], source);
+    return twByte((value & 128u) ? hi : lo, int(value & 3u));
+}
+#endif
 #else
 #define TW_FN static inline
 static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
 static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
 static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+#if ECC_TABLE_WARP_LUT
+static inline unsigned twWarpLookup(const uint8_t *row, unsigned value) {
+    return row[value];
+}
+#endif
 #endif
 
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
@@ -168,7 +192,14 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
 #pragma unroll
     for (int w = 0; w < 4; ++w)
 #pragma unroll
-        for (int t = 0; t < 4; ++t) s += phase[(4 * w + t) * 256 + twByte(x.v[w], t)];
+        for (int t = 0; t < 4; ++t) {
+            const unsigned value = twByte(x.v[w], t);
+#if ECC_TABLE_WARP_LUT
+            s += twWarpLookup(phase + (4 * w + t) * 256, value);
+#else
+            s += phase[(4 * w + t) * 256 + value];
+#endif
+        }
     s += phase[16 * 256 + (x.v[4] & 0xFFu)];
     return int(((s % 131u) * inv[hw]) % 131u);
 }
@@ -192,7 +223,14 @@ TW_FN int twPivot(const P131 &x, int k, const uint32_t *maskLt,
     for (int w = 0; w < 4; ++w)
 #pragma unroll
         for (int t = 0; t < 4; ++t)
-            best = twMax(best, unsigned(maxL[(4 * w + t) * 256 + twByte(s[w], t)]));
+        {
+            const unsigned value = twByte(s[w], t);
+#if ECC_TABLE_WARP_LUT
+            best = twMax(best, twWarpLookup(maxL + (4 * w + t) * 256, value));
+#else
+            best = twMax(best, unsigned(maxL[(4 * w + t) * 256 + value]));
+#endif
+        }
     best = twMax(best, unsigned(maxL[16 * 256 + (s[4] & 7u)]));
 #else
 #pragma unroll
