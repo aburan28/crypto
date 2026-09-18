@@ -1,5 +1,10 @@
 # Cheap operation and research credits
 
+This campaign exists to **measure index-calculus algorithms** against
+a generic-group bound, so post-quantum parameter work has a number
+instead of a phase quote. It is mathematical science. It is not a
+key-recovery service.
+
 Cost is iterations per dollar, not dollars per hour. The unit is the
 same one the scoreboard uses: completed scalar updates. Wall-clock
 belongs here as a practicality note, never as the metric.
