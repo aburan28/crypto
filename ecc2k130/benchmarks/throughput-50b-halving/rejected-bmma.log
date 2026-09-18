@@ -1,0 +1,8 @@
+point-halving CUDA probe: 512 subgroup points, root failures 0, sqrt failures 0, host subgroup failures 0, mismatched words 0
+  trace(y/x): subgroup [260,252], other [252,260]
+  polynomial state: 2
+PASS
+  benchmark occupancy: 188 SMs x 1 blocks x 512 threads x 1 chains
+  halving raw 1.746 B/s (225.794 ms)
+  halving raw 1.743 B/s (226.206 ms)
+  halving raw 1.771 B/s (222.617 ms)

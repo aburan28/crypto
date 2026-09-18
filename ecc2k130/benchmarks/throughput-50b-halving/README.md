@@ -8,3 +8,4 @@ a rho map by itself.
 `result.json` records the CLMAD ceiling, ideal mixed-walk optimization and
 fruitless-cycle status. The canonical report is
 [`../../THROUGHPUT-50B.md`](../../THROUGHPUT-50B.md).
+`rejected-bmma.log` retains the exact but 1.746 B/s binary-tensor experiment.

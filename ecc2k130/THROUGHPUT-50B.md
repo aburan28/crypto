@@ -22,6 +22,7 @@ also executing the half-trace, square root, trace test and state traffic.
 | one-product lambda halving, 768 threads | 28.953 | 0.579 | 512/512 | permutation, not rho | engineering |
 | one-product lambda halving, 1024 threads | **29.053** | **0.581** | **512/512** | permutation, not rho | **engineering; target not met** |
 | explicit dual-chain ILP | 28.823 | 0.576 | 512/512 | permutation, not rho | engineering, rejected |
+| binary-tensor square-root map | 1.746 | 0.035 | 512/512 | permutation, not rho | engineering, rejected |
 | CLMAD-only halving ceiling | 54.273 | 1.085 | extrapolation | excludes map semantics | hardware bound |
 | ideal r=128 mixed optimum | 22.257 raw / **21.112 effective** | 0.422 effective | model | cycle guard unpriced | upper model |
 | 50 B/s target | 50.000 | 1.000 | required | zero undetected fruitless cycles required | boundary |
@@ -54,6 +55,12 @@ enabled. Before it can count as a result it must add, price and test:
 
 Until those gates pass, the 29.053 B/s number is a cheaper primitive only.
 There is no 50 B/s rho claim.
+
+Binary tensor cores were also measured, not assumed. A direct 131×131
+polynomial square-root matrix using exact XOR-popcount BMMA passes all 512
+points but runs at 1.746 B/s: 68 warp-level matrix operations plus fragment
+shared-memory traffic per 32 points cost far more than the scalar permutation
+network. It is retained and rejected.
 
 Frozen evidence:
 [`benchmarks/throughput-50b-halving`](benchmarks/throughput-50b-halving/).

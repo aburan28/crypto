@@ -28,6 +28,12 @@
     "effective_rate": 21.1121259,
     "excluded_costs": "lambda/affine conversion, GPU dispatch/compaction, cycle detection and restart"
   },
+  "rejected_bmma_square_root": {
+    "samples": [1.746, 1.743, 1.771],
+    "median": 1.746,
+    "correctness": "512/512 subgroup points; zero mismatches",
+    "reason": "68 warp-level m8n8k128 operations plus fragment shared-memory traffic per 32 points"
+  },
   "fruitless_cycle_status": {
     "mixed_gpu_walk_implemented": false,
     "existing_addition_guard": "exact 2- and 4-cycle tag rejection",
