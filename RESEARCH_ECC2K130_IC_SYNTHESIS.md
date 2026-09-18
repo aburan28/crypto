@@ -27,9 +27,10 @@ panel is `#ecc2k130-ic-synthesis-20260918`.
 
 A separate toy-suite question — whether production pair-table IC on the
 five small Koblitz cells costs no more than matched signed-Frobenius rho
-in exclusive group operations — is frozen in
-[`RESEARCH_ECC2K130_RHO_PARITY.md`](RESEARCH_ECC2K130_RHO_PARITY.md)
-before measurement. That gate is not n=131 parity. The product-law floor
+in exclusive group operations — lives in
+[`RESEARCH_ECC2K130_RHO_PARITY.md`](RESEARCH_ECC2K130_RHO_PARITY.md).
+Iteration 0 (two-pass table) is 1.05–1.31× rho, all 45 pairs verified,
+all-cases unmet. That gate is not n=131 parity. The product-law floor
 at degree 131 is unchanged.
 
 Companion map: [`RESEARCH_ECC2K130_ROUTES.md`](RESEARCH_ECC2K130_ROUTES.md)

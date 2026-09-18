@@ -2471,8 +2471,9 @@ impl PairSumTable {
 
     /// Folded pair table using only `rows` orbit-representative rows.
     /// `rows == 0` means every nonempty signed orbit. Returns the table
-    /// and the number of point additions spent building stored sums
-    /// (both counting and fill passes).
+    /// and the number of point additions spent building stored sums.
+    /// Occupancy keys are held so the fill scatter does not recompute
+    /// those sums.
     pub fn build_folded_rows(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
@@ -2781,15 +2782,11 @@ impl PairSumTable {
         for o in 0..fb.signed_orbits.len() {
             suffix[o + 1] = suffix[o + 1].max(suffix[o]);
         }
-        let mut stored = 0u64;
-        for r in 0..n_rows {
-            let (orbit, _) = reps[r];
-            let from = suffix[orbit as usize] as usize;
-            stored += (n_points - from) as u64;
-        }
-        // Both the occupancy pass and the fill pass recompute the sums.
-        let additions = stored.saturating_mul(2);
-        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        // One `add_many` per row. Occupancy used to walk the same sums
+        // again only to count buckets; holding `(key, orbit)` and
+        // scattering from that list is the same table at half the
+        // additions. Charging `stored` while still adding twice would
+        // be relabelling.
         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
             let mut sums = Vec::with_capacity(n_points);
             let mut scratch = BatchScratch::default();
@@ -2800,13 +2797,22 @@ impl PairSumTable {
                 f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
             }
         };
-        (0..n_rows).into_par_iter().for_each(|r| {
-            each_row(r, &mut |key, _| {
+        let row_keys: Vec<Vec<(u64, u32)>> = (0..n_rows)
+            .into_par_iter()
+            .map(|r| {
+                let mut keys = Vec::new();
+                each_row(r, &mut |key, orbit| keys.push((key, orbit)));
+                keys
+            })
+            .collect();
+        let additions: u64 = row_keys.iter().map(|row| row.len() as u64).sum();
+        let mut bucket_start = vec![0u32; buckets + 1];
+        for row in &row_keys {
+            for &(key, _) in row {
                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
-                counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
-            });
-        });
-        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+                bucket_start[bucket + 1] += 1;
+            }
+        }
         for b in 0..buckets {
             bucket_start[b + 1] += bucket_start[b];
         }
@@ -2818,8 +2824,8 @@ impl PairSumTable {
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
         let slots = rests.as_mut_ptr() as usize;
-        (0..n_rows).into_par_iter().for_each(|r| {
-            each_row(r, &mut |key, orbit| {
+        row_keys.into_par_iter().for_each(|row| {
+            for (key, orbit) in row {
                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
                 let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
                 // SAFETY: `slot` is this pair's own index, handed out
@@ -2834,7 +2840,7 @@ impl PairSumTable {
                 }
                 let h = (pair_filter_hash(key) & present_mask) as usize;
                 present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
-            });
+            }
         });
         let present: Vec<u64> = present_atomic
             .iter()
@@ -8076,6 +8082,7 @@ mod tests {
         assert!(rows >= 1 && rows <= fb.unknowns());
         let (pair, additions) = PairSumTable::build_folded_rows(&kc, &fb, rows).unwrap();
         assert!(pair.is_folded());
+        assert_eq!(additions, pair.len() as u64);
         assert!(additions > 0);
         let opts = KoblitzIcOptions {
             m: 3,

@@ -452,7 +452,7 @@ rather than whether to read more.
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **done** 2026-09-18 FFD; `ell>1` max=4 at `n=9,15`, does not grow. Solve-under-64 still open | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
-| T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | protocol frozen 2026-09-18 in [`RESEARCH_ECC2K130_RHO_PARITY.md`](RESEARCH_ECC2K130_RHO_PARITY.md); not a result until the receipt exists | hours |
+| T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | iteration 0 measured 2026-09-18, gate unmet (mean `α` 1.05–1.24, max 1.31); iteration 1 one-pass table frozen, not a result until its receipt exists | hours |
 
 T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not

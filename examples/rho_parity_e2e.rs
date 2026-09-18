@@ -239,10 +239,12 @@ fn main() {
         .map(PathBuf::from);
 
     println!("rho-parity protocol seed={ALGORITHM_SEED:#x} fb_seed={FB_SEED} quick={quick}");
-    println!(
+    let header = format!(
         "{:>8} {:>4} {:>4} {:>8} {:>10} {:>10} {:>8} {:>6} {:>6} {}",
         "cell", "tgt", "rep", "order", "G_ic", "G_rho", "alpha", "S_ic", "S_rho", "ok"
     );
+    println!("{header}");
+    let mut table_lines = vec![header];
 
     let mut rows = Vec::new();
     let mut all_ok = true;
@@ -279,7 +281,7 @@ fn main() {
                         };
                         let ok = ic_ok && rho_ok && alpha <= 1.0;
                         all_ok &= ic_ok && rho_ok;
-                        println!(
+                        let line = format!(
                             "{:>8} {:>4} {:>4} {:>8} {:>10} {:>10} {:>8.4} {:>6.3} {:>6.3} {}",
                             cell_name(cell),
                             t,
@@ -292,6 +294,8 @@ fn main() {
                             g_rho as f64 / sqrt_r,
                             if ok { "yes" } else { "NO" }
                         );
+                        println!("{line}");
+                        table_lines.push(line);
                         rows.push(json!({
                             "cell": cell_name(cell),
                             "a": cell.a,
@@ -319,13 +323,15 @@ fn main() {
                     }
                     Err(reason) => {
                         all_ok = false;
-                        println!(
+                        let line = format!(
                             "{:>8} {:>4} {:>4} {:>8} ic failed: {reason}",
                             cell_name(cell),
                             t,
                             rep,
                             if ic_first { "ic-rho" } else { "rho-ic" }
                         );
+                        println!("{line}");
+                        table_lines.push(line);
                         rows.push(json!({
                             "cell": cell_name(cell),
                             "a": cell.a,
@@ -392,5 +398,6 @@ fn main() {
             serde_json::to_vec_pretty(&summary).unwrap(),
         )
         .expect("summary");
+        fs::write(dir.join("table.txt"), table_lines.join("\n") + "\n").expect("table");
     }
 }

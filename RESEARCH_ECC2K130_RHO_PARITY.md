@@ -5,13 +5,17 @@ already solved, does the production pair-table pipeline cost no more
 than matched signed-Frobenius rho in exclusive group operations, on
 every useful completed verified case?
 
-**Answer.** Not yet measured. This note freezes the protocol before the
-run. It is a toy-suite practicality gate, not degree-131 parity, not an
-exponent claim, and not a refit of X1–X4.
+**Answer.** Iteration 0 does not. All 45 pairs verified `[d]G = Q` on
+both arms; mean `α` is 1.05–1.24 and the worst pair is 1.31. The
+all-cases gate is unmet. The leftover is the two-pass table build
+charging every stored sum twice. Iteration 1 (one-pass: hold occupancy
+keys, scatter without a second `add_many`) is frozen in §8 and is not
+a result until its receipt exists. This is a toy-suite practicality
+gate, not degree-131 parity, not an exponent claim, and not a refit of
+X1–X4.
 
 Companion: [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
-T12. Scoreboard panel `#ecc2k130-rho-parity-20260918` is filled only
-when the receipt exists.
+T12. Scoreboard panel `#ecc2k130-rho-parity-20260918`.
 
 ## 1. Boundaries, written before the run
 
@@ -107,7 +111,11 @@ that target. There is no warm amortisation across targets.
 
 ## 4. What is charged
 
-**IC.** Table-build additions (both occupancy and fill passes).
+**IC.** Table-build additions. Iteration 0 recomputed every stored sum
+on the occupancy pass and again on the fill pass (`additions = 2 ×
+stored`). Iteration 1 holds `(key, orbit)` from the first `add_many`
+and scatters from that list (`additions = stored`). Charging one pass
+while still adding twice is relabelling and is not this iteration.
 Walked collection: one binary-method multiplication per 64-probe run
 plus one addition per probe, and one stride multiplication per batch.
 Column certification: binary-method cost of each `x_o`. Descent: three
@@ -161,4 +169,70 @@ cargo run --release --example rho_parity_e2e -- --quick   # not a result
 ```
 
 Receipt: `experiments/ecc2k130_rho_parity_20260918/`.
+Iteration 0: `experiments/ecc2k130_rho_parity_20260918/iteration-0/`.
+Iteration 1: `experiments/ecc2k130_rho_parity_20260918/iteration-1/`
+(created by the run; not a result until `summary.json` exists).
 Runner: `examples/rho_parity_e2e.rs`.
+
+```bash
+cargo run --release --example rho_parity_e2e -- \
+  --out experiments/ecc2k130_rho_parity_20260918/iteration-1
+```
+
+## 7. Iteration 0, two-pass table (measured 2026-09-18)
+
+Host `ip-172-31-19-103`. Cited from
+[`experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json).
+All 45 pairs recovered `[d]G = Q` on both arms. Class: **engineering**.
+`B` and `m` are the frozen recipe. The counting floor did not move.
+
+| Cell | `|F|` | `t` | `G_IC` | table adds | `G_rho` | mean `α` | max `α` | gate |
+|---|---:|---:|---:|---:|---|---:|---:|---|
+| n13a0 | 182 | 1 | 685 | 364 | 548–555 | 1.241 | 1.250 | unmet |
+| n17a1 | 272 | 1 | 978 | 544 | 869–951 | 1.063 | 1.125 | unmet |
+| n19a0 | 304 | 1 | 1069 | 608 | 897–903 | 1.187 | 1.192 | unmet |
+| n19a1 | 304 | 1 | 1093 | 608 | 988–1106 | 1.054 | 1.106 | unmet |
+| n23a0 | 368 | 2 | 1931 | 1380 | 1474–1670 | 1.238 | 1.310 | unmet |
+
+`all_cases_gate = false`. IC cost is setup-dominated and constant per
+cell. One pair on n19a1 already has `α = 0.988`; the cell still fails
+because other targets on that cell are above 1. Collection is one
+64-probe batch on every cell; descent is one walking probe after
+64-walk placement. Neither is the dominant term. Table adds are
+`2 × stored` (n13: 182, n17: 272, n19: 304, n23: 690).
+
+Mean `α` is below 2 on every cell, so the abandonment clause in §5
+does not fire. The remaining production lever that changes `G` without
+changing `B` or `m` is to stop paying for the stored sums twice.
+
+## 8. Iteration 1, one-pass table (frozen before the run)
+
+**Hypothesis, written before treating any second measurement as a
+result.** Occupancy already computes every stored sum. Hold
+`(key, orbit)` per row and scatter into buckets from that list. Do
+not call `add_many` a second time. Charge `additions = stored`. The
+stored keys, the row rule `t = optimal_folded_rows(K, |F|, r)`, `B`,
+`m`, the window, the seeds, and the conversion are unchanged.
+
+Predicted class: **engineering**. `S` falls by `stored` group
+operations; the ratio to the counting floor is flat.
+
+Predicted `G_IC` (iteration-0 `G_IC` minus stored entries), not a
+result:
+
+| Cell | predicted `G_IC` | vs min `G_rho` | predicted max `α` |
+|---|---:|---:|---:|
+| n13a0 | 503 | 548 | 0.918 |
+| n17a1 | 706 | 869 | 0.813 |
+| n19a0 | 765 | 897 | 0.853 |
+| n19a1 | 789 | 988 | 0.799 |
+| n23a0 | 1241 | 1474 | 0.842 |
+
+If every verified pair then has `α ≤ 1`, the gate in §5 is met on
+these five cells. That is still not n=131 parity.
+
+If a cell remains above 1, the next named lever is stopping collection
+at `K+1` relations or shrinking the 64-walk descent placement when the
+expected probe count is already 1. That is a new iteration, frozen
+before its run, and is not mixed into this one. Do not change `B`,
+`m`, the row formula, the window, the seeds, or the conversion.
