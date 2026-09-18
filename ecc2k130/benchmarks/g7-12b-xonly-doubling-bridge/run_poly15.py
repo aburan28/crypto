@@ -7,6 +7,7 @@ OUT = Path(__file__).resolve().parent
 STEPS = [
     "build_poly15.py",
     "validate_poly15.py",
+    "run_collision_poly12.py",
     "screen_poly15.py",
     "summarize_poly15.py",
 ]

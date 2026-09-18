@@ -35,16 +35,38 @@ def summarize(prefix, labels, base_label, status):
             "rate_over_12b": median / 12.0,
             "rate_over_15b": median / 15.0,
         })
+    collision_path = OUT / "poly15-collision.json"
+    collision = json.loads(collision_path.read_text()) if collision_path.exists() else {}
+    trial100 = collision.get("trials_100") or {}
+    trial2000 = collision.get("trials_2000") or {}
+    work_ratio = trial2000.get("work_ratio")
     result = {
         "status": status,
+        "collision_work_ratio_vs_selected": work_ratio,
         "generic_work_boundary": "sqrt(n/262) times collision work",
         "full_dlp_S": None,
         "rows": rows,
     }
     poly = next(row for row in rows if row["variant"] == "poly12")
     arith = next(row for row in rows if row["variant"] == "arith")
-    if poly["median_billion_per_second"] >= 15.0 and poly["paired_95_ci"][0] > 1:
-        result["decision"] = "promote poly12 complete map; median reaches 15 B/s and paired interval exceeds one"
+    adjusted = [bound / work_ratio for bound in poly["paired_95_ci"]] if work_ratio else [0.0, 0.0]
+    poly["collision_adjusted_paired_95_ci"] = adjusted
+    collision_ok = bool(
+        trial100.get("passed")
+        and trial2000.get("passed")
+        and work_ratio is not None
+        and work_ratio <= 1.10
+    )
+    if (
+        poly["median_billion_per_second"] >= 15.0
+        and poly["paired_95_ci"][0] > 1
+        and collision_ok
+        and adjusted[0] > 1
+    ):
+        result["decision"] = (
+            "promote poly12 complete map; median reaches 15 B/s and raw and "
+            "collision-adjusted paired intervals exceed one"
+        )
         result["class"] = "engineering"
     elif arith["median_billion_per_second"] < 15.5:
         result["decision"] = "product+inverse ceiling below 15.5 B/s; 15 B/s is not available on this common path"
