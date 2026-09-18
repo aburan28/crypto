@@ -348,30 +348,12 @@ ECC_HD P131 halvingQuadraticRoot131(P131 a) {
     return fromHalvingPhase131(z);
 }
 ECC_HD unsigned halvingSecondTrace131(P131 a) {
-    const P131 q=toHalvingPhase131(a);
-    P131 z=q;
-    z.v[0]&=~1u;
-    const int shifts[8]={1,2,4,8,16,32,64,128};
-#pragma unroll
-    for(int k=0;k<8;k++){
-        const int s=shifts[k], words=s>>5, bits=s&31;
-        P131 old=z;
-#pragma unroll
-        for(int i=4;i>=0;i--){
-            uint32_t v=0;
-            if(i>=words){v=old.v[i-words]<<bits;if(bits&&i>words)v|=old.v[i-words-1]>>(32-bits);}
-            z.v[i]^=v;
-        }
-        z.v[4]&=7u;
-    }
-    unsigned parity=0;
-#pragma unroll
-    for(int i=0;i<5;i++){
+    unsigned w=0;
 #ifdef __CUDA_ARCH__
-        parity^=__popc(q.v[i]&z.v[i]);
+    w=__popc(a.v[0]&~1u)+__popc(a.v[1])+__popc(a.v[2])+__popc(a.v[3])+__popc(a.v[4]);
 #else
-        parity^=__builtin_popcount(q.v[i]&z.v[i]);
+    w=__builtin_popcount(a.v[0]&~1u)+__builtin_popcount(a.v[1])+__builtin_popcount(a.v[2])+
+      __builtin_popcount(a.v[3])+__builtin_popcount(a.v[4]);
 #endif
-    }
-    return parity&1u;
+    return ((w*(w+1u))>>1)&1u;
 }
