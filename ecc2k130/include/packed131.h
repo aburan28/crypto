@@ -38,6 +38,21 @@
 #if ECC_PACKED_TOP_CLMAD && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_TOP_CLMAD requires ECC_PACKED_CLMAD"
 #endif
+#ifndef ECC_PACKED_TOP_HOIST
+#define ECC_PACKED_TOP_HOIST 0
+#endif
+#if ECC_PACKED_TOP_HOIST != 0 && ECC_PACKED_TOP_HOIST != 1
+#error "ECC_PACKED_TOP_HOIST must be 0 or 1"
+#endif
+#if ECC_PACKED_TOP_HOIST && ECC_PACKED_TOP_CLMAD
+#error "ECC_PACKED_TOP_HOIST is the ALU form of the 3-bit correction; do not combine with ECC_PACKED_TOP_CLMAD"
+#endif
+#ifndef ECC_PACKED_ONB_INV
+#define ECC_PACKED_ONB_INV 0
+#endif
+#if ECC_PACKED_ONB_INV != 0 && ECC_PACKED_ONB_INV != 1
+#error "ECC_PACKED_ONB_INV must be 0 or 1"
+#endif
 #ifndef ECC_PACKED_CLMAD_SQUARE
 #define ECC_PACKED_CLMAD_SQUARE 0
 #endif
@@ -272,6 +287,31 @@ ECC_HD void product131Karat3(const P131 &a, const P131 &b, uint32_t *c) {
     c[8] ^= mid[2] ^ hi[2];
     // The omitted tenth word is zero: a 64x3 cross term has degree <=65.
 }
+/* Bit-identical to the k-then-i shift loop.  Accumulate the 3-bit
+   contribution into a five-word local so the overlapping c[4+i] / c[5+i]
+   stores do not go through the caller's pointer until the end. */
+ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
+    const uint32_t a4 = a.v[4] & 7u, b4 = b.v[4] & 7u;
+    const uint32_t ma0 = 0u - (a4 & 1u);
+    const uint32_t ma1 = 0u - ((a4 >> 1) & 1u);
+    const uint32_t ma2 = 0u - ((a4 >> 2) & 1u);
+    const uint32_t mb0 = 0u - (b4 & 1u);
+    const uint32_t mb1 = 0u - ((b4 >> 1) & 1u);
+    const uint32_t mb2 = 0u - ((b4 >> 2) & 1u);
+    uint32_t extra[5] = {0, 0, 0, 0, 0};
+#pragma unroll
+    for (int i = 0; i < 4; ++i) {
+        const uint32_t av = a.v[i], bv = b.v[i];
+        const uint32_t t0 = (av & mb0) ^ (bv & ma0);
+        const uint32_t t1 = (av & mb1) ^ (bv & ma1);
+        const uint32_t t2 = (av & mb2) ^ (bv & ma2);
+        extra[i] ^= t0 ^ (t1 << 1) ^ (t2 << 2);
+        extra[i + 1] ^= (t1 >> 31) ^ (t2 >> 30);
+    }
+    extra[4] ^= (b4 & ma0) ^ ((b4 << 1) & ma1) ^ ((b4 << 2) & ma2);
+#pragma unroll
+    for (int i = 0; i < 5; ++i) c[4 + i] ^= extra[i];
+}
 ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
 #if ECC_PACKED_KARAT3
     product131Karat3(a, b, c);
@@ -279,6 +319,8 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
     clmul128(c,a.v,b.v); c[8]=0;
 #if ECC_PACKED_TOP_CLMAD
     topCrossClmad131(a,b,c);
+#elif ECC_PACKED_TOP_HOIST
+    topCrossHoist131(a,b,c);
 #else
 #pragma unroll
     for(int k=0;k<3;k++) {
@@ -386,15 +428,11 @@ using MulArg = P131;
 #else
 using MulArg = const P131 &;
 #endif
-static ECC_BIG P131 mul131(MulArg a, MulArg b) {
-#if ECC_PACKED_SINGLE_PRODUCT
-    const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
-    uint32_t h[9];
-    product131(pa,pb,h);
-    return fromPolynomialProduct131(h);
-#else
-    // gamma_i gamma_j = gamma_(i+j) + gamma_(i-j), gamma_0=0,
-    // gamma_k=gamma_(263-k): the original two-product multiplier.
+// Two-product ONB multiply: stays in the normal basis.  The shipping
+// SINGLE_PRODUCT path converts to the polynomial basis and back around every
+// mul131; inv131 is already in the ONB, so those conversions are pure
+// overhead on the inverse chain (8 muls / 16 slots).
+static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     uint32_t c[9],d[9];
     P131 rb=reverse131(b),r;
     product131(a,b,c); product131(a,rb,d);
@@ -408,6 +446,17 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
     }
     r.v[4]&=7;
     return r;
+}
+static ECC_BIG P131 mul131(MulArg a, MulArg b) {
+#if ECC_PACKED_SINGLE_PRODUCT
+    const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
+    uint32_t h[9];
+    product131(pa,pb,h);
+    return fromPolynomialProduct131(h);
+#else
+    // gamma_i gamma_j = gamma_(i+j) + gamma_(i-j), gamma_0=0,
+    // gamma_k=gamma_(263-k): the original two-product multiplier.
+    return mulOnb131(a, b);
 #endif
 }
 #ifndef ECC_PACKED_ALU_SQUARE
@@ -503,26 +552,32 @@ ECC_HD P131 sigma131(P131 a,int k){
 #define ECC_PACKED_UNROLL_INV 0
 #endif
 ECC_HD P131 inv131(P131 a){
+#if ECC_PACKED_ONB_INV
+#define ECC_INV_MUL mulOnb131
+#else
+#define ECC_INV_MUL mul131
+#endif
 #if ECC_PACKED_UNROLL_INV
  // The same Itoh–Tsujii chain with explicit powers: beta_2,4,8,16,32,64,65,130.
- P131 acc=mul131(sqr131(a),a);
- acc=mul131(sqr131(sqr131(acc)),acc);
- acc=mul131(sigma131(acc,4),acc);
- acc=mul131(sigma131(acc,8),acc);
- acc=mul131(sigma131(acc,16),acc);
- acc=mul131(sigma131(acc,32),acc);
- acc=mul131(sqr131(acc),a);
- acc=mul131(sigma131(acc,65),acc);
+ P131 acc=ECC_INV_MUL(sqr131(a),a);
+ acc=ECC_INV_MUL(sqr131(sqr131(acc)),acc);
+ acc=ECC_INV_MUL(sigma131(acc,4),acc);
+ acc=ECC_INV_MUL(sigma131(acc,8),acc);
+ acc=ECC_INV_MUL(sigma131(acc,16),acc);
+ acc=ECC_INV_MUL(sigma131(acc,32),acc);
+ acc=ECC_INV_MUL(sqr131(acc),a);
+ acc=ECC_INV_MUL(sigma131(acc,65),acc);
  return sqr131(acc);
 #else
  P131 acc=a;int k=1;
 #pragma unroll 1
  for(int bit=6;bit>=0;--bit){
-  acc=mul131(sigma131(acc,k),acc);k*=2;
-  if((130>>bit)&1){acc=mul131(sqr131(acc),a);k++;}
+  acc=ECC_INV_MUL(sigma131(acc,k),acc);k*=2;
+  if((130>>bit)&1){acc=ECC_INV_MUL(sqr131(acc),a);k++;}
  }
  return sqr131(acc);
 #endif
+#undef ECC_INV_MUL
 }
 
 } // namespace eccPacked131

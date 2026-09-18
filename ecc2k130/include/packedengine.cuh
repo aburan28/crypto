@@ -292,8 +292,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
         printf("packed pair ilp: %d\n", ECC_PACKED_PAIR_ILP);
+        printf("packed top hoist: %d\n", ECC_PACKED_TOP_HOIST);
+        printf("packed onb inv: %d\n", ECC_PACKED_ONB_INV);
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
+        printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
@@ -310,6 +313,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
+        printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

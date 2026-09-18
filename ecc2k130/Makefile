@@ -17,6 +17,10 @@
 #   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   PACKED_PAIR_ILP  independent buffers for the two paired products (default 0)
 #   PACKED_L2_PERSIST  one field blob + stream L2 persist window (default 0)
+#   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
+#   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
+#   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
+#   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
@@ -58,7 +62,10 @@ PACKED_ADD_COMBINE ?= 0
 PACKED_PAIR_ILP ?= 0
 UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
+PACKED_SLOT_PIPELINE ?= 0
 PACKED_L2_PERSIST ?= 0
+PACKED_TOP_HOIST ?= 0
+PACKED_ONB_INV ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
@@ -67,6 +74,8 @@ TABLE_PIVOT_BYTES ?= 0
 # Drops the 48 KB smem tax so 80-register builds can resident 3 blocks on
 # this SKU's 100 KB/SM; random table lookups then miss the LDS pipe.
 TABLE_GLOBAL ?= 0
+# Hybrid: selection tables in shared, addend table in global.
+TABLE_ADDEND_GLOBAL ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -149,10 +158,14 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_PAIR_ILP=$(PACKED_PAIR_ILP) \
        -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
+       -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
+       -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
+       -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
+       -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
@@ -319,9 +332,13 @@ test-clmad:
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_PAIR_ILP=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-pair-ilp-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_HOIST=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-top-hoist-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_ONB_INV=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-onb-inv-host
 	./build/test-packed-clmad-host
 	./build/test-packed-topclmad-host
 	./build/test-packed-pair-ilp-host
+	./build/test-packed-top-hoist-host
+	./build/test-packed-onb-inv-host
 
 test-clmad-square:
 	python3 -m unittest discover -s codegen -p testclmad.py
@@ -366,6 +383,10 @@ test-table-walk-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
+	./build/test-table-walk-cuda-addend-global
 
 test-timing:
 	mkdir -p build
@@ -526,6 +547,7 @@ clean:
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-pair-ilp-host build/test-packed-clmad-square-host
+	rm -f build/test-packed-top-hoist-host build/test-packed-onb-inv-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes

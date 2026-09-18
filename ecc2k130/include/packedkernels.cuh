@@ -70,6 +70,21 @@ namespace eccPacked131 {
 #if ECC_PACKED_SLOT_PREFETCH && !ECC_PACKED_COMPACT_STATE
 #error "ECC_PACKED_SLOT_PREFETCH requires compact state"
 #endif
+#ifndef ECC_PACKED_SLOT_PIPELINE
+#define ECC_PACKED_SLOT_PIPELINE 0
+#endif
+#if ECC_PACKED_SLOT_PIPELINE != 0 && ECC_PACKED_SLOT_PIPELINE != 1
+#error "ECC_PACKED_SLOT_PIPELINE must be 0 or 1"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && !ECC_WALK_TABLE
+#error "ECC_PACKED_SLOT_PIPELINE requires ECC_WALK_TABLE"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_SLOT_PIPELINE requires compact state"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && ECC_PACKED_SLOT_PREFETCH
+#error "ECC_PACKED_SLOT_PIPELINE and ECC_PACKED_SLOT_PREFETCH both issue the next slot load; pick one"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -175,10 +190,16 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_WALK_TABLE
     // All block threads participate, including inactive partial-tile workers.
 #if ECC_TABLE_GLOBAL
-    const uint32_t *twShared = p.twConsts;
+    const uint32_t *twSel = p.twConsts;
+    const uint32_t *twTab = p.twConsts;
+#elif ECC_TABLE_ADDEND_GLOBAL
+    extern __shared__ uint32_t twSel[];
+    twLoadShared(twSel, p.twConsts + TW_MASK_OFF, TW_SEL_WORDS);
+    const uint32_t *twTab = p.twConsts;
 #else
-    extern __shared__ uint32_t twShared[];
-    twLoadShared(twShared, p.twConsts);
+    extern __shared__ uint32_t twSel[];
+    twLoadShared(twSel, p.twConsts);
+    const uint32_t *twTab = twSel;
 #endif
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
@@ -191,6 +212,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     unsigned char js[ECC_BATCH];
 #endif
     P131 prod, inv;
+#if ECC_PACKED_SLOT_PIPELINE
+    P131 pipeX = load(p.x, 0, tid, p.threads);
+    P131 pipeY = load(p.y, 0, tid, p.threads);
+    P131 pipeD, pipeC;
+#endif
 #pragma unroll 1
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
@@ -209,9 +235,19 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 prefetch(p.y, slot + 1, tid, p.threads);
             }
 #endif
+#if ECC_PACKED_SLOT_PIPELINE
+            P131 x = pipeX;
+            const P131 xp = x;
+            const P131 yp = pipeY;
+            if (slot + 1 < ECC_BATCH) {
+                pipeX = load(p.x, slot + 1, tid, p.threads);
+                pipeY = load(p.y, slot + 1, tid, p.threads);
+            }
+#else
             P131 x = load(p.x, slot, tid, p.threads);
 #if ECC_WALK_TABLE
             const P131 xp = x;
+#endif
 #endif
 #if ECC_PACKED_POLY_STATE
             x = fromPolynomial131(x);
@@ -247,10 +283,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             // x and one coordinate of y; the addend is read from the table in
             // the polynomial basis, so nothing is converted and no Frobenius
             // network runs.  The second pass only needs dp and the chain.
+#if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
-            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twShared);
+#endif
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
             P131 dp, ep;
-            twAddend(tag, xp, yp, twShared, &dp, &ep);
+            twAddend(tag, xp, yp, twTab, &dp, &ep);
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
                 store(p.pchain, slot, tid, p.threads, pair.first);
@@ -320,6 +358,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
         inv = inv131(prod);
 #endif
+#if ECC_PACKED_SLOT_PIPELINE
+        pipeX = load(p.x, ECC_BATCH - 1, tid, p.threads);
+        pipeY = load(p.y, ECC_BATCH - 1, tid, p.threads);
+        pipeD = load(denominators, ECC_BATCH - 1, tid, p.threads);
+        pipeC = load(p.pchain, ECC_BATCH - 1, tid, p.threads);
+#endif
 #if ECC_UNROLL_SLOTS >= 4
 #pragma unroll 4
 #elif ECC_UNROLL_SLOTS > 1
@@ -336,6 +380,24 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 prefetch(denominators, slot - 1, tid, p.threads);
             }
 #endif
+#if ECC_PACKED_SLOT_PIPELINE
+            P131 x = pipeX, y = pipeY, dp = pipeD, pch = pipeC;
+            if (slot > 0) {
+                pipeX = load(p.x, slot - 1, tid, p.threads);
+                pipeY = load(p.y, slot - 1, tid, p.threads);
+                pipeD = load(denominators, slot - 1, tid, p.threads);
+                pipeC = load(p.pchain, slot - 1, tid, p.threads);
+            }
+            dp.v[4] &= 7;
+            P131 lambdaPoly;
+            if (slot) {
+                PolynomialPair pair = mulPolynomialPair131(inv, pch, dp);
+                lambdaPoly = pair.first;
+                inv = pair.second;
+            } else {
+                lambdaPoly = mulPolynomial131(inv, pch);
+            }
+#else
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
             P131 dp = load(denominators, slot, tid, p.threads);
@@ -391,6 +453,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             } else ii = inv;
 #if ECC_PACKED_POLY_STATE
             P131 lambdaPoly = mulPolynomial131(ep, ii);
+#endif
 #endif
 #endif
 #if ECC_PACKED_POLY_STATE

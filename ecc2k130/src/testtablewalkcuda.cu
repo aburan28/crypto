@@ -29,19 +29,27 @@ static void checked(cudaError_t s) {
 }
 
 __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
-    extern __shared__ uint32_t shared[];
-    twLoadShared(shared, consts);
+#if ECC_TABLE_ADDEND_GLOBAL
+    extern __shared__ uint32_t sel[];
+    twLoadShared(sel, consts + TW_MASK_OFF, TW_SEL_WORDS);
+    const uint32_t *tab = consts;
+#else
+    extern __shared__ uint32_t sel[];
+    twLoadShared(sel, consts);
+    const uint32_t *tab = sel;
+#endif
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
     In a = in[i];
     Out o;
-    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
-    o.k = twPhase(a.xn, a.hw, bytes + 4 * TW_PHASE_OFF, shared + TW_INV_OFF);
-    o.pivot = twPivot(a.xn, o.k, shared + TW_MASK_OFF, bytes + 4 * TW_MAX_OFF, bytes + 4 * TW_LINV_OFF);
-    o.eps = twCoordinate(a.yp, o.pivot, shared + TW_ROW_OFF);
+    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(sel);
+    o.k = twPhase(a.xn, a.hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), sel + (TW_INV_OFF - TW_SEL0));
+    o.pivot = twPivot(a.xn, o.k, sel + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
+                      bytes + 4 * (TW_LINV_OFF - TW_SEL0));
+    o.eps = twCoordinate(a.yp, o.pivot, sel + (TW_ROW_OFF - TW_SEL0));
     unsigned long long hist = a.hist;
-    o.tag = twSelect(a.xn, a.yp, a.hw, &hist, shared);
-    twAddend(o.tag, a.xp, a.yp, shared, &o.d, &o.e);
+    o.tag = twSelect(a.xn, a.yp, a.hw, &hist, sel);
+    twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e);
     out[i] = o;
 }
 
@@ -115,7 +123,8 @@ int main() {
     }
     std::printf("table walk device probe: %d points, cycle rule fired on %d\n", N, ruleFired);
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
-    std::printf("  branches %d, shared bytes %zu\n", TW_H, TW_SHARED_BYTES);
+    std::printf("  branches %d, shared bytes %zu, addend global %d\n",
+                TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL);
     const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= N / 4;
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
