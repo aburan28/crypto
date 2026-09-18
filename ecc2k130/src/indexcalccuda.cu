@@ -168,7 +168,8 @@ void probeTable(const P131 *X, const P131 *Y, int B, const PairSum *tab, int nTa
         int p = lowerBoundX(tab, nTab, tx);
         while (p < nTab && same131(tab[p].x, tx)) {
             int i = tab[p].i, j = tab[p].j;
-            if (i != k && j != k) {
+            // Same-x as i or j is P or -P (char-2); those triples cancel.
+            if (i != k && j != k && !same131(X[k], X[i]) && !same131(X[k], X[j])) {
                 P131 sx, sy;
                 if (affineAdd(X[i], Y[i], X[j], Y[j], &sx, &sy)
                     && same131(sx, tx) && same131(sy, ty)) {

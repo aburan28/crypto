@@ -153,8 +153,13 @@ def pairDecomposeTable(curve, lookup, target, summands=3):
         if remainder is None:
             continue
         for i, j in table.get(remainder, ()):
-            if k != i and k != j:
-                return (points[i], points[j], points[k])
+            if k == i or k == j:
+                continue
+            third = points[k]
+            if (third == points[i] or third == points[j]
+                    or third == curve.neg(points[i]) or third == curve.neg(points[j])):
+                continue
+            return (points[i], points[j], third)
     return None
 
 

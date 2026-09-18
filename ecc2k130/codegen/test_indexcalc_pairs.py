@@ -82,6 +82,28 @@ class PairOracleTests(unittest.TestCase):
             got = curve.add(got, p)
         self.assertEqual(got, target)
 
+    def test_pair_table_rejects_cancelling_triple_on_a_base_point(self):
+        meter = engine.Ledger()
+        context = engine.setup(5, 4, 3, meter)
+        onb, curve, ell, generator, eigen, reps, lookup, _, _ = context
+        points = list(lookup)
+        foundBase = False
+        for target in points:
+            if curve.neg(target) not in lookup:
+                continue
+            foundBase = True
+            streamed = pairs.pairDecomposeLookup(curve, lookup, target)
+            tabulated = pairs.pairDecomposeTable(curve, lookup, target)
+            if streamed is None:
+                self.assertIsNone(tabulated)
+            if tabulated is not None:
+                self.assertTrue(engine.proper(tabulated, [1, 1, 1], curve))
+                got = None
+                for p in tabulated:
+                    got = curve.add(got, p)
+                self.assertEqual(got, target)
+        self.assertTrue(foundBase)
+
 
 if __name__ == '__main__':
     unittest.main()
