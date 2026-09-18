@@ -504,3 +504,51 @@ not a statement about genus-3 curves at cryptographic size, where the
 factor-base build alone is `O(p)` and everything here would have to be
 rebuilt. What the rows do support is narrower and was the point: the
 crossover moves in the direction and at the genus the theory names.
+
+## Round five: the exponent law, pre-registered
+
+Rounds one to four established that `S_ic/S_rho` is flat at genus 2 and dips
+below 1 at genus 3 on the two largest `N`. Two data points with the right sign
+in the right place is not an exponent. This round states the law the earlier
+rounds' asymptotics imply, and the condition that would kill it, *before*
+measuring.
+
+**The law.** With `N ≈ p^g`, rho costs `√N ≈ p^{g/2}`. The relation stage is
+`(m+1)·g!` group operations with `m ≈ p/2` places, so it is `≈ p·g!`, linear
+in `p` at every genus. In the unit `S = ops/√N` both sides divide by `p^{g/2}`,
+so the ratio is
+
+    S_ic / S_rho  ∝  g! · p^{1 − g/2}
+
+giving a predicted slope of `d log S_ratio / d log p = 1 − g/2`:
+
+| `g` | predicted slope | what it means |
+|--:|--:|:--|
+| 2 | 0.0 | flat — no crossover at any size |
+| 3 | −0.5 | crosses, slowly |
+| 4 | −1.0 | crosses, twice as fast in the exponent |
+
+The `g!` prefactor moves the crossover *later* as genus rises while the slope
+moves it *earlier*; the crossover point is where `g!·p^{1−g/2} = 1`, i.e.
+`p* = (g!)^{2/(g−2)}`. That predicts `p* = 36` at `g = 3` and `p* = 24` at
+`g = 4` — both inside reach, which is why this is measurable at all rather
+than an extrapolation.
+
+**Success condition.** Fitted slopes within `±0.25` of `1 − g/2` at genus 3
+and genus 4, over at least four `p` per genus, with every run returning the
+verified `k`, against a distinguished-point rho whose `S_walk` stays inside
+`1.0 – 1.5`.
+
+**Falsification.** Any of: a genus-3 or genus-4 slope flatter than `−0.25`
+(the dip is then a constant, not a trend); `S_walk` drifting outside
+`1.0 – 1.5` (the reference has broken and the ratio is measuring that);
+`S_ic/S_rho` failing to fall below 1 at genus 4 anywhere in range; or the
+fitted crossover disagreeing with `p* = (g!)^{2/(g−2)}` by more than a factor
+of 4.
+
+**What a success would and would not mean.** It would establish that the
+crossover is a trend with a measured exponent rather than two lucky rows, at
+toy sizes, on one machine. It would *not* be a statement about
+cryptographic-size Jacobians, where the `O(p)` factor-base build alone is
+prohibitive and everything here would have to be rebuilt. The honest claim
+available from this design is about the shape of the curve, not its position.
