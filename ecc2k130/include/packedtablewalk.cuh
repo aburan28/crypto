@@ -112,8 +112,9 @@ static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4 + ECC_TABLE_BANK_PAD;
 static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
 #endif
-static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
-static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
+static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
+static const int TW_ROW_WORDS = 4 + ECC_TABLE_BANK_PAD;
+static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * TW_ROW_WORDS;
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
@@ -138,7 +139,7 @@ static const int TW_SEL0 = (ECC_TABLE_ADDEND_GLOBAL || ECC_TABLE_SELECTION_GLOBA
 static const size_t TW_SHARED_BYTES =
     size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS :
            (ECC_TABLE_SELECTION_GLOBAL ? TW_TABLE_WORDS : TW_WORDS)) * sizeof(uint32_t);
-// 49,256 bytes with bank padding plus the driver's measured 1,024-byte
+// 49,780 bytes with bank padding plus the driver's measured 1,024-byte
 // reservation still permits one 512-thread block on the 100 KiB SM.
 static_assert(TW_SHARED_BYTES <= 50 * 1024, "table walk tables exceed the measured shared-memory budget");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
@@ -211,7 +212,7 @@ TW_FN int twPivot(const P131 &x, int k, const uint32_t *maskLt,
 // Coordinate p of the normal-basis image of a polynomial-basis y.
 TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 #if ECC_TABLE_PIVOT_BYTES
-    const uint32_t *r = fromRow + p * 4;
+    const uint32_t *r = fromRow + p * TW_ROW_WORDS;
     const uint32_t top = (fromRow[(TW_ROWTOP_OFF - TW_ROW_OFF) + (p >> 3)] >> ((p & 7) * 4)) & 7u;
     const uint32_t t = (yp.v[0] & r[0]) ^ (yp.v[1] & r[1]) ^ (yp.v[2] & r[2]) ^ (yp.v[3] & r[3]) ^ (yp.v[4] & top);
 #else
@@ -337,7 +338,7 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         for (int p = 0; p < 131; ++p)
             if ((n.v[p >> 5] >> (p & 31)) & 1u) {
 #if ECC_TABLE_PIVOT_BYTES
-                if (j < 128) out[TW_ROW_OFF + p * 4 + (j >> 5)] |= 1u << (j & 31);
+                if (j < 128) out[TW_ROW_OFF + p * TW_ROW_WORDS + (j >> 5)] |= 1u << (j & 31);
                 else out[TW_ROWTOP_OFF + (p >> 3)] |= 1u << ((j - 128) + (p & 7) * 4);
 #else
                 out[TW_ROW_OFF + p * 5 + (j >> 5)] |= 1u << (j & 31);
