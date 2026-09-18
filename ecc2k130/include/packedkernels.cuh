@@ -236,7 +236,9 @@ static __device__ __forceinline__ PreparedTableSlot prepareTableSlot(
     const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
     PreparedTableSlot out;
     twAddend(tag, xp, yp, twTab, &out.dp, &out.ep, p.twConsts);
+#if !ECC_TABLE_RECOMPUTE_DENOM
     store(denominators, slot, tid, p.threads, out.dp);
+#endif
     return out;
 }
 #endif
@@ -381,7 +383,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 prod = dp;
                 store(p.pchain, slot, tid, p.threads, ep);
             }
+#if !ECC_TABLE_RECOMPUTE_DENOM
             store(denominators, slot, tid, p.threads, dp);
+#endif
 #else
             const int j = 3 + ((hw >> 1) & 7);
 #if !ECC_PACKED_CACHE_DENOM
@@ -487,8 +491,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
+#if ECC_WALK_TABLE && ECC_TABLE_RECOMPUTE_DENOM
+            const size_t id = size_t(slot) * p.threads + tid;
+            P131 dp = twDenominator(unsigned(p.hist[id] & 0xFFFFu), x, twTab, p.twConsts);
+#else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
+#endif
             P131 lambdaPoly;
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(inv,

@@ -137,7 +137,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
-        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE)) *
+        (1 - ECC_TABLE_RECOMPUTE_DENOM);
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
@@ -322,6 +323,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
+        printf("packed table recompute denominator: %d\n", ECC_TABLE_RECOMPUTE_DENOM);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

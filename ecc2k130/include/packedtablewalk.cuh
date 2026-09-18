@@ -76,6 +76,15 @@
 #if ECC_TABLE_SELECTION_GLOBAL && (!ECC_WALK_TABLE || ECC_TABLE_GLOBAL || ECC_TABLE_ADDEND_GLOBAL)
 #error "ECC_TABLE_SELECTION_GLOBAL requires the table walk and is exclusive with other global-table modes"
 #endif
+#ifndef ECC_TABLE_RECOMPUTE_DENOM
+#define ECC_TABLE_RECOMPUTE_DENOM 0
+#endif
+#if ECC_TABLE_RECOMPUTE_DENOM != 0 && ECC_TABLE_RECOMPUTE_DENOM != 1
+#error "ECC_TABLE_RECOMPUTE_DENOM must be 0 or 1"
+#endif
+#if ECC_TABLE_RECOMPUTE_DENOM && !ECC_WALK_TABLE
+#error "ECC_TABLE_RECOMPUTE_DENOM requires the table walk"
+#endif
 
 namespace eccPacked131 {
 
@@ -248,6 +257,34 @@ TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
     const uint32_t tx = top & 7u;
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
+}
+
+// Reconstruct only d=x+x_T in the reverse Montgomery pass. The selected tag
+// is already the low history word, so this can replace a global denominator
+// field without repeating phase/pivot/sign selection.
+TW_FN P131 twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared,
+                         const uint32_t *allConsts = nullptr) {
+#if ECC_TABLE_PIVOT_BYTES
+    const int h = eccTagH(tag);
+    const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
+    const uint32_t *t = kbase + h * TW_ENTRY;
+#if ECC_TABLE_SELECTION_GLOBAL
+    const uint32_t entry = unsigned(eccTagK(tag) * TW_H + h);
+    const uint32_t top = reinterpret_cast<const uint8_t *>(allConsts + TW_TOP_OFF)[entry] & 7u;
+#else
+    const uint32_t top =
+        (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 7u;
+#endif
+#else
+    const uint32_t *t =
+        shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
+    const uint32_t top = t[8] & 7u;
+#endif
+    P131 d;
+#pragma unroll
+    for (int i = 0; i < 4; ++i) d.v[i] = xp.v[i] ^ t[i];
+    d.v[4] = xp.v[4] ^ top;
+    return d;
 }
 
 // Host: fill the flat constant buffer from the reference walk.
