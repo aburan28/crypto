@@ -94,8 +94,8 @@ namespace eccPacked131 {
 #if ECC_PACKED_STATE_TILE && (!ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_STATE_TILE requires polynomial state, denominator cache and polynomial chains"
 #endif
-#if ECC_PACKED_STATE_TILE && ECC_THREADS != 256
-#error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256"
+#if ECC_PACKED_STATE_TILE && ECC_THREADS != 256 && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256 unless compact state is on"
 #endif
 #if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"

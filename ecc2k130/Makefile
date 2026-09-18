@@ -19,6 +19,7 @@
 #   PACKED_L2_PERSIST  one field blob + stream L2 persist window (default 0)
 #   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
 #   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
+#   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   ARCH     CUDA architectures
@@ -66,6 +67,7 @@ PACKED_SLOT_PIPELINE ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
+PACKED_FROM_REDUCED ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
@@ -162,6 +164,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
+       -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
@@ -334,11 +337,13 @@ test-clmad:
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_PAIR_ILP=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-pair-ilp-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_HOIST=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-top-hoist-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_ONB_INV=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-onb-inv-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_FROM_REDUCED=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-from-reduced-host
 	./build/test-packed-clmad-host
 	./build/test-packed-topclmad-host
 	./build/test-packed-pair-ilp-host
 	./build/test-packed-top-hoist-host
 	./build/test-packed-onb-inv-host
+	./build/test-packed-from-reduced-host
 
 test-clmad-square:
 	python3 -m unittest discover -s codegen -p testclmad.py
@@ -548,6 +553,7 @@ clean:
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
 	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-pair-ilp-host build/test-packed-clmad-square-host
 	rm -f build/test-packed-top-hoist-host build/test-packed-onb-inv-host
+	rm -f build/test-packed-from-reduced-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes

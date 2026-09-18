@@ -96,3 +96,45 @@ From `ecc2k130/`, GPU idle, CUDA 13.3.73 on `PATH`:
 ```sh
 bash benchmarks/throughput-29b-gpu/run.sh
 ```
+
+## 5. Measured, this SKU
+
+Frozen: [benchmarks/throughput-29b-gpu/summary.json](benchmarks/throughput-29b-gpu/summary.json).
+Unit: `finished:` B complete scalar updates/s. Each verified row replayed 300
+reports with 0 dropped. 50,465,865,728 updates/sample. Class: engineering.
+
+Round 1 priced the 3-bit hoist, ONB inverse, and slot pipeline against the
+17.298 control (table + byte pivot + pair-ILP + L2 persist + unroll 2).
+Nsight Compute on that control (sudo, `walk`, this card) is why round 2
+moved the square: DRAM 11%, ALU pipe 36%, **FP64/`clmad` 71%**, 16 warps/SM.
+
+| variant | median B/s | / 29 | / 22 B floor | / 17.298 | class |
+|---|---:|---:|---:|---:|---|
+| control (unroll 2) | 17.298 | 0.596 | 0.786 | 1.000 | reference |
+| `TOP_HOIST` | 17.270 | 0.596 | 0.785 | 0.998 | engineering, did not pay |
+| `ONB_INV` | 16.460 | 0.568 | 0.748 | 0.952 | engineering, did not pay |
+| `SLOT_PIPELINE` | 16.463 | 0.568 | 0.748 | 0.952 | engineering, did not pay |
+| hoist + ONB | 16.490 | 0.569 | 0.750 | 0.953 | engineering, did not pay |
+| hoist + ONB + pipe | 16.498 | 0.569 | 0.750 | 0.954 | engineering, did not pay |
+| **`ALU_SQUARE`** | **17.414** | **0.600** | **0.792** | **1.007** | **engineering** |
+
+`ALU_SQUARE=1` is the only arm that beat the control: three alternating
+samples 17.418 / 17.405 / 17.414 against a matched 17.298-class control
+(17.296 / 17.308 / 17.298). 300/300 reports. Nsight after the change:
+FP64 63%, ALU 39%, SM throughput 73%, issue slots 51%, IPC 2.07. The
+squaring `clmad`s were on the busy pipe; the 3-bit hoist and ONB inverse
+were not.
+
+Inadmissible occupancy scouts (addend-global, 3 blocks at 80 registers,
+128×5) all ran slower. `FROM_REDUCED` cut isolated `k_fromPoly` 61→48 and
+measured a wash. Overlapping the 3-bit correction with `clmul128` still
+cost 116 registers and 17.338 B/s.
+
+**Against the falsification target.** Success was a verified median > 29.0.
+Measured best **17.414**. 29 B/s on one RTX PRO 6000 is not a result this
+tree has. The one-add floor is still 22–25 B/s; this row is 0.792 of 22.
+The campaign default stays the shipping walk. Knobs stay off by default.
+
+The leftover is still the 5.3125 products and the dense-modulus reduction.
+Nsight now says the next percent has to come from the carry-less unit or
+from filling the other 49% of issue slots without spilling to 80 registers.

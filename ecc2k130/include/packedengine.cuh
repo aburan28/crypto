@@ -294,6 +294,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed pair ilp: %d\n", ECC_PACKED_PAIR_ILP);
         printf("packed top hoist: %d\n", ECC_PACKED_TOP_HOIST);
         printf("packed onb inv: %d\n", ECC_PACKED_ONB_INV);
+        printf("packed from reduced: %d\n", ECC_PACKED_FROM_REDUCED);
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
@@ -309,6 +310,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
+        printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);

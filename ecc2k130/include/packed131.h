@@ -53,6 +53,12 @@
 #if ECC_PACKED_ONB_INV != 0 && ECC_PACKED_ONB_INV != 1
 #error "ECC_PACKED_ONB_INV must be 0 or 1"
 #endif
+#ifndef ECC_PACKED_FROM_REDUCED
+#define ECC_PACKED_FROM_REDUCED 0
+#endif
+#if ECC_PACKED_FROM_REDUCED != 0 && ECC_PACKED_FROM_REDUCED != 1
+#error "ECC_PACKED_FROM_REDUCED must be 0 or 1"
+#endif
 #ifndef ECC_PACKED_CLMAD_SQUARE
 #define ECC_PACKED_CLMAD_SQUARE 0
 #endif
@@ -287,10 +293,10 @@ ECC_HD void product131Karat3(const P131 &a, const P131 &b, uint32_t *c) {
     c[8] ^= mid[2] ^ hi[2];
     // The omitted tenth word is zero: a 64x3 cross term has degree <=65.
 }
-/* Bit-identical to the k-then-i shift loop.  Accumulate the 3-bit
-   contribution into a five-word local so the overlapping c[4+i] / c[5+i]
-   stores do not go through the caller's pointer until the end. */
-ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
+/* Bit-identical to the k-then-i shift loop.  Writes the 3-bit contribution
+   into extra[5] with no dependence on the 128x128 product, so product131 can
+   issue it beside the six clmads.  The caller XORs extra into c[4..8]. */
+ECC_HD void topCrossInto131(const P131 &a, const P131 &b, uint32_t extra[5]) {
     const uint32_t a4 = a.v[4] & 7u, b4 = b.v[4] & 7u;
     const uint32_t ma0 = 0u - (a4 & 1u);
     const uint32_t ma1 = 0u - ((a4 >> 1) & 1u);
@@ -298,7 +304,8 @@ ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
     const uint32_t mb0 = 0u - (b4 & 1u);
     const uint32_t mb1 = 0u - ((b4 >> 1) & 1u);
     const uint32_t mb2 = 0u - ((b4 >> 2) & 1u);
-    uint32_t extra[5] = {0, 0, 0, 0, 0};
+#pragma unroll
+    for (int i = 0; i < 5; ++i) extra[i] = 0;
 #pragma unroll
     for (int i = 0; i < 4; ++i) {
         const uint32_t av = a.v[i], bv = b.v[i];
@@ -309,6 +316,10 @@ ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
         extra[i + 1] ^= (t1 >> 31) ^ (t2 >> 30);
     }
     extra[4] ^= (b4 & ma0) ^ ((b4 << 1) & ma1) ^ ((b4 << 2) & ma2);
+}
+ECC_HD void topCrossHoist131(const P131 &a, const P131 &b, uint32_t *c) {
+    uint32_t extra[5];
+    topCrossInto131(a, b, extra);
 #pragma unroll
     for (int i = 0; i < 5; ++i) c[4 + i] ^= extra[i];
 }
@@ -316,12 +327,19 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
 #if ECC_PACKED_KARAT3
     product131Karat3(a, b, c);
 #else
+#if ECC_PACKED_TOP_HOIST
+    /* 3-bit correction does not read the 128-bit product.  Compute it first so
+       ptxas can dual-issue those ALU ops with the six clmads that follow. */
+    uint32_t extra[5];
+    topCrossInto131(a, b, extra);
     clmul128(c,a.v,b.v); c[8]=0;
-#if ECC_PACKED_TOP_CLMAD
+#pragma unroll
+    for (int i = 0; i < 5; ++i) c[4 + i] ^= extra[i];
+#elif ECC_PACKED_TOP_CLMAD
+    clmul128(c,a.v,b.v); c[8]=0;
     topCrossClmad131(a,b,c);
-#elif ECC_PACKED_TOP_HOIST
-    topCrossHoist131(a,b,c);
 #else
+    clmul128(c,a.v,b.v); c[8]=0;
 #pragma unroll
     for(int k=0;k<3;k++) {
         uint32_t ma=0u-((a.v[4]>>k)&1u), mb=0u-((b.v[4]>>k)&1u);
@@ -368,9 +386,63 @@ ECC_HD P131 add131(const P131 &a,const P131 &b) {
 #if ECC_PACKED_GENERATED_PRODUCT
 #include "packedgeneratedproduct131.h"
 #endif
+#if ECC_PACKED_FROM_REDUCED
+/* Inverse of toPolynomial131 for a reduced 131-bit polynomial.  The shipping
+   fromPolynomial131 zero-pads into fromPolynomialProduct131's 261-bit expand,
+   which is the map for an unreduced product: 9 words, five reverse32, and
+   about 115 ALU.  A reduced input is 5 words, and stages(131, false) is the
+   inverse of the 131-bit unexpand toPolynomial uses, so the high half and
+   the BREVs are not part of the answer.  Bit-identical on reduced inputs;
+   unreduced 9-word products still go through fromPolynomialProduct131. */
+ECC_HD P131 fromPolynomialReduced131(const P131 &a) {
+    uint32_t v0 = a.v[0];
+    uint32_t v1 = a.v[1];
+    uint32_t v2 = a.v[2];
+    uint32_t v3 = a.v[3];
+    uint32_t v4 = a.v[4];
+    // shift 64
+    v1 ^= v3;
+    // shift 32
+    v0 ^= (v1) & 0xffff0000u;
+    v1 ^= (v2) & 0xffff0000u;
+    v2 ^= (v3) & 0xffff0000u;
+    // shift 16
+    v0 ^= ((v0 >> 16) | (v1 << 16)) & 0xff00ff00u;
+    v1 ^= ((v1 >> 16) | (v2 << 16)) & 0xff00ff00u;
+    v2 ^= ((v2 >> 16) | (v3 << 16)) & 0xff00ff00u;
+    v3 ^= ((v3 >> 16) | (v4 << 16)) & 0x0000ff00u;
+    // shift 8
+    v0 ^= ((v0 >> 8) | (v1 << 24)) & 0xf0f0f0f0u;
+    v1 ^= ((v1 >> 8) | (v2 << 24)) & 0xf0f0f0f0u;
+    v2 ^= ((v2 >> 8) | (v3 << 24)) & 0xf0f0f0f0u;
+    v3 ^= ((v3 >> 8) | (v4 << 24)) & 0x00f0f0f0u;
+    // shift 4
+    v0 ^= ((v0 >> 4) | (v1 << 28)) & 0xccccccccu;
+    v1 ^= ((v1 >> 4) | (v2 << 28)) & 0xccccccccu;
+    v2 ^= ((v2 >> 4) | (v3 << 28)) & 0xccccccccu;
+    v3 ^= ((v3 >> 4) | (v4 << 28)) & 0x4cccccccu;
+    // shift 2
+    v0 ^= ((v0 >> 2) | (v1 << 30)) & 0xaaaaaaaau;
+    v1 ^= ((v1 >> 2) | (v2 << 30)) & 0xaaaaaaaau;
+    v2 ^= ((v2 >> 2) | (v3 << 30)) & 0xaaaaaaaau;
+    v3 ^= ((v3 >> 2) | (v4 << 30)) & 0xaaaaaaaau;
+    const uint32_t sign = 0u - (v0 & 1u);
+    P131 out;
+    out.v[0] = ((v0 >> 1) | (v1 << 31)) ^ sign;
+    out.v[1] = ((v1 >> 1) | (v2 << 31)) ^ sign;
+    out.v[2] = ((v2 >> 1) | (v3 << 31)) ^ sign;
+    out.v[3] = ((v3 >> 1) | (v4 << 31)) ^ sign;
+    out.v[4] = ((v4 >> 1) ^ sign) & 7u;
+    return out;
+}
+#endif
 ECC_HD P131 fromPolynomial131(const P131 &a) {
+#if ECC_PACKED_FROM_REDUCED
+    return fromPolynomialReduced131(a);
+#else
     const uint32_t h[9]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0,0};
     return fromPolynomialProduct131(h);
+#endif
 }
 static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
 // Native carryless products supersede the generated software multiplier.
