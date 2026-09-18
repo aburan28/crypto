@@ -263,6 +263,7 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 #    ./launch_spot_all.sh
 #    REGIONS=eu-west-2,us-west-2 ./launch_spot_all.sh   # optional subset
 #    skips 0-leftover regions and regions with no g7/g6/g4dn offering
+#    instant fleet last-resort keeps only type/AZ pairs the region offers
 #    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;

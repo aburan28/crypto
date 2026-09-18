@@ -111,6 +111,11 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("--type", script)
         self.assertIn("instant", script)
         self.assertNotIn("create-fleet --type maintain", script)
+        # Instant fleet must drop types an AZ does not offer; mixing g7e
+        # into Sydney/Canada produced InvalidFleetConfiguration and launched 0.
+        self.assertIn("no offered type/AZ pair", script)
+        self.assertIn("dropped %d unsupported type/AZ pairs", script)
+        self.assertIn("InstanceTypeOfferings[].[InstanceType,Location]", script)
         # WeightedCapacity suffixes must be longest-first; ".xlarge" matches
         # ".2xlarge" if it is tried first and would double the fleet target.
         self.assertRegex(

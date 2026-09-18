@@ -206,7 +206,7 @@ region, n, stack, pref = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
 subs = json.loads(subprocess.check_output([
     "aws", "ec2", "describe-subnets", "--region", region,
     "--filters", "Name=default-for-az,Values=true",
-    "--query", "Subnets[].SubnetId", "--output", "json",
+    "--query", "Subnets[].[SubnetId,AvailabilityZone]", "--output", "json",
 ], text=True) or "[]")
 if not subs:
     print("no default subnets", file=sys.stderr)
@@ -216,20 +216,36 @@ for extra in ("g7e.4xlarge", "g7.4xlarge", "g6e.4xlarge", "g6.4xlarge",
               "g4dn.4xlarge", "g4dn.xlarge"):
     if extra not in types:
         types.append(extra)
+off_raw = json.loads(subprocess.check_output([
+    "aws", "ec2", "describe-instance-type-offerings", "--region", region,
+    "--location-type", "availability-zone",
+    "--filters", "Name=instance-type,Values=" + ",".join(types),
+    "--query", "InstanceTypeOfferings[].[InstanceType,Location]",
+    "--output", "json",
+], text=True) or "[]")
+offered = {(t, az) for t, az in off_raw}
 # Longest suffix first so ".xlarge" does not also match ".2xlarge".
 weight = (
     (".48xlarge", 24), (".24xlarge", 12), (".16xlarge", 8), (".12xlarge", 6),
     (".8xlarge", 4), (".4xlarge", 2), (".2xlarge", 1), (".xlarge", 0.5),
 )
 overrides = []
+dropped = 0
 for typ in types:
     w = 1
     for suf, val in weight:
         if typ.endswith(suf):
             w = val
             break
-    for subnet in subs:
+    for subnet, az in subs:
+        if (typ, az) not in offered:
+            dropped += 1
+            continue
         overrides.append({"InstanceType": typ, "SubnetId": subnet, "WeightedCapacity": w})
+print("  fleet overrides %d (dropped %d unsupported type/AZ pairs)" % (len(overrides), dropped))
+if not overrides:
+    print("  no offered type/AZ pair for instant fleet in %s" % region)
+    sys.exit(0)
 cfg = [{
     "LaunchTemplateSpecification": {"LaunchTemplateName": stack + "-worker", "Version": "$Latest"},
     "Overrides": overrides,
