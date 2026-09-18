@@ -95,7 +95,7 @@
         "falsifier": "FFD max grows with n at m=4",
         "incumbent": "no prior chained-sym FFD"
       },
-      "note": "The missing T9 arm. Not unchained S4. Variable count is the x-chain analog, not the 4(ell-1)+1+n sketch. Four draws is a smoke; promotion needs 16."
+      "note": "The missing T9 arm. Not unchained S4. Variable count is the x-chain analog, not the 4(ell-1)+1+n sketch. Interior links are degree 3; d_max=4 so a fall at 4 is visible. Four draws is a smoke; promotion needs 16."
     },
     "x5.ffd_chained_sym_m4": {
       "label": "X5 promotion: chained symmetrised S3 at m=4, n=7,9,15, 16 draws, d_max=4",

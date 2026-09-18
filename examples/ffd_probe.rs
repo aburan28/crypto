@@ -11,8 +11,9 @@
 //!
 //! `--sym` prices the chained symmetrised `S₃`
 //! (`build_chained_symmetrised_system`): divisor
-//! `divisor_for_dimension(n, (n+1)/m)`, `d_max = 4` (bilinear, so a
-//! fall at 4 would be invisible at the x-arm's `d_max = 3`), same seed.
+//! `divisor_for_dimension(n, (n+1)/m)`, `d_max = 4` (interior links are
+//! degree 3, so a fall at 4 would be invisible at the x-arm's
+//! `d_max = 3`), same seed.
 //! That is not the unchained `S₄`.
 
 use crypto_lib::binary_ecc::BinaryPoint;
