@@ -221,7 +221,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
-#if ECC_UNROLL_SLOTS >= 4
+#if ECC_UNROLL_SLOTS >= 8
+#pragma unroll 8
+#elif ECC_UNROLL_SLOTS >= 4
 #pragma unroll 4
 #elif ECC_UNROLL_SLOTS > 1
 #pragma unroll 2
@@ -364,7 +366,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         pipeD = load(denominators, ECC_BATCH - 1, tid, p.threads);
         pipeC = load(p.pchain, ECC_BATCH - 1, tid, p.threads);
 #endif
-#if ECC_UNROLL_SLOTS >= 4
+#if ECC_UNROLL_SLOTS >= 8
+#pragma unroll 8
+#elif ECC_UNROLL_SLOTS >= 4
 #pragma unroll 4
 #elif ECC_UNROLL_SLOTS > 1
 #pragma unroll 2

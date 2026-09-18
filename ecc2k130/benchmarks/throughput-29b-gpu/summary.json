@@ -127,7 +127,28 @@
     "minblocks3 launch_bounds only": "15.164 B/s, still 80 regs / 16 local bytes",
     "pairIlpOff plus aluSquare": "17.413 B/s one sample, within noise of ALU_SQUARE",
     "topHoist overlapped with clmul plus aluSquare": "3-rep median 17.338, 116 regs; still slower than ALU_SQUARE",
-    "threads128 minblocks5 addendGlobal": "5 blocks/SM, 94 regs, 0 spill, 16.048 B/s"
+    "threads128 minblocks5 addendGlobal": "5 blocks/SM, 94 regs, 0 spill, 16.048 B/s",
+    "aluOnbSquare": "ALU_SQR=1 on ALU_SQUARE; 300/300; one sample 17.253",
+    "pairClmul": "PAIR_CLMUL=1; 112 regs; 300/300; one sample 17.260",
+    "clmulFlat": "CLMUL_FLAT=1; 300/300; one sample 17.297",
+    "unroll4": "UNROLL_SLOTS=4; 112 regs; 300/300; 3-rep median 17.379 (17.380/17.371/17.379) vs matched ALU_SQUARE 17.403",
+    "unroll8": "UNROLL_SLOTS=8; 106 regs; 300/300; 3-rep median 16.000",
+    "comboAluSqrPairFlat": "ALU_SQR+PAIR_CLMUL+CLMUL_FLAT; 112 regs; 300/300; one sample 17.214",
+    "threads192 minblocks3 addendGlobal": "3 blocks/SM, 94 regs, 0 spill, 108288 workers; 3-rep median 15.808; SM clock 2340–2355 MHz"
+  },
+  "nsightRound3": {
+    "note": "sudo ncu 2026.1.0, walk kernel, launch-skip 2, launch-count 1, steps 32, ALU_SQUARE binary. Stall percents are of peak sustained active.",
+    "fp64PipePct": 62.82,
+    "aluPipePct": 39.02,
+    "smThroughputPct": 73.20,
+    "issueActivePct": 51.77,
+    "activeWarpsPerScheduler": 3.44,
+    "eligibleWarpsPerScheduler": 1.04,
+    "stallWaitPct": 7.56,
+    "stallNotSelectedPct": 4.77,
+    "stallMathPipeThrottlePct": 3.94,
+    "stallShortScoreboardPct": 3.81,
+    "stallLongScoreboardPct": 2.96
   },
   "receipts": {
     "round1ResultJson": "result.json"

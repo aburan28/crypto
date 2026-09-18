@@ -1465,8 +1465,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 29 B target</th><th scope="col">/ 17.298 control</th><th scope="col">/ 22 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Table + pivot + ILP + persist + unroll 2</td><td>17.298</td><td>0.596</td><td>1.000</td><td>0.786</td><td>300 reports, 0 dropped / reference</td></tr><tr><td>+ top hoist</td><td>17.270</td><td>0.596</td><td>0.998</td><td>0.785</td><td>116 registers / not accepted</td></tr><tr><td>+ ONB inv</td><td>16.460</td><td>0.568</td><td>0.952</td><td>0.748</td><td>+clmad on inv / not accepted</td></tr><tr><td>+ slot pipeline</td><td>16.463</td><td>0.568</td><td>0.952</td><td>0.748</td><td>scheduling / not accepted</td></tr><tr><td>+ ALU square</td><td>17.414</td><td>0.600</td><td>1.007</td><td>0.792</td><td>300 reports; FP64 71%→63% / not accepted</td></tr></tbody></table>
     <p>Each rate is a median of three complete-scalar benches. Each sample
     completed 50,465,865,728 updates. ALU square is the only arm that beat
-    the control. Occupancy scouts (3 blocks at 80 registers, 128×5,
-    addend-global) all ran slower. This thread has not reached 29.</p>
+    the control. A later round tried twelve outstanding pair-clmads, a
+    flattened lo-then-hi 128-bit Karatsuba, ONB squares on the ALU, slot
+    unroll 4 and 8, and 192×3 occupancy: all verified 300/300 and all ran
+    slower (best of those, unroll 4, 17.379). This thread has not reached 29.</p>
     <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-29b-gpu/summary.json">29 B/s measurement receipt</a>;
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/THROUGHPUT-29B.md">priced note</a>.</p>
   </section>

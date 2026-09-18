@@ -18,6 +18,9 @@ arms were slower than the control.
 
 Nsight Compute on the 17.298 kernel: DRAM 11%, ALU pipe 36%, FP64/`clmad`
 71%. That is why `ALU_SQUARE` paid (+0.67%) and the ALU-only knobs did not.
+A later round on that 17.414 kernel (issue 52%, 3.44 active warps per
+scheduler) tried pair-clmul ILP, flattened Karatsuba, ONB ALU squares,
+unroll 4/8, and 192×3 occupancy. All 300/300, all slower.
 
 ## Acceptance
 

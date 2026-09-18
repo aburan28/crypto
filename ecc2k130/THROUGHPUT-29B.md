@@ -130,11 +130,30 @@ Inadmissible occupancy scouts (addend-global, 3 blocks at 80 registers,
 measured a wash. Overlapping the 3-bit correction with `clmul128` still
 cost 116 registers and 17.338 B/s.
 
+Round 3 took the Nsight leftover (issue slots 51%, FP64 63%) as ILP and
+occupancy. Matched 3-rep ALU_SQUARE control **17.403**. Every new arm
+verified 300/300 and ran slower:
+
+| variant | median B/s | notes |
+|---|---:|---|
+| `ALU_SQR` (ONB square on ALU) | 17.253 | one sample |
+| `PAIR_CLMUL` (12 outstanding clmads) | 17.260 | 112 regs, one sample |
+| `CLMUL_FLAT` (lo then hi) | 17.297 | one sample |
+| `UNROLL_SLOTS=4` | 17.379 | 112 regs, 3-rep |
+| `UNROLL_SLOTS=8` | 16.000 | 106 regs, 3-rep |
+| combo of the three knobs | 17.214 | one sample |
+| 192×3 + addend-global | 15.808 | 94 regs, 0 spill; SM clock 2340 MHz |
+
+Nsight on the 17.41 kernel (sudo, `walk`): 3.44 active warps/scheduler of 12,
+1.04 eligible, issue 52%. Dominant stall is `wait` (7.6%), then
+`not_selected` (4.8%) and `math_pipe_throttle` (3.9%). Long scoreboard is
+only 3.0%. The 192×3 scout did resident 3 blocks and still lost: extra
+warps pulled the boost clock down and the addend missed LDS.
+
 **Against the falsification target.** Success was a verified median > 29.0.
 Measured best **17.414**. 29 B/s on one RTX PRO 6000 is not a result this
 tree has. The one-add floor is still 22–25 B/s; this row is 0.792 of 22.
 The campaign default stays the shipping walk. Knobs stay off by default.
 
-The leftover is still the 5.3125 products and the dense-modulus reduction.
-Nsight now says the next percent has to come from the carry-less unit or
-from filling the other 49% of issue slots without spilling to 80 registers.
+The leftover is the 5.3125 products. Filling issue slots without cutting
+`clmad` count does not move the ratio to the floor.
