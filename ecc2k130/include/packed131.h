@@ -26,8 +26,13 @@
 #if ECC_PACKED_CLMAD && defined(__CUDACC__) && (__CUDACC_VER_MAJOR__ < 13 || (__CUDACC_VER_MAJOR__ == 13 && __CUDACC_VER_MINOR__ < 3))
 #error "ECC_PACKED_CLMAD requires CUDA 13.3 or newer (PTX 9.3)"
 #endif
-#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 800
-#error "ECC_PACKED_CLMAD requires sm_80 or newer"
+/* Fat ARCHES="75 89 120" CLMAD=1: emit clmad on sm_80+ slices and keep the
+   software product on Turing (sm_75, g4dn). An #error here would make that
+   mixed-fleet client unbuildable. */
+#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 800
+#define ECC_USE_CLMAD_INSN 1
+#else
+#define ECC_USE_CLMAD_INSN 0
 #endif
 #ifndef ECC_PACKED_TOP_CLMAD
 #define ECC_PACKED_TOP_CLMAD 0
@@ -118,7 +123,7 @@ ECC_HD uint32_t clmul32(uint32_t x, uint32_t y, uint32_t *hi) {
 /* 2 x 2 words -> 4 words. The software path uses three clmul32 leaves;
    CLMAD retains both halves of the native 64-bit carryless product. */
 ECC_HD void clmul64(uint32_t r[4], const uint32_t a[2], const uint32_t b[2]) {
-#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+#if ECC_USE_CLMAD_INSN
     const uint64_t aa = uint64_t(a[0]) | (uint64_t(a[1]) << 32);
     const uint64_t bb = uint64_t(b[0]) | (uint64_t(b[1]) << 32);
     uint64_t lo, hi;
@@ -415,7 +420,7 @@ ECC_HD uint64_t spread32alu(uint32_t x){
  return r;
 }
 ECC_HD uint64_t spread32p(uint32_t x){
-#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+#if ECC_USE_CLMAD_INSN
  /* A carryless square is a bit spread.  x*x = sum_(i,j) x_i x_j t^(i+j) and
     every i != j term appears twice, so in characteristic two only the doubled
     positions survive, which is exactly what the stages below build.  Degree

@@ -263,8 +263,8 @@ def slotFamilyCompatible(slot_family, worker_family):
 
 
 def usesCampaignWorkers(family):
-    """Ada omits --threads so packedengine.autoThreads sizes the grid."""
-    return family not in ADA_FAMILIES
+    """Ada and Turing omit --threads so packedengine.autoThreads sizes the grid."""
+    return family not in ADA_FAMILIES and family not in ("g4dn", "g5", "g5g")
 
 
 def frozenCampaignMoved(current, nxt):

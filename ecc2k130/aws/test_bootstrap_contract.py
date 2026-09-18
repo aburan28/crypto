@@ -72,10 +72,12 @@ class BootstrapContract(unittest.TestCase):
 
     def test_fat_client_covers_ada_and_blackwell(self):
         self.assertIn("local_cc", BOOTSTRAP)
-        self.assertIn('ARCHES="${ARCHES:-89 120}"', BOOTSTRAP)
+        self.assertIn('ARCHES="${ARCHES:-75 89 120}"', BOOTSTRAP)
+        self.assertIn('CLMAD="${CLMAD:-1}"', BOOTSTRAP)
         self.assertIn("manifest.json", BOOTSTRAP)
-        # A thin sm_89 publish must not become the live binaryKey.
-        self.assertIn("g6/g6e (sm_89) and g7e (sm_120) share one binaryKey", BOOTSTRAP)
+        # A thin sm_89/sm_75 publish must not become the live binaryKey.
+        self.assertIn("g4dn (sm_75), g6/g6e (sm_89) and g7e (sm_120) share one", BOOTSTRAP)
+        self.assertIn("binaryKey. A thin Ada/T4 rebuild", BOOTSTRAP)
         self.assertIn("ECC_INSTANCE_TYPE", BOOTSTRAP)
         self.assertIn("ECC_DEVICE_NAME", BOOTSTRAP)
 
@@ -88,6 +90,41 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("bash ./infra.sh", script)
         self.assertIn("bash ./push_source.sh", script)
         subprocess.run(["bash", "-n", str(HERE / "launch_g6.sh")], check=True)
+
+    def test_launch_spot_all_is_discovered_spot_only(self):
+        script = (HERE / "launch_spot_all.sh").read_text()
+        self.assertIn("g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge", script)
+        self.assertIn('MarketType":"spot"', script)
+        self.assertIn("describe-regions --all-regions", script)
+        self.assertIn("opted-in", script)
+        self.assertNotIn("on-demand", script)
+        self.assertNotIn("TerminateInstances", script)
+        self.assertIn("bash ./infra.sh", script)
+        self.assertIn("bash ./push_source.sh", script)
+        self.assertIn("meow34", script)
+        self.assertIn('REGIONS:-', script)
+        self.assertIn("describe-instance-type-offerings", script)
+        self.assertIn("g4dn.xlarge", script)
+        self.assertIn("g4dn.4xlarge", script)
+        self.assertIn("create-fleet", script)
+        self.assertIn("capacity-optimized", script)
+        self.assertIn("--type", script)
+        self.assertIn("instant", script)
+        self.assertNotIn("create-fleet --type maintain", script)
+        # Instant fleet must drop types an AZ does not offer; mixing g7e
+        # into Sydney/Canada produced InvalidFleetConfiguration and launched 0.
+        self.assertIn("no offered type/AZ pair", script)
+        self.assertIn("dropped %d unsupported type/AZ pairs", script)
+        self.assertIn("InstanceTypeOfferings[].[InstanceType,Location]", script)
+        self.assertIn("skip $type (no offering in $region)", script)
+        self.assertIn("offered_types", script)
+        # WeightedCapacity suffixes must be longest-first; ".xlarge" matches
+        # ".2xlarge" if it is tried first and would double the fleet target.
+        self.assertRegex(
+            script,
+            r'\("\.4xlarge", 2\).*\("\.2xlarge", 1\).*\("\.xlarge", 0\.5\)',
+        )
+        subprocess.run(["bash", "-n", str(HERE / "launch_spot_all.sh")], check=True)
 
 
 if __name__ == "__main__":

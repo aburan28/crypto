@@ -268,6 +268,12 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
 #    leftover G/VT Spot quota on Ada (does not stop g7/g7e):
 #    ./launch_g6.sh
+#    leftover G/VT Spot in every opted-in region (g7e, g7, g6e, g6, g4dn; no OD):
+#    ./launch_spot_all.sh
+#    REGIONS=eu-west-2,us-west-2 ./launch_spot_all.sh   # optional subset
+#    skips 0-leftover regions and regions with no g7/g6/g4dn offering
+#    instant fleet last-resort keeps only type/AZ pairs the region offers
+#    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
