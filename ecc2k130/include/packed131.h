@@ -568,7 +568,25 @@ ECC_HD P131 fromPolynomial131(const P131 &a) {
     return fromPolynomialProduct131(h);
 #endif
 }
-static ECC_BIG P131 mulPolynomial131(P131 a, P131 b) {
+// Selectively inline the small native polynomial products, independently of
+// the much larger normal-basis routines. Bits select single (1) and pair (2).
+#ifndef ECC_PACKED_INLINE_POLY
+#define ECC_PACKED_INLINE_POLY 0
+#endif
+#if ECC_PACKED_INLINE_POLY < 0 || ECC_PACKED_INLINE_POLY > 3
+#error "ECC_PACKED_INLINE_POLY must be in [0, 3]"
+#endif
+#if ECC_PACKED_INLINE_POLY & 1
+#define ECC_POLY_SINGLE ECC_HD
+#else
+#define ECC_POLY_SINGLE ECC_BIG
+#endif
+#if ECC_PACKED_INLINE_POLY & 2
+#define ECC_POLY_PAIR ECC_HD
+#else
+#define ECC_POLY_PAIR ECC_BIG
+#endif
+static ECC_POLY_SINGLE P131 mulPolynomial131(P131 a, P131 b) {
 // Native carryless products supersede the generated software multiplier.
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     return generatedProduct131(a,b);
@@ -584,7 +602,7 @@ struct PolynomialPair { P131 first,second; };
 #if ECC_PACKED_PAIR_ILP != 0 && ECC_PACKED_PAIR_ILP != 1
 #error "ECC_PACKED_PAIR_ILP must be 0 or 1"
 #endif
-static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
+static ECC_POLY_PAIR PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     P131 first=generatedProduct131(a,b);
     return PolynomialPair{first,generatedProduct131(a,c)};

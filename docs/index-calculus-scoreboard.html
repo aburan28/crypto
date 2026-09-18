@@ -916,18 +916,53 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         Continuing the quotiented self-consistent accounting, it goes sub-reference at
         <strong>m = 18</strong> and reaches 2<sup>&minus;4.05</sup> at m = 28. Those rows price
         relations among base points alone, which give one linear equation among <em>unknown</em>
-        logarithms and determine log<sub>P</sub>(Q) not at all. Priced as a logarithm instead
-        &mdash; T + 1 relations against known targets [a]P + [b]Q &mdash; the optimum is a
-        10-orbit support (B = 1,310) with 15-point
-        relations at <strong>2<sup>71.94</sup></strong>, short of the reference by
-        <strong>2<sup>+11.13</sup></strong> &mdash; <em>with memory charged at
-        zero</em>, so the negative no longer rests on the storage wall at all. The decomposition rate
-        the figure depends on is measured, not assumed; a model giving &sigma; a further factor of
-        131 there is optimistic by 7&times;, because the reachable sum set is itself &sigma;-closed
-        and accepting &sigma;<sup>k</sup>(target) is one chance taken 131 times. Wagner&rsquo;s
-        k-tree would beat the meet-in-the-middle but needs partial matching, which curve addition
-        does not admit (<code>research/ecc2k130_relations/results/target_boundary.json</code>,
-        <code>target_decomposition.json</code>).</p>
+        logarithms and determine log<sub>P</sub>(Q) not at all.</p>
+      <p><strong>Priced as a logarithm, the gap is 2<sup>+6.48</sup> and every step of it is
+        bookkeeping.</strong> T + 1 relations against known targets [a]P + [b]Q, the
+        meet-in-the-middle table built <em>once</em>, probes and their canonicalisation priced in
+        rho&rsquo;s own unit, memory charged at zero. One table, one unit
+        (S = operations / &radic;r, &radic;r = 2<sup>64.5</sup>):</p>
+      <table>
+        <caption>ECC2K-130 homogeneous-relation index calculus, cost of a <em>logarithm</em>.
+          Reference cited from <code>experiments/ecc2k130_extension_field_boundary.json</code>;
+          variants from <code>research/ecc2k130_relations/results/target_boundary.json</code>.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">log&#8322; ops</th>
+          <th scope="col" class="n">S</th><th scope="col" class="n">Ratio to rho</th>
+          <th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Pollard rho, &lang;&minus;1&rang;&times;&lang;&pi;&rang; <em>(reference)</em></td>
+            <td class="n">60.81</td><td class="n">0.077</td><td class="n">2^+0.00</td>
+            <td><span class="chip">baseline</span></td></tr>
+          <tr><td>Section 1 as published, no quotient</td><td class="n">85.60</td>
+            <td class="n">2,199,000</td><td class="n">2^+24.79</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ Frobenius quotient at every m</td><td class="n">74.40</td>
+            <td class="n">954</td><td class="n">2^+13.59</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ priced as a logarithm, not a relation</td><td class="n">71.94</td>
+            <td class="n">173</td><td class="n">2^+11.13</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ stored table built once</td><td class="n">74.94</td>
+            <td class="n">1.39e+03</td><td class="n">2^+14.14</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td><strong>+ probes and E[4] translates priced</strong> <em>(current)</em></td>
+            <td class="n"><strong>67.29</strong></td><td class="n"><strong>6.9</strong></td>
+            <td class="n"><strong>2^+6.48</strong></td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>Homogeneous relations at m = 28</td><td class="n">56.76</td>
+            <td class="n">0.018</td><td class="n">2^&minus;4.05</td>
+            <td><span class="chip relabel">relabelling</span></td></tr>
+        </tbody>
+      </table>
+      <p>The last row sits <em>below</em> the reference and is the only one that is not an honest
+        accounting of a logarithm: it prices relations among unknown base logarithms, which
+        determine log<sub>P</sub>(Q) not at all. Every other row is a correction to this
+        ledger&rsquo;s own arithmetic &mdash; four made the attack look better, the fifth made it
+        look worse by 2<sup>2.65</sup> and came from an external review agent. None is a fact about
+        the curve. Current optimum: 2 Frobenius orbits (B = 262), 12-point relations split 11+1,
+        quotiented table, 1,011 EB charged at zero. The structure is run end to
+        end on small curves and recovers a planted logarithm in 6 of 6 cells
+        (<code>amortised_attack.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
@@ -2683,5 +2718,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0015 -->
+<section id="ecc2k-inline-25b"><h2>ECC2K-130 selective inlining: 25 B/s target not reached</h2>
+<p>One RTX PRO 6000 Blackwell Server Edition, median of three paired runs on the archived tuning snapshot; not a throughput measurement of the main-branch port.
+Best measured throughput 17.946263 B complete scalar updates/s, up 3.760%.
+All variants retain 5.3125 products/update and the same generic-group bound;
+this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
+<table><thead><tr><th>Variant</th><th>Median B updates/s</th><th>/ paired baseline</th><th>/ 25 B target</th><th>Replay</th></tr></thead><tbody><tr><td>Baseline (engineering)</td><td>17.295877</td><td>1.000000</td><td>0.691835</td><td>600/600, zero dropped</td></tr><tr><td>Inline single (engineering)</td><td>17.296764</td><td>1.000051</td><td>0.691871</td><td>600/600, zero dropped</td></tr><tr><td>Inline paired (engineering)</td><td>17.940329</td><td>1.037260</td><td>0.717613</td><td>600/600, zero dropped</td></tr><tr><td>Inline both (engineering)</td><td>17.946263</td><td>1.037604</td><td>0.717851</td><td>600/600, zero dropped</td></tr></tbody></table>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/results.json">results</a>;
+<a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/README.md">report and reproduction</a>.</p></section>
 </body>
 </html>

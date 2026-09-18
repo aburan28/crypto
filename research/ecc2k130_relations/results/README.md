@@ -40,6 +40,10 @@ Section 5 (the cost of a logarithm, as against a homogeneous relation):
   length and meet-in-the-middle split, with memory charged at zero. Carries
   the homogeneous extension past m = 8 alongside, because that is the
   accounting that crosses below the reference and the contrast is the point.
+* `amortised_attack.json` — measured, from `validate_amortised_attack.py`.
+  The section 5.3 structure run end to end: table of canonical sigma-classes
+  built once, single points streamed per target, planted logarithm recovered
+  and checked by the point identity [d]P = Q.
 * `target_decomposition.json` — measured, from `validate_target_model.py`.
   The decomposition rate the above depends on, against exhaustive enumeration
   on small analogues, and the direct check that the reachable sum set is
