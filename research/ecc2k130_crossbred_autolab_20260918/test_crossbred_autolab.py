@@ -52,6 +52,9 @@ class ProtocolTests(unittest.TestCase):
         self.assertIn("replay.x3_k1_n7", protocol["beats"])
         self.assertIn("fit.alpha", protocol["beats"])
         self.assertIn("x5.ffd_chained_m4", protocol["beats"])
+        self.assertIn("x5.ffd_chained_m4_16", protocol["beats"])
+        self.assertIn("x5.ffd_chained_sym_m4_smoke", protocol["beats"])
+        self.assertIn("x5.ffd_chained_sym_m4", protocol["beats"])
         self.assertIsNone(protocol["beats"]["fit.alpha"]["expect"]["fit"])
         self.assertEqual(protocol["beats"]["smoke.x1_n5"]["expect"]["Q_over_Q_enum"], 83.248)
         self.assertEqual(protocol["beats"]["replay.x3_k1_n7"]["expect"]["Q_over_Q_enum"], 4.653)
@@ -59,11 +62,9 @@ class ProtocolTests(unittest.TestCase):
     def test_plan_lists_beats_and_refuses_a_fit(self) -> None:
         report = lab.plan(lab.load_protocol())
         beat_ids = [row["beat_id"] for row in report["beats"]]
-        self.assertEqual(
-            beat_ids,
-            ["smoke.x1_n5", "replay.x3_k1_n7", "fit.alpha", "x5.ffd_chained_m4"],
-        )
-        self.assertEqual(report["next"], "x5.ffd_chained_m4")
+        self.assertIn("x5.ffd_chained_sym_m4_smoke", beat_ids)
+        self.assertIn("x5.ffd_chained_m4_16", beat_ids)
+        self.assertEqual(report["next"], "x5.ffd_chained_sym_m4_smoke")
         self.assertIsNone(report["incumbent"]["fit"]["fit"])
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x1"]["n_rungs"], 2)
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x3"]["n_rungs"], 2)
