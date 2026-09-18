@@ -354,18 +354,20 @@ result: it is evidence on the FFD stalemate, which this repository's
 small-`n` ladder currently holds at FFD = 3 for chained `m ≥ 3`.
 
 **Predicted class.** Measurement, not an attack. A growing FFD is a
-negative that still counts.
+negative that still counts. The 16-draw measurement is flat: chained-sym
+FFD max = 4 at `n = 9` and `n = 15` (`ℓ = 3`), so H1 is not met.
 
 **AutoLab.** Local control plane
 [`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/)
 replays the X1/X3 freezes, refuses an `α` claim without four rungs in
-one frame, and launches the chained-`x` FFD smoke. First run
-2026-09-18: X1 `n=5` replay `Q/C = 80.243` (freeze `83.248`, within
-5%); X3 `K_1 n=7` replay `Q/C = 4.653` exact; `fit.alpha` still null
-(2+2 rungs, frames not mixed); chained-`x` FFD at `m = 4` is 3 at
-`n = 9` and `n = 15` over 4 draws, so it does not grow. That is a
-smoke, not a 16-draw promotion, and not the missing chained
-symmetrised `S₃`. Receipt
+one frame, and runs X5 FFD. First run 2026-09-18: X1 `n=5` replay
+`Q/C = 80.243` (freeze `83.248`, within 5%); X3 `K_1 n=7` replay
+`Q/C = 4.653` exact; `fit.alpha` still null (2+2 rungs, frames not
+mixed). Chained-`x` FFD at `m = 4` is 3 at `n = 9` and `n = 15` over
+16 draws, so it does not grow. Chained symmetrised `S₃` FFD at `m = 4`
+is 4 at `n = 9` and `n = 15` (`ℓ = 3`) over 16 draws, so it does not
+grow either; `n = 7` `ℓ = 1` is a degree-1 collapse (no factor-base
+bits) and is not H1. Receipt
 [`research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json`](research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json).
 
 ### C5 — GPU search phase of Crossbred, only after C1 has an `α`

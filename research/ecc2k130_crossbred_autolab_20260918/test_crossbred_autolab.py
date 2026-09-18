@@ -72,7 +72,8 @@ class ProtocolTests(unittest.TestCase):
         beat_ids = [row["beat_id"] for row in report["beats"]]
         self.assertIn("x5.ffd_chained_sym_m4_smoke", beat_ids)
         self.assertIn("x5.ffd_chained_m4_16", beat_ids)
-        self.assertEqual(report["next"], "x5.ffd_chained_sym_m4_smoke")
+        self.assertIsNone(report["next"])
+        self.assertIn("X5 FFD", report["next_note"])
         self.assertIsNone(report["incumbent"]["fit"]["fit"])
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x1"]["n_rungs"], 2)
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x3"]["n_rungs"], 2)

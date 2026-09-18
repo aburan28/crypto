@@ -16,11 +16,10 @@ Do not change T4, `Q_enum`, or the paired-oracle divisor with hindsight.
 3. Launch one beat. Inspect `runs/<id>/artifacts/claim.json`.
 4. A replay that matches the freeze is accounting, not progress.
 5. `fit.alpha` may not invent rungs and may not mix X1 with X3.
-   `x5.ffd_chained_sym_m4_smoke` is the next measurement: chained
-   symmetrised `S₃` at `m = 4`. Variable count is
-   `m(ℓ−1)+(m−2)n+(m−1)`, the production analog, not the
-   `4(ℓ−1)+1+n` sketch. Interior links are degree 3; `d_max = 4`
-   so a fall at 4 is visible. Do not relabel this as unchained `S₄`.
+   `x5.ffd_chained_sym_m4` is measured: chained symmetrised `S₃` at
+   `m = 4`, `d_max = 4`, 16 draws. Variable count is
+   `m(ℓ−1)+(m−2)n+(m−1)`. Interior links are degree 3. `n = 7`
+   `ell = 1` is a collapse, not H1. Do not relabel this as unchained `S₄`.
 6. `promote` copies a passing `runs/` claim into `evidence/`. Do not
    cite a gitignored run.
 

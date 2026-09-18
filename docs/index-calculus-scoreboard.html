@@ -1207,9 +1207,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the weight-2 table, SAT, and Frobenius compose and still sit on the
         product law. The only row below rho does not recover
         <code>log<sub>P</sub>(Q)</code>. Two Crossbred frames are measured
-        and neither produced <code>α</code>. Three experiments remain
-        compatible (symmetrised end-to-end, chained <code>m = 4</code> FFD,
-        CM/τ survey). None has a fitted
+        and neither produced <code>α</code>. X5 FFD at <code>m = 4</code>
+        does not grow on either arm. Two experiments remain compatible
+        (symmetrised end-to-end, CM/τ survey). None has a fitted
         <code>α</code>. Note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_IC_SYNTHESIS.md"><code>RESEARCH_ECC2K130_IC_SYNTHESIS.md</code></a>.
         Frozen receipts as in the G7e panel plus
@@ -1285,11 +1285,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </table>
     <p>Open combinations, predicted engineering unless a fitted
       <code>α ≤ 1.5</code> is produced: symmetrised oracle end-to-end with
-      every phase priced (X4); chained symmetrised <code>S<sub>3</sub></code>
-      at <code>m = 4</code> with FFD (X5); a second literature pass on CM/τ
+      every phase priced (X4); a second literature pass on CM/τ
       for index calculus (X6). Chained Crossbred (X1/X2) and symmetrised
       Crossbred (X3) are measured: a determining space exists, <code>α</code>
-      does not fit on either frame. GPU acceleration of Crossbred's
+      does not fit on either frame. X5 FFD at <code>m = 4</code> is
+      measured: chained-<code>x</code> max = 3 and chained-sym max = 4
+      at <code>n = 9</code> and <code>n = 15</code> over 16 draws, neither
+      grows (H1 not met). GPU acceleration of Crossbred's
       search phase is admissible only after some frame has an
       <code>α</code>. The only coherent
       factor-base stack is already the G7e one: type-II ONB, Hamming-weight-2
@@ -1510,34 +1512,38 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <p>A two-point sketch between <code>n = 7</code> and <code>n = 15</code>
       gives slope <code>+0.46</code> (<code>α ≈ 2.46</code>). That is not a
       fit. Crossbred cannot produce <code>α</code> on either the chained
-      or the symmetrised frame under the frozen protocols. Next is X4
-      (end-to-end, predicted engineering) or X5 (FFD at
-      <code>m = 4</code>), launched from
-      <code>research/ecc2k130_crossbred_autolab_20260918/</code>. The
+      or the symmetrised frame under the frozen protocols. X5 FFD at
+      <code>m = 4</code> is measured and does not grow. Next is X4
+      (end-to-end, predicted engineering). The
       product-law floor and the 500×-or-worse rho verdict are unchanged.</p>
   </div>
 
   <div class="panel" id="ecc2k130-crossbred-autolab-20260918">
     <div class="panel-head">
-      <h2>Crossbred AutoLab: no α, chained-x FFD smoke does not grow</h2>
+      <h2>Crossbred AutoLab: no α, FFD at m=4 does not grow</h2>
       <p><span class="chip">measurement</span>
         Local control plane, Harbor not required. Replays of frozen X1/X3
         match. OLS is per frame and still has no fit. Chained-<code>x</code>
         FFD at <code>m = 4</code> is 3 at <code>n = 9</code> and
-        <code>n = 15</code> over 4 draws. That is a smoke, not a 16-draw
-        promotion, and not the missing chained symmetrised
-        <code>S<sub>3</sub></code>. Receipt
+        <code>n = 15</code> over 16 draws. Chained symmetrised
+        <code>S<sub>3</sub></code> FFD at <code>m = 4</code> is 4 at those
+        <code>n</code> with <code>ℓ = 3</code>; <code>n = 7</code>
+        <code>ℓ = 1</code> is a degree-1 collapse, not H1. Receipt
         <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json"><code>research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json</code></a>.</p>
     </div>
     <p>Unit: X1/X3 in 64-bit word XORs with
-      <code>Q_enum = C(|F|, 2)</code>; X5 in first-fall degree under
-      <code>ffd_summary</code> factor index 0, <code>d_max = 3</code>,
-      seed <code>0x5EED</code>. Not the field-product <code>S</code> of
-      the panels above. Success still requires
-      <code>α ≤ 1.5</code> over four rungs in one frame. The product-law
-      floor is untouched.</p>
+      <code>Q_enum = C(|F|, 2)</code>; X5 in first-fall degree. Chained-
+      <code>x</code> uses <code>ffd_summary</code> factor index 0,
+      <code>d_max = 3</code>; chained-sym uses
+      <code>build_chained_symmetrised_system</code>,
+      <code>d_max = 4</code> (interior links are degree 3), divisor
+      <code>(n+1)/m</code>, seed <code>0x5EED</code>. Not the field-product
+      <code>S</code> of the panels above. Success still requires
+      <code>α ≤ 1.5</code> over four rungs in one frame. H1 is FFD growing
+      with <code>n</code> at <code>m = 4</code> on <code>ell &gt; 1</code>.
+      The product-law floor is untouched.</p>
     <table>
-      <caption>First AutoLab run 2026-09-18 on
+      <caption>AutoLab runs 2026-09-18 on
         <code>ip-172-31-19-103</code>. Cited from
         <code>research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json</code>.</caption>
       <thead><tr>
@@ -1559,12 +1565,22 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td><code>x5.ffd_chained_m4</code></td><td>PASS</td>
           <td>FFD max = 3 at n = 9 and n = 15, m = 4, 4 draws; does not grow</td>
           <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_m4_16</code></td><td>PASS</td>
+          <td>same cells, 16 draws; still max = 3, does not grow</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_sym_m4_smoke</code></td><td>PASS</td>
+          <td>ell&gt;1 FFD max = 4 at n = 9,15; n = 7 ell = 1 is degree 1</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_sym_m4</code></td><td>PASS</td>
+          <td>16 draws; ell&gt;1 FFD max = 4 at n = 9 and n = 15, does not grow</td>
+          <td><span class="chip">measurement</span></td></tr>
       </tbody>
     </table>
     <p>A two-point sketch is still not a fit. GPU search stays off
-      (<code>filters = 0</code>). Next on this harness is a 16-draw FFD
-      promotion or the missing chained symmetrised <code>S<sub>3</sub></code>
-      at <code>m = 4</code>. The 500×-or-worse rho verdict is unchanged.</p>
+      (<code>filters = 0</code>). Mixing <code>ell = 1</code> into the
+      growth flag is accounting, not H1. Next on this curve is X4
+      (end-to-end, predicted engineering). The 500×-or-worse rho verdict
+      is unchanged.</p>
   </div>
 
   <div class="panel" id="ec-baseline-20260914">

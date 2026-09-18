@@ -276,7 +276,8 @@ def plan(protocol: dict[str, Any]) -> dict[str, Any]:
             {"beat_id": beat_id, "priority": spec.get("priority"), "label": spec.get("label")}
             for beat_id, spec in protocol["beats"].items()
         ],
-        "next": "x5.ffd_chained_sym_m4_smoke",
+        "next": None,
+        "next_note": "X5 FFD beats are measured. X4 e2e is not an AutoLab beat.",
         "inadmissible": [
             "Changing T4 after seeing a cell",
             "Reporting a two-point sketch as α",

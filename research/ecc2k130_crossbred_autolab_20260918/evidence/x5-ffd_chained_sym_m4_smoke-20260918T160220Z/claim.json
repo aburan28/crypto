@@ -1,0 +1,80 @@
+{
+  "beat_id": "x5.ffd_chained_sym_m4_smoke",
+  "class": "measurement",
+  "falsifier": "FFD max grows with n at m=4",
+  "finished_utc": "2026-09-18T16:02:21.315175+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "98b639e9a9e997a21e8b54b412d04864ae672ad8af83b19e6b65575ff1322d08",
+  "m4_ell_eq_1": [
+    {
+      "deg": 1,
+      "ell": 1,
+      "eqs": 21,
+      "ffd_max": 2,
+      "ffd_min": 2,
+      "m": 4,
+      "mean_syz_d2": 223.5,
+      "n": 7,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 17
+    }
+  ],
+  "m4_ffd_grows_with_n": false,
+  "m4_ffd_grows_with_n_including_ell_1": true,
+  "m4_ffd_maxima": [
+    4,
+    4
+  ],
+  "m4_ffd_maxima_including_ell_1": [
+    2,
+    4,
+    4
+  ],
+  "note": "The missing T9 arm. Not unchained S4. Variable count is the x-chain analog, not the 4(ell-1)+1+n sketch. Interior links are degree 3; d_max=4 so a fall at 4 is visible. Four draws is a smoke; promotion needs 16.",
+  "rows": [
+    {
+      "deg": 1,
+      "ell": 1,
+      "eqs": 21,
+      "ffd_max": 2,
+      "ffd_min": 2,
+      "m": 4,
+      "mean_syz_d2": 223.5,
+      "n": 7,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 17
+    },
+    {
+      "deg": 3,
+      "ell": 3,
+      "eqs": 27,
+      "ffd_max": 4,
+      "ffd_min": 4,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 29
+    },
+    {
+      "deg": 3,
+      "ell": 3,
+      "eqs": 45,
+      "ffd_max": 4,
+      "ffd_min": 4,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 41
+    }
+  ],
+  "run_id": "x5-ffd_chained_sym_m4_smoke-20260918T160220Z",
+  "started_utc": "2026-09-18T16:02:20.168980+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

@@ -1,0 +1,78 @@
+{
+  "beat_id": "x5.ffd_chained_m4_16",
+  "class": "measurement",
+  "falsifier": "FFD max grows with n at m=4",
+  "finished_utc": "2026-09-18T16:02:21.568916+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "f5deeb654dd2db8480b85d9d4d6a7de3410d18f79cd5b6d6582c5729723c58cf",
+  "m4_ell_eq_1": [],
+  "m4_ffd_grows_with_n": false,
+  "m4_ffd_grows_with_n_including_ell_1": false,
+  "m4_ffd_maxima": [
+    3,
+    3
+  ],
+  "m4_ffd_maxima_including_ell_1": [
+    3,
+    3
+  ],
+  "note": "16-draw promotion of x5.ffd_chained_m4. Still the chained x-system.",
+  "rows": [
+    {
+      "deg": 3,
+      "ell": 6,
+      "eqs": 18,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 3,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 27
+    },
+    {
+      "deg": 3,
+      "ell": 6,
+      "eqs": 27,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 42
+    },
+    {
+      "deg": 3,
+      "ell": 4,
+      "eqs": 30,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 3,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 27
+    },
+    {
+      "deg": 3,
+      "ell": 4,
+      "eqs": 45,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 46
+    }
+  ],
+  "run_id": "x5-ffd_chained_m4_16-20260918T160221Z",
+  "started_utc": "2026-09-18T16:02:21.389209+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}
