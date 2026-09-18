@@ -104,9 +104,11 @@ What the GPU *can* do, and what this thread measures:
    pair-enumeration algorithm on the CPU, so the oracle is not a GPU
    artefact.
 
-Weight 3 is admitted by the binary (`--weight 3`) and is not required
-for the verdict: it enlarges `|F|` and does not change the leading
-`60 · #E` product count.
+`--weight 3` cannot enlarge `|F|`. In this type-II ONB, `Tr(x)` is
+the parity of the Hamming weight, so the odd-order filter keeps only
+even-weight abscissae and the extra layer is empty. The binary
+rejects the flag rather than report the weight-2 base as a larger
+one. The leading `60 · #E` product count does not depend on `|F|`.
 
 ## 3. One table, one unit
 

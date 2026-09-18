@@ -161,10 +161,12 @@ static Base buildBase(int weight, bool oddOrder) {
     // oddOrder keeps the necessary trace-zero abscissae (even ONB weight).
     // It is not a [r]P certificate: that scalar mul is out of scope for the
     // oracle-throughput measurement and is what made a weight-2 build stall.
+    // Remainder tests use b.weight as max Hamming weight of a hit. Odd
+    // layers have Tr(x)=1 and never enter F, so they cannot be in the bound.
     Base b;
-    b.weight = weight;
+    b.weight = oddOrder ? (weight & ~1) : weight;
     std::vector<R::Elem> xs;
-    for (int w = 1; w <= weight; ++w) recBits(0, w, R::zero(), &xs);
+    for (int w = 1; w <= b.weight; ++w) recBits(0, w, R::zero(), &xs);
     for (const R::Elem &x : xs) {
         if (oddOrder && (R::weight(x) & 1)) continue;
         R::Point p;
@@ -368,6 +370,7 @@ int main(int argc, char **argv) {
     const bool wantGen = argf(argc, argv, "--search-generator");
     const char *jsonPath = args(argc, argv, "--json");
     if (weight < 1 || weight > 3) die("--weight must be 1, 2 or 3");
+    if (weight & 1) die("--weight must be even: odd ONB weight has Tr(x)=1 and adds no points");
 
     cudaDeviceProp prop;
     checked(cudaGetDeviceProperties(&prop, 0));
