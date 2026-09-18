@@ -2410,6 +2410,96 @@ mod transport_tests {
         None
     }
 
+    fn mask_bits(width: usize) -> u64 {
+        if width >= 64 {
+            u64::MAX
+        } else {
+            (1u64 << width) - 1
+        }
+    }
+
+    fn u_of_affine(p: &BinaryPoint, kc: &KoblitzCurve) -> Option<F2mElement> {
+        let BinaryPoint::Affine { x, .. } = p else {
+            return None;
+        };
+        let u = u_of_x(x, kc)?;
+        if u.is_zero() {
+            None
+        } else {
+            Some(u)
+        }
+    }
+
+    fn fb_coord(u: &F2mElement, fb: &SymmetrisedFactorBase, n: u32) -> Option<(u64, u64)> {
+        let c = express_span(u, &fb.v_basis, n)?;
+        let ell_w = fb.ell - 1;
+        Some(((c >> 1) & mask_bits(ell_w), c & 1))
+    }
+
+    fn signed_point(p: &BinaryPoint, flip: bool) -> BinaryPoint {
+        if flip {
+            point_neg(p)
+        } else {
+            p.clone()
+        }
+    }
+
+    /// K0 `F_u` is typically one point at these `n` (X3 freeze). A
+    /// constructed triple needs three affine summands, so the gate uses
+    /// `K_1` and the FFD divisor `(n+1)/m`.
+    fn chained_sym_witness_fb() -> Option<(KoblitzCurve, SymmetrisedFactorBase, FieldStructure)> {
+        for (a, n, m) in [(1u8, 7u32, 3usize), (1, 9, 3), (1, 15, 3)] {
+            let kc = KoblitzCurve::new(a, n)?;
+            let dim = (n + 1).div_ceil(m as u32);
+            let div = divisor_for_dimension(n, dim)?;
+            let fb = build_symmetrised_factor_base(&kc, &div)?;
+            if fb.points.len() >= 6 && n_vars_chained_symmetrised(m, fb.ell, n) <= 64 {
+                let st = FieldStructure::new(n, &kc.curve.irreducible);
+                return Some((kc, fb, st));
+            }
+        }
+        None
+    }
+
+    fn chained_m3_vanishes(
+        sys: &ChainedSymmetrisedSystem,
+        fb: &SymmetrisedFactorBase,
+        n: u32,
+        u1: &F2mElement,
+        u2: &F2mElement,
+        u3: &F2mElement,
+        ue: &F2mElement,
+    ) -> bool {
+        let Some((b1, e1)) = fb_coord(u1, fb, n) else {
+            return false;
+        };
+        let Some((b2, e2)) = fb_coord(u2, fb, n) else {
+            return false;
+        };
+        let Some((b3, e3)) = fb_coord(u3, fb, n) else {
+            return false;
+        };
+        let ell_w = fb.ell - 1;
+        let inter_off = 3 * ell_w;
+        let eps_off = inter_off + n as usize;
+        if sys.n_vars > 64 || eps_off + 2 > sys.n_vars {
+            return false;
+        }
+        let mut stem = 0u64;
+        stem |= b1;
+        stem |= b2 << ell_w;
+        stem |= b3 << (2 * ell_w);
+        stem |= (bits_of(ue) & mask_bits(n as usize)) << inter_off;
+        let predicted = (e1 ^ e2) | (e3 << 1);
+        for eps in [predicted, 0, 1, 2, 3] {
+            let root = stem | (eps << eps_off);
+            if sys.equations.iter().all(|p| p.eval(root) == 0) {
+                return true;
+            }
+        }
+        false
+    }
+
     #[test]
     fn chained_m2_matches_unchained_s3() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
@@ -2456,10 +2546,8 @@ mod transport_tests {
 
     #[test]
     fn a_constructed_triple_is_a_root_of_chained_s3() {
-        let kc = KoblitzCurve::new(0, 9).unwrap();
-        let div = divisor_for_dimension(9, 5).unwrap();
-        let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
-        let st = FieldStructure::new(9, &kc.curve.irreducible);
+        let (kc, fb, st) = chained_sym_witness_fb().expect("K1 F_u with enough points");
+        let n = kc.n;
         let pts: Vec<BinaryPoint> = fb.points.clone();
         assert!(
             pts.len() >= 6,
@@ -2468,75 +2556,43 @@ mod transport_tests {
             fb.ell
         );
         let mut found = false;
-        for i in 0..pts.len().min(8) {
-            for j in (i + 1)..pts.len().min(8) {
-                for k in (j + 1)..pts.len().min(10) {
+        let cap = pts.len().min(10);
+        'search: for i in 0..cap {
+            for j in (i + 1)..cap {
+                for k in (j + 1)..pts.len().min(cap + 2) {
                     let p1 = &pts[i];
                     let p2 = &pts[j];
                     let p3 = &pts[k];
-                    let e = kc.add(p1, p2);
-                    let r = kc.add(&e, p3);
-                    let BinaryPoint::Affine { x: x1, .. } = p1 else {
-                        continue;
-                    };
-                    let BinaryPoint::Affine { x: x2, .. } = p2 else {
-                        continue;
-                    };
-                    let BinaryPoint::Affine { x: x3, .. } = p3 else {
-                        continue;
-                    };
-                    let BinaryPoint::Affine { x: xe, .. } = &e else {
-                        continue;
-                    };
-                    let BinaryPoint::Affine { x: xr, .. } = &r else {
-                        continue;
-                    };
-                    let (Some(u1), Some(u2), Some(u3), Some(ue), Some(ur)) = (
-                        u_of_x(x1, &kc),
-                        u_of_x(x2, &kc),
-                        u_of_x(x3, &kc),
-                        u_of_x(xe, &kc),
-                        u_of_x(xr, &kc),
-                    ) else {
-                        continue;
-                    };
-                    if ur.is_zero() {
-                        continue;
-                    }
-                    let sys = build_chained_symmetrised_system(&kc, &fb, &r, 3, &st).unwrap();
-                    let Some(c1) = express_span(&u1, &fb.v_basis, 9) else {
-                        continue;
-                    };
-                    let Some(c2) = express_span(&u2, &fb.v_basis, 9) else {
-                        continue;
-                    };
-                    let Some(c3) = express_span(&u3, &fb.v_basis, 9) else {
-                        continue;
-                    };
-                    let ell_w = fb.ell - 1;
-                    let mut root = 0u64;
-                    root |= (c1 >> 1) & ((1u64 << ell_w) - 1);
-                    root |= ((c2 >> 1) & ((1u64 << ell_w) - 1)) << ell_w;
-                    root |= ((c3 >> 1) & ((1u64 << ell_w) - 1)) << (2 * ell_w);
-                    let ue_bits = bits_of(&ue);
-                    root |= (ue_bits & ((1u64 << 9) - 1)) << (3 * ell_w);
-                    let eps0 = ((c1 & 1) ^ (c2 & 1)) as u64;
-                    let eps1 = c3 & 1;
-                    let eps_off = 3 * ell_w + 9;
-                    root |= eps0 << eps_off;
-                    root |= eps1 << (eps_off + 1);
-                    let ok = sys.equations.iter().all(|p| p.eval(root) == 0);
-                    if ok {
-                        found = true;
-                        break;
+                    for s1 in [false, true] {
+                        for s2 in [false, true] {
+                            for s3 in [false, true] {
+                                let q1 = signed_point(p1, s1);
+                                let q2 = signed_point(p2, s2);
+                                let q3 = signed_point(p3, s3);
+                                let e = kc.add(&q1, &q2);
+                                let r = kc.add(&e, &q3);
+                                let (Some(u1), Some(u2), Some(u3), Some(ue), Some(_ur)) = (
+                                    u_of_affine(&q1, &kc),
+                                    u_of_affine(&q2, &kc),
+                                    u_of_affine(&q3, &kc),
+                                    u_of_affine(&e, &kc),
+                                    u_of_affine(&r, &kc),
+                                ) else {
+                                    continue;
+                                };
+                                let Some(sys) =
+                                    build_chained_symmetrised_system(&kc, &fb, &r, 3, &st)
+                                else {
+                                    continue;
+                                };
+                                if chained_m3_vanishes(&sys, &fb, n, &u1, &u2, &u3, &ue) {
+                                    found = true;
+                                    break 'search;
+                                }
+                            }
+                        }
                     }
                 }
-                if found {
-                    break;
-                }
-            }
-            if found {
-                break;
             }
         }
         assert!(found, "no constructed (P1,P2,P3) vanished on chained S3");
