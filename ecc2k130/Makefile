@@ -100,6 +100,7 @@ TABLE_RECOMPUTE_DENOM ?= 0
 TABLE_BANK_PAD ?= 0
 TABLE_WARP_LUT ?= 0
 TABLE_DP4A_PHASE ?= 0
+TABLE_FUSED_WEIGHT_PHASE ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -203,6 +204,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_BANK_PAD=$(TABLE_BANK_PAD) \
        -DECC_TABLE_WARP_LUT=$(TABLE_WARP_LUT) \
        -DECC_TABLE_DP4A_PHASE=$(TABLE_DP4A_PHASE) \
+       -DECC_TABLE_FUSED_WEIGHT_PHASE=$(TABLE_FUSED_WEIGHT_PHASE) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu

@@ -212,7 +212,15 @@ static __device__ __forceinline__ PreparedTableSlot prepareTableSlot(
     const P131 xp = load(p.x, slot, tid, p.threads);
     const P131 yp = load(p.y, slot, tid, p.threads);
     const P131 x = fromPolynomial131(xp);
-    const int hw = weight(x);
+    int hw;
+#if ECC_TABLE_FUSED_WEIGHT_PHASE
+    const uint8_t *twBytes = reinterpret_cast<const uint8_t *>(twSel);
+    const int phaseK = twPhaseWeight(
+        x, &hw, twBytes + 4 * (TW_PHASE_OFF - TW_SEL0),
+        twSel + (TW_INV_OFF - TW_SEL0));
+#else
+    hw = weight(x);
+#endif
     const size_t id = size_t(slot) * p.threads + tid;
     if (!p.dead[id]) {
         if (hw <= p.dpWeight) {
@@ -233,7 +241,11 @@ static __device__ __forceinline__ PreparedTableSlot prepareTableSlot(
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
+#if ECC_TABLE_FUSED_WEIGHT_PHASE
+    const unsigned tag = twSelectKnownPhase(x, yp, hw, phaseK, p.hist + id, twSel);
+#else
     const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
+#endif
     PreparedTableSlot out;
     twAddend(tag, xp, yp, twTab, &out.dp, &out.ep, p.twConsts);
 #if !ECC_TABLE_RECOMPUTE_DENOM
@@ -338,7 +350,15 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if ECC_PACKED_POLY_STATE
             x = fromPolynomial131(x);
 #endif
+#if ECC_WALK_TABLE && ECC_TABLE_FUSED_WEIGHT_PHASE
+            int hw;
+            const uint8_t *twBytes = reinterpret_cast<const uint8_t *>(twSel);
+            const int phaseK = twPhaseWeight(
+                x, &hw, twBytes + 4 * (TW_PHASE_OFF - TW_SEL0),
+                twSel + (TW_INV_OFF - TW_SEL0));
+#else
             const int hw = weight(x);
+#endif
             const size_t id = size_t(slot) * p.threads + tid;
             if (!p.dead[id]) {
                 if (hw <= p.dpWeight) {
@@ -372,7 +392,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
 #endif
+#if ECC_TABLE_FUSED_WEIGHT_PHASE
+            const unsigned tag =
+                twSelectKnownPhase(x, yp, hw, phaseK, p.hist + id, twSel);
+#else
             const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
+#endif
             P131 dp, ep;
             twAddend(tag, xp, yp, twTab, &dp, &ep, p.twConsts);
             if (slot) {

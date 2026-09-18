@@ -112,6 +112,15 @@
 #if ECC_TABLE_DP4A_PHASE && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES)
 #error "ECC_TABLE_DP4A_PHASE requires the byte-pivot table walk"
 #endif
+#ifndef ECC_TABLE_FUSED_WEIGHT_PHASE
+#define ECC_TABLE_FUSED_WEIGHT_PHASE 0
+#endif
+#if ECC_TABLE_FUSED_WEIGHT_PHASE != 0 && ECC_TABLE_FUSED_WEIGHT_PHASE != 1
+#error "ECC_TABLE_FUSED_WEIGHT_PHASE must be 0 or 1"
+#endif
+#if ECC_TABLE_FUSED_WEIGHT_PHASE && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_DP4A_PHASE || ECC_TABLE_WARP_LUT)
+#error "fused weight/phase requires the ordinary shared byte-pivot LUT path"
+#endif
 
 namespace eccPacked131 {
 
@@ -135,7 +144,8 @@ static const int TW_ROW_WORDS = 4 + ECC_TABLE_BANK_PAD;
 static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * TW_ROW_WORDS;
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;
-static const int TW_PHASE_WORDS = ECC_TABLE_DP4A_PHASE ? 33 : 17 * 64;
+static const int TW_PHASE_WORDS =
+    ECC_TABLE_DP4A_PHASE ? 33 : (ECC_TABLE_FUSED_WEIGHT_PHASE ? 17 * 128 : 17 * 64);
 static const int TW_MAX_OFF = TW_PHASE_OFF + TW_PHASE_WORDS;
 static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
 #else
@@ -218,7 +228,15 @@ static inline unsigned twWarpLookup(const uint8_t *row, unsigned value) {
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
 TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
     unsigned s = 0;
-#if ECC_TABLE_DP4A_PHASE
+#if ECC_TABLE_FUSED_WEIGHT_PHASE
+    const uint16_t *packed = reinterpret_cast<const uint16_t *>(phase);
+#pragma unroll
+    for (int w = 0; w < 4; ++w)
+#pragma unroll
+        for (int t = 0; t < 4; ++t)
+            s += packed[(4 * w + t) * 256 + twByte(x.v[w], t)] & 4095u;
+    s += packed[16 * 256 + (x.v[4] & 7u)] & 4095u;
+#elif ECC_TABLE_DP4A_PHASE
     const uint32_t *weights = reinterpret_cast<const uint32_t *>(phase);
 #pragma unroll
     for (int w = 0; w < 4; ++w) {
@@ -245,6 +263,27 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
 #endif
     return int(((s % 131u) * inv[hw]) % 131u);
 }
+
+#if ECC_TABLE_FUSED_WEIGHT_PHASE
+TW_FN int twPhaseWeight(const P131 &x, int *hw, const uint8_t *phase,
+                        const uint32_t *inv) {
+    const uint16_t *packed = reinterpret_cast<const uint16_t *>(phase);
+    unsigned total = 0;
+#pragma unroll
+    for (int w = 0; w < 4; ++w)
+#pragma unroll
+        for (int t = 0; t < 4; ++t) {
+            const unsigned value = twByte(x.v[w], t);
+            total += packed[(4 * w + t) * 256 + value];
+        }
+    total += packed[16 * 256 + (x.v[4] & 7u)];
+    // Each entry is log-sum + 4096*popcount. Across 17 bytes the log sums
+    // total at most 17*130, so they cannot carry into the weight field.
+    *hw = int(total >> 12);
+    const unsigned logSum = total & 4095u;
+    return int(((logSum % 131u) * inv[*hw]) % 131u);
+}
+#endif
 
 // Index of the support element whose L is last before k in cyclic order:
 // among set bits with L < k if any, else among all set bits, the largest L.
@@ -304,10 +343,18 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 
 // The whole selection for one point: (h, k, eps) after the cycle rule, with
 // the history advanced.  x is in the normal basis, yp in the polynomial basis.
+TW_FN unsigned twSelectKnownPhase(const P131 &x, const P131 &yp, int hw, int k,
+                                  unsigned long long *hist, const uint32_t *shared);
 TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
                                              unsigned long long *hist, const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
     const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+    return twSelectKnownPhase(x, yp, hw, k, hist, shared);
+}
+
+TW_FN unsigned twSelectKnownPhase(const P131 &x, const P131 &yp, int hw, int k,
+                                  unsigned long long *hist, const uint32_t *shared) {
+    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
     const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
                           bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     const int eps = twCoordinate(yp, p, shared + (TW_ROW_OFF - TW_SEL0));
@@ -440,6 +487,17 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         }
         weights[i] = packed;
     }
+#elif ECC_TABLE_FUSED_WEIGHT_PHASE
+    uint16_t *packedPhase = reinterpret_cast<uint16_t *>(out + TW_PHASE_OFF);
+    for (int i = 0; i < 17; ++i)
+        for (int v = 0; v < 256; ++v) {
+            unsigned s = 0;
+            for (int t = 0; t < 8; ++t)
+                if ((v >> t) & 1)
+                    s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
+            packedPhase[i * 256 + v] =
+                uint16_t((s % 131u) | (unsigned(__builtin_popcount(unsigned(v))) << 12));
+        }
 #else
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {

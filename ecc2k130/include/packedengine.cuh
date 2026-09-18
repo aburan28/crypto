@@ -327,6 +327,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table bank pad: %d\n", ECC_TABLE_BANK_PAD);
         printf("packed table warp LUT: %d\n", ECC_TABLE_WARP_LUT);
         printf("packed table DP4A phase: %d\n", ECC_TABLE_DP4A_PHASE);
+        printf("packed table fused weight/phase: %d\n", ECC_TABLE_FUSED_WEIGHT_PHASE);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());
