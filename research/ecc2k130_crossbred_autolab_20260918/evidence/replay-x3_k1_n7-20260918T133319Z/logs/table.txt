@@ -1,0 +1,23 @@
+| n | m | ℓ | v | |F| | Q_enum | Q_word | Q/Q_enum | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall |
+|--:|--:|--:|--:|----:|-------:|-------:|---------:|----:|--------:|:----------|:-----:|----------------:|-------------:|--------------------:|---------:|------:|--:|--:|-------:|--------:|--------:|
+probe n=7 m=3 v=10 deg=4 |F_u|=29 ell=4 eqs=7
+T4 pick n=7 m=3 v=10 D=4 k=9 |F_u|=29 ell=4
+| 7 | 3 | 4 | 10 | 29 | 406 | 1889 | 4.653 | 4 | 39 | exhaustive, == | yes | 615187 | 3643 | 120933 | 0.197 | 33.196 | 4 | 9 | 7 | 0 | 0.1 ms |
+
+X1/X3 unit: Q_word is 64-bit word XORs per target (extraction + search).
+Q_enum is C(|F|, m-1) word-ops at one word-op per pair (m=3) or point (m=2);
+that undercounts enumeration, so Q/Q_enum is conservative against an advance.
+`--sym` uses |F_u| and ℓ = dim V from divisor_for_dimension(n, (n+1)/m).
+
+The `agree` column is the correctness gate, and it has two strengths.
+  `exhaustive, ==` : crossbred's root set equals exhaustive search's, exactly.
+  `F4 capped, ⊆`   : past v = 24 exhaustive search does not fit, and F4+splitting
+                     runs under its default max_solutions cap, so its list is a
+                     prefix of the root set.  The check is then two one-sided
+                     ones: every crossbred root verifies against the original
+                     equations, and every root F4 found is one crossbred found.
+A row that does not say `yes` is not a result.
+
+What this prices is the decomposition oracle only.  Relation collection stays
+Θ(2^n) with any oracle polynomial in the factor base — see
+RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.

@@ -1,0 +1,62 @@
+{
+  "schema": "ecc2k130_crossbred_x3/v1",
+  "question": "Does Crossbred Q on the symmetrised u-frame beat C(|F_u|, 2) with alpha < 2 at m = 3?",
+  "class": "measurement",
+  "fit": null,
+  "fit_reason": "fewer than four agreeing m=3 rungs with |F_u| >= 3",
+  "q_enum_convention": "C(|F_u|, m-1) word-ops at one word-op per pair; undercounts enumeration",
+  "selection": "T4: smallest D then smallest k with kernel_dim >= v-k, v-k in 1..=64, solve_crossbred on probe not exhausted, k < min(v, 22)",
+  "instance": "K_a; divisor_for_dimension(n, (n+1).div_ceil(m)); build_symmetrised_factor_base; axis ell = dim V",
+  "host": "ip-172-31-19-103",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "command": "cargo run --release --example crossbred_bench -- --sym --no-sweep --a {0|1} …",
+  "notes": [
+    "filters=0 on every priced cell",
+    "K_0 F_u is degenerate (|F_u|=1) on every small rung under the frozen divisor",
+    "K_1 supplies the only two usable rungs",
+    "n=23 a=1 probed v=34 |F_u|=4141; T4 not repeated after K_0 n=23 v=34 had no determining space"
+  ],
+  "oracle_rows": [
+    {
+      "a": 1, "n": 7, "m": 3, "ell": 4, "v": 10, "F": 29, "Q_enum": 406, "Q_word": 1889,
+      "Q_over_Q_enum": 4.653, "D": 4, "k": 9, "kernel": 7, "filters": 0,
+      "agree": true, "usable_for_fit": true, "targets": 39
+    },
+    {
+      "a": 1, "n": 9, "m": 3, "ell": 3, "v": 7, "F": 13, "Q_enum": 78, "Q_word": 380,
+      "Q_over_Q_enum": 4.872, "D": 4, "k": 2, "kernel": 1, "filters": 0,
+      "agree": false, "usable_for_fit": false, "note": "T4 probe k=2 does not determine later targets"
+    },
+    {
+      "a": 1, "n": 15, "m": 3, "ell": 5, "v": 13, "F": 61, "Q_enum": 1830, "Q_word": 11728,
+      "Q_over_Q_enum": 6.409, "D": 4, "k": 11, "kernel": 5, "filters": 0,
+      "agree": true, "usable_for_fit": true, "targets": 39
+    },
+    {
+      "a": 1, "n": 17, "m": 3, "ell": 9, "v": 25, "F": 409,
+      "agree": false, "usable_for_fit": false, "note": "no determining space under T4"
+    },
+    {
+      "a": 0, "n": 23, "m": 3, "ell": 12, "v": 34, "F": 4049,
+      "agree": false, "usable_for_fit": false, "note": "no determining space under T4"
+    },
+    {
+      "a": 0, "n": 31, "m": 3, "ell": 11, "v": 31, "F": 2357,
+      "agree": false, "usable_for_fit": false, "note": "no determining space under T4"
+    }
+  ],
+  "degenerate_or_missing": [
+    {"a": 0, "n": [5, 7, 9, 13, 15, 19], "note": "|F_u|=1 or ell=1"},
+    {"a": 1, "n": [5, 11, 19, 29], "note": "ell=1"},
+    {"a": 0, "n": [11, 17, 25, 27, 29, 33, 35], "note": "no KoblitzCurve"},
+    {"a": 1, "n": [13, 21, 25, 27, 31, 33, 35, 37], "note": "no KoblitzCurve"}
+  ],
+  "two_point_sketch_not_a_fit": {
+    "rungs": ["K_1 n=7 ell=4 Q/C=4.653", "K_1 n=15 ell=5 Q/C=6.409"],
+    "delta_log2_Q_over_C": 0.463,
+    "delta_ell": 1,
+    "sketch_slope": 0.463,
+    "sketch_alpha": 2.463,
+    "class": "not a result"
+  }
+}

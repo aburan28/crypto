@@ -7,6 +7,11 @@ decides it, and what would close it. Companion to
 [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md)
 (the measured ladder these routes feed).
 
+Which of these compose, and which combinations are already closed, is
+[`RESEARCH_ECC2K130_IC_SYNTHESIS.md`](RESEARCH_ECC2K130_IC_SYNTHESIS.md):
+one table in field products, class chips by `AGENTS.md` §3, and no claim
+that stacking GPU, SAT, or the pair table beats rho.
+
 ## The frame
 
 Three established facts set the ranking, and all three are measurements

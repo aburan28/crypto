@@ -14,7 +14,9 @@ discrete logs recovered by the same algorithm on the CPU. CryptoMiniSat
 on this host's CPU recovers the same toy logs and loses to pair
 enumeration on planted triples; SAT internals stay uncalibrated and do
 not enter `S`. A stored weight-2 pair table cuts the product count by
-`|F|` and is still `2^53.62` times rho.
+`|F|` and is still `2^53.62` times rho. How this oracle sits next to the
+other IC threads on this curve is
+[`RESEARCH_ECC2K130_IC_SYNTHESIS.md`](RESEARCH_ECC2K130_IC_SYNTHESIS.md).
 
 ## 1. The boundary, stated before measuring
 
