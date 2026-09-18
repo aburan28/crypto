@@ -166,11 +166,15 @@ class WorkflowTests(unittest.TestCase):
         # distinguished_points is heap-fetched only by one hour of backfill
         # at a time; the publish-first fallback groups by hour, not worker.
         self.assertEqual(BACKFILL_SQL.count("FROM distinguished_points"), 1)
+        self.assertIn("ISOLATION LEVEL REPEATABLE READ", BACKFILL_SQL)
         self.assertNotIn("LOCK TABLE", BACKFILL_SQL)
         self.assertIn("date_trunc('hour', found_at)", BACKFILL_SQL)
         self.assertIn("ON CONFLICT (campaign_id, hour, worker_id)", BACKFILL_SQL)
         self.assertIn("found_at >= '{{hour}}'::timestamptz", BACKFILL_SQL)
         self.assertIn("found_at < '{{hour}}'::timestamptz + interval '1 hour'", BACKFILL_SQL)
+        recent = BACKFILL_SQL.split("INSERT INTO rho_dp_recent", 1)[1].split("UPDATE rho_dp_meta", 1)[0]
+        self.assertIn("worker_id, found_at, count(*)", recent)
+        self.assertNotIn("worker_id, hour, dps", recent)
         self.assertNotIn("FROM distinguished_points", READ_SQL)
         self.assertIn("FROM rho_dp_hour", READ_SQL)
         self.assertIn("FROM rho_dp_recent", READ_SQL)
@@ -261,9 +265,12 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("RHO_REMOTE_TIMEOUT:-1500", text)
         self.assertIn("snapshot exceeded", text)
         self.assertIn("exit 124", text)
-        # A 124 after the fallback write must still copy status.json or the
-        # live page stays on the last successful hop.
-        scp_at = text.index('"$USER@$HOST:/tmp/rho_status.json" "$OUT"')
+        self.assertIn("GITHUB_RUN_ID", text)
+        self.assertIn("REMOTE_JSON=", text)
+        # A 124 after the fallback write must still copy this run's file, and
+        # must not copy /tmp/rho_status.json leftover from the 11:25Z hop.
+        self.assertNotIn('"$USER@$HOST:/tmp/rho_status.json"', text)
+        scp_at = text.index('"$USER@$HOST:$REMOTE_JSON" "$OUT"')
         timeout_exit_at = text.index("exit 124")
         self.assertLess(scp_at, timeout_exit_at)
         self.assertNotIn("meow34", text)
