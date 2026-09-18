@@ -8,6 +8,9 @@
 #if !ECC_WALK_HALVING
 #error "build with -DECC_WALK_HALVING=1"
 #endif
+#ifndef ECC_HALVING_POLY_STATE
+#define ECC_HALVING_POLY_STATE 0
+#endif
 
 using eccPacked131::P131;
 using R = Ref<CfgF131>;
@@ -30,14 +33,26 @@ static bool same(P131 a, P131 b) {
 
 __global__ void halveProbe(const P131 *x, const P131 *y, P131 *hx, P131 *hy, int n) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) eccPacked131::pointHalf131(x[i], y[i], hx + i, hy + i);
+    if (i < n) {
+#if ECC_HALVING_POLY_STATE
+        eccPacked131::pointHalfPolynomial131(x[i], y[i], hx + i, hy + i);
+#else
+        eccPacked131::pointHalf131(x[i], y[i], hx + i, hy + i);
+#endif
+    }
 }
 __global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void halveBench(P131 *x, P131 *y, int n, int steps) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
     P131 px = x[i], py = y[i];
-    for (int step = 0; step < steps; ++step) eccPacked131::pointHalf131(px, py, &px, &py);
+    for (int step = 0; step < steps; ++step) {
+#if ECC_HALVING_POLY_STATE
+        eccPacked131::pointHalfPolynomial131(px, py, &px, &py);
+#else
+        eccPacked131::pointHalf131(px, py, &px, &py);
+#endif
+    }
     x[i] = px; y[i] = py;
 }
 
@@ -72,8 +87,16 @@ int main() {
         const P131 sqroot = eccPacked131::halvingSqrt131(qx);
         badRoot += !same(rootCheck, qx);
         badSqrt += !same(eccPacked131::sqr131(sqroot), qx);
-        x.push_back(qx); y.push_back(pack(q.y));
-        wantX.push_back(pack(h.x)); wantY.push_back(pack(h.y));
+        const P131 qy = pack(q.y), hx = pack(h.x), hy = pack(h.y);
+#if ECC_HALVING_POLY_STATE
+        x.push_back(eccPacked131::toPolynomial131(qx));
+        y.push_back(eccPacked131::toPolynomial131(qy));
+        wantX.push_back(eccPacked131::toPolynomial131(hx));
+        wantY.push_back(eccPacked131::toPolynomial131(hy));
+#else
+        x.push_back(qx); y.push_back(qy);
+        wantX.push_back(hx); wantY.push_back(hy);
+#endif
     }
     P131 *dx, *dy, *dhx, *dhy;
     const size_t bytes = x.size() * sizeof(P131);
@@ -95,6 +118,7 @@ int main() {
                 x.size(), badRoot, badSqrt, badHost, bad);
     std::printf("  trace(y/x): subgroup [%d,%d], other [%d,%d]\n",
                 correctTrace[0], correctTrace[1], otherTrace[0], otherTrace[1]);
+    std::printf("  polynomial state: %d\n", ECC_HALVING_POLY_STATE);
     std::printf("%s\n", bad ? "FAIL" : "PASS");
     if (badRoot || badSqrt || badHost || bad) return 1;
 

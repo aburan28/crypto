@@ -903,6 +903,40 @@ ECC_HD void pointHalf131(P131 x, P131 y, P131 *hx, P131 *hy) {
  *hx=root;
  *hy=mul131(root,add131(lambda,root));
 }
+
+// The same subgroup half with polynomial input/output state. Keep the two
+// nonlinear products in the polynomial basis; convert only where the ONB
+// makes the quadratic solve, square root and trace pairing cheap.
+ECC_HD void pointHalfPolynomial131(P131 xp, P131 yp, P131 *hxp, P131 *hyp) {
+ P131 x=fromPolynomial131(xp);
+ P131 lambda=halvingQuadraticRoot131(x);
+ P131 lambdaPoly=toPolynomial131(lambda);
+ P131 root=halvingSqrt131(fromPolynomial131(
+     add131(add131(yp,xp),mulPolynomial131(lambdaPoly,xp))));
+#ifdef __CUDA_ARCH__
+#define ECC_HALF_POLY_POPC __popc
+#else
+#define ECC_HALF_POLY_POPC __builtin_popcount
+#endif
+ unsigned outside=0;
+#pragma unroll
+ for(int i=0;i<5;i++)
+  outside^=ECC_HALF_POLY_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
+           ECC_HALF_POLY_POPC(root.v[i]);
+ outside^=halvingSecondTrace131(root);
+#undef ECC_HALF_POLY_POPC
+ const uint32_t mask=0u-(outside&1u);
+ const P131 sqrtx=halvingSqrt131(x);
+#pragma unroll
+ for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}
+ lambda.v[4]^=mask&7u;root.v[4]^=sqrtx.v[4]&mask;
+ // Polynomial one is coefficient zero. Avoid rerunning the linear conversion
+ // after toggling the ONB all-ones representation.
+ lambdaPoly.v[0]^=mask&1u;
+ const P131 rootPoly=toPolynomial131(root);
+ *hxp=rootPoly;
+ *hyp=mulPolynomial131(rootPoly,add131(lambdaPoly,rootPoly));
+}
 #endif
 
 } // namespace eccPacked131
