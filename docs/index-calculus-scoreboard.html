@@ -1659,14 +1659,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><span class="chip">engineering</span>
         Five tournament Koblitz cells, production pair table against
         matched signed-Frobenius rho in exclusive group operations.
-        Protocol frozen before the run. Iteration 0 (two-pass table)
-        does not meet the all-cases gate: mean <code>α</code>
-        1.05–1.24, max 1.31, 45/45 verified. Iteration 1 (one-pass
-        table) is frozen and is not a result until its receipt exists.
-        Not n=131. Note
+        Protocol frozen before the run. Iteration 1 (one-pass table)
+        meets the all-cases gate: mean <code>α</code> 0.76–0.91,
+        max 0.918, 45/45 verified. Iteration 0 (two-pass) is the
+        before mark, 1.05–1.31×. Not n=131. Note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_RHO_PARITY.md"><code>RESEARCH_ECC2K130_RHO_PARITY.md</code></a>.
         Receipt
-        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json"><code>experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json</code></a>.</p>
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json"><code>experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json</code></a>.</p>
     </div>
     <p>Unit: exclusive group operations
       <code>G</code> = point additions + binary-method additions of
@@ -1680,12 +1679,15 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       unit with the Valgrind-instruction tournament win is
       inadmissible.</p>
     <table>
-      <caption>Iteration 0, two-pass folded table, host
-        <code>ip-172-31-19-103</code>, 2026-09-18. Cited from
-        <code>experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json</code>.
+      <caption>Host <code>ip-172-31-19-103</code>, 2026-09-18.
+        Iteration 0 cited from
+        <code>experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json</code>;
+        iteration 1 from
+        <code>experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json</code>.
         <code>G<sub>IC</sub></code> is constant per cell.
         <code>G<sub>rho</sub></code> is the range across three
-        targets × three repetitions.</caption>
+        targets × three repetitions. Iteration 0 is the before mark
+        and is not deleted.</caption>
       <thead><tr>
         <th scope="col">Variant</th>
         <th scope="col">Cell</th>
@@ -1706,6 +1708,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">15.31</td><td class="n">1.241</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>n13a0</td><td class="n">503</td>
+          <td class="n">11.24</td><td class="n">0.911</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
           <td>n17a1</td><td class="n">869–951</td>
           <td class="n">3.39–3.71</td><td class="n">1</td>
@@ -1714,6 +1721,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>PairTable, two-pass (iteration 0)</td>
           <td>n17a1</td><td class="n">978</td>
           <td class="n">3.82</td><td class="n">1.063</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>n17a1</td><td class="n">706</td>
+          <td class="n">2.76</td><td class="n">0.767</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
@@ -1726,6 +1738,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">2.95</td><td class="n">1.187</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>n19a0</td><td class="n">765</td>
+          <td class="n">2.11</td><td class="n">0.850</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
           <td>n19a1</td><td class="n">988–1106</td>
           <td class="n">1.93–2.16</td><td class="n">1</td>
@@ -1735,6 +1752,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td>n19a1</td><td class="n">1093</td>
           <td class="n">2.13</td><td class="n">1.054</td>
           <td>9/9 verified; one target 0.988</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>n19a1</td><td class="n">789</td>
+          <td class="n">1.54</td><td class="n">0.761</td>
+          <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
           <td>n23a0</td><td class="n">1474–1670</td>
@@ -1746,14 +1768,19 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">1.33</td><td class="n">1.238</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>n23a0</td><td class="n">1241</td>
+          <td class="n">0.857</td><td class="n">0.796</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table>
-    <p>All-cases gate unmet. The one-pass table is the remaining
-      production lever that changes <code>G</code> without changing
-      <code>B</code> or <code>m</code>. Predicted iteration-1
-      <code>G<sub>IC</sub></code> is iteration 0 minus stored entries
-      (503, 706, 765, 789, 1241); that arithmetic is a hypothesis,
-      not a measurement, and is not drawn as a bar.</p>
+    <p>All-cases gate met on iteration 1. Worst pair is n13a0 target 1,
+      <code>α = 0.918</code>. The drop is the second
+      <code>add_many</code> going away; collection and descent counts
+      are the iteration-0 values. <code>B</code> and <code>m</code>
+      are unchanged, so the ratio to the counting floor is flat.
+      Not an exponent, not degree 131.</p>
   </div>
 
   <div class="panel" id="ec-baseline-20260914">

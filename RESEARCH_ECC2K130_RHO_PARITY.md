@@ -5,14 +5,13 @@ already solved, does the production pair-table pipeline cost no more
 than matched signed-Frobenius rho in exclusive group operations, on
 every useful completed verified case?
 
-**Answer.** Iteration 0 does not. All 45 pairs verified `[d]G = Q` on
-both arms; mean `α` is 1.05–1.24 and the worst pair is 1.31. The
-all-cases gate is unmet. The leftover is the two-pass table build
-charging every stored sum twice. Iteration 1 (one-pass: hold occupancy
-keys, scatter without a second `add_many`) is frozen in §8 and is not
-a result until its receipt exists. This is a toy-suite practicality
-gate, not degree-131 parity, not an exponent claim, and not a refit of
-X1–X4.
+**Answer.** Yes, on these five cells, after the one-pass table.
+Iteration 1 meets the all-cases gate: 45/45 pairs verified `[d]G = Q`
+on both arms, mean `α` 0.76–0.91, worst pair 0.918. Class:
+**engineering**. `B` and `m` are unchanged, so the ratio to the
+counting floor is flat. This is a toy-suite practicality result, not
+degree-131 parity, not an exponent claim, and not a refit of X1–X4.
+The product-law floor at `n = 131` is untouched.
 
 Companion: [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
 T12. Scoreboard panel `#ecc2k130-rho-parity-20260918`.
@@ -56,8 +55,9 @@ This is the same all-cases shape as
 [`research/rho_parity_20260915/`](research/rho_parity_20260915/), in
 group operations rather than Valgrind instructions.
 
-Class, predicted: **engineering**. `S` may fall against rho; the ratio
+Class: **engineering**. `S` may fall against rho; the ratio
 to the counting floor does not, because `B` and `m` are unchanged.
+Iteration 1 confirmed that class: `S` fell, the floor ratio did not.
 
 ## 2. Frozen suite
 
@@ -143,7 +143,7 @@ verification. Pooling cells. Quoting wall-clock. Changing `B`, `m`,
 the row formula, the window rule, the seed, or the conversion after
 seeing a cell.
 
-**Predicted class.** Engineering: the counting floor is unchanged.
+**Class, measured.** Engineering: the counting floor is unchanged.
 Hitting the gate is a practicality result on five toy cells. It does
 not move `α` at `n = 131` and is not claimed to.
 
@@ -170,8 +170,7 @@ cargo run --release --example rho_parity_e2e -- --quick   # not a result
 
 Receipt: `experiments/ecc2k130_rho_parity_20260918/`.
 Iteration 0: `experiments/ecc2k130_rho_parity_20260918/iteration-0/`.
-Iteration 1: `experiments/ecc2k130_rho_parity_20260918/iteration-1/`
-(created by the run; not a result until `summary.json` exists).
+Iteration 1: `experiments/ecc2k130_rho_parity_20260918/iteration-1/`.
 Runner: `examples/rho_parity_e2e.rs`.
 
 ```bash
@@ -205,34 +204,36 @@ Mean `α` is below 2 on every cell, so the abandonment clause in §5
 does not fire. The remaining production lever that changes `G` without
 changing `B` or `m` is to stop paying for the stored sums twice.
 
-## 8. Iteration 1, one-pass table (frozen before the run)
+## 8. Iteration 1, one-pass table (measured 2026-09-18)
 
-**Hypothesis, written before treating any second measurement as a
-result.** Occupancy already computes every stored sum. Hold
-`(key, orbit)` per row and scatter into buckets from that list. Do
-not call `add_many` a second time. Charge `additions = stored`. The
-stored keys, the row rule `t = optimal_folded_rows(K, |F|, r)`, `B`,
-`m`, the window, the seeds, and the conversion are unchanged.
+**Hypothesis, frozen before the run.** Occupancy already computes every
+stored sum. Hold `(key, orbit)` per row and scatter into buckets from
+that list. Do not call `add_many` a second time. Charge
+`additions = stored`. The stored keys, the row rule
+`t = optimal_folded_rows(K, |F|, r)`, `B`, `m`, the window, the seeds,
+and the conversion are unchanged. Predicted class: **engineering**.
 
-Predicted class: **engineering**. `S` falls by `stored` group
-operations; the ratio to the counting floor is flat.
+Host `ip-172-31-19-103`. Cited from
+[`experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json).
+All 45 pairs recovered `[d]G = Q` on both arms.
+`all_cases_gate = true`. Table adds equal stored entries (n13: 182,
+n17: 272, n19: 304, n23: 690), not twice that. Collection and descent
+counts are the iteration-0 values, so the whole drop is the second
+`add_many` going away. The predicted `G_IC` in the hypothesis table
+matched the measurement on every cell.
 
-Predicted `G_IC` (iteration-0 `G_IC` minus stored entries), not a
-result:
+| Cell | `|F|` | `t` | `G_IC` | table adds | `G_rho` | mean `α` | max `α` | gate |
+|---|---:|---:|---:|---:|---|---:|---:|---|
+| n13a0 | 182 | 1 | 503 | 182 | 548–555 | 0.911 | 0.918 | met |
+| n17a1 | 272 | 1 | 706 | 272 | 869–951 | 0.767 | 0.812 | met |
+| n19a0 | 304 | 1 | 765 | 304 | 897–903 | 0.850 | 0.853 | met |
+| n19a1 | 304 | 1 | 789 | 304 | 988–1106 | 0.761 | 0.799 | met |
+| n23a0 | 368 | 2 | 1241 | 690 | 1474–1670 | 0.796 | 0.842 | met |
 
-| Cell | predicted `G_IC` | vs min `G_rho` | predicted max `α` |
-|---|---:|---:|---:|
-| n13a0 | 503 | 548 | 0.918 |
-| n17a1 | 706 | 869 | 0.813 |
-| n19a0 | 765 | 897 | 0.853 |
-| n19a1 | 789 | 988 | 0.799 |
-| n23a0 | 1241 | 1474 | 0.842 |
+Worst pair is n13a0 target 1, `α = 0.918`. No verified pair has
+`α > 1`. The §5 gate holds on every useful cell.
 
-If every verified pair then has `α ≤ 1`, the gate in §5 is met on
-these five cells. That is still not n=131 parity.
-
-If a cell remains above 1, the next named lever is stopping collection
-at `K+1` relations or shrinking the 64-walk descent placement when the
-expected probe count is already 1. That is a new iteration, frozen
-before its run, and is not mixed into this one. Do not change `B`,
-`m`, the row formula, the window, the seeds, or the conversion.
+Class: **engineering**. `S` fell; the ratio to the counting floor did
+not, because `B` and `m` did not. Iteration 0 remains the before mark
+on the scoreboard. This is not n=131 parity and is not claimed to
+move `α` at degree 131.

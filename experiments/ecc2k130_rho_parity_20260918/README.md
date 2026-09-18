@@ -9,7 +9,7 @@ Class: engineering. Not n=131.
 | iteration | what | all-cases gate |
 |---|---|---|
 | 0 | folded-row rule + walked collection, two-pass table build | unmet: mean α 1.05–1.24, max 1.31. `iteration-0/` |
-| 1 | same, one-pass table build (hypothesis frozen in the note §8 before the run) | not a result until `iteration-1/summary.json` exists |
+| 1 | same, one-pass table build | **met**: mean α 0.76–0.91, max 0.918. `iteration-1/` |
 
 `table.txt` is the runner's per-pair print. `summary.json` is the
 machine receipt. `run.log` is the raw cargo session including compiler
