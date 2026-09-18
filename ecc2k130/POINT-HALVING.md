@@ -1,22 +1,17 @@
 # Point-halving mixed rho
 
 Question: can replacing some affine-addition iterations by point halvings beat
-the measured **17.952 B updates/s** table walk on one RTX PRO 6000?
+the measured table walk on one RTX PRO 6000?
 
-Answer: **not with this representation.** The exact two-product halving
-primitive reaches **16.053 B/s**, 0.894 of the matched reference, before a
-rho-producing addition branch or mixed-walk control is charged. A mixture of
-an operation slower than the reference and the reference cannot exceed the
-reference without unpriced parallelism. The mixed walk was therefore rejected
-before changing the campaign protocol.
+Answer: **not with either representation measured.** Polynomial-state halving
+improves the exact two-product primitive from 16.053 to **17.921 B/s**, but is
+still only 0.890 of the current 20.134 B/s table walk before a rho-producing
+addition branch or mixed-walk control is charged.
 
 ## Boundary and target
 
 Unit: billions of complete point operations per second on the same GPU. The
-reference is the current table-walk preset (`PACKED_INLINE_POLY=3`, pair ILP,
-L2 persistence, slot unroll 2), freshly rerun three times. The success target,
-set by the request, is strictly above its **17.952 B/s** median with correct
-subgroup points.
+reference is the current verified B17 table-walk preset at **20.134 B/s**.
 
 Point halving alone is a permutation and is not a rho iteration. A valid mixed
 walk must also pay for a non-permutation branch. A point-dependent branch
@@ -25,14 +20,15 @@ phase avoids divergence only by making the phase part of the state.
 
 ## Single table
 
-| variant | products / point op | measured B/s | / 17.952 reference | correct | class |
+| variant | products / point op | measured B/s | / 20.134 reference | correct | class |
 |---|---:|---:|---:|---|---|
-| table-add reference | 5.3125 | **17.952** | 1.000 | 300/300 reports, 0 dropped | reference |
-| halving, first phase-map build (superseded) | 2 | 12.125 | 0.675 | 512/512 | engineering |
-| **halving, direct square-root map + trace-only subgroup selection** | **2** | **16.053** | **0.894** | **512/512** | **engineering, rejected** |
-| 50/50 uniform alternation, raw | 3.65625 average | 16.950 | 0.944 | extrapolation from measured rows | model |
-| 50/50 uniform alternation, phase-priced effective | 3.65625 average | 11.985 | 0.668 | phase doubles the rho state | model |
-| success boundary | — | **>17.952** | **>1.000** | required | boundary |
+| selected B17 table-add reference | 5.2941 | **20.134** | 1.000 | 300/300 reports, 0 dropped | reference |
+| halving, first phase-map build (superseded) | 2 | 12.125 | 0.602 | 512/512 | engineering |
+| halving, normal-basis state | 2 | 16.053 | 0.797 | 512/512 | engineering, superseded |
+| **halving, polynomial state, 512 threads** | **2** | **17.921** | **0.890** | **512/512** | **engineering, rejected for mixed rho** |
+| 50/50 uniform alternation, raw | 3.6471 average | 18.963 | 0.942 | extrapolation from measured rows | model |
+| 50/50 uniform alternation, phase-priced effective | 3.6471 average | 13.409 | 0.666 | phase doubles the rho state | model |
+| 25 B/s target | — | **25.000** | **1.242** | required | above both primitives |
 
 The alternation rows are extrapolations, not kernel measurements. Their raw
 rate is the harmonic mean of the two measured operation rates. The effective
@@ -66,11 +62,13 @@ checked on `[i]P`, `i=1..512`, against scalar `[2^-1 mod ell]`; all coordinates
 matched, every result doubled back to its input, and all generated quadratic
 roots and square roots passed.
 
-The remaining cost is linear algebra, not multiplication count. The optimized
-kernel contains 1,744 static SASS instructions and six `CLMAD` instructions
-per halving. Directly generating the inverse-Frobenius permutation raised the
-first 12.125 B/s build to 16.053 B/s, but the two quadratic solves and subgroup
-selection still make halving slower than the highly amortised affine-add path.
+The remaining cost is linear algebra, not multiplication count. Directly
+generating the inverse-Frobenius permutation raised the first 12.125 B/s build
+to 16.053 B/s. Keeping state and both products polynomial raises it again to
+17.921 B/s, but the quadratic solves and subgroup selection still make halving
+slower than the highly amortised affine-add path.
 
 Frozen measurements and commands are in
 [`benchmarks/point-halving/result.json`](benchmarks/point-halving/result.json).
+The polynomial-state follow-up is in
+[`benchmarks/point-halving-poly`](benchmarks/point-halving-poly/README.md).

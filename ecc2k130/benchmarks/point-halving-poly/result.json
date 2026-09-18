@@ -1,0 +1,29 @@
+{
+  "classification": "alternative primitive; engineering improvement; mixed rho rejected",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete point halvings per second",
+  "configuration": {
+    "threads_per_block": 512,
+    "resident_blocks_per_sm": 1,
+    "polynomial_state": true,
+    "PACKED_INLINE_POLY": 3,
+    "PACKED_FROM_REDUCED": 1,
+    "PACKED_CLMUL_FLAT": 0
+  },
+  "samples": [17.881, 17.940, 17.921],
+  "median": 17.921,
+  "ratio_to_original_halving": 1.1163645,
+  "ratio_to_selected_table_walk": 0.8900720,
+  "ratio_to_25b_target": 0.71684,
+  "correctness": {
+    "subgroup_points": 512,
+    "quadratic_root_failures": 0,
+    "square_root_failures": 0,
+    "host_subgroup_failures": 0,
+    "coordinate_word_mismatches": 0
+  },
+  "rejected": {
+    "flat_clmad_median": 17.837
+  }
+}
