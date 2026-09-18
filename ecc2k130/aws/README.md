@@ -276,6 +276,7 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 #    instant fleet last-resort keeps only type/AZ pairs the region offers
 #    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 #    cheapest SKU and research-credit route: RESEARCH-CREDITS.md
+#    (GCP L4 spot is cheaper than Modal; leftover AWS g6 is cheaper than both)
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared

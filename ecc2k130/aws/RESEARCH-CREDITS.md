@@ -67,6 +67,50 @@ the reference*, not a budget for a key-recovery job. The index-calculus
 thread is priced in the same unit so a crossover, if one exists, can
 be read off one table.
 
+## Modal vs GCP (same unit, same L4 / 6000 receipts)
+
+**GCP is cheaper than Modal. Leftover AWS g6 is cheaper than both.**
+Neither is a reason to move the live campaign: the binary, S3 corpus,
+and bootstrap already sit on account `590183823895`. Use Modal for
+short benches and the academic credit; use GCP only if a research
+award lands that cannot be spent on AWS.
+
+Rates are the same receipts as the AWS table. Prices are public list
+quotes, 2026-09-18. Modal GPU-only from
+[modal.com/pricing](https://modal.com/pricing) (`$/s × 3600`). GCP
+rows are `g2-standard-*` spot (VM + one L4 together) from published
+aggregator list prices, not a receipt on our project.
+
+| host | GPU | list $/h | it/$ (×10¹²) | note |
+|---|---|---:|---:|---|
+| AWS leftover g6.2xlarge | L4 | 0.1602 | **56.0** | Stockholm spot; our quote |
+| GCP g2-standard-4 spot | L4 | 0.192 | 46.7 | cheapest published APAC |
+| GCP g2-standard-8 spot | L4 | 0.229 | 39.2 | APAC; 8 vCPU, closer to g6.2xlarge |
+| GCP g2-standard-8 spot | L4 | 0.340 | 26.3 | US-East matched SKU |
+| AWS leftover g7e.2xlarge | RTX PRO 6000 | 1.327 | 38.2 | Stockholm spot; our quote |
+| Modal RTX PRO 6000 | RTX PRO 6000 | 3.031 | 16.8 | $0.000842/s, GPU only |
+| Modal L40S | L40S | 1.951 | 16.3 | $0.000542/s, GPU only |
+| Modal L4 | L4 | 0.799 | 11.2 | $0.000222/s, GPU only |
+| Modal L4 + 1 core + 8 GiB | L4 | 0.910 | 9.8 | same L4 plus Modal CPU/memory |
+
+`it/$ = (B/s) × 3600 / ($/h) / 10¹²` with L4 at 2.490 B/s, L40S at
+8.838 B/s, collecting 6000 at 14.1 B/s. Modal region multipliers
+(1.15–1.75× on the Team plan) make those rows worse, not better.
+
+So:
+
+1. **On the same L4, GCP spot is about 2–4× Modal.** The gap is the
+   serverless markup, not the silicon.
+2. **On the 6000, leftover AWS g7e is about 2× Modal.** Do not rent
+   Modal 6000s to walk.
+3. **Do not migrate the campaign to GCP for a $1–5k research credit.**
+   Standing up a second corpus eats the award. The cheap route is
+   leftover AWS g6 plus the AWS Cloud Credit for Research form, or
+   Modal's academic grant (up to $10k, faster review) spent on
+   *benches*, not on the walk.
+4. Modal stays the right host for a one-shot `--bench` / TOP_CLMAD
+   receipt: per-second billing, no AMI, no leftover OD box.
+
 ## What this research is (and is not)
 
 This tree studies **bleeding-edge index calculus** on algebraic groups
@@ -98,6 +142,8 @@ Ranked for this scientific workload, not in general.
 <https://aws.amazon.com/government-education/research-and-technical-computing/cloud-credit-for-research/>
 
 Apply at <https://pages.awscloud.com/aws-cloud-credit-for-research.html>.
+The filled paste-ready form is
+[`AWS-RESEARCH-CREDIT-APPLICATION.md`](AWS-RESEARCH-CREDIT-APPLICATION.md).
 
 | | |
 |---|---|
@@ -181,7 +227,7 @@ the wrong form if the honest description is a thesis.
 | program | why not |
 |---|---|
 | NVIDIA Academic Grant | Current CFPs are robotics / AV / 5G / federated learning, delivered as Saturn Cloud H100 hours, not EC2 T4/L4/Blackwell walking this client. |
-| Google Cloud research credits | $1–5k and a different GPU stack. Migration cost eats the award. |
+| Google Cloud research credits | $1–5k. GCP L4 spot is cheaper than Modal L4 (~26–47 vs ~11 ×10¹² it/$) and still below leftover AWS g6 (56). Migration cost eats the award. |
 | AWS Educate | Teaching credits, not a 90-day measurement. |
 | Capacity reservations / Savings Plans | Upfront, 1-year, and promotional credit will not pay the reservation fee. |
 
