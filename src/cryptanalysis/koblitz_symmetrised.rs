@@ -284,6 +284,35 @@ pub fn frobenius_view_of_symmetrised(
     build_explicit_frobenius_orbit_factor_base(kc, &symmetrised_abscissae(kc, fb))
 }
 
+/// Build `F_u` and its Frobenius view under the frozen X4 divisor
+/// `divisor_for_dimension(n, (n+1)/m)`.
+///
+/// `None` if the divisor, the base, or the view fails, if `|F_u| < 3`,
+/// or if `ell = 1` (no factor-base bits).
+pub fn prepare_symmetrised_attack(
+    kc: &KoblitzCurve,
+    m: usize,
+) -> Option<(SymmetrisedFactorBase, FrobeniusFactorBase)> {
+    if m < 2 {
+        return None;
+    }
+    let dim = (kc.n + 1).div_ceil(m as u32);
+    let div = divisor_for_dimension(kc.n, dim)?;
+    let fu = build_symmetrised_factor_base(kc, &div)?;
+    if fu.ell <= 1 || fu.points.len() < 3 {
+        return None;
+    }
+    let view = frobenius_view_of_symmetrised(kc, &fu)?;
+    let _map = symmetrised_index_map(&fu, &view)?;
+    Some((fu, view))
+}
+
+/// Translate a decomposition over [`SymmetrisedFactorBase::points`] into
+/// the Frobenius view's index order.
+pub fn map_symmetrised_indices(map: &[usize], idxs: &[usize]) -> Option<Vec<usize>> {
+    idxs.iter().map(|&i| map.get(i).copied()).collect()
+}
+
 /// Index translation from [`SymmetrisedFactorBase::points`] to
 /// [`FrobeniusFactorBase::points`].
 ///
@@ -962,6 +991,9 @@ pub struct OracleOutcome {
     pub built_degree: u32,
     /// Macaulay matrices refused for exceeding the size caps.
     pub oversize: usize,
+    /// F4 reductions, infeasible branches, and exhaustion. Default for
+    /// SAT arms, which price effort in `effort` instead.
+    pub stats: SolveStats,
 }
 
 fn system_degree(eqs: &[F2BoolPoly]) -> u32 {
@@ -1028,6 +1060,7 @@ pub fn symmetrised_groebner_decompose_accepting(
         effort: stats.splits as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
+        stats,
     })
 }
 
@@ -1076,6 +1109,7 @@ pub fn direct_x_groebner_decompose(
         effort: stats.splits as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
+        stats,
     })
 }
 
@@ -1104,6 +1138,10 @@ fn sat_loop(
             effort,
             built_degree: 0,
             oversize: 0,
+            stats: SolveStats {
+                exhausted: !complete,
+                ..Default::default()
+            },
         }
     };
     loop {
@@ -1494,6 +1532,7 @@ pub fn paired_bench(a: u8, n: u32, m: usize, opts: &PairedOptions) -> Option<Pai
                 effort: stats.splits as u64,
                 built_degree: stats.max_degree_built,
                 oversize: stats.oversize,
+                stats: stats.clone(),
                 relation: rel.clone(),
             };
             x_chain.record(&o, ms, truth_x, sum_check_x(&rel));
@@ -1788,6 +1827,40 @@ mod tests {
             }
             assert!(covered.iter().all(|&b| b), "a={a} n={n}: orbits miss a point");
         }
+    }
+
+    #[test]
+    fn prepare_symmetrised_attack_skips_ell_one_and_tiny_bases() {
+        // Frozen X4 divisor. K0 at the small E1 rungs is |F_u| = 1;
+        // K1 n = 7, 9, 15 is the expected usable frame.
+        for n in [7u32, 9, 13, 15] {
+            if let Some(kc) = KoblitzCurve::new(0, n) {
+                if let Some((fu, _)) = prepare_symmetrised_attack(&kc, 3) {
+                    assert!(fu.ell > 1 && fu.points.len() >= 3);
+                }
+            }
+        }
+        let mut usable = 0usize;
+        for n in [7u32, 9, 15] {
+            let kc = KoblitzCurve::new(1, n).unwrap();
+            let Some((fu, view)) = prepare_symmetrised_attack(&kc, 3) else {
+                continue;
+            };
+            usable += 1;
+            assert!(fu.ell > 1);
+            assert!(fu.points.len() >= 3);
+            let map = symmetrised_index_map(&fu, &view).unwrap();
+            assert_eq!(map.len(), fu.points.len());
+            let raw: Vec<usize> = (0..fu.points.len().min(3)).collect();
+            let mapped = map_symmetrised_indices(&map, &raw).unwrap();
+            for (i, &j) in raw.iter().zip(&mapped) {
+                assert_eq!(point_key(&fu.points[*i]), point_key(&view.points[j]));
+            }
+        }
+        assert!(
+            usable >= 1,
+            "X4 expected at least one K1 rung with |F_u| ≥ 3 and ell > 1"
+        );
     }
 
     #[test]

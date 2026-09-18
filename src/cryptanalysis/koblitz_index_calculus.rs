@@ -84,7 +84,7 @@
 //!
 //! ## Honest scope
 //!
-//! - **Three decomposition oracles.**  "Is `R` a sum of `m` factor-base
+//! - **Decomposition oracles.**  "Is `R` a sum of `m` factor-base
 //!   points?" can be answered by
 //!   [`DecompositionStrategy::Groebner`] — Semaev's `S₃` Weil-restricted
 //!   to a low-degree Boolean system over the invariant subspace and
@@ -92,11 +92,13 @@
 //!   [`crate::cryptanalysis::koblitz_groebner`]) — by
 //!   [`DecompositionStrategy::Sat`], which encodes the descended
 //!   equations with native XOR rows and exact factor-base membership,
-//!   or by
-//!   [`DecompositionStrategy::Enumerate`], a table-driven search over
-//!   ordered tuples costing `|F|^{m−1}` group operations.  They are
-//!   cross-checked against each other on the toy cases in the tests.
-//!   At the sizes this module can reach the search is still 10–100×
+//!   by [`DecompositionStrategy::Enumerate`], a table-driven search over
+//!   ordered tuples costing `|F|^{m−1}` group operations, by
+//!   [`DecompositionStrategy::PairTable`], or by
+//!   [`DecompositionStrategy::Symmetrised`] — the unchained `u`-frame
+//!   polynomial over `F_u`, reported in the Frobenius view's order.
+//!   They are cross-checked against each other on the toy cases in the
+//!   tests.  At the sizes this module can reach the search is still 10–100×
 //!   *faster* in wall-clock terms: `|F|` is a few dozen points, so
 //!   `|F|^{m−1}` is nothing, while the Macaulay matrix already has
 //!   thousands of columns.  A completed Gröbner or SAT refutation proves
@@ -142,6 +144,10 @@ use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, Fro
 use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, matrix_f4_f2, solve_boolean_system_filtered, split_rule_default,
     FieldStructure, SolveOptions, SolveStats, SolverEngine,
+};
+use crate::cryptanalysis::koblitz_symmetrised::{
+    frobenius_view_of_symmetrised, map_symmetrised_indices, prepare_symmetrised_attack,
+    symmetrised_groebner_decompose, symmetrised_index_map, SymmetrisedFactorBase,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -2152,6 +2158,11 @@ pub enum DecompositionStrategy {
     /// `|F|^{m−1}` group operations for [`Self::Enumerate`].  Exact and
     /// complete like enumeration; costs `|F|²` memory once per run.
     PairTable,
+    /// Unchained symmetrised summation polynomial over `F_u`, with
+    /// indices reported in the Frobenius view's order. Requires
+    /// [`KoblitzIcOptions::symmetrised_fb`] whose view is the factor
+    /// base. Not chained `S₃` and not unchained `S₄`.
+    Symmetrised,
 }
 
 /// Packed identity of a point for hashing and sorting, in one `u64`:
@@ -4519,6 +4530,11 @@ pub struct KoblitzIcOptions {
     pub collapse_projected_orbits: bool,
     /// How [`solve_factor_base_logs`] solves the relation matrix.
     pub linear_algebra: LinearAlgebra,
+    /// `F_u` for [`DecompositionStrategy::Symmetrised`]. Required when
+    /// that strategy is selected on a caller-supplied view; filled in
+    /// by [`koblitz_index_calculus_dlp`] via
+    /// [`crate::cryptanalysis::koblitz_symmetrised::prepare_symmetrised_attack`].
+    pub symmetrised_fb: Option<std::sync::Arc<SymmetrisedFactorBase>>,
 }
 
 /// The linear-algebra stage of the factor-base logarithm precompute.
@@ -4559,6 +4575,7 @@ impl Default for KoblitzIcOptions {
             allow_direct_relation: true,
             collapse_projected_orbits: false,
             linear_algebra: LinearAlgebra::Dense,
+            symmetrised_fb: None,
         }
     }
 }
@@ -4808,6 +4825,17 @@ pub fn koblitz_index_calculus_dlp_with_progress(
     progress: &mut dyn FnMut(KoblitzIcEvent),
 ) -> Option<KoblitzIcReport> {
     progress(KoblitzIcEvent::FactorBaseStarted);
+    if opts.strategy == DecompositionStrategy::Symmetrised {
+        let mut prepared = opts.clone();
+        let view = if let Some(fu) = opts.symmetrised_fb.as_ref() {
+            frobenius_view_of_symmetrised(kc, fu)?
+        } else {
+            let (fu, view) = prepare_symmetrised_attack(kc, opts.m)?;
+            prepared.symmetrised_fb = Some(std::sync::Arc::new(fu));
+            view
+        };
+        return koblitz_index_calculus_dlp_observed(kc, q, &view, &prepared, progress);
+    }
     let fb = build_frobenius_factor_base(kc, opts.factor_index)?;
     koblitz_index_calculus_dlp_observed(kc, q, &fb, opts, progress)
 }
@@ -4815,8 +4843,10 @@ pub fn koblitz_index_calculus_dlp_with_progress(
 /// Run index calculus with a caller-supplied invariant factor base.
 ///
 /// This admits explicit nonlinear orbit unions selected by a finite
-/// search while retaining the same enumeration, Gröbner, and SAT
-/// decomposition controls as [`koblitz_index_calculus_dlp`].
+/// search while retaining the same enumeration, Gröbner, SAT, pair-table,
+/// and symmetrised decomposition controls as [`koblitz_index_calculus_dlp`].
+/// [`DecompositionStrategy::Symmetrised`] requires
+/// [`KoblitzIcOptions::symmetrised_fb`] whose Frobenius view is `fb`.
 pub fn koblitz_index_calculus_dlp_with_factor_base(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -4973,6 +5003,15 @@ fn koblitz_index_calculus_dlp_observed(
     } else {
         None
     };
+    if opts.strategy == DecompositionStrategy::Symmetrised && opts.symmetrised_fb.is_none() {
+        return None;
+    }
+    let symmetrised_map = if opts.strategy == DecompositionStrategy::Symmetrised {
+        let fu = opts.symmetrised_fb.as_ref()?;
+        Some(symmetrised_index_map(fu, fb)?)
+    } else {
+        None
+    };
 
     let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let mut relations: Vec<KoblitzRelation> = Vec::with_capacity(wanted);
@@ -5115,6 +5154,17 @@ fn koblitz_index_calculus_dlp_observed(
                         opts.sat_options,
                     );
                     RelationAttemptOutcome::Sat(idxs, stats)
+                }
+                DecompositionStrategy::Symmetrised => {
+                    let (idxs, stats) = symmetrised_decompose_mapped(
+                        kc,
+                        fb,
+                        &field,
+                        opts,
+                        target,
+                        symmetrised_map.as_deref(),
+                    );
+                    RelationAttemptOutcome::Groebner(idxs, stats)
                 }
             }
         };
@@ -6613,7 +6663,68 @@ fn decompose_once(
             )
             .0
         }
+        DecompositionStrategy::Symmetrised => {
+            symmetrised_decompose_mapped(kc, fb, field, opts, target, None).0
+        }
     }
+}
+
+/// Unchained symmetrised `S_{m+1}` over `F_u`, with indices rewritten
+/// into the Frobenius view.  `cached_map` is the
+/// [`symmetrised_index_map`] computed once per run; `None` rebuilds it.
+fn symmetrised_decompose_mapped(
+    kc: &KoblitzCurve,
+    view: &FrobeniusFactorBase,
+    field: &FieldStructure,
+    opts: &KoblitzIcOptions,
+    target: &BinaryPoint,
+    cached_map: Option<&[usize]>,
+) -> (Option<Vec<usize>>, SolveStats) {
+    let Some(fu) = opts.symmetrised_fb.as_deref() else {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                ..Default::default()
+            },
+        );
+    };
+    let computed = cached_map
+        .map(|m| m.to_vec())
+        .or_else(|| symmetrised_index_map(fu, view));
+    let Some(map) = computed else {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                ..Default::default()
+            },
+        );
+    };
+    let Some(outcome) = symmetrised_groebner_decompose(
+        kc,
+        fu,
+        field,
+        target,
+        opts.m,
+        opts.engine,
+        opts.node_budget,
+    ) else {
+        // No Semaev instance (u(R) = 0 or ∞, or m ∉ {2, 3}): not a
+        // completed refutation, and not mixed into the Enumerate gate.
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                ..Default::default()
+            },
+        );
+    };
+    let idxs = outcome
+        .relation
+        .as_ref()
+        .and_then(|raw| map_symmetrised_indices(&map, raw));
+    (idxs, outcome.stats)
 }
 
 // ── Relation collection in work units ──────────────────────────────
@@ -7681,6 +7792,9 @@ enum Probe {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cryptanalysis::koblitz_symmetrised::{
+        prepare_symmetrised_attack, SymmetrisedFactorBase,
+    };
 
     #[test]
     fn koblitz_mul_dispatch_matches_general_arithmetic() {
@@ -10686,6 +10800,99 @@ mod tests {
         let q = kc.mul(&g, &d);
         let report = koblitz_index_calculus_dlp(&kc, &q, &KoblitzIcOptions::default()).unwrap();
         assert_eq!(report.log, Some(d));
+    }
+
+    fn x4_k1_prepared(m: usize) -> Option<(
+        KoblitzCurve,
+        SymmetrisedFactorBase,
+        FrobeniusFactorBase,
+        FieldStructure,
+    )> {
+        for n in [7u32, 9, 15] {
+            let kc = KoblitzCurve::new(1, n)?;
+            let Some((fu, view)) = prepare_symmetrised_attack(&kc, m) else {
+                continue;
+            };
+            if !view.m_can_decompose(&kc, m) {
+                continue;
+            }
+            let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+            return Some((kc, fu, view, st));
+        }
+        None
+    }
+
+    #[test]
+    fn symmetrised_strategy_agrees_with_enumerate_on_sampled_targets() {
+        let (kc, fu, view, field) = x4_k1_prepared(3).expect("a usable K1 X4 rung");
+        let index_of = view.index_map();
+        let opts = KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::Symmetrised,
+            node_budget: 50_000,
+            allow_direct_relation: false,
+            stop_on_verified_rank: true,
+            collapse_negation: true,
+            seed: 0x5EED_0004,
+            symmetrised_fb: Some(std::sync::Arc::new(fu)),
+            ..KoblitzIcOptions::default()
+        };
+        let g = kc.generator().clone();
+        let mut completed = 0usize;
+        for k in 1..16u32 {
+            let target = kc.mul(&g, &BigUint::from(k));
+            let enumerated = enumerate_decompose(&kc, &view, &index_of, &target, 3);
+            let (algebraic, stats) =
+                symmetrised_decompose_mapped(&kc, &view, &field, &opts, &target, None);
+            if stats.exhausted {
+                continue;
+            }
+            completed += 1;
+            assert_eq!(
+                enumerated.is_some(),
+                algebraic.is_some(),
+                "n={} k={k}: algebraic complete but disagrees with Enumerate",
+                kc.n
+            );
+            if let Some(idxs) = algebraic {
+                let mut acc = BinaryPoint::Infinity;
+                for i in &idxs {
+                    acc = kc.add(&acc, &view.points[*i]);
+                }
+                assert_eq!(acc, target, "mapped indices must sum to the target");
+            }
+        }
+        assert!(
+            completed >= 4,
+            "need ≥4 completed sampled targets, got {completed} on n={}",
+            kc.n
+        );
+    }
+
+    #[test]
+    fn solves_the_dlp_with_the_symmetrised_oracle() {
+        let (kc, fu, view, _) = x4_k1_prepared(3).expect("a usable K1 X4 rung");
+        let d = BigUint::from(29u32);
+        let q = kc.mul(kc.generator(), &d);
+        let opts = KoblitzIcOptions {
+            m: 3,
+            strategy: DecompositionStrategy::Symmetrised,
+            node_budget: 50_000,
+            extra_relations: 4,
+            max_trials: 20_000,
+            allow_direct_relation: false,
+            stop_on_verified_rank: true,
+            collapse_negation: true,
+            seed: 0x5EED_0004,
+            symmetrised_fb: Some(std::sync::Arc::new(fu)),
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &view, &opts).unwrap();
+        assert_eq!(report.log, Some(d), "recovered log must satisfy [k]P = Q");
+        assert!(!report.direct_relation);
+        assert_eq!(report.verification_failures, 0);
+        assert!(report.reductions > 0, "the symmetrised F4 path must have run");
+        assert!(kc.mul(kc.generator(), report.log.as_ref().unwrap()) == q);
     }
 
     #[test]
