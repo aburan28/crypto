@@ -3,11 +3,13 @@
 # Fill leftover G/VT Spot quota in every opted-in commercial region.
 # Prefers g7e (RTX PRO 6000), then g7 (4500), then g6e (L40S), then g6 (L4),
 # then g4dn (T4) in regions that have leftover quota and no Ada/Blackwell SKU.
-# 2xlarge first (8 vCPU = 1 GPU); 4xlarge only if 2xlarge is dry and at
-# least 16 vCPU remain. Spot only. Does not stop existing boxes and does
-# not rewrite campaign.json.
+# CHEAP=1 drops Turing: T4 leftover is cheaper per hour and worse per
+# iteration (see RESEARCH-CREDITS.md). 2xlarge first (8 vCPU = 1 GPU);
+# 4xlarge only if 2xlarge is dry and at least 16 vCPU remain. Spot only.
+# Does not stop existing boxes and does not rewrite campaign.json.
 #
 #   ./launch_spot_all.sh
+#   CHEAP=1 ./launch_spot_all.sh
 #
 # Region list is discovered (OptInStatus opted-in / opt-in-not-required).
 # A region with zero leftover 2xlarge slots is skipped. Uses meow34 where
@@ -20,7 +22,11 @@ BUCKET=${BUCKET:-ecc2k130-$ACCOUNT}
 export AWS_MAX_ATTEMPTS=${AWS_MAX_ATTEMPTS:-1}
 STACK=ecc2k130
 UNIT_VCPU=8
-TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge}
+if [ "${CHEAP:-0}" = 1 ]; then
+    TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge}
+else
+    TYPES_PREF=${TYPES_PREF:-g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge}
+fi
 
 opted_regions() {
     aws ec2 describe-regions --all-regions --output json \
@@ -170,7 +176,11 @@ fill_spot() {
     local region=$1 left=$2
     local type offered
     IFS=',' read -r -a types <<< "$TYPES_PREF"
-    offered=$(offered_types "$region" "$TYPES_PREF,g7e.4xlarge,g7.4xlarge,g6e.4xlarge,g6.4xlarge,g4dn.4xlarge,g4dn.xlarge")
+    if [ "${CHEAP:-0}" = 1 ]; then
+        offered=$(offered_types "$region" "$TYPES_PREF,g7e.4xlarge,g7.4xlarge,g6e.4xlarge,g6.4xlarge")
+    else
+        offered=$(offered_types "$region" "$TYPES_PREF,g7e.4xlarge,g7.4xlarge,g6e.4xlarge,g6.4xlarge,g4dn.4xlarge,g4dn.xlarge")
+    fi
     STOP_REGION=0
     for type in "${types[@]}"; do
         [ "$left" -gt 0 ] || break
@@ -185,7 +195,7 @@ fill_spot() {
         fi
     done
     if [ "$left" -ge 2 ]; then
-        for type in g7e.4xlarge g7.4xlarge g6e.4xlarge g6.4xlarge g4dn.4xlarge; do
+        for type in g7e.4xlarge g7.4xlarge g6e.4xlarge g6.4xlarge $([ "${CHEAP:-0}" = 1 ] || echo g4dn.4xlarge); do
             [ "$left" -ge 2 ] || break
             if ! printf '%s\n' "$offered" | grep -qx "$type"; then
                 echo "  skip $type (no offering in $region)"
@@ -199,7 +209,7 @@ fill_spot() {
         done
     fi
     # Turing leftover: xlarge is 4 vCPU / 1 T4, so two fit in one 2xlarge slot.
-    if [ "$left" -gt 0 ]; then
+    if [ "$left" -gt 0 ] && [ "${CHEAP:-0}" != 1 ]; then
         if ! printf '%s\n' "$offered" | grep -qx g4dn.xlarge; then
             echo "  skip g4dn.xlarge (no offering in $region)"
         else
@@ -224,9 +234,10 @@ fleet_fill() {
     [ "$n" -gt 0 ] || return 0
     echo "=== $region: capacity-optimized instant fleet for $n × 2xlarge-equivalent ==="
     set +e
-    out=$(python3 - "$region" "$n" "$STACK" "$TYPES_PREF" <<'PY'
+    out=$(python3 - "$region" "$n" "$STACK" "$TYPES_PREF" "${CHEAP:-0}" <<'PY'
 import json, subprocess, sys
 region, n, stack, pref = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
+cheap = sys.argv[5] == "1" if len(sys.argv) > 5 else False
 subs = json.loads(subprocess.check_output([
     "aws", "ec2", "describe-subnets", "--region", region,
     "--filters", "Name=default-for-az,Values=true",
@@ -236,8 +247,10 @@ if not subs:
     print("no default subnets", file=sys.stderr)
     sys.exit(2)
 types = [t.strip() for t in pref.split(",") if t.strip()]
-for extra in ("g7e.4xlarge", "g7.4xlarge", "g6e.4xlarge", "g6.4xlarge",
-              "g4dn.4xlarge", "g4dn.xlarge"):
+extras = ["g7e.4xlarge", "g7.4xlarge", "g6e.4xlarge", "g6.4xlarge"]
+if not cheap:
+    extras.extend(("g4dn.4xlarge", "g4dn.xlarge"))
+for extra in extras:
     if extra not in types:
         types.append(extra)
 off_raw = json.loads(subprocess.check_output([
