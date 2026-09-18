@@ -403,6 +403,19 @@ struct RefT {
         }
         return acc;
     }
+    // The unique half in the odd-order subgroup.  Solving lambda^2+lambda=x
+    // gives the two rational halves; their x coordinates differ by sqrt(x),
+    // and the subgroup member is the one with trace-zero x.
+    static Point half(const Point &p) {
+        if (p.inf) return p;
+        Elem lambda = halfTrace(p.x);
+        Elem xh = sigma(add(add(p.y, p.x), mul(lambda, p.x)), M - 1);
+        if (trace(xh)) {
+            lambda = add(lambda, one());
+            xh = add(xh, sigma(p.x, M - 1));
+        }
+        return make(xh, mul(xh, add(lambda, xh)));
+    }
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
