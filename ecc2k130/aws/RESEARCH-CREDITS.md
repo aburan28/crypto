@@ -56,13 +56,37 @@ So:
 4. On-demand g7e at list (~$3.36/h in us-west-2) is ~15×10¹² it/$ —
    worse than every spot row above. Do not refill OD.
 
-At the Stockholm g6 quote the expected work is about **$38k**. At the
-Stockholm g7e quote it is about **$56k**. A week-solve (3.55 T it/s)
-is the same dollars over 168 hours, not a different budget.
+At the Stockholm g6 quote a full generic-group reference walk of the
+Bailey expected work is about **$38k**. That number is a *ceiling on
+the reference*, not a budget for a key-recovery job. The index-calculus
+thread is priced in the same unit so a crossover, if one exists, can
+be read off one table.
+
+## What this research is (and is not)
+
+This tree studies **bleeding-edge index calculus** on algebraic groups
+— Semaev-style summation polynomials, Weil-descent encodings, Gröbner /
+WDSat solving, factor-base geometry — in order to say where those
+methods actually sit relative to a generic-group algorithm. The
+audience is post-quantum cryptography: if an algebraic method has a
+real crossover, parameter writers need that number; if it does not,
+they need that number too. The rule in `AGENTS.md` is the scientific
+one: every claimed improvement is a **ratio to a boundary**, in one
+unit, with a verified answer. A thread that cannot state its floor
+has not started.
+
+Pollard rho on a Koblitz curve is the **reference**, not the product.
+It is run so the index-calculus variants can be placed on the same
+axis (\(S = \mathrm{ops}/\sqrt{n}\)). It is not a service for
+recovering keys, and a credit proposal must not read as one.
+
+That framing is also the one the AWS program will accept. The FAQ
+funds finite proofs of concept, benchmarks, and shareable research
+tools. It refuses ongoing operations and “general funding of a lab.”
 
 ## Best credit route
 
-Ranked for this workload, not in general.
+Ranked for this scientific workload, not in general.
 
 ### 1. AWS Cloud Credit for Research — only if you have a `.edu` / institution address
 
@@ -79,40 +103,59 @@ Apply at <https://pages.awscloud.com/aws-cloud-credit-for-research.html>.
 | Review | Rolling, **90–120 days** on the program page (some mirrors say 30–60). No expedite. |
 | Contact | `aws-research-credit@amazon.com` |
 
-**Do not apply as “run Pollard rho until ECC2K-130 falls.”** The FAQ
-refuses ongoing research, lab operations, and general lab funding. A
-year-long walk is exactly that.
+**Apply as mathematical cryptanalysis in service of PQC.** Title it
+as a finite, published measurement of algebraic index-calculus
+against a generic-group bound, with open tooling other labs can
+rerun. That is the program's first project type (“proof of concept
+or benchmark for comparison”) plus the second (“repeatable, sharable
+solutions”).
 
-**Do apply as a finite, published benchmark.** The repository already
-is one: generic-group rho versus algebraic index-calculus on the same
-instances, one unit \(S = \mathrm{ops}/\sqrt{n}\), a public scoreboard,
-and open tooling. That is the program's first project type (“proof of
-concept or benchmark for comparison”) plus the second (“repeatable,
-sharable solutions”).
+Proposal skeleton (paste-ready):
 
-Proposal skeleton:
-
-1. **Problem.** Where does index-calculus on \(E(\mathbb{F}_{p^3})\)
-   actually cross Pollard rho? The literature quotes phase costs; this
-   tree prices the whole method.
-2. **AWS work.** EC2 G/VT spot (g6 / g6e / g7 / g7e) running the
-   published `ecc2k130` client; S3 for the unversioned DP corpus;
-   CloudWatch/costguard for the $ ceiling. Timeline: 90 days of
-   measured comparison across four field sizes, then stop.
-3. **Share.** `docs/index-calculus-scoreboard.html`, frozen experiment
-   directories, and this repository. No private corpus.
-4. **After the credit.** The scoreboard stays; the walk does not have
-   to. Future use is other researchers repeating the comparison.
-5. **Pricing Calculator URL.** Size it as a 90-day *benchmark*, not a
-   week-solve: e.g. 32× g6.2xlarge spot for 90 days is the right
-   order, not 252× g7e.
-6. **Student vs faculty.** A student award ($5k) is a few days of the
-   current leftover fleet. Only a faculty/staff application can cover
-   the $38k expected-work figure. If you are a student, apply for the
-   benchmark slice and get a faculty PI on the form.
+1. **Problem.** Post-quantum parameter selection needs to know whether
+   algebraic index-calculus on small-characteristic or extension-field
+   elliptic curves ever beats a generic-group algorithm, and at what
+   size. The literature often prices one phase (relations, or Gröbner)
+   and treats that as the method. This project prices the *whole*
+   method — precomputation, encoding, solving, linear algebra, lifting,
+   verification — against a counting floor and against Pollard rho on
+   the same instances, in one unit.
+2. **Scientific goal.** Locate the crossover (or show there is none
+   in the sizes that fit) for the index-calculus variants already
+   built in this repository, and publish every row so a later
+   algebraic improvement can be classified as an advance, engineering,
+   relabelling, or accounting. The work informs PQC: it says which
+   algebraic attacks actually move the bound that a next-generation
+   scheme has to clear.
+3. **What it is not.** It is not a key-recovery service and not a
+   campaign to finish a specific cryptanalytic challenge. Distinguished
+   points and planted secrets exist so every row can be *checked*. A
+   run without a verified answer is not a result.
+4. **AWS work.** EC2 G/VT spot (g6 / g6e / g7 / g7e) for (a) the
+   index-calculus solver stages and (b) a matched rho *reference* on
+   the same curves, so \(S\) is comparable. S3 holds frozen experiment
+   directories. Timeline: 90 days, four field sizes, then stop. The
+   rho reference is sized to settle the ratio, not to exhaust
+   \(2^{60.9}\) iterations.
+5. **Share.** `docs/index-calculus-scoreboard.html`, the frozen
+   experiment trees under `research/`, `AGENTS.md`'s boundary/table/
+   ratio rule, and this repository. No private corpus. Anyone can
+   rerun a row.
+6. **After the credit.** The scoreboard and the method stay public.
+   Future use is other researchers adding a variant as a new row
+   against the same floor. The reference walk does not have to
+   continue.
+7. **Pricing Calculator URL.** Size a 90-day *measurement*, not a
+   challenge attempt: e.g. 32× g6.2xlarge spot for IC solver +
+   reference rho at the sizes that fit, plus a small g7e slice for
+   the Blackwell receipt. Do not price 252× g7e.
+8. **Student vs faculty.** A student award ($5k) covers the solver
+   regression and a few reference sizes. A faculty/staff application
+   can cover the full four-size exponent fit. If you are a student,
+   put a faculty PI on the form and ask for the measurement slice.
 
 Account to put on the form: `590183823895` (already paid-tier, already
-has the campaign bucket). Do not open a second account just to apply.
+has the experiment bucket). Do not open a second account just to apply.
 
 ### 2. AWS Activate — if this is a startup, not a thesis
 
@@ -123,9 +166,10 @@ has the campaign bucket). Do not open a second account just to apply.
 - Portfolio (accelerator / angel Org ID, pre-Series B): up to **$200k**.
 - Paid-tier account, founded < 10 years, not a Free Tier account.
 
-$1–5k is the fastest cash. $200k is the only AWS product that can
-cover a week-solve without a faculty appointment. It is the wrong
-form if you cannot name an Activate Provider.
+$1–5k is the fastest cash if the applicant is a company. $200k
+covers a larger measurement campaign without a faculty appointment.
+It is the wrong form if you cannot name an Activate Provider, and
+the wrong form if the honest description is a thesis.
 
 ### 3. What not to chase for this thread
 
@@ -147,6 +191,7 @@ form if you cannot name an Activate Provider.
 4. Keep the $5k costguard as a hard stop on *tagged* boxes. Do not
    raise it while a credit application is in flight — a $5k student
    award and a $5k ceiling are the same number.
-5. File the research-credit application as the 90-day benchmark, or
+5. File the research-credit application as the 90-day index-calculus
+   measurement (PQC-relevant algebraic vs generic-group bound), or
    Activate Founders if you have a company and need money this month.
-   Then wait. Do not scale to a week-solve on a card.
+   Size the calculator to the measurement, not to a challenge attempt.
