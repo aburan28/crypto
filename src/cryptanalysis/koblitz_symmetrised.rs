@@ -2429,7 +2429,7 @@ mod transport_tests {
     #[test]
     fn chained_s3_is_bilinear_and_counts_links() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
-        let div = divisor_for_dimension(9, (9 + 1).div_ceil(4)).unwrap();
+        let div = divisor_for_dimension(9, 10u32.div_ceil(4)).unwrap();
         let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
         let st = FieldStructure::new(9, &kc.curve.irreducible);
         let target = kc.mul(kc.generator(), &BigUint::from(7u32));
