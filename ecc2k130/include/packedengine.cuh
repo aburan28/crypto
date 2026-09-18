@@ -304,6 +304,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed selection pipeline: %d\n", ECC_PACKED_SELECT_PIPELINE);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
+        printf("packed reduction CLMAD t: %d\n", ECC_PACKED_REDUCE_CLMAD_T);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed inline onb multiply: %d\n", ECC_PACKED_INLINE_ONB_MUL);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
