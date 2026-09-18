@@ -351,6 +351,42 @@ printed beside any ratio.
 
 **Depends on** the merged `frobenius_view_of_symmetrised`.
 
+**Protocol, frozen before the run, 2026-09-18.** Written so X4 cannot
+choose a curve, divisor, or accounting after seeing a cell.
+
+1. `m = 3`. `K_a` with `a` given; skip if `KoblitzCurve::new` is `None`.
+2. Divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, then
+   `F_u = build_symmetrised_factor_base` and
+   `fb = frobenius_view_of_symmetrised`. Skip the rung if the view is
+   `None`, if `|F_u| < 3`, or if `ell = 1` (no factor-base bits; the
+   system is not an `m = 3` Semaev instance).
+3. Oracle `DecompositionStrategy::Symmetrised`: unchained symmetrised
+   `S_{m+1}` via `symmetrised_groebner_decompose`, indices mapped
+   through `symmetrised_index_map`. That is not chained `S₃` and not
+   unchained `S₄` relabelled as a strategy.
+4. Matched control: `DecompositionStrategy::Enumerate` on the same
+   view, same seed, same `m`. A rung is usable only if every sampled
+   target the algebraic arm completes agrees with Enumerate
+   (found/refuted), and the recovered log satisfies `[k]P = Q`.
+5. Pipeline: `allow_direct_relation = false`, `stop_on_verified_rank =
+   true`, `collapse_negation = true`, seed `0x5EED_0004`. Price setup
+   (`F_u` + view), target generation (`trials`), oracle (reductions /
+   infeasible branches), lifting, verification, linear algebra
+   (`linear_algebra_ns`, rank checks), scalar recovery.
+6. **Unit.** `Λ = trials · C(|F_u|, m−1) / 2^n` — the enumerative
+   envelope of this base, the unit the product-law floor is written in.
+   Algebraic reductions stay a stage diagnostic until a word-op →
+   group-op conversion (T3) exists; wall-clock is a footnote.
+7. **Ratio to the floor.** `Λ · n / m`. Slope of `log₂(Λ · n / m)`
+   against `n` over ≥4 usable rungs. Slope consistent with zero is
+   **engineering**. A decrease is **advance**. Mixing K0 with K1 is
+   inadmissible (different frames, as X1/X3).
+8. K0 `F_u` is one point at the small E1 rungs (`n = 13, 19` among
+   them). Those cells are skips, not a change of divisor. Usable rungs
+   are expected on `K_1` first (`n = 7, 9, 15, …`).
+
+Changing (1)–(7) after seeing a cell is inadmissible.
+
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
