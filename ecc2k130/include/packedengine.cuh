@@ -303,6 +303,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
+        printf("packed inline onb multiply: %d\n", ECC_PACKED_INLINE_ONB_MUL);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
         printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
         printf("packed three-limb Karatsuba: %d\n", ECC_PACKED_KARAT3);

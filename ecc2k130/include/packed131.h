@@ -657,6 +657,17 @@ using MulArg = const P131 &;
 // SINGLE_PRODUCT path converts to the polynomial basis and back around every
 // mul131; inv131 is already in the ONB, so those conversions are pure
 // overhead on the inverse chain (8 muls / 16 slots).
+#ifndef ECC_PACKED_INLINE_ONB_MUL
+#define ECC_PACKED_INLINE_ONB_MUL 0
+#endif
+#if ECC_PACKED_INLINE_ONB_MUL != 0 && ECC_PACKED_INLINE_ONB_MUL != 1
+#error "ECC_PACKED_INLINE_ONB_MUL must be 0 or 1"
+#endif
+#if ECC_PACKED_INLINE_ONB_MUL
+#define ECC_ONB_MUL ECC_HD
+#else
+#define ECC_ONB_MUL ECC_BIG
+#endif
 static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     uint32_t c[9],d[9];
     P131 rb=reverse131(b),r;
@@ -672,7 +683,7 @@ static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     r.v[4]&=7;
     return r;
 }
-static ECC_BIG P131 mul131(MulArg a, MulArg b) {
+static ECC_ONB_MUL P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
@@ -684,6 +695,7 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
     return mulOnb131(a, b);
 #endif
 }
+#undef ECC_ONB_MUL
 #ifndef ECC_PACKED_ALU_SQUARE
 #define ECC_PACKED_ALU_SQUARE 0
 #endif
