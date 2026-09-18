@@ -1139,6 +1139,53 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       wall-clock. At the occupied rate a streaming logarithm is still
       2<sup>94.2</sup> seconds. Wall-clock is a practicality note, not S.
       No full-DLP at n=131 is claimed.</p>
+    <p>SAT on this host CPU (CryptoMiniSat 5.14.7, python-sat 1.9.dev15; not
+      the GPU). Conflict counts have no measured conversion to field products,
+      so SAT is not a row in the product table. Frozen receipt:
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/indexcalc-g7e/sat.json"><code>ecc2k130/benchmarks/indexcalc-g7e/sat.json</code></a>.
+      Type-II ONB degrees only: 5, 9, 11, 23.</p>
+    <table>
+      <caption>SAT diagnostic on the G7e host, wall-clock, not the product unit.
+        Cited from <code>ecc2k130/benchmarks/indexcalc-g7e/sat.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">Cell</th>
+        <th scope="col">Result</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Growth m=5, k=3, w=3</td>
+          <td>5/5 solved, median 0.0018&nbsp;s, 507 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=9</td>
+          <td>5/5 solved, median 0.096&nbsp;s, 1587 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=11</td>
+          <td>5/5 solved, median 1.25&nbsp;s, 2311 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=23</td>
+          <td>0/1, budget at 30.05&nbsp;s, 8029 gates</td>
+          <td>timeout; 0 unsat</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>SAT DLP n=5</td>
+          <td>complete in 22&nbsp;ms, scalar 8</td>
+          <td>[k]P = Q</td>
+          <td><span class="chip">correctness</span></td></tr>
+        <tr><td>SAT DLP n=9</td>
+          <td>complete in 1.07&nbsp;s, scalar 112</td>
+          <td>[k]P = Q</td>
+          <td><span class="chip">correctness</span></td></tr>
+        <tr><td>Pair vs unbounded SAT, n=9, w=2, 16 planted triples</td>
+          <td>pair 16/16, median 0.362&nbsp;ms; SAT 14/16 lifted, median 82.5&nbsp;ms (228× slower)</td>
+          <td>pair hits verified; 2 SAT models spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table>
+    <p>The n=131 product-law floor is untouched. Ratio to that floor remains
+      2^+0.00. Quoting SAT seconds as S is relabelling.</p>
   </div>
 
   <div class="panel" id="ec-baseline-20260914">

@@ -77,6 +77,74 @@
     "subgroup_order": "680564733841876926932320129493409985129"
   },
   "question": "Can a G7e GPU make Hamming-weight index calculus on ECC2K-130 cheaper than Pollard rho?",
+  "sat": {
+    "growth": [
+      {
+        "budget": 0,
+        "gates": 507,
+        "m": 5,
+        "median": 0.0017976760864257812,
+        "orbits": 3,
+        "solved": 5,
+        "unsat": 0
+      },
+      {
+        "budget": 0,
+        "gates": 1587,
+        "m": 9,
+        "median": 0.09605836868286133,
+        "orbits": 7,
+        "solved": 5,
+        "unsat": 0
+      },
+      {
+        "budget": 0,
+        "gates": 2311,
+        "m": 11,
+        "median": 1.2477421760559082,
+        "orbits": 9,
+        "solved": 5,
+        "unsat": 0
+      },
+      {
+        "budget": 1,
+        "gates": 8029,
+        "m": 23,
+        "median": 30.052161931991577,
+        "orbits": 52,
+        "solved": 0,
+        "unsat": 0
+      }
+    ],
+    "pair_versus_sat": {
+      "class": "engineering",
+      "degree": 9,
+      "note": "wall-clock on this host; unbounded CryptoMiniSat vs exhaustive pair lookup on the same planted triples",
+      "pair_hits": 16,
+      "pair_median_s": 0.0003617970069171861,
+      "pair_total_s": 0.0077973720035515726,
+      "sat_hits": 14,
+      "sat_median_s": 0.0825306970073143,
+      "sat_total_s": 1.4579919619864086,
+      "seed": 20260918,
+      "timeout_s": 5,
+      "trials": 16,
+      "weight": 2
+    },
+    "receipt": "sat.json",
+    "sat_dlp": [
+      {
+        "degree": 5,
+        "status": "complete",
+        "verified": true
+      },
+      {
+        "degree": 9,
+        "status": "complete",
+        "verified": true
+      }
+    ]
+  },
   "schema": "ecc2k130_g7e_index_calculus/v1",
   "source_hashes": {
     "indexcalc_pairs.py": "a9ee7677c8c851f884b50bf39406a1d76ad1f1083d9bd642f8c2a95110a14122",

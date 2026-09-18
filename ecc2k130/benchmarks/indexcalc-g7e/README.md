@@ -29,4 +29,5 @@ cd ../benchmarks/indexcalc-g7e
 ```
 
 `run_sat.py` writes `sat.json` and patches `summary.json['sat']`. It does
-not change the product-law floor or the GPU pair-scan row.
+not change the product-law floor or the GPU pair-scan row. Frozen SAT
+receipt: [`sat.json`](sat.json). Type-II ONB ladder: 5, 9, 11, 23.
