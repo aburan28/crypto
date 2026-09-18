@@ -21,16 +21,23 @@ from render import (
 )
 from snapshot import (
     BACKFILL_SQL,
+    BOUNDS_SQL,
     CLAIM_BOUNDARY,
     ENSURE_SQL,
+    FALLBACK_SQL,
     FORBIDDEN_PUBLIC_KEYS,
+    MARK_READY_SQL,
     READ_SQL,
+    SESSION_PREAMBLE,
     assert_public,
     campaign_state,
+    hours_to_backfill,
     normalize,
+    parse_bounds,
     render_sql,
     rollup_ready_from_text,
     sql_campaign,
+    sql_hour,
 )
 from work_feed import MAX_FEED_AGE_S, feed_url, ingest_block, merge_work, work_block
 
@@ -155,16 +162,22 @@ class WorkflowTests(unittest.TestCase):
         # walker hop from 41s to 510s and broke publication; grouping the heap
         # once by worker and hour then pushed it to 524s at 187M rows, one
         # timeout tick under 540s, and the next scheduled run died. The
-        # published document is assembled from rho_dp_hour / rho_dp_recent.
-        # distinguished_points is read only by the one-time backfill.
+        # ready document is assembled from rho_dp_hour / rho_dp_recent.
+        # distinguished_points is heap-fetched only by one hour of backfill
+        # at a time; the publish-first fallback groups by hour, not worker.
         self.assertEqual(BACKFILL_SQL.count("FROM distinguished_points"), 1)
-        self.assertIn("LOCK TABLE distinguished_points IN SHARE MODE", BACKFILL_SQL)
+        self.assertNotIn("LOCK TABLE", BACKFILL_SQL)
+        self.assertIn("date_trunc('hour', found_at)", BACKFILL_SQL)
+        self.assertIn("ON CONFLICT (campaign_id, hour, worker_id)", BACKFILL_SQL)
+        self.assertIn("found_at >= '{{hour}}'::timestamptz", BACKFILL_SQL)
+        self.assertIn("found_at < '{{hour}}'::timestamptz + interval '1 hour'", BACKFILL_SQL)
         self.assertNotIn("FROM distinguished_points", READ_SQL)
         self.assertIn("FROM rho_dp_hour", READ_SQL)
         self.assertIn("FROM rho_dp_recent", READ_SQL)
         self.assertIn("CREATE TRIGGER", ENSURE_SQL)
         self.assertIn("rho_dp_rollup_insert", ENSURE_SQL)
         self.assertIn("ON distinguished_points", ENSURE_SQL)
+        self.assertIn("backfill_through", ENSURE_SQL)
         # Ingest INSERTs fire this as the rho/dp-rds role, which is not the
         # walker DATABASE_URL role that creates the rollup tables.
         self.assertIn("SECURITY DEFINER", ENSURE_SQL)
@@ -174,6 +187,47 @@ class WorkflowTests(unittest.TestCase):
             source = fh.read()
         self.assertNotIn('replace("%(campaign)s", "%s")', source)
         self.assertIn("if rollup_ready_from_text", source)
+        self.assertIn("publishing index-only fallback first", source)
+        self.assertIn("SET statement_timeout = 0;", SESSION_PREAMBLE)
+
+    def test_fallback_groups_by_hour_not_worker(self):
+        # The live page stayed on 11:25Z because the worker GROUP BY never
+        # finished. The fallback has to be something the found_at index can
+        # answer, and it must not under-count by reading a half-built rollup.
+        self.assertIn("FROM distinguished_points", FALLBACK_SQL)
+        self.assertNotIn("worker_id", FALLBACK_SQL)
+        self.assertIn("date_trunc('hour', found_at)", FALLBACK_SQL)
+        self.assertIn("'workers', 0", FALLBACK_SQL)
+        self.assertIn("'per_worker', '[]'::json", FALLBACK_SQL)
+        self.assertIn("SET statement_timeout = '600s'", FALLBACK_SQL)
+        self.assertIn("backfill_through", MARK_READY_SQL)
+        self.assertIn("min(found_at)", BOUNDS_SQL)
+
+    def test_backfill_resumes_after_the_hour_already_written(self):
+        start = datetime(2026, 9, 11, 17, tzinfo=timezone.utc)
+        now = datetime(2026, 9, 11, 20, tzinfo=timezone.utc)
+        self.assertEqual(
+            [h.hour for h in hours_to_backfill(start, now, None)],
+            [17, 18, 19, 20],
+        )
+        through = datetime(2026, 9, 11, 18, tzinfo=timezone.utc)
+        self.assertEqual(
+            [h.hour for h in hours_to_backfill(start, now, through)],
+            [19, 20],
+        )
+        self.assertEqual(hours_to_backfill(start, now, now), [])
+        start_h, now_h, through_h = parse_bounds(
+            "2026-09-11T17:00:00Z|2026-09-18T18:00:00Z|2026-09-12T00:00:00Z"
+        )
+        self.assertEqual(start_h, datetime(2026, 9, 11, 17, tzinfo=timezone.utc))
+        self.assertEqual(now_h, datetime(2026, 9, 18, 18, tzinfo=timezone.utc))
+        self.assertEqual(through_h, datetime(2026, 9, 12, 0, tzinfo=timezone.utc))
+        self.assertEqual(sql_hour(start_h), "2026-09-11T17:00:00Z")
+        with self.assertRaises(SystemExit):
+            sql_hour("2026-09-11 17:00:00")
+        self.assertIn("'2026-09-11T17:00:00Z'", render_sql(
+            "x = '{{hour}}'::timestamptz", "ecc2k-130", hour=start_h
+        ))
 
     def test_campaign_id_is_a_literal_not_concatenated_sql(self):
         self.assertEqual(sql_campaign("ecc2k-130"), "ecc2k-130")
@@ -204,9 +258,14 @@ class WorkflowTests(unittest.TestCase):
         # from a dead connection and the hop dies on a broken pipe.
         self.assertIn("ServerAliveInterval", text)
         self.assertIn("ServerAliveCountMax", text)
-        self.assertIn("RHO_REMOTE_TIMEOUT:-900", text)
+        self.assertIn("RHO_REMOTE_TIMEOUT:-1500", text)
         self.assertIn("snapshot exceeded", text)
         self.assertIn("exit 124", text)
+        # A 124 after the fallback write must still copy status.json or the
+        # live page stays on the last successful hop.
+        scp_at = text.index('"$USER@$HOST:/tmp/rho_status.json" "$OUT"')
+        timeout_exit_at = text.index("exit 124")
+        self.assertLess(scp_at, timeout_exit_at)
         self.assertNotIn("meow34", text)
         pub = os.path.join(HERE, "gha_walker.pub")
         with open(pub, encoding="utf-8") as fh:
@@ -232,12 +291,17 @@ class WorkflowTests(unittest.TestCase):
         path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
-        self.assertIn("timeout-minutes: 25", text)
+        self.assertIn("timeout-minutes: 35", text)
         fetch = os.path.join(HERE, "fetch_via_walker.sh")
         with open(fetch, encoding="utf-8") as fh:
             script = fh.read()
-        self.assertIn("RHO_REMOTE_TIMEOUT:-900", script)
-        self.assertIn("SET LOCAL statement_timeout = '800s'", BACKFILL_SQL)
+        self.assertIn("RHO_REMOTE_TIMEOUT:-1500", script)
+        self.assertIn("SET LOCAL statement_timeout = '300s'", BACKFILL_SQL)
+        self.assertIn("SET LOCAL lock_timeout = '15s'", BACKFILL_SQL)
+        with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("lost a lock race; retrying", source)
+        self.assertIn("RHO_SNAPSHOT_BUDGET_S", source)
 
 
 class HistoryTests(unittest.TestCase):

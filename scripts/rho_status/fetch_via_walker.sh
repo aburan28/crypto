@@ -102,12 +102,12 @@ SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecki
 SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}")
 
 # Bound the query remotely too, so a genuinely stuck snapshot fails with its
-# own message instead of hanging until the job timeout. The first run after
-# this hop copies snapshot.py has to backfill rho_dp_hour from the heap
-# (524 s at 187 M rows on 2026-09-18); later runs read the rollup. 900 s
-# leaves room for that one scan. The publish job's timeout must stay above
-# this, plus the steps after.
-REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-900}
+# own message instead of hanging until the job timeout. snapshot.py writes an
+# index-only fallback to /tmp/rho_status.json before the hour-by-hour
+# backfill, so a 124 still has a file to copy. 1500 s covers that fallback
+# (~index-only GROUP BY hour) plus a stretch of 300 s hour chunks. The
+# publish job's timeout must stay above this, plus the steps after.
+REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-1500}
 
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS
@@ -116,13 +116,22 @@ set +e
 SSH_RC=$?
 set -e
 ELAPSED=$((SECONDS - STARTED))
+# Copy even on 124: the fallback file is written first, and a SIGTERM during
+# a later hour still leaves a current generated_at for Pages. Without this
+# the live dashboard stays on the last successful hop (2026-09-18T11:25Z).
+set +e
+"${SCP[@]}" "$USER@$HOST:/tmp/rho_status.json" "$OUT"
+SCP_RC=$?
+set -e
+if [ "$SCP_RC" -eq 0 ] && [ -s "$OUT" ]; then
+    echo "wrote $OUT from $USER@$HOST ($IID); snapshot query took ${ELAPSED}s (remote rc=$SSH_RC)"
+    exit 0
+fi
 if [ "$SSH_RC" -eq 124 ]; then
     echo "snapshot exceeded ${REMOTE_TIMEOUT}s after ${ELAPSED}s (rollup backfill or a stuck scan)" >&2
     exit 124
 elif [ "$SSH_RC" -ne 0 ]; then
     exit "$SSH_RC"
 fi
-"${SCP[@]}" "$USER@$HOST:/tmp/rho_status.json" "$OUT"
-# Printed every run on purpose: this number is the early warning for the
-# growth above, and it is invisible unless the log carries it.
-echo "wrote $OUT from $USER@$HOST ($IID); snapshot query took ${ELAPSED}s"
+echo "snapshot finished but produced no status.json" >&2
+exit 1
