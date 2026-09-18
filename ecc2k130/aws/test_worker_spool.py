@@ -17,13 +17,14 @@ import contextlib
 import io
 import os
 import shutil
+import struct
 import tempfile
 import unittest
 from unittest import mock
 
 import worker
 from protocol import PROTOCOL, campaignContract, sha256File, verifyEnvelope
-from worker import RECORD_BYTES, Worker, readJson
+from worker import CKPT_MAGIC, RECORD_BYTES, Worker, readJson
 
 
 def record(i):
@@ -498,6 +499,53 @@ class Fragments(SpoolCase):
         self.assertTrue(os.path.exists(entry["payload"]))
         w.workLock.close()
         nxt = self.makeWorker()
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertNotEqual(int(nxt.state["slot"]), slot)
+        self.assertEqual(nxt.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        for key in storedKeys(self.storeRoot):
+            self.assertIn("slot-%05d" % slot, key)
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
+
+    def test_retiring_sends_a_payload_that_never_got_a_manifest(self):
+        """retireSlot clears state; the next claim must not sweep the fragment."""
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        entry = w.spoolEntries()[0]
+        os.remove(entry["manifest"])
+        self.assertTrue(os.path.exists(entry["payload"]))
+        _, err = quiet(w.retireSlot, slot, "checkpoint refused by the client")
+        self.assertIsNone(err)
+        self.assertEqual(w.state, {})
+        w.workLock.close()
+        nxt = self.makeWorker()
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertNotEqual(int(nxt.state["slot"]), slot)
+        self.assertEqual(nxt.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        for key in storedKeys(self.storeRoot):
+            self.assertIn("slot-%05d" % slot, key)
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
+
+    def test_a_missing_state_file_still_sends_a_fragment(self):
+        """state.json gone, checkpoint still names the slot the fragment belongs to."""
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        entry = w.spoolEntries()[0]
+        os.remove(entry["manifest"])
+        self.assertTrue(os.path.exists(entry["payload"]))
+        with open(w.ckptPath, "wb") as fh:
+            fh.write(struct.pack("<8s6IQ", CKPT_MAGIC, 1, 131, 2, 4, 64, slot + 1, 1))
+        os.remove(w.statePath)
+        w.workLock.close()
+        nxt = self.makeWorker()
+        self.assertEqual(nxt.state, {})
         out, err = quiet(nxt.claimSlot)
         self.assertIsNone(err, out)
         self.assertNotEqual(int(nxt.state["slot"]), slot)

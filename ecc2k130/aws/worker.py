@@ -136,6 +136,26 @@ def checkpointIter(path):
     return struct.unpack_from("<Q", head, CKPT_ITER_OFFSET)[0]
 
 
+def checkpointSlot(path):
+    """slot = run-id - 1 from a checkpoint still on disk, or None.
+
+    retireSlot clears state.json and a crash can lose it; the checkpoint
+    header still names the walk those leftover spool files were cut for.
+    """
+    for candidate in (path, path + ".snap", path + ".remote"):
+        try:
+            with open(candidate, "rb") as fh:
+                head = fh.read(CKPT_ITER_OFFSET)
+        except OSError:
+            continue
+        if len(head) < CKPT_ITER_OFFSET or head[:8] != CKPT_MAGIC:
+            continue
+        runId = struct.unpack_from("<I", head, 8 + 5 * 4)[0]
+        if 1 <= runId <= MAX_SLOT + 1:
+            return runId - 1
+    return None
+
+
 def instanceId():
     try:
         req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
@@ -790,8 +810,7 @@ class Worker:
             # so sweepSpool cannot drop the only copy and creditSpoolEntry
             # cannot treat those records as a prefix of the new empty file.
             old = self.state.get("slot")
-            if old is not None:
-                self.completeSpoolFragments(old)
+            self.completeSpoolFragments(old)
             self.detachSpoolFromLiveFile()
             for name in ("dp.bin", "walk.ck", "walk.ck.snap", "walk.ck.remote"):
                 p = os.path.join(self.work, name)
@@ -831,6 +850,11 @@ class Worker:
 
     def retireSlot(self, slot, reason):
         log("retiring slot %d: %s" % (slot, reason))
+        # Finish payload-only fragments while this slot is still known.
+        # Clearing state below is what makes the next claimSlot see no
+        # prior slot; without a manifest, sweepSpool would then drop them
+        # once that claim deletes dp.bin.
+        self.completeSpoolFragments(slot)
         if os.path.exists(self.ckptPath):
             self.store.put(self.ckptPath, "ckpt/retired/slot-%05d.ck" % slot)
         self.slots.release(slot, self.owner, state="retired", extra={"reason": reason})
@@ -927,8 +951,20 @@ class Worker:
         would drop a lone payload as a fragment whose records are still in
         dp.bin -- true only until claimSlot deletes that file on a slot
         change.  The payload's name is the basename of its final key.
+        retireSlot clears state and a missing state.json leaves slot None;
+        recover it from a leftover manifest or a local checkpoint rather
+        than skip and let sweepSpool drop the only copy.
         """
-        if slot is None or not os.path.isdir(self.spoolDir):
+        if not os.path.isdir(self.spoolDir):
+            return
+        if slot is None:
+            for entry in self.spoolEntries():
+                if entry.get("slot") is not None:
+                    slot = int(entry["slot"])
+                    break
+        if slot is None:
+            slot = checkpointSlot(self.ckptPath)
+        if slot is None:
             return
         claimed = {e["name"] for e in self.spoolEntries()}
         fallbackOffset = int(self.state.get("dpOffset", 0))
@@ -983,9 +1019,13 @@ class Worker:
         for entry in self.spoolEntries():
             known.update((entry["name"], entry["name"] + ".json",
                           entry["name"] + SPOOL_MANIFEST))
+        live = os.path.exists(self.dpPath)
         for name in sorted(os.listdir(self.spoolDir)):
             path = os.path.join(self.spoolDir, name)
             if name in known or not os.path.isfile(path):
+                continue
+            if not live and (name.endswith(".bin") or name.endswith(".bin.json")):
+                # dp.bin is gone, so these records are not 'still in dp.bin'.
                 continue
             log("spool: discarding fragment %s (%d bytes); its records are still in dp.bin"
                 % (name, os.path.getsize(path)))
