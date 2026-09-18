@@ -307,8 +307,15 @@
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference; their existing
-      500×-or-worse rho verdict is unchanged. The newer binary-field solver and
+      their generic-group floor and matched Pollard rho reference. On elliptic curves the
+      500×-or-worse rho verdict is unchanged, and ECC2K-130 homogeneous relations are
+      now closed in both memory regimes. The verdict is no longer blanket: on
+      hyperelliptic Jacobians at genus 3 and 4, index calculus measures
+      <strong>below</strong> a real distinguished-point rho — 0.21 at
+      <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
+      exponent matching the derived law. That is a toy-size result
+      (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
+      any deployed curve. The newer binary-field solver and
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -1386,6 +1393,111 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <section aria-labelledby="homogeneous-relations" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="homogeneous-relations">ECC2K-130: homogeneous relations, closed in both memory regimes</h2>
+    <p>A factor base of <code>B</code> abscissae has about <code>B<sup>m</sup>/m!</code>
+    unordered <code>m</code>-multisets, each summing to a fixed point with probability about
+    <code>1/r</code>, so <code>m</code>-point relations begin to exist only at
+    <code>B<sub>m</sub> = (m! r)<sup>1/m</sup></code>. That is a counting floor no support
+    structure moves, because a structured base of size <code>B</code> has exactly as many
+    multisets as a random one. Reference: rho at 2<sup>60.809</sup>, cited from
+    <code>experiments/ecc2k130_extension_field_boundary.json</code>.</p>
+    <table><thead><tr>
+      <th scope="col">Regime</th><th scope="col" class="n">log&#8322; ops</th>
+      <th scope="col" class="n">vs rho</th><th scope="col" class="n">log&#8322; memory</th>
+      <th scope="col" class="n">BSGS at that memory</th><th scope="col">Class</th>
+    </tr></thead><tbody>
+      <tr><td>Best cell, no table (Frobenius-collapsed)</td><td class="n">124.97</td><td class="n">2^+64.16</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Best cell, tabulated (<code>m = 8</code>, <code>split = m</code>)</td><td class="n">68.17</td><td class="n">2^+7.36</td><td class="n">66.70</td><td class="n">66.70 &mdash; <strong>IC loses by 2^1.47</strong></td><td><span class="chip relabel">relabelling</span></td></tr>
+      <tr><td>Free-oracle floor, <code>m = 4</code> (not an algorithm)</td><td class="n">56.40</td><td class="n">2^&minus;4.41</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td><span class="chip">floor</span></td></tr>
+    </tbody></table>
+    <p>There is no regime in which it wins. Cheap on memory it is 2<sup>64</sup> behind rho;
+    expensive on memory it is 2<sup>7.4</sup> behind rho <em>and</em> behind plain baby-step
+    giant-step using the same table &mdash; the tabulated cells beat rho only by spending
+    memory, and a generic algorithm spends it better. The Frobenius collapse
+    (<code>|F|/n</code> unknowns and relations) is already priced in and buys 2<sup>7</sup>.
+    The binding constraint is the decomposition oracle, which would have to beat its own
+    2<sup>77.91</sup> search space by 2<sup>72.19</sup>.</p>
+    <p>Six three-point supports were swept complete &mdash; every pair with repetition, the
+    third abscissa solved from Semaev&rsquo;s <code>S3</code> rather than scanned. Weight-two
+    (<code>B</code>&thinsp;=&thinsp;4262), weight&thinsp;&le;&thinsp;two, the &sigma;-stable
+    part, two matched random bases, and a base built from the public <code>P, Q</code> with
+    random coefficients: <strong>one relation between them</strong>, and it is
+    <code>(0,1) + (1,0) + (1,0) = O</code>, the <code>Z/4</code> of <code>E(F&#8322;)</code>,
+    on points failing <code>[r]R = O</code> &mdash; the cofactor, not the subgroup.</p>
+    <table><thead><tr>
+      <th scope="col">Support</th><th scope="col" class="n">relations</th>
+      <th scope="col" class="n">predicted</th><th scope="col" class="n">useful rank</th>
+      <th scope="col">What they are</th>
+    </tr></thead><tbody>
+      <tr><td>Constructed from <code>P,Q</code>, small coefficients</td><td class="n">2,045,254</td><td class="n">2^&minus;95.69</td><td class="n"><strong>0</strong></td><td>construction rows, <code>&sum;u = &sum;v = 0</code></td></tr>
+      <tr><td>Constructed from <code>P,Q</code>, random coefficients</td><td class="n">0</td><td class="n">2^&minus;95.69</td><td class="n">0</td><td>&mdash;</td></tr>
+      <tr><td>Weight-two, &sigma;-stable, four-point</td><td class="n">88</td><td class="n">2^&minus;93.23</td><td class="n"><strong>0</strong></td><td>Frobenius identities, 88 of 88</td></tr>
+      <tr><td>Weight-two, complete, four-point</td><td class="n">338</td><td class="n">2^&minus;85.36</td><td class="n"><strong>0</strong></td><td>Frobenius identities, 338 of 338</td></tr>
+      <tr><td>Random matched, four-point</td><td class="n">0</td><td class="n">2^&minus;85.36</td><td class="n">0</td><td>false positives 645 vs 600 predicted</td></tr>
+    </tbody></table>
+    <p><strong>Structure can beat the counting floor, and what it produces carries no
+    information.</strong> <code>#E(F&#8322;) = 4</code> gives Koblitz trace
+    <code>t = &minus;1</code>, so Frobenius satisfies
+    <code>&sigma;&sup2; + &sigma; + 2 = 0</code> and
+    <code>&sigma;&sup2;(R) + &sigma;(R) + [2]R = O</code> for <em>every</em> point of the curve,
+    the challenge <code>P</code> and <code>Q</code> included. On a &sigma;-stable support that
+    is a free four-point relation, arriving at roughly 2<sup>100</sup> above the random rate.
+    In <code>(u,v)</code> coordinates it gives
+    <code>(2 + &lambda; + &lambda;&sup2;)(u,v) = (0,0)</code>, a construction row. So relation
+    count is not evidence and relation rank is not evidence: both can be driven arbitrarily
+    high by choosing the support, and the only quantity that means anything &mdash; rows whose
+    <code>&sum;v</code> is a unit mod <code>r</code> &mdash; is zero everywhere.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_relations/results/boundary.json">boundary.json</a>,
+    <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_relations/results/summary.json">three-point sweeps</a>,
+    <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_relations/results_f4/four_point_summary.json">four-point sweeps</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_RELATION_SWEEPS.md">report</a>.
+    Scope: this closes homogeneous-relation index calculus at <code>m &le; 8</code> on this
+    curve. It says nothing about decomposition-based index calculus, priced separately
+    above.</p>
+  </section>
+
+  <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="genus-crossover">Hyperelliptic: the crossover has a measured exponent</h2>
+    <p>The one family in this ledger that goes under a real rho. With <code>N</code> the
+    subgroup order, rho costs <code>&radic;N</code> at any genus while the relation stage is
+    <code>(m+1)&middot;g!</code>, so
+    <code>S<sub>ic</sub>/S<sub>rho</sub> &prop; g!&middot;N<sup>1/g &minus; 1/2</sup></code>.
+    Pre-registered before measuring, with its falsification list, in
+    <code>RESEARCH_HYPERELLIPTIC_IC_RHO.md</code>.</p>
+    <table><thead><tr>
+      <th scope="col" class="n">g</th><th scope="col" class="n">predicted slope</th>
+      <th scope="col" class="n">measured (corrected)</th><th scope="col" class="n">R&sup2;</th>
+      <th scope="col" class="n">best ratio</th><th scope="col">Class</th>
+    </tr></thead><tbody>
+      <tr><td class="n">2</td><td class="n">0.000</td><td class="n">&minus;0.027</td><td class="n">0.24</td><td class="n">0.94</td><td><span class="chip">baseline, no trend</span></td></tr>
+      <tr><td class="n">3</td><td class="n">&minus;0.167</td><td class="n"><strong>&minus;0.154</strong></td><td class="n">0.98</td><td class="n">0.38 at <code>N</code>&thinsp;=&thinsp;2<sup>22</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+      <tr><td class="n">4</td><td class="n">&minus;0.250</td><td class="n"><strong>&minus;0.275</strong></td><td class="n">0.96</td><td class="n"><strong>0.21</strong> at <code>N</code>&thinsp;=&thinsp;2<sup>24</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+    </tbody></table>
+    <p><strong>Two corrections belong on this row and both cut against it.</strong> The fit was
+    pre-registered against <code>log&#8322; p</code> with slopes <code>1 &minus; g/2</code>, and
+    genus 4 missed it at &minus;1.611 against &minus;1.0. The law is not wrong; the step from
+    <code>N</code> to <code>p</code> is, and it was ours: the harness picks a prime-order
+    subgroup above <code>lo/4</code>, and <code>N</code> measures as
+    <code>p<sup>1.91</sup></code>, <code>p<sup>3.20</sup></code> and
+    <code>p<sup>5.94</sup></code>. Restated against <code>N</code>, every genus lands inside
+    the band.</p>
+    <p>And the reference degrades where it matters. <code>S<sub>walk</sub></code>, rho&rsquo;s
+    walk alone, must sit near <code>&radic;(&pi;/2) = 1.2533</code>; it drifts to 1.71, 1.82
+    and <strong>2.10</strong> on the three largest rows while genus 2 stays flat near 1.3. A
+    reference that worsens as the group grows flatters the algorithm under study, so every
+    ratio here renormalises rho&rsquo;s walk to the ideal and leaves its measured
+    precomputation alone. The best row reads <strong>0.13 raw and 0.21 corrected</strong>: the
+    correction nearly halves the claim, and that row&rsquo;s walk is 68% above ideal, so it is
+    also the least trustworthy correction. <strong>0.21 is the number to quote</strong>, and
+    the walk needs fixing before it is quoted hard.</p>
+    <p>Scope: <code>p &le; 251</code>, <code>N &le; 2<sup>24</sup></code>, one machine, full
+    degree-1 factor base, every run returning its verified <code>k</code>. The
+    <code>O(p)</code> factor-base build that dominates at cryptographic size is not modelled.
+    This is a statement about the shape of the curve, not its position. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_exponent_fit.json">hyperelliptic_exponent_fit.json</a>.</p>
+  </section>
+
   <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
     <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
     <p>Completed on one RTX PRO 4500 Blackwell Server Edition. All device and integration
@@ -1399,7 +1511,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     The historical 14.637530 B/s RTX PRO 6000 result is a different GPU, not a matched control.</p>
     <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/native-candidates/g7/summary.json">G7 measurement receipt</a>;
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/G7-NATIVE-RESULTS.md">experiment report and raw output</a>.</p>
-  </section>>>>>>>> 882ac7c2 (Add ECC performance dashboard and interactive algorithm lab)
+  </section>
 
   <footer>
     <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
@@ -1675,7 +1787,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <tr><td>dense</td><td>9.221e+05</td><td>0.999</td><td>22.13</td><td>3.317e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>excess8</td><td>9.217e+05</td><td>0.9986</td><td>22.12</td><td>3.316e+07</td><td>36/36</td><td>engineering experiment</td></tr>
 <tr><td>window8</td><td>7.858e+05</td><td>0.8514</td><td>18.86</td><td>2.827e+07</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+<tr><td>rho</td><td>4.166e+04</td><td>0.04514</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1894,7 +2006,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>3.171e+04</td><td>1</td><td>0.7422</td><td>1.141e+06</td><td>36/36</td><td>reference</td></tr>
 <tr><td>tiny2_cert_batch4</td><td>3.177e+04</td><td>1.002</td><td>0.7438</td><td>1.143e+06</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<tr><td>rho</td><td>4.272e+04</td><td>1.347</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -1923,7 +2035,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
 <tr><td>incumbent</td><td>1.425e+04</td><td>1</td><td>0.5598</td><td>5.128e+05</td><td>36/36</td><td>reference</td></tr>
 <tr><td>fastcurve_batch4</td><td>1.431e+04</td><td>1.004</td><td>0.5622</td><td>5.149e+05</td><td>36/36</td><td>engineering experiment</td></tr>
-<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<tr><td>rho</td><td>2.546e+04</td><td>1.786</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table>
 <caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
@@ -2049,7 +2161,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       log ratios. The 28 B/s RTX PRO 6000 goal remains unmet; defaults remain unchanged.</p>
     <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
       <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
-  </section>>>>>>>> f1cbfda7 (Accelerate Koblitz arithmetic and add audited AutoLab harness)
+  </section>
 <!-- BEGIN ic-tournament-round-autolab-20260915 -->
 <section class="panel" id="ic-tournament-round-autolab-20260915">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -2179,7 +2291,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 </tbody></table></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
-<!-- END ic-tournament-round-20260915t224645z -->>>>>>>> 5c242586 (Audit single-target IC policy and implementation tournaments)
+<!-- END ic-tournament-round-20260915t224645z -->
 <!-- BEGIN ic-tournament-round-0006b-single -->
 <section class="panel" id="ic-tournament-round-0006b-single">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
