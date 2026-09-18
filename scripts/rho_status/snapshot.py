@@ -22,6 +22,9 @@ from datetime import datetime, timezone
 
 DEFAULT_CAMPAIGN = "ecc2k-130"
 SCHEMA_VERSION = 1
+# The walker hop allows 900 s (RHO_REMOTE_TIMEOUT). Leave the read, the prune
+# and the copy back their share of it; an unfinished backfill resumes next run.
+DEFAULT_BACKFILL_BUDGET = 600
 CLAIM_BOUNDARY = (
     "Public research campaign aggregates for Certicom ECC2K-130 distinguished-point "
     "collection. Not a discrete-log recovery, not a verified collision, and not a "
@@ -45,6 +48,31 @@ CLAIM_BOUNDARY = (
 # backfills it once, and installs a statement-level trigger so the ingest's
 # INSERT ... SELECT keeps the buckets current without a code deploy on that
 # host. Later snapshots read the rollup.
+#
+# The first shape of that backfill was one statement under SHARE on
+# distinguished_points, and it cost more than the scan it replaced. At 187 M
+# rows it did not finish inside its 800 s timeout, so from 2026-09-18T16:00Z
+# every 15-minute run took the lock, held the ingest's INSERTs behind it for
+# the whole attempt, timed out, rolled back, and left ready=false for the next
+# one to repeat. The store went 76 minutes without ingesting an object and its
+# own status write took 2,916 s against the 143 s it had measured; the page
+# stayed on the 11:25Z snapshot either way. A backfill that blocks the thing
+# it is reporting on is worse than no backfill.
+#
+# So the work is chunked by hour, which is the grain the rollup is keyed on and
+# about a million rows here, and each hour is one absolute upsert:
+#
+#   INSERT ... SELECT count(*) ... GROUP BY hour, worker
+#   ON CONFLICT DO UPDATE SET dps = EXCLUDED.dps
+#
+# One statement, so one snapshot, which is what makes it safe to run beside the
+# trigger without locking the table or raising the isolation level. A row the
+# trigger commits before that snapshot is inside the count and the trigger's
+# increment is overwritten by it; a row it commits after blocks on the row lock
+# and its increment lands on top. Either way the bucket counts it once, and
+# rerunning an hour is a no-op, so a run that stops mid-backfill leaves the
+# next one a cursor and nothing to undo. rho_dp_backfill() is a procedure
+# rather than a script because it commits per hour and stops on a deadline.
 
 ENSURE_SQL = r"""
 CREATE TABLE IF NOT EXISTS rho_dp_hour (
@@ -68,6 +96,8 @@ CREATE TABLE IF NOT EXISTS rho_dp_meta (
   ready         boolean NOT NULL DEFAULT false,
   backfilled_at timestamptz
 );
+ALTER TABLE rho_dp_meta ADD COLUMN IF NOT EXISTS backfill_cursor timestamptz;
+ALTER TABLE rho_dp_meta ADD COLUMN IF NOT EXISTS backfill_until timestamptz;
 CREATE INDEX IF NOT EXISTS rho_dp_hour_hour
   ON rho_dp_hour (campaign_id, hour);
 CREATE INDEX IF NOT EXISTS rho_dp_recent_found_at
@@ -132,44 +162,116 @@ SELECT COALESCE(
 );
 """
 
-# One scan of distinguished_points, and only on a run that saw ready=false.
-# Grouping by (worker_id, found_at) is one row per ingested object; the hour
-# buckets and the rolling-window table are derived from that. Later snapshots
-# never reach this statement. The Python caller must not run it when ready.
-BACKFILL_SQL = r"""
-BEGIN ISOLATION LEVEL REPEATABLE READ;
-SET LOCAL statement_timeout = '800s';
-LOCK TABLE distinguished_points IN SHARE MODE;
-INSERT INTO rho_dp_meta (campaign_id, ready)
-VALUES ('{{campaign}}', false)
-ON CONFLICT (campaign_id) DO NOTHING;
-DELETE FROM rho_dp_hour WHERE campaign_id = '{{campaign}}';
-DELETE FROM rho_dp_recent WHERE campaign_id = '{{campaign}}';
-WITH objs AS MATERIALIZED (
-  SELECT campaign_id, worker_id, found_at, count(*)::bigint AS dps
-  FROM distinguished_points
-  WHERE campaign_id = '{{campaign}}'
-  GROUP BY 1, 2, 3
-), ins_hour AS (
-  INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
-  SELECT campaign_id,
-         date_trunc('hour', found_at),
-         worker_id,
-         sum(dps),
-         min(found_at),
-         max(found_at)
-  FROM objs
-  GROUP BY 1, 2, 3
-), ins_recent AS (
-  INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
-  SELECT campaign_id, worker_id, found_at, dps
-  FROM objs
-  WHERE found_at > now() - interval '7 days'
-)
-UPDATE rho_dp_meta
-SET ready = true, backfilled_at = now()
-WHERE campaign_id = '{{campaign}}';
-COMMIT;
+PROGRESS_SQL = r"""
+SELECT COALESCE(backfill_cursor::text, ''), COALESCE(backfill_until::text, '')
+FROM rho_dp_meta WHERE campaign_id = '{{campaign}}';
+"""
+
+# One hour of distinguished_points per transaction, only on a run that saw
+# ready=false, and never a lock on the table the ingest is writing. Each hour is
+# one absolute upsert, so it may run beside the insert trigger (see the note
+# above) and rerunning it changes nothing. lock_timeout is short because the
+# only thing that can hold these rollup rows is another copy of this backfill;
+# waiting out its statement timeout would spend this run's whole budget on one
+# hour.
+BACKFILL_PROC_SQL = r"""
+CREATE OR REPLACE PROCEDURE rho_dp_backfill(p_campaign text, p_deadline timestamptz)
+LANGUAGE plpgsql
+AS $proc$
+DECLARE
+  cur  timestamptz;
+  lim  timestamptz;
+  nxt  timestamptz;
+  hrs  integer := 0;
+BEGIN
+  INSERT INTO rho_dp_meta (campaign_id, ready)
+  VALUES (p_campaign, false)
+  ON CONFLICT (campaign_id) DO NOTHING;
+
+  SELECT backfill_cursor, backfill_until INTO cur, lim
+  FROM rho_dp_meta WHERE campaign_id = p_campaign;
+
+  IF lim IS NULL THEN
+    SELECT date_trunc('hour', min(found_at)),
+           date_trunc('hour', max(found_at)) + interval '1 hour'
+      INTO cur, lim
+    FROM distinguished_points WHERE campaign_id = p_campaign;
+    IF lim IS NULL THEN
+      UPDATE rho_dp_meta SET ready = true, backfilled_at = now()
+      WHERE campaign_id = p_campaign;
+      RAISE NOTICE 'rho_dp_backfill: no rows for %, rollup is trivially ready', p_campaign;
+      RETURN;
+    END IF;
+    UPDATE rho_dp_meta SET backfill_cursor = cur, backfill_until = lim
+    WHERE campaign_id = p_campaign;
+    COMMIT;
+  END IF;
+
+  LOOP
+    EXIT WHEN cur >= lim;
+    IF clock_timestamp() > p_deadline THEN
+      RAISE NOTICE 'rho_dp_backfill: budget spent at % after % hour(s)', cur, hrs;
+      RETURN;
+    END IF;
+
+    -- Skip a gap in one index probe rather than a transaction per empty hour.
+    SELECT date_trunc('hour', min(found_at)) INTO nxt
+    FROM distinguished_points
+    WHERE campaign_id = p_campaign AND found_at >= cur;
+    IF nxt IS NULL OR nxt >= lim THEN
+      cur := lim;
+      EXIT;
+    END IF;
+    IF nxt > cur THEN
+      cur := nxt;
+    END IF;
+
+    SET LOCAL lock_timeout = '15s';
+
+    INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
+    SELECT campaign_id, date_trunc('hour', found_at), worker_id,
+           count(*)::bigint, min(found_at), max(found_at)
+    FROM distinguished_points
+    WHERE campaign_id = p_campaign
+      AND found_at >= cur
+      AND found_at < cur + interval '1 hour'
+    GROUP BY 1, 2, 3
+    ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
+      dps = EXCLUDED.dps,
+      first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
+      last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at);
+
+    IF cur + interval '1 hour' > now() - interval '7 days' THEN
+      INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
+      SELECT campaign_id, worker_id, found_at, count(*)::bigint
+      FROM distinguished_points
+      WHERE campaign_id = p_campaign
+        AND found_at >= cur
+        AND found_at < cur + interval '1 hour'
+      GROUP BY 1, 2, 3
+      ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
+        dps = EXCLUDED.dps;
+    END IF;
+
+    cur := cur + interval '1 hour';
+    UPDATE rho_dp_meta SET backfill_cursor = cur WHERE campaign_id = p_campaign;
+    COMMIT;
+    hrs := hrs + 1;
+  END LOOP;
+
+  UPDATE rho_dp_meta
+  SET ready = true, backfilled_at = now(), backfill_cursor = lim
+  WHERE campaign_id = p_campaign;
+  COMMIT;
+  RAISE NOTICE 'rho_dp_backfill: complete through % after % hour(s)', lim, hrs;
+END
+$proc$;
+"""
+
+# CALL, not BEGIN: the procedure commits per hour, which a psql transaction
+# block would forbid.
+BACKFILL_CALL_SQL = r"""
+CALL rho_dp_backfill('{{campaign}}', clock_timestamp() + interval '{{budget}} seconds');
 """
 
 PRUNE_SQL = r"""
@@ -254,7 +356,7 @@ WHERE c.campaign_id = '{{campaign}}';
 # Kept only so a grep for the old one-pass scan still finds the backfill, which
 # is the one remaining full-table read, and so tests can pin that the published
 # document is assembled from the rollup.
-SNAPSHOT_SQL = BACKFILL_SQL
+SNAPSHOT_SQL = BACKFILL_PROC_SQL
 
 
 FORBIDDEN_PUBLIC_KEYS = (
@@ -395,15 +497,44 @@ def rollup_ready_from_text(text):
     return token[-1].lower() in ("t", "true", "1")
 
 
-def psql_json(database_url, campaign):
+def backfill_progress(database_url, campaign):
+    text = psql_script(database_url, render_sql(PROGRESS_SQL, campaign), tuples_only=True)
+    for line in reversed(text.strip().splitlines()):
+        if "|" in line:
+            cursor, until = line.split("|", 1)
+            return cursor.strip() or None, until.strip() or None
+    return None, None
+
+
+def run_backfill(database_url, campaign, budget):
+    """Advance the rollup backfill by at most `budget` seconds of hours."""
+    sys.stderr.write(
+        "rho_status: backfilling rho_dp rollup by hour, budget %ds\n" % budget)
+    psql_script(database_url, BACKFILL_PROC_SQL, tuples_only=False)
+    psql_script(
+        database_url,
+        render_sql(BACKFILL_CALL_SQL, campaign).replace("{{budget}}", str(int(budget))),
+        tuples_only=False,
+    )
+    ready_text = psql_script(database_url, render_sql(READY_SQL, campaign), tuples_only=True)
+    return rollup_ready_from_text(ready_text)
+
+
+def psql_json(database_url, campaign, budget=DEFAULT_BACKFILL_BUDGET):
     sys.stderr.write("rho_status: ensuring rho_dp rollup tables and insert trigger\n")
     psql_script(database_url, ENSURE_SQL, tuples_only=False)
     ready_text = psql_script(database_url, render_sql(READY_SQL, campaign), tuples_only=True)
     if rollup_ready_from_text(ready_text):
         sys.stderr.write("rho_status: rollup ready, skipping distinguished_points scan\n")
-    else:
-        sys.stderr.write("rho_status: backfilling rho_dp rollup from distinguished_points\n")
-        psql_script(database_url, render_sql(BACKFILL_SQL, campaign), tuples_only=False)
+    elif not run_backfill(database_url, campaign, budget):
+        # Not an error, and not something to publish an undercount over: the
+        # cursor moved, so say how far and let the next run carry on. Every
+        # hour already staged stays staged.
+        cursor, until = backfill_progress(database_url, campaign)
+        raise RuntimeError(
+            "campaign %s rollup backfill is at %s of %s; rerun to resume"
+            % (campaign, cursor or "the start", until or "an unknown end")
+        )
     psql_script(database_url, PRUNE_SQL, tuples_only=False)
     text = psql_script(database_url, render_sql(READ_SQL, campaign), tuples_only=True)
     lines = [line for line in text.strip().splitlines() if line.startswith("{")]
@@ -414,15 +545,15 @@ def psql_json(database_url, campaign):
     return json.loads(lines[-1])
 
 
-def take_snapshot(database_url, campaign, source="direct"):
+def take_snapshot(database_url, campaign, source="direct", budget=DEFAULT_BACKFILL_BUDGET):
     if not database_url:
         raise SystemExit("DATABASE_URL is required")
     # The walker hop has psql and often no psycopg. Prefer psql so the
-    # multi-statement ensure/backfill script is one session with COMMIT
-    # between the trigger becoming visible and the REPEATABLE READ backfill.
+    # ensure/backfill script is one session and the backfill procedure can
+    # commit each hour as it goes.
     if not shutil.which("psql"):
         raise SystemExit("psql is required to take a snapshot")
-    row = psql_json(database_url, campaign)
+    row = psql_json(database_url, campaign, budget)
     if isinstance(row, str):
         row = json.loads(row)
     snapshot = normalize(row, campaign, source)
@@ -436,8 +567,14 @@ def main(argv=None):
     parser.add_argument("--campaign", default=os.environ.get("RHO_CAMPAIGN", DEFAULT_CAMPAIGN))
     parser.add_argument("--out", default="-")
     parser.add_argument("--source", default="direct")
+    parser.add_argument(
+        "--backfill-budget",
+        type=int,
+        default=int(os.environ.get("RHO_BACKFILL_BUDGET", DEFAULT_BACKFILL_BUDGET)),
+        help="seconds of rollup backfill this run may do before deferring the rest",
+    )
     args = parser.parse_args(argv)
-    snapshot = take_snapshot(args.database_url, args.campaign, args.source)
+    snapshot = take_snapshot(args.database_url, args.campaign, args.source, args.backfill_budget)
     text = json.dumps(snapshot, indent=2, sort_keys=True) + "\n"
     if args.out == "-":
         sys.stdout.write(text)

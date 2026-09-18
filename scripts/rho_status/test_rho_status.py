@@ -20,7 +20,8 @@ from render import (
     merge_history,
 )
 from snapshot import (
-    BACKFILL_SQL,
+    BACKFILL_CALL_SQL,
+    BACKFILL_PROC_SQL,
     CLAIM_BOUNDARY,
     ENSURE_SQL,
     FORBIDDEN_PUBLIC_KEYS,
@@ -157,8 +158,6 @@ class WorkflowTests(unittest.TestCase):
         # timeout tick under 540s, and the next scheduled run died. The
         # published document is assembled from rho_dp_hour / rho_dp_recent.
         # distinguished_points is read only by the one-time backfill.
-        self.assertEqual(BACKFILL_SQL.count("FROM distinguished_points"), 1)
-        self.assertIn("LOCK TABLE distinguished_points IN SHARE MODE", BACKFILL_SQL)
         self.assertNotIn("FROM distinguished_points", READ_SQL)
         self.assertIn("FROM rho_dp_hour", READ_SQL)
         self.assertIn("FROM rho_dp_recent", READ_SQL)
@@ -168,12 +167,56 @@ class WorkflowTests(unittest.TestCase):
         # Ingest INSERTs fire this as the rho/dp-rds role, which is not the
         # walker DATABASE_URL role that creates the rollup tables.
         self.assertIn("SECURITY DEFINER", ENSURE_SQL)
-        self.assertGreaterEqual(BACKFILL_SQL.count("{{campaign}}"), 1)
+        self.assertIn("{{campaign}}", BACKFILL_CALL_SQL)
         self.assertIn("{{campaign}}", READ_SQL)
         with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
             source = fh.read()
         self.assertNotIn('replace("%(campaign)s", "%s")', source)
         self.assertIn("if rollup_ready_from_text", source)
+
+    def test_backfill_never_locks_the_table_the_ingest_writes(self):
+        # 2026-09-18: the backfill's first shape held SHARE on
+        # distinguished_points for its whole 800s attempt, which at 187M rows
+        # never completed. Every 15-minute run blocked the ingest, timed out,
+        # rolled back and left ready=false: the store went 76 minutes without
+        # ingesting an object and the page never moved. A backfill that blocks
+        # the thing it reports on is worse than no backfill.
+        self.assertNotIn("LOCK TABLE", BACKFILL_PROC_SQL)
+        self.assertNotIn("SHARE MODE", BACKFILL_PROC_SQL)
+        # Hour-sized, cursor-resumable, and bounded by a deadline the caller
+        # sets, so a run that does not finish leaves the next one less to do.
+        self.assertIn("backfill_cursor", BACKFILL_PROC_SQL)
+        self.assertIn("p_deadline", BACKFILL_PROC_SQL)
+        self.assertIn("interval '1 hour'", BACKFILL_PROC_SQL)
+        self.assertIn("COMMIT;", BACKFILL_PROC_SQL)
+        self.assertIn("backfill_cursor", ENSURE_SQL)
+        self.assertIn("backfill_until", ENSURE_SQL)
+
+    def test_each_hour_is_one_absolute_upsert_so_the_trigger_cannot_double_count(self):
+        # The trigger adds to a bucket; the backfill sets it. Both are safe
+        # together only because each hour is a single statement: a row the
+        # trigger commits before that statement's snapshot is inside the
+        # count and its increment is overwritten, and one it commits after
+        # blocks on the row lock and lands on top. A DELETE-then-INSERT pair
+        # would need REPEATABLE READ to say the same thing, and rerunning an
+        # hour would stop being free.
+        self.assertNotIn("DELETE FROM rho_dp_hour", BACKFILL_PROC_SQL)
+        self.assertNotIn("DELETE FROM rho_dp_recent", BACKFILL_PROC_SQL)
+        self.assertIn("dps = EXCLUDED.dps", BACKFILL_PROC_SQL)
+        self.assertEqual(BACKFILL_PROC_SQL.count("ON CONFLICT"), 3)
+        # A procedure, because a function or a plain script cannot COMMIT per
+        # hour, and CALL rather than BEGIN for the same reason.
+        self.assertIn("CREATE OR REPLACE PROCEDURE rho_dp_backfill", BACKFILL_PROC_SQL)
+        self.assertIn("CALL rho_dp_backfill", BACKFILL_CALL_SQL)
+        self.assertNotIn("BEGIN;", BACKFILL_CALL_SQL)
+
+    def test_an_unfinished_backfill_defers_rather_than_publishing_an_undercount(self):
+        with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("rerun to resume", source)
+        self.assertIn("backfill_progress", source)
+        # A partial rollup undercounts dps, and the page's headline is dps.
+        self.assertIn("m.ready", READ_SQL)
 
     def test_campaign_id_is_a_literal_not_concatenated_sql(self):
         self.assertEqual(sql_campaign("ecc2k-130"), "ecc2k-130")
@@ -237,7 +280,13 @@ class WorkflowTests(unittest.TestCase):
         with open(fetch, encoding="utf-8") as fh:
             script = fh.read()
         self.assertIn("RHO_REMOTE_TIMEOUT:-900", script)
-        self.assertIn("SET LOCAL statement_timeout = '800s'", BACKFILL_SQL)
+        # The backfill's budget has to leave the read, the prune and the copy
+        # back their share of the hop, and it is a budget rather than a
+        # statement timeout because the work now commits as it goes.
+        from snapshot import DEFAULT_BACKFILL_BUDGET
+
+        self.assertLess(DEFAULT_BACKFILL_BUDGET, 900)
+        self.assertGreaterEqual(DEFAULT_BACKFILL_BUDGET, 300)
 
 
 class HistoryTests(unittest.TestCase):
