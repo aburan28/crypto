@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import platform
+import random
 import sys
 import time
 
@@ -19,6 +20,8 @@ CODEGEN = os.path.join(ROOT, 'ecc2k130', 'codegen')
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, CODEGEN)
 
+import cnf as cnfmod
+import decomp
 import indexcalc
 import indexcalc_e2e as engine
 import indexcalc_pairs as pairs
@@ -74,12 +77,18 @@ def satDlp(m, variant, seed):
     }
 
 
-def pairVersusSat(m=9, weight=2, trials=16, seed=20260918):
-    """Same planted triples: pair lookup vs SAT, wall-clock only."""
+def pairVersusSat(m=9, weight=2, trials=16, seed=20260918, timeout=5):
+    """Same planted triples: pair lookup vs unbounded SAT, wall-clock only.
+
+    Uses the growth-ladder encoding (indexcalc.solveCnf), not the 0.25s /
+    2000-conflict e2e DLP budget.  That budget is a different instrument and
+    is already priced in sat_dlp.
+    """
     meter = engine.Ledger()
     context = engine.setup(m, weight, 3, meter)
     onb, curve, ell, generator, eigen, reps, lookup, _, _ = context
-    rng = __import__('random').Random(seed)
+    prog, roots = decomp.buildSystem(m, onb.n, 3, 12)
+    rng = random.Random(seed)
     points = list(lookup)
     pairTimes, satTimes = [], []
     pairHits = satHits = 0
@@ -93,22 +102,37 @@ def pairVersusSat(m=9, weight=2, trials=16, seed=20260918):
         pairTimes.append(time.perf_counter() - t0)
         pairHits += found is not None
         t0 = time.perf_counter()
-        row, detail = engine.decompose(context, target, 3, weight, 'candidate', meter)
+        c = cnfmod.Cnf()
+        pvars = decomp.encode(prog, roots, m, 3, weight,
+                              onb.toCoords(target[0]), c)
+        val, status = indexcalc.solveCnf(c, 0, timeout)
+        got = None
+        if status == 'sat':
+            coords = []
+            for v in pvars:
+                cc = 0
+                for j in range(m):
+                    if indexcalc.litValue(val, v[j], c):
+                        cc |= 1 << j
+                coords.append(cc)
+            got = indexcalc.liftAndCheck(onb, curve, coords, target)
+            status = 'solved' if got else 'spurious'
         satTimes.append(time.perf_counter() - t0)
-        satHits += row is not None
+        satHits += got is not None
         print('  trial %d pair=%.4fs sat=%.4fs pair_hit=%s sat_status=%s'
-              % (i, pairTimes[-1], satTimes[-1], found is not None, detail['status']),
+              % (i, pairTimes[-1], satTimes[-1], found is not None, status),
               flush=True)
     pairTimes.sort()
     satTimes.sort()
     return {
         'degree': m, 'weight': weight, 'trials': trials, 'seed': seed,
+        'timeout_s': timeout,
         'pair_hits': pairHits, 'sat_hits': satHits,
         'pair_median_s': pairTimes[len(pairTimes) // 2],
         'sat_median_s': satTimes[len(satTimes) // 2],
         'pair_total_s': sum(pairTimes), 'sat_total_s': sum(satTimes),
         'class': 'engineering',
-        'note': 'wall-clock on this host; SAT is CryptoMiniSat, pairs are exhaustive lookup',
+        'note': 'wall-clock on this host; unbounded CryptoMiniSat vs exhaustive pair lookup on the same planted triples',
     }
 
 
