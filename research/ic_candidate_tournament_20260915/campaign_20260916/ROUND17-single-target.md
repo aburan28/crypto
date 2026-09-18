@@ -146,8 +146,17 @@ the new arm is the certificate format alone; and `orbits`, `scan_io` plus
 `round17-orbits.patch`. Panel: the round-0016 eight cells — `13a0, 17a1, 19a0,
 23a0, 23a1, 31a0` with `19a1, 29a1` held out to confirmation and replay. Seed
 2026091717, pilot profile, one target per job, CPU 3, 60 s timeout,
-`--max-processes 3000` (2,268 trials: 36 aa, 72 smoke, 216 development, 216
-selection, 864 confirmation, 864 replay).
+`--max-processes 3000`. Trial count, corrected before any measured stage: this
+paragraph first said 2,268 trials (36 aa, 72 smoke, 216 development, 216
+selection, 864 confirmation, 864 replay), which was written for three IC arms
+before `orbits_rows` was added. With four IC arms and the implicit rho reference
+the stages are 36 aa, **90** smoke (6 cells x 3 repetitions x 5 arms), **270**
+development (18 cases x 3 x 5), 216 selection (the two best challengers, the
+incumbent and rho), 864 confirmation and 864 replay (incumbent, the provisional
+challenger and rho): **2,340 trials**, inside the 3,000 budget. The wrong
+figure is kept here because a pre-registration that silently changes is not
+one; the correction was made while `prepare` was still building and no trial
+had run.
 
 ## Boundary, floor, class, honesty
 

@@ -3,7 +3,8 @@
 losing cells with the frozen round-0016 worker, recording Ir (callgrind), native
 wall, base size, columns, trials and which pipeline ran. The table in
 ROUND17-single-target.md is this script's output. Run from the campaign root."""
-import json,os,sys,subprocess,statistics,time,re,collections
+import json,os,sys,subprocess,statistics,time,re,collections,tempfile
+_OUT=os.path.join(tempfile.gettempdir(),'round17_base_sweep.json')  # raw rows; the table below is the record
 sys.path.insert(0,'.')
 import tournament as T
 W='runs/round-0016/worker'
@@ -40,7 +41,7 @@ for cell in CELLS:
             rows.append(dict(cell=cell,case=c['id'],arm='ic',mult=m,points=m*n,ir=ir,rc=rc,wall=w,path=path,
                              fb=len(out.get('factor_base',[])) if out else None,cols=out.get('columns'),trials=out.get('trials')))
         print(cell,c['id'],'done',flush=True)
-json.dump(rows,open('/tmp/claude-0/-home-user/d851d573-3be8-5245-8e4e-603b7615435c/scratchpad/sweep17.json','w'))
+json.dump(rows,open(_OUT,'w'))
 # summary: per cell, median over fixtures of ic/rho ratio per multiplier
 by=collections.defaultdict(dict)
 for r in rows: by[(r['cell'],r['case'])][r['arm'],r['mult']]=r
@@ -55,3 +56,4 @@ for cell in CELLS:
             ok+=1; irs.append(ic['ir']/rho['ir']); ws.append(ic['wall']/rho['wall']); fbs.append(ic['fb']); cols.append(ic['cols'] or 0); tr.append(ic['trials'] or 0); paths.add(ic['path'])
         if irs: print(f"{cell:7} {m:>4} {statistics.median(irs):10.4f} {statistics.median(ws):12.4f} {statistics.median(fbs):7.0f} {statistics.median(cols):5.0f} {statistics.median(tr):7.0f} {','.join(sorted(paths)):>8} {ok:>3}")
         else: print(f"{cell:7} {m:>4} {'FAIL':>10}")
+print('raw rows written to',_OUT)

@@ -2,7 +2,8 @@
 """Byte-verify the round-0017 challenger against the oracle on every confirmation
 fixture of round 0016, then measure Ir (callgrind) and native wall per cell for
 challenger, scan_io and rho.  Usage: measure17.py CHALLENGER_BIN [reps]"""
-import json,os,sys,subprocess,statistics,time,re,collections,random
+import json,os,sys,subprocess,statistics,time,re,collections,tempfile
+_OUT=os.path.join(tempfile.gettempdir(),'round17_measure.json')  # raw rows; the table below is the record,random
 sys.path.insert(0,'.')
 import tournament as T
 from oracle import verify
@@ -46,4 +47,5 @@ for cell in cells:
     R=rows[cell]
     f=lambda a,b,key: gm([r[key][a]/r[key][b] for r in R])
     print(f"{cell:7} {f('ch','rho',0):10.4f} {f('scan_io','rho',0):11.4f} {f('ch','scan_io',0):10.4f} | {f('ch','rho',1):12.4f} {f('scan_io','rho',1):13.4f} {f('ch','scan_io',1):12.4f}")
-json.dump({c:[(i,w) for i,w in rows[c]] for c in cells},open('/tmp/claude-0/-home-user/d851d573-3be8-5245-8e4e-603b7615435c/scratchpad/measure17.json','w'))
+json.dump({c:[(i,w) for i,w in rows[c]] for c in cells},open(_OUT,'w'))
+print('raw rows written to',_OUT)
