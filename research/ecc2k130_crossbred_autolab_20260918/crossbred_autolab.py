@@ -513,7 +513,11 @@ def verify() -> dict[str, Any]:
         actual = sha256_file(log)
         if actual != expected:
             raise SystemExit(f"log hash mismatch: {actual} != {expected}")
-    return {"status": "PASS", "claim": str(claim_path.relative_to(REPO)), "log_sha256": expected}
+    try:
+        claim_rel = str(claim_path.relative_to(REPO))
+    except ValueError:
+        claim_rel = str(claim_path)
+    return {"status": "PASS", "claim": claim_rel, "log_sha256": expected}
 
 
 def promote() -> dict[str, Any]:
@@ -533,7 +537,11 @@ def promote() -> dict[str, Any]:
     if log.exists():
         (dest / "logs").mkdir()
         shutil.copy2(log, dest / "logs" / "bench.txt")
-    return {"status": "PASS", "evidence": str(dest.relative_to(REPO))}
+    try:
+        evidence_rel = str(dest.relative_to(REPO))
+    except ValueError:
+        evidence_rel = str(dest)
+    return {"status": "PASS", "evidence": evidence_rel}
 
 
 def main() -> None:
