@@ -136,7 +136,15 @@ int main() {
     std::printf("%s\n", bad ? "FAIL" : "PASS");
     if (badRoot || badSqrt || badHost || bad) return 1;
 
-    const int benchN = 188 * 512, steps = 4096;
+    cudaDeviceProp prop;
+    checked(cudaGetDeviceProperties(&prop, 0));
+    int residentBlocks = 0;
+    checked(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+        &residentBlocks, halveBench, ECC_THREADS, 0));
+    const int benchN = prop.multiProcessorCount * ECC_THREADS * residentBlocks;
+    const int steps = 4096;
+    std::printf("  benchmark occupancy: %d SMs x %d blocks x %d threads\n",
+                prop.multiProcessorCount, residentBlocks, ECC_THREADS);
     std::vector<P131> bx(benchN), by(benchN);
     for (int i = 0; i < benchN; ++i) {
         bx[i] = x[i % x.size()]; by[i] = y[i % y.size()];
