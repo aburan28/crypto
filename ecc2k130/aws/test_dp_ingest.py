@@ -303,6 +303,8 @@ class Passes(unittest.TestCase):
         self.addCleanup(setattr, dp_ingest, "pending", self.realPending)
         self.addCleanup(setattr, dp_ingest, "ingestObject", self.realIngest)
         self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest._failed.clear()
+        self.addCleanup(dp_ingest._failed.clear)
         dp_ingest.log = lambda msg: None
 
     def backlog(self, n):
@@ -347,6 +349,45 @@ class Passes(unittest.TestCase):
         self.assertEqual(objects, 4)  # the killed object retried, rest unharmed
         self.assertEqual(state["outstanding"], 0)
         self.assertGreaterEqual(len(self.conns), 2)  # it reconnected
+
+    def test_a_failed_slice_does_not_pin_the_rest_of_the_backlog(self):
+        # The bound takes the oldest `limit` keys. If those stay outstanding
+        # because they failed, the next pass would take the same slice and
+        # never reach the objects behind them.
+        items = self.backlog(4)
+        poison = {items[0][0], items[1][0]}
+        seen = []
+
+        def ingest(conn, s3, bucket, key, found_at):
+            seen.append(key)
+            if key in poison:
+                raise ValueError("object is unreadable")
+            return 100, 100
+
+        dp_ingest.ingestObject = ingest
+        _, objects, state = self.run_pass(limit=2)
+        self.assertEqual((objects, state["outstanding"]), (0, 4))
+        self.assertEqual(seen, [items[0][0], items[1][0]])
+        _, objects, state = self.run_pass(limit=2)
+        self.assertEqual((objects, state["outstanding"]), (2, 2))
+        self.assertEqual(seen[2:], [items[2][0], items[3][0]])
+
+    def test_failed_keys_are_retried_once_nothing_else_is_outstanding(self):
+        items = self.backlog(2)
+        seen = []
+
+        def ingest(conn, s3, bucket, key, found_at):
+            seen.append(key)
+            raise ValueError("object is unreadable")
+
+        dp_ingest.ingestObject = ingest
+        _, objects, state = self.run_pass(limit=2)
+        self.assertEqual((objects, state["outstanding"]), (0, 2))
+        self.assertEqual(seen, [items[0][0], items[1][0]])
+        # Both keys failed, so they are all that remains; retry them.
+        _, objects, state = self.run_pass(limit=2)
+        self.assertEqual((objects, state["outstanding"]), (0, 2))
+        self.assertEqual(seen[2:], [items[0][0], items[1][0]])
 
     def test_an_object_that_is_simply_bad_is_counted_and_left_behind(self):
         self.backlog(3)

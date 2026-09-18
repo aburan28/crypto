@@ -672,13 +672,22 @@ def pending(conn, s3, bucket, prefix="dp/"):
     return todo, newest, unrecognised
 
 
+# Keys that failed the last bounded pass. They stay at the front of
+# pending(), so taking the oldest `limit` again would pin the window on
+# them and never reach the objects behind. The next slice skips them;
+# they are retried once they no longer fill the window, or once they are
+# all that remains.
+_failed = set()
+
+
 def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     """Ingest the oldest outstanding objects, several at a time.
 
     Each thread owns a connection: psycopg connections are not shared, and the
     temp table the COPY lands in is per-session anyway. Order does not matter
-    because every insert is idempotent, so a failed object is simply retried
-    on the next pass instead of stopping the ones behind it.
+    because every insert is idempotent. A failed object is retried on a later
+    pass; the next slice skips it so a poison prefix cannot pin the bound
+    window on the same oldest keys.
 
     A pass is *bounded* rather than "everything outstanding". Status and
     metrics are published between passes, so an unbounded pass publishes
@@ -692,12 +701,18 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
         todo, newest, unrecognised = pending(probe, s3, bucket, prefix)
     state = {"newest": newest, "unrecognised": len(unrecognised), "outstanding": len(todo)}
     if not todo:
+        _failed.clear()
         return 0, 0, state
-    slice_ = todo[:limit] if limit and limit > 0 else todo
+    if limit and limit > 0:
+        rest = [item for item in todo if item[0] not in _failed]
+        slice_ = (rest or todo)[:limit]
+    else:
+        slice_ = todo
     work = queue.Queue()
     for item in slice_:
         work.put(item)
     tally = {"rows": 0, "objects": 0, "failed": 0}
+    failed = set()
     lock = threading.Lock()
 
     def drain():
@@ -736,9 +751,11 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
                             time.sleep(2.0)
                             continue
                         # One bad object must not take the pass down with it;
-                        # it keeps its place in the backlog and is retried.
+                        # it is skipped on the next slice so it cannot stall
+                        # the rest of the backlog, then retried later.
                         with lock:
                             tally["failed"] += 1
+                            failed.add(key)
                         log("object %s failed (will retry): %s: %s"
                             % (key, type(exc).__name__, exc))
                     else:
@@ -760,6 +777,8 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
         t.start()
     for t in pool:
         t.join()
+    _failed.clear()
+    _failed.update(failed)
     elapsed = max(time.time() - started, 1e-9)
     state["outstanding"] = len(todo) - tally["objects"]
     log("pass complete: %d of %d outstanding objects touched, %d rows added, "
