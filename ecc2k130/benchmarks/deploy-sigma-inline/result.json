@@ -33,5 +33,20 @@
     "median": 14.387428,
     "knobs": "INLINE_POLY=3, PAIR_ILP=1, PAIR_CLMUL=1, L2_PERSIST=1, FROM_REDUCED=1, UNROLL_SLOTS=2, ALU_SQUARE=1"
   },
-  "compatibility": "walk and frozen checkpoint geometry unchanged"
+  "compatibility": "walk and frozen checkpoint geometry unchanged",
+  "deployment": {
+    "prefix": "bin/f3ab725a533b777e",
+    "kernelVersion": 3,
+    "activated": true,
+    "gpu_walkers_adopted": 8,
+    "gpu_walkers_stale": 0,
+    "reported_gpu_aggregate_bps": 40520817000,
+    "legacy_cpu_worker": {
+      "count": 1,
+      "reported_version": null,
+      "host_binary_sha_unchanged": true,
+      "action": "left running to preserve uncommitted legacy checkpoint state"
+    },
+    "corpus_or_geometry_changed": false
+  }
 }
