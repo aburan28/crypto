@@ -87,6 +87,10 @@ def comparison(root, stage, candidate, baseline, keep):
     if not logs:
         raise SystemExit(f'{stage}: no cases in cells {sorted(keep)} carry both '
                          f'{candidate} and {baseline}')
+    missing = keep - set(logs)
+    if missing:
+        raise SystemExit(f'{stage}: requested cells {sorted(missing)} have no cases; '
+                         'the tree is incomplete')
     counts = {len(v) for v in logs.values()}
     if len(counts) != 1:
         raise SystemExit(f'{stage}: uneven cases per cell '
