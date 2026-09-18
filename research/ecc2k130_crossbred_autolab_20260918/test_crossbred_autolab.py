@@ -178,6 +178,17 @@ class ClaimTests(unittest.TestCase):
         self.assertEqual(claim["status"], "PASS")
         self.assertFalse(claim["m4_ffd_grows_with_n"])
         self.assertEqual(claim["class"], "measurement")
+        self.assertIn("chained x-system", claim["note"])
+        self.assertNotIn("unchained S4", claim["note"])
+
+    def test_ffd_sym_smoke_note_is_not_the_x_arm(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["x5.ffd_chained_sym_m4_smoke"]
+        claim = lab.claim_ffd(FFD_TABLE, beat)
+        self.assertEqual(claim["status"], "PASS")
+        self.assertEqual(claim["class"], "measurement")
+        self.assertIn("Not unchained S4", claim["note"])
+        self.assertNotIn("chained x-system", claim["note"])
 
     def test_ffd_growth_is_measurement_not_advance(self) -> None:
         protocol = lab.load_protocol()

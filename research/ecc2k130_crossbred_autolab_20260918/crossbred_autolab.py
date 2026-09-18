@@ -447,7 +447,7 @@ def claim_ffd(text: str, beat: dict[str, Any]) -> dict[str, Any]:
         "m4_ffd_maxima": maxima,
         "falsifier": beat["expect"]["falsifier"],
         "class": "measurement",
-        "note": "Smoke at 4 draws on the chained x-system. Incumbent FFD max=3 on chained m≥3. Promotion needs 16 draws. Not the missing chained symmetrised S3.",
+        "note": beat.get("note"),
     }
 
 
