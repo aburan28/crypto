@@ -229,7 +229,7 @@ Reading the table:
 | SAT growth `m=5,9,11` and toy DLP `n=5,9` | Conflicts have no measured conversion to field products | Diagnostic; pair lookup 228× faster on 16 planted triples at `n=9` | engineering |
 | Conditional FFD formula at `n=131` (`2^{86}`) | Literature bit-complexity, gated on `D_reg = D_ff + o(1)` | Extrapolation, `2^{25}` short of rho even if granted | extrapolation |
 | Residual-walk `S ≈ 200×–265×` at `2^{50}` | Different curve `E(F_{p³})` | Phase-pricing lesson: LA can dominate | accounting |
-| Crossbred `word_ops` | Conversion factor to group ops is **unmeasured** (`AGENTS.md` §2) | X1 still unfitted; X2 frozen 2026-09-18 | unmeasured |
+| Crossbred `word_ops` | Conversion factor to group ops is **unmeasured** (`AGENTS.md` §2) | X1 frozen 2026-09-18: no `α` fit (two usable rungs); X2 frozen | unmeasured |
 | Symmetrised 350× SAT at `n=15` | Wall-clock on one size, not `Λ` | Size gain; predicted engineering | engineering |
 | Crossbred kernel frontier | Bit ops, not field products | Space exists through `n=9, m=3` and `n=13, m=2`; `filters=0`; `n=13, m=3` is not a result | measurement |
 
@@ -261,9 +261,13 @@ tried: `m = 3` through `n = 9` (`ℓ = 6`, `v = 27`) and `m = 2` through
 Every printed cell has `filters = 0`. The first larger `m = 3` rung,
 `n = 13`, `v = 49`, extracts a kernel but fails the correctness gate
 (`agree = NO`, `xb/F4 = 1150`). Receipt:
-`experiments/ecc2k130_crossbred_kernel_20260918/`. X1 is not fitted:
-only three agreeing `m = 3` rungs, and the bench does not report
-`Q / C(|F|, 2)`.
+`experiments/ecc2k130_crossbred_kernel_20260918/`. **X1, frozen.**
+Receipt `experiments/ecc2k130_crossbred_x1_20260918/`. T4 is applied.
+No fit: only two agreeing `m = 3` rungs have `|F| ≥ 3` (`n = 5`,
+`Q/C = 83.248`; `n = 9`, `Q/C = 319.222`). `n = 13` and `n = 23` have
+no determining space. The two-point sketch slope is not a result.
+Chained Route 1 cannot produce `α`. The remaining `α` measurement is
+C2 / X3.
 
 **The combination.** Existing Semaev systems → Crossbred `(D, k)` →
 `DecompositionStrategy`, with the search phase (`2^k` independent points)
@@ -277,8 +281,8 @@ per target, `(D, k)` rule fixed before the run.
 **Falsifier.** Slope ≥ −0.1 (`α ≥ 1.9`), or `kernel_dim = 0` past the toy
 rungs so there is no Crossbred space to fit.
 
-**Predicted class.** Unknown. This is the only combination whose *premise*
-is that `α` is not 2.
+**Predicted class.** Unknown *a priori*; **blocked in practice** — the
+chained ladder cannot supply four usable rungs, so C1 cannot produce `α`.
 
 ### C2 — Crossbred on the symmetrised `u`-frame (X3)
 
@@ -294,6 +298,11 @@ is uncertain — which is why it is a run, not an argument.
 
 **Falsifier.** As C1, plus `kernel_dim = 0` throughout (systems too small
 for the technique). That outcome is still worth recording.
+
+**Protocol, frozen 2026-09-18 before the run.** T4 selection, paired-oracle
+divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, `|F| = |F_u|`,
+axis `ℓ = dim V`, same slope falsifier as C1. Wired as
+`cargo run --release --example crossbred_bench -- --sym`.
 
 **Predicted class.** Unknown, independently of C1.
 

@@ -1,0 +1,50 @@
+{
+  "schema": "ecc2k130_crossbred_x1/v1",
+  "question": "Does Crossbred Q beat C(|F|, 2) with alpha < 2 at m = 3?",
+  "class": "measurement",
+  "fit": null,
+  "fit_reason": "fewer than four agreeing m=3 rungs with |F| >= 3",
+  "q_enum_convention": "C(|F|, m-1) word-ops at one word-op per pair; undercounts enumeration",
+  "selection": "T4: smallest D then smallest k with kernel_dim >= v-k, v-k in 1..=64, solve_crossbred on probe not exhausted, k < min(v, 22)",
+  "oracle_rows": [
+    {
+      "n": 5, "m": 3, "ell": 4, "v": 17, "F": 21, "Q_enum": 210, "Q_word": 17482,
+      "Q_over_Q_enum": 83.248, "D": 3, "k": 8, "kernel": 52, "filters": 0,
+      "agree": true, "usable_for_fit": true
+    },
+    {
+      "n": 7, "m": 3, "ell": 3, "v": 16, "F": 1, "Q_enum": 0, "Q_word": 5006,
+      "Q_over_Q_enum": null, "D": 3, "k": 6, "kernel": 15, "filters": 0,
+      "agree": true, "usable_for_fit": false, "note": "degenerate factor base"
+    },
+    {
+      "n": 9, "m": 3, "ell": 6, "v": 27, "F": 55, "Q_enum": 1485, "Q_word": 474044,
+      "Q_over_Q_enum": 319.222, "D": 3, "k": 12, "kernel": 23, "filters": 0,
+      "agree": true, "usable_for_fit": true
+    },
+    {
+      "n": 13, "m": 3, "ell": 12, "v": 49, "agree": false,
+      "usable_for_fit": false, "note": "no determining space under T4"
+    },
+    {
+      "n": 15, "m": 3, "ell": 4, "v": 27, "F": 1, "Q_enum": 0, "Q_word": 157321,
+      "Q_over_Q_enum": null, "D": 3, "k": 8, "kernel": 25, "filters": 0,
+      "agree": true, "usable_for_fit": false, "note": "degenerate factor base"
+    },
+    {
+      "n": 19, "m": 3, "usable_for_fit": false, "note": "no decomposition system"
+    },
+    {
+      "n": 23, "m": 3, "ell": 11, "v": 56, "agree": false,
+      "usable_for_fit": false, "note": "no determining space under T4"
+    }
+  ],
+  "two_point_sketch_not_a_fit": {
+    "rungs": ["n=5 ell=4 Q/C=83.248", "n=9 ell=6 Q/C=319.222"],
+    "delta_log2_Q_over_C": 1.939,
+    "delta_ell": 2,
+    "sketch_slope": 0.970,
+    "sketch_alpha": 2.970,
+    "class": "not a result"
+  }
+}

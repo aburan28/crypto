@@ -180,6 +180,26 @@ solve_row_ops`. `Q_enum` is `C(|F|, m−1)` word-ops with **one word-op
 per pair** (or per point at `m = 2`). That undercounts enumeration, so
 it is conservative for an advance claim: it makes `Q / Q_enum` larger.
 
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_x1_20260918/`. T4 is applied. **No
+fit:** only two agreeing `m = 3` rungs have `|F| ≥ 3`. The two-point
+sketch of `log₂(Q / Q_enum)` vs `ℓ` has slope `+0.97` (`α ≈ 2.97`);
+that is not a least-squares fit and is **not a result**. `Q / Q_enum`
+is already `83` and `319` against a conservative pair count. Route 1's
+chained `α` measurement is blocked on the missing rungs. Next is X3.
+
+| n | m | ℓ | v | \|F\| | Q_enum | Q_word | Q/Q_enum | D | k | kernel | filters | agree | usable | Class |
+|--:|--:|--:|--:|------:|-------:|-------:|---------:|--:|--:|-------:|--------:|:-----:|:-----:|:--|
+| 5 | 3 | 4 | 17 | 21 | 210 | 17482 | 83.248 | 3 | 8 | 52 | 0 | yes | yes | measurement |
+| 7 | 3 | 3 | 16 | 1 | 0 | 5006 | — | 3 | 6 | 15 | 0 | yes | no (`\|F\|=1`) | measurement |
+| 9 | 3 | 6 | 27 | 55 | 1485 | 474044 | 319.222 | 3 | 12 | 23 | 0 | yes | yes | measurement |
+| 13 | 3 | 12 | 49 | — | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 15 | 3 | 4 | 27 | 1 | 0 | 157321 | — | 3 | 8 | 25 | 0 | yes | no (`\|F\|=1`) | measurement |
+| 19 | 3 | — | — | — | — | — | — | — | — | — | — | — | no | no decomposition system |
+| 23 | 3 | 11 | 56 | — | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+
+`n = 11, 17, 21` have no `KoblitzCurve` at `a = 0`.
+
 ## X2 — Where does a crossbred space exist at all?
 
 **Question.** `extract_crossbred` returns nothing when the left kernel
@@ -199,9 +219,8 @@ is moot; record the `(D, k)` frontier and close Route 1.
 `experiments/ecc2k130_crossbred_kernel_20260918/`. The falsifier is
 **not** met: a determining space exists at `m = 3` through `n = 9`
 (`ℓ = 6`, `v = 27`, `D = 3`, `k = 12`, `kernel = 23`, `agree = yes`) and
-at `m = 2` through `n = 13` (`ℓ = 12`, `v = 24`). Route 1 stays open.
-X1 is still unfitted: only three agreeing `m = 3` rungs (`n = 5, 7, 9`),
-and the bench's `xb/F4` column is not `Q / C(|F|, 2)`.
+at `m = 2` through `n = 13` (`ℓ = 12`, `v = 24`). Route 1 stays open
+only as far as X3: X1 (above) could not fit `α` on the chained systems.
 
 Every printed cell has **`filters = 0`**, including the `(D, k)` sweep
 at `K_0/F_2^9`, `m = 2`. The GPU search phase advertised in the routes
@@ -240,6 +259,25 @@ the symmetrised systems are *too small* for the technique — worth
 recording either way.
 
 **Depends on** X2's method, not its result.
+
+**Protocol, frozen before the run, 2026-09-18.** Same T4 rule, same
+`Q / C(|F|, 2)` metric and the same slope falsifier as X1, on the
+`u`-frame. Written here so the X3 run cannot choose a divisor or a
+curve family with hindsight.
+
+1. Curve `K_a` with `a` given (`--a`, default `0`). Skip the rung if
+   `KoblitzCurve::new` returns `None`.
+2. Divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, then
+   `F_u = build_symmetrised_factor_base`. This is the paired-oracle
+   convention, not chosen per rung.
+3. System `build_symmetrised_system`. `|F|` is `|F_u|`. The fit axis is
+   `ℓ = dim V`.
+4. `Q_enum = C(|F_u|, m−1)` at one word-op per pair (same conservative
+   convention as X1).
+5. A fit requires ≥4 agreeing `m = 3` rungs with `|F_u| ≥ 3`.
+6. Additional falsifier: no determining space on any such rung.
+
+Command: `cargo run --release --example crossbred_bench -- --sym --no-sweep …`
 
 ## X4 — The symmetrised oracle end to end: advance or engineering?
 
@@ -335,11 +373,11 @@ rather than whether to read more.
 | # | task | gates | cost |
 |---|---|---|---|
 | T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | **done** 2026-09-18, `experiments/ecc2k130_crossbred_kernel_20260918/` | minutes |
-| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | **done** (X2 above); X1 still needs a fourth agreeing `m = 3` rung | short |
+| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | **done** (X2 above); chained X1 has no fourth usable rung | short |
 | T3 | Measure the word-op → group-op conversion factor and record it (`AGENTS.md` §2) | X1's absolute column | short |
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | **done** (T4 above); implemented in `examples/crossbred_bench.rs` | short |
-| T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
-| T6 | X3: repeat T5 on the symmetrised systems | Route 2 verdict | hours |
+| T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
+| T6 | X3: repeat T5 on the symmetrised systems | protocol frozen 2026-09-18; run next | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
@@ -355,8 +393,9 @@ a state this repository has.
 Any one of:
 
 - **`α` measured over ≥4 rungs**, whatever its value. A number closes
-  Route 1 either way. X2 is frozen: the space exists; what is missing is
-  a fourth agreeing `m = 3` rung and `Q / C(|F|, 2)`.
+  Route 1 either way. X2 is frozen: the chained space exists through
+  `n = 9`, `m = 3`. X1 is frozen: no fit (only two usable rungs). The
+  remaining `α` measurement is X3 on the symmetrised systems.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
   not by how the 350× felt.
 - **H1 falsified at `m = 4`** — a first fall degree that grows, which
