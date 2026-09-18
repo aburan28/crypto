@@ -922,6 +922,12 @@ k! orderings of the same multiset of points.
 | 11 | 2311 | 9  | 2.64 s |
 | 23 | 8029 | 52 | none finished; one instance ran 25 min without returning |
 
+The same ladder, remeasured on the G7e host (pycryptosat 5.14.7), is frozen in
+`benchmarks/indexcalc-g7e/sat.json`: medians 0.096 s at m=9 and 1.25 s at m=11,
+timeout at 30 s for the single m=23 trial. Pair lookup on that host is 228×
+faster than unbounded SAT on planted triples at n=9. See
+`RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md`.
+
 Roughly 2^2.3 per bit of field over that range. Three points is not a fit, and
 the encoding has not been tuned, but the shape is already clear enough to say
 what the instrument is for: finding where the curve bends, if it does.
