@@ -196,6 +196,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     extern __shared__ uint32_t twSel[];
     twLoadShared(twSel, p.twConsts + TW_MASK_OFF, TW_SEL_WORDS);
     const uint32_t *twTab = p.twConsts;
+#elif ECC_TABLE_SELECTION_GLOBAL
+    extern __shared__ uint32_t twShared[];
+    twLoadShared(twShared, p.twConsts, TW_TABLE_WORDS);
+    const uint32_t *twSel = p.twConsts + TW_MASK_OFF;
+    const uint32_t *twTab = twShared;
 #else
     extern __shared__ uint32_t twSel[];
     twLoadShared(twSel, p.twConsts);

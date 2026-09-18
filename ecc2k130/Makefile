@@ -89,6 +89,9 @@ TABLE_PIVOT_BYTES ?= 0
 TABLE_GLOBAL ?= 0
 # Hybrid: selection tables in shared, addend table in global.
 TABLE_ADDEND_GLOBAL ?= 0
+# Inverse hybrid: addends stay in shared memory while conflict-heavy selection
+# LUTs use the read-only global/L2 path.
+TABLE_SELECTION_GLOBAL ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -184,6 +187,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
+       -DECC_TABLE_SELECTION_GLOBAL=$(TABLE_SELECTION_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu

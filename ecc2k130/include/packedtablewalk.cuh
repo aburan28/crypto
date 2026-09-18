@@ -67,6 +67,15 @@
 #if ECC_TABLE_ADDEND_GLOBAL && ECC_TABLE_GLOBAL
 #error "ECC_TABLE_ADDEND_GLOBAL is the hybrid smem path; do not combine with ECC_TABLE_GLOBAL"
 #endif
+#ifndef ECC_TABLE_SELECTION_GLOBAL
+#define ECC_TABLE_SELECTION_GLOBAL 0
+#endif
+#if ECC_TABLE_SELECTION_GLOBAL != 0 && ECC_TABLE_SELECTION_GLOBAL != 1
+#error "ECC_TABLE_SELECTION_GLOBAL must be 0 or 1"
+#endif
+#if ECC_TABLE_SELECTION_GLOBAL && (!ECC_WALK_TABLE || ECC_TABLE_GLOBAL || ECC_TABLE_ADDEND_GLOBAL)
+#error "ECC_TABLE_SELECTION_GLOBAL requires the table walk and is exclusive with other global-table modes"
+#endif
 
 namespace eccPacked131 {
 
@@ -98,8 +107,10 @@ static const int TW_WORDS = TW_LINV_OFF + 33;
 // fits three (and four) blocks in this SKU's 100 KB/SM; the full buffer does
 // not.  Offsets in the selection copy are relative to TW_MASK_OFF.
 static const int TW_SEL_WORDS = TW_WORDS - TW_MASK_OFF;
-static const int TW_SEL0 = ECC_TABLE_ADDEND_GLOBAL ? TW_MASK_OFF : 0;
-static const size_t TW_SHARED_BYTES = size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS : TW_WORDS) * sizeof(uint32_t);
+static const int TW_SEL0 = (ECC_TABLE_ADDEND_GLOBAL || ECC_TABLE_SELECTION_GLOBAL) ? TW_MASK_OFF : 0;
+static const size_t TW_SHARED_BYTES =
+    size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS :
+           (ECC_TABLE_SELECTION_GLOBAL ? TW_TABLE_WORDS : TW_WORDS)) * sizeof(uint32_t);
 static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
               "selection tables must fit three blocks in a 100 KB SM");
