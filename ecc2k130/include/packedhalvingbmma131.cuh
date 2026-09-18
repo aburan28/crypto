@@ -78,6 +78,13 @@ static __device__ __constant__ uint8_t halvingSqrtBmmaTop[136]={
  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
  0,0,0,0,0,0,0,0,
 };
+static __device__ __constant__ uint8_t halvingSqrtBmmaWeight[136]={
+ 8,8,11,12,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,
+ 11,10,10,9,8,8,8,8,8,8,8,8,8,8,8,8,8,7,7,6,5,5,5,5,5,4,4,3,2,1,1,1,
+ 7,7,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
+ 15,16,17,17,17,17,17,17,17,17,17,17,17,17,17,17,20,21,20,18,18,18,18,18,19,20,17,13,12,13,13,13,
+ 10,11,6,0,0,0,0,0,
+};
 #endif
 ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
 #ifdef __CUDA_ARCH__
@@ -85,6 +92,8 @@ ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
  __shared__ __align__(16) uint32_t bmem[32][32];
  __shared__ __align__(16) int cmem[32][64];
  const int lane=int(threadIdx.x)&31,warp=int(threadIdx.x)>>5;
+ const unsigned inputWeight=__popc(input.v[0])+__popc(input.v[1])+
+   __popc(input.v[2])+__popc(input.v[3]);
  P131 out={{0,0,0,0,0}};
  for(int group=0;group<4;++group){
   if((lane>>3)==group){
@@ -100,7 +109,7 @@ ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
    wmma::load_matrix_sync(a,halvingSqrtBmmaRows+block*32,128);
    wmma::load_matrix_sync(b,bmem[warp],128);
    wmma::fill_fragment(c,0);
-   wmma::bmma_sync(d,a,b,c,wmma::experimental::bmmaBitOpAND,wmma::experimental::bmmaAccumulateOpPOPC);
+   wmma::bmma_sync(d,a,b,c,wmma::experimental::bmmaBitOpXOR,wmma::experimental::bmmaAccumulateOpPOPC);
    wmma::store_matrix_sync(cmem[warp],d,8,wmma::mem_row_major);
    __syncwarp();
    if((lane>>3)==group){
@@ -108,8 +117,9 @@ ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
     for(int r=0;r<8;++r){
      const int bit=block*8+r;
      if(bit<131){
-      const unsigned parity=(unsigned(cmem[warp][r*8+(lane&7)])^
-        unsigned(__popc(input.v[4]&halvingSqrtBmmaTop[bit])))&1u;
+      const unsigned xorCount=unsigned(cmem[warp][r*8+(lane&7)]);
+      const unsigned parity=(((unsigned(halvingSqrtBmmaWeight[bit])+
+        inputWeight-xorCount)>>1)^unsigned(__popc(input.v[4]&halvingSqrtBmmaTop[bit])))&1u;
       out.v[bit>>5]|=parity<<(bit&31);
      }
     }
