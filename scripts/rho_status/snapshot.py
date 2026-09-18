@@ -239,52 +239,19 @@ WHERE campaign_id = '{{campaign}}'
   AND backfill_through >= date_trunc('hour', now());
 """
 
-# Index-only: group by hour, never by worker_id, so this does not heap-fetch
-# 187 M rows. Used to publish a fresh generated_at while the worker rollup
-# is still catching up. per_worker is empty until the rollup is ready.
-FALLBACK_SQL = r"""
-SET statement_timeout = '600s';
+# Campaign row plus collisions. Cheap. The DP totals are summed from
+# HOUR_COUNT_SQL so a 187 M-row GROUP BY never sits on the walker.
+CAMPAIGN_SQL = r"""
+SET statement_timeout = '15s';
 SELECT json_build_object(
   'campaign_id', c.campaign_id,
   'curve_id', c.curve_id,
   'dp_mask_bits', c.dp_mask_bits,
   'campaign_created_at', c.created_at,
-  'meta', c.meta,
-  'dps', COALESCE(s.dps, 0),
-  'workers', 0,
-  'first_dp_at', s.first_dp,
-  'last_dp_at', s.last_dp,
-  'dps_last_hour', COALESCE(s.dps_last_hour, 0),
-  'dps_last_day', COALESCE(s.dps_last_day, 0),
   'collisions', COALESCE(k.collisions, 0),
-  'latest_collision_at', k.latest_collision_at,
-  'per_worker', '[]'::json,
-  'hourly', COALESCE(s.hourly, '[]'::json),
-  'rollup_ready', false
+  'latest_collision_at', k.latest_collision_at
 )
 FROM rho_campaigns c
-LEFT JOIN LATERAL (
-  SELECT
-    sum(bucket.dps)::bigint AS dps,
-    min(bucket.first_at) AS first_dp,
-    max(bucket.last_at) AS last_dp,
-    COALESCE(sum(bucket.dps_last_hour), 0)::bigint AS dps_last_hour,
-    COALESCE(sum(bucket.dps_last_day), 0)::bigint AS dps_last_day,
-    json_agg(json_build_object('hour', bucket.hour, 'dps', bucket.dps) ORDER BY bucket.hour)
-      FILTER (WHERE bucket.hour > now() - interval '7 days' AND bucket.dps > 0) AS hourly
-  FROM (
-    SELECT
-      date_trunc('hour', found_at) AS hour,
-      count(*)::bigint AS dps,
-      min(found_at) AS first_at,
-      max(found_at) AS last_at,
-      count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint AS dps_last_hour,
-      count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint AS dps_last_day
-    FROM distinguished_points
-    WHERE campaign_id = c.campaign_id
-    GROUP BY 1
-  ) bucket
-) s ON true
 LEFT JOIN LATERAL (
   SELECT
     count(*)::bigint AS collisions,
@@ -294,6 +261,29 @@ LEFT JOIN LATERAL (
 ) k ON true
 WHERE c.campaign_id = '{{campaign}}';
 """
+
+# One hour through (campaign_id, found_at). Index-only: no worker_id, no
+# GROUP BY. The 2026-09-18T18:56Z publish died ~200s into a full-table
+# GROUP BY hour — walker SSH reset, scp of this run's file never happened.
+# Peak hours are ~10 M rows; a count of one hour is seconds and logs a line
+# so the hop is not silent.
+HOUR_COUNT_SQL = r"""
+SET statement_timeout = '60s';
+SELECT
+  count(*)::bigint,
+  min(found_at),
+  max(found_at),
+  count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint,
+  count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint
+FROM distinguished_points
+WHERE campaign_id = '{{campaign}}'
+  AND found_at >= '{{hour}}'::timestamptz
+  AND found_at < '{{hour}}'::timestamptz + interval '1 hour';
+"""
+
+# Name kept so tests and greps still find the fallback path. The published
+# fallback is CAMPAIGN_SQL plus one HOUR_COUNT_SQL per hour.
+FALLBACK_SQL = HOUR_COUNT_SQL
 
 PRUNE_SQL = r"""
 DELETE FROM rho_dp_recent
@@ -516,6 +506,20 @@ def parse_bounds(text):
     return parse_hour(parts[0]), parse_hour(parts[1]), parse_hour(parts[2])
 
 
+def parse_hour_counts(text):
+    lines = [line for line in (text or "").strip().splitlines() if line]
+    if not lines:
+        return 0, None, None, 0, 0
+    parts = lines[-1].split("|")
+    while len(parts) < 5:
+        parts.append("")
+
+    def count(value):
+        return int(value) if value else 0
+
+    return count(parts[0]), parts[1] or None, parts[2] or None, count(parts[3]), count(parts[4])
+
+
 def hours_to_backfill(start_hour, now_hour, through):
     if start_hour is None or now_hour is None:
         return []
@@ -551,6 +555,7 @@ def psql_script(database_url, sql, tuples_only=True):
         sys.stderr.write(proc.stderr)
         if not proc.stderr.endswith("\n"):
             sys.stderr.write("\n")
+        sys.stderr.flush()
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "psql failed")
     return proc.stdout
@@ -651,9 +656,81 @@ def backfill_hours(database_url, campaign, started, budget):
             "rho_status: backfill hour %s (%d/%d, %.0fs left)\n"
             % (sql_hour(hour), index, len(hours), leftover)
         )
+        sys.stderr.flush()
         backfill_one_hour(database_url, campaign, hour)
     psql_script(database_url, render_sql(MARK_READY_SQL, campaign), tuples_only=False)
     return True
+
+
+def load_fallback(database_url, campaign, started, budget):
+    """Lifetime totals by counting one hour at a time on the found_at index."""
+    meta = parse_json_row(
+        psql_script(
+            database_url, render_sql(CAMPAIGN_SQL, campaign), tuples_only=True
+        ),
+        "campaign %s missing from rho_campaigns" % campaign,
+    )
+    bounds_text = psql_script(
+        database_url, render_sql(BOUNDS_SQL, campaign), tuples_only=True
+    )
+    start_hour, now_hour, _through = parse_bounds(bounds_text)
+    hours = hours_to_backfill(start_hour, now_hour, None)
+    total = last_hour = last_day = 0
+    first_at = last_at = None
+    hourly = []
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    sys.stderr.write(
+        "rho_status: fallback counting %d hour(s) from %s through %s\n"
+        % (
+            len(hours),
+            sql_hour(hours[0]) if hours else "-",
+            sql_hour(hours[-1]) if hours else "-",
+        )
+    )
+    sys.stderr.flush()
+    for index, hour in enumerate(hours, 1):
+        leftover = budget - (time.monotonic() - started)
+        if leftover < 90:
+            raise RuntimeError(
+                "fallback budget exhausted after %d/%d hours" % (index - 1, len(hours))
+            )
+        sys.stderr.write(
+            "rho_status: fallback hour %s (%d/%d, %.0fs left)\n"
+            % (sql_hour(hour), index, len(hours), leftover)
+        )
+        sys.stderr.flush()
+        dps, hour_min, hour_max, dps_last_hour, dps_last_day = parse_hour_counts(
+            psql_script(
+                database_url,
+                render_sql(HOUR_COUNT_SQL, campaign, hour=hour),
+                tuples_only=True,
+            )
+        )
+        total += dps
+        last_hour += dps_last_hour
+        last_day += dps_last_day
+        if dps <= 0:
+            continue
+        if hour >= week_ago:
+            hourly.append({"hour": sql_hour(hour), "dps": dps})
+        if first_at is None and hour_min:
+            first_at = hour_min
+        if hour_max:
+            last_at = hour_max
+    meta.update(
+        {
+            "dps": total,
+            "workers": 0,
+            "first_dp_at": first_at,
+            "last_dp_at": last_at,
+            "dps_last_hour": last_hour,
+            "dps_last_day": last_day,
+            "per_worker": [],
+            "hourly": hourly,
+            "rollup_ready": False,
+        }
+    )
+    return meta
 
 
 def psql_json(database_url, campaign, publish=None):
@@ -671,12 +748,8 @@ def psql_json(database_url, campaign, publish=None):
         sys.stderr.write(
             "rho_status: rollup not ready; publishing index-only fallback first\n"
         )
-        fallback = parse_json_row(
-            psql_script(
-                database_url, render_sql(FALLBACK_SQL, campaign), tuples_only=True
-            ),
-            "campaign %s fallback snapshot returned no json" % campaign,
-        )
+        sys.stderr.flush()
+        fallback = load_fallback(database_url, campaign, started, budget)
         if publish is not None:
             publish(fallback)
         try:

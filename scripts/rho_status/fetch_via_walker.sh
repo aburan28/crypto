@@ -97,16 +97,16 @@ fi
 # an idle timeout between the runner and the walker collects, so keep the
 # connection warm rather than letting a slow query look like a dead host.
 # 15s x 20 tolerates five minutes of silence before giving up.
-KEEPALIVE=(-o ServerAliveInterval=15 -o ServerAliveCountMax=20)
+KEEPALIVE=(-o ServerAliveInterval=5 -o ServerAliveCountMax=60)
 SSH=(ssh -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}" "$USER@$HOST")
 SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 "${KEEPALIVE[@]}")
 
 # Bound the query remotely too, so a genuinely stuck snapshot fails with its
 # own message instead of hanging until the job timeout. snapshot.py writes an
-# index-only fallback to /tmp/rho_status.json before the hour-by-hour
-# backfill, so a 124 still has a file to copy. 1500 s covers that fallback
-# (~index-only GROUP BY hour) plus a stretch of 300 s hour chunks. The
-# publish job's timeout must stay above this, plus the steps after.
+# index-only fallback (one hour count at a time) before the worker backfill,
+# so a 124 still has a file to copy. 1500 s covers that fallback plus a
+# stretch of 300 s hour chunks. The publish job's timeout must stay above
+# this, plus the steps after.
 REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-1500}
 
 # Per-run path: /tmp/rho_status.json on the walker is leftover from the
@@ -117,16 +117,26 @@ REMOTE_JSON="/tmp/rho_status.${GITHUB_RUN_ID:-0}-${GITHUB_RUN_ATTEMPT:-0}-$$.jso
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS
 set +e
-"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out '$REMOTE_JSON'"
+"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; PYTHONUNBUFFERED=1 timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out '$REMOTE_JSON'"
 SSH_RC=$?
 set -e
 ELAPSED=$((SECONDS - STARTED))
 # Copy even on 124: snapshot.py writes the fallback before hour chunks, so
 # a SIGTERM later still leaves a current generated_at for Pages — but only
-# this run's file, never a previous hop's.
+# this run's file, never a previous hop's. Retry: the 18:56Z hop reset SSH
+# mid-query and the immediate scp hit "Connection reset by peer".
+SCP_RC=1
+for attempt in 1 2 3 4; do
+    set +e
+    "${SCP[@]}" "$USER@$HOST:$REMOTE_JSON" "$OUT"
+    SCP_RC=$?
+    set -e
+    if [ "$SCP_RC" -eq 0 ]; then
+        break
+    fi
+    sleep $((attempt * 4))
+done
 set +e
-"${SCP[@]}" "$USER@$HOST:$REMOTE_JSON" "$OUT"
-SCP_RC=$?
 "${SSH[@]}" "rm -f '$REMOTE_JSON'" >/dev/null 2>&1
 set -e
 if [ "$SCP_RC" -eq 0 ] && [ -s "$OUT" ]; then

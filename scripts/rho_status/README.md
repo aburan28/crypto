@@ -26,12 +26,16 @@ The first merged backfill (#448) did not unstick Pages. It set
 `(worker_id, found_at)`, and PostgreSQL cancelled it; `rho_dp_meta.ready`
 stayed false and the hop kept retrying, so
 https://aburan28.github.io/crypto/status/ froze on the 2026-09-18T11:25Z
-snapshot. The hop now writes an index-only fallback (group by hour, no
-`worker_id`) *before* the backfill, copies that file even if the remote
-`timeout` fires, and backfills one hour at a time through
-`(campaign_id, found_at)`, resuming from `rho_dp_meta.backfill_through`.
-The remote timeout is 1500 s so the fallback plus a stretch of hour
-chunks fit; leftover hours wait for the next scheduled run.
+snapshot. The hop now writes an index-only fallback *before* the worker
+backfill: it counts one hour at a time through `(campaign_id, found_at)`
+(no `worker_id`, no full-table `GROUP BY`) so a 187 M-row hash aggregate
+cannot OOM the walker. The 2026-09-18T18:56Z publish died ~200s into that
+GROUP BY (`Connection reset by peer`); counting by hour logs each step
+and keeps SSH alive. The file is copied even if the remote `timeout`
+fires, from a per-run path so leftover `/tmp/rho_status.json` is never
+republished. Worker buckets backfill one hour at a time, resuming from
+`rho_dp_meta.backfill_through`. The remote timeout is 1500 s; leftover
+hours wait for the next scheduled run.
 
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
