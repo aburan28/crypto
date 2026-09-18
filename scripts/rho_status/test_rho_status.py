@@ -22,10 +22,12 @@ from render import (
 from snapshot import (
     BACKFILL_SQL,
     BOUNDS_SQL,
+    CAMPAIGN_SQL,
     CLAIM_BOUNDARY,
     ENSURE_SQL,
     FALLBACK_SQL,
     FORBIDDEN_PUBLIC_KEYS,
+    HOUR_COUNT_SQL,
     MARK_READY_SQL,
     READ_SQL,
     SESSION_PREAMBLE,
@@ -34,6 +36,7 @@ from snapshot import (
     hours_to_backfill,
     normalize,
     parse_bounds,
+    parse_hour_counts,
     render_sql,
     rollup_ready_from_text,
     sql_campaign,
@@ -194,18 +197,26 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("publishing index-only fallback first", source)
         self.assertIn("SET statement_timeout = 0;", SESSION_PREAMBLE)
 
-    def test_fallback_groups_by_hour_not_worker(self):
-        # The live page stayed on 11:25Z because the worker GROUP BY never
-        # finished. The fallback has to be something the found_at index can
-        # answer, and it must not under-count by reading a half-built rollup.
-        self.assertIn("FROM distinguished_points", FALLBACK_SQL)
-        self.assertNotIn("worker_id", FALLBACK_SQL)
-        self.assertIn("date_trunc('hour', found_at)", FALLBACK_SQL)
-        self.assertIn("'workers', 0", FALLBACK_SQL)
-        self.assertIn("'per_worker', '[]'::json", FALLBACK_SQL)
-        self.assertIn("SET statement_timeout = '600s'", FALLBACK_SQL)
+    def test_fallback_counts_one_hour_without_worker_id(self):
+        # The 18:56Z publish died ~200s into a full-table GROUP BY hour:
+        # walker SSH reset and Pages stayed on 11:25Z. Fallback is a count
+        # of one hour through the found_at index, no worker_id, no GROUP BY.
+        self.assertEqual(FALLBACK_SQL, HOUR_COUNT_SQL)
+        self.assertIn("FROM distinguished_points", HOUR_COUNT_SQL)
+        self.assertNotIn("worker_id", HOUR_COUNT_SQL)
+        self.assertNotIn("GROUP BY", HOUR_COUNT_SQL)
+        self.assertIn("found_at >= '{{hour}}'::timestamptz", HOUR_COUNT_SQL)
+        self.assertIn("found_at < '{{hour}}'::timestamptz + interval '1 hour'", HOUR_COUNT_SQL)
+        self.assertIn("SET statement_timeout = '60s'", HOUR_COUNT_SQL)
+        self.assertIn("rho_campaigns", CAMPAIGN_SQL)
+        self.assertNotIn("distinguished_points", CAMPAIGN_SQL)
         self.assertIn("backfill_through", MARK_READY_SQL)
         self.assertIn("min(found_at)", BOUNDS_SQL)
+        self.assertEqual(
+            parse_hour_counts("123|2026-09-18 11:00:00+00|2026-09-18 11:59:00+00|4|50"),
+            (123, "2026-09-18 11:00:00+00", "2026-09-18 11:59:00+00", 4, 50),
+        )
+        self.assertEqual(parse_hour_counts("0||||"), (0, None, None, 0, 0))
 
     def test_backfill_resumes_after_the_hour_already_written(self):
         start = datetime(2026, 9, 11, 17, tzinfo=timezone.utc)
@@ -262,6 +273,8 @@ class WorkflowTests(unittest.TestCase):
         # from a dead connection and the hop dies on a broken pipe.
         self.assertIn("ServerAliveInterval", text)
         self.assertIn("ServerAliveCountMax", text)
+        self.assertIn("PYTHONUNBUFFERED=1", text)
+        self.assertIn("ServerAliveInterval=5", text)
         self.assertIn("RHO_REMOTE_TIMEOUT:-1500", text)
         self.assertIn("snapshot exceeded", text)
         self.assertIn("exit 124", text)
