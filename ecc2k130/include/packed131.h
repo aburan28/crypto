@@ -2,6 +2,12 @@
 // Each element occupies five uint32_t words. Squaring is a bit permutation;
 // multiplication uses gamma_i*gamma_j = gamma_(i+j) + gamma_(i-j).
 #pragma once
+#ifndef ECC_WALK_HALVING
+#define ECC_WALK_HALVING 0
+#endif
+#if ECC_WALK_HALVING != 0 && ECC_WALK_HALVING != 1
+#error "ECC_WALK_HALVING must be 0 or 1"
+#endif
 #ifndef ECC_PACKED_WEIGHTED_PREFIX
 #define ECC_PACKED_WEIGHTED_PREFIX 0
 #endif
@@ -769,6 +775,9 @@ ECC_HD P131 sqr131(const P131 &a){
 #if ECC_PACKED_PERM_SIGMA
 #include "packedsigma131.h"
 #endif
+#if ECC_WALK_HALVING
+#include "packedhalving131.h"
+#endif
 ECC_HD P131 sigma131(P131 a,int k){
 #if ECC_PACKED_PERM_SIGMA & 1
  if(k>=3 && k<=10) return sigmaWalkNetwork131(a,k-3);
@@ -811,5 +820,23 @@ ECC_HD P131 inv131(P131 a){
 #endif
 #undef ECC_INV_MUL
 }
+
+#if ECC_WALK_HALVING
+// The unique half in the odd-order subgroup.  The two rational halves differ
+// by the curve's 2-torsion point; exactly one has trace-zero x-coordinate.
+ECC_HD void pointHalf131(P131 x, P131 y, P131 *hx, P131 *hy) {
+ P131 lambda=halvingQuadraticRoot131(x);
+ P131 root=halvingSqrt131(add131(add131(y,x),mul131(lambda,x)));
+ const unsigned odd=(__popc(root.v[0])^__popc(root.v[1])^__popc(root.v[2])^
+                     __popc(root.v[3])^__popc(root.v[4]))&1u;
+ const uint32_t mask=0u-odd;
+ const P131 sqrtx=halvingSqrt131(x);
+#pragma unroll
+ for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}
+ lambda.v[4]^=mask&7u;root.v[4]^=sqrtx.v[4]&mask;
+ *hx=root;
+ *hy=mul131(root,add131(lambda,root));
+}
+#endif
 
 } // namespace eccPacked131
