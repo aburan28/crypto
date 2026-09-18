@@ -401,7 +401,7 @@ rather than whether to read more.
 | T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
-| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict; chained-`x` FFD smoke is AutoLab beat `x5.ffd_chained_m4` | medium |
+| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **open**; chained-`x` 4-draw smoke agrees with incumbent FFD max=3 and does not grow | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
 
@@ -414,6 +414,19 @@ FFD smoke live in
 [`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/).
 Harbor is not required. The chained *symmetrised* `S₃` at `m = 4` is still
 unbuilt; do not relabel the smoke as that arm.
+
+First run, 2026-09-18, host `ip-172-31-19-103`, cited from
+[`research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json`](research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json):
+
+| beat | status | class | number |
+|---|---|---|---|
+| `smoke.x1_n5` | PASS | accounting | `Q/C = 80.243` vs freeze `83.248` (within 5%); `filters = 0` |
+| `replay.x3_k1_n7` | PASS | accounting | `Q/C = 4.653` exact; `filters = 0` |
+| `fit.alpha` | PASS | measurement | no fit; 2 chained + 2 `K_1` rungs; frames not mixed |
+| `x5.ffd_chained_m4` | PASS | measurement | FFD max = 3 at `n = 9` and `n = 15`, `m = 4`, 4 draws; does not grow |
+
+The X5 row is a smoke. H1 is not settled until 16 draws, and not on the
+missing chained symmetrised arm.
 
 ## What would count as finishing this thread
 

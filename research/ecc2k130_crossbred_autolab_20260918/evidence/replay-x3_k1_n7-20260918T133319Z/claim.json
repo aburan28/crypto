@@ -1,0 +1,31 @@
+{
+  "beat_id": "replay.x3_k1_n7",
+  "class": "accounting",
+  "expect": {
+    "Q_over_Q_enum": 4.653,
+    "a": 1,
+    "agree": true,
+    "m": 3,
+    "n": 7,
+    "rel_tol": 0.05
+  },
+  "finished_utc": "2026-09-18T13:33:19.848581+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "ab233acb122174c719e03153909751e4bef03395ec69401a001f0b1a930489fb",
+  "row": {
+    "F": 29,
+    "Q_enum": 406,
+    "Q_over_Q_enum": 4.653,
+    "Q_word": 1889,
+    "agree": true,
+    "ell": 4,
+    "filters": 0,
+    "m": 3,
+    "n": 7,
+    "v": 10
+  },
+  "run_id": "replay-x3_k1_n7-20260918T133319Z",
+  "started_utc": "2026-09-18T13:33:19.782261+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

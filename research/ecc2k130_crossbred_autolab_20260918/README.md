@@ -23,7 +23,7 @@ python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py \
   launch --beat fit.alpha
 python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py \
   launch --beat x5.ffd_chained_m4
-python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py promote
+python3 research/ecc2k130_crossbred_autolab_20260918/crossbred_autolab.py promote --all
 ```
 
 ## Beats
