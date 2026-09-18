@@ -947,7 +947,10 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
  P131 lambdaPoly=toPolynomial131(lambda);
  P131 term=add131(add131(lqp,xp),lambdaPoly);
  term.v[0]^=1u;
- P131 root=halvingSqrt131(fromPolynomial131(mulPolynomial131(xp,term)));
+ const HalvingPair131 roots=halvingSqrtPair131(
+     fromPolynomial131(mulPolynomial131(xp,term)),x);
+ P131 root=roots.first;
+ const P131 sqrtx=roots.second;
 #ifdef __CUDA_ARCH__
 #define ECC_HALF_LAMBDA_POPC __popc
 #else
@@ -960,7 +963,6 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
  outside^=halvingSecondTrace131(root);
 #undef ECC_HALF_LAMBDA_POPC
  const uint32_t mask=0u-(outside&1u);
- const P131 sqrtx=halvingSqrt131(x);
 #pragma unroll
  for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}
  lambda.v[4]^=mask&7u;root.v[4]^=sqrtx.v[4]&mask;

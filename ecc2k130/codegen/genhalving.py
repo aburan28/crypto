@@ -70,6 +70,38 @@ def emit_network(name, perm):
     return lines
 
 
+def emit_pair_network(name, perm):
+    net = route(perm)
+    lines = ["struct HalvingPair131 { P131 first, second; };",
+             f"ECC_HD HalvingPair131 {name}(P131 a, P131 b) {{",
+             "    uint32_t av[8]={a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0};",
+             "    uint32_t bv[8]={b.v[0],b.v[1],b.v[2],b.v[3],b.v[4],0,0,0};",
+             "    uint32_t t;"]
+    for distance, mask in net:
+        for word in range(8):
+            wm = (mask >> (32 * word)) & 0xffffffff
+            if not wm:
+                continue
+            for value in ("av", "bv"):
+                if distance < 32:
+                    lines += [
+                        f"    t=(({value}[{word}] >> {distance})^{value}[{word}])&0x{wm:08x}u;",
+                        f"    {value}[{word}]^=t^(t << {distance});",
+                    ]
+                else:
+                    other = word + distance // 32
+                    lines += [
+                        f"    t=({value}[{word}]^{value}[{other}])&0x{wm:08x}u;",
+                        f"    {value}[{word}]^=t; {value}[{other}]^=t;",
+                    ]
+    lines += [
+        "    return HalvingPair131{P131{{av[0],av[1],av[2],av[3],av[4]&7u}},",
+        "                          P131{{bv[0],bv[1],bv[2],bv[3],bv[4]&7u}}};",
+        "}",
+    ]
+    return lines
+
+
 def generate():
     to_phase = phase_permutation()
     from_phase = invert(to_phase)
@@ -106,6 +138,7 @@ def generate():
         j = i * pow(2, M - 1, N) % N
         sqrt_perm[i - 1] = fold(j) - 1
     lines += emit_network("halvingSqrt131", sqrt_perm)
+    lines += emit_pair_network("halvingSqrtPair131", sqrt_perm)
     lines += [
         "ECC_HD P131 halvingQuadraticRoot131(P131 a) {",
         "    P131 z=toHalvingPhase131(a);",
