@@ -1,39 +1,70 @@
-//! **Cheon's attack** on Strong-Diffie-Hellman with auxiliary inputs
-//! (Cheon, EUROCRYPT 2006).
+//! **Cheon's algorithm** for the discrete logarithm with auxiliary
+//! inputs (Cheon, EUROCRYPT 2006; J. Cryptology 23, 2010), `p − 1` case.
 //!
-//! Threat model: the adversary observes `G, d·G, d²·G` (or
-//! `G, d·G, …, d^k·G` for some `k`).  Cheon shows that if `d | n − 1`
-//! (where `n = ord(G)`), the DLP becomes recoverable at cost
-//! `O(√(n/d) + √d)` instead of the `O(√n)` baseline — a factor `√d`
-//! speed-up.  More generally for `k`-auxiliary inputs the cost is
-//! `O(√(n/k) + √k)`.
+//! Threat model (DLPwAI).  The adversary observes `G`, `[α]G` and
+//! `[α^d]G` for a *known* divisor `d` of `n − 1`, where `n = ord(G)` is
+//! prime.  Such powers leak from every `q`-SDH-style assumption: Boneh–
+//! Boyen signatures, broadcast encryption and traitor tracing publish
+//! `[α^i]G` for `i ≤ q`, so any `d ≤ q` with `d | n − 1` is usable.
 //!
-//! Applies to:
-//! - **Boneh–Boyen short signatures** (where the auxiliary points
-//!   `H(m_i)/(d+H(m_i)) · G` give exactly such auxiliary structure).
-//! - **Many pairing-based protocols** using Strong Diffie-Hellman
-//!   assumptions.
+//! Cheon shows that `α` is then recoverable in
 //!
-//! ## Algorithm sketch
+//! ```text
+//!     O( √((n − 1)/d) + √d )   exponentiations
+//! ```
 //!
-//! Suppose `d ≡ ζ_d · ζ_e (mod n)` where `ζ_d ∈ ⟨g_d⟩` (a subgroup of
-//! order `d_factor | n − 1`).  Two baby-step / giant-step searches
-//! on the lifted group recover `ζ_d` and `ζ_e` separately, total cost
-//! `O(√(d_factor) + √((n−1)/d_factor))`.
+//! instead of the `Ω(√n)` group operations of a generic algorithm.  This
+//! matches the generic-group lower bound `Ω(√(n/d))` for the DLPwAI, so
+//! the algorithm is optimal for this problem; at `d ≈ √n` the cost is
+//! `O(n^{1/4})` exponentiations.
 //!
-//! ## What this module ships
+//! ## Why it works
 //!
-//! - [`cheon_attack`] — drive the attack when given (G, d·G, d²·G)
-//!   and `d_factor` (a known divisor of `n − 1`).
-//! - [`CheonAttackReport`] — structured outcome.
-//! - [`format_visualization`] — Markdown report.
+//! `F_n^*` is cyclic of order `n − 1`.  Let `ζ` generate it and let
+//! `ζ̂ = ζ^d`, of order `N = (n − 1)/d`.  Write `α = ζ^k` with
+//! `k = k₀ + k₁·N`, `0 ≤ k₀ < N`, `0 ≤ k₁ < d`.  Then
+//!
+//! * `α^d = ζ^{dk} = ζ̂^{k₀}` (the `k₁` part vanishes since `d·N = n−1`),
+//!   so a baby-step/giant-step search of size `√N` on the pair
+//!   `(G, [α^d]G)` finds `k₀`: baby steps `[ζ̂^i]G`, giant steps
+//!   `[ζ̂^{−mj}]·[α^d]G`.
+//! * `α·ζ^{−k₀} = ζ^{k₁N} = ζ̌^{k₁}` with `ζ̌ = ζ^N` of order `d`, so a
+//!   second search of size `√d` on `(G, [ζ^{−k₀}]·[α]G)` finds `k₁`.
+//!
+//! Every step is a scalar multiplication of a *fixed* base by a scalar
+//! known in `F_n`, which is why the unit is exponentiations; with
+//! fixed-base tables (Kozaki–Kutsuma–Matsuo 2007) each costs a handful
+//! of group additions.  This module uses plain scalar multiplication and
+//! reports the exponentiation count, so the reader can convert.
+//!
+//! ## What the auxiliary input buys, and what it does not
+//!
+//! Without `[α^d]G` the algorithm cannot start: the first search needs
+//! `α^d` embedded into the small subgroup `⟨ζ̂⟩`, and `[α^d]G` cannot be
+//! computed from `G, [α]G` (that is the CDH problem).  Cheon's algorithm
+//! is therefore a statement about protocols that leak powers of the
+//! secret, not about the ECDLP itself.  See
+//! `RESEARCH_TORSION_AUXILIARY_INPUTS.md` for the measured accounting
+//! against Pollard rho.
+//!
+//! ## History of this module
+//!
+//! An earlier version of this file performed a plain baby-step/giant-step
+//! with `d` baby steps on `(G, [α]G)` and never used the auxiliary input;
+//! its cost was `d + (n − 1)/d ≥ 2√n` group operations, i.e. *worse* than
+//! rho, while its report quoted Cheon's formula.  The measurement in the
+//! research note above (`plain_bsgs_as_in_rust` rows) records that.
 //!
 //! ## References
 //!
 //! - **J. H. Cheon**, *Security analysis of the strong Diffie-Hellman
 //!   problem*, EUROCRYPT 2006.
 //! - **J. H. Cheon**, *Discrete logarithm problems with auxiliary
-//!   inputs*, J. Cryptology 23 (2010).
+//!   inputs*, J. Cryptology 23 (2010), 457–476.
+//! - **D. R. L. Brown, R. P. Gallant**, *The static Diffie–Hellman
+//!   problem*, ePrint 2004/306 (independent discovery of the `p − 1` case).
+//! - **S. Kozaki, T. Kutsuma, K. Matsuo**, *Remarks on Cheon's algorithms
+//!   for pairing-related problems*, Pairing 2007.
 
 use crate::cryptanalysis::j0_twists::factorise_small;
 use crate::ecc::curve::CurveParams;
@@ -47,181 +78,237 @@ use std::collections::HashMap;
 pub struct CheonAttackReport {
     /// Subgroup order `n`.
     pub n: BigUint,
-    /// Divisor of `n − 1` we exploited.
-    pub d_factor: BigUint,
-    /// Recovered `d` (if found).
-    pub recovered_d: Option<BigUint>,
-    /// Baby-step count for the inner subgroup.
-    pub inner_steps: u64,
-    /// Giant-step count for the outer search.
-    pub outer_steps: u64,
-    /// Naive √n baseline cost (for comparison).
+    /// Divisor `d` of `n − 1` we exploited (the auxiliary input is `[α^d]G`).
+    pub d: BigUint,
+    /// Recovered `α` (if found).
+    pub recovered_alpha: Option<BigUint>,
+    /// Exponentiations spent in the first search (size `√((n−1)/d)`).
+    pub step1_exps: u64,
+    /// Exponentiations spent in the second search (size `√d`).
+    pub step2_exps: u64,
+    /// `⌊√n⌋`: the generic reference, in group operations.
     pub naive_cost: u64,
-    /// Cheon's predicted cost: `√d_factor + √((n−1)/d_factor)`.
+    /// Cheon's predicted cost `√((n−1)/d) + √d`, in exponentiations.
     pub predicted_cost: u64,
-    /// Elapsed time in ms.
+    /// Why the attack could not run, if it could not.
+    pub error: Option<String>,
+    /// Elapsed time in ms (practicality note only; never the metric).
     pub elapsed_ms: u128,
 }
 
-/// **Cheon's attack**: given `G, d·G, d²·G`, recover `d` exploiting
-/// a known divisor `d_factor` of `n − 1`.
+fn isqrt(n: &BigUint) -> BigUint {
+    if n.is_zero() {
+        return BigUint::zero();
+    }
+    // Newton's method on BigUint.
+    let mut x = BigUint::one() << ((n.bits() + 1) / 2);
+    loop {
+        let y = (&x + n / &x) >> 1u32;
+        if y >= x {
+            return x;
+        }
+        x = y;
+    }
+}
+
+fn to_u64_sat(n: &BigUint) -> u64 {
+    n.to_u64_digits().first().copied().unwrap_or(0)
+}
+
+/// Smallest primitive root modulo the prime `n`.
+fn primitive_root(n: &BigUint) -> BigUint {
+    let n_minus_1 = n - 1u32;
+    let factors = factorise_small(&n_minus_1);
+    let mut g = BigUint::from(2u32);
+    loop {
+        if factors
+            .iter()
+            .all(|(q, _)| g.modpow(&(&n_minus_1 / q), n) != BigUint::one())
+        {
+            return g;
+        }
+        g += 1u32;
+    }
+}
+
+fn point_key(p: &Point) -> Option<(BigUint, BigUint)> {
+    match p {
+        Point::Infinity => None,
+        Point::Affine { x, y } => Some((x.value.clone(), y.value.clone())),
+    }
+}
+
+/// Find `k ∈ [0, order)` with `target = [gen^k]·base`, where `gen ∈ F_n^*`
+/// has multiplicative order `order`.  Baby steps `[gen^i]base`, giant
+/// steps `[gen^{−mj}]target`.  Returns `(k, exponentiations)`.
+fn bsgs_in_exponent(
+    curve: &CurveParams,
+    base: &Point,
+    target: &Point,
+    n: &BigUint,
+    gen: &BigUint,
+    order: &BigUint,
+) -> (Option<BigUint>, u64) {
+    let a_fe = curve.a_fe();
+    let m = isqrt(order) + 1u32;
+    let m_u64 = to_u64_sat(&m);
+    let mut exps = 0u64;
+    let mut table: HashMap<(BigUint, BigUint), BigUint> = HashMap::new();
+    let mut z = BigUint::one();
+    for i in 0..m_u64 {
+        let pt = base.scalar_mul(&z, &a_fe);
+        exps += 1;
+        if let Some(key) = point_key(&pt) {
+            table.entry(key).or_insert_with(|| BigUint::from(i));
+        }
+        z = &z * gen % n;
+    }
+    // gen^{-m}
+    let gen_inv = gen.modpow(&(n - 2u32), n);
+    let step = gen_inv.modpow(&m, n);
+    let mut z = BigUint::one();
+    for j in 0..=m_u64 {
+        let pt = target.scalar_mul(&z, &a_fe);
+        exps += 1;
+        if let Some(key) = point_key(&pt) {
+            if let Some(i) = table.get(&key) {
+                let k = (i + &m * BigUint::from(j)) % order;
+                return (Some(k), exps);
+            }
+        }
+        z = &z * &step % n;
+    }
+    (None, exps)
+}
+
+/// **Cheon's `p − 1` algorithm**: given `G`, `[α]G` and `[α^d]G` with
+/// `d | n − 1`, recover `α`.
 ///
-/// Strategy: write `d = ζ^a · h^b` where `ζ` generates a subgroup of
-/// order `d_factor` and `h` generates a cofactor subgroup.  Use BSGS
-/// in each subgroup separately.
-///
-/// `d_factor` MUST divide `n − 1`.  We brute-force the inner BSGS
-/// because it's the smaller of the two costs.
+/// `d` must divide `n − 1`; otherwise the report carries an `error` and
+/// no result.  Cost is `√((n−1)/d) + √d` exponentiations (plus two for
+/// the shift and verification), independent of the size of `α`.
 pub fn cheon_attack(
     curve: &CurveParams,
     g: &Point,
-    d_g: &Point,
-    d2_g: &Point,
+    alpha_g: &Point,
+    alpha_d_g: &Point,
     n: &BigUint,
-    d_factor: &BigUint,
+    d: &BigUint,
 ) -> CheonAttackReport {
     let t0 = std::time::Instant::now();
     let a_fe = curve.a_fe();
     let n_minus_1 = n - 1u32;
-    let cofactor = &n_minus_1 / d_factor;
-    // Outer search: enumerate ζ^a for a ∈ [0, d_factor)
-    // and the corresponding "expected" d²·G via the auxiliary input.
-    let mut inner_steps = 0u64;
-    let mut outer_steps = 0u64;
-    // Naive approach for the educational demo: brute-force `d` by
-    // computing `i · G` and matching against `d·G`, but BSGS-style:
-    // split `d = a + d_factor · b` and search each half independently.
-    //
-    // Build a baby-step table: { (i · G) → i } for i ∈ [0, d_factor).
-    let mut table: HashMap<BigUint, BigUint> = HashMap::new();
-    let mut current = Point::Infinity;
-    let d_factor_u64 = d_factor
-        .to_u64_digits()
-        .get(0)
-        .copied()
-        .unwrap_or(0)
-        .min(1_000_000);
-    let mut found = None;
-    for i in 0..d_factor_u64 {
-        inner_steps += 1;
-        if let Some(x) = current.x_coord() {
-            table.insert(x.clone(), BigUint::from(i));
-        }
-        if &current == d_g {
-            found = Some(BigUint::from(i));
-            break;
-        }
-        current = current.add(g, &a_fe);
-    }
-    if let Some(d) = found {
-        return CheonAttackReport {
-            n: n.clone(),
-            d_factor: d_factor.clone(),
-            recovered_d: Some(d),
-            inner_steps,
-            outer_steps,
-            naive_cost: isqrt(n.to_u64_digits().get(0).copied().unwrap_or(0)),
-            predicted_cost: isqrt(d_factor_u64)
-                + isqrt(cofactor.to_u64_digits().get(0).copied().unwrap_or(0)),
-            elapsed_ms: t0.elapsed().as_millis(),
-        };
-    }
-    // Giant-step phase: compute (-j · d_factor · G + d·G) and look up
-    // its x-coord in the baby-step table.
-    let stride = g.scalar_mul(d_factor, &a_fe).neg();
-    let mut candidate = d_g.clone();
-    let max_j = (cofactor.to_u64_digits().get(0).copied().unwrap_or(0)).min(1_000_000);
-    for j in 0..max_j {
-        outer_steps += 1;
-        if let Some(x) = candidate.x_coord() {
-            if let Some(i) = table.get(x).cloned() {
-                // Verify the y-coordinate matches (table only stores x).
-                let trial = g.scalar_mul(&i, &a_fe);
-                if trial == candidate {
-                    let d = i + BigUint::from(j) * d_factor;
-                    let _ = d2_g; // not needed in this BSGS variant
-                    return CheonAttackReport {
-                        n: n.clone(),
-                        d_factor: d_factor.clone(),
-                        recovered_d: Some(d % n),
-                        inner_steps,
-                        outer_steps,
-                        naive_cost: isqrt(n.to_u64_digits().get(0).copied().unwrap_or(0)),
-                        predicted_cost: isqrt(d_factor_u64) + isqrt(max_j),
-                        elapsed_ms: t0.elapsed().as_millis(),
-                    };
-                }
-            }
-        }
-        candidate = candidate.add(&stride, &a_fe);
-    }
-    CheonAttackReport {
+    let naive_cost = to_u64_sat(&isqrt(n));
+    let mut report = CheonAttackReport {
         n: n.clone(),
-        d_factor: d_factor.clone(),
-        recovered_d: None,
-        inner_steps,
-        outer_steps,
-        naive_cost: isqrt(n.to_u64_digits().get(0).copied().unwrap_or(0)),
-        predicted_cost: isqrt(d_factor_u64) + isqrt(max_j),
-        elapsed_ms: t0.elapsed().as_millis(),
+        d: d.clone(),
+        recovered_alpha: None,
+        step1_exps: 0,
+        step2_exps: 0,
+        naive_cost,
+        predicted_cost: 0,
+        error: None,
+        elapsed_ms: 0,
+    };
+    if d.is_zero() || !(&n_minus_1 % d).is_zero() {
+        report.error = Some(format!("d = {} does not divide n − 1 = {}", d, n_minus_1));
+        report.elapsed_ms = t0.elapsed().as_millis();
+        return report;
     }
-}
+    let big_n = &n_minus_1 / d; // N = (n−1)/d
+    report.predicted_cost = to_u64_sat(&isqrt(&big_n)) + to_u64_sat(&isqrt(d));
 
-fn isqrt(n: u64) -> u64 {
-    if n == 0 {
-        return 0;
+    let zeta = primitive_root(n);
+    let zeta_hat = zeta.modpow(d, n); // order N
+
+    // Step 1: α^d = ζ̂^{k₀}.
+    let (k0, e1) = bsgs_in_exponent(curve, g, alpha_d_g, n, &zeta_hat, &big_n);
+    report.step1_exps = e1;
+    let k0 = match k0 {
+        Some(k) => k,
+        None => {
+            report.error = Some("step 1 found no match (is [α^d]G genuine?)".into());
+            report.elapsed_ms = t0.elapsed().as_millis();
+            return report;
+        }
+    };
+
+    // Step 2: α ζ^{−k₀} = ζ̌^{k₁}, ζ̌ = ζ^N of order d.
+    let zeta_inv = zeta.modpow(&(n - 2u32), n);
+    let shift = zeta_inv.modpow(&k0, n);
+    let shifted = alpha_g.scalar_mul(&shift, &a_fe);
+    let zeta_check = zeta.modpow(&big_n, n);
+    let (k1, e2) = bsgs_in_exponent(curve, g, &shifted, n, &zeta_check, d);
+    report.step2_exps = e2 + 1;
+    let k1 = match k1 {
+        Some(k) => k,
+        None => {
+            report.error = Some("step 2 found no match".into());
+            report.elapsed_ms = t0.elapsed().as_millis();
+            return report;
+        }
+    };
+    let alpha = zeta.modpow(&(&k0 + &k1 * &big_n), n);
+    // Verify: [α]G must equal the given [α]G.
+    report.step2_exps += 1;
+    if &g.scalar_mul(&alpha, &a_fe) == alpha_g {
+        report.recovered_alpha = Some(alpha);
+    } else {
+        report.error = Some("recovered α failed verification".into());
     }
-    let mut x = n;
-    let mut y = (x + 1) / 2;
-    while y < x {
-        x = y;
-        y = (x + n / x) / 2;
-    }
-    x
+    report.elapsed_ms = t0.elapsed().as_millis();
+    report
 }
 
 /// Render a Markdown report of Cheon's attack outcome.
 pub fn format_visualization(report: &CheonAttackReport) -> String {
     use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_YELLOW};
     let mut s = String::new();
-    s.push_str("# Cheon's auxiliary-input attack on DLP\n\n");
+    s.push_str("# Cheon's auxiliary-input attack on DLP (p − 1 case)\n\n");
     s.push_str(&format!(
         "**Subgroup order `n`**: {} ({} bits)\n\n",
         report.n,
         report.n.bits()
     ));
     s.push_str(&format!(
-        "**Exploited divisor**: `d_factor = {}` (divides `n − 1`)\n\n",
-        report.d_factor
+        "**Exploited divisor**: `d = {}` (divides `n − 1`; auxiliary input `[α^d]G`)\n\n",
+        report.d
     ));
     s.push_str("## Cost comparison\n\n");
     s.push_str("```\n");
     s.push_str(&format!(
-        "  naive √n baseline   : {:>10} group operations\n",
+        "  generic √n reference    : {:>10} group operations\n",
         report.naive_cost
     ));
     s.push_str(&format!(
-        "  Cheon √d + √(n−1)/d : {:>10} group operations\n",
+        "  Cheon √((n−1)/d) + √d   : {:>10} exponentiations (predicted)\n",
         report.predicted_cost
     ));
-    let speedup = report.naive_cost as f64 / report.predicted_cost.max(1) as f64;
     s.push_str(&format!(
-        "  empirical (this run):       {} baby + {} giant = {} total\n\n",
-        report.inner_steps,
-        report.outer_steps,
-        report.inner_steps + report.outer_steps
+        "  measured (this run)     : {} + {} = {} exponentiations\n\n",
+        report.step1_exps,
+        report.step2_exps,
+        report.step1_exps + report.step2_exps
     ));
-    s.push_str(&format!("  speedup: {:.2}×\n", speedup));
+    s.push_str(
+        "  one exponentiation ≈ 1.5·log₂ n group operations without\n  fixed-base tables; \
+         the ratio to the reference is in group operations only\n  after that conversion.\n",
+    );
     s.push_str("```\n\n");
-    match &report.recovered_d {
-        Some(d) => s.push_str(&format!(
-            "  {} **`d = {}` recovered in {} ms**\n",
+    match (&report.recovered_alpha, &report.error) {
+        (Some(alpha), _) => s.push_str(&format!(
+            "  {} **`α = {}` recovered in {} ms**\n",
             paint("✓", FG_BRIGHT_GREEN),
-            d,
+            alpha,
             report.elapsed_ms
         )),
-        None => s.push_str(&format!(
-            "  {} BSGS exceeded our cap before finding `d`\n",
+        (None, Some(err)) => s.push_str(&format!(
+            "  {} attack did not complete: {}\n",
+            paint("⚠", FG_BRIGHT_YELLOW),
+            err
+        )),
+        (None, None) => s.push_str(&format!(
+            "  {} attack did not complete\n",
             paint("⚠", FG_BRIGHT_YELLOW)
         )),
     }
@@ -235,8 +322,6 @@ mod tests {
     use super::*;
 
     /// Toy curve with order 199; 199 − 1 = 198 = 2 · 3² · 11.
-    /// Picking `d_factor = 11` exploits the largest non-trivial
-    /// divisor of `n − 1`.
     fn small_curve() -> CurveParams {
         CurveParams {
             name: "cheon-test-199",
@@ -250,33 +335,67 @@ mod tests {
         }
     }
 
-    /// **Cheon BSGS recovers d** when given a usable `d_factor`.
-    #[test]
-    fn cheon_recovers_d() {
-        let curve = small_curve();
+    fn aux_inputs(curve: &CurveParams, alpha: u32, d: u32) -> (Point, Point, Point) {
         let g = curve.generator();
         let a_fe = curve.a_fe();
-        let d_truth = BigUint::from(73u32);
-        let d_g = g.scalar_mul(&d_truth, &a_fe);
-        let d2_g = d_g.scalar_mul(&d_truth, &a_fe);
-        // 198 = 2 · 3² · 11.  Use d_factor = 11.
-        let report = cheon_attack(&curve, &g, &d_g, &d2_g, &curve.n, &BigUint::from(11u32));
-        assert_eq!(report.recovered_d, Some(d_truth));
+        let alpha_b = BigUint::from(alpha);
+        let alpha_d = alpha_b.modpow(&BigUint::from(d), &curve.n);
+        let alpha_g = g.scalar_mul(&alpha_b, &a_fe);
+        let alpha_d_g = g.scalar_mul(&alpha_d, &a_fe);
+        (g, alpha_g, alpha_d_g)
     }
 
-    /// **Cost ratio**: Cheon's predicted cost is below the naive √n
-    /// when `d_factor` is non-trivial.
+    /// **Cheon recovers α** from `G, [α]G, [α^d]G` for every divisor of
+    /// `n − 1` and several secrets.
     #[test]
-    fn cheon_cost_under_naive() {
+    fn cheon_recovers_alpha_for_every_divisor() {
         let curve = small_curve();
-        let g = curve.generator();
-        let a_fe = curve.a_fe();
-        let d_g = g.scalar_mul(&BigUint::from(50u32), &a_fe);
-        let d2_g = d_g.scalar_mul(&BigUint::from(50u32), &a_fe);
-        let report = cheon_attack(&curve, &g, &d_g, &d2_g, &curve.n, &BigUint::from(11u32));
-        // naive √199 ≈ 14.
-        // Cheon √11 + √18 ≈ 3 + 4 = 7.
-        assert!(report.predicted_cost <= report.naive_cost);
+        for &d in &[1u32, 2, 3, 6, 9, 11, 18, 22, 33, 66, 99, 198] {
+            for &alpha in &[2u32, 5, 73, 100, 197] {
+                let (g, ag, adg) = aux_inputs(&curve, alpha, d);
+                let report = cheon_attack(&curve, &g, &ag, &adg, &curve.n, &BigUint::from(d));
+                assert_eq!(
+                    report.recovered_alpha,
+                    Some(BigUint::from(alpha)),
+                    "d = {d}, alpha = {alpha}: {:?}",
+                    report.error
+                );
+            }
+        }
+    }
+
+    /// **The auxiliary input is used**: a wrong `[α^d]G` makes step 1 fail
+    /// instead of silently recovering α by brute force.
+    #[test]
+    fn cheon_needs_the_auxiliary_input() {
+        let curve = small_curve();
+        let (g, ag, _) = aux_inputs(&curve, 73, 11);
+        let bogus = g.scalar_mul(&BigUint::from(5u32), &curve.a_fe()); // not [73^11]G
+        let report = cheon_attack(&curve, &g, &ag, &bogus, &curve.n, &BigUint::from(11u32));
+        assert_ne!(report.recovered_alpha, Some(BigUint::from(73u32)));
+    }
+
+    /// **A non-divisor is rejected** with an explanation.
+    #[test]
+    fn cheon_rejects_non_divisor() {
+        let curve = small_curve();
+        let (g, ag, adg) = aux_inputs(&curve, 73, 11);
+        let report = cheon_attack(&curve, &g, &ag, &adg, &curve.n, &BigUint::from(7u32));
+        assert!(report.recovered_alpha.is_none());
+        assert!(report.error.is_some());
+    }
+
+    /// **Cost scales as √((n−1)/d) + √d**: the measured exponentiation
+    /// count stays within a small constant of the prediction.
+    #[test]
+    fn cheon_cost_tracks_prediction() {
+        let curve = small_curve();
+        let (g, ag, adg) = aux_inputs(&curve, 73, 11);
+        let report = cheon_attack(&curve, &g, &ag, &adg, &curve.n, &BigUint::from(11u32));
+        let measured = report.step1_exps + report.step2_exps;
+        // predicted √18 + √11 ≈ 4 + 3 = 7; BSGS spends ≤ 2(m+1) per search.
+        assert!(measured <= 4 * report.predicted_cost + 8, "{measured}");
+        assert!(report.predicted_cost < report.naive_cost);
     }
 
     /// **Visualization renders** the canonical sections.
@@ -284,17 +403,18 @@ mod tests {
     fn cheon_visualization_renders() {
         let report = CheonAttackReport {
             n: BigUint::from(199u32),
-            d_factor: BigUint::from(11u32),
-            recovered_d: Some(BigUint::from(73u32)),
-            inner_steps: 11,
-            outer_steps: 18,
+            d: BigUint::from(11u32),
+            recovered_alpha: Some(BigUint::from(73u32)),
+            step1_exps: 9,
+            step2_exps: 8,
             naive_cost: 14,
             predicted_cost: 7,
+            error: None,
             elapsed_ms: 2,
         };
         let s = format_visualization(&report);
         assert!(s.contains("Cheon"));
-        assert!(s.contains("d_factor = 11"));
-        assert!(s.contains("speedup"));
+        assert!(s.contains("d = 11"));
+        assert!(s.contains("exponentiations"));
     }
 }
