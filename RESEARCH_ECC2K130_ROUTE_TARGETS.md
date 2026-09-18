@@ -6,6 +6,8 @@
 (why those and not others).
 **Frame inherited from** [`RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`](RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md)
 §"The shared boundary" and [`AGENTS.md`](AGENTS.md).
+Which of X1–X6 can run together, and which stacks are already closed, is
+[`RESEARCH_ECC2K130_IC_SYNTHESIS.md`](RESEARCH_ECC2K130_IC_SYNTHESIS.md).
 
 Six experiments, each with a boundary derived before anything is run, a
 primary metric in one unit, and a falsifier specific enough that a run

@@ -1199,6 +1199,103 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       2^+0.00. Quoting SAT seconds as S is relabelling.</p>
   </div>
 
+  <div class="panel" id="ecc2k130-ic-synthesis-20260918">
+    <div class="panel-head">
+      <h2>ECC2K-130 index-calculus combinations</h2>
+      <p><span class="chip">accounting</span>
+        A map of the IC threads on this curve, not a new oracle. GPU pairs,
+        the weight-2 table, SAT, and Frobenius compose and still sit on the
+        product law. The only row below rho does not recover
+        <code>log<sub>P</sub>(Q)</code>. Five experiments remain compatible
+        (Crossbred, Crossbred on the symmetrised frame, symmetrised end-to-end,
+        chained <code>m = 4</code> FFD, CM/τ survey); none has a fitted
+        <code>α</code>. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_IC_SYNTHESIS.md"><code>RESEARCH_ECC2K130_IC_SYNTHESIS.md</code></a>.
+        Frozen receipts as in the G7e panel plus
+        <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6.</p>
+    </div>
+    <p>Unit: field products. Rho conversion on this SKU: 5.3125 products per
+      walk iteration. <code>S = products / √r</code>, √r = 2<sup>64.5</sup>.
+      The MITM row was published in rho-step equivalents as 2<sup>67.287</sup>;
+      multiplying by 5.3125 converts the unit and leaves the ratio to rho
+      unchanged. Memory on that row is still charged at zero (1,011&nbsp;EB).
+      Homogeneous <code>S</code> is 2<sup>59.17 − 64.5</sup> from that converted
+      log<sub>2</sub>, so the column is consistent with the other rows; the
+      ratio 2<sup>−4.05</sup> is the column
+      <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6 supports against
+      rho. SAT, the conditional FFD formula, residual walks on
+      <code>E(F<sub>p³</sub>)</code>, and Crossbred word-ops do not enter this
+      table: they have no measured conversion into field products on this
+      instance.</p>
+    <table>
+      <caption>ECC2K-130 index-calculus combinations in the field-product unit.
+        G7e rows cited from
+        <code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code>;
+        MITM and homogeneous rows from
+        <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col" class="n">log<sub>2</sub> products</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">Ratio to rho</th>
+        <th scope="col" class="n">Ratio to floor</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pollard rho, ⟨−1⟩×⟨π⟩ <em>(reference)</em></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2^+0.00</td>
+          <td class="n">—</td><td>shipping client on this SKU</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>Product-law floor, m = 3, any |F|</td>
+          <td class="n">136.91</td><td class="n">2^{72.4}</td><td class="n">2^+73.69</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">floor</span></td></tr>
+        <tr><td>+ Frobenius collapse |F|/131</td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td><td class="n">2^+66.66</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Streaming pairs, G7e, |F| = 8,384</td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td>
+          <td class="n">2^+66.66</td><td class="n">2^+0.00</td>
+          <td>8/8 planted; 0 generator hits, yield 3.6×10<sup>−29</sup></td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Pair-table identity, |F| = 8,384</td>
+          <td class="n">116.84</td><td class="n">5.70×10<sup>15</sup></td><td class="n">2^+53.62</td>
+          <td class="n">2^−13.03 vs streaming</td>
+          <td>derived: generic 3SUM with memory</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Pair table, G7e, |F| = 8,384</td>
+          <td class="n">116.84</td><td class="n">5.70×10<sup>15</sup></td>
+          <td class="n">2^+53.62</td><td class="n">2^−13.03 vs streaming</td>
+          <td>8/8 planted; 0 generator hits; 35,137,344 sums</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Honest MITM logarithm, memory free</td>
+          <td class="n">69.70</td><td class="n">36.7</td>
+          <td class="n">2^+6.48</td><td class="n">—</td>
+          <td>6/6 planted logs on analogues; 1,011 EB uncharged</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Homogeneous relations, m = 28</td>
+          <td class="n">59.17</td><td class="n">0.025</td>
+          <td class="n">2^−4.05</td><td class="n">—</td>
+          <td>relations determine nothing</td>
+          <td><span class="chip relabel">relabelling</span></td></tr>
+      </tbody>
+    </table>
+    <p>Open combinations, predicted engineering unless a fitted
+      <code>α ≤ 1.5</code> is produced: Crossbred on chained
+      <code>m = 3</code> systems (X1/X2); Crossbred on the symmetrised
+      <code>u</code>-frame (X3); symmetrised oracle end-to-end with every
+      phase priced (X4); chained symmetrised <code>S<sub>3</sub></code> at
+      <code>m = 4</code> with FFD (X5); a second literature pass on CM/τ for
+      index calculus (X6). GPU acceleration of Crossbred's search phase is
+      admissible only after X1 has an <code>α</code>. Closed: Joux–Vitse and
+      GHS at prime <code>n</code>, Wagner on elliptic addition, extension-field
+      base change, pairs-and-solve as a Koblitz speed-up, SAT as a cheaper
+      <code>n = 131</code> oracle, Yokoyama as a shield. The 500×-or-worse
+      rho verdict above is unchanged. No full-DLP at n=131 is claimed.</p>
+  </div>
+
   <div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>
