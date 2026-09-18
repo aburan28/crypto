@@ -151,8 +151,9 @@ only 3.0%. The 192×3 scout did resident 3 blocks and still lost: extra
 warps pulled the boost clock down and the addend missed LDS.
 
 **Against the falsification target.** Success was a verified median > 29.0.
-Measured best in this round **17.414**. The later composed follow-up below
-supersedes it at 18.110 B/s, still far short of 29. 29 B/s on one RTX PRO
+Measured best in this round **17.414**. Later follow-ups supersede it first at
+18.110 B/s below and then at **20.134 B/s** in THROUGHPUT-22B.md, still far
+short of 29. 29 B/s on one RTX PRO
 6000 is not a result this tree has. The one-add floor is still 22–25 B/s.
 The campaign default stays the shipping walk. Knobs stay off by default.
 
@@ -177,3 +178,9 @@ complete receipt, raw logs and exploratory paired interval are in
 [`benchmarks/throughput-18b-composed`](benchmarks/throughput-18b-composed/README.md).
 This supersedes the headline engineering rate, not the 29 B/s verdict or the
 one-add floor.
+
+The next round combines a 512-thread block, denominator reconstruction, batch
+17 and bank-padded shared rows. Its confirmed **20.134 B/s** result and the
+rows rejected while pursuing 22 B/s are in
+[`THROUGHPUT-22B.md`](THROUGHPUT-22B.md). It supersedes 18.110 as the
+engineering headline; 22 and 29 remain unmet.
