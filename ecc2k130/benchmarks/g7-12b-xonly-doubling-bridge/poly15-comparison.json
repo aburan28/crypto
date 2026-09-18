@@ -1,0 +1,60 @@
+{
+  "status": "complete-map-poly12-15b-benchmark-screen",
+  "generic_work_boundary": "sqrt(n/262) times collision work",
+  "full_dlp_S": null,
+  "rows": [
+    {
+      "variant": "control",
+      "rates_billion_per_second": [
+        12.649233,
+        12.584091,
+        12.385245999999999
+      ],
+      "median_billion_per_second": 12.584091,
+      "paired_geomean_vs_control": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rate_over_10b": 1.2584091000000002,
+      "rate_over_12b": 1.0486742500000001,
+      "rate_over_15b": 0.8389394
+    },
+    {
+      "variant": "arith",
+      "rates_billion_per_second": [
+        14.307193999999999,
+        14.141587,
+        14.027602
+      ],
+      "median_billion_per_second": 14.141587,
+      "paired_geomean_vs_control": 1.1291417276205271,
+      "paired_95_ci": [
+        1.1174575522533297,
+        1.1409480731352493
+      ],
+      "rate_over_10b": 1.4141587,
+      "rate_over_12b": 1.1784655833333333,
+      "rate_over_15b": 0.9427724666666666
+    },
+    {
+      "variant": "poly12",
+      "rates_billion_per_second": [
+        13.261398999999999,
+        13.010086,
+        12.972214
+      ],
+      "median_billion_per_second": 13.010086,
+      "paired_geomean_vs_control": 1.0431921525722516,
+      "paired_95_ci": [
+        1.023164342457394,
+        1.0636119947012759
+      ],
+      "rate_over_10b": 1.3010085999999998,
+      "rate_over_12b": 1.0841738333333333,
+      "rate_over_15b": 0.8673390666666666
+    }
+  ],
+  "decision": "product+inverse ceiling below 15.5 B/s; 15 B/s is not available on this common path",
+  "class": "engineering"
+}

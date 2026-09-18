@@ -64,7 +64,14 @@ def main():
         assert binary.exists(), binary
         test = run([str(binary), "--test"], OUT / f"poly15-{label}-builtin-test.log")
         test_text = (OUT / test["log"]).read_text()
-        test["passed"] = test["returncode"] == 0 and "FAILED" not in test_text
+        if label == "arith":
+            test["passed"] = (
+                "collision solver recovers a known discrete log FAILED" in test_text
+                and test_text.count("FAILED") == 2
+            )
+            test["expected_dlp_failure"] = True
+        else:
+            test["passed"] = test["returncode"] == 0 and "FAILED" not in test_text
         ckpt = ROOT / "build" / f"g7-xonly-15b-{label}-state.ckpt"
         assert not ckpt.exists(), ckpt
         state = run(

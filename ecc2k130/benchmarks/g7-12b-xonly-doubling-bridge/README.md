@@ -527,3 +527,42 @@ the built-in suite, and a zero-mismatch 2,048-point seven-step version-8
 oracle. Then compare three interleaved equal-work pairs against the modulus-72
 control. The direct complete-map median must reach 15 B/s, and both raw and
 collision-adjusted paired intervals must exceed one. Full-DLP S stays null.
+
+## 15 B/s result
+
+The arithmetic-only ceiling is below the 15.5 B/s continue-to-complete-map
+gate, so 15 B/s is not available on this product+inverse common path.
+
+All three kernels compile with 80 registers and zero walk-kernel spills at
+minimum-three-block occupancy. Independent 2,048-point seven-step affine-x
+oracles report zero mismatches. Control and poly12 pass the built-in suite.
+Arithmetic-only fails the planted discrete-log builtin because multiplier
+`1+s` has index 12; that failure is expected and does not affect the
+checkpoint oracle.
+
+Each sample below accounts for 34,359,738,368 complete scalar updates:
+
+| variant | rates (B/s) | median (B/s) | rate / 15 B/s |
+|---|---|---:|---:|
+| modulus-72 control | 12.649233, 12.584091, 12.385246 | 12.584091 | 0.838939 |
+| poly12 complete map | 13.261399, 13.010086, 12.972214 | 13.010086 | 0.867339 |
+| arithmetic-only diagnostic | 14.307194, 14.141587, 14.027602 | **14.141587** | 0.942772 |
+
+Paired geometric-mean ratios versus the modulus-72 control: poly12 1.043192
+with 95% CI [1.023164, 1.063612]; arithmetic-only 1.129142 with 95% CI
+[1.117458, 1.140948]. Both intervals exceed one, so skipping conversion is a
+real engineering gain. Neither row reaches 15 B/s. Arithmetic-only cannot be
+promoted: it is not a complete map.
+
+The GF(2^23) poly12 collision study solved every trial with zero bad points,
+but recorded **zero** `sigma^3` bridges in 20,558 candidate steps. The 12-bit
+window is too rare on the short F23 walks, so the study collapsed to `1+s`
+alone. Mean charged-work ratio 1.133484 exceeds the 1.10 gate and is not a
+mixing measurement of the two-bridge map. Do not promote poly12.
+
+A four-block occupancy compile of the same arithmetic-only source
+(`MINBLOCKS=4`) uses 64 registers and **28-byte spill stores and loads**.
+Reject it before timing, as previous G7 rounds reject any walk-kernel spill.
+
+Retain the modulus-72 complete map. A 15 B/s G7 rate needs a cheaper inverse
+or an inverse-free iteration, not a cheaper selector on this denominator tree.

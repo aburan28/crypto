@@ -1,0 +1,30 @@
+{
+  "compile_seconds": 1.4681568060004793,
+  "compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "trials_100": {
+    "returncode": 0,
+    "elapsed_seconds": 25.46779502299978,
+    "log_sha256": "e9f02b418db102f5a74b577117788d61162e4f15441fd241488502ea31a045f6",
+    "output": "mode=selected trials=100 solved=100 bad=0 invariant_bad=0 overdue=0 zero_den=1 bridges1=0 bridges3=0 iterations_mean=181.370000 iterations_median=160 iterations_p90=337 walks_mean=133.750000 walks_median=119 walks_p90=236\nmode=poly12-sparse-bridge3 trials=100 solved=100 bad=0 invariant_bad=0 overdue=0 zero_den=1 bridges1=20558 bridges3=0 iterations_mean=205.580000 iterations_median=184 iterations_p90=365 walks_mean=145.160000 walks_median=129 walks_p90=265",
+    "parsed": {
+      "selected": {
+        "solved": 100,
+        "bad": 0,
+        "invariant_bad": 0,
+        "overdue": 0,
+        "iterations_mean": 181.37,
+        "line": "mode=selected trials=100 solved=100 bad=0 invariant_bad=0 overdue=0 zero_den=1 bridges1=0 bridges3=0 iterations_mean=181.370000 iterations_median=160 iterations_p90=337 walks_mean=133.750000 walks_median=119 walks_p90=236"
+      },
+      "poly12-sparse-bridge3": {
+        "solved": 100,
+        "bad": 0,
+        "invariant_bad": 0,
+        "overdue": 0,
+        "iterations_mean": 205.58,
+        "line": "mode=poly12-sparse-bridge3 trials=100 solved=100 bad=0 invariant_bad=0 overdue=0 zero_den=1 bridges1=20558 bridges3=0 iterations_mean=205.580000 iterations_median=184 iterations_p90=365 walks_mean=145.160000 walks_median=129 walks_p90=265"
+      }
+    },
+    "work_ratio": 1.1334840381540499,
+    "passed": false
+  }
+}
