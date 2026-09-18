@@ -96,6 +96,32 @@ def native_markdown(rows):
     return '\n'.join(lines)
 
 
+def flat_base(report):
+    """The factor base a report names, as (x, y) integer pairs, whichever
+    certificate format it uses. A report that lists every point is read as is.
+    One that names the base by its orbit representatives (round 0017 and later,
+    `factor_base_orbits`) is expanded here with the checker's own Frobenius and
+    negation -- the same expansion oracle.py performs to verify it -- so that a
+    fully listed base and an orbit-named base of the same points fingerprint
+    identically, which is what the support audit below exists to establish."""
+    if 'factor_base_orbits' in report:
+        from oracle import Curve
+        c = Curve(report['fixture'])
+        points = []
+        for rep in report['factor_base_orbits']:
+            q = c.decode(rep)
+            if q is None:
+                raise ValueError('orbit representative does not lift to the curve')
+            for _ in range(c.n):
+                points.append(q)
+                points.append(c.neg(q))
+                q = c.frob(q)
+            if q != c.decode(rep):
+                raise ValueError('orbit representative does not close under Frobenius')
+        return [tuple(int(v) for v in pt) for pt in points]
+    return [tuple(map(int, p)) for p in report['factor_base']]
+
+
 def matched_base_audit(root):
     policy=read(root/'contract.json').get('comparison_kind')=='factor-base-policy'
     support_rows={}
@@ -108,7 +134,7 @@ def matched_base_audit(root):
                 report=read(path)
                 if report.get('mode')!='ic' or report.get('status')!='complete':
                     continue
-                points=sorted(tuple(map(int,p)) for p in report['factor_base'])
+                points=sorted(flat_base(report))
                 fingerprint=hashlib.sha256(json.dumps(points,separators=(',',':')).encode()).hexdigest()
                 hashes.add(fingerprint)
                 arm=path.relative_to(case).parts[0]
