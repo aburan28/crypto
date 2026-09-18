@@ -112,7 +112,9 @@ REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-1500}
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS
 set +e
-"${SSH[@]}" "set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
+# Unlink first so a leftover from an earlier hop cannot satisfy the copy
+# below. Copy-on-124 is only correct when *this* process wrote the file.
+"${SSH[@]}" "rm -f /tmp/rho_status.json; set -euo pipefail; source '$REMOTE_ENV'; timeout ${REMOTE_TIMEOUT} python3 /tmp/rho_status_snapshot.py --campaign '$CAMPAIGN' --source walker-ssh --out /tmp/rho_status.json"
 SSH_RC=$?
 set -e
 ELAPSED=$((SECONDS - STARTED))

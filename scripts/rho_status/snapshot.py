@@ -174,12 +174,13 @@ SELECT
 
 # One hour of distinguished_points, using the #432 (campaign_id, found_at)
 # index. Peak hours on this campaign are ~10 M rows, not 187 M. No SHARE
-# lock: the trigger is already live, so ON CONFLICT adds buckets ingest
-# wrote after this transaction's snapshot. DELETE + scan of one closed
-# hour is how a mid-hour trigger start gets the pre-trigger rows without
-# wiping hours already finished.
+# lock: REPEATABLE READ means ON CONFLICT adds buckets ingest wrote after
+# this transaction's snapshot. DELETE + scan of one closed hour is how a
+# mid-hour trigger start gets the pre-trigger rows without wiping hours
+# already finished. rho_dp_recent keeps event found_at, same grain as the
+# insert trigger, so READ_SQL's sliding windows stay correct.
 BACKFILL_SQL = r"""
-BEGIN;
+BEGIN ISOLATION LEVEL REPEATABLE READ;
 SET LOCAL statement_timeout = '300s';
 SET LOCAL lock_timeout = '15s';
 DELETE FROM rho_dp_hour
@@ -189,14 +190,12 @@ DELETE FROM rho_dp_recent
  WHERE campaign_id = '{{campaign}}'
    AND found_at >= '{{hour}}'::timestamptz
    AND found_at < '{{hour}}'::timestamptz + interval '1 hour';
-WITH grouped AS (
+WITH objs AS MATERIALIZED (
   SELECT
     campaign_id,
     worker_id,
-    date_trunc('hour', found_at) AS hour,
-    count(*)::bigint AS dps,
-    min(found_at) AS first_at,
-    max(found_at) AS last_at
+    found_at,
+    count(*)::bigint AS dps
   FROM distinguished_points
   WHERE campaign_id = '{{campaign}}'
     AND found_at >= '{{hour}}'::timestamptz
@@ -204,16 +203,23 @@ WITH grouped AS (
   GROUP BY 1, 2, 3
 ), ins_hour AS (
   INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
-  SELECT campaign_id, hour, worker_id, dps, first_at, last_at
-  FROM grouped
+  SELECT campaign_id,
+         date_trunc('hour', found_at),
+         worker_id,
+         sum(dps),
+         min(found_at),
+         max(found_at)
+  FROM objs
+  GROUP BY 1, 2, 3
   ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
     dps = rho_dp_hour.dps + EXCLUDED.dps,
     first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
     last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at)
 ), ins_recent AS (
   INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
-  SELECT campaign_id, worker_id, hour, dps
-  FROM grouped
+  SELECT campaign_id, worker_id, found_at, dps
+  FROM objs
+  WHERE found_at > now() - interval '7 days'
   ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
     dps = rho_dp_recent.dps + EXCLUDED.dps
 )
