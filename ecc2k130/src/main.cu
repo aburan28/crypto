@@ -635,7 +635,12 @@ static void testOrbit(Rng &rng, const U192 &ell) {
         if (R::weight(pc.x) != hw) okWeight = false;
         if (R::trace(p.x) != 0) okTrace = false;
     }
+#if ECC_PACKED_XONLY_POLY_SELECT
+    (void)okFrob;
+    report("polynomial-bit selector is not Frobenius-invariant", true);
+#else
     report("iteration commutes with Frobenius", okFrob);
+#endif
     report("iteration commutes with negation", okNeg);
     report("weight is constant on an orbit", okWeight);
     report("subgroup x-coordinates have even weight", okTrace);

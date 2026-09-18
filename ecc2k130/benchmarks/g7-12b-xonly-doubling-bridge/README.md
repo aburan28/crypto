@@ -476,3 +476,54 @@ equal-work benchmark pairs and three interleaved DP34 pairs against the
 control. Retain the candidate only if a paired 95% interval exceeds one.
 DP34 measurement of the control is required even if the skip is rejected:
 the 10 B/s G7 claim is incomplete without collection throughput.
+
+## Preregistered 15 B/s arithmetic-only ceiling
+
+The promoted modulus-72 complete map measures 12.499203 B/s. The earlier
+bridge-1 diagnostic, which still converted every output to the normal basis
+to test Hamming weight, measured 13.089917 B/s. That is the present common-path
+ceiling, and it is below 15 B/s.
+
+`--bench` sets `dpWeight=0`, so distinguished-point reports are essentially
+never taken. The remaining conversion exists only to feed the sparse selector.
+Skip classification, the rare warp, and `fromPolynomial`+`weight` entirely.
+Always use denominator `x` and finish with `x+1/x`. This diagnostic applies
+only scalar multiplier `1+s`, whose generated subgroup has index 12, so it
+cannot be promoted. Checkpoint version 7 and backend name
+`cuda-packed131-xonly-bridge1-arith-only` isolate it from the complete map.
+
+Build the isolated binary with the same B16/split2/cache1/shared-X4/minblocks3
+geometry. Require at most 80 registers, zero walk-kernel spills, and at least
+three blocks per SM. Validate a 2,048-point seven-step affine `P+sigma(P)`
+oracle with zero mismatches. Then run three interleaved equal-work pairs
+against the modulus-72 control. Continue to a complete cheap-selector map only
+if the arithmetic-only median is at least 15.5 B/s; a ceiling below that means
+15 B/s is not available on this product+inverse path.
+
+## Preregistered 15 B/s polynomial-bit complete map
+
+If the arithmetic-only ceiling is at least 15.5 B/s, replace the Hamming-weight
+selector with a 12-bit window of the stored polynomial coordinate:
+`(x.v[0] & 0xfff) == 14`, probability 1/4096. Rare states keep
+`P+sigma^3(P)` and scalar `1+s^3`; ordinary states keep `P+sigma(P)` and
+`1+s`. Those multipliers still generate `F_ell*`. The selector is not
+Frobenius-invariant; the collision key remains the canonical orbit, with the
+existing rotation/sign search.
+
+On GF(2^23) the same 12-bit window is taken from the host normal-basis word,
+because that field has no packed 131-bit transform. Freeze the existing
+collision harness, seeds, DP threshold, restart charge, coefficient tracking,
+endpoint verification and scalar recovery. Run 100 matched trials first.
+Continue to 2,000 only if candidate mean charged work is at most 1.10 times
+selected and there are no bad points, invariant failures, overdue walks, or
+unsolved trials.
+
+The CUDA candidate skips Hamming conversion on the `--bench` path
+(`POLY_DP_CONVERT=0`); distinguished points there are only the all-zero
+abscissa. Checkpoint version 8 and backend
+`cuda-packed131-xonly-bridge1-bridge3-poly12`. Do not combine empty-queue skip
+in this first measurement. Require zero spills, at least three blocks per SM,
+the built-in suite, and a zero-mismatch 2,048-point seven-step version-8
+oracle. Then compare three interleaved equal-work pairs against the modulus-72
+control. The direct complete-map median must reach 15 B/s, and both raw and
+collision-adjusted paired intervals must exceed one. Full-DLP S stays null.

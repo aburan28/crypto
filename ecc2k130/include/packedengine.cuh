@@ -1,6 +1,15 @@
 // Included by main.cu after the common CUDA engine and checkpoint helpers.
 #pragma once
 #include "packedkernels.cuh"
+#ifndef ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#define ECC_PACKED_XONLY_ARITHMETIC_ONLY 0
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT
+#define ECC_PACKED_XONLY_POLY_SELECT 0
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_DP_CONVERT
+#define ECC_PACKED_XONLY_POLY_DP_CONVERT 1
+#endif
 
 struct PackedCudaEngine : CudaEngine<CfgF131> {
     static const int LANES = 1;
@@ -26,9 +35,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
     unsigned checkpointVersion() const override {
-        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? 6u :
+        return ECC_PACKED_XONLY_POLY_SELECT ? 8u :
+            (ECC_PACKED_XONLY_ARITHMETIC_ONLY ? 7u :
+            (ECC_PACKED_XONLY_BRIDGE_MOD72 ? 6u :
             (ECC_PACKED_XONLY_BRIDGE1_COMMON ? 5u :
-            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)));
+            (ECC_PACKED_XONLY_BRIDGE3 ? 4u : (ECC_PACKED_XONLY_23 ? 3u : 2u)))));
     }
     int checkpointLanes() const override { return 1; }
 #if ECC_PACKED_POLY_STATE
@@ -101,10 +112,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
     const char *name() const {
-        return ECC_PACKED_XONLY_BRIDGE_MOD72 ? "cuda-packed131-xonly-bridge1-bridge3-mod72" :
+        return ECC_PACKED_XONLY_POLY_SELECT ? "cuda-packed131-xonly-bridge1-bridge3-poly12" :
+            (ECC_PACKED_XONLY_ARITHMETIC_ONLY ? "cuda-packed131-xonly-bridge1-arith-only" :
+            (ECC_PACKED_XONLY_BRIDGE_MOD72 ? "cuda-packed131-xonly-bridge1-bridge3-mod72" :
             (ECC_PACKED_XONLY_BRIDGE1_COMMON ? "cuda-packed131-xonly-bridge1-bridge3" :
             (ECC_PACKED_XONLY_BRIDGE3 ? "cuda-packed131-xonly23-bridge3" :
-            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131")));
+            (ECC_PACKED_XONLY_23 ? "cuda-packed131-xonly23" : "cuda-packed131")))));
     }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
@@ -223,6 +236,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed sigma^1 common path: %d\n", ECC_PACKED_XONLY_BRIDGE1_COMMON);
         printf("packed sparse bridge modulus 72: %d\n", ECC_PACKED_XONLY_BRIDGE_MOD72);
         printf("packed skip empty bridge phase: %d\n", ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE);
+        printf("packed arithmetic-only diagnostic: %d\n", ECC_PACKED_XONLY_ARITHMETIC_ONLY);
+        printf("packed polynomial-bit selector: %d\n", ECC_PACKED_XONLY_POLY_SELECT);
+        printf("packed polynomial-bit Hamming DP convert: %d\n", ECC_PACKED_XONLY_POLY_DP_CONVERT);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed block inverse: %d\n", ECC_PACKED_BLOCK_INVERSE);
         printf("packed physical slots/thread: %d; logical workers/block: %d\n", ECC_BATCH / ECC_PACKED_BATCH_SPLIT, eccPacked131::walkWorkersPerBlock131);

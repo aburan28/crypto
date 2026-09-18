@@ -87,11 +87,23 @@ struct Solver {
             }
             if (it >= maxIters) return out;
 #if ECC_PACKED_XONLY_23
-#if ECC_PACKED_XONLY_BRIDGE3
-            if (ECC_PACKED_XONLY_IS_BRIDGE3(hw)) out.counts[2]++;
-            else
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY
+            out.counts[0]++;
+#elif ECC_PACKED_XONLY_BRIDGE3
+            if (
+#if ECC_PACKED_XONLY_POLY_SELECT
+                R::polySelectBridge3(p.x)
+#else
+                ECC_PACKED_XONLY_IS_BRIDGE3(hw)
 #endif
+            ) out.counts[2]++;
+            else
 #if ECC_PACKED_XONLY_DOUBLE_ONLY
+            out.counts[0]++;
+#else
+            out.counts[(hw >> 1) & 1]++;
+#endif
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
             out.counts[0]++;
 #else
             out.counts[(hw >> 1) & 1]++;

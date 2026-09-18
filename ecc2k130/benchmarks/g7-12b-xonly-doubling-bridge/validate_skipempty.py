@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Resource, builtin, checkpoint and independent affine-x gates for skip-empty."""
 from pathlib import Path
-import json, re, subprocess
+import json, re, subprocess, time
 from experiment import ROOT, OUT, sha
 
 CONTROL = ROOT / "build/g7-xonly-mod72-control"
