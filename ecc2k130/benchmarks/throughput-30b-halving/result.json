@@ -1,0 +1,41 @@
+{
+  "classification": "cheaper primitive; 30 B/s target not met; not rho alone",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete subgroup point halvings per second",
+  "target": 30.0,
+  "configuration": {
+    "representation": "polynomial lambda-affine",
+    "field_products": 1,
+    "threads_per_block": 768,
+    "blocks_per_sm": 1,
+    "chains_per_thread": 1,
+    "PACKED_TOP_CLMAD": 1,
+    "PACKED_CLMUL_FLAT": 1,
+    "PACKED_REDUCE_CLMAD_T": 1,
+    "HALVING_CLMAD_PREFIX": 1,
+    "PACKED_FROM_REDUCED": 1,
+    "PACKED_INLINE_POLY": 3
+  },
+  "samples": [28.909, 29.069, 28.953],
+  "median": 28.953,
+  "ratio_to_30b_target": 0.9651,
+  "ratio_to_25b_target": 1.15812,
+  "ratio_to_20_134_table_walk": 1.4379920,
+  "correctness": {
+    "subgroup_points": 512,
+    "quadratic_root_failures": 0,
+    "square_root_failures": 0,
+    "host_subgroup_failures": 0,
+    "coordinate_word_mismatches": 0
+  },
+  "ideal_50_50_mixed_raw_harmonic_mean": 23.7515131,
+  "scouts": {
+    "lambda_state_before_closed_trace": 19.695,
+    "closed_second_trace": 23.344,
+    "pre_square_root_selection": 27.725,
+    "top_clmad_and_flat_issue": 27.888,
+    "clmad_prefix_and_reduction": 28.953,
+    "dual_chain_ilp": 28.917
+  }
+}

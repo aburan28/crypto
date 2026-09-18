@@ -4,10 +4,10 @@ Question: can replacing some affine-addition iterations by point halvings beat
 the measured table walk on one RTX PRO 6000?
 
 Answer: lambda-affine polynomial state produces a genuinely cheaper primitive:
-**23.904 B/s with one field product**, 1.187 times the current 20.134 B/s table
+**28.953 B/s with one field product**, 1.438 times the current 20.134 B/s table
 walk. It still does not produce a 25 B/s rho walk: halving alone is a
 permutation, and even an ideal free-dispatch 50/50 mixture has raw harmonic
-mean 21.858 B/s before representation changes or collision constants.
+mean 23.752 B/s before representation changes or collision constants.
 
 ## Boundary and target
 
@@ -27,9 +27,9 @@ phase avoids divergence only by making the phase part of the state.
 | halving, first phase-map build (superseded) | 2 | 12.125 | 0.602 | 512/512 | engineering |
 | halving, normal-basis state | 2 | 16.053 | 0.797 | 512/512 | engineering, superseded |
 | **halving, polynomial state, 512 threads** | **2** | **17.921** | **0.890** | **512/512** | **engineering, rejected for mixed rho** |
-| **halving, polynomial λ-state** | **1** | **23.904** | **1.187** | **512/512** | **cheaper primitive; not a rho map alone** |
-| ideal 50/50 λ-halving/table-add mixture | 3.1471 average | 21.858 | 1.086 | free-dispatch extrapolation | upper-bound model |
-| 25 B/s target | — | **25.000** | **1.242** | required | above both primitives |
+| **halving, polynomial λ-state, selected** | **1** | **28.953** | **1.438** | **512/512** | **cheaper primitive; not a rho map alone** |
+| ideal 50/50 λ-halving/table-add mixture | 3.1471 average | 23.752 | 1.180 | free-dispatch extrapolation | upper-bound model |
+| 30 B/s primitive target | — | **30.000** | **1.490** | required | not met |
 
 The mixture row is an extrapolation, not a kernel measurement. It is the
 harmonic mean with free branch dispatch and omits the λ-to-affine conversion
@@ -71,5 +71,5 @@ Frozen measurements and commands are in
 [`benchmarks/point-halving/result.json`](benchmarks/point-halving/result.json).
 The polynomial-state follow-up is in
 [`benchmarks/point-halving-poly`](benchmarks/point-halving-poly/README.md).
-The one-product λ-state result is in
-[`benchmarks/point-halving-lambda`](benchmarks/point-halving-lambda/README.md).
+The one-product λ-state progression is in
+[`THROUGHPUT-30B-HALVING.md`](THROUGHPUT-30B-HALVING.md).
