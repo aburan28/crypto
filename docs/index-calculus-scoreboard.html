@@ -949,6 +949,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
             <td class="n"><strong>67.29</strong></td><td class="n"><strong>6.9</strong></td>
             <td class="n"><strong>2^+6.48</strong></td>
             <td><span class="chip">accounting</span></td></tr>
+          <tr><td><em>Floor of this family &mdash; a bound, not a search result</em></td>
+            <td class="n"><em>65.54</em></td><td class="n"><em>2.06</em></td>
+            <td class="n"><em>2^+4.73</em></td>
+            <td><span class="chip">boundary</span></td></tr>
           <tr><td>Homogeneous relations at m = 28</td><td class="n">56.76</td>
             <td class="n">0.018</td><td class="n">2^&minus;4.05</td>
             <td><span class="chip relabel">relabelling</span></td></tr>
@@ -963,6 +967,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         quotiented table, 1,011 EB charged at zero. The structure is run end to
         end on small curves and recovers a planted logarithm in 6 of 6 cells
         (<code>amortised_attack.json</code>).</p>
+      <p><strong>Parity is below the floor, so it is unreachable rather than unreached.</strong>
+        Balancing the build against the streamed side collapses every configuration to
+        total = 2&radic;(K&#8321;&thinsp;&middot;&thinsp;U&thinsp;&middot;&thinsp;C(n,s)&thinsp;&middot;&thinsp;r)
+        with K&#8321; = 0.265358. U&thinsp;&ge;&thinsp;2 (one orbit, plus d) and
+        C(n,s)&thinsp;&ge;&thinsp;n&thinsp;&ge;&thinsp;2, so every configuration costs at least
+        <strong>2<sup>65.54</sup></strong> whatever the support size, relation
+        length, split or table layout. The reference is 2<sup>60.81</sup>: parity sits
+        2<sup>-4.73</sup> <em>below</em> the floor, and closing it would need the
+        constant to fall 26.6&times; with nothing left to take it from.
+        Structurally, the 262 automorphisms enter rho&rsquo;s constant <em>inside</em> its square
+        root, while the Frobenius quotient divides index calculus&rsquo;s unknown count and table
+        size &mdash; both real, worth 2<sup>14</sup> together, and neither touching the square root
+        a two-list collision search over a space of size r must pay. Moving it needs a
+        decomposition oracle cheaper than that square root, not a better constant.</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),

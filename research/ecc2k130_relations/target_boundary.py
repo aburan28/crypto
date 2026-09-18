@@ -106,6 +106,23 @@ def _lchoose(B: int, k: int):
     return sum(math.log2(B - i) for i in range(k)) - _lf(k)
 
 
+def _exp2(x: float):
+    """`2**x` as a float, or None when that is out of range.
+
+    `cost()` is called across the whole (T, n, s) grid, and a lopsided split
+    at large `T` puts the stored side past 2^1024 -- where `2**x` raises
+    OverflowError. That is exactly the shape the optimiser prefers, so an
+    unguarded exponentiation turns "the search covered this" into "the
+    search crashed here", silently bounding how far anyone can scan. The
+    log2 figures are always reported; only the human-readable conversions
+    can be absent.
+    """
+    try:
+        return 2.0 ** x
+    except OverflowError:
+        return None
+
+
 def _lse(a: float, b: float) -> float:
     """log2(2^a + 2^b)."""
     hi, lo = max(a, b), min(a, b)
@@ -172,9 +189,55 @@ def cost(T: int, n: int, s: int, amortise: bool = True,
         "relations_needed": T + 1,
         "log2_total_cost": round(total, 3),
         "log2_total_vs_rho": round(total - RHO_LOG2, 3),
-        "S": float(f"{2 ** (total - LOG2_R / 2):.4g}"),
+        "S": (float(f"{_exp2(total - LOG2_R / 2):.4g}")
+              if _exp2(total - LOG2_R / 2) is not None else None),
         "log2_memory_bytes": round(build + math.log2(KEY_BYTES), 3),
-        "memory_exabytes": float(f"{2 ** (build + math.log2(KEY_BYTES)) / 1e18:.4g}"),
+        "memory_exabytes": (
+            float(f"{_exp2(build + math.log2(KEY_BYTES)) / 1e18:.4g}")
+            if _exp2(build + math.log2(KEY_BYTES)) is not None else None),
+    }
+
+
+def family_floor():
+    """A lower bound on this whole family, not a search result.
+
+    Writing `X` for the build and balancing it against the streamed side,
+    the totals collapse to
+
+        total(X) = X + K / X,      K = U * C(n,s) * r * E4 * c / (131 * f)
+
+    minimised at `X = sqrt(K)`, so
+
+        total = 2 * sqrt(K1 * U * C(n,s) * r),   K1 = E4 * c / (131 * f)
+
+    Every factor there is pinned. `U = T + 1 >= 2`, because a support has at
+    least one orbit and `d` is always an unknown. `C(n,s) >= n >= 2`, because
+    a relation needs at least two points and the cheapest split is the most
+    lopsided one. So `U * C(n,s) >= 4` and
+
+        total >= 2 * sqrt(4 * K1 * r)
+
+    independently of support size, relation length, split, table layout, or
+    how the search is organised. That is the number to compare against rho,
+    because no configuration in the family can go below it.
+    """
+    k1 = REACHABLE_E4 * (1 + CANONICALISATION_GROUP_OPS) / (M * MEASURED_RATE_FACTOR)
+    log2_floor = 1 + 0.5 * (math.log2(k1) + math.log2(4) + LOG2_R)
+    return {
+        "K1": round(k1, 6),
+        "min_unknowns": 2,
+        "min_split_multiplicity": 2,
+        "log2_floor": round(log2_floor, 3),
+        "log2_floor_vs_rho": round(log2_floor - RHO_LOG2, 3),
+        "parity_reachable": log2_floor <= RHO_LOG2,
+        "statement": (
+            f"Every configuration in this family costs at least "
+            f"2^{log2_floor:.2f}. The rho reference is 2^{RHO_LOG2}. Parity "
+            f"sits 2^{RHO_LOG2 - log2_floor:.2f} below the floor, so it is "
+            f"not reachable by any choice of support size, relation length, "
+            f"split or table layout -- the constant would have to fall by "
+            f"{2 ** (log2_floor - RHO_LOG2):.1f}x, and it is pinned by the "
+            f"probe cost and the group structure."),
     }
 
 
@@ -226,6 +289,7 @@ def homogeneous_extension():
 def main():
     best = optimise()
     unamortised = optimise(amortise=False)
+    floor = family_floor()
     homog = homogeneous_extension()
     crossing = next((r for r in homog if r["log2_total_vs_rho"] < 0), None)
 
@@ -241,6 +305,7 @@ def main():
         "measured_rate_factor": MEASURED_RATE_FACTOR,
         "decomposition_model": "P = 2^n C(B,n) / r, measured in "
                                "results/target_decomposition.json",
+        "family_floor": family_floor(),
         "best_logarithm_cost": best,
         "best_if_table_rebuilt_per_attempt": unamortised,
         "amortisation_saving_log2": round(
@@ -277,6 +342,10 @@ def main():
               f"{r['log2_total_cost']:>8.2f} {r['log2_total_vs_rho']:>+9.2f}")
     print(f"\n  first sub-rho m: {crossing['m'] if crossing else 'none'}"
           "  <- prices relations that determine nothing\n")
+    print("Family floor -- a bound, not a search result:")
+    for k, v in floor.items():
+        print(f"  {k:34} {v}")
+    print()
     print("Cost of a LOGARITHM, quotient applied, memory free:")
     for k, v in best.items():
         print(f"  {k:34} {v}")

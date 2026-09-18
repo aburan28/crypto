@@ -538,9 +538,16 @@ The error bars that remain:
 
 * **memory is charged at zero** — 1,011 exabytes,
   free and instantaneous. Charging it makes the negative larger;
-* the build assumes one representative per `sigma`-class is enumerable in
-  constant amortised time (necklace enumeration over `Z/131`); naively it
-  costs `2^3.3` more;
+* the build's enumeration assumption is **discharged**, not carried. A
+  `sigma`-class of `s`-subsets over `T` orbits of length 131 is a *necklace*:
+  a length-131 string over an alphabet of `2^T` symbols, up to rotation.
+  `necklaces.py` generates one representative per class by the
+  Fredricksen–Kessler–Maiorana recursion with a density prune. Measured: the
+  count is exactly `C(131T, s)/131` — 131 is prime and `s < 131`, so nothing
+  is fixed by a non-trivial rotation — and the recursion visits **13–31
+  nodes per representative**, falling with density and flat in `m`, against
+  the ~1 group operation each entry needs anyway. The `2^3.3` penalty the
+  note previously carried does not apply;
 * the total is dominated by *table construction*, not search, and a table
   write is counted as one rho step, which is generous to the table.
 
@@ -575,8 +582,14 @@ number of cells asked for, and the script exits non-zero if any cell did not
 recover. Found by an external review agent on the pull request, not by this
 thread.
 
-That is four of nine defects now living in validation rather than in the
-thing being validated. A ninth surfaced while fixing the eighth: the
+That is four of ten defects now living in validation rather than in the
+thing being validated. The tenth is in the model: `cost()` raised
+`OverflowError` on lopsided splits at large `T`, because it exponentiated the
+stored side to report it in bytes. That is exactly the shape the optimiser
+prefers, so part of the search space returned an exception rather than a
+result — and a scan that crashes where it was supposed to look cannot support
+"nothing better is out there". The log2 figures are always reported now; only
+the human-readable conversions can be absent. A ninth surfaced while fixing the eighth: the
 counterfactual in `target_boundary.py` charged `attempts x max(build,
 stream)` for rebuilding the table every time, which drops the build entirely
 whenever streaming dominates — making the counterfactual *cheaper* than the
@@ -648,7 +661,75 @@ the square root of the space it must cover. That square root, against a group
 whose rho already takes its own `sqrt` with the same 262 automorphisms, is
 the whole of the remaining gap.
 
-### 5.6 Where this leaves the thread
+### 5.6 Parity is below this family's floor
+
+The question the thread has been circling is whether the gap can be closed.
+It cannot, and the reason is a bound rather than a failure to search.
+
+Write `X` for the cost of building the stored side. Balancing it against the
+streamed side collapses every configuration to one shape:
+
+    total(X) = X + K/X,    K = U · C(n,s) · r · E4 · c / (131 · f)
+
+minimised at `X = sqrt(K)`, so
+
+    total = 2 · sqrt(K1 · U · C(n,s) · r),    K1 = E4 · c / (131 · f) = 0.265358
+
+Every factor is pinned:
+
+* `U = T + 1 ≥ 2` — a support has at least one orbit, and `d` is always an
+  unknown;
+* `C(n,s) ≥ n ≥ 2` — a relation needs at least two points, and the cheapest
+  split is the most lopsided;
+* `E4 = 2` and `c = 14.6` are the measured probe cost and the reachable part
+  of `E[4]`; `131` is the Frobenius order.
+
+So `U · C(n,s) ≥ 4` and
+
+    total ≥ 2 · sqrt(4 · K1 · r) = 2^65.543
+
+**independently of support size, relation length, split, table layout, or how
+the search is organised.** The reference is `2^60.809`.
+Parity sits `2^-4.73` *below* the floor.
+
+To reach it the constant would have to fall by **26.6x**,
+and there is nothing left to take it from: `U` and `C(n,s)` are at their
+minima by definition, and `K1` is fixed by the group.
+
+Verified against the search: an exact scan of 708,000 configurations —
+`T ≤ 200`, `n ≤ 60`, every split, both table layouts — finds
+`2^67.287`, and larger `T` only rises (`2^71.72` at `T = 200`,
+`2^76.05` at `T = 200000`). The best configuration respects its own floor
+with `2^1.74` to spare.
+
+### 5.7 Why rho wins, stated structurally
+
+Both costs are a constant times `sqrt(r)`. That is the whole of it:
+
+    rho            0.077 · sqrt(r)
+    this family  ≥ 2.06 · sqrt(r)
+
+The 262 automorphisms enter rho's constant **inside** its square root — rho
+walks a quotient of the group, so its step count is `sqrt(r/262)`-shaped. The
+Frobenius quotient does something different for index calculus: it divides
+the *unknown count* and the *table size* by 131. Both are real savings, and
+this thread measured them at `2^14` combined. Neither touches the square
+root, because the meet-in-the-middle still has to cover a space of size `r`
+and a two-list collision search over such a space costs `sqrt` of it.
+
+That is why the gap stopped closing at `2^6.5` after four rounds of
+correction, and why the fifth round widened it. The bookkeeping had room to
+be wrong; the square root did not.
+
+**What would actually move it** is a decomposition oracle cheaper than a
+square-root search — not a better constant. §5.5 closes the one generic
+candidate: Wagner's `k`-tree needs partial matching, which curve addition
+does not admit. The summation-polynomial route to such an oracle is measured
+and closed elsewhere in this repository. Absent one, `2^4.73`
+is a floor and `2^6.48` is where the arithmetic lands.
+
+### 5.8 Where this leaves the thread
+
 
 `2^6.48` over the reference, with memory free, every input either
 measured or derived, and the three directions that looked open — larger `m`,
