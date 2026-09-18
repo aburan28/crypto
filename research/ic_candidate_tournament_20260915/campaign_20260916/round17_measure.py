@@ -2,8 +2,8 @@
 """Byte-verify the round-0017 challenger against the oracle on every confirmation
 fixture of round 0016, then measure Ir (callgrind) and native wall per cell for
 challenger, scan_io and rho.  Usage: measure17.py CHALLENGER_BIN [reps]"""
-import json,os,sys,subprocess,statistics,time,re,collections,tempfile
-_OUT=os.path.join(tempfile.gettempdir(),'round17_measure.json')  # raw rows; the table below is the record,random
+import json,os,sys,subprocess,statistics,time,re,collections,random,tempfile
+_OUT=os.path.join(tempfile.gettempdir(),'round17_measure.json')  # raw rows; the table below is the record
 sys.path.insert(0,'.')
 import tournament as T
 from oracle import verify
