@@ -44,6 +44,9 @@ Section 5 (the cost of a logarithm, as against a homogeneous relation):
   The section 5.3 structure run end to end: table of canonical sigma-classes
   built once, single points streamed per target, planted logarithm recovered
   and checked by the point identity [d]P = Q.
+* `target_boundary.json` also carries `family_floor` — a lower bound on every
+  configuration, derived not searched, and the number parity must be compared
+  against.
 * `target_decomposition.json` — measured, from `validate_target_model.py`.
   The decomposition rate the above depends on, against exhaustive enumeration
   on small analogues, and the direct check that the reachable sum set is
