@@ -677,6 +677,17 @@ static ECC_POLY_PAIR PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
     return PolynomialPair{first,reducePolynomial131(h)};
 #endif
 }
+static ECC_POLY_PAIR PolynomialPair mulPolynomialIndependentPair131(
+    P131 a, P131 b, P131 c, P131 d) {
+#if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
+    return PolynomialPair{generatedProduct131(a,b),generatedProduct131(c,d)};
+#else
+    uint32_t ha[9],hb[9];
+    product131(a,b,ha);
+    product131(c,d,hb);
+    return PolynomialPair{reducePolynomial131(ha),reducePolynomial131(hb)};
+#endif
+}
 #ifndef ECC_PACKED_SINGLE_PRODUCT
 #define ECC_PACKED_SINGLE_PRODUCT 0
 #endif
@@ -966,6 +977,43 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
  lambdaPoly.v[0]^=mask&1u;
  *hxp=toPolynomial131(halvingSqrt131(t));
  *hlp=lambdaPoly;
+}
+
+ECC_HD void pointHalfLambdaPolynomialPair131(
+    P131 axp, P131 alp, P131 bxp, P131 blp,
+    P131 *ahx, P131 *ahl, P131 *bhx, P131 *bhl) {
+ P131 ax=fromPolynomial131(axp),bx=fromPolynomial131(bxp);
+ P131 al=halvingQuadraticRoot131(ax),bl=halvingQuadraticRoot131(bx);
+ P131 alp0=toPolynomial131(al),blp0=toPolynomial131(bl);
+ P131 at=add131(add131(alp,axp),alp0),bt=add131(add131(blp,bxp),blp0);
+ at.v[0]^=1u;bt.v[0]^=1u;
+ const PolynomialPair products=mulPolynomialIndependentPair131(axp,at,bxp,bt);
+ P131 an=fromPolynomial131(products.first),bn=fromPolynomial131(products.second);
+#ifdef __CUDA_ARCH__
+#define ECC_HALF_PAIR_POPC __popc
+#else
+#define ECC_HALF_PAIR_POPC __builtin_popcount
+#endif
+ unsigned ao=0,bo=0;
+#pragma unroll
+ for(int i=0;i<5;i++){
+  ao^=ECC_HALF_PAIR_POPC(an.v[i]&(al.v[i]^ax.v[i]));
+  bo^=ECC_HALF_PAIR_POPC(bn.v[i]&(bl.v[i]^bx.v[i]));
+ }
+ ao^=halvingSecondTrace131(an);bo^=halvingSecondTrace131(bn);
+#undef ECC_HALF_PAIR_POPC
+ const uint32_t am=0u-(ao&1u),bm=0u-(bo&1u);
+#pragma unroll
+ for(int i=0;i<4;i++){
+  al.v[i]^=am;an.v[i]^=ax.v[i]&am;
+  bl.v[i]^=bm;bn.v[i]^=bx.v[i]&bm;
+ }
+ al.v[4]^=am&7u;an.v[4]^=ax.v[4]&am;
+ bl.v[4]^=bm&7u;bn.v[4]^=bx.v[4]&bm;
+ alp0.v[0]^=am&1u;blp0.v[0]^=bm&1u;
+ const HalvingPair131 roots=halvingSqrtPair131(an,bn);
+ *ahx=toPolynomial131(roots.first);*ahl=alp0;
+ *bhx=toPolynomial131(roots.second);*bhl=blp0;
 }
 #endif
 

@@ -45,6 +45,12 @@ static bool same(P131 a, P131 b) {
 
 __global__ void halveProbe(const P131 *x, const P131 *y, P131 *hx, P131 *hy, int n) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
+#if ECC_HALVING_ILP == 2 && ECC_HALVING_POLY_STATE == 2
+    const int j=2*i;
+    if(j+1<n)
+        eccPacked131::pointHalfLambdaPolynomialPair131(
+            x[j],y[j],x[j+1],y[j+1],hx+j,hy+j,hx+j+1,hy+j+1);
+#else
     if (i < n) {
 #if ECC_HALVING_POLY_STATE == 2
         eccPacked131::pointHalfLambdaPolynomial131(x[i], y[i], hx + i, hy + i);
@@ -54,6 +60,7 @@ __global__ void halveProbe(const P131 *x, const P131 *y, P131 *hx, P131 *hy, int
         eccPacked131::pointHalf131(x[i], y[i], hx + i, hy + i);
 #endif
     }
+#endif
 }
 __global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void halveBench(P131 *x, P131 *y, int n, int steps) {
@@ -64,6 +71,10 @@ void halveBench(P131 *x, P131 *y, int n, int steps) {
     P131 qx = x[i + n], qy = y[i + n];
 #endif
     for (int step = 0; step < steps; ++step) {
+#if ECC_HALVING_ILP == 2 && ECC_HALVING_POLY_STATE == 2
+        eccPacked131::pointHalfLambdaPolynomialPair131(
+            px,py,qx,qy,&px,&py,&qx,&qy);
+#else
 #if ECC_HALVING_POLY_STATE == 2
         eccPacked131::pointHalfLambdaPolynomial131(px, py, &px, &py);
 #elif ECC_HALVING_POLY_STATE == 1
@@ -72,12 +83,11 @@ void halveBench(P131 *x, P131 *y, int n, int steps) {
         eccPacked131::pointHalf131(px, py, &px, &py);
 #endif
 #if ECC_HALVING_ILP == 2
-#if ECC_HALVING_POLY_STATE == 2
-        eccPacked131::pointHalfLambdaPolynomial131(qx, qy, &qx, &qy);
-#elif ECC_HALVING_POLY_STATE == 1
+#if ECC_HALVING_POLY_STATE == 1
         eccPacked131::pointHalfPolynomial131(qx, qy, &qx, &qy);
 #else
         eccPacked131::pointHalf131(qx, qy, &qx, &qy);
+#endif
 #endif
 #endif
     }
