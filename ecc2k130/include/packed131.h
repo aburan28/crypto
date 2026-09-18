@@ -937,6 +937,40 @@ ECC_HD void pointHalfPolynomial131(P131 xp, P131 yp, P131 *hxp, P131 *hyp) {
  *hxp=rootPoly;
  *hyp=mulPolynomial131(rootPoly,add131(lambdaPoly,rootPoly));
 }
+
+// Repeated point halving in lambda-affine representation (x, l=x+y/x).
+// If Q=2P, l_P solves l_P^2+l_P=x_Q and
+//   x_P^2 = x_Q * (l_Q + x_Q + l_P + 1).
+// This avoids reconstructing y_P and therefore needs one field product.
+ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
+                                         P131 *hxp, P131 *hlp) {
+ P131 x=fromPolynomial131(xp);
+ P131 lambda=halvingQuadraticRoot131(x);
+ P131 lambdaPoly=toPolynomial131(lambda);
+ P131 term=add131(add131(lqp,xp),lambdaPoly);
+ term.v[0]^=1u;
+ P131 root=halvingSqrt131(fromPolynomial131(mulPolynomial131(xp,term)));
+#ifdef __CUDA_ARCH__
+#define ECC_HALF_LAMBDA_POPC __popc
+#else
+#define ECC_HALF_LAMBDA_POPC __builtin_popcount
+#endif
+ unsigned outside=0;
+#pragma unroll
+ for(int i=0;i<5;i++)
+  outside^=ECC_HALF_LAMBDA_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
+           ECC_HALF_LAMBDA_POPC(root.v[i]);
+ outside^=halvingSecondTrace131(root);
+#undef ECC_HALF_LAMBDA_POPC
+ const uint32_t mask=0u-(outside&1u);
+ const P131 sqrtx=halvingSqrt131(x);
+#pragma unroll
+ for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}
+ lambda.v[4]^=mask&7u;root.v[4]^=sqrtx.v[4]&mask;
+ lambdaPoly.v[0]^=mask&1u;
+ *hxp=toPolynomial131(root);
+ *hlp=lambdaPoly;
+}
 #endif
 
 } // namespace eccPacked131
