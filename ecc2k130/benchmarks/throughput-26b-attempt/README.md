@@ -11,4 +11,5 @@ B/s one-addition boundary.
 - `verify-dp4a.log`: 300/300 scalar replay, zero dropped.
 - `bench-dp4a.log`: three complete throughput samples.
 - `*-fused-weight-phase.log`: exact fused selector build, replay and timing.
+- `*-h4.log`: four-branch three-block build, replay and raw/effective timing.
 - `result.json`: frozen table values and boundary ratios.

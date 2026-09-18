@@ -29,6 +29,19 @@
     "shared_bytes": 54132,
     "correctness": "300/300 reports replayed, zero dropped; 4096/4096 host selector points"
   },
+  "four_branch_occupancy_candidate": {
+    "samples": [18.201515, 18.159592, 18.117625],
+    "median_raw": 18.159592,
+    "effective_vs_eight_branch_constant": 17.1507258,
+    "ratio_to_target_raw": 0.6984458,
+    "threads_per_block": 256,
+    "resident_blocks_per_sm": 3,
+    "registers": 80,
+    "shared_bytes": 32488,
+    "r_adding_constant": 1.125,
+    "reference_r_adding_constant": 1.0625,
+    "correctness": "300/300 reports replayed, zero dropped; 4096/4096 host selector points"
+  },
   "point_halving_alternative": {
     "median": 16.053,
     "field_products": 2,

@@ -23,6 +23,7 @@ boundary, but its effective collision work must also be priced.
 | selected B17 table walk | **20.134** | 0.774 | 1.000 | 300/300, 0 dropped | reference |
 | fused 16-bit weight/phase LUT | 20.055 | 0.771 | 0.996 | 300/300; 4096/4096 selector points | engineering, rejected |
 | exact DP4A phase selector | 19.515 | 0.751 | 0.969 | 300/300; 4096/4096 selector points | engineering, rejected |
+| H=4, 256×3 occupancy | 18.160 raw / 17.151 effective | 0.698 raw | 0.902 raw | 300/300; 4096/4096 selector points | alternative iteration, rejected |
 | two-product point halving | 16.053 | 0.617 | 0.797 | 512/512 subgroup halves | alternative primitive; not a rho map alone |
 | one-addition practical boundary | 22--25 | 0.846--0.962 | 1.09--1.24 | derived | boundary |
 | **26 B/s target** | **26.000** | **1.000** | **1.291** | required | above boundary |
@@ -44,6 +45,12 @@ entry, deriving phase and Hamming weight from the same 17 loads and deleting
 five quarter-rate POPCs. It retains 98 registers and is exact, but the wider
 shared loads enlarge the table to 54,132 bytes and measure 20.055 B/s, 0.4%
 below the selected byte-LUT row.
+
+Reducing the table from eight to four branches fits three fully shared
+256-thread blocks per SM, but ptxas falls to 80 registers and raw throughput
+falls to 18.160 B/s. Its r-adding constant rises from 1.0625 to 1.125, so the
+rate normalized to the H=8 collision work is only 17.151 B/s. The raw count
+and effective count both reject the alternative.
 
 Point halving did change the product count, but its linear solves and subgroup
 selection measured only 16.053 B/s, and halving alone is a permutation rather

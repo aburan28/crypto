@@ -1,0 +1,156 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 3 block(s) of 256 packed threads resident per SM
+packed L2 persist window: 83886080 of 125180928 field bytes, cap 83886080
+packed kernel: 80 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 1
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 1
+packed slot unroll: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed selection pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed inline onb multiply: 0
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed half top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 1
+packed alu onb square: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 32488
+packed table global: 0
+packed table addend global: 0
+packed table recompute denominator: 1
+packed table bank pad: 1
+packed table warp LUT: 0
+packed table DP4A phase: 0
+packed table fused weight/phase: 0
+packed table walk: 1 (4 branches, 32488 shared bytes)
+backend cuda-packed131: 144384 threads x 17 slots x 1 lanes = 2454528 walks, dp weight 0, 1024 steps per launch
+       2.1 s   18249.842 M it/s  37701550080 iterations         0 dp         0 stored         0 dropped
+       4.1 s   18202.320 M it/s  75403100160 iterations         0 dp         0 stored         0 dropped
+       4.4 s   18201.538 M it/s  80429973504 iterations         0 dp         0 stored         0 dropped
+  finished: 18201.515 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 3 block(s) of 256 packed threads resident per SM
+packed L2 persist window: 83886080 of 125180928 field bytes, cap 83886080
+packed kernel: 80 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 1
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 1
+packed slot unroll: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed selection pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed inline onb multiply: 0
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed half top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 1
+packed alu onb square: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 32488
+packed table global: 0
+packed table addend global: 0
+packed table recompute denominator: 1
+packed table bank pad: 1
+packed table warp LUT: 0
+packed table DP4A phase: 0
+packed table fused weight/phase: 0
+packed table walk: 1 (4 branches, 32488 shared bytes)
+backend cuda-packed131: 144384 threads x 17 slots x 1 lanes = 2454528 walks, dp weight 0, 1024 steps per launch
+       2.1 s   18205.934 M it/s  37701550080 iterations         0 dp         0 stored         0 dropped
+       4.2 s   18164.963 M it/s  75403100160 iterations         0 dp         0 stored         0 dropped
+       4.4 s   18159.627 M it/s  80429973504 iterations         0 dp         0 stored         0 dropped
+  finished: 18159.592 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 3 block(s) of 256 packed threads resident per SM
+packed L2 persist window: 83886080 of 125180928 field bytes, cap 83886080
+packed kernel: 80 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 1
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 1
+packed slot unroll: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed selection pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed inline onb multiply: 0
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed half top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 1
+packed alu onb square: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 32488
+packed table global: 0
+packed table addend global: 0
+packed table recompute denominator: 1
+packed table bank pad: 1
+packed table warp LUT: 0
+packed table DP4A phase: 0
+packed table fused weight/phase: 0
+packed table walk: 1 (4 branches, 32488 shared bytes)
+backend cuda-packed131: 144384 threads x 17 slots x 1 lanes = 2454528 walks, dp weight 0, 1024 steps per launch
+       2.1 s   18165.885 M it/s  37701550080 iterations         0 dp         0 stored         0 dropped
+       4.2 s   18121.096 M it/s  75403100160 iterations         0 dp         0 stored         0 dropped
+       4.4 s   18117.653 M it/s  80429973504 iterations         0 dp         0 stored         0 dropped
+  finished: 18117.625 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
