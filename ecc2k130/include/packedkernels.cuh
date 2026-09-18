@@ -481,6 +481,15 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             store(p.x, slot, tid, p.threads, nx);
             store(p.y, slot, tid, p.threads, ny);
+#if ECC_PACKED_SLOT_PIPELINE
+            // Reverse pass ends at slot 0 with pipeX/pipeY still holding that
+            // slot's pre-add coordinates. Refresh them so the next step's first
+            // pass does not rebuild the addend from a stale point.
+            if (!slot) {
+                pipeX = nx;
+                pipeY = ny;
+            }
+#endif
         }
     }
 }
