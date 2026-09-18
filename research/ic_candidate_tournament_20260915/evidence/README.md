@@ -126,6 +126,15 @@ ships `round17-orbits.patch`, `round17-rows.patch`, `round17-oracle-orbits.patch
 second certificate format), `round17_candidates.py`, `round17_base_sweep.py`, `round17_measure.py`
 and `round-0017.tar.zst`, whose 2,340 receipts include both certificate formats side by side on
 the development and selection fixtures where `scan_io` and `orbits` both ran.
+
+The first `round-0017.tar.zst` (sha256 `48a120ed19c5f2141cc1f5c7d879dd721b6705a82760b581a9fc56f888dc15ae`,
+committed in b9b0fee) was packed before `report.py` had produced its outputs: the
+report's support audit did not yet understand the orbit-named certificate and
+failed, and the post-run chain masked the failure. That archive holds the same
+2,340 receipts and the same decision but no `REPORT.md`, `measurements.json` or
+`admission.json`. It is superseded, not rewritten: the archive the manifest now
+names was packed from the identical receipts after the report ran, and the
+earlier hash is recorded here so the two cannot be confused.
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 
