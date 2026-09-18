@@ -20,6 +20,15 @@
     "shared_bytes": 45560,
     "correctness": "300/300 reports replayed, zero dropped; 4096/4096 host selector points"
   },
+  "fused_weight_phase_candidate": {
+    "samples": [20.023481, 20.055259, 20.054621],
+    "median": 20.054621,
+    "ratio_to_reference": 0.9960413,
+    "ratio_to_target": 0.7713316,
+    "registers": 98,
+    "shared_bytes": 54132,
+    "correctness": "300/300 reports replayed, zero dropped; 4096/4096 host selector points"
+  },
   "point_halving_alternative": {
     "median": 16.053,
     "field_products": 2,

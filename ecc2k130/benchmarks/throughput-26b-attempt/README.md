@@ -10,4 +10,5 @@ B/s one-addition boundary.
 - `build-dp4a.log`: CUDA compiler and resource report.
 - `verify-dp4a.log`: 300/300 scalar replay, zero dropped.
 - `bench-dp4a.log`: three complete throughput samples.
+- `*-fused-weight-phase.log`: exact fused selector build, replay and timing.
 - `result.json`: frozen table values and boundary ratios.
