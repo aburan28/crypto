@@ -1,0 +1,12 @@
+verify-0-0
+verify-0-1937
+verify-1-0
+verify-1-1937
+verify-2-0
+Traceback (most recent call last):
+  File "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/run.py", line 60, in <module>
+    p = run(f'verify-{mode}-{seed}', [binary, '--curve', '131', '--packed', '--dp-weight', '50', '--steps', '16', '--launches', '6', '--dp-cap', '262144', '--threads', '1024', '--verify', '300', '--run-id', str(seed)])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/run.py", line 49, in run
+    raise RuntimeError('Another GPU process appeared; sample rejected')
+RuntimeError: Another GPU process appeared; sample rejected

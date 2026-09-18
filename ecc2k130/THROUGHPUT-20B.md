@@ -4,13 +4,19 @@ Question: can the g7e client be pushed from the measured 16.56 B/s of the table
 walk ([ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6) to 20 B complete
 scalar updates per second on one RTX PRO 6000?
 
-Answer: **not with any lever this tree can price.** 20 B/s is above the
-one-addition-per-step floor (≈ 22–23 B/s at 90% of either pipe, §1 of that
-note), so unlike 28 B/s it is not forbidden — but it needs the ALU pipe to
+Answer: **not on this RTX PRO 6000.** The verified median tops out at
+**17.298 B/s** (table walk + byte pivot + pair-ILP + L2 persist + slot
+unroll 2) against a 20 B/s target and a 22–25 B/s one-add floor. Pair-ILP
+was priced at ~9% if ptxas dual-issued and measured +0.9%. Persist, the
+lever Nsight reopened after a DRAM-heavy 16-step diagnostic, measured
++2.8% and still left the kernel short. Receipts:
+[benchmarks/throughput-20b-gpu/summary.json](benchmarks/throughput-20b-gpu/summary.json).
+
+The static profile below is unchanged: 20 B/s still needs the ALU pipe to
 shed **19–22% of its dynamic work** on top of the table walk while the
-carry-less pipe sheds the per-update squaring, and every addressable item
-this profile finds sums to about 3%. The reduction and the products are 60%
-of the walk's ALU, and they are the floor.
+carry-less pipe sheds the per-update squaring, and every addressable
+instruction cut this profile finds sums to about 3%. The reduction and
+the products are 60% of the walk's ALU, and they are the floor.
 
 The new evidence is a **per-routine static profile of the table walk**, made
 with the exact compiler behind the tree's measured receipts (nvcc 13.3.73)
@@ -109,9 +115,16 @@ ceiling below the current rate is listed because it keeps being proposed.
 | packed top words (part of `TABLE_PIVOT_BYTES`) | **+11** | 0 | `twCoordinate` 35 → 46 for the packed-`fromRow` address math; the price of the shared budget, already inside the −45 above |
 | byte table for the phase | 0 | 0 | already bytes |
 | `H = 4` (halves the table) | ~−10 | 0 | r-adding constant 1.125 vs 1.0625: +6% iterations for <1% rate |
+| **`PACKED_PAIR_ILP=1`** (this round) — two product buffers so the second `clmul` is not false-dependent on the first reduction | 0 static | 0 | Scheduling, not a cut. Priced as hiding one ALU-only reduction (~78 slots, ~1.2 SM-clocks) behind the next product's 6 `clmad` (~3.6 SM-clocks), twice per update: about **9%** if the ALU binds and ptxas actually dual-issues. Measured 16.617 B/s against a 16.474 B/s table+pivot control on this RTX PRO 6000, **+0.9%**, not 9%. See [benchmarks/throughput-20b-gpu](benchmarks/throughput-20b-gpu/summary.json). |
+| **`PACKED_L2_PERSIST=1`** (this instance) — one contiguous x/y/pchain/denom blob and a stream access-policy window of the device's persisting-L2 cap (80 MiB here) | 0 static | 0 | Not an instruction cut. Measured 17.081 B/s against the 16.617 ILP control, **+2.8%**. Slot unroll 2 on that persist build is the best row, 17.298 B/s. Still 0.865 of 20. |
 
 Sum of everything that does not lower a ceiling below 16.56: **−45 static
 ALU, 0 clmad**, against a need of −330 to −400 with the squaring moved.
+The pair-ILP lever does not change those static counts; this instance
+asked the dual-issue question and measured +0.9%, not 9%. Persist and
+slot unroll 2 are likewise scheduling, and together they move the
+table+pivot from 16.474 to 17.298 B/s on this card. That is still 0.865
+of 20.
 
 ## 5. What this change adds
 
@@ -193,3 +206,20 @@ header that inlined into them (a first version put a third of
   buys nothing a second RTX PRO 6000 does not buy cheaper, and the shipping
   kernel already does 14+ B/s on each. 20 B/s of ECC2K-130 is a
   `g7e.2xlarge` and a third of another.
+
+## 7. This instance's GPU receipt
+
+[benchmarks/throughput-20b-gpu/summary.json](benchmarks/throughput-20b-gpu/summary.json),
+median of three `finished:` samples, 50,465,865,728 updates, 300 reports
+replayed per binary, 0 dropped:
+
+| variant | median B/s | / 20 | / 22 B floor | class |
+|---|---:|---:|---:|---|
+| shipping | 14.436 | 0.722 | 0.656 | reference |
+| table + byte pivot | 16.474 | 0.824 | 0.749 | engineering |
+| + pair-ILP | 16.617 | 0.831 | 0.755 | engineering |
+| + L2 persist | 17.081 | 0.854 | 0.776 | engineering |
+| + slot unroll 2 | 17.298 | 0.865 | 0.786 | engineering |
+
+The knobs stay off by default. The campaign walk stays the shipping
+product. 20 B/s on one RTX PRO 6000 is not a result this tree has.
