@@ -1208,8 +1208,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         product law. The only row below rho does not recover
         <code>log<sub>P</sub>(Q)</code>. Two Crossbred frames are measured
         and neither produced <code>α</code>. X5 FFD at <code>m = 4</code>
-        does not grow on either arm. Two experiments remain compatible
-        (symmetrised end-to-end, CM/τ survey). None has a fitted
+        does not grow on either arm. X4 has three usable K<sub>1</sub>
+        rungs and no slope. One experiment remains compatible
+        (CM/τ survey). None has a fitted
         <code>α</code>. Note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_IC_SYNTHESIS.md"><code>RESEARCH_ECC2K130_IC_SYNTHESIS.md</code></a>.
         Frozen receipts as in the G7e panel plus
@@ -1284,11 +1285,12 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </tbody>
     </table>
     <p>Open combinations, predicted engineering unless a fitted
-      <code>α ≤ 1.5</code> is produced: symmetrised oracle end-to-end with
-      every phase priced (X4); a second literature pass on CM/τ
+      <code>α ≤ 1.5</code> is produced: a second literature pass on CM/τ
       for index calculus (X6). Chained Crossbred (X1/X2) and symmetrised
       Crossbred (X3) are measured: a determining space exists, <code>α</code>
-      does not fit on either frame. X5 FFD at <code>m = 4</code> is
+      does not fit on either frame. X4 is measured on three usable
+      K<sub>1</sub> rungs and has no slope (protocol wants four). X5 FFD at
+      <code>m = 4</code> is
       measured: chained-<code>x</code> max = 3 and chained-sym max = 4
       at <code>n = 9</code> and <code>n = 15</code> over 16 draws, neither
       grows (H1 not met). GPU acceleration of Crossbred's
@@ -1513,8 +1515,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       gives slope <code>+0.46</code> (<code>α ≈ 2.46</code>). That is not a
       fit. Crossbred cannot produce <code>α</code> on either the chained
       or the symmetrised frame under the frozen protocols. X5 FFD at
-      <code>m = 4</code> is measured and does not grow. Next is X4
-      (end-to-end, predicted engineering). The
+      <code>m = 4</code> is measured and does not grow. X4 has three
+      usable K<sub>1</sub> rungs and no slope. The
       product-law floor and the 500×-or-worse rho verdict are unchanged.</p>
   </div>
 
@@ -1578,9 +1580,77 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </table>
     <p>A two-point sketch is still not a fit. GPU search stays off
       (<code>filters = 0</code>). Mixing <code>ell = 1</code> into the
-      growth flag is accounting, not H1. Next on this curve is X4
-      (end-to-end, predicted engineering). The 500×-or-worse rho verdict
+      growth flag is accounting, not H1. X4 has three usable
+      K<sub>1</sub> rungs and no slope. The 500×-or-worse rho verdict
       is unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-x4-e2e-20260918">
+    <div class="panel-head">
+      <h2>X4: symmetrised oracle end-to-end, no slope</h2>
+      <p><span class="chip">measurement</span>
+        Unchained symmetrised <code>S<sub>m+1</sub></code> through
+        collection on K<sub>1</sub>. Protocol frozen before the run.
+        T7 holds: 12/12 sampled targets agree with Enumerate.
+        Three usable rungs recovered <code>[k]P = Q</code>. A slope
+        needs four. Predicted class engineering is not confirmed.
+        Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_symmetrised_x4_20260918/summary.json"><code>experiments/ecc2k130_symmetrised_x4_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: enumerative envelope
+      <code>Λ = trials · C(|F_u|, m−1) / 2<sup>n</sup></code>,
+      ratio <code>Λ · n / m</code> to the floor <code>m/n</code>.
+      Algebraic reductions are a stage diagnostic (T3 still open).
+      Wall-clock is a footnote. Mixing K<sub>0</sub> with K<sub>1</sub>
+      is inadmissible. Not the field-product <code>S</code> of the
+      panels above. The product-law floor is untouched.</p>
+    <table>
+      <caption>X4 on K<sub>1</sub>, <code>m = 3</code>, seed
+        <code>0x5EED_0004</code>, host <code>ip-172-31-19-103</code>.
+        Cited from
+        <code>experiments/ecc2k130_symmetrised_x4_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">n</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">|F<sub>u</sub>|</th>
+        <th scope="col" class="n">trials</th>
+        <th scope="col" class="n">Λ</th>
+        <th scope="col" class="n">Λ·n/m</th>
+        <th scope="col">agree</th>
+        <th scope="col">[k]P=Q</th>
+        <th scope="col">Enumerate</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>7</td><td class="n">4</td><td class="n">29</td>
+          <td class="n">4</td><td class="n">12.6875</td>
+          <td class="n">29.60</td>
+          <td>12/12</td><td>yes</td><td>yes, 4 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">3</td><td class="n">13</td>
+          <td class="n">20,000</td><td class="n">3046.88</td>
+          <td class="n">9140.63</td>
+          <td>12/12</td><td>no</td><td>no, 0 relations</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>15</td><td class="n">5</td><td class="n">61</td>
+          <td class="n">18</td><td class="n">1.0052</td>
+          <td class="n">5.03</td>
+          <td>12/12</td><td>yes</td><td>yes, 18 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>17</td><td class="n">9</td><td class="n">409</td>
+          <td class="n">11</td><td class="n">7.0022</td>
+          <td class="n">39.68</td>
+          <td>12/12</td><td>yes</td><td>yes, 14 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+      </tbody>
+    </table>
+    <p>Skips: <code>n = 5, 11, 19</code> (<code>prepare</code> returned
+      none); <code>n = 13</code> (no curve). <code>n = 23</code> was
+      started and killed with no cell. The three usable ratios are not
+      flat and do not decrease through the last rung. That is not a
+      fit. Linear algebra is priced on every completed rung
+      (<code>linear_algebra_ns</code> in the receipt). No α, no
+      rho-beating claim.</p>
   </div>
 
   <div class="panel" id="ec-baseline-20260914">

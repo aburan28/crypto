@@ -113,6 +113,7 @@ fn main() {
         let mut agreed = 0usize;
         let mut completed = 0usize;
         let mut disagreed = 0usize;
+        let mut sample_found = 0usize;
         if admissible {
             for k in 1..=SAMPLE {
                 let target = kc.mul(&g, &BigUint::from(k));
@@ -122,6 +123,9 @@ fn main() {
                 ) {
                     Some(o) if o.complete => {
                         completed += 1;
+                        if o.relation.is_some() {
+                            sample_found += 1;
+                        }
                         if o.relation.is_some() == enumerated.is_some() {
                             agreed += 1;
                         } else {
@@ -135,6 +139,7 @@ fn main() {
 
         let d = BigUint::from(29u32);
         let q = kc.mul(&g, &d);
+        let fu_ell = fu.ell;
         let fu = Arc::new(fu);
         let mut opts = KoblitzIcOptions {
             m: M,
@@ -182,7 +187,7 @@ fn main() {
         };
         println!(
             "{n:>2} {ell:>3} {fu:>4} {adm:>5} {agree:>6} {trials:>8} {c:>8.1} {lambda:>8.4} {ratio:>8.4} {reductions:>10} {ok:>6} {note}",
-            ell = view.ell,
+            ell = fu_ell,
             fu = fu_len,
             adm = if admissible { "yes" } else { "no" },
             c = c_enum,
@@ -192,7 +197,9 @@ fn main() {
             "a": a,
             "n": n,
             "m": M,
-            "ell": view.ell,
+            "ell": fu_ell,
+            "view_ell": view.ell,
+            "sample_found": sample_found,
             "fu": fu_len,
             "orbits": view.unknowns(),
             "admissible": admissible,

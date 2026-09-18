@@ -387,6 +387,18 @@ choose a curve, divisor, or accounting after seeing a cell.
 
 Changing (1)–(7) after seeing a cell is inadmissible.
 
+**Measurement, 2026-09-18**, host `ip-172-31-19-103`, cited from
+[`experiments/ecc2k130_symmetrised_x4_20260918/summary.json`](experiments/ecc2k130_symmetrised_x4_20260918/summary.json).
+T7 holds: 12/12 sampled targets agree with Enumerate on every priced
+rung. Three usable rungs recovered a verified log (`n = 7, 15, 17`).
+`n = 9` agreed 12/12 as refutations and both oracles collected zero
+relations in 20,000 trials. `n = 5, 11, 19` skip; `n = 13` has no
+curve; `n = 23` was started and killed with no cell. No least-squares
+fit: the protocol needs ≥4 usable rungs. The three ratios
+(`29.60`, `5.03`, `39.68`) are not flat and do not decrease through
+the last rung. Predicted class remains engineering; it is not a
+result. Algebraic reductions stay a stage diagnostic (T3 still open).
+
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
@@ -435,8 +447,8 @@ rather than whether to read more.
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | **done** (T4 above); implemented in `examples/crossbred_bench.rs` | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
 | T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
-| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
-| T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
+| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | **done** 2026-09-18: 12/12 on every priced K1 rung | medium |
+| T8 | X4: ladder end-to-end with every phase priced | **blocked** 2026-09-18: three usable K1 rungs (`n = 7, 15, 17`), not four | days |
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **done** 2026-09-18 FFD; `ell>1` max=4 at `n=9,15`, does not grow. Solve-under-64 still open | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
@@ -491,7 +503,11 @@ Any one of:
   Crossbred cannot produce `α` under the frozen protocols. That number
   is now "no fit", not a missing measurement.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
-  not by how the 350× felt.
+  not by how the 350× felt. **Blocked** 2026-09-18: three usable K1
+  rungs (`n = 7, 15, 17`) recovered `[k]P = Q` with Enumerate agreement;
+  `n = 9` collected nothing; no fourth rung. Receipt
+  [`experiments/ecc2k130_symmetrised_x4_20260918/`](experiments/ecc2k130_symmetrised_x4_20260918/).
+  The predicted class remains engineering and is not confirmed.
 - **H1 at `m = 4`.** Measured: chained-`x` FFD max = 3 and chained-sym
   FFD max = 4 at `n = 9` and `n = 15` over 16 draws, neither grows on
   `ell > 1`. That is a measurement, not an advance, and it does not

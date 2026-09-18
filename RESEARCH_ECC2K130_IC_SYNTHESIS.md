@@ -335,6 +335,21 @@ engineering. An advance requires the ratio to *decrease* with `n`.
 **Predicted class.** Engineering. The prediction is pre-registered so a
 later 350× e2e cannot be reported as progress if the ratio is flat.
 
+**Measurement, 2026-09-18.** T7 is in: `DecompositionStrategy::Symmetrised`
+agrees with Enumerate (12/12) and recovers `[k]P = Q` on the usable
+rungs. T8 has three usable K1 rungs, not four — the same missing-rung
+block as X1/X3, now on the enumerative envelope:
+
+| n | ℓ | \|F_u\| | trials | Λ | Λ·n/m | log |
+|---|---:|---:|---:|---:|---:|---|
+| 7 | 4 | 29 | 4 | 12.6875 | 29.60 | yes |
+| 15 | 5 | 61 | 18 | 1.0052 | 5.03 | yes |
+| 17 | 9 | 409 | 11 | 7.0022 | 39.68 | yes |
+
+`n = 9` is not a usable rung (zero relations, both oracles). No slope
+is fitted. The prediction is not confirmed and not falsified. Receipt
+[`experiments/ecc2k130_symmetrised_x4_20260918/summary.json`](experiments/ecc2k130_symmetrised_x4_20260918/summary.json).
+
 ### C4 — Chained symmetrised `S₃` at `m = 4` (X5)
 
 **Why it survives.** Conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
@@ -442,7 +457,8 @@ Any one of:
 - **`α` fitted over ≥4 rungs** on C1 or C2, whatever its value. A number
   closes Crossbred either way; X2 is now frozen and the remaining gap is
   a fourth agreeing `m = 3` rung plus `Q / C(|F|, 2)`.
-- **C3 classified** by the `Λ · n / m` slope, not by the 350×.
+- **C3 classified** by the `Λ · n / m` slope, not by the 350×. Blocked
+  on a fourth usable rung (three verified: `n = 7, 15, 17`).
 - **H1 falsified at `m = 4`** — a first fall degree that grows.
 
 None of these threatens a deployed curve. The `α ≤ 0.38` row of the
@@ -452,9 +468,10 @@ within `2^{27}` of it. The 500×-or-worse rho verdict on
 
 ## 8. What this note does not settle
 
-- It is a map, not a measurement of C1–C6. Combining ideas on paper does
-  not substitute for the word-op conversion factor, the `(D, k)` kernel
-  frontier, or an end-to-end ladder with linear algebra priced.
+- It is a map, not a measurement of C1–C6 as a whole. C3 is measured on
+  three usable K1 rungs with linear algebra priced and has no slope.
+  Combining ideas on paper does not substitute for the word-op
+  conversion factor or a fourth X4 rung.
 - The MITM row still charges 1,011 exabytes at zero. That is inherited
   honesty from the relation-sweep note, not a new discount.
 - Small-characteristic ECDLP remains a literature stalemate on `D_reg`.
@@ -492,4 +509,5 @@ within `2^{27}` of it. The 500×-or-worse rho verdict on
   — price every phase.
 - Frozen receipts:
   `ecc2k130/benchmarks/indexcalc-g7e/summary.json`,
-  `ecc2k130/benchmarks/indexcalc-g7e/sat.json`.
+  `ecc2k130/benchmarks/indexcalc-g7e/sat.json`,
+  `experiments/ecc2k130_symmetrised_x4_20260918/summary.json`.
