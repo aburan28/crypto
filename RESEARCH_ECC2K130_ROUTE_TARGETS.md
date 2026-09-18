@@ -279,6 +279,27 @@ curve family with hindsight.
 
 Command: `cargo run --release --example crossbred_bench -- --sym --no-sweep …`
 
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_x3_20260918/`. T4 is applied. **No
+fit:** only two agreeing `m = 3` rungs have `|F_u| ≥ 3`, both on `K_1`.
+The additional falsifier (no determining space at all) is **not** met.
+`Q / Q_enum` is already `4.65` and `6.41` against a conservative pair
+count. Every priced cell has `filters = 0`. Route 2 cannot produce `α`
+on this divisor convention.
+
+| a | n | m | ℓ | v | \|F_u\| | Q_enum | Q_word | Q/Q_enum | D | k | kernel | filters | agree | usable | Class |
+|--:|--:|--:|--:|--:|--------:|-------:|-------:|---------:|--:|--:|-------:|--------:|:-----:|:-----:|:--|
+| 1 | 7 | 3 | 4 | 10 | 29 | 406 | 1889 | 4.653 | 4 | 9 | 7 | 0 | yes | yes | measurement |
+| 1 | 9 | 3 | 3 | 7 | 13 | 78 | 380 | 4.872 | 4 | 2 | 1 | 0 | **NO** | no | not a result |
+| 1 | 15 | 3 | 5 | 13 | 61 | 1830 | 11728 | 6.409 | 4 | 11 | 5 | 0 | yes | yes | measurement |
+| 1 | 17 | 3 | 9 | 25 | 409 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 0 | 23 | 3 | 12 | 34 | 4049 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 0 | 31 | 3 | 11 | 31 | 2357 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+
+`K_0` has `|F_u| = 1` at `n = 5, 7, 9, 13, 15, 19`. A two-point sketch
+between `K_1` `n = 7` and `n = 15` has slope `+0.46` (`α ≈ 2.46`); that
+is not a fit.
+
 ## X4 — The symmetrised oracle end to end: advance or engineering?
 
 **Question.** The symmetrised oracle is measured at ~350× the chained
@@ -377,7 +398,7 @@ rather than whether to read more.
 | T3 | Measure the word-op → group-op conversion factor and record it (`AGENTS.md` §2) | X1's absolute column | short |
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | **done** (T4 above); implemented in `examples/crossbred_bench.rs` | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
-| T6 | X3: repeat T5 on the symmetrised systems | protocol frozen 2026-09-18; run next | hours |
+| T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
@@ -392,10 +413,10 @@ a state this repository has.
 
 Any one of:
 
-- **`α` measured over ≥4 rungs**, whatever its value. A number closes
-  Route 1 either way. X2 is frozen: the chained space exists through
-  `n = 9`, `m = 3`. X1 is frozen: no fit (only two usable rungs). The
-  remaining `α` measurement is X3 on the symmetrised systems.
+- **`α` measured over ≥4 rungs**, whatever its value. X1 and X3 are
+  frozen: neither frame can supply four usable `m = 3` rungs, so
+  Crossbred cannot produce `α` under the frozen protocols. That number
+  is now "no fit", not a missing measurement.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
   not by how the 350× felt.
 - **H1 falsified at `m = 4`** — a first fall degree that grows, which

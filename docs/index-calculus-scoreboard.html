@@ -1206,10 +1206,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         A map of the IC threads on this curve, not a new oracle. GPU pairs,
         the weight-2 table, SAT, and Frobenius compose and still sit on the
         product law. The only row below rho does not recover
-        <code>log<sub>P</sub>(Q)</code>. Four experiments remain compatible
-        (Crossbred on the symmetrised frame, symmetrised end-to-end,
-        chained <code>m = 4</code> FFD, CM/τ survey). Chained Crossbred X1
-        produced no <code>α</code> (two usable rungs). None has a fitted
+        <code>log<sub>P</sub>(Q)</code>. Two Crossbred frames are measured
+        and neither produced <code>α</code>. Three experiments remain
+        compatible (symmetrised end-to-end, chained <code>m = 4</code> FFD,
+        CM/τ survey). None has a fitted
         <code>α</code>. Note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_IC_SYNTHESIS.md"><code>RESEARCH_ECC2K130_IC_SYNTHESIS.md</code></a>.
         Frozen receipts as in the G7e panel plus
@@ -1284,12 +1284,12 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </tbody>
     </table>
     <p>Open combinations, predicted engineering unless a fitted
-      <code>α ≤ 1.5</code> is produced: Crossbred on the symmetrised
-      <code>u</code>-frame (X3); symmetrised oracle end-to-end with every
-      phase priced (X4); chained symmetrised <code>S<sub>3</sub></code> at
-      <code>m = 4</code> with FFD (X5); a second literature pass on CM/τ for
-      index calculus (X6). Chained Crossbred (X1/X2) is measured: space
-      exists, <code>α</code> does not fit. GPU acceleration of Crossbred's
+      <code>α ≤ 1.5</code> is produced: symmetrised oracle end-to-end with
+      every phase priced (X4); chained symmetrised <code>S<sub>3</sub></code>
+      at <code>m = 4</code> with FFD (X5); a second literature pass on CM/τ
+      for index calculus (X6). Chained Crossbred (X1/X2) and symmetrised
+      Crossbred (X3) are measured: a determining space exists, <code>α</code>
+      does not fit on either frame. GPU acceleration of Crossbred's
       search phase is admissible only after some frame has an
       <code>α</code>. The only coherent
       factor-base stack is already the G7e one: type-II ONB, Hamming-weight-2
@@ -1436,9 +1436,84 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </table>
     <p>A two-point sketch between <code>n = 5</code> and <code>n = 9</code>
       gives slope <code>+0.97</code> (<code>α ≈ 2.97</code>). That is not a
-      fit. Next is X3 on the symmetrised <code>u</code>-frame, whose systems
-      are smaller. The product-law floor and the 500×-or-worse rho verdict
+      fit. Next is X3 on the symmetrised <code>u</code>-frame (following
+      panel). The product-law floor and the 500×-or-worse rho verdict
       are unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-crossbred-x3-20260918">
+    <div class="panel-head">
+      <h2>Crossbred X3: no α fit on the symmetrised u-frame</h2>
+      <p><span class="chip">measurement</span>
+        Protocol frozen before the run (paired-oracle <code>F<sub>u</sub></code>,
+        T4 selection, same slope falsifier as X1). Only two usable
+        <code>m = 3</code> rungs with <code>|F<sub>u</sub>| ≥ 3</code>, both
+        on <code>K<sub>1</sub></code>. No fit, no advance. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_crossbred_x3_20260918/summary.json"><code>experiments/ecc2k130_crossbred_x3_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: 64-bit word XORs. <code>Q_enum = C(|F<sub>u</sub>|, 2)</code>
+      at one word-op per pair. Axis <code>ℓ = dim V</code>.
+      <code>K<sub>0</sub></code> is degenerate (<code>|F<sub>u</sub>| = 1</code>)
+      on every small rung under the frozen divisor. Every priced cell has
+      <code>filters = 0</code>.</p>
+    <table>
+      <caption>Symmetrised systems under T4. Cited from
+        <code>experiments/ecc2k130_crossbred_x3_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">K<sub>a</sub></th>
+        <th scope="col">n</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">v</th>
+        <th scope="col" class="n">|F<sub>u</sub>|</th>
+        <th scope="col" class="n">Q_enum</th>
+        <th scope="col" class="n">Q_word</th>
+        <th scope="col" class="n">Q/Q_enum</th>
+        <th scope="col" class="n">D</th>
+        <th scope="col" class="n">k</th>
+        <th scope="col">agree</th>
+        <th scope="col">usable</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td>7</td><td class="n">4</td><td class="n">10</td>
+          <td class="n">29</td><td class="n">406</td><td class="n">1889</td>
+          <td class="n">4.653</td><td class="n">4</td><td class="n">9</td>
+          <td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>1</td><td>9</td><td class="n">3</td><td class="n">7</td>
+          <td class="n">13</td><td class="n">78</td><td class="n">380</td>
+          <td class="n">4.872</td><td class="n">4</td><td class="n">2</td>
+          <td>NO</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>1</td><td>15</td><td class="n">5</td><td class="n">13</td>
+          <td class="n">61</td><td class="n">1830</td><td class="n">11728</td>
+          <td class="n">6.409</td><td class="n">4</td><td class="n">11</td>
+          <td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>1</td><td>17</td><td class="n">9</td><td class="n">25</td>
+          <td class="n">409</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>0</td><td>23</td><td class="n">12</td><td class="n">34</td>
+          <td class="n">4049</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>0</td><td>31</td><td class="n">11</td><td class="n">31</td>
+          <td class="n">2357</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+      </tbody>
+    </table>
+    <p>A two-point sketch between <code>n = 7</code> and <code>n = 15</code>
+      gives slope <code>+0.46</code> (<code>α ≈ 2.46</code>). That is not a
+      fit. Crossbred cannot produce <code>α</code> on either the chained
+      or the symmetrised frame under the frozen protocols. Next is X4
+      (end-to-end, predicted engineering) or X5 (FFD at
+      <code>m = 4</code>). The product-law floor and the 500×-or-worse rho
+      verdict are unchanged.</p>
   </div>
 
   <div class="panel" id="ec-baseline-20260914">

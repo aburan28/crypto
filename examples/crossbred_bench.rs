@@ -156,6 +156,7 @@ fn f4_verdict(system: &[F2BoolPoly], n_vars: usize, max_degree: u32) -> (bool, u
 struct Cli {
     symmetrised: bool,
     no_sweep: bool,
+    probe_only: bool,
     curve_a: u8,
     cases: Vec<(u32, usize)>,
 }
@@ -164,6 +165,7 @@ fn parse_cli() -> Cli {
     let raw: Vec<String> = std::env::args().skip(1).collect();
     let mut symmetrised = false;
     let mut no_sweep = false;
+    let mut probe_only = false;
     let mut curve_a: u8 = 0;
     let mut rest: Vec<String> = Vec::new();
     let mut i = 0;
@@ -171,6 +173,7 @@ fn parse_cli() -> Cli {
         match raw[i].as_str() {
             "--sym" => symmetrised = true,
             "--no-sweep" => no_sweep = true,
+            "--probe-only" => probe_only = true,
             "--a" => {
                 i += 1;
                 curve_a = raw
@@ -202,6 +205,7 @@ fn parse_cli() -> Cli {
     Cli {
         symmetrised,
         no_sweep,
+        probe_only,
         curve_a,
         cases,
     }
@@ -516,6 +520,17 @@ fn main() {
                 continue;
             };
             let sys_deg = system_degree(&probe_eqs);
+            eprintln!(
+                "probe n={n} m={m} v={v} deg={sys_deg} |F_u|={f_pts} ell={ell} eqs={}",
+                probe_eqs.len()
+            );
+            if cli.probe_only {
+                println!(
+                    "| {n} | {m} | {ell} | {v} | {f_pts} | {} | — | — | {sys_deg} | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |",
+                    q_enum_word_ops(m, f_pts)
+                );
+                continue;
+            }
             let (k, deg) = match pick_determining_params(&probe_eqs, v, sys_deg) {
                 Some(c) => {
                     eprintln!(

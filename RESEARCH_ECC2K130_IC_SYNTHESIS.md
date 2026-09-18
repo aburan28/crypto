@@ -304,7 +304,13 @@ divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, `|F| = |F_u|`,
 axis `ℓ = dim V`, same slope falsifier as C1. Wired as
 `cargo run --release --example crossbred_bench -- --sym`.
 
-**Predicted class.** Unknown, independently of C1.
+**X3, frozen.** Receipt `experiments/ecc2k130_crossbred_x3_20260918/`.
+No fit: only two usable rungs (`K_1` `n = 7`, `Q/C = 4.653`; `K_1`
+`n = 15`, `Q/C = 6.409`). `K_0` is degenerate at small `n`. Larger
+rungs with a real `F_u` have no determining space. `filters = 0`.
+C2 cannot produce `α` on this divisor convention.
+
+**Predicted class.** Unknown *a priori*; **blocked in practice**.
 
 ### C3 — Symmetrised oracle through end-to-end collection (X4)
 
