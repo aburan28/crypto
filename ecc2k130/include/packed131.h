@@ -827,9 +827,20 @@ ECC_HD P131 inv131(P131 a){
 ECC_HD void pointHalf131(P131 x, P131 y, P131 *hx, P131 *hy) {
  P131 lambda=halvingQuadraticRoot131(x);
  P131 root=halvingSqrt131(add131(add131(y,x),mul131(lambda,x)));
- const unsigned odd=(__popc(root.v[0])^__popc(root.v[1])^__popc(root.v[2])^
-                     __popc(root.v[3])^__popc(root.v[4]))&1u;
- const uint32_t mask=0u-odd;
+#ifdef __CUDA_ARCH__
+#define ECC_HALF_POPC __popc
+#else
+#define ECC_HALF_POPC __builtin_popcount
+#endif
+ unsigned outside=0;
+#pragma unroll
+ for(int i=0;i<5;i++)
+  outside^=ECC_HALF_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
+           ECC_HALF_POPC(root.v[i]);
+ outside^=halvingSecondTrace131(root);
+ outside&=1u;
+#undef ECC_HALF_POPC
+ const uint32_t mask=0u-outside;
  const P131 sqrtx=halvingSqrt131(x);
 #pragma unroll
  for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}

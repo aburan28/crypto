@@ -78,8 +78,8 @@ PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
-# Alternate subgroup point-halving and table-addition phases. Experimental:
-# the phase is part of the rho state and is charged in the effective rate.
+# Build the exact subgroup point-halving arithmetic probe (POINT-HALVING.md).
+# It does not change the campaign iteration function.
 WALK_HALVING ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
@@ -419,7 +419,7 @@ test-table-walk-cuda:
 
 test-halving-cuda:
 	mkdir -p build
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -DECC_WALK_HALVING=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_HALVING=%,$(DEFS)) -DECC_WALK_HALVING=1 \
 	    -Xcompiler -fopenmp src/testhalvingcuda.cu -o build/test-halving-cuda -lgomp
 	./build/test-halving-cuda
 

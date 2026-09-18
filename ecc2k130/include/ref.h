@@ -410,7 +410,14 @@ struct RefT {
         if (p.inf) return p;
         Elem lambda = halfTrace(p.x);
         Elem xh = sigma(add(add(p.y, p.x), mul(lambda, p.x)), M - 1);
-        if (trace(xh)) {
+        const Elem lambda2 = halfTrace(xh);
+        // Q is in the odd subgroup iff Q is four-divisible.  For either
+        // rational half R of Q, that is Tr(x_R)=0.  Taking the trace before
+        // the square root avoids constructing R:
+        // Tr(x_R)=Tr(y_Q+x_Q+lambda_R*x_Q).
+        const int outside = trace(mul(xh, add(lambda, xh))) ^ trace(xh) ^
+                            trace(mul(lambda2, xh));
+        if (outside) {
             lambda = add(lambda, one());
             xh = add(xh, sigma(p.x, M - 1));
         }
