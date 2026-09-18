@@ -43,6 +43,14 @@ GROWING_FFD = """
 | 15 | 4 | 4 | 46 | 45 | 3 | 3 | 4 | 0/4 | 0.00 |
 """
 
+ELL1_THEN_CUBIC = """
+| n | ℓ | m | vars | eqs | deg | FFD min | FFD max | no fall | mean syz D=2 |
+|--:|--:|--:|-----:|----:|----:|--------:|--------:|--------:|-------------:|
+| 7 | 1 | 4 | 17 | 21 | 1 | 2 | 2 | 0/4 | 223.50 |
+| 9 | 3 | 4 | 29 | 27 | 3 | 4 | 4 | 0/4 | 0.00 |
+| 15 | 3 | 4 | 41 | 45 | 3 | 4 | 4 | 0/4 | 0.00 |
+"""
+
 
 class ProtocolTests(unittest.TestCase):
     def test_protocol_loads(self) -> None:
@@ -195,6 +203,17 @@ class ClaimTests(unittest.TestCase):
         beat = protocol["beats"]["x5.ffd_chained_m4"]
         claim = lab.claim_ffd(GROWING_FFD, beat)
         self.assertTrue(claim["m4_ffd_grows_with_n"])
+        self.assertEqual(claim["class"], "measurement")
+
+    def test_ell_1_row_is_not_h1(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["x5.ffd_chained_sym_m4_smoke"]
+        claim = lab.claim_ffd(ELL1_THEN_CUBIC, beat)
+        self.assertEqual(claim["m4_ffd_maxima_including_ell_1"], [2, 4, 4])
+        self.assertTrue(claim["m4_ffd_grows_with_n_including_ell_1"])
+        self.assertEqual(claim["m4_ffd_maxima"], [4, 4])
+        self.assertFalse(claim["m4_ffd_grows_with_n"])
+        self.assertEqual(len(claim["m4_ell_eq_1"]), 1)
         self.assertEqual(claim["class"], "measurement")
 
 
