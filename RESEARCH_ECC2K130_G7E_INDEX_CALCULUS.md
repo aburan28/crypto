@@ -13,7 +13,8 @@ client already uses, plus verified planted decompositions and two toy
 discrete logs recovered by the same algorithm on the CPU. CryptoMiniSat
 on this host's CPU recovers the same toy logs and loses to pair
 enumeration on planted triples; SAT internals stay uncalibrated and do
-not enter `S`.
+not enter `S`. A stored weight-2 pair table cuts the product count by
+`|F|` and is still `2^53.62` times rho.
 
 ## 1. The boundary, stated before measuring
 
@@ -144,23 +145,26 @@ At `|F| = 8384` that is `2^116.84` field products, `S = 5.70×10^{15}`,
 `2^53.62` times rho, a factor `|F|` below the streaming row. Class:
 engineering. It is generic 3SUM with memory, not a sub-quadratic oracle.
 Falsification is unchanged: still `2^{70}` below `C(|F|, 2)` per target
-on a base with `m · log2 |F| ≥ 131`. The GPU row below records whether
-the table actually recovers planted triples; the product count does not
-wait on occupancy.
+on a base with `m · log2 |F| ≥ 131`.
 
 | Variant | log2 products | S | vs rho | vs streaming | Correctness | Class |
 |---|---:|---:|---:|---:|---|---|
 | Pair-table identity, `\|F\|=8384` | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | derived | accounting |
-| Pair table, G7e *(to measure)* | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | pending GPU planted | engineering |
+| Pair table, G7e, `\|F\|=8384` | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | 8/8 planted; 0 hits on the generator | engineering |
+
+The measured table row sits on its counting identity. Ratio to that
+identity is 1. Ratio to rho is still `2^53.62`. Frozen receipt:
+`ecc2k130/benchmarks/indexcalc-g7e/summary.json` `gpu.pair_table`.
 
 **Practicality, not the metric.** On this RTX PRO 6000 Blackwell
 (`sm_120`, 97,252 MiB) the occupied pair scan did `3.5141536×10^7`
-pairs in 12.73 ms (`2.76×10^9` pairs/s). The same scan on the eight
-host cores took 40.23 s, a **3161×** wall-clock speedup and an
-engineering constant. At that occupied rate a streaming logarithm is
-still `2^{94.2}` seconds. A 2048-point add microbench, too small to
-fill the device, measured only `2.52×10^8` affine adds/s and is not
-the rate used above.
+pairs in 12.71 ms (`2.77×10^9` pairs/s). The same scan on the eight
+host cores took 42.79 s, a **3368×** wall-clock speedup. The pair table
+stored 35,137,344 sums (938 MiB); GPU fill 6.12 ms, host sort 6.28 s;
+occupied remainder probes `1.29×10^9` /s. At that probe rate a
+table-amortized logarithm is still `2^{83.3}` seconds. A 2048-point add
+microbench, too small to fill the device, measured only `2.52×10^8`
+affine adds/s and is not the rate used above.
 
 SAT does not get a row in that table. Its conflict counts have no
 measured conversion to field products, so putting them in `S` would be
@@ -203,10 +207,12 @@ python3 -m venv ~/ic-venv
 
 `--skip-gpu` on `run.py` still recovers the degree-5 and degree-9
 logs. `--from-raw` rebuilds `summary.json` from a frozen
-`raw-gpu.json`. The CUDA self-test is a packed-add differential against
-`Ref` and one planted triple at weight 2. `run_sat.py` writes `sat.json`
-and patches `summary.json['sat']`; it does not use the GPU. System
-Python on this host is PEP 668, so the venv is required.
+`raw-gpu.json`. `run.py` passes `--table` so the same process builds
+the weight-2 pair-sum table and probes it. The CUDA self-test is a
+packed-add differential against `Ref`, one planted streaming triple,
+and one planted table probe. `run_sat.py` writes `sat.json` and patches
+`summary.json['sat']`; it does not use the GPU. System Python on this
+host is PEP 668, so the venv is required.
 
 ## 5. Classification
 
@@ -226,9 +232,9 @@ Nothing in this thread is an advance against the floor.
 
 Not a discrete logarithm of the Certicom challenge. Not an F₄ or
 Riemann–Roch solver. SAT *was* run on this host; it does not beat pair
-enumeration and it does not enter the product unit. Not a pair *table*:
-96 GiB holds a weight-2 table and not a weight-9 table, and weight 2
-has expected yield `2^{-90}` per target. Not a claim that G7e capacity
-was previously unavailable for rho — the rho client already runs here;
-this is the first IC oracle that uses the same field code on the same
-chip.
+enumeration and it does not enter the product unit. A weight-2 pair
+*table* was run: 938 MiB, 8/8 planted, and still `2^53.62` times rho.
+A weight-4 table does not fit, and weight 2 has expected yield
+`2^{-90}` per target. Not a claim that G7e capacity was previously
+unavailable for rho — the rho client already runs here; this is the
+first IC oracle that uses the same field code on the same chip.

@@ -1090,8 +1090,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><span class="chip">engineering</span>
         The cheapest three-summand oracle this repository has (exhaustive pair
         enumeration) now runs in the packed type-II ONB arithmetic of the rho
-        client, on one RTX PRO 6000 Blackwell. The product-law floor does not
-        move. Frozen receipt:
+        client, on one RTX PRO 6000 Blackwell. A stored weight-2 pair table
+        fits and cuts S by |F|; it is still 2^53.62 times rho. Frozen receipt:
         <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/indexcalc-g7e/summary.json"><code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code></a>;
         note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md"><code>RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md</code></a>.</p>
@@ -1137,18 +1137,19 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">2^−13.03 vs streaming</td>
           <td>derived: C(|F|,2)·10 setup + |F| remainder adds per target; generic 3SUM with memory</td>
           <td><span class="chip">accounting</span></td></tr>
-        <tr><td>Pair table, G7e, |F| = 8,384</td>
-          <td class="n">116.84</td><td class="n">5.70×10^{15}</td><td class="n">2^+53.62</td>
-          <td class="n">2^−13.03 vs streaming</td>
-          <td>GPU planted pending this round</td>
+        <tr><td><strong>Pair table, G7e, |F| = 8,384</strong> <em>(measured)</em></td>
+          <td class="n"><strong>116.84</strong></td><td class="n"><strong>5.70×10^{15}</strong></td>
+          <td class="n"><strong>2^+53.62</strong></td><td class="n"><strong>2^−13.03 vs streaming</strong></td>
+          <td>8/8 planted 3-sums verified on device against Ref; 0 hits on the generator; 35,137,344 sums stored (938 MiB)</td>
           <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table>
-    <p>Occupied pair scan: 2.76×10<sup>9</sup> pairs/s (35,141,536 pairs in
-      12.73&nbsp;ms). Same scan on eight host cores: 40.23&nbsp;s, 3161×
-      wall-clock. At the occupied rate a streaming logarithm is still
-      2<sup>94.2</sup> seconds. Wall-clock is a practicality note, not S.
-      No full-DLP at n=131 is claimed.</p>
+    <p>Occupied pair scan: 2.77×10<sup>9</sup> pairs/s (35,141,536 pairs in
+      12.71&nbsp;ms). Same scan on eight host cores: 42.79&nbsp;s, 3368×
+      wall-clock. Pair table: 35,137,344 sums in 938&nbsp;MiB, GPU fill 6.12&nbsp;ms,
+      host sort 6.28&nbsp;s, remainder probes 1.29×10<sup>9</sup>/s. A table-amortized
+      logarithm is still 2<sup>83.3</sup> seconds. Wall-clock is a practicality
+      note, not S. No full-DLP at n=131 is claimed.</p>
     <p>SAT on this host CPU (CryptoMiniSat 5.14.7, python-sat 1.9.dev15; not
       the GPU). Conflict counts have no measured conversion to field products,
       so SAT is not a row in the product table. Frozen receipt:

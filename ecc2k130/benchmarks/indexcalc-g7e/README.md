@@ -14,6 +14,7 @@ python3 run.py
 ```
 
 `--skip-gpu` runs only the degree-5/9 pair-enumeration discrete logs.
+`run.py` passes `--table` to build the weight-2 pair-sum table on the GPU.
 
 SAT (CryptoMiniSat on the host CPU, not the GPU) is a separate receipt.
 System Python on this host is PEP 668, so use a venv:
