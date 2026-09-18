@@ -128,6 +128,31 @@ products/iteration, measured on this SKU. `S = products / √r` with
 The measured row is the Frobenius-accounting row, run. Its ratio to the
 floor is 1. The GPU does not appear in the product column.
 
+**Pair table, stated before measuring.** Streaming re-pays `C(|F|, 2)`
+affine adds on every target. A stored table of those pair sums pays it
+once, then `|F|` remainder adds per target. Weight 2 at `|F| = 8384` is
+`C(8384, 2) = 35,141,536` entries, under 1 GiB at 28 bytes, so it fits
+in 96 GiB; a weight-4 table does not. Charging `|F|/131` Frobenius
+relations, the counting identity is
+
+```
+C(|F|, 2)·10  +  (|F|/131)·(#E / C(|F|, 3))·|F|·10
+    ≈  60·#E / (131 |F|)
+```
+
+At `|F| = 8384` that is `2^116.84` field products, `S = 5.70×10^{15}`,
+`2^53.62` times rho, a factor `|F|` below the streaming row. Class:
+engineering. It is generic 3SUM with memory, not a sub-quadratic oracle.
+Falsification is unchanged: still `2^{70}` below `C(|F|, 2)` per target
+on a base with `m · log2 |F| ≥ 131`. The GPU row below records whether
+the table actually recovers planted triples; the product count does not
+wait on occupancy.
+
+| Variant | log2 products | S | vs rho | vs streaming | Correctness | Class |
+|---|---:|---:|---:|---:|---|---|
+| Pair-table identity, `\|F\|=8384` | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | derived | accounting |
+| Pair table, G7e *(to measure)* | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | pending GPU planted | engineering |
+
 **Practicality, not the metric.** On this RTX PRO 6000 Blackwell
 (`sm_120`, 97,252 MiB) the occupied pair scan did `3.5141536×10^7`
 pairs in 12.73 ms (`2.76×10^9` pairs/s). The same scan on the eight
@@ -192,6 +217,7 @@ Python on this host is PEP 668, so the venv is required.
 | Toy DLP at `n = 5, 9` (pairs and SAT) | correctness | known-answer logs, not an ECC2K-130 result |
 | SAT growth 5/9/11 and timeout at 23 | engineering | same Semaev encoding, host CPU; floor flat |
 | Unbounded SAT vs pair lookup at `n=9` | engineering | SAT 228× slower; 2/16 spurious; floor flat |
+| Pair table vs streaming at `\|F\|=8384` | engineering | S falls by `\|F\|`; still generic 3SUM; rho ratio `2^53.62` |
 | Quoting pairs/second or SAT seconds as `S` | relabelling | forbidden; wall-clock is a footnote |
 
 Nothing in this thread is an advance against the floor.
