@@ -133,38 +133,53 @@ SELECT COALESCE(
 """
 
 # One scan of distinguished_points, and only on a run that saw ready=false.
-# Grouping by (worker_id, found_at) is one row per ingested object; the hour
-# buckets and the rolling-window table are derived from that. Later snapshots
-# never reach this statement. The Python caller must not run it when ready.
+#
+# This is the same GROUP BY (worker_id, hour) that published in 524s at
+# 187 M rows. The first merged run grouped by (worker_id, found_at) — one
+# row per object — under a SHARE lock, and PostgreSQL cancelled it at 800s
+# (`psql:<stdin>:33`). SHARE waits for ingest writers; with six ingest
+# threads that wait is unbounded. The finer grain also spilled more groups
+# than the query that actually finished. Later snapshots never reach this
+# statement. The Python caller must not run it when ready.
+#
+# No SHARE lock: the trigger is already live, so ON CONFLICT adds any
+# buckets ingest wrote after this transaction's snapshot. A few minutes of
+# overlap is tens of thousands of points on 187 M, not a second 800s wait.
 BACKFILL_SQL = r"""
 BEGIN ISOLATION LEVEL REPEATABLE READ;
-SET LOCAL statement_timeout = '800s';
-LOCK TABLE distinguished_points IN SHARE MODE;
+SET LOCAL statement_timeout = '1200s';
+SET LOCAL lock_timeout = '15s';
 INSERT INTO rho_dp_meta (campaign_id, ready)
 VALUES ('{{campaign}}', false)
 ON CONFLICT (campaign_id) DO NOTHING;
 DELETE FROM rho_dp_hour WHERE campaign_id = '{{campaign}}';
 DELETE FROM rho_dp_recent WHERE campaign_id = '{{campaign}}';
-WITH objs AS MATERIALIZED (
-  SELECT campaign_id, worker_id, found_at, count(*)::bigint AS dps
+WITH grouped AS (
+  SELECT
+    campaign_id,
+    worker_id,
+    date_trunc('hour', found_at) AS hour,
+    count(*)::bigint AS dps,
+    min(found_at) AS first_at,
+    max(found_at) AS last_at
   FROM distinguished_points
   WHERE campaign_id = '{{campaign}}'
   GROUP BY 1, 2, 3
 ), ins_hour AS (
   INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
-  SELECT campaign_id,
-         date_trunc('hour', found_at),
-         worker_id,
-         sum(dps),
-         min(found_at),
-         max(found_at)
-  FROM objs
-  GROUP BY 1, 2, 3
+  SELECT campaign_id, hour, worker_id, dps, first_at, last_at
+  FROM grouped
+  ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
+    dps = rho_dp_hour.dps + EXCLUDED.dps,
+    first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
+    last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at)
 ), ins_recent AS (
   INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
-  SELECT campaign_id, worker_id, found_at, dps
-  FROM objs
-  WHERE found_at > now() - interval '7 days'
+  SELECT campaign_id, worker_id, hour, dps
+  FROM grouped
+  WHERE hour > now() - interval '7 days'
+  ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
+    dps = rho_dp_recent.dps + EXCLUDED.dps
 )
 UPDATE rho_dp_meta
 SET ready = true, backfilled_at = now()
@@ -402,8 +417,35 @@ def psql_json(database_url, campaign):
     if rollup_ready_from_text(ready_text):
         sys.stderr.write("rho_status: rollup ready, skipping distinguished_points scan\n")
     else:
-        sys.stderr.write("rho_status: backfilling rho_dp rollup from distinguished_points\n")
-        psql_script(database_url, render_sql(BACKFILL_SQL, campaign), tuples_only=False)
+        sys.stderr.write(
+            "rho_status: backfilling rho_dp rollup from distinguished_points "
+            "(worker, hour — same grain as the 524s snapshot)\n"
+        )
+        last_err = None
+        for attempt in range(1, 4):
+            try:
+                psql_script(
+                    database_url, render_sql(BACKFILL_SQL, campaign), tuples_only=False
+                )
+                last_err = None
+                break
+            except RuntimeError as err:
+                last_err = err
+                text = str(err).lower()
+                if attempt < 3 and (
+                    "serialize" in text
+                    or "deadlock" in text
+                    or "lock timeout" in text
+                    or "lock_not_available" in text
+                ):
+                    sys.stderr.write(
+                        "rho_status: backfill attempt %d lost a lock race; retrying\n"
+                        % attempt
+                    )
+                    continue
+                raise
+        if last_err is not None:
+            raise last_err
     psql_script(database_url, PRUNE_SQL, tuples_only=False)
     text = psql_script(database_url, render_sql(READ_SQL, campaign), tuples_only=True)
     lines = [line for line in text.strip().splitlines() if line.startswith("{")]

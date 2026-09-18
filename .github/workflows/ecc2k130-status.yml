@@ -71,10 +71,10 @@ jobs:
     needs: test
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    # 25 min so the one-time rho_dp_hour backfill (heap scan, ~9 min at
-    # 187 M rows) plus history merge and Pages deploy still fit. Later runs
-    # read the rollup and finish in the old 15.
-    timeout-minutes: 25
+    # 30 min so the one-time rho_dp_hour backfill (heap scan, ~9 min at
+    # 187 M rows, plus a lock-race retry) plus history merge and Pages
+    # deploy still fit. Later runs read the rollup and finish in the old 15.
+    timeout-minutes: 30
     permissions:
       contents: read
       pages: write

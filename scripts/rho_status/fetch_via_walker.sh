@@ -104,10 +104,10 @@ SCP=(scp -i "$KEY" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecki
 # Bound the query remotely too, so a genuinely stuck snapshot fails with its
 # own message instead of hanging until the job timeout. The first run after
 # this hop copies snapshot.py has to backfill rho_dp_hour from the heap
-# (524 s at 187 M rows on 2026-09-18); later runs read the rollup. 900 s
-# leaves room for that one scan. The publish job's timeout must stay above
-# this, plus the steps after.
-REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-900}
+# (524 s at 187 M rows on 2026-09-18, same worker/hour grain). 1200 s leaves
+# room for that scan plus a lock-race retry. The publish job's timeout must
+# stay above this, plus the steps after.
+REMOTE_TIMEOUT=${RHO_REMOTE_TIMEOUT:-1200}
 
 "${SCP[@]}" "$ROOT/scripts/rho_status/snapshot.py" "$USER@$HOST:/tmp/rho_status_snapshot.py"
 STARTED=$SECONDS

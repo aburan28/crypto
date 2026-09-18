@@ -158,7 +158,9 @@ class WorkflowTests(unittest.TestCase):
         # published document is assembled from rho_dp_hour / rho_dp_recent.
         # distinguished_points is read only by the one-time backfill.
         self.assertEqual(BACKFILL_SQL.count("FROM distinguished_points"), 1)
-        self.assertIn("LOCK TABLE distinguished_points IN SHARE MODE", BACKFILL_SQL)
+        self.assertNotIn("LOCK TABLE", BACKFILL_SQL)
+        self.assertIn("date_trunc('hour', found_at)", BACKFILL_SQL)
+        self.assertIn("ON CONFLICT (campaign_id, hour, worker_id)", BACKFILL_SQL)
         self.assertNotIn("FROM distinguished_points", READ_SQL)
         self.assertIn("FROM rho_dp_hour", READ_SQL)
         self.assertIn("FROM rho_dp_recent", READ_SQL)
@@ -204,7 +206,7 @@ class WorkflowTests(unittest.TestCase):
         # from a dead connection and the hop dies on a broken pipe.
         self.assertIn("ServerAliveInterval", text)
         self.assertIn("ServerAliveCountMax", text)
-        self.assertIn("RHO_REMOTE_TIMEOUT:-900", text)
+        self.assertIn("RHO_REMOTE_TIMEOUT:-1200", text)
         self.assertIn("snapshot exceeded", text)
         self.assertIn("exit 124", text)
         self.assertNotIn("meow34", text)
@@ -232,12 +234,16 @@ class WorkflowTests(unittest.TestCase):
         path = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
-        self.assertIn("timeout-minutes: 25", text)
+        self.assertIn("timeout-minutes: 30", text)
         fetch = os.path.join(HERE, "fetch_via_walker.sh")
         with open(fetch, encoding="utf-8") as fh:
             script = fh.read()
-        self.assertIn("RHO_REMOTE_TIMEOUT:-900", script)
-        self.assertIn("SET LOCAL statement_timeout = '800s'", BACKFILL_SQL)
+        self.assertIn("RHO_REMOTE_TIMEOUT:-1200", script)
+        self.assertIn("SET LOCAL statement_timeout = '1200s'", BACKFILL_SQL)
+        self.assertIn("SET LOCAL lock_timeout = '15s'", BACKFILL_SQL)
+        with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("lost a lock race; retrying", source)
 
 
 class HistoryTests(unittest.TestCase):
