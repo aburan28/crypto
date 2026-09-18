@@ -151,9 +151,29 @@ only 3.0%. The 192×3 scout did resident 3 blocks and still lost: extra
 warps pulled the boost clock down and the addend missed LDS.
 
 **Against the falsification target.** Success was a verified median > 29.0.
-Measured best **17.414**. 29 B/s on one RTX PRO 6000 is not a result this
-tree has. The one-add floor is still 22–25 B/s; this row is 0.792 of 22.
+Measured best in this round **17.414**. The later composed follow-up below
+supersedes it at 18.110 B/s, still far short of 29. 29 B/s on one RTX PRO
+6000 is not a result this tree has. The one-add floor is still 22–25 B/s.
 The campaign default stays the shipping walk. Knobs stay off by default.
 
 The leftover is the 5.3125 products. Filling issue slots without cutting
 `clmad` count does not move the ratio to the floor.
+
+## 6. Follow-up: 18.110 B/s by composition
+
+The selective-inlining round subsequently moved the same control to 17.946
+B/s. Profiling that binary put the `CLMAD`/FP64 pipe at 71.6%, reopening three
+existing opt-in levers as a composition rather than isolated changes:
+
+| variant | median B/s | / 29 | / 22 B floor | / paired 17.949 | correct | class |
+|---|---:|---:|---:|---:|---|---|
+| inline-both table walk | 17.949 | 0.619 | 0.816 | 1.000 | 300/300 | reference |
+| + ALU polynomial square + paired CLMAD schedule | 17.975 | 0.620 | 0.817 | 1.001 | replay passed | engineering |
+| **+ reduced-input conversion** | **18.110** | **0.624** | **0.823** | **1.009** | **300/300, 0 dropped** | **engineering** |
+
+Six balanced-order repetitions of the last row were 18.045--18.200 B/s and
+all six paired ratios exceeded one. Products remain 5.3125 per update. The
+complete receipt, raw logs and exploratory paired interval are in
+[`benchmarks/throughput-18b-composed`](benchmarks/throughput-18b-composed/README.md).
+This supersedes the headline engineering rate, not the 29 B/s verdict or the
+one-add floor.

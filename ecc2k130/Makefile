@@ -416,8 +416,8 @@ test-table-walk-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
-	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_SELECTION_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -DECC_TABLE_SELECTION_GLOBAL=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
 	./build/test-table-walk-cuda-addend-global
 
@@ -426,6 +426,25 @@ test-halving-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_HALVING=%,$(DEFS)) -DECC_WALK_HALVING=1 \
 	    -Xcompiler -fopenmp src/testhalvingcuda.cu -o build/test-halving-cuda -lgomp
 	./build/test-halving-cuda
+
+# Pair-enumeration IC oracle on the packed ONB arithmetic.  Inverse-heavy, so
+# ONB_INV and the Itoh–Tsujii unroll stay on; walk-only knobs stay off.
+INDEXCALC_DEFS = -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 \
+	-DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 \
+	-DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 \
+	-DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_ONB_INV=1 \
+	-DECC_THREADS=128 -DECC_MINBLOCKS=1 -DECC_BATCH=16
+indexcalc-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(INDEXCALC_DEFS) -Xptxas -v \
+	    -Xcompiler -fopenmp src/indexcalccuda.cu -o build/indexcalc-cuda -lgomp
+
+test-indexcalc-cuda: indexcalc-cuda
+	./build/indexcalc-cuda --self-test
+	cd codegen && python3 -m unittest test_indexcalc_pairs.py
+
+test-indexcalc-pairs:
+	cd codegen && python3 -m unittest test_indexcalc_pairs.py
 
 test-timing:
 	mkdir -p build
