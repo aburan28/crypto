@@ -85,6 +85,15 @@
 #if ECC_TABLE_RECOMPUTE_DENOM && !ECC_WALK_TABLE
 #error "ECC_TABLE_RECOMPUTE_DENOM requires the table walk"
 #endif
+#ifndef ECC_TABLE_BANK_PAD
+#define ECC_TABLE_BANK_PAD 0
+#endif
+#if ECC_TABLE_BANK_PAD != 0 && ECC_TABLE_BANK_PAD != 1
+#error "ECC_TABLE_BANK_PAD must be 0 or 1"
+#endif
+#if ECC_TABLE_BANK_PAD && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_SELECTION_GLOBAL)
+#error "ECC_TABLE_BANK_PAD requires the byte-pivot shared-table layout"
+#endif
 
 namespace eccPacked131 {
 
@@ -97,7 +106,9 @@ static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
 static const int TW_TOP_OFF = TW_TABLE_WORDS;             // one x|y-top byte per entry
 static const int TW_MASK_OFF = TW_TOP_OFF + (131 * TW_H + 3) / 4;
 #else
-static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4;  // + tops, 8 bits per entry
+// The optional pad changes the phase-row stride from 66 (only 16 possible
+// starting banks) to 67 words (all 32 banks) for random addend lookups.
+static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4 + ECC_TABLE_BANK_PAD;
 static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
 #endif
@@ -127,7 +138,9 @@ static const int TW_SEL0 = (ECC_TABLE_ADDEND_GLOBAL || ECC_TABLE_SELECTION_GLOBA
 static const size_t TW_SHARED_BYTES =
     size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS :
            (ECC_TABLE_SELECTION_GLOBAL ? TW_TABLE_WORDS : TW_WORDS)) * sizeof(uint32_t);
-static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
+// 49,256 bytes with bank padding plus the driver's measured 1,024-byte
+// reservation still permits one 512-thread block on the 100 KiB SM.
+static_assert(TW_SHARED_BYTES <= 50 * 1024, "table walk tables exceed the measured shared-memory budget");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
               "selection tables must fit three blocks in a 100 KB SM");
 
