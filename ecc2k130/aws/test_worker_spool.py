@@ -17,13 +17,14 @@ import contextlib
 import io
 import os
 import shutil
+import struct
 import tempfile
 import unittest
 from unittest import mock
 
 import worker
 from protocol import PROTOCOL, campaignContract, sha256File, verifyEnvelope
-from worker import RECORD_BYTES, Worker, readJson
+from worker import CKPT_MAGIC, RECORD_BYTES, Worker, readJson
 
 
 def record(i):
@@ -284,6 +285,44 @@ class FailedUpload(SpoolCase):
         self.assertEqual(int(nxt.state["dpOffset"]), 0)
         self.assertEqual(int(nxt.state.get("dpUploaded", 0)), 0)
 
+    def test_reclaiming_the_original_slot_does_not_skip_the_new_file(self):
+        """A leftover from a prior tenure must not move the new file's offset.
+
+        claimSlot deletes dp.bin on a slot change.  If an outage then an
+        intervening other-slot claim leave a same-slot spool entry on disk,
+        crediting it by slot and offset=0 would jump past the start of the
+        empty file the reclaimed slot is about to write.
+        """
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        w.workLock.close()
+        nxt = self.makeWorker()
+        nxt.store = BrokenStore(nxt.store)
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        other = int(nxt.state["slot"])
+        self.assertNotEqual(other, slot)
+        self.assertTrue(nxt.spoolPending())
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
+        w.slots.release(slot, w.owner)
+        nxt.slots.release(other, nxt.owner)
+        nxt.workLock.close()
+        nxt2 = self.makeWorker()
+        out, err = quiet(nxt2.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertEqual(int(nxt2.state["slot"]), slot)
+        self.assertEqual(int(nxt2.state["dpOffset"]), 0)
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        self.appendDp(nxt2, 3)
+        out, err = quiet(nxt2.uploadCycle, slot)
+        self.assertIsNone(err, out)
+        self.assertEqual(int(nxt2.state["dpOffset"]), 3 * RECORD_BYTES)
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(8)))
+        self.assertEqual(len([k for k in storedKeys(self.storeRoot) if k.endswith(".bin")]), 2)
+
 
 class AlreadyUploaded(SpoolCase):
     def test_a_key_the_store_already_has_is_dropped_without_re_uploading(self):
@@ -456,6 +495,73 @@ class Fragments(SpoolCase):
         self.assertEqual(counting.puts, [])
         self.assertFalse(w.spoolPending())
         self.assertEqual(int(w.state["dpOffset"]), 0)
+
+    def test_a_slot_change_sends_a_payload_that_never_got_a_manifest(self):
+        """claimSlot deletes dp.bin; a fragment is then the only local copy."""
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        entry = w.spoolEntries()[0]
+        os.remove(entry["manifest"])
+        self.assertTrue(os.path.exists(entry["payload"]))
+        w.workLock.close()
+        nxt = self.makeWorker()
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertNotEqual(int(nxt.state["slot"]), slot)
+        self.assertEqual(nxt.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        for key in storedKeys(self.storeRoot):
+            self.assertIn("slot-%05d" % slot, key)
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
+
+    def test_retiring_sends_a_payload_that_never_got_a_manifest(self):
+        """retireSlot clears state; the next claim must not sweep the fragment."""
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        entry = w.spoolEntries()[0]
+        os.remove(entry["manifest"])
+        self.assertTrue(os.path.exists(entry["payload"]))
+        _, err = quiet(w.retireSlot, slot, "checkpoint refused by the client")
+        self.assertIsNone(err)
+        self.assertEqual(w.state, {})
+        w.workLock.close()
+        nxt = self.makeWorker()
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertNotEqual(int(nxt.state["slot"]), slot)
+        self.assertEqual(nxt.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        for key in storedKeys(self.storeRoot):
+            self.assertIn("slot-%05d" % slot, key)
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
+
+    def test_a_missing_state_file_still_sends_a_fragment(self):
+        """state.json gone, checkpoint still names the slot the fragment belongs to."""
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        entry = w.spoolEntries()[0]
+        os.remove(entry["manifest"])
+        self.assertTrue(os.path.exists(entry["payload"]))
+        with open(w.ckptPath, "wb") as fh:
+            fh.write(struct.pack("<8s6IQ", CKPT_MAGIC, 1, 131, 2, 4, 64, slot + 1, 1))
+        os.remove(w.statePath)
+        w.workLock.close()
+        nxt = self.makeWorker()
+        self.assertEqual(nxt.state, {})
+        out, err = quiet(nxt.claimSlot)
+        self.assertIsNone(err, out)
+        self.assertNotEqual(int(nxt.state["slot"]), slot)
+        self.assertEqual(nxt.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecords(self.storeRoot)),
+                         sorted(record(i) for i in range(5)))
+        for key in storedKeys(self.storeRoot):
+            self.assertIn("slot-%05d" % slot, key)
+        self.assertEqual(int(nxt.state["dpOffset"]), 0)
 
 
 if __name__ == "__main__":
