@@ -8,20 +8,40 @@
   "measured_rate_factor": 0.84,
   "decomposition_model": "P = 2^n C(B,n) / r, measured in results/target_decomposition.json",
   "best_logarithm_cost": {
+    "orbits": 1,
+    "support_size": 131,
+    "relation_length": 14,
+    "mitm_split": "13+1",
+    "log2_stored_classes": 63.977,
+    "log2_streamed": 8.033,
+    "log2_build_once": 63.977,
+    "log2_cost_per_attempt": 8.033,
+    "log2_decomposition_probability": -54.165,
+    "log2_target_attempts": 55.165,
+    "relations_needed": 2,
+    "log2_total_cost": 64.64,
+    "log2_total_vs_rho": 3.831,
+    "log2_memory_bytes": 66.977,
+    "memory_exabytes": 145.3
+  },
+  "best_if_table_rebuilt_per_attempt": {
     "orbits": 10,
     "support_size": 1310,
     "relation_length": 15,
     "mitm_split": "8+7",
     "log2_stored_classes": 68.479,
     "log2_streamed": 67.165,
+    "log2_build_once": 68.479,
     "log2_cost_per_attempt": 68.479,
     "log2_decomposition_probability": 0.0,
+    "log2_target_attempts": 3.459,
     "relations_needed": 11,
     "log2_total_cost": 71.939,
     "log2_total_vs_rho": 11.13,
     "log2_memory_bytes": 71.479,
     "memory_exabytes": 3292.0
   },
+  "amortisation_saving_log2": 7.299,
   "homogeneous_extension_past_m8": [
     {
       "m": 4,
@@ -103,5 +123,5 @@
     }
   ],
   "homogeneous_first_sub_rho_m": 18,
-  "verdict": "Pricing a logarithm rather than a homogeneous relation, the best configuration is a 10-orbit support (B = 1310) with 15-point relations, at 2^71.939 against the reference 2^60.809 -- short by 2^11.13, with memory charged at zero. The homogeneous accounting extended past m = 8 does cross below the reference, at m = 18, but it prices relations that carry no information about log_P(Q), which is the section 3 error in its strongest form."
+  "verdict": "Pricing a logarithm rather than a homogeneous relation, the best configuration is a 1-orbit support (B = 131) with 14-point relations, at 2^64.64 against the reference 2^60.809 -- short by 2^3.831, with memory charged at zero. The homogeneous accounting extended past m = 8 does cross below the reference, at m = 18, but it prices relations that carry no information about log_P(Q), which is the section 3 error in its strongest form. Building the table once rather than per attempt is worth 2^7.30."
 }

@@ -43,6 +43,24 @@ What the quotient does buy:
   * the support carries `B/131` unknowns rather than `B`, so `B/131`
     relations are needed rather than `B`.  This is the large saving.
 
+**The stored side is built once, not once per target.**  An earlier form of
+this module charged the meet-in-the-middle table build on every target
+attempt.  That is wrong: the table holds `s`-subset sums of the support and
+does not depend on the target at all, so it is built once and streamed
+against for every attempt.  Charging it per attempt over-counted by
+`2^7.3`, and the corrected optimum is `2^64.64` rather than `2^71.94`.
+
+The optimum that follows is lopsided: store `n-1` points, stream **one**.
+The support is a single Frobenius orbit -- 131 points, two unknowns, its own
+orbit logarithm and `d` -- which needs no weight-two construction at all,
+just a random curve point and its conjugates.
+
+Two costs this leaves standing, both flagged rather than hidden.  The table
+build assumes one representative per `sigma`-class can be enumerated in
+constant amortised time (necklace enumeration over `Z/131`); enumerating
+naively by fixing an element costs `2^3.3` more.  And the build is
+`2^63.98` entries, so the total is a table-construction cost, not a search.
+
 **Memory is charged at zero here, deliberately.**  The totals below assume
 storage is free and instantaneous.  The conclusion does not depend on the
 storage wall, which is the objection an engineer could always call a matter
@@ -79,18 +97,35 @@ def _lchoose(B: int, k: int):
     return sum(math.log2(B - i) for i in range(k)) - _lf(k)
 
 
-def cost(T: int, n: int, s: int):
-    """log2 cost of a logarithm from a `T`-orbit support and `n`-point relations."""
+def _lse(a: float, b: float) -> float:
+    """log2(2^a + 2^b)."""
+    hi, lo = max(a, b), min(a, b)
+    return hi + math.log2(1 + 2 ** (lo - hi))
+
+
+def cost(T: int, n: int, s: int, amortise: bool = True):
+    """log2 cost of a logarithm from a `T`-orbit support and `n`-point relations.
+
+    With `amortise` (the default and the correct accounting) the stored side
+    is built once and the streamed side is paid per target attempt.  With
+    `amortise=False` the whole meet-in-the-middle is charged per attempt,
+    which is what this module did before and is 2^7.3 too expensive.
+    """
     B = M * T
     a, b = _lchoose(B, s), _lchoose(B, n - s)
     if a is None or b is None:
         return None
     stored = s + a - LOG2_M           # canonical sigma-classes only
     streamed = (n - s) + b
-    per_attempt = max(stored, streamed)
     log_p = min(0.0, n + _lchoose(B, n) - LOG2_R
                 + math.log2(MEASURED_RATE_FACTOR))   # measured, no sigma bonus
-    total = math.log2(T + 1) + per_attempt - log_p
+    log_attempts = math.log2(T + 1) - log_p
+    if amortise:
+        per_attempt = streamed
+        total = _lse(stored, log_attempts + streamed)
+    else:
+        per_attempt = max(stored, streamed)
+        total = log_attempts + per_attempt
     return {
         "orbits": T,
         "support_size": B,
@@ -98,8 +133,10 @@ def cost(T: int, n: int, s: int):
         "mitm_split": f"{s}+{n - s}",
         "log2_stored_classes": round(stored, 3),
         "log2_streamed": round(streamed, 3),
+        "log2_build_once": round(stored, 3),
         "log2_cost_per_attempt": round(per_attempt, 3),
         "log2_decomposition_probability": round(log_p, 3),
+        "log2_target_attempts": round(log_attempts, 3),
         "relations_needed": T + 1,
         "log2_total_cost": round(total, 3),
         "log2_total_vs_rho": round(total - RHO_LOG2, 3),
@@ -108,13 +145,13 @@ def cost(T: int, n: int, s: int):
     }
 
 
-def optimise(max_orbits: int = 200000, max_n: int = 48):
+def optimise(max_orbits: int = 120000, max_n: int = 48, amortise: bool = True):
     best = None
-    grid = list(range(1, 300)) + list(range(300, max_orbits + 1, 11))
+    grid = list(range(1, 300)) + list(range(300, max_orbits + 1, 13))
     for T in grid:
         for n in range(2, max_n + 1):
             for s in range(1, n):
-                r = cost(T, n, s)
+                r = cost(T, n, s, amortise=amortise)
                 if r and (best is None or
                           r["log2_total_cost"] < best["log2_total_cost"]):
                     best = r
@@ -153,6 +190,7 @@ def homogeneous_extension():
 
 def main():
     best = optimise()
+    unamortised = optimise(amortise=False)
     homog = homogeneous_extension()
     crossing = next((r for r in homog if r["log2_total_vs_rho"] < 0), None)
 
@@ -169,6 +207,9 @@ def main():
         "decomposition_model": "P = 2^n C(B,n) / r, measured in "
                                "results/target_decomposition.json",
         "best_logarithm_cost": best,
+        "best_if_table_rebuilt_per_attempt": unamortised,
+        "amortisation_saving_log2": round(
+            unamortised["log2_total_cost"] - best["log2_total_cost"], 3),
         "homogeneous_extension_past_m8": homog,
         "homogeneous_first_sub_rho_m": crossing["m"] if crossing else None,
         "verdict": (
@@ -182,7 +223,9 @@ def main():
             f"reference, at m = "
             f"{crossing['m'] if crossing else 'n/a'}, but it prices relations "
             f"that carry no information about log_P(Q), which is the section 3 "
-            f"error in its strongest form."),
+            f"error in its strongest form. Building the table once rather "
+            f"than per attempt is worth "
+            f"2^{unamortised['log2_total_cost'] - best['log2_total_cost']:.2f}."),
     }
 
     out = Path(__file__).resolve().parent / "results" / "target_boundary.json"

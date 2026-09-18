@@ -916,18 +916,22 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         Continuing the quotiented self-consistent accounting, it goes sub-reference at
         <strong>m = 18</strong> and reaches 2<sup>&minus;4.05</sup> at m = 28. Those rows price
         relations among base points alone, which give one linear equation among <em>unknown</em>
-        logarithms and determine log<sub>P</sub>(Q) not at all. Priced as a logarithm instead
-        &mdash; T + 1 relations against known targets [a]P + [b]Q &mdash; the optimum is a
-        10-orbit support (B = 1,310) with 15-point
-        relations at <strong>2<sup>71.94</sup></strong>, short of the reference by
-        <strong>2<sup>+11.13</sup></strong> &mdash; <em>with memory charged at
-        zero</em>, so the negative no longer rests on the storage wall at all. The decomposition rate
-        the figure depends on is measured, not assumed; a model giving &sigma; a further factor of
-        131 there is optimistic by 7&times;, because the reachable sum set is itself &sigma;-closed
-        and accepting &sigma;<sup>k</sup>(target) is one chance taken 131 times. Wagner&rsquo;s
-        k-tree would beat the meet-in-the-middle but needs partial matching, which curve addition
-        does not admit (<code>research/ecc2k130_relations/results/target_boundary.json</code>,
-        <code>target_decomposition.json</code>).</p>
+        logarithms and determine log<sub>P</sub>(Q) not at all.</p>
+      <p><strong>Priced as a logarithm, the gap is 2<sup>+3.83</sup> and it is all bookkeeping.</strong>
+        T + 1 relations against known targets [a]P + [b]Q, with the meet-in-the-middle table built
+        <em>once</em> and streamed against per target &mdash; charging it per attempt over-counted by
+        2<sup>7.30</sup>. The optimum is lopsided and needs nothing from the weight-two
+        construction: a <strong>single Frobenius orbit</strong> of 131 points, two unknowns, 14-point
+        relations split 13+1, total <strong>2<sup>64.64</sup></strong> against the reference
+        2<sup>60.81</sup>, <em>with memory charged at zero</em> (145 EB, free). The structure is run
+        end to end on small curves and recovers a planted logarithm in 6 of 6 cells. Caveats carried
+        openly: the build assumes constant-amortised necklace enumeration over Z/131 (naive costs
+        2<sup>3.3</sup> more), and the total is table construction, not search. The trajectory
+        2<sup>+24.79</sup> &rarr; 2<sup>+13.59</sup> &rarr; 2<sup>+11.13</sup> &rarr;
+        2<sup>+3.83</sup> is four corrections to this ledger&rsquo;s own accounting, every one in the
+        optimistic direction, and no new fact about the curve
+        (<code>research/ecc2k130_relations/results/target_boundary.json</code>,
+        <code>amortised_attack.json</code>).</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),

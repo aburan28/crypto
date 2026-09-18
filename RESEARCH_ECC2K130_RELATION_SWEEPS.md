@@ -487,21 +487,77 @@ A logarithm needs relations against **known targets** `[a]P + [b]Q`.
 
 Unknowns are the `T` orbit logarithms plus `d`, so `T + 1` relations are
 needed. Each requires decomposing a random known target into `n` signed base
-points, at one meet-in-the-middle per attempt divided by the chance a target
-decomposes at all. Optimising over support size, relation length and split
+points, by meet-in-the-middle.
+
+**The table is built once, not once per target.** An earlier form of this
+section charged the whole meet-in-the-middle on every target attempt. That is
+wrong, and it is the ordinary structure of index calculus that makes it
+wrong: the stored side holds `s`-subset sums *of the support*, which do not
+depend on the target at all. It is built once and streamed against for every
+attempt afterwards. Charging it per attempt over-counted by
+**`2^7.30`**.
+
+Optimising over support size, relation length and split
 (`results/target_boundary.json`):
 
-    support         10 orbits, B = 1310
-    relations       15 points each, split 8+7
-    per attempt     2^68.479
-    relations needed 11
-    total           2^71.939      vs rho  +11.13
+    support           1 Frobenius orbit, B = 131
+    relations         14 points each, split 13+1
+    build (once)      2^63.977
+    stream / attempt  2^8.033
+    target attempts   2^55.165
+    relations needed  2
+    total             2^64.64      vs rho  +3.83
 
-**Memory is charged at zero.** The totals assume storage is free and
-instantaneous. This matters: the storage wall is the objection an engineer
-can always call a budget question, and the negative no longer rests on it.
-Granting unlimited free memory, the method is still `2^11.13`
-short — a factor of about 2,241 in operations.
+Two things about that optimum are worth saying plainly.
+
+It is **lopsided**: store `13` points, stream **one**. The meet-in-the-middle
+degenerates into a table of 13-subset sums that every target is simply looked
+up against.
+
+And the support is **one Frobenius orbit** — 131 points carrying two
+unknowns, its own orbit logarithm and `d`. That needs no weight-two
+construction, no normal basis, nothing from §4: a random curve point and its
+131 conjugates will do. Everything §4 built was needed to *measure* the
+supply law; none of it is needed to realise this support.
+
+`2^3.83` is a factor of about 14.
+That is close enough that the error bars matter, so:
+
+* **memory is charged at zero** — 145 exabytes of class
+  keys, free and instantaneous. Charging it makes the negative larger, not
+  smaller;
+* the build assumes one representative per `sigma`-class can be enumerated in
+  constant amortised time — necklace enumeration over `Z/131`. Enumerating
+  naively, by fixing an element and de-duplicating, costs `2^3.3` more and
+  puts the total at `2^68`;
+* the total is dominated by *table construction*, not by search. It is
+  `2^63.977` writes plus `2^55.165`
+  lookups, against rho's `2^60.81` iterations. Treating a table write and a
+  rho step as one operation each is generous to the table.
+
+So the honest reading is a negative of `2^3.8` under idealised accounting,
+degrading to `2^7` under a plainer enumeration, and further under any real
+memory cost.
+
+### 5.3.1 The structure, run for real
+
+The optimum's shape — one orbit, two unknowns, two relations, a table built
+once — is unusual enough to be worth exercising rather than trusting.
+`validate_amortised_attack.py` builds exactly that table, streams targets
+against it, solves, and checks `[d]P = Q`:
+
+| `m` | `B` | `T` | `n` | table (built once) | relations | target attempts | `[d]P = Q` |
+|---:|---:|---:|---:|---:|---:|---:|:--:|
+| 13 | 13 | 1 | 3 | 20 | 2 | 5 | yes |
+| 13 | 26 | 2 | 3 | 82 | 3 | 5 | yes |
+| 13 | 13 | 1 | 4 | 98 | 2 | 3 | yes |
+| 19 | 19 | 1 | 3 | 32 | 2 | 17 | yes |
+| 19 | 38 | 2 | 3 | 140 | 3 | 13 | yes |
+| 19 | 19 | 1 | 4 | 282 | 2 | 18 | yes |
+
+Six of six recover the planted logarithm. The `T = 1` rows close a
+two-unknown system from two relations, which is the shape the ECC2K-130
+optimum uses, so that shape is not an artefact of the cost model.
 
 ### 5.4 The measured input, and a seventh defect
 
@@ -566,11 +622,26 @@ the whole of the remaining gap.
 
 ### 5.6 Where this leaves the thread
 
-`2^11.13` over the reference, with memory free, every
-input either measured or derived, and the two directions that looked open
-— larger `m`, and a `k`-tree in place of the meet-in-the-middle — closed for
-stated reasons rather than left untried.
+`2^3.83` over the reference, with memory free, every
+input either measured or derived, and the three directions that looked open
+— larger `m`, a `k`-tree in place of the meet-in-the-middle, and rebuilding
+the table per target — closed, corrected and corrected again.
 
-That is a better negative than §1's. It is also a *tighter* one: §1 recorded
-`2^+24.79` and leaned on a storage wall. What is left is an operation count
-that no amount of memory, structure or Frobenius moves.
+The trajectory is the point. §1 recorded `2^+24.79` and leaned on a storage
+wall. Applying the Frobenius quotient uniformly gave `2^+13.59`. Pricing a
+logarithm rather than a homogeneous relation gave `2^+11.13`. Building the
+table once rather than per target gives `2^+3.83`.
+
+Every one of those steps made the attack look *better*, and every one was a
+correction to this thread's own accounting rather than a new idea about the
+curve. That is worth stating as a caution and not as a result: the remaining
+`2^3.8` is small enough that one more accounting error of the size of the
+last four would erase it. What it is not is evidence that the curve is weak —
+the only lever anyone has applied here is bookkeeping, and the bookkeeping
+has now been wrong in the optimistic direction four times.
+
+What would actually move it is a decomposition oracle cheaper than a
+square-root search, and §5.5 closes the one generic candidate. Until such an
+oracle exists, the floor is `sqrt` of a space that rho already square-roots
+with the same 262 automorphisms, and `2^3.8` is what separates two square
+roots of nearly the same thing.

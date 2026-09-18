@@ -24,6 +24,7 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
 from target_boundary import cost as logarithm_cost            # noqa: E402
+from validate_amortised_attack import attack as amortised_attack  # noqa: E402
 from validate_target_model import (_signed_subset_sums,       # noqa: E402
                                    _support)
 
@@ -305,6 +306,24 @@ def test_homogeneous_relations_are_not_priced_as_a_logarithm():
     assert best["log2_total_vs_rho"] > 0, (
         "a logarithm priced against known targets must not beat rho here")
     assert data["memory_charged"] is False
+
+
+def test_amortising_the_table_is_a_real_saving_and_correctly_signed():
+    """Building once must be cheaper than rebuilding per attempt, never dearer."""
+    for T, n, s in ((1, 14, 13), (10, 15, 8), (3, 8, 4)):
+        once = logarithm_cost(T, n, s, amortise=True)
+        each = logarithm_cost(T, n, s, amortise=False)
+        assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+
+
+def test_amortised_attack_recovers_a_planted_logarithm():
+    """The lopsided single-orbit structure the optimum uses, run for real."""
+    for spec in ((13, 3, 1), (19, 3, 1)):
+        out = amortised_attack(*spec)
+        assert out.get("verified_by_point_identity"), out
+        assert out["recovered_d"] == out["planted_d"]
+        assert out["unknowns"] == out["orbits"] + 1
+        assert out["relations"] == out["unknowns"]
 
 
 def test_logarithm_cost_is_monotone_in_the_obvious_places():
