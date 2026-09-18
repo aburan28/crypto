@@ -1,8 +1,11 @@
 {
   "candidates": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/next-candidates-single-target.json",
-  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/source",
+  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/source",
   "target_count": 1,
   "require_native_progress": true,
-  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count and metric gates, and choose a new campaign seed. A different target count is a separate workload panel.",
-  "comparison_kind": "fixed-support"
+  "panel": {
+    "cells": "13a0,17a1,19a0,23a0,23a1,31a0",
+    "holdout_cells": "19a1,29a1"
+  },
+  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count and metric gates, and choose a new campaign seed. Pass the same --cells/--holdout-cells as this round: reverting to the five-cell default would restore the strict win by dropping the cells that refute it. The open question round 0016 raises is the factor base, which is sized 6*degree and so does not grow with the subgroup: n23a1 has twice n23a0's subgroup at the same degree and the winner loses there, which is what a fixed factor base predicts."
 }

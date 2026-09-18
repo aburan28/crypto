@@ -51,6 +51,23 @@ rounds, and the reason the pre-registration gives is the process floor that is
 a third of every native measurement. The median complete one-target job is
 1.08 ms against rho's 1.19 ms.
 
+**Round-0016 then widened the panel, and the strict claim did not survive it.**
+Every round from 0006 to 0015 ran the same four cells plus one holdout — a panel
+that was inherited, never chosen. A census of every (degree, curve_a) pair the
+worker admits found seventeen usable cells, two of them never run, so round-0016
+re-ran the *unchanged* round-0015 executables on eight: 0.8383 (0.7479–0.9420)
+of rho's instructions and 0.9779 (0.9339–1.0288) of its native time, with the
+winner losing to rho outright at n23a1 (subgroup 4,196,903, instructions 1.0656)
+and at n29a1 (native 1.0905). `beats_rho_strict` is false there for the first
+time since round-0013. The same frozen receipts restricted to the legacy five
+cells still pass strictly (0.9341 native, 0.9118–0.9653, every cell below one),
+so the difference is the panel and not the code, and **every strict-win
+statement above is scoped to those five cells**. The likely mechanism is that
+the factor base is sized 6·degree and does not grow with the subgroup, while
+rho's cost grows as its square root: n23a1 has twice n23a0's subgroup at the
+same degree and the same 138-point factor base, and that is exactly where the
+winner flips from 0.898 to 1.066.
+
 All 19,176 new profiled trials and their paired native runs verified. The
 earlier [single-target continuation](single_target_20260916/RESULTS.md) adds three audited precursor rounds
 (4,680 receipts: 4,662 verified solves and 18 retained smoke rejections). The

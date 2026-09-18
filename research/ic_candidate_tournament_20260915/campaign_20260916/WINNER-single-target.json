@@ -908,5 +908,268 @@
       }
     }
   },
-  "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw."
+  "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw. Round 0016 widened the panel to eight cells and beats_rho_strict came back FALSE: the winner loses to rho outright at n23a1 (instructions 1.0656) and at n29a1 (native 1.0905), and the panel-wide native upper limit is 1.0288. The same receipts restricted to the legacy five cells still pass strictly (native 0.9341, upper 0.9653, every cell below one), so every strict-win record above -- round 0013 included -- is scoped to that five-cell panel and must not be restated at family level. The record pointer is left at round-0013 because it names the best five-cell measurement, not because the claim survives a wider panel.",
+  "round_0016": {
+    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
+    "status": "retained",
+    "panel": {
+      "cells": [
+        "n13a0",
+        "n17a1",
+        "n19a0",
+        "n23a0",
+        "n23a1",
+        "n31a0"
+      ],
+      "holdout_cells": [
+        "n19a1",
+        "n29a1"
+      ],
+      "confirmation_cases": 96,
+      "changed_from": "five cells (n13a0, n17a1, n19a0, n23a0 + n19a1 holdout), rounds 0006-0015"
+    },
+    "what_changed": "no source in either arm: both are the byte-identical trees round 0015 sealed, so every difference from round 0015 belongs to the panel or to fresh fixtures. The PANEL changed, for the first time since round 0006. tournament.py gained --cells and --holdout-cells (defaults reproduce the rounds 0006-0015 panel exactly) and this round ran eight confirmation cells instead of five, adding n23a1 (subgroup 4,196,903, twice the largest cell previously tested), n31a0 at the highest usable degree, and n29a1 as a second holdout. A census of every (degree, curve_a) pair the worker admits found seventeen usable cells; degrees 21, 25 and 27 have no usable subgroup at either a, so 31 is the top of the family rather than the next rung.",
+    "headline": "beats_rho_strict is FALSE on the widened panel, for the first time since round 0013. The same receipts restricted to the legacy five cells still pass it. The strict win was a property of the panel, not of the algorithm.",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/source",
+    "patches_from_round_0015_source": [],
+    "challenger_patches": [
+      "campaign_20260916/round15-scan.patch",
+      "campaign_20260916/round15-fastio.patch"
+    ],
+    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/decision.json",
+    "rho_parity": true,
+    "beats_rho_instructions_point": true,
+    "beats_rho_strict": false,
+    "rho_over_winner": 1.192874511885588,
+    "winner_over_rho_confirmation": {
+      "candidate_over_baseline": 0.83831114676035,
+      "ci95": [
+        0.747866139139291,
+        0.9420452776988771
+      ],
+      "native_wall_candidate_over_baseline": 0.9778805273908171,
+      "native_wall_ci95": [
+        0.9338506276887212,
+        1.0288208398184095
+      ],
+      "per_cell": {
+        "n13a0": 0.7891099022162837,
+        "n17a1": 0.7248216405450234,
+        "n19a0": 0.6692179141950286,
+        "n19a1": 0.7745923196593695,
+        "n23a0": 0.8978744225205727,
+        "n23a1": 1.0655652095395407,
+        "n29a1": 1.030925246907129,
+        "n31a0": 0.8340838840882753
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.9115260986251638,
+        "n17a1": 0.930176179021046,
+        "n19a0": 0.9297204427141912,
+        "n19a1": 0.9230185798476568,
+        "n23a0": 0.9771501952681292,
+        "n23a1": 1.0586257995453932,
+        "n29a1": 1.0904880344351338,
+        "n31a0": 1.0187427668107298
+      }
+    },
+    "winner_over_rho_replay": {
+      "candidate_over_baseline": 0.8383035602647319,
+      "ci95": [
+        0.7478521099449237,
+        0.9420334329845709
+      ],
+      "native_wall_candidate_over_baseline": 0.9482313595668521,
+      "native_wall_ci95": [
+        0.9034677107711173,
+        0.998022604447831
+      ],
+      "per_cell": {
+        "n13a0": 0.7891033898065052,
+        "n17a1": 0.7248043755393284,
+        "n19a0": 0.6692109464713168,
+        "n19a1": 0.774597503738729,
+        "n23a0": 0.89784175517525,
+        "n23a1": 1.06556513560274,
+        "n29a1": 1.0309144940292703,
+        "n31a0": 0.8340924561542631
+      },
+      "native_wall_per_cell": {
+        "n13a0": 0.8800337267085385,
+        "n17a1": 0.8840341704741222,
+        "n19a0": 0.8745305913470791,
+        "n19a1": 0.9285570259066868,
+        "n23a0": 0.9466652944297197,
+        "n23a1": 1.0368196167152641,
+        "n29a1": 1.026445481165334,
+        "n31a0": 1.0268972933367952
+      }
+    },
+    "cells_where_the_winner_loses_to_rho": {
+      "instructions": {
+        "n23a1": 1.0655652095395407,
+        "n29a1": 1.030925246907129
+      },
+      "native": {
+        "n23a1": 1.0586257995453932,
+        "n29a1": 1.0904880344351338,
+        "n31a0": 1.0187427668107298
+      }
+    },
+    "legacy_five_cell_subset_of_these_receipts": {
+      "cells": [
+        "n13a0",
+        "n17a1",
+        "n19a0",
+        "n19a1",
+        "n23a0"
+      ],
+      "purpose": "the same frozen receipts restricted to the rounds 0006-0015 panel, so the eight-cell verdict and the five-cell one are read side by side",
+      "incumbent_over_rho": {
+        "candidate_over_baseline": 0.767441000826205,
+        "ci95": [
+          0.7012914895717608,
+          0.855889186367098
+        ],
+        "native_wall_candidate_over_baseline": 0.9340533740904756,
+        "native_wall_ci95": [
+          0.9117856762213744,
+          0.965254188565241
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.9115260986251638,
+          "n17a1": 0.930176179021046,
+          "n19a0": 0.9297204427141912,
+          "n19a1": 0.9230185798476568,
+          "n23a0": 0.9771501952681292
+        },
+        "per_cell": {
+          "n13a0": 0.7891099022162837,
+          "n17a1": 0.7248216405450234,
+          "n19a0": 0.6692179141950286,
+          "n19a1": 0.7745923196593695,
+          "n23a0": 0.8978744225205727
+        }
+      },
+      "scan_io_over_incumbent": {
+        "candidate_over_baseline": 0.9055858786101901,
+        "ci95": [
+          0.8792845267591635,
+          0.9271128142999386
+        ],
+        "native_wall_candidate_over_baseline": 0.9857573208664466,
+        "native_wall_ci95": [
+          0.9675006179808505,
+          1.0065477009436978
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.971609579694721,
+          "n17a1": 0.9765996263169431,
+          "n19a0": 0.9792514177703967,
+          "n19a1": 0.9857335804096767,
+          "n23a0": 1.016220503231187
+        },
+        "per_cell": {
+          "n13a0": 0.9403441879423585,
+          "n17a1": 0.9156684737635247,
+          "n19a0": 0.9113309848077052,
+          "n19a1": 0.9029391835972258,
+          "n23a0": 0.8595842821750695
+        }
+      },
+      "scan_io_over_rho": {
+        "candidate_over_baseline": 0.6949837330146825,
+        "ci95": [
+          0.6385755749688302,
+          0.7602338646900942
+        ],
+        "native_wall_candidate_over_baseline": 0.9207499515896921,
+        "native_wall_ci95": [
+          0.8946021079442085,
+          0.9636374733614804
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 0.8856474895659641,
+          "n17a1": 0.9084097088408755,
+          "n19a0": 0.9104300616579927,
+          "n19a1": 0.9098504094978858,
+          "n23a0": 0.9930000631678308
+        },
+        "per_cell": {
+          "n13a0": 0.7420349101968453,
+          "n17a1": 0.6636963253486355,
+          "n19a0": 0.6098790207943138,
+          "n19a1": 0.6994097567339124,
+          "n23a0": 0.7717987409657016
+        }
+      }
+    },
+    "controls_over_incumbent": {
+      "scan_io": {
+        "confirmation": {
+          "candidate_over_baseline": 0.8872690528573522,
+          "ci95": [
+            0.86443096699722,
+            0.9093386210939163
+          ],
+          "native_wall_candidate_over_baseline": 0.9780434377558893,
+          "native_wall_ci95": [
+            0.960814677461623,
+            0.9947467695163384
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.971609579694721,
+            "n17a1": 0.9765996263169431,
+            "n19a0": 0.9792514177703967,
+            "n19a1": 0.9857335804096767,
+            "n23a0": 1.016220503231187,
+            "n23a1": 0.9646245204251439,
+            "n29a1": 0.9505737086050502,
+            "n31a0": 0.9810044939963461
+          }
+        },
+        "replay": {
+          "candidate_over_baseline": 0.8872703726659092,
+          "ci95": [
+            0.8644310955934759,
+            0.9093410947506849
+          ],
+          "native_wall_candidate_over_baseline": 0.9870630056558192,
+          "native_wall_ci95": [
+            0.972057558633584,
+            1.0034028800015453
+          ],
+          "native_wall_per_cell": {
+            "n13a0": 0.9600623382693132,
+            "n17a1": 1.0033390686693617,
+            "n19a0": 0.9912130695545174,
+            "n19a1": 0.9823889938045406,
+            "n23a0": 0.9851076708164385,
+            "n23a1": 0.973367148868979,
+            "n29a1": 1.0231825640257608,
+            "n31a0": 0.9791468262326045
+          }
+        }
+      }
+    },
+    "median_complete_job_confirmation": {
+      "incumbent": {
+        "instructions": 1948049.5,
+        "native_ms": 1.262,
+        "receipts": 288
+      },
+      "scan_io": {
+        "instructions": 1723525.0,
+        "native_ms": 1.242,
+        "receipts": 288
+      },
+      "rho": {
+        "instructions": 1996379.0,
+        "native_ms": 1.286,
+        "receipts": 288
+      }
+    }
+  }
 }
