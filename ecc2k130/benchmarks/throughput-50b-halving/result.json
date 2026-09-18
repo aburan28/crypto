@@ -1,0 +1,38 @@
+{
+  "classification": "primitive engineering; 50 B/s target not met",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "target": 50.0,
+  "lambda_halving": {
+    "samples": [29.010, 29.095, 29.053],
+    "median": 29.053,
+    "ratio_to_target": 0.58106,
+    "products": 1,
+    "clmad_per_halving": 14,
+    "threads_per_block": 1024,
+    "blocks_per_sm": 1,
+    "correctness": "512/512 subgroup points; zero mismatches"
+  },
+  "clmad_issue_ceiling": {
+    "rate_billion_per_second": 54.2729143,
+    "assumptions": "1.684 lanes/SM-clock, 188 SMs, 2.4 GHz, 14 CLMAD/half, every other operation free",
+    "target_utilization_required": 0.9212699
+  },
+  "ideal_mixed_model": {
+    "addition_rate": 20.1343255,
+    "halving_rate": 29.053,
+    "addition_rules": 128,
+    "optimal_halving_probability": 0.31071,
+    "raw_rate": 22.2572582,
+    "randomness_factor": 1.0542405,
+    "effective_rate": 21.1121259,
+    "excluded_costs": "lambda/affine conversion, GPU dispatch/compaction, cycle detection and restart"
+  },
+  "fruitless_cycle_status": {
+    "mixed_gpu_walk_implemented": false,
+    "existing_addition_guard": "exact 2- and 4-cycle tag rejection",
+    "required_before_claim": "mixed-rule replay plus exact cycle detection/restart and exhaustive small-curve cycle audit",
+    "zero_cycles_possible": false,
+    "reason": "every deterministic map on a finite state space is eventually periodic"
+  }
+}
