@@ -1,5 +1,6 @@
 {
   "status": "complete-map-poly12-15b-benchmark-screen",
+  "collision_work_ratio_vs_selected": 1.1334840381540499,
   "generic_work_boundary": "sqrt(n/262) times collision work",
   "full_dlp_S": null,
   "rows": [
@@ -52,7 +53,11 @@
       ],
       "rate_over_10b": 1.3010085999999998,
       "rate_over_12b": 1.0841738333333333,
-      "rate_over_15b": 0.8673390666666666
+      "rate_over_15b": 0.8673390666666666,
+      "collision_adjusted_paired_95_ci": [
+        0.9026720342032178,
+        0.9383563940021908
+      ]
     }
   ],
   "decision": "product+inverse ceiling below 15.5 B/s; 15 B/s is not available on this common path",

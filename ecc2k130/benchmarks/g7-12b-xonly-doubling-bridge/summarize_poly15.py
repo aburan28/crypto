@@ -40,6 +40,8 @@ def summarize(prefix, labels, base_label, status):
     trial100 = collision.get("trials_100") or {}
     trial2000 = collision.get("trials_2000") or {}
     work_ratio = trial2000.get("work_ratio")
+    if work_ratio is None:
+        work_ratio = trial100.get("work_ratio")
     result = {
         "status": status,
         "collision_work_ratio_vs_selected": work_ratio,
