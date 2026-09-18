@@ -75,6 +75,7 @@ CREATE INDEX IF NOT EXISTS rho_dp_recent_found_at
 
 CREATE OR REPLACE FUNCTION rho_dp_rollup_insert() RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = public
 AS $fn$
 BEGIN

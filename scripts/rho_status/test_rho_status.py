@@ -165,6 +165,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("CREATE TRIGGER", ENSURE_SQL)
         self.assertIn("rho_dp_rollup_insert", ENSURE_SQL)
         self.assertIn("ON distinguished_points", ENSURE_SQL)
+        # Ingest INSERTs fire this as the rho/dp-rds role, which is not the
+        # walker DATABASE_URL role that creates the rollup tables.
+        self.assertIn("SECURITY DEFINER", ENSURE_SQL)
         self.assertGreaterEqual(BACKFILL_SQL.count("{{campaign}}"), 1)
         self.assertIn("{{campaign}}", READ_SQL)
         with open(os.path.join(HERE, "snapshot.py"), encoding="utf-8") as fh:
