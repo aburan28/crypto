@@ -197,6 +197,14 @@ def main():
     frozen_write(root/'admission.json', {'stage':'smoke', 'tables':admission,
         'rule':'A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.'})
     winner=result['winner'] or 'none (inconclusive)'
+    # Counted from the round's own frozen fixtures rather than stated: the panel
+    # is chosen per round since round 0016 (--cells/--holdout-cells), so a fixed
+    # number here would publish a false one for every round that is not the
+    # five-cell pilot. Older rounds have no `cells` in their contract and count
+    # the same way, so their regenerated reports are unchanged in substance.
+    confirmation = read(root/'fixtures.json')['confirmation']
+    confirmation_cases = len(confirmation)
+    confirmation_cells = len({case['cell'] for case in confirmation})
     text=[f'# IC candidate tournament: {root.name}', '',f"Decision: **{result['status']} — {winner}**.",'',
           'This round compares complete cold Koblitz ECDLP recovery in fixed-compiler amd64 user-space instruction reads (Ir).',
           'Every admitted run includes setup, failed attempts, relation and log verification, scalar linear algebra, descent and final scalar verification.','']
@@ -209,7 +217,10 @@ def main():
              'Repetitions are grouped within fixtures; intervals resample curve cells and their targets.', '',
              'The operation unit is explicit and unconverted to curve additions. Kernel/device work, profiler execution and external audit work are outside it. Native timings use separate scope and confidence rules from the contract.', '',
              'The floor is deliberately weak: the implemented K-column full-rank collector needs at least K relation-producing trials and at least K instructions. It does not establish a non-generic advance.', '',
-             'The ordinary WDSat corpus is inapplicable to this point-base API. This campaign uses matched complete-DLP fixtures and an independent point/rank checker; the pilot confirmation includes 60 fresh inputs, both IC arms, rho and three repetitions.', '',
+             'The ordinary WDSat corpus is inapplicable to this point-base API. This campaign uses '
+             'matched complete-DLP fixtures and an independent point/rank checker; this round\'s '
+             f'confirmation includes {confirmation_cases} fresh inputs over {confirmation_cells} curve cells, '
+             'both IC arms, rho and three repetitions.', '',
              f"Observed rho/winner instruction ratio: **{fmt(result.get('rho_over_winner'))}**. "
              'A value below one means rho costs less. This is not an extrapolated crossover.', '']
     text += ['## Smoke admission (all candidates)', '', markdown_table(admission), '',
