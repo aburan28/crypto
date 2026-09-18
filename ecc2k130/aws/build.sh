@@ -61,9 +61,14 @@ case " $ARCHES " in
     *) clmadDefault=1 ;;
 esac
 CLMAD=${CLMAD:-$clmadDefault}
+INLINE_POLY=${INLINE_POLY:-0}
 if [ "$CLMAD" != 0 ] && [ "$CLMAD" != 1 ]; then
     echo "CLMAD must be 0 or 1" >&2; exit 2
 fi
+case "$INLINE_POLY" in
+    0|1|2|3) ;;
+    *) echo "INLINE_POLY must be in [0,3]" >&2; exit 2 ;;
+esac
 CUDA_IMAGE=${CUDA_IMAGE:-nvidia/cuda:13.3.1-devel-ubuntu24.04}
 SRC=${1:?source: s3 key of a push_source.sh tarball, or a local ecc2k130 directory}
 
@@ -92,7 +97,8 @@ esac
 knobs="BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=$CLMAD PACKED_STATE_TILE=256 \
-PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=$walkTable TABLE_BRANCHES=8"
+PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 PACKED_INLINE_POLY=$INLINE_POLY \
+WALK_TABLE=$walkTable TABLE_BRANCHES=8"
 # The fixtures must be built with the arithmetic they are meant to check, so
 # take their -D flags from the knobs above rather than from a second list.
 defs="-DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0"

@@ -1,0 +1,37 @@
+{
+  "classification": "compatible kernel engineering",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "live_campaign": {
+    "walk": "sigma",
+    "batch": 16,
+    "blockThreads": 256,
+    "minBlocks": 2,
+    "workers": 385024,
+    "kernelVersion": 2,
+    "binaryKey": "bin/099f7b6bfc6f322c/ecc2k130",
+    "checkpoint_bytes": 48137652960,
+    "dp_bytes": 6061204928
+  },
+  "equal_updates_per_sample": 50465865728,
+  "baseline": {
+    "samples": [14.459237, 14.464916, 14.444165, 14.384217, 14.373804, 14.365194],
+    "median": 14.414191
+  },
+  "candidate": {
+    "change": "PACKED_INLINE_POLY=3",
+    "samples": [14.946950, 14.919466, 14.855282, 14.854237, 14.787038, 14.783897],
+    "median": 14.8547595,
+    "ratio_to_baseline": 1.0305649,
+    "paired_ratios": [1.0337302, 1.0314243, 1.0284625, 1.0326761, 1.0287491, 1.0291470],
+    "paired_geometric_mean": 1.0306962,
+    "paired_95_percent_t_interval": [1.0283606, 1.0330371],
+    "correctness": "300/300 reports replayed, zero dropped",
+    "registers": 91
+  },
+  "rejected_bundle": {
+    "median": 14.387428,
+    "knobs": "INLINE_POLY=3, PAIR_ILP=1, PAIR_CLMUL=1, L2_PERSIST=1, FROM_REDUCED=1, UNROLL_SLOTS=2, ALU_SQUARE=1"
+  },
+  "compatibility": "walk and frozen checkpoint geometry unchanged"
+}
