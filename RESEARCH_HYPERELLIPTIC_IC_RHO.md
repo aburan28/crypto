@@ -552,3 +552,84 @@ toy sizes, on one machine. It would *not* be a statement about
 cryptographic-size Jacobians, where the `O(p)` factor-base build alone is
 prohibitive and everything here would have to be rebuilt. The honest claim
 available from this design is about the shape of the curve, not its position.
+
+## Round five: measured
+
+`cargo run --release --example hyperelliptic_ic_vs_rho`, then
+`python3 scripts/hyperelliptic_exponent_fit.py`. Evidence:
+`experiments/hyperelliptic_exponent_fit.json`. Every row returned its verified
+`k`. `S_rho*` is rho with its walk renormalised to `sqrt(pi/2)`, per the
+correction pre-registered above; `corr` is the conservative column and the one
+to read.
+
+| `g` | `p` | `N` | `S_ic` | `S_rho` | raw | `S_walk` | `S_rho*` | **corr** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 3 | 61 | 124,459 | 1.51 | 2.30 | 0.66 | 1.48 | 2.07 | 0.73 |
+| 3 | 101 | 364,747 | 1.12 | 1.90 | 0.59 | 1.41 | 1.74 | 0.64 |
+| 3 | 151 | 1,180,351 | 0.79 | 1.98 | 0.40 | 1.71 | 1.52 | 0.52 |
+| 3 | 211 | 4,620,611 | 0.53 | 1.96 | 0.27 | 1.82 | 1.39 | 0.38 |
+| 4 | 31 | 239,753 | 1.77 | 1.90 | 0.93 | 1.30 | 1.85 | 0.95 |
+| 4 | 41 | 333,041 | 1.41 | 1.86 | 0.76 | 1.34 | 1.77 | 0.80 |
+| 4 | 61 | 16,790,591 | 0.28 | 2.17 | 0.13 | **2.10** | 1.32 | **0.21** |
+
+**The law holds at all three genera**, fitted against `log2 N`:
+
+| `g` | predicted `1/g − 1/2` | corrected slope | `R²` |
+|--:|--:|--:|--:|
+| 2 | 0.000 | −0.027 | 0.24 (no trend) |
+| 3 | −0.167 | **−0.154** | 0.98 |
+| 4 | −0.250 | **−0.275** | 0.96 |
+
+### The pre-registered fit was against the wrong variable, and that is my error
+
+Round five above predicted slopes against `log2 p` of `1 − g/2`, and genus 4
+missed badly: −1.611 corrected against −1.0, outside the ±0.25 band. The law
+is not wrong; the step from `N` to `p` is. `N ≈ p^g` is an assumption the
+harness does not satisfy — it selects a prime-order subgroup above `lo/4`, and
+the measured scaling is
+
+    N ~ p^1.91 (g=2),   p^3.20 (g=3),   **p^5.94 (g=4)**
+
+At genus 4 that inflates the p-slope by `5.94/4`, predicting `−0.25 × 5.94 =
+−1.485` against the measured −1.611. Restated in the variable the law is
+actually about — rho costs `√N` whatever the genus —
+
+    S_ic / S_rho  ∝  g! · N^{1/g − 1/2}
+
+every genus lands inside the band, at `R² = 0.96–0.98` where there is a trend
+to fit. The `log2 N` fit is now the primary one and the `log2 p` fit is kept
+beside it, because the discrepancy between them *is* the finding about the
+harness.
+
+### The reference degrades, and the correction is doing real work
+
+The pre-registered falsification condition on `S_walk` fired on three rows:
+genus 3 at `p = 151, 211` (1.71, 1.82) and genus 4 at `p = 61` (**2.10**),
+against the `1.2533` ideal. The drift is systematic in `N`, not noise, and
+genus 2 stays flat near 1.3 — so it is not a constant implementation tax, it
+is a reference that gets worse exactly where the interesting rows are. That
+direction flatters index calculus, so the raw column overstates the result.
+
+The single best row is the clearest case: genus 4, `p = 61`, `N = 2^24`. Raw
+ratio 0.13 — a 7.7× win. With rho's walk renormalised, 0.21 — a 4.8× win. The
+correction nearly halves the claim, and that row's `S_walk` is 68% above ideal,
+so it is also the row whose correction is least trustworthy. **0.21 is the
+number to quote, and the reference needs fixing before it is quoted hard.**
+
+### Where this leaves the thread
+
+Index calculus beats a real distinguished-point rho at genus 3 and genus 4, on
+the conservative accounting, by up to 4.8× at `N = 2^24`, with a measured
+exponent matching the derived law to within 0.025. That is a crossover with a
+slope, not two lucky rows — which is what round five set out to decide.
+
+It remains a statement about toy sizes and one machine. `p ≤ 251`, `N ≤ 2^24`,
+full degree-1 factor base, and the `O(p)` factor-base build that dominates at
+cryptographic size is not modelled here at all.
+
+**Next, in order.** (1) Fix the DP walk so `S_walk` stays near 1.2533 as `N`
+grows, and re-measure — the correction should then be a no-op, and if the
+crossover survives an uncorrected reference it is no longer arguable. (2) Push
+genus 4 past `N = 2^24`, where the law predicts the ratio keeps falling as
+`N^{−0.25}`. (3) Only then ask what any of it costs at a size anyone cares
+about.
