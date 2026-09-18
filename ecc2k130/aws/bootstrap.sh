@@ -9,10 +9,14 @@
 # client is a static-cudart binary built by build.sh from CUDA 13.3, which the
 # 580 driver runs under CUDA 13.x minor-version compatibility because the build
 # carries native sm_120 code and never needs the PTX JIT.  If the campaign has
-# no published binary yet, this instance builds it (Docker, ~10 minutes) from
-# the source tarball push_source.sh uploaded, so a pilot needs no interactive
-# access.  The GPU fixtures must pass, and must report the preset's arithmetic,
-# before any worker starts.
+# no published binary yet, or the published prefix is missing a GPU fixture,
+# this instance builds it (Docker, ~10 minutes) from the source tarball
+# push_source.sh uploaded, so a pilot needs no interactive access.  A present
+# client with a 404 fixture is the same failure as a missing client: the
+# 2026-09-17 fleet died on exactly that (binaryKey existed, test-packed-
+# storage-cuda did not) because the old gate treated it as fatal.  The GPU
+# fixtures must pass, and must report the preset's arithmetic, before any
+# worker starts.
 # One systemd unit per GPU runs worker.py; logs are copied to S3 every
 # five minutes so the campaign can be watched without ssh.
 
@@ -30,8 +34,15 @@ cd "$ROOT"
 TOKEN=$(curl -s -m 2 -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 300")
 IID=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 IID=${IID:-unknown}
+CLAIMED_BUILD=0
 shipLog() { aws s3 cp /var/log/ecc2k130-bootstrap.log "s3://$BUCKET/logs/$IID/bootstrap.log" --only-show-errors; }
-trap shipLog EXIT
+onExit() {
+    if [ "$CLAIMED_BUILD" = 1 ]; then
+        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
+    fi
+    shipLog
+}
+trap onExit EXIT
 echo "instance $IID"
 
 # The driver can still be loading right after boot.
@@ -45,28 +56,119 @@ nvidia-smi --query-gpu=name,driver_version,clocks.max.sm,power.limit --format=cs
 
 aws s3 cp "s3://$BUCKET/campaign.json" campaign.json || { echo "no campaign.json in s3://$BUCKET"; exit 1; }
 field() { python3 -c 'import json,sys; print(json.load(open("campaign.json")).get(sys.argv[1], ""))' "$1"; }
-BIN=$(field binaryKey)
-if [ -z "$BIN" ] || ! aws s3api head-object --bucket "$BUCKET" --key "$BIN" >/dev/null 2>&1; then
+FIXTURES="test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda"
+
+s3_has() { aws s3api head-object --bucket "$BUCKET" --key "$1" >/dev/null 2>&1; }
+prefix_complete() {
+    local bin=$1 prefix f
+    [ -n "$bin" ] || return 1
+    s3_has "$bin" || return 1
+    prefix=$(dirname "$bin")
+    for f in $FIXTURES; do
+        s3_has "$prefix/$f" || return 1
+    done
+    return 0
+}
+
+# This GPU's compute capability as the nvcc sm_ number (8.9 -> 89, 12.0 -> 120).
+local_cc() {
+    nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | awk -F. '{printf "%s%s\n", $1, $2}'
+}
+
+# The published client is a native-only fat binary (no PTX). An sm_120-only
+# prefix is complete for g7e and unloadable on g6/g6e; rebuild rather than
+# start a worker that will die at the first CUDA launch.
+prefix_usable() {
+    local bin=$1 prefix cc
+    prefix_complete "$bin" || return 1
+    prefix=$(dirname "$bin")
+    cc=$(local_cc)
+    [ -n "$cc" ] || return 1
+    aws s3 cp "s3://$BUCKET/$prefix/manifest.json" manifest.json --only-show-errors || return 1
+    python3 -c '
+import json, sys
+cc = sys.argv[1]
+arches = [str(a) for a in json.load(open("manifest.json")).get("arches", [])]
+raise SystemExit(0 if cc in arches else 1)
+' "$cc"
+}
+
+build_from_source() {
+    local SRC
     SRC=$(field sourceKey)
-    [ -n "$SRC" ] || { echo "no published binary and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
-    echo "no published binary; building from $SRC"
+    [ -n "$SRC" ] || { echo "published prefix incomplete and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
+    # Fat client so g4dn (sm_75), g6/g6e (sm_89) and g7e (sm_120) share one
+    # binaryKey. A thin Ada/T4 rebuild would point the live campaign at a
+    # binary Blackwell cannot load. CLMAD stays 1 even with 75 in ARCHES:
+    # Turing uses the software product in that slice; Ada/Blackwell keep
+    # the receipt. build.sh would otherwise default CLMAD=0 and slow the fleet.
+    export ARCHES="${ARCHES:-75 89 120}"
+    export CLMAD="${CLMAD:-1}"
+    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES CLMAD=$CLMAD from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
-    BUCKET=$BUCKET ./build.sh "$SRC" || { echo "build failed"; exit 1; }
+    aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
+    BUCKET=$BUCKET ARCHES="$ARCHES" CLMAD="$CLMAD" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
+}
+
+BIN=$(field binaryKey)
+if ! prefix_usable "$BIN"; then
+    claim_out=$(aws s3api put-object --bucket "$BUCKET" --key "bin/.building" --body /dev/null --if-none-match "*" 2>&1)
+    claim_rc=$?
+    if [ "$claim_rc" -eq 0 ]; then
+        CLAIMED_BUILD=1
+        echo "claimed the build lock; compiling from sourceKey"
+        build_from_source
+        CLAIMED_BUILD=0
+        aws s3 rm "s3://$BUCKET/bin/.building" --only-show-errors || true
+    elif echo "$claim_out" | grep -qE 'PreconditionFailed|412'; then
+        echo "another instance is publishing the prefix; waiting for a client this GPU can load"
+        for i in $(seq 1 40); do
+            aws s3 cp "s3://$BUCKET/campaign.json" campaign.json --only-show-errors || true
+            BIN=$(field binaryKey)
+            prefix_usable "$BIN" && break
+            sleep 30
+        done
+        if ! prefix_usable "$BIN"; then
+            echo "waited 20 minutes; prefix still unusable on this GPU; building anyway"
+            build_from_source
+        fi
+    else
+        echo "build lock unavailable; building from sourceKey"
+        echo "$claim_out"
+        build_from_source
+    fi
+    BIN=$(field binaryKey)
+    prefix_usable "$BIN" || { echo "build did not publish a client this GPU can load; not starting workers"; exit 1; }
 fi
 PREFIX=$(dirname "$BIN")
-FIXTURES="test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda"
 aws s3 cp "s3://$BUCKET/$BIN" ecc2k130 --only-show-errors || { echo "client binary $BIN missing"; exit 1; }
 for f in $FIXTURES; do
     aws s3 cp "s3://$BUCKET/$PREFIX/$f" "$f" --only-show-errors \
-        || { echo "fixture $f missing from $PREFIX; not starting workers"; exit 1; }
+        || { echo "fixture $f missing from $PREFIX after rebuild; not starting workers"; exit 1; }
 done
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
+# Host binary walks on spare instance CPUs alongside the GPU workers.
+HOST_BIN=$(field hostBinaryKey)
+HOST_SHA=$(field hostBinarySha256)
+if [ -n "$HOST_BIN" ]; then
+    aws s3 cp "s3://$BUCKET/$HOST_BIN" ecc2k130-cpu --only-show-errors \
+        || { echo "host binary $HOST_BIN missing"; exit 1; }
+    chmod +x ecc2k130-cpu
+    if [ -n "$HOST_SHA" ]; then
+        got=$(sha256sum ecc2k130-cpu | cut -d' ' -f1)
+        if [ "$got" != "$HOST_SHA" ]; then
+            echo "host binary hash $got != campaign hostBinarySha256 $HOST_SHA"
+            exit 1
+        fi
+    fi
+fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
 chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib
 cat manifest.json 2>/dev/null
@@ -81,14 +183,12 @@ cat manifest.json 2>/dev/null
 # the markers are checked too.
 #
 # The carryless marker is the one that cannot be a constant.  On sm_120 a
-# CLMAD=0 build is the accident this gate exists to catch; on an Ada part
-# (sm_89, EC2 g6/g6e) it may be the CORRECT build, because clmad is bought with
-# a pipe balance measured only on Blackwell, and build.sh therefore defaults it
-# off for any pre-Blackwell ARCHES (../ADA-L4-L40S.md).  Hardcoding 1 here would
-# reject that binary and the fleet would never come up.  So take the expected
-# value from the manifest the build published: the gate still fails a binary
-# that disagrees with its own contract, which is what it is for, without also
-# deciding the tuning question.  A missing manifest keeps the old strict 1.
+# CLMAD=0 build is the accident this gate exists to catch. Ada (sm_89, EC2
+# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="75 89 120"
+# rebuild keeps CLMAD=1 (Turing uses the software product in its slice).
+# A software-product Ada client is still legal if its manifest says 0.
+# Hardcoding 1 here would reject that binary. Take the expected value from
+# the published manifest. A missing manifest keeps the old strict 1.
 expectedClmad=1
 if [ -s manifest.json ]; then
     expectedClmad=$(python3 - <<'EOF'
@@ -126,6 +226,10 @@ done
 echo "fixtures report the audited preset arithmetic"
 ./ecc2k130 --curve 131 --test 2>&1 | tail -n 12 || true
 
+# Pin family from the instance, not from a later IMDS/PATH miss inside systemd.
+ECC_INSTANCE_TYPE=$(curl -s -m 2 -H "X-aws-ec2-metadata-token: $TOKEN" \
+    http://169.254.169.254/latest/meta-data/instance-type || true)
+ECC_DEVICE_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1 || true)
 cat > /etc/ecc2k130.env <<EOF
 ECC_BUCKET=$BUCKET
 ECC_TABLE=$TABLE
@@ -133,7 +237,18 @@ AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 ECC_ROOT=$ROOT
 LD_LIBRARY_PATH=$ROOT/lib
 PYTHONUNBUFFERED=1
+ECC_INSTANCE_TYPE=$ECC_INSTANCE_TYPE
+ECC_DEVICE_NAME=$ECC_DEVICE_NAME
 EOF
+# The live campaign.json predates storageProtocol. worker.py refuses that
+# store unless this is set; CERTIFICATION.md forbids writing the strict
+# protocol onto an existing corpus. The 2026-09-17 afternoon fleet
+# bootstrapped, then crash-looped on exactly that gate, so the status
+# page stayed at the three g7s that still run the pre-gate worker.
+if [ -z "$(field storageProtocol)" ]; then
+    echo "ECC_ALLOW_LEGACY_STORAGE=1" >> /etc/ecc2k130.env
+    echo "campaign.json has no storageProtocol; allowing the live unversioned store"
+fi
 # systemd reads this as root; keep it unreadable to other local users since
 # it may carry the static keys below.
 chmod 600 /etc/ecc2k130.env
@@ -176,7 +291,7 @@ while true; do
     if curl -s -m 2 -f -H "X-aws-ec2-metadata-token: $TOKEN" \
             http://169.254.169.254/latest/meta-data/spot/instance-action >/dev/null; then
         logger -t ecc2k130 "spot interruption notice: stopping workers"
-        systemctl stop 'ecc2k130-worker@*'
+        systemctl stop 'ecc2k130-worker@*' ecc2k130-hostcpu.service 2>/dev/null || true
         exit 0
     fi
     sleep 5
@@ -199,7 +314,7 @@ EOF
 # Logs to S3 every five minutes: the only window into a fleet with no ssh.
 cat > "$ROOT/logship.sh" <<EOF
 #!/bin/bash
-journalctl -u 'ecc2k130-worker@*' -u ecc2k130-spot-watch --no-pager -n 600 > /tmp/ecc-worker.log 2>&1
+journalctl -u 'ecc2k130-worker@*' -u ecc2k130-hostcpu -u ecc2k130-spot-watch --no-pager -n 600 > /tmp/ecc-worker.log 2>&1
 aws s3 cp /tmp/ecc-worker.log "s3://$BUCKET/logs/$IID/worker.log" --only-show-errors
 aws s3 cp /var/log/ecc2k130-bootstrap.log "s3://$BUCKET/logs/$IID/bootstrap.log" --only-show-errors
 EOF
@@ -232,4 +347,44 @@ NGPU=$(nvidia-smi -L | wc -l)
 for g in $(seq 0 $((NGPU - 1))); do
     systemctl enable --now "ecc2k130-worker@$g"
 done
-echo "bootstrap done $(date -u): $NGPU worker(s) started"
+
+# Spare host CPUs: one ecc2k130-cpu walker beside the GPU clients. Leave two
+# vCPUs for the CUDA supervisors on typical 8-vCPU g7/g7e.2xlarge boxes.
+# Set ECC_HOST_CPU=0 in the launch env to skip.
+HOST_CPU=${ECC_HOST_CPU:-1}
+HOST_THREADS=0
+if [ "$HOST_CPU" = 1 ] && [ -x "$ROOT/ecc2k130-cpu" ]; then
+    NCPU=$(nproc)
+    if [ "$NCPU" -gt 2 ]; then HOST_THREADS=$((NCPU - 2)); else HOST_THREADS=1; fi
+    cat > /etc/systemd/system/ecc2k130-hostcpu.service <<EOF
+[Unit]
+Description=ECC2K-130 campaign worker on spare host CPUs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/ecc2k130.env
+Environment=ECC_DEVICE=cpu
+Environment=ECC_CLAIM_NEW=1
+Environment=ECC_THREADS=$HOST_THREADS
+Environment=ECC_CLIENT=$ROOT/ecc2k130-cpu
+Environment=ECC_GPU=0
+Environment=ECC_DEVICE_NAME=cpu/$HOST_THREADS@host
+WorkingDirectory=/opt/ecc2k130
+ExecStart=/usr/bin/python3 /opt/ecc2k130/worker.py
+Restart=on-failure
+RestartSec=120
+KillSignal=SIGTERM
+KillMode=mixed
+TimeoutStopSec=900
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable --now ecc2k130-hostcpu.service
+    echo "host-CPU worker started ($HOST_THREADS of $NCPU threads)"
+elif [ "$HOST_CPU" = 1 ]; then
+    echo "host binary missing; skipping spare-CPU worker"
+fi
+echo "bootstrap done $(date -u): $NGPU GPU worker(s) started, host-CPU threads=$HOST_THREADS"

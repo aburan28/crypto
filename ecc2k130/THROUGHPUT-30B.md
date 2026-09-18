@@ -206,7 +206,8 @@ only pays together with it. Lever 3 is larger than it looked: of `product131`'s
 the 4x4-word `clmad` product, and the product itself is 12. Moving that
 correction onto the carryless unit is `PACKED_TOP_CLMAD=1`: measured -5.4% of
 the routine ALU per update for +41% `clmad`s, predicted about +4% by the pipe
-model, unmeasured on a card.
+model, and **15% slower** on an RTX PRO 6000 (12.859 vs 15.116 B/s matched
+control). See [TOP-CLMAD.md](TOP-CLMAD.md). The default stays off.
 
 ## Reproducing
 

@@ -109,6 +109,10 @@ __global__ void k_weight(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
     (void)o; (void)h; (void)k;
     *w = weight(i[0]);
 }
+__global__ void k_mulOnb(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
+    (void)h; (void)w; (void)k;
+    *o = mulOnb131(i[0], i[1]);
+}
 __global__ void k_mulPair(P131 *o, const P131 *i, uint32_t *h, int *w, int k) {
     (void)h; (void)w; (void)k;
     PolynomialPair p = mulPolynomialPair131(i[0], i[1], i[2]);
@@ -224,7 +228,7 @@ def main():
     fn = functions(build(defs, a.arch, a.nvcc, work), a.cuobjdump)
 
     order = ["k_product", "k_productNoTop", "k_reduce", "k_fromPolyProduct", "k_mulPoly", "k_mulPair",
-             "k_mul", "k_inv", "k_sigmaWalk", "k_sigmaPair", "k_toPoly", "k_fromPoly", "k_sqr",
+             "k_mulOnb", "k_mul", "k_inv", "k_sigmaWalk", "k_sigmaPair", "k_toPoly", "k_fromPoly", "k_sqr",
              "k_sqrPoly", "k_add", "k_weight"]
     named = {}
     # Itanium mangling puts the name's length directly before it: _Z5k_mulP...

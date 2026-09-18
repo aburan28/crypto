@@ -15,6 +15,16 @@
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
 #   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
+#   PACKED_PAIR_ILP  independent buffers for the two paired products (default 0)
+#   PACKED_L2_PERSIST  one field blob + stream L2 persist window (default 0)
+#   PACKED_TOP_HOIST  hoisted 3-bit product correction, bit-identical (default 0)
+#   PACKED_ONB_INV  ONB two-product multiply inside inv131 (default 0)
+#   PACKED_FROM_REDUCED  5-word inverse of toPolynomial131 (default 0)
+#   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
+#   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
+#   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
+#   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
+#   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   ARCH     CUDA architectures
 
 MODAL   ?= modal
@@ -44,6 +54,8 @@ PACKED_PAIR_PRODUCTS ?= 0
 PACKED_POLY_STATE ?= 0
 PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
+# Bits: 1 inline single polynomial products, 2 inline paired products.
+PACKED_INLINE_POLY ?= 0
 PACKED_CLMAD ?= 0
 PACKED_CLMAD_SQUARE ?= 0
 PACKED_KARAT3 ?= 0
@@ -53,10 +65,27 @@ PACKED_SHARED_SIGMA ?= 0
 PACKED_TOP_CLMAD ?= 0
 PACKED_STATE_TILE ?= 0
 PACKED_ADD_COMBINE ?= 0
+PACKED_PAIR_ILP ?= 0
+UNROLL_SLOTS ?= 1
+PACKED_SLOT_PREFETCH ?= 0
+PACKED_SLOT_PIPELINE ?= 0
+PACKED_L2_PERSIST ?= 0
+PACKED_TOP_HOIST ?= 0
+PACKED_ONB_INV ?= 0
+PACKED_FROM_REDUCED ?= 0
+PACKED_CLMUL_FLAT ?= 0
+PACKED_PAIR_CLMUL ?= 0
+PACKED_ALU_SQR ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
+# Read the table from global memory instead of a per-block shared copy.
+# Drops the 48 KB smem tax so 80-register builds can resident 3 blocks on
+# this SKU's 100 KB/SM; random table lookups then miss the LDS pipe.
+TABLE_GLOBAL ?= 0
+# Hybrid: selection tables in shared, addend table in global.
+TABLE_ADDEND_GLOBAL ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -129,6 +158,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
+       -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) -DECC_PACKED_CLMAD_SQUARE=$(PACKED_CLMAD_SQUARE) -DECC_PACKED_KARAT3=$(PACKED_KARAT3) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
@@ -136,8 +166,21 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
+       -DECC_PACKED_PAIR_ILP=$(PACKED_PAIR_ILP) \
+       -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
+       -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
+       -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
+       -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
+       -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
+       -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
+       -DECC_PACKED_FROM_REDUCED=$(PACKED_FROM_REDUCED) \
+       -DECC_PACKED_CLMUL_FLAT=$(PACKED_CLMUL_FLAT) \
+       -DECC_PACKED_PAIR_CLMUL=$(PACKED_PAIR_CLMUL) \
+       -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
+       -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
@@ -248,6 +291,11 @@ trailforest: build/trailforest
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
+	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
+	python3 -m unittest discover -s aws -p test_worker_family.py -v
+	python3 -m unittest discover -s aws -p test_status_walks.py -v
+	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
+	python3 -m unittest discover -s aws -p test_rollout.py -v
 
 certify-local: ecc2k130-cpu build/test-production
 	python3 aws/certify.py --output build/certification-local.json
@@ -302,8 +350,20 @@ test-clmad:
 	mkdir -p build
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-clmad-host
 	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_CLMAD=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-topclmad-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_PAIR_ILP=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-pair-ilp-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_TOP_HOIST=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-top-hoist-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_ONB_INV=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-onb-inv-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_FROM_REDUCED=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-from-reduced-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_PAIR_ILP=1 -DECC_PACKED_PAIR_CLMUL=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-pair-clmul-host
+	$(CXX) -O2 -std=c++17 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_ALU_SQUARE=1 -DECC_PACKED_ALU_SQR=1 -Wno-unknown-pragmas src/testpacked.cpp -o build/test-packed-alu-sqr-host
 	./build/test-packed-clmad-host
 	./build/test-packed-topclmad-host
+	./build/test-packed-pair-ilp-host
+	./build/test-packed-top-hoist-host
+	./build/test-packed-onb-inv-host
+	./build/test-packed-from-reduced-host
+	./build/test-packed-pair-clmul-host
+	./build/test-packed-alu-sqr-host
 
 test-clmad-square:
 	python3 -m unittest discover -s codegen -p testclmad.py
@@ -348,6 +408,10 @@ test-table-walk-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
+	./build/test-table-walk-cuda-addend-global
 
 test-timing:
 	mkdir -p build
@@ -431,6 +495,8 @@ RTX_PRO6000_SHARED_SIGMA ?= 1
 RTX_PRO6000_TOP_CLMAD ?= 0
 RTX_PRO6000_CLMAD_SQUARE ?= 0
 RTX_PRO6000_KARAT3 ?= 0
+RTX_PRO6000_WALK_TABLE ?= 0
+RTX_PRO6000_TABLE_PIVOT_BYTES ?= 0
 RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
                  ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
@@ -441,7 +507,9 @@ RTX_PRO6000_ENV = ECC_GPU=RTX-PRO-6000 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SHARED_SIGMA=$(RTX_PRO6000_SHARED_SIGMA) \
                  ECC_PACKED_TOP_CLMAD=$(RTX_PRO6000_TOP_CLMAD) \
                  ECC_PACKED_CLMAD_SQUARE=$(RTX_PRO6000_CLMAD_SQUARE) \
-                 ECC_PACKED_KARAT3=$(RTX_PRO6000_KARAT3)
+                 ECC_PACKED_KARAT3=$(RTX_PRO6000_KARAT3) \
+                 ECC_WALK_TABLE=$(RTX_PRO6000_WALK_TABLE) \
+                 ECC_TABLE_PIVOT_BYTES=$(RTX_PRO6000_TABLE_PIVOT_BYTES)
 
 bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
@@ -449,17 +517,12 @@ bench-rtx-pro6000:
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
-# It is the RTX PRO 6000 preset with ONE knob moved: PACKED_CLMAD.  Every other
-# option here is a field-arithmetic or storage choice and transfers across GPU
-# models, which is why benchmarks/rtx-pro4500/run.sh reuses them verbatim.
-# CLMAD does not transfer: it is bought with a pipe balance measured only on
-# sm_120 (87.3% ALU against 51.4% on the carryless pipe), at a price of ~37.7
-# ALU ops per carryless op.  Ada divides its units differently and no
-# measurement in this tree covers it, so the default is the software path and
-# ADA_CLMAD=1 is the A/B arm benchmarks/ada/run.sh measures.  See ADA-L4-L40S.md.
+# It is the RTX PRO 6000 arithmetic/storage preset. CLMAD is on: the
+# preblackwell receipt measured 1.811× on L40S and 1.881× on L4 against the
+# software product. ADA_CLMAD=0 is the superseded before-arm.
 ADA_GPU ?= L40S
 ADA_CUDA ?= 13.3.1
-ADA_CLMAD ?= 0
+ADA_CLMAD ?= 1
 ADA_COMPACT_STATE ?= 1
 ADA_SHARED_SIGMA ?= 1
 ADA_ENV = ECC_GPU=$(ADA_GPU) ECC_CUDA_VERSION=$(ADA_CUDA) \
@@ -481,10 +544,61 @@ bench-ada-modal:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3
 
+# Instance-type aliases. g6 is L4, g6e is L40S, both sm_89. Workers stay
+# automatic. CLMAD defaults on after the preblackwell receipt.
+bench-g6-modal:
+	$(MAKE) bench-ada-modal ADA_GPU=L4
+
+bench-g6e-modal:
+	$(MAKE) bench-ada-modal ADA_GPU=L40S
+
+# Turing T4 (EC2 g4dn), sm_75. Software product only; see T4-G4DN.md.
+T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=0 ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-g4dn-modal:
+	$(T4_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+# Thin native clients for one architecture. Need nvcc. These are the
+# binaries a g6 / g6e / g4dn worker should run; the campaign fat default
+# is still sm_120. Ada (g6/g6e) ships CLMAD=1; Turing (g4dn) cannot.
+ADA_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
+	PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+	PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
+	PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_TOP_CLMAD=0
+T4_PACKED = BATCH=16 THREADS=256 MINBLOCKS=2 \
+	PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
+	PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 \
+	PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 \
+	PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=0 PACKED_STATE_TILE=256 \
+	PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	PACKED_TOP_CLMAD=0
+
+gpu-g6 gpu-g6e:
+	$(MAKE) gpu ARCH="-gencode arch=compute_89,code=sm_89" $(ADA_PACKED)
+
+gpu-g4dn:
+	$(MAKE) gpu ARCH="-gencode arch=compute_75,code=sm_75" $(T4_PACKED)
+
 # On the g6/g6e instance itself, where the part actually is.  Measures both
 # arms of the CLMAD question rather than assuming either.
 bench-ada:
 	bash benchmarks/ada/run.sh
+
+bench-g4dn:
+	bash benchmarks/t4/run.sh
 
 # The g7 fleet runs the RTX PRO 4500, for which this tree records no rate at
 # all; see RTX-PRO4500.md for the purchasing decision that waits on one. Unlike
@@ -503,9 +617,12 @@ clean:
 	rm -f build/test-schedule-base build/test-schedule-stream
 	rm -f build/test-packed build/test-packed-base build/test-packed-single
 	rm -f build/test-packed-network build/test-packed-network-direct build/test-packed-network-generated build/test-packed-network-add
-	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-clmad-square-host
+	rm -f build/test-packed-clmad-host build/test-packed-topclmad-host build/test-packed-pair-ilp-host build/test-packed-clmad-square-host
+	rm -f build/test-packed-top-hoist-host build/test-packed-onb-inv-host
+	rm -f build/test-packed-from-reduced-host
+	rm -f build/test-packed-pair-clmul-host build/test-packed-alu-sqr-host
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

@@ -1,13 +1,12 @@
 # Ada (EC2 g6 / g6e) — what transfers off sm_120, and what has to be measured
 
-Every throughput figure in this tree is for the **RTX PRO 6000 Blackwell Server
-Edition**, `sm_120`: 14.637530 B/s benchmarking and 14.1 B/s collecting
-([THROUGHPUT-30B.md](THROUGHPUT-30B.md), [aws/README.md](aws/README.md)). EC2
-**g6** carries the **L4** and **g6e** the **L40S**, both `sm_89` (Ada). This
-tree records no rate for either, and until this change it could not have
-produced a correct client for them at all.
-
-That is two separate gaps, and only the first is a bug.
+The campaign default is still the **RTX PRO 6000 Blackwell Server Edition**,
+`sm_120`: 15.115792 B/s on the matched TOP_CLMAD control
+([benchmarks/top-clmad](benchmarks/top-clmad/summary.json)). EC2 **g6**
+carries the **L4** and **g6e** the **L40S**, both `sm_89` (Ada). This note
+is the Ada rate table. The T4 / g4dn sibling is [T4-G4DN.md](T4-G4DN.md).
+The first gap was a build bug (CLMAD travelling with every `ARCHES`). The
+second was the missing rate. Both are closed below.
 
 ## 1. The fleet could not build an Ada client
 
@@ -26,9 +25,10 @@ is short of ALU there and has carryless capacity to spend, so moving work onto
 the dearer unit wins. Change the ratio of units and that argument does not
 survive; it does not even point in a known direction.
 
-So `CLMAD` no longer travels with `ARCHES`. `aws/build.sh` defaults it to 1
-only for a Blackwell-only build and to 0 as soon as anything older is in
-`ARCHES`, and `CLMAD=1` is available to override once a receipt justifies it.
+So `CLMAD` no longer travels with every `ARCHES` value. `aws/build.sh`
+defaults it to 1 for Blackwell (`120`) and Ada (`89`) after the receipt
+below, and to 0 the moment Turing (`75`) or an unmeasured Ampere/Hopper
+arch is in `ARCHES`.
 
 The same change closed a second hazard it created. The published S3 key was
 `bin/<source-sha>/`, and `ARCHES` and `CLMAD` now vary independently of the
@@ -37,7 +37,7 @@ leaving `campaign.json` pointing at one binary and its manifest describing the
 other. The key is now bound to the source, the architectures **and** the knobs,
 and the manifest carries that `buildSha256` alongside the source sha.
 
-## 2. Nothing has measured the Ada rate
+## 2. How to measure (and the receipt that did)
 
 ```bash
 bash benchmarks/ada/run.sh          # on the g6/g6e instance, or: make bench-ada
@@ -66,8 +66,11 @@ into a number. It builds `sm_89` only; the Makefile default is a
 five-architecture fat binary and ptxas takes minutes per architecture on this
 kernel.
 
-`make bench-ada-modal` runs the same preset through Modal (`ECC_GPU=L40S`, or
-`ADA_GPU=L4`) when no instance is to hand. Workers stay **automatic** in both:
+`make bench-g6-modal` and `make bench-g6e-modal` run the same preset through
+Modal (`ECC_GPU=L4` / `L40S`). `make gpu-g6` / `make gpu-g6e` emit the thin
+`sm_89` software-product client. The T4 / g4dn sibling is
+[T4-G4DN.md](T4-G4DN.md). `make bench-ada-modal` is the same L40S entry
+(`ADA_GPU=L4` selects the L4). Workers stay **automatic** in both:
 the RTX PRO 6000 preset's 385,024 is four waves on a 188-SM part and has no
 claim on a 142-SM (L40S) or 58-SM (L4) one, and `autoThreads`
 ([include/packedengine.cuh](include/packedengine.cuh)) scales with
@@ -142,15 +145,17 @@ distinguished-point handling and the collecting rate is lower (14.1 vs
 bash benchmarks/ada/prices.sh            # g6, g6e, g7, g7e; cheapest AZ per type
 ```
 
-| | value |
-|---|---|
-| L4 (g6), `--bench` | *pending — fill from `benchmarks/ada/result.json`* |
-| L4 (g6), collecting | *pending* |
-| L40S (g6e), `--bench` | *pending* |
-| L40S (g6e), collecting | *pending* |
-| RTX PRO 4500 (g7) | *pending — see [RTX-PRO4500.md](RTX-PRO4500.md)* |
-| RTX PRO 6000 (g7e), `--bench` | 14.637530 B/s |
-| RTX PRO 6000 (g7e), collecting | 14.1 B/s |
+| | value | source |
+|---|---|---|
+| L4 (g6), `--bench`, software | 1.323708 B/s | [preblackwell](benchmarks/preblackwell/g6-software.json) |
+| L4 (g6), `--bench`, CLMAD=1 | **2.490035 B/s** | [preblackwell](benchmarks/preblackwell/g6-clmad.json) |
+| L4 (g6), collecting | *unmeasured* | — |
+| L40S (g6e), `--bench`, software | 4.879118 B/s | [preblackwell](benchmarks/preblackwell/g6e-software.json) |
+| L40S (g6e), `--bench`, CLMAD=1 | **8.838416 B/s** | [preblackwell](benchmarks/preblackwell/g6e-clmad.json) |
+| L40S (g6e), collecting | *unmeasured* | — |
+| RTX PRO 4500 (g7) | *pending — see [RTX-PRO4500.md](RTX-PRO4500.md)* | — |
+| RTX PRO 6000 (g7e), `--bench` | 15.115792 B/s | [top-clmad](benchmarks/top-clmad/summary.json) |
+| RTX PRO 6000 (g7e), collecting | 14.1 B/s | [THROUGHPUT-30B.md](THROUGHPUT-30B.md) |
 
 No price table is printed here because none has been observed for g6/g6e in
 this tree, and [RTX-PRO4500.md](RTX-PRO4500.md) already records what happens
@@ -166,22 +171,65 @@ cheaper than us-east-1 for both Blackwell parts, a wider gap than the one
 between the parts in either region. Before moving region, price egress on the
 DP bucket (`ecc2k130-<account>`), which becomes cross-region.
 
+## 3. What the receipt showed
+
+Boundaries, written before the run: the 5.5 / 2.3 B/s priors above; the
+6000 reference 15.115792 B/s; unit = complete scalar updates / s; class
+= engineering (same walk, 5.3125 products/update). Success is a verified
+median on a named L4 or L40S with identity matching the requested build.
+Inadmissible: filing a T4 number here, promoting CLMAD without a win, or
+quoting the 6000 rate as if it transferred.
+
+One table, one unit. Software is the superseded "before" mark; it stays.
+
+| variant | median B/s | / scaled prior | / 6000 15.116 | / matched software | class | correctness |
+|---|---:|---:|---:|---:|---|---|
+| RTX PRO 6000 shipping | 15.115792 | — | 1.000 | — | reference | top-clmad control |
+| L40S software (CLMAD=0) | 4.879118 | 0.887 vs 5.5 | 0.323 | 1.000 | engineering | 3/3, 128 regs, 72704 workers |
+| L40S CLMAD=1 | 8.838416 | 1.607 vs 5.5 | 0.585 | 1.811 | engineering | 3/3, 94 regs, 72704 workers |
+| L4 software (CLMAD=0) | 1.323708 | 0.576 vs 2.3 | 0.088 | 1.000 | engineering | 3/3, 128 regs, 29696 workers |
+| L4 CLMAD=1 | 2.490035 | 1.083 vs 2.3 | 0.165 | 1.881 | engineering | 3/3, 94 regs, 29696 workers |
+
+Software on the L40S landed at 34.4 M it/s per SM against the 6000's
+80.4, ratio 0.427 — H2's "Ada SM is half of Blackwell" on an
+integer-logic-bound walk. CLMAD moved that to 62.2 M it/s per SM (0.774
+of the 6000) and beat the 5.5 prior. The prior assumed the walk stayed
+on the integer pipe; native carryless products take a different unit,
+which is why the Ada default is now `CLMAD=1`. The L4 72 W cut is still
+visible: CLMAD L4 is 42.9 M it/s per SM against L40S CLMAD's 62.2.
+
+Collecting rates (`--bench` off) are unmeasured. Iterations-per-dollar
+still needs a matched `prices.sh` run; this note does not pick g6/g6e
+over g7/g7e on `--bench` alone.
+
+A mixed g6/g6e + g7e **spot** fleet is now the leftover-quota path
+(`aws/launch_g6.sh`). It still uses one `binaryKey`: bootstrap rebuilds a
+fat `ARCHES="89 120"` client when the published prefix is sm_120-only.
+Geometry (batch / block / minBlocks) stays the 6000 preset. What does
+not stay is the worker count — Ada omits `--threads` so `autoThreads`
+sizes the grid (29,696 on the L4, 72,704 on the L40S) — and slots are
+pinned by `gpuFamily` so an Ada box cannot resume a 385,024-worker
+Blackwell checkpoint and retire that run id. g6 and g6e do not share
+slots with each other either.
+
 ## If the receipt selects g6/g6e
 
 Build and publish an Ada client with:
 
 ```bash
-BUCKET=... ARCHES="89" ./aws/build.sh /path/to/ecc2k130      # CLMAD defaults to 0
-BUCKET=... ARCHES="89" CLMAD=1 ./aws/build.sh /path/...      # only with a receipt
+BUCKET=... ARCHES="89 120" ./aws/build.sh --stage /path/to/ecc2k130  # fat; CLMAD defaults to 1
+./aws/rollout.sh activate bin/<sha>   # refuses if arches drop 89 or 120
+BUCKET=... ARCHES="89" ./aws/build.sh --stage /path/to/ecc2k130      # thin Ada only; activate will refuse
+BUCKET=... ARCHES="89" CLMAD=0 ./aws/build.sh --stage /path/...      # software-product before-arm
 ```
 
-The binary key now includes the knobs, so an Ada client and a Blackwell client
-coexist in the bucket instead of overwriting one another. `bootstrap.sh` reads
-the expected carryless marker off that build's `manifest.json` instead of
-requiring 1, so a CLMAD-free Ada client boots; a binary that disagrees with its
-own manifest is still refused, and a missing manifest still demands 1. `campaign.json` still
-carries one `binaryKey` and one geometry, so a **mixed-architecture** fleet is a
-further change and not merely a further build — the batch/threads/minBlocks
-assertion in `build.sh` is what would catch an attempt to serve both from one
-entry, and it should keep catching it until the campaign record grows a
-per-architecture binary map.
+The binary key now includes the knobs, so an Ada-only client and a Blackwell
+client coexist in the bucket instead of overwriting one another. Do **not**
+point the live `campaign.json` at a thin `ARCHES="89"` build: running g7e
+workers cannot load it. `build.sh --stage` plus `rollout.sh activate` is
+the path that enforces that; a bootstrap rebuild still points so the first
+Ada box can publish a fat client when the live prefix is sm_120-only. `bootstrap.sh` reads the expected carryless marker
+off that build's `manifest.json` instead of requiring 1, so a CLMAD-free Ada
+client boots; a binary that disagrees with its own manifest is still refused,
+and a missing manifest still demands 1. `launch_g6.sh` fills leftover G/VT
+Spot quota with g6e then g6 and does not stop existing g7/g7e instances.

@@ -1,0 +1,43 @@
+[
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "The round-0014 winner source, unchanged. This round makes no shared change at all, so the winner/rho ratios are expected to reproduce round-0014's (0.7818 instructions, 0.9424 native on confirmation) up to fresh-fixture variation, and any difference the challengers show is their own.",
+    "id": "incumbent",
+    "parent": "tiny2 + certificate, one optimisation unit (round-0014)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: the orbit name of an abscissa found from the longest circular run of zeros rather than by trying all n-1 rotations, and the block scan of a decomposition computing only each rest's abscissa, with its ordinate computed for the one rest in a few hundred whose orbit is stored. Development: 0.874-0.994 of the incumbent's instructions by cell, strongest on n23a0 where the scan dominates.",
+    "id": "scan",
+    "parent": "incumbent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round15-sources/scan"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: scan plus the report's decimal numbers written two digits at a time from a table and appended without a UTF-8 validation pass. Development: 0.852-0.942 of the incumbent's instructions, the largest IC-only step the campaign has measured. Expected to pass the instruction gate and, on the reasoning in the pre-registration, to sit at the edge of what the native clock can resolve.",
+    "id": "scan_io",
+    "parent": "incumbent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round15-sources/scan_io"
+  }
+]

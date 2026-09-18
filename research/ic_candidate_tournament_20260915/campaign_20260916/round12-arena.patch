@@ -1,0 +1,139 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -19,6 +19,136 @@
+ use std::io::Read;
+ use std::time::Instant;
+ 
++/// The whole process allocates well under a megabyte (the largest job of the
++/// panel, rho on `n23a0`, asks for 321 KB in 5,700 calls) and lives a few
++/// milliseconds, so the general-purpose allocator's bookkeeping is pure
++/// overhead: a bump pointer over a zero page region serves every request,
++/// frees only the most recent block, grows the most recent block in place and
++/// falls back to the system allocator if the region is ever exhausted. The
++/// region lives in `.bss`, so it costs nothing until a page is touched.
++/// Shared by every arm, rho included.
++mod arena {
++    use std::alloc::{GlobalAlloc, Layout, System};
++    use std::cell::UnsafeCell;
++    use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
++
++    const SIZE: usize = 64 << 20;
++
++    #[repr(C, align(4096))]
++    struct Region(UnsafeCell<[u8; SIZE]>);
++    unsafe impl Sync for Region {}
++    static REGION: Region = Region(UnsafeCell::new([0; SIZE]));
++    /// Offset of the first free byte.
++    static TOP: AtomicUsize = AtomicUsize::new(0);
++
++    #[inline(always)]
++    fn base() -> usize { REGION.0.get() as usize }
++
++    pub struct Bump;
++
++    unsafe impl GlobalAlloc for Bump {
++        #[inline]
++        unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
++            let mut top = TOP.load(Relaxed);
++            loop {
++                let start = (top + layout.align() - 1) & !(layout.align() - 1);
++                let end = start + layout.size();
++                if end > SIZE { return System.alloc(layout); }
++                match TOP.compare_exchange_weak(top, end, Relaxed, Relaxed) {
++                    Ok(_) => return (base() + start) as *mut u8,
++                    Err(seen) => top = seen,
++                }
++            }
++        }
++
++        #[inline]
++        unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
++            let offset = (ptr as usize).wrapping_sub(base());
++            if offset >= SIZE { return System.dealloc(ptr, layout); }
++            // Only the most recent block can be given back.
++            let end = offset + layout.size();
++            let _ = TOP.compare_exchange(end, offset, Relaxed, Relaxed);
++        }
++
++        #[inline]
++        unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
++            let offset = (ptr as usize).wrapping_sub(base());
++            if offset >= SIZE { return System.realloc(ptr, layout, new_size); }
++            let end = offset + layout.size();
++            if offset + new_size <= SIZE
++                && TOP.compare_exchange(end, offset + new_size, Relaxed, Relaxed).is_ok()
++            {
++                return ptr;
++            }
++            let new = self.alloc(Layout::from_size_align_unchecked(new_size, layout.align()));
++            if !new.is_null() {
++                std::ptr::copy_nonoverlapping(ptr, new, layout.size().min(new_size));
++                self.dealloc(ptr, layout);
++            }
++            new
++        }
++    }
++}
++
++#[global_allocator]
++static GLOBAL: arena::Bump = arena::Bump;
++
++#[cfg(test)]
++mod arena_tests {
++    use std::alloc::{GlobalAlloc, Layout};
++
++    #[test]
++    fn grows_the_last_block_in_place_and_gives_it_back() {
++        let a = super::arena::Bump;
++        unsafe {
++            let l = Layout::from_size_align(48, 8).unwrap();
++            let p = a.alloc(l);
++            assert!(!p.is_null() && (p as usize) % 8 == 0);
++            std::ptr::write_bytes(p, 0xA5, 48);
++            let q = a.realloc(p, l, 96);
++            assert_eq!(q, p, "the most recent block grows in place");
++            assert!((0..48).all(|i| *q.add(i) == 0xA5));
++            let l96 = Layout::from_size_align(96, 8).unwrap();
++            a.dealloc(q, l96);
++            let r = a.alloc(l);
++            assert_eq!(r, p, "a freed last block is reused");
++            a.dealloc(r, l);
++        }
++    }
++
++    #[test]
++    fn honours_alignment_and_moves_a_block_that_cannot_grow() {
++        let a = super::arena::Bump;
++        unsafe {
++            let l = Layout::from_size_align(24, 8).unwrap();
++            let p = a.alloc(l);
++            std::ptr::write_bytes(p, 0x3C, 24);
++            let big = Layout::from_size_align(200, 64).unwrap();
++            let q = a.alloc(big);
++            assert_eq!((q as usize) % 64, 0);
++            let r = a.realloc(p, l, 1000);
++            assert_ne!(r, p, "a block that is not the last one moves");
++            assert!((0..24).all(|i| *r.add(i) == 0x3C), "its bytes travel with it");
++            a.dealloc(r, Layout::from_size_align(1000, 8).unwrap());
++            a.dealloc(q, big);
++            a.dealloc(p, l);
++        }
++    }
++
++    #[test]
++    fn falls_back_to_the_system_allocator_beyond_the_region() {
++        let a = super::arena::Bump;
++        unsafe {
++            let huge = Layout::from_size_align(80 << 20, 16).unwrap();
++            let p = a.alloc(huge);
++            assert!(!p.is_null());
++            *p = 1;
++            *p.add((80 << 20) - 1) = 2;
++            a.dealloc(p, huge);
++        }
++    }
++}
++
+ /// The amd64 Valgrind client-request ABI, as specified in valgrind.h.
+ /// Outside Valgrind the rotation preamble and self-exchange have no effect.
+ /// DUMP_STATS_AT writes the interval then resets counters; collection stays on.

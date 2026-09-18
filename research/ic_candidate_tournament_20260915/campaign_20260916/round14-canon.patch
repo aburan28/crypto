@@ -1,0 +1,126 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -701,10 +701,76 @@
+ 
+     /// `(least rotation, rotations applied)`: the orbit name of `x` and
+     /// the `k` with `canon = coords(x^{2^k})`.
++    ///
++    /// The least rotation is the one with the most leading zeros, so it
++    /// begins with a longest circular run of zeros at the top of the
++    /// word.  The runs are found by doubling (`run(2L) = run(L) ∧
++    /// rotr(run(L), L)`), their maximal length by a binary search over
++    /// those masks, and only the rotations that put such a run at the
++    /// top are compared — usually one or two, where the loop it replaces
++    /// tried all `n − 1`.  Ties (periodic words) resolve to the least
++    /// `k`, as the loop did; the loop is kept as the test reference.
+     #[inline]
+     fn canon(&self, x: u64) -> (u64, u32) {
+         let c = self.coords(x);
+         let n = self.n;
++        let mask = self.mask;
++        let z = !c & mask;
++        if z == 0 {
++            return (c, 0);
++        }
++        let rotr = |v: u64, k: u32| if k == 0 { v } else { ((v >> k) | (v << (n - k))) & mask };
++        let rotl = |v: u64, k: u32| if k == 0 { v } else { ((v << k) | (v >> (n - k))) & mask };
++        // `runs[i]`: positions that start (upward) a zero run of length ≥ 2^i.
++        let mut runs = [0u64; 6];
++        runs[0] = z;
++        let mut i = 0usize;
++        let mut len = 1u32;
++        while len * 2 <= n {
++            let next = runs[i] & rotr(runs[i], len);
++            if next == 0 {
++                break;
++            }
++            i += 1;
++            runs[i] = next;
++            len *= 2;
++        }
++        let mut best_mask = runs[i];
++        let mut best_len = len;
++        let mut j = i;
++        let mut step = len / 2;
++        while step > 0 {
++            j -= 1;
++            let cand = best_mask & rotr(runs[j], best_len);
++            if cand != 0 {
++                best_mask = cand;
++                best_len += step;
++            }
++            step /= 2;
++        }
++        // A run at positions `p .. p + len − 1` sits at the top of `rotl(c, k)`
++        // when `p + len − 1 ≡ n − 1 − k`, i.e. `k ≡ n − p − len (mod n)`.
++        let mut best = u64::MAX;
++        let mut best_k = 0u32;
++        let mut m = best_mask;
++        while m != 0 {
++            let p = m.trailing_zeros();
++            m &= m - 1;
++            let k = (2 * n - p - best_len) % n;
++            let v = rotl(c, k);
++            if v < best || (v == best && k < best_k) {
++                best = v;
++                best_k = k;
++            }
++        }
++        (best, best_k)
++    }
++
++    /// The rotation loop `canon` replaced, kept as the reference.
++    #[cfg(test)]
++    fn canon_reference(&self, x: u64) -> (u64, u32) {
++        let c = self.coords(x);
++        let n = self.n;
+         let mut best = c;
+         let mut best_k = 0u32;
+         let mut v = c;
+@@ -1476,6 +1542,46 @@
+ 
+ #[cfg(test)]
+ mod tests {
++    #[test]
++    fn the_orbit_name_from_zero_runs_equals_the_rotation_loop() {
++        // Every width the pipeline runs (and up to a whole word), random
++        // and sparse words, the all-ones word, powers of two and periodic
++        // words: the same least rotation and the same least index.
++        for n in (5..=31).chain([33, 47, 62]) {
++            let basis = super::NormalBasis { n, mask: (1u64 << n) - 1, tables: (0..((n + 3) / 4) as usize).map(|i| {
++                let mut t = [0u64; 16];
++                for (b, slot) in t.iter_mut().enumerate() {
++                    *slot = ((b as u64) << (4 * i)) & ((1u64 << n) - 1);
++                }
++                t
++            }).collect() };
++            let mask = (1u64 << n) - 1;
++            let mut state = 0x243f_6a88_85a3_08d3u64 ^ u64::from(n);
++            let mut words: Vec<u64> = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
++            let period = |p: u32| {
++                let mut w = 0u64;
++                let mut i = 0;
++                while i < n {
++                    w |= 1 << i;
++                    i += p;
++                }
++                w & mask
++            };
++            words.extend((1..=n).filter(|p| n % p == 0).map(period));
++            for _ in 0..3000 {
++                state ^= state << 13;
++                state ^= state >> 7;
++                state ^= state << 17;
++                words.push(state & mask);
++                words.push(state & (state >> 11) & (state >> 23) & mask);
++                words.push(!(state & (state >> 5)) & mask);
++            }
++            for &w in &words {
++                assert_eq!(basis.canon(w), basis.canon_reference(w), "n={n} word={w:#b}");
++            }
++        }
++    }
++
+     use super::*;
+     use crate::cryptanalysis::koblitz_fast::FastCurve;
+     use crate::binary_ecc::F2mElement;

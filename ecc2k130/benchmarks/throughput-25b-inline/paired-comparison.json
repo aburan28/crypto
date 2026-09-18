@@ -1,0 +1,41 @@
+{
+  "method": "Student t interval on log throughput ratios, paired by repetition; df=2; exploratory n=3, normality assumption not testable at this sample size",
+  "results": {
+    "1": {
+      "pairedRatios": [
+        1.0002986999640693,
+        0.9995170230870245,
+        0.9999916164991228
+      ],
+      "geometricMeanRatio": 0.9999357281462591,
+      "ci95": [
+        0.9989578671406771,
+        1.000914546361527
+      ]
+    },
+    "2": {
+      "pairedRatios": [
+        1.0371273356501038,
+        1.0367806162029565,
+        1.0372604407397208
+      ],
+      "geometricMeanRatio": 1.0370561111403669,
+      "ci95": [
+        1.0364409176385654,
+        1.0376716697985784
+      ]
+    },
+    "3": {
+      "pairedRatios": [
+        1.0389712368416593,
+        1.0370460281389815,
+        1.0374513532907295
+      ],
+      "geometricMeanRatio": 1.0378225419980012,
+      "ci95": [
+        1.035304906818464,
+        1.0403462995158521
+      ]
+    }
+  }
+}

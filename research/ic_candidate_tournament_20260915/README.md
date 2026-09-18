@@ -1,6 +1,6 @@
 # Index-calculus candidate tournament
 
-Status: implementation complete; ten further tournaments finished and audited
+Status: implementation complete; fourteen further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
 16 targets: 0.7195 times its profiled instructions and 0.7796 times its native
@@ -25,10 +25,33 @@ stages. Round-0011 then put the general binary-field arithmetic that both arms
 run in their final check into words, bit-exact with the bit-serial code it
 replaced: 0.4796 (0.4498–0.5217) of rho's instructions and 0.8653
 (0.8396–0.8919) of its native time, replay agreeing (0.8654, 0.8454–0.8883),
-every cell below one in both metrics on both stages: the strict-win record.
-The native margin is bounded by the process creation both arms pay.
+every cell below one in both metrics on both stages. Round-0012 took the C
+runtime's start-up and the heap out of the way for both arms (a musl static
+executable without relocations, a bump-pointer arena in the worker): 0.4369
+(0.4069–0.4815) of rho's instructions and 0.7988 (0.7668–0.8319) of its native
+time, replay agreeing (0.7914, 0.7558–0.8270), every cell below one in both
+metrics on both stages. Round-0013 then gave every scalar product in the
+library one field inversion instead of one per step, for both arms, and found
+that rho's setup was mostly such products: rho's job halved, the IC arm's
+shared phases shrank, and the honest ratios are 0.7697 (0.7148–0.8370) of
+rho's instructions and 0.9098 (0.8894–0.9313) of its native time, replay
+agreeing (0.9206, 0.8983–0.9480), every cell below one in both metrics on
+both stages: the strict-win record under the corrected baseline. Round-0014
+then built the worker as one optimisation unit, which made both arms faster
+again and rho slightly more so, as its pre-registration said it would: 0.7818
+(0.7200–0.8601) of rho's instructions and 0.9424 (0.9126–0.9715) of its native
+time, every cell still below one in both metrics, but at worse ratios than
+round-0013, which therefore keeps the record. Round-0015 changed nothing
+shared and measured that same executable again on fresh fixtures: 0.7372
+(0.6628–0.8326) of rho's instructions and 0.9246 (0.9034–0.9503) of its native
+time, which is how much these ratios move on fixture draw alone. Its IC-only
+challenger reached 0.9059 of the incumbent's instructions, the largest such
+step measured here, and still failed the native gate — the fifth time in five
+rounds, and the reason the pre-registration gives is the process floor that is
+a third of every native measurement. The median complete one-target job is
+1.08 ms against rho's 1.19 ms.
 
-All 13,368 new profiled trials and their paired native runs verified. The
+All 19,176 new profiled trials and their paired native runs verified. The
 earlier [single-target continuation](single_target_20260916/RESULTS.md) adds three audited precursor rounds
 (4,680 receipts: 4,662 verified solves and 18 retained smoke rejections). The
 [original pilot](runs/round-0002/REPORT.md), every intermediate comparison, and

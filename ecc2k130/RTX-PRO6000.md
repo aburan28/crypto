@@ -42,6 +42,9 @@ target. The general compact build option defaults to 0.
 The preset also stages the paired [Frobenius masks in shared memory](SHARED-SIGMA.md).
 Set `RTX_PRO6000_SHARED_SIGMA=0` to select the global-memory control in either
 Make target. The general `PACKED_SHARED_SIGMA` build option defaults to 0.
+`PACKED_TOP_CLMAD=1` was measured on this preset and rejected: 12.859 B/s
+against a 15.116 B/s matched control ([TOP-CLMAD.md](TOP-CLMAD.md)).
+`RTX_PRO6000_TOP_CLMAD` stays 0.
 
 The generated-product comparison used CUDA 13.3.73 and driver 580.95.05.
 NVIDIA documents CUDA 13.x minor-version compatibility with driver 580 or

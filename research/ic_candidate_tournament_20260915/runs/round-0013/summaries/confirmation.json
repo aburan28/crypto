@@ -1,0 +1,73 @@
+{
+  "comparisons": [
+    {
+      "candidate": "ld_ic",
+      "candidate_over_baseline": 0.9221004420079083,
+      "ci95": [
+        0.9105500658173483,
+        0.9341019412100591
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 1.0198827963255803,
+      "native_wall_ci95": [
+        1.0000254421497812,
+        1.0442689454686955
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 1.0226701590118126,
+        "n17a1": 1.037760725227264,
+        "n19a0": 1.0319718844730705,
+        "n19a1": 0.9986962342160127,
+        "n23a0": 1.0088282575945933
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.943305915161083,
+        "n17a1": 0.9206255807541983,
+        "n19a0": 0.9199991776576659,
+        "n19a1": 0.9240081562744475,
+        "n23a0": 0.9030094831145716
+      },
+      "speedup": 1.0844805559603274
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 145.77921389400944,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.2992507745815909,
+    "ci95": [
+      1.1948270513191057,
+      1.399264153470238
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 1.09917614764373,
+    "native_wall_ci95": [
+      1.0737304202689943,
+      1.1243525431012924
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.1293773850887996,
+      "n17a1": 1.1178496469171733,
+      "n19a0": 1.0834352857614187,
+      "n19a1": 1.0868426248142837,
+      "n23a0": 1.0793054205750736
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 1.2643118650611362,
+      "n17a1": 1.4619779930394101,
+      "n19a0": 1.373031295161438,
+      "n19a1": 1.2543678706273542,
+      "n23a0": 1.162959298709023
+    },
+    "speedup": 0.7696743535304328
+  },
+  "runs": 540,
+  "stage": "confirmation",
+  "verified_runs": 540
+}

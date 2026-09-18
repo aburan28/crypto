@@ -1,0 +1,64 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -398,17 +398,55 @@
+         "sparse_report":solved.sparse_report,"elapsed_seconds":start.elapsed().as_secs_f64()})))
+ }
+ 
+-/// Decimal text of a word, appended.
++/// Decimal text of a word, appended: two digits per division from a
++/// table, and the ASCII bytes appended without a validation pass (the
++/// same characters `u64::to_string` produces; a test compares them).
+ fn push_u64(out: &mut String, mut v: u64) {
++    const DIGITS: &[u8; 200] = b"0001020304050607080910111213141516171819\
++2021222324252627282930313233343536373839\
++4041424344454647484950515253545556575859\
++6061626364656667686970717273747576777879\
++8081828384858687888990919293949596979899";
+     let mut buf = [0u8; 20];
+     let mut i = buf.len();
+-    loop {
++    while v >= 100 {
++        let d = ((v % 100) as usize) * 2;
++        v /= 100;
++        i -= 2;
++        buf[i] = DIGITS[d];
++        buf[i + 1] = DIGITS[d + 1];
++    }
++    if v >= 10 {
++        let d = (v as usize) * 2;
++        i -= 2;
++        buf[i] = DIGITS[d];
++        buf[i + 1] = DIGITS[d + 1];
++    } else {
+         i -= 1;
+-        buf[i] = b'0' + (v % 10) as u8;
+-        v /= 10;
+-        if v == 0 { break; }
++        buf[i] = b'0' + v as u8;
++    }
++    // SAFETY: every byte written is an ASCII digit.
++    unsafe { out.as_mut_vec().extend_from_slice(&buf[i..]) };
++}
++
++#[cfg(test)]
++mod push_u64_tests {
++    use super::push_u64;
++
++    #[test]
++    fn matches_std_formatting() {
++        let mut seed = 0x9E37_79B9_7F4A_7C15u64;
++        let mut values = vec![0u64, 1, 9, 10, 11, 99, 100, 101, 999, 1000, 12345, u32::MAX as u64, u64::MAX - 1, u64::MAX];
++        for _ in 0..2000 {
++            seed ^= seed << 13; seed ^= seed >> 7; seed ^= seed << 17;
++            values.push(seed >> (seed % 64));
++        }
++        for v in values {
++            let mut s = String::new();
++            push_u64(&mut s, v);
++            assert_eq!(s, v.to_string());
++        }
+     }
+-    out.push_str(std::str::from_utf8(&buf[i..]).expect("ascii digits"));
+ }
+ 
+ /// `["x","y"]`, the same text as `point` produces for a single-word point.

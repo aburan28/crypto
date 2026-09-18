@@ -1,0 +1,156 @@
+{
+  "kind": "RTX PRO 6000 29 B/s attempt: complete scalar updates/s",
+  "unit": "B scalar updates / s",
+  "class": "engineering",
+  "targetB": 29.0,
+  "floorB": [22.0, 25.0],
+  "clmadCeilingB": 26.6,
+  "twentyBestB": 17.297791,
+  "sku": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "uuid": "GPU-c2cb23e6-a474-1d96-06a6-a5cac9511ca2",
+  "driver": "595.91.07",
+  "cuda": "13.3.73",
+  "workers": 96256,
+  "updatesPerSample": 50465865728,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "clockLock": "nvidia-smi -lgc 2430,2430 -pl 600 (SM 2422 MHz under the best rows)",
+  "anyOver29": false,
+  "productsPerUpdate": 5.3125,
+  "nsight": {
+    "note": "sudo ncu, walk kernel, launch-skip 2, launch-count 1-2, steps 32. Control (17.30 B/s config) is FP64/clmad bound, not DRAM or ALU. ALU_SQUARE moves the per-update polynomial square onto the logic pipe.",
+    "controlUnroll": {
+      "dramPct": 11.40,
+      "l2Pct": 38.48,
+      "aluPipePct": 36.11,
+      "fp64PipePct": 71.44,
+      "smThroughputPct": 71.44,
+      "warpsActivePct": 29.60
+    },
+    "aluSquare": {
+      "dramPct": 12.93,
+      "l2Pct": 38.84,
+      "aluPipePct": 39.05,
+      "fp64PipePct": 62.87,
+      "smThroughputPct": 73.26,
+      "issueSlotsBusyPct": 50.74,
+      "executedIpcActive": 2.07,
+      "warpsActivePct": 28.51
+    }
+  },
+  "table": {
+    "control_unroll": {
+      "medianB": 17.2976,
+      "ratesB": [17.2976, 17.29591, 17.299668],
+      "ratioTo29": 0.5964689655172414,
+      "ratioToFloor22": 0.7862545454545454,
+      "ratioTo20best": 0.9999889581276591,
+      "valid": true,
+      "registers": 110,
+      "aluSquare": false,
+      "topHoist": false,
+      "onbInv": false,
+      "slotPipeline": false,
+      "fromReduced": false,
+      "verify300": true
+    },
+    "top_hoist": {
+      "medianB": 17.269561,
+      "ratioTo29": 0.5955021034482759,
+      "ratioToFloor22": 0.7849800454545456,
+      "valid": true,
+      "registers": 116,
+      "topHoist": true,
+      "verify300": true
+    },
+    "onb_inv": {
+      "medianB": 16.459503,
+      "ratioTo29": 0.5675690689655173,
+      "ratioToFloor22": 0.7481592272727273,
+      "valid": true,
+      "registers": 102,
+      "onbInv": true,
+      "verify300": true
+    },
+    "pipeline": {
+      "medianB": 16.463174,
+      "ratioTo29": 0.5676956551724137,
+      "ratioToFloor22": 0.7483260909090909,
+      "valid": true,
+      "registers": 102,
+      "slotPipeline": true,
+      "verify300": true
+    },
+    "hoist_onb": {
+      "medianB": 16.489508,
+      "ratioTo29": 0.568603724137931,
+      "ratioToFloor22": 0.749523090909091,
+      "valid": true,
+      "registers": 102,
+      "topHoist": true,
+      "onbInv": true,
+      "verify300": true
+    },
+    "hoist_onb_pipe": {
+      "medianB": 16.498195,
+      "ratioTo29": 0.5689032758620689,
+      "ratioToFloor22": 0.7499179545454545,
+      "valid": true,
+      "registers": 102,
+      "topHoist": true,
+      "onbInv": true,
+      "slotPipeline": true,
+      "verify300": true
+    },
+    "alu_square": {
+      "medianB": 17.413977,
+      "ratesB": [17.417808, 17.404756, 17.413977],
+      "minB": 17.404756,
+      "maxB": 17.417808,
+      "ratioTo29": 0.600482,
+      "ratioToFloor22": 0.791544,
+      "ratioTo20best": 1.006717,
+      "valid": true,
+      "registers": 110,
+      "aluSquare": true,
+      "verify300": true,
+      "note": "Matched 3-rep against control_r2 (medians 17.297637). Same 17.30 config plus PACKED_ALU_SQUARE=1."
+    }
+  },
+  "rejectedScouts": {
+    "note": "Not in the verified table, or verified but slower than the ALU_SQUARE row.",
+    "fromReduced": "k_fromPoly 61→48 ALU; 3-rep median 17.291 vs control 17.295, wash. 300 reports on the device probe and the walk.",
+    "preferL1": "14.018 B/s vs ALU_SQUARE 17.407, one sample",
+    "tableAddendGlobal2blocks": "17.138 B/s; addend from global, selection still shared, same occupancy",
+    "minblocks3 maxrregcount80": "15.153 B/s, 16 local bytes/thread, SM clock 2242 MHz",
+    "minblocks3 launch_bounds only": "15.164 B/s, still 80 regs / 16 local bytes",
+    "pairIlpOff plus aluSquare": "17.413 B/s one sample, within noise of ALU_SQUARE",
+    "topHoist overlapped with clmul plus aluSquare": "3-rep median 17.338, 116 regs; still slower than ALU_SQUARE",
+    "threads128 minblocks5 addendGlobal": "5 blocks/SM, 94 regs, 0 spill, 16.048 B/s",
+    "aluOnbSquare": "ALU_SQR=1 on ALU_SQUARE; 300/300; one sample 17.253",
+    "pairClmul": "PAIR_CLMUL=1; 112 regs; 300/300; one sample 17.260",
+    "clmulFlat": "CLMUL_FLAT=1; 300/300; one sample 17.297",
+    "unroll4": "UNROLL_SLOTS=4; 112 regs; 300/300; 3-rep median 17.379 (17.380/17.371/17.379) vs matched ALU_SQUARE 17.403",
+    "unroll8": "UNROLL_SLOTS=8; 106 regs; 300/300; 3-rep median 16.000",
+    "comboAluSqrPairFlat": "ALU_SQR+PAIR_CLMUL+CLMUL_FLAT; 112 regs; 300/300; one sample 17.214",
+    "threads192 minblocks3 addendGlobal": "3 blocks/SM, 94 regs, 0 spill, 108288 workers; 3-rep median 15.808; SM clock 2340–2355 MHz"
+  },
+  "nsightRound3": {
+    "note": "sudo ncu 2026.1.0, walk kernel, launch-skip 2, launch-count 1, steps 32, ALU_SQUARE binary. Stall percents are of peak sustained active.",
+    "fp64PipePct": 62.82,
+    "aluPipePct": 39.02,
+    "smThroughputPct": 73.20,
+    "issueActivePct": 51.77,
+    "activeWarpsPerScheduler": 3.44,
+    "eligibleWarpsPerScheduler": 1.04,
+    "stallWaitPct": 7.56,
+    "stallNotSelectedPct": 4.77,
+    "stallMathPipeThrottlePct": 3.94,
+    "stallShortScoreboardPct": 3.81,
+    "stallLongScoreboardPct": 2.96
+  },
+  "receipts": {
+    "round1ResultJson": "result.json"
+  }
+}

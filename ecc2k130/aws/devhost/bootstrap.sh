@@ -61,6 +61,41 @@ EOF
 systemctl daemon-reload
 systemctl enable g7e-agent-tools-refresh.service
 
+# GitHub PAT lives in SSM /crypto/g7e-dev/github, never in this user-data blob.
+install_g7e_gh_auth() {
+  local dest=/usr/local/bin/g7e-gh-auth
+  local here=""
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || true)"
+  if [ -n "$here" ] && [ -f "$here/g7e-gh-auth.sh" ]; then
+    install -m 0755 "$here/g7e-gh-auth.sh" "$dest"
+  elif [ -f /home/ubuntu/crypto/ecc2k130/aws/devhost/g7e-gh-auth.sh ]; then
+    install -m 0755 /home/ubuntu/crypto/ecc2k130/aws/devhost/g7e-gh-auth.sh "$dest"
+  elif [ -x "$dest" ]; then
+    :
+  else
+    log "g7e-gh-auth helper not bundled; skipping GitHub SSM login"
+    return 0
+  fi
+  cat >/etc/systemd/system/g7e-gh-auth.service <<'EOF'
+[Unit]
+Description=Log gh in from SSM GitHub token
+After=network-online.target g7e-agent-tools-refresh.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/g7e-gh-auth
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable g7e-gh-auth.service
+  /usr/local/bin/g7e-gh-auth || log "g7e-gh-auth deferred (no instance role or parameter yet)"
+}
+
+install_g7e_gh_auth
+
 # Helpful shell defaults for interactive SSH/SSM sessions.
 cat >/etc/profile.d/g7e-devhost.sh <<'EOF'
 export WORKSPACE=/workspace
@@ -77,4 +112,23 @@ codex --version || true
 opencode --version || true
 nvidia-smi || true
 
-log "bootstrap complete; authenticate interactively with: gh auth login, claude, codex, and opencode"
+# Runaway cost controls: optional host timer (idle/age default OFF).
+# Monthly $5k enforcement lives in costguard/costguard.sh on a control host.
+log "installing costguard host timer (idle/age disabled by default)"
+install -d -m 755 /var/lib/costguard /usr/local/lib/costguard
+if [[ -x /home/ubuntu/crypto/ecc2k130/aws/costguard/install-host.sh ]]; then
+  COSTGUARD_MAX_AGE_HOURS=${COSTGUARD_MAX_AGE_HOURS:-0} \
+  COSTGUARD_IDLE_HOURS=${COSTGUARD_IDLE_HOURS:-0} \
+    bash /home/ubuntu/crypto/ecc2k130/aws/costguard/install-host.sh
+elif [[ -x /workspace/crypto/ecc2k130/aws/costguard/install-host.sh ]]; then
+  COSTGUARD_MAX_AGE_HOURS=${COSTGUARD_MAX_AGE_HOURS:-0} \
+  COSTGUARD_IDLE_HOURS=${COSTGUARD_IDLE_HOURS:-0} \
+    bash /workspace/crypto/ecc2k130/aws/costguard/install-host.sh
+else
+  curl -fsSL "https://raw.githubusercontent.com/aburan28/crypto/main/ecc2k130/aws/costguard/install-host.sh" \
+    -o /tmp/costguard-install-host.sh \
+    && COSTGUARD_MAX_AGE_HOURS=0 COSTGUARD_IDLE_HOURS=0 bash /tmp/costguard-install-host.sh \
+    || log "costguard install deferred (scripts not yet on main / no checkout)"
+fi
+
+log "bootstrap complete; GitHub token is fetched from SSM at boot. Authenticate remaining CLIs interactively: claude, codex, opencode"
