@@ -890,8 +890,7 @@ ECC_HD void pointHalf131(P131 x, P131 y, P131 *hx, P131 *hy) {
  unsigned outside=0;
 #pragma unroll
  for(int i=0;i<5;i++)
-  outside^=ECC_HALF_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
-           ECC_HALF_POPC(root.v[i]);
+  outside^=ECC_HALF_POPC(root.v[i]&lambda.v[i]);
  outside^=halvingSecondTrace131(root);
  outside&=1u;
 #undef ECC_HALF_POPC
@@ -921,8 +920,7 @@ ECC_HD void pointHalfPolynomial131(P131 xp, P131 yp, P131 *hxp, P131 *hyp) {
  unsigned outside=0;
 #pragma unroll
  for(int i=0;i<5;i++)
-  outside^=ECC_HALF_POLY_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
-           ECC_HALF_POLY_POPC(root.v[i]);
+  outside^=ECC_HALF_POLY_POPC(root.v[i]&lambda.v[i]);
  outside^=halvingSecondTrace131(root);
 #undef ECC_HALF_POLY_POPC
  const uint32_t mask=0u-(outside&1u);
@@ -958,8 +956,7 @@ ECC_HD void pointHalfLambdaPolynomial131(P131 xp, P131 lqp,
  unsigned outside=0;
 #pragma unroll
  for(int i=0;i<5;i++)
-  outside^=ECC_HALF_LAMBDA_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
-           ECC_HALF_LAMBDA_POPC(root.v[i]);
+  outside^=ECC_HALF_LAMBDA_POPC(root.v[i]&lambda.v[i]);
  outside^=halvingSecondTrace131(root);
 #undef ECC_HALF_LAMBDA_POPC
  const uint32_t mask=0u-(outside&1u);
