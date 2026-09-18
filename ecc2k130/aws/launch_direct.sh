@@ -50,6 +50,8 @@ running_od=0
 running_spot=0
 while read -r type life; do
     [ -n "$type" ] || continue
+    life=${life:-on-demand}
+    [ "$life" = None ] && life=on-demand
     w=$(gpusOf "$type")
     if [ "$life" = spot ]; then running_spot=$((running_spot + w)); else running_od=$((running_od + w)); fi
 done < <(aws ec2 describe-instances \

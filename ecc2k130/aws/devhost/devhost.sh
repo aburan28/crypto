@@ -7,8 +7,10 @@ INSTANCE_TYPE=${INSTANCE_TYPE:-g7e.2xlarge}
 KEY_NAME=${KEY_NAME:-meow34}
 ROOT_GB=${ROOT_GB:-500}
 SECURITY_GROUP_NAME=${SECURITY_GROUP_NAME:-crypto-g7e-dev-ssh}
-BOOTSTRAP=${BOOTSTRAP:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bootstrap.sh}
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+BOOTSTRAP=${BOOTSTRAP:-$DIR/bootstrap.sh}
 SSH_USER=${SSH_USER:-ubuntu}
+IAM_PROFILE=${IAM_PROFILE:-crypto-g7e-dev}
 
 aws_ec2() { aws --region "$REGION" ec2 "$@"; }
 
@@ -59,8 +61,45 @@ latest_dlami() {
     --query 'reverse(sort_by(Images,&CreationDate))[0].ImageId' --output text
 }
 
+# User-data must not contain the GitHub PAT. It only installs the helper that
+# reads SSM /crypto/g7e-dev/github at boot via the instance role.
+write_userdata() {
+  local out=$1
+  {
+    echo '#!/usr/bin/env bash'
+    echo 'set -euo pipefail'
+    if [ -f "$DIR/g7e-gh-auth.sh" ]; then
+      echo 'cat >/usr/local/bin/g7e-gh-auth <<'\''EOF_G7E_GH_AUTH'\'''
+      cat "$DIR/g7e-gh-auth.sh"
+      echo 'EOF_G7E_GH_AUTH'
+      echo 'chmod 0755 /usr/local/bin/g7e-gh-auth'
+    fi
+    # Skip the bootstrap shebang; the wrapper already has one.
+    if [ -f "$BOOTSTRAP" ]; then
+      tail -n +2 "$BOOTSTRAP"
+    fi
+  } >"$out"
+}
+
+ensure_instance_profile() {
+  local id=$1 assoc
+  if ! aws iam get-instance-profile --instance-profile-name "$IAM_PROFILE" >/dev/null 2>&1; then
+    echo "IAM instance profile $IAM_PROFILE missing; run ./iam.sh so the host can read SSM GitHub auth." >&2
+    return 0
+  fi
+  assoc=$(aws_ec2 describe-iam-instance-profile-associations \
+    --filters "Name=instance-id,Values=$id" \
+    --query 'IamInstanceProfileAssociations[?State==`associated` || State==`associating`].AssociationId | [0]' \
+    --output text 2>/dev/null || true)
+  if [ -z "$assoc" ] || [ "$assoc" = "None" ]; then
+    aws_ec2 associate-iam-instance-profile --instance-id "$id" \
+      --iam-instance-profile "Name=$IAM_PROFILE" >/dev/null
+    echo "Attached instance profile $IAM_PROFILE to $id"
+  fi
+}
+
 cmd_up() {
-  local id state ami root_dev sg_id instance_sg_id
+  local id state ami root_dev sg_id instance_sg_id ud profile_args
   id=$(instance_id)
   if [ -n "$id" ]; then
     state=$(aws_ec2 describe-instances --instance-ids "$id" --query 'Reservations[0].Instances[0].State.Name' --output text)
@@ -83,6 +122,7 @@ cmd_up() {
         ;;
     esac
     aws_ec2 wait instance-running --instance-ids "$id"
+    ensure_instance_profile "$id"
     echo "Instance: $id"
     echo "Public IP: $(public_ip "$id")"
     return
@@ -93,6 +133,15 @@ cmd_up() {
   [ "$ami" != "None" ] || { echo "Could not resolve a G7e-compatible Ubuntu DLAMI; set AMI_ID." >&2; exit 2; }
   root_dev=$(aws_ec2 describe-images --image-ids "$ami" --query 'Images[0].RootDeviceName' --output text)
   sg_id=${SG_ID:-$(ensure_sg)}
+  ud=$(mktemp)
+  write_userdata "$ud"
+
+  profile_args=()
+  if aws iam get-instance-profile --instance-profile-name "$IAM_PROFILE" >/dev/null 2>&1; then
+    profile_args=(--iam-instance-profile "Name=$IAM_PROFILE")
+  else
+    echo "IAM instance profile $IAM_PROFILE missing; run ./iam.sh. Launching without it." >&2
+  fi
 
   echo "Launching $INSTANCE_TYPE on-demand in $REGION (AMI $ami, key $KEY_NAME) ..."
   id=$(aws_ec2 run-instances \
@@ -100,12 +149,14 @@ cmd_up() {
     --instance-type "$INSTANCE_TYPE" \
     --key-name "$KEY_NAME" \
     --security-group-ids "$sg_id" \
-    --user-data "file://$BOOTSTRAP" \
+    --user-data "file://$ud" \
+    "${profile_args[@]}" \
     --instance-initiated-shutdown-behavior stop \
     --block-device-mappings "DeviceName=$root_dev,Ebs={VolumeSize=$ROOT_GB,VolumeType=gp3,Encrypted=true,DeleteOnTermination=false}" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME},{Key=Purpose,Value=durable-gpu-devhost},{Key=Lifecycle,Value=on-demand},{Key=CostGuardManaged,Value=true},{Key=CostGuardMonthlyBudget,Value=${MONTHLY_BUDGET_USD:-5000}}]" \
     --metadata-options 'HttpTokens=required,HttpEndpoint=enabled' \
     --query 'Instances[0].InstanceId' --output text)
+  rm -f "$ud"
 
   # Protect against accidental termination. Stop/start is the normal lifecycle.
   aws_ec2 modify-instance-attribute --instance-id "$id" --disable-api-termination >/dev/null

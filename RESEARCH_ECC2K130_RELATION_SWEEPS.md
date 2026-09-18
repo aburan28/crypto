@@ -431,3 +431,338 @@ is to catch the other kind.
 Defects 2, 3 and 5 were in validation code. That is the pattern worth
 carrying forward: on this thread the instrument has been more reliable than
 the things built to check it.
+
+## 5. Pushing it: what a logarithm costs, and where the table was flattering
+
+§4.8 stopped at `m = 8` because §1 did. That was an arbitrary stopping point,
+and the obvious thing to try is more of what was working. The result is worth
+recording in full, including the part that looked like a win.
+
+### 5.1 Extended past `m = 8`, the homogeneous accounting goes below rho
+
+Continuing §4.8.1's self-consistent, quotiented table to larger `m`, with the
+support constrained to be a union of `sigma`-orbits (so `B >= 131`):
+
+| `m` | `log2 B` | `log2` total | vs rho |
+|---:|---:|---:|---:|
+| 4 | 41.18 | 108.48 | **+47.68** |
+| 6 | 25.29 | 84.52 | **+23.71** |
+| 8 | 18.61 | 74.39 | **+13.59** |
+| 10 | 14.97 | 68.86 | **+8.06** |
+| 12 | 12.71 | 65.41 | **+4.60** |
+| 14 | 11.18 | 63.05 | **+2.25** |
+| 16 | 10.08 | 61.36 | **+0.56** |
+| 18 | 9.26 | 60.10 | **-0.71** |
+| 20 | 8.63 | 59.12 | **-1.69** |
+| 22 | 8.14 | 58.34 | **-2.47** |
+| 24 | 7.74 | 57.71 | **-3.10** |
+| 26 | 7.41 | 57.19 | **-3.62** |
+| 28 | 7.14 | 56.76 | **-4.05** |
+
+It crosses at **`m = 18`** and reaches `2^-4.05` at `m = 28`. Taken at face
+value that is index calculus beating optimised rho on ECC2K-130.
+
+It is not. It is §3, in the strongest form this thread has produced.
+
+### 5.2 Those are homogeneous relations, and they determine nothing
+
+Every row above prices relations *among base points only*. §3 says what such
+a relation is worth:
+
+> Writing each base point as `R_i = [u_i] P + [v_i] Q`, a relation gives
+> `sum(u_i) + log_P(Q) * sum(v_i) = 0 (mod r)`, which determines `log_P(Q)`
+> only when `sum(v_i)` is invertible mod `r`.
+
+The base points here are not built from `P` and `Q` — they are whatever the
+normal basis produces — so their logarithms are unknown and a homogeneous
+relation is one linear equation among unknowns. Collecting `T + 1` of them
+gives a consistent homogeneous system whose solution space contains the truth
+and says nothing about which point of it is true. The cost falls below rho
+because the thing being bought has been quietly swapped for something
+cheaper. §1 warned about exactly this and the warning still bites at `m = 18`.
+
+A logarithm needs relations against **known targets** `[a]P + [b]Q`.
+
+### 5.3 The cost of a logarithm
+
+Unknowns are the `T` orbit logarithms plus `d`, so `T + 1` relations are
+needed. Each requires decomposing a random known target into `n` signed base
+points, by meet-in-the-middle.
+
+**The table is built once, not once per target.** An earlier form of this
+section charged the whole meet-in-the-middle on every target attempt. That is
+wrong, and ordinarily so: the stored side holds `s`-subset sums *of the
+support*, which do not depend on the target at all. It is built once and
+streamed against for every attempt afterwards.
+
+Amortising it moves the optimum from `2^74.945` to
+`2^67.287`. Those are **two separately optimised
+configurations**, not one attack repriced — the correction changes which
+attack is cheapest, and quoting the difference as the price of a fixed attack
+would be wrong. Held at this section's own configuration, rebuilding per
+attempt costs far more than the gap between the optima.
+
+**A probe is not free, and there are two of them per streamed point.** The
+first form of this model counted probes and not their cost. Each probe is a
+group addition, and against a quotiented table it also needs the probe point
+canonicalised over its own `sigma`-orbit before it can be looked up — measured
+on this container at **13.6 group-operation
+equivalents** (29.20 us per batched addition against 398.52 us per
+canonicalisation). And each streamed point is tested against both elements of
+`E[4] ∩ H`, not one. Together those omissions were worth `2^2.65`.
+
+That makes the table layout a real choice, so both are searched:
+
+* **quotiented** — one canonical class per orbit, 131x fewer entries to
+  build, every probe canonicalised;
+* **full** — all 131 rotations stored, probes are bare lookups, 131x the
+  entries to build.
+
+With memory free it is a pure build-versus-probe trade. Quotiented wins here,
+but only by `2^1.4`.
+
+Optimising over support size, relation length, split and table layout
+(`results/target_boundary.json`):
+
+    support           2 Frobenius orbits, B = 262
+    relations         12 points each, split 11+1
+    stored table      quotiented
+    build (once)      2^66.777
+    probes / attempt  2^10.033 at 2^3.868 each
+    target attempts   2^51.64
+    relations needed  3
+    total             2^67.287      vs rho  +6.48
+
+`2^6.48` is a factor of about 89.
+The error bars that remain:
+
+* **memory is charged at zero** — 1,011 exabytes,
+  free and instantaneous. Charging it makes the negative larger;
+* the build's enumeration assumption is **discharged**, not carried. A
+  `sigma`-class of `s`-subsets over `T` orbits of length 131 is a *necklace*:
+  a length-131 string over an alphabet of `2^T` symbols, up to rotation.
+  `necklaces.py` generates one representative per class by the
+  Fredricksen–Kessler–Maiorana recursion with a density prune. Measured: the
+  count is exactly `C(131T, s)/131` — 131 is prime and `s < 131`, so nothing
+  is fixed by a non-trivial rotation — and the recursion visits **13–31
+  nodes per representative**, falling with density and flat in `m`, against
+  the ~1 group operation each entry needs anyway. The `2^3.3` penalty the
+  note previously carried does not apply;
+* the total is dominated by *table construction*, not search, and a table
+  write is counted as one rho step, which is generous to the table.
+
+### 5.3.1 The structure, run for real
+
+The optimum's shape — one orbit, two unknowns, two relations, a table built
+once — is unusual enough to be worth exercising rather than trusting.
+`validate_amortised_attack.py` builds exactly that table, streams targets
+against it, solves, and checks `[d]P = Q`:
+
+| `m` | `B` | `T` | `n` | table (built once) | relations | target attempts | `[d]P = Q` |
+|---:|---:|---:|---:|---:|---:|---:|:--:|
+| 13 | 13 | 1 | 3 | 20 | 2 | 5 | yes |
+| 13 | 26 | 2 | 3 | 82 | 3 | 5 | yes |
+| 13 | 13 | 1 | 4 | 98 | 2 | 3 | yes |
+| 19 | 19 | 1 | 3 | 32 | 2 | 17 | yes |
+| 19 | 38 | 2 | 3 | 140 | 3 | 13 | yes |
+| 19 | 19 | 1 | 4 | 282 | 2 | 18 | yes |
+
+Six of six recover the planted logarithm. The `T = 1` rows close a
+two-unknown system from two relations, which is the shape the ECC2K-130
+optimum uses, so that shape is not an artefact of the cost model.
+
+**An eighth defect, in the script that produces that table.** Its first
+form filtered the cells down to those carrying a recovery and then reported
+"N of N" over the survivors. A support that could not be found, or a cell
+that ran out of targets, returns without a recovery and so vanished from
+the *denominator* — one real recovery beside one skipped support and one
+outright failure reported as `all_recovered: true`, verdict "1 of 1".
+Reproduced, then fixed: every cell is accounted for, the denominator is the
+number of cells asked for, and the script exits non-zero if any cell did not
+recover. Found by an external review agent on the pull request, not by this
+thread.
+
+That is four of ten defects now living in validation rather than in the
+thing being validated. The tenth is in the model: `cost()` raised
+`OverflowError` on lopsided splits at large `T`, because it exponentiated the
+stored side to report it in bytes. That is exactly the shape the optimiser
+prefers, so part of the search space returned an exception rather than a
+result — and a scan that crashes where it was supposed to look cannot support
+"nothing better is out there". The log2 figures are always reported now; only
+the human-readable conversions can be absent. A ninth surfaced while fixing the eighth: the
+counterfactual in `target_boundary.py` charged `attempts x max(build,
+stream)` for rebuilding the table every time, which drops the build entirely
+whenever streaming dominates — making the counterfactual *cheaper* than the
+thing it exists to be worse than. Caught by this thread's own control
+asserting amortisation is never dearer, which is the first time on this study
+a test found a defect before a reviewer did. The pattern is stable enough to state as a finding of
+its own: on this study, code written to check a result has been less reliable
+than the code producing it, and the failure mode is always the same — the
+check reports success over a subset it quietly chose.
+
+### 5.4 The measured input, and a seventh defect
+
+The model has one free parameter, the decomposition rate, so it is measured
+rather than asserted — the same discipline that caught the `2x`–`43x` miss in
+§4.5.
+
+An earlier form of this model gave `sigma` a factor of 131 in that rate, on
+the reasoning that a decomposition of `sigma^k(target)` is as useful as one
+of `target`, so there are 131 acceptable right-hand sides. Measured on small
+analogues, that model is optimistic by about **7x**:
+
+| `m` | `T` | `B` | `n` | measured | `2^n C(B,n)/r` | ratio | with `sigma` factor | ratio |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 19 | 2 | 38 | 2 | 0.0117 | 0.0215 | 0.54 | 0.4082 | 0.03 |
+| 19 | 3 | 57 | 2 | 0.0433 | 0.0488 | 0.89 | 0.9268 | 0.05 |
+| 17 | 2 | 34 | 2 | 0.0650 | 0.0685 | 0.95 | 1.0000 | 0.07 |
+| 17 | 3 | 51 | 2 | 0.1200 | 0.1558 | 0.77 | 1.0000 | 0.12 |
+| 19 | 4 | 76 | 2 | 0.1033 | 0.0871 | 1.19 | 1.0000 | 0.10 |
+| 17 | 4 | 68 | 2 | 0.2417 | 0.2783 | 0.87 | 1.0000 | 0.24 |
+| 19 | 2 | 38 | 3 | 0.3633 | 0.5157 | 0.70 | 1.0000 | 0.36 |
+| 17 | 2 | 34 | 3 | 0.7817 | 1.0000 | 0.78 | 1.0000 | 0.78 |
+
+The reason is structural, and checked directly: **the set of `n`-subset sums
+is itself `sigma`-closed** — true in every cell above. The support is
+`sigma`-stable, so if a sum is reachable then so is every rotation of it.
+Accepting `sigma^k(target)` is therefore one chance taken 131 times, not 131
+independent chances.
+
+So the Frobenius quotient buys memory (one canonical class per orbit) and
+unknowns (`B/131` rather than `B`) — the latter is the large saving — and it
+does **not** buy hit rate. That is the seventh defect in this thread's
+running list, and like three of the first six it was in a model rather than
+in code, and it was caught by measuring an assumption rather than by a test
+failing.
+
+The plain rate `2^n C(B,n)/r` holds to a mean of
+`0.844` over 7 unsaturated cells —
+slightly below 1, because subset sums collide — and that factor is carried
+into the cost so the total is not quoted optimistically.
+
+### 5.5 Why the meet-in-the-middle cannot be replaced
+
+The remaining lever would be a better `k`-sum algorithm. Wagner's
+generalised birthday would find an `n`-sum hitting a target in about
+`k · 2^(129/(1+log2 k))` — `2^25.80` at `k = 16`, far below the reference.
+
+It does not apply. Wagner needs partial matching: the low `t` bits of a sum
+must depend only on the low `t` bits of the summands, so partial collisions
+can be merged level by level. That holds for XOR and for addition mod `2^m`.
+It fails for elliptic-curve addition, where `x(P+Q)` is not determined by any
+truncation of `x(P)` and `x(Q)` — there is no prefix structure on curve
+points to recurse on. The scalar domain would support it and the scalars are
+exactly the unknowns; the abscissa domain supports it only through summation
+polynomials, which is a Gröbner solve this repository has already measured
+and closed (`RESEARCH_ECC2K130_DECOMPOSITION.md`).
+
+So two lists are what is available, and a two-list meet-in-the-middle costs
+the square root of the space it must cover. That square root, against a group
+whose rho already takes its own `sqrt` with the same 262 automorphisms, is
+the whole of the remaining gap.
+
+### 5.6 Parity is below this family's floor
+
+The question the thread has been circling is whether the gap can be closed.
+It cannot, and the reason is a bound rather than a failure to search.
+
+Write `X` for the cost of building the stored side. Balancing it against the
+streamed side collapses every configuration to one shape:
+
+    total(X) = X + K/X,    K = U · C(n,s) · r · E4 · c / (131 · f)
+
+minimised at `X = sqrt(K)`, so
+
+    total = 2 · sqrt(K1 · U · C(n,s) · r),    K1 = E4 · c / (131 · f) = 0.265358
+
+Every factor is pinned:
+
+* `U = T + 1 ≥ 2` — a support has at least one orbit, and `d` is always an
+  unknown;
+* `C(n,s) ≥ n ≥ 2` — a relation needs at least two points, and the cheapest
+  split is the most lopsided;
+* `E4 = 2` and `c = 14.6` are the measured probe cost and the reachable part
+  of `E[4]`; `131` is the Frobenius order.
+
+So `U · C(n,s) ≥ 4` and
+
+    total ≥ 2 · sqrt(4 · K1 · r) = 2^65.543
+
+**independently of support size, relation length, split, table layout, or how
+the search is organised.** The reference is `2^60.809`.
+Parity sits `2^-4.73` *below* the floor.
+
+To reach it the constant would have to fall by **26.6x**,
+and there is nothing left to take it from: `U` and `C(n,s)` are at their
+minima by definition, and `K1` is fixed by the group.
+
+Verified against the search: an exact scan of 708,000 configurations —
+`T ≤ 200`, `n ≤ 60`, every split, both table layouts — finds
+`2^67.287`, and larger `T` only rises (`2^71.72` at `T = 200`,
+`2^76.05` at `T = 200000`). The best configuration respects its own floor
+with `2^1.74` to spare.
+
+### 5.7 Why rho wins, stated structurally
+
+Both costs are a constant times `sqrt(r)`. That is the whole of it:
+
+    rho            0.077 · sqrt(r)
+    this family  ≥ 2.06 · sqrt(r)
+
+The 262 automorphisms enter rho's constant **inside** its square root — rho
+walks a quotient of the group, so its step count is `sqrt(r/262)`-shaped. The
+Frobenius quotient does something different for index calculus: it divides
+the *unknown count* and the *table size* by 131. Both are real savings, and
+this thread measured them at `2^14` combined. Neither touches the square
+root, because the meet-in-the-middle still has to cover a space of size `r`
+and a two-list collision search over such a space costs `sqrt` of it.
+
+That is why the gap stopped closing at `2^6.5` after four rounds of
+correction, and why the fifth round widened it. The bookkeeping had room to
+be wrong; the square root did not.
+
+**What would actually move it** is a decomposition oracle cheaper than a
+square-root search — not a better constant. §5.5 closes the one generic
+candidate: Wagner's `k`-tree needs partial matching, which curve addition
+does not admit. The summation-polynomial route to such an oracle is measured
+and closed elsewhere in this repository. Absent one, `2^4.73`
+is a floor and `2^6.48` is where the arithmetic lands.
+
+### 5.8 Where this leaves the thread
+
+
+`2^6.48` over the reference, with memory free, every input either
+measured or derived, and the three directions that looked open — larger `m`,
+a `k`-tree in place of the meet-in-the-middle, and rebuilding the table per
+target — closed, corrected, and corrected again.
+
+**One table, one unit**, as §2 of `AGENTS.md` asks. `S = operations / sqrt(r)`,
+`sqrt(r) = 2^64.5`:
+
+| variant | `log2` ops | `S` | vs rho | class |
+|:--|---:|---:|---:|:--|
+| Pollard rho, `<-1> x <pi>` *(reference)* | 60.81 | 0.077 | — | baseline |
+| §1 as published, no quotient | 85.60 | 2,199,000 | `2^+24.79` | accounting |
+| + Frobenius quotient at every `m` | 74.40 | 954 | `2^+13.59` | accounting |
+| + priced as a logarithm, not a relation | 71.94 | 173 | `2^+11.13` | accounting |
+| + stored table built once | 74.94 | 1.39e+03 | `2^+14.14` | accounting |
+| **+ probes and `E[4]` translates priced** | **67.29** | **6.9** | **`2^+6.48`** | accounting |
+| homogeneous relations, `m = 28` | 56.76 | 0.018 | `2^-4.05` | **relabelling** |
+
+The last row is the one to read twice. It is *below* the reference, and it is
+the only row in the table that is not an honest accounting of a logarithm —
+it prices relations that determine nothing. §1's warning, drawn.
+
+**The trajectory is the finding, and it is not about the curve.** Every step
+above was a correction to this thread's own bookkeeping. Four of them made
+the attack look better; the last made it look worse by `2^2.65`, and it was
+found by an external review agent rather than by this thread. The remaining
+`2^6.48` is small enough that one more error of the size of any of these
+would move it materially in either direction. What it is not is evidence that
+the curve is weak: the only lever anyone has applied here is arithmetic about
+costs.
+
+What would actually move it is a decomposition oracle cheaper than a
+square-root search, and §5.5 closes the one generic candidate. Until such an
+oracle exists, the floor is `sqrt` of a space that rho already square-roots
+with the same 262 automorphisms.

@@ -907,19 +907,80 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         (<code>research/ecc2k130_relations/results/summary.json</code>,
         <code>four_point_orbit_summary.json</code>).</p>
       <p><strong>Frobenius is a real saving and not a lever.</strong> On a normal basis the
-        weight-two support is closed under &sigma;, so both sides of the meet-in-the-middle group
-        into &sigma;-orbits of 131 and a 131&thinsp;&times;&thinsp;T-point support carries only T
-        unknowns. Applied at every m &mdash; not just m&thinsp;=&thinsp;4 &mdash; it is worth
-        2<sup>16.1</sup> to 2<sup>18.4</sup>, more at larger m, so it does <em>not</em> change which
-        m is cheapest: m&thinsp;=&thinsp;8 before and after. It changes the margin. Priced on a
-        support that actually yields the relations it is charged for &mdash; section 1 charges for B
-        relations at a support expected to yield one &mdash; the best row is m&thinsp;=&thinsp;8 at
-        <strong>2<sup>+13.59</sup></strong> over rho, against the 2<sup>+24.79</sup> previously
-        recorded, needing 65 exabytes of class keys. Still short, and still behind a storage wall
-        that no engineering removes. Its single-relation rows at m&thinsp;=&thinsp;4, 6 and 8 fall
-        <em>below</em> the reference, which is exactly the row this ledger declines to quote: the
-        work moved into the relations a logarithm needs, not out of the method
-        (<code>research/ecc2k130_relations/results/four_point_orbit_boundary.json</code>).</p>
+        weight-two support is closed under &sigma;, so the stored side of the meet-in-the-middle
+        holds one canonical class per orbit and a 131&thinsp;&times;&thinsp;T-point support carries
+        only T unknowns. Applied at every m it is worth 2<sup>16.1</sup>&ndash;2<sup>18.4</sup>,
+        more at larger m, so it does <em>not</em> change which m is cheapest &mdash; it changes the
+        margin (<code>four_point_orbit_boundary.json</code>).</p>
+      <p><strong>Extended past m = 8 the homogeneous table crosses rho, and that is the trap.</strong>
+        Continuing the quotiented self-consistent accounting, it goes sub-reference at
+        <strong>m = 18</strong> and reaches 2<sup>&minus;4.05</sup> at m = 28. Those rows price
+        relations among base points alone, which give one linear equation among <em>unknown</em>
+        logarithms and determine log<sub>P</sub>(Q) not at all.</p>
+      <p><strong>Priced as a logarithm, the gap is 2<sup>+6.48</sup> and every step of it is
+        bookkeeping.</strong> T + 1 relations against known targets [a]P + [b]Q, the
+        meet-in-the-middle table built <em>once</em>, probes and their canonicalisation priced in
+        rho&rsquo;s own unit, memory charged at zero. One table, one unit
+        (S = operations / &radic;r, &radic;r = 2<sup>64.5</sup>):</p>
+      <table>
+        <caption>ECC2K-130 homogeneous-relation index calculus, cost of a <em>logarithm</em>.
+          Reference cited from <code>experiments/ecc2k130_extension_field_boundary.json</code>;
+          variants from <code>research/ecc2k130_relations/results/target_boundary.json</code>.</caption>
+        <thead><tr><th scope="col">Variant</th><th scope="col" class="n">log&#8322; ops</th>
+          <th scope="col" class="n">S</th><th scope="col" class="n">Ratio to rho</th>
+          <th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Pollard rho, &lang;&minus;1&rang;&times;&lang;&pi;&rang; <em>(reference)</em></td>
+            <td class="n">60.81</td><td class="n">0.077</td><td class="n">2^+0.00</td>
+            <td><span class="chip">baseline</span></td></tr>
+          <tr><td>Section 1 as published, no quotient</td><td class="n">85.60</td>
+            <td class="n">2,199,000</td><td class="n">2^+24.79</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ Frobenius quotient at every m</td><td class="n">74.40</td>
+            <td class="n">954</td><td class="n">2^+13.59</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ priced as a logarithm, not a relation</td><td class="n">71.94</td>
+            <td class="n">173</td><td class="n">2^+11.13</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td>+ stored table built once</td><td class="n">74.94</td>
+            <td class="n">1.39e+03</td><td class="n">2^+14.14</td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td><strong>+ probes and E[4] translates priced</strong> <em>(current)</em></td>
+            <td class="n"><strong>67.29</strong></td><td class="n"><strong>6.9</strong></td>
+            <td class="n"><strong>2^+6.48</strong></td>
+            <td><span class="chip">accounting</span></td></tr>
+          <tr><td><em>Floor of this family &mdash; a bound, not a search result</em></td>
+            <td class="n"><em>65.54</em></td><td class="n"><em>2.06</em></td>
+            <td class="n"><em>2^+4.73</em></td>
+            <td><span class="chip">boundary</span></td></tr>
+          <tr><td>Homogeneous relations at m = 28</td><td class="n">56.76</td>
+            <td class="n">0.018</td><td class="n">2^&minus;4.05</td>
+            <td><span class="chip relabel">relabelling</span></td></tr>
+        </tbody>
+      </table>
+      <p>The last row sits <em>below</em> the reference and is the only one that is not an honest
+        accounting of a logarithm: it prices relations among unknown base logarithms, which
+        determine log<sub>P</sub>(Q) not at all. Every other row is a correction to this
+        ledger&rsquo;s own arithmetic &mdash; four made the attack look better, the fifth made it
+        look worse by 2<sup>2.65</sup> and came from an external review agent. None is a fact about
+        the curve. Current optimum: 2 Frobenius orbits (B = 262), 12-point relations split 11+1,
+        quotiented table, 1,011 EB charged at zero. The structure is run end to
+        end on small curves and recovers a planted logarithm in 6 of 6 cells
+        (<code>amortised_attack.json</code>).</p>
+      <p><strong>Parity is below the floor, so it is unreachable rather than unreached.</strong>
+        Balancing the build against the streamed side collapses every configuration to
+        total = 2&radic;(K&#8321;&thinsp;&middot;&thinsp;U&thinsp;&middot;&thinsp;C(n,s)&thinsp;&middot;&thinsp;r)
+        with K&#8321; = 0.265358. U&thinsp;&ge;&thinsp;2 (one orbit, plus d) and
+        C(n,s)&thinsp;&ge;&thinsp;n&thinsp;&ge;&thinsp;2, so every configuration costs at least
+        <strong>2<sup>65.54</sup></strong> whatever the support size, relation
+        length, split or table layout. The reference is 2<sup>60.81</sup>: parity sits
+        2<sup>-4.73</sup> <em>below</em> the floor, and closing it would need the
+        constant to fall 26.6&times; with nothing left to take it from.
+        Structurally, the 262 automorphisms enter rho&rsquo;s constant <em>inside</em> its square
+        root, while the Frobenius quotient divides index calculus&rsquo;s unknown count and table
+        size &mdash; both real, worth 2<sup>14</sup> together, and neither touching the square root
+        a two-list collision search over a space of size r must pay. Moving it needs a
+        decomposition oracle cheaper than that square root, not a better constant.</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
@@ -1459,6 +1520,45 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     This thread stops: the leftover that could still be priced has been measured.</p>
     <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/summary.json">18 B/s measurement receipt</a>;
     <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/eighteen/README.md">experiment report</a>.</p>
+  </section>
+
+  <section aria-labelledby="twenty-b-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="twenty-b-result">ECC2K-130 GPU engineering: 20 B/s on one RTX PRO 6000</h2>
+    <p>A later allocation of the same SKU (driver 595.91.07, CUDA 13.3.73,
+    automatic 96,256 workers, clocks locked at 2430 MHz) timed pair-ILP, an
+    L2 persist window, and slot unroll 2 on top of the table walk + byte
+    pivot. The one-add floor is 22–25 B/s, so 20 is not forbidden. No arm
+    cleared it. The campaign default stays the shipping walk. Field-product
+    count is unchanged at 5.3125 per update. Class: engineering.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 20 B target</th><th scope="col">/ this shipping 14.436</th><th scope="col">/ 22 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Shipping product</td><td>14.436</td><td>0.722</td><td>1.000</td><td>0.656</td><td>300 reports, 0 dropped / reference</td></tr><tr><td>Table walk + byte pivot</td><td>16.474</td><td>0.824</td><td>1.141</td><td>0.749</td><td>walk 1, pivot 1 / not accepted</td></tr><tr><td>+ pair-ILP</td><td>16.617</td><td>0.831</td><td>1.151</td><td>0.755</td><td>priced +9%, measured +0.9% / not accepted</td></tr><tr><td>+ L2 persist</td><td>17.081</td><td>0.854</td><td>1.183</td><td>0.776</td><td>80 MiB window / not accepted</td></tr><tr><td>+ slot unroll 2</td><td>17.298</td><td>0.865</td><td>1.198</td><td>0.786</td><td>110 registers, 0 spill / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample completed
+    50,465,865,728 updates. Pair-ILP was priced at +9% if ptxas dual-issued and
+    measured +0.9%. Persist was +2.8% on that control. Unroll 2 is the best
+    row and still 0.865 of 20. This thread stops.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-20b-gpu/summary.json">20 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-20b-gpu/README.md">experiment report</a>.</p>
+  </section>
+
+  <section aria-labelledby="twenty-nine-b-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="twenty-nine-b-result">ECC2K-130 GPU engineering: 29 B/s on one RTX PRO 6000</h2>
+    <p>The same SKU and 17.298 B/s control (driver 595.91.07, CUDA 13.3.73,
+    automatic 96,256 workers, clocks locked at 2430 MHz) timed a hoisted
+    3-bit product correction, an ONB multiply inside <code>inv131</code>, a
+    compact-state slot pipeline, a 5-word poly→ONB map, and — after Nsight
+    Compute put that control at 71% FP64/<code>clmad</code> and 36% ALU —
+    moving the polynomial square onto the logic pipe. The one-add floor is
+    22–25 B/s; 29 sits above both pipe budgets at 5.3125 products/update.
+    No arm cleared 29. The campaign default stays the shipping walk. Class:
+    engineering.</p>
+    <table><thead><tr><th scope="col">Variant (engineering)</th><th scope="col">Median B/s</th><th scope="col">/ 29 B target</th><th scope="col">/ 17.298 control</th><th scope="col">/ 22 B floor</th><th scope="col">Correctness / acceptance</th></tr></thead><tbody><tr><td>Table + pivot + ILP + persist + unroll 2</td><td>17.298</td><td>0.596</td><td>1.000</td><td>0.786</td><td>300 reports, 0 dropped / reference</td></tr><tr><td>+ top hoist</td><td>17.270</td><td>0.596</td><td>0.998</td><td>0.785</td><td>116 registers / not accepted</td></tr><tr><td>+ ONB inv</td><td>16.460</td><td>0.568</td><td>0.952</td><td>0.748</td><td>+clmad on inv / not accepted</td></tr><tr><td>+ slot pipeline</td><td>16.463</td><td>0.568</td><td>0.952</td><td>0.748</td><td>scheduling / not accepted</td></tr><tr><td>+ ALU square</td><td>17.414</td><td>0.600</td><td>1.007</td><td>0.792</td><td>300 reports; FP64 71%→63% / not accepted</td></tr></tbody></table>
+    <p>Each rate is a median of three complete-scalar benches. Each sample
+    completed 50,465,865,728 updates. ALU square is the only arm that beat
+    the control. A later round tried twelve outstanding pair-clmads, a
+    flattened lo-then-hi 128-bit Karatsuba, ONB squares on the ALU, slot
+    unroll 4 and 8, and 192×3 occupancy: all verified 300/300 and all ran
+    slower (best of those, unroll 4, 17.379). This thread has not reached 29.</p>
+    <p>Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-29b-gpu/summary.json">29 B/s measurement receipt</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/THROUGHPUT-29B.md">priced note</a>.</p>
   </section>
 
   <section aria-labelledby="preblackwell-result" style="margin:3rem 0;overflow-x:auto">
@@ -2598,5 +2698,51 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0014 -->
+<!-- BEGIN ic-tournament-round-0015 -->
+<section class="panel" id="ic-tournament-round-0015">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0015/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,468</td><td>1</td><td>0.7217</td><td>1.607e+05</td><td>12/12</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,294</td><td>0.961</td><td>0.6935</td><td>1.545e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,053</td><td>0.9071</td><td>0.6547</td><td>1.458e+05</td><td>12/12</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>6,191</td><td>1.386</td><td>1</td><td>unmeasured</td><td>12/12</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,444</td><td>1</td><td>0.7452</td><td>1.599e+05</td><td>36/36</td><td>reference</td></tr>
+<tr><td>scan</td><td>4,269</td><td>0.9606</td><td>0.7158</td><td>1.536e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>4,028</td><td>0.9064</td><td>0.6754</td><td>1.449e+05</td><td>36/36</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,964</td><td>1.342</td><td>1</td><td>unmeasured</td><td>36/36</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>4,050</td><td>1</td><td>0.7372</td><td>1.635e+05</td><td>180/180</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,669</td><td>0.9059</td><td>0.6679</td><td>1.481e+05</td><td>180/180</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>5,493</td><td>1.356</td><td>1</td><td>unmeasured</td><td>180/180</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.102</td><td>1</td><td>reference</td><td>0.9246</td><td>180/180</td></tr>
+<tr><td>scan_io</td><td>1.094</td><td>0.9925</td><td>[0.9785179757065511, 1.0072720504423012]</td><td>0.9176</td><td>180/180</td></tr>
+<tr><td>rho</td><td>1.192</td><td>1.082</td><td>[1.0523319128877338, 1.1070035958217628]</td><td>1</td><td>180/180</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0015 -->
+<section id="ecc2k-inline-25b"><h2>ECC2K-130 selective inlining: 25 B/s target not reached</h2>
+<p>One RTX PRO 6000 Blackwell Server Edition, median of three paired runs on the archived tuning snapshot; not a throughput measurement of the main-branch port.
+Best measured throughput 17.946263 B complete scalar updates/s, up 3.760%.
+All variants retain 5.3125 products/update and the same generic-group bound;
+this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
+<table><thead><tr><th>Variant</th><th>Median B updates/s</th><th>/ paired baseline</th><th>/ 25 B target</th><th>Replay</th></tr></thead><tbody><tr><td>Baseline (engineering)</td><td>17.295877</td><td>1.000000</td><td>0.691835</td><td>600/600, zero dropped</td></tr><tr><td>Inline single (engineering)</td><td>17.296764</td><td>1.000051</td><td>0.691871</td><td>600/600, zero dropped</td></tr><tr><td>Inline paired (engineering)</td><td>17.940329</td><td>1.037260</td><td>0.717613</td><td>600/600, zero dropped</td></tr><tr><td>Inline both (engineering)</td><td>17.946263</td><td>1.037604</td><td>0.717851</td><td>600/600, zero dropped</td></tr></tbody></table>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/results.json">results</a>;
+<a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/README.md">report and reproduction</a>.</p></section>
 </body>
 </html>

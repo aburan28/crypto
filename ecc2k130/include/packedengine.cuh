@@ -7,6 +7,12 @@
 #ifndef ECC_PROFILE_RANGE
 #define ECC_PROFILE_RANGE 0
 #endif
+#ifndef ECC_PACKED_L2_PERSIST
+#define ECC_PACKED_L2_PERSIST 0
+#endif
+#if ECC_PACKED_L2_PERSIST != 0 && ECC_PACKED_L2_PERSIST != 1
+#error "ECC_PACKED_L2_PERSIST must be 0 or 1"
+#endif
 #if ECC_PROFILE_RANGE
 #include <cuda_profiler_api.h>
 #endif
@@ -16,18 +22,33 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     bool restartPending = false;
     unsigned *denominators = nullptr;
     unsigned *twConsts = nullptr;
+#if ECC_PACKED_L2_PERSIST
+    // One allocation: the access-policy window is a single contiguous range.
+    unsigned *fieldBlob = nullptr;
+#endif
     // The table walk's addends and coefficients come from the resolver's
     // TableWalk so device and re-walk share one table by construction.
     const Solver<CfgF131> *sol = nullptr;
 
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
-        cudaFree(P.x); cudaFree(P.y); cudaFree(P.pchain); cudaFree(P.dead);
+#if ECC_PACKED_L2_PERSIST
+        cudaFree(fieldBlob);
+#else
+        cudaFree(P.x); cudaFree(P.y); cudaFree(P.pchain);
+        cudaFree(denominators);
+#endif
+        cudaFree(P.dead);
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
-        cudaFree(denominators); cudaFree(P.hist); cudaFree(twConsts);
+        cudaFree(P.hist); cudaFree(twConsts);
     }
-#if ECC_WALK_TABLE
+#if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
+    unsigned checkpointVersion() const override { return 3u; }
+    int laneArrayCount() const override { return 3; }
+    u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
+#elif ECC_WALK_TABLE
+    static size_t dynamicSharedBytes() { return 0; }
     unsigned checkpointVersion() const override { return 3u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
@@ -162,6 +183,41 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
                 cudaFuncAttributeMaxDynamicSharedMemorySize, int(dynamicSharedBytes())));
     }
 
+#if ECC_PACKED_L2_PERSIST
+    static int persistFieldCount() {
+        return 3 + (ECC_PACKED_CACHE_DENOM ? denominatorFields : 0);
+    }
+
+    static void applyPackedL2Persist(void *base, size_t bytes) {
+        int device = 0, maxPersist = 0;
+        CUDA_CHECK(cudaGetDevice(&device));
+        CUDA_CHECK(cudaDeviceGetAttribute(&maxPersist,
+            cudaDevAttrMaxPersistingL2CacheSize, device));
+        if (maxPersist <= 0 || bytes == 0) {
+            printf("packed L2 persist window: skipped (cap %d, blob %zu)\n",
+                   maxPersist, bytes);
+            return;
+        }
+        CUDA_CHECK(cudaDeviceSetLimit(cudaLimitPersistingL2CacheSize,
+                                      size_t(maxPersist)));
+        CUDA_CHECK(cudaCtxResetPersistingL2Cache());
+        // One window per stream. Cover the coordinate fields fully: x+y+pchain
+        // at automatic occupancy is ~75 MiB, under the 80 MiB cap on this SKU.
+        // Denominators sit after them and take whatever of the cap remains.
+        cudaAccessPolicyWindow window = {};
+        window.base_ptr = base;
+        window.num_bytes = bytes < size_t(maxPersist) ? bytes : size_t(maxPersist);
+        window.hitRatio = 1.0f;
+        window.hitProp = cudaAccessPropertyPersisting;
+        window.missProp = cudaAccessPropertyStreaming;
+        cudaStreamAttrValue attr = {};
+        attr.accessPolicyWindow = window;
+        CUDA_CHECK(cudaStreamSetAttribute(0, cudaStreamAttributeAccessPolicyWindow, &attr));
+        printf("packed L2 persist window: %zu of %zu field bytes, cap %d\n",
+               window.num_bytes, bytes, maxPersist);
+    }
+#endif
+
     void setup(const Options &o, const u64 *px, const u64 *py, const u64 *qx, const u64 *qy) {
         prepareKernel();
         if (o.preferL1)
@@ -169,10 +225,21 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         P.threads = o.threads; P.steps = o.steps; P.dpWeight = o.dpWeight;
         P.runId = o.runId; P.maxIters = o.maxIters; P.iterBase = 0; P.dpCap = o.dpCap;
         const size_t bytes = physicalFieldCount() * sizeof(unsigned);
+#if ECC_PACKED_L2_PERSIST
+        CUDA_CHECK(cudaMalloc(&fieldBlob, bytes * size_t(persistFieldCount())));
+        P.x = fieldBlob;
+        P.y = fieldBlob + physicalFieldCount();
+        P.pchain = fieldBlob + 2 * physicalFieldCount();
+#if ECC_PACKED_CACHE_DENOM
+        denominators = fieldBlob + 3 * physicalFieldCount();
+#endif
+        applyPackedL2Persist(fieldBlob, bytes * size_t(persistFieldCount()));
+#else
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
 #if ECC_PACKED_CACHE_DENOM
         CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
+#endif
 #endif
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
         CUDA_CHECK(cudaMalloc(&P.seed, laneCount() * sizeof(u64)));
@@ -224,6 +291,16 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed polynomial state: %d\n", ECC_PACKED_POLY_STATE);
         printf("packed unrolled inversion: %d\n", ECC_PACKED_UNROLL_INV);
         printf("packed paired products: %d\n", ECC_PACKED_PAIR_PRODUCTS);
+        printf("packed pair ilp: %d\n", ECC_PACKED_PAIR_ILP);
+        printf("packed pair clmul: %d\n", ECC_PACKED_PAIR_CLMUL);
+        printf("packed clmul flat: %d\n", ECC_PACKED_CLMUL_FLAT);
+        printf("packed top hoist: %d\n", ECC_PACKED_TOP_HOIST);
+        printf("packed onb inv: %d\n", ECC_PACKED_ONB_INV);
+        printf("packed from reduced: %d\n", ECC_PACKED_FROM_REDUCED);
+        printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
+        printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
+        printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
+        printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
@@ -235,9 +312,13 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
+        printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
+        printf("packed alu onb square: %d\n", ECC_PACKED_ALU_SQR);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
+        printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
+        printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

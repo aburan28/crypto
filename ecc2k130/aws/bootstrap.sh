@@ -97,15 +97,18 @@ build_from_source() {
     local SRC
     SRC=$(field sourceKey)
     [ -n "$SRC" ] || { echo "published prefix incomplete and no sourceKey in campaign.json; run push_source.sh"; exit 1; }
-    # Fat client so g6/g6e (sm_89) and g7e (sm_120) share one binaryKey.
-    # A thin Ada rebuild would point the live campaign at a binary Blackwell
-    # cannot load. CLMAD stays 1: both arches have a receipt.
-    export ARCHES="${ARCHES:-89 120}"
-    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES from $SRC"
+    # Fat client so g4dn (sm_75), g6/g6e (sm_89) and g7e (sm_120) share one
+    # binaryKey. A thin Ada/T4 rebuild would point the live campaign at a
+    # binary Blackwell cannot load. CLMAD stays 1 even with 75 in ARCHES:
+    # Turing uses the software product in that slice; Ada/Blackwell keep
+    # the receipt. build.sh would otherwise default CLMAD=0 and slow the fleet.
+    export ARCHES="${ARCHES:-75 89 120}"
+    export CLMAD="${CLMAD:-1}"
+    echo "published prefix incomplete or missing sm_$(local_cc); building ARCHES=$ARCHES CLMAD=$CLMAD from $SRC"
     for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 5; done
     aws s3 cp "s3://$BUCKET/aws/build.sh" build.sh --only-show-errors && chmod +x build.sh
     aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
-    BUCKET=$BUCKET ARCHES="$ARCHES" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
+    BUCKET=$BUCKET ARCHES="$ARCHES" CLMAD="$CLMAD" POINT_CAMPAIGN=1 ./build.sh "$SRC" || { echo "build failed"; exit 1; }
     aws s3 cp "s3://$BUCKET/campaign.json" campaign.json
     BIN=$(field binaryKey)
 }
@@ -148,6 +151,21 @@ for f in $FIXTURES; do
 done
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/$PREFIX/manifest.json" manifest.json --only-show-errors || true
+# Host binary walks on spare instance CPUs alongside the GPU workers.
+HOST_BIN=$(field hostBinaryKey)
+HOST_SHA=$(field hostBinarySha256)
+if [ -n "$HOST_BIN" ]; then
+    aws s3 cp "s3://$BUCKET/$HOST_BIN" ecc2k130-cpu --only-show-errors \
+        || { echo "host binary $HOST_BIN missing"; exit 1; }
+    chmod +x ecc2k130-cpu
+    if [ -n "$HOST_SHA" ]; then
+        got=$(sha256sum ecc2k130-cpu | cut -d' ' -f1)
+        if [ "$got" != "$HOST_SHA" ]; then
+            echo "host binary hash $got != campaign hostBinarySha256 $HOST_SHA"
+            exit 1
+        fi
+    fi
+fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
@@ -166,11 +184,11 @@ cat manifest.json 2>/dev/null
 #
 # The carryless marker is the one that cannot be a constant.  On sm_120 a
 # CLMAD=0 build is the accident this gate exists to catch. Ada (sm_89, EC2
-# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="89 120"
-# rebuild uses that default; a software-product Ada client is still legal if
-# its manifest says 0. Hardcoding 1 here would reject that binary. Take the
-# expected value from the published manifest. A missing manifest keeps the
-# old strict 1.
+# g6/g6e) now has its own receipt (CLMAD=1) and the fat ARCHES="75 89 120"
+# rebuild keeps CLMAD=1 (Turing uses the software product in its slice).
+# A software-product Ada client is still legal if its manifest says 0.
+# Hardcoding 1 here would reject that binary. Take the expected value from
+# the published manifest. A missing manifest keeps the old strict 1.
 expectedClmad=1
 if [ -s manifest.json ]; then
     expectedClmad=$(python3 - <<'EOF'
@@ -273,7 +291,7 @@ while true; do
     if curl -s -m 2 -f -H "X-aws-ec2-metadata-token: $TOKEN" \
             http://169.254.169.254/latest/meta-data/spot/instance-action >/dev/null; then
         logger -t ecc2k130 "spot interruption notice: stopping workers"
-        systemctl stop 'ecc2k130-worker@*'
+        systemctl stop 'ecc2k130-worker@*' ecc2k130-hostcpu.service 2>/dev/null || true
         exit 0
     fi
     sleep 5
@@ -296,7 +314,7 @@ EOF
 # Logs to S3 every five minutes: the only window into a fleet with no ssh.
 cat > "$ROOT/logship.sh" <<EOF
 #!/bin/bash
-journalctl -u 'ecc2k130-worker@*' -u ecc2k130-spot-watch --no-pager -n 600 > /tmp/ecc-worker.log 2>&1
+journalctl -u 'ecc2k130-worker@*' -u ecc2k130-hostcpu -u ecc2k130-spot-watch --no-pager -n 600 > /tmp/ecc-worker.log 2>&1
 aws s3 cp /tmp/ecc-worker.log "s3://$BUCKET/logs/$IID/worker.log" --only-show-errors
 aws s3 cp /var/log/ecc2k130-bootstrap.log "s3://$BUCKET/logs/$IID/bootstrap.log" --only-show-errors
 EOF
@@ -329,4 +347,44 @@ NGPU=$(nvidia-smi -L | wc -l)
 for g in $(seq 0 $((NGPU - 1))); do
     systemctl enable --now "ecc2k130-worker@$g"
 done
-echo "bootstrap done $(date -u): $NGPU worker(s) started"
+
+# Spare host CPUs: one ecc2k130-cpu walker beside the GPU clients. Leave two
+# vCPUs for the CUDA supervisors on typical 8-vCPU g7/g7e.2xlarge boxes.
+# Set ECC_HOST_CPU=0 in the launch env to skip.
+HOST_CPU=${ECC_HOST_CPU:-1}
+HOST_THREADS=0
+if [ "$HOST_CPU" = 1 ] && [ -x "$ROOT/ecc2k130-cpu" ]; then
+    NCPU=$(nproc)
+    if [ "$NCPU" -gt 2 ]; then HOST_THREADS=$((NCPU - 2)); else HOST_THREADS=1; fi
+    cat > /etc/systemd/system/ecc2k130-hostcpu.service <<EOF
+[Unit]
+Description=ECC2K-130 campaign worker on spare host CPUs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/ecc2k130.env
+Environment=ECC_DEVICE=cpu
+Environment=ECC_CLAIM_NEW=1
+Environment=ECC_THREADS=$HOST_THREADS
+Environment=ECC_CLIENT=$ROOT/ecc2k130-cpu
+Environment=ECC_GPU=0
+Environment=ECC_DEVICE_NAME=cpu/$HOST_THREADS@host
+WorkingDirectory=/opt/ecc2k130
+ExecStart=/usr/bin/python3 /opt/ecc2k130/worker.py
+Restart=on-failure
+RestartSec=120
+KillSignal=SIGTERM
+KillMode=mixed
+TimeoutStopSec=900
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable --now ecc2k130-hostcpu.service
+    echo "host-CPU worker started ($HOST_THREADS of $NCPU threads)"
+elif [ "$HOST_CPU" = 1 ]; then
+    echo "host binary missing; skipping spare-CPU worker"
+fi
+echo "bootstrap done $(date -u): $NGPU GPU worker(s) started, host-CPU threads=$HOST_THREADS"

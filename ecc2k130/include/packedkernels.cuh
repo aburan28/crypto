@@ -55,6 +55,36 @@ namespace eccPacked131 {
 #if ECC_WALK_TABLE && !ECC_PACKED_WEIGHTED_PREFIX
 #error "ECC_WALK_TABLE is implemented on the weighted-prefix path only"
 #endif
+#ifndef ECC_UNROLL_SLOTS
+#define ECC_UNROLL_SLOTS 1
+#endif
+#if ECC_UNROLL_SLOTS < 1 || ECC_UNROLL_SLOTS > ECC_BATCH
+#error "ECC_UNROLL_SLOTS must be between 1 and ECC_BATCH"
+#endif
+#ifndef ECC_PACKED_SLOT_PREFETCH
+#define ECC_PACKED_SLOT_PREFETCH 0
+#endif
+#if ECC_PACKED_SLOT_PREFETCH != 0 && ECC_PACKED_SLOT_PREFETCH != 1
+#error "ECC_PACKED_SLOT_PREFETCH must be 0 or 1"
+#endif
+#if ECC_PACKED_SLOT_PREFETCH && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_SLOT_PREFETCH requires compact state"
+#endif
+#ifndef ECC_PACKED_SLOT_PIPELINE
+#define ECC_PACKED_SLOT_PIPELINE 0
+#endif
+#if ECC_PACKED_SLOT_PIPELINE != 0 && ECC_PACKED_SLOT_PIPELINE != 1
+#error "ECC_PACKED_SLOT_PIPELINE must be 0 or 1"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && !ECC_WALK_TABLE
+#error "ECC_PACKED_SLOT_PIPELINE requires ECC_WALK_TABLE"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_SLOT_PIPELINE requires compact state"
+#endif
+#if ECC_PACKED_SLOT_PIPELINE && ECC_PACKED_SLOT_PREFETCH
+#error "ECC_PACKED_SLOT_PIPELINE and ECC_PACKED_SLOT_PREFETCH both issue the next slot load; pick one"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -64,8 +94,8 @@ namespace eccPacked131 {
 #if ECC_PACKED_STATE_TILE && (!ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_STATE_TILE requires polynomial state, denominator cache and polynomial chains"
 #endif
-#if ECC_PACKED_STATE_TILE && ECC_THREADS != 256
-#error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256"
+#if ECC_PACKED_STATE_TILE && ECC_THREADS != 256 && !ECC_PACKED_COMPACT_STATE
+#error "ECC_PACKED_STATE_TILE requires ECC_THREADS=256 unless compact state is on"
 #endif
 #if ECC_PACKED_COMPACT_STATE && (ECC_PACKED_STATE_TILE != 256 || !ECC_PACKED_POLY_STATE || !ECC_PACKED_CACHE_DENOM || !ECC_PACKED_POLY_CHAIN)
 #error "ECC_PACKED_COMPACT_STATE requires TILE256, polynomial state, denominator cache and polynomial chains"
@@ -93,6 +123,13 @@ __device__ __forceinline__ P131 load(const unsigned *p, int slot, int tid, int t
     for (int i = 0; i < 5; ++i) a.v[i] = p[(size_t(slot) * 5 + i) * threads + tid];
 #endif
     return a;
+#endif
+}
+__device__ __forceinline__ void prefetch(const unsigned *p, int slot, int tid, int threads) {
+#if ECC_PACKED_SLOT_PREFETCH
+    compactPrefetch131(p, slot, tid);
+#else
+    (void)p; (void)slot; (void)tid; (void)threads;
 #endif
 }
 __device__ __forceinline__ void store(unsigned *p, int slot, int tid, int threads, P131 a) {
@@ -152,8 +189,18 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_WALK_TABLE
     // All block threads participate, including inactive partial-tile workers.
-    extern __shared__ uint32_t twShared[];
-    twLoadShared(twShared, p.twConsts);
+#if ECC_TABLE_GLOBAL
+    const uint32_t *twSel = p.twConsts;
+    const uint32_t *twTab = p.twConsts;
+#elif ECC_TABLE_ADDEND_GLOBAL
+    extern __shared__ uint32_t twSel[];
+    twLoadShared(twSel, p.twConsts + TW_MASK_OFF, TW_SEL_WORDS);
+    const uint32_t *twTab = p.twConsts;
+#else
+    extern __shared__ uint32_t twSel[];
+    twLoadShared(twSel, p.twConsts);
+    const uint32_t *twTab = twSel;
+#endif
 #elif ECC_PACKED_SHARED_SIGMA
     initSigmaWalkShared131();
 #endif
@@ -165,15 +212,44 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     unsigned char js[ECC_BATCH];
 #endif
     P131 prod, inv;
+#if ECC_PACKED_SLOT_PIPELINE
+    P131 pipeX = load(p.x, 0, tid, p.threads);
+    P131 pipeY = load(p.y, 0, tid, p.threads);
+    P131 pipeD, pipeC;
+#endif
 #pragma unroll 1
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#if ECC_UNROLL_SLOTS >= 8
+#pragma unroll 8
+#elif ECC_UNROLL_SLOTS >= 4
+#pragma unroll 4
+#elif ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
 #pragma unroll 1
+#endif
         for (int slot = 0; slot < ECC_BATCH; ++slot) {
+#if ECC_PACKED_SLOT_PREFETCH
+            if (slot + 1 < ECC_BATCH) {
+                prefetch(p.x, slot + 1, tid, p.threads);
+                prefetch(p.y, slot + 1, tid, p.threads);
+            }
+#endif
+#if ECC_PACKED_SLOT_PIPELINE
+            P131 x = pipeX;
+            const P131 xp = x;
+            const P131 yp = pipeY;
+            if (slot + 1 < ECC_BATCH) {
+                pipeX = load(p.x, slot + 1, tid, p.threads);
+                pipeY = load(p.y, slot + 1, tid, p.threads);
+            }
+#else
             P131 x = load(p.x, slot, tid, p.threads);
 #if ECC_WALK_TABLE
             const P131 xp = x;
+#endif
 #endif
 #if ECC_PACKED_POLY_STATE
             x = fromPolynomial131(x);
@@ -209,10 +285,12 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             // x and one coordinate of y; the addend is read from the table in
             // the polynomial basis, so nothing is converted and no Frobenius
             // network runs.  The second pass only needs dp and the chain.
+#if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
-            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twShared);
+#endif
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
             P131 dp, ep;
-            twAddend(tag, xp, yp, twShared, &dp, &ep);
+            twAddend(tag, xp, yp, twTab, &dp, &ep);
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
                 store(p.pchain, slot, tid, p.threads, pair.first);
@@ -282,8 +360,48 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
         inv = inv131(prod);
 #endif
+#if ECC_PACKED_SLOT_PIPELINE
+        pipeX = load(p.x, ECC_BATCH - 1, tid, p.threads);
+        pipeY = load(p.y, ECC_BATCH - 1, tid, p.threads);
+        pipeD = load(denominators, ECC_BATCH - 1, tid, p.threads);
+        pipeC = load(p.pchain, ECC_BATCH - 1, tid, p.threads);
+#endif
+#if ECC_UNROLL_SLOTS >= 8
+#pragma unroll 8
+#elif ECC_UNROLL_SLOTS >= 4
+#pragma unroll 4
+#elif ECC_UNROLL_SLOTS > 1
+#pragma unroll 2
+#else
 #pragma unroll 1
+#endif
         for (int slot = ECC_BATCH - 1; slot >= 0; --slot) {
+#if ECC_PACKED_SLOT_PREFETCH
+            if (slot > 0) {
+                prefetch(p.x, slot - 1, tid, p.threads);
+                prefetch(p.y, slot - 1, tid, p.threads);
+                prefetch(p.pchain, slot - 1, tid, p.threads);
+                prefetch(denominators, slot - 1, tid, p.threads);
+            }
+#endif
+#if ECC_PACKED_SLOT_PIPELINE
+            P131 x = pipeX, y = pipeY, dp = pipeD, pch = pipeC;
+            if (slot > 0) {
+                pipeX = load(p.x, slot - 1, tid, p.threads);
+                pipeY = load(p.y, slot - 1, tid, p.threads);
+                pipeD = load(denominators, slot - 1, tid, p.threads);
+                pipeC = load(p.pchain, slot - 1, tid, p.threads);
+            }
+            dp.v[4] &= 7;
+            P131 lambdaPoly;
+            if (slot) {
+                PolynomialPair pair = mulPolynomialPair131(inv, pch, dp);
+                lambdaPoly = pair.first;
+                inv = pair.second;
+            } else {
+                lambdaPoly = mulPolynomial131(inv, pch);
+            }
+#else
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
             P131 dp = load(denominators, slot, tid, p.threads);
@@ -341,6 +459,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             P131 lambdaPoly = mulPolynomial131(ep, ii);
 #endif
 #endif
+#endif
 #if ECC_PACKED_POLY_STATE
             P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
             P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
@@ -362,6 +481,15 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             store(p.x, slot, tid, p.threads, nx);
             store(p.y, slot, tid, p.threads, ny);
+#if ECC_PACKED_SLOT_PIPELINE
+            // Reverse pass ends at slot 0 with pipeX/pipeY still holding that
+            // slot's pre-add coordinates. Refresh them so the next step's first
+            // pass does not rebuild the addend from a stale point.
+            if (!slot) {
+                pipeX = nx;
+                pipeY = ny;
+            }
+#endif
         }
     }
 }

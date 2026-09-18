@@ -7,6 +7,7 @@ answers are known.  Each defect that once produced plausible output has a
 test here that fails if it comes back.
 """
 
+import math
 import random
 import sys
 from itertools import combinations, product
@@ -23,6 +24,13 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
                          find_normal_elements, is_normal)
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
+from target_boundary import (cost as logarithm_cost,          # noqa: E402
+                             family_floor)
+from necklaces import cost_per_representative, necklaces      # noqa: E402
+from validate_amortised_attack import (aggregate as amortised_aggregate,  # noqa: E402
+                                       attack as amortised_attack)
+from validate_target_model import (_signed_subset_sums,       # noqa: E402
+                                   _support)
 
 SEED = 20260917
 
@@ -272,6 +280,157 @@ def test_planted_logarithm_is_recovered_end_to_end():
         assert out["recovered"], out
         assert out["recovered_d"] == out["planted_d"]
         assert out["unknowns"] == out["orbits"] + 1
+
+
+def test_subset_sum_set_is_sigma_closed():
+    """Why sigma buys no hit rate: the reachable sums are already sigma-closed."""
+    for mdeg, orbits, n in ((17, 2, 2), (19, 2, 2)):
+        F, E, _ = SC.small_curve(mdeg)
+        rng = random.Random(5)
+        sup = _support(F, E, orbits, rng)
+        assert sup is not None
+        sums = _signed_subset_sums(E, sup.orbit_points(E), n)
+        assert all(E.frobenius(S) in sums for S in sums if S is not None)
+
+
+def test_homogeneous_relations_are_not_priced_as_a_logarithm():
+    """The m-sweep crosses rho only when relations carry no information.
+
+    Guards the section 5 conclusion: whatever the homogeneous table says, the
+    cost of a logarithm must stay above the rho reference.
+    """
+    import json
+    from pathlib import Path
+    data = json.loads((HERE / "results" / "target_boundary.json").read_text())
+    homog = data["homogeneous_extension_past_m8"]
+    assert any(r["log2_total_vs_rho"] < 0 for r in homog), (
+        "the homogeneous accounting is supposed to cross; section 5 exists to "
+        "explain why that is not a result")
+    best = data["best_logarithm_cost"]
+    assert best["log2_total_vs_rho"] > 0, (
+        "a logarithm priced against known targets must not beat rho here")
+    assert data["memory_charged"] is False
+
+
+def test_amortising_the_table_is_a_real_saving_and_correctly_signed():
+    """Building once must be cheaper than rebuilding per attempt, never dearer.
+
+    This caught the counterfactual charging `attempts * max(build, stream)`,
+    which drops the build entirely whenever streaming dominates and so made
+    rebuilding look *cheaper* than amortising at T=10, n=15. A faithful
+    rebuild pays both terms on every attempt.
+    """
+    for T, n, s in ((1, 14, 13), (10, 15, 8), (3, 8, 4), (2, 12, 11)):
+        for quot in (True, False):
+            once = logarithm_cost(T, n, s, amortise=True, quotient_table=quot)
+            each = logarithm_cost(T, n, s, amortise=False, quotient_table=quot)
+            assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+
+
+def test_probe_cost_and_e4_translates_are_priced():
+    """Regression: probes were counted but not costed, and E[4] was ignored."""
+    q = logarithm_cost(2, 12, 11, quotient_table=True)
+    f = logarithm_cost(2, 12, 11, quotient_table=False)
+    # a quotiented table must charge canonicalisation per probe
+    assert q["log2_probe_cost"] > 0
+    # a full table must not, and must pay 131x the build instead
+    assert f["log2_probe_cost"] == 0
+    assert f["log2_build_once"] > q["log2_build_once"]
+    # both E[4] translates are probed, so probes exceed the streamed count
+    from target_boundary import REACHABLE_E4
+    assert REACHABLE_E4 == 2
+    assert q["log2_probes_per_attempt"] > 1
+
+
+def test_a_skipped_or_failed_cell_cannot_be_reported_as_success():
+    """Regression for an eighth defect, again in validation code.
+
+    Filtering to cells that carry a recovery and then reporting "N of N"
+    over the survivors lets a skipped support or a cell that ran out of
+    targets vanish from the denominator, so the artifact claims success for
+    validation that never ran.
+    """
+    good = {"verified_by_point_identity": True, "recovered_d": 1, "planted_d": 1}
+    skipped = {"skipped": "no support of that size"}
+    failed = {"recovered": False, "reason": "ran out of targets"}
+
+    assert amortised_aggregate([good, good], 2)["all_recovered"]
+    for bad in (skipped, failed):
+        agg = amortised_aggregate([good, bad], 2)
+        assert not agg["all_recovered"], bad
+        assert agg["cells_recovered"] == 1
+        assert agg["cells_expected"] == 2
+    # a cell that never ran at all must not shrink the denominator either
+    assert not amortised_aggregate([good], 2)["all_recovered"]
+
+
+def test_amortised_attack_recovers_a_planted_logarithm():
+    """The lopsided single-orbit structure the optimum uses, run for real."""
+    for spec in ((13, 3, 1), (19, 3, 1)):
+        out = amortised_attack(*spec)
+        assert out.get("verified_by_point_identity"), out
+        assert out["recovered_d"] == out["planted_d"]
+        assert out["unknowns"] == out["orbits"] + 1
+        assert out["relations"] == out["unknowns"]
+
+
+def test_sigma_class_representatives_are_enumerable_at_constant_cost():
+    """Discharges the assumption the build cost rested on.
+
+    Storing one entry per sigma-orbit is only a saving if the
+    representatives can be enumerated proportionally to their number. The
+    count must be exactly C(T*m, d)/m -- m is prime and d < m, so no subset
+    is fixed by a non-trivial rotation -- and the work per representative
+    must stay bounded rather than growing like m.
+    """
+    seen = []
+    for m, tracks, d in ((13, 1, 5), (17, 1, 8), (19, 1, 9), (23, 1, 11),
+                         (11, 2, 5), (13, 2, 6)):
+        count, _ = necklaces(m, tracks, d, emit=False)
+        assert count == math.comb(tracks * m, d) // m, (m, tracks, d)
+        per = cost_per_representative(m, tracks, d)
+        assert per < 40, (m, tracks, d, per)
+        seen.append((m, per))
+    # flat in m at comparable density, not growing like m
+    single = [p for mm, p in seen[:4]]
+    assert max(single) - min(single) < 6, single
+
+
+def test_cost_does_not_raise_on_lopsided_large_configurations():
+    """Regression: 2**build overflowed a float exactly where the optimiser looks.
+
+    The search prefers the most lopsided split, which is where the stored
+    side is largest. An unguarded exponentiation turned part of the search
+    space into an exception rather than a result.
+    """
+    for T, n, s in ((200000, 60, 59), (50000, 60, 59), (120000, 48, 47)):
+        r = logarithm_cost(T, n, s)
+        assert r is not None
+        assert r["log2_total_cost"] > 0          # log2 figures always present
+        assert "S" in r and "memory_exabytes" in r   # may be None, must exist
+
+
+def test_parity_with_rho_is_below_the_family_floor():
+    """The whole family is bounded away from the reference, not merely observed to be.
+
+    total = 2*sqrt(K1 * U * C(n,s) * r) with U >= 2 and C(n,s) >= 2, so no
+    support size, relation length, split or table layout reaches rho.
+    """
+    f = family_floor()
+    assert f["parity_reachable"] is False
+    assert f["log2_floor_vs_rho"] > 0
+    # the best configuration found must respect its own floor
+    best = logarithm_cost(2, 12, 11, quotient_table=True)
+    assert best["log2_total_cost"] >= f["log2_floor"]
+
+
+def test_logarithm_cost_is_monotone_in_the_obvious_places():
+    a = logarithm_cost(10, 15, 8)
+    assert a is not None
+    # more unknowns cannot be cheaper at fixed relation shape
+    assert logarithm_cost(200, 15, 8)["log2_total_cost"] > a["log2_total_cost"]
+    # an impossible split returns nothing rather than a number
+    assert logarithm_cost(1, 500, 250) is None
 
 
 if __name__ == "__main__":

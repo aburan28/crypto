@@ -268,6 +268,12 @@ TYPES=g7e.2xlarge,g7e.4xlarge,g7e.8xlarge ./fleet.sh up 1
 ./fleet.sh status
 #    leftover G/VT Spot quota on Ada (does not stop g7/g7e):
 #    ./launch_g6.sh
+#    leftover G/VT Spot in every opted-in region (g7e, g7, g6e, g6, g4dn; no OD):
+#    ./launch_spot_all.sh
+#    REGIONS=eu-west-2,us-west-2 ./launch_spot_all.sh   # optional subset
+#    skips 0-leftover regions and regions with no g7/g6/g4dn offering
+#    instant fleet last-resort keeps only type/AZ pairs the region offers
+#    us-west-1 is g4dn-only; needs the fat 75+89+120 client (CLMAD=1)
 ECC_BUCKET=ecc2k130-<account> python3 status.py --watch 60   # ~14 B it/s per GPU expected
 #    logs land in s3://bucket/logs/<instance>/{bootstrap,worker}.log every 5 min;
 #    bootstrap runs the three GPU fixtures (arithmetic, compact storage, shared
@@ -392,12 +398,16 @@ supervisor moved) changes what *new* boots run and nothing else. Running
 instances keep the supervisor they booted with until their unit restarts,
 which on a spot fleet happens on its own as capacity churns.
 
-That makes a forced roll a choice rather than a step. A supervisor change that
-protects points already collected (the local spool) is worth adopting
-promptly; one that only changes reporting can wait for churn. To force it,
-restart the unit — `systemctl restart ecc2k130@<slot>` — which SIGTERMs the
-client, checkpoints, uploads, and resumes the same slot; the cost is the walk
-since the last checkpoint on that slot, not the slot.
+Forcing it onto the running fleet is `./fleet.sh roll` (see the `walks` bullet
+under Monitoring), which replaces instances `ROLL_BATCH` at a time so each
+re-bootstraps onto the published copy. Whether to is a judgement: a change that
+protects points already collected — the local spool — is worth rolling for, and
+one that only changes reporting can ride the spot churn. One box can be done in
+place with `systemctl restart ecc2k130-worker@<gpu>` after copying the new file
+over `/opt/ecc2k130/worker.py`, which SIGTERMs the client, checkpoints, uploads
+and resumes the same slot, at the cost of the walk since that slot's last
+checkpoint — but the unit is per GPU, not per slot, and a restart that does not
+also replace the file just starts the same supervisor again.
 
 Because there is no gate, the gate is here: run `python3 -m unittest
 test_worker_spool test_worker_family test_certification` and
@@ -429,7 +439,16 @@ every boot after it.
   The 2^27.9 iterations-per-point figure of 2026-09-15 was one such ratio
   and has been retired for the measurement in the table above, taken from
   each client's own counters and therefore independent of the grid:
-  `../benchmarks/dp-interval/`.
+  `../benchmarks/dp-interval/`. The corrected `walks` field is code inside
+  worker.py, and worker.py has no self-update path: bootstrap.sh fetches it
+  once at instance launch, so a running instance keeps reporting the way it
+  did when it booted no matter how long ago `infra.sh sync` published a fix.
+  Getting the fix onto an already-running fleet needs both: `./infra.sh
+  sync` to publish the corrected worker.py, then `./fleet.sh roll` to
+  replace every running instance (`ROLL_BATCH` at a time, default 4) so each
+  re-bootstraps onto it. This is unlike a CUDA-client fix, which needs only
+  `rollout.sh activate` — workers poll campaign.json for a new `binaryKey`
+  and restart the client in place, no instance replacement required.
   Its `rateBps` is what the walkers say about themselves right now; the
   public dashboard instead differences the checkpoint sum between two
   snapshots, which ran 72.5 B it/s against this 86–101 B it/s on

@@ -108,9 +108,16 @@ class SpoolCase(unittest.TestCase):
         self.root = os.path.join(self.tmp.name, "root")
         self.storeRoot = os.path.join(self.tmp.name, "store")
         os.makedirs(self.root)
+        # ECC_DEVICE with the name, not the name alone: a slot record whose
+        # gpuName is cpu-shaped is refused to a claimant that did not declare
+        # itself a CPU worker (idleSlotClaimable), so a name-only environment
+        # is a GPU worker looking at a CPU slot -- a pair bootstrap-cpu.sh
+        # never produces, and one that made this fixture skip its own slot.
         env = mock.patch.dict(os.environ, {"ECC_ROOT": self.root,
                                            "ECC_LOCAL_STORE": self.storeRoot,
                                            "ECC_GPU": "0",
+                                           "ECC_DEVICE": "cpu",
+                                           "ECC_THREADS": "1",
                                            "ECC_DEVICE_NAME": "cpu",
                                            "ECC_INSTANCE_TYPE": "local"})
         env.start()

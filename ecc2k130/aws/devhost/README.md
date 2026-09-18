@@ -30,10 +30,18 @@ The user-data bootstrap installs/upgrades:
 
 `/usr/local/bin/refresh-agent-tools` is idempotent and refreshes Claude, Codex, OpenCode and `gh`. A systemd oneshot runs it after each boot so a stopped host comes back with current agent CLIs.
 
-Authentication is intentionally **not** embedded in user-data or committed to the repo. After first login authenticate interactively as needed:
+GitHub authentication is **not** embedded in user-data. Put a PAT in SSM (and optionally Secrets Manager), attach the `crypto-g7e-dev` instance profile, and the boot helper `g7e-gh-auth` fetches it:
 
 ```bash
-gh auth login
+# from a trusted workstation; token on stdin, never in git or user-data
+./put-github-token.sh < ~/.github-token
+./iam.sh
+./devhost.sh up
+```
+
+Parameter: SSM SecureString `/crypto/g7e-dev/github` in `us-east-2` and `us-west-2`. Fallback secret: `crypto/g7e-dev/github`. After first login, remaining CLIs are still interactive:
+
+```bash
 claude
 codex
 opencode
@@ -96,4 +104,4 @@ G7e includes local NVMe instance storage, but instance-store data does not survi
 
 ## Credentials
 
-Never put `meow34.pem`, GitHub tokens, Anthropic credentials, OpenAI credentials, or OpenCode provider keys in this repository, EC2 user-data, AMI metadata, shell history, or build artifacts. Use each CLI's interactive authentication or a secrets manager/instance role where appropriate.
+Never put `meow34.pem`, GitHub tokens, Anthropic credentials, OpenAI credentials, or OpenCode provider keys in this repository, EC2 user-data, AMI metadata, shell history, or build artifacts. Store the GitHub PAT as SSM SecureString `/crypto/g7e-dev/github` (`./put-github-token.sh`) and let the instance role `crypto-g7e-dev` read it at boot. Use each remaining CLI's interactive authentication or a secrets manager/instance role where appropriate.
