@@ -44,6 +44,12 @@ HOST=${RHO_WALKER_HOST:-$LOOKED_UP_HOST}
 
 if [ -z "$HOST" ] || [ "$HOST" = None ] || [ -z "$SG" ] || [ "$SG" = None ]; then
     echo "no running instance tagged Name=rho-ecc2k-walker" >&2
+    echo "tagged walkers (any state):" >&2
+    aws ec2 describe-instances --region "$REGION" \
+        --filters "Name=tag:Name,Values=rho-ecc2k-walker" \
+        --query 'Reservations[].Instances[].[InstanceId,State.Name,PublicIpAddress,LaunchTime]' \
+        --output text >&2 || true
+    echo "the status hop cannot reach RDS without that host; start the stopped instance or launch a replacement with the same Name tag and scripts/rho_status/gha_walker.pub" >&2
     exit 1
 fi
 
