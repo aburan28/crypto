@@ -33,6 +33,11 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     extern __shared__ uint32_t sel[];
     twLoadShared(sel, consts + TW_MASK_OFF, TW_SEL_WORDS);
     const uint32_t *tab = consts;
+#elif ECC_TABLE_SELECTION_GLOBAL
+    extern __shared__ uint32_t sharedTab[];
+    twLoadShared(sharedTab, consts, TW_TABLE_WORDS);
+    const uint32_t *sel = consts + TW_MASK_OFF;
+    const uint32_t *tab = sharedTab;
 #else
     extern __shared__ uint32_t sel[];
     twLoadShared(sel, consts);
@@ -49,7 +54,7 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     o.eps = twCoordinate(a.yp, o.pivot, sel + (TW_ROW_OFF - TW_SEL0));
     unsigned long long hist = a.hist;
     o.tag = twSelect(a.xn, a.yp, a.hw, &hist, sel);
-    twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e);
+    twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e, consts);
     out[i] = o;
 }
 
@@ -123,8 +128,8 @@ int main() {
     }
     std::printf("table walk device probe: %d points, cycle rule fired on %d\n", N, ruleFired);
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
-    std::printf("  branches %d, shared bytes %zu, addend global %d\n",
-                TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL);
+    std::printf("  branches %d, shared bytes %zu, addend global %d, selection global %d\n",
+                TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL, ECC_TABLE_SELECTION_GLOBAL);
     const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= N / 4;
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;

@@ -84,13 +84,20 @@ def generate():
     ]
     lines += emit_network("toHalvingPhase131", to_phase)
     lines += emit_network("fromHalvingPhase131", from_phase)
+    # Direct inverse-Frobenius permutation.  Keeping the phase-order
+    # implementation would pay two Beneš networks for one square root.
+    sqrt_perm = list(range(256))
+    for i in range(1, M + 1):
+        j = i * pow(2, M - 1, N) % N
+        sqrt_perm[i - 1] = fold(j) - 1
+    lines += emit_network("halvingSqrt131", sqrt_perm)
     lines += [
         "ECC_HD P131 halvingQuadraticRoot131(P131 a) {",
         "    P131 z=toHalvingPhase131(a);",
         "    z.v[0]&=~1u;",
-        "    const int shifts[7]={1,2,4,8,16,32,64};",
+        "    const int shifts[8]={1,2,4,8,16,32,64,128};",
         "#pragma unroll",
-        "    for(int k=0;k<7;k++){",
+        "    for(int k=0;k<8;k++){",
         "        const int s=shifts[k], words=s>>5, bits=s&31;",
         "        P131 old=z;",
         "#pragma unroll",
@@ -103,14 +110,33 @@ def generate():
         "    }",
         "    return fromHalvingPhase131(z);",
         "}",
-        "ECC_HD P131 halvingSqrt131(P131 a) {",
-        "    P131 q=toHalvingPhase131(a), r;",
-        "    r.v[0]=(q.v[0]>>1)|(q.v[1]<<31);",
-        "    r.v[1]=(q.v[1]>>1)|(q.v[2]<<31);",
-        "    r.v[2]=(q.v[2]>>1)|(q.v[3]<<31);",
-        "    r.v[3]=(q.v[3]>>1)|(q.v[4]<<31);",
-        "    r.v[4]=(q.v[4]>>1)|((q.v[0]&1u)<<2);",
-        "    return fromHalvingPhase131(r);",
+        "ECC_HD unsigned halvingSecondTrace131(P131 a) {",
+        "    const P131 q=toHalvingPhase131(a);",
+        "    P131 z=q;",
+        "    z.v[0]&=~1u;",
+        "    const int shifts[8]={1,2,4,8,16,32,64,128};",
+        "#pragma unroll",
+        "    for(int k=0;k<8;k++){",
+        "        const int s=shifts[k], words=s>>5, bits=s&31;",
+        "        P131 old=z;",
+        "#pragma unroll",
+        "        for(int i=4;i>=0;i--){",
+        "            uint32_t v=0;",
+        "            if(i>=words){v=old.v[i-words]<<bits;if(bits&&i>words)v|=old.v[i-words-1]>>(32-bits);}",
+        "            z.v[i]^=v;",
+        "        }",
+        "        z.v[4]&=7u;",
+        "    }",
+        "    unsigned parity=0;",
+        "#pragma unroll",
+        "    for(int i=0;i<5;i++){",
+        "#ifdef __CUDA_ARCH__",
+        "        parity^=__popc(q.v[i]&z.v[i]);",
+        "#else",
+        "        parity^=__builtin_popcount(q.v[i]&z.v[i]);",
+        "#endif",
+        "    }",
+        "    return parity&1u;",
         "}",
     ]
     return "\n".join(lines) + "\n"

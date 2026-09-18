@@ -1,0 +1,134 @@
+==PROF== Connected to process 63331 (/home/ubuntu/crypto/ecc2k130/build/ecc2k130-baseline)
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 98 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed slot unroll: 2
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 48732
+packed table global: 0
+packed table addend global: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 16 steps per launch
+==PROF== Profiling "walk": 0%....50%....100% - 15 passes
+       2.2 s      11.212 M it/s    24641536 iterations         0 dp         0 stored         0 dropped
+  finished: 11.212 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+==PROF== Disconnected from process 63331
+[63331] ecc2k130-baseline@127.0.0.1
+  walk(WalkParams<unsigned int>, unsigned int *) (376, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 12.0
+    Section: Compute Workload Analysis
+    -------------------- ----------- ------------
+    Metric Name          Metric Unit Metric Value
+    -------------------- ----------- ------------
+    Executed Ipc Active   inst/cycle         1.86
+    Executed Ipc Elapsed  inst/cycle         1.82
+    Issue Slots Busy               %        45.59
+    Issued Ipc Active     inst/cycle         1.86
+    SM Busy                        %        71.38
+    -------------------- ----------- ------------
+
+    OPT   FP64 is the highest-utilized pipeline (71.4%) based on elapsed cycles in the workload, taking into account    
+          the rates of its different instructions. It executes 64-bit floating point operations. The pipeline is        
+          well-utilized, but might become a bottleneck if more work is added. Based on the number of executed           
+          instructions, the highest utilized pipeline (71.4%) is FP64 (FP64). It executes non-DMMA 64-bit floating      
+          point operations. Comparing the two, the overall pipeline utilization appears to be caused by frequent,       
+          low-latency instructions. See the Profiling Guide                                                             
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-decoder) or hover over the          
+          pipeline name to understand the workloads handled by each pipeline. The Instruction Statistics section shows  
+          the mix of executed instructions for this workload. Check the Warp State Statistics section for which         
+          reasons cause warps to stall.                                                                                 
+
+    Section: Memory Workload Analysis
+    --------------------------------------- ----------- ------------
+    Metric Name                             Metric Unit Metric Value
+    --------------------------------------- ----------- ------------
+    Local Memory Spilling Requests                                 0
+    Local Memory Spilling Request Overhead            %            0
+    L2 Sector Promotion Misses                        %            0
+    Shared Memory Spilling Requests                                0
+    Shared Memory Spilling Request Overhead           %            0
+    Memory Throughput                           Gbyte/s       205.44
+    Mem Busy                                          %        37.26
+    Max Bandwidth                                     %        38.29
+    L1/TEX Hit Rate                                   %        11.76
+    L2 Persisting Size                            Mbyte        83.89
+    L2 Compression Success Rate                       %            0
+    L2 Compression Ratio                                           0
+    L2 Compression Input Sectors                 sector            0
+    L2 Hit Rate                                       %        97.39
+    Mem Pipes Busy                                    %        20.63
+    --------------------------------------- ----------- ------------
+
+    Section: Scheduler Statistics
+    ---------------------------- ----------- ------------
+    Metric Name                  Metric Unit Metric Value
+    ---------------------------- ----------- ------------
+    One or More Eligible                   %        46.82
+    Issued Warp Per Scheduler                        0.47
+    No Eligible                            %        53.18
+    Active Warps Per Scheduler          warp         3.61
+    Eligible Warps Per Scheduler        warp         0.90
+    ---------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 53.18%                                                                                    
+          Every scheduler is capable of issuing one instruction per cycle, but for this workload each scheduler only    
+          issues an instruction every 2.1 cycles. This might leave hardware resources underutilized and may lead to     
+          less optimal performance. Out of the maximum of 12 warps per scheduler, this workload allocates an average    
+          of 3.61 active warps per scheduler, but only an average of 0.90 warps were eligible per cycle. Eligible       
+          warps are the subset of active warps that are ready to issue their next instruction. Every cycle with no      
+          eligible warp results in no instruction being issued and the issue slot remains unused. To increase the       
+          number of eligible warps, avoid possible load imbalances due to highly different execution durations per      
+          warp. Reducing stalls indicated on the Warp State Statistics and Source Counters sections can help, too.      
+
+    Section: Source Counters
+    ------------------------- ----------- ------------
+    Metric Name               Metric Unit Metric Value
+    ------------------------- ----------- ------------
+    Branch Instructions Ratio           %         0.01
+    Branch Instructions              inst      8219870
+    Branch Efficiency                   %        99.82
+    Avg. Divergent Branches      branches        15.59
+    ------------------------- ----------- ------------
+
+    OPT   Est. Speedup: 0.01044%                                                                                        
+          This workload has uncoalesced global accesses resulting in a total of 16544 excessive sectors (0% of the      
+          total 152289776 sectors). Check the L2 Theoretical Sectors Global Excessive table for the primary source      
+          locations. The CUDA Programming Guide                                                                         
+          (https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#device-memory-accesses) has additional      
+          information on reducing uncoalesced device memory accesses.                                                   
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 54.4%                                                                                           
+          This workload has uncoalesced shared accesses resulting in a total of 54190540 excessive wavefronts (56% of   
+          the total 97457612 wavefronts). Check the L1 Wavefronts Shared Excessive table for the primary source         
+          locations. The CUDA Best Practices Guide                                                                      
+           (https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c
+          -ab) has an example on optimizing shared memory accesses.                                                     
+

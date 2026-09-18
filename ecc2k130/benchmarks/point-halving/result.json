@@ -1,0 +1,45 @@
+{
+  "classification": "engineering, rejected",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete point operations per second",
+  "reference": {
+    "name": "table walk, inline both, pair ILP, L2 persist, slot unroll 2",
+    "samples": [
+      17.946783,
+      17.955782,
+      17.952227
+    ],
+    "median": 17.952227,
+    "correctness": "300/300 reports replayed, zero dropped"
+  },
+  "candidate": {
+    "name": "exact odd-subgroup point halving, two field products",
+    "samples": [
+      15.959,
+      16.053,
+      16.219
+    ],
+    "median": 16.053,
+    "ratio_to_reference": 0.8942066073,
+    "correctness": "512/512 subgroup points equal scalar multiplication by inverse(2); zero root, square-root, or coordinate mismatches"
+  },
+  "superseded_candidate": {
+    "name": "two phase-order permutations per square root",
+    "samples": [
+      12.125,
+      12.088,
+      12.131
+    ],
+    "median": 12.125
+  },
+  "alternating_model": {
+    "raw_harmonic_mean": 16.9495766066,
+    "effective_if_phase_is_part_of_state": 11.9851605568,
+    "state_expansion": 2
+  },
+  "commands": {
+    "candidate": "make test-halving-cuda ARCH='-gencode arch=compute_120,code=sm_120' BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_PERM_SIGMA=3 PACKED_UNROLL_INV=1 PACKED_INLINE_POLY=0",
+    "reference": "./ecc2k130 --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0"
+  }
+}

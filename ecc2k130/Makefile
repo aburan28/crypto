@@ -56,6 +56,8 @@ PACKED_DIRECT_REDUCE ?= 0
 PACKED_GENERATED_PRODUCT ?= 0
 # Bits: 1 inline single polynomial products, 2 inline paired products.
 PACKED_INLINE_POLY ?= 0
+# Inline the normal-basis wrapper used by the batched inversion chain.
+PACKED_INLINE_ONB_MUL ?= 0
 PACKED_CLMAD ?= 0
 PACKED_CLMAD_SQUARE ?= 0
 PACKED_KARAT3 ?= 0
@@ -63,12 +65,14 @@ PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
 PACKED_TOP_CLMAD ?= 0
+PACKED_TOP_CLMAD_HALF ?= 0
 PACKED_STATE_TILE ?= 0
 PACKED_ADD_COMBINE ?= 0
 PACKED_PAIR_ILP ?= 0
 UNROLL_SLOTS ?= 1
 PACKED_SLOT_PREFETCH ?= 0
 PACKED_SLOT_PIPELINE ?= 0
+PACKED_SELECT_PIPELINE ?= 0
 PACKED_L2_PERSIST ?= 0
 PACKED_TOP_HOIST ?= 0
 PACKED_ONB_INV ?= 0
@@ -78,8 +82,8 @@ PACKED_PAIR_CLMUL ?= 0
 PACKED_ALU_SQR ?= 0
 # The table walk of ITERATION-FUNCTION.md §4 (tablewalk.h) in place of sigma^j + 1.
 WALK_TABLE ?= 0
-# Alternate subgroup point-halving and table-addition phases. Experimental:
-# the phase is part of the rho state and is charged in the effective rate.
+# Build the exact subgroup point-halving arithmetic probe (POINT-HALVING.md).
+# It does not change the campaign iteration function.
 WALK_HALVING ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
@@ -89,6 +93,12 @@ TABLE_PIVOT_BYTES ?= 0
 TABLE_GLOBAL ?= 0
 # Hybrid: selection tables in shared, addend table in global.
 TABLE_ADDEND_GLOBAL ?= 0
+# Inverse hybrid: addends stay in shared memory while conflict-heavy selection
+# LUTs use the read-only global/L2 path.
+TABLE_SELECTION_GLOBAL ?= 0
+TABLE_RECOMPUTE_DENOM ?= 0
+TABLE_BANK_PAD ?= 0
+TABLE_WARP_LUT ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -162,17 +172,20 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
+       -DECC_PACKED_INLINE_ONB_MUL=$(PACKED_INLINE_ONB_MUL) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) -DECC_PACKED_CLMAD_SQUARE=$(PACKED_CLMAD_SQUARE) -DECC_PACKED_KARAT3=$(PACKED_KARAT3) \
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
        -DECC_PACKED_TOP_CLMAD=$(PACKED_TOP_CLMAD) \
+       -DECC_PACKED_TOP_CLMAD_HALF=$(PACKED_TOP_CLMAD_HALF) \
        -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
        -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
        -DECC_PACKED_PAIR_ILP=$(PACKED_PAIR_ILP) \
        -DECC_UNROLL_SLOTS=$(UNROLL_SLOTS) \
        -DECC_PACKED_SLOT_PREFETCH=$(PACKED_SLOT_PREFETCH) \
        -DECC_PACKED_SLOT_PIPELINE=$(PACKED_SLOT_PIPELINE) \
+       -DECC_PACKED_SELECT_PIPELINE=$(PACKED_SELECT_PIPELINE) \
        -DECC_PACKED_L2_PERSIST=$(PACKED_L2_PERSIST) \
        -DECC_PACKED_TOP_HOIST=$(PACKED_TOP_HOIST) \
        -DECC_PACKED_ONB_INV=$(PACKED_ONB_INV) \
@@ -184,6 +197,10 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
+       -DECC_TABLE_SELECTION_GLOBAL=$(TABLE_SELECTION_GLOBAL) \
+       -DECC_TABLE_RECOMPUTE_DENOM=$(TABLE_RECOMPUTE_DENOM) \
+       -DECC_TABLE_BANK_PAD=$(TABLE_BANK_PAD) \
+       -DECC_TABLE_WARP_LUT=$(TABLE_WARP_LUT) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
 
 all: cpu
@@ -412,16 +429,35 @@ test-table-walk-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
-	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_SELECTION_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -DECC_TABLE_SELECTION_GLOBAL=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
 	./build/test-table-walk-cuda-addend-global
 
 test-halving-cuda:
 	mkdir -p build
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) -DECC_WALK_HALVING=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_HALVING=%,$(DEFS)) -DECC_WALK_HALVING=1 \
 	    -Xcompiler -fopenmp src/testhalvingcuda.cu -o build/test-halving-cuda -lgomp
 	./build/test-halving-cuda
+
+# Pair-enumeration IC oracle on the packed ONB arithmetic.  Inverse-heavy, so
+# ONB_INV and the Itoh–Tsujii unroll stay on; walk-only knobs stay off.
+INDEXCALC_DEFS = -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_BY_VALUE=1 \
+	-DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_DIRECT_REDUCE=1 \
+	-DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 \
+	-DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_ONB_INV=1 \
+	-DECC_THREADS=128 -DECC_MINBLOCKS=1 -DECC_BATCH=16
+indexcalc-cuda:
+	mkdir -p build
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(INDEXCALC_DEFS) -Xptxas -v \
+	    -Xcompiler -fopenmp src/indexcalccuda.cu -o build/indexcalc-cuda -lgomp
+
+test-indexcalc-cuda: indexcalc-cuda
+	./build/indexcalc-cuda --self-test
+	cd codegen && python3 -m unittest test_indexcalc_pairs.py
+
+test-indexcalc-pairs:
+	cd codegen && python3 -m unittest test_indexcalc_pairs.py
 
 test-timing:
 	mkdir -p build

@@ -49,14 +49,26 @@
 #if ECC_PACKED_TOP_CLMAD && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_TOP_CLMAD requires ECC_PACKED_CLMAD"
 #endif
+#ifndef ECC_PACKED_TOP_CLMAD_HALF
+#define ECC_PACKED_TOP_CLMAD_HALF 0
+#endif
+#if ECC_PACKED_TOP_CLMAD_HALF != 0 && ECC_PACKED_TOP_CLMAD_HALF != 1
+#error "ECC_PACKED_TOP_CLMAD_HALF must be 0 or 1"
+#endif
+#if ECC_PACKED_TOP_CLMAD_HALF && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_TOP_CLMAD_HALF requires ECC_PACKED_CLMAD"
+#endif
+#if ECC_PACKED_TOP_CLMAD_HALF && ECC_PACKED_TOP_CLMAD
+#error "select either half or full top CLMAD correction"
+#endif
 #ifndef ECC_PACKED_TOP_HOIST
 #define ECC_PACKED_TOP_HOIST 0
 #endif
 #if ECC_PACKED_TOP_HOIST != 0 && ECC_PACKED_TOP_HOIST != 1
 #error "ECC_PACKED_TOP_HOIST must be 0 or 1"
 #endif
-#if ECC_PACKED_TOP_HOIST && ECC_PACKED_TOP_CLMAD
-#error "ECC_PACKED_TOP_HOIST is the ALU form of the 3-bit correction; do not combine with ECC_PACKED_TOP_CLMAD"
+#if ECC_PACKED_TOP_HOIST && (ECC_PACKED_TOP_CLMAD || ECC_PACKED_TOP_CLMAD_HALF)
+#error "ECC_PACKED_TOP_HOIST is the ALU form of the 3-bit correction; do not combine with top CLMAD modes"
 #endif
 #ifndef ECC_PACKED_ONB_INV
 #define ECC_PACKED_ONB_INV 0
@@ -252,7 +264,7 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
 
 struct P131 { uint32_t v[5]; };
 
-#if ECC_PACKED_TOP_CLMAD
+#if ECC_PACKED_TOP_CLMAD || ECC_PACKED_TOP_CLMAD_HALF
 /* The low 64 bits of x*y, plus an addend.  On the device this is one clmad
    whose third operand is free; the host emulates it through the software
    clmul64 so that testpacked.cpp checks the device formulation bit for bit. */
@@ -311,6 +323,34 @@ ECC_HD void topCrossClmad131(const P131 &a, const P131 &b, uint32_t *c) {
     c[4] = uint32_t(C2); c[5] = uint32_t(C2 >> 32);
     c[6] = uint32_t(C3); c[7] = uint32_t(C3 >> 32);
     c[8] ^= h1 ^ clmulTiny(a4, b4);
+}
+#endif
+#if ECC_PACKED_TOP_CLMAD_HALF
+// Move only the low 64 bits of the 3x128 cross correction onto CLMAD. This
+// spends two instructions per product instead of full TOP_CLMAD's four, while
+// deleting the low-half masked-shift chain from the ALU path.
+ECC_HD void topCrossHalfClmad131(const P131 &a, const P131 &b, uint32_t *c) {
+    const uint64_t A0 = a.v[0] | (uint64_t(a.v[1]) << 32);
+    const uint64_t B0 = b.v[0] | (uint64_t(b.v[1]) << 32);
+    const uint32_t a4 = a.v[4] & 7u, b4 = b.v[4] & 7u;
+    const uint32_t h0 =
+        (clmulTiny(a4, uint32_t(B0 >> 62)) ^ clmulTiny(b4, uint32_t(A0 >> 62))) >> 2;
+    uint64_t C2 = c[4] | (uint64_t(c[5]) << 32);
+    C2 = clmadLo64(a4, B0, clmadLo64(b4, A0, C2));
+    c[4] = uint32_t(C2);
+    c[5] = uint32_t(C2 >> 32);
+    c[6] ^= h0;
+    for (int k = 0; k < 3; ++k) {
+        const uint32_t ma = 0u - ((a4 >> k) & 1u);
+        const uint32_t mb = 0u - ((b4 >> k) & 1u);
+#pragma unroll
+        for (int i = 2; i < 4; ++i) {
+            const uint32_t t = (a.v[i] & mb) ^ (b.v[i] & ma);
+            c[4 + i] ^= t << k;
+            if (k) c[5 + i] ^= t >> (32 - k);
+        }
+        c[8] ^= (b4 & ma) << k;
+    }
 }
 #endif
 ECC_HD uint32_t reverse32(uint32_t x) {
@@ -407,6 +447,9 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
 #elif ECC_PACKED_TOP_CLMAD
     clmul128(c,a.v,b.v); c[8]=0;
     topCrossClmad131(a,b,c);
+#elif ECC_PACKED_TOP_CLMAD_HALF
+    clmul128(c,a.v,b.v); c[8]=0;
+    topCrossHalfClmad131(a,b,c);
 #else
     clmul128(c,a.v,b.v); c[8]=0;
 #pragma unroll
@@ -657,6 +700,17 @@ using MulArg = const P131 &;
 // SINGLE_PRODUCT path converts to the polynomial basis and back around every
 // mul131; inv131 is already in the ONB, so those conversions are pure
 // overhead on the inverse chain (8 muls / 16 slots).
+#ifndef ECC_PACKED_INLINE_ONB_MUL
+#define ECC_PACKED_INLINE_ONB_MUL 0
+#endif
+#if ECC_PACKED_INLINE_ONB_MUL != 0 && ECC_PACKED_INLINE_ONB_MUL != 1
+#error "ECC_PACKED_INLINE_ONB_MUL must be 0 or 1"
+#endif
+#if ECC_PACKED_INLINE_ONB_MUL
+#define ECC_ONB_MUL ECC_HD
+#else
+#define ECC_ONB_MUL ECC_BIG
+#endif
 static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     uint32_t c[9],d[9];
     P131 rb=reverse131(b),r;
@@ -672,7 +726,7 @@ static ECC_BIG P131 mulOnb131(MulArg a, MulArg b) {
     r.v[4]&=7;
     return r;
 }
-static ECC_BIG P131 mul131(MulArg a, MulArg b) {
+static ECC_ONB_MUL P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_SINGLE_PRODUCT
     const P131 pa = toPolynomial131(a), pb = toPolynomial131(b);
     uint32_t h[9];
@@ -684,6 +738,7 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
     return mulOnb131(a, b);
 #endif
 }
+#undef ECC_ONB_MUL
 #ifndef ECC_PACKED_ALU_SQUARE
 #define ECC_PACKED_ALU_SQUARE 0
 #endif
@@ -827,9 +882,20 @@ ECC_HD P131 inv131(P131 a){
 ECC_HD void pointHalf131(P131 x, P131 y, P131 *hx, P131 *hy) {
  P131 lambda=halvingQuadraticRoot131(x);
  P131 root=halvingSqrt131(add131(add131(y,x),mul131(lambda,x)));
- const unsigned odd=(__popc(root.v[0])^__popc(root.v[1])^__popc(root.v[2])^
-                     __popc(root.v[3])^__popc(root.v[4]))&1u;
- const uint32_t mask=0u-odd;
+#ifdef __CUDA_ARCH__
+#define ECC_HALF_POPC __popc
+#else
+#define ECC_HALF_POPC __builtin_popcount
+#endif
+ unsigned outside=0;
+#pragma unroll
+ for(int i=0;i<5;i++)
+  outside^=ECC_HALF_POPC(root.v[i]&(lambda.v[i]^root.v[i]))^
+           ECC_HALF_POPC(root.v[i]);
+ outside^=halvingSecondTrace131(root);
+ outside&=1u;
+#undef ECC_HALF_POPC
+ const uint32_t mask=0u-outside;
  const P131 sqrtx=halvingSqrt131(x);
 #pragma unroll
  for(int i=0;i<4;i++){lambda.v[i]^=mask;root.v[i]^=sqrtx.v[i]&mask;}

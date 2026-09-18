@@ -230,12 +230,111 @@ ECC_HD P131 fromHalvingPhase131(P131 a) {
     v[4]^=t^(t << 1);
     return P131{{v[0],v[1],v[2],v[3],v[4]&7u}};
 }
+ECC_HD P131 halvingSqrt131(P131 a) {
+    uint32_t v[8] = {a.v[0],a.v[1],a.v[2],a.v[3],a.v[4],0,0,0};
+    uint32_t t;
+    t=((v[0] >> 1)^v[0])&0x44444444u;
+    v[0]^=t^(t << 1);
+    t=((v[1] >> 1)^v[1])&0x44444444u;
+    v[1]^=t^(t << 1);
+    t=((v[2] >> 1)^v[2])&0x44444444u;
+    v[2]^=t^(t << 1);
+    t=((v[3] >> 1)^v[3])&0x44444444u;
+    v[3]^=t^(t << 1);
+    t=((v[0] >> 2)^v[0])&0x30303030u;
+    v[0]^=t^(t << 2);
+    t=((v[1] >> 2)^v[1])&0x30303030u;
+    v[1]^=t^(t << 2);
+    t=((v[2] >> 2)^v[2])&0x30303030u;
+    v[2]^=t^(t << 2);
+    t=((v[3] >> 2)^v[3])&0x30303030u;
+    v[3]^=t^(t << 2);
+    t=((v[4] >> 2)^v[4])&0x00000002u;
+    v[4]^=t^(t << 2);
+    t=((v[0] >> 4)^v[0])&0x0f000f00u;
+    v[0]^=t^(t << 4);
+    t=((v[1] >> 4)^v[1])&0x0f000f00u;
+    v[1]^=t^(t << 4);
+    t=((v[2] >> 4)^v[2])&0x0f000f00u;
+    v[2]^=t^(t << 4);
+    t=((v[3] >> 4)^v[3])&0x0f000f00u;
+    v[3]^=t^(t << 4);
+    t=((v[4] >> 4)^v[4])&0x00000004u;
+    v[4]^=t^(t << 4);
+    t=((v[0] >> 8)^v[0])&0x00ff0000u;
+    v[0]^=t^(t << 8);
+    t=((v[1] >> 8)^v[1])&0x00ff0000u;
+    v[1]^=t^(t << 8);
+    t=((v[2] >> 8)^v[2])&0x00ff0000u;
+    v[2]^=t^(t << 8);
+    t=((v[3] >> 8)^v[3])&0x00ff0000u;
+    v[3]^=t^(t << 8);
+    t=((v[1] >> 16)^v[1])&0x0000ffffu;
+    v[1]^=t^(t << 16);
+    t=((v[3] >> 16)^v[3])&0x0000ffffu;
+    v[3]^=t^(t << 16);
+    t=(v[2]^v[3])&0xffffffffu;
+    v[2]^=t; v[3]^=t;
+    t=(v[0]^v[4])&0x00000049u;
+    v[0]^=t; v[4]^=t;
+    t=(v[0]^v[2])&0x69969669u;
+    v[0]^=t; v[2]^=t;
+    t=(v[1]^v[3])&0x96696996u;
+    v[1]^=t; v[3]^=t;
+    t=(v[0]^v[1])&0x69969669u;
+    v[0]^=t; v[1]^=t;
+    t=(v[2]^v[3])&0x69969620u;
+    v[2]^=t; v[3]^=t;
+    t=((v[0] >> 16)^v[0])&0x00009669u;
+    v[0]^=t^(t << 16);
+    t=((v[1] >> 16)^v[1])&0x00009669u;
+    v[1]^=t^(t << 16);
+    t=((v[2] >> 16)^v[2])&0x00009620u;
+    v[2]^=t^(t << 16);
+    t=((v[3] >> 16)^v[3])&0x00009620u;
+    v[3]^=t^(t << 16);
+    t=((v[0] >> 8)^v[0])&0x00690069u;
+    v[0]^=t^(t << 8);
+    t=((v[1] >> 8)^v[1])&0x00690069u;
+    v[1]^=t^(t << 8);
+    t=((v[2] >> 8)^v[2])&0x00200020u;
+    v[2]^=t^(t << 8);
+    t=((v[3] >> 8)^v[3])&0x00200020u;
+    v[3]^=t^(t << 8);
+    t=((v[0] >> 4)^v[0])&0x09090909u;
+    v[0]^=t^(t << 4);
+    t=((v[1] >> 4)^v[1])&0x09090909u;
+    v[1]^=t^(t << 4);
+    t=((v[2] >> 4)^v[2])&0x04040404u;
+    v[2]^=t^(t << 4);
+    t=((v[3] >> 4)^v[3])&0x04040404u;
+    v[3]^=t^(t << 4);
+    t=((v[4] >> 4)^v[4])&0x00000004u;
+    v[4]^=t^(t << 4);
+    t=((v[0] >> 2)^v[0])&0x11111111u;
+    v[0]^=t^(t << 2);
+    t=((v[1] >> 2)^v[1])&0x11111111u;
+    v[1]^=t^(t << 2);
+    t=((v[2] >> 2)^v[2])&0x33333333u;
+    v[2]^=t^(t << 2);
+    t=((v[3] >> 2)^v[3])&0x33333333u;
+    v[3]^=t^(t << 2);
+    t=((v[4] >> 2)^v[4])&0x00000003u;
+    v[4]^=t^(t << 2);
+    t=((v[0] >> 1)^v[0])&0x55555555u;
+    v[0]^=t^(t << 1);
+    t=((v[1] >> 1)^v[1])&0x55555555u;
+    v[1]^=t^(t << 1);
+    t=((v[2] >> 1)^v[2])&0x00000001u;
+    v[2]^=t^(t << 1);
+    return P131{{v[0],v[1],v[2],v[3],v[4]&7u}};
+}
 ECC_HD P131 halvingQuadraticRoot131(P131 a) {
     P131 z=toHalvingPhase131(a);
     z.v[0]&=~1u;
-    const int shifts[7]={1,2,4,8,16,32,64};
+    const int shifts[8]={1,2,4,8,16,32,64,128};
 #pragma unroll
-    for(int k=0;k<7;k++){
+    for(int k=0;k<8;k++){
         const int s=shifts[k], words=s>>5, bits=s&31;
         P131 old=z;
 #pragma unroll
@@ -248,12 +347,31 @@ ECC_HD P131 halvingQuadraticRoot131(P131 a) {
     }
     return fromHalvingPhase131(z);
 }
-ECC_HD P131 halvingSqrt131(P131 a) {
-    P131 q=toHalvingPhase131(a), r;
-    r.v[0]=(q.v[0]>>1)|(q.v[1]<<31);
-    r.v[1]=(q.v[1]>>1)|(q.v[2]<<31);
-    r.v[2]=(q.v[2]>>1)|(q.v[3]<<31);
-    r.v[3]=(q.v[3]>>1)|(q.v[4]<<31);
-    r.v[4]=(q.v[4]>>1)|((q.v[0]&1u)<<2);
-    return fromHalvingPhase131(r);
+ECC_HD unsigned halvingSecondTrace131(P131 a) {
+    const P131 q=toHalvingPhase131(a);
+    P131 z=q;
+    z.v[0]&=~1u;
+    const int shifts[8]={1,2,4,8,16,32,64,128};
+#pragma unroll
+    for(int k=0;k<8;k++){
+        const int s=shifts[k], words=s>>5, bits=s&31;
+        P131 old=z;
+#pragma unroll
+        for(int i=4;i>=0;i--){
+            uint32_t v=0;
+            if(i>=words){v=old.v[i-words]<<bits;if(bits&&i>words)v|=old.v[i-words-1]>>(32-bits);}
+            z.v[i]^=v;
+        }
+        z.v[4]&=7u;
+    }
+    unsigned parity=0;
+#pragma unroll
+    for(int i=0;i<5;i++){
+#ifdef __CUDA_ARCH__
+        parity^=__popc(q.v[i]&z.v[i]);
+#else
+        parity^=__builtin_popcount(q.v[i]&z.v[i]);
+#endif
+    }
+    return parity&1u;
 }

@@ -137,7 +137,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
-        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
+        (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE)) *
+        (1 - ECC_TABLE_RECOMPUTE_DENOM);
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
@@ -300,9 +301,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
+        printf("packed selection pipeline: %d\n", ECC_PACKED_SELECT_PIPELINE);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
+        printf("packed inline onb multiply: %d\n", ECC_PACKED_INLINE_ONB_MUL);
         printf("packed native carryless multiply: %d\n", ECC_PACKED_CLMAD);
         printf("packed native carryless square: %d\n", ECC_PACKED_CLMAD_SQUARE);
         printf("packed three-limb Karatsuba: %d\n", ECC_PACKED_KARAT3);
@@ -310,6 +313,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed compact state: %d\n", ECC_PACKED_COMPACT_STATE);
         printf("packed shared sigma: %d\n", ECC_PACKED_SHARED_SIGMA);
         printf("packed top clmad: %d\n", ECC_PACKED_TOP_CLMAD);
+        printf("packed half top clmad: %d\n", ECC_PACKED_TOP_CLMAD_HALF);
         printf("packed state tile: %d\n", ECC_PACKED_STATE_TILE);
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
@@ -319,6 +323,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
+        printf("packed table recompute denominator: %d\n", ECC_TABLE_RECOMPUTE_DENOM);
+        printf("packed table bank pad: %d\n", ECC_TABLE_BANK_PAD);
+        printf("packed table warp LUT: %d\n", ECC_TABLE_WARP_LUT);
 #endif
         printf("packed table walk: %d (%d branches, %zu shared bytes)\n", ECC_WALK_TABLE,
                ECC_WALK_TABLE ? ECC_TABLE_BRANCHES : 0, dynamicSharedBytes());

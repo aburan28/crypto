@@ -1,0 +1,78 @@
+{
+  "classification": "engineering; target not met",
+  "source_commit": "4445dd27047ffd3f4e0c27f68e0e052882310b30",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete scalar updates per second",
+  "target": 22.0,
+  "one_affine_addition_boundary": [22.0, 25.0],
+  "equal_updates_per_confirmation_sample": 53619982336,
+  "confirmation": {
+    "baseline": {
+      "binary_sha256": "e2ef2fc63c2779188133ace7a540cf4fd84ee857ae7680a2bfe5a5237cff80e9",
+      "batch": 16,
+      "threads_per_block": 256,
+      "resident_blocks_per_sm": 2,
+      "launches": 34,
+      "products_per_update": 5.3125,
+      "samples": [18.222922, 18.203371, 18.194044, 18.135451, 18.134877, 18.095905],
+      "median": 18.1647475,
+      "correctness": "300/300 reports replayed, zero dropped"
+    },
+    "candidate": {
+      "binary_sha256": "4512df4ea41b97612da960be982d2217494a8873e070f544ddaab65af8de0354",
+      "batch": 17,
+      "threads_per_block": 512,
+      "resident_blocks_per_sm": 1,
+      "launches": 32,
+      "products_per_update": 5.2941176471,
+      "samples": [20.184920, 20.164478, 20.101141, 20.112260, 20.090317, 20.156391],
+      "median": 20.1343255,
+      "ratio_to_baseline": 1.1084286,
+      "ratio_to_target": 0.9151966,
+      "paired_ratios": [1.1076665, 1.1077332, 1.1048199, 1.1090025, 1.1078276, 1.1138648],
+      "paired_geometric_mean": 1.1084824,
+      "paired_95_percent_t_interval": [1.1053660, 1.1116075],
+      "correctness": "300/300 reports replayed, zero dropped"
+    }
+  },
+  "candidate_configuration": {
+    "PACKED_INLINE_POLY": 3,
+    "PACKED_ALU_SQUARE": 1,
+    "PACKED_PAIR_CLMUL": 1,
+    "PACKED_FROM_REDUCED": 1,
+    "PACKED_L2_PERSIST": 1,
+    "TABLE_RECOMPUTE_DENOM": 1,
+    "TABLE_BANK_PAD": 1,
+    "TABLE_WARP_LUT": 0,
+    "PACKED_SELECT_PIPELINE": 0,
+    "UNROLL_SLOTS": 1,
+    "WALK_TABLE": 1,
+    "TABLE_PIVOT_BYTES": 1
+  },
+  "scouts": {
+    "inline_onb_multiply": 18.041041,
+    "threads_512_batch_16": 19.207916,
+    "threads_576": 17.783764,
+    "threads_640": 17.913804,
+    "selection_pipeline_before_recompute": 19.210384,
+    "unroll_4": 18.462692,
+    "half_top_clmad": 18.626265,
+    "threads_512_without_pair_clmul": 19.222995,
+    "recompute_denominator_without_pair_clmul": 19.634386,
+    "recompute_denominator_with_pair_clmul": 19.815628,
+    "batch_17": 20.130866,
+    "phase_row_bank_padding": 20.154333,
+    "phase_and_sign_row_bank_padding": 20.174535,
+    "warp_cooperative_lut": 17.944101,
+    "batch_18": 19.955515
+  },
+  "profile_candidate": {
+    "issue_slots_busy_percent": 56.38,
+    "fp64_clmad_pipeline_percent": 70.4,
+    "no_eligible_percent": 42.81,
+    "eligible_warps_per_scheduler": 1.31,
+    "l2_hit_percent": 97.57,
+    "shared_excessive_wavefront_percent": 58
+  }
+}

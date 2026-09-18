@@ -85,6 +85,18 @@ namespace eccPacked131 {
 #if ECC_PACKED_SLOT_PIPELINE && ECC_PACKED_SLOT_PREFETCH
 #error "ECC_PACKED_SLOT_PIPELINE and ECC_PACKED_SLOT_PREFETCH both issue the next slot load; pick one"
 #endif
+#ifndef ECC_PACKED_SELECT_PIPELINE
+#define ECC_PACKED_SELECT_PIPELINE 0
+#endif
+#if ECC_PACKED_SELECT_PIPELINE != 0 && ECC_PACKED_SELECT_PIPELINE != 1
+#error "ECC_PACKED_SELECT_PIPELINE must be 0 or 1"
+#endif
+#if ECC_PACKED_SELECT_PIPELINE && (!ECC_WALK_TABLE || !ECC_PACKED_PAIR_CLMUL || !ECC_PACKED_POLY_STATE)
+#error "ECC_PACKED_SELECT_PIPELINE requires table walk, paired CLMAD and polynomial state"
+#endif
+#if ECC_PACKED_SELECT_PIPELINE && (ECC_PACKED_SLOT_PIPELINE || ECC_PACKED_SLOT_PREFETCH)
+#error "ECC_PACKED_SELECT_PIPELINE is exclusive with the existing slot pipelines"
+#endif
 #ifndef ECC_PACKED_STATE_TILE
 #define ECC_PACKED_STATE_TILE 0
 #endif
@@ -185,6 +197,52 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #endif
 }
 
+#if ECC_PACKED_SELECT_PIPELINE
+struct PreparedTableSlot {
+    P131 dp, ep;
+};
+
+// Prepare one additive-table slot independently of the running denominator
+// product. The pipelined caller places this work between a paired raw product
+// and its reductions, giving ptxas shared-memory/ALU instructions it can issue
+// while the twelve CLMAD results are pending.
+static __device__ __forceinline__ PreparedTableSlot prepareTableSlot(
+    WalkParams<unsigned> p, int slot, int tid, unsigned long long now, bool guard,
+    const uint32_t *twSel, const uint32_t *twTab, unsigned *denominators) {
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const P131 x = fromPolynomial131(xp);
+    const int hw = weight(x);
+    const size_t id = size_t(slot) * p.threads + tid;
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(fromPolynomial131(yp), rec.y);
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
+    PreparedTableSlot out;
+    twAddend(tag, xp, yp, twTab, &out.dp, &out.ep, p.twConsts);
+#if !ECC_TABLE_RECOMPUTE_DENOM
+    store(denominators, slot, tid, p.threads, out.dp);
+#endif
+    return out;
+}
+#endif
+
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_WALK_TABLE
@@ -196,6 +254,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     extern __shared__ uint32_t twSel[];
     twLoadShared(twSel, p.twConsts + TW_MASK_OFF, TW_SEL_WORDS);
     const uint32_t *twTab = p.twConsts;
+#elif ECC_TABLE_SELECTION_GLOBAL
+    extern __shared__ uint32_t twShared[];
+    twLoadShared(twShared, p.twConsts, TW_TABLE_WORDS);
+    const uint32_t *twSel = p.twConsts + TW_MASK_OFF;
+    const uint32_t *twTab = twShared;
 #else
     extern __shared__ uint32_t twSel[];
     twLoadShared(twSel, p.twConsts);
@@ -221,6 +284,27 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
     for (int step = 0; step < p.steps; ++step) {
         const unsigned long long now = p.iterBase + step;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
+#if ECC_PACKED_SELECT_PIPELINE
+        PreparedTableSlot first = prepareTableSlot(
+            p, 0, tid, now, guard, twSel, twTab, denominators);
+        prod = first.dp;
+        store(p.pchain, 0, tid, p.threads, first.ep);
+        PreparedTableSlot cur = prepareTableSlot(
+            p, 1, tid, now, guard, twSel, twTab, denominators);
+#pragma unroll 1
+        for (int slot = 1; slot < ECC_BATCH; ++slot) {
+            uint32_t hb[9], hc[9];
+            product131Pair(prod, cur.ep, cur.dp, hb, hc);
+            PreparedTableSlot next;
+            if (slot + 1 < ECC_BATCH)
+                next = prepareTableSlot(p, slot + 1, tid, now, guard,
+                                        twSel, twTab, denominators);
+            const P131 prefix = reducePolynomial131(hb);
+            prod = reducePolynomial131(hc);
+            store(p.pchain, slot, tid, p.threads, prefix);
+            if (slot + 1 < ECC_BATCH) cur = next;
+        }
+#else
 #if ECC_UNROLL_SLOTS >= 8
 #pragma unroll 8
 #elif ECC_UNROLL_SLOTS >= 4
@@ -290,7 +374,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
             P131 dp, ep;
-            twAddend(tag, xp, yp, twTab, &dp, &ep);
+            twAddend(tag, xp, yp, twTab, &dp, &ep, p.twConsts);
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
                 store(p.pchain, slot, tid, p.threads, pair.first);
@@ -299,7 +383,9 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 prod = dp;
                 store(p.pchain, slot, tid, p.threads, ep);
             }
+#if !ECC_TABLE_RECOMPUTE_DENOM
             store(denominators, slot, tid, p.threads, dp);
+#endif
 #else
             const int j = 3 + ((hw >> 1) & 7);
 #if !ECC_PACKED_CACHE_DENOM
@@ -355,6 +441,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #endif  // ECC_WALK_TABLE
         }
+#endif  // ECC_PACKED_SELECT_PIPELINE
 #if ECC_PACKED_POLY_CHAIN
         inv = toPolynomial131(inv131(fromPolynomial131(prod)));
 #else
@@ -404,8 +491,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
             P131 x = load(p.x, slot, tid, p.threads), y = load(p.y, slot, tid, p.threads);
 #if ECC_PACKED_WEIGHTED_PREFIX
+#if ECC_WALK_TABLE && ECC_TABLE_RECOMPUTE_DENOM
+            const size_t id = size_t(slot) * p.threads + tid;
+            P131 dp = twDenominator(unsigned(p.hist[id] & 0xFFFFu), x, twTab, p.twConsts);
+#else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
+#endif
             P131 lambdaPoly;
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(inv,

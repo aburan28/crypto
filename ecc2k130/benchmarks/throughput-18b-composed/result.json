@@ -1,0 +1,70 @@
+{
+  "classification": "engineering",
+  "source_commit": "70a2c0cd50acfd5b86c52993379d9fa1584aa305",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete scalar updates per second",
+  "updates_per_sample": 50465865728,
+  "comparison_order": [
+    ["baseline", "alu_square_pair_clmul", "candidate"],
+    ["alu_square_pair_clmul", "candidate", "baseline"],
+    ["candidate", "baseline", "alu_square_pair_clmul"],
+    ["baseline", "candidate", "alu_square_pair_clmul"],
+    ["candidate", "alu_square_pair_clmul", "baseline"],
+    ["alu_square_pair_clmul", "baseline", "candidate"]
+  ],
+  "variants": {
+    "baseline": {
+      "binary_sha256": "fe1fc232675a57ec09434e3478863ab8115da93acc55b37159e942ce24fee1d4",
+      "samples": [17.949115, 17.951217, 17.949622, 17.949660, 17.938109, 17.924599],
+      "median": 17.9493685,
+      "registers": 98,
+      "correctness": "300/300 reports replayed, zero dropped"
+    },
+    "alu_square_pair_clmul": {
+      "samples": [18.088736, 18.064915, 17.983305, 17.967654, 17.949975, 17.930716],
+      "median": 17.9754795,
+      "ratio_to_baseline": 1.0014547,
+      "registers": 102
+    },
+    "candidate": {
+      "binary_sha256": "5cb6a3709fc78ea97e1e511dd5cffe404bdb52b872b33e0c1ae9eb180944b73c",
+      "samples": [18.200210, 18.176657, 18.132732, 18.086785, 18.074317, 18.045151],
+      "median": 18.1097585,
+      "ratio_to_baseline": 1.0089357,
+      "paired_ratios": [1.0139893, 1.0125585, 1.0102013, 1.0076394, 1.0075932, 1.0067255],
+      "paired_geometric_mean": 1.0097809,
+      "paired_95_percent_t_interval": [1.0066633, 1.0129081],
+      "registers": 102,
+      "correctness": "300/300 reports replayed, zero dropped"
+    }
+  },
+  "candidate_changes": {
+    "PACKED_ALU_SQUARE": 1,
+    "PACKED_PAIR_CLMUL": 1,
+    "PACKED_FROM_REDUCED": 1
+  },
+  "unchanged": {
+    "field_products_per_update": 5.3125,
+    "walk": "table",
+    "batch": 16,
+    "threads": 256,
+    "min_blocks": 2,
+    "workers": 96256,
+    "steps": 1024,
+    "launches": 32,
+    "PACKED_INLINE_POLY": 3
+  },
+  "rejected_followups": {
+    "PACKED_TOP_HOIST": {
+      "control_samples": [18.227677, 18.193285, 18.169778, 18.111584, 18.113952, 18.092142],
+      "candidate_samples": [18.202707, 18.188689, 18.142719, 18.122827, 18.094989, 18.081309],
+      "control_median": 18.141865,
+      "candidate_median": 18.132773,
+      "ratio_of_medians": 0.9994988,
+      "pairs_favoring_candidate": 1,
+      "pairs": 6,
+      "correctness": "300/300 reports replayed, zero dropped"
+    }
+  }
+}

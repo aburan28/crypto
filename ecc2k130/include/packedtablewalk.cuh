@@ -67,17 +67,63 @@
 #if ECC_TABLE_ADDEND_GLOBAL && ECC_TABLE_GLOBAL
 #error "ECC_TABLE_ADDEND_GLOBAL is the hybrid smem path; do not combine with ECC_TABLE_GLOBAL"
 #endif
+#ifndef ECC_TABLE_SELECTION_GLOBAL
+#define ECC_TABLE_SELECTION_GLOBAL 0
+#endif
+#if ECC_TABLE_SELECTION_GLOBAL != 0 && ECC_TABLE_SELECTION_GLOBAL != 1
+#error "ECC_TABLE_SELECTION_GLOBAL must be 0 or 1"
+#endif
+#if ECC_TABLE_SELECTION_GLOBAL && (!ECC_WALK_TABLE || ECC_TABLE_GLOBAL || ECC_TABLE_ADDEND_GLOBAL)
+#error "ECC_TABLE_SELECTION_GLOBAL requires the table walk and is exclusive with other global-table modes"
+#endif
+#ifndef ECC_TABLE_RECOMPUTE_DENOM
+#define ECC_TABLE_RECOMPUTE_DENOM 0
+#endif
+#if ECC_TABLE_RECOMPUTE_DENOM != 0 && ECC_TABLE_RECOMPUTE_DENOM != 1
+#error "ECC_TABLE_RECOMPUTE_DENOM must be 0 or 1"
+#endif
+#if ECC_TABLE_RECOMPUTE_DENOM && !ECC_WALK_TABLE
+#error "ECC_TABLE_RECOMPUTE_DENOM requires the table walk"
+#endif
+#ifndef ECC_TABLE_BANK_PAD
+#define ECC_TABLE_BANK_PAD 0
+#endif
+#if ECC_TABLE_BANK_PAD != 0 && ECC_TABLE_BANK_PAD != 1
+#error "ECC_TABLE_BANK_PAD must be 0 or 1"
+#endif
+#if ECC_TABLE_BANK_PAD && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_SELECTION_GLOBAL)
+#error "ECC_TABLE_BANK_PAD requires the byte-pivot shared-table layout"
+#endif
+#ifndef ECC_TABLE_WARP_LUT
+#define ECC_TABLE_WARP_LUT 0
+#endif
+#if ECC_TABLE_WARP_LUT != 0 && ECC_TABLE_WARP_LUT != 1
+#error "ECC_TABLE_WARP_LUT must be 0 or 1"
+#endif
+#if ECC_TABLE_WARP_LUT && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_GLOBAL || ECC_TABLE_SELECTION_GLOBAL)
+#error "ECC_TABLE_WARP_LUT requires byte-pivot LUTs in shared memory"
+#endif
 
 namespace eccPacked131 {
 
 static const int TW_H = ECC_TABLE_BRANCHES;
 #if ECC_TABLE_PIVOT_BYTES
 static const int TW_ENTRY = 8;                            // x words 0-3, y words 0-3
-static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4;  // + tops, 8 bits per entry
+#if ECC_TABLE_SELECTION_GLOBAL
+static const int TW_KWORDS = TW_H * TW_ENTRY;
+static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
+static const int TW_TOP_OFF = TW_TABLE_WORDS;             // one x|y-top byte per entry
+static const int TW_MASK_OFF = TW_TOP_OFF + (131 * TW_H + 3) / 4;
+#else
+// The optional pad changes the phase-row stride from 66 (only 16 possible
+// starting banks) to 67 words (all 32 banks) for random addend lookups.
+static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4 + ECC_TABLE_BANK_PAD;
 static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
-static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
-static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
+#endif
+static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
+static const int TW_ROW_WORDS = 4 + ECC_TABLE_BANK_PAD;
+static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * TW_ROW_WORDS;
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
@@ -98,9 +144,13 @@ static const int TW_WORDS = TW_LINV_OFF + 33;
 // fits three (and four) blocks in this SKU's 100 KB/SM; the full buffer does
 // not.  Offsets in the selection copy are relative to TW_MASK_OFF.
 static const int TW_SEL_WORDS = TW_WORDS - TW_MASK_OFF;
-static const int TW_SEL0 = ECC_TABLE_ADDEND_GLOBAL ? TW_MASK_OFF : 0;
-static const size_t TW_SHARED_BYTES = size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS : TW_WORDS) * sizeof(uint32_t);
-static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
+static const int TW_SEL0 = (ECC_TABLE_ADDEND_GLOBAL || ECC_TABLE_SELECTION_GLOBAL) ? TW_MASK_OFF : 0;
+static const size_t TW_SHARED_BYTES =
+    size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS :
+           (ECC_TABLE_SELECTION_GLOBAL ? TW_TABLE_WORDS : TW_WORDS)) * sizeof(uint32_t);
+// 49,780 bytes with bank padding plus the driver's measured 1,024-byte
+// reservation still permits one 512-thread block on the 100 KiB SM.
+static_assert(TW_SHARED_BYTES <= 50 * 1024, "table walk tables exceed the measured shared-memory budget");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
               "selection tables must fit three blocks in a 100 KB SM");
 
@@ -114,11 +164,26 @@ __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *g
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
 __device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
 __device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+#if ECC_TABLE_WARP_LUT
+__device__ __forceinline__ unsigned twWarpLookup(const uint8_t *row, unsigned value) {
+    const uint32_t *words = reinterpret_cast<const uint32_t *>(row);
+    const int lane = int(threadIdx.x & 31);
+    const int source = int((value >> 2) & 31u);
+    uint32_t lo = __shfl_sync(0xFFFFFFFFu, words[lane], source);
+    uint32_t hi = __shfl_sync(0xFFFFFFFFu, words[32 + lane], source);
+    return twByte((value & 128u) ? hi : lo, int(value & 3u));
+}
+#endif
 #else
 #define TW_FN static inline
 static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
 static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
 static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+#if ECC_TABLE_WARP_LUT
+static inline unsigned twWarpLookup(const uint8_t *row, unsigned value) {
+    return row[value];
+}
+#endif
 #endif
 
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
@@ -127,7 +192,14 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
 #pragma unroll
     for (int w = 0; w < 4; ++w)
 #pragma unroll
-        for (int t = 0; t < 4; ++t) s += phase[(4 * w + t) * 256 + twByte(x.v[w], t)];
+        for (int t = 0; t < 4; ++t) {
+            const unsigned value = twByte(x.v[w], t);
+#if ECC_TABLE_WARP_LUT
+            s += twWarpLookup(phase + (4 * w + t) * 256, value);
+#else
+            s += phase[(4 * w + t) * 256 + value];
+#endif
+        }
     s += phase[16 * 256 + (x.v[4] & 0xFFu)];
     return int(((s % 131u) * inv[hw]) % 131u);
 }
@@ -151,7 +223,14 @@ TW_FN int twPivot(const P131 &x, int k, const uint32_t *maskLt,
     for (int w = 0; w < 4; ++w)
 #pragma unroll
         for (int t = 0; t < 4; ++t)
-            best = twMax(best, unsigned(maxL[(4 * w + t) * 256 + twByte(s[w], t)]));
+        {
+            const unsigned value = twByte(s[w], t);
+#if ECC_TABLE_WARP_LUT
+            best = twMax(best, twWarpLookup(maxL + (4 * w + t) * 256, value));
+#else
+            best = twMax(best, unsigned(maxL[(4 * w + t) * 256 + value]));
+#endif
+        }
     best = twMax(best, unsigned(maxL[16 * 256 + (s[4] & 7u)]));
 #else
 #pragma unroll
@@ -171,7 +250,7 @@ TW_FN int twPivot(const P131 &x, int k, const uint32_t *maskLt,
 // Coordinate p of the normal-basis image of a polynomial-basis y.
 TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 #if ECC_TABLE_PIVOT_BYTES
-    const uint32_t *r = fromRow + p * 4;
+    const uint32_t *r = fromRow + p * TW_ROW_WORDS;
     const uint32_t top = (fromRow[(TW_ROWTOP_OFF - TW_ROW_OFF) + (p >> 3)] >> ((p & 7) * 4)) & 7u;
     const uint32_t t = (yp.v[0] & r[0]) ^ (yp.v[1] & r[1]) ^ (yp.v[2] & r[2]) ^ (yp.v[3] & r[3]) ^ (yp.v[4] & top);
 #else
@@ -204,12 +283,18 @@ TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
 // d = x + x_T and e = y + y_T (+ x_T when the table point is negated), in the
 // polynomial basis, for the selected tag.
 TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
-                    const uint32_t *shared, P131 *d, P131 *e) {
+                    const uint32_t *shared, P131 *d, P131 *e,
+                    const uint32_t *allConsts = nullptr) {
 #if ECC_TABLE_PIVOT_BYTES
     const int h = eccTagH(tag);
     const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
     const uint32_t *t = kbase + h * TW_ENTRY;
+#if ECC_TABLE_SELECTION_GLOBAL
+    const uint32_t entry = unsigned(eccTagK(tag) * TW_H + h);
+    const uint32_t top = reinterpret_cast<const uint8_t *>(allConsts + TW_TOP_OFF)[entry] & 63u;
+#else
     const uint32_t top = (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 63u;
+#endif
 #else
     const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
     const uint32_t top = t[8];
@@ -224,6 +309,34 @@ TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
     const uint32_t tx = top & 7u;
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
+}
+
+// Reconstruct only d=x+x_T in the reverse Montgomery pass. The selected tag
+// is already the low history word, so this can replace a global denominator
+// field without repeating phase/pivot/sign selection.
+TW_FN P131 twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared,
+                         const uint32_t *allConsts = nullptr) {
+#if ECC_TABLE_PIVOT_BYTES
+    const int h = eccTagH(tag);
+    const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
+    const uint32_t *t = kbase + h * TW_ENTRY;
+#if ECC_TABLE_SELECTION_GLOBAL
+    const uint32_t entry = unsigned(eccTagK(tag) * TW_H + h);
+    const uint32_t top = reinterpret_cast<const uint8_t *>(allConsts + TW_TOP_OFF)[entry] & 7u;
+#else
+    const uint32_t top =
+        (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 7u;
+#endif
+#else
+    const uint32_t *t =
+        shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
+    const uint32_t top = t[8] & 7u;
+#endif
+    P131 d;
+#pragma unroll
+    for (int i = 0; i < 4; ++i) d.v[i] = xp.v[i] ^ t[i];
+    d.v[4] = xp.v[4] ^ top;
+    return d;
 }
 
 // Host: fill the flat constant buffer from the reference walk.
@@ -243,7 +356,12 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
 #if ECC_TABLE_PIVOT_BYTES
             uint32_t *t = out + k * TW_KWORDS + h * TW_ENTRY;
             for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }
+#if ECC_TABLE_SELECTION_GLOBAL
+            reinterpret_cast<uint8_t *>(out + TW_TOP_OFF)[k * TW_H + h] =
+                uint8_t((x.v[4] & 7u) | ((y.v[4] & 7u) << 3));
+#else
             out[k * TW_KWORDS + TW_H * TW_ENTRY + (h >> 2)] |= ((x.v[4] & 7u) | ((y.v[4] & 7u) << 3)) << ((h & 3) * 8);
+#endif
 #else
             uint32_t *t = out + (k * TW_H + h) * TW_ENTRY;
             for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }
@@ -258,7 +376,7 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         for (int p = 0; p < 131; ++p)
             if ((n.v[p >> 5] >> (p & 31)) & 1u) {
 #if ECC_TABLE_PIVOT_BYTES
-                if (j < 128) out[TW_ROW_OFF + p * 4 + (j >> 5)] |= 1u << (j & 31);
+                if (j < 128) out[TW_ROW_OFF + p * TW_ROW_WORDS + (j >> 5)] |= 1u << (j & 31);
                 else out[TW_ROWTOP_OFF + (p >> 3)] |= 1u << ((j - 128) + (p & 7) * 4);
 #else
                 out[TW_ROW_OFF + p * 5 + (j >> 5)] |= 1u << (j & 31);
