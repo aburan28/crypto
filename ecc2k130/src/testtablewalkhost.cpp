@@ -61,7 +61,7 @@ int main() {
         unsigned long long h2 = hist;
         const unsigned tag = twSelect(xn, yp, hw, &h2, shared.data());
         P131 d, e;
-        twAddend(tag, xp, yp, shared.data(), &d, &e);
+        twAddend(tag, xp, yp, shared.data(), &d, &e, shared.data());
 
         // reference
         const R::Elem rxn = R::nbCoords(pt.x), ryn = R::nbCoords(pt.y);

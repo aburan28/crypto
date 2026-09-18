@@ -295,7 +295,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
             const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
             P131 dp, ep;
-            twAddend(tag, xp, yp, twTab, &dp, &ep);
+            twAddend(tag, xp, yp, twTab, &dp, &ep, p.twConsts);
             if (slot) {
                 PolynomialPair pair = mulPolynomialPair131(prod, ep, dp);
                 store(p.pchain, slot, tid, p.threads, pair.first);

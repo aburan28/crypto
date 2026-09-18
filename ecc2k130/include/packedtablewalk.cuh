@@ -82,9 +82,16 @@ namespace eccPacked131 {
 static const int TW_H = ECC_TABLE_BRANCHES;
 #if ECC_TABLE_PIVOT_BYTES
 static const int TW_ENTRY = 8;                            // x words 0-3, y words 0-3
+#if ECC_TABLE_SELECTION_GLOBAL
+static const int TW_KWORDS = TW_H * TW_ENTRY;
+static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
+static const int TW_TOP_OFF = TW_TABLE_WORDS;             // one x|y-top byte per entry
+static const int TW_MASK_OFF = TW_TOP_OFF + (131 * TW_H + 3) / 4;
+#else
 static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4;  // + tops, 8 bits per entry
 static const int TW_TABLE_WORDS = 131 * TW_KWORDS;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
+#endif
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
 static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
@@ -215,12 +222,18 @@ TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
 // d = x + x_T and e = y + y_T (+ x_T when the table point is negated), in the
 // polynomial basis, for the selected tag.
 TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
-                    const uint32_t *shared, P131 *d, P131 *e) {
+                    const uint32_t *shared, P131 *d, P131 *e,
+                    const uint32_t *allConsts = nullptr) {
 #if ECC_TABLE_PIVOT_BYTES
     const int h = eccTagH(tag);
     const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
     const uint32_t *t = kbase + h * TW_ENTRY;
+#if ECC_TABLE_SELECTION_GLOBAL
+    const uint32_t entry = unsigned(eccTagK(tag) * TW_H + h);
+    const uint32_t top = reinterpret_cast<const uint8_t *>(allConsts + TW_TOP_OFF)[entry] & 63u;
+#else
     const uint32_t top = (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 63u;
+#endif
 #else
     const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
     const uint32_t top = t[8];
@@ -254,7 +267,12 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
 #if ECC_TABLE_PIVOT_BYTES
             uint32_t *t = out + k * TW_KWORDS + h * TW_ENTRY;
             for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }
+#if ECC_TABLE_SELECTION_GLOBAL
+            reinterpret_cast<uint8_t *>(out + TW_TOP_OFF)[k * TW_H + h] =
+                uint8_t((x.v[4] & 7u) | ((y.v[4] & 7u) << 3));
+#else
             out[k * TW_KWORDS + TW_H * TW_ENTRY + (h >> 2)] |= ((x.v[4] & 7u) | ((y.v[4] & 7u) << 3)) << ((h & 3) * 8);
+#endif
 #else
             uint32_t *t = out + (k * TW_H + h) * TW_ENTRY;
             for (int i = 0; i < 4; ++i) { t[i] = x.v[i]; t[4 + i] = y.v[i]; }

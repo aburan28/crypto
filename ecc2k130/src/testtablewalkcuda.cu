@@ -54,7 +54,7 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     o.eps = twCoordinate(a.yp, o.pivot, sel + (TW_ROW_OFF - TW_SEL0));
     unsigned long long hist = a.hist;
     o.tag = twSelect(a.xn, a.yp, a.hw, &hist, sel);
-    twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e);
+    twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e, consts);
     out[i] = o;
 }
 
