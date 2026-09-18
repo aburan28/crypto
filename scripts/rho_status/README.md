@@ -19,10 +19,19 @@ already on that host.
 creates `rho_dp_hour` / `rho_dp_recent`, backfills them once from the
 heap, and installs a statement-level insert trigger so the ingest's
 `INSERT ... SELECT` keeps the buckets current. Later snapshots read those
-tables. The one-time backfill is why the hop's remote timeout is 900 s
-rather than 540 s: the last heap scan published at 524 s on
-2026-09-18T11:25Z and the next run died at exit 124, which is the stale
-banner the page then shows.
+tables.
+
+The first merged backfill (#448) did not unstick Pages. It set
+`statement_timeout` to 800 s, took SHARE on the heap, grouped by
+`(worker_id, found_at)`, and PostgreSQL cancelled it; `rho_dp_meta.ready`
+stayed false and the hop kept retrying, so
+https://aburan28.github.io/crypto/status/ froze on the 2026-09-18T11:25Z
+snapshot. The hop now writes an index-only fallback (group by hour, no
+`worker_id`) *before* the backfill, copies that file even if the remote
+`timeout` fires, and backfills one hour at a time through
+`(campaign_id, found_at)`, resuming from `rho_dp_meta.backfill_through`.
+The remote timeout is 1500 s so the fallback plus a stretch of hour
+chunks fit; leftover hours wait for the next scheduled run.
 
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
