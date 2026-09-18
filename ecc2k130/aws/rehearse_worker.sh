@@ -18,6 +18,13 @@ CLIENT=${CLIENT:-$PWD/../ecc2k130-cpu}
 BASE=${BASE:-$(mktemp -d)}
 mkdir -p "$BASE"
 echo "rehearsal in $BASE"
+# The rehearsal runs the host client, so it declares itself a CPU worker the
+# way bootstrap-cpu.sh does: ECC_DEVICE=cpu, not just a cpu-shaped device
+# name.  A slot record whose gpuName looks like a CPU's is refused to a
+# claimant that did not declare one (idleSlotClaimable), so the name alone
+# made the second run allocate a new slot instead of resuming its own.
+# ECC_DEVICE=cpu also names the work directory, hence WORKDIR.
+WORKDIR=cpu0
 
 config() {  # curve steps checkpointEvery
     python3 - "$1" "$2" "$3" > "$STORE/campaign.json" <<'EOF'
@@ -31,6 +38,7 @@ EOF
 
 runWorker() {  # seconds-before-SIGTERM (0 = wait for exit) logfile
     ECC_ALLOW_LEGACY_STORAGE=1 ECC_LOCAL_STORE="$STORE" ECC_ROOT="$ROOT" ECC_CLIENT="$CLIENT" ECC_GPU=0 \
+        ECC_DEVICE=cpu ECC_THREADS=2 \
         python3 worker.py > "$2" 2>&1 &
     local pid=$!
     if [ "$1" -gt 0 ]; then
@@ -52,7 +60,7 @@ python3 -c "
 import json,sys; s=json.load(open('$STORE/slots.json'))['0']; sys.exit(0 if s['leaseUntil']==0 and s['state']=='idle' else 1)" \
     || { echo "FAIL: slot not released"; cat "$STORE/slots.json"; exit 1; }
 # Every uploaded byte is whole records, and no record was uploaded twice.
-python3 - "$STORE/dp/slot-00000" "$ROOT/gpu0/dp.bin" <<'EOF' || exit 1
+python3 - "$STORE/dp/slot-00000" "$ROOT/$WORKDIR/dp.bin" <<'EOF' || exit 1
 import os, sys
 d, local = sys.argv[1:]
 parts = sorted(os.listdir(d))

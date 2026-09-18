@@ -97,6 +97,11 @@ LEGACY_KEY_RE = re.compile(r"^dp/(slot-\d+)/(\d+)-(\d+)\.bin$")
 ORBIT_KEY_RE = re.compile(r"^dp/(slot-\d+)/([0-9a-f]{32})-(\d+)-([0-9a-f]{64})\.bin$")
 # Written beside a record object by the contract path; metadata, not points.
 ENVELOPE_SUFFIX = ".bin.json"
+# Objects one pass will take before it stops to publish what it knows. Sized
+# so that a pass is a couple of minutes at the measured rate (~3 objects/s),
+# which is the cadence the dashboard and the alarms want; the backlog itself
+# is unbounded and the next pass simply takes the next slice.
+PASS_OBJECTS = 256
 
 
 def log(msg):
@@ -208,7 +213,84 @@ def ensureProgress(conn):
     conn.commit()
 
 
-def ingestedCounts(conn):
+FOUND_AT_INDEX = "distinguished_points_campaign_found_at"
+META_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_meta (
+    key   text PRIMARY KEY,
+    at    timestamptz NOT NULL DEFAULT now()
+)
+"""
+VACUUM_MARK = "found_at_index_vacuum"
+
+
+def ensureFoundAtIndex(conn):
+    """Give the snapshot an index to read instead of the whole table.
+
+    Every figure on the dashboard except `dps` is a question about `found_at`
+    -- the newest point, the first point, the last 48 hours by hour -- and
+    with no index on it each one reads all 42 GB of the table. Measured on
+    2026-09-17 at 130 M rows: one `publishStatus` held ~12,000 read IOPS for
+    over five minutes, on the same instance the ingest writes to, and
+    `--status-every` would have started the next one straight after. `dps`
+    itself becomes an index-only count of this index rather than a heap scan.
+
+    CONCURRENTLY so the build does not block the ingest, which means it cannot
+    run inside a transaction and can leave an invalid index behind if it
+    fails; an invalid one is dropped and rebuilt rather than silently used.
+    """
+    previous = conn.autocommit
+    conn.autocommit = True
+    built = False
+    try:
+        with conn.cursor() as cur:
+            cur.execute(META_DDL)
+            cur.execute(
+                "SELECT c.relname, i.indisvalid FROM pg_class c "
+                "JOIN pg_index i ON i.indexrelid = c.oid WHERE c.relname = %s",
+                (FOUND_AT_INDEX,))
+            row = cur.fetchone()
+            if row and not row[1]:
+                log("index %s exists but is invalid (a previous build failed); "
+                    "dropping it" % FOUND_AT_INDEX)
+                cur.execute("DROP INDEX CONCURRENTLY IF EXISTS %s" % FOUND_AT_INDEX)
+                row = None
+            if not row:
+                log("building index %s; the ingest keeps running while it does"
+                    % FOUND_AT_INDEX)
+                started = time.time()
+                cur.execute(
+                    "CREATE INDEX CONCURRENTLY IF NOT EXISTS %s "
+                    "ON distinguished_points (campaign_id, found_at)" % FOUND_AT_INDEX)
+                log("built index %s in %.0fs" % (FOUND_AT_INDEX, time.time() - started))
+                built = True
+            # An index-only scan reads the heap for every page the visibility
+            # map does not mark all-visible, and a bulk-loaded table has
+            # almost none marked: measured after the index was built, the
+            # snapshot still took over six minutes, because it was still
+            # reading 42 GB of heap. VACUUM is what sets that map, so the
+            # index is only half the fix and this is the other half. Once
+            # ever, recorded in dp_ingest_meta, because a replacement host is
+            # the deployment mechanism here and a vacuum per deploy is not a
+            # cost this table can carry.
+            cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (VACUUM_MARK,))
+            if cur.fetchone() is None:
+                started = time.time()
+                cur.execute("VACUUM (ANALYZE) distinguished_points")
+                cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                            "ON CONFLICT (key) DO NOTHING", (VACUUM_MARK,))
+                log("vacuumed distinguished_points in %.0fs; index-only scans "
+                    "are available from here" % (time.time() - started))
+                return True
+            return built
+    finally:
+        conn.autocommit = previous
+
+
+COUNTS_TTL = 1800.0
+_counts = {"at": 0.0, "map": {}}
+
+
+def ingestedCounts(conn, ttl=COUNTS_TTL):
     """Rows already present per worker_id, and objects recorded as complete.
 
     Two sources because the corpus has two eras.  Objects this program ingested
@@ -223,18 +305,32 @@ def ingestedCounts(conn):
     object's own worker_id never reaches its record count and the object would
     be re-ingested on every pass forever.  Harmless for correctness, but it
     means the backlog never converges.
+
+    The progress table is read every pass and is small.  The per-worker counts
+    are not: `worker_id` is one value per *object*, so that aggregate groups
+    the whole corpus -- 124 M rows into 113 k groups on 2026-09-17, three
+    minutes before the first object of a pass could be read, and growing with
+    the corpus.  It is also answering a question about an era that stopped
+    growing when this table appeared, so it is cached for `ttl` seconds.  A
+    stale entry costs a re-ingest of one already-stored object, which
+    `ON CONFLICT DO NOTHING` makes a no-op.
     """
+    now = time.time()
     with conn.cursor() as cur:
-        cur.execute(
-            "SELECT worker_id, count(*) FROM distinguished_points "
-            "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
-            (CAMPAIGN,))
-        counts = {row[0]: int(row[1]) for row in cur.fetchall()}
+        if not _counts["map"] or now - _counts["at"] >= ttl:
+            cur.execute(
+                "SELECT worker_id, count(*) FROM distinguished_points "
+                "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
+                (CAMPAIGN,))
+            _counts["map"] = {row[0]: int(row[1]) for row in cur.fetchall()}
+            _counts["at"] = now
+            log("refreshed per-object row counts: %d objects known to the store"
+                % len(_counts["map"]))
         cur.execute(
             "SELECT object_key, records FROM dp_ingest_progress WHERE campaign_id = %s",
             (CAMPAIGN,))
         done = {row[0]: int(row[1]) for row in cur.fetchall()}
-    return counts, done
+    return _counts["map"], done
 
 
 def ingestObject(conn, s3, bucket, key, found_at):
@@ -329,7 +425,14 @@ def verify(conn, s3, bucket, sample=64):
 
 CKPT_MAGIC = b"ECC2K130"
 CKPT_HEADER = 40  # magic[8] + 6x u32 + u64 iterBase
-CKPT_RE = re.compile(r"^ckpt/(retired/)?slot-(\d+)\.ck$")
+# Two live key shapes, the same split as dp/:
+#   ckpt/slot-00002.ck and ckpt/retired/slot-00002.ck -- the original worker's
+#   mutable pointer, overwritten in place.
+#   ckpt/slot-00002/<64-hex>.ck -- ecc2k-seed-orbit-v1; the worker never
+#   updates the old pointer, it writes a new immutable blob and keeps the
+#   live name on the slot record.  Matching only the first shape is how a
+#   walking fleet becomes zero walkers on the public feed.
+CKPT_RE = re.compile(r"^ckpt/(retired/)?slot-(\d+)(?:/([0-9a-f]{64}))?\.ck$")
 
 
 def checkpointWork(s3, bucket, staleAfter=1800.0):
@@ -347,8 +450,12 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     factor comes out of the checkpoint header, so a slot is self-describing and
     a geometry change needs no bookkeeping here.  Retired slots are included --
     their work is part of the campaign whether or not they still run.
+
+    The contract path leaves every earlier blob in place, so a slot may have
+    many `.ck` objects.  Only the newest one is the walk; summing the rest
+    would count the same slot once per checkpoint.
     """
-    slots, token = [], None
+    latest, token = {}, None
     while True:
         kw = {"Bucket": bucket, "Prefix": "ckpt/"}
         if token:
@@ -358,33 +465,40 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
             m = CKPT_RE.match(item["Key"])
             if not m:
                 continue
-            head = s3.get_object(Bucket=bucket, Key=item["Key"],
-                                 Range="bytes=0-%d" % (CKPT_HEADER - 1))["Body"].read()
-            if len(head) < CKPT_HEADER or head[:8] != CKPT_MAGIC:
-                log("checkpoint %s: not a checkpoint header, skipped" % item["Key"])
-                continue
-            version, m131, threads, batch, lanes, runId = struct.unpack_from("<6I", head, 8)
-            iterBase, = struct.unpack_from("<Q", head, 32)
-            walks = threads * batch
-            age = time.time() - item["LastModified"].timestamp()
-            slots.append({
-                "slot": int(m.group(2)),
-                "run_id": runId,
-                # Whether a slot is still walking is decided by how recently its
-                # checkpoint moved, not by the ckpt/retired/ prefix.  That prefix
-                # is written by an orderly retirement, and a worker that was
-                # stopped abruptly never writes it -- slots 0 and 1 sat under the
-                # live prefix for hours after their instances were gone.  Asking
-                # the artifact when it last changed cannot be fooled that way.
-                "retired": bool(m.group(1)) or age > staleAfter,
-                "checkpoint_age_s": int(age),
-                "walks": walks,
-                "per_walk_steps": iterBase,
-                "iterations": iterBase * walks,
-            })
+            slot = int(m.group(2))
+            modified = item["LastModified"].timestamp()
+            prev = latest.get(slot)
+            if prev is None or modified > prev[0]:
+                latest[slot] = (modified, m, item)
         if not page.get("IsTruncated"):
             break
         token = page["NextContinuationToken"]
+    slots = []
+    for modified, m, item in latest.values():
+        head = s3.get_object(Bucket=bucket, Key=item["Key"],
+                             Range="bytes=0-%d" % (CKPT_HEADER - 1))["Body"].read()
+        if len(head) < CKPT_HEADER or head[:8] != CKPT_MAGIC:
+            log("checkpoint %s: not a checkpoint header, skipped" % item["Key"])
+            continue
+        version, m131, threads, batch, lanes, runId = struct.unpack_from("<6I", head, 8)
+        iterBase, = struct.unpack_from("<Q", head, 32)
+        walks = threads * batch
+        age = time.time() - modified
+        slots.append({
+            "slot": int(m.group(2)),
+            "run_id": runId,
+            # Whether a slot is still walking is decided by how recently its
+            # checkpoint moved, not by the ckpt/retired/ prefix.  That prefix
+            # is written by an orderly retirement, and a worker that was
+            # stopped abruptly never writes it -- slots 0 and 1 sat under the
+            # live prefix for hours after their instances were gone.  Asking
+            # the artifact when it last changed cannot be fooled that way.
+            "retired": bool(m.group(1)) or age > staleAfter,
+            "checkpoint_age_s": int(age),
+            "walks": walks,
+            "per_walk_steps": iterBase,
+            "iterations": iterBase * walks,
+        })
     slots.sort(key=lambda s: (s["retired"], s["slot"]))
     total = sum(s["iterations"] for s in slots)
     return total, slots
@@ -512,6 +626,7 @@ def publishMetrics(namespace, ingest):
 
 def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     """Write the snapshot where a browser can read it, no workflow involved."""
+    started = time.time()
     payload = statusPayload(conn, s3, bucket, ingest)
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
@@ -520,9 +635,14 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    log("published status.json: dps=%d state=%s work=2^%.3f walkers=%d "
+    # The elapsed time is in the line because the snapshot counts the whole
+    # table: it is the one part of this program whose cost grows with the
+    # corpus rather than with the backlog, and it shares a database with the
+    # ingest it must not slow down. If it approaches --status-every, that is
+    # the number to act on.
+    log("published status.json in %.1fs: dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d"
-        % (payload["dps"], payload["state"],
+        % (time.time() - started, payload["dps"], payload["state"],
            payload["work"]["iterations_log2"] or 0, payload["walkers"],
            payload["ingest"]["outstanding_objects"],
            payload["ingest"]["unrecognised_objects"]))
@@ -552,52 +672,104 @@ def pending(conn, s3, bucket, prefix="dp/"):
     return todo, newest, unrecognised
 
 
-def onePass(connect, s3, bucket, threads=6, prefix="dp/"):
-    """Ingest everything outstanding, several objects at a time.
+# Keys that failed the last bounded pass. They stay at the front of
+# pending(), so taking the oldest `limit` again would pin the window on
+# them and never reach the objects behind. The next slice skips them;
+# they are retried once they no longer fill the window, or once they are
+# all that remains.
+_failed = set()
+
+
+def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
+    """Ingest the oldest outstanding objects, several at a time.
 
     Each thread owns a connection: psycopg connections are not shared, and the
     temp table the COPY lands in is per-session anyway. Order does not matter
-    because every insert is idempotent, so a failed object is simply retried
-    on the next pass instead of stopping the ones behind it.
+    because every insert is idempotent. A failed object is retried on a later
+    pass; the next slice skips it so a poison prefix cannot pin the bound
+    window on the same oldest keys.
+
+    A pass is *bounded* rather than "everything outstanding". Status and
+    metrics are published between passes, so an unbounded pass publishes
+    nothing for as long as the drain takes: on 2026-09-17 that was a
+    four-thousand-object backlog and a page frozen on IDLE_OR_STALE for the
+    half hour it took to clear, which is indistinguishable from the outage it
+    was recovering from. `outstanding` stays the whole backlog, not this
+    slice, so the number a reader sees is the one that matters.
     """
     with connect() as probe:
         todo, newest, unrecognised = pending(probe, s3, bucket, prefix)
     state = {"newest": newest, "unrecognised": len(unrecognised), "outstanding": len(todo)}
     if not todo:
+        _failed.clear()
         return 0, 0, state
+    if limit and limit > 0:
+        rest = [item for item in todo if item[0] not in _failed]
+        slice_ = (rest or todo)[:limit]
+    else:
+        slice_ = todo
     work = queue.Queue()
-    for item in todo:
+    for item in slice_:
         work.put(item)
     tally = {"rows": 0, "objects": 0, "failed": 0}
+    failed = set()
     lock = threading.Lock()
 
     def drain():
+        conn = None
         try:
-            with connect() as conn:
-                while True:
+            while True:
+                try:
+                    key, records, when, have = work.get_nowait()
+                except queue.Empty:
+                    return
+                # Two attempts, because the failure worth surviving is the
+                # database going away mid-pass -- a failover or an instance
+                # resize -- after which this thread's connection is closed and
+                # every remaining object would fail against the corpse of it.
+                # 2,533 objects failed that way on 2026-09-17 when rho-dp was
+                # resized under a running drain.
+                for attempt in (0, 1):
                     try:
-                        key, records, when, have = work.get_nowait()
-                    except queue.Empty:
-                        return
-                    try:
+                        if conn is None or conn.closed:
+                            conn = connect()
                         n, seen = ingestObject(
                             conn, s3, bucket, key,
                             time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(when)))
                     except Exception as exc:
+                        broken = conn is None or conn.closed
+                        if not broken:
+                            try:
+                                conn.rollback()
+                            except Exception:
+                                conn, broken = None, True
+                        else:
+                            conn = None
+                        if broken and attempt == 0:
+                            log("reconnecting after %s on %s"
+                                % (type(exc).__name__, key))
+                            time.sleep(2.0)
+                            continue
                         # One bad object must not take the pass down with it;
-                        # it keeps its place in the backlog and is retried.
+                        # it is skipped on the next slice so it cannot stall
+                        # the rest of the backlog, then retried later.
                         with lock:
                             tally["failed"] += 1
+                            failed.add(key)
                         log("object %s failed (will retry): %s: %s"
                             % (key, type(exc).__name__, exc))
-                        continue
-                    with lock:
-                        tally["rows"] += n
-                        tally["objects"] += 1
-                    log("ingested %s: %d records, %d new (store had %d)"
-                        % (key, seen, n, have))
+                    else:
+                        with lock:
+                            tally["rows"] += n
+                            tally["objects"] += 1
+                        log("ingested %s: %d records, %d new (store had %d)"
+                            % (key, seen, n, have))
+                    break
         except Exception as exc:  # a connection that will not open at all
             log("ingest thread stopped: %s: %s" % (type(exc).__name__, exc))
+        finally:
+            if conn is not None and not conn.closed:
+                conn.close()
 
     pool = [threading.Thread(target=drain, daemon=True) for _ in range(max(1, threads))]
     started = time.time()
@@ -605,11 +777,13 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/"):
         t.start()
     for t in pool:
         t.join()
+    _failed.clear()
+    _failed.update(failed)
     elapsed = max(time.time() - started, 1e-9)
     state["outstanding"] = len(todo) - tally["objects"]
-    log("pass complete: %d objects touched, %d rows added, %d failed, %d still "
-        "outstanding, %.0f rows/s"
-        % (tally["objects"], tally["rows"], tally["failed"],
+    log("pass complete: %d of %d outstanding objects touched, %d rows added, "
+        "%d failed, %d still outstanding, %.0f rows/s"
+        % (tally["objects"], len(todo), tally["rows"], tally["failed"],
            state["outstanding"], tally["rows"] / elapsed))
     return tally["rows"], tally["objects"], state
 
@@ -627,6 +801,19 @@ def main(argv=None):
                     help="objects ingested concurrently, each on its own connection")
     ap.add_argument("--metric-namespace", default=os.environ.get("RHO_METRIC_NAMESPACE"),
                     help="publish outstanding/lag/unrecognised here as CloudWatch metrics")
+    ap.add_argument("--pass-objects", type=int,
+                    default=int(os.environ.get("RHO_PASS_OBJECTS", PASS_OBJECTS)),
+                    help="objects per pass; status and metrics are published "
+                         "between passes, so this bounds how long the page can "
+                         "stay stale while a backlog drains (0 = unbounded)")
+    ap.add_argument("--no-index", dest="index", action="store_false",
+                    help="do not create the found_at index at startup")
+    ap.add_argument("--status-every", type=float, default=1800.0,
+                    help="seconds between status.json writes. The snapshot "
+                         "counts the whole campaign, and while it runs this "
+                         "program is not ingesting, so it is spaced well apart: "
+                         "the page's own refresh is the 15-minute Actions job, "
+                         "and this copy is the second one")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -662,6 +849,13 @@ def main(argv=None):
         try:
             with connect() as conn:
                 ensureProgress(conn)
+                if args.index and not (args.verify or args.pending):
+                    try:
+                        ensureFoundAtIndex(conn)
+                    except Exception as exc:
+                        # A missing index is slow, not wrong: say so and walk on.
+                        log("index build failed (snapshots stay slow): %s: %s"
+                            % (type(exc).__name__, exc))
                 if args.verify:
                     return 0 if verify(conn, s3, args.bucket) else 1
                 if args.pending:
@@ -673,14 +867,23 @@ def main(argv=None):
                            if newest else "none",
                            len(unrecognised)))
                     return 0
+            published, wasBehind = 0.0, False
             while True:
-                _, _, ingest = onePass(connect, s3, args.bucket, args.threads, args.prefix)
+                _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
+                                             args.prefix, args.pass_objects)
                 if args.metric_namespace:
                     publishMetrics(args.metric_namespace, ingest)
-                if args.status_bucket:
+                behind = bool(ingest.get("outstanding"))
+                # Rate-limited, except for the pass that finishes a drain:
+                # "caught up" is the one transition a reader is waiting for.
+                due = (time.time() - published >= args.status_every
+                       or (wasBehind and not behind))
+                wasBehind = behind
+                if args.status_bucket and (due or args.once):
                     try:
                         with connect() as conn:
                             publishStatus(conn, s3, args.bucket, args.status_bucket, ingest)
+                        published = time.time()
                     except Exception as exc:
                         # Publishing is a view; never let it stop the ingest.
                         log("status publish failed: %s: %s" % (type(exc).__name__, exc))
@@ -688,8 +891,11 @@ def main(argv=None):
                     return 0
                 # A backlog is drained as fast as the database allows rather
                 # than one pass per interval: the interval exists to keep an
-                # idle ingest cheap, not to rate-limit catching up.
-                time.sleep(0.0 if ingest.get("outstanding") else args.interval)
+                # idle ingest cheap, not to rate-limit catching up.  A pass
+                # that added nothing is not a backlog -- it is a retry -- and
+                # sleeping 0 while a poison object stays outstanding is how
+                # one failed row busy-loops the host.
+                time.sleep(0.0 if objects else args.interval)
         except KeyboardInterrupt:
             return 0
         except Exception as exc:  # a failover is a retry, never an outage
