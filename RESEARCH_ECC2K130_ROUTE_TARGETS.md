@@ -401,7 +401,7 @@ rather than whether to read more.
 | T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
-| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **open**; chained-`x` 4-draw smoke agrees with incumbent FFD max=3 and does not grow | medium |
+| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **done** 2026-09-18 FFD; `ell>1` max=4 at `n=9,15`, does not grow. Solve-under-64 still open | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
 
@@ -409,11 +409,12 @@ T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not
 a state this repository has.
 
-Replay of the X1/X3 freezes, the per-frame `α` refusal, and the chained-`x`
-FFD smoke live in
+Replay of the X1/X3 freezes, the per-frame `α` refusal, chained-`x`
+FFD, and chained-symmetrised `S₃` FFD live in
 [`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/).
-Harbor is not required. The chained *symmetrised* `S₃` at `m = 4` is still
-unbuilt; do not relabel the smoke as that arm.
+Harbor is not required. The chained *symmetrised* `S₃` builder is in
+`build_chained_symmetrised_system`; do not relabel the chained-`x` arm
+as that polynomial. X5 FFD beats are measured.
 
 First run, 2026-09-18, host `ip-172-31-19-103`, cited from
 [`research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json`](research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json):
@@ -424,9 +425,26 @@ First run, 2026-09-18, host `ip-172-31-19-103`, cited from
 | `replay.x3_k1_n7` | PASS | accounting | `Q/C = 4.653` exact; `filters = 0` |
 | `fit.alpha` | PASS | measurement | no fit; 2 chained + 2 `K_1` rungs; frames not mixed |
 | `x5.ffd_chained_m4` | PASS | measurement | FFD max = 3 at `n = 9` and `n = 15`, `m = 4`, 4 draws; does not grow |
+| `x5.ffd_chained_m4_16` | PASS | measurement | same cells, 16 draws; still max = 3, does not grow |
+| `x5.ffd_chained_sym_m4_smoke` | PASS | measurement | `ell>1` FFD max = 4 at `n = 9,15`; `n = 7` `ell = 1` is a degree-1 collapse |
+| `x5.ffd_chained_sym_m4` | PASS | measurement | 16-draw promotion: `ell>1` FFD max = 4 at `n = 9` and `n = 15`, does not grow |
 
-The X5 row is a smoke. H1 is not settled until 16 draws, and not on the
-missing chained symmetrised arm.
+H1 (FFD growing with `n` at `m = 4` on `ell > 1`) is **not** met on
+either arm. Mixing the `n = 7` `ell = 1` row into the growth flag is
+accounting: that system has no factor-base bits and is not an `m = 4`
+Semaev chain. `d_max = 4` on the symmetrised arm is why a fall at 4 is
+visible; the `x`-arm's frozen `d_max = 3` would have recorded it as no
+fall. Neither number is an advance against the product-law floor.
+
+**Accounting, stated before the chained-sym measurement.** The sketch
+`4(ℓ−1)+1+n` in §8.5 undercounts. The production analog of chaining
+`S₃` is `m−1` links and `m−2` free intermediates, so
+`n_vars = m(ℓ−1) + (m−2)n + (m−1)` (one parity bit per link). At
+`m = 4` that is `4(ℓ−1)+2n+3`. Measured: `n = 9` `ℓ = 3` → 29 vars
+(sketch would have said 18); `n = 15` `ℓ = 3` → 41 vars (sketch 24).
+The AutoLab beats used this count, `d_max = 4`, and
+`divisor_for_dimension(n, (n+1)/m)`. Changing those after seeing a cell
+is inadmissible.
 
 ## What would count as finishing this thread
 
@@ -438,9 +456,11 @@ Any one of:
   is now "no fit", not a missing measurement.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
   not by how the 350× felt.
-- **H1 falsified at `m = 4`** — a first fall degree that grows, which
-  would matter to the FFD controversy directly and is the one place
-  where this repository's measurements are the state of the art.
+- **H1 at `m = 4`.** Measured: chained-`x` FFD max = 3 and chained-sym
+  FFD max = 4 at `n = 9` and `n = 15` over 16 draws, neither grows on
+  `ell > 1`. That is a measurement, not an advance, and it does not
+  close the FFD controversy by growth. A later size where FFD *does*
+  grow would still be H1.
 
 None of these threatens a deployed curve, and none is claimed to. The
 `α ≤ 0.38` row of the scale table is what that would take, and nothing

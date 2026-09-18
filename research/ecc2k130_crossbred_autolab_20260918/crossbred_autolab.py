@@ -276,7 +276,8 @@ def plan(protocol: dict[str, Any]) -> dict[str, Any]:
             {"beat_id": beat_id, "priority": spec.get("priority"), "label": spec.get("label")}
             for beat_id, spec in protocol["beats"].items()
         ],
-        "next": "x5.ffd_chained_m4",
+        "next": None,
+        "next_note": "X5 FFD beats are measured. X4 e2e is not an AutoLab beat.",
         "inadmissible": [
             "Changing T4 after seeing a cell",
             "Reporting a two-point sketch as α",
@@ -431,23 +432,37 @@ def claim_fit(protocol: dict[str, Any]) -> dict[str, Any]:
 def claim_ffd(text: str, beat: dict[str, Any]) -> dict[str, Any]:
     rows = parse_ffd_table(text)
     m4 = [r for r in rows if r.get("m") == 4]
-    growing = False
-    maxima: list[Any] = []
-    if len(m4) >= 2:
-        ordered = sorted(m4, key=lambda r: r["n"] or 0)
-        maxima = [r.get("ffd_max") for r in ordered]
-        if all(isinstance(v, int) for v in maxima):
-            growing = maxima[-1] > maxima[0]
-    # Growing FFD is H1 of the scaling target: a result that closes the
-    # route, not an advance against the product-law floor.
+    ell1 = [r for r in m4 if r.get("ell") == 1]
+    comparable = [r for r in m4 if isinstance(r.get("ell"), int) and r["ell"] > 1]
+
+    def maxima_and_growth(group: list[dict[str, Any]]) -> tuple[list[Any], bool]:
+        growing = False
+        maxima: list[Any] = []
+        if len(group) >= 2:
+            ordered = sorted(group, key=lambda r: r["n"] or 0)
+            maxima = [r.get("ffd_max") for r in ordered]
+            if all(isinstance(v, int) for v in maxima):
+                growing = maxima[-1] > maxima[0]
+        elif group:
+            maxima = [group[0].get("ffd_max")]
+        return maxima, growing
+
+    maxima_all, growing_all = maxima_and_growth(m4)
+    maxima_cmp, growing_cmp = maxima_and_growth(comparable)
+    # ell = 1 has no FB bits, so S3 collapses (degree 1). That row is
+    # not an m=4 Semaev system; H1 is read from ell > 1. Mixing it into
+    # the growth flag is accounting, not a falsification of H1.
     return {
         "status": "PASS" if rows else "FAIL",
         "rows": rows,
-        "m4_ffd_grows_with_n": growing,
-        "m4_ffd_maxima": maxima,
+        "m4_ffd_grows_with_n": growing_cmp,
+        "m4_ffd_maxima": maxima_cmp,
+        "m4_ffd_grows_with_n_including_ell_1": growing_all,
+        "m4_ffd_maxima_including_ell_1": maxima_all,
+        "m4_ell_eq_1": ell1,
         "falsifier": beat["expect"]["falsifier"],
         "class": "measurement",
-        "note": "Smoke at 4 draws on the chained x-system. Incumbent FFD max=3 on chained m≥3. Promotion needs 16 draws. Not the missing chained symmetrised S3.",
+        "note": beat.get("note"),
     }
 
 

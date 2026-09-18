@@ -43,6 +43,14 @@ GROWING_FFD = """
 | 15 | 4 | 4 | 46 | 45 | 3 | 3 | 4 | 0/4 | 0.00 |
 """
 
+ELL1_THEN_CUBIC = """
+| n | ℓ | m | vars | eqs | deg | FFD min | FFD max | no fall | mean syz D=2 |
+|--:|--:|--:|-----:|----:|----:|--------:|--------:|--------:|-------------:|
+| 7 | 1 | 4 | 17 | 21 | 1 | 2 | 2 | 0/4 | 223.50 |
+| 9 | 3 | 4 | 29 | 27 | 3 | 4 | 4 | 0/4 | 0.00 |
+| 15 | 3 | 4 | 41 | 45 | 3 | 4 | 4 | 0/4 | 0.00 |
+"""
+
 
 class ProtocolTests(unittest.TestCase):
     def test_protocol_loads(self) -> None:
@@ -52,6 +60,9 @@ class ProtocolTests(unittest.TestCase):
         self.assertIn("replay.x3_k1_n7", protocol["beats"])
         self.assertIn("fit.alpha", protocol["beats"])
         self.assertIn("x5.ffd_chained_m4", protocol["beats"])
+        self.assertIn("x5.ffd_chained_m4_16", protocol["beats"])
+        self.assertIn("x5.ffd_chained_sym_m4_smoke", protocol["beats"])
+        self.assertIn("x5.ffd_chained_sym_m4", protocol["beats"])
         self.assertIsNone(protocol["beats"]["fit.alpha"]["expect"]["fit"])
         self.assertEqual(protocol["beats"]["smoke.x1_n5"]["expect"]["Q_over_Q_enum"], 83.248)
         self.assertEqual(protocol["beats"]["replay.x3_k1_n7"]["expect"]["Q_over_Q_enum"], 4.653)
@@ -59,11 +70,10 @@ class ProtocolTests(unittest.TestCase):
     def test_plan_lists_beats_and_refuses_a_fit(self) -> None:
         report = lab.plan(lab.load_protocol())
         beat_ids = [row["beat_id"] for row in report["beats"]]
-        self.assertEqual(
-            beat_ids,
-            ["smoke.x1_n5", "replay.x3_k1_n7", "fit.alpha", "x5.ffd_chained_m4"],
-        )
-        self.assertEqual(report["next"], "x5.ffd_chained_m4")
+        self.assertIn("x5.ffd_chained_sym_m4_smoke", beat_ids)
+        self.assertIn("x5.ffd_chained_m4_16", beat_ids)
+        self.assertIsNone(report["next"])
+        self.assertIn("X5 FFD", report["next_note"])
         self.assertIsNone(report["incumbent"]["fit"]["fit"])
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x1"]["n_rungs"], 2)
         self.assertEqual(report["incumbent"]["fit"]["frames"]["x3"]["n_rungs"], 2)
@@ -177,12 +187,34 @@ class ClaimTests(unittest.TestCase):
         self.assertEqual(claim["status"], "PASS")
         self.assertFalse(claim["m4_ffd_grows_with_n"])
         self.assertEqual(claim["class"], "measurement")
+        self.assertIn("chained x-system", claim["note"])
+        self.assertNotIn("unchained S4", claim["note"])
+
+    def test_ffd_sym_smoke_note_is_not_the_x_arm(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["x5.ffd_chained_sym_m4_smoke"]
+        claim = lab.claim_ffd(FFD_TABLE, beat)
+        self.assertEqual(claim["status"], "PASS")
+        self.assertEqual(claim["class"], "measurement")
+        self.assertIn("Not unchained S4", claim["note"])
+        self.assertNotIn("chained x-system", claim["note"])
 
     def test_ffd_growth_is_measurement_not_advance(self) -> None:
         protocol = lab.load_protocol()
         beat = protocol["beats"]["x5.ffd_chained_m4"]
         claim = lab.claim_ffd(GROWING_FFD, beat)
         self.assertTrue(claim["m4_ffd_grows_with_n"])
+        self.assertEqual(claim["class"], "measurement")
+
+    def test_ell_1_row_is_not_h1(self) -> None:
+        protocol = lab.load_protocol()
+        beat = protocol["beats"]["x5.ffd_chained_sym_m4_smoke"]
+        claim = lab.claim_ffd(ELL1_THEN_CUBIC, beat)
+        self.assertEqual(claim["m4_ffd_maxima_including_ell_1"], [2, 4, 4])
+        self.assertTrue(claim["m4_ffd_grows_with_n_including_ell_1"])
+        self.assertEqual(claim["m4_ffd_maxima"], [4, 4])
+        self.assertFalse(claim["m4_ffd_grows_with_n"])
+        self.assertEqual(len(claim["m4_ell_eq_1"]), 1)
         self.assertEqual(claim["class"], "measurement")
 
 

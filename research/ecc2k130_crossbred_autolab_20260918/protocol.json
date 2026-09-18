@@ -69,6 +69,47 @@
         "incumbent": "RESEARCH_KOBLITZ_SCALING_TARGET.md: FFD max=3 on chained m≥3"
       },
       "note": "This is the chained x-system, not the missing symmetrised chain. A growing FFD here would still be a result. Four draws is a smoke; promotion needs 16."
+    },
+    "x5.ffd_chained_m4_16": {
+      "label": "X5 promotion: chained-x FFD at m=3,4, n=9,15, 16 draws, d_max=3",
+      "stage": "decomposition",
+      "priority": 4,
+      "command": ["cargo", "run", "--release", "--example", "ffd_probe", "--", "9:3", "9:4", "15:3", "15:4"],
+      "env": {"FFD_TRIALS": "16"},
+      "expect": {
+        "protocol": "ffd_summary factor_index=0 d_max=3 seed=0x5EED",
+        "falsifier": "FFD max grows with n at m=4",
+        "incumbent": "RESEARCH_KOBLITZ_SCALING_TARGET.md: FFD max=3 on chained m≥3"
+      },
+      "note": "16-draw promotion of x5.ffd_chained_m4. Still the chained x-system."
+    },
+    "x5.ffd_chained_sym_m4_smoke": {
+      "label": "X5 smoke: chained symmetrised S3 at m=4, n=7,9,15, 4 draws, d_max=4",
+      "stage": "decomposition",
+      "priority": 5,
+      "command": ["cargo", "run", "--release", "--example", "ffd_probe", "--", "--sym", "--a", "0", "7:4", "9:4", "15:4"],
+      "env": {"FFD_TRIALS": "4", "FFD_DMAX": "4"},
+      "expect": {
+        "protocol": "build_chained_symmetrised_system; divisor_for_dimension(n,(n+1)/m); d_max=4 seed=0x5EED",
+        "n_vars": "m(ell-1)+(m-2)n+(m-1)",
+        "falsifier": "FFD max grows with n at m=4",
+        "incumbent": "no prior chained-sym FFD"
+      },
+      "note": "The missing T9 arm. Not unchained S4. Variable count is the x-chain analog, not the 4(ell-1)+1+n sketch. Interior links are degree 3; d_max=4 so a fall at 4 is visible. Four draws is a smoke; promotion needs 16."
+    },
+    "x5.ffd_chained_sym_m4": {
+      "label": "X5 promotion: chained symmetrised S3 at m=4, n=7,9,15, 16 draws, d_max=4",
+      "stage": "decomposition",
+      "priority": 6,
+      "command": ["cargo", "run", "--release", "--example", "ffd_probe", "--", "--sym", "--a", "0", "7:4", "9:4", "15:4"],
+      "env": {"FFD_TRIALS": "16", "FFD_DMAX": "4"},
+      "expect": {
+        "protocol": "build_chained_symmetrised_system; divisor_for_dimension(n,(n+1)/m); d_max=4 seed=0x5EED",
+        "n_vars": "m(ell-1)+(m-2)n+(m-1)",
+        "falsifier": "FFD max grows with n at m=4",
+        "incumbent": "smoke of x5.ffd_chained_sym_m4_smoke"
+      },
+      "note": "16-draw promotion of the chained symmetrised S3. H1 is FFD growing with n."
     }
   },
   "lock": {
