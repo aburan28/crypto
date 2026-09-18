@@ -500,6 +500,14 @@ def status() -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
+def table_excerpt(text: str) -> str:
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines) if line.startswith("| n |")), None)
+    if start is None:
+        return text[-4000:]
+    return "\n".join(lines[start:]) + "\n"
+
+
 def verify() -> dict[str, Any]:
     st = status()
     if st.get("status") == "idle":
@@ -520,28 +528,45 @@ def verify() -> dict[str, Any]:
     return {"status": "PASS", "claim": claim_rel, "log_sha256": expected}
 
 
-def promote() -> dict[str, Any]:
+def _rel(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO))
+    except ValueError:
+        return str(path)
+
+
+def promote_run(run_dir: Path) -> dict[str, Any]:
+    state = json.loads((run_dir / "state.json").read_text())
+    if state.get("status") != "PASS":
+        raise SystemExit(f"refusing to promote status={state.get('status')}")
+    dest = EVIDENCE_DIR / state["run_id"]
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(run_dir / "artifacts" / "claim.json", dest / "claim.json")
+    shutil.copy2(run_dir / "state.json", dest / "state.json")
+    log = run_dir / "logs" / "bench.txt"
+    if log.exists():
+        (dest / "logs").mkdir(exist_ok=True)
+        (dest / "logs" / "table.txt").write_text(table_excerpt(log.read_text(errors="replace")))
+        (dest / "logs" / "log_sha256.txt").write_text(sha256_file(log) + "\n")
+    return {"status": "PASS", "evidence": _rel(dest), "run_id": state["run_id"]}
+
+
+def promote(all_runs: bool = False) -> dict[str, Any]:
+    if all_runs:
+        promoted = []
+        for state_path in sorted(runs_dir().glob("*/state.json")):
+            state = json.loads(state_path.read_text())
+            if state.get("status") == "PASS":
+                promoted.append(promote_run(state_path.parent))
+        if not promoted:
+            raise SystemExit("no PASS runs to promote")
+        return {"status": "PASS", "promoted": promoted}
     st = status()
     if st.get("status") == "idle":
         raise SystemExit("no current run")
     if st.get("status") != "PASS":
         raise SystemExit(f"refusing to promote status={st.get('status')}")
-    run_dir = Path(st["dir"])
-    dest = EVIDENCE_DIR / st["run_id"]
-    if dest.exists():
-        raise SystemExit(f"evidence already present: {dest}")
-    dest.mkdir(parents=True)
-    shutil.copy2(run_dir / "artifacts" / "claim.json", dest / "claim.json")
-    shutil.copy2(run_dir / "state.json", dest / "state.json")
-    log = run_dir / "logs" / "bench.txt"
-    if log.exists():
-        (dest / "logs").mkdir()
-        shutil.copy2(log, dest / "logs" / "bench.txt")
-    try:
-        evidence_rel = str(dest.relative_to(REPO))
-    except ValueError:
-        evidence_rel = str(dest)
-    return {"status": "PASS", "evidence": evidence_rel}
+    return promote_run(Path(st["dir"]))
 
 
 def main() -> None:
@@ -553,7 +578,8 @@ def main() -> None:
     launch_p.add_argument("--beat", required=True)
     sub.add_parser("status")
     sub.add_parser("verify")
-    sub.add_parser("promote")
+    promote_p = sub.add_parser("promote")
+    promote_p.add_argument("--all", action="store_true")
     args = parser.parse_args()
     if args.cmd == "plan":
         print(json.dumps(plan(load_protocol()), indent=2))
@@ -566,7 +592,7 @@ def main() -> None:
     elif args.cmd == "verify":
         print(json.dumps(verify(), indent=2))
     elif args.cmd == "promote":
-        print(json.dumps(promote(), indent=2))
+        print(json.dumps(promote(all_runs=args.all), indent=2))
 
 
 if __name__ == "__main__":

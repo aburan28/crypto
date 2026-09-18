@@ -98,6 +98,12 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([r["ffd_max"] for r in m4], [3, 3])
         self.assertEqual(m4[0]["trials"], 4)
 
+    def test_table_excerpt_drops_cargo_preamble(self) -> None:
+        text = "warning: unused\n" + X1_TABLE
+        excerpt = lab.table_excerpt(text)
+        self.assertTrue(excerpt.startswith("| n |"))
+        self.assertNotIn("warning:", excerpt)
+
 
 class FitHygieneTests(unittest.TestCase):
     def test_fewer_than_four_is_not_a_fit(self) -> None:
