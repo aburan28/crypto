@@ -1,0 +1,29 @@
+{
+  "classification": "engineering; target above current iteration boundary",
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "unit": "billions of complete scalar updates per second",
+  "target": 26.0,
+  "one_affine_addition_boundary": [22.0, 25.0],
+  "verified_reference": {
+    "name": "batch-17 table walk with denominator recomputation and bank padding",
+    "median": 20.1343255,
+    "ratio_to_target": 0.7743971,
+    "correctness": "300/300 reports replayed, zero dropped"
+  },
+  "dp4a_phase_candidate": {
+    "samples": [19.509537, 19.530224, 19.515426],
+    "median": 19.515426,
+    "ratio_to_reference": 0.9692589,
+    "ratio_to_target": 0.7505933,
+    "registers": 102,
+    "shared_bytes": 45560,
+    "correctness": "300/300 reports replayed, zero dropped; 4096/4096 host selector points"
+  },
+  "point_halving_alternative": {
+    "median": 16.053,
+    "field_products": 2,
+    "correctness": "512/512 subgroup halves",
+    "rho_status": "permutation alone; mixed implementation rejected because primitive is slower than table addition"
+  }
+}

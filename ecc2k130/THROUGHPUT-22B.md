@@ -84,3 +84,7 @@ schedule that raises eligible warps without moving enough work onto the
 freezes configuration, samples, ratios, profile counters and binary hashes.
 `balanced-comparison.log`, verification logs, build logs, profile output and
 all retained scout/regression logs are in the same directory.
+
+The follow-up 26 B/s request and exact DP4A selector measurement are recorded
+in [`THROUGHPUT-26B.md`](THROUGHPUT-26B.md). They do not change this round's
+20.134 B/s selected row.
