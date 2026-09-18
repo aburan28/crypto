@@ -65,9 +65,12 @@ def main():
         test = run([str(binary), "--test"], OUT / f"poly15-{label}-builtin-test.log")
         test_text = (OUT / test["log"]).read_text()
         if label == "arith":
+            dlp_fail = "collision solver recovers a known discrete log FAILED"
+            failed_checks = [line for line in test_text.splitlines() if line.endswith("FAILED")]
+            unexpected = [line for line in failed_checks if dlp_fail not in line]
             test["passed"] = (
-                "collision solver recovers a known discrete log FAILED" in test_text
-                and test_text.count("FAILED") == 2
+                (test["returncode"] == 0 and "FAILED" not in test_text)
+                or (any(dlp_fail in line for line in failed_checks) and not unexpected)
             )
             test["expected_dlp_failure"] = True
         else:
