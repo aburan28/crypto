@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Decompose a measured native wall into the segments that make it up.
 
-    # build the instrumented worker first
-    cp -a runs/round-0015/source /tmp/probe && cd /tmp/probe \
-      && patch -p1 -i campaign_20260916/round16-floor-probe.patch \
-      && cargo build --release --example ic_tournament_worker
-    python3 campaign_20260916/round16_floor_probe.py --worker /tmp/probe/.../ic_tournament_worker
+    # Build the instrumented worker first, from this directory
+    # (research/ic_candidate_tournament_20260915). `patch -d` keeps the patch
+    # path relative to here while applying it over there, and cargo must run
+    # inside the tree so the snapshot's .cargo/config.toml selects the musl
+    # static target -- a --manifest-path build would read neither.
+    cp -a runs/round-0015/source /tmp/probe
+    patch -d /tmp/probe -p1 -i "$PWD/campaign_20260916/round16-floor-probe.patch"
+    ( cd /tmp/probe && cargo build --release --example ic_tournament_worker )
+    python3 campaign_20260916/round16_floor_probe.py --worker \
+      /tmp/probe/target/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker
 
 The probe patch adds `CLOCK_REALTIME` marks inside the worker at the entry to
 `main`, after the job is parsed, after the algorithm returns, after the report
