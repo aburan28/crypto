@@ -1,0 +1,133 @@
+{
+  "boundaries": {
+    "falsification": "an oracle whose streaming product count at some |F| falls a factor 2^70 below exhaustive pair search, with every hit verified on the curve",
+    "product_law_floor_log2": 136.90689059560853,
+    "product_law_note": "60\u00b7#E field products for m=3 at leading order, independent of |F|",
+    "rho_S": 0.41133648168606274,
+    "rho_field_products": 1.0730796264052675e+19,
+    "rho_log2_iterations": 60.809,
+    "rho_products_per_iteration": 5.3125
+  },
+  "class": "engineering",
+  "elapsed_s": 0.006114482879638672,
+  "gpu": {
+    "bench_affine_adds": 8384512,
+    "bench_affine_adds_per_second": 251673963.859567,
+    "bench_seconds": 0.033314976,
+    "bench_steps": 4096,
+    "class": "engineering",
+    "curve": "K_0 / F_2^131",
+    "factor_base_abscissae": 4192,
+    "factor_base_points": 8384,
+    "generator_cpu_hits": 0,
+    "generator_cpu_pairs": 35141536,
+    "generator_cpu_pairs_per_second": 873609.497074,
+    "generator_cpu_seconds": 40.225679915,
+    "generator_cpu_verified": true,
+    "generator_gpu_hits": 0,
+    "generator_gpu_pairs": 35141536,
+    "generator_gpu_pairs_per_second": 2761511302.418645,
+    "generator_gpu_seconds": 0.012725472,
+    "generator_gpu_verified": true,
+    "gpu_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "oracle_class": "enumerate_pairs",
+    "planted_found": 8,
+    "planted_tried": 8,
+    "planted_verified": true,
+    "products_per_affine_add": 10,
+    "products_per_pair": 20,
+    "schema": "ecc2k130_g7e_index_calculus/v1",
+    "sm": 120,
+    "weight": 2
+  },
+  "host": {
+    "hostname": "ip-172-31-19-103",
+    "machine": "x86_64",
+    "platform": "Linux-7.0.0-1012-aws-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "practicality": {
+    "cpu_pairs_per_second": 873609.497074,
+    "gpu_over_cpu_pair_scan": 3161.036265823388,
+    "gpu_pairs_per_second": 2761511302.418645,
+    "microbench_affine_adds_per_second": 251673963.859567,
+    "note": "wall-clock at the occupied pair-scan rate; not the metric",
+    "occupied_affine_adds_per_second": 5523022604.83729,
+    "projected_streaming_log2_seconds": 94.18907280846601,
+    "projected_streaming_seconds": 2.258063647555936e+28
+  },
+  "projection": {
+    "S": 4.780554564474147e+19,
+    "S_rho": 0.41133648168606274,
+    "base_size": 8384,
+    "class": "engineering",
+    "expected_yield_per_target": 3.6067638646852256e-29,
+    "group_order": "2722258935367507707729280517973639940516",
+    "log2_ratio_to_rho": 66.6554208533402,
+    "log2_rho_field_products": 63.21839093613771,
+    "log2_streaming_field_products": 129.8738117894779,
+    "note": "GPU pair-add throughput changes wall-clock, not S; the product law is the floor",
+    "products_per_affine_add": 10,
+    "products_per_pair": 20,
+    "ratio_to_rho": 1.1622004799765674e+20,
+    "relations_charged": 64.0,
+    "rho_field_products": 1.0730796264052675e+19,
+    "rho_products_per_iteration": 5.3125,
+    "streaming_field_products": 1.2471336568612776e+39,
+    "subgroup_order": "680564733841876926932320129493409985129"
+  },
+  "question": "Can a G7e GPU make Hamming-weight index calculus on ECC2K-130 cheaper than Pollard rho?",
+  "schema": "ecc2k130_g7e_index_calculus/v1",
+  "source_hashes": {
+    "indexcalc_pairs.py": "a9ee7677c8c851f884b50bf39406a1d76ad1f1083d9bd642f8c2a95110a14122",
+    "indexcalccuda.cu": "d1033a691bfe0f64f8259e9fc72ea0489dfbc45c4b8456da07725388a6fc9781"
+  },
+  "toy_dlp": [
+    {
+      "attempts": 256,
+      "degree": 5,
+      "elapsed_ns": 128663,
+      "expected_scalar": "5",
+      "factor_base_points": 10,
+      "oracle_class": "enumerate_pairs",
+      "orbit_columns": 1,
+      "records": [
+        {
+          "independent": true,
+          "index": 0,
+          "status": "hit"
+        }
+      ],
+      "scalar_recovered": "5",
+      "seed": 20260918,
+      "status": "complete",
+      "subgroup_order": "11",
+      "verified": true,
+      "weight": 4
+    },
+    {
+      "attempts": 256,
+      "degree": 9,
+      "elapsed_ns": 222132,
+      "expected_scalar": "113",
+      "factor_base_points": 18,
+      "oracle_class": "enumerate_pairs",
+      "orbit_columns": 1,
+      "records": [
+        {
+          "independent": true,
+          "index": 0,
+          "status": "hit"
+        }
+      ],
+      "scalar_recovered": "113",
+      "seed": 20260918,
+      "status": "complete",
+      "subgroup_order": "127",
+      "verified": true,
+      "weight": 2
+    }
+  ],
+  "unit": "field products; S = products / sqrt(r)",
+  "verdict": "NO. Pair enumeration is the cheapest oracle measured here; the GPU moves wall-clock, not S."
+}

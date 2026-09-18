@@ -1084,6 +1084,63 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="ecc2k130-g7e-pairs-20260918">
+    <div class="panel-head">
+      <h2>ECC2K-130 pair enumeration on one G7e GPU</h2>
+      <p><span class="chip">engineering</span>
+        The cheapest three-summand oracle this repository has (exhaustive pair
+        enumeration) now runs in the packed type-II ONB arithmetic of the rho
+        client, on one RTX PRO 6000 Blackwell. The product-law floor does not
+        move. Frozen receipt:
+        <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/indexcalc-g7e/summary.json"><code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code></a>;
+        note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md"><code>RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md</code></a>.</p>
+    </div>
+    <p>Unit: field products. Rho conversion on this SKU: 5.3125 products per
+      walk iteration. <code>S = products / √r</code>, √r = 2<sup>64.5</sup>.
+      Factor base: Hamming weight ≤ 2, even ONB trace, 4,192 abscissae /
+      8,384 signed points. FFD is inapplicable (oracle class
+      <code>enumerate_pairs</code>).</p>
+    <table>
+      <caption>ECC2K-130 streaming pair-enumeration logarithm, field-product unit.
+        Boundaries and the G7e row cited from
+        <code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col" class="n">log<sub>2</sub> products</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">Ratio to rho</th>
+        <th scope="col" class="n">Ratio to floor</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pollard rho, ⟨−1⟩×⟨π⟩ <em>(reference)</em></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2^+0.00</td>
+          <td class="n">—</td><td>shipping client on this SKU</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>Product-law floor, m = 3, any |F|</td>
+          <td class="n">136.91</td><td class="n">2^{72.4}</td><td class="n">2^+73.69</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">floor</span></td></tr>
+        <tr><td>+ Frobenius collapse |F|/131</td>
+          <td class="n">129.87</td><td class="n">4.78×10^{19}</td><td class="n">2^+66.66</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td><strong>Streaming pairs, G7e, |F| = 8,384</strong> <em>(measured)</em></td>
+          <td class="n"><strong>129.87</strong></td><td class="n"><strong>4.78×10^{19}</strong></td>
+          <td class="n"><strong>2^+66.66</strong></td><td class="n"><strong>2^+0.00</strong></td>
+          <td>8/8 planted 3-sums verified on device against Ref; 0 hits on the generator, matching yield 3.6×10<sup>−29</sup>; CPU pair-enum DLP recovered at n=5 and n=9</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table>
+    <p>Occupied pair scan: 2.76×10<sup>9</sup> pairs/s (35,141,536 pairs in
+      12.73&nbsp;ms). Same scan on eight host cores: 40.23&nbsp;s, 3161×
+      wall-clock. At the occupied rate a streaming logarithm is still
+      2<sup>94.2</sup> seconds. Wall-clock is a practicality note, not S.
+      No full-DLP at n=131 is claimed.</p>
+  </div>
+
   <div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>
