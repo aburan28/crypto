@@ -59,6 +59,30 @@
 #if ECC_PACKED_FROM_REDUCED != 0 && ECC_PACKED_FROM_REDUCED != 1
 #error "ECC_PACKED_FROM_REDUCED must be 0 or 1"
 #endif
+#ifndef ECC_PACKED_CLMUL_FLAT
+#define ECC_PACKED_CLMUL_FLAT 0
+#endif
+#if ECC_PACKED_CLMUL_FLAT != 0 && ECC_PACKED_CLMUL_FLAT != 1
+#error "ECC_PACKED_CLMUL_FLAT must be 0 or 1"
+#endif
+#if ECC_PACKED_CLMUL_FLAT && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_CLMUL_FLAT requires ECC_PACKED_CLMAD"
+#endif
+#ifndef ECC_PACKED_PAIR_CLMUL
+#define ECC_PACKED_PAIR_CLMUL 0
+#endif
+#if ECC_PACKED_PAIR_CLMUL != 0 && ECC_PACKED_PAIR_CLMUL != 1
+#error "ECC_PACKED_PAIR_CLMUL must be 0 or 1"
+#endif
+#if ECC_PACKED_PAIR_CLMUL && !ECC_PACKED_CLMAD
+#error "ECC_PACKED_PAIR_CLMUL requires ECC_PACKED_CLMAD"
+#endif
+#if ECC_PACKED_PAIR_CLMUL && ECC_PACKED_KARAT3
+#error "ECC_PACKED_PAIR_CLMUL is the 128-bit Karatsuba pair; do not combine with ECC_PACKED_KARAT3"
+#endif
+#if ECC_PACKED_PAIR_CLMUL && ECC_PACKED_TOP_CLMAD
+#error "ECC_PACKED_PAIR_CLMUL keeps the 3-bit correction on the ALU; do not combine with ECC_PACKED_TOP_CLMAD"
+#endif
 #ifndef ECC_PACKED_CLMAD_SQUARE
 #define ECC_PACKED_CLMAD_SQUARE 0
 #endif
@@ -162,8 +186,41 @@ ECC_HD void clmul64(uint32_t r[4], const uint32_t a[2], const uint32_t b[2]) {
 #endif
 }
 
+/* Fold three 128-bit Karatsuba leaves into one 256-bit product. l0/l1 are
+   the low 64x64, h0/h1 the high, m0/m1 the middle; each pair is lo then hi. */
+#if ECC_PACKED_CLMUL_FLAT || ECC_PACKED_PAIR_CLMUL
+ECC_HD void foldKarat128(uint32_t r[8], uint64_t l0, uint64_t l1, uint64_t h0, uint64_t h1,
+                         uint64_t m0, uint64_t m1) {
+    m0 ^= l0 ^ h0;
+    m1 ^= l1 ^ h1;
+    const uint64_t t1 = l1 ^ m0;
+    const uint64_t t2 = h0 ^ m1;
+    r[0] = uint32_t(l0); r[1] = uint32_t(l0 >> 32);
+    r[2] = uint32_t(t1); r[3] = uint32_t(t1 >> 32);
+    r[4] = uint32_t(t2); r[5] = uint32_t(t2 >> 32);
+    r[6] = uint32_t(h1); r[7] = uint32_t(h1 >> 32);
+}
+#endif
+
 /* 4 x 4 words -> 8 words, Karatsuba again: 3 clmul64 = 9 clmul32. */
 ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
+#if ECC_PACKED_CLMUL_FLAT && ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+    /* Issue the three .lo halves, then the three .hi, so the carry-less unit
+       sees six independent multiplies instead of three lo/hi pairs. */
+    const uint64_t a0 = uint64_t(a[0]) | (uint64_t(a[1]) << 32);
+    const uint64_t a1 = uint64_t(a[2]) | (uint64_t(a[3]) << 32);
+    const uint64_t b0 = uint64_t(b[0]) | (uint64_t(b[1]) << 32);
+    const uint64_t b1 = uint64_t(b[2]) | (uint64_t(b[3]) << 32);
+    const uint64_t as = a0 ^ a1, bs = b0 ^ b1;
+    uint64_t l0, h0, m0, l1, h1, m1;
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(l0) : "l"(a0), "l"(b0));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(h0) : "l"(a1), "l"(b1));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(m0) : "l"(as), "l"(bs));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(l1) : "l"(a0), "l"(b0));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(h1) : "l"(a1), "l"(b1));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(m1) : "l"(as), "l"(bs));
+    foldKarat128(r, l0, l1, h0, h1, m0, m1);
+#else
     uint32_t lo[4], hi[4], mid[4], as[2], bs[2];
     clmul64(lo, a, b);
     clmul64(hi, a + 2, b + 2);
@@ -179,6 +236,7 @@ ECC_HD void clmul128(uint32_t r[8], const uint32_t a[4], const uint32_t b[4]) {
     r[5] = hi[1] ^ mid[3];
     r[6] = hi[2];
     r[7] = hi[3];
+#endif
 }
 
 struct P131 { uint32_t v[5]; };
@@ -354,6 +412,67 @@ ECC_HD void product131(const P131 &a,const P131 &b,uint32_t *c) {
 #endif
 #endif
 }
+#if ECC_PACKED_PAIR_CLMUL
+/* Two independent 131-bit products that share the left operand.  The six
+   64x64 carryless multiplies have no mutual data dependence, so issuing all
+   six .lo then all six .hi gives the bound pipe twelve outstanding clmads
+   instead of two sequential six-clmad products.  Top-cross stays on the ALU
+   and is the same k-loop as product131 (via topCrossHoist131). */
+ECC_HD void product131Pair(const P131 &a, const P131 &b, const P131 &c,
+                           uint32_t *hb, uint32_t *hc) {
+    uint64_t blo_l, clo_l, bhi_l, chi_l, bmid_l, cmid_l;
+    uint64_t blo_h, clo_h, bhi_h, chi_h, bmid_h, cmid_h;
+#if ECC_PACKED_CLMAD && defined(__CUDA_ARCH__)
+    const uint64_t a0 = uint64_t(a.v[0]) | (uint64_t(a.v[1]) << 32);
+    const uint64_t a1 = uint64_t(a.v[2]) | (uint64_t(a.v[3]) << 32);
+    const uint64_t b0 = uint64_t(b.v[0]) | (uint64_t(b.v[1]) << 32);
+    const uint64_t b1 = uint64_t(b.v[2]) | (uint64_t(b.v[3]) << 32);
+    const uint64_t c0 = uint64_t(c.v[0]) | (uint64_t(c.v[1]) << 32);
+    const uint64_t c1 = uint64_t(c.v[2]) | (uint64_t(c.v[3]) << 32);
+    const uint64_t as = a0 ^ a1, bs = b0 ^ b1, cs = c0 ^ c1;
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(blo_l) : "l"(a0), "l"(b0));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(clo_l) : "l"(a0), "l"(c0));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(bhi_l) : "l"(a1), "l"(b1));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(chi_l) : "l"(a1), "l"(c1));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(bmid_l) : "l"(as), "l"(bs));
+    asm("clmad.lo.u64 %0, %1, %2, 0;" : "=l"(cmid_l) : "l"(as), "l"(cs));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(blo_h) : "l"(a0), "l"(b0));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(clo_h) : "l"(a0), "l"(c0));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(bhi_h) : "l"(a1), "l"(b1));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(chi_h) : "l"(a1), "l"(c1));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(bmid_h) : "l"(as), "l"(bs));
+    asm("clmad.hi.u64 %0, %1, %2, 0;" : "=l"(cmid_h) : "l"(as), "l"(cs));
+#else
+    uint32_t blo[4], bhi[4], bmid[4], clo[4], chi[4], cmid[4], bb[2], cc[2], asw[2];
+    clmul64(blo, a.v, b.v);
+    clmul64(clo, a.v, c.v);
+    clmul64(bhi, a.v + 2, b.v + 2);
+    clmul64(chi, a.v + 2, c.v + 2);
+    asw[0] = a.v[0] ^ a.v[2]; asw[1] = a.v[1] ^ a.v[3];
+    bb[0] = b.v[0] ^ b.v[2]; bb[1] = b.v[1] ^ b.v[3];
+    cc[0] = c.v[0] ^ c.v[2]; cc[1] = c.v[1] ^ c.v[3];
+    clmul64(bmid, asw, bb);
+    clmul64(cmid, asw, cc);
+    blo_l = uint64_t(blo[0]) | (uint64_t(blo[1]) << 32);
+    blo_h = uint64_t(blo[2]) | (uint64_t(blo[3]) << 32);
+    bhi_l = uint64_t(bhi[0]) | (uint64_t(bhi[1]) << 32);
+    bhi_h = uint64_t(bhi[2]) | (uint64_t(bhi[3]) << 32);
+    bmid_l = uint64_t(bmid[0]) | (uint64_t(bmid[1]) << 32);
+    bmid_h = uint64_t(bmid[2]) | (uint64_t(bmid[3]) << 32);
+    clo_l = uint64_t(clo[0]) | (uint64_t(clo[1]) << 32);
+    clo_h = uint64_t(clo[2]) | (uint64_t(clo[3]) << 32);
+    chi_l = uint64_t(chi[0]) | (uint64_t(chi[1]) << 32);
+    chi_h = uint64_t(chi[2]) | (uint64_t(chi[3]) << 32);
+    cmid_l = uint64_t(cmid[0]) | (uint64_t(cmid[1]) << 32);
+    cmid_h = uint64_t(cmid[2]) | (uint64_t(cmid[3]) << 32);
+#endif
+    foldKarat128(hb, blo_l, blo_h, bhi_l, bhi_h, bmid_l, bmid_h);
+    foldKarat128(hc, clo_l, clo_h, chi_l, chi_h, cmid_l, cmid_h);
+    hb[8] = 0; hc[8] = 0;
+    topCrossHoist131(a, b, hb);
+    topCrossHoist131(a, c, hc);
+}
+#endif
 ECC_HD P131 add131(const P131 &a,const P131 &b) {
     P131 r;
 #pragma unroll
@@ -464,6 +583,11 @@ static ECC_BIG PolynomialPair mulPolynomialPair131(P131 a,P131 b,P131 c) {
 #if ECC_PACKED_GENERATED_PRODUCT && !ECC_PACKED_CLMAD
     P131 first=generatedProduct131(a,b);
     return PolynomialPair{first,generatedProduct131(a,c)};
+#elif ECC_PACKED_PAIR_CLMUL
+    /* Twelve independent clmads (six 64x64 products) before either reduction. */
+    uint32_t hb[9], hc[9];
+    product131Pair(a,b,c,hb,hc);
+    return PolynomialPair{reducePolynomial131(hb), reducePolynomial131(hc)};
 #elif ECC_PACKED_PAIR_ILP
     /* Two product buffers so the second clmul is not false-dependent on the
        first reduction through a reused 9-word array.  The reduction is
@@ -537,6 +661,12 @@ static ECC_BIG P131 mul131(MulArg a, MulArg b) {
 #if ECC_PACKED_ALU_SQUARE != 0 && ECC_PACKED_ALU_SQUARE != 1
 #error "ECC_PACKED_ALU_SQUARE must be 0 or 1"
 #endif
+#ifndef ECC_PACKED_ALU_SQR
+#define ECC_PACKED_ALU_SQR 0
+#endif
+#if ECC_PACKED_ALU_SQR != 0 && ECC_PACKED_ALU_SQR != 1
+#error "ECC_PACKED_ALU_SQR must be 0 or 1"
+#endif
 // The logic-op spread, kept callable beside the clmad one: with the table walk
 // the ALU pipe is no longer the only saturated one (ITERATION-FUNCTION.md
 // section 6), so the per-update polynomial squaring can be moved back here
@@ -590,8 +720,13 @@ ECC_HD P131 squarePolynomial131(P131 a) {
 }
 ECC_HD P131 sqr131(const P131 &a){
  P131 rev=reverse131(a),r;
+#if ECC_PACKED_ALU_SQR
+ uint64_t lo=(spread32alu(a.v[0])<<1)^spread32alu(rev.v[0]);
+ uint64_t hi=(spread32alu(a.v[1])<<1)^spread32alu(rev.v[1]);
+#else
  uint64_t lo=(spread32p(a.v[0])<<1)^spread32p(rev.v[0]);
  uint64_t hi=(spread32p(a.v[1])<<1)^spread32p(rev.v[1]);
+#endif
  r.v[0]=uint32_t(lo);r.v[1]=uint32_t(lo>>32);
  r.v[2]=uint32_t(hi);r.v[3]=uint32_t(hi>>32);
  r.v[4]=(rev.v[2]&1u)|((a.v[2]&1u)<<1)|((rev.v[2]&2u)<<1);
