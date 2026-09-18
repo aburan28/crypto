@@ -152,6 +152,34 @@ repository to bend the oracle exponent.
 
 **Depends on** X2.
 
+### T4 — `(D, k)` selection rule, fixed before X1
+
+Written here so the X1 run cannot choose parameters with hindsight.
+
+On the probe system (generator times 7), with `SearchOptions::default()`
+(`max_enumerated_bits = 22`, `max_kernel_dim = 12`, `max_rows = 20_000`):
+
+1. For `D` from the system degree to degree+2, then for `k` from 2 to
+   `min(v, 22) − 1` (the search engine's hard cap, not an 18-variable
+   accident), extract at `target_degree = 1`.
+2. Accept a pair only if extraction succeeds, `kernel_dim ≥ v − k`,
+   `0 < v − k ≤ 64`, and `solve_crossbred` on that probe does **not**
+   set `exhausted`.
+3. Take the first accepted pair in that order: smallest `D`, then
+   smallest `k`.
+4. Apply the same `(D, k)` to every target of the rung. A target that
+   then has `kernel_dim < v − k` or `exhausted` fails `agree`.
+
+The previous loop capped `k` at `v.min(18)`, so at `n = 13`, `m = 3`,
+`v = 49` it never tried `k ≥ 18` and fell through to `D = 4`, `k = 2`,
+which is not a result. That cap is part of the rule being replaced, not
+a finding about Crossbred.
+
+`Q` per target is `word_ops + transform_word_ops + filter_word_ops +
+solve_row_ops`. `Q_enum` is `C(|F|, m−1)` word-ops with **one word-op
+per pair** (or per point at `m = 2`). That undercounts enumeration, so
+it is conservative for an advance claim: it makes `Q / Q_enum` larger.
+
 ## X2 — Where does a crossbred space exist at all?
 
 **Question.** `extract_crossbred` returns nothing when the left kernel
@@ -309,7 +337,7 @@ rather than whether to read more.
 | T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | **done** 2026-09-18, `experiments/ecc2k130_crossbred_kernel_20260918/` | minutes |
 | T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | **done** (X2 above); X1 still needs a fourth agreeing `m = 3` rung | short |
 | T3 | Measure the word-op → group-op conversion factor and record it (`AGENTS.md` §2) | X1's absolute column | short |
-| T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | X1 admissibility | short |
+| T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | **done** (T4 above); implemented in `examples/crossbred_bench.rs` | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
 | T6 | X3: repeat T5 on the symmetrised systems | Route 2 verdict | hours |
 | T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |

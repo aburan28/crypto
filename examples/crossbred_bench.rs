@@ -57,6 +57,57 @@ fn brute_force(system: &[F2BoolPoly], n_vars: usize) -> (Vec<u64>, u64) {
 
 /// Matrix-F4 at the first degree that decides, with its word-op count.
 /// Returns whether the reduction produced the infeasibility certificate.
+/// T4 of `RESEARCH_ECC2K130_ROUTE_TARGETS.md`, applied to the probe.
+/// Smallest `D` then smallest `k` whose extraction determines the
+/// remaining variables *and* whose search does not exhaust.
+fn pick_determining_params(
+    equations: &[F2BoolPoly],
+    n_vars: usize,
+    sys_deg: u32,
+) -> Option<(usize, u32)> {
+    let search_opts = SearchOptions::default();
+    let k_hi = n_vars.min(search_opts.max_enumerated_bits as usize);
+    if k_hi <= 2 {
+        return None;
+    }
+    for d in sys_deg..=(sys_deg + 2) {
+        for k in 2..k_hi {
+            let solved = n_vars - k;
+            if solved == 0 || solved > 64 {
+                continue;
+            }
+            let params = CrossbredParams {
+                macaulay_degree: d,
+                enumerated: k,
+                target_degree: 1,
+                max_rows: 20_000,
+            };
+            let Some(xb) = extract_crossbred(equations, n_vars, &params) else {
+                continue;
+            };
+            if xb.stats.kernel_dim < solved {
+                continue;
+            }
+            let (_, stats) = solve_crossbred(equations, &xb, &search_opts);
+            if !stats.exhausted {
+                return Some((k, d));
+            }
+        }
+    }
+    None
+}
+
+fn q_enum_word_ops(m: usize, factor_base_points: u64) -> u64 {
+    // One word-op per enumerated pair (m = 3) or point (m = 2). This
+    // undercounts real enumeration, so Q / Q_enum is biased against
+    // calling Crossbred an advance.
+    if m <= 2 {
+        factor_base_points
+    } else {
+        factor_base_points.saturating_mul(factor_base_points.saturating_sub(1)) / 2
+    }
+}
+
 fn f4_verdict(system: &[F2BoolPoly], n_vars: usize, max_degree: u32) -> (bool, u64, u32) {
     let base = system
         .iter()
@@ -146,11 +197,11 @@ fn main() {
     println!("=== Oracle cost per target, three engines, same verdicts ===");
     println!();
     println!(
-        "| n | m | ℓ | v | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | \
+        "| n | m | ℓ | v | |F| | Q_enum | Q_word | Q/Q_enum | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | \
          crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall |"
     );
     println!(
-        "|--:|--:|--:|--:|----:|--------:|:----------|:-----:|----------------:|-------------:|\
+        "|--:|--:|--:|--:|----:|-------:|-------:|---------:|----:|--------:|:----------|:-----:|----------------:|-------------:|\
          --------------------:|---------:|------:|--:|--:|-------:|--------:|--------:|"
     );
 
@@ -192,29 +243,15 @@ fn main() {
 
         // Smallest `k` whose crossbred space determines the remaining
         // variables — the choice the algorithm actually has to make.
-        let mut chosen: Option<(usize, u32)> = None;
-        'pick: for d in sys_deg..=(sys_deg + 2) {
-            for k in 2..v.min(18) {
-                let params = CrossbredParams {
-                    macaulay_degree: d,
-                    enumerated: k,
-                    target_degree: 1,
-                    max_rows: 20_000,
-                };
-                if let Some(xb) = extract_crossbred(&probe_sys.equations, v, &params) {
-                    if xb.stats.kernel_dim >= v - k {
-                        chosen = Some((k, d));
-                        break 'pick;
-                    }
-                }
+        let (k, deg) = match pick_determining_params(&probe_sys.equations, v, sys_deg) {
+            Some(c) => {
+                eprintln!("T4 pick n={n} m={m} v={v} D={} k={}", c.1, c.0);
+                c
             }
-        }
-        let (k, deg) = match chosen {
-            Some(c) => c,
             None => {
                 println!(
                     "| {n} | {m} | {} | {v} | {sys_deg} | — | — | — | — | — | — | — | — | — | — \
-                     | — | — | no crossbred space |",
+                     | — | — | — | — | — | no determining space |",
                     fb.ell
                 );
                 continue;
@@ -228,11 +265,13 @@ fn main() {
             max_rows: 20_000,
         };
 
-        let (mut brute_ops, mut f4_ops, mut xb_ops) = (0u64, 0u64, 0u64);
+        let (mut brute_ops, mut f4_ops, mut xb_ops, mut xb_word) = (0u64, 0u64, 0u64, 0u64);
         let (mut kernel, mut filters) = (0usize, 0usize);
         let mut agree = true;
         let mut targets = 0u32;
         let mut wall = std::time::Duration::ZERO;
+        let f_pts = fb.points.len() as u64;
+        let q_enum = q_enum_word_ops(m, f_pts);
 
         for t in 1..=12u32 {
             let point = kc.mul(&g, &BigUint::from(t * 7 + 1));
@@ -285,18 +324,22 @@ fn main() {
             }
 
             let t0 = Instant::now();
-            let xb = extract_crossbred(&sys.equations, v, &params).expect("extraction");
+            let Some(xb) = extract_crossbred(&sys.equations, v, &params) else {
+                agree = false;
+                continue;
+            };
             let (mut got, stats) = solve_crossbred(&sys.equations, &xb, &SearchOptions::default());
             wall += t0.elapsed();
             kernel = xb.stats.kernel_dim;
             filters = xb.stats.filters;
-            xb_ops += (xb.stats.word_ops
+            let words = xb.stats.word_ops
                 + stats.transform_word_ops
                 + stats.filter_word_ops
-                + stats.solve_row_ops)
-                * BITS_PER_WORD_OP;
+                + stats.solve_row_ops;
+            xb_word += words;
+            xb_ops += words * BITS_PER_WORD_OP;
 
-            if stats.exhausted {
+            if stats.exhausted || xb.stats.kernel_dim < v.saturating_sub(k) {
                 agree = false;
             }
             let mut expect = roots;
@@ -339,10 +382,12 @@ fn main() {
                 "—".to_string()
             }
         };
+        let qw = per(xb_word);
         println!(
-            "| {n} | {m} | {} | {v} | {sys_deg} | {targets} | {} | {} | {} | {} | {x} | {} | {} \
+            "| {n} | {m} | {} | {v} | {f_pts} | {q_enum} | {qw} | {} | {sys_deg} | {targets} | {} | {} | {} | {} | {x} | {} | {} \
              | {deg} | {k} | {kernel} | {filters} | {:.1} ms |",
             fb.ell,
+            ratio(qw, q_enum),
             if brute_ok {
                 "exhaustive, =="
             } else {
@@ -358,8 +403,9 @@ fn main() {
     }
 
     println!();
-    println!("Unit: bit operations, one 64-bit word XOR = {BITS_PER_WORD_OP} bit ops.");
-    println!("Boundary: exhaustive search over the Boolean system, 2^v · (total monomials).");
+    println!("X1 unit: Q_word is 64-bit word XORs per target (extraction + search).");
+    println!("Q_enum is C(|F|, m-1) word-ops at one word-op per pair (m=3) or point (m=2);");
+    println!("that undercounts enumeration, so Q/Q_enum is conservative against an advance.");
     println!();
     println!("The `agree` column is the correctness gate, and it has two strengths.");
     println!("  `exhaustive, ==` : crossbred's root set equals exhaustive search's, exactly.");
