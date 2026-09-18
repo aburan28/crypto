@@ -620,8 +620,10 @@ fn add_parity_bit(s: &SymElement, bit: u32, n: u32, n_vars: usize) -> SymElement
 ///
 /// Factor-base points range over `F_u` (`ℓ − 1` bits of `w`). Intermediate
 /// `u(E_i)` range over the whole field (`n` bits); `w(E_i) = AS(u(E_i))`
-/// is `F₂`-linear. Each link has its own parity bit because each
-/// factor-base summand appears in exactly one link.
+/// is `F₂`-linear. Interior links are Boolean degree 3 (`w₁ w₂ w_E`);
+/// the last link has known `w_R` and is bilinear. Each link has its own
+/// parity bit because each factor-base summand appears in exactly one
+/// link.
 ///
 /// `None` if `m < 2`, `u(R)` is `0` or `∞`, or the layout exceeds
 /// [`MAX_VARS`]. `m = 2` is the same system as [`build_symmetrised_system`].
@@ -2447,7 +2449,7 @@ mod transport_tests {
             .map(|t| t.mask.count_ones())
             .max()
             .unwrap_or(0);
-        assert_eq!(deg, 2, "chained S3 must stay bilinear, got deg {deg}");
+        assert_eq!(deg, 3, "interior links are cubic (w1 w2 wE), got deg {deg}");
         assert!(sys.n_vars <= 64);
         assert!(sys.n_vars > n_vars_chained_symmetrised(2, fb.ell, 9));
     }
@@ -2458,13 +2460,13 @@ mod transport_tests {
         let div = divisor_for_dimension(9, 5).unwrap();
         let fb = build_symmetrised_factor_base(&kc, &div).unwrap();
         let st = FieldStructure::new(9, &kc.curve.irreducible);
-        let pts: Vec<BinaryPoint> = fb
-            .points
-            .iter()
-            .filter(|p| matches!(p, BinaryPoint::Affine { .. }))
-            .cloned()
-            .collect();
-        assert!(pts.len() >= 6);
+        let pts: Vec<BinaryPoint> = fb.points.clone();
+        assert!(
+            pts.len() >= 6,
+            "F_u too small: {} points, ell={}",
+            pts.len(),
+            fb.ell
+        );
         let mut found = false;
         for i in 0..pts.len().min(8) {
             for j in (i + 1)..pts.len().min(8) {

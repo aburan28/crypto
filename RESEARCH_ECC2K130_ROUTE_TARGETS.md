@@ -433,7 +433,8 @@ missing chained symmetrised arm.
 `S₃` is `m−1` links and `m−2` free intermediates, so
 `n_vars = m(ℓ−1) + (m−2)n + (m−1)` (one parity bit per link). At
 `m = 4` that is `4(ℓ−1)+2n+3`. The AutoLab beat
-`x5.ffd_chained_sym_m4_smoke` uses this count, `d_max = 4`, and
+`x5.ffd_chained_sym_m4_smoke` uses this count, `d_max = 4` (system
+degree 3, so a fall at 4 is visible), and
 `divisor_for_dimension(n, (n+1)/m)`. Changing those after seeing a cell
 is inadmissible.
 

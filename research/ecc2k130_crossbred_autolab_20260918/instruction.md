@@ -19,8 +19,8 @@ Do not change T4, `Q_enum`, or the paired-oracle divisor with hindsight.
    `x5.ffd_chained_sym_m4_smoke` is the next measurement: chained
    symmetrised `S₃` at `m = 4`. Variable count is
    `m(ℓ−1)+(m−2)n+(m−1)`, the production analog, not the
-   `4(ℓ−1)+1+n` sketch. `d_max = 4` because the links are bilinear.
-   Do not relabel this as unchained `S₄`.
+   `4(ℓ−1)+1+n` sketch. Interior links are degree 3; `d_max = 4`
+   so a fall at 4 is visible. Do not relabel this as unchained `S₄`.
 6. `promote` copies a passing `runs/` claim into `evidence/`. Do not
    cite a gitignored run.
 
