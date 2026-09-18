@@ -487,21 +487,105 @@ A logarithm needs relations against **known targets** `[a]P + [b]Q`.
 
 Unknowns are the `T` orbit logarithms plus `d`, so `T + 1` relations are
 needed. Each requires decomposing a random known target into `n` signed base
-points, at one meet-in-the-middle per attempt divided by the chance a target
-decomposes at all. Optimising over support size, relation length and split
+points, by meet-in-the-middle.
+
+**The table is built once, not once per target.** An earlier form of this
+section charged the whole meet-in-the-middle on every target attempt. That is
+wrong, and ordinarily so: the stored side holds `s`-subset sums *of the
+support*, which do not depend on the target at all. It is built once and
+streamed against for every attempt afterwards.
+
+Amortising it moves the optimum from `2^74.945` to
+`2^67.287`. Those are **two separately optimised
+configurations**, not one attack repriced — the correction changes which
+attack is cheapest, and quoting the difference as the price of a fixed attack
+would be wrong. Held at this section's own configuration, rebuilding per
+attempt costs far more than the gap between the optima.
+
+**A probe is not free, and there are two of them per streamed point.** The
+first form of this model counted probes and not their cost. Each probe is a
+group addition, and against a quotiented table it also needs the probe point
+canonicalised over its own `sigma`-orbit before it can be looked up — measured
+on this container at **13.6 group-operation
+equivalents** (29.20 us per batched addition against 398.52 us per
+canonicalisation). And each streamed point is tested against both elements of
+`E[4] ∩ H`, not one. Together those omissions were worth `2^2.65`.
+
+That makes the table layout a real choice, so both are searched:
+
+* **quotiented** — one canonical class per orbit, 131x fewer entries to
+  build, every probe canonicalised;
+* **full** — all 131 rotations stored, probes are bare lookups, 131x the
+  entries to build.
+
+With memory free it is a pure build-versus-probe trade. Quotiented wins here,
+but only by `2^1.4`.
+
+Optimising over support size, relation length, split and table layout
 (`results/target_boundary.json`):
 
-    support         10 orbits, B = 1310
-    relations       15 points each, split 8+7
-    per attempt     2^68.479
-    relations needed 11
-    total           2^71.939      vs rho  +11.13
+    support           2 Frobenius orbits, B = 262
+    relations         12 points each, split 11+1
+    stored table      quotiented
+    build (once)      2^66.777
+    probes / attempt  2^10.033 at 2^3.868 each
+    target attempts   2^51.64
+    relations needed  3
+    total             2^67.287      vs rho  +6.48
 
-**Memory is charged at zero.** The totals assume storage is free and
-instantaneous. This matters: the storage wall is the objection an engineer
-can always call a budget question, and the negative no longer rests on it.
-Granting unlimited free memory, the method is still `2^11.13`
-short — a factor of about 2,241 in operations.
+`2^6.48` is a factor of about 89.
+The error bars that remain:
+
+* **memory is charged at zero** — 1,011 exabytes,
+  free and instantaneous. Charging it makes the negative larger;
+* the build assumes one representative per `sigma`-class is enumerable in
+  constant amortised time (necklace enumeration over `Z/131`); naively it
+  costs `2^3.3` more;
+* the total is dominated by *table construction*, not search, and a table
+  write is counted as one rho step, which is generous to the table.
+
+### 5.3.1 The structure, run for real
+
+The optimum's shape — one orbit, two unknowns, two relations, a table built
+once — is unusual enough to be worth exercising rather than trusting.
+`validate_amortised_attack.py` builds exactly that table, streams targets
+against it, solves, and checks `[d]P = Q`:
+
+| `m` | `B` | `T` | `n` | table (built once) | relations | target attempts | `[d]P = Q` |
+|---:|---:|---:|---:|---:|---:|---:|:--:|
+| 13 | 13 | 1 | 3 | 20 | 2 | 5 | yes |
+| 13 | 26 | 2 | 3 | 82 | 3 | 5 | yes |
+| 13 | 13 | 1 | 4 | 98 | 2 | 3 | yes |
+| 19 | 19 | 1 | 3 | 32 | 2 | 17 | yes |
+| 19 | 38 | 2 | 3 | 140 | 3 | 13 | yes |
+| 19 | 19 | 1 | 4 | 282 | 2 | 18 | yes |
+
+Six of six recover the planted logarithm. The `T = 1` rows close a
+two-unknown system from two relations, which is the shape the ECC2K-130
+optimum uses, so that shape is not an artefact of the cost model.
+
+**An eighth defect, in the script that produces that table.** Its first
+form filtered the cells down to those carrying a recovery and then reported
+"N of N" over the survivors. A support that could not be found, or a cell
+that ran out of targets, returns without a recovery and so vanished from
+the *denominator* — one real recovery beside one skipped support and one
+outright failure reported as `all_recovered: true`, verdict "1 of 1".
+Reproduced, then fixed: every cell is accounted for, the denominator is the
+number of cells asked for, and the script exits non-zero if any cell did not
+recover. Found by an external review agent on the pull request, not by this
+thread.
+
+That is four of nine defects now living in validation rather than in the
+thing being validated. A ninth surfaced while fixing the eighth: the
+counterfactual in `target_boundary.py` charged `attempts x max(build,
+stream)` for rebuilding the table every time, which drops the build entirely
+whenever streaming dominates — making the counterfactual *cheaper* than the
+thing it exists to be worse than. Caught by this thread's own control
+asserting amortisation is never dearer, which is the first time on this study
+a test found a defect before a reviewer did. The pattern is stable enough to state as a finding of
+its own: on this study, code written to check a result has been less reliable
+than the code producing it, and the failure mode is always the same — the
+check reports success over a subset it quietly chose.
 
 ### 5.4 The measured input, and a seventh defect
 
@@ -566,11 +650,38 @@ the whole of the remaining gap.
 
 ### 5.6 Where this leaves the thread
 
-`2^11.13` over the reference, with memory free, every
-input either measured or derived, and the two directions that looked open
-— larger `m`, and a `k`-tree in place of the meet-in-the-middle — closed for
-stated reasons rather than left untried.
+`2^6.48` over the reference, with memory free, every input either
+measured or derived, and the three directions that looked open — larger `m`,
+a `k`-tree in place of the meet-in-the-middle, and rebuilding the table per
+target — closed, corrected, and corrected again.
 
-That is a better negative than §1's. It is also a *tighter* one: §1 recorded
-`2^+24.79` and leaned on a storage wall. What is left is an operation count
-that no amount of memory, structure or Frobenius moves.
+**One table, one unit**, as §2 of `AGENTS.md` asks. `S = operations / sqrt(r)`,
+`sqrt(r) = 2^64.5`:
+
+| variant | `log2` ops | `S` | vs rho | class |
+|:--|---:|---:|---:|:--|
+| Pollard rho, `<-1> x <pi>` *(reference)* | 60.81 | 0.077 | — | baseline |
+| §1 as published, no quotient | 85.60 | 2,199,000 | `2^+24.79` | accounting |
+| + Frobenius quotient at every `m` | 74.40 | 954 | `2^+13.59` | accounting |
+| + priced as a logarithm, not a relation | 71.94 | 173 | `2^+11.13` | accounting |
+| + stored table built once | 74.94 | 1.39e+03 | `2^+14.14` | accounting |
+| **+ probes and `E[4]` translates priced** | **67.29** | **6.9** | **`2^+6.48`** | accounting |
+| homogeneous relations, `m = 28` | 56.76 | 0.018 | `2^-4.05` | **relabelling** |
+
+The last row is the one to read twice. It is *below* the reference, and it is
+the only row in the table that is not an honest accounting of a logarithm —
+it prices relations that determine nothing. §1's warning, drawn.
+
+**The trajectory is the finding, and it is not about the curve.** Every step
+above was a correction to this thread's own bookkeeping. Four of them made
+the attack look better; the last made it look worse by `2^2.65`, and it was
+found by an external review agent rather than by this thread. The remaining
+`2^6.48` is small enough that one more error of the size of any of these
+would move it materially in either direction. What it is not is evidence that
+the curve is weak: the only lever anyone has applied here is arithmetic about
+costs.
+
+What would actually move it is a decomposition oracle cheaper than a
+square-root search, and §5.5 closes the one generic candidate. Until such an
+oracle exists, the floor is `sqrt` of a space that rho already square-roots
+with the same 262 automorphisms.

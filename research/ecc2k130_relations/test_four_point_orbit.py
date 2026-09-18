@@ -24,6 +24,8 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
 from target_boundary import cost as logarithm_cost            # noqa: E402
+from validate_amortised_attack import (aggregate as amortised_aggregate,  # noqa: E402
+                                       attack as amortised_attack)
 from validate_target_model import (_signed_subset_sums,       # noqa: E402
                                    _support)
 
@@ -305,6 +307,68 @@ def test_homogeneous_relations_are_not_priced_as_a_logarithm():
     assert best["log2_total_vs_rho"] > 0, (
         "a logarithm priced against known targets must not beat rho here")
     assert data["memory_charged"] is False
+
+
+def test_amortising_the_table_is_a_real_saving_and_correctly_signed():
+    """Building once must be cheaper than rebuilding per attempt, never dearer.
+
+    This caught the counterfactual charging `attempts * max(build, stream)`,
+    which drops the build entirely whenever streaming dominates and so made
+    rebuilding look *cheaper* than amortising at T=10, n=15. A faithful
+    rebuild pays both terms on every attempt.
+    """
+    for T, n, s in ((1, 14, 13), (10, 15, 8), (3, 8, 4), (2, 12, 11)):
+        for quot in (True, False):
+            once = logarithm_cost(T, n, s, amortise=True, quotient_table=quot)
+            each = logarithm_cost(T, n, s, amortise=False, quotient_table=quot)
+            assert once["log2_total_cost"] <= each["log2_total_cost"] + 1e-9
+
+
+def test_probe_cost_and_e4_translates_are_priced():
+    """Regression: probes were counted but not costed, and E[4] was ignored."""
+    q = logarithm_cost(2, 12, 11, quotient_table=True)
+    f = logarithm_cost(2, 12, 11, quotient_table=False)
+    # a quotiented table must charge canonicalisation per probe
+    assert q["log2_probe_cost"] > 0
+    # a full table must not, and must pay 131x the build instead
+    assert f["log2_probe_cost"] == 0
+    assert f["log2_build_once"] > q["log2_build_once"]
+    # both E[4] translates are probed, so probes exceed the streamed count
+    from target_boundary import REACHABLE_E4
+    assert REACHABLE_E4 == 2
+    assert q["log2_probes_per_attempt"] > 1
+
+
+def test_a_skipped_or_failed_cell_cannot_be_reported_as_success():
+    """Regression for an eighth defect, again in validation code.
+
+    Filtering to cells that carry a recovery and then reporting "N of N"
+    over the survivors lets a skipped support or a cell that ran out of
+    targets vanish from the denominator, so the artifact claims success for
+    validation that never ran.
+    """
+    good = {"verified_by_point_identity": True, "recovered_d": 1, "planted_d": 1}
+    skipped = {"skipped": "no support of that size"}
+    failed = {"recovered": False, "reason": "ran out of targets"}
+
+    assert amortised_aggregate([good, good], 2)["all_recovered"]
+    for bad in (skipped, failed):
+        agg = amortised_aggregate([good, bad], 2)
+        assert not agg["all_recovered"], bad
+        assert agg["cells_recovered"] == 1
+        assert agg["cells_expected"] == 2
+    # a cell that never ran at all must not shrink the denominator either
+    assert not amortised_aggregate([good], 2)["all_recovered"]
+
+
+def test_amortised_attack_recovers_a_planted_logarithm():
+    """The lopsided single-orbit structure the optimum uses, run for real."""
+    for spec in ((13, 3, 1), (19, 3, 1)):
+        out = amortised_attack(*spec)
+        assert out.get("verified_by_point_identity"), out
+        assert out["recovered_d"] == out["planted_d"]
+        assert out["unknowns"] == out["orbits"] + 1
+        assert out["relations"] == out["unknowns"]
 
 
 def test_logarithm_cost_is_monotone_in_the_obvious_places():
