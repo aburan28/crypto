@@ -17,6 +17,12 @@
 #ifndef ECC_HALVING_BENCH_BLOCKS
 #define ECC_HALVING_BENCH_BLOCKS 0
 #endif
+#ifndef ECC_HALVING_ILP
+#define ECC_HALVING_ILP 1
+#endif
+#if ECC_HALVING_ILP != 1 && ECC_HALVING_ILP != 2
+#error "ECC_HALVING_ILP must be 1 or 2"
+#endif
 
 using eccPacked131::P131;
 using R = Ref<CfgF131>;
@@ -54,6 +60,9 @@ void halveBench(P131 *x, P131 *y, int n, int steps) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
     P131 px = x[i], py = y[i];
+#if ECC_HALVING_ILP == 2
+    P131 qx = x[i + n], qy = y[i + n];
+#endif
     for (int step = 0; step < steps; ++step) {
 #if ECC_HALVING_POLY_STATE == 2
         eccPacked131::pointHalfLambdaPolynomial131(px, py, &px, &py);
@@ -62,8 +71,20 @@ void halveBench(P131 *x, P131 *y, int n, int steps) {
 #else
         eccPacked131::pointHalf131(px, py, &px, &py);
 #endif
+#if ECC_HALVING_ILP == 2
+#if ECC_HALVING_POLY_STATE == 2
+        eccPacked131::pointHalfLambdaPolynomial131(qx, qy, &qx, &qy);
+#elif ECC_HALVING_POLY_STATE == 1
+        eccPacked131::pointHalfPolynomial131(qx, qy, &qx, &qy);
+#else
+        eccPacked131::pointHalf131(qx, qy, &qx, &qy);
+#endif
+#endif
     }
     x[i] = px; y[i] = py;
+#if ECC_HALVING_ILP == 2
+    x[i + n] = qx; y[i + n] = qy;
+#endif
 }
 
 int main() {
@@ -147,10 +168,11 @@ int main() {
 #if ECC_HALVING_BENCH_BLOCKS
     residentBlocks = ECC_HALVING_BENCH_BLOCKS;
 #endif
-    const int benchN = prop.multiProcessorCount * ECC_THREADS * residentBlocks;
+    const int benchThreads = prop.multiProcessorCount * ECC_THREADS * residentBlocks;
+    const int benchN = benchThreads * ECC_HALVING_ILP;
     const int steps = 4096;
-    std::printf("  benchmark occupancy: %d SMs x %d blocks x %d threads\n",
-                prop.multiProcessorCount, residentBlocks, ECC_THREADS);
+    std::printf("  benchmark occupancy: %d SMs x %d blocks x %d threads x %d chains\n",
+                prop.multiProcessorCount, residentBlocks, ECC_THREADS, ECC_HALVING_ILP);
     std::vector<P131> bx(benchN), by(benchN);
     for (int i = 0; i < benchN; ++i) {
         bx[i] = x[i % x.size()]; by[i] = y[i % y.size()];
@@ -160,14 +182,14 @@ int main() {
     checked(cudaMalloc(&bdy, size_t(benchN) * sizeof(P131)));
     checked(cudaMemcpy(bdx, bx.data(), size_t(benchN) * sizeof(P131), cudaMemcpyHostToDevice));
     checked(cudaMemcpy(bdy, by.data(), size_t(benchN) * sizeof(P131), cudaMemcpyHostToDevice));
-    halveBench<<<(benchN + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
-        bdx, bdy, benchN, 4);
+    halveBench<<<(benchThreads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
+        bdx, bdy, benchThreads, 4);
     checked(cudaDeviceSynchronize());
     cudaEvent_t begin, end; checked(cudaEventCreate(&begin)); checked(cudaEventCreate(&end));
     for (int rep = 0; rep < 3; ++rep) {
         checked(cudaEventRecord(begin));
-        halveBench<<<(benchN + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
-            bdx, bdy, benchN, steps);
+        halveBench<<<(benchThreads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
+            bdx, bdy, benchThreads, steps);
         checked(cudaEventRecord(end)); checked(cudaEventSynchronize(end));
         float ms = 0; checked(cudaEventElapsedTime(&ms, begin, end));
         std::printf("  halving raw %.3f B/s (%g ms)\n",
