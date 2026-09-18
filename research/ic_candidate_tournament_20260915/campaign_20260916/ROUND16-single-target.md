@@ -192,6 +192,20 @@ from `runs/round-0015/source_candidates/scan_io/source` — so no source changes
 in this round at all and every difference measured here belongs to the panel.
 Seed 2026091616, pilot profile, one target per job, CPU 3, 60 s timeout.
 
+Amendment, recorded after the first `prepare` and before any measured stage: the
+first prepare of this round took the default `--max-processes` of 1800 while the
+eight-cell panel needs 2142 trials (36 aa, 54 smoke, 162 development, 162
+selection, 864 confirmation, 864 replay). That run would have exhausted its
+budget partway and could not be resumed, because an interrupted trial directory
+is deliberately never overwritten. It was discarded unrun -- it held no receipts
+and measured nothing -- and re-prepared with `--max-processes 3000`. The seed is
+unchanged, so the fixtures are identical; the discarded prepare sealed contract
+`372ae2ee7bf2e0362c48f9ac5337bd6633ef4ac9aea39203dafc97d73a10abcb` over
+`fixtures.json` `0b929d5a9de3f532923f58e12ce6b13b6ddc02b73a34412466957b8479e7aa96`,
+and the re-prepare must reproduce the second of those. The alternative -- 
+dropping the `scan_io` arm to fit under 1800 -- was rejected: it would have
+deleted prediction 1 after seeing an obstacle to testing it.
+
 ## Boundary, floor, class, honesty
 
 Unchanged from round 0015. The unit is Valgrind 3.22 `Ir` over the complete
