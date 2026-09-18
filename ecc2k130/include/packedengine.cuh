@@ -300,6 +300,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
+        printf("packed selection pipeline: %d\n", ECC_PACKED_SELECT_PIPELINE);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
         printf("packed direct reduction: %d\n", ECC_PACKED_DIRECT_REDUCE);
         printf("packed generated product: %d\n", ECC_PACKED_GENERATED_PRODUCT);
