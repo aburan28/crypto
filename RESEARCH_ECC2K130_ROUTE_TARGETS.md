@@ -412,8 +412,9 @@ a state this repository has.
 Replay of the X1/X3 freezes, the per-frame `α` refusal, and the chained-`x`
 FFD smoke live in
 [`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/).
-Harbor is not required. The chained *symmetrised* `S₃` at `m = 4` is still
-unbuilt; do not relabel the smoke as that arm.
+Harbor is not required. The chained *symmetrised* `S₃` builder is in
+`build_chained_symmetrised_system`; do not relabel the chained-`x` smoke
+as that arm. The next beat is `x5.ffd_chained_sym_m4_smoke`.
 
 First run, 2026-09-18, host `ip-172-31-19-103`, cited from
 [`research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json`](research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json):
