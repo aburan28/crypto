@@ -38,9 +38,13 @@ CLAIM_BOUNDARY = (
 # worker_id still heap-fetches every row.
 #
 # The durable answer is the one #432 named and deferred: a rollup maintained
-# from INSERTs. snapshot.py creates it, backfills it once, and installs a
-# statement-level trigger so the ingest's INSERT ... SELECT keeps the buckets
-# current without a code deploy on that host. Later snapshots read the rollup.
+# from INSERTs. Another btree on distinguished_points does not get Pages
+# under 540s: the ingest already builds (campaign_id, found_at), and this
+# query still has to read worker_id for every row. A covering index would
+# still be O(corpus) every 15 minutes. snapshot.py creates the rollup,
+# backfills it once, and installs a statement-level trigger so the ingest's
+# INSERT ... SELECT keeps the buckets current without a code deploy on that
+# host. Later snapshots read the rollup.
 
 ENSURE_SQL = r"""
 CREATE TABLE IF NOT EXISTS rho_dp_hour (
