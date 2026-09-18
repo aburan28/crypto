@@ -135,6 +135,11 @@ def main():
     summary = merge(toy, gpu)
     summary['elapsed_s'] = time.time() - t0
     out = os.path.join(HERE, 'summary.json')
+    if os.path.isfile(out):
+        with open(out) as f:
+            previous = json.load(f)
+        if 'sat' in previous:
+            summary['sat'] = previous['sat']
     with open(out, 'w') as f:
         json.dump(summary, f, indent=2, sort_keys=True)
         f.write('\n')

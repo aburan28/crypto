@@ -14,3 +14,19 @@ python3 run.py
 ```
 
 `--skip-gpu` runs only the degree-5/9 pair-enumeration discrete logs.
+
+SAT (CryptoMiniSat on the host CPU, not the GPU) is a separate receipt.
+System Python on this host is PEP 668, so use a venv:
+
+```sh
+python3 -m venv ~/ic-venv
+~/ic-venv/bin/pip install -r requirements-sat.txt
+cd ../../codegen
+~/ic-venv/bin/python testdecomp.py
+~/ic-venv/bin/python -m unittest test_indexcalc_pairs.py test_indexcalc_e2e.py
+cd ../benchmarks/indexcalc-g7e
+~/ic-venv/bin/python run_sat.py
+```
+
+`run_sat.py` writes `sat.json` and patches `summary.json['sat']`. It does
+not change the product-law floor or the GPU pair-scan row.

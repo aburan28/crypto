@@ -270,7 +270,9 @@ check-cycles:
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
-#   pip install python-sat pycryptosat
+#   python3 -m venv ~/ic-venv && ~/ic-venv/bin/pip install -r \
+#     benchmarks/indexcalc-g7e/requirements-sat.txt
+# On PEP 668 hosts, `python3 testdecomp.py` will fail; use the venv interpreter.
 test-decomp:
 	cd codegen && python3 testdecomp.py
 
