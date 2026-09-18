@@ -103,6 +103,15 @@
 #if ECC_TABLE_WARP_LUT && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES || ECC_TABLE_GLOBAL || ECC_TABLE_SELECTION_GLOBAL)
 #error "ECC_TABLE_WARP_LUT requires byte-pivot LUTs in shared memory"
 #endif
+#ifndef ECC_TABLE_DP4A_PHASE
+#define ECC_TABLE_DP4A_PHASE 0
+#endif
+#if ECC_TABLE_DP4A_PHASE != 0 && ECC_TABLE_DP4A_PHASE != 1
+#error "ECC_TABLE_DP4A_PHASE must be 0 or 1"
+#endif
+#if ECC_TABLE_DP4A_PHASE && (!ECC_WALK_TABLE || !ECC_TABLE_PIVOT_BYTES)
+#error "ECC_TABLE_DP4A_PHASE requires the byte-pivot table walk"
+#endif
 
 namespace eccPacked131 {
 
@@ -125,8 +134,9 @@ static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
 static const int TW_ROW_WORDS = 4 + ECC_TABLE_BANK_PAD;
 static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * TW_ROW_WORDS;
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
-static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
-static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
+static const int TW_PHASE_OFF = TW_INV_OFF + 132;
+static const int TW_PHASE_WORDS = ECC_TABLE_DP4A_PHASE ? 33 : 17 * 64;
+static const int TW_MAX_OFF = TW_PHASE_OFF + TW_PHASE_WORDS;
 static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
 #else
 static const int TW_ENTRY = 9;
@@ -164,6 +174,15 @@ __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *g
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
 __device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
 __device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+#if ECC_TABLE_DP4A_PHASE
+__device__ __forceinline__ uint32_t twExpandNibble(uint32_t v) {
+    return (v * 0x00204081u) & 0x01010101u;
+}
+__device__ __forceinline__ unsigned twDot4(uint32_t bits, uint32_t weights,
+                                           unsigned sum) {
+    return __dp4a(bits, weights, sum);
+}
+#endif
 #if ECC_TABLE_WARP_LUT
 __device__ __forceinline__ unsigned twWarpLookup(const uint8_t *row, unsigned value) {
     const uint32_t *words = reinterpret_cast<const uint32_t *>(row);
@@ -179,6 +198,16 @@ __device__ __forceinline__ unsigned twWarpLookup(const uint8_t *row, unsigned va
 static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
 static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
 static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+#if ECC_TABLE_DP4A_PHASE
+static inline uint32_t twExpandNibble(uint32_t v) {
+    return (v * 0x00204081u) & 0x01010101u;
+}
+static inline unsigned twDot4(uint32_t bits, uint32_t weights, unsigned sum) {
+    for (int i = 0; i < 4; ++i)
+        sum += ((bits >> (8 * i)) & 0xFFu) * ((weights >> (8 * i)) & 0xFFu);
+    return sum;
+}
+#endif
 #if ECC_TABLE_WARP_LUT
 static inline unsigned twWarpLookup(const uint8_t *row, unsigned value) {
     return row[value];
@@ -189,6 +218,18 @@ static inline unsigned twWarpLookup(const uint8_t *row, unsigned value) {
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
 TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
     unsigned s = 0;
+#if ECC_TABLE_DP4A_PHASE
+    const uint32_t *weights = reinterpret_cast<const uint32_t *>(phase);
+#pragma unroll
+    for (int w = 0; w < 4; ++w) {
+#pragma unroll
+        for (int n = 0; n < 8; ++n) {
+            const uint32_t nibble = (x.v[w] >> (4 * n)) & 15u;
+            s = twDot4(twExpandNibble(nibble), weights[8 * w + n], s);
+        }
+    }
+    s = twDot4(twExpandNibble(x.v[4] & 7u), weights[32], s);
+#else
 #pragma unroll
     for (int w = 0; w < 4; ++w)
 #pragma unroll
@@ -201,6 +242,7 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
 #endif
         }
     s += phase[16 * 256 + (x.v[4] & 0xFFu)];
+#endif
     return int(((s % 131u) * inv[hw]) % 131u);
 }
 
@@ -388,6 +430,17 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
     auto L = [&](int bit) { return bit < 131 ? walk.consts.L[bit + 1] : -1; };
     uint8_t *bytes = reinterpret_cast<uint8_t *>(out);
     uint8_t *phase = bytes + 4 * TW_PHASE_OFF, *maxL = bytes + 4 * TW_MAX_OFF, *linv = bytes + 4 * TW_LINV_OFF;
+#if ECC_TABLE_DP4A_PHASE
+    uint32_t *weights = out + TW_PHASE_OFF;
+    for (int i = 0; i < 33; ++i) {
+        uint32_t packed = 0;
+        for (int t = 0; t < 4; ++t) {
+            const int value = L(4 * i + t);
+            packed |= uint32_t(value < 0 ? 0 : value) << (8 * t);
+        }
+        weights[i] = packed;
+    }
+#else
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {
             unsigned s = 0;
@@ -395,6 +448,7 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
             phase[i * 256 + v] = uint8_t(s % 131u);
         }
+#endif
 #if ECC_TABLE_PIVOT_BYTES
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {
