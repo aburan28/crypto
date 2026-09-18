@@ -32,7 +32,7 @@ __global__ void halveProbe(const P131 *x, const P131 *y, P131 *hx, P131 *hy, int
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) eccPacked131::pointHalf131(x[i], y[i], hx + i, hy + i);
 }
-__global__ __launch_bounds__(256, 2)
+__global__ __launch_bounds__(ECC_THREADS, ECC_MINBLOCKS)
 void halveBench(P131 *x, P131 *y, int n, int steps) {
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
@@ -108,12 +108,14 @@ int main() {
     checked(cudaMalloc(&bdy, size_t(benchN) * sizeof(P131)));
     checked(cudaMemcpy(bdx, bx.data(), size_t(benchN) * sizeof(P131), cudaMemcpyHostToDevice));
     checked(cudaMemcpy(bdy, by.data(), size_t(benchN) * sizeof(P131), cudaMemcpyHostToDevice));
-    halveBench<<<(benchN + 255) / 256, 256>>>(bdx, bdy, benchN, 4);
+    halveBench<<<(benchN + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
+        bdx, bdy, benchN, 4);
     checked(cudaDeviceSynchronize());
     cudaEvent_t begin, end; checked(cudaEventCreate(&begin)); checked(cudaEventCreate(&end));
     for (int rep = 0; rep < 3; ++rep) {
         checked(cudaEventRecord(begin));
-        halveBench<<<(benchN + 255) / 256, 256>>>(bdx, bdy, benchN, steps);
+        halveBench<<<(benchN + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS>>>(
+            bdx, bdy, benchN, steps);
         checked(cudaEventRecord(end)); checked(cudaEventSynchronize(end));
         float ms = 0; checked(cudaEventElapsedTime(&ms, begin, end));
         std::printf("  halving raw %.3f B/s (%g ms)\n",
