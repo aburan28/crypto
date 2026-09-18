@@ -155,13 +155,29 @@ launch_n() {
     done
 }
 
+# Newline-separated instance types offered in any AZ of the region.
+offered_types() {
+    local region=$1
+    shift
+    aws ec2 describe-instance-type-offerings --region "$region" \
+        --location-type availability-zone \
+        --filters "Name=instance-type,Values=$*" \
+        --query 'InstanceTypeOfferings[].InstanceType' --output text 2>/dev/null \
+        | tr '\t' '\n' | sort -u
+}
+
 fill_spot() {
     local region=$1 left=$2
-    local type
+    local type offered
     IFS=',' read -r -a types <<< "$TYPES_PREF"
+    offered=$(offered_types "$region" "$TYPES_PREF,g7e.4xlarge,g7.4xlarge,g6e.4xlarge,g6.4xlarge,g4dn.4xlarge,g4dn.xlarge")
     STOP_REGION=0
     for type in "${types[@]}"; do
         [ "$left" -gt 0 ] || break
+        if ! printf '%s\n' "$offered" | grep -qx "$type"; then
+            echo "  skip $type (no offering in $region)"
+            continue
+        fi
         launch_n "$region" "$type" "$left"
         left=$((left - LAUNCHED_N))
         if [ "${STOP_REGION:-0}" -eq 1 ]; then
@@ -171,6 +187,10 @@ fill_spot() {
     if [ "$left" -ge 2 ]; then
         for type in g7e.4xlarge g7.4xlarge g6e.4xlarge g6.4xlarge g4dn.4xlarge; do
             [ "$left" -ge 2 ] || break
+            if ! printf '%s\n' "$offered" | grep -qx "$type"; then
+                echo "  skip $type (no offering in $region)"
+                continue
+            fi
             launch_n "$region" "$type" $((left / 2))
             left=$((left - LAUNCHED_N * 2))
             if [ "${STOP_REGION:-0}" -eq 1 ]; then
@@ -180,10 +200,14 @@ fill_spot() {
     fi
     # Turing leftover: xlarge is 4 vCPU / 1 T4, so two fit in one 2xlarge slot.
     if [ "$left" -gt 0 ]; then
-        launch_n "$region" "g4dn.xlarge" $((left * 2))
-        left=$((left - (LAUNCHED_N + 1) / 2))
-        if [ "${STOP_REGION:-0}" -eq 1 ]; then
-            return 0
+        if ! printf '%s\n' "$offered" | grep -qx g4dn.xlarge; then
+            echo "  skip g4dn.xlarge (no offering in $region)"
+        else
+            launch_n "$region" "g4dn.xlarge" $((left * 2))
+            left=$((left - (LAUNCHED_N + 1) / 2))
+            if [ "${STOP_REGION:-0}" -eq 1 ]; then
+                return 0
+            fi
         fi
     fi
     if [ "$left" -gt 0 ]; then

@@ -116,6 +116,8 @@ class BootstrapContract(unittest.TestCase):
         self.assertIn("no offered type/AZ pair", script)
         self.assertIn("dropped %d unsupported type/AZ pairs", script)
         self.assertIn("InstanceTypeOfferings[].[InstanceType,Location]", script)
+        self.assertIn("skip $type (no offering in $region)", script)
+        self.assertIn("offered_types", script)
         # WeightedCapacity suffixes must be longest-first; ".xlarge" matches
         # ".2xlarge" if it is tried first and would double the fleet target.
         self.assertRegex(
