@@ -78,7 +78,9 @@ static __device__ __constant__ uint8_t halvingSqrtBmmaTop[136]={
  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
  0,0,0,0,0,0,0,0,
 };
-static __device__ __forceinline__ P131 halvingSqrtPolynomialBmma131(P131 input){
+#endif
+ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
+#ifdef __CUDA_ARCH__
  using namespace nvcuda;
  __shared__ __align__(16) uint32_t bmem[32][32];
  __shared__ __align__(16) int cmem[32][64];
@@ -116,9 +118,7 @@ static __device__ __forceinline__ P131 halvingSqrtPolynomialBmma131(P131 input){
   }
  }
  return out;
-}
 #else
-ECC_HD P131 halvingSqrtPolynomialBmma131(P131 input){
  return toPolynomial131(halvingSqrt131(fromPolynomial131(input)));
-}
 #endif
+}
