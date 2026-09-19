@@ -622,6 +622,18 @@ footer {
 }
 footer h2 { color: var(--ink); font-size: 14px; }
 
+.transcript {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  font: 13px/1.5 var(--mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
 @media (max-width: 720px) {
   body { padding: 0 14px 40px; }
   th, td { padding: 8px 10px; }

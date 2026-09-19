@@ -559,6 +559,30 @@ class WalkRate(unittest.TestCase):
         self.assertIsNone(dp_ingest.walkRateBetween(
             {"generated_at": "2026-09-19T12:04:00Z", "work": {"iterations": 1100}}, base))
 
+    def test_uses_the_previous_rate_window_when_the_last_write_is_too_close(self):
+        previous = {
+            "generated_at": "2026-09-19T12:09:00Z",
+            "work": {"iterations": 1540},
+            "walk_rate": {
+                "iterations_from": 1000,
+                "measured_from": "2026-09-19T12:00:00Z",
+            },
+        }
+        current = {
+            "generated_at": "2026-09-19T12:12:00Z",
+            "work": {"iterations": 1720},
+        }
+        rate = dp_ingest.walkRateBetween(current, previous)
+        self.assertAlmostEqual(rate["iterations_per_second"], (1720 - 1000) / 720)
+        self.assertEqual(rate["measured_from"], "2026-09-19T12:00:00Z")
+
+    def test_public_status_drops_per_slot_rows(self):
+        public = dp_ingest.publicStatus({
+            "work": {"iterations": 10, "walking_slots": 1, "per_slot": [{"slot": 1}]},
+        })
+        self.assertNotIn("per_slot", public["work"])
+        self.assertEqual(public["work"]["walking_slots"], 1)
+
 
 class Defaults(unittest.TestCase):
     def test_status_every_default_is_three_minutes(self):

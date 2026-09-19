@@ -1,3 +1,10 @@
+The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
+GPU client uses. Live campaign counts:
+[status page](https://aburan28.github.io/crypto/status/). How the walk works,
+including a browser copy of the toy:
+[how.html](https://aburan28.github.io/crypto/status/how.html).
+
 # ECC2K-130 and ECC2K-95
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
