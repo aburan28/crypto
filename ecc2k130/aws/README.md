@@ -607,7 +607,7 @@ same tables.
 
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
-is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
+is the 3-minute Actions job, with this copy as the second one. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.

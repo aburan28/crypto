@@ -814,7 +814,7 @@ def main(argv=None):
                     help="seconds between status.json writes. The snapshot "
                          "counts the whole campaign, and while it runs this "
                          "program is not ingesting, so it is spaced well apart: "
-                         "the page's own refresh is the 15-minute Actions job, "
+                         "the page's own refresh is the 3-minute Actions job, "
                          "and this copy is the second one")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
