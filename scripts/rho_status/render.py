@@ -21,9 +21,9 @@ import os
 from datetime import datetime, timezone
 
 # Seven days of snapshots at the publish cadence in ecc2k130-status.yml
-# (480 a day, every 3 minutes). This is a count, so it tracks the cron: at a
+# (288 a day, every 5 minutes). This is a count, so it tracks the cron: at a
 # slower cadence it covers more than a week, at a faster one less.
-HISTORY_LIMIT = 3360
+HISTORY_LIMIT = 2016
 
 # Smoothing window for the walk rate. A slot's iteration total only moves when
 # it checkpoints, every 600 s, so a rate taken across a single publish

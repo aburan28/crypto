@@ -816,7 +816,7 @@ def main(argv=None):
                          "counts the whole campaign, and while it runs this "
                          "program is not ingesting. At ~190 M rows a publish "
                          "takes a few minutes; keep this at or above that. "
-                         "The page's Actions job runs every 3 minutes and reads "
+                         "The page's Actions job runs every 5 minutes and reads "
                          "this copy from the status bucket.")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")

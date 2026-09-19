@@ -5,10 +5,11 @@ name: ECC2K-130 status pages
 
 on:
   schedule:
-    # Every 3 minutes. scripts/rho_status/render.py sizes history.json from
-    # this interval, and test_rho_status.py pins the two together, so changing
-    # it here without changing that constant shortens the published series.
-    - cron: "*/3 * * * *"
+    # Every 5 minutes (GitHub's schedule floor). scripts/rho_status/render.py
+    # sizes history.json from this interval, and test_rho_status.py pins the
+    # two together, so changing it here without changing that constant
+    # shortens the published series.
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   pull_request:
     paths:

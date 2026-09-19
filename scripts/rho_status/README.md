@@ -1,6 +1,6 @@
 # ECC2K-130 public status snapshot
 
-GitHub Action, run every 3 minutes, that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 5 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
@@ -73,7 +73,7 @@ Two more things stop one dependency from freezing the page:
   Before this the page had one sentence for both, and the fix for a dead
   walker was indistinguishable from the fix for a dead cron.
 
-The dashboard's stale threshold is 90 minutes: many missed feed writes at
+The dashboard's stale threshold is 150 minutes: many missed feed writes at
 the ingest host's 3-minute cadence, or thirty missed Action runs.
 `test_rho_status.py` pins it to both cadences.
 
