@@ -13,10 +13,13 @@ both key shapes are points, and anything unreadable is counted out loud.
 """
 
 import datetime
+import hashlib
 import io
+import json
 import os
 import struct
 import sys
+import time
 import unittest
 from unittest import mock
 
@@ -152,6 +155,8 @@ class FakeCursor:
     def __init__(self, conn):
         self.conn = conn
         self.rows = []
+        self.one = None
+        self.rowcount = 1
 
     def __enter__(self):
         return self
@@ -161,50 +166,97 @@ class FakeCursor:
 
     def execute(self, sql, args=None):
         self.conn.queries.append(sql)
-        self.rows = ([("dp-slot-00002-old.bin", 24000)] if "GROUP BY worker_id" in sql
-                     else [])
+        if "GROUP BY worker_id" in sql:
+            self.rows = list(self.conn.workerCounts.items())
+        elif "FROM dp_ingest_progress" in sql:
+            self.rows = list(self.conn.progress.items())
+        else:
+            self.rows = []
+        if "FROM dp_ingest_meta WHERE key" in sql:
+            self.one = (1,) if self.conn.marked else None
+        else:
+            self.one = None
+        if "INSERT INTO dp_ingest_progress" in sql:
+            self.conn.inserted.append(args)
 
     def fetchall(self):
         return self.rows
 
+    def fetchone(self):
+        return self.one
+
 
 class CountingConn:
-    def __init__(self):
+    def __init__(self, workerCounts=None, progress=None, marked=False):
         self.queries = []
+        self.workerCounts = dict(workerCounts or {})
+        self.progress = dict(progress or {})
+        self.marked = marked
+        self.inserted = []
+        self.commits = 0
 
     def cursor(self):
         return FakeCursor(self)
 
+    def commit(self):
+        self.commits += 1
 
-class LegacyCounts(unittest.TestCase):
-    """The aggregate that reads the whole corpus must not run every pass."""
+
+class ProgressBackfill(unittest.TestCase):
+    """The last question this program asked of the points table, asked once.
+
+    Objects the previous ingester wrote had no `dp_ingest_progress` row, so
+    every pass recognised them by grouping the whole corpus on `worker_id` --
+    124 M rows into 113 k groups on 2026-09-17, three minutes before a pass
+    could read its first object. A 30-minute cache hid how often that ran; it
+    did not change what it cost. Pairing the bucket with the corpus once and
+    writing the missing rows retires it.
+    """
 
     def setUp(self):
-        dp_ingest._counts.update({"at": 0.0, "map": {}})
-        self.addCleanup(dp_ingest._counts.update, {"at": 0.0, "map": {}})
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest.log = lambda msg: None
+        self.s3 = FakeS3([(LEGACY, 32 * 100, when("2026-09-19T07:00:00")),
+                          (ORBIT, 32 * 50, when("2026-09-19T08:00:00"))])
 
     def aggregates(self, conn):
         return sum("GROUP BY worker_id" in q for q in conn.queries)
 
-    def test_the_corpus_wide_aggregate_is_not_repeated_within_the_ttl(self):
-        conn = CountingConn()
-        for _ in range(4):
-            counts, _ = dp_ingest.ingestedCounts(conn)
+    def test_an_object_the_store_holds_in_full_gets_its_row(self):
+        conn = CountingConn(workerCounts={dp_ingest.workerId(LEGACY): 100})
+        self.assertEqual(dp_ingest.backfillProgress(conn, self.s3, "bucket"), 1)
+        self.assertEqual([a[1] for a in conn.inserted], [LEGACY])
+        self.assertEqual([a[2] for a in conn.inserted], [100])
+
+    def test_a_partly_stored_object_is_left_to_be_re_read(self):
+        # Fewer rows than records means the object is not done; no row, so the
+        # next pass re-reads it, which is a no-op for what is already there.
+        conn = CountingConn(workerCounts={dp_ingest.workerId(LEGACY): 99})
+        dp_ingest.backfillProgress(conn, self.s3, "bucket")
+        self.assertEqual(conn.inserted, [])
+
+    def test_it_reads_the_corpus_once_and_marks_itself(self):
+        conn = CountingConn(workerCounts={dp_ingest.workerId(LEGACY): 100})
+        dp_ingest.backfillProgress(conn, self.s3, "bucket")
         self.assertEqual(self.aggregates(conn), 1)
-        self.assertEqual(counts, {"dp-slot-00002-old.bin": 24000})
+        self.assertTrue(any("INSERT INTO dp_ingest_meta" in q for q in conn.queries))
 
-    def test_progress_is_still_read_every_time(self):
-        conn = CountingConn()
-        for _ in range(4):
-            dp_ingest.ingestedCounts(conn)
-        self.assertEqual(sum("dp_ingest_progress" in q for q in conn.queries), 4)
+    def test_a_replacement_host_does_not_read_the_corpus_again(self):
+        conn = CountingConn(marked=True)
+        self.assertEqual(dp_ingest.backfillProgress(conn, self.s3, "bucket"), 0)
+        self.assertEqual(self.aggregates(conn), 0)
 
-    def test_it_refreshes_once_the_ttl_has_passed(self):
-        conn = CountingConn()
-        dp_ingest.ingestedCounts(conn)
-        dp_ingest._counts["at"] -= 3600.0
-        dp_ingest.ingestedCounts(conn)
-        self.assertEqual(self.aggregates(conn), 2)
+    def test_a_pass_asks_the_points_table_nothing(self):
+        # The property the backfill buys: what an object still needs is now a
+        # question about a small table, not about the corpus.
+        conn = CountingConn(progress={LEGACY: 100})
+        self.assertEqual(dp_ingest.ingestedObjects(conn), {LEGACY: 100})
+        self.assertFalse([q for q in conn.queries if "distinguished_points" in q])
+
+    def test_pending_skips_what_the_progress_table_records(self):
+        conn = CountingConn(progress={LEGACY: 100})
+        todo, _, _ = dp_ingest.pending(conn, self.s3, "bucket")
+        self.assertEqual([k for k, _, _, _ in todo], [ORBIT])
 
 
 class IndexCursor:
@@ -611,6 +663,89 @@ class Collisions(unittest.TestCase):
         dp_ingest.ingestObject = lambda *a, **k: (99, 100, 1)
         _, _, state = dp_ingest.onePass(lambda: FakeConn([]), None, "bucket", threads=1)
         self.assertEqual(state["collisions"], 1)
+
+
+class EnvelopeS3:
+    """get_object for a body and, optionally, its .bin.json commit marker."""
+
+    def __init__(self, body, manifest=None):
+        self.body = body
+        self.manifest = manifest
+        self.fetched = []
+
+    def get_object(self, **kw):
+        key = kw["Key"]
+        self.fetched.append(key)
+        if key.endswith(".bin.json"):
+            if self.manifest is None:
+                raise RuntimeError("NoSuchKey")
+            return {"Body": io.BytesIO(json.dumps(self.manifest).encode())}
+        return {"Body": io.BytesIO(self.body)}
+
+
+class Envelopes(unittest.TestCase):
+    """The commit marker beside every object, which the ingest used to ignore.
+
+    merge.py verifies it over the same corpus; this program did not, so a body
+    that came back corrupted was accepted into the store that collision
+    detection reads. It also carries the producer's own clock, which is a
+    campaign fact, where S3 LastModified is storage metadata that a copy or a
+    lifecycle transition rewrites.
+    """
+
+    def setUp(self):
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest.log = lambda msg: None
+        self.body = record(7) + record(8)
+
+    def manifest(self, **over):
+        m = {"protocol": 1, "kind": "dp", "bytes": len(self.body),
+             "sha256": hashlib.sha256(self.body).hexdigest(),
+             "records": len(self.body) // 32}
+        m.update(over)
+        return m
+
+    def ingest(self, s3, inserted=2):
+        conn = CollisionConn(inserted=inserted)
+        return conn, dp_ingest.ingestObject(conn, s3, "bucket", ORBIT,
+                                            "2026-09-19 00:00:00+00")
+
+    def test_a_body_matching_its_manifest_is_ingested(self):
+        conn, (added, seen, _) = self.ingest(EnvelopeS3(self.body, self.manifest()))
+        self.assertEqual((added, seen), (2, 2))
+
+    def test_a_corrupted_body_is_refused_not_stored(self):
+        # Truncation self-heals -- the object stays short of its S3 size and is
+        # retried -- but a body corrupted in place does not, and once stored is
+        # indistinguishable from real points.
+        bad = EnvelopeS3(self.body, self.manifest(sha256="00" * 32))
+        with self.assertRaises(ValueError):
+            self.ingest(bad)
+
+    def test_a_record_count_that_disagrees_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.ingest(EnvelopeS3(self.body, self.manifest(records=99)))
+
+    def test_an_object_with_no_manifest_is_still_ingested(self):
+        # Legacy keys and anything uploaded before the contract path have none;
+        # a missing marker is not an error.
+        conn, (added, seen, _) = self.ingest(EnvelopeS3(self.body, manifest=None))
+        self.assertEqual((added, seen), (2, 2))
+
+    def test_produced_at_is_preferred_over_the_listing_time(self):
+        s3 = EnvelopeS3(self.body, self.manifest(producedAt=1789311001))
+        conn, _ = self.ingest(s3)
+        stamps = [a for q, a in conn.queries
+                  if a and "INSERT INTO distinguished_points" in q]
+        self.assertTrue(stamps)
+        self.assertIn(time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(1789311001)),
+                      stamps[0])
+
+    def test_without_produced_at_the_listing_time_stands(self):
+        conn, _ = self.ingest(EnvelopeS3(self.body, self.manifest()))
+        stamps = [a for q, a in conn.queries
+                  if a and "INSERT INTO distinguished_points" in q]
+        self.assertIn("2026-09-19 00:00:00+00", stamps[0])
 
 
 class RollupCursor:
