@@ -36,12 +36,14 @@ Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 
 Every rate in this tree is for that `sm_120` part. The other GPUs the campaign
 can rent have none: [RTX-PRO4500.md](RTX-PRO4500.md) covers the RTX PRO 4500
-(EC2 g7) and [ADA-L4-L40S.md](ADA-L4-L40S.md) the Ada parts, L4 (g6) and L40S
-(g6e), with `make bench-ada` to measure one. The arithmetic and storage options
-of the RTX PRO 6000 preset carry over to both; `PACKED_CLMAD` does not, because
-it is bought with a pipe balance measured only on Blackwell, so `aws/build.sh`
-now defaults it off for any build that includes a pre-Blackwell architecture
-and `benchmarks/ada/run.sh` measures both arms rather than assuming one.
+(EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md) the Ada parts, L4 (g6) and L40S
+(g6e), with `make bench-ada` to measure one, and [B200.md](B200.md) the
+datacenter Blackwell B200 (`make bench-b200-modal`). The arithmetic and storage
+options of the RTX PRO 6000 preset carry over; `PACKED_CLMAD` does not travel
+onto a pre-Blackwell architecture, so `aws/build.sh` defaults it off for any
+build that includes one and `benchmarks/ada/run.sh` measures both arms rather
+than assuming one. The B200 is Blackwell (`sm_100`) and uses the shipping
+CLMAD=1 arm; the rate is the receipt, not the SM-count prior.
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
