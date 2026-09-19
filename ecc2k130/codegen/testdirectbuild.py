@@ -1225,11 +1225,13 @@ class SharedSigmaBuildTests(unittest.TestCase):
 
     def test_preblackwell_targets_bind_gpu_arch_and_fastest_product(self):
         # Ada receipt selected CLMAD=1; Turing has no clmad. See
-        # benchmarks/preblackwell/summary.json.
+        # benchmarks/preblackwell/summary.json. B200 is Blackwell sm_100
+        # with automatic workers (B200.md).
         cases = (
             ('bench-g6-modal', 'ECC_GPU=L4', '1'),
             ('bench-g6e-modal', 'ECC_GPU=L40S', '1'),
             ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
+            ('bench-b200-modal', 'ECC_GPU=B200', '1'),
             ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g4dn', 'arch=compute_75,code=sm_75', '0'),
