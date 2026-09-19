@@ -146,17 +146,21 @@ if PACKED_COMPACT_STATE == "1" and (PACKED_STATE_TILE != "256" or any(value != "
         (PACKED_POLY_STATE, PACKED_POLY_CHAIN, PACKED_CACHE_DENOM))):
     raise ValueError("ECC_PACKED_COMPACT_STATE=1 requires TILE256, polynomial state, polynomial chains and denominator cache")
 
-# Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
-# H200, B200 and B300; append ":n" for several of them.
+# Valid values include T4, L4, A10, L40S, A100, A100-40GB, A100-80GB,
+# RTX-PRO-6000, H100, H100!, H200, B200, B200+ and B300; append ":n" for
+# several of them. H100! / A100-40GB / B200 pin the SKU against Modal's
+# automatic upgrades (H100→H200, A100→A100-80GB, B200→B300).
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
 
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
-# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4.
+# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4. Modal B300 reports
+# compute capability 10.3; the survey image still bakes sm_100, which ran.
 GPU_ARCH = {
     "T4": "75", "L4": "89", "L40S": "89", "A10": "86", "A10G": "86",
-    "A100": "80", "A100-80GB": "80", "H100": "90", "H200": "90",
-    "B200": "100", "B300": "100", "RTX-PRO-6000": "120",
+    "A100": "80", "A100-40GB": "80", "A100-80GB": "80",
+    "H100": "90", "H100!": "90", "H200": "90",
+    "B200": "100", "B200+": "100", "B300": "100", "RTX-PRO-6000": "120",
 }
 ALL_ARCHES = ("80", "89", "90", "100", "120")
 
@@ -171,7 +175,10 @@ def archesFor(gpu):
     GPU can run.  An unrecognised name falls back to the full set rather than
     guessing, since a missing architecture is a runtime failure, not a slow
     build."""
-    arch = GPU_ARCH.get(gpu.split(":")[0].strip())
+    key = gpu.split(":")[0].strip()
+    arch = GPU_ARCH.get(key)
+    if arch is None and key.endswith(("!", "+")):
+        arch = GPU_ARCH.get(key.rstrip("!+"))
     return (arch,) if arch else ALL_ARCHES
 
 
