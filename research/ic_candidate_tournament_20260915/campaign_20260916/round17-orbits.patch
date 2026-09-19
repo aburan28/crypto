@@ -1,0 +1,61 @@
+diff -ruN -x target -x '*.log' a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-17 16:59:10.844994097 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-18 09:34:07.557441741 +0000
+@@ -480,10 +480,14 @@
+     let (accepted, duplicates, solve_attempts) = ic.accounting();
+     let trials = ic.trials();
+     let (table_rows, table_rows_possible, table_entries, scan_block) = ic.table_shape();
+-    let mut out = String::with_capacity(16 * 1024 + 24 * ic.base_words().len());
+-    let mut base = String::with_capacity(24 * ic.base_words().len());
++    // The certificate names the base by its orbit representatives; the
++    // checker expands them (oracle.py `factor_base_orbits`). Same base, same
++    // relation indices, 2n times fewer points to format and to write.
++    let reps = ic.orbit_representatives();
++    let mut out = String::with_capacity(8 * 1024 + 24 * reps.len());
++    let mut base = String::with_capacity(24 * reps.len());
+     base.push('[');
+-    for (i, &p) in ic.base_words().iter().enumerate() {
++    for (i, &p) in reps.iter().enumerate() {
+         if i > 0 { base.push(','); }
+         push_point(&mut base, p);
+     }
+@@ -514,7 +518,7 @@
+         push_u64(&mut out, expected_columns as u64);
+         out.push_str(",\"relations\":");
+         out.push_str(&rels);
+-        out.push_str(",\"factor_base\":");
++        out.push_str(",\"factor_base_orbits\":");
+         out.push_str(&base);
+         out.push_str(",\"rejected_relations\":0}");
+         return Ok(Report::Text(out, false));
+@@ -574,7 +578,7 @@
+         }
+         out.push('}');
+     }
+-    out.push_str("],\"factor_base\":");
++    out.push_str("],\"factor_base_orbits\":");
+     out.push_str(&base);
+     out.push_str(",\"relations\":");
+     out.push_str(&rels);
+diff -ruN -x target -x '*.log' a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-17 16:59:10.842816387 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-18 09:34:07.557021529 +0000
+@@ -1289,6 +1289,18 @@
+         self.points.iter().map(|p| (p.x, p.y)).collect()
+     }
+ 
++    /// One representative point per signed Frobenius orbit, in orbit order:
++    /// entry `o` is `points[index(o, 0, false)]`, from which the whole base
++    /// regenerates as `+Frob^k(R), -Frob^k(R)` for `k < n`. The checker
++    /// performs that expansion itself, so a report carrying these instead of
++    /// the full base names the same base with `2n` times fewer points.
++    pub fn orbit_representatives(&self) -> Vec<(u64, u64)> {
++        (0..self.columns.len())
++            .map(|o| self.points[self.index(o as u32, 0, false)])
++            .map(|p| (p.x, p.y))
++            .collect()
++    }
++
+     #[inline]
+     fn index(&self, orbit: u32, k: u32, negated: bool) -> usize {
+         (orbit as usize) * 2 * self.n as usize + 2 * k as usize + usize::from(negated)
