@@ -5,6 +5,7 @@
 #ifndef GPU_ECC_BSGS_HOST_HPP
 #define GPU_ECC_BSGS_HOST_HPP
 
+#include <array>
 #include <cstdio>
 #include <cstring>
 #include <vector>
@@ -168,17 +169,24 @@ struct BsgsChains {
     std::vector<bsgs_cand> cand;
     uint32_t cand_count = 0;
     uint32_t overflow = 0;
+    uint32_t stop = 0;
 
-    void bind(bsgs_ctx &c, uint32_t T, uint32_t W, std::vector<uint64_t> &table, uint32_t cand_cap) {
+    /* `early` binds the early-exit flag; pass 0 to leave it null, which
+     * makes the steppers run every iteration of every launch.  The
+     * equivalence tests do that so the two steppers stay comparable
+     * step for step. */
+    void bind(bsgs_ctx &c, uint32_t T, uint32_t W, std::vector<uint64_t> &table,
+              uint32_t cand_cap, int early = 1) {
         uint32_t n = T * W;
         X.assign(8 * (size_t)n, 0); Y.assign(8 * (size_t)n, 0);
         inf.assign(n, 1); pos.assign(n, 0);
         cand.resize(cand_cap);
-        cand_count = 0; overflow = 0;
+        cand_count = 0; overflow = 0; stop = 0;
         c.X = X.data(); c.Y = Y.data(); c.inf = inf.data(); c.pos = pos.data();
         c.table = table.data();
         c.overflow = &overflow;
         c.cand = cand.data(); c.cand_count = &cand_count; c.cand_cap = cand_cap;
+        c.stop = early ? &stop : nullptr;
     }
 };
 
@@ -198,6 +206,18 @@ struct BsgsStats {
     uint32_t false_candidates = 0;        /* hits that failed verification */
     unsigned long long table_entries = 0;
 };
+
+/* Chain-steps actually executed: every chain's index has advanced from
+ * its start by exactly the number of steps it took, early exit and
+ * past-the-end stepping included.  Counting `rounds * iters * nchains`
+ * instead would charge a launch that exited after one iteration for all
+ * of them, which is the overcount the early exit exists to remove. */
+inline unsigned long long bsgs_steps_taken(const bsgs_ctx &c) {
+    unsigned long long total = 0;
+    uint32_t n = bsgs_nchains(c);
+    for (uint32_t i = 0; i < n; i++) total += c.pos[i] - bsgs_chain_start(c, i);
+    return total;
+}
 
 /* Group operations a seed costs: one double-and-add per chain, one
  * inversion per thread (batched normalisation). */
@@ -223,12 +243,28 @@ inline void bsgs_cpu_seed(const bsgs_ctx &c, BsgsStats &st) {
     bsgs_account_seed(c, st);
 }
 
-/* One round: every thread runs `iters` steps, as one kernel launch does. */
+/* One round of `iters` steps, as one kernel launch is.
+ *
+ * Threads advance in lockstep -- every thread takes iteration `it` before
+ * any takes `it + 1` -- because that is what the device does, and it is
+ * what makes the early-exit poll mean the same thing here as there: the
+ * flag is read once per iteration by all chains together, so the work
+ * done past the hit is bounded by one iteration across the whole grid
+ * rather than by one launch per thread.  Running each thread to
+ * completion in turn instead would leave a host-only overshoot of
+ * `iters` steps for every thread dispatched before the one that hits,
+ * which is an artefact of the emulation and not of the algorithm.
+ *
+ * Both steppers are driven from the same loop, so they stay comparable
+ * step for step with the flag bound or null. */
 template <int W>
 inline void bsgs_cpu_round(const bsgs_ctx &c, uint32_t iters, int use_ref) {
-    for (uint32_t t = 0; t < c.nthreads; t++) {
-        if (use_ref) { for (uint32_t it = 0; it < iters; it++) bsgs_step_ref(c, t); }
-        else bsgs_run_batch<W>(c, t, iters);
+    for (uint32_t it = 0; it < iters; it++) {
+        if (it && c.stop && *c.stop) break;
+        for (uint32_t t = 0; t < c.nthreads; t++) {
+            if (use_ref) bsgs_step_ref(c, t);
+            else bsgs_run_batch<W>(c, t, 1);
+        }
     }
 }
 
@@ -243,10 +279,10 @@ inline void bsgs_cpu_build_table(BsgsHost &h, bsgs_ctx &c, uint32_t iters, BsgsS
                                  int use_ref = 0) {
     h.fill_baby_ctx(c);
     bsgs_cpu_seed<W>(c, st);
-    while (!bsgs_all_done(c)) {
-        bsgs_cpu_round<W>(c, iters, use_ref);
-        st.baby_steps += (unsigned long long)iters * bsgs_nchains(c);
-    }
+    /* The baby phase inserts, never emits, so nothing raises the flag and
+     * every chain runs to its end. */
+    while (!bsgs_all_done(c)) bsgs_cpu_round<W>(c, iters, use_ref);
+    st.baby_steps += bsgs_steps_taken(c);
     st.table_entries = bsgs_table_count(c.table, c.table_bits);
 }
 
@@ -256,18 +292,61 @@ inline bool bsgs_cpu_solve(BsgsHost &h, bsgs_ctx &c, uint32_t iters, uint32_t k_
     h.fill_giant_ctx(c);
     bsgs_cpu_seed<W>(c, st);
     uint32_t consumed = 0;
+    bool solved = false;
     while (!bsgs_all_done(c)) {
         bsgs_cpu_round<W>(c, iters, use_ref);
-        st.giant_steps += (unsigned long long)iters * bsgs_nchains(c);
         st.rounds++;
         uint32_t cnt = *c.cand_count < c.cand_cap ? *c.cand_count : c.cand_cap;
         while (consumed < cnt) {
             st.candidates++;
-            if (h.verify(c.cand[consumed++], k_out)) return true;
+            if (h.verify(c.cand[consumed++], k_out)) { solved = true; break; }
             st.false_candidates++;
         }
+        if (solved) break;
+        /* Every candidate of the round was false, so the flag that
+         * stopped the chains was a false alarm: clear it and relaunch.
+         * Each chain resumes from its own `pos`, so the sweep continues
+         * exactly where it left off. */
+        if (c.stop) *c.stop = 0;
     }
-    return false;
+    st.giant_steps += bsgs_steps_taken(c);
+    return solved;
+}
+
+/* Solve several targets against one already-built table.
+ *
+ * The table is a function of G and the plan alone, so it is built once and
+ * every further target costs only its giant phase.  For a uniform target
+ * that is ~0.5*sqrt(width) additions against the ~1.0 a cold solve pays,
+ * so per-target cost halves as soon as the second target is asked for and
+ * keeps falling towards the giant phase's own cost.  This is the mode to
+ * use for a batch of known-range keys, or for the sub-problems of a
+ * Pohlig-Hellman decomposition, which all share one group.
+ *
+ * `ks` receives one 8-limb scalar per target; `ok` one flag per target.
+ * The chain buffers are rebound per target because a solve leaves them
+ * wherever it stopped. */
+template <int W>
+inline uint32_t bsgs_cpu_solve_many(BsgsHost &h, BsgsChains &buf, bsgs_ctx &c,
+                                    std::vector<uint64_t> &table,
+                                    const std::vector<affine_pt> &targets, uint32_t iters,
+                                    std::vector<std::array<uint32_t, 8>> &ks,
+                                    std::vector<char> &ok, BsgsStats &st,
+                                    uint32_t cand_cap = 1024) {
+    ks.assign(targets.size(), {});
+    ok.assign(targets.size(), 0);
+    uint32_t solved = 0;
+    for (size_t t = 0; t < targets.size(); t++) {
+        buf.bind(c, h.plan.nthreads, W, table, cand_cap);
+        h.set_target(targets[t]);
+        uint32_t k[8];
+        if (bsgs_cpu_solve<W>(h, c, iters, k, st)) {
+            for (int l = 0; l < 8; l++) ks[t][l] = k[l];
+            ok[t] = 1;
+            solved++;
+        }
+    }
+    return solved;
 }
 
 #endif /* GPU_ECC_BSGS_HOST_HPP */

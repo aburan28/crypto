@@ -35,12 +35,12 @@ though — see "How this is tested" below.
 | `test_bsgs.cpp` | BSGS verification harness — same idea, for `bsgs.cuh` |
 | `ptx_stats.sh` | Static instruction/occupancy analysis with no GPU present |
 | `ptx_asm_check.py` | Interprets the `FP_PTX` inline assembly and checks it against the portable path |
-| `modal_app.py` | Runs `bench` on a rented GPU via Modal — the selftest, throughput, and the launch-bounds sweep |
+| `modal_app.py` | Runs `bench` on a rented GPU via Modal — the selftest, throughput, the launch-bounds sweep and the BSGS solve |
 
 ## Build and test
 
 ```bash
-make test          # three CPU test suites, plus the inline-asm check
+make test          # six CPU test suites, plus the inline-asm check
 make ptxcheck      # just the inline-asm check
 make bench         # CUDA benchmark binary (needs nvcc)
 make bench ARCH=sm_100    # datacenter Blackwell; sm_120 for RTX 50-series
@@ -73,7 +73,8 @@ that is also the differential test the assembly ultimately needs, and the
 only one that closes the gap the script leaves open.
 
 On a GPU, `./bench bsgs --wbits 44` builds the table for a 2^44-wide
-interval on the device and solves a planted log in it; `selftest` also
+interval on the device and solves a planted log in it, and `--targets 16`
+amortises that table over sixteen of them; `selftest` also
 covers the BSGS kernels against the host driver.
 
 ### Without a GPU of your own
@@ -232,6 +233,16 @@ Both are rows of the Galbraith–Wang–Zhang table that the Rust
 #2 there); this is the same arithmetic laid out for a machine with a hundred
 thousand threads and one memory system.
 
+The same structure is also ported to the CPU, in Rust, as
+[`src/cryptanalysis/bsgs_fast.rs`](../../src/cryptanalysis/bsgs_fast.rs):
+single-word Montgomery arithmetic, the same x-keyed flat table, the same
+batched inversion, chains handed to `rayon` instead of to warps.  It runs
+on the same toy40 curve as the tests here, so its numbers and these sit in
+one table.  Measured there: 37-49 Msteps/s on four threads, `S = 1.03`
+cold and `0.55` amortised, and **6.3x to 10.9x** the general `BigUint`
+implementation on the same instances (`cargo run --release --example
+bsgs_fast_bench`).
+
 ### What maps onto the GPU
 
 - **Independent chains.** Both phases are sets of chains that each add one
@@ -270,9 +281,23 @@ thousand threads and one memory system.
   split substitutes a unit denominator for those steps so the shared
   inversion stays valid, and the test suite drives chains through every
   one of them.
-- **Table reuse.** The table depends only on `G`, `x0`'s width and `m`, so
-  many targets in the same interval share one build; the toy suite solves
-  21 targets against one table.
+- **Early exit.** One flag in device memory, raised by the chain that
+  emits a candidate and polled by every chain once per iteration (an
+  L2-resident load).  Without it a launch always runs all its iterations,
+  so a hit in the first one still costs `iters x chains` steps.
+- **Table reuse, as a mode.** The table depends only on `G`, `x0`'s width
+  and `m`, so many targets in the same interval share one build:
+  `./bench bsgs --targets N` pays for it once and every further target
+  costs only its giant phase.  Per-target cost falls from `~1.0` to the
+  giant phase's own `~0.5` -- measured at **0.56 over 12 targets**
+  against **2.13** for a single cold solve on the toy curve.
+- **`W` is a free parameter.** `ptxas` gives every `W` from 4 to 32 the
+  same 94 registers and the same 640 threads/SM, so the trade is purely
+  arithmetic against per-thread stack: 39.8 multiplies per step at
+  `W = 8` with a 1320 B frame, 22.9 at `W = 16` with 2640 B, 14.4 at
+  `W = 32` with 5280 B.  The default is 16; which point wins depends on
+  whether local-memory traffic or arithmetic binds, and only a device
+  settles that (`--w`).
 
 ### How it is tested
 
@@ -321,10 +346,17 @@ emulation of the kernels, 128 chains, every answer verified as `kG == Q`.
 | rho, negation map (reference, `test_toy_mont`) | — | 0 | ops / W | **0.85** | 1.00 | — | 1/1 |
 | rho, no negation map (`test_toy_mont`) | — | 0 | ops / W | 1.42 | 1.67 | — | 1/1 |
 | BSGS textbook layout, `neg_map=0`, reference stepper | baseline | 0.707 | = ops | 1.44 (predicted 1.41) | 1.69 | 1.02 vs `√2` | 21/21 |
-| BSGS textbook layout, `neg_map=0`, batched `W = 8` | engineering | 0.707 | ops / 8 | 1.44 (bit-identical) | 1.69 | 1.02 vs `√2` | 21/21 |
-| BSGS negation layout, `neg_map=1`, batched `W = 8` | `√2` of the layout | 0.500 | ops / 8 | **1.07** (predicted 1.00) | 1.26 | 1.07 vs `1.0` | 21/21 |
-| … same, table amortised (giant phase only, per further target) | — | 0.500 | ops / 8 | 0.56 (predicted 0.50) | 0.66 | — | 21/21 |
-| … same, textbook layout amortised | — | 0.707 | ops / 8 | 0.73 (predicted 0.71) | 0.86 | — | 21/21 |
+| BSGS textbook layout, `neg_map=0`, batched `W = 16` | engineering | 0.707 | ops / 16 | 1.44 (bit-identical) | 1.69 | 1.02 vs `√2` | 21/21 |
+| BSGS negation layout, `neg_map=1`, batched `W = 16` | `√2` of the layout | 0.500 | ops / 16 | **1.07** (predicted 1.00) | 1.26 | 1.07 vs `1.0` | 21/21 |
+| … same, giant phase only — the limit a batch tends to | multi-target | 0.500 | ops / 16 | **0.56** (predicted 0.50) | 0.66 | — | 8/8 |
+| … textbook layout, giant phase only | multi-target | 0.707 | ops / 16 | 0.72 (predicted 0.71) | 0.85 | — | 8/8 |
+
+The last two rows are the giant phase alone, averaged over the same 8
+random targets: that is what a further target costs once a table exists,
+and so the limit per-target cost falls to as a batch grows.  `test_multi_target`
+runs that as an actual batch — one table, 12 targets on a `2^26` interval —
+and measures **0.560 per target against 2.131 for a single cold solve**,
+which is the same limit reached from the other side.
 
 "Correct" counts the 13 seam targets plus the 8 random ones per layout, each
 verified as `kG == Q`; the 8 random rows are the only ones in the mean,
@@ -332,10 +364,18 @@ since a target at `x = 0` or one that wraps mod `n` is found in the first
 launch and says nothing about cost. The spread on the random rows is the
 uniform giant index: `S` ran from 0.55 to 1.46 under the negation layout
 (0.83 to 2.06 textbook), which is the tail a deterministic method has and
-rho's distribution does not. The giant phase overshoots by up to one launch
-(`iters × chains`, 1% of `√n` here) because the host verifies candidates
-between launches; a device-side stop flag would trim that and is not worth
-its synchronisation at this size.
+rho's distribution does not. The giant phase used to overshoot by up to a full
+launch (`iters × chains`) because the host only verifies candidates
+between launches.  It no longer does: a device-side flag, raised the
+moment a candidate is emitted and polled by every chain once per
+iteration, bounds the work past the hit by one iteration across the grid.
+A candidate is only *probably* the answer, so the host clears the flag and
+relaunches when verification rejects one, and each chain resumes from its
+own stored index -- nothing skipped, nothing repeated.  The test suite
+pins this down by solving one instance at `iters` of 4, 64 and 512 and
+requiring the same step count: **2944 at all three**.  The launch size is
+therefore a free knob, set for launch overhead and the host round-trip
+alone, which is why it now defaults to 256.
 
 The chips follow §3 of the rule: the batched stepper is *engineering*
 against the reference stepper (`S` unchanged, inversions cut by `W`), the

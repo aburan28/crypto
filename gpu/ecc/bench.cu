@@ -11,7 +11,7 @@
  * rho options:  --walks N --iters N --w W --rbits R --dp BITS --neg 0|1
  *               --variant reg|lowmem|ref  --solve
  * bsgs options: --walks N (threads) --iters N --w W --neg 0|1 --wbits B
- *               --variant reg|ref
+ *               --variant reg|ref --targets N
  *
  * Everything the kernels compute is checked against the same host code that
  * test_cpu.cpp verifies against the Python reference, so `selftest` is a
@@ -437,6 +437,9 @@ struct DevBsgs {
     bsgs_ctx c{};
     uint64_t *table = nullptr;
     uint32_t nchains = 0;
+    /* Non-volatile alias of c.stop, for the allocator and cudaMemset;
+     * the kernels see the volatile one. */
+    uint32_t *stop_mem = nullptr;
 
     void alloc_chains(uint32_t T, uint32_t W, uint32_t cand_cap) {
         nchains = T * W;
@@ -447,6 +450,8 @@ struct DevBsgs {
         CU(cudaMalloc(&c.overflow, 4));
         CU(cudaMalloc(&c.cand, (size_t)cand_cap * sizeof(bsgs_cand)));
         CU(cudaMalloc(&c.cand_count, 4));
+        CU(cudaMalloc(&stop_mem, 4));
+        c.stop = stop_mem;
         c.cand_cap = cand_cap;
         reset_counters();
     }
@@ -460,6 +465,21 @@ struct DevBsgs {
     void reset_counters() {
         CU(cudaMemset(c.overflow, 0, 4));
         CU(cudaMemset(c.cand_count, 0, 4));
+        clear_stop();
+    }
+    /* Clear the early-exit flag: after the host has rejected every
+     * candidate of a round, so the chains resume; the kernel never
+     * clears it itself. */
+    void clear_stop() { if (stop_mem) CU(cudaMemset(stop_mem, 0, 4)); }
+    /* Total chain-steps executed, read back from the chain positions --
+     * exact under early exit, where a launch need not run every
+     * iteration.  Mirrors bsgs_steps_taken on the host. */
+    unsigned long long steps_taken() {
+        std::vector<uint64_t> pos(nchains);
+        CU(cudaMemcpy(pos.data(), c.pos, (size_t)nchains * 8, cudaMemcpyDeviceToHost));
+        unsigned long long total = 0;
+        for (uint32_t i = 0; i < nchains; i++) total += pos[i] - (uint64_t)i * c.chain_len;
+        return total;
     }
     uint32_t cand_count() {
         uint32_t n = 0;
@@ -484,6 +504,7 @@ struct DevBsgs {
     void release() {
         cudaFree(c.X); cudaFree(c.Y); cudaFree(c.inf); cudaFree(c.pos);
         cudaFree(c.overflow); cudaFree(c.cand); cudaFree(c.cand_count);
+        cudaFree(stop_mem);
         if (table) cudaFree(table);
     }
 };
@@ -506,13 +527,15 @@ static void bsgs_seed_w(DevBsgs &d, uint32_t T, uint32_t W) {
     if (W == 4) bsgs_launch_seed<4>(d, T);
     else if (W == 8) bsgs_launch_seed<8>(d, T);
     else if (W == 16) bsgs_launch_seed<16>(d, T);
-    else { fprintf(stderr, "unsupported --w %u (use 4, 8 or 16)\n", W); exit(1); }
+    else if (W == 32) bsgs_launch_seed<32>(d, T);
+    else { fprintf(stderr, "unsupported --w %u (use 4, 8, 16 or 32)\n", W); exit(1); }
 }
 
 static void bsgs_run_w(DevBsgs &d, uint32_t T, uint32_t W, uint32_t iters, bool ref) {
     if (W == 4) bsgs_launch_run<4>(d, T, iters, ref);
     else if (W == 8) bsgs_launch_run<8>(d, T, iters, ref);
-    else bsgs_launch_run<16>(d, T, iters, ref);
+    else if (W == 16) bsgs_launch_run<16>(d, T, iters, ref);
+    else bsgs_launch_run<32>(d, T, iters, ref);
 }
 
 /* Device state -> host vectors, for comparison with the CPU driver. */
@@ -553,11 +576,16 @@ static void selftest_bsgs() {
     BsgsHost h;
     h.setup(G, p);
 
-    /* host table */
+    /* Host and device must run the *same* number of steps for the state
+     * to be comparable bit for bit, so the early-exit flag is unbound on
+     * both sides here: device thread scheduling and the host's lockstep
+     * emulation would otherwise stop the sweep at different points.  The
+     * end-to-end solve at the bottom turns it back on, which is the mode
+     * the bench actually runs in. */
     std::vector<uint64_t> htable = bsgs_new_table(p.table_bits);
     bsgs_ctx hc{};
     BsgsChains hb;
-    hb.bind(hc, T, W, htable, 1024);
+    hb.bind(hc, T, W, htable, 1024, /*early=*/0);
     BsgsStats hs;
     bsgs_cpu_build_table<W>(h, hc, iters, hs);
 
@@ -565,6 +593,8 @@ static void selftest_bsgs() {
     DevBsgs d;
     d.alloc_chains(T, W, 1024);
     d.alloc_table(p.table_bits);
+    volatile uint32_t *stop_buf = d.c.stop;   /* restored for the end-to-end solve */
+    d.c.stop = nullptr;
     h.fill_baby_ctx(d.c);
     bsgs_seed_w(d, T, W);
     for (uint32_t r = 0; r < bsgs_rounds(p.Lb, iters); r++) bsgs_run_w(d, T, W, iters, false);
@@ -591,7 +621,7 @@ static void selftest_bsgs() {
 
     bsgs_ctx gc{};
     BsgsChains gb;
-    gb.bind(gc, T, W, htable, 1024);
+    gb.bind(gc, T, W, htable, 1024, /*early=*/0);
     h.fill_giant_ctx(gc);
     BsgsStats gs;
     bsgs_cpu_seed<W>(gc, gs);
@@ -625,7 +655,11 @@ static void selftest_bsgs() {
         bsgs_fetch(d, X, Y, inf, pos);
         CHECK(X == gb.X && Y == gb.Y && inf == gb.inf && pos == gb.pos, "bsgs reference kernel state");
     }
-    /* finish: run rounds until a candidate verifies */
+    /* finish: run rounds until a candidate verifies, with early exit on --
+     * the mode the bench runs in, and the one the solve path must work
+     * under.  Candidates rejected by the host clear the flag and the
+     * chains resume from where they stopped. */
+    d.c.stop = stop_buf;
     d.reset_counters();
     bsgs_seed_w(d, T, W);
     uint32_t k[8], consumed = 0;
@@ -640,6 +674,7 @@ static void selftest_bsgs() {
             CU(cudaMemcpy(dc.data(), d.c.cand + consumed, dc.size() * sizeof(bsgs_cand), cudaMemcpyDeviceToHost));
             for (auto &cd : dc) { consumed++; if (h.verify(cd, k)) { ok = true; break; } }
         }
+        if (!ok) d.clear_stop();
     }
     CHECK(ok, "bsgs: planted interval log not recovered on the device");
     if (ok) CHECK(Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(k)), "bsgs: recovered k != planted secret");
@@ -648,7 +683,16 @@ static void selftest_bsgs() {
 }
 
 struct BsgsOpts {
-    uint32_t threads = 0, iters = 64, w = 8, neg = 1, wbits = 40;
+    /* W = 16: ptxas gives every W from 4 to 32 the same 94 registers and
+     * the same 640 threads/SM, so the trade is purely arithmetic against
+     * per-thread stack -- 22.9 multiplies per step at 2640 B against 39.8
+     * at 1320 B for W = 8.  Sweep it on real hardware (--w) against the
+     * local-memory traffic the stack costs; there is no offline answer.
+     *
+     * iters = 256: with the early-exit flag the launch size no longer
+     * costs anything past the hit, so it is set for launch overhead and
+     * the host round-trip alone. */
+    uint32_t threads = 0, iters = 256, w = 16, neg = 1, wbits = 40, targets = 1;
     std::string variant = "reg";
 };
 
@@ -682,7 +726,7 @@ static void bench_bsgs(BsgsOpts o) {
         }
     }
     affine_pt G = Curve::generator();
-    affine_pt Q = Curve::to_affine(Curve::scalar_mul(G, xs, 0));
+    (void)xs;   /* the per-target loop below re-derives each target from x0 */
 
     BsgsPlan p = bsgs_plan(width, o.neg, T, W, x0);
     BsgsHost h;
@@ -714,7 +758,7 @@ static void bench_bsgs(BsgsOpts o) {
     tm.start();
     for (uint32_t rd = 0; rd < rounds_b; rd++) bsgs_run_w(d, T, W, o.iters, ref);
     double t_baby = tm.stop();
-    st.baby_steps = (unsigned long long)rounds_b * o.iters * T * W;
+    st.baby_steps = d.steps_taken();   /* exact, from the chain positions */
     bsgs_account_seed(d.c, st);
     unsigned long long entries = d.table_count();
     printf("  baby:  %llu entries in %.3f s (+%.3f s seed): %.3f Gstep/s, %.1f ns/step, overflow %u\n",
@@ -722,53 +766,92 @@ static void bench_bsgs(BsgsOpts o) {
            d.overflow());
     if (entries != p.m - 1) printf("  WARNING: expected %llu entries\n", (unsigned long long)(p.m - 1));
 
-    /* giant phase, stopping at the first verified candidate */
-    h.set_target(Q);
-    d.reset_counters();
-    h.fill_giant_ctx(d.c);
-    tm.start();
-    bsgs_seed_w(d, T, W);
-    double t_gseed = tm.stop();
-    bsgs_account_seed(d.c, st);
-    uint32_t k[8], consumed = 0;
-    bool ok = false;
-    double t_giant = 0;
-    uint32_t rounds_g = bsgs_rounds(p.Lg, o.iters);
-    for (uint32_t rd = 0; rd < rounds_g && !ok; rd++) {
-        tm.start();
-        bsgs_run_w(d, T, W, o.iters, ref);
-        t_giant += tm.stop();
-        st.giant_steps += (unsigned long long)o.iters * T * W;
-        st.rounds++;
-        uint32_t cnt = d.cand_count();
-        if (cnt > d.c.cand_cap) cnt = d.c.cand_cap;
-        if (cnt > consumed) {
-            std::vector<bsgs_cand> dc(cnt - consumed);
-            CU(cudaMemcpy(dc.data(), d.c.cand + consumed, dc.size() * sizeof(bsgs_cand), cudaMemcpyDeviceToHost));
-            for (auto &cd : dc) {
-                consumed++; st.candidates++;
-                if (h.verify(cd, k)) { ok = true; break; }
-                st.false_candidates++;
+    /* Giant phase, once per target.  The table is a function of G and the
+     * plan alone, so every target after the first costs only its giant
+     * phase -- that is what --targets measures. */
+    std::vector<unsigned long long> per_target;
+    double t_giant_all = 0, t_gseed_all = 0;
+    uint32_t solved = 0;
+    unsigned long long giant_all = 0;
+    for (uint32_t tgt = 0; tgt < o.targets; tgt++) {
+        uint32_t xs_t[8];
+        memcpy(xs_t, x0, sizeof(xs_t));
+        uint64_t rt = (tgt == 0) ? r : (rho_splitmix64(seed) % width);
+        {
+            uint64_t carry = rt;
+            for (int l = 0; l < 8 && carry; l++) {
+                uint64_t s = (uint64_t)xs_t[l] + (carry & 0xFFFFFFFFu);
+                xs_t[l] = (uint32_t)s;
+                carry = (carry >> 32) + (s >> 32);
             }
         }
+        affine_pt Qt = Curve::to_affine(Curve::scalar_mul(G, xs_t, 0));
+        h.set_target(Qt);
+        d.reset_counters();
+        h.fill_giant_ctx(d.c);
+        tm.start();
+        bsgs_seed_w(d, T, W);
+        t_gseed_all += tm.stop();
+        bsgs_account_seed(d.c, st);
+
+        uint32_t k[8], consumed = 0;
+        bool ok = false;
+        uint32_t rounds_g = bsgs_rounds(p.Lg, o.iters);
+        for (uint32_t rd = 0; rd < rounds_g && !ok; rd++) {
+            tm.start();
+            bsgs_run_w(d, T, W, o.iters, ref);
+            t_giant_all += tm.stop();
+            st.rounds++;
+            uint32_t cnt = d.cand_count();
+            if (cnt > d.c.cand_cap) cnt = d.c.cand_cap;
+            if (cnt > consumed) {
+                std::vector<bsgs_cand> dc(cnt - consumed);
+                CU(cudaMemcpy(dc.data(), d.c.cand + consumed, dc.size() * sizeof(bsgs_cand),
+                              cudaMemcpyDeviceToHost));
+                for (auto &cd : dc) {
+                    consumed++; st.candidates++;
+                    if (h.verify(cd, k)) { ok = true; break; }
+                    st.false_candidates++;
+                }
+            }
+            if (ok) break;
+            /* Every candidate was false, so the flag that stopped the
+             * chains was a false alarm: clear it and relaunch.  Each chain
+             * resumes from its own stored position. */
+            d.clear_stop();
+        }
+        unsigned long long steps = d.steps_taken();
+        giant_all += steps;
+        per_target.push_back(steps);
+        if (ok && Fn::eq(Fn::from_limbs(xs_t), Fn::from_limbs(k))) {
+            solved++;
+            if (o.targets == 1) {
+                printf("  SOLVED: k = 0x");
+                for (int l = 7; l >= 0; l--) printf("%08x", k[l]);
+                printf("\n");
+            }
+        } else {
+            printf("  target %u: %s\n", tgt,
+                   ok ? "WRONG ANSWER" : "not solved, the giant phase ran to the end");
+            failures++;
+        }
     }
-    printf("  giant: %llu steps in %llu launches, %.3f s (+%.3f s seed): %.3f Gstep/s, %.1f ns/step; "
-           "%u candidates, %u false\n", st.giant_steps, st.rounds, t_giant, t_gseed,
-           st.giant_steps / t_giant / 1e9, t_giant / st.giant_steps * 1e9, st.candidates, st.false_candidates);
-    if (ok) {
-        bool right = Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(k));
-        printf("  %s: k = 0x", right ? "SOLVED" : "WRONG ANSWER");
-        for (int l = 7; l >= 0; l--) printf("%08x", k[l]);
-        printf("\n");
-        if (!right) failures++;
-    } else {
-        printf("  not solved: the giant phase ran to the end without a verified hit\n");
-        failures++;
-    }
-    unsigned long long ops = st.baby_steps + st.giant_steps + st.seed_ops + st.candidates;
-    printf("  S = %.3f  (ops / sqrt(width): baby %.3f + giant %.3f + seed %.4f), "
-           "wall %.3f s\n", ops / sqrt_w, st.baby_steps / sqrt_w, st.giant_steps / sqrt_w,
-           st.seed_ops / sqrt_w, t_seed + t_baby + t_gseed + t_giant);
+    st.giant_steps = giant_all;
+    printf("  giant: %llu steps over %u target(s) in %llu launches, %.3f s (+%.3f s seed): "
+           "%.3f Gstep/s, %.1f ns/step; %u candidates, %u false\n",
+           st.giant_steps, o.targets, st.rounds, t_giant_all, t_gseed_all,
+           st.giant_steps / t_giant_all / 1e9, t_giant_all / st.giant_steps * 1e9,
+           st.candidates, st.false_candidates);
+    printf("  %u/%u targets solved and verified\n", solved, o.targets);
+
+    double table_ops = (double)st.baby_steps + (double)st.seed_ops;
+    double cold = (table_ops + (double)st.giant_steps / o.targets) / sqrt_w;
+    double amortised = (table_ops + (double)st.giant_steps) / o.targets / sqrt_w;
+    printf("  S = %.3f per target cold (one table, one target); ", cold);
+    if (o.targets > 1)
+        printf("%.3f amortised over %u targets; ", amortised, o.targets);
+    printf("giant phase alone %.3f\n", (double)st.giant_steps / o.targets / sqrt_w);
+    printf("  wall %.3f s total\n", t_seed + t_baby + t_gseed_all + t_giant_all);
     d.release();
 }
 
@@ -787,6 +870,7 @@ int main(int argc, char **argv) {
         else if (a == "--dp") o.dpbits = next();
         else if (a == "--neg") o.neg = b.neg = next();
         else if (a == "--wbits") b.wbits = next();
+        else if (a == "--targets") b.targets = next();
         else if (a == "--variant" && i + 1 < argc) o.variant = b.variant = argv[++i];
         else if (a == "--solve") o.solve = true;
         else { fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }

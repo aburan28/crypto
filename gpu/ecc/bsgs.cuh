@@ -90,6 +90,29 @@ struct bsgs_ctx {
     bsgs_cand *cand;        /* giant phase output */
     uint32_t *cand_count;
     uint32_t cand_cap;
+
+    /* Early exit.  Set by the giant phase the moment a candidate is
+     * emitted, polled by every chain once per iteration.  A candidate is
+     * only *probably* the answer -- the host verifies it -- so this is a
+     * hint, not a result: if verification rejects every candidate of the
+     * round the host clears the flag and relaunches, and each chain
+     * resumes from its own stored `pos`, which is exactly where it
+     * stopped.  Nothing is skipped and nothing is repeated.
+     *
+     * Without it a launch always runs its full `iters` steps on every
+     * chain, so a hit in the first iteration still costs iters*nchains
+     * steps.  With it the overshoot is bounded by one iteration, which is
+     * what lets `iters` be large enough (hundreds) for the launch overhead
+     * and the host round-trip to disappear.  Null disables the check, and
+     * the steppers then behave exactly as before -- which is how the
+     * equivalence tests compare them.
+     *
+     * `volatile` is load-bearing: the flag is written by *other* threads,
+     * and a plain load in the polling loop is one the compiler may hoist
+     * into a register and never repeat, which would leave the exit
+     * silently dead.  The cost is one real load per iteration, which is
+     * what the poll is meant to be. */
+    volatile uint32_t *stop;
 };
 
 FP_HD uint32_t bsgs_nchains(const bsgs_ctx &c) { return c.nthreads * c.chains_per_thread; }
@@ -119,23 +142,29 @@ FP_HD void bsgs_store(const bsgs_ctx &c, uint32_t idx, const affine_pt &P) {
 
 /* ---- hash table -------------------------------------------------------- */
 
-/* 64-bit hash of an x-coordinate (internal representation).  A multiply /
- * xor-shift fold over the limbs followed by a finaliser; the low bits pick
- * the slot and the high 32 bits are the tag, so both halves need to be well
- * mixed even on toy curves whose upper limbs are all zero. */
+/* 64-bit hash of an x-coordinate (internal representation), from its low
+ * two limbs through the splitmix64 finaliser.
+ *
+ * Folding all eight limbs buys nothing: the output is 64 bits either way,
+ * so the collision probability is set by the *output* width, and the low
+ * 64 bits of x already carry at least min(64, log2 p) bits of entropy --
+ * the whole of it on a toy curve whose upper limbs are zero, and 64
+ * uniform bits on a 256-bit curve (canonical or Montgomery form alike).
+ * The other six rounds were hashing zeros or discarding entropy the
+ * finaliser then had to re-spread.  This runs the mixer once instead of
+ * nine times, which matters because the hash sits in the inner loop next
+ * to only a few dozen field multiplications.
+ *
+ * A full 64-bit collision costs one host verification and is rejected,
+ * never a wrong answer; the rate is unchanged from the eight-limb fold. */
 FP_HD uint64_t bsgs_hash_x(const fp256 &x) {
-    uint64_t h = 0x243F6A8885A308D3ull;
-#pragma unroll
-    for (int l = 0; l < 8; l++) {
-        h ^= x.v[l];
-        h *= 0x9E3779B97F4A7C15ull;
-        h ^= h >> 29;
-    }
-    h ^= h >> 32;
+    uint64_t h = (uint64_t)x.v[0] | ((uint64_t)x.v[1] << 32);
+    h ^= 0x243F6A8885A308D3ull;
+    h ^= h >> 30;
     h *= 0xBF58476D1CE4E5B9ull;
-    h ^= h >> 31;
+    h ^= h >> 27;
     h *= 0x94D049BB133111EBull;
-    h ^= h >> 32;
+    h ^= h >> 31;
     return h;
 }
 
@@ -195,6 +224,7 @@ inline uint64_t bsgs_table_count(const uint64_t *table, uint32_t bits) {
 /* ---- candidates ----------------------------------------------------- */
 
 FP_HD void bsgs_emit(const bsgs_ctx &c, uint64_t i, uint32_t j, uint32_t chain) {
+    if (c.stop) *c.stop = 1;       /* benign race: every writer stores 1 */
 #ifdef __CUDA_ARCH__
     uint32_t slot = atomicAdd(c.cand_count, 1u);
 #else
@@ -324,6 +354,10 @@ FP_HD void bsgs_run_batch(const bsgs_ctx &c, uint32_t t, uint32_t iters) {
     }
 
     for (uint32_t it = 0; it < iters; it++) {
+        /* One L2-resident load per thread per iteration, and only after
+         * the first: a chain that starts a launch with the flag already
+         * set still takes its step, so a resumed launch always advances. */
+        if (it && c.stop && *c.stop) break;
         if (c.giant) {
             uint64_t h[W], first[W];
             const uint64_t mask = bsgs_slot_mask(c.table_bits);
@@ -372,6 +406,10 @@ FP_HD void bsgs_step_batch(const bsgs_ctx &c, uint32_t t) {
  * measured against. */
 FP_HD void bsgs_step_ref(const bsgs_ctx &c, uint32_t t) {
     for (uint32_t w = 0; w < c.chains_per_thread; w++) {
+        /* The batched stepper polls between iterations, i.e. between
+         * whole sweeps of the W chains; this one is a single sweep per
+         * call, so the caller's loop is the matching granularity and
+         * nothing is polled inside it. */
         uint32_t idx = t + w * c.nthreads;
         affine_pt P;
         bsgs_load(c, idx, P);

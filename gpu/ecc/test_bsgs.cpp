@@ -145,10 +145,12 @@ static void test_steppers() {
     Phase ga, gb;
     for (Phase *ph : {&ga, &gb}) {
         ph->table = a.table;
-        ph->buf.bind(ph->ctx, T, W, ph->table, 64);
+        ph->buf.bind(ph->ctx, T, W, ph->table, 64, /*early=*/0);
         h.fill_giant_ctx(ph->ctx);
     }
-    /* run every chain to the end without stopping, then compare */
+    /* run every chain to the end without stopping, then compare: with the
+     * early-exit flag bound the sweep would halt at the first candidate
+     * and the two steppers would only be compared up to that point. */
     BsgsStats ta, tb;
     bsgs_cpu_seed<W>(ga.ctx, ta);
     bsgs_cpu_seed<W>(gb.ctx, tb);
@@ -420,6 +422,126 @@ static void test_interval() {
     }
 }
 
+
+/* ---------------------------------------------------------------------- *
+ * The early-exit flag makes the launch size a free tuning knob: a solve
+ * costs what the answer's position says it costs, not what the launch
+ * granularity rounds it up to.  Without the flag a launch of `iters`
+ * always runs all of them on every chain, so the same solve at iters=512
+ * would overshoot by up to 512*chains steps past the hit.  Here the two
+ * step counts must agree to within one iteration per chain.
+ * ---------------------------------------------------------------------- */
+static void test_iters_independence() {
+    if (ModN::bits() > 48) {
+        printf("[iters] skipped (group too large for a CPU-only run)\n");
+        return;
+    }
+    const uint32_t T = 8, W = 8;
+    const uint64_t width = 1ull << 26;
+    printf("[iters] solve cost is independent of the launch size\n");
+    affine_pt G = Curve::generator();
+    BsgsPlan p = bsgs_plan(width, 1, T, W);
+    BsgsHost h;
+    h.setup(G, p);
+    std::vector<uint64_t> table = bsgs_new_table(p.table_bits);
+    bsgs_ctx bc{};
+    BsgsChains bb;
+    bb.bind(bc, T, W, table, 16);
+    BsgsStats build;
+    bsgs_cpu_build_table<W>(h, bc, 64, build);
+    CHECK(build.table_entries == p.m - 1, "table entries");
+
+    std::mt19937_64 rng(4242);
+    uint64_t secret = rng() % width;
+    uint32_t xs[8] = {(uint32_t)secret, (uint32_t)(secret >> 32), 0, 0, 0, 0, 0, 0};
+    affine_pt Q = Curve::to_affine(Curve::scalar_mul(G, xs, 0));
+
+    unsigned long long prev = 0;
+    for (uint32_t iters : std::vector<uint32_t>{4, 64, 512}) {
+        bsgs_ctx gc{};
+        BsgsChains gb;
+        gb.bind(gc, T, W, table, 1024);
+        h.set_target(Q);
+        uint32_t k[8];
+        BsgsStats st;
+        bool ok = bsgs_cpu_solve<W>(h, gc, iters, k, st);
+        CHECK(ok && Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(k)), "iters=%u solve", iters);
+        /* Threads poll together, so the work past the hit is at most one
+         * iteration across the whole grid, whatever the launch size. */
+        unsigned long long slack = (unsigned long long)2 * T * W;
+        if (prev) {
+            unsigned long long lo = prev < st.giant_steps ? prev : st.giant_steps;
+            unsigned long long hi = prev < st.giant_steps ? st.giant_steps : prev;
+            CHECK(hi - lo <= slack, "iters=%u cost %llu vs %llu differs by more than one launch (%llu)",
+                  iters, st.giant_steps, prev, slack);
+        }
+        printf("  iters=%-4u %8llu giant steps in %3llu rounds  (slack %llu)\n",
+               iters, st.giant_steps, st.rounds, slack);
+        prev = st.giant_steps;
+    }
+}
+
+/* ---------------------------------------------------------------------- *
+ * One table, many targets.  The table is a function of G and the plan, so
+ * every target after the first costs only its giant phase.  Per-target
+ * cost must therefore fall towards the giant phase's own ~0.5 sqrt(width)
+ * and away from a cold solve's ~1.0.
+ * ---------------------------------------------------------------------- */
+static void test_multi_target() {
+    if (ModN::bits() > 48) {
+        printf("[multi] skipped (group too large for a CPU-only run)\n");
+        return;
+    }
+    const uint32_t T = 8, W = 8, iters = 128;
+    const uint64_t width = 1ull << 26;
+    const size_t ntargets = 12;
+    printf("[multi] one table, %zu targets\n", ntargets);
+    affine_pt G = Curve::generator();
+    BsgsPlan p = bsgs_plan(width, 1, T, W);
+    BsgsHost h;
+    h.setup(G, p);
+    std::vector<uint64_t> table = bsgs_new_table(p.table_bits);
+    bsgs_ctx bc{};
+    BsgsChains bb;
+    bb.bind(bc, T, W, table, 16);
+    BsgsStats st;
+    bsgs_cpu_build_table<W>(h, bc, iters, st);
+    CHECK(st.table_entries == p.m - 1, "table entries");
+
+    std::mt19937_64 rng(2026);
+    std::vector<uint64_t> secrets;
+    std::vector<affine_pt> targets;
+    for (size_t t = 0; t < ntargets; t++) {
+        uint64_t s = rng() % width;
+        secrets.push_back(s);
+        uint32_t xs[8] = {(uint32_t)s, (uint32_t)(s >> 32), 0, 0, 0, 0, 0, 0};
+        targets.push_back(Curve::to_affine(Curve::scalar_mul(G, xs, 0)));
+    }
+    bsgs_ctx gc{};
+    BsgsChains gb;
+    std::vector<std::array<uint32_t, 8>> ks;
+    std::vector<char> ok;
+    double t0 = now();
+    uint32_t solved = bsgs_cpu_solve_many<W>(h, gb, gc, table, targets, iters, ks, ok, st);
+    double secs = now() - t0;
+    CHECK(solved == ntargets, "%u of %zu targets solved", solved, ntargets);
+    for (size_t t = 0; t < ntargets; t++) {
+        uint32_t xs[8] = {(uint32_t)secrets[t], (uint32_t)(secrets[t] >> 32), 0, 0, 0, 0, 0, 0};
+        CHECK(ok[t] && Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(ks[t].data())),
+              "target %zu recovered", t);
+    }
+    double sqrt_w = std::sqrt((double)width);
+    double cold = (st.baby_steps + st.seed_ops) / sqrt_w + (st.giant_steps / (double)ntargets) / sqrt_w;
+    double amortised = (st.baby_steps + st.seed_ops + st.giant_steps) / (double)ntargets / sqrt_w;
+    printf("  table %llu steps, %llu giant steps over %zu targets, %u candidates (%u false), %.2fs\n",
+           st.baby_steps, st.giant_steps, ntargets, st.candidates, st.false_candidates, secs);
+    printf("  S per target: %.3f amortised over %zu (a single cold solve is %.3f); "
+           "giant phase alone %.3f\n",
+           amortised, ntargets, cold, (st.giant_steps / (double)ntargets) / sqrt_w);
+    /* Amortised must beat a cold solve, and approach the giant-only cost. */
+    CHECK(amortised < cold, "amortised %.3f not better than cold %.3f", amortised, cold);
+}
+
 int main() {
     printf("gpu/ecc BSGS CPU test: curve=%s FP_FAST=%d\n", CURVE_NAME, (int)FP_FAST);
     test_hash_table();
@@ -428,6 +550,8 @@ int main() {
     test_coverage();
     test_solve_toy(1);
     test_solve_toy(0);
+    test_iters_independence();
+    test_multi_target();
     test_interval();
     if (failures) { printf("FAILED: %d checks\n", failures); return 1; }
     printf("ALL PASSED\n");

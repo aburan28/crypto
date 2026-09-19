@@ -754,6 +754,8 @@ src/
 │   ├── cipher_registry.rs     — Named-cipher catalog
 │   ├── auto_attack.rs         — Auto-discovery + dispatch
 │   ├── research_bench.rs      — Falsifiable-hypothesis bench
+│   ├── ecdlp_variants/        — The Galbraith-Wang-Zhang BSGS and Gaudry-Schost table
+│   ├── bsgs_fast.rs           — Same BSGS, single-word Montgomery + flat table + rayon
 │   └── …45+ other attack modules
 ├── examples/
 │   └── ghs_attack_demo.rs     — Three runnable GHS scenarios
@@ -806,8 +808,16 @@ r-adding rho walk with the negation map and fruitless-cycle escape, and a
 parallel baby-step giant-step engine for full-group and interval logs: both
 phases run as independent chains sharing one inversion per thread, the baby
 table is an x-keyed lock-free hash table in device memory, and every hit is
-verified on the host. Measured on the toy curve at `S ≈ 1.0` against rho's
-`1.3`, in exchange for `16 · √n` bytes of table.
+verified on the host. Measured on the toy curve at `S ≈ 1.07` against rho's
+`0.85`, in exchange for `16 · √n` bytes of table — and `0.56` per target
+once a batch shares one table.
+
+The same engine is ported to the CPU as
+[`src/cryptanalysis/bsgs_fast.rs`](./src/cryptanalysis/bsgs_fast.rs):
+single-word Montgomery arithmetic, the same flat x-keyed table, chains on
+`rayon`. It is **6.3× to 10.9×** the crate's general `BigUint` baby-step
+giant-step on the same curves and runs at 37–49 Msteps/s on four threads
+(`cargo run --release --example bsgs_fast_bench`).
 `hdl/ecc/` implements the same walk's datapath: a 256-bit modular
 multiplier at one multiply per clock, and a point adder that interleaves
 independent walks to keep it saturated at three clocks per addition.
