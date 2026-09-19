@@ -85,18 +85,23 @@
 //! tiny multiply, instead of the usual `2n`.  A full `mul` is 36 + 6
 //! multiplies.  This is the "specialised reduction exploiting the prime's
 //! shape" that a generic CIOS would leave on the table, and it is why a
-//! 326-bit multiplication here measures 48 cycles rather than the ~110 a
-//! generic six-limb CIOS would need.
+//! 326-bit multiplication here measures 48-61 cycles rather than the ~110 a
+//! generic six-limb CIOS would need.  (The spread is real and is *between
+//! builds*, not within them: two back-to-back runs of one binary agree to
+//! 0.5%, but adding or removing unrelated code moves the number by a quarter.
+//! Code layout and inlining decisions dominate at this size.  The current
+//! tree measures 61.)
 //!
 //! One thing that did *not* pay off, recorded because the negative result is
 //! the useful part: a dedicated squaring with the off-diagonal trick (21 limb
 //! multiplies instead of 36) was written, differentially tested, and measured
-//! at 51 cycles against the general multiply's 48 — no faster, and inside the
-//! roughly 5% run-to-run noise of this (shared, 4-core) machine, so not
-//! reliably slower either.  The plausible reason it fails to win is that with
-//! the reduction already this cheap, the 12-limb doubling shift and the
-//! separated reduction's carry-propagation loop cost about what the 15 saved
-//! multiplies do.  Forty lines of carry plumbing that buys nothing measurable
+//! at 51 cycles against the general multiply's 48 — no faster.  Nor reliably
+//! slower: after it was removed, the two benchmark rows, now running
+//! *identical* code, still differed by 5% (58 against 61), which is how big
+//! the layout effect alone is here.  The plausible reason it fails to win is
+//! that with the reduction already this cheap, the 12-limb doubling shift and
+//! the separated reduction's carry-propagation loop cost about what the 15
+//! saved multiplies do.  Forty lines of carry plumbing that buys nothing measurable
 //! is not worth keeping, so [`Fp::sqr`] is just `mul(a, a)`.  This is a
 //! not-measured-any-better result, not a proof that the trick cannot be made
 //! to win with a more integrated reduction.
@@ -328,7 +333,8 @@ impl Fp {
     /// This is just [`Fp::mul`] with both operands the same.  A dedicated
     /// off-diagonal squaring (21 limb multiplies instead of 36) was written
     /// and measured at 51 cycles against 48 for the general multiply: no
-    /// faster, within measurement noise.  See the module docs; it was dropped
+    /// faster, and the difference is no bigger than this benchmark's
+    /// build-to-build layout noise.  See the module docs; it was dropped
     /// rather than kept as an unearned complication.
     #[inline(always)]
     pub fn sqr(&self) -> Fp {

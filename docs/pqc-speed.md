@@ -234,6 +234,18 @@ implementation should reach, and the quadratic extension multiply at 167 is
 about 4.2× that, consistent with Karatsuba's three base multiplications plus
 reduction and carry overhead.
 
+**Read the sub-100-cycle rows with care.** At this size the numbers move
+*between builds* far more than within them: two back-to-back runs of one binary
+agree to 0.5%, but adding or removing unrelated code shifts a field-multiply
+figure by a quarter, and the multiply has been seen anywhere from 48 to 61
+cycles across builds of the same algorithm. Code layout and inlining decisions
+dominate. This was established the hard way, by removing a candidate
+optimisation and finding that the two benchmark rows, then running identical
+code, still differed by 5%. Any comparison of two primitives at this scale that
+rests on a difference under about 10% is measuring the linker, not the
+algorithm. The chain and ladder rows, which are thousands of times larger, do
+not have this problem.
+
 **The optimal strategy is worth 11.3× over the naive walker** on a full-length
 chain, 2.52 against 28.57 megacycles. That is the single largest structural win
 in this module and the reason the naive walker is kept: it is the thing the
