@@ -268,6 +268,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("gha_walker.pub", text)
         self.assertIn("InvalidPermission.Duplicate", text)
         self.assertIn("ecc2k-dp-walker", text)
+        self.assertIn("no running instance tagged Name=rho-ecc2k-walker", text)
+        self.assertIn("tagged walkers (any state)", text)
         # The snapshot query runs silently and is getting slower as the DP
         # table grows; without keepalives a slow query is indistinguishable
         # from a dead connection and the hop dies on a broken pipe.
