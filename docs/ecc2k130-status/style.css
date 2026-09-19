@@ -514,6 +514,12 @@ td.empty { color: var(--muted); text-align: center; padding: 18px; }
 }
 time { border-bottom: 1px dotted var(--line); }
 
+/* The coordinate-system table has prose cells; let those wrap so the
+   numeric columns stay in view at desktop width. */
+.coords th[scope="row"], .coords td.wrap { white-space: normal; }
+.coords th[scope="row"] { min-width: 16ch; }
+.coords td.wrap { min-width: 14ch; }
+
 /* ---- misc ---- */
 
 .mono { font-family: var(--mono); }

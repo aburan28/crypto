@@ -13,6 +13,25 @@ on:
 permissions:
   contents: read
 jobs:
+  # The generator's own checks: the packed/sigma/reduction generators agree
+  # with the committed headers, the Modal entry points survive click, the
+  # autolab self-test, the codegen unit tests (report parsing, autotune,
+  # audits, the lambda-projective formulas and price table against
+  # LAMBDA-PROJECTIVE.md) and the fruitless-cycle check on every curve.
+  # Ten seconds, nothing compiled, nothing installed: the failures it catches
+  # were invisible until someone ran `make check-cli` by hand.
+  offline-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: make -C ecc2k130 check-cli
+      - run: make -C ecc2k130 check-cycles
+      - run: python3 ecc2k130/codegen/lambda_projective.py --table
+
   local-software:
     runs-on: ubuntu-latest
     timeout-minutes: 15

@@ -92,7 +92,7 @@ What would move the floor, and why each is out of reach here:
 
 | lever | effect | status |
 |---|---|---|
-| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), λ-coordinates cost 1I+3M+2S, `2P+Q` single-inversion tricks cost ≥ 8M |
+| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), and even with that hash free the cheapest inversion-free addition, λ-projective mixed at 8M + 2S, is 60.5 clmad per update against this row's 38.1 — priced in [LAMBDA-PROJECTIVE.md](LAMBDA-PROJECTIVE.md); `2P+Q` single-inversion tricks cost ≥ 8M |
 | a product in fewer than 6 clmad | lowers the clmad floor | 32-bit limbs need 9 `lo` products; 3-limb splits need `hi` anyway; no 128-bit `CLMAD` form exists |
 | products off the carry-less unit | trades pipes | software `clmul` costs ~9 SM-clocks per product on the FMA pipe vs 3.9 on clmad; bit-sliced ALU products cost ~300 ALU each and the ALU is the tighter pipe; tensor cores need a shared matrix operand, and every walk's operands differ |
 | a walk that is not one addition per step | changes the count | `x`-only doubling is 1I+1S but a single multiplier `[2]` is a permutation, not a random function; mixed doubling/addition diverges per lane, and SIMT pays both |
