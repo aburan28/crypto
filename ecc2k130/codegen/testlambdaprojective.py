@@ -1,4 +1,5 @@
 """lambda-projective formulas, invariance and pricing (LAMBDA-PROJECTIVE.md)."""
+import os
 import random
 import unittest
 
@@ -61,6 +62,19 @@ class LambdaProjectiveTests(unittest.TestCase):
         paid = rows['lambda-projective mixed + invariant hash by one inversion']
         self.assertLess(rows['affine, Montgomery batch 1'][0], paid[0])
         self.assertLess(rows['affine, Montgomery batch 1'][1], paid[1])
+
+    def test_price_table_matches_the_note(self):
+        # LAMBDA-PROJECTIVE.md carries the table this script prints, and the
+        # campaign status page is pinned to the note; so a price change here
+        # (a routine cost, a formula count) must reach the note in the same
+        # commit or this fails. Every row's carry-less and ALU figure, as the
+        # script formats it, has to appear as a table cell of the note.
+        here = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(here, '..', 'LAMBDA-PROJECTIVE.md'), encoding='utf-8') as fh:
+            note = fh.read().replace('*', '')
+        for name, mu, sq, iv, alu, cl in lp.priceTable((8, 2, 0), (11, 2, 0)):
+            self.assertIn('| %.1f |' % cl, note, '%s: %.1f clmad is not in the note' % (name, cl))
+            self.assertIn('| {:,.0f} |'.format(alu), note, '%s: %.0f ALU is not in the note' % (name, alu))
 
 
 if __name__ == '__main__':

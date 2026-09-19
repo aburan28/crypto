@@ -283,6 +283,21 @@ class BuildTests(unittest.TestCase):
         self.assertIn("ecc2k130/LAMBDA-PROJECTIVE.md", landing)
         self.assertIn('href="./status/#h-coords"', landing)
 
+    def test_status_workflow_reruns_the_pins_when_a_cited_document_changes(self):
+        # These tests pin the published pages to documents outside the site
+        # tree. The workflow that runs them is path-filtered, so a document
+        # it does not list can change without the pins running, and the page
+        # drifts from what it cites until the next site edit. Keep every
+        # document a pin reads in both the pull_request and push filters.
+        workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
+        cited = ("ecc2k130/LAMBDA-PROJECTIVE.md", "ecc2k130/aws/README.md")
+        for trigger in ("pull_request:", "push:"):
+            block = workflow[workflow.index(trigger):]
+            block = block[:block.index("\n\n")]
+            paths = re.findall(r'-\s+"([^"]+)"', block)
+            for doc in cited:
+                self.assertIn(doc, paths, "%s does not list %s" % (trigger, doc))
+
     def test_dashboard_publishes_the_rate_and_the_span_it_measured(self):
         # A rate without its window is not checkable: 15 minutes of
         # checkpoints and an hour of them are different measurements, and the
