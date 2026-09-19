@@ -613,6 +613,230 @@ class Collisions(unittest.TestCase):
         self.assertEqual(state["collisions"], 1)
 
 
+class RollupCursor:
+    """Records the SQL a rollup path runs, and answers the reads it makes."""
+
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+        self.one = None
+        self.rowcount = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        self.conn.queries.append((" ".join(sql.split()), args))
+        if "FROM dp_ingest_meta WHERE key" in sql:
+            self.one = (1,) if self.conn.marked else None
+        elif "GROUP BY 1" in sql and "distinguished_points" in sql:
+            self.rows = self.conn.corpus
+        else:
+            self.rows = []
+            self.one = None
+
+    def fetchone(self):
+        return self.one
+
+    def fetchall(self):
+        return self.rows
+
+
+class RollupConn:
+    def __init__(self, marked=False, corpus=()):
+        self.marked = marked
+        self.corpus = list(corpus)
+        self.queries = []
+
+    def cursor(self):
+        return RollupCursor(self)
+
+
+class Rollup(unittest.TestCase):
+    """The snapshot's cost must stop growing with the corpus.
+
+    Every published figure but the checkpoint work was a question asked of the
+    whole table -- count(*), min/max of found_at, a 48-hour GROUP BY -- run
+    every --status-every seconds on the instance the ingest writes to, and
+    while it ran this program was not ingesting. The counters below are
+    maintained by the insert itself, so the publish reads one row and 48 more.
+    """
+
+    def setUp(self):
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest.log = lambda msg: None
+
+    def sql(self, conn):
+        return [q for q, _ in conn.queries]
+
+    def test_an_object_adds_its_rows_to_the_totals_and_to_its_hour(self):
+        conn = RollupConn()
+        cur = conn.cursor()
+        dp_ingest.applyRollup(cur, 1200, "2026-09-19 07:31:00+00")
+        totals = [(q, a) for q, a in conn.queries if "dp_ingest_totals" in q]
+        hourly = [(q, a) for q, a in conn.queries if "dp_ingest_hourly" in q]
+        self.assertEqual(len(totals), 1)
+        self.assertEqual(len(hourly), 1)
+        self.assertIn(1200, totals[0][1])
+        self.assertIn(1200, hourly[0][1])
+        # The hour is derived in the database from the object's own found_at,
+        # not from the clock the ingest happens to be running on.
+        self.assertIn("date_trunc('hour', %s::timestamptz)", hourly[0][0])
+
+    def test_an_object_that_added_nothing_moves_no_counter(self):
+        # A re-ingested object inserts zero rows; the counters must not move,
+        # which is what keeps them exact under this file's idempotency.
+        conn = RollupConn()
+        dp_ingest.applyRollup(conn.cursor(), 0, "2026-09-19 07:31:00+00")
+        self.assertEqual(conn.queries, [])
+
+    def test_the_counters_are_written_in_the_insert_transaction(self):
+        conn = CollisionConn(inserted=100)
+        dp_ingest.ingestObject(conn, CollisionS3(record(7) * 100), "bucket",
+                               ORBIT, "2026-09-19 07:31:00+00")
+        order = [q for q, _ in conn.queries]
+        # After the points, before the single commit: the counters cannot
+        # describe rows that were never stored, nor miss rows that were.
+        self.assertTrue(any("dp_ingest_totals" in q for q in order))
+        self.assertLess(next(i for i, q in enumerate(order)
+                             if "INSERT INTO distinguished_points" in q),
+                        next(i for i, q in enumerate(order) if "dp_ingest_totals" in q))
+        self.assertEqual(conn.commits, 1)
+
+    def test_the_corpus_is_read_once_to_seed_the_counters(self):
+        conn = RollupConn(corpus=[(when("2026-09-19T07:00:00"), 1200,
+                                   when("2026-09-19T07:01:00"),
+                                   when("2026-09-19T07:59:00"))])
+        self.assertTrue(dp_ingest.ensureRollup(conn.cursor()))
+        self.assertEqual(len([q for q in self.sql(conn)
+                              if "FROM distinguished_points" in q]), 1)
+        self.assertTrue(any("INSERT INTO dp_ingest_meta" in q for q in self.sql(conn)))
+
+    def test_a_replacement_host_does_not_read_the_corpus_again(self):
+        conn = RollupConn(marked=True)
+        self.assertFalse(dp_ingest.ensureRollup(conn.cursor()))
+        self.assertFalse([q for q in self.sql(conn) if "FROM distinguished_points" in q])
+
+    def test_recount_seeds_them_again(self):
+        conn = RollupConn(marked=True)
+        self.assertTrue(dp_ingest.ensureRollup(conn.cursor(), force=True))
+        self.assertTrue(any("DELETE FROM dp_ingest_meta" in q for q in self.sql(conn)))
+        self.assertTrue([q for q in self.sql(conn) if "FROM distinguished_points" in q])
+
+    def test_the_seed_takes_its_lock_before_it_reads(self):
+        # applyRollup locks the totals row *after* inserting its points, so
+        # claiming that row first puts any concurrent ingest behind this
+        # transaction with its points still uncommitted -- invisible to the
+        # aggregate, and applied as a delta once this commits. Reading first
+        # would lose every object that landed during the scan.
+        conn = RollupConn()
+        dp_ingest.ensureRollup(conn.cursor())
+        order = self.sql(conn)
+        self.assertLess(next(i for i, q in enumerate(order) if "FOR UPDATE" in q),
+                        next(i for i, q in enumerate(order) if "FROM distinguished_points" in q))
+
+
+class SnapshotCursor:
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+        self.one = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        flat = " ".join(sql.split())
+        self.conn.queries.append(flat)
+        if "FROM dp_ingest_hourly" in flat:
+            self.rows = self.conn.hourly
+        elif "rho_collisions" in flat:
+            self.one = (0, None)
+        elif "rho_campaigns" in flat:
+            self.one = (dp_ingest.CAMPAIGN, "sect131r1", 32,
+                        when("2026-09-01T00:00:00"), 190123456,
+                        when("2026-09-01T00:00:00"), when("2026-09-19T07:59:00"))
+
+    def fetchone(self):
+        return self.one
+
+    def fetchall(self):
+        return self.rows
+
+
+class SnapshotConn:
+    def __init__(self, hourly=()):
+        self.hourly = list(hourly)
+        self.queries = []
+
+    def cursor(self):
+        return SnapshotCursor(self)
+
+
+class Snapshot(unittest.TestCase):
+    """What a publish costs, which is the whole point of the rollup."""
+
+    def setUp(self):
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        dp_ingest.log = lambda msg: None
+        now = datetime.datetime.now(datetime.timezone.utc).replace(
+            minute=0, second=0, microsecond=0)
+        self.conn = SnapshotConn(hourly=[(now, 7), (now - datetime.timedelta(hours=3), 5)])
+        self.payload = dp_ingest.statusPayload(self.conn, FakeWorkS3([]), "bucket")
+
+    def test_the_snapshot_never_reads_the_points_table(self):
+        # The regression this guards: every figure below used to be a question
+        # asked of distinguished_points, so a publish cost more every day the
+        # campaign ran and blocked the ingest while it did.
+        self.assertFalse([q for q in self.conn.queries if "distinguished_points" in q])
+
+    def test_the_total_comes_from_the_counter(self):
+        self.assertEqual(self.payload["dps"], 190123456)
+
+    def test_the_recency_figures_come_from_the_rollup(self):
+        self.assertEqual(self.payload["dps_last_hour"], 7)
+        self.assertEqual(self.payload["dps_last_day"], 12)
+
+    def test_the_first_and_last_point_still_reach_the_page(self):
+        # These moved column with the query; a silently shifted index would
+        # publish the campaign's creation date as its newest point.
+        self.assertTrue(self.payload["first_dp_at"].startswith("2026-09-01"))
+        self.assertTrue(self.payload["last_dp_at"].startswith("2026-09-19"))
+
+    def test_the_hourly_series_is_still_published(self):
+        self.assertEqual([h["dps"] for h in self.payload["hourly"]], [7, 5])
+
+
+class Windows(unittest.TestCase):
+    """The recency tiles come from the rollup the chart is drawn from."""
+
+    def hours(self, *offsets):
+        now = datetime.datetime.now(datetime.timezone.utc).replace(
+            minute=0, second=0, microsecond=0)
+        return [(now - datetime.timedelta(hours=h), 10) for h in offsets]
+
+    def test_it_sums_whole_buckets_inside_the_window(self):
+        self.assertEqual(dp_ingest.windowSum(self.hours(0, 1), 1), 20)
+
+    def test_buckets_outside_the_window_are_not_counted(self):
+        self.assertEqual(dp_ingest.windowSum(self.hours(0, 5), 1), 10)
+        self.assertEqual(dp_ingest.windowSum(self.hours(0, 5, 30), 24), 20)
+
+    def test_a_naive_timestamp_is_read_as_utc_not_local(self):
+        naive = [(datetime.datetime.now(datetime.timezone.utc).replace(
+            tzinfo=None, minute=0, second=0, microsecond=0), 10)]
+        self.assertEqual(dp_ingest.windowSum(naive, 1), 10)
+
+    def test_an_empty_rollup_is_zero_not_an_error(self):
+        self.assertEqual(dp_ingest.windowSum([], 24), 0)
+
+
 class StatusState(unittest.TestCase):
     """The page must not read a stalled ingest as a quiet campaign."""
 

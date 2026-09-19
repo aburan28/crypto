@@ -22,6 +22,12 @@ history and are the reason this is a file rather than a shell one-liner:
   * **Restartable by the machine, not by a person.** Deployed as a systemd unit
     with `Restart=always`; a database failover costs a retry, not an outage that
     ends when somebody notices.
+  * **Its published figures cost the same on any day of the campaign.** The
+    snapshot used to ask the whole table for every number it published, every
+    few minutes, on the instance the ingest writes to. `dp_ingest_totals` and
+    `dp_ingest_hourly` are maintained by the insert itself, in the transaction
+    that adds the points, so they cannot drift from what they summarise and a
+    publish reads one row and 48 more.
   * **It reports the collision it is uniquely placed to see.** The unique key
     that makes re-ingest harmless is the same constraint that defines a
     collision: two walks reaching one distinguished point from different
@@ -346,6 +352,126 @@ def ingestedCounts(conn, ttl=COUNTS_TTL):
     return _counts["map"], done
 
 
+# Every figure the snapshot publishes except the checkpoint work was a
+# question asked of the whole table -- count(*) over the campaign, min and max
+# of found_at, and a 48-hour GROUP BY -- so its cost grew with the corpus
+# while the answer it produced stayed the same size. It ran every
+# --status-every seconds, on the instance the ingest writes to, and while it
+# ran this program was not ingesting: the help text for --status-every already
+# conceded "at ~190 M rows a publish takes a few minutes". An index and a
+# one-off VACUUM bought time; neither changes the shape of the cost.
+#
+# These two tables are maintained by the insert itself, in the transaction
+# that adds the points, so they cannot drift from what they summarise. The
+# snapshot then reads one row and 48 more, and its cost stops depending on how
+# long the campaign has been running.
+#
+# Every record of one object shares that object's found_at -- ingestObject
+# inserts a single scalar for the whole COPY -- so an object contributes its
+# rows to exactly one hour, and the rollup is an addition rather than a
+# regrouping.
+TOTALS_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_totals (
+    campaign_id text PRIMARY KEY,
+    dps         bigint NOT NULL DEFAULT 0,
+    first_dp_at timestamptz,
+    last_dp_at  timestamptz
+)
+"""
+HOURLY_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_hourly (
+    campaign_id text NOT NULL,
+    hour        timestamptz NOT NULL,
+    dps         bigint NOT NULL,
+    PRIMARY KEY (campaign_id, hour)
+)
+"""
+ROLLUP_MARK = "rollup_backfilled"
+
+
+def applyRollup(cur, added, found_at):
+    """Add one object's rows to the totals and to its hour.
+
+    Called inside ingestObject's transaction, after the insert, with the rows
+    that were actually inserted -- so a re-ingested object contributes zero and
+    the counters stay exact under the idempotency the rest of this file
+    depends on.
+    """
+    if added <= 0:
+        return
+    cur.execute(
+        "INSERT INTO dp_ingest_totals (campaign_id, dps, first_dp_at, last_dp_at) "
+        "VALUES (%s, %s, %s::timestamptz, %s::timestamptz) "
+        "ON CONFLICT (campaign_id) DO UPDATE SET "
+        "  dps = dp_ingest_totals.dps + EXCLUDED.dps, "
+        "  first_dp_at = least(dp_ingest_totals.first_dp_at, EXCLUDED.first_dp_at), "
+        "  last_dp_at = greatest(dp_ingest_totals.last_dp_at, EXCLUDED.last_dp_at)",
+        (CAMPAIGN, added, found_at, found_at))
+    cur.execute(
+        "INSERT INTO dp_ingest_hourly (campaign_id, hour, dps) "
+        "VALUES (%s, date_trunc('hour', %s::timestamptz), %s) "
+        "ON CONFLICT (campaign_id, hour) DO UPDATE SET "
+        "  dps = dp_ingest_hourly.dps + EXCLUDED.dps",
+        (CAMPAIGN, found_at, added))
+
+
+def ensureRollup(cur, force=False):
+    """Seed the counters from the corpus, once, and say whether it ran.
+
+    The corpus predates these tables, so the first pass has to read it -- the
+    same aggregate the snapshot used to run, run once instead of every three
+    minutes. One scan yields all of it: the hours are the rollup, their sum is
+    the total, and the extremes of found_at come out of the same GROUP BY.
+
+    Ordering is what makes this safe while the fleet is being ingested.
+    `applyRollup` takes a row lock on this campaign's `dp_ingest_totals` row
+    *after* inserting its points; locking that row here first means a
+    concurrent ingest blocks before it adds its delta, with its points still
+    uncommitted and therefore invisible to the aggregate below. It applies the
+    delta once this commits. Neither a lost object nor a double-counted one is
+    reachable.
+    """
+    cur.execute(TOTALS_DDL)
+    cur.execute(HOURLY_DDL)
+    cur.execute(META_DDL)
+    if force:
+        cur.execute("DELETE FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
+    else:
+        cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
+        if cur.fetchone() is not None:
+            return False
+    log("seeding the dp counters from the corpus; this reads the table once "
+        "and the ingest waits on it, then no snapshot reads it again")
+    started = time.time()
+    # Claim the lock before the read, so that anything mid-flight is behind us.
+    cur.execute("INSERT INTO dp_ingest_totals (campaign_id) VALUES (%s) "
+                "ON CONFLICT (campaign_id) DO NOTHING", (CAMPAIGN,))
+    cur.execute("SELECT 1 FROM dp_ingest_totals WHERE campaign_id = %s FOR UPDATE",
+                (CAMPAIGN,))
+    cur.execute("LOCK TABLE dp_ingest_hourly IN EXCLUSIVE MODE")
+    cur.execute(
+        "SELECT date_trunc('hour', found_at), count(*), min(found_at), max(found_at) "
+        "FROM distinguished_points WHERE campaign_id = %s GROUP BY 1", (CAMPAIGN,))
+    rows = cur.fetchall()
+    total = sum(int(n) for _, n, _, _ in rows)
+    cur.execute("DELETE FROM dp_ingest_hourly WHERE campaign_id = %s", (CAMPAIGN,))
+    for hour, n, _, _ in rows:
+        cur.execute("INSERT INTO dp_ingest_hourly (campaign_id, hour, dps) "
+                    "VALUES (%s, %s, %s)", (CAMPAIGN, hour, int(n)))
+    cur.execute(
+        "UPDATE dp_ingest_totals SET dps = %s, first_dp_at = %s, last_dp_at = %s "
+        "WHERE campaign_id = %s",
+        (total,
+         min((r[2] for r in rows if r[2] is not None), default=None),
+         max((r[3] for r in rows if r[3] is not None), default=None),
+         CAMPAIGN))
+    cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                "ON CONFLICT (key) DO NOTHING", (ROLLUP_MARK,))
+    log("seeded the dp counters in %.0fs: %d points across %d hours"
+        % (time.time() - started, total, len(rows)))
+    return True
+
+
 # A collision is the campaign's terminal event, and until now the ingest was
 # the one place it could be seen and the one place it was thrown away:
 # `ON CONFLICT (campaign_id, point_key) DO NOTHING` cannot tell a worker
@@ -530,6 +656,11 @@ def ingestObject(conn, s3, bucket, key, found_at):
             "VALUES (%s, %s, %s) ON CONFLICT (campaign_id, object_key) "
             "DO UPDATE SET records = EXCLUDED.records, ingested_at = now()",
             (CAMPAIGN, key, whole // RECORD_BYTES))
+        # Also this transaction, so the counters the snapshot reads cannot
+        # drift from the rows they summarise. Last, because every ingest
+        # thread contends on the one totals row and the lock it takes is held
+        # until the commit below.
+        applyRollup(cur, added, found_at)
     conn.commit()
     return added, whole // RECORD_BYTES, len(collisions)
 
@@ -682,6 +813,31 @@ def _walkRate(current, previous):
     }
 
 
+def windowSum(hourly, hours):
+    """Points in the last `hours`, from the rollup.
+
+    These two figures were a sliding `found_at > now() - interval '1 hour'`
+    over the whole table. They are now a sum of whole hour buckets, which is
+    the same series the published chart draws, so the tile and the chart can
+    no longer disagree -- but it does mean the window is aligned to the hour
+    and can reach back up to an hour further than the name suggests. For what
+    they are used for, a COLLECTING/IDLE decision and a headline figure, that
+    is the more consistent answer rather than a less accurate one.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc)
+    floor = (now - datetime.timedelta(hours=hours)).replace(
+        minute=0, second=0, microsecond=0)
+    total = 0
+    for hour, count in hourly:
+        if hour is None:
+            continue
+        if hour.tzinfo is None:
+            hour = hour.replace(tzinfo=datetime.timezone.utc)
+        if hour >= floor:
+            total += int(count)
+    return total
+
+
 def publicStatus(payload):
     """The browser-safe document: same aggregates, no per-slot rows."""
     out = json.loads(json.dumps(payload))
@@ -771,30 +927,33 @@ def statusPayload(conn, s3, bucket, ingest=None):
     hours while 133 workers were walking and 56 M records were landing in S3.
     """
     with conn.cursor() as cur:
+        # One row from the counters instead of a count over the campaign, and
+        # 48 from the rollup instead of a GROUP BY over two days of points.
+        # Neither reads distinguished_points, so the cost of a publish no
+        # longer grows with the corpus.
         cur.execute("""
             SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
-                   count(d.point_key) AS dps,
-                   count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 hour') AS dps_last_hour,
-                   count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 day') AS dps_last_day,
-                   min(d.found_at) AS first_dp_at, max(d.found_at) AS last_dp_at
-            FROM rho_campaigns c LEFT JOIN distinguished_points d USING (campaign_id)
-            WHERE c.campaign_id = %s GROUP BY 1,2,3,4""", (CAMPAIGN,))
+                   COALESCE(t.dps, 0) AS dps, t.first_dp_at, t.last_dp_at
+            FROM rho_campaigns c
+            LEFT JOIN dp_ingest_totals t USING (campaign_id)
+            WHERE c.campaign_id = %s""", (CAMPAIGN,))
         row = cur.fetchone() or ()
         cur.execute("SELECT count(*), max(detected_at) FROM rho_collisions WHERE campaign_id = %s",
                     (CAMPAIGN,))
         collisions, latest_collision = cur.fetchone()
         cur.execute("""
-            SELECT date_trunc('hour', found_at) AS hour, count(*)
-            FROM distinguished_points
-            WHERE campaign_id = %s AND found_at > now() - interval '48 hours'
-            GROUP BY 1 ORDER BY 1""", (CAMPAIGN,))
+            SELECT hour, dps FROM dp_ingest_hourly
+            WHERE campaign_id = %s
+              AND hour >= date_trunc('hour', now() - interval '48 hours')
+            ORDER BY hour""", (CAMPAIGN,))
         hourly = cur.fetchall()
 
     def iso(v):
         return v.isoformat() if hasattr(v, "isoformat") else v
 
     dps = int(row[4] or 0) if row else 0
-    dps_last_hour = int(row[5] or 0) if row else 0
+    dps_last_hour = windowSum(hourly, 1)
+    dps_last_day = windowSum(hourly, 24)
     collisions = int(collisions or 0)
     ingest = dict(ingest or {})
     # An ingest that is behind makes every recency figure below a statement
@@ -821,11 +980,11 @@ def statusPayload(conn, s3, bucket, ingest=None):
         "state": state,
         "dps": dps,
         "collisions": collisions,
-        "first_dp_at": iso(row[7]) if row else None,
-        "last_dp_at": iso(row[8]) if row else None,
+        "first_dp_at": iso(row[5]) if row else None,
+        "last_dp_at": iso(row[6]) if row else None,
         "latest_collision_at": iso(latest_collision),
         "dps_last_hour": dps_last_hour,
-        "dps_last_day": int(row[6] or 0) if row else 0,
+        "dps_last_day": dps_last_day,
         "hourly": [{"hour": iso(h), "dps": int(n)} for h, n in hourly],
         # Exact, and the reason this block exists rather than a dps multiplier:
         # see checkpointWork.  `walkers` is the count of slots still running,
@@ -905,11 +1064,11 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    # The elapsed time is in the line because the snapshot counts the whole
-    # table: it is the one part of this program whose cost grows with the
-    # corpus rather than with the backlog, and it shares a database with the
-    # ingest it must not slow down. If it approaches --status-every, that is
-    # the number to act on.
+    # The elapsed time stays in the line because this used to be the one part
+    # of the program whose cost grew with the corpus -- it counted the whole
+    # table, on the instance the ingest writes to. It now reads the counters
+    # the insert maintains, so the number should be flat as the campaign
+    # grows; if it starts climbing, the counters are not being read.
     log("published status.json in %.1fs: dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d"
         % (time.time() - started, payload["dps"], payload["state"],
@@ -1086,11 +1245,16 @@ def main(argv=None):
     ap.add_argument("--status-every", type=float,
                     default=float(os.environ.get("RHO_STATUS_EVERY", "180")),
                     help="seconds between status.json writes. The snapshot "
-                         "counts the whole campaign, and while it runs this "
-                         "program is not ingesting. At ~190 M rows a publish "
-                         "takes a few minutes; keep this at or above that. "
-                         "The page's Actions job runs every 3 minutes and reads "
-                         "this copy from the status bucket.")
+                         "reads the maintained counters rather than the points "
+                         "table, so its cost no longer grows with the corpus "
+                         "and this is a publishing cadence rather than a "
+                         "throttle. The page's Actions job runs every 3 minutes "
+                         "and reads this copy from the status bucket.")
+    ap.add_argument("--recount", action="store_true",
+                    help="re-seed the dp counters from the table even if they "
+                         "were seeded before. They are maintained in the same "
+                         "transaction as the points and cannot drift from them, "
+                         "so this is for a corpus something else has written to")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -1129,6 +1293,9 @@ def main(argv=None):
                 # --pending promises to write nothing, and the DDL is a write.
                 if not (args.verify or args.pending):
                     ensureCollisions(conn)
+                    with conn.cursor() as cur:
+                        ensureRollup(cur, force=args.recount)
+                    conn.commit()
                 if args.index and not (args.verify or args.pending):
                     try:
                         ensureFoundAtIndex(conn)
