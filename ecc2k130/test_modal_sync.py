@@ -57,9 +57,58 @@ class ModalSyncTests(unittest.TestCase):
     def test_run_sh_defaults_a_one_minute_checkpoint(self):
         script = Path(__file__).with_name("run.sh").read_text()
         self.assertIn("CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}", script)
-        self.assertIn("SYNC_INTERVAL=${SYNC_INTERVAL:-30}", script)
+        self.assertIn("SYNC_INTERVAL=${SYNC_INTERVAL:-15}", script)
         self.assertIn("--checkpoint-every \"$CHECKPOINT_EVERY\"", script)
         self.assertIn('--watch "$SYNC_INTERVAL"', script)
+
+    def test_checkpoint_header_roundtrip(self):
+        blob = modal_sync.pack_checkpoint_header(2, 131, 385024, 16, 1, 1, 6439936)
+        self.assertEqual(len(blob), 40)
+        parsed = modal_sync.unpack_checkpoint_header(blob)
+        self.assertEqual(parsed["threads"], 385024)
+        self.assertEqual(parsed["iterBase"], 6439936)
+        self.assertEqual(parsed["version"], 2)
+
+    def test_iter_base_from_progress_inverts_the_client_line(self):
+        # resume 6439936, then 6160384 walks * 256 steps = 1_577_058_304 pass iters
+        self.assertEqual(
+            modal_sync.iter_base_from_progress(6439936, 1577058304, 6160384),
+            6439936 + 256)
+
+    def test_status_header_file_is_forty_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "curve131-run1.hdr")
+            blob = modal_sync.write_checkpoint_header_file(path, dict(
+                version=2, m=131, threads=4, batch=16, lanes=1, runId=1, iterBase=32))
+            self.assertEqual(os.path.getsize(path), 40)
+            with open(path, "rb") as fh:
+                self.assertEqual(fh.read(), blob)
+
+    def test_sync_prefers_the_header_sidecar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hdr = os.path.join(tmp, "curve131-run1.hdr")
+            modal_sync.write_checkpoint_header_file(hdr, dict(
+                version=2, m=131, threads=4, batch=16, lanes=1, runId=1, iterBase=99))
+            got = []
+
+            def fake_get(volume, remote, local):
+                got.append(remote)
+                if remote.endswith(".hdr"):
+                    with open(hdr, "rb") as src, open(local, "wb") as dst:
+                        dst.write(src.read())
+                    return True
+                return False
+
+            original = modal_sync.modal_volume_get
+            modal_sync.modal_volume_get = fake_get
+            try:
+                result = modal_sync.sync_checkpoint(
+                    None, "bucket", "vol", 131, 1, tmp, dry_run=True)
+            finally:
+                modal_sync.modal_volume_get = original
+            self.assertTrue(result["checkpoint_uploaded"])
+            self.assertEqual(got[0], "ckpt/curve131-run1.hdr")
+            self.assertTrue(got[0].endswith(".hdr"))
 
     def test_parse_run_ids(self):
         self.assertEqual(modal_sync.parse_run_ids("1,2, 3"), [1, 2, 3])

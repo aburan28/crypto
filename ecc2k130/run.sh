@@ -36,8 +36,8 @@ PASSES=${PASSES:-6}         # 0 = until solved
 GPU=${ECC_GPU:-RTX-PRO-6000}
 RUNID=${RUNID:-1}
 COUNT=${COUNT:-4}           # fanout width
-CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}  # client writes walks+DPs this often
-SYNC_INTERVAL=${SYNC_INTERVAL:-30}        # volume → S3, so the page sees them
+CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}  # full walk-state file; status uses a 15s header
+SYNC_INTERVAL=${SYNC_INTERVAL:-15}        # volume → S3, so the page sees the header
 
 if [ "$CURVE" = 131 ]; then
     # Audited fleet preset — see RTX-PRO6000.md and aws/campaign.json.

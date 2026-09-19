@@ -571,7 +571,8 @@ planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
 same thing the CPU run does. `autotune` rebuilds for the local compute
 capability only and sweeps batch size, block size and Karatsuba leaf, writing
 the ranking to a Modal Volume. `search` collects distinguished points into that
-same volume, checkpointing its live walks alongside them every 60 seconds, so a
+same volume, checkpointing its live walks alongside them every 60 seconds (and a
+40-byte status header every 15 seconds), so a
 stopped run resumes where it left off and several containers contribute to one corpus; each
 gets its own run id, which keeps their seed spaces disjoint, and each loads its
 siblings' corpora so a cross-container collision is caught as it happens.
@@ -639,7 +640,7 @@ and start over. Run `validate` first -- it recovers planted discrete logarithms
 on the GPU itself, so a broken kernel fails in a minute rather than quietly
 burning a day of credits.
 
-The searcher reports every 60 seconds:
+The searcher reports every 15 seconds:
 
 ```
 [1h04m] 842.1 M it/s  3.24T iters (18.412% of 2^44.0)  14.80M dp  14.79M distinct  corpus 473.6 MB  2h56m left

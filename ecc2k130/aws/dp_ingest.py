@@ -607,14 +607,8 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     return total, slots
 
 
-def statusPayload(conn, s3, bucket, ingest=None):
-    """The dashboard snapshot, computed here so the page can read it directly.
-
-    `ingest` is what the last pass knew about itself. It is published because
-    `state` alone cannot tell the difference between a fleet that stopped and
-    an ingest that stopped: on 2026-09-17 the page read IDLE_OR_STALE for five
-    hours while 133 workers were walking and 56 M records were landing in S3.
-    """
+def campaignSnapshot(conn):
+    """SQL half of the dashboard. Slow at ~190 M rows; reuse between publishes."""
     with conn.cursor() as cur:
         cur.execute("""
             SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
@@ -638,10 +632,39 @@ def statusPayload(conn, s3, bucket, ingest=None):
     def iso(v):
         return v.isoformat() if hasattr(v, "isoformat") else v
 
-    dps = int(row[4] or 0) if row else 0
-    dps_last_hour = int(row[5] or 0) if row else 0
-    collisions = int(collisions or 0)
+    return {
+        "curve_id": row[1] if row else None,
+        "dp_mask_bits": row[2] if row else None,
+        "campaign_created_at": iso(row[3]) if row else None,
+        "dps": int(row[4] or 0) if row else 0,
+        "dps_last_hour": int(row[5] or 0) if row else 0,
+        "dps_last_day": int(row[6] or 0) if row else 0,
+        "first_dp_at": iso(row[7]) if row else None,
+        "last_dp_at": iso(row[8]) if row else None,
+        "collisions": int(collisions or 0),
+        "latest_collision_at": iso(latest_collision),
+        "hourly": [{"hour": iso(h), "dps": int(n)} for h, n in hourly],
+    }
+
+
+def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
+    """The dashboard snapshot, computed here so the page can read it directly.
+
+    `ingest` is what the last pass knew about itself. It is published because
+    `state` alone cannot tell the difference between a fleet that stopped and
+    an ingest that stopped: on 2026-09-17 the page read IDLE_OR_STALE for five
+    hours while 133 workers were walking and 56 M records were landing in S3.
+
+    `snapshot` is the SQL half (point counts). Checkpoint work is always
+    re-read from S3, so walker liveness can move every --status-every without
+    waiting for the multi-minute table count.
+    """
+    if snapshot is None:
+        snapshot = campaignSnapshot(conn)
     ingest = dict(ingest or {})
+    dps = int(snapshot.get("dps") or 0)
+    dps_last_hour = int(snapshot.get("dps_last_hour") or 0)
+    collisions = int(snapshot.get("collisions") or 0)
     # An ingest that is behind makes every recency figure below a statement
     # about this program, not about the fleet, so it is named as one rather
     # than left to be read as a quiet campaign.
@@ -660,18 +683,18 @@ def statusPayload(conn, s3, bucket, ingest=None):
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": "dp_ingest.py (live, direct from rho-dp + slot checkpoints)",
         "campaign_id": CAMPAIGN,
-        "curve_id": row[1] if row else None,
-        "dp_mask_bits": row[2] if row else None,
-        "campaign_created_at": iso(row[3]) if row else None,
+        "curve_id": snapshot.get("curve_id"),
+        "dp_mask_bits": snapshot.get("dp_mask_bits"),
+        "campaign_created_at": snapshot.get("campaign_created_at"),
         "state": state,
         "dps": dps,
         "collisions": collisions,
-        "first_dp_at": iso(row[7]) if row else None,
-        "last_dp_at": iso(row[8]) if row else None,
-        "latest_collision_at": iso(latest_collision),
+        "first_dp_at": snapshot.get("first_dp_at"),
+        "last_dp_at": snapshot.get("last_dp_at"),
+        "latest_collision_at": snapshot.get("latest_collision_at"),
         "dps_last_hour": dps_last_hour,
-        "dps_last_day": int(row[6] or 0) if row else 0,
-        "hourly": [{"hour": iso(h), "dps": int(n)} for h, n in hourly],
+        "dps_last_day": int(snapshot.get("dps_last_day") or 0),
+        "hourly": list(snapshot.get("hourly") or []),
         # Exact, and the reason this block exists rather than a dps multiplier:
         # see checkpointWork.  `walkers` is the count of slots still running,
         # which is what "workers" should have meant all along -- the page's own
@@ -733,11 +756,17 @@ def publishMetrics(namespace, ingest):
         log("metric publish failed: %s: %s" % (type(exc).__name__, exc))
 
 
-def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
-    """Write the snapshot where a browser can read it, no workflow involved."""
+def publishStatus(conn, s3, bucket, statusBucket, ingest=None, snapshot=None,
+                  source=None):
+    """Write the snapshot where a browser can read it, no workflow involved.
+
+    Point counts come from `snapshot` (the SQL query). Walker liveness always
+    comes from S3 checkpoints, so a cached snapshot still moves `walkers`.
+    """
     started = time.time()
     previous = loadPreviousStatus(s3, statusBucket)
-    payload = statusPayload(conn, s3, bucket, ingest)
+    kind = source or ("cached" if snapshot is not None else "sql")
+    payload = statusPayload(conn, s3, bucket, ingest, snapshot=snapshot)
     payload["published_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     rate = walkRateBetween(payload, previous)
     if rate is not None:
@@ -750,14 +779,11 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    # The elapsed time is in the line because the snapshot counts the whole
-    # table: it is the one part of this program whose cost grows with the
-    # corpus rather than with the backlog, and it shares a database with the
-    # ingest it must not slow down. If it approaches --status-every, that is
-    # the number to act on.
-    log("published status.json in %.1fs: dps=%d state=%s work=2^%.3f walkers=%d "
+    # The SQL snapshot is the one part of this program whose cost grows with
+    # the corpus. Walker refresh is a list of ckpt/ objects and does not.
+    log("published status.json in %.1fs (%s): dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d"
-        % (time.time() - started, payload["dps"], payload["state"],
+        % (time.time() - started, kind, payload["dps"], payload["state"],
            payload["work"]["iterations_log2"] or 0, payload["walkers"],
            payload["ingest"]["outstanding_objects"],
            payload["ingest"]["unrecognised_objects"]))
@@ -925,12 +951,14 @@ def main(argv=None):
                     help="do not create the found_at index at startup")
     ap.add_argument("--status-every", type=float,
                     default=float(os.environ.get("RHO_STATUS_EVERY", "180")),
-                    help="seconds between status.json writes. The snapshot "
-                         "counts the whole campaign, and while it runs this "
-                         "program is not ingesting. At ~190 M rows a publish "
-                         "takes a few minutes; keep this at or above that. "
-                         "The page's Actions job runs every 3 minutes and reads "
-                         "this copy from the status bucket.")
+                    help="seconds between status.json writes. Walker liveness "
+                         "is an S3 list and can run at this cadence. Point "
+                         "counts come from --snapshot-every, because counting "
+                         "the whole campaign takes minutes at ~190 M rows.")
+    ap.add_argument("--snapshot-every", type=float,
+                    default=float(os.environ.get("RHO_SNAPSHOT_EVERY", "600")),
+                    help="seconds between SQL recounts of distinguished points. "
+                         "Walker liveness still refreshes every --status-every.")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -985,6 +1013,7 @@ def main(argv=None):
                            len(unrecognised)))
                     return 0
             published, wasBehind = 0.0, False
+            snapshot, snapAt = None, 0.0
             while True:
                 _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
                                              args.prefix, args.pass_objects)
@@ -998,8 +1027,15 @@ def main(argv=None):
                 wasBehind = behind
                 if args.status_bucket and (due or args.once):
                     try:
-                        with connect() as conn:
-                            publishStatus(conn, s3, args.bucket, args.status_bucket, ingest)
+                        need_sql = (snapshot is None
+                                    or time.time() - snapAt >= args.snapshot_every)
+                        if need_sql:
+                            with connect() as conn:
+                                snapshot = campaignSnapshot(conn)
+                            snapAt = time.time()
+                        publishStatus(None, s3, args.bucket, args.status_bucket,
+                                      ingest, snapshot=snapshot,
+                                      source="sql" if need_sql else "cached")
                         published = time.time()
                     except Exception as exc:
                         # Publishing is a view; never let it stop the ingest.
