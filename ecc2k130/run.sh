@@ -21,6 +21,9 @@
 # while the CLI must keep heartbeating.  search and fanout call validate first
 # (PREWARM=1, the default) so that build finishes before the timed pass loop.
 # Set PREWARM=0 to skip when the image is already warm.
+#
+# CURVE=131 selects the audited RTX PRO 6000 packed preset (campaign.json):
+# batch 16, 256 threads, 385024 workers, dp weight 32, ~14 B iterations/s.
 
 set -euo pipefail
 
@@ -28,14 +31,49 @@ CURVE=${CURVE:-97}          # 97 = ECC2K-95 (solved 1998, answer known); 131 = E
 HOURS=${HOURS:-4}           # per pass; the loop supplies the total
 PASSES=${PASSES:-6}         # 0 = until solved
 GPU=${ECC_GPU:-RTX-PRO-6000}
-BATCH=${BATCH:-8}
-THREADS=${THREADS:-128}
-LEAF=${LEAF:-17}
-WALKS=${WALKS:-4000000}
 RUNID=${RUNID:-1}
-DPW=${DPW:--1}           # -1 = size the cutoff from the measured rate
-LOADMAX=${LOADMAX:-50000000}  # cap the startup corpus reload; 0 = no limit
 COUNT=${COUNT:-4}           # fanout width
+
+if [ "$CURVE" = 131 ]; then
+    # Audited fleet preset — see RTX-PRO6000.md and aws/campaign.json.
+    PACKED=${PACKED:-1}
+    BATCH=${BATCH:-16}
+    THREADS=${THREADS:-256}
+    LEAF=${LEAF:-0}
+    WORKERS=${WORKERS:-385024}
+    WALKS=${WALKS:-$((WORKERS * BATCH))}
+    DPW=${DPW:-32}
+    LOADMAX=${LOADMAX:-2000000}
+    export ECC_CUDA_VERSION="${ECC_CUDA_VERSION:-13.3.1}"
+    export ECC_PACKED_SINGLE_PRODUCT="${ECC_PACKED_SINGLE_PRODUCT:-1}"
+    export ECC_PACKED_CACHE_DENOM="${ECC_PACKED_CACHE_DENOM:-1}"
+    export ECC_PACKED_BY_VALUE="${ECC_PACKED_BY_VALUE:-1}"
+    export ECC_PACKED_PERM_SIGMA="${ECC_PACKED_PERM_SIGMA:-3}"
+    export ECC_PACKED_POLY_CHAIN="${ECC_PACKED_POLY_CHAIN:-1}"
+    export ECC_PACKED_UNROLL_INV="${ECC_PACKED_UNROLL_INV:-1}"
+    export ECC_PACKED_PAIR_PRODUCTS="${ECC_PACKED_PAIR_PRODUCTS:-1}"
+    export ECC_PACKED_POLY_STATE="${ECC_PACKED_POLY_STATE:-1}"
+    export ECC_PACKED_DIRECT_REDUCE="${ECC_PACKED_DIRECT_REDUCE:-1}"
+    export ECC_PACKED_GENERATED_PRODUCT="${ECC_PACKED_GENERATED_PRODUCT:-1}"
+    export ECC_PACKED_CLMAD="${ECC_PACKED_CLMAD:-1}"
+    export ECC_PACKED_STATE_TILE="${ECC_PACKED_STATE_TILE:-256}"
+    export ECC_PACKED_WEIGHTED_PREFIX="${ECC_PACKED_WEIGHTED_PREFIX:-2}"
+    export ECC_PACKED_COMPACT_STATE="${ECC_PACKED_COMPACT_STATE:-1}"
+    export ECC_PACKED_SHARED_SIGMA="${ECC_PACKED_SHARED_SIGMA:-1}"
+    export ECC_PACKED_TOP_CLMAD="${ECC_PACKED_TOP_CLMAD:-0}"
+    export ECC_PACKED_CLMAD_SQUARE="${ECC_PACKED_CLMAD_SQUARE:-0}"
+    export ECC_PACKED_KARAT3="${ECC_PACKED_KARAT3:-0}"
+    export ECC_WALK_TABLE="${ECC_WALK_TABLE:-0}"
+    export ECC_TABLE_PIVOT_BYTES="${ECC_TABLE_PIVOT_BYTES:-0}"
+else
+    PACKED=${PACKED:-0}
+    BATCH=${BATCH:-8}
+    THREADS=${THREADS:-128}
+    LEAF=${LEAF:-17}
+    WALKS=${WALKS:-4000000}
+    DPW=${DPW:--1}
+    LOADMAX=${LOADMAX:-50000000}
+fi
 
 export ECC_GPU="$GPU"
 # Modal relays the container's stdout; keep Python from buffering it so the
@@ -51,9 +89,16 @@ esac
 
 command -v modal >/dev/null || { echo "modal CLI not found: pip install -U modal" >&2; exit 1; }
 
+packed_flag=
+if [ "$PACKED" = 1 ]; then
+    packed_flag=--packed
+fi
+
 shape="--curve $CURVE --batch $BATCH --threads $THREADS --leaf $LEAF --walks $WALKS"
 shape="$shape --dp-weight $DPW --load-max $LOADMAX"
-build_shape="--batch $BATCH --threads $THREADS --leaf $LEAF"
+[ -n "$packed_flag" ] && shape="$shape $packed_flag"
+build_shape="--batch $BATCH --threads $THREADS --leaf $LEAF --min-blocks 2"
+[ -n "$packed_flag" ] && build_shape="$build_shape $packed_flag"
 
 prewarm_modal() {
     echo "pre-warming Modal image and GPU build on $GPU ($build_shape)..."
@@ -73,7 +118,7 @@ prewarm)
     ;;
 
 bench)
-    modal run modal_app.py::bench --batch "$BATCH" --threads "$THREADS" --leaf "$LEAF"
+    modal run modal_app.py::bench $build_shape --steps 1024 --launches 32 --workers "${WORKERS:-0}"
     ;;
 
 search)
@@ -81,6 +126,9 @@ search)
         prewarm_modal
     fi
     echo "curve $CURVE on $GPU: $PASSES passes of ${HOURS}h, run id $RUNID"
+    if [ "$PACKED" = 1 ]; then
+        echo "packed preset: batch=$BATCH threads=$THREADS workers=$WORKERS walks=$WALKS dp-weight=$DPW"
+    fi
     echo "checkpoint /data/ckpt/curve$CURVE-run$RUNID.ck, corpus /data/dp/curve$CURVE-run$RUNID.bin"
     pass=1
     while [ "$PASSES" -eq 0 ] || [ "$pass" -le "$PASSES" ]; do
