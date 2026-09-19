@@ -210,19 +210,33 @@ def cpuThreadCount():
     return max(1, int(os.cpu_count() or 1))
 
 
-def gpuName(gpu):
+def gpuName(gpu, attempts=3):
     # Non-GPU clients (CPU / FPGA host) have no nvidia-smi; the bootstrap
     # tells us what the device is instead.
     if os.environ.get("ECC_DEVICE_NAME"):
         return os.environ["ECC_DEVICE_NAME"]
     if isCpuDevice():
         return "cpu/%d" % cpuThreadCount()
-    try:
-        r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
-                           capture_output=True, text=True)
-    except OSError:
-        return "cpu"
-    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
+    for attempt in range(attempts):
+        try:
+            r = subprocess.run(
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
+                capture_output=True, text=True)
+        except OSError:
+            break
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+        if attempt + 1 < attempts:
+            time.sleep(1 + attempt)
+    # Never "cpu" on a host that did not say it was one. A CPU-shaped gpuName
+    # goes into the slot record, isCpuSlotRecord then reads it as a CPU slot,
+    # and idleSlotClaimable refuses CPU slots to every GPU claimant -- so one
+    # failed nvidia-smi call would strand that slot's checkpoint behind a
+    # claimant that can only be a CPU worker, which would refuse the packed
+    # shape anyway (exit 6). An unreadable GPU is unknown, not absent.
+    log("nvidia-smi did not name GPU %d after %d attempts; "
+        "claiming as an unknown GPU rather than a CPU slot" % (gpu, attempts))
+    return "gpu%d-unknown" % gpu
 
 
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,

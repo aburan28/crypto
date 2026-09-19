@@ -564,19 +564,58 @@ mechanism here and a vacuum per deploy is not a cost this table can carry.
 With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
 vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
 snapshot from over six minutes to **142.8 s** (`published status.json in
-142.8s`, which is why that line carries a duration). It is still O(corpus)
-for this program's own `publishStatus`. The Pages snapshot no longer is:
+142.8s`, which is why that line carries a duration). The Pages snapshot is no longer O(corpus):
 `scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
 once and installs a statement-level insert trigger on
 `distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
 the buckets current without a code deploy on this host. Later Pages runs
-read the rollup. This program's 30-minute `--status-every` still buys room
-for the 142 s count query until an ingest-host deploy starts reading the
-same tables.
+read the rollup.
+
+**Neither is the count here, and waiting to fix that cost a day.** The 142.8 s
+was measured with a visibility map that had just been vacuumed, and `VACUUM`
+marks only the pages that exist when it runs. Every row added afterwards costs
+the heap fetch the index-only scan was meant to avoid, so the same query grew
+far faster than the corpus: 143 s at 137 M rows on 2026-09-17, then **1,663 s at
+14:15Z, 2,010 s at 15:20Z and 2,916 s at 17:38Z** on 2026-09-18 at 188 M. The
+loop is pass, publish, pass, so those are minutes in which the store is not
+ingesting; the 16:49Z-to-18:05Z gap in the log is one of them. `campaignTotals`
+therefore reads the same rollup the Pages job does, which is O(hours), and
+keeps the scan only for a store whose rollup is missing or not yet backfilled.
+Which one answered is in the log line and in the document's `source`, because
+this repository has already paid once for a figure whose origin was ambiguous.
+The ingest connects as the `rho/dp-rds` role while those tables belong to the
+walker role — the reason the trigger needs `SECURITY DEFINER` — so a refused
+`SELECT` is an expected answer and not an error: it falls back and says so.
+Granting that role `SELECT` on `rho_dp_hour`, `rho_dp_recent` and `rho_dp_meta`
+is what keeps it on the fast path.
+
+**A backfill that locks the table it reports on is worse than no backfill.**
+The rollup's first backfill was one statement holding `SHARE` on
+`distinguished_points`. At 187 M rows it does not finish inside its 800 s
+timeout, and `SHARE` conflicts with the `ROW EXCLUSIVE` an `INSERT` takes, so
+from about 16:00Z on 2026-09-18 every 15-minute Pages run queued behind this
+ingest, held this ingest behind itself for the rest of the attempt, timed out,
+rolled back, and left `ready` false for the next run to repeat. The page stayed
+on its 11:25Z snapshot throughout — the backfill meant to unstick it was also
+what kept the store from moving. The fleet never stopped: S3 had fresh objects
+the whole time. It is chunked by hour now, each hour one absolute upsert
+(`ON CONFLICT DO UPDATE SET dps = EXCLUDED.dps`), committed as it goes and
+resumable from a cursor, taking no lock on the table and safe to run beside the
+trigger because one statement is one snapshot. `scripts/rho_status/test_rollup_postgres.py`
+runs that against a real server, including the case that matters: the backfill
+completes while another session holds `ROW EXCLUSIVE`.
+
+Clearing a stuck rollup needs one run of the backfill without the 900 s hop
+ceiling, because the Pages job only reaches the backfill while `ready` is false
+and only a completed backfill clears it. `scripts/rho_status/complete_rollup.sh up`
+does that from a short-lived host in this subnet under this instance profile,
+and terminates itself when the rollup is ready.
 
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
-is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
+is the 15-minute Actions job, with this copy as the second one. On the rollup
+path that ceases to be the thing protecting the ingest, but leave it: it is
+also what bounds the cost if a store ever falls back to the scan. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.
