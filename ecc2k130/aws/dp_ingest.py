@@ -159,8 +159,10 @@ def databaseUrl():
 
     blob = boto3.client("secretsmanager").get_secret_value(SecretId=secret)["SecretString"]
     c = json.loads(blob)
-    return "postgresql://%s:%s@%s:5432/%s" % (
-        c["username"], urllib.request.quote(c["password"], safe=""), host, c["dbname"])
+    sslmode = os.environ.get("RHO_DB_SSLMODE", "require")
+    return "postgresql://%s:%s@%s:5432/%s?sslmode=%s" % (
+        c["username"], urllib.request.quote(c["password"], safe=""),
+        host, c["dbname"], sslmode)
 
 
 def s3Objects(s3, bucket, prefix="dp/"):

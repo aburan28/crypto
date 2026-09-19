@@ -9,6 +9,7 @@
 #   ./run.sh fanout              the same across several GPUs at once
 #   ./run.sh merge               scan the corpus for collisions
 #   ./run.sh sync                copy new volume DPs into the campaign bucket
+#   ./run.sh ingest              copy s3://bucket/dp/ into Postgres (any host)
 #
 # A container has a finite life, so a real search is a loop: each pass runs for
 # HOURS, is stopped with SIGTERM so the client checkpoints, and the next pass
@@ -83,7 +84,7 @@ cd "$(dirname "$0")"
 
 cmd=${1:-search}
 case "$cmd" in
-    validate|prewarm|bench|search|fanout|merge|sync) ;;
+    validate|prewarm|bench|search|fanout|merge|sync|ingest) ;;
     *) sed -n '3,11p' "$0"; exit 1 ;;
 esac
 
@@ -182,6 +183,11 @@ merge)
 
 sync)
     python3 modal_sync.py --curve "$CURVE" --run-id "$RUNID" ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
+    ;;
+
+ingest)
+    shift
+    INGEST_ENSURE_ACCESS=${INGEST_ENSURE_ACCESS:-1} exec aws/ingest.sh "$@"
     ;;
 
 esac
