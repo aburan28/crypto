@@ -425,7 +425,10 @@ every boot after it.
   via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through
-  the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
+  the tagged `rho-ecc2k-walker` host. If that instance is not running, it
+  republishes the ingest host's `status.json` from the status bucket
+  instead of leaving Pages on the last successful hop. It does not open
+  RDS to the internet.
 * `status.py` sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
   fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint

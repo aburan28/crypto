@@ -42,7 +42,14 @@ from snapshot import (
     sql_campaign,
     sql_hour,
 )
-from work_feed import MAX_FEED_AGE_S, feed_url, ingest_block, merge_work, work_block
+from work_feed import (
+    MAX_FEED_AGE_S,
+    feed_url,
+    ingest_block,
+    merge_work,
+    snapshot_from_feed,
+    work_block,
+)
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -270,6 +277,13 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("ecc2k-dp-walker", text)
         self.assertIn("no running instance tagged Name=rho-ecc2k-walker", text)
         self.assertIn("tagged walkers (any state)", text)
+        # Pages has been frozen on 11:25Z every time this hop found no
+        # running walker. The ingest host already writes the counts; copy
+        # that file rather than failing the job.
+        self.assertIn("--as-snapshot", text)
+        no_walker = text.split("no running instance tagged Name=rho-ecc2k-walker", 1)[1]
+        self.assertIn("write_from_ingest_feed", no_walker.split("exit 1", 1)[0])
+        self.assertIn("after walker hop failed", text)
         # The snapshot query runs silently and is getting slower as the DP
         # table grows; without keepalives a slow query is indistinguishable
         # from a dead connection and the hop dies on a broken pipe.
@@ -567,6 +581,32 @@ def work_feed(iterations=7817055361302528, generated_at=None, campaign="ecc2k-13
     }
 
 
+def ingest_campaign_feed(generated_at=None, campaign="ecc2k-130",
+                         dps=187000000, dps_last_hour=5120):
+    generated_at = generated_at or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    feed = work_feed(generated_at=generated_at, campaign=campaign)
+    feed.update({
+        "curve_id": "certicom-ecc2k-130",
+        "dp_mask_bits": None,
+        "campaign_created_at": "2026-09-11T17:51:35Z",
+        "dps": dps,
+        "dps_last_hour": dps_last_hour,
+        "dps_last_day": 120000,
+        "collisions": 0,
+        "walkers": 13,
+        "first_dp_at": "2026-09-11T17:51:35Z",
+        "last_dp_at": generated_at,
+        "hourly": [{"hour": "2026-09-19T03:00:00Z", "dps": dps_last_hour}],
+        "ingest": {
+            "outstanding_objects": 0,
+            "unrecognised_objects": 0,
+            "newest_object_at": generated_at,
+            "lag_seconds": 12,
+        },
+    })
+    return feed
+
+
 class WorkFeedTests(unittest.TestCase):
     def test_takes_the_iteration_total_and_counts_who_is_walking(self):
         block = work_block(work_feed(), "ecc2k-130")
@@ -640,6 +680,67 @@ class WorkFeedTests(unittest.TestCase):
         with open(os.path.join(HERE, "work_feed.py"), encoding="utf-8") as fh:
             source = fh.read()
         self.assertNotRegex(source, r"\b\d{12}\b", "an account number is hardcoded in work_feed.py")
+
+    def test_snapshot_from_feed_is_public_and_keeps_the_ingest_timestamp(self):
+        stamped = "2026-09-19T03:44:00Z"
+        feed = ingest_campaign_feed(generated_at=stamped)
+        snapshot = snapshot_from_feed(feed, "ecc2k-130")
+        self.assertEqual(snapshot["generated_at"], stamped)
+        self.assertEqual(snapshot["source"], "ingest-status-feed")
+        self.assertEqual(snapshot["query_driver"], "ingest-feed")
+        self.assertEqual(snapshot["state"], "COLLECTING")
+        self.assertEqual(snapshot["dps"], 187000000)
+        self.assertEqual(snapshot["dps_last_hour"], 5120)
+        self.assertEqual(snapshot["per_worker"], [])
+        self.assertEqual(snapshot["workers"], 0)
+        self.assertEqual(snapshot["work"]["walking_slots"], 2)
+        self.assertNotIn("per_slot", snapshot["work"])
+        assert_public(snapshot)
+        dumped = json.dumps(snapshot)
+        self.assertNotIn("run_id", dumped)
+        self.assertNotIn('"slot"', dumped)
+
+    def test_snapshot_from_feed_keeps_work_on_a_stale_ingest_document(self):
+        # Overlaying a stale total onto a fresh walker snapshot is refused;
+        # here the ingest document *is* the snapshot, so dropping the total
+        # would publish counts with no walk rate for no reason.
+        old = datetime.now(timezone.utc) - timedelta(seconds=MAX_FEED_AGE_S + 3600)
+        stamped = old.strftime("%Y-%m-%dT%H:%M:%SZ")
+        feed = ingest_campaign_feed(generated_at=stamped)
+        snapshot = snapshot_from_feed(feed, "ecc2k-130")
+        self.assertEqual(snapshot["generated_at"], stamped)
+        self.assertEqual(snapshot["work"]["iterations"], 7817055361302528)
+        self.assertGreater(snapshot["work"]["feed_age_seconds"], MAX_FEED_AGE_S)
+        self.assertIsNone(snapshot_from_feed(work_feed(), "ecc2k-130"))
+        self.assertIsNone(snapshot_from_feed(ingest_campaign_feed(campaign="other"), "ecc2k-130"))
+
+    def test_as_snapshot_cli_writes_the_file_and_fails_closed(self):
+        import work_feed as wf
+
+        feed = ingest_campaign_feed(generated_at="2026-09-19T03:44:00Z")
+        original = wf.fetch
+        wf.fetch = lambda url, timeout=20: feed
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                out = os.path.join(tmp, "status.json")
+                self.assertEqual(wf.main([
+                    "--as-snapshot",
+                    "--status", out,
+                    "--feed-url", "https://example.invalid/status.json",
+                ]), 0)
+                with open(out, encoding="utf-8") as fh:
+                    published = json.load(fh)
+                self.assertEqual(published["generated_at"], "2026-09-19T03:44:00Z")
+                self.assertEqual(published["dps"], 187000000)
+                assert_public(published)
+                wf.fetch = lambda url, timeout=20: work_feed()
+                self.assertEqual(wf.main([
+                    "--as-snapshot",
+                    "--status", out,
+                    "--feed-url", "https://example.invalid/status.json",
+                ]), 1)
+        finally:
+            wf.fetch = original
 
     def test_workflow_merges_the_feed_before_it_renders_history(self):
         # The rate is a difference between snapshots, so the iteration total
