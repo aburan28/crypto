@@ -1225,11 +1225,14 @@ class SharedSigmaBuildTests(unittest.TestCase):
 
     def test_preblackwell_targets_bind_gpu_arch_and_fastest_product(self):
         # Ada receipt selected CLMAD=1; Turing has no clmad. See
-        # benchmarks/preblackwell/summary.json.
+        # benchmarks/preblackwell/summary.json. B200 is Blackwell sm_100
+        # with automatic workers (B200.md).
         cases = (
             ('bench-g6-modal', 'ECC_GPU=L4', '1'),
             ('bench-g6e-modal', 'ECC_GPU=L40S', '1'),
             ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
+            ('bench-b200-modal', 'ECC_GPU=B200', '1'),
+            ('bench-waves-modal', 'ECC_GPU=RTX-PRO-6000', '1'),
             ('bench-modal-gpu', 'ECC_GPU=L40S', '1'),
             ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
@@ -1255,6 +1258,14 @@ class SharedSigmaBuildTests(unittest.TestCase):
         self.assertEqual(bang.returncode, 0, bang.stderr)
         self.assertIn('ECC_GPU=H100!', bang.stdout)
         self.assertNotIn('--workers', bang.stdout)
+        waves = subprocess.run(
+            ['make', '-n', 'bench-waves-modal', 'WAVES_GPU=L40S'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(waves.returncode, 0, waves.stderr)
+        self.assertIn('ECC_GPU=L40S', waves.stdout)
+        self.assertIn('modal_app.py::waves', waves.stdout)
+        self.assertIn('--wave-list', waves.stdout)
+        self.assertNotIn('--workers', waves.stdout)
 
 
 if __name__ == '__main__':

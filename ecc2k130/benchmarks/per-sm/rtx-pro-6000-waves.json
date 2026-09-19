@@ -1,0 +1,95 @@
+{
+  "kind": "per-SM occupancy wave sweep",
+  "modal": "RTX-PRO-6000",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cc": "120",
+  "valid": true,
+  "sms": 188,
+  "automaticThreads": 96256,
+  "residentBlocks": 2,
+  "blockThreads": 256,
+  "registers": 104,
+  "packedClmad": true,
+  "packedTopClmad": false,
+  "pipeM": 85.0,
+  "referencePerSmM": 80.40314893617023,
+  "rows": [
+    {
+      "wave": 1,
+      "workers": 96256,
+      "medianM": 14479.876,
+      "medianB": 14.479876,
+      "minRateM": 14455.338,
+      "maxRateM": 14484.095,
+      "ratesM": [
+        14455.338,
+        14479.876,
+        14484.095
+      ],
+      "perSmM": 77.02061702127659,
+      "ratioToPipe": 0.9061249061326658,
+      "ratioToFour": 0.9697061343345145,
+      "ratioToRefSm": 0.9579303552205533,
+      "class": "engineering"
+    },
+    {
+      "wave": 4,
+      "workers": 385024,
+      "medianM": 14932.231,
+      "medianB": 14.932231,
+      "minRateM": 14858.449,
+      "maxRateM": 15052.917,
+      "ratesM": [
+        15052.917,
+        14932.231,
+        14858.449
+      ],
+      "perSmM": 79.42676063829786,
+      "ratioToPipe": 0.934432478097622,
+      "ratioToFour": 1.0,
+      "ratioToRefSm": 0.9878563425588283,
+      "class": "engineering"
+    },
+    {
+      "wave": 6,
+      "workers": 577536,
+      "medianM": 14861.568,
+      "medianB": 14.861568,
+      "minRateM": 14836.661,
+      "maxRateM": 14903.615,
+      "ratesM": [
+        14903.615,
+        14861.568,
+        14836.661
+      ],
+      "perSmM": 79.05089361702127,
+      "ratioToPipe": 0.9300105131414268,
+      "ratioToFour": 0.9952677533584902,
+      "ratioToRefSm": 0.9831815626994601,
+      "class": "engineering"
+    },
+    {
+      "wave": 8,
+      "workers": 770048,
+      "medianM": 14844.084,
+      "medianB": 14.844084,
+      "minRateM": 14843.982,
+      "maxRateM": 14860.159,
+      "ratesM": [
+        14860.159,
+        14843.982,
+        14844.084
+      ],
+      "perSmM": 78.95789361702128,
+      "ratioToPipe": 0.928916395494368,
+      "ratioToFour": 0.9940968633555162,
+      "ratioToRefSm": 0.9820248915835835,
+      "class": "engineering"
+    }
+  ],
+  "bestWave": 4,
+  "bestPerSmM": 79.42676063829786,
+  "fourBeaten": false,
+  "parsedFrom": "modal-log",
+  "modalApp": "ap-CreQoLEbhXsEhB1glybxbo"
+}

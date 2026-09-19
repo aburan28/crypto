@@ -634,6 +634,91 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
     return info
 
 
+def parseWaveList(text):
+    """Positive integer wave counts, comma-separated, order preserved."""
+    waves = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        n = int(part)
+        if n < 1:
+            raise ValueError("waves must be positive integers, got %r" % part)
+        waves.append(n)
+    if not waves:
+        raise ValueError("waves is empty")
+    return waves
+
+
+def parsePackedLaunch(text):
+    """SM count and automatic worker count from one packed client dump."""
+    sms = re.search(r"(\d+) SMs", text)
+    resident = re.search(
+        r"(\d+) block\(s\) of (\d+) packed threads resident per SM", text)
+    threads = re.search(r"backend cuda-packed131: (\d+) threads", text)
+    if not (sms and resident and threads):
+        raise ValueError("packed launch identity missing from:\n" + text[-2000:])
+    return {
+        "sms": int(sms.group(1)),
+        "residentBlocks": int(resident.group(1)),
+        "blockThreads": int(resident.group(2)),
+        "automaticThreads": int(threads.group(1)),
+    }
+
+
+@app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR)
+def runWaves(batch=32, threads=256, leaf=0, minBlocks=2, steps=1024, launches=32,
+             repeats=3, packed=True, waves="1,4,6,8", preferL1=False):
+    """One allocation, several oversubscribed grids.
+
+    Automatic occupancy is one wave: SMs × resident blocks × block threads.
+    The shipping 6000 preset is four waves. This measures that multiplier on
+    the same GPU, same binary, without a rebuild between rows.
+    """
+    if not packed:
+        raise ValueError("runWaves is the packed-walk occupancy sweep")
+    if leaf:
+        raise ValueError("packed arithmetic requires leaf=0")
+    waveList = parseWaveList(waves)
+    info = dict(gpu=gpuName(), cc=computeCapability(), batch=batch,
+                threads=threads, leaf=leaf, minBlocks=minBlocks,
+                steps=steps, launches=launches, repeats=repeats,
+                packed=True, waves=waveList, preferL1=preferL1)
+    ok, log = buildFor(batch, threads, leaf, minBlocks=minBlocks)
+    info["buildLog"] = log
+    if not ok:
+        return dict(info, valid=False, error=log)
+    info["identity"] = benchmarkIdentity(True)
+    probe = ("./ecc2k130 --curve 131 --bench --packed --steps 1 --launches 1 "
+             "--verify 0")
+    rc, out = sh(probe, timeout=600)
+    if rc != 0:
+        return dict(info, valid=False, error=out, probe=out)
+    launch = parsePackedLaunch(out)
+    info.update(launch)
+    info["probe"] = out
+    print("automatic occupancy: %d threads on %d SMs (%d x %d resident)"
+          % (launch["automaticThreads"], launch["sms"],
+             launch["residentBlocks"], launch["blockThreads"]), flush=True)
+    rows = []
+    for wave in waveList:
+        workers = launch["automaticThreads"] * wave
+        print("=== wave %d: %d workers ===" % (wave, workers), flush=True)
+        measured = measureBench(steps, launches, workers, preferL1, repeats, True)
+        row = dict(wave=wave, workers=workers, **measured)
+        if launch["sms"] and measured.get("valid"):
+            row["perSmM"] = measured["rate"] / launch["sms"]
+            row["medianB"] = measured["rate"] / 1000.0
+        rows.append(row)
+        if not measured.get("valid"):
+            break
+    info["rows"] = rows
+    info["valid"] = bool(rows) and all(r.get("valid") for r in rows)
+    validRows = [r for r in rows if r.get("valid")]
+    info["best"] = max(validRows, key=lambda r: r["rate"]) if validRows else None
+    return info
+
+
 def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
                     knobs=(False, False, False)):
     """The (leaf, batch, threads, minBlocks, streamKarat, smemSpill, globalCg)
@@ -1279,6 +1364,22 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
     print(json.dumps(r, indent=2))
     if not r.get('valid'):
         raise RuntimeError('benchmark did not complete successfully')
+
+
+@app.local_entrypoint()
+def waves(gpu: str = "", batch: int = 16, threads: int = 256, leaf: int = 0,
+          min_blocks: int = 2, steps: int = 1024, launches: int = 32,
+          repeats: int = 3, packed: bool = True, wave_list: str = "1,4,6,8",
+          prefer_l1: bool = False):
+    """Oversubscribed-grid sweep on one packed binary. --wave-list is 1,4,6,8."""
+    r = onGpu(runWaves, gpu).remote(batch=batch, threads=threads, leaf=leaf,
+                                    minBlocks=min_blocks, steps=steps,
+                                    launches=launches, repeats=repeats,
+                                    packed=packed, waves=wave_list,
+                                    preferL1=prefer_l1)
+    print(json.dumps(r, indent=2))
+    if not r.get("valid"):
+        raise RuntimeError("wave sweep did not complete successfully")
 
 
 @app.local_entrypoint()

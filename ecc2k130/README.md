@@ -39,9 +39,12 @@ Modal GPUs are a `--bench` survey, not a campaign move:
 [benchmarks/modal-gpus/SURVEY.md](benchmarks/modal-gpus/SURVEY.md), via
 `make bench-modal-gpu SURVEY_GPU=…`. Per-family notes remain
 [RTX-PRO4500.md](RTX-PRO4500.md) (EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md)
-(L4 / L40S), [T4-G4DN.md](T4-G4DN.md). The arithmetic and storage options of
-the RTX PRO 6000 preset carry over; `PACKED_CLMAD` is on for sm_80+ and off
-on Turing. Workers stay automatic — 385,024 is a 188-SM occupancy.
+(L4 / L40S), [T4-G4DN.md](T4-G4DN.md), and [B200.md](B200.md)
+(`make bench-b200-modal`). The arithmetic and storage options of the RTX PRO
+6000 preset carry over; `PACKED_CLMAD` is on for sm_80+ and off on Turing.
+Workers stay automatic — 385,024 is a 188-SM occupancy.
+Per-SM occupancy (oversubscribed waves, same walk) is
+[benchmarks/per-sm/WAVES.md](benchmarks/per-sm/WAVES.md).
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
