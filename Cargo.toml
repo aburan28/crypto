@@ -52,3 +52,13 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
+
+[[bench]]
+name = "pqc_speed"
+path = "benches/pqc_speed.rs"
+harness = false
+
+[[bench]]
+name = "pqc_split"
+path = "benches/pqc_split.rs"
+harness = false
