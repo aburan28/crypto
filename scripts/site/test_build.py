@@ -291,10 +291,14 @@ class BuildTests(unittest.TestCase):
         # document a pin reads in both the pull_request and push filters.
         workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
         cited = ("ecc2k130/LAMBDA-PROJECTIVE.md", "ecc2k130/aws/README.md")
-        for trigger in ("pull_request:", "push:"):
-            block = workflow[workflow.index(trigger):]
-            block = block[:block.index("\n\n")]
-            paths = re.findall(r'-\s+"([^"]+)"', block)
+        for trigger in ("pull_request", "push"):
+            # The trigger's block is everything indented deeper than its key,
+            # up to the next key at the same depth (the triggers are adjacent,
+            # with no blank line between them) or the next top-level key.
+            match = re.search(r"^  %s:\n((?:    .*\n|\n)*)" % trigger, workflow, re.M)
+            self.assertIsNotNone(match, "no %s trigger in the status workflow" % trigger)
+            paths = re.findall(r'-\s+"([^"]+)"', match.group(1))
+            self.assertIn("docs/ecc2k130-status/**", paths, trigger)
             for doc in cited:
                 self.assertIn(doc, paths, "%s does not list %s" % (trigger, doc))
 
