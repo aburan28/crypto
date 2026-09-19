@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Upload new distinguished points from the Modal volume into the campaign bucket.
 
-Modal search appends 32-byte records to /data/dp/curve{C}-run{R}.bin on the ecc2k130
-volume. The public dashboard reads Postgres, which dp_ingest.py fills from
-s3://<bucket>/dp/. This script copies each new whole-record stretch into the
-ecc2k-seed-orbit-v1 object layout the ingester already understands, so Modal
-contributions ride the same store path as fleet workers.
+Modal search appends 32-byte records to /data/dp/curve{C}-run{R}.bin and
+checkpoints to /data/ckpt/curve{C}-run{R}.ck on the ecc2k130 volume. The
+public dashboard's iteration total and walk rate come from slot checkpoints in
+s3://<bucket>/ckpt/, not from the point count. This script copies each new
+whole-record stretch into the ecc2k-seed-orbit-v1 dp layout the ingester
+already understands, and uploads fresh checkpoints as immutable
+ckpt/slot-NNNNN/<sha256>.ck objects so dp_ingest.py's checkpointWork sees
+Modal as slot MODAL_SLOT_BASE + run_id.
 """
 
 from __future__ import annotations
@@ -85,6 +88,14 @@ def remote_corpus(curve, run_id):
     return "dp/curve%d-run%d.bin" % (curve, run_id)
 
 
+def remote_checkpoint(curve, run_id):
+    return "ckpt/curve%d-run%d.ck" % (curve, run_id)
+
+
+def checkpoint_key(slot, ckpt_path):
+    return "ckpt/slot-%05d/%s.ck" % (slot, sha256_file(ckpt_path))
+
+
 def orbit_key(slot, run_id, offset, delta_path):
     sid = stream_id(run_id)
     return "dp/slot-%05d/%s-%016d-%s.bin" % (
@@ -105,6 +116,41 @@ def modal_volume_get(volume, remote, local):
     return True
 
 
+def sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
+    """Upload the Modal checkpoint when its content hash changes."""
+    state_file = state_path(curve, run_id, state_dir)
+    state = load_state(state_file)
+    remote = remote_checkpoint(curve, run_id)
+    slot = slot_for_run(run_id)
+
+    with tempfile.TemporaryDirectory(prefix="ecc-modal-ckpt-") as tmp:
+        local = os.path.join(tmp, os.path.basename(remote))
+        if not modal_volume_get(volume, remote, local):
+            log("no checkpoint yet at %s on volume %s" % (remote, volume))
+            return dict(checkpoint_uploaded=False, checkpoint_key=None)
+
+        digest = sha256_file(local)
+        if state.get("checkpoint_sha256") == digest:
+            return dict(checkpoint_uploaded=False, checkpoint_key=state.get("checkpoint_key"))
+
+        key = checkpoint_key(slot, local)
+        if dry_run:
+            log("dry-run: would upload checkpoint to s3://%s/%s" % (bucket, key))
+        else:
+            if s3 is None:
+                import boto3
+                s3 = boto3.client("s3")
+            s3.upload_file(local, bucket, key)
+            log("uploaded checkpoint to s3://%s/%s" % (bucket, key))
+        state.update(checkpoint_sha256=digest,
+                     checkpoint_key=key,
+                     checkpoint_sync=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                     checkpoint_slot=slot)
+        if not dry_run:
+            save_state(state_file, state)
+        return dict(checkpoint_uploaded=True, checkpoint_key=key)
+
+
 def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
     remote = remote_corpus(curve, run_id)
     state_file = state_path(curve, run_id, state_dir)
@@ -115,14 +161,16 @@ def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
         local = os.path.join(tmp, os.path.basename(remote))
         if not modal_volume_get(volume, remote, local):
             log("no corpus yet at %s on volume %s (offset still %d)" % (remote, volume, offset))
-            return dict(offset=offset, uploaded_records=0, objects=0, pending=False)
+            ckpt = sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=dry_run)
+            return dict(offset=offset, uploaded_records=0, objects=0, pending=False, **ckpt)
 
         size = os.path.getsize(local)
         whole = size - size % RECORD_BYTES
         if whole <= offset:
             log("corpus %s: %d bytes on volume, nothing new after offset %d"
                 % (remote, size, offset))
-            return dict(offset=offset, uploaded_records=0, objects=0, pending=False)
+            ckpt = sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=dry_run)
+            return dict(offset=offset, uploaded_records=0, objects=0, pending=False, **ckpt)
 
         slot = slot_for_run(run_id)
         uploaded_records = 0
@@ -157,7 +205,9 @@ def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
                      bucket=bucket)
         if not dry_run:
             save_state(state_file, state)
-        return dict(offset=offset, uploaded_records=uploaded_records, objects=objects, pending=True)
+        ckpt = sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=dry_run)
+        return dict(offset=offset, uploaded_records=uploaded_records, objects=objects,
+                    pending=True, **ckpt)
 
 
 def main(argv=None):
