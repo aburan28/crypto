@@ -7,6 +7,7 @@
 #   ./run.sh search              collect, resuming after every container deadline
 #   ./run.sh fanout              the same across several GPUs at once
 #   ./run.sh merge               scan the corpus for collisions
+#   ./run.sh sync                copy new volume DPs into the campaign bucket
 #
 # A container has a finite life, so a real search is a loop: each pass runs for
 # HOURS, is stopped with SIGTERM so the client checkpoints, and the next pass
@@ -38,8 +39,8 @@ cd "$(dirname "$0")"
 
 cmd=${1:-search}
 case "$cmd" in
-    validate|bench|search|fanout|merge) ;;
-    *) sed -n '3,9p' "$0"; exit 1 ;;
+    validate|bench|search|fanout|merge|sync) ;;
+    *) sed -n '3,10p' "$0"; exit 1 ;;
 esac
 
 command -v modal >/dev/null || { echo "modal CLI not found: pip install -U modal" >&2; exit 1; }
@@ -79,8 +80,12 @@ search)
             echo "pass $pass failed; the checkpoint survives, retrying" >&2
         fi
         rm -f /tmp/ecc-pass.$$
+        if [ "${SYNC:-1}" != 0 ]; then
+            "$0" sync || echo "sync after pass $pass failed; will retry" >&2
+        fi
         pass=$((pass + 1))
     done
+    "$0" sync || true
     modal run modal_app.py::merge --curve "$CURVE"
     ;;
 
@@ -100,6 +105,10 @@ fanout)
 
 merge)
     modal run modal_app.py::merge --curve "$CURVE"
+    ;;
+
+sync)
+    python3 modal_sync.py --curve "$CURVE" --run-id "$RUNID" ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
     ;;
 
 esac
