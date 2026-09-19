@@ -29,7 +29,7 @@
 #   DATABASE_URL                    full URL; overrides secret lookup
 #   INGEST_THREADS                  default 6
 #   INGEST_STATUS_EVERY / RHO_STATUS_EVERY   default 180 (walker refresh)
-#   INGEST_SNAPSHOT_EVERY / RHO_SNAPSHOT_EVERY  default 600 (SQL point counts)
+#   INGEST_SNAPSHOT_EVERY / RHO_SNAPSHOT_EVERY  default 0 (SQL on every status write)
 #   INGEST_VENV                     venv dir (default .ingest-venv beside script)
 set -euo pipefail
 
@@ -42,7 +42,7 @@ BUCKET=${ECC_BUCKET:-${RHO_BUCKET:-ecc2k130-$ACCOUNT}}
 STATUS_BUCKET=${ECC_STATUS_BUCKET:-${RHO_STATUS_BUCKET:-ecc2k130-status-$ACCOUNT}}
 THREADS=${INGEST_THREADS:-6}
 STATUS_EVERY=${INGEST_STATUS_EVERY:-${RHO_STATUS_EVERY:-180}}
-SNAPSHOT_EVERY=${INGEST_SNAPSHOT_EVERY:-${RHO_SNAPSHOT_EVERY:-600}}
+SNAPSHOT_EVERY=${INGEST_SNAPSHOT_EVERY:-${RHO_SNAPSHOT_EVERY:-0}}
 VENV=${INGEST_VENV:-$(pwd)/.ingest-venv}
 RDS_SG=${INGEST_RDS_SG:-sg-08c045a6f2fd2b8dc}
 

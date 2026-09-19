@@ -22,6 +22,22 @@ history and are the reason this is a file rather than a shell one-liner:
   * **Restartable by the machine, not by a person.** Deployed as a systemd unit
     with `Restart=always`; a database failover costs a retry, not an outage that
     ends when somebody notices.
+  * **Its published figures cost the same on any day of the campaign.** The
+    snapshot used to ask the whole table for every number it published, every
+    few minutes, on the instance the ingest writes to. `dp_ingest_totals` and
+    `dp_ingest_hourly` are maintained by the insert itself, in the transaction
+    that adds the points, so they cannot drift from what they summarise and a
+    publish reads one row and 48 more.
+  * **It reports the collision it is uniquely placed to see.** The unique key
+    that makes re-ingest harmless is the same constraint that defines a
+    collision: two walks reaching one distinguished point from different
+    seeds. `DO NOTHING` cannot tell that from a worker re-reporting its own
+    point, and dropped both alike, so the campaign's terminal event was the
+    one thing this program threw away -- and `rho_collisions`, which it and
+    scripts/rho_status/snapshot.py both read, had no writer at all. A
+    conflicting record is now compared against the stored one and a genuine
+    meeting is recorded and published at once. `merge.py` over the S3 corpus
+    stays the independent check rather than the only detector.
 
 Record and column encodings are not invented here. They are read back from
 `rho_campaigns.meta`, which the original ingest wrote:
@@ -336,8 +352,275 @@ def ingestedCounts(conn, ttl=COUNTS_TTL):
     return _counts["map"], done
 
 
+# Every figure the snapshot publishes except the checkpoint work was a
+# question asked of the whole table -- count(*) over the campaign, min and max
+# of found_at, and a 48-hour GROUP BY -- so its cost grew with the corpus
+# while the answer it produced stayed the same size. It ran every
+# --status-every seconds, on the instance the ingest writes to, and while it
+# ran this program was not ingesting: the help text for --status-every already
+# conceded "at ~190 M rows a publish takes a few minutes". An index and a
+# one-off VACUUM bought time; neither changes the shape of the cost.
+#
+# These two tables are maintained by the insert itself, in the transaction
+# that adds the points, so they cannot drift from what they summarise. The
+# snapshot then reads one row and 48 more, and its cost stops depending on how
+# long the campaign has been running.
+#
+# Every record of one object shares that object's found_at -- ingestObject
+# inserts a single scalar for the whole COPY -- so an object contributes its
+# rows to exactly one hour, and the rollup is an addition rather than a
+# regrouping.
+TOTALS_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_totals (
+    campaign_id text PRIMARY KEY,
+    dps         bigint NOT NULL DEFAULT 0,
+    first_dp_at timestamptz,
+    last_dp_at  timestamptz
+)
+"""
+HOURLY_DDL = """
+CREATE TABLE IF NOT EXISTS dp_ingest_hourly (
+    campaign_id text NOT NULL,
+    hour        timestamptz NOT NULL,
+    dps         bigint NOT NULL,
+    PRIMARY KEY (campaign_id, hour)
+)
+"""
+ROLLUP_MARK = "rollup_backfilled"
+
+
+def applyRollup(cur, added, found_at):
+    """Add one object's rows to the totals and to its hour.
+
+    Called inside ingestObject's transaction, after the insert, with the rows
+    that were actually inserted -- so a re-ingested object contributes zero and
+    the counters stay exact under the idempotency the rest of this file
+    depends on.
+    """
+    if added <= 0:
+        return
+    cur.execute(
+        "INSERT INTO dp_ingest_totals (campaign_id, dps, first_dp_at, last_dp_at) "
+        "VALUES (%s, %s, %s::timestamptz, %s::timestamptz) "
+        "ON CONFLICT (campaign_id) DO UPDATE SET "
+        "  dps = dp_ingest_totals.dps + EXCLUDED.dps, "
+        "  first_dp_at = least(dp_ingest_totals.first_dp_at, EXCLUDED.first_dp_at), "
+        "  last_dp_at = greatest(dp_ingest_totals.last_dp_at, EXCLUDED.last_dp_at)",
+        (CAMPAIGN, added, found_at, found_at))
+    cur.execute(
+        "INSERT INTO dp_ingest_hourly (campaign_id, hour, dps) "
+        "VALUES (%s, date_trunc('hour', %s::timestamptz), %s) "
+        "ON CONFLICT (campaign_id, hour) DO UPDATE SET "
+        "  dps = dp_ingest_hourly.dps + EXCLUDED.dps",
+        (CAMPAIGN, found_at, added))
+
+
+def ensureRollup(cur, force=False):
+    """Seed the counters from the corpus, once, and say whether it ran.
+
+    The corpus predates these tables, so the first pass has to read it -- the
+    same aggregate the snapshot used to run, run once instead of every three
+    minutes. One scan yields all of it: the hours are the rollup, their sum is
+    the total, and the extremes of found_at come out of the same GROUP BY.
+
+    Ordering is what makes this safe while the fleet is being ingested.
+    `applyRollup` takes a row lock on this campaign's `dp_ingest_totals` row
+    *after* inserting its points; locking that row here first means a
+    concurrent ingest blocks before it adds its delta, with its points still
+    uncommitted and therefore invisible to the aggregate below. It applies the
+    delta once this commits. Neither a lost object nor a double-counted one is
+    reachable.
+
+    That argument has a precondition worth stating plainly, because it is the
+    limit of what this can promise: it holds for writers that go through
+    `applyRollup`. A superseded ingester still writing to the same table takes
+    no such lock, so points it commits during or after the seed never reach
+    these counters. The remedy is the order of a cutover -- stop the old
+    writer, then seed -- and `--recount` for a corpus that was written to
+    behind this program's back. It is deliberately not a self-healing check:
+    verifying the seed means counting the table, and a verification that runs
+    until it agrees with a moving corpus never agrees, so it would reinstate
+    the per-pass full scan this whole mechanism exists to remove.
+    """
+    cur.execute(TOTALS_DDL)
+    cur.execute(HOURLY_DDL)
+    cur.execute(META_DDL)
+    if force:
+        cur.execute("DELETE FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
+    else:
+        cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
+        if cur.fetchone() is not None:
+            return False
+    log("seeding the dp counters from the corpus; this reads the table once "
+        "and the ingest waits on it, then no snapshot reads it again")
+    started = time.time()
+    # Claim the lock before the read, so that anything mid-flight is behind us.
+    cur.execute("INSERT INTO dp_ingest_totals (campaign_id) VALUES (%s) "
+                "ON CONFLICT (campaign_id) DO NOTHING", (CAMPAIGN,))
+    cur.execute("SELECT 1 FROM dp_ingest_totals WHERE campaign_id = %s FOR UPDATE",
+                (CAMPAIGN,))
+    cur.execute("LOCK TABLE dp_ingest_hourly IN EXCLUSIVE MODE")
+    cur.execute(
+        "SELECT date_trunc('hour', found_at), count(*), min(found_at), max(found_at) "
+        "FROM distinguished_points WHERE campaign_id = %s GROUP BY 1", (CAMPAIGN,))
+    rows = cur.fetchall()
+    total = sum(int(n) for _, n, _, _ in rows)
+    cur.execute("DELETE FROM dp_ingest_hourly WHERE campaign_id = %s", (CAMPAIGN,))
+    for hour, n, _, _ in rows:
+        cur.execute("INSERT INTO dp_ingest_hourly (campaign_id, hour, dps) "
+                    "VALUES (%s, %s, %s)", (CAMPAIGN, hour, int(n)))
+    cur.execute(
+        "UPDATE dp_ingest_totals SET dps = %s, first_dp_at = %s, last_dp_at = %s "
+        "WHERE campaign_id = %s",
+        (total,
+         min((r[2] for r in rows if r[2] is not None), default=None),
+         max((r[3] for r in rows if r[3] is not None), default=None),
+         CAMPAIGN))
+    cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                "ON CONFLICT (key) DO NOTHING", (ROLLUP_MARK,))
+    log("seeded the dp counters in %.0fs: %d points across %d hours"
+        % (time.time() - started, total, len(rows)))
+    return True
+
+
+# A collision is the campaign's terminal event, and until now the ingest was
+# the one place it could be seen and the one place it was thrown away:
+# `ON CONFLICT (campaign_id, point_key) DO NOTHING` cannot tell a worker
+# re-reporting its own point from two different walks meeting, and dropped
+# both alike. `rho_collisions` is read by this program and by
+# scripts/rho_status/snapshot.py and was written by nothing in the tree, so
+# the dashboard's COLLISION_RECORDED state had no producer at all.
+#
+# The store already enforces exactly the constraint that defines a collision.
+# This makes it report one. merge.py stays the independent check over the S3
+# corpus rather than the only detector.
+COLLISIONS_DDL = """
+CREATE TABLE IF NOT EXISTS rho_collisions (
+    campaign_id text NOT NULL,
+    point_key   bytea NOT NULL,
+    a1          bytea,
+    walk_seed1  bytea,
+    worker_id1  text,
+    a2          bytea,
+    walk_seed2  bytea,
+    worker_id2  text,
+    object_key  text,
+    detected_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (campaign_id, point_key)
+)
+"""
+# Columns the live table actually has. The DDL above is a no-op against the
+# table the original out-of-tree ingest created, whose shape is not in this
+# repository, so the INSERT is built from what is there rather than from what
+# this file would have chosen. Anything but campaign_id and point_key is
+# optional; without those two a row cannot be written at all and the finding
+# goes to the log instead, which is never silent either way.
+_collisionCols = set()
+
+
+def ensureCollisions(conn):
+    """Make sure a collision has somewhere to be recorded, and learn its shape."""
+    global _collisionCols
+    with conn.cursor() as cur:
+        cur.execute(COLLISIONS_DDL)
+        cur.execute("SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'rho_collisions' "
+                    "  AND table_schema = ANY(current_schemas(false))")
+        _collisionCols = {row[0] for row in cur.fetchall()}
+    conn.commit()
+    missing = {"campaign_id", "point_key"} - _collisionCols
+    if missing:
+        log("WARNING: rho_collisions is missing %s; a collision will be logged "
+            "but cannot be stored" % ", ".join(sorted(missing)))
+    return _collisionCols
+
+
+def seedOf(coeff):
+    """The walk seed as an integer, however wide the stored bytes happen to be.
+
+    `a` is the seed in 17 big-endian bytes here, but the corpus predates this
+    program and verify() already reports that the old ingester's widths differ.
+    Comparing bytes would call every legacy re-ingest a collision; comparing
+    the integer is what the seed actually means.
+    """
+    return int.from_bytes(bytes(coeff or b""), "big")
+
+
+def findCollisions(cur, key):
+    """Records of this object whose point is already stored under another seed.
+
+    Runs against the temp table after the insert, so a record that was just
+    inserted joins to itself and compares equal. What is left is a point that
+    two different walks reached -- within this object or against the corpus --
+    which is the whole point of the campaign.
+    """
+    cur.execute(
+        "SELECT i.point_key, i.a, i.walk_seed, d.a, d.walk_seed, d.worker_id "
+        "FROM dp_in i JOIN distinguished_points d "
+        "  ON d.campaign_id = %s AND d.point_key = i.point_key "
+        "WHERE d.a IS DISTINCT FROM i.a",
+        (CAMPAIGN,))
+    out = []
+    for point_key, mineA, mineSeed, theirsA, theirsSeed, worker in cur.fetchall():
+        if theirsA is None:
+            # `a` is NOT NULL for everything this program writes, but the
+            # corpus predates it. A stored point with no seed cannot be
+            # compared and could not be solved from if it were a meeting, so
+            # it is said out loud and not counted -- reporting it as a
+            # collision would make every record that meets it one.
+            log("WARNING: point %s is stored with no seed (%s); cannot tell a "
+                "re-report from a collision" % (bytes(point_key).hex(), worker))
+            continue
+        # Byte inequality is the cheap filter the database can do; equality of
+        # the seeds themselves is the question, and a width difference between
+        # eras is not a collision.
+        if seedOf(mineA) == seedOf(theirsA):
+            continue
+        out.append({
+            "point_key": bytes(point_key),
+            "a1": bytes(theirsA),
+            "walk_seed1": bytes(theirsSeed) if theirsSeed is not None else None,
+            "worker_id1": worker,
+            "a2": bytes(mineA),
+            "walk_seed2": bytes(mineSeed),
+            "worker_id2": workerId(key),
+            "object_key": key,
+        })
+    return out
+
+
+def recordCollisions(cur, found):
+    """Store what can be stored, and say the rest out loud.
+
+    Written in the same transaction as the points that revealed it, so a
+    recorded collision cannot outlive the insert it came from. ON CONFLICT DO
+    NOTHING because re-ingesting the same object must not multiply the row.
+    """
+    for row in found:
+        # Never let a storage problem be the reason nobody hears about this.
+        log("COLLISION: point %s seen from seed %d (%s) and seed %d (%s)"
+            % (row["point_key"].hex(), seedOf(row["a1"]), row["worker_id1"],
+               seedOf(row["a2"]), row["worker_id2"]))
+    if not found or not {"campaign_id", "point_key"} <= _collisionCols:
+        return 0
+    cols = [c for c in ("point_key", "a1", "walk_seed1", "worker_id1",
+                        "a2", "walk_seed2", "worker_id2", "object_key")
+            if c in _collisionCols]
+    sql = ("INSERT INTO rho_collisions (campaign_id, %s) VALUES (%s) "
+           "ON CONFLICT DO NOTHING"
+           % (", ".join(cols), ", ".join(["%s"] * (len(cols) + 1))))
+    stored = 0
+    for row in found:
+        cur.execute(sql, tuple([CAMPAIGN] + [row[c] for c in cols]))
+        stored += cur.rowcount
+    return stored
+
+
 def ingestObject(conn, s3, bucket, key, found_at):
-    """Insert every record of one object. Returns rows actually added."""
+    """Insert every record of one object.
+
+    Returns (rows added, records seen, collisions found).
+    """
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
@@ -368,6 +651,15 @@ def ingestObject(conn, s3, bucket, key, found_at):
             "ON CONFLICT (campaign_id, point_key) DO NOTHING",
             (CAMPAIGN, wid, found_at))
         added = cur.rowcount
+        # Every record inserted means nothing conflicted, so there is nothing
+        # to look for: in the steady state, where each object is new points,
+        # the check below never runs and costs nothing. It runs on the
+        # re-reports and the resumed walks -- and on the one object that ends
+        # the campaign.
+        collisions = []
+        if added < len(rows):
+            collisions = findCollisions(cur, key)
+            recordCollisions(cur, collisions)
         # Same transaction as the points, so the record of having ingested an
         # object cannot outlive the insert that it describes.
         cur.execute(
@@ -375,8 +667,13 @@ def ingestObject(conn, s3, bucket, key, found_at):
             "VALUES (%s, %s, %s) ON CONFLICT (campaign_id, object_key) "
             "DO UPDATE SET records = EXCLUDED.records, ingested_at = now()",
             (CAMPAIGN, key, whole // RECORD_BYTES))
+        # Also this transaction, so the counters the snapshot reads cannot
+        # drift from the rows they summarise. Last, because every ingest
+        # thread contends on the one totals row and the lock it takes is held
+        # until the commit below.
+        applyRollup(cur, added, found_at)
     conn.commit()
-    return added, whole // RECORD_BYTES
+    return added, whole // RECORD_BYTES, len(collisions)
 
 
 def verify(conn, s3, bucket, sample=64):
@@ -527,6 +824,31 @@ def _walkRate(current, previous):
     }
 
 
+def windowSum(hourly, hours):
+    """Points in the last `hours`, from the rollup.
+
+    These two figures were a sliding `found_at > now() - interval '1 hour'`
+    over the whole table. They are now a sum of whole hour buckets, which is
+    the same series the published chart draws, so the tile and the chart can
+    no longer disagree -- but it does mean the window is aligned to the hour
+    and can reach back up to an hour further than the name suggests. For what
+    they are used for, a COLLECTING/IDLE decision and a headline figure, that
+    is the more consistent answer rather than a less accurate one.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc)
+    floor = (now - datetime.timedelta(hours=hours)).replace(
+        minute=0, second=0, microsecond=0)
+    total = 0
+    for hour, count in hourly:
+        if hour is None:
+            continue
+        if hour.tzinfo is None:
+            hour = hour.replace(tzinfo=datetime.timezone.utc)
+        if hour >= floor:
+            total += int(count)
+    return total
+
+
 def publicStatus(payload):
     """The browser-safe document: same aggregates, no per-slot rows."""
     out = json.loads(json.dumps(payload))
@@ -608,25 +930,27 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
 
 
 def campaignSnapshot(conn):
-    """SQL half of the dashboard. Slow at ~190 M rows; reuse between publishes."""
+    """SQL half of the dashboard: the insert-maintained rollup, not the table."""
     with conn.cursor() as cur:
+        # One row from the counters instead of a count over the campaign, and
+        # 48 from the rollup instead of a GROUP BY over two days of points.
+        # Neither reads distinguished_points, so the cost of a publish no
+        # longer grows with the corpus.
         cur.execute("""
             SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
-                   count(d.point_key) AS dps,
-                   count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 hour') AS dps_last_hour,
-                   count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 day') AS dps_last_day,
-                   min(d.found_at) AS first_dp_at, max(d.found_at) AS last_dp_at
-            FROM rho_campaigns c LEFT JOIN distinguished_points d USING (campaign_id)
-            WHERE c.campaign_id = %s GROUP BY 1,2,3,4""", (CAMPAIGN,))
+                   COALESCE(t.dps, 0) AS dps, t.first_dp_at, t.last_dp_at
+            FROM rho_campaigns c
+            LEFT JOIN dp_ingest_totals t USING (campaign_id)
+            WHERE c.campaign_id = %s""", (CAMPAIGN,))
         row = cur.fetchone() or ()
         cur.execute("SELECT count(*), max(detected_at) FROM rho_collisions WHERE campaign_id = %s",
                     (CAMPAIGN,))
         collisions, latest_collision = cur.fetchone()
         cur.execute("""
-            SELECT date_trunc('hour', found_at) AS hour, count(*)
-            FROM distinguished_points
-            WHERE campaign_id = %s AND found_at > now() - interval '48 hours'
-            GROUP BY 1 ORDER BY 1""", (CAMPAIGN,))
+            SELECT hour, dps FROM dp_ingest_hourly
+            WHERE campaign_id = %s
+              AND hour >= date_trunc('hour', now() - interval '48 hours')
+            ORDER BY hour""", (CAMPAIGN,))
         hourly = cur.fetchall()
 
     def iso(v):
@@ -637,10 +961,10 @@ def campaignSnapshot(conn):
         "dp_mask_bits": row[2] if row else None,
         "campaign_created_at": iso(row[3]) if row else None,
         "dps": int(row[4] or 0) if row else 0,
-        "dps_last_hour": int(row[5] or 0) if row else 0,
-        "dps_last_day": int(row[6] or 0) if row else 0,
-        "first_dp_at": iso(row[7]) if row else None,
-        "last_dp_at": iso(row[8]) if row else None,
+        "dps_last_hour": windowSum(hourly, 1),
+        "dps_last_day": windowSum(hourly, 24),
+        "first_dp_at": iso(row[5]) if row else None,
+        "last_dp_at": iso(row[6]) if row else None,
         "collisions": int(collisions or 0),
         "latest_collision_at": iso(latest_collision),
         "hourly": [{"hour": iso(h), "dps": int(n)} for h, n in hourly],
@@ -655,9 +979,9 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
     an ingest that stopped: on 2026-09-17 the page read IDLE_OR_STALE for five
     hours while 133 workers were walking and 56 M records were landing in S3.
 
-    `snapshot` is the SQL half (point counts). Checkpoint work is always
-    re-read from S3, so walker liveness can move every --status-every without
-    waiting for the multi-minute table count.
+    `snapshot` is the SQL half (point counts from the insert-maintained
+    rollup). Checkpoint work is always re-read from S3, so walker liveness
+    can move every --status-every without waiting on the database.
     """
     if snapshot is None:
         snapshot = campaignSnapshot(conn)
@@ -779,8 +1103,9 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None, snapshot=None,
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.
         CacheControl="public, max-age=30")
-    # The SQL snapshot is the one part of this program whose cost grows with
-    # the corpus. Walker refresh is a list of ckpt/ objects and does not.
+    # The SQL half now reads the counters the insert maintains, so its cost
+    # should stay flat; walker refresh is a list of ckpt/ objects. If the
+    # elapsed time starts climbing, the counters are not being read.
     log("published status.json in %.1fs (%s): dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d"
         % (time.time() - started, kind, payload["dps"], payload["state"],
@@ -852,7 +1177,7 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     work = queue.Queue()
     for item in slice_:
         work.put(item)
-    tally = {"rows": 0, "objects": 0, "failed": 0}
+    tally = {"rows": 0, "objects": 0, "failed": 0, "collisions": 0}
     failed = set()
     lock = threading.Lock()
 
@@ -874,7 +1199,7 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
                     try:
                         if conn is None or conn.closed:
                             conn = connect()
-                        n, seen = ingestObject(
+                        n, seen, hits = ingestObject(
                             conn, s3, bucket, key,
                             time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(when)))
                     except Exception as exc:
@@ -903,8 +1228,10 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
                         with lock:
                             tally["rows"] += n
                             tally["objects"] += 1
-                        log("ingested %s: %d records, %d new (store had %d)"
-                            % (key, seen, n, have))
+                            tally["collisions"] += hits
+                        log("ingested %s: %d records, %d new (store had %d)%s"
+                            % (key, seen, n, have,
+                               ", %d COLLISION(S)" % hits if hits else ""))
                     break
         except Exception as exc:  # a connection that will not open at all
             log("ingest thread stopped: %s: %s" % (type(exc).__name__, exc))
@@ -922,10 +1249,13 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     _failed.update(failed)
     elapsed = max(time.time() - started, 1e-9)
     state["outstanding"] = len(todo) - tally["objects"]
+    state["collisions"] = tally["collisions"]
     log("pass complete: %d of %d outstanding objects touched, %d rows added, "
-        "%d failed, %d still outstanding, %.0f rows/s"
+        "%d failed, %d still outstanding, %.0f rows/s%s"
         % (tally["objects"], len(todo), tally["rows"], tally["failed"],
-           state["outstanding"], tally["rows"] / elapsed))
+           state["outstanding"], tally["rows"] / elapsed,
+           ", %d COLLISION(S) RECORDED" % tally["collisions"]
+           if tally["collisions"] else ""))
     return tally["rows"], tally["objects"], state
 
 
@@ -951,14 +1281,25 @@ def main(argv=None):
                     help="do not create the found_at index at startup")
     ap.add_argument("--status-every", type=float,
                     default=float(os.environ.get("RHO_STATUS_EVERY", "180")),
-                    help="seconds between status.json writes. Walker liveness "
-                         "is an S3 list and can run at this cadence. Point "
-                         "counts come from --snapshot-every, because counting "
-                         "the whole campaign takes minutes at ~190 M rows.")
+                    help="seconds between status.json writes. The SQL half "
+                         "reads the maintained counters rather than the points "
+                         "table; walker liveness is an S3 list. Both can run "
+                         "at this cadence. The page's Actions job runs every "
+                         "3 minutes and reads this copy from the status bucket.")
     ap.add_argument("--snapshot-every", type=float,
-                    default=float(os.environ.get("RHO_SNAPSHOT_EVERY", "600")),
-                    help="seconds between SQL recounts of distinguished points. "
-                         "Walker liveness still refreshes every --status-every.")
+                    default=float(os.environ.get("RHO_SNAPSHOT_EVERY", "0")),
+                    help="seconds between rollup reads. 0 (the default) reads "
+                         "them on every status write. Walker liveness still "
+                         "refreshes every --status-every.")
+    ap.add_argument("--recount", action="store_true",
+                    help="re-seed the dp counters from the table even if they "
+                         "were seeded before. They are maintained in the same "
+                         "transaction as the points and cannot drift from them, "
+                         "so this is for a corpus something else has written to "
+                         "-- a superseded ingester that wrote during the first "
+                         "seed. Run it once, after that writer is stopped; it "
+                         "reads the whole table, and it is consumed on the "
+                         "first seed rather than repeated on every reconnect")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",
@@ -990,10 +1331,22 @@ def main(argv=None):
     def connect():
         return psycopg.connect(url, connect_timeout=30)
 
+    recount_once = args.recount
     while True:
         try:
             with connect() as conn:
                 ensureProgress(conn)
+                # --pending promises to write nothing, and the DDL is a write.
+                if not (args.verify or args.pending):
+                    ensureCollisions(conn)
+                    with conn.cursor() as cur:
+                        ensureRollup(cur, force=recount_once)
+                    conn.commit()
+                    # Consume it: --recount stays set for the life of the
+                    # process, and this block is inside the failover retry, so
+                    # leaving it true made a database blip re-read the whole
+                    # corpus on every reconnect.
+                    recount_once = False
                 if args.index and not (args.verify or args.pending):
                     try:
                         ensureFoundAtIndex(conn)
@@ -1022,12 +1375,16 @@ def main(argv=None):
                 behind = bool(ingest.get("outstanding"))
                 # Rate-limited, except for the pass that finishes a drain:
                 # "caught up" is the one transition a reader is waiting for.
+                # A collision ends the campaign, so it does not wait out the
+                # rate limit: it is published on the pass that found it.
                 due = (time.time() - published >= args.status_every
-                       or (wasBehind and not behind))
+                       or (wasBehind and not behind)
+                       or bool(ingest.get("collisions")))
                 wasBehind = behind
                 if args.status_bucket and (due or args.once):
                     try:
                         need_sql = (snapshot is None
+                                    or args.snapshot_every <= 0
                                     or time.time() - snapAt >= args.snapshot_every)
                         if need_sql:
                             with connect() as conn:

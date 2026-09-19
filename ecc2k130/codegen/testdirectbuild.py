@@ -1233,6 +1233,7 @@ class SharedSigmaBuildTests(unittest.TestCase):
             ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
             ('bench-b200-modal', 'ECC_GPU=B200', '1'),
             ('bench-waves-modal', 'ECC_GPU=RTX-PRO-6000', '1'),
+            ('bench-modal-gpu', 'ECC_GPU=L40S', '1'),
             ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g4dn', 'arch=compute_75,code=sm_75', '0'),
@@ -1244,6 +1245,19 @@ class SharedSigmaBuildTests(unittest.TestCase):
             hay = result.stdout.replace('ECC_PACKED_CLMAD=', 'PACKED_CLMAD=')
             self.assertIn('PACKED_CLMAD=' + clmad, hay)
             self.assertIn('--batch 16' if target.startswith('bench-') else 'BATCH=16', result.stdout)
+        dry = subprocess.run(
+            ['make', '-n', 'bench-modal-gpu', 'SURVEY_GPU=T4', 'SURVEY_CLMAD=0'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(dry.returncode, 0, dry.stderr)
+        self.assertIn('ECC_GPU=T4', dry.stdout)
+        self.assertIn('ECC_PACKED_CLMAD=0', dry.stdout)
+        self.assertNotIn('--workers', dry.stdout)
+        bang = subprocess.run(
+            ['make', '-n', 'bench-modal-gpu', 'SURVEY_GPU=H100!'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(bang.returncode, 0, bang.stderr)
+        self.assertIn('ECC_GPU=H100!', bang.stdout)
+        self.assertNotIn('--workers', bang.stdout)
         waves = subprocess.run(
             ['make', '-n', 'bench-waves-modal', 'WAVES_GPU=L40S'],
             cwd=ROOT, capture_output=True, text=True)

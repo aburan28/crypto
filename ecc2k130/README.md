@@ -34,16 +34,15 @@ client checks before all six timed samples completed their exact work budget.
 Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
-Every rate in this tree is for that `sm_120` part. The other GPUs the campaign
-can rent have none: [RTX-PRO4500.md](RTX-PRO4500.md) covers the RTX PRO 4500
-(EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md) the Ada parts, L4 (g6) and L40S
-(g6e), with `make bench-ada` to measure one, and [B200.md](B200.md) the
-datacenter Blackwell B200 (`make bench-b200-modal`). The arithmetic and storage
-options of the RTX PRO 6000 preset carry over; `PACKED_CLMAD` does not travel
-onto a pre-Blackwell architecture, so `aws/build.sh` defaults it off for any
-build that includes one and `benchmarks/ada/run.sh` measures both arms rather
-than assuming one. The B200 is Blackwell (`sm_100`) and uses the shipping
-CLMAD=1 arm; the rate is the receipt, not the SM-count prior.
+Every audited collecting rate in this tree is for that `sm_120` part. Other
+Modal GPUs are a `--bench` survey, not a campaign move:
+[benchmarks/modal-gpus/SURVEY.md](benchmarks/modal-gpus/SURVEY.md), via
+`make bench-modal-gpu SURVEY_GPU=…`. Per-family notes remain
+[RTX-PRO4500.md](RTX-PRO4500.md) (EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md)
+(L4 / L40S), [T4-G4DN.md](T4-G4DN.md), and [B200.md](B200.md)
+(`make bench-b200-modal`). The arithmetic and storage options of the RTX PRO
+6000 preset carry over; `PACKED_CLMAD` is on for sm_80+ and off on Turing.
+Workers stay automatic — 385,024 is a 188-SM occupancy.
 Per-SM occupancy (oversubscribed waves, same walk) is
 [benchmarks/per-sm/WAVES.md](benchmarks/per-sm/WAVES.md).
 
