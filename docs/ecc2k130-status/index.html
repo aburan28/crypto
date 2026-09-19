@@ -247,6 +247,69 @@
     </figure>
   </section>
 
+  <section aria-labelledby="h-coords">
+    <h2 id="h-coords">What a step costs in each coordinate system</h2>
+    <p class="note">
+      Every walk on this page is one point addition per iteration, and the
+      cost of that addition is the floor the rate above sits on. This table
+      prices one scalar update in each point representation of the challenge
+      curve, in the kernel's unit: field products (M), squarings (S) and
+      inversions (I) per update, the carry-less (clmad) and ALU
+      lane-instructions they cost on an RTX PRO 6000 at the per-routine prices
+      of THROUGHPUT-20B, and the rate ceiling at 100% of whichever pipe binds.
+      The Weierstrass rows are measured. Every other row is priced from an
+      addition formula checked against affine addition on the code generator's
+      field model at <span class="mono">m = 23, 41, 131</span>, not built.
+      Projective rows are given their scale-invariant branch hash for free and
+      still lose: the cheapest known invariant of
+      <span class="mono">[X : Z]</span> is <span class="mono">X/Z</span>, one
+      inversion, which is the cost they set out to remove, and Montgomery's
+      trick already amortises that inversion to three products plus a
+      sixteenth of the chain.
+    </p>
+    <div class="scroll" tabindex="0">
+      <table>
+        <caption class="sr-only">Cost of one scalar update in each coordinate system</caption>
+        <thead>
+          <tr>
+            <th scope="col">coordinates</th>
+            <th scope="col">addition</th>
+            <th scope="col" class="num">M</th>
+            <th scope="col" class="num">S</th>
+            <th scope="col" class="num">I</th>
+            <th scope="col" class="num">clmad / update</th>
+            <th scope="col" class="num">ALU / update</th>
+            <th scope="col" class="num">ceiling B/s</th>
+            <th scope="col">status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Weierstrass affine <span class="mono">(x, y)</span>, Montgomery batch 16</th><td>1I + 2M + 1S, batched</td><td class="num">4.81</td><td class="num">1</td><td class="num">1/16</td><td class="num clmad">38.1</td><td class="num">1,120</td><td class="num">18.7 &ndash; 19.8</td><td><strong>shipping: measured 14.41 B/s</strong></td></tr>
+          <tr><th scope="row">Weierstrass affine, batch 8</th><td>same</td><td class="num">4.62</td><td class="num">1</td><td class="num">1/8</td><td class="num clmad">40.0</td><td class="num">1,352</td><td class="num">17.8 &ndash; 18.8</td><td>measured 12.6 B/s (screen)</td></tr>
+          <tr><th scope="row">Weierstrass affine, batch 32</th><td>same</td><td class="num">4.91</td><td class="num">1</td><td class="num">1/32</td><td class="num clmad">37.2</td><td class="num">1,004</td><td class="num">19.2 &ndash; 20.3</td><td>measured 8.7 B/s (state traffic)</td></tr>
+          <tr><th scope="row">&lambda;-affine <span class="mono">(x, &lambda;)</span>, batch 16</th><td>1I + 6M + 2S, batched</td><td class="num">8.81</td><td class="num">2</td><td class="num">1/16</td><td class="num clmad">68.4</td><td class="num">1,847</td><td class="num">10.4 &ndash; 11.0</td><td>priced, below the shipping row</td></tr>
+          <tr><th scope="row">&lambda;-projective <span class="mono">(X, L, Z)</span>, affine addend</th><td>8M + 2S, invariant hash free</td><td class="num">8</td><td class="num">2</td><td class="num">0</td><td class="num clmad">60.5</td><td class="num">1,454</td><td class="num">11.8 &ndash; 12.5</td><td>priced, below the shipping row</td></tr>
+          <tr><th scope="row">&lambda;-projective, projective addend <span class="mono">&sigma;<sup>j</sup>(R)</span></th><td>11M + 2S, invariant hash free</td><td class="num">11</td><td class="num">2</td><td class="num">0</td><td class="num clmad">78.5</td><td class="num">1,937</td><td class="num">9.1 &ndash; 9.6</td><td>priced, below the shipping row</td></tr>
+          <tr><th scope="row">L&oacute;pez&ndash;Dahab <span class="mono">(X, Y, Z)</span>, affine addend</th><td>8M + 5S, invariant hash free</td><td class="num">8</td><td class="num">5</td><td class="num">0</td><td class="num clmad">79.2</td><td class="num">1,703</td><td class="num">9.0 &ndash; 9.5</td><td>priced, below the shipping row</td></tr>
+          <tr><th scope="row">&lambda;-projective, invariant hash by inverting <span class="mono">Z</span></th><td>8M + 2S + 1I</td><td class="num">8</td><td class="num">2</td><td class="num">1</td><td class="num clmad">108.5</td><td class="num">5,646</td><td class="num">4.8 &ndash; 5.0</td><td>priced, below the shipping row on both pipes</td></tr>
+          <tr><th scope="row">binary Edwards, Hessian, Huff, Jacobian</th><td colspan="7">published inversion-free additions from about 10M to 16M + 1S + 4D; every affine form has more than one denominator per addition</td><td>published counts, not re-derived, not priced</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Source and reproduction:
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/LAMBDA-PROJECTIVE.md">ecc2k130/LAMBDA-PROJECTIVE.md</a>
+      (the boundary, the table, and the measurement that a selector on the
+      representative rather than the point parts two trails of the same point
+      at step 1 in four cases of five), regenerated by
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/codegen/lambda_projective.py">lambda_projective.py</a>;
+      the affine floor and the pipe rates are from
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/ITERATION-FUNCTION.md">ITERATION-FUNCTION.md</a>,
+      the batch rows from
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/BATCH-TUNING.md">BATCH-TUNING.md</a>.
+    </p>
+  </section>
+
   <section aria-labelledby="h-workers">
     <h2 id="h-workers">Workers</h2>
     <p class="note">

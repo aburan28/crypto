@@ -262,6 +262,27 @@ class BuildTests(unittest.TestCase):
                 "%s applies the fallback interval before checking for a counted total" % rel,
             )
 
+    def test_dashboard_coordinate_table_cites_the_priced_note(self):
+        # The coordinate-system table prices one update per point
+        # representation. Every figure on it comes from
+        # ecc2k130/LAMBDA-PROJECTIVE.md and nowhere else (AGENTS.md section 7:
+        # the page cites, never computes), so pin each carry-less figure on
+        # the page to that note, the page's link to the note, and the landing
+        # page's entry pointing at both.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        # the note bolds its reference row, so drop the markers before matching
+        note = read(os.path.join(ROOT, "ecc2k130", "LAMBDA-PROJECTIVE.md")).replace("*", "")
+        self.assertIn('id="h-coords"', dashboard)
+        section = dashboard[dashboard.index('id="h-coords"'):dashboard.index('id="h-workers"')]
+        figures = re.findall(r'<td class="num clmad">([^<]+)</td>', section)
+        self.assertGreaterEqual(len(figures), 8, figures)
+        for figure in figures:
+            self.assertIn("| %s |" % figure, note, "dashboard prices %s clmad, which the note does not carry" % figure)
+        self.assertIn("ecc2k130/LAMBDA-PROJECTIVE.md", section)
+        self.assertIn("ecc2k130/LAMBDA-PROJECTIVE.md", landing)
+        self.assertIn('href="./status/#h-coords"', landing)
+
     def test_dashboard_publishes_the_rate_and_the_span_it_measured(self):
         # A rate without its window is not checkable: 15 minutes of
         # checkpoints and an hour of them are different measurements, and the

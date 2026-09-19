@@ -248,6 +248,10 @@ full   (X_P, L_P, Z_P) + (X_Q, L_Q, Z_Q):                        11M + 2S
 | 41 | 300 | 8M + 2S, all agree | 11M + 2S, all agree | all agree | all agree |
 | 131 | 30 | 8M + 2S, all agree | 11M + 2S, all agree | all agree | all agree |
 
+The same runs check the λ-affine addition reduced to one inversion
+(`6M + 2S + 1I`, §6) and the López–Dahab mixed addition (`8M + 5S`), each
+against the same affine `Curve.add`, with the same result at all three sizes.
+
 The counts are taken by a counting wrapper on the field on every call and
 asserted constant across inputs; a first draft of the full formula came out at
 12M because `A B Z_Q` was formed twice, and the shared product is what brings
@@ -276,5 +280,50 @@ projective row are outside it:
   where it matters.
 
 The lever row in ITERATION-FUNCTION.md §1 stands, with this note as its
-price. The ECC2K-130 status page carries walk rates, not this comparison, and
-no measured number moved, so it is unchanged.
+price. No measured number moved; the campaign status page carries the table
+of §6 as a static section that cites this note, and the site build pins its
+figures to it.
+
+## 6. Every point representation, priced
+
+The question generalises: is there *any* point representation on this curve
+whose addition, plus the class-invariant selector it needs, costs less per
+step than Weierstrass affine with Montgomery's trick? The rows below extend
+the table of §2 to the other representations. Verified rows were checked by
+`checkFormulas` against the generator's affine addition at `m = 23, 41, 131`
+(300, 300 and 30 random pairs, random `Z` on every projective input) with
+their operations counted; the last row is from the literature and is marked
+so. Prices as in §1; the ceiling is at 100% of the binding pipe.
+
+| coordinates | addition | M | S | I | clmad / update | ALU / update | ceiling B/s | invariant selector | status |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| **Weierstrass affine `(x, y)`, Montgomery batch 16** | `1I + 2M + 1S`, batched | 4.81 | 1 | 1/16 | **38.1** | 1,120 | 18.7 – 19.8 | `HW(x)`, free in the normal basis | **shipping, measured 14.41 B/s** |
+| Weierstrass affine, batch 8 | same | 4.62 | 1 | 1/8 | 40.0 | 1,352 | 17.8 – 18.8 | same | measured 12.6 B/s screen (BATCH-TUNING) |
+| Weierstrass affine, batch 32 | same | 4.91 | 1 | 1/32 | 37.2 | 1,004 | 19.2 – 20.3 | same | measured 8.7 B/s (state traffic) |
+| λ-affine `(x, λ)`, batch 16 | `1I + 6M + 2S` reduced to one inversion, batched | 8.81 | 2 | 1/16 | 68.4 | 1,847 | 10.4 – 11.0 | same `x` | verified formula, below reference |
+| λ-projective `(X, L, Z)`, mixed addend | `8M + 2S` | 8 | 2 | 0 | 60.5 | 1,454 | 11.8 – 12.5 | none without `X/Z`; given free here | verified, below reference |
+| λ-projective, projective addend `σʲ(R)` | `11M + 2S` | 11 | 2 | 0 | 78.5 | 1,937 | 9.1 – 9.6 | given free | verified, below reference |
+| López–Dahab `(X, Y, Z)`, `x = X/Z`, `y = Y/Z²`, mixed addend | `8M + 5S` (the `a Z²` term is a constant multiply on a Koblitz curve) | 8 | 5 | 0 | 79.2 | 1,703 | 9.0 – 9.5 | given free | verified, below reference |
+| λ-projective mixed, invariant by one inversion of `Z` | `8M + 2S + 1I` | 8 | 2 | 1 | 108.5 | 5,646 | 4.8 – 5.0 | `HW(X/Z)` | below reference on both pipes |
+| binary Edwards, Hessian, Huff, Jacobian | published inversion-free additions from about `10M` to `16M + 1S + 4D`; every affine form has more than one denominator per addition, so it costs more products than Weierstrass to fold into one inversion | | | | | | | negation is not a coordinate map on Edwards (`(x, y) ↦ (y, x)`), so the invariant needs symmetric functions | published counts, not re-derived here, not priced |
+
+Reading it. Two structural facts make the column monotone. Every projective
+model exists to remove the inversion, and Montgomery's trick already
+amortises the inversion to three products plus a sixteenth of the chain, so
+an inversion-free formula has to beat about five products per step and none
+is below eight. Every affine model other than Weierstrass has more than one
+denominator per addition (λ-affine has `B` and `AB`), so folding them into
+one inversion costs the products the model was meant to save. The
+Itoh–Tsujii chain is at the addition-chain lower bound for exponent 130
+(`⌊log₂ 130⌋ + HW(130) − 1 = 8` products), so the inversion cannot get
+cheaper either. What is left on the representation axis is the field and
+state representation, which have their own notes (polynomial against normal
+basis for the products, packed and compact state for the traffic that
+decided batch 16 over 32, the denominator cache).
+
+Two ideas that look like representation changes and are not: on this curve
+`τ² + τ + 2 = 0`, so `R + σʲR = [1 + τʲ]R` and `x([1 + τʲ]R)` is a rational
+function of `x(R)` of degree `1 + 2ʲ + Vⱼ`, which is 14 already at `j = 3`,
+more than an addition; and x-only (Kummer-line) arithmetic needs
+`x(P − Q)`, which a random-walk addend does not supply, while a fixed addend
+makes the walk a permutation rather than a random function.

@@ -4,9 +4,11 @@ Companion to ../LAMBDA-PROJECTIVE.md.  Three things, each checked against the
 generator's ONB model of GF(2^m) on y^2 + xy = x^3 + 1 (codegen/curves.py):
 
   1. the lambda-projective mixed (8M + 2S) and full (11M + 2S) addition
-     formulas of Oliveira, Lopez, Aranha and Rodriguez-Henriquez agree with
-     affine addition on random points, at m = 23, 41 and 131, and the
-     operation counts are what the note prices;
+     formulas of Oliveira, Lopez, Aranha and Rodriguez-Henriquez, the
+     lambda-affine addition reduced to one inversion (6M + 2S + I) and the
+     Lopez-Dahab mixed addition (8M + 5S) agree with affine
+     addition on random points, at m = 23, 41 and 131, and the operation
+     counts are what the note prices;
   2. a walk driven from a projective representative is a function of the
      point iff its branch selector and distinguished-point predicate are
      invariant under scaling of (X, L, Z); with the weight of X in place of
@@ -140,6 +142,53 @@ def lambdaFullAdd(f, r, s):
     return (x3, l3, z3)
 
 
+def lambdaAffineAdd(f, p, q):
+    """(x_P, lambda_P) + (x_Q, lambda_Q) in lambda-affine form, one inversion.
+
+    x = x_P x_Q A / B,  lambda = (x_Q A + B)^2 / (A B) + lambda_P + 1,
+    A = lambda_P + lambda_Q,  B = (x_P + x_Q)^2; invert A B once.  6M + 2S + 1I.
+    """
+    x1, l1 = p
+    x2, l2 = q
+    a = f.add(l1, l2)
+    b = f.sqr(f.add(x1, x2))                 # S
+    inv = f.inv(f.mul(a, b))                 # M I   1 / (A B)
+    invB = f.mul(a, inv)                     # M     1 / B
+    t = f.mul(x2, a)                         # M     x_Q A
+    x3 = f.mul(f.mul(x1, t), invB)           # M M
+    l3 = f.add(f.add(f.mul(f.sqr(f.add(t, b)), inv), l1), f.one())  # S M
+    return (x3, l3)
+
+
+def ldMixedAdd(f, r, q):
+    """Lopez-Dahab (X, Y, Z), x = X/Z, y = Y/Z^2, plus affine (x_Q, y_Q); a = 0.
+
+    Lopez and Dahab 1999 as written.  8M + 5S on this curve: the a Z_1^2 term is
+    a multiplication by the constant a (0 here, 1 on the other Koblitz curve),
+    never a field product, so the count is the published best.
+    """
+    X1, Y1, Z1 = r
+    x2, y2 = q
+    z1sq = f.sqr(Z1)                         # S
+    a = f.add(f.mul(y2, z1sq), Y1)           # M
+    b = f.add(f.mul(x2, Z1), X1)             # M
+    c = f.mul(Z1, b)                         # M
+    d = f.mul(f.sqr(b), c)                   # S M   (a = 0 drops the a Z1^2 term)
+    z3 = f.sqr(c)                            # S
+    e = f.mul(a, c)                          # M
+    x3 = f.add(f.add(f.sqr(a), d), e)        # S
+    ff = f.add(x3, f.mul(x2, z3))            # M
+    g = f.mul(f.add(x2, y2), f.sqr(z3))      # S M
+    y3 = f.add(f.mul(f.add(e, z3), ff), g)   # M
+    return (x3, y3, z3)
+
+
+def fromLd(f, r):
+    X, Y, Z = r
+    zi = f.inv(Z)
+    return (f.mul(X, zi), f.mul(Y, f.sqr(zi)))
+
+
 def sigmaProjective(f, r, j):
     """The Frobenius acts coordinate-wise: (X, L, Z) -> (X^(2^j), L^(2^j), Z^(2^j))."""
     X, L, Z = r
@@ -175,6 +224,8 @@ def checkFormulas(m, trials, rng):
     f = Counted(onb)
     mixedCounts = None
     fullCounts = None
+    affineCounts = None
+    ldCounts = None
     for _ in range(trials):
         p = randomAffinePoint(curve, rng)
         q = randomAffinePoint(curve, rng)
@@ -185,6 +236,22 @@ def checkFormulas(m, trials, rng):
             continue
         lp = toLambdaAffine(onb, p)
         lq = toLambdaAffine(onb, q)
+
+        f.reset()
+        got = lambdaAffineAdd(f, lp, lq)
+        c = f.counts()
+        assert affineCounts in (None, c), (affineCounts, c)
+        affineCounts = c
+        assert fromLambdaAffine(onb, got) == expected, ('lambda-affine', m)
+
+        f.reset()
+        zl = onb.randomElement(rng) or onb.one()
+        ld = (onb.mul(p[0], zl), onb.mul(p[1], onb.sqr(zl)), zl)
+        got = ldMixedAdd(f, ld, q)
+        c = f.counts()
+        assert ldCounts in (None, c), (ldCounts, c)
+        ldCounts = c
+        assert fromLd(onb, got) == expected, ('lopez-dahab', m)
         zp = onb.randomElement(rng) or onb.one()
         zq = onb.randomElement(rng) or onb.one()
         rp = toLambdaProjective(onb, lp, zp)
@@ -217,7 +284,7 @@ def checkFormulas(m, trials, rng):
 
         # negation on a representative
         assert fromLambdaAffine(onb, fromLambdaProjective(onb, negProjective(onb, rp))) == curve.neg(p)
-    return mixedCounts, fullCounts
+    return mixedCounts, fullCounts, affineCounts, ldCounts
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +432,7 @@ def affineBatched(batch, mixed=True):
     return muls, 1.0, 1.0 / batch
 
 
-def priceTable(mixedCounts, fullCounts):
+def priceTable(mixedCounts, fullCounts, lambdaAffineCounts=(6, 2, 1), ldCounts=(8, 5, 0)):
     rows = []
     for batch in (1, 2, 3, 4, 8, 16, 32):
         mu, sq, iv = affineBatched(batch)
@@ -374,6 +441,13 @@ def priceTable(mixedCounts, fullCounts):
     mu, sq, iv = affineBatched(10 ** 9)
     alu, cl = price(mu, sq, iv)
     rows.append(('affine, batch -> infinity', mu, sq, iv, alu, cl))
+    am, as_, ai = lambdaAffineCounts
+    mu = am + 3.0 * 15 / 16
+    alu, cl = price(mu, as_, ai / 16.0)
+    rows.append(('lambda-affine, Montgomery batch 16', mu, as_, ai / 16.0, alu, cl))
+    lm, ls, li = ldCounts
+    alu, cl = price(lm, ls, li)
+    rows.append(('Lopez-Dahab mixed, hash free', lm, ls, li, alu, cl))
     mm, ms, mi = mixedCounts
     alu, cl = price(mm, ms, mi)
     rows.append(('lambda-projective mixed (table walk), hash free', mm, ms, mi, alu, cl))
@@ -415,15 +489,21 @@ def main(argv=None):
 
     mixedCounts = None
     fullCounts = None
+    affineCounts = None
+    ldCounts = None
     if not args.table:
         for m in (23, 41, 131):
             trials = args.trials if m < 131 else max(20, args.trials // 10)
-            mixed, full = checkFormulas(m, trials, rng)
-            print('m = %3d: %d random additions agree with affine; mixed %dM+%dS+%dI, full %dM+%dS+%dI' % (
-                m, trials, mixed[0], mixed[1], mixed[2], full[0], full[1], full[2]))
+            mixed, full, affine, ld = checkFormulas(m, trials, rng)
+            print('m = %3d: %d random additions agree with affine; lambda-projective mixed %dM+%dS, '
+                  'full %dM+%dS; lambda-affine %dM+%dS+%dI; Lopez-Dahab mixed %dM+%dS' % (
+                      m, trials, mixed[0], mixed[1], full[0], full[1],
+                      affine[0], affine[1], affine[2], ld[0], ld[1]))
             mixedCounts = mixedCounts or mixed
             fullCounts = fullCounts or full
-            assert mixed == mixedCounts and full == fullCounts
+            affineCounts = affineCounts or affine
+            ldCounts = ldCounts or ld
+            assert (mixed, full, affine, ld) == (mixedCounts, fullCounts, affineCounts, ldCounts)
         for m in (23, 41):
             s = splitStatistics(m, args.trials, args.steps, rng)
             print('m = %3d: invariant selector, trails on the same point after %d steps: %d of %d split' % (
@@ -436,9 +516,9 @@ def main(argv=None):
                   'spurious %.3f, missed %.3f' % (
                       s['dpWeight'], s['dpRate'], s['dpAgree'], s['dpSpurious'], s['dpMissed']))
     if mixedCounts is None:
-        mixedCounts, fullCounts = (8, 2, 0), (11, 2, 0)
+        mixedCounts, fullCounts, affineCounts, ldCounts = (8, 2, 0), (11, 2, 0), (6, 2, 1), (8, 5, 0)
     print()
-    print(formatTable(priceTable(mixedCounts, fullCounts)))
+    print(formatTable(priceTable(mixedCounts, fullCounts, affineCounts, ldCounts)))
     return 0
 
 

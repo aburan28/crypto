@@ -10,9 +10,11 @@ import lambda_projective as lp
 class LambdaProjectiveTests(unittest.TestCase):
     def test_formulas_agree_with_affine_at_published_counts(self):
         rng = random.Random(7)
-        mixed, full = lp.checkFormulas(23, 40, rng)
+        mixed, full, affine, ld = lp.checkFormulas(23, 40, rng)
         self.assertEqual(mixed, (8, 2, 0))
         self.assertEqual(full, (11, 2, 0))
+        self.assertEqual(affine, (6, 2, 1))
+        self.assertEqual(ld, (8, 5, 0))
 
     def test_twist_identity(self):
         # f(c R) is a representative of the point f(R) whenever the selector
