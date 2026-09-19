@@ -116,6 +116,15 @@ class FreezeTests(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIsNone(out)
 
+    def test_b300_accepts_sm103(self):
+        obj = payload(gpu="NVIDIA B300 SXM6 AC", cc="103", sms=148, threads=75776,
+                      rates=(7575.0, 7574.0, 7571.0))
+        r, out = self.freeze(obj, modal="B300")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(out["cc"], "103")
+        self.assertEqual(out["sms"], 148)
+        self.assertAlmostEqual(out["medianB"], 7.574)
+
     def test_a100_40_refuses_80gb(self):
         r, out = self.freeze(
             payload(gpu="NVIDIA A100-SXM4-80GB", cc="80"), modal="A100-40GB")

@@ -154,7 +154,8 @@ DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
 
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
-# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4.
+# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4. Modal B300 reports
+# compute capability 10.3; the survey image still bakes sm_100, which ran.
 GPU_ARCH = {
     "T4": "75", "L4": "89", "L40S": "89", "A10": "86", "A10G": "86",
     "A100": "80", "A100-40GB": "80", "A100-80GB": "80",

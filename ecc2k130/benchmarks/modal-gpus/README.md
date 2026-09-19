@@ -17,3 +17,7 @@ copy into this directory.
 
 `python3 benchmarks/modal-gpus/summarize.py` rebuilds `summary.json`
 from the frozen receipts. It does not invent a rate.
+
+Every pinned SKU returned three valid repeats. No SKU beat the 6000
+reference 15.115792 B/s. See [SURVEY.md](SURVEY.md) §3.
+

@@ -102,24 +102,47 @@ rather than invent a rate.
 ## 3. Receipt
 
 Frozen in this directory. Cite those files; do not recompute. The 6000
-shipping row is the reference, not a survey number; the survey also
-re-measures a 6000 with **automatic** workers so occupancy matches the
-other rows.
+shipping row is the reference (385,024 workers). Every survey row used
+**automatic** workers on the same packed recipe. Class is engineering
+on every SKU: same walk, 5.3125 products/update.
 
 | variant | median B/s | / SM prior | / 6000 15.116 | T it/$ | class | correctness |
 |---|---:|---:|---:|---:|---|---|
-| RTX PRO 6000 shipping, 385k workers | 15.115792 | 1.000 | 1.000 | 17.96 | reference | top-clmad control |
-| T4 CLMAD=0 | *not yet run* | | | | | |
-| L4 CLMAD=1 | *not yet run* | | | | | |
-| A10 CLMAD=1 | *not yet run* | | | | | |
-| L40S CLMAD=1 | *not yet run* | | | | | |
-| A100-40GB CLMAD=1 | *not yet run* | | | | | |
-| A100-80GB CLMAD=1 | *not yet run* | | | | | |
-| RTX-PRO-6000 automatic CLMAD=1 | *not yet run* | | | | | |
-| H100! CLMAD=1 | *not yet run* | | | | | |
-| H200 CLMAD=1 | *not yet run* | | | | | |
-| B200 CLMAD=1 | *not yet run* | | | | | |
-| B300 CLMAD=1 | *not yet run* | | | | | |
+| RTX PRO 6000 shipping, 385k workers | 15.115792 | 1.000 | 1.000 | 17.95 | reference | top-clmad control |
+| RTX-PRO-6000 automatic CLMAD=1 | 14.470284 | 0.957 | 0.957 | 17.19 | engineering | 3/3, 188 SMs, 96,256 workers, 104 regs, [ap-H91F5mhJhxcD4q0UFno4kU](https://modal.com/apps/a-buran28/main/ap-H91F5mhJhxcD4q0UFno4kU) |
+| B200 CLMAD=1 | 8.840089 | 0.743 | 0.585 | 5.09 | engineering | 3/3, 148 SMs, 75,776 workers, 102 regs, sm_100, [ap-zSAroEZ9bIxx0mpguVpw4d](https://modal.com/apps/a-buran28/main/ap-zSAroEZ9bIxx0mpguVpw4d) |
+| L40S CLMAD=1 | 8.696036 | 0.762 | 0.575 | 16.04 | engineering | 3/3, 142 SMs, 72,704 workers, 94 regs, [ap-IXpS5030y8Dt96m6Uxg84Y](https://modal.com/apps/a-buran28/main/ap-IXpS5030y8Dt96m6Uxg84Y) |
+| H200 CLMAD=1 | 7.631529 | 0.719 | 0.505 | 6.05 | engineering | 3/3, 132 SMs, 67,584 workers, 94 regs, [ap-9dnaI248uh4wJcBUaR8swa](https://modal.com/apps/a-buran28/main/ap-9dnaI248uh4wJcBUaR8swa) |
+| B300 CLMAD=1 | 7.574599 | 0.637 | 0.501 | 3.84 | engineering | 3/3, **148 SMs** (SKU, not the 160 published max), sm_103, 75,776 workers, 102 regs, NVIDIA B300 SXM6 AC, [ap-qw3FaHKz9gAZnBsDrCPKBO](https://modal.com/apps/a-buran28/main/ap-qw3FaHKz9gAZnBsDrCPKBO) |
+| H100! CLMAD=1 | 7.539836 | 0.710 | 0.499 | 6.87 | engineering | 3/3, NVIDIA H100 80GB HBM3 (not H200), 132 SMs, 67,584 workers, 94 regs, [ap-5XfegYVjcNjFjf8rVbeSvn](https://modal.com/apps/a-buran28/main/ap-5XfegYVjcNjFjf8rVbeSvn) |
+| A100-80GB CLMAD=1 | 4.631707 | 0.533 | 0.306 | 6.67 | engineering | 3/3, A100-SXM4-80GB, 108 SMs, 55,296 workers, 94 regs, [ap-eBJmY6u2a7FcUWiDoZI4ay](https://modal.com/apps/a-buran28/main/ap-eBJmY6u2a7FcUWiDoZI4ay) |
+| A100-40GB CLMAD=1 | 4.617559 | 0.532 | 0.305 | 7.92 | engineering | 3/3, A100-SXM4-40GB, 108 SMs, 55,296 workers, 94 regs, [ap-FwDmAoBYdBXL5bJ696HG7Q](https://modal.com/apps/a-buran28/main/ap-FwDmAoBYdBXL5bJ696HG7Q) |
+| L4 CLMAD=1 | 2.560970 | 0.549 | 0.169 | 11.54 | engineering | 3/3, 58 SMs, 29,696 workers, 94 regs, [ap-j6vKWdJmiTrGYl0gu9vPMn](https://modal.com/apps/a-buran28/main/ap-j6vKWdJmiTrGYl0gu9vPMn) |
+| A10 CLMAD=1 | 2.423276 | 0.419 | 0.160 | 7.92 | engineering | 3/3, 72 SMs, 36,864 workers, 94 regs, [ap-yUgWVfFYPA86TldZbX85Wj](https://modal.com/apps/a-buran28/main/ap-yUgWVfFYPA86TldZbX85Wj) |
+| T4 CLMAD=0 | 0.541290 | 0.168 | 0.036 | 3.30 | engineering | 3/3, Tesla T4, sm_75, 40 SMs, 20,480 workers, 128 regs, [ap-HnfK9biXIa79CvQA58Q4Mt](https://modal.com/apps/a-buran28/main/ap-HnfK9biXIa79CvQA58Q4Mt) |
 
-Collecting rates on every non-6000 SKU are unmeasured. Do not move the
-live searchers.
+No row beat 15.115792 B/s. The "GPU X is faster than the 6000" claim is
+false for every Modal type in the catalog. Closest other parts: B200
+0.585×, L40S 0.575×. Hopper H100!/H200 sit at 0.50×. B300 SXM6 AC ran
+the sm_100 binary at compute capability 10.3 with **148 SMs**, the same
+count as B200, and landed at 0.501× — slower than B200, slower than
+L40S, and last on it/$.
+
+it/$ uses Modal list prices from §2. A collecting 6000 at 14.1 B/s is
+**16.75** T it/$. L40S is the cheapest other SKU at 16.04 and still
+loses that comparison. Automatic occupancy on the 6000 itself is
+14.470 B/s (96,256 workers = 188 × 2 × 256); the shipping 385,024 is
+four waves and the extra 4.3% is that occupancy, not a different GPU.
+
+Per-SM M it/s, same recipe: 6000 automatic 77.0, L40S 61.2, B200 59.7,
+H200 57.8, H100 57.1, B300 51.2, L4 44.2, A100 42.8, A10 33.7, T4 13.5.
+L4 beats A10 despite 58 vs 72 SMs. Ada CLMAD on L40S remains the only
+non-6000 row whose it/$ is even in the same band as a collecting 6000.
+
+Earlier Ada/T4/B200 receipts (L40S 8.838, L4 2.490, T4 0.533, B200
+8.822) stay as before-marks on those SKUs; this table is one matched
+day. Collecting rates on every non-6000 SKU are unmeasured. Do not
+move the live searchers.
+
+Skipped aliases, as declared: `A100`, `H100`, `B200+`.
+
