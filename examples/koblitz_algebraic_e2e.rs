@@ -318,6 +318,7 @@ fn main() {
         allow_direct_relation: false,
         collapse_projected_orbits: true,
         linear_algebra: crypto_lib::cryptanalysis::koblitz_index_calculus::LinearAlgebra::Dense,
+        weil_charts: None,
     };
     let solve_start = Instant::now();
     let report =
