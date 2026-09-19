@@ -723,7 +723,24 @@ class Rollup(unittest.TestCase):
                                    when("2026-09-19T07:59:00"))])
         self.assertTrue(dp_ingest.ensureRollup(conn.cursor()))
         self.assertEqual(len([q for q in self.sql(conn)
-                              if "FROM distinguished_points" in q and "GROUP BY" in q]), 1)
+                              if "FROM distinguished_points" in q]), 1)
+        self.assertTrue(any("INSERT INTO dp_ingest_meta" in q for q in self.sql(conn)))
+
+    def test_the_seed_does_not_verify_itself_by_counting_the_table(self):
+        # A verification pass sounds free and is not: counting the corpus to
+        # check the seed is a second full scan, and a check that retries until
+        # it agrees with a corpus the fleet is still writing to never agrees.
+        # Deferring the mark on a mismatch therefore reinstates a full scan
+        # before every pass -- the exact cost these counters exist to remove.
+        # The seed reads the table once, marks itself, and the precondition
+        # (every writer goes through applyRollup) is documented instead.
+        conn = RollupConn(corpus=[(when("2026-09-19T07:00:00"), 1200,
+                                   when("2026-09-19T07:01:00"),
+                                   when("2026-09-19T07:59:00"))])
+        dp_ingest.ensureRollup(conn.cursor())
+        scans = [q for q in self.sql(conn) if "FROM distinguished_points" in q]
+        self.assertEqual(len(scans), 1)
+        self.assertIn("GROUP BY", scans[0])
         self.assertTrue(any("INSERT INTO dp_ingest_meta" in q for q in self.sql(conn)))
 
     def test_a_replacement_host_does_not_read_the_corpus_again(self):
