@@ -38,6 +38,7 @@ RUNID=${RUNID:-1}
 COUNT=${COUNT:-4}           # fanout width
 CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}  # full walk-state file; status uses a 15s header
 SYNC_INTERVAL=${SYNC_INTERVAL:-15}        # volume → S3, so the page sees the header
+VERIFY=${VERIFY:-0}                       # 0: do not CPU-replay reports (stalls dp32)
 
 if [ "$CURVE" = 131 ]; then
     # Audited fleet preset — see RTX-PRO6000.md and aws/campaign.json.
@@ -100,7 +101,7 @@ if [ "$PACKED" = 1 ]; then
 fi
 
 shape="--curve $CURVE --batch $BATCH --threads $THREADS --leaf $LEAF --walks $WALKS"
-shape="$shape --dp-weight $DPW --load-max $LOADMAX"
+shape="$shape --dp-weight $DPW --load-max $LOADMAX --verify $VERIFY"
 [ -n "$packed_flag" ] && shape="$shape $packed_flag"
 build_shape="--batch $BATCH --threads $THREADS --leaf $LEAF --min-blocks 2"
 [ -n "$packed_flag" ] && build_shape="$build_shape $packed_flag"

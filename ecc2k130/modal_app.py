@@ -1146,7 +1146,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=4):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -1168,6 +1168,16 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     so a recovered logarithm can be checked against it."""
     if packed and (curve != 131 or leaf):
         raise ValueError('packed search requires curve=131 and leaf=0')
+    if int(verify) > 0:
+        # --verify N replays the first N reports through the CPU reference
+        # before they are written. At dp-weight 32 that is ~2^32 scalar steps
+        # per point, and the GPU sits idle while it runs. That is why the
+        # recycled 6000s printed "resumed from" and then produced no DPs:
+        # the first report never finished verifying. validate/ still uses a
+        # budget; campaign collection does not.
+        print("WARNING: --verify %d replays reports on the CPU; campaign "
+              "collection uses --verify 0 so the walk is not stalled"
+              % int(verify), flush=True)
     backendFlag = ' --packed' if packed else ''
     if rebuild:
         ok, log = buildFor(batch, threads, leaf)
@@ -1582,7 +1592,7 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
            walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 4, checkpoint_every: int = 60):
+           verify: int = 0, checkpoint_every: int = 60):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
                                      runId=run_id, walksTarget=walks, loadMax=load_max,
@@ -1595,7 +1605,7 @@ def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
            walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 4, checkpoint_every: int = 60):
+           verify: int = 0, checkpoint_every: int = 60):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
