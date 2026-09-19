@@ -618,6 +618,26 @@ where the first shape waits out its timeout. It skips where there is no
 Postgres, so it is a no-op in CI and a real check on any host that can reach
 one.
 
+**The page reading `IDLE_OR_STALE` with no new points is not always a bug in
+any of the above.** Since 19:02Z on 2026-09-18 it is the truth: spot reclaimed
+every worker, and `RunInstances` is refused account-wide — `Blocked … not
+recognized as a valid account`, an account-verification hold that no IAM
+permission overrides — so nothing can replace them. The document says which
+kind of stop it is without needing this paragraph: `walking_slots: 0`,
+`workers: 0`, `iterations_per_second: 0.0` and `outstanding_objects: 0` beside
+an 11-hour `lag_seconds` is a fleet that stopped with an ingest that is caught
+up, where a stopped ingest shows a rising `outstanding_objects` and a fresh
+`newest_object_at`. Both ASGs still hold their launch template and an available
+AMI, and they track `$Latest`, so recovery once the hold clears is capacity
+only:
+
+```
+aws autoscaling update-auto-scaling-group --region us-west-2 \
+  --auto-scaling-group-name ecc2k130-g7 --min-size 0 --max-size 8 --desired-capacity 8
+```
+
+They are at `min=max=desired=0`, which is why `max-size` is in that line.
+
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
 is the 15-minute Actions job, with this copy as the second one. On the rollup
