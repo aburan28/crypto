@@ -74,6 +74,9 @@ search)
             if grep -q '"solved": "' /tmp/ecc-pass.$$ && ! grep -q '"solved": null' /tmp/ecc-pass.$$; then
                 echo "solved on pass $pass"
                 rm -f /tmp/ecc-pass.$$
+                if [ "${SYNC:-1}" != 0 ]; then
+                    "$0" sync || echo "sync after solve failed; will retry" >&2
+                fi
                 exit 0
             fi
         else
