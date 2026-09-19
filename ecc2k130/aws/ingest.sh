@@ -93,7 +93,7 @@ ensure_access() {
     if [ "$public" != "True" ] && [ "$public" != "true" ]; then
         echo "rho-dp is not publicly accessible; enabling (takes a few minutes)..."
         aws rds modify-db-instance --db-instance-identifier rho-dp \
-            --publicly-accessible --apply-immediately >/dev/null
+            --publicly-accessible --apply-immediately >/dev/null 2>&1 || true
         aws rds wait db-instance-available --db-instance-identifier rho-dp
     fi
     if aws ec2 describe-security-groups --group-ids "$RDS_SG" \
@@ -104,7 +104,8 @@ ensure_access() {
         echo "adding $cidr to $RDS_SG:5432"
         aws ec2 authorize-security-group-ingress \
             --group-id "$RDS_SG" \
-            --ip-permissions "IpProtocol=tcp,FromPort=5432,ToPort=5432,IpRanges=[{CidrIp=$cidr,Description=ingest-$(hostname -s 2>/dev/null || echo host)}]"
+            --ip-permissions "IpProtocol=tcp,FromPort=5432,ToPort=5432,IpRanges=[{CidrIp=$cidr,Description=ingest-$(hostname -s 2>/dev/null || echo host)}]" \
+            >/dev/null 2>&1 || true
     fi
     if timeout 10 bash -c "echo >/dev/tcp/$host/5432" 2>/dev/null; then
         echo "postgres reachable at $host:5432"
