@@ -24,6 +24,7 @@
     <a href="../">Overview</a>
     <a href="../scoreboard/">Scoreboard</a>
     <a href="./" aria-current="page">Campaign status</a>
+    <a href="./how.html">How the walk works</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
 </header>
@@ -34,14 +35,18 @@
   <p class="sub">
     Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
     distinguished-point table. The browser loads the live feed from the
-    campaign store every minute and falls back to the GitHub Pages copy when
-    that feed is unreachable. The page publishes counts only &mdash; walk
+    campaign store and the GitHub Pages copy together, and keeps whichever
+    fields each one actually has: counts from the store, walk rate from the
+    snapshot history when the live document is missing it. Refresh is every
+    minute. The page publishes counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
   <p class="sub">
     Adding hardware to the walk: <a href="#h-contribute">contribute compute</a>
-    &mdash; <a href="https://github.com/aburan28/cairn/releases/latest">download
+    &mdash; <a href="./how.html">how the walk works</a>, as a toy that recovers
+    <span class="mono">k</span> in the browser &mdash;
+    <a href="https://github.com/aburan28/cairn/releases/latest">download
     cairn</a> for the paid piecework path, or run the client itself.
   </p>
 
@@ -506,7 +511,17 @@ make gpu
   function walkingSlots(status) {
     if (!status || !status.work) return null;
     var slots = Number(status.work.walking_slots);
-    return isFinite(slots) && slots >= 0 ? slots : null;
+    if (isFinite(slots) && slots >= 0) return slots;
+    var rows = status.work.per_slot;
+    if (!Array.isArray(rows)) return null;
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      if (!row || row.retired) continue;
+      var age = Number(row.checkpoint_age_s);
+      if (isFinite(age) && age <= 1800) n++;
+    }
+    return n;
   }
 
   // Billions of iterations per second is the campaign's own unit: it is what
@@ -1334,23 +1349,93 @@ make gpu
     return response.json();
   }
 
-  async function loadStatus() {
-    var sources = [
-      { url: LIVE_FEED_URL, label: "live feed" },
-      { url: "./status.json", label: "Pages snapshot" }
-    ];
-    var errors = [];
-    for (var i = 0; i < sources.length; i++) {
-      try {
-        var status = await fetchJSON(sources[i].url);
-        status._fetch_url = sources[i].url;
-        status._fetch_label = sources[i].label;
-        return status;
-      } catch (err) {
-        errors.push(sources[i].label + ": " + err.message);
+  function generatedMs(status) {
+    var t = Date.parse(String(status && status.generated_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
+  function mergeSnapshots(live, pages) {
+    if (!live && !pages) return null;
+    if (!live) return pages;
+    if (!pages) return live;
+    var newer = generatedMs(live) >= generatedMs(pages) ? live : pages;
+    var older = newer === live ? pages : live;
+    var out = {};
+    var key;
+    for (key in older) out[key] = older[key];
+    for (key in newer) out[key] = newer[key];
+    out.work = {};
+    if (older.work) for (key in older.work) out.work[key] = older.work[key];
+    if (newer.work) for (key in newer.work) out.work[key] = newer.work[key];
+    if (walkingSlots({ work: out.work }) === null && walkingSlots(older) !== null) {
+      out.work.walking_slots = walkingSlots(older);
+    }
+    if (!out.walk_rate && older.walk_rate) out.walk_rate = older.walk_rate;
+    if (!(out.per_worker && out.per_worker.length) && older.per_worker && older.per_worker.length) {
+      out.per_worker = older.per_worker;
+    }
+    out._fetch_label = (live._fetch_label || "live feed") + " + " + (pages._fetch_label || "Pages snapshot");
+    return out;
+  }
+
+  function attachRateFromHistory(status, history) {
+    if (!status || measuredRate(status) !== null) return status;
+    var iterations = reportedIterations(status);
+    if (iterations === null) return status;
+    var points = (history && history.points) || [];
+    var samples = [];
+    var i;
+    for (i = 0; i < points.length; i++) {
+      var it = Number(points[i].iterations);
+      var at = Date.parse(String(points[i].generated_at || ""));
+      if (isFinite(it) && it > 0 && isFinite(at)) {
+        samples.push({ at: at, iterations: it, stamp: points[i].generated_at });
       }
     }
-    throw new Error(errors.join("; "));
+    var now = Date.parse(String(status.generated_at || ""));
+    if (isFinite(now)) samples.push({ at: now, iterations: iterations, stamp: status.generated_at });
+    samples.sort(function (a, b) { return a.at - b.at; });
+    if (samples.length < 2) return status;
+    var latest = samples[samples.length - 1];
+    var windowMs = 3600 * 1000;
+    var base = null;
+    for (i = 0; i < samples.length - 1; i++) {
+      if (latest.at - samples[i].at <= windowMs) { base = samples[i]; break; }
+    }
+    if (!base) base = samples[samples.length - 2];
+    var span = (latest.at - base.at) / 1000;
+    if (span < 600 || latest.iterations < base.iterations) return status;
+    status.walk_rate = {
+      iterations_per_second: (latest.iterations - base.iterations) / span,
+      window_seconds: Math.round(span),
+      measured_from: base.stamp,
+      measured_to: latest.stamp,
+      iterations_from: base.iterations,
+      iterations_to: latest.iterations,
+      method: "difference of checkpointed iteration totals between two snapshots"
+    };
+    return status;
+  }
+
+  async function loadStatus() {
+    var live = null;
+    var pages = null;
+    var errors = [];
+    try {
+      live = await fetchJSON(LIVE_FEED_URL);
+      live._fetch_label = "live feed";
+    } catch (err) {
+      errors.push("live feed: " + err.message);
+    }
+    try {
+      pages = await fetchJSON("./status.json");
+      pages._fetch_label = "Pages snapshot";
+    } catch (err) {
+      errors.push("Pages snapshot: " + err.message);
+    }
+    var status = mergeSnapshots(live, pages);
+    if (!status) throw new Error(errors.join("; ") || "no snapshot");
+    return status;
   }
 
   var lastStatus = null;
@@ -1379,6 +1464,7 @@ make gpu
     } catch (err) {
       historyError = err.message;
     }
+    attachRateFromHistory(status, history);
 
     var generated = parseTime(status.generated_at);
     var published = parseTime(status.published_at);

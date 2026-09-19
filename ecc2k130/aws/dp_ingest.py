@@ -469,7 +469,35 @@ def loadPreviousStatus(s3, statusBucket):
 
 
 def walkRateBetween(current, previous):
-    """Iterations per second between two ingest publishes, or None."""
+    """Iterations per second between two ingest publishes, or None.
+
+    Consecutive writes are often closer together than MIN_WALK_RATE_SPAN_S
+    (the dashboard publishes every ~180s; a slot checkpoints every 600s).
+    When the previous document already carries a measured_from, difference
+    against that older total instead of dropping the rate.
+    """
+    if not isinstance(previous, dict):
+        return None
+    bases = [previous]
+    prior = previous.get("walk_rate")
+    if isinstance(prior, dict) and prior.get("measured_from"):
+        try:
+            fromIter = int(prior.get("iterations_from"))
+        except (TypeError, ValueError):
+            fromIter = 0
+        if fromIter > 0:
+            bases.append({
+                "generated_at": prior["measured_from"],
+                "work": {"iterations": fromIter},
+            })
+    for base in bases:
+        rate = _walkRate(current, base)
+        if rate is not None:
+            return rate
+    return None
+
+
+def _walkRate(current, previous):
     if not isinstance(previous, dict):
         return None
     curWork = current.get("work") or {}
@@ -497,6 +525,17 @@ def walkRateBetween(current, previous):
         "iterations_to": curIter,
         "method": "difference between this publish and the previous status.json",
     }
+
+
+def publicStatus(payload):
+    """The browser-safe document: same aggregates, no per-slot rows."""
+    out = json.loads(json.dumps(payload))
+    work = out.get("work")
+    if isinstance(work, dict):
+        work = dict(work)
+        work.pop("per_slot", None)
+        out["work"] = work
+    return out
 
 
 def checkpointWork(s3, bucket, staleAfter=1800.0):
@@ -703,9 +742,10 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     rate = walkRateBetween(payload, previous)
     if rate is not None:
         payload["walk_rate"] = rate
+    public = publicStatus(payload)
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
-        Body=(json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),
+        Body=(json.dumps(public, indent=2, sort_keys=True) + "\n").encode(),
         ContentType="application/json",
         # Short but non-zero: the underlying data only moves when a worker
         # uploads, so caching for less than that buys nothing and costs requests.

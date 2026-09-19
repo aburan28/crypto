@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the ECC2K-130 walk works · aburan28/crypto</title>
+<meta name="description" content="The Pollard rho walk behind the ECC2K-130 campaign, as a few dozen lines that recover a planted discrete logarithm on a tiny curve.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1020">
+<link rel="canonical" href="https://aburan28.github.io/crypto/status/how.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to explanation</a>
+
+<header class="topbar">
+  <nav aria-label="Site">
+    <a href="../">Overview</a>
+    <a href="../scoreboard/">Scoreboard</a>
+    <a href="./">Campaign status</a>
+    <a href="./how.html" aria-current="page">How the walk works</a>
+    <a href="https://github.com/aburan28/crypto">Repository</a>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="kicker">Certicom ECC2K-130 · the algorithm, not the fleet</p>
+  <h1>How the walk works</h1>
+  <p class="sub">
+    The live dashboard is a count of work. This page is the method: the same
+    Pollard rho the GPUs run, on a curve small enough that a browser recovers
+    <span class="mono">k</span> in a moment. The production kernels are
+    bitsliced CUDA; the readable copy is
+    <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/examples/rho_toy.py"><span class="mono">ecc2k130/examples/rho_toy.py</span></a>.
+  </p>
+
+  <section aria-labelledby="h-what">
+    <h2 id="h-what">What the campaign is computing</h2>
+    <p class="note">
+      A Koblitz curve over <span class="mono">GF(2^131)</span> and two points
+      <span class="mono">P</span>, <span class="mono">Q</span> on it. The
+      secret is the integer <span class="mono">k</span> with
+      <span class="mono">Q = [k]P</span>. Certicom published the instance in
+      1997. Nobody has published <span class="mono">k</span>. The expected
+      cost of a collision, from Bailey et al., is
+      <span class="mono">2^60.9</span> group operations.
+    </p>
+    <p class="note">
+      Independent walks start from random seeds and iterate
+    </p>
+    <p class="ops-value mono" style="font-size:1.15rem">R ← R + τ<sup>j</sup>(R)</p>
+    <p class="note">
+      with <span class="mono">j = 3 + ((HW(x)/2) mod 8)</span>. Hamming
+      weight is taken in a normal basis so it is constant on Frobenius
+      orbits; the walk therefore runs on classes, not points, which is why
+      this curve is easier than a prime-field curve of the same size. A
+      point is <em>distinguished</em> when that weight is at most 32. Two
+      walks that hit the same orbit give a linear equation for
+      <span class="mono">k</span>. Until that happens, the only honest
+      progress number is how many iterations the walkers have actually
+      counted.
+    </p>
+  </section>
+
+  <section aria-labelledby="h-run">
+    <h2 id="h-run">Run it here, on GF(2<sup>23</sup>)</h2>
+    <p class="note">
+      Same iteration, same distinguishing test, planted
+      <span class="mono">k</span>. The subgroup is 21 bits, so a collision
+      is a fraction of a second rather than a decade. This is not the
+      challenge; it is the algorithm finishing.
+    </p>
+    <p>
+      <button type="button" id="run-toy">Recover a toy discrete log</button>
+    </p>
+    <pre class="transcript" id="toy-out">Press the button. The script is rho-toy.js, a line-for-line port of rho_toy.py.</pre>
+  </section>
+
+  <section aria-labelledby="h-code">
+    <h2 id="h-code">The four steps in the Python file</h2>
+    <ol class="note" style="padding-left:1.2rem">
+      <li>Walk: <span class="mono">step(P)</span> adds the Frobenius image
+          <span class="mono">τ^j(P)</span>.</li>
+      <li>Distinguish: stop when <span class="mono">HW(x) ≤ 8</span> (32 on
+          the challenge).</li>
+      <li>Collide: store the canonical orbit; a second seed on that orbit is
+          the meeting.</li>
+      <li>Solve: rewalk both seeds, build
+          <span class="mono">a, b</span> from the branch counts, recover
+          <span class="mono">k</span>, check <span class="mono">[k]P = Q</span>.</li>
+    </ol>
+    <p class="note">
+      Run it locally with
+      <span class="mono">python3 ecc2k130/examples/rho_toy.py</span>.
+      The GPU client is the same loop with a packed field and millions of
+      walks in flight; it is not a different attack.
+    </p>
+    <p class="note">
+      Live counts for the 131-bit campaign:
+      <a href="./">campaign status</a>.
+    </p>
+  </section>
+</main>
+
+<script src="./rho-toy.js"></script>
+<script>
+(function () {
+  var button = document.getElementById("run-toy");
+  var out = document.getElementById("toy-out");
+  button.addEventListener("click", function () {
+    button.disabled = true;
+    out.textContent = "Walking…";
+    setTimeout(function () {
+      try {
+        var r = RhoToy.run(1);
+        var lines = [
+          "curve  y^2 + xy = x^3 + 1  over GF(2^" + RhoToy.M + ")",
+          "prime subgroup order r = " + r.r,
+          "walk    R <- R + tau^j(R),  j = 3 + ((HW(x)/2) mod 8)",
+          "distinguish HW(x) <= " + RhoToy.DP_WEIGHT,
+          "planted k = " + r.planted,
+          "walked " + r.stats.steps + " steps across " + r.stats.walks +
+            " seeds, " + r.stats.dps + " distinguished points"
+        ];
+        if (r.recovered === null) {
+          lines.push("no collision this trial");
+        } else {
+          lines.push("collision on orbit " + r.key);
+          lines.push("  walk A seed " + r.seedA + " reached it in " + r.stepsA + " steps");
+          lines.push("  walk B seed " + r.seedB + " reached it in " + r.stepsB + " steps");
+          lines.push("recovered k = " + r.recovered);
+          lines.push(r.verified ? "verified [k]P = Q" : "MISMATCH");
+        }
+        out.textContent = lines.join("\n");
+      } catch (err) {
+        out.textContent = "Failed: " + err.message;
+      }
+      button.disabled = false;
+    }, 20);
+  });
+})();
+</script>
+</body>
+</html>
