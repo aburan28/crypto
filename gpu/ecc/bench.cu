@@ -6,8 +6,12 @@
  *   ./bench rho [opts]      Pollard-rho walk throughput (and, on a small
  *                           curve, an actual DLP solve)
  *
- * rho options:  --walks N --iters N --w W --rbits R --dp BITS --neg 0|1
- *               --variant reg|lowmem|ref  --solve
+ * rho options:  --walks N --iters N --w W --rbits R --dp BITS --fold 1|2|6
+ *               --max-steps N --variant reg|lowmem|ref  --solve
+ *
+ * --fold defaults to 6 (the full Aut(E) = Z/6 of secp256k1) where the curve
+ * supports it and to 2 (negation map) otherwise; --max-steps defaults to
+ * eight DP periods (see rho.cuh on fruitless cycles).
  *
  * Everything the kernels compute is checked against the same host code that
  * test_cpu.cpp verifies against the Python reference, so `selftest` is a
@@ -16,6 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -114,7 +119,8 @@ static void selftest() {
 
     /* --- rho: kernel state must track the host stepper exactly --- */
     RhoHost h;
-    h.prm.r_bits = 8; h.prm.dp_mask = 0x1F; h.prm.neg_map = 1;
+    h.prm.r_bits = 8; h.prm.dp_mask = 0x1F;
+    h.prm.fold = CURVE_HAS_AUT6 ? RHO_FOLD_AUT6 : RHO_FOLD_NEG;
     h.prm.max_steps = 1u << 20; h.prm.table_seed = 99;
     h.P = Curve::generator();
     uint32_t sk[8] = {0x9e3779b9u, 0x85ebca6bu, 0, 0, 0, 0, 0, 0};
@@ -123,7 +129,7 @@ static void selftest() {
 
     const uint32_t T = 256, W = 8, nw = T * W, dpcap = 1 << 14;
     rho_ctx hc{}, dc{};
-    std::vector<uint32_t> hX(8 * nw), hY(8 * nw), hH(2 * nw), hE(nw), hS(nw), hR(nw);
+    std::vector<uint32_t> hX(8 * nw), hY(8 * nw), hH(RHO_CYCLE_DEPTH * nw), hE(nw), hS(nw), hR(nw);
     std::vector<rho_dp> hdp(dpcap);
     uint32_t hcount = 0;
     hc.X = hX.data(); hc.Y = hY.data(); hc.H = hH.data(); hc.esc = hE.data();
@@ -131,12 +137,12 @@ static void selftest() {
     hc.nthreads = T; hc.walks_per_thread = W;
     hc.table = h.table.data(); hc.P = h.P; hc.Q = h.Q; hc.prm = h.prm;
     hc.dp_out = hdp.data(); hc.dp_count = &hcount; hc.dp_cap = dpcap;
-    hc.cycle_counter = nullptr;
+    hc.cycles = nullptr; hc.aborts = nullptr;
 
     dc = hc;
     CU(cudaMalloc(&dc.X, 8 * nw * sizeof(uint32_t)));
     CU(cudaMalloc(&dc.Y, 8 * nw * sizeof(uint32_t)));
-    CU(cudaMalloc(&dc.H, 2 * nw * sizeof(uint32_t)));
+    CU(cudaMalloc(&dc.H, RHO_CYCLE_DEPTH * nw * sizeof(uint32_t)));
     CU(cudaMalloc(&dc.esc, nw * sizeof(uint32_t)));
     CU(cudaMalloc(&dc.steps, nw * sizeof(uint32_t)));
     CU(cudaMalloc(&dc.restarts, nw * sizeof(uint32_t)));
@@ -151,7 +157,7 @@ static void selftest() {
     CU(cudaMalloc(&d_cnt, sizeof(uint32_t)));
     CU(cudaMemset(d_cnt, 0, sizeof(uint32_t)));
     dc.dp_out = d_dp; dc.dp_count = d_cnt;
-    dc.cycle_counter = nullptr;
+    dc.cycles = nullptr; dc.aborts = nullptr;
 
     size_t smem = rho_smem_bytes(h.prm.r_bits);
     k_rho_init<<<(T + 127) / 128, 128>>>(dc);
@@ -175,8 +181,8 @@ static void selftest() {
     uint32_t gcount = 0;
     CU(cudaMemcpy(&gcount, d_cnt, 4, cudaMemcpyDeviceToHost));
     CHECK(gcount == hcount, "dp count: device %u vs host %u", gcount, hcount);
-    if (!failures) printf("  rho: %u walks x %u steps identical to the host, %u DPs\n",
-                          nw, iters, gcount);
+    if (!failures) printf("  rho (fold %u): %u walks x %u steps identical to the host, %u DPs\n",
+                          h.prm.fold, nw, iters, gcount);
 
     /* every device DP must replay on the host to the reported x */
     std::vector<rho_dp> gdp(gcount < dpcap ? gcount : dpcap);
@@ -291,7 +297,7 @@ static void bench_mul() {
 
 /* ---------------------------------------------------------------- */
 struct RhoOpts {
-    uint32_t threads = 0, iters = 256, w = 8, rbits = 8, dpbits = 20, neg = 1;
+    uint32_t threads = 0, iters = 256, w = 8, rbits = 8, dpbits = 20, fold = 0, max_steps = 0;
     std::string variant = "lowmem";
     bool solve = false;
 };
@@ -312,8 +318,14 @@ static void bench_rho(RhoOpts o) {
     RhoHost h;
     h.prm.r_bits = o.rbits;
     h.prm.dp_mask = (o.dpbits >= 24) ? 0xFFFFFFu : ((1u << o.dpbits) - 1u);
-    h.prm.neg_map = o.neg;
-    h.prm.max_steps = 100u << 20;
+    h.prm.fold = o.fold ? o.fold : (CURVE_HAS_AUT6 ? RHO_FOLD_AUT6 : RHO_FOLD_NEG);
+    if (!rho_fold_supported(h.prm.fold)) {
+        fprintf(stderr, "--fold %u is not available on %s\n", h.prm.fold, CURVE_NAME);
+        exit(2);
+    }
+    /* Undetected fruitless cycles (longer than RHO_CYCLE_DEPTH+1) end at
+     * this abort, so keep it a small multiple of the DP period. */
+    h.prm.max_steps = o.max_steps ? o.max_steps : 8u * (h.prm.dp_mask + 1u);
     h.prm.table_seed = 2024;
     h.P = Curve::generator();
     /* A 48-bit secret.  On a toy curve --solve finds it; on secp256k1 the
@@ -330,10 +342,10 @@ static void bench_rho(RhoOpts o) {
     const uint32_t dpcap = 1u << 20;
     rho_ctx dc{};
     dc.nthreads = T; dc.walks_per_thread = W; dc.P = h.P; dc.Q = h.Q; dc.prm = h.prm;
-    dc.dp_cap = dpcap; dc.cycle_counter = nullptr;
+    dc.dp_cap = dpcap; dc.cycles = nullptr; dc.aborts = nullptr;
     CU(cudaMalloc(&dc.X, 8 * (size_t)nw * 4));
     CU(cudaMalloc(&dc.Y, 8 * (size_t)nw * 4));
-    CU(cudaMalloc(&dc.H, 2 * (size_t)nw * 4));
+    CU(cudaMalloc(&dc.H, RHO_CYCLE_DEPTH * (size_t)nw * 4));
     CU(cudaMalloc(&dc.esc, (size_t)nw * 4));
     CU(cudaMalloc(&dc.steps, (size_t)nw * 4));
     CU(cudaMalloc(&dc.restarts, (size_t)nw * 4));
@@ -345,13 +357,15 @@ static void bench_rho(RhoOpts o) {
     CU(cudaMalloc(&dc.dp_out, (size_t)dpcap * sizeof(rho_dp)));
     CU(cudaMalloc(&dc.dp_count, 4));
     CU(cudaMemset(dc.dp_count, 0, 4));
-    CU(cudaMalloc(&dc.cycle_counter, 8));
-    CU(cudaMemset(dc.cycle_counter, 0, 8));
+    CU(cudaMalloc(&dc.cycles, RHO_CYCLE_DEPTH * 8));
+    CU(cudaMemset(dc.cycles, 0, RHO_CYCLE_DEPTH * 8));
+    CU(cudaMalloc(&dc.aborts, 8));
+    CU(cudaMemset(dc.aborts, 0, 8));
 
     size_t smem = rho_smem_bytes(o.rbits);
     uint32_t blocks = (T + RHO_BLOCK - 1) / RHO_BLOCK;
-    printf("  %u walks (%u threads x %u), r=2^%u, dp=2^%u, neg=%u, variant=%s\n",
-           nw, T, W, o.rbits, o.dpbits, o.neg, o.variant.c_str());
+    printf("  %u walks (%u threads x %u), r=2^%u, dp=2^%u, fold=%u, max_steps=%u, variant=%s\n",
+           nw, T, W, o.rbits, o.dpbits, h.prm.fold, h.prm.max_steps, o.variant.c_str());
     printf("  %u blocks x %d threads, %zu B shared\n", blocks, RHO_BLOCK, smem);
 
     k_rho_init<<<(T + 127) / 128, 128>>>(dc);
@@ -375,11 +389,16 @@ static void bench_rho(RhoOpts o) {
     CU(cudaGetLastError());
 
     double steps = (double)nw * o.iters;
-    unsigned long long cyc = 0;
-    CU(cudaMemcpy(&cyc, dc.cycle_counter, 8, cudaMemcpyDeviceToHost));
+    unsigned long long cyc[RHO_CYCLE_DEPTH], aborts = 0;
+    CU(cudaMemcpy(cyc, dc.cycles, RHO_CYCLE_DEPTH * 8, cudaMemcpyDeviceToHost));
+    CU(cudaMemcpy(&aborts, dc.aborts, 8, cudaMemcpyDeviceToHost));
     printf("  %.3f Gstep/s  (%.0f M steps in %.3f s)\n", steps / t / 1e9, steps / 1e6, t);
-    printf("  %.1f ns/step/walk, %llu cycle escapes (%.2f%% of steps)\n",
-           t / steps * 1e9, cyc, 100.0 * cyc / steps);
+    printf("  %.1f ns/step/walk\n", t / steps * 1e9);
+    printf("  fruitless cycles per step:");
+    for (int l = 0; l < RHO_CYCLE_DEPTH; l++)
+        printf("  length %d: %llu (%.2e)", l + 2, cyc[l], cyc[l] / steps);
+    printf("\n  %llu walks aborted at max_steps (%.2e per step) -- longer cycles, if not ~0\n",
+           aborts, aborts / steps);
 
     if (o.solve) {
         RhoHost solver = h;
@@ -407,7 +426,14 @@ static void bench_rho(RhoOpts o) {
         if (ok) {
             printf("  SOLVED: k = 0x");
             for (int l = 7; l >= 0; l--) printf("%08x", k[l]);
-            printf("\n  after %.0f M steps in %.1f s\n", steps / 1e6, elapsed);
+            printf("\n  after %.0f M steps in %.1f s", steps / 1e6, elapsed);
+            if (ModN::bits() <= 64) {
+                double n = 0;
+                for (int l = 7; l >= 0; l--) n = n * 4294967296.0 + (double)ModN::limb(l);
+                printf(" = %.2fx sqrt(pi n / %u)", steps / sqrt(3.14159265358979 * n / (2.0 * h.prm.fold)),
+                       2 * h.prm.fold);
+            }
+            printf("\n");
         } else {
             printf("  not solved within the step budget\n");
         }
@@ -415,7 +441,7 @@ static void bench_rho(RhoOpts o) {
 
     cudaFree(dc.X); cudaFree(dc.Y); cudaFree(dc.H); cudaFree(dc.esc);
     cudaFree(dc.steps); cudaFree(dc.restarts); cudaFree(d_table);
-    cudaFree(dc.dp_out); cudaFree(dc.dp_count); cudaFree(dc.cycle_counter);
+    cudaFree(dc.dp_out); cudaFree(dc.dp_count); cudaFree(dc.cycles); cudaFree(dc.aborts);
 }
 
 int main(int argc, char **argv) {
@@ -430,7 +456,8 @@ int main(int argc, char **argv) {
         else if (a == "--w") o.w = next();
         else if (a == "--rbits") o.rbits = next();
         else if (a == "--dp") o.dpbits = next();
-        else if (a == "--neg") o.neg = next();
+        else if (a == "--fold") o.fold = next();
+        else if (a == "--max-steps") o.max_steps = next();
         else if (a == "--variant" && i + 1 < argc) o.variant = argv[++i];
         else if (a == "--solve") o.solve = true;
         else { fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }

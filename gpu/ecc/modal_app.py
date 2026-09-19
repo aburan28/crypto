@@ -195,7 +195,8 @@ def parseRate(text):
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
-def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = ""):
+def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = "",
+             fold: int = 0):
     """Measure whether the 55% instruction reduction is a 55% throughput win."""
     name, cap = gpuInfo()
     print(f"GPU: {name}, sm_{cap}\n")
@@ -209,6 +210,8 @@ def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = ""):
         opts += f" --w {w}"
     if variant:
         opts += f" --variant {variant}"
+    if fold:
+        opts += f" --fold {fold}"    # 1, 2 or 6; the binary defaults to 6 on secp256k1
 
     rates = {}
     for ptx in (False, True):
@@ -299,8 +302,9 @@ def selftest(gpu: str = ""):
 
 @app.local_entrypoint()
 def bench(gpu: str = "", walks: int = 0, iters: int = 0, w: int = 0,
-          variant: str = ""):
-    onGpu(runBench, gpu).remote(walks=walks, iters=iters, w=w, variant=variant)
+          variant: str = "", fold: int = 0):
+    onGpu(runBench, gpu).remote(walks=walks, iters=iters, w=w, variant=variant,
+                                fold=fold)
 
 
 @app.local_entrypoint()
