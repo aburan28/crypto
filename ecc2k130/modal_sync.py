@@ -82,7 +82,7 @@ def save_state(path, state):
 
 
 def remote_corpus(curve, run_id):
-    return "/data/dp/curve%d-run%d.bin" % (curve, run_id)
+    return "dp/curve%d-run%d.bin" % (curve, run_id)
 
 
 def orbit_key(slot, run_id, offset, delta_path):
