@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble the published GitHub Pages site for aburan28/crypto.
 
-The ECC2K-130 workflow uploads the directory this script writes, every 15
+The ECC2K-130 workflow uploads the directory this script writes, every 3
 minutes.
 Everything it publishes already exists in the repository; the script only
 copies and lays out, so the repository file stays canonical (AGENTS.md §7)

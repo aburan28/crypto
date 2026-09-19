@@ -28,6 +28,7 @@
 #   RHO_DB_SECRET                   default rho/dp-rds
 #   DATABASE_URL                    full URL; overrides secret lookup
 #   INGEST_THREADS                  default 6
+#   INGEST_STATUS_EVERY / RHO_STATUS_EVERY   default 180 (3 minutes)
 #   INGEST_VENV                     venv dir (default .ingest-venv beside script)
 set -euo pipefail
 
@@ -39,6 +40,7 @@ ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 BUCKET=${ECC_BUCKET:-${RHO_BUCKET:-ecc2k130-$ACCOUNT}}
 STATUS_BUCKET=${ECC_STATUS_BUCKET:-${RHO_STATUS_BUCKET:-ecc2k130-status-$ACCOUNT}}
 THREADS=${INGEST_THREADS:-6}
+STATUS_EVERY=${INGEST_STATUS_EVERY:-${RHO_STATUS_EVERY:-180}}
 VENV=${INGEST_VENV:-$(pwd)/.ingest-venv}
 RDS_SG=${INGEST_RDS_SG:-sg-08c045a6f2fd2b8dc}
 
@@ -124,6 +126,7 @@ run_ingest() {
     export RHO_BUCKET=$BUCKET
     export RHO_STATUS_BUCKET=$STATUS_BUCKET
     export RHO_INGEST_THREADS=$THREADS
+    export RHO_STATUS_EVERY=$STATUS_EVERY
     local extra=()
     case "$mode" in
     once) extra=(--once) ;;
@@ -132,10 +135,11 @@ run_ingest() {
     "") ;;
     *) echo "unknown mode: $mode" >&2; exit 1 ;;
     esac
-    echo "ingest: bucket=s3://$BUCKET/dp/ status=s3://$STATUS_BUCKET/ db=$RHO_DB_HOST threads=$THREADS"
+    echo "ingest: bucket=s3://$BUCKET/dp/ status=s3://$STATUS_BUCKET/ db=$RHO_DB_HOST threads=$THREADS status-every=${STATUS_EVERY}s"
     exec "$(python_bin)" dp_ingest.py \
         --bucket "$BUCKET" --status-bucket "$STATUS_BUCKET" \
-        --threads "$THREADS" --metric-namespace "${RHO_METRIC_NAMESPACE:-ECC2K130/Ingest}" \
+        --threads "$THREADS" --status-every "$STATUS_EVERY" \
+        --metric-namespace "${RHO_METRIC_NAMESPACE:-ECC2K130/Ingest}" \
         "${extra[@]}"
 }
 

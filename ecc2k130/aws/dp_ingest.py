@@ -810,12 +810,14 @@ def main(argv=None):
                          "stay stale while a backlog drains (0 = unbounded)")
     ap.add_argument("--no-index", dest="index", action="store_false",
                     help="do not create the found_at index at startup")
-    ap.add_argument("--status-every", type=float, default=1800.0,
+    ap.add_argument("--status-every", type=float,
+                    default=float(os.environ.get("RHO_STATUS_EVERY", "180")),
                     help="seconds between status.json writes. The snapshot "
                          "counts the whole campaign, and while it runs this "
-                         "program is not ingesting, so it is spaced well apart: "
-                         "the page's own refresh is the 15-minute Actions job, "
-                         "and this copy is the second one")
+                         "program is not ingesting. At ~190 M rows a publish "
+                         "takes a few minutes; keep this at or above that. "
+                         "The page's Actions job runs every 3 minutes and reads "
+                         "this copy from the status bucket.")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--verify", action="store_true")
     ap.add_argument("--work", action="store_true",

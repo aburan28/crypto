@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ECC2K-130 campaign status · aburan28/crypto</title>
-<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: iterations per second, point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 3 minutes: iterations per second, point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
-<meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
+<meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 3 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="./style.css">
@@ -33,7 +33,7 @@
   <h1>Campaign status</h1>
   <p class="sub">
     Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table, refreshed every 15 minutes. The page publishes
+    distinguished-point table, refreshed every 3 minutes. The page publishes
     counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
@@ -378,7 +378,7 @@ make gpu
     <h2 id="h-history">Snapshot history</h2>
     <p class="note">
       Every snapshot the publishing Action has posted in the last seven
-      days, newest first. It runs every 15 minutes. The iterations column is
+      days, newest first. It runs every 3 minutes. The iterations column is
       the walkers' checkpoint sum at each snapshot, so the rate at the top of
       the page is the difference between two of these rows over the time
       between them &mdash; the arithmetic is here to be redone.
@@ -424,12 +424,12 @@ make gpu
 
   var HOUR_MS = 3600 * 1000;
   var REFRESH_MS = 60 * 1000;
-  // The publishing Action runs every 15 minutes, but the snapshot it
+  // The publishing Action runs every 3 minutes, but the snapshot it
   // publishes is only as fresh as its source: when the walker hop is down
-  // the source is the ingest host's feed, rewritten every 30 minutes
+  // the source is the ingest host's feed, rewritten every 3 minutes
   // (dp_ingest.py --status-every), so at publish time the snapshot can
-  // already be 30 minutes old and just before the next publish 60. Ninety
-  // minutes is two missed feed writes, or six missed Action runs: late
+  // already be a few minutes old. Ninety minutes is many missed feed
+  // writes, or thirty missed Action runs: late
   // enough that neither cadence trips it, early enough to say so before
   // the counts are badly out of date. test_rho_status.py pins it to both.
   var STALE_AFTER_MS = 90 * 60 * 1000;
