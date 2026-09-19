@@ -444,6 +444,8 @@ FRESH_CHECKPOINT_S = 1800
 # Below this the checkpoint granularity dominates the difference between two
 # consecutive status.json writes.
 MIN_WALK_RATE_SPAN_S = 600
+# Smoothing window for the walk rate, matching scripts/rho_status/render.py.
+RATE_WINDOW_S = 3600
 
 
 def parseIso(value):
@@ -497,6 +499,72 @@ def walkRateBetween(current, previous):
         "iterations_to": curIter,
         "method": "difference between this publish and the previous status.json",
     }
+
+
+def anchorSample(status):
+    """Extract a walk-rate anchor from a status document or stored anchor."""
+    if not isinstance(status, dict):
+        return None
+    if "iterations" in status:
+        try:
+            iterations = int(status["iterations"])
+        except (TypeError, ValueError):
+            iterations = None
+        if iterations and iterations > 0 and status.get("generated_at"):
+            return {"generated_at": status["generated_at"], "iterations": iterations}
+    work = status.get("work") or {}
+    try:
+        iterations = int(work.get("iterations"))
+    except (TypeError, ValueError):
+        return None
+    if iterations > 0 and status.get("generated_at"):
+        return {"generated_at": status["generated_at"], "iterations": iterations}
+    return None
+
+
+def walkRateFromSample(current, sample):
+    """Iterations per second between the current publish and an anchored sample."""
+    if not sample:
+        return None
+    return walkRateBetween(current, {
+        "generated_at": sample["generated_at"],
+        "work": {"iterations": sample["iterations"]},
+    })
+
+
+def preservedWalkRate(current, previous):
+    """Keep the last measured rate while the anchor span is still too short."""
+    if not isinstance(previous, dict):
+        return None
+    rate = previous.get("walk_rate")
+    if not isinstance(rate, dict):
+        return None
+    cur = anchorSample(current)
+    if cur is None:
+        return None
+    try:
+        iter_to = int(rate.get("iterations_to"))
+    except (TypeError, ValueError):
+        return None
+    return rate if cur["iterations"] >= iter_to else None
+
+
+def nextWalkRateAnchor(current, previous, stored_anchor):
+    """Anchor for the next publish: oldest sample inside the smoothing window."""
+    cur = anchorSample(current)
+    if cur is None:
+        return stored_anchor
+    if not stored_anchor:
+        prev = anchorSample(previous) if isinstance(previous, dict) else None
+        return prev or cur
+    anchor_at = parseIso(stored_anchor.get("generated_at"))
+    cur_at = parseIso(cur.get("generated_at"))
+    if anchor_at is None or cur_at is None:
+        return stored_anchor
+    if (cur_at - anchor_at).total_seconds() <= RATE_WINDOW_S:
+        return stored_anchor
+    prev = anchorSample(previous) if isinstance(previous, dict) else None
+    return prev or cur
 
 
 def checkpointWork(s3, bucket, staleAfter=1800.0):
@@ -700,9 +768,20 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     previous = loadPreviousStatus(s3, statusBucket)
     payload = statusPayload(conn, s3, bucket, ingest)
     payload["published_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    rate = walkRateBetween(payload, previous)
+    stored_anchor = previous.get("_walk_rate_anchor") if isinstance(previous, dict) else None
+    anchor = stored_anchor or (anchorSample(previous) if isinstance(previous, dict) else None)
+    rate = walkRateFromSample(payload, anchor)
     if rate is not None:
+        rate["method"] = (
+            "difference of checkpointed iteration totals between this publish "
+            "and the anchored status.json sample"
+        )
         payload["walk_rate"] = rate
+    else:
+        kept = preservedWalkRate(payload, previous)
+        if kept is not None:
+            payload["walk_rate"] = kept
+    payload["_walk_rate_anchor"] = nextWalkRateAnchor(payload, previous, stored_anchor)
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
         Body=(json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),

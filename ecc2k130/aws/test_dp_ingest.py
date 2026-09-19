@@ -559,6 +559,41 @@ class WalkRate(unittest.TestCase):
         self.assertIsNone(dp_ingest.walkRateBetween(
             {"generated_at": "2026-09-19T12:04:00Z", "work": {"iterations": 1100}}, base))
 
+    def test_anchor_span_covers_short_publish_cadence(self):
+        anchor = {
+            "generated_at": "2026-09-19T12:00:00Z",
+            "iterations": 1000,
+        }
+        current = {
+            "generated_at": "2026-09-19T12:10:00Z",
+            "work": {"iterations": 1600},
+        }
+        rate = dp_ingest.walkRateFromSample(current, anchor)
+        self.assertAlmostEqual(rate["iterations_per_second"], 1.0)
+        self.assertEqual(rate["window_seconds"], 600)
+
+    def test_preserves_rate_until_anchor_span_is_long_enough(self):
+        previous = {
+            "generated_at": "2026-09-19T12:03:00Z",
+            "work": {"iterations": 1100},
+            "walk_rate": {
+                "iterations_per_second": 1.0,
+                "iterations_to": 1100,
+            },
+            "_walk_rate_anchor": {
+                "generated_at": "2026-09-19T12:00:00Z",
+                "iterations": 1000,
+            },
+        }
+        current = {
+            "generated_at": "2026-09-19T12:06:00Z",
+            "work": {"iterations": 1200},
+        }
+        self.assertIsNone(dp_ingest.walkRateFromSample(
+            current, previous["_walk_rate_anchor"]))
+        kept = dp_ingest.preservedWalkRate(current, previous)
+        self.assertEqual(kept["iterations_per_second"], 1.0)
+
 
 class Defaults(unittest.TestCase):
     def test_status_every_default_is_three_minutes(self):

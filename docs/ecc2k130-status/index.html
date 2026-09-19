@@ -932,12 +932,15 @@ make gpu
     el("gpus-foot").textContent = parts.join(" · ");
   }
 
-  function drawWorkers(workers, snapshotAt, source) {
+  function drawWorkers(workers, snapshotAt, source, fetchLabel) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
-      emptyRow(body, 5, source === "ingest-status-feed"
+      var fromIngest = source === "ingest-status-feed"
+        || fetchLabel === "live feed"
+        || (source && source.indexOf("dp_ingest") >= 0);
+      emptyRow(body, 5, fromIngest
         ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
         : "No workers have reported points.");
       note.textContent = "";
@@ -1335,22 +1338,38 @@ make gpu
   }
 
   async function loadStatus() {
-    var sources = [
-      { url: LIVE_FEED_URL, label: "live feed" },
-      { url: "./status.json", label: "Pages snapshot" }
-    ];
+    var live = null;
+    var pages = null;
     var errors = [];
-    for (var i = 0; i < sources.length; i++) {
-      try {
-        var status = await fetchJSON(sources[i].url);
-        status._fetch_url = sources[i].url;
-        status._fetch_label = sources[i].label;
-        return status;
-      } catch (err) {
-        errors.push(sources[i].label + ": " + err.message);
+    try {
+      live = await fetchJSON(LIVE_FEED_URL);
+      live._fetch_url = LIVE_FEED_URL;
+      live._fetch_label = "live feed";
+    } catch (err) {
+      errors.push("live feed: " + err.message);
+    }
+    try {
+      pages = await fetchJSON("./status.json");
+    } catch (err) {
+      if (!live) errors.push("Pages snapshot: " + err.message);
+    }
+    if (!live) {
+      if (pages) {
+        pages._fetch_url = "./status.json";
+        pages._fetch_label = "Pages snapshot";
+        return pages;
+      }
+      throw new Error(errors.join("; "));
+    }
+    // The live feed has current counts but no per-worker table; keep the
+    // walker-hop lifetime table from Pages when it is still there.
+    if (pages) {
+      if ((!live.per_worker || !live.per_worker.length) &&
+          pages.per_worker && pages.per_worker.length) {
+        live.per_worker = pages.per_worker;
       }
     }
-    throw new Error(errors.join("; "));
+    return live;
   }
 
   var lastStatus = null;
@@ -1452,7 +1471,7 @@ make gpu
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated, status.source);
+    drawWorkers(status.per_worker || [], generated, status.source, status._fetch_label);
     drawCampaign(status);
 
     if (historyError) {

@@ -193,8 +193,8 @@ class BuildTests(unittest.TestCase):
             self.assertIn("ecc2k130-status-", page, name)
             self.assertIn("status.json", page, name)
         self.assertIn("loadStatus", dashboard)
-        self.assertIn('label: "live feed"', dashboard)
-        self.assertIn('label: "Pages snapshot"', dashboard)
+        self.assertIn('_fetch_label = "live feed"', dashboard)
+        self.assertIn('_fetch_label = "Pages snapshot"', dashboard)
         load = dashboard[dashboard.index("async function loadStatus"):dashboard.index("async function load()")]
         self.assertLess(
             load.index("LIVE_FEED_URL"),
