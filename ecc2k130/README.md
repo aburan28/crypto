@@ -44,6 +44,8 @@ onto a pre-Blackwell architecture, so `aws/build.sh` defaults it off for any
 build that includes one and `benchmarks/ada/run.sh` measures both arms rather
 than assuming one. The B200 is Blackwell (`sm_100`) and uses the shipping
 CLMAD=1 arm; the rate is the receipt, not the SM-count prior.
+Per-SM occupancy (oversubscribed waves, same walk) is
+[benchmarks/per-sm/WAVES.md](benchmarks/per-sm/WAVES.md).
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
