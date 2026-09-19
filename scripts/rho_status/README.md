@@ -1,56 +1,98 @@
 # ECC2K-130 public status snapshot
 
-GitHub Action, run every 15 minutes, that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 3 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
 the database URL.
 
-## Why the Action hops through the walker
+## Where the snapshot comes from, and why there are two sources
 
-RDS `rho-dp` is **not** publicly accessible. Security group `rho-dp-rds`
-allows TCP 5432 only from VPC worker groups, including
-`rho-ecc2k-walker`. GitHub-hosted runners therefore SSH to the running
-instance tagged `Name=rho-ecc2k-walker` and run
-`scripts/rho_status/snapshot.py` there, using `/opt/rho-ecc2k/env.sh`
-already on that host.
+The publish job has to survive any one host disappearing, because one did:
+from 2026-09-18T19:15Z to 2026-09-19T04:41Z every scheduled run died in one
+second with `no running instance tagged Name=rho-ecc2k-walker`, and Pages
+sat on the 11:25Z snapshot for seventeen hours. The earlier fixes (#448,
+#450, #452, #454, #455) each made the walker hop itself sturdier, and each
+was undone by the next thing that could break on that path. So the hop is
+no longer the path Pages depends on. `fetch_via_walker.sh` layers two
+sources:
 
-`snapshot.py` does not scan `distinguished_points` on every run. It
-creates `rho_dp_hour` / `rho_dp_recent`, backfills them once from the
-heap, and installs a statement-level insert trigger so the ingest's
+1. **The ingest host's public `status.json`** — first, always. The ingest
+   host (`ecc2k130/aws/dp_ingest.py`, `publishStatus`) writes the campaign
+   counts, the 48-hour hourly series, the checkpointed walk total and its
+   own health to the status bucket every `--status-every` seconds (180).
+   It is one HTTPS GET, retried, and it needs no EC2 instance, no SSH key
+   and no security-group change. `work_feed.py --as-snapshot` copies that
+   document (with `work.per_slot` stripped, `per_worker` empty, and the
+   ingest host's `generated_at` kept so the stale banner tracks the feed
+   rather than the copy) to `status.json.feed`. That file is the floor: the
+   job has something current to publish before anything fragile is tried.
+
+2. **The walker SSH hop** — second, and only an improvement. RDS `rho-dp`
+   is **not** publicly accessible; security group `rho-dp-rds` allows TCP
+   5432 only from VPC worker groups, including `rho-ecc2k-walker`. The hop
+   finds the running instance tagged `Name=rho-ecc2k-walker`, opens TCP/22
+   from the runner's public IP on that instance's group (refusing any group
+   not tagged `Name=rho-ecc2k-walker` / `Purpose=ecc2k-dp-walker`), runs
+   `snapshot.py` there against `/opt/rho-ecc2k/env.sh`, copies the file
+   back and revokes the rule. Its snapshot is generated now rather than up
+   to 30 minutes ago, and it carries the per-worker table, so when it
+   produces a file that file replaces the feed copy. The whole hop runs in
+   a **subshell**: a missing or stopped instance, a mistagged group, a
+   failed `checkip`, a refused punch-hole, a reset SSH session, a query
+   past `RHO_REMOTE_TIMEOUT` (1500 s) or a failed `scp` all return to the
+   script, which still holds the feed copy and publishes it. An unset or
+   empty `RHO_WALKER_SSH_KEY` skips the hop; `RHO_SKIP_WALKER=1` skips it
+   on purpose.
+
+The script exits 1 only when **neither** source answered. There is then
+genuinely nothing newer to publish, and a red job is the right signal.
+
+Two more things stop one dependency from freezing the page:
+
+- The workflow's `Configure AWS` step is `continue-on-error`. Credentials
+  are needed to find the walker and to derive the status-bucket URL from
+  the account id (`<stack>-status-<account>`, which this public tree does
+  not carry). With the **`RHO_WORK_FEED_URL`** repository secret set to
+  that bucket's `status.json` URL, the feed publishes with no AWS identity
+  at all, so an IAM or STS problem costs the per-worker table and nothing
+  else. Set it once:
+
+  ```bash
+  ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+  printf 'https://ecc2k130-status-%s.s3.us-west-2.amazonaws.com/status.json' "$ACCOUNT" \
+    | gh secret set RHO_WORK_FEED_URL --repo aburan28/crypto
+  ```
+
+- `render.py --status-out` stamps **`published_at`** on every document it
+  writes. `generated_at` is when the source counted; `published_at` is
+  when the job wrote the page. The dashboard prints both and, when the
+  snapshot is stale, says which half is behind: a fresh `published_at` on
+  an old `generated_at` means the publisher ran and neither source had
+  anything newer; an old `published_at` means the publisher did not run.
+  Before this the page had one sentence for both, and the fix for a dead
+  walker was indistinguishable from the fix for a dead cron.
+
+The dashboard's stale threshold is 90 minutes: many missed feed writes at
+the ingest host's 3-minute cadence, or thirty missed Action runs.
+`test_rho_status.py` pins it to both cadences.
+
+`snapshot.py` on the walker does not scan `distinguished_points` on every
+run. It creates `rho_dp_hour` / `rho_dp_recent`, backfills them once from
+the heap, and installs a statement-level insert trigger so the ingest's
 `INSERT ... SELECT` keeps the buckets current. Later snapshots read those
-tables.
+tables. It writes an index-only fallback *before* the worker backfill,
+counting one hour at a time through `(campaign_id, found_at)` so a 187 M-row
+hash aggregate cannot OOM the walker; the file is copied even if the remote
+`timeout` fires, from a per-run path so a leftover `/tmp/rho_status.json`
+is never republished. Worker buckets backfill one hour at a time, resuming
+from `rho_dp_meta.backfill_through`.
 
-The first merged backfill (#448) did not unstick Pages. It set
-`statement_timeout` to 800 s, took SHARE on the heap, grouped by
-`(worker_id, found_at)`, and PostgreSQL cancelled it; `rho_dp_meta.ready`
-stayed false and the hop kept retrying, so
-https://aburan28.github.io/crypto/status/ froze on the 2026-09-18T11:25Z
-snapshot. The hop now writes an index-only fallback *before* the worker
-backfill: it counts one hour at a time through `(campaign_id, found_at)`
-(no `worker_id`, no full-table `GROUP BY`) so a 187 M-row hash aggregate
-cannot OOM the walker. The 2026-09-18T18:56Z publish died ~200s into that
-GROUP BY (`Connection reset by peer`); counting by hour logs each step
-and keeps SSH alive. The file is copied even if the remote `timeout`
-fires, from a per-run path so leftover `/tmp/rho_status.json` is never
-republished. Worker buckets backfill one hour at a time, resuming from
-`rho_dp_meta.backfill_through`. The remote timeout is 1500 s; leftover
-hours wait for the next scheduled run.
-
-That still left Pages on 11:25Z: from 19:15Z on 2026-09-18 every scheduled
-publish died in one second with `no running instance tagged
-Name=rho-ecc2k-walker`. The 18:56Z hop reset SSH and the instance did not
-come back. RDS is private; without that host the Action cannot query the
-store. The ingest host, though, already writes the same campaign counts to
-the public status bucket (`dp_ingest.py` `publishStatus`) every
-`--status-every` seconds, and `work_feed.py` already fetched that file
-*after* a successful hop. When the hop finds no walker — or finishes
-without a file — `fetch_via_walker.sh` now republishes that ingest
-document (`work_feed.py --as-snapshot`): counts, last-hour, hourly (48 h),
-and the checkpointed walk total, with `work.per_slot` stripped. The
-per-worker table is empty on that path; the GPU card still reads
-`walking_slots`. `generated_at` is the ingest host's stamp, so the stale
-banner tracks the feed rather than the copy.
+What the feed path does **not** give the page: the per-worker table (the
+walker's `DISTINCT worker_id` over the heap) and a snapshot fresher than
+the ingest host's `--status-every`. Restoring the walker restores both; the
+ingest host reading the rollup tables would let it publish more often
+without the 142 s corpus count (see `ecc2k130/aws/README.md`).
 
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
@@ -84,7 +126,12 @@ SG only). Do not upload the `adam` user keys.
 
 4. If the walker is replaced, install `gha_walker.pub` on the new box
    and keep instance tag `Name=rho-ecc2k-walker` plus SG tags
-   `Name=rho-ecc2k-walker` and `Purpose=ecc2k-dp-walker`.
+   `Name=rho-ecc2k-walker` and `Purpose=ecc2k-dp-walker`. Until it is,
+   the page publishes from the ingest feed without it.
+
+5. `RHO_WORK_FEED_URL` (optional, recommended): the status bucket's
+   `status.json` URL, so the feed is read without an AWS identity. See
+   above.
 
 The workflow does **not** need `DATABASE_URL`. The walker already has it.
 
@@ -99,6 +146,11 @@ python3 scripts/rho_status/snapshot.py --out /tmp/status.json
 
 # From a laptop with AWS creds + the GHA deploy key
 RHO_WALKER_SSH_KEY=$HOME/.ssh/gha_walker \
+  scripts/rho_status/fetch_via_walker.sh
+
+# Feed only, no AWS identity and no hop (what the Action does when the
+# walker is down or the credentials are not usable)
+RHO_SKIP_WALKER=1 RHO_WORK_FEED_URL=https://<status-bucket>/status.json \
   scripts/rho_status/fetch_via_walker.sh
 ```
 

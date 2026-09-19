@@ -26,6 +26,7 @@
     <a href="./scoreboard/performance-gains.html">Performance</a>
     <a href="./scoreboard/algorithm-lab.html">Algorithm lab</a>
     <a href="./status/">Campaign status</a>
+    <a href="./status/how.html">How the walk works</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
 </header>
@@ -95,10 +96,10 @@
       <h3>ECC2K-130 status</h3>
       <p>
         Aggregates from the Certicom ECC2K-130 distinguished-point
-        collection, refreshed every 15 minutes: counts, per-worker yield and
-        collisions. Counts only
-        &mdash; walk coefficients, point keys and seeds stay in the private
-        store.
+        collection. The card reads the live store and the Pages snapshot
+        together so a missing field on one feed does not blank the rate.
+        Counts only &mdash; walk coefficients, point keys and seeds stay in
+        the private store.
       </p>
       <dl class="live" id="live">
         <div><dt>Iterations/s</dt><dd class="mono" id="live-rate">&mdash;</dd></div>
@@ -121,6 +122,18 @@
         for <span class="mono">HW(x) &le; 34</span>.
       </p>
       <p class="card-more">Open the dashboard</p>
+    </a>
+
+    <a class="card" href="./status/how.html">
+      <p class="card-kicker">The algorithm</p>
+      <h3>How the walk works</h3>
+      <p>
+        The same Pollard rho the GPUs run, written as a few hundred lines of
+        Python and as a page that recovers a planted
+        <span class="mono">k</span> on <span class="mono">GF(2^23)</span>
+        in the browser. The CUDA client is this loop with a packed field.
+      </p>
+      <p class="card-more">Read the toy walk</p>
     </a>
 
     <a class="card" href="https://github.com/aburan28/crypto/blob/main/docs/ECDLP_ATTACK_MATRIX.md">
@@ -388,6 +401,8 @@
   // campaign; the dashboard carries the same two constants.
   var CAMPAIGN = "ecc2k-130";
   var ITERATIONS_PER_DP_LOG2 = 25.27;
+  var LIVE_FEED_URL =
+    "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json";
 
   // --- mirrored block: docs/site/index.html carries these five functions
   // verbatim, and scripts/site/test_build.py fails if the two copies differ
@@ -414,7 +429,17 @@
   function walkingSlots(status) {
     if (!status || !status.work) return null;
     var slots = Number(status.work.walking_slots);
-    return isFinite(slots) && slots >= 0 ? slots : null;
+    if (isFinite(slots) && slots >= 0) return slots;
+    var rows = status.work.per_slot;
+    if (!Array.isArray(rows)) return null;
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      if (!row || row.retired) continue;
+      var age = Number(row.checkpoint_age_s);
+      if (isFinite(age) && age <= 1800) n++;
+    }
+    return n;
   }
 
   // Billions of iterations per second is the campaign's own unit: it is what
@@ -461,12 +486,84 @@
     if (!isFinite(dps) || dps <= 0) return "—";
     return "2^" + (Math.log(dps) / Math.LN2 + ITERATIONS_PER_DP_LOG2).toFixed(1);
   };
-  fetch("./status.json", { cache: "no-store" })
-    .then(function (response) {
+  function generatedMs(status) {
+    var t = Date.parse(String(status && status.generated_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
+  function mergeSnapshots(live, pages) {
+    if (!live && !pages) return null;
+    if (!live) return pages;
+    if (!pages) return live;
+    var newer = generatedMs(live) >= generatedMs(pages) ? live : pages;
+    var older = newer === live ? pages : live;
+    var out = {};
+    var key;
+    for (key in older) out[key] = older[key];
+    for (key in newer) out[key] = newer[key];
+    out.work = {};
+    if (older.work) for (key in older.work) out.work[key] = older.work[key];
+    if (newer.work) for (key in newer.work) out.work[key] = newer.work[key];
+    if (walkingSlots({ work: out.work }) === null && walkingSlots(older) !== null) {
+      out.work.walking_slots = walkingSlots(older);
+    }
+    if (!out.walk_rate && older.walk_rate) out.walk_rate = older.walk_rate;
+    return out;
+  }
+
+  function attachRateFromHistory(status, history) {
+    if (!status || measuredRate(status) !== null) return status;
+    var iterations = reportedIterations(status);
+    if (iterations === null) return status;
+    var points = (history && history.points) || [];
+    var samples = [];
+    var i;
+    for (i = 0; i < points.length; i++) {
+      var it = Number(points[i].iterations);
+      var at = Date.parse(String(points[i].generated_at || ""));
+      if (isFinite(it) && it > 0 && isFinite(at)) {
+        samples.push({ at: at, iterations: it, stamp: points[i].generated_at });
+      }
+    }
+    var now = Date.parse(String(status.generated_at || ""));
+    if (isFinite(now)) samples.push({ at: now, iterations: iterations, stamp: status.generated_at });
+    samples.sort(function (a, b) { return a.at - b.at; });
+    if (samples.length < 2) return status;
+    var latest = samples[samples.length - 1];
+    var windowMs = 3600 * 1000;
+    var base = null;
+    for (i = 0; i < samples.length - 1; i++) {
+      if (latest.at - samples[i].at <= windowMs) { base = samples[i]; break; }
+    }
+    if (!base) base = samples[samples.length - 2];
+    var span = (latest.at - base.at) / 1000;
+    if (span < 600 || latest.iterations < base.iterations) return status;
+    status.walk_rate = {
+      iterations_per_second: (latest.iterations - base.iterations) / span,
+      window_seconds: Math.round(span),
+      measured_from: base.stamp,
+      measured_to: latest.stamp,
+      iterations_from: base.iterations,
+      iterations_to: latest.iterations,
+      method: "difference of checkpointed iteration totals between two snapshots"
+    };
+    return status;
+  }
+
+  function fetchStatus(url) {
+    return fetch(url, { cache: "no-store" }).then(function (response) {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
-    })
-    .then(function (status) {
+    });
+  }
+  Promise.all([
+    fetchStatus(LIVE_FEED_URL).catch(function () { return null; }),
+    fetchStatus("./status.json").catch(function () { return null; }),
+    fetchStatus("./history.json").catch(function () { return null; })
+  ]).then(function (parts) {
+    var status = mergeSnapshots(parts[0], parts[1]);
+    if (!status) throw new Error("no snapshot");
+    attachRateFromHistory(status, parts[2]);
       var dps = Number(status.dps);
       var gpus = walkingSlots(status);
       set("live-rate", status.campaign_id === CAMPAIGN ? formatRate(measuredRate(status)) : "—");
