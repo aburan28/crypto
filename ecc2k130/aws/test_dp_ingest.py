@@ -15,6 +15,7 @@ both key shapes are points, and anything unreadable is counted out loud.
 import datetime
 import io
 import os
+import pathlib
 import struct
 import sys
 import unittest
@@ -204,6 +205,96 @@ class LegacyCounts(unittest.TestCase):
         dp_ingest._counts["at"] -= 3600.0
         dp_ingest.ingestedCounts(conn)
         self.assertEqual(self.aggregates(conn), 2)
+
+
+class TotalsCursor:
+    """Answers the rollup query, or refuses it the way a missing grant does."""
+
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        self.conn.queries.append(sql)
+        if "rho_dp_meta" in sql:
+            if self.conn.refuse:
+                raise RuntimeError("permission denied for table rho_dp_hour")
+            self.rows = [self.conn.rollupRow] if self.conn.rollupRow else []
+        elif "FROM rho_dp_hour" in sql:
+            self.rows = [("2026-09-18T17:00:00Z", 500)]
+        elif "LEFT JOIN distinguished_points" in sql:
+            self.rows = [("ecc2k-130", "curve", 32, "created", 188, 4, 120, "first", "last")]
+        else:
+            self.rows = [("2026-09-18T17:00:00Z", 7)]
+
+    def fetchone(self):
+        return self.rows[0] if self.rows else None
+
+    def fetchall(self):
+        return self.rows
+
+
+class TotalsConn:
+    def __init__(self, rollupRow=None, refuse=False):
+        self.queries = []
+        self.rollupRow = rollupRow
+        self.refuse = refuse
+        self.rollbacks = 0
+
+    def cursor(self):
+        return TotalsCursor(self)
+
+    def rollback(self):
+        self.rollbacks += 1
+
+
+class CampaignTotals(unittest.TestCase):
+    """Where the headline figures come from, and what happens when they cannot.
+
+    The scan was 143 s at 137 M rows on 2026-09-17 and 2,916 s at 188 M on
+    2026-09-18, and the ingest stops ingesting for as long as it runs.
+    """
+
+    def scans(self, conn):
+        return sum("LEFT JOIN distinguished_points" in q for q in conn.queries)
+
+    def test_a_ready_rollup_is_read_and_the_corpus_is_not_touched(self):
+        conn = TotalsConn(rollupRow=("ecc2k-130", "curve", 32, "created",
+                                     189235432, 494759, 120695354, "first", "last"))
+        row, hourly, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "rollup")
+        self.assertEqual(row[4], 189235432)
+        self.assertEqual(self.scans(conn), 0, "the rollup path must not scan the corpus")
+        self.assertEqual(hourly, [("2026-09-18T17:00:00Z", 500)])
+
+    def test_a_store_without_a_backfilled_rollup_still_gets_its_figures(self):
+        conn = TotalsConn(rollupRow=None)
+        row, _, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "scan")
+        self.assertEqual(row[4], 188)
+        self.assertEqual(self.scans(conn), 1)
+
+    def test_a_refused_rollup_falls_back_rather_than_failing_the_status(self):
+        # The ingest connects as the rho/dp-rds role; the rollup tables are
+        # owned by the walker role, which is why #448's trigger is SECURITY
+        # DEFINER. A missing SELECT grant must cost a slow status, not a
+        # status.
+        conn = TotalsConn(rollupRow=("x",), refuse=True)
+        row, _, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "scan")
+        self.assertEqual(self.scans(conn), 1)
+        self.assertGreaterEqual(conn.rollbacks, 1, "a failed query must not poison the session")
+
+    def test_the_published_document_names_which_one_it_used(self):
+        source = pathlib.Path(dp_ingest.__file__).read_text(encoding="utf-8")
+        self.assertIn('"rollup" if totals_source == "rollup" else "corpus scan"', source)
+        self.assertIn('"rollup" if "rollup" in payload["source"] else "corpus scan"', source)
 
 
 class IndexCursor:
