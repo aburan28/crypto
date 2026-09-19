@@ -236,7 +236,16 @@ fn run_ic(
     let verified = found < curve.subgroup_order && curve.mul(curve.generator(), &found) == *target;
     let cofactor = curve.cofactor.to_u64_digits().first().copied().unwrap_or(1);
     let cert: u64 = table.columns.iter().map(|(_, log)| log_ops(log)).sum();
-    let ops = table_adds
+    // Iterations 0–2 charged a probe one addition and nothing for the
+    // `R − P_k` it forms for every summand in its window. Those are point
+    // additions (`add_many`, the same call the table build is charged
+    // for), so iteration 3 charges them (protocol §10). A descent probe
+    // scans the whole base and stops at its first witness, so its charge
+    // `trials × |F|` overstates the truth by at most one scan.
+    let collection_summands = trials.saturating_mul(window as u64);
+    let descent_summands =
+        (descent_report.trials as u64).saturating_mul(fb.points.len() as u64);
+    let before_correction = table_adds
         .saturating_add(
             u64::try_from(k)
                 .unwrap_or(0)
@@ -245,6 +254,9 @@ fn run_ic(
         .saturating_add(walked_collection_ops(ALGORITHM_SEED, trials, r, batches))
         .saturating_add(cert)
         .saturating_add(descent_ops(descent_report.trials as u64, r_bits));
+    let ops = before_correction
+        .saturating_add(collection_summands)
+        .saturating_add(descent_summands);
     let ns = started.elapsed().as_nanos();
     let detail = json!({
         "factor_base_size": fb.points.len(),
@@ -257,10 +269,9 @@ fn run_ic(
         "descent_trials": descent_report.trials,
         "window": window,
         "recipe_floor": floor,
-        // Memory probes are not group operations; recorded so the unit's
-        // blind spot is visible (protocol §9), never added to `ops`.
-        "collection_lookups": trials.saturating_mul(window as u64),
-        "descent_lookups": (descent_report.trials as u64).saturating_mul(fb.points.len() as u64),
+        "collection_summand_additions": collection_summands,
+        "descent_summand_additions": descent_summands,
+        "g_ic_before_summand_correction": before_correction,
     });
     Ok((verified, ops, detail, ns))
 }
@@ -490,8 +501,8 @@ fn main() {
         "quick": quick,
         "ladder": ladder,
         "caps": {"max_trials": caps.max_trials, "rho_iterations_per_restart": caps.rho_iterations},
-        "unit": "exclusive group operations (adds + binary-method scalar muls)",
-        "class": "engineering",
+        "unit": "exclusive group operations (adds + binary-method scalar muls); summand additions charged from iteration 3",
+        "class": "accounting",
         "n131_claim": false,
         "all_cases_gate": gate,
         "fit": fit,
