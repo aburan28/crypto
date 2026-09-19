@@ -1051,7 +1051,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True, loadMax=50000000, packed=False, verify=4):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=4):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -1138,7 +1138,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # terminal that started it, so summarise on a fixed clock rather than
     # relaying the client's own line every two seconds.
     expected = 2.0 ** CURVE_FACTS[curve][1] if curve in CURVE_FACTS else 0.0
-    print(f"progress every 60 s; corpus {dpFile}"
+    print(f"progress every 60 s; checkpoint every {int(checkpointEvery)} s; corpus {dpFile}"
           + (f", checkpoint {ckFile}" if resume else ""), flush=True)
     try:
         while proc.poll() is None:
@@ -1175,8 +1175,9 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                           % humanTime(now - started), flush=True)
             # Commit on a clock, not on a line count: the client's output rate
             # depends on the launch size, so counting lines would space the
-            # commits arbitrarily far apart on a quiet run.
-            if now - lastCommit > 60:
+            # commits arbitrarily far apart on a quiet run. Twenty seconds
+            # puts a 60 s checkpoint on the volume before the next sync pass.
+            if now - lastCommit > 20:
                 volume.commit()
                 lastCommit = now
             if now > deadline:
@@ -1455,22 +1456,27 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
+           verify: int = 4, checkpoint_every: int = 60):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
-                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                                     runId=run_id, walksTarget=walks, loadMax=load_max,
+                                     packed=packed, verify=verify,
+                                     checkpointEvery=checkpoint_every)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
+           verify: int = 4, checkpoint_every: int = 60):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max,
+                      packed=packed, verify=verify, checkpointEvery=checkpoint_every)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))

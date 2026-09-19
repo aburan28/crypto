@@ -571,8 +571,8 @@ planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
 same thing the CPU run does. `autotune` rebuilds for the local compute
 capability only and sweeps batch size, block size and Karatsuba leaf, writing
 the ranking to a Modal Volume. `search` collects distinguished points into that
-same volume, checkpointing its live walks alongside them, so a stopped run
-resumes where it left off and several containers contribute to one corpus; each
+same volume, checkpointing its live walks alongside them every 60 seconds, so a
+stopped run resumes where it left off and several containers contribute to one corpus; each
 gets its own run id, which keeps their seed spaces disjoint, and each loads its
 siblings' corpora so a cross-container collision is caught as it happens.
 `merge` scans the corpus for repeated hashes, which are the candidate

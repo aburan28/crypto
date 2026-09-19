@@ -4,6 +4,7 @@ import os
 import re
 import tempfile
 import unittest
+from pathlib import Path
 
 import modal_sync
 
@@ -52,6 +53,13 @@ class ModalSyncTests(unittest.TestCase):
 
     def test_remote_checkpoint_path(self):
         self.assertEqual(modal_sync.remote_checkpoint(131, 1), "ckpt/curve131-run1.ck")
+
+    def test_run_sh_defaults_a_one_minute_checkpoint(self):
+        script = Path(__file__).with_name("run.sh").read_text()
+        self.assertIn("CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}", script)
+        self.assertIn("SYNC_INTERVAL=${SYNC_INTERVAL:-30}", script)
+        self.assertIn("--checkpoint-every \"$CHECKPOINT_EVERY\"", script)
+        self.assertIn('--watch "$SYNC_INTERVAL"', script)
 
     def test_parse_run_ids(self):
         self.assertEqual(modal_sync.parse_run_ids("1,2, 3"), [1, 2, 3])
