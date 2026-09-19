@@ -250,6 +250,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testpolystateaudit.py'
 	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
 	python3 -m unittest discover -s codegen -p 'testnativebench.py'
+	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is

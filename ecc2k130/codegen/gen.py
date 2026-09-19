@@ -79,6 +79,11 @@ def sizeChain(m, leaf):
     return out
 
 
+# Emit the straight-line routines in a liveness-minimising order rather than
+# the order the DAG was built in.  See HOST-SCHEDULE.md; --no-schedule is the
+# paired control.
+SCHEDULE = True
+
 # Karatsuba cutoffs tried when building a generated leaf.  Instruction count
 # and peak liveness both depend on the cutoff, so chooseLeaf and the emitters
 # share this list and the same fewest-instruction pick.
@@ -265,6 +270,8 @@ def emitFunction(name, prog, roots, inputs, outLen, indent='    '):
     for nm in inputs:
         args.append('const W *%s' % nm)
     args.append('W *o')
+    if SCHEDULE:
+        prog.scheduleLive(roots)
     lines, slots = prog.emit(roots, 'o', indent=indent)
     head = 'template <class W> ECC_BIG void %s(%s) {' % (name, ', '.join(args))
     return [head] + lines + ['}'], slots
@@ -671,9 +678,13 @@ def main():
                     help='generated-leaf size; 0 picks the largest that fits --regs')
     ap.add_argument('--regs', type=int, default=255,
                     help='live values a leaf may use before the compiler spills')
+    ap.add_argument('--no-schedule', dest='schedule', action='store_false',
+                    help='emit in construction order (the pre-scheduling control)')
     ap.add_argument('--only', type=int, default=0)
     ap.add_argument('--basis', default='')
     args = ap.parse_args()
+    global SCHEDULE
+    SCHEDULE = args.schedule
 
     def leafFor(cfg):
         if args.leaf:
