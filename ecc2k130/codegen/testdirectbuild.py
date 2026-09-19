@@ -1232,6 +1232,7 @@ class SharedSigmaBuildTests(unittest.TestCase):
             ('bench-g6e-modal', 'ECC_GPU=L40S', '1'),
             ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
             ('bench-b200-modal', 'ECC_GPU=B200', '1'),
+            ('bench-waves-modal', 'ECC_GPU=RTX-PRO-6000', '1'),
             ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
             ('gpu-g4dn', 'arch=compute_75,code=sm_75', '0'),
@@ -1243,6 +1244,14 @@ class SharedSigmaBuildTests(unittest.TestCase):
             hay = result.stdout.replace('ECC_PACKED_CLMAD=', 'PACKED_CLMAD=')
             self.assertIn('PACKED_CLMAD=' + clmad, hay)
             self.assertIn('--batch 16' if target.startswith('bench-') else 'BATCH=16', result.stdout)
+        waves = subprocess.run(
+            ['make', '-n', 'bench-waves-modal', 'WAVES_GPU=L40S'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(waves.returncode, 0, waves.stderr)
+        self.assertIn('ECC_GPU=L40S', waves.stdout)
+        self.assertIn('modal_app.py::waves', waves.stdout)
+        self.assertIn('--wave-list', waves.stdout)
+        self.assertNotIn('--workers', waves.stdout)
 
 
 if __name__ == '__main__':
