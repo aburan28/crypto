@@ -18,6 +18,7 @@ import os
 import struct
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -533,6 +534,22 @@ class CheckpointWork(unittest.TestCase):
         self.assertEqual(total, 960)
         self.assertEqual(len(slots), 1)
         self.assertFalse(slots[0]["retired"])
+
+
+class DatabaseUrl(unittest.TestCase):
+    def test_secret_lookup_includes_sslmode(self):
+        env = os.environ.copy()
+        env.pop("DATABASE_URL", None)
+        env["RHO_DB_HOST"] = "rho-dp.example.com"
+        env["RHO_DB_SSLMODE"] = "require"
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch("boto3.client") as client:
+                client.return_value.get_secret_value.return_value = {
+                    "SecretString": '{"username":"u","password":"p/w","dbname":"d"}'
+                }
+                url = dp_ingest.databaseUrl()
+        self.assertIn("sslmode=require", url)
+        self.assertIn("rho-dp.example.com", url)
 
 
 if __name__ == "__main__":

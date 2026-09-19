@@ -476,10 +476,38 @@ every boot after it.
 ### The store's ingest path (`dp_ingest.py`)
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
-copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does, on its own instance
-(`Name=rho-dp-ingest`), as a systemd unit with `Restart=always`, publishing
-`status.json` to the status bucket and its journal to
+copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
+deployed is a separate question.
+
+**General path (any host).** From a machine with AWS credentials and a route
+to Postgres, run:
+
+```bash
+cd ecc2k130/aws
+./ingest.sh ensure-access    # once per new egress IP: opens rho-dp to this /32
+./ingest.sh                  # poll forever
+./ingest.sh once             # one pass, then exit
+./ingest.sh pending          # backlog report, writes nothing
+```
+
+Or from the Modal tree: `./run.sh ingest` (same script; sets
+`INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
+Set `DATABASE_URL` to skip Secrets Manager, or `RHO_DB_HOST` plus the
+`rho/dp-rds` secret (connections use `sslmode=require` by default). Requires
+the same IAM scope as the ingest instance profile: read `dp/`, read the
+secret, write the status bucket. Multiple ingesters at once are safe.
+
+From outside the VPC, `rho-dp` must be publicly reachable (`ensure-access`
+enables that and opens the RDS security group). Hosts with unstable egress
+(Cloud Agents, some NAT pools) may need several /32 rules over time; the
+VPC ingest host avoids that.
+
+**VPC host (classic deployment).** `./ingest_host.sh up` launches
+`Name=rho-dp-ingest` inside the VPC as a systemd unit with `Restart=always`,
+publishing `status.json` to the status bucket and its journal to
 `s3://$BUCKET/logs/rho-ingest-<instance>/ingest.log` every two minutes.
+Use this when EC2 is available and you prefer a private RDS endpoint with no
+public IP allowlisting.
 
 **The store is a derived view.** `dp/` is the corpus, `merge.py` is what
 searches it for collisions, and `distinguished_points` can be dropped and
