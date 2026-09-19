@@ -36,6 +36,8 @@ PASSES=${PASSES:-6}         # 0 = until solved
 GPU=${ECC_GPU:-RTX-PRO-6000}
 RUNID=${RUNID:-1}
 COUNT=${COUNT:-4}           # fanout width
+CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}  # full walk-state file; status uses a 15s header
+SYNC_INTERVAL=${SYNC_INTERVAL:-15}        # volume → S3, so the page sees the header
 
 if [ "$CURVE" = 131 ]; then
     # Audited fleet preset — see RTX-PRO6000.md and aws/campaign.json.
@@ -133,7 +135,7 @@ search)
     if [ "$PACKED" = 1 ]; then
         echo "packed preset: batch=$BATCH threads=$THREADS workers=$WORKERS walks=$WALKS dp-weight=$DPW"
     fi
-    echo "checkpoint /data/ckpt/curve$CURVE-run$RUNID.ck, corpus /data/dp/curve$CURVE-run$RUNID.bin"
+    echo "checkpoint /data/ckpt/curve$CURVE-run$RUNID.ck every ${CHECKPOINT_EVERY}s, corpus /data/dp/curve$CURVE-run$RUNID.bin"
     pass=1
     while [ "$PASSES" -eq 0 ] || [ "$pass" -le "$PASSES" ]; do
         echo "=== pass $pass ($(date -u +%H:%M:%SZ)) ==="
@@ -141,7 +143,8 @@ search)
         # A pass that solves the logarithm prints "k = ..." and exits; stop then
         # rather than starting another.
         if modal run modal_app.py::search \
-                $shape --hours "$HOURS" --run-id "$RUNID" | tee /tmp/ecc-pass.$$; then
+                $shape --hours "$HOURS" --run-id "$RUNID" \
+                --checkpoint-every "$CHECKPOINT_EVERY" | tee /tmp/ecc-pass.$$; then
             if grep -q '"solved": "' /tmp/ecc-pass.$$ && ! grep -q '"solved": null' /tmp/ecc-pass.$$; then
                 echo "solved on pass $pass"
                 rm -f /tmp/ecc-pass.$$
@@ -175,7 +178,8 @@ fanout)
     pass=1
     while [ "$PASSES" -eq 0 ] || [ "$pass" -le "$PASSES" ]; do
         echo "=== pass $pass ($(date -u +%H:%M:%SZ)) ==="
-        modal run modal_app.py::fanout $shape --hours "$HOURS" --count "$COUNT" || \
+        modal run modal_app.py::fanout $shape --hours "$HOURS" --count "$COUNT" \
+            --checkpoint-every "$CHECKPOINT_EVERY" || \
             echo "pass $pass failed; checkpoints survive, retrying" >&2
         pass=$((pass + 1))
     done
@@ -192,7 +196,7 @@ sync)
 sync-loop)
     # Discover every curve*-run*.bin on the Modal volume each pass so fanout
     # workers need no sync configuration. Failures are logged and retried.
-    python3 modal_sync.py --curve "$CURVE" --all-runs --watch "${SYNC_INTERVAL:-120}" \
+    python3 modal_sync.py --curve "$CURVE" --all-runs --watch "$SYNC_INTERVAL" \
         ${SYNC_RUN_IDS:+--run-ids "$SYNC_RUN_IDS"} \
         ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
     ;;

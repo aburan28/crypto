@@ -1050,6 +1050,29 @@ class Defaults(unittest.TestCase):
                         default=float(os.environ.get("RHO_STATUS_EVERY", "180")))
         self.assertEqual(ap.parse_args([]).status_every, 180.0)
 
+    def test_snapshot_every_default_is_every_status_write(self):
+        path = os.path.join(os.path.dirname(__file__), "dp_ingest.py")
+        with open(path) as fh:
+            self.assertIn('RHO_SNAPSHOT_EVERY", "0"', fh.read())
+
+
+class CachedSnapshot(unittest.TestCase):
+    def test_status_payload_refreshes_walkers_without_sql(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        items = [("ckpt/slot-90001/%s.ck" % ("ab" * 32), now, ckpt(50, 2, 4))]
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 190404664, "dps_last_hour": 0, "dps_last_day": 10,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+        payload = dp_ingest.statusPayload(
+            None, FakeWorkS3(items), "bucket", snapshot=snapshot)
+        self.assertEqual(payload["dps"], 190404664)
+        self.assertEqual(payload["walkers"], 1)
+        self.assertEqual(payload["work"]["walking_slots"], 1)
+        self.assertEqual(payload["state"], "IDLE_OR_STALE")
+
 
 class DatabaseUrl(unittest.TestCase):
     def test_secret_lookup_includes_sslmode(self):
