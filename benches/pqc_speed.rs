@@ -335,6 +335,273 @@ fn bench_primitives(rows: &mut Vec<Row>) {
     });
 }
 
+// ── SQIsign field / isogeny core ─────────────────────────────────────────────
+
+/// The layer SQIsign *verification* actually spends its time in, at the real
+/// NIST level-1 parameter size: `p = 3*2^324 - 1`, `F_p^2`, x-only Montgomery
+/// curves and 2-isogeny chains.  See `src/pqc/fast/isogeny.rs`; this is the
+/// arithmetic core only, not the scheme.
+fn bench_isogeny(rows: &mut Vec<Row>) {
+    use crypto_lib::pqc::fast::isogeny::*;
+
+    const S: &str = "isogeny p=3*2^324-1";
+
+    // ── field ────────────────────────────────────────────────────────────
+    let a = Fp::from_u64(0x0123_4567_89ab_cdef).mul(&Fp::from_u64(0xfedc_ba98_7654_3210));
+    let b = Fp::from_u64(0x9e37_79b9_7f4a_7c15);
+    let a2 = Fp2::new(a, b);
+    let b2 = Fp2::new(b, a);
+
+    let field_ok = a.mul(&a.inv()) == Fp::ONE && a2.mul(&a2.inv()) == Fp2::ONE;
+
+    rows.push(Row {
+        scheme: S,
+        op: "F_p mul (6 limbs)",
+        cycles: measure_each(200, 401, 128, || {
+            let mut x = std::hint::black_box(a);
+            for _ in 0..128 {
+                x = x.mul(&b);
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "F_p sqr (= mul, see docs)",
+        cycles: measure_each(200, 401, 128, || {
+            let mut x = std::hint::black_box(a);
+            for _ in 0..128 {
+                x = x.sqr();
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "F_p inv (addition chain)",
+        cycles: measure_each(5, 51, 4, || {
+            let mut x = std::hint::black_box(a);
+            for _ in 0..4 {
+                x = x.inv();
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "F_p^2 mul (karatsuba)",
+        cycles: measure_each(200, 401, 128, || {
+            let mut x = std::hint::black_box(a2);
+            for _ in 0..128 {
+                x = x.mul(&b2);
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "F_p^2 sqr",
+        cycles: measure_each(200, 401, 128, || {
+            let mut x = std::hint::black_box(a2);
+            for _ in 0..128 {
+                x = x.sqr();
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "F_p^2 inv",
+        cycles: measure_each(5, 51, 4, || {
+            let mut x = std::hint::black_box(a2);
+            for _ in 0..4 {
+                x = x.inv();
+            }
+            x
+        }),
+        ok: field_ok,
+    });
+
+    // ── curve ────────────────────────────────────────────────────────────
+    // E_6: y^2 = x^3 + 6x^2 + x, supersingular over F_p^2 with
+    // #E = (p+1)^2 = (3*2^324)^2.  Find a point of E by trying small x, which
+    // is deterministic and needs no RNG in the harness.
+    let curve = Curve::from_a(Fp2::from_u64(6));
+    let a24 = curve.normalised_a24();
+
+    // Enumerate x = c + d*i for small c, d, which is deterministic and needs
+    // no RNG in the harness.  d must be nonzero: E_6 has its full 2-torsion
+    // rational over F_p (2 is a QR mod p since p = 7 mod 8), so E(F_p) has
+    // 2-Sylow Z/2 x Z/2^323 and no x in F_p carries a point of order 2^324.
+    let candidates = (1u64..40).flat_map(|d| (0u64..40).map(move |c| (c, d)));
+
+    let mut base = PointX::INFINITY;
+    let mut kernel = PointX::INFINITY;
+    for (c, d) in candidates {
+        let x = Fp2::new(Fp::from_u64(c), Fp::from_u64(d));
+        let p = PointX::from_affine(x);
+        if !curve.is_on_curve(&p) {
+            continue;
+        }
+        if base.is_infinity() {
+            base = p;
+        }
+        // A point of exact order 2^324 whose bottom 2-torsion point is not
+        // (0,0), the kernel the x-only isogeny formulas exclude.
+        let q = ladder(&[3], 8, &p, &a24);
+        if q.is_infinity() {
+            continue;
+        }
+        let bottom = xdbl_e(&q, TWO_TORSION_POWER - 1, &a24);
+        if bottom.is_infinity() || bottom.x.is_zero() {
+            continue;
+        }
+        kernel = q;
+        break;
+    }
+    assert!(!base.is_infinity(), "no base point found");
+    assert!(!kernel.is_infinity(), "no usable full-order 2-torsion point found");
+    let curve_ok = xdbl_e(&kernel, TWO_TORSION_POWER, &a24).is_infinity()
+        && ladder(&P_PLUS_1, P_PLUS_1_BITS, &base, &a24).is_infinity();
+
+    rows.push(Row {
+        scheme: S,
+        op: "xDBL (A24plus:C24)",
+        cycles: measure_each(100, 301, 64, || {
+            let mut p = std::hint::black_box(base);
+            for _ in 0..64 {
+                p = xdbl(&p, &curve);
+            }
+            p
+        }),
+        ok: curve_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "xDBL (a24 normalised)",
+        cycles: measure_each(100, 301, 64, || {
+            let mut p = std::hint::black_box(base);
+            for _ in 0..64 {
+                p = xdbl_a24(&p, &a24);
+            }
+            p
+        }),
+        ok: curve_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "xADD",
+        cycles: measure_each(100, 301, 64, || {
+            let d = xdbl(&base, &curve);
+            let mut p = std::hint::black_box(d);
+            for _ in 0..64 {
+                p = xadd(&p, &base, &base);
+            }
+            p
+        }),
+        ok: curve_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "ladder [k]P, k ~ 2^326",
+        cycles: measure(3, 31, || ladder(&P_PLUS_1, P_PLUS_1_BITS, &base, &a24)),
+        ok: curve_ok,
+    });
+
+    // ── isogenies ────────────────────────────────────────────────────────
+    let k2 = xdbl_e(&kernel, TWO_TORSION_POWER - 1, &a24); // order 2
+    let k4 = xdbl_e(&kernel, TWO_TORSION_POWER - 2, &a24); // order 4
+    let (_, kps2) = isog2_codomain(&k2).expect("generic kernel");
+    let (_, kps4) = isog4_codomain(&k4);
+    let isog_ok = isog2_eval(&k2, &kps2).is_infinity() && isog4_eval(&k4, &kps4).is_infinity();
+
+    rows.push(Row {
+        scheme: S,
+        op: "2-isog step (codomain+eval)",
+        cycles: measure_each(100, 301, 64, || {
+            let k = std::hint::black_box(k2);
+            let mut q = std::hint::black_box(base);
+            for _ in 0..64 {
+                let (_, kps) = isog2_codomain(&k).unwrap();
+                q = isog2_eval(&q, &kps);
+            }
+            q
+        }),
+        ok: isog_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "2-isog eval only",
+        cycles: measure_each(100, 301, 64, || {
+            let mut q = std::hint::black_box(base);
+            for _ in 0..64 {
+                q = isog2_eval(&q, &kps2);
+            }
+            q
+        }),
+        ok: isog_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "4-isog step (codomain+eval)",
+        cycles: measure_each(100, 301, 64, || {
+            let k = std::hint::black_box(k4);
+            let mut q = std::hint::black_box(base);
+            for _ in 0..64 {
+                let (_, kps) = isog4_codomain(&k);
+                q = isog4_eval(&q, &kps);
+            }
+            q
+        }),
+        ok: isog_ok,
+    });
+
+    // ── full chains ──────────────────────────────────────────────────────
+    let n = TWO_TORSION_POWER / 2; // 162 four-isogeny steps = degree 2^324
+    let strategy = optimal_strategy(n, COST_DBL, COST_EVAL);
+
+    let mut probe = [kernel, base];
+    let chain_ok = two_isogeny_chain_with_strategy(
+        &curve,
+        &kernel,
+        TWO_TORSION_POWER,
+        &mut probe,
+        &strategy,
+    )
+    .map(|img| probe[0].is_infinity() && img.is_on_curve(&probe[1]))
+    .unwrap_or(false);
+
+    rows.push(Row {
+        scheme: S,
+        op: "2^324 chain, optimal strategy",
+        cycles: measure(2, 11, || {
+            let mut push = [base];
+            two_isogeny_chain_with_strategy(
+                &curve,
+                &kernel,
+                TWO_TORSION_POWER,
+                &mut push,
+                &strategy,
+            )
+        }),
+        ok: chain_ok,
+    });
+    rows.push(Row {
+        scheme: S,
+        op: "2^324 chain, naive walker",
+        cycles: measure(1, 5, || {
+            let mut push = [base];
+            chain_4_naive(&curve, &kernel, n, &mut push)
+        }),
+        ok: chain_ok,
+    });
+}
+
 fn main() {
     let filter: Vec<String> = std::env::args().skip(1).filter(|a| !a.starts_with('-')).collect();
     let want = |name: &str| filter.is_empty() || filter.iter().any(|f| name.contains(f.as_str()));
@@ -356,6 +623,9 @@ fn main() {
     }
     if want("sqisign") {
         bench_sqisign(&mut rows);
+    }
+    if want("isogeny") {
+        bench_isogeny(&mut rows);
     }
     print_table(&rows, hz);
 

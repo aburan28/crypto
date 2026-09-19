@@ -13,6 +13,7 @@
 //! and side-channel resistance pull in opposite directions, and only the first
 //! was the goal. See `SECURITY.md`.
 
+pub mod isogeny;
 pub mod keccak;
 pub mod ml_dsa;
 pub mod ml_kem;

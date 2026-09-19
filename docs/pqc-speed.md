@@ -188,6 +188,87 @@ Dilithium rather than final FIPS 204 ML-DSA-65, on different hardware, and the
 C reference has not been built on this machine. A peer row would need a
 same-machine build.
 
+## Isogeny arithmetic (SQIsign verification core)
+
+### What this is, and what it is not
+
+The existing `pqc::sqisign` is a toy: p = 431, 37 supersingular j-invariants, a
+precomputed graph, breadth-first search standing in for the KLPT algorithm, and
+a signing function that ignores the secret key. Making *that* faster is
+meaningless.
+
+`pqc::fast::isogeny` is instead the layer where a real SQIsign spends its time:
+field and isogeny arithmetic at real parameter sizes. **It is not SQIsign.** A
+real implementation still needs quaternion order arithmetic, the Deuring
+correspondence and KLPT for signing, which is tens of thousands of lines and
+was deliberately not attempted. What is here is roughly the verification-side
+arithmetic, which is self-contained and has a clean correctness specification.
+
+The prime is `p = 3·2^324 − 1`, six 64-bit limbs, chosen for the right shape
+(`p + 1` divisible by a large power of two) rather than copied from the NIST
+submission. The module documents that it is representative rather than the
+submitted parameter.
+
+### Measured
+
+| operation | kilocycles | per second |
+|---|---:|---:|
+| F_p multiply (6 limbs) | 0.040 | 52.9 M |
+| F_p square (= multiply, see below) | 0.045 | 46.4 M |
+| F_p inverse (addition chain) | 13.675 | 154 k |
+| F_p² multiply (Karatsuba) | 0.167 | 12.6 M |
+| F_p² square | 0.113 | 18.6 M |
+| F_p² inverse | 13.902 | 151 k |
+| xDBL (A24plus : C24) | 1.002 | 2.10 M |
+| xDBL (a24 normalised) | 0.910 | 2.31 M |
+| xADD | 1.262 | 1.66 M |
+| ladder [k]P, k ≈ 2^326 | 923.9 | 2.3 k |
+| 2-isogeny step (codomain + evaluation) | 1.102 | 1.91 M |
+| 2-isogeny evaluation only | 0.846 | 2.48 M |
+| 4-isogeny step (codomain + evaluation) | 2.208 | 951 k |
+| 2^324 chain, optimal strategy | 2524.5 | 832 |
+| 2^324 chain, naive walker | 28566.1 | 74 |
+
+A 326-bit field multiplication at 40 cycles is in the range a tuned
+implementation should reach, and the quadratic extension multiply at 167 is
+about 4.2× that, consistent with Karatsuba's three base multiplications plus
+reduction and carry overhead.
+
+**The optimal strategy is worth 11.3× over the naive walker** on a full-length
+chain, 2.52 against 28.57 megacycles. That is the single largest structural win
+in this module and the reason the naive walker is kept: it is the thing the
+strategy is measured against, and the two are checked to produce the same
+isogeny.
+
+### A negative result worth keeping
+
+A dedicated squaring using the usual off-diagonal trick, 21 limb
+multiplications instead of 36, was written, differentially tested, and measured
+at 51 cycles against the general multiply's 48. No faster, and within this
+shared machine's run-to-run noise, so not reliably slower either. With the CIOS
+reduction already integrated and cheap, the 12-limb doubling shift and the
+separated reduction's carry loop appear to cost about what the 15 saved
+multiplications save. Forty lines of carry plumbing that buys nothing
+measurable was dropped, so `Fp::sqr` is `mul(a, a)`. This is a
+not-measured-any-better result, not a proof that the trick cannot be made to
+win with a more integrated reduction.
+
+### Correctness
+
+Seventeen tests. The load-bearing ones are the differential tests against
+`num-bigint`, which reimplement the same operations schoolbook-style and
+compare over thousands of seeded random inputs, for both the base field and the
+quadratic extension. On top of those: field axioms, Legendre symbol and square
+roots, the ladder against repeated addition and its multiplicativity, points
+staying on the curve under doubling, a 4-isogeny equalling two 2-isogenies, the
+optimal-strategy chain agreeing with the naive walker, a full-length chain of
+degree 2^324, the supersingular group order, and the modular polynomial
+recognising known pairs.
+
+Four of these failed on the first pass, in the two- and four-isogeny formulas,
+the strategy-versus-naive comparison and the prime constants. That is what
+those tests are for.
+
 ## Security
 
 **These implementations are not constant-time and must not be used for

@@ -90,10 +90,16 @@
 //!
 //! One thing that did *not* pay off, recorded because the negative result is
 //! the useful part: a dedicated squaring with the off-diagonal trick (21 limb
-//! multiplies instead of 36) measured 51 cycles against the general
-//! multiply's 48.  With the reduction already this cheap, the 12-limb
-//! doubling shift and the separated reduction's carry loop cost more than the
-//! 15 saved multiplies.  [`Fp::sqr`] is therefore just `mul(a, a)`.
+//! multiplies instead of 36) was written, differentially tested, and measured
+//! at 51 cycles against the general multiply's 48 — no faster, and inside the
+//! roughly 5% run-to-run noise of this (shared, 4-core) machine, so not
+//! reliably slower either.  The plausible reason it fails to win is that with
+//! the reduction already this cheap, the 12-limb doubling shift and the
+//! separated reduction's carry-propagation loop cost about what the 15 saved
+//! multiplies do.  Forty lines of carry plumbing that buys nothing measurable
+//! is not worth keeping, so [`Fp::sqr`] is just `mul(a, a)`.  This is a
+//! not-measured-any-better result, not a proof that the trick cannot be made
+//! to win with a more integrated reduction.
 //!
 //! # Security
 //!
@@ -320,14 +326,10 @@ impl Fp {
     /// `a^2 mod p`.
     ///
     /// This is just [`Fp::mul`] with both operands the same.  A dedicated
-    /// squaring using the usual off-diagonal trick (21 limb multiplies
-    /// instead of 36) was written and measured: **51 cycles against 48 for
-    /// the general multiply**, i.e. slower.  At six limbs the 15 multiplies
-    /// it saves are paid back with interest by the 12-limb doubling shift and
-    /// by the separated reduction's carry-propagation loop, which the
-    /// integrated CIOS reduction in [`mont_mul`] does not need.  It was
-    /// removed rather than kept as a slower path with a faster-sounding
-    /// comment.
+    /// off-diagonal squaring (21 limb multiplies instead of 36) was written
+    /// and measured at 51 cycles against 48 for the general multiply: no
+    /// faster, within measurement noise.  See the module docs; it was dropped
+    /// rather than kept as an unearned complication.
     #[inline(always)]
     pub fn sqr(&self) -> Fp {
         Fp(mont_mul(&self.0, &self.0))
