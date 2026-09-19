@@ -576,6 +576,24 @@ class WalkRate(unittest.TestCase):
         self.assertAlmostEqual(rate["iterations_per_second"], (1720 - 1000) / 720)
         self.assertEqual(rate["measured_from"], "2026-09-19T12:00:00Z")
 
+    def test_clips_a_sticky_fallback_window_to_one_hour(self):
+        previous = {
+            "generated_at": "2026-09-19T13:59:00Z",
+            "work": {"iterations": 10_000},
+            "walk_rate": {
+                "iterations_from": 1000,
+                "measured_from": "2026-09-19T12:00:00Z",
+            },
+        }
+        current = {
+            "generated_at": "2026-09-19T14:02:00Z",
+            "work": {"iterations": 11_800},
+        }
+        rate = dp_ingest.walkRateBetween(current, previous)
+        self.assertEqual(rate["window_seconds"], dp_ingest.WALK_RATE_WINDOW_S)
+        self.assertEqual(rate["measured_from"], "2026-09-19T13:02:00Z")
+        self.assertAlmostEqual(rate["iterations_per_second"], 10800 / 7320)
+
     def test_public_status_drops_per_slot_rows(self):
         public = dp_ingest.publicStatus({
             "work": {"iterations": 10, "walking_slots": 1, "per_slot": [{"slot": 1}]},

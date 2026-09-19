@@ -444,6 +444,9 @@ FRESH_CHECKPOINT_S = 1800
 # Below this the checkpoint granularity dominates the difference between two
 # consecutive status.json writes.
 MIN_WALK_RATE_SPAN_S = 600
+# Match scripts/rho_status/render.py: prefer an hour of checkpoints so the
+# rate reflects the fleet that is running now, not a lengthening average.
+WALK_RATE_WINDOW_S = 3600
 
 
 def parseIso(value):
@@ -490,11 +493,42 @@ def walkRateBetween(current, previous):
                 "generated_at": prior["measured_from"],
                 "work": {"iterations": fromIter},
             })
-    for base in bases:
+    for idx, base in enumerate(bases):
         rate = _walkRate(current, base)
         if rate is not None:
+            if idx > 0:
+                rate = _clipWalkRateWindow(rate)
             return rate
     return None
+
+
+def _clipWalkRateWindow(rate):
+    """Keep a fallback rate inside WALK_RATE_WINDOW_S so measured_from slides."""
+    span = rate.get("window_seconds", 0)
+    if span <= WALK_RATE_WINDOW_S:
+        return rate
+    fromAt = parseIso(rate.get("measured_from"))
+    toAt = parseIso(rate.get("measured_to"))
+    if fromAt is None or toAt is None or toAt <= fromAt:
+        return rate
+    anchorAt = toAt - datetime.timedelta(seconds=WALK_RATE_WINDOW_S)
+    if anchorAt <= fromAt:
+        return rate
+    totalSpan = (toAt - fromAt).total_seconds()
+    fromIter = rate["iterations_from"]
+    toIter = rate["iterations_to"]
+    frac = (anchorAt - fromAt).total_seconds() / totalSpan
+    anchorIter = fromIter + frac * (toIter - fromIter)
+    anchorStamp = anchorAt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return {
+        "iterations_per_second": (toIter - anchorIter) / WALK_RATE_WINDOW_S,
+        "window_seconds": WALK_RATE_WINDOW_S,
+        "measured_from": anchorStamp,
+        "measured_to": rate["measured_to"],
+        "iterations_from": int(round(anchorIter)),
+        "iterations_to": toIter,
+        "method": rate["method"],
+    }
 
 
 def _walkRate(current, previous):
