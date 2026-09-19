@@ -322,7 +322,7 @@ class Passes(unittest.TestCase):
         self.backlog(5)
         done = []
         dp_ingest.ingestObject = lambda conn, s3, bucket, key, found_at: (
-            done.append(key) or (100, 100))
+            done.append(key) or (100, 100, 0))
         rows, objects, state = self.run_pass(limit=2)
         self.assertEqual((objects, rows), (2, 200))
         # The slice is this pass's work; the number published is the backlog.
@@ -330,7 +330,7 @@ class Passes(unittest.TestCase):
 
     def test_an_unbounded_pass_is_still_available(self):
         self.backlog(5)
-        dp_ingest.ingestObject = lambda *a, **k: (100, 100)
+        dp_ingest.ingestObject = lambda *a, **k: (100, 100, 0)
         _, objects, state = self.run_pass(limit=0)
         self.assertEqual((objects, state["outstanding"]), (5, 0))
 
@@ -343,7 +343,7 @@ class Passes(unittest.TestCase):
             if len(seen) == 1:  # the resize lands here
                 conn.close()
                 raise RuntimeError("the connection is closed")
-            return 100, 100
+            return 100, 100, 0
 
         dp_ingest.ingestObject = ingest
         _, objects, state = self.run_pass()
@@ -363,7 +363,7 @@ class Passes(unittest.TestCase):
             seen.append(key)
             if key in poison:
                 raise ValueError("object is unreadable")
-            return 100, 100
+            return 100, 100, 0
 
         dp_ingest.ingestObject = ingest
         _, objects, state = self.run_pass(limit=2)
@@ -396,7 +396,7 @@ class Passes(unittest.TestCase):
         def ingest(conn, s3, bucket, key, found_at):
             if key.endswith("%016d.bin" % 1):
                 raise ValueError("record size is not a multiple of 32")
-            return 100, 100
+            return 100, 100, 0
 
         dp_ingest.ingestObject = ingest
         _, objects, state = self.run_pass()
@@ -405,6 +405,212 @@ class Passes(unittest.TestCase):
         # The failed object must leave a usable transaction behind; without
         # rollback the rest of this thread's objects fail as well.
         self.assertGreaterEqual(sum(c.rollbacks for c in self.conns), 1)
+
+
+class CollisionCopy:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def set_types(self, types):
+        pass
+
+    def write_row(self, row):
+        pass
+
+
+class CollisionCursor:
+    """Enough of a cursor to drive ingestObject's insert-and-check path."""
+
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+        self.rowcount = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def copy(self, sql):
+        return CollisionCopy()
+
+    def execute(self, sql, args=None):
+        self.conn.queries.append((sql, args))
+        if "JOIN distinguished_points" in sql:
+            self.rows = self.conn.candidates
+            self.rowcount = len(self.rows)
+        elif "INSERT INTO distinguished_points" in sql:
+            self.rowcount = self.conn.inserted
+        elif "INSERT INTO rho_collisions" in sql:
+            self.conn.stored.append(args)
+            self.rowcount = 1
+        else:
+            self.rows = []
+            self.rowcount = 1
+
+    def fetchall(self):
+        return self.rows
+
+
+class CollisionConn:
+    def __init__(self, inserted=0, candidates=()):
+        self.inserted = inserted
+        self.candidates = list(candidates)
+        self.queries = []
+        self.stored = []
+        self.commits = 0
+
+    def cursor(self):
+        return CollisionCursor(self)
+
+    def commit(self):
+        self.commits += 1
+
+
+class CollisionS3:
+    def __init__(self, body):
+        self.body = body
+
+    def get_object(self, **kw):
+        return {"Body": io.BytesIO(self.body)}
+
+
+def record(seed, k0=1, k1=2, k2=3):
+    return struct.pack("<QQQQ", seed, k0, k1, k2)
+
+
+class Collisions(unittest.TestCase):
+    """The campaign's terminal event must not be swallowed by DO NOTHING.
+
+    `ON CONFLICT (campaign_id, point_key) DO NOTHING` cannot distinguish a
+    worker re-reporting its own point from two different walks meeting at one,
+    and before this it dropped both alike -- so the only thing the campaign
+    exists to find was the one thing the ingest discarded. Nothing in the tree
+    wrote `rho_collisions`, which both this program and
+    scripts/rho_status/snapshot.py read.
+    """
+
+    def setUp(self):
+        self.realCols = dp_ingest._collisionCols
+        self.addCleanup(setattr, dp_ingest, "_collisionCols", self.realCols)
+        dp_ingest._collisionCols = {
+            "campaign_id", "point_key", "a1", "walk_seed1", "worker_id1",
+            "a2", "walk_seed2", "worker_id2", "object_key", "detected_at"}
+        self.addCleanup(setattr, dp_ingest, "log", dp_ingest.log)
+        self.logged = []
+        dp_ingest.log = self.logged.append
+
+    def candidate(self, minePoint, mineSeed, theirsSeed):
+        """One row as the join returns it: same point, two different seeds."""
+        return (minePoint,
+                mineSeed.to_bytes(dp_ingest.COEFF_BYTES, "big"),
+                mineSeed.to_bytes(8, "big").lstrip(b"\x00"),
+                theirsSeed.to_bytes(dp_ingest.COEFF_BYTES, "big"),
+                theirsSeed.to_bytes(8, "big").lstrip(b"\x00"),
+                "dp-slot-00002-old.bin")
+
+    def ingest(self, body, inserted, candidates=()):
+        conn = CollisionConn(inserted=inserted, candidates=candidates)
+        result = dp_ingest.ingestObject(conn, CollisionS3(body), "bucket",
+                                        ORBIT, "2026-09-19 00:00:00+00")
+        return conn, result
+
+    def test_a_point_reached_by_two_seeds_is_recorded(self):
+        conn, (added, seen, hits) = self.ingest(
+            record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])
+        self.assertEqual((added, seen, hits), (0, 1, 1))
+        self.assertEqual(len(conn.stored), 1)
+        stored = conn.stored[0]
+        self.assertIn(dp_ingest.CAMPAIGN, stored)
+        self.assertIn(b"pk", stored)
+
+    def test_the_collision_is_announced_whether_or_not_it_can_be_stored(self):
+        # A storage problem must never be the reason nobody hears about this.
+        dp_ingest._collisionCols = set()
+        conn, (_, _, hits) = self.ingest(
+            record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])
+        self.assertEqual(hits, 1)
+        self.assertEqual(conn.stored, [])
+        self.assertTrue(any("COLLISION" in line for line in self.logged))
+
+    def test_the_same_seed_twice_is_a_re_report_not_a_collision(self):
+        # A resumed worker re-uploads points it already sent; that is the case
+        # DO NOTHING is for and it must stay silent.
+        conn, (_, _, hits) = self.ingest(
+            record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 7)])
+        self.assertEqual(hits, 0)
+        self.assertEqual(conn.stored, [])
+
+    def test_one_seed_stored_at_another_width_is_not_a_collision(self):
+        # verify() already reports that the old ingester's column widths differ
+        # from this program's. Comparing bytes would call every legacy
+        # re-ingest a collision; the seed is an integer.
+        row = list(self.candidate(b"pk", 7, 7))
+        row[3] = (7).to_bytes(8, "big")  # same seed, narrower column
+        conn, (_, _, hits) = self.ingest(record(7), inserted=0, candidates=[tuple(row)])
+        self.assertEqual(hits, 0)
+        self.assertEqual(conn.stored, [])
+
+    def test_an_object_of_new_points_never_runs_the_check(self):
+        # The cost property: in the steady state every record inserts, so
+        # nothing conflicted and there is nothing to look for.
+        conn, (added, seen, hits) = self.ingest(record(7) + record(8), inserted=2)
+        self.assertEqual((added, seen, hits), (2, 2, 0))
+        self.assertFalse([q for q, _ in conn.queries if "JOIN distinguished_points" in q])
+
+    def test_the_check_runs_as_soon_as_anything_conflicted(self):
+        conn, _ = self.ingest(record(7) + record(8), inserted=1)
+        self.assertTrue([q for q, _ in conn.queries if "JOIN distinguished_points" in q])
+
+    def test_the_collision_is_written_in_the_transaction_that_found_it(self):
+        # A recorded collision must not be able to outlive the insert it came
+        # from, so it is stored before the single commit, like the progress row.
+        conn, _ = self.ingest(record(7), inserted=0,
+                              candidates=[self.candidate(b"pk", 7, 9)])
+        order = [q for q, _ in conn.queries]
+        self.assertLess(next(i for i, q in enumerate(order) if "rho_collisions" in q),
+                        next(i for i, q in enumerate(order) if "dp_ingest_progress" in q))
+        self.assertEqual(conn.commits, 1)
+
+    def test_a_stored_point_with_no_seed_is_reported_not_counted(self):
+        # `a` is NOT NULL for everything this program writes, but the corpus
+        # predates it. Calling an uncomparable row a collision would make one
+        # of every record that meets it.
+        row = list(self.candidate(b"pk", 7, 9))
+        row[3] = None
+        conn, (_, _, hits) = self.ingest(record(7), inserted=0, candidates=[tuple(row)])
+        self.assertEqual(hits, 0)
+        self.assertEqual(conn.stored, [])
+        self.assertTrue(any("no seed" in line for line in self.logged))
+
+    def test_the_insert_is_built_from_the_columns_the_table_actually_has(self):
+        # rho_collisions predates this file and its shape is not in the tree,
+        # so the DDL above may be a no-op against a different table.
+        dp_ingest._collisionCols = {"campaign_id", "point_key", "detected_at"}
+        conn, (_, _, hits) = self.ingest(
+            record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])
+        self.assertEqual(hits, 1)
+        sql = [q for q, _ in conn.queries if "INSERT INTO rho_collisions" in q][0]
+        self.assertIn("(campaign_id, point_key)", sql)
+        self.assertEqual(sql.count("%s"), 2)
+        self.assertNotIn("walk_seed1", sql)
+
+    def test_a_pass_reports_collisions_so_the_page_publishes_at_once(self):
+        real = dp_ingest.pending
+        self.addCleanup(setattr, dp_ingest, "pending", real)
+        realIngest = dp_ingest.ingestObject
+        self.addCleanup(setattr, dp_ingest, "ingestObject", realIngest)
+        dp_ingest._failed.clear()
+        self.addCleanup(dp_ingest._failed.clear)
+        dp_ingest.pending = lambda *a, **k: (
+            [("dp/slot-00001/x-0000000000000000.bin", 100, 1789000000, 0)], 1789000000, [])
+        dp_ingest.ingestObject = lambda *a, **k: (99, 100, 1)
+        _, _, state = dp_ingest.onePass(lambda: FakeConn([]), None, "bucket", threads=1)
+        self.assertEqual(state["collisions"], 1)
 
 
 class StatusState(unittest.TestCase):

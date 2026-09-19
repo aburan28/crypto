@@ -22,6 +22,16 @@ history and are the reason this is a file rather than a shell one-liner:
   * **Restartable by the machine, not by a person.** Deployed as a systemd unit
     with `Restart=always`; a database failover costs a retry, not an outage that
     ends when somebody notices.
+  * **It reports the collision it is uniquely placed to see.** The unique key
+    that makes re-ingest harmless is the same constraint that defines a
+    collision: two walks reaching one distinguished point from different
+    seeds. `DO NOTHING` cannot tell that from a worker re-reporting its own
+    point, and dropped both alike, so the campaign's terminal event was the
+    one thing this program threw away -- and `rho_collisions`, which it and
+    scripts/rho_status/snapshot.py both read, had no writer at all. A
+    conflicting record is now compared against the stored one and a genuine
+    meeting is recorded and published at once. `merge.py` over the S3 corpus
+    stays the independent check rather than the only detector.
 
 Record and column encodings are not invented here. They are read back from
 `rho_campaigns.meta`, which the original ingest wrote:
@@ -336,8 +346,144 @@ def ingestedCounts(conn, ttl=COUNTS_TTL):
     return _counts["map"], done
 
 
+# A collision is the campaign's terminal event, and until now the ingest was
+# the one place it could be seen and the one place it was thrown away:
+# `ON CONFLICT (campaign_id, point_key) DO NOTHING` cannot tell a worker
+# re-reporting its own point from two different walks meeting, and dropped
+# both alike. `rho_collisions` is read by this program and by
+# scripts/rho_status/snapshot.py and was written by nothing in the tree, so
+# the dashboard's COLLISION_RECORDED state had no producer at all.
+#
+# The store already enforces exactly the constraint that defines a collision.
+# This makes it report one. merge.py stays the independent check over the S3
+# corpus rather than the only detector.
+COLLISIONS_DDL = """
+CREATE TABLE IF NOT EXISTS rho_collisions (
+    campaign_id text NOT NULL,
+    point_key   bytea NOT NULL,
+    a1          bytea,
+    walk_seed1  bytea,
+    worker_id1  text,
+    a2          bytea,
+    walk_seed2  bytea,
+    worker_id2  text,
+    object_key  text,
+    detected_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (campaign_id, point_key)
+)
+"""
+# Columns the live table actually has. The DDL above is a no-op against the
+# table the original out-of-tree ingest created, whose shape is not in this
+# repository, so the INSERT is built from what is there rather than from what
+# this file would have chosen. Anything but campaign_id and point_key is
+# optional; without those two a row cannot be written at all and the finding
+# goes to the log instead, which is never silent either way.
+_collisionCols = set()
+
+
+def ensureCollisions(conn):
+    """Make sure a collision has somewhere to be recorded, and learn its shape."""
+    global _collisionCols
+    with conn.cursor() as cur:
+        cur.execute(COLLISIONS_DDL)
+        cur.execute("SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'rho_collisions' "
+                    "  AND table_schema = ANY(current_schemas(false))")
+        _collisionCols = {row[0] for row in cur.fetchall()}
+    conn.commit()
+    missing = {"campaign_id", "point_key"} - _collisionCols
+    if missing:
+        log("WARNING: rho_collisions is missing %s; a collision will be logged "
+            "but cannot be stored" % ", ".join(sorted(missing)))
+    return _collisionCols
+
+
+def seedOf(coeff):
+    """The walk seed as an integer, however wide the stored bytes happen to be.
+
+    `a` is the seed in 17 big-endian bytes here, but the corpus predates this
+    program and verify() already reports that the old ingester's widths differ.
+    Comparing bytes would call every legacy re-ingest a collision; comparing
+    the integer is what the seed actually means.
+    """
+    return int.from_bytes(bytes(coeff or b""), "big")
+
+
+def findCollisions(cur, key):
+    """Records of this object whose point is already stored under another seed.
+
+    Runs against the temp table after the insert, so a record that was just
+    inserted joins to itself and compares equal. What is left is a point that
+    two different walks reached -- within this object or against the corpus --
+    which is the whole point of the campaign.
+    """
+    cur.execute(
+        "SELECT i.point_key, i.a, i.walk_seed, d.a, d.walk_seed, d.worker_id "
+        "FROM dp_in i JOIN distinguished_points d "
+        "  ON d.campaign_id = %s AND d.point_key = i.point_key "
+        "WHERE d.a IS DISTINCT FROM i.a",
+        (CAMPAIGN,))
+    out = []
+    for point_key, mineA, mineSeed, theirsA, theirsSeed, worker in cur.fetchall():
+        if theirsA is None:
+            # `a` is NOT NULL for everything this program writes, but the
+            # corpus predates it. A stored point with no seed cannot be
+            # compared and could not be solved from if it were a meeting, so
+            # it is said out loud and not counted -- reporting it as a
+            # collision would make every record that meets it one.
+            log("WARNING: point %s is stored with no seed (%s); cannot tell a "
+                "re-report from a collision" % (bytes(point_key).hex(), worker))
+            continue
+        # Byte inequality is the cheap filter the database can do; equality of
+        # the seeds themselves is the question, and a width difference between
+        # eras is not a collision.
+        if seedOf(mineA) == seedOf(theirsA):
+            continue
+        out.append({
+            "point_key": bytes(point_key),
+            "a1": bytes(theirsA),
+            "walk_seed1": bytes(theirsSeed) if theirsSeed is not None else None,
+            "worker_id1": worker,
+            "a2": bytes(mineA),
+            "walk_seed2": bytes(mineSeed),
+            "worker_id2": workerId(key),
+            "object_key": key,
+        })
+    return out
+
+
+def recordCollisions(cur, found):
+    """Store what can be stored, and say the rest out loud.
+
+    Written in the same transaction as the points that revealed it, so a
+    recorded collision cannot outlive the insert it came from. ON CONFLICT DO
+    NOTHING because re-ingesting the same object must not multiply the row.
+    """
+    for row in found:
+        # Never let a storage problem be the reason nobody hears about this.
+        log("COLLISION: point %s seen from seed %d (%s) and seed %d (%s)"
+            % (row["point_key"].hex(), seedOf(row["a1"]), row["worker_id1"],
+               seedOf(row["a2"]), row["worker_id2"]))
+    if not found or not {"campaign_id", "point_key"} <= _collisionCols:
+        return 0
+    cols = [c for c in ("point_key", "a1", "walk_seed1", "worker_id1",
+                        "a2", "walk_seed2", "worker_id2", "object_key")
+            if c in _collisionCols]
+    sql = ("INSERT INTO rho_collisions (campaign_id, %s) VALUES (%s) "
+           "ON CONFLICT DO NOTHING"
+           % (", ".join(cols), ", ".join(["%s"] * (len(cols) + 1))))
+    stored = 0
+    for row in found:
+        cur.execute(sql, tuple([CAMPAIGN] + [row[c] for c in cols]))
+        stored += cur.rowcount
+    return stored
+
+
 def ingestObject(conn, s3, bucket, key, found_at):
-    """Insert every record of one object. Returns rows actually added."""
+    """Insert every record of one object.
+
+    Returns (rows added, records seen, collisions found).
+    """
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
@@ -368,6 +514,15 @@ def ingestObject(conn, s3, bucket, key, found_at):
             "ON CONFLICT (campaign_id, point_key) DO NOTHING",
             (CAMPAIGN, wid, found_at))
         added = cur.rowcount
+        # Every record inserted means nothing conflicted, so there is nothing
+        # to look for: in the steady state, where each object is new points,
+        # the check below never runs and costs nothing. It runs on the
+        # re-reports and the resumed walks -- and on the one object that ends
+        # the campaign.
+        collisions = []
+        if added < len(rows):
+            collisions = findCollisions(cur, key)
+            recordCollisions(cur, collisions)
         # Same transaction as the points, so the record of having ingested an
         # object cannot outlive the insert that it describes.
         cur.execute(
@@ -376,7 +531,7 @@ def ingestObject(conn, s3, bucket, key, found_at):
             "DO UPDATE SET records = EXCLUDED.records, ingested_at = now()",
             (CAMPAIGN, key, whole // RECORD_BYTES))
     conn.commit()
-    return added, whole // RECORD_BYTES
+    return added, whole // RECORD_BYTES, len(collisions)
 
 
 def verify(conn, s3, bucket, sample=64):
@@ -826,7 +981,7 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     work = queue.Queue()
     for item in slice_:
         work.put(item)
-    tally = {"rows": 0, "objects": 0, "failed": 0}
+    tally = {"rows": 0, "objects": 0, "failed": 0, "collisions": 0}
     failed = set()
     lock = threading.Lock()
 
@@ -848,7 +1003,7 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
                     try:
                         if conn is None or conn.closed:
                             conn = connect()
-                        n, seen = ingestObject(
+                        n, seen, hits = ingestObject(
                             conn, s3, bucket, key,
                             time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(when)))
                     except Exception as exc:
@@ -877,8 +1032,10 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
                         with lock:
                             tally["rows"] += n
                             tally["objects"] += 1
-                        log("ingested %s: %d records, %d new (store had %d)"
-                            % (key, seen, n, have))
+                            tally["collisions"] += hits
+                        log("ingested %s: %d records, %d new (store had %d)%s"
+                            % (key, seen, n, have,
+                               ", %d COLLISION(S)" % hits if hits else ""))
                     break
         except Exception as exc:  # a connection that will not open at all
             log("ingest thread stopped: %s: %s" % (type(exc).__name__, exc))
@@ -896,10 +1053,13 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     _failed.update(failed)
     elapsed = max(time.time() - started, 1e-9)
     state["outstanding"] = len(todo) - tally["objects"]
+    state["collisions"] = tally["collisions"]
     log("pass complete: %d of %d outstanding objects touched, %d rows added, "
-        "%d failed, %d still outstanding, %.0f rows/s"
+        "%d failed, %d still outstanding, %.0f rows/s%s"
         % (tally["objects"], len(todo), tally["rows"], tally["failed"],
-           state["outstanding"], tally["rows"] / elapsed))
+           state["outstanding"], tally["rows"] / elapsed,
+           ", %d COLLISION(S) RECORDED" % tally["collisions"]
+           if tally["collisions"] else ""))
     return tally["rows"], tally["objects"], state
 
 
@@ -966,6 +1126,9 @@ def main(argv=None):
         try:
             with connect() as conn:
                 ensureProgress(conn)
+                # --pending promises to write nothing, and the DDL is a write.
+                if not (args.verify or args.pending):
+                    ensureCollisions(conn)
                 if args.index and not (args.verify or args.pending):
                     try:
                         ensureFoundAtIndex(conn)
@@ -993,8 +1156,11 @@ def main(argv=None):
                 behind = bool(ingest.get("outstanding"))
                 # Rate-limited, except for the pass that finishes a drain:
                 # "caught up" is the one transition a reader is waiting for.
+                # A collision ends the campaign, so it does not wait out the
+                # rate limit: it is published on the pass that found it.
                 due = (time.time() - published >= args.status_every
-                       or (wasBehind and not behind))
+                       or (wasBehind and not behind)
+                       or bool(ingest.get("collisions")))
                 wasBehind = behind
                 if args.status_bucket and (due or args.once):
                     try:
