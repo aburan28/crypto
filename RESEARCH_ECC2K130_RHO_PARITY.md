@@ -237,3 +237,75 @@ Class: **engineering**. `S` fell; the ratio to the counting floor did
 not, because `B` and `m` did not. Iteration 0 remains the before mark
 on the scoreboard. This is not n=131 parity and is not claimed to
 move `α` at degree 131.
+
+## 9. Iteration 2, the ladder (frozen before the run)
+
+**Question.** The five cells span `log₂ r` = 11.0 to 21.0 and IC is
+setup-dominated on all of them. Where does parity break, and what are
+the fitted exponents of `G_IC` and `G_rho` in `r`? `AGENTS.md` §5 asks
+for exponents over at least four sizes; the gate alone does not supply
+them.
+
+**Cells added.** Every Koblitz curve `KoblitzCurve::new(a, n)` returns
+for `25 ≤ n ≤ 47`, with its prime subgroup order. The ladder is
+indexed by `log₂ r`, not `n`, because the cofactor varies:
+
+| Cell | `log₂ r` | recipe `|F|` | `K` | `t` | expected rho walk |
+|---|---:|---:|---:|---:|---:|
+| n29a1 | 15.37 | 464 | 8 | 1 | 34 |
+| n31a0 | 20.46 | 496 | 8 | 1 | 191 |
+| n39a0 | 26.03 | 624 | 8 | 5 | 1,176 |
+| n37a0 | 27.78 | 592 | 8 | 7 | 2,212 |
+| n43a1 | 32.11 | 688 | 8 | 8 | 9,210 |
+| n47a1 | 36.64 | 752 | 8 | 8 | 42,242 |
+| n41a0 | 39.00 | 656 | 8 | 8 | 102,621 |
+
+`|F|`, `K`, `t` are from the public recipe (`SubgroupOrbits{43, 6n}`,
+`optimal_folded_rows`) and are written here before any target is
+solved. The five §2 cells are re-run in the same receipt so every
+rung has one code hash.
+
+**Unchanged.** Unit, gate shape, recipe, row rule, window rule,
+`m = 3`, seeds, target domain, repetitions, order rule, conversion,
+one-pass table.
+
+**Changed, and why.** `max_trials` `4096 → 2²⁰` and rho
+`max_iterations_per_restart` `2²⁰ → 2²⁴`. Both are caps, not costs:
+every trial and iteration actually spent is charged. A cell that
+exhausts either cap is a failure, retained as a failure.
+
+**Diagnostics added, not charged.** Table lookups
+(`collection_trials · window` and `descent_trials · |F|`). The unit
+charges a walked probe one addition; the `|F|` memory probes it makes
+are not group operations. Their count is written next to `G` so the
+unit's blind spot is visible.
+
+**Fit.** Least-squares slope of `log₂ mean(G)` against `log₂ r` over
+every cell whose nine pairs all verified, for each arm. Rho's slope
+should sit near `0.5` once the walk dominates its fixed setup.
+
+**Prediction, written before the run.** `G_IC` is
+`table + K·cofactor muls + collection + certification + descent`.
+Collection probes scale as `2rK / |F|³` at fixed `|F| ≈ 6n`; so as
+`r` grows with `|F|` nearly flat the IC slope tends to `1`, twice
+rho's. On these cells `|F|³` is between `10⁸` and `4·10⁸`, so the
+collection term stays below rho's walk through `log₂ r = 39`, and the
+gate is predicted to **hold on every rung** while the fitted IC slope
+is predicted to exceed rho's. The extrapolated crossing in this unit
+is where `2rK/|F|³ ≈ √(πr/4n)`, about `r ≈ 2⁴⁸` at `|F| ≈ 650`,
+past `MAX_N = 63`'s reach in one run. That crossing is an
+extrapolation and will be labelled one.
+
+**Class.** Engineering if the gate holds: the counting floor at these
+`B` is unchanged. If the IC slope is at or below `0.5` on ≥ 4 rungs,
+that contradicts the counting argument and must be re-examined as an
+accounting error before it is called anything else.
+
+**Inadmissible.** Choosing which of the twelve cells to fit after
+seeing them. Growing `|F|` on a rung to rescue it. Quoting the
+crossing as a measurement.
+
+```bash
+cargo run --release --example rho_parity_e2e -- --ladder \
+  --out experiments/ecc2k130_rho_parity_20260918/iteration-2
+```

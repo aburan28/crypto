@@ -32,6 +32,10 @@ const REPS: u32 = 3;
 const MAX_TRIALS: usize = 4_096;
 const WALKS: u64 = 64;
 const PROBE_RUN: u64 = 64;
+/// Iteration 2 caps (protocol §9). Caps, not costs: what is spent is charged.
+const LADDER_MAX_TRIALS: usize = 1 << 20;
+const LADDER_RHO_ITERATIONS: u64 = 1 << 24;
+const RHO_ITERATIONS: u64 = 1 << 20;
 
 struct Cell {
     a: u8,
@@ -45,6 +49,28 @@ const CELLS: [Cell; 5] = [
     Cell { a: 1, n: 19 },
     Cell { a: 0, n: 23 },
 ];
+
+/// Every Koblitz curve with a prime subgroup for `25 ≤ n ≤ 47`, in the
+/// order of `log₂ r` (protocol §9).
+const LADDER_CELLS: [Cell; 12] = [
+    Cell { a: 0, n: 13 },
+    Cell { a: 1, n: 29 },
+    Cell { a: 1, n: 17 },
+    Cell { a: 0, n: 19 },
+    Cell { a: 1, n: 19 },
+    Cell { a: 0, n: 31 },
+    Cell { a: 0, n: 23 },
+    Cell { a: 0, n: 39 },
+    Cell { a: 0, n: 37 },
+    Cell { a: 1, n: 43 },
+    Cell { a: 1, n: 47 },
+    Cell { a: 0, n: 41 },
+];
+
+struct Caps {
+    max_trials: usize,
+    rho_iterations: u64,
+}
 
 fn cell_name(cell: &Cell) -> String {
     format!("n{}a{}", cell.n, cell.a)
@@ -127,10 +153,15 @@ fn ic_then_rho(n: u32, a: u8, target_index: usize, rep: u32) -> bool {
     (n + u32::from(a) + target_index as u32 + rep) % 2 == 0
 }
 
-fn run_rho(curve: &KoblitzCurve, target: &BinaryPoint, seed: u64) -> (bool, u64, u64, u64, u128) {
+fn run_rho(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    seed: u64,
+    caps: &Caps,
+) -> (bool, u64, u64, u64, u128) {
     let options = KoblitzSignedRhoOptions {
         seed,
-        max_iterations_per_restart: 1 << 20,
+        max_iterations_per_restart: caps.rho_iterations,
         ..KoblitzSignedRhoOptions::default()
     };
     let started = Instant::now();
@@ -154,7 +185,9 @@ fn run_rho(curve: &KoblitzCurve, target: &BinaryPoint, seed: u64) -> (bool, u64,
 fn run_ic(
     curve: &KoblitzCurve,
     target: &BinaryPoint,
+    caps: &Caps,
 ) -> Result<(bool, u64, serde_json::Value, u128), String> {
+    let max_trials = caps.max_trials;
     let started = Instant::now();
     let floor = recipe_floor(curve.n);
     let fb = build_subgroup_orbit_factor_base(curve, FB_SEED, floor)
@@ -169,7 +202,7 @@ fn run_ic(
     let opts = KoblitzIcOptions {
         m: 3,
         seed: ALGORITHM_SEED,
-        max_trials: MAX_TRIALS,
+        max_trials,
         strategy: DecompositionStrategy::PairTable,
         allow_direct_relation: false,
         collection_window: Some(window),
@@ -181,8 +214,8 @@ fn run_ic(
     let mut trials = 0u64;
     let mut batches = 0u64;
     let mut outcome = None;
-    while trials < MAX_TRIALS as u64 && outcome.is_none() {
-        let count = (PRECOMPUTE_BATCH_TRIALS as u64).min(MAX_TRIALS as u64 - trials);
+    while trials < max_trials as u64 && outcome.is_none() {
+        let count = (PRECOMPUTE_BATCH_TRIALS as u64).min(max_trials as u64 - trials);
         let (rels, report) = collector.collect(RelationWorkUnit {
             seed: ALGORITHM_SEED,
             start: trials,
@@ -224,21 +257,46 @@ fn run_ic(
         "descent_trials": descent_report.trials,
         "window": window,
         "recipe_floor": floor,
+        // Memory probes are not group operations; recorded so the unit's
+        // blind spot is visible (protocol §9), never added to `ops`.
+        "collection_lookups": trials.saturating_mul(window as u64),
+        "descent_lookups": (descent_report.trials as u64).saturating_mul(fb.points.len() as u64),
     });
     Ok((verified, ops, detail, ns))
 }
 
 fn main() {
     let quick = env::args().any(|a| a == "--quick");
+    let ladder = env::args().any(|a| a == "--ladder");
     let targets = if quick { 1usize } else { TARGET_SEEDS.len() };
     let reps = if quick { 1u32 } else { REPS };
-    let cells: &[Cell] = if quick { &CELLS[..1] } else { &CELLS };
+    let cells: &[Cell] = if quick {
+        &CELLS[..1]
+    } else if ladder {
+        &LADDER_CELLS
+    } else {
+        &CELLS
+    };
+    let caps = if ladder {
+        Caps {
+            max_trials: LADDER_MAX_TRIALS,
+            rho_iterations: LADDER_RHO_ITERATIONS,
+        }
+    } else {
+        Caps {
+            max_trials: MAX_TRIALS,
+            rho_iterations: RHO_ITERATIONS,
+        }
+    };
     let out = env::args()
         .position(|a| a == "--out")
         .and_then(|i| env::args().nth(i + 1))
         .map(PathBuf::from);
 
-    println!("rho-parity protocol seed={ALGORITHM_SEED:#x} fb_seed={FB_SEED} quick={quick}");
+    println!(
+        "rho-parity protocol seed={ALGORITHM_SEED:#x} fb_seed={FB_SEED} quick={quick} ladder={ladder} max_trials={} rho_cap={}",
+        caps.max_trials, caps.rho_iterations
+    );
     let header = format!(
         "{:>8} {:>4} {:>4} {:>8} {:>10} {:>10} {:>8} {:>6} {:>6} {}",
         "cell", "tgt", "rep", "order", "G_ic", "G_rho", "alpha", "S_ic", "S_rho", "ok"
@@ -263,12 +321,12 @@ fn main() {
                 let ic_first = ic_then_rho(cell.n, cell.a, t, rep);
                 let rho_seed = ALGORITHM_SEED ^ (t as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15);
                 let (ic, rho) = if ic_first {
-                    let ic = run_ic(&curve, &target);
-                    let rho = run_rho(&curve, &target, rho_seed);
+                    let ic = run_ic(&curve, &target, &caps);
+                    let rho = run_rho(&curve, &target, rho_seed, &caps);
                     (ic, rho)
                 } else {
-                    let rho = run_rho(&curve, &target, rho_seed);
-                    let ic = run_ic(&curve, &target);
+                    let rho = run_rho(&curve, &target, rho_seed, &caps);
+                    let ic = run_ic(&curve, &target, &caps);
                     (ic, rho)
                 };
                 let (rho_ok, g_rho, rho_iters, rho_walk, rho_ns) = rho;
@@ -355,11 +413,15 @@ fn main() {
         .filter(|r| r["ic_verified"] == true && r["rho_verified"] == true)
         .collect();
     let mut cell_means = Vec::new();
+    // (log2 r, log2 mean G_ic, log2 mean G_rho) for cells whose every
+    // pair verified on both arms (protocol §9 fit rule).
+    let mut fit_points: Vec<(f64, f64, f64)> = Vec::new();
     for cell in cells {
         let name = cell_name(cell);
-        let xs: Vec<f64> = useful
+        let cell_rows: Vec<&&serde_json::Value> =
+            useful.iter().filter(|r| r["cell"] == name).collect();
+        let xs: Vec<f64> = cell_rows
             .iter()
-            .filter(|r| r["cell"] == name)
             .filter_map(|r| r["alpha"].as_f64())
             .collect();
         if xs.is_empty() {
@@ -368,25 +430,71 @@ fn main() {
         }
         let mean = xs.iter().sum::<f64>() / xs.len() as f64;
         let max = xs.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let mean_of = |key: &str| {
+            cell_rows
+                .iter()
+                .filter_map(|r| r[key].as_u64())
+                .map(|v| v as f64)
+                .sum::<f64>()
+                / cell_rows.len() as f64
+        };
+        let g_ic_mean = mean_of("g_ic");
+        let g_rho_mean = mean_of("g_rho");
+        let log2_r = cell_rows[0]["subgroup_order"]
+            .as_str()
+            .and_then(|s| s.parse::<f64>().ok())
+            .map(f64::log2);
+        let complete = xs.len() as u32 == (targets as u32) * reps;
+        if let (true, Some(lr)) = (complete, log2_r) {
+            fit_points.push((lr, g_ic_mean.log2(), g_rho_mean.log2()));
+        }
         cell_means.push(json!({
             "cell": name,
             "pairs": xs.len(),
+            "log2_r": log2_r,
+            "mean_g_ic": g_ic_mean,
+            "mean_g_rho": g_rho_mean,
             "mean_alpha": mean,
             "max_alpha": max,
             "gate": mean <= 1.0 && max <= 1.0,
+            "in_fit": complete && log2_r.is_some(),
         }));
     }
     let gate = cell_means.iter().all(|c| c["gate"] == true) && all_ok && !quick;
+    let slope = |pick: &dyn Fn(&(f64, f64, f64)) -> f64| -> Option<f64> {
+        if fit_points.len() < 4 {
+            return None;
+        }
+        let n = fit_points.len() as f64;
+        let mx = fit_points.iter().map(|p| p.0).sum::<f64>() / n;
+        let my = fit_points.iter().map(pick).sum::<f64>() / n;
+        let sxx: f64 = fit_points.iter().map(|p| (p.0 - mx).powi(2)).sum();
+        let sxy: f64 = fit_points
+            .iter()
+            .map(|p| (p.0 - mx) * (pick(p) - my))
+            .sum();
+        Some(sxy / sxx)
+    };
+    let fit = json!({
+        "rule": "least squares of log2 mean(G) on log2 r over cells with every pair verified; None below four rungs",
+        "rungs": fit_points.len(),
+        "ic_slope": slope(&|p| p.1),
+        "rho_slope": slope(&|p| p.2),
+        "reference_slope": 0.5,
+    });
     let summary = json!({
         "protocol": "RESEARCH_ECC2K130_RHO_PARITY.md",
         "algorithm_seed": ALGORITHM_SEED,
         "fb_seed": FB_SEED,
         "target_seeds": TARGET_SEEDS,
         "quick": quick,
+        "ladder": ladder,
+        "caps": {"max_trials": caps.max_trials, "rho_iterations_per_restart": caps.rho_iterations},
         "unit": "exclusive group operations (adds + binary-method scalar muls)",
         "class": "engineering",
         "n131_claim": false,
         "all_cases_gate": gate,
+        "fit": fit,
         "cells": cell_means,
         "rows": rows,
     });
