@@ -161,17 +161,20 @@ fn run_wdsat(solver: &Path, anf: &Path, n: u32, l: u32, timeout: Duration) -> So
         return SolverRun { status: "TIMEOUT".into(), conflicts: None, wall_s, assignment: None, stdout_tail: out.chars().rev().take(200).collect::<String>().chars().rev().collect() };
     }
     let conflicts = lines.last().and_then(|s| s.parse::<u64>().ok());
+    // WDSat prints `UNSAT` or the satisfying assignment as one line of
+    // `9l − 3` bits, then the conflict count; there is no `SAT` line.
+    let n_vars = (9 * l - 3) as usize;
+    let assignment = lines
+        .iter()
+        .find(|s| s.len() == n_vars && s.bytes().all(|b| b == b'0' || b == b'1'))
+        .map(|s| s.to_string());
     let status = if lines.iter().any(|s| *s == "UNSAT") {
         "UNSAT"
-    } else if lines.iter().any(|s| *s == "SAT") {
+    } else if assignment.is_some() {
         "SAT"
     } else {
         "UNKNOWN"
     };
-    let assignment = lines
-        .iter()
-        .find(|s| s.len() > 3 && s.bytes().all(|b| b == b'0' || b == b'1'))
-        .map(|s| s.to_string());
     SolverRun { status: status.into(), conflicts, wall_s, assignment, stdout_tail: lines.iter().rev().take(3).rev().map(|s| s.to_string()).collect::<Vec<_>>().join(" | ") }
 }
 
