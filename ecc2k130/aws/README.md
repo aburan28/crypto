@@ -601,13 +601,14 @@ for this program's own `publishStatus`. The Pages snapshot no longer is:
 once and installs a statement-level insert trigger on
 `distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
 the buckets current without a code deploy on this host. Later Pages runs
-read the rollup. This program's 30-minute `--status-every` still buys room
-for the 142 s count query until an ingest-host deploy starts reading the
+read the rollup. This program's `--status-every` (default 180 s) still buys
+room for the count query until an ingest-host deploy starts reading the
 same tables.
 
 While a snapshot runs, this program is not ingesting — the loop is
-pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
-is the 3-minute Actions job, with this copy as the second one. The corpus-wide per-object
+pass, publish, pass — so `--status-every` matches the 3-minute Actions
+refresh cadence, with this copy in the status bucket as what the job reads
+when the walker hop is down. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.

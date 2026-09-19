@@ -426,10 +426,10 @@ make gpu
   var REFRESH_MS = 60 * 1000;
   // The publishing Action runs every 3 minutes, but the snapshot it
   // publishes is only as fresh as its source: when the walker hop is down
-  // the source is the ingest host's feed, rewritten every 30 minutes
+  // the source is the ingest host's feed, rewritten every 3 minutes
   // (dp_ingest.py --status-every), so at publish time the snapshot can
-  // already be 30 minutes old and just before the next publish 60. Ninety
-  // minutes is two missed feed writes, or six missed Action runs: late
+  // already be a few minutes old. Ninety minutes is many missed feed
+  // writes, or thirty missed Action runs: late
   // enough that neither cadence trips it, early enough to say so before
   // the counts are badly out of date. test_rho_status.py pins it to both.
   var STALE_AFTER_MS = 90 * 60 * 1000;

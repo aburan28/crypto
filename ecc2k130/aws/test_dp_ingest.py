@@ -536,6 +536,15 @@ class CheckpointWork(unittest.TestCase):
         self.assertFalse(slots[0]["retired"])
 
 
+class Defaults(unittest.TestCase):
+    def test_status_every_default_is_three_minutes(self):
+        import argparse
+        ap = argparse.ArgumentParser()
+        ap.add_argument("--status-every", type=float,
+                        default=float(os.environ.get("RHO_STATUS_EVERY", "180")))
+        self.assertEqual(ap.parse_args([]).status_every, 180.0)
+
+
 class DatabaseUrl(unittest.TestCase):
     def test_secret_lookup_includes_sslmode(self):
         env = os.environ.copy()

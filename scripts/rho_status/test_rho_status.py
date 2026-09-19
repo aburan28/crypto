@@ -200,7 +200,9 @@ class WorkflowTests(unittest.TestCase):
         ingest = os.path.join(ROOT, "ecc2k130", "aws", "dp_ingest.py")
         with open(ingest, encoding="utf-8") as fh:
             source = fh.read()
-        every = re.search(r'"--status-every", type=float, default=([\d.]+)', source)
+        every = re.search(r'RHO_STATUS_EVERY", "([\d.]+)"', source)
+        if every is None:
+            every = re.search(r'"--status-every", type=float, default=([\d.]+)', source)
         self.assertIsNotNone(every, "--status-every default not found in dp_ingest.py")
         feed_minutes = float(every.group(1)) / 60
         self.assertGreaterEqual(

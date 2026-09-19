@@ -20,7 +20,7 @@ sources:
 1. **The ingest host's public `status.json`** — first, always. The ingest
    host (`ecc2k130/aws/dp_ingest.py`, `publishStatus`) writes the campaign
    counts, the 48-hour hourly series, the checkpointed walk total and its
-   own health to the status bucket every `--status-every` seconds (1800).
+   own health to the status bucket every `--status-every` seconds (180).
    It is one HTTPS GET, retried, and it needs no EC2 instance, no SSH key
    and no security-group change. `work_feed.py --as-snapshot` copies that
    document (with `work.per_slot` stripped, `per_worker` empty, and the
@@ -73,8 +73,8 @@ Two more things stop one dependency from freezing the page:
   Before this the page had one sentence for both, and the fix for a dead
   walker was indistinguishable from the fix for a dead cron.
 
-The dashboard's stale threshold is 90 minutes: two missed feed writes at
-the ingest host's 30-minute cadence, or thirty missed Action runs.
+The dashboard's stale threshold is 90 minutes: many missed feed writes at
+the ingest host's 3-minute cadence, or thirty missed Action runs.
 `test_rho_status.py` pins it to both cadences.
 
 `snapshot.py` on the walker does not scan `distinguished_points` on every
