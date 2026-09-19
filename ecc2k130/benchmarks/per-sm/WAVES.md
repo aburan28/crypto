@@ -67,10 +67,51 @@ Do not move the live searchers.
 
 Frozen in this directory. Cite those files; do not recompute.
 
+One table, one unit. The 85 M it/s/SM floor is a 6000 integer-pipe remainder;
+L40S rows keep the column because the receipt writes it, not because Ada can
+be asked to cross a 6000 pipe. Occupancy on Ada is the `/ 4-wave` column on
+that allocation.
+
 | GPU | waves | workers | median B/s | M it/s/SM | / 4-wave | / pipe ~85 | class | correctness |
 |---|---:|---:|---:|---:|---:|---:|---|---|
-| RTX PRO 6000 shipping | 4 | 385024 | 15.115792 | 80.40 | 1.000 | 0.946 | reference | top-clmad, other allocation |
-| RTX-PRO-6000 | 1 | *not yet run* | | | | | | |
-| RTX-PRO-6000 | 4 | *not yet run* | | | | | | |
-| RTX-PRO-6000 | 6 | *not yet run* | | | | | | |
-| RTX-PRO-6000 | 8 | *not yet run* | | | | | | |
+| RTX PRO 6000 shipping | 4 | 385024 | 15.115792 | 80.40 | — | 0.946 | reference | top-clmad, other allocation |
+| RTX-PRO-6000 | 1 | 96256 | 14.479876 | 77.02 | 0.970 | 0.906 | engineering | 3/3, 104 regs, identity shipping packed, clmad 1 |
+| RTX-PRO-6000 | 4 | 385024 | 14.932231 | 79.43 | 1.000 | 0.934 | engineering | 3/3, same binary, 188 SMs, 2×256 resident |
+| RTX-PRO-6000 | 6 | 577536 | 14.861568 | 79.05 | 0.995 | 0.930 | engineering | 3/3, same allocation |
+| RTX-PRO-6000 | 8 | 770048 | 14.844084 | 78.96 | 0.994 | 0.929 | engineering | 3/3, same allocation |
+| L40S | 1 | 72704 | 8.618576 | 60.69 | 1.115 | 0.714 | engineering | 3/3, 94 regs, identity shipping packed, clmad 1 |
+| L40S | 4 | 290816 | 7.727937 | 54.42 | 1.000 | 0.640 | engineering | 3/3, 142 SMs, 2×256 resident |
+| L40S | 6 | 436224 | 7.464325 | 52.57 | 0.966 | 0.618 | engineering | 3/3, same allocation |
+| L40S | 8 | 581632 | 7.268352 | 51.19 | 0.941 | 0.602 | engineering | 3/3, same allocation |
+
+6000 rates from [rtx-pro-6000-waves.json](rtx-pro-6000-waves.json)
+(`ap-CreQoLEbhXsEhB1glybxbo`): automatic occupancy 96,256 threads on 188 SMs.
+Best wave is **4**. 6× is 0.995 of that row, 8× is 0.994. Neither is >1%
+above 4×, so `fourBeaten` is false. This 4-wave median is 0.988 of the
+historical 80.40 on a different card-day; that gap is not occupancy.
+
+L40S rates from [l40s-waves.json](l40s-waves.json)
+(`ap-aNsvFhZH5TKB6fETEVUfLP`): automatic occupancy 72,704 threads on 142 SMs.
+Best wave is **1**, 1.115× the 4-wave row on that allocation, so
+`fourBeaten` is true — 4× lost, it was not beaten from above by 6× or 8×.
+
+Every row is **engineering**: same walk, 5.3125 products/update, grid
+multiplier only. The ratio to the 6000 pipe did not fall. 6× and 8× on the
+6000 slightly lowered `S` at a flat pipe ratio (~0.93). L40S 1-wave raised
+B/s relative to 4-wave by cutting oversubscription, which is still
+engineering.
+
+## 4. Verdict
+
+Falsify "more waves help the 6000": **yes**. 6× and 8× are both ≤ 4× per-SM
+(0.995 and 0.994). The shipping 385,024-worker grid stays the 6000 default.
+
+Falsify "the survey starved other SMs": **yes** on L40S. 4× / 1× is 0.897,
+not within 1%, and 4× is slower. Ada wants automatic occupancy. Putting
+385,024 workers on a 142-SM part is still inadmissible; so is promoting
+L40S 1-wave onto the campaign 6000.
+
+The occupancy axis on the campaign part is spent. Remaining 6000 headroom
+is instruction cuts against the pipe ([THROUGHPUT-30B.md](../../THROUGHPUT-30B.md)).
+Do not move the live searchers. This is `--bench`; it does not promote a
+collecting rate.

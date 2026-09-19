@@ -46,22 +46,33 @@ def parse_modal_log(text: str) -> dict:
     text = strip_ansi(text)
     gpu = first_match(r'"gpu": "([^"]+)"', text)
     cc = first_match(r'"cc": "(\d+)"', text)
+    occ = re.search(
+        r"automatic occupancy: (\d+) threads on (\d+) SMs \((\d+) x (\d+) resident\)",
+        text)
     sms = int(first_match(r'"sms": (\d+)', text)
+              or (occ.group(2) if occ else None)
               or first_match(r"(\d+) SMs", text) or 0)
     auto = int(first_match(r'"automaticThreads": (\d+)', text)
+               or (occ.group(1) if occ else None)
                or first_match(r"automatic occupancy: (\d+) threads", text) or 0)
+    resident = int(occ.group(3)) if occ else None
+    block = int(occ.group(4)) if occ else None
+    registers = first_match(r"packed kernel:\s*(\d+)", text)
+    clmad = first_match(r'"packedClmad": (true|false)', text)
+    top = first_match(r'"packedTopClmad": (true|false)', text)
+    headers = list(re.finditer(r"=== wave (\d+): (\d+) workers ===", text))
     rows = []
-    for m in re.finditer(
-            r"=== wave (\d+): (\d+) workers ===\s*"
-            r"(?:  repeat \d+/\d+: ([0-9.]+) M it/s \(complete\)\s*){3}",
-            text):
-        wave = int(m.group(1))
-        workers = int(m.group(2))
+    for i, h in enumerate(headers):
+        end = headers[i + 1].start() if i + 1 < len(headers) else len(text)
+        chunk = text[h.end():end]
         rates = [float(x) for x in re.findall(
-            r"repeat \d+/\d+: ([0-9.]+) M it/s \(complete\)", m.group(0))]
-        if len(rates) != 3:
+            r"repeat \d+/\d+: ([0-9.]+) M it/s \(complete\)", chunk)]
+        if len(rates) < 3:
             continue
+        rates = rates[:3]
         median = sorted(rates)[1]
+        wave = int(h.group(1))
+        workers = int(h.group(2))
         rows.append({
             "wave": wave,
             "workers": workers,
@@ -80,6 +91,11 @@ def parse_modal_log(text: str) -> dict:
         "cc": cc,
         "sms": sms,
         "automaticThreads": auto,
+        "residentBlocks": resident,
+        "blockThreads": block or 256,
+        "registers": int(registers) if registers else None,
+        "packedClmad": (clmad == "true") if clmad else None,
+        "packedTopClmad": (top == "true") if top else None,
         "valid": True,
         "rows": rows,
         "parsedFrom": "modal-log",
@@ -146,6 +162,9 @@ def freeze(raw: dict, modal: str) -> dict:
         "automaticThreads": raw.get("automaticThreads"),
         "residentBlocks": raw.get("residentBlocks"),
         "blockThreads": raw.get("blockThreads") or 256,
+        "registers": raw.get("registers"),
+        "packedClmad": raw.get("packedClmad"),
+        "packedTopClmad": raw.get("packedTopClmad"),
         "pipeM": PIPE,
         "referencePerSmM": REF_PER_SM,
         "rows": rows,

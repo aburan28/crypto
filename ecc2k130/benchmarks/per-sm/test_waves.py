@@ -90,10 +90,71 @@ class FreezeTests(unittest.TestCase):
         self.assertIn("--wave-list", dry.stdout)
         self.assertNotIn("--workers", dry.stdout)
 
+    def test_parses_spinner_between_wave_and_repeats(self):
+        mangled = """
+"gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+"cc": "120",
+automatic occupancy: 96256 threads on 188 SMs (2 x 256 resident)
+=== wave 1: 96256 workers ===
+Running (1/1 containers active)... View app at https://modal.com/apps/x
+  repeat 1/3: 14470.000 M it/s (complete)
+  repeat 2/3: 14480.000 M it/s (complete)
+  repeat 3/3: 14460.000 M it/s (complete)
+=== wave 4: 385024 workers ===
+  repeat 1/3: 15110.000 M it/s (complete)
+  repeat 2/3: 15120.000 M it/s (complete)
+  repeat 3/3: 15100.000 M it/s (complete)
+=== wave 6: 577536 workers ===
+  repeat 1/3: 15090.000 M it/s (complete)
+  repeat 2/3: 15100.000 M it/s (complete)
+  repeat 3/3: 15105.000 M it/s (complete)
+=== wave 8: 770048 workers ===
+  repeat 1/3: 14900.000 M it/s (complete)
+  repeat 2/3: 14880.000 M it/s (complete)
+  repeat 3/3: 14920.000 M it/s (complete)
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "m.log"
+            dst = Path(tmp) / "out.json"
+            src.write_text(mangled)
+            r = subprocess.run(
+                ["python3", str(FREEZE), "RTX-PRO-6000", str(src), str(dst)],
+                cwd=ROOT, capture_output=True, text=True,
+            )
+            self.assertEqual(r.returncode, 0, r.stderr)
+            out = json.loads(dst.read_text())
+            self.assertEqual(out["sms"], 188)
+            self.assertEqual(out["residentBlocks"], 2)
+            self.assertEqual(out["blockThreads"], 256)
+            self.assertEqual([row["wave"] for row in out["rows"]], [1, 4, 6, 8])
+            self.assertEqual(out["bestWave"], 4)
+            self.assertFalse(out["fourBeaten"])
+
     def test_run_sh_tees_outside_the_image_tree(self):
         script = (HERE / "run.sh").read_text()
         self.assertIn("/tmp/ecc2k130-per-sm", script)
         self.assertNotIn('tee "$OUTDIR/', script)
+
+    def test_committed_logs_freeze_to_receipts(self):
+        for modal, slug, best, beaten in (
+                ("RTX-PRO-6000", "rtx-pro-6000", 4, False),
+                ("L40S", "l40s", 1, True)):
+            log = HERE / f"{slug}-waves.log"
+            receipt = json.loads((HERE / f"{slug}-waves.json").read_text())
+            with tempfile.TemporaryDirectory() as tmp:
+                dst = Path(tmp) / "out.json"
+                r = subprocess.run(
+                    ["python3", str(FREEZE), modal, str(log), str(dst)],
+                    cwd=ROOT, capture_output=True, text=True,
+                )
+                self.assertEqual(r.returncode, 0, r.stderr)
+                out = json.loads(dst.read_text())
+            self.assertEqual(out["bestWave"], best)
+            self.assertEqual(out["fourBeaten"], beaten)
+            self.assertEqual(out["sms"], receipt["sms"])
+            self.assertEqual(
+                [row["medianB"] for row in out["rows"]],
+                [row["medianB"] for row in receipt["rows"]])
 
 
 if __name__ == "__main__":
