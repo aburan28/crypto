@@ -424,10 +424,15 @@ make gpu
 
   var HOUR_MS = 3600 * 1000;
   var REFRESH_MS = 60 * 1000;
-  // The publishing Action runs every 15 minutes, so an hour is four missed
-  // runs: late enough that GitHub's scheduler jitter does not trip it, early
-  // enough to say so before the counts are badly out of date.
-  var STALE_AFTER_MS = HOUR_MS;
+  // The publishing Action runs every 15 minutes, but the snapshot it
+  // publishes is only as fresh as its source: when the walker hop is down
+  // the source is the ingest host's feed, rewritten every 30 minutes
+  // (dp_ingest.py --status-every), so at publish time the snapshot can
+  // already be 30 minutes old and just before the next publish 60. Ninety
+  // minutes is two missed feed writes, or six missed Action runs: late
+  // enough that neither cadence trips it, early enough to say so before
+  // the counts are badly out of date. test_rho_status.py pins it to both.
+  var STALE_AFTER_MS = 90 * 60 * 1000;
   // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
   // the interval the snapshot query buckets over — a window in the data, not
   // in the publish cadence, so it does not move when the cron does.
@@ -979,6 +984,7 @@ make gpu
       ["Latest point", timeCell(status.last_dp_at, true), false],
       ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
       ["Snapshot generated", timeCell(status.generated_at, true), false],
+      ["Published to Pages", status.published_at ? timeCell(status.published_at, true) : "not stamped", false],
       ["Snapshot source", status.source || "—", true],
       ["Schema version", status.schema_version === undefined ? "—" : String(status.schema_version), true]
     ];
@@ -1301,9 +1307,14 @@ make gpu
       return;
     }
     var generated = parseTime(status && status.generated_at);
+    var published = parseTime(status && status.published_at);
     var parts = [];
     if (generated) parts.push("Snapshot " + utc(generated, true) + " (" + ago(generated) + ")");
     else parts.push("Snapshot time not published");
+    // Two clocks: when the source counted, and when the publishing job
+    // wrote the file. A publisher that stopped and a source that stopped
+    // look identical on the first one and different on the second.
+    if (published) parts.push("published " + ago(published));
     if (loadedAt) parts.push("fetched " + ago(loadedAt));
     text.textContent = parts.join(" · ");
   }
@@ -1342,12 +1353,22 @@ make gpu
     }
 
     var generated = parseTime(status.generated_at);
+    var published = parseTime(status.published_at);
     var snapshotAge = generated ? Date.now() - generated.getTime() : null;
+    var publishedAge = published ? Date.now() - published.getTime() : null;
     var stale = snapshotAge !== null && snapshotAge > STALE_AFTER_MS;
     var displayState = campaignDisplayState(status);
     var extra = "";
     if (stale) {
       extra = "This snapshot is " + ago(generated) + " old, so these counts are not current.";
+      // Say which half of the pipeline is behind. The publisher stamps every
+      // file it writes; a fresh stamp on a stale snapshot means it ran and
+      // found nothing newer at either source, an old stamp means it did not run.
+      if (publishedAge !== null && publishedAge <= STALE_AFTER_MS) {
+        extra += " The publisher ran " + ago(published) + " and neither the walker hop nor the ingest feed had anything newer.";
+      } else if (published) {
+        extra += " The publisher itself last wrote this page " + ago(published) + ".";
+      }
     } else if (displayState === "IDLE_OR_STALE") {
       var lastPoint = parseTime(status.last_dp_at);
       if (lastPoint) extra = "Latest point " + ago(lastPoint) + ".";
