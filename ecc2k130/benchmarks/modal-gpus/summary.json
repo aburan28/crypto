@@ -1,0 +1,115 @@
+{
+  "kind": "modal GPU packed-walk survey",
+  "unit": "B complete scalar updates / s",
+  "class": "engineering",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": "automatic",
+    "cudaImageVersion": "13.3.1",
+    "packedClmadDefault": 1,
+    "topClmad": 0
+  },
+  "reference": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "modal": "RTX-PRO-6000",
+    "medianB": 15.115792,
+    "sms": 188,
+    "workers": 385024,
+    "receipt": "ecc2k130/benchmarks/top-clmad/summary.json",
+    "collectingB": 14.1,
+    "pricePerSecond": 0.000842,
+    "priceSource": "https://modal.com/pricing (2026-09-19)"
+  },
+  "skipAliases": {
+    "A100": "Modal may upgrade A100 to A100-80GB; measure A100-40GB and A100-80GB.",
+    "H100": "Modal may upgrade H100 to H200; measure H100! to pin Hopper 80 GB.",
+    "B200+": "Modal may run B200+ on B300; measure B200 and B300."
+  },
+  "rows": [
+    {
+      "modal": "RTX-PRO-6000",
+      "label": "RTX PRO 6000 shipping, 385k workers",
+      "medianB": 15.115792,
+      "workers": 385024,
+      "sms": 188,
+      "ratioToPrior": 1.0,
+      "ratioTo6000": 1.0,
+      "trillionItPerDollar": 17.95224703087886,
+      "class": "reference",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/top-clmad/summary.json"
+    },
+    {
+      "modal": "T4",
+      "label": "T4 CLMAD=0",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "L4",
+      "label": "L4 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "A10",
+      "label": "A10 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "L40S",
+      "label": "L40S CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "A100-40GB",
+      "label": "A100-40GB CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "A100-80GB",
+      "label": "A100-80GB CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "RTX-PRO-6000",
+      "label": "RTX-PRO-6000 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "H100!",
+      "label": "H100! CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "H200",
+      "label": "H200 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "B200",
+      "label": "B200 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    },
+    {
+      "modal": "B300",
+      "label": "B300 CLMAD=1",
+      "valid": null,
+      "class": "not-yet-run"
+    }
+  ],
+  "receipts": []
+}
