@@ -166,6 +166,13 @@ class WorkflowTests(unittest.TestCase):
             "The fleet is walking, but the store is behind on ingest",
             text,
         )
+        # The banner's "last hour" is wall-clock. A frozen snapshot that still
+        # says COLLECTING is what made the page claim new points while also
+        # saying the job had not run in 16 hours.
+        self.assertIn("function campaignDisplayState", text)
+        self.assertIn("This snapshot is ", text)
+        self.assertNotIn("The publishing job last ran ", text)
+        self.assertIn("Per-worker counts need the walker hop", text)
 
     def test_snapshot_reads_the_rollup_and_scans_the_heap_only_to_backfill(self):
         # Three separate LATERAL scans of a 30M-row table is what pushed the

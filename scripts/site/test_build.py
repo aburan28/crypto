@@ -207,6 +207,7 @@ class BuildTests(unittest.TestCase):
             "function measuredRate",
             "function walkingSlots",
             "function formatRate",
+            "function campaignDisplayState",
         ):
             self.assertIn(name, dashboard, name)
         # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
@@ -229,6 +230,7 @@ class BuildTests(unittest.TestCase):
         self.assertIn('id="live-gpus"', landing)
         self.assertIn(">GPUs running<", landing)
         self.assertIn("walkingSlots(status)", landing)
+        self.assertIn("campaignDisplayState(status)", landing)
         self.assertNotIn("live-workers", landing)
         # Lifetime contributors stay in the workers table, not the GPU card.
         self.assertIn('id="workers-note"', dashboard)
