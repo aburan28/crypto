@@ -204,35 +204,63 @@ correspondence and KLPT for signing, which is tens of thousands of lines and
 was deliberately not attempted. What is here is roughly the verification-side
 arithmetic, which is self-contained and has a clean correctness specification.
 
-The prime is `p = 3·2^324 − 1`, six 64-bit limbs, chosen for the right shape
-(`p + 1` divisible by a large power of two) rather than copied from the NIST
-submission. The module documents that it is representative rather than the
-submitted parameter.
+### The prime
+
+`p = 3·2^324 − 1`, 326 bits, six 64-bit limbs. This is the **genuine SQIsign
+NIST level-1 prime**, not a stand-in. It was established rather than recalled:
+the official reference implementation was cloned at a named commit and the
+value read out of its parameter file, then cross-checked two ways before any
+constant was written down, with the limb decomposition and the recomputed
+`R mod p` and `R² mod p` matching the reference's own constants limb for limb.
+It was also Miller-Rabin tested, and `p ≡ 3 mod 4` confirmed so that
+`F_p[i]/(i²+1)` is a field.
+
+Worth recording because I got this wrong when scoping the work: I said level-1
+was about 254 bits. That was the 2023 round-1 submission. The current
+dimension-2 SQIsign moved to 326, which is six limbs rather than four, so every
+field multiplication costs roughly 2.25× what a 254-bit one would.
+
+The shape pays for itself twice. Because `p ≡ −1 mod 2^64` the Montgomery
+constant is 1, so the quotient digit needs no multiplication; and because
+`m·p = 48m·2^320 − m`, the `−m` cancels the low limb exactly with no borrow, so
+dividing by `2^64` is a pure limb shift. A reduction round costs six
+multiplications and one small one instead of twelve.
 
 ### Measured
 
-| operation | kilocycles | per second |
-|---|---:|---:|
-| F_p multiply (6 limbs) | 0.040 | 52.9 M |
-| F_p square (= multiply, see below) | 0.045 | 46.4 M |
-| F_p inverse (addition chain) | 13.675 | 154 k |
-| F_p² multiply (Karatsuba) | 0.167 | 12.6 M |
-| F_p² square | 0.113 | 18.6 M |
-| F_p² inverse | 13.902 | 151 k |
-| xDBL (A24plus : C24) | 1.002 | 2.10 M |
-| xDBL (a24 normalised) | 0.910 | 2.31 M |
-| xADD | 1.262 | 1.66 M |
-| ladder [k]P, k ≈ 2^326 | 923.9 | 2.3 k |
-| 2-isogeny step (codomain + evaluation) | 1.102 | 1.91 M |
-| 2-isogeny evaluation only | 0.846 | 2.48 M |
-| 4-isogeny step (codomain + evaluation) | 2.208 | 951 k |
-| 2^324 chain, optimal strategy | 2524.5 | 832 |
-| 2^324 chain, naive walker | 28566.1 | 74 |
+Cycles per operation, from the final tree:
 
-A 326-bit field multiplication at 40 cycles is in the range a tuned
-implementation should reach, and the quadratic extension multiply at 167 is
-about 4.2× that, consistent with Karatsuba's three base multiplications plus
-reduction and carry overhead.
+| operation | cycles |
+|---|---:|
+| F_p multiply (6 limbs) | 61 |
+| F_p inverse (addition chain, 324S + 11M) | 16,918 |
+| F_p² multiply (Karatsuba, 3M) | 212 |
+| F_p² square (2M) | 144 |
+| F_p² inverse | 17,700 |
+| xDBL (A24plus : C24) | 1,270 |
+| xDBL (a24 normalised) | 1,025 |
+| xADD | 1,420 |
+| ladder [k]P, k ≈ 2^326 | 768,648 |
+| 2-isogeny step (codomain + evaluation) | 1,335 |
+| 2-isogeny evaluation only | 1,028 |
+| 4-isogeny step (codomain + evaluation) | 2,479 |
+| **2^324 chain, optimal strategy** | **3,055,572** |
+| 2^324 chain, naive walker | 34,685,256 |
+
+These are **dependency-chain latencies**, measured with each operation feeding
+the next 128 deep, which is the pessimistic end. Throughput with instruction
+level parallelism would be better. An independent run of an earlier build gave
+lower absolute figures throughout, for the reason in the next paragraph.
+
+A 326-bit field multiplication at 61 cycles is in the range a tuned
+implementation should reach. Scaled to 254 bits, four limbs and so roughly
+`(4/6)²` of the multiplications, that is about 27 cycles-equivalent, the "tens
+of cycles" figure one wants, in plain Rust with no `unsafe`, no `mulx`/`adcx`
+intrinsics and no assembly. The extension multiply at 212 is 3.5× the base
+one, as Karatsuba's three products plus five modular additions should cost.
+Hand-written ADX assembly would likely be 1.5× to 2× faster; that is an
+estimate, not a measurement, since no such implementation was benchmarked
+here.
 
 **Read the sub-100-cycle rows with care.** At this size the numbers move
 *between builds* far more than within them: two back-to-back runs of one binary
@@ -246,8 +274,9 @@ rests on a difference under about 10% is measuring the linker, not the
 algorithm. The chain and ladder rows, which are thousands of times larger, do
 not have this problem.
 
-**The optimal strategy is worth 11.3× over the naive walker** on a full-length
-chain, 2.52 against 28.57 megacycles. That is the single largest structural win
+**The optimal strategy is worth 11.4× over the naive walker** on a full-length
+chain, 3.06 against 34.7 megacycles. That is the `Θ(n log n)` against `Θ(n²)`
+gap at n = 162. That is the single largest structural win
 in this module and the reason the naive walker is kept: it is the thing the
 strategy is measured against, and the two are checked to produce the same
 isogeny.
@@ -277,9 +306,47 @@ optimal-strategy chain agreeing with the naive walker, a full-length chain of
 degree 2^324, the supersingular group order, and the modular polynomial
 recognising known pairs.
 
-Four of these failed on the first pass, in the two- and four-isogeny formulas,
-the strategy-versus-naive comparison and the prime constants. That is what
-those tests are for.
+Two checks are independent of the implementation's own formulas, which matters
+because a differential test against your own algebra can agree on a shared
+misconception:
+
+- **The classical modular polynomial** `Φ₂(j(E), j(E')) = 0` on every 2-isogeny
+  codomain, which knows nothing about Montgomery models or projective curve
+  coefficients. Its coefficients were themselves checked against four classical
+  pairs first, so a typo cannot make the test vacuous.
+- **The 4-isogeny against two composed 2-isogenies**, compared on j-invariants,
+  which is convention-free. This one earns its keep: the reference
+  implementation's 4-isogeny is the Costello–Longa–Naehrig formula composed
+  with `x ↦ −x`, the opposite sign convention from the 2-isogeny taken from
+  Renes, and the test confirms the two are the same isogeny up to that
+  isomorphism.
+
+Four tests failed on the first pass and all four were worth having. One was a
+bug in the *test*, which computed a modular inverse by Fermat's little theorem
+on a composite modulus. Two surfaced a real precondition: the random kernel
+sometimes hit `(0,0)`, the one 2-torsion point whose Montgomery 2-isogeny needs
+a square root to name its codomain, which every x-only implementation excludes;
+that exclusion is now documented and the generator rejects it. The fourth found
+an API footgun in the new code itself: `PartialEq` had been derived on the
+projective types, which is simply wrong for projective coordinates, and the two
+chain walkers reach the same curve by different representatives. The derive is
+gone, replaced by an explicit same-curve test.
+
+### What a real SQIsign still needs
+
+So that nobody reads this as more than it is. On top of what is here: the
+quaternion algebra and its maximal orders and ideals with lattice reduction;
+KLPT equivalent-ideal search; the Deuring correspondence's ideal-to-isogeny
+translation; the theta-model (2,2)-isogeny machinery that dimension-2 SQIsign
+uses; and deterministic point compression, torsion-basis generation and the
+Fiat–Shamir plumbing. The first three are the signer, which is essentially
+absent here. That list is tens of thousands of lines.
+
+There is also **no known-answer test**, because no test vector exists for this
+layer in isolation and the reference C was not linked against to generate one.
+Correctness is internal consistency plus the two independent checks above.
+Cross-checking against the reference's own field and curve test binaries is the
+obvious next strengthening.
 
 ## Security
 
