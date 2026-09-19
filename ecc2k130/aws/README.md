@@ -154,6 +154,15 @@ resident blocks per SM (minBlocks 4) cost 34%
   A slot whose checkpoint the client refuses (exit 6) is *retired*, never
   restarted from its start points: that would walk the same seeds again and
   re-report points already in the corpus.
+  A third registry lives in RDS Postgres -- the database the dashboard
+  already runs -- and is chosen with `ECC_SLOT_BACKEND=rds`: a claim is then
+  one conditional `UPDATE`, and every lease carries a fence token that
+  rejects writes from an owner the slot has moved past, which no lease length
+  can do on its own. See [`controlplane/README.md`](controlplane/README.md)
+  for the invariants it keeps across RDS, ElastiCache and S3. The live
+  campaign is unchanged: switching an existing fleet is a cutover, and a
+  cutover two backends could both serve during is the double claim the
+  registry exists to prevent.
 * **Checkpoints.** The client writes one every `checkpointEvery` seconds and
   on SIGTERM. The supervisor uploads a hard-link snapshot after every tick.
   A replacement worker resumes whichever of the local or S3 checkpoint is
