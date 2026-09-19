@@ -456,6 +456,12 @@ static void test_iters_independence() {
     uint32_t xs[8] = {(uint32_t)secret, (uint32_t)(secret >> 32), 0, 0, 0, 0, 0, 0};
     affine_pt Q = Curve::to_affine(Curve::scalar_mul(G, xs, 0));
 
+    /* Both steppers: the batched one polls inside `bsgs_run_batch`, the
+     * reference one leaves it to its launch loop, and the two must come
+     * out the same.  A launch loop that forgets the poll runs every
+     * iteration regardless and shows up here as a cost that grows with
+     * the launch size. */
+    for (int use_ref = 0; use_ref < 2; use_ref++) {
     unsigned long long prev = 0;
     for (uint32_t iters : std::vector<uint32_t>{4, 64, 512}) {
         bsgs_ctx gc{};
@@ -464,20 +470,23 @@ static void test_iters_independence() {
         h.set_target(Q);
         uint32_t k[8];
         BsgsStats st;
-        bool ok = bsgs_cpu_solve<W>(h, gc, iters, k, st);
-        CHECK(ok && Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(k)), "iters=%u solve", iters);
+        bool ok = bsgs_cpu_solve<W>(h, gc, iters, k, st, use_ref);
+        CHECK(ok && Fn::eq(Fn::from_limbs(xs), Fn::from_limbs(k)), "%s iters=%u solve",
+              use_ref ? "ref" : "batched", iters);
         /* Threads poll together, so the work past the hit is at most one
          * iteration across the whole grid, whatever the launch size. */
         unsigned long long slack = (unsigned long long)2 * T * W;
         if (prev) {
             unsigned long long lo = prev < st.giant_steps ? prev : st.giant_steps;
             unsigned long long hi = prev < st.giant_steps ? st.giant_steps : prev;
-            CHECK(hi - lo <= slack, "iters=%u cost %llu vs %llu differs by more than one launch (%llu)",
-                  iters, st.giant_steps, prev, slack);
+            CHECK(hi - lo <= slack, "%s iters=%u cost %llu vs %llu differs by more than "
+                  "one iteration across the grid (%llu)",
+                  use_ref ? "ref" : "batched", iters, st.giant_steps, prev, slack);
         }
-        printf("  iters=%-4u %8llu giant steps in %3llu rounds  (slack %llu)\n",
-               iters, st.giant_steps, st.rounds, slack);
+        printf("  %-8s iters=%-4u %8llu giant steps in %3llu rounds  (slack %llu)\n",
+               use_ref ? "ref" : "batched", iters, st.giant_steps, st.rounds, slack);
         prev = st.giant_steps;
+    }
     }
 }
 

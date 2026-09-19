@@ -67,6 +67,12 @@ __global__ BSGS_BOUNDS
 void k_bsgs_run_ref(bsgs_ctx c, uint32_t iters) {
     uint32_t t = blockIdx.x * blockDim.x + threadIdx.x;
     if (t >= c.nthreads) return;
+    /* `bsgs_step_ref` is one sweep of a thread's W chains and leaves the
+     * early-exit poll to its caller, so this loop has to do it -- exactly
+     * as `bsgs_run_batch` does internally and as the host driver's
+     * reference path does.  Without it this kernel would run every
+     * iteration whatever the flag said, and the baseline would overshoot
+     * the variant it is supposed to be compared against. */
     for (uint32_t it = 0; it < iters; it++) {
         if (it && c.stop && *c.stop) break;
         bsgs_step_ref(c, t);
