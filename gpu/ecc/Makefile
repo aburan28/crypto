@@ -25,10 +25,10 @@ NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 FP_PTX     ?= 0
 MIN_BLOCKS ?= 0
 
-GEN := curve_secp256k1.h curve_toy40.h \
-       vec_secp256k1_mont.h vec_secp256k1_fast.h vec_toy40_mont.h
+GEN := curve_secp256k1.h curve_toy40.h curve_toy36j0.h \
+       vec_secp256k1_mont.h vec_secp256k1_fast.h vec_toy40_mont.h vec_toy36j0_mont.h
 
-TESTS := test_secp_fast test_secp_mont test_toy_mont
+TESTS := test_secp_fast test_secp_mont test_toy_mont test_toyj0_mont
 
 .PHONY: all test bench clean gen ptxcheck
 all: test
@@ -44,6 +44,8 @@ vec_secp256k1_fast.h: ecref.py
 	$(PY) ecref.py vectors --curve secp256k1 --mode fast > $@
 vec_toy40_mont.h: ecref.py
 	$(PY) ecref.py vectors --curve toy40 --mode mont > $@
+vec_toy36j0_mont.h: ecref.py
+	$(PY) ecref.py vectors --curve toy36j0 --mode mont > $@
 
 HDRS := fp256.cuh point.cuh rho.cuh rho_host.hpp
 
@@ -63,6 +65,14 @@ test_secp_mont: test_cpu.cpp $(HDRS) curve_secp256k1.h vec_secp256k1_mont.h
 test_toy_mont: test_cpu.cpp $(HDRS) curve_toy40.h vec_toy40_mont.h
 	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy40.h"' \
 	  -DGPU_ECC_VECTORS_HEADER='"vec_toy40_mont.h"' -DFP_FAST=0 -o $@ $<
+
+# 36-bit j = 0 toy curve (a = 0, prime order, p = n = 1 mod 3): the smallest
+# curve carrying the full Aut(E) = Z/6, so the fold-6 walk -- secp256k1's
+# production configuration -- is solved end to end, and its step count is
+# averaged over SOLVE_RUNS solves against folds 1 and 2 on the same curve
+test_toyj0_mont: test_cpu.cpp $(HDRS) curve_toy36j0.h vec_toy36j0_mont.h
+	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy36j0.h"' \
+	  -DGPU_ECC_VECTORS_HEADER='"vec_toy36j0_mont.h"' -DFP_FAST=0 -DSOLVE_RUNS=8 -o $@ $<
 
 test: $(TESTS) ptxcheck
 	@rc=0; for t in $(TESTS); do \
