@@ -761,7 +761,7 @@ src/
 ├── ecc_safety.rs              — ECC parameter-safety auditor
 └── utils/                     — Modular arithmetic, encoding, randomness
 
-gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho
+gpu/ecc/                       — CUDA kernels: 256-bit prime field, EC points, batched Pollard rho, parallel BSGS
 gpu/ecc2k/                     — CUDA kernels: F(2^m) Koblitz curves, Frobenius-class rho (ECC2K-95)
 gpu/btcpuzzle/                 — CUDA kernels: Pollard kangaroo for interval ECDLP (Bitcoin puzzle series)
 hdl/sha1/                      — VHDL: pipelined SHA-1 core + collision search
@@ -785,6 +785,7 @@ cd gpu/ecc && ./ptx_stats.sh --setup && ./ptx_stats.sh
 
 # on a machine with a GPU
 cd gpu/ecc && make bench && ./bench selftest && ./bench rho
+cd gpu/ecc && ./bench bsgs --wbits 44      # baby-step giant-step, table on the device
 
 # Koblitz curves over F(2^m): ECC2K-95 plus two solvable toy curves
 cd gpu/ecc2k && make test
@@ -800,8 +801,13 @@ cd hdl/ecc && make
 cd hdl/ecc2k130 && make
 ```
 
-`gpu/ecc/` covers batch scalar multiplication and a distinguished-point
-r-adding rho walk with the negation map and fruitless-cycle escape.
+`gpu/ecc/` covers batch scalar multiplication, a distinguished-point
+r-adding rho walk with the negation map and fruitless-cycle escape, and a
+parallel baby-step giant-step engine for full-group and interval logs: both
+phases run as independent chains sharing one inversion per thread, the baby
+table is an x-keyed lock-free hash table in device memory, and every hit is
+verified on the host. Measured on the toy curve at `S ≈ 1.0` against rho's
+`1.3`, in exchange for `16 · √n` bytes of table.
 `hdl/ecc/` implements the same walk's datapath: a 256-bit modular
 multiplier at one multiply per clock, and a point adder that interleaves
 independent walks to keep it saturated at three clocks per addition.

@@ -1,8 +1,9 @@
 # gpu/ecc — GPU kernels for 256-bit elliptic-curve arithmetic
 
-CUDA kernels for prime-field ECC, aimed at the two things a GPU is good for
-here: batch scalar multiplication, and massively parallel Pollard rho for
-the ECDLP. Written for secp256k1 with a fast path for its special prime,
+CUDA kernels for prime-field ECC, aimed at the three things a GPU is good
+for here: batch scalar multiplication, massively parallel Pollard rho for
+the ECDLP, and a parallel baby-step giant-step engine for full-group and
+interval logs. Written for secp256k1 with a fast path for its special prime,
 but the field layer is generic over any odd modulus below 2^256.
 
 Companion documents:
@@ -26,8 +27,12 @@ though — see "How this is tested" below.
 | `rho.cuh` | The r-adding walk: partitioning, negation map, fruitless-cycle escape, batched stepping |
 | `rho_host.hpp` | Host side: jump-table construction, walk replay, collision to discrete log |
 | `kernels.cuh` | The kernels and their launch structure |
-| `bench.cu` | Device driver: self-test against the host, microbenchmarks, rho runner |
+| `bsgs.cuh` | Baby-step giant-step: parallel chains, batched stepping, the x-keyed lock-free table, candidate emission |
+| `bsgs_host.hpp` | Host side of BSGS: the plan (m, stride, table, chain lengths), seed constants, candidate verification, CPU driver |
+| `kernels_bsgs.cuh` | The BSGS kernels |
+| `bench.cu` | Device driver: self-test against the host, microbenchmarks, rho and BSGS runners |
 | `test_cpu.cpp` | Verification harness — compiles the `.cuh` headers with g++ |
+| `test_bsgs.cpp` | BSGS verification harness — same idea, for `bsgs.cuh` |
 | `ptx_stats.sh` | Static instruction/occupancy analysis with no GPU present |
 | `ptx_asm_check.py` | Interprets the `FP_PTX` inline assembly and checks it against the portable path |
 | `modal_app.py` | Runs `bench` on a rented GPU via Modal — the selftest, throughput, and the launch-bounds sweep |
@@ -41,7 +46,7 @@ make bench         # CUDA benchmark binary (needs nvcc)
 make bench ARCH=sm_100    # datacenter Blackwell; sm_120 for RTX 50-series
 ```
 
-`make test` needs only Python 3 and a C++17 compiler. It runs three
+`make test` needs only Python 3 and a C++17 compiler. It runs six
 configurations:
 
 | Suite | Curve | Reduction | What it covers |
@@ -49,6 +54,9 @@ configurations:
 | `test_secp_fast` | secp256k1 | special | the production path |
 | `test_secp_mont` | secp256k1 | Montgomery | the generic path on the same curve |
 | `test_toy_mont` | 40-bit toy, a ≠ 0 | Montgomery | generic doubling, and an end-to-end DLP solve |
+| `test_bsgs_secp_fast` | secp256k1 | special | BSGS table, steppers, a 2^22-wide interval log |
+| `test_bsgs_secp_mont` | secp256k1 | Montgomery | the same on the generic path |
+| `test_bsgs_toy` | 40-bit toy | Montgomery | the same, plus whole-group logs with the cost table below |
 
 `make test` also runs `ptx_asm_check.py`, which covers the one thing the
 C++ suites structurally cannot: the `FP_PTX` inline assembly is guarded on
@@ -64,6 +72,10 @@ full rho walk state after 64 batched iterations. Built with `-DFP_PTX=1`
 that is also the differential test the assembly ultimately needs, and the
 only one that closes the gap the script leaves open.
 
+On a GPU, `./bench bsgs --wbits 44` builds the table for a 2^44-wide
+interval on the device and solves a planted log in it; `selftest` also
+covers the BSGS kernels against the host driver.
+
 ### Without a GPU of your own
 
 `modal_app.py` rents one:
@@ -77,6 +89,7 @@ export MODAL_TOKEN_ID=...  MODAL_TOKEN_SECRET=...   # modal.com/settings/tokens
 ECC_GPU=H100 modal run modal_app.py::selftest   # both configurations vs the host
 ECC_GPU=H100 modal run modal_app.py::bench      # does the 55% become throughput?
 ECC_GPU=H100 modal run modal_app.py::tune       # sweep RHO_MIN_BLOCKS
+ECC_GPU=H100 modal run modal_app.py::bsgs --wbits 48   # BSGS: is the giant phase memory-bound?
 ```
 
 `selftest` is the one that matters: it builds `FP_PTX=0` and `FP_PTX=1`,
@@ -184,6 +197,153 @@ walk's point in the backward pass of Montgomery's trick instead of holding
 it, trading one coalesced load for a 5x smaller stack frame — measured 792
 bytes against 4008 before the frame optimisations described in the Blackwell
 document, and 792 against 1616 after.
+
+## Baby-step giant-step
+
+`bsgs.cuh` solves `Q = xG` for `x ∈ [x0, x0 + width)`: the whole group when
+`x0 = 0, width = n`, an interval otherwise (a known-range key, or one
+Pohlig–Hellman sub-problem). It is the deterministic `√width` method, and
+what it buys over rho is paid in memory: the baby table costs 16 bytes per
+entry, so a 2^44-wide interval needs 2^21 entries (32 MB) and a 2^66-wide
+one needs 2^32 (64 GB, the top of one 80 GB device). Past that the method
+is out of memory, not out of time, and rho or kangaroo take over. This is
+the boundary the table below is measured against.
+
+### The layout
+
+```
+baby table    { hash(x(jG)) -> j : 1 <= j < m }
+giant walk    P_i = Q' - i*S,  Q' = Q - x0*G,  S = M*G,  i = 0, 1, ...
+hit           x(P_i) == x(jG)   =>   x = x0 + i*M +- j   (host verifies both signs)
+```
+
+The table is keyed by the x-coordinate alone, so `jG` and `−jG` share one
+entry: with `neg_map` the giant stride is `M = 2m − 1` and `m` entries cover
+`2m − 1` residues. Because the giant phase stops at the first verified hit,
+its expected cost is half its stride count, which sets the balance:
+
+| layout | baby `m` | stride `M` | expected cost (random target, cold table) |
+|---|---|---|---|
+| `neg_map=1` | `√width / 2` | `2m − 1` | `m + width/(2M) ≈ 1.00 √width` |
+| `neg_map=0` (textbook, the baseline) | `√(width/2)` | `m` | `m + width/(2m) ≈ 1.41 √width` |
+
+Both are rows of the Galbraith–Wang–Zhang table that the Rust
+`cryptanalysis::ecdlp_variants::bsgs` module implements sequentially (#7 and
+#2 there); this is the same arithmetic laid out for a machine with a hundred
+thousand threads and one memory system.
+
+### What maps onto the GPU
+
+- **Independent chains.** Both phases are sets of chains that each add one
+  constant point per step, `G` for the baby chains and `−S` for the giant
+  chains. Chain `c` owns the index range `[cL, (c+1)L)`, is seeded with one
+  short scalar multiplication (`c · LG`, a double-and-add over the bit
+  length of `c`, not 256 doublings), and from then on every step is one
+  affine addition. A thread runs `W` chains and shares one field inversion
+  across them with Montgomery's trick, so a step costs `~6 + 270/W`
+  multiplications — the same trade the rho kernel makes.
+- **Register-resident state.** Nothing but its own thread touches a chain,
+  so `k_bsgs_run<W>` loads the `W` points once, runs the whole launch's
+  `iters` steps, and stores once; the rho walk, whose state is shared with
+  the host's replay, must write every step. `ptxas` reports 94 registers
+  and no spills at `W = 8` on `sm_90` and `sm_100` (168 for the rho walk).
+- **A lock-free x-keyed table.** Open addressing with linear probing over
+  8-byte slots: a 32-bit tag (the high half of a 64-bit hash of `x` in its
+  internal representation, so no Montgomery conversion per step) and the
+  32-bit index `j`. Insertion is one 64-bit `atomicCAS` per probe; lookups
+  probe until an empty slot, so nothing is missed, and at load ≤ 1/2 a
+  probe touches 2.5 slots on average — one 32-byte sector. A tag match is a
+  *candidate*, and a false one occurs with probability `~load / 2^32` per
+  probe; the host verifies every candidate with a scalar multiplication,
+  so a false positive costs time and never correctness. (Zero false
+  candidates in every run below.)
+- **Grouped probes.** A table read is a dependent random access to global
+  memory, hundreds of cycles against a few dozen multiplications of
+  arithmetic between reads. The giant stepper issues all `W` first-slot
+  loads of a thread before examining any of them so the memory system
+  overlaps them; this is what the kernel's throughput will turn on, and it
+  is the one thing the CPU suites cannot measure.
+- **Exceptional cases handled, not assumed away.** A chain that starts at
+  `O` (baby chain 0), one whose point equals the addend (`1G + G`, or a giant
+  chain that lands on `S`), or its negative (the chain passes through `O`,
+  which *is* the `j = 0` hit and is reported as one): the phase-A/phase-B
+  split substitutes a unit denominator for those steps so the shared
+  inversion stays valid, and the test suite drives chains through every
+  one of them.
+- **Table reuse.** The table depends only on `G`, `x0`'s width and `m`, so
+  many targets in the same interval share one build; the toy suite solves
+  21 targets against one table.
+
+### How it is tested
+
+`test_bsgs.cpp` compiles the same headers with g++ and checks, in order:
+the hash table (insert, look-up, false positives on absent keys, refusal
+when full); `bsgs_run_batch<W>` against the one-inversion-per-chain
+reference for bit-identical chain state, table contents and candidate
+lists, through the exceptional starts above; that every `j ∈ [1, m)` is
+found from `x(jG)` computed independently by `scalar_mul`; that *every*
+`x` in intervals of width 1, 2, 3, 7, 16, 61 and 200 is recovered under
+both layouts (the index arithmetic at the seams); whole-group logs on the
+toy curve at the seams of the layout (`x = 0, 1, m−1, m, M−1, M, M+1, n−1,
+n−m`) and at random; and a 2^22-wide interval at a random 256-bit offset
+on the compiled curve, so the interval path runs on secp256k1 itself. Every
+recovered `k` is checked as `kG == Q`.
+
+`./bench selftest` then compares the device against the same host driver:
+the baby table as a set (insertion order across threads is not
+deterministic under `atomicCAS`, so slot positions may differ; the entries
+may not), the giant chain state after a launch bit for bit, the candidate
+list, the reference kernel against the batched one, and finally a planted
+interval log recovered end to end. **This has not been run on a GPU.** The
+device code has been compiled to PTX with clang and assembled by `ptxas`
+for `sm_90` and `sm_100`, in both the portable and `FP_PTX=1` builds, which
+rules out build errors and nothing more; `modal_app.py::selftest` and
+`::bsgs` are the commands that close the gap.
+
+### Cost, measured
+
+Per the repository rule (`AGENTS.md`): boundary first, one table, one
+unit. The unit is `S = group additions / √n` with every phase charged —
+the baby steps, the giant steps until the verified hit, both seeds, and one
+addition per candidate verification. The **reference** is Pollard rho as
+measured by `test_toy_mont` on the same curve with the same accounting:
+`1.13 × √(πn/2) = 1.42` without the negation map and `0.96 × √(πn/4) =
+0.85` with it. The **floor** for a deterministic table method is the
+`√width` of its own balance, which is not a bound rho respects: rho is
+cheaper in operations *with* the negation map and pays nothing in memory,
+so what BSGS offers is determinism, table reuse across targets, and a
+`1.0` that is a mean, not a tail. All rows are whole-group logs on the
+40-bit toy curve (`n = 649 523 094 257`) from `test_bsgs_toy`, CPU
+emulation of the kernels, 128 chains, every answer verified as `kG == Q`.
+
+| row | class | table (entries / √n) | inversions | mean `S`, 8 random targets | ratio to rho ref | ratio to own floor | correct |
+|---|---|---|---|---|---|---|---|
+| rho, negation map (reference, `test_toy_mont`) | — | 0 | ops / W | **0.85** | 1.00 | — | 1/1 |
+| rho, no negation map (`test_toy_mont`) | — | 0 | ops / W | 1.42 | 1.67 | — | 1/1 |
+| BSGS textbook layout, `neg_map=0`, reference stepper | baseline | 0.707 | = ops | 1.44 (predicted 1.41) | 1.69 | 1.02 vs `√2` | 21/21 |
+| BSGS textbook layout, `neg_map=0`, batched `W = 8` | engineering | 0.707 | ops / 8 | 1.44 (bit-identical) | 1.69 | 1.02 vs `√2` | 21/21 |
+| BSGS negation layout, `neg_map=1`, batched `W = 8` | `√2` of the layout | 0.500 | ops / 8 | **1.07** (predicted 1.00) | 1.26 | 1.07 vs `1.0` | 21/21 |
+| … same, table amortised (giant phase only, per further target) | — | 0.500 | ops / 8 | 0.56 (predicted 0.50) | 0.66 | — | 21/21 |
+| … same, textbook layout amortised | — | 0.707 | ops / 8 | 0.73 (predicted 0.71) | 0.86 | — | 21/21 |
+
+"Correct" counts the 13 seam targets plus the 8 random ones per layout, each
+verified as `kG == Q`; the 8 random rows are the only ones in the mean,
+since a target at `x = 0` or one that wraps mod `n` is found in the first
+launch and says nothing about cost. The spread on the random rows is the
+uniform giant index: `S` ran from 0.55 to 1.46 under the negation layout
+(0.83 to 2.06 textbook), which is the tail a deterministic method has and
+rho's distribution does not. The giant phase overshoots by up to one launch
+(`iters × chains`, 1% of `√n` here) because the host verifies candidates
+between launches; a device-side stop flag would trim that and is not worth
+its synchronisation at this size.
+
+The chips follow §3 of the rule: the batched stepper is *engineering*
+against the reference stepper (`S` unchanged, inversions cut by `W`), the
+negation layout against the textbook one is the `√2` the table predicts,
+and nothing here is an advance on rho's floor — the point is the memory
+boundary, drawn above. Wall-clock is a practicality note only:
+about 380 k steps/s per core on the CPU emulation, which says nothing
+about the device.
 
 ## Curve support
 
