@@ -415,6 +415,11 @@ def applyRollup(cur, added, found_at):
         (CAMPAIGN, found_at, added))
 
 
+def rollupMarked(cur):
+    cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
+    return cur.fetchone() is not None
+
+
 def ensureRollup(cur, force=False):
     """Seed the counters from the corpus, once, and say whether it ran.
 
@@ -430,16 +435,30 @@ def ensureRollup(cur, force=False):
     uncommitted and therefore invisible to the aggregate below. It applies the
     delta once this commits. Neither a lost object nor a double-counted one is
     reachable.
+
+    A superseded ingester that predates `applyRollup` does not take that lock,
+    so its commits during the seed can leave the counters short. The mark is
+    not set until a count over the corpus matches the seeded total, and the
+    caller retries until it does.
     """
     cur.execute(TOTALS_DDL)
     cur.execute(HOURLY_DDL)
     cur.execute(META_DDL)
     if force:
         cur.execute("DELETE FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
-    else:
-        cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (ROLLUP_MARK,))
-        if cur.fetchone() is not None:
-            return False
+    elif rollupMarked(cur):
+        return False
+    elif not force:
+        cur.execute("SELECT dps FROM dp_ingest_totals WHERE campaign_id = %s",
+                    (CAMPAIGN,))
+        row = cur.fetchone()
+        if row is not None:
+            cur.execute("SELECT count(*) FROM distinguished_points "
+                        "WHERE campaign_id = %s", (CAMPAIGN,))
+            if int(cur.fetchone()[0]) == int(row[0]):
+                cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                            "ON CONFLICT (key) DO NOTHING", (ROLLUP_MARK,))
+                return False
     log("seeding the dp counters from the corpus; this reads the table once "
         "and the ingest waits on it, then no snapshot reads it again")
     started = time.time()
@@ -465,8 +484,16 @@ def ensureRollup(cur, force=False):
          min((r[2] for r in rows if r[2] is not None), default=None),
          max((r[3] for r in rows if r[3] is not None), default=None),
          CAMPAIGN))
-    cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
-                "ON CONFLICT (key) DO NOTHING", (ROLLUP_MARK,))
+    cur.execute("SELECT count(*) FROM distinguished_points WHERE campaign_id = %s",
+                (CAMPAIGN,))
+    actual = int(cur.fetchone()[0])
+    if actual == total:
+        cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                    "ON CONFLICT (key) DO NOTHING", (ROLLUP_MARK,))
+    else:
+        log("seeded %d points but the corpus now has %d; another ingester may "
+            "still be writing without rollup -- will retry until they match"
+            % (total, actual))
     log("seeded the dp counters in %.0fs: %d points across %d hours"
         % (time.time() - started, total, len(rows)))
     return True
@@ -1286,6 +1313,8 @@ def main(argv=None):
     def connect():
         return psycopg.connect(url, connect_timeout=30)
 
+    recount_once = args.recount
+    rollup_open = True
     while True:
         try:
             with connect() as conn:
@@ -1294,8 +1323,10 @@ def main(argv=None):
                 if not (args.verify or args.pending):
                     ensureCollisions(conn)
                     with conn.cursor() as cur:
-                        ensureRollup(cur, force=args.recount)
+                        ensureRollup(cur, force=recount_once)
+                        rollup_open = not rollupMarked(cur)
                     conn.commit()
+                    recount_once = False
                 if args.index and not (args.verify or args.pending):
                     try:
                         ensureFoundAtIndex(conn)
@@ -1316,6 +1347,12 @@ def main(argv=None):
                     return 0
             published, wasBehind = 0.0, False
             while True:
+                if rollup_open:
+                    with connect() as conn:
+                        with conn.cursor() as cur:
+                            ensureRollup(cur, force=False)
+                            rollup_open = not rollupMarked(cur)
+                        conn.commit()
                 _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
                                              args.prefix, args.pass_objects)
                 if args.metric_namespace:

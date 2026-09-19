@@ -632,8 +632,14 @@ class RollupCursor:
         self.conn.queries.append((" ".join(sql.split()), args))
         if "FROM dp_ingest_meta WHERE key" in sql:
             self.one = (1,) if self.conn.marked else None
+        elif "SELECT dps FROM dp_ingest_totals" in sql:
+            self.one = (self.conn.totals_dps,) if self.conn.totals_dps is not None else None
+        elif "SELECT count(*)" in sql and "distinguished_points" in sql:
+            self.one = (self.conn.corpusCount(),)
         elif "GROUP BY 1" in sql and "distinguished_points" in sql:
             self.rows = self.conn.corpus
+        elif "UPDATE dp_ingest_totals SET dps" in sql:
+            self.conn.totals_dps = int(args[0]) if args else 0
         else:
             self.rows = []
             self.one = None
@@ -646,10 +652,15 @@ class RollupCursor:
 
 
 class RollupConn:
-    def __init__(self, marked=False, corpus=()):
+    def __init__(self, marked=False, corpus=(), corpus_extra=0):
         self.marked = marked
         self.corpus = list(corpus)
+        self.corpus_extra = corpus_extra
+        self.totals_dps = None
         self.queries = []
+
+    def corpusCount(self):
+        return sum(int(n) for _, n, _, _ in self.corpus) + self.corpus_extra
 
     def cursor(self):
         return RollupCursor(self)
@@ -712,7 +723,7 @@ class Rollup(unittest.TestCase):
                                    when("2026-09-19T07:59:00"))])
         self.assertTrue(dp_ingest.ensureRollup(conn.cursor()))
         self.assertEqual(len([q for q in self.sql(conn)
-                              if "FROM distinguished_points" in q]), 1)
+                              if "FROM distinguished_points" in q and "GROUP BY" in q]), 1)
         self.assertTrue(any("INSERT INTO dp_ingest_meta" in q for q in self.sql(conn)))
 
     def test_a_replacement_host_does_not_read_the_corpus_again(self):
