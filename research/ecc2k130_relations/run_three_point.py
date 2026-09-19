@@ -50,7 +50,7 @@ def expected_relation_count(base_size: int, r: int) -> float:
 
 
 def run_experiment(name, description, E, base_x, r, *, coeffs=None,
-                   budget_seconds=None, log=print):
+                   budget_seconds=None, verify_cap=20000, rng=None, log=print):
     started = time.time()
     base_x = sorted(set(base_x))
     n = len(base_x)
@@ -69,22 +69,27 @@ def run_experiment(name, description, E, base_x, r, *, coeffs=None,
             log(f"[{name}]   {seen:,}/{total_pairs:,} ({frac:6.2%}) "
                 f"hits={hits} elapsed={el:6.0f}s eta={eta:6.0f}s")
 
-    budget_pairs = None
-    if budget_seconds:
-        # re-checked below; the sweep itself is bounded by pair count
-        budget_pairs = None
-
     found, seen_pairs, complete = R.three_point_relations(
         E, base_x, allow_repeats=True, chunk=20000, progress=progress,
-        budget_pairs=budget_pairs)
+        budget_seconds=budget_seconds)
     elapsed = time.time() - started
 
+    # Realising a triple costs about thirty field inversions, so a support
+    # that yields millions of relations cannot have every one re-derived on
+    # the curve inside any sane budget -- the small-coefficient constructed
+    # base yields 2,044,422. When that happens a uniform random sample is
+    # verified instead and the run records that it sampled, rather than
+    # reporting a number that implies the whole set was checked.
+    sampled = len(found) > verify_cap
+    picker = rng or random.Random(0xC0FFEE)
+    subset = picker.sample(found, verify_cap) if sampled else list(found)
+
     verified = []
-    for t in found:
+    for t in subset:
         pts = R.realise_triple(E, *t)
         if pts is None:
             continue
-        assert E.sum_points(list(pts)) is None
+        assert E.sum_points(list(pts)) is None, t
         verified.append({
             "abscissae": [hex(x) for x in t],
             "points": [[hex(p[0]), hex(p[1])] for p in pts],
@@ -100,6 +105,8 @@ def run_experiment(name, description, E, base_x, r, *, coeffs=None,
         "elapsed_seconds": round(elapsed, 3),
         "pair_rate_per_second": round(seen_pairs / elapsed, 1) if elapsed else None,
         "relations_found": len(found),
+        "verification_sampled": sampled,
+        "relations_submitted_for_verification": len(subset),
         "relations_verified_on_curve": len(verified),
         "relations": verified[:64],
         "expected_by_yield_law": expected_relation_count(n, r),
@@ -109,8 +116,9 @@ def run_experiment(name, description, E, base_x, r, *, coeffs=None,
     }
 
     if coeffs is not None:
-        rows = R.relation_vectors(E, found, coeffs, r)
+        rows = R.relation_vectors(E, subset, coeffs, r)
         rank = R.useful_rank(rows, r)
+        rank["rows_are_a_sample_of"] = len(found)
         out["rank_accounting"] = rank
         out["rows"] = [[str(a), str(b)] for a, b in rows[:64]]
 
@@ -126,6 +134,8 @@ def main():
     ap.add_argument("--out", default=str(HERE / "results"))
     ap.add_argument("--only", default=None)
     ap.add_argument("--constructed-size", type=int, default=4000)
+    ap.add_argument("--verify-cap", type=int, default=20000,
+                    help="max relations re-derived on the curve per experiment")
     args = ap.parse_args()
 
     outdir = Path(args.out)
@@ -198,13 +208,15 @@ def main():
             continue
         res = run_experiment(spec["name"], spec["description"], E,
                              spec["base_x"], r, coeffs=spec["coeffs"],
-                             budget_seconds=args.budget_seconds)
+                             budget_seconds=args.budget_seconds,
+                             verify_cap=args.verify_cap)
         (outdir / f"{spec['name']}.json").write_text(json.dumps(res, indent=2))
         summary["experiments"].append({
             k: res[k] for k in
             ("name", "base_size", "pairs_total", "complete", "elapsed_seconds",
-             "relations_found", "relations_verified_on_curve",
-             "log2_expected_by_yield_law")
+             "relations_found", "verification_sampled",
+             "relations_submitted_for_verification",
+             "relations_verified_on_curve", "log2_expected_by_yield_law")
         } | ({"rank_accounting": res["rank_accounting"]}
              if "rank_accounting" in res else {}))
         (outdir / "summary.json").write_text(json.dumps(summary, indent=2))

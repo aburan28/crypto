@@ -307,8 +307,14 @@
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference; their existing
-      500×-or-worse rho verdict is unchanged. The newer binary-field solver and
+      their generic-group floor and matched Pollard rho reference. On elliptic curves the
+      500×-or-worse rho verdict is unchanged. It is no longer blanket, though: on
+      hyperelliptic Jacobians at genus 3 and 4 index calculus measures
+      <strong>below</strong> a real distinguished-point rho — 0.21 at
+      <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
+      exponent matching the derived law. That is a toy-size result
+      (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
+      any deployed curve. The newer binary-field solver and
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -1473,6 +1479,49 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/SOLVER_SELECTION.md">Run and train</a></p>
     </div>
   </div>
+
+  <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="genus-crossover">Hyperelliptic: the crossover has a measured exponent</h2>
+    <p>The one family in this ledger that measures below a real rho. With <code>N</code> the
+    subgroup order, rho costs <code>&radic;N</code> at any genus while the relation stage is
+    <code>(m+1)&middot;g!</code>, so
+    <code>S<sub>ic</sub>/S<sub>rho</sub> &prop; g!&middot;N<sup>1/g &minus; 1/2</sup></code>.
+    Pre-registered with its falsification list before measuring, in
+    <code>RESEARCH_HYPERELLIPTIC_IC_RHO.md</code>.</p>
+    <table><caption>Genus exponent fit against <code>log&#8322; N</code>, rho&rsquo;s walk
+    renormalised to <code>&radic;(&pi;/2)</code>. Every run returned its verified
+    <code>k</code>.</caption><thead><tr>
+      <th scope="col" class="n">g</th><th scope="col" class="n">predicted slope</th>
+      <th scope="col" class="n">measured</th><th scope="col" class="n">R&sup2;</th>
+      <th scope="col" class="n">best ratio</th><th scope="col">Class</th>
+    </tr></thead><tbody>
+      <tr><td class="n">2</td><td class="n">0.000</td><td class="n">&minus;0.027</td><td class="n">0.24</td><td class="n">0.94</td><td><span class="chip">baseline, no trend</span></td></tr>
+      <tr><td class="n">3</td><td class="n">&minus;0.167</td><td class="n"><strong>&minus;0.154</strong></td><td class="n">0.98</td><td class="n">0.38 at <code>N</code>&thinsp;=&thinsp;2<sup>22</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+      <tr><td class="n">4</td><td class="n">&minus;0.250</td><td class="n"><strong>&minus;0.275</strong></td><td class="n">0.96</td><td class="n"><strong>0.21</strong> at <code>N</code>&thinsp;=&thinsp;2<sup>24</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+    </tbody></table>
+    <p><strong>Two corrections belong on this row and both cut against it.</strong> The fit was
+    pre-registered against <code>log&#8322; p</code> with slopes <code>1 &minus; g/2</code>, and
+    genus 4 missed it at &minus;1.611 against &minus;1.0. The law is not wrong; the step from
+    <code>N</code> to <code>p</code> is, and it was this thread&rsquo;s: the harness picks a
+    prime-order subgroup above <code>lo/4</code>, and <code>N</code> measures as
+    <code>p<sup>1.91</sup></code>, <code>p<sup>3.20</sup></code> and
+    <code>p<sup>5.94</sup></code>. Restated against <code>N</code>, every genus lands inside
+    the band.</p>
+    <p>And the reference degrades where it matters. <code>S<sub>walk</sub></code>, rho&rsquo;s
+    walk alone, must sit near <code>1.2533</code>; it drifts to 1.71, 1.82 and
+    <strong>2.10</strong> on the three largest rows while genus 2 stays flat near 1.3. A
+    reference that worsens as the group grows flatters the algorithm under study, so every
+    ratio here renormalises the walk to the ideal and leaves rho&rsquo;s measured
+    precomputation alone. The best row reads <strong>0.13 raw and 0.21 corrected</strong>: the
+    correction nearly halves the claim, and that row&rsquo;s walk is 68% above ideal, so it is
+    also the least trustworthy correction. <strong>0.21 is the number to quote</strong>, and
+    the walk needs fixing before it is quoted hard.</p>
+    <p>Scope: <code>p &le; 251</code>, <code>N &le; 2<sup>24</sup></code>, one machine, full
+    degree-1 factor base. The <code>O(p)</code> factor-base build that dominates at
+    cryptographic size is not modelled, so this is a statement about the shape of the curve,
+    not its position. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_exponent_fit.json">hyperelliptic_exponent_fit.json</a>.</p>
+  </section>
 
   <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
     <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
