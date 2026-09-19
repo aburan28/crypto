@@ -136,6 +136,26 @@ def checkpointIter(path):
     return struct.unpack_from("<Q", head, CKPT_ITER_OFFSET)[0]
 
 
+def checkpointSlot(path):
+    """slot = run-id - 1 from a checkpoint still on disk, or None.
+
+    retireSlot clears state.json and a crash can lose it; the checkpoint
+    header still names the walk those leftover spool files were cut for.
+    """
+    for candidate in (path, path + ".snap", path + ".remote"):
+        try:
+            with open(candidate, "rb") as fh:
+                head = fh.read(CKPT_ITER_OFFSET)
+        except OSError:
+            continue
+        if len(head) < CKPT_ITER_OFFSET or head[:8] != CKPT_MAGIC:
+            continue
+        runId = struct.unpack_from("<I", head, 8 + 5 * 4)[0]
+        if 1 <= runId <= MAX_SLOT + 1:
+            return runId - 1
+    return None
+
+
 def instanceId():
     try:
         req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
@@ -856,7 +876,15 @@ class Worker:
                 raise RuntimeError("lease lost during campaign binding")
         log("claimed slot %d (run id %d)" % (slot, slot + 1))
         if self.state.get("slot") != slot:
-            # A different slot than this work dir last held: nothing local applies.
+            # A different slot than this work dir last held: the live dp.bin
+            # and checkpoint do not apply.  Unsent spool entries do -- they
+            # were cut for the slot they name.  Finish any payload-only
+            # fragment and forget leftover offsets before deleting dp.bin,
+            # so sweepSpool cannot drop the only copy and creditSpoolEntry
+            # cannot treat those records as a prefix of the new empty file.
+            old = self.state.get("slot")
+            self.completeSpoolFragments(old)
+            self.detachSpoolFromLiveFile()
             for name in ("dp.bin", "walk.ck", "walk.ck.snap", "walk.ck.remote"):
                 p = os.path.join(self.work, name)
                 if os.path.exists(p):
@@ -895,6 +923,11 @@ class Worker:
 
     def retireSlot(self, slot, reason):
         log("retiring slot %d: %s" % (slot, reason))
+        # Finish payload-only fragments while this slot is still known.
+        # Clearing state below is what makes the next claimSlot see no
+        # prior slot; without a manifest, sweepSpool would then drop them
+        # once that claim deletes dp.bin.
+        self.completeSpoolFragments(slot)
         if os.path.exists(self.ckptPath):
             self.store.put(self.ckptPath, "ckpt/retired/slot-%05d.ck" % slot)
         self.slots.release(slot, self.owner, state="retired", extra={"reason": reason})
@@ -984,13 +1017,74 @@ class Worker:
             if os.path.exists(path):
                 os.remove(path)
 
+    def completeSpoolFragments(self, slot):
+        """Give payload-only spool files a manifest for this slot.
+
+        spoolDelta writes the payload first and the manifest last.  sweepSpool
+        would drop a lone payload as a fragment whose records are still in
+        dp.bin -- true only until claimSlot deletes that file on a slot
+        change.  The payload's name is the basename of its final key.
+        retireSlot clears state and a missing state.json leaves slot None;
+        recover it from a leftover manifest or a local checkpoint rather
+        than skip and let sweepSpool drop the only copy.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return
+        if slot is None:
+            for entry in self.spoolEntries():
+                if entry.get("slot") is not None:
+                    slot = int(entry["slot"])
+                    break
+        if slot is None:
+            slot = checkpointSlot(self.ckptPath)
+        if slot is None:
+            return
+        claimed = {e["name"] for e in self.spoolEntries()}
+        fallbackOffset = int(self.state.get("dpOffset", 0))
+        for name in sorted(os.listdir(self.spoolDir)):
+            if not name.endswith(".bin") or name in claimed:
+                continue
+            payload = os.path.join(self.spoolDir, name)
+            if not os.path.isfile(payload):
+                continue
+            size = os.path.getsize(payload)
+            if size <= 0 or size % RECORD_BYTES:
+                continue
+            parts = name[:-4].rsplit("-", 2)
+            if len(parts) == 3 and parts[1].isdigit():
+                streamId, offset = parts[0], int(parts[1])
+            else:
+                streamId, offset = self.streamId, fallbackOffset
+            meta = payload + ".json"
+            entry = {"name": name, "key": "dp/slot-%05d/%s" % (slot, name),
+                     "slot": slot, "streamId": streamId, "offset": offset,
+                     "bytes": size, "hasMeta": os.path.isfile(meta),
+                     "createdAt": time.time()}
+            writeJson(payload + SPOOL_MANIFEST, entry)
+
+    def detachSpoolFromLiveFile(self):
+        """Stop leftover entries from indexing a dp.bin that is about to go.
+
+        creditSpoolEntry treats a matching slot and offset as the records
+        still being in the live file.  After a slot change that file is a
+        new empty one, and a later reclaim of the same slot number would
+        jump dpOffset past its prefix.  Clearing the offset (not the
+        payload) keeps the records publishable on their own key.
+        """
+        for entry in self.spoolEntries():
+            body = {k: v for k, v in entry.items() if k not in ("manifest", "payload")}
+            body["offset"] = -1
+            writeJson(entry["manifest"], body)
+
     def sweepSpool(self):
         """Discard spool files that no manifest claims.
 
         A payload is written before dpOffset moves, so an interrupted write
         costs nothing: those records are still in dp.bin and the next cycle
         cuts them again.  rotateDpFile refusing to run while the spool is
-        non-empty is what keeps that true.
+        non-empty is what keeps that true on a rollout.  claimSlot changing
+        slot completes any payload-only fragment before it deletes dp.bin,
+        so a crash in spoolDelta cannot be swept away with the file.
         """
         if not os.path.isdir(self.spoolDir):
             return
@@ -998,9 +1092,13 @@ class Worker:
         for entry in self.spoolEntries():
             known.update((entry["name"], entry["name"] + ".json",
                           entry["name"] + SPOOL_MANIFEST))
+        live = os.path.exists(self.dpPath)
         for name in sorted(os.listdir(self.spoolDir)):
             path = os.path.join(self.spoolDir, name)
             if name in known or not os.path.isfile(path):
+                continue
+            if not live and (name.endswith(".bin") or name.endswith(".bin.json")):
+                # dp.bin is gone, so these records are not 'still in dp.bin'.
                 continue
             log("spool: discarding fragment %s (%d bytes); its records are still in dp.bin"
                 % (name, os.path.getsize(path)))
@@ -1009,13 +1107,20 @@ class Worker:
     def creditSpoolEntry(self, entry, slot):
         """Move dpOffset past a delta the store has, and only then.
 
-        The offset indexes one dp file, so only an entry this process cut
-        from the one it is reading now may move it: an entry left by another
-        process or another slot is published on its own key and the offset
-        stays where it is, because skipping the prefix of a file these
-        records are not in would lose the points at the front of it.
+        The offset indexes one dp file, so only an entry for this slot whose
+        offset is where this process is reading may move it.  streamId is not
+        the test: it is a fresh UUID each process start and is not in
+        state.json, so a same-slot restart would upload the leftover and then
+        recut that prefix.  Rotation will not drop dp.bin while the spool
+        holds anything, so a matching slot and offset are the file still here.
+        claimSlot will drop it on a slot change, and forgets leftover offsets
+        first so a later claim of the same slot number cannot treat those
+        records as a prefix of the new empty file.  An entry for another slot
+        is published on its own key and the offset stays where it is, because
+        skipping the prefix of a file those records are not in would lose the
+        points at the front of it.
         """
-        if slot is None or entry.get("slot") != slot or entry.get("streamId") != self.streamId:
+        if slot is None or entry.get("slot") != slot:
             return
         if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
             return

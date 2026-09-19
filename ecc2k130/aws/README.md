@@ -392,13 +392,43 @@ the CPU reference, and at cutoff 34 one replay is a 2^25-step scalar walk
 during which the GPU idles. Set it to 1 on the pilot to prove the build once;
 the merge's solve step verifies `[k]P == Q` independently anyway.
 
+### Rolling out a supervisor (`worker.py`) change
+
+`worker.py` is not versioned by `campaign.json` and has no hash gate: every
+instance copies `s3://$BUCKET/aws/worker.py` once, in `bootstrap.sh`, at boot.
+So publishing it (`infra.sh sync`, or a single `aws s3 cp` when only the
+supervisor moved) changes what *new* boots run and nothing else. Running
+instances keep the supervisor they booted with until their unit restarts,
+which on a spot fleet happens on its own as capacity churns.
+
+Forcing it onto the running fleet is `./fleet.sh roll` (see the `walks` bullet
+under Monitoring), which replaces instances `ROLL_BATCH` at a time so each
+re-bootstraps onto the published copy. Whether to is a judgement: a change that
+protects points already collected — the local spool — is worth rolling for, and
+one that only changes reporting can ride the spot churn. One box can be done in
+place with `systemctl restart ecc2k130-worker@<gpu>` after copying the new file
+over `/opt/ecc2k130/worker.py`, which SIGTERMs the client, checkpoints, uploads
+and resumes the same slot, at the cost of the walk since that slot's last
+checkpoint — but the unit is per GPU, not per slot, and a restart that does not
+also replace the file just starts the same supervisor again.
+
+Because there is no gate, the gate is here: run `python3 -m unittest
+test_worker_spool test_worker_family test_certification` and
+`./rehearse_worker.sh`, which runs the real supervisor against a directory
+standing in for S3 and requires a resume, byte-identical deltas and an actual
+solve on curve 41. A `worker.py` that fails that and reaches the bucket breaks
+every boot after it.
+
 ## Monitoring
 
 * Public hourly DP counts (GitHub Pages): [`docs/ecc2k130-status/`](../../docs/ecc2k130-status)
   via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through
-  the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
+  the tagged `rho-ecc2k-walker` host. If that instance is not running, it
+  republishes the ingest host's `status.json` from the status bucket
+  instead of leaving Pages on the last successful hop. It does not open
+  RDS to the internet.
 * `status.py` sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
   fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
@@ -485,13 +515,82 @@ failing.** One object at a time sustained ~2,450 records/s; at 133 workers the
 fleet produces ~2,607 points/s, so even with every object recognised the
 backlog would have grown. `--threads` (default 6) ingests several objects at
 once, each on its own connection, and a backlog is drained without waiting out
-the poll interval: measured 137,753 rows/s over both key shapes, 50× the
-fleet's production.
+the poll interval: measured 137,753 rows/s over both key shapes.
+
+The recovery itself is the end-to-end figure to quote, because it is the whole
+path under a real backlog rather than a decoder benchmark. Six threads on one
+`c7g.large` against `db.r7g.xlarge`, 2026-09-17 19:38–20:01Z:
+
+```
+4,321 objects, 63,351,803 rows, 0 failed, 0 outstanding, 44,987 rows/s
+```
+
+That is 17× the fleet's ~2,607 points/s, so five and a half hours of stopped
+ingest took twenty-three minutes to clear and the store went from 67.6 M
+points to 124.3 M.
 
 `found_at` is the object's upload time — the epoch in a legacy key, the
 object's `LastModified` for an orbit key — never the clock at insert, so a
 catch-up cannot stack a backlog into the hour it ran and leave an hourly spike
-no GPU produced.
+no GPU produced. It also means the store's `last_dp_at` climbs *through* the
+backlog from the moment ingest stopped, so during a catch-up the page is
+honest and slow rather than instantly correct: the hour the drain finishes is
+the hour `dps_last_hour` becomes non-zero again.
+
+**A pass is bounded, because status is published between passes.** The first
+recovery pass on 2026-09-17 took the whole 4,164-object backlog as one unit of
+work and published nothing until it finished, so for the half hour it ran the
+page still read `IDLE_OR_STALE` — the ingest was recovering and looked
+identical to the ingest that was broken. `--pass-objects` (default 256) caps
+the slice; `ingest.outstanding_objects` still reports the whole backlog, not
+the slice, so a reader sees the real number every couple of minutes.
+
+**The snapshot is the one cost that grows with the corpus, so it gets an
+index.** Every figure on the page except `dps` is a question about `found_at`
+— newest point, first point, the last 48 hours by hour — and with no index on
+that column each one reads the whole 42 GB table. Measured at 130 M rows on
+2026-09-17: a single `publishStatus` held ~12,000 read IOPS on `rho-dp` for
+over five minutes, on the instance the ingest was writing to, and
+`--status-every` would have started the next one immediately after. The ingest
+creates `distinguished_points_campaign_found_at` on `(campaign_id, found_at)`
+at startup, `CONCURRENTLY` so the build does not block it, dropping and
+rebuilding rather than trusting an invalid index from a failed build; `dps`
+becomes an index-only count. `--no-index` opts out.
+
+The index is only half of it, which the live store demonstrated: built in 405 s
+at 20:47Z, and the next snapshot still took over six minutes. An index-only
+scan reads the heap for every page the visibility map does not mark
+all-visible, and a bulk-loaded table has almost none marked, so it was still
+reading the 42 GB. `VACUUM (ANALYZE)` is what sets that map; it runs once,
+recorded in `dp_ingest_meta`, because a replacement host is the deployment
+mechanism here and a vacuum per deploy is not a cost this table can carry.
+With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
+vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
+snapshot from over six minutes to **142.8 s** (`published status.json in
+142.8s`, which is why that line carries a duration). It is still O(corpus)
+for this program's own `publishStatus`. The Pages snapshot no longer is:
+`scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
+once and installs a statement-level insert trigger on
+`distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
+the buckets current without a code deploy on this host. Later Pages runs
+read the rollup. This program's 30-minute `--status-every` still buys room
+for the 142 s count query until an ingest-host deploy starts reading the
+same tables.
+
+While a snapshot runs, this program is not ingesting — the loop is
+pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
+is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
+aggregate in `pending()` is the other scan, and it is cached for half an hour
+(`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
+era, which stopped growing when that table appeared.
+
+**A thread whose connection dies opens another.** `rho-dp` was resized under
+that same pass, and each worker thread went on using its closed connection:
+2,533 objects failed with `OperationalError: the connection is closed` in a
+few seconds, one after another. Nothing was lost — the pass is idempotent and
+they were retried — but a failover or a resize should cost one object, not a
+pass, so a thread now reconnects and retries the object once before counting
+it failed.
 
 The host runs under the `ecc2k130-ingest` instance profile: read `dp/`, write
 `logs/` and the status bucket's `status.json`, read the `rho/dp-rds` secret,

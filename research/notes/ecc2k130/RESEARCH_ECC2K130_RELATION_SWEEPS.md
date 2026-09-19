@@ -766,3 +766,96 @@ What would actually move it is a decomposition oracle cheaper than a
 square-root search, and §5.5 closes the one generic candidate. Until such an
 oracle exists, the floor is `sqrt` of a space that rho already square-roots
 with the same 262 automorphisms.
+
+
+## 6-7. Two measurements from the polynomial-basis line of this thread
+
+Sections 4 and 5 above are the normal-basis, orbit-grouped treatment, and they
+are the later and more careful ones: §4.8.1 and §5.3 supersede the `m <= 8`
+accounting of §1, and §5.6's `2^+6.48` supersedes every cost figure quoted
+before it.
+
+What follows is from the earlier polynomial-basis line, kept because it
+measures things sections 4 and 5 do not: a complete three-point sweep over six
+supports, and a constructed base that produces two million relations of
+exactly zero worth. Where the two lines overlap they agree, independently:
+§4.7 classifies the four-point collisions as instances of
+`sigma^2 + sigma + 2 = 0` by re-evaluating each pattern at random curve
+points, and the polynomial-basis four-point run reached the same conclusion
+by the same test, 338 of 338 and 88 of 88. That agreement is worth more than
+either run alone, because the two used different bases, different supports and
+different collision machinery.
+
+## 6. The three-point sweeps, on the polynomial-basis supports
+
+Every row is a *complete* search over its support: all unordered pairs with
+repetition, the third abscissa solved from `S3` rather than scanned. A zero
+means the support has no homogeneous three-point relation at all.
+
+| support | `B` | pairs | relations | `log2` predicted |
+|:--|--:|--:|--:|--:|
+| weight-two, complete | 4262 | 9,084,453 | 0 | −95.41 |
+| weight ≤ two | 4336 | 9,402,616 | 1 (cofactor) | −95.34 |
+| weight-two, σ-stable | 1090 | 594,595 | 0 | −101.31 |
+| random matched #1 | 4262 | 9,084,453 | 0 | −95.41 |
+| random matched #2 | 4262 | 9,084,453 | 0 | −95.41 |
+| constructed, random `u,v` | 4000 | 8,002,000 | 0 | −95.69 |
+
+Six supports, one relation between them, and it is in the cofactor. Measured
+yield matches the counting prediction everywhere.
+
+**The weight-two support is 4262 abscissae**, not the 3,668 an earlier
+summary of this thread recorded; 8515 candidates `z^i + z^j` with `i < j`, of
+which 4262 pass the trace condition and carry a point.
+
+**The single hit** is `(0,1) + (1,0) + (1,0) = O`: the 2-torsion point plus
+twice `(1,0)`. All three points are `F_2`-rational, none satisfies `[r]R = O`,
+and the relation is the `Z/4` structure of `E(F_2)`. It lives entirely in the
+cofactor and says nothing about `log_P(Q)`. It appears only because the
+weight-at-most-two support admits `x = 0` and `x = 1`, which is the whole
+difference between that row and the one above it.
+
+**The constructed base with random coefficients is the control that matters.**
+Points `[u]P + [v]Q` with uniform random `u, v` produce nothing, exactly as
+counting predicts. Being built from `P` and `Q` is not by itself enough to
+manufacture relations; the coefficients have to be small enough to make them.
+
+
+## 7. The accounting result, measured on a constructed base
+
+The small-coefficient constructed base is the positive control for §3, and it
+is emphatic. Points `[u]P + [v]Q` with `u, v` drawn from a small range, base
+size 4000:
+
+| quantity | value |
+|:--|--:|
+| relations found (complete sweep, 8,002,000 pairs) | **2,045,254** |
+| predicted by random counting | 2^−95.69 |
+| verified on the curve (uniform random sample) | 20,000 of 20,000 |
+| construction rows, `sum(u) = sum(v) = 0` | **20,000** |
+| rows determining `log_P(Q)` | **0** |
+| useful rank | **0** |
+
+Two million relations. Every sampled one holds whatever `log_P(Q)` is. A
+relation matrix built from this base would have enormous rank and would
+determine nothing.
+
+Set beside the two controls, the picture is complete:
+
+| base | relations | useful rank |
+|:--|--:|--:|
+| constructed, small `u,v` | 2,045,254 | 0 |
+| constructed, random `u,v` | 0 | 0 |
+| weight-two, σ-stable (four-point) | 88, all Frobenius identities | 0 |
+
+**Relation count is not evidence, and relation rank is not evidence.** Both
+can be driven as high as one likes by choosing the support, and neither moves
+`log_P(Q)` at all. The only quantity that means anything is the number of rows
+whose `sum(v)` is a unit mod `r`, and across every experiment in this note
+that number is zero.
+
+This is why the `useful_rank` split exists rather than a rank count, and why
+the thread's earlier framing — relation rank from `P,Q`-constructed bases —
+needed the construction span quotiented out before any of it could be read as
+progress.
+
