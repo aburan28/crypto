@@ -115,6 +115,11 @@ class FreezeTests(unittest.TestCase):
         self.assertIn("modal_app.py::validate", val.stdout)
         self.assertIn("ECC_GPU=B200", val.stdout)
 
+    def test_run_modal_tees_outside_the_image_tree(self):
+        script = (Path(__file__).resolve().parent / "run-modal.sh").read_text()
+        self.assertIn("/tmp/ecc2k130-b200", script)
+        self.assertNotIn('tee "$OUTDIR/', script)
+
 
 if __name__ == "__main__":
     unittest.main()
