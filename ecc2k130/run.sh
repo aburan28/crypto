@@ -198,16 +198,29 @@ sync-loop)
     ;;
 
 ensure-sync)
-    SESSION=${MODAL_SYNC_SESSION:-ecc2k130-modal-sync}
+    SESSION=${MODAL_SYNC_SESSION:-ecc2k130-modal-sync-c${CURVE}}
     LOG=${MODAL_SYNC_LOG:-/tmp/ecc2k130-modal-sync.log}
-    TMUX=(tmux -f /exec-daemon/tmux.portal.conf)
-    if "${TMUX[@]}" has-session -t "=$SESSION" 2>/dev/null; then
-        echo "sync loop already running in tmux session $SESSION"
-        exit 0
+    CURVE_MARKER="${LOG}.curve"
+    TMUX=(tmux)
+    if [ -n "${MODAL_SYNC_TMUX_CONF:-}" ]; then
+        TMUX=(tmux -f "$MODAL_SYNC_TMUX_CONF")
+    elif [ -f /exec-daemon/tmux.portal.conf ]; then
+        TMUX=(tmux -f /exec-daemon/tmux.portal.conf)
     fi
+    if "${TMUX[@]}" has-session -t "=$SESSION" 2>/dev/null; then
+        running_curve=
+        [ -f "$CURVE_MARKER" ] && running_curve=$(<"$CURVE_MARKER")
+        if [ "$running_curve" = "$CURVE" ]; then
+            echo "sync loop already running in tmux session $SESSION (curve $CURVE)"
+            exit 0
+        fi
+        echo "sync loop in session $SESSION is for curve ${running_curve:-unknown}; restarting for curve $CURVE" >&2
+        "${TMUX[@]}" kill-session -t "=$SESSION" 2>/dev/null || true
+    fi
+    printf '%s\n' "$CURVE" > "$CURVE_MARKER"
     "${TMUX[@]}" new-session -d -s "$SESSION" -c "$(dirname "$0")" -- "${SHELL:-bash}" -l -c \
-        "while true; do ./run.sh sync-loop 2>&1 || sleep 30; done | tee -a $LOG"
-    echo "started sync loop in tmux session $SESSION (log: $LOG)"
+        "export CURVE=$CURVE; while true; do ./run.sh sync-loop 2>&1 || sleep 30; done | tee -a $LOG"
+    echo "started sync loop in tmux session $SESSION (curve $CURVE, log: $LOG)"
     ;;
 
 ingest)
