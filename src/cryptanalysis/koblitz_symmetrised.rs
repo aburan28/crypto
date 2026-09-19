@@ -1,6 +1,6 @@
 //! # Symmetrised decomposition systems for Koblitz curves.
 //!
-//! The follow-through on `RESEARCH_EXOTIC_COORDINATES.md`: the coordinate
+//! The follow-through on `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`: the coordinate
 //! search found that on a Koblitz curve the rational 2-torsion point
 //! `T = (0, 1)` acts on the `x`-line as `x ↦ 1/x`, that the frame
 //! `u = 1/(x + 1)` (defined over `F₂`, so the Frobenius survives) turns
@@ -1756,7 +1756,7 @@ mod tests {
 //
 // On `K_0` the rational points form `E(F_2) ≅ Z/4`, and the endomorphism
 // `φ = π − 1` has exactly that kernel.  The second coordinate search
-// (`RESEARCH_EXOTIC_COORDINATES.md` §10) found that the 4-torsion
+// (`research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` §10) found that the 4-torsion
 // quadruples the collapse factor and identified the mechanism as `φ`
 // transporting the instance: a decomposition of `φ(R)` over `F_u` lifts to
 // a decomposition of `R + K`, `K ∈ E(F_2)`, over `φ⁻¹(F_u)`.  This section

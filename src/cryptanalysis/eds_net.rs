@@ -1,5 +1,5 @@
 //! **Canonical rank-2 elliptic net over `F_p`, derived without Stange's
-//! seed formulas** (program §5.3b of `RESEARCH_EDS_RESIDUE.md`).
+//! seed formulas** (program §5.3b of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`).
 //!
 //! Stange's net needs explicit "mixed" initial values (`W(2,1)`, `W(1,2)`,
 //! …; arXiv:0710.1316 Props 6.3/6.4) that could not be fetched in this

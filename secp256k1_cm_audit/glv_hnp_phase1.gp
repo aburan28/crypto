@@ -15,7 +15,7 @@
 \\ scaling subtleties; deferred for separate investigation.)
 \\
 \\ Phase 2 (deferred): GLV-aware lattice replacing the 1D bias on k
-\\ with the 2D structure on (k_1, k_2).  See RESEARCH_GLV_HNP.md §3.
+\\ with the 2D structure on (k_1, k_2).  See research/notes/lattice-hnp/RESEARCH_GLV_HNP.md §3.
 \\
 \\ Run: gp -q glv_hnp_phase1.gp > glv_hnp_phase1_output.txt
 
@@ -164,7 +164,7 @@ if (verdict_pass,
     print("at toy scale; LATTICE attack (Phase 1.5) scales this to");
     print("cryptographic sizes via Boneh-Venkatesan.  GLV-aware lattice");
     print("(Phase 2) extends to the k_1-only-leak threat model — see");
-    print("RESEARCH_GLV_HNP.md §3 for the proposed construction.")
+    print("research/notes/lattice-hnp/RESEARCH_GLV_HNP.md §3 for the proposed construction.")
 ,
     print("Phase 1 verdict: INVESTIGATE");
     print("Planted d   = ", d_secret);

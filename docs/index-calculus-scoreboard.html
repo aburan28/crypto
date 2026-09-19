@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every index-calculus variant built for the elliptic-curve discrete logarithm in this repository, scored in operations per root-n against Pollard rho and a generic-group floor.">
 <!--
-  Standalone build of the cost ledger in RESEARCH_RESIDUAL_WALKS.md §§9-11.
+  Standalone build of the cost ledger in research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §§9-11.
   Open it directly in a browser; it loads two webfont families from Google
   Fonts and needs nothing else.  Every figure on the page is taken from the
   frozen experiment JSON in experiments/; see the footer for the conversion
@@ -1487,7 +1487,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <code>(m+1)&middot;g!</code>, so
     <code>S<sub>ic</sub>/S<sub>rho</sub> &prop; g!&middot;N<sup>1/g &minus; 1/2</sup></code>.
     Pre-registered with its falsification list before measuring, in
-    <code>RESEARCH_HYPERELLIPTIC_IC_RHO.md</code>.</p>
+    <code>research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md</code>.</p>
     <table><caption>Genus exponent fit against <code>log&#8322; N</code>, rho&rsquo;s walk
     renormalised to <code>&radic;(&pi;/2)</code>. Every run returned its verified
     <code>k</code>.</caption><thead><tr>
@@ -1641,7 +1641,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   </section>
 
   <footer>
-    <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
+    <p>Source: <code>research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
       with the pair-only cells from <code>gaudry_cubic_bench --pair-only</code> and the closed routes
       from <code>examples/fixed_x1_oracle.rs</code> and <code>examples/blocked_macaulay_bench.rs</code>.
@@ -2826,5 +2826,33 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <table><thead><tr><th>Variant</th><th>Median B updates/s</th><th>/ paired baseline</th><th>/ 25 B target</th><th>Replay</th></tr></thead><tbody><tr><td>Baseline (engineering)</td><td>17.295877</td><td>1.000000</td><td>0.691835</td><td>600/600, zero dropped</td></tr><tr><td>Inline single (engineering)</td><td>17.296764</td><td>1.000051</td><td>0.691871</td><td>600/600, zero dropped</td></tr><tr><td>Inline paired (engineering)</td><td>17.940329</td><td>1.037260</td><td>0.717613</td><td>600/600, zero dropped</td></tr><tr><td>Inline both (engineering)</td><td>17.946263</td><td>1.037604</td><td>0.717851</td><td>600/600, zero dropped</td></tr></tbody></table>
 <p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/results.json">results</a>;
 <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/README.md">report and reproduction</a>.</p></section>
+<!-- BEGIN auxiliary-inputs-20260918 -->
+<section class="panel" id="auxiliary-inputs-20260918">
+<div class="panel-head"><h2>Auxiliary inputs and torsion points against rho <span class="chip advance">advance, DLPwAI only</span></h2>
+<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
+<div class="table-scroll"><table>
+<caption>p &minus; 1 case, d &asymp; p<sup>1/2</sup>, inputs G, [&alpha;]G, [&alpha;<sup>d</sup>]G. Fitted exponents over seven sizes (24&ndash;48 bits): rho 0.487, comb 0.231, naive 0.297, kangaroo 0.310.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Pollard rho (sees G, [&alpha;]G only)</td><td>24 / 32 / 40 / 48</td><td>1.317 / 2.007 / 1.638 / 0.926</td><td>1</td><td>&mdash;</td><td>21/21</td><td><span class="chip">reference</span></td></tr>
+<tr><td>plain BSGS, d baby steps (old <code>cheon_attack.rs</code>)</td><td>24 / 28 / 32</td><td>1.714 / 1.697 / 1.710</td><td>1.30 / 2.72 / 0.85</td><td>&mdash;</td><td>9/9</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Cheon p&minus;1, BSGS, naive scalar mults</td><td>24 / 32 / 40 / 48</td><td>1.481 / 0.530 / 0.140 / 0.051</td><td>1.13 / 0.26 / 0.086 / 0.055</td><td>86 / 118 / 138 / 306</td><td>21/21</td><td><span class="chip advance">advance, DLPwAI</span></td></tr>
+<tr><td>Cheon p&minus;1, BSGS, fixed-base comb</td><td>24 / 32 / 40 / 48</td><td>0.370 / 0.090 / 0.016 / 0.004</td><td>0.28 / 0.045 / 0.010 / 0.004</td><td>21.5 / 20.1 / 15.3 / 24.2</td><td>21/21</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>Cheon p&minus;1, kangaroo, comb</td><td>24 / 32 / 40 / 48</td><td>1.101 / 0.363 / 0.065 / 0.043</td><td>0.84 / 0.18 / 0.039 / 0.047</td><td>64 / 81 / 63 / 262</td><td>21/21</td><td><span class="chip">engineering, memory</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>p + 1 case, d &asymp; p<sup>1/3</sup>, inputs [&alpha;<sup>i</sup>]G for i &le; 2d. Fitted exponents over five sizes (24&ndash;40 bits): rho 0.503, Cheon 0.355. The polynomial phase (3(2d+1) multi-scalar terms) is 85&ndash;93% of the total.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Pollard rho</td><td>24 / 32 / 40</td><td>1.428 / 1.189 / 1.411</td><td>1</td><td>&mdash;</td><td>15/15</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Cheon p+1, BSGS, comb</td><td>24 / 32 / 40</td><td>10.04 / 3.43 / 1.94</td><td>7.0 / 2.9 / 1.37</td><td>179 / 126 / 184</td><td>15/15</td><td><span class="chip advance">advance, DLPwAI</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Torsion-point route (Kim&ndash;Cheon elliptic embedding), d &asymp; p<sup>1/4</sup>, d&sup2; inputs. Honest = the only computable comparison (pairwise, cross-multiplied); oracle = handed the exponent quotient, not an attack.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho (S &asymp; 1.3)</th><th>ops / &radic;(p/d)</th><th>Answer</th><th>Class</th></tr></thead><tbody>
+<tr><td>torsion embedding, honest</td><td>14 / 16 / 18 / 20</td><td>677&ndash;2,242 / 1,106&ndash;1,870 / 2,360&ndash;6,988 / 8,976&ndash;15,833</td><td>500&ndash;12,000&times;, rising</td><td>1,659&ndash;100,138</td><td>10/12 (2 runs found no pair, full cost recorded)</td><td><span class="chip relabel">closed</span></td></tr>
+<tr><td>torsion embedding, oracle quotient</td><td>14 / 16 / 18 / 20</td><td>8.6&ndash;27.5 / 10.6&ndash;35.0 / 8.6&ndash;20.6 / 9.8&ndash;22.0</td><td>&mdash;</td><td>33&ndash;139</td><td>collision 12/12</td><td>not a row (uses &alpha;)</td></tr>
+</tbody></table></div>
+<p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
+</section>
+<!-- END auxiliary-inputs-20260918 -->
 </body>
 </html>

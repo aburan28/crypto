@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E1-E6: running the six experiments `RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`
+"""E1-E6: running the six experiments `research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`
 pre-registered, against the boundaries frozen before any of them was run.
 
 `experiments/ecc2k130_decomposition_targets.json` holds the predictions.  This
@@ -980,7 +980,7 @@ def main():
         "question": "how much of the difficulty is deciding, and how much is "
                     "producing the witness?",
         "status": "run in the previous round and recorded in section 3.2 of "
-                  "RESEARCH_ECC2K130_DECOMPOSITION.md: a whole-base detector "
+                  "research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md: a whole-base detector "
                   "localises its own witness by swapping, measured over eight "
                   "rungs with zero sub-base queries",
         "artefact": "experiments/ecc2k130_point_decomposition.json "
@@ -993,7 +993,7 @@ def main():
     report = {
         "schema": "ecc2k130_decomposition_runs/v1",
         "purpose": "the six pre-registered experiments of "
-                   "RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md, run",
+                   "research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md, run",
         "unit": "Lambda = oracle operations / 2^n; an oracle operation is one "
                 "(m-1)-subset enumerated",
         "boundaries_frozen_before_the_runs":

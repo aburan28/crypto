@@ -1,6 +1,6 @@
 //! **`F_{p²}` reduced pairing and a working MOV attack on supersingular
 //! curves** — the one regime where the EDS/elliptic-net→pairing machinery
-//! actually *breaks* the ECDLP (§5.10 of `RESEARCH_EDS_RESIDUE.md`).
+//! actually *breaks* the ECDLP (§5.10 of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`).
 //!
 //! For `y²=x³+x` over `p≡3 (mod 4)` (supersingular, `#E=p+1`, embedding
 //! degree 2), the distortion map `φ(x,y) = (−x, iy)` with `i²=−1 ∈ F_{p²}`

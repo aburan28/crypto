@@ -1,7 +1,7 @@
 # LaTeX paper draft
 
 `structural_completeness.tex` is a paper-quality LaTeX version of
-[`PAPER_STRUCTURAL_COMPLETENESS.md`](../PAPER_STRUCTURAL_COMPLETENESS.md).
+[`research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`](../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md).
 
 **Status**: anonymized for double-blind review.  Restore real
 authors via `make deanonymize` after creating an `AUTHORS` file

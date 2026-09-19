@@ -1,5 +1,5 @@
 //! Canonical rank-2 elliptic net over F_p, derived via (REL-P) without
-//! Stange's seed formulas — §5.3b of `RESEARCH_EDS_RESIDUE.md`.
+//! Stange's seed formulas — §5.3b of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.
 //!
 //! ```bash
 //! cargo run --release --example eds_net_demo

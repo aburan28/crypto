@@ -1,7 +1,7 @@
 //! # Buying down the Gröbner solving degree `D*` — lever L3 (hybrid slicing).
 //!
-//! The FFD program (`RESEARCH_FFD_PROOF_COMPLEXITY.md`,
-//! `RESEARCH_FFD_WORKFLOW.md`) measures `D*`, the degree at which the
+//! The FFD program (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md`,
+//! `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md`) measures `D*`, the degree at which the
 //! Macaulay/Gröbner computation on a Weil-descended Semaev system
 //! terminates, and establishes two facts we now use *offensively*:
 //!
@@ -72,7 +72,7 @@
 //! - L. Bettale, J.-C. Faugère, L. Perret, *Hybrid approach for solving
 //!   multivariate systems over finite fields*, J. Math. Cryptol. 2009.
 //! - Bardet–Faugère–Salvy, semi-regular complexity (the `cols^ω` model).
-//! - `RESEARCH_DEGREE_REDUCTION.md` (this thread's charter, ledger R1–R5).
+//! - `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` (this thread's charter, ledger R1–R5).
 
 use std::collections::BTreeMap;
 

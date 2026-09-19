@@ -383,7 +383,7 @@ pub struct SearchArgs {
     ///
     /// A trial is paid whether or not it succeeds, and the Weil-restricted
     /// system carries m·ℓ unknowns, so coverage alone can rank bases
-    /// backwards: see RESEARCH_FACTOR_BASE_SOLVE_COST.md. Off by default,
+    /// backwards: see research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md. Off by default,
     /// so existing searches score exactly as before.
     #[arg(long,value_parser=clap::value_parser!(u32).range(1..=4096))]
     pub solve_cost_targets: Option<u32>,

@@ -2,7 +2,7 @@
 \\ Horizontal Cl(O)-orbit measurement on a small h>1 CM curve
 \\ ============================================================
 \\
-\\ Slice-2 companion to RESEARCH_SECP256K1_CM.md.  The existing
+\\ Slice-2 companion to research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md.  The existing
 \\ cga_hnc module in src/cryptanalysis/cga_hnc.rs walks 2-isogeny
 \\ BFS which mixes horizontal and descending isogenies.  This
 \\ script does the strictly horizontal Cl(O)-orbit walk that the
@@ -20,7 +20,7 @@
 \\      the saving in PH is at most a factor of ~h.  Net: no
 \\      asymptotic gain over single-curve PH on #E's smooth part.
 \\
-\\ Run: gp -q cl_o_horizontal.gp > cl_o_horizontal_output.txt
+\\ Run: gp -q cl_o_horizontal.gp > secp256k1_cm_audit/cl_o_horizontal_output.txt
 
 default(parisize, 256000000);
 default(timer, 0);

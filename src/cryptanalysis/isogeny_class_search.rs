@@ -1,7 +1,7 @@
 //! # EXP-R6 / lever **L5** — the curve-side lever: can an isogeny make the
 //! Gröbner basis easier?
 //!
-//! `RESEARCH_DEGREE_REDUCTION.md` measures four levers (L1–L4), all of
+//! `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` measures four levers (L1–L4), all of
 //! which change the *presentation* of one fixed curve's decomposition
 //! ideal.  This module measures the one lever that changes the **curve**:
 //! the ECDLP transports along an isogeny `φ: E → E'` of degree coprime to
@@ -169,7 +169,7 @@
 //! subfields but too strong as a claim about the mechanism: subfield-*like*
 //! bases do not need one — quasi-subfield polynomials
 //! (Huang–Kosters–Petit–Yeo–Yun) supply them at prime `n`, and
-//! `RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield examples over
+//! `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield examples over
 //! `F_{2^7}`.  The field-invariance form above does not depend on that question
 //! either way.  For `n = 131` the census in that note happens to find no
 //! quasi-subfield cell either, so the mechanism is doubly out of reach here.

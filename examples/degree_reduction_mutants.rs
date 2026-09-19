@@ -2,7 +2,7 @@
 //!
 //! ## The correction this experiment rests on
 //!
-//! `RESEARCH_DEGREE_REDUCTION.md` iteration 1 framed L4 as "add the relation
+//! `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` iteration 1 framed L4 as "add the relation
 //! EXP-J identified." That was wrong, and the error is instructive. EXP-J's
 //! relation is `Σ_i ℓ_i · f_i ≡ 0` — a **pure syzygy**. It vanishes
 //! identically, so it contributes no polynomial; adding it to the generating

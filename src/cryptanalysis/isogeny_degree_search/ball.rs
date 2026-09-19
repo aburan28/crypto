@@ -6,7 +6,7 @@
 //! measure `D*`.  It walks the isogeny graph **exhaustively to a fixed
 //! radius** and screens every curve it reaches against the *structural*
 //! properties that are known to move `D*` — the properties
-//! `RESEARCH_DEGREE_REDUCTION.md` §2 calls lever **L1**:
+//! `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` §2 calls lever **L1**:
 //!
 //! | screen | what it would buy | what the walk finds |
 //! |---|---|---|
@@ -44,7 +44,7 @@
 //! ## The same divisor set closes the quasi-subfield route
 //!
 //! [`crate::cryptanalysis::quasi_subfield`] (see
-//! `RESEARCH_QUASI_SUBFIELD.md`) reaches the ECDLP from the other
+//! `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md`) reaches the ECDLP from the other
 //! direction: it builds a factor base from the roots of a
 //! quasi-subfield polynomial, which exist exactly where a
 //! Frobenius-stable `F_2`-subspace does — i.e. exactly at the divisor

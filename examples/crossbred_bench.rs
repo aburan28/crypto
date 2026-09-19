@@ -21,7 +21,7 @@
 //! doing algebra rather than search, and it is the column every other
 //! row is divided by.
 //!
-//! Note what this does **not** claim.  Per `RESEARCH_SEMAEV_DECOMPOSITION.md`,
+//! Note what this does **not** claim.  Per `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`,
 //! a faster decomposition oracle does not move the exponent of the
 //! attack — relation collection stays `Θ(2^n)` with any oracle that is
 //! polynomial in the factor base.  This table prices the oracle, which
@@ -372,5 +372,5 @@ fn main() {
     println!();
     println!("What this prices is the decomposition oracle only.  Relation collection stays");
     println!("Θ(2^n) with any oracle polynomial in the factor base — see");
-    println!("RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.");
+    println!("research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.");
 }

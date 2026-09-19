@@ -8,7 +8,7 @@
 //! solved for `φ(R)` then lifted; whether the two verdicts ever differ
 //! (theory: never); how often `R` decomposes over `F_u`, over `φ⁻¹(F_u)`
 //! and over their union by exhaustive enumeration; and how many projected
-//! columns each base occupies.  See `RESEARCH_EXOTIC_COORDINATES.md` §11.
+//! columns each base occupies.  See `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` §11.
 
 use crypto_lib::cryptanalysis::koblitz_symmetrised::{format_transport, transport_bench};
 use std::time::Instant;

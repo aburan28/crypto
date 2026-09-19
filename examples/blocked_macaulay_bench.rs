@@ -1,6 +1,6 @@
 //! Does the block structure of the decomposition systems pay?
 //!
-//! `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` lists, under *Open problems
+//! `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` lists, under *Open problems
 //! from the talk*:
 //!
 //! > Exploiting the block/homogeneous structure of the resulting

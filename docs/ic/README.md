@@ -8,14 +8,14 @@ pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETE
 The older inspection command uses imported points for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
-[`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
-[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime;
+[`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
+[`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
 `schema_version` 2). Beat claims must include the ledger's **measurement
 schema** fields — including **FFD / degree of regularity** on algebraic
 `decomposition` frontiers — or they fail closed.
 
 **Autolab runner:** agents push those beats with the local control plane at
-[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
 (`boundary_autolab.py`). It pins the ledger, fail-closed validates measurement
 reports, and launches the public-synthetic `koblitz_rank_fixture` /
 `koblitz_rho_fixture` producers for the priority Koblitz `vs_rho` rungs.
@@ -191,7 +191,7 @@ second factor is the one that varies: coverage saturates at 100% as the
 subspace grows while the Weil-restricted summation system keeps `m·ℓ`
 Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
 twelve verified logarithms — see
-[`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../RESEARCH_FACTOR_BASE_SOLVE_COST.md).
+[`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
 
     ./target/release/ic search --degree 15 --curve-a 1 --summands 2 --family divisor \
         --min-dimension 3 --max-dimension 8 --no-prune --no-saturate \

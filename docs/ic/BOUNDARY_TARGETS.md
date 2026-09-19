@@ -5,7 +5,7 @@ the best *measured* result in this repository, the next target that counts as a
 push, and the acceptance gates. Do not combine best-of-breed component costs
 from different runs into a synthetic win.
 
-**Machine-readable twin:** [`boundary_targets.json`](./boundary_targets.json)
+**Machine-readable twin:** [`boundary_targets.json`](boundary_targets.json)
 (`schema_version` 2). Update both files in the same PR when a record moves.
 
 **Claim hygiene.** Every positive result must state its claim boundary
@@ -49,7 +49,7 @@ and how its step count compares with `√(πr/2)/√A`. A baseline that
 exhausts its iteration budget, or runs orders of magnitude above that
 bound, makes every ratio in the row meaningless — see the
 negation-map fruitless-cycle failure recorded in
-[`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
+[`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
 ("The ρ baseline was failing, not losing"), which produced a spurious
 charged crossover at `n = 41` until the walk was fixed.
 
@@ -82,7 +82,7 @@ same process series. Faster planted decompositions alone never promote to
 
 1. Freeze a public fixture (curve, seeds, base hash, resource caps).
 2. Run via
-   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
    (`boundary_autolab.py plan|preflight|launch|claim-check`); write a JSON
    report under `research/` or `docs/ic/runs/` with hashes of executable,
    inputs, and outputs **and** every required measurement-schema field for
@@ -108,8 +108,8 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md` |
-| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `RESEARCH_SAT_SEMAEV.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md`; `RESEARCH_FFD_MEASUREMENT.md` |
+| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` |
+| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`; `research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md` |
 | `relation_yield` | Measured on small corpus instances; not yet a distributional frontier | Yield curve η ↦ hit-rate for one frozen base at `n = 21` with 256 natural targets; publish trials-per-relation | 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | *(open — first publication beats the "absent" record)* |
 | `rank` | Toy matrices only; no published sparse dims / LA cost | Full orbit-reduced rank at `n = 21` with surplus ≤ 2K+64; report `{rows,cols}`, sparse/dense, LA wall | Rank recomputed after every relation; terminal rank = required | *(open)* |
 | `end_to_end_dlp` | Toy known-answer only (framework / small degrees); claim = synthetic | Known-answer DLP at `n = 19` with stage times | `[d]G = Q`; incomplete stages fail closed | `docs/ic/` synthetic runs |
@@ -134,7 +134,7 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
 | `factor_base` | Algebraic point-defined `n = 53` base: 9,964 points, 94 signed-Frobenius orbit columns, and 24,805,379 exact support entries. Four direct-routed shards build the 738,197,504-byte table in a 1.379006 s median while preserving the 95-relation solve; selection uses no scalar labels or target-subgroup enumeration | Reduce retained support below 512 MiB without regressing the exact 95-relation solve or selected online crossover | Same base/support cardinality; terminal rank 95; construction wall/core/RSS + retained bytes logged | `stage-108-routing-selection-archive-20260913/verification.json` |
-| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `RESEARCH_KOBLITZ_SCALING_TARGET.md`; `RESEARCH_KOBLITZ_INDEX_CALCULUS.md` |
+| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`; `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` |
 | `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
 | `rank` | Rank-aware `n = 53` collection reaches augmented rank 95 with exactly 95 rows and zero surplus; current final solve is 0.542 ms after 48,531,878 support queries; relation-matrix LA, not GB FFD | Unaffiliated replay of the 95-row transcript and a distribution across public targets | Preserved transcript; matrix dimensions and LA wall logged; terminal rank unchanged; no log labels used by targeting | `stage-89-current-selected-panel-20260912/verification.json` |
 | `end_to_end_dlp` | Selected public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 40,136,342 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Direct is 4.307977 s versus 4.362556 s rho, ratio 0.987489 | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-108-routing-selection-archive-20260913/verification.json` |
@@ -151,7 +151,7 @@ Separate measurement, separate base family, not a competing record. The
 construction rather than the `two_torsion_saturated` base behind the row above.
 On that family, index calculus is behind ρ at every rung measured — `n = 13`,
 37, 41 and 53. Full writeup and committed bundles:
-[`evidence/20260912-koblitz-vs-rho-no-crossover/`](../../research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/).
+[`evidence/20260912-koblitz-vs-rho-no-crossover/`](../../research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover).
 
 At `n = 37` over 1024 targets, charged ms/target, with ρ verifying 1024/1024:
 
@@ -200,11 +200,11 @@ should be quoted without its configuration.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `docs/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
+| `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
 | `decomposition` | 2-decomp via S₃ through bench sizes; S₄/Gröbner not a scaling win. **FFD not published** on the current 2-decomp bench frontier (must be filled on the next algebraic push) | One verified 3-decomposition relation family on a ≥14-bit prime with GB cost + **FFD / DoR logged**; record unknowns, system degree, eq/var, median ms | Witnesses sum in the group; timing + **FFD** logged | `ec_index_calculus.rs` |
-| `relation_yield` | Enough relations for toys ≤ 14 bits (j=0) / 12 bits (generic) | Publish trials-per-relation vs bitlength for 10–16 bits on a frozen curve ladder | ≥3 bitlengths; R² reported | `docs/RESEARCH_BENCH_LOG.md` |
+| `relation_yield` | Enough relations for toys ≤ 14 bits (j=0) / 12 bits (generic) | Publish trials-per-relation vs bitlength for 10–16 bits on a frozen curve ladder | ≥3 bitlengths; R² reported | `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md` |
 | `rank` | Dense GE mod n on toy matrices; dims unpublished as a frontier | Sparse LA for ≥ 2⁸ factor-base columns on a 16-bit instance; report dims + LA cost | Correctness vs dense GE on a subsample | — |
-| `end_to_end_dlp` | Generic IC **12-bit**; j=0 orbit IC **14-bit** (bench success); synthetic known-answer | j=0 IC known-answer at **16 bits** under the same bench harness | Agrees with ρ on the same instance; wall time logged | `docs/RESEARCH_BENCH_LOG.md` |
+| `end_to_end_dlp` | Generic IC **12-bit**; j=0 orbit IC **14-bit** (bench success); synthetic known-answer | j=0 IC known-answer at **16 bits** under the same bench harness | Agrees with ρ on the same instance; wall time logged | `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md` |
 | `vs_rho` | **Not achieved** — IC slower than ρ at all measured sizes; dense 3-sum non-scaling wall ~**80 bits** | Any prime-order instance ≥ 16 bits where charged IC < ρ (same host accounting) | Artifact cost model + independent replay; no verifier gaming | `research/ecdlp_autolab/paper.md` |
 
 **Asymptotic reminder:** 2-decomp IC on prime fields is `O(p^{3/2})` vs ρ's
@@ -232,13 +232,13 @@ should be quoted without its configuration.
 
 ## Related documents
 
-- [`docs/ic/README.md`](./README.md) — `ic` runner, fixtures, comparison limits
-- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
-- [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
-- [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
-- [`RESEARCH_FFD_MEASUREMENT.md`](../../RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
-- [`RESEARCH_SAT_SEMAEV.md`](../../RESEARCH_SAT_SEMAEV.md)
-- [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
-- [`docs/RESEARCH_BENCH_LOG.md`](../RESEARCH_BENCH_LOG.md)
+- [`docs/ic/README.md`](README.md) — `ic` runner, fixtures, comparison limits
+- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
+- [`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`](../../research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
+- [`research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`](../../research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md)
+- [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
+- [`research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`](../../research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md)
 - [`docs/ECDLP_ATTACK_MATRIX.md`](../ECDLP_ATTACK_MATRIX.md)
 - `research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md`

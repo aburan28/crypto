@@ -78,7 +78,7 @@ algorithms (Gaudry 2007, Diem 2006, large-prime variant).
 **Concrete experiment:**
 1. For our LMFDB curves, search for explicit Jacobian descent maps
 2. If found, measure genus-2 DLP cost vs. genus-1 cost
-3. Cross-reference with `RESEARCH_DIEM_DESCENT.md` (already in the repo)
+3. Cross-reference with `research/notes/index-calculus/RESEARCH_DIEM_DESCENT.md` (already in the repo)
 
 **Risk:** Hyperelliptic descent may not exist for our specific curves;
 when it does, algorithms are still subexponential, not polynomial.
@@ -119,7 +119,7 @@ reveal structure not visible to traditional algebraic methods.
 But worth verifying explicitly that no shortcut exists.
 
 **Reference:** No prior work I'm aware of (worth checking SAT-based
-papers like `RESEARCH_SAT_SEMAEV.md`).
+papers like `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`).
 
 ## Phase 29: p-adic Newton-Iwasawa methods
 
@@ -162,7 +162,7 @@ specific construction).
 For limited research bandwidth:
 1. **Phase 23 (F5 for Semaev)** — best literature anchor; highest impact
 2. **Phase 26 (Hyperelliptic descent)** — concrete computable test;
-   complements existing `RESEARCH_DIEM_DESCENT.md`
+   complements existing `research/notes/index-calculus/RESEARCH_DIEM_DESCENT.md`
 3. **Phase 28 (ML representation)** — quick to test; even negative result
    is valuable
 4. **Phase 30 (Cross-curve relations)** — quick negative result expected
@@ -192,8 +192,8 @@ empirical resistance map.
 
 - Yokoyama lower bound is for *naive* IC; F5 specialized (Phase 23) is the
   most direct candidate to escape it
-- `RESEARCH_DIEM_DESCENT.md` (this repo) is the foundation for Phase 26
-- `RESEARCH_HIGHER_SEMAEV.md` (this repo) relates to Phase 23
+- `research/notes/index-calculus/RESEARCH_DIEM_DESCENT.md` (this repo) is the foundation for Phase 26
+- `research/notes/index-calculus/RESEARCH_HIGHER_SEMAEV.md` (this repo) relates to Phase 23
 - The Yokoyama paper itself acknowledges F5-based variants may have
   different complexity profile
 
