@@ -14,4 +14,5 @@
 //! was the goal. See `SECURITY.md`.
 
 pub mod keccak;
+pub mod ml_dsa;
 pub mod ml_kem;

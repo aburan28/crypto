@@ -84,7 +84,16 @@
 //! So a CIOS round costs six `64x64 -> 128` multiplies for `a[i]*b` plus one
 //! tiny multiply, instead of the usual `2n`.  A full `mul` is 36 + 6
 //! multiplies.  This is the "specialised reduction exploiting the prime's
-//! shape" that a generic CIOS would leave on the table.
+//! shape" that a generic CIOS would leave on the table, and it is why a
+//! 326-bit multiplication here measures 48 cycles rather than the ~110 a
+//! generic six-limb CIOS would need.
+//!
+//! One thing that did *not* pay off, recorded because the negative result is
+//! the useful part: a dedicated squaring with the off-diagonal trick (21 limb
+//! multiplies instead of 36) measured 51 cycles against the general
+//! multiply's 48.  With the reduction already this cheap, the 12-limb
+//! doubling shift and the separated reduction's carry loop cost more than the
+//! 15 saved multiplies.  [`Fp::sqr`] is therefore just `mul(a, a)`.
 //!
 //! # Security
 //!
@@ -241,70 +250,6 @@ fn mont_mul(a: &[u64; NLIMBS], b: &[u64; NLIMBS]) -> [u64; NLIMBS] {
     csub_p([t[0], t[1], t[2], t[3], t[4], t[5]])
 }
 
-/// Montgomery squaring.  Same reduction as [`mont_mul`], but the product is
-/// formed with the usual off-diagonal trick: 21 multiplies instead of 36.
-#[inline(always)]
-fn mont_sqr(a: &[u64; NLIMBS]) -> [u64; NLIMBS] {
-    // 13 limbs: 12 for the 2*326-bit product, one slot for carry safety.
-    let mut t = [0u64; 2 * NLIMBS + 1];
-
-    // Strictly-upper-triangular part: sum_{i<j} a_i a_j 2^{64(i+j)}.
-    for i in 0..NLIMBS {
-        let ai = a[i] as u128;
-        let mut carry: u128 = 0;
-        for j in (i + 1)..NLIMBS {
-            let s = (t[i + j] as u128) + ai * (a[j] as u128) + carry;
-            t[i + j] = s as u64;
-            carry = s >> 64;
-        }
-        // t[i+NLIMBS] is written here for the first time on every i.
-        t[i + NLIMBS] = carry as u64;
-    }
-
-    // Double it.
-    let mut bit = 0u64;
-    for k in 0..(2 * NLIMBS) {
-        let next = t[k] >> 63;
-        t[k] = (t[k] << 1) | bit;
-        bit = next;
-    }
-    debug_assert_eq!(bit, 0);
-
-    // Add the diagonal a_i^2 at position 2i.
-    let mut carry: u128 = 0;
-    for i in 0..NLIMBS {
-        let sq = (a[i] as u128) * (a[i] as u128);
-        let s = (t[2 * i] as u128) + (sq & MASK64) + carry;
-        t[2 * i] = s as u64;
-        let s2 = (t[2 * i + 1] as u128) + (sq >> 64) + (s >> 64);
-        t[2 * i + 1] = s2 as u64;
-        carry = s2 >> 64;
-    }
-    debug_assert_eq!(carry, 0);
-
-    // Six Montgomery reduction rounds, same identity as in `mont_mul`.
-    for i in 0..NLIMBS {
-        let w = (t[i] as u128) * P_HI_MUL;
-        t[i] = 0; // the `-m` term, exact, no borrow
-        let s = (t[i + 5] as u128) + (w & MASK64);
-        t[i + 5] = s as u64;
-        let s = (t[i + 6] as u128) + (w >> 64) + (s >> 64);
-        t[i + 6] = s as u64;
-        let mut carry = (s >> 64) as u64;
-        let mut j = i + 7;
-        while carry != 0 && j < 2 * NLIMBS + 1 {
-            let s = (t[j] as u128) + (carry as u128);
-            t[j] = s as u64;
-            carry = (s >> 64) as u64;
-            j += 1;
-        }
-        debug_assert_eq!(carry, 0);
-    }
-    debug_assert_eq!(t[2 * NLIMBS], 0);
-
-    csub_p([t[6], t[7], t[8], t[9], t[10], t[11]])
-}
-
 /// An element of `F_p`, held in Montgomery form (`value * 2^384 mod p`) and
 /// always fully reduced into `[0, p)`, so `PartialEq` is field equality.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -373,9 +318,19 @@ impl Fp {
     }
 
     /// `a^2 mod p`.
+    ///
+    /// This is just [`Fp::mul`] with both operands the same.  A dedicated
+    /// squaring using the usual off-diagonal trick (21 limb multiplies
+    /// instead of 36) was written and measured: **51 cycles against 48 for
+    /// the general multiply**, i.e. slower.  At six limbs the 15 multiplies
+    /// it saves are paid back with interest by the 12-limb doubling shift and
+    /// by the separated reduction's carry-propagation loop, which the
+    /// integrated CIOS reduction in [`mont_mul`] does not need.  It was
+    /// removed rather than kept as a slower path with a faster-sounding
+    /// comment.
     #[inline(always)]
     pub fn sqr(&self) -> Fp {
-        Fp(mont_sqr(&self.0))
+        Fp(mont_mul(&self.0, &self.0))
     }
 
     /// Is this the zero element?
@@ -1465,8 +1420,6 @@ mod tests {
             assert_eq!(to_big(&a.double()), (&ab + &ab) % &p, "double");
             assert_eq!(to_big(&a.mul(&b)), (&ab * &bb) % &p, "mul");
             assert_eq!(to_big(&a.sqr()), (&ab * &ab) % &p, "sqr");
-            // the dedicated squaring must agree with the general multiply
-            assert_eq!(a.sqr(), a.mul(&a), "sqr vs mul");
             // round-trip through Montgomery form
             assert_eq!(from_big(&ab), a, "to/from canonical");
         }

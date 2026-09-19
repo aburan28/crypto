@@ -227,6 +227,49 @@ fn bench_ml_dsa(rows: &mut Vec<Row>) {
     });
 }
 
+fn bench_ml_dsa_fast(rows: &mut Vec<Row>) {
+    use crypto_lib::pqc::fast::ml_dsa as fast;
+    use crypto_lib::pqc::ml_dsa as reference;
+
+    let seed = [7u8; 32];
+    let rnd = [0u8; 32];
+    let msg = b"the quick brown fox jumps over the lazy dog";
+
+    let (pk, sk) = fast::ml_dsa_65_keygen(&seed);
+    let sig = fast::ml_dsa_65_sign(&sk, msg, &rnd);
+
+    // The correctness column is the round trip *and* byte equality with the
+    // reference, so a wrong-but-self-consistent implementation cannot appear
+    // here as a speedup.
+    let (rpk, rsk) = reference::ml_dsa_65_keygen(&seed);
+    let rsig = reference::ml_dsa_65_sign(&rsk, msg, &rnd);
+    let ok = fast::ml_dsa_65_verify(&pk, msg, &sig)
+        && pk.0 == rpk.0
+        && sk.0 == rsk.0
+        && sig == rsig
+        && reference::ml_dsa_65_verify(&rpk, msg, &sig)
+        && fast::ml_dsa_65_verify(&pk, msg, &rsig);
+
+    rows.push(Row {
+        scheme: "ML-DSA-65 fast",
+        op: "keygen",
+        cycles: measure(2, 11, || fast::ml_dsa_65_keygen(&seed)),
+        ok,
+    });
+    rows.push(Row {
+        scheme: "ML-DSA-65 fast",
+        op: "sign",
+        cycles: measure(2, 11, || fast::ml_dsa_65_sign(&sk, msg, &rnd)),
+        ok,
+    });
+    rows.push(Row {
+        scheme: "ML-DSA-65 fast",
+        op: "verify",
+        cycles: measure(2, 11, || fast::ml_dsa_65_verify(&pk, msg, &sig)),
+        ok,
+    });
+}
+
 // ── SQIsign ──────────────────────────────────────────────────────────────────
 
 fn bench_sqisign(rows: &mut Vec<Row>) {
@@ -309,6 +352,7 @@ fn main() {
     }
     if want("ml-dsa") {
         bench_ml_dsa(&mut rows);
+        bench_ml_dsa_fast(&mut rows);
     }
     if want("sqisign") {
         bench_sqisign(&mut rows);

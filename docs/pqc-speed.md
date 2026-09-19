@@ -107,6 +107,87 @@ call:
   anything above. It is not written, so it is not claimed.
 - No constant-time work. This went the other way if anything: see below.
 
+## ML-DSA
+
+ML-DSA-65, median of four back-to-back runs. Absolute counts on this machine
+wandered by up to 30% between runs because other builds were competing for
+cores; the ratios are the stable quantity, because both rows of a pair are
+measured back to back in the same process.
+
+| operation | reference | fast | speedup | per-run range |
+|---|---:|---:|---:|---|
+| keygen | 368.0 | 289.2 | 1.27× | 1.24–1.29 |
+| sign | 1220.7 | 565.4 | 2.16× | 1.99–2.31 |
+| verify | 415.9 | 253.4 | 1.64× | 1.57–1.69 |
+
+The `correct` column asserts byte equality of the public key, secret key and
+signature against the reference, and that each implementation verifies the
+other's signature. A self-consistent wrong answer cannot pass it.
+
+An independent run on a quieter machine gave 292.4 → 208.6, 985.3 → 450.2 and
+314.2 → 200.3, that is 1.40× / 2.19× / 1.57×. Signing and verification agree
+with the table; key generation came out above the four-run range quoted there,
+so treat the keygen ratio as roughly 1.3× with real spread rather than a
+figure good to two digits. Every absolute number on this page was taken on a
+machine with other builds running, and the spread is wider than any single run
+suggests.
+
+### What each change bought
+
+Four configurations built in one process out of tree, so they are directly
+comparable. A and B are the fast module with exactly one piece swapped back to
+the reference's; all four produce byte-identical keys and signatures.
+
+| configuration | keygen | sign | verify |
+|---|---:|---:|---:|
+| reference | 390.8 | 1254.5 | 419.4 |
+| A: streaming sponge, reference `% q` arithmetic | 331.6 | 1084.4 | 375.9 |
+| B: Montgomery arithmetic, reference one-shot XOF | 301.7 | 631.7 | 271.1 |
+| fast (both) | 260.4 | 598.4 | 265.4 |
+
+Isolating one knob at a time:
+
+- **Montgomery arithmetic** (A to fast): −21% keygen, −45% sign, −29% verify.
+  The large item by far.
+- **Streaming sponge** (B to fast): −14% keygen, −5% sign, −2% verify. Real but
+  modest, and it shrinks as the arithmetic gets faster.
+- **Residual**, the fixed-array restructuring mixed with the non-additivity of
+  the other two: −18 / −137 / −38 kilocycles. Not separated further, so it is
+  reported as one figure rather than split on a guess.
+
+### Why this is 2× and not 5×
+
+The ML-DSA reference does **not** have the two pathologies the ML-KEM reference
+had. Its zeta table is already a compile-time constant, its packing is
+nibble-oriented rather than bit-at-a-time, and it already hoists the matrix
+expansion and the hashed prefixes out of the rejection loop. No factor of ten
+was available.
+
+What remained was arithmetic, not hashing, which is the opposite of the usual
+expectation for a lattice signature. The reference multiplies with
+`(a as i64 * b as i64) % q` and reduces every addition with `rem_euclid`, so a
+64-bit division-by-constant sequence runs on roughly 30,000 butterflies and
+12,000 pointwise products per signing attempt. Replacing that is 45% of
+signing; the XOF is 5%.
+
+### A convention trap between the two modules
+
+The reference's `inv_ntt` multiplies by n⁻¹ and is a true inverse, so
+`inv_ntt(ntt(p)) == p`. The fast one is the pq-crystals `invntt_tomont`, which
+also scales by R, cancelled by the R⁻¹ that the pointwise multiply introduces.
+So in the fast module `inv_ntt(ntt(p)) == R·p mod q`, and only the composition
+with a pointwise multiply is the identity. Anyone moving a helper between the
+two files needs to know this.
+
+### On comparing against published figures
+
+pq-crystals publishes, for round-3 Dilithium3 on one core of a Core-i7 6600U:
+C reference 544,232 / 2,348,703 / 522,267 and AVX2 256,403 / 529,106 / 179,424.
+Those are **not** recorded as a row above, deliberately. They are round-3
+Dilithium rather than final FIPS 204 ML-DSA-65, on different hardware, and the
+C reference has not been built on this machine. A peer row would need a
+same-machine build.
+
 ## Security
 
 **These implementations are not constant-time and must not be used for
