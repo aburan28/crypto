@@ -73,6 +73,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import math
 import os
@@ -436,6 +437,67 @@ CKPT_HEADER = 40  # magic[8] + 6x u32 + u64 iterBase
 #   walking fleet becomes zero walkers on the public feed.
 CKPT_RE = re.compile(r"^ckpt/(retired/)?slot-(\d+)(?:/([0-9a-f]{64}))?\.ck$")
 
+# Slots checkpoint every 600 s (campaign.json `checkpointEvery`). Three missed
+# checkpoints is a dead worker rather than a slow one — the same rule as
+# scripts/rho_status/work_feed.py, which strips per_slot before publishing.
+FRESH_CHECKPOINT_S = 1800
+# Below this the checkpoint granularity dominates the difference between two
+# consecutive status.json writes.
+MIN_WALK_RATE_SPAN_S = 600
+
+
+def parseIso(value):
+    if not value:
+        return None
+    text = str(value).replace("Z", "+00:00")
+    try:
+        stamp = datetime.datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=datetime.timezone.utc)
+    return stamp
+
+
+def loadPreviousStatus(s3, statusBucket):
+    """The last published status.json, or None when this is the first write."""
+    try:
+        body = s3.get_object(Bucket=statusBucket, Key="status.json")["Body"].read()
+        return json.loads(body.decode("utf-8"))
+    except Exception:
+        return None
+
+
+def walkRateBetween(current, previous):
+    """Iterations per second between two ingest publishes, or None."""
+    if not isinstance(previous, dict):
+        return None
+    curWork = current.get("work") or {}
+    prevWork = previous.get("work") or {}
+    try:
+        curIter = int(curWork.get("iterations"))
+        prevIter = int(prevWork.get("iterations"))
+    except (TypeError, ValueError):
+        return None
+    if curIter <= 0 or prevIter <= 0 or curIter < prevIter:
+        return None
+    curAt = parseIso(current.get("generated_at"))
+    prevAt = parseIso(previous.get("generated_at"))
+    if curAt is None or prevAt is None:
+        return None
+    span = (curAt - prevAt).total_seconds()
+    if span < MIN_WALK_RATE_SPAN_S:
+        return None
+    return {
+        "iterations_per_second": (curIter - prevIter) / span,
+        "window_seconds": int(round(span)),
+        "measured_from": previous.get("generated_at"),
+        "measured_to": current.get("generated_at"),
+        "iterations_from": prevIter,
+        "iterations_to": curIter,
+        "method": "difference between this publish and the previous status.json",
+    }
+
 
 def checkpointWork(s3, bucket, staleAfter=1800.0):
     """Exact iterations walked, read from the slot checkpoints.
@@ -550,6 +612,10 @@ def statusPayload(conn, s3, bucket, ingest=None):
              "INGEST_BEHIND" if behind else
              "IDLE_OR_STALE" if dps else "EMPTY")
     iterations, per_slot = checkpointWork(s3, bucket)
+    walking = [
+        slot for slot in per_slot
+        if not slot["retired"] and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
+    ]
     payload = {
         "schema_version": 1,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -577,6 +643,8 @@ def statusPayload(conn, s3, bucket, ingest=None):
             "iterations_log2": (math.log2(iterations) if iterations else None),
             "method": "sum over slot checkpoints of iterBase * threads * batch",
             "density_independent": True,
+            "slots": len(per_slot),
+            "walking_slots": len(walking),
             "per_slot": per_slot,
         },
         "walkers": sum(1 for s in per_slot if not s["retired"]),
@@ -629,7 +697,12 @@ def publishMetrics(namespace, ingest):
 def publishStatus(conn, s3, bucket, statusBucket, ingest=None):
     """Write the snapshot where a browser can read it, no workflow involved."""
     started = time.time()
+    previous = loadPreviousStatus(s3, statusBucket)
     payload = statusPayload(conn, s3, bucket, ingest)
+    payload["published_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    rate = walkRateBetween(payload, previous)
+    if rate is not None:
+        payload["walk_rate"] = rate
     s3.put_object(
         Bucket=statusBucket, Key="status.json",
         Body=(json.dumps(payload, indent=2, sort_keys=True) + "\n").encode(),

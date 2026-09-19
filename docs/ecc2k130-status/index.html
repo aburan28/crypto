@@ -33,8 +33,9 @@
   <h1>Campaign status</h1>
   <p class="sub">
     Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table, refreshed every 3 minutes. The page publishes
-    counts only &mdash; walk
+    distinguished-point table. The browser loads the live feed from the
+    campaign store every minute and falls back to the GitHub Pages copy when
+    that feed is unreachable. The page publishes counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
@@ -409,7 +410,9 @@ make gpu
     <h2>What this page does and does not claim</h2>
     <p id="claim"></p>
     <p>
-      Raw data: <a href="./status.json">status.json</a> ·
+      Raw data:
+      <a id="live-feed-link" href="https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json">live feed</a>
+      · <a href="./status.json">status.json</a> ·
       <a href="./history.json">history.json</a>. How the snapshot is taken,
       and what is deliberately withheld:
       <a href="https://github.com/aburan28/crypto/blob/main/scripts/rho_status/README.md">scripts/rho_status/README.md</a>.
@@ -433,6 +436,11 @@ make gpu
   // enough that neither cadence trips it, early enough to say so before
   // the counts are badly out of date. test_rho_status.py pins it to both.
   var STALE_AFTER_MS = 90 * 60 * 1000;
+  // The ingest host writes this document from rho-dp every ~3 minutes. CORS
+  // on the status bucket allows this origin to read it directly, so the page
+  // does not wait on the GitHub Actions publish cadence for current counts.
+  var LIVE_FEED_URL =
+    "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json";
   // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
   // the interval the snapshot query buckets over — a window in the data, not
   // in the publish cadence, so it does not move when the cron does.
@@ -1316,6 +1324,7 @@ make gpu
     // look identical on the first one and different on the second.
     if (published) parts.push("published " + ago(published));
     if (loadedAt) parts.push("fetched " + ago(loadedAt));
+    if (status && status._fetch_label) parts.push("via " + status._fetch_label);
     text.textContent = parts.join(" · ");
   }
 
@@ -1325,16 +1334,35 @@ make gpu
     return response.json();
   }
 
+  async function loadStatus() {
+    var sources = [
+      { url: LIVE_FEED_URL, label: "live feed" },
+      { url: "./status.json", label: "Pages snapshot" }
+    ];
+    var errors = [];
+    for (var i = 0; i < sources.length; i++) {
+      try {
+        var status = await fetchJSON(sources[i].url);
+        status._fetch_url = sources[i].url;
+        status._fetch_label = sources[i].label;
+        return status;
+      } catch (err) {
+        errors.push(sources[i].label + ": " + err.message);
+      }
+    }
+    throw new Error(errors.join("; "));
+  }
+
   var lastStatus = null;
   var historyLoaded = false;
 
   async function load() {
     var status;
     try {
-      status = await fetchJSON("./status.json");
+      status = await loadStatus();
     } catch (err) {
-      setBanner("UNREACHABLE", "Could not read status.json (" + err.message + ").");
-      tickFreshness(lastStatus, "status.json unavailable · last try " + utc(new Date(), true));
+      setBanner("UNREACHABLE", "Could not read the live feed or Pages snapshot (" + err.message + ").");
+      tickFreshness(lastStatus, "status unavailable · last try " + utc(new Date(), true));
       placeholderTables("No data — the snapshot could not be read.");
       return;
     }
