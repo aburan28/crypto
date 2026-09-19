@@ -33,6 +33,9 @@ flushes points and checkpoints before exiting.  Spot interruptions and
 Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_BUCKET, AWS_DEFAULT_REGION   the campaign bucket (slots live in it too)
   ECC_TABLE      optional DynamoDB table for slots instead of S3 objects
+  ECC_SLOT_BACKEND  rds -> lease slots from the RDS control plane instead
+                 (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
+                 default keeps DynamoDB/S3 so an upgrade is one variable
   ECC_GPU        GPU index on this instance (default 0)
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
@@ -584,6 +587,24 @@ class S3Slots:
         return self._modify(slot, owner, lambda it: it.update(extra or {}, leaseUntil=0, state=state))
 
 
+def rdsSlots():
+    """The control plane's registry, under the same four-method contract.
+
+    Imported here rather than at module scope: a worker that leases from
+    DynamoDB or from the bucket must not need the control-plane package on
+    its PATH, and this file runs on every GPU in the fleet.
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from controlplane.cache import cacheFromEnv
+    from controlplane.config import Config
+    from controlplane.db import databaseFromEnv
+    from controlplane.slots import PostgresSlots
+
+    config = Config.fromEnv()
+    return PostgresSlots(databaseFromEnv(config), campaign=config.campaign,
+                         cache=cacheFromEnv(config))
+
+
 class LocalSlots:
     """Same contract as DynamoSlots on one JSON file under an exclusive lock."""
 
@@ -654,10 +675,17 @@ class Worker:
             self.slots = LocalSlots(os.path.join(local, "slots.json"))
         else:
             self.store = S3Store(os.environ["ECC_BUCKET"])
-            # DynamoDB when a table is named, otherwise slots live in the
-            # bucket itself (fewer services, fewer permissions).
+            # The RDS control plane when asked for, DynamoDB when a table is
+            # named, otherwise slots live in the bucket itself (fewer
+            # services, fewer permissions).  One variable moves a campaign
+            # between them, and the four-method contract is the same.
             table = os.environ.get("ECC_TABLE", "")
-            self.slots = DynamoSlots(table) if table else S3Slots(os.environ["ECC_BUCKET"])
+            if os.environ.get("ECC_SLOT_BACKEND", "").strip().lower() == "rds":
+                self.slots = rdsSlots()
+            elif table:
+                self.slots = DynamoSlots(table)
+            else:
+                self.slots = S3Slots(os.environ["ECC_BUCKET"])
         self.instance = instanceId()
         deviceTag = "cpu%d" % self.gpu if self.cpu else "gpu%d" % self.gpu
         self.owner = "%s:%s:%s" % (self.instance, deviceTag, uuid.uuid4().hex)
