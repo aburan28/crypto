@@ -67,7 +67,10 @@ __global__ BSGS_BOUNDS
 void k_bsgs_run_ref(bsgs_ctx c, uint32_t iters) {
     uint32_t t = blockIdx.x * blockDim.x + threadIdx.x;
     if (t >= c.nthreads) return;
-    for (uint32_t it = 0; it < iters; it++) bsgs_step_ref(c, t);
+    for (uint32_t it = 0; it < iters; it++) {
+        if (it && c.stop && *c.stop) break;
+        bsgs_step_ref(c, t);
+    }
 }
 
 /* Count occupied slots: grid-stride over the table, one atomic per block. */
