@@ -37,6 +37,21 @@ republished. Worker buckets backfill one hour at a time, resuming from
 `rho_dp_meta.backfill_through`. The remote timeout is 1500 s; leftover
 hours wait for the next scheduled run.
 
+That still left Pages on 11:25Z: from 19:15Z on 2026-09-18 every scheduled
+publish died in one second with `no running instance tagged
+Name=rho-ecc2k-walker`. The 18:56Z hop reset SSH and the instance did not
+come back. RDS is private; without that host the Action cannot query the
+store. The ingest host, though, already writes the same campaign counts to
+the public status bucket (`dp_ingest.py` `publishStatus`) every
+`--status-every` seconds, and `work_feed.py` already fetched that file
+*after* a successful hop. When the hop finds no walker — or finishes
+without a file — `fetch_via_walker.sh` now republishes that ingest
+document (`work_feed.py --as-snapshot`): counts, last-hour, hourly (48 h),
+and the checkpointed walk total, with `work.per_slot` stripped. The
+per-worker table is empty on that path; the GPU card still reads
+`walking_slots`. `generated_at` is the ingest host's stamp, so the stale
+banner tracks the feed rather than the copy.
+
 Do not open `0.0.0.0/0` on the RDS security group for this dashboard.
 
 ## One-time GitHub + IAM setup

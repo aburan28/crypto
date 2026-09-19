@@ -7,6 +7,10 @@
 # once RHO_WALKER_SSH_KEY is the ed25519 key whose pubkey is
 # scripts/rho_status/gha_walker.pub (installed on ubuntu@walker).
 #
+# If no walker is running, or the hop finishes without a file, the script
+# republishes the ingest host's public status.json (work_feed.py
+# --as-snapshot) so Pages is not frozen on the last successful hop.
+#
 # Required environment:
 #   RHO_WALKER_SSH_KEY   path to the GHA deploy private key
 # Optional:
@@ -26,6 +30,16 @@ CAMPAIGN=${RHO_CAMPAIGN:-ecc2k-130}
 REMOTE_ENV=${RHO_REMOTE_ENV:-/opt/rho-ecc2k/env.sh}
 OUT=${RHO_STATUS_OUT:-$PWD/status.json}
 KEY=${RHO_WALKER_SSH_KEY:-}
+
+write_from_ingest_feed() {
+    # The ingest host already publishes the campaign counts to the status
+    # bucket. When this hop cannot reach RDS, that file is still current,
+    # and republishing it is what unsticks Pages. Fail the caller if it
+    # cannot: there is then nothing newer than the last successful hop.
+    echo "walker hop did not produce a snapshot; publishing the ingest host's status.json" >&2
+    python3 "$ROOT/scripts/rho_status/work_feed.py" \
+        --as-snapshot --status "$OUT" --campaign "$CAMPAIGN"
+}
 
 if [ -z "$KEY" ] || [ ! -f "$KEY" ]; then
     echo "RHO_WALKER_SSH_KEY must point at the GHA deploy private key" >&2
@@ -49,6 +63,10 @@ if [ -z "$HOST" ] || [ "$HOST" = None ] || [ -z "$SG" ] || [ "$SG" = None ]; the
         --filters "Name=tag:Name,Values=rho-ecc2k-walker" \
         --query 'Reservations[].Instances[].[InstanceId,State.Name,PublicIpAddress,LaunchTime]' \
         --output text >&2 || true
+    if write_from_ingest_feed && [ -s "$OUT" ]; then
+        echo "wrote $OUT from ingest status feed (no running walker)"
+        exit 0
+    fi
     echo "the status hop cannot reach RDS without that host; start the stopped instance or launch a replacement with the same Name tag and scripts/rho_status/gha_walker.pub" >&2
     exit 1
 fi
@@ -147,6 +165,10 @@ set +e
 set -e
 if [ "$SCP_RC" -eq 0 ] && [ -s "$OUT" ]; then
     echo "wrote $OUT from $USER@$HOST ($IID); snapshot query took ${ELAPSED}s (remote rc=$SSH_RC)"
+    exit 0
+fi
+if write_from_ingest_feed && [ -s "$OUT" ]; then
+    echo "wrote $OUT from ingest status feed after walker hop failed (ssh=$SSH_RC scp=$SCP_RC elapsed=${ELAPSED}s)"
     exit 0
 fi
 if [ "$SSH_RC" -eq 124 ]; then
