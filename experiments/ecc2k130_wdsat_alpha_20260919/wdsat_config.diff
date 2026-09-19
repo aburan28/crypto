@@ -1,0 +1,22 @@
+81c81
+< /** IC-S4: l=6 **/
+---
+> /** IC-S4: l<=11, widened for X7 **/
+83c83
+< #define __MAX_ANF_ID__ 52
+---
+> #define __MAX_ANF_ID__ 100
+86,88c86,88
+< #define __MAX_ID__ 767
+< #define __MAX_BUFFER_SIZE__ 60000
+< #define __MAX_EQ__ 3000
+---
+> #define __MAX_ID__ 2600
+> #define __MAX_BUFFER_SIZE__ 400000
+> #define __MAX_EQ__ 12000
+90,91c90,91
+< #define __MAX_XEQ__ 52
+< #define __MAX_XEQ_SIZE__ 800
+---
+> #define __MAX_XEQ__ 100
+> #define __MAX_XEQ_SIZE__ 2600
