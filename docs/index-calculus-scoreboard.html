@@ -1656,16 +1656,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   <div class="panel" id="ecc2k130-rho-parity-20260918">
     <div class="panel-head">
       <h2>Toy-suite rho parity: PairTable vs signed-Frobenius rho</h2>
-      <p><span class="chip">engineering</span>
-        Five tournament Koblitz cells, production pair table against
-        matched signed-Frobenius rho in exclusive group operations.
-        Protocol frozen before the run. Iteration 1 (one-pass table)
-        meets the all-cases gate: mean <code>α</code> 0.76–0.91,
-        max 0.918, 45/45 verified. Iteration 0 (two-pass) is the
-        before mark, 1.05–1.31×. Not n=131. Note
-        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_RHO_PARITY.md"><code>RESEARCH_ECC2K130_RHO_PARITY.md</code></a>.
-        Receipt
-        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json"><code>experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json</code></a>.</p>
+      <p><span class="chip">accounting</span>
+        The iteration-1 parity claim on this panel (mean
+        <code>α</code> 0.76–0.91) was an accounting error and is
+        withdrawn. A windowed <code>m = 3</code> probe forms
+        <code>R − P<sub>k</sub></code> for every summand in its
+        window with the same batched point addition the table build
+        is charged for; iterations 0–2 charged the probe one addition
+        and the window nothing, and descent had the same hole.
+        Charged (iteration 3), the five toy cells cost 16–23× rho and
+        a twelve-rung ladder from <code>2<sup>11</sup></code> to
+        <code>2<sup>39</sup></code> costs 8× to 612× rho on every
+        rung. Two engineering rounds after the correction (batch 8;
+        <code>|F| = ⌈(2r)<sup>1/3</sup>⌉</code>) bring the range to
+        4.8–218×. Gate unmet on every rung; thread closed negative.
+        Not n=131. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_RHO_PARITY.md"><code>RESEARCH_ECC2K130_RHO_PARITY.md</code></a>
+        §10–§13. Receipts
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_rho_parity_20260918/"><code>experiments/ecc2k130_rho_parity_20260918/</code></a>.</p>
     </div>
     <p>Unit: exclusive group operations
       <code>G</code> = point additions + binary-method additions of
@@ -1673,21 +1681,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <code>S = G / √r</code>,
       <code>α = G<sub>IC</sub> / G<sub>rho</sub></code>.
       The gate is mean <code>α ≤ 1</code> and no verified pair
-      <code>α &gt; 1</code> on every useful cell. The counting floor
-      is unchanged (<code>B</code> and <code>m</code> fixed), so a
-      win here is engineering. Wall-clock is a footnote. Mixing this
-      unit with the Valgrind-instruction tournament win is
-      inadmissible.</p>
+      <code>α &gt; 1</code> on every useful cell. From iteration 3
+      the summand additions (<code>trials × window</code> in
+      collection, <code>trials × |F|</code> in descent) are in
+      <code>G<sub>IC</sub></code>; the uncorrected subtotal stays in
+      each receipt as <code>g_ic_before_summand_correction</code>.
+      Wall-clock is a footnote. Mixing this unit with the
+      Valgrind-instruction tournament win is inadmissible.</p>
     <table>
-      <caption>Host <code>ip-172-31-19-103</code>, 2026-09-18.
-        Iteration 0 cited from
-        <code>experiments/ecc2k130_rho_parity_20260918/iteration-0/summary.json</code>;
-        iteration 1 from
-        <code>experiments/ecc2k130_rho_parity_20260918/iteration-1/summary.json</code>.
-        <code>G<sub>IC</sub></code> is constant per cell.
+      <caption>Host <code>ip-172-31-19-103</code>, 2026-09-18/19.
+        Five toy cells. Iteration 0 and 1 rows are as originally
+        reported (uncorrected, before marks, not deleted); their
+        corrected <code>α</code> is derived from the same receipts.
+        Iteration 3 row from
+        <code>iteration-3/summary.json</code>, iteration 4 from
+        <code>iteration-4/summary.json</code>.
+        <code>G<sub>IC</sub></code> is constant per cell;
         <code>G<sub>rho</sub></code> is the range across three
-        targets × three repetitions. Iteration 0 is the before mark
-        and is not deleted.</caption>
+        targets × three repetitions.</caption>
       <thead><tr>
         <th scope="col">Variant</th>
         <th scope="col">Cell</th>
@@ -1703,14 +1714,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">12.24–12.40</td><td class="n">1</td>
           <td>9/9 verified</td>
           <td><span class="chip">baseline</span></td></tr>
-        <tr><td>PairTable, two-pass (iteration 0)</td>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
           <td>n13a0</td><td class="n">685</td>
           <td class="n">15.31</td><td class="n">1.241</td>
-          <td>9/9 verified</td>
-          <td><span class="chip">engineering</span></td></tr>
-        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>9/9 verified; corrected α 22.6</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
           <td>n13a0</td><td class="n">503</td>
           <td class="n">11.24</td><td class="n">0.911</td>
+          <td>9/9 verified; corrected α 22.2</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n13a0</td><td class="n">12,269</td>
+          <td class="n">274.14</td><td class="n">22.2 (22.1–22.4)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.19</td><td class="n">6.4 (6.4–6.5)</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
@@ -1718,14 +1739,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">3.39–3.71</td><td class="n">1</td>
           <td>9/9 verified</td>
           <td><span class="chip">baseline</span></td></tr>
-        <tr><td>PairTable, two-pass (iteration 0)</td>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
           <td>n17a1</td><td class="n">978</td>
           <td class="n">3.82</td><td class="n">1.063</td>
-          <td>9/9 verified</td>
-          <td><span class="chip">engineering</span></td></tr>
-        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>9/9 verified; corrected α 20.2</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
           <td>n17a1</td><td class="n">706</td>
           <td class="n">2.76</td><td class="n">0.767</td>
+          <td>9/9 verified; corrected α 19.9</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n17a1</td><td class="n">18,322</td>
+          <td class="n">71.54</td><td class="n">19.9 (19.3–21.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.64</td><td class="n">5.7 (5.6–6.1)</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
@@ -1733,57 +1764,376 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n">2.48–2.50</td><td class="n">1</td>
           <td>9/9 verified</td>
           <td><span class="chip">baseline</span></td></tr>
-        <tr><td>PairTable, two-pass (iteration 0)</td>
-          <td>n19a0</td><td class="n">1069</td>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n19a0</td><td class="n">1,069</td>
           <td class="n">2.95</td><td class="n">1.187</td>
-          <td>9/9 verified</td>
-          <td><span class="chip">engineering</span></td></tr>
-        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>9/9 verified; corrected α 23.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
           <td>n19a0</td><td class="n">765</td>
           <td class="n">2.11</td><td class="n">0.850</td>
+          <td>9/9 verified; corrected α 22.7</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n19a0</td><td class="n">20,461</td>
+          <td class="n">56.56</td><td class="n">22.7 (22.7–22.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.28</td><td class="n">6.5 (6.5–6.6)</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
-          <td>n19a1</td><td class="n">988–1106</td>
+          <td>n19a1</td><td class="n">988–1,106</td>
           <td class="n">1.93–2.16</td><td class="n">1</td>
           <td>9/9 verified</td>
           <td><span class="chip">baseline</span></td></tr>
-        <tr><td>PairTable, two-pass (iteration 0)</td>
-          <td>n19a1</td><td class="n">1093</td>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n19a1</td><td class="n">1,093</td>
           <td class="n">2.13</td><td class="n">1.054</td>
-          <td>9/9 verified; one target 0.988</td>
-          <td><span class="chip">engineering</span></td></tr>
-        <tr><td>PairTable, one-pass (iteration 1)</td>
+          <td>9/9 verified; corrected α 20.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
           <td>n19a1</td><td class="n">789</td>
           <td class="n">1.54</td><td class="n">0.761</td>
+          <td>9/9 verified; corrected α 19.8</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n19a1</td><td class="n">20,485</td>
+          <td class="n">39.98</td><td class="n">19.8 (18.5–20.7)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.54</td><td class="n">5.7 (5.3–6.0)</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
         <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
-          <td>n23a0</td><td class="n">1474–1670</td>
+          <td>n23a0</td><td class="n">1,474–1,670</td>
           <td class="n">1.02–1.15</td><td class="n">1</td>
           <td>9/9 verified</td>
           <td><span class="chip">baseline</span></td></tr>
-        <tr><td>PairTable, two-pass (iteration 0)</td>
-          <td>n23a0</td><td class="n">1931</td>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n23a0</td><td class="n">1,931</td>
           <td class="n">1.33</td><td class="n">1.238</td>
+          <td>9/9 verified; corrected α 16.5</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n23a0</td><td class="n">1,241</td>
+          <td class="n">0.86</td><td class="n">0.796</td>
+          <td>9/9 verified; corrected α 16.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n23a0</td><td class="n">25,097</td>
+          <td class="n">17.34</td><td class="n">16.1 (15.0–17.0)</td>
           <td>9/9 verified</td>
-          <td><span class="chip">engineering</span></td></tr>
-        <tr><td>PairTable, one-pass (iteration 1)</td>
-          <td>n23a0</td><td class="n">1241</td>
-          <td class="n">0.857</td><td class="n">0.796</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
           <td>9/9 verified</td>
           <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table>
-    <p>All-cases gate met on iteration 1. Worst pair is n13a0 target 1,
-      <code>α = 0.918</code>. The drop is the second
-      <code>add_many</code> going away; collection and descent counts
-      are the iteration-0 values. <code>B</code> and <code>m</code>
-      are unchanged, so the ratio to the counting floor is flat.
-      Not an exponent, not degree 131.</p>
+    <p>Corrected, no toy cell is within 4.8× of rho. The one-pass
+      table (iteration 0 → 1) was worth 1–3% of the corrected
+      <code>G<sub>IC</sub></code>; the batch-8 stop (iteration 4) is
+      worth 3–4× on these cells because a 64-probe batch scans
+      <code>64 × (|F| − 1)</code> summands for about
+      <code>K + 2</code> relations it needs.</p>
+    <div class="table-scroll"><table>
+      <caption>The ladder, iterations 3–5, host
+        <code>ip-172-31-19-103</code>, 2026-09-19, cited from
+        <code>experiments/ecc2k130_rho_parity_20260918/iteration-{3,4,5}/summary.json</code>.
+        Twelve Koblitz cells ordered by <code>log₂ r</code>. All 108
+        pairs verified on both arms in every iteration.
+        <code>G<sub>IC</sub></code> is the mean over nine pairs (it
+        varies per target on the upper rungs through descent);
+        <code>G<sub>rho</sub></code> is the range. On the eight rungs
+        below n37a0 the sampler's eight-orbit minimum makes the
+        iteration-5 base identical to iteration 4, so those rows are
+        the same measurement and not evidence for the recipe.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col">Cell</th>
+        <th scope="col" class="n">G</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">α vs rho, mean (min–max)</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n13a0 (log₂ r 11.0)</td><td class="n">548–555</td>
+          <td class="n">12.2–12.4</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">12,269</td>
+          <td class="n">274</td><td class="n">22.2 (22.1–22.4)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.2</td><td class="n">6.4 (6.4–6.5)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.2</td><td class="n">6.4 (6.4–6.5)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n29a1 (log₂ r 15.4)</td><td class="n">822–852</td>
+          <td class="n">3.99–4.13</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">31,132</td>
+          <td class="n">151</td><td class="n">37.4 (36.5–37.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">12,610</td>
+          <td class="n">61.2</td><td class="n">15.1 (14.8–15.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">12,610</td>
+          <td class="n">61.2</td><td class="n">15.1 (14.8–15.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n17a1 (log₂ r 16.0)</td><td class="n">869–951</td>
+          <td class="n">3.39–3.71</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">18,322</td>
+          <td class="n">71.5</td><td class="n">19.9 (19.3–21.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.6</td><td class="n">5.7 (5.6–6.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.6</td><td class="n">5.7 (5.6–6.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a0 (log₂ r 17.0)</td><td class="n">897–903</td>
+          <td class="n">2.48–2.5</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">20,461</td>
+          <td class="n">56.6</td><td class="n">22.7 (22.7–22.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.3</td><td class="n">6.5 (6.5–6.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.3</td><td class="n">6.5 (6.5–6.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a1 (log₂ r 18.0)</td><td class="n">988–1,106</td>
+          <td class="n">1.93–2.16</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">20,485</td>
+          <td class="n">40</td><td class="n">19.8 (18.5–20.7)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.5</td><td class="n">5.7 (5.3–6.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.5</td><td class="n">5.7 (5.3–6.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n31a0 (log₂ r 20.5)</td><td class="n">1,164–1,301</td>
+          <td class="n">0.97–1.08</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">33,310</td>
+          <td class="n">27.8</td><td class="n">27.1 (25.6–28.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">9,527</td>
+          <td class="n">7.94</td><td class="n">7.8 (7.3–8.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">9,527</td>
+          <td class="n">7.94</td><td class="n">7.8 (7.3–8.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n23a0 (log₂ r 21.0)</td><td class="n">1,474–1,670</td>
+          <td class="n">1.02–1.15</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">25,097</td>
+          <td class="n">17.3</td><td class="n">16.1 (15.0–17.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n39a0 (log₂ r 26.0)</td><td class="n">3,499–4,600</td>
+          <td class="n">0.422–0.555</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">44,453</td>
+          <td class="n">5.37</td><td class="n">11.3 (9.8–12.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">24,596</td>
+          <td class="n">2.97</td><td class="n">6.2 (5.4–7.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">24,596</td>
+          <td class="n">2.97</td><td class="n">6.2 (5.4–7.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n37a0 (log₂ r 27.8)</td><td class="n">4,952–6,686</td>
+          <td class="n">0.326–0.44</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 592, t = 7</td>
+          <td>n37a0</td><td class="n">46,921</td>
+          <td class="n">3.09</td><td class="n">8.4 (6.7–9.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 592, t = 7</td>
+          <td>n37a0</td><td class="n">42,407</td>
+          <td class="n">2.79</td><td class="n">7.6 (6.0–8.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 1,184, t = 6</td>
+          <td>n37a0</td><td class="n">68,485</td>
+          <td class="n">4.51</td><td class="n">12.2 (10.7–13.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n43a1 (log₂ r 32.1)</td><td class="n">13,368–18,921</td>
+          <td class="n">0.196–0.278</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 688, t = 8</td>
+          <td>n43a1</td><td class="n">514,405</td>
+          <td class="n">7.55</td><td class="n">31.2 (25.1–35.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 688, t = 8</td>
+          <td>n43a1</td><td class="n">478,775</td>
+          <td class="n">7.03</td><td class="n">29.0 (23.1–32.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 2,752, t = 15</td>
+          <td>n43a1</td><td class="n">259,748</td>
+          <td class="n">3.81</td><td class="n">15.9 (13.6–19.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n47a1 (log₂ r 36.6)</td><td class="n">18,113–96,225</td>
+          <td class="n">0.0554–0.294</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 752, t = 8</td>
+          <td>n47a1</td><td class="n">21,956,488</td>
+          <td class="n">67.2</td><td class="n">611.7 (225.0–1260.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 752, t = 8</td>
+          <td>n47a1</td><td class="n">22,106,848</td>
+          <td class="n">67.7</td><td class="n">615.8 (226.6–1269.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 6,016, t = 41</td>
+          <td>n47a1</td><td class="n">2,260,191</td>
+          <td class="n">6.92</td><td class="n">61.8 (23.5–125.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n41a0 (log₂ r 39.0)</td><td class="n">41,444–72,529</td>
+          <td class="n">0.0559–0.0978</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 656, t = 8</td>
+          <td>n41a0</td><td class="n">28,241,615</td>
+          <td class="n">38.1</td><td class="n">532.1 (300.9–759.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 656, t = 8</td>
+          <td>n41a0</td><td class="n">28,424,411</td>
+          <td class="n">38.3</td><td class="n">535.4 (303.4–763.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 10,496, t = 80</td>
+          <td>n41a0</td><td class="n">11,886,436</td>
+          <td class="n">16</td><td class="n">217.7 (163.8–286.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Exponents</strong> (least squares of
+      <code>log₂ mean G</code> on <code>log₂ r</code>, all twelve
+      rungs / top four rungs): iteration 3 IC 0.40 / 0.88, iteration
+      4 IC 0.48 / 0.90, iteration 5 IC 0.40 / 0.66; rho 0.27 / 0.32
+      in every iteration (rho's fixed setup dominates its walk below
+      <code>log₂ r ≈ 26</code>, and n41a0's three targets finished in
+      0.56× the expected walk, so the top-four rho slope is low and
+      noisy). Reference slope 0.5.</p>
+    <p><strong>Model and extrapolation, not a measurement.</strong>
+      With the window charged, one addition buys one table lookup
+      that hits with probability <code>|F|²/(2r)</code>, so
+      <code>G<sub>IC</sub> ≈ |F|²/(4n) + (relations)·2r/|F|²</code>.
+      Iteration 5 sized <code>|F|</code> at the minimiser for
+      <code>relations = K + 1</code> and measured 2–4× more relations
+      than that (coupon-collector coverage of the <code>K</code>
+      orbits, about <code>K ln K / 3</code>), which is why its
+      collection came in 4–7× above the model and n37a0 got worse.
+      At the model optimum <code>α ≈ 1.34 · r<sup>1/6</sup> / √n</code>,
+      below 1 only for <code>r &lt; (n/1.8)³</code>, under every rung
+      here; at <code>n = 131</code> it is about
+      <code>3.5 × 10<sup>5</sup></code>. Recovering the full
+      relation-count factor would move the best upper rung from 16×
+      to roughly 4×, not to 1×. The thread is closed negative in this
+      unit; the Valgrind-instruction tournament win is a different
+      unit and is neither confirmed nor contradicted by this.</p>
   </div>
 
-  <div class="panel" id="ec-baseline-20260914">
+<div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>
       <p>Class <span class="chip">accounting</span>. Unmodified WDSat on selected

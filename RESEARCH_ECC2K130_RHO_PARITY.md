@@ -5,13 +5,17 @@ already solved, does the production pair-table pipeline cost no more
 than matched signed-Frobenius rho in exclusive group operations, on
 every useful completed verified case?
 
-**Answer.** Yes, on these five cells, after the one-pass table.
-Iteration 1 meets the all-cases gate: 45/45 pairs verified `[d]G = Q`
-on both arms, mean `α` 0.76–0.91, worst pair 0.918. Class:
-**engineering**. `B` and `m` are unchanged, so the ratio to the
-counting floor is flat. This is a toy-suite practicality result, not
-degree-131 parity, not an exponent claim, and not a refit of X1–X4.
-The product-law floor at `n = 131` is untouched.
+**Answer.** No. Iteration 1 reported the gate met (mean `α`
+0.76–0.91) and that figure was an accounting error: the `|F| − 1`
+point additions a windowed probe makes before its lookups were not
+charged (§10). Charged, the five toy cells cost 16–23× rho and the
+twelve-rung ladder (§9–§10, `2^{11}` to `2^{39}`) costs 8× to 600×
+rho on every rung, 108/108 pairs verified on both arms. Iterations
+0–2 are retained as before marks; their gates are withdrawn. Class of
+the correction: **accounting**. Iterations 4–5 (§11–§12) are the
+engineering that remains after the correction and are predicted, in
+advance, not to reach the gate on any rung. Not degree-131, not a
+refit of X1–X4; the product-law floor at `n = 131` is untouched.
 
 Companion: [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
 T12. Scoreboard panel `#ecc2k130-rho-parity-20260918`.
@@ -171,7 +175,11 @@ cargo run --release --example rho_parity_e2e -- --quick   # not a result
 Receipt: `experiments/ecc2k130_rho_parity_20260918/`.
 Iteration 0: `experiments/ecc2k130_rho_parity_20260918/iteration-0/`.
 Iteration 1: `experiments/ecc2k130_rho_parity_20260918/iteration-1/`.
-Runner: `examples/rho_parity_e2e.rs`.
+Iterations 2–5 (`--ladder`, `--batch`, `--recipe`): §9–§12.
+Runner: `examples/rho_parity_e2e.rs`. From iteration 3 the runner
+charges the summand additions (§10); a rerun of the iteration 0/1
+command now reports the corrected `G_IC`, with the old subtotal kept
+as `g_ic_before_summand_correction`.
 
 ```bash
 cargo run --release --example rho_parity_e2e -- \
@@ -376,7 +384,10 @@ Cited from
 Gate: **fails on every rung.** Best rung n37a0 at `α = 8.4`. Fitted
 slopes over the twelve rungs: `G_IC ∝ r^{0.40}`, `G_rho ∝ r^{0.27}`
 (rho's fixed setup still dominates its walk below `log₂ r ≈ 26`; on
-the top four rungs alone rho's slope is `0.49`). Corrected iteration
+the top four rungs alone the slopes are IC `0.88`, near the model's
+`1` at fixed `|F|`, and rho `0.32`, low because n41a0's three targets
+finished in 0.56× the expected walk; three targets per rung is a noisy
+slope and it is reported as such). Corrected iteration
 0 and 1 on the five toy cells: mean `α` 16.5–23.1 and 16.1–22.7. The
 one-pass table was worth 1–3% of the corrected `G_IC`, not the 20–40%
 the uncorrected figure showed.
@@ -407,6 +418,33 @@ still fails on every rung. Class: **engineering**.
 cargo run --release --example rho_parity_e2e -- --ladder --batch 8 \
   --out experiments/ecc2k130_rho_parity_20260918/iteration-4
 ```
+
+**Measured 2026-09-19**, host `ip-172-31-19-103`, cited from
+[`iteration-4/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-4/summary.json).
+108/108 verified. As predicted: the eight rungs through n39a0 stop at
+16–32 trials and land at mean `α` 4.8–7.8 (n29a1 15.2, its 24 trials
+against a 464-point window); n37a0 stops at 56 trials (7.6); the top
+three rungs move by less than one batch. Gate fails on every rung.
+Class: **engineering**. Slopes over twelve rungs IC 0.48, rho 0.27.
+
+| Cell | trials (was 64+) | `G_IC` | `G_rho` | mean `α` (iter. 3 → 4) |
+|---|---:|---:|---:|---|
+| n13a0 | 16 | 3,544 | 552 | 22.2 → 6.4 |
+| n29a1 | 24 | 12,610 | 833 | 37.4 → 15.2 |
+| n17a1 | 16 | 5,287 | 922 | 19.9 → 5.7 |
+| n19a0 | 16 | 5,889 | 900 | 22.7 → 6.5 |
+| n19a1 | 16 | 5,915 | 1,039 | 19.8 → 5.7 |
+| n31a0 | 16 | 9,527 | 1,230 | 27.1 → 7.8 |
+| n23a0 | 16 | 7,460 | 1,563 | 16.1 → 4.8 |
+| n39a0 | 32 | 24,596 | 3,992 | 11.3 → 6.2 |
+| n37a0 | 56 | 42,407 | 5,681 | 8.4 → 7.6 |
+| n43a1 | 584 | 478,775 | 16,700 | 31.2 → 29.0 |
+| n47a1 | 28,016 | 22,106,848 | 58,516 | 611.7 → 615.8 |
+| n41a0 | 32,440 | 28,424,411 | 57,538 | 532.1 → 535.4 |
+
+(n47a1 and n41a0 tick up by a few relations' worth of stride
+multiplications, one per batch; that is the granularity's cost at the
+top and it is charged.)
 
 ## 12. Iteration 5, `|F|` sized by `r` (frozen before the run)
 
@@ -466,3 +504,59 @@ iteration 5 without the iteration-3 rows beside it.
 cargo run --release --example rho_parity_e2e -- --ladder --batch 8 --recipe cbrt \
   --out experiments/ecc2k130_rho_parity_20260918/iteration-5
 ```
+
+**Measured 2026-09-19**, host `ip-172-31-19-103`, cited from
+[`iteration-5/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-5/summary.json).
+108/108 verified. The eight lower rungs are byte-identical to
+iteration 4, as the sampler floor predicted. The four upper rungs got
+the derived `|F|`, `K`, `t` and table adds exactly, and then needed
+far more relations than `K + 1`:
+
+| Cell | `|F|` | `K` | relations needed | `K ln K / 3` | trials | collection adds (model) | `G_IC` | `G_rho` | mean `α` (iter. 4 → 5, predicted) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| n37a0 | 1,184 | 16 | 30 | 15 | 48 | 56,784 (9,178) | 68,485 | 5,681 | 7.6 → **12.2** (3.0) |
+| n43a1 | 2,752 | 32 | 43 | 37 | 80 | 220,080 (56,386) | 259,748 | 16,700 | 29.0 → **15.9** (5.6) |
+| n47a1 | 6,016 | 64 | 96 | 89 | 344 | 2,069,160 (440,432) | 2,260,191 | 58,516 | 615.8 → **61.8** (10.6) |
+| n41a0 | 10,496 | 128 | 285 | 207 | 1,072 | 11,250,640 (1,498,165) | 11,886,436 | 57,538 | 535.4 → **217.7** (36) |
+
+**What the model missed.** A relation is one equation in three of
+the `K` orbit unknowns, and the system cannot solve until every orbit
+has appeared in at least one of them. With third summands landing
+uniformly that is a coupon-collector count, about `K ln K / 3`, not
+`K + 1`; the measured counts sit at or above it, and the solver also
+had to wait for full rank past mere coverage. The relation count
+enters the collection term linearly, so the collection came in 4–7×
+above the model and the optimum `|F|` is smaller than `(2r)^{1/3}`
+by the cube root of that factor. n37a0 is the case where the recipe
+overshot: doubling `|F|` on a rung whose collection was already
+cheap bought a larger table and twice the relations.
+
+**Result.** Net of both levers the top three rungs improved 1.8×,
+10× and 2.5× over iteration 3 and n37a0 worsened 1.6×. Gate fails on
+every rung; best rung n23a0 at `α = 4.8` (unchanged from iteration
+4). Class: **engineering**, with the quantitative prediction
+falsified by the factor above and the sign of the prediction (α
+falls on the rungs the recipe touches) holding on three of four.
+Slopes over twelve rungs IC 0.40, rho 0.27; top four rungs IC 0.66,
+rho 0.32 (rho's top-rung slope is depressed by n41a0's lucky targets,
+§10).
+
+## 13. Where this leaves the thread
+
+In exclusive group operations, on every Koblitz cell from `2^{11}` to
+`2^{39}`, the pair-table pipeline costs between 4.8× and 218× matched
+signed-Frobenius rho after the accounting correction and the two
+engineering rounds. The remaining structural cost is the collection
+term `(relations) · 2r / |F|²`, in which each point addition buys one
+lookup that hits with probability `|F|²/(2r)`; no choice of `|F|`
+brings the sum with the `|F|²/(4n)` table under `√r` at these sizes,
+and the model gap widens as `r^{1/6}`. The lever that is not
+exhausted is the relation count: steering probes toward uncovered
+orbits, or a table built so that every stored pair covers a
+prescribed orbit, would bring `K ln K / 3` toward `K + 1` and recover
+at most the factor between the model and measured columns above
+(4–7×), which does not reach the gate on any rung. That is the
+falsification: the §5 target is not reachable in this unit by any
+lever this note has left, and the thread closes negative. The
+tournament's Valgrind-instruction win is a different unit and is not
+contradicted or confirmed by this.

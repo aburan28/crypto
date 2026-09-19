@@ -29,9 +29,12 @@ A separate toy-suite question — whether production pair-table IC on the
 five small Koblitz cells costs no more than matched signed-Frobenius rho
 in exclusive group operations — is measured in
 [`RESEARCH_ECC2K130_RHO_PARITY.md`](RESEARCH_ECC2K130_RHO_PARITY.md).
-Iteration 1 (one-pass table) meets the all-cases gate: mean `α`
-0.76–0.91, max 0.918, 45/45 verified, class engineering. That gate is
-not n=131 parity. The product-law floor at degree 131 is unchanged.
+Iteration 1 reported the all-cases gate met (mean `α` 0.76–0.91); that
+was an accounting error, since the `|F| − 1` point additions a windowed
+probe makes were not charged. Corrected (iteration 3), the toy cells
+cost 16–23× rho and a twelve-rung ladder to `2^{39}` costs 8× to 600×
+rho on every rung, 108/108 verified. Class accounting; the parity
+claim is withdrawn. The product-law floor at degree 131 is unchanged.
 
 Companion map: [`RESEARCH_ECC2K130_ROUTES.md`](RESEARCH_ECC2K130_ROUTES.md)
 and [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
