@@ -537,6 +537,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         allow_direct_relation: false,
         collapse_projected_orbits: true,
         linear_algebra: LinearAlgebra::Dense,
+        weil_charts: None,
     };
     let solve_started = Instant::now();
     let report = koblitz_index_calculus_dlp_with_factor_base_and_progress(
